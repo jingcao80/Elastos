@@ -85,8 +85,7 @@ ECode SimpleDateFormat::constructor(
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&pILocaleHelper);
     AutoPtr<ILocale> pILocale;
     pILocaleHelper->GetDefault((ILocale**)&pILocale);
-    constructor(pattern, (ILocale*)pILocale);
-    return NOERROR;
+    return constructor(pattern, (ILocale*)pILocale);
 }
 
 ECode SimpleDateFormat::ValidatePatternCharacter(
@@ -185,7 +184,7 @@ ECode SimpleDateFormat::constructor(
     FAIL_RETURN(NumberFormat::GetInstance(locale, (INumberFormat**)&mNumberFormat));
     mNumberFormat->SetParseIntegerOnly(TRUE);
     mNumberFormat->SetGroupingUsed(FALSE);
-    CGregorianCalendar::New(locale, (IGregorianCalendar**)&mCalendar);
+    CGregorianCalendar::New(locale, (ICalendar**)&mCalendar);
     mCalendar->Add(ICalendar::YEAR, -80);
     mCalendar->Get(ICalendar::YEAR, &mCreationYear);
     mCalendar->GetTime((IDate**)&mDefaultCenturyStart);
@@ -510,7 +509,7 @@ ECode SimpleDateFormat::Append(
         position->GetField(&f);
         position->GetEndIndex(&ei);
         Boolean isflag = FALSE;
-        if ( (IObject::Probe(ff)->Equals(dateFormatField, &isflag), isflag || ff == NULL) && (f == index) && (ei == 0) ) {
+        if ((IObject::Probe(dateFormatField)->Equals(ff, &isflag), isflag || ((ff == NULL) && (f == index))) && (ei == 0)) {
             position->SetBeginIndex(beginPosition);
             position->SetEndIndex(buffer->GetLength());
         }

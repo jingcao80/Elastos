@@ -1,4 +1,4 @@
-#include "elastos/droid/ext/frameworkext.h"
+
 #include "elastos/droid/view/CDragEventHelper.h"
 #include "elastos/droid/view/CDragEvent.h"
 
@@ -6,12 +6,18 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
+CAR_INTERFACE_IMPL(CDragEventHelper, Singleton, IDragEventHelper)
+CAR_SINGLETON_IMPL(CDragEventHelper)
+
 ECode CDragEventHelper::Obtain(
     /* [out] */ IDragEvent** event)
 {
-    CDragEvent* ev;
-    FAIL_RETURN(CDragEvent::Obtain(&ev));
-    *event = (IDragEvent*)ev;
+    VALIDATE_NOT_NULL(event)
+
+    AutoPtr<IDragEvent> tmp = CDragEvent::Obtain();
+    *event = tmp;
+    REFCOUNT_ADD(*event)
+
     return NOERROR;
 }
 
@@ -25,13 +31,14 @@ ECode CDragEventHelper::Obtain(
     /* [in] */ Boolean result,
     /* [out] */ IDragEvent** event)
 {
-    AutoPtr<IDragEvent> ev;
-    FAIL_RETURN(CDragEvent::Obtain(
-        action, x, y, localState, description,
-        data, result, (CDragEvent**)&ev));
+    VALIDATE_NOT_NULL(event)
 
-    *event = ev;
-    REFCOUNT_ADD(*event);
+    AutoPtr<IDragEvent> tmp = CDragEvent::Obtain(
+        action, x, y, localState, description,
+        data, result);
+    *event = tmp;
+    REFCOUNT_ADD(*event)
+
     return NOERROR;
 }
 
@@ -39,11 +46,12 @@ ECode CDragEventHelper::Obtain(
     /* [in] */ IDragEvent* source,
     /* [out] */ IDragEvent** event)
 {
-    AutoPtr<IDragEvent> ev;
-    FAIL_RETURN(CDragEvent::Obtain((CDragEvent*)source, (CDragEvent**)&ev));
+    VALIDATE_NOT_NULL(event)
 
-    *event = ev;
-    REFCOUNT_ADD(*event);
+    AutoPtr<IDragEvent> tmp = CDragEvent::Obtain(source);
+    *event = tmp;
+    REFCOUNT_ADD(*event)
+
     return NOERROR;
 }
 

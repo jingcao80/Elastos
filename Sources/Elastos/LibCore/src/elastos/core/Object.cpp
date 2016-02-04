@@ -1,6 +1,7 @@
 
 #include "Object.h"
 #include "Thread.h"
+#include <utils/Log.h>
 
 using Elastos::Core::Thread;
 using Elastos::Core::IThread;
@@ -177,6 +178,74 @@ ECode Object::GetWeakReference(
     (*weakReference)->AddRef();
     return NOERROR;
 }
+
+String Object::GetClassName(
+    /* [in] */ IInterface* obj)
+{
+    AutoPtr<IClassInfo> classInfo;
+    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
+    String className;
+    if (classInfo != NULL) {
+        classInfo->GetName(&className);
+    }
+    else {
+        ALOGD("error: failed to GetClassName with %s. It is not a Car class.", TO_CSTR(obj));
+    }
+    return className;
+}
+
+String Object::GetFullClassName(
+    /* [in] */ IInterface* obj)
+{
+    AutoPtr<IClassInfo> classInfo;
+    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
+    String fullClassName;
+    if (classInfo != NULL) {
+        String className, ns;
+        classInfo->GetName(&className);
+        classInfo->GetNamespace(&ns);
+        fullClassName = ns + String("::") + className;
+    }
+    else {
+        ALOGD("error: failed to GetFullClassName with %s. It is not a Car class.", TO_CSTR(obj));
+    }
+    return fullClassName;
+}
+
+String Object::GetNamespace(
+    /* [in] */ IInterface* obj)
+{
+    AutoPtr<IClassInfo> classInfo;
+    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
+    String ns;
+    if (classInfo != NULL) {
+        classInfo->GetNamespace(&ns);
+    }
+    else {
+        ALOGD("error: failed to GetNamespace with %s. It is not a Car class.", TO_CSTR(obj));
+    }
+    return ns;
+}
+
+String Object::GetModulePath(
+    /* [in] */ IInterface* obj)
+{
+    AutoPtr<IClassInfo> classInfo;
+    _CObject_ReflectClassInfo(obj, (IClassInfo**)&classInfo);
+    String path;
+    if (classInfo != NULL) {
+        AutoPtr<IModuleInfo> moduleInfo;
+        classInfo->GetModuleInfo((IModuleInfo**)&moduleInfo);
+        if (moduleInfo != NULL) {
+            moduleInfo->GetPath(&path);
+        }
+    }
+    else {
+        ALOGD("error: failed to GetModulePath with %s. It is not a Car class.", TO_CSTR(obj));
+    }
+    return path;
+}
+
 
 } // namespace Core
 } // namespace Elastos

@@ -1,0 +1,71 @@
+
+module
+{
+
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Telecomm.Internal.IIVideoProvider;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecomm {
+    namespace Telecom {
+
+        /**
+         * Information about a connection that is used between Telecom and the ConnectionService.
+         * This is used to send initial Connection information to Telecom when the connection is
+         * first created.
+         *  @hide
+         *
+         * @Involve
+         * interface IParcelable
+         */
+        interface IParcelableConnection {
+            GetPhoneAccount(
+                [out] IPhoneAccountHandle** res);
+
+            GetState(
+                [out] Int32* res);
+
+            GetCapabilities(
+                [out] Int32* res);
+
+            GetHandle(
+                [out] IUri** res);
+
+            GetHandlePresentation(
+                [out] Int32* res);
+
+            GetCallerDisplayName(
+                [out] String* res);
+
+            GetCallerDisplayNamePresentation(
+                [out] Int32* res);
+
+            GetVideoProvider(
+                [out] IIVideoProvider** res);
+
+            GetVideoState(
+                [out] Int32* res);
+
+            IsRingbackRequested(
+                [out] Boolean* res);
+
+            GetIsVoipAudioMode(
+                [out] Boolean* res);
+
+            GetStatusHints(
+                [out] IStatusHints** res);
+
+            GetDisconnectCause(
+                [out] IDisconnectCause** res);
+
+            GetConferenceableConnectionIds(
+                [out] IList** res);
+        }
+
+    } // namespace Telecom
+    } // namespace Telecomm
+    } // namespace Droid
+    } // namespace Elastos
+}

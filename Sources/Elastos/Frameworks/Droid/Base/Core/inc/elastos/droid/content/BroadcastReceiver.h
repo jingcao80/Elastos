@@ -10,6 +10,7 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Core::IClassLoader;
 
 namespace Elastos {

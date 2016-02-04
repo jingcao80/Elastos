@@ -2,24 +2,23 @@
 #ifndef __ELASTOS_DROID_SERVER_LOCATION_PASSIVEPROVIDER_H__
 #define __ELASTOS_DROID_SERVER_LOCATION_PASSIVEPROVIDER_H__
 
-#ifdef DROID_CORE
-#include "Elastos.Droid.Core_server.h"
-#else
-#include "Elastos.Droid.Core.h"
-#endif
 #include "elastos/droid/ext/frameworkext.h"
-#include "location/LocationProviderInterface.h"
+#include "_Elastos.Droid.Server.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Location.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include <elastos/core/Object.h>
 
-using Elastos::IO::IPrintWriter;
-using Elastos::IO::IFileDescriptor;
-using Elastos::Droid::Location::ILocation;
 using Elastos::Droid::Location::IILocationManager;
-using Elastos::Droid::Location::ILocationManager;
-using Elastos::Droid::Location::CProviderProperties;
-using Elastos::Droid::Location::IProviderProperties;
-using Elastos::Droid::Location::IProviderRequest;
+using Elastos::Droid::Location::ILocation;
+using Elastos::Droid::Internal::Location::IProviderProperties;
+using Elastos::Droid::Internal::Location::IProviderRequest;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IWorkSource;
+using Elastos::Droid::Server::Location::ILocationProviderInterface;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
 
 namespace Elastos {
 namespace Droid {
@@ -34,14 +33,10 @@ namespace Location {
  * {@hide}
  */
 class PassiveProvider
-        : public ILocationProviderInterface
-        , public ElRefBase
+    : public Object
+    , public ILocationProviderInterface
 {
-private:
-    static const String TAG;// = "PassiveProvider";
-
 public:
-
     CAR_INTERFACE_DECL()
 
     PassiveProvider(
@@ -78,9 +73,6 @@ public:
     CARAPI SetRequest(
         /* [in] */ IProviderRequest* request,
         /* [in] */ IWorkSource* source);
-    //@Override
-    CARAPI SwitchUser(
-        /* [in] */ Int32 userId);
 
     CARAPI UpdateLocation(
         /* [in] */ ILocation* location);
@@ -98,10 +90,8 @@ public:
         /* [in] */ ArrayOf<String>* args);
 
 private:
-    static AutoPtr<IProviderProperties> PROPERTIES;// = new ProviderProperties(
-            //false, false, false, false, false, false, false,
-            //Criteria.POWER_LOW, Criteria.ACCURACY_COARSE);
-
+    const static String TAG;
+    static AutoPtr<IProviderProperties> PROPERTIES;
     AutoPtr<IILocationManager> mLocationManager;
     Boolean mReportLocation;
 };

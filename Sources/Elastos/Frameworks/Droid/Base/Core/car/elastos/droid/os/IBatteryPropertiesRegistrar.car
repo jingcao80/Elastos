@@ -1,18 +1,18 @@
 module
 {
-    interface Elastos.Droid.Os.IBatteryPropertiesListener;
+    interface Elastos.Droid.Os.IIBatteryPropertiesListener;
 
     namespace Elastos {
     namespace Droid {
     namespace Os {
 
-    interface IBatteryPropertiesRegistrar {
+    interface IIBatteryPropertiesRegistrar {
 
         RegisterListener(
-            [in] IBatteryPropertiesListener* listener);
+            [in] IIBatteryPropertiesListener* listener);
 
         UnregisterListener(
-            [in] IBatteryPropertiesListener* listener);
+            [in] IIBatteryPropertiesListener* listener);
 
         GetProperty(
             [in] Int32 id,

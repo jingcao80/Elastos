@@ -1,8 +1,12 @@
 #ifndef __ELASTOS_DROID_OPENGL_EGLLOGWRAPPER_H__
 #define __ELASTOS_DROID_OPENGL_EGLLOGWRAPPER_H__
 
+#include "Elastos.Droid.Opengl.h"
 #include "elastos/droid/ext/frameworkext.h"
 
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 using Elastos::IO::IWriter;
 using Elastosx::Microedition::Khronos::Egl::IEGL;
 using Elastosx::Microedition::Khronos::Egl::IEGL10;
@@ -17,8 +21,10 @@ namespace Droid {
 namespace Opengl {
 
 class EGLLogWrapper
-    : public IEGL11
-    , public ElRefBase
+    : public Object
+    , public IEGL
+    , public IEGL10
+    , public IEGL11
 {
 typedef Elastosx::Microedition::Khronos::Egl::IEGLConfig XIEGLConfig;
 typedef Elastosx::Microedition::Khronos::Egl::IEGLContext XIEGLContext;
@@ -31,18 +37,9 @@ public:
         /* [in] */ Int32 configFlags,
         /* [in] */ IWriter* log);
 
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
+    CAR_INTERFACE_DECL()
 
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface* object,
-        /* [out] */ InterfaceID* iid);
-
-    CARAPI eglChooseConfig(
+    CARAPI EglChooseConfig(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ ArrayOf<Int32>* attrib_list,
         /* [in] */ ArrayOf<XIEGLConfig*>* configs,
@@ -50,105 +47,105 @@ public:
         /* [in] */ ArrayOf<Int32>* num_config,
         /* [out] */ Boolean* result);
 
-    CARAPI eglCopyBuffers(
+    CARAPI EglCopyBuffers(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLSurface* surface,
         /* [in] */ IInterface* native_pixmap,
         /* [out] */ Boolean* result);
 
-    CARAPI eglCreateContext(
+    CARAPI EglCreateContext(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLConfig* config,
         /* [in] */ XIEGLContext* share_context,
         /* [in] */ ArrayOf<Int32>* attrib_list,
         /* [out] */ XIEGLContext** context);
 
-    CARAPI eglCreatePbufferSurface(
+    CARAPI EglCreatePbufferSurface(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLConfig* config,
         /* [in] */ ArrayOf<Int32>* attrib_list,
         /* [out] */ XIEGLSurface** surface);
 
-    CARAPI eglCreatePixmapSurface(
+    CARAPI EglCreatePixmapSurface(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLConfig* config,
         /* [in] */ IInterface* native_pixmap,
         /* [in] */ ArrayOf<Int32>* attrib_list,
         /* [out] */ XIEGLSurface** surface);
 
-    CARAPI eglCreateWindowSurface(
+    CARAPI EglCreateWindowSurface(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLConfig* config,
         /* [in] */ IInterface* native_window,
         /* [in] */ ArrayOf<Int32>* attrib_list,
         /* [out] */ XIEGLSurface** surface);
 
-    CARAPI eglDestroyContext(
+    CARAPI EglDestroyContext(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLContext* context,
         /* [out] */ Boolean* result);
 
-    CARAPI eglDestroySurface(
+    CARAPI EglDestroySurface(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLSurface* surface,
         /* [out] */ Boolean* result);
 
-    CARAPI eglGetConfigAttrib(
+    CARAPI EglGetConfigAttrib(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLConfig* config,
         /* [in] */ Int32 attribute,
         /* [in] */ ArrayOf<Int32>* value,
         /* [out] */ Boolean* result);
 
-    CARAPI eglGetConfigs(
+    CARAPI EglGetConfigs(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ ArrayOf<XIEGLConfig*>* configs,
         /* [in] */ Int32 config_size,
         /* [in] */ ArrayOf<Int32>* num_config,
         /* [out] */ Boolean* result);
 
-    CARAPI eglGetCurrentContext(
+    CARAPI EglGetCurrentContext(
         /* [out] */ XIEGLContext** context);
 
-    CARAPI eglGetCurrentDisplay(
+    CARAPI EglGetCurrentDisplay(
         /* [out] */ XIEGLDisplay** display);
 
-    CARAPI eglGetCurrentSurface(
+    CARAPI EglGetCurrentSurface(
         /* [in] */ Int32 readdraw,
         /* [out] */ XIEGLSurface** surface);
 
-    CARAPI eglGetDisplay(
+    CARAPI EglGetDisplay(
         /* [in] */ IInterface* native_display,
         /* [out] */ XIEGLDisplay** display);
 
-    CARAPI eglGetError(
+    CARAPI EglGetError(
         /* [out] */ Int32* error);
 
-    CARAPI eglInitialize(
+    CARAPI EglInitialize(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ ArrayOf<Int32>* major_minor,
         /* [out] */ Boolean* result);
 
-    CARAPI eglMakeCurrent(
+    CARAPI EglMakeCurrent(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLSurface* draw,
         /* [in] */ XIEGLSurface* read,
         /* [in] */ XIEGLContext* context,
         /* [out] */ Boolean* result);
 
-    CARAPI eglQueryContext(
+    CARAPI EglQueryContext(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLContext* context,
         /* [in] */ Int32 attribute,
         /* [in] */ ArrayOf<Int32>* value,
         /* [out] */ Boolean* result);
 
-    CARAPI eglQueryString(
+    CARAPI EglQueryString(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ Int32 name,
         /* [out] */ String* str);
 
-    CARAPI eglQuerySurface(
+    CARAPI EglQuerySurface(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLSurface* surface,
         /* [in] */ Int32 attribute,
@@ -156,22 +153,22 @@ public:
         /* [out] */ Boolean* result);
 
     /** @hide **/
-    CARAPI eglReleaseThread(
+    CARAPI EglReleaseThread(
         /* [out] */ Boolean* result);
 
-    CARAPI eglSwapBuffers(
+    CARAPI EglSwapBuffers(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLSurface* surface,
         /* [out] */ Boolean* result);
 
-    CARAPI eglTerminate(
+    CARAPI EglTerminate(
         /* [in] */ XIEGLDisplay* display,
         /* [out] */ Boolean* result);
 
-    CARAPI eglWaitGL(
+    CARAPI EglWaitGL(
         /* [out] */ Boolean* result);
 
-    CARAPI eglWaitNative(
+    CARAPI EglWaitNative(
         /* [in] */ Int32 engine,
         /* [in] */ IInterface* bindTarget,
         /* [out] */ Boolean* result);

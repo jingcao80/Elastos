@@ -4,17 +4,25 @@
 
 #include "_Elastos_Droid_Media_CAudioServiceHelper.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Singleton.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Media {
 
 CarClass(CAudioServiceHelper)
+    , public Singleton
+    , public IAudioServiceHelper
 {
 public:
-    CAudioServiceHelper();
+    CAR_INTERFACE_DECL()
 
-    ~CAudioServiceHelper();
+    CAR_SINGLETON_DECL()
+
+    /** @hide */
+    CARAPI StreamToString(
+        /* [in] */ Int32 stream,
+        /* [out] */ String* result);
 
     /**
      * @see #setVibrateSetting(int, int);

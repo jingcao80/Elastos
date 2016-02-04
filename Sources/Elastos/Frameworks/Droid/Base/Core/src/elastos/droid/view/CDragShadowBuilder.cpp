@@ -1,6 +1,8 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/view/CDragShadowBuilder.h"
 
+#include <elastos/utility/logging.h>
+
 namespace Elastos {
 namespace Droid {
 namespace View {
@@ -8,14 +10,13 @@ namespace View {
 ECode CDragShadowBuilder::constructor(
     /* [in] */ IView* view)
 {
-    //mView = new WeakReference<View>(view);
-    mView = view;
+    AutoPtr<IWeakReferenceSource> obj = IWeakReferenceSource::Probe(view);
+    obj->GetWeakReference((IWeakReference**)&mView);
     return NOERROR;
 }
 
 ECode CDragShadowBuilder::constructor()
 {
-    //mView = new WeakReference<View>(null);
     mView = NULL;
     return NOERROR;
 }
@@ -23,20 +24,26 @@ ECode CDragShadowBuilder::constructor()
 ECode CDragShadowBuilder::GetView(
     /* [out] */ IView** view)
 {
-    VALIDATE_NOT_NULL(view);
-    *view = mView;
-    REFCOUNT_ADD(*view);
-    return NOERROR;
+    VALIDATE_NOT_NULL(view)
+
+    if (mView == NULL) {
+        view = NULL;
+        return NOERROR;
+    }
+    return mView->Resolve(EIID_IView, (Interface**)view);
+
 }
 
 ECode CDragShadowBuilder::OnProvideShadowMetrics(
     /* [in] */ IPoint* shadowSize,
     /* [in] */ IPoint* shadowTouchPoint)
 {
-    if (mView != NULL) {
+    AutoPtr<IView> view;
+    mView->Resolve(EIID_IView, (Interface**)&view);
+    if (view != NULL) {
         Int32 w = 0, h = 0;
-        mView->GetWidth(&w);
-        mView->GetHeight(&h);
+        view->GetWidth(&w);
+        view->GetHeight(&h);
         shadowSize->Set(w, h);
         Int32 x, y;
         shadowSize->GetX(&x);
@@ -44,7 +51,7 @@ ECode CDragShadowBuilder::OnProvideShadowMetrics(
         shadowTouchPoint->Set(x / 2, y / 2);
     }
     else {
-        //Log.e(View.VIEW_LOG_TAG, "Asked for drag thumb metrics but no view");
+        SLOGGERE("View::DragShadowBuilder", "Asked for drag thumb metrics but no view");
     }
 
     return NOERROR;
@@ -53,11 +60,13 @@ ECode CDragShadowBuilder::OnProvideShadowMetrics(
 ECode CDragShadowBuilder::OnDrawShadow(
     /* [in] */ ICanvas* canvas)
 {
-    if (mView != NULL) {
-        return mView->Draw(canvas);
+    AutoPtr<IView> view;
+    mView->Resolve(EIID_IView, (Interface**)&view);
+    if (view != NULL) {
+        return view->Draw(canvas);
     }
     else {
-        //Log.e(View.VIEW_LOG_TAG, "Asked to draw drag shadow but no view");
+        SLOGGERE("View::DragShadowBuilder", "Asked to draw drag shadow but no view")
     }
 
     return NOERROR;

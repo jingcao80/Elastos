@@ -1,0 +1,140 @@
+
+module
+{
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * API for Bluetooth Headset Client service (HFP HF Role)
+     *
+     * {@hide}
+     */
+    [deprecated]
+    interface IIBluetoothHeadsetClient {
+        Connect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        Disconnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        AcceptIncomingConnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        RejectIncomingConnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        GetConnectedDevices(
+            [out] IList** devices);
+
+        GetDevicesMatchingConnectionStates(
+            [in] ArrayOf<Int32>* states,
+            [out] IList** devices);
+
+        GetConnectionState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* result);
+
+        SetPriority(
+            [in] IBluetoothDevice* device,
+            [in] Int32 priority,
+            [out] Boolean* result);
+
+        GetPriority(
+            [in] IBluetoothDevice* device,
+            [out] Int32* result);
+
+        StartVoiceRecognition(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        StopVoiceRecognition(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        GetCurrentCalls(
+            [in] IBluetoothDevice* device,
+            [out] IList** result);
+
+        GetCurrentAgEvents(
+            [in] IBluetoothDevice* device,
+            [out] IBundle** bundle);
+
+        AcceptCall(
+            [in] IBluetoothDevice* device,
+            [in] Int32 flag,
+            [out] Boolean* result);
+
+        HoldCall(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        RejectCall(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        TerminateCall(
+            [in] IBluetoothDevice* device,
+            [in] Int32 index,
+            [out] Boolean* result);
+
+        EnterPrivateMode(
+            [in] IBluetoothDevice* device,
+            [in] Int32 index,
+            [out] Boolean* result);
+
+        ExplicitCallTransfer(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        Redial(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        Dial(
+            [in] IBluetoothDevice* device,
+            [in] String number,
+            [out] Boolean* result);
+
+        DialMemory(
+            [in] IBluetoothDevice* device,
+            [in] Int32 location,
+            [out] Boolean* result);
+
+        SendDTMF(
+            [in] IBluetoothDevice* device,
+            [in] Byte code,
+            [out] Boolean* result);
+
+        GetLastVoiceTagNumber(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        GetAudioState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* result);
+
+        ConnectAudio(
+            [out] Boolean* result);
+
+        DisconnectAudio(
+            [out] Boolean* result);
+
+        GetCurrentAgFeatures(
+            [in] IBluetoothDevice* device,
+            [out] IBundle** bundle);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

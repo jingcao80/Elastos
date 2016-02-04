@@ -12,7 +12,7 @@ using Elastos::IO::IByteBuffer;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Opengl::IGLES20;
 using Elastos::Droid::Opengl::CGLES20;
-using Elastos::Droid::Opengl::CMatrixGL;
+using Elastos::Droid::Opengl::CMatrix;
 using Elastos::Droid::Opengl::IMatrix;
 
 namespace Elastos {
@@ -118,7 +118,7 @@ ECode Triangle::DrawSelf()
     CGLES20::AcquireSingleton((IGLES20**)&gl);
     ASSERT_SUCCEEDED(gl->GlUseProgram(mProgram));
     AutoPtr<IMatrix> matrix;
-    CMatrixGL::AcquireSingleton((IMatrix**)&matrix);
+    CMatrix::AcquireSingleton((IMatrix**)&matrix);
     ASSERT_SUCCEEDED(matrix->SetRotateM(mMMatrix, 0, 0, 0, 1, 0));
     ASSERT_SUCCEEDED(matrix->TranslateM(mMMatrix, 0 ,0, 0, 1));
     ASSERT_SUCCEEDED(matrix->RotateM(mMMatrix, 0, xAngle, 1, 0, 0));
@@ -152,7 +152,7 @@ AutoPtr<ArrayOf<Float> > Triangle::GetFinalMatrix(
 {
     mMVPMatrix = ArrayOf<Float>::Alloc(16);
     AutoPtr<IMatrix> matrix;
-    CMatrixGL::AcquireSingleton((IMatrix**)&matrix);
+    CMatrix::AcquireSingleton((IMatrix**)&matrix);
     ASSERT_SUCCEEDED(matrix->MultiplyMM(mMVPMatrix, 0, mVMatrix, 0, spec, 0));
     ASSERT_SUCCEEDED(matrix->MultiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVPMatrix, 0));
 

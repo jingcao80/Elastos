@@ -4,6 +4,7 @@
 
 #include "_Elastos_Droid_Server_Pm_CPackageInstallerService.h"
 #include "elastos/droid/server/pm/CPackageManagerService.h"
+#include "elastos/droid/server/pm/CPackageInstallerSession.h"
 #include "elastos/droid/app/PackageDeleteObserver.h"
 #include "elastos/droid/app/PackageInstallObserver.h"
 #include "Elastos.Droid.App.h"
@@ -35,7 +36,58 @@ namespace Droid {
 namespace Server {
 namespace Pm {
 
-class CPackageInstallerSession;
+class CPackageInstallerService;
+
+class InternalCallback : public Object
+{
+private:
+    class SessionFinishedRunnable : public Runnable
+    {
+    public:
+        SessionFinishedRunnable(
+            /* [in] */ CPackageInstallerService* host,
+            /* [in] */ CPackageInstallerSession* session)
+            : mHost(host)
+            , mSession(session)
+        {}
+
+        CARAPI Run();
+
+    private:
+        CPackageInstallerService* mHost;
+        CPackageInstallerSession* mSession;
+    };
+
+public:
+    InternalCallback(
+        /* [in] */ CPackageInstallerService* host)
+        : mHost(host)
+    {}
+
+    CARAPI_(void) OnSessionBadgingChanged(
+        /* [in] */ CPackageInstallerSession* session);
+
+    CARAPI_(void) OnSessionActiveChanged(
+        /* [in] */ CPackageInstallerSession* session,
+        /* [in] */ Boolean active);
+
+    CARAPI_(void) OnSessionProgressChanged(
+        /* [in] */ CPackageInstallerSession* session,
+        /* [in] */ Float progress);
+
+    CARAPI_(void) OnSessionFinished(
+        /* [in] */ CPackageInstallerSession* session,
+        /* [in] */ Boolean success);
+
+    CARAPI_(void) OnSessionPrepared(
+        /* [in] */ CPackageInstallerSession* session);
+
+    CARAPI_(void) OnSessionSealedBlocking(
+        /* [in] */ CPackageInstallerSession* session);
+
+private:
+    CPackageInstallerService* mHost;
+};
 
 CarClass(CPackageInstallerService)
     , public Object
@@ -96,39 +148,6 @@ public:
         Int32 mSessionId;
     };
 
-    class InternalCallback : public Object
-    {
-    public:
-        InternalCallback(
-            /* [in] */ CPackageInstallerService* host)
-            : mHost(host)
-        {}
-
-        CARAPI_(void) OnSessionBadgingChanged(
-            /* [in] */ CPackageInstallerSession* session);
-
-        CARAPI_(void) OnSessionActiveChanged(
-            /* [in] */ CPackageInstallerSession* session,
-            /* [in] */ Boolean active);
-
-        CARAPI_(void) OnSessionProgressChanged(
-            /* [in] */ CPackageInstallerSession* session,
-            /* [in] */ Float progress);
-
-        CARAPI_(void) OnSessionFinished(
-            /* [in] */ CPackageInstallerSession* session,
-            /* [in] */ Boolean success);
-
-        CARAPI_(void) OnSessionPrepared(
-            /* [in] */ CPackageInstallerSession* session);
-
-        CARAPI_(void) OnSessionSealedBlocking(
-            /* [in] */ CPackageInstallerSession* session);
-
-    private:
-        CPackageInstallerService* mHost;
-    };
-
 private:
     class StageFilter
         : public Object
@@ -159,29 +178,9 @@ private:
 
     class Callbacks : public Handler
     {
-    private:
-        class SessionFinishedRunnable : public Runnable
-        {
-        public:
-            SessionFinishedRunnable(
-                /* [in] */ CPackageInstallerService* host,
-                /* [in] */ CPackageInstallerSession* session)
-                : mHost(host)
-                , mSession(session)
-            {}
-
-            CARAPI Run();
-
-        private:
-            CPackageInstallerService* mHost;
-            CPackageInstallerSession* mSession;
-        };
-
     public:
         Callbacks(
-            /* [in] */ ILooper* looper)
-            : Handler(looper)
-        {}
+            /* [in] */ ILooper* looper);
 
         CARAPI_(void) Register(
             /* [in] */ IPackageInstallerCallback* callback,
@@ -229,6 +228,9 @@ private:
         static const Int32 MSG_SESSION_FINISHED = 5;
 
         AutoPtr<IRemoteCallbackList> mCallbacks;
+
+        friend class InternalCallback;
+        friend class CPackageInstallerService;
     };
 
 public:
@@ -311,12 +313,17 @@ public:
         /* [in] */ Int32 sessionId,
         /* [in] */ Boolean accepted);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 private:
+    static CARAPI_(AutoPtr<IFilenameFilter>) InitStageFilter();
+
     CARAPI_(void) ReadSessionsLocked();
 
     CARAPI ReadSessionLocked(
         /* [in] */ IXmlPullParser* in,
-        /* [out] */ CPackageInstallerSession* session);
+        /* [out] */ CPackageInstallerSession** session);
 
     CARAPI_(void) WriteSessionsLocked();
 

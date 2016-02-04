@@ -1696,12 +1696,12 @@ ECode Instrumentation::CheckStartActivityResult(
             }
             //throw new ActivityNotFoundException(
             //        "No Activity found to handle " + intent);
-            Slogger::E(TAG, "No Activity found to handle %s", Object::ToString(intent).string());
+            Slogger::E(TAG, "No Activity found to handle %s", TO_CSTR(intent));
             return E_ACTIVITY_NOT_FOUND_EXCEPTION;
         case IActivityManager::START_PERMISSION_DENIED:
             //throw new SecurityException("Not allowed to start activity "
             //         + intent);
-            Slogger::E(TAG, "Not allowed to start activity %s", Object::ToString(intent).string());
+            Slogger::E(TAG, "Not allowed to start activity %s", TO_CSTR(intent));
             return E_SECURITY_EXCEPTION;
         case IActivityManager::START_FORWARD_AND_REQUEST_CONFLICT:
             // throw new AndroidRuntimeException(
@@ -1716,12 +1716,12 @@ ECode Instrumentation::CheckStartActivityResult(
         case IActivityManager::START_NOT_VOICE_COMPATIBLE:
             // throw new SecurityException(
             //         "Starting under voice control not allowed for: " + intent);
-            Slogger::E(TAG, "Starting under voice control not allowed for: %s", Object::ToString(intent).string());
+            Slogger::E(TAG, "Starting under voice control not allowed for: %s", TO_CSTR(intent));
             return E_SECURITY_EXCEPTION;
         default:
             //throw new AndroidRuntimeException("Unknown error code "
             //        + res + " when starting " + intent);
-            Slogger::E(TAG, "Unknown error code %d when starting %s", res, Object::ToString(intent).string());
+            Slogger::E(TAG, "Unknown error code %d when starting %s", res, TO_CSTR(intent));
             return E_RUNTIME_EXCEPTION;
     }
     return NOERROR;

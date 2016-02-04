@@ -54,6 +54,7 @@ ECode SRTTrack::constructor(
 {
 	WebVttTrack::constructor(NULL, format);
     mEventHandler = eventHandler;
+    return NOERROR;
 }
 
 ECode SRTTrack::OnData(
@@ -99,6 +100,7 @@ ECode SRTTrack::OnData(
     // } catch (UnsupportedEncodingException e) {
         // Log.w(TAG, "subtitle data is not UTF-8 encoded: " + e);
     // }
+    return NOERROR;
 }
 
 ECode SRTTrack::OnData(
@@ -141,7 +143,6 @@ ECode SRTTrack::OnData(
             paragraph->Add(StringUtils::ParseCharSequence(s).Get());
         }
 
-        Int32 i = 0;
         Int32 size;
         paragraph->GetSize(&size);
 

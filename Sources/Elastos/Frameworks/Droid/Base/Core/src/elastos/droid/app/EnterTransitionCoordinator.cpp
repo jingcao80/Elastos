@@ -1071,12 +1071,13 @@ Boolean EnterTransitionCoordinator::AllowOverlappingTransitions()
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
     Boolean bval;
-    assert(0 && "TODO");
-    // if (mIsReturning)
-    //     window->GetAllowExitTransitionOverlap(&bval);
-    // else
-    //     window->GetAllowEnterTransitionOverlap(&bval);
-    return NOERROR;
+    if (mIsReturning) {
+        window->GetAllowExitTransitionOverlap(&bval);
+    }
+    else {
+        window->GetAllowEnterTransitionOverlap(&bval);
+    }
+    return bval;
 }
 
 void EnterTransitionCoordinator::StartRejectedAnimations(

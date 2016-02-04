@@ -15,14 +15,11 @@ CEmojiFactoryHelper::CEmojiFactoryHelper()
 CEmojiFactoryHelper::~CEmojiFactoryHelper()
 {}
 
-ECode CEmojiFactoryHelper::constructor()
-{}
-
 ECode CEmojiFactoryHelper::NewInstance(
-    /* [in] */ const String& class_name,
+    /* [in] */ const String& className,
     /* [out] */ IEmojiFactory** emojiFactory)
 {
-    return EmojiFactory::NewInstance(class_name, emojiFactory);
+    return EmojiFactory::NewInstance(className, emojiFactory);
 }
 
 ECode CEmojiFactoryHelper::NewAvailableInstance(

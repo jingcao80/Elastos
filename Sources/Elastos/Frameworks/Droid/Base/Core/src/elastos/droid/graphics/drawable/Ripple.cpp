@@ -3,18 +3,19 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
+#include "elastos/droid/animation/ObjectAnimator.h"
 #include "elastos/droid/graphics/drawable/Ripple.h"
 #include "elastos/droid/graphics/drawable/CVectorDrawable.h"
 #include "elastos/droid/graphics/drawable/RippleDrawable.h"
 #include "elastos/droid/graphics/CPaint.h"
-#include "elastos/droid/animation/ObjectAnimator.h"
-// #include "elastos/droid/view/animation/CLinearInterpolator.h"
 #include "elastos/droid/utility/MathUtils.h"
+#include "elastos/droid/view/animation/CLinearInterpolator.h"
 
 using Elastos::Droid::Animation::ObjectAnimator;
 using Elastos::Droid::Animation::EIID_ITimeInterpolator;
-using Elastos::Droid::View::IRenderNodeAnimator;
 using Elastos::Droid::Utility::MathUtils;
+using Elastos::Droid::View::IRenderNodeAnimator;
+using Elastos::Droid::View::Animation::CLinearInterpolator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 
@@ -23,16 +24,8 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
-Boolean Ripple::sInit = InitStatic();
-AutoPtr<ITimeInterpolator> Ripple::LINEAR_INTERPOLATOR;
-AutoPtr<ITimeInterpolator> Ripple::DECEL_INTERPOLATOR;
-const Float Ripple::GLOBAL_SPEED = 1.0f;
-const Float Ripple::WAVE_TOUCH_DOWN_ACCELERATION = 1024.0f * GLOBAL_SPEED;
-const Float Ripple::WAVE_TOUCH_UP_ACCELERATION = 3400.0f * GLOBAL_SPEED;
-const Float Ripple::WAVE_OPACITY_DECAY_VELOCITY = 3.0f / GLOBAL_SPEED;
-const Int64 Ripple::RIPPLE_ENTER_DELAY = 80;
-
 CAR_INTERFACE_IMPL(Ripple::LogInterpolator, Object, ITimeInterpolator);
+
 ECode Ripple::LogInterpolator::GetInterpolation(
     /* [in] */ Float input,
     /* [out] */ Float* result)
@@ -64,15 +57,21 @@ ECode Ripple::RippleAnimatorListenerAdapter::OnAnimationEnd(
     return NOERROR;
 }
 
+
 ///////////////////  Ripple  ///////////////////////
-Boolean Ripple::InitStatic()
+AutoPtr<ITimeInterpolator> Ripple::LINEAR_INTERPOLATOR = Init_LINEAR_INTERPOLATOR();
+AutoPtr<ITimeInterpolator> Ripple::DECEL_INTERPOLATOR = new Ripple::LogInterpolator();
+const Float Ripple::GLOBAL_SPEED = 1.0f;
+const Float Ripple::WAVE_TOUCH_DOWN_ACCELERATION = 1024.0f * GLOBAL_SPEED;
+const Float Ripple::WAVE_TOUCH_UP_ACCELERATION = 3400.0f * GLOBAL_SPEED;
+const Float Ripple::WAVE_OPACITY_DECAY_VELOCITY = 3.0f / GLOBAL_SPEED;
+const Int64 Ripple::RIPPLE_ENTER_DELAY = 80;
+
+AutoPtr<ITimeInterpolator> Ripple::Init_LINEAR_INTERPOLATOR()
 {
-    assert(0 && "TODO");
-    // AutoPtr<CLinearInterpolator> li;
-    // CLinearInterpolator::New((CTimeInterpolator**)&li);
-    // LINEAR_INTERPOLATOR = (ITimeInterpolator*)li.Get();
-    DECEL_INTERPOLATOR = new LogInterpolator();
-    return TRUE;
+    AutoPtr<ITimeInterpolator> li;
+    CLinearInterpolator::New((ITimeInterpolator**)&li);
+    return li;
 }
 
 Ripple::Ripple(

@@ -72,9 +72,19 @@ const String Transition::MATCH_VIEW_NAME_STR("viewName");
 const String Transition::MATCH_ID_STR("id");
 const String Transition::MATCH_ITEM_ID_STR("itemId");
 
-AutoPtr<ArrayOf<Int32> > Transition::DEFAULT_MATCH_ORDER;
+AutoPtr<ArrayOf<Int32> > Transition::DEFAULT_MATCH_ORDER = Init_DEFAULT_MATCH_ORDER();
 
 AutoPtr<IPathMotion> Transition::STRAIGHT_PATH_MOTION = new PathMotionOverride();
+
+AutoPtr< ArrayOf<Int32> > Transition::Init_DEFAULT_MATCH_ORDER()
+{
+    AutoPtr< ArrayOf<Int32> > order =  ArrayOf<Int32>::Alloc(4);
+    (*DEFAULT_MATCH_ORDER)[0] = MATCH_NAME;
+    (*DEFAULT_MATCH_ORDER)[1] = MATCH_INSTANCE;
+    (*DEFAULT_MATCH_ORDER)[2] = MATCH_ID;
+    (*DEFAULT_MATCH_ORDER)[3] = MATCH_ITEM_ID;
+    return order;
+}
 
 // Per-animator information used for later canceling when future transitions overlap
 //AutoPtr<IThreadLocal> Transition::sRunningAnimators = new ThreadLocal();
@@ -82,11 +92,21 @@ AutoPtr<IPathMotion> Transition::STRAIGHT_PATH_MOTION = new PathMotionOverride()
 CAR_INTERFACE_IMPL_2(Transition, Object, ITransition, ICloneable)
 
 Transition::Transition()
+    : mStartDelay(-1)
+    , mDuration(-1)
+    , mCanRemoveViews(FALSE)
+    , mNumInstances(0)
+    , mPaused(FALSE)
+    , mEnded(FALSE)
 {
-    (*DEFAULT_MATCH_ORDER)[0] = MATCH_NAME;
-    (*DEFAULT_MATCH_ORDER)[1] = MATCH_INSTANCE;
-    (*DEFAULT_MATCH_ORDER)[2] = MATCH_ID;
-    (*DEFAULT_MATCH_ORDER)[3] = MATCH_ITEM_ID;
+    CArrayList::New((IArrayList**)&mTargetIds);
+    CArrayList::New((IArrayList**)&mTargets);
+    // TODO:
+    // mStartValues = new TransitionValuesMaps();
+    // mEndValues = new TransitionValuesMaps();
+    CArrayList::New((IArrayList**)&mCurrentAnimators);
+    CArrayList::New((IArrayList**)&mAnimators);
+    mPathMotion = STRAIGHT_PATH_MOTION;
 }
 
 ECode Transition::constructor()

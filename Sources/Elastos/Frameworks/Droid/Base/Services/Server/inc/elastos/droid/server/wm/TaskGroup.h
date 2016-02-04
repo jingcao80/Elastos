@@ -2,10 +2,13 @@
 #define __ELASTOS_DROID_SERVER_WM_TASKGROUP_H__
 
 #include "_Elastos.Droid.Server.h"
+#include <Elastos.Droid.View.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
+#include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::View::IApplicationToken;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {

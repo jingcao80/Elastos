@@ -33,6 +33,8 @@ SOURCES += CAudioPatch.cpp
 SOURCES += AudioPortEventHandler.cpp
 SOURCES += CAudioRecord.cpp
 SOURCES += CAudioRoutesInfo.cpp
+SOURCES += CAudioService.cpp
+SOURCES += CAudioServiceHelper.cpp
 SOURCES += AudioSystem.cpp
 SOURCES += CAudioSystem.cpp
 SOURCES += CAudioTimestamp.cpp
@@ -80,7 +82,7 @@ SOURCES += CMediaDrm.cpp
 SOURCES += CMediaFileType.cpp
 SOURCES += MediaFile.cpp
 SOURCES += CMediaFile.cpp
-#SOURCES += MediaFocusControl.cpp
+SOURCES += MediaFocusControl.cpp
 SOURCES += CMediaFormat.cpp
 SOURCES += CMediaFormatHelper.cpp
 SOURCES += CMediaHTTPConnection.cpp
@@ -130,92 +132,21 @@ SOURCES += CMetadata.cpp
 SOURCES += CMetadataHelper.cpp
 SOURCES += CMediaScannerConnection.cpp
 SOURCES += CMediaScannerConnectionHelper.cpp
-#SOURCES += CRemoteDisplay.cpp
-#SOURCES += CRemoteDisplayHelper.cpp
+SOURCES += CRemoteDisplay.cpp
+SOURCES += CRemoteDisplayHelper.cpp
+SOURCES += Rating.cpp
+SOURCES += CRingtone.cpp
+SOURCES += CRatingHelper.cpp
+SOURCES += CRingtoneManager.cpp
+SOURCES += CRingtoneManagerHelper.cpp
+SOURCES += CTimedText.cpp
+SOURCES += CRemoteControlClient.cpp
+SOURCES += Utils.cpp
+SOURCES += PlayerRecord.cpp
+SOURCES += TtmlRenderer.cpp
+SOURCES += RemoteController.cpp
 
 SOURCES += media.cpp
-
-
-
-#SOURCES += CAudioManagerAudioFocusDispatcher.cpp
-#SOURCES += CAudioManager.cpp
-#SOURCES += CAudioManagerHelper.cpp
-
-#SOURCES += CAudioRecord.cpp
-#SOURCES += CAudioRecordHelper.cpp
-
-#SOURCES += CAudioRoutesInfo.cpp
-
-#SOURCES += CAudioService.cpp
-#SOURCES += CAudioServiceHelper.cpp
-
-#SOURCES += CAudioSystem.cpp
-#SOURCES += CAudioSystemHelper.cpp
-
-#SOURCES += CAudioTrack.cpp
-#SOURCES += CAudioTrackHelper.cpp
-
-#SOURCES += CCamcorderProfile.cpp
-#SOURCES += CCamcorderProfileHelper.cpp
-
-#SOURCES += CCameraProfileHelper.cpp
-
-#SOURCES += CDecoderCapabilities.cpp
-#SOURCES += CDecoderCapabilitiesHelper.cpp
-
-#SOURCES += CEncoderCapabilities.cpp
-#SOURCES += CEncoderCapabilitiesHelper.cpp
-
-#SOURCES += CExifInterface.cpp
-
-#SOURCES += CFace.cpp
-#SOURCES += CFaceDetector.cpp
-
-#SOURCES += CJetPlayer.cpp
-#SOURCES += CJetPlayerHelper.cpp
-
-#SOURCES += CMediaActionSound.cpp
-#SOURCES += CMediaCodecBufferInfo.cpp
-#SOURCES += CMediaCodecCryptoInfo.cpp
-#SOURCES += CMediaCodec.cpp
-#SOURCES += CMediaCodecHelper.cpp
-#SOURCES += CMediaCodecInfo.cpp
-#SOURCES += CMediaCodecList.cpp
-#SOURCES += CMediaCrypto.cpp
-#SOURCES += CMediaCryptoHelper.cpp
-#SOURCES += CMediaExtractor.cpp
-#SOURCES += CMediaFile.cpp
-#SOURCES += CMediaFileType.cpp
-#SOURCES += CMediaFormat.cpp
-#SOURCES += CMediaFormatHelper.cpp
-#SOURCES += CMediaInserter.cpp
-#SOURCES += CMediaMetadataRetriever.cpp
-#SOURCES += CMediaPlayer.cpp
-#SOURCES += CMediaPlayerHelper.cpp
-#SOURCES += CMediaPlayerTrackInfo.cpp
-#SOURCES += CMediaPlayerSubInfo.cpp
-#SOURCES += CTrackInfoVendor.cpp
-#SOURCES += CMediaRecorder.cpp
-#SOURCES += CMediaRecorderHelper.cpp
-#SOURCES += CMediaRouter.cpp
-#SOURCES += CMediaRouteInfo.cpp
-#SOURCES += MediaRouteInfo.cpp
-#SOURCES += CRouteCategory.cpp
-#SOURCES += CUserRouteInfo.cpp
-#SOURCES += CRouteGroup.cpp
-#SOURCES += CMediaScanner.cpp
-#SOURCES += CMediaScannerHelper.cpp
-#SOURCES += CRemoteControlClient.cpp
-#SOURCES += CResampleInputStream.cpp
-#SOURCES += CRingtone.cpp
-#SOURCES += CRingtoneManager.cpp
-#SOURCES += CRingtoneManagerHelper.cpp
-#SOURCES += CSoundPool.cpp
-#SOURCES += CTimedText.cpp
-#SOURCES += CCodecCapabilities.cpp
-#SOURCES += CCodecProfileLevel.cpp
-#SOURCES += Media_Utils.cpp
-
 
 ELASTOS_LIBS += audiofx/audiofx.lib
 ELASTOS_LIBS += audiopolicy/audiopolicy.lib

@@ -155,7 +155,7 @@ ECode PacProxySelector::ProxyFromHostPort(
     AutoPtr<IInetSocketAddress> address;
     ECode ec = helper->CreateUnresolved(host, port, (IInetSocketAddress**)&address);
     if (FAILED(ec)) {
-        if (ec == (ECode)E_NUMBER_FORMAT_EXCEPTION|| ec == E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION) {
+        if (ec == (ECode)E_NUMBER_FORMAT_EXCEPTION|| ec == (ECode)E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION) {
             Logger::D(TAG, "Unable to parse proxy %s %d", hostPortString.string(), ec);
             *result = NULL;
             return NOERROR;
@@ -165,7 +165,7 @@ ECode PacProxySelector::ProxyFromHostPort(
     AutoPtr<Elastos::Net::IProxy> rev;
     ec = CProxy::New(type, ISocketAddress::Probe(address), (Elastos::Net::IProxy**)&rev);
     if (FAILED(ec)) {
-        if (ec == (ECode)E_NUMBER_FORMAT_EXCEPTION|| ec == E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION) {
+        if (ec == (ECode)E_NUMBER_FORMAT_EXCEPTION|| ec == (ECode)E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION) {
             Logger::D(TAG, "Unable to parse proxy %s %d", hostPortString.string(), ec);
             *result = NULL;
             return NOERROR;

@@ -1,16 +1,18 @@
-
-#include "BluetoothInputDevice.h"
-#include "CBluetoothAdapter.h"
-#include "CBluetoothInputDeviceStateChangeCallback.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/bluetooth/BluetoothInputDevice.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/droid/bluetooth/CBluetoothInputDeviceStateChangeCallback.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/core/AutoLock.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
-using Elastos::Core::StringUtils;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::CIntent;
+using Elastos::Core::AutoLock;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -19,13 +21,12 @@ namespace Bluetooth {
 /////////////////////////////////////////////////////
 // ServiceConnection
 /////////////////////////////////////////////////////
+CAR_INTERFACE_IMPL(BluetoothInputDevice::ServiceConnection, Object, IServiceConnection);
 
 BluetoothInputDevice::ServiceConnection::ServiceConnection(
     /* [in] */ BluetoothInputDevice* host)
     : mHost(host)
 {}
-
-CAR_INTERFACE_IMPL(BluetoothInputDevice::ServiceConnection, IServiceConnection)
 
 ECode BluetoothInputDevice::ServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
@@ -56,31 +57,33 @@ ECode BluetoothInputDevice::ServiceConnection::OnServiceDisconnected(
 // BluetoothInputDevice
 /////////////////////////////////////////////////////
 
-const String BluetoothInputDevice::ACTION_CONNECTION_STATE_CHANGED ("android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED");
-const String BluetoothInputDevice::ACTION_PROTOCOL_MODE_CHANGED("android.bluetooth.input.profile.action.PROTOCOL_MODE_CHANGED");
-const String BluetoothInputDevice::ACTION_VIRTUAL_UNPLUG_STATUS("android.bluetooth.input.profile.action.VIRTUAL_UNPLUG_STATUS");
-const Int32 BluetoothInputDevice::INPUT_DISCONNECT_FAILED_NOT_CONNECTED;
-const Int32 BluetoothInputDevice::INPUT_CONNECT_FAILED_ALREADY_CONNECTED;
-const Int32 BluetoothInputDevice::INPUT_CONNECT_FAILED_ATTEMPT_FAILED;
-const Int32 BluetoothInputDevice::INPUT_OPERATION_GENERIC_FAILURE;
-const Int32 BluetoothInputDevice::INPUT_OPERATION_SUCCESS;
-const Int32 BluetoothInputDevice::PROTOCOL_REPORT_MODE;
-const Int32 BluetoothInputDevice::PROTOCOL_BOOT_MODE;
-const Int32 BluetoothInputDevice::PROTOCOL_UNSUPPORTED_MODE;
-const Byte BluetoothInputDevice::REPORT_TYPE_INPUT;
-const Byte BluetoothInputDevice::REPORT_TYPE_OUTPUT;
-const Byte BluetoothInputDevice::REPORT_TYPE_FEATURE;
-const Int32 BluetoothInputDevice::VIRTUAL_UNPLUG_STATUS_SUCCESS;
-const Int32 BluetoothInputDevice::VIRTUAL_UNPLUG_STATUS_FAIL;
-const String BluetoothInputDevice::EXTRA_PROTOCOL_MODE("android.bluetooth.BluetoothInputDevice.extra.PROTOCOL_MODE");
-const String BluetoothInputDevice::EXTRA_REPORT_TYPE("android.bluetooth.BluetoothInputDevice.extra.REPORT_TYPE");
-const String BluetoothInputDevice::EXTRA_REPORT_ID("android.bluetooth.BluetoothInputDevice.extra.REPORT_ID");
-const String BluetoothInputDevice::EXTRA_REPORT_BUFFER_SIZE("android.bluetooth.BluetoothInputDevice.extra.REPORT_BUFFER_SIZE");
-const String BluetoothInputDevice::EXTRA_REPORT("android.bluetooth.BluetoothInputDevice.extra.REPORT");
-const String BluetoothInputDevice::EXTRA_VIRTUAL_UNPLUG_STATUS("android.bluetooth.BluetoothInputDevice.extra.VIRTUAL_UNPLUG_STATUS");
+//const String BluetoothInputDevice::ACTION_CONNECTION_STATE_CHANGED ("android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED");
+//const String BluetoothInputDevice::ACTION_PROTOCOL_MODE_CHANGED("android.bluetooth.input.profile.action.PROTOCOL_MODE_CHANGED");
+//const String BluetoothInputDevice::ACTION_VIRTUAL_UNPLUG_STATUS("android.bluetooth.input.profile.action.VIRTUAL_UNPLUG_STATUS");
+//const Int32 BluetoothInputDevice::INPUT_DISCONNECT_FAILED_NOT_CONNECTED;
+//const Int32 BluetoothInputDevice::INPUT_CONNECT_FAILED_ALREADY_CONNECTED;
+//const Int32 BluetoothInputDevice::INPUT_CONNECT_FAILED_ATTEMPT_FAILED;
+//const Int32 BluetoothInputDevice::INPUT_OPERATION_GENERIC_FAILURE;
+//const Int32 BluetoothInputDevice::INPUT_OPERATION_SUCCESS;
+//const Int32 BluetoothInputDevice::PROTOCOL_REPORT_MODE;
+//const Int32 BluetoothInputDevice::PROTOCOL_BOOT_MODE;
+//const Int32 BluetoothInputDevice::PROTOCOL_UNSUPPORTED_MODE;
+//const Byte BluetoothInputDevice::REPORT_TYPE_INPUT;
+//const Byte BluetoothInputDevice::REPORT_TYPE_OUTPUT;
+//const Byte BluetoothInputDevice::REPORT_TYPE_FEATURE;
+//const Int32 BluetoothInputDevice::VIRTUAL_UNPLUG_STATUS_SUCCESS;
+//const Int32 BluetoothInputDevice::VIRTUAL_UNPLUG_STATUS_FAIL;
+//const String BluetoothInputDevice::EXTRA_PROTOCOL_MODE("android.bluetooth.BluetoothInputDevice.extra.PROTOCOL_MODE");
+//const String BluetoothInputDevice::EXTRA_REPORT_TYPE("android.bluetooth.BluetoothInputDevice.extra.REPORT_TYPE");
+//const String BluetoothInputDevice::EXTRA_REPORT_ID("android.bluetooth.BluetoothInputDevice.extra.REPORT_ID");
+//const String BluetoothInputDevice::EXTRA_REPORT_BUFFER_SIZE("android.bluetooth.BluetoothInputDevice.extra.REPORT_BUFFER_SIZE");
+//const String BluetoothInputDevice::EXTRA_REPORT("android.bluetooth.BluetoothInputDevice.extra.REPORT");
+//const String BluetoothInputDevice::EXTRA_VIRTUAL_UNPLUG_STATUS("android.bluetooth.BluetoothInputDevice.extra.VIRTUAL_UNPLUG_STATUS");
 const String BluetoothInputDevice::TAG("BluetoothInputDevice");
 const Boolean BluetoothInputDevice::DBG = TRUE;
 const Boolean BluetoothInputDevice::VDBG = FALSE;
+
+CAR_INTERFACE_IMPL_2(BluetoothInputDevice, Object, IBluetoothInputDevice, IBluetoothProfile);
 
 BluetoothInputDevice::BluetoothInputDevice(
     /* [in] */ IContext* context,
@@ -88,7 +91,7 @@ BluetoothInputDevice::BluetoothInputDevice(
     : mContext(context)
     , mServiceListener(listener)
 {
-    CBluetoothInputDeviceStateChangeCallback::New(this, (IIBluetoothStateChangeCallback**)&mBluetoothStateChangeCallback);
+    CBluetoothInputDeviceStateChangeCallback::New(TO_IINTERFACE(this), (IIBluetoothStateChangeCallback**)&mBluetoothStateChangeCallback);
     mConnection = new ServiceConnection(this);
 
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
@@ -113,8 +116,6 @@ BluetoothInputDevice::BluetoothInputDevice(
         Logger::E(TAG, "Could not bind to Bluetooth HID Service");
     }
 }
-
-CAR_INTERFACE_IMPL(BluetoothInputDevice, IBluetoothProfile)
 
 ECode BluetoothInputDevice::Close()
 {
@@ -206,7 +207,7 @@ ECode BluetoothInputDevice::Disconnect(
 }
 
 ECode BluetoothInputDevice::GetConnectedDevices(
-    /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices)
+    /* [out] */ IList** devices)
 {
     VALIDATE_NOT_NULL(devices)
     *devices = NULL;
@@ -222,14 +223,14 @@ ECode BluetoothInputDevice::GetConnectedDevices(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    *devices = _devices;
+    //TODO *devices = _devices;
     REFCOUNT_ADD(*devices)
     return NOERROR;
 }
 
 ECode BluetoothInputDevice::GetDevicesMatchingConnectionStates(
     /* [in] */ ArrayOf<Int32>* states,
-    /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices)
+    /* [out] */ IList** devices)
 {
     VALIDATE_NOT_NULL(*devices)
     *devices = NULL;
@@ -245,7 +246,7 @@ ECode BluetoothInputDevice::GetDevicesMatchingConnectionStates(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    *devices = _devices;
+    //TODO *devices = _devices;
     REFCOUNT_ADD(*devices)
     return NOERROR;
 }

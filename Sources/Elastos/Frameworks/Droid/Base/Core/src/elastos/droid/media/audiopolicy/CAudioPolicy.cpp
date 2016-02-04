@@ -2,10 +2,9 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/media/audiopolicy/CAudioPolicy.h"
 #include "elastos/droid/media/audiopolicy/CAudioPolicyConfig.h"
-//TODO: Need CBinder
-// #include "elastos/droid/os/CBinder.h"
+#include "elastos/droid/os/CBinder.h"
 
-// using Elastos::Droid::Os::CBinder;
+using Elastos::Droid::Os::CBinder;
 
 namespace Elastos {
 namespace Droid {
@@ -21,8 +20,7 @@ CAR_OBJECT_IMPL(CAudioPolicy)
 CAudioPolicy::CAudioPolicy()
     : mStatus(0)
 {
-//TODO: Need CBinder
-    // CBinder::New((IBinder**)&mToken);
+    CBinder::New((IBinder**)&mToken);
 }
 
 CAudioPolicy::~CAudioPolicy()
@@ -81,7 +79,6 @@ ECode CAudioPolicy::ToString(
     *result = textDump + str;
     return NOERROR;
 }
-
 
 } // namespace AudioPolicy
 } // namespace Media

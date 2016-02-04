@@ -1,26 +1,38 @@
 
 #include "elastos/droid/server/pm/CPackageInstallerSession.h"
+#include "elastos/droid/server/pm/CPackageInstallerService.h"
 #include "elastos/droid/server/pm/CLocalObserver.h"
 #include "elastos/droid/internal/utility/ArrayUtils.h"
 #include "elastos/droid/os/FileUtils.h"
 #include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/os/Process.h"
 #include "elastos/droid/system/Os.h"
+#include "elastos/droid/Manifest.h"
 #include "elastos/droid/utility/MathUtils.h"
 #include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/system/OsConstants.h"
+#include <Elastos.CoreLibrary.Libcore.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
-
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::CPackageInstallerSessionInfo;
 using Elastos::Droid::Content::Pm::CParceledListSlice;
 using Elastos::Droid::Content::Pm::CSignature;
+using Elastos::Droid::Content::Pm::EIID_IIPackageInstallerSession;
+using Elastos::Droid::Content::Pm::IPackageInstaller;
+using Elastos::Droid::Content::Pm::CSignatureHelper;
+using Elastos::Droid::Content::Pm::ISignatureHelper;
+using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Internal::Content::IPackageHelper;
 using Elastos::Droid::Internal::Content::CPackageHelper;
 using Elastos::Droid::Internal::Content::INativeLibraryHelper;
 using Elastos::Droid::Internal::Content::CNativeLibraryHelper;
 using Elastos::Droid::Internal::Content::INativeLibraryHelperHandle;
+using Elastos::Droid::Internal::Content::INativeLibraryHelperHandleHelper;
+using Elastos::Droid::Internal::Content::CNativeLibraryHelperHandleHelper;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Droid::Internal::Utility::IPreconditions;
 using Elastos::Droid::Internal::Utility::CPreconditions;
@@ -31,14 +43,23 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CFileBridge;
 using Elastos::Droid::Os::CParcelFileDescriptor;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::EIID_IHandlerCallback;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::System::Os;
 using Elastos::Droid::System::OsConstants;
 using Elastos::Droid::System::IStructStat;
 using Elastos::Droid::Utility::MathUtils;
 using Elastos::Core::StringUtils;
+using Elastos::Core::IThread;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
 using Elastos::IO::CFile;
 using Elastos::IO::CFileHelper;
 using Elastos::IO::IFileHelper;
+using Elastos::IO::ICloseable;
 using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
 using Elastos::Utility::Logging::Slogger;
 using Libcore::IO::IIoUtils;
@@ -56,15 +77,16 @@ namespace Pm {
 //                  CPackageInstallerSession::HandlerCallBack
 //==============================================================================
 
-CAR_INTERFACE_IMPL(CPackageInstallerSession::HandlerCallBack, Object, IHandlerCallback)
+CAR_INTERFACE_IMPL(CPackageInstallerSession::MyHandlerCallBack, Object, IHandlerCallback)
 
-ECode CPackageInstallerSession::HandlerCallBack::HandleMessage(
+ECode CPackageInstallerSession::MyHandlerCallBack::HandleMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
 
-    synchronized (mHost->mLock) {
+    Object& lock = mHost->mLock;
+    synchronized (lock) {
         AutoPtr<IInterface> obj;
         msg->GetObj((IInterface**)&obj);
         if (obj != NULL) {
@@ -76,7 +98,7 @@ ECode CPackageInstallerSession::HandlerCallBack::HandleMessage(
             // String completeMsg = ExceptionUtils.getCompleteMessage(e);
             Slogger::E(CPackageInstallerSession::TAG, "Commit of session %d failed", mHost->mSessionId);
             mHost->DestroyInternal();
-            mHost->DispatchSessionFinished(mHost->mErrorCode, String(NULL), NULL);
+            mHost->DispatchSessionFinished(mHost->sErrorCode, String(NULL), NULL);
         }
         // } catch (PackageManagerException e) {
         //     final String completeMsg = ExceptionUtils.getCompleteMessage(e);
@@ -99,6 +121,8 @@ const String CPackageInstallerSession::TAG("PackageInstaller");
 const Boolean CPackageInstallerSession::LOGD;
 const Int32 CPackageInstallerSession::MSG_COMMIT;
 
+Int32 CPackageInstallerSession::sErrorCode = IPackageManager::INSTALL_SUCCEEDED;
+
 CPackageInstallerSession::CPackageInstallerSession()
     : mSessionId(0)
     , mUserId(0)
@@ -114,10 +138,9 @@ CPackageInstallerSession::CPackageInstallerSession()
     , mDestroyed(FALSE)
     , mFinalStatus(0)
     , mVersionCode(0)
-    , mErrorCode(-1)
 {
     CAtomicInteger32::New((IAtomicInteger32**)&mActiveCount);
-    mHandlerCallback = (IHandlerCallback*)new HandlerCallback(this);
+    mHandlerCallback = (IHandlerCallback*)new MyHandlerCallBack(this);
 }
 
 CAR_INTERFACE_IMPL_2(CPackageInstallerSession, Object, IIPackageInstallerSession, IBinder)
@@ -126,7 +149,7 @@ CAR_OBJECT_IMPL(CPackageInstallerSession)
 
 ECode CPackageInstallerSession::constructor(
 	/* [in] */ Handle64 callback,
-    /* [in] */ IContext* ctx,
+    /* [in] */ IContext* context,
     /* [in] */ IIPackageManager* pm,
     /* [in] */ ILooper* looper,
     /* [in] */ Int32 sessionId,
@@ -140,10 +163,10 @@ ECode CPackageInstallerSession::constructor(
     /* [in] */ Boolean prepared,
     /* [in] */ Boolean sealed)
 {
-    mCallback = (CPackageInstallerService::InternalCallback*)callback;
+    mCallback = (InternalCallback*)callback;
     mContext = context;
-    mPm = reinterpret_cast<CPackageManagerService*>(pm->Probe(EIID_CPackageManagerService));
-    CHandler::New(looper, mHandlerCallback, (IHandler**)&mHandler);
+    mPm = (CPackageManagerService*)pm;
+    CHandler::New(looper, mHandlerCallback, TRUE, (IHandler**)&mHandler);
 
     mSessionId = sessionId;
     mUserId = userId;
@@ -151,10 +174,10 @@ ECode CPackageInstallerSession::constructor(
     mInstallerUid = installerUid;
     mParams = params;
     mCreatedMillis = createdMillis;
-    mStageDir = stageDir;
+    mStageDir = stagingDir;
     mStageCid = stageCid;
 
-    if ((stageDir == NULL) == (stageCid.IsNull())) {
+    if ((stagingDir == NULL) == (stageCid.IsNull())) {
         Slogger::E(TAG, "Exactly one of stageDir or stageCid stage must be set");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -163,8 +186,8 @@ ECode CPackageInstallerSession::constructor(
     mSealed = sealed;
 
     Int32 result;
-    FAIL_RETURN(mPm->checkUidPermission(Elastos::Droid::Manifest::permission::INSTALL_PACKAGES, installerUid, &result))
-    if ((result == IPackageManager::PERMISSION_GRANTED) || (installerUid == IProcess::ROOT_UID)) {
+    FAIL_RETURN(mPm->CheckUidPermission(Elastos::Droid::Manifest::permission::INSTALL_PACKAGES, installerUid, &result))
+    if ((result == IPackageManager::PERMISSION_GRANTED) || (installerUid == Process::ROOT_UID)) {
         mPermissionsAccepted = TRUE;
     }
     else {
@@ -206,23 +229,23 @@ AutoPtr<IPackageInstallerSessionInfo> CPackageInstallerSession::GenerateInfo()
         info->SetAppIcon(appIcon);
         String appLabel;
         mParams->GetAppLabel(&appLabel);
-        info->SetAppLabel(appLabel);
+        AutoPtr<ICharSequence> cs;
+        CString::New(appLabel, (ICharSequence**)&cs);
+        info->SetAppLabel(cs);
     }
     return info;
 }
 
 Boolean CPackageInstallerSession::IsPrepared()
 {
-    synchronized (mLock) {
-        return mPrepared;
-    }
+    AutoLock lock(mLock);
+    return mPrepared;
 }
 
 Boolean CPackageInstallerSession::IsSealed()
 {
-    synchronized (mLock) {
-        return mSealed;
-    }
+    AutoLock lock(mLock);
+    return mSealed;
 }
 
 ECode CPackageInstallerSession::AssertPreparedAndNotSealed(
@@ -238,10 +261,11 @@ ECode CPackageInstallerSession::AssertPreparedAndNotSealed(
             return E_SECURITY_EXCEPTION;
         }
     }
+    return NOERROR;
 }
 
 ECode CPackageInstallerSession::ResolveStageDir(
-    /* [out] */ IFile* dir)
+    /* [out] */ IFile** dir)
 {
     VALIDATE_NOT_NULL(dir)
     *dir = NULL;
@@ -267,7 +291,7 @@ ECode CPackageInstallerSession::ResolveStageDir(
             }
         }
         *dir = mResolvedStageDir;
-        REFCOUNT_ADD(*file)
+        REFCOUNT_ADD(*dir)
     }
     return NOERROR;
 }
@@ -296,8 +320,8 @@ ECode CPackageInstallerSession::AddClientProgress(
 void CPackageInstallerSession::ComputeProgressLocked(
     /* [in] */ Boolean forcePublish)
 {
-    mProgress = MathUtils::Constrain(mClientProgress * 0.8f, 0f, 0.8f)
-            + MathUtils::Constrain(mInternalProgress * 0.2f, 0f, 0.2f);
+    mProgress = MathUtils::Constrain(mClientProgress * 0.8, 0, 0.8)
+            + MathUtils::Constrain(mInternalProgress * 0.2, 0, 0.2);
 
     // Only publish when meaningful change
     if (forcePublish || Elastos::Core::Math::Abs(mProgress - mReportedProgress) >= 0.01) {
@@ -307,7 +331,7 @@ void CPackageInstallerSession::ComputeProgressLocked(
 }
 
 ECode CPackageInstallerSession::GetNames(
-    /* [out, callee] */ ArrayOf<String>* names)
+    /* [out, callee] */ ArrayOf<String>** names)
 {
     VALIDATE_NOT_NULL(names)
     *names = NULL;
@@ -375,10 +399,10 @@ ECode CPackageInstallerSession::OpenWriteInternal(
     AutoPtr<IOs> os;
     libcore->GetOs((IOs**)&os);
     AutoPtr<IFileDescriptor> targetFd;
-    if (FAILED(os->Open(absolutePath, OsConstants::O_CREAT | OsConstants::O_WRONLY, 0644, (IFileDescriptor**)&targetFd))) {
+    if (FAILED(os->Open(absolutePath, OsConstants::_O_CREAT | OsConstants::_O_WRONLY, 0644, (IFileDescriptor**)&targetFd))) {
         return E_IO_EXCEPTION;
     }
-    Os::Chmod(absolutePath, 0644);
+    Elastos::Droid::System::Os::Chmod(absolutePath, 0644);
 
     // If caller specified a total length, allocate it for them. Free up
     // cache space to grow, if needed.
@@ -388,7 +412,7 @@ ECode CPackageInstallerSession::OpenWriteInternal(
             return E_IO_EXCEPTION;
         }
         Int64 size;
-        star->GetSize(&size);
+        stat->GetSize(&size);
         Int64 deltaBytes = lengthBytes - size;
         // Only need to free up space when writing to internal stage
         if (mStageDir != NULL && deltaBytes > 0) {
@@ -400,7 +424,8 @@ ECode CPackageInstallerSession::OpenWriteInternal(
     }
 
     if (offsetBytes > 0) {
-        if (FAILED(os->Lseek(targetFd, offsetBytes, OsConstants::SEEK_SET))) {
+        Int64 result;
+        if (FAILED(os->Lseek(targetFd, offsetBytes, OsConstants::_SEEK_SET, &result))) {
             return E_IO_EXCEPTION;
         }
     }
@@ -409,7 +434,7 @@ ECode CPackageInstallerSession::OpenWriteInternal(
     IThread::Probe(bridge)->Start();
     AutoPtr<IFileDescriptor> fd;
     bridge->GetClientSocket((IFileDescriptor**)&fd);
-    return CParcelFileDescriptor::New(fd, pfd);
+    return CParcelFileDescriptor::New(IParcelFileDescriptor::Probe(fd), pfd);
 
     // } catch (ErrnoException e) {
     //     throw e.rethrowAsIOException();
@@ -422,7 +447,7 @@ ECode CPackageInstallerSession::OpenRead(
 {
     VALIDATE_NOT_NULL(pfd)
     // try {
-    return OpenReadInternal(name);
+    return OpenReadInternal(name, pfd);
     // } catch (IOException e) {
     //     throw ExceptionUtils.wrap(e);
     // }
@@ -453,10 +478,10 @@ ECode CPackageInstallerSession::OpenReadInternal(
     String absolutePath;
     target->GetAbsolutePath(&absolutePath);
     AutoPtr<IFileDescriptor> targetFd;
-    if (FAILED(os->Open(absolutePath, OsConstants::O_RDONLY, 0, (IFileDescriptor**)&targetFd))) {
+    if (FAILED(os->Open(absolutePath, OsConstants::_O_RDONLY, 0, (IFileDescriptor**)&targetFd))) {
         return E_IO_EXCEPTION;
     }
-    return CParcelFileDescriptor::New(targetFdm, pfd);
+    return CParcelFileDescriptor::New(IParcelFileDescriptor::Probe(targetFd), pfd);
 
     // } catch (ErrnoException e) {
     //     throw e.rethrowAsIOException();
@@ -488,7 +513,7 @@ ECode CPackageInstallerSession::Commit(
         }
 
         // Client staging is fully done at this point
-        mClientProgress = 1f;
+        mClientProgress = 1.0;
         ComputeProgressLocked(TRUE);
     }
 
@@ -501,7 +526,8 @@ ECode CPackageInstallerSession::Commit(
 
     // This ongoing commit should keep session active, even though client
     // will probably close their end.
-    mActiveCount->IncrementAndGet();
+    Int32 result;
+    mActiveCount->IncrementAndGet(&result);
 
     AutoPtr<CPackageInstallerService::PackageInstallObserverAdapter> adapter
             = new CPackageInstallerService::PackageInstallObserverAdapter(mContext,
@@ -511,18 +537,18 @@ ECode CPackageInstallerSession::Commit(
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(MSG_COMMIT, b, (IMessage**)&msg);
     msg->SendToTarget();
-    reutrn NOERROR;
+    return NOERROR;
 }
 
 ECode CPackageInstallerSession::CommitLocked()
 {
     if (mDestroyed) {
-        mErrorCode = IPackageManager::INSTALL_FAILED_INTERNAL_ERROR;
+        sErrorCode = IPackageManager::INSTALL_FAILED_INTERNAL_ERROR;
         Slogger::E(TAG, "Session destroyed");
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
     if (!mSealed) {
-        mErrorCode = IPackageManager::INSTALL_FAILED_INTERNAL_ERROR;
+        sErrorCode = IPackageManager::INSTALL_FAILED_INTERNAL_ERROR;
         Slogger::E(TAG, "Session not sealed");
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
@@ -530,7 +556,7 @@ ECode CPackageInstallerSession::CommitLocked()
     // try {
     AutoPtr<IFile> dir;
     if (FAILED(ResolveStageDir((IFile**)&dir))) {
-        mErrorCode = IPackageManager::INSTALL_FAILED_CONTAINER_ERROR;
+        sErrorCode = IPackageManager::INSTALL_FAILED_CONTAINER_ERROR;
         Slogger::E(TAG, "Failed to resolve stage location");
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
@@ -553,9 +579,9 @@ ECode CPackageInstallerSession::CommitLocked()
         // User needs to accept permissions; give installer an intent they
         // can use to involve user.
         AutoPtr<IIntent> intent;
-        CIntent::New(IPackageInstaller::ACTION_CONFIRM_PERMISSIONS);
+        CIntent::New(IPackageInstaller::ACTION_CONFIRM_PERMISSIONS, (IIntent**)&intent);
         intent->SetPackage(String("com.android.packageinstaller"));
-        intent->PutExtra(IPackageInstaller::EXTRA_SESSION_ID, sessionId);
+        intent->PutExtra(IPackageInstaller::EXTRA_SESSION_ID, mSessionId);
         // try {
         mRemoteObserver->OnUserActionRequired(intent);
         // } catch (RemoteException ignored) {
@@ -572,8 +598,8 @@ ECode CPackageInstallerSession::CommitLocked()
         // and for all. Internally the parser handles straddling between two
         // locations when inheriting.
         Int64 finalSize;
-        FAIL_RETURN(CalculateInstalledSize())
-        FAIL_RETURN(ResizeContainer(stageCid, finalSize))
+        FAIL_RETURN(CalculateInstalledSize(&finalSize))
+        FAIL_RETURN(ResizeContainer(mStageCid, finalSize))
     }
 
     // Inherit any packages and native libraries from existing install that
@@ -584,15 +610,27 @@ ECode CPackageInstallerSession::CommitLocked()
         if (!mStageCid.IsNull()) {
             // TODO: this should delegate to DCS so the system process
             // avoids holding open FDs into containers.
-            if (FAILED(CopyFiles(mResolvedInheritedFiles, resolveStageDir()))) {
-                mErrorCode = IPackageManager::INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            AutoPtr<IFile> dir;
+            if (FAILED(ResolveStageDir((IFile**)&dir))) {
+                sErrorCode = IPackageManager::INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                Slogger::E(TAG, "Failed to inherit existing install");
+                return E_PACKAGE_MANAGER_EXCEPTION;
+            }
+            if (FAILED(CopyFiles(mResolvedInheritedFiles, dir))) {
+                sErrorCode = IPackageManager::INSTALL_FAILED_INSUFFICIENT_STORAGE;
                 Slogger::E(TAG, "Failed to inherit existing install");
                 return E_PACKAGE_MANAGER_EXCEPTION;
             }
         }
         else {
-            if (FAILED(LinkFiles(mResolvedInheritedFiles, resolveStageDir()))) {
-                mErrorCode = IPackageManager::INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            AutoPtr<IFile> dir;
+            if (FAILED(ResolveStageDir((IFile**)&dir))) {
+                sErrorCode = IPackageManager::INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                Slogger::E(TAG, "Failed to inherit existing install");
+                return E_PACKAGE_MANAGER_EXCEPTION;
+            }
+            if (FAILED(LinkFiles(mResolvedInheritedFiles, dir))) {
+                sErrorCode = IPackageManager::INSTALL_FAILED_INSUFFICIENT_STORAGE;
                 Slogger::E(TAG, "Failed to inherit existing install");
                 return E_PACKAGE_MANAGER_EXCEPTION;
             }
@@ -604,7 +642,7 @@ ECode CPackageInstallerSession::CommitLocked()
     }
 
     // TODO: surface more granular state from dexopt
-    mInternalProgress = 0.5f;
+    mInternalProgress = 0.5;
     ComputeProgressLocked(TRUE);
 
     // Unpack native libraries
@@ -614,13 +652,13 @@ ECode CPackageInstallerSession::CommitLocked()
 
     // Container is ready to go, let's seal it up!
     if (!mStageCid.IsNull()) {
-        FAIL_RETURN(FinalizeAndFixContainer(stageCid))
+        FAIL_RETURN(FinalizeAndFixContainer(mStageCid))
     }
 
     // We've reached point of no return; call into PMS to install the stage.
     // Regardless of success or failure we always destroy session.
     AutoPtr<IIPackageInstallObserver2> localObserver;
-    CLocalObserver::New((IIPackageInstallObserver2**)&localObserver);
+    CLocalObserver::New((IIPackageInstallerSession*)this, (IIPackageInstallObserver2**)&localObserver);
 
     AutoPtr<IUserHandle> user;
     Int32 installFlags;
@@ -628,7 +666,7 @@ ECode CPackageInstallerSession::CommitLocked()
         user = UserHandle::ALL;
     }
     else {
-        CUserHandle::New(userId, (IUserHandle**)&user);
+        CUserHandle::New(mUserId, (IUserHandle**)&user);
     }
 
     mPm->InstallStage(mPackageName, mStageDir, mStageCid, localObserver, mParams,
@@ -648,8 +686,8 @@ ECode CPackageInstallerSession::ValidateInstallLocked()
 
     AutoPtr<ArrayOf<IFile*> > files;
     mResolvedStageDir->ListFiles((ArrayOf<IFile*>**)&files);
-    if (ArrayUtils::IsEmpty(files)) {
-        mErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
+    if (ArrayUtils::IsEmpty<IFile*>(files)) {
+        sErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
         Slogger::E(TAG, "No packages staged");
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
@@ -665,9 +703,10 @@ ECode CPackageInstallerSession::ValidateInstallLocked()
 
         AutoPtr<PackageParser::ApkLite> apk;
         // try {
+        AutoPtr<ArrayOf<Byte> > readBuffer = ArrayOf<Byte>::Alloc(PackageParser::CERTIFICATE_BUFFER_SIZE);
         if (FAILED(PackageParser::ParseApkLite(file, PackageParser::PARSE_COLLECT_CERTIFICATES,
-                (PackageParser::ApkLite**)&apk))) {
-            mErrorCode = PackageParser::GetParseError();
+                readBuffer, (PackageParser::ApkLite**)&apk))) {
+            sErrorCode = PackageParser::GetParseError();
             return E_PACKAGE_MANAGER_EXCEPTION;
         }
         // } catch (PackageParserException e) {
@@ -675,7 +714,7 @@ ECode CPackageInstallerSession::ValidateInstallLocked()
         // }
 
         if (stagedSplits.Find(apk->mSplitName) != stagedSplits.End()) {
-            mErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
+            sErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
             Slogger::E(TAG, "Split %s was defined multiple times", apk->mSplitName.string());
             return E_PACKAGE_MANAGER_EXCEPTION;
         }
@@ -709,7 +748,7 @@ ECode CPackageInstallerSession::ValidateInstallLocked()
             targetName = String("split_") + apk->mSplitName + ".apk";
         }
         if (!FileUtils::IsValidExtFilename(targetName)) {
-            mErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
+            sErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
             Slogger::E(TAG, "Invalid filename: %s", targetName.string());
             return E_PACKAGE_MANAGER_EXCEPTION;
         }
@@ -717,8 +756,9 @@ ECode CPackageInstallerSession::ValidateInstallLocked()
         AutoPtr<IFile> targetFile;
         CFile::New(mResolvedStageDir, targetName, (IFile**)&targetFile);
         Boolean equals;
-        if (IObject::Probe(file)->Equals(targetFile, &equals). !equals) {
-            file->RenameTo(targetFile);
+        if (IObject::Probe(file)->Equals(targetFile, &equals), !equals) {
+            Boolean result;
+            file->RenameTo(targetFile, &result);
         }
 
         // Base is coming from session
@@ -733,7 +773,7 @@ ECode CPackageInstallerSession::ValidateInstallLocked()
     if (mParams->GetMode(&mode), mode == IPackageInstallerSessionParams::MODE_FULL_INSTALL) {
         // Full installs must include a base package
         if (stagedSplits.Find(String(NULL)) == stagedSplits.End()) {
-            mErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
+            sErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
             Slogger::E(TAG, "Full install must include a base package");
             return E_PACKAGE_MANAGER_EXCEPTION;
         }
@@ -742,9 +782,9 @@ ECode CPackageInstallerSession::ValidateInstallLocked()
     else {
         // Partial installs must be consistent with existing install
         AutoPtr<IApplicationInfo> app;
-        mPm->GetApplicationInfo(mPackageName, 0, userId, (IApplicationInfo**)&app);
+        mPm->GetApplicationInfo(mPackageName, 0, mUserId, (IApplicationInfo**)&app);
         if (app == NULL) {
-            mErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
+            sErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
             Slogger::E(TAG, "Missing existing base package for %s", mPackageName.string());
             return E_PACKAGE_MANAGER_EXCEPTION;
         }
@@ -752,19 +792,20 @@ ECode CPackageInstallerSession::ValidateInstallLocked()
         AutoPtr<PackageParser::PackageLite> existing;
         AutoPtr<PackageParser::ApkLite> existingBase;
         // try {
-        Striong path;
+        String path;
         app->GetCodePath(&path);
         AutoPtr<IFile> file;
         CFile::New(path, (IFile**)&file);
-        if (FAILED(PackageParser::ParsePackageLite(file, 0, (PackageParser::PackageLite**)&existing))) {
+        AutoPtr<ArrayOf<Byte> > readBuffer = ArrayOf<Byte>::Alloc(PackageParser::CERTIFICATE_BUFFER_SIZE);
+        if (FAILED(PackageParser::ParsePackageLite(file, 0, readBuffer, (PackageParser::PackageLite**)&existing))) {
             return E_PACKAGE_MANAGER_EXCEPTION;
         }
         app->GetBaseCodePath(&path);
         file = NULL;
         CFile::New(path, (IFile**)&file);
         if (FAILED(PackageParser::ParseApkLite(file,
-                PackageParser::PARSE_COLLECT_CERTIFICATES, (PackageParser::ApkLite**)&existingBase))) {
-            mErrorCode = PackageParser::GetParseError();
+                PackageParser::PARSE_COLLECT_CERTIFICATES, readBuffer, (PackageParser::ApkLite**)&existingBase))) {
+            sErrorCode = PackageParser::GetParseError();
             return E_PACKAGE_MANAGER_EXCEPTION;
         }
         // } catch (PackageParserException e) {
@@ -780,7 +821,7 @@ ECode CPackageInstallerSession::ValidateInstallLocked()
         }
 
         // Inherit splits if not overridden
-        if (!ArrayUtils::IsEmpty(existing->mSplitNames)) {
+        if (!ArrayUtils::IsEmpty<String>(existing->mSplitNames)) {
             for (Int32 i = 0; i < existing->mSplitNames->GetLength(); i++) {
                 String splitName = (*existing->mSplitNames)[i];
                 AutoPtr<IFile> splitFile;
@@ -799,21 +840,21 @@ ECode CPackageInstallerSession::AssertApkConsistent(
     /* [in] */ const String& tag,
     /* [in] */ PackageParser::ApkLite* apk)
 {
-    if (!mPackageName.Equals(apk->PmackageName)) {
-        mErrorCode = INSTALL_FAILED_INVALID_APK;
+    if (!mPackageName.Equals(apk->mPackageName)) {
+        sErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
         Slogger::E(TAG, " package %s inconsistent with %s", apk->mPackageName.string(), mPackageName.string());
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
     if (mVersionCode != apk->mVersionCode) {
-        mErrorCode = INSTALL_FAILED_INVALID_APK;
+        sErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
         Slogger::E(TAG, " version code %d inconsistent with %d", apk->mVersionCode, mVersionCode);
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
-    AutoPtr<ISignature> sig;
-    CSignature::AcquireSingleton((ISignature**)&sig);
+    AutoPtr<ISignatureHelper> sig;
+    CSignatureHelper::AcquireSingleton((ISignatureHelper**)&sig);
     Boolean result;
     if (sig->AreExactMatch(mSignatures, apk->mSignatures, &result), !result) {
-        mErrorCode = INSTALL_FAILED_INVALID_APK;
+        sErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
         Slogger::E(TAG, "signatures are inconsistent");
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
@@ -834,9 +875,10 @@ ECode CPackageInstallerSession::CalculateInstalledSize(
 
     AutoPtr<PackageParser::ApkLite> baseApk;
     // try {
+    AutoPtr<ArrayOf<Byte> > readBuffer = ArrayOf<Byte>::Alloc(PackageParser::CERTIFICATE_BUFFER_SIZE);
     if (FAILED(PackageParser::ParseApkLite(mResolvedBaseFile, 0,
-            (PackageParser::ApkLite**)&baseApk))) {
-        mErrorCode = PackageParser::GetParseError();
+            readBuffer, (PackageParser::ApkLite**)&baseApk))) {
+        sErrorCode = PackageParser::GetParseError();
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
     // } catch (PackageParserException e) {
@@ -870,22 +912,24 @@ ECode CPackageInstallerSession::CalculateInstalledSize(
     for (Int32 i = 0; strIt != splitPaths.End(); ++strIt, ++i) {
         (*pathsArray)[i] = *strIt;
     }
-    AutoPtr<PackageParser::PackageLite> pkg = new PackageLite(String(NULL), baseApk, NULL, pathsArray);
+    AutoPtr<PackageParser::PackageLite> pkg = new PackageParser::PackageLite(String(NULL), baseApk, NULL, pathsArray);
     Int32 installFlags;
     mParams->GetInstallFlags(&installFlags);
-    Boolean isForwardLocked = installFlags & IPackageManager::INSTALL_FORWARD_LOCK) != 0;
+    Boolean isForwardLocked = (installFlags & IPackageManager::INSTALL_FORWARD_LOCK) != 0;
 
     // try {
     AutoPtr<IPackageHelper> pkgHelper;
     CPackageHelper::AcquireSingleton((IPackageHelper**)&pkgHelper);
     String abiOverride;
     mParams->GetAbiOverride(&abiOverride);
-    ECode ec = pkgHelper->CalculateInstalledSize(pkg, isForwardLocked, abiOverride);
+    Int64 result;
+    ECode ec = pkgHelper->CalculateInstalledSize((Handle64)pkg.Get(), isForwardLocked, abiOverride, &result);
     if (ec == (ECode)E_IO_EXCEPTION) {
-        mErrorCode = INSTALL_FAILED_INVALID_APK;
+        sErrorCode = IPackageManager::INSTALL_FAILED_INVALID_APK;
         Slogger::E(TAG, "Failed to calculate install size");
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
+    *size = result;
     return NOERROR;
     // } catch (IOException e) {
     //     throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
@@ -910,7 +954,7 @@ ECode CPackageInstallerSession::LinkFiles(
         fromFile->GetAbsolutePath(&absolutePath);
         String toAbsolutePath;
         toFile->GetAbsolutePath(&toAbsolutePath);
-        if (FAILED(Os::Link(absolutePath, toAbsolutePath))) {
+        if (FAILED(Elastos::Droid::System::Os::Link(absolutePath, toAbsolutePath))) {
             Slogger::E(TAG, "Failed to link %p to %p", fromFile.Get(), toFile.Get());
             return E_IO_EXCEPTION;
         }
@@ -918,7 +962,7 @@ ECode CPackageInstallerSession::LinkFiles(
         //     throw new IOException("Failed to link " + fromFile + " to " + toFile, e);
         // }
     }
-    Slogger::D(TAG, "Linked %d files into %p", fromFiles.GetSize(), toDir.Get());
+    Slogger::D(TAG, "Linked %d files into %p", fromFiles.GetSize(), toDir);
     return NOERROR;
 }
 
@@ -933,7 +977,7 @@ ECode CPackageInstallerSession::CopyFiles(
         String name;
         fromFile->GetName(&name);
         if (name.EndWith(".tmp")) {
-            file->Delete();
+            fromFile->Delete();
         }
     }
 
@@ -961,9 +1005,7 @@ ECode CPackageInstallerSession::CopyFiles(
             return E_IO_EXCEPTION;
         }
     }
-    Int32 size;
-    fromFiles->GetSize(&size);
-    Slogger::D(TAG, "Copied %d files into %p", size, toDir.Get());
+    Slogger::D(TAG, "Copied %d files into %p", fromFiles.GetSize(), toDir);
     return NOERROR;
 }
 
@@ -992,11 +1034,11 @@ ECode CPackageInstallerSession::ExtractNativeLibraries(
         goto fail;
     }
     if (res != IPackageManager::INSTALL_SUCCEEDED) {
-        mErrorCode = res;
+        sErrorCode = res;
         Slogger::E(TAG, "Failed to extract native libraries, res=%d", res);
         AutoPtr<IIoUtils> ioutils;
         CIoUtils::AcquireSingleton((IIoUtils**)&ioutils);
-        ioutils->CloseQuietly(ICloseable::Probe(os));
+        ioutils->CloseQuietly(ICloseable::Probe(handle));
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
     // } catch (IOException e) {
@@ -1006,11 +1048,11 @@ ECode CPackageInstallerSession::ExtractNativeLibraries(
     //     IoUtils.closeQuietly(handle);
     // }
 fail:
-    mErrorCode = INSTALL_FAILED_INTERNAL_ERROR;
+    sErrorCode = IPackageManager::INSTALL_FAILED_INTERNAL_ERROR;
     Slogger::E(TAG, "Failed to extract native libraries");
     AutoPtr<IIoUtils> ioutils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioutils);
-    ioutils->CloseQuietly(ICloseable::Probe(os));
+    ioutils->CloseQuietly(ICloseable::Probe(handle));
     return E_PACKAGE_MANAGER_EXCEPTION;
 }
 
@@ -1022,8 +1064,8 @@ ECode CPackageInstallerSession::ResizeContainer(
     CPackageHelper::AcquireSingleton((IPackageHelper**)&helper);
     String path;
     helper->GetSdDir(cid, &path);
-    if (path.IsNull) {
-        mErrorCode = INSTALL_FAILED_CONTAINER_ERROR;
+    if (path.IsNull()) {
+        sErrorCode = IPackageManager::INSTALL_FAILED_CONTAINER_ERROR;
         Slogger::E(TAG, "Failed to find mounted %s", cid.string());
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
@@ -1039,25 +1081,26 @@ ECode CPackageInstallerSession::ResizeContainer(
 
     Boolean result;
     if (helper->UnMountSdDir(cid, &result), !result) {
-        mErrorCode = INSTALL_FAILED_CONTAINER_ERROR;
+        sErrorCode = IPackageManager::INSTALL_FAILED_CONTAINER_ERROR;
         Slogger::E(TAG, "Failed to unmount %s before resize", cid.string());
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
 
     if (helper->ResizeSdDir(targetSize, cid,
-            PackageManagerService::GetEncryptKey(), &result), !result) {
-        mErrorCode = INSTALL_FAILED_CONTAINER_ERROR;
+            CPackageManagerService::GetEncryptKey(), &result), !result) {
+        sErrorCode = IPackageManager::INSTALL_FAILED_CONTAINER_ERROR;
         Slogger::E(TAG, "Failed to resize %s to %d bytes", cid.string(), targetSize);
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
 
-    helper->MountSdDir(cid, PackageManagerService::GetEncryptKey(),
+    helper->MountSdDir(cid, CPackageManagerService::GetEncryptKey(),
             IProcess::SYSTEM_UID, FALSE, &path);
     if (path.IsNull()) {
-        mErrorCode = INSTALL_FAILED_CONTAINER_ERROR;
+        sErrorCode = IPackageManager::INSTALL_FAILED_CONTAINER_ERROR;
         Slogger::E(TAG, "Failed to unmount %s after resize", cid.string());
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
+    return NOERROR;
 }
 
 ECode CPackageInstallerSession::FinalizeAndFixContainer(
@@ -1067,20 +1110,20 @@ ECode CPackageInstallerSession::FinalizeAndFixContainer(
     CPackageHelper::AcquireSingleton((IPackageHelper**)&helper);
     Boolean result;
     if (helper->FinalizeSdDir(cid, &result), !result) {
-        mErrorCode = INSTALL_FAILED_CONTAINER_ERROR;
+        sErrorCode = IPackageManager::INSTALL_FAILED_CONTAINER_ERROR;
         Slogger::E(TAG, "Failed to finalize container %s", cid.string());
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
 
     Int32 uid;
-    mPm->GetPackageUid(IPackageManagerService::DEFAULT_CONTAINER_PACKAGE,
+    mPm->GetPackageUid(CPackageManagerService::DEFAULT_CONTAINER_PACKAGE,
             IUserHandle::USER_OWNER, &uid);
     AutoPtr<IUserHandleHelper> handleHelper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&handleHelper);
     Int32 gid;
     handleHelper->GetSharedAppGid(uid, &gid);
     if (helper->FixSdPermissions(cid, gid, String(NULL), &result), !result) {
-        mErrorCode = INSTALL_FAILED_CONTAINER_ERROR;
+        sErrorCode = IPackageManager::INSTALL_FAILED_CONTAINER_ERROR;
         Slogger::E(TAG, "Failed to fix permissions on container %s", cid.string());
         return E_PACKAGE_MANAGER_EXCEPTION;
     }
@@ -1104,7 +1147,7 @@ ECode CPackageInstallerSession::SetPermissionsResult(
     }
     else {
         DestroyInternal();
-        DispatchSessionFinished(INSTALL_FAILED_ABORTED, String("User rejected permissions"), NULL);
+        DispatchSessionFinished(IPackageManager::INSTALL_FAILED_ABORTED, String("User rejected permissions"), NULL);
     }
     return NOERROR;
 }
@@ -1119,15 +1162,15 @@ ECode CPackageInstallerSession::Open()
     synchronized (mLock) {
         if (!mPrepared) {
             if (mStageDir != NULL) {
-                FAIL_RETURN(CPackageInstallerService::PrepareInternalStageDir(stageDir))
+                FAIL_RETURN(CPackageInstallerService::PrepareInternalStageDir(mStageDir))
             }
             else if (!mStageCid.IsNull()) {
                 Int64 size;
-                FAIL_RETURN(CPackageInstallerService::PrepareExternalStageCid(
-                        stageCid, params.sizeBytes))
+                mParams->GetSizeBytes(&size);
+                FAIL_RETURN(CPackageInstallerService::PrepareExternalStageCid(mStageCid, size))
 
                 // TODO: deliver more granular progress for ASEC allocation
-                mInternalProgress = 0.25f;
+                mInternalProgress = 0.25;
                 ComputeProgressLocked(TRUE);
             }
             else {
@@ -1144,15 +1187,18 @@ ECode CPackageInstallerSession::Open()
 
 ECode CPackageInstallerSession::Close()
 {
-    if (mActiveCount.decrementAndGet() == 0) {
-        mCallback.onSessionActiveChanged(this, false);
+    Int32 value;
+    if (mActiveCount->DecrementAndGet(&value), value == 0) {
+        mCallback->OnSessionActiveChanged(this, FALSE);
     }
+    return NOERROR;
 }
 
 ECode CPackageInstallerSession::Abandon()
 {
     DestroyInternal();
-    DispatchSessionFinished(IPackageManager::INSTALL_FAILED_ABORTED, "Session was abandoned", NULL);
+    DispatchSessionFinished(IPackageManager::INSTALL_FAILED_ABORTED, String("Session was abandoned"), NULL);
+    return NOERROR;
 }
 
 void CPackageInstallerSession::DispatchSessionFinished(
@@ -1186,13 +1232,23 @@ void CPackageInstallerSession::DestroyInternal()
             (*it)->ForceClose();
         }
     }
-    if (stageDir != null) {
-        FileUtils.deleteContents(stageDir);
-        stageDir.delete();
+    if (mStageDir != NULL) {
+        FileUtils::DeleteContents(mStageDir);
+        mStageDir->Delete();
     }
-    if (stageCid != null) {
-        PackageHelper.destroySdDir(stageCid);
+    if (!mStageCid.IsNull()) {
+        AutoPtr<IPackageHelper> helper;
+        CPackageHelper::AcquireSingleton((IPackageHelper**)&helper);
+        Boolean result;
+        helper->DestroySdDir(mStageCid, &result);
     }
+}
+
+ECode CPackageInstallerSession::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    return Object::ToString(str);
 }
 
 } // namespace Pm

@@ -281,7 +281,7 @@ void ServerSocketTimer::AcceptCmd()
         if (FAILED(ec))
             break;
         cmdResult += "\n";
-        ec = outToClient->WriteBytes(*cmdResult.GetBytes());
+        ec = outToClient->Write(cmdResult.GetBytes());
 
         if (DBG) Slogger::D(TAG, "cmdResult %s", cmdResult.string());
         mTimerThread->ResetTimer();
@@ -364,7 +364,7 @@ void ServerSocketTimer::FactoryCmd(
         if (FAILED(ec))
             break;
         cmdResult += '\n';
-        ec = outToClient->WriteBytes(*cmdResult.GetBytes());
+        ec = outToClient->Write(cmdResult.GetBytes());
 
         if (DBG) Slogger::D(TAG, "cmdResult %s", cmdResult.string());
         if (outToClient != NULL)
@@ -402,7 +402,7 @@ ECode ServerSocketTimer::SendFile(
         Int32 bytesReaded = 0;
         while ((bis->ReadBytes(buffer, 0, BUFFER_SIZE, &bytesReaded), bytesReaded) > -1) {
             if (DBG) Slogger::D(TAG, "readBuffer %d", bytesReaded);
-            dos->WriteBytes(*buffer, 0, bytesReaded);
+            dos->Write(buffer, 0, bytesReaded);
         }
         ec = IFlushable::Probe(dos)->Flush();
     } while (0);
@@ -450,7 +450,7 @@ ECode ServerSocketTimer::ReceiveFile(
             break;
 
         String str = READYFORRECEIVE + "\n";
-        ec = outToClient->WriteBytes(*str.GetBytes());
+        ec = outToClient->Write(str.GetBytes());
         if (FAILED(ec))
             break;
 
@@ -465,7 +465,7 @@ ECode ServerSocketTimer::ReceiveFile(
         Int32 bytesReaded = 0;
         while ((dis->ReadBytes(buffer, 0, BUFFER_SIZE, &bytesReaded), bytesReaded) > -1) {
             if (DBG) Slogger::D(TAG, "readBuffer %d", bytesReaded);
-            fos->WriteBytes(*buffer, 0, bytesReaded);
+            fos->Write(buffer, 0, bytesReaded);
             IFlushable::Probe(fos)->Flush();
         }
     } while (0);

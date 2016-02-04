@@ -2,9 +2,10 @@
 #ifndef __ELASTOS_DROID_MEDIA_CRINGTONE_H__
 #define __ELASTOS_DROID_MEDIA_CRINGTONE_H__
 
+#include "Elastos.Droid.Media.h"
 #include "_Elastos_Droid_Media_CRingtone.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "CRingtoneManager.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::IUri;
@@ -25,11 +26,17 @@ namespace Media {
  * @see RingtoneManager
  */
 CarClass(CRingtone)
+    , public Object
+    , public IRingtone
 {
 public:
     CRingtone();
 
-    ~CRingtone();
+    virtual ~CRingtone();
+
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context,
@@ -39,7 +46,9 @@ public:
      * Sets the stream type where this ringtone will be played.
      *
      * @param streamType The stream, see {@link AudioManager}.
+     * @deprecated use {@link #setAudioAttributes(AudioAttributes)}
      */
+     // @Deprecated
     CARAPI SetStreamType(
         /* [in] */ Int32 streamType);
 
@@ -50,6 +59,21 @@ public:
      */
     CARAPI GetStreamType(
         /* [out] */ Int32* type);
+
+    /**
+     * Sets the {@link AudioAttributes} for this ringtone.
+     * @param attributes the non-null attributes characterizing this ringtone.
+     */
+    CARAPI SetAudioAttributes(
+        /* [in] */ IAudioAttributes* attributes);
+
+    /**
+     * Returns the {@link AudioAttributes} used by this object.
+     * @return the {@link AudioAttributes} that were set with
+     *     {@link #setAudioAttributes(AudioAttributes)} or the default attributes if none were set.
+     */
+    CARAPI GetAudioAttributes(
+        /* [out] */ IAudioAttributes** result);
 
     /**
      * Returns a human-presentable title for ringtone. Looks in media and DRM
@@ -93,12 +117,13 @@ private:
 
     CARAPI_(void) DestroyLocalPlayer();
 
+    CARAPI_(Boolean) PlayFallbackRingtone();
+
 private:
     static const String TAG;
-    static const Boolean LOGD;// = true;
+    static const Boolean LOGD;
 
     static AutoPtr<ArrayOf<String> > MEDIA_COLUMNS;
-    static AutoPtr<ArrayOf<String> > DRM_COLUMNS;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IAudioManager> mAudioManager;
@@ -111,7 +136,7 @@ private:
     AutoPtr<IUri> mUri;
     String mTitle;
 
-    Int32 mStreamType;// = AudioManager.STREAM_RING;
+    AutoPtr<IAudioAttributes> mAudioAttributes;
 };
 
 } // namespace Media

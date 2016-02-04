@@ -8,9 +8,9 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/utility/CDisplayMetrics.h"
-// #include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/os/SystemProperties.h"
 
-// using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Os::SystemProperties;
 
 namespace Elastos {
 namespace Droid {
@@ -18,12 +18,12 @@ namespace Utility {
 
 static Int32 InitDENSITY_DEVICE()
 {
-    // Int32 ro = SystemProperties::GetInt32(String("ro.sf.lcd_density"),
-    //     IDisplayMetrics::DENSITY_DEFAULT);
-    // Int32 result = SystemProperties::GetInt32(String("qemu.sf.lcd_density"), ro);
-    // return result;
-    assert(0);
-    return 0;
+    Int32 ro;
+    SystemProperties::GetInt32(String("ro.sf.lcd_density"),
+            IDisplayMetrics::DENSITY_DEFAULT, &ro);
+    Int32 result;
+    SystemProperties::GetInt32(String("qemu.sf.lcd_density"), ro, &result);
+    return result;
 }
 
 Int32 CDisplayMetrics::DENSITY_DEVICE = InitDENSITY_DEVICE();

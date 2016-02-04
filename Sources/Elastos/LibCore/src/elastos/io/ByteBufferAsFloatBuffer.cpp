@@ -23,6 +23,21 @@ ECode ByteBufferAsFloatBuffer::constructor(
     return NOERROR;
 }
 
+ECode ByteBufferAsFloatBuffer::GetPrimitiveArray(
+    /* [out] */ Handle64* arrayHandle)
+{
+    AutoPtr<ArrayOf<Float> > arrayTmp;
+    GetArray((ArrayOf<Float>**)&arrayTmp);
+    if (arrayTmp == NULL)
+    {
+        *arrayHandle = 0;
+        return NOERROR;
+    }
+    Float* primitiveArray = arrayTmp->GetPayload();
+    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    return NOERROR;
+}
+
 AutoPtr<IFloatBuffer> ByteBufferAsFloatBuffer::AsFloatBuffer(
     /* [in] */ ByteBuffer* mByteBuffer)
 {

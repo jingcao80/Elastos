@@ -46,6 +46,30 @@ public:
             /* [in] */ IInterface* o,
             /* [out] */ Boolean* result);
 
+        CARAPI GetStartHour(
+            /* [out] */ Int32* startHour);
+
+        CARAPI SetStartHour(
+            /* [in] */ Int32 startHour);
+
+        CARAPI GetStartMinute(
+            /* [out] */ Int32* startMinute);
+
+        CARAPI SetStartMinute(
+            /* [in] */ Int32 startMinute);
+
+        CARAPI GetEndHour(
+            /* [out] */ Int32* endHour);
+
+        CARAPI SetEndHour(
+            /* [in] */ Int32 endHour);
+
+        CARAPI GetEndMinute(
+            /* [out] */ Int32* endMinute);
+
+        CARAPI SetEndMinute(
+            /* [in] */ Int32 endMinute);
+
     public:
         Int32 mStartHour;
         Int32 mStartMinute;
@@ -155,6 +179,84 @@ public:
 
     static CARAPI_(Boolean) IsValidDowntimeConditionId(
         /* [in] */ IUri* conditionId);
+
+    CARAPI GetAllowCalls(
+        /* [out] */ Boolean* allowCalls);
+
+    CARAPI SetAllowCalls(
+        /* [in] */ Boolean allowCalls);
+
+    CARAPI GetAllowMessages(
+        /* [out] */ Boolean* allowMessages);
+
+    CARAPI SetAllowMessages(
+        /* [in] */ Boolean allowMessages);
+
+    CARAPI GetAllowEvents(
+        /* [out] */ Boolean* allowEvents);
+
+    CARAPI SetAllowEvents(
+        /* [in] */ Boolean allowEvents);
+
+    CARAPI GetAllowFrom(
+        /* [out] */ Int32* allowFrom);
+
+    CARAPI SetAllowFrom(
+        /* [in] */ Int32 allowFrom);
+
+    CARAPI GetSleepMode(
+        /* [out] */ String* sleepMode);
+
+    CARAPI SetSleepMode(
+        /* [in] */ const String& sleepMode);
+
+    CARAPI GetSleepStartHour(
+        /* [out] */ Int32* sleepStartHour);
+
+    CARAPI SetSleepStartHour(
+        /* [in] */ Int32 sleepStartHour);
+
+    CARAPI GetSleepStartMinute(
+        /* [out] */ Int32* sleepStartMinute);
+
+    CARAPI SetSleepStartMinute(
+        /* [in] */ Int32 sleepStartMinute);
+
+    CARAPI GetSleepEndHour(
+        /* [out] */ Int32* sleepEndHour);
+
+    CARAPI SetSleepEndHour(
+        /* [in] */ Int32 sleepEndHour);
+
+    CARAPI GetSleepEndMinute(
+        /* [out] */ Int32* sleepEndMinute);
+
+    CARAPI SetSleepEndMinute(
+        /* [in] */ Int32 sleepEndMinute);
+
+    CARAPI GetConditionComponents(
+        /* [out, callee] */ ArrayOf<IComponentName*>** conditionComponents);
+
+    CARAPI SetConditionComponents(
+        /* [in] */ ArrayOf<IComponentName*>* conditionComponents);
+
+    CARAPI GetConditionIds(
+        /* [out, callee] */ ArrayOf<IUri*>** conditionIds);
+
+    CARAPI SetConditionIds(
+        /* [in] */ ArrayOf<IUri*>* conditionIds);
+
+    CARAPI GetExitCondition(
+        /* [out] */ ICondition** exitCondition);
+
+    CARAPI SetExitCondition(
+        /* [in] */ ICondition* exitCondition);
+
+    CARAPI GetExitConditionComponent(
+        /* [out] */ IComponentName** exitConditionComponent);
+
+    CARAPI SetExitConditionComponent(
+        /* [in] */ IComponentName* exitConditionComponent);
 
 private:
     static CARAPI_(Int32) TryParseInt32(

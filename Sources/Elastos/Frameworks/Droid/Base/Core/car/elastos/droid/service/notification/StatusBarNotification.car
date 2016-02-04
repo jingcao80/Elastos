@@ -15,6 +15,7 @@ module
      *
      * @Involve
      * interface IParcelable
+     * interface ICloneable
      */
     interface IStatusBarNotification {
         /**

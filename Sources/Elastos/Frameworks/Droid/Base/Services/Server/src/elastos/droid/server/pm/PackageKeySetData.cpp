@@ -65,8 +65,8 @@ void PackageKeySetData::AddUpgradeKeySet(
 {
     /* must have previously been defined */
     Int64 ks;
-    HashMap<String, Int64>::Iterator it = mKeySetAliases.Find();
-    for (it != mKeySetAliases.End()) {
+    HashMap<String, Int64>::Iterator it = mKeySetAliases.Find(alias);
+    if (it != mKeySetAliases.End()) {
         ks = it->mSecond;
     }
     // if (ks != null) {
@@ -111,20 +111,23 @@ void PackageKeySetData::RemoveAllDefinedKeySets()
 Boolean PackageKeySetData::PackageIsSignedBy(
     /* [in] */ Int64 ks)
 {
-    return ArrayUtils::Contains(mSigningKeySets, ks);
+    for (Int32 i = 0; i < mSigningKeySets->GetLength(); ++i) {
+        if ((*mSigningKeySets)[i] == ks) return TRUE;
+    }
+    return FALSE;
 }
 
-ArrayOf<ArrayOf<Int64> > PackageKeySetData::GetSigningKeySets()
+AutoPtr<ArrayOf<Int64> > PackageKeySetData::GetSigningKeySets()
 {
     return mSigningKeySets;
 }
 
-ArrayOf<ArrayOf<Int64> > PackageKeySetData::GetUpgradeKeySets()
+AutoPtr<ArrayOf<Int64> > PackageKeySetData::GetUpgradeKeySets()
 {
     return mUpgradeKeySets;
 }
 
-ArrayOf<ArrayOf<Int64> > PackageKeySetData::GetDefinedKeySets()
+AutoPtr<ArrayOf<Int64> > PackageKeySetData::GetDefinedKeySets()
 {
     return mDefinedKeySets;
 }

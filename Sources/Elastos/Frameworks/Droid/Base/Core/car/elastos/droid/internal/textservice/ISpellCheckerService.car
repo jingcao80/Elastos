@@ -1,12 +1,11 @@
 module
 {
     interface Elastos.Droid.Os.IBundle;
-    interface Elastos.Droid.View.Internal.TextService.IISpellCheckerSession;
-    interface Elastos.Droid.View.Internal.TextService.IISpellCheckerSessionListener;
+    interface Elastos.Droid.Internal.TextService.IISpellCheckerSession;
+    interface Elastos.Droid.Internal.TextService.IISpellCheckerSessionListener;
 
     namespace Elastos {
     namespace Droid {
-    namespace View {
     namespace Internal {
     namespace TextService {
 
@@ -24,7 +23,6 @@ module
 
     } // namespace TextService
     } // namespace Internal
-    } // namespace View
     } // namespace Droid
     } // namespace Elastos
 }

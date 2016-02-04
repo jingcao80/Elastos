@@ -731,7 +731,7 @@ void CTethering::TetherMasterSM::TetherMasterUtilState::ChooseUpstreamType(
             // interface described by linkProperties, or one of the interfaces
             // stacked on top of it.
             Logger::I(TAG, "Finding IPv4 upstream interface on: %s",
-                Object::ToString(linkProperties).string());
+                TO_CSTR(linkProperties));
             AutoPtr<IList> allRoutes;
             linkProperties->GetAllRoutes((IList**)&allRoutes);
             AutoPtr<IRouteInfoHelper> riHelper;
@@ -790,7 +790,7 @@ void CTethering::TetherMasterSM::TetherMasterUtilState::ChooseUpstreamType(
             }
             if (VDBG) {
                 Logger::D(TAG, "Setting DNS forwarders: Network=%s, dnsServers=%s",
-                    Object::ToString(network).string(), Arrays::ToString(dnsServers).string());
+                    TO_CSTR(network), Arrays::ToString(dnsServers).string());
             }
             mHost->mHost->mNMService->SetDnsForwarders(network, dnsServers);
 
@@ -899,7 +899,7 @@ ECode CTethering::TetherMasterSM::TetherModeAliveState::ProcessMessage(
             AutoPtr<IInterface> obj;
             message->GetObj((IInterface**)&obj);
             TetherInterfaceSM* who = (TetherInterfaceSM*)IObject::Probe(obj);
-            if (VDBG) Logger::D(CTethering::TAG, "Tether Mode requested by %s", Object::ToString(who).string());
+            if (VDBG) Logger::D(CTethering::TAG, "Tether Mode requested by %s", TO_CSTR(who));
             mHost->mNotifyList.PushBack(who);
             AutoPtr<ICharSequence> cs;
             CString::New(mHost->mUpstreamIfaceName, (ICharSequence**)&cs);
@@ -910,11 +910,11 @@ ECode CTethering::TetherMasterSM::TetherModeAliveState::ProcessMessage(
             AutoPtr<IInterface> obj;
             message->GetObj((IInterface**)&obj);
             AutoPtr<TetherInterfaceSM> who = (TetherInterfaceSM*)IObject::Probe(obj);
-            if (VDBG) Logger::D(CTethering::TAG, "Tether Mode unrequested by %s", Object::ToString(who).string());
+            if (VDBG) Logger::D(CTethering::TAG, "Tether Mode unrequested by %s", TO_CSTR(who));
             List< AutoPtr<TetherInterfaceSM> >::Iterator it = Find(
                     mHost->mNotifyList.Begin(), mHost->mNotifyList.End(), who);
             if (it != mHost->mNotifyList.End()) {
-                if (DBG) Logger::D(CTethering::TAG, "TetherModeAlive removing notifyee %s", Object::ToString(who).string());
+                if (DBG) Logger::D(CTethering::TAG, "TetherModeAlive removing notifyee %s", TO_CSTR(who));
                 mHost->mNotifyList.Erase(it);
                 if (mHost->mNotifyList.IsEmpty()) {
                     TurnOffMasterTetherSettings(); // transitions appropriately
@@ -928,7 +928,7 @@ ECode CTethering::TetherMasterSM::TetherModeAliveState::ProcessMessage(
                 }
             }
             else {
-                Logger::E(CTethering::TAG, "TetherModeAliveState UNREQUESTED has unknown who: %s", Object::ToString(who).string());
+                Logger::E(CTethering::TAG, "TetherModeAliveState UNREQUESTED has unknown who: %s", TO_CSTR(who));
             }
             break;
         }

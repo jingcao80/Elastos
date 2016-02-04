@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_SERVER_WM_CWINDOWID_H__
 
 #include "_Elastos_Droid_Server_Wm_CWindowId.h"
-#include "wm/WindowState.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::View::IIWindowId;
 using Elastos::Droid::View::IIWindowFocusObserver;

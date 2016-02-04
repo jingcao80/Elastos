@@ -11,27 +11,6 @@ module
     namespace Net {
 
     /**
-     * Collect and persist detailed network statistics, and provide this data to
-     * other system services.
-     */
-    /**
-     * @Involved
-     * interface IINetworkStatsService;
-     * interface IBinder;
-     */
-    [local]
-    interface INetworkStatsService {
-        // @VisibleForTesting
-        const String ACTION_NETWORK_STATS_POLL = "com.android.server.action.NETWORK_STATS_POLL";
-        const String ACTION_NETWORK_STATS_UPDATED = "com.android.server.action.NETWORK_STATS_UPDATED";
-
-        BindConnectivityManager(
-            [in] IIConnectivityManager* connManager);
-
-        SystemReady();
-    }
-
-    /**
      * Settings that can be changed externally.
      */
     /**

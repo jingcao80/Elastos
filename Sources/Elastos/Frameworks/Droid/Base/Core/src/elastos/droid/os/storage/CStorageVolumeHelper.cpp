@@ -6,6 +6,9 @@ namespace Droid {
 namespace Os {
 namespace Storage {
 
+CAR_INTERFACE_IMPL(CStorageVolumeHelper, Singleton, IStorageVolumeHelper)
+CAR_SINGLETON_IMPL(CStorageVolumeHelper)
+
 ECode CStorageVolumeHelper::FromTemplate(
     /* [in] */ IStorageVolume* temp,
     /* [in] */ IFile* path,
@@ -14,7 +17,6 @@ ECode CStorageVolumeHelper::FromTemplate(
 {
     VALIDATE_NOT_NULL(volume);
 
-    AutoPtr<IStorageVolume> result;
     Int32 descriptionId, mtpReserveSpace;
     Int64 maxFileSize;
     Boolean primary, removable, emulated, allowMassStorage;
@@ -27,12 +29,8 @@ ECode CStorageVolumeHelper::FromTemplate(
     temp->AllowMassStorage(&allowMassStorage);
     temp->GetMaxFileSize(&maxFileSize);
 
-    CStorageVolume::New(path, descriptionId, primary, removable, emulated, mtpReserveSpace,
-            allowMassStorage, maxFileSize, owner, (IStorageVolume**)&result);
-
-    *volume = result;
-    REFCOUNT_ADD(*volume);
-    return NOERROR;
+    return CStorageVolume::New(path, descriptionId, primary, removable, emulated, mtpReserveSpace,
+            allowMassStorage, maxFileSize, owner, volume);
 }
 
 } // namespace Storage

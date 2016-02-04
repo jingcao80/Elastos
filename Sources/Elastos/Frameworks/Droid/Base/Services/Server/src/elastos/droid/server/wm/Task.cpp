@@ -1,5 +1,8 @@
 
-#include "wm/Task.h"
+#include "elastos/droid/server/wm/Task.h"
+#include "elastos/droid/server/wm/TaskStack.h"
+#include "elastos/droid/server/wm/DisplayContent.h"
+#include "elastos/droid/server/wm/WindowState.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -35,7 +38,7 @@ void Task::AddAppToken(
 {
     AppTokenList::Iterator it = mAppTokens.Begin();
     for (Int32 pos = 0; it != mAppTokens.End() && pos < addPos; ++pos, ++it) {
-        if (*it->mRemoved) {
+        if ((*it)->mRemoved) {
             // addPos assumes removed tokens are actually gone.
             ++addPos;
         }
@@ -47,7 +50,7 @@ void Task::AddAppToken(
 Boolean Task::RemoveAppToken(
     /* [in] */ AppWindowToken* wtoken)
 {
-    AppTokenList::Iterator it = Find(mAppTokens.Begin(), mAppTokens.End(), wtoken);
+    AppTokenList::Iterator it = Find(mAppTokens.Begin(), mAppTokens.End(), AutoPtr<AppWindowToken>(wtoken));
     Boolean removed = FALSE;
     if (it != mAppTokens.End()) {
         mAppTokens.Erase(it);

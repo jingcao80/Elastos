@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_WIDGET_LINEARLAYOUT_H__
 
 #include "Elastos.Droid.Widget.h"
-#include "elastos/droid/view/ViewGroup.h"
+#include <elastos/droid/view/ViewGroup.h>
 
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IViewGroupMarginLayoutParams;
@@ -13,7 +13,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class LinearLayout
+class ECO_PUBLIC LinearLayout
     : public ViewGroup
     , public ILinearLayout
 {
@@ -556,12 +556,11 @@ private:
 
     AutoPtr<ArrayOf<Int32> > mMaxDescent;
 
-    static const Int32 VERTICAL_GRAVITY_COUNT = 4;
-
-    static const Int32 INDEX_CENTER_VERTICAL = 0;
-    static const Int32 INDEX_TOP = 1;
-    static const Int32 INDEX_BOTTOM = 2;
-    static const Int32 INDEX_FILL = 3;
+    ECO_LOCAL static const Int32 VERTICAL_GRAVITY_COUNT;
+    ECO_LOCAL static const Int32 INDEX_CENTER_VERTICAL;
+    ECO_LOCAL static const Int32 INDEX_TOP;
+    ECO_LOCAL static const Int32 INDEX_BOTTOM;
+    ECO_LOCAL static const Int32 INDEX_FILL;
 
     AutoPtr<IDrawable> mDivider;
     Int32 mDividerWidth;

@@ -1,0 +1,131 @@
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        /**
+         * This class represents a single call, its state and properties.
+         * It implements {@link Parcelable} for inter-process message passing.
+         * @hide
+         */
+        /**
+         * @Involve
+         * interface IParcelable
+         */
+        interface IBluetoothHeadsetClientCall {
+            /* Call state */
+            /**
+             * Call is active.
+             */
+            const Int32 CALL_STATE_ACTIVE = 0;
+            /**
+             * Call is in held state.
+             */
+            const Int32 CALL_STATE_HELD = 1;
+            /**
+             * Outgoing call that is being dialed right now.
+             */
+            const Int32 CALL_STATE_DIALING = 2;
+            /**
+             * Outgoing call that remote party has already been alerted about.
+             */
+            const Int32 CALL_STATE_ALERTING = 3;
+            /**
+             * Incoming call that can be accepted or rejected.
+             */
+            const Int32 CALL_STATE_INCOMING = 4;
+            /**
+             * Waiting call state when there is already an active call.
+             */
+            const Int32 CALL_STATE_WAITING = 5;
+            /**
+             * Call that has been held by response and hold
+             * (see Bluetooth specification for further references).
+             */
+            const Int32 CALL_STATE_HELD_BY_RESPONSE_AND_HOLD = 6;
+            /**
+             * Call that has been already terminated and should not be referenced as a valid call.
+             */
+            const Int32 CALL_STATE_TERMINATED = 7;
+
+            /**
+             * Sets call's state.
+             *
+             * <p>Note: This is an internal function and shouldn't be exposed</p>
+             *
+             * @param  state    new call state.
+             */
+            SetState(
+                [in] Int32 state);
+
+            /**
+             * Sets call's number.
+             *
+             * <p>Note: This is an internal function and shouldn't be exposed</p>
+             *
+             * @param number    String representing phone number.
+             */
+            SetNumber(
+                [in] String number);
+
+            /**
+             * Sets this call as multi party call.
+             *
+             * <p>Note: This is an internal function and shouldn't be exposed</p>
+             *
+             * @param multiParty    if <code>true</code> sets this call as a part
+             *                      of multi party conference.
+             */
+            SetMultiParty(
+                [in] Boolean multiParty);
+
+            /**
+             * Gets call's Id.
+             *
+             * @return call id.
+             */
+            GetId(
+                [out] Int32* id);
+
+            /**
+             * Gets call's current state.
+             *
+             * @return state of this particular phone call.
+             */
+            GetState(
+                [out] Int32* state);
+
+            /**
+             * Gets call's number.
+             *
+             * @return string representing phone number.
+             */
+            GetNumber(
+                [out] String* number);
+
+            /**
+             * Checks if call is an active call in a conference mode (aka multi party).
+             *
+             * @return <code>true</code> if call is a multi party call,
+             *         <code>false</code> otherwise.
+             */
+            IsMultiParty(
+                [out] Boolean* isMultiParty);
+
+            /**
+             * Checks if this call is an outgoing call.
+             *
+             * @return <code>true</code> if its outgoing call,
+             *         <code>false</code> otherwise.
+             */
+            IsOutgoing(
+                [out] Boolean* isOutgoing);
+
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

@@ -297,7 +297,6 @@ static ssize_t socket_read_all(
     /* [in] */ size_t len)
 {
     ssize_t ret;
-    ssize_t bytesread = 0;
     struct msghdr msg;
     struct iovec iv;
     unsigned char *buf = (unsigned char *)buffer;
@@ -1173,7 +1172,7 @@ ECode LocalSocketImpl::SetOption(
         boolValue = bv? 1 : 0;
     }
     else {
-        Logger::E("LocalSocketImpl", "bad value: %s", Object::ToString(value).string());
+        Logger::E("LocalSocketImpl", "bad value: %s", TO_CSTR(value));
         return E_IO_EXCEPTION;
     }
 

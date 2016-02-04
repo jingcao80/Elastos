@@ -35,6 +35,9 @@ public:
     static CARAPI_(AutoPtr<IFloatBuffer>) AsFloatBuffer(
         /* [in] */ ByteBuffer* byteBuffer);
 
+    CARAPI GetPrimitiveArray(
+        /* [out] */ Handle64* arrayHandle);
+
     // @Override
     CARAPI AsReadOnlyBuffer(
         /* [out] */ IFloatBuffer** buffer);

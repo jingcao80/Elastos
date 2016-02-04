@@ -32,8 +32,8 @@ CAR_OBJECT_IMPL(CVisualizer)
 CVisualizer::NativeEventHandler::NativeEventHandler(
     /* [in] */ CVisualizer* v,
     /* [in] */ ILooper* looper)
-    : mVisualizer(v)
-    , Handler(looper)
+    : Handler(looper)
+    , mVisualizer(v)
 {
 }
 
@@ -489,7 +489,7 @@ static Int32 translateError(Int32 code) {
 }
 
 // ----------------------------------------------------------------------------
-void CVisualizer::ensureArraySize(
+static void ensureArraySize(
     /* [in] */ ArrayOf<Byte>* arrayIn,
     /* [in] */ uint32_t size,
     /* [out] */ ArrayOf<Byte>** arrayOut)
@@ -511,7 +511,7 @@ void CVisualizer::ensureArraySize(
     }
 }
 
-void CVisualizer::captureCallback(
+void captureCallback(
     /* [in] */ void* user,
     /* [in] */ uint32_t waveformSize,
     /* [in] */ uint8_t *waveform,
@@ -519,10 +519,6 @@ void CVisualizer::captureCallback(
     /* [in] */ uint8_t *fft,
     /* [in] */ uint32_t samplingrate)
 {
-    int arg1 = 0;
-    int arg2 = 0;
-    size_t size;
-
     visualizer_callback_cookie *callbackInfo = (visualizer_callback_cookie *)user;
     android::AutoMutex lock(&callbackInfo->callback_data_lock);
 
@@ -537,7 +533,6 @@ void CVisualizer::captureCallback(
 
     AutoPtr<IByte> byte;
     AutoPtr<IArrayOf> obj;
-    // CObjectContainer::New((IObjectContainer**)&obj);
 
     if (waveformSize != 0 && waveform != NULL) {
         AutoPtr<ArrayOf<Byte> > jArray;
@@ -554,7 +549,7 @@ void CVisualizer::captureCallback(
                 obj->Set(i, byte);
             }
 
-            PostEventFromNative(callbackInfo->visualizer_ref, NATIVE_EVENT_PCM_CAPTURE, samplingrate, 0, obj);
+            CVisualizer::PostEventFromNative(callbackInfo->visualizer_ref, NATIVE_EVENT_PCM_CAPTURE, samplingrate, 0, obj);
         }
     }
 
@@ -573,12 +568,12 @@ void CVisualizer::captureCallback(
                 obj->Set(i, byte);
             }
 
-            PostEventFromNative(callbackInfo->visualizer_ref, NATIVE_EVENT_FFT_CAPTURE, samplingrate, 0, obj);
+            CVisualizer::PostEventFromNative(callbackInfo->visualizer_ref, NATIVE_EVENT_FFT_CAPTURE, samplingrate, 0, obj);
         }
     }
 }
 
-void CVisualizer::android_media_visualizer_effect_callback(
+void elastos_media_visualizer_effect_callback(
     /* [in] */ int event,
     /* [in] */ void* user,
     /* [in] */ void* info)
@@ -588,7 +583,7 @@ void CVisualizer::android_media_visualizer_effect_callback(
         visualizerJniStorage* lpJniStorage = (visualizerJniStorage*)user;
         visualizer_callback_cookie* callbackInfo = &lpJniStorage->mCallbackData;
 
-        PostEventFromNative(callbackInfo->visualizer_ref, NATIVE_EVENT_SERVER_DIED, 0, 0, 0);
+        CVisualizer::PostEventFromNative(callbackInfo->visualizer_ref, CVisualizer::NATIVE_EVENT_SERVER_DIED, 0, 0, 0);
     }
 }
 
@@ -618,7 +613,7 @@ Int32 CVisualizer::Native_Setup(
 
     // create the native Visualizer object
     lpVisualizer = new android::Visualizer(0,
-        android_media_visualizer_effect_callback, lpJniStorage, sessionId);
+        elastos_media_visualizer_effect_callback, lpJniStorage, sessionId);
 
     if (lpVisualizer == NULL) {
         ALOGE("Error creating Visualizer");

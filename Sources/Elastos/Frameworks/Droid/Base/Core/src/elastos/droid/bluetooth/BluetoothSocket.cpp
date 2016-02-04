@@ -1,14 +1,16 @@
 
-#include "BluetoothSocket.h"
-#include "CBluetoothDevice.h"
-#include "CBluetoothAdapter.h"
-#include "BluetoothInputStream.h"
-#include "BluetoothOutputStream.h"
+#include "elastos/droid/bluetooth/BluetoothSocket.h"
+#include "elastos/droid/bluetooth/CBluetoothDevice.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/droid/bluetooth/BluetoothInputStream.h"
+#include "elastos/droid/bluetooth/BluetoothOutputStream.h"
 #include "elastos/droid/net/CLocalSocket.h"
 #include "elastos/droid/os/CParcelFileDescriptor.h"
+#include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Net::CLocalSocket;
+using Elastos::Droid::Os::CParcelFileDescriptor;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::EIID_ICloseable;
 using Elastos::IO::IByteBuffer;
@@ -17,8 +19,8 @@ using Elastos::IO::CByteBufferHelper;
 using Elastos::IO::ByteOrder;
 using Elastos::IO::IByteOrderHelper;
 using Elastos::IO::CByteOrderHelper;
-using Elastos::Droid::Net::CLocalSocket;
-using Elastos::Droid::Os::CParcelFileDescriptor;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -27,8 +29,8 @@ namespace Bluetooth {
 const Int32 BluetoothSocket::TYPE_RFCOMM;
 const Int32 BluetoothSocket::TYPE_SCO;
 const Int32 BluetoothSocket::TYPE_L2CAP;
-const Int32 BluetoothSocket::EBADFD;
-const Int32 BluetoothSocket::EADDRINUSE;
+const Int32 BluetoothSocket::_EBADFD;
+const Int32 BluetoothSocket::_EADDRINUSE;
 const Int32 BluetoothSocket::SEC_FLAG_ENCRYPT;
 const Int32 BluetoothSocket::SEC_FLAG_AUTH;
 const String BluetoothSocket::TAG("BluetoothSocket");
@@ -37,7 +39,11 @@ const Boolean BluetoothSocket::VDBG;
 Int32 BluetoothSocket::PROXY_CONNECTION_TIMEOUT = 5000;
 Int32 BluetoothSocket::SOCK_SIGNAL_SIZE = 16;
 
-CAR_INTERFACE_IMPL_2(BluetoothSocket, IBluetoothSocket, ICloseable)
+CAR_INTERFACE_IMPL_2(BluetoothSocket, Object, IBluetoothSocket, ICloseable)
+
+BluetoothSocket::BluetoothSocket()
+{
+}
 
 BluetoothSocket::BluetoothSocket(
     /* [in] */ Int32 type,
@@ -275,7 +281,7 @@ ECode BluetoothSocket::Connect()
 
 Int32 BluetoothSocket::BindListen()
 {
-    if (mSocketState == CLOSED) return EBADFD;
+    if (mSocketState == CLOSED) return _EBADFD;
 
     AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
     if (adapter != NULL) {
@@ -303,7 +309,7 @@ Int32 BluetoothSocket::BindListen()
     {
         AutoLock lock(mLock);
         if (VDBG) Slogger::D(TAG, "bindListen(), SocketState: %d, mPfd: %p", mSocketState, mPfd.Get());
-        if(mSocketState != INIT) return EBADFD;
+        if(mSocketState != INIT) return _EBADFD;
         if(mPfd == NULL) return -1;
         AutoPtr<IFileDescriptor> fd;
         mPfd->GetFileDescriptor((IFileDescriptor**)&fd);
@@ -385,7 +391,7 @@ ECode BluetoothSocket::Read(
 
     if (VDBG) Slogger::D(TAG, "read in:  %p len: %d", mSocketIS.Get(), length);
     Int32 ret;
-    mSocketIS->ReadBytes(b, offset, length, &ret);
+    mSocketIS->Read(b, offset, length, &ret);
     if(ret < 0) {
         // throw new IOException("bt socket closed, read return: " + ret);
         Slogger::E(TAG, "bt socket closed, read return: %d", ret);
@@ -405,7 +411,7 @@ ECode BluetoothSocket::Write(
     VALIDATE_NOT_NULL(count)
     *count = 0;
     if (VDBG) Slogger::D(TAG, "write: %p length: %d", mSocketOS.Get(), length);
-    mSocketOS->WriteBytes(*b, offset, length);
+    mSocketOS->Write(b, offset, length);
     // There is no good way to confirm since the entire process is asynchronous anyway
     if (VDBG) Slogger::D(TAG, "write out: %p length: %d", mSocketOS.Get(), length);
     *count = length;
@@ -428,7 +434,7 @@ ECode BluetoothSocket::Close()
             if (VDBG) Slogger::D(TAG, "Closing mSocket: %p", mSocket.Get());
             mSocket->ShutdownInput();
             mSocket->ShutdownOutput();
-            mSocket->Close();
+            ICloseable::Probe(mSocket)->Close();
             mSocket = NULL;
         }
         if(mPfd != NULL) {
@@ -470,7 +476,7 @@ ECode BluetoothSocket::WaitSocketSignal(
     AutoPtr<IByteBufferHelper> bufferHelper;
     CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&bufferHelper);
     AutoPtr<IByteBuffer> bb;
-    bufferHelper->WrapArray(sig, (IByteBuffer**)&bb);
+    bufferHelper->Wrap(sig, (IByteBuffer**)&bb);
     AutoPtr<IByteOrderHelper> helper;
     CByteOrderHelper::AcquireSingleton((IByteOrderHelper**)&helper);
     ByteOrder nativeOrder;
@@ -485,7 +491,7 @@ ECode BluetoothSocket::WaitSocketSignal(
     }
 
     AutoPtr< ArrayOf<Byte> > addrs = ArrayOf<Byte>::Alloc(6);
-    bb->GetBytes(addrs);
+    bb->Get(addrs);
     Int32 channel, status;
     bb->GetInt32(&channel);
     bb->GetInt32(&status);
@@ -514,7 +520,7 @@ ECode BluetoothSocket::ReadAll(
     Int32 left = b->GetLength();
     while(left > 0) {
         Int32 ret;
-        is->ReadBytes(b, b->GetLength() - left, left, &ret);
+        is->Read(b, b->GetLength() - left, left, &ret);
         if(ret <= 0) {
             // throw new IOException("read failed, socket might closed or timeout, read ret: " + ret);
             Slogger::E(TAG, "read failed, socket might closed or timeout, read ret: %d", ret);
@@ -544,7 +550,7 @@ ECode BluetoothSocket::ReadInt32(
     AutoPtr<IByteBufferHelper> helper;
     CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
     AutoPtr<IByteBuffer> bb;
-    helper->WrapArray(ibytes, (IByteBuffer**)&bb);
+    helper->Wrap(ibytes, (IByteBuffer**)&bb);
     AutoPtr<IByteOrderHelper> orderHelper;
     CByteOrderHelper::AcquireSingleton((IByteOrderHelper**)&orderHelper);
     ByteOrder nativeOrder;

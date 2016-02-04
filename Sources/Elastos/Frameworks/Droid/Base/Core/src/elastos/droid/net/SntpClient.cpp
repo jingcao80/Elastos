@@ -6,7 +6,6 @@
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Droid::Os::ISystemClock;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Utility::ILog;
 
@@ -69,7 +68,7 @@ ECode SntpClient::RequestTime(
     CInetAddressHelper::AcquireSingleton((IInetAddressHelper**)&helper);
 
     Int64 requestTime, requestTicks, responseTicks, responseTime;
-    Int64 originateTime, receiveTime, transmitTime, roundTripTime, clockOffset;
+    Int64 originateTime = 0, receiveTime = 0, transmitTime = 0, roundTripTime, clockOffset;
     Int32  length = NTP_PACKET_SIZE;
     AutoPtr<ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(length);
 
@@ -201,9 +200,9 @@ ECode SntpClient::ReadTimeStamp(
 {
     VALIDATE_NOT_NULL(result)
 
-    Int64 seconds;
+    Int64 seconds = 0;
     Read32(buffer, offset, &seconds);
-    Int64 fraction;
+    Int64 fraction = 0;
     Read32(buffer, offset + 4, &fraction);
     return ((seconds - OFFSET_1900_TO_1970) * 1000) + ((fraction * 1000L) / 0x100000000L);
 }

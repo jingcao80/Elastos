@@ -181,9 +181,9 @@ Int32 CConcurrentHashMap::CompareComparables(
     /* [in] */ IInterface* k,
     /* [in] */ IInterface* x)
 {
-    Int32 res, id = 0;
-    // TODO:
-    return (x == NULL/* || (x->GetClassID(&id) ,id) != kc */ ? 0 :
+    Int32 res;
+    InterfaceID id;
+    return (x == NULL || (x->GetInterfaceID(x, &id), id != kc) ? 0 :
             (IComparable::Probe(k)->CompareTo(x, &res), res));
 }
 

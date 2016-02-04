@@ -13,6 +13,57 @@ module
      * interface IColorFilter
      */
     interface IPorterDuffColorFilter {
+        /**
+         * Returns the ARGB color used to tint the source pixels when this filter
+         * is applied.
+         *
+         * @see Color
+         * @see #setColor(int)
+         *
+         * @hide
+         */
+        GetColor(
+            [out] Int32* color);
+
+        /**
+         * Specifies the color to tint the source pixels with when this color
+         * filter is applied.
+         *
+         * @param color An ARGB {@link Color color}
+         *
+         * @see Color
+         * @see #getColor()
+         * @see #getMode()
+         *
+         * @hide
+         */
+        SetColor(
+            [in] Int32 color);
+
+        /**
+         * Returns the Porter-Duff mode used to composite this color filter's
+         * color with the source pixel when this filter is applied.
+         *
+         * @see PorterDuff
+         * @see #setMode(android.graphics.PorterDuff.Mode)
+         *
+         * @hide
+         */
+        GetMode(
+            [out] PorterDuffMode* mode);
+
+        /**
+         * Specifies the Porter-Duff mode to use when compositing this color
+         * filter's color with the source pixel at draw time.
+         *
+         * @see PorterDuff
+         * @see #getMode()
+         * @see #getColor()
+         *
+         * @hide
+         */
+        SetMode(
+            [in] PorterDuffMode mode);
     }
 
     } // namespace Graphics

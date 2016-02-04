@@ -1,41 +1,70 @@
-
-#include "CBluetoothManagerService.h"
-#include "elastos/droid/os/Looper.h"
-#include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/server/CBluetoothManagerService.h"
+#include "elastos/droid/server/CBluetoothManagerServiceBluetoothCallback.h"
+#include "elastos/droid/server/IoThread.h"
+#include <elastos/droid/R.h>
+#include <elastos/droid/os/Looper.h>
+#include <elastos/droid/os/Binder.h>
+#include <elastos/droid/os/UserHandle.h>
+#include <elastos/droid/os/SystemClock.h>
+#include <elastos/droid/provider/Settings.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/Thread.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.App.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.Droid.Bluetooth.h>
+#include <Elastos.CoreLibrary.Utility.h>
 
-using Elastos::Core::Thread;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Content::IContext;
+using Elastos::Droid::R;
+using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::CRemoteCallbackList;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::Content::EIID_IServiceConnection;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Bluetooth::IBluetoothAdapter;
+using Elastos::Droid::Bluetooth::EIID_IIBluetoothCallback;
+using Elastos::Droid::Bluetooth::EIID_IIBluetoothManager;
+using Elastos::Droid::Bluetooth::IIBluetoothCallback;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 const Boolean DBG = TRUE;
-const char* TAG = "CBluetoothManagerService";
+const String TAG("CBluetoothManagerService");
 
 const String CBluetoothManagerService::BLUETOOTH_ADMIN_PERM("android.permission.BLUETOOTH_ADMIN");
 const String CBluetoothManagerService::BLUETOOTH_PERM("android.permission.BLUETOOTH");
-const String CBluetoothManagerService::ACTION_SERVICE_STATE_CHANGED;//="com.android.bluetooth.btservice.action.STATE_CHANGED";
-const String CBluetoothManagerService::EXTRA_ACTION=String("action");
-const String CBluetoothManagerService::SECURE_SETTINGS_BLUETOOTH_ADDR_VALID=String("bluetooth_addr_valid");
-const String CBluetoothManagerService::SECURE_SETTINGS_BLUETOOTH_ADDRESS=String("bluetooth_address");
-const String CBluetoothManagerService::SECURE_SETTINGS_BLUETOOTH_NAME=String("bluetooth_name");
+const String CBluetoothManagerService::ACTION_SERVICE_STATE_CHANGED("com.android.bluetooth.btservice.action.STATE_CHANGED");
+const String CBluetoothManagerService::EXTRA_ACTION("action");
+const String CBluetoothManagerService::SECURE_SETTINGS_BLUETOOTH_ADDR_VALID("bluetooth_addr_valid");
+const String CBluetoothManagerService::SECURE_SETTINGS_BLUETOOTH_ADDRESS("bluetooth_address");
+const String CBluetoothManagerService::SECURE_SETTINGS_BLUETOOTH_NAME("bluetooth_name");
 
 const Int32 CBluetoothManagerService::TIMEOUT_BIND_MS = 3000; //Maximum msec to wait for a bind
 const Int32 CBluetoothManagerService::TIMEOUT_SAVE_MS = 500; //Maximum msec to wait for a save
-//Maximum msec to wait for service restart
 const Int32 CBluetoothManagerService::SERVICE_RESTART_TIME_MS = 200;
-//Maximum msec to delay MESSAGE_USER_SWITCHED
+const Int32 CBluetoothManagerService::ERROR_RESTART_TIME_MS = 200;
 const Int32 CBluetoothManagerService::USER_SWITCHED_TIME_MS = 200;
 
 const Int32 CBluetoothManagerService::MESSAGE_ENABLE = 1;
@@ -47,26 +76,31 @@ const Int32 CBluetoothManagerService::MESSAGE_UNREGISTER_STATE_CHANGE_CALLBACK =
 const Int32 CBluetoothManagerService::MESSAGE_BLUETOOTH_SERVICE_CONNECTED = 40;
 const Int32 CBluetoothManagerService::MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED = 41;
 const Int32 CBluetoothManagerService::MESSAGE_RESTART_BLUETOOTH_SERVICE = 42;
-const Int32 CBluetoothManagerService::MESSAGE_BLUETOOTH_STATE_CHANGE=60;
-const Int32 CBluetoothManagerService::MESSAGE_TIMEOUT_BIND =100;
-const Int32 CBluetoothManagerService::MESSAGE_TIMEOUT_UNBIND =101;
-const Int32 CBluetoothManagerService::MESSAGE_GET_NAME_AND_ADDRESS=200;
-const Int32 CBluetoothManagerService::MESSAGE_SAVE_NAME_AND_ADDRESS=201;
+const Int32 CBluetoothManagerService::MESSAGE_BLUETOOTH_STATE_CHANGE = 60;
+const Int32 CBluetoothManagerService::MESSAGE_TIMEOUT_BIND = 100;
+const Int32 CBluetoothManagerService::MESSAGE_TIMEOUT_UNBIND = 101;
+const Int32 CBluetoothManagerService::MESSAGE_GET_NAME_AND_ADDRESS= 200;
+const Int32 CBluetoothManagerService::MESSAGE_SAVE_NAME_AND_ADDRESS= 201;
 const Int32 CBluetoothManagerService::MESSAGE_USER_SWITCHED = 300;
-const Int32 CBluetoothManagerService::MAX_SAVE_RETRIES=3;
-// Bluetooth persisted setting is off
-const Int32 CBluetoothManagerService::BLUETOOTH_OFF=0;
-// Bluetooth persisted setting is on
-// and Airplane mode won't affect Bluetooth state at start up
-const Int32 CBluetoothManagerService::BLUETOOTH_ON_BLUETOOTH=1;
-// Bluetooth persisted setting is on
-// but Airplane mode will affect Bluetooth state at start up
-// and Airplane mode will have higher priority.
-const Int32 CBluetoothManagerService::BLUETOOTH_ON_AIRPLANE=2;
+const Int32 CBluetoothManagerService::MAX_SAVE_RETRIES = 3;
+const Int32 CBluetoothManagerService::MAX_ERROR_RESTART_RETRIES = 6;
+
+const Int32 CBluetoothManagerService::BLUETOOTH_OFF = 0;
+const Int32 CBluetoothManagerService::BLUETOOTH_ON_BLUETOOTH = 1;
+const Int32 CBluetoothManagerService::BLUETOOTH_ON_AIRPLANE = 2;
+
+const Int32 CBluetoothManagerService::SERVICE_IBLUETOOTH = 1;
+const Int32 CBluetoothManagerService::SERVICE_IBLUETOOTHGATT = 2;
+
+//========================================================================
+// CBluetoothManagerService::BluetoothServiceConnection
+//========================================================================
+
+CAR_INTERFACE_IMPL(CBluetoothManagerService::BluetoothServiceConnection, Object, IServiceConnection)
 
 CBluetoothManagerService::BluetoothServiceConnection::BluetoothServiceConnection(
-    /* [in] */ CBluetoothManagerService* owner)
-    : mOwner(owner)
+    /* [in] */ CBluetoothManagerService* host)
+    : mHost(host)
 { }
 
 void CBluetoothManagerService::BluetoothServiceConnection::SetGetNameAddressOnly(
@@ -80,393 +114,531 @@ Boolean CBluetoothManagerService::BluetoothServiceConnection::IsGetNameAddressOn
     return mGetNameAddressOnly;
 }
 
-void CBluetoothManagerService::BluetoothServiceConnection::OnServiceConnected(
+ECode CBluetoothManagerService::BluetoothServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* className,
-    /* [in] */ IBinder service)
+    /* [in] */ IBinder* service)
 {
-    if (DBG) Logger::D(TAG, "BluetoothServiceConnection: connected to AdapterService");
-    mOwner->mHandler->SendMessage(MESSAGE_BLUETOOTH_SERVICE_CONNECTED, 0, 0, service);
+    String clsName;
+    className->GetClassName(&clsName);
+
+    if (DBG) {
+        Slogger::D(TAG, "BluetoothServiceConnection: connected to AdapterService %s",
+            clsName.string());
+    }
+
+    AutoPtr<IMessage> msg;
+    mHost->mHandler->ObtainMessage(MESSAGE_BLUETOOTH_SERVICE_CONNECTED, (IMessage**)&msg);
+    // TBD if (className.getClassName().equals(IBluetooth.class.getName())) {
+    if (clsName.Equals("Elastos.Droid.Bluetooth.Btservice.CAdapterService")) {
+        msg->SetArg1(SERVICE_IBLUETOOTH);
+        // } else if (className.getClassName().equals(IBluetoothGatt.class.getName())) {
+    }
+    else if (clsName.Equals("Elastos.Droid.Bluetooth.Gatt.CGattService")) {
+        msg->SetArg1(SERVICE_IBLUETOOTHGATT);
+    }
+     else {
+        Slogger::E(TAG, "Unknown service connected: %s", clsName.string());
+        return NOERROR;
+    }
+
+    msg->SetObj(service);
+    Boolean bval;
+    return mHost->mHandler->SendMessage(msg, &bval);
 }
 
-void CBluetoothManagerService::BluetoothServiceConnection::OnServiceDisconnected(
-    /* [in] */ IComponentName className)
+ECode CBluetoothManagerService::BluetoothServiceConnection::OnServiceDisconnected(
+    /* [in] */ IComponentName* className)
 {
+    String clsName;
+    className->GetClassName(&clsName);
+
     // Called if we unexpected disconnected.
-    if (DBG) Logger::D(TAG, "BluetoothServiceConnection: disconnected from AdapterService");
-    mOwner->mHandler->SendMessage(MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED, 0, 0, NULL);
+    if (DBG) Slogger::D(TAG, "BluetoothServiceConnection: disconnected from AdapterService%s",
+        clsName.string());
+
+    AutoPtr<IMessage> msg;
+    mHost->mHandler->ObtainMessage(MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED, (IMessage**)&msg);
+    // TBD if (className.getClassName().equals(IBluetooth.class.getName())) {
+    if (clsName.Equals("Elastos.Droid.Bluetooth.Btservice.CAdapterService")) {
+        msg->SetArg1(SERVICE_IBLUETOOTH);
+        // } else if (className.getClassName().equals(IBluetoothGatt.class.getName())) {
+    }
+    else if (clsName.Equals("Elastos.Droid.Bluetooth.Btservice.CGattService")) {
+        msg->SetArg1(SERVICE_IBLUETOOTHGATT);
+    }
+     else {
+        Slogger::E(TAG, "Unknown service disconnected: %s", clsName.string());
+        return NOERROR;
+    }
+
+    Boolean bval;
+    return mHost->mHandler->SendMessage(msg, &bval);
 }
 
+//========================================================================
+// CBluetoothManagerService::BluetoothHandler
+//========================================================================
 CBluetoothManagerService::BluetoothHandler::BluetoothHandler(
     /* [in] */ ILooper* looper,
-    /* [in] */ CBluetoothManagerService* owner)
-    : mOwner(owner)
+    /* [in] */ CBluetoothManagerService* host)
+    : mHost(host)
 {
 }
 
-void CBluetoothManagerService::BluetoothHandler::HandleMessage(
+ECode CBluetoothManagerService::BluetoothHandler::HandleMessage(
     /* [in] */ IMessage * msg)
 {
     Int32 what, arg1,  arg2;
     msg->GetWhat(&what);
     msg->GetArg1(&arg1);
     msg->GetArg2(&arg2);
+    Boolean bval;
+    AutoPtr<IInterface> obj;
+    msg->GetObj((IInterface**)&obj);
 
-    if (DBG) Logger::D (TAG, "Message: " + what);
+    if (DBG) Slogger::D (TAG, "Message: %d", what);
     switch (what) {
-        case MESSAGE_GET_NAME_AND_ADDRESS:
-            if (DBG) Logger::D(TAG,"MESSAGE_GET_NAME_AND_ADDRESS");
-            {
-                AutoLock lock(mOwner->mConnectionLock);
-                //Start bind request
-                if ((mOwner->mBluetooth == NULL) && (!mOwner->mBinding)) {
-                    if (DBG) Logger::D(TAG, "Binding to service to get name and address");
-                    mOwner->mConnection->SetGetNameAddressOnly(TRUE);
-                    //Start bind timeout and bind
-                    this->SendMessageDelayed(MESSAGE_TIMEOUT_BIND, 0, 0, NULL, TIMEOUT_BIND_MS);
-                    AutoPtr<IIntent> i;
-                    CIntent::New(IBluetooth.class.getName(), (IIntent**)&i);
-                    if (!mOwner->mContext->BindService(i, mConnection,
-                          IContext::BIND_AUTO_CREATE, UserHandle::USER_CURRENT)) {
-                        mHandler->RemoveMessages(MESSAGE_TIMEOUT_BIND);
-                        Logger::E(TAG, "fail to bind to: " + IBluetooth.class.getName());
-                    } else {
-                        mOwner->mBinding = TRUE;
-                    }
-                } else {
-                    if (mOwner->mBluetooth != NULL) {
-                        this->SendMessage(MESSAGE_SAVE_NAME_AND_ADDRESS, 0, 0, NULL);
-                    } else {
-                        // if enable is also called to bind the service
-                        // wait for MESSAGE_BLUETOOTH_SERVICE_CONNECTED
-                        this->SendMessageDelayed(MESSAGE_SAVE_NAME_AND_ADDRESS, 0, 0, NULL, TIMEOUT_SAVE_MS);
-                    }
+        case CBluetoothManagerService::MESSAGE_GET_NAME_AND_ADDRESS: {
+            if (DBG) Slogger::D(TAG,"MESSAGE_GET_NAME_AND_ADDRESS");
+            AutoLock lock(mHost->mConnection);
+            //Start bind request
+            if ((mHost->mBluetooth == NULL) && (!mHost->mBinding)) {
+                if (DBG) Slogger::D(TAG, "Binding to service to get name and address");
+                mHost->mConnection->SetGetNameAddressOnly(TRUE);
+                //Start bind timeout and bind
+                AutoPtr<IMessage> bindMsg;
+                mHost->mHandler->ObtainMessage(CBluetoothManagerService::MESSAGE_TIMEOUT_BIND, (IMessage**)&bindMsg);
+                mHost->mHandler->SendMessageDelayed(bindMsg, TIMEOUT_BIND_MS, &bval);
+                AutoPtr<IIntent> i;
+                CIntent::New(String("Elastos.Droid.Bluetooth.IIBluetooth"), (IIntent**)&i);
+
+                if (!mHost->DoBind(i, mHost->mConnection,
+                    IContext::BIND_AUTO_CREATE | IContext::BIND_IMPORTANT, UserHandle::CURRENT)) {
+                        mHost->mHandler->RemoveMessages(MESSAGE_TIMEOUT_BIND);
+                }
+                else {
+                    mHost->mBinding = TRUE;
                 }
             }
-            break;
+            else {
+                AutoPtr<IMessage> bindMsg;
+                mHost->mHandler->ObtainMessage(
+                    CBluetoothManagerService::MESSAGE_SAVE_NAME_AND_ADDRESS, (IMessage**)&bindMsg);
 
-        case MESSAGE_SAVE_NAME_AND_ADDRESS:
-            Boolean unbind = FALSE;
-            if (DBG) Logger::D(TAG,"MESSAGE_SAVE_NAME_AND_ADDRESS");
-            {
-                AutoLock lock(mOwner->mConnectionLock);
-                if (!mOwner->mEnable && mOwner->mBluetooth != NULL)
-                    mOwner->mBluetooth->Enable();
+                if (mHost->mBluetooth != NULL) {
+                    mHost->mHandler->SendMessage(bindMsg, &bval);
+                }
+                else {
+                    // if enable is also called to bind the service
+                    // wait for MESSAGE_BLUETOOTH_SERVICE_CONNECTED
+                    mHost->mHandler->SendMessageDelayed(bindMsg, TIMEOUT_SAVE_MS, &bval);
+                }
             }
-            if (mOwner->mBluetooth != NULL)
-                mOwner->WaitForOnOff(TRUE, FALSE);
+        }
+        break;
+
+        case CBluetoothManagerService::MESSAGE_SAVE_NAME_AND_ADDRESS: {
+            Boolean unbind = FALSE;
+            if (DBG) Slogger::D(TAG,"MESSAGE_SAVE_NAME_AND_ADDRESS");
+            {
+                AutoLock lock(mHost->mConnection);
+                if (!mHost->mEnable && mHost->mBluetooth != NULL)
+                    mHost->mBluetooth->Enable(&bval);
+            }
+            if (mHost->mBluetooth != NULL)
+                mHost->WaitForOnOff(TRUE, FALSE);
 
             {
-                AutoLock lock(mOwner->mConnectionLock);
-                if (mOwner->mBluetooth != NULL) {
-                    String name =  NULL;
-                    String address = NULL;
-                    mOwner->mBluetooth->GetName(&name);
-                    mOwner->mBluetooth->GetAddress(&address);
+                AutoLock lock(mHost->mConnection);
+                if (mHost->mBluetooth != NULL) {
+                    String name, address;
+                    mHost->mBluetooth->GetName(&name);
+                    mHost->mBluetooth->GetAddress(&address);
 
                     if (name != NULL && address != NULL) {
-                        mOwner->StoreNameAndAddress(name,address);
-                        if (mOwner->mConnection->IsGetNameAddressOnly()) {
+                        mHost->StoreNameAndAddress(name, address);
+                        if (mHost->mConnection->IsGetNameAddressOnly()) {
                             unbind = TRUE;
                         }
-                    } else {
+                    }
+                    else {
                         if (arg1 < MAX_SAVE_RETRIES) {
-                            //if (DBG) Logger::D(TAG,"Retrying name/address remote retrieval and save.....Retry count =" + retryMsg.arg1);
-                            this->SendMessageDelayed(MESSAGE_SAVE_NAME_AND_ADDRESS, 1+arg1, 0, NULL, TIMEOUT_SAVE_MS);
-                        } else {
-                            Logger::W(TAG,"Maximum name/address remote retrieval retry exceeded");
-                            if (mOwner->mConnection->IsGetNameAddressOnly())
+                            //if (DBG) Slogger::D(TAG,"Retrying name/address remote retrieval and save.....Retry count =" + retryMsg.arg1);
+                            AutoPtr<IMessage> retryMsg;
+                            mHost->mHandler->ObtainMessage(
+                                CBluetoothManagerService::MESSAGE_SAVE_NAME_AND_ADDRESS, (IMessage**)&retryMsg);
+                            retryMsg->SetArg1(1 + arg1);
+                            mHost->mHandler->SendMessageDelayed(
+                                retryMsg, CBluetoothManagerService::TIMEOUT_SAVE_MS, &bval);
+                        }
+                        else {
+                            Slogger::W(TAG,"Maximum name/address remote retrieval retry exceeded");
+                            if (mHost->mConnection->IsGetNameAddressOnly())
                                 unbind = TRUE;
                         }
                     }
 
-                    if (!mOwner->mEnable)
-                        mOwner->mBluetooth->Disable();
-                } else {
+                    if (!mHost->mEnable)
+                        mHost->mBluetooth->Disable(&bval);
+                }
+                else {
                     // rebind service by Request GET NAME AND ADDRESS
                     // if service is unbinded by disable or
                     // MESSAGE_BLUETOOTH_SERVICE_CONNECTED is not received
-                    this->SendMessage(MESSAGE_GET_NAME_AND_ADDRESS, 0, 0, NULL);
+                    AutoPtr<IMessage> bindMsg;
+                    mHost->mHandler->ObtainMessage(
+                        CBluetoothManagerService::MESSAGE_GET_NAME_AND_ADDRESS, (IMessage**)&bindMsg);
+                    mHost->mHandler->SendMessage(bindMsg, &bval);
                 }
             }
-            if (!mOwner->mEnable && mOwner->mBluetooth != NULL)
-                mOwner->WaitForOnOff(FALSE, TRUE);
+            if (!mHost->mEnable && mHost->mBluetooth != NULL)
+                mHost->WaitForOnOff(FALSE, TRUE);
             if (unbind)
-                mOwner->UnbindAndFinish();
+                mHost->UnbindAndFinish();
             break;
+        }
 
-        case MESSAGE_ENABLE:
+        case CBluetoothManagerService::MESSAGE_ENABLE: {
             if (DBG) {
-                Logger::D(TAG, "MESSAGE_ENABLE: mBluetooth = " + mBluetooth);
+                Slogger::D(TAG, "MESSAGE_ENABLE: mBluetooth = %s",
+                    Object::ToString(mHost->mBluetooth).string());
             }
-            mOwner->mHandler->RemoveMessages(MESSAGE_RESTART_BLUETOOTH_SERVICE);
-            mOwner->mEnable = TRUE;
-            mOwner->HandleEnable(arg1 == 1);
+            mHost->mHandler->RemoveMessages(CBluetoothManagerService::MESSAGE_RESTART_BLUETOOTH_SERVICE);
+            mHost->mEnable = TRUE;
+            mHost->HandleEnable(arg1 == 1);
             break;
+        }
 
-        case MESSAGE_DISABLE:
-            mHandler->RemoveMessages(MESSAGE_RESTART_BLUETOOTH_SERVICE);
-            if (mEnable && mBluetooth != NULL) {
-                mOwner->WaitForOnOff(TRUE, FALSE);
-                 mOwner->mEnable = FALSE;
-                mOwner->HandleDisable();
-                mOwner->WaitForOnOff(FALSE, FALSE);
-            } else {
-                 mOwner->mEnable = FALSE;
-                mOwner->HandleDisable();
+        case CBluetoothManagerService::MESSAGE_DISABLE:
+            mHost->mHandler->RemoveMessages(CBluetoothManagerService::MESSAGE_RESTART_BLUETOOTH_SERVICE);
+            if (mHost->mEnable && mHost->mBluetooth != NULL) {
+                mHost->WaitForOnOff(TRUE, FALSE);
+                mHost->mEnable = FALSE;
+                mHost->HandleDisable();
+                mHost->WaitForOnOff(FALSE, FALSE);
+            }
+            else {
+                mHost->mEnable = FALSE;
+                mHost->HandleDisable();
             }
             break;
 
-        case MESSAGE_REGISTER_ADAPTER:
-            IBluetoothManagerCallback callback = (IBluetoothManagerCallback) msg.obj;
-            Boolean added = mCallbacks.register(callback);
-            Logger::D(TAG,"Added callback: " +  (callback == NULL? "NULL": callback)  +":" +added );
+        case CBluetoothManagerService::MESSAGE_REGISTER_ADAPTER: {
+            IIBluetoothManagerCallback* cb = IIBluetoothManagerCallback::Probe(obj);
+            Boolean added;
+            mHost->mCallbacks->Register(cb, &added);
+            Slogger::D(TAG,"Added callback: %s: %d", TO_CSTR(cb), added);
             break;
+        }
 
-        case MESSAGE_UNREGISTER_ADAPTER:
-            IBluetoothManagerCallback callback = (IBluetoothManagerCallback) msg.obj;
-            Boolean removed = mCallbacks.unregister(callback);
-            Logger::D(TAG,"Removed callback: " +  (callback == NULL? "NULL": callback)  +":" + removed);
+        case CBluetoothManagerService::MESSAGE_UNREGISTER_ADAPTER: {
+            IIBluetoothManagerCallback* cb = IIBluetoothManagerCallback::Probe(obj);
+            Boolean removed;
+            mHost->mCallbacks->Unregister(cb, &removed);
+            Slogger::D(TAG,"Removed callback: %s: %d", TO_CSTR(cb), removed );
             break;
+        }
 
-        case MESSAGE_REGISTER_STATE_CHANGE_CALLBACK:
-            IBluetoothStateChangeCallback callback = (IBluetoothStateChangeCallback) msg.obj;
-            mStateChangeCallbacks.register(callback);
+        case CBluetoothManagerService::MESSAGE_REGISTER_STATE_CHANGE_CALLBACK: {
+            IIBluetoothStateChangeCallback* cb = IIBluetoothStateChangeCallback::Probe(obj);
+            if (cb != NULL) {
+                mHost->mStateChangeCallbacks->Register(cb, &bval);
+            }
             break;
+        }
 
-        case MESSAGE_UNREGISTER_STATE_CHANGE_CALLBACK:
-            IBluetoothStateChangeCallback callback = (IBluetoothStateChangeCallback) msg.obj;
-            mOwner->mStateChangeCallbacks.unregister(callback);
+        case CBluetoothManagerService::MESSAGE_UNREGISTER_STATE_CHANGE_CALLBACK: {
+            IIBluetoothStateChangeCallback* cb = IIBluetoothStateChangeCallback::Probe(obj);
+            if (cb != NULL) {
+                mHost->mStateChangeCallbacks->Unregister(cb, &bval);
+            }
             break;
+        }
 
-        case MESSAGE_BLUETOOTH_SERVICE_CONNECTED:
-            if (DBG) Logger::D(TAG,"MESSAGE_BLUETOOTH_SERVICE_CONNECTED");
+        case CBluetoothManagerService::MESSAGE_BLUETOOTH_SERVICE_CONNECTED: {
+            if (DBG) Slogger::D(TAG,"MESSAGE_BLUETOOTH_SERVICE_CONNECTED %d", arg1);
 
-            //Remove timeout
-            mOwner->mHandler->RemoveMessages(MESSAGE_TIMEOUT_BIND);
-
-            IBinder service = (IBinder) msg.obj;
+            AutoPtr<IBinder> service = IBinder::Probe(obj);
             {
-                AutoLock lock(mConnectionLock);
-                mOwner->mBinding = FALSE;
-                mOwner->mBluetooth = IBluetooth.Stub.asInterface(service);
+                AutoLock lock(mHost->mConnection);
 
-                if (mOwner->mConnection->IsGetNameAddressOnly()) {
-                    //Request GET NAME AND ADDRESS
-                    this->SendMessage(MESSAGE_GET_NAME_AND_ADDRESS, 0, 0, NULL);
-                    if (!mOwner->mEnable) return;
+                if (arg1 == CBluetoothManagerService::SERVICE_IBLUETOOTHGATT) {
+                    mHost->mBluetoothGatt = IIBluetoothGatt::Probe(service);
+                    break;
+                } // else must be SERVICE_IBLUETOOTH
+
+                //Remove timeout
+                mHandler->RemoveMessages(CBluetoothManagerService::MESSAGE_TIMEOUT_BIND);
+
+                mHost->mBinding = FALSE;
+                mHost->mBluetooth = IIBluetooth::Probe(service);
+
+                Int32 ival;
+                Settings::Secure::GetInt32(mHost->mContentResolver, ISettingsSecure::BLUETOOTH_HCI_LOG, 0, &ival);
+                Boolean enableHciSnoopLog = ival == 1;
+                ECode ec = mHost->mBluetooth->ConfigHciSnoopLog(enableHciSnoopLog, &bval);
+                if (!bval) {
+                    Slogger::E(TAG,"IBluetooth.configHciSnoopLog return FALSE");
+                }
+                if (ec == (ECode)E_REMOTE_EXCEPTION) {
+                    Slogger::E(TAG,"Unable to call configHciSnoopLog");
                 }
 
-                mOwner->mConnection->SetGetNameAddressOnly(FALSE);
+                if (mHost->mConnection->IsGetNameAddressOnly()) {
+                    //Request GET NAME AND ADDRESS
+                    AutoPtr<IMessage> restartMsg;
+                    mHost->mHandler->ObtainMessage(
+                        CBluetoothManagerService::MESSAGE_GET_NAME_AND_ADDRESS, (IMessage**)&restartMsg);
+
+                    mHost->mHandler->SendMessage(restartMsg, &bval);
+                    if (!mHost->mEnable) return NOERROR;
+                }
+
+                mHost->mConnection->SetGetNameAddressOnly(FALSE);
                 //Register callback object
-                mOwner->mBluetooth->RegisterCallback(mBluetoothCallback);
+                mHost->mBluetooth->RegisterCallback(mHost->mBluetoothCallback);
                 //Inform BluetoothAdapter instances that service is up
-                mOwner->SendBluetoothServiceUpCallback();
+                mHost->SendBluetoothServiceUpCallback();
 
                 //Do enable request
-                if (mOwner->mQuietEnable == FALSE) {
-                    if(!mOwner->mBluetooth->Enable())
-                        Logger::E(TAG,"IBluetooth.enable() returned FALSE");
-                } else {
-                    if(!mOwner->mBluetooth->EnableNoAutoConnect())
-                        Logger::E(TAG,"IBluetooth.enableNoAutoConnect() returned FALSE");
+                if (mHost->mQuietEnable == FALSE) {
+                    if(!mHost->mBluetooth->Enable(&bval))
+                        Slogger::E(TAG,"IBluetooth.enable() returned FALSE");
+                }
+                else {
+                    mHost->mBluetooth->EnableNoAutoConnect(&bval);
+                    if(!bval)
+                        Slogger::E(TAG,"IBluetooth.enableNoAutoConnect() returned FALSE");
                 }
             }
 
-            if (!mOwner->mEnable) {
-                mOwner->WaitForOnOff(TRUE, FALSE);
-                mOwner->HandleDisable();
-                mOwner->WaitForOnOff(FALSE, FALSE);
+            if (!mHost->mEnable) {
+                mHost->WaitForOnOff(TRUE, FALSE);
+                mHost->HandleDisable();
+                mHost->WaitForOnOff(FALSE, FALSE);
+            }
+            break;
+        }
+
+        case CBluetoothManagerService::MESSAGE_TIMEOUT_BIND: {
+                Slogger::E(TAG, "MESSAGE_TIMEOUT_BIND");
+                AutoLock lock(mHost->mConnection);
+                mHost->mBinding = FALSE;
             }
             break;
 
-        case MESSAGE_TIMEOUT_BIND:
-            Logger::E(TAG, "MESSAGE_TIMEOUT_BIND");
-            {
-                AutoLock lock(mConnectionLock);
-                mOwner->mBinding = FALSE;
-            }
-            break;
-
-        case MESSAGE_BLUETOOTH_STATE_CHANGE:
+        case CBluetoothManagerService::MESSAGE_BLUETOOTH_STATE_CHANGE: {
             Int32 prevState = arg1;
             Int32 newState = arg2;
-            if (DBG) Logger::D(TAG, "MESSAGE_BLUETOOTH_STATE_CHANGE: prevState = " + prevState + ", newState=" + newState);
-            mOwner->mState = newState;
-            mOwner->BluetoothStateChangeHandler(prevState, newState);
+            if (DBG) Slogger::D(TAG, "MESSAGE_BLUETOOTH_STATE_CHANGE: prevState = %d, newState=%d",
+                prevState, newState);
+            mHost->mState = newState;
+            mHost->BluetoothStateChangeHandler(prevState, newState);
+
+            // handle error state transition case from TURNING_ON to OFF
+            // unbind and rebind bluetooth service and enable bluetooth
+            if ((prevState == IBluetoothAdapter::STATE_TURNING_ON) &&
+                (newState == IBluetoothAdapter::STATE_OFF) &&
+                (mHost->mBluetooth != NULL) && mHost->mEnable) {
+                mHost->RecoverBluetoothServiceFromError();
+            }
+            if (newState == IBluetoothAdapter::STATE_ON) {
+                // bluetooth is working, reset the counter
+                if (mHost->mErrorRecoveryRetryCounter != 0) {
+                    Slogger::W(TAG, "bluetooth is recovered from error");
+                    mHost->mErrorRecoveryRetryCounter = 0;
+                }
+            }
             break;
+        }
 
-        case MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED:
-            Logger::E(TAG, "MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED");
+        case CBluetoothManagerService::MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED:
+            Slogger::E(TAG, "MESSAGE_BLUETOOTH_SERVICE_DISCONNECTED %d", arg1);
             {
-                AutoLock lock(mConnectionLock);
-                // if service is unbinded already, do nothing and return
-                if (mOwner->mBluetooth == NULL) return;
-                mOwner->mBluetooth = NULL;
+                AutoLock lock(mHost->mConnection);
+                if (arg1 == SERVICE_IBLUETOOTH) {
+                    // if service is unbinded already, do nothing and return
+                    if (mHost->mBluetooth == NULL) break;
+                    mHost->mBluetooth = NULL;
+                }
+                else if (arg1 == SERVICE_IBLUETOOTHGATT) {
+                    mHost->mBluetoothGatt = NULL;
+                    break;
+                } else {
+                    Slogger::E(TAG, "Bad msg.arg1: %d", arg1);
+                    break;
+                }
             }
 
-            if (mOwner->mEnable) {
-                mOwner->mEnable = FALSE;
+            if (mHost->mEnable) {
+                mHost->mEnable = FALSE;
                 // Send a Bluetooth Restart message
-                this->SendMessageDelayed(MESSAGE_RESTART_BLUETOOTH_SERVICE, 0, 0, NULL,
-                    SERVICE_RESTART_TIME_MS);
+                AutoPtr<IMessage> restartMsg;
+                mHost->mHandler->ObtainMessage(
+                    CBluetoothManagerService::MESSAGE_RESTART_BLUETOOTH_SERVICE, (IMessage**)&restartMsg);
+                mHost->mHandler->SendMessageDelayed(
+                    restartMsg, CBluetoothManagerService::SERVICE_RESTART_TIME_MS, &bval);
             }
 
-            if (!mOwner->mConnection->IsGetNameAddressOnly()) {
-                mOwner->SendBluetoothServiceDownCallback();
+            if (!mHost->mConnection->IsGetNameAddressOnly()) {
+                mHost->SendBluetoothServiceDownCallback();
 
                 // Send BT state broadcast to update
                 // the BT icon correctly
-                if ((mState == BluetoothAdapter::STATE_TURNING_ON) ||
-                    (mState == BluetoothAdapter::STATE_ON)) {
-                    bluetoothStateChangeHandler(BluetoothAdapter::STATE_ON,
-                                                BluetoothAdapter::STATE_TURNING_OFF);
-                    mState = BluetoothAdapter::STATE_TURNING_OFF;
+                if ((mHost->mState == IBluetoothAdapter::STATE_TURNING_ON) ||
+                    (mHost->mState == IBluetoothAdapter::STATE_ON)) {
+                    mHost->BluetoothStateChangeHandler(
+                        IBluetoothAdapter::STATE_ON, IBluetoothAdapter::STATE_TURNING_OFF);
+                    mHost->mState = IBluetoothAdapter::STATE_TURNING_OFF;
                 }
-                if (mState == BluetoothAdapter::STATE_TURNING_OFF) {
-                    bluetoothStateChangeHandler(BluetoothAdapter::STATE_TURNING_OFF,
-                                                BluetoothAdapter::STATE_OFF);
+                if (mHost->mState == IBluetoothAdapter::STATE_TURNING_OFF) {
+                    mHost->BluetoothStateChangeHandler(
+                        IBluetoothAdapter::STATE_TURNING_OFF, IBluetoothAdapter::STATE_OFF);
                 }
 
-                mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
+                mHost->mHandler->RemoveMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
 
-                mOwner->BluetoothStateChangeHandler(BluetoothAdapter::STATE_ON,
-                                            BluetoothAdapter::STATE_TURNING_OFF);
-                mOwner->mState = BluetoothAdapter::STATE_OFF;
+                mHost->BluetoothStateChangeHandler(
+                    IBluetoothAdapter::STATE_ON, IBluetoothAdapter::STATE_TURNING_OFF);
+                mHost->mState = IBluetoothAdapter::STATE_OFF;
             }
             break;
 
-        case MESSAGE_RESTART_BLUETOOTH_SERVICE:
-            Logger::D(TAG, "MESSAGE_RESTART_BLUETOOTH_SERVICE:"
-                +" Restart IBluetooth service");
+        case CBluetoothManagerService::MESSAGE_RESTART_BLUETOOTH_SERVICE:
+            Slogger::D(TAG, "MESSAGE_RESTART_BLUETOOTH_SERVICE: Restart IBluetooth service");
             /* Enable without persisting the setting as
              it doesnt change when IBluetooth
              service restarts */
-            mOwner->mEnable = TRUE;
-            mOwner->HandleEnable(mOwner->mQuietEnable);
+            mHost->mEnable = TRUE;
+            mHost->HandleEnable(mHost->mQuietEnable);
             break;
 
-        case MESSAGE_TIMEOUT_UNBIND:
-            Logger::E(TAG, "MESSAGE_TIMEOUT_UNBIND");
+        case CBluetoothManagerService::MESSAGE_TIMEOUT_UNBIND:
+            Slogger::E(TAG, "MESSAGE_TIMEOUT_UNBIND");
             {
-                AutoLock lock(mOwner->mConnectionLock);
-                mOwner->mUnbinding = FALSE;
+                AutoLock lock(mHost->mConnection);
+                mHost->mUnbinding = FALSE;
             }
             break;
 
-        case MESSAGE_USER_SWITCHED:
+        case CBluetoothManagerService::MESSAGE_USER_SWITCHED: {
             if (DBG) {
-                Logger::D(TAG, "MESSAGE_USER_SWITCHED");
+                Slogger::D(TAG, "MESSAGE_USER_SWITCHED");
             }
             mHandler->RemoveMessages(MESSAGE_USER_SWITCHED);
             /* disable and enable BT when detect a user switch */
-            if (mOwner->mEnable && mOwner->mBluetooth != NULL) {
+            if (mHost->mEnable && mHost->mBluetooth != NULL) {
                 {
-                    AutoLock lock(mOwner->mConnectionLock);
-                    if (mOwner->mBluetooth != NULL) {
+                    AutoLock lock(mHost->mConnection);
+                    if (mHost->mBluetooth != NULL) {
                         //Unregister callback object
-                        mOwner->mBluetooth->UnregisterCallback(mBluetoothCallback);
+                        mHost->mBluetooth->UnregisterCallback(mHost->mBluetoothCallback);
                     }
                 }
 
-                if (mState == BluetoothAdapter::STATE_TURNING_OFF) {
+                if (mHost->mState == IBluetoothAdapter::STATE_TURNING_OFF) {
                     // MESSAGE_USER_SWITCHED happened right after MESSAGE_ENABLE
-                    bluetoothStateChangeHandler(mState, BluetoothAdapter::STATE_OFF);
-                    mState = BluetoothAdapter::STATE_OFF;
+                    mHost->BluetoothStateChangeHandler(mHost->mState, IBluetoothAdapter::STATE_OFF);
+                    mHost->mState = IBluetoothAdapter::STATE_OFF;
                 }
-                if (mState == BluetoothAdapter::STATE_OFF) {
-                    bluetoothStateChangeHandler(mState, BluetoothAdapter::STATE_TURNING_ON);
-                    mState = BluetoothAdapter::STATE_TURNING_ON;
+                if (mHost->mState == IBluetoothAdapter::STATE_OFF) {
+                    mHost->BluetoothStateChangeHandler(mHost->mState, IBluetoothAdapter::STATE_TURNING_ON);
+                    mHost->mState = IBluetoothAdapter::STATE_TURNING_ON;
                 }
 
-                mOwner->WaitForOnOff(TRUE, FALSE);
+                mHost->WaitForOnOff(TRUE, FALSE);
 
-                if (mState == BluetoothAdapter::STATE_TURNING_ON) {
-                    mOwner->BluetoothStateChangeHandler(mOwner->mState, BluetoothAdapter::STATE_ON);
+                if (mHost->mState == IBluetoothAdapter::STATE_TURNING_ON) {
+                    mHost->BluetoothStateChangeHandler(mHost->mState, IBluetoothAdapter::STATE_ON);
                 }
 
                 // disable
-                mOwner->HandleDisable();
+                mHost->HandleDisable();
 
                 // Pbap service need receive STATE_TURNING_OFF intent to close
-                mOwner->BluetoothStateChangeHandler(
-                    BluetoothAdapter::STATE_ON, BluetoothAdapter::STATE_TURNING_OFF);
+                mHost->BluetoothStateChangeHandler(
+                    IBluetoothAdapter::STATE_ON, IBluetoothAdapter::STATE_TURNING_OFF);
 
-                mOwner->WaitForOnOff(FALSE, TRUE);
+                mHost->WaitForOnOff(FALSE, TRUE);
 
-                mOwner->BluetoothStateChangeHandler(
-                    BluetoothAdapter::STATE_TURNING_OFF, BluetoothAdapter::STATE_OFF);
+                mHost->BluetoothStateChangeHandler(
+                    IBluetoothAdapter::STATE_TURNING_OFF, IBluetoothAdapter::STATE_OFF);
 
-                mOwner->SendBluetoothServiceDownCallback();
+                mHost->SendBluetoothServiceDownCallback();
                 {
-                    AutoLock lock(mConnectionLock);
-                    if (mOwner->mBluetooth != NULL) {
-                        mOwner->mBluetooth = NULL;
+                    AutoLock lock(mHost->mConnection);
+                    if (mHost->mBluetooth != NULL) {
+                        mHost->mBluetooth = NULL;
                         //Unbind
-                        mOwner->mContext->UnbindService(mConnection);
+                        mHost->mContext->UnbindService(mHost->mConnection);
                     }
                 }
-                SystemClock.sleep(100);
+                SystemClock::Sleep(100);
 
                 // enable
-                mHandler->RemoveMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
-                mState = BluetoothAdapter::STATE_OFF;
+                mHandler->RemoveMessages(CBluetoothManagerService::MESSAGE_BLUETOOTH_STATE_CHANGE);
+                mHost->mState = IBluetoothAdapter::STATE_OFF;
                 // enable
-                mOwner->HandleEnable(mQuietEnable);
+                mHost->HandleEnable(mHost->mQuietEnable);
             }
-            else if (mOwner->mBinding || mOwner->mBluetooth != NULL) {
+            else if (mHost->mBinding || mHost->mBluetooth != NULL) {
                 // if user is switched when service is being binding
                 // delay sending MESSAGE_USER_SWITCHED
-                this->SendMessageDelayed(MESSAGE_USER_SWITCHED, 0, 1+arg2, NULL, USER_SWITCHED_TIME_MS);
+                AutoPtr<IMessage> userMsg;
+                mHost->mHandler->ObtainMessage(
+                    CBluetoothManagerService::MESSAGE_RESTART_BLUETOOTH_SERVICE, (IMessage**)&userMsg);
+                userMsg->SetArg2(1 + arg2);
+                mHost->mHandler->SendMessageDelayed(
+                    userMsg, CBluetoothManagerService::USER_SWITCHED_TIME_MS, &bval);
                 if (DBG)
-                    Logger::D(TAG, "delay MESSAGE_USER_SWITCHED " + userMsg.arg2);
+                    Slogger::D(TAG, "delay MESSAGE_USER_SWITCHED %d", 1 + arg2);
             }
             break;
-
+        }
     }
-}
 
-CBluetoothManagerService::MyRunnable::MyRunnable(
-    /* [in] */ CBluetoothManagerService* owner)
-    : mOwner(owner)
-{ }
-
-ECode CBluetoothManagerService::MyRunnable::Run()
-{
-    mOwner->ReleaseWakeLock();
     return NOERROR;
 }
 
-CBluetoothManagerService::MyIBluetoothCallback::MyIBluetoothCallback(
-    /* [in] */ CBluetoothManagerService* owner)
-    : mOwner(owner)
-{ }
+//========================================================================
+// CBluetoothManagerService::BluetoothCallback
+//========================================================================
+CAR_INTERFACE_IMPL_2(CBluetoothManagerService::BluetoothCallback, Object, IIBluetoothCallback, IBinder)
 
-ECode CBluetoothManagerService::MyIBluetoothCallback::OnBluetoothStateChange(
+CBluetoothManagerService::BluetoothCallback::BluetoothCallback()
+{}
+
+ECode CBluetoothManagerService::BluetoothCallback::constructor(
+    /* [in] */ IIBluetoothManager* bm)
+{
+    mHost = (CBluetoothManagerService*)bm;
+    return NOERROR;
+}
+
+ECode CBluetoothManagerService::BluetoothCallback::OnBluetoothStateChange(
     /* [in] */ Int32 prevState,
     /* [in] */ Int32 newState)
 {
-    mOwner->mHandler->SendMessage(MESSAGE_BLUETOOTH_STATE_CHANGE, prevState, newState, NULL);
+    AutoPtr<IMessage> msg;
+    mHost->mHandler->ObtainMessage(
+        CBluetoothManagerService::MESSAGE_BLUETOOTH_STATE_CHANGE, prevState, newState, (IMessage**)&msg);
+    Boolean bval;
+    mHost->mHandler->SendMessage(msg, &bval);
     return NOERROR;
 }
 
-CBluetoothManagerService::MyRunnableEx::MyRunnable(
-    /* [in] */ CBluetoothManagerService* owner)
-    : mOwner(owner)
-{ }
-
-ECode CBluetoothManagerService::MyRunnableEx::Run()
+ECode CBluetoothManagerService::BluetoothCallback::ToString(
+    /* [out] */ String* str)
 {
-    if (mOwner->mState == BluetoothAdapter::STATE_ON) {
-        if (DBG) Log.d(TAG, "10s is passed , get rx count again");
-        mOwner->mHandler->SendMessage(MESSAGE_GET_RX_COUNT, 0, 0, NULL);
-        mOwner->mDelayedHandler.postDelayed(this, 10 * 1000);
-    }
-    return NOERROR;
+    return Object::ToString(str);
 }
 
+//========================================================================
+// CBluetoothManagerService::MyBroadcastReceiver
+//========================================================================
 CBluetoothManagerService::MyBroadcastReceiver::MyBroadcastReceiver(
-    /* [in] */ CBluetoothManagerService* owner)
-    : mOwner(owner)
+    /* [in] */ CBluetoothManagerService* host)
+    : mHost(host)
 { }
 
 ECode CBluetoothManagerService::MyBroadcastReceiver::OnReceive(
@@ -476,54 +648,119 @@ ECode CBluetoothManagerService::MyBroadcastReceiver::OnReceive(
     String action;
     intent->GetAction(&action);
 
-    if (BluetoothAdapter::ACTION_LOCAL_NAME_CHANGED.Equals(action)) {
-        String newName = intent.getStringExtra(BluetoothAdapter::EXTRA_LOCAL_NAME);
-        if (DBG) Log.d(TAG, "Bluetooth Adapter name changed to " + newName);
+    if (IBluetoothAdapter::ACTION_LOCAL_NAME_CHANGED.Equals(action)) {
+        String newName;
+        intent->GetStringExtra(IBluetoothAdapter::EXTRA_LOCAL_NAME, &newName);
+        if (DBG) Slogger::D(TAG, "Bluetooth Adapter name changed to %s", newName.string());
         if (newName != NULL) {
-            mOwner->StoreNameAndAddress(newName, NULL);
+            mHost->StoreNameAndAddress(newName, String(NULL));
         }
     }
     else if (IIntent::ACTION_AIRPLANE_MODE_CHANGED.Equals(action)) {
-        AutoLock lock(mReceiverLock);
-        if (mOwner->IsBluetoothPersistedStateOn()) {
-            if (mOwner->IsAirplaneModeOn()) {
-                mOwner->PersistBluetoothSetting(BLUETOOTH_ON_AIRPLANE);
+        AutoLock lock(mHost->mReceiver);
+        if (mHost->IsBluetoothPersistedStateOn()) {
+            if (mHost->IsAirplaneModeOn()) {
+                mHost->PersistBluetoothSetting(BLUETOOTH_ON_AIRPLANE);
             } else {
-                mOwner->PersistBluetoothSetting(BLUETOOTH_ON_BLUETOOTH);
+                mHost->PersistBluetoothSetting(BLUETOOTH_ON_BLUETOOTH);
             }
         }
-        if (mOwner->IsAirplaneModeOn()) {
+        if (mHost->IsAirplaneModeOn()) {
             // disable without persisting the setting
-            mOwner->SendDisableMsg();
-        } else if (mEnableExternal) {
+            mHost->SendDisableMsg();
+        }
+        else if (mHost->mEnableExternal) {
             // enable without persisting the setting
-            mOwner->SendEnableMsg(mQuietEnableExternal);
+            mHost->SendEnableMsg(mHost->mQuietEnableExternal);
         }
     }
     else if (IIntent::ACTION_USER_SWITCHED.Equals(action)) {
         Int32 num;
-        intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, 0, &num)
-        mOwner->mHandler->SendMessage(MESSAGE_USER_SWITCHED, num, 0, NULL);
+        intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, 0, &num);
+        AutoPtr<IMessage> msg;
+        mHost->mHandler->ObtainMessage(
+            MESSAGE_BLUETOOTH_STATE_CHANGE, num, 0, (IMessage**)&msg);
+        Boolean bval;
+        mHost->mHandler->SendMessage(msg, &bval);
     }
-    else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+    else if (IIntent::ACTION_BOOT_COMPLETED.Equals(action)) {
         {
-            AutoLock lock(mReceiverLock);
-            if (mOwner->mEnableExternal && mOwner->IsBluetoothPersistedStateOnBluetooth()) {
+            AutoLock lock(mHost->mReceiver);
+            if (mHost->mEnableExternal && mHost->IsBluetoothPersistedStateOnBluetooth()) {
                 //Enable
-                // if (DBG) Log.d(TAG, "Auto-enabling Bluetooth.");
-                mOwner->SendEnableMsg(mQuietEnableExternal);
+                if (DBG) Slogger::D(TAG, "Auto-enabling Bluetooth.");
+                mHost->SendEnableMsg(mHost->mQuietEnableExternal);
             }
         }
 
-        if (!mOwner->IsNameAndAddressSet()) {
+        if (!mHost->IsNameAndAddressSet()) {
             //Sync the Bluetooth name and address from the Bluetooth Adapter
-            // if (DBG) Log.d(TAG,"Retrieving Bluetooth Adapter name and address...");
-            mOwner->GetNameAndAddress();
+            if (DBG) Slogger::D(TAG,"Retrieving Bluetooth Adapter name and address...");
+            mHost->GetNameAndAddress();
         }
     }
     return NOERROR;
 }
 
+//====================================================================
+// CBluetoothManagerService
+//====================================================================
+CAR_INTERFACE_IMPL_2(CBluetoothManagerService, Object, IIBluetoothManager, IBinder)
+
+CAR_OBJECT_IMPL(CBluetoothManagerService)
+
+CBluetoothManagerService::CBluetoothManagerService()
+    : mBinding(FALSE)
+    , mUnbinding(FALSE)
+    , mQuietEnable(FALSE)
+    , mQuietEnableExternal(FALSE)
+    , mEnableExternal(FALSE)
+    , mEnable(FALSE)
+    , mState(0)
+    , mErrorRecoveryRetryCounter(0)
+    , mSystemUiUid(0)
+{}
+
+ECode CBluetoothManagerService::constructor(
+    /* [in] */ IContext* context)
+{
+    CBluetoothManagerServiceBluetoothCallback::New(this, (IIBluetoothCallback**)&mBluetoothCallback);
+    mReceiver = new MyBroadcastReceiver(this);
+
+    AutoPtr<ILooper> looper;
+    IoThread::Get()->GetLooper((ILooper**)&looper);
+    mHandler = new BluetoothHandler(looper, this);
+
+    mContext = context;
+    mState = IBluetoothAdapter::STATE_OFF;
+    context->GetContentResolver((IContentResolver**)&mContentResolver);
+    CRemoteCallbackList::New((IRemoteCallbackList**)&mCallbacks);
+    CRemoteCallbackList::New((IRemoteCallbackList**)&mStateChangeCallbacks);
+    AutoPtr<IIntentFilter> filter;
+    CIntentFilter::New(IIntent::ACTION_BOOT_COMPLETED, (IIntentFilter**)&filter);
+    filter->AddAction(IBluetoothAdapter::ACTION_LOCAL_NAME_CHANGED);
+    filter->AddAction(IIntent::ACTION_USER_SWITCHED);
+    RegisterForAirplaneMode(filter);
+    filter->SetPriority(IIntentFilter::SYSTEM_HIGH_PRIORITY);
+    AutoPtr<IIntent> i;
+    mContext->RegisterReceiver(mReceiver, filter, (IIntent**)&i);
+    LoadStoredNameAndAddress();
+
+    if (IsBluetoothPersistedStateOn()) {
+        mEnableExternal = TRUE;
+    }
+
+    AutoPtr<IPackageManager> pm;
+    mContext->GetPackageManager((IPackageManager**)&pm);
+    Int32 sysUiUid = -1;
+    ECode ec = pm->GetPackageUid(String("com.android.systemui"), UserHandle::USER_OWNER, &sysUiUid);
+    if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
+        Slogger::E(TAG, "Unable to resolve SystemUI's UID.");
+    }
+    mSystemUiUid = sysUiUid;
+
+    return NOERROR;
+}
 
 void CBluetoothManagerService::RegisterForAirplaneMode(
     /* [in] */ IIntentFilter* filter)
@@ -531,191 +768,96 @@ void CBluetoothManagerService::RegisterForAirplaneMode(
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
     String airplaneModeRadios;
-    Settings::Global::GetString(resolver, Settings::Global::AIRPLANE_MODE_RADIOS, &airplaneModeRadios);
+    Settings::Global::GetString(resolver, ISettingsGlobal::AIRPLANE_MODE_RADIOS, &airplaneModeRadios);
     String toggleableRadios;
-    Settings::Global::GetString(resolver, Settings::Global::AIRPLANE_MODE_TOGGLEABLE_RADIOS, &toggleableRadios);
+    Settings::Global::GetString(resolver, ISettingsGlobal::AIRPLANE_MODE_TOGGLEABLE_RADIOS, &toggleableRadios);
     Boolean mIsAirplaneSensitive = airplaneModeRadios == NULL ? TRUE :
-            airplaneModeRadios.Contains(Settings::Global::RADIO_BLUETOOTH);
+            airplaneModeRadios.Contains(ISettingsGlobal::RADIO_BLUETOOTH);
     if (mIsAirplaneSensitive) {
         filter->AddAction(IIntent::ACTION_AIRPLANE_MODE_CHANGED);
     }
 }
 
-ECode CBluetoothManagerService::constructor(
-    /* [in] */ IContext* context)
-{
-    CHandlerThread::New("BluetoothManager", (*IHandlerThread*)&mThread);
-    mThread->Start();
-    AutoPtr<ILooper> looper;
-    mThread->GetLooper((ILooper**)&looper);
-    mHandler = new BluetoothHandler(looper, this);
-
-    mContext = context;
-    mBluetooth = NULL;
-    mBinding = FALSE;
-    mUnbinding = FALSE;
-    mEnable = FALSE;
-    mState = BluetoothAdapter::STATE_OFF;
-    mQuietEnableExternal = FALSE;
-    mEnableExternal = FALSE;
-    mAddress = NULL;
-    mName = NULL;
-    context->GetContentResolver((IContentResolver**)&mContentResolver);
-    mCallbacks = new RemoteCallbackList<IBluetoothManagerCallback>();
-    mStateChangeCallbacks = new RemoteCallbackList<IBluetoothStateChangeCallback>();
-    AutoPtr<IIntentFilter> filter;
-    CIntentFilter::New(IIntent::ACTION_BOOT_COMPLETE, (IIntentFilter**)&filter);
-    filter->AddAction(BluetoothAdapter::ACTION_LOCAL_NAME_CHANGED);
-    filter->AddAction(IIntent::ACTION_USER_SWITCHED);
-    RegisterForAirplaneMode(filter);
-
-    mContext->RegisterReceiver(mReceiver, filter);
-    Boolean airplaneModeOn = IsAirplaneModeOn();
-    Boolean bluetoothOn = IsBluetoothPersistedStateOn();
-    LoadStoredNameAndAddress();
-
-    String value;
-    if (IsBluetoothPersistedStateOn()) {
-        mEnableExternal = true;
-    }
-    else {
-        AutoPtr<ISystemProperties> sysProp;
-        CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
-        sysProp->Get(String("ro.property.bluetooth.rtk8723a"), &value);
-        if (String("true").Equals(value)) {
-            //Realtek add start
-            //Enable
-            AutoPtr<IMessage> msg1;
-            mHandler->ObtainMessage(MESSAGE_ENABLE, (IMessage**)&msg1);
-            msg1->SetArg1(0); //No persist
-            msg1->SetArg2(1); //Quiet mode
-            Boolean rst;
-            mHandler->SendMessage(msg1, &rst);
-            Thread::Sleep(2000);
-            // try {
-            //     Thread.sleep(2000); //add delay to make sure BT is enabled
-            // } catch (Exception e) {}
-
-            //Disable
-            AutoPtr<IMessage> msg2;
-            mHandler->ObtainMessage(MESSAGE_DISABLE, (IMessage**)&msg2);
-            msg2->SetArg1(0);
-            mHandler->SendMessage(msg2, &rst);
-        }
-   }
-   //Realtek add end
-
-    return NOERROR;
-}
-
-/**
- *  Returns TRUE if airplane mode is currently on
- */
 Boolean CBluetoothManagerService::IsAirplaneModeOn()
 {
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
     Int32 val;
-    Settings::Global::GetInt32(resolver, Settings::Global::AIRPLANE_MODE_ON, 0, &val);
+    Settings::Global::GetInt32(resolver, ISettingsGlobal::AIRPLANE_MODE_ON, 0, &val);
     return (val == 1);
 }
 
-/**
- *  Returns TRUE if the Bluetooth saved state is "on"
- */
 Boolean CBluetoothManagerService::IsBluetoothPersistedStateOn()
 {
     Int32 val;
-    Settings::Global::GetInt32(mContentResolver, Settings::Global::BLUETOOTH_ON, 0, &val);
+    Settings::Global::GetInt32(mContentResolver, ISettingsGlobal::BLUETOOTH_ON, 0, &val);
     return (val == BLUETOOTH_OFF);
 }
 
-/**
- *  Returns true if the Bluetooth saved state is BLUETOOTH_ON_BLUETOOTH
- */
-Boolean CBluetoothManagerService::IsBluetoothPersistedStateOn()
+Boolean CBluetoothManagerService::IsBluetoothPersistedStateOnBluetooth()
 {
     Int32 val;
-    Settings::Global::GetInt32(mContentResolver, Settings::Global::BLUETOOTH_ON, 0, &val);
+    Settings::Global::GetInt32(mContentResolver, ISettingsGlobal::BLUETOOTH_ON, 0, &val);
     return (val == BLUETOOTH_ON_BLUETOOTH);
 }
 
-/**
- *  Save the Bluetooth on/off state
- *
- */
 void CBluetoothManagerService::PersistBluetoothSetting(
     /* [in] */ Int32 setOn)
 {
-    Boolean bol;
+    Boolean bval;
     AutoPtr<IContentResolver> resolver;
     mContext->GetContentResolver((IContentResolver**)&resolver);
-    Settings::Global::PutInt32(resolver, Settings::Global::BLUETOOTH_ON, setOn, &bol);
+    Settings::Global::PutInt32(resolver, ISettingsGlobal::BLUETOOTH_ON, setOn, &bval);
 }
 
-/**
- * Returns TRUE if the Bluetooth Adapter's name and address is
- * locally cached
- * @return
- */
 Boolean CBluetoothManagerService::IsNameAndAddressSet()
 {
-    return mName !=NULL && mAddress!= NULL && mName.GetLength()>0 && mAddress.GetLength()>0;
+    return !mName.IsNullOrEmpty() && !mAddress.IsNullOrEmpty();
 }
 
-/**
- * Retrieve the Bluetooth Adapter's name and address and save it in
- * in the local cache
- */
 void CBluetoothManagerService::LoadStoredNameAndAddress()
 {
-    if (DBG) Logger::D(TAG, "Loading stored name and address");
+    if (DBG) Slogger::D(TAG, "Loading stored name and address");
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
-    Boolean bol;
-    res->GetBoolean(R::bool_::config_bluetooth_address_validation, &bol);
+    Boolean bval;
+    res->GetBoolean(R::bool_::config_bluetooth_address_validation, &bval);
     Int32 val;
-    Settings::Secure::GetInt32(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDR_VALID, 0, &val)
-    if (bol && (val == 0)) {
+    Settings::Secure::GetInt32(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDR_VALID, 0, &val);
+    if (bval && (val == 0)) {
         // if the valid flag is not set, don't load the address and name
-        if (DBG) Logger::D(TAG, "invalid bluetooth name and address stored");
+        if (DBG) Slogger::D(TAG, "invalid bluetooth name and address stored");
         return;
     }
     Settings::Secure::GetString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_NAME, &mName);
     Settings::Secure::GetString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDRESS, &mAddress);
-    if (DBG) Logger::D(TAG, "Stored bluetooth Name=" + mName + ",Address=" + mAddress);
+    if (DBG) Slogger::D(TAG, "Stored bluetooth Name=%s, Address=%s",
+        mName.string(), mAddress.string());
 }
 
-/**
- * Save the Bluetooth name and address in the persistent store.
- * Only non-NULL values will be saved.
- * @param name
- * @param address
- */
 void CBluetoothManagerService::StoreNameAndAddress(
     /* [in] */ const String& name,
     /* [in] */ const String& address)
 {
-    Boolean bol;
+    Boolean bval;
     String str;
-
     if (name != NULL) {
-        Settings::Secure::PutString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_NAME, name, &bol);
+        Settings::Secure::PutString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_NAME, name, &bval);
         mName = name;
         Settings::Secure::GetString(mContentResolver,SECURE_SETTINGS_BLUETOOTH_NAME, &str);
         if (DBG)
-            Logger::D(TAG,"Stored Bluetooth name: " + str);
+            Slogger::D(TAG,"Stored Bluetooth name: %s", str.string());
     }
 
     if (address != NULL) {
-        Settings::Secure::PutString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDRESS, address, &bol);
-        mAddress=address;
-        Settings::Secure::GetString(mContentResolver,SECURE_SETTINGS_BLUETOOTH_ADDRESS, &str)
-        if (DBG)  Logger::D(TAG,"Stored Bluetoothaddress: " + str);
+        Settings::Secure::PutString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDRESS, address, &bval);
+        mAddress = address;
+        Settings::Secure::GetString(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDRESS, &str);
+        if (DBG)  Slogger::D(TAG,"Stored Bluetoothaddress: %s", str.string());
     }
 
     if ((name != NULL) && (address != NULL)) {
-        Settings::Secure::PutInt32(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDR_VALID, 1, &bol);
+        Settings::Secure::PutInt32(mContentResolver, SECURE_SETTINGS_BLUETOOTH_ADDR_VALID, 1, &bval);
     }
 }
 
@@ -724,10 +866,19 @@ ECode CBluetoothManagerService::RegisterAdapter(
     /* [out] */ IIBluetooth** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
 
-    mHandler->SendMessage(MESSAGE_REGISTER_ADAPTER, 0, 0, callback);
+    if (callback == NULL) {
+        Slogger::W(TAG, "Callback is NULL in RegisterAdapter");
+        return NOERROR;
+    }
+
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(MESSAGE_REGISTER_ADAPTER, (IMessage**)&msg);
+    Boolean bval;
+    mHandler->SendMessage(msg, &bval);
     {
-        AutoLock lock(mConnectionLock);
+        AutoLock lock(mConnection);
         *result = mBluetooth;
         REFCOUNT_ADD(*result);
     }
@@ -737,60 +888,75 @@ ECode CBluetoothManagerService::RegisterAdapter(
 ECode CBluetoothManagerService::UnregisterAdapter(
     /* [in] */ IIBluetoothManagerCallback* callback)
 {
+    if (callback == NULL) {
+        Slogger::W(TAG, "Callback is NULL in UnregisterAdapter");
+        return NOERROR;
+    }
+
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(BLUETOOTH_PERM,
-                                            "Need BLUETOOTH permission"));
-    mHandler->SendMessage(MESSAGE_UNREGISTER_ADAPTER, 0, 0, callback);
+        String("Need BLUETOOTH permission")));
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(MESSAGE_UNREGISTER_ADAPTER, 0, 0, callback, (IMessage**)&msg);
+    Boolean bval;
+    mHandler->SendMessage(msg, &bval);
     return NOERROR;
 }
 
 ECode CBluetoothManagerService::RegisterStateChangeCallback(
-    /* [in] */ IIBluetoothStateChangeCallback callback)
+    /* [in] */ IIBluetoothStateChangeCallback* callback)
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(BLUETOOTH_PERM,
-                                            "Need BLUETOOTH permission"));
-    mHandler->SendMessage(MESSAGE_REGISTER_STATE_CHANGE_CALLBACK, 0, 0, callback);
+        String("Need BLUETOOTH permission")));
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(MESSAGE_REGISTER_STATE_CHANGE_CALLBACK, 0, 0, callback, (IMessage**)&msg);
+    Boolean bval;
+    mHandler->SendMessage(msg, &bval);
     return NOERROR;
 }
 
 ECode CBluetoothManagerService::UnregisterStateChangeCallback(
-    /* [in] */ IIBluetoothStateChangeCallback callback)
+    /* [in] */ IIBluetoothStateChangeCallback* callback)
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(BLUETOOTH_PERM,
-                                            "Need BLUETOOTH permission"));
-    mHandler->SendMessage(MESSAGE_UNREGISTER_STATE_CHANGE_CALLBACK, 0, 0, callback);
+        String("Need BLUETOOTH permission")));
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(MESSAGE_UNREGISTER_STATE_CHANGE_CALLBACK, 0, 0, callback, (IMessage**)&msg);
+    Boolean bval;
+    mHandler->SendMessage(msg, &bval);
     return NOERROR;
 }
 
 ECode CBluetoothManagerService::IsEnabled(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
     if ((Binder::GetCallingUid() != IProcess::SYSTEM_UID) &&
         !CheckIfCallerIsForegroundUser()) {
-        Logger::W(TAG,"isEnabled(): not allowed for non-active and non system user");
-        *result = FALSE;
+        Slogger::W(TAG,"isEnabled(): not allowed for non-active and non system user");
         return NOERROR;
     }
 
     {
-        AutoLock lock(mConnectionLock);
-        Boolean bol;
-        mBluetooth->IsEnabled(&bol);
-        *result = (mBluetooth != NULL && bol);
-        return NOERROR;
+        AutoLock lock(mConnection);
+        Boolean bval;
+        mBluetooth->IsEnabled(&bval);
+        *result = (mBluetooth != NULL && bval);
     }
-    *result = FALSE;
     return NOERROR;
 }
 
 ECode CBluetoothManagerService::GetNameAndAddress()
 {
     if (DBG) {
-//        Logger::D(TAG,"getNameAndAddress(): mBluetooth = " + mBluetooth +
-//              " mBinding = " + mBinding);
+       Slogger::D(TAG, "GetNameAndAddress(): %s mBinding=%d",
+            TO_CSTR(mBluetooth), mBinding);
     }
-    mHandler->SendMessage(MESSAGE_GET_NAME_AND_ADDRESS, 0, 0, NULL);
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(MESSAGE_GET_NAME_AND_ADDRESS, (IMessage**)&msg);
+    Boolean bval;
+    mHandler->SendMessage(msg, &bval);
     return NOERROR;
 }
 
@@ -798,13 +964,14 @@ ECode CBluetoothManagerService::EnableNoAutoConnect(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                            "Need BLUETOOTH ADMIN permission"));
+        String("Need BLUETOOTH ADMIN permission")));
 
     if (DBG) {
-//        Logger::D(TAG,"enableNoAutoConnect():  mBluetooth =" + mBluetooth +
-//                " mBinding = " + mBinding);
+       Slogger::D(TAG, "EnableNoAutoConnect(): %s mBinding=%d",
+            TO_CSTR(mBluetooth), mBinding);
     }
 
     Int32 callingAppId = UserHandle::GetAppId(Binder::GetCallingUid());
@@ -814,7 +981,7 @@ ECode CBluetoothManagerService::EnableNoAutoConnect(
     }
 
     {
-        AutoLock lock(mReceiverLock);
+        AutoLock lock(mReceiver);
         mQuietEnableExternal = TRUE;
         mEnableExternal = TRUE;
         SendEnableMsg(TRUE);
@@ -822,31 +989,31 @@ ECode CBluetoothManagerService::EnableNoAutoConnect(
 
     *result = TRUE;
     return NOERROR;
-
 }
 
 ECode CBluetoothManagerService::Enable(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
 
     if ((Binder::GetCallingUid() != IProcess::SYSTEM_UID) &&
         (!CheckIfCallerIsForegroundUser())) {
-        Logger::W(TAG,"enable(): not allowed for non-active and non system user");
-        *result = FALSE;
+        Slogger::W(TAG,"enable(): not allowed for non-active and non system user");
         return NOERROR;
     }
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
         BLUETOOTH_ADMIN_PERM,
         String("Need BLUETOOTH ADMIN permission")));
-    // if (DBG) {
-    //     Log.d(TAG,"enable():  mBluetooth =" + mBluetooth +
-    //             " mBinding = " + mBinding);
-    // }
+
+    if (DBG) {
+       Slogger::D(TAG, "Enable()(): %s mBinding=%d",
+            TO_CSTR(mBluetooth), mBinding);
+    }
 
     {
-        AutoLock lock(mReceiverLock);
+        AutoLock lock(mReceiver);
         mQuietEnableExternal = FALSE;
         mEnableExternal = TRUE;
         // waive WRITE_SECURE_SETTINGS permission check
@@ -865,24 +1032,24 @@ ECode CBluetoothManagerService::Disable(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                            "Need BLUETOOTH ADMIN permissicacheNameAndAddresson"));
+        String("Need BLUETOOTH ADMIN permissicacheNameAndAddresson")));
 
     if ((Binder::GetCallingUid() != IProcess::SYSTEM_UID) &&
         (!CheckIfCallerIsForegroundUser())) {
-        Logger::W(TAG,"disable(): not allowed for non-active and non system user");
-        *result = FALSE;
+        Slogger::W(TAG,"disable(): not allowed for non-active and non system user");
         return NOERROR;
     }
 
-    // if (DBG) {
-    //     Log.d(TAG,"disable(): mBluetooth = " + mBluetooth +
-    //         " mBinding = " + mBinding);
-    // }
+    if (DBG) {
+       Slogger::D(TAG,"Disable()(): %s mBinding=%d",
+            TO_CSTR(mBluetooth), mBinding);
+    }
 
     {
-        AutoLock lock(mReceiverLock);
+        AutoLock lock(mReceiver);
         if (persist) {
             // waive WRITE_SECURE_SETTINGS permission check
             Int64 callingIdentity = Binder::ClearCallingIdentity();
@@ -900,22 +1067,23 @@ ECode CBluetoothManagerService::Disable(
 ECode CBluetoothManagerService::UnbindAndFinish()
 {
     if (DBG) {
-//        Logger::D(TAG,"UnbindAndFinish(): " + mBluetooth +
-//            " mBinding = " + mBinding);
+       Slogger::D(TAG,"UnbindAndFinish(): %s mBinding=%d",
+            TO_CSTR(mBluetooth), mBinding);
     }
 
     {
-        AutoLock lock(mConnectionLock);
+        AutoLock lock(mConnection);
         if (mUnbinding)
             return NOERROR;
 
         mUnbinding = TRUE;
         if (mBluetooth != NULL) {
-            if (!mConnection->IsGetNameAddressOnly()) {
+            Boolean bval = mConnection->IsGetNameAddressOnly();
+            if (!bval) {
                 //Unregister callback object
                 mBluetooth->UnregisterCallback(mBluetoothCallback);
             }
-            if (DBG) Logger::D(TAG, "Sending unbind request.");
+            if (DBG) Slogger::D(TAG, "Sending unbind request.");
             mBluetooth = NULL;
             //Unbind
             mContext->UnbindService(mConnection);
@@ -933,45 +1101,58 @@ void CBluetoothManagerService::SendBluetoothStateCallback(
 {
     Int32 n;
     mStateChangeCallbacks->BeginBroadcast(&n);
-    if (DBG) Logger::D(TAG,"Broadcasting onBluetoothStateChange("+isUp+") to " + n + " receivers.");
+    if (DBG) Slogger::D(TAG,"Broadcasting onBluetoothStateChange(%d) to %d receivers.", isUp, n);
     for (Int32 i = 0; i < n; i++) {
-         mStateChangeCallbacks->GetBroadcastItem(i).onBluetoothStateChange(isUp);
+        AutoPtr<IInterface> obj;
+        mStateChangeCallbacks->GetBroadcastItem(i, (IInterface**)&obj);
+        IIBluetoothStateChangeCallback::Probe(obj)->OnBluetoothStateChange(isUp);
     }
     mStateChangeCallbacks->FinishBroadcast();
 }
 
-/**
- * Inform BluetoothAdapter instances that Adapter service is up
- */
 void CBluetoothManagerService::SendBluetoothServiceUpCallback()
 {
     if (!mConnection->IsGetNameAddressOnly()) {
-        if (DBG) Logger::D(TAG,"Calling onBluetoothServiceUp callbacks");
+        if (DBG) Slogger::D(TAG,"Calling onBluetoothServiceUp callbacks");
         Int32 n;
         mCallbacks->BeginBroadcast(&n);
-        Logger::D(TAG,"Broadcasting onBluetoothServiceUp() to " + n + " receivers.");
+        Slogger::D(TAG,"Broadcasting onBluetoothServiceUp() to %d receivers.", n);
         for (Int32 i = 0; i < n; i++) {
-            mCallbacks->GetBroadcastItem(i).onBluetoothServiceUp(mBluetooth);
+            AutoPtr<IInterface> obj;
+            mCallbacks->GetBroadcastItem(i, (IInterface**)&obj);
+            IIBluetoothManagerCallback::Probe(obj)->OnBluetoothServiceUp(mBluetooth);
         }
         mCallbacks->FinishBroadcast();
     }
 }
-/**
- * Inform BluetoothAdapter instances that Adapter service is down
- */
+
+ECode CBluetoothManagerService::GetBluetoothGatt(
+    /* [out] */ IIBluetoothGatt** bg)
+{
+    VALIDATE_NOT_NULL(bg)
+    // sync protection
+    *bg = mBluetoothGatt;
+    REFCOUNT_ADD(*bg)
+    return NOERROR;
+}
+
 void CBluetoothManagerService::SendBluetoothServiceDownCallback()
 {
-    if (!mConnection->IsGetNameAddressOnly()) {
-        if (DBG) Logger::D(TAG,"Calling onBluetoothServiceDown callbacks");
+    Boolean bval = mConnection->IsGetNameAddressOnly();
+    if (!bval) {
+        if (DBG) Slogger::D(TAG,"Calling onBluetoothServiceDown callbacks");
         Int32 n;
         mCallbacks->BeginBroadcast(&n);
-        Logger::D(TAG,"Broadcasting onBluetoothServiceDown() to " + n + " receivers.");
+        Slogger::D(TAG,"Broadcasting onBluetoothServiceDown() to %d receivers.", n);
         for (Int32 i = 0; i < n; i++) {
-             mCallbacks->GetBroadcastItem(i).onBluetoothServiceDown();
+            AutoPtr<IInterface> obj;
+            mCallbacks->GetBroadcastItem(i, (IInterface**)&obj);
+            IIBluetoothManagerCallback::Probe(obj)->OnBluetoothServiceDown();
         }
         mCallbacks->FinishBroadcast();
     }
 }
+
 ECode CBluetoothManagerService::GetAddress(
     /* [out] */ String* result)
 {
@@ -983,12 +1164,12 @@ ECode CBluetoothManagerService::GetAddress(
 
     if ((Binder::GetCallingUid() != IProcess::SYSTEM_UID) &&
             (!CheckIfCallerIsForegroundUser())) {
-        Logger::W(TAG,"getAddress(): not allowed for non-active user");
+        Slogger::W(TAG,"getAddress(): not allowed for non-active user");
         return NOERROR;
     }
 
     {
-        AutoLock lock(mConnectionLock);
+        AutoLock lock(mConnection);
         if (mBluetooth != NULL) {
              return mBluetooth->GetAddress(result);
         }
@@ -1011,12 +1192,12 @@ ECode CBluetoothManagerService::GetName(
 
     if ((Binder::GetCallingUid() != IProcess::SYSTEM_UID) &&
             (!CheckIfCallerIsForegroundUser())) {
-        Logger::W(TAG,"getName(): not allowed for non-active user");
+        Slogger::W(TAG,"getName(): not allowed for non-active user");
         return NOERROR;
     }
 
     {
-        AutoLock lock(mConnectionLock);
+        AutoLock lock(mConnection);
         if (mBluetooth != NULL) {
             return mBluetooth->GetName(result);
         }
@@ -1033,21 +1214,25 @@ void CBluetoothManagerService::HandleEnable(
 {
     mQuietEnable = quietMode;
     {
-        AutoLock lock(mConnectionLock);
+        AutoLock lock(mConnection);
         if ((mBluetooth == NULL) && (!mBinding)) {
             //Start bind timeout and bind
-            mHandler->SendMessageDelayed(MESSAGE_TIMEOUT_BIND, 0, 0, NULL, TIMEOUT_BIND_MS);
+            AutoPtr<IMessage> msg;
+            mHandler->ObtainMessage(MESSAGE_TIMEOUT_BIND, (IMessage**)&msg);
+            Boolean bval;
+            mHandler->SendMessageDelayed(msg, TIMEOUT_BIND_MS, &bval);
             mConnection->SetGetNameAddressOnly(FALSE);
             AutoPtr<IIntent> i;
-            CIntent::New(IBluetooth.class.getName(), (IIntent**)&i);
-            if (!mContext->BindService(i, mConnection, IContext::BIND_AUTO_CREATE,
-                                      UserHandle::USER_CURRENT)) {
+            CIntent::New(String("Elastos.Droid.Bluetooth.IIBluetooth"), (IIntent**)&i);
+            if (!DoBind(i, mConnection, IContext::BIND_AUTO_CREATE | IContext::BIND_IMPORTANT,
+                    UserHandle::CURRENT)) {
                 mHandler->RemoveMessages(MESSAGE_TIMEOUT_BIND);
-                Logger::E(TAG, "Fail to bind to: " + IBluetooth.class.getName());
-            } else {
+            }
+            else {
                 mBinding = TRUE;
             }
-        } else if (mBluetooth != NULL) {
+        }
+        else if (mBluetooth != NULL) {
             if (mConnection->IsGetNameAddressOnly()) {
                 // if GetNameAddressOnly is set, we can clear this flag,
                 // so the service won't be unbind
@@ -1060,34 +1245,52 @@ void CBluetoothManagerService::HandleEnable(
             }
             //Enable bluetooth
 
-            Boolean bol;
+            Boolean bval;
             if (!mQuietEnable) {
-                mBluetooth->Enable(&bol);
-                if(!bol)
-                    Logger::E(TAG,"IBluetooth.enable() returned FALSE");
-            } else {
-                mBluetooth->EnableNoAutoConnect(&bol);
-                if(!bol)
-                    Logger::E(TAG,"IBluetooth.enableNoAutoConnect() returned FALSE");
+                mBluetooth->Enable(&bval);
+                if(!bval)
+                    Slogger::E(TAG,"IBluetooth.enable() returned FALSE");
+            }
+            else {
+                mBluetooth->EnableNoAutoConnect(&bval);
+                if(!bval)
+                    Slogger::E(TAG,"IBluetooth.enableNoAutoConnect() returned FALSE");
             }
         }
     }
 }
 
+Boolean CBluetoothManagerService::DoBind(
+    /* [in] */ IIntent* intent,
+    /* [in] */ IServiceConnection* conn,
+    /* [in] */ Int32 flags,
+    /* [in] */ IUserHandle* user)
+{
+    AutoPtr<IPackageManager> pm;
+    mContext->GetPackageManager((IPackageManager**)&pm);
+    AutoPtr<IComponentName> comp;
+    intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
+    intent->SetComponent(comp);
+    Boolean bval;
+    if (comp == NULL || (mContext->BindServiceAsUser(intent, conn, flags, user, &bval), !bval)) {
+        Slogger::E(TAG, "Fail to bind to: %s", TO_CSTR(intent));
+        return FALSE;
+    }
+    return TRUE;
+}
+
 void CBluetoothManagerService::HandleDisable()
 {
-    {
-        AutoLock lock(mConnectionLock);
-        // don't need to disable if GetNameAddressOnly is set,
-        // service will be unbinded after Name and Address are saved
-        if ((mBluetooth != NULL) && (!mConnection->IsGetNameAddressOnly())) {
-            if (DBG)
-                Logger::D(TAG,"Sending off request.");
-            Boolean bol;
-            mBluetooth->Disable(&bol);
-            if(!bol)
-                Logger::E(TAG,"IBluetooth.disable() returned FALSE");
-        }
+    AutoLock lock(mConnection);
+    // don't need to disable if GetNameAddressOnly is set,
+    // service will be unbinded after Name and Address are saved
+    if ((mBluetooth != NULL) && !mConnection->IsGetNameAddressOnly()) {
+        if (DBG)
+            Slogger::D(TAG,"Sending off request.");
+        Boolean bval;
+        mBluetooth->Disable(&bval);
+        if(!bval)
+            Slogger::E(TAG,"IBluetooth.disable() returned FALSE");
     }
 }
 
@@ -1100,14 +1303,16 @@ Boolean CBluetoothManagerService::CheckIfCallerIsForegroundUser()
     Int32 callingAppId = UserHandle::GetAppId(callingUid);
     Boolean valid = FALSE;
 //    try {
-        foregroundUser = ActivityManager::GetCurrentUser();
-        valid = (callingUser == foregroundUser) ||
-                callingAppId == IProcess::NFC_UID;
-        if (DBG) {
-//            Logger::D(TAG, "checkIfCallerIsForegroundUser: valid=" + valid
-//                + " callingUser=" + callingUser
-//                + " foregroundUser=" + foregroundUser);
-        }
+    AutoPtr<IActivityManagerHelper> helper;
+    CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
+    helper->GetCurrentUser(&foregroundUser);
+    valid = (callingUser == foregroundUser) ||
+            callingAppId == IProcess::NFC_UID ||
+            callingAppId == mSystemUiUid;
+    if (DBG) {
+        Slogger::D(TAG, "checkIfCallerIsForegroundUser: valid=%d, callingUser=%d, foregroundUser=%d",
+            valid, callingUser, foregroundUser);
+    }
 //    } finally {
     Binder::RestoreCallingIdentity(callingIdentity);
 //    }
@@ -1120,34 +1325,43 @@ void CBluetoothManagerService::BluetoothStateChangeHandler(
 {
     if (prevState != newState) {
         //Notify all proxy objects first of adapter state change
-        if (newState == BluetoothAdapter::STATE_ON || newState == BluetoothAdapter::STATE_OFF) {
-            Boolean isUp = (newState==BluetoothAdapter::STATE_ON);
+        if (newState == IBluetoothAdapter::STATE_ON || newState == IBluetoothAdapter::STATE_OFF) {
+            Boolean isUp = (newState == IBluetoothAdapter::STATE_ON);
             SendBluetoothStateCallback(isUp);
 
-            //If Bluetooth is off, send service down event to proxy objects, and unbind
-            if (!isUp && CanUnbindBluetoothService()) {
-                SendBluetoothServiceDownCallback();
-                UnbindAndFinish();
+            if (isUp) {
+                AutoPtr<IPackageManager> pm;
+                mContext->GetPackageManager((IPackageManager**)&pm);
+                // connect to GattService
+                Boolean bval;
+                if (pm->HasSystemFeature(IPackageManager::FEATURE_BLUETOOTH_LE, &bval), bval) {
+                    AutoPtr<IIntent> i;
+                    CIntent::New(String("Elastos.Droid.Bluetooth.IIBluetoothGatt"), (IIntent**)&i);
+                    DoBind(i, mConnection, IContext::BIND_AUTO_CREATE | IContext::BIND_IMPORTANT,
+                        UserHandle::CURRENT);
+                }
+            }
+            else {
+                //If Bluetooth is off, send service down event to proxy objects, and unbind
+                if (!isUp && CanUnbindBluetoothService()) {
+                    SendBluetoothServiceDownCallback();
+                    UnbindAndFinish();
+                }
             }
         }
 
         //Send broadcast message to everyone else
         AutoPtr<IIntent> intent;
-        CIntent::New(BluetoothAdapter::ACTION_STATE_CHANGED, (IIntent**)&intent);
-        intent->PutExtra(BluetoothAdapter::EXTRA_PREVIOUS_STATE, prevState);
-        intent->PutExtra(BluetoothAdapter::EXTRA_STATE, newState);
+        CIntent::New(IBluetoothAdapter::ACTION_STATE_CHANGED, (IIntent**)&intent);
+        intent->PutExtra(IBluetoothAdapter::EXTRA_PREVIOUS_STATE, prevState);
+        intent->PutExtra(IBluetoothAdapter::EXTRA_STATE, newState);
         intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         if (DBG)
-            Logger::D(TAG,"Bluetooth State Change Intent: " + prevState + " -> " + newState);
+            Slogger::D(TAG,"Bluetooth State Change Intent: %d -> %d", prevState, newState);
         mContext->SendBroadcastAsUser(intent, UserHandle::ALL, BLUETOOTH_PERM);
     }
 }
 
-/**
- *  if on is TRUE, wait for state become ON
- *  if off is TRUE, wait for state become OFF
- *  if both on and off are FALSE, wait for state not ON
- */
 Boolean CBluetoothManagerService::WaitForOnOff(
     /* [in] */ Boolean on,
     /* [in] */ Boolean off)
@@ -1155,41 +1369,50 @@ Boolean CBluetoothManagerService::WaitForOnOff(
     Int32 i = 0;
     while (i < 10) {
         {
-            AutoLock lock(mConnectionLock);
-                if (mBluetooth == NULL)
-                    break;
-                Int32 val;
-                mBluetooth->GetState(&val);
-                if (on) {
-                    if (val == BluetoothAdapter::STATE_ON) return TRUE;
-                } else if (off) {
-                    if (val == BluetoothAdapter::STATE_OFF) return TRUE;
-                } else {
-                    if (val != BluetoothAdapter::STATE_ON) return TRUE;
-                }
+            AutoLock lock(mConnection);
+            if (mBluetooth == NULL)
+                break;
+            Int32 val;
+            mBluetooth->GetState(&val);
+            if (on) {
+                if (val == IBluetoothAdapter::STATE_ON) return TRUE;
+            }
+            else if (off) {
+                if (val == IBluetoothAdapter::STATE_OFF) return TRUE;
+            }
+            else {
+                if (val != IBluetoothAdapter::STATE_ON) return TRUE;
+            }
         }
 
         if (on || off) {
             SystemClock::Sleep(300);
-        } else {
+        }
+        else {
             SystemClock::Sleep(50);
         }
         i++;
     }
-    Logger::E(TAG,"WaitForOnOff time out");
+    Slogger::E(TAG,"WaitForOnOff time out");
     return FALSE;
 }
 
 void CBluetoothManagerService::SendDisableMsg()
 {
-    mHandler->SendMessage(mHandler.obtainMessage(MESSAGE_DISABLE));
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(MESSAGE_DISABLE, (IMessage**)&msg);
+    Boolean bval;
+    mHandler->SendMessage(msg, &bval);
 }
 
 void CBluetoothManagerService::SendEnableMsg(
     /* [in] */ Boolean quietMode)
 {
-    mHandler->SendMessage(mHandler.obtainMessage(MESSAGE_ENABLE,
-                         quietMode ? 1 : 0, 0));
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(
+        MESSAGE_ENABLE, quietMode ? 1 : 0, 0, (IMessage**)&msg);
+    Boolean bval;
+    mHandler->SendMessage(msg, &bval);
 }
 
 Boolean CBluetoothManagerService::CanUnbindBluetoothService()
@@ -1202,16 +1425,72 @@ Boolean CBluetoothManagerService::CanUnbindBluetoothService()
     //     //Only unbind with Bluetooth at OFF state
     //     //Only unbind without any MESSAGE_BLUETOOTH_STATE_CHANGE message
     //     try {
-    //         if (mEnable || (mBluetooth == null)) return false;
-    //         if (mHandler.hasMessages(MESSAGE_BLUETOOTH_STATE_CHANGE)) return false;
-    //         return (mBluetooth.getState() == BluetoothAdapter.STATE_OFF);
+    //         if (mEnable || (mBluetooth == NULL)) return FALSE;
+    //         if (mHandler.hasMessages(MESSAGE_BLUETOOTH_STATE_CHANGE)) return FALSE;
+    //         return (mBluetooth->getState() == IBluetoothAdapter::STATE_OFF);
     //     } catch (RemoteException e) {
-    //         Log.e(TAG, "getState()", e);
+    //         Slogger::E(TAG, "getState()", e);
     //     }
     // }
-    return false;
+    return FALSE;
 }
 
+void CBluetoothManagerService::RecoverBluetoothServiceFromError()
+{
+    Slogger::E(TAG,"RecoverBluetoothServiceFromError");
+    synchronized (mConnection) {
+        if (mBluetooth != NULL) {
+            //Unregister callback object
+            ECode ec = mBluetooth->UnregisterCallback(mBluetoothCallback);
+            if (FAILED(ec)) {
+                Slogger::E(TAG, "Unable to unregister, ec=%08x", ec);
+            }
+        }
+    }
+
+    SystemClock::Sleep(500);
+
+    // disable
+    HandleDisable();
+
+    WaitForOnOff(FALSE, TRUE);
+
+    SendBluetoothServiceDownCallback();
+    synchronized (mConnection) {
+        if (mBluetooth != NULL) {
+            mBluetooth = NULL;
+            //Unbind
+            mContext->UnbindService(mConnection);
+        }
+    }
+
+    mHandler->RemoveMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
+    mState = IBluetoothAdapter::STATE_OFF;
+
+    mEnable = FALSE;
+
+    if (mErrorRecoveryRetryCounter++ < MAX_ERROR_RESTART_RETRIES) {
+        // Send a Bluetooth Restart message to reenable bluetooth
+        AutoPtr<IMessage> restartMsg;
+        mHandler->ObtainMessage(MESSAGE_RESTART_BLUETOOTH_SERVICE, (IMessage**)&restartMsg);
+        Boolean bval;
+        mHandler->SendMessageDelayed(restartMsg, ERROR_RESTART_TIME_MS, &bval);
+    } else {
+        // todo: notify user to power down and power up phone to make bluetooth work.
+    }
+}
+
+
+ECode CBluetoothManagerService::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("CBluetoothManagerService:");
+    sb += "name:";
+    sb += mName.string();
+    *str = sb.ToString();
+    return NOERROR;
+}
 
 } // namespace Server
 } // namespace Droid

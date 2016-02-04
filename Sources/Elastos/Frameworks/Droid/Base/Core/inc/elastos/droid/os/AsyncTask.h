@@ -2,9 +2,9 @@
 #ifndef __ELASTOS_DROID_OS_ASYNCTASK_H__
 #define __ELASTOS_DROID_OS_ASYNCTASK_H__
 
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/os/Handler.h>
+#include <elastos/droid/os/Runnable.h>
 #include <elastos/utility/concurrent/FutureTask.h>
 
 using Elastos::Core::IRunnable;
@@ -168,11 +168,11 @@ namespace Os {
  * {@link #executeOnExecutor(java.util.concurrent.Executor, Object[])} with
  * {@link #THREAD_POOL_EXECUTOR}.</p>
  */
-class AsyncTask
+class ECO_PUBLIC AsyncTask
     : public Object
 {
 private:
-    class InternalHandler
+    class ECO_LOCAL InternalHandler
         : public Handler
     {
     public:
@@ -205,7 +205,7 @@ public:
     };
 
 private:
-    class MyThreadFactory
+    class ECO_LOCAL MyThreadFactory
         : public Object
         , public IThreadFactory
     {
@@ -222,7 +222,7 @@ private:
         AutoPtr<IAtomicInteger32> mCount;
     };
 
-    class SerialExecutor
+    class ECO_LOCAL SerialExecutor
         : public Object
         , public IExecutor
     {
@@ -261,7 +261,7 @@ private:
         AutoPtr<IRunnable> mActive;
     };
 
-    class WorkerRunnable
+    class ECO_LOCAL WorkerRunnable
         : public Object
         , public ICallable
     {
@@ -281,7 +281,7 @@ private:
         AsyncTask* mOwner;
     };
 
-    class MyFutureTask
+    class ECO_LOCAL MyFutureTask
         : public FutureTask
     {
     public:
@@ -299,7 +299,7 @@ private:
         AsyncTask* mOwner;
     };
 
-    class AsyncTaskResult
+    class ECO_LOCAL AsyncTaskResult
         : public Object
     {
     public:
@@ -609,9 +609,9 @@ private:
     CARAPI_(void) Finish(
         /* [in] */ IInterface* result);
 
-    static CARAPI_(AutoPtr<IExecutor>) InitThreadPoolExecutor();
+    ECO_LOCAL static CARAPI_(AutoPtr<IExecutor>) InitThreadPoolExecutor();
 
-    static CARAPI_(AutoPtr<IHandler>) GetHandler();
+    ECO_LOCAL static CARAPI_(AutoPtr<IHandler>) GetHandler();
 public:
     /**
      * An {@link Executor} that executes tasks one at a time in serial
@@ -625,23 +625,23 @@ public:
     static const AutoPtr<IExecutor> THREAD_POOL_EXECUTOR;
 
 private:
-    static const String TAG;
+    ECO_LOCAL static const String TAG;
 
-    static const Int32 CPU_COUNT;//Runtime.getRuntime().availableProcessors();
-    static const Int32 CORE_POOL_SIZE;//CPU_COUNT + 1;
-    static const Int32 MAXIMUM_POOL_SIZE;//CPU_COUNT * 2 + 1;
-    static const Int32 KEEP_ALIVE = 1;
+    ECO_LOCAL static const Int32 CPU_COUNT;//Runtime.getRuntime().availableProcessors();
+    ECO_LOCAL static const Int32 CORE_POOL_SIZE;//CPU_COUNT + 1;
+    ECO_LOCAL static const Int32 MAXIMUM_POOL_SIZE;//CPU_COUNT * 2 + 1;
+    ECO_LOCAL static const Int32 KEEP_ALIVE = 1;
 
-    static const AutoPtr<IThreadFactory> sThreadFactory;
+    ECO_LOCAL static const AutoPtr<IThreadFactory> sThreadFactory;
 
-    static const AutoPtr<IBlockingQueue> sPoolWorkQueue;
+    ECO_LOCAL static const AutoPtr<IBlockingQueue> sPoolWorkQueue;
 
-    static AutoPtr<IHandler> sHandler;
+    ECO_LOCAL static AutoPtr<IHandler> sHandler;
 
-    static /* volatile */ AutoPtr<IExecutor> sDefaultExecutor;
+    ECO_LOCAL static /* volatile */ AutoPtr<IExecutor> sDefaultExecutor;
 
-    static const Int32 MESSAGE_POST_RESULT = 0x1;
-    static const Int32 MESSAGE_POST_PROGRESS = 0x2;
+    ECO_LOCAL static const Int32 MESSAGE_POST_RESULT = 0x1;
+    ECO_LOCAL static const Int32 MESSAGE_POST_PROGRESS = 0x2;
 
     AutoPtr<WorkerRunnable> mWorker;
     AutoPtr<MyFutureTask> mFuture;

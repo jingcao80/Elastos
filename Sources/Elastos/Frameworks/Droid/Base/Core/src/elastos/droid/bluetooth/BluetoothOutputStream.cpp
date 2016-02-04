@@ -1,12 +1,9 @@
 
-#include "BluetoothOutputStream.h"
-#include "BluetoothSocket.h"
+#include "elastos/droid/bluetooth/BluetoothOutputStream.h"
+#include "elastos/droid/bluetooth/BluetoothSocket.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
-using Elastos::IO::EIID_ICloseable;
-using Elastos::IO::EIID_IOutputStream;
-using Elastos::IO::EIID_IFlushable;
 
 namespace Elastos {
 namespace Droid {
@@ -17,59 +14,9 @@ BluetoothOutputStream::BluetoothOutputStream(
     : mSocket(s)
 {}
 
-UInt32 BluetoothOutputStream::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 BluetoothOutputStream::Release()
-{
-    return ElRefBase::Release();
-}
-
-PInterface BluetoothOutputStream::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IOutputStream*)this;
-    }
-    else if (riid == EIID_IOutputStream) {
-        return (IOutputStream*)this;
-    }
-    if (riid == EIID_ICloseable) {
-        return (ICloseable*)(IOutputStream*)this;
-    }
-    else if (riid == EIID_IFlushable) {
-       return (IFlushable*)this;
-    }
-
-    return NULL;
-}
-
-ECode BluetoothOutputStream::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    if (NULL == pIID) return E_INVALID_ARGUMENT;
-
-    if (pObject == (IInterface *)(IOutputStream *)this) {
-        *pIID = EIID_IOutputStream;
-        return NOERROR;
-    }
-    else if (pObject == (IInterface *)(ICloseable *)this) {
-        *pIID = EIID_ICloseable;
-        return NOERROR;
-    }
-    else if (pObject == (IInterface *)(IFlushable *)this) {
-        *pIID = EIID_IFlushable;
-        return NOERROR;
-    }
-    return E_INVALID_ARGUMENT;
-}
-
 ECode BluetoothOutputStream::Close()
 {
-    return ((ICloseable*)mSocket->Probe(EIID_ICloseable))->Close();
+    return ICloseable::Probe(mSocket)->Close();
 }
 
 ECode BluetoothOutputStream::Write(
@@ -100,32 +47,32 @@ ECode BluetoothOutputStream::WriteBytes(
 
 ECode BluetoothOutputStream::Flush()
 {
-    return OutputStream::Flush();
-}
-
-ECode BluetoothOutputStream::WriteBytes(
-    /* [in] */ const ArrayOf<Byte> & buffer)
-{
-    return OutputStream::WriteBytes(buffer);
-}
-
-ECode BluetoothOutputStream::CheckError(
-    /* [out] */ Boolean* hasError)
-{
-    return OutputStream::CheckError(hasError);
-}
-
-ECode BluetoothOutputStream::GetLock(
-    /* [out] */ IInterface** lockobj)
-{
-    VALIDATE_NOT_NULL(lockobj);
-    AutoPtr<IInterface> obj = OutputStream::GetLock();
-    *lockobj = obj;
-    REFCOUNT_ADD(*lockobj);
+    //TODO return mSocket->Flush();
     return NOERROR;
 }
+
+//ECode BluetoothOutputStream::WriteBytes(
+//    /* [in] */ const ArrayOf<Byte> & buffer)
+//{
+//    return OutputStream::WriteBytes(buffer);
+//}
+//
+//ECode BluetoothOutputStream::CheckError(
+//    /* [out] */ Boolean* hasError)
+//{
+//    return OutputStream::CheckError(hasError);
+//}
+//
+//ECode BluetoothOutputStream::GetLock(
+//    /* [out] */ IInterface** lockobj)
+//{
+//    VALIDATE_NOT_NULL(lockobj);
+//    AutoPtr<IInterface> obj = OutputStream::GetLock();
+//    *lockobj = obj;
+//    REFCOUNT_ADD(*lockobj);
+//    return NOERROR;
+//}
 
 } // Bluetooth
 } // Droid
 } // Elastos
-

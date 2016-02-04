@@ -41,7 +41,6 @@ module
      * interface Elastos.Droid.INotificationDataEnvironment
      */
     interface IBaseStatusBar {
-
         // Should match the value in PhoneWindowManager
         const String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
 
@@ -134,6 +133,10 @@ module
             [out] Boolean* showing);
 
         Destroy();
+
+        RemoveNotification(
+            [in] String key,
+            [in] INotificationListenerServiceRankingMap* ranking);
     }
 
     } // namespace StatusBar

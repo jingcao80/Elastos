@@ -178,7 +178,7 @@ ELAPI_(void) _Impl_SetHelperInfoFlag(
         uFlag &= ~flag;
     }
 
-    ECode ec = pthread_setspecific(TL_HELPER_INFO_SLOT, (void*)uFlag);
+    ECode ec __attribute__((__unused__)) = pthread_setspecific(TL_HELPER_INFO_SLOT, (void*)uFlag);
     assert(SUCCEEDED(ec));
 }
 

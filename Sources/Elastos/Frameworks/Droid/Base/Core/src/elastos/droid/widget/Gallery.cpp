@@ -146,7 +146,7 @@ ECode Gallery::FlingRunnable::Run()
     } else {
         Int32 count = 0;
         mHost->GetChildCount(&count);
-        Int32 offsetToLast = count - 1;
+        Int32 UNUSED(offsetToLast) = count - 1;
         mHost->mDownTouchPosition = mHost->mIsRtl ? mHost->mFirstPosition :
             (mHost->mFirstPosition + count - 1);
 

@@ -2,17 +2,16 @@
 #ifndef __ELASTOS_DROID_WIDGET_IMAGEVIEW_H__
 #define __ELASTOS_DROID_WIDGET_IMAGEVIEW_H__
 
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/view/View.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Net.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/view/View.h"
-#include "elastos/droid/graphics/CRectF.h"
 #include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IMatrix;
-using Elastos::Droid::Graphics::CRectF;
+using Elastos::Droid::Graphics::IRectF;
 using Elastos::Droid::Graphics::IColorFilter;
 using Elastos::Droid::Graphics::IXfermode;
 using Elastos::Droid::Graphics::MatrixScaleToFit;
@@ -24,7 +23,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class ImageView
+class ECO_PUBLIC ImageView
     : public Elastos::Droid::View::View
     , public IImageView
 {
@@ -335,8 +334,8 @@ private:
     AutoPtr<IMatrix> mDrawMatrix;
 
     // Avoid allocations...
-    AutoPtr<CRectF> mTempSrc;
-    AutoPtr<CRectF> mTempDst;
+    AutoPtr<IRectF> mTempSrc;
+    AutoPtr<IRectF> mTempDst;
 
     Boolean mCropToPadding;
 

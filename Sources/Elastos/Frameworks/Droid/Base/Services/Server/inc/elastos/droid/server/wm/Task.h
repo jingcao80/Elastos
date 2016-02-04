@@ -1,12 +1,16 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_TASK_H__
 #define __ELASTOS_DROID_SERVER_WM_TASK_H__
 
-#include "wm/TaskStack.h"
+#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/server/wm/AppWindowToken.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wm {
+
+class TaskStack;
+class DisplayContent;
 
 class Task : public Object
 {
@@ -30,6 +34,7 @@ public:
 
 public:
     AutoPtr<TaskStack> mStack;
+    typedef List<AutoPtr<AppWindowToken> > AppTokenList;
     AppTokenList mAppTokens;
     Int32 mTaskId;
     Int32 mUserId;

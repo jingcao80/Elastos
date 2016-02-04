@@ -3,12 +3,13 @@
 #include "Elastos.Droid.Net.h"
 #include "elastos/droid/internal/view/RotationPolicy.h"
 #include "elastos/droid/graphics/CPoint.h"
-// #include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/os/AsyncTask.h"
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/view/CWindowManagerGlobal.h"
 #include "elastos/droid/R.h"
+#include "Elastos.Droid.Provider.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContentResolver;
@@ -22,7 +23,8 @@ using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::UserHandle;
-// using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::View::CWindowManagerGlobal;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IIWindowManager;
@@ -126,13 +128,11 @@ Boolean RotationPolicy::IsRotationLockToggleVisible(
 {
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
-    assert(0);
-    return FALSE;
-    // Int32 value;
-    // return IsRotationSupported(context) &&
-    //     (Settings::System::GetInt32ForUser(cr,
-    //         Settings::System::HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, 0,
-    //             IUserHandle::USER_CURRENT, &value), value) == 0;
+    Int32 value;
+    return IsRotationSupported(context) &&
+        (Settings::System::GetInt32ForUser(cr,
+            ISettingsSystem::HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, 0,
+                IUserHandle::USER_CURRENT, &value), value) == 0;
 }
 
 Boolean RotationPolicy::IsRotationLocked(
@@ -140,12 +140,10 @@ Boolean RotationPolicy::IsRotationLocked(
 {
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
-    assert(0);
-    return FALSE;
-    // Int32 value;
-    // return (Settings::System::GetInt32ForUser(cr,
-    //     Settings::System::ACCELEROMETER_ROTATION, 0,
-    //         IUserHandle::USER_CURRENT, &value), value) == 0;
+    Int32 value;
+    return (Settings::System::GetInt32ForUser(cr,
+        ISettingsSystem::ACCELEROMETER_ROTATION, 0,
+            IUserHandle::USER_CURRENT, &value), value) == 0;
 }
 
 void RotationPolicy::SetRotationLock(
@@ -154,10 +152,10 @@ void RotationPolicy::SetRotationLock(
 {
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
-    assert(0);
-    // Settings::System::PutInt32ForUser(cr,
-    //     Settings::System::HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
-    //     0, IUserHandle::USER_CURRENT);
+    Boolean res;
+    Settings::System::PutInt32ForUser(cr,
+        ISettingsSystem::HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+        0, IUserHandle::USER_CURRENT, &res);
 
     Int32 rotation = AreAllRotationsAllowed(context) ? CURRENT_ROTATION : NATURAL_ROTATION;
     SetRotationLock(enabled, rotation);
@@ -169,10 +167,10 @@ void RotationPolicy::SetRotationLockForAccessibility(
 {
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
-    assert(0);
-    // Settings::System::PutInt32ForUser(cr,
-    //     Settings::System::HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
-    //     enabled ? 1 : 0, IUserHandle::USER_CURRENT);
+    Boolean res;
+    Settings::System::PutInt32ForUser(cr,
+        ISettingsSystem::HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+        enabled ? 1 : 0, IUserHandle::USER_CURRENT, &res);
 
     SetRotationLock(enabled, NATURAL_ROTATION);
 }
@@ -211,12 +209,11 @@ void RotationPolicy::RegisterRotationPolicyListener(
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<IUri> uri;
-    assert(0);
-    // Settings::System::GetUriFor(Settings::System::ACCELEROMETER_ROTATION, (IUri**)&uri);
+    Settings::System::GetUriFor(ISettingsSystem::ACCELEROMETER_ROTATION, (IUri**)&uri);
     cr->RegisterContentObserver(uri, FALSE, listener->mObserver, userHandle);
     uri = NULL;
-    // Settings::System::GetUriFor(
-    //     Settings::System::HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, (IUri**)&uri);
+    Settings::System::GetUriFor(
+        ISettingsSystem::HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, (IUri**)&uri);
     cr->RegisterContentObserver(uri, FALSE, listener->mObserver, userHandle);
 }
 

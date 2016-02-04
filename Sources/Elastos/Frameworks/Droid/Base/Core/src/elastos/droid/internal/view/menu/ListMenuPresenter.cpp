@@ -2,7 +2,7 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/internal/view/menu/ListMenuPresenter.h"
 #include "elastos/droid/internal/view/menu/CMenuDialogHelper.h"
-// #include "elastos/droid/view/CContextThemeWrapper.h"
+#include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/utility/CSparseArray.h"
@@ -10,7 +10,8 @@
 
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Utility::CSparseArray;
-// using Elastos::Droid::View::CContextThemeWrapper;
+using Elastos::Droid::View::CContextThemeWrapper;
+using Elastos::Droid::View::IContextThemeWrapper;
 using Elastos::Droid::View::IMenu;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::View::LayoutInflater;
@@ -121,9 +122,7 @@ void ListMenuPresenter::MenuAdapter::FindExpandedIndex()
 ECode ListMenuPresenter::MenuAdapter::NotifyDataSetChanged()
 {
     FindExpandedIndex();
-    assert(0);
-    return NOERROR;
-    // return BaseAdapter::NotifyDataSetChanged();
+    return BaseAdapter::NotifyDataSetChanged();
 }
 
 CAR_INTERFACE_IMPL(ListMenuPresenter::OnItemClickListener, Object, IAdapterViewOnItemClickListener)
@@ -173,8 +172,7 @@ ECode ListMenuPresenter::InitForMenu(
     if (mThemeRes != 0) {
         mContext = NULL;
         mInflater = NULL;
-        assert(0);
-        // CContextThemeWrapper::New(context, mThemeRes, (IContextThemeWrapper**)&mContext);
+        CContextThemeWrapper::New(context, mThemeRes, (IContextThemeWrapper**)&mContext);
         LayoutInflater::From(mContext, (ILayoutInflater**)&mInflater);
     }
     else if (mContext != NULL) {
@@ -205,8 +203,7 @@ ECode ListMenuPresenter::GetMenuView(
             mAdapter = new MenuAdapter(this);
         }
 
-        assert(0);
-        // mMenuView->SetAdapter(mAdapter);
+        IAdapterView::Probe(mMenuView)->SetAdapter(mAdapter);
         AutoPtr<OnItemClickListener> listener = new OnItemClickListener(this);
         IAdapterView::Probe(mMenuView)->SetOnItemClickListener(listener);
     }
@@ -225,8 +222,7 @@ ECode ListMenuPresenter::GetAdapter(
         mAdapter = new MenuAdapter(this);
     }
 
-    assert(0);
-    // *adapter = mAdapter;
+    *adapter = mAdapter;
     REFCOUNT_ADD(*adapter)
     return NOERROR;
 }

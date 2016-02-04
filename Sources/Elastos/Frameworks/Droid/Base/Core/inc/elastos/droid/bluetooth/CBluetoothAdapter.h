@@ -3,13 +3,17 @@
 #define __ELASTOS_DROID_BLUETOOTH_CBLUETOOTHADAPTER_H__
 
 #include "_Elastos_Droid_Bluetooth_CBluetoothAdapter.h"
+#include "Elastos.Droid.Bluetooth.h"
 #include "elastos/droid/ext/frameworkdef.h"
-#include "CBluetoothAdapterManagerCallback.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/bluetooth/CBluetoothAdapterManagerCallback.h"
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Droid::Bluetooth::LE::IBluetoothLeAdvertiser;
+using Elastos::Droid::Bluetooth::LE::IBluetoothLeScanner;
+using Elastos::Droid::Os::IHandler;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::IUUID;
-using Elastos::Droid::Os::IHandler;
 
 namespace Elastos {
 namespace Droid {
@@ -48,16 +52,22 @@ namespace Bluetooth {
  * {@see BluetoothServerSocket}
  */
 CarClass(CBluetoothAdapter)
+    , public Object
+    , public IBluetoothAdapter
 {
-public:
-    interface IBluetoothStateChangeCallback : public IInterface
-    {
-    public:
-        virtual CARAPI_(void) OnBluetoothStateChange(
-            /* [in] */ Boolean on) = 0;
-    };
+//public:
+//    interface IBluetoothStateChangeCallback : public IInterface
+//    {
+//    public:
+//        virtual CARAPI_(void) OnBluetoothStateChange(
+//            /* [in] */ Boolean on) = 0;
+//    };
 
 public:
+    CAR_INTERFACE_DECL();
+
+    CAR_OBJECT_DECL();
+
     CBluetoothAdapter();
 
     ~CBluetoothAdapter();
@@ -80,6 +90,12 @@ public:
         /* [in] */ ArrayOf<Byte>* address,
         /* [out] */ IBluetoothDevice** device);
 
+    CARAPI GetBluetoothLeAdvertiser(
+        /* [out] */ IBluetoothLeAdvertiser** btAdvertiser);
+
+    CARAPI GetBluetoothLeScanner(
+        /* [out] */ IBluetoothLeScanner** btLeScanner);
+
     CARAPI IsEnabled(
         /* [out] */ Boolean* isEnable);
 
@@ -101,6 +117,10 @@ public:
 
     CARAPI GetName(
         /* [out] */ String* name);
+
+    CARAPI ConfigHciSnoopLog(
+        /* [in] */ Boolean enabled,
+        /* [out] */ Boolean* result);
 
     CARAPI GetUuids(
         /* [out, callee] */ ArrayOf<Elastos::Droid::Os::IParcelUuid *>** uuids);
@@ -135,6 +155,19 @@ public:
 
     CARAPI IsDiscovering(
         /* [out] */ Boolean* isDiscovering);
+
+    CARAPI IsMultipleAdvertisementSupported(
+        /* [out] */ Boolean* result);
+
+    CARAPI IsOffloadedFilteringSupported(
+        /* [out] */ Boolean* result);
+
+    CARAPI IsOffloadedScanBatchingSupported(
+        /* [out] */ Boolean* result);
+
+    CARAPI GetControllerActivityEnergyInfo(
+        /* [in] */ Int32 updateType,
+        /* [out] */ IBluetoothActivityEnergyInfo** btActivityEnergyInfo);
 
     CARAPI GetBondedDevices(
         /* [out, callee] */ ArrayOf<IBluetoothDevice*>** device);
@@ -196,6 +229,18 @@ public:
         /* [in] */ Boolean on,
         /* [in] */ IIBluetoothStateChangeCallback* stateChangeCallback,
         /* [out] */ Boolean* result);
+
+    CARAPI StartLeScan(
+        /* [in] */ IBluetoothAdapterLeScanCallback* cb,
+        /* [out] */ Boolean* result);
+
+    CARAPI StartLeScan(
+        /* [in] */ ArrayOf<IUUID*>* serviceUuids,
+        /* [in] */ IBluetoothAdapterLeScanCallback* cb,
+        /* [out] */ Boolean* result);
+
+    CARAPI StopLeScan(
+        /* [in] */ IBluetoothAdapterLeScanCallback* cb);
 
     static CARAPI_(Boolean) CheckBluetoothAddress(
         /* [in] */ const String& address);

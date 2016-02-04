@@ -127,10 +127,8 @@ ECode CAtomicInteger32Array::LazySet(
 
     volatile int32_t* address = (volatile int32_t*)(mArray->GetPayload() + index);
 
-    // TODO:
-    // ANDROID_MEMBAR_STORE();
-    // *address = newValue;
-
+    ANDROID_MEMBAR_STORE();
+    *address = newValue;
     return NOERROR;
 }
 

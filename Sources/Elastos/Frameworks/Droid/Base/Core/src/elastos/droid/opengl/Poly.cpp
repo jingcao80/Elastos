@@ -27,7 +27,7 @@
  * Paul Heckbert    1985, Dec 1989
  */
 
-#include "Poly.h"
+#include "elastos/droid/opengl/Poly.h"
 #include "elastos/droid/ext/frameworkext.h"
 
 namespace Elastos {
@@ -57,7 +57,6 @@ namespace Opengl {
 
 void poly_clip_to_halfspace(Poly* p, Poly* q, int index, float sign, float k)
 {
-    unsigned long m;
     float *up, *vp, *wp;
     Poly_vert *v;
     int i;

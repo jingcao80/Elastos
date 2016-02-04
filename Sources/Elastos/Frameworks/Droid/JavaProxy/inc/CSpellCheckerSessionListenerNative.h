@@ -5,8 +5,8 @@
 #include "_CSpellCheckerSessionListenerNative.h"
 #include <jni.h>
 
-using Elastos::Droid::View::Textservice::ISentenceSuggestionsInfo;
-using Elastos::Droid::View::Textservice::ISuggestionsInfo;
+using Elastos::Droid::View::TextService::ISentenceSuggestionsInfo;
+using Elastos::Droid::View::TextService::ISuggestionsInfo;
 
 namespace Elastos {
 namespace Droid {

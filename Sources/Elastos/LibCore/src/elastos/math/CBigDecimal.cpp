@@ -11,102 +11,94 @@ using Elastos::Core::EIID_IComparable;
 namespace Elastos {
 namespace Math {
 
-const Double CBigDecimal::Log10_2 = 0.3010299956639812;
-
-const Int64 CBigDecimal::LongFivePow[] = {
-    1LL,
-    5LL,
-    25LL,
-    125LL,
-    625LL,
-    3125LL,
-    15625LL,
-    78125LL,
-    390625LL,
-    1953125LL,
-    9765625LL,
-    48828125LL,
-    244140625LL,
-    1220703125LL,
-    6103515625LL,
-    30517578125LL,
-    152587890625LL,
-    762939453125LL,
-    3814697265625LL,
-    19073486328125LL,
-    95367431640625LL,
-    476837158203125LL,
-    2384185791015625LL,
-    11920928955078125LL,
-    59604644775390625LL,
-    298023223876953125LL,
-    1490116119384765625LL,
-    7450580596923828125LL,
-};
-
-AutoPtr<ArrayOf<Char32> > CBigDecimal::CharZeros = NULL;
-
-AutoPtr<IBigDecimal> CBigDecimal::ZERO = NULL;
-AutoPtr<IBigDecimal> CBigDecimal::ONE = NULL;
-AutoPtr<IBigDecimal> CBigDecimal::TEN = NULL;
-
-AutoPtr<ArrayOf<IBigInteger*> > CBigDecimal::FivePow = NULL;
-AutoPtr<ArrayOf<IBigInteger*> > CBigDecimal::TenPow = NULL;
-AutoPtr<ArrayOf<IBigDecimal*> > CBigDecimal::BiScaledByZero = NULL;
-AutoPtr<ArrayOf<IBigDecimal*> > CBigDecimal::ZeroScaledBy = NULL;
-
-Int32 CBigDecimal::LongFivePowBitLength[] = {0};
-Int32 CBigDecimal::LongPowsersOfTenBitLength[] = {0};
-
-Boolean CBigDecimal::mIsStaticInited = InitStatic();
-
 static AutoPtr<IBigDecimal> CreateBigDecimal(Int32 smallValue, Int32 scale)
 {
-    AutoPtr<CBigDecimal> obj;
-    CBigDecimal::NewByFriend(smallValue, scale, (CBigDecimal**)&obj);
-    AutoPtr<IBigDecimal> result = (IBigDecimal*)(obj.Get());
-    return result;
+    AutoPtr<IBigDecimal> obj;
+    CBigDecimal::New(smallValue, scale, (IBigDecimal**)&obj);
+    return obj;
 }
 
-Boolean CBigDecimal::InitStatic()
+CBigDecimal::StaticInitializer::StaticInitializer()
 {
-    if (!mIsStaticInited) {
-        mIsStaticInited = TRUE;
-
-        CharZeros = ArrayOf<Char32>::Alloc(CharZerosLength);
-        for (Int32 i = 0; i < CharZerosLength; ++i) {
-            (*CharZeros)[i] = '0';
-        }
-
-        ZERO = CreateBigDecimal(0, 0);
-        ONE = CreateBigDecimal(1, 0);
-        TEN = CreateBigDecimal(10, 0);
-
-        BiScaledByZero = ArrayOf<IBigDecimal*>::Alloc(BiScaledByZeroLength);
-        ZeroScaledBy = ArrayOf<IBigDecimal*>::Alloc(BiScaledByZeroLength);
-        for (Int32 i = 0; i < BiScaledByZeroLength; ++i) {
-            AutoPtr<IBigDecimal> value1 = CreateBigDecimal(i, 0);
-            AutoPtr<IBigDecimal> value2 = CreateBigDecimal(0, i);
-            BiScaledByZero->Set(i, value1);
-            ZeroScaledBy->Set(i, value2);
-        }
-
-        for (Int32 i = 0; i < LongFivePowLength; ++i) {
-            LongFivePowBitLength[i] = BitLength(LongFivePow[i]);
-        }
-
-        using Elastos::Core::Math;
-        for (Int32 i = 0; i < Math::LongPowersOfTenLength; ++i) {
-            LongPowsersOfTenBitLength[i] = BitLength(Math::LongPowersOfTen[i]);
-        }
-
-        // Taking the references of useful powers.
-        TenPow = Multiplication::BigTenPows;
-        FivePow = Multiplication::BigFivePows;
+    for (Int32 i = 0; i < CH_ZEROS->GetLength(); ++i) {
+        (*CH_ZEROS)[i] = '0';
     }
 
-    return mIsStaticInited;
+    for (Int32 i = 0; i < ZERO_SCALED_BY->GetLength(); ++i) {
+        AutoPtr<IBigDecimal> value = CreateBigDecimal(i, 0);
+        BI_SCALED_BY_ZERO->Set(i, value);
+        value = CreateBigDecimal(0, i);
+        ZERO_SCALED_BY->Set(i, value);
+    }
+    for (Int32 i = 0; i < LONG_FIVE_POW_BIT_LENGTH->GetLength(); ++i) {
+        (*LONG_FIVE_POW_BIT_LENGTH)[i] = BitLength((*LONG_FIVE_POW)[i]);
+    }
+    using Elastos::Core::Math;
+    for (Int32 i = 0; i < LONG_POWERS_OF_TEN_BIT_LENGTH->GetLength(); ++i) {
+        (*LONG_POWERS_OF_TEN_BIT_LENGTH)[i] = BitLength((*Math::LONG_POWERS_OF_TEN)[i]);
+    }
+
+    // Taking the references of useful powers.
+    TEN_POW = Multiplication::sBigTenPows;
+    FIVE_POW = Multiplication::sBigFivePows;
 }
+
+const Double CBigDecimal::Log10_2 = 0.3010299956639812;
+
+INIT_PROI_4 AutoPtr< ArrayOf<IBigInteger*> > CBigDecimal::FIVE_POW;
+INIT_PROI_4 AutoPtr< ArrayOf<IBigInteger*> > CBigDecimal::TEN_POW;
+INIT_PROI_4 const AutoPtr< ArrayOf<Int64> > CBigDecimal::LONG_FIVE_POW = INIT_LONG_FIVE_POW();
+
+AutoPtr< ArrayOf<Int64> > CBigDecimal::INIT_LONG_FIVE_POW()
+{
+    AutoPtr< ArrayOf<Int64> > array = ArrayOf<Int64>::Alloc(28);
+    (*array)[0] = 1LL;
+    (*array)[1] = 5LL;
+    (*array)[2] = 25LL;
+    (*array)[3] = 125LL;
+    (*array)[4] = 625LL;
+    (*array)[5] = 3125LL;
+    (*array)[6] = 15625LL;
+    (*array)[7] = 78125LL;
+    (*array)[8] = 390625LL;
+    (*array)[9] = 1953125LL;
+    (*array)[10] = 9765625LL;
+    (*array)[11] = 48828125LL;
+    (*array)[12] = 244140625LL;
+    (*array)[13] = 1220703125LL;
+    (*array)[14] = 6103515625LL;
+    (*array)[15] = 30517578125LL;
+    (*array)[16] = 152587890625LL;
+    (*array)[17] = 762939453125LL;
+    (*array)[18] = 3814697265625LL;
+    (*array)[19] = 19073486328125LL;
+    (*array)[20] = 95367431640625LL;
+    (*array)[21] = 476837158203125LL;
+    (*array)[22] = 2384185791015625LL;
+    (*array)[23] = 11920928955078125LL;
+    (*array)[24] = 59604644775390625LL;
+    (*array)[25] = 298023223876953125LL;
+    (*array)[26] = 1490116119384765625LL;
+    (*array)[27] = 7450580596923828125LL;
+    return array;
+};
+
+INIT_PROI_4 const AutoPtr< ArrayOf<Int32> > CBigDecimal::LONG_FIVE_POW_BIT_LENGTH = ArrayOf<Int32>::Alloc(LONG_FIVE_POW->GetLength());
+INIT_PROI_4 const AutoPtr< ArrayOf<Int32> > CBigDecimal::LONG_POWERS_OF_TEN_BIT_LENGTH = ArrayOf<Int32>::Alloc(Elastos::Core::Math::LONG_POWERS_OF_TEN->GetLength());
+
+const Int32 CBigDecimal::BI_SCALED_BY_ZERO_LENGTH;
+INIT_PROI_4 AutoPtr< ArrayOf<IBigDecimal*> > CBigDecimal::BI_SCALED_BY_ZERO = ArrayOf<IBigDecimal*>::Alloc(BI_SCALED_BY_ZERO_LENGTH);
+
+INIT_PROI_4 AutoPtr<ArrayOf<IBigDecimal*> > CBigDecimal::ZERO_SCALED_BY = ArrayOf<IBigDecimal*>::Alloc(11);
+
+INIT_PROI_4 AutoPtr<ArrayOf<Char32> > CBigDecimal::CH_ZEROS = ArrayOf<Char32>::Alloc(100);
+
+INIT_PROI_4 CBigDecimal::StaticInitializer CBigDecimal::sInitializer;
+
+INIT_PROI_4 AutoPtr<IBigDecimal> CBigDecimal::ZERO = CreateBigDecimal(0, 0);
+INIT_PROI_4 AutoPtr<IBigDecimal> CBigDecimal::ONE = CreateBigDecimal(1, 0);
+INIT_PROI_4 AutoPtr<IBigDecimal> CBigDecimal::TEN = CreateBigDecimal(10, 0);
+
 
 CAR_OBJECT_IMPL(CBigDecimal)
 
@@ -200,9 +192,9 @@ ECode CBigDecimal::constructor(
     }
     else if (mScale > 0) {
         // m * 2^e =  (m * 5^(-e)) * 10^e
-        if(mScale < LongFivePowLength
-                && mantissaBits + LongFivePowBitLength[mScale] < 64) {
-            mSmallValue = mantissa * LongFivePow[mScale];
+        if (mScale < LONG_FIVE_POW_BIT_LENGTH->GetLength()
+                && mantissaBits + (*LONG_FIVE_POW_BIT_LENGTH)[mScale] < 64) {
+            mSmallValue = mantissa * (*LONG_FIVE_POW)[mScale];
             mBitLength = BitLength(mSmallValue);
         }
         else {
@@ -439,8 +431,8 @@ ECode CBigDecimal::ValueOf(
     }
 
     if ((unscaledVal == 0) && (scale >= 0)
-            && (scale < BiScaledByZeroLength)) {
-        *result = (*ZeroScaledBy)[scale];
+            && (scale < ZERO_SCALED_BY->GetLength())) {
+        *result = (*ZERO_SCALED_BY)[scale];
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -454,8 +446,8 @@ ECode CBigDecimal::ValueOf(
 {
     VALIDATE_NOT_NULL(result);
 
-    if ((unscaledVal >= 0) && (unscaledVal < BiScaledByZeroLength)) {
-        *result = (*BiScaledByZero)[unscaledVal];
+    if ((unscaledVal >= 0) && (unscaledVal < BI_SCALED_BY_ZERO_LENGTH)) {
+        *result = (*BI_SCALED_BY_ZERO)[unscaledVal];
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -545,11 +537,11 @@ ECode CBigDecimal::AddAndMult10(
     assert(thisValue && augend);
 
     using Elastos::Core::Math;
-    if(diffScale < Math::LongPowersOfTenLength &&
+    if (diffScale < Math::LONG_POWERS_OF_TEN->GetLength() &&
             Math::Max(thisValue->mBitLength,
-                    augend->mBitLength + LongPowsersOfTenBitLength[diffScale]) + 1 < 64) {
+                    augend->mBitLength + (*LONG_POWERS_OF_TEN_BIT_LENGTH)[diffScale]) + 1 < 64) {
         return ValueOf(
-            thisValue->mSmallValue + augend->mSmallValue * Math::LongPowersOfTen[diffScale],
+            thisValue->mSmallValue + augend->mSmallValue * (*Math::LONG_POWERS_OF_TEN)[diffScale],
             thisValue->mScale, result);
     }
     else {
@@ -694,9 +686,9 @@ ECode CBigDecimal::Subtract(
     }
     else if (diffScale > 0) {
         // case s1 > s2 : [ u1 - u2 * 10 ^ (s1 - s2) , s1 ]
-        if(diffScale < Math::LongPowersOfTenLength &&
-                Math::Max(mBitLength, subtrahend->mBitLength+LongPowsersOfTenBitLength[diffScale]) + 1 < 64) {
-            Int32 val = mSmallValue-subtrahend->mSmallValue * Math::LongPowersOfTen[diffScale];
+        if (diffScale < Math::LONG_POWERS_OF_TEN->GetLength() &&
+                Math::Max(mBitLength, subtrahend->mBitLength + (*LONG_POWERS_OF_TEN_BIT_LENGTH)[diffScale]) + 1 < 64) {
+            Int32 val = mSmallValue-subtrahend->mSmallValue * (*Math::LONG_POWERS_OF_TEN)[diffScale];
             return ValueOf(val, mScale, result);
         }
 
@@ -708,9 +700,9 @@ ECode CBigDecimal::Subtract(
     }
     else {// case s2 > s1 : [ u1 * 10 ^ (s2 - s1) - u2 , s2 ]
         diffScale = -diffScale;
-        if(diffScale < Math::LongPowersOfTenLength &&
-                Math::Max(mBitLength + LongPowsersOfTenBitLength[diffScale],subtrahend->mBitLength)+1<64) {
-            Int32 val = mSmallValue*Math::LongPowersOfTen[diffScale]-subtrahend->mSmallValue;
+        if (diffScale < Math::LONG_POWERS_OF_TEN->GetLength() &&
+                Math::Max(mBitLength + (*LONG_POWERS_OF_TEN_BIT_LENGTH)[diffScale],subtrahend->mBitLength)+1<64) {
+            Int32 val = mSmallValue * (*Math::LONG_POWERS_OF_TEN)[diffScale]-subtrahend->mSmallValue;
             return ValueOf(val, subtrahend->mScale, result);
         }
 
@@ -865,24 +857,24 @@ ECode CBigDecimal::Divide(
         return E_ARITHMETIC_EXCEPTION;
     }
 
-    if(mBitLength < 64 && divisor->mBitLength < 64 ) {
-        if(diffScale == 0) {
+    if (mBitLength < 64 && divisor->mBitLength < 64 ) {
+        if (diffScale == 0) {
             return DividePrimitiveLongs(mSmallValue,
                     divisor->mSmallValue, scale, roundingMode, result);
         }
-        else if(diffScale > 0) {
-            if(diffScale < Math::LongPowersOfTenLength &&
-                    divisor->mBitLength + LongPowsersOfTenBitLength[(Int32)diffScale] < 64) {
+        else if (diffScale > 0) {
+            if (diffScale < Math::LONG_POWERS_OF_TEN->GetLength() &&
+                    divisor->mBitLength + (*LONG_POWERS_OF_TEN_BIT_LENGTH)[(Int32)diffScale] < 64) {
                 return DividePrimitiveLongs(mSmallValue,
-                        divisor->mSmallValue * Math::LongPowersOfTen[(Int32)diffScale],
+                        divisor->mSmallValue * (*Math::LONG_POWERS_OF_TEN)[(Int32)diffScale],
                         scale, roundingMode, result);
             }
         }
         else { // diffScale < 0
-            if(-diffScale < Math::LongPowersOfTenLength &&
-                    mBitLength + LongPowsersOfTenBitLength[(Int32)-diffScale] < 64) {
+            if (-diffScale < Math::LONG_POWERS_OF_TEN->GetLength() &&
+                    mBitLength + (*LONG_POWERS_OF_TEN_BIT_LENGTH)[(Int32)-diffScale] < 64) {
                 return DividePrimitiveLongs(
-                        mSmallValue * Math::LongPowersOfTen[(Int32)-diffScale],
+                        mSmallValue * (*Math::LONG_POWERS_OF_TEN)[(Int32)-diffScale],
                         divisor->mSmallValue, scale, roundingMode, result);
             }
         }
@@ -1071,7 +1063,7 @@ ECode CBigDecimal::Divide(
     Int32 k; // number of factors "2" in 'q'
     Int32 l = 0; // number of factors "5" in 'q'
     Int32 i = 1;
-    Int32 lastPow = FivePow->GetLength() - 1;
+    Int32 lastPow = FIVE_POW->GetLength() - 1;
     AutoPtr<IBigInteger> q = divisor->GetUnscaledValue();
 
     // To divide both by the GCD
@@ -1097,7 +1089,7 @@ ECode CBigDecimal::Divide(
 
     do {
         AutoPtr<ArrayOf<IBigInteger*> > quotAndRem;
-        q->DivideAndRemainder((*FivePow)[i], (ArrayOf<IBigInteger*>**)&quotAndRem);
+        q->DivideAndRemainder((*FIVE_POW)[i], (ArrayOf<IBigInteger*>**)&quotAndRem);
 
         Int32 remSignum = 0;
         (*quotAndRem)[1]->GetSignum(&remSignum);
@@ -1181,7 +1173,7 @@ ECode CBigDecimal::Divide(
     Int64 newScale = diffScale; // scale of the final quotient
     Int32 compRem; // to compare the remainder
     Int32 i = 1; // index
-    Int32 lastPow = TenPow->GetLength() - 1; // last power of ten
+    Int32 lastPow = TEN_POW->GetLength() - 1; // last power of ten
     AutoPtr<IBigInteger> integerQuot; // for temporal results
 
     AutoPtr<IBigInteger> tuBI = GetUnscaledValue();
@@ -1232,7 +1224,7 @@ ECode CBigDecimal::Divide(
         // To strip trailing zeros until the preferred scale is reached
         while (NOERROR == integerQuot->TestBit(0, &testBit) && !testBit) {
             AutoPtr<ArrayOf<IBigInteger*> > tempQuotAndRem;
-            integerQuot->DivideAndRemainder((*TenPow)[i], (ArrayOf<IBigInteger*>**)&tempQuotAndRem);
+            integerQuot->DivideAndRemainder((*TEN_POW)[i], (ArrayOf<IBigInteger*>**)&tempQuotAndRem);
             Int32 tempRemSignum = 0;
             (*tempQuotAndRem)[1]->GetSignum(&tempRemSignum);
             if ((tempRemSignum == 0) && (newScale - i >= diffScale)) {
@@ -1279,7 +1271,7 @@ ECode CBigDecimal::DivideToIntegralValue(
     Int64 newScale = (Int64)mScale - divisor->mScale;
     Int64 tempScale = 0;
     Int32 i = 1;
-    Int32 lastPow = TenPow->GetLength() - 1;
+    Int32 lastPow = TEN_POW->GetLength() - 1;
 
     if ((divisor->ApproxPrecision() + newScale > ApproxPrecision() + 1LL)
     || (IsZero())) {
@@ -1309,7 +1301,7 @@ ECode CBigDecimal::DivideToIntegralValue(
         Boolean testBit = FALSE;
         while (NOERROR == integralValue->TestBit(0, &testBit) && !testBit) {
             AutoPtr<ArrayOf<IBigInteger*> > quotAndRem;
-            FAIL_RETURN(integralValue->DivideAndRemainder((*TenPow)[i], (ArrayOf<IBigInteger*>**)&quotAndRem));
+            FAIL_RETURN(integralValue->DivideAndRemainder((*TEN_POW)[i], (ArrayOf<IBigInteger*>**)&quotAndRem));
             Int32 remSignum = 0;
             (*quotAndRem)[1]->GetSignum(&remSignum);
             if (remSignum == 0 && (tempScale - i >= newScale)) {
@@ -1367,7 +1359,7 @@ ECode CBigDecimal::DivideToIntegralValue(
     divisor->GetPrecision(&divPre);
     Int32 diffPrecision = thisPre - divPre;
 
-    Int32 lastPow = TenPow->GetLength() - 1;
+    Int32 lastPow = TEN_POW->GetLength() - 1;
     Int64 diffScale = (Int64)mScale - divisor->mScale;
     Int64 newScale = diffScale;
     Int64 quotPrecision = diffPrecision - diffScale + 1;
@@ -1463,7 +1455,7 @@ ECode CBigDecimal::DivideToIntegralValue(
     Boolean testBit = FALSE;
     while (NOERROR == strippedBI->TestBit(0, &testBit) && !testBit) {
         AutoPtr<ArrayOf<IBigInteger*> > quotAndRem;
-        FAIL_RETURN(strippedBI->DivideAndRemainder((*TenPow)[i],
+        FAIL_RETURN(strippedBI->DivideAndRemainder((*TEN_POW)[i],
                 (ArrayOf<IBigInteger*>**)&quotAndRem));
         Int32 remSignum = 0;
         (*quotAndRem)[1]->GetSignum(&remSignum);
@@ -1863,11 +1855,11 @@ ECode CBigDecimal::SetScale(
 
     using Elastos::Core::Math;
     AutoPtr<IBigInteger> tubi = GetUnscaledValue();
-    if(diffScale > 0) {
+    if (diffScale > 0) {
     // return  [u * 10^(s2 - s), newScale]
-        if(diffScale < Math::LongPowersOfTenLength &&
-                (mBitLength + LongPowsersOfTenBitLength[(Int32)diffScale]) < 64 ) {
-            Int32 val = mSmallValue * Math::LongPowersOfTen[(Int32)diffScale];
+        if (diffScale < Math::LONG_POWERS_OF_TEN->GetLength() &&
+                (mBitLength + (*LONG_POWERS_OF_TEN_BIT_LENGTH)[(Int32)diffScale]) < 64 ) {
+            Int32 val = mSmallValue * (*Math::LONG_POWERS_OF_TEN)[(Int32)diffScale];
             return ValueOf(val, newScale, result);
         }
 
@@ -1878,8 +1870,8 @@ ECode CBigDecimal::SetScale(
 
     // diffScale < 0
     // return  [u,s] / [1,newScale]  with the appropriate scale and rounding
-    if(mBitLength < 64 && -diffScale < Math::LongPowersOfTenLength) {
-        Int32 val = Math::LongPowersOfTen[(Int32)-diffScale];
+    if (mBitLength < 64 && -diffScale < Math::LONG_POWERS_OF_TEN->GetLength()) {
+        Int32 val = (*Math::LONG_POWERS_OF_TEN)[(Int32)-diffScale];
         return DividePrimitiveLongs(mSmallValue, val, newScale,roundingMode, result);
     }
 
@@ -1936,9 +1928,9 @@ ECode CBigDecimal::MovePoint(
         return CBigDecimal::New(tubi, iNewScale, result);
     }
 
-    if(-newScale < Math::LongPowersOfTenLength &&
-            mBitLength + LongPowsersOfTenBitLength[(Int32)-newScale] < 64 ) {
-        Int64 val = mSmallValue * Math::LongPowersOfTen[(Int32)-newScale];
+    if(-newScale < Math::LONG_POWERS_OF_TEN->GetLength() &&
+            mBitLength + (*LONG_POWERS_OF_TEN_BIT_LENGTH)[(Int32)-newScale] < 64 ) {
+        Int64 val = mSmallValue * (*Math::LONG_POWERS_OF_TEN)[(Int32)-newScale];
         return ValueOf(val, 0, result);
     }
 
@@ -1986,7 +1978,7 @@ ECode CBigDecimal::StripTrailingZeros(
     VALIDATE_NOT_NULL(result);
 
     Int32 i = 1; // 1 <= i <= 18
-    Int32 lastPow = TenPow->GetLength() - 1;
+    Int32 lastPow = TEN_POW->GetLength() - 1;
     Int64 newScale = mScale;
 
     if (IsZero()) {
@@ -2004,7 +1996,7 @@ ECode CBigDecimal::StripTrailingZeros(
     while (NOERROR == strippedBI->TestBit(0, &testBit) && !testBit) {
         AutoPtr<ArrayOf<IBigInteger*> > quotAndRem;
         // To divide by 10^i
-        strippedBI->DivideAndRemainder((*TenPow)[i], (ArrayOf<IBigInteger*>**)&quotAndRem);
+        strippedBI->DivideAndRemainder((*TEN_POW)[i], (ArrayOf<IBigInteger*>**)&quotAndRem);
         // To look the remainder
         Int32 remSignum = 0;
         (*quotAndRem)[1]->GetSignum(&remSignum);
@@ -2230,8 +2222,8 @@ ECode CBigDecimal::ToString(
             AutoPtr<ArrayOf<Char32> > array = ArrayOf<Char32>::Alloc(2);
             (*array)[0] = '0';
             (*array)[1] = '.';
-            result.Insert(begin - 1, *(ArrayOf<Char32>*)array);
-            result.Insert(begin + 1, *(ArrayOf<Char32>*)CharZeros, 0, -(Int32)exponent - 1);
+            result.Insert(begin - 1, *array);
+            result.Insert(begin + 1, *CH_ZEROS, 0, -(Int32)exponent - 1);
         }
     } else {
         if (end - begin >= 1) {
@@ -2280,8 +2272,8 @@ ECode CBigDecimal::ToEngineeringString(
             AutoPtr<ArrayOf<Char32> > array = ArrayOf<Char32>::Alloc(2);
             (*array)[0] = '0';
             (*array)[1] = '.';
-            result.Insert(begin - 1, *(ArrayOf<Char32>*)array);
-            result.Insert(begin + 1, *(ArrayOf<Char32>*)CharZeros, 0, -(Int32)exponent - 1);
+            result.Insert(begin - 1, *array);
+            result.Insert(begin + 1, *CH_ZEROS, 0, -(Int32)exponent - 1);
         }
     }
     else {
@@ -2359,10 +2351,10 @@ ECode CBigDecimal::ToPlainString(
         if (delta >= 0) {
             result.Append("0.");
             // To append zeros after the decimal point
-            for (; delta > CharZerosLength; delta -= CharZerosLength) {
-                result.Append(*(ArrayOf<Char32>*)CharZeros);
+            for (; delta > CH_ZEROS->GetLength(); delta -= CH_ZEROS->GetLength()) {
+                result.Append(*CH_ZEROS);
             }
-            result.Append(*(ArrayOf<Char32>*)CharZeros, 0, delta);
+            result.Append(*CH_ZEROS, 0, delta);
 
             String subStr = intStr.Substring(begin);
             result.Append(subStr);
@@ -2379,10 +2371,10 @@ ECode CBigDecimal::ToPlainString(
         String subStr = intStr.Substring(begin);
         result.Append(subStr);
         // To append trailing zeros
-        for (; delta < -CharZerosLength; delta += CharZerosLength) {
-            result.Append(*(ArrayOf<Char32>*)CharZeros);
+        for (; delta < -CH_ZEROS->GetLength(); delta += CH_ZEROS->GetLength()) {
+            result.Append(*CH_ZEROS);
         }
-        result.Append(*(ArrayOf<Char32>*)CharZeros, 0, -delta);
+        result.Append(*CH_ZEROS, 0, -delta);
     }
 
     result.ToString(representation);
@@ -2838,7 +2830,7 @@ Int32 CBigDecimal::DecimalDigitsInLong(
     }
     else {
         Int64 absVal = Math::Abs(value);
-        Int32 index = BinarySearch<Int64>(Math::LongPowersOfTen, Math::LongPowersOfTenLength, absVal);
+        Int32 index = BinarySearch<Int64>(Math::LONG_POWERS_OF_TEN->GetPayload(), Math::LONG_POWERS_OF_TEN->GetLength(), absVal);
         return (index < 0) ? (-index - 1) : (index + 1);
     }
 }
@@ -3009,7 +3001,7 @@ ECode CBigDecimal::SmallRound(
 {
     using Elastos::Core::Math;
 
-    Int64 sizeOfFraction = Math::LongPowersOfTen[discardedPrecision];
+    Int64 sizeOfFraction = (*Math::LONG_POWERS_OF_TEN)[discardedPrecision];
     Int64 newScale = (Int64)mScale - discardedPrecision;
     Int64 unscaledVal = mSmallValue;
     // Getting the integer part and the discarded fraction

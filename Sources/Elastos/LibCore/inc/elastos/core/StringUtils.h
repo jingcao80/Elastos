@@ -191,6 +191,12 @@ public:
         /* [in] */ const char* replacement,
         /* [out] */ String* result);
 
+    static CARAPI Replace(
+        /* [in] */ const String& input,
+        /* [in] */ const char* target,
+        /* [in] */ const char* replacement,
+        /* [out] */ String* result);
+
     static CARAPI Matches(
         /* [in] */ const String& input,
         /* [in] */ const char* regularExpression,

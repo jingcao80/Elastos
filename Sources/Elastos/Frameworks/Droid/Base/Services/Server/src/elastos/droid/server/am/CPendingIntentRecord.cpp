@@ -1,7 +1,9 @@
 
 #include "elastos/droid/server/am/CPendingIntentRecord.h"
-// #include "elastos/droid/server/am/CActivityManagerService.h"
+#include "elastos/droid/server/am/CActivityManagerService.h"
+#include "elastos/droid/server/am/ActivityStack.h"
 #include "Elastos.Droid.App.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -237,11 +239,12 @@ CPendingIntentRecord::CPendingIntentRecord()
 CPendingIntentRecord::~CPendingIntentRecord()
 {
     if (!mCanceled) {
-        // AutoPtr<IMessage> msg;
-        // mOwner->mHandler->ObtainMessage(
-        //     CActivityManagerService::FINALIZE_PENDING_INTENT_MSG,
-        //     (IPendingIntentRecord*)this, (IMessage**)&msg);
-        // mOwner->mHandler->SendMessage(msg);
+        AutoPtr<IMessage> msg;
+        mOwner->mHandler->ObtainMessage(
+            CActivityManagerService::FINALIZE_PENDING_INTENT_MSG,
+            (IPendingIntentRecord*)this, (IMessage**)&msg);
+        Boolean res;
+        mOwner->mHandler->SendMessage(msg, &res);
     }
 }
 
@@ -287,12 +290,12 @@ Int32 CPendingIntentRecord::SendInner(
     /* [in] */ IActivityContainer* container)
 {
     String resolvedType(aResolvedType);
-    // AutoLock lock(mOwner);
+    AutoLock lock(mOwner);
 
     if (!mCanceled) {
         mSent = TRUE;
         if ((mKey->mFlags & IPendingIntent::FLAG_ONE_SHOT) != 0) {
-            // mOwner->CancelIntentSenderLocked(this, TRUE);
+            mOwner->CancelIntentSenderLocked(this, TRUE);
             mCanceled = TRUE;
         }
 
@@ -329,7 +332,7 @@ Int32 CPendingIntentRecord::SendInner(
         Boolean sendFinish = finishedReceiver != NULL;
         Int32 userId = mKey->mUserId;
         if (userId == IUserHandle::USER_CURRENT) {
-            // userId = mOwner->GetCurrentUserIdLocked();
+            userId = mOwner->GetCurrentUserIdLocked();
         }
 
         Int32 status;
@@ -358,44 +361,44 @@ Int32 CPendingIntentRecord::SendInner(
 
                 allIntents->Set(length - 1, finalIntent);
                 allResolvedTypes->Set(length -1, resolvedType);
-                // ec = mOwner->StartActivitiesInPackage(mUid, key->mPackageName, allIntents,
-                //         allResolvedTypes, resultTo, options, userId, &status);
+                ec = mOwner->StartActivitiesInPackage(mUid, mKey->mPackageName, allIntents,
+                        allResolvedTypes, resultTo, options, userId, &status);
             }
             else {
-                // ec = mOwner->StartActivityInPackage(mUid, key->mPackageName, finalIntent, resolvedType,
-                //         resultTo, resultWho, requestCode, 0, options, userId, container, NULL &status);
+                ec = mOwner->StartActivityInPackage(mUid, mKey->mPackageName, finalIntent, resolvedType,
+                        resultTo, resultWho, requestCode, 0, options, userId, container, NULL, &status);
             }
 
             if (ec == (ECode)E_RUNTIME_EXCEPTION) {
-                // Slogger::W(CActivityManagerService::TAG,
-                //         "Unable to send startActivity intent %08x", ec);
+                Slogger::W(CActivityManagerService::TAG,
+                        "Unable to send startActivity intent %08x", ec);
             }
             break;
 
         case IActivityManager::INTENT_SENDER_ACTIVITY_RESULT:
-            // mKey->mActivity->mTask->mStack->SendActivityResultLocked(-1, mKey->mActivity,
-            //         mKey->mWho, mKey->mRequestCode, code, finalIntent);
+            mKey->mActivity->mTask->mStack->SendActivityResultLocked(-1, mKey->mActivity,
+                    mKey->mWho, mKey->mRequestCode, code, finalIntent);
             break;
 
         case IActivityManager::INTENT_SENDER_BROADCAST:
             // If a completion callback has been requested, require
             // that the broadcast be delivered synchronously
-            // ec = mOwner->BroadcastIntentInPackage(mKey->mPackageName, mUid,
-            //         finalIntent, resolvedType, finishedReceiver, code, nullStr, NULL,
-            //         requiredPermission, (finishedReceiver != NULL), FALSE, userId, &status);
+            ec = mOwner->BroadcastIntentInPackage(mKey->mPackageName, mUid,
+                    finalIntent, resolvedType, finishedReceiver, code, nullStr, NULL,
+                    requiredPermission, (finishedReceiver != NULL), FALSE, userId, &status);
             sendFinish = FALSE;
             if (ec == (ECode)E_RUNTIME_EXCEPTION) {
-                // Slogger::W(CActivityManagerService::TAG,
-                //         "Unable to send startActivity intent %08x", ec);
+                Slogger::W(CActivityManagerService::TAG,
+                        "Unable to send startActivity intent %08x", ec);
             }
             break;
 
         case IActivityManager::INTENT_SENDER_SERVICE:
             AutoPtr<IComponentName> cn;
-            // ec = mOwner->StartServiceInPackage(mUid, finalIntent, resolvedType, userId, (IComponentName**)&cn);
+            ec = mOwner->StartServiceInPackage(mUid, finalIntent, resolvedType, userId, (IComponentName**)&cn);
             if (ec == (ECode)E_RUNTIME_EXCEPTION) {
-                // Slogger::W(CActivityManagerService::TAG,
-                //         "Unable to send startService intent %08x", ec);
+                Slogger::W(CActivityManagerService::TAG,
+                        "Unable to send startService intent %08x", ec);
             }
             break;
         }
@@ -420,14 +423,14 @@ Int32 CPendingIntentRecord::SendInner(
 
 ECode CPendingIntentRecord::CompleteFinalize()
 {
-    // AutoLock lock(mOwner);
-    // CActivityManagerService::PendingIntentRecordHashMap::Iterator it;
-    // it = mOwner->mIntentSenderRecords.Find(mKey);
-    // if (it != mOwner->mIntentSenderRecords.End()) {
-    //     if (it->mSecond == mRef) {
-    //         mOwner->mIntentSenderRecords.Erase(it);
-    //     }
-    // }
+    AutoLock lock(mOwner);
+    CActivityManagerService::PendingIntentRecordHashMap::Iterator it;
+    it = mOwner->mIntentSenderRecords.Find(mKey);
+    if (it != mOwner->mIntentSenderRecords.End()) {
+        if (it->mSecond == mRef) {
+            mOwner->mIntentSenderRecords.Erase(it);
+        }
+    }
     return NOERROR;
 }
 

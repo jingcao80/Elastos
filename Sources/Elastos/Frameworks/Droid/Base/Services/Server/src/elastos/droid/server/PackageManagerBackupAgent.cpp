@@ -352,7 +352,7 @@ ECode PackageManagerBackupAgent::WriteSignatureArray(
         AutoPtr<ArrayOf<Byte> > flat;
         (*sigs)[i]->ToByteArray((ArrayOf<Byte>**)&flat);
         FAIL_RETURN(IDataOutput::Probe(out)->WriteInt32(flat->GetLength()));
-        FAIL_RETURN(out->WriteBytes(*flat));
+        FAIL_RETURN(out->Write(flat));
     }
     return NOERROR;
 }

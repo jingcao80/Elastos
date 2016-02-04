@@ -62,6 +62,9 @@ public:
     CARAPI GetCallingUserId(
         /* [out] */ Int32* userId);
 
+    CARAPI GetCallingUserHandle(
+        /* [out] */ IUserHandle** userHandle);
+
     /**
      * Returns the uid that is composed from the userId and the appId.
      * @hide

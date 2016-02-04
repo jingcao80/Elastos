@@ -651,6 +651,7 @@ ECode CMediaRecorder::Prepare()
     }
 
     NativePrepare();
+    return NOERROR;
 }
 
 ECode CMediaRecorder::Start()

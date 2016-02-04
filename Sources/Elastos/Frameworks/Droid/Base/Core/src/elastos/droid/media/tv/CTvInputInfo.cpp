@@ -9,9 +9,10 @@
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/graphics/drawable/CDrawableHelper.h"
 #include "elastos/droid/os/CUserHandle.h"
-#include "elastos/droid/utility/SparseInt32Array.h"
-#include "elastos/droid/R.h"
+#include "elastos/droid/utility/CSparseInt32Array.h"
 #include "elastos/droid/utility/Xml.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::CIntent;
@@ -25,9 +26,10 @@ using Elastos::Droid::Graphics::Drawable::IDrawableHelper;
 using Elastos::Droid::Graphics::Drawable::CDrawableHelper;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::R;
-using Elastos::Droid::Utility::SparseInt32Array;
+using Elastos::Droid::Utility::CSparseInt32Array;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Core::CString;
+using Elastos::Core::StringUtils;
 using Elastos::IO::IInputStream;
 using Org::Xmlpull::V1::IXmlPullParser;
 
@@ -42,7 +44,7 @@ String CTvInputInfo::TAG("TvInputInfo");
 static AutoPtr<ISparseInt32Array> Init()
 {
     AutoPtr<ISparseInt32Array> array;
-    array = new SparseInt32Array();
+    CSparseInt32Array::New((ISparseInt32Array**)&array);
     array->Put(ITvInputHardwareInfo::TV_INPUT_TYPE_OTHER_HARDWARE, ITvInputInfo::TYPE_OTHER);
     array->Put(ITvInputHardwareInfo::TV_INPUT_TYPE_TUNER, ITvInputInfo::TYPE_TUNER);
     array->Put(ITvInputHardwareInfo::TV_INPUT_TYPE_COMPOSITE, ITvInputInfo::TYPE_COMPOSITE);
@@ -355,8 +357,7 @@ ECode CTvInputInfo::CreateTvInputInfo(
 {
     VALIDATE_NOT_NULL(result)
     Int32 addr;
-//TODO: Need IHdmiDeviceInfo
-    // hdmiDeviceInfo->GetPhysicalAddress(&addr);
+    hdmiDeviceInfo->GetPhysicalAddress(&addr);
     Boolean isConnectedToHdmiSwitch = (addr & 0x0FFF) != 0;
 
     AutoPtr<IServiceInfo> si;
@@ -574,10 +575,9 @@ String CTvInputInfo::GenerateInputIdForHdmiDevice(
     String str;
     name->FlattenToShortString(&str);
     Int32 addr, id;
-//TODO: Need IHdmiDeviceInfo
-    // deviceInfo->GetId(&id);
-    // deviceInfo->GetPhysicalAddress(&addr);
-    return str + "/HDMI" + addr + id;
+    deviceInfo->GetId(&id);
+    deviceInfo->GetPhysicalAddress(&addr);
+    return str + "/HDMI" + StringUtils::ToString(addr) + StringUtils::ToString(id);
 }
 
 String CTvInputInfo::GenerateInputIdForHardware(
@@ -590,7 +590,7 @@ String CTvInputInfo::GenerateInputIdForHardware(
     name->FlattenToShortString(&str);
     Int32 deviceId;
     hardwareInfo->GetDeviceId(&deviceId);
-    return str + "/HW" + deviceId;
+    return str + "/HW" + StringUtils::ToString(deviceId);
 }
 
 } // namespace Tv

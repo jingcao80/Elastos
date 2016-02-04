@@ -449,9 +449,8 @@ ECode QwertyKeyListener::OnKeyDown(
         *ret = TRUE;
         return NOERROR;
     }
-    else if (keyCode == IKeyEvent::KEYCODE_DEL
-        && (event->HasNoModifiers(&bHasNoModifiers), bHasNoModifiers) || (event->HasModifiers(IKeyEvent::META_ALT_ON, &bHasModifiers), bHasModifiers)
-        && selStart == selEnd) {
+    else if ((keyCode == IKeyEvent::KEYCODE_DEL && (event->HasNoModifiers(&bHasNoModifiers), bHasNoModifiers)) ||
+        ((event->HasModifiers(IKeyEvent::META_ALT_ON, &bHasModifiers), bHasModifiers) && selStart == selEnd)) {
         // special backspace case for undoing autotext
 
         Int32 consider = 1;

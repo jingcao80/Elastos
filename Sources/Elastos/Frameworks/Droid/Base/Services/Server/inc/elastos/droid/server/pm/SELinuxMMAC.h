@@ -4,6 +4,8 @@
 
 #include "_Elastos.Droid.Server.h"
 #include "elastos/droid/ext/frameworkext.h"
+#define HASH_FOR_CONTENT
+#include "elastos/droid/ext/frameworkhash.h"
 #include "elastos/droid/content/pm/PackageParser.h"
 #include "Elastos.Droid.Content.h"
 #include <Elastos.CoreLibrary.IO.h>

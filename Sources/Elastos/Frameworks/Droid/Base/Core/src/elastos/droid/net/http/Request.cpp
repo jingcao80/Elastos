@@ -63,7 +63,6 @@ using Org::Apache::Http::Message::IBasicHttpEntityEnclosingRequest;
 using Org::Apache::Http::Message::IBasicHttpRequest;
 using Org::Apache::Http::Protocol::CRequestContent;
 using Org::Apache::Http::Protocol::IHttpContext;
-using Org::Apache::Http::Protocol::IRequestContent;
 
 namespace Elastos {
 namespace Droid {
@@ -75,14 +74,12 @@ CAR_INTERFACE_IMPL(Request, Object, IRequest)
 const String Request::HOST_HEADER("Host");
 const String Request::ACCEPT_ENCODING_HEADER("Accept-Encoding");
 const String Request::CONTENT_LENGTH_HEADER("content-length");
-AutoPtr<IRequestContent> Request::mRequestContentProcessor = InitRequestContentProcessor();
+AutoPtr<IHttpRequestInterceptor> Request::mRequestContentProcessor = InitRequestContentProcessor();
 
-AutoPtr<IRequestContent> Request::InitRequestContentProcessor()
+AutoPtr<IHttpRequestInterceptor> Request::InitRequestContentProcessor()
 {
-    AutoPtr<IRequestContent> rev;
-    // TODO: Waiting for CRequestContent
-    assert(0);
-    // CRequestContent::New((IRequestContent**)&rev);
+    AutoPtr<IHttpRequestInterceptor> rev;
+    CRequestContent::New((IHttpRequestInterceptor**)&rev);
     return rev;
 }
 
@@ -128,6 +125,7 @@ ECode Request::constructor(
        high priority reqs (saving the trouble for images, etc) */
     AddHeader(ACCEPT_ENCODING_HEADER, String("gzip"));
     AddHeaders(headers);
+    return NOERROR;
 }
 
 ECode Request::SetLoadingPaused(
@@ -258,6 +256,7 @@ ECode Request::SendRequest(
         this->GetHostPort(&hostPort);
         HttpLog::V("Request.requestSent() %s://%s%s", name.string(), hostPort.string(), mPath.string());
     }
+    return NOERROR;
 }
 
 ECode Request::ReadResponse(
@@ -445,10 +444,11 @@ ECode Request::GetHostPort(
 
     String port;
     // Only send port when we must... many servers can't deal with it
-    if (myPort != 80 && myScheme.Equals("http") ||
-        myPort != 443 && myScheme.Equals("https")) {
+    if ((myPort != 80 && myScheme.Equals("http")) ||
+        (myPort != 443 && myScheme.Equals("https"))) {
         mHost->ToHostString(&port);
-    } else {
+    }
+    else {
         mHost->GetHostName(&port);
     }
 

@@ -718,7 +718,7 @@ ECode CAccessibilityInteractionClient::SetFindAccessibilityNodeInfosResult(
 Boolean CAccessibilityInteractionClient::GetPerformAccessibilityActionResultAndClear(
     /* [in] */ Int32 interactionId)
 {
-    Boolean result;
+    Boolean result = FALSE;
     synchronized(mInstanceLock) {
         Boolean success = WaitForResultTimedLocked(interactionId);
         result = success ? mPerformAccessibilityActionResult : FALSE;

@@ -214,6 +214,10 @@ static const KeywordToken s_keywords_I[] = {
     { "Int8", Token_K_Int8 },
 };
 
+static const KeywordToken s_keywords_N[] = {
+    { "NULL", Token_K_null },
+};
+
 static const KeywordToken s_keywords_O[] = {
 };
 
@@ -286,9 +290,9 @@ static const KeywordIndex s_upperIndexTable[26] = {
     { 0, NULL },                                                    // K
     { 0, NULL },                                                    // L
     { 0, NULL },                                                    // M
-    { 0, NULL },                                                    // N
+    { sizeof(s_keywords_N) / sizeof(KeywordToken), s_keywords_N },  // N
     { sizeof(s_keywords_O) / sizeof(KeywordToken), s_keywords_O },  // O
-    { sizeof(s_keywords_P) / sizeof(KeywordToken), s_keywords_P },  // P                                                  // P
+    { sizeof(s_keywords_P) / sizeof(KeywordToken), s_keywords_P },  // P
     { 0, NULL },                                                    // Q
     { 0, NULL },                                                    // R
     { sizeof(s_keywords_S) / sizeof(KeywordToken), s_keywords_S },  // S

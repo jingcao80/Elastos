@@ -1511,6 +1511,13 @@ module
             [in] Boolean allow);
 
         /**
+         * TODO: remove this.
+         * @hide
+         */
+        SetAllowExitTransitionOverlap(
+            [in] Boolean allow);
+
+        /**
          * Returns how the transition set in
          * {@link #setExitTransition(android.transition.Transition)} overlaps with the exit
          * transition of the called Activity when reentering after if finishes. When true,
@@ -1522,6 +1529,13 @@ module
          * @attr ref android.R.styleable#Window_windowAllowReturnTransitionOverlap
          */
         GetAllowReturnTransitionOverlap(
+            [out] Boolean* allow);
+
+        /**
+         * TODO: remove this.
+         * @hide
+         */
+        GetAllowExitTransitionOverlap(
             [out] Boolean* allow);
 
         /**

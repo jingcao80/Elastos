@@ -19,7 +19,7 @@ using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::Pm::IServiceInfo;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Internal::App::IServiceState;
-using Elastos::Droid::Os::IBatteryStatsUidPkgServ;
+using Elastos::Droid::Internal::Os::IBatteryStatsImplUidPkgServ;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Utility::Etl::HashMap;
@@ -159,7 +159,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ CActivityManagerService* ams,
-        /* [in] */ IBatteryStatsUidPkgServ* servStats,
+        /* [in] */ IBatteryStatsImplUidPkgServ* servStats,
         /* [in] */ IComponentName* name,
         /* [in] */ IIntentFilterComparison* intent,
         /* [in] */ IServiceInfo* sInfo,
@@ -221,7 +221,7 @@ public:
     static const Int32 MAX_DONE_EXECUTING_COUNT = 6;
 
     AutoPtr<CActivityManagerService> mAms;
-    AutoPtr<IBatteryStatsUidPkgServ> mStats;
+    AutoPtr<IBatteryStatsImplUidPkgServ> mStats;
     AutoPtr<IComponentName> mName; // service component.
     String mShortName; // name.flattenToShortString().
     AutoPtr<IIntentFilterComparison> mIntent; // original intent used to find service.

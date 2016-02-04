@@ -1,0 +1,48 @@
+
+module
+{
+
+    interface Elastos.Droid.Telecomm.Telecom.IVideoProfile;
+    interface Elastos.Droid.Telecomm.Telecom.ICameraCapabilities;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecomm {
+    namespace Internal {
+
+        /**
+        * Internal definition of a callback interface, used for an InCallUi to respond to video
+        * telephony changes.
+        *
+        * @see android.telecom.InCallService.VideoCall.Listener
+        *
+        * {@hide}
+        */
+        interface IIVideoCallback {
+            ReceiveSessionModifyRequest(
+                [in] IVideoProfile* videoProfile);
+
+            ReceiveSessionModifyResponse(
+                [in] Int32 status,
+                [in] IVideoProfile* requestedProfile,
+                [in] IVideoProfile* responseProfile);
+
+            HandleCallSessionEvent(
+                [in] Int32 event);
+
+            ChangePeerDimensions(
+                [in] Int32 width,
+                [in] Int32 height);
+
+            ChangeCallDataUsage(
+                [in] Int32 dataUsage);
+
+            ChangeCameraCapabilities(
+                [in] ICameraCapabilities* cameraCapabilities);
+        }
+
+    } // namespace Internal
+    } // namespace Telecomm
+    } // namespace Droid
+    } // namespace Elastos
+}

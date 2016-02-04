@@ -6,8 +6,10 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/view/DragEvent.h"
+#include "elastos/droid/view/CDragEvent.h"
 #include "elastos/droid/content/CClipData.h"
 #include "elastos/droid/content/CClipDescription.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IClipData;
@@ -22,9 +24,9 @@ namespace View {
 
 const Int32 DragEvent::MAX_RECYCLED;
 const Boolean DragEvent::TRACK_RECYCLED_LOCATION;
-Mutex DragEvent::sRecyclerLock;
+Object DragEvent::sRecyclerLock;
 Int32 DragEvent::sRecyclerUsed = 0;
-AutoPtr<DragEvent> DragEvent::sRecyclerTop;
+AutoPtr<IDragEvent> DragEvent::sRecyclerTop;
 
 CAR_INTERFACE_IMPL_2(DragEvent, Object, IDragEvent, IParcelable)
 
@@ -138,7 +140,7 @@ ECode DragEvent::Recycle()
     mClipDescription = NULL;
     mLocalState = NULL;
 
-    Mutex::AutoLock lock(sRecyclerLock);
+    AutoLock lock(sRecyclerLock);
     if (sRecyclerUsed < MAX_RECYCLED) {
         sRecyclerUsed++;
         mNext = sRecyclerTop;
@@ -216,13 +218,13 @@ ECode DragEvent::constructor()
 }
 
 ECode DragEvent::Init(
-        /* [in] */ Int32 action,
-        /* [in] */ Float x,
-        /* [in] */ Float y,
-        /* [in] */ IClipDescription * description,
-        /* [in] */ IClipData* data,
-        /* [in] */ IInterface* localState,
-        /* [in] */ Boolean result)
+    /* [in] */ Int32 action,
+    /* [in] */ Float x,
+    /* [in] */ Float y,
+    /* [in] */ IClipDescription * description,
+    /* [in] */ IClipData* data,
+    /* [in] */ IInterface* localState,
+    /* [in] */ Boolean result)
 {
     mAction = action;
     mX = x;
@@ -235,72 +237,58 @@ ECode DragEvent::Init(
 }
 
 
-ECode DragEvent::Obtain(
-    /* [out] */ IDragEvent** event)
+AutoPtr<IDragEvent> DragEvent::Obtain()
 {
-    VALIDATE_NOT_NULL(event);
-    return Obtain(0, 0.0f, 0.0f, NULL, NULL, NULL, FALSE, event);
+    return Obtain(0, 0.0f, 0.0f, NULL, NULL, NULL, FALSE);
 }
 
-ECode DragEvent::Obtain(
+AutoPtr<IDragEvent> DragEvent::Obtain(
     /* [in] */ Int32 action,
     /* [in] */ Float x,
     /* [in] */ Float y,
-    /* [in] */ IInterface * pLocalState,
-    /* [in] */ IClipDescription * pDescription,
-    /* [in] */ IClipData * pData,
-    /* [in] */ Boolean result,
-    /* [out] */ IDragEvent ** ppEvent)
-{
-    AutoPtr<DragEvent> event= Obtain(action, x, y, pLocalState, pDescription, pData, result);
-    *ppEvent = event.Get();
-    REFCOUNT_ADD(*ppEvent)
-    return NOERROR;
-}
-
-
-ECode DragEvent::Obtain(
-    /* [in] */ IDragEvent* source,
-    /* [out] */ IDragEvent** event)
-{
-    if (source == NULL) {
-        Logger::E("DragEvent", "other drag event must not be null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-    AutoPtr<DragEvent> sourceParam = (DragEvent*)source;
-    return(Obtain(sourceParam->mAction, sourceParam->mX, sourceParam->mY,
-        sourceParam->mLocalState, sourceParam->mClipDescription, sourceParam->mClipData,
-        sourceParam->mDragResult, event));
-}
-
-
-AutoPtr<DragEvent> DragEvent::Obtain(
-    /* [in] */ Int32 action,
-    /* [in] */ Float x,
-    /* [in] */ Float y,
-    /* [in] */ IInterface* localState,
-    /* [in] */ IClipDescription* description,
-    /* [in] */ IClipData* data,
+    /* [in] */ IInterface * localState,
+    /* [in] */ IClipDescription * description,
+    /* [in] */ IClipData * data,
     /* [in] */ Boolean result)
 {
-    AutoPtr<DragEvent> event;
+    AutoPtr<CDragEvent> ev;
     {
-        Mutex::AutoLock lock(sRecyclerLock);
+        AutoLock lock(sRecyclerLock);
         if (sRecyclerTop == NULL) {
-            event = new DragEvent();
-            event->Init(action, x, y, description, data, localState, result);
-            return event;
-
+            CDragEvent::NewByFriend((CDragEvent**)&ev);
+            ev->Init(action, x, y, description, data, localState, result);
+            return (IDragEvent*)ev.Get();
         }
-        event = sRecyclerTop;
-        sRecyclerTop = event->mNext;
+        ev = (CDragEvent*)sRecyclerTop.Get();
+        sRecyclerTop = ev->mNext;
         sRecyclerUsed -= 1;
     }
-    event->mRecycledLocation = FALSE;
-    event->mRecycled = FALSE;
-    event->mNext = NULL;
-    event->Init(action, x, y, description, data, localState, result);
-    return event;
+    ev->mRecycledLocation = FALSE;
+    ev->mRecycled = FALSE;
+    ev->mNext = NULL;
+
+    ev->Init(action, x, y, description, data, localState, result);
+
+    return (IDragEvent*)ev.Get();
+}
+
+AutoPtr<IDragEvent> DragEvent::Obtain(
+    /* [in] */ IDragEvent* source)
+{
+    Int32 action;
+    source->GetAction(&action);
+    Float x, y;
+    source->GetX(&x);
+    source->GetY(&y);
+    AutoPtr<IInterface> localState;
+    source->GetLocalState((IInterface**)&localState);
+    AutoPtr<IClipDescription> clipDescription;
+    source->GetClipDescription((IClipDescription**)&clipDescription);
+    AutoPtr<IClipData> clipData;
+    source->GetClipData((IClipData**)&clipData);
+    Boolean result;
+    source->GetResult(&result);
+    return Obtain(action, x, y, localState, clipDescription, clipData, result);
 }
 
 } // View

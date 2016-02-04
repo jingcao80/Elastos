@@ -854,6 +854,7 @@ ECode CApplicationThread::UpdateProcessState(
             if (processState <= IActivityManager::PROCESS_STATE_IMPORTANT_FOREGROUND) {
                 dalvikProcessState = DALVIK_PROCESS_STATE_JANK_PERCEPTIBLE;
             }
+            // TODO:
             // VMRuntime.getRuntime().UpdateProcessState(dalvikProcessState);
             if (FALSE) {
                 Slogger::I("CApplicationThread", "******************* PROCESS STATE CHANGED TO: %d %s",

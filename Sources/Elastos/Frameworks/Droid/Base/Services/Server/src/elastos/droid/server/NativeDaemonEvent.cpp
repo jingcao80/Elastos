@@ -1,6 +1,4 @@
-
-#include "elastos/droid/ext/frameworkdef.h"
-#include "NativeDaemonEvent.h"
+#include "elastos/droid/server/NativeDaemonEvent.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/etl/List.h>
 
@@ -10,12 +8,6 @@ using Elastos::Core::StringUtils;
 namespace Elastos {
 namespace Droid {
 namespace Server {
-
-// 9b10807e-13c4-48e8-a1a5-a5bc4e2a91bf
-extern "C" const InterfaceID EIID_NativeDaemonEvent =
-    { 0x9b10807e, 0x13c4, 0x48e8, { 0xa1, 0xa5, 0xa5, 0xbc, 0x4e, 0x2a, 0x91, 0xbf } };
-
-CAR_INTERFACE_IMPL_WITH_CPP_CAST(NativeDaemonEvent, IInterface, NativeDaemonEvent)
 
 NativeDaemonEvent::NativeDaemonEvent(
     /* [in] */ Int32 cmdNumber,
@@ -225,22 +217,16 @@ AutoPtr< ArrayOf<String> > NativeDaemonEvent::UnescapeArgs(
     }
     while (current < length) {
         // find the end of the word
-        if (quoted) {
-            wordEnd = current;
-            while ((wordEnd = rawEvent.IndexOf('\"', wordEnd)) != -1) {
-                if (rawEvent.GetChar(wordEnd - 1) != '\\') {
-                    break;
-                }
-                else {
-                    wordEnd++; // skip this escaped quote and keep looking
-                }
+        char terminator = quoted ? '\"' : ' ';
+        wordEnd = current;
+        while (wordEnd < length && rawEvent.GetChar(wordEnd) != terminator) {
+            if (rawEvent.GetChar(wordEnd) == '\\') {
+                // skip the escaped char
+                ++wordEnd;
             }
+            ++wordEnd;
         }
-        else {
-            wordEnd = rawEvent.IndexOf(' ', current);
-        }
-        // if we didn't find the end-o-word token, take the rest of the string
-        if (wordEnd == -1) wordEnd = length;
+        if (wordEnd > length) wordEnd = length;
         String word = rawEvent.Substring(current, wordEnd);
         current += word.GetLength();
         if (!quoted) {

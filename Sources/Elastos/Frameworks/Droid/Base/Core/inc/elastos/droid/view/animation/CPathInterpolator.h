@@ -5,6 +5,7 @@
 #include "_Elastos_Droid_View_Animation_CPathInterpolator.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesTheme;
@@ -37,6 +38,7 @@ CarClass(CPathInterpolator)
     , public Object
     , public IPathInterpolator
     , public IInterpolator
+    , public ITimeInterpolator
 {
 public:
     CAR_INTERFACE_DECL();

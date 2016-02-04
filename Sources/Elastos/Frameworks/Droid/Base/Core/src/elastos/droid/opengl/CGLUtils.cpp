@@ -1,6 +1,7 @@
 
-#include "CGLUtils.h"
-#include "skia/core/SkBitmap.h"
+#include "elastos/droid/opengl/CGLUtils.h"
+#include "Elastos.Droid.Graphics.h"
+#include <skia/core/SkBitmap.h>
 #include <GLES/gl.h>
 #include <ETC1/etc1.h>
 #include <stdio.h>
@@ -17,11 +18,16 @@ extern void setGLDebugLevel(int level);
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
+CAR_SINGLETON_IMPL(CGLUtils)
+
+CAR_INTERFACE_IMPL(CGLUtils, Object, IGLUtils)
 
 ECode CGLUtils::GetInternalFormat(
     /* [in] */ IBitmap* bitmap,
     /* [out] */ Int32* rst)
 {
+    VALIDATE_NOT_NULL(rst)
+
     if (bitmap == NULL) {
         SLOGGERD("CGLUtils", "getInternalFormat can't be used with a null Bitmap")
         return E_NULL_POINTER_EXCEPTION;
@@ -45,6 +51,8 @@ ECode CGLUtils::GetType(
     /* [in] */ IBitmap* bitmap,
     /* [out] */ Int32* type)
 {
+    VALIDATE_NOT_NULL(type)
+
     if (bitmap == NULL) {
         SLOGGERD("CGLUtils", "texImage2D can't be used with a null Bitmap")
         return E_NULL_POINTER_EXCEPTION;
@@ -158,26 +166,30 @@ ECode CGLUtils::GetEGLErrorString(
     /* [in] */ Int32 error,
     /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str)
+
     return NOERROR;
 }
 
-ECode CGLUtils::EnableTracing()
+ECode CGLUtils::SetTracingLevel(
+    /* [in] */ Int32 level)
 {
+    android::setGLDebugLevel(level);
     return NOERROR;
 }
 
-static int getInternalFormat(SkBitmap::Config config)
+static int getInternalFormat(SkColorType colorType)
 {
-    switch(config) {
-        case SkBitmap::kA8_Config:
+    switch(colorType) {
+        case kAlpha_8_SkColorType:
             return GL_ALPHA;
-        case SkBitmap::kARGB_4444_Config:
+        case kARGB_4444_SkColorType:
             return GL_RGBA;
-        case SkBitmap::kARGB_8888_Config:
+        case kN32_SkColorType:
             return GL_RGBA;
-        case SkBitmap::kIndex8_Config:
+        case kIndex_8_SkColorType:
             return GL_PALETTE8_RGBA8_OES;
-        case SkBitmap::kRGB_565_Config:
+        case kRGB_565_SkColorType:
             return GL_RGB;
         default:
             return -1;
@@ -187,27 +199,26 @@ static int getInternalFormat(SkBitmap::Config config)
 Int32  CGLUtils::Native_getInternalFormat(
     /* [in] */ IBitmap* bitmap)
 {
-    Handle32 nativeMapTmp;
+    Handle64 nativeMapTmp;
     bitmap->GetNativeBitmap(&nativeMapTmp);
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)nativeMapTmp;
-    const SkBitmap& skBitmap(*nativeBitmap);
-    SkBitmap::Config config = skBitmap.getConfig();
-    return getInternalFormat(config);
+
+    return getInternalFormat(nativeBitmap->colorType());
 }
 
-static int getType(SkBitmap::Config config)
+static int getType(SkColorType colorType)
 {
-    switch(config) {
-        case SkBitmap::kA8_Config:
+    switch(colorType) {
+        case kAlpha_8_SkColorType:
             return GL_UNSIGNED_BYTE;
-        case SkBitmap::kARGB_4444_Config:
+        case kARGB_4444_SkColorType:
             return GL_UNSIGNED_SHORT_4_4_4_4;
-        case SkBitmap::kARGB_8888_Config:
+        case kN32_SkColorType:
             return GL_UNSIGNED_BYTE;
-        case SkBitmap::kIndex8_Config:
+        case kIndex_8_SkColorType:
             return -1; // No type for compressed data.
-        case SkBitmap::kRGB_565_Config:
+        case kRGB_565_SkColorType:
             return GL_UNSIGNED_SHORT_5_6_5;
         default:
             return -1;
@@ -217,27 +228,26 @@ static int getType(SkBitmap::Config config)
 Int32  CGLUtils::Native_getType(
     /* [in] */ IBitmap* bitmap)
 {
-    Handle32 nativeMapTmp;
+    Handle64 nativeMapTmp;
     bitmap->GetNativeBitmap(&nativeMapTmp);
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)nativeMapTmp;
-    const SkBitmap& skBitmap(*nativeBitmap);
-    SkBitmap::Config config = skBitmap.getConfig();
-    return getType(config);
+
+    return getType(nativeBitmap->colorType());
 }
 
-static int checkFormat(SkBitmap::Config config, int format, int type)
+static int checkFormat(SkColorType colorType, int format, int type)
 {
-    switch(config) {
-        case SkBitmap::kIndex8_Config:
+    switch(colorType) {
+        case kIndex_8_SkColorType:
             if (format == GL_PALETTE8_RGBA8_OES)
                 return 0;
-        case SkBitmap::kARGB_8888_Config:
-        case SkBitmap::kA8_Config:
+        case kN32_SkColorType:
+        case kAlpha_8_SkColorType:
             if (type == GL_UNSIGNED_BYTE)
                 return 0;
-        case SkBitmap::kARGB_4444_Config:
-        case SkBitmap::kRGB_565_Config:
+        case kARGB_4444_SkColorType:
+        case kRGB_565_SkColorType:
             switch (type) {
                 case GL_UNSIGNED_SHORT_4_4_4_4:
                 case GL_UNSIGNED_SHORT_5_6_5:
@@ -262,19 +272,19 @@ Int32  CGLUtils::Native_texImage2D(
     /* [in] */ Int32 type,
     /* [in] */ Int32 border)
 {
-    Handle32 nativeMapTmp;
+    Handle64 nativeMapTmp;
     bitmap->GetNativeBitmap(&nativeMapTmp);
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)nativeMapTmp;
     const SkBitmap& skBitmap(*nativeBitmap);
-    SkBitmap::Config config = skBitmap.getConfig();
+    SkColorType colorType = skBitmap.colorType();
     if (internalformat < 0) {
-        internalformat = getInternalFormat(config);
+        internalformat = getInternalFormat(colorType);
     }
     if (type < 0) {
-        type = getType(config);
+        type = getType(colorType);
     }
-    int err = checkFormat(config, internalformat, type);
+    int err = checkFormat(colorType, internalformat, type);
     if (err)
         return err;
     skBitmap.lockPixels();
@@ -295,7 +305,7 @@ Int32  CGLUtils::Native_texImage2D(
             SkColorTable* ctable = skBitmap.getColorTable();
             memcpy(data, ctable->lockColors(), ctable->count() * sizeof(SkPMColor));
             memcpy(pixels, p, size);
-            ctable->unlockColors(false);
+            ctable->unlockColors();
             glCompressedTexImage2D(target, level, internalformat, w, h, border, imageSize, data);
             free(data);
         } else {
@@ -318,18 +328,18 @@ Int32  CGLUtils::Native_texSubImage2D(
     /* [in] */ Int32 format,
     /* [in] */ Int32 type)
 {
-    Handle32 nativeMapTmp;
+    Handle64 nativeMapTmp;
     bitmap->GetNativeBitmap(&nativeMapTmp);
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)nativeMapTmp;
     const SkBitmap& skBitmap(*nativeBitmap);
-    SkBitmap::Config config = skBitmap.getConfig();
+    SkColorType colorType = skBitmap.colorType();
     if (format < 0) {
-        format = getInternalFormat(config);
+        format = getInternalFormat(colorType);
         if (format == GL_PALETTE8_RGBA8_OES)
             return -1; // glCompressedTexSubImage2D() not supported
     }
-    int err = checkFormat(config, format, type);
+    int err = checkFormat(colorType, format, type);
     if (err)
         return err;
     skBitmap.lockPixels();
@@ -339,13 +349,6 @@ Int32  CGLUtils::Native_texSubImage2D(
     glTexSubImage2D(target, level, xoffset, yoffset, w, h, format, type, p);
     skBitmap.unlockPixels();
     return 0;
-}
-
-
-
-void  CGLUtils::Native_enableTracing()
-{
-    android::setGLDebugLevel(1);
 }
 
 } // namespace Opengl

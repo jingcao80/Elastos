@@ -695,7 +695,6 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(
     MtpObjectHandle handle,
     MtpObjectInfo& info)
 {
-    char            date[20];
     MtpString       path;
     int64_t         length;
     MtpObjectFormat format;

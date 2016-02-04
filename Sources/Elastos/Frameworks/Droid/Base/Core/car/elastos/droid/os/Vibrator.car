@@ -96,6 +96,29 @@ module
             [in] IAudioAttributes* aa);
 
         /**
+         * @hide
+         * Like {@link #vibrate(long, AudioAttributes)}, but allowing the caller to specify that
+         * the vibration is owned by someone else.
+         */
+        Vibrate(
+            [in] Int32 uid,
+            [in] String opPkg,
+            [in] Int64 milliseconds,
+            [in] IAudioAttributes* attributes);
+
+        /**
+         * @hide
+         * Like {@link #vibrate(long[], int, AudioAttributes)}, but allowing the caller to specify that
+         * the vibration is owned by someone else.
+         */
+        Vibrate(
+            [in] Int32 uid,
+            [in] String opPkg,
+            [in] ArrayOf<Int64>* pattern,
+            [in] Int32 repeat,
+            [in] IAudioAttributes* attributes);
+
+        /**
          * Turn the vibrator off.
          * <p>This method requires the caller to hold the permission
          * {@link android.Manifest.permission#VIBRATE}.

@@ -258,6 +258,7 @@ AutoPtr<IBundle> PerformanceCollector::GetAllocCounts()
     // results.putLong(METRIC_KEY_GLOBAL_FREED_SIZE, Debug.getGlobalFreedSize());
     // results.putLong(METRIC_KEY_GC_INVOCATION_COUNT, Debug.getGlobalGcInvocationCount());
     // return results;
+    return NULL;
 }
 
 AutoPtr<IBundle> PerformanceCollector::GetBinderCounts()

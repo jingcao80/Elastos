@@ -3,7 +3,7 @@
 #include "elastos/droid/internal/view/menu/MenuItemImpl.h"
 #include "elastos/droid/internal/view/menu/MenuBuilder.h"
 #include "elastos/droid/view/LayoutInflater.h"
-// #include "elastos/droid/widget/CLinearLayout.h"
+#include "elastos/droid/widget/CLinearLayout.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Character.h>
 #include <elastos/core/StringBuilder.h>
@@ -16,7 +16,7 @@ using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::EIID_IMenuItem;
 using Elastos::Droid::View::EIID_IVisibilityListener;
 using Elastos::Droid::View::IViewGroup;
-// using Elastos::Droid::Widget::CLinearLayout;
+using Elastos::Droid::Widget::CLinearLayout;
 using Elastos::Droid::Widget::ILinearLayout;
 using Elastos::Core::Character;
 using Elastos::Core::CString;
@@ -782,8 +782,7 @@ ECode MenuItemImpl::SetActionView(
     LayoutInflater::From(context, (ILayoutInflater**)&inflater);
 
     AutoPtr<IViewGroup> linearLayout;
-    assert(0);
-    // CLinearLayout::New(context, (IViewGroup**)&linearLayout);
+    CLinearLayout::New(context, (IViewGroup**)&linearLayout);
     AutoPtr<IView> view;
     inflater->Inflate(resId, linearLayout, FALSE, (IView**)&view);
 

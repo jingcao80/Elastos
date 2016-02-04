@@ -11,7 +11,7 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CColorMatrixColorFilter);
-
+CAR_INTERFACE_IMPL(CColorMatrixColorFilter, ColorFilter, IColorMatrixColorFilter);
 CColorMatrixColorFilter::CColorMatrixColorFilter()
 {
     CColorMatrix::New((IColorMatrix**)&mMatrix);
@@ -36,45 +36,6 @@ ECode CColorMatrixColorFilter::constructor(
     mMatrix->Set(const_cast<ArrayOf<Float>*>(&array));
     Update();
     return NOERROR;
-}
-
-PInterface CColorMatrixColorFilter::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_ColorFilter) {
-        return reinterpret_cast<PInterface>((ColorFilter*)this);
-    }
-    else if (riid == EIID_IColorMatrixColorFilter) {
-        return (IColorMatrixColorFilter*)this;
-    }
-    return ColorFilter::Probe(riid);
-}
-
-ECode CColorMatrixColorFilter::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    VALIDATE_NOT_NULL(iid);
-
-    if (object == reinterpret_cast<PInterface>((ColorFilter*)this)) {
-        *iid = EIID_ColorFilter;
-        return NOERROR;
-    }
-    else if (object == (IColorMatrixColorFilter*)this) {
-        *iid = EIID_IColorMatrixColorFilter;
-        return NOERROR;
-    }
-    return ColorFilter::GetInterfaceID(object, iid);
-}
-
-UInt32 CColorMatrixColorFilter::AddRef()
-{
-    return ColorFilter::AddRef();
-}
-
-UInt32 CColorMatrixColorFilter::Release()
-{
-    return ColorFilter::Release();
 }
 
 ECode CColorMatrixColorFilter::GetColorMatrix(

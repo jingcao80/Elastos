@@ -1,5 +1,8 @@
 
-#include "pm/CResourcesChangedReceiver.h"
+#include "elastos/droid/server/pm/CResourcesChangedReceiver.h"
+
+using Elastos::Droid::Content::EIID_IIntentReceiver;
+using Elastos::Droid::Os::EIID_IBinder;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +18,7 @@ ECode CResourcesChangedReceiver::constructor(
     /* [in] */ ISet* keys,
     /* [in] */ Boolean reportStatus)
 {
-    mOwner = reinterpret_cast<CPackageManagerService*>(owner->Probe(EIID_CPackageManagerService));
+    mOwner = (CPackageManagerService*)owner;
     mKeys = keys;
     mReportStatus = reportStatus;
     return NOERROR;
@@ -37,6 +40,13 @@ ECode CResourcesChangedReceiver::PerformReceive(
     msg->SetArg2(1);
     Boolean result;
     return mOwner->mHandler->SendMessage(msg, &result);
+}
+
+ECode CResourcesChangedReceiver::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    return Object::ToString(str);
 }
 
 } // namespace Pm

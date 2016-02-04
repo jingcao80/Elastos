@@ -1,6 +1,7 @@
 
-#include "wm/StrictModeFlash.h"
-#include "wm/CWindowManagerService.h"
+#include <Elastos.Droid.Graphics.h>
+#include <Elastos.Droid.View.h>
+#include "elastos/droid/server/wm/StrictModeFlash.h"
 
 using Elastos::Droid::View::CSurface;
 using Elastos::Droid::View::CSurfaceControl;
@@ -29,11 +30,10 @@ StrictModeFlash::StrictModeFlash(
     // try {
     CSurfaceControl::New(session, String("StrictModeFlash"),
             1, 1, IPixelFormat::TRANSLUCENT, ISurfaceControl::HIDDEN, (ISurfaceControl**)&ctrl);
-    ctrl = new SurfaceControl();
     Int32 stack;
     display->GetLayerStack(&stack);
     ctrl->SetLayerStack(stack);
-    ctrl->SetLayer(CWindowManagerService::TYPE_LAYER_MULTIPLIER * 101);  // one more than Watermark? arbitrary.
+    ctrl->SetLayer(10000/*CWindowManagerService::TYPE_LAYER_MULTIPLIER*/ * 101);  // one more than Watermark? arbitrary.
     ctrl->SetPosition(0, 0);
     ctrl->Show();
     mSurface->CopyFrom(ctrl);

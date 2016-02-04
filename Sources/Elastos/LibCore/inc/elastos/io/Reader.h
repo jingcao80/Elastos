@@ -170,18 +170,6 @@ protected:
      */
     Reader();
 
-    /**
-     * Constructs a new {@code Reader} with {@code lock} used to synchronize
-     * critical sections.
-     *
-     * @param lock
-     *            the {@code Object} used to synchronize critical sections.
-     * @throws NullPointerException
-     *             if {@code lock} is {@code null}.
-     */
-    Reader(
-        /* [in] */ ISynchronize* lock);
-
     virtual ~Reader();
 
 

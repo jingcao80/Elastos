@@ -1,16 +1,17 @@
 
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/internal/app/ToolbarActionBar.h"
-// #include "elastos/droid/app/CActionBarLayoutParams.h"
-// #include "elastos/droid/internal/app/CNavItemSelectedListener.h"
+#include "elastos/droid/internal/app/CNavItemSelectedListener.h"
+#include "elastos/droid/internal/widget/CToolbarWidgetWrapper.h"
+#include "elastos/droid/app/CActionBarLayoutParams.h"
 #include "elastos/droid/view/LayoutInflater.h"
-// #include "elastos/droid/widget/CToolbarWidgetWrapper.h"
 #include <elastos/utility/logging/Logger.h>
 
-// using Elastos::Droid::App::CActionBarLayoutParams;
+using Elastos::Droid::App::CActionBarLayoutParams;
 using Elastos::Droid::App::IActionBarLayoutParams;
 using Elastos::Droid::Internal::View::Menu::EIID_IMenuBuilderCallback;
 using Elastos::Droid::Internal::View::Menu::EIID_IMenuPresenterCallback;
+using Elastos::Droid::Internal::Widget::CToolbarWidgetWrapper;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewGroupLayoutParams;
@@ -18,7 +19,6 @@ using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::Widget::EIID_IToolbarOnMenuItemClickListener;
 using Elastos::Droid::Widget::IAdapterViewOnItemSelectedListener;
-// using Elastos::Droid::Internal::Widget::CToolbarWidgetWrapper;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
@@ -172,8 +172,7 @@ ECode ToolbarActionBar::constructor(
     /* [in] */ IWindowCallback* windowCallback)
 {
     mToolbar = toolbar;
-    assert(0);
-    // CToolbarWidgetWrapper::New(toolbar, FALSE, this, (IDecorToolbar**)&mDecorToolbar);
+    CToolbarWidgetWrapper::New(toolbar, FALSE, (IDecorToolbar**)&mDecorToolbar);
     mWindowCallback = new ToolbarCallbackWrapper(windowCallback, this);
     mDecorToolbar->SetWindowCallback(mWindowCallback);
     toolbar->SetOnMenuItemClickListener(mMenuClicker);
@@ -194,9 +193,8 @@ ECode ToolbarActionBar::SetCustomView(
     /* [in] */ IView* view)
 {
     AutoPtr<IActionBarLayoutParams> lp;
-    assert(0);
-    // CActionBarLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT,
-    //     IViewGroupLayoutParams::WRAP_CONTENT, (IActionBarLayoutParams**)&lp);
+    CActionBarLayoutParams::New(IViewGroupLayoutParams::WRAP_CONTENT,
+        IViewGroupLayoutParams::WRAP_CONTENT, (IActionBarLayoutParams**)&lp);
     return SetCustomView(view, lp);
 }
 
@@ -347,8 +345,7 @@ ECode ToolbarActionBar::SetListNavigationCallbacks(
     /* [in] */ IActionBarOnNavigationListener* callback)
 {
     AutoPtr<IAdapterViewOnItemSelectedListener> listener;
-    assert(0);
-    // CNavItemSelectedListener::New(callback, (IAdapterViewOnItemSelectedListener**)&listener);
+    CNavItemSelectedListener::New(callback, (IAdapterViewOnItemSelectedListener**)&listener);
     return mDecorToolbar->SetDropdownParams(adapter, listener);
 }
 

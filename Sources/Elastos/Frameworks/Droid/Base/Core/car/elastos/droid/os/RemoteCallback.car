@@ -6,16 +6,15 @@ module
     namespace Droid {
     namespace Os {
 
-
-    /**
-     * @Involve
-     * interface IParcelable;
-     */
     interface IIRemoteCallback {
         SendResult(
             [in] IBundle* data);
     }
 
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
     interface IRemoteCallback {
         SendResult(
             [in] IBundle* data);

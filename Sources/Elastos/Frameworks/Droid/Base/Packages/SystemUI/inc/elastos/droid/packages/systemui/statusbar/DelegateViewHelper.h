@@ -1,34 +1,40 @@
-#ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_DELEGATEVIEWHELPER_H__
-#define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_DELEGATEVIEWHELPER_H__
+#ifndef  __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_DELEGATEVIEWHELPER_H__
+#define  __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_DELEGATEVIEWHELPER_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include "_SystemUI.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::IRectF;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IMotionEvent;
-using Elastos::Droid::SystemUI::StatusBar::IBaseStatusBar;
+using Elastos::Droid::Packages::SystemUI::StatusBar::IBaseStatusBar;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 
-class DelegateViewHelper : public ElRefBase
+class DelegateViewHelper : public Object
 {
 public:
     DelegateViewHelper(
         /* [in] */ IView* sourceView);
 
-    void SetDelegateView(
+    CARAPI_(void) SetDelegateView(
         /* [in] */ IView* view);
 
-    void SetBar(
+    CARAPI_(void) SetBar(
         /* [in] */ IBaseStatusBar* phoneStatusBar);
 
-    Boolean OnInterceptTouchEvent(
+    CARAPI_(Boolean) OnInterceptTouchEvent(
         /* [in] */ IMotionEvent* event);
 
-    void SetSourceView(
+    CARAPI_(void) SetSourceView(
         /* [in] */ IView* view);
 
     /**
@@ -38,34 +44,39 @@ public:
      *
      * @param views
      */
-    void SetInitialTouchRegion(
+    CARAPI_(void) SetInitialTouchRegion(
         /* [in] */ ArrayOf<IView*>* views);
 
     /**
      * When rotation is set to NO_SENSOR, then this allows swapping x/y for gesture detection
      * @param swap
      */
-    void SetSwapXY(
+    CARAPI_(void) SetSwapXY(
         /* [in] */ Boolean swap);
+
+    CARAPI_(void) SetDisabled(
+        /* [in] */ Boolean disabled);
 
 public:
     AutoPtr<IRectF> mInitialTouch;
     AutoPtr<IBaseStatusBar> mBar;
+
 private:
     AutoPtr<IView> mDelegateView;
     AutoPtr<IView> mSourceView;
-    Int32 mTempPoint[2];
+    AutoPtr<ArrayOf<Int32> > mTempPoint;
     Float mDownPoint[2];
     Float mTriggerThreshhold;
     Boolean mPanelShowing;
     Boolean mStarted;
     Boolean mSwapXY;
+    Boolean mDisabled;
 };
 
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos
 
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
-
-#endif //__ELASTOS_DROID_SYSTEMUI_STATUSBAR_DELEGATEVIEWHELPER_H__
+#endif // __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_DELEGATEVIEWHELPER_H__

@@ -7,10 +7,13 @@
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
+#include "Elastos.Droid.Os.h"
 
 using Elastos::Core::Thread;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::List;
+using Elastos::Droid::Os::IUEvent;
+using Elastos::Droid::Os::IUEventObserver;
 
 namespace Elastos {
 namespace Droid {
@@ -33,27 +36,42 @@ namespace Os {
  *
  * @hide
 */
-class UEventObserver
+class ECO_PUBLIC UEventObserver
     : public Object
+    , public IUEventObserver
 {
 public:
     /**
      * Representation of a UEvent.
      */
-    class UEvent : public Object
+    class UEvent
+        : public Object
+        , public IUEvent
     {
     public:
+        CAR_INTERFACE_DECL()
+
         UEvent(
             /* [in] */ const String& message);
 
         CARAPI_(String) Get(
             /* [in] */ const String& key);
 
+        CARAPI Get(
+            /* [in] */ const String& key,
+            /* [out] */ String* str);
+
+        CARAPI Get(
+            /* [in] */ const String& key,
+            /* [in] */ const String& defaultValue,
+            /* [out] */ String* str);
+
         CARAPI_(String) Get(
             /* [in] */ const String& key,
             /* [in] */ const String& defaultValue);
 
-        CARAPI_(String) ToString();
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         // collection of key=value pairs parsed from the uevent message
@@ -61,7 +79,7 @@ public:
     };
 
 private:
-    class UEventThread
+    class ECO_LOCAL UEventThread
          : public Thread
     {
     public:
@@ -94,6 +112,8 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     virtual ~UEventObserver();
 
     /**
@@ -120,33 +140,33 @@ public:
      * This process's UEvent thread will never call onUEvent() on this
      * UEventObserver after this call. Repeated calls have no effect.
      */
-    CARAPI_(void) StopObserving();
+    CARAPI StopObserving();
 
     /**
      * Subclasses of UEventObserver should override this method to handle
      * UEvents.
      */
-    virtual CARAPI_(void) OnUEvent(
-        /* [in] */ UEvent* event) = 0;
+    virtual CARAPI OnUEvent(
+        /* [in] */ IUEvent* event) = 0;
 
 private:
-    static CARAPI NativeSetup();
+    ECO_LOCAL static CARAPI NativeSetup();
 
-    static CARAPI_(String) NativeWaitForNextEvent();
+    ECO_LOCAL static CARAPI_(String) NativeWaitForNextEvent();
 
-    static CARAPI_(void) NativeAddMatch(
+    ECO_LOCAL static CARAPI_(void) NativeAddMatch(
         /* [in] */ const String& match);
 
-    static CARAPI_(void) NativeRemoveMatch(
+    ECO_LOCAL static CARAPI_(void) NativeRemoveMatch(
         /* [in] */ const String& match);
 
-    static CARAPI_(AutoPtr<UEventThread>) GetThread();
+    ECO_LOCAL static CARAPI_(AutoPtr<UEventThread>) GetThread();
 
-    static CARAPI_(AutoPtr<UEventThread>) PeekThread();
+    ECO_LOCAL static CARAPI_(AutoPtr<UEventThread>) PeekThread();
 
 private:
-    static const String TAG;
-    static const Boolean DEBUG;
+    ECO_LOCAL static const String TAG;
+    ECO_LOCAL static const Boolean DEBUG;
 
     static AutoPtr<UEventThread> sThread;
 

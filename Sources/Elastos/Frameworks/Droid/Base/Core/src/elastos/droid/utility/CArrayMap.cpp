@@ -16,25 +16,24 @@ namespace Utility {
 
 static AutoPtr<IArrayMap> InitEMPTY()
 {
-    AutoPtr<CArrayMap> map;
-    CArrayMap::NewByFriend((CArrayMap**)&map);
-    map->constructor(TRUE);
-    return (IArrayMap*)map.Get();
+    AutoPtr<IArrayMap> map;
+    CArrayMap::New(TRUE, (IArrayMap**)&map);
+    return map;
 }
 
-const AutoPtr<IArrayMap> CArrayMap::EMPTY = InitEMPTY();
+INIT_PROI_3 const AutoPtr<IArrayMap> CArrayMap::EMPTY = InitEMPTY();
 const Boolean CArrayMap::DEBUG = FALSE;
 const String CArrayMap::TAG("CArrayMap");
 const Int32 CArrayMap::BASE_SIZE = 4;
 const Int32 CArrayMap::CACHE_SIZE = 10;
 
-AutoPtr<ArrayOf<IInterface*> > CArrayMap::mBaseCache;
-Int32 CArrayMap::mBaseCacheSize = 0;
-AutoPtr<ArrayOf<IInterface*> > CArrayMap::mTwiceBaseCache;
-Int32 CArrayMap::mTwiceBaseCacheSize = 0;
-Object CArrayMap::sLock;
+INIT_PROI_3 AutoPtr<ArrayOf<IInterface*> > CArrayMap::sBaseCache;
+Int32 CArrayMap::sBaseCacheSize = 0;
+INIT_PROI_3 AutoPtr<ArrayOf<IInterface*> > CArrayMap::sTwiceBaseCache;
+Int32 CArrayMap::sTwiceBaseCacheSize = 0;
+INIT_PROI_3 Object CArrayMap::sLock;
 
-const AutoPtr<ArrayOf<Int32> > CArrayMap::EMPTY_IMMUTABLE_INTS = ArrayOf<Int32>::Alloc(0);
+INIT_PROI_3 const AutoPtr<ArrayOf<Int32> > CArrayMap::EMPTY_IMMUTABLE_INTS = ArrayOf<Int32>::Alloc(0);
 
 //======================================================================
 // CArrayMap::InnerMapCollections
@@ -249,36 +248,36 @@ ECode CArrayMap::AllocArrays(
 
     if (size == (BASE_SIZE * 2)) {
         synchronized(sLock) {
-            if (mTwiceBaseCache != NULL) {
-                AutoPtr<ArrayOf<IInterface*> > array = mTwiceBaseCache;
+            if (sTwiceBaseCache != NULL) {
+                AutoPtr<ArrayOf<IInterface*> > array = sTwiceBaseCache;
                 mArray = array;
                 AutoPtr<ObjectsEntry> oe = (ObjectsEntry*)(IObject*)(*array)[0];
                 AutoPtr<HashesEntry> he = (HashesEntry*)(IObject*)(*array)[1];
-                mTwiceBaseCache = oe->mObjects;
+                sTwiceBaseCache = oe->mObjects;
                 mHashes = he->mHashes;
 
                 array->Set(0, NULL);
                 array->Set(1, NULL);
-                mTwiceBaseCacheSize--;
-                if (DEBUG) Logger::D(TAG, "Retrieving 2x cache %p now have %d entries", mHashes.Get(), mTwiceBaseCacheSize);
+                sTwiceBaseCacheSize--;
+                if (DEBUG) Logger::D(TAG, "Retrieving 2x cache %p now have %d entries", mHashes.Get(), sTwiceBaseCacheSize);
                 return NOERROR;
             }
         }
     }
     else if (size == BASE_SIZE) {
         synchronized(sLock) {
-            if (mBaseCache != NULL) {
-                AutoPtr<ArrayOf<IInterface*> > array = mBaseCache;
+            if (sBaseCache != NULL) {
+                AutoPtr<ArrayOf<IInterface*> > array = sBaseCache;
                 mArray = array;
                 AutoPtr<ObjectsEntry> oe = (ObjectsEntry*)(IObject*)(*array)[0];
                 AutoPtr<HashesEntry> he = (HashesEntry*)(IObject*)(*array)[1];
-                mBaseCache = oe->mObjects;
+                sBaseCache = oe->mObjects;
                 mHashes = he->mHashes;
 
                 array->Set(0, NULL);
                 array->Set(1, NULL);
-                mBaseCacheSize--;
-                if (DEBUG) Logger::D(TAG, "Retrieving 1x cache %p now have %d entries", mHashes.Get(), mBaseCacheSize);
+                sBaseCacheSize--;
+                if (DEBUG) Logger::D(TAG, "Retrieving 1x cache %p now have %d entries", mHashes.Get(), sBaseCacheSize);
                 return NOERROR;
             }
         }
@@ -296,8 +295,8 @@ ECode CArrayMap::FreeArrays(
 {
     if (hashes->GetLength() == (BASE_SIZE * 2)) {
         synchronized(sLock) {
-            if (mTwiceBaseCacheSize < CACHE_SIZE) {
-                AutoPtr<IInterface> oe = (IObject*)new ObjectsEntry(mTwiceBaseCache.Get());
+            if (sTwiceBaseCacheSize < CACHE_SIZE) {
+                AutoPtr<IInterface> oe = (IObject*)new ObjectsEntry(sTwiceBaseCache.Get());
                 AutoPtr<IInterface> he = (IObject*)new HashesEntry(hashes);
                 array->Set(0, oe);
                 array->Set(1, he);
@@ -305,16 +304,16 @@ ECode CArrayMap::FreeArrays(
                 for (Int32 i = (size << 1) - 1; i >= 2; i--) {
                     array->Set(i, NULL);
                 }
-                mTwiceBaseCache = array;
-                mTwiceBaseCacheSize++;
-                if (DEBUG) Logger::D(TAG, "Storing 2x cache %p now have %d entries", array, mTwiceBaseCacheSize);
+                sTwiceBaseCache = array;
+                sTwiceBaseCacheSize++;
+                if (DEBUG) Logger::D(TAG, "Storing 2x cache %p now have %d entries", array, sTwiceBaseCacheSize);
             }
         }
     }
     else if (hashes->GetLength() == BASE_SIZE) {
         synchronized(sLock) {
-            if (mBaseCacheSize < CACHE_SIZE) {
-                AutoPtr<IInterface> oe = (IObject*)new ObjectsEntry(mBaseCache.Get());
+            if (sBaseCacheSize < CACHE_SIZE) {
+                AutoPtr<IInterface> oe = (IObject*)new ObjectsEntry(sBaseCache.Get());
                 AutoPtr<IInterface> he = (IObject*)new HashesEntry(hashes);
                 array->Set(0, oe);
                 array->Set(1, he);
@@ -323,9 +322,9 @@ ECode CArrayMap::FreeArrays(
                     array->Set(i, NULL);
                 }
 
-                mBaseCache = array;
-                mBaseCacheSize++;
-                if (DEBUG) Logger::D(TAG, "Storing 1x cache %p now have %d entries", array, mBaseCacheSize);
+                sBaseCache = array;
+                sBaseCacheSize++;
+                if (DEBUG) Logger::D(TAG, "Storing 1x cache %p now have %d entries", array, sBaseCacheSize);
             }
         }
     }

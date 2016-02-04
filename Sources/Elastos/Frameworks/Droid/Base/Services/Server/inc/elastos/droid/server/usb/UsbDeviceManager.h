@@ -64,7 +64,7 @@ private:
             /* [in] */ UsbDeviceManager* host);
 
         CARAPI_(void) OnUEvent(
-            /* [in] */ UEvent* event);
+            /* [in] */ IUEvent* event);
 
     private:
         UsbDeviceManager* mHost;

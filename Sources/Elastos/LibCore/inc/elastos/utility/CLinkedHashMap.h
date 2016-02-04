@@ -16,7 +16,8 @@ private:
      * LinkedEntry adds nxt/prv double-links to plain HashMapEntry.
      */
     class LinkedEntry
-        : public HashMapEntry {
+        : public HashMapEntry
+    {
     public:
         /** Create the header entry */
         LinkedEntry()
@@ -39,6 +40,7 @@ private:
             mNxt = nxt;
             mPrv = prv;
         }
+
     public:
         AutoPtr<LinkedEntry> mNxt;
         AutoPtr<LinkedEntry> mPrv;
@@ -103,6 +105,8 @@ private:
 
 public:
     CAR_INTERFACE_DECL()
+
+    ~CLinkedHashMap();
 
     /**
      * Constructs a new empty {@code LinkedHashMap} instance.

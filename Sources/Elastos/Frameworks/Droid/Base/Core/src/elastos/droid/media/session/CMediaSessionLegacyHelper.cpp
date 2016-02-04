@@ -11,8 +11,7 @@
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/utility/CArrayMap.h"
-//TODO: Need CKeyEvent
-// #include "elastos/droid/view/CKeyEvent.h"
+#include "elastos/droid/view/CKeyEvent.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
@@ -31,8 +30,7 @@ using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Utility::CArrayMap;
-//TODO: Need CKeyEvent
-// using Elastos::Droid::View::CKeyEvent;
+using Elastos::Droid::View::CKeyEvent;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::IMap;
 using Elastos::Utility::Logging::Logger;
@@ -106,8 +104,7 @@ void CMediaSessionLegacyHelper::MediaButtonListener::SendKeyEvent(
     /* [in] */ Int32 keyCode)
 {
     AutoPtr<IKeyEvent> ke;
-//TODO: Need CKeyEvent
-    // CKeyEvent::New(IKeyEvent::ACTION_DOWN, keyCode, (IKeyEvent**)&ke);
+    CKeyEvent::New(IKeyEvent::ACTION_DOWN, keyCode, (IKeyEvent**)&ke);
     AutoPtr<IIntent> intent;
     CIntent::New(IIntent::ACTION_MEDIA_BUTTON, (IIntent**)&intent);
     intent->AddFlags(IIntent::FLAG_RECEIVER_FOREGROUND);
@@ -116,8 +113,7 @@ void CMediaSessionLegacyHelper::MediaButtonListener::SendKeyEvent(
     CMediaSessionLegacyHelper::SendKeyEvent(mPendingIntent, mContext, intent);
 
     ke = NULL;
-//TODO: Need CKeyEvent
-    // CKeyEvent::New(IKeyEvent::ACTION_UP, keyCode);
+    CKeyEvent::New(IKeyEvent::ACTION_UP, keyCode, (IKeyEvent**)&ke);
     intent->PutExtra(IIntent::EXTRA_KEY_EVENT, IParcelable::Probe(ke));
     CMediaSessionLegacyHelper::SendKeyEvent(mPendingIntent, mContext, intent);
 
@@ -217,9 +213,9 @@ CMediaSessionLegacyHelper::SessionHolder::SessionHolder(
     /* [in] */ IMediaSession * session,
     /* [in] */ IPendingIntent * pi,
     /* [in] */ CMediaSessionLegacyHelper * host)
-    : mFlags(0)
-    , mSession(session)
+    : mSession(session)
     , mPi(pi)
+    , mFlags(0)
     , mHost(host)
 {
 }
@@ -383,7 +379,7 @@ ECode CMediaSessionLegacyHelper::AddRccListener(
         return NOERROR;
     }
     if (holder->mRccListener != NULL) {
-        if (holder->mRccListener == listener) {
+        if (holder->mRccListener.Get() == listener) {
             if (DEBUG) {
                 Logger::D(TAG, "addRccListener listener already added.");
             }

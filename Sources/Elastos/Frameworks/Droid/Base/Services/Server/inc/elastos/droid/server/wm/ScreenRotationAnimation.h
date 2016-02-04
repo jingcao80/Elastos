@@ -1,8 +1,8 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_SCREENROTATIONANIMATION_H__
 #define __ELASTOS_DROID_SERVER_WM_SCREENROTATIONANIMATION_H__
 
-#include "wm/BlackFrame.h"
-#include "wm/DisplayContent.h"
+#include "_Elastos.Droid.Server.h"
+#include "elastos/droid/server/wm/BlackFrame.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IMatrix;
@@ -17,6 +17,8 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wm {
+
+class DisplayContent;
 
 class ScreenRotationAnimation : public Object
 {
@@ -104,10 +106,10 @@ private:
 
 public:
     static const String TAG;
-    static const Boolean DEBUG_STATE;
-    static const Boolean DEBUG_TRANSFORMS;
-    static const Boolean TWO_PHASE_ANIMATION;
-    static const Boolean USE_CUSTOM_BLACK_FRAME;
+    static const Boolean DEBUG_STATE = FALSE;
+    static const Boolean DEBUG_TRANSFORMS = FALSE;
+    static const Boolean TWO_PHASE_ANIMATION = FALSE;
+    static const Boolean USE_CUSTOM_BLACK_FRAME = FALSE;
 
     static const Int32 FREEZE_LAYER;
 

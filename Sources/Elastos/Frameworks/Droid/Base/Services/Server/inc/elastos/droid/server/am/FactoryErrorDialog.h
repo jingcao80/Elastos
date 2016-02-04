@@ -4,10 +4,9 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/server/am/BaseErrorDialog.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "elastos/droid/os/Handler.h"
 
-using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
-using Elastos::Droid::Os::HandlerBase;
+using Elastos::Droid::Os::Handler;
 
 namespace Elastos {
 namespace Droid {
@@ -19,7 +18,7 @@ class FactoryErrorDialog
 {
 private:
     class MyHandler
-        : public HandlerBase
+        : public Handler
     {
     public:
         MyHandler();
@@ -35,7 +34,7 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ ICharSequence* msg);
 
-    CARAPI_(void) OnStop();
+    CARAPI OnStop();
 
 private:
     AutoPtr<MyHandler> mHandler;

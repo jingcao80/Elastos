@@ -25,9 +25,15 @@ private:
     {
         friend class FileObserver;
     public:
-        RebootThread();
+        RebootThread(
+            /* [in] */ Boolean shutdown,
+            /* [in] */ const String& reason);
 
         CARAPI Run();
+
+    private:
+        Boolean mShutdown;
+        String mReason;
     };
 
 public:

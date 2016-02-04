@@ -4,6 +4,7 @@
 
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/core/Math.h>
+#include <elastos/core/Object.h>
 
 using Elastos::Core::Math;
 
@@ -12,7 +13,8 @@ namespace Droid {
 namespace Server {
 
 /** @hide */
-class TwilightCalculator : public ElRefBase
+class TwilightCalculator
+    : public Object
 {
 public:
     TwilightCalculator();
@@ -30,8 +32,11 @@ public:
         /* [in] */ Double longitude);
 
     CARAPI_(Int64) GetSunset();
+
     CARAPI_(Int64) GetSunrise();
+
     CARAPI_(Int32) GetState();
+
 public:
     /** Value of {@link #mState} if it is currently day */
     static const Int32 DAY = 0;

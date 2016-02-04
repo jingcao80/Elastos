@@ -4,14 +4,15 @@
 
 #include "elastos/droid/ext/frameworkdef.h"
 #include "_Elastos_Droid_Server_CTextServicesManagerService.h"
-#include "elastos/droid/content/PackageMonitor.h"
+#include "elastos/droid/internal/content/PackageMonitor.h"
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.App.h>
+#include <Elastos.Droid.Internal.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.View.h>
 
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Etl::HashMap;
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IPrintWriter;
 using Elastos::Droid::App::IUserSwitchObserver;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IContext;
@@ -19,21 +20,29 @@ using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::IRemoteCallback;
-using Elastos::Droid::View::Textservice::ISpellCheckerInfo;
-using Elastos::Droid::View::Textservice::ISpellCheckerSubtype;
-using Elastos::Droid::View::Textservice::IISpellCheckerService;
-using Elastos::Droid::View::Textservice::IISpellCheckerSession;
-using Elastos::Droid::View::Textservice::ITextServicesSessionListener;
-using Elastos::Droid::View::Textservice::ISpellCheckerSessionListener;
-using Elastos::Droid::View::Textservice::ISpellCheckerInfo;
+using Elastos::Droid::Os::IIRemoteCallback;
+using Elastos::Droid::View::TextService::ISpellCheckerInfo;
+using Elastos::Droid::View::TextService::ISpellCheckerSubtype;
+using Elastos::Droid::View::TextService::ISpellCheckerInfo;
 using Elastos::Droid::Internal::Content::PackageMonitor;
+using Elastos::Droid::Internal::TextService::IISpellCheckerService;
+using Elastos::Droid::Internal::TextService::IISpellCheckerSession;
+using Elastos::Droid::Internal::TextService::IISpellCheckerSessionListener;
+using Elastos::Droid::Internal::TextService::IITextServicesSessionListener;
+using Elastos::Droid::Internal::TextService::IITextServicesManager;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 CarClass(CTextServicesManagerService)
+    , public Object
+    , public IITextServicesManager
+    , public IBinder
 {
 private:
     class CTSMSUserSwitchObserver;
@@ -44,29 +53,30 @@ private:
     class TextServicesSettings;
 
     class CTSMSUserSwitchObserver
-        : public ElRefBase
+        : public Object
         , public IUserSwitchObserver
     {
     public:
+        CAR_INTERFACE_DECL();
+
         CTSMSUserSwitchObserver(
             /* [in] */ CTextServicesManagerService* owner);
 
         ~CTSMSUserSwitchObserver();
 
-        CAR_INTERFACE_DECL();
-
         CARAPI OnUserSwitching(
             /* [in] */ Int32 newUserId,
-            /* [in] */ IRemoteCallback* reply);
+            /* [in] */ IIRemoteCallback* reply);
 
         CARAPI OnUserSwitchComplete(
             /* [in] */ Int32 newUserId);
 
     private:
-        CTextServicesManagerService* mOwner;
+        CTextServicesManagerService* mHost;
     };
 
-    class TextServicesMonitor : public PackageMonitor
+    class TextServicesMonitor
+        : public PackageMonitor
     {
     public:
         TextServicesMonitor(
@@ -80,14 +90,16 @@ private:
         CARAPI_(Boolean) IsChangingPackagesOfCurrentUser();
 
     private:
-        CTextServicesManagerService* mOwner;
+        CTextServicesManagerService* mHost;
     };
 
     class InternalServiceConnection
-        : public ElRefBase
+        : public Object
         , public IServiceConnection
     {
     public:
+        CAR_INTERFACE_DECL();
+
         InternalServiceConnection(
             /* [in] */ const String& id,
             /* [in] */ const String& locale,
@@ -95,8 +107,6 @@ private:
             /* [in] */ CTextServicesManagerService* owner);
 
         virtual ~InternalServiceConnection();
-
-        CAR_INTERFACE_DECL();
 
         CARAPI OnServiceConnected(
             /* [in] */ IComponentName* name,
@@ -111,26 +121,28 @@ private:
 
         CARAPI_(String) GetSciId();
 
-        CARAPI_(String) ToString();
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         String mSciId;
         String mLocale;
         AutoPtr<IBundle> mBundle;
-        CTextServicesManagerService* mOwner;
+        CTextServicesManagerService* mHost;
     };
 
     // SpellCheckerBindGroup contains active text service session listeners.
     // If there are no listeners anymore, the SpellCheckerBindGroup instance will be removed from
     // mSpellCheckerBindGroups
-    class SpellCheckerBindGroup : public ElRefBase
+    class SpellCheckerBindGroup
+        : public Object
     {
     public:
         SpellCheckerBindGroup(
             /* [in] */ InternalServiceConnection* connection,
-            /* [in] */ ITextServicesSessionListener* listener,
+            /* [in] */ IITextServicesSessionListener* listener,
             /* [in] */ const String& locale,
-            /* [in] */ ISpellCheckerSessionListener* scListener,
+            /* [in] */ IISpellCheckerSessionListener* scListener,
             /* [in] */ Int32 uid,
             /* [in] */ IBundle* bundle,
             /* [in] */ CTextServicesManagerService* owner);
@@ -141,19 +153,20 @@ private:
             /* [in] */ IISpellCheckerService* spellChecker);
 
         CARAPI AddListener(
-            /* [in] */ ITextServicesSessionListener* tsListener,
+            /* [in] */ IITextServicesSessionListener* tsListener,
             /* [in] */ const String& locale,
-            /* [in] */ ISpellCheckerSessionListener* scListener,
+            /* [in] */ IISpellCheckerSessionListener* scListener,
             /* [in] */ Int32 uid,
             /* [in] */ IBundle* bundle,
             /* [out] */ InternalDeathRecipient** recipient);
 
         CARAPI RemoveListener(
-            /* [in] */ ISpellCheckerSessionListener* listener);
+            /* [in] */ IISpellCheckerSessionListener* listener);
 
         CARAPI RemoveAll();
 
-        CARAPI_(String) ToString();
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         CARAPI CleanLocked();
@@ -166,14 +179,14 @@ private:
         //const CopyOnWriteArrayList<InternalDeathRecipient> mListeners; //=new CopyOnWriteArrayList<InternalDeathRecipient>();
         /*const*/ List<AutoPtr<InternalDeathRecipient> > mListeners;
         typedef List<AutoPtr<InternalDeathRecipient> >::Iterator ManagedInternalDeathRecipientListIt;
-        CTextServicesManagerService* mOwner;
+        CTextServicesManagerService* mHost;
 
     private:
         const String TAG;// = SpellCheckerBindGroup.class.getSimpleName();
     };
 
     class InternalDeathRecipient
-        : public ElRefBase
+        : public Object
         , public IProxyDeathRecipient
     {
     public:
@@ -181,9 +194,9 @@ private:
 
         InternalDeathRecipient(
             /* [in] */ SpellCheckerBindGroup* group,
-            /* [in] */ ITextServicesSessionListener* tsListener,
+            /* [in] */ IITextServicesSessionListener* tsListener,
             /* [in] */ const String& scLocale,
-            /* [in] */ ISpellCheckerSessionListener* scListener,
+            /* [in] */ IISpellCheckerSessionListener* scListener,
             /* [in] */ Int32 uid,
             /* [in] */ IBundle* bundle,
             /* [in] */ CTextServicesManagerService* owner);
@@ -191,23 +204,24 @@ private:
         virtual ~InternalDeathRecipient();
 
         CARAPI_(Boolean) HasSpellCheckerListener(
-            /* [in] */ ISpellCheckerSessionListener* listener);
+            /* [in] */ IISpellCheckerSessionListener* listener);
 
         CARAPI ProxyDied();
 
     public:
         AutoPtr<SpellCheckerBindGroup> mGroup;
-        AutoPtr<ITextServicesSessionListener> mTsListener;
+        AutoPtr<IITextServicesSessionListener> mTsListener;
         String mScLocale;
-        AutoPtr<ISpellCheckerSessionListener> mScListener;
+        AutoPtr<IISpellCheckerSessionListener> mScListener;
         Int32 mUid;
         AutoPtr<IBundle> mBundle;
 
     private:
-        CTextServicesManagerService* mOwner;
+        CTextServicesManagerService* mHost;
     };
 
-    class TextServicesSettings : public ElRefBase
+    class TextServicesSettings
+        : public Object
     {
     public:
         TextServicesSettings(
@@ -244,10 +258,14 @@ private:
     private:
         AutoPtr<IContentResolver> mResolver;
         Int32 mCurrentUserId;
-        CTextServicesManagerService* mOwner;
+        CTextServicesManagerService* mHost;
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 
@@ -263,12 +281,12 @@ public:
     CARAPI GetSpellCheckerService(
         /* [in] */ const String& sciId,
         /* [in] */ const String& locale,
-        /* [in] */ ITextServicesSessionListener* tsListener,
-        /* [in] */ ISpellCheckerSessionListener* scListener,
+        /* [in] */ IITextServicesSessionListener* tsListener,
+        /* [in] */ IISpellCheckerSessionListener* scListener,
         /* [in] */ IBundle* bundle);
 
     CARAPI FinishSpellCheckerService(
-        /* [in] */ ISpellCheckerSessionListener* listener);
+        /* [in] */ IISpellCheckerSessionListener* listener);
 
     CARAPI SetCurrentSpellChecker(
         /* [in] */ const String& locale,
@@ -287,7 +305,7 @@ public:
     CARAPI GetEnabledSpellCheckers(
         /* [out, callee] */ ArrayOf<ISpellCheckerInfo*>** infoArray);
 
-    CARAPI SystemReady();
+    CARAPI SystemRunning();
 
     CARAPI ToString(
         /* [out] */ String* str);
@@ -320,8 +338,8 @@ private:
     CARAPI StartSpellCheckerServiceInnerLocked(
         /* [in] */ ISpellCheckerInfo* info,
         /* [in] */ const String& locale,
-        /* [in] */ ITextServicesSessionListener* tsListener,
-        /* [in] */ ISpellCheckerSessionListener* scListener,
+        /* [in] */ IITextServicesSessionListener* tsListener,
+        /* [in] */ IISpellCheckerSessionListener* scListener,
         /* [in] */ Int32 uid,
         /* [in] */ IBundle* bundle);
 

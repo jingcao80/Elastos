@@ -1,8 +1,12 @@
 #ifndef __ELASTOS_DROID_OPENGL_GLWRAPPERBASE_H__
 #define __ELASTOS_DROID_OPENGL_GLWRAPPERBASE_H__
 
-#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Opengl.h"
 #include "elastos/droid/ext/frameworkext.h"
+
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 using Elastosx::Microedition::Khronos::Opengles::IGL;
 using Elastosx::Microedition::Khronos::Opengles::IGL10;
@@ -16,26 +20,19 @@ namespace Droid {
 namespace Opengl {
 
 class GLWrapperBase
-    : public IGL11
+    : public Object
+    , public IGL
+    , public IGL10
     , public IGL10Ext
+    , public IGL11
     , public IGL11Ext
     , public IGL11ExtensionPack
-    , public ElRefBase
 {
 public:
     GLWrapperBase(
         /* [in] */ IGL* gl);
 
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
-
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface* object,
-        /* [out] */ InterfaceID* iid);
+    CAR_INTERFACE_DECL()
 
 protected:
     AutoPtr<IGL10> mgl;

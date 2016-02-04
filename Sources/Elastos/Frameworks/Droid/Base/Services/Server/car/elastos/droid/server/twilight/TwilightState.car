@@ -1,0 +1,58 @@
+module
+{
+    using interface Elastos.Droid.Os.IHandler;
+
+    interface Elastos.Droid.Server.Twilight.ITwilightListener;
+    interface Elastos.Droid.Server.Twilight.ITwilightState;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Twilight {
+
+    /**
+     * Describes whether it is day or night.
+     * This object is immutable.
+     */
+    interface ITwilightState {
+
+        /**
+         * Returns true if it is currently night time.
+         */
+        IsNight(
+            [out] Boolean* result);
+
+        /**
+         * Returns the time of yesterday's sunset in the System.currentTimeMillis() timebase,
+         * or -1 if the sun never sets.
+         */
+        GetYesterdaySunset(
+            [out] Int64* result);
+
+        /**
+         * Returns the time of today's sunrise in the System.currentTimeMillis() timebase,
+         * or -1 if the sun never rises.
+         */
+        GetTodaySunrise(
+            [out] Int64* result);
+
+        /**
+         * Returns the time of today's sunset in the System.currentTimeMillis() timebase,
+         * or -1 if the sun never sets.
+         */
+        GetTodaySunset(
+            [out] Int64* result);
+
+        /**
+         * Returns the time of tomorrow's sunrise in the System.currentTimeMillis() timebase,
+         * or -1 if the sun never rises.
+         */
+        GetTomorrowSunrise(
+            [out] Int64* result);
+    }
+
+    } // namespace Twilight
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

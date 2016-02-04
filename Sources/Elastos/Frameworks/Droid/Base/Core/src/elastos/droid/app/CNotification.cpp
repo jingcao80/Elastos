@@ -1172,7 +1172,7 @@ ECode CNotification::CloneInto(
         Int32 size;
         ECode ec = that->mExtras->GetSize(&size); // will unparcel
         if (ec == (ECode)E_BAD_PARCELABLE_EXCEPTION) {
-            Logger::E(TAG, "could not unparcel extras from notification: %s", Object::ToString(this).string());
+            Logger::E(TAG, "could not unparcel extras from notification: %s", TO_CSTR(this));
             that->mExtras = NULL;
         }
     }

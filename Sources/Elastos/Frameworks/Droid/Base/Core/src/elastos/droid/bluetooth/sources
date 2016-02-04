@@ -8,31 +8,54 @@ INCLUDES += $(MAKEDIR)/../../../../inc/
 
 C_DEFINES += -DDROID_CORE
 
-SOURCES = CBluetoothA2dpStateChangeCallback.cpp
-SOURCES += BluetoothA2dp.cpp
+SOURCES =  BluetoothGattCallbackWrapper.cpp
+SOURCES += BluetoothA2dpSink.cpp
+SOURCES += BluetoothActivityEnergyInfo.cpp
+SOURCES += BluetoothAudioConfig.cpp
+SOURCES += BluetoothAvrcpController.cpp
+SOURCES += BluetoothGattCallback.cpp
+SOURCES += BluetoothGattCharacteristic.cpp
+SOURCES += BluetoothGattDescriptor.cpp
+SOURCES += BluetoothGatt.cpp
+SOURCES += BluetoothGattServerCallback.cpp
+SOURCES += BluetoothGattServer.cpp
+SOURCES += BluetoothGattService.cpp
+SOURCES += BluetoothHeadsetClientCall.cpp
+SOURCES += BluetoothHeadsetClient.cpp
+SOURCES += BluetoothManager.cpp
+SOURCES += BluetoothMap.cpp
+SOURCES += BluetoothMasInstance.cpp
+
+SOURCES += CBluetoothA2dpStateChangeCallback.cpp
+SOURCES += CBluetoothHeadsetStateChangeCallback.cpp
+SOURCES += CBluetoothHealthStateChangeCallback.cpp
+SOURCES += CBluetoothInputDeviceStateChangeCallback.cpp
+SOURCES += CBluetoothPanStateChangeCallback.cpp
+SOURCES += CBluetoothPbapStateChangeCallback.cpp
 SOURCES += CBluetoothStateChangeCallbackWrapper.cpp
+SOURCES += CBluetoothHealthCallbackWrapper.cpp
+
+SOURCES += BluetoothA2dp.cpp
+SOURCES += BluetoothHeadset.cpp
+SOURCES += BluetoothUuid.cpp
+SOURCES += BluetoothHealth.cpp
+SOURCES += BluetoothHealthCallback.cpp
+SOURCES += BluetoothInputDevice.cpp
+SOURCES += BluetoothInputStream.cpp
+SOURCES += BluetoothOutputStream.cpp
+SOURCES += BluetoothPan.cpp
+SOURCES += BluetoothPbap.cpp
+SOURCES += BluetoothServerSocket.cpp
+SOURCES += BluetoothSocket.cpp
+
 SOURCES += CBluetoothAdapterManagerCallback.cpp
 SOURCES += CBluetoothAdapter.cpp
 SOURCES += CBluetoothAdapterHelper.cpp
 SOURCES += CBluetoothClass.cpp
 SOURCES += CBluetoothDeviceManagerCallback.cpp
 SOURCES += CBluetoothDevice.cpp
-SOURCES += CBluetoothHeadsetStateChangeCallback.cpp
-SOURCES += BluetoothHeadset.cpp
-SOURCES += CBluetoothHealthStateChangeCallback.cpp
-SOURCES += CBluetoothHealthCallbackWrapper.cpp
-SOURCES += BluetoothHealth.cpp
 SOURCES += CBluetoothHealthAppConfiguration.cpp
-SOURCES += BluetoothHealthCallback.cpp
-SOURCES += CBluetoothInputDeviceStateChangeCallback.cpp
-SOURCES += BluetoothInputDevice.cpp
-SOURCES += BluetoothInputStream.cpp
-SOURCES += BluetoothOutputStream.cpp
-SOURCES += CBluetoothPanStateChangeCallback.cpp
-SOURCES += BluetoothPan.cpp
-SOURCES += CBluetoothPbapStateChangeCallback.cpp
-SOURCES += BluetoothPbap.cpp
-SOURCES += BluetoothServerSocket.cpp
-SOURCES += BluetoothSocket.cpp
-SOURCES += BluetoothTetheringDataTracker.cpp
-SOURCES += BluetoothUuid.cpp
+
+ELASTOS_LIBS += le/le.lib
+
+#SOURCES += BluetoothTetheringDataTracker.cpp

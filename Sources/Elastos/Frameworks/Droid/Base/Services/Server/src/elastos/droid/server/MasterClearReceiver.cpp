@@ -8,7 +8,11 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 
-MasterClearReceiver::RebootThread::RebootThread()
+MasterClearReceiver::RebootThread::RebootThread(
+    /* [in] */ Boolean shutdown,
+    /* [in] */ const String& reason)
+    : mShutdown(shutdown)
+    , mReason(reason)
 {
     Thread::constructor(String("Reboot"));
 }
@@ -16,10 +20,12 @@ MasterClearReceiver::RebootThread::RebootThread()
 ECode MasterClearReceiver::RebootThread::Run()
 {
     Slogger::E("MasterClearReceiver", "MasterClearReceiver::RebootThread::Run() E_NOT_IMPLEMENTED");
-    // try {
-    //     RecoverySystem.rebootWipeUserData(context);
-        // Log.wtf(TAG, "Still running after master clear?!");
+        // try {
+    //     RecoverySystem.rebootWipeUserData(context, mShutdown, mReason);
+    //     Log.wtf(TAG, "Still running after master clear?!");
     // } catch (IOException e) {
+    //     Slog.e(TAG, "Can't perform master clear/factory reset", e);
+    // } catch (SecurityException e) {
     //     Slog.e(TAG, "Can't perform master clear/factory reset", e);
     // }
     return NOERROR;
@@ -40,9 +46,14 @@ ECode MasterClearReceiver::OnReceive(
         }
     }
 
+    Boolean shutdown;
+    intent->GetBooleanExtra(String("shutdown"), FALSE, &shutdown);
+    String reason;
+    intent->GetStringExtra(IIntent::EXTRA_REASON, &reason);
+
     Slogger::W("MasterClearReceiver", "!!! FACTORY RESET !!!");
     // The reboot call is blocking, so we need to do it on another thread.
-    mRebootThread = new RebootThread();
+    mRebootThread = new RebootThread(shutdown, reason);
     mRebootThread->Start();
 
     return NOERROR;

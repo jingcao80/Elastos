@@ -6,7 +6,7 @@
 #include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/os/CUserHandle.h"
-// #include "elastos/droid/widget/Toast.h"
+#include "elastos/droid/widget/Toast.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Slogger.h>
 
@@ -29,7 +29,7 @@ using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Widget::IToast;
-// using Elastos::Droid::Widget::Toast;
+using Elastos::Droid::Widget::Toast;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::Logging::Slogger;
 
@@ -136,8 +136,7 @@ ECode IntentForwarderActivity::OnCreate(
             AutoPtr<ICharSequence> text;
             GetText(userMessageId, (ICharSequence**)&text);
             AutoPtr<IToast> toast;
-            assert(0);
-            // Toast::MakeText(this, text, IToast::LENGTH_LONG, (IToast**)&toast);
+            Toast::MakeText(this, text, IToast::LENGTH_LONG, (IToast**)&toast);
             toast->Show();
         }
     }

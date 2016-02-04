@@ -54,15 +54,14 @@ ECode UserIcons::GetDefaultUserIcon(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable)
-    assert(0 && "TODO: wait R.h update");
-    Int32 colorResId;// = light ? R::color::user_icon_default_white : R::color::user_icon_default_gray;
+    Int32 colorResId = light ? R::color::user_icon_default_white : R::color::user_icon_default_gray;
     if (userId != IUserHandle::USER_NULL) {
         // Return colored icon instead
         colorResId = USER_ICON_COLORS[userId % 8/*USER_ICON_COLORS.length*/];
     }
 
     AutoPtr<IDrawable> d;
-    // CResources::GetSystem()->GetDrawable(R::drawable::ic_account_circle, (IDrawable**)&d);
+    CResources::GetSystem()->GetDrawable(R::drawable::ic_account_circle, (IDrawable**)&d);
     AutoPtr<IDrawable> icon;
     d->Mutate((IDrawable**)&icon);
     Int32 color;

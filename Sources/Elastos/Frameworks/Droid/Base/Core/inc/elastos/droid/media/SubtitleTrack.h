@@ -202,8 +202,6 @@ private:
 
         ~Run();
 
-        CARAPI constructor();
-
         //TODO
         //StoreByEndTimeMs(
         //    [in] ILongSparseArray* runsByEndTime);
@@ -228,11 +226,12 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        SubTrackRunnable();
-
-        CARAPI constructor(
+        SubTrackRunnable(
             /* [in] */ SubtitleTrack* host,
-            /* [in] */ Int64 thenMs);
+            /* [in] */ Int64 thenMs)
+            : mHost(host)
+            , mThenMs(thenMs)
+        {}
 
         CARAPI Run();
 
@@ -349,6 +348,7 @@ protected:
     AutoPtr<IHandler> mHandler;
     /** @hide */
     AutoPtr<IMediaTimeProvider> mTimeProvider;
+
 private:
     Int64 mLastUpdateTimeMs;
     Int64 mLastTimeMs;

@@ -2,31 +2,28 @@
 #ifndef __ELASTOS_DROID_SERVER_LOCATION_MOCKPROVIDER_H__
 #define __ELASTOS_DROID_SERVER_LOCATION_MOCKPROVIDER_H__
 
-#ifdef DROID_CORE
-#include "Elastos.Droid.Core_server.h"
-#elif defined(DROID_SERVER)
-#include "Elastos.Droid.Core.h"
-#endif
 #include "elastos/droid/ext/frameworkext.h"
-#include "location/LocationProviderInterface.h"
+#include "_Elastos.Droid.Server.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Location.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include <elastos/core/Object.h>
 
-using Elastos::IO::IPrintWriter;
-using Elastos::IO::IFileDescriptor;
-using Elastos::Droid::Location::CLocation;
-using Elastos::Droid::Location::ILocation;
 using Elastos::Droid::Location::IILocationManager;
-using Elastos::Droid::Location::ILocationManager;
-using Elastos::Droid::Location::ILocationProvider;
-using Elastos::Droid::Location::IProviderProperties;
-using Elastos::Droid::Location::IProviderRequest;
+using Elastos::Droid::Location::ILocation;
+using Elastos::Droid::Internal::Location::IProviderProperties;
+using Elastos::Droid::Internal::Location::IProviderRequest;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IWorkSource;
+using Elastos::Droid::Server::Location::ILocationProviderInterface;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Location {
-
 
 /**
  * A mock location provider used by LocationManagerService to implement test providers.
@@ -34,15 +31,10 @@ namespace Location {
  * {@hide}
  */
 class MockProvider
-        : public ILocationProviderInterface
-        , public ElRefBase
+    : public Object
+    , public ILocationProviderInterface
 {
-private:
-
-    static const String TAG;// = "MockProvider";
-
 public:
-
     CAR_INTERFACE_DECL()
 
     MockProvider(
@@ -77,17 +69,17 @@ public:
     CARAPI GetStatusUpdateTime(
         /* [out] */ Int64* time);
 
-    CARAPI_(void) SetLocation(
+    CARAPI SetLocation(
         /* [in] */ ILocation* l);
 
-    CARAPI_(void) ClearLocation();
+    CARAPI ClearLocation();
 
-    CARAPI_(void) SetStatus(
+    CARAPI SetStatus(
         /* [in] */ Int32 status,
         /* [in] */ IBundle* extras,
         /* [in] */ Int64 updateTime);
 
-    CARAPI_(void) ClearStatus();
+    CARAPI ClearStatus();
 
     //@Override
     CARAPI Dump(
@@ -95,7 +87,7 @@ public:
         /* [in] */ IPrintWriter* pw,
         /* [in] */ ArrayOf<String>* args);
 
-    CARAPI_(void) Dump(
+    CARAPI Dump(
         /* [in] */ IPrintWriter* pw,
         /* [in] */ const String& prefix);
 
@@ -103,10 +95,6 @@ public:
     CARAPI SetRequest(
         /* [in] */ IProviderRequest* request,
         /* [in] */ IWorkSource* source);
-
-    //@Override
-    CARAPI SwitchUser(
-        /* [in] */ Int32 userId);
 
     //@Override
     CARAPI SendExtraCommand(
@@ -120,13 +108,15 @@ private:
     AutoPtr<IILocationManager> mLocationManager;
 
     AutoPtr<ILocation> mLocation;
-    AutoPtr<IBundle> mExtras;// = new Bundle();
+    AutoPtr<IBundle> mExtras;
 
     Int32 mStatus;
     Int64 mStatusUpdateTime;
     Boolean mHasLocation;
     Boolean mHasStatus;
     Boolean mEnabled;
+
+    const static String TAG;
 };
 
 } // namespace Location

@@ -82,7 +82,7 @@ public:
         /* [in] */ ICanvas* canvas);
 
 private:
-    AutoPtr<IView> mView;
+    AutoPtr<IWeakReference> mView;
 };
 
 }   //namespace View

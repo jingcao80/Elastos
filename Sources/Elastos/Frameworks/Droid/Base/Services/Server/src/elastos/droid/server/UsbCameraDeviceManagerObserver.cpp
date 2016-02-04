@@ -71,7 +71,7 @@ AutoPtr<UsbCameraDeviceManagerObserver> UsbCameraDeviceManagerObserver::GetInsta
 }
 
 void UsbCameraDeviceManagerObserver::OnUEvent(
-    /* [in] */ UEventObserver::UEvent* event)
+    /* [in] */ IUEvent* event)
 {
     Logger::D(TAG, "UsbCamera device change: %s", event->ToString().string());
 //     try{

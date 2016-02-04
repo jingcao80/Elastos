@@ -289,7 +289,7 @@ public:
         // @Override
         CARAPI OnUserSwitching(
             /* [in] */ Int32 newUserId,
-            /* [in] */ IRemoteCallback* reply);
+            /* [in] */ IIRemoteCallback* reply);
 
         // @Override
         CARAPI OnUserSwitchComplete(

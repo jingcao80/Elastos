@@ -2,17 +2,23 @@
 #define __ELASTOS_DROID_VIEW_CACCESSIBILITYINTERACTIONCONNECTION_H__
 
 #include "_Elastos_Droid_View_CAccessibilityInteractionConnection.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkext.h"
 
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::View::Accessibility::IAccessibilityInteractionConnection;
-using Elastos::Droid::View::Accessibility::IAccessibilityInteractionConnectionCallback;
+using Elastos::Droid::Graphics::IRegion;
+using Elastos::Droid::View::Accessibility::IIAccessibilityInteractionConnection;
+using Elastos::Droid::View::Accessibility::IIAccessibilityInteractionConnectionCallback;
 
 namespace Elastos {
 namespace Droid {
 namespace View {
 
-class ViewRootImpl;
 
 /**
  * This class is an interface this ViewAncestor provides to the
@@ -20,67 +26,92 @@ class ViewRootImpl;
  * the view hierarchy in this ViewAncestor.
  */
 CarClass(CAccessibilityInteractionConnection)
+    , public Object
+    , public IIAccessibilityInteractionConnection
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
-        /* [in] */ Handle32 viewRootImpl);
+        /* [in] */ IWeakReference* viewRootImpl);
 
     CARAPI FindAccessibilityNodeInfoByAccessibilityId(
         /* [in] */ Int64 accessibilityNodeId,
+        /* [in] */ IRegion* bounds,
         /* [in] */ Int32 interactionId,
-        /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
+        /* [in] */ IIAccessibilityInteractionConnectionCallback* cb,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 interrogatingPid,
-        /* [in] */ Int64 interrogatingTid);
+        /* [in] */ Int64 interrogatingTid,
+        /* [in] */ IMagnificationSpec* spec);
+
+    CARAPI FindAccessibilityNodeInfosByViewId(
+        /* [in] */ Int64 accessibilityNodeId,
+        /* [in] */ const String& viewId,
+        /* [in] */ IRegion* bounds,
+        /* [in] */ Int32 interactionId,
+        /* [in] */ IIAccessibilityInteractionConnectionCallback* cb,
+        /* [in] */ Int32 flags,
+        /* [in] */ Int32 interrogatingPid,
+        /* [in] */ Int64 interrogatingTid,
+        /* [in] */ IMagnificationSpec* spec);
+
+    CARAPI FindAccessibilityNodeInfosByText(
+        /* [in] */ Int64 accessibilityNodeId,
+        /* [in] */ const String& text,
+        /* [in] */ IRegion* bounds,
+        /* [in] */ Int32 interactionId,
+        /* [in] */ IIAccessibilityInteractionConnectionCallback* cb,
+        /* [in] */ Int32 flags,
+        /* [in] */ Int32 interrogatingPid,
+        /* [in] */ Int64 interrogatingTid,
+        /* [in] */ IMagnificationSpec* spec);
+
+    CARAPI FindFocus(
+        /* [in] */ Int64 accessibilityNodeId,
+        /* [in] */ Int32 focusType,
+        /* [in] */ IRegion* bounds,
+        /* [in] */ Int32 interactionId,
+        /* [in] */ IIAccessibilityInteractionConnectionCallback* cb,
+        /* [in] */ Int32 flags,
+        /* [in] */ Int32 interrogatingPid,
+        /* [in] */ Int64 interrogatingTid,
+        /* [in] */ IMagnificationSpec* spec);
+
+    CARAPI FocusSearch(
+        /* [in] */ Int64 accessibilityNodeId,
+        /* [in] */ Int32 direction,
+        /* [in] */ IRegion* bounds,
+        /* [in] */ Int32 interactionId,
+        /* [in] */ IIAccessibilityInteractionConnectionCallback* cb,
+        /* [in] */ Int32 flags,
+        /* [in] */ Int32 interrogatingPid,
+        /* [in] */ Int64 interrogatingTid,
+        /* [in] */ IMagnificationSpec* spec);
 
     CARAPI PerformAccessibilityAction(
         /* [in] */ Int64 accessibilityNodeId,
         /* [in] */ Int32 action,
         /* [in] */ IBundle* arguments,
         /* [in] */ Int32 interactionId,
-        /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
-        /* [in] */ Int32 flags,
-        /* [in] */ Int32 interogatingPid,
-        /* [in] */ Int64 interrogatingTid);
-
-    CARAPI FindAccessibilityNodeInfoByViewId(
-        /* [in] */ Int64 accessibilityNodeId,
-        /* [in] */ Int32 viewId,
-        /* [in] */ Int32 interactionId,
-        /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
+        /* [in] */ IIAccessibilityInteractionConnectionCallback* cb,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 interrogatingPid,
         /* [in] */ Int64 interrogatingTid);
 
-    CARAPI FindAccessibilityNodeInfosByText(
+    CARAPI ComputeClickPointInScreen(
         /* [in] */ Int64 accessibilityNodeId,
-        /* [in] */ const String& text,
+        /* [in] */ IRegion* bounds,
         /* [in] */ Int32 interactionId,
-        /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
-        /* [in] */ Int32 flags,
+        /* [in] */ IIAccessibilityInteractionConnectionCallback* cb,
         /* [in] */ Int32 interrogatingPid,
-        /* [in] */ Int64 interrogatingTid);
-
-    CARAPI FindFocus(
-        /* [in] */ Int64 accessibilityNodeId,
-        /* [in] */ Int32 focusType,
-        /* [in] */ Int32 interactionId,
-        /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
-        /* [in] */ Int32 flags,
-        /* [in] */ Int32 interrogatingPid,
-        /* [in] */ Int64 interrogatingTid);
-
-    CARAPI FocusSearch(
-        /* [in] */ Int64 accessibilityNodeId,
-        /* [in] */ Int32 direction,
-        /* [in] */ Int32 interactionId,
-        /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
-        /* [in] */ Int32 flags,
-        /* [in] */ Int32 interrogatingPid,
-        /* [in] */ Int64 interrogatingTid);
+        /* [in] */ Int64 interrogatingTid,
+        /* [in] */ IMagnificationSpec* spec);
 
 private:
-    ViewRootImpl* mViewRootImpl;
+    AutoPtr<IWeakReference> mViewRootImpl;
 };
 
 } // View

@@ -23,6 +23,12 @@ ECode CNIOAccess::GetBaseArray(
     return NIOAccess::GetBaseArray(b, result);
 }
 
+ECode CNIOAccess::GetRemainingBytes(
+    /* [in] */ IBuffer* b,
+    /* [out] */ Int32* remaining)
+{
+    return NIOAccess::GetRemainingBytes(b, remaining);
+}
 
 ECode CNIOAccess::GetBaseArrayOffset(
         /* [in] */ IBuffer* b,

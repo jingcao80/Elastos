@@ -161,7 +161,8 @@ module
 
         StartActivityFromRecents(
             [in] Int32 taskId,
-            [in] IBundle* options);
+            [in] IBundle* options,
+            [out] Int32* result);
 
         FinishActivity(
             [in] IBinder* token,
@@ -636,12 +637,14 @@ module
             [in] Boolean enabled);
 
         SetActivityController(
-            [in] IActivityController* watcher);
+            [in] IIActivityController* watcher);
 
         EnterSafeMode();
 
         NoteWakeupAlarm(
-            [in] IIIntentSender* sender);
+            [in] IIIntentSender* sender,
+            [in] Int32 sourceUid,
+            [in] String sourcePkg);
 
         KillPids(
             [in] ArrayOf<Int32>* pids,
@@ -660,6 +663,7 @@ module
         HandleApplicationWtf(
             [in] IBinder* app,
             [in] String tag,
+            [in] Boolean system,
             [in] IApplicationErrorReportCrashInfo* crashInfo,
             [out] Boolean* result);
 
@@ -701,7 +705,7 @@ module
             [in] String process,
             [in] Int32 userId,
             [in] Boolean start,
-            [in] IParcelFileDescriptor* fd,
+            [in] IProfilerInfo* profilerInfo,
             [in] Int32 profileType,
             [out] Boolean* result);
 

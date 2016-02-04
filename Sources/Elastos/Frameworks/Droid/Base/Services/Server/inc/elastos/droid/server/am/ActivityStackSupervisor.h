@@ -155,6 +155,12 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
+        ActivityContainer();
+
+        CARAPI constructor(
+            /* [in] */ Int32 stackId,
+            /* [in] */ IInterface* owner);//ActivityStackSupervisor
+
         ActivityContainer(
             /* [in] */ Int32 stackId,
             /* [in] */ ActivityStackSupervisor* owner);
@@ -596,7 +602,7 @@ public:
     virtual CARAPI_(Int32) GetNextStackId();
 
     virtual CARAPI CreateStackForRestoredTaskHistory(
-        /* [in] */ IArrayList* tasks);//TaskRecord
+        /* [in] */ List<AutoPtr<TaskRecord> >* tasks);
 
     virtual CARAPI MoveTaskToStack(
         /* [in] */ Int32 taskId,

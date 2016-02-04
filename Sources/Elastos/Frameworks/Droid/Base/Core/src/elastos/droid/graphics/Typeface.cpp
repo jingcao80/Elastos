@@ -23,24 +23,7 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-// {CCCF6009-21EE-411A-BC20-EA156193742D}
-extern const InterfaceID EIID_Typeface =
-    { 0xcccf6009, 0x21ee, 0x411a, { 0xbc, 0x20, 0xea, 0x15, 0x61, 0x93, 0x74, 0x2d } };
-
-const String Typeface::TAG = String("Typeface");
-const String Typeface::FONTS_CONFIG = String("fonts.xml");
-AutoPtr<ITypeface> Typeface::DEFAULT;
-AutoPtr<ITypeface> Typeface::DEFAULT_BOLD;
-AutoPtr<ITypeface> Typeface::SANS_SERIF;
-AutoPtr<ITypeface> Typeface::SERIF;
-AutoPtr<ITypeface> Typeface::MONOSPACE;
-AutoPtr< ArrayOf<ITypeface*> > Typeface::sDefaults = StaticInit();
-HashMap<Int32, AutoPtr<Typeface::TypefaceMap> > Typeface::sTypefaceCache(3);
-AutoPtr<ITypeface> Typeface::sDefaultTypeface;
-HashMap<String, AutoPtr<ITypeface> > Typeface::sSystemFontMap;
-AutoPtr<ArrayOf<IFontFamily*> > Typeface::sFallbackFonts;
-
-AutoPtr< ArrayOf<ITypeface*> > Typeface::StaticInit()
+Typeface::StaticInitializer::StaticInitializer()
 {
     Init();
     // Set up defaults and typefaces exposed in public API
@@ -54,13 +37,27 @@ AutoPtr< ArrayOf<ITypeface*> > Typeface::StaticInit()
     Typeface::Create(String(NULL), ITypeface::ITALIC, (ITypeface**)&italic);
     Typeface::Create(String(NULL), ITypeface::BOLD_ITALIC, (ITypeface**)&boldItalic);
 
-    AutoPtr< ArrayOf<ITypeface*> > typefaces = ArrayOf<ITypeface*>::Alloc(4);
-    typefaces->Set(0, Typeface::DEFAULT);
-    typefaces->Set(1, Typeface::DEFAULT_BOLD);
-    typefaces->Set(2, italic);
-    typefaces->Set(3, boldItalic);
-    return typefaces;
+    sDefaults = ArrayOf<ITypeface*>::Alloc(4);
+    sDefaults->Set(0, Typeface::DEFAULT);
+    sDefaults->Set(1, Typeface::DEFAULT_BOLD);
+    sDefaults->Set(2, italic);
+    sDefaults->Set(3, boldItalic);
 }
+
+
+const String Typeface::TAG("Typeface");
+const String Typeface::FONTS_CONFIG("fonts.xml");
+AutoPtr<ITypeface> Typeface::DEFAULT;
+AutoPtr<ITypeface> Typeface::DEFAULT_BOLD;
+AutoPtr<ITypeface> Typeface::SANS_SERIF;
+AutoPtr<ITypeface> Typeface::SERIF;
+AutoPtr<ITypeface> Typeface::MONOSPACE;
+AutoPtr< ArrayOf<ITypeface*> > Typeface::sDefaults;
+HashMap<Int32, AutoPtr<Typeface::TypefaceMap> > Typeface::sTypefaceCache(3);
+AutoPtr<ITypeface> Typeface::sDefaultTypeface;
+HashMap<String, AutoPtr<ITypeface> > Typeface::sSystemFontMap;
+AutoPtr<ArrayOf<IFontFamily*> > Typeface::sFallbackFonts;
+const Typeface::StaticInitializer Typeface::sInitializer;
 
 CAR_INTERFACE_IMPL(Typeface, Object, ITypeface);
 Typeface::Typeface()
@@ -175,7 +172,7 @@ ECode Typeface::Create(
             return NOERROR;
         }
 
-        ni = ((Typeface*)(ITypeface*)family->Probe(EIID_Typeface))->mNativeInstance;
+        ni = ((Typeface*)family)->mNativeInstance;
     }
 
     AutoPtr<ITypeface> tmpTypeface;
@@ -427,19 +424,6 @@ private:
     const void* fMemoryBase;
 };
 
-#define MIN_GAMMA   (0.1f)
-#define MAX_GAMMA   (10.0f)
-static float pinGamma(float gamma)
-{
-    if (gamma < MIN_GAMMA) {
-        gamma = MIN_GAMMA;
-    }
-    else if (gamma > MAX_GAMMA) {
-        gamma = MAX_GAMMA;
-    }
-    return gamma;
-}
-
 AutoPtr<IFontFamily> Typeface::MakeFamilyFromParsed(
     /* [in] */ FontListParser::Family* family)
 {
@@ -534,14 +518,17 @@ void Typeface::Init()
 Error:
     String filename;
     configFilename->GetName(&filename);
-    if (E_RUNTIME_EXCEPTION == ec) {
+    if ((ECode)E_RUNTIME_EXCEPTION == ec) {
         Logger::W(TAG, String("Didn't create default family (most likely, non-Minikin build)"));
         // TODO: normal in non-Minikin case, remove or make error when Minikin-only
-    } else if (E_FILE_NOT_FOUND_EXCEPTION == ec) {
+    }
+    else if ((ECode)E_FILE_NOT_FOUND_EXCEPTION == ec) {
         Logger::E(TAG, String("Error opening: %s"), filename.string());
-    } else if (E_IO_EXCEPTION == ec) {
+    }
+    else if ((ECode)E_IO_EXCEPTION == ec) {
         Logger::E(TAG, String("Error reading: %s"), filename.string());
-    } else if (E_XML_PULL_PARSER_EXCEPTION == ec) {
+    }
+    else if ((ECode)E_XML_PULL_PARSER_EXCEPTION == ec) {
         Logger::E(TAG, String("XML parse exception for: %s"), filename.string());
     }
 }

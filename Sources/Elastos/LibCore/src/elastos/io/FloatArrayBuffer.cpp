@@ -32,6 +32,21 @@ ECode FloatArrayBuffer::constructor(
     return NOERROR;
 }
 
+ECode FloatArrayBuffer::GetPrimitiveArray(
+    /* [out] */ Handle64* arrayHandle)
+{
+    AutoPtr<ArrayOf<Float> > arrayTmp;
+    GetArray((ArrayOf<Float>**)&arrayTmp);
+    if (arrayTmp == NULL)
+    {
+        *arrayHandle = 0;
+        return NOERROR;
+    }
+    Float* primitiveArray = arrayTmp->GetPayload();
+    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    return NOERROR;
+}
+
 ECode FloatArrayBuffer::Get(
     /* [out] */ Float* value)
 {
@@ -139,6 +154,8 @@ ECode FloatArrayBuffer::ProtectedArray(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     *array = mBackingArray;
+    REFCOUNT_ADD(*array)
+
     return NOERROR;
 }
 

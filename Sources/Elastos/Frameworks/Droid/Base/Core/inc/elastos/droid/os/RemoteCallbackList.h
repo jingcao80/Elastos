@@ -42,7 +42,7 @@ namespace Os {
  * additional work in this situation, you can create a subclass that
  * implements the {@link #onCallbackDied} method.
  */
-class RemoteCallbackList
+class ECO_PUBLIC RemoteCallbackList
     : public Object
     , public IRemoteCallbackList
 {

@@ -48,7 +48,7 @@ static void ThreadDestructor(void* st)
 
 Boolean CHttpDate::InitTLS()
 {
-    Int32 result = pthread_key_create(&key_tls, ThreadDestructor);
+    Int32 UNUSED(result) = pthread_key_create(&key_tls, ThreadDestructor);
     assert(result == 0);
     return TRUE;
 }

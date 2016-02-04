@@ -5,8 +5,6 @@
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Droid::R;
-using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
-using Elastos::Droid::Os::EIID_IHandler;
 using Elastos::Droid::Os::IMessage;
 
 namespace Elastos {
@@ -56,8 +54,10 @@ FactoryErrorDialog::FactoryErrorDialog(
     window->SetAttributes(attrs);
 }
 
-void FactoryErrorDialog::OnStop()
-{}
+ECode FactoryErrorDialog::OnStop()
+{
+    return NOERROR;
+}
 
 } // namespace Am
 } // namespace Server

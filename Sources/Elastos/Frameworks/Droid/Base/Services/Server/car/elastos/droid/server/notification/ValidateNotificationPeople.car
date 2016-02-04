@@ -1,0 +1,26 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Notification {
+
+    /**
+     * This {@link NotificationSignalExtractor} attempts to validate
+     * people references. Also elevates the priority of real people.
+     *
+     * {@hide}
+     */
+    /**
+     * @Involve
+     * interface INotificationSignalExtractor
+     */
+    interface IValidateNotificationPeople {
+
+    }
+
+    } // namespace Notification
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

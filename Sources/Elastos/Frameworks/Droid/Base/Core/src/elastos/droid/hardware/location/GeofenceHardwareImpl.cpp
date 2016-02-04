@@ -503,9 +503,9 @@ const Int32 GeofenceHardwareImpl::LOCATION_HAS_ACCURACY = 16;
 
 // Resolution level constants used for permission checks.
 // These constants must be in increasing order of finer resolution.
-const Int32 RESOLUTION_LEVEL_NONE = 1;
-const Int32 RESOLUTION_LEVEL_COARSE = 2;
-const Int32 RESOLUTION_LEVEL_FINE = 3;
+const Int32 GeofenceHardwareImpl::RESOLUTION_LEVEL_NONE = 1;
+const Int32 GeofenceHardwareImpl::RESOLUTION_LEVEL_COARSE = 2;
+const Int32 GeofenceHardwareImpl::RESOLUTION_LEVEL_FINE = 3;
 
 CAR_INTERFACE_IMPL(GeofenceHardwareImpl, Object, IGeofenceHardwareImpl)
 
@@ -653,8 +653,8 @@ ECode GeofenceHardwareImpl::GetMonitoringTypes(
 {
     VALIDATE_NOT_NULL(types);
 
-    Boolean gpsSupported;
-    Boolean fusedSupported;
+    Boolean gpsSupported = FALSE;
+    Boolean fusedSupported = FALSE;
     synchronized(mSupportedMonitorTypesLock) {
         gpsSupported = (*mSupportedMonitorTypes)[IGeofenceHardware::MONITORING_TYPE_GPS_HARDWARE]
                 != IGeofenceHardware::MONITOR_UNSUPPORTED;
@@ -729,9 +729,7 @@ ECode GeofenceHardwareImpl::AddCircularFence(
         sb += "addCircularFence: monitoringType=";
         sb += monitoringType;
         sb += ", ";
-        String tmp;
-        IObject::Probe(request)->ToString(&tmp);
-        sb += tmp;
+        sb += TO_STR(request);
         Slogger::D(TAG, sb.ToString());
     }
     Boolean _result;

@@ -2,14 +2,18 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEALTH_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEALTH_H__
 
-#include "Elastos.Droid.Core_server.h"
+//#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IParcelFileDescriptor;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -18,19 +22,20 @@ namespace Bluetooth {
 class CBluetoothHealthStateChangeCallback;
 
 class BluetoothHealth
-    : public ElRefBase
+    : public Object
     , public IBluetoothHealth
+    , public IBluetoothProfile
 {
 private:
     class ServiceConnection
-        : public ElRefBase
+        : public Object
         , public IServiceConnection
     {
     public:
+        CAR_INTERFACE_DECL();
+
         ServiceConnection(
             /* [in] */ BluetoothHealth* host);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI OnServiceConnected(
             /* [in] */ IComponentName* name,
@@ -44,11 +49,14 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
+    BluetoothHealth();
+
     BluetoothHealth(
         /* [in] */ IContext* context,
         /* [in] */ IBluetoothProfileServiceListener* listener);
 
-    CAR_INTERFACE_DECL()
 
     CARAPI RegisterSinkAppConfiguration(
         /* [in] */ const String& name,
@@ -95,11 +103,11 @@ public:
         /* [out] */ Int32* state);
 
     CARAPI GetConnectedDevices(
-        /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices);
+        /* [out] */ IList** devices);// IBluetoothDevice
 
     CARAPI GetDevicesMatchingConnectionStates(
         /* [in] */ ArrayOf<Int32>* states,
-        /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices);
+        /* [out] */ IList** devices);// IBluetoothDevice
 
     CARAPI Close();
 

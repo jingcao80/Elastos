@@ -15,12 +15,11 @@ namespace Media {
  * Information about a media route.
  */
 class MediaRouteInfo
+    : public Object
+    , public IMediaRouterRouteInfo
 {
 public:
     MediaRouteInfo();
-
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid) = 0;
 
     CARAPI Init(
         /* [in] */ IRouteCategory* category);

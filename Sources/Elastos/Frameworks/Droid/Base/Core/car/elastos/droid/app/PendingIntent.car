@@ -384,6 +384,14 @@ module
         GetIntent(
             [out] IIntent** intent);
 
+        /**
+         * @hide
+         * Return descriptive tag for this PendingIntent.
+         */
+        GetTag(
+            [in] String prefix,
+            [out] String* str);
+
         /** @hide */
         GetTarget(
             [out] IIIntentSender** target);

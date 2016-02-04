@@ -12,6 +12,8 @@ module
     interface Elastos.Droid.Telephony.ISignalStrength;
     interface Elastos.Droid.Internal.Telephony.IIPhoneStateListener;
 
+    using interface Elastos.Utility.IList;
+
     namespace Elastos {
     namespace Droid {
     namespace Internal {
@@ -115,7 +117,7 @@ module
             [in] Int32 otaspMode);
 
         NotifyCellInfo(
-            [in] ArrayOf<ICellInfo*>* cellInfo);
+            [in] IList* cellInfo);
 
         NotifyPreciseCallState(
             [in] Int32 ringingCallState,
@@ -134,7 +136,7 @@ module
 
         NotifyCellInfoForSubscriber(
             [in] Int64 subId,
-            [in] ArrayOf<ICellInfo*>* cellInfo);
+            [in] IList* cellInfo);
 
         NotifyDataConnectionRealTimeInfo(
             [in] IDataConnectionRealTimeInfo* dcRtInfo);

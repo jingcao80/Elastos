@@ -40,6 +40,48 @@ public:
     static CARAPI_(Boolean) IsValidState(
         /* [in] */ Int32 state);
 
+    CARAPI GetId(
+        /* [out] */ IUri** id);
+
+    CARAPI SetId(
+        /* [in] */ IUri* id);
+
+    CARAPI GetSummary(
+        /* [out] */ String* summary);
+
+    CARAPI SetSummary(
+        /* [in] */ const String& summary);
+
+    CARAPI GetLine1(
+        /* [out] */ String* line1);
+
+    CARAPI SetLine1(
+        /* [in] */ const String& line1);
+
+    CARAPI GetLine2(
+        /* [out] */ String* line2);
+
+    CARAPI SetLine2(
+        /* [in] */ const String& line2);
+
+    CARAPI GetIcon(
+        /* [out] */ Int32* icon);
+
+    CARAPI SetIcon(
+        /* [in] */ Int32 icon);
+
+    CARAPI GetState(
+        /* [out] */ Int32* state);
+
+    CARAPI SetState(
+        /* [in] */ Int32 state);
+
+    CARAPI GetFlags(
+        /* [out] */ Int32* flags);
+
+    CARAPI SetFlags(
+        /* [in] */ Int32 flags);
+
 public:
     // @Override
     CARAPI ReadFromParcel(

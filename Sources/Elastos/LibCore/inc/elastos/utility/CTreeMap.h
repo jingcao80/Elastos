@@ -116,7 +116,7 @@ public:
         AutoPtr<Node> mNext;
         AutoPtr<Node> mLast;
         Int32 mExpectedModCount;
-        AutoPtr<CTreeMap> mHost;
+        CTreeMap* mHost;
     };
 
     class _KeySetBackwardMapIterator
@@ -247,7 +247,7 @@ public:
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
     private:
-        AutoPtr<CTreeMap> mHost;
+        CTreeMap* mHost;
     };
 
     class _KeySet
@@ -396,7 +396,7 @@ public:
             /* [in] */ ICollection* collection);
 
     private:
-        AutoPtr<CTreeMap> mHost;
+        CTreeMap* mHost;
     };
 
     /*
@@ -481,6 +481,7 @@ public:
      */
     class BoundedMap
         : public AbstractMap
+        , public ISortedMap
         , public INavigableMap
         , public ISerializable
     {
@@ -579,7 +580,7 @@ public:
                 /* [out] */ Int32* hashCode);
 
         private:
-            AutoPtr<BoundedMap> mHost;
+            BoundedMap* mHost;
         };
 
         class BoundedKeySet
@@ -753,11 +754,10 @@ public:
                 /* [in] */ ICollection* collection);
 
         private:
-            AutoPtr<BoundedMap> mHost;
+            BoundedMap* mHost;
         };
 
     public:
-
         BoundedMap(
             /* [in] */ Boolean ascending,
             /* [in] */ IInterface* from,

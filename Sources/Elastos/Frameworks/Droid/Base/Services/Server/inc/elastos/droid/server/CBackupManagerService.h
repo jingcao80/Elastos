@@ -57,7 +57,7 @@ using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
-using Elastos::Droid::Os::Storage::IMountService;
+using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Server::PackageManagerBackupAgent;
 
@@ -1331,7 +1331,7 @@ private:
 
     AutoPtr<IPowerManager> mPowerManager;
     AutoPtr<IAlarmManager> mAlarmManager;
-    AutoPtr<IMountService> mMountService;
+    AutoPtr<IIMountService> mMountService;
     AutoPtr<IIBackupManager> mBackupManagerBinder;
 
     Boolean mEnabled;   // access to this is synchronized on 'this'

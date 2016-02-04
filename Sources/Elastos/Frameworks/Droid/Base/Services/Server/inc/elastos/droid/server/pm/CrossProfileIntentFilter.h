@@ -40,10 +40,10 @@ public:
         /* [in] */ const String& attribute,
         /* [in] */ const String& defaultValue);
 
-    CARAPI_(Int32) GetIntFromXml(
+    CARAPI_(Int32) GetInt32FromXml(
         /* [in] */ IXmlPullParser* parser,
         /* [in] */ const String& attribute,
-        /* [in] */ const String& defaultValue);
+        /* [in] */ Int32 defaultValue);
 
     CARAPI WriteToXml(
         /* [in] */ IXmlSerializer* serializer);
@@ -74,6 +74,7 @@ private:
 } // namespace Elastos
 
 DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Pm::CrossProfileIntentFilter, IInterface)
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Server::Pm::CrossProfileIntentFilter)
 
 #endif //__ELASTOS_DROID_SERVER_PM_CROSSPROFILEINTENTFILTER_H__
 

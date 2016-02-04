@@ -2,6 +2,7 @@
 #include "elastos/droid/server/pm/SELinuxMMAC.h"
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/utility/Xml.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <Elastos.CoreLibrary.Security.h>
 #include <Elastos.CoreLibrary.Libcore.h>
@@ -9,8 +10,10 @@
 using Elastos::Droid::Content::Pm::CSignature;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Utility::Xml;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Security::IMessageDigestHelper;
 using Elastos::Security::CMessageDigestHelper;
+using Elastos::Security::IMessageDigest;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::IO::IFileReader;
 using Elastos::IO::CFileReader;
@@ -48,7 +51,7 @@ void SELinuxMMAC::Policy::PutPkg(
 
 Boolean SELinuxMMAC::Policy::IsValid()
 {
-    return (!mSeinfo.IsNull() || (!pkgMap.IsEmpty());
+    return (!mSeinfo.IsNull() || !mPkgMap.IsEmpty());
 }
 
 String SELinuxMMAC::Policy::CheckPolicy(
@@ -102,12 +105,12 @@ Boolean SELinuxMMAC::UseOverridePolicy()
 const String SELinuxMMAC::TAG("SELinuxMMAC");
 const Boolean SELinuxMMAC::DEBUG_POLICY;
 const Boolean SELinuxMMAC::DEBUG_POLICY_INSTALL;
-static HashMap<AutoPtr<ISignature>, AutoPtr<Policy> > SELinuxMMAC::sSigSeinfo;
-static String SELinuxMMAC::sDefaultSeinfo(NULL);
+HashMap<AutoPtr<ISignature>, AutoPtr<SELinuxMMAC::Policy> > SELinuxMMAC::sSigSeinfo;
+String SELinuxMMAC::sDefaultSeinfo(NULL);
 
 static String InitStaticAttr(
     /* [in] */ Int32 mode,
-    /* [in] */ Char32* str)
+    /* [in] */ const char* str)
 {
     AutoPtr<IFile> file;
     switch (mode) {
@@ -117,7 +120,7 @@ static String InitStaticAttr(
             file = Environment::GetRootDirectory();
     }
     String fileStr;
-    IObject::Probe(file)->ToSring(&fileStr);
+    IObject::Probe(file)->ToString(&fileStr);
     return fileStr + str;
 
 }
@@ -150,14 +153,17 @@ Boolean SELinuxMMAC::ReadInstallPolicy()
     CFileReader::New(MAC_PERMISSIONS, (IFileReader**)&policyFile);
     Slogger::D(TAG, "Using policy file %s", MAC_PERMISSIONS.string());
 
-    AutoPtr<IXmlPullParser> parser = Xml::NewPullParser();
-    ECode ec = parser->SetInput(policyFile);
-    FAIL_GOTO(ec, fail);
-
-    ec = XmlUtils::BeginDocument(parser, String("policy"));
-    FAIL_GOTO(ec, fail);
+    AutoPtr<IXmlPullParser> parser;
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    ECode ec = NOERROR;
     while (TRUE) {
-        ec = XmlUtils->NextElement(parser);
+        ec = parser->SetInput(IReader::Probe(policyFile));
+        if (FAILED(ec)) break;
+
+        ec = XmlUtils::BeginDocument(parser, String("policy"));
+        if (FAILED(ec)) break;
+
+        ec = XmlUtils::NextElement(parser);
         if (FAILED(ec)) break;
         Int32 type;
         if (parser->GetEventType(&type), type == IXmlPullParser::END_DOCUMENT) {
@@ -168,7 +174,7 @@ Boolean SELinuxMMAC::ReadInstallPolicy()
         parser->GetName(&tagName);
         if (tagName.Equals("signer")) {
             String cert;
-            ec = parser->GetAttributeValue(String, String("signature"), &cert);
+            ec = parser->GetAttributeValue(String(NULL), String("signature"), &cert);
             if (FAILED(ec)) break;
             if (cert.IsNull()) {
                 String desc;
@@ -183,7 +189,7 @@ Boolean SELinuxMMAC::ReadInstallPolicy()
             if (ec == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
                 String desc;
                 parser->GetPositionDescription(&desc);
-                Slogger::w(TAG, "<signer> with bad signature at %s", desc.string());
+                Slogger::W(TAG, "<signer> with bad signature at %s", desc.string());
                 XmlUtils::SkipCurrentTag(parser);
                 continue;
             }
@@ -197,7 +203,7 @@ Boolean SELinuxMMAC::ReadInstallPolicy()
             ec = ReadPolicyTags(parser, (Policy**)&policy);
             if (FAILED(ec)) break;
             if (policy->IsValid()) {
-                mSigSeinfo[signature] = policy;
+                sSigSeinfo[signature] = policy;
             }
         }
         else if (tagName.Equals("default")) {
@@ -221,7 +227,6 @@ Boolean SELinuxMMAC::ReadInstallPolicy()
     // } finally {
     //     IoUtils.closeQuietly(policyFile);
     // }
-fail:
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
     ioUtils->CloseQuietly(ICloseable::Probe(policyFile));
@@ -249,7 +254,7 @@ ECode SELinuxMMAC::ReadPolicyTags(
     parser->GetDepth(&outerDepth);
     AutoPtr<Policy> policy = new Policy();
     Int32 depth;
-    while ((parser->GetNext(&type), type != IXmlPullParser::END_DOCUMENT)
+    while ((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
            && (type != IXmlPullParser::END_TAG
                || (parser->GetDepth(&depth), depth > outerDepth))) {
         if (type == IXmlPullParser::END_TAG
@@ -277,9 +282,10 @@ ECode SELinuxMMAC::ReadPolicyTags(
                 continue;
             }
 
-            String seinfo = ReadSeinfoTag(parser);
+            String seinfo;
+            ReadSeinfoTag(parser, &seinfo);
             if (!seinfo.IsNull()) {
-                policy[pkg] = seinfo;
+                policy->PutPkg(pkg, seinfo);
             }
         }
         else {
@@ -287,7 +293,7 @@ ECode SELinuxMMAC::ReadPolicyTags(
         }
     }
     *p = policy;
-    REFCOUNT_ADD()
+    REFCOUNT_ADD(*p)
     return NOERROR;
 }
 
@@ -302,7 +308,7 @@ ECode SELinuxMMAC::ReadSeinfoTag(
     parser->GetDepth(&outerDepth);
     String seinfo(NULL);
     Int32 depth;
-    while ((parser->GetNext(&type)), type != IXmlPullParser::END_DOCUMENT
+    while ((parser->Next(&type)), type != IXmlPullParser::END_DOCUMENT
            && (type != IXmlPullParser::END_TAG
                || (parser->GetDepth(&depth), depth > outerDepth))) {
         if (type == IXmlPullParser::END_TAG
@@ -401,7 +407,7 @@ Boolean SELinuxMMAC::AssignSeinfoValue(
         if (policy != NULL) {
             String seinfo = policy->CheckPolicy(pkg->mPackageName);
             if (!seinfo.IsNull()) {
-                pkg->mApplicationInfo->setSeinfo(seinfo);
+                pkg->mApplicationInfo->SetSeinfo(seinfo);
                 if (DEBUG_POLICY_INSTALL)
                     Slogger::I(TAG, "package (%s) labeled with seinfo=%s",
                             pkg->mPackageName.string(), seinfo.string());
@@ -487,17 +493,17 @@ ECode SELinuxMMAC::DumpHash(
     AutoPtr<IFileHelper> helper;
     CFileHelper::AcquireSingleton((IFileHelper**)&helper);
     helper->CreateTempFile(String("seapp_hash"), String(".journal"), parentFile, (IFile**)&tmp);
-    tmp->SetReadable(TRUE);
-    CFileOutputStream(tmp, (IFileOutputStream**)&fos);
-    fos->Write(content);
+    Boolean result;
+    tmp->SetReadable(TRUE, &result);
+    CFileOutputStream::New(tmp, (IFileOutputStream**)&fos);
+    IOutputStream::Probe(fos)->Write(content);
     AutoPtr<IFileDescriptor> fd;
     fos->GetFD((IFileDescriptor**)&fd);
     fd->Sync();
     ECode ec = NOERROR;
-    Boolean result;
     if (tmp->RenameTo(file, &result), !result) {
         String path;
-        file->GetCanonicalPaht(&path);
+        file->GetCanonicalPath(&path);
         Slogger::E(TAG, "Failure renaming %s", path.string());
         if (tmp != NULL) {
             tmp->Delete();
@@ -535,32 +541,6 @@ ECode SELinuxMMAC::ReturnHash(
     // } catch (NoSuchAlgorithmException nsae) {
     //     throw new RuntimeException(nsae);  // impossible
     // }
-}
-
-Boolean SELinuxMMAC::UseOverridePolicy()
-{
-    // try {
-    AutoPtr<IIoUtils> ioUtils;
-    CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-    String overrideVersion;
-    if (FAILED(ioUtils->ReadFileAsString(DATA_VERSION_FILE, &overrideVersion))) {
-        return FALSE;
-    }
-    String baseVersion;
-    if (FAILED(ioUtils->ReadFileAsString(BASE_VERSION_FILE, &baseVersion))) {
-        return FALSE;
-    }
-    if (overrideVersion.Equals(baseVersion)) {
-        return TRUE;
-    }
-    Slogger::E(TAG, "Override policy version '%s' doesn't match base version '%s'. Skipping override policy files.",
-            overrideVersion.string(), baseVersion.string());
-    // } catch (FileNotFoundException fnfe) {
-    //     // Override version file doesn't have to exist so silently ignore.
-    // } catch (IOException ioe) {
-    //     Slog.w(TAG, "Skipping override policy files.", ioe);
-    // }
-    return FALSE;
 }
 
 } // namespace Pm

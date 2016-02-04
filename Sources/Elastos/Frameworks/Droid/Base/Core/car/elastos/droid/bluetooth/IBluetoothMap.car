@@ -1,0 +1,59 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * System private API for Bluetooth MAP service
+     *
+     * {@hide}
+     */
+    [deprecated]
+    interface IIBluetoothMap {
+
+        GetState(
+            [out] Int32* state);
+
+        Connect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        Disconnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        IsConnected(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        GetConnectedDevices(
+            [out] IList** devices);//List<BluetoothDevice>
+
+        GetDevicesMatchingConnectionStates(
+            [in] ArrayOf<Int32>* states,
+            [out] IList** devices);//List<BluetoothDevice>
+
+        GetConnectionState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* state);
+
+        SetPriority(
+            [in] IBluetoothDevice* device,
+            [in] Int32 priority,
+            [out] Boolean* result);
+
+        GetPriority(
+            [in] IBluetoothDevice* device,
+            [out] Int32* result);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

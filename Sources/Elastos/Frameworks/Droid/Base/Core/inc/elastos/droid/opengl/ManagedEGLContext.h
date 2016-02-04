@@ -2,7 +2,7 @@
 #define __ELASTOS_DROID_OPENGL_MANAGEDEGLCONTEXT_H__
 
 #include "elastos/Mutex.h"
-#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Opengl.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/utility/etl/List.h>
 

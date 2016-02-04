@@ -27,7 +27,7 @@ using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::IActivityManagerWaitResult;
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IInstrumentationWatcher;
-using Elastos::Droid::App::IActivityController;
+using Elastos::Droid::App::IIActivityController;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::IUriHelper;
@@ -1287,8 +1287,8 @@ ECode CAm::RunMonitor()
         FAILED_AND_RETURN(ec);
     }
 
-    AutoPtr<IActivityController> controller;
-    CMyActivityController::New((Handle32)this, gdbPort, (IActivityController**)&controller);
+    AutoPtr<IIActivityController> controller;
+    CMyActivityController::New((Handle32)this, gdbPort, (IIActivityController**)&controller);
     MyActivityController* mc = reinterpret_cast<MyActivityController*>(controller->Probe(EIID_MyActivityController));
     return mc->Run();
 }

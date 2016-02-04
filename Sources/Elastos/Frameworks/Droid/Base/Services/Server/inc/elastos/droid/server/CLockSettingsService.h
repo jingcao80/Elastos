@@ -1,19 +1,28 @@
 
-#ifndef __ELASTOS_DROID_WIDGET_INTERNAL_CLOCKSETTINGSSERVICE_H__
-#define __ELASTOS_DROID_WIDGET_INTERNAL_CLOCKSETTINGSSERVICE_H__
+#ifndef __ELASTOS_DROID_SERVER_CLOCKSETTINGSSERVICE_H__
+#define __ELASTOS_DROID_SERVER_CLOCKSETTINGSSERVICE_H__
 
-#include "_Elastos_Droid_Widget_Internal_CLockSettingsService.h"
-#include "elastos/droid/ext/frameworkdef.h"
-#include <database/sqlite/SQLiteOpenHelper.h>
+#include "_Elastos_Droid_Server_CLockSettingsService.h"
+#include <elastos/droid/content/BroadcastReceiver.h>
+#include <elastos/droid/database/sqlite/SQLiteOpenHelper.h>
+#include <elastos/utility/etl/List.h>
 
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::Storage::IIMountService;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Database::Sqlite::ISQLiteDatabase;
-using Elastos::Droid::Database::Sqlite::ISQLiteOpenHelper;
 using Elastos::Droid::Database::Sqlite::SQLiteOpenHelper;
+using Elastos::Droid::Internal::Os::IBackgroundThread;
+using Elastos::Droid::Internal::Widget::IILockSettings;
+using Elastos::Droid::Internal::Widget::IILockSettingsObserver;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
-namespace Widget {
-namespace Internal {
+namespace Server {
 
 /**
  * Keeps the lock pattern/password data and related settings for each user.
@@ -22,18 +31,71 @@ namespace Internal {
  * @hide
  */
 CarClass(CLockSettingsService)
+    , public Object
+    , public IILockSettings
+    , public IBinder
 {
 private:
-    class DatabaseHelper
-        : public ElRefBase
-        , public ISQLiteOpenHelper
-        , public SQLiteOpenHelper
+    class UserAddedBroadcastReceiver
+        : public BroadcastReceiver
     {
-    private:
-        static String TAG;
-        static String DATABASE_NAME;
+    public:
+        UserAddedBroadcastReceiver(
+            /* [in] */ CLockSettingsService* lss);
 
-        static const Int32 DATABASE_VERSION;
+        // @Override
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+    private:
+        CLockSettingsService* mHost;
+    };
+
+    class DatabaseHelper
+        : public SQLiteOpenHelper
+    {
+    public:
+        CARAPI constructor(
+            /* [in] */ IContext* context,
+            /* [in] */ CLockSettingsService* host);
+
+        CARAPI OnCreate(
+            /* [in] */ ISQLiteDatabase* db);
+
+        CARAPI OnUpgrade(
+            /* [in] */ ISQLiteDatabase* db,
+            /* [in] */ Int32 oldVersion,
+            /* [in] */ Int32 currentVersion);
+
+        CARAPI GetDatabaseName(
+            /* [out] */ String* name);
+
+        CARAPI SetWriteAheadLoggingEnabled(
+            /* [in] */ Boolean enabled);
+
+        CARAPI GetWritableDatabase(
+            /* [out] */ ISQLiteDatabase** database);
+
+        CARAPI GetReadableDatabase(
+            /* [out] */ ISQLiteDatabase** database);
+
+        CARAPI Close();
+
+        CARAPI OnConfigure(
+            /* [in] */ ISQLiteDatabase* db);
+
+        CARAPI OnDowngrade(
+            /* [in] */ ISQLiteDatabase* db,
+            /* [in] */ Int32 oldVersion,
+            /* [in] */ Int32 newVersion);
+
+        CARAPI OnOpen(
+            /* [in] */ ISQLiteDatabase* db);
+
+    private:
+        CARAPI MaybeEnableWidgetSettingForUsers(
+            /* [in] */ ISQLiteDatabase* db);
 
         CARAPI_(void) CreateTable(
             /* [in] */ ISQLiteDatabase* db);
@@ -41,129 +103,153 @@ private:
         CARAPI_(void) InitializeDefaults(
             /* [in] */ ISQLiteDatabase* db);
 
+        CARAPI LoadSetting(
+            /* [in] */ ISQLiteDatabase* db,
+            /* [in] */ const String& key,
+            /* [in] */ Int32 userId,
+            /* [in] */ Boolean value);
+
+    private:
+        static String TAG;
+        static String DATABASE_NAME;
+
+        static const Int32 DATABASE_VERSION;
+
+        CLockSettingsService* mHost;
+    };
+
+    class LockSettingsObserver
+        : public Object
+        , public IProxyDeathRecipient
+    {
     public:
-        CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL()
 
-        DatabaseHelper(
-            /* [in] */ IContext* context,
-            /* [in] */ CLockSettingsService* host);
+        LockSettingsObserver(
+            /* [in] */ CLockSettingsService* lss);
 
-        virtual CARAPI OnCreate(
-            /* [in] */ ISQLiteDatabase* db);
+        //@Override
+        CARAPI ProxyDied();
 
-        virtual CARAPI OnUpgrade(
-            /* [in] */ ISQLiteDatabase* db,
-            /* [in] */ Int32 oldVersion,
-            /* [in] */ Int32 currentVersion);
-
-        virtual CARAPI GetDatabaseName(
-            /* [out] */ String* name);
-
-        virtual CARAPI SetWriteAheadLoggingEnabled(
-            /* [in] */ Boolean enabled);
-
-        virtual CARAPI GetWritableDatabase(
-            /* [out] */ ISQLiteDatabase** database);
-
-        virtual CARAPI GetReadableDatabase(
-            /* [out] */ ISQLiteDatabase** database);
-
-        virtual CARAPI Close();
-
-        virtual CARAPI OnConfigure(
-            /* [in] */ ISQLiteDatabase* db);
-
-        virtual CARAPI OnDowngrade(
-            /* [in] */ ISQLiteDatabase* db,
-            /* [in] */ Int32 oldVersion,
-            /* [in] */ Int32 newVersion);
-
-        virtual CARAPI OnOpen(
-            /* [in] */ ISQLiteDatabase* db);
+    public:
+        AutoPtr<IILockSettingsObserver> mRemote;
 
     private:
         CLockSettingsService* mHost;
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+    CLockSettingsService();
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 
     CARAPI SystemReady();
 
-    virtual CARAPI SetBoolean(
+    CARAPI SetBoolean(
         /* [in] */ const String& key,
         /* [in] */ Boolean value,
         /* [in] */ Int32 userId);
 
-    virtual CARAPI SetInt64(
+    CARAPI SetInt64(
         /* [in] */ const String& key,
         /* [in] */ Int64 value,
         /* [in] */ Int32 userId);
 
-    virtual CARAPI SetString(
+    CARAPI SetString(
         /* [in] */ const String& key,
         /* [in] */ const String& value,
         /* [in] */ Int32 userId);
 
-    virtual CARAPI GetBoolean(
+    CARAPI GetBoolean(
         /* [in] */ const String& key,
         /* [in] */ Boolean defaultValue,
         /* [in] */ Int32 userId,
         /* [out] */ Boolean* res);
 
-    virtual CARAPI GetInt64(
+    CARAPI GetInt64(
         /* [in] */ const String& key,
         /* [in] */ Int64 defaultValue,
         /* [in] */ Int32 userId,
         /* [out] */ Int64* res);
 
-    virtual CARAPI GetString(
+    CARAPI GetString(
         /* [in] */ const String& key,
         /* [in] */ const String& defaultValue,
         /* [in] */ Int32 userId,
         /* [out] */ String* retValue);
 
-    virtual CARAPI HavePassword(
-        /* [in] */ Int32 userId,
-        /* [out] */ Boolean* res);
+    CARAPI RegisterObserver(
+        /* [in] */ IILockSettingsObserver* remote);
 
-    virtual CARAPI HavePattern(
-        /* [in] */ Int32 userId,
-        /* [out] */ Boolean* res);
+    CARAPI UnregisterObserver(
+        /* [in] */ IILockSettingsObserver* remote);
 
-    virtual CARAPI SetLockPattern(
-        /* [in] */ const ArrayOf<Byte>& hash,
+    CARAPI NotifyObservers(
+        /* [in] */ const String& key,
         /* [in] */ Int32 userId);
 
-    virtual CARAPI CheckPattern(
-        /* [in] */ const ArrayOf<Byte>& hash,
+    CARAPI HavePassword(
         /* [in] */ Int32 userId,
         /* [out] */ Boolean* res);
 
-    virtual CARAPI SetLockPassword(
-        /* [in] */ const ArrayOf<Byte>& hash,
-        /* [in] */ Int32 userId);
-
-    virtual CARAPI CheckPassword(
-        /* [in] */ const ArrayOf<Byte>& hash,
+    CARAPI HavePattern(
         /* [in] */ Int32 userId,
         /* [out] */ Boolean* res);
 
-    virtual CARAPI RemoveUser(
+    CARAPI SetLockPattern(
+        /* [in] */ const String& hash,
         /* [in] */ Int32 userId);
 
+    CARAPI SetLockPassword(
+        /* [in] */ const String& password,
+        /* [in] */ Int32 userId);
+
+    CARAPI CheckPattern(
+        /* [in] */ const String& hash,
+        /* [in] */ Int32 userId,
+        /* [out] */ Boolean* res);
+
+    CARAPI CheckPassword(
+        /* [in] */ const String& hash,
+        /* [in] */ Int32 userId,
+        /* [out] */ Boolean* res);
+
+    CARAPI CheckVoldPassword(
+        /* [in] */ Int32 userId,
+        /* [out] */ Boolean* res);
+
+    CARAPI RemoveUser(
+        /* [in] */ Int32 userId);
+
+    CARAPI ToString(
+        /* [out] */ String* str)
+    {
+        return Object::ToString(str);
+    }
 private:
     CARAPI_(void) MigrateOldData();
 
-    static CARAPI_(void) CheckWritePermission(
+    CARAPI CheckWritePermission(
         /* [in] */ Int32 userId);
 
-    static CARAPI_(void) CheckPasswordReadPermission(
+    CARAPI CheckPasswordReadPermission(
         /* [in] */ Int32 userId);
 
-    static CARAPI_(void) CheckReadPermission(
+    CARAPI CheckReadPermission(
+        /* [in] */ const String& requestedKey,
         /* [in] */ Int32 userId);
+
+    Int32 GetUserParentOrSelfId(
+        /* [in] */ Int32 userId);
+
+    void MaybeUpdateKeystore(
+        /* [in] */ const String& password,
+        /* [in] */ Int32 userHandle);
 
     CARAPI_(String) GetLockPatternFilename(
         /* [in] */ Int32 userId);
@@ -171,16 +257,16 @@ private:
     CARAPI_(String) GetLockPasswordFilename(
         /* [in] */ Int32 userId);
 
-    CARAPI_(void) WriteFile(
+    CARAPI WriteFile(
         /* [in] */ const String& name,
         /* [in] */ ArrayOf<Byte>* hash);
 
-    CARAPI_(void) WriteToDb(
+    CARAPI WriteToDb(
         /* [in] */ const String& key,
         /* [in] */ const String& value,
         /* [in] */ Int32 userId);
 
-    CARAPI_(void) WriteToDb(
+    CARAPI WriteToDb(
         /* [in] */ ISQLiteDatabase* db,
         /* [in] */ const String& key,
         /* [in] */ const String& value, Int32 userId);
@@ -191,10 +277,13 @@ private:
         /* [in] */ Int32 userId,
         /* [out]*/ String* value);
 
-private:
-    static Boolean InitArray();
+    AutoPtr<IIMountService> GetMountService();
 
 private:
+
+    static String PERMISSION;
+    static String SYSTEM_DEBUGGABLE;
+
     AutoPtr<DatabaseHelper> mOpenHelper;
     static String TAG;
 
@@ -210,14 +299,21 @@ private:
     static String LOCK_PASSWORD_FILE;
 
     AutoPtr<IContext> mContext;
+    AutoPtr<ILockPatternUtils> mLockPatternUtils;
+    Boolean mFirstCallToVold;
+
+    List<AutoPtr<LockSettingsObserver> > mObservers;
+    Object mObserversLock;
 
     static AutoPtr<ArrayOf<String> > VALID_SETTINGS;
-    static Boolean sInitArray;
+
+    AutoPtr<IBroadcastReceiver> mBroadcastReceiver;
+
+    static AutoPtr<ArrayOf<String> > READ_PROFILE_PROTECTED_SETTINGS;
 };
 
-}// namespace Internal
-}// namespace Widget
+}// namespace Server
 }// namespace Droid
 }// namespace Elastos
 
-#endif  // __ELASTOS_DROID_WIDGET_INTERNAL_CLOCKSETTINGSSERVICE_H__
+#endif  // __ELASTOS_DROID_SERVER_CLOCKSETTINGSSERVICE_H__

@@ -5,18 +5,18 @@ module
     namespace Droid {
     namespace Bluetooth {
 
-        /**
-         * System private API for Bluetooth service callbacks.
-         *
-         * {@hide}
-         */
-        interface IIBluetoothCallback {
-            //void onRfcommChannelFound(int channel);
+    /**
+     * System private API for Bluetooth service callbacks.
+     *
+     * {@hide}
+     */
+    interface IIBluetoothCallback {
+        //void onRfcommChannelFound(int channel);
 
-            OnBluetoothStateChange(
-                [in] Int32 prevState,
-                [in] Int32 newState);
-        }
+        OnBluetoothStateChange(
+            [in] Int32 prevState,
+            [in] Int32 newState);
+    }
 
     } // Bluetooth
     } // Droid

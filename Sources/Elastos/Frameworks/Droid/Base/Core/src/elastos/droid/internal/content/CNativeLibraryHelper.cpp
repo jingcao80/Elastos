@@ -983,7 +983,6 @@ static int findSupportedAbi(Int64 apkHandle, ArrayOf<String>* supportedAbis)
     }
 
     ZipEntryRO entry = NULL;
-    char fileName[PATH_MAX];
     int status = NO_NATIVE_LIBRARIES;
     while ((entry = it->next()) != NULL) {
         // We're currently in the lib/ directory of the APK, so it does have some native

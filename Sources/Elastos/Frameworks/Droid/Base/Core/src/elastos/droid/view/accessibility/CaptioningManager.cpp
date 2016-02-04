@@ -48,10 +48,10 @@ AutoPtr<ICaptioningManagerCaptionStyle> CaptioningManager::CaptionStyle::InitSTY
     /* [in] */ Int32 value5,
     /* [in] */ const String& value)
 {
-    AutoPtr<CCaptioningManagerCaptionStyle> style;
-    CCaptioningManagerCaptionStyle::NewByFriend(value1, value2, value3, value4, value5, value,
-            (CCaptioningManagerCaptionStyle**)&style);
-    return (ICaptioningManagerCaptionStyle*)style.Get();
+    AutoPtr<ICaptioningManagerCaptionStyle> style;
+    CCaptioningManagerCaptionStyle::New(value1, value2, value3, value4, value5, value,
+            (ICaptioningManagerCaptionStyle**)&style);
+    return style;
 }
 
 const AutoPtr<ICaptioningManagerCaptionStyle> CaptioningManager::CaptionStyle::WHITE_ON_BLACK = InitSTYLE(
@@ -72,11 +72,11 @@ const AutoPtr<ICaptioningManagerCaptionStyle> CaptioningManager::CaptionStyle::U
 AutoPtr< ArrayOf<ICaptioningManagerCaptionStyle*> > CaptioningManager::CaptionStyle::InitPRESETS()
 {
     AutoPtr< ArrayOf<ICaptioningManagerCaptionStyle*> > args = ArrayOf<ICaptioningManagerCaptionStyle*>::Alloc(5);
-    (*args)[0] = CaptioningManager::CaptionStyle::WHITE_ON_BLACK;
-    (*args)[1] = CaptioningManager::CaptionStyle::BLACK_ON_WHITE;
-    (*args)[2] = CaptioningManager::CaptionStyle::YELLOW_ON_BLACK;
-    (*args)[3] = CaptioningManager::CaptionStyle::YELLOW_ON_BLUE;
-    (*args)[4] = CaptioningManager::CaptionStyle::UNSPECIFIED;
+    args->Set(0, CaptioningManager::CaptionStyle::WHITE_ON_BLACK);
+    args->Set(1, CaptioningManager::CaptionStyle::BLACK_ON_WHITE);
+    args->Set(2, CaptioningManager::CaptionStyle::YELLOW_ON_BLACK);
+    args->Set(3, CaptioningManager::CaptionStyle::YELLOW_ON_BLUE);
+    args->Set(4, CaptioningManager::CaptionStyle::UNSPECIFIED);
 
     return args;
 }

@@ -14,7 +14,10 @@ module
      */
     /**
      * @Involve
-     * interface IView
+     * extends Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
     [deprecated]
     interface INotificationBackgroundView {
@@ -45,54 +48,6 @@ module
 
         SetRippleColor(
             [in] Int32 color);
-    }
-
-
-    /**
-     * A frame layout containing the actual payload of the notification, including the contracted and
-     * expanded layout. This class is responsible for clipping the content and and switching between the
-     * expanded and contracted view depending on its clipped size.
-     */
-    /**
-     * @Involve
-     * interface IFrameLayout
-     */
-    [local]
-    interface INotificationContentView {
-        Reset();
-
-        GetContractedChild(
-            [out] IView** view);
-
-        GetExpandedChild(
-            [out] IView** view);
-
-        SetContractedChild(
-            [in] IView* child);
-
-        SetExpandedChild(
-            [in] IView* child);
-
-        SetActualHeight(
-            [in] Int32 actualHeight);
-
-        GetMaxHeight(
-            [out] Int32* height);
-
-        GetMinHeight(
-            [out] Int32* height);
-
-        SetClipTopAmount(
-            [in] Int32 clipTopAmount);
-
-        NotifyContentUpdated();
-
-        IsContentExpandable(
-            [out] Boolean* result);
-
-        SetDark(
-            [in] Boolean dark,
-            [in] Boolean fade);
     }
 
     } // namespace StatusBar

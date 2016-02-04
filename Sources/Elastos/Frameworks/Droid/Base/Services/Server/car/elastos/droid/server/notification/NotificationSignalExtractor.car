@@ -1,0 +1,49 @@
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    interface Elastos.Droid.Server.Notification.INotificationRecord;
+    interface Elastos.Droid.Server.Notification.IRankingReconsideration;
+    interface Elastos.Droid.Server.Notification.IRankingConfig;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Notification {
+
+    /**
+     * Extracts signals that will be useful to the {@link NotificationComparator} and caches them
+     *  on the {@link NotificationRecord} object. These annotations will
+     *  not be passed on to {@link android.service.notification.NotificationListenerService}s.
+     */
+    interface INotificationSignalExtractor {
+        /** One-time initialization. */
+        Initialize(
+            [in] IContext* context);
+
+        /**
+         * Called once per notification that is posted or updated.
+         *
+         * @return null if the work is done, or a future if there is more to do. The
+         * {@link RankingReconsideration} will be run on a worker thread, and if notifications
+         * are re-ordered by that execution, the {@link NotificationManagerService} may send order
+         * update events to the {@link android.service.notification.NotificationListenerService}s.
+         */
+        Process(
+            [in] INotificationRecord* notification,
+            [out] IRankingReconsideration** consideration);
+
+        /**
+         * Called whenever the {@link RankingConfig} changes.
+         *
+         * @param config information about which signals are important.
+         */
+        SetConfig(
+            [in] IRankingConfig* config);
+    }
+
+    } // namespace Notification
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

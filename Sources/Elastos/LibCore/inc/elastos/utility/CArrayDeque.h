@@ -71,8 +71,8 @@ private:
     public:
         DescendingIterator(
             /* [in] */ CArrayDeque* owner)
-            : mCursor(mOwner->mTail)
-            , mFence(mOwner->mHead)
+            : mCursor(owner->mTail)
+            , mFence(owner->mHead)
             , mLastRet(-1)
             , mOwner(owner)
         {}

@@ -28,7 +28,7 @@ using Elastos::Droid::App::CActivityOptionsHelper;
 using Elastos::Droid::App::CResultInfo;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IActivityContainer;
-using Elastos::Droid::App::IActivityController;
+using Elastos::Droid::App::IIActivityController;
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerRunningTaskInfo;
@@ -2120,14 +2120,15 @@ void ActivityStack::ValidateAppTokensLocked()
         if (activities->IsEmpty()) {
             continue;
         }
-        AutoPtr<TaskGroup> group = new TaskGroup();
-        group->mTaskId = task->mTaskId;
-        mValidateAppTokens->Add(TO_IINTERFACE(group));
-        Int32 numActivities = activities->GetSize();
-        for (Int32 activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
-            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];//->get(activityNdx);
-            group->mTokens.PushBack(r->mAppToken);
-        }
+        assert(0);
+        // AutoPtr<TaskGroup> group = new TaskGroup();
+        // group->mTaskId = task->mTaskId;
+        // mValidateAppTokens->Add(TO_IINTERFACE(group));
+        // Int32 numActivities = activities->GetSize();
+        // for (Int32 activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
+        //     AutoPtr<ActivityRecord> r = (*activities)[activityNdx];//->get(activityNdx);
+        //     group->mTokens.PushBack(r->mAppToken);
+        // }
     }
     //TODO mWindowManager->ValidateAppTokens(mStackId, mValidateAppTokens);
 }
@@ -2955,7 +2956,7 @@ Boolean ActivityStack::NavigateUpToLocked(
         }
     }
 
-    AutoPtr<IActivityController> controller = mService->mController;
+    AutoPtr<IIActivityController> controller = mService->mController;
     if (controller != NULL) {
         AutoPtr<ActivityRecord> next = TopRunningActivityLocked(IBinder::Probe(srec->mAppToken), 0);
         if (next != NULL) {
@@ -3099,7 +3100,7 @@ void ActivityStack::CleanUpActivityServicesLocked(
         //}
         while (iter != r->mConnections->End()) {
             AutoPtr<ConnectionRecord> cr = *iter;
-            mService->mServices->RemoveConnectionLocked(cr, NULL, r);
+            //TODO mService->mServices->RemoveConnectionLocked(cr, NULL, r);
             ++iter;
         }
         r->mConnections = NULL;
@@ -3268,7 +3269,7 @@ Boolean ActivityStack::DestroyActivityLocked(
             if (r->mApp->mActivities.IsEmpty()) {
                 // Update any services we are bound to that might care about whether
                 // their client may have activities.
-                mService->mServices->UpdateServiceConnectionActivitiesLocked(r->mApp);
+                //TODO mService->mServices->UpdateServiceConnectionActivitiesLocked(r->mApp);
                 // No longer have activities, so update LRU list and oom adj.
                 mService->UpdateLruProcessLocked(r->mApp, FALSE, NULL);
                 mService->UpdateOomAdjLocked();

@@ -429,6 +429,10 @@ module
         interface ICloseable;
     }
 
+    singleton class CDirectByteBufferHelper {
+        interface IDirectByteBufferHelper;
+    }
+
     class CPrintWriter {
         constructor(
             [in] IOutputStream* outs);

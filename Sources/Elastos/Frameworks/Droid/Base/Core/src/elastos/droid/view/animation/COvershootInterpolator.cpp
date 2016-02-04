@@ -10,6 +10,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/R.h"
 
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Internal::View::Animation::EIID_INativeInterpolatorFactory;
 using Elastos::Droid::Internal::View::Animation::NativeInterpolatorFactoryHelper;
@@ -22,7 +23,8 @@ namespace Animation {
 
 CAR_OBJECT_IMPL(COvershootInterpolator);
 
-CAR_INTERFACE_IMPL_3(COvershootInterpolator, Object, IOvershootInterpolator, INativeInterpolatorFactory, IInterpolator);
+CAR_INTERFACE_IMPL_4(COvershootInterpolator, Object, IOvershootInterpolator,
+        INativeInterpolatorFactory, IInterpolator, ITimeInterpolator);
 
 COvershootInterpolator::COvershootInterpolator()
     : mTension(0.0f)

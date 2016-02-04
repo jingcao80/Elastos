@@ -290,6 +290,21 @@ ECode CUserInfo::SetLastLoggedInTime(
     return NOERROR;
 }
 
+ECode CUserInfo::GetProfileGroupId(
+    /* [out] */ Int32* id)
+{
+    VALIDATE_NOT_NULL(id)
+    *id = mProfileGroupId;
+    return NOERROR;
+}
+
+ECode CUserInfo::SetProfileGroupId(
+    /* [in] */ Int32 id)
+{
+    mProfileGroupId = id;
+    return NOERROR;
+}
+
 ECode CUserInfo::GetPartial(
     /* [out] */ Boolean* partial)
 {
@@ -302,6 +317,21 @@ ECode CUserInfo::SetPartial(
     /* [in] */ Boolean partial)
 {
     mPartial = partial;
+    return NOERROR;
+}
+
+ECode CUserInfo::GetGuestToRemove(
+    /* [out] */ Boolean* value)
+{
+    VALIDATE_NOT_NULL(value);
+    *value = mGuestToRemove;
+    return NOERROR;
+}
+
+ECode CUserInfo::SetGuestToRemove(
+    /* [in] */ Boolean value)
+{
+    mGuestToRemove = value;
     return NOERROR;
 }
 

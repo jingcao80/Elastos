@@ -3,16 +3,9 @@
 #define __ELASTOS_DROID_INTERNAL_VIEW_MENU_ICONMENIITEMVIEW_H__
 
 #include "Elastos.Droid.Content.h"
-#if 0
 #include "elastos/droid/widget/TextView.h"
 
 using Elastos::Droid::Widget::TextView;
-#else
-#include "elastos/droid/view/View.h"
-
-using Elastos::Droid::View::IView;
-
-#endif
 
 namespace Elastos {
 namespace Droid {
@@ -24,11 +17,7 @@ namespace Menu {
  * The item view for each item in the {@link IconMenuView}.
  */
 class IconMenuItemView
-#if 0
     : public TextView
-#else
-    : public Elastos::Droid::View::View
-#endif
     , public IIconMenuItemView
     , public IMenuItemView
 {
@@ -133,7 +122,7 @@ protected:
         /* [in] */ Int32 bottom);
 
     //@Override
-    CARAPI OnTextChanged(
+    CARAPI_(void) OnTextChanged(
         /* [in] */ ICharSequence* text,
         /* [in] */ Int32 start,
         /* [in] */ Int32 before,

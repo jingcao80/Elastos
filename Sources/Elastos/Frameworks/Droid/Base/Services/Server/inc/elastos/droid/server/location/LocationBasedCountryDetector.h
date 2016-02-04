@@ -2,38 +2,30 @@
 #ifndef __ELASTOS_DROID_SERVER_LOCATION_LOCATIONBASEDCOUNTRYDETECTOR_H__
 #define __ELASTOS_DROID_SERVER_LOCATION_LOCATIONBASEDCOUNTRYDETECTOR_H__
 
-#ifdef DROID_CORE
-#include "Elastos.Droid.Core_server.h"
-#elif defined(DROID_SERVER)
-#include "Elastos.Droid.Core.h"
-#endif
 #include "elastos/droid/ext/frameworkext.h"
-#include "location/CountryDetectorBase.h"
-#include <elastos/TimerTask.h>
-#include <elastos/utility/etl/List.h>
+#include "_Elastos.Droid.Server.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Location.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/os/Runnable.h"
+#include "elastos/droid/server/location/CountryDetectorBase.h"
+#include <elastos/core/Object.h>
+#include <elastos/utility/TimerTask.h>
 
-using Elastos::Core::IThread;
-using Elastos::Core::CThread;
-using Elastos::Utility::Etl::List;
-using Elastos::Core::ICharSequence;
-using Elastos::Utility::TimerTask;
-using Elastos::Utility::ITimerTask;
-using Elastos::Utility::EIID_ITimerTask;
-using Elastos::Core::IRunnable;
-using Elastos::Core::EIID_IRunnable;
-using Elastos::Utility::ITimer;
-using Elastos::Utility::CTimer;
-using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Location::CCountry;
 using Elastos::Droid::Location::ICountry;
 using Elastos::Droid::Location::ILocation;
 using Elastos::Droid::Location::ILocationListener;
-using Elastos::Droid::Location::EIID_ILocationListener;
 using Elastos::Droid::Location::ILocationManager;
-using Elastos::Droid::Location::EIID_ILocationManager;
-using Elastos::Droid::Location::IAddress;
-using Elastos::Droid::Location::EIID_IAddress;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Server::Location::CountryDetectorBase;
+using Elastos::Core::IThread;
+using Elastos::Utility::IList;
+using Elastos::Utility::ITimer;
+using Elastos::Utility::TimerTask;
 
 namespace Elastos {
 namespace Droid {
@@ -53,15 +45,15 @@ namespace Location {
  *
  * @hide
  */
-class LocationBasedCountryDetector : public CountryDetectorBase
+class LocationBasedCountryDetector
+    : public CountryDetectorBase
 {
 private:
-    const static String TAG;// = "LocationBasedCountryDetector";
-
-    class DetectCountryTimerTask : public TimerTask
+    class MyTimerTask
+        : public TimerTask
     {
     public:
-        DetectCountryTimerTask(
+        MyTimerTask(
             /* [in] */ LocationBasedCountryDetector* host);
 
         CARAPI Run();
@@ -70,14 +62,14 @@ private:
         LocationBasedCountryDetector* mHost;
     };
 
-    class LocationListener
-            : public ILocationListener
-            , public ElRefBase
+    class MyLocationListener
+            : public Object
+            , public ILocationListener
     {
     public:
         CAR_INTERFACE_DECL()
 
-        LocationListener(
+        MyLocationListener(
             /* [in] */ LocationBasedCountryDetector* host);
 
         CARAPI OnLocationChanged(
@@ -98,22 +90,21 @@ private:
 
     };
 
-    class QueryRunnable
-            : public IRunnable
-            , public ElRefBase
+    class MyRunnable
+        : public Runnable
     {
     public:
-        CAR_INTERFACE_DECL()
-
-        QueryRunnable(
+        MyRunnable(
             /* [in] */ LocationBasedCountryDetector* host,
             /* [in] */ ILocation* location);
 
         CARAPI Run();
+
     private:
         LocationBasedCountryDetector* mHost;
         ILocation* mLocation;
     };
+
 public:
     LocationBasedCountryDetector(
         /* [in] */ IContext* ctx);
@@ -134,7 +125,7 @@ public:
      */
     //@Override
     //synchronized
-    CARAPI_(void) Stop();
+    CARAPI Stop();
 
 protected:
 
@@ -170,8 +161,15 @@ protected:
      */
     CARAPI_(Int64) GetQueryLocationTimeout();
 
-    CARAPI_(AutoPtr< List<String> >) GetEnabledProviders();
+    CARAPI_(AutoPtr<IList>) GetEnabledProviders();
 
+private:
+    /**
+     * Start a new thread to query the country from Geocoder.
+     */
+    //synchronized
+    CARAPI_(void) QueryCountryCode(
+        /* [in] */ ILocation* location);
 
 protected:
     /**
@@ -183,24 +181,13 @@ protected:
      * The thread to query the country from the GeoCoder.
      */
     AutoPtr<IThread> mQueryThread;
-    AutoPtr<List<AutoPtr<LocationListener> > > mLocationListeners;
+    AutoPtr<IList> mLocationListeners;
 
 private:
-
-    /**
-     * Start a new thread to query the country from Geocoder.
-     */
-    //synchronized
-    CARAPI_(void) QueryCountryCode(
-        /* [in] */ ILocation* location);
-
-private:
-    const static Int64 QUERY_LOCATION_TIMEOUT;// = 1000 * 60 * 5; // 5 mins
-
+    const static String TAG;
+    const static Int64 QUERY_LOCATION_TIMEOUT;
     AutoPtr<ILocationManager> mLocationManager;
-    AutoPtr<List<String> > mEnabledProviders;
-
-    Object mLock;
+    AutoPtr<IList> mEnabledProviders;
 };
 
 } // namespace Location

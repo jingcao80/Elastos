@@ -35,7 +35,10 @@ module
         StartViewServer(
             [in] Int32 port,
             [out] Boolean* result);   // Transaction #1
-        StopViewServer();            // Transaction #2
+
+        StopViewServer(
+            [out] Boolean* result);            // Transaction #2
+
         IsViewServerRunning(
             [out] Boolean* result);       // Transaction #3
 
@@ -44,6 +47,7 @@ module
             [in] IInputMethodClient* client,
             [in] IInputContext* inputContext,
             [out] IWindowSession** session);
+
         InputMethodClientHasFocus(
             [in] IInputMethodClient* client,
             [out] Boolean* result);
@@ -52,25 +56,32 @@ module
             [in] Int32 displayId,
             [in] IPoint* inSize,
             [out] IPoint** outSize);
+
         GetBaseDisplaySize(
             [in] Int32 displayId,
             [in] IPoint* inSize,
             [out] IPoint** outSize);
+
         SetForcedDisplaySize(
             [in] Int32 displayId,
             [in] Int32 width,
             [in] Int32 height);
+
         ClearForcedDisplaySize(
             [in] Int32 displayId);
+
         GetInitialDisplayDensity(
             [in] Int32 displayId,
             [out] Int32* result);
+
         GetBaseDisplayDensity(
             [in] Int32 displayId,
             [out] Int32* result);
+
         SetForcedDisplayDensity(
             [in] Int32 displayId,
             [in] Int32 density);
+
         ClearForcedDisplayDensity(
             [in] Int32 displayId);
 
@@ -84,15 +95,20 @@ module
         // These can only be called when holding the MANAGE_APP_TOKENS permission.
         PauseKeyDispatching(
             [in] IBinder* token);
+
         ResumeKeyDispatching(
             [in] IBinder* token);
+
         SetEventDispatching(
             [in] Boolean enabled);
+
         AddWindowToken(
             [in] IBinder* token,
             [in] Int32 type);
+
         RemoveWindowToken(
             [in] IBinder* token);
+
         AddAppToken(
             [in] Int32 addPos,
             [in] IApplicationToken* token,
@@ -105,39 +121,49 @@ module
             [in] Int32 configChanges,
             [in] Boolean voiceInteraction,
             [in] Boolean launchTaskBehind);
+
         SetAppGroupId(
             [in] IBinder* token,
             [in] Int32 groupId);
+
         SetAppOrientation(
             [in] IApplicationToken* token,
             [in] Int32 requestedOrientation);
+
         GetAppOrientation(
             [in] IApplicationToken* token,
             [out] Int32* result);
+
         SetFocusedApp(
             [in] IBinder* token,
             [in] Boolean moveFocusNow);
+
         PrepareAppTransition(
             [in] Int32 transit,
             [in] Boolean alwaysKeepCurrent);
+
         GetPendingAppTransition(
             [in] Int32* result);
+
         OverridePendingAppTransition(
             [in] String packageName,
             [in] Int32 enterAnim,
             [in] Int32 exitAnim,
             [in] IIRemoteCallback* startedCallback);
+
         OverridePendingAppTransitionScaleUp(
             [in] Int32 startX,
             [in] Int32 startY,
             [in] Int32 startWidth,
             [in] Int32 startHeight);
+
         OverridePendingAppTransitionThumb(
             [in] IBitmap* srcThumb,
             [in] Int32 startX,
             [in] Int32 startY,
             [in] IIRemoteCallback* startedCallback,
             [in] Boolean scaleUp);
+
         OverridePendingAppTransitionAspectScaledThumb(
             [in] IBitmap* srcThumb,
             [in] Int32 startX,
@@ -146,7 +172,9 @@ module
             [in] Int32 targetHeight,
             [in] IIRemoteCallback* startedCallback,
             [in] Boolean scaleUp);
+
         ExecuteAppTransition();
+
         SetAppStartingWindow(
             [in] IBinder* token,
             [in] String pkg,
@@ -159,17 +187,22 @@ module
             [in] Int32 windowFlags,
             [in] IBinder* transferFrom,
             [in] Boolean createIfNeeded);
+
         SetAppWillBeHidden(
             [in] IBinder* token);
+
         SetAppVisibility(
             [in] IBinder* token,
             [in] Boolean visible);
+
         StartAppFreezingScreen(
             [in] IBinder* token,
             [in] Int32 configChanges);
+
         StopAppFreezingScreen(
             [in] IBinder* token,
             [in] Boolean force);
+
         RemoveAppToken(
             [in] IBinder* token);
 
@@ -180,29 +213,38 @@ module
             [in] IConfiguration* currentConfig,
             [in] IBinder* freezeThisOneIfNeeded,
             [out] IConfiguration** cfg);
+
         SetNewConfiguration(
             [in] IConfiguration* config);
 
         StartFreezingScreen(
             [in] Int32 exitAnim,
             [in] Int32 enterAnim);
+
         StopFreezingScreen();
 
         // these require DISABLE_KEYGUARD permission
         DisableKeyguard(
             [in] IBinder* token,
             [in] String tag);
+
         ReenableKeyguard(
             [in] IBinder* token);
+
         ExitKeyguardSecurely(
             [in] IOnKeyguardExitResult* cb);
+
         IsKeyguardLocked(
             [out] Boolean* result);
+
         IsKeyguardSecure(
             [out] Boolean* result);
+
         InKeyguardRestrictedInputMode(
             [out] Boolean* result);
+
         DismissKeyguard();
+
         KeyguardGoingAway(
             [in] Boolean disableWindowAnimations,
             [in] Boolean keyguardGoingToNotificationShade);
@@ -214,11 +256,14 @@ module
         GetAnimationScale(
             [in] Int32 which,
             [out] Float* result);
+
         GetAnimationScales(
             [out, callee] ArrayOf<Float>* scales);
+
         SetAnimationScale(
             [in] Int32 which,
             [in] Float scale);
+
         SetAnimationScales(
             [in] ArrayOf<Float>* scales);
 

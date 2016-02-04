@@ -3,14 +3,26 @@
 #define __ELASTOS_DROID_BLUETOOTH_CBLUETOOTHCLASS_H__
 
 #include "_Elastos_Droid_Bluetooth_CBluetoothClass.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/ext/frameworkdef.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Bluetooth {
 
 CarClass(CBluetoothClass)
+    , public Object
+    , public IBluetoothClass
+    , public IParcelable
 {
 public:
+    CAR_INTERFACE_DECL();
+
+    CAR_OBJECT_DECL();
+
+    CBluetoothClass();
+
     CARAPI GetHashCode(
         /* [out] */ Int32* code);
 

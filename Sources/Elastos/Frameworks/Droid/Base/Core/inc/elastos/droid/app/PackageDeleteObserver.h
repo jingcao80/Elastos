@@ -16,7 +16,7 @@ namespace Droid {
 namespace App {
 
 /** {@hide} */
-class PackageDeleteObserver
+class ECO_PUBLIC PackageDeleteObserver
     : public Object
     , public IPackageDeleteObserver
 {

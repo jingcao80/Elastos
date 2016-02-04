@@ -1,28 +1,32 @@
-
+#include "Elastos.Droid.Provider.h"
 #include "elastos/droid/media/CRingtoneManager.h"
-
 #include "elastos/droid/net/CUriHelper.h"
 #include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/provider/CMediaStoreAudioMedia.h"
+#include "elastos/droid/internal/database/CSortCursor.h"
 #include "elastos/droid/os/Environment.h"
 #include <elastos/core/StringBuilder.h>
 #include "elastos/droid/media/CRingtone.h"
 #include <elastos/utility/logging/Logger.h>
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Droid::Provider::IMediaStoreAudioAudioColumns;
-using Elastos::Droid::Provider::IMediaStoreAudioMedia;
-using Elastos::Droid::Provider::CMediaStoreAudioMedia;
-using Elastos::Droid::Provider::IMediaStoreMediaColumns;
-//using Elastos::Droid::Provider::IDrmStoreAudio;
-using Elastos::Droid::Net::IUriHelper;
-using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Content::IContentUris;
-using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Internal::Database::CSortCursor;
+using Elastos::Droid::Internal::Database::ISortCursor;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::IEnvironment;
-using Elastos::Core::StringBuilder;
+using Elastos::Droid::Provider::CMediaStoreAudioMedia;
+using Elastos::Droid::Provider::IMediaStoreAudioMedia;
+using Elastos::Droid::Provider::IMediaStoreAudioAudioColumns;
+using Elastos::Droid::Provider::IMediaStoreMediaColumns;
+using Elastos::Droid::Provider::IMediaStoreAudioPlaylistsMembers;
 using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -33,58 +37,49 @@ const String CRingtoneManager::TAG("RingtoneManager");
 static AutoPtr<ArrayOf<String> > InitINTERNAL_COLUMNS()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(4);
-    array->Set(0, IMediaStoreAudioMedia::ID);
-    array->Set(1, IMediaStoreAudioMedia::TITLE);
+    array->Set(0, IMediaStoreAudioPlaylistsMembers::ID);
+    array->Set(1, IMediaStoreMediaColumns::TITLE);
 
     AutoPtr<IMediaStoreAudioMedia> am;
     CMediaStoreAudioMedia::AcquireSingleton((IMediaStoreAudioMedia**)&am);
     String internalContentUri;
     AutoPtr<IUri> uri;
     am->GetINTERNAL_CONTENT_URI((IUri**)&uri);
-    uri->ToString(&internalContentUri);
+    IObject::Probe(uri)->ToString(&internalContentUri);
 
     String info;
     info.AppendFormat("\"%s\"", internalContentUri.string());
     array->Set(2, info);
-    array->Set(3, IMediaStoreAudioMedia::TITLE_KEY);
-    return array;
-}
-
-static AutoPtr<ArrayOf<String> > InitDRM_COLUMNS()
-{
-    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(4);
-    // array->Set(0, IDrmStoreAudio::ID);
-    // array->Set(1, IDrmStoreAudio::TITLE);
-    // String info;
-    // info.Format("\"%s\"", IDrmStoreAudio::CONTENT_URI.string());
-    // array->Set(2, info);
-    // array->Set(3, IDrmStoreAudio::TITLE_KEY);
+    array->Set(3, IMediaStoreAudioAudioColumns::TITLE_KEY);
     return array;
 }
 
 static AutoPtr<ArrayOf<String> > InitMEDIA_COLUMNS()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(4);
-    array->Set(0, IMediaStoreAudioMedia::ID);
-    array->Set(1, IMediaStoreAudioMedia::TITLE);
+    array->Set(0, IMediaStoreAudioPlaylistsMembers::ID);
+    array->Set(1, IMediaStoreMediaColumns::TITLE);
 
     AutoPtr<IMediaStoreAudioMedia> am;
     CMediaStoreAudioMedia::AcquireSingleton((IMediaStoreAudioMedia**)&am);
     String externalContentUri;
     AutoPtr<IUri> uri;
     am->GetEXTERNAL_CONTENT_URI((IUri**)&uri);
-    uri->ToString(&externalContentUri);
+    IObject::Probe(uri)->ToString(&externalContentUri);
 
     String info;
     info.AppendFormat("\"%s\"", externalContentUri.string());
     array->Set(2, info);
-    array->Set(3, IMediaStoreAudioMedia::TITLE_KEY);
+    array->Set(3, IMediaStoreAudioAudioColumns::TITLE_KEY);
     return array;
 }
 
 AutoPtr< ArrayOf<String> > CRingtoneManager::INTERNAL_COLUMNS = InitINTERNAL_COLUMNS();
-AutoPtr< ArrayOf<String> > CRingtoneManager::DRM_COLUMNS = InitDRM_COLUMNS();
 AutoPtr< ArrayOf<String> > CRingtoneManager::MEDIA_COLUMNS = InitMEDIA_COLUMNS();
+
+CAR_OBJECT_IMPL(CRingtoneManager)
+
+CAR_INTERFACE_IMPL(CRingtoneManager, Object, IRingtoneManager)
 
 CRingtoneManager::CRingtoneManager()
     : mType(TYPE_RINGTONE)
@@ -92,10 +87,14 @@ CRingtoneManager::CRingtoneManager()
 {
 }
 
+CRingtoneManager::~CRingtoneManager()
+{}
+
 ECode CRingtoneManager::constructor(
     /* [in] */ IActivity* activity)
 {
-    mContext = mActivity = activity;
+    mActivity = activity;
+    mContext = IContext::Probe(activity);
     SetType(mType);
     return NOERROR;
 }
@@ -174,15 +173,16 @@ ECode CRingtoneManager::GetIncludeDrm(
 {
     VALIDATE_NOT_NULL(result);
 
-    *result = mIncludeDrm;
+    *result = FALSE;
     return NOERROR;
 }
 
 ECode CRingtoneManager::SetIncludeDrm(
     /* [in] */ Boolean includeDrm)
 {
-    mIncludeDrm = includeDrm;
-
+    if (includeDrm) {
+        Slogger::W(TAG, "setIncludeDrm no longer supported");
+    }
     return NOERROR;
 }
 
@@ -199,12 +199,15 @@ ECode CRingtoneManager::GetCursor(
     }
 
     AutoPtr<ICursor> internalCursor = GetInternalRingtones();
-    AutoPtr<ICursor> drmCursor = mIncludeDrm ? GetDrmRingtones() : NULL;
     AutoPtr<ICursor> mediaCursor = GetMediaRingtones();
-/*Eddie(E_NOT_IMPLEMENTED)*/
-//    mCursor = new SortCursor(new Cursor[] { internalCursor, drmCursor, mediaCursor },
-//            IMediaStoreAudioMedia::DEFAULT_SORT_ORDER);
-
+    AutoPtr<ArrayOf<ICursor*> > cursors = ArrayOf<ICursor*>::Alloc(2);
+    cursors->Set(0, internalCursor.Get());
+    cursors->Set(1, mediaCursor.Get());
+    AutoPtr<ISortCursor> sc;
+    CSortCursor::New(cursors.Get(), IMediaStoreAudioMedia::DEFAULT_SORT_ORDER, (ISortCursor**)&sc);
+    mCursor = ICursor::Probe(sc);
+    *result = mCursor.Get();
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -289,7 +292,7 @@ ECode CRingtoneManager::GetRingtonePosition(
         cursor->GetInt64(ID_COLUMN_INDEX, &tempValue);
         AutoPtr<IUri> uri;
         contentUris->WithAppendedId(currentUri, tempValue, (IUri**)&uri);
-        ringtoneUri->Equals(uri, &tempState);
+        IObject::Probe(ringtoneUri)->Equals(uri, &tempState);
         if (tempState) {
             *result = i;
             return NOERROR;
@@ -320,9 +323,6 @@ ECode CRingtoneManager::GetValidRingtoneUri(
         uri = GetValidRingtoneUriFromCursorAndClose(context, rm->GetMediaRingtones());
     }
 
-    if (uri == NULL) {
-        uri = GetValidRingtoneUriFromCursorAndClose(context, rm->GetDrmRingtones());
-    }
     *result = uri;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -383,7 +383,7 @@ ECode CRingtoneManager::SetActualDefaultRingtoneUri(
     AutoPtr<IContentResolver> contentResolver;
     context->GetContentResolver((IContentResolver**)&contentResolver);
     String tempText, tempNull;
-    ringtoneUri->ToString(&tempText);
+    IObject::Probe(ringtoneUri)->ToString(&tempText);
     Boolean restlt;
     return Settings::System::PutString(contentResolver, setting,
             ringtoneUri != NULL ? tempText : tempNull, &restlt);
@@ -413,11 +413,11 @@ ECode CRingtoneManager::GetDefaultType(
     Boolean tempState;
     if (defaultRingtoneUri == NULL) {
         *result = -1;
-    } else if (defaultRingtoneUri->Equals(Settings::System::DEFAULT_RINGTONE_URI, &tempState), tempState) {
+    } else if (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_RINGTONE_URI, &tempState), tempState) {
         *result = TYPE_RINGTONE;
-    } else if (defaultRingtoneUri->Equals(Settings::System::DEFAULT_NOTIFICATION_URI, &tempState), tempState) {
+    } else if (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_NOTIFICATION_URI, &tempState), tempState) {
         *result = TYPE_NOTIFICATION;
-    } else if (defaultRingtoneUri->Equals(Settings::System::DEFAULT_ALARM_ALERT_URI, &tempState), tempState) {
+    } else if (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_ALARM_ALERT_URI, &tempState), tempState) {
         *result = TYPE_ALARM;
     } else {
         *result = -1;
@@ -478,7 +478,7 @@ AutoPtr<IUri> CRingtoneManager::GetValidRingtoneUriFromCursorAndClose(
         if (tempState) {
             uri = GetUriFromCursor(cursor);
         }
-        cursor->Close();
+        ICloseable::Probe(cursor)->Close();
     }
 
     return uri;
@@ -491,17 +491,8 @@ AutoPtr<ICursor> CRingtoneManager::GetInternalRingtones()
     AutoPtr<IUri> uri;
     am->GetINTERNAL_CONTENT_URI((IUri**)&uri);
     return Query(uri, INTERNAL_COLUMNS,
-        ConstructBooleanTrueWhereClause(&mFilterColumns, mIncludeDrm),
+        ConstructBooleanTrueWhereClause(&mFilterColumns),
         NULL, IMediaStoreAudioMedia::DEFAULT_SORT_ORDER);
-}
-
-AutoPtr<ICursor> CRingtoneManager::GetDrmRingtones()
-{
-    assert(0);
-    // DRM store does not have any columns to use for filtering
-    // String nullStr;
-    // return Query(IDrmStoreAudio::CONTENT_URI, DRM_COLUMNS, nullStr, NULL, IDrmStoreAudio::TITLE);
-    return NULL;
 }
 
 AutoPtr<ICursor> CRingtoneManager::GetMediaRingtones()
@@ -515,7 +506,7 @@ AutoPtr<ICursor> CRingtoneManager::GetMediaRingtones()
 
     return (status.Equals(IEnvironment::MEDIA_MOUNTED) || status.Equals(IEnvironment::MEDIA_MOUNTED_READ_ONLY))
         ? Query(uri, MEDIA_COLUMNS,
-            ConstructBooleanTrueWhereClause(&mFilterColumns, mIncludeDrm), NULL,
+            ConstructBooleanTrueWhereClause(&mFilterColumns), NULL,
             IMediaStoreAudioMedia::DEFAULT_SORT_ORDER)
         : NULL;
 }
@@ -541,8 +532,7 @@ void CRingtoneManager::SetFilterColumnsList(
 
 /*static*/
 String CRingtoneManager::ConstructBooleanTrueWhereClause(
-    /* [in] */ List<String>* columns,
-    /* [in] */ Boolean includeDrm)
+    /* [in] */ List<String>* columns)
 {
     String tempNull;
     if (columns == NULL) {
@@ -568,14 +558,6 @@ String CRingtoneManager::ConstructBooleanTrueWhereClause(
     }
 
     sb += ")";
-
-    if (!includeDrm) {
-        // If not DRM files should be shown, the where clause
-        // will be something like "(is_notification=1) and is_drm=0"
-        sb += " and ";
-        sb += IMediaStoreMediaColumns::IS_DRM;
-        sb += "=0";
-    }
     String tempText;
     sb.ToString(&tempText);
     return tempText;
@@ -625,7 +607,7 @@ AutoPtr<IRingtone> CRingtoneManager::GetRingtone(
 //    } catch (Exception ex) {
 exception:
         String tempText;
-        ringtoneUri->ToString(&tempText);
+        IObject::Probe(ringtoneUri)->ToString(&tempText);
         Logger::E(TAG, "Failed to open ringtone %s : %08x", tempText.string(), ec);
 //    }
     return NULL;

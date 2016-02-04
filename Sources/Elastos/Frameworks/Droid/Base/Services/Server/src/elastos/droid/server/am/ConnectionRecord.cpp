@@ -112,8 +112,7 @@ String ConnectionRecord::ToString()
     if (mServiceDead) {
         sb += "DEAD ";
     }
-    assert(0);
-    // sb += mBinding->mService->mShortName;
+    sb += mBinding->mService->mShortName;
     sb += ":@";
     sb += StringUtils::ToString((Int32)IBinder::Probe(mConn), 16);
     sb += '}';

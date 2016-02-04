@@ -14,6 +14,7 @@
 #include "StringUtils.h"
 #include "CString.h"
 #include "Collections.h"
+#include <ustrenum.h>
 
 #include <unicode/ucat.h>
 #include <unicode/ureslocs.h>
@@ -68,7 +69,10 @@ static String getCurrencyName(const String& languageTag, const String& currencyC
     }
     UnicodeString icuCurrencyCode = UnicodeString::fromUTF8(currencyCode.string());
     UErrorCode status = U_ZERO_ERROR;
+    UBool isChoiceFormat = false;
     Int32 charCount;
+    const UChar* chars = ucurr_getName(icuCurrencyCode.getTerminatedBuffer(), languageTag,
+                                     nameStyle, &isChoiceFormat, &charCount, &status);
     if (U_USING_DEFAULT_WARNING == status) {
         if (UCURR_SYMBOL_NAME == nameStyle) {
             // ICU doesn't distinguish between falling back to the root locale and meeting a genuinely
@@ -79,10 +83,11 @@ static String getCurrencyName(const String& languageTag, const String& currencyC
         }
         if (UCURR_LONG_NAME == nameStyle) {
             // ICU's default is English. We want the ISO 4217 currency code instead.
+            chars = icuCurrencyCode.getBuffer();
             charCount = icuCurrencyCode.length();
         }
     }
-    return (0 == charCount) ? String(NULL) : UnicodeStringToString(icuCurrencyCode);
+    return (0 == charCount) ? String(NULL) : UnicodeStringToString(chars);
 }
 
 // TODO: put this in a header file and use it everywhere!
@@ -688,13 +693,9 @@ ECode ICUUtil::GetAvailableCurrencyCodes(
     /* [out, callee] */ ArrayOf<String>** codes)
 {
     UErrorCode status = U_ZERO_ERROR;
-#if 0 // TODO: Waiting for external eco
+
     UStringEnumeration e(ucurr_openISOCurrencies(UCURR_COMMON|UCURR_NON_DEPRECATED, &status));
     return fromStringEnumeration(status, "ucurr_openISOCurrencies", &e, codes);
-#else
-    assert(0);
-    return NOERROR;
-#endif
 }
 
 // TODO: rewrite this with int32_t ucurr_forLocale(const char* locale, UChar* buff, int32_t buffCapacity, UErrorCode* ec)...
@@ -953,14 +954,14 @@ AutoPtr<ArrayOf<String> > ICUUtil::GetISOCountriesNative()
     return ToStringArray(Locale::getISOCountries());
 }
 
-static void getIntegerField(
+static void setIntegerField(
     /* [in] */ Int32 value,
     /* [out] */ IInteger32** field)
 {
     CInteger32::New(value, field);
 }
 
-static void getStringField(
+static void setStringField(
     /* [in] */ UResourceBundle* bundle,
     /* [in] */ Int32 index,
     /* [out] */ String* field)
@@ -979,26 +980,7 @@ static void getStringField(
     }
 }
 
-static void getStringField(
-    /* [in] */ UResourceBundle* bundle,
-    /* [in] */ const char* key,
-    /* [out] */ String* field)
-{
-    UErrorCode status = U_ZERO_ERROR;
-    Int32 charCount;
-    UnicodeString chars = ures_getStringByKey(bundle, key, &charCount, &status);
-    if (U_SUCCESS(status)) {
-        String s("");
-        ElStringByteSink sink(&s);
-        chars.toUTF8(sink);
-        *field = s;
-    }
-    else {
-       PFL_EX("Error setting String field %d from ICUUtil resource: %s", key, u_errorName(status));
-    }
-}
-
-static void getStringArrayField(
+static void setStringArrayField(
     /* [in] */ const UnicodeString* valueArray,
     /* [in] */ int32_t size,
     /* [out] */ ArrayOf<String> ** field)
@@ -1014,7 +996,7 @@ static void getStringArrayField(
     REFCOUNT_ADD(*field);
 }
 
-static void getCharField(
+static void setCharField(
     /* [in] */ const UnicodeString& value,
     /* [out] */ Char32* field)
 {
@@ -1024,7 +1006,7 @@ static void getCharField(
     *field = (Char32)value.charAt(0);
 }
 
-static void getStringField(
+static void setStringField(
     /* [in] */ const UnicodeString& value,
     /* [out] */ String* field)
 {
@@ -1044,15 +1026,15 @@ static void setNumberPatterns(
     UniquePtr<DecimalFormat> fmt(static_cast<DecimalFormat*>(
             NumberFormat::createInstance(locale, UNUM_CURRENCY, status)));
     pattern = fmt->toPattern(pattern.remove());
-    getStringField(pattern, &localeData->mCurrencyPattern);
+    setStringField(pattern, &localeData->mCurrencyPattern);
 
     fmt.reset(static_cast<DecimalFormat*>(NumberFormat::createInstance(locale, UNUM_DECIMAL, status)));
     pattern = fmt->toPattern(pattern.remove());
-    getStringField(pattern, &localeData->mNumberPattern);
+    setStringField(pattern, &localeData->mNumberPattern);
 
     fmt.reset(static_cast<DecimalFormat*>(NumberFormat::createInstance(locale, UNUM_PERCENT, status)));
     pattern = fmt->toPattern(pattern.remove());
-    getStringField(pattern, &localeData->mPercentPattern);
+    setStringField(pattern, &localeData->mPercentPattern);
 }
 
 static void setDecimalFormatSymbolsData(
@@ -1062,17 +1044,17 @@ static void setDecimalFormatSymbolsData(
     UErrorCode status = U_ZERO_ERROR;
     DecimalFormatSymbols dfs(locale, status);
 
-    getCharField(dfs.getSymbol(DecimalFormatSymbols::kDecimalSeparatorSymbol), &localeData->mDecimalSeparator);
-    getCharField(dfs.getSymbol(DecimalFormatSymbols::kGroupingSeparatorSymbol), &localeData->mGroupingSeparator);
-    getCharField(dfs.getSymbol(DecimalFormatSymbols::kPatternSeparatorSymbol), &localeData->mPatternSeparator);
-    getCharField(dfs.getSymbol(DecimalFormatSymbols::kPercentSymbol), &localeData->mPercent);
-    getCharField(dfs.getSymbol(DecimalFormatSymbols::kPerMillSymbol), &localeData->mPerMill);
-    getCharField(dfs.getSymbol(DecimalFormatSymbols::kMonetarySeparatorSymbol), &localeData->mMonetarySeparator);
-    getStringField(dfs.getSymbol(DecimalFormatSymbols:: kMinusSignSymbol), &localeData->mMinusSign);
-    getStringField(dfs.getSymbol(DecimalFormatSymbols::kExponentialSymbol), &localeData->mExponentSeparator);
-    getStringField(dfs.getSymbol(DecimalFormatSymbols::kInfinitySymbol), &localeData->mInfinity);
-    getStringField(dfs.getSymbol(DecimalFormatSymbols::kNaNSymbol), &localeData->mNaN);
-    getCharField(dfs.getSymbol(DecimalFormatSymbols::kZeroDigitSymbol), &localeData->mZeroDigit);
+    setCharField(dfs.getSymbol(DecimalFormatSymbols::kDecimalSeparatorSymbol), &localeData->mDecimalSeparator);
+    setCharField(dfs.getSymbol(DecimalFormatSymbols::kGroupingSeparatorSymbol), &localeData->mGroupingSeparator);
+    setCharField(dfs.getSymbol(DecimalFormatSymbols::kPatternSeparatorSymbol), &localeData->mPatternSeparator);
+    setCharField(dfs.getSymbol(DecimalFormatSymbols::kPercentSymbol), &localeData->mPercent);
+    setCharField(dfs.getSymbol(DecimalFormatSymbols::kPerMillSymbol), &localeData->mPerMill);
+    setCharField(dfs.getSymbol(DecimalFormatSymbols::kMonetarySeparatorSymbol), &localeData->mMonetarySeparator);
+    setStringField(dfs.getSymbol(DecimalFormatSymbols:: kMinusSignSymbol), &localeData->mMinusSign);
+    setStringField(dfs.getSymbol(DecimalFormatSymbols::kExponentialSymbol), &localeData->mExponentSeparator);
+    setStringField(dfs.getSymbol(DecimalFormatSymbols::kInfinitySymbol), &localeData->mInfinity);
+    setStringField(dfs.getSymbol(DecimalFormatSymbols::kNaNSymbol), &localeData->mNaN);
+    setCharField(dfs.getSymbol(DecimalFormatSymbols::kZeroDigitSymbol), &localeData->mZeroDigit);
 }
 
 // Iterates up through the locale hierarchy. So "en_US" would return "en_US", "en", "".
@@ -1129,8 +1111,8 @@ static bool getAmPmMarkersNarrow(
     if (U_FAILURE(status)) {
         return false;
     }
-    getStringField(amPmMarkersNarrow.get(), 0, &localeData->mNarrowAm);
-    getStringField(amPmMarkersNarrow.get(), 1, &localeData->mNarrowPm);
+    setStringField(amPmMarkersNarrow.get(), 0, &localeData->mNarrowAm);
+    setStringField(amPmMarkersNarrow.get(), 1, &localeData->mNarrowPm);
     return true;
 }
 
@@ -1155,14 +1137,14 @@ static Boolean getDateTimePatterns(
     if (U_FAILURE(status)) {
         return FALSE;
     }
-    getStringField(dateTimePatterns.get(), 0, &localeData->mFullTimeFormat);
-    getStringField(dateTimePatterns.get(), 1, &localeData->mLongTimeFormat);
-    getStringField(dateTimePatterns.get(), 2, &localeData->mMediumTimeFormat);
-    getStringField(dateTimePatterns.get(), 3, &localeData->mShortTimeFormat);
-    getStringField(dateTimePatterns.get(), 4, &localeData->mFullDateFormat);
-    getStringField(dateTimePatterns.get(), 5, &localeData->mLongDateFormat);
-    getStringField(dateTimePatterns.get(), 6, &localeData->mMediumDateFormat);
-    getStringField(dateTimePatterns.get(), 7, &localeData->mShortDateFormat);
+    setStringField(dateTimePatterns.get(), 0, &localeData->mFullTimeFormat);
+    setStringField(dateTimePatterns.get(), 1, &localeData->mLongTimeFormat);
+    setStringField(dateTimePatterns.get(), 2, &localeData->mMediumTimeFormat);
+    setStringField(dateTimePatterns.get(), 3, &localeData->mShortTimeFormat);
+    setStringField(dateTimePatterns.get(), 4, &localeData->mFullDateFormat);
+    setStringField(dateTimePatterns.get(), 5, &localeData->mLongDateFormat);
+    setStringField(dateTimePatterns.get(), 6, &localeData->mMediumDateFormat);
+    setStringField(dateTimePatterns.get(), 7, &localeData->mShortDateFormat);
     return TRUE;
 }
 
@@ -1196,9 +1178,9 @@ static Boolean getYesterdayTodayAndTomorrow(
     yesterday.toTitle(brk.get(), locale, U_TITLECASE_NO_LOWERCASE | U_TITLECASE_NO_BREAK_ADJUSTMENT);
     today.toTitle(brk.get(), locale, U_TITLECASE_NO_LOWERCASE | U_TITLECASE_NO_BREAK_ADJUSTMENT);
     tomorrow.toTitle(brk.get(), locale, U_TITLECASE_NO_LOWERCASE | U_TITLECASE_NO_BREAK_ADJUSTMENT);
-    getStringField(yesterday, &localeData->mYesterday);
-    getStringField(today, &localeData->mToday);
-    getStringField(tomorrow, &localeData->mTomorrow);
+    setStringField(yesterday, &localeData->mYesterday);
+    setStringField(today, &localeData->mToday);
+    setStringField(tomorrow, &localeData->mTomorrow);
     return TRUE;
 }
 
@@ -1268,8 +1250,8 @@ Boolean ICUUtil::InitLocaleDataNative(
 
     localeData->mMinimalDaysInFirstWeek = NULL;
     localeData->mFirstDayOfWeek = NULL;
-    getIntegerField(cal->getFirstDayOfWeek(), (IInteger32**)&localeData->mFirstDayOfWeek);
-    getIntegerField(cal->getMinimalDaysInFirstWeek(),
+    setIntegerField(cal->getFirstDayOfWeek(), (IInteger32**)&localeData->mFirstDayOfWeek);
+    setIntegerField(cal->getMinimalDaysInFirstWeek(),
             (IInteger32**)&localeData->mMinimalDaysInFirstWeek);
 
     // Get DateFormatSymbols.
@@ -1283,71 +1265,71 @@ Boolean ICUUtil::InitLocaleDataNative(
     int32_t count = 0;
     const UnicodeString* amPmStrs = dateFormatSym.getAmPmStrings(count);
     localeData->mAmPm = NULL;
-    getStringArrayField(amPmStrs, count, (ArrayOf<String> **)&(localeData->mAmPm));
+    setStringArrayField(amPmStrs, count, (ArrayOf<String> **)&(localeData->mAmPm));
 
     const UnicodeString* erasStrs = dateFormatSym.getEras(count);
     localeData->mEras = NULL;
-    getStringArrayField(erasStrs, count, (ArrayOf<String> **)&localeData->mEras);
+    setStringArrayField(erasStrs, count, (ArrayOf<String> **)&localeData->mEras);
 
     localeData->mLongMonthNames = NULL;
     const UnicodeString* longMonthNames =
             dateFormatSym.getMonths(count, DateFormatSymbols::FORMAT, DateFormatSymbols::WIDE);
-    getStringArrayField(longMonthNames, count, (ArrayOf<String> **)&localeData->mLongMonthNames);
+    setStringArrayField(longMonthNames, count, (ArrayOf<String> **)&localeData->mLongMonthNames);
 
     localeData->mShortMonthNames = NULL;
     const UnicodeString* shortMonthNames =
             dateFormatSym.getMonths(count, DateFormatSymbols::FORMAT, DateFormatSymbols::ABBREVIATED);
-    getStringArrayField(shortMonthNames, count, (ArrayOf<String> **)&localeData->mShortMonthNames);
+    setStringArrayField(shortMonthNames, count, (ArrayOf<String> **)&localeData->mShortMonthNames);
 
     localeData->mTinyMonthNames = NULL;
     const UnicodeString* tinyMonthNames =
             dateFormatSym.getMonths(count, DateFormatSymbols::FORMAT, DateFormatSymbols::NARROW);
-    getStringArrayField(tinyMonthNames, count, (ArrayOf<String> **)&localeData->mTinyMonthNames);
+    setStringArrayField(tinyMonthNames, count, (ArrayOf<String> **)&localeData->mTinyMonthNames);
 
     localeData->mLongWeekdayNames = NULL;
     const UnicodeString* longWeekdayNames =
             dateFormatSym.getWeekdays(count, DateFormatSymbols::FORMAT, DateFormatSymbols::WIDE);
-    getStringArrayField(longWeekdayNames, count, (ArrayOf<String> **)&localeData->mLongWeekdayNames);
+    setStringArrayField(longWeekdayNames, count, (ArrayOf<String> **)&localeData->mLongWeekdayNames);
 
     localeData->mShortWeekdayNames = NULL;
     const UnicodeString* shortWeekdayNames =
             dateFormatSym.getWeekdays(count, DateFormatSymbols::FORMAT, DateFormatSymbols::ABBREVIATED);
-    getStringArrayField(shortWeekdayNames, count, (ArrayOf<String> **)&localeData->mShortWeekdayNames);
+    setStringArrayField(shortWeekdayNames, count, (ArrayOf<String> **)&localeData->mShortWeekdayNames);
 
     localeData->mTinyWeekdayNames = NULL;
     const UnicodeString* tinyWeekdayNames =
             dateFormatSym.getWeekdays(count, DateFormatSymbols::FORMAT, DateFormatSymbols::NARROW);
-    getStringArrayField(tinyWeekdayNames, count, (ArrayOf<String> **)&localeData->mTinyWeekdayNames);
+    setStringArrayField(tinyWeekdayNames, count, (ArrayOf<String> **)&localeData->mTinyWeekdayNames);
 
     localeData->mLongStandAloneMonthNames = NULL;
     const UnicodeString* longStandAloneMonthNames =
             dateFormatSym.getMonths(count, DateFormatSymbols::STANDALONE, DateFormatSymbols::WIDE);
-    getStringArrayField(longStandAloneMonthNames, count, (ArrayOf<String> **)&localeData->mLongStandAloneMonthNames);
+    setStringArrayField(longStandAloneMonthNames, count, (ArrayOf<String> **)&localeData->mLongStandAloneMonthNames);
 
     localeData->mShortStandAloneMonthNames = NULL;
     const UnicodeString* shortStandAloneMonthNames =
             dateFormatSym.getMonths(count, DateFormatSymbols::STANDALONE, DateFormatSymbols::ABBREVIATED);
-    getStringArrayField(shortStandAloneMonthNames, count, (ArrayOf<String> **)&localeData->mShortStandAloneMonthNames);
+    setStringArrayField(shortStandAloneMonthNames, count, (ArrayOf<String> **)&localeData->mShortStandAloneMonthNames);
 
     localeData->mTinyStandAloneMonthNames = NULL;
     const UnicodeString* tinyStandAloneMonthNames =
             dateFormatSym.getMonths(count, DateFormatSymbols::STANDALONE, DateFormatSymbols::NARROW);
-    getStringArrayField(tinyStandAloneMonthNames, count, (ArrayOf<String> **)&localeData->mTinyStandAloneMonthNames);
+    setStringArrayField(tinyStandAloneMonthNames, count, (ArrayOf<String> **)&localeData->mTinyStandAloneMonthNames);
 
     localeData->mLongStandAloneWeekdayNames = NULL;
     const UnicodeString* longStandAloneWeekdayNames =
             dateFormatSym.getWeekdays(count, DateFormatSymbols::STANDALONE, DateFormatSymbols::WIDE);
-    getStringArrayField(longStandAloneWeekdayNames, count, (ArrayOf<String> **)&localeData->mLongStandAloneWeekdayNames);
+    setStringArrayField(longStandAloneWeekdayNames, count, (ArrayOf<String> **)&localeData->mLongStandAloneWeekdayNames);
 
     localeData->mShortStandAloneWeekdayNames = NULL;
     const UnicodeString* shortStandAloneWeekdayNames =
             dateFormatSym.getWeekdays(count, DateFormatSymbols::STANDALONE, DateFormatSymbols::ABBREVIATED);
-    getStringArrayField(shortStandAloneWeekdayNames, count, (ArrayOf<String> **)&localeData->mShortStandAloneWeekdayNames);
+    setStringArrayField(shortStandAloneWeekdayNames, count, (ArrayOf<String> **)&localeData->mShortStandAloneWeekdayNames);
 
     localeData->mTinyStandAloneWeekdayNames = NULL;
     const UnicodeString* tinyStandAloneWeekdayNames =
             dateFormatSym.getWeekdays(count, DateFormatSymbols::STANDALONE, DateFormatSymbols::NARROW);
-    getStringArrayField(tinyStandAloneWeekdayNames, count, (ArrayOf<String> **)&localeData->mTinyStandAloneWeekdayNames);
+    setStringArrayField(tinyStandAloneWeekdayNames, count, (ArrayOf<String> **)&localeData->mTinyStandAloneWeekdayNames);
 
     status = U_ZERO_ERROR;
 
@@ -1474,12 +1456,7 @@ Int32 ICUUtil::GetCurrencyNumericCode(
         return 0;
     }
     UnicodeString icuCurrencyCode = UnicodeString::fromUTF8(currencyCode.string());
-#if 0 // TODO: Waiting for external eco
     return ucurr_getNumericCode(icuCurrencyCode.getTerminatedBuffer());
-#else
-    assert(0);
-    return 0;
-#endif
 }
 
 ECode ICUUtil::GetCurrencyDisplayName(
@@ -1532,7 +1509,7 @@ ECode ICUUtil::GetDisplayLanguage(
     return NOERROR;
 }
 
-ILocale* ICUUtil::AddLikelySubtags(
+AutoPtr<ILocale> ICUUtil::AddLikelySubtags(
         /* [in] */ ILocale* locale)
 {
     String languageTag;
@@ -1540,8 +1517,6 @@ ILocale* ICUUtil::AddLikelySubtags(
 
     AutoPtr<ILocale> rev;
     CLocale::ForLanguageTag(AddLikelySubtags(languageTag), (ILocale**)&rev);
-
-    REFCOUNT_ADD(rev);
     return rev;
 }
 

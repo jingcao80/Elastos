@@ -38,30 +38,7 @@ FileInputStream::~FileInputStream()
     if (mGuard != NULL) {
         mGuard->WarnIfOpen();
     }
-
-    if (mChannel != NULL) {
-        ICloseable::Probe(mChannel)->Close();
-    }
-    if (mShouldClose) {
-        AutoPtr<CIoBridge> ioBridge;
-        CIoBridge::AcquireSingletonByFriend((CIoBridge**)&ioBridge);
-        ioBridge->CloseAndSignalBlockedThreads(mFd);
-    }
-    else {
-        // An owned fd has been invalidated by IoUtils.close, but
-        // we need to explicitly stop using an unowned fd (http://b/4361076).
-        mFd = NULL;
-        CFileDescriptor::New((IFileDescriptor**)&mFd);
-    }
-    // } finally {
-    //     try {
-    //         super.finalize();
-    //     } catch (Throwable t) {
-    //         // for consistency with the RI, we must override Object.finalize() to
-    //         // remove the 'throws Throwable' clause.
-    //         throw new AssertionError(t);
-    //     }
-    // }
+    Close();
 }
 
 ECode FileInputStream::constructor(

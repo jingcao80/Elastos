@@ -1,10 +1,12 @@
 
-#include "pm/CLocalObserver.h"
+#include "elastos/droid/server/pm/CLocalObserver.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Content::Pm::IPackageManagerHelper;
 using Elastos::Droid::Content::Pm::CPackageManagerHelper;
+using Elastos::Droid::Content::Pm::EIID_IIPackageInstallObserver2;
+using Elastos::Droid::Os::EIID_IBinder;
 
 namespace Elastos {
 namespace Droid {
@@ -18,7 +20,7 @@ CAR_OBJECT_IMPL(CLocalObserver)
 ECode CLocalObserver::constructor(
     /* [in] */ IIPackageInstallerSession* host)
 {
-    mHost = reinterpret_cast<CPackageInstallerSession*>(host->Probe(EIID_CPackageInstallerSession));
+    mHost = (CPackageInstallerSession*)host;
     return NOERROR;
 }
 
@@ -37,6 +39,13 @@ ECode CLocalObserver::OnPackageInstalled(
     mHost->DestroyInternal();
     mHost->DispatchSessionFinished(returnCode, msg, extras);
     return NOERROR;
+}
+
+ECode CLocalObserver::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    return Object::ToString(str);
 }
 
 } // namespace Pm

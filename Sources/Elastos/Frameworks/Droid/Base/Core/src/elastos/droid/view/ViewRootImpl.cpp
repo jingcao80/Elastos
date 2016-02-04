@@ -27,6 +27,7 @@
 #include "elastos/droid/view/accessibility/CAccessibilityEvent.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManager.h"
 #include "elastos/droid/view/accessibility/CAccessibilityNodeInfo.h"
+#include "elastos/droid/view/CAccessibilityInteractionConnection.h"
 #include "elastos/droid/view/animation/CAccelerateDecelerateInterpolator.h"
 #include "elastos/droid/view/inputmethod/CInputMethodManager.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -94,6 +95,7 @@ using Elastos::Droid::View::CAccessibilityInteractionController;
 using Elastos::Droid::View::Accessibility::CAccessibilityEvent;
 using Elastos::Droid::View::Accessibility::CAccessibilityManager;
 using Elastos::Droid::View::Accessibility::CAccessibilityNodeInfo;
+using Elastos::Droid::View::Accessibility::IIAccessibilityInteractionConnection;
 using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Droid::View::Animation::CAccelerateDecelerateInterpolator;
 using Elastos::Droid::View::InputMethod::IInputConnection;
@@ -534,7 +536,7 @@ ECode ViewRootImpl::WindowInputEventReceiver::Dispose()
         }
     }
 
-    //return InputEventReceiver::Dispose();
+    return InputEventReceiver::Dispose();
 }
 
 ECode ViewRootImpl::WindowInputEventReceiver::FinishInputEvent(
@@ -1046,14 +1048,15 @@ ECode ViewRootImpl::AccessibilityInteractionConnectionManager::EnsureConnection(
     Boolean registered =
         mViewRootImpl->mAttachInfo->mAccessibilityWindowId != IAccessibilityNodeInfo::UNDEFINED_ITEM_ID;
     if (!registered) {
-        assert(0 && "TODO");
-        /*AutoPtr<IAccessibilityInteractionConnection> connection;
+        AutoPtr<IIAccessibilityInteractionConnection> connection;
+        AutoPtr<IWeakReference> weakThis;
+        mViewRootImpl->GetWeakReference((IWeakReference**)&weakThis);
         CAccessibilityInteractionConnection::New(
-            (Handle32)mViewRootImpl, (IAccessibilityInteractionConnection**)&connection);
+            weakThis, (IIAccessibilityInteractionConnection**)&connection);
         Int32 status;
         mViewRootImpl->mAttachInfo->mAccessibilityWindowId =
             mViewRootImpl->mAccessibilityManager->AddAccessibilityInteractionConnection(
-                mViewRootImpl->mWindow, connection, &status);*/
+                mViewRootImpl->mWindow, connection, &status);
     }
     return NOERROR;
 }
@@ -1072,9 +1075,9 @@ ECode ViewRootImpl::AccessibilityInteractionConnectionManager::EnsureNoConnectio
 
 ViewRootImpl::SendWindowContentChangedAccessibilityEvent::SendWindowContentChangedAccessibilityEvent(
     /* [in] */ ViewRootImpl* host)
-    : mHost(host)
+    : mLastEventTimeMillis(0)
     , mChangeTypes(0)
-    , mLastEventTimeMillis(0)
+    , mHost(host)
 {}
 
 ECode ViewRootImpl::SendWindowContentChangedAccessibilityEvent::Run()
@@ -1224,69 +1227,69 @@ AutoPtr<Elastos::Droid::View::Animation::IInterpolator> ViewRootImpl::mResizeInt
 
 CAR_INTERFACE_IMPL_3(ViewRootImpl, Object, IViewRootImpl, IViewParent, IHardwareDrawCallbacks)
 
-ViewRootImpl::ViewRootImpl() :
-    mSeq(0),
-    mViewVisibility(IView::GONE),
-    mAppVisible(TRUE),
-    mOrigWindowType(-1),
-    mStopped(FALSE),
-    mLastInCompatMode(FALSE),
-    mIsCreating(FALSE),
-    mDrawingAllowed(FALSE),
-    mWidth(-1),
-    mHeight(-1),
-    mIsAnimating(FALSE),
-    mTraversalScheduled(FALSE),
-    mTraversalBarrier(0),
-    mWillDrawSoon(FALSE),
-    mIsInTraversal(FALSE),
-    mApplyInsetsRequested(FALSE),
-    mLayoutRequested(FALSE),
-    mFirst(TRUE), // TRUE for the first time the view is added
-    mReportNextDraw(FALSE),
-    mFullRedrawNeeded(FALSE),
-    mNewSurfaceNeeded(FALSE),
-    mHasHadWindowFocus(FALSE),
-    mLastWasImTarget(FALSE),
-    mWindowsAnimating(FALSE),
-    mDrawDuringWindowsAnimating(FALSE),
-    mIsDrawing(FALSE),
-    mLastSystemUiVisibility(0),
-    mClientWindowLayoutFlags(0),
-    mLastOverscanRequested(FALSE),
-    mPendingInputEventCount(0),
-    mProcessInputEventsScheduled(FALSE),
-    mUnbufferedInputDispatch(FALSE),
-    mPendingInputEventQueueLengthCounterName("pq"),
-    mWindowAttributesChanged(FALSE),
-    mWindowAttributesChangesFlag(0),
-    mAdded(FALSE),
-    mAddedTouchMode(FALSE),
-    mScrollMayChange(FALSE),
-    mScrollY(0),
-    mCurScrollY(0),
-    mResizeBufferStartTime(0),
-    mResizeBufferDuration(0),
-    mBlockResizeBuffer(FALSE),
-    mHardwareYOffset(0),
-    mResizeAlpha(0),
-    mConsumeBatchedInputScheduled(FALSE),
-    mQueuedInputEventPoolSize(0),
-    mProfileRendering(FALSE),
-    mRenderProfilingEnabled(FALSE),
-    mMediaDisabled(FALSE),
-    mFpsStartTime(-1),
-    mFpsPrevTime(-1),
-    mFpsNumFrames(0),
-    mInLayout(FALSE),
-    mHandlingLayoutInLayoutRequest(FALSE),
-    mViewLayoutDirectionInitial(0),
-    mRemoved(FALSE),
-    mIsEmulator(FALSE),
-    mIsCircularEmulator(FALSE),
-    mWindowIsRound(FALSE),
-    mProfile(FALSE),
-    mConsumeBatchedInputImmediatelyScheduled(FALSE)
+ViewRootImpl::ViewRootImpl()
+    : mSeq(0)
+    , mViewVisibility(IView::GONE)
+    , mAppVisible(TRUE)
+    , mOrigWindowType(-1)
+    , mStopped(FALSE)
+    , mLastInCompatMode(FALSE)
+    , mIsCreating(FALSE)
+    , mDrawingAllowed(FALSE)
+    , mWidth(-1)
+    , mHeight(-1)
+    , mIsAnimating(FALSE)
+    , mTraversalScheduled(FALSE)
+    , mTraversalBarrier(0)
+    , mWillDrawSoon(FALSE)
+    , mIsInTraversal(FALSE)
+    , mApplyInsetsRequested(FALSE)
+    , mLayoutRequested(FALSE)
+    , mFirst(TRUE) // TRUE for the first time the view is added
+    , mReportNextDraw(FALSE)
+    , mFullRedrawNeeded(FALSE)
+    , mNewSurfaceNeeded(FALSE)
+    , mHasHadWindowFocus(FALSE)
+    , mLastWasImTarget(FALSE)
+    , mWindowsAnimating(FALSE)
+    , mDrawDuringWindowsAnimating(FALSE)
+    , mIsDrawing(FALSE)
+    , mLastSystemUiVisibility(0)
+    , mClientWindowLayoutFlags(0)
+    , mLastOverscanRequested(FALSE)
+    , mPendingInputEventCount(0)
+    , mProcessInputEventsScheduled(FALSE)
+    , mUnbufferedInputDispatch(FALSE)
+    , mPendingInputEventQueueLengthCounterName("pq")
+    , mWindowAttributesChanged(FALSE)
+    , mWindowAttributesChangesFlag(0)
+    , mAdded(FALSE)
+    , mAddedTouchMode(FALSE)
+    , mScrollMayChange(FALSE)
+    , mScrollY(0)
+    , mCurScrollY(0)
+    , mResizeBufferStartTime(0)
+    , mResizeBufferDuration(0)
+    , mBlockResizeBuffer(FALSE)
+    , mHardwareYOffset(0)
+    , mResizeAlpha(0)
+    , mConsumeBatchedInputScheduled(FALSE)
+    , mConsumeBatchedInputImmediatelyScheduled(FALSE)
+    , mQueuedInputEventPoolSize(0)
+    , mProfileRendering(FALSE)
+    , mRenderProfilingEnabled(FALSE)
+    , mMediaDisabled(FALSE)
+    , mFpsStartTime(-1)
+    , mFpsPrevTime(-1)
+    , mFpsNumFrames(0)
+    , mInLayout(FALSE)
+    , mHandlingLayoutInLayoutRequest(FALSE)
+    , mViewLayoutDirectionInitial(0)
+    , mRemoved(FALSE)
+    , mIsEmulator(FALSE)
+    , mIsCircularEmulator(FALSE)
+    , mWindowIsRound(FALSE)
+    , mProfile(FALSE)
 {
     mDisplayListener = new RootDisplayListener(this);
     mConsumeBatchedInputImmediatelyRunnable = new ConsumeBatchedInputImmediatelyRunnable(this);
@@ -1348,8 +1351,8 @@ ECode ViewRootImpl::constructor(
     context->GetSystemService(IContext::DISPLAY_SERVICE, (IInterface**)&it);
     mDisplayManager = IDisplayManager::Probe(it);
     LoadSystemProperties();
-    assert(0 && "TODO");
-    //resources->GetBoolean(R::Boolean::config_windowIsRound, &mWindowIsRound);
+    resources->GetBoolean(R::bool_::config_windowIsRound, &mWindowIsRound);
+    return NOERROR;
 }
 
 ViewRootImpl::~ViewRootImpl()
@@ -1744,6 +1747,7 @@ ECode ViewRootImpl::RegisterAnimatingRenderNode(
         }
         mAttachInfo->mPendingAnimatingRenderNodes->Add(animator);
     }
+    return NOERROR;
 }
 
 void ViewRootImpl::EnableHardwareAcceleration(
@@ -3839,7 +3843,6 @@ void ViewRootImpl::Draw(
             && (mAttachInfo->mHardwareRenderer->IsEnabled(&isEnabled), isEnabled)) {
             // Draw with hardware renderer.
             mIsAnimating = FALSE;
-            Boolean invalidateRoot = FALSE;
             if (mHardwareYOffset != yOffset || mHardwareXOffset != xOffset) {
                 mHardwareYOffset = yOffset;
                 mHardwareXOffset = xOffset;
@@ -6777,6 +6780,7 @@ ECode ViewRootImpl::InputStage::Dump(
     if (mNext != NULL) {
         mNext->Dump(prefix, writer);
     }
+    return NOERROR;
 }
 
 ////////////////////////////////////////////////////////////
@@ -7614,12 +7618,12 @@ const Int32 ViewRootImpl::SyntheticJoystickHandler::MSG_ENQUEUE_Y_AXIS_KEY_REPEA
 
 ViewRootImpl::SyntheticJoystickHandler::SyntheticJoystickHandler(
     /* [in] */ ViewRootImpl* host)
-    : mHost(host)
-    , Handler(TRUE)
+    : Handler(TRUE)
     , mLastXDirection(0)
     , mLastYDirection(0)
     , mLastXKeyCode(0)
     , mLastYKeyCode(0)
+    , mHost(host)
 {}
 
 CARAPI ViewRootImpl::SyntheticJoystickHandler::HandleMessage(
@@ -7795,8 +7799,7 @@ const Float ViewRootImpl::SyntheticTouchNavigationHandler::FLING_TICK_DECAY = 0.
 
 ViewRootImpl::SyntheticTouchNavigationHandler::SyntheticTouchNavigationHandler(
     /* [in] */ ViewRootImpl* host)
-    : mHost(host)
-    , Handler(TRUE)
+    : Handler(TRUE)
     , mCurrentDeviceId(-1)
     , mCurrentSource(0)
     , mCurrentDeviceSupported(FALSE)
@@ -7817,6 +7820,7 @@ ViewRootImpl::SyntheticTouchNavigationHandler::SyntheticTouchNavigationHandler(
     , mPendingKeyMetaState(0)
     , mFlinging(FALSE)
     , mFlingVelocity(0)
+    , mHost(host)
 {
     mFlingRunnable = new NavigationRun(this);
 }

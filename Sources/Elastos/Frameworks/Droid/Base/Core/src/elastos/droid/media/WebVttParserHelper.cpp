@@ -117,6 +117,7 @@ ECode WebVttParserHelper::TimeToString(
     // return String.format("%d:%02d:%02d.%03d",
     //         timeMs / 3600000, (timeMs / 60000) % 60,
     //         (timeMs / 1000) % 60, timeMs % 1000);
+    return NOERROR;
 }
 
 } // namespace Media

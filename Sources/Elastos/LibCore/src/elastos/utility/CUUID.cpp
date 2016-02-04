@@ -4,7 +4,7 @@
 #include "StringUtils.h"
 #include "StringBuilder.h"
 #include "Memory.h"
-//#include "CMessageDigestHelper.h"
+#include "CMessageDigestHelper.h"
 #include "AutoLock.h"
 
 using Elastos::Core::StringUtils;
@@ -17,7 +17,7 @@ using Elastos::IO::EIID_ISerializable;
 using Elastos::Security::EIID_ISecureRandom;
 using Elastos::Security::IMessageDigest;
 using Elastos::Security::IMessageDigestHelper;
-// using Elastos::Security::CMessageDigestHelper;
+using Elastos::Security::CMessageDigestHelper;
 
 namespace Elastos {
 namespace Utility {
@@ -129,12 +129,12 @@ ECode CUUID::NameUUIDFromBytes(
     }
     // try {
     AutoPtr<IMessageDigestHelper> helper;
-    // CMessageDigestHelper::AcquireSingleton((IMessageDigestHelper**)&helper);
+    CMessageDigestHelper::AcquireSingleton((IMessageDigestHelper**)&helper);
     AutoPtr<IMessageDigest> md;
     helper->GetInstance(String("MD5"), (IMessageDigest**)&md);
 
     AutoPtr<ArrayOf<Byte> > hash;
-    // md->Digest(name, (ArrayOf<Byte>**)&hash);
+    md->Digest(name, (ArrayOf<Byte>**)&hash);
     AutoPtr<IUUID> id = MakeUuid(hash, 3);
     *uuid = id;
     REFCOUNT_ADD(*uuid);

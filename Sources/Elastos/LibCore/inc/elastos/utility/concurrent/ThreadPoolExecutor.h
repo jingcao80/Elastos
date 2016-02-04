@@ -4,13 +4,13 @@
 
 #include "AbstractExecutorService.h"
 #include "AbstractQueuedSynchronizer.h"
-#include <HashSet.h>
+#include <elastos/utility/etl/HashSet.h>
 //#include <Condition.h>
 
 using Elastos::Core::IThrowable;
 using Elastos::Core::IRunnable;
 //using Elastos::Core::Condition;
-//using Elastos::Utility::Etl::HashSet;
+using Elastos::Utility::Etl::HashSet;
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
 using Elastos::Utility::Concurrent::Locks::AbstractQueuedSynchronizer;
 
@@ -1173,7 +1173,7 @@ private:
      * Set containing all worker threads in pool. Accessed only when
      * holding mainLock.
      */
-//    HashSet< AutoPtr<Worker>, HashWorker > mWorkers;
+    HashSet< AutoPtr<Worker>, HashWorker > mWorkers;
 
     /**
      * Wait condition to support awaitTermination

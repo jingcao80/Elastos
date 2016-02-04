@@ -5,10 +5,11 @@ module
     namespace Server {
     namespace Twilight {
 
+    /**
+     * Listener for changes in twilight state.
+     */
     interface ITwilightListener {
-
         OnTwilightStateChanged();
-
     }
 
     } // namespace Twilight

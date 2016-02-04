@@ -14,6 +14,12 @@ using namespace Elastos;
 
 #define ANDROID_SMP 1
 
+#ifdef __GNUC__
+#define UNUSED(x) x __attribute__((__unused__))
+#else
+#define UNUSED(x) x
+#endif
+
 /*
  * TEMP_FAILURE_RETRY is defined by some, but not all, versions of
  * <unistd.h>. (Alas, it is not as standard as we'd hoped!) So, if it's
@@ -32,7 +38,7 @@ using namespace Elastos;
 #ifndef ASSERT_TRUE
 #define ASSERT_TRUE(expr) \
     do { \
-        Boolean assert_result_ = (Boolean)(expr); \
+        Boolean UNUSED(assert_result_) = (Boolean)(expr); \
         assert(assert_result_); \
     } while(0);
 #endif
@@ -40,7 +46,7 @@ using namespace Elastos;
 #ifndef ASSERT_SUCCEEDED
 #define ASSERT_SUCCEEDED(expr) \
    do { \
-       ECode assert_ec_ = expr; \
+       ECode UNUSED(assert_ec_) = expr; \
        assert(SUCCEEDED(assert_ec_)); \
    } while(0);
 #endif
@@ -81,6 +87,13 @@ using namespace Elastos;
 #define TO_IINTERFACE(obj) ((obj) == NULL ? NULL : (obj)->Probe(EIID_IInterface))
 #endif
 
+#ifndef TO_STR
+#define TO_STR(obj) (Object::ToString(obj))
+#endif
+
+#ifndef TO_CSTR
+#define TO_CSTR(obj) (Object::ToString(obj).string())
+#endif
 
 #ifndef __UUNM_Elastos_CoreLibrary_DEFINED__
 #define __UUNM_Elastos_CoreLibrary_DEFINED__

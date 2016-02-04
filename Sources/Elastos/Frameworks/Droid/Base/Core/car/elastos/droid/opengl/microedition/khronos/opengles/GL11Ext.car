@@ -34,86 +34,86 @@ module
         const Int32 _GL_WEIGHT_ARRAY_STRIDE_OES               = 0x86AA;
         const Int32 _GL_WEIGHT_ARRAY_TYPE_OES                 = 0x86A9;
 
-        glCurrentPaletteMatrixOES(
+        GlCurrentPaletteMatrixOES(
             [in] Int32 matrixpaletteindex);
 
-        glDrawTexfOES(
+        GlDrawTexfOES(
             [in] Float x,
             [in] Float y,
             [in] Float z,
             [in] Float width,
             [in] Float height);
 
-        glDrawTexfvOES(
+        GlDrawTexfvOES(
             [in] ArrayOf<Float>* coords,
             [in] Int32 offset);
 
-        glDrawTexfvOES(
+        GlDrawTexfvOES(
             [in] IFloatBuffer* coords);
 
-        glDrawTexiOES(
+        GlDrawTexiOES(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 z,
             [in] Int32 width,
             [in] Int32 height);
 
-        glDrawTexivOES(
+        GlDrawTexivOES(
             [in] ArrayOf<Int32>* coords,
             [in] Int32 offset);
 
-        glDrawTexivOES(
+        GlDrawTexivOES(
             [in] IInt32Buffer* coords);
 
-        glDrawTexsOES(
+        GlDrawTexsOES(
             [in] Int16 x,
             [in] Int16 y,
             [in] Int16 z,
             [in] Int16 width,
             [in] Int16 height);
 
-        glDrawTexsvOES(
+        GlDrawTexsvOES(
             [in] ArrayOf<Int16>* coords,
             [in] Int32 offset);
 
-        glDrawTexsvOES(
+        GlDrawTexsvOES(
             [in] IInt16Buffer* coords);
 
-        glDrawTexxOES(
+        GlDrawTexxOES(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 z,
             [in] Int32 width,
             [in] Int32 height);
 
-        glDrawTexxvOES(
+        GlDrawTexxvOES(
             [in] ArrayOf<Int32>* coords,
             [in] Int32 offset);
 
-        glDrawTexxvOES(
+        GlDrawTexxvOES(
             [in] IInt32Buffer* coords);
 
-        glLoadPaletteFromModelViewMatrixOES();
+        GlLoadPaletteFromModelViewMatrixOES();
 
-        glMatrixIndexPointerOES(
+        GlMatrixIndexPointerOES(
             [in] Int32 size,
             [in] Int32 type,
             [in] Int32 stride,
             [in] IBuffer* pointer);
 
-        glMatrixIndexPointerOES(
+        GlMatrixIndexPointerOES(
             [in] Int32 size,
             [in] Int32 type,
             [in] Int32 stride,
             [in] Int32 offset);
 
-        glWeightPointerOES(
+        GlWeightPointerOES(
             [in] Int32 size,
             [in] Int32 type,
             [in] Int32 stride,
             [in] IBuffer* pointer);
 
-        glWeightPointerOES(
+        GlWeightPointerOES(
             [in] Int32 size,
             [in] Int32 type,
             [in] Int32 stride,

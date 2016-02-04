@@ -152,7 +152,7 @@ public:
      * @return this CharArrayWriter.
      */
 
-    CARAPI Append(
+    CARAPI AppendChar(
         /* [in] */ Char32 c);
 
     /**

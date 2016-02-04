@@ -9,7 +9,7 @@
 #include "elastos/droid/internal/view/menu/CSubMenuBuilder.h"
 #include "elastos/droid/internal/view/menu/CMenuItemImpl.h"
 #include "elastos/droid/utility/CSparseArray.h"
-// #include "elastos/droid/view/CKeyCharacterMap.h"
+#include "elastos/droid/view/CKeyCharacterMap.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
 
@@ -23,6 +23,7 @@ using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Droid::View::CKeyCharacterMap;
 using Elastos::Droid::View::EIID_IMenu;
 using Elastos::Droid::View::IActionProvider;
 using Elastos::Core::CoreUtils;
@@ -1059,15 +1060,14 @@ void MenuBuilder::FindItemsWithShortcutForKey(
     const Boolean qwerty = IsQwertyMode();
     Int32 metaState = 0;
     event->GetMetaState(&metaState);
-    assert(0);
-    // AutoPtr<CKeyCharacterMap::KeyData> possibleChars = new CKeyCharacterMap::KeyData();
-    // // Get the chars associated with the keyCode (i.e using any chording combo)
-    // Boolean isKeyCodeMapped = FALSE;
-    // event->GetKeyData(possibleChars, &isKeyCodeMapped);
-    // // The delete key is not mapped to '\b' so we treat it specially
-    // if (!isKeyCodeMapped && (keyCode != IKeyEvent::KEYCODE_DEL)) {
-    //     return;
-    // }
+    AutoPtr<CKeyCharacterMap::KeyData> possibleChars = new CKeyCharacterMap::KeyData();
+    // Get the chars associated with the keyCode (i.e using any chording combo)
+    Boolean isKeyCodeMapped = FALSE;
+    event->GetKeyData(possibleChars, &isKeyCodeMapped);
+    // The delete key is not mapped to '\b' so we treat it specially
+    if (!isKeyCodeMapped && (keyCode != IKeyEvent::KEYCODE_DEL)) {
+        return;
+    }
 
     // Look for an item whose shortcut is this key.
     MenuItemImplList::Iterator iter;
@@ -1113,13 +1113,12 @@ AutoPtr<IMenuItemImpl> MenuBuilder::FindItemWithShortcutForKey(
         return NULL;
     }
 
-    assert(0);
-    // Int32 metaState;
-    // event->GetMetaState(&metaState);
-    // AutoPtr<CKeyCharacterMap::KeyData> possibleChars = new CKeyCharacterMap::KeyData();
-    // // Get the chars associated with the keyCode (i.e using any chording combo)
-    // Boolean isKeyCodeMapped;
-    // event->GetKeyData(possibleChars, &isKeyCodeMapped);
+    Int32 metaState;
+    event->GetMetaState(&metaState);
+    AutoPtr<CKeyCharacterMap::KeyData> possibleChars = new CKeyCharacterMap::KeyData();
+    // Get the chars associated with the keyCode (i.e using any chording combo)
+    Boolean isKeyCodeMapped;
+    event->GetKeyData(possibleChars, &isKeyCodeMapped);
 
     // If we have only one element, we can safely returns it
     if (items->GetSize() == 1) {

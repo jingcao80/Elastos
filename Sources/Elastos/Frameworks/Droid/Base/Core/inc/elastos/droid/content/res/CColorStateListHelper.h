@@ -10,7 +10,6 @@ using Elastos::Droid::Content::Res::IColorStateList;
 using Elastos::Droid::Content::Res::IResources;
 using Org::Xmlpull::V1::IXmlPullParser;
 
-
 namespace Elastos {
 namespace Droid {
 namespace Content {

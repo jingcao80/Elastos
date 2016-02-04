@@ -1,33 +1,45 @@
-#ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_STATUSBARICONVIEW_H__
-#define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_STATUSBARICONVIEW_H__
+#ifndef  __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_STATUSBARICONVIEW_H__
+#define  __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_STATUSBARICONVIEW_H__
 
-#include "elastos/droid/systemui/statusbar/AnimatedImageView.h"
+#include "elastos/droid/packages/systemui/statusbar/AnimatedImageView.h"
+#include "Elastos.Droid.App.h"
 
 using Elastos::Droid::App::INotification;
-using Elastos::Droid::StatusBar::IStatusBarIcon;
+using Elastos::Droid::Internal::StatusBar::IStatusBarIcon;
 using Elastos::Droid::Os::IUserHandle;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 
-class StatusBarIconView : public AnimatedImageView
+class StatusBarIconView
+    : public AnimatedImageView
+    , public IStatusBarIconView
 {
 public:
+    CAR_INTERFACE_DECL();
+
     StatusBarIconView();
 
-    StatusBarIconView(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ const String& slot,
         /* [in] */ INotification* notification);
 
-    StatusBarIconView(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    Boolean Set(
-        /* [in] */ IStatusBarIcon* icon);
+    CARAPI SetNotification(
+        /* [in] */ INotification* notification);
+
+    CARAPI Set(
+        /* [in] */ IStatusBarIcon* icon,
+        /* [out] */ Boolean* result);
+
+    CARAPI UpdateDrawable();
 
     /**
      * Returns the right icon to use for this item, respecting the iconId and
@@ -41,12 +53,16 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IStatusBarIcon* icon);
 
-    AutoPtr<IStatusBarIcon> GetStatusBarIcon();
+    CARAPI GetStatusBarIcon(
+        /* [out] */ IStatusBarIcon** icon);
 
     virtual CARAPI OnInitializeAccessibilityEvent(
         /* [in] */ IAccessibilityEvent* event);
 
-    String ToString();
+    CARAPI ToString(
+        /* [out] */ String* str);
+
+    using AnimatedImageView::SetContentDescription;
 
 protected:
     virtual CARAPI_(void) OnSizeChanged(
@@ -58,34 +74,20 @@ protected:
     virtual CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
 
-    void PlaceNumber();
+    CARAPI_(void) PlaceNumber();
 
-    ECode Init(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
-
-    ECode Init(
-        /* [in] */ IContext* context,
-        /* [in] */ const String& slot,
-        /* [in] */ INotification* notification);
+    CARAPI_(Boolean) UpdateDrawable(
+        /* [in] */ Boolean withClear);
 
 private:
-    ECode InitWithNotification(
-        /* [in] */ IContext* context,
-        /* [in] */ const String& slot,
-        /* [in] */ INotification* notification);
-
-    ECode InitPrivate(
-        /* [in] */ IContext* context);
-
-    static Boolean StrEQ(
+    static CARAPI_(Boolean) StrEQ(
         /* [in] */ const String& a,
         /* [in] */ const String& b);
 
-    AutoPtr<IDrawable> GetIcon(
+    CARAPI_(AutoPtr<IDrawable>) GetIcon(
         /* [in] */ IStatusBarIcon* icon);
 
-    void SetContentDescriptionByNotification(
+    CARAPI_(void) SetContentDescription(
         /* [in] */ INotification* notification);
 
 private:
@@ -102,10 +104,10 @@ private:
     AutoPtr<INotification> mNotification;
 };
 
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos
 
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
-
-#endif //__ELASTOS_DROID_SYSTEMUI_STATUSBAR_STATUSBARICONVIEW_H__
+#endif // __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_STATUSBARICONVIEW_H__

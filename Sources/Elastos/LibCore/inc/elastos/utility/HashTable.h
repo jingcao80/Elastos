@@ -258,7 +258,7 @@ private:
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
     public:
-        AutoPtr<HashTable> mHost;
+        HashTable* mHost;
     };
 
     class ECO_LOCAL _Values
@@ -325,7 +325,7 @@ private:
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
     public:
-        AutoPtr<HashTable> mHost;;
+        HashTable* mHost;;
     };
 
     class ECO_LOCAL _EntrySet
@@ -392,7 +392,7 @@ private:
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
     public:
-        AutoPtr<HashTable> mHost;
+        HashTable* mHost;
     };
 
 public:

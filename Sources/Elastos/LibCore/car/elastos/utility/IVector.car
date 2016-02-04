@@ -71,7 +71,7 @@ module
          * @see #size
          */
         // @SuppressWarnings("unchecked")
-        GetElementAt(
+        ElementAt(
             [in] Int32 location,
             [out] IInterface** outface);
 
@@ -109,7 +109,7 @@ module
          * @see #size
          */
         // @SuppressWarnings("unchecked")
-        GetFirstElement(
+        FirstElement(
             [out] IInterface** outface);
 
         /**
@@ -165,7 +165,7 @@ module
          * @see #size
          */
         // @SuppressWarnings("unchecked")
-        GetLastElement(
+        LastElement(
             [out] IInterface** outface);
 
         /**

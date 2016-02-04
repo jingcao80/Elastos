@@ -3,6 +3,7 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include "elastos/droid/content/CComponentName.h"
 
+using Elastos::Core::StringBuilder;
 using Elastos::IO::IWriter;
 using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::EIID_IComparable;
@@ -107,7 +108,7 @@ ECode CComponentName::GetShortClassName(
 }
 
 ECode CComponentName::AppendShortClassName(
-    /* [in] */ StringBuilder* sb,
+    /* [in] */ IStringBuilder* sb,
     /* [in] */ const String& packageName,
     /* [in] */ const String& className)
 {
@@ -163,13 +164,13 @@ ECode CComponentName::FlattenToShortString(
 }
 
 ECode CComponentName::AppendShortString(
-    /* [in] */ StringBuilder* sb)
+    /* [in] */ IStringBuilder* sb)
 {
     return AppendShortString(sb, mPackage, mClass);
 }
 
 ECode CComponentName::AppendShortString(
-    /* [in] */ StringBuilder* sb,
+    /* [in] */ IStringBuilder* sb,
     /* [in] */ const String& packageName,
     /* [in] */ const String& className)
 {
@@ -236,7 +237,7 @@ ECode CComponentName::ToString(
 }
 
 ECode CComponentName::Equals(
-    /* [in] */ IComponentName* obj,
+    /* [in] */ IInterface* obj,
     /* [out] */ Boolean* isEqual)
 {
     VALIDATE_NOT_NULL(isEqual)
@@ -246,8 +247,8 @@ ECode CComponentName::Equals(
         // never be null.
         String pkg;
         String cls;
-        obj->GetPackageName(&pkg);
-        obj->GetClassName(&cls);
+        IComponentName::Probe(obj)->GetPackageName(&pkg);
+        IComponentName::Probe(obj)->GetClassName(&cls);
         if (mPackage.Equals(pkg) && mClass.Equals(cls)) {
             *isEqual = TRUE;
             return NOERROR;

@@ -1,5 +1,10 @@
 
-#include "wm/CWindowId.h"
+#include "elastos/droid/server/wm/CWindowId.h"
+#include "elastos/droid/server/wm/WindowState.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
+
+using Elastos::Droid::View::EIID_IIWindowId;
+using Elastos::Droid::View::EIID_IWindowState;
 
 namespace Elastos {
 namespace Droid {

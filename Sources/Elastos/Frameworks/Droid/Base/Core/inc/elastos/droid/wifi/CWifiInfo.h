@@ -26,6 +26,13 @@ CarClass(CWifiInfo)
     , public IWifiInfo
     , public IParcelable
 {
+private:
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -302,12 +309,9 @@ public:
     static CARAPI_(SupplicantState) ValueOf(
         /* [in] */ const String& stateName);
 
-    static CARAPI_(Int32) InternalInit();
-
 private:
     static String TAG;
 
-    static Int32 mInitFlag;
     /**
      * This is the map described in the Javadoc comment above. The positions
      * of the elements of the array must correspond to the ordinal values
@@ -315,7 +319,7 @@ private:
      */
     // private static final EnumMap<SupplicantState, DetailedState> stateMap =
     //     new EnumMap<SupplicantState, DetailedState>(SupplicantState.class);
-    static HashMap<SupplicantState, NetworkInfoDetailedState> mStateMap;
+    static HashMap<SupplicantState, NetworkInfoDetailedState> sStateMap;
 
     //AutoPtr<ISupplicantStateHelper> mSupplicantState;
     SupplicantState mSupplicantState;
@@ -352,6 +356,7 @@ private:
      * and sensitive to heavy data transfers.
      */
     Boolean mMeteredHint;
+    static const StaticInitializer sInitializer;
 };
 
 } // namespace Wifi

@@ -88,7 +88,7 @@ $                               ELSE
 $                               END IF ;; parameter is not last
 $                           END DO ;; all parameters
     {
-        IInterface* __pNewObj;
+        IInterface* __pNewObj = NULL;
         _ELASTOS ECode ec = $^
 $                           IF class.attrib is "singleton"
 _AcquireSingletonInRegime($^

@@ -1,35 +1,81 @@
-#include "CCommonTimeManagementService.h"
-#include "elastos/droid/os/Handler.h"
-#include "elastos/droid/os/ServiceManager.h"
-#include "elastos/droid/Manifest.h"
-#include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/server/CCommonTimeManagementService.h"
+#include "elastos/droid/server/CCommonTimeManagementServiceIfaceObserver.h"
+#include <elastos/droid/os/Handler.h>
+#include <elastos/droid/os/Binder.h>
+#include <elastos/droid/Manifest.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
-#include "elastos/droid/os/Binder.h"
+#include <elastos/utility/logging/Logger.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Utility.h>
 
-using Elastos::Core::IRunnable;
-using Elastos::Core::EIID_IRunnable;
-using Elastos::Core::StringBuilder;
-using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 //using Elastos::Droid::Os::ICommonTimeConfig;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::EIID_IBinder;
-using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::Net::EIID_INetworkManagementEventObserver;
+using Elastos::Droid::Net::IINetworkManagementEventObserver;
+using Elastos::Droid::Net::EIID_IINetworkManagementEventObserver;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::IInterfaceConfiguration;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::Pm::IPackageManager;
-
+using Elastos::Core::IRunnable;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
+
+CCommonTimeManagementService::StaticInitializer::StaticInitializer()
+{
+    AutoPtr<ISystemProperties> sysProp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
+    Int32 value;
+    sysProp->GetInt32(CCommonTimeManagementService::AUTO_DISABLE_PROP, 1, &value);
+    CCommonTimeManagementService::AUTO_DISABLE = (0 != value);
+    sysProp->GetInt32(CCommonTimeManagementService::ALLOW_WIFI_PROP, 0, &value);
+    CCommonTimeManagementService::ALLOW_WIFI = (0 != value);
+    Int32 tmp;
+    sysProp->GetInt32(CCommonTimeManagementService::NO_INTERFACE_TIMEOUT_PROP, 60000, &tmp);
+    CCommonTimeManagementService::NO_INTERFACE_TIMEOUT = tmp;
+
+    sysProp->GetInt32(CCommonTimeManagementService::SERVER_PRIO_PROP, 1, &tmp);
+    if (tmp < 1) {
+        CCommonTimeManagementService::BASE_SERVER_PRIO = 1;
+    }
+    else if (tmp > 30) {
+        CCommonTimeManagementService::BASE_SERVER_PRIO = 30;
+    }
+    else {
+        CCommonTimeManagementService::BASE_SERVER_PRIO = (Byte)tmp;
+    }
+
+    if (CCommonTimeManagementService::ALLOW_WIFI) {
+        IFACE_SCORE_RULES = ArrayOf<CCommonTimeManagementService::InterfaceScoreRule*>::Alloc(2);
+        AutoPtr<CCommonTimeManagementService::InterfaceScoreRule> isr1, isr2;
+        isr1 = new CCommonTimeManagementService::InterfaceScoreRule(String("wlan"), (Byte)1);
+        isr2 = new CCommonTimeManagementService::InterfaceScoreRule(String("eth"), (Byte)2);
+        IFACE_SCORE_RULES->Set(0, isr1);
+        IFACE_SCORE_RULES->Set(1, isr2);
+    }
+    else {
+        IFACE_SCORE_RULES = ArrayOf<CCommonTimeManagementService::InterfaceScoreRule* >::Alloc(1);
+        AutoPtr<CCommonTimeManagementService::InterfaceScoreRule> isr1;
+        isr1 = new CCommonTimeManagementService::InterfaceScoreRule(String("eth"), (Byte)2);
+        IFACE_SCORE_RULES->Set(0, isr1);
+    }
+}
+
 
 const String CCommonTimeManagementService::TAG("CCommonTimeManagementService");
 const Int32 CCommonTimeManagementService::NATIVE_SERVICE_RECONNECT_TIMEOUT;
@@ -42,46 +88,14 @@ Boolean CCommonTimeManagementService::ALLOW_WIFI = FALSE;
 Byte CCommonTimeManagementService::BASE_SERVER_PRIO = 0x0;
 Int32 CCommonTimeManagementService::NO_INTERFACE_TIMEOUT = 0;
 AutoPtr<ArrayOf<CCommonTimeManagementService::InterfaceScoreRule *> > CCommonTimeManagementService::IFACE_SCORE_RULES;
-const Boolean CCommonTimeManagementService::staticParagraph = Initstatic();
-
-Boolean CCommonTimeManagementService::Initstatic()
-{
-    AutoPtr<ISystemProperties> sysProp;
-    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
-    Int32 value;
-    sysProp->GetInt32(AUTO_DISABLE_PROP, 1, &value);
-    AUTO_DISABLE = (0 != value);
-    sysProp->GetInt32(ALLOW_WIFI_PROP, 0, &value);
-    ALLOW_WIFI = (0 != value);
-    Int32 tmp;
-    sysProp->GetInt32(SERVER_PRIO_PROP, 1, &tmp);
-    sysProp->GetInt32(NO_INTERFACE_TIMEOUT_PROP, 60000, &NO_INTERFACE_TIMEOUT);
-
-    if (tmp < 1)
-        BASE_SERVER_PRIO = 1;
-    else if (tmp > 30)
-        BASE_SERVER_PRIO = 30;
-    else
-        BASE_SERVER_PRIO = (byte)tmp;
-
-    if (ALLOW_WIFI) {
-        IFACE_SCORE_RULES = ArrayOf<InterfaceScoreRule* >::Alloc(2);
-        IFACE_SCORE_RULES->Set(0, new InterfaceScoreRule(String("wlan"), (Byte)1));
-        IFACE_SCORE_RULES->Set(1, new InterfaceScoreRule(String("eth"), (Byte)2));
-    }
-    else {
-        IFACE_SCORE_RULES = ArrayOf<InterfaceScoreRule* >::Alloc(1);
-        IFACE_SCORE_RULES->Set(0, new InterfaceScoreRule(String("eth"), (Byte)2));
-    }
-    return TRUE;
-}
+const CCommonTimeManagementService::StaticInitializer CCommonTimeManagementService::sInitializer;
 
 //====================================================================
 // CCommonTimeManagementService::ReconnectRunnable
 //====================================================================
 ECode CCommonTimeManagementService::ReconnectRunnable::Run()
 {
-    mOwner->ConnectToTimeConfig();
+    mHost->ConnectToTimeConfig();
     return NOERROR;
 }
 
@@ -90,26 +104,31 @@ ECode CCommonTimeManagementService::ReconnectRunnable::Run()
 //====================================================================
 ECode CCommonTimeManagementService::NoInterfaceRunnable::Run()
 {
-    mOwner->HandleNoInterfaceTimeout();
+    mHost->HandleNoInterfaceTimeout();
     return NOERROR;
 }
 
 //====================================================================
 // CCommonTimeManagementService::IfaceObserver
 //====================================================================
-CCommonTimeManagementService::IfaceObserver::IfaceObserver(
-    /* [in] */ CCommonTimeManagementService* owner)
+CCommonTimeManagementService::IfaceObserver::IfaceObserver()
 {
-    mOwner = owner;
 }
 
-CAR_INTERFACE_IMPL_2(CCommonTimeManagementService::IfaceObserver, INetworkManagementEventObserver, IBinder);
+ECode CCommonTimeManagementService::IfaceObserver::constructor(
+    /* [in] */ IBinder* commonTimeManagementService)
+{
+    FAIL_RETURN(BaseNetworkObserver::constructor())
+
+    mHost = (CCommonTimeManagementService*)commonTimeManagementService;
+    return NOERROR;
+}
 
 ECode CCommonTimeManagementService::IfaceObserver::InterfaceStatusChanged(
     /* [in] */ const String& iface,
     /* [in] */ Boolean up)
 {
-    mOwner->ReevaluateServiceState();
+    mHost->ReevaluateServiceState();
     return NOERROR;
 }
 
@@ -117,52 +136,23 @@ ECode CCommonTimeManagementService::IfaceObserver::InterfaceLinkStateChanged(
     /* [in] */ const String& iface,
     /* [in] */ Boolean up)
 {
-    mOwner->ReevaluateServiceState();
+    mHost->ReevaluateServiceState();
     return NOERROR;
 }
 
 ECode CCommonTimeManagementService::IfaceObserver::InterfaceAdded(
     /* [in] */ const String& iface)
 {
-    mOwner->ReevaluateServiceState();
+    mHost->ReevaluateServiceState();
     return NOERROR;
 }
 
 ECode CCommonTimeManagementService::IfaceObserver::InterfaceRemoved(
     /* [in] */ const String& iface)
 {
-    mOwner->ReevaluateServiceState();
+    mHost->ReevaluateServiceState();
     return NOERROR;
 }
-
-ECode CCommonTimeManagementService::IfaceObserver::LimitReached(
-    /* [in] */ const String& limitName,
-    /* [in] */ const String& iface)
-{
-    return NOERROR;
-}
-
-ECode CCommonTimeManagementService::IfaceObserver::InterfaceClassDataActivityChanged(
-    /* [in] */ const String& label,
-    /* [in] */ Boolean active)
-{
-    return NOERROR;
-}
-
-ECode CCommonTimeManagementService::IfaceObserver::GetHashCode(
-    /* [out] */ Int32* result)
-{
-    VALIDATE_NOT_NULL(result);
-    *result = (Int32)this;
-    return NOERROR;
-}
-
-ECode CCommonTimeManagementService::IfaceObserver::ToString(
-    /* [out] */ String* result)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
 
 //====================================================================
 // CCommonTimeManagementService::ConnectivityMangerObserver
@@ -170,14 +160,14 @@ ECode CCommonTimeManagementService::IfaceObserver::ToString(
 CCommonTimeManagementService::ConnectivityMangerObserver::ConnectivityMangerObserver(
     /* [in] */ CCommonTimeManagementService* owner)
 {
-    mOwner = owner;
+    mHost = owner;
 }
 
 ECode CCommonTimeManagementService::ConnectivityMangerObserver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
-    mOwner->ReevaluateServiceState();
+    mHost->ReevaluateServiceState();
     return NOERROR;
 }
 
@@ -188,12 +178,12 @@ ECode CCommonTimeManagementService::ConnectivityMangerObserver::OnReceive(
 CCommonTimeManagementService::CTServerDiedListener::CTServerDiedListener(
     /* [in] */ CCommonTimeManagementService* owner)
 {
-    mOwner = owner;
+    mHost = owner;
 }
 
 ECode CCommonTimeManagementService::CTServerDiedListener::OnServerDied()
 {
-    mOwner->ScheduleTimeConfigReconnect();
+    mHost->ScheduleTimeConfigReconnect();
     return NOERROR;
 }
 
@@ -213,6 +203,10 @@ CCommonTimeManagementService::InterfaceScoreRule::InterfaceScoreRule(
 //====================================================================
 // CCommonTimeManagementService
 //====================================================================
+CAR_INTERFACE_IMPL(CCommonTimeManagementService, Object, IBinder)
+
+CAR_OBJECT_IMPL(CCommonTimeManagementService)
+
 CCommonTimeManagementService::CCommonTimeManagementService()
     : mDetectedAtStartup(FALSE)
     , mEffectivePrio(BASE_SERVER_PRIO)
@@ -226,8 +220,9 @@ ECode CCommonTimeManagementService::constructor(
     CHandler::New((IHandler **)&mReconnectHandler);
     CHandler::New((IHandler **)&mNoInterfaceHandler);
 
-    mIfaceObserver = new IfaceObserver(this);
-
+    AutoPtr<IINetworkManagementEventObserver> nmeo;
+    CCommonTimeManagementServiceIfaceObserver::New(this, (IINetworkManagementEventObserver**)&nmeo);
+    mIfaceObserver = (IfaceObserver*)nmeo.Get();
     mConnectivityMangerObserver = new ConnectivityMangerObserver(this);
 
     mCTServerDiedListener = new CTServerDiedListener(this);
@@ -244,13 +239,19 @@ ECode CCommonTimeManagementService::ToString(
 ECode CCommonTimeManagementService::SystemReady()
 {
     String CommonTimeConfig_SERVICE_NAME("common_time.config");
-    if (ServiceManager::CheckService(CommonTimeConfig_SERVICE_NAME) == NULL) {
+    AutoPtr<IInterface> service;
+    AutoPtr<IServiceManager> serviceManager;
+    CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
+    assert(0 && "TODO");
+    // serviceManager::CheckService(ICommonTimeConfig::SERVICE_NAME, (IInterface**)&service);
+    if (service == NULL) {
         Logger::I(TAG, "No common time service detected on this platform.  ", "Common time services will be unavailable.");
         return E_NULL_POINTER_EXCEPTION;
     }
     mDetectedAtStartup = TRUE;
 
-    AutoPtr<IInterface> tmpObj = ServiceManager::GetService(IContext::NETWORKMANAGEMENT_SERVICE);
+    AutoPtr<IInterface> tmpObj;
+    serviceManager->GetService(IContext::NETWORKMANAGEMENT_SERVICE, (IInterface**)&tmpObj);
     mNetMgr = IINetworkManagementService::Probe(tmpObj.Get());
     assert(mNetMgr != NULL);
 
@@ -287,17 +288,17 @@ ECode CCommonTimeManagementService::Dump(
         sb += Binder::GetCallingPid();
         sb += ", uid=";
         sb += Binder::GetCallingUid();
-        pw->PrintStringln(sb.ToString());
+        pw->Println(sb.ToString());
         return -1;
     }
 
     if (!mDetectedAtStartup) {
-        pw->PrintStringln(String("Native Common Time service was not detected at startup.  Service is unavailable"));
+        pw->Println(String("Native Common Time service was not detected at startup.  Service is unavailable"));
         return -2;
     }
 
     AutoLock Lock(mLock);
-    pw->PrintStringln(String("Current Common Time Management Service Config:"));
+    pw->Println(String("Current Common Time Management Service Config:"));
 
     StringBuilder builder("  Native service     : ");
 //TODO
@@ -310,36 +311,36 @@ ECode CCommonTimeManagementService::Dump(
         builder += "alive";
     }
 */
-    pw->PrintStringln(builder.ToString());
+    pw->Println(builder.ToString());
 
     StringBuilder builderTwo("  Bound interface    : ");
     if (mCurIface.IsNull())
         builderTwo += "unbound";
     else
         builderTwo += mCurIface;
-    pw->PrintStringln(builderTwo.ToString());
+    pw->Println(builderTwo.ToString());
 
     StringBuilder builderThr("  Allow WiFi         : ");
     if (ALLOW_WIFI)
         builderThr += "yes";
     else
         builderThr += "no";
-    pw->PrintStringln(builderThr.ToString());
+    pw->Println(builderThr.ToString());
 
     StringBuilder builderFour("  Allow Auto Disable : ");
     if (AUTO_DISABLE)
         builderFour += "yes";
     else
         builderFour += "no";
-    pw->PrintStringln(builderFour.ToString());
+    pw->Println(builderFour.ToString());
 
     StringBuilder builderFive("  Server Priority    : ");
     builderFive += mEffectivePrio;
-    pw->PrintStringln(builderFive.ToString());
+    pw->Println(builderFive.ToString());
 
     StringBuilder builderSix("  No iface timeout    : ");
     builderSix += NO_INTERFACE_TIMEOUT;
-    pw->PrintStringln(builderSix.ToString());
+    pw->Println(builderSix.ToString());
 
     return NOERROR;
 }
@@ -476,6 +477,8 @@ void CCommonTimeManagementService::ReevaluateServiceState()
     else {
         doRebind = FALSE;
     }
+
+    assert(0 && "TODO");
 //TODO
 /*
     if (doRebind && (NULL != mCTConfig)) {

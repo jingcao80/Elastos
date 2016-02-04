@@ -16,13 +16,13 @@
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Process;
-using Elastos::Droid::Service::Textservice::CInternalISpellCheckerSession;
-using Elastos::Droid::Service::Textservice::CSpellCheckerServiceBinder;
+using Elastos::Droid::Service::TextService::CInternalISpellCheckerSession;
+using Elastos::Droid::Service::TextService::CSpellCheckerServiceBinder;
 using Elastos::Droid::Text::ISelectionPositionIterator;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::Method::CWordIterator;
-using Elastos::Droid::View::Internal::TextService::EIID_IISpellCheckerService;
-using Elastos::Droid::View::Internal::TextService::EIID_IISpellCheckerSession;
+using Elastos::Droid::Internal::TextService::EIID_IISpellCheckerService;
+using Elastos::Droid::Internal::TextService::EIID_IISpellCheckerSession;
 using Elastos::Droid::View::TextService::CSentenceSuggestionsInfo;
 using Elastos::Droid::View::TextService::CSuggestionsInfo;
 using Elastos::Droid::View::TextService::CTextInfo;
@@ -37,7 +37,7 @@ using Elastos::Utility::Logging::Logger;
 namespace Elastos {
 namespace Droid {
 namespace Service {
-namespace Textservice {
+namespace TextService {
 
 //=============
 // SpellCheckerService
@@ -489,6 +489,6 @@ AutoPtr<ISentenceSuggestionsInfo> SpellCheckerService::SentenceLevelAdapter::Rec
 }
 
 } // namespace Service
-} // namespace Textservice
+} // namespace TextService
 } // namepsace Droid
 } // namespace Elastos

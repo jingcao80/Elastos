@@ -133,8 +133,6 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-#define UNUSED(x) (void)x
-
 const String CActivityThread::TAG("CActivityThread");
 const Boolean CActivityThread::localLOGV = FALSE;
 const Boolean CActivityThread::DEBUG_MESSAGES = FALSE;
@@ -1212,7 +1210,7 @@ static void IntentDestructor(void* st)
 void CActivityThread::InitTLS()
 {
     if (!sHaveKey) {
-        Int32 result = pthread_key_create(&sKey, ActivityThreadDestructor);
+        Int32 UNUSED(result) = pthread_key_create(&sKey, ActivityThreadDestructor);
         assert(result == 0);
 
         result = pthread_key_create(&sCurrentBroadcastIntentKey, IntentDestructor);
@@ -3549,7 +3547,7 @@ ECode CActivityThread::HandleResumeActivity(
         }
         else if (!willBeVisible) {
             if (localLOGV) {
-                Slogger::V(TAG, "Launch %s mStartedActivity set", Object::ToString(r).string());
+                Slogger::V(TAG, "Launch %s mStartedActivity set", TO_CSTR(r));
             }
             r->mHideForNow = TRUE;
         }
@@ -3606,7 +3604,7 @@ ECode CActivityThread::HandleResumeActivity(
             r->mNextIdle = mNewActivities;
             mNewActivities = r;
             if (localLOGV)  {
-                Slogger::V(TAG, "Scheduling idle handler for %s", Object::ToString(r).string());
+                Slogger::V(TAG, "Scheduling idle handler for %s", TO_CSTR(r));
             }
             Looper::GetMyQueue()->AddIdleHandler(new Idler(this));
         }
@@ -4459,8 +4457,7 @@ ECode CActivityThread::HandleDestroyActivity(
 
     if (finishing) {
         AutoPtr<IIActivityManager> amService = ActivityManagerNative::GetDefault();
-        ECode ec = amService->ActivityDestroyed(token);
-        UNUSED(ec);
+        amService->ActivityDestroyed(token);
     }
 
     mSomeActivitiesChanged = TRUE;
@@ -5299,7 +5296,7 @@ ECode CActivityThread::HandleBindApplication(
     // Allow application-generated systrace messages if we're debuggable.
     Int32 flags;
     data->mAppInfo->GetFlags(&flags);
-    Boolean appTracingAllowed = (flags & IApplicationInfo::FLAG_DEBUGGABLE) != 0;
+    Boolean UNUSED(appTracingAllowed) = (flags & IApplicationInfo::FLAG_DEBUGGABLE) != 0;
     // Trace.setAppTracingAllowed(appTracingAllowed);
 
     /**

@@ -177,10 +177,11 @@ const Int32 ChildProcessLauncher::MAX_REGISTERED_PRIVILEGED_SERVICES;
 
 // Service class for child process. As the default value it uses SandboxedProcessService0 and
 // PrivilegedProcessService0.
-const AutoPtr<ChildProcessLauncher::ChildConnectionAllocator> ChildProcessLauncher::sSandboxedChildConnectionAllocator =
-        new ChildConnectionAllocator(TRUE);
-const AutoPtr<ChildProcessLauncher::ChildConnectionAllocator> ChildProcessLauncher::sPrivilegedChildConnectionAllocator =
-        new ChildProcessLauncher::ChildConnectionAllocator(FALSE);
+// TODO:
+const AutoPtr<ChildProcessLauncher::ChildConnectionAllocator> ChildProcessLauncher::sSandboxedChildConnectionAllocator;// =
+        // new ChildConnectionAllocator(TRUE);
+const AutoPtr<ChildProcessLauncher::ChildConnectionAllocator> ChildProcessLauncher::sPrivilegedChildConnectionAllocator;// =
+        // new ChildProcessLauncher::ChildConnectionAllocator(FALSE);
 
 Boolean ChildProcessLauncher::sConnectionAllocated = FALSE;
 
@@ -198,7 +199,8 @@ const Int32 ChildProcessLauncher::NULL_PROCESS_HANDLE;
 AutoPtr<ChildProcessConnection> ChildProcessLauncher::sSpareSandboxedConnection;
 
 // Manages oom bindings used to bind chind services.
-AutoPtr<BindingManager> ChildProcessLauncher::sBindingManager = BindingManagerImpl::CreateBindingManager();
+// TODO
+AutoPtr<BindingManager> ChildProcessLauncher::sBindingManager;// = BindingManagerImpl::CreateBindingManager();
 
 // Map from surface id to Surface.
 //Map<Integer, Surface> ChildProcessLauncher::sViewSurfaceMap =

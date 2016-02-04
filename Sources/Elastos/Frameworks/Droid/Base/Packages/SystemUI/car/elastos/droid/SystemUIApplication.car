@@ -13,8 +13,12 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.App.IApplication
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IComponentCallbacks2;
+     * interface Elastos.Droid.Content.IComponentCallbacks;
      */
-    [local]
+    [local, deprecated]
     interface ISystemUIApplication {
         /**
          * Makes sure that all the SystemUI services are running. If they are already running, this is a
@@ -27,6 +31,10 @@ module
 
         GetServices(
             [out, callee] ArrayOf<ISystemUI*>* services);
+
+        GetComponent(
+            [in] InterfaceID interfaceType,
+            [out] IInterface** obj);
     }
 
     } // namespace SystemUI

@@ -75,29 +75,34 @@ const Int32 Math::IntegerNtzTable[] = {
     30, -1, -1, -1, -1, 23, -1, 19,  29, -1, 22, 18, 28, 17, 16, -1
 };
 
-const Int64 Math::LongPowersOfTen[] = {
-    1LL,
-    10LL,
-    100LL,
-    1000LL,
-    10000LL,
-    100000LL,
-    1000000LL,
-    10000000LL,
-    100000000LL,
-    1000000000LL,
-    10000000000LL,
-    100000000000LL,
-    1000000000000LL,
-    10000000000000LL,
-    100000000000000LL,
-    1000000000000000LL,
-    10000000000000000LL,
-    100000000000000000LL,
-    1000000000000000000LL,
-};
+INIT_PROI_2 const AutoPtr< ArrayOf<Int64> > Math::LONG_POWERS_OF_TEN = INIT_LONG_POWERS_OF_TEN();
 
-AutoPtr<IRandom> Math::mRandom;
+AutoPtr< ArrayOf<Int64> > Math::INIT_LONG_POWERS_OF_TEN()
+{
+    AutoPtr< ArrayOf<Int64> > array = ArrayOf<Int64>::Alloc(19);
+    (*array)[0] = 1LL;
+    (*array)[1] = 10LL;
+    (*array)[2] = 100LL;
+    (*array)[3] = 1000LL;
+    (*array)[4] = 10000LL;
+    (*array)[5] = 100000LL;
+    (*array)[6] = 1000000LL;
+    (*array)[7] = 10000000LL;
+    (*array)[8] = 100000000LL;
+    (*array)[9] = 1000000000LL;
+    (*array)[10] = 10000000000LL;
+    (*array)[11] = 100000000000LL;
+    (*array)[12] = 1000000000000LL;
+    (*array)[13] = 10000000000000LL;
+    (*array)[14] = 100000000000000LL;
+    (*array)[15] = 1000000000000000LL;
+    (*array)[16] = 10000000000000000LL;
+    (*array)[17] = 100000000000000000LL;
+    (*array)[18] = 1000000000000000000LL;
+    return array;
+}
+
+AutoPtr<IRandom> Math::sRandom;
 
 /*
  * These match the definitions in the VM specification.
@@ -490,12 +495,12 @@ Double Math::Tanh(
 
 Double Math::Random()
 {
-    if (NULL == mRandom) {
-        CRandom::New((IRandom**)&mRandom);
+    if (NULL == sRandom) {
+        CRandom::New((IRandom**)&sRandom);
     }
 
     Double d;
-    mRandom->NextDouble(&d);
+    sRandom->NextDouble(&d);
     return d;
 }
 
@@ -1048,6 +1053,20 @@ Int32 Math::ReverseBytes(
     // http://graphics.stanford.edu/~seander/bithacks.html
     i =    ((((UInt32)i) >>  8) & 0x00FF00FF) | ((i & 0x00FF00FF) <<  8);
     return ( ((UInt32)i) >> 16             ) | ( i               << 16);
+}
+
+Int32 Math::Compare(
+    /* [in] */ Int32 lhs,
+    /* [in] */ Int32 rhs)
+{
+    return lhs < rhs ? -1 : (lhs == rhs ? 0 : 1);
+}
+
+Int32 Math::Compare(
+    /* [in] */ Int64 lhs,
+    /* [in] */ Int64 rhs)
+{
+    return lhs < rhs ? -1 : (lhs == rhs ? 0 : 1);
 }
 
 Int32 Math::Compare(

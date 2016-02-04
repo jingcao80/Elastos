@@ -2,6 +2,7 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include "elastos/droid/internal/os/ProcessCpuTracker.h"
 #include "elastos/droid/internal/os/CProcessCpuTracker.h"
+#include "elastos/droid/internal/utility/CFastPrintWriter.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/FileUtils.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -10,6 +11,7 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::Internal::Utility::CFastPrintWriter;
 using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::Process;
@@ -108,11 +110,34 @@ ECode ProcessCpuTracker::Stats::GetUid(
     return NOERROR;
 }
 
+ECode ProcessCpuTracker::Stats::GetBatteryStats(
+    /* [out] */ IBatteryStatsImplUidProc** batteryStats)
+{
+    VALIDATE_NOT_NULL(batteryStats)
+    *batteryStats = mBatteryStats;
+    REFCOUNT_ADD(*batteryStats);
+    return NOERROR;
+}
+
+ECode ProcessCpuTracker::Stats::SetBatteryStats(
+    /* [in] */ IBatteryStatsImplUidProc* batteryStats)
+{
+    mBatteryStats = batteryStats;
+    return NOERROR;
+}
+
 ECode ProcessCpuTracker::Stats::GetInteresting(
     /* [out] */ Boolean* interesting)
 {
     VALIDATE_NOT_NULL(interesting);
     *interesting = mInteresting;
+    return NOERROR;
+}
+
+ECode ProcessCpuTracker::Stats::SetInteresting(
+    /* [in] */ Boolean interesting)
+{
+    mInteresting = interesting;
     return NOERROR;
 }
 
@@ -124,11 +149,25 @@ ECode ProcessCpuTracker::Stats::GetBaseName(
     return NOERROR;
 }
 
+ECode ProcessCpuTracker::Stats::SetBaseName(
+    /* [in] */ const String& baseName)
+{
+    mBaseName = baseName;
+    return NOERROR;
+}
+
 ECode ProcessCpuTracker::Stats::GetName(
     /* [out] */ String* name)
 {
     VALIDATE_NOT_NULL(name);
     *name = mName;
+    return NOERROR;
+}
+
+ECode ProcessCpuTracker::Stats::SetName(
+    /* [in] */ const String& name)
+{
+    mName = name;
     return NOERROR;
 }
 
@@ -140,11 +179,25 @@ ECode ProcessCpuTracker::Stats::GetNameWidth(
     return NOERROR;
 }
 
+ECode ProcessCpuTracker::Stats::SetNameWidth(
+    /* [in] */ Int32 nameWidth)
+{
+    mNameWidth = nameWidth;
+    return NOERROR;
+}
+
 ECode ProcessCpuTracker::Stats::GetVsize(
     /* [out] */ Int64* vsize)
 {
     VALIDATE_NOT_NULL(vsize);
     *vsize = mVsize;
+    return NOERROR;
+}
+
+ECode ProcessCpuTracker::Stats::SetVsize(
+    /* [in] */ Int64 vsize)
+{
+    mVsize = vsize;
     return NOERROR;
 }
 
@@ -156,11 +209,25 @@ ECode ProcessCpuTracker::Stats::GetBaseUptime(
     return NOERROR;
 }
 
+ECode ProcessCpuTracker::Stats::SetBaseUptime(
+    /* [in] */ Int64 baseUptime)
+{
+    mBase_uptime = baseUptime;
+    return NOERROR;
+}
+
 ECode ProcessCpuTracker::Stats::GetRelUptime(
     /* [out] */ Int64* time)
 {
     VALIDATE_NOT_NULL(time);
     *time = mRel_uptime;
+    return NOERROR;
+}
+
+ECode ProcessCpuTracker::Stats::SetRelUptime(
+    /* [in] */ Int64 relUptime)
+{
+    mRel_uptime = relUptime;
     return NOERROR;
 }
 
@@ -172,11 +239,25 @@ ECode ProcessCpuTracker::Stats::GetBaseUtime(
     return NOERROR;
 }
 
+ECode ProcessCpuTracker::Stats::SetBaseUtime(
+    /* [in] */ Int64 baseUtime)
+{
+    mBase_utime = baseUtime;
+    return NOERROR;
+}
+
 ECode ProcessCpuTracker::Stats::GetBaseStime(
     /* [out] */ Int64* time)
 {
     VALIDATE_NOT_NULL(time);
     *time = mBase_stime;
+    return NOERROR;
+}
+
+ECode ProcessCpuTracker::Stats::SetBaseStime(
+    /* [in] */ Int64 baseStime)
+{
+    mBase_stime = baseStime;
     return NOERROR;
 }
 
@@ -188,11 +269,25 @@ ECode ProcessCpuTracker::Stats::GetRelUtime(
     return NOERROR;
 }
 
+ECode ProcessCpuTracker::Stats::SetRelUtime(
+    /* [in] */ Int32 relUtime)
+{
+    mRel_utime = relUtime;
+    return NOERROR;
+}
+
 ECode ProcessCpuTracker::Stats::GetRelStime(
     /* [out] */ Int32* time)
 {
     VALIDATE_NOT_NULL(time);
     *time = mRel_stime;
+    return NOERROR;
+}
+
+ECode ProcessCpuTracker::Stats::SetRelStime(
+    /* [in] */ Int32 relStime)
+{
+    mRel_stime = relStime;
     return NOERROR;
 }
 
@@ -204,11 +299,25 @@ ECode ProcessCpuTracker::Stats::GetBaseMinfaults(
     return NOERROR;
 }
 
+ECode ProcessCpuTracker::Stats::SetBaseMinfaults(
+    /* [in] */ Int64 baseMinfaults)
+{
+    mBase_minfaults = baseMinfaults;
+    return NOERROR;
+}
+
 ECode ProcessCpuTracker::Stats::GetBaseMajfaults(
     /* [out] */ Int64* faults)
 {
     VALIDATE_NOT_NULL(faults);
     *faults = mBase_majfaults;
+    return NOERROR;
+}
+
+ECode ProcessCpuTracker::Stats::SetBaseMajfaults(
+    /* [in] */ Int64 baseMajfaults)
+{
+    mBase_majfaults = baseMajfaults;
     return NOERROR;
 }
 
@@ -220,11 +329,25 @@ ECode ProcessCpuTracker::Stats::GetRelMinfaults(
     return NOERROR;
 }
 
+ECode ProcessCpuTracker::Stats::SetRelMinfaults(
+    /* [in] */ Int32 relMinfaults)
+{
+    mRel_minfaults = relMinfaults;
+    return NOERROR;
+}
+
 ECode ProcessCpuTracker::Stats::GetRelMajfaults(
     /* [out] */ Int32* faults)
 {
     VALIDATE_NOT_NULL(faults);
     *faults = mRel_majfaults;
+    return NOERROR;
+}
+
+ECode ProcessCpuTracker::Stats::SetRelMajfaults(
+    /* [in] */ Int32 relMajfaults)
+{
+    mRel_majfaults = relMajfaults;
     return NOERROR;
 }
 
@@ -236,11 +359,25 @@ ECode ProcessCpuTracker::Stats::GetActive(
     return NOERROR;
 }
 
+ECode ProcessCpuTracker::Stats::SetActive(
+    /* [in] */ Boolean active)
+{
+    mActive = active;
+    return NOERROR;
+}
+
 ECode ProcessCpuTracker::Stats::GetWorking(
     /* [out] */ Boolean* working)
 {
     VALIDATE_NOT_NULL(working);
     *working = mWorking;
+    return NOERROR;
+}
+
+ECode ProcessCpuTracker::Stats::SetWorking(
+    /* [in] */ Boolean working)
+{
+    mWorking = working;
     return NOERROR;
 }
 
@@ -252,11 +389,25 @@ ECode ProcessCpuTracker::Stats::GetAdded(
     return NOERROR;
 }
 
+ECode ProcessCpuTracker::Stats::SetAdded(
+    /* [in] */ Boolean added)
+{
+    mAdded = added;
+    return NOERROR;
+}
+
 ECode ProcessCpuTracker::Stats::GetRemoved(
     /* [out] */ Boolean* removed)
 {
     VALIDATE_NOT_NULL(removed);
     *removed = mRemoved;
+    return NOERROR;
+}
+
+ECode ProcessCpuTracker::Stats::SetRemoved(
+    /* [in] */ Boolean removed)
+{
+    mRemoved = removed;
     return NOERROR;
 }
 
@@ -949,18 +1100,17 @@ ECode ProcessCpuTracker::PrintCurrentLoad(
 {
     VALIDATE_NOT_NULL(str);
 
-    AutoPtr<IStringWriter> sw;
-    CStringWriter::New((IStringWriter**)&sw);
+    AutoPtr<IWriter> sw;
+    CStringWriter::New((IWriter**)&sw);
     AutoPtr<IPrintWriter> pw;
-    assert(0 && "TODO:CFastPrintWriter is not implemented");
-    // CFastPrintWriter::New(sw, FALSE, 128, (IPrintWriter**)&pw);
+    CFastPrintWriter::New(sw, FALSE, 128, (IPrintWriter**)&pw);
     pw->Print(String("Load: "));
     pw->Print(mLoad1);
     pw->Print(String(" / "));
     pw->Print(mLoad5);
     pw->Print(String(" / "));
     pw->Print(mLoad15);
-    sw->ToString(str);
+    IStringWriter::Probe(sw)->ToString(str);
     IFlushable::Probe(pw)->Flush();
     return NOERROR;
 }
@@ -973,11 +1123,10 @@ ECode ProcessCpuTracker::PrintCurrentState(
 
     BuildWorkingProcs();
 
-    AutoPtr<IStringWriter> sw;
-    CStringWriter::New((IStringWriter**)&sw);
+    AutoPtr<IWriter> sw;
+    CStringWriter::New((IWriter**)&sw);
     AutoPtr<IPrintWriter> pw;
-    assert(0 && "TODO:CFastPrintWriter is not implemented");
-    // CFastPrintWriter::New(sw, FALSE, 1024, (IPrintWriter**)&pw);
+    CFastPrintWriter::New(sw, FALSE, 1024, (IPrintWriter**)&pw);
 
     pw->Print(String("CPU usage from "));
     if (now > mLastSampleTime) {
@@ -1031,7 +1180,7 @@ ECode ProcessCpuTracker::PrintCurrentState(
            mRelIoWaitTime, mRelIrqTime, mRelSoftIrqTime, 0, 0);
 
     IFlushable::Probe(pw)->Flush();
-    sw->ToString(str);
+    IStringWriter::Probe(sw)->ToString(str);
     return NOERROR;
 }
 

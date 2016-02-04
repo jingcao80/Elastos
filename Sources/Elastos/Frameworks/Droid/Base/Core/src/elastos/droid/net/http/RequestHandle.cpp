@@ -199,7 +199,7 @@ ECode RequestHandle::SetupRedirect(
     if (++mRedirectCount == MAX_REDIRECT_COUNT) {
         // Way too many redirects -- fail out
         if (HttpLog::LOGV) {
-            HttpLog::V("RequestHandle.setupRedirect(): too many redirects %s", Object::ToString(mRequest).string());
+            HttpLog::V("RequestHandle.setupRedirect(): too many redirects %s", TO_CSTR(mRequest));
         }
         ((Request*)mRequest.Get())->Error(IEventHandler::ERROR_REDIRECT_LOOP,
                        R::string::httpErrorRedirectLoop);

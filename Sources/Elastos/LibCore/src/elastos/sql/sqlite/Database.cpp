@@ -42,12 +42,6 @@ static void Freep(char **strp)
     }
 }
 
-static void Transfree(transstr *dest)
-{
-    dest->result = 0;
-    Freep(&dest->tofree);
-}
-
 static Int32 Callback(void *udata, int ncol, char **data, char **cols)
 {
     handle *h = (handle *) udata;
@@ -1657,7 +1651,7 @@ Boolean Database::_Complete(
     sqlstr = sql;
     result = sqlite3_complete(sqlstr.string()) ? TRUE : FALSE;
 #else
-    trans2iso(env, strcmp(sqlite_libencoding(), "UTF-8") == 0, 0,sql, &sqlstr);
+    trans2iso(env, strcmp(sqlite_libencoding(), "UTF-8") == 0, 0, sql, &sqlstr);
     result = sqlite_complete(sqlstr.result) ? TRUE : FALSE;
 #endif
     return result;

@@ -1,25 +1,24 @@
 
-#ifndef __ELASTOS_DROID_SYSTEMUI_CDESSERTCASEDREAM_H__
-#define __ELASTOS_DROID_SYSTEMUI_CDESSERTCASEDREAM_H__
+#ifndef  __ELASTOS_DROID_PACKAGES_SYSTEMUI_CDESSERTCASEDREAM_H__
+#define  __ELASTOS_DROID_PACKAGES_SYSTEMUI_CDESSERTCASEDREAM_H__
 
-#include "_Elastos_Droid_SystemUI_CDessertCaseDream.h"
-#include "elastos/droid/os/Runnable.h"
-
-#include <elastos/core/Object.h>
+#include "_Elastos_Droid_Packages_SystemUI_CDessertCaseDream.h"
+#include "Elastos.Droid.Widget.h"
+#include <elastos/droid/service/dreams/DreamService.h>
+#include <elastos/droid/os/Runnable.h>
 
 using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Service::Dreams::IDreamService;
-
+using Elastos::Droid::Service::Dreams::DreamService;
+using Elastos::Droid::Widget::IFrameLayout;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 
 CarClass(CDessertCaseDream)
-//    , public DreamService
-    , public Object
+    , public DreamService
     , public IDessertCaseDream
-//    , public IDreamService
 {
 private:
     class Runnable_1
@@ -34,8 +33,11 @@ private:
     public:
         CDessertCaseDream* mOwner;
     };
+
 public:
-    CAR_INTERFACE_DECL()
+    CAR_OBJECT_DECL();
+
+    CAR_INTERFACE_DECL();
 
     CARAPI OnAttachedToWindow();
 
@@ -45,11 +47,12 @@ public:
 
 private:
     AutoPtr<IDessertCaseView> mView;
-    AutoPtr<IDessertCaseViewRescalingContainer> mContainer;
+    AutoPtr</*IDessertCaseViewRescalingContainer*/IFrameLayout> mContainer;
 };
 
 } // namespace SystemUI
+} // namespace Packages
 } // namespace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_SYSTEMUI_CDESSERTCASEDREAM_H__
+#endif // __ELASTOS_DROID_PACKAGES_SYSTEMUI_CDESSERTCASEDREAM_H__

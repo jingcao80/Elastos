@@ -10,39 +10,11 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CPorterDuffColorFilter);
+CAR_INTERFACE_IMPL(CPorterDuffColorFilter, ColorFilter, IPorterDuffColorFilter);
 CPorterDuffColorFilter::CPorterDuffColorFilter()
     : mColor(0)
     , mMode(-1)
 {}
-
-PInterface CPorterDuffColorFilter::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_ColorFilter) {
-        return reinterpret_cast<PInterface>((ColorFilter*)this);
-    }
-    else if (riid == EIID_IPorterDuffColorFilter) {
-        return (IPorterDuffColorFilter*)this;
-    }
-    return ColorFilter::Probe(riid);
-}
-
-UInt32 CPorterDuffColorFilter::AddRef()
-{
-    return ColorFilter::AddRef();
-}
-
-UInt32 CPorterDuffColorFilter::Release()
-{
-    return ColorFilter::Release();
-}
-
-ECode CPorterDuffColorFilter::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return ColorFilter::GetInterfaceID(object, iid);
-}
 
 ECode CPorterDuffColorFilter::constructor(
     /* [in] */ Int32 srcColor,

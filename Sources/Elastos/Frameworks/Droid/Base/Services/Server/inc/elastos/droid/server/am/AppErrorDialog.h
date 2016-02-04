@@ -2,16 +2,14 @@
 #ifndef __ELASTOS_DROID_SERVER_AM_APPERRORDIALOG_H__
 #define __ELASTOS_DROID_SERVER_AM_APPERRORDIALOG_H__
 
-#include "elastos/droid/os/HandlerBase.h"
-#include "elastos/droid/server/am/BaseErrorDialog.h"
+#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/server/am/AppErrorResult.h"
+#include "elastos/droid/server/am/BaseErrorDialog.h"
+#include "elastos/droid/server/am/CActivityManagerService.h"
 #include "elastos/droid/server/am/ProcessRecord.h"
 
-using namespace Elastos::Core;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IDialogInterface;
-using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 
 namespace Elastos {
 namespace Droid {
@@ -22,7 +20,7 @@ class AppErrorDialog : public BaseErrorDialog
 {
 private:
     class MyHandler
-        : public HandlerBase
+        : public Handler
     {
     public:
         MyHandler(

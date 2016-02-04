@@ -14,6 +14,7 @@
 
 using Elastos::Core::CoreUtils;
 using Elastos::Core::INumber;
+using Elastos::Core::IString;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::CArrayList;
@@ -25,13 +26,9 @@ using Elastos::Utility::Logging::Logger;
 namespace Org {
 namespace Json {
 
-AutoPtr<IInterface> JSONObject::InitNULL()
-{
-    AutoPtr<MyObject> obj = new MyObject();
-    return (IObject*)obj;
-}
+const AutoPtr<IInterface> JSONObject::Object_NULL = (IObject*)new MyObject();
 
-const AutoPtr<IInterface> JSONObject::Object_NULL = InitNULL();
+const Double JSONObject::NEGATIVE_ZERO = -0;
 
 //==============================================================================
 //          JSONObject::MyObject
@@ -172,38 +169,33 @@ ECode JSONObject::Put(
     /* [in] */ const String& name,
     /* [in] */ Boolean value)
 {
-    String str;
-    CheckName(name, &str);
-    return mNameValuePairs->Put(CoreUtils::Convert(str), CoreUtils::Convert(value));
+    FAIL_RETURN(CheckName(name));
+    return mNameValuePairs->Put(CoreUtils::Convert(name), CoreUtils::Convert(value));
 }
 
 ECode JSONObject::Put(
     /* [in] */ const String& name,
     /* [in] */ Double value)
 {
-    String str;
-    CheckName(name, &str);
-    Double data;
-    JSON::CheckDouble(value, &data);
-    return mNameValuePairs->Put(CoreUtils::Convert(str), CoreUtils::Convert(data));
+    FAIL_RETURN(CheckName(name));
+    FAIL_RETURN(JSON::CheckDouble(value));
+    return mNameValuePairs->Put(CoreUtils::Convert(name), CoreUtils::Convert(value));
 }
 
 ECode JSONObject::Put(
     /* [in] */ const String& name,
     /* [in] */ Int32 value)
 {
-    String str;
-    CheckName(name, &str);
-    return mNameValuePairs->Put(CoreUtils::Convert(str), CoreUtils::Convert(value));
+    FAIL_RETURN(CheckName(name));
+    return mNameValuePairs->Put(CoreUtils::Convert(name), CoreUtils::Convert(value));
 }
 
 ECode JSONObject::Put(
     /* [in] */ const String& name,
     /* [in] */ Int64 value)
 {
-    String str;
-    CheckName(name, &str);
-    return mNameValuePairs->Put(CoreUtils::Convert(str), CoreUtils::Convert(value));
+    FAIL_RETURN(CheckName(name));
+    return mNameValuePairs->Put(CoreUtils::Convert(name), CoreUtils::Convert(value));
 }
 
 ECode JSONObject::Put(
@@ -218,13 +210,11 @@ ECode JSONObject::Put(
         // deviate from the original by checking all Numbers, not just floats & doubles
         Double data;
         INumber::Probe(value)->DoubleValue(&data);
-        Double result;
-        JSON::CheckDouble(data, &result);
+        FAIL_RETURN(JSON::CheckDouble(data));
     }
 
-    String str;
-    CheckName(name, &str);
-    mNameValuePairs->Put(CoreUtils::Convert(str), value);
+    FAIL_RETURN(CheckName(name));
+    mNameValuePairs->Put(CoreUtils::Convert(name), value);
     return NOERROR;
 }
 
@@ -242,26 +232,25 @@ ECode JSONObject::Accumulate(
     /* [in] */ const String& name,
     /* [in] */ IInterface* value)
 {
-    String str;
-    CheckName(name, &str);
+    FAIL_RETURN(CheckName(name));
     AutoPtr<IInterface> current;
-    mNameValuePairs->Get(CoreUtils::Convert(str), (IInterface**)&current);
+    mNameValuePairs->Get(CoreUtils::Convert(name), (IInterface**)&current);
     if (current == NULL) {
         return Put(name, value);
     }
 
     if (IJSONArray::Probe(current) != NULL) {
         AutoPtr<IJSONArray> obj = IJSONArray::Probe(current);
-        AutoPtr<JSONArray> array = (JSONArray*)obj.Get();
-        array->CheckedPut(value);
+        JSONArray* array = (JSONArray*)obj.Get();
+        return array->CheckedPut(value);
     }
     else {
         AutoPtr<IJSONArray> obj;
         CJSONArray::New((IJSONArray**)&obj);
-        AutoPtr<JSONArray> array = (JSONArray*)obj.Get();
-        array->CheckedPut(current);
-        array->CheckedPut(value);
-        mNameValuePairs->Put(CoreUtils::Convert(name), (IJSONArray*)array.Get());
+        JSONArray* array = (JSONArray*)obj.Get();
+        FAIL_RETURN(array->CheckedPut(current));
+        FAIL_RETURN(array->CheckedPut(value));
+        mNameValuePairs->Put(CoreUtils::Convert(name), obj);
     }
     return NOERROR;
 }
@@ -270,10 +259,9 @@ ECode JSONObject::Append(
     /* [in] */ const String& name,
     /* [in] */ IInterface* value)
 {
-    String str;
-    CheckName(name, &str);
+    FAIL_RETURN(CheckName(name));
     AutoPtr<IInterface> current;
-    mNameValuePairs->Get(CoreUtils::Convert(str), (IInterface**)&current);
+    mNameValuePairs->Get(CoreUtils::Convert(name), (IInterface**)&current);
 
     AutoPtr<IJSONArray> array;
     if (IJSONArray::Probe(current) != NULL) {
@@ -291,24 +279,17 @@ ECode JSONObject::Append(
         // throw new JSONException("Key " + name + " is not a JSONArray");
     }
 
-    ((JSONArray*)array.Get())->CheckedPut(value);
-
-    return NOERROR;
+    return ((JSONArray*)array.Get())->CheckedPut(value);
 }
 
 ECode JSONObject::CheckName(
-    /* [in] */ const String& name,
-    /* [out] */ String* str)
+    /* [in] */ const String& name)
 {
-    VALIDATE_NOT_NULL(str);
-    *str = String(NULL);
-
     if (name.IsNull()) {
         Logger::E("JSONObject", "Names must be non-null");
         return E_JSON_EXCEPTION;
         // throw new JSONException("Names must be non-null");
     }
-    *str = name;
     return NOERROR;
 }
 
@@ -547,12 +528,13 @@ ECode JSONObject::GetString(
 
     AutoPtr<IInterface> object;
     Get(name, (IInterface**)&object);
-    AutoPtr<ICharSequence> result;
-    JSON::ToString(object, (ICharSequence**)&result);
-    if (result == NULL) {
+    String result;
+    JSON::ToString(object, &result);
+    if (result.IsNull()) {
         return JSON::TypeMismatch(CoreUtils::Convert(name), object, String("String"));
     }
-    return result->ToString(str);
+    *str = result;
+    return NOERROR;
 }
 
 ECode JSONObject::OptString(
@@ -572,10 +554,11 @@ ECode JSONObject::OptString(
 
     AutoPtr<IInterface> object;
     Opt(name, (IInterface**)&object);
-    AutoPtr<ICharSequence> result;
-    JSON::ToString(object, (ICharSequence**)&result);
-    if (result != NULL) {
-        return result->ToString(str);
+    String result;
+    JSON::ToString(object, &result);
+    if (!result.IsNull()) {
+        *str = result;
+        return NOERROR;
     }
     *str = fallback;
     return NOERROR;
@@ -658,8 +641,6 @@ ECode JSONObject::ToJSONArray(
     VALIDATE_NOT_NULL(jsonArray);
     *jsonArray = NULL;
 
-    AutoPtr<IJSONArray> result;
-    CJSONArray::New((IJSONArray**)&result);
     if (names == NULL) {
         return NOERROR;
     }
@@ -669,13 +650,14 @@ ECode JSONObject::ToJSONArray(
     if (length == 0) {
         return NOERROR;
     }
+
+    AutoPtr<IJSONArray> result;
+    CJSONArray::New((IJSONArray**)&result);
     for (Int32 i = 0; i < length; i++) {
         AutoPtr<IInterface> obj;
         names->Opt(i, (IInterface**)&obj);
-        AutoPtr<ICharSequence> cs;
-        JSON::ToString(obj, (ICharSequence**)&cs);
         String name;
-        cs->ToString(&name);
+        JSON::ToString(obj, &name);
         AutoPtr<IInterface> object;
         Opt(name, (IInterface**)&object);
         result->Put(object);
@@ -795,8 +777,7 @@ ECode JSONObject::NumberToString(
 
     Double doubleValue;
     number->DoubleValue(&doubleValue);
-    Double data;
-    JSON::CheckDouble(doubleValue, &data);
+    FAIL_RETURN(JSON::CheckDouble(doubleValue));
 
     // the original returns "-0" instead of "-0.0" for negative zero
     Boolean res;
@@ -890,17 +871,24 @@ ECode JSONObject::Wrap(
         IInteger32::Probe(o) != NULL ||
         IInteger64::Probe(o) != NULL ||
         IInteger16::Probe(o) != NULL ||
-        ICharSequence::Probe(o) != NULL ) {
+        IString::Probe(o) != NULL ) {
         *obj = o;
         REFCOUNT_ADD(*obj);
         return NOERROR;
     }
 
-    assert(0 && "TODO");
-    // if (o.getClass().getPackage().getName().startsWith("java.")) {
-    //     return o.toString();
-    // }
-
+    AutoPtr<IClassInfo> classInfo;
+    CObject::ReflectClassInfo(o, (IClassInfo**)&classInfo);
+    String name;;
+    classInfo->GetNamespace(&name);
+    if (name.StartWith("Elastos.")) {
+        String str;
+        IObject::Probe(o)->ToString(&str);
+        AutoPtr<ICharSequence> cs = CoreUtils::Convert(str);
+        *obj = cs;
+        REFCOUNT_ADD(*obj);
+        return NOERROR;
+    }
     // } catch (Exception ignored) {
     // }
     return NOERROR;

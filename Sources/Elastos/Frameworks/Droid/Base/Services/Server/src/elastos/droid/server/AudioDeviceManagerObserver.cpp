@@ -361,7 +361,7 @@ void AudioDeviceManagerObserver::StartObservingTv(
 }
 
 void AudioDeviceManagerObserver::OnUEvent(
-    /* [in] */ UEventObserver::UEvent* event)
+    /* [in] */ IUEvent* event)
 {
     Logger::D(TAG, "Audio device change: %s", event->ToString().string());
 

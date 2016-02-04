@@ -20,8 +20,6 @@ CarClass(CMediaCodecInfoEncoderCapabilities)
     , public IMediaCodecInfoEncoderCapabilities
 {
 public:
-    friend class CMediaCodecInfoEncoderCapabilities;
-
     CMediaCodecInfoEncoderCapabilities();
 
     virtual ~CMediaCodecInfoEncoderCapabilities();

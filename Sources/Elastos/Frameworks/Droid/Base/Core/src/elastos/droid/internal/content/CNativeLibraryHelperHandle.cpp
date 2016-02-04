@@ -1,12 +1,15 @@
 
 #include "elastos/droid/internal/content/CNativeLibraryHelperHandle.h"
 #include "elastos/droid/internal/content/CNativeLibraryHelper.h"
-// #include "elastos/droid/content/pm/PackageParser.h"
+#include "elastos/droid/content/pm/PackageParser.h"
+#include <elastos/utility/logging/Slogger.h>
 
-// using Elastos::Droid::Content::Pm::PackageParser;
+using Elastos::Droid::Content::Pm::PackageParser;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Core::ICloseGuardHelper;
 using Elastos::Core::CCloseGuardHelper;
 using Elastos::IO::EIID_ICloseable;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -21,35 +24,34 @@ ECode CNativeLibraryHelperHandle::Create(
     /* [out] */ INativeLibraryHelperHandle** handle)
 {
     // try {
-        assert(0 && "TODO: need PackageParser");
-        return NOERROR;
-        // AutoPtr<PackageParser::PackageLite> lite = PackageParser::ParsePackageLite(packageFile, 0);
-        // return Create((Handle32)lite.Get());
+    AutoPtr<ArrayOf<Byte> > readBuffer = ArrayOf<Byte>::Alloc(PackageParser::CERTIFICATE_BUFFER_SIZE);
+    AutoPtr<PackageParser::PackageLite> lite;
+    if (FAILED(PackageParser::ParsePackageLite(packageFile, 0, readBuffer, (PackageParser::PackageLite**)&lite))) {
+        Slogger::E("CNativeLibraryHelperHandle", "Failed to parse package: %p", packageFile);
+        return E_IO_EXCEPTION;
+    }
+    return CreatePackageLite((Handle64)lite.Get(), handle);
     // } catch (PackageParserException e) {
     //     throw new IOException("Failed to parse package: " + packageFile, e);
     // }
 }
 
-ECode CNativeLibraryHelperHandle::Create(
-    /* [in] */ Handle32 _pkg,
+ECode CNativeLibraryHelperHandle::CreatePackage(
+    /* [in] */ Handle64 _pkg,
     /* [out] */ INativeLibraryHelperHandle** handle)
 {
-    // AutoPtr<PackageParser::Package> pkg = (PackageParser::Package*)_pkg;
-    // Int32 flags;
-    // pkg->mApplicationInfo->GetFlags(&flags);
-    // return Create(pkg->GetAllCodePaths(), (flags & IApplicationInfo::FLAG_MULTIARCH) != 0);
-    assert(0 && "TODO: need PackageParser");
-    return NOERROR;
+    AutoPtr<PackageParser::Package> pkg = (PackageParser::Package*)_pkg;
+    Int32 flags;
+    pkg->mApplicationInfo->GetFlags(&flags);
+    return Create(pkg->GetAllCodePaths(), (flags & IApplicationInfo::FLAG_MULTIARCH) != 0, handle);
 }
 
-ECode CNativeLibraryHelperHandle::Create(
-    /* [in] */ IPackageLite* _lite,
+ECode CNativeLibraryHelperHandle::CreatePackageLite(
+    /* [in] */ Handle64 _lite,
     /* [out] */ INativeLibraryHelperHandle** handle)
 {
-    // AutoPtr<PackageParser::PackageLite> lite = (PackageParser::PackageLite*)_lite;
-    // return Create(lite->GetAllCodePaths(), lite->mMultiArch);
-    assert(0 && "TODO: need PackageParser");
-    return NOERROR;
+    AutoPtr<PackageParser::PackageLite> lite = (PackageParser::PackageLite*)_lite;
+    return Create(lite->GetAllCodePaths(), lite->mMultiArch, handle);
 }
 
 ECode CNativeLibraryHelperHandle::Create(

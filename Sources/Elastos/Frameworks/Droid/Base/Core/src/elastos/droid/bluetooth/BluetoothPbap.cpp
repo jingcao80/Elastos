@@ -1,14 +1,16 @@
 
-#include "BluetoothPbap.h"
-#include "CBluetoothAdapter.h"
-#include "CBluetoothPbapStateChangeCallback.h"
+#include "elastos/droid/bluetooth/BluetoothPbap.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/droid/bluetooth/CBluetoothPbapStateChangeCallback.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::CIntent;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -17,13 +19,12 @@ namespace Bluetooth {
 //====================================================
 // BluetoothPbap::ServiceConnection
 //====================================================
+CAR_INTERFACE_IMPL(BluetoothPbap::ServiceConnection, Object, IServiceConnection)
 
 BluetoothPbap::ServiceConnection::ServiceConnection(
     /* [in] */ BluetoothPbap* host)
     : mHost(host)
 {}
-
-CAR_INTERFACE_IMPL(BluetoothPbap::ServiceConnection, IServiceConnection)
 
 ECode BluetoothPbap::ServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
@@ -56,24 +57,30 @@ ECode BluetoothPbap::ServiceConnection::OnServiceDisconnected(
 const String BluetoothPbap::TAG("BluetoothPbap");
 const Boolean BluetoothPbap::DBG = TRUE;
 const Boolean BluetoothPbap::VDBG = FALSE;
-const String BluetoothPbap::PBAP_STATE("android.bluetooth.pbap.intent.PBAP_STATE");
-const String BluetoothPbap::PBAP_PREVIOUS_STATE("android.bluetooth.pbap.intent.PBAP_PREVIOUS_STATE");
-const String BluetoothPbap::PBAP_STATE_CHANGED_ACTION("android.bluetooth.pbap.intent.action.PBAP_STATE_CHANGED");
-const Int32 BluetoothPbap::STATE_ERROR;
-const Int32 BluetoothPbap::STATE_DISCONNECTED;
-const Int32 BluetoothPbap::STATE_CONNECTING;
-const Int32 BluetoothPbap::STATE_CONNECTED;
-const Int32 BluetoothPbap::RESULT_FAILURE;
-const Int32 BluetoothPbap::RESULT_SUCCESS;
-const Int32 BluetoothPbap::RESULT_CANCELED;
+//const String BluetoothPbap::PBAP_STATE("android.bluetooth.pbap.intent.PBAP_STATE");
+//const String BluetoothPbap::PBAP_PREVIOUS_STATE("android.bluetooth.pbap.intent.PBAP_PREVIOUS_STATE");
+//const String BluetoothPbap::PBAP_STATE_CHANGED_ACTION("android.bluetooth.pbap.intent.action.PBAP_STATE_CHANGED");
+//const Int32 BluetoothPbap::STATE_ERROR;
+//const Int32 BluetoothPbap::STATE_DISCONNECTED;
+//const Int32 BluetoothPbap::STATE_CONNECTING;
+//const Int32 BluetoothPbap::STATE_CONNECTED;
+//const Int32 BluetoothPbap::RESULT_FAILURE;
+//const Int32 BluetoothPbap::RESULT_SUCCESS;
+//const Int32 BluetoothPbap::RESULT_CANCELED;
+
+CAR_INTERFACE_IMPL(BluetoothPbap, Object, IBluetoothPbap);
+
+BluetoothPbap::BluetoothPbap()
+{
+}
 
 BluetoothPbap::BluetoothPbap(
     /* [in] */ IContext* context,
-    /* [in] */ IServiceListener* listener)
+    /* [in] */ IBluetoothPbapServiceListener* listener)
     : mContext(context)
     , mServiceListener(listener)
 {
-    CBluetoothPbapStateChangeCallback::New((Handle32)this, (IIBluetoothStateChangeCallback**)&mBluetoothStateChangeCallback);
+    CBluetoothPbapStateChangeCallback::New((IBluetoothPbap*)this, (IIBluetoothStateChangeCallback**)&mBluetoothStateChangeCallback);
     mConnection = new ServiceConnection(this);
 
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
@@ -108,7 +115,7 @@ BluetoothPbap::~BluetoothPbap()
     // }
 }
 
-void BluetoothPbap::Close()
+ECode BluetoothPbap::Close()
 {
     AutoLock lock(mLock);
     if (mAdapter != NULL) {
@@ -141,6 +148,7 @@ void BluetoothPbap::Close()
         }
     }
     mServiceListener = NULL;
+    return NOERROR;
 }
 
 ECode BluetoothPbap::GetState(

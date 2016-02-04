@@ -17,6 +17,8 @@ module
      * state constants in <code>defs.h</code> in <code>wpa_supplicant</code>.
      */
     enum SupplicantState {
+        SupplicantState_NONE,
+
         /**
          * This state indicates that client is not associated, but is likely to
          * start looking for an access point. This state is entered when a

@@ -3,13 +3,24 @@
 #define __ELASTOS_DROID_OS_STORAGE_CSTORAGEMANAGER_H__
 
 #include "_Elastos_Droid_Os_Storage_CStorageManager.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/provider/Settings.h"
+
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.Concurrent.h"
+
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Net::ITrafficStats;
+using Elastos::Droid::Provider::Settings;
+using Elastos::IO::IFile;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
-using Elastos::Droid::Os::HandlerBase;
 
 namespace Elastos {
 namespace Droid {
@@ -17,6 +28,8 @@ namespace Os {
 namespace Storage {
 
 CarClass(CStorageManager)
+     , public Object
+     , public IStorageManager
 {
 public:
     friend class CObbActionListener;
@@ -26,13 +39,13 @@ public:
     class ObbListenerDelegate;
 
     class ObbHandler
-        : public HandlerBase
+        : public Handler
     {
     public:
         ObbHandler(
             /* [in] */ ObbListenerDelegate * host,
             /* [in] */ ILooper * looper)
-            : HandlerBase(looper)
+            : Handler(looper)
             , mHost(host)
         {}
 
@@ -47,7 +60,7 @@ public:
      * Private class containing sender and receiver code for StorageEvents.
      */
     class ObbListenerDelegate
-        : public ElRefBase
+        : public Object
     {
     public:
         friend class CObbActionListener;
@@ -76,15 +89,12 @@ public:
      * and the target looper handler.
      */
     class StorageEvent
-        : public IInterface
-        , public ElRefBase
+        : public Object
     {
     public:
         static const Int32 EVENT_UMS_CONNECTION_CHANGED = 1;
         static const Int32 EVENT_STORAGE_STATE_CHANGED = 2;
         static const Int32 EVENT_OBB_STATE_CHANGED = 3;
-
-        CAR_INTERFACE_DECL()
 
         StorageEvent(
             /* [in] */ Int32 what);
@@ -159,13 +169,13 @@ public:
 
     class ListenerDelegate;
     class ListenerHandler
-        : public HandlerBase
+        : public Handler
     {
     public:
         ListenerHandler(
             /* [in] */ ListenerDelegate * host,
             /* [in] */ ILooper * looper)
-            : HandlerBase(looper)
+            : Handler(looper)
             , mHost(host)
         {}
 
@@ -180,7 +190,7 @@ public:
      * Private class containing sender and receiver code for StorageEvents.
      */
     class ListenerDelegate
-        : public ElRefBase
+        : public Object
     {
     public:
         ListenerDelegate(
@@ -207,9 +217,14 @@ public:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CStorageManager();
 
     CARAPI constructor(
+        /* [in] */ IContentResolver* resolver,
         /* [in] */ ILooper* tgtLooper);
 
     CARAPI RegisterListener(
@@ -261,16 +276,70 @@ public:
     CARAPI GetPrimaryVolume(
         /* [out] */ IStorageVolume** result );
 
+    /**
+     * Return the number of available bytes until the given path is considered
+     * running low on storage.
+     *
+     * @hide
+     */
+    CARAPI GetStorageBytesUntilLow(
+        /* [in] */ IFile* path,
+        /* [out] */ Int64* result);
+
+    /**
+     * Return the number of available bytes at which the given path is
+     * considered running low on storage.
+     *
+     * @hide
+     */
+    CARAPI GetStorageLowBytes(
+        /* [in] */ IFile* path,
+        /* [out] */ Int64* result);
+
+    /**
+     * Return the number of available bytes at which the given path is
+     * considered full.
+     *
+     * @hide
+     */
+    CARAPI GetStorageFullBytes(
+        /* [in] */ IFile* path,
+        /* [out] */ Int64* result);
+
+public:
+    /// Consts to match the password types in cryptfs.h
+    /** @hide */
+    const static Int32 CRYPT_TYPE_PASSWORD;// = 0;
+    /** @hide */
+    const static Int32 CRYPT_TYPE_DEFAULT;// = 1;
+    /** @hide */
+    const static Int32 CRYPT_TYPE_PATTERN;// = 2;
+    /** @hide */
+    const static Int32 CRYPT_TYPE_PIN;// = 3;
+
+    // Constants for the data available via MountService.getField.
+    /** @hide */
+    const static  String SYSTEM_LOCALE_KEY;// = "SystemLocale";
+    /** @hide */
+    const static  String OWNER_INFO_KEY;// = "OwnerInfo";
+    /** @hide */
+    const static  String PATTERN_VISIBLE_KEY;// = "PatternVisible";
+
 private:
     CARAPI_(Int32) GetNextNonce();
 
 private:
     static const String TAG;
 
+    const static Int32 DEFAULT_THRESHOLD_PERCENTAGE;// = 10;
+    const static Int64 DEFAULT_THRESHOLD_MAX_BYTES;// = 500 * ITrafficStats::MB_IN_BYTES;
+    const static Int64 DEFAULT_FULL_THRESHOLD_BYTES;// = ITrafficStats::MB_IN_BYTES;
+
+    AutoPtr<IContentResolver> mResolver;
     /*
      * Our internal MountService binder reference
      */
-    AutoPtr<IMountService> mMountService;
+    AutoPtr<IIMountService> mMountService;
 
     /*
      * The looper target for callbacks
@@ -280,7 +349,7 @@ private:
     /*
      * Target listener for binder callbacks
      */
-    AutoPtr<IMountServiceListener> mBinderListener;
+    AutoPtr<IIMountServiceListener> mBinderListener;
 
     /*
      * List of our listeners
@@ -295,7 +364,7 @@ private:
     /**
      * Binder listener for OBB action results.
      */
-    AutoPtr<IObbActionListener> mObbActionListener;
+    AutoPtr<IIObbActionListener> mObbActionListener;
 
     Object mListenersLock;
 };

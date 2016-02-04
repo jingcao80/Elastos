@@ -181,18 +181,14 @@ CAlertController::RecycleListView::RecycleListView()
 ECode CAlertController::RecycleListView::constructor(
     /* [in] */ IContext* context)
 {
-    assert(0);
-    return NOERROR;
-    // return ListView::constructor(context);
+    return ListView::constructor(context);
 }
 
 ECode CAlertController::RecycleListView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    assert(0);
-    return NOERROR;
-    // return ListView::constructor(context, attrs);
+    return ListView::constructor(context, attrs);
 }
 
 ECode CAlertController::RecycleListView::constructor(
@@ -200,9 +196,7 @@ ECode CAlertController::RecycleListView::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyleAttr)
 {
-    assert(0);
-    return NOERROR;
-    // return ListView::constructor(context, attrs, defStyleAttr,);
+    return ListView::constructor(context, attrs, defStyleAttr);
 }
 
 ECode CAlertController::RecycleListView::constructor(
@@ -211,9 +205,7 @@ ECode CAlertController::RecycleListView::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    assert(0);
-    return NOERROR;
-    // return ListView::constructor(context, attrs, defStyleAttr, defStyleRes);
+    return ListView::constructor(context, attrs, defStyleAttr, defStyleRes);
 }
 
 Boolean CAlertController::RecycleListView::RecycleOnMeasure()

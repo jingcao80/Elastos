@@ -6,23 +6,23 @@ module
     namespace Media {
 
     interface IIVolumeController {
-        displaySafeVolumeWarning(
+        DisplaySafeVolumeWarning(
             [in] Int32 flags);
 
-        volumeChanged(
+        VolumeChanged(
             [in] Int32 streamType,
             [in] Int32 flags);
 
-        masterVolumeChanged(
+        MasterVolumeChanged(
             [in] Int32 flags);
 
-        masterMuteChanged(
+        MasterMuteChanged(
             [in] Int32 flags);
 
-        setLayoutDirection(
+        SetLayoutDirection(
             [in] Int32 layoutDirection);
 
-        dismiss();
+        Dismiss();
     }
 
     } // namespace Media

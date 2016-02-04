@@ -129,6 +129,9 @@ ECode ServiceWatcher::MyBroadcastReceiver::OnReceive(
 //========================================================================
 // ServiceWatcher
 //========================================================================
+
+CAR_INTERFACE_IMPL(ServiceWatcher, Object, IServiceConnection)
+
 List<HashSet<AutoPtr<ISignature> > > ServiceWatcher::GetSignatureSets(
     /* [in] */ IContext* context,
     /* [in] */ List<String>* initialPackageNames)

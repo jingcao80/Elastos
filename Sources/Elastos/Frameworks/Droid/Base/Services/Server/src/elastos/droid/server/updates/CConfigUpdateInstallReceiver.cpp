@@ -406,7 +406,7 @@ void CConfigUpdateInstallReceiver::WriteUpdate(
 
         AutoPtr<ArrayOf<Byte> > tempBuf;
         StringToByteArray(content, (ArrayOf<Byte>**)&tempBuf);
-        out->WriteBytes(*tempBuf);
+        out->Write(tempBuf);
         // sync to disk
         AutoPtr<IFileDescriptor> fd;
         out->GetFD((IFileDescriptor**)&fd);

@@ -112,6 +112,7 @@ VPATH := $(MAKEDIR)/../elastos/core
 
 SOURCES = Elastos.CoreLibrary.car
 SOURCES += AsynchronousCloseMonitor.cpp
+SOURCES += Symbols.cpp
 
 LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib
 ELASTOS_LIBS += ../elastos/core/elastos.core.lib

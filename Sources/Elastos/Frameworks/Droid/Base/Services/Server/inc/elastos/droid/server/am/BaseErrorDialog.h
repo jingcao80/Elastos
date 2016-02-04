@@ -2,18 +2,12 @@
 #ifndef __ELASTOS_DROID_SERVER_AM_BASEERRORDIALOG_H__
 #define __ELASTOS_DROID_SERVER_AM_BASEERRORDIALOG_H__
 
+#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/app/AlertDialog.h"
-
-
-#include "elastos/droid/os/HandlerBase.h"
-
+#include "elastos/droid/os/Handler.h"
 
 using Elastos::Droid::App::AlertDialog;
-using Elastos::Droid::App::IAlertDialog;
-using Elastos::Droid::Os::HandlerBase;
-using Elastos::Droid::View::IWindowCallback;
-using Elastos::Droid::View::IKeyEventCallback;
-using Elastos::Droid::View::IViewOnCreateContextMenuListener;
+using Elastos::Droid::Os::Handler;
 
 namespace Elastos {
 namespace Droid {
@@ -21,16 +15,10 @@ namespace Server {
 namespace Am {
 
 class BaseErrorDialog
-    : public IAlertDialog
-    , public IWindowCallback
-    , public IKeyEventCallback
-    , public IViewOnCreateContextMenuListener
-    , public IWeakReferenceSource
-    , public Object
-    , public AlertDialog
+    : public AlertDialog
 {
 private:
-    class MyHandler : public HandlerBase
+    class MyHandler : public Handler
     {
     public:
         MyHandler(
@@ -46,32 +34,19 @@ private:
     };
 
 public:
-    IALERTDIALOG_METHODS_DECL();
-
-    IDIALOG_METHODS_DECL();
-
-    IWINDOWCALLBACK_METHODS_DECL();
-
     BaseErrorDialog();
 
     BaseErrorDialog(
         /* [in] */ IContext* context);
 
-    CARAPI_(PInterface) Probe(
-        /* [in]  */ REIID riid);
-
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface *pObject,
-        /* [out] */ InterfaceID *pIID);
-
-    CARAPI_(void) OnStart();
+    CARAPI OnStart();
 
     CARAPI_(Boolean) DispatchKeyEvent(
         /* [in] */ IKeyEvent* event);
+
+    CARAPI DispatchKeyEvent(
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Boolean* result);
 
     CARAPI OnCreateContextMenu(
         /* [in] */ IContextMenu* menu,
@@ -110,6 +85,8 @@ private:
         /* [in] */ Boolean enabled);
 
 private:
+    static const Int32 ENABLE_BUTTONS;
+    static const Int32 DISABLE_BUTTONS;
     Boolean mConsuming;
 
 public:

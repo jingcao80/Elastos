@@ -201,7 +201,7 @@ void SyncQueue::Remove(
     }
     if (!mSyncStorageEngine->DeleteFromPending(operationToRemove->mPendingOperation)) {
         Logger::E(TAG, "unable to find pending row for %s",
-            Object::ToString(operationToRemove).string());
+            TO_CSTR(operationToRemove));
     }
 }
 
@@ -270,7 +270,7 @@ void SyncQueue::Remove(
 
         if (!mSyncStorageEngine->DeleteFromPending(syncOperation->mPendingOperation)) {
             Logger::E(TAG, "unable to find pending row for %s",
-                Object::ToString(syncOperation).string());
+                TO_CSTR(syncOperation));
         }
     }
 }

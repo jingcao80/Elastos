@@ -6,8 +6,7 @@
 #include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::Pm::IPackageLite;
-using Elastos::Droid::Os::Storage::IMountService;
+using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Core::Singleton;
 using Elastos::IO::IFile;
 using Elastos::Utility::Zip::IZipEntry;
@@ -29,7 +28,7 @@ public:
     CAR_SINGLETON_DECL()
 
     CARAPI GetMountService(
-        /* [out] */ IMountService** mountService);
+        /* [out] */ IIMountService** mountService);
 
     CARAPI CreateSdDir(
         /* [in] */ Int64 sizeBytes,
@@ -114,13 +113,13 @@ public:
         /* [out] */ Int32* result);
 
     CARAPI CalculateInstalledSize(
-        /* [in] */ IPackageLite* pkg,
+        /* [in] */ Handle64 pkg,
         /* [in] */ Boolean isForwardLocked,
         /* [in] */ const String& abiOverride,
         /* [out] */ Int64* size);
 
     CARAPI CalculateInstalledSize(
-        /* [in] */ IPackageLite* pkg,
+        /* [in] */ Handle64 pkg,
         /* [in] */ INativeLibraryHelperHandle* handle,
         /* [in] */ Boolean isForwardLocked,
         /* [in] */ const String& abiOverride,

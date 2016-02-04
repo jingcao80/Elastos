@@ -47,7 +47,7 @@ public:
     String mHint;
     Int32 mUserHandle;
     Boolean mHaveResult;
-    AutoPtr<IBundle> result;
+    AutoPtr<IBundle> mResult;
 };
 
 } // namespace Am

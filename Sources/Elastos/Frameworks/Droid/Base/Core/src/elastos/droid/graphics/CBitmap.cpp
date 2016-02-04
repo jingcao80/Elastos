@@ -1162,7 +1162,7 @@ ECode CBitmap::SetPixels(
 }
 
 ECode CBitmap::GetNativeBitmap(
-    /* [out] */ Handle32* bitmap)
+    /* [out] */ Handle64* bitmap)
 {
     VALIDATE_NOT_NULL(bitmap);
     *bitmap = mNativeBitmap;

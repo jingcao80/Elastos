@@ -121,7 +121,6 @@ ECode SelectPopupDialog::InnerDialogInterfaceOnCancelListener::OnCancel(
 static AutoPtr< ArrayOf<Int32> > SELECT_DIALOG_ATTRS_Init()
 {
     AutoPtr< ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(2);
-    assert(0);
     // TODO
     // (*array)[0] = R::attr::select_dialog_multichoice;
     // (*array)[1] = R::attr::select_dialog_singlechoice;

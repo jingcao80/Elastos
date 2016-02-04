@@ -119,6 +119,7 @@ ECode AudioPortEventHandler::EventHandler::HandleMessage(
     default:
         break;
     }
+    return NOERROR;
 }
 
 AudioPortEventHandler::AudioPortEventHandler(

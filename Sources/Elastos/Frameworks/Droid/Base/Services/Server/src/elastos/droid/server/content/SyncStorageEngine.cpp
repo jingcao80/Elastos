@@ -1932,7 +1932,7 @@ AutoPtr<AuthorityInfo> SyncStorageEngine::GetAuthorityLocked(
     }
 
     Logger::E(TAG, "%s Authority : %s, invalid target",
-        tag.string(), Object::ToString(info).string());
+        tag.string(), TO_CSTR(info));
     return NULL;
 }
 

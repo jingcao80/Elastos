@@ -1,33 +1,30 @@
 
 #include "elastos/droid/server/am/CompatModeDialog.h"
 #include "elastos/droid/R.h"
+#include "elastos/core/AutoLock.h"
 
+using Elastos::Droid::App::IActivityManager;
+using Elastos::Droid::Content::Pm::IPackageInfo;
 using Elastos::Droid::R;
-using Elastos::Droid::App::EIID_IDialog;
 using Elastos::Droid::View::IGravity;
-using Elastos::Droid::View::EIID_IWindowCallback;
-using Elastos::Droid::View::EIID_IKeyEventCallback;
-using Elastos::Droid::View::EIID_IViewOnCreateContextMenuListener;
 using Elastos::Droid::Widget::ICheckable;
 using Elastos::Droid::Widget::EIID_ICompoundButtonOnCheckedChangeListener;
-using Elastos::Droid::Content::EIID_IDialogInterface;
+using Elastos::Core::AutoLock;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Am {
 
-IDIALOG_METHODS_IMPL(CompatModeDialog, Dialog);
-
-IWINDOWCALLBACK_METHODS_IMPL(CompatModeDialog, Dialog);
+CAR_INTERFACE_IMPL(CompatModeDialog::CompatEnabledListener, Object, ICompoundButtonOnCheckedChangeListener)
 
 ECode CompatModeDialog::CompatEnabledListener::OnCheckedChanged(
     /* [in] */ ICompoundButton* buttonView,
     /* [in] */ Boolean isChecked)
 {
-    AutoLock lock(mHost->mService->mLock);
+    AutoLock lock(mHost->mService);
     String appInfoPkgName;
-    mHost->mAppInfo->GetPackageName(&appInfoPkgName);
+    IPackageInfo::Probe(mHost->mAppInfo)->GetPackageName(&appInfoPkgName);
     Boolean checked;
     ICheckable::Probe(mHost->mCompatEnabled)->IsChecked(&checked);
     mHost->mService->mCompatModePackages->SetPackageScreenCompatModeLocked(
@@ -38,15 +35,15 @@ ECode CompatModeDialog::CompatEnabledListener::OnCheckedChanged(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CompatModeDialog::CompatEnabledListener, ICompoundButtonOnCheckedChangeListener);
+CAR_INTERFACE_IMPL(CompatModeDialog::AlwaysShowListener, Object, ICompoundButtonOnCheckedChangeListener)
 
 ECode CompatModeDialog::AlwaysShowListener::OnCheckedChanged(
     /* [in] */ ICompoundButton* buttonView,
     /* [in] */ Boolean isChecked)
 {
-    AutoLock lock(mHost->mService->mLock);
+    AutoLock lock(mHost->mService);
     String appInfoPkgName;
-    mHost->mAppInfo->GetPackageName(&appInfoPkgName);
+    IPackageInfo::Probe(mHost->mAppInfo)->GetPackageName(&appInfoPkgName);
     Boolean checked;
     ICheckable::Probe(mHost->mAlwaysShow)->IsChecked(&checked);
     mHost->mService->mCompatModePackages->SetPackageAskCompatModeLocked(
@@ -55,96 +52,38 @@ ECode CompatModeDialog::AlwaysShowListener::OnCheckedChanged(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CompatModeDialog::AlwaysShowListener, ICompoundButtonOnCheckedChangeListener);
-
-
 CompatModeDialog::CompatModeDialog(
     /* [in] */ CActivityManagerService* service,
     /* [in] */ IContext* context,
     /* [in] */ IApplicationInfo* appInfo)
-    : Dialog(context, R::style::Theme_Holo_Dialog_MinWidth)
-    , mService(service)
+    : mService(service)
     , mAppInfo(appInfo)
 {
+    Dialog::constructor(context, R::style::Theme_Holo_Dialog_MinWidth);
     SetCancelable(TRUE);
     SetCanceledOnTouchOutside(TRUE);
     Boolean hasFeature;
-    Dialog::GetWindow()->RequestFeature(IWindow::FEATURE_NO_TITLE, &hasFeature);
-    Dialog::GetWindow()->SetType(IWindowManagerLayoutParams::TYPE_PHONE);
-    Dialog::GetWindow()->SetGravity(IGravity::BOTTOM | IGravity::CENTER_HORIZONTAL);
+    AutoPtr<IWindow> window;
+    Dialog::GetWindow((IWindow**)&window);
+    window->RequestFeature(IWindow::FEATURE_NO_TITLE, &hasFeature);
+    window->SetType(IWindowManagerLayoutParams::TYPE_PHONE);
+    window->SetGravity(IGravity::BOTTOM | IGravity::CENTER_HORIZONTAL);
 
     SetContentView(R::layout::am_compat_mode_dialog);
-    AutoPtr<IView> view = Dialog::FindViewById(R::id::compat_checkbox);
+    AutoPtr<IView> view;
+    Dialog::FindViewById(R::id::compat_checkbox, (IView**)&view);
     mCompatEnabled = ISwitch::Probe(view);
     AutoPtr<ICompoundButtonOnCheckedChangeListener> enabledListener = new CompatEnabledListener(this);
-    mCompatEnabled->SetOnCheckedChangeListener(enabledListener);
+    ICompoundButton::Probe(mCompatEnabled)->SetOnCheckedChangeListener(enabledListener);
 
-    view = Dialog::FindViewById(R::id::ask_checkbox);
+    view = NULL;
+    Dialog::FindViewById(R::id::ask_checkbox, (IView**)&view);
     mAlwaysShow = ICheckBox::Probe(view);
     AutoPtr<ICompoundButtonOnCheckedChangeListener> showListener = new AlwaysShowListener(this);
-    mAlwaysShow->SetOnCheckedChangeListener(showListener);
-    mHint = Dialog::FindViewById(R::id::reask_hint);
+    ICompoundButton::Probe(mAlwaysShow)->SetOnCheckedChangeListener(showListener);
+    Dialog::FindViewById(R::id::reask_hint, (IView**)&mHint);
 
     UpdateControls();
-}
-
-PInterface CompatModeDialog::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IDialog) {
-        return (PInterface)(IDialog*)this;
-    }
-    else if (riid == EIID_IDialogInterface) {
-        return (PInterface)(IDialogInterface*)this;
-    }
-    else if (riid == EIID_IWindowCallback) {
-        return (PInterface)(IWindowCallback*)this;
-    }
-    if (riid == EIID_IKeyEventCallback) {
-        return (PInterface)(IKeyEventCallback*)this;
-    }
-    else if (riid == EIID_IViewOnCreateContextMenuListener) {
-       return (PInterface)(IViewOnCreateContextMenuListener*)this;
-    }
-
-    return NULL;
-}
-
-UInt32 CompatModeDialog::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 CompatModeDialog::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode CompatModeDialog::GetInterfaceID(
-    /* [in] */ IInterface *object,
-    /* [out] */ InterfaceID *iid)
-{
-    VALIDATE_NOT_NULL(iid);
-    if (object == (IInterface*)(IDialog *)this) {
-        *iid = EIID_IDialog;
-    }
-    else if (object == (IInterface*)(IDialogInterface *)this) {
-        *iid = EIID_IDialogInterface;
-    }
-    else if (object == (IInterface*)(IWindowCallback *)this) {
-        *iid = EIID_IWindowCallback;
-    }
-    else if (object == (IInterface*)(IKeyEventCallback *)this) {
-        *iid = EIID_IKeyEventCallback;
-    }
-    else if (object == (IInterface*)(IViewOnCreateContextMenuListener *)this) {
-        *iid = EIID_IViewOnCreateContextMenuListener;
-    }
-    else {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-    return NOERROR;
-
 }
 
 ECode CompatModeDialog::OnKeyDown(
@@ -153,7 +92,7 @@ ECode CompatModeDialog::OnKeyDown(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = Dialog::OnKeyDown(keyCode, event);
+    Dialog::OnKeyDown(keyCode, event, result);
     return NOERROR;
 }
 
@@ -163,7 +102,7 @@ ECode CompatModeDialog::OnKeyLongPress(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = Dialog::OnKeyLongPress(keyCode, event);
+    Dialog::OnKeyLongPress(keyCode, event, result);
     return NOERROR;
 }
 
@@ -173,7 +112,7 @@ ECode CompatModeDialog::OnKeyUp(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = Dialog::OnKeyUp(keyCode, event);
+    Dialog::OnKeyUp(keyCode, event, result);
     return NOERROR;
 }
 
@@ -184,7 +123,7 @@ ECode CompatModeDialog::OnKeyMultiple(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = Dialog::OnKeyMultiple(keyCode, count, event);
+    Dialog::OnKeyMultiple(keyCode, count, event, result);
     return NOERROR;
 }
 
@@ -198,11 +137,11 @@ ECode CompatModeDialog::OnCreateContextMenu(
 
 void CompatModeDialog::UpdateControls()
 {
-    AutoLock lock(mService->mLock);
+    AutoLock lock(mService);
     Int32 mode = mService->mCompatModePackages->ComputeCompatModeLocked(mAppInfo);
     ICheckable::Probe(mCompatEnabled)->SetChecked(mode == IActivityManager::COMPAT_MODE_ENABLED);
     String appInfoPkgName;
-    mAppInfo->GetPackageName(&appInfoPkgName);
+    IPackageInfo::Probe(mAppInfo)->GetPackageName(&appInfoPkgName);
     Boolean ask = mService->mCompatModePackages->GetPackageAskCompatModeLocked(appInfoPkgName);
     ICheckable::Probe(mAlwaysShow)->SetChecked(ask);
     mHint->SetVisibility(ask ? IView::INVISIBLE : IView::VISIBLE);

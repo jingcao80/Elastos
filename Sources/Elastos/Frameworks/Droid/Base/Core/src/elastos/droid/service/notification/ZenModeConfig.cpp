@@ -958,6 +958,205 @@ Boolean ZenModeConfig::IsValidDowntimeConditionId(
     return info != NULL;
 }
 
+ECode ZenModeConfig::GetAllowCalls(
+    /* [out] */ Boolean* allowCalls)
+{
+    VALIDATE_NOT_NULL(allowCalls);
+    *allowCalls = mAllowCalls;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetAllowCalls(
+    /* [in] */ Boolean allowCalls)
+{
+    mAllowCalls = allowCalls;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetAllowMessages(
+    /* [out] */ Boolean* allowMessages)
+{
+    VALIDATE_NOT_NULL(allowMessages);
+    *allowMessages = mAllowMessages;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetAllowMessages(
+    /* [in] */ Boolean allowMessages)
+{
+    mAllowMessages = allowMessages;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetAllowEvents(
+    /* [out] */ Boolean* allowEvents)
+{
+    VALIDATE_NOT_NULL(allowEvents);
+    *allowEvents = mAllowEvents;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetAllowEvents(
+    /* [in] */ Boolean allowEvents)
+{
+    mAllowEvents = allowEvents;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetAllowFrom(
+    /* [out] */ Int32* allowFrom)
+{
+    VALIDATE_NOT_NULL(allowFrom);
+    *allowFrom = mAllowFrom;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetAllowFrom(
+    /* [in] */ Int32 allowFrom)
+{
+    mAllowFrom = allowFrom;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetSleepMode(
+    /* [out] */ String* sleepMode)
+{
+    VALIDATE_NOT_NULL(sleepMode)
+    *sleepMode = mSleepMode;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetSleepMode(
+    /* [in] */ const String& sleepMode)
+{
+    mSleepMode = sleepMode;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetSleepStartHour(
+    /* [out] */ Int32* sleepStartHour)
+{
+    VALIDATE_NOT_NULL(sleepStartHour);
+    *sleepStartHour = mSleepStartHour;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetSleepStartHour(
+    /* [in] */ Int32 sleepStartHour)
+{
+    mSleepStartHour = sleepStartHour;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetSleepStartMinute(
+    /* [out] */ Int32* sleepStartMinute)
+{
+    VALIDATE_NOT_NULL(sleepStartMinute);
+    *sleepStartMinute = mSleepStartMinute;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetSleepStartMinute(
+    /* [in] */ Int32 sleepStartMinute)
+{
+    mSleepStartMinute = sleepStartMinute;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetSleepEndHour(
+    /* [out] */ Int32* sleepEndHour)
+{
+    VALIDATE_NOT_NULL(sleepEndHour);
+    *sleepEndHour = mSleepEndHour;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetSleepEndHour(
+    /* [in] */ Int32 sleepEndHour)
+{
+    mSleepEndHour = sleepEndHour;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetSleepEndMinute(
+    /* [out] */ Int32* sleepEndMinute)
+{
+    VALIDATE_NOT_NULL(sleepEndMinute);
+    *sleepEndMinute = mSleepEndMinute;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetSleepEndMinute(
+    /* [in] */ Int32 sleepEndMinute)
+{
+    mSleepEndMinute = sleepEndMinute;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetConditionComponents(
+    /* [out, callee] */ ArrayOf<IComponentName*>** conditionComponents)
+{
+    VALIDATE_NOT_NULL(conditionComponents)
+    *conditionComponents = mConditionComponents;
+    REFCOUNT_ADD(*conditionComponents);
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetConditionComponents(
+    /* [in] */ ArrayOf<IComponentName*>* conditionComponents)
+{
+    mConditionComponents = conditionComponents;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetConditionIds(
+    /* [out, callee] */ ArrayOf<IUri*>** conditionIds)
+{
+    VALIDATE_NOT_NULL(conditionIds);
+    *conditionIds = mConditionIds;
+    REFCOUNT_ADD(*conditionIds);
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetConditionIds(
+    /* [in] */ ArrayOf<IUri*>* conditionIds)
+{
+    mConditionIds = conditionIds;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetExitCondition(
+    /* [out] */ ICondition** exitCondition)
+{
+    VALIDATE_NOT_NULL(exitCondition);
+    *exitCondition = mExitCondition;
+    REFCOUNT_ADD(*exitCondition);
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetExitCondition(
+    /* [in] */ ICondition* exitCondition)
+{
+    mExitCondition = exitCondition;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::GetExitConditionComponent(
+    /* [out] */ IComponentName** exitConditionComponent)
+{
+    VALIDATE_NOT_NULL(exitConditionComponent);
+    *exitConditionComponent = mExitConditionComponent;
+    REFCOUNT_ADD(*exitConditionComponent);
+    return NOERROR;
+}
+
+ECode ZenModeConfig::SetExitConditionComponent(
+    /* [in] */ IComponentName* exitConditionComponent)
+{
+    mExitConditionComponent = exitConditionComponent;
+    return NOERROR;
+}
+
 ECode ZenModeConfig::GetALL_DAYS(
     /* [out, callee] */ ArrayOf<Int32>** days)
 {
@@ -1027,6 +1226,66 @@ ECode ZenModeConfig::DowntimeInfo::Equals(
             && mStartMinute == other->mStartMinute
             && mEndHour == other->mEndHour
             && mEndMinute == other->mEndMinute;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::DowntimeInfo::GetStartHour(
+    /* [out] */ Int32* startHour)
+{
+    VALIDATE_NOT_NULL(startHour);
+    *startHour = mStartHour;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::DowntimeInfo::SetStartHour(
+    /* [in] */ Int32 startHour)
+{
+    mStartHour = startHour;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::DowntimeInfo::GetStartMinute(
+    /* [out] */ Int32* startMinute)
+{
+    VALIDATE_NOT_NULL(startMinute);
+    *startMinute = mStartMinute;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::DowntimeInfo::SetStartMinute(
+    /* [in] */ Int32 startMinute)
+{
+    mStartMinute = startMinute;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::DowntimeInfo::GetEndHour(
+    /* [out] */ Int32* endHour)
+{
+    VALIDATE_NOT_NULL(endHour);
+    *endHour = mEndHour;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::DowntimeInfo::SetEndHour(
+    /* [in] */ Int32 endHour)
+{
+    mEndHour = endHour;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::DowntimeInfo::GetEndMinute(
+    /* [out] */ Int32* endMinute)
+{
+    VALIDATE_NOT_NULL(endMinute);
+    *endMinute = mEndMinute;
+    return NOERROR;
+}
+
+ECode ZenModeConfig::DowntimeInfo::SetEndMinute(
+    /* [in] */ Int32 endMinute)
+{
+    mEndMinute = endMinute;
     return NOERROR;
 }
 

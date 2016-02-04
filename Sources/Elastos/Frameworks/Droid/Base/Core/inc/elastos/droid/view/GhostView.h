@@ -48,8 +48,6 @@ public:
     static CARAPI_(AutoPtr<IGhostView>) GetGhost(
         /* [in] */ IView* view);
 
-
-
 protected:
     CARAPI_(void) OnDraw(
         /* [in] */ ICanvas* canvas);
@@ -57,7 +55,6 @@ protected:
     CARAPI OnDetachedFromWindow();
 
 private:
-
     CARAPI_(void) SetGhostedVisibility(
         /* [in] */ Int32 visibility);
 

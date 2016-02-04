@@ -33,7 +33,7 @@ CAR_INTERFACE_IMPL_2(NetworkTemplate, Object, IParcelable, INetworkTemplate)
 
 Boolean NetworkTemplate::sForceAllNetworkTypes = FALSE;
 
-const AutoPtr<ArrayOf<Int32> > NetworkTemplate::DATA_USAGE_NETWORK_TYPES = CreateDataUsageNetworkTypes();
+INIT_PROI_6 const AutoPtr<ArrayOf<Int32> > NetworkTemplate::DATA_USAGE_NETWORK_TYPES = CreateDataUsageNetworkTypes();
 
 AutoPtr<ArrayOf<Int32> > NetworkTemplate::CreateDataUsageNetworkTypes()
 {

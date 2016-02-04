@@ -1,6 +1,7 @@
 
 #include "CDummy.h"
 
+CAR_INTERFACE_IMPL(CDummy, Object, IConstsDef)
 
 ECode CDummy::Read()
 {

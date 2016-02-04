@@ -172,6 +172,9 @@ module
     merge("media/VolumeProvider.car");
     merge("media/WebVttRenderer.car");
 
+    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.App.IPendingIntentOnFinished;
     interface Elastos.Droid.Content.IComponentName;
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Content.IIContentProvider;
@@ -192,6 +195,7 @@ module
     interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.ILooper;
     interface Elastos.Droid.Os.IUserHandle;
     interface Elastos.Droid.Os.Storage.IStorageVolume;
     interface Elastos.Droid.Utility.IAttributeSet;
@@ -212,453 +216,6 @@ module
     interface Elastos.Utility.IList;
     interface Elastos.Utility.IMap;
     interface Elastos.Utility.IUUID;
-
-//        // media/media/AudioManager
-//        [local]
-//        class CAudioManager {
-//            constructor(
-//                [in] IContext* ctx);
-//
-//            interface IAudioManager;
-//        }
-//
-//        singleton class CAudioManagerHelper{
-//            interface IAudioManagerHelper;
-//        }
-//
-//        // media/media/AudioRecord
-//        class CAudioRecord {
-//            constructor(
-//                [in] Int32 audioSource,
-//                [in] Int32 sampleRateInHz,
-//                [in] Int32 channelConfig,
-//                [in] Int32 audioFormat,
-//                [in] Int32 bufferSizeInBytes);
-//
-//            interface IAudioRecord;
-//        }
-//
-//        singleton class CAudioRecordHelper {
-//            interface IAudioRecordHelper;
-//        }
-//
-//        // media/media/AudioRoutesInfo
-//        class CAudioRoutesInfo{
-//            constructor();
-//
-//            constructor(
-//                [in] IAudioRoutesInfo* o);
-//
-//            interface IAudioRoutesInfo;
-//            interface IParcelable;
-//        }
-//
-//        // media/media/AudioService
-//        [local]
-//        class CAudioService {
-//            constructor(
-//                [in] IContext* ctx);
-//
-//            interface IAudioService;
-//            interface IPendingIntentOnFinished;
-//        }
-//
-//        singleton class CAudioServiceHelper{
-//            interface IAudioServiceHelper;
-//        }
-//
-//        // media/media/AudioSystem
-//        class CAudioSystem {
-//            interface IAudioSystem;
-//        }
-//
-//        singleton class CAudioSystemHelper {
-//            interface IAudioSystemHelper;
-//        }
-//
-//        // media/media/AudioTrack
-//        class CAudioTrack {
-//            constructor(
-//                [in] Int32 streamType,
-//                [in] Int32 sampleRateInHz,
-//                [in] Int32 channelConfig,
-//                [in] Int32 audioFormat,
-//                [in] Int32 bufferSizeInBytes,
-//                [in] Int32 mode);
-//
-//            constructor(
-//                [in] Int32 streamType,
-//                [in] Int32 sampleRateInHz,
-//                [in] Int32 channelConfig,
-//                [in] Int32 audioFormat,
-//                [in] Int32 bufferSizeInBytes,
-//                [in] Int32 mode,
-//                [in] Int32 sessionId);
-//
-//            interface IAudioTrack;
-//        }
-//
-//        singleton class CAudioTrackHelper {
-//            interface IAudioTrackHelper;
-//        }
-//
-//        // media/media/CamcorderProfile
-//        class CCamcorderProfile {
-//            constructor(
-//                [in] Int32 duration,
-//                [in] Int32 quality,
-//                [in] Int32 fileFormat,
-//                [in] Int32 videoCodec,
-//                [in] Int32 videoBitRate,
-//                [in] Int32 videoFrameRate,
-//                [in] Int32 videoWidth,
-//                [in] Int32 videoHeight,
-//                [in] Int32 audioCodec,
-//                [in] Int32 audioBitRate,
-//                [in] Int32 audioSampleRate,
-//                [in] Int32 audioChannels);
-//
-//            interface ICamcorderProfile;
-//        }
-//
-//        singleton class CCamcorderProfileHelper {
-//            interface ICamcorderProfileHelper;
-//        }
-//
-//        singleton class CCameraProfileHelper {
-//            interface ICameraProfileHelper;
-//        }
-//
-//        // media/media/DecoderCapabilities
-//        class CDecoderCapabilities {
-//            constructor();
-//
-//            interface IDecoderCapabilities;
-//        }
-//
-//        singleton class CDecoderCapabilitiesHelper {
-//            interface IDecoderCapabilitiesHelper;
-//        }
-//
-//        // media/media/EncoderCapabilities
-//        class CEncoderCapabilities {
-//            constructor();
-//
-//            interface IEncoderCapabilities;
-//        }
-//
-//        singleton class CEncoderCapabilitiesHelper {
-//            interface IEncoderCapabilitiesHelper;
-//        }
-//
-//        // media/media/ExifInterface
-//        class CExifInterface {
-//            constructor(
-//                [in] String fileName);
-//
-//            interface IExifInterface;
-//        }
-//
-//        class CFace {
-//            interface IFace;
-//        }
-//
-//        class CFaceDetector {
-//            constructor(
-//                [in] Int32 width,
-//                [in] Int32 height,
-//                [in] Int32 maxFaces);
-//
-//            interface IFaceDetector;
-//        }
-//
-//        class CJetPlayer {
-//            constructor();
-//
-//            interface IJetPlayer;
-//        }
-//
-//        singleton class CJetPlayerHelper {
-//            interface IJetPlayerHelper;
-//        }
-//
-//        class CMediaActionSound {
-//            constructor();
-//            interface IMediaActionSound;
-//        }
-//
-//        // media/media/TrackInfoVendor
-//        [deprecated]
-//        class CTrackInfoVendor {
-//            constructor(
-//                [in] ArrayOf<Byte>* name,
-//                [in] String charset);
-//
-//            interface ITrackInfoVendor;
-//        }
-//
-//        // media/media/SubInfo
-//        [deprecated]
-//        class CMediaPlayerSubInfo {
-//            constructor(
-//                [in] ArrayOf<Byte>* name,
-//                [in] String charset,
-//                [in] Int32 type);
-//
-//            interface IMediaPlayerSubInfo;
-//        }
-//
-//        class CMediaPlayer {
-//            constructor();
-//
-//            interface IMediaPlayer;
-//        }
-//
-//        singleton class CMediaPlayerHelper {
-//            interface IMediaPlayerHelper;
-//        }
-//
-//        // media/media/MediaPlayer.TrackInfo
-//        class CMediaPlayerTrackInfo {
-//            constructor();
-//
-//            interface IMediaPlayerTrackInfo;
-//            interface IParcelable;
-//        }
-//
-//        // media/media/MediaRecorder
-//        class CMediaRecorder {
-//            constructor();
-//
-//            interface IMediaRecorder;
-//        }
-//
-//        singleton class CMediaRecorderHelper {
-//            interface IMediaRecorderHelper;
-//        }
-//
-//        // media/media/MediaRouter
-//        [local]
-//        class CMediaRouter {
-//            constructor(
-//                [in] IContext* ctx);
-//
-//            interface IMediaRouter;
-//        }
-//
-//        [local]
-//        class CMediaRouteInfo {
-//            constructor(
-//                [in] IRouteCategory* category);
-//
-//            interface IRouteInfo;
-//        }
-//
-//        class CRouteCategory {
-//            constructor(
-//                [in] ICharSequence* name,
-//                [in] Int32 types,
-//                [in] Boolean groupable);
-//
-//            constructor(
-//                [in] Int32 nameResId,
-//                [in] Int32 types,
-//                [in] Boolean groupable);
-//
-//            interface IRouteCategory;
-//        }
-//
-//        [local]
-//        class CUserRouteInfo {
-//            constructor(
-//                [in] IRouteCategory* category);
-//
-//            interface IUserRouteInfo;
-//        }
-//
-//        [local]
-//        class CRouteGroup {
-//            constructor(
-//                [in] IRouteCategory* category);
-//
-//            interface IRouteGroup;
-//        }
-//
-//        // media/media/MediaScanner
-//        [local]
-//        class CMediaScanner {
-//            constructor(
-//                [in] IContext* c);
-//
-//            interface IMediaScanner;
-//        }
-//
-//        singleton class CMediaScannerHelper {
-//            interface IMediaScannerHelper;
-//        }
-//
-////      class CMediaScannerClient {
-////          interface IMediaScannerClient;
-////      }
-//
-//        // media/media/RemoteControlClient
-//        class CRemoteControlClient {
-//            constructor(
-//                [in] IPendingIntent* mediaButtonIntent);
-//
-//            constructor(
-//                [in] IPendingIntent* mediaButtonIntent,
-//                [in] ILooper* looper);
-//
-//            interface IRemoteControlClient;
-//        }
-//
-//        [local]
-//        class CRingtone {
-//            constructor(
-//                [in] IContext* ctx,
-//                [in] Boolean allowRemote);
-//
-//            interface IRingtone;
-//        }
-//
-//        // media/media/RingtoneManager
-//        [local]
-//        class CRingtoneManager {
-//            constructor(
-//                [in] IActivity* activity);
-//
-//            constructor(
-//                [in] IContext* ctx);
-//
-//            interface IRingtoneManager;
-//        }
-//
-//        singleton class CRingtoneManagerHelper {
-//            interface IRingtoneManagerHelper;
-//        }
-//
-//        // media/media/SoundPool
-//        class CSoundPool {
-//            constructor(
-//                [in] Int32 maxStreams,
-//                [in] Int32 streamType,
-//                [in] Int32 srcQuality);
-//
-//            interface ISoundPool;
-//        }
-//
-//
-//        // media/media/TimeText
-//        class CTimedText {
-//            constructor(
-//                [in] IParcel* parcel);
-//
-//            interface ITimedText;
-//        }
-//
-//
-//        class CMediaCodec {
-//            constructor(
-//                [in] String name,
-//                [in] Boolean nameIsType,
-//                [in] Boolean encoder);
-//
-//            interface IMediaCodec;
-//        }
-//
-//        singleton class CMediaCodecHelper {
-//
-//            interface IMediaCodecHelper;
-//        }
-//
-//        class CMediaCodecCryptoInfo {
-//            interface IMediaCodecCryptoInfo;
-//        }
-//
-//        class CMediaCodecBufferInfo {
-//            interface IMediaCodecBufferInfo;
-//        }
-//
-//        class CMediaCodecInfo {
-//            constructor(
-//                [in] Int32 index);
-//
-//            interface IMediaCodecInfo;
-//        }
-//
-//        class CCodecCapabilities {
-//            interface ICodecCapabilities;
-//        }
-//
-//        class CCodecProfileLevel {
-//            interface ICodecProfileLevel;
-//        }
-//
-//        singleton class CMediaCodecList {
-//            interface IMediaCodecList;
-//        }
-//
-//        [deprecated]
-//        class CMediaCrypto {
-//            constructor(
-//                [in] IUUID* uuid,
-//                [in] ArrayOf<Byte>* initData);
-//
-//            interface IMediaCrypto;
-//        }
-//
-//        singleton class CMediaCryptoHelper {
-//            interface IMediaCryptoHelper;
-//        }
-//
-//        class CMediaExtractor {
-//            constructor();
-//
-//            interface IMediaExtractor;
-//        }
-//
-//        // media/media/MediaFile
-//        singleton class CMediaFile {
-//            interface IMediaFile;
-//        }
-//
-//        class CMediaFileType {
-//            constructor(
-//                [in] Int32 fileType,
-//                [in] String mimeType);
-//
-//            interface IMediaFileType;
-//        }
-//
-//        // media/media/MediaFormat
-//        class CMediaFormat {
-//            constructor();
-//
-//            constructor(
-//                [in] IObjectStringMap* inputmap);
-//
-//            interface IMediaFormat;
-//        }
-//
-//        singleton class CMediaFormatHelper {
-//            interface IMediaFormatHelper;
-//        }
-//
-//        // media/media/MediaInserter
-//        class CMediaInserter {
-//            constructor(
-//                [in] IIContentProvider* provider,
-//                [in] Int32 bufferSizePerUri);
-//
-//            interface IMediaInserter;
-//        }
-//
-//        class CMediaMetadataRetriever {
-//            constructor();
-//
-//            interface IMediaMetadataRetriever;
-//        }
 
     namespace Elastos {
     namespace Droid {
@@ -896,6 +453,20 @@ module
         interface IAudioRoutesInfo;
     }
 
+    class CAudioService {
+        constructor();
+
+        constructor(
+            [in] IContext* context);
+
+        interface IAudioService;
+        interface IIAudioService;
+    }
+
+    singleton class CAudioServiceHelper {
+        interface IAudioServiceHelper;
+    }
+
     singleton class CAudioSystem {
         interface IAudioSystem;
     }
@@ -1000,6 +571,20 @@ module
             [in] Int32 maxFaces);
 
         interface IFaceDetector;
+    }
+
+    class CFocusRequester {
+        constructor(
+            [in] Int32 streamType,
+            [in] Int32 focusRequest,
+            [in] IIAudioFocusDispatcher* afl,
+            [in] IBinder* source,
+            [in] String id,
+            [in] IProxyDeathRecipient* hdlr,
+            [in] String pn,
+            [in] Int32 uid);
+
+        interface IFocusRequester;
     }
 
     class CImageReader {
@@ -1214,6 +799,16 @@ module
             [in] String mimeType);
 
         interface IMediaFileType;
+    }
+
+    class CMediaFocusControl {
+        constructor(
+            [in] ILooper* looper,
+            [in] IContext* cntxt,
+            [in] IAudioServiceVolumeController* volumeCtrl,
+            [in] IAudioService* as);
+
+        interface IPendingIntentOnFinished;
     }
 
     class CMediaFormat {
@@ -1617,19 +1212,73 @@ module
         interface IMediaScannerConnectionHelper;
     }
 
-    //class CRemoteDisplay {
+    class CRemoteDisplay {
 
-        //constructor(
-        //    [in] IRemoteDisplayListener* listener,
-        //    [in] IHandler* handler);
+        constructor(
+            [in] IRemoteDisplayListener* listener,
+            [in] IHandler* handler);
 
-      //  interface IRemoteDisplay;
-    //}
+        interface IRemoteDisplay;
+    }
 
-    //singleton class CRemoteDisplayHelper {
+    singleton class CRemoteDisplayHelper {
 
-      //  interface IRemoteDisplayHelper;
-    //}
+        interface IRemoteDisplayHelper;
+    }
+
+    singleton class CRatingHelper {
+        interface IRatingHelper;
+    }
+
+    [local]
+    class CRingtoneManager {
+        constructor(
+            [in] IActivity* activity);
+
+        constructor(
+            [in] IContext* ctx);
+
+        interface IRingtoneManager;
+    }
+
+    singleton class CRingtoneManagerHelper {
+        interface IRingtoneManagerHelper;
+    }
+
+    [local]
+    class CRingtone {
+        constructor(
+            [in] IContext* ctx,
+            [in] Boolean allowRemote);
+
+        interface IRingtone;
+    }
+
+    class CTimedText {
+        constructor(
+            [in] IParcel* parcel);
+
+        interface ITimedText;
+    }
+
+    class CRemoteControlClient {
+        constructor(
+            [in] IPendingIntent* mediaButtonIntent);
+
+        constructor(
+            [in] IPendingIntent* mediaButtonIntent,
+            [in] ILooper* looper);
+
+        interface IRemoteControlClient;
+    }
+
+    class CTtmlRenderer {
+        constructor(
+            [in] IContext* context);
+
+        interface ISubtitleControllerRenderer;
+        interface ITtmlRenderer;
+    }
 
     } // namespace media
     } // namepsace Droid

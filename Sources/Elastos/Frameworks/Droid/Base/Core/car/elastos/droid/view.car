@@ -26,6 +26,7 @@ module
     merge("view/HardwareCanvas.car");
     merge("view/HardwareLayer.car");
     merge("view/IApplicationToken.car");
+    merge("view/IAssetAtlas.car");
     merge("view/IInputFilter.car");
     merge("view/IInputFilterHost.car");
     merge("view/IOnKeyguardExitResult.car");
@@ -230,12 +231,12 @@ module
     interface Elastos.Droid.Graphics.ISurfaceTexture;
     interface Elastos.Droid.Graphics.ICanvasProperty;
     interface Elastos.Droid.Animation.IAnimator;
-    interface Elastos.Droid.View.Internal.TextService.IISpellCheckerSessionListener;
-    interface Elastos.Droid.View.Internal.TextService.IITextServicesSessionListener;
-    interface Elastos.Droid.View.Internal.TextService.IITextServicesManager;
+    interface Elastos.Droid.Internal.TextService.IISpellCheckerSessionListener;
+    interface Elastos.Droid.Internal.TextService.IITextServicesSessionListener;
+    interface Elastos.Droid.Internal.TextService.IITextServicesManager;
     interface Elastos.Droid.Content.IContextWrapper;
 
-    // interface Elastos.Droid.View.Accessibility.IIAccessibilityInteractionConnection;
+    interface Elastos.Droid.View.Accessibility.IIAccessibilityInteractionConnection;
     // interface Elastos.Droid.View.Accessibility.IAccessibilityManager;
     // interface Elastos.Droid.View.InputMethod.ICorrectionInfo;
     interface Elastos.Droid.Utility.IAttributeSet;
@@ -795,9 +796,9 @@ module
         interface IFocusFinderHelper;
     }
 
-    //     singleton class CDragEventHelper {
-    //         interface IDragEventHelper;
-    //     }
+    singleton class CDragEventHelper {
+        interface IDragEventHelper;
+    }
 
     [local]
     class CViewConfiguration {
@@ -890,12 +891,12 @@ module
         interface IViewPropertyAnimator;
     }
 
-    //     class CAccessibilityInteractionConnection {
-    //         constructor(
-    //             [in] Handle32 viewRootImpl);
+    class CAccessibilityInteractionConnection {
+        constructor(
+            [in] IWeakReference* viewRootImpl);
 
-    //         interface IIAccessibilityInteractionConnection;
-    //     }
+        interface IIAccessibilityInteractionConnection;
+    }
 
     [local]
     class CAccessibilityInteractionController {
@@ -1272,9 +1273,9 @@ module
         interface IScaleGestureDetectorOnScaleGestureListener;
     }
 
-    // singleton class CVelocityTrackerHelper {
-    //     interface IVelocityTrackerHelper;
-    // }
+    singleton class CVelocityTrackerHelper {
+        interface IVelocityTrackerHelper;
+    }
 
     // singleton class CWindowManagerPolicyThread {
     //     interface IWindowManagerPolicyThread;
@@ -1357,6 +1358,10 @@ module
 
         interface IMagnificationSpec;
         interface IParcelable;
+    }
+
+    singleton class CMagnificationSpecHelper {
+        interface IMagnificationSpecHelper;
     }
 
     class CViewTreeObserver {

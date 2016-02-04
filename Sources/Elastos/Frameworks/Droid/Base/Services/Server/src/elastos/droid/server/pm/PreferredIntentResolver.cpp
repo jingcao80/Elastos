@@ -1,5 +1,5 @@
 
-#include "pm/PreferredIntentResolver.h"
+#include "elastos/droid/server/pm/PreferredIntentResolver.h"
 
 namespace Elastos {
 namespace Droid {

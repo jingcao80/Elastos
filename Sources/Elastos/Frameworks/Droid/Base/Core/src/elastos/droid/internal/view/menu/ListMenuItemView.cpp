@@ -19,11 +19,7 @@ namespace Menu {
 
 const String ListMenuItemView::TAG("ListMenuItemView");
 
-#if 0
 CAR_INTERFACE_IMPL_2(ListMenuItemView, LinearLayout, IListMenuItemView, IMenuItemView)
-#else
-CAR_INTERFACE_IMPL_2(ListMenuItemView, ViewGroup, IListMenuItemView, IMenuItemView)
-#endif
 
 ListMenuItemView::ListMenuItemView()
     : mTextAppearance(0)
@@ -38,8 +34,7 @@ ECode ListMenuItemView::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    assert(0);
-    // FAIL_RETURN(LinearLayout::constructor(context, attrs, defStyleAttr, defStyleRes));
+    FAIL_RETURN(LinearLayout::constructor(context, attrs, defStyleAttr, defStyleRes));
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
         const_cast<Int32 *>(R::styleable::MenuView),
@@ -73,8 +68,7 @@ ECode ListMenuItemView::constructor(
 
 ECode ListMenuItemView::OnFinishInflate()
 {
-    assert(0);
-    // FAIL_RETURN(LinearLayout::OnFinishInflate())
+    FAIL_RETURN(LinearLayout::OnFinishInflate())
 
     SetBackgroundDrawable(mBackground);
 
@@ -326,8 +320,7 @@ void ListMenuItemView::OnMeasure(
         }
     }
 
-    assert(0);
-    // LinearLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    LinearLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
 }
 
 void ListMenuItemView::InsertIconView()
@@ -388,8 +381,7 @@ AutoPtr<ILayoutInflater> ListMenuItemView::GetInflater()
 ECode ListMenuItemView::OnInitializeAccessibilityNodeInfo(
     /* [in] */ IAccessibilityNodeInfo* info)
 {
-    assert(0);
-    // FAIL_RETURN(LinearLayout::OnInitializeAccessibilityNodeInfo(info))
+    FAIL_RETURN(LinearLayout::OnInitializeAccessibilityNodeInfo(info))
 
     Boolean hasSubMenu;
     if (mItemData != NULL && (IMenuItem::Probe(mItemData)->HasSubMenu(&hasSubMenu), hasSubMenu)) {
@@ -401,9 +393,7 @@ ECode ListMenuItemView::OnInitializeAccessibilityNodeInfo(
 ECode ListMenuItemView::SetEnabled(
     /* [in] */ Boolean enabled)
 {
-    assert(0);
-    // return LayoutInflater::SetEnabled(enabled);
-    return NOERROR;
+    return LinearLayout::SetEnabled(enabled);
 }
 
 } // namespace Menu

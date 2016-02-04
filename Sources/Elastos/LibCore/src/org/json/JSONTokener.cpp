@@ -34,9 +34,11 @@ ECode JSONTokener::constructor(
 {
     String tmp = in;
     // consume an optional byte order mark (BOM) if it exists
-    if (!tmp.IsNull() && tmp.StartWith("\ufeff")) {
-        String str = tmp.Substring(1);
-        tmp = str;
+    Char32 c = 0xfeff;
+    String str("");
+    str += c;
+    if (!tmp.IsNull() && tmp.StartWith(str)) {
+        tmp = tmp.Substring(1);
     }
 
     mIn = tmp;
@@ -50,14 +52,14 @@ ECode JSONTokener::NextValue(
     *obj = NULL;
 
     Int32 c;
-    NextCleanInternal(&c);
+    FAIL_RETURN(NextCleanInternal(&c));
     switch (c) {
         case -1:
             return SyntaxError(String("End of input"));
 
         case '{': {
             AutoPtr<IJSONObject> json;
-            ReadObject((IJSONObject**)&json);
+            FAIL_RETURN(ReadObject((IJSONObject**)&json));
             *obj = json;
             REFCOUNT_ADD(*obj);
             return NOERROR;
@@ -65,7 +67,7 @@ ECode JSONTokener::NextValue(
 
         case '[':{
             AutoPtr<IJSONArray> json;
-            ReadArray((IJSONArray**)&json);
+            FAIL_RETURN(ReadArray((IJSONArray**)&json));
             *obj = json;
             REFCOUNT_ADD(*obj);
             return NOERROR;
@@ -208,7 +210,7 @@ ECode JSONTokener::NextString(
             AutoPtr<ArrayOf<Char32> > args = mIn.GetChars();
             builder->Append(*args, start, mPos - 1);
             Char32 cd;
-            ReadEscapeCharacter(&cd);
+            FAIL_RETURN(ReadEscapeCharacter(&cd));
             builder->AppendChar(cd);
             start = mPos;
         }
@@ -292,6 +294,8 @@ ECode JSONTokener::ReadLiteral(
         return NOERROR;
     }
 
+    ECode ec;
+
     /* try to parse as an integral type... */
     if (literal.IndexOf('.') == -1) {
         Int32 base = 10;
@@ -305,19 +309,22 @@ ECode JSONTokener::ReadLiteral(
             base = 8;
         }
         // try {
-        Int64 longValue = StringUtils::ParseInt64(number, base);
-        using Elastos::Core::Math;
-        if (longValue <= Math::INT32_MAX_VALUE && longValue >= Math::INT32_MIN_VALUE) {
-            AutoPtr<IInteger32> iObj = CoreUtils::Convert((Int32)longValue);
-            *obj = iObj;
-            REFCOUNT_ADD(*obj);
-            return NOERROR;
-        }
-        else {
-            AutoPtr<IInteger64> lObj = CoreUtils::Convert(longValue);
-            *obj = lObj;
-            REFCOUNT_ADD(*obj);
-            return NOERROR;
+        Int64 longValue;
+        ec = StringUtils::Parse(number, base, &longValue);
+        if (SUCCEEDED(ec)) {
+            using Elastos::Core::Math;
+            if (longValue <= Math::INT32_MAX_VALUE && longValue >= Math::INT32_MIN_VALUE) {
+                AutoPtr<IInteger32> iObj = CoreUtils::Convert((Int32)longValue);
+                *obj = iObj;
+                REFCOUNT_ADD(*obj);
+                return NOERROR;
+            }
+            else {
+                AutoPtr<IInteger64> lObj = CoreUtils::Convert(longValue);
+                *obj = lObj;
+                REFCOUNT_ADD(*obj);
+                return NOERROR;
+            }
         }
         //} catch (NumberFormatException e) {
             /*
@@ -330,11 +337,14 @@ ECode JSONTokener::ReadLiteral(
 
     /* ...next try to parse as a floating point... */
     // try {
-    Double data = StringUtils::ParseDouble(literal);
-    AutoPtr<IDouble> dObj = CoreUtils::Convert(data);
-    *obj = dObj;
-    REFCOUNT_ADD(*obj);
-    return NOERROR;
+    Double data;
+    ec = StringUtils::Parse(literal, &data);
+    if (SUCCEEDED(ec)) {
+        AutoPtr<IDouble> dObj = CoreUtils::Convert(data);
+        *obj = dObj;
+        REFCOUNT_ADD(*obj);
+        return NOERROR;
+    }
     // } catch (NumberFormatException ignored) {
     // }
 
@@ -369,7 +379,7 @@ ECode JSONTokener::ReadObject(
 
     /* Peek to see if this is the empty object. */
     Int32 first;
-    NextCleanInternal(&first);
+    FAIL_RETURN(NextCleanInternal(&first));
     if (first == '}') {
         *obj = result;
         REFCOUNT_ADD(*obj);
@@ -404,7 +414,7 @@ ECode JSONTokener::ReadObject(
          * include them because that's what the original implementation did.
          */
         Int32 separator;
-        NextCleanInternal(&separator);
+        FAIL_RETURN(NextCleanInternal(&separator));
         if (separator != ':' && separator != '=') {;
             StringBuilder builder;
             builder += "Expected ':' after ";
@@ -423,7 +433,7 @@ ECode JSONTokener::ReadObject(
         result->Put(str, object);
 
         Int32 data;
-        NextCleanInternal(&data);
+        FAIL_RETURN(NextCleanInternal(&data));
         switch (data) {
             case '}':
                 *obj = result;
@@ -453,7 +463,7 @@ ECode JSONTokener::ReadArray(
 
     while (TRUE) {
         Int32 data;
-        NextCleanInternal(&data);
+        FAIL_RETURN(NextCleanInternal(&data));
         switch (data) {
             case -1:
                 return SyntaxError(String("Unterminated array"));
@@ -479,7 +489,7 @@ ECode JSONTokener::ReadArray(
         result->Put(object);
 
         Int32 other;
-        NextCleanInternal(&other);
+        FAIL_RETURN(NextCleanInternal(&other));
         switch (other) {
             case ']':
                 *obj = result;
@@ -499,7 +509,7 @@ ECode JSONTokener::ReadArray(
 ECode JSONTokener::SyntaxError(
     /* [in] */ const String& message)
 {
-    Logger::E("JSONTokener", message);
+    Logger::E("JSONTokener", "%s", message.string());
     return E_JSON_EXCEPTION;
 }
 
@@ -565,7 +575,7 @@ ECode JSONTokener::NextClean(
     *ca = '\0';
 
     Int32 nextCleanInt;
-    NextCleanInternal(&nextCleanInt);
+    FAIL_RETURN(NextCleanInternal(&nextCleanInt));
     if (nextCleanInt != -1) {
         *ca = (Char32)nextCleanInt;
     }
@@ -616,7 +626,8 @@ ECode JSONTokener::NextTo(
 {
     VALIDATE_NOT_NULL(str);
 
-    String strExcluded = StringUtils::ToString((Int32)excluded);
+    String strExcluded("");
+    strExcluded += excluded;
     *str = NextToInternal(strExcluded).Trim();
     return NOERROR;
 }

@@ -182,7 +182,7 @@ ProcessList::ProcessList()
 }
 
 ECode ProcessList::ApplyDisplaySize(
-    /* [in] */ CWindowManagerService*  wm)
+    /* [in] */ CWindowManagerService* wm)
 {
     if (!mHaveDisplaySize) {
         AutoPtr<IPoint> p, outP;
@@ -295,7 +295,7 @@ ECode ProcessList::UpdateOomLevels(
         bbHelper->Allocate(4 * (2*mOomAdj->GetLength() + 1), (IByteBuffer**)&buf);
         buf->PutInt32(LMK_TARGET);
         for (Int32 i = 0; i < mOomAdj->GetLength(); i++) {
-            buf->PutInt32(((*mOomMinFree)[i] * 1024) / PAGE_SIZE);
+            buf->PutInt32(((*mOomMinFree)[i] * 1024) / MEMORY_PAGE_SIZE);
             buf->PutInt32((*mOomAdj)[i]);
         }
 

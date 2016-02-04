@@ -1,5 +1,6 @@
 
 #include "ClassLoader.h"
+#include "CPathClassLoader.h"
 #include "CSystem.h"
 #include "Globals.h"
 #include "io/CFile.h"
@@ -42,8 +43,9 @@ AutoPtr<IClassLoader> ClassLoader::CreateSystemClassLoader()
     // return new java.net.URLClassLoader(urls, null);
 
     // TODO Make this a java.net.URLClassLoader once we have those?
-    // return new PathClassLoader(classPath, BootClassLoader.getInstance());
-    return NULL;
+    AutoPtr<IClassLoader> passClassLoader;
+    CPathClassLoader::New(classPath, (IClassLoader**)&passClassLoader);
+    return passClassLoader;
 }
 
 AutoPtr<IClassLoader> ClassLoader::GetSystemClassLoader()

@@ -57,7 +57,6 @@ Boolean DateFormat::sIs24Hour = FALSE;
 Boolean DateFormat::Is24HourFormat(
     /* [in] */ IContext* context)
 {
-    VALIDATE_NOT_NULL(context)
     AutoPtr<IContentResolver> resolver;
     context->GetContentResolver((IContentResolver**)&resolver);
     AutoPtr<ISettingsSystem> settingsSystem;

@@ -353,7 +353,7 @@ AutoPtr<Choreographer> Choreographer::GetInstance()
         AutoPtr<ILooper> looper = Looper::GetMyLooper();
         if (looper == NULL) {
             Logger::E(TAG, "The current thread must have a looper!");
-            assert(0);
+            // assert(0);
             //throw new IllegalStateException("The current thread must have a looper!");
         }
         instance = new Choreographer(looper);

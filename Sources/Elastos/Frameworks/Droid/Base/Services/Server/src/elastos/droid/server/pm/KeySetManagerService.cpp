@@ -1,14 +1,22 @@
 
-#include "pm/KeySetManagerService.h"
-#include "pm/PackageKeySetData.h"
+#include "elastos/droid/server/pm/KeySetManagerService.h"
+#include "elastos/droid/server/pm/PackageKeySetData.h"
+#include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Utility.h"
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::Utility::IBase64;
+using Elastos::Droid::Utility::CBase64;
+using Elastos::Droid::Utility::CArraySet;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Core::IInteger64;
 using Elastos::Core::CInteger64;
-using Elastos::Droid::Utility::IBase64;
-using Elastos::Droid::Utility::CBase64;
+using Elastos::Core::StringUtils;
+using Elastos::Security::IKey;
+using Elastos::Utility::ISet;
+using Elastos::Utility::ICollection;
+using Elastos::Utility::IIterator;
 
 namespace Elastos {
 namespace Droid {
@@ -16,7 +24,7 @@ namespace Server {
 namespace Pm {
 
 const String KeySetManagerService::TAG("KeySetManagerService");
-const Int32 KeySetManagerService::FIRST_VERSIO;
+const Int32 KeySetManagerService::FIRST_VERSION;
 const Int32 KeySetManagerService::CURRENT_VERSION;
 const Int64 KeySetManagerService::KEYSET_NOT_FOUND;
 const Int64 KeySetManagerService::PUBLIC_KEY_NOT_FOUND;
@@ -115,7 +123,7 @@ ECode KeySetManagerService::AddUpgradeKeySetToPackageLPw(
     /* [in] */ const String& packageName,
     /* [in] */ const String& alias)
 {
-    if ((packageName.IsNull()) || (alias.IsNull)) {
+    if (packageName.IsNull() || alias.IsNull()) {
         Slogger::W(TAG, "Got null argument for a defined keyset, ignoring!");
         return NOERROR;
     }
@@ -136,7 +144,7 @@ ECode KeySetManagerService::AddSigningKeySetToPackageLPw(
     /* [in] */ const String& packageName,
     /* [in] */ IArraySet* signingKeys)
 {
-    if ((packageName.IsNull()) || (keys == NULL) || (alias.IsNull())) {
+    if (packageName.IsNull() || signingKeys == NULL) {
         Slogger::W(TAG, "Got null argument for a defined keyset, ignoring!");
         return NOERROR;
     }
@@ -175,7 +183,7 @@ ECode KeySetManagerService::AddSigningKeySetToPackageLPw(
             definedKeys = idIt->mSecond;
         }
         Boolean result;
-        if (ISet::Probe(publicKeyIds)->ContainsAll(definedKeys, &result), result) {
+        if (ISet::Probe(publicKeyIds)->ContainsAll(ICollection::Probe(definedKeys), &result), result) {
             pkg->mKeySetData->AddSigningKeySet(keySetID);
         }
     }
@@ -188,8 +196,8 @@ Int64 KeySetManagerService::GetIdByKeySetLPr(
     HashMap<Int64, AutoPtr<CKeySetHandle> >::Iterator it = mKeySets.Begin();
     for (; it != mKeySets.End(); ++it) {
         AutoPtr<CKeySetHandle> value = it->mSecond;
-        Booelan equals;
-        if (ks->Equals(value, &equals), equals) {
+        Boolean equals;
+        if (((IObject*)ks->Probe(EIID_IObject))->Equals((IObject*)value, &equals), equals) {
             return it->mFirst;
         }
     }
@@ -223,19 +231,17 @@ ECode KeySetManagerService::GetKeySetByAliasAndPackageNameLPr(
     if (p == NULL || p->mKeySetData == NULL) {
         return NOERROR;
     }
-    AutoPtr<IInteger64> keySetId;
-    HashMap<String, AutoPtr<IInteger64> >& aliases = p->mKeySetData->GetAliases();
-    HashMap<String, AutoPtr<IInteger64> >::Iterator aliasIt = aliases.Find(alias);
+    Int64 keySetId;
+    HashMap<String, Int64>& aliases = p->mKeySetData->GetAliases();
+    HashMap<String, Int64>::Iterator aliasIt = aliases.Find(alias);
     if (aliasIt != aliases.End()) {
         keySetId = aliasIt->mSecond;
     }
-    if (keySetId == NULL) {
+    else {
         Slogger::E(TAG, "Unknown KeySet alias: %s", alias.string());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    Int64 value;
-    keySetId->GetValue(&value);
-    HashMap<Int64, AutoPtr<CKeySetHandle> >::Iterator handleIt = mKeySets.Find(value);
+    HashMap<Int64, AutoPtr<CKeySetHandle> >::Iterator handleIt = mKeySets.Find(keySetId);
     if (handleIt != mKeySets.End()) {
         *handle = handleIt->mSecond;
     }
@@ -257,11 +263,11 @@ AutoPtr<IArraySet> KeySetManagerService::GetPublicKeysFromKeySetLPr(
     AutoPtr<IArraySet> mPubKeys;
     CArraySet::New((IArraySet**)&mPubKeys);
     AutoPtr<IIterator> setIt;
-    sets->GetIterator((IIterator**)&setIt);
+    ISet::Probe(sets)->GetIterator((IIterator**)&setIt);
     Boolean hasNext;
     while (setIt->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> value;
-        it->GetNext((IInterface**)&value);
+        setIt->GetNext((IInterface**)&value);
         AutoPtr<IInteger64> pkId = IInteger64::Probe(value);
         Int64 v;
         pkId->GetValue(&v);
@@ -270,7 +276,7 @@ AutoPtr<IArraySet> KeySetManagerService::GetPublicKeysFromKeySetLPr(
         if (pkIt != mPublicKeys.End()) {
             pk = pkIt->mSecond;
         }
-        mPubKeys->Add(pk);
+        ISet::Probe(mPubKeys)->Add(pk);
     }
     return mPubKeys;
 }
@@ -289,9 +295,9 @@ AutoPtr<CKeySetHandle> KeySetManagerService::GetSigningKeySetByPackageNameLPr(
         return NULL;
     }
     AutoPtr<CKeySetHandle> handle;
-    HashMap<Int64, AutoPtr<CKeySetHandle> >::Iterator it = mKeySets.Find(p->mKeySetData->GetProperSigningKeySet());
-    if (it != mKeySets.End()) {
-        handle = it->mSecond;
+    HashMap<Int64, AutoPtr<CKeySetHandle> >::Iterator setit = mKeySets.Find(p->mKeySetData->GetProperSigningKeySet());
+    if (setit != mKeySets.End()) {
+        handle = setit->mSecond;
     }
     return handle;
 }
@@ -322,11 +328,11 @@ ECode KeySetManagerService::GetUpgradeKeySetsByPackageNameLPr(
         AutoPtr<ArrayOf<Int64> > sets = p->mKeySetData->GetUpgradeKeySets();
         for (Int32 i = 0; i < sets->GetLength(); ++i) {
             AutoPtr<CKeySetHandle> handle;
-            HashMap<Int64, AutoPtr<CKeySetHandle> >::Iterator handleIt = mKeySets.Find((*sets)[i]));
+            HashMap<Int64, AutoPtr<CKeySetHandle> >::Iterator handleIt = mKeySets.Find((*sets)[i]);
             if (handleIt != mKeySets.End()) {
                 handle = handleIt->mSecond;
             }
-            upgradeKeySets->Add(handle);
+            ISet::Probe(upgradeKeySets)->Add(handle->Probe(EIID_IInterface));
         }
     }
     *handles = upgradeKeySets;
@@ -347,11 +353,11 @@ ECode KeySetManagerService::AddKeySetLPw(
     }
     // add each of the keys in the provided set
     Int32 size;
-    keys->GetSize(&size);
+    ISet::Probe(keys)->GetSize(&size);
     AutoPtr<IArraySet> addedKeyIds;
     CArraySet::New(size, (IArraySet**)&addedKeyIds);
     AutoPtr<IIterator> it;
-    keys->GetIterator((IIterator**)&it);
+    ISet::Probe(keys)->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> value;
@@ -360,7 +366,7 @@ ECode KeySetManagerService::AddKeySetLPw(
         Int64 id = AddPublicKeyLPw(k);
         AutoPtr<IInteger64> idint;
         CInteger64::New(id, (IInteger64**)&idint);
-        addedKeyIds->Add(idint);
+        ISet::Probe(addedKeyIds)->Add(idint);
     }
 
     // check to see if the resulting keyset is new
@@ -395,7 +401,7 @@ ECode KeySetManagerService::AddKeySetLPw(
                     pSigningKeys = keysIt->mSecond;
                 }
                 Boolean result;
-                if (ISet::Probe(pSigningKeys)->ContainsAll(addedKeyIds, result), result) {
+                if (ISet::Probe(pSigningKeys)->ContainsAll(ICollection::Probe(addedKeyIds), &result), result) {
                     p->mKeySetData->AddSigningKeySet(id);
                 }
             }
@@ -430,7 +436,7 @@ Int64 KeySetManagerService::GetIdFromKeyIdsLPr(
     for (; it != mKeySetMapping.End(); ++it) {
         AutoPtr<IArraySet> value = it->mSecond;
         Boolean equals;
-        if (IObject::Probe(value).Equals(publicKeyIds, &equals), equals) {
+        if (IObject::Probe(value)->Equals(publicKeyIds, &equals), equals) {
             return it->mFirst;
         }
     }
@@ -441,13 +447,13 @@ Int64 KeySetManagerService::GetIdForPublicKeyLPr(
     /* [in] */ IPublicKey* k)
 {
     AutoPtr<ArrayOf<Byte> > encoded;
-    k->GetEncoded((ArrayOf<Byte>**)&encoded);
+    IKey::Probe(k)->GetEncoded((ArrayOf<Byte>**)&encoded);
     String encodedPublicKey(*encoded);
     HashMap<Int64, AutoPtr<IPublicKey> >::Iterator it = mPublicKeys.Begin();
     for (; it != mPublicKeys.End(); ++it) {
         AutoPtr<IPublicKey> value = it->mSecond;
         encoded = NULL;
-        k->GetEncoded((ArrayOf<Byte>**)&encoded);
+        IKey::Probe(k)->GetEncoded((ArrayOf<Byte>**)&encoded);
         String encodedExistingKey(*encoded);
         if (encodedPublicKey.Equals(encodedExistingKey)) {
             return it->mFirst;
@@ -477,7 +483,7 @@ ECode KeySetManagerService::RemoveAppKeySetDataLPw(
     CArraySet::New((IArraySet**)&deletableKeys);
     AutoPtr<IArraySet> knownKeys;
     AutoPtr<IIterator> it;
-    deletableKeySets->GetIterator((IIterator**)&it);
+    ISet::Probe(deletableKeySets)->GetIterator((IIterator**)&it);
     Boolean hasNext;
     while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> value;
@@ -502,12 +508,12 @@ ECode KeySetManagerService::RemoveAppKeySetDataLPw(
             continue;
         }
         AutoPtr<IArraySet> knownKeySets;
-        FAIL_RETURN(GetOriginalKeySetsByPackageNameLPr(pkgName, (IArraySet**)knownKeySets))
-        ISet::Probe(deletableKeySets)->RemoveAll(knownKeySets);
+        FAIL_RETURN(GetOriginalKeySetsByPackageNameLPr(pkgName, (IArraySet**)&knownKeySets))
+        ISet::Probe(deletableKeySets)->RemoveAll(ICollection::Probe(knownKeySets));
         knownKeys = NULL;
         CArraySet::New((IArraySet**)&knownKeys);
         it = NULL;
-        knownKeySets->GetIterator((IIterator**)&it);
+        ISet::Probe(knownKeySets)->GetIterator((IIterator**)&it);
         while (it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> value;
             it->GetNext((IInterface**)&value);
@@ -519,7 +525,7 @@ ECode KeySetManagerService::RemoveAppKeySetDataLPw(
                 knownKeys = setIt->mSecond;
             }
             if (knownKeys != NULL) {
-                ISet::Probe(deletableKeys)->RemoveAll(knownKeys);
+                ISet::Probe(deletableKeys)->RemoveAll(ICollection::Probe(knownKeys));
             }
         }
     }
@@ -527,7 +533,7 @@ ECode KeySetManagerService::RemoveAppKeySetDataLPw(
     // The remaining keys and KeySets are not relied on by any other
     // application and so can be safely deleted.
     it = NULL;
-    deletableKeySets->GetIterator((IIterator**)&it);
+    ISet::Probe(deletableKeySets)->GetIterator((IIterator**)&it);
     while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> value;
         it->GetNext((IInterface**)&value);
@@ -537,8 +543,8 @@ ECode KeySetManagerService::RemoveAppKeySetDataLPw(
         mKeySetMapping.Erase(ks);
     }
     it = NULL;
-    deletableKeys->GetIterator((IIterator**)&it);
-    while (hasNext, it->HasNext(&hasNext)) {
+    ISet::Probe(deletableKeys)->GetIterator((IIterator**)&it);
+    while (it->HasNext(&hasNext), hasNext) {
         AutoPtr<IInterface> value;
         it->GetNext((IInterface**)&value);
         Int64 keyId;
@@ -551,7 +557,7 @@ ECode KeySetManagerService::RemoveAppKeySetDataLPw(
     for (; pkgIt != mPackages->End(); ++pkgIt) {
         AutoPtr<PackageSetting> p = pkgIt->mSecond;
         it = NULL;
-        deletableKeySets->GetIterator((IIterator**)&it);
+        ISet::Probe(deletableKeySets)->GetIterator((IIterator**)&it);
         while (it->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> value;
             it->GetNext((IInterface**)&value);
@@ -561,7 +567,7 @@ ECode KeySetManagerService::RemoveAppKeySetDataLPw(
         }
     }
     // Finally, remove all KeySets from the original package
-    AutoPtr<PackageSetting>
+    AutoPtr<PackageSetting> p;
     pkgIt = mPackages->Find(packageName);
     if (pkgIt != mPackages->End()) {
         p = pkgIt->mSecond;
@@ -603,77 +609,79 @@ ECode KeySetManagerService::GetOriginalKeySetsByPackageNameLPr(
     CArraySet::New((IArraySet**)&knownKeySets);
     AutoPtr<IInteger64> i;
     CInteger64::New(p->mKeySetData->GetProperSigningKeySet(), (IInteger64**)&i);
-    knownKeySets->Add(i);
+    ISet::Probe(knownKeySets)->Add(i);
     if (p->mKeySetData->IsUsingDefinedKeySets()) {
         AutoPtr<ArrayOf<Int64> > keysets = p->mKeySetData->GetDefinedKeySets();
         for (Int32 i = 0; i < keysets->GetLength(); ++i) {
-            AutoPtr<IInteger64> i;
-            CInteger64::New((*keysets)[i], (IInteger64**)&i);
-            knownKeySets->Add(i);
+            AutoPtr<IInteger64> in;
+            CInteger64::New((*keysets)[i], (IInteger64**)&in);
+            ISet::Probe(knownKeySets)->Add(in);
         }
     }
-    return knownKeySets;
+    *sets = knownKeySets;
+    REFCOUNT_ADD(*sets)
+    return NOERROR;
 }
 
 ECode KeySetManagerService::EncodePublicKey(
-    /* [in] */ IPublicKey* k
+    /* [in] */ IPublicKey* k,
     /* [out] */ String* key)
 {
     VALIDATE_NOT_NULL(key)
     AutoPtr<ArrayOf<Byte> > encoded;
-    k->GetEncoded((ArrayOf<Byte>**)&encoded);
+    IKey::Probe(k)->GetEncoded((ArrayOf<Byte>**)&encoded);
     AutoPtr<IBase64> base64;
     CBase64::AcquireSingleton((IBase64**)&base64);
     AutoPtr<ArrayOf<Byte> > encoded1;
     base64->Encode(encoded, 0, (ArrayOf<Byte>**)&encoded1);
-    *key = String(encoded1);
+    *key = String(*encoded1);
     return NOERROR;
 }
 
 ECode KeySetManagerService::WriteKeySetManagerServiceLPr(
-    /* [in] */ IXmlPullParser* serializer)
+    /* [in] */ IXmlSerializer* serializer)
 {
     FAIL_RETURN(serializer->WriteStartTag(String(NULL), String("keyset-settings")))
-    FAIL_RETURN(serializer->WriteAttribute(String(NULL), String("version", StringUtils::ToString(CURRENT_VERSION))))
+    FAIL_RETURN(serializer->WriteAttribute(String(NULL), String("version"), StringUtils::ToString(CURRENT_VERSION)))
     FAIL_RETURN(WritePublicKeysLPr(serializer))
     FAIL_RETURN(WriteKeySetsLPr(serializer))
     FAIL_RETURN(serializer->WriteStartTag(String(NULL), String("lastIssuedKeyId")))
-    FAIL_RETURN(serializer->WriteAttribute(String(NULL), String("value", StringUtils::ToString(sLastIssuedKeyId))))
+    FAIL_RETURN(serializer->WriteAttribute(String(NULL), String("value"), StringUtils::ToString(sLastIssuedKeyId)))
     FAIL_RETURN(serializer->WriteEndTag(String(NULL), String("lastIssuedKeyId")))
     FAIL_RETURN(serializer->WriteStartTag(String(NULL), String("lastIssuedKeySetId")))
-    FAIL_RETURN(serializer->WriteAttribute(String(NULL), String("value", StringUtils::ToString(sLastIssuedKeySetId))))
+    FAIL_RETURN(serializer->WriteAttribute(String(NULL), String("value"), StringUtils::ToString(sLastIssuedKeySetId)))
     FAIL_RETURN(serializer->WriteEndTag(String(NULL), String("lastIssuedKeySetId")))
-    return serializer->WriteEndTag(String(NULL), String("keyset-settings"))
+    return serializer->WriteEndTag(String(NULL), String("keyset-settings"));
 }
 
 ECode KeySetManagerService::WritePublicKeysLPr(
-    /* [in] */ IXmlPullParser* serializer)
+    /* [in] */ IXmlSerializer* serializer)
 {
     FAIL_RETURN(serializer->WriteStartTag(String(NULL), String("keys")))
     HashMap<Int64, AutoPtr<IPublicKey> >::Iterator it = mPublicKeys.Begin();
     for (; it != mPublicKeys.End(); ++it) {
         AutoPtr<IPublicKey> key = it->mSecond;
         String encodedKey;
-        FAIL_RETURN(EncodePublicKey(key, encodedKey))
+        FAIL_RETURN(EncodePublicKey(key, &encodedKey))
         FAIL_RETURN(serializer->WriteStartTag(String(NULL), String("public-key")))
-        FAIL_RETURN(serializer->WriteAttribute(String(NULL), String("identifier"), StringUtils::ToString(id)))
+        FAIL_RETURN(serializer->WriteAttribute(String(NULL), String("identifier"), StringUtils::ToString(it->mFirst)))
         FAIL_RETURN(serializer->WriteAttribute(String(NULL), String("value"), encodedKey))
         FAIL_RETURN(serializer->WriteEndTag(String(NULL), String("public-key")))
     }
-    FAIL_RETURN(serializer->WriteEndTag(String(NULL), String("keys")))
+    return serializer->WriteEndTag(String(NULL), String("keys"));
 }
 
 ECode KeySetManagerService::WriteKeySetsLPr(
-    /* [in] */ IXmlPullParser* serializer)
+    /* [in] */ IXmlSerializer* serializer)
 {
     FAIL_RETURN(serializer->WriteStartTag(String(NULL), String("keysets")))
     HashMap<Int64, AutoPtr<IArraySet> >::Iterator it = mKeySetMapping.Begin();
     for (; it != mKeySetMapping.End(); ++it) {
         AutoPtr<IArraySet> keys = it->mSecond;
         FAIL_RETURN(serializer->WriteStartTag(String(NULL), String("keyset")))
-        FAIL_RETURN(serializer->WriteAttribute(String(NULL), String("identifier"), StringUtils::ToString(id)))
+        FAIL_RETURN(serializer->WriteAttribute(String(NULL), String("identifier"), StringUtils::ToString(it->mFirst)))
         AutoPtr<IIterator> iter;
-        keys->GetIterator((IIterator**)&iter);
+        ISet::Probe(keys)->GetIterator((IIterator**)&iter);
         Boolean hasNext;
         while (iter->HasNext(&hasNext), hasNext) {
             AutoPtr<IInterface> value;
@@ -693,13 +701,12 @@ ECode KeySetManagerService::ReadKeySetsLPw(
     /* [in] */ IXmlPullParser* parser)
 {
     Int32 type;
-    Int64 currentKeySetId = 0;
     Int32 outerDepth, depth;
     parser->GetDepth(&outerDepth);
     String recordedVersion;
-    FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("version")))
+    FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("version"), &recordedVersion))
     if (recordedVersion.IsNull() || StringUtils::ParseInt32(recordedVersion) != CURRENT_VERSION) {
-        while ((parser->GetNext(&type), type != IXmlPullParser::END_DOCUMENT)
+        while ((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
                 && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&depth), depth > outerDepth))) {
             // Our version is different than the one which generated the old keyset data.
             // We don't want any of the old data, but we must advance the parser
@@ -711,9 +718,9 @@ ECode KeySetManagerService::ReadKeySetsLPw(
         for (; pkgIt != mPackages->End(); ++pkgIt) {
             ClearPackageKeySetDataLPw(pkgIt->mSecond);
         }
-        return;
+        return NOERROR;
     }
-    while ((parser->GetNext(&type), type != IXmlPullParser::END_DOCUMENT)
+    while ((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
            && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&depth), depth > outerDepth))) {
         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
             continue;
@@ -746,7 +753,7 @@ ECode KeySetManagerService::ReadKeysLPw(
     Int32 outerDepth, depth;
     parser->GetDepth(&outerDepth);
     Int32 type;
-    while ((parser->GetNext(&type), type != IXmlPullParser::END_DOCUMENT)
+    while ((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
             && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&depth), depth > outerDepth))) {
         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
             continue;
@@ -757,6 +764,7 @@ ECode KeySetManagerService::ReadKeysLPw(
             FAIL_RETURN(ReadPublicKeyLPw(parser))
         }
     }
+    return NOERROR;
 }
 
 ECode KeySetManagerService::ReadKeySetListLPw(
@@ -766,7 +774,7 @@ ECode KeySetManagerService::ReadKeySetListLPw(
     parser->GetDepth(&outerDepth);
     Int32 type;
     Int64 currentKeySetId = 0;
-    while ((parser->GetNext(&type), type != IXmlPullParser::END_DOCUMENT)
+    while ((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
             && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&depth), depth > outerDepth))) {
         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
             continue;
@@ -789,22 +797,23 @@ ECode KeySetManagerService::ReadKeySetListLPw(
             if (it != mKeySetMapping.End()) {
                 AutoPtr<IInteger64> in;
                 CInteger64::New(id, (IInteger64**)&in);
-                it->mSecond->Add(in);
+                ISet::Probe(it->mSecond)->Add(in);
             }
         }
     }
+    return NOERROR;
 }
 
 ECode KeySetManagerService::ReadIdentifierLPw(
     /* [in] */ IXmlPullParser* parser,
-    /* [out] */ Int64 value)
+    /* [out] */ Int64* value)
 {
     VALIDATE_NOT_NULL(value)
     value = 0;
     String v;
     FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("identifier"), &v))
     *value = StringUtils::ParseInt64(v);
-    return NOERROR
+    return NOERROR;
 }
 
 ECode KeySetManagerService::ReadPublicKeyLPw(
@@ -812,7 +821,7 @@ ECode KeySetManagerService::ReadPublicKeyLPw(
 {
     String encodedID;
     FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("identifier"), &encodedID))
-    Int64 identifier = StringUtils::ParseLong(encodedID);
+    Int64 identifier = StringUtils::ParseInt64(encodedID);
     String encodedPublicKey;
     FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("value"), &encodedPublicKey))
     AutoPtr<IPublicKey> pub;

@@ -1,27 +1,54 @@
 
-#include "elastos/droid/net/NetworkStatsRecorder.h"
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringUtils.h>
+#include "elastos/droid/server/net/NetworkStatsRecorder.h"
+#include "elastos/droid/server/net/NetworkStatsCollection.h"
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Libcore.h>
+#include <Elastos.Droid.Os.h>
 #include <elastos/core/Math.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/droid/net/ReturnOutValue.h>
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/etl/HashMap.h>
+#include <elastos/utility/etl/HashSet.h>
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
-using Elastos::IO::IByteArrayOutputStream;
-using Elastos::IO::CByteArrayOutputStream;
-using Elastos::IO::IDataOutputStream;
-using Elastos::IO::CDataOutputStream;
-using Elastos::IO::IIoUtils;
-using Elastos::IO::CIoUtils;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Net::ITrafficStats;
-using Elastos::Droid::Net::INetworkStatsHelper;
+using Elastos::Core::IByte;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::StringUtils;
+using Elastos::Droid::Internal::Utility::EIID_IFileRotatorRewriter;
+using Elastos::Droid::Internal::Utility::IIndentingPrintWriter;
+using Elastos::Droid::Net::CNetworkStats;
 using Elastos::Droid::Net::CNetworkStatsHelper;
+using Elastos::Droid::Net::INetworkStatsHelper;
+using Elastos::Droid::Net::INetworkTemplate;
+using Elastos::Droid::Net::ITrafficStats;
+using Elastos::IO::CByteArrayOutputStream;
+using Elastos::IO::CDataOutputStream;
+using Elastos::IO::IByteArrayOutputStream;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IDataOutput;
+using Elastos::IO::IDataOutputStream;
+using Elastos::IO::IFile;
+using Elastos::IO::IInputStream;
+using Elastos::IO::IOutputStream;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::HashSet;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::Logging::Slogger;
+using Libcore::IO::CIoUtils;
+using Libcore::IO::IIoUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Net {
+
+//=============================================================================
+// NetworkStatsRecorder::CombiningRewriter
+//=============================================================================
+CAR_INTERFACE_IMPL(NetworkStatsRecorder::CombiningRewriter, Object, IFileRotatorRewriter)
 
 NetworkStatsRecorder::CombiningRewriter::CombiningRewriter(
     /* [in] */ NetworkStatsCollection* collection)
@@ -31,29 +58,6 @@ NetworkStatsRecorder::CombiningRewriter::CombiningRewriter(
         assert(0);
     }
     mCollection = collection;
-}
-
-UInt32 NetworkStatsRecorder::CombiningRewriter::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 NetworkStatsRecorder::CombiningRewriter::Release()
-{
-    return ElRefBase::Release();
-}
-
-PInterface NetworkStatsRecorder::CombiningRewriter::Probe(
-    /* [in] */ REIID riid)
-{
-    return NULL;
-}
-
-ECode NetworkStatsRecorder::CombiningRewriter::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    return NOERROR;
 }
 
 ECode NetworkStatsRecorder::CombiningRewriter::Reset()
@@ -86,35 +90,17 @@ ECode NetworkStatsRecorder::CombiningRewriter::Write(
 }
 
 
+//=============================================================================
+// NetworkStatsRecorder::RemoveUidRewriter
+//=============================================================================
+CAR_INTERFACE_IMPL(NetworkStatsRecorder::RemoveUidRewriter, Object, IFileRotatorRewriter)
+
 NetworkStatsRecorder::RemoveUidRewriter::RemoveUidRewriter(
     /* [in] */ Int64 bucketDuration,
     /* [in] */ ArrayOf<Int32>* uids)
 {
     mTemp = new NetworkStatsCollection(bucketDuration);
     mUids = uids;
-}
-
-UInt32 NetworkStatsRecorder::RemoveUidRewriter::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 NetworkStatsRecorder::RemoveUidRewriter::Release()
-{
-    return ElRefBase::Release();
-}
-
-PInterface NetworkStatsRecorder::RemoveUidRewriter::Probe(
-    /* [in] */ REIID riid)
-{
-    return NULL;
-}
-
-ECode NetworkStatsRecorder::RemoveUidRewriter::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    return NOERROR;
 }
 
 ECode NetworkStatsRecorder::RemoveUidRewriter::Reset()
@@ -149,7 +135,9 @@ ECode NetworkStatsRecorder::RemoveUidRewriter::Write(
     return NOERROR;
 }
 
-
+//=============================================================================
+// NetworkStatsRecorder
+//=============================================================================
 const String NetworkStatsRecorder::TAG("NetworkStatsRecorder");
 const Boolean NetworkStatsRecorder::LOGD;
 const Boolean NetworkStatsRecorder::LOGV;
@@ -157,8 +145,8 @@ const String NetworkStatsRecorder::TAG_NETSTATS_DUMP("netstats_dump");
 const Boolean NetworkStatsRecorder::DUMP_BEFORE_DELETE;
 
 NetworkStatsRecorder::NetworkStatsRecorder(
-    /* [in] */ FileRotator* rotator,
-    /* [in] */ INonMonotonicObserver* observer,
+    /* [in] */ IFileRotator* rotator,
+    /* [in] */ INetworkStatsNonMonotonicObserver* observer,
     /* [in] */ IDropBoxManager* dropBox,
     /* [in] */ const String& cookie,
     /* [in] */ Int64 bucketDuration,
@@ -203,7 +191,7 @@ void NetworkStatsRecorder::SetPersistThreshold(
     /* [in] */ Int64 thresholdBytes)
 {
     if (LOGV) {
-        Slogger::V(TAG, "setPersistThreshold() with %s", StringUtils::Int64ToString(thresholdBytes).string());
+        Slogger::V(TAG, "setPersistThreshold() with %s", StringUtils::ToString(thresholdBytes).string());
     }
     mPersistThresholdBytes = MathUtilsConstrain(thresholdBytes,
             1 * ITrafficStats::KB_IN_BYTES, 100 * ITrafficStats::MB_IN_BYTES);
@@ -228,7 +216,7 @@ ECode NetworkStatsRecorder::GetTotalSinceBootLocked(
 }
 
 ECode NetworkStatsRecorder::GetOrLoadCompleteLocked(
-    /* [out] */ NetworkStatsCollection* result)
+    /* [out] */ NetworkStatsCollection** result)
 {
     AutoPtr<NetworkStatsCollection> complete;
     if (mComplete != NULL) {
@@ -252,7 +240,7 @@ ECode NetworkStatsRecorder::GetOrLoadCompleteLocked(
         } while(FALSE);
         if (FAILED(ec)) {
             // } catch (IOException e) {
-            if ((ECode)E_IO_EXCEPTION == ec || ) {
+            if ((ECode)E_IO_EXCEPTION == ec) {
                 Slogger::E(TAG, "problem completely reading network stats");
                 RecoverFromWtf();
                 FUNC_RETURN(complete)
@@ -274,10 +262,10 @@ ECode NetworkStatsRecorder::GetOrLoadCompleteLocked(
 
 void NetworkStatsRecorder::RecordSnapshotLocked(
     /* [in] */ INetworkStats* snapshot,
-    /* [in] */ HashMap<String, AutoPtr<NetworkIdentitySet> >& ifaceIdent,
+    /* [in] */ IMap* ifaceIdent,
     /* [in] */ Int64 currentTimeMillis)
 {
-    HashSet<String> unknownIfaces;
+    AutoPtr<IHashSet> unknownIfaces;
 
     // skip recording when snapshot missing
     if (snapshot == NULL) {
@@ -317,12 +305,11 @@ void NetworkStatsRecorder::RecordSnapshotLocked(
         String iface;
         entry->GetIface(&iface);
         AutoPtr<NetworkIdentitySet> ident;
-        HashMap<String, AutoPtr<NetworkIdentitySet> >::Iterator it = ifaceIdent.Find(iface);
-        if(it != ifaceIdent.End()) {
-            ident = it->mSecond;
-        }
+        AutoPtr<IInterface> obj;
+        ifaceIdent->Get(StringUtils::ParseCharSequence(iface), (IInterface**)&obj);
+        ident = (NetworkIdentitySet*)IHashSet::Probe(obj);
         if (ident == NULL) {
-            unknownIfaces.Insert(iface);
+            unknownIfaces->Add(StringUtils::ParseCharSequence(iface));
             continue;
         }
 
@@ -359,12 +346,8 @@ void NetworkStatsRecorder::RecordSnapshotLocked(
 
     mLastSnapshot = snapshot;
 
-    if (LOGV && unknownIfaces.Begin() != unknownIfaces.End()) {
-        HashSet<String>::Iterator it = unknownIfaces.Begin();
-        for(; it != unknownIfaces.End(); ++it) {
-            String ifaceStr = *it;
-            Slogger::W(TAG, "unknown interfaces %s, ignoring those stats", ifaceStr.string());
-        }
+    if (LOGV && Ptr(unknownIfaces)->Func(unknownIfaces->GetSize) > 0) {
+        Slogger::W(TAG, "unknown interfaces %s, ignoring those stats", TO_CSTR(unknownIfaces));
     }
 }
 
@@ -388,7 +371,7 @@ ECode NetworkStatsRecorder::ForcePersistLocked(
         // try {
         ECode ec;
         do {
-            if (ec = mRotator->RewriteActive(mPendingRewriter, currentTimeMillis)) break;
+            if (FAILED(ec = mRotator->RewriteActive(mPendingRewriter, currentTimeMillis))) break;
             mRotator->MaybeRotate(currentTimeMillis);
             mPending->Reset();
         } while(FALSE);
@@ -440,7 +423,7 @@ ECode NetworkStatsRecorder::RemoveUidsLocked(
     // Clear UID from current stats snapshot
     if (mLastSnapshot != NULL) {
         AutoPtr<INetworkStats> temp;
-        mLastSnapshot->WithoutUids(*uids, (INetworkStats**)&temp);
+        mLastSnapshot->WithoutUids(uids, (INetworkStats**)&temp);
         mLastSnapshot = temp;
     }
 
@@ -456,14 +439,14 @@ ECode NetworkStatsRecorder::RemoveUidsLocked(
     return NOERROR;
 }
 
-void NetworkStatsRecorder::ImportLegacyNetworkLocked(
+ECode NetworkStatsRecorder::ImportLegacyNetworkLocked(
     /* [in] */ IFile* file)
 {
     // legacy file still exists; start empty to avoid double importing
     mRotator->DeleteAll();
 
     AutoPtr<NetworkStatsCollection> collection = new NetworkStatsCollection(mBucketDuration);
-    collection->ReadLegacyUid(file, mOnlyTags);
+    FAIL_RETURN(collection->ReadLegacyUid(file, mOnlyTags))
 
     Int64 startMillis = collection->GetStartMillis();
     Int64 endMillis = collection->GetEndMillis();
@@ -475,16 +458,17 @@ void NetworkStatsRecorder::ImportLegacyNetworkLocked(
         mRotator->RewriteActive(rewriter, startMillis);
         mRotator->MaybeRotate(endMillis);
     }
+    return NOERROR;
 }
 
-void NetworkStatsRecorder::ImportLegacyUidLocked(
+ECode NetworkStatsRecorder::ImportLegacyUidLocked(
     /* [in] */ IFile* file)
 {
     // legacy file still exists; start empty to avoid double importing
     mRotator->DeleteAll();
 
     AutoPtr<NetworkStatsCollection> collection = new NetworkStatsCollection(mBucketDuration);
-    collection->ReadLegacyUid(file, mOnlyTags);
+    FAIL_RETURN(collection->ReadLegacyUid(file, mOnlyTags))
 
     Int64 startMillis = collection->GetStartMillis();
     Int64 endMillis = collection->GetEndMillis();
@@ -496,20 +480,23 @@ void NetworkStatsRecorder::ImportLegacyUidLocked(
         mRotator->RewriteActive(rewriter, startMillis);
         mRotator->MaybeRotate(endMillis);
     }
+    return NOERROR;
 }
 
 void NetworkStatsRecorder::DumpLocked(
     /* [in] */ IIndentingPrintWriter* pw,
     /* [in] */ Boolean fullHistory)
 {
-    pw->PrintString(String("Pending bytes: "));
-    pw->PrintInt64ln(mPending->GetTotalBytes());
+    IPrintWriter::Probe(pw)->Print(String("Pending bytes: "));
+    IPrintWriter::Probe(pw)->Println(mPending->GetTotalBytes());
     if (fullHistory) {
-        pw->PrintStringln(String("Complete history:"));
-        GetOrLoadCompleteLocked()->Dump(pw);
+        IPrintWriter::Probe(pw)->Println(String("Complete history:"));
+        AutoPtr<NetworkStatsCollection> netStatsCollection;
+        GetOrLoadCompleteLocked((NetworkStatsCollection**)&netStatsCollection);
+        netStatsCollection->Dump(pw);
     }
     else {
-        pw->PrintStringln(String("History since boot:"));
+        IPrintWriter::Probe(pw)->Println(String("History since boot:"));
         mSinceBoot->Dump(pw);
     }
 }
@@ -520,7 +507,7 @@ void NetworkStatsRecorder::RecoverFromWtf()
         AutoPtr<IByteArrayOutputStream> os;
         CByteArrayOutputStream::New((IByteArrayOutputStream**)&os);
         // try {
-        if (FAILED(mRotator->DumpAll(os))) {
+        if (FAILED(mRotator->DumpAll(IOutputStream::Probe(os)))) {
             os->Reset();
         }
         // } catch (IOException e) {
@@ -531,7 +518,7 @@ void NetworkStatsRecorder::RecoverFromWtf()
         // }
         AutoPtr<IIoUtils> ioutils;
         CIoUtils::AcquireSingleton((IIoUtils**)&ioutils);
-        ioutils->CloseQuietly(os);
+        ioutils->CloseQuietly(ICloseable::Probe(os));
         AutoPtr< ArrayOf<Byte> > bytes;
         os->ToByteArray((ArrayOf<Byte>**)&bytes);
         mDropBox->AddData(TAG_NETSTATS_DUMP, bytes, 0);

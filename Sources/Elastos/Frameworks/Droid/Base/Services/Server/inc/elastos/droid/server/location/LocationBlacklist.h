@@ -2,19 +2,17 @@
 #ifndef __ELASTOS_DROID_SERVER_LOCATION_LOCATIONBLACKLIST_H__
 #define __ELASTOS_DROID_SERVER_LOCATION_LOCATIONBLACKLIST_H__
 
-#ifdef DROID_CORE
-#include "Elastos.Droid.Core_server.h"
-#elif defined(DROID_SERVER)
-#include "Elastos.Droid.Core.h"
-#endif
+#include "elastos/droid/ext/frameworkext.h"
+#include "_Elastos.Droid.Server.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/database/ContentObserver.h"
-#include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Core::StringUtils;
-using Elastos::IO::IPrintWriter;
 using Elastos::Droid::Database::ContentObserver;
-using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Os::IHandler;
+using Elastos::IO::IPrintWriter;
 
 namespace Elastos {
 namespace Droid {
@@ -27,34 +25,29 @@ namespace Location {
  * This is a silent blacklist. Applications can still call Location Manager
  * API's, but they just won't receive any locations.
  */
-class LocationBlacklist : public ContentObserver
+class LocationBlacklist
+    : public ContentObserver
 {
-private:
-
-    static const String TAG;
-
 public:
-
-    LocationBlacklist();
-
     LocationBlacklist(
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler);
 
-    CARAPI_(void) Init();
+    CARAPI Init();
 
     /**
      * Return true if in blacklist
      * (package name matches blacklist, and does not match whitelist)
      */
-    CARAPI_(Boolean) IsBlacklisted(
-        /* [in] */ const String& packageName);
+    CARAPI IsBlacklisted(
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* result);
 
     //@Override
     CARAPI OnChange(
         /* [in] */ Boolean selfChange);
 
-    CARAPI_(void) SwitchUser(
+    CARAPI SwitchUser(
         /* [in] */ Int32 userId);
 
     CARAPI_(void) Dump(
@@ -75,12 +68,12 @@ private:
         /* [in] */ const String& key);
 
 private:
+    static const String TAG;
     static const Boolean D;
     static const String BLACKLIST_CONFIG_NAME;
     static const String WHITELIST_CONFIG_NAME;
 
     AutoPtr<IContext> mContext;
-    Object mLock;
 
     // all fields below synchronized on mLock
     AutoPtr<ArrayOf<String> > mWhitelist;

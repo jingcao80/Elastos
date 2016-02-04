@@ -2,8 +2,11 @@
 #ifndef __ELASTOS_DROID_OPENGL_CGLUTILS_H__
 #define __ELASTOS_DROID_OPENGL_CGLUTILS_H__
 
+#include "Elastos.Droid.Opengl.h"
 #include "_Elastos_Droid_Opengl_CGLUtils.h"
+#include <elastos/core/Singleton.h>
 
+using Elastos::Core::Singleton;
 using Elastos::Droid::Graphics::IBitmap;
 
 namespace Elastos {
@@ -11,8 +14,14 @@ namespace Droid {
 namespace Opengl {
 
 CarClass(CGLUtils)
+    , public Singleton
+    , public IGLUtils
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
+
     CARAPI GetInternalFormat(
         /* [in] */ IBitmap* bitmap,
         /* [out] */ Int32* rst);
@@ -62,7 +71,8 @@ public:
         /* [in] */ Int32 error,
         /* [out] */ String* str);
 
-    CARAPI EnableTracing();
+    CARAPI SetTracingLevel(
+        /* [in] */ Int32 level);
 
 private:
     static CARAPI_(Int32) Native_getInternalFormat(
@@ -87,8 +97,6 @@ private:
         /* [in] */ IBitmap* bitmap,
         /* [in] */ Int32 format,
         /* [in] */ Int32 type);
-
-    static CARAPI_(void) Native_enableTracing();
 };
 
 } // namespace Opengl

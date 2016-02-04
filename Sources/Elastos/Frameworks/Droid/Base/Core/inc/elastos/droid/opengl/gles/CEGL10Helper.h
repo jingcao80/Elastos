@@ -2,6 +2,12 @@
 #define __ELASTOS_DROID_OPENGL_GLES_CEGL10HELPER_H__
 
 #include "_Elastos_Droid_Opengl_Gles_CEGL10Helper.h"
+#include "Elastos.Droid.Opengl.h"
+
+#include <elastos/core/Singleton.h>
+
+using Elastos::Core::Singleton;
+using Elastosx::Microedition::Khronos::Egl::IEGL10Helper;
 
 namespace Elastos {
 namespace Droid {
@@ -9,12 +15,18 @@ namespace Opengl {
 namespace Gles {
 
 CarClass(CEGL10Helper)
+    , public Singleton
+    , public IEGL10Helper
 {
 typedef Elastosx::Microedition::Khronos::Egl::IEGLContext XIEGLContext;
 typedef Elastosx::Microedition::Khronos::Egl::IEGLDisplay XIEGLDisplay;
 typedef Elastosx::Microedition::Khronos::Egl::IEGLSurface XIEGLSurface;
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
+
     CARAPI GetDefaultDisplay(
         /* [out] */ IInterface** disp);
 

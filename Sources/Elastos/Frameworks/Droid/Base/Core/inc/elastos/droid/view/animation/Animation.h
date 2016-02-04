@@ -22,7 +22,7 @@ namespace Droid {
 namespace View {
 namespace Animation {
 
-class Animation
+class ECO_PUBLIC Animation
     : public Object
     , public IAnimation
     , public ICloneable

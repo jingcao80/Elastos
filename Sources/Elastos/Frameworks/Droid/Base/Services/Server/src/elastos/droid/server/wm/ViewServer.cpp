@@ -1,8 +1,13 @@
 
-#include "wm/ViewServer.h"
+#include "elastos/droid/server/wm/ViewServer.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
+#include <Elastos.CoreLibrary.IO.h>
 #include <elastos/core/Thread.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Core::CThread;
+using Elastos::Core::StringUtils;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IFlushable;
 using Elastos::IO::IBufferedReader;
@@ -15,11 +20,13 @@ using Elastos::IO::CInputStreamReader;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::IOutputStreamWriter;
 using Elastos::IO::COutputStreamWriter;
+using Elastos::IO::IWriter;
+using Elastos::IO::IReader;
 using Elastos::Net::IInetAddress;
 using Elastos::Net::CServerSocket;
 using Elastos::Net::IInetAddressHelper;
 using Elastos::Net::CInetAddressHelper;
-using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -39,7 +46,7 @@ ViewServer::ViewServerWorker::ViewServerWorker(
     , mHost(host)
 { }
 
-CAR_INTERFACE_IMPL(ViewServer::ViewServerWorker, Runnable, CWindowManagerService::IWindowChangeListener)
+CAR_INTERFACE_IMPL(ViewServer::ViewServerWorker, Runnable, IWindowChangeListener)
 
 ECode ViewServer::ViewServerWorker::Run()
 {
@@ -53,7 +60,7 @@ ECode ViewServer::ViewServerWorker::Run()
     }
     AutoPtr<IInputStreamReader> reader;
     CInputStreamReader::New(inputStream, (IInputStreamReader**)&reader);
-    ec = CBufferedReader::New(reader, 1024, (IBufferedReader**)&in);
+    ec = CBufferedReader::New(IReader::Probe(reader), 1024, (IBufferedReader**)&in);
     if (FAILED(ec)) {
         mClient->Close();
         return ec;
@@ -101,9 +108,9 @@ ECode ViewServer::ViewServerWorker::Run()
                 command, parameters);
     }
 
-    // if (!result) {
-    //     Slog.w(LOG_TAG, "An error occurred with the command: " + command);
-    // }
+    if (!result) {
+        Slogger::W(LocalLOG_TAG, "An error occurred with the command: %s", command.string());
+    }
     // } catch(IOException e) {
     //     Slog.w(LOG_TAG, "Connection error: ", e);
     // } finally {
@@ -127,43 +134,41 @@ ECode ViewServer::ViewServerWorker::Run()
     return NOERROR;
 }
 
-void ViewServer::ViewServerWorker::WindowsChanged()
+ECode ViewServer::ViewServerWorker::WindowsChanged()
 {
     synchronized (mLock) {
         mNeedWindowListUpdate = TRUE;
         mLock.NotifyAll();
     }
+    return NOERROR;
 }
 
-void ViewServer::ViewServerWorker::FocusChanged()
+ECode ViewServer::ViewServerWorker::FocusChanged()
 {
     synchronized (mLock) {
         mNeedFocusedWindowUpdate = TRUE;
         mLock.NotifyAll();
     }
+    return NOERROR;
 }
 
 Boolean ViewServer::ViewServerWorker::WindowManagerAutolistLoop()
 {
-    mHost->mWindowManager->AddWindowChangeListener(
-            (CWindowManagerService::IWindowChangeListener*)this);
+    mHost->mWindowManager->AddWindowChangeListener((IWindowChangeListener*)this);
     AutoPtr<IBufferedWriter> out;
     // try {
     AutoPtr<IOutputStream> outputStream;
     if (FAILED(mClient->GetOutputStream((IOutputStream**)&outputStream))) {
-        mHost->mWindowManager->RemoveWindowChangeListener(
-                (CWindowManagerService::IWindowChangeListener*)this);
+        mHost->mWindowManager->RemoveWindowChangeListener((IWindowChangeListener*)this);
         return TRUE;
     }
     AutoPtr<IOutputStreamWriter> writer;
     if (FAILED(COutputStreamWriter::New(outputStream, (IOutputStreamWriter**)&writer))) {
-        mHost->mWindowManager->RemoveWindowChangeListener(
-                (CWindowManagerService::IWindowChangeListener*)this);
+        mHost->mWindowManager->RemoveWindowChangeListener((IWindowChangeListener*)this);
         return TRUE;
     }
-    if (FAILED(CBufferedWriter::New(writer, (IBufferedWriter**)&out))) {
-        mHost->mWindowManager->RemoveWindowChangeListener(
-                (CWindowManagerService::IWindowChangeListener*)this);
+    if (FAILED(CBufferedWriter::New(IWriter::Probe(writer), (IBufferedWriter**)&out))) {
+        mHost->mWindowManager->RemoveWindowChangeListener((IWindowChangeListener*)this);
         return TRUE;
     }
     while (!Thread::Interrupted()) {
@@ -185,11 +190,11 @@ Boolean ViewServer::ViewServerWorker::WindowManagerAutolistLoop()
         }
 
         if (needWindowListUpdate) {
-            out->WriteString(String("LIST UPDATE\n"));
+            IWriter::Probe(out)->Write(String("LIST UPDATE\n"));
             IFlushable::Probe(out)->Flush();
         }
         if (needFocusedWindowUpdate) {
-            out->WriteString(String("ACTION_FOCUS UPDATE\n"));
+            IWriter::Probe(out)->Write(String("ACTION_FOCUS UPDATE\n"));
             IFlushable::Probe(out)->Flush();
         }
     }
@@ -203,8 +208,7 @@ Boolean ViewServer::ViewServerWorker::WindowManagerAutolistLoop()
         //     // Ignore
         // }
     }
-    mHost->mWindowManager->RemoveWindowChangeListener(
-            (CWindowManagerService::IWindowChangeListener*)this);
+    mHost->mWindowManager->RemoveWindowChangeListener((IWindowChangeListener*)this);
     // }
     return TRUE;
 }
@@ -247,7 +251,7 @@ ECode ViewServer::Start(
     FAIL_RETURN(CServerSocket::New(mPort, VIEW_SERVER_MAX_CONNECTIONS, addr,
             (IServerSocket**)&mServer));
     FAIL_RETURN(CThread::New((IRunnable*)this,
-            String("Remote View Server [port=") + StringUtils::Int32ToString(mPort) + String("]"),
+            String("Remote View Server [port=") + StringUtils::ToString(mPort) + String("]"),
             (IThread**)&mThread));
     // AutoPtr<IExecutors> executors;
     // CExecutors::AcquireSingleton((IExecutors**)&executors);
@@ -329,15 +333,15 @@ Boolean ViewServer::WriteValue(
         goto fail;
     }
     COutputStreamWriter::New(clientStream, (IOutputStreamWriter**)&writer);
-    if (FAILED(CBufferedWriter::New(writer , 8 * 1024, (IBufferedWriter**)&out))) {
+    if (FAILED(CBufferedWriter::New(IWriter::Probe(writer) , 8 * 1024, (IBufferedWriter**)&out))) {
         result = FALSE;
         goto fail;
     }
-    if (FAILED(out->WriteString(String(value)))) {
+    if (FAILED(IWriter::Probe(out)->Write(String(value)))) {
         result = FALSE;
         goto fail;
     }
-    if (FAILED(out->WriteString(String("\n")))) {
+    if (FAILED(IWriter::Probe(out)->Write(String("\n")))) {
         result = FALSE;
         goto fail;
     }

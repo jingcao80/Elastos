@@ -429,6 +429,9 @@ module
             [in] String host,
             [in] String port);
 
+        AddDataAuthority(
+            [in] IIntentFilterAuthorityEntry* authority);
+
         /**
          * Return the number of data authorities in the filter.
          */
@@ -496,6 +499,9 @@ module
         AddDataPath(
             [in] String path,
             [in] Int32 type);
+
+        AddDataPath(
+            [in] IPatternMatcher* pm);
 
         /**
          * Return the number of data paths in the filter.

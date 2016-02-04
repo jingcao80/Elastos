@@ -5,7 +5,7 @@
 #include "Elastos.Droid.View.h"
 #include "_Elastos_Droid_Internal_App_CAlertController.h"
 #include "elastos/droid/os/Handler.h"
-// #include "elastos/droid/widget/ListView.h"
+#include "elastos/droid/widget/ListView.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IDialogInterface;
@@ -27,7 +27,7 @@ using Elastos::Droid::Widget::IListAdapter;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::ITextView;
 using Elastos::Droid::Widget::IScrollView;
-// using Elastos::Droid::Widget::ListView;
+using Elastos::Droid::Widget::ListView;
 using Elastos::Core::ICharSequence;
 
 namespace Elastos {
@@ -42,8 +42,7 @@ CarClass(CAlertController)
     friend class CAlertControllerAlertParams;
 public:
     class RecycleListView
-        // : public ListView
-        : public Object
+        : public ListView
         , public IRecycleListView
     {
     public:

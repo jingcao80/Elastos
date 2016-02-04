@@ -115,11 +115,14 @@ public:
         /* [in] */ Boolean resultAbort,
         /* [in] */ Boolean waitForServices);
 
+    CARAPI_(void) BackgroundServicesFinishedLocked(
+        /* [in] */ Int32 userId);
+
     CARAPI ProcessNextBroadcast(
         /* [in] */ Boolean fromMsg);
 
     CARAPI_(void) SetBroadcastTimeoutLocked(
-        /* [in] */ Millisecond64 timeoutTime);
+        /* [in] */ Int64 timeoutTime);
 
     CARAPI_(void) CancelBroadcastTimeoutLocked();
 
@@ -142,9 +145,6 @@ private:
     CARAPI ProcessCurBroadcastLocked(
         /* [in] */ BroadcastRecord* r,
         /* [in] */ ProcessRecord* app);
-
-    CARAPI_(void) BackgroundServicesFinishedLocked(
-        /* [in] */ Int32 userId);
 
     static CARAPI PerformReceiveLocked(
         /* [in] */ ProcessRecord* app,
@@ -256,5 +256,10 @@ public:
 } // namespace Droid
 } // namespace Elastos
 
+template <>
+struct Conversion<Elastos::Droid::Server::Am::BroadcastQueue*, IInterface*>
+{
+    enum { exists = TRUE, exists2Way = FALSE, sameType = FALSE };
+};
 
 #endif //__ELASTOS_DROID_SERVER_AM_BROADCASTQUEUE_H__

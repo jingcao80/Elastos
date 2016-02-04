@@ -75,8 +75,7 @@ void CoreSettingsObserver::SendCoreSettings()
     PopulateSettings(mCoreSettings, &sSecureSettingToTypeMap);
     PopulateSettings(mCoreSettings, &sSystemSettingToTypeMap);
     PopulateSettings(mCoreSettings, &sGlobalSettingToTypeMap);
-    assert(0);
-    // mActivityManagerService->OnCoreSettingsChange(mCoreSettings);
+    mActivityManagerService->OnCoreSettingsChange(mCoreSettings);
 }
 
 void CoreSettingsObserver::BeginObserveCoreSettings()
@@ -127,7 +126,7 @@ void CoreSettingsObserver::PopulateSettings(
         String setting = it->mFirst;
         String type = it->mSecond;
         // try {
-        ECode ec;
+        ECode ec = NOERROR;
         do {
             if (type.Equals("String")) {
                 String value;

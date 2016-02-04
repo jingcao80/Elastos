@@ -1,19 +1,25 @@
 
-#include "CSamplingProfilerService.h"
+#include "elastos/droid/server/CSamplingProfilerService.h"
 #include <elastos/utility/logging/Slogger.h>
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/Manifest.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Net.h>
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.Droid.Database.h>
+#include <Elastos.CoreLibrary.IO.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::IO::CFile;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Database::IContentObserver;
+using Elastos::Core::StringUtils;
+using Elastos::IO::CFile;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -23,6 +29,10 @@ namespace Server {
 const String CSamplingProfilerService::SNAPSHOT_DIR("/data/snapshots");//SamplingProfilerIntegration::SNAPSHOT_DIR;
 const String CSamplingProfilerService::TAG("SamplingProfilerService");
 const Boolean CSamplingProfilerService::LOCAL_LOGV = FALSE;
+
+CAR_INTERFACE_IMPL(CSamplingProfilerService, Object, IBinder)
+
+CAR_OBJECT_IMPL(CSamplingProfilerService)
 
 ECode CSamplingProfilerService::constructor(
     /* [in] */ IContext* context)
@@ -100,8 +110,9 @@ ECode CSamplingProfilerService::RegisterSettingObserver(
     AutoPtr<ISettingsGlobal> settingsGlobal;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
     settingsGlobal->GetUriFor(ISettingsGlobal::SAMPLING_PROFILER_MS, (IUri**)&uri);
-    AutoPtr<IContentObserver> observer = new SamplingProfilerSettingsObserver(contentResolver);
-    contentResolver->RegisterContentObserver(uri, FALSE, observer);
+    AutoPtr<SamplingProfilerSettingsObserver> observer = new SamplingProfilerSettingsObserver(contentResolver);
+    observer->constructor(NULL);
+    contentResolver->RegisterContentObserver(uri, FALSE, observer.Get());
     return NOERROR;
 }
 
@@ -112,16 +123,15 @@ ECode CSamplingProfilerService::Dump(
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::DUMP, String(TAG)));
 
-    pw->PrintStringln(String("SamplingProfilerService:") );
-    pw->PrintStringln(String("Watching directory: ") + SNAPSHOT_DIR);
+    pw->Println(String("SamplingProfilerService:") );
+    pw->Println(String("Watching directory: ") + SNAPSHOT_DIR);
 
     return NOERROR;
 }
 
 CSamplingProfilerService::SamplingProfilerSettingsObserver::SamplingProfilerSettingsObserver(
     /* [in] */ IContentResolver *contentResolver)
-    : ContentObserver(NULL)
-    , mContentResolver(contentResolver)
+    : mContentResolver(contentResolver)
 {
     OnChange(FALSE);
 }
@@ -139,7 +149,7 @@ ECode CSamplingProfilerService::SamplingProfilerSettingsObserver::OnChange(
     // as well as adjust the the time between taking snapshots.
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
-    sysProp->Set(String("persist.sys.profiler_ms"), StringUtils::Int32ToString(samplingProfilerMs));
+    sysProp->Set(String("persist.sys.profiler_ms"), StringUtils::ToString(samplingProfilerMs));
 
     return NOERROR;
 }

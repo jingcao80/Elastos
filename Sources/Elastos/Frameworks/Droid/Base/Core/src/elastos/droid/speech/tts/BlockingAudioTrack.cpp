@@ -171,6 +171,7 @@ ECode BlockingAudioTrack::WaitAndRelease()
         mAudioTrack = NULL;
     }
     track->ReleaseResources();
+    return NOERROR;
 }
 
 

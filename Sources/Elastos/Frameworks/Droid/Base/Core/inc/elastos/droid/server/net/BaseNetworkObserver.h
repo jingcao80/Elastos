@@ -68,7 +68,8 @@ public:
     //@Override
     CARAPI InterfaceClassDataActivityChanged(
         /* [in] */ const String& label,
-        /* [in] */ Boolean active);
+        /* [in] */ Boolean active,
+        /* [in] */ Int64 tsNanos);
 
     //@Override
     CARAPI LimitReached(

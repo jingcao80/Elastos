@@ -1,6 +1,7 @@
 
 #include "elastos/droid/server/am/UriPermission.h"
 #include "elastos/droid/server/am/UriPermissionOwner.h"
+#include "elastos/droid/server/am/CActivityManagerService.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include <elastos/core/Math.h>
@@ -34,8 +35,7 @@ ECode UriPermission::PersistedTimeComparator::Compare(
     VALIDATE_NOT_NULL(result)
     UriPermission* lhs = (UriPermission*)IObject::Probe(_lhs);
     UriPermission* rhs = (UriPermission*)IObject::Probe(_rhs);
-    *result = lhs->mPersistedCreateTime < rhs->mPersistedCreateTime ?
-        -1 : (lhs->mPersistedCreateTime == rhs->mPersistedCreateTime ? 0 : 1);
+    *result = PersistedTimeCompare(lhs, rhs);
     return NOERROR;
 }
 
@@ -366,6 +366,15 @@ AutoPtr<IUriPermission> UriPermission::BuildPersistedPublicApiObject()
     CUriPermission::New(mUri->mUri, mPersistedModeFlags, mPersistedCreateTime,
         (IUriPermission**)&perm);
     return perm;
+}
+
+Int32 UriPermission::PersistedTimeCompare(
+    /* [in] */ UriPermission* lhs,
+    /* [in] */ UriPermission* rhs)
+{
+    assert(lhs && rhs);
+    return lhs->mPersistedCreateTime < rhs->mPersistedCreateTime ?
+        -1 : (lhs->mPersistedCreateTime == rhs->mPersistedCreateTime ? 0 : 1);
 }
 
 } // namespace Am

@@ -86,7 +86,9 @@ ECode AbsSavedState::constructor(
 }
 
 ECode AbsSavedState::constructor()
-{}
+{
+    return NOERROR;
+}
 
 } // namespace View
 } // namespace Droid

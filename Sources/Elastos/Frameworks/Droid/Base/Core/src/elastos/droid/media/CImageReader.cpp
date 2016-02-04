@@ -49,8 +49,8 @@ CImageReader::SurfaceImage::SurfacePlane::SurfacePlane(
     /* [in] */ Int32 pixelStride,
     /* [in] */ SurfaceImage* host)
     : mIndex(index)
-    , mRowStride(rowStride)
     , mPixelStride(pixelStride)
+    , mRowStride(rowStride)
     , mHost(host)
 {
 }

@@ -4,13 +4,14 @@
 #include "elastos/droid/internal/view/menu/IconMenuView.h"
 #include "elastos/droid/internal/view/menu/CMenuDialogHelper.h"
 #include "elastos/droid/internal/view/menu/IconMenuItemView.h"
-// #include "elastos/droid/view/CContextThemeWrapper.h"
+#include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/R.h"
 
 using Elastos::Droid::Os::CBundle;
-// using Elastos::Droid::View::CContextThemeWrapper;
+using Elastos::Droid::View::CContextThemeWrapper;
+using Elastos::Droid::View::IContextThemeWrapper;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewParent;
@@ -79,8 +80,7 @@ ECode IconMenuPresenter::constructor(
     /* [in] */ IContext* context)
 {
     AutoPtr<IContext> themeContext;
-    assert(0);
-    // CContextThemeWrapper::New(context, R::style::Theme_IconMenu, (IContextThemeWrapper**)&themeContext);
+    CContextThemeWrapper::New(context, R::style::Theme_IconMenu, (IContextThemeWrapper**)&themeContext);
     return BaseMenuPresenter::constructor(themeContext, R::layout::icon_menu_layout,
             R::layout::icon_menu_item_layout);
 }

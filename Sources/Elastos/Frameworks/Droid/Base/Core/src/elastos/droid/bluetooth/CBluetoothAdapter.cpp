@@ -1,21 +1,22 @@
 
-#include "CBluetoothAdapter.h"
-#include "CBluetoothDevice.h"
-#include "BluetoothServerSocket.h"
-#include "BluetoothHeadset.h"
-#include "BluetoothA2dp.h"
-#include "BluetoothInputDevice.h"
-#include "BluetoothPan.h"
-#include "BluetoothHealth.h"
-#include "BluetoothSocket.h"
+#include "Elastos.Droid.App.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/droid/bluetooth/CBluetoothDevice.h"
+#include "elastos/droid/bluetooth/BluetoothServerSocket.h"
+#include "elastos/droid/bluetooth/BluetoothHeadset.h"
+#include "elastos/droid/bluetooth/BluetoothA2dp.h"
+#include "elastos/droid/bluetooth/BluetoothInputDevice.h"
+#include "elastos/droid/bluetooth/BluetoothPan.h"
+#include "elastos/droid/bluetooth/BluetoothHealth.h"
+#include "elastos/droid/bluetooth/BluetoothSocket.h"
 #include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::App::CActivityThread;
+using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Os::ServiceManager;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -26,7 +27,11 @@ const Boolean CBluetoothAdapter::DBG = TRUE;
 const Boolean CBluetoothAdapter::VDBG = FALSE;
 const Int32 CBluetoothAdapter::ADDRESS_LENGTH;
 AutoPtr<IBluetoothAdapter> CBluetoothAdapter::sAdapter;
-Mutex CBluetoothAdapter::sLock;
+Object CBluetoothAdapter::sLock;
+
+CAR_INTERFACE_IMPL(CBluetoothAdapter, Object, IBluetoothAdapter);
+
+CAR_OBJECT_IMPL(CBluetoothAdapter);
 
 CBluetoothAdapter::CBluetoothAdapter()
 {
@@ -109,6 +114,20 @@ ECode CBluetoothAdapter::GetRemoteDevice(
     String add;
     add.AppendFormat("%02X:%02X:%02X:%02X:%02X:%02X", (*address)[0], (*address)[1], (*address)[2], (*address)[3], (*address)[4], (*address)[5]);
     return CBluetoothDevice::New(add, device);
+}
+
+ECode CBluetoothAdapter::GetBluetoothLeAdvertiser(
+    /* [out] */ IBluetoothLeAdvertiser** btAdvertiser)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode CBluetoothAdapter::GetBluetoothLeScanner(
+    /* [out] */ IBluetoothLeScanner** btLeScanner)
+{
+    //TODO
+    return NOERROR;
 }
 
 ECode CBluetoothAdapter::IsEnabled(
@@ -206,6 +225,14 @@ ECode CBluetoothAdapter::GetName(
     return mManagerService->GetName(name);
     // } catch (RemoteException e) {Log.e(TAG, "", e);}
     // return null;
+}
+
+ECode CBluetoothAdapter::ConfigHciSnoopLog(
+    /* [in] */ Boolean enabled,
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
 }
 
 ECode CBluetoothAdapter::GetUuids(
@@ -360,6 +387,35 @@ ECode CBluetoothAdapter::IsDiscovering(
     return NOERROR;
 }
 
+ECode CBluetoothAdapter::IsMultipleAdvertisementSupported(
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode CBluetoothAdapter::IsOffloadedFilteringSupported(
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode CBluetoothAdapter::IsOffloadedScanBatchingSupported(
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode CBluetoothAdapter::GetControllerActivityEnergyInfo(
+    /* [in] */ Int32 updateType,
+    /* [out] */ IBluetoothActivityEnergyInfo** btActivityEnergyInfo)
+{
+    //TODO
+    return NOERROR;
+}
+
 ECode CBluetoothAdapter::GetBondedDevices(
     /* [out, callee] */ ArrayOf<IBluetoothDevice*>** device)
 {
@@ -422,13 +478,13 @@ ECode CBluetoothAdapter::ListenUsingRfcommOn(
     *socket = NULL;
     AutoPtr<BluetoothServerSocket> serverSocket = new BluetoothServerSocket(
             BluetoothSocket::TYPE_RFCOMM, TRUE, TRUE, channel);
-    Int32 errno = serverSocket->mSocket->BindListen();
-    if (errno != 0) {
+    Int32 terrno = serverSocket->mSocket->BindListen();
+    if (terrno != 0) {
         //TODO(BT): Throw the same exception error code
         // that the previous code was using.
         //socket.mSocket.throwErrnoNative(errno);
         // throw new IOException("Error: " + errno);
-        Logger::E(TAG, "Error: %d", errno);
+        Logger::E(TAG, "Error: %d", terrno);
         return E_IO_EXCEPTION;
     }
     *socket = serverSocket;
@@ -474,13 +530,13 @@ ECode CBluetoothAdapter::CreateNewRfcommSocketAndRecord(
     AutoPtr<BluetoothServerSocket> serverSocket = new BluetoothServerSocket(
             BluetoothSocket::TYPE_RFCOMM, auth, encrypt, parcelUuid);
     serverSocket->SetServiceName(name);
-    Int32 errno = serverSocket->mSocket->BindListen();
-    if (errno != 0) {
+    Int32 terrno = serverSocket->mSocket->BindListen();
+    if (terrno != 0) {
         //TODO(BT): Throw the same exception error code
         // that the previous code was using.
         //socket.mSocket.throwErrnoNative(errno);
         // throw new IOException("Error: " + errno);
-        Logger::E(TAG, "Error: %d", errno);
+        Logger::E(TAG, "Error: %d", terrno);
         return E_IO_EXCEPTION;
     }
     *socket = (IBluetoothServerSocket*)serverSocket;
@@ -496,13 +552,13 @@ ECode CBluetoothAdapter::ListenUsingInsecureRfcommOn(
     *socket = NULL;
     AutoPtr<BluetoothServerSocket> serverSocket = new BluetoothServerSocket(
             BluetoothSocket::TYPE_RFCOMM, FALSE, FALSE, port);
-    Int32 errno = serverSocket->mSocket->BindListen();
-    if (errno != 0) {
+    Int32 terrno = serverSocket->mSocket->BindListen();
+    if (terrno != 0) {
         //TODO(BT): Throw the same exception error code
         // that the previous code was using.
         //socket.mSocket.throwErrnoNative(errno);
         // throw new IOException("Error: " + errno);
-        Logger::E(TAG, "Error: %d", errno);
+        Logger::E(TAG, "Error: %d", terrno);
         return E_IO_EXCEPTION;
     }
     *socket = serverSocket;
@@ -518,12 +574,12 @@ ECode CBluetoothAdapter::ListenUsingEncryptedRfcommOn(
     *socket = NULL;
     AutoPtr<BluetoothServerSocket> serverSocket = new BluetoothServerSocket(
             BluetoothSocket::TYPE_RFCOMM, FALSE, TRUE, port);
-    Int32 errno = serverSocket->mSocket->BindListen();
-    if (errno < 0) {
+    Int32 terrno = serverSocket->mSocket->BindListen();
+    if (terrno < 0) {
         //TODO(BT): Throw the same exception error code
         // that the previous code was using.
         //socket.mSocket.throwErrnoNative(errno);
-        Logger::E(TAG, "Error: %d", errno);
+        Logger::E(TAG, "Error: %d", terrno);
         return E_IO_EXCEPTION;
     }
     *socket = serverSocket;
@@ -538,8 +594,8 @@ ECode CBluetoothAdapter::ListenUsingScoOn(
     *socket = NULL;
     AutoPtr<BluetoothServerSocket> serverSocket = new BluetoothServerSocket(
             BluetoothSocket::TYPE_SCO, FALSE, FALSE, -1);
-    Int32 errno = serverSocket->mSocket->BindListen();
-    if (errno < 0) {
+    Int32 terrno = serverSocket->mSocket->BindListen();
+    if (terrno < 0) {
         //TODO(BT): Throw the same exception error code
         // that the previous code was using.
         //socket.mSocket.throwErrnoNative(errno);
@@ -686,6 +742,30 @@ ECode CBluetoothAdapter::ChangeApplicationBluetoothState(
        Log.e(TAG, "changeBluetoothState", e);
     }*/
     // return false;
+}
+
+ECode CBluetoothAdapter::StartLeScan(
+    /* [in] */ IBluetoothAdapterLeScanCallback* cb,
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode CBluetoothAdapter::StartLeScan(
+    /* [in] */ ArrayOf<IUUID*>* serviceUuids,
+    /* [in] */ IBluetoothAdapterLeScanCallback* cb,
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode CBluetoothAdapter::StopLeScan(
+    /* [in] */ IBluetoothAdapterLeScanCallback* cb)
+{
+    //TODO
+    return NOERROR;
 }
 
 Boolean CBluetoothAdapter::CheckBluetoothAddress(

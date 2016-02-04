@@ -1,16 +1,16 @@
-#include "ManagedEGLContext.h"
 #include "elastos/droid/os/Looper.h"
+#include "elastos/droid/opengl/ManagedEGLContext.h"
+#include "elastos/droid/opengl/gles/CEGL10Helper.h"
+#include "elastos/droid/opengl/gles/CEGLImpl.h"
+#include "elastos/droid/opengl/gles/CEGLContextImpl.h"
 #include <elastos/utility/logging/Slogger.h>
-#include "gles/CEGL10Helper.h"
-#include "gles/CEGLImpl.h"
-#include "gles/CEGLContextImpl.h"
 
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Opengl::gles::CEGLImpl;
 using Elastos::Droid::Opengl::gles::CEGL10Helper;
 using Elastos::Droid::Opengl::gles::CEGLContextImpl;
-using Elastosx::Microedition::Khronos::egl::IEGL10Helper;
-using Elastosx::Microedition::Khronos::egl::IEGL10;
+using Elastosx::Microedition::Khronos::Egl::IEGL10Helper;
+using Elastosx::Microedition::Khronos::Egl::IEGL10;
 
 namespace Elastos {
 namespace Droid {

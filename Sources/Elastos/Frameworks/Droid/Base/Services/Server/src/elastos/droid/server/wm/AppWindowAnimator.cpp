@@ -1,5 +1,7 @@
 
-#include "wm/AppWindowAnimator.h"
+#include <Elastos.Droid.View.h>
+#include "elastos/droid/server/wm/AppWindowAnimator.h"
+#include "elastos/droid/server/wm/ScreenRotationAnimation.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
@@ -19,8 +21,19 @@ ECode AppWindowAnimator::DummyAnimation::GetTransformation(
     /* [in, out] */ ITransformation* outTransformation,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     *result = FALSE;
+    return NOERROR;
+}
+
+ECode AppWindowAnimator::DummyAnimation::Clone(
+    /* [out] */ IInterface** obj)
+{
+    VALIDATE_NOT_NULL(obj)
+    AutoPtr<DummyAnimation> animation = new DummyAnimation();
+    animation->CloneImpl((IAnimation*)animation.Get());
+    *obj = (IAnimation*)animation.Get();
+    REFCOUNT_ADD(*obj)
     return NOERROR;
 }
 
@@ -63,7 +76,7 @@ AutoPtr<AppWindowToken> AppWindowAnimator::GetAppToken()
     if (mWeakAppToken != NULL) {
         AutoPtr<IInterface> obj;
         mWeakAppToken->Resolve(EIID_IInterface, (IInterface**)&obj);
-        appWinToken = (AppWindowToken*)obj.Get();
+        appWinToken = (AppWindowToken*)(IObject*)obj.Get();
     }
     return appWinToken;
 }
@@ -123,7 +136,6 @@ void AppWindowAnimator::SetDummyAnimation()
     }
 
     mAnimation = sDummyAnimation;
-    mAnimInitialized = FALSE;
     mHasTransformation = TRUE;
     mTransformation->Clear();
     mTransformation->SetAlpha(appToken->IsVisible() ? 1 : 0);
@@ -230,7 +242,7 @@ void AppWindowAnimator::StepThumbnailAnimation(
     else {
         // The thumbnail is layered below the window immediately above this
         // token's anim layer.
-        mThumbnail->SetLayer(thumbnailLayer + CWindowManagerService::WINDOW_LAYER_MULTIPLIER
+        mThumbnail->SetLayer(mThumbnailLayer + CWindowManagerService::WINDOW_LAYER_MULTIPLIER
                 - CWindowManagerService::LAYER_OFFSET_THUMBNAIL);
     }
     mThumbnail->SetMatrix((*tmpFloats)[IMatrix::MSCALE_X], (*tmpFloats)[IMatrix::MSKEW_Y],
@@ -348,12 +360,12 @@ Boolean AppWindowAnimator::StepAnimationLocked(
         mService->mActivityManager->NotifyLaunchTaskBehindComplete(appToken->mToken);
         // } catch (RemoteException e) {
         // }
-        mAppToken->mLaunchTaskBehind = FALSE;
+        appToken->mLaunchTaskBehind = FALSE;
     }
     else {
-        mAppToken->UpdateReportedVisibilityLocked();
-        if (mAppToken->mEnteringAnimation) {
-            mAppToken->mEnteringAnimation = FALSE;
+        appToken->UpdateReportedVisibilityLocked();
+        if (appToken->mEnteringAnimation) {
+            appToken->mEnteringAnimation = FALSE;
             // try {
             mService->mActivityManager->NotifyEnterAnimationComplete(appToken->mToken);
             // } catch (RemoteException e) {

@@ -25,11 +25,19 @@ CThrowable::CThrowable()
     mSuppressedExceptions = Collections::EMPTY_LIST;
 }
 
+CThrowable::~CThrowable()
+{
+    if (mCause != (IThrowable*)this) {
+        mCause->Release();
+        mCause = NULL;
+    }
+}
+
 ECode CThrowable::constructor()
 {
     mStackTrace = EmptyArray::STACK_TRACE_ELEMENT;
     FillInStackTrace();
-    mCause = THIS_PROBE(IThrowable);
+    mCause = (IThrowable*)this;
     return NOERROR;
 }
 
@@ -38,7 +46,7 @@ ECode CThrowable::constructor(
 {
     mDetailMessage = detailMessage;
     mStackTrace = EmptyArray::STACK_TRACE_ELEMENT;
-    mCause = THIS_PROBE(IThrowable);
+    mCause = (IThrowable*)this;
     FillInStackTrace();
     return NOERROR;
 }
@@ -49,6 +57,7 @@ ECode CThrowable::constructor(
 {
     mDetailMessage = detailMessage;
     mCause = cause;
+    if (mCause != (IThrowable*)this) mCause->AddRef();
     mStackTrace = EmptyArray::STACK_TRACE_ELEMENT;
     FillInStackTrace();
     return NOERROR;
@@ -59,6 +68,7 @@ ECode CThrowable::constructor(
 {
     mDetailMessage = Object::ToString(cause);
     mCause = cause;
+    if (mCause != (IThrowable*)this) mCause->AddRef();
     mStackTrace = EmptyArray::STACK_TRACE_ELEMENT;
     FillInStackTrace();
     return NOERROR;
@@ -72,6 +82,7 @@ ECode CThrowable::constructor(
 {
     mDetailMessage = detailMessage;
     mCause = cause;
+    if (mCause != (IThrowable*)this) mCause->AddRef();
     if (!enableSuppression) {
         mSuppressedExceptions = NULL;
     }
@@ -279,15 +290,16 @@ ECode CThrowable::ToString(
 ECode CThrowable::InitCause(
     /* [in] */ IThrowable* throwable)
 {
-    if (mCause.Get() != THIS_PROBE(IThrowable)) {
+    if (mCause != (IThrowable*)this) {
         //throw new IllegalStateException("Cause already initialized");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
-    if (throwable == THIS_PROBE(IThrowable)) {
+    if (throwable == (IThrowable*)this) {
         // throw new IllegalArgumentException("throwable == this");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mCause = throwable;
+    if (mCause != (IThrowable*)this) mCause->AddRef();
     return NOERROR;
 }
 
@@ -296,7 +308,7 @@ ECode CThrowable::GetCause(
 {
     VALIDATE_NOT_NULL(outthr)
     *outthr = NULL;
-    if (mCause.Get() == THIS_PROBE(IThrowable)) {
+    if (mCause == (IThrowable*)this) {
         return NOERROR;
     }
     *outthr = mCause;
@@ -307,7 +319,7 @@ ECode CThrowable::GetCause(
 ECode CThrowable::AddSuppressed(
     /* [in] */ IThrowable* throwable)
 {
-    if (throwable == THIS_PROBE(IThrowable)) {
+    if (throwable == (IThrowable*)this) {
         // throw new IllegalArgumentException("throwable == this");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }

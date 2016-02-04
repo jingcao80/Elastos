@@ -11,6 +11,7 @@
  *      elcopy helloCar
  *
  * run:
+        adb root
  *      adb shell
  *      cd /data/data/com.elastos.runtime/elastos
  *      ./helloCar
@@ -30,10 +31,13 @@
 #include <_Elastos.HelloCar.h>
 #include <elastos/coredef.h>            // include ETL 头文件之前必须先 include 该头文件以便ETL使用其中定义的宏
 #include <elastos/core/Math.h>
+ #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/Arrays.h>
+
+#include <dlfcn.h>
 
 using namespace Elastos;
 
@@ -127,12 +131,44 @@ void testArrays()
     printf("Arrays::BinarySearch(animalArr, Dog_4); result: %d\n", index);
 }
 
+class AutoLockTest
+    : public Object
+{
+public:
+    Object mLock;
+};
+
+void lockTest()
+{
+    AutoPtr<AutoLockTest> lock = new AutoLockTest();
+    synchronized(lock->mLock) {
+        Int32 i = 0;
+        ++i;
+    }
+}
+
 void otherTests()
 {
     //testThread
     //testEtl()
-    // testCoreExports();
-    testArrays();
+    //testCoreExports();
+    //testArrays();
+    //lockTest();
+}
+
+void loadFrameworkModule()
+{
+    void* module = dlopen("Elastos.Droid.Core.eco", RTLD_NOW);
+    if (NULL == module) {
+        printf("<%s, %d> dlopen '%s' failed.\n", __FILE__, __LINE__, "Elastos.Droid.Core.eco");
+        printf("error: %s\n", dlerror());
+    }
+
+    module = dlopen("Elastos.Droid.Server.eco", RTLD_NOW);
+    if (NULL == module) {
+        printf("<%s, %d> dlopen '%s' failed.\n", __FILE__, __LINE__, "Elastos.Droid.Server.eco");
+        printf("error: %s\n", dlerror());
+    }
 }
 
 int main(int argc, char *argv[])
@@ -168,7 +204,11 @@ int main(int argc, char *argv[])
         printf("CAnimalHelper::CanFly : %s %s!\n\n", name.string(), canFly ? "can fly" : "can not fly");
     }
 
+    loadFrameworkModule();
+
     // other tests
     otherTests();
+
+    printf("=========== Exit Hello Car ============\n");
     return 0;
 }

@@ -25,6 +25,7 @@ using Elastos::Droid::View::Accessibility::EIID_ICaptioningManagerCaptioningChan
 using Elastos::Droid::View::Accessibility::CaptioningManager;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::View::View;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::CArrayList;
@@ -450,11 +451,9 @@ ECode CClosedCaptionRenderer::ClosedCaptionWidget::SetSize(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height)
 {
-    Int32 widthSpec;
-    Elastos::Droid::View::View::MeasureSpec::MakeMeasureSpec(width,
+    Int32 widthSpec = View::MeasureSpec::MakeMeasureSpec(width,
             Elastos::Droid::View::View::MeasureSpec::EXACTLY);
-    Int32 heightSpec;
-    Elastos::Droid::View::View::MeasureSpec::MakeMeasureSpec(height,
+    Int32 heightSpec = View::MeasureSpec::MakeMeasureSpec(height,
             Elastos::Droid::View::View::MeasureSpec::EXACTLY);
 
     Measure(widthSpec, heightSpec);
@@ -996,16 +995,16 @@ ECode CClosedCaptionRenderer::CCParser::CCData::GetBasicChar(
     Char32 c;
     // replace the non-ASCII ones
     switch (data) {
-        case 0x2A: c = '\u00E1'; break;
-        case 0x5C: c = '\u00E9'; break;
-        case 0x5E: c = '\u00ED'; break;
-        case 0x5F: c = '\u00F3'; break;
-        case 0x60: c = '\u00FA'; break;
-        case 0x7B: c = '\u00E7'; break;
-        case 0x7C: c = '\u00F7'; break;
-        case 0x7D: c = '\u00D1'; break;
-        case 0x7E: c = '\u00F1'; break;
-        case 0x7F: c = '\u2588'; break; // Full block
+        case 0x2A: c = 0x00E1; break;
+        case 0x5C: c = 0x00E9; break;
+        case 0x5E: c = 0x00ED; break;
+        case 0x5F: c = 0x00F3; break;
+        case 0x60: c = 0x00FA; break;
+        case 0x7B: c = 0x00E7; break;
+        case 0x7C: c = 0x00F7; break;
+        case 0x7D: c = 0x00D1; break;
+        case 0x7E: c = 0x00F1; break;
+        case 0x7F: c = 0x2588; break; // Full block
         default: c = (Char32) data; break;
     }
     *result = c;
@@ -1689,7 +1688,7 @@ const Int32 CClosedCaptionRenderer::CCParser::CR  = 0x2d;
 const Int32 CClosedCaptionRenderer::CCParser::ENM = 0x2e;
 const Int32 CClosedCaptionRenderer::CCParser::EOC = 0x2f;
 
-const Char32 CClosedCaptionRenderer::CCParser::TS = '\u00A0';
+const Char32 CClosedCaptionRenderer::CCParser::TS = 0x00A0;
 
 const Int32 CClosedCaptionRenderer::CCParser::MODE_UNKNOWN = 0;
 const Int32 CClosedCaptionRenderer::CCParser::MODE_PAINT_ON = 1;
@@ -1699,9 +1698,9 @@ const Int32 CClosedCaptionRenderer::CCParser::MODE_TEXT = 4;
 
 CClosedCaptionRenderer::CCParser::CCParser(
     /* [in] */ IClosedCaptionRendererCCParserDisplayListener* listener)
-    : mMode(MODE_PAINT_ON)
+    : mListener(listener)
+    , mMode(MODE_PAINT_ON)
     , mRollUpSize(4)
-    , mListener(listener)
 {
     mDisplay = new CCMemory();
     mNonDisplay = new CCMemory();
@@ -1927,8 +1926,7 @@ CClosedCaptionRenderer::ClosedCaptionTrack::ClosedCaptionTrack(
     /* [in] */ ClosedCaptionWidget* renderingWidget,
     /* [in] */ IMediaFormat* format)
 {
-// TODO: Need SubtitleTrack
-    // SubtitleTrack(format);
+    SubtitleTrack::constructor(format);
 
     mRenderingWidget = renderingWidget;
     mCCParser = new CCParser(renderingWidget);

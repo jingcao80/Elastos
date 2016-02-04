@@ -146,7 +146,7 @@ ECode CAssetManager::AssetInputStream::Skip(
     return NOERROR;
 }
 
-AutoPtr<CAssetManager> CAssetManager::sSystem;
+INIT_PROI_3 AutoPtr<CAssetManager> CAssetManager::sSystem;
 const Int32 CAssetManager::STYLE_NUM_ENTRIES;
 const Int32 CAssetManager::STYLE_TYPE;
 const Int32 CAssetManager::STYLE_DATA;
@@ -158,7 +158,7 @@ const Int32 CAssetManager::STYLE_DENSITY;
 const String CAssetManager::TAG("CAssetManager");
 const Boolean CAssetManager::LocalLOGV = FALSE;
 const Boolean CAssetManager::DEBUG_REFS = TRUE;
-Object CAssetManager::sSync;
+INIT_PROI_3 Object CAssetManager::sSync;
 
 CAR_INTERFACE_IMPL_2(CAssetManager, Object, IAssetManager, ICloseable)
 
@@ -1833,7 +1833,7 @@ ECode CAssetManager::ResolveAttrs(
                 newBlock = res.resolveReference(&value, block, &resid,
                         &typeSetFlags, &config);
 #if THROW_ON_BAD_ID
-                if (newBlock == BAD_INDEX) {
+                if (newBlock == android::BAD_INDEX) {
                     // jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
                     return E_ILLEGAL_STATE_EXCEPTION;
                 }
@@ -2416,7 +2416,10 @@ ECode CAssetManager::GetArrayStringInfo(
 ECode CAssetManager::Init(
     /* [in] */ Boolean isSystem)
 {
-    assert(0 && "TODO");
+    // TODO
+    // if (isSystem) {
+    //     verifySystemIdmaps();
+    // }
     android::AssetManager* am = new android::AssetManager();
     if (am == NULL) {
         // jniThrowException(env, "java/lang/OutOfMemoryError", "");
@@ -2565,7 +2568,7 @@ void CAssetManager::DumpTheme(
     /* [in] */ const String& prefix)
 {
     android::ResTable::Theme* theme = (android::ResTable::Theme*)themeToken;
-    const android::ResTable& res(theme->getResTable());
+    const android::ResTable& __attribute__((__unused__)) res(theme->getResTable());
 
     // XXX Need to use params.
     theme->dumpToLog();

@@ -46,7 +46,7 @@ const Int32 CMediaStoreInternalThumbnails::MICRO_KIND = 3;
 
 static const AutoPtr<ArrayOf<String> > initPROJECTION()
 {
-    AutoPtr<ArrayOf<String> > str;
+    AutoPtr<ArrayOf<String> > str = ArrayOf<String>::Alloc(2);
     (*str)[0] = IBaseColumns::ID;
     (*str)[1] = IMediaStoreMediaColumns::DATA;
     return str;

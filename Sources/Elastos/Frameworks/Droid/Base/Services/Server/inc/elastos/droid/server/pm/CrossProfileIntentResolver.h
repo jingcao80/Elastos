@@ -1,6 +1,8 @@
 #ifndef __ELASTOS_DROID_SERVER_PM_CROSSPROFILEINTENTRESOLVER_H__
 #define __ELASTOS_DROID_SERVER_PM_CROSSPROFILEINTENTRESOLVER_H__
 
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Net.h"
 #include "elastos/droid/server/IntentResolver.h"
 #include "elastos/droid/server/pm/CrossProfileIntentFilter.h"
 

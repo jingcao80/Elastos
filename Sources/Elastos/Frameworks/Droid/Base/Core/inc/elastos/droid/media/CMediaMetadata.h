@@ -27,6 +27,13 @@ CarClass(CMediaMetadata)
     , public IMediaMetadata
     , public IParcelable
 {
+private:
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
+    };
+
 public:
     friend class CMediaMetadataBuilder;
 
@@ -154,11 +161,7 @@ public:
         /* [out] */ String* result);
 
 private:
-    static CARAPI_(Boolean) InitStatic();
-
-private:
     static String TAG;
-    static Boolean mInit;
 
     static AutoPtr<ArrayOf<String> > PREFERRED_DESCRIPTION_ORDER;
 
@@ -177,6 +180,8 @@ private:
 
     AutoPtr<IBundle> mBundle;
     AutoPtr<IMediaDescription> mDescription;
+
+    static const StaticInitializer sInitializer;
 };
 
 } // namespace Media

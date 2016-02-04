@@ -5,14 +5,13 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/database/ContentObserver.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "elastos/droid/os/Handler.h"
+#include <elastos/core/Thread.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/Set.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.Internal.h>
 
-using Elastos::Core::IComparable;
-using Elastos::IO::IFile;
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Utility::Set;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContentResolver;
@@ -20,17 +19,28 @@ using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Os::IDropBoxManagerEntry;
-using Elastos::Droid::Os::HandlerBase;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IStatFs;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Internal::Os::IIDropBoxManagerService;
+using Elastos::Core::Thread;
+using Elastos::Core::IComparable;
+using Elastos::IO::IFile;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::Set;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 CarClass(CDropBoxManagerService)
+    , public Object
+    , public IIDropBoxManagerService
+    , public IBinder
 {
 private:
-    class MyHandler : public HandlerBase
+    class MyHandler
+        : public Handler
     {
     public:
         MyHandler(
@@ -46,7 +56,8 @@ private:
     };
 
     /** Metadata describing an on-disk log file. */
-    class EntryFile : public ElRefBase
+    class EntryFile
+        : public Object
     {
     public:
         EntryFile();
@@ -110,7 +121,8 @@ private:
     };
 
     /** Chronologically sorted list of {@link #EntryFile} */
-    class FileList : public ElRefBase
+    class FileList
+        : public Object
     {
     public:
         FileList() : mBlocks(0) {}
@@ -126,11 +138,11 @@ private:
     };
 
     /** Receives events that might indicate a need to clean up files. */
-    class _Receiver : public BroadcastReceiver
+    class CleanupBroadcastReceiver : public BroadcastReceiver
     {
     public:
-        _Receiver(
-            /* [in] */ CDropBoxManagerService* owner) : mOwner(owner)
+        CleanupBroadcastReceiver(
+            /* [in] */ CDropBoxManagerService* owner) : mHost(owner)
         {}
 
         //@Override
@@ -142,35 +154,37 @@ private:
             /* [out] */ String* info)
         {
             VALIDATE_NOT_NULL(info);
-            *info = String("CDropBoxManagerService::_Receiver: ");
+            *info = String("CDropBoxManagerService::CleanupBroadcastReceiver: ");
             (*info).AppendFormat("%p", this);
             return NOERROR;
         }
     private:
-        class _Thread : public ThreadBase
+        class MyThread
+            : public Thread
         {
         public:
-            _Thread(
+            MyThread(
                 /* [in] */ CDropBoxManagerService* owner);
 
             CARAPI Run();
 
         private:
-            CDropBoxManagerService* mOwner;
+            CDropBoxManagerService* mHost;
         };
 
     public:
-        CDropBoxManagerService* mOwner;
+        CDropBoxManagerService* mHost;
 
     };
 
-    class _Observer : public ContentObserver
+    class MyContentObserver
+        : public ContentObserver
     {
     public:
-        _Observer(
+        MyContentObserver(
             /* [in] */ CDropBoxManagerService* owner,
             /* [in] */ IContext* context)
-            : mOwner(owner)
+            : mHost(owner)
             , mContext(context)
         {}
 
@@ -178,11 +192,15 @@ private:
             /* [in] */ Boolean selfChange);
 
     private:
-        CDropBoxManagerService* mOwner;
+        CDropBoxManagerService* mHost;
         AutoPtr<IContext> mContext;
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CDropBoxManagerService();
 
     ~CDropBoxManagerService();

@@ -5,9 +5,6 @@ EXPORT_ALL_SYMBOLS=1
 
 C_DEFINES += -DDROID_SERVER
 
-#IMPORTS = Elastos.CoreLibrary.eco
-#IMPORTS = Elastos.Droid.Core.eco
-
 VPATH := $(MAKEDIR)/../../../../../../Core/src/elastos/droid/
 
 include $(MAKEDIR)/../../../../../../../sources.inc
@@ -22,6 +19,14 @@ INCLUDES += $(PREBUILD_INC)/hardware
 INCLUDES += $(PREBUILD_INC)/surfaceFlinger
 
 SOURCES = Elastos.Droid.Server.car
+SOURCES += Elastos.Droid.Core.cpp
+SOURCES += Elastos.CoreLibrary.cpp
+
+# TODO: Add ECO_PUBLIC to R.h and Manifest.h
+SOURCES += R.cpp
+SOURCES += Manifest.cpp
+
+SOURCES += server.cpp
 SOURCES += AttributeCache.cpp
 SOURCES += CSystemServer.cpp
 SOURCES += SystemService.cpp
@@ -35,81 +40,92 @@ SOURCES += ServiceWatcher.cpp
 SOURCES += SystemConfig.cpp
 SOURCES += MasterClearReceiver.cpp
 SOURCES += Watchdog.cpp
-SOURCES += CNetworkPolicyListener.cpp
-SOURCES += CDataActivityObserver.cpp
+SOURCES += NetworkTimeUpdateService.cpp
+SOURCES += AlarmManagerService.cpp
+SOURCES += CAssetAtlasService.cpp
+SOURCES += CBatteryService.cpp
+SOURCES += CBluetoothManagerService.cpp
+SOURCES += CCertBlacklister.cpp
+SOURCES += CCommonTimeManagementService.cpp
 SOURCES += CConnectivityService.cpp
+SOURCES += CConsumerIrService.cpp
+SOURCES += CCountryDetectorService.cpp
+SOURCES += CDataActivityObserver.cpp
+SOURCES += CDiskStatsService.cpp
+SOURCES += CDropBoxManagerService.cpp
+SOURCES += CLockSettingsService.cpp
+SOURCES += CMountServiceIdler.cpp
+SOURCES += CNetworkPolicyListener.cpp
+SOURCES += CNetworkManagementService.cpp
+SOURCES += CNetworkScoreService.cpp
+SOURCES += CNsdService.cpp
+SOURCES += CVibratorService.cpp
+SOURCES += CSamplingProfilerService.cpp
+SOURCES += CSerialService.cpp
+SOURCES += CTelephonyRegistry.cpp
+SOURCES += CTextServicesManagerService.cpp
+SOURCES += UiModeManagerService.cpp
+SOURCES += CUpdateLockService.cpp
+SOURCES += BrickReceiver.cpp
+SOURCES += DockObserver.cpp
+SOURCES += EntropyMixer.cpp
+#SOURCES += MmsServiceBroker.cpp
+SOURCES += NativeDaemonEvent.cpp
+SOURCES += NativeDaemonConnector.cpp
+SOURCES += PersistentDataBlockService.cpp
+SOURCES += RandomBlock.cpp
+SOURCES += ShutdownActivity.cpp
+SOURCES += TwilightCalculator.cpp
+#SOURCES += WiredAccessoryManager.cpp  //needs CInputManagerService
 
-#SOURCES += CAlarmManagerService.cpp
+
+#=========================================
+# TODO
+#=========================================
+
 #SOURCES += CBootReceiver.cpp
-#SOURCES += CBrickReceiver.cpp
 #SOURCES += CaptivePortalTracker.cpp
-#SOURCES += CSerialService.cpp
-#SOURCES += CDiskStatsService.cpp
-#SOURCES += CUpdateLockService.cpp
-#SOURCES += CSamplingProfilerService.cpp
-#SOURCES += CCountryDetectorService.cpp
-#SOURCES += CEthernetService.cpp
-#SOURCES += CLocationManagerService.cpp
-#SOURCES += NetworkTimeUpdateService.cpp
-#SOURCES += CNotificationManagerService.cpp
-#SOURCES += CCommonTimeManagementService.cpp
-#SOURCES += CClipboardService.cpp
-#SOURCES += TwilightCalculator.cpp
-#SOURCES += CVibratorService.cpp
-#SOURCES += TwilightService.cpp
-#SOURCES += CRecognitionManagerService.cpp
-#SOURCES += CTextServicesManagerService.cpp
-#SOURCES += CStatusBarManagerService.cpp
-#SOURCES += CDeviceStorageMonitorService.cpp
-#SOURCES += CUiModeManagerService.cpp
-#SOURCES += CBatteryService.cpp
-#SOURCES += CDropBoxManagerService.cpp
-#SOURCES += CNsdService.cpp
 #SOURCES += CThrottleService.cpp
 #SOURCES += CWallpaperManagerService.cpp
 #SOURCES += CWMSWallpaperConnection.cpp
 #SOURCES += CWMSUserSwitchObserver.cpp
-#SOURCES += CInputMethodManagerService.cpp
-#SOURCES += CInputMethodManagerServiceMethodCallback.cpp
-#SOURCES += CInputMethodManagerServiceUserSwitchObserver.cpp
-#SOURCES += NativeDaemonConnector.cpp
-#SOURCES += NativeDaemonEvent.cpp
 #SOURCES += NetworkManagementSocketTagger.cpp
-#SOURCES += CNetworkManagementService.cpp
 #SOURCES += CMountService.cpp
 #SOURCES += AppWidgetServiceImpl.cpp
 #SOURCES += CAppWidgetService.cpp
 #SOURCES += CPrivacySettingsManagerService.cpp
 #SOURCES += CWifiService.cpp
 #SOURCES += invokeCallback_gnuc.S
-# TODO: Add ECO_PUBLIC to R.h and Manifest.h
-SOURCES += R.cpp
-SOURCES += Manifest.cpp
 #SOURCES += AudioDeviceManagerObserver.cpp
 #SOURCES += CZigbeeService.cpp
 #SOURCES += CKortideRemoteService.cpp
-SOURCES += Elastos.Droid.Core.cpp
-SOURCES += Elastos.CoreLibrary.cpp
+
 
 ELASTOS_LIBS += am/am.lib
 ELASTOS_LIBS += clipboard/clipboard.lib
 ELASTOS_LIBS += connectivity/connectivity.lib
 ELASTOS_LIBS += content/content.lib
 ELASTOS_LIBS += display/display.lib
+ELASTOS_LIBS += dreams/dreams.lib
+ELASTOS_LIBS += input/input.lib
 ELASTOS_LIBS += lights/lights.lib
+ELASTOS_LIBS += location/location.lib
 ELASTOS_LIBS += net/net.lib
+ELASTOS_LIBS += notification/notification.lib
 ELASTOS_LIBS += os/os.lib
+ELASTOS_LIBS += pm/pm.lib
+ELASTOS_LIBS += wm/wm.lib
 ELASTOS_LIBS += power/power.lib
+ELASTOS_LIBS += statusbar/statusbar.lib
+ELASTOS_LIBS += trust/trust.lib
+ELASTOS_LIBS += twilight/twilight.lib
 ELASTOS_LIBS += wallpaper/wallpaper.lib
+ELASTOS_LIBS += webkit/webkit.lib
 
-#ELASTOS_LIBS += input/input.lib
-#ELASTOS_LIBS += location/location.lib
-#ELASTOS_LIBS += pm/pm.lib
+
 #ELASTOS_LIBS += usb/usb.lib
-#ELASTOS_LIBS += wm/wm.lib
 #ELASTOS_LIBS += accessibility/accessibility.lib
 #ELASTOS_LIBS += accounts/accounts.lib
-#ELASTOS_LIBS += dreams/dreams.lib
 #ELASTOS_LIBS += search/search.lib
 #ELASTOS_LIBS += zigbee/zigbee.lib
 #ELASTOS_LIBS += remote/remote.lib
@@ -120,7 +136,7 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += $(PREBUILD_LIB)/libm.a
-LIBRARIES += -licuuc -llog -lbinder -lutils -lcutils -lselinux -lsurfaceflinger -lsensorservice -lgui -lskia -landroidfw -linput -lhardware -lusbhost -lsuspend -lpower -lhardware_legacy -ldl -lnetutils -lmedia
+LIBRARIES += -licuuc -llog -lbinder -lutils -lcutils -lselinux -lsurfaceflinger -lsensorservice -lgui -lskia -landroidfw -linput -lhardware -lusbhost -lsuspend -lpower -lhardware_legacy -ldl -lnetutils -lmedia -linputflinger
 
 #ELASTOS_LIBS += server/server.lib
 #LIBRARIES +=  -lui

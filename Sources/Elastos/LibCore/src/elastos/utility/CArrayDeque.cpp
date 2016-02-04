@@ -241,8 +241,9 @@ ECode CArrayDeque::OfferFirst(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
+    *value = FALSE;
 
-    AddFirst(e);
+    FAIL_RETURN(AddFirst(e));
     *value = TRUE;
     return NOERROR;
 }
@@ -252,8 +253,9 @@ ECode CArrayDeque::OfferLast(
     /* [out] */ Boolean* value)
 {
     VALIDATE_NOT_NULL(value)
+    *value = FALSE;
 
-    AddLast(e);
+    FAIL_RETURN(AddLast(e));
     *value = TRUE;
     return NOERROR;
 }

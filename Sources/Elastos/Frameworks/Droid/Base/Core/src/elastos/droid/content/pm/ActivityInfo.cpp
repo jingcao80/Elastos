@@ -37,7 +37,7 @@ static AutoPtr< ArrayOf<Int32> > Init_CONFIG_NATIVE_BITS()
     return int32Array;
 }
 
-AutoPtr< ArrayOf<Int32> > ActivityInfo::CONFIG_NATIVE_BITS = Init_CONFIG_NATIVE_BITS();
+INIT_PROI_3 AutoPtr< ArrayOf<Int32> > ActivityInfo::CONFIG_NATIVE_BITS = Init_CONFIG_NATIVE_BITS();
 
 CAR_INTERFACE_IMPL_2(ActivityInfo, ComponentInfo, IActivityInfo, IParcelable)
 

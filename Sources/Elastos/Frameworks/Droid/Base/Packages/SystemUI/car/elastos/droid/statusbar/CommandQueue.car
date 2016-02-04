@@ -29,7 +29,8 @@ module
             [in] Int32 viewIndex);
 
         Disable(
-            [in] Int32 state);
+            [in] Int32 state,
+            [in] Boolean animate);
 
         AnimateExpandNotificationsPanel();
 
@@ -48,7 +49,8 @@ module
         SetImeWindowStatus(
             [in] IBinder* token,
             [in] Int32 vis,
-            [in] Int32 backDisposition);
+            [in] Int32 backDisposition,
+            [in] Boolean showImeSwitcher);
 
         ShowRecentApps(
             [in] Boolean triggeredFromAltTab);
@@ -91,6 +93,7 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.Internal.StatusBar.IIStatusBar
+     * interface Elastos.Droid.Os.IBinder
      */
     interface ICommandQueue {
         const Int32 FLAG_EXCLUDE_NONE = 0;

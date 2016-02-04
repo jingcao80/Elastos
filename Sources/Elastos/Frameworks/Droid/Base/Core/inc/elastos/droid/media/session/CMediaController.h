@@ -105,8 +105,8 @@ private:
             /* [in] */ IBundle * data);
 
     public:
-        CMediaController * mHost;
         AutoPtr<IMediaControllerCallback> mCallback;
+        CMediaController * mHost;
     };
 
 public:

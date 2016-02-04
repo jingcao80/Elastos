@@ -44,11 +44,11 @@ namespace Media {
 //======================================================================================
 static int attributeCount;      // keep track of how many attributes we've added
 
-static int loadExifInfo(const char* FileName, int readJPG) {
+static int loadExifInfo(const char* FileName, int readJPG)
+{
 #ifdef SUPERDEBUG
     ALOGE("loadExifInfo");
 #endif
-    int Modified = FALSE;
     ReadMode_t ReadMode = (ReadMode_t)READ_METADATA;
     if (readJPG) {
         // Must add READ_IMAGE else we can't write the JPG back out.
@@ -143,7 +143,8 @@ static void saveJPGFile(const char* filename) {
     }
 }
 
-void copyThumbnailData(uchar* thumbnailData, int thumbnailLen) {
+void copyThumbnailData(uchar* thumbnailData, int thumbnailLen)
+{
 #ifdef SUPERDEBUG
     ALOGE("******************************** copyThumbnailData\n");
 #endif
@@ -439,8 +440,8 @@ ECode CExifInterface::GetThumbnail(
         AutoPtr<ArrayOf<Byte> > thumbnail = GetThumbnailNative(mFilename);
         *result = thumbnail;
         REFCOUNT_ADD(*result);
-        return NOERROR;
     }
+    return NOERROR;
 }
 
 ECode CExifInterface::GetThumbnailRange(
@@ -450,8 +451,8 @@ ECode CExifInterface::GetThumbnailRange(
         AutoPtr<ArrayOf<Int64> > range = GetThumbnailRangeNative(mFilename);
         *result = range;
         REFCOUNT_ADD(*result)
-        return NOERROR;
     }
+    return NOERROR;
 }
 
 ECode CExifInterface::GetLatLong(

@@ -12,6 +12,13 @@ module
         Free();
     }
 
+    interface IDirectByteBufferHelper {
+        GetNewInstance(
+            [in] Int64 address,
+            [in] Int32 capacity,
+            [out] IDirectByteBuffer** instance);
+    }
+
     } // namespace IO
     } // namespace Elastos
 }

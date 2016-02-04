@@ -1,17 +1,15 @@
 #include "elastos/droid/media/CAudioAttributes.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
-// TODO: Need Collections.h
-// #include "elastos/utility/Collections.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::ICollections;
 using Elastos::Utility::CHashSet;
-// TODO: Need Collections.h
-// using Elastos::Utility::Collections;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -114,8 +112,9 @@ ECode CAudioAttributes::GetTags(
     /* [out] */ ISet** result)
 {
     VALIDATE_NOT_NULL(result)
-// TODO: Need Collections.h
-    // return Collections::UnmodifiableSet(ISet::Probe(mTags), result);
+    AutoPtr<ICollections> c;
+    CCollections::AcquireSingleton((ICollections**)&c);
+    c->UnmodifiableSet(ISet::Probe(mTags), result);
     return NOERROR;
 }
 

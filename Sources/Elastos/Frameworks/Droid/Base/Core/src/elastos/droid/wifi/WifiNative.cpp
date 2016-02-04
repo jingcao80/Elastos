@@ -276,11 +276,11 @@ Boolean WifiNative::SetNetworkVariable(
 {
     if (name.IsNullOrEmpty() || value.IsNullOrEmpty()) return FALSE;
     StringBuilder command;
-    command.AppendCStr("SET_NETWORK ");
+    command.Append("SET_NETWORK ");
     command.AppendInt32(netId);
-    command.AppendCStr(" ");
+    command.Append(" ");
     command.AppendString(name);
-    command.AppendCStr(" ");
+    command.Append(" ");
     command.AppendString(value);
     return DoBooleanCommand(command.ToString());
 }
@@ -291,9 +291,9 @@ String WifiNative::GetNetworkVariable(
 {
     if (name.IsNullOrEmpty()) return String(NULL);
     StringBuilder command;
-    command.AppendCStr("GET_NETWORK ");
+    command.Append("GET_NETWORK ");
     command.AppendInt32(netId);
-    command.AppendCStr(" ");
+    command.Append(" ");
     command.AppendString(name);
     return DoStringCommand(command.ToString());
 }
@@ -527,9 +527,9 @@ Boolean WifiNative::StartWpsPbc(
     }
     else {
         StringBuilder command;
-        command.AppendCStr("WPS_PBC interface=");
+        command.Append("WPS_PBC interface=");
         command.AppendString(iface);
-        command.AppendCStr(" ");
+        command.Append(" ");
         command.AppendString(bssid);
         return DoBooleanCommand(command.ToString());
     }
@@ -548,9 +548,9 @@ Boolean WifiNative::StartWpsPinKeypad(
 {
     if (pin.IsNullOrEmpty()) return FALSE;
     StringBuilder command;
-    command.AppendCStr("WPS_PIN interface=");
+    command.Append("WPS_PIN interface=");
     command.AppendString(iface);
-    command.AppendCStr(" any ");
+    command.Append(" any ");
     command.AppendString(pin);
     return DoBooleanCommand(command.ToString());
 }
@@ -572,16 +572,16 @@ String WifiNative::StartWpsPinDisplay(
 {
     if (bssid.IsNullOrEmpty()) {
         StringBuilder command;
-        command.AppendCStr("WPS_PIN interface=");
+        command.Append("WPS_PIN interface=");
         command.AppendString(iface);
-        command.AppendCStr(" any");
+        command.Append(" any");
         return DoStringCommand(command.ToString());
     }
     else {
         StringBuilder command;
-        command.AppendCStr("WPS_PIN interface=");
+        command.Append("WPS_PIN interface=");
         command.AppendString(iface);
-        command.AppendCStr(" ");
+        command.Append(" ");
         command.AppendString(bssid);
         return DoStringCommand(command.ToString());
     }
@@ -593,9 +593,9 @@ Boolean WifiNative::StartWpsRegistrar(
 {
     if (bssid.IsNullOrEmpty() || pin.IsNullOrEmpty()) return FALSE;
     StringBuilder command;
-    command.AppendCStr("WPS_REG ");
+    command.Append("WPS_REG ");
     command.AppendString(bssid);
-    command.AppendCStr(" ");
+    command.Append(" ");
     command.AppendString(pin);
     return DoBooleanCommand(command.ToString());
 }
@@ -671,9 +671,9 @@ Boolean WifiNative::SetP2pGroupIdle(
     /* [in] */ Int32 time)
 {
     StringBuilder command;
-    command.AppendCStr("SET interface=");
+    command.Append("SET interface=");
     command.AppendString(iface);
-    command.AppendCStr(" p2p_group_idle ");
+    command.Append(" p2p_group_idle ");
     command.AppendInt32(time);
     return DoBooleanCommand(command.ToString());
 }
@@ -695,16 +695,16 @@ Boolean WifiNative::SetP2pPowerSave(
 {
     if (enabled) {
         StringBuilder command;
-        command.AppendCStr("P2P_SET interface=");
+        command.Append("P2P_SET interface=");
         command.AppendString(iface);
-        command.AppendCStr(" ps 1");
+        command.Append(" ps 1");
         return DoBooleanCommand(String("P2P_SET interface=") + iface + String(" ps 1"));
     }
     else {
         StringBuilder command;
-        command.AppendCStr("P2P_SET interface=");
+        command.Append("P2P_SET interface=");
         command.AppendString(iface);
-        command.AppendCStr(" ps 0");
+        command.Append(" ps 0");
         return DoBooleanCommand(String("P2P_SET interface=") + iface + String(" ps 0"));
     }
 }
@@ -937,9 +937,9 @@ Boolean WifiNative::P2pReinvoke(
     if (deviceAddress.IsNullOrEmpty() || netId < 0) return FALSE;
 
     StringBuilder command;
-    command.AppendCStr("P2P_INVITE persistent=");
+    command.Append("P2P_INVITE persistent=");
     command.AppendInt32(netId);
-    command.AppendCStr(" peer=");
+    command.Append(" peer=");
     command.AppendString(deviceAddress);
     return DoBooleanCommand(command.ToString());
 }

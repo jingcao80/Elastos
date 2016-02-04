@@ -52,6 +52,16 @@ module
      * @see android.content.Context#getSystemService
      */
     interface INotificationManager {
+
+        /**
+         * Intent that is broadcast when the state of {@link #getEffectsSuppressor()} changes.
+         * This broadcast is only sent to registered receivers.
+         *
+         * @hide
+         */
+        // @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String ACTION_EFFECTS_SUPPRESSOR_CHANGED = "android.os.action.ACTION_EFFECTS_SUPPRESSOR_CHANGED";
+
         /**
          * Post a notification to be shown in the status bar. If a notification with
          * the same id has already been posted by your application and has not yet been canceled, it

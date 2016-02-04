@@ -59,13 +59,7 @@ static NATIVE(AlphabeticIndex::ImmutableIndex)* immutableIndexFromPeer(Int64 pee
 Int32 ImmutableIndex::GetBucketCount(Int64 peer)
 {
     NATIVE(AlphabeticIndex::ImmutableIndex)* ii = immutableIndexFromPeer(peer);
-    // TODO: There is a problem here. Waiting for new .so files.
-#if 0 // for compiling
     return ii->getBucketCount();
-#else
-    assert(0);
-    return 0;
-#endif
 }
 
 Int32 ImmutableIndex::GetBucketIndex(Int64 peer, const String& s)
@@ -74,23 +68,15 @@ Int32 ImmutableIndex::GetBucketIndex(Int64 peer, const String& s)
     if(s.IsNull())
         return -1;
     UErrorCode status = U_ZERO_ERROR;
-    // TODO: There is a problem here. Waiting for new .so files.
-#if 0 // for compiling
     Int32 result = ii->getBucketIndex(UnicodeString::fromUTF8(s.string()), status);
     if(!U_SUCCESS(status))
         return -1;
     return result;
-#else
-    assert(0);
-    return 0;
-#endif
 }
 
 String ImmutableIndex::GetBucketLabel(Int64 peer, Int32 index)
 {
     NATIVE(AlphabeticIndex::ImmutableIndex)* ii = immutableIndexFromPeer(peer);
-    // TODO: There is a problem here. Waiting for new .so files.
-#if 0 // for compiling
     const NATIVE(AlphabeticIndex::Bucket)* bucket = ii->getBucket(index);
     if(NULL == bucket) {
         return String(NULL);
@@ -106,10 +92,6 @@ String ImmutableIndex::GetBucketLabel(Int64 peer, Int32 index)
     ElStringByteSink sink(&s);
     label.toUTF8(sink);
     return s;
-#else
-    assert(0);
-    return String(NULL);
-#endif
 }
 
 ECode ImmutableIndex::ToString(

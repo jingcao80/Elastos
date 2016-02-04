@@ -1,8 +1,10 @@
 
-#include "wm/DisplaySettings.h"
-#include "wm/CWindowManagerService.h"
-#include "util/Xml.h"
-#include "util/XmlUtils.h"
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.Droid.Internal.h>
+#include "elastos/droid/server/wm/DisplaySettings.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/utility/Xml.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -10,15 +12,17 @@ using Elastos::Core::StringUtils;
 using Elastos::IO::CFile;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileInputStream;
+using Elastos::IO::IFileOutputStream;
+using Elastos::IO::ICloseable;
 using Elastos::Utility::Logging::Slogger;
 using Org::Xmlpull::V1::IXmlSerializer;
 using Elastos::Droid::Internal::Utility::IFastXmlSerializer;
 using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::CEnvironment;
 using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Droid::Utility::Xml;
-using Elastos::Droid::Utility::XmlUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -63,7 +67,7 @@ void DisplaySettings::GetOverscanLocked(
 }
 
 void DisplaySettings::SetOverscanLocked(
-    /* [in] */ const String* name,
+    /* [in] */ const String& name,
     /* [in] */ Int32 left,
     /* [in] */ Int32 top,
     /* [in] */ Int32 right,
@@ -97,7 +101,7 @@ ECode DisplaySettings::ReadSettingsLocked()
     ECode ec = mFile->OpenRead((IFileInputStream**)&stream);
     if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
         AutoPtr<IFile> baseF;
-        mFile->GetBaseFile(IFile**)&baseF;
+        mFile->GetBaseFile((IFile**)&baseF);
         Slogger::I(TAG, "No existing display settings %p; starting empty", baseF.Get());
         return NOERROR;
     }
@@ -108,10 +112,11 @@ ECode DisplaySettings::ReadSettingsLocked()
     // }
     Boolean success = FALSE;
     // try {
-    AutoPtr<IXmlPullParser> parser = Xml::NewPullParser();
-    parser->SetInput(stream, String(NULL));
+    AutoPtr<IXmlPullParser> parser;
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    parser->SetInput(IInputStream::Probe(stream), String(NULL));
     Int32 type;
-    while ((parser->next(&type), type != IXmlPullParser::START_TAG)
+    while ((parser->Next(&type), type != IXmlPullParser::START_TAG)
             && type != IXmlPullParser::END_DOCUMENT) {
         ;
     }
@@ -165,7 +170,7 @@ ECode DisplaySettings::ReadSettingsLocked()
         mEntries.Clear();
     }
     // try {
-    ICloseable::(stream)->Close();
+    ICloseable::Probe(stream)->Close();
     // } catch (IOException e) {
     // }
     return NOERROR;
@@ -186,7 +191,7 @@ Int32 DisplaySettings::GetIntAttribute(
     // }
 }
 
-ECode ReadDisplay(
+ECode DisplaySettings::ReadDisplay(
     /* [in] */ IXmlPullParser* parser)
 {
     String name;
@@ -219,14 +224,14 @@ void DisplaySettings::WriteSettingsLocked()
     AutoPtr<IFastXmlSerializer> fxs;
     CFastXmlSerializer::New((IFastXmlSerializer**)&fxs);
     AutoPtr<IXmlSerializer> out = IXmlSerializer::Probe(fxs);
-    out->SetOutput(stream, String("utf-8");
+    out->SetOutput(IOutputStream::Probe(stream), String("utf-8"));
     out->StartDocument(String(NULL), TRUE);
-    out->StartTag(String(NULL), String("display-settings"));
+    out->WriteStartTag(String(NULL), String("display-settings"));
 
     HashMap<String, AutoPtr<Entry> >::Iterator it = mEntries.Begin();
     for (; it != mEntries.End(); ++it) {
         AutoPtr<Entry> entry = it->mSecond;
-        out->StartTag(String(NULL), String("display"));
+        out->WriteStartTag(String(NULL), String("display"));
         out->WriteAttribute(String(NULL), String("name"), entry->mName);
         if (entry->mOverscanLeft != 0) {
             out->WriteAttribute(String(NULL), String("overscanLeft"), StringUtils::ToString(entry->mOverscanLeft));
@@ -240,10 +245,10 @@ void DisplaySettings::WriteSettingsLocked()
         if (entry->mOverscanBottom != 0) {
             out->WriteAttribute(String(NULL), String("overscanBottom"), StringUtils::ToString(entry->mOverscanBottom));
         }
-        out->EndTag(String(NULL), String("display"));
+        out->WriteEndTag(String(NULL), String("display"));
     }
 
-    out->EndTag(String(NULL), String("display-settings"));
+    out->WriteEndTag(String(NULL), String("display-settings"));
     out->EndDocument();
     mFile->FinishWrite(stream);
     // } catch (IOException e) {

@@ -48,7 +48,6 @@ ECode NumberKeyListener::Filter(
     VALIDATE_NOT_NULL(ret)
     PRINT_ENTER_LEAVE("NumberKeyListener::Filter jiazhenjiang");
     AutoPtr< ArrayOf<Char32> > accept = GetAcceptedChars();
-    Boolean filter = FALSE;
 
     Int32 i;
     for (i = start; i < end; i++) {
@@ -78,7 +77,7 @@ ECode NumberKeyListener::Filter(
     i -= start;
     end -= start;
 
-    Int32 len = end - start;
+    Int32 UNUSED(len) = end - start;
     // Only count down to i because the chars before that were all OK.
     for (Int32 j = end - 1; j >= i; j--) {
         Char32 c;

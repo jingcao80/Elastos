@@ -15,19 +15,14 @@ namespace Org {
 namespace Json {
 
 ECode JSON::CheckDouble(
-    /* [in] */ Double d,
-    /* [out] */ Double* result)
+    /* [in] */ Double d)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = 0;
-
     using Elastos::Core::Math;
     if (Math::IsInfinite(d) || Math::IsNaN(d)) {
         Logger::E("JSON", "Forbidden numeric value: %lf", d);
         return E_JSON_EXCEPTION;
         // throw new JSONException("Forbidden numeric value: " + d);
     }
-    *result = d;
     return NOERROR;
 }
 
@@ -87,7 +82,9 @@ ECode JSON::ToDouble(
         // try {
         String stringValue;
         ICharSequence::Probe(value)->ToString(&stringValue);
-        Double data = StringUtils::ParseDouble(stringValue);
+        Double data;
+        ECode ec = StringUtils::Parse(stringValue, &data);
+        if (FAILED(ec)) return NOERROR;
         AutoPtr<IDouble> object = CoreUtils::Convert(data);
         *result = object;
         REFCOUNT_ADD(*result);
@@ -122,7 +119,9 @@ ECode JSON::ToInteger32(
         // try {
         String stringValue;
         ICharSequence::Probe(value)->ToString(&stringValue);
-        Double data = StringUtils::ParseDouble(stringValue);
+        Double data;
+        ECode ec = StringUtils::Parse(stringValue, &data);
+        if (FAILED(ec)) return NOERROR;
         AutoPtr<IInteger32> object = CoreUtils::Convert((Int32)data);
         *result = object;
         REFCOUNT_ADD(*result);
@@ -157,7 +156,9 @@ ECode JSON::ToInteger64(
         // try {
         String stringValue;
         ICharSequence::Probe(value)->ToString(&stringValue);
-        Double data = StringUtils::ParseDouble(stringValue);
+        Double data;
+        ECode ec = StringUtils::Parse(stringValue, &data);
+        if (FAILED(ec)) return NOERROR;
         AutoPtr<IInteger64> object = CoreUtils::Convert((Int64)data);
         *result = object;
         REFCOUNT_ADD(*result);
@@ -170,23 +171,17 @@ ECode JSON::ToInteger64(
 
 ECode JSON::ToString(
     /* [in] */ IInterface* value,
-    /* [out] */ ICharSequence** result)
+    /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
+    *result = String(NULL);
 
     if (IString::Probe(value) != NULL) {
         AutoPtr<ICharSequence> seq = ICharSequence::Probe(value);
-        *result = seq;
-        REFCOUNT_ADD(*result);
-        return NOERROR;
+        return seq->ToString(result);
     }
     else if (value != NULL) {
-        String str = Object::ToString(value);
-        AutoPtr<ICharSequence> seq = CoreUtils::Convert(str);
-        *result = seq;
-        REFCOUNT_ADD(*result);
-        return NOERROR;
+        return Object::ToString(value);
     }
     return NOERROR;
 }

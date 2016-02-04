@@ -3,19 +3,21 @@
 #define __ELASTOS_DROID_SERVER_DREAMS_DREAMCONTROLLER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/os/Runnable.h>
+#include <Elastos.Droid.Content.h>
 
-using Elastos::IO::IPrintWriter;
-using Elastos::Core::IRunnable;
-using Elastos::Core::EIID_IRunnable;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::View::IIWindowManager;
-using Elastos::Droid::Service::Dreams::IIDreamService;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IServiceConnection;
-using Elastos::Droid::Content::EIID_IServiceConnection;
+using Elastos::Droid::Service::Dreams::IIDreamService;
+
+using Elastos::IO::IPrintWriter;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -23,13 +25,13 @@ namespace Server {
 namespace Dreams {
 
 class DreamController
-    : public ElRefBase
+    : public Object
 {
 class DreamRecord;
 
 public:
     class Listener
-        : public ElRefBase
+        : public Object
     {
     public:
         virtual CARAPI OnDreamStopped(
@@ -37,18 +39,9 @@ public:
     };
 
 private:
-    class _Runnable
-        : public ElRefBase
-        , public IRunnable
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        virtual CARAPI Run() = 0;
-    };
 
     class ProxyDiedRunnable
-        : public _Runnable
+        : public Runnable
     {
     public:
         ProxyDiedRunnable(
@@ -63,7 +56,7 @@ private:
     };
 
     class ConnectedRunnable
-        : public _Runnable
+        : public Runnable
     {
     public:
         ConnectedRunnable(
@@ -81,7 +74,7 @@ private:
     };
 
     class DisconnectedRunnable
-        : public _Runnable
+        : public Runnable
     {
     public:
         DisconnectedRunnable(
@@ -96,7 +89,7 @@ private:
     };
 
     class StopDreamRunnable
-        : public _Runnable
+        : public Runnable
     {
     public:
         StopDreamRunnable(
@@ -114,7 +107,7 @@ private:
     };
 
     class StopUnconnectedDreamRunnable
-        : public _Runnable
+        : public Runnable
     {
     public:
         StopUnconnectedDreamRunnable(
@@ -128,8 +121,23 @@ private:
         DreamController* mDCHost;
     };
 
+    class StopStubbornDreamRunnable
+        : public Runnable
+    {
+    public:
+        StopStubbornDreamRunnable(
+            /* [in] */ DreamController* host)
+            : mDCHost(host)
+        {}
+
+        CARAPI Run();
+
+    private:
+        DreamController* mDCHost;
+    };
+
     class DreamRecord
-        : public ElRefBase
+        : public Object
         , public IServiceConnection
         , public IProxyDeathRecipient
     {
@@ -140,6 +148,7 @@ private:
             /* [in] */ IBinder* token,
             /* [in] */ IComponentName* name,
             /* [in] */ Boolean isTest,
+            /* [in] */ Boolean canDoze,
             /* [in] */ Int32 userId,
             /* [in] */ DreamController* host);
 
@@ -156,12 +165,14 @@ private:
         AutoPtr<IBinder> mToken;
         AutoPtr<IComponentName> mName;
         const Boolean mIsTest;
+        const Boolean mCanDoze;
         const Int32 mUserId;
 
         Boolean mBound;
         Boolean mConnected;
         AutoPtr<IIDreamService> mService;
         Boolean mSentStartBroadcast;
+        Boolean mWakingGently;
 
         DreamController* mHost;
     };
@@ -179,9 +190,11 @@ public:
         /* [in] */ IBinder* token,
         /* [in] */ IComponentName* name,
         /* [in] */ Boolean isTest,
+        /* [in] */ Boolean canDoze,
         /* [in] */ Int32 userId);
 
-    CARAPI StopDream();
+    CARAPI StopDream(
+        /* [in] */ Boolean immediate);
 
 private:
     CARAPI_(void) Attach(
@@ -192,6 +205,9 @@ private:
 
     // How long we wait for a newly bound dream to create the service connection
     static const Int32 DREAM_CONNECTION_TIMEOUT = 5 * 1000;
+
+    // Time to allow the dream to perform an exit transition when waking up.
+    static const Int32 DREAM_FINISH_TIMEOUT = 5 * 1000;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IHandler> mHandler;
@@ -206,6 +222,7 @@ private:
     AutoPtr<DreamRecord> mCurrentDream;
 
     AutoPtr<IRunnable> mStopUnconnectedDreamRunnable;
+    AutoPtr<IRunnable> mStopStubbornDreamRunnable;
 };
 
 } // namespace Dreams

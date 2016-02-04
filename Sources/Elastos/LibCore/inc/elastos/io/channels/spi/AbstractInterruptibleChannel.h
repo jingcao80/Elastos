@@ -43,7 +43,7 @@ private:
         CARAPI Run();
 
     private:
-        AutoPtr<AbstractInterruptibleChannel> mChannel;
+        AbstractInterruptibleChannel* mChannel;
     };
 
 public:

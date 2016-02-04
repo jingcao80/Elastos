@@ -26,7 +26,7 @@ ECode ResettableTimeout::T::Run()
 {
     mHost->mLock->Open();
     while (TRUE) {
-        Int64 diff;
+        Int64 diff = 0;
         synchronized(this) {
             diff = mHost->mOffAt - SystemClock::GetUptimeMillis();
             if (diff <= 0) {
@@ -36,7 +36,7 @@ ECode ResettableTimeout::T::Run()
                 break;
             }
         }
-        ECode ec = this->Sleep(diff);
+        ECode ec = Sleep(diff);
         if (FAILED(ec)) {
             return E_INTERRUPTED_EXCEPTION;
         }

@@ -18,6 +18,7 @@ using Libcore::IO::Memory;
 
 namespace Elastos {
 namespace IO {
+CAR_INTERFACE_IMPL(DirectByteBuffer, MappedByteBuffer, IDirectByteBuffer)
 
 DirectByteBuffer::DirectByteBuffer()
     : mOffset(0)
@@ -66,6 +67,21 @@ ECode DirectByteBuffer::constructor(
 
     mOffset = offset;
     mIsReadOnly = isReadOnly;
+    return NOERROR;
+}
+
+ECode DirectByteBuffer::GetPrimitiveArray(
+    /* [out] */ Handle64* arrayHandle)
+{
+    AutoPtr<ArrayOf<Byte> > arrayTmp;
+    GetArray((ArrayOf<Byte>**)&arrayTmp);
+    if (arrayTmp == NULL)
+    {
+        *arrayHandle = 0;
+        return NOERROR;
+    }
+    Byte* primitiveArray = arrayTmp->GetPayload();
+    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
     return NOERROR;
 }
 
@@ -390,6 +406,7 @@ ECode DirectByteBuffer::ProtectedArray(
     }
     *array = arr;
     REFCOUNT_ADD(*array);
+
     return NOERROR;
 }
 

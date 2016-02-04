@@ -121,11 +121,23 @@ public:
     CARAPI SetLastLoggedInTime(
         /* [in] */ Int64 lastLoggedInTime);
 
+    CARAPI GetProfileGroupId(
+        /* [out] */ Int32* id);
+
+    CARAPI SetProfileGroupId(
+        /* [in] */ Int32 id);
+
     CARAPI GetPartial(
         /* [out] */ Boolean* partial);
 
     CARAPI SetPartial(
         /* [in] */ Boolean partial);
+
+    CARAPI GetGuestToRemove(
+        /* [out] */ Boolean* value);
+
+    CARAPI SetGuestToRemove(
+        /* [in] */ Boolean value);
 
 public:
     Int32 mId;

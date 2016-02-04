@@ -3,6 +3,7 @@
 #define __ELASTOS_DROID_SERVER_AM_TASKPERSISTER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Graphics.h"
 #include <elastos/core/Object.h>
 #include <elastos/core/Thread.h>
 #include <elastos/utility/etl/List.h>

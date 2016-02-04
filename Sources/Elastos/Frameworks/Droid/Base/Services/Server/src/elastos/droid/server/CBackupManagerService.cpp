@@ -889,7 +889,7 @@ _Exit_:
         mStatus = IBackupConstants::AGENT_ERROR;
         mHost->AddBackupTrace(String("agent SE"));
     }
-    if(ec == E_NAME_NOT_FOUND_EXCEPTION) {
+    if(ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
         Slogger::D(TAG, "Package does not exist; skipping");
         mHost->AddBackupTrace(String("no such package"));
         mStatus = IBackupConstants::AGENT_UNKNOWN;
@@ -1521,7 +1521,7 @@ ECode CBackupManagerService::PerformFullBackupTask::Run()
     headerbuf->ToString(&head);
     AutoPtr< ArrayOf<Byte> > header = ArrayOf<Byte>::Alloc((Byte*)const_cast<char*>(head.string()), head.GetByteLength());
     //ArrayOf<Byte> header = head->GetBytes("UTF-8");
-    ECode ec = ofstream->WriteBytes(*header);
+    ECode ec = ofstream->Write(header);
     if (FAILED(ec)) {
        Slogger::E(TAG, "Unable to emit archive header 0x%08x", ec);
        return NOERROR;
@@ -1742,7 +1742,7 @@ void CBackupManagerService::PerformFullBackupTask::BackupOnePackage(
                 Int32 toRead = (chunkTotal > buffer->GetLength()) ? buffer->GetLength() : chunkTotal;
                 Int32 nRead = 0;
                 in->ReadBytes(buffer, 0, toRead, &nRead);
-                out->WriteBytes(*buffer, 0, nRead);
+                out->Write(buffer, 0, nRead);
                 chunkTotal -= nRead;
             }
         }
@@ -1831,7 +1831,7 @@ void CBackupManagerService::PerformFullBackupTask::FinalizeBackup(
     // try {
     // A standard 'tar' EOF sequence: two 512-byte blocks of all zeroes.
     AutoPtr<ArrayOf<Byte> > eof = ArrayOf<Byte>::Alloc(512 * 2); // newly allocated == zero filled
-    ECode ec = out->WriteBytes(*eof);
+    ECode ec = out->Write(eof);
     if (FAILED(ec)) {
         Slogger::W(TAG, "Error attempting to finalize backup stream");
     }
@@ -1892,7 +1892,7 @@ void CBackupManagerService::PerformFullBackupTask::WriteAppManifest(
 
     String strBuilder = builder->ToString();
     AutoPtr< ArrayOf<Byte> > bytes = ArrayOf<Byte>::Alloc((Byte*)const_cast<char*>(strBuilder.string()), strBuilder.GetByteLength());
-    outstream->WriteBytes(*bytes);
+    outstream->Write(bytes);
     outstream->Close();
 }
 
@@ -2683,7 +2683,7 @@ _Exit2_:
                         // are still good
                         if (pipeOkay) {
                             //try {
-                            ECode ee = pipe->WriteBytes(*buffer, 0, nRead);
+                            ECode ee = pipe->Write(buffer, 0, nRead);
                             if (ee == E_IO_EXCEPTION) {
                                 Slogger::E(TAG, "Failed to write to restore pipe 0x%08x", ee);
                                 pipeOkay = FALSE;
@@ -2851,7 +2851,7 @@ Boolean CBackupManagerService::PerformFullRestoreTask::InstallApk(
         Int32 didRead;
         FAIL_GOTO((ec = instream->ReadBytes(buffer, 0, (Int32)toRead, &didRead)), _Exit_);
         if (didRead >= 0) mBytes += didRead;
-        apkStream->WriteBytes(*buffer, 0, didRead);
+        apkStream->Write(buffer, 0, didRead);
         size -= didRead;
     }
     FAIL_GOTO((ec = apkStream->Close()), _Exit_);
@@ -4594,7 +4594,7 @@ ECode CBackupManagerService::constructor(
     mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&mAlarmManager);
     mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&mPowerManager);
     AutoPtr<IInterface> mountService = ServiceManager::GetService(String("mount"));
-    mMountService = IMountService::Probe(mountService);
+    mMountService = IIMountService::Probe(mountService);
 
     mBackupManagerBinder = IIBackupManager::Probe(this);
 
@@ -5234,7 +5234,7 @@ ECode CBackupManagerService::SetBackupPassword(
     // integer length of the salt array, followed by the salt,
     // then the hex pw hash string
     FAIL_GOTO((ec = out->Write(salt->GetLength())), _Exit_);
-    FAIL_GOTO((ec = out->WriteBytes(*salt)), _Exit_);
+    FAIL_GOTO((ec = out->Write(salt)), _Exit_);
     FAIL_GOTO((ec = IDataOutput::Probe(out)->WriteUTF(newPwHash)), _Exit_);
     FAIL_GOTO((ec == IFlushable::Probe(out)->Flush()), _Exit_);
     mPasswordHash = newPwHash;
@@ -5266,7 +5266,7 @@ ECode CBackupManagerService::HasBackupPassword(
     // try {
     Int32 intResult;
     if (SUCCEEDED(mMountService->GetEncryptionState(&intResult))) {
-        *result= (intResult != IMountService::ENCRYPTION_STATE_NONE)
+        *result= (intResult != IIMountService::ENCRYPTION_STATE_NONE)
             || (!mPasswordHash.IsNullOrEmpty());
         return NOERROR;
     }
@@ -5505,7 +5505,7 @@ ECode CBackupManagerService::AcknowledgeFullBackupOrRestore(
                 // try {
                 Int32 result;
                 if (SUCCEEDED(mMountService->GetEncryptionState(&result))) {
-                    isEncrypted = (result != IMountService::ENCRYPTION_STATE_NONE);
+                    isEncrypted = (result != IIMountService::ENCRYPTION_STATE_NONE);
                     if (isEncrypted) Slogger::W(TAG, "Device is encrypted; forcing enc password");
                 }
                 else {
@@ -6238,7 +6238,7 @@ Boolean CBackupManagerService::PasswordMatchesSaved(
     Int32 result;
     ECode ec = mMountService->GetEncryptionState(&result);
     if (FAILED(ec)) return FALSE;
-    isEncrypted = (result != IMountService::ENCRYPTION_STATE_NONE);
+    isEncrypted = (result != IIMountService::ENCRYPTION_STATE_NONE);
     if (isEncrypted) {
         if (DEBUG) {
             Slogger::I(TAG, "Device encrypted; verifying against device data pw");
@@ -7223,24 +7223,24 @@ void CBackupManagerService::DumpInternal(
         str += "provisioned / ";
         str += (mPendingInits.IsEmpty() ? "not " : "");
         str += "pending init";
-        pw->PrintStringln(str);
+        pw->Println(str);
 
-        pw->PrintStringln(String("Auto-restore is ") + String(mAutoRestore ? "enabled" : "disabled"));
-        if (mBackupRunning) pw->PrintStringln(String("Backup currently running"));
+        pw->Println(String("Auto-restore is ") + String(mAutoRestore ? "enabled" : "disabled"));
+        if (mBackupRunning) pw->Println(String("Backup currently running"));
 
         AutoPtr<ISystem> system;
         Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
         Int64 millis;
         system->GetCurrentTimeMillis(&millis);
-        pw->PrintStringln(String("Last backup pass started: ") + mLastBackupPass
+        pw->Println(String("Last backup pass started: ") + mLastBackupPass
                 + String(" (now = ") + millis + String(")"));
-        pw->PrintStringln(String("  next scheduled: ") + mNextBackupPass);
+        pw->Println(String("  next scheduled: ") + mNextBackupPass);
 
-        pw->PrintStringln(String("Available transports:"));
+        pw->Println(String("Available transports:"));
         AutoPtr<ArrayOf<String> > listStr;
         ListAllTransports((ArrayOf<String>**)&listStr);
         for(Int32 i = 0; i < listStr->GetLength(); ++i) {
-            pw->PrintStringln(String(((*listStr)[i]).Equals(mCurrentTransport) ? "  * " : "    ") + (*listStr)[i]);
+            pw->Println(String(((*listStr)[i]).Equals(mCurrentTransport) ? "  * " : "    ") + (*listStr)[i]);
             // try {
             AutoPtr<IIBackupTransport> transport = GetTransport((*listStr)[i]);
             // File dir = new File(mBaseStateDir, transport->TransportDirName());
@@ -7257,10 +7257,10 @@ void CBackupManagerService::DumpInternal(
             }
 
             transport->CurrentDestinationString(&tempStr);
-            pw->PrintStringln(String("       destination: ") + tempStr);
+            pw->Println(String("       destination: ") + tempStr);
             transport->ConfigurationIntent((IIntent**)&intent);
             intent->ToString(&tempStr);
-            pw->PrintStringln(String("       intent: ") + tempStr);
+            pw->Println(String("       intent: ") + tempStr);
             dir->ListFiles((ArrayOf<IFile*>**)&listFiles);
             for (Int32 i = 0; i < listFiles->GetLength(); ++i) {
                 AutoPtr<IFile> f = (*listFiles)[i];
@@ -7268,12 +7268,12 @@ void CBackupManagerService::DumpInternal(
                 FAIL_GOTO((ec = f->GetName(&str)), _Exit_);
                 Int64 len;
                 FAIL_GOTO((ec = f->GetLength(&len)), _Exit_);
-                pw->PrintStringln(String("       ") + str + String(" - ") + StringUtils::Int64ToString(len) + String(" state bytes"));
+                pw->Println(String("       ") + str + String(" - ") + StringUtils::Int64ToString(len) + String(" state bytes"));
             }
 _Exit_:
             if(FAILED(ec)) {
                 Slogger::E(TAG, "Error in transport");
-                pw->PrintStringln(String("        Error: ") + StringUtils::Int32ToString(ec, 16));
+                pw->Println(String("        Error: ") + StringUtils::Int32ToString(ec, 16));
             }
             // } catch (Exception e) {
                 // Slog.e(TAG, "Error in transport", e);
@@ -7282,24 +7282,24 @@ _Exit_:
         }
 
         Int32 iSize = mPendingInits.GetSize();
-        pw->PrintStringln(String("Pending init: ") + StringUtils::Int32ToString(iSize));
+        pw->Println(String("Pending init: ") + StringUtils::Int32ToString(iSize));
         for (HashSet<String>::Iterator it = mPendingInits.Begin(); it != mPendingInits.End(); ++it) {
-            pw->PrintStringln(String("    ") + *it);
+            pw->Println(String("    ") + *it);
         }
 
         if (DEBUG_BACKUP_TRACE) {
             {
                 AutoLock lock(mBackupTraceLock);
                 if (!mBackupTrace.IsEmpty()) {
-                    pw->PrintStringln(String("Most recent backup trace:"));
+                    pw->Println(String("Most recent backup trace:"));
                     for (List<String>::Iterator it = mBackupTrace.Begin(); it != mBackupTrace.End(); ++it) {
-                        pw->PrintStringln(String("   ") + *it);
+                        pw->Println(String("   ") + *it);
                     }
                 }
             }
         }
 
-        pw->PrintStringln(String("Participants:"));
+        pw->Println(String("Participants:"));
         HashMap<Int32, AutoPtr<HashSet<String> > >::Iterator iter;
         for (iter = mBackupParticipants.Begin(); iter != mBackupParticipants.End(); ++iter) {
             Int32 uid = iter->mFirst;
@@ -7307,28 +7307,28 @@ _Exit_:
             pw->PrintInt32ln(uid);
             AutoPtr<HashSet<String> > participants = iter->mSecond;
             for (HashSet<String>::Iterator it = participants->Begin(); it != participants->End(); ++it) {
-                pw->PrintStringln(String("    ") + *it);
+                pw->Println(String("    ") + *it);
             }
         }
 
-        pw->PrintStringln(String("Ancestral packages: ")
+        pw->Println(String("Ancestral packages: ")
                 + String(mAncestralPackages == NULL ? "none" : StringUtils::Int32ToString(mAncestralPackages->GetSize())));
         if (mAncestralPackages != NULL) {
             for (HashSet<String>::Iterator it = mAncestralPackages->Begin(); it != mAncestralPackages->End(); ++it) {
-                pw->PrintStringln(String("    ") + *it);
+                pw->Println(String("    ") + *it);
             }
         }
 
-        pw->PrintStringln(String("Ever backed up: ") + StringUtils::Int32ToString(mEverStoredApps.GetSize()));
+        pw->Println(String("Ever backed up: ") + StringUtils::Int32ToString(mEverStoredApps.GetSize()));
         for (HashSet<String>::Iterator it = mEverStoredApps.Begin(); it != mEverStoredApps.End(); ++it){
-            pw->PrintStringln(String("    ") + *it);
+            pw->Println(String("    ") + *it);
         }
 
-        pw->PrintStringln(String("Pending backup: ") + StringUtils::Int32ToString(mPendingBackups.GetSize()));
+        pw->Println(String("Pending backup: ") + StringUtils::Int32ToString(mPendingBackups.GetSize()));
         HashMap<String, AutoPtr<BackupRequest> >::Iterator iter2;
         for (iter2 = mPendingBackups.Begin(); iter2 != mPendingBackups.End(); ++iter2) {
             AutoPtr<BackupRequest> req = iter2->mSecond;
-            pw->PrintStringln(String("    ") + req->ToString());
+            pw->Println(String("    ") + req->ToString());
         }
     }
 }

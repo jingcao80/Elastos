@@ -3,46 +3,76 @@
 #define __ELASTOS_DROID_SERVER_WM_CWINDOWMANAGERSERVICE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#define HASH_FOR_OS
+#include "elastos/droid/ext/frameworkhash.h"
 #include "_Elastos_Droid_Server_Wm_CWindowManagerService.h"
-#include "input/CInputManagerService.h"
-#include "display/CDisplayManagerService.h"
-#include "power/CPowerManagerService.h"
+#include <Elastos.Droid.App.h>
+#include <Elastos.Droid.Internal.h>
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/view/InputEventReceiver.h"
-#include "wm/WindowState.h"
-#include "wm/AppWindowToken.h"
-#include "wm/FakeWindowImpl.h"
-#include "wm/WindowToken.h"
-#include "wm/Watermark.h"
-#include "wm/StrictModeFlash.h"
-#include "wm/WindowAnimator.h"
-#include "wm/CSession.h"
-#include "wm/AppWindowAnimator.h"
-#include "wm/WindowStateAnimator.h"
-#include "wm/DimAnimator.h"
-#include "wm/DisplayContent.h"
-#include "wm/DisplaySettings.h"
-#include "wm/CircularDisplayMask.h"
-#include "wm/EmulatorDisplayOverlay.h"
-#include "wm/FocusedStackFrame.h"
-#include "wm/AppTransition.h"
-#include "wm/AccessibilityController.h"
-#include "AttributeCache.h"
-#include "wm/MagnificationSpec.h"
-#include "wm/WindowBinder.h"
+#include "elastos/droid/server/AttributeCache.h"
+#include "elastos/droid/server/wm/WindowState.h"
+#include "elastos/droid/server/wm/AppWindowToken.h"
+#include "elastos/droid/server/wm/FakeWindowImpl.h"
+#include "elastos/droid/server/wm/WindowToken.h"
+#include "elastos/droid/server/wm/Watermark.h"
+#include "elastos/droid/server/wm/StrictModeFlash.h"
+#include "elastos/droid/server/wm/CSession.h"
+#include "elastos/droid/server/wm/AppWindowAnimator.h"
+#include "elastos/droid/server/wm/WindowStateAnimator.h"
+#include "elastos/droid/server/wm/DisplaySettings.h"
+#include "elastos/droid/server/wm/CircularDisplayMask.h"
+#include "elastos/droid/server/wm/EmulatorDisplayOverlay.h"
+#include "elastos/droid/server/wm/FocusedStackFrame.h"
+#include "elastos/droid/server/wm/AppTransition.h"
+#include "elastos/droid/server/wm/WindowBinder.h"
+#include "elastos/droid/server/wm/TaskStack.h"
+#include "elastos/droid/server/wm/TaskGroup.h"
+#include "elastos/droid/server/wm/AccessibilityController.h"
+#include "elastos/droid/server/wm/PointerEventDispatcher.h"
+#include "elastos/droid/server/wm/KeyguardDisableHandler.h"
+#include "elastos/droid/server/wm/InputMonitor.h"
+#include "elastos/droid/server/wm/ViewServer.h"
+#include "elastos/droid/server/wm/DragState.h"
+#include "elastos/droid/server/input/CInputManagerService.h"
+#include "elastos/droid/server/display/CDisplayManagerService.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Etl::Pair;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::IRunnable;
-using Elastos::Net::ISocket;
+using Elastos::Droid::App::IAppOpsManagerOnOpChangedInternalListener;
+using Elastos::Droid::App::IAppOpsManagerOnOpChangedListener;
+using Elastos::Droid::App::IIActivityManager;
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Content::Res::IConfiguration;
+using Elastos::Droid::Content::Res::ICompatibilityInfo;
 using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Hardware::Display::IDisplayManagerInternal;
 using Elastos::Droid::Hardware::Display::IDisplayManager;
+using Elastos::Droid::Internal::App::IIBatteryStats;
+using Elastos::Droid::Internal::View::IInputMethodClient;
+using Elastos::Droid::Internal::View::IIInputMethodManager;
+using Elastos::Droid::Internal::View::IInputContext;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IIRemoteCallback;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::IPowerManagerInternal;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::ILowPowerModeListener;
+using Elastos::Droid::Server::Display::CDisplayManagerService;
+using Elastos::Droid::Server::Input::CInputManagerService;
+using Elastos::Droid::Utility::IArraySet;
+using Elastos::Droid::Utility::ISparseArray;
+using Elastos::Droid::View::IWindowManagerInternal;
+using Elastos::Droid::View::IIWindowId;
 using Elastos::Droid::View::IWindowSession;
 using Elastos::Droid::View::IInputChannel;
 using Elastos::Droid::View::IIWindow;
@@ -53,7 +83,6 @@ using Elastos::Droid::View::IChoreographer;
 using Elastos::Droid::View::IRotationWatcher;
 using Elastos::Droid::View::IWindowManagerPolicy;
 using Elastos::Droid::View::IWindowInfo;
-using Elastos::Droid::View::IDisplayContentChangeListener;
 using Elastos::Droid::View::IOnKeyguardExitResult;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::View::IFakeWindow;
@@ -62,44 +91,44 @@ using Elastos::Droid::View::Animation::IAnimation;
 using Elastos::Droid::View::IDisplayInfo;
 using Elastos::Droid::View::IApplicationToken;
 using Elastos::Droid::View::IWindowContentFrameStats;
+using Elastos::Droid::View::IIWindowManager;
+using Elastos::Droid::View::IWindowManagerPolicyWindowManagerFuncs;
+using Elastos::Droid::View::IMagnificationSpec;
+using Elastos::Droid::View::IIWindowSessionCallback;;
+using Elastos::Droid::View::IWindowsForAccessibilityCallback;
+using Elastos::Droid::View::IMagnificationCallbacks;
 using Elastos::Droid::View::Animation::IInterpolator;
-using Elastos::Droid::App::IIActivityManager;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IBroadcastReceiver;
-using Elastos::Droid::Content::Res::IConfiguration;
-using Elastos::Droid::Content::Res::ICompatibilityInfo;
-using Elastos::Droid::Os::IPowerManagerWakeLock;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::IRemoteCallback;
-using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Os::IPowerManagerInternal;
-using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Droid::Graphics::IRect;
-using Elastos::Droid::Graphics::IPoint;
-using Elastos::Droid::Internal::App::IIBatteryStats;
-using Elastos::Droid::Internal::View::IInputMethodClient;
-using Elastos::Droid::Internal::View::IIInputMethodManager;
-using Elastos::Droid::Internal::View::IInputContext;
-using Elastos::Droid::Server::Display::CDisplayManagerService;
-using Elastos::Droid::Server::Input::CInputManagerService;
-using Elastos::Droid::Server::Power::CPowerManagerService;
-using Elastos::Droid::SystemUI::StatusBar::Policy::IAccessibilityController;
-using Elastos::Droid::Utility::IArraySet;
-using Elastos::Droid::Utility::ISparseArray;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IInteger32;
+using Elastos::Net::ISocket;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::Etl::Pair;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wm {
 
-class KeyguardDisableHandler;
-class ViewServer;
 class FakeWindowImpl;
 class DisplayContent;
-class DragState;
-class InputMonitor;
+class WindowAnimator;
+
+class DragInputEventReceiver : public InputEventReceiver
+{
+public:
+    DragInputEventReceiver(
+        /* [in] */ IInputChannel* inputChannel,
+        /* [in] */ ILooper* looper,
+        /* [in] */ CWindowManagerService* host);
+
+    CARAPI OnInputEvent(
+        /* [in] */ IInputEvent* event);
+
+private:
+    CWindowManagerService* mHost;
+};
+
 
 CarClass(CWindowManagerService)
     , public Object
@@ -166,34 +195,6 @@ public:
         friend class CWindowManagerService;
     };
 
-    class DragInputEventReceiver : public InputEventReceiver
-    {
-    public:
-        DragInputEventReceiver(
-            /* [in] */ IInputChannel* inputChannel,
-            /* [in] */ ILooper* looper,
-            /* [in] */ CWindowManagerService* host);
-
-        CARAPI OnInputEvent(
-            /* [in] */ IInputEvent* event);
-
-    private:
-        CWindowManagerService* mHost;
-    };
-
-    interface IWindowChangeListener : public IInterface
-    {
-        virtual CARAPI_(void) WindowsChanged() = 0;
-
-        virtual CARAPI_(void) FocusChanged() = 0;
-    };
-
-    interface IOnHardKeyboardStatusChangeListener : public IInterface
-    {
-        virtual CARAPI_(void) OnHardKeyboardStatusChange(
-            /* [in] */ Boolean available) = 0;
-    };
-
     class LocalBroadcastReceiver : public BroadcastReceiver
     {
     public:
@@ -240,7 +241,7 @@ public:
     // -------------------------------------------------------------
     // Async Handler
     // -------------------------------------------------------------
-    class H : public HandlerBase
+    class H : public Handler
     {
     public:
         H(
@@ -353,6 +354,7 @@ private:
     class MyAppOpsManagerOnOpChangedListener
         : public Object
         , public IAppOpsManagerOnOpChangedListener
+        , public IAppOpsManagerOnOpChangedInternalListener
     {
     public:
         MyAppOpsManagerOnOpChangedListener(
@@ -362,6 +364,10 @@ private:
 
         CARAPI OnOpChanged(
             /* [in] */ Int32 op,
+            /* [in] */ const String& packageName);
+
+        CARAPI OnOpChanged(
+            /* [in] */ const String& op,
             /* [in] */ const String& packageName);
 
     private:
@@ -399,23 +405,15 @@ private:
         AutoPtr<IBinder> mWatcherBinder;
     };
 
-    class LocalInterpolator
+    class LocalService
         : public Object
-        , public IInterpolator
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        CARAPI GetInterpolation(
-            /* [in] */ Float input,
-            /* [out] */ Float* output);
-    };
-
-    class LocalService : public WindowManagerInternal
+        , public IWindowManagerInternal
     {
     public:
         LocalService(
             /* [in] */ CWindowManagerService* host);
+
+        CAR_INTERFACE_DECL()
 
         CARAPI RequestTraversalFromDisplayManager();
 
@@ -450,9 +448,15 @@ private:
         CARAPI WaitForAllWindowsDrawn(
             /* [in] */ IRunnable* callback,
             /* [in] */ Int64 timeout);
+
+    private:
+        CWindowManagerService* mHost;
     };
 
 public:
+    typedef List<AutoPtr<WindowState> > WindowList;
+    typedef List<AutoPtr<AppWindowToken> > AppTokenList;
+
     CWindowManagerService();
 
     CAR_INTERFACE_DECL()
@@ -468,7 +472,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ Handle32 inputManager,
+        /* [in] */ Handle64 inputManager,
         /* [in] */ Boolean haveInputMethods,
         /* [in] */ Boolean showBootMsgs,
         /* [in] */ Boolean onlyCore);
@@ -567,7 +571,7 @@ public:
      * Set mScreenCaptureDisabled for specific user
      */
     // @Override
-    CARAPI_(void) SetScreenCaptureDisabled(
+    CARAPI SetScreenCaptureDisabled(
         /* [in] */ Int32 userId,
         /* [in] */ Boolean disabled);
 
@@ -662,6 +666,7 @@ public:
         /* [in] */ Int32 viewVisibility,
         /* [in] */ Int32 flags,
         /* [in] */ IRect* inFrame,
+        /* [in] */ IRect* inOverscanInsets,
         /* [in] */ IRect* inContentInsets,
         /* [in] */ IRect* inVisibleInsets,
         /* [in] */ IRect* inStableInsets,
@@ -672,7 +677,7 @@ public:
         /* [out] */ IRect** outContentInsets,
         /* [out] */ IRect** outVisibleInsets,
         /* [out] */ IRect** outStableInsets,
-        /* [out] */ IConfiguration* outConfig,
+        /* [out] */ IConfiguration** outConfig,
         /* [out] */ ISurface** outSurface);
 
     CARAPI_(void) PerformDeferredDestroyWindow(
@@ -787,7 +792,7 @@ public:
         /* [in] */ const String& capsuleName,
         /* [in] */ Int32 enterAnim,
         /* [in] */ Int32 exitAnim,
-        /* [in] */ IRemoteCallback* startedCallback);
+        /* [in] */ IIRemoteCallback* startedCallback);
 
     CARAPI OverridePendingAppTransitionScaleUp(
         /* [in] */ Int32 startX,
@@ -799,7 +804,7 @@ public:
         /* [in] */ IBitmap* srcThumb,
         /* [in] */ Int32 startX,
         /* [in] */ Int32 startY,
-        /* [in] */ IRemoteCallback* startedCallback,
+        /* [in] */ IIRemoteCallback* startedCallback,
         /* [in] */ Boolean scaleUp);
 
     CARAPI OverridePendingAppTransitionAspectScaledThumb(
@@ -808,7 +813,7 @@ public:
         /* [in] */ Int32 startY,
         /* [in] */ Int32 targetWidth,
         /* [in] */ Int32 targetHeight,
-        /* [in] */ IRemoteCallback* startedCallback,
+        /* [in] */ IIRemoteCallback* startedCallback,
         /* [in] */ Boolean scaleUp);
 
     CARAPI ExecuteAppTransition();
@@ -824,7 +829,7 @@ public:
         /* [in] */ Int32 logo,
         /* [in] */ Int32 windowFlags,
         /* [in] */ IBinder* transferFrom,
-        /* [in] */ Boolean createIfNeeded,);
+        /* [in] */ Boolean createIfNeeded);
 
     CARAPI_(void) RemoveAppStartingWindow(
         /* [in] */ IBinder* token);
@@ -849,7 +854,8 @@ public:
         /* [in] */ IWindowManagerLayoutParams* lp,
         /* [in] */ Boolean visible,
         /* [in] */ Int32 transit,
-        /* [in] */ Boolean performLayout);
+        /* [in] */ Boolean performLayout,
+        /* [in] */ Boolean isVoiceInteraction);
 
     CARAPI SetAppVisibility(
         /* [in] */ IBinder* token,
@@ -1001,7 +1007,7 @@ public:
         /* [out] */ Float* scale);
 
     CARAPI_(void) DispatchNewAnimatorScaleLocked(
-        /* [in] */ ISession* session);
+        /* [in] */ CSession* session);
 
     CARAPI RegisterPointerEventListener(
         /* [in] */ IPointerEventListener* listener);
@@ -1416,7 +1422,7 @@ public:
      * @return bitmap indicating if another pass through layout must be made.
      */
     CARAPI_(Int32) HandleAppTransitionReadyLocked(
-        /* [in] */ List< AutoPtr<WindowState> >& windows);
+        /* [in] */ List<AutoPtr<WindowState> >* windows);
 
     CARAPI_(void) CheckDrawnWindowsLocked();
 
@@ -1576,7 +1582,7 @@ public:
     // There is an inherent assumption that this will never return null.
     CARAPI_(AutoPtr<DisplayContent>) GetDefaultDisplayContentLocked();
 
-    CARAPI_(AutoPtr<WindowList>) GetDefaultWindowListLocked();
+    CARAPI_(AutoPtr<List<AutoPtr<WindowState> > >) GetDefaultWindowListLocked();
 
     CARAPI_(AutoPtr<IDisplayInfo>) GetDefaultDisplayInfoLocked();
 
@@ -1585,10 +1591,10 @@ public:
      * @param display The screen to return windows from.
      * @return The list of WindowStates on the screen, or null if the there is no screen.
      */
-    CARAPI_(AutoPtr<WindowList>) GetWindowListLocked(
+    CARAPI_(AutoPtr<List<AutoPtr<WindowState> > >) GetWindowListLocked(
         /* [in] */ IDisplay* display);
 
-    CARAPI_(AutoPtr<WindowList>) GetWindowListLocked(
+    CARAPI_(AutoPtr<List<AutoPtr<WindowState> > >) GetWindowListLocked(
         /* [in] */ Int32 displayId);
 
     CARAPI OnDisplayAdded(
@@ -1602,6 +1608,12 @@ public:
 
     CARAPI OnDisplayChanged(
         /* [in] */ Int32 displayId);
+
+    CARAPI GetWindowManagerLock(
+        /* [out] */ IInterface** lock);
+
+    CARAPI ToString(
+        /* [ou] */ String* str);
 
 private:
     CARAPI_(void) InitPolicy();
@@ -1681,7 +1693,7 @@ private:
         /* [in] */ List< AutoPtr<WindowState> >::Iterator it,
         /* [in] */ WindowState* win);
 
-    CARAPI_(WindowList:Iterator) ReAddAppWindowsLocked(
+    CARAPI_(WindowList::Iterator) ReAddAppWindowsLocked(
         /* [in] */ DisplayContent* displayContent,
         /* [in] */ List< AutoPtr<WindowState> >::Iterator it,
         /* [in] */ WindowToken* token);
@@ -1908,138 +1920,138 @@ private:
 
 public:
     static const String TAG;
-    static const Boolean DEBUG;
-    static const Boolean DEBUG_ADD_REMOVE;
-    static const Boolean DEBUG_FOCUS;
-    static const Boolean DEBUG_FOCUS_LIGHT
-    static const Boolean DEBUG_ANIM;
-    static const Boolean DEBUG_LAYOUT;
-    static const Boolean DEBUG_RESIZE;
-    static const Boolean DEBUG_LAYERS;
-    static const Boolean DEBUG_INPUT;
-    static const Boolean DEBUG_INPUT_METHOD;
-    static const Boolean DEBUG_VISIBILITY;
-    static const Boolean DEBUG_WINDOW_MOVEMENT;
-    static const Boolean DEBUG_TOKEN_MOVEMENT;
-    static const Boolean DEBUG_ORIENTATION;
-    static const Boolean DEBUG_APP_ORIENTATION;
-    static const Boolean DEBUG_CONFIGURATION;
-    static const Boolean DEBUG_APP_TRANSITIONS;
-    static const Boolean DEBUG_STARTING_WINDOW;
-    static const Boolean DEBUG_REORDER;
-    static const Boolean DEBUG_WALLPAPER;
-    static const Boolean DEBUG_WALLPAPER_LIGHT;
-    static const Boolean DEBUG_DRAG;
-    static const Boolean DEBUG_SCREEN_ON;
-    static const Boolean DEBUG_SCREENSHOT;
-    static const Boolean DEBUG_BOOT;
-    static const Boolean DEBUG_LAYOUT_REPEATS;
-    static const Boolean DEBUG_SURFACE_TRACE;
-    static const Boolean DEBUG_WINDOW_TRACE;
-    static const Boolean DEBUG_TASK_MOVEMENT;
-    static const Boolean DEBUG_STACK;
-    static const Boolean DEBUG_DISPLAY;
-    static const Boolean SHOW_SURFACE_ALLOC;
-    static const Boolean SHOW_TRANSACTIONS;
-    static const Boolean SHOW_LIGHT_TRANSACTIONS;
-    static const Boolean HIDE_STACK_CRAWLS;
-    static const Int32 LAYOUT_REPEAT_THRESHOLD;
+    static const Boolean DEBUG = FALSE;
+    static const Boolean DEBUG_ADD_REMOVE = FALSE;
+    static const Boolean DEBUG_FOCUS = FALSE;
+    static const Boolean DEBUG_FOCUS_LIGHT = DEBUG_FOCUS || FALSE;
+    static const Boolean DEBUG_ANIM = FALSE;
+    static const Boolean DEBUG_LAYOUT = FALSE;
+    static const Boolean DEBUG_RESIZE = FALSE;
+    static const Boolean DEBUG_LAYERS = FALSE;
+    static const Boolean DEBUG_INPUT = FALSE;
+    static const Boolean DEBUG_INPUT_METHOD = FALSE;
+    static const Boolean DEBUG_VISIBILITY = FALSE;
+    static const Boolean DEBUG_WINDOW_MOVEMENT = FALSE;
+    static const Boolean DEBUG_TOKEN_MOVEMENT = FALSE;
+    static const Boolean DEBUG_ORIENTATION = FALSE;
+    static const Boolean DEBUG_APP_ORIENTATION = FALSE;
+    static const Boolean DEBUG_CONFIGURATION = FALSE;
+    static const Boolean DEBUG_APP_TRANSITIONS = FALSE;
+    static const Boolean DEBUG_STARTING_WINDOW = TRUE;
+    static const Boolean DEBUG_REORDER = FALSE;
+    static const Boolean DEBUG_WALLPAPER = FALSE;
+    static const Boolean DEBUG_WALLPAPER_LIGHT = FALSE || DEBUG_WALLPAPER;
+    static const Boolean DEBUG_DRAG = FALSE;
+    static const Boolean DEBUG_SCREEN_ON = FALSE;
+    static const Boolean DEBUG_SCREENSHOT = FALSE;
+    static const Boolean DEBUG_BOOT = FALSE;
+    static const Boolean DEBUG_LAYOUT_REPEATS = TRUE;
+    static const Boolean DEBUG_SURFACE_TRACE = FALSE;
+    static const Boolean DEBUG_WINDOW_TRACE = FALSE;
+    static const Boolean DEBUG_TASK_MOVEMENT = FALSE;
+    static const Boolean DEBUG_STACK = FALSE;
+    static const Boolean DEBUG_DISPLAY = FALSE;
+    static const Boolean SHOW_SURFACE_ALLOC = FALSE;
+    static const Boolean SHOW_TRANSACTIONS = FALSE;
+    static const Boolean SHOW_LIGHT_TRANSACTIONS = FALSE || SHOW_TRANSACTIONS;
+    static const Boolean HIDE_STACK_CRAWLS = TRUE;
+    static const Int32 LAYOUT_REPEAT_THRESHOLD = 4;
 
-    static const Boolean PROFILE_ORIENTATION;
-    static const Boolean mLocalLOGV;
+    static const Boolean PROFILE_ORIENTATION = FALSE;
+    static const Boolean localLOGV = DEBUG;
 
     /** How much to multiply the policy's type layer, to reserve room
      * for multiple windows of the same type and Z-ordering adjustment
      * with TYPE_LAYER_OFFSET. */
-    static const Int32 TYPE_LAYER_MULTIPLIER;
+    static const Int32 TYPE_LAYER_MULTIPLIER = 10000;
 
     /** Offset from TYPE_LAYER_MULTIPLIER for moving a group of windows above
      * or below others in the same layer. */
-    static const Int32 TYPE_LAYER_OFFSET;
+    static const Int32 TYPE_LAYER_OFFSET = 1000;
 
     /** How much to increment the layer for each window, to reserve room
      * for effect surfaces between them.
      */
-    static const Int32 WINDOW_LAYER_MULTIPLIER;
+    static const Int32 WINDOW_LAYER_MULTIPLIER = 5;
 
     /**
      * Dim surface layer is immediately below target window.
      */
-    static const Int32 LAYER_OFFSET_DIM;
+    static const Int32 LAYER_OFFSET_DIM = 1;
 
     /**
      * Blur surface layer is immediately below dim layer.
      */
-    static const Int32 LAYER_OFFSET_BLUR;
+    static const Int32 LAYER_OFFSET_BLUR = 2;
 
     /**
      * FocusedStackFrame layer is immediately above focused window.
      */
-    static const Int32 LAYER_OFFSET_FOCUSED_STACK;
+    static const Int32 LAYER_OFFSET_FOCUSED_STACK = 1;
 
     /**
      * Animation thumbnail is as far as possible below the window above
      * the thumbnail (or in other words as far as possible above the window
      * below it).
      */
-    static const Int32 LAYER_OFFSET_THUMBNAIL;
+    static const Int32 LAYER_OFFSET_THUMBNAIL = WINDOW_LAYER_MULTIPLIER - 1;
 
     /**
      * Layer at which to put the rotation freeze snapshot.
      */
-    static const Int32 FREEZE_LAYER;
+    static const Int32 FREEZE_LAYER = (TYPE_LAYER_MULTIPLIER * 200) + 1;
 
     /**
      * Layer at which to put the mask for emulated screen sizes.
      */
-    static const Int32 MASK_LAYER;
+    static const Int32 MASK_LAYER = TYPE_LAYER_MULTIPLIER * 200;
 
     /** The maximum length we will accept for a loaded animation duration:
      * this is 10 seconds.
      */
-    static const Int32 MAX_ANIMATION_DURATION;
+    static const Int32 MAX_ANIMATION_DURATION = 10 * 1000;
 
     /** Amount of time (in milliseconds) to animate the fade-in-out transition for
      * compatible windows.
      */
-    static const Int32 DEFAULT_FADE_IN_OUT_DURATION;
+    static const Int32 DEFAULT_FADE_IN_OUT_DURATION = 400;
 
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
-    static const Int32 WINDOW_FREEZE_TIMEOUT_DURATION;
+    static const Int32 WINDOW_FREEZE_TIMEOUT_DURATION = 3000;
 
     /**
      * If true, the window manager will do its own custom freezing and general
      * management of the screen during rotation.
      */
-    static const Boolean CUSTOM_SCREEN_ROTATION;
+    static const Boolean CUSTOM_SCREEN_ROTATION = TRUE;
 
     // Default input dispatching timeout in nanoseconds.
-    static const Int64 DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+    static const Int64 DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS = 5000 * 1000000LL;
 
     // Poll interval in milliseconds for watching boot animation finished.
-    static const Int32 BOOT_ANIMATION_POLL_INTERVAL;
+    static const Int32 BOOT_ANIMATION_POLL_INTERVAL = 200;
 
     // The name of the boot animation service in init.rc.
     static const String BOOT_ANIMATION_SERVICE;
 
     /** Minimum value for attachStack and resizeStack weight value */
-    static const Float STACK_WEIGHT_MIN;
+    static const Float STACK_WEIGHT_MIN = 0.2f;
 
     /** Maximum value for attachStack and resizeStack weight value */
-    static const Float STACK_WEIGHT_MAX;
+    static const Float STACK_WEIGHT_MAX = 0.8f;
 
-    static const Int32 UPDATE_FOCUS_NORMAL;
-    static const Int32 UPDATE_FOCUS_WILL_ASSIGN_LAYERS;
-    static const Int32 UPDATE_FOCUS_PLACING_SURFACES;
-    static const Int32 UPDATE_FOCUS_WILL_PLACE_SURFACES;
+    static const Int32 UPDATE_FOCUS_NORMAL = 0;
+    static const Int32 UPDATE_FOCUS_WILL_ASSIGN_LAYERS = 1;
+    static const Int32 UPDATE_FOCUS_PLACING_SURFACES = 2;
+    static const Int32 UPDATE_FOCUS_WILL_PLACE_SURFACES = 3;
 
     // We give a wallpaper up to 150ms to finish scrolling.
-    static const Int64 WALLPAPER_TIMEOUT;
+    static const Int64 WALLPAPER_TIMEOUT = 150LL;
     // Time we wait after a timeout before trying to wait again.
-    static const Int64 WALLPAPER_TIMEOUT_RECOVERY;
+    static const Int64 WALLPAPER_TIMEOUT_RECOVERY = 10000LL;
 
-    static const Int32 ADJUST_WALLPAPER_LAYERS_CHANGED;
-    static const Int32 ADJUST_WALLPAPER_VISIBILITY_CHANGED;
+    static const Int32 ADJUST_WALLPAPER_LAYERS_CHANGED = 1<<1;
+    static const Int32 ADJUST_WALLPAPER_VISIBILITY_CHANGED = 1<<2;
 
     AutoPtr<IBroadcastReceiver> mBroadcastReceiver;
 
@@ -2185,6 +2197,7 @@ public:
     Int32 mFocusedStackLayer;
 
     AutoPtr< ArrayOf<Float> > mTmpFloats;
+    AutoPtr<IRect> mTmpContentRect;
 
     Boolean mDisplayReady;
     Boolean mSafeMode;
@@ -2202,7 +2215,7 @@ public:
     Int32 mRotation;
     Int32 mForcedAppOrientation;
     Boolean mAltOrientation;
-    List< AutoPtr<RotationWatcher> > mRotationWatchers;
+    List<AutoPtr<RotationWatcher> > mRotationWatchers;
     Int32 mDeferredRotationPauseCount;
 
     Int32 mSystemDecorLayer;
@@ -2350,17 +2363,18 @@ public:
 private:
     // Maximum number of milliseconds to wait for input devices to be enumerated before
     // proceding with safe mode detection.
-    static const Int32 INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS;
+    static const Int32 INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS = 1000;
     static const String SYSTEM_SECURE;
     static const String SYSTEM_DEBUGGABLE;
     static const String DENSITY_OVERRIDE;
     static const String SIZE_OVERRIDE;
     static const String SYSTEM_DEFAULT_ROTATION;
-    static const Int32 MAX_SCREENSHOT_RETRIES;
+    static const Int32 MAX_SCREENSHOT_RETRIES = 3;
 
     // The flag describing a full screen app window (where the app takes care of drawing under the
     // SystemUI bars)
-    static const Int32 SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN;
+    static const Int32 SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN =
+            IView::SYSTEM_UI_FLAG_LAYOUT_STABLE | IView::SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 
     static const String PROPERTY_EMULATOR_CIRCULAR;
 

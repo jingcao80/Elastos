@@ -50,6 +50,21 @@ ECode ByteArrayBuffer::constructor(
     return NOERROR;
 }
 
+ECode ByteArrayBuffer::GetPrimitiveArray(
+    /* [out] */ Handle64* arrayHandle)
+{
+    AutoPtr<ArrayOf<Byte> > arrayTemp;
+    GetArray((ArrayOf<Byte>**)&arrayTemp);
+    if (arrayTemp == NULL)
+    {
+        *arrayHandle = 0;
+        return NOERROR;
+    }
+    Byte* primitiveArray = arrayTemp->GetPayload();
+    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    return NOERROR;
+}
+
 ECode ByteArrayBuffer::Copy(
     /* [in] */ ByteArrayBuffer* other,
     /* [in] */ Int32 markOfOther,
@@ -133,6 +148,7 @@ ECode ByteArrayBuffer::ProtectedArray(
     }
     *array = mBackingArray;
     REFCOUNT_ADD(*array)
+
     return NOERROR;
 }
 

@@ -11,6 +11,7 @@
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Internal::View::Animation::EIID_INativeInterpolatorFactory;
 using Elastos::Droid::Internal::View::Animation::NativeInterpolatorFactoryHelper;
@@ -23,7 +24,8 @@ namespace Animation {
 
 CAR_OBJECT_IMPL(CAccelerateInterpolator);
 
-CAR_INTERFACE_IMPL_3(CAccelerateInterpolator, Object, IAccelerateInterpolator, INativeInterpolatorFactory, IInterpolator);
+CAR_INTERFACE_IMPL_4(CAccelerateInterpolator, Object, IAccelerateInterpolator,
+        INativeInterpolatorFactory, IInterpolator, ITimeInterpolator);
 
 CAccelerateInterpolator::CAccelerateInterpolator()
     : mFactor(0.0f)

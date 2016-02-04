@@ -386,6 +386,29 @@ const Int32 ActivityStackSupervisor::ActivityContainer::CONTAINER_STATE_HAS_SURF
 const Int32 ActivityStackSupervisor::ActivityContainer::CONTAINER_STATE_NO_SURFACE = 1;
 const Int32 ActivityStackSupervisor::ActivityContainer::CONTAINER_STATE_FINISHING = 2;
 
+ActivityStackSupervisor::ActivityContainer::ActivityContainer()
+{
+}
+
+ECode ActivityStackSupervisor::ActivityContainer::constructor(
+    /* [in] */ Int32 stackId,
+    /* [in] */ IInterface* owner)
+{
+    mVisible = TRUE;
+    mContainerState = CONTAINER_STATE_HAS_SURFACE;
+    mOwner = (ActivityStackSupervisor*)(IObject::Probe(owner));
+
+    {
+        AutoLock lock(mOwner->mService);
+        mStackId = stackId;
+        mStack = new ActivityStack(this);
+        mIdString = String("ActivtyContainer{") + StringUtils::ToString(mStackId) + String("}");
+        //if (CActivityManagerService::DEBUG_STACK) Slog.d(CActivityManagerService::TAG, "Creating " + this);
+    }
+    return NOERROR;
+}
+
+
 ActivityStackSupervisor::ActivityContainer::ActivityContainer(
     /* [in] */ Int32 stackId,
     /* [in] */ ActivityStackSupervisor* owner)
@@ -4208,16 +4231,13 @@ Int32 ActivityStackSupervisor::GetNextStackId()
 }
 
 ECode ActivityStackSupervisor::CreateStackForRestoredTaskHistory(
-    /* [in] */ IArrayList* tasks)
+    /* [in] */ List<AutoPtr<TaskRecord> >* tasks)
 {
     Int32 stackId = CreateStackOnDisplay(GetNextStackId(), IDisplay::DEFAULT_DISPLAY);
     AutoPtr<ActivityStack> stack = GetStack(stackId);
-    Int32 taskSize;
-    tasks->GetSize(&taskSize);
-    for (Int32 taskNdx = taskSize - 1; taskNdx >= 0; --taskNdx) {
-        AutoPtr<IInterface> taskobj;
-        tasks->Get(taskNdx, (IInterface**)&taskobj);
-        TaskRecord* task = (TaskRecord*)(IObject::Probe(taskobj));
+    List<AutoPtr<TaskRecord> >::ReverseIterator rit = tasks->RBegin();
+    for (; rit != tasks->REnd(); ++rit) {
+        TaskRecord* task = *rit;
         stack->AddTask(task, FALSE, FALSE);
         Int32 taskId = task->mTaskId;
         //final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -4615,7 +4635,8 @@ Boolean ActivityStackSupervisor::RequestVisibleBehindLocked(
         // Make the activity immediately above r opaque.
         AutoPtr<ActivityRecord> next = stack->FindNextTranslucentActivity(r);
         if (next != NULL) {
-            mService->ConvertFromTranslucent(IBinder::Probe(next->mAppToken));
+            Boolean res;
+            mService->ConvertFromTranslucent(IBinder::Probe(next->mAppToken), &res);
         }
     }
     if (top->mApp != NULL && top->mApp->mThread != NULL) {

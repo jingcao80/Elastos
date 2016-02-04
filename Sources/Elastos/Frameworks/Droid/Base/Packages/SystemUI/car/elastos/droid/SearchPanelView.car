@@ -12,7 +12,14 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.Widget.IFrameLayout
-     * interface Elastos.Droid.SystemUI.StatusBar.IStatusBarPanel
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     * interface Elastos.Droid.Packages.SystemUI.StatusBar.IStatusBarPanel
      */
     interface ISearchPanelView {
         ReplaceDrawable(
@@ -38,7 +45,6 @@ module
 
         SetHorizontal(
             [in] Boolean horizontal);
-
     }
 
     } // namespace SystemUI

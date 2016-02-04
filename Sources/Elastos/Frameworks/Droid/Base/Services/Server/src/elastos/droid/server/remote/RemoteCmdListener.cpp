@@ -156,7 +156,7 @@ void RemoteCmdListener::AcceptStringCmd()
         if (FAILED(ec))
             break;
         cmdResult += '\n';
-        ec = outToClient->WriteBytes(*cmdResult.GetBytes());
+        ec = outToClient->Write(cmdResult.GetBytes());
 
         if (DBG) Slogger::D(TAG, "cmdResult %s", cmdResult.string());
         if (inFromClient != NULL) {

@@ -1,10 +1,8 @@
 #include "elastos/droid/media/audiopolicy/CAudioMixBuilder.h"
 #include "elastos/droid/media/audiopolicy/CAudioMix.h"
-//TODO: Need CAudioSystemHelper
-//#include "elastos/droid/media/CAudioSystemHelper.h"
+#include "elastos/droid/media/AudioSystem.h"
 #include "elastos/droid/media/CAudioFormatBuilder.h"
 
-//using Elastos::Droid::Media::CAudioSystemHelper;
 using Elastos::Droid::Media::CAudioFormatBuilder;
 using Elastos::Droid::Media::IAudioSystemHelper;
 
@@ -105,10 +103,7 @@ ECode CAudioMixBuilder::Build(
     }
     if (mFormat == NULL) {
         Int32 rate;
-        AutoPtr<IAudioSystemHelper> audioSystemHelper;
-//TODO: Need CAudioSystemHelper
-        // CAudioSystemHelper::AcquireSingleton((IAudioSystemHelper**)&audioSystemHelper);
-        audioSystemHelper->GetPrimaryOutputSamplingRate(&rate);
+        AudioSystem::GetPrimaryOutputSamplingRate(&rate);
         if (rate <= 0) {
             rate = 44100;
         }

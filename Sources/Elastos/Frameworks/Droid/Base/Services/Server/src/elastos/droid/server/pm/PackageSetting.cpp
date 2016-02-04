@@ -1,10 +1,12 @@
 
-#include "pm/PackageSetting.h"
+#include "elastos/droid/server/pm/PackageSetting.h"
+#include "elastos/droid/server/pm/SharedUserSetting.h"
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Core::StringUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
 
 namespace Elastos {
 namespace Droid {
@@ -56,9 +58,9 @@ ECode PackageSetting::ToString(
     AutoPtr<ISystem> sys;
     CSystem::AcquireSingleton((ISystem**)&sys);
     Int32 hashCode;
-    sys->IdentityHashCode((IInterface*)this, &hashCode);
+    sys->IdentityHashCode((IInterface*)(IObject*)this, &hashCode);
     *str = String("PackageSetting{") + StringUtils::ToHexString(hashCode) + " "
-            + mName + "/" + mAppId + "}";
+            + mName + "/" + StringUtils::ToString(mAppId) + "}";
     return NOERROR;
 }
 

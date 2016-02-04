@@ -1,0 +1,85 @@
+
+module
+{
+
+    interface Elastos.Droid.Telecomm.Telecom.IConnectionRequest;
+    interface Elastos.Droid.Telecomm.Telecom.IRemoteConnection;
+    interface Elastos.Droid.Telecomm.Telecom.IRemoteConference;
+    using interface Elastos.Utility.ICollection;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecomm {
+    namespace Telecom {
+
+        /**
+         *  Encapsulates all audio states during a call.
+         *  @hide
+         */
+        /**
+         * @Involve
+         * interface Elastos.Droid.Content.IContext
+         * interface Elastos.Droid.Content.IContextWrapper
+         * interface IComponentCallbacks
+         * interface IComponentCallbacks2
+         * interface IService
+         */
+        interface IConnectionService {
+            /**
+             * The {@link Intent} that must be declared as handled by the service.
+             * @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
+            */
+            const String SERVICE_INTERFACE = "android.telecom.ConnectionService";
+
+            CreateRemoteIncomingConnection(
+                [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+                [in] IConnectionRequest* request,
+                [out] IRemoteConnection** res);
+
+            CreateRemoteOutgoingConnection(
+                [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+                [in] IConnectionRequest* request,
+                [out] IRemoteConnection** res);
+
+            ConferenceRemoteConnections(
+                [in] IRemoteConnection* a,
+                [in] IRemoteConnection* b);
+
+            AddConference(
+                [in] IConference* conference);
+
+            GetAllConnections(
+                [out] ICollection** res);
+
+            OnCreateIncomingConnection(
+                [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+                [in] IConnectionRequest* request,
+                [out] IConnection** res);
+
+            OnCreateOutgoingConnection(
+                [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+                [in] IConnectionRequest* request,
+                [out] IConnection** res);
+
+            OnCreateUnknownConnection(
+                [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+                [in] IConnectionRequest* request,
+                [out] IConnection** res);
+
+            OnConference(
+                [in] IConnection* connection1,
+                [in] IConnection* connection2);
+
+            OnRemoteConferenceAdded(
+                [in] IRemoteConference* conference);
+
+            ContainsConference(
+                [in] IConference* conference,
+                [out] Boolean* res);
+        }
+
+    } // namespace Telecom
+    } // namespace Telecomm
+    } // namespace Droid
+    } // namespace Elastos
+}

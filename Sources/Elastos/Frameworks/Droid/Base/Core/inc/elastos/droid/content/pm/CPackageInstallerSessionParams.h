@@ -39,6 +39,12 @@ public:
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 
+    CARAPI SetMode(
+        /* [in] */ Int32 mode);
+
+    CARAPI SetInstallFlags(
+        /* [in] */ Int32 flags);
+
     /**
      * Provide value of {@link PackageInfo#installLocation}, which may be used
      * to determine where the app will be staged. Defaults to
@@ -46,6 +52,9 @@ public:
      */
     CARAPI SetInstallLocation(
         /* [in] */ Int32 installLocation);
+
+    CARAPI SetSizeBytes(
+        /* [in] */ Int64 bytes);
 
     /**
      * Optionally indicate the total size (in bytes) of all APKs that will be
@@ -85,6 +94,9 @@ public:
     CARAPI SetAppLabel(
         /* [in] */ ICharSequence* appLabel);
 
+    CARAPI SetAppIconLastModified(
+        /* [in] */ Int64 lastModified);
+
     /**
      * Optionally set the URI where this package was downloaded from. Used for
      * verification purposes.
@@ -108,6 +120,9 @@ public:
 
     /** {@hide} */
     CARAPI SetInstallFlagsExternal();
+
+    CARAPI SetAbiOverride(
+        /* [in] */ const String& abiOverride);
 
     CARAPI GetMode(
         /* [out] */ Int32* mode);

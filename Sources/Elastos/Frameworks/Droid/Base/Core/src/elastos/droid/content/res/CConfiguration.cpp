@@ -3,8 +3,8 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/content/res/CConfiguration.h"
-//#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/os/Build.h"
+#include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/etl/List.h>
@@ -12,7 +12,7 @@
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Content::Pm::IActivityInfo;
-//using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CLocale;
@@ -32,38 +32,38 @@ static AutoPtr<IConfiguration> InitEmpty()
 
 const AutoPtr<IConfiguration> CConfiguration::EMPTY = InitEmpty();
 
-/** @hide Native-specific bit mask for MCC config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_MCC = 0x0001;
-/** @hide Native-specific bit mask for MNC config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_MNC = 0x0002;
-/** @hide Native-specific bit mask for LOCALE config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_LOCALE = 0x0004;
-/** @hide Native-specific bit mask for TOUCHSCREEN config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_TOUCHSCREEN = 0x0008;
-/** @hide Native-specific bit mask for KEYBOARD config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_KEYBOARD = 0x0010;
-/** @hide Native-specific bit mask for KEYBOARD_HIDDEN config; DO NOT USE UNLESS YOU
- * ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_KEYBOARD_HIDDEN = 0x0020;
-/** @hide Native-specific bit mask for NAVIGATION config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_NAVIGATION = 0x0040;
-/** @hide Native-specific bit mask for ORIENTATION config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_ORIENTATION = 0x0080;
-/** @hide Native-specific bit mask for DENSITY config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_DENSITY = 0x0100;
-/** @hide Native-specific bit mask for SCREEN_SIZE config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_SCREEN_SIZE = 0x0200;
-/** @hide Native-specific bit mask for VERSION config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_VERSION = 0x0400;
-/** @hide Native-specific bit mask for SCREEN_LAYOUT config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_SCREEN_LAYOUT = 0x0800;
-/** @hide Native-specific bit mask for UI_MODE config; DO NOT USE UNLESS YOU ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_UI_MODE = 0x1000;
-/** @hide Native-specific bit mask for SMALLEST_SCREEN_SIZE config; DO NOT USE UNLESS YOU
- * ARE SURE. */
-const Int32 CConfiguration::NATIVE_CONFIG_SMALLEST_SCREEN_SIZE = 0x2000;
-/** @hide Native-specific bit mask for LAYOUTDIR config ; DO NOT USE UNLESS YOU ARE SURE.*/
-const Int32 CConfiguration::NATIVE_CONFIG_LAYOUTDIR = 0x4000;
+// /** @hide Native-specific bit mask for MCC config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_MCC = 0x0001;
+// /** @hide Native-specific bit mask for MNC config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_MNC = 0x0002;
+// /** @hide Native-specific bit mask for LOCALE config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_LOCALE = 0x0004;
+// /** @hide Native-specific bit mask for TOUCHSCREEN config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_TOUCHSCREEN = 0x0008;
+// /** @hide Native-specific bit mask for KEYBOARD config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_KEYBOARD = 0x0010;
+// /** @hide Native-specific bit mask for KEYBOARD_HIDDEN config; DO NOT USE UNLESS YOU
+//  * ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_KEYBOARD_HIDDEN = 0x0020;
+// /** @hide Native-specific bit mask for NAVIGATION config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_NAVIGATION = 0x0040;
+// /** @hide Native-specific bit mask for ORIENTATION config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_ORIENTATION = 0x0080;
+// /** @hide Native-specific bit mask for DENSITY config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_DENSITY = 0x0100;
+// /** @hide Native-specific bit mask for SCREEN_SIZE config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_SCREEN_SIZE = 0x0200;
+// /** @hide Native-specific bit mask for VERSION config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_VERSION = 0x0400;
+// /** @hide Native-specific bit mask for SCREEN_LAYOUT config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_SCREEN_LAYOUT = 0x0800;
+// /** @hide Native-specific bit mask for UI_MODE config; DO NOT USE UNLESS YOU ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_UI_MODE = 0x1000;
+// /** @hide Native-specific bit mask for SMALLEST_SCREEN_SIZE config; DO NOT USE UNLESS YOU
+//  * ARE SURE. */
+// const Int32 CConfiguration::NATIVE_CONFIG_SMALLEST_SCREEN_SIZE = 0x2000;
+// /** @hide Native-specific bit mask for LAYOUTDIR config ; DO NOT USE UNLESS YOU ARE SURE.*/
+// const Int32 CConfiguration::NATIVE_CONFIG_LAYOUTDIR = 0x4000;
 
 const String CConfiguration::XML_ATTR_FONT_SCALE("fs");
 const String CConfiguration::XML_ATTR_MCC("mcc");
@@ -1025,10 +1025,9 @@ ECode CConfiguration::SetLayoutDirection(
 {
     // There is a "1" difference between the configuration values for
     // layout direction and View constants for layout direction, just add "1".
-    assert(0 && "TODO");
-    // Int32 layoutDirection = 1 + TextUtils::GetLayoutDirectionFromLocale(locale);
-    // mScreenLayout = (mScreenLayout & ~SCREENLAYOUT_LAYOUTDIR_MASK)|
-    //         (layoutDirection << SCREENLAYOUT_LAYOUTDIR_SHIFT);
+    Int32 layoutDirection = 1 + TextUtils::GetLayoutDirectionFromLocale(locale);
+    mScreenLayout = (mScreenLayout & ~SCREENLAYOUT_LAYOUTDIR_MASK)|
+            (layoutDirection << SCREENLAYOUT_LAYOUTDIR_SHIFT);
     return NOERROR;
 }
 

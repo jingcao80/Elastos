@@ -8,6 +8,7 @@
 
 using Elastos::Droid::App::INotification;
 using Elastos::Droid::Os::IUserHandle;
+using Elastos::Core::ICloneable;
 
 namespace Elastos {
 namespace Droid {
@@ -22,6 +23,7 @@ class StatusBarNotification
     : public Object
     , public IStatusBarNotification
     , public IParcelable
+    , public ICloneable
 {
 public:
     CAR_INTERFACE_DECL()

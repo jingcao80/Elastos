@@ -210,7 +210,7 @@ ECode CharArrayWriter::WriteTo(
     return out->Write(mBuf, 0, mCount);
 }
 
-ECode CharArrayWriter::Append(
+ECode CharArrayWriter::AppendChar(
     /* [in] */ Char32 c)
 {
     return Write(c);

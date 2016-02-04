@@ -149,7 +149,7 @@ ECode CLauncherActivityInfo::GetBadgedIcon(
         return mPm->GetUserBadgedIcon(originalIcon, mUser, drawable);
     }
     else {
-        Logger::E(TAG, "Unable to create badged icon for %s", Object::ToString(mActivityInfo).string());
+        Logger::E(TAG, "Unable to create badged icon for %s", TO_CSTR(mActivityInfo));
     }
 
     *drawable = originalIcon;

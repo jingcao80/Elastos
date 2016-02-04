@@ -578,6 +578,62 @@ ECode StringUtils::ReplaceFirst(
     return ReplaceFirst(input, String(regularExpression), String(replacement), result);
 }
 
+ECode StringUtils::Replace(
+    /* [in] */ const String& input,
+    /* [in] */ const char* target,
+    /* [in] */ const char* replacement,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = String(NULL);
+    VALIDATE_NOT_NULL(target);
+    VALIDATE_NOT_NULL(replacement);
+
+
+    String targetString = String(target);
+    Int32 matchStart = input.IndexOf(targetString, 0);
+    if (matchStart == -1) {
+        // If there's nothing to replace, return the original string untouched.
+        *result = input;
+        return NOERROR;
+    }
+
+    String replacementString = String(replacement);
+
+    // The empty target matches at the start and end and between each char.
+    Int32 targetLength = targetString.GetLength();
+    if (targetLength == 0) {
+        // The result contains the original 'count' chars, a copy of the
+        // replacement string before every one of those chars, and a final
+        // copy of the replacement string at the end.
+        Int32 resultLength = input.GetLength() + (input.GetLength() + 1) * replacementString.GetLength();
+        StringBuilder sb(resultLength);
+        sb.Append(replacementString);
+        Int32 end = input.GetLength();
+        for (int i = 0; i != end; ++i) {
+            sb.AppendChar(input.GetChar(i));
+            sb.Append(replacementString);
+        }
+        *result = sb.ToString();
+        return NOERROR;
+    }
+
+    StringBuilder sb(input.GetLength());
+    Int32 searchStart = 0;
+    do {
+        // Copy chars before the match...
+        sb.Append(*(input.GetChars()), searchStart, matchStart - searchStart);
+        // Insert the replacement...
+        sb.Append(replacementString);
+        // And skip over the match...
+        searchStart = matchStart + targetLength;
+    } while ((matchStart = input.IndexOf(targetString, searchStart)) != -1);
+    // Copy any trailing chars...
+    sb.Append(*(input.GetChars()), searchStart, input.GetLength() - searchStart);
+    *result = sb.ToString();
+    return NOERROR;
+}
+
 ECode StringUtils::ReplaceAll(
     /* [in] */ const String& input,
     /* [in] */ const char* regularExpression,
@@ -618,7 +674,7 @@ ECode StringUtils::ParsePositiveInt64(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    if (radix < Character::MIN_RADIX || Character::MAX_RADIX) {
+    if (radix < Character::MIN_RADIX || radix > Character::MAX_RADIX) {
         return E_NUMBER_FORMAT_EXCEPTION;
     }
     if (input.IsEmpty() || input.GetLength() == 0) {

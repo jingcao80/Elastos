@@ -3,9 +3,13 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/graphics/CRect.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/CoreUtils.h>
+#include <Elastos.CoreLibrary.Utility.h>
 
 using Elastos::Core::StringUtils;
 using Elastos::Core::CInteger32;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IArrayList;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Graphics::CRect;
 
@@ -14,25 +18,87 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
-/*static*/ const String CTimedText::TAG("TimedText");
+const Int32 CTimedText::FIRST_PUBLIC_KEY                 = 1;
 
-CTimedText::CharPos::CharPos(
+// These keys must be in sync with the keys in TextDescription.h
+const Int32 CTimedText::KEY_DISPLAY_FLAGS                 = 1;
+const Int32 CTimedText::KEY_STYLE_FLAGS                   = 2;
+const Int32 CTimedText::KEY_BACKGROUND_COLOR_RGBA         = 3;
+const Int32 CTimedText::KEY_HIGHLIGHT_COLOR_RGBA          = 4;
+const Int32 CTimedText::KEY_SCROLL_DELAY                  = 5;
+const Int32 CTimedText::KEY_WRAP_TEXT                     = 6;
+const Int32 CTimedText::KEY_START_TIME                    = 7;
+const Int32 CTimedText::KEY_STRUCT_BLINKING_TEXT_LIST     = 8;
+const Int32 CTimedText::KEY_STRUCT_FONT_LIST              = 9;
+const Int32 CTimedText::KEY_STRUCT_HIGHLIGHT_LIST         = 10;
+const Int32 CTimedText::KEY_STRUCT_HYPER_TEXT_LIST        = 11;
+const Int32 CTimedText::KEY_STRUCT_KARAOKE_LIST           = 12;
+const Int32 CTimedText::KEY_STRUCT_STYLE_LIST             = 13;
+const Int32 CTimedText::KEY_STRUCT_TEXT_POS               = 14;
+const Int32 CTimedText::KEY_STRUCT_JUSTIFICATION          = 15;
+const Int32 CTimedText::KEY_STRUCT_TEXT                   = 16;
+
+const Int32 CTimedText::LAST_PUBLIC_KEY                  = 16;
+
+const Int32 CTimedText::FIRST_PRIVATE_KEY                = 101;
+
+// The following keys are used between TimedText.java and
+// TextDescription.cpp in order to parce the Parcel.
+const Int32 CTimedText::KEY_GLOBAL_SETTING               = 101;
+const Int32 CTimedText::KEY_LOCAL_SETTING                = 102;
+const Int32 CTimedText::KEY_START_CHAR                   = 103;
+const Int32 CTimedText::KEY_END_CHAR                     = 104;
+const Int32 CTimedText::KEY_FONT_ID                      = 105;
+const Int32 CTimedText::KEY_FONT_SIZE                    = 106;
+const Int32 CTimedText::KEY_TEXT_COLOR_RGBA              = 107;
+
+const Int32 CTimedText::LAST_PRIVATE_KEY                 = 107;
+
+const String CTimedText::TAG("TimedText");
+
+CAR_INTERFACE_IMPL(CTimedText::CharPos, Object, ICharPos);
+
+CTimedText::CharPos::CharPos()
+{}
+
+CTimedText::CharPos::~CharPos()
+{}
+
+ECode CTimedText::CharPos::constructor(
     /* [in] */ Int32 startChar,
     /* [in] */ Int32 endChar)
-    : mStartChar(startChar)
-    , mEndChar(endChar)
+{
+    mStartChar = startChar;
+    mEndChar = endChar;
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(CTimedText::Justification, Object, IJustification);
+
+CTimedText::Justification::Justification()
 {}
 
-CAR_INTERFACE_IMPL(CTimedText::Justification, IInterface)
+CTimedText::Justification::~Justification()
+{}
 
-CTimedText::Justification::Justification(
+ECode CTimedText::Justification::constructor(
     /* [in] */ Int32 horizontal,
     /* [in] */ Int32 vertical)
-    : mHorizontalJustification(horizontal)
-    , mVerticalJustification(vertical)
+{
+    mHorizontalJustification = horizontal;
+    mVerticalJustification = vertical;
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(CTimedText::Style, Object, IStyle);
+
+CTimedText::Style::Style()
 {}
 
-CTimedText::Style::Style(
+CTimedText::Style::~Style()
+{}
+
+ECode CTimedText::Style::constructor(
     /* [in] */ Int32 startChar,
     /* [in] */ Int32 endChar,
     /* [in] */ Int32 fontId,
@@ -41,44 +107,76 @@ CTimedText::Style::Style(
     /* [in] */ Boolean isUnderlined,
     /* [in] */ Int32 fontSize,
     /* [in] */ Int32 colorRGBA)
-    : mStartChar(startChar)
-    , mEndChar(endChar)
-    , mFontID(fontId)
-    , mIsBold(isBold)
-    , mIsItalic(isItalic)
-    , mIsUnderlined(isUnderlined)
-    , mFontSize(fontSize)
-    , mColorRGBA(colorRGBA)
+{
+    mStartChar = startChar;
+    mEndChar = endChar;
+    mFontID = fontId;
+    mIsBold = isBold;
+    mIsItalic = isItalic;
+    mIsUnderlined = isUnderlined;
+    mFontSize = fontSize;
+    mColorRGBA = colorRGBA;
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(CTimedText::Font, Object, IFont);
+
+CTimedText::Font::Font()
 {}
 
-CTimedText::Font::Font(
+CTimedText::Font::~Font()
+{}
+
+ECode CTimedText::Font::constructor(
     /* [in] */ Int32 id,
     /* [in] */ const String& name)
-    : ID(id)
-    , mName(name)
+{
+    ID = id;
+    mName = name;
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(CTimedText::Karaoke, Object, IKaraoke);
+
+CTimedText::Karaoke::Karaoke()
 {}
 
-CTimedText::Karaoke::Karaoke(
+CTimedText::Karaoke::~Karaoke()
+{}
+
+ECode CTimedText::Karaoke::constructor(
     /* [in] */ Int32 startTimeMs,
     /* [in] */ Int32 endTimeMs,
     /* [in] */ Int32 startChar,
     /* [in] */ Int32 endChar)
-    : mStartTimeMs(startTimeMs)
-    , mEndTimeMs(endTimeMs)
-    , mStartChar(startChar)
-    , mEndChar(endChar)
+{
+    mStartTimeMs = startTimeMs;
+    mEndTimeMs = endTimeMs;
+    mStartChar = startChar;
+    mEndChar = endChar;
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(CTimedText::HyperText, Object, IHyperText);
+
+CTimedText::HyperText::HyperText()
 {}
 
-CTimedText::HyperText::HyperText(
+CTimedText::HyperText::~HyperText()
+{}
+
+ECode CTimedText::HyperText::constructor(
     /* [in] */ Int32 startChar,
     /* [in] */ Int32 endChar,
     /* [in] */ const String& url,
     /* [in] */ const String& alt)
-    : mStartChar(startChar)
-    , mEndChar(endChar)
-    , URL(url)
-    , altString(alt)
-{}
+{
+    mStartChar = startChar;
+    mEndChar = endChar;
+    URL = url;
+    altString = alt;
+    return NOERROR;
+}
 
 CTimedText::CTimedText()
     : mDisplayFlags(-1)
@@ -94,6 +192,13 @@ CTimedText::CTimedText()
     , mTextChars(NULL)
 {
 }
+
+CTimedText::~CTimedText()
+{}
+
+CAR_OBJECT_IMPL(CTimedText);
+
+CAR_INTERFACE_IMPL(CTimedText, Object, ITimedText);
 
 ECode CTimedText::constructor(
     /* [in] */ IParcel* parcel)
@@ -145,9 +250,7 @@ Boolean CTimedText::ParseParcel(
         }
         Int32 mStartTimeMs;
         parcel->ReadInt32(&mStartTimeMs);
-        AutoPtr<IInteger32> iObj;
-        CInteger32::New(mStartTimeMs, (IInteger32**)&iObj);
-        mKeyObjectMap[type] = iObj;
+        mKeyObjectMap[type] = CoreUtils::Convert(mStartTimeMs).Get();
 
         parcel->ReadInt32(&type);
         if (type != KEY_STRUCT_TEXT) {
@@ -222,25 +325,19 @@ Boolean CTimedText::ParseParcel(
             case KEY_WRAP_TEXT:
             {
                 parcel->ReadInt32(&mWrapText);
-                AutoPtr<IInteger32> iObj;
-                CInteger32::New(mWrapText, (IInteger32**)&iObj);
-                object = iObj;
+                object = CoreUtils::Convert(mWrapText).Get();
                 break;
             }
             case KEY_HIGHLIGHT_COLOR_RGBA:
             {
                 parcel->ReadInt32(&mHighlightColorRGBA);
-                AutoPtr<IInteger32> iObj;
-                CInteger32::New(mHighlightColorRGBA, (IInteger32**)&iObj);
-                object = iObj;
+                object = CoreUtils::Convert(mHighlightColorRGBA).Get();
                 break;
             }
             case KEY_DISPLAY_FLAGS:
             {
                 parcel->ReadInt32(&mDisplayFlags);
-                AutoPtr<IInteger32> iObj;
-                CInteger32::New(mDisplayFlags, (IInteger32**)&iObj);
-                object = iObj;
+                object = CoreUtils::Convert(mDisplayFlags).Get();
                 break;
             }
             case KEY_STRUCT_JUSTIFICATION:
@@ -249,16 +346,15 @@ Boolean CTimedText::ParseParcel(
                 parcel->ReadInt32(&horizontal);
                 Int32 vertical;
                 parcel->ReadInt32(&vertical);
-                mJustification = new Justification(horizontal, vertical);
-                object = (IInterface*)mJustification.Get();
+                mJustification = new Justification();
+                mJustification->constructor(horizontal, vertical);
+                object = IJustification::Probe(mJustification);
                 break;
             }
             case KEY_BACKGROUND_COLOR_RGBA:
             {
                 parcel->ReadInt32(&mBackgroundColorRGBA);
-                AutoPtr<IInteger32> iObj;
-                CInteger32::New(mBackgroundColorRGBA, (IInteger32**)&iObj);
-                object = iObj;
+                object = CoreUtils::Convert(mBackgroundColorRGBA).Get();
                 break;
             }
             case KEY_STRUCT_TEXT_POS:
@@ -278,9 +374,7 @@ Boolean CTimedText::ParseParcel(
             case KEY_SCROLL_DELAY:
             {
                 parcel->ReadInt32(&mScrollDelay);
-                AutoPtr<IInteger32> iObj;
-                CInteger32::New(mScrollDelay, (IInteger32**)&iObj);
-                object = iObj;
+                object = CoreUtils::Convert(mScrollDelay).Get();
                 break;
             }
             default:
@@ -368,13 +462,16 @@ void CTimedText::ReadStyle(
         }
     }
 
-    AutoPtr<Style> style = new Style(startChar, endChar, fontId,
+    AutoPtr<Style> style = new Style();
+    style->constructor(startChar, endChar, fontId,
         isBold, isItalic, isUnderlined, fontSize, colorRGBA);
 
     if (mStyleList == NULL) {
-        mStyleList = new MyList< AutoPtr<Style> >();
+        AutoPtr<IArrayList> l;
+        CArrayList::New((IArrayList**)&l);
+        mStyleList = IList::Probe(l);
     }
-    mStyleList->PushBack(style);
+    mStyleList->Add(IStyle::Probe(style));
 }
 
 void CTimedText::ReadFont(
@@ -396,11 +493,14 @@ void CTimedText::ReadFont(
             name = String((const char*)text->GetPayload(), nameLen);
         }
 
-        AutoPtr<Font> font = new Font(id, name);
+        AutoPtr<Font> font = new Font();
+        font->constructor(id, name);
         if (mFontList == NULL) {
-            mFontList = new MyList< AutoPtr<Font> >();
+            AutoPtr<IArrayList> l;
+            CArrayList::New((IArrayList**)&l);
+            mFontList = IList::Probe(l);
         }
-        mFontList->PushBack(font);
+        mFontList->Add(IFont::Probe(font));
     }
 }
 
@@ -411,12 +511,15 @@ void CTimedText::ReadHighlight(
     parcel->ReadInt32(&startChar);
     Int32 endChar;
     parcel->ReadInt32(&endChar);
-    AutoPtr<CharPos> pos = new CharPos(startChar, endChar);
+    AutoPtr<CharPos> pos = new CharPos();
+    pos->constructor(startChar, endChar);
 
     if (mHighlightPosList == NULL) {
-        mHighlightPosList = new CharPostList();
+        AutoPtr<IArrayList> l;
+        CArrayList::New((IArrayList**)&l);
+        mHighlightPosList = IList::Probe(l);
     }
-    mHighlightPosList->PushBack(pos);
+    mHighlightPosList->Add(ICharPos::Probe(pos));
 }
 
 void CTimedText::ReadKaraoke(
@@ -434,12 +537,15 @@ void CTimedText::ReadKaraoke(
         parcel->ReadInt32(&startChar);
         Int32 endChar;
         parcel->ReadInt32(&endChar);
-        AutoPtr<Karaoke> kara = new Karaoke(startTimeMs, endTimeMs, startChar, endChar);
+        AutoPtr<Karaoke> kara = new Karaoke();
+        kara->constructor(startTimeMs, endTimeMs, startChar, endChar);
 
         if (mKaraokeList == NULL) {
-            mKaraokeList = new MyList< AutoPtr<Karaoke> >();
+            AutoPtr<IArrayList> l;
+            CArrayList::New((IArrayList**)&l);
+            mKaraokeList = IList::Probe(l);
         }
-        mKaraokeList->PushBack(kara);
+        mKaraokeList->Add(IKaraoke::Probe(kara));
     }
 }
 
@@ -463,12 +569,15 @@ void CTimedText::ReadHyperText(
     parcel->ReadArrayOf((Handle32*)(&alt));
     String altString = String((const char*)alt->GetPayload(), len);
 
-    AutoPtr<HyperText> hyperText = new HyperText(startChar, endChar, urlString, altString);
+    AutoPtr<HyperText> hyperText = new HyperText();
+    hyperText->constructor(startChar, endChar, urlString, altString);
 
     if (mHyperTextList == NULL) {
-        mHyperTextList = new MyList< AutoPtr<HyperText> >();
+        AutoPtr<IArrayList> l;
+        CArrayList::New((IArrayList**)&l);
+        mHyperTextList = IList::Probe(l);
     }
-    mHyperTextList->PushBack(hyperText);
+    mHyperTextList->Add(IHyperText::Probe(hyperText));
 }
 
 void CTimedText::ReadBlinkingText(
@@ -478,12 +587,15 @@ void CTimedText::ReadBlinkingText(
     parcel->ReadInt32(&startChar);
     Int32 endChar;
     parcel->ReadInt32(&endChar);
-    AutoPtr<CharPos> blinkingPos = new CharPos(startChar, endChar);
+    AutoPtr<CharPos> blinkingPos = new CharPos();
+    blinkingPos->constructor(startChar, endChar);
 
     if (mBlinkingPosList == NULL) {
-        mBlinkingPosList = new CharPostList();
+        AutoPtr<IArrayList> l;
+        CArrayList::New((IArrayList**)&l);
+        mBlinkingPosList = IList::Probe(l);
     }
-    mBlinkingPosList->PushBack(blinkingPos);
+    mBlinkingPosList->Add(ICharPos::Probe(blinkingPos));
 }
 
 Boolean CTimedText::IsValidKey(
@@ -506,12 +618,12 @@ Boolean CTimedText::ContainsKey(
     return FALSE;
 }
 
-AutoPtr<Set<Int32> > CTimedText::KeySet()
+Set<Int32> CTimedText::KeySet()
 {
     HashMap<Int32, AutoPtr<IInterface> >::Iterator it = mKeyObjectMap.Begin();
-    AutoPtr<Set<Int32> > set = new Set<Int32>();
+    Set<Int32> set;
     for(; it != mKeyObjectMap.End(); ++it) {
-        set->Insert(it->mFirst);
+        set.Insert(it->mFirst);
     }
     return set;
 }

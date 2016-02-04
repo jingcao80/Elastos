@@ -1,13 +1,36 @@
-#include "CDropBoxManagerService.h"
+#include "elastos/droid/server/CDropBoxManagerService.h"
 #include "elastos/droid/Manifest.h"
-#include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/FileUtils.h"
+#include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/SystemClock.h"
-#include "elastos/droid/net/Uri.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.CoreLibrary.Utility.Zip.h>
+
+using Elastos::Droid::Manifest;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::IDropBoxManager;
+using Elastos::Droid::Os::FileUtils;
+using Elastos::Droid::Os::CStatFs;
+using Elastos::Droid::Os::UserHandle;
+// using Elastos::Droid::Os::CDropBoxManagerEntry;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Internal::Os::EIID_IIDropBoxManagerService;
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
@@ -26,14 +49,8 @@ using Elastos::IO::CBufferedOutputStream;
 using Elastos::Utility::Zip::IGZIPOutputStream;
 using Elastos::Utility::Zip::CGZIPOutputStream;
 using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Net::Uri;
-using Elastos::Droid::Content::CIntent;
-using Elastos::Droid::Content::IIntentFilter;
-using Elastos::Droid::Content::CIntentFilter;
-using Elastos::Droid::Content::Pm::IPackageManager;
-using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::Provider::ISettingsGlobal;
-using Elastos::Droid::Provider::CSettingsGlobal;
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::Server::CDropBoxManagerService::EntryFile, IInterface)
 
 namespace Elastos {
 namespace Droid {
@@ -112,9 +129,10 @@ CDropBoxManagerService::EntryFile::Init(
     mTimestampMillis = timestampMillis;
     mFlags = flags;
 
+    AutoPtr<IUriHelper> helper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     String encoded;
-    // TODO:
-    Uri::Encode(tag, &encoded);
+    helper->Encode(tag, &encoded);
     StringBuilder sb(encoded);
     sb += "@";
     sb += timestampMillis;
@@ -144,18 +162,19 @@ CDropBoxManagerService::EntryFile::Init(
     mTag = tag;
     mTimestampMillis = timestampMillis;
     mFlags = IDropBoxManager::IS_EMPTY;
+    AutoPtr<IUriHelper> helper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     String encoded;
-    // TODO:
-    Uri::Encode(tag, &encoded);
+    helper->Encode(tag, &encoded);
     StringBuilder sb(encoded);
     sb += "@";
     sb += timestampMillis;
     sb += ".lost";
     CFile::New(dir, sb.ToString(), (IFile**)&mFile);
     mBlocks = 0;
-    AutoPtr<IFileOutputStream> fos;
-    CFileOutputStream::New(mFile, (IFileOutputStream**)&fos);
-    ICloseable::Probe(fos)->Close();
+    AutoPtr<ICloseable> fos;
+    CFileOutputStream::New(mFile, (ICloseable**)&fos);
+    fos->Close();
     return NOERROR;
 }
 
@@ -179,7 +198,9 @@ CDropBoxManagerService::EntryFile::Init(
     }
 
     Int32 flags = 0;
-    Uri::Decode(name.Substring(0, at), &mTag);
+    AutoPtr<IUriHelper> helper;
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+    helper->Decode(name.Substring(0, at), &mTag);
     if (name.EndWith(".gz")) {
         flags |= IDropBoxManager::IS_GZIPPED;
         name = name.Substring(0, name.GetLength() - 3);
@@ -204,7 +225,7 @@ CDropBoxManagerService::EntryFile::Init(
 
     Int64 millis;
     //try {
-    ECode ec = StringUtils::ParseInt64(name, &millis);
+    ECode ec = StringUtils::Parse(name, &millis);
     if (FAILED(ec)) millis = 0;
     //} catch (NumberFormatException e) { millis = 0; }
     mTimestampMillis = millis;
@@ -258,68 +279,70 @@ Int32 CDropBoxManagerService::EntryFile::CompareTo(
 
 
 //====================================================================
-// CDropBoxManagerService::_Receiver::_Thread
+// CDropBoxManagerService::CleanupBroadcastReceiver::MyThread
 //====================================================================
-CDropBoxManagerService::_Receiver::_Thread::_Thread(
+CDropBoxManagerService::CleanupBroadcastReceiver::MyThread::MyThread(
     /* [in] */ CDropBoxManagerService* owner)
-    : mOwner(owner)
+    : mHost(owner)
 {
-    Thread::constructor();
 }
 
-ECode CDropBoxManagerService::_Receiver::_Thread::Run()
+ECode CDropBoxManagerService::CleanupBroadcastReceiver::MyThread::Run()
 {
-   mOwner->Init();
-   mOwner->TrimToFit();
+   mHost->Init();
+   mHost->TrimToFit();
    return NOERROR;
 }
 
 
 //====================================================================
-// CDropBoxManagerService::_Receiver
+// CDropBoxManagerService::CleanupBroadcastReceiver
 //====================================================================
-ECode CDropBoxManagerService::_Receiver::OnReceive(
+ECode CDropBoxManagerService::CleanupBroadcastReceiver::OnReceive(
     /* [in] */ IContext* context,
     /* [in] */ IIntent* intent)
 {
     String action;
     if (intent != NULL && (intent->GetAction(&action), IIntent::ACTION_BOOT_COMPLETED.Equals(action))) {
-        mOwner->mBooted = TRUE;
+        mHost->mBooted = TRUE;
         return NOERROR;
     }
 
     // Else, for ACTION_DEVICE_STORAGE_LOW:
-    mOwner->mCachedQuotaUptimeMillis = 0;  // Force a re-check of quota size
+    mHost->mCachedQuotaUptimeMillis = 0;  // Force a re-check of quota size
 
     // Run the initialization in the background (not this main thread).
     // The init() and trimToFit() methods are synchronized, so they still
     // block other users -- but at least the onReceive() call can finish.
-    AutoPtr<_Thread> thread = new _Thread(mOwner);
+    AutoPtr<MyThread> thread = new MyThread(mHost);
+    thread->constructor();
+
     thread->Start();
     return NOERROR;
 }
 
-
 //====================================================================
-// CDropBoxManagerService::_Observer
+// CDropBoxManagerService::MyContentObserver
 //====================================================================
-ECode CDropBoxManagerService::_Observer::OnChange(
+ECode CDropBoxManagerService::MyContentObserver::OnChange(
     /* [in] */ Boolean selfChange)
 {
-    return mOwner->mReceiver->OnReceive(mContext, NULL);
+    return mHost->mReceiver->OnReceive(mContext, NULL);
 }
-
 
 //====================================================================
 // CDropBoxManagerService
 //====================================================================
+CAR_INTERFACE_IMPL_2(CDropBoxManagerService, Object, IIDropBoxManagerService, IBinder)
+
+CAR_OBJECT_IMPL(CDropBoxManagerService)
+
 CDropBoxManagerService::CDropBoxManagerService()
     : mBlockSize(0)
     , mCachedQuotaBlocks(0)
     , mCachedQuotaUptimeMillis(0)
     , mBooted(FALSE)
 {
-    mReceiver = new _Receiver(this);
 }
 
 CDropBoxManagerService::~CDropBoxManagerService()
@@ -333,6 +356,8 @@ ECode CDropBoxManagerService::constructor(
 {
     mDropBoxDir = path;
 
+    mReceiver = new CleanupBroadcastReceiver(this);
+
     // Set up intent receivers
     mContext = context;
     context->GetContentResolver((IContentResolver**)&mContentResolver);
@@ -344,11 +369,11 @@ ECode CDropBoxManagerService::constructor(
     AutoPtr<IIntent> result;
     context->RegisterReceiver(mReceiver, filter, (IIntent**)&result);
 
-    AutoPtr<_Observer> observer = new _Observer(this, context);
+    AutoPtr<MyContentObserver> observer = new MyContentObserver(this, context);
     AutoPtr<ISettingsGlobal> settings;
     CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settings);
     AutoPtr<IUri> uri;
-    settings->GetContentUri((IUri**)&uri);
+    settings->GetCONTENT_URI((IUri**)&uri);
     mContentResolver->RegisterContentObserver(uri, TRUE, observer);
 
     mHandler = new MyHandler(this);
@@ -402,7 +427,7 @@ ECode CDropBoxManagerService::Add(
     read = 0;
     while (read < buffer->GetLength()) {
        Int32 n;
-       FAIL_GOTO(input->ReadBytes(buffer, read, buffer->GetLength() - read, &n), EXIT);
+       FAIL_GOTO(input->Read(buffer, read, buffer->GetLength() - read, &n), EXIT);
        if (n <= 0) {
            break;
        }
@@ -427,16 +452,16 @@ ECode CDropBoxManagerService::Add(
        }
        AutoPtr<IFileOutputStream> foutput;
        CFileOutputStream::New(temp, (IFileOutputStream**)&foutput);
-       CBufferedOutputStream::New(foutput, bufferSize, (IBufferedOutputStream**)&output);
+       CBufferedOutputStream::New(IOutputStream::Probe(foutput), bufferSize, (IBufferedOutputStream**)&output);
        if (read == buffer->GetLength() && ((flags & IDropBoxManager::IS_GZIPPED) == 0)) {
-           AutoPtr<IGZIPOutputStream> goutput;
-           CGZIPOutputStream::New(output, (IGZIPOutputStream**)&goutput);
-           output = goutput.Get();
+           AutoPtr<IOutputStream> goutput;
+           CGZIPOutputStream::New(output, (IOutputStream**)&goutput);
+           output = goutput;
            flags = flags | IDropBoxManager::IS_GZIPPED;
        }
 
        do {
-           FAIL_GOTO(output->WriteBytes(*buffer, 0, read), EXIT);
+           FAIL_GOTO(output->Write(buffer, 0, read), EXIT);
 
            Int64 now;
            system->GetCurrentTimeMillis(&now);
@@ -445,11 +470,10 @@ ECode CDropBoxManagerService::Add(
                lastTrim = now;
            }
 
-           FAIL_GOTO(input->ReadBytes(buffer, &read), EXIT);
+           FAIL_GOTO(input->Read(buffer, &read), EXIT);
            if (read <= 0) {
-               Boolean result;
-               FileUtils::Sync(foutput, &result);
-               output->Close();  // Get a final size measurement
+               Boolean result = FileUtils::Sync(foutput);
+               ICloseable::Probe(output)->Close();  // Get a final size measurement
                output = NULL;
            }
            else {
@@ -577,12 +601,15 @@ ECode CDropBoxManagerService::GetNextEntry(
         if (entry->mTag.IsNull()) {
             continue;
         }
+
         if ((entry->mFlags & IDropBoxManager::IS_EMPTY) != 0) {
-            return CDropBoxManagerEntry::New(entry->mTag, entry->mTimestampMillis, nextEntry);
+        assert(0 && "TODO");
+            // return CDropBoxManagerEntry::New(entry->mTag, entry->mTimestampMillis, nextEntry);
         }
         //try {
-        return CDropBoxManagerEntry::New(entry->mTag, entry->mTimestampMillis,
-                entry->mFile, entry->mFlags, nextEntry);
+        assert(0 && "TODO");
+        // return CDropBoxManagerEntry::New(entry->mTag, entry->mTimestampMillis,
+                // entry->mFile, entry->mFlags, nextEntry);
         //} catch (IOException e) {
         //    Slog.e(TAG, "Can't read: " + entry.file, e);
         //    // Continue to next file
@@ -890,11 +917,7 @@ ECode CDropBoxManagerService::HandleMessage(
     /* [in] */ Int32 what)
 {
     if (what == MSG_SEND_BROADCAST) {
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        AutoPtr<IUserHandle> OWNER;
-        helper->GetOWNER((IUserHandle**)&OWNER);
-        mContext->SendBroadcastAsUser(obj, OWNER, Elastos::Droid::Manifest::permission::READ_LOGS);
+        mContext->SendBroadcastAsUser(obj, UserHandle::OWNER, Elastos::Droid::Manifest::permission::READ_LOGS);
     }
     return NOERROR;
 }

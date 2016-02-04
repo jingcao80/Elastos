@@ -12,7 +12,8 @@ module
      *
      * @hide
      */
-    interface IInputFilterHost {
+    [oneway]
+    interface IIInputFilterHost {
         SendInputEvent(
             [in] IInputEvent* event,
             [in] Int32 policyFlags);

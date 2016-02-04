@@ -93,7 +93,7 @@ Boolean SystemSensorManager::BaseEventQueue::AddSensor(
         // Try continuous mode if batching fails.
         EnableSensor(sensor, delayUs, 0, 0, &result);
         if (maxBatchReportLatencyUs == 0 ||
-            maxBatchReportLatencyUs > 0 && result != 0) {
+            (maxBatchReportLatencyUs > 0 && result != 0)) {
             RemoveSensor(sensor, FALSE);
             return FALSE;
         }

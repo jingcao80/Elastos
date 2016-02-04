@@ -1,15 +1,26 @@
 
-#include "CBluetoothPbapStateChangeCallback.h"
+#include "elastos/droid/bluetooth/CBluetoothPbapStateChangeCallback.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Bluetooth {
+
+CAR_INTERFACE_IMPL_2(CBluetoothPbapStateChangeCallback, Object, IIBluetoothStateChangeCallback, IBinder);
+
+CAR_OBJECT_IMPL(CBluetoothPbapStateChangeCallback);
+
+CBluetoothPbapStateChangeCallback::CBluetoothPbapStateChangeCallback()
+{
+}
 
 ECode CBluetoothPbapStateChangeCallback::OnBluetoothStateChange(
     /* [in] */ Boolean up)
@@ -52,9 +63,9 @@ ECode CBluetoothPbapStateChangeCallback::OnBluetoothStateChange(
 }
 
 ECode CBluetoothPbapStateChangeCallback::constructor(
-    /* [in] */ Handle32 host)
+    /* [in] */ IBluetoothPbap* host)
 {
-    mHost = (BluetoothPbap*)host;
+    mHost = (BluetoothPbap*)(host);
     return NOERROR;
 }
 

@@ -27,9 +27,9 @@ private:
             /* [in] */ Int32 rowInc,
             /* [in] */ Int32 colInc,
             /* [in] */ CMediaCodecMediaImage* host)
-            : mData(buffer)
-            , mRowInc(rowInc)
+            : mRowInc(rowInc)
             , mColInc(colInc)
+            , mData(buffer)
             , mHost(host)
         {}
 

@@ -1,8 +1,8 @@
 
 module
 {
-    interface Elastos.Droid.Os.Storage.IObbActionListener;
-    interface Elastos.Droid.Os.Storage.IMountServiceListener;
+    interface Elastos.Droid.Os.Storage.IIObbActionListener;
+    interface Elastos.Droid.Os.Storage.IIMountServiceListener;
     interface Elastos.Droid.Os.Storage.IIMountShutdownObserver;
     interface Elastos.Droid.Os.Storage.IStorageVolume;
 
@@ -11,7 +11,7 @@ module
     namespace Os {
     namespace Storage {
 
-    interface IMountService {
+    interface IIMountService {
         /** The volume is not encrypted. */
         const Int32 ENCRYPTION_STATE_NONE = 1;
         /** The volume has been encrypted succesfully. */
@@ -20,6 +20,10 @@ module
         const Int32 ENCRYPTION_STATE_ERROR_UNKNOWN = -1;
         /** The volume is in a bad state - partially encrypted. Data is likely irrecoverable. */
         const Int32 ENCRYPTION_STATE_ERROR_INCOMPLETE = -2;
+        /** Encryption is incomplete and irrecoverable */
+        const Int32 ENCRYPTION_STATE_ERROR_INCONSISTENT = -3;
+        /** Underlying data is corrupt */
+        const Int32 ENCRYPTION_STATE_ERROR_CORRUPT = -4;
 
         /*
          * Creates a secure container with the specified parameters. Returns an Int32
@@ -131,14 +135,14 @@ module
         /**
          * Mounts an Opaque Binary Blob (OBB) with the specified decryption key and
          * only allows the calling process's UID access to the contents.
-         * MountService will call back to the supplied IObbActionListener to inform
+         * MountService will call back to the supplied IIObbActionListener to inform
          * it of the terminal state of the call.
          */
         MountObb(
             [in] String rawPath,
             [in] String canonicalPath,
             [in] String key,
-            [in] IObbActionListener* token,
+            [in] IIObbActionListener* token,
             [in] Int32 nonce);
 
         /*
@@ -161,10 +165,10 @@ module
             [out] Int32* result);
 
         /**
-         * Registers an IMountServiceListener for receiving async notifications.
+         * Registers an IIMountServiceListener for receiving async notifications.
          */
         RegisterListener(
-            [in] IMountServiceListener* listener);
+            [in] IIMountServiceListener* listener);
 
         /*
          * Rename an unmounted secure container. Returns an Int32 consistent with
@@ -192,13 +196,13 @@ module
         /**
          * Unmounts an Opaque Binary Blob (OBB). When the force flag is specified,
          * any program using it will be forcibly killed to unmount the image.
-         * MountService will call back to the supplied IObbActionListener to inform
+         * MountService will call back to the supplied IIObbActionListener to inform
          * it of the terminal state of the call.
          */
         UnmountObb(
             [in] String rawPath,
             [in] Boolean force,
-            [in] IObbActionListener* token,
+            [in] IIObbActionListener* token,
             [in] Int32 nonce);
 
         /*
@@ -221,10 +225,10 @@ module
             [in] Boolean removeEncryption);
 
         /**
-         * Unregisters an IMountServiceListener
+         * Unregisters an IIMountServiceListener
          */
         UnregisterListener(
-            [in] IMountServiceListener* listener);
+            [in] IIMountServiceListener* listener);
 
         /**
          * Returns whether or not the external storage is emulated.

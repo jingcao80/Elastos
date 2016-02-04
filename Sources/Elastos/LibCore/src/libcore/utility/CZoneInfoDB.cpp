@@ -62,6 +62,10 @@ ECode CZoneInfoDB::GetInstance(
 //===============================================================
 // TzData::MyBasicLruCache
 //===============================================================
+TzData::MyBasicLruCache::MyBasicLruCache(TzData* host) {
+    BasicLruCache::constructor(CACHE_SIZE);
+    mHost = host;
+}
 
 AutoPtr<IZoneInfo> TzData::MyBasicLruCache::Create(
     /* [in] */ const String& id)
@@ -107,6 +111,8 @@ CAR_INTERFACE_IMPL(TzData, Object, ITzData)
 TzData::TzData(
     /* [in] */ ArrayOf<String>* paths)
 {
+    mCache = new MyBasicLruCache(this);
+
     for (Int32 i = 0; i < paths->GetLength(); ++i) {
         if (LoadData((*paths)[i])) {
             return;

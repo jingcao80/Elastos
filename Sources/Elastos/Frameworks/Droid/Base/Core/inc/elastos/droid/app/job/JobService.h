@@ -18,7 +18,7 @@ namespace Job {
  * Contains the parameters used to configure/identify your job. You do not create this object
  * yourself, instead it is handed in to your application by the System.
  */
-class JobService
+class ECO_PUBLIC JobService
     : public Service
     , public IJobService
 {
@@ -125,20 +125,20 @@ public:
 private:
     friend class JobHandler;
 
-    static const String TAG;
+    ECO_LOCAL static const String TAG;
     /**
      * Identifier for a message that will result in a call to
      * {@link #onStartJob(android.app.job.JobParameters)}.
      */
-    static const Int32 MSG_EXECUTE_JOB;
+    ECO_LOCAL static const Int32 MSG_EXECUTE_JOB;
     /**
      * Message that will result in a call to {@link #onStopJob(android.app.job.JobParameters)}.
      */
-    static const Int32 MSG_STOP_JOB;
+    ECO_LOCAL static const Int32 MSG_STOP_JOB;
     /**
      * Message that the client has completed execution of this job.
      */
-    static const Int32 MSG_JOB_FINISHED;
+    ECO_LOCAL static const Int32 MSG_JOB_FINISHED;
 
     /** Lock object for {@link #mHandler}. */
     Object mHandlerLock;

@@ -212,7 +212,7 @@ ECode IpConfigStore::WriteConfig(
     label:
     if (FAILED(ec)) {
         if ((ECode)E_NULL_POINTER_EXCEPTION == ec)
-            Loge(TAG, "Failure in writing %s%d", Object::ToString(config).string(), ec);
+            Loge(TAG, "Failure in writing %s%d", TO_CSTR(config), ec);
         else
             return ec;
     }
@@ -286,7 +286,7 @@ ECode IpConfigStore::ReadIpAndProxyConfigurations(
                     staticIpConfiguration->SetIpAddress(linkAddr);
                 }
                 else {
-                    Loge("Non-IPv4 or duplicate address: %s", Object::ToString(linkAddr).string());
+                    Loge("Non-IPv4 or duplicate address: %s", TO_CSTR(linkAddr));
                 }
             }
             else if (key.Equals(GATEWAY_KEY)) {
@@ -316,7 +316,7 @@ ECode IpConfigStore::ReadIpAndProxyConfigurations(
                             Ptr(staticIpConfiguration)->Func(staticIpConfiguration->GetGateway) == NULL) {
                         staticIpConfiguration->SetGateway(gateway);
                     } else {
-                        Loge("Non-IPv4 default or duplicate route: %s", Object::ToString(route).string());
+                        Loge("Non-IPv4 default or duplicate route: %s", TO_CSTR(route));
                     }
                 }
             } else if (key.Equals(DNS_KEY)) {

@@ -1,25 +1,21 @@
 
-#include "elastos/droid/ext/frameworkext.h"
+//#include "Elastos.Droid.Core.h"
+#include "Elastos.Droid.Widget.h"
 #include "elastos/droid/server/am/BaseErrorDialog.h"
-#include "elastos/droid/os/Handler.h"
 #include "elastos/droid/R.h"
 
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Droid::R;
 using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::App::EIID_IDialog;
-using Elastos::Droid::App::EIID_IAlertDialog;
-using Elastos::Droid::View::EIID_IWindowCallback;
-using Elastos::Droid::View::EIID_IKeyEventCallback;
-using Elastos::Droid::View::EIID_IViewOnCreateContextMenuListener;
-using Elastos::Droid::Content::EIID_IDialogInterface;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Am {
 
+const Int32 BaseErrorDialog::ENABLE_BUTTONS = 0;
+const Int32 BaseErrorDialog::DISABLE_BUTTONS= 0;
 
 ECode BaseErrorDialog::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -27,18 +23,14 @@ ECode BaseErrorDialog::MyHandler::HandleMessage(
     Int32 what;
     msg->GetWhat(&what);
 
-    if (what == 0) {
+    if (what == ENABLE_BUTTONS) {
         mHost->HandleOnStartMessage();
+    } else if (what == DISABLE_BUTTONS) {
+        mHost->SetEnabled(FALSE);
     }
 
     return NOERROR;
 }
-
-IALERTDIALOG_METHODS_IMPL(BaseErrorDialog, AlertDialog);
-
-IDIALOG_METHODS_IMPL(BaseErrorDialog, AlertDialog);
-
-IWINDOWCALLBACK_METHODS_IMPL(BaseErrorDialog, AlertDialog);
 
 BaseErrorDialog::BaseErrorDialog()
     : mConsuming(TRUE)
@@ -54,7 +46,7 @@ BaseErrorDialog::BaseErrorDialog(
 ECode BaseErrorDialog::Init(
     /* [in] */ IContext* context)
 {
-    FAIL_RETURN(AlertDialog::Init(context, R::style::Theme_Dialog_AppError));
+    FAIL_RETURN(AlertDialog::constructor(context, R::style::Theme_Dialog_AppError));
     mHandler = new MyHandler(this);
 
     AutoPtr<IWindow> window;
@@ -68,65 +60,19 @@ ECode BaseErrorDialog::Init(
     CString::New(String("Error Dialog") ,(ICharSequence**)&cs);
     attrs->SetTitle(cs);
     window->SetAttributes(attrs);
-    SetIconAttribute(R::attr::alertDialogIcon);
     return NOERROR;
 }
 
-PInterface BaseErrorDialog::Probe(
-    /* [in] */ REIID riid)
-{
-    if (EIID_IInterface == riid) {
-        return (PInterface)(IAlertDialog*)this;
-    }
-    else if (riid == EIID_IAlertDialog) {
-        return (PInterface)(IAlertDialog*)this;
-    }
-    else if (riid == EIID_IDialog) {
-        return (PInterface)(IDialog*)this;
-    }
-    else if (riid == EIID_IDialogInterface) {
-        return (PInterface)(IDialogInterface*)this;
-    }
-    else if (riid == EIID_IWindowCallback) {
-        return (PInterface)(IWindowCallback*)this;
-    }
-    if (riid == EIID_IKeyEventCallback) {
-        return (PInterface)(IKeyEventCallback*)this;
-    }
-    else if (riid == EIID_IViewOnCreateContextMenuListener) {
-        return (PInterface)(IViewOnCreateContextMenuListener*)this;
-    }
-    else if (riid == EIID_IWeakReferenceSource) {
-        return (PInterface)(IWeakReferenceSource*)this;
-    }
-
-    return NULL;
-}
-
-UInt32 BaseErrorDialog::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 BaseErrorDialog::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode BaseErrorDialog::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-void BaseErrorDialog::OnStart()
+ECode BaseErrorDialog::OnStart()
 {
     AlertDialog::OnStart();
-    SetEnabled(FALSE);
-
     Boolean result;
-    mHandler->SendEmptyMessageDelayed(0, 1000, &result);
+    mHandler->SendEmptyMessage(DISABLE_BUTTONS, &result);
+
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(ENABLE_BUTTONS, (IMessage**)&msg);
+    mHandler->SendMessageDelayed(msg, 1000, &result);
+    return NOERROR;
 }
 
 void BaseErrorDialog::HandleOnStartMessage()
@@ -143,7 +89,18 @@ Boolean BaseErrorDialog::DispatchKeyEvent(
         return TRUE;
     }
     //Slog.i(TAG, "Dispatching: " + event);
-    return AlertDialog::DispatchKeyEvent(event);
+    Boolean result;
+    AlertDialog::DispatchKeyEvent(event, &result);
+    return result;
+}
+
+ECode BaseErrorDialog::DispatchKeyEvent(
+    /* [in] */ IKeyEvent* event,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = DispatchKeyEvent(event);
+    return NOERROR;
 }
 
 ECode BaseErrorDialog::OnCreateContextMenu(
@@ -161,21 +118,21 @@ void BaseErrorDialog::SetEnabled(
     FindViewById(R::id::button1, (IView**)&view);
     AutoPtr<IButton> b = IButton::Probe(view);
     if (b != NULL) {
-        b->SetEnabled(enabled);
+        IView::Probe(b)->SetEnabled(enabled);
     }
 
     view = NULL;
     FindViewById(R::id::button2, (IView**)&view);
     b = IButton::Probe(view);
     if (b != NULL) {
-        b->SetEnabled(enabled);
+        IView::Probe(b)->SetEnabled(enabled);
     }
 
     view = NULL;
     FindViewById(R::id::button3, (IView**)&view);
     b = IButton::Probe(view);
     if (b != NULL) {
-        b->SetEnabled(enabled);
+        IView::Probe(b)->SetEnabled(enabled);
     }
 }
 
@@ -185,7 +142,7 @@ ECode BaseErrorDialog::OnKeyDown(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = AlertDialog::OnKeyDown(keyCode, event);
+    AlertDialog::OnKeyDown(keyCode, event, result);
 
     return NOERROR;
 }
@@ -196,7 +153,7 @@ ECode BaseErrorDialog::OnKeyLongPress(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = AlertDialog::OnKeyLongPress(keyCode, event);
+    AlertDialog::OnKeyLongPress(keyCode, event, result);
 
     return NOERROR;
 }
@@ -207,7 +164,7 @@ ECode BaseErrorDialog::OnKeyUp(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = AlertDialog::OnKeyUp(keyCode, event);
+    AlertDialog::OnKeyUp(keyCode, event, result);
 
     return NOERROR;
 }
@@ -219,17 +176,8 @@ ECode BaseErrorDialog::OnKeyMultiple(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = AlertDialog::OnKeyMultiple(keyCode, repeatCount, event);
+    AlertDialog::OnKeyMultiple(keyCode, repeatCount, event, result);
 
-    return NOERROR;
-}
-
-ECode BaseErrorDialog::GetWeakReference(
-    /* [out] */ IWeakReference** weakReference)
-{
-    VALIDATE_NOT_NULL(weakReference);
-    *weakReference = new WeakReferenceImpl(THIS_PROBE(IInterface), CreateWeak(this));
-    (*weakReference)->AddRef();
     return NOERROR;
 }
 

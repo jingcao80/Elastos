@@ -13,3 +13,5 @@ SOURCES += CInputManagerInputDevicesChangedListener.cpp
 SOURCES += InputDeviceIdentifier.cpp
 SOURCES += KeyboardLayout.cpp
 SOURCES += TouchCalibration.cpp
+SOURCES += CTouchCalibration.cpp
+SOURCES += CTouchCalibrationHelper.cpp

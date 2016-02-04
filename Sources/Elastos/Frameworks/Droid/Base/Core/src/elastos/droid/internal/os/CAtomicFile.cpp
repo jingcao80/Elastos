@@ -133,7 +133,6 @@ ECode CAtomicFile::Truncate()
     //try {
         AutoPtr<IFileOutputStream> fos;
         FAIL_RETURN(CFileOutputStream::New(mBaseName, (IFileOutputStream**)&fos));
-        Boolean result;
         FileUtils::Sync(fos);
         ICloseable::Probe(fos)->Close();
     //} catch (FileNotFoundException e) {

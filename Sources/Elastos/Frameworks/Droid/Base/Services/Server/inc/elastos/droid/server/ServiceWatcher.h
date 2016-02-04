@@ -1,6 +1,8 @@
 #ifndef __ELASTOS_DROID_SERVER_LOCATION_SERVICEWATCHER_H__
 #define __ELASTOS_DROID_SERVER_LOCATION_SERVICEWATCHER_H__
 
+#define HASH_FOR_CONTENT
+#include <elastos/droid/ext/frameworkhash.h>
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/droid/internal/content/PackageMonitor.h>
 #include <elastos/core/Math.h>

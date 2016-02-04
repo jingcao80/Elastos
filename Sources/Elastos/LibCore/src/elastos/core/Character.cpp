@@ -2,7 +2,7 @@
 #include "Character.h"
 #include "Math.h"
 #include "StringBuilder.h"
-
+#include "elastos/utility/logging/Slogger.h"
 
 DEFINE_CONVERSION_FOR(Elastos::Core::Character::UnicodeBlock, IInterface)
 
@@ -734,16 +734,16 @@ ECode Character::GetCharCount(
 //     /*[in]*/ Int32 index,
 //     /*[out]*/ Int32* code)
 // {
-//     assert(code != NULL);
+//     VALIDATE_NOT_NULL(code)
+
 //     if (seq == NULL) {
-//         assert(0);
-//         // throw new NullPointerException("seq == null");
+//         SLOGGERD("Character", "seq == null")
+//         return E_NULL_POINTER_EXCEPTION;
 //     }
 
 //     Int32 len = seq->GetLength();
 //     if (index < 0 || index >= len) {
-//         assert(0);
-//         // throw new IndexOutOfBoundsException();
+//         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
 //     }
 
 //     Char32 high = (*seq)[index++];
@@ -761,12 +761,65 @@ ECode Character::GetCharCount(
 //     return NOERROR;
 // }
 
+// ECode Character::CodePointAt(
+//     /*[in]*/ ICharSequence* seq,
+//     /*[in]*/ Int32 index,
+//     /* [out] */ Int32* code)
+// {
+//     if (seq == NULL) {
+//         SLOGGERD("Character", "seq == null")
+//         return E_NULL_POINTER_EXCEPTION;
+//     }
+//     Int32 len;
+//     seq->GetLength(&len);
+//     if (index < 0 || index >= len) {
+//         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+//     }
+
+//     Char32 high;
+//     seq->GetCharAt(index++, &high);
+//     if (index >= len) {
+//         *code = high;
+//         return NOERROR;
+//     }
+//     Char32 low;
+//     seq->GetCharAt(index, &low);
+//     if (IsSurrogatePair(high, low)) {
+//         return ToCodePoint(high, low, code);
+//     }
+//     *code = high;
+//     return NOERROR;
+// }
+
+// ECode Character::CodePointAt(
+//     /*[in]*/ ArrayOf<Char32>* seq,
+//     /*[in]*/ Int32 index,
+//     [in] Int32 limit,
+//     /* [out] */ Int32* code)
+// {
+//     if (index < 0 || index >= limit || limit < 0 || limit > seq->GetLength()) {
+//         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+//     }
+
+//     Char32 high = (*seq)[index++];
+//     if (index >= limit) {
+//         *code = high;
+//     }
+//     Char32 low = (*seq)[index];
+//     if (IsSurrogatePair(high, low)) {
+//         return ToCodePoint(high, low, code);
+//     }
+//     *code = high;
+//     return NOERROR;
+// }
+
 // ECode Character::ToCodePoint(
 //     /*[in]*/ Char32 high,
 //     /*[in]*/ Char32 low,
 //     /*[out]*/ Int32* value)
 // {
-//     assert(value != NULL);
+//     VALIDATE_NOT_NULL(value)
+
 //     // See RFC 2781, Section 2.2
 //     // http://www.ietf.org/rfc/rfc2781.txt
 //     Int32 h = (high & 0x3FF) << 10;

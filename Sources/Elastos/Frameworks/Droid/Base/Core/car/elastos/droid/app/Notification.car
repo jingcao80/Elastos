@@ -28,6 +28,14 @@ module
     }
 
     /**
+     * The default value of {@link #audioAttributes}.
+     */
+    interface INotificationHelper {
+        GetAUDIO_ATTRIBUTES_DEFAULT(
+            [out] IAudioAttributes** attr);
+    }
+
+    /**
      * A class that represents how a persistent notification is to be presented to the user using the NotificationManager.
      *
      * @sa NotificationManager
@@ -819,6 +827,12 @@ module
 
         Clone(
             [out] IInterface** result);
+
+        /**
+         * @hide
+         */
+        IsGroupChild(
+            [out] Boolean* result);
     }
 
     interface INotificationAction {
@@ -1441,6 +1455,14 @@ module
          */
         Build(
             [out] INotification** notification);
+    }
+
+    interface INotificationBuilderHelper {
+        CalculateTopPadding(
+            [in] IContext* ctx,
+            [in] Boolean hasThreeLines,
+            [in] Float fontScale,
+            [out] Int32* result);
     }
 
     /**

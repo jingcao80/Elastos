@@ -114,7 +114,7 @@ ECode Nat464Xlat::StartClat(
     }
     String iface;
     lp->GetInterfaceName(&iface);
-    Slogger::I(TAG, "Starting clatd on %s, lp=", iface.string(), Object::ToString(lp).string());
+    Slogger::I(TAG, "Starting clatd on %s, lp=", iface.string(), TO_CSTR(lp));
     ECode ec = mNMService->StartClatd(iface);
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
         Slogger::E(TAG, "Error starting clat daemon: ");
@@ -149,7 +149,7 @@ void Nat464Xlat::UpdateConnectivityService()
     mHandler->ObtainMessage(
         INetworkAgent::EVENT_NETWORK_PROPERTIES_CHANGED, mBaseLP.Get(), (IMessage**)&msg);
     msg->SetReplyTo(mNetworkMessenger);
-    Slogger::I(TAG, "sending message to ConnectivityService: %s", Object::ToString(msg).string());
+    Slogger::I(TAG, "sending message to ConnectivityService: %s", TO_CSTR(msg));
     msg->SendToTarget();
 }
 
@@ -234,7 +234,7 @@ ECode Nat464Xlat::InterfaceAdded(
         mLP->AddRoute(ipv4Default, &bval);
         mLP->AddLinkAddress(clatAddress, &bval);
         mBaseLP->AddStackedLink(mLP, &bval);
-        Slogger::I(TAG, "Adding stacked link. tracker LP: %s", Object::ToString(mBaseLP).string());
+        Slogger::I(TAG, "Adding stacked link. tracker LP: %s", TO_CSTR(mBaseLP));
         UpdateConnectivityService();
         // } catch(RemoteException e) {
 
@@ -266,7 +266,7 @@ ECode Nat464Xlat::InterfaceRemoved(
         Slogger::I(TAG, "interface %s removed, mIsRunning = %d -> FALSE", CLAT_INTERFACE_NAME.string(), mIsRunning);
         mIsRunning = FALSE;
         mLP->Clear();
-        Slogger::I(TAG, "mLP = %s",Object::ToString(mLP).string());
+        Slogger::I(TAG, "mLP = %s",TO_CSTR(mLP));
     }
     return NOERROR;
 }

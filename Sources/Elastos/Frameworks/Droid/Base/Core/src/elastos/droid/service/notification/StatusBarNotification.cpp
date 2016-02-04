@@ -9,7 +9,7 @@ using Elastos::Droid::App::CNotification;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Service::Notification::CStatusBarNotification;
 using Elastos::Core::CSystem;
-using Elastos::Core::ICloneable;
+using Elastos::Core::EIID_ICloneable;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
 
@@ -18,7 +18,7 @@ namespace Droid {
 namespace Service {
 namespace Notification {
 
-CAR_INTERFACE_IMPL_2(StatusBarNotification, Object, IStatusBarNotification, IParcelable)
+CAR_INTERFACE_IMPL_3(StatusBarNotification, Object, IStatusBarNotification, IParcelable, ICloneable)
 
 StatusBarNotification::StatusBarNotification()
     : mId(0)

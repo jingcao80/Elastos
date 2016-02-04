@@ -87,7 +87,7 @@ ECode AbstractEventLogger::OnCompleted(
         mLogWritten = TRUE;
     }
 
-    Int64 completionTime = SystemClock::GetElapsedRealtime();
+    Int64 UNUSED(completionTime) = SystemClock::GetElapsedRealtime();
 
     // We don't report latency for stopped syntheses because their overall
     // total time spent will be inaccurate (will not correlate with

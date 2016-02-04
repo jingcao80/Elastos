@@ -588,22 +588,22 @@ void WifiDisplayAdapter::DumpLocked(
 {
     DisplayAdapter::DumpLocked(pw);
 
-    // pw->PrintStringln(String("mCurrentStatus=") + getWifiDisplayStatusLocked());
-    // pw->PrintStringln(String("mFeatureState=") + mFeatureState);
-    // pw->PrintStringln(String("mScanState=") + mScanState);
-    // pw->PrintStringln(String("mActiveDisplayState=") + mActiveDisplayState);
-    // pw->PrintStringln(String("mActiveDisplay=") + mActiveDisplay);
-    // pw->PrintStringln(String("mDisplays=") + Arrays.toString(mDisplays));
-    // pw->PrintStringln(String("mAvailableDisplays=") + Arrays.toString(mAvailableDisplays));
-    // pw->PrintStringln(String("mRememberedDisplays=") + Arrays.toString(mRememberedDisplays));
-    // pw->PrintStringln(String("mPendingStatusChangeBroadcast=") + mPendingStatusChangeBroadcast);
-    // pw->PrintStringln(String("mSupportsProtectedBuffers=") + mSupportsProtectedBuffers);
+    // pw->Println(String("mCurrentStatus=") + getWifiDisplayStatusLocked());
+    // pw->Println(String("mFeatureState=") + mFeatureState);
+    // pw->Println(String("mScanState=") + mScanState);
+    // pw->Println(String("mActiveDisplayState=") + mActiveDisplayState);
+    // pw->Println(String("mActiveDisplay=") + mActiveDisplay);
+    // pw->Println(String("mDisplays=") + Arrays.toString(mDisplays));
+    // pw->Println(String("mAvailableDisplays=") + Arrays.toString(mAvailableDisplays));
+    // pw->Println(String("mRememberedDisplays=") + Arrays.toString(mRememberedDisplays));
+    // pw->Println(String("mPendingStatusChangeBroadcast=") + mPendingStatusChangeBroadcast);
+    // pw->Println(String("mSupportsProtectedBuffers=") + mSupportsProtectedBuffers);
 
     // // Try to dump the controller state.
     // if (mDisplayController == NULL) {
-    //     pw->PrintStringln("mDisplayController=NULL");
+    //     pw->Println("mDisplayController=NULL");
     // } else {
-    //     pw->PrintStringln("mDisplayController:");
+    //     pw->Println("mDisplayController:");
     //     final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
     //     ipw->increaseIndent();
     //     DumpUtils.dumpAsync(getHandler(), mDisplayController, ipw, 200);

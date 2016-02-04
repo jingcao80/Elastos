@@ -58,9 +58,10 @@ const AutoPtr<IHostnameVerifier> CertificateChainValidator::NoPreloadHolder::sVe
 
 AutoPtr<ICertificateChainValidator> CertificateChainValidator::NoPreloadHolder::InitInstance()
 {
-    AutoPtr<CCertificateChainValidator> ret;
-    CCertificateChainValidator::NewByFriend((CCertificateChainValidator**)&ret);
-    return (ICertificateChainValidator*) ret;
+    AutoPtr<ICertificateChainValidator> ret;
+    // TODO
+    // CCertificateChainValidator::New((ICertificateChainValidator**)&ret);
+    return ret;
 }
 
 AutoPtr<IHostnameVerifier> CertificateChainValidator::NoPreloadHolder::InitVerifier()
@@ -69,7 +70,7 @@ AutoPtr<IHostnameVerifier> CertificateChainValidator::NoPreloadHolder::InitVerif
     AutoPtr<IHttpsURLConnectionHelper> huc;
 
     // TODO: Waiting for CHttpsURLConnectionHelper
-    assert(0);
+    // assert(0);
     // CHttpsURLConnectionHelper::AcquireSingleton((IHttpsURLConnectionHelper**)&huc);
     // huc->GetDefaultHostnameVerifier(&ret);
 

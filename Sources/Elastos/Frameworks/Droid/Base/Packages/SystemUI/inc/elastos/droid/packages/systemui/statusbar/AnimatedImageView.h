@@ -1,7 +1,8 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_ANIMATEDIMAGEVIEW_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_ANIMATEDIMAGEVIEW_H__
 
-#include "elastos/droid/widget/ImageView.h"
+#include "_SystemUI.h"
+#include <elastos/droid/widget/ImageView.h>
 
 using Elastos::Droid::Graphics::Drawable::IAnimationDrawable;
 using Elastos::Droid::View::IView;
@@ -9,18 +10,23 @@ using Elastos::Droid::Widget::ImageView;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 
-class AnimatedImageView : public ImageView
+class AnimatedImageView
+    : public ImageView
+    , public IAnimatedImageView
 {
 public:
+    CAR_INTERFACE_DECL();
+
     AnimatedImageView();
 
-    AnimatedImageView(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
-    AnimatedImageView(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
@@ -35,7 +41,7 @@ public:
     virtual CARAPI OnDetachedFromWindow();
 
 protected:
-    virtual CARAPI_(void) OnVisibilityChanged(
+    virtual CARAPI OnVisibilityChanged(
         /* [in] */ IView* changedView,
         /* [in] */ Int32 vis);
 
@@ -47,10 +53,10 @@ private:
     Boolean mAttached;
 };
 
-
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos
 
 #endif //__ELASTOS_DROID_SYSTEMUI_STATUSBAR_ANIMATEDIMAGEVIEW_H__

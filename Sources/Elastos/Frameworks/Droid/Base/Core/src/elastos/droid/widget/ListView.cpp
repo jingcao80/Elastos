@@ -3287,7 +3287,6 @@ void ListView::DispatchDraw(
         Boolean headerDividers = mHeaderDividersEnabled;
         Boolean footerDividers = mFooterDividersEnabled;
         Int32 first = mFirstPosition;
-        Boolean areAllItemsSelectable = mAreAllItemsSelectable;
         AutoPtr<IListAdapter> adapter = mAdapter;
         Boolean res, res1;
         IsOpaque(&res);
@@ -3346,10 +3345,10 @@ void ListView::DispatchDraw(
                         adapter->IsEnabled(itemIndex, &enabled);
                         adapter->IsEnabled(nextIndex, &addEnabled);
 
-                        if (enabled && (headerDividers || !isHeader
-                                && (nextIndex >= headerCount))
-                                && (isLastItem || addEnabled && (footerDividers
-                                || !isFooter && (nextIndex < footerLimit)))) {
+                        if (enabled && (headerDividers || (!isHeader
+                                && (nextIndex >= headerCount)))
+                                && (isLastItem || (addEnabled && (footerDividers
+                                || (!isFooter && (nextIndex < footerLimit)))))) {
                             bounds->mTop = bottom;
                             bounds->mBottom = bottom + dividerHeight;
                             DrawDivider(canvas, bounds, i);
@@ -3402,10 +3401,10 @@ void ListView::DispatchDraw(
                         // before the first enabled item.
                         adapter->IsEnabled(itemIndex, &enabled);
                         adapter->IsEnabled(previousIndex, &addEnabled);
-                        if (enabled && (headerDividers || !isHeader
-                                && (previousIndex >= headerCount))
-                                && (isFirstItem || addEnabled && (footerDividers || !isFooter
-                                && (previousIndex < footerLimit)))) {
+                        if (enabled && (headerDividers || (!isHeader
+                                && (previousIndex >= headerCount)))
+                                && (isFirstItem || (addEnabled && (footerDividers || (!isFooter
+                                && (previousIndex < footerLimit)))))) {
                             bounds->mTop = top - dividerHeight;
                             bounds->mBottom = top;
                             DrawDivider(canvas, bounds, i - 1);
@@ -3890,10 +3889,10 @@ Boolean ListView::ShouldAdjustHeightForDivider(
                     Boolean enabled1, enabled2;
                     adapter->IsEnabled(itemIndex, &enabled1);
                     adapter->IsEnabled(nextIndex, &enabled2);
-                    if (enabled1 && (headerDividers || !isHeader
-                            && (nextIndex >= headerCount)) && (isLastItem
-                            || enabled2 && (footerDividers || !isFooter
-                            && (nextIndex < footerLimit)))) {
+                    if (enabled1 && (headerDividers || (!isHeader
+                            && (nextIndex >= headerCount))) && (isLastItem
+                            || (enabled2 && (footerDividers || (!isFooter
+                            && (nextIndex < footerLimit)))))) {
                         return TRUE;
                     }
                     else if (fillForMissingDividers) {
@@ -3912,10 +3911,10 @@ Boolean ListView::ShouldAdjustHeightForDivider(
                     Boolean enabled1, enabled2;
                     adapter->IsEnabled(itemIndex, &enabled1);
                     adapter->IsEnabled(previousIndex, &enabled2);
-                    if (enabled1 && (headerDividers || !isHeader
-                            && (previousIndex >= headerCount)) && (isFirstItem ||
-                            enabled2 && (footerDividers || !isFooter
-                            && (previousIndex < footerLimit)))) {
+                    if (enabled1 && (headerDividers || (!isHeader
+                            && (previousIndex >= headerCount))) && (isFirstItem ||
+                            (enabled2 && (footerDividers || (!isFooter
+                            && (previousIndex < footerLimit)))))) {
                         return TRUE;
                     }
                     else if (fillForMissingDividers) {
@@ -3966,7 +3965,7 @@ ECode ListView::OnInitializeAccessibilityNodeInfoForItem(
     view->GetLayoutParams((IViewGroupLayoutParams**)&params);
     AutoPtr<IAbsListViewLayoutParams> lp = IAbsListViewLayoutParams::Probe(params);
 
-    Boolean isHeading;
+    Boolean isHeading = FALSE;
     if (lp != NULL) {
         Int32 viewType;
         lp->GetViewType(&viewType);

@@ -33,6 +33,9 @@ TokenWatcher::TokenWatcher(
     mNotificationTask = new NotificationTaskRunnable(this);
 }
 
+TokenWatcher::~TokenWatcher()
+{}
+
 ECode TokenWatcher::AcquireToken(
     /* [in] */ IBinder* token,
     /* [in] */ const String& tag)

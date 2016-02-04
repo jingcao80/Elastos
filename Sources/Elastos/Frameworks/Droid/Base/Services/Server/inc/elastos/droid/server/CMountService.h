@@ -28,9 +28,9 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::HandlerBase;
-using Elastos::Droid::Os::Storage::IObbActionListener;
+using Elastos::Droid::Os::Storage::IIObbActionListener;
 using Elastos::Droid::Os::Storage::IIMountShutdownObserver;
-using Elastos::Droid::Os::Storage::IMountServiceListener;
+using Elastos::Droid::Os::Storage::IIMountServiceListener;
 using Elastos::Droid::Os::Storage::IStorageVolume;
 using Elastos::Droid::Server::Pm::CPackageManagerService;
 
@@ -137,7 +137,7 @@ public:
             /* [in] */ const String& rawPath,
             /* [in] */ const String& canonicalPath,
             /* [in] */ Int32 callerUid,
-            /* [in] */ IObbActionListener* token,
+            /* [in] */ IIObbActionListener* token,
             /* [in] */ Int32 nonce,
             /* [in] */ CMountService* host);
 
@@ -162,7 +162,7 @@ public:
         Int32 mOwnerGid;
 
         // Token of remote Binder caller
-        AutoPtr<IObbActionListener> mToken;
+        AutoPtr<IIObbActionListener> mToken;
 
         // Identifier to pass back to the token
         Int32 mNonce;
@@ -329,7 +329,7 @@ private:
     {
     public:
         MountServiceBinderListener(
-            /* [in] */ IMountServiceListener* listener,
+            /* [in] */ IIMountServiceListener* listener,
             /* [in] */ CMountService* host);
 
         CAR_INTERFACE_DECL();
@@ -337,7 +337,7 @@ private:
         CARAPI ProxyDied();
 
     public:
-        AutoPtr<IMountServiceListener> mListener;
+        AutoPtr<IIMountServiceListener> mListener;
         CMountService* mHost;
     };
 
@@ -476,10 +476,10 @@ public:
     CARAPI_(void) SystemReady();
 
     CARAPI RegisterListener(
-        /* [in] */ IMountServiceListener* listener);
+        /* [in] */ IIMountServiceListener* listener);
 
     CARAPI UnregisterListener(
-        /* [in] */ IMountServiceListener* listener);
+        /* [in] */ IIMountServiceListener* listener);
 
     CARAPI Shutdown(
         /* [in] */ IIMountShutdownObserver* observer);
@@ -586,13 +586,13 @@ public:
         /* [in] */ const String& rawPath,
         /* [in] */ const String& canonicalPath,
         /* [in] */ const String& key,
-        /* [in] */ IObbActionListener* token,
+        /* [in] */ IIObbActionListener* token,
         /* [in] */ Int32 nonce);
 
     CARAPI UnmountObb(
         /* [in] */ const String& rawPath,
         /* [in] */ Boolean force,
-        /* [in] */ IObbActionListener* token,
+        /* [in] */ IIObbActionListener* token,
         /* [in] */ Int32 nonce);
 
     CARAPI GetEncryptionState(

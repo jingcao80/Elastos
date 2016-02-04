@@ -74,6 +74,7 @@ class JSONObject
     : public Object
     , public IJSONObject
 {
+    friend class JSONStringer;
 public:
     class MyObject
         : public Object
@@ -549,9 +550,6 @@ public:
         /* [in] */ Int32 indentSpaces,
         /* [out] */ String* str);
 
-    CARAPI WriteTo(
-        /* [in] */ IJSONStringer* stringer);
-
     /**
      * Encodes the number as a JSON string.
      *
@@ -591,8 +589,10 @@ public:
 
 protected:
     CARAPI CheckName(
-        /* [in] */ const String& name,
-        /* [out] */ String* str);
+        /* [in] */ const String& name);
+
+    CARAPI WriteTo(
+        /* [in] */ IJSONStringer* stringer);
 
 public:
     /**
@@ -612,10 +612,8 @@ public:
      */
     static const AutoPtr<IInterface> Object_NULL;
 
-    static CARAPI_(AutoPtr<IInterface>) InitNULL();
-
 private:
-    static const Double NEGATIVE_ZERO = -0;
+    static const Double NEGATIVE_ZERO;
 
     AutoPtr<ILinkedHashMap> mNameValuePairs;
     /*private final LinkedHashMap<String, Object> nameValuePairs;*/

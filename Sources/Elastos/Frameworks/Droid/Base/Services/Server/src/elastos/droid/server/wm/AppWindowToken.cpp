@@ -1,10 +1,14 @@
 
-#include "wm/AppWindowToken.h"
+#include "elastos/droid/server/wm/AppWindowToken.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.View.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Core::StringBuilder;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 
@@ -146,7 +150,7 @@ void AppWindowToken::UpdateReportedVisibilityLocked()
         if (nowDrawn) {
             AutoPtr<IMessage> msg;
             mService->mH->ObtainMessage(CWindowManagerService::H::REPORT_APPLICATION_TOKEN_DRAWN,
-                this, (IMessage**)&msg);
+                    (IObject*)this, (IMessage**)&msg);
             Boolean result;
             mService->mH->SendMessage(msg, &result);
         }
@@ -159,7 +163,7 @@ void AppWindowToken::UpdateReportedVisibilityLocked()
         mReportedVisible = nowVisible;
         AutoPtr<IMessage> msg;
         mService->mH->ObtainMessage(CWindowManagerService::H::REPORT_APPLICATION_TOKEN_WINDOWS,
-            nowVisible ? 1 : 0, nowGone ? 1 : 0, this, (IMessage**)&msg);
+                nowVisible ? 1 : 0, nowGone ? 1 : 0, (IObject*)this, (IMessage**)&msg);
         Boolean result;
         mService->mH->SendMessage(msg, &result);
     }
@@ -189,7 +193,7 @@ Boolean AppWindowToken::IsVisible()
         if (!win->mAppFreezing
                 && (win->mViewVisibility == IView::VISIBLE ||
                     (win->mWinAnimator->IsAnimating() &&
-                            !service->mAppTransition->IsTransitionSet()))
+                            !mService->mAppTransition->IsTransitionSet()))
                 && !win->mDestroying && win->IsDrawnLw()) {
             return TRUE;
         }
@@ -204,7 +208,7 @@ void AppWindowToken::RemoveAllWindows()
         AutoPtr<WindowState> win = *rit;
         if (CWindowManagerService::DEBUG_WINDOW_MOVEMENT)
             Slogger::W(CWindowManagerService::TAG, "removeAllWindows: removing win=%p", win.Get());
-        win->mService>RemoveWindowLocked(win->mSession, win);
+        win->mService->RemoveWindowLocked(win->mSession, win);
     }
 }
 
@@ -220,12 +224,8 @@ ECode AppWindowToken::ToString(
         String info;
         mToken->ToString(&info);
         sb.Append(info);
-        if (mStartingWindow != NULL) {
-            sb.Append(" startingWindow=");
-            sb.Append(mStartingWindow->ToString());
-        }
         sb.AppendChar('}');
-        sb.ToString(&mStringName);
+        mStringName = sb.ToString();
     }
     *str = mStringName;
     return NOERROR;

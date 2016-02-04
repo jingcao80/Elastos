@@ -30,6 +30,8 @@ public:
      */
     TouchCalibration();
 
+    CARAPI constructor();
+
     /**
      * Create a new TouchCalibration from affine transformation paramters.
      * @param xScale   Influence of input x-axis value on output x-axis value.
@@ -39,16 +41,13 @@ public:
      * @param yScale   Influence of input y-axis value on output y-axis value.
      * @param yOffset  Constant offset to be applied to output y-axis value.
      */
-    TouchCalibration(
+    CARAPI constructor(
         /* [in] */ Float xScale,
         /* [in] */ Float xyMix,
         /* [in] */ Float xOffset,
         /* [in] */ Float yxMix,
         /* [in] */ Float yScale,
         /* [in] */ Float yOffset);
-
-    TouchCalibration(
-        /* [in] */ IParcel* source);
 
     //@Override
     CARAPI ReadFromParcel(
@@ -70,23 +69,19 @@ public:
     CARAPI GetHashCode(
         /* [out] */ Int32* code);
 
+private:
+    static CARAPI_(AutoPtr<ITouchCalibration>) INIT_IDENTITY();
+
 public:
-    static const AutoPtr<ITouchCalibration> IDENTITY;// = new TouchCalibration();
-
-    // public static final Parcelable.Creator<TouchCalibration> CREATOR
-    //         = new Parcelable.Creator<TouchCalibration>() {
-    //     public TouchCalibration createFromParcel(Parcel in) {
-    //         return new TouchCalibration(in);
-    //     }
-
-    //     public TouchCalibration[] newArray(int size) {
-    //         return new TouchCalibration[size];
-    //     }
-    // };
+    static const AutoPtr<ITouchCalibration> IDENTITY;
 
 private:
-    Float mXScale, mXYMix, mXOffset;
-    Float mYXMix, mYScale, mYOffset;
+    Float mXScale;
+    Float mXYMix;
+    Float mXOffset;
+    Float mYXMix;
+    Float mYScale;
+    Float mYOffset;
 };
 
 } // namespace Input

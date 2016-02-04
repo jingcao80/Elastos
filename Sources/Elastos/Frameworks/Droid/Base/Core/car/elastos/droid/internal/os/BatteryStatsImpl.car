@@ -209,7 +209,7 @@ module
      * interface IBatteryStatsUidProc
      * interface ITimeBaseObs
      */
-    [local]
+    [local, deprecated]
     interface IBatteryStatsImplUidProc {
         AddExcessiveWake(
             [in] Int64 overTime,
@@ -233,7 +233,7 @@ module
 
         /* Called by ActivityManagerService when CPU times are updated. */
         AddSpeedStepTimes(
-            [in] ArrayOf<Int64> values);
+            [in] ArrayOf<Int64>* values);
     }
 
     /**
@@ -443,7 +443,7 @@ module
      * interface IParcelable
      * interface IBatteryStats;
      */
-    [local, parcelable]
+    [local, parcelable, deprecated]
     interface IBatteryStatsImpl {
         /*
          * Get the wakeup reason counter, and create a new one if one
@@ -590,7 +590,11 @@ module
             [in] Int32 perc,
             [in] Int32 utime,
             [in] Int32 stime,
-            [in] ArrayOf<Int64> cpuSpeedTimes);
+            [in] ArrayOf<Int64>* cpuSpeedTimes);
+
+        NoteProcessDiedLocked(
+            [in] Int32 uid,
+            [in] Int32 pid);
 
         GetProcessWakeTime(
             [in] Int32 uid,

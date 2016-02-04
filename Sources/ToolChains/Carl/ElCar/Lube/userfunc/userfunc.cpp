@@ -3048,7 +3048,7 @@ void OutputClass(ClassDirEntry* pClsDir, CLSModule* pModule)
                             }
                         }
                         fprintf(pFile, "    {\n");
-                        fprintf(pFile, "        IInterface* __pNewObj;\n");
+                        fprintf(pFile, "        IInterface* __pNewObj = NULL;\n");
                         fprintf(pFile, "\n");
                         fprintf(pFile, "        _ELASTOS ECode ec = ");
                         if (pClsDir->mDesc->mAttribs & ClassAttrib_singleton) {

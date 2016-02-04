@@ -2,11 +2,11 @@
 #ifndef __ELASTOS_DROID_SERVER_LOCATION_GEOFENCESTATE_H__
 #define __ELASTOS_DROID_SERVER_LOCATION_GEOFENCESTATE_H__
 
-#ifdef DROID_CORE
-#include "Elastos.Droid.Core_server.h"
-#elif defined(DROID_SERVER)
-#include "Elastos.Droid.Core.h"
-#endif
+#include "elastos/droid/ext/frameworkext.h"
+#include "_Elastos.Droid.Server.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Location.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Location::IGeofence;
@@ -20,39 +20,32 @@ namespace Location {
 /**
  * Represents state associated with a geofence
  */
-class GeofenceState : public ElRefBase
+class GeofenceState
+    : public Object
 {
-public:
-    const static Int32 FLAG_ENTER;// = 0x01;
-    const static Int32 FLAG_EXIT;// = 0x02;
-
 public:
     GeofenceState(
         /* [in] */ IGeofence* fence,
         /* [in] */ Int64 expireAt,
+        /* [in] */ Int32 allowedResolutionLevel,
+        /* [in] */ Int32 uid,
         /* [in] */ const String& packageName,
         /* [in] */ IPendingIntent* intent);
-
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface *object,
-        /* [out] */ InterfaceID *IID);
 
     /**
      * Process a new location.
      * @return FLAG_ENTER or FLAG_EXIT if the fence was crossed, 0 otherwise
      */
-    CARAPI_(Int32) ProcessLocation(
-        /* [in] */ ILocation* location);
+    CARAPI ProcessLocation(
+        /* [in] */ ILocation* location,
+        /* [out] */ Int32* v);
 
     /**
      * Gets the distance from the current location to the fence's boundary.
      * @return The distance or {@link Double#MAX_VALUE} if unknown.
      */
-    CARAPI_(Double) GetDistanceToBoundary();
+    CARAPI GetDistanceToBoundary(
+        /* [out] */ Double* v);
 
     //@Override
     CARAPI ToString(
@@ -60,20 +53,24 @@ public:
 
 public:
     AutoPtr<IGeofence> mFence;
-
     Int64 mExpireAt;
+    Int32 mAllowedResolutionLevel;
+    Int32 mUid;
     String mPackageName;
     AutoPtr<IPendingIntent> mIntent;
 
+public:
+    const static Int32 FLAG_ENTER = 0x01;
+    const static Int32 FLAG_EXIT = 0x02;
+
+protected:
     Int32 mState;  // current state
     Double mDistanceToCenter;  // current distance to center of fence
 
 private:
-
-    static const Int32 STATE_UNKNOWN;// = 0;
-    static const Int32 STATE_INSIDE;// = 1;
-    static const Int32 STATE_OUTSIDE;// = 2;
-
+    static const Int32 STATE_UNKNOWN = 0;
+    static const Int32 STATE_INSIDE = 1;
+    static const Int32 STATE_OUTSIDE = 2;
     AutoPtr<ILocation> mLocation;
 };
 

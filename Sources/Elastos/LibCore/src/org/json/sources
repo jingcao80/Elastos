@@ -14,7 +14,6 @@ INCLUDES += $(MAKEDIR)/../../../inc/elastos/core;
 INCLUDES += $(MAKEDIR)/../../../inc/elastos/io;
 
 SOURCES = JSON.cpp
-SOURCES += CJSON.cpp
 SOURCES += JSONArray.cpp
 SOURCES += JSONObject.cpp
 SOURCES += CJSONObjectHelper.cpp

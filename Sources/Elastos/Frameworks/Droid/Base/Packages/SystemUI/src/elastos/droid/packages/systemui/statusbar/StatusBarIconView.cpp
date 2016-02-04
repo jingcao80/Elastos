@@ -1,126 +1,100 @@
-#include "elastos/droid/systemui/statusbar/StatusBarIconView.h"
-#include "elastos/droid/ext/frameworkext.h"
+
+#include "elastos/droid/packages/systemui/statusbar/StatusBarIconView.h"
+#include "elastos/droid/R.h"
+#include "../R.h"
+#include "Elastos.CoreLibrary.Text.h"
+#include "Elastos.Droid.Os.h"
+#include <elastos/droid/text/TextUtils.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
-#include "elastos/droid/R.h"
-#include "elastos/droid/text/TextUtils.h"
-#include "elastos/droid/graphics/CPaint.h"
-#include "elastos/droid/statusbar/CStatusBarIcon.h"
-#include "elastos/droid/systemui/SystemUIR.h"
 
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Graphics::PaintAlign_CENTER;
+using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::IPaint;
+using Elastos::Droid::Internal::StatusBar::CStatusBarIcon;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
+using Elastos::Droid::Widget::ImageViewScaleType_CENTER;
+using Elastos::Core::ICloneable;
 using Elastos::Core::StringBuilder;
 using Elastos::Text::INumberFormat;
 using Elastos::Text::INumberFormatHelper;
 using Elastos::Text::CNumberFormatHelper;
-using Elastos::Droid::R;
-using Elastos::Droid::Text::TextUtils;
-using Elastos::Droid::Content::Pm::IPackageManager;
-using Elastos::Droid::Graphics::PaintAlign_CENTER;
-using Elastos::Droid::Graphics::IPaint;
-using Elastos::Droid::Graphics::CPaint;
-using Elastos::Droid::Widget::ImageViewScaleType_CENTER;
-using Elastos::Droid::StatusBar::CStatusBarIcon;
-using Elastos::Droid::SystemUI::SystemUIR;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 
 const String StatusBarIconView::TAG("StatusBarIconView");
 const Boolean StatusBarIconView::DBG = FALSE;
 
+CAR_INTERFACE_IMPL(StatusBarIconView, AnimatedImageView, IStatusBarIconView);
 StatusBarIconView::StatusBarIconView()
     : mNumberX(0)
     , mNumberY(0)
 {}
 
-StatusBarIconView::StatusBarIconView(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-    : AnimatedImageView(context, attrs)
-    , mNumberX(0)
-    , mNumberY(0)
-{
-    InitPrivate(context);
-}
-
-StatusBarIconView::StatusBarIconView(
-    /* [in] */ IContext* context,
-    /* [in] */ const String& slot,
-    /* [in] */ INotification* notification)
-    : AnimatedImageView(context)
-    , mNumberX(0)
-    , mNumberY(0)
-{
-    InitWithNotification(context, slot, notification);
-}
-
-ECode StatusBarIconView::Init(
+ECode StatusBarIconView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    AnimatedImageView::Init(context, attrs);
+    AnimatedImageView::constructor(context, attrs);
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
 
-    return InitPrivate(context);
+    Int32 outerBounds, imageBounds;
+    res->GetDimensionPixelSize(R::dimen::status_bar_icon_size, &outerBounds);
+    res->GetDimensionPixelSize(R::dimen::status_bar_icon_drawing_size, &imageBounds);
+    Float scale = (Float)imageBounds / (Float)outerBounds;
+    SetScaleX(scale);
+    SetScaleY(scale);
+    return NOERROR;
 }
 
-ECode StatusBarIconView::Init(
+ECode StatusBarIconView::SetNotification(
+    /* [in] */ INotification* notification)
+{
+    mNotification = notification;
+    SetContentDescription(notification);
+    return NOERROR;
+}
+
+ECode StatusBarIconView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ const String& slot,
     /* [in] */ INotification* notification)
 {
-    AnimatedImageView::Init(context);
-
-    return InitWithNotification(context, slot, notification);
-}
-
-ECode StatusBarIconView::InitWithNotification(
-    /* [in] */ IContext* context,
-    /* [in] */ const String& slot,
-    /* [in] */ INotification* notification)
-{
-    assert(mNumberPain == NULL);
-
+    AnimatedImageView::constructor(context);
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
     Int32 color;
-    res->GetColor(SystemUIR::drawable::notification_number_text_color, &color);
+    res->GetColor(R::drawable::notification_number_text_color, &color);
 
     mSlot = slot;
     CPaint::New((IPaint**)&mNumberPain);
     mNumberPain->SetTextAlign(PaintAlign_CENTER);
     mNumberPain->SetColor(color);
-    mNumberPain->SetAntiAlias(true);
-    mNotification = notification;
-    SetContentDescriptionByNotification(notification);
+    mNumberPain->SetAntiAlias(TRUE);
+    SetNotification(notification);
 
     // We do not resize and scale system icons (on the right), only notification icons (on the
     // left).
     if (notification != NULL) {
-        InitPrivate(context);
+        Int32 outerBounds, imageBounds;
+        res->GetDimensionPixelSize(R::dimen::status_bar_icon_size, &outerBounds);
+        res->GetDimensionPixelSize(R::dimen::status_bar_icon_drawing_size, &imageBounds);
+        Float scale = (Float)imageBounds / (Float)outerBounds;
+        SetScaleX(scale);
+        SetScaleY(scale);
     }
 
     SetScaleType(ImageViewScaleType_CENTER);
-    return NOERROR;
-}
-
-ECode StatusBarIconView::InitPrivate(
-    /* [in] */ IContext* context)
-{
-    AutoPtr<IResources> res;
-    context->GetResources((IResources**)&res);
-
-    Int32 outerBounds, imageBounds;
-    res->GetDimensionPixelSize(SystemUIR::dimen::status_bar_icon_size, &outerBounds);
-    res->GetDimensionPixelSize(SystemUIR::dimen::status_bar_icon_drawing_size, &imageBounds);
-    Float scale = (Float)imageBounds / (Float)outerBounds;
-    SetScaleX(scale);
-    SetScaleY(scale);
-    Float alpha;
-    res->GetFraction(SystemUIR::dimen::status_bar_icon_drawing_alpha, 1, 1, &alpha);
-    SetAlpha(alpha);
     return NOERROR;
 }
 
@@ -140,9 +114,11 @@ Boolean StatusBarIconView::StrEQ(
     return a.Equals(b);
 }
 
-Boolean StatusBarIconView::Set(
-    /* [in] */ IStatusBarIcon* icon)
+ECode StatusBarIconView::Set(
+    /* [in] */ IStatusBarIcon* icon,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     assert(icon != NULL);
     Boolean iconEquals = FALSE;
     Boolean levelEquals = FALSE;
@@ -162,30 +138,31 @@ Boolean StatusBarIconView::Set(
     AutoPtr<ICharSequence> oc;
     icon->GetContentDescription((ICharSequence**)&oc);
 
-    if (mIcon != NULL) {
-        String pkg;
-        mIcon->GetIconPackage(&pkg);
-        iconEquals = StrEQ(pkg, opkg);
-        if (iconEquals) {
-            Int32 id;
-            mIcon->GetIconId(&id);
-            iconEquals = (id == oid);
-        }
-
-        if (iconEquals) {
-            Int32 level;
-            mIcon->GetIconLevel(&level);
-            levelEquals = (level == olevel);
-        }
-
-        Boolean v;
-        mIcon->GetVisible(&v);
-        visibilityEquals = (v == ov);
-
-        Int32 n;
-        mIcon->GetNumber(&n);
-        numberEquals = (n == on);
+    AutoPtr<IInterface> obj;
+    ICloneable::Probe(icon)->Clone((IInterface**)&obj);
+    mIcon = IStatusBarIcon::Probe(obj);
+    String pkg;
+    mIcon->GetIconPackage(&pkg);
+    iconEquals = StrEQ(pkg, opkg);
+    if (iconEquals) {
+        Int32 id;
+        mIcon->GetIconId(&id);
+        iconEquals = (id == oid);
     }
+
+    if (iconEquals) {
+        Int32 level;
+        mIcon->GetIconLevel(&level);
+        levelEquals = (level == olevel);
+    }
+
+    Boolean v;
+    mIcon->GetVisible(&v);
+    visibilityEquals = (v == ov);
+
+    Int32 n;
+    mIcon->GetNumber(&n);
+    numberEquals = (n == on);
 
     mIcon = NULL;
     CStatusBarIcon::New(opkg, ouser, oid, olevel, on, oc, (IStatusBarIcon**)&mIcon);
@@ -193,29 +170,26 @@ Boolean StatusBarIconView::Set(
 
     SetContentDescription(oc);
     if (!iconEquals) {
-        AutoPtr<IDrawable> drawable = GetIcon(icon);
-        if (drawable == NULL) {
-            Slogger::W(TAG, "No icon for slot %s", mSlot.string());
-            return FALSE;
+        if (!UpdateDrawable(FALSE /* no clear */)) {
+            *result = FALSE;
+            return NOERROR;
         }
-        SetImageDrawable(drawable);
     }
     if (!levelEquals) {
         SetImageLevel(olevel);
     }
 
     if (!numberEquals) {
+        AutoPtr<IContext> c;
+        GetContext((IContext**)&c);
         AutoPtr<IResources> res;
-        mContext->GetResources((IResources**)&res);
+        c->GetResources((IResources**)&res);
 
         Boolean showNumber = FALSE;
-        if (on > 0) {
-            res->GetBoolean(SystemUIR::bool_::config_statusBarShowNumber, &showNumber);
-        }
-
-        if (on > 0 && showNumber) {
+        if (on > 0 && (res->GetBoolean(
+            R::bool_::config_statusBarShowNumber, &showNumber), showNumber)) {
             if (mNumberBackground == NULL) {
-                res->GetDrawable(SystemUIR::drawable::ic_notification_overlay,
+                res->GetDrawable(Elastos::Droid::R::drawable::ic_notification_overlay,
                     (IDrawable**)&mNumberBackground);
             }
             PlaceNumber();
@@ -229,14 +203,38 @@ Boolean StatusBarIconView::Set(
     if (!visibilityEquals) {
         SetVisibility(ov ? IView::VISIBLE : IView::GONE);
     }
+    *result = TRUE;
+    return NOERROR;
+}
+
+ECode StatusBarIconView::UpdateDrawable()
+{
+    UpdateDrawable(TRUE /* with clear */);
+    return NOERROR;
+}
+
+Boolean StatusBarIconView::UpdateDrawable(
+    /* [in] */ Boolean withClear)
+{
+    AutoPtr<IDrawable> drawable = GetIcon(mIcon);
+    if (drawable == NULL) {
+        Slogger::W(TAG, "No icon for slot %s", mSlot.string());
+        return FALSE;
+    }
+    if (withClear) {
+        SetImageDrawable(NULL);
+    }
+    SetImageDrawable(drawable);
     return TRUE;
 }
 
 AutoPtr<IDrawable> StatusBarIconView::GetIcon(
     /* [in] */ IStatusBarIcon* icon)
 {
-    AutoPtr<IContext> context = GetContext();
-    return GetIcon(context, icon);
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
+    AutoPtr<IDrawable> d = GetIcon(context, icon);
+    return d;
 }
 
 AutoPtr<IDrawable> StatusBarIconView::GetIcon(
@@ -263,12 +261,11 @@ AutoPtr<IDrawable> StatusBarIconView::GetIcon(
         context->GetPackageManager((IPackageManager**)&pm);
         ECode ec = pm->GetResourcesForApplicationAsUser(pkg, userId, (IResources**)&r);
         if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
+            String p;
+            icon->GetIconPackage(&p);
+            Slogger::E(TAG, "Icon package not found: %s", p.string());
             return NULL;
         }
-        // } catch (PackageManager.NameNotFoundException ex) {
-        //     Slog.e(TAG, "Icon package not found: " + icon.iconPackage);
-        //     return NULL;
-        // }
     }
     else {
         context->GetResources((IResources**)&r);
@@ -276,6 +273,7 @@ AutoPtr<IDrawable> StatusBarIconView::GetIcon(
 
     // TODO: delete
     if (r == NULL) {
+        assert(0 && "TODO");
         Slogger::E("xihao", "StatusBarIconView::GetIcon r == NULL");
         return NULL;
     }
@@ -300,9 +298,13 @@ AutoPtr<IDrawable> StatusBarIconView::GetIcon(
     return d;
 }
 
-AutoPtr<IStatusBarIcon> StatusBarIconView::GetStatusBarIcon()
+ECode StatusBarIconView::GetStatusBarIcon(
+    /* [out] */ IStatusBarIcon** icon)
 {
-    return mIcon;
+    VALIDATE_NOT_NULL(icon);
+    *icon = mIcon;
+    REFCOUNT_ADD(*icon);
+    return NOERROR;
 }
 
 ECode StatusBarIconView::OnInitializeAccessibilityEvent(
@@ -310,7 +312,8 @@ ECode StatusBarIconView::OnInitializeAccessibilityEvent(
 {
     AnimatedImageView::OnInitializeAccessibilityEvent(event);
     if (mNotification != NULL) {
-        event->SetParcelableData(IParcelable::Probe(mNotification.Get()));
+        AutoPtr<IParcelable> p = IParcelable::Probe(mNotification);
+        IAccessibilityRecord::Probe(event)->SetParcelableData(p);
     }
     return NOERROR;
 }
@@ -341,26 +344,29 @@ void StatusBarIconView::OnDraw(
 void StatusBarIconView::PlaceNumber()
 {
     String str;
-
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
     AutoPtr<IResources> res;
-    mContext->GetResources((IResources**)&res);
+    context->GetResources((IResources**)&res);
     Int32 tooBig, number;
-    res->GetInteger(R::integer::status_bar_notification_info_maxnum, &tooBig);
+    res->GetInteger(Elastos::Droid::R::integer::status_bar_notification_info_maxnum, &tooBig);
     mIcon->GetNumber(&number);
     if (number > tooBig) {
-        res->GetString(R::string::status_bar_notification_info_overflow, &str);
+        res->GetString(Elastos::Droid::R::string::status_bar_notification_info_overflow, &str);
     }
     else {
         AutoPtr<INumberFormatHelper> helper;
         CNumberFormatHelper::AcquireSingleton((INumberFormatHelper**)&helper);
         AutoPtr<INumberFormat> f;
         helper->GetIntegerInstance((INumberFormat**)&f);
-        f->FormatInt64((Int64)number, &str);
+        f->Format((Int64)number, &str);
     }
     mNumberText = str;
 
-    Int32 w = GetWidth();
-    Int32 h = GetHeight();
+    Int32 w = 0;
+    GetWidth(&w);
+    Int32 h = 0;
+    GetHeight(&h);
     AutoPtr<IRect> rect;
     CRect::New((IRect**)&rect);
     mNumberPain->GetTextBounds(str, 0, str.GetLength(), rect);
@@ -387,7 +393,7 @@ void StatusBarIconView::PlaceNumber()
     mNumberBackground->SetBounds(w - dw, h - dh, w, h);
 }
 
-void StatusBarIconView::SetContentDescriptionByNotification(
+void StatusBarIconView::SetContentDescription(
     /* [in] */ INotification* notification)
 {
     if (notification != NULL) {
@@ -399,8 +405,10 @@ void StatusBarIconView::SetContentDescriptionByNotification(
     }
 }
 
-String StatusBarIconView::ToString()
+ECode StatusBarIconView::ToString(
+    /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str);
     StringBuilder sb("StatusBarIconView(slot=");
     sb += mSlot;
     sb += " icon=";
@@ -408,17 +416,18 @@ String StatusBarIconView::ToString()
     sb += " notification=";
     if (mNotification != NULL) {
         String tmp;
-        mNotification->ToString(&tmp);
+        IObject::Probe(mNotification)->ToString(&tmp);
         sb += tmp;
     }
     else {
         sb += "NULL";
     }
     sb += ")";
-    return sb.ToString();;
+    return sb.ToString(str);
 }
 
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos

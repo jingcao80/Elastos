@@ -147,7 +147,7 @@ public:
             /* [out] */ IIterator** outiter);
 
     private:
-        AutoPtr<CIdentityHashMap> mAssociatedMap;
+        CIdentityHashMap* mAssociatedMap;
     };
 
     class IdentityHashMapValues
@@ -174,7 +174,7 @@ public:
             /* [out] */ IIterator** outiter);
 
     private:
-        AutoPtr<CIdentityHashMap> mAssociatedMap;
+        CIdentityHashMap* mAssociatedMap;
     };
 
     class IdentityHashMapMapEntryType

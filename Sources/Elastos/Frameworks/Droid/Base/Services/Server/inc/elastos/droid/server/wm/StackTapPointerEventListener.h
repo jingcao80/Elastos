@@ -1,7 +1,8 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_STACKTAPPOINTEREVENTLISTENER_H__
 #define __ELASTOS_DROID_SERVER_WM_STACKTAPPOINTEREVENTLISTENER_H__
 
-#include "wm/CWindowManagerService.h"
+#include "_Elastos.Droid.Server.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
 
 using Elastos::Droid::Graphics::IRegion;
 using Elastos::Droid::View::IPointerEventListener;
@@ -12,11 +13,15 @@ namespace Droid {
 namespace Server {
 namespace Wm {
 
+class DisplayContent;
+
 class StackTapPointerEventListener
     : public Object
     , public IPointerEventListener
 {
 public:
+    CAR_INTERFACE_DECL()
+
     StackTapPointerEventListener(
         /* [in] */ CWindowManagerService* service,
         /* [in] */ DisplayContent* displayContent);

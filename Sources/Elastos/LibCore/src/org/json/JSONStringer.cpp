@@ -33,7 +33,6 @@ JSONStringer::~JSONStringer()
 
 ECode JSONStringer::constructor()
 {
-    mIndent = String(NULL);
     return NOERROR;
 }
 
@@ -43,8 +42,7 @@ ECode JSONStringer::constructor(
     AutoPtr< ArrayOf<Char32> > indentChars = ArrayOf<Char32>::Alloc(indentSpaces);
     Char32 c = ' ';
     Arrays::Fill(indentChars, c);
-    String str(*indentChars);
-    mIndent = str;
+    mIndent = String(*indentChars);
 
     return NOERROR;
 }
@@ -82,7 +80,7 @@ ECode JSONStringer::Open(
         return E_JSON_EXCEPTION;
         // throw new JSONException("Nesting problem: multiple top-level roots");
     }
-    BeforeValue();
+    FAIL_RETURN(BeforeValue());
     mStack->Add(CoreUtils::Convert((Int32)empty));
     mOut->Append(openBracket);
     return NOERROR;
@@ -94,7 +92,7 @@ ECode JSONStringer::Close(
     /* [in] */ const String& closeBracket)
 {
     JSONStringerScope context;
-    Peek(&context);
+    FAIL_RETURN(Peek(&context));
     if (context != nonempty && context != empty) {
         Logger::E("JSONStringer", "Nesting problem");
         return E_JSON_EXCEPTION;
@@ -154,20 +152,20 @@ ECode JSONStringer::Value(
     }
 
     if (IJSONArray::Probe(value) != NULL) {
-        IJSONArray::Probe(value)->WriteTo((IJSONStringer*)this);
+        ((JSONArray*)IJSONArray::Probe(value))->WriteTo((IJSONStringer*)this);
         return NOERROR;
 
     }
     else if (IJSONObject::Probe(value) != NULL) {
-        IJSONObject::Probe(value)->WriteTo((IJSONStringer*)this);
+        ((JSONObject*)IJSONObject::Probe(value))->WriteTo((IJSONStringer*)this);
         return NOERROR;
     }
 
-    BeforeValue();
+    FAIL_RETURN(BeforeValue());
 
     if (value == NULL
             || (IBoolean::Probe(value) != NULL)
-            || value == JSONObject::Object_NULL) {
+            || IInterface::Probe(value) == IInterface::Probe(JSONObject::Object_NULL)) {
         mOut->Append(value);
 
     }
@@ -196,7 +194,7 @@ ECode JSONStringer::Value(
         // throw new JSONException("Nesting problem");
     }
 
-    BeforeValue();
+    FAIL_RETURN(BeforeValue());
     mOut->Append(value);
     return NOERROR;
 }
@@ -211,7 +209,7 @@ ECode JSONStringer::Value(
         // throw new JSONException("Nesting problem");
     }
 
-    BeforeValue();
+    FAIL_RETURN(BeforeValue());
     String str;
     JSONObject::NumberToString(INumber::Probe(CoreUtils::Convert(value)), &str);
     mOut->Append(str);
@@ -228,7 +226,7 @@ ECode JSONStringer::Value(
         // throw new JSONException("Nesting problem");
     }
 
-    BeforeValue();
+    FAIL_RETURN(BeforeValue());
     mOut->Append(value);
     return NOERROR;
 }
@@ -312,7 +310,7 @@ ECode JSONStringer::Key(
         return E_JSON_EXCEPTION;
         // throw new JSONException("Names must be non-null");
     }
-    BeforeKey();
+    FAIL_RETURN(BeforeKey());
     AppendString(name);
     return NOERROR;
 }
@@ -320,7 +318,7 @@ ECode JSONStringer::Key(
 ECode JSONStringer::BeforeKey()
 {
     JSONStringerScope context;
-    Peek(&context);
+    FAIL_RETURN(Peek(&context));
     if (context == JSONStringerScope_NONEMPTY_OBJECT) { // first in object
         mOut->AppendChar(',');
     }
@@ -342,7 +340,7 @@ ECode JSONStringer::BeforeValue()
     }
 
     JSONStringerScope context;
-    Peek(&context);
+    FAIL_RETURN(Peek(&context));
     if (context == JSONStringerScope_EMPTY_ARRAY) { // first in array
         ReplaceTop(JSONStringerScope_NONEMPTY_ARRAY);
         Newline();

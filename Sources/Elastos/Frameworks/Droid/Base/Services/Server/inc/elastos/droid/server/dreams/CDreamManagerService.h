@@ -3,17 +3,28 @@
 #define __ELASTOS_DROID_SERVER_DREAMS_CDREAMMANAGERSERVICE_H__
 
 #include "_Elastos_Droid_Server_Dreams_CDreamManagerService.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/server/dreams/DreamController.h"
+#include "elastos/droid/server/SystemService.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "dreams/DreamController.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.Service.h>
+#include <Elastos.Droid.Os.h>
 
-using Elastos::IO::IPrintWriter;
-using Elastos::IO::IFileDescriptor;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::IPowerManagerInternal;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::Pm::IServiceInfo;
+using Elastos::Droid::Service::Dreams::IDreamManagerInternal;
+using Elastos::Droid::Service::Dreams::IIDreamManager;
+using Elastos::IO::IPrintWriter;
+using Elastos::IO::IFileDescriptor;
 
 namespace Elastos {
 namespace Droid {
@@ -21,7 +32,106 @@ namespace Server {
 namespace Dreams {
 
 CarClass(CDreamManagerService)
+    , public SystemService
 {
+
+public:
+    class BinderService
+        : public Object
+        , public IIDreamManager
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        BinderService();
+
+        constructor(
+            /* [in] */ ISystemService* dreamManagerService);
+
+        //@Override // Binder call
+        CARAPI Dump(
+            /* [in] */ IFileDescriptor* fd,
+            /* [in] */ IPrintWriter* pw,
+            /* [in] */ ArrayOf<String>* args);
+
+        //@Override // Binder call
+        CARAPI GetDreamComponents(
+            /* [out, callee] */ ArrayOf<IComponentName*>** results);
+
+        //@Override // Binder call
+        CARAPI SetDreamComponents(
+            /* [in] */ ArrayOf<IComponentName*>* componentNames);
+
+        //@Override // Binder call
+        CARAPI GetDefaultDreamComponent(
+            /* [out] */ IComponentName** result);
+
+        //@Override // Binder call
+        CARAPI IsDreaming(
+            /* [out] */ Boolean* result);
+
+        //@Override // Binder call
+        CARAPI Dream();
+
+        //@Override // Binder call
+        CARAPI TestDream(
+            /* [in] */ IComponentName* dream);
+
+        //@Override // Binder call
+        CARAPI Awaken();
+
+        //@Override // Binder call
+        CARAPI FinishSelf(
+            /* [in] */ IBinder* token,
+            /* [in] */ Boolean immediate);
+
+        //@Override // Binder call
+        CARAPI StartDozing(
+            /* [in] */ IBinder* token,
+            /* [in] */ Int32 screenState,
+            /* [in] */ Int32 screenBrightness);
+
+        //@Override // Binder call
+        CARAPI StopDozing(
+            /* [in] */ IBinder* token);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+    private:
+        CDreamManagerService* mHost;
+    };
+
+    class LocalService
+        : public Object
+        , public IDreamManagerInternal
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        LocalService(
+            /* [in] */ CDreamManagerService* host)
+            : mHost(host)
+        {}
+
+        //@Override
+        CARAPI StartDream(
+            /* [in] */ Boolean doze);
+
+        //@Override
+        CARAPI StopDream(
+            /* [in] */ Boolean immediate);
+
+        //@Override
+        CARAPI IsDreaming(
+            /* [out] */ Boolean* result);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+    private:
+        CDreamManagerService* mHost;
+    };
+
 private:
     class SRBroadcastReceiver
         : public BroadcastReceiver
@@ -49,22 +159,21 @@ private:
     };
 
     class StartDreamRunnable
-        : public ElRefBase
-        , public IRunnable
+        : public Runnable
     {
     public:
-        CAR_INTERFACE_DECL()
-
         StartDreamRunnable(
             /* [in] */ CDreamManagerService* host,
             /* [in] */ IBinder* token,
             /* [in] */ IComponentName* name,
             /* [in] */ Boolean isTest,
+            /* [in] */ Boolean canDoze,
             /* [in] */ Int32 userId)
             : mHost(host)
             , mToken(token)
             , mName(name)
             , mIsTest(isTest)
+            , mCanDoze(canDoze)
             , mUserId(userId)
         {}
 
@@ -72,41 +181,55 @@ private:
 
     private:
         CDreamManagerService* mHost;
-        IBinder* mToken;
-        IComponentName* mName;
+        AutoPtr<IBinder> mToken;
+        AutoPtr<IComponentName> mName;
         Boolean mIsTest;
+        Boolean mCanDoze;
         Int32 mUserId;
     };
 
     class StopDreamRunnable
-        : public ElRefBase
-        , public IRunnable
+        : public Runnable
     {
     public:
-        CAR_INTERFACE_DECL()
-
         StopDreamRunnable(
-            /* [in] */ CDreamManagerService* host)
+            /* [in] */ CDreamManagerService* host,
+            /* [in] */ Boolean immediate)
             : mHost(host)
+            , mImmediate(immediate)
         {}
 
         CARAPI Run();
 
     private:
         CDreamManagerService* mHost;
+        Boolean mImmediate;
     };
 
+    class SystemPropertiesChangedRunnable
+        : public Runnable
+    {
+    public:
+        SystemPropertiesChangedRunnable(
+            /* [in] */ CDreamManagerService* host)
+            : mHost(host)
+        {}
+
+        CARAPI Run();
+    private:
+        CDreamManagerService* mHost;
+    };
     /**
      * Handler for asynchronous operations performed by the dream manager.
      * Ensures operations to {@link DreamController} are single-threaded.
      */
     class DreamHandler
-        : public HandlerBase
+        : public Handler
     {
     public:
         DreamHandler(
             /* [in] */ ILooper* looper)
-            : HandlerBase(looper, TRUE/*async*/)
+            : Handler(looper, TRUE/*async*/)
         {}
 
         virtual CARAPI HandleMessage(
@@ -117,73 +240,88 @@ private:
     };
 
 public:
-    CDreamManagerService()
-        : mCurrentDreamUserId(0)
-        , mCurrentDreamIsTest(FALSE)
-    {}
+    CAR_OBJECT_DECL()
+
+    CDreamManagerService();
 
     CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ IHandler* mainHandler);
+        /* [in] */ IContext* context);
 
-    CARAPI SystemReady();
+    //@Override
+    CARAPI OnStart();
 
-    CARAPI GetDreamComponents(
-        /* [out,callee] */ ArrayOf<IComponentName*>** result);
-
-    CARAPI SetDreamComponents(
-        /* [in] */ ArrayOf<IComponentName*>* componentNames);
-
-    CARAPI GetDefaultDreamComponent(
-        /* [out] */ IComponentName** component);
-
-    CARAPI IsDreaming(
-        /* [out] */ Boolean* result);
-
-    CARAPI Dream();
-
-    CARAPI TestDream(
-        /* [in] */ IComponentName* dream);
-
-    CARAPI Awaken();
-
-    CARAPI FinishSelf(
-        /* [in] */ IBinder* token);
-
-    /**
-     * Called by the power manager to start a dream.
-     */
-    CARAPI StartDream();
-
-    /**
-     * Called by the power manager to stop a dream.
-     */
-    CARAPI StopDream();
+    //@Override
+    CARAPI OnBootPhase(
+        /* [in] */ Int32 phase);
 
 protected:
-    CARAPI Dump(
-        /* [in] */ IFileDescriptor* fd,
-        /* [in] */ IPrintWriter* pw,
-        /* [in] */ ArrayOf<String>* args);
+    CARAPI DumpInternal(
+        /* [in] */ IPrintWriter* pw);
 
 private:
+    Boolean IsDreamingInternal();
+
+    CARAPI RequestDreamInternal();
+
+    CARAPI RequestAwakenInternal();
+
+    CARAPI FinishSelfInternal(
+        /* [in] */ IBinder* token,
+        /* [in] */ Boolean immediate);
+
+    CARAPI TestDreamInternal(
+        /* [in] */ IComponentName* dream,
+        /* [in] */ Int32 userId);
+
+    CARAPI StartDreamInternal(
+        /* [in] */ Boolean doze);
+
+    CARAPI StopDreamInternal(
+        /* [in] */ Boolean immediate);
+
+    CARAPI StartDozingInternal(
+        /* [in] */ IBinder* token,
+        /* [in] */ Int32 screenState,
+        /* [in] */ Int32 screenBrightness);
+
+    CARAPI StopDozingInternal(
+        /* [in] */ IBinder* token);
+
     CARAPI_(AutoPtr<IComponentName>) ChooseDreamForUser(
+        /* [in] */ Boolean doze,
         /* [in] */ Int32 userId);
 
-    CARAPI_(AutoPtr< ArrayOf<IComponentName*> >) GetDreamComponentsForUser(
+    Boolean ValidateDream(
+        /* [in] */ IComponentName* component);
+
+    AutoPtr< ArrayOf<IComponentName*> > GetDreamComponentsForUser(
         /* [in] */ Int32 userId);
 
-    CARAPI_(Boolean) ServiceExists(
+    CARAPI SetDreamComponentsForUser(
+        /* [in] */ Int32 userId,
+        /* [in] */ ArrayOf<IComponentName*>* componentNames);
+
+    AutoPtr<IComponentName> GetDefaultDreamComponentForUser(
+        /* [in] */ Int32 userId);
+
+    AutoPtr<IComponentName> GetDozeComponent();
+
+    AutoPtr<IComponentName> GetDozeComponent(
+        /* [in] */ Int32 userId);
+
+    AutoPtr<IServiceInfo> GetServiceInfo(
         /* [in] */ IComponentName* name);
 
-    CARAPI_(void) StartDreamLocked(
+    CARAPI StartDreamLocked(
         /* [in] */ IComponentName* name,
         /* [in] */ Boolean isTest,
+        /* [in] */ Boolean canDoze,
         /* [in] */ Int32 userId);
 
-    CARAPI_(void) StopDreamLocked();
+    CARAPI StopDreamLocked(
+        /* [in] */ Boolean immediate);
 
-    CARAPI_(void) CleanupDreamLocked();
+    CARAPI CleanupDreamLocked();
 
     CARAPI CheckPermission(
         /* [in] */ const String& permission);
@@ -195,6 +333,9 @@ private:
         /* [in] */ const String& names);
 
 private:
+    friend class BinderService;
+    friend class LocalService;
+
     static const Boolean DEBUG;
     static const String TAG;
 
@@ -204,13 +345,21 @@ private:
     AutoPtr<IHandler> mHandler;
     AutoPtr<DreamController> mController;
     AutoPtr<IPowerManager> mPowerManager;
+    AutoPtr<IPowerManagerInternal> mPowerManagerInternal;
+    AutoPtr<IPowerManagerWakeLock> mDozeWakeLock;
 
     AutoPtr<IBinder> mCurrentDreamToken;
     AutoPtr<IComponentName> mCurrentDreamName;
     Int32 mCurrentDreamUserId;
     Boolean mCurrentDreamIsTest;
+    Boolean mCurrentDreamCanDoze;
+    Boolean mCurrentDreamIsDozing;
+    Boolean mCurrentDreamIsWaking;
+    Int32 mCurrentDreamDozeScreenState;// = Display.STATE_UNKNOWN;
+    Int32 mCurrentDreamDozeScreenBrightness;// = PowerManager.BRIGHTNESS_DEFAULT;
 
     AutoPtr<DreamController::Listener> mControllerListener;
+    AutoPtr<IRunnable> mSystemPropertiesChanged;
 };
 
 } // namespace Dreams

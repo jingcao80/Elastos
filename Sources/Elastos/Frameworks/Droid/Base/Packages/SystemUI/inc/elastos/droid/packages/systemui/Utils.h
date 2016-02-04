@@ -2,7 +2,14 @@
 #ifndef  __ELASTOS_DROID_PACKAGES_SYSTEMUI_UTILS_H__
 #define  __ELASTOS_DROID_PACKAGES_SYSTEMUI_UTILS_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/ext/frameworkext.h>
+
+_ETL_NAMESPACE_BEGIN
+template<> struct Hash<Elastos::InterfaceID>
+{
+    size_t operator()(const Elastos::InterfaceID& x) const { return size_t(&x); }
+};
+_ETL_NAMESPACE_END
 
 namespace Elastos {
 namespace Droid {

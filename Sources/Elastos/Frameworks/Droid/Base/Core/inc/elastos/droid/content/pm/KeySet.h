@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_CONTENT_PM_KEYSET_H__
 
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IBinder;
@@ -26,8 +27,10 @@ class KeySet
 public:
     CAR_INTERFACE_DECL()
 
-    KeySet(
+    CARAPI constructor(
         /* [in] */ IBinder* token);
+
+    CARAPI constructor();
 
     virtual ~KeySet();
 

@@ -18,16 +18,16 @@ namespace IO {
  */
 class CharSequenceAdapter
     : public CharBuffer
-    , public ICharSequence
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CharSequenceAdapter();
 
     CARAPI constructor(
         /* [in] */ Int32 capacity,
         /* [in] */ ICharSequence* chseq);
+
+    CARAPI GetPrimitiveArray(
+        /* [out] */ Handle64* arrayHandle);
 
     static CARAPI Copy(
         /* [in] */ CharSequenceAdapter* other,
@@ -107,9 +107,6 @@ public:
         /* [out] */ String* str);
 public:
     AutoPtr<ICharSequence> mSequence;
-
-private:
-    AutoPtr<ArrayOf<Char32> > mArrayTemp;
 };
 
 } // namespace IO

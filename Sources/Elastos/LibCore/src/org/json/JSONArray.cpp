@@ -64,8 +64,7 @@ ECode JSONArray::constructor(
     readFrom->NextValue((IInterface**)&object);
     if (IJSONArray::Probe(object) != NULL) {
         AutoPtr<IJSONArray> obj = IJSONArray::Probe(object);
-        AutoPtr<JSONArray> isonArray = (JSONArray*)obj.Get();
-        mValues = isonArray->mValues;
+        mValues = ((JSONArray*)obj.Get())->mValues;
     }
     else {
         return JSON::TypeMismatch(object, String("JSONArray"));
@@ -79,9 +78,8 @@ ECode JSONArray::constructor(
 {
     AutoPtr<IJSONTokener> tokener;
     CJSONTokener::New(json, (IJSONTokener**)&tokener);
-    constructor(tokener);
 
-    return NOERROR;
+    return constructor(tokener);
 }
 
 ECode JSONArray::constructor(
@@ -124,9 +122,8 @@ ECode JSONArray::Put(
 ECode JSONArray::Put(
     /* [in] */ Double value)
 {
-    Double data;
-    JSON::CheckDouble(value, &data);
-    mValues->Add(CoreUtils::Convert(data));
+    FAIL_RETURN(JSON::CheckDouble(value));
+    mValues->Add(CoreUtils::Convert(value));
     return NOERROR;
 }
 
@@ -155,9 +152,9 @@ ECode JSONArray::CheckedPut(
     /* [in] */ IInterface* value)
 {
     if (INumber::Probe(value)) {
-        Double result, res;
+        Double result;
         INumber::Probe(value)->DoubleValue(&result);
-        JSON::CheckDouble(result, &res);
+        FAIL_RETURN(JSON::CheckDouble(result));
     }
 
     return Put(value);
@@ -197,13 +194,12 @@ ECode JSONArray::Put(
 {
     if (INumber::Probe(value)) {
         // deviate from the original by checking all Numbers, not just floats & doubles
-        Double result, res;
+        Double result;
         INumber::Probe(value)->DoubleValue(&result);
-        JSON::CheckDouble(result, &res);
+        FAIL_RETURN(JSON::CheckDouble(result));
     }
     Int32 size;
-    mValues->GetSize(&size);
-    while (size <= index) {
+    while (mValues->GetSize(&size), size <= index) {
         mValues->Add(NULL);
     }
     mValues->Set(index, value);
@@ -466,13 +462,14 @@ ECode JSONArray::GetString(
 
     AutoPtr<IInterface> object;
     Get(index, (IInterface**)&object);
-    AutoPtr<ICharSequence> result;
-    JSON::ToString(object, (ICharSequence**)&result);
-    if (result == NULL) {
+    String result;
+    JSON::ToString(object, &result);
+    if (result.IsNull()) {
         return JSON::TypeMismatch(CoreUtils::Convert(index), object, String("String"));
         // throw JSON.typeMismatch(index, object, "String");
     }
-    return result->ToString(str);
+    *str = result;
+    return NOERROR;
 }
 
 ECode JSONArray::OptString(
@@ -492,10 +489,11 @@ ECode JSONArray::OptString(
 
     AutoPtr<IInterface> object;
     Opt(index, (IInterface**)&object);
-    AutoPtr<ICharSequence> result;
-    JSON::ToString(object, (ICharSequence**)&result);
-    if (result != NULL) {
-        return result->ToString(str);
+    String result;
+    JSON::ToString(object, &result);
+    if (!result.IsNull()) {
+        *str = result;
+        return NOERROR;
     }
     *str = fallback;
     return NOERROR;
@@ -594,10 +592,8 @@ ECode JSONArray::ToJSONObject(
     for (Int32 i = 0; i < length; i++) {
         AutoPtr<IInterface> obj;
         names->Opt(i, (IInterface**)&obj);
-        AutoPtr<ICharSequence> cs;
-        JSON::ToString(obj, (ICharSequence**)&cs);
         String name;
-        cs->ToString(&name);
+        JSON::ToString(obj, &name);
         AutoPtr<IInterface> object;
         Opt(i, (IInterface**)&object);
         result->Put(name, object);
@@ -613,22 +609,21 @@ ECode JSONArray::Join(
 {
     VALIDATE_NOT_NULL(res);
 
-    AutoPtr<IJSONStringer> stringer;
-    CJSONStringer::New((IJSONStringer**)&stringer);
+    AutoPtr<CJSONStringer> stringer;
+    CJSONStringer::NewByFriend((CJSONStringer**)&stringer);
     stringer->Open(JSONStringerScope_NULL, String(""));
     Int32 size;
     mValues->GetSize(&size);
-    AutoPtr<JSONStringer> cObj = (JSONStringer*)stringer.Get();
     for (Int32 i = 0; i < size; i++) {
         if (i > 0) {
-            (cObj->mOut)->Append(separator);
+            stringer->mOut->Append(separator);
         }
         AutoPtr<IInterface> object;
         mValues->Get(i, (IInterface**)&object);
         stringer->Value(object);
     }
     stringer->Close(JSONStringerScope_NULL, JSONStringerScope_NULL, String(""));
-    *res = (cObj->mOut)->ToString();
+    *res = stringer->mOut->ToString();
     return NOERROR;
 }
 
@@ -641,11 +636,8 @@ ECode JSONArray::ToString(
     // try {
     AutoPtr<IJSONStringer> stringer;
     CJSONStringer::New((IJSONStringer**)&stringer);
-    ECode ec = WriteTo(stringer);
-    if (SUCCEEDED(ec)) {
-        return IObject::Probe(stringer)->ToString(str);
-    }
-    return NOERROR;
+    FAIL_RETURN(WriteTo(stringer));
+    return IObject::Probe(stringer)->ToString(str);
     // } catch (JSONException e) {
     //     return null;
     // }
@@ -659,23 +651,22 @@ ECode JSONArray::ToString(
 
     AutoPtr<IJSONStringer> stringer;
     CJSONStringer::New(indentSpaces, (IJSONStringer**)&stringer);
-    WriteTo(stringer);
+    FAIL_RETURN(WriteTo(stringer));
     return IObject::Probe(stringer)->ToString(str);
 }
 
 ECode JSONArray::WriteTo(
     /* [in] */ IJSONStringer* stringer)
 {
-    stringer->Array();
+    FAIL_RETURN(stringer->Array());
     Int32 size;
     mValues->GetSize(&size);
     for (Int32 i = 0; i < size; ++i) {
         AutoPtr<IInterface> value;
         mValues->Get(i, (IInterface**)&value);
-        stringer->Value(value);
+        FAIL_RETURN(stringer->Value(value));
     }
-    stringer->EndArray();
-    return NOERROR;
+    return stringer->EndArray();
 }
 
 ECode JSONArray::Equals(
@@ -686,8 +677,7 @@ ECode JSONArray::Equals(
     *res = FALSE;
     if (IJSONArray::Probe(o) != NULL) {
         AutoPtr<IJSONArray> object = IJSONArray::Probe(o);
-        AutoPtr<JSONArray> obj = (JSONArray*)object.Get();
-        return obj->mValues->Equals(mValues, res);
+        return ((JSONArray*)object.Get())->mValues->Equals(mValues, res);
     }
     return NOERROR;
 }

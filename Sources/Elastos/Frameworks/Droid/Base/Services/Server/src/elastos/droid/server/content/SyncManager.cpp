@@ -1248,7 +1248,7 @@ Boolean SyncManager::SyncHandler::IsOperationValidLocked(
         ai->GetUid(&targetUid);
     }
     else {
-        Logger::E(TAG, "Unknown target for Sync Op: %s", Object::ToString(target).string());
+        Logger::E(TAG, "Unknown target for Sync Op: %s", TO_CSTR(target));
         return FALSE;
     }
 
@@ -1360,7 +1360,7 @@ Boolean SyncManager::SyncHandler::DispatchSyncOperation(
     //     Logger::V(TAG, "DispatchSyncOperation: starting " + activeSyncContext);
     // }
     if (!activeSyncContext->BindToSyncAdapter(targetComponent, info->mUserId)) {
-        Logger::E(TAG, "Bind attempt failed - target: %s", Object::ToString(targetComponent).string());
+        Logger::E(TAG, "Bind attempt failed - target: %s", TO_CSTR(targetComponent));
         CloseActiveSyncContext(activeSyncContext);
         return FALSE;
     }
@@ -1404,7 +1404,7 @@ void SyncManager::SyncHandler::RunBoundToAdapter(
     else if (ec == (ECode)E_RUNTIME_EXCEPTION) {
         CloseActiveSyncContext(activeSyncContext);
         Logger::E(TAG, "Caught RuntimeException while starting the sync %s",
-            Object::ToString(syncOperation).string());
+            TO_CSTR(syncOperation));
     }
     // }
 }
@@ -1480,8 +1480,8 @@ void SyncManager::SyncHandler::RunSyncFinishedOrCanceledLocked(
         }
         else {
             Logger::D(TAG, "failed sync operation %s, %s",
-                Object::ToString(syncOperation).string(),
-                Object::ToString(syncResult).string());
+                TO_CSTR(syncOperation),
+                TO_CSTR(syncResult));
 
             // the operation failed so increase the backoff time
             mHost->IncreaseBackoffSetting(syncOperation);
@@ -1640,7 +1640,7 @@ Int32 SyncManager::SyncHandler::SyncResultToErrorNumber(
         return IContentResolver::SYNC_ERROR_INTERNAL;
 
     Logger::E(TAG, "we are not in an error state, %s",
-        Object::ToString(syncResult).string());
+        TO_CSTR(syncResult));
     return 0;
 }
 
@@ -1888,8 +1888,8 @@ void SyncManager::SyncHandler::InstallHandleTooManyDeletesNotification(
     contextForUser->GetString(R::string::contentServiceSyncNotificationTitle, &str);
     String text;
     text.AppendFormat(
-        Object::ToString(tooManyDeletesDescFormat).string(),
-        Object::ToString(authorityName).string());
+        TO_CSTR(tooManyDeletesDescFormat),
+        TO_CSTR(authorityName));
     notification->SetColor(color);
     notification->SetLatestEventInfo(contextForUser,
         CoreUtils::Convert(str), CoreUtils::Convert(text), pendingIntent);
@@ -2249,7 +2249,7 @@ ECode SyncManager::MyRegisteredServicesCacheListener::OnServiceChanged(
 //==========================================================================================
 // SyncManager::SyncStatusObserver
 //==========================================================================================
-CAR_INTERFACE_IMPL(SyncManager::SyncStatusObserver, Object, IISyncStatusObserver)
+CAR_INTERFACE_IMPL_2(SyncManager::SyncStatusObserver, Object, IISyncStatusObserver, IBinder)
 
 ECode SyncManager::SyncStatusObserver::constructor(
     /* [in] */ ISyncManager* host)

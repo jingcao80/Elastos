@@ -605,7 +605,7 @@ ECode RequestQueue::GetRequest(
             ret = RemoveFirst(IHashMap::Probe(mPending));
         }
         if (HttpLog::LOGV) {
-            HttpLog::V("RequestQueue.getRequest() => %s", Object::ToString(ret).string());
+            HttpLog::V("RequestQueue.getRequest() => %s", TO_CSTR(ret));
         }
         *req = ret;
     }
@@ -638,8 +638,8 @@ ECode RequestQueue::GetRequest(
             String shost = Object::ToString(host);
             String sret = Object::ToString(ret);
             HttpLog::V("RequestQueue.getRequest(%s) => %s",
-                    Object::ToString(host).string(),
-                    Object::ToString(ret).string());
+                    TO_CSTR(host),
+                    TO_CSTR(ret));
         }
         *req = ret;
         REFCOUNT_ADD(*req)

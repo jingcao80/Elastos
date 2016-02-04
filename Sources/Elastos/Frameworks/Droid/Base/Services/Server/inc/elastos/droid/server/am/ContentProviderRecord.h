@@ -65,8 +65,6 @@ public:
 
     ~ContentProviderRecord();
 
-    CAR_INTERFACE_DECL();
-
     CARAPI_(AutoPtr<IContentProviderHolder>) NewHolder(
         /* [in] */ CContentProviderConnection* conn);
 

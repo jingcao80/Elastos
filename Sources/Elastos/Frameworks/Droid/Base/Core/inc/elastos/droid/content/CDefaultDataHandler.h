@@ -145,7 +145,7 @@ private:
     static const String ARG;
 
 private:
-    Stack<AutoPtr<IUri> > mUris;
+    Stack< AutoPtr<IUri> > mUris;
     AutoPtr<IContentValues> mValues;
     AutoPtr<IContentResolver> mContentResolver;
 };

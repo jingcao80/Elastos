@@ -2,12 +2,10 @@
 #ifndef __ELASTOS_DROID_VIEW_DRAGEVENT_H__
 #define __ELASTOS_DROID_VIEW_DRAGEVENT_H__
 
-#include "elastos/droid/ext/frameworkdef.h"
+#include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/core/Object.h>
-#include <elastos/core/Mutex.h>
 
-using Elastos::Core::Mutex;
 using Elastos::Droid::Content::IClipData;
 using Elastos::Droid::Content::IClipDescription;
 
@@ -163,39 +161,27 @@ public:
         /* [in] */ IParcel* dest);
 
 public:
-    static CARAPI Obtain(
-        /* [out] */ IDragEvent ** ppEvent);
+    static CARAPI_(AutoPtr<IDragEvent>) Obtain();
 
-    static CARAPI Obtain(
+    static CARAPI_(AutoPtr<IDragEvent>) Obtain(
         /* [in] */ Int32 action,
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [in] */ IInterface * pLocalState,
         /* [in] */ IClipDescription * pDescription,
         /* [in] */ IClipData * pData,
-        /* [in] */ Boolean result,
-        /* [out] */ IDragEvent ** ppEvent);
-
-    static CARAPI Obtain(
-        /* [in] */ IDragEvent * pSource,
-        /* [out] */ IDragEvent ** ppEvent);
-
-    static AutoPtr<DragEvent> Obtain(
-        /* [in] */ Int32 action,
-        /* [in] */ Float x,
-        /* [in] */ Float y,
-        /* [in] */ IInterface* localState,
-        /* [in] */ IClipDescription* description,
-        /* [in] */ IClipData* data,
         /* [in] */ Boolean result);
+
+    static CARAPI_(AutoPtr<IDragEvent>) Obtain(
+        /* [in] */ IDragEvent * pSource);
 
 private:
     friend class ViewRootImpl;
 
     static const Int32 MAX_RECYCLED = 10;
-    static Mutex sRecyclerLock;
+    static Object sRecyclerLock;
     static Int32 sRecyclerUsed;
-    static AutoPtr<DragEvent> sRecyclerTop;
+    static AutoPtr<IDragEvent> sRecyclerTop;
     static const Boolean TRACK_RECYCLED_LOCATION = FALSE;
     Boolean mRecycledLocation;
     Int32 mAction;
@@ -204,7 +190,7 @@ private:
     AutoPtr<IClipData> mClipData;
     AutoPtr<IInterface> mLocalState;
     Boolean mDragResult;
-    AutoPtr<DragEvent> mNext;
+    AutoPtr<IDragEvent> mNext;
     Boolean mRecycled;
 };
 

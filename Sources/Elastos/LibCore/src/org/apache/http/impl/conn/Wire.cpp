@@ -53,8 +53,9 @@ void Wire::DoWire(
 
 Boolean Wire::Enabled()
 {
-    // return log.isDebugEnabled();
     assert(0);
+    // return log.isDebugEnabled();
+    return FALSE;
 }
 
 ECode Wire::Output(

@@ -2,6 +2,7 @@
 module
 {
     using interface Elastos.IO.IByteBuffer;
+
     interface Elastos.Droid.Hardware.Camera2.Utils.ITypeReference;
 
     namespace Elastos {
@@ -20,6 +21,13 @@ module
      * @param <T> the compile-time managed type
      */
     interface IMarshaler {
+        /**
+         * Used to denote variable-length data structures.
+         *
+         * <p>If the size is dynamic then we can't know ahead of time how big of a data structure
+         * to preallocate for e.g. arrays, so one object must be unmarshaled at a time.</p>
+         */
+        const Int32 NATIVE_SIZE_DYNAMIC = -1;
 
         /**
          * Marshal the specified object instance (value) into a byte buffer.

@@ -2,30 +2,48 @@
 #define __ELASTOS_DROID_SERVER_CNSDSERVICE_H__
 
 #include "_Elastos_Droid_Server_CNsdService.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include "util/AsyncChannel.h"
-#include "NativeDaemonConnector.h"
+#include <elastos/droid/ext/frameworkext.h>
+#define HASH_FOR_OS
+#include <elastos/droid/ext/frameworkhash.h>
+// #include "elastos/droid/server/NativeDaemonConnector.h"
+#include <Elastos.Droid.Utility.h>
+#include <elastos/droid/R.h>
+#include <elastos/droid/database/ContentObserver.h>
+#include <elastos/droid/internal/utility/AsyncChannel.h>
+#include <elastos/droid/internal/utility/State.h>
+#include <elastos/droid/internal/utility/StateMachine.h>
+#include <elastos/droid/net/http/Request.h>
+#include <elastos/droid/net/nsd/DnsSdTxtRecord.h>
+#include <elastos/droid/net/nsd/NsdManager.h>
+#include <elastos/droid/os/Binder.h>
+#include <elastos/droid/os/Handler.h>
+#include <elastos/droid/os/Process.h>
 #include <elastos/utility/etl/HashMap.h>
-#include "util/StateMachine.h"
-#include "util/State.h"
-#include "elastos/droid/database/ContentObserver.h"
 
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
-using Elastos::Droid::Os::IMessenger;
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Utility::IProtocol;
-using Elastos::Droid::Internal::Utility::AsyncChannel;
-using Elastos::Droid::Internal::Utility::StateMachine;
-using Elastos::Droid::Internal::Utility::State;
-using Elastos::Droid::Net::Nsd::INsdManager;
-using Elastos::Droid::Server::NativeDaemonConnector;
-using Elastos::Utility::Concurrent::ICountDownLatch;
-using Elastos::Droid::Net::Nsd::INsdServiceInfo;
-using Elastos::Droid::Net::Nsd::IDnsSdTxtRecord;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::ContentObserver;
-
+using Elastos::Droid::Internal::Utility::AsyncChannel;
+using Elastos::Droid::Internal::Utility::IProtocol;
+using Elastos::Droid::Internal::Utility::State;
+using Elastos::Droid::Internal::Utility::StateMachine;
+using Elastos::Droid::Net::Nsd::IDnsSdTxtRecord;
+using Elastos::Droid::Net::Nsd::IINsdManager;
+using Elastos::Droid::Net::Nsd::INsdManager;
+using Elastos::Droid::Net::Nsd::INsdServiceInfo;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IMessenger;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::R;
+using Elastos::Droid::Server::INativeDaemonConnectorCallbacks;
+// using Elastos::Droid::Server::NativeDaemonConnector;
+using Elastos::Droid::Utility::ISparseArray;
+using Elastos::Utility::Concurrent::ICountDownLatch;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -40,10 +58,14 @@ extern "C" const InterfaceID EIID_NativeEvent;
  * @hide
  */
 CarClass(CNsdService)
+    , public Object
+    , public IBinder
+    , public IINsdManager
 {
 private:
-    /* These should be in sync with system/netd/mDnsResponseCode.h */
-    class NativeResponseCode : public ElRefBase
+    /* These should be in sync with system/netd/server/mDnsResponseCode.h */
+    class NativeResponseCode
+        : public Object
     {
     public:
         static const Int32 SERVICE_DISCOVERY_FAILED    =   602;
@@ -64,22 +86,21 @@ private:
     };
 
     class NativeEvent
-        : public ElRefBase
-        , public IInterface
+        : public Object
     {
     public:
-        CAR_INTERFACE_DECL()
-
         NativeEvent(
             /* [in] */ Int32 code,
-            /* [in] */ const String& raw);
+            /* [in] */ const String& raw,
+            /* [in] */ ArrayOf<String>* cooked);
     public:
         Int32 mCode;
         String mRaw;
+        AutoPtr<ArrayOf<String> > mCooked;
     };
 
     class NativeCallbackReceiver
-        : public ElRefBase
+        : public Object
         , public INativeDaemonConnectorCallbacks
     {
     public:
@@ -90,36 +111,26 @@ private:
 
         CARAPI OnDaemonConnected();
 
+        CARAPI OnCheckHoldWakeLock(
+            /* [in] */ Int32 code,
+            /* [out] */ Boolean* result);
+
         CARAPI OnEvent(
             /* [in] */ Int32 code,
             /* [in] */ const String& raw,
-            /* [in] */ const ArrayOf<String>& cooked,
+            /* [in] */ ArrayOf<String>* cooked,
             /* [out] */ Boolean* result);
     public:
         CNsdService* mHost;
     };
 
-    class ClientInfo : public ElRefBase
+    class ClientInfo;
+    class NsdStateMachine
+        : public StateMachine
     {
     public:
-        ClientInfo(
-            /* [in] */ AsyncChannel* c,
-            /* [in] */ IMessenger* m);
-    public:
-        static const Int32 MAX_LIMIT = 10;
-        AutoPtr<AsyncChannel> mChannel;
-        AutoPtr<IMessenger> mMessenger;
-        /* Remembers a resolved service until getaddrinfo completes */
-        AutoPtr<INsdServiceInfo> mResolvedService;
-
-        /* A map from client id to unique id sent to mDns */
-        HashMap<Int32, Int32> mClientIds;
-    };
-
-    class NsdStateMachine : public StateMachine
-    {
-    public:
-        class DefaultState : public State
+        class DefaultState
+            : public State
         {
         public:
             DefaultState(
@@ -129,11 +140,15 @@ private:
             CARAPI ProcessMessage(
                 /* [in] */ IMessage* msg,
                 /* [out] */ Boolean* result);
+
+            CARAPI_(String) GetName();
+
         public:
             NsdStateMachine* mHost;
         };
 
-        class DisabledState : public State
+        class DisabledState
+            : public State
         {
         public:
             DisabledState(
@@ -147,11 +162,14 @@ private:
                 /* [in] */ IMessage* msg,
                 /* [out] */ Boolean* result);
 
+            CARAPI_(String) GetName();
+
         public:
             NsdStateMachine* mHost;
         };
 
-        class EnabledState : public State
+        class EnabledState
+            : public State
         {
         public:
             EnabledState(
@@ -168,6 +186,8 @@ private:
                 /* [in] */ IMessage* msg,
                 /* [out] */ Boolean* value);
 
+            CARAPI_(String) GetName();
+
         private:
             CARAPI_(Boolean) RequestLimitReached(
                 /* [in] */ ClientInfo* clientInfo);
@@ -175,20 +195,30 @@ private:
             CARAPI_(void) StoreRequestMap(
                 /* [in] */ Int32 clientId,
                 /* [in] */ Int32 globalId,
-                /* [in] */ ClientInfo* clientInfo);
+                /* [in] */ ClientInfo* clientInfo,
+                /* [in] */ Int32 what);
 
             CARAPI_(void) RemoveRequestMap(
                 /* [in] */ Int32 clientId,
                 /* [in] */ Int32 globalId,
                 /* [in] */ ClientInfo* clientInfo);
+
+            CARAPI_(Boolean) HandleNativeEvent(
+                /* [in] */ Int32 code,
+                /* [in] */ const String& raw,
+                /* [in] */ ArrayOf<String>* cooked);
+
         public:
             NsdStateMachine* mHost;
         };
 
-        class MyContentObserver : public ContentObserver
+        class MyContentObserver
+            : public ContentObserver
         {
         public:
-            MyContentObserver(
+            MyContentObserver();
+
+            CARAPI constructor(
                 /* [in] */ IHandler* handler,
                 /* [in] */ NsdStateMachine* owner);
 
@@ -221,7 +251,54 @@ private:
 
     };
 
+    class ClientInfo
+        : public Object
+    {
+        friend class NsdStateMachine::DefaultState;
+        friend class NsdStateMachine::EnabledState;
+
+    public:
+        ClientInfo(
+            /* [in] */ CNsdService* host,
+            /* [in] */ AsyncChannel* c,
+            /* [in] */ IMessenger* m);
+
+        // @Override
+        CARAPI ToString(
+            /* [out] */ String* result);
+
+    private:
+        // Remove any pending requests from the global map when we get rid of a client,
+        // and send cancellations to the daemon.
+        CARAPI ExpungeAllRequests();
+
+        // mClientIds is a sparse array of listener id -> mDnsClient id.  For a given mDnsClient id,
+        // return the corresponding listener id.  mDnsClient id is also called a global id.
+        CARAPI_(Int32) GetClientId(
+            /* [in] */ Int32 globalId);
+
+    public:
+        static const Int32 MAX_LIMIT = 10;
+        AutoPtr<AsyncChannel> mChannel;
+        AutoPtr<IMessenger> mMessenger;
+        /* Remembers a resolved service until getaddrinfo completes */
+        AutoPtr<INsdServiceInfo> mResolvedService;
+
+        /* A map from client id to unique id sent to mDns */
+        AutoPtr<ISparseArray> mClientIds;
+
+    private:
+        /* A map from client id to the type of the request we had received */
+        AutoPtr<ISparseArray> mClientRequests;
+
+        CNsdService* mHost;
+    };
+
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CNsdService();
 
     ~CNsdService();
@@ -252,11 +329,6 @@ private:
     CARAPI_(Boolean) IsNsdEnabled();
 
     CARAPI_(Int32) GetUniqueId();
-
-    CARAPI_(void) HandleNativeEvent(
-        /* [in] */ Int32 code,
-        /* [in] */ const String& raw,
-        /* [in] */ ArrayOf<String>* cooked);
 
     CARAPI_(Boolean) StartMDnsDaemon();
 
@@ -313,6 +385,11 @@ private:
         /* [in] */ Int32 what,
         /* [in] */ IInterface* obj);
 
+    CARAPI_(String) Unescape(
+        /* [in] */ const String& s);
+
+    static CARAPI_(AutoPtr<ArrayOf<String> >) InitSCmdToString();
+
 public:
     const static Int32 BASE = IProtocol::BASE_NSD_MANAGER;
     const static Int32 CMD_TO_STRING_COUNT = INsdManager::RESOLVE_SERVICE - BASE + 1;
@@ -340,7 +417,8 @@ private:
     Int32 INVALID_ID;
     Int32 mUniqueId;
 
-    AutoPtr<NativeDaemonConnector> mNativeConnector;
+    // TODO: Waiting for NativeDaemonConnector
+    // AutoPtr<NativeDaemonConnector> mNativeConnector;
     AutoPtr<ICountDownLatch> mNativeDaemonConnected;
 };
 

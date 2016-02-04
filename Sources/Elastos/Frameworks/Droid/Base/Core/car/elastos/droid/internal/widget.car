@@ -115,41 +115,41 @@ module
     [local]
     class CPreferenceImageView {
         constructor(
-	        [in] IContext* context);
+            [in] IContext* context);
 
-	    constructor(
-	        [in] IContext* context,
-	        [in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
 
-	    constructor(
-	        [in] IContext* context,
-	        [in] IAttributeSet* attrs,
-	        [in] Int32 defStyleAttr);
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
 
-	    constructor(
-	        [in] IContext* context,
-	        [in] IAttributeSet* attrs,
-	        [in] Int32 defStyleAttr,
-	        [in] Int32 defStyleRes);
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
 
         interface IPreferenceImageView;
         interface IImageView;
         interface IView;
-    	interface IDrawableCallback;
-    	interface IKeyEventCallback;
-    	interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
     }
 
     [local]
     class CToolbarWidgetWrapper {
-	    constructor(
-	        [in] IToolbar* toolbar,
-	        [in] Boolean style);
+        constructor(
+            [in] IToolbar* toolbar,
+            [in] Boolean style);
 
-	    constructor(
-	        [in] IToolbar* toolbar,
-	        [in] Boolean style,
-	        [in] Int32 defaultNavigationContentDescription);
+        constructor(
+            [in] IToolbar* toolbar,
+            [in] Boolean style,
+            [in] Int32 defaultNavigationContentDescription);
 
         interface IToolbarWidgetWrapper;
         interface IDecorToolbar;
@@ -158,53 +158,53 @@ module
     [local]
     class CSubtitleView {
         constructor(
-	        [in] IContext* context);
+            [in] IContext* context);
 
-	    constructor(
-	        [in] IContext* context,
-	        [in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
 
-	    constructor(
-	        [in] IContext* context,
-	        [in] IAttributeSet* attrs,
-	        [in] Int32 defStyleAttr);
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
 
-	    constructor(
-	        [in] IContext* context,
-	        [in] IAttributeSet* attrs,
-	        [in] Int32 defStyleAttr,
-	        [in] Int32 defStyleRes);
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
 
         interface ISubtitleView;
         interface IView;
-    	interface IDrawableCallback;
-    	interface IKeyEventCallback;
-    	interface IAccessibilityEventSource;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
     }
 
     [local]
     class CSwipeDismissLayout {
         constructor(
-	        [in] IContext* context);
+            [in] IContext* context);
 
-	    constructor(
-	        [in] IContext* context,
-	        [in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs);
 
-	    constructor(
-	        [in] IContext* context,
-	        [in] IAttributeSet* attrs,
-	        [in] Int32 defStyle);
+        constructor(
+            [in] IContext* context,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyle);
 
         interface ISwipeDismissLayout;
         interface IFrameLayout;
-    	interface IViewGroup;
-    	interface IViewParent;
-    	interface IViewManager;
-    	interface IView;
-    	interface IDrawableCallback;
-    	interface IKeyEventCallback;
-    	interface IAccessibilityEventSource;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
     }
 
     [local]
@@ -214,35 +214,35 @@ module
         interface IBackgroundFallback;
     }
 
-	[local]
-	class CAbsActionBarView {
-		constructor(
-			[in] IContext* ctx);
+    [local]
+    class CAbsActionBarView {
+        constructor(
+            [in] IContext* ctx);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs,
-			[in] Int32 defStyleAttr);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs,
-			[in] Int32 defStyleAttr,
-			[in] Int32 defStyleRes);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
 
-		interface IAbsActionBarView;
-		interface IViewGroup;
-    	interface IViewParent;
-    	interface IViewManager;
-    	interface IView;
-    	interface IDrawableCallback;
-    	interface IKeyEventCallback;
-    	interface IAccessibilityEventSource;
-	}
+        interface IAbsActionBarView;
+        interface IViewGroup;
+        interface IViewParent;
+        interface IViewManager;
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
     [local]
     class CAbsListViewAutoScroller {
@@ -342,15 +342,19 @@ module
         interface ILockPatternUtilsCacheHelper;
     }
 
-	[local]
-	class CSmileys {
-		interface ISmileys;
-	}
+    singleton class CLockPatternUtilsHelper {
+        interface ILockPatternUtilsHelper;
+    }
 
-	[local]
-	singleton class CSmileysHelper {
-		interface ISmileysHelper;
-	}
+    [local]
+    class CSmileys {
+        interface ISmileys;
+    }
+
+    [local]
+    singleton class CSmileysHelper {
+        interface ISmileysHelper;
+    }
 
    //  [local]
    //  class CDigitalClock2 {
@@ -388,38 +392,38 @@ module
         interface IAccessibilityEventSource;
     }
 
-	[local]
-	class CWaveView {
-		constructor(
-			[in] IContext* ctx);
+    [local]
+    class CWaveView {
+        constructor(
+            [in] IContext* ctx);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-		interface IWaveView;
-		interface IAnimatorUpdateListener;
-		interface IDrawableCallback;
-		interface IKeyEventCallback;
-		interface IAccessibilityEventSource;
-	}
+        interface IWaveView;
+        interface IAnimatorUpdateListener;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
-	[local]
-	class CFaceUnlockView {
-		constructor(
-			[in] IContext* ctx);
+    [local]
+    class CFaceUnlockView {
+        constructor(
+            [in] IContext* ctx);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-		interface IFaceUnlockView;
-		interface IViewParent;
-		interface IViewManager;
-		interface IDrawableCallback;
-		interface IKeyEventCallback;
-		interface IAccessibilityEventSource;
-	}
+        interface IFaceUnlockView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
    //  [local]
     class CPointerLocationView {
@@ -435,22 +439,22 @@ module
         interface IAccessibilityEventSource;
     }
 
-	[local]
-	class CLinearLayoutWithDefaultTouchRecepient {
-		constructor(
-			[in] IContext* ctx);
+    [local]
+    class CLinearLayoutWithDefaultTouchRecepient {
+        constructor(
+            [in] IContext* ctx);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-		interface ILinearLayoutWithDefaultTouchRecepient;
-		interface IViewParent;
-		interface IViewManager;
-		interface IDrawableCallback;
-		interface IKeyEventCallback;
-		interface IAccessibilityEventSource;
-	}
+        interface ILinearLayoutWithDefaultTouchRecepient;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
    //  [local]
     class CPasswordEntryKeyboard {
@@ -561,22 +565,22 @@ module
         interface IInputConnection;
     }
 
-	[local]
-	class CWeightedLinearLayout {
-		constructor(
-			[in] IContext* ctx);
+    [local]
+    class CWeightedLinearLayout {
+        constructor(
+            [in] IContext* ctx);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-		interface IWeightedLinearLayout;
-		interface IViewParent;
-		interface IViewManager;
-		interface IDrawableCallback;
-		interface IKeyEventCallback;
-		interface IAccessibilityEventSource;
-	}
+        interface IWeightedLinearLayout;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
    //  [local]
     class CRotarySelector {
@@ -620,112 +624,112 @@ module
    //      interface ITransportControlViewSavedState;
    //  }
 
-	[local]
-	class CActionBarContextView {
-		constructor(
-			[in] IContext* ctx);
+    [local]
+    class CActionBarContextView {
+        constructor(
+            [in] IContext* ctx);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs,
-			[in] Int32 defStyleAttr);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs,
-			[in] Int32 defStyleAttr,
-			[in] Int32 defStyleRes);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
 
-		interface IActionBarContextView;
-		interface IViewParent;
-		interface IViewManager;
-		interface IDrawableCallback;
-		interface IKeyEventCallback;
-		interface IAccessibilityEventSource;
-		interface IAnimatorListener;
-	}
+        interface IActionBarContextView;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IAnimatorListener;
+    }
 
-	[local]
-	class CTextProgressBar {
-		constructor(
-			[in] IContext* ctx);
+    [local]
+    class CTextProgressBar {
+        constructor(
+            [in] IContext* ctx);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs,
-			[in] Int32 defStyleAttr);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs,
-			[in] Int32 defStyleAttr,
-			[in] Int32 defStyleRes);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
 
-		interface ITextProgressBar;
-		interface IViewParent;
-		interface IViewManager;
-		interface IDrawableCallback;
-		interface IKeyEventCallback;
-		interface IAccessibilityEventSource;
-		interface IOnChronometerTickListener;
-	}
+        interface ITextProgressBar;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+        interface IOnChronometerTickListener;
+    }
 
-	[local]
-	class CActionBarView {
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs);
+    [local]
+    class CActionBarView {
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-		interface IActionBarView;
-		interface IDecorToolbar;
-		interface IViewParent;
-		interface IViewManager;
-		interface IDrawableCallback;
-		interface IKeyEventCallback;
-		interface IAccessibilityEventSource;
-	}
+        interface IActionBarView;
+        interface IDecorToolbar;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
-	[local, deprecated]
-	class CActionBarOverlayLayout {
-		constructor(
-			[in] IContext* ctx);
+    [local, deprecated]
+    class CActionBarOverlayLayout {
+        constructor(
+            [in] IContext* ctx);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-		interface IActionBarOverlayLayout;
-		interface IViewParent;
-		interface IViewManager;
-		interface IDrawableCallback;
-		interface IKeyEventCallback;
-		interface IAccessibilityEventSource;
-	}
+        interface IActionBarOverlayLayout;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
-	[local]
-	class CActionBarContainer {
-		constructor(
-			[in] IContext* ctx);
+    [local]
+    class CActionBarContainer {
+        constructor(
+            [in] IContext* ctx);
 
-		constructor(
-			[in] IContext* ctx,
-			[in] IAttributeSet* attrs);
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
 
-		interface IActionBarContainer;
-		interface IViewParent;
-		interface IViewManager;
-		interface IDrawableCallback;
-		interface IKeyEventCallback;
-		interface IAccessibilityEventSource;
-	}
+        interface IActionBarContainer;
+        interface IViewParent;
+        interface IViewManager;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
 
 
     [local]

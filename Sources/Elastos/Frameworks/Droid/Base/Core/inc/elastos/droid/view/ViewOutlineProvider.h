@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_VIEW_VIEWOUTLINEPROVIDER_H__
 
 #include "Elastos.Droid.View.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::IOutline;
@@ -16,7 +16,7 @@ namespace View {
 /**
  * Interface by which a View builds its {@link Outline}, used for shadow casting and clipping.
  */
-class ViewOutlineProvider
+class ECO_PUBLIC ViewOutlineProvider
     : public Object
     , public IViewOutlineProvider
 {
@@ -69,10 +69,10 @@ public:
     static AutoPtr<IViewOutlineProvider> PADDED_BOUNDS;
 
 private:
-    static Boolean sInit;
+    ECO_LOCAL static Boolean sInit;
 };
 
-class BackgroundViewOutlineProvider
+class ECO_PUBLIC BackgroundViewOutlineProvider
     : public ViewOutlineProvider
 {
 public:
@@ -81,7 +81,7 @@ public:
         /* [in] */ IOutline* outline);
 };
 
-class BoundsViewOutlineProvider
+class ECO_PUBLIC BoundsViewOutlineProvider
     : public ViewOutlineProvider
 {
 public:
@@ -90,7 +90,7 @@ public:
         /* [in] */ IOutline* outline);
 };
 
-class PaddedViewOutlineProvider
+class ECO_PUBLIC PaddedViewOutlineProvider
     : public ViewOutlineProvider
 {
 public:

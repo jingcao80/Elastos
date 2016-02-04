@@ -71,7 +71,8 @@ ECode BaseNetworkObserver::InterfaceAdded(
 
 ECode BaseNetworkObserver::InterfaceClassDataActivityChanged(
     /* [in] */ const String& label,
-    /* [in] */ Boolean active)
+    /* [in] */ Boolean active,
+    /* [in] */ Int64 tsNanos)
 {
     // default no-op
     return NOERROR;

@@ -372,6 +372,7 @@ ECode CTime::CheckChar(
         //             (int) c, spos, (int) expected, expected));
         return E_TIME_FORMAT_EXCEPTION;
     }
+    return NOERROR;
 }
 
 Int32 CTime::GetChar(
@@ -1143,7 +1144,7 @@ String CTime::TimeCalculator::ToStringInternal()
     //                 wallTime.getIsDst(),
     //                 toMillis(false /* use isDst */) / 1000
     //         );
-
+    return String(NULL);
 }
 
 Int32 CTime::TimeCalculator::Compare(

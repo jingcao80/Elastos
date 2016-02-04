@@ -2,7 +2,7 @@ module
 {
     interface Elastos.Droid.Os.IParcelFileDescriptor;
     interface Elastos.Droid.Os.IWorkSource;
-//    interface Elastos.Droid.Telephony.ISignalStrength;
+    interface Elastos.Droid.Telephony.ISignalStrength;
 
     namespace Elastos {
     namespace Droid {
@@ -155,8 +155,8 @@ module
 
         NotePhoneOff();
 
-//        NotePhoneSignalStrength(
-//            [in] ISignalStrength* signalStrength);
+        NotePhoneSignalStrength(
+            [in] ISignalStrength* signalStrength);
 
         NotePhoneDataConnectionState(
             [in] Int32 dataType,

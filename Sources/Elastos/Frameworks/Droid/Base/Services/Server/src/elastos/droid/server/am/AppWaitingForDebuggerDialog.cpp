@@ -1,7 +1,10 @@
 
 #include "elastos/droid/server/am/AppWaitingForDebuggerDialog.h"
+#include "elastos/core/StringBuilder.h"
 
+using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Core::CString;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -25,23 +28,23 @@ AppWaitingForDebuggerDialog::AppWaitingForDebuggerDialog(
     StringBuilder text;
     Int32 length;
     if (mAppName != NULL && (mAppName->GetLength(&length), length > 0)) {
-        text.AppendCStr("Application ");
-        text.AppendCharSequence(mAppName);
-        text.AppendCStr(" (process ");
-        text.AppendString(app->mProcessName);
-        text.AppendCStr(")");
+        text.Append("Application ");
+        text.Append(mAppName);
+        text.Append(" (process ");
+        text.Append(app->mProcessName);
+        text.Append(")");
     } else {
-        text.AppendCStr("Process ");
-        text.AppendString(app->mProcessName);
+        text.Append("Process ");
+        text.Append(app->mProcessName);
     }
 
-    text.AppendCStr(" is waiting for the debugger to attach.");
+    text.Append(" is waiting for the debugger to attach.");
 
     AutoPtr<ICharSequence> textMsg;
     CString::New(text.ToString(), (ICharSequence**)&textMsg);
     SetMessage(textMsg);
     AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(1, (IInterface*)app, (IMessage**)&msg);
+    mHandler->ObtainMessage(1, TO_IINTERFACE(app), (IMessage**)&msg);
     AutoPtr<ICharSequence> btMsg;
     CString::New(String("Force Close"), (ICharSequence**)&btMsg);
     SetButton(IDialogInterface::BUTTON_POSITIVE, btMsg, msg);
@@ -49,17 +52,20 @@ AppWaitingForDebuggerDialog::AppWaitingForDebuggerDialog(
     CString::New(String("Waiting For Debugger"), (ICharSequence**)&title);
     SetTitle(title);
     AutoPtr<IWindowManagerLayoutParams> attrs;
-    Dialog::GetWindow()->GetAttributes((IWindowManagerLayoutParams**)&attrs);
+    AutoPtr<IWindow> window;
+    window->GetAttributes((IWindowManagerLayoutParams**)&attrs);
     String processName;
     app->mInfo->GetProcessName(&processName);
     AutoPtr<ICharSequence> attrsTitle;
     CString::New(String("Waiting For Debugger: ") + processName, (ICharSequence**)&attrsTitle);
     attrs->SetTitle(attrsTitle);
-    Dialog::GetWindow()->SetAttributes(attrs);
+    window->SetAttributes(attrs);
 }
 
-void AppWaitingForDebuggerDialog::OnStop()
-{}
+ECode AppWaitingForDebuggerDialog::OnStop()
+{
+    return NOERROR;
+}
 
 ECode AppWaitingForDebuggerDialog::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)

@@ -383,7 +383,7 @@ ECode CTestSuite::CountTestCases(
     mTests->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<ITest> each;
-        mTests->GetElementAt(i, (IInterface**)&each);
+        mTests->ElementAt(i, (IInterface**)&each);
         Int32 n;
         each->CountTestCases(&n);
         count += n;
@@ -407,7 +407,7 @@ ECode CTestSuite::Run(
     mTests->GetSize(&N);
     for (Int32 i = 0; i < N; i++) {
         AutoPtr<ITest> each;
-        mTests->GetElementAt(i, (IInterface**)&each);
+        mTests->ElementAt(i, (IInterface**)&each);
         Boolean shouldStop;
         if (result->ShouldStop(&shouldStop), shouldStop) {
             break;

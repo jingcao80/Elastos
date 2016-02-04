@@ -144,7 +144,7 @@ ECode SystemServiceManager::StartBootPhase(
         if (FAILED(ec)) {
             Slogger::E(TAG, "Failed to boot service %s: onBootPhase threw an exception"
             " during phase %d, error code: %08x",
-            Object::ToString(service).string(), mCurrentPhase, ec);
+            TO_CSTR(service), mCurrentPhase, ec);
             return E_RUNTIME_EXCEPTION;
         }
     }
@@ -163,7 +163,7 @@ ECode SystemServiceManager::StartUser(
         ec = service->OnStartUser(userHandle);
         if (FAILED(ec)) {
             Slogger::E(TAG, "Failed reporting start of user %d: to service  %s, error code: %08x",
-                userHandle, Object::ToString(service).string(), ec);
+                userHandle, TO_CSTR(service), ec);
         }
     }
 
@@ -181,7 +181,7 @@ ECode SystemServiceManager::SwitchUser(
         ec = service->OnSwitchUser(userHandle);
         if (FAILED(ec)) {
             Slogger::E(TAG, "Failed reporting switch of user %d: to service  %s, error code: %08x",
-                userHandle, Object::ToString(service).string(), ec);
+                userHandle, TO_CSTR(service), ec);
         }
     }
 
@@ -199,7 +199,7 @@ ECode SystemServiceManager::StopUser(
         ec = service->OnStopUser(userHandle);
         if (FAILED(ec)) {
             Slogger::E(TAG, "Failed reporting stop of user %d: to service  %s, error code: %08x",
-                userHandle, Object::ToString(service).string(), ec);
+                userHandle, TO_CSTR(service), ec);
         }
     }
 
@@ -217,7 +217,7 @@ ECode SystemServiceManager::CleanupUser(
         ec = service->OnCleanupUser(userHandle);
         if (FAILED(ec)) {
             Slogger::E(TAG, "Failed reporting cleanup of user %d: to service  %s, error code: %08x",
-                userHandle, Object::ToString(service).string(), ec);
+                userHandle, TO_CSTR(service), ec);
         }
     }
 

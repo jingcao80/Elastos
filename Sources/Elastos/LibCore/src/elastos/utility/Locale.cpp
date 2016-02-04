@@ -939,8 +939,7 @@ ECode Locale::SetDefault(
     String languageTag;
     locale->ToLanguageTag(&languageTag);
     sDefaultLocale = locale;
-    assert(0);
-    // ICUUtil::SetDefaultLocale(languageTag);
+    ICUUtil::SetDefaultLocale(languageTag);
     return NOERROR;
 }
 

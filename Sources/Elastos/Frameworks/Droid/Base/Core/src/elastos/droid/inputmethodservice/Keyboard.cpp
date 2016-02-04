@@ -1198,7 +1198,7 @@ void Keyboard::LoadKeyboard(
 {
     Boolean inKey = FALSE;
     Boolean inRow = FALSE;
-    Boolean leftMostKey = FALSE;
+    Boolean UNUSED(leftMostKey) = FALSE;
     Int32 row = 0;
     Int32 x = 0;
     Int32 y = 0;

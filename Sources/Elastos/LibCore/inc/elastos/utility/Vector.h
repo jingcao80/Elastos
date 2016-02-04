@@ -13,6 +13,7 @@ namespace Utility {
 
 class Vector
     : public AbstractList
+    , public IVector
     , public IRandomAccess
     , public ICloneable
     , public ISerializable
@@ -53,12 +54,22 @@ public:
     using AbstractList::Set;
 
     CARAPI Add(
+        /* [in] */ IInterface* object);
+
+    CARAPI Add(
         /* [in] */ Int32 location,
         /* [in] */ IInterface* object);
 
     CARAPI Add(
         /* [in] */ IInterface* object,
         /* [out] */ Boolean* modified);
+
+    CARAPI AddAll(
+        /* [in] */ ICollection* collection);
+
+    CARAPI AddAll(
+        /* [in] */ Int32 location,
+        /* [in] */ ICollection* collection);
 
     CARAPI AddAll(
         /* [in] */ Int32 location,
@@ -145,11 +156,17 @@ public:
         /* [out] */ IInterface** object);
 
     CARAPI Remove(
+        /* [in] */ Int32 location);
+
+    CARAPI Remove(
         /* [in] */ IInterface* object,
         /* [out] */ Boolean* modified);
 
     CARAPI Remove(
         /* [in] */ IInterface* object);
+
+    CARAPI RemoveAll(
+        /* [in] */ ICollection* collection);
 
     CARAPI RemoveAll(
         /* [in] */ ICollection* collection,
@@ -168,6 +185,9 @@ public:
         /* [in] */ Int32 location);
 
     CARAPI RetainAll(
+        /* [in] */ ICollection* collection);
+
+    CARAPI RetainAll(
         /* [in] */ ICollection* collection,
         /* [out] */ Boolean* modified);
 
@@ -175,6 +195,10 @@ public:
         /* [in] */ Int32 location,
         /* [in] */ IInterface* object,
         /* [out] */ IInterface** prevObject);
+
+    CARAPI Set(
+        /* [in] */ Int32 location,
+        /* [in] */ IInterface* object);
 
     CARAPI SetElementAt(
         /* [in] */ IInterface* object,
@@ -190,6 +214,16 @@ public:
         /* [in] */ Int32 start,
         /* [in] */ Int32 end,
         /* [out] */ IList** subList);
+
+    CARAPI GetIterator(
+        /* [out] */ IIterator** it);
+
+    CARAPI GetListIterator(
+        /* [out] */ IListIterator** it);
+
+    CARAPI GetListIterator(
+        /* [in] */ Int32 location,
+        /* [out] */ IListIterator** it);
 
     CARAPI ToArray(
         /* [out, callee] */ ArrayOf<IInterface*>** array);

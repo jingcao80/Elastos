@@ -4,7 +4,7 @@
 #include "elastos/droid/hardware/camera2/params/StreamConfigurationMap.h"
 #include "elastos/droid/internal/utility/Preconditions.h"
 #include "elastos/droid/graphics/PixelFormat.h"
-//#include "elastos/droid/graphics/CImageFormat.h"
+#include "elastos/droid/graphics/CImageFormat.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/Objects.h>
@@ -17,7 +17,7 @@ using Elastos::Droid::Internal::Utility::Preconditions;
 // using Elastos::Droid::View::ECLSID_CSurfaceHolder;
 // using Elastos::Droid::Graphics::ECLSID_CSurfaceTexture;
 using Elastos::Droid::Graphics::IImageFormat;
-//using Elastos::Droid::Graphics::CImageFormat;
+using Elastos::Droid::Graphics::CImageFormat;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::PixelFormat;
 using Elastos::Core::StringBuilder;
@@ -574,11 +574,10 @@ ECode StreamConfigurationMap::CheckArgumentFormat(
     VALIDATE_NOT_NULL(result);
     *result = 0;
 
+    AutoPtr<IImageFormat> helper;
+    CImageFormat::AcquireSingleton((IImageFormat**)&helper);
     Boolean res1;
-    assert(0);
-    // AutoPtr<IImageFormat> helper;
-    // CImageFormat::AcquireSingleton((IImageFormat**)&helper);
-    // helper->IsPublicFormat(format, &res1);
+    helper->IsPublicFormat(format, &res1);
     if (!res1 && !(PixelFormat::IsPublicFormat(format))) {
         // throw new IllegalArgumentException(String.format(
         //         "format 0x%x was not defined in either ImageFormat or PixelFormat", format));

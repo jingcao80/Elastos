@@ -4,8 +4,8 @@
 #include "elastos/droid/internal/view/menu/CMenuPopupHelper.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/view/View.h"
-// #include "elastos/droid/widget/CFrameLayout.h"
-// #include "elastos/droid/widget/CListPopupWindow.h"
+#include "elastos/droid/widget/CFrameLayout.h"
+#include "elastos/droid/widget/CListPopupWindow.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
@@ -24,9 +24,9 @@ using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::EIID_IPopupWindowOnDismissListener;
 using Elastos::Droid::Widget::IListView;
 using Elastos::Droid::Widget::IPopupWindow;
-// using Elastos::Droid::Widget::CFrameLayout;
+using Elastos::Droid::Widget::CFrameLayout;
 using Elastos::Droid::Widget::IFrameLayout;
-// using Elastos::Droid::Widget::CListPopupWindow;
+using Elastos::Droid::Widget::CListPopupWindow;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -156,9 +156,7 @@ void MenuPopupHelper::MenuAdapter::FindExpandedIndex()
 ECode MenuPopupHelper::MenuAdapter::NotifyDataSetChanged()
 {
     FindExpandedIndex();
-    assert(0);
-    return NOERROR;
-    // return BaseAdapter::NotifyDataSetChanged();
+    return BaseAdapter::NotifyDataSetChanged();
 }
 
 CAR_INTERFACE_IMPL_3(MenuPopupHelper::MyListener, Object, IAdapterViewOnItemClickListener,
@@ -225,8 +223,7 @@ ECode MenuPopupHelper::constructor(
     mContext = context;
     LayoutInflater::From(context, (ILayoutInflater**)&mInflater);
     mMenu = menu;
-    assert(0);
-    // mAdapter = new MenuAdapter(mMenu, this);
+    mAdapter = new MenuAdapter(mMenu, this);
     mOverflowOnly = overflowOnly;
     mPopupStyleAttr = popupStyleAttr;
 
@@ -297,13 +294,11 @@ ECode MenuPopupHelper::TryShow(
 {
     VALIDATE_NOT_NULL(result)
     mPopup = NULL;
-    assert(0);
-    // CListPopupWindow::New(mContext, NULL, mPopupStyleAttr, (IListPopupWindow**)&mPopup);
+    CListPopupWindow::New(mContext, NULL, mPopupStyleAttr, (IListPopupWindow**)&mPopup);
     AutoPtr<MyListener> listener = new MyListener(this);
     mPopup->SetOnDismissListener(listener);
     mPopup->SetOnItemClickListener(listener);
-    assert(0);
-    // mPopup->SetAdapter(mAdapter);
+    mPopup->SetAdapter(mAdapter);
     mPopup->SetModal(TRUE);
 
     AutoPtr<IView> anchor = mAnchorView;
@@ -428,16 +423,14 @@ Int32 MenuPopupHelper::MeasureContentWidth()
     adapter->GetCount(&count);
     for (Int32 i = 0; i < count; i++) {
         Int32 positionType = 0;
-        assert(0);
-        // adapter->GetItemViewType(i, &positionType);
+        adapter->GetItemViewType(i, &positionType);
         if (positionType != itemType) {
             itemType = positionType;
             itemView = NULL;
         }
 
         if (mMeasureParent == NULL) {
-            assert(0);
-            // CFrameLayout::New(mContext, (IFrameLayout**)&mMeasureParent);
+            CFrameLayout::New(mContext, (IFrameLayout**)&mMeasureParent);
         }
         AutoPtr<IView> temp;
         adapter->GetView(i, itemView, mMeasureParent, (IView**)&temp);

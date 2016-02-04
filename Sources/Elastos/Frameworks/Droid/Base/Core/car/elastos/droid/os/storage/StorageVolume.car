@@ -122,7 +122,7 @@ module
          * parse or UUID is unknown.
          */
         GetFatVolumeId(
-            [out] String* uuid);
+            [out] Int32* uuid);
 
         SetUserLabel(
             [in] String userLabel);

@@ -1,15 +1,23 @@
-#include "elastos/droid/systemui/statusbar/CCommandQueue.h"
-#include <elastos/core/StringBuilder.h>
-#include "elastos/droid/statusbar/CStatusBarIcon.h"
 
-using Elastos::Core::CString;
-using Elastos::Core::StringBuilder;
-using Elastos::Core::ICharSequence;
+#include "elastos/droid/packages/systemui/statusbar/CCommandQueue.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Droid::Internal::StatusBar::CStatusBarIcon;
+using Elastos::Droid::Internal::StatusBar::EIID_IIStatusBar;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::StatusBar::CStatusBarIcon;
+using Elastos::Core::AutoLock;
+using Elastos::Core::CString;
+using Elastos::Core::CInteger32;
+using Elastos::Core::IInteger32;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 
@@ -21,26 +29,32 @@ const Int32 CCommandQueue::OP_SET_ICON    = 1;
 const Int32 CCommandQueue::OP_REMOVE_ICON = 2;
 
 const Int32 CCommandQueue::MSG_ICON                       = 1 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_ADD_NOTIFICATION           = 2 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_UPDATE_NOTIFICATION        = 3 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_REMOVE_NOTIFICATION        = 4 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_DISABLE                    = 5 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_EXPAND_NOTIFICATIONS       = 6 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_COLLAPSE_PANELS            = 7 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_EXPAND_SETTINGS            = 8 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_SET_SYSTEMUI_VISIBILITY    = 9 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_TOP_APP_WINDOW_CHANGED     = 10 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_SHOW_IME_BUTTON            = 11 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_SET_HARD_KEYBOARD_STATUS   = 12 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_TOGGLE_RECENT_APPS         = 13 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_PRELOAD_RECENT_APPS        = 14 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_CANCEL_PRELOAD_RECENT_APPS = 15 << MSG_SHIFT;
-const Int32 CCommandQueue::MSG_SET_NAVIGATION_ICON_HINTS  = 16 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_DISABLE                    = 2 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_EXPAND_NOTIFICATIONS       = 3 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_COLLAPSE_PANELS            = 4 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_EXPAND_SETTINGS            = 5 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_SET_SYSTEMUI_VISIBILITY    = 6 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_TOP_APP_WINDOW_CHANGED     = 7 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_SHOW_IME_BUTTON            = 8 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_TOGGLE_RECENT_APPS         = 9 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_PRELOAD_RECENT_APPS        = 10 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_CANCEL_PRELOAD_RECENT_APPS = 11 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_SET_WINDOW_STATE           = 12 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_SHOW_RECENT_APPS           = 13 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_HIDE_RECENT_APPS           = 14 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_BUZZ_BEEP_BLINKED          = 15 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_NOTIFICATION_LIGHT_OFF     = 16 << MSG_SHIFT;
+const Int32 CCommandQueue::MSG_NOTIFICATION_LIGHT_PULSE   = 17 << MSG_SHIFT;
+const String CCommandQueue::SHOW_IME_SWITCHER_KEY("showImeSwitcherKey");
 
+CAR_OBJECT_IMPL(CCommandQueue);
+CAR_INTERFACE_IMPL_3(CCommandQueue, Object, ICommandQueue, IIStatusBar, IBinder);
 ECode CCommandQueue::constructor(
-    /* [in] */ ICommandQueueCallbacks* callbacks)
+    /* [in] */ ICommandQueueCallbacks* callbacks,
+    /* [in] */ IStatusBarIconList* list)
 {
     mCallbacks = callbacks;
+    mList = list;
     mHandler = new MyHandler(this);
     return NOERROR;
 }
@@ -57,31 +71,14 @@ ECode CCommandQueue::SetIcon(
     /* [in] */ IStatusBarIcon* icon)
 {
     AutoLock lock(mListLock);
-
-    String iconPackage;
-    icon->GetIconPackage(&iconPackage);
-    Int32 iconId, iconLevel, number;
-    icon->GetIconId(&iconId);
-    icon->GetIconLevel(&iconLevel);
-    icon->GetNumber(&number);
-    AutoPtr<ICharSequence> seq;
-    icon->GetContentDescription((ICharSequence**)&seq);
-    AutoPtr<IUserHandle> user;
-    icon->GetUser((IUserHandle**)&user);
-    Boolean visible;
-    icon->GetVisible(&visible);
-
-    AutoPtr<IStatusBarIcon> cloneIcon;
-    CStatusBarIcon::New(iconPackage, user,
-        iconId, iconLevel, number, seq, (IStatusBarIcon**)&cloneIcon);
-    cloneIcon->SetVisible(visible);
-
     Int32 what = MSG_ICON | index;
     mHandler->RemoveMessages(what);
-    AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(what, OP_SET_ICON, 0, cloneIcon, (IMessage**)&msg);
-    Boolean result;
-    return mHandler->SendMessage(msg, &result);
+    AutoPtr<IStatusBarIcon> c;
+    icon->Clone((IStatusBarIcon**)&c);
+    AutoPtr<IMessage> m;
+    mHandler->ObtainMessage(what, OP_SET_ICON, 0, c, (IMessage**)&m);
+    m->SendToTarget();
+    return NOERROR;
 }
 
 ECode CCommandQueue::RemoveIcon(
@@ -93,49 +90,6 @@ ECode CCommandQueue::RemoveIcon(
     mHandler->RemoveMessages(what);
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(what, OP_REMOVE_ICON, 0, (IMessage**)&msg);
-    Boolean result;
-    return mHandler->SendMessage(msg, &result);
-}
-
-ECode CCommandQueue::AddNotification(
-    /* [in] */ IBinder* key,
-    /* [in] */ IStatusBarNotification* notification)
-{
-    AutoLock lock(mListLock);
-
-    AutoPtr<NotificationQueueEntry> ne = new NotificationQueueEntry();
-    ne->mKey = key;
-    ne->mNotification = notification;
-
-    AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(MSG_ADD_NOTIFICATION, ne, (IMessage**)&msg);
-    Boolean result;
-    return mHandler->SendMessage(msg, &result);
-}
-
-ECode CCommandQueue::UpdateNotification(
-    /* [in] */ IBinder* key,
-    /* [in] */ IStatusBarNotification* notification)
-{
-    AutoLock lock(mListLock);
-
-    AutoPtr<NotificationQueueEntry> ne = new NotificationQueueEntry();
-    ne->mKey = key;
-    ne->mNotification = notification;
-
-    AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(MSG_UPDATE_NOTIFICATION, ne, (IMessage**)&msg);
-    Boolean result;
-    return mHandler->SendMessage(msg, &result);
-}
-
-ECode CCommandQueue::RemoveNotification(
-    /* [in] */ IBinder* key)
-{
-    AutoLock lock(mListLock);
-
-    AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(MSG_REMOVE_NOTIFICATION, key, (IMessage**)&msg);
     Boolean result;
     return mHandler->SendMessage(msg, &result);
 }
@@ -215,30 +169,48 @@ ECode CCommandQueue::TopAppWindowChanged(
 ECode CCommandQueue::SetImeWindowStatus(
     /* [in] */ IBinder* token,
     /* [in] */ Int32 vis,
-    /* [in] */ Int32 backDisposition)
+    /* [in] */ Int32 backDisposition,
+    /* [in] */ Boolean showImeSwitcher)
 {
     AutoLock lock(mListLock);
 
     mHandler->RemoveMessages(MSG_SHOW_IME_BUTTON);
-    AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(MSG_SHOW_IME_BUTTON,
-        vis, backDisposition, token, (IMessage**)&msg);
-    Boolean result;
-    return mHandler->SendMessage(msg, &result);
+
+    AutoPtr<IMessage> m;
+    mHandler->ObtainMessage(MSG_SHOW_IME_BUTTON, vis, backDisposition, token, (IMessage**)&m);
+    AutoPtr<IBundle> data;
+    m->GetData((IBundle**)&data);
+    data->PutBoolean(SHOW_IME_SWITCHER_KEY, showImeSwitcher);
+    m->SendToTarget();
+    return NOERROR;
 }
 
-ECode CCommandQueue::SetHardKeyboardStatus(
-    /* [in] */ Boolean available,
-    /* [in] */ Boolean enabled)
+ECode CCommandQueue::ShowRecentApps(
+    /* [in] */ Boolean triggeredFromAltTab)
 {
     AutoLock lock(mListLock);
+    mHandler->RemoveMessages(MSG_SHOW_RECENT_APPS);
 
-    mHandler->RemoveMessages(MSG_SET_HARD_KEYBOARD_STATUS);
-    AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(MSG_SET_HARD_KEYBOARD_STATUS,
-        available ? 1 : 0, enabled ? 1 : 0, (IMessage**)&msg);
-    Boolean result;
-    return mHandler->SendMessage(msg, &result);
+    AutoPtr<IMessage> m;
+    mHandler->ObtainMessage(MSG_SHOW_RECENT_APPS,
+            triggeredFromAltTab ? 1 : 0, 0, NULL, (IMessage**)&m);
+    m->SendToTarget();
+    return NOERROR;
+}
+
+ECode CCommandQueue::HideRecentApps(
+    /* [in] */ Boolean triggeredFromAltTab,
+    /* [in] */ Boolean triggeredFromHomeKey)
+{
+    AutoLock lock(mListLock);
+    mHandler->RemoveMessages(MSG_HIDE_RECENT_APPS);
+
+    AutoPtr<IMessage> m;
+    mHandler->ObtainMessage(MSG_HIDE_RECENT_APPS,
+            triggeredFromAltTab ? 1 : 0, triggeredFromHomeKey ? 1 : 0,
+            NULL, (IMessage**)&m);
+    m->SendToTarget();
+    return NOERROR;
 }
 
 ECode CCommandQueue::ToggleRecentApps()
@@ -274,16 +246,47 @@ ECode CCommandQueue::CancelPreloadRecentApps()
     return mHandler->SendMessage(msg, &result);
 }
 
-ECode CCommandQueue::SetNavigationIconHints(
-    /* [in] */ Int32 hints)
+ECode CCommandQueue::SetWindowState(
+    /* [in] */ Int32 window,
+    /* [in] */ Int32 state)
 {
     AutoLock lock(mListLock);
+    // don't coalesce these
+    AutoPtr<IMessage> m;
+    mHandler->ObtainMessage(MSG_SET_WINDOW_STATE, window, state, NULL, (IMessage**)&m);
+    m->SendToTarget();
+    return NOERROR;
+}
 
-    mHandler->RemoveMessages(MSG_SET_NAVIGATION_ICON_HINTS);
-    AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(MSG_SET_NAVIGATION_ICON_HINTS, hints, 0, (IMessage**)&msg);
-    Boolean result;
-    return mHandler->SendMessage(msg, &result);
+ECode CCommandQueue::BuzzBeepBlinked()
+{
+    AutoLock lock(mListLock);
+    mHandler->RemoveMessages(MSG_BUZZ_BEEP_BLINKED);
+    Boolean tmp = FALSE;
+    mHandler->SendEmptyMessage(MSG_BUZZ_BEEP_BLINKED, &tmp);
+    return NOERROR;
+}
+
+ECode CCommandQueue::NotificationLightOff()
+{
+    AutoLock lock(mListLock);
+    Boolean tmp = FALSE;
+    mHandler->SendEmptyMessage(MSG_NOTIFICATION_LIGHT_OFF, &tmp);
+    return NOERROR;
+}
+
+ECode CCommandQueue::NotificationLightPulse(
+    /* [in] */ Int32 argb,
+    /* [in] */ Int32 onMillis,
+    /* [in] */ Int32 offMillis)
+{
+    AutoLock lock(mListLock);
+    AutoPtr<IInteger32> obj;
+    CInteger32::New(argb, (IInteger32**)&obj);
+    AutoPtr<IMessage> m;
+    mHandler->ObtainMessage(MSG_NOTIFICATION_LIGHT_PULSE, onMillis, offMillis, obj, (IMessage**)&m);
+    m->SendToTarget();
+    return NOERROR;
 }
 
 ECode CCommandQueue::ToString(
@@ -302,8 +305,6 @@ ECode CCommandQueue::ToString(
 }
 
 //=============================================================================
-CAR_INTERFACE_IMPL(CCommandQueue::NotificationQueueEntry, IInterface)
-
 ECode CCommandQueue::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
@@ -326,22 +327,8 @@ ECode CCommandQueue::MyHandler::HandleMessage(
             }
             break;
         }
-        case CCommandQueue::MSG_ADD_NOTIFICATION: {
-            NotificationQueueEntry* ne = (NotificationQueueEntry*)obj.Get();
-            mHost->mCallbacks->AddNotification(ne->mKey, ne->mNotification);
-            break;
-        }
-        case CCommandQueue::MSG_UPDATE_NOTIFICATION: {
-            NotificationQueueEntry* ne = (NotificationQueueEntry*)obj.Get();
-            mHost->mCallbacks->UpdateNotification(ne->mKey, ne->mNotification);
-            break;
-        }
-        case CCommandQueue::MSG_REMOVE_NOTIFICATION: {
-            mHost->mCallbacks->RemoveNotification(IBinder::Probe(obj));
-            break;
-        }
         case CCommandQueue::MSG_DISABLE:
-            mHost->mCallbacks->Disable(arg1);
+            mHost->mCallbacks->Disable(arg1, TRUE /* animate */);
             break;
         case CCommandQueue::MSG_EXPAND_NOTIFICATIONS:
             mHost->mCallbacks->AnimateExpandNotificationsPanel();
@@ -358,12 +345,19 @@ ECode CCommandQueue::MyHandler::HandleMessage(
         case CCommandQueue::MSG_TOP_APP_WINDOW_CHANGED:
             mHost->mCallbacks->TopAppWindowChanged(arg1 != 0);
             break;
-        case CCommandQueue::MSG_SHOW_IME_BUTTON:
-            mHost->mCallbacks->SetImeWindowStatus(IBinder::Probe(obj), arg1, arg2);
+        case CCommandQueue::MSG_SHOW_IME_BUTTON: {
+            AutoPtr<IBundle> data;
+            msg->GetData((IBundle**)&data);
+            Boolean value = FALSE;
+            data->GetBoolean(SHOW_IME_SWITCHER_KEY, FALSE, &value);
+            mHost->mCallbacks->SetImeWindowStatus(IBinder::Probe(obj), arg1, arg2, value);
+        }
             break;
-        case CCommandQueue::MSG_SET_HARD_KEYBOARD_STATUS:
-            mHost->mCallbacks->SetHardKeyboardStatus(arg1 != 0, arg2 != 0);
+        case CCommandQueue::MSG_SHOW_RECENT_APPS:
+            mHost->mCallbacks->ShowRecentApps(arg1 != 0);
             break;
+        case MSG_HIDE_RECENT_APPS:
+            mHost->mCallbacks->HideRecentApps(arg1 != 0, arg2 != 0);
         case CCommandQueue::MSG_TOGGLE_RECENT_APPS:
             mHost->mCallbacks->ToggleRecentApps();
             break;
@@ -373,9 +367,22 @@ ECode CCommandQueue::MyHandler::HandleMessage(
         case CCommandQueue::MSG_CANCEL_PRELOAD_RECENT_APPS:
             mHost->mCallbacks->CancelPreloadRecentApps();
             break;
-        case CCommandQueue::MSG_SET_NAVIGATION_ICON_HINTS:
-            mHost->mCallbacks->SetNavigationIconHints(arg1);
+        case MSG_SET_WINDOW_STATE:
+            mHost->mCallbacks->SetWindowState(arg1, arg2);
             break;
+        case MSG_BUZZ_BEEP_BLINKED:
+            mHost->mCallbacks->BuzzBeepBlinked();
+            break;
+        case MSG_NOTIFICATION_LIGHT_OFF:
+            mHost->mCallbacks->NotificationLightOff();
+            break;
+        case MSG_NOTIFICATION_LIGHT_PULSE: {
+            AutoPtr<IInteger32> data = IInteger32::Probe(obj);
+            Int32 value = 0;
+            data->GetValue(&value);
+            mHost->mCallbacks->NotificationLightPulse(value, arg1, arg2);
+            break;
+        }
     }
 
     return NOERROR;
@@ -431,7 +438,8 @@ ECode CCommandQueue::HandleRemoveIcon(
     return NOERROR;
 }
 
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos

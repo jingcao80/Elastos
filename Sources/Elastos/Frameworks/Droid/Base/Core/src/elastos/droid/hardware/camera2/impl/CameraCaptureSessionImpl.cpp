@@ -236,7 +236,7 @@ ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnActive(
 ECode CameraCaptureSessionImpl::MyStateCallbackKK::OnIdle(
     /* [in] */ ICameraDevice* camera)
 {
-    Boolean isAborting;
+    Boolean isAborting = FALSE;
     if (mHost->VERBOSE) {
         Slogger::V(TAG, "%s onIdle", mHost->mIdString.string());
     }

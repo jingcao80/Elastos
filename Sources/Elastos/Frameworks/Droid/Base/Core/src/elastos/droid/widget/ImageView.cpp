@@ -7,6 +7,7 @@
 #include "elastos/droid/graphics/CMatrix.h"
 #include "elastos/droid/graphics/CCanvas.h"
 #include "elastos/droid/graphics/CPorterDuffColorFilter.h"
+#include "elastos/droid/graphics/CRectF.h"
 #include "elastos/droid/graphics/drawable/CBitmapDrawable.h"
 #include "elastos/droid/graphics/drawable/CDrawableHelper.h"
 #include "elastos/droid/graphics/drawable/Drawable.h"
@@ -22,6 +23,7 @@ using Elastos::Droid::Content::IContentResolverOpenResourceIdResult;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::CPorterDuffColorFilter;
+using Elastos::Droid::Graphics::CRectF;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::IPorterDuffColorFilter;
 using Elastos::Droid::Graphics::Drawable::CBitmapDrawable;

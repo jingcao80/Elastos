@@ -2,7 +2,12 @@
 #ifndef __ELASTOS_DROID_OPENGL_GLES_CEGLSURFACEIMPL_H__
 #define __ELASTOS_DROID_OPENGL_GLES_CEGLSURFACEIMPL_H__
 
+#include "Elastos.Droid.Opengl.h"
 #include "_Elastos_Droid_Opengl_Gles_CEGLSurfaceImpl.h"
+
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -11,13 +16,19 @@ namespace Gles {
 class CEGLImpl;
 
 CarClass(CEGLSurfaceImpl)
+    , public Object
+    , public Elastosx::Microedition::Khronos::Egl::IEGLSurface
 {
     friend class CEGLImpl;
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(
-        /* [in] */ Int32 surface);
+        /* [in] */ Int64 surface);
 
     CARAPI Equals(
         /* [in] */ IInterface *object,
@@ -26,11 +37,11 @@ public:
     CARAPI GetHashCode(
         /* [out] */ Int32 *hashCode);
 
-    CARAPI_(Int32) GetEGLSurface();
+    CARAPI_(Int64) GetEGLSurface();
 
 private:
-    Int32 mEGLSurface;
-    Int32 mNativePixelRef;
+    Int64 mEGLSurface;
+    Int64 mNativePixelRef;
 };
 
 } // namespace Gles

@@ -411,7 +411,7 @@ static String models[] = {
     String("SM-T310"),   // Galaxy Tab 3 8.0 (WiFi)
 };
 //TODO
-const AutoPtr< ArrayOf<String> > AudioManagerElastos::SUPPORTED_AEC_MODELS = ArrayOf_Init(models);
+const AutoPtr< ArrayOf<String> > AudioManagerElastos::SUPPORTED_AEC_MODELS;// = ArrayOf_Init(models);
 
 // Supported audio device types.
 const Int32 AudioManagerElastos::DEVICE_DEFAULT;
@@ -435,7 +435,7 @@ static String names[] = {
 };
 
 //TODO
-const AutoPtr< ArrayOf<String> > AudioManagerElastos::DEVICE_NAMES = ArrayOf_Init(names);
+const AutoPtr< ArrayOf<String> > AudioManagerElastos::DEVICE_NAMES;// = ArrayOf_Init(names);
 
 Int32 AudioManagerElastos::devices[4] = {
     AudioManagerElastos::DEVICE_SPEAKERPHONE,
@@ -446,7 +446,7 @@ Int32 AudioManagerElastos::devices[4] = {
 
 // List of valid device types.
 //TODO
-const AutoPtr< ArrayOf<Int32> > AudioManagerElastos::VALID_DEVICES = ArrayOf_Init(devices);
+const AutoPtr< ArrayOf<Int32> > AudioManagerElastos::VALID_DEVICES;// = ArrayOf_Init(devices);
 
 // Bluetooth audio SCO states. Example of valid state sequence:
 // SCO_INVALID -> SCO_TURNING_ON -> SCO_ON -> SCO_TURNING_OFF -> SCO_OFF.

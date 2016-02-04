@@ -28,15 +28,12 @@ static AutoPtr<ISSLSocketFactory> InitDefaultSSLSocketFactory()
 {
     AutoPtr<ISocketFactory> factory;
     SSLSocketFactory::GetDefault((ISocketFactory**)&factory);
-    AutoPtr<ISSLSocketFactory> sslFactory;
-    sslFactory = ISSLSocketFactory::Probe(factory);
-    return sslFactory;
+    return ISSLSocketFactory::Probe(factory);
 }
 
 AutoPtr<IHostnameVerifier> HttpsURLConnection::NoPreloadHolder::sDefaultHostnameVerifier;// = InitDefaultHostnameVerifier();
 
 AutoPtr<ISSLSocketFactory> HttpsURLConnection::NoPreloadHolder::sDefaultSSLSocketFactory;// = InitDefaultSSLSocketFactory();
-
 
 CAR_INTERFACE_IMPL(HttpsURLConnection, HttpURLConnection, IHttpsURLConnection)
 

@@ -7,7 +7,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-// #include "elastos/droid/widget/BaseAdapter.h"
+#include "elastos/droid/widget/BaseAdapter.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
@@ -16,7 +16,7 @@ using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
-// using Elastos::Droid::Widget::BaseAdapter;
+using Elastos::Droid::Widget::BaseAdapter;
 using Elastos::Droid::Widget::IListAdapter;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Core::Object;
@@ -35,11 +35,7 @@ class ListMenuPresenter
 {
 private:
     class MenuAdapter
-    #if 0
         : public BaseAdapter
-    #else
-        : public Object
-    #endif
     {
     public:
         MenuAdapter(

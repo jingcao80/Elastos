@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_TEXT_FORMAT_Formatter_H__
 #define __ELASTOS_DROID_TEXT_FORMAT_Formatter_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/ext/frameworkext.h>
 
 using Elastos::Net::IInetAddress;
 using Elastos::Droid::Content::IContext;
@@ -16,7 +16,7 @@ namespace Format {
  * Utility class to aid in formatting common values that are not covered
  * by the {@link java.util.Formatter} class in {@link java.util}
  */
-class Formatter
+class ECO_PUBLIC Formatter
 {
 public:
     /**
@@ -80,8 +80,6 @@ private:
     static const Int32 SECONDS_PER_HOUR;// = 60 * 60;
     static const Int32 SECONDS_PER_DAY;// = 24 * 60 * 60;
 };
-
-
 
 } // namespace Format
 } // namespace Text

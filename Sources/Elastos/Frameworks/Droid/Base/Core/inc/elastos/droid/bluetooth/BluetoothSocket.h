@@ -2,10 +2,15 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHSOCKET_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHSOCKET_H__
 
-#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include <elastos/core/Object.h>
+//#include "Elastos.Droid.Core_server.h"
 #include "elastos/droid/ext/frameworkdef.h"
-#include "BluetoothInputStream.h"
-#include "BluetoothOutputStream.h"
+#include "elastos/droid/bluetooth/BluetoothInputStream.h"
+#include "elastos/droid/bluetooth/BluetoothOutputStream.h"
 
 using Elastos::IO::ICloseable;;
 using Elastos::IO::IInputStream;
@@ -19,7 +24,7 @@ namespace Droid {
 namespace Bluetooth {
 
 class BluetoothSocket
-    : public ElRefBase
+    : public Object
     , public IBluetoothSocket
     , public ICloseable
 {
@@ -33,6 +38,8 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
     BluetoothSocket();
 
     BluetoothSocket(
@@ -45,8 +52,6 @@ public:
         /* [in] */ IParcelUuid* uuid);
 
     ~BluetoothSocket();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI GetRemoteDevice(
         /* [out] */ IBluetoothDevice** device);
@@ -132,8 +137,8 @@ public:
     /*package*/ static const Int32 TYPE_SCO = 2;
     /*package*/ static const Int32 TYPE_L2CAP = 3;
 
-    /*package*/ static const Int32 EBADFD = 77;
-    /*package*/ static const Int32 EADDRINUSE = 98;
+    /*package*/ static const Int32 _EBADFD = 77;
+    /*package*/ static const Int32 _EADDRINUSE = 98;
 
     /*package*/ static const Int32 SEC_FLAG_ENCRYPT = 1;
     /*package*/ static const Int32 SEC_FLAG_AUTH = 1 << 1;

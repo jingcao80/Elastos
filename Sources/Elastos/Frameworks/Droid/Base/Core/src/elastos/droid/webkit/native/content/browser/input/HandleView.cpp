@@ -58,11 +58,10 @@ const Float HandleView::LINE_OFFSET_Y_DIP = 5.0f;
 static AutoPtr< ArrayOf<Int32> > TEXT_VIEW_HANDLE_ATTRS_Init()
 {
     AutoPtr< ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(3);
-    assert(0);
     // TODO
-    // (*array)[0] = android::R::attr::textSelectHandleLeft;
-    // (*array)[1] = android::R::attr::textSelectHandle;
-    // (*array)[2] = android::R::attr::textSelectHandleRight;
+    // (*array)[0] = R::attr::textSelectHandleLeft;
+    // (*array)[1] = R::attr::textSelectHandle;
+    // (*array)[2] = R::attr::textSelectHandleRight;
     return array;
 }
 

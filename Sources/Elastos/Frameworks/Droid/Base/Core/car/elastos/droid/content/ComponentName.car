@@ -1,6 +1,9 @@
 
 module
 {
+    using interface Elastos.Core.IStringBuilder;
+    using interface Elastos.IO.IPrintWriter;
+
     namespace Elastos {
     namespace Droid {
     namespace Content {
@@ -71,6 +74,9 @@ module
         FlattenToShortString(
             [out] String* name);
 
+        AppendShortString(
+            [in] IStringBuilder* sb);
+
         /**
          * Return string representation of this class without the class's name
          * as a prefix.
@@ -130,6 +136,26 @@ module
         ReadFromParcel(
             [in] IParcel* source,
             [out] IComponentName** cn);
+
+        AppendShortClassName(
+            [in] IStringBuilder* sb,
+            [in] String packageName,
+            [in] String className);
+
+        PrintShortClassName(
+            [in] IPrintWriter* sb,
+            [in] String packageName,
+            [in] String className);
+
+        AppendShortString(
+            [in] IStringBuilder* sb,
+            [in] String packageName,
+            [in] String className);
+
+        PrintShortString(
+            [in] IPrintWriter* sb,
+            [in] String packageName,
+            [in] String className);
     }
 
     } // namespace Content

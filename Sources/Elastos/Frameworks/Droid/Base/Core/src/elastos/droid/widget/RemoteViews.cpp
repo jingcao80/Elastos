@@ -18,6 +18,7 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/widget/CRemoteViews.h"
+#include "elastos/droid/widget/CRemoteViewsListAdapter.h"
 #include "elastos/droid/R.h"
 
 #include <elastos/core/AutoLock.h>
@@ -607,7 +608,8 @@ ECode RemoteViews::SetRemoteViewsAdapterList::Apply(
         } else {
             AutoPtr<IContext> ctx;
             IView::Probe(v)->GetContext((IContext**)&ctx);
-            AutoPtr<IAdapter> apt;// new RemoteViewsListAdapter(ctx, list, viewTypeCount)
+            AutoPtr<IAdapter> apt;
+            CRemoteViewsListAdapter::New(ctx, mList, mViewTypeCount, (IAdapter**)&apt);
             IAdapterView::Probe(v)->SetAdapter(apt);
         }
     } else if (IAdapterViewAnimator::Probe(target) != NULL) {
@@ -621,7 +623,8 @@ ECode RemoteViews::SetRemoteViewsAdapterList::Apply(
         } else {
             AutoPtr<IContext> ctx;
             IView::Probe(v)->GetContext((IContext**)&ctx);
-            AutoPtr<IAdapter> apt;// new RemoteViewsListAdapter(ctx, list, viewTypeCount)
+            AutoPtr<IAdapter> apt;
+            CRemoteViewsListAdapter::New(ctx, mList, mViewTypeCount, (IAdapter**)&apt);
             IAdapterView::Probe(v)->SetAdapter(apt);
         }
     }

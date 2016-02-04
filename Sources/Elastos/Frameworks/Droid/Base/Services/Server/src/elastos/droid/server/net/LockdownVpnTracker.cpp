@@ -253,7 +253,7 @@ ECode LockdownVpnTracker::HandleStateChangedLocked()
             return NOERROR;
         }
 
-        Slogger::D(TAG, "VPN connected using iface=%s, sourceAddr=%s", iface.string(), Object::ToString(sourceAddrs).string());
+        Slogger::D(TAG, "VPN connected using iface=%s, sourceAddr=%s", iface.string(), TO_CSTR(sourceAddrs));
         //EventLogTags.writeLockdownVpnConnected(egressType);
         ShowNotification(R::string::vpn_lockdown_connected, R::drawable::vpn_connected);
 

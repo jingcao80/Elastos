@@ -3,7 +3,7 @@
 #include "elastos/droid/internal/app/NetInitiatedActivity.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/location/LocationManager.h"
-// #include "elastos/droid/widget/Toast.h"
+#include "elastos/droid/widget/Toast.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
@@ -16,7 +16,7 @@ using Elastos::Droid::Internal::Location::IGpsNetInitiatedHandler;
 using Elastos::Droid::Location::LocationManager;
 using Elastos::Droid::Location::ILocationManager;
 using Elastos::Droid::Widget::IToast;
-// using Elastos::Droid::Widget::Toast;
+using Elastos::Droid::Widget::Toast;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
@@ -209,10 +209,9 @@ void NetInitiatedActivity::HandleNIVerify(
 
 void NetInitiatedActivity::ShowNIError()
 {
-    assert(0);
     AutoPtr<IToast> toast;
-    // Toast::MakeText(this, CoreUtils::Convert(String("NI error"/* com.android.internal.R.string.usb_storage_error_message */))
-    //    , IToast::LENGTH_LONG, (IToast**)&toast);
+    Toast::MakeText(this, CoreUtils::Convert(String("NI error"/* com.android.internal.R.string.usb_storage_error_message */))
+       , IToast::LENGTH_LONG, (IToast**)&toast);
     toast->Show();
 }
 

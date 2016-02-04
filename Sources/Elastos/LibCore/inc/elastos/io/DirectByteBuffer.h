@@ -21,11 +21,17 @@ namespace IO {
  */
 class DirectByteBuffer
     : public MappedByteBuffer
+    , public IDirectByteBuffer
 {
     friend class ReadWriteDirectByteBuffer;
     friend class ReadOnlyDirectByteBuffer;
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CARAPI GetPrimitiveArray(
+        /* [out] */ Handle64* arrayHandle);
+
     CARAPI Get(
         /* [out] */ ArrayOf<Byte>* dst,
         /* [in] */ Int32 dstOffset,

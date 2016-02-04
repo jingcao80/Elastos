@@ -21,47 +21,47 @@ namespace Tv {
 
 static AutoPtr<IArraySet> Init()
 {
-    AutoPtr<IArraySet> set;
-    CArraySet::New((IArraySet**)&set);
+    AutoPtr<ISet> set;
+    CArraySet::New((ISet**)&set);
 
     AutoPtr<ICharSequence> cs;
     CString::New(ITvContractProgramsGenres::FAMILY_KIDS, (ICharSequence**)&cs);
-    ISet::Probe(set)->Add(cs);
+    set->Add(cs);
     cs = NULL;
     CString::New(ITvContractProgramsGenres::SPORTS, (ICharSequence**)&cs);
-    ISet::Probe(set)->Add(cs);
+    set->Add(cs);
     cs = NULL;
     CString::New(ITvContractProgramsGenres::SHOPPING, (ICharSequence**)&cs);
-    ISet::Probe(set)->Add(cs);
+    set->Add(cs);
     cs = NULL;
     CString::New(ITvContractProgramsGenres::MOVIES, (ICharSequence**)&cs);
-    ISet::Probe(set)->Add(cs);
+    set->Add(cs);
     cs = NULL;
     CString::New(ITvContractProgramsGenres::COMEDY, (ICharSequence**)&cs);
-    ISet::Probe(set)->Add(cs);
+    set->Add(cs);
     cs = NULL;
     CString::New(ITvContractProgramsGenres::TRAVEL, (ICharSequence**)&cs);
-    ISet::Probe(set)->Add(cs);
+    set->Add(cs);
     cs = NULL;
     CString::New(ITvContractProgramsGenres::DRAMA, (ICharSequence**)&cs);
-    ISet::Probe(set)->Add(cs);
+    set->Add(cs);
     cs = NULL;
     CString::New(ITvContractProgramsGenres::EDUCATION, (ICharSequence**)&cs);
-    ISet::Probe(set)->Add(cs);
+    set->Add(cs);
     cs = NULL;
     CString::New(ITvContractProgramsGenres::ANIMAL_WILDLIFE, (ICharSequence**)&cs);
-    ISet::Probe(set)->Add(cs);
+    set->Add(cs);
     cs = NULL;
     CString::New(ITvContractProgramsGenres::NEWS, (ICharSequence**)&cs);
-    ISet::Probe(set)->Add(cs);
+    set->Add(cs);
     cs = NULL;
     CString::New(ITvContractProgramsGenres::GAMING, (ICharSequence**)&cs);
-    ISet::Probe(set)->Add(cs);
+    set->Add(cs);
 
-    return set;
+    return IArraySet::Probe(set);
 }
 
-AutoPtr<IArraySet> TvContractProgramsGenres::CANONICAL_GENRES = Init();
+INIT_PROI_4 AutoPtr<IArraySet> TvContractProgramsGenres::CANONICAL_GENRES = Init();
 
 TvContractProgramsGenres::TvContractProgramsGenres()
 {

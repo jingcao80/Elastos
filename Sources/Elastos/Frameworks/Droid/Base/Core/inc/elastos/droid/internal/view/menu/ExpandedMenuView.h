@@ -3,16 +3,9 @@
 #define __ELASTOS_DROID_INTERNAL_VIEW_MENU_EXPANDEDMENUVIEW_H__
 
 #include "Elastos.Droid.Widget.h"
-#if 0
 #include "elastos/droid/widget/ListView.h"
-#else
-#include "elastos/droid/view/ViewGroup.h"
 
-using Elastos::Droid::View::ViewGroup;
-
-#endif
-
-// using Elastos::Droid::Widget::ListView;
+using Elastos::Droid::Widget::ListView;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
 
@@ -27,11 +20,7 @@ namespace Menu {
  * by the user clicking no the 'More' button on the icon menu view.
  */
 class ExpandedMenuView
-#if 0
     : public ListView
-#else
-    : public ViewGroup
-#endif
     , public IExpandedMenuView
     , public IMenuBuilderItemInvoker
     , public IMenuView

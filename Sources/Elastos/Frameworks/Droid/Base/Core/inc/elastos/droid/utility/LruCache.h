@@ -278,7 +278,7 @@ template<typename K, typename V>
 V LruCache<K, V>::Get(
     /* [in] */ K key)
 {
-    if (key == NULL) {
+    if (key == 0) {
         Slogger::E("LruCache", "key == null");
         assert(0);
         // throw new NullPointerException("key == null");
@@ -406,7 +406,7 @@ template<typename K, typename V>
 V LruCache<K, V>::Remove(
     /* [in] */ K key)
 {
-    if (key == NULL) {
+    if (key == 0) {
         Slogger::E("LruCache", "key == null");
         assert(0);
         // throw new NullPointerException("key == null");

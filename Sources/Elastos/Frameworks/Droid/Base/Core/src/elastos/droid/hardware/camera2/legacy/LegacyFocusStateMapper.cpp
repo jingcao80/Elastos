@@ -194,7 +194,7 @@ ECode LegacyFocusStateMapper::ProcessRequestTriggers(
 
     // Passive AF Scanning
     {
-        Int32 currentAfRun;
+        Int32 currentAfRun = 0;
 
         synchronized(mLock) {
             currentAfRun = mAfRun;
@@ -286,7 +286,7 @@ ECode LegacyFocusStateMapper::MapResultTriggers(
 {
     FAIL_RETURN(Preconditions::CheckNotNull(result, String("result must not be null")))
 
-    Int32 newAfState;
+    Int32 newAfState = 0;
     synchronized(mLock) {
         newAfState = mAfState;
     }

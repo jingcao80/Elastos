@@ -2,6 +2,8 @@
 #ifndef __ELASTOS_DROID_SERVER_PM_PACKAGESETTINGBASE_H__
 #define __ELASTOS_DROID_SERVER_PM_PACKAGESETTINGBASE_H__
 
+#include <Elastos.CoreLibrary.IO.h>
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/server/pm/GrantedPermissions.h"
 #include "elastos/droid/server/pm/PackageSignatures.h"

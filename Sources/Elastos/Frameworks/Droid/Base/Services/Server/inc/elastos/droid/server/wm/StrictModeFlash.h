@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_SERVER_WM_STRICTMODEFLASH_H__
 
 #include "_Elastos.Droid.Server.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::ISurfaceSession;
@@ -13,7 +14,7 @@ namespace Droid {
 namespace Server {
 namespace Wm {
 
-class StrictModeFlash : public ElRefBase
+class StrictModeFlash : public Object
 {
 public:
     StrictModeFlash(

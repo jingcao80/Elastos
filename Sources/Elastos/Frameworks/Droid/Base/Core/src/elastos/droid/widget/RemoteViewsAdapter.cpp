@@ -175,20 +175,20 @@ ECode RemoteViewsAdapter::RemoteViewsAdapterServiceConnection::Bind(
         if (mAdapter != NULL) {
             mAdapter->Resolve(EIID_IRemoteViewsAdapter, (IInterface**)&adapter);
         }
-        ECode pe;
+        ECode ec = NOERROR;
         if (adapter != NULL) {
             String opPkgName;
             ctx->GetOpPackageName(&opPkgName);
-            pe = mgr->BindRemoteViewsService(opPkgName, appWidgetId, intent, this);
+            ec = mgr->BindRemoteViewsService(opPkgName, appWidgetId, intent, this);
         }
         else {
             SLOGGERE("RemoteViewsAdapterServiceConnection", "bind: adapter was null");
         }
-        if (FAILED(pe)) {
+        if (FAILED(ec)) {
             SLOGGERE("RemoteViewsAdapterServiceConnection", "Bind() : Error system server dead?")
             mIsConnecting = FALSE;
             mIsConnected = FALSE;
-            return pe;
+            return ec;
         }
         mIsConnecting = TRUE;
     }
@@ -209,19 +209,20 @@ ECode RemoteViewsAdapter::RemoteViewsAdapterServiceConnection::Unbind(
         if (mAdapter != NULL) {
             mAdapter->Resolve(EIID_IRemoteViewsAdapter, (IInterface**)&adapter);
         }
-        ECode pe;
+        ECode ec = NOERROR;
         if (adapter != NULL) {
             String opPkgName;
             ctx->GetOpPackageName(&opPkgName);
-            pe = mgr->UnbindRemoteViewsService(opPkgName, appWidgetId, intent);
-        } else {
+            ec = mgr->UnbindRemoteViewsService(opPkgName, appWidgetId, intent);
+        }
+        else {
             SLOGGERE("RemoteViewsAdapterServiceConnection", "unbind: adapter was null");
         }
-        if (FAILED(pe)) {
+        if (FAILED(ec)) {
             SLOGGERE("RemoteViewsAdapterServiceConnection", "Unbind() : Error system server dead?")
             mIsConnecting = FALSE;
             mIsConnected = FALSE;
-            return pe;
+            return ec;
         }
         mIsConnecting = FALSE;
         return NOERROR;

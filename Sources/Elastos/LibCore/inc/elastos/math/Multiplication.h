@@ -9,6 +9,12 @@ namespace Math {
 
 class Multiplication
 {
+private:
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
+    };
 
 public:
     /**
@@ -59,20 +65,6 @@ public:
 
     static CARAPI_(void) Init();
 
-    /**
-     * An array with the first powers of ten in {@code BigInteger} version.
-     * ({@code 10^0,10^1,...,10^31})
-     */
-    static CARAPI_(AutoPtr<ArrayOf<IBigInteger*> >) BigTenPows;
-
-    /**
-     * An array with the first powers of five in {@code BigInteger} version.
-     * ({@code 5^0,5^1,...,5^31})
-     */
-    static CARAPI_(AutoPtr<ArrayOf<IBigInteger*> >) BigFivePows;
-
-    static CARAPI_(Boolean) InitStatic();
-
 private:
     /** Just to denote that this class can't be instantiated. */
     Multiplication();
@@ -83,21 +75,34 @@ private:
     Multiplication& operator = (
         /* [in] */ const Multiplication&);
 
+public:
+    /**
+     * An array with the first powers of ten in {@code BigInteger} version.
+     * ({@code 10^0,10^1,...,10^31})
+     */
+    static AutoPtr<ArrayOf<IBigInteger*> > sBigTenPows;
+
+    /**
+     * An array with the first powers of five in {@code BigInteger} version.
+     * ({@code 5^0,5^1,...,5^31})
+     */
+    static AutoPtr<ArrayOf<IBigInteger*> > sBigFivePows;
+
 private:
-    static Boolean mIsStaticInited;
     /**
      * An array with powers of ten that fit in the type {@code int}.
      * ({@code 10^0,10^1,...,10^9})
      */
-    static const Int32 TenPowsLength = 10;
-    static const Int32 TenPows[TenPowsLength];
+    static const Int32 sTenPowsLength = 10;
+    static const Int32 sTenPows[sTenPowsLength];
 
     /**
      * An array with powers of five that fit in the type {@code int}.
      * ({@code 5^0,5^1,...,5^13})
      */
-    static const Int32 FivePowsLength = 14;
-    static const Int32 FivePows[FivePowsLength];
+    static const Int32 sFivePowsLength = 14;
+    static const Int32 sFivePows[sFivePowsLength];
+    static StaticInitializer sInitializer;
 };
 
 } // namespace Math

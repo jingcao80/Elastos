@@ -204,8 +204,8 @@ ECode LegacyFaceDetectMapper::MapResultFaces(
 
     AutoPtr<ArrayOf<ICameraFace*> > faces;
     AutoPtr<ArrayOf<ICameraFace*> > previousFaces;
-    Int32 fdMode;
-    Boolean fdScenePriority;
+    Int32 fdMode = 0;
+    Boolean fdScenePriority = FALSE;
     synchronized(mLock) {
         fdMode = mFaceDetectReporting ?
                 ICameraMetadata::STATISTICS_FACE_DETECT_MODE_SIMPLE :

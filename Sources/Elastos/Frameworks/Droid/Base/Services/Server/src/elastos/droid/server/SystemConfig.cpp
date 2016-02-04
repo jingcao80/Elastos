@@ -130,7 +130,7 @@ ECode SystemConfig::ReadPermissions(
     // Read permissions from given directory.
     if (!exists || !isDir) {
         if (!onlyFeatures) {
-            Slogger::W(TAG, "No directory %s, skipping", Object::ToString(libraryDir).string());
+            Slogger::W(TAG, "No directory %s, skipping", TO_CSTR(libraryDir));
         }
         return NOERROR;
     }
@@ -138,7 +138,7 @@ ECode SystemConfig::ReadPermissions(
     Boolean canRead;
     libraryDir->CanRead(&canRead);
     if (!canRead) {
-        Slogger::W(TAG, "Directory %s cannot be read", Object::ToString(libraryDir).string());
+        Slogger::W(TAG, "Directory %s cannot be read", TO_CSTR(libraryDir));
         return NOERROR;
     }
 
@@ -159,14 +159,14 @@ ECode SystemConfig::ReadPermissions(
 
             if (!path.EndWith(".xml")) {
                 Slogger::I(TAG, "Non-xml file %s in %s directory, ignoring",
-                    Object::ToString(f).string(),
-                    Object::ToString(libraryDir).string());
+                    TO_CSTR(f),
+                    TO_CSTR(libraryDir));
                 continue;
             }
             f->CanRead(&canRead);
             if (!canRead) {
                 Slogger::W(TAG, "Permissions library file %s cannot be read",
-                    Object::ToString(f).string());
+                    TO_CSTR(f));
                 continue;
             }
 
@@ -193,8 +193,8 @@ ECode SystemConfig::ReadPermissionsFromXml(
     AutoPtr<IFileReader> permReader;
 
     ECode ec = CFileReader::New(permFile, (IFileReader**)&permReader);
-    if (ec = (ECode)E_FILE_NOT_FOUND_EXCEPTION){
-        Slogger::W(TAG, "Couldn't find or open permissions file %s", Object::ToString(permFile).string());
+    if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION){
+        Slogger::W(TAG, "Couldn't find or open permissions file %s", TO_CSTR(permFile));
         return NOERROR;
     }
 

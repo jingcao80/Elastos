@@ -17,8 +17,17 @@ using Libcore::IO::IOs;
 using Libcore::IO::IIoBridge;
 using Libcore::IO::CIoBridge;
 using Libcore::IO::IoUtils;
+
 namespace Elastos {
 namespace IO {
+
+CAR_INTERFACE_IMPL(FileOutputStream::_Closable, Object, ICloseable)
+
+ECode FileOutputStream::_Closable::Close()
+{
+    return mHost->Close();
+}
+
 
 CAR_INTERFACE_IMPL(FileOutputStream, OutputStream, IFileOutputStream)
 
@@ -77,7 +86,7 @@ ECode FileOutputStream::constructor(
     mFd = fd;
     mShouldClose = FALSE;
     mMode = OsConstants::_O_WRONLY;
-    mChannel = NioUtils::NewFileChannel(THIS_PROBE(ICloseable), fd, mMode);
+    mChannel = NioUtils::NewFileChannel((ICloseable*)new _Closable(this), fd, mMode);
     return NOERROR;
 }
 

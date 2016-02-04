@@ -1,0 +1,42 @@
+module
+{
+    using interface Elastos.Droid.Hardware.Location.IIFusedLocationHardware;
+    using interface Elastos.Droid.Location.IIFusedGeofenceHardware;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Location {
+
+        interface IListenerOperation {
+            Execute(
+                [in] IInterface* listener);
+        }
+
+        [local]
+        interface IRemoteListenerHelper {
+            AddListener(
+                [in] IInterface* listener,
+                [out] Boolean* result);
+
+            RemoveListener(
+                [in] IInterface* listener,
+                [out] Boolean* result);
+
+            IsSupported(
+                [out] Boolean* isSupported);
+
+            RegisterWithService(
+                [out] Boolean* isRegistered);
+
+            UnregisterFromService();
+
+            Foreach(
+                [in] IListenerOperation* operation);
+        }
+
+    } // namespace Location
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

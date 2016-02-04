@@ -23,6 +23,7 @@
 #include <binder/ProcessState.h>
 #include <cutils/process_name.h>
 #include <cutils/sched_policy.h>
+#include <processgroup/processgroup.h>
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -1050,14 +1051,14 @@ static Int64 GetFreeMemoryImpl(
 Int64 Process::GetFreeMemory()
 {
     static const char* const sums[] = { "MemFree:", "Cached:", NULL };
-    static const int sumsLen[] = { strlen("MemFree:"), strlen("Cached:"), 0 };
+    static const int sumsLen[] = { (int)strlen("MemFree:"), (int)strlen("Cached:"), 0 };
     return GetFreeMemoryImpl(sums, sumsLen, 2);
 }
 
 Int64 Process::GetTotalMemory()
 {
     static const char* const sums[] = { "MemTotal:", NULL };
-    static const int sumsLen[] = { strlen("MemTotal:"), 0 };
+    static const int sumsLen[] = { (int)strlen("MemTotal:"), 0 };
     return GetFreeMemoryImpl(sums, sumsLen, 1);
 }
 
@@ -1498,6 +1499,13 @@ Int64 Process::GetPss(
 
     // Return the Pss value in bytes, not kilobytes
     return pss * 1024;
+}
+
+Int32 Process::KillProcessGroup(
+    /* [in] */ Int32 uid,
+    /* [in] */ Int32 pid)
+{
+    return killProcessGroup(uid, pid, SIGKILL);
 }
 
 ECode Process::OpenZygoteSocketIfNeeded(

@@ -32,7 +32,9 @@ public:
         /* [in] */ Int32 userId);
 
     static CARAPI_(void) NoteWakeupAlarm(
-        /* [in] */ IPendingIntent* ps);
+        /* [in] */ IPendingIntent* ps,
+        /* [in] */ Int32 sourceUid,
+        /* [in] */ const String& sourcePkg);
 
 protected:
     static Boolean sSystemReady;

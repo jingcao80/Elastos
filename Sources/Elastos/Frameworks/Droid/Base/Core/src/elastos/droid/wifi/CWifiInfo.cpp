@@ -15,6 +15,13 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Net::CNetworkUtils;
 using Elastos::Droid::Net::NetworkInfoDetailedState;
 using Elastos::Droid::Net::NetworkUtils;
+using Elastos::Droid::Net::NetworkInfoDetailedState_DISCONNECTED;
+using Elastos::Droid::Net::NetworkInfoDetailedState_IDLE;
+using Elastos::Droid::Net::NetworkInfoDetailedState_SCANNING;
+using Elastos::Droid::Net::NetworkInfoDetailedState_CONNECTING;
+using Elastos::Droid::Net::NetworkInfoDetailedState_AUTHENTICATING;
+using Elastos::Droid::Net::NetworkInfoDetailedState_OBTAINING_IPADDR;
+using Elastos::Droid::Net::NetworkInfoDetailedState_FAILED;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuffer;
 using Elastos::Core::ICharSequence;
@@ -29,11 +36,27 @@ namespace Elastos {
 namespace Droid {
 namespace Wifi {
 
-String CWifiInfo::TAG("WifiInfo");
-HashMap<SupplicantState, NetworkInfoDetailedState> CWifiInfo::mStateMap;
-String CWifiInfo::LINK_SPEED_UNITS = String("Mbps");
+CWifiInfo::StaticInitializer::StaticInitializer()
+{
+    sStateMap[SupplicantState_DISCONNECTED] = NetworkInfoDetailedState_DISCONNECTED;
+    sStateMap[SupplicantState_INTERFACE_DISABLED] = NetworkInfoDetailedState_DISCONNECTED;
+    sStateMap[SupplicantState_INACTIVE] = NetworkInfoDetailedState_IDLE;
+    sStateMap[SupplicantState_SCANNING] = NetworkInfoDetailedState_SCANNING;
+    sStateMap[SupplicantState_AUTHENTICATING] = NetworkInfoDetailedState_CONNECTING;
+    sStateMap[SupplicantState_ASSOCIATING] = NetworkInfoDetailedState_CONNECTING;
+    sStateMap[SupplicantState_ASSOCIATED] = NetworkInfoDetailedState_CONNECTING;
+    sStateMap[SupplicantState_FOUR_WAY_HANDSHAKE] = NetworkInfoDetailedState_AUTHENTICATING;
+    sStateMap[SupplicantState_GROUP_HANDSHAKE] = NetworkInfoDetailedState_AUTHENTICATING;
+    sStateMap[SupplicantState_COMPLETED] = NetworkInfoDetailedState_OBTAINING_IPADDR;
+    sStateMap[SupplicantState_DORMANT] = NetworkInfoDetailedState_DISCONNECTED;
+    sStateMap[SupplicantState_UNINITIALIZED] = NetworkInfoDetailedState_IDLE;
+    sStateMap[SupplicantState_INVALID] = NetworkInfoDetailedState_FAILED;
+}
 
-Int32 CWifiInfo::mInitFlag = InternalInit();
+String CWifiInfo::TAG("WifiInfo");
+HashMap<SupplicantState, NetworkInfoDetailedState> CWifiInfo::sStateMap;
+String CWifiInfo::LINK_SPEED_UNITS("Mbps");
+const CWifiInfo::StaticInitializer CWifiInfo::sInitializer;
 
 CAR_INTERFACE_IMPL_2(CWifiInfo, Object, IWifiInfo, IParcelable)
 
@@ -624,7 +647,7 @@ ECode CWifiInfo::GetHiddenSSID(
 NetworkInfoDetailedState CWifiInfo::GetDetailedStateOf(
     /* [in] */ SupplicantState suppState)
 {
-    return mStateMap[suppState];
+    return sStateMap[suppState];
 }
 
 void CWifiInfo::SetSupplicantState(
@@ -685,7 +708,7 @@ ECode CWifiInfo::ToString(
     sb.Append(", MAC: ");
     sb.Append(mMacAddress.IsNull() ? none : mMacAddress);
     sb.Append(", Supplicant state: ");
-    if (mSupplicantState == NULL) sb.Append(none);
+    if (mSupplicantState == SupplicantState_NONE) sb.Append(none);
     sb.Append(mSupplicantState);
     sb.Append(", RSSI: ");
     sb.Append(mRssi);
@@ -777,27 +800,6 @@ ECode CWifiInfo::ReadFromParcel(
     source->ReadInt32(&mSupplicantState);
 
     return NOERROR;
-}
-
-Int32 CWifiInfo::InternalInit()
-{
-    assert(0);
-    // TODO
-    // mStateMap[SupplicantState_DISCONNECTED] = NetworkInfoDetailedState_DISCONNECTED;
-    // mStateMap[SupplicantState_INTERFACE_DISABLED] = NetworkInfoDetailedState_DISCONNECTED;
-    // mStateMap[SupplicantState_INACTIVE] = NetworkInfoDetailedState_IDLE;
-    // mStateMap[SupplicantState_SCANNING] = NetworkInfoDetailedState_SCANNING;
-    // mStateMap[SupplicantState_AUTHENTICATING] = NetworkInfoDetailedState_CONNECTING;
-    // mStateMap[SupplicantState_ASSOCIATING] = NetworkInfoDetailedState_CONNECTING;
-    // mStateMap[SupplicantState_ASSOCIATED] = NetworkInfoDetailedState_CONNECTING;
-    // mStateMap[SupplicantState_FOUR_WAY_HANDSHAKE] = NetworkInfoDetailedState_AUTHENTICATING;
-    // mStateMap[SupplicantState_GROUP_HANDSHAKE] = NetworkInfoDetailedState_AUTHENTICATING;
-    // mStateMap[SupplicantState_COMPLETED] = NetworkInfoDetailedState_OBTAINING_IPADDR;
-    // mStateMap[SupplicantState_DORMANT] = NetworkInfoDetailedState_DISCONNECTED;
-    // mStateMap[SupplicantState_UNINITIALIZED] = NetworkInfoDetailedState_IDLE;
-    // mStateMap[SupplicantState_INVALID] = NetworkInfoDetailedState_FAILED;
-    // return 0;
-    return -1;
 }
 
 } // namespace Wifi

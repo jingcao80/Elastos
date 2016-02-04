@@ -9,7 +9,7 @@ namespace Pm {
 
 PackageVerificationState::PackageVerificationState(
     /* [in] */ Int32 requiredVerifierUid,
-    /* [in] */ CPackageManagerService::InstallArgs* args)
+    /* [in] */ InstallArgs* args)
     : mArgs(args)
     , mSufficientVerifierUids(10)
     , mRequiredVerifierUid(requiredVerifierUid)
@@ -20,7 +20,7 @@ PackageVerificationState::PackageVerificationState(
     , mExtendedTimeout(FALSE)
 {}
 
-AutoPtr<CPackageManagerService::InstallArgs> PackageVerificationState::GetInstallArgs()
+AutoPtr<InstallArgs> PackageVerificationState::GetInstallArgs()
 {
     return mArgs;
 }

@@ -7,6 +7,7 @@
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/ViewGroup.h"
+#include "elastos/droid/view/AccessibilityIterators.h"
 #include "elastos/droid/view/CWindowInsets.h"
 #include "elastos/droid/view/ViewRootImpl.h"
 #include "elastos/droid/view/CDispatcherState.h"
@@ -153,6 +154,17 @@ using Elastos::Utility::ILocale;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Logging::Logger;
 
+static Int32 bitCount(
+    /* [in] */ Int32 i)
+{
+    // Hacker's Delight, Figure 5-2
+    i -= (i >> 1) & 0x55555555;
+    i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+    i = ((i >> 4) + i) & 0x0F0F0F0F;
+    i += i >> 8;
+    i += i >> 16;
+    return i & 0x0000003F;
+}
 
 namespace Elastos {
 namespace Droid {
@@ -466,9 +478,9 @@ const AutoPtr<ArrayOf<Int32Array> > View::InitViewStateSets()
 
     const Int32 vdsLen = sizeof(R::styleable::ViewDrawableStates) / sizeof(Int32);
     if ((VIEW_STATE_IDS->GetLength() / 2) != vdsLen) {
+        Logger::D("View", "VIEW_STATE_IDs array length does not match ViewDrawableStates style array");
+        // return E_ILLEGAL_STATE_EXCEPTION;
         assert(0);
-        // throw new IllegalStateException(
-        //         "VIEW_STATE_IDs array length does not match ViewDrawableStates style array");
     }
 
     AutoPtr<ArrayOf<Int32> > orderedIds = ArrayOf<Int32>::Alloc(VIEW_STATE_IDS->GetLength());
@@ -485,8 +497,7 @@ const AutoPtr<ArrayOf<Int32Array> > View::InitViewStateSets()
     const Int32 NUM_BITS = VIEW_STATE_IDS->GetLength() / 2;
     AutoPtr<ArrayOf<Int32Array> > stateSets = ArrayOf<Int32Array>::Alloc(1 << NUM_BITS);
     for (Int32 i = 0; i < stateSets->GetLength(); i++) {
-        //Int32 numBits = Integer.bitCount(i);
-        Int32 numBits = 0;
+        Int32 numBits = bitCount(i);
 
         Int32 tmp = i;
         while (tmp != 0) {
@@ -1206,6 +1217,7 @@ View::View()
     , mLabelForId(IView::NO_ID)
     , mBackgroundResource(0)
     , mBackgroundSizeChanged(FALSE)
+    , mOutlineProvider(ViewOutlineProvider::BACKGROUND)
     , mNextFocusLeftId(IView::NO_ID)
     , mNextFocusRightId(IView::NO_ID)
     , mNextFocusUpId(IView::NO_ID)
@@ -1222,7 +1234,6 @@ View::View()
     , mSendingHoverAccessibilityEvents(FALSE)
     , mLeftPaddingDefined(FALSE)
     , mRightPaddingDefined(FALSE)
-    , mOutlineProvider(ViewOutlineProvider::BACKGROUND)
 {
     if (InputEventConsistencyVerifier::IsInstrumentationEnabled()) {
         mInputEventConsistencyVerifier =
@@ -4654,7 +4665,7 @@ AutoPtr<IView> View::FindViewInsideOutShouldExist(
     root->FindViewByPredicateInsideOut(
         IVIEW_PROBE(this), mMatchIdPredicate, (IView**)&result);
     if (result == NULL) {
-        //Log.w(VIEW_LOG_TAG, "couldn't find view with id " + id);
+        Logger::W(VIEW_LOG_TAG, "couldn't find view with id %d", id);
     }
 
     return result;
@@ -4667,8 +4678,7 @@ AutoPtr<IView> View::FindViewShouldExist(
     AutoPtr<IView> result;
     root->FindViewById(childViewId, (IView**)&result);
     if (result == NULL) {
-        //Log.w(VIEW_LOG_TAG, "couldn't find next focus view specified "
-        //        + "by user for id " + childViewId);
+        Logger::W(VIEW_LOG_TAG, "couldn't find next focus view specified by user for id %d", childViewId);
     }
     return result;
 }
@@ -5651,14 +5661,15 @@ ECode View::GetIteratorForGranularity(
 
                 AutoPtr<ILocale> locale;
                 config->GetLocale((ILocale**)&locale);
-                assert(0 && "TODO");
-                // AutoPtr<ICharacterTextSegmentIterator> iterator =
-                //     CharacterTextSegmentIterator::GetInstance(locale);
+                AutoPtr<AccessibilityIterators::CharacterTextSegmentIterator> iterator =
+                    AccessibilityIterators::CharacterTextSegmentIterator::GetInstance(locale);
 
-                // String str;
-                // text->ToString(&str);
-                // iterator->Initialize(str);
-                // *result = iterator;
+                String str;
+                text->ToString(&str);
+                iterator->Initialize(str);
+                *result = iterator;
+                REFCOUNT_ADD(*result)
+
                 return NOERROR;
             }
         } break;
@@ -5676,14 +5687,15 @@ ECode View::GetIteratorForGranularity(
 
                 AutoPtr<ILocale> locale;
                 config->GetLocale((ILocale**)&locale);
-                assert(0 && "TODO");
-                // AutoPtr<IWordTextSegmentIterator> iterator =
-                //     WordTextSegmentIterator::GetInstance(locale);
+                AutoPtr<AccessibilityIterators::WordTextSegmentIterator> iterator =
+                    AccessibilityIterators::WordTextSegmentIterator::GetInstance(locale);
 
-                // String str;
-                // text->ToString(&str);
-                // iterator->Initialize(str);
-                // *result = iterator;
+                String str;
+                text->ToString(&str);
+                iterator->Initialize(str);
+                *result = iterator;
+                REFCOUNT_ADD(*result)
+
                 return NOERROR;
             }
         } break;
@@ -5691,14 +5703,15 @@ ECode View::GetIteratorForGranularity(
             AutoPtr<ICharSequence> text;
             GetIterableTextForAccessibility((ICharSequence**)&text);
             if (text != NULL && (text->GetLength(&len), len) > 0) {
-                assert(0 && "TODO");
-                // AutoPtr<IParagraphTextSegmentIterator> iterator =
-                //     ParagraphTextSegmentIterator::GetInstance();
+                AutoPtr<AccessibilityIterators::ParagraphTextSegmentIterator> iterator =
+                    AccessibilityIterators::ParagraphTextSegmentIterator::GetInstance();
 
-                // String str;
-                // text->ToString(&str);
-                // iterator->Initialize(str);
-                // *result = iterator;
+                String str;
+                text->ToString(&str);
+                iterator->Initialize(str);
+                *result = iterator;
+                REFCOUNT_ADD(*result)
+
                 return NOERROR;
             }
         } break;
@@ -5781,7 +5794,7 @@ void View::CaptureViewInfo(
     /* [in] */ const char* subTag,
     /* [in] */ IView* v)
 {
-    assert(0 && "TODO");
+    // assert(0 && "TODO");
     //if (v == NULL || SystemProperties.getInt(ViewDebug.SYSTEM_PROPERTY_CAPTURE_VIEW, 0) == 0) {
      //   return;
     //}
@@ -10979,16 +10992,15 @@ ECode View::GetWindowId(
         *id = NULL;
         return NOERROR;
     }
-    ECode ec;
     if (mAttachInfo->mWindowId == NULL) {
         //try {
-        ec = mAttachInfo->mSession->GetWindowId(mAttachInfo->mWindowToken, (IIWindowId**)&mAttachInfo->mIWindowId);
+        FAIL_RETURN(mAttachInfo->mSession->GetWindowId(mAttachInfo->mWindowToken, (IIWindowId**)&mAttachInfo->mIWindowId))
         CWindowId::New(mAttachInfo->mIWindowId, (IWindowId**)&mAttachInfo->mWindowId);
         //} catch (RemoteException e) {
         //}
     }
     *id = mAttachInfo->mWindowId;
-    return ec;
+    return NOERROR;
 }
 
 /**
@@ -11416,10 +11428,8 @@ ECode View::SetLayerType(
     /* [in] */ IPaint* paint)
 {
     if (layerType < IView::LAYER_TYPE_NONE || layerType > IView::LAYER_TYPE_HARDWARE) {
-        assert(0);
+        Logger::D("View", "Layer type can only be one of: LAYER_TYPE_NONE, LAYER_TYPE_SOFTWARE or LAYER_TYPE_HARDWARE");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // throw new IllegalArgumentException("Layer type can only be one of: LAYER_TYPE_NONE, "
-        //         + "LAYER_TYPE_SOFTWARE or LAYER_TYPE_HARDWARE");
     }
 
     Boolean typeChanged;
@@ -11500,9 +11510,8 @@ ECode View::BuildLayer()
     if (mLayerType == IView::LAYER_TYPE_NONE) return NOERROR;
 
     if (mAttachInfo == NULL) {
-        assert(0);
+        Logger::D("View", "This view must be attached to a window first");
         return E_ILLEGAL_STATE_EXCEPTION;
-        //throw new IllegalStateException("This view must be attached to a window first");
     }
     Int32 width, height;
     GetWidth(&width);
@@ -11712,120 +11721,6 @@ ECode View::GetHardwareRenderer(
     return NOERROR;
 }
 
-AutoPtr<IDisplayList> View::GetDisplayList(
-    /* [in] */ IDisplayList* displayList,
-    /* [in] */ Boolean isLayer)
-{
-    assert(0 && "TODO");
-    return NULL;
-    // if (!CanHaveDisplayList()) {
-    //     return NULL;
-    // }
-
-    // Boolean valid = FALSE;
-    // assert(displayList != NULL);
-    // displayList->IsValid(&valid);
-    // if (((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0 ||
-    //         displayList == NULL || !valid ||
-    //         (!isLayer && mRecreateDisplayList))) {
-    //     // Don't need to recreate the display list, just need to tell our
-    //     // children to restore/recreate theirs
-    //     if (displayList != NULL && valid &&
-    //             !isLayer && !mRecreateDisplayList) {
-    //         mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
-    //         mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-    //         DispatchGetDisplayList();
-
-    //         return displayList;
-    //     }
-
-    //     if (!isLayer) {
-    //         // If we got here, we're recreating it. Mark it as such to ensure that
-    //         // we copy in child display lists into ours in drawChild()
-    //         mRecreateDisplayList = TRUE;
-    //     }
-    //     if (displayList == NULL) {
-    //         assert(0);
-    //         //TODO
-    //         // final String name = getClass().getSimpleName();
-    //         //displayList = mAttachInfo->mHardwareRenderer->CreateDisplayList(name);
-    //         // If we're creating a new display list, make sure our parent gets invalidated
-    //         // since they will need to recreate their display list to account for this
-    //         // new child display list.
-    //         InvalidateParentCaches();
-    //     }
-
-    //     Boolean caching = FALSE;
-    //     AutoPtr<IHardwareCanvas> canvas;
-    //     displayList->Start((IHardwareCanvas**)&canvas);
-    //     Int32 width = mRight - mLeft;
-    //     Int32 height = mBottom - mTop;
-
-    //     canvas->SetViewport(width, height);
-    //     // The dirty rect should always be NULL for a display list
-    //     canvas->OnPreDraw(NULL);
-    //     Int32 layerType = GetLayerType();
-    //     if (!isLayer && layerType != IView::LAYER_TYPE_NONE) {
-    //         if (layerType == IView::LAYER_TYPE_HARDWARE) {
-    //             AutoPtr<IHardwareLayer> layer = GetHardwareLayer();
-
-    //             Boolean tmp = FALSE;
-    //             if (layer != NULL && (layer->IsValid(&tmp), tmp)) {
-    //                 canvas->DrawHardwareLayer(layer, 0, 0, mLayerPaint);
-    //             }
-    //             else {
-    //                 canvas->SaveLayer(0, 0, mRight - mLeft, mBottom - mTop, mLayerPaint,
-    //                         Canvas.HAS_ALPHA_LAYER_SAVE_FLAG |
-    //                                 Canvas.CLIP_TO_LAYER_SAVE_FLAG);
-    //             }
-    //             caching = TRUE;
-    //         }
-    //         else {
-    //             BuildDrawingCache(TRUE);
-    //             AutoPtr<IBitmap> cache = GetDrawingCache(TRUE);
-    //             if (cache != NULL) {
-    //                 canvas->DrawBitmap(cache, 0, 0, mLayerPaint);
-    //                 caching = TRUE;
-    //             }
-    //         }
-    //     }
-    //     else {
-    //         ComputeScroll();
-
-    //         canvas->Translate(-mScrollX, -mScrollY);
-    //         if (!isLayer) {
-    //             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
-    //             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-    //         }
-
-    //         // Fast path for layouts with no backgrounds
-    //         if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
-    //             DispatchDraw(canvas);
-    //         }
-    //         else {
-    //             Draw(canvas);
-    //         }
-    //     }
-
-    //     canvas->OnPostDraw();
-
-    //     displayList->End();
-    //     displayList->SetCaching(caching);
-    //     if (isLayer) {
-    //         displayList->SetLeftTopRightBottom(0, 0, width, height);
-    //     }
-    //     else {
-    //         SetDisplayListProperties(displayList);
-    //     }
-    // }
-    // else if (!isLayer) {
-    //     mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
-    //     mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-    // }
-
-    // return displayList;
-}
-
 ECode View::GetDisplayList(
     /* [out] */ IRenderNode** node)
 {
@@ -12033,9 +11928,8 @@ ECode View::BuildDrawingCache(
         Int64 drawingCacheSize = size;
         if (width <= 0 || height <= 0 || projectedBitmapSize > drawingCacheSize) {
             if (width > 0 && height > 0) {
-                // Log.w(VIEW_LOG_TAG, "View too large to fit into drawing cache, needs "
-                //         + projectedBitmapSize + " bytes, only "
-                //         + drawingCacheSize + " available");
+                Logger::W(VIEW_LOG_TAG, "View too large to fit into drawing cache, needs %lld bytes, only %lld available"
+                        , projectedBitmapSize, drawingCacheSize);
             }
             DestroyDrawingCache();
             mCachingFailed = TRUE;
@@ -12163,7 +12057,6 @@ ECode View::BuildDrawingCache(
         }
         else {
             Draw(canvas);
-            assert(0 && "TODO");
             //TODO: delete
             //
             //AutoPtr<IPaintEx> paint;
@@ -12575,7 +12468,7 @@ void View::SetDisplayListProperties(
             renderNode->SetClipToBounds(
                 (VIEWGROUP_PROBE(mParent)->mGroupFlags & ViewGroup::FLAG_CLIP_CHILDREN) != 0, &res);
         }
-        Float alpha;
+        Float alpha = 1;
         if (IViewGroup::Probe(mParent) && (VIEWGROUP_PROBE(mParent)->mGroupFlags &
                 ViewGroup::FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
             ViewGroup* parentVG = VIEWGROUP_PROBE(mParent);

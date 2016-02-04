@@ -65,7 +65,7 @@ ECode CChannels::ChannelInputStream::Available(
         AutoPtr<IFileChannel> fileChannel = IFileChannel::Probe(mChannel);
         Int64 result, size, position;
         fileChannel->GetSize(&size);
-        fileChannel->GetPosition(&position);
+        fileChannel->Position(&position);
         result = size - position;
         *number = result > Elastos::Core::Math::INT32_MAX_VALUE ? Elastos::Core::Math::INT32_MAX_VALUE : (Int32)result;
         return NOERROR;

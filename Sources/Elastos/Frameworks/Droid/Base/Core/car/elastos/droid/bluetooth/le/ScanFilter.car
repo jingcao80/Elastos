@@ -1,0 +1,194 @@
+
+module
+{
+    interface Elastos.Droid.Os.IParcelUuid;
+    interface Elastos.Droid.Bluetooth.LE.IScanResult;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+    namespace LE {
+
+    /**
+     * Criteria for filtering result from Bluetooth LE scans. A {@link ScanFilter} allows clients to
+     * restrict scan results to only those that are of interest to them.
+     * <p>
+     * Current filtering on the following fields are supported:
+     * <li>Service UUIDs which identify the bluetooth gatt services running on the device.
+     * <li>Name of remote Bluetooth LE device.
+     * <li>Mac address of the remote device.
+     * <li>Service data which is the data associated with a service.
+     * <li>Manufacturer specific data which is the data associated with a particular manufacturer.
+     *
+     * @see ScanResult
+     * @see BluetoothLeScanner
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IScanFilter {
+
+        /**
+         * Returns the filter set the device name field of Bluetooth advertisement data.
+         */
+        //@Nullable
+        GetDeviceName(
+            [out] String* str);
+
+        /**
+         * Returns the filter set on the service uuid.
+         */
+        //@Nullable
+        GetServiceUuid(
+            [out] IParcelUuid** uuid);
+
+        //@Nullable
+        GetServiceUuidMask(
+            [out] IParcelUuid** uuid);
+
+        //@Nullable
+        GetDeviceAddress(
+            [out] String* str);
+
+        //@Nullable
+        GetServiceData(
+            [out, callee] ArrayOf<Byte>* result);
+
+        //@Nullable
+        GetServiceDataMask(
+            [out, callee] ArrayOf<Byte>* result);
+
+        //@Nullable
+        GetServiceDataUuid(
+            [out] IParcelUuid** uuid);
+
+        /**
+         * Returns the manufacturer id. -1 if the manufacturer filter is not set.
+         */
+        GetManufacturerId(
+            [out] Int32* id);
+
+        //@Nullable
+        GetManufacturerData(
+            [out, callee] ArrayOf<Byte>* result);
+
+        //@Nullable
+        GetManufacturerDataMask(
+            [out, callee] ArrayOf<Byte>* result);
+
+        /**
+         * Check if the scan filter matches a {@code scanResult}. A scan result is considered as a match
+         * if it matches all the field filters.
+         */
+        Matches(
+            [in] IScanResult* scanResult,
+            [out] Boolean* str);
+    }
+
+    /**
+     * Builder class for {@link ScanFilter}.
+     */
+    [deprecated]
+    interface IScanFilterBuilder {
+
+        /**
+         * Set filter on device name.
+         */
+        SetDeviceName(
+            [in] String deviceName);
+
+        /**
+         * Set filter on device address.
+         *
+         * @param deviceAddress The device Bluetooth address for the filter. It needs to be in the
+         *            format of "01:02:03:AB:CD:EF". The device address can be validated using
+         *            {@link BluetoothAdapter#checkBluetoothAddress}.
+         * @throws IllegalArgumentException If the {@code deviceAddress} is invalid.
+         */
+        SetDeviceAddress(
+            [in] String deviceAddress);
+
+        /**
+         * Set filter on service uuid.
+         */
+        SetServiceUuid(
+            [in] IParcelUuid* serviceUuid);
+
+        /**
+         * Set filter on partial service uuid. The {@code uuidMask} is the bit mask for the
+         * {@code serviceUuid}. Set any bit in the mask to 1 to indicate a match is needed for the
+         * bit in {@code serviceUuid}, and 0 to ignore that bit.
+         *
+         * @throws IllegalArgumentException If {@code serviceUuid} is {@code null} but
+         *             {@code uuidMask} is not {@code null}.
+         */
+        SetServiceUuid(
+            [in] IParcelUuid* serviceUuid,
+            [in] IParcelUuid* uuidMask);
+
+        /**
+         * Set filtering on service data.
+         *
+         * @throws IllegalArgumentException If {@code serviceDataUuid} is null.
+         */
+        SetServiceData(
+            [in] IParcelUuid* serviceDataUuid,
+            [in] ArrayOf<Byte>* serviceData);
+
+        /**
+         * Set partial filter on service data. For any bit in the mask, set it to 1 if it needs to
+         * match the one in service data, otherwise set it to 0 to ignore that bit.
+         * <p>
+         * The {@code serviceDataMask} must have the same length of the {@code serviceData}.
+         *
+         * @throws IllegalArgumentException If {@code serviceDataUuid} is null or
+         *             {@code serviceDataMask} is {@code null} while {@code serviceData} is not or
+         *             {@code serviceDataMask} and {@code serviceData} has different length.
+         */
+        SetServiceData(
+            [in] IParcelUuid* serviceDataUuid,
+            [in] ArrayOf<Byte>* serviceData,
+            [in] ArrayOf<Byte>* serviceDataMask);
+
+        /**
+         * Set filter on on manufacturerData. A negative manufacturerId is considered as invalid id.
+         * <p>
+         * Note the first two bytes of the {@code manufacturerData} is the manufacturerId.
+         *
+         * @throws IllegalArgumentException If the {@code manufacturerId} is invalid.
+         */
+        SetManufacturerData(
+            [in] Int32 manufacturerId,
+            [in] ArrayOf<Byte>* manufacturerData);
+
+        /**
+         * Set filter on partial manufacture data. For any bit in the mask, set it the 1 if it needs
+         * to match the one in manufacturer data, otherwise set it to 0.
+         * <p>
+         * The {@code manufacturerDataMask} must have the same length of {@code manufacturerData}.
+         *
+         * @throws IllegalArgumentException If the {@code manufacturerId} is invalid, or
+         *             {@code manufacturerData} is null while {@code manufacturerDataMask} is not,
+         *             or {@code manufacturerData} and {@code manufacturerDataMask} have different
+         *             length.
+         */
+        SetManufacturerData(
+            [in] Int32 manufacturerId,
+            [in] ArrayOf<Byte>* manufacturerData,
+            [in] ArrayOf<Byte>* manufacturerDataMask);
+
+        /**
+         * Build {@link ScanFilter}.
+         *
+         * @throws IllegalArgumentException If the filter cannot be built.
+         */
+        Build(
+            [out] IScanFilter** filter);
+    }
+
+    } // LE
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

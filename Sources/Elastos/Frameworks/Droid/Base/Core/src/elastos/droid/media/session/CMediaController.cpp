@@ -7,15 +7,13 @@
 #include "elastos/droid/media/session/CParcelableVolumeInfo.h"
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/utility/CArrayMap.h"
-// TODO: Need CKeyEventHelper
-// #include "elastos/droid/view/CKeyEventHelper.h"
+#include "elastos/droid/view/CKeyEventHelper.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::IHandler;
-// TODO: Need CKeyEventHelper
-// using Elastos::Droid::View::CKeyEventHelper;
+using Elastos::Droid::View::CKeyEventHelper;
 using Elastos::Droid::View::IKeyEventHelper;
 using Elastos::Droid::Utility::CArrayMap;
 using Elastos::Core::CString;
@@ -251,8 +249,7 @@ ECode CMediaController::DispatchMediaButtonEvent(
     keyEvent->GetKeyCode(&code);
     Boolean b;
     AutoPtr<IKeyEventHelper> helper;
-// TODO: Need CKeyEventHelper
-    // CKeyEventHelper::AcquireSingleton((IKeyEventHelper**)&helper);
+    CKeyEventHelper::AcquireSingleton((IKeyEventHelper**)&helper);
     helper->IsMediaKey(code, &b);
     if (!b) {
         *result = FALSE;

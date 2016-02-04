@@ -8,6 +8,7 @@ module
     interface Elastos.Droid.Utility.IDisplayMetrics;
     interface Elastos.Droid.Utility.IAttributeSet;
     interface Elastos.Droid.Utility.ITypedValue;
+    interface Elastos.Droid.Utility.IInt64SparseArray;
     interface Elastos.Droid.Graphics.Drawable.IDrawable;
     interface Elastos.Droid.Graphics.IMovie;
     interface Elastos.Droid.Content.Res.IColorStateList;
@@ -1279,6 +1280,12 @@ module
          * to normal Resources operation.
          */
         FinishPreloading();
+
+        /**
+         * @hide
+         */
+        GetPreloadedDrawables(
+            [out] IInt64SparseArray** array);
     }
 
     interface IResourcesHelper {

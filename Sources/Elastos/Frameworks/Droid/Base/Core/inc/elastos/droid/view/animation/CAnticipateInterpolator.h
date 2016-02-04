@@ -5,6 +5,7 @@
 #include "_Elastos_Droid_View_Animation_CAnticipateInterpolator.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesTheme;
@@ -21,6 +22,7 @@ CarClass(CAnticipateInterpolator)
     , public IAnticipateInterpolator
     , public INativeInterpolatorFactory
     , public IInterpolator
+    , public ITimeInterpolator
 {
 public:
     CAR_INTERFACE_DECL();

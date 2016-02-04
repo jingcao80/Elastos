@@ -83,7 +83,8 @@ module
          */
         InterfaceClassDataActivityChanged(
             [in] String label,
-            [in] Boolean active);
+            [in] Boolean active,
+            [in] Int64 tsNanos);
 
         /**
          * Information about available DNS servers has been received.

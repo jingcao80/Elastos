@@ -463,7 +463,7 @@ CInputMethodManagerService::HardKeyboardListener::HardKeyboardListener(
 {
 }
 
-void CInputMethodManagerService::HardKeyboardListener::OnHardKeyboardStatusChange(
+ECode CInputMethodManagerService::HardKeyboardListener::OnHardKeyboardStatusChange(
     /* [in] */ Boolean available,
     /* [in] */ Boolean enabled)
 {
@@ -473,6 +473,7 @@ void CInputMethodManagerService::HardKeyboardListener::OnHardKeyboardStatusChang
         available ? 1 : 0, enabled ? 1 : 0, (IMessage**)&msg);
     Boolean result;
     mHost->mHandler->SendMessage(msg, &result);
+    return NOERROR;
 }
 
 void CInputMethodManagerService::HardKeyboardListener::HandleHardKeyboardStatusChange(

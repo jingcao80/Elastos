@@ -1,5 +1,4 @@
 
-#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/view/CVelocityTrackerHelper.h"
 #include "elastos/droid/view/VelocityTracker.h"
 
@@ -7,6 +6,8 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
+CAR_SINGLETON_IMPL(CVelocityTrackerHelper);
+CAR_INTERFACE_IMPL(CVelocityTrackerHelper, Singleton, IVelocityTrackerHelper);
 ECode CVelocityTrackerHelper::Obtain(
     /* [out] */ IVelocityTracker** velocity)
 {

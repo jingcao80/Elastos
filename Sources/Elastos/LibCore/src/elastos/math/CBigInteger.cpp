@@ -21,15 +21,15 @@ namespace Math {
 
 static AutoPtr<IBigInteger> CreateBigInteger(Int32 sign, Int32 value)
 {
-    AutoPtr<CBigInteger> obj;
-    CBigInteger::NewByFriend(sign, value, (CBigInteger**)&obj);
-    return (IBigInteger*)obj.Get();
+    AutoPtr<IBigInteger> obj;
+    CBigInteger::New(sign, value, (IBigInteger**)&obj);
+    return obj;
 }
 
-AutoPtr<IBigInteger> CBigInteger::ZERO = CreateBigInteger(0, 0);
-AutoPtr<IBigInteger> CBigInteger::ONE = CreateBigInteger(1, 1);
-AutoPtr<IBigInteger> CBigInteger::TEN = CreateBigInteger(1, 10);
-AutoPtr<IBigInteger> CBigInteger::MINUS_ONE = CreateBigInteger(-1, 1);
+INIT_PROI_2 AutoPtr<IBigInteger> CBigInteger::ZERO = CreateBigInteger(0, 0);
+INIT_PROI_2 AutoPtr<IBigInteger> CBigInteger::ONE = CreateBigInteger(1, 1);
+INIT_PROI_2 AutoPtr<IBigInteger> CBigInteger::TEN = CreateBigInteger(1, 10);
+INIT_PROI_2 AutoPtr<IBigInteger> CBigInteger::MINUS_ONE = CreateBigInteger(-1, 1);
 
 CBigInteger::CBigInteger()
     : mNativeIsValid(FALSE)
@@ -326,11 +326,7 @@ ECode CBigInteger::ValueOf(
 
     if (value < 0) {
         if (value != -1) {
-            AutoPtr<CBigInteger> bi;
-            ECode ec = CBigInteger::NewByFriend(-1, -value, (CBigInteger**)&bi);
-            *result = (IBigInteger*)bi.Get();
-            REFCOUNT_ADD(*result);
-            return ec;
+            return CBigInteger::New(-1, -value, result);
         }
         *result = MINUS_ONE;
         REFCOUNT_ADD(*result);
@@ -352,11 +348,7 @@ ECode CBigInteger::ValueOf(
         return NOERROR;
     }
     else {
-        AutoPtr<CBigInteger> bi;
-        ECode ec = CBigInteger::NewByFriend(1, value, (CBigInteger**)&bi);
-        *result = (IBigInteger*)bi.Get();
-        REFCOUNT_ADD(*result);
-        return ec;
+        return CBigInteger::New(1, value, result);
     }
 }
 

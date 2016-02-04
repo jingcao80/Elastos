@@ -420,6 +420,7 @@ public:
     class SyncStatusObserver
         : public Object
         , public IISyncStatusObserver
+        , public IBinder
     {
     public:
         CAR_INTERFACE_DECL()
@@ -429,6 +430,12 @@ public:
 
         CARAPI OnStatusChanged(
             /* [in] */ Int32 which);
+
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            return Object::ToString(str);
+        }
     private:
         SyncManager* mHost;
     };

@@ -67,8 +67,8 @@ private:
             /* [out] */ String* info)
         {
             VALIDATE_NOT_NULL(info);
-            *info = String("Notifier::WakeUpBroadcastDone: ");
-            (*info).AppendFormat("%p", this);
+            *info = "Notifier::WakeUpBroadcastDone: ";
+            info->AppendFormat("%p", this);
             return NOERROR;
         }
 
@@ -91,8 +91,8 @@ private:
             /* [out] */ String* info)
         {
             VALIDATE_NOT_NULL(info);
-            *info = String("Notifier::GoToSleepBroadcastDone: ");
-            (*info).AppendFormat("%p", this);
+            *info = "Notifier::GoToSleepBroadcastDone: ";
+            info->AppendFormat("%p", this);
             return NOERROR;
         }
 

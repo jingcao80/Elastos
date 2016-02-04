@@ -1,9 +1,10 @@
 module
 {
-    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Hardware.Display.IVirtualDisplayCallback;
+    interface Elastos.Droid.Hardware.Display.IVirtualDisplay;
     interface Elastos.Droid.Media.IAudioRecord;
-// TODO: Need IIVirtualDisplayCallback
-    // interface Elastos.Droid.Hardware.Display.IIVirtualDisplayCallback;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.View.ISurface;
 
     namespace Elastos {
     namespace Droid {
@@ -32,8 +33,8 @@ module
          * @see #unregisterCallback
          */
         RegisterCallback(
-            [in] IMediaProjectionCallback * cb,
-            [in] IHandler * handler);
+            [in] IMediaProjectionCallback* cb,
+            [in] IHandler* handler);
 
         /** Unregister a MediaProjection listener.
          *
@@ -42,22 +43,21 @@ module
          * @see #registerCallback
          */
         UnregisterCallback(
-            [in] IMediaProjectionCallback * cb);
+            [in] IMediaProjectionCallback* cb);
 
         /**
          * @hide
          */
-// TODO: Need IIVirtualDisplayCallback
-        // CreateVirtualDisplay(
-        //     [in] String name,
-        //     [in] Int32 width,
-        //     [in] Int32 height,
-        //     [in] Int32 dpi,
-        //     [in] Boolean isSecure,
-        //     [in] ISurface * surface,
-        //     [in] IIVirtualDisplayCallback * cb,
-        //     [in] IHandler * handler,
-        //     [out] IVirtualDisplay ** result);
+        CreateVirtualDisplay(
+            [in] String name,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 dpi,
+            [in] Boolean isSecure,
+            [in] ISurface* surface,
+            [in] IVirtualDisplayCallback* cb,
+            [in] IHandler* handler,
+            [out] IVirtualDisplay** result);
 
         /**
          * Creates a {@link android.hardware.display.VirtualDisplay} to capture the
@@ -83,17 +83,16 @@ module
          * @see android.hardware.display.DisplayManager#createVirtualDisplay(
          * String, int, int, int, int, Surface, VirtualDisplay.Callback, Handler)
          */
-// TODO: Need IIVirtualDisplayCallback
-        // CreateVirtualDisplay(
-        //     [in] String name,
-        //     [in] Int32 width,
-        //     [in] Int32 height,
-        //     [in] Int32 dpi,
-        //     [in] Int32 flags,
-        //     [in] ISurface * surface,
-        //     [in] IIVirtualDisplayCallback * cb,
-        //     [in] IHandler * handler,
-        //     [out] IVirtualDisplay ** result);
+        CreateVirtualDisplay(
+            [in] String name,
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] Int32 dpi,
+            [in] Int32 flags,
+            [in] ISurface* surface,
+            [in] IVirtualDisplayCallback* cb,
+            [in] IHandler* handler,
+            [out] IVirtualDisplay** result);
 
         /**
          * Creates an AudioRecord to capture audio played back by the system.
@@ -104,7 +103,7 @@ module
             [in] Int32 channelConfig,
             [in] Int32 audioFormat,
             [in] Int32 bufferSizeInBytes,
-            [out] IAudioRecord ** result);
+            [out] IAudioRecord** result);
 
         /**
          * Stops projection.
@@ -116,8 +115,7 @@ module
          * @hide
          */
         GetProjection(
-            [out] IIMediaProjection ** result);
-
+            [out] IIMediaProjection** result);
     }
 
     } // namespace Projection

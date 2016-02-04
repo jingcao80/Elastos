@@ -92,7 +92,7 @@ ECode CProfilerInfo::GetProfileFd(
     return NOERROR;
 }
 
-ECode CProfilerInfo::SetProfiledFd(
+ECode CProfilerInfo::SetProfileFd(
     /* [in] */ IParcelFileDescriptor* fd)
 {
     mProfileFd = fd;

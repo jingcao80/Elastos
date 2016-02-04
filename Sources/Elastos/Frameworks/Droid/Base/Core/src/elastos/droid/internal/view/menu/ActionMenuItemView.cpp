@@ -5,7 +5,7 @@
 #include "elastos/droid/internal/view/menu/ActionMenuItemView.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/text/TextUtils.h"
-// #include "elastos/droid/widget/CToastHelper.h"
+#include "elastos/droid/widget/Toast.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Content::Res::IResources;
@@ -13,13 +13,13 @@ using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IMenuItem;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnLongClickListener;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
-// using Elastos::Droid::Widget::IToast;
-// using Elastos::Droid::Widget::IToastHelper;
-// using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Widget::IToast;
+using Elastos::Droid::Widget::Toast;
 using Elastos::Droid::Widget::EIID_IActionMenuChildView;
 
 namespace Elastos {
@@ -50,13 +50,9 @@ ECode ActionMenuItemView::MyListener::OnLongClick(
 
 ActionMenuItemView::ActionMenuItemForwardingListener::ActionMenuItemForwardingListener(
     /* [in] */ ActionMenuItemView* owner)
-#if 0
-    : ForwardingListener(owner)
-    , mOwner(owner)
-#else
     : mOwner(owner)
-#endif
 {
+     ListPopupWindow::ForwardingListener::constructor(owner);
 }
 
 ECode ActionMenuItemView::ActionMenuItemForwardingListener::GetPopup(
@@ -97,13 +93,8 @@ Boolean ActionMenuItemView::ActionMenuItemForwardingListener::OnForwardingStoppe
 String ActionMenuItemView::TAG("ActionMenuItemView");
 const Int32 ActionMenuItemView::MAX_ICON_SIZE = 32; // dp
 
-#if 0
 CAR_INTERFACE_IMPL_5(ActionMenuItemView, TextView, IActionMenuChildView, IMenuItemView,
     IViewOnClickListener, IViewOnLongClickListener, IActionMenuChildView)
-#else
-CAR_INTERFACE_IMPL_5(ActionMenuItemView, View, IActionMenuChildView, IMenuItemView,
-    IViewOnClickListener, IViewOnLongClickListener, IActionMenuChildView)
-#endif
 
 ActionMenuItemView::ActionMenuItemView()
     : mAllowTextWithIcon(FALSE)
@@ -141,8 +132,7 @@ ECode ActionMenuItemView::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    assert(0 && "TODO:TextView is not implemented");
-    // FAIL_RETURN(TextView::constructor(context, attrs, defStyleAttr, defStyleRes))
+    FAIL_RETURN(TextView::constructor(context, attrs, defStyleAttr, defStyleRes))
 
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
@@ -174,8 +164,7 @@ ECode ActionMenuItemView::constructor(
 void ActionMenuItemView::OnConfigurationChanged(
     /* [in] */ IConfiguration* newConfig)
 {
-    assert(0);
-    // FAIL_RETURN(TextView::OnConfigurationChanged(newConfig))
+    TextView::OnConfigurationChanged(newConfig);
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
@@ -192,9 +181,7 @@ ECode ActionMenuItemView::SetPadding(
     /* [in] */ Int32 b)
 {
     mSavedPaddingLeft = l;
-    // return TextView::SetPadding(l, t, r, b);
-    assert(0);
-    return NOERROR;
+    return TextView::SetPadding(l, t, r, b);
 }
 
 ECode ActionMenuItemView::GetItemData(
@@ -236,10 +223,9 @@ ECode ActionMenuItemView::Initialize(
 
     Boolean hasSubMenu;
     if (itemData->HasSubMenu(&hasSubMenu), hasSubMenu) {
-        assert(0);
-        // if (mForwardingListener == NULL) {
-        //     mForwardingListener = new ActionMenuItemForwardingListener();
-        // }
+        if (mForwardingListener == NULL) {
+            mForwardingListener = new ActionMenuItemForwardingListener(this);
+        }
     }
 
     return NOERROR;
@@ -252,15 +238,13 @@ ECode ActionMenuItemView::OnTouchEvent(
     VALIDATE_NOT_NULL(result)
     Boolean hasSubMenu;
     IMenuItem::Probe(mItemData)->HasSubMenu(&hasSubMenu);
-    // Boolean res;
-    // if (hasSubMenu && mForwardingListener != NULL
-    //     && (mForwardingListener->OnTouch(this, e, &res), res)) {
-    //     *result = TRUE;
-    //     return NOERROR;
-    // }
-    // return TextView::OnTouchEvent(e, result);
-    assert(0);
-    return NOERROR;
+    Boolean res;
+    if (hasSubMenu && mForwardingListener != NULL
+        && (mForwardingListener->OnTouch(this, e, &res), res)) {
+        *result = TRUE;
+        return NOERROR;
+    }
+    return TextView::OnTouchEvent(e, result);
 }
 
 ECode ActionMenuItemView::OnClick(
@@ -331,8 +315,7 @@ void ActionMenuItemView::UpdateTextButtonVisibility()
     visible &= mIcon == NULL ||
             ((mItemData->ShowsTextAsAction(&tmp), tmp) && (mAllowTextWithIcon || mExpandedFormat));
 
-    assert(0);
-    // SetText(visible ? mTitle : NULL);
+    SetText(visible ? mTitle : NULL);
 }
 
 ECode ActionMenuItemView::SetIcon(
@@ -359,8 +342,7 @@ ECode ActionMenuItemView::SetIcon(
         icon->SetBounds(0, 0, width, height);
     }
 
-    assert(0);
-    // SetCompoundDrawables(icon, NULL, NULL, NULL);
+    SetCompoundDrawables(icon, NULL, NULL, NULL);
 
     UpdateTextButtonVisibility();
 
@@ -371,8 +353,9 @@ ECode ActionMenuItemView::HasText(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    assert(0);
-    // *result = !TextUtils::IsEmpty(GetText());
+    AutoPtr<ICharSequence> text;
+    GetText((ICharSequence**)&text);
+    *result = !TextUtils::IsEmpty(text);
     return NOERROR;
 }
 
@@ -408,8 +391,7 @@ ECode ActionMenuItemView::DispatchPopulateAccessibilityEvent(
 ECode ActionMenuItemView::OnPopulateAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
-    assert(0);
-    // FAIL_RETURN(TextView::OnPopulateAccessibilityEvent(event))
+    FAIL_RETURN(TextView::OnPopulateAccessibilityEvent(event))
     AutoPtr<ICharSequence> cdesc;
     GetContentDescription((ICharSequence**)&cdesc);
     if (!TextUtils::IsEmpty(cdesc)) {
@@ -498,22 +480,19 @@ ECode ActionMenuItemView::OnLongClick(
     AutoPtr<ICharSequence> title;
     IMenuItem::Probe(mItemData)->GetTitle((ICharSequence**)&title);
 
-    assert(0);
-    // AutoPtr<IToast> cheatSheet;
-    // AutoPtr<IToastHelper> helper;
-    // CToastHelper::AcquireSingleton((IToastHelper**)&helper);
-    // helper->MakeText(context, title, IToast::LENGTH_SHORT, (IToast**)&cheatSheet);
+    AutoPtr<IToast> cheatSheet;
+    Toast::MakeText(context, title, IToast::LENGTH_SHORT, (IToast**)&cheatSheet);
 
-    // Int32 fHeight = 0;
-    // if (midy < (displayFrame->GetHeight(&fHeight), fHeight)) {
-    //     // Show along the top; follow action buttons
-    //     cheatSheet->SetGravity(IGravity::TOP | IGravity::END, referenceX, height);
-    // }
-    // else {
-    //     // Show along the bottom center
-    //     cheatSheet->SetGravity(IGravity::BOTTOM | IGravity::CENTER_HORIZONTAL, 0, height);
-    // }
-    // cheatSheet->Show();
+    Int32 fHeight = 0;
+    if (midy < (displayFrame->GetHeight(&fHeight), fHeight)) {
+        // Show along the top; follow action buttons
+        cheatSheet->SetGravity(IGravity::TOP | IGravity::END, referenceX, height);
+    }
+    else {
+        // Show along the bottom center
+        cheatSheet->SetGravity(IGravity::BOTTOM | IGravity::CENTER_HORIZONTAL, 0, height);
+    }
+    cheatSheet->Show();
 
     *result = TRUE;
     return NOERROR;
@@ -523,15 +502,17 @@ void ActionMenuItemView::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    assert(0);
     Boolean textVisible;
     HasText(&textVisible);
     if (textVisible && mSavedPaddingLeft >= 0) {
-        // TextView::SetPadding(mSavedPaddingLeft, GetPaddingTop(),
-        //         GetPaddingRight(), GetPaddingBottom());
+        Int32 t, r, b;
+        GetPaddingTop(&t);
+        GetPaddingRight(&r);
+        GetPaddingBottom(&b);
+        TextView::SetPadding(mSavedPaddingLeft, t, r, b);
     }
 
-    // TextView::OnMeasure(widthMeasureSpec, heightMeasureSpec);
+    TextView::OnMeasure(widthMeasureSpec, heightMeasureSpec);
 
     const Int32 widthMode = MeasureSpec::GetMode(widthMeasureSpec);
     const Int32 widthSize = MeasureSpec::GetSize(widthMeasureSpec);
@@ -542,8 +523,8 @@ void ActionMenuItemView::OnMeasure(
 
     if (widthMode != MeasureSpec::EXACTLY && mMinWidth > 0 && oldMeasuredWidth < targetWidth) {
         // Remeasure at exactly the minimum width.
-        // TextView::OnMeasure(MeasureSpec::MakeMeasureSpec(targetWidth, MeasureSpec::EXACTLY),
-        //         heightMeasureSpec);
+        TextView::OnMeasure(MeasureSpec::MakeMeasureSpec(targetWidth, MeasureSpec::EXACTLY),
+                heightMeasureSpec);
     }
 
     if (!textVisible && mIcon != NULL) {
@@ -558,16 +539,18 @@ void ActionMenuItemView::OnMeasure(
         Int32 dw = 0;
         bounds->GetWidth(&dw);
 
-        // TextView::SetPadding((w - dw) / 2, GetPaddingTop(), GetPaddingRight(), GetPaddingBottom());
+        Int32 t, r, b;
+        GetPaddingTop(&t);
+        GetPaddingRight(&r);
+        GetPaddingBottom(&b);
+        TextView::SetPadding((w - dw) / 2, t, r, b);
     }
 }
 
 ECode ActionMenuItemView::SetEnabled(
     /* [in] */ Boolean enabled)
 {
-    assert(0);
-    // return TextView::SetEnabled(enabled);
-    return NOERROR;
+    return TextView::SetEnabled(enabled);
 }
 
 } // namespace Menu

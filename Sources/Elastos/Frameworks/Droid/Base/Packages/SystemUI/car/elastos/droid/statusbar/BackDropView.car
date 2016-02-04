@@ -12,7 +12,14 @@ module
      * A view who contains media artwork.
      *
      * @Involve
-     * interface Elastos.Droid.Widget.IFrameLayout
+     * extends Elastos.Droid.Widget.IFrameLayout
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
     interface IBackDropView {
         SetOnVisibilityChangedRunnable(

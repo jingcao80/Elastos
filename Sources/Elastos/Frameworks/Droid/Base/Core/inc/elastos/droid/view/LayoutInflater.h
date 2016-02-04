@@ -2,11 +2,11 @@
 #ifndef __ELASTOS_DROID_VIEW_LAYOUTINFLATER_H__
 #define __ELASTOS_DROID_VIEW_LAYOUTINFLATER_H__
 
+#include <elastos/droid/ext/frameworkext.h>
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Graphics.h"
-#include "elastos/droid/widget/FrameLayout.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/widget/FrameLayout.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Utility::IHashMap;
@@ -23,7 +23,7 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-class LayoutInflater
+class ECO_PUBLIC LayoutInflater
     : public Object
     , public ILayoutInflater
 {
@@ -72,8 +72,8 @@ public:
         CARAPI_(void) MakeBlink();
 
     private:
-        static const Int32 MESSAGE_BLINK = 0x42;
-        static const Int32 BLINK_DELAY = 500;
+        ECO_LOCAL static const Int32 MESSAGE_BLINK = 0x42;
+        ECO_LOCAL static const Int32 BLINK_DELAY = 500;
 
         Boolean mBlink;
         Boolean mBlinkState;
@@ -81,7 +81,7 @@ public:
     };
 
 private:
-    class FactoryMerger
+    class ECO_LOCAL FactoryMerger
         : public Object
         , public ILayoutInflaterFactory
         , public ILayoutInflaterFactory2
@@ -321,17 +321,17 @@ private:
     Object mConstructorArgsLock;
 
     // static AutoPtr< HashMap<String, AutoPtr<IConstructorInfo> > > sConstructorMap;
-    static AutoPtr<IHashMap> sConstructorMap;
+    ECO_LOCAL static AutoPtr<IHashMap> sConstructorMap;
 
     AutoPtr<IHashMap> mFilterMap;
 
-    static const String TAG;
+    ECO_LOCAL static const String TAG;
 
-    static const String TAG_TAG;
-    static const String TAG_MERGE;
-    static const String TAG_INCLUDE;
-    static const String TAG_1995;
-    static const String TAG_REQUEST_FOCUS;
+    ECO_LOCAL static const String TAG_TAG;
+    ECO_LOCAL static const String TAG_MERGE;
+    ECO_LOCAL static const String TAG_INCLUDE;
+    ECO_LOCAL static const String TAG_1995;
+    ECO_LOCAL static const String TAG_REQUEST_FOCUS;
 };
 
 } // namespace View

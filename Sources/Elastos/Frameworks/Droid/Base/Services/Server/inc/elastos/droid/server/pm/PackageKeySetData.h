@@ -15,6 +15,8 @@ namespace Pm {
 
 class PackageSettingBase;
 class CPackageManagerService;
+class Settings;
+class KeySetManagerService;
 
 class PackageKeySetData : public Object
 {
@@ -88,6 +90,8 @@ private:
 
     friend class PackageSettingBase;
     friend class CPackageManagerService;
+    friend class Settings;
+    friend class KeySetManagerService;
 };
 
 } // namespace Pm

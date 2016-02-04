@@ -41,7 +41,7 @@ using Elastos::Droid::Os::IVibrator;
 using Elastos::Droid::Os::CSystemVibrator;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::Storage::EIID_IIMountShutdownObserver;
-using Elastos::Droid::Os::Storage::IMountService;
+using Elastos::Droid::Os::Storage::IIMountService;
 // using Elastos::Droid::Server::Pm::CPackageManagerService;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
@@ -625,7 +625,7 @@ ECode ShutdownThread::Run()
         // try {
         obj = NULL;
         serviceManager->CheckService(String("mount"), (IInterface**)&obj);
-        AutoPtr<IMountService> mount = IMountService::Probe(obj);
+        AutoPtr<IIMountService> mount = IIMountService::Probe(obj);
         if (mount != NULL) {
             if (FAILED(mount->Shutdown(observer))) {
                 Logger::E(TAG, "Exception during MountService shutdown");

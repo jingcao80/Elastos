@@ -1,0 +1,43 @@
+
+module
+{
+    merge("telecomm/telecom/AudioState.car");
+    merge("telecomm/telecom/PhoneAccountHandle.car");
+    merge("telecomm/telecom/DisconnectCause.car");
+    merge("telecomm/telecom/GatewayInfo.car");
+    merge("telecomm/telecom/StatusHints.car");
+    merge("telecomm/telecom/Phone.car");
+    merge("telecomm/telecom/InCallService.car");
+    merge("telecomm/telecom/Call.car");
+    merge("telecomm/telecom/VideoProfile.car");
+    merge("telecomm/telecom/CallState.car");
+    merge("telecomm/telecom/CameraCapabilities.car");
+    merge("telecomm/telecom/Conference.car");
+    merge("telecomm/telecom/ConnectionService.car");
+    merge("telecomm/telecom/Connection.car");
+    merge("telecomm/telecom/ConnectionRequest.car");
+    merge("telecomm/telecom/ConnectionServiceAdapter.car");
+    merge("telecomm/telecom/ConnectionServiceAdapterServant.car");
+    merge("telecomm/telecom/InCallAdapter.car");
+    merge("telecomm/telecom/ParcelableCall.car");
+    merge("telecomm/telecom/ParcelableConference.car");
+    merge("telecomm/telecom/ParcelableConnection.car");
+    merge("telecomm/telecom/PhoneAccount.car");
+    merge("telecomm/telecom/PhoneCapabilities.car");
+    merge("telecomm/telecom/RemoteConference.car");
+    merge("telecomm/telecom/RemoteConnection.car");
+    merge("telecomm/telecom/RemoteConnectionManager.car");
+    merge("telecomm/telecom/RemoteConnectionService.car");
+    merge("telecomm/telecom/Response.car");
+    merge("telecomm/telecom/TelecomManager.car");
+    merge("telecomm/telecom/VideoCallImpl.car");
+    // merge("telecomm/telecom/VideoCallbackServant.car");
+    merge("telecomm/internal/IConnectionServiceAdapter.car");
+    merge("telecomm/internal/IConnectionService.car");
+    merge("telecomm/internal/IInCallAdapter.car");
+    merge("telecomm/internal/IInCallService.car");
+    merge("telecomm/internal/ITelecomService.car");
+    merge("telecomm/internal/IVideoCallback.car");
+    merge("telecomm/internal/IVideoProvider.car");
+    merge("telecomm/internal/RemoteServiceCallback.car");
+}

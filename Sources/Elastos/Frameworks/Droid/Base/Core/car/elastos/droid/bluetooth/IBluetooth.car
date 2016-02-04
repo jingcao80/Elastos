@@ -1,11 +1,11 @@
 
 module
 {
-    using interface Elastos.Droid.Os.IParcelUuid;
-    using interface Elastos.Droid.Os.IParcelFileDescriptor;
-
+    interface Elastos.Droid.Os.IParcelUuid;
+    interface Elastos.Droid.Os.IParcelFileDescriptor;
     interface Elastos.Droid.Bluetooth.IIBluetoothCallback;
     interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+    interface Elastos.Droid.Bluetooth.IBluetoothActivityEnergyInfo;
 
     namespace Elastos {
     namespace Droid {
@@ -91,9 +91,17 @@ module
                 [in] IBluetoothDevice* device,
                 [out] Int32* state);
 
+            IsConnected(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
             GetRemoteName(
                 [in] IBluetoothDevice* device,
                 [out] String* name);
+
+            GetRemoteType(
+                [in] IBluetoothDevice* device,
+                [out] Int32* type);
 
             GetRemoteAlias(
                 [in] IBluetoothDevice* device,
@@ -116,6 +124,10 @@ module
                 [in] IBluetoothDevice* device,
                 [out] Boolean* result);
 
+            FetchRemoteMasInstances(
+                [in] IBluetoothDevice* device,
+                [out] Boolean* result);
+
             SetPin(
                 [in] IBluetoothDevice* device,
                 [in] Boolean accept,
@@ -133,6 +145,24 @@ module
             SetPairingConfirmation(
                 [in] IBluetoothDevice* device,
                 [in] Boolean accept,
+                [out] Boolean* result);
+
+            GetPhonebookAccessPermission(
+                [in] IBluetoothDevice* device,
+                [out] Int32* result);
+
+            SetPhonebookAccessPermission(
+                [in] IBluetoothDevice* device,
+                [in] Int32 value,
+                [out] Boolean* result);
+
+            GetMessageAccessPermission(
+                [in] IBluetoothDevice* device,
+                [out] Int32* result);
+
+            SetMessageAccessPermission(
+                [in] IBluetoothDevice* device,
+                [in] Int32 value,
                 [out] Boolean* result);
 
             SendConnectionStateChange(
@@ -163,6 +193,28 @@ module
                 [in] Int32 port,
                 [in] Int32 flag,
                 [out] IParcelFileDescriptor** fd);
+
+            ConfigHciSnoopLog(
+                [in] Boolean isEnable,
+                [out] Boolean* result);
+
+            IsMultiAdvertisementSupported(
+                [out] Boolean* result);
+
+            IsOffloadedFilteringSupported(
+                [out] Boolean* result);
+
+            IsOffloadedScanBatchingSupported(
+                [out] Boolean* result);
+
+            IsActivityAndEnergyReportingSupported(
+                [out] Boolean* result);
+
+            GetActivityEnergyInfoFromController();
+
+            ReportActivityInfo(
+                [out] IBluetoothActivityEnergyInfo** info);
+
         }
 
     } // Bluetooth

@@ -81,8 +81,8 @@ module
     interface ISwipeHelper {
         const Int32 X = 0;
         const Int32 Y = 1;
-        const Float ALPHA_FADE_START = 0.0;    //fraction of thumbnail width where fade starts
-        const Float ALPHA_FADE_END = 0.5;      //fraction of thumbnail width beyond which
+        const Float SWIPE_PROGRESS_FADE_START = 0.0;    //fraction of thumbnail width where fade starts
+        const Float SWIPE_PROGRESS_FADE_END = 0.5;      //fraction of thumbnail width beyond which
 
         SetLongPressListener(
             [in] ISwipeHelperLongPressListener* listener);

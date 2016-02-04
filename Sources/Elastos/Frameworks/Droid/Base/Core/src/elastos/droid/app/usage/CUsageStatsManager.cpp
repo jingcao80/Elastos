@@ -55,8 +55,8 @@ ECode CUsageStatsManager::QueryUsageStats(
     AutoPtr<IParceledListSlice> slice;
     String packageName;
     mContext->GetOpPackageName(&packageName);
-    ECode ec = mService->QueryUsageStats(intervalType, beginTime, endTime, packageName,
-        (IParceledListSlice**)&slice);
+    FAIL_RETURN(mService->QueryUsageStats(intervalType, beginTime, endTime, packageName,
+            (IParceledListSlice**)&slice));
     if (slice != NULL) {
         return slice->GetList(result);
     }
@@ -78,8 +78,8 @@ ECode CUsageStatsManager::QueryConfigurations(
     AutoPtr<IParceledListSlice> slice;
     String packageName;
     mContext->GetOpPackageName(&packageName);
-    ECode ec = mService->QueryConfigurationStats(intervalType, beginTime, endTime, packageName,
-        (IParceledListSlice**)&slice);
+    FAIL_RETURN(mService->QueryConfigurationStats(intervalType, beginTime, endTime, packageName,
+            (IParceledListSlice**)&slice));
     if (slice != NULL) {
         return slice->GetList(result);
     }

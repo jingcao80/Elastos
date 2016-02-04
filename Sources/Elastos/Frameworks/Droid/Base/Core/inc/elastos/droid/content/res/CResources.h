@@ -20,6 +20,7 @@ using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Graphics::Drawable::IDrawableConstantState;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::Utility::IInt64SparseArray;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Droid::Utility::Pools;
@@ -67,9 +68,7 @@ public:
     // private final ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> mDrawableCache
     // private final ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> mColorStateListCache
     // private final LongSparseArray<WeakReference<ColorStateList>> mColorDrawableCache
-    typedef HashMap<Int64, AutoPtr<IWeakReference> > ConstantStateMap;
-    typedef typename ConstantStateMap::Iterator ConstantStateMapIterator;
-    typedef HashMap<String, AutoPtr<ConstantStateMap> > DrawableMap;
+    typedef HashMap<String, AutoPtr<IInt64SparseArray> > DrawableMap;
     typedef typename DrawableMap::Iterator DrawableMapIterator;
 
     typedef HashMap<Int64, AutoPtr<IWeakReference> > ColorStateMap;
@@ -198,6 +197,13 @@ public:
 
         /** Unique key for the series of styles applied to this theme. */
         String mKey;
+    };
+
+private:
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
     };
 
 public:
@@ -1231,10 +1237,8 @@ public:
     /**
      * @hide
      */
-    AutoPtr<ConstantStateMap> GetPreloadedDrawables();
-
     CARAPI GetPreloadedDrawables(
-        /* [out] */ IHashMap** drawables);
+        /* [out] */ IInt64SparseArray** drawables);
 
     CARAPI LoadDrawable(
         /* [in] */ ITypedValue* value,
@@ -1287,7 +1291,7 @@ private:
         /* [in] */ Int32 configChanges);
 
     CARAPI_(void) ClearDrawableCacheLocked(
-        /* [in] */ ConstantStateMap* cache,
+        /* [in] */ IInt64SparseArray* cache,
         /* [in] */ Int32 configChanges);
 
     CARAPI_(Boolean) VerifyPreloadConfig(
@@ -1302,11 +1306,11 @@ private:
         /* [in] */ IResourcesTheme* theme);
 
     CARAPI_(AutoPtr<IDrawableConstantState>) GetConstantStateLocked(
-        /* [in] */ ConstantStateMap* drawableCache,
+        /* [in] */ IInt64SparseArray* drawableCache,
         /* [in] */ Int64 key);
 
     CARAPI_(AutoPtr<IDrawable>) GetCachedDrawableLocked(
-        /* [in] */ ConstantStateMap* drawableCache,
+        /* [in] */ IInt64SparseArray* drawableCache,
         /* [in] */ Int64 key);
 
     CARAPI_(AutoPtr<IColorStateList>) GetCachedColorStateList(
@@ -1340,25 +1344,25 @@ private:
     static const Boolean TRACE_FOR_PRELOAD;
     static const Boolean TRACE_FOR_MISS_PRELOAD;
 
-    static const Int32 LAYOUT_DIR_CONFIG;//= ActivityInfo.activityInfoConfigToNative(ActivityInfo.CONFIG_LAYOUT_DIRECTION);
+    static Int32 LAYOUT_DIR_CONFIG;
     static const Int32 ID_OTHER;
 
     static Object sSync;
 
-    static List< AutoPtr<ConstantStateMap> > sPreloadedDrawables;
-    static ConstantStateMap sPreloadedColorDrawables;
+    static AutoPtr< ArrayOf<IInt64SparseArray*> > sPreloadedDrawables;
+    static AutoPtr<IInt64SparseArray> sPreloadedColorDrawables;
     static ColorStateMap sPreloadedColorStateLists;
 
     // Pool of TypedArrays targeted to this Resources object.
     AutoPtr<Pools::SynchronizedPool<ITypedArray> > mTypedArrayPool;
 
-    static AutoPtr<IResources> mSystem;
+    static AutoPtr<IResources> sSystem;
 
     static Boolean sPreloaded;
     static Int32 sPreloadedDensity;
 
     // These are protected by the mTmpValue lock.
-    Object mAccessLock;// = new Object();
+    Object mAccessLock;
     AutoPtr<CConfiguration> mTmpConfig;
     DrawableMap mDrawableCache;
     DrawableMap mColorDrawableCache;
@@ -1384,7 +1388,9 @@ private:
 
     AutoPtr<IWeakReference> mToken;//WeakReference<IBinder> mToken;
 
-    static const String WIDGET_SUFFIX;// = "widget_preview";
+    static const String WIDGET_SUFFIX;
+
+    static const StaticInitializer sInitializer;
 };
 
 } // namespace Res

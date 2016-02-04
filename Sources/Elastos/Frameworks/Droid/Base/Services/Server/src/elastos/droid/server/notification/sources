@@ -1,0 +1,28 @@
+TARGET_NAME= notification
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
+
+C_DEFINES += -DDROID_SERVER
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+SOURCES = NotificationManagerService.cpp
+SOURCES += ConditionProviders.cpp
+SOURCES += CountdownConditionProvider.cpp
+SOURCES += DowntimeConditionProvider.cpp
+SOURCES += GlobalSortKeyComparator.cpp
+SOURCES += ManagedServices.cpp
+SOURCES += NotificationComparator.cpp
+SOURCES += NotificationIntrusivenessExtractor.cpp
+SOURCES += NotificationRecord.cpp
+SOURCES += NotificationUsageStats.cpp
+SOURCES += PackagePriorityExtractor.cpp
+SOURCES += PackageVisibilityExtractor.cpp
+SOURCES += RankingHelper.cpp
+SOURCES += RankingReconsideration.cpp
+SOURCES += ValidateNotificationPeople.cpp
+SOURCES += ZenLog.cpp
+SOURCES += ZenModeHelper.cpp
+SOURCES += notification.cpp

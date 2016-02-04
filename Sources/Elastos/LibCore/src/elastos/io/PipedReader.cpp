@@ -308,14 +308,14 @@ ECode PipedReader::Done()
 
 ECode PipedReader::constructor()
 {
-    return NOERROR;
+    return Reader::constructor();
 }
 
 ECode PipedReader::constructor(
     /* [in] */ IPipedWriter* out)
 {
     VALIDATE_NOT_NULL(out)
-
+    FAIL_RETURN(Reader::constructor());
     FAIL_RETURN(Connect(out));
     return NOERROR;
 }
@@ -327,6 +327,7 @@ ECode PipedReader::constructor(
         // throw new IllegalArgumentException("pipe size " + pipeSize + " too small");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+    FAIL_RETURN(Reader::constructor());
     mBuffer = ArrayOf<Char32>::Alloc(pipeSize);
     return NOERROR;
 }

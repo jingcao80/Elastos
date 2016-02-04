@@ -254,73 +254,73 @@ module
         const Int32 _GL_XOR                                   = 0x1506;
         const Int32 _GL_ZERO                                  = 0;
 
-        glActiveTexture(
+        GlActiveTexture(
             [in] Int32 texture);
 
-        glAlphaFunc(
+        GlAlphaFunc(
             [in] Int32 func,
             [in] Float ref);
 
-        glAlphaFuncx(
+        GlAlphaFuncx(
             [in] Int32 func,
             [in] Int32 ref);
 
-        glBlendFunc(
+        GlBlendFunc(
             [in] Int32 sfactor,
             [in] Int32 dfactor);
 
-        glClear(
+        GlClear(
             [in] Int32 mask);
 
-        glClearColor(
+        GlClearColor(
             [in] Float red,
             [in] Float green,
             [in] Float blue,
             [in] Float alpha);
 
-        glClearColorx(
+        GlClearColorx(
             [in] Int32 red,
             [in] Int32 green,
             [in] Int32 blue,
             [in] Int32 alpha);
 
-        glClearDepthf(
+        GlClearDepthf(
             [in] Float depth);
 
-        glClearDepthx(
+        GlClearDepthx(
             [in] Int32 depth);
 
-        glClearStencil(
+        GlClearStencil(
             [in] Int32 s);
 
-        glClientActiveTexture(
+        GlClientActiveTexture(
             [in] Int32 texture);
 
-        glColor4f(
+        GlColor4f(
             [in] Float red,
             [in] Float green,
             [in] Float blue,
             [in] Float alpha);
 
-        glColor4x(
+        GlColor4x(
             [in] Int32 red,
             [in] Int32 green,
             [in] Int32 blue,
             [in] Int32 alpha);
 
-        glColorMask(
+        GlColorMask(
             [in] Boolean red,
             [in] Boolean green,
             [in] Boolean blue,
             [in] Boolean alpha);
 
-        glColorPointer(
+        GlColorPointer(
             [in] Int32 size,
             [in] Int32 type,
             [in] Int32 stride,
             [in] IBuffer* pointer);
 
-        glCompressedTexSubImage2D(
+        GlCompressedTexSubImage2D(
             [in] Int32 target,
             [in] Int32 level,
             [in] Int32 xoffset,
@@ -331,7 +331,7 @@ module
             [in] Int32 imageSize,
             [in] IBuffer* data);
 
-        glCopyTexSubImage2D(
+        GlCopyTexSubImage2D(
             [in] Int32 target,
             [in] Int32 level,
             [in] Int32 xoffset,
@@ -341,83 +341,83 @@ module
             [in] Int32 width,
             [in] Int32 height);
 
-        glCullFace(
+        GlCullFace(
             [in] Int32 mode);
 
-        glDeleteTextures(
+        GlDeleteTextures(
             [in] Int32 n,
             [in] ArrayOf<Int32>* textures,
             [in] Int32 offset);
 
-        glDeleteTextures(
+        GlDeleteTextures(
             [in] Int32 n,
             [in] IInt32Buffer* textures);
 
-        glDepthFunc(
+        GlDepthFunc(
             [in] Int32 func);
 
-        glDepthMask(
+        GlDepthMask(
             [in] Boolean flag);
 
-        glDepthRangef(
+        GlDepthRangef(
             [in] Float zNear,
             [in] Float zFar);
 
-        glDepthRangex(
+        GlDepthRangex(
             [in] Int32 zNear,
             [in] Int32 zFar);
 
-        glDisable(
+        GlDisable(
             [in] Int32 cap);
 
-        glDisableClientState(
+        GlDisableClientState(
             [in] Int32 array);
 
-        glDrawArrays(
+        GlDrawArrays(
             [in] Int32 mode,
             [in] Int32 first,
             [in] Int32 count);
 
-        glDrawElements(
+        GlDrawElements(
             [in] Int32 mode,
             [in] Int32 count,
             [in] Int32 type,
             [in] IBuffer* indices);
 
-        glFinish();
+        GlFinish();
 
-        glFlush();
+        GlFlush();
 
-        glFogf(
+        GlFogf(
             [in] Int32 pname,
             [in] Float param);
 
-        glFogfv(
+        GlFogfv(
             [in] Int32 pname,
             [in] ArrayOf<Float>* params,
             [in] Int32 offset);
 
-        glFogfv(
+        GlFogfv(
             [in] Int32 pname,
             [in] IFloatBuffer* params);
 
-        glFogx(
+        GlFogx(
             [in] Int32 pname,
             [in] Int32 param);
 
-        glFogxv(
+        GlFogxv(
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
             [in] Int32 offset);
 
-        glFogxv(
+        GlFogxv(
             [in] Int32 pname,
             [in] IInt32Buffer* params);
 
-        glFrontFace(
+        GlFrontFace(
             [in] Int32 mode);
 
-        glFrustumf(
+        GlFrustumf(
             [in] Float left,
             [in] Float right,
             [in] Float bottom,
@@ -425,7 +425,7 @@ module
             [in] Float zNear,
             [in] Float zFar);
 
-        glFrustumx(
+        GlFrustumx(
             [in] Int32 left,
             [in] Int32 right,
             [in] Int32 bottom,
@@ -433,188 +433,188 @@ module
             [in] Int32 zNear,
             [in] Int32 zFar);
 
-        glGenTextures(
+        GlGenTextures(
             [in] Int32 n,
             [in] ArrayOf<Int32>* textures,
             [in] Int32 offset);
 
-        glGenTextures(
+        GlGenTextures(
             [in] Int32 n,
             [in] IInt32Buffer* textures);
 
-        glGetError(
+        GlGetError(
             [out] Int32* error);
 
-        glGetString(
+        GlGetString(
             [in] Int32 name,
             [out] String* str);
 
-        glHint(
+        GlHint(
             [in] Int32 target,
             [in] Int32 mode);
 
-        glLightModelf(
+        GlLightModelf(
             [in] Int32 pname,
             [in] Float param);
 
-        glLightModelfv(
+        GlLightModelfv(
             [in] Int32 pname,
             [in] ArrayOf<Float>* params,
             [in] Int32 offset);
 
-        glLightModelfv(
+        GlLightModelfv(
             [in] Int32 pname,
             [in] IFloatBuffer* params);
 
-        glLightModelx(
+        GlLightModelx(
             [in] Int32 pname,
             [in] Int32 param);
 
-        glLightModelxv(
+        GlLightModelxv(
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
             [in] Int32 offset);
 
-        glLightModelxv(
+        GlLightModelxv(
             [in] Int32 pname,
             [in] IInt32Buffer* params);
 
-        glLightf(
+        GlLightf(
             [in] Int32 light,
             [in] Int32 pname,
             [in] Float param);
 
-        glLightfv(
+        GlLightfv(
             [in] Int32 light,
             [in] Int32 pname,
             [in] ArrayOf<Float>* params,
             [in] Int32 offset);
 
-        glLightfv(
+        GlLightfv(
             [in] Int32 light,
             [in] Int32 pname,
             [in] IFloatBuffer* params);
 
-        glLightx(
+        GlLightx(
             [in] Int32 light,
             [in] Int32 pname,
             [in] Int32 param);
 
-        glLightxv(
+        GlLightxv(
             [in] Int32 light,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
             [in] Int32 offset);
 
-        glLightxv(
+        GlLightxv(
             [in] Int32 light,
             [in] Int32 pname,
             [in] IInt32Buffer* params);
 
-        glLineWidth(
+        GlLineWidth(
             [in] Float width);
 
-        glLineWidthx(
+        GlLineWidthx(
             [in] Int32 width);
 
-        glLoadIdentity();
+        GlLoadIdentity();
 
-        glLoadMatrixf(
+        GlLoadMatrixf(
             [in] ArrayOf<Float>* m,
             [in] Int32 offset);
 
-        glLoadMatrixf(
+        GlLoadMatrixf(
             [in] IFloatBuffer* m);
 
-        glLoadMatrixx(
+        GlLoadMatrixx(
             [in] ArrayOf<Int32>* m,
             [in] Int32 offset);
 
-        glLoadMatrixx(
+        GlLoadMatrixx(
             [in] IInt32Buffer* m);
 
-        glLogicOp(
+        GlLogicOp(
             [in] Int32 opcode);
 
-        glMaterialf(
+        GlMaterialf(
             [in] Int32 face,
             [in] Int32 pname,
             [in] Float param);
 
-        glMaterialfv(
+        GlMaterialfv(
             [in] Int32 face,
             [in] Int32 pname,
             [in] ArrayOf<Float>* params,
             [in] Int32 offset);
 
-        glMaterialfv(
+        GlMaterialfv(
             [in] Int32 face,
             [in] Int32 pname,
             [in] IFloatBuffer* params);
 
-        glMaterialx(
+        GlMaterialx(
             [in] Int32 face,
             [in] Int32 pname,
             [in] Int32 param);
 
-        glMaterialxv(
+        GlMaterialxv(
             [in] Int32 face,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
             [in] Int32 offset);
 
-        glMaterialxv(
+        GlMaterialxv(
             [in] Int32 face,
             [in] Int32 pname,
             [in] IInt32Buffer* params);
 
-        glMatrixMode(
+        GlMatrixMode(
             [in] Int32 mode);
 
-        glMultMatrixf(
+        GlMultMatrixf(
             [in] ArrayOf<Float>* m,
             [in] Int32 offset);
 
-        glMultMatrixf(
+        GlMultMatrixf(
             [in] IFloatBuffer* m);
 
-        glMultMatrixx(
+        GlMultMatrixx(
             [in] ArrayOf<Int32>* m,
             [in] Int32 offset);
 
-        glMultMatrixx(
+        GlMultMatrixx(
             [in] IInt32Buffer* m);
 
-        glMultiTexCoord4f(
+        GlMultiTexCoord4f(
             [in] Int32 target,
             [in] Float s,
             [in] Float t,
             [in] Float r,
             [in] Float q);
 
-        glMultiTexCoord4x(
+        GlMultiTexCoord4x(
             [in] Int32 target,
             [in] Int32 s,
             [in] Int32 t,
             [in] Int32 r,
             [in] Int32 q);
 
-        glNormal3f(
+        GlNormal3f(
             [in] Float nx,
             [in] Float ny,
             [in] Float nz);
 
-        glNormal3x(
+        GlNormal3x(
             [in] Int32 nx,
             [in] Int32 ny,
             [in] Int32 nz);
 
-        glNormalPointer(
+        GlNormalPointer(
             [in] Int32 type,
             [in] Int32 stride,
             [in] IBuffer* pointer);
 
-        glOrthof(
+        GlOrthof(
             [in] Float left,
             [in] Float right,
             [in] Float bottom,
@@ -622,7 +622,7 @@ module
             [in] Float zNear,
             [in] Float zFar);
 
-        glOrthox(
+        GlOrthox(
             [in] Int32 left,
             [in] Int32 right,
             [in] Int32 bottom,
@@ -630,29 +630,29 @@ module
             [in] Int32 zNear,
             [in] Int32 zFar);
 
-        glPixelStorei(
+        GlPixelStorei(
             [in] Int32 pname,
             [in] Int32 param);
 
-        glPointSize(
+        GlPointSize(
             [in] Float size);
 
-        glPointSizex(
+        GlPointSizex(
             [in] Int32 size);
 
-        glPolygonOffset(
+        GlPolygonOffset(
             [in] Float factor,
             [in] Float units);
 
-        glPolygonOffsetx(
+        GlPolygonOffsetx(
             [in] Int32 factor,
             [in] Int32 units);
 
-        glPopMatrix();
+        GlPopMatrix();
 
-        glPushMatrix();
+        GlPushMatrix();
 
-        glReadPixels(
+        GlReadPixels(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 width,
@@ -661,60 +661,60 @@ module
             [in] Int32 type,
             [in] IBuffer* pixels);
 
-        glRotatef(
+        GlRotatef(
             [in] Float angle,
             [in] Float x,
             [in] Float y,
             [in] Float z);
 
-        glRotatex(
+        GlRotatex(
             [in] Int32 angle,
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 z);
 
-        glSampleCoverage(
+        GlSampleCoverage(
             [in] Float value,
             [in] Boolean invert);
 
-        glSampleCoveragex(
+        GlSampleCoveragex(
             [in] Int32 value,
             [in] Boolean invert);
 
-        glScalef(
+        GlScalef(
             [in] Float x,
             [in] Float y,
             [in] Float z);
 
-        glScalex(
+        GlScalex(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 z);
 
-        glScissor(
+        GlScissor(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 width,
             [in] Int32 height);
 
-        glShadeModel(
+        GlShadeModel(
             [in] Int32 mode);
 
-        glStencilFunc(
+        GlStencilFunc(
             [in] Int32 func,
             [in] Int32 ref,
             [in] Int32 mask);
 
-        glStencilMask(
+        GlStencilMask(
             [in] Int32 mask);
 
-        glTexCoordPointer(
+        GlTexCoordPointer(
             [in] Int32 size,
             [in] Int32 type,
             [in] Int32 stride,
             [in] IBuffer* pointer);
 
-        glTexImage2D(
+        GlTexImage2D(
             [in] Int32 target,
             [in] Int32 level,
             [in] Int32 internalformat,
@@ -725,12 +725,12 @@ module
             [in] Int32 type,
             [in] IBuffer* pixels);
 
-        glTexParameterx(
+        GlTexParameterx(
             [in] Int32 target,
             [in] Int32 pname,
             [in] Int32 param);
 
-        glTexSubImage2D(
+        GlTexSubImage2D(
             [in] Int32 target,
             [in] Int32 level,
             [in] Int32 xoffset,
@@ -741,23 +741,23 @@ module
             [in] Int32 type,
             [in] IBuffer* pixels);
 
-        glTranslatef(
+        GlTranslatef(
             [in] Float x,
             [in] Float y,
             [in] Float z);
 
-        glTranslatex(
+        GlTranslatex(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 z);
 
-        glVertexPointer(
+        GlVertexPointer(
             [in] Int32 size,
             [in] Int32 type,
             [in] Int32 stride,
             [in] IBuffer* pointer);
 
-        glViewport(
+        GlViewport(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 width,

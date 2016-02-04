@@ -1,69 +1,104 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_SIGNALCLUSTERVIEW_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_SIGNALCLUSTERVIEW_H__
 
-#include "elastos/droid/os/Runnable.h"
-#include "elastos/droid/widget/LinearLayout.h"
+#include "_SystemUI.h"
+#include <elastos/droid/os/Runnable.h>
+#include <elastos/droid/widget/LinearLayout.h>
 
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::LinearLayout;
 using Elastos::Droid::Widget::IImageView;
-using Elastos::Droid::SystemUI::StatusBar::Policy::INetworkController;
+using Elastos::Droid::Packages::SystemUI::StatusBar::Policy::INetworkControllerImpl;
+using Elastos::Droid::Packages::SystemUI::StatusBar::Policy::INetworkControllerImplSignalCluster;
+using Elastos::Droid::Packages::SystemUI::StatusBar::Policy::ISecurityController;
+using Elastos::Droid::Packages::SystemUI::StatusBar::Policy::ISecurityControllerCallback;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 
-
-class SignalClusterView : public LinearLayout
+class SignalClusterView
+    : public LinearLayout
+    , public ISignalClusterView
+    , public INetworkControllerImplSignalCluster
+    , public ISecurityControllerCallback
 {
+private:
+    class ChangedRunnable : public Runnable
+    {
+    public:
+        ChangedRunnable(
+            /* [in] */ SignalClusterView* host);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        SignalClusterView* mHost;
+    };
+
+    class TmpCallback
+        : public Object
+        , public ISecurityControllerCallback
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        TmpCallback(
+            /* [in] */ SignalClusterView* host);
+
+        CARAPI OnStateChanged();
+
+    private:
+        SignalClusterView* mHost;
+    };
+
 public:
+    CAR_INTERFACE_DECL();
+
     SignalClusterView();
 
-    SignalClusterView(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
-    SignalClusterView(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
-    SignalClusterView(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs,
         /* [in] */ Int32 defStyle);
 
     CARAPI SetNetworkController(
-        /* [in] */ INetworkController* nc);
+        /* [in] */ INetworkControllerImpl* nc);
 
-protected:
-    virtual CARAPI OnAttachedToWindow();
+    CARAPI SetSecurityController(
+        /* [in] */ ISecurityController* sc);
 
-    virtual CARAPI OnDetachedFromWindow();
+    // From SecurityController.
+    // @Override
+    CARAPI OnStateChanged();
 
     //@Override
     virtual CARAPI SetWifiIndicators(
         /* [in] */ Boolean visible,
         /* [in] */ Int32 strengthIcon,
-        /* [in] */ Int32 activityIcon,
         /* [in] */ const String& contentDescription);
 
     //@Override
     virtual CARAPI SetMobileDataIndicators(
         /* [in] */ Boolean visible,
         /* [in] */ Int32 strengthIcon,
-        /* [in] */ Int32 activityIcon,
         /* [in] */ Int32 typeIcon,
         /* [in] */ const String& contentDescription,
-        /* [in] */ const String& typeContentDescription);
-
-    //@Override
-    virtual CARAPI SetEthernetIndicators(
-        /* [in] */ Boolean visible,
-        /* [in] */ Int32 stateIcon,
-        /* [in] */ Int32 activityIcon,
-        /* [in] */ const String& contentDescription);
+        /* [in] */ const String& typeContentDescription,
+        /* [in] */ Boolean roaming,
+        /* [in] */ Boolean isTypeIconWide);
 
     //@Override
     virtual CARAPI SetIsAirplaneMode(
@@ -71,55 +106,68 @@ protected:
         /* [in] */ Int32 airplaneIcon);
 
     //@Override
-    virtual CARAPI_(Boolean) DispatchPopulateAccessibilityEvent(
-        /* [in] */ IAccessibilityEvent* event);
+    virtual CARAPI DispatchPopulateAccessibilityEvent(
+        /* [in] */ IAccessibilityEvent* event,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI OnRtlPropertiesChanged(
+        /* [in] */ Int32 layoutDirection);
+
+    // @Override
+    CARAPI HasOverlappingRendering(
+        /* [out] */ Boolean* result);
+
+protected:
+    virtual CARAPI OnAttachedToWindow();
+
+    virtual CARAPI OnDetachedFromWindow();
+
+    // @Override
+    CARAPI OnFinishInflate();
 
 private:
     // Run after each indicator change.
     CARAPI_(void) Apply();
 
 private:
-    // static final Boolean DEBUG = false;
-    // static final String TAG = "SignalClusterView";
+    static const String TAG;
+    static Boolean DEBUG;
 
-    AutoPtr<INetworkController> mNC;
+    AutoPtr<INetworkControllerImpl> mNC;
+    AutoPtr<ISecurityController> mSC;
 
+    Boolean mVpnVisible;
     Boolean mWifiVisible;
     Int32 mWifiStrengthId;
-    Int32 mWifiActivityId;
     Boolean mMobileVisible;
     Int32 mMobileStrengthId;
-    Int32 mMobileActivityId;
     Int32 mMobileTypeId;
-    Boolean mEthernetVisible;
-    Int32 mEthernetStateId;
-    Int32 mEthernetActivityId;
     Boolean mIsAirplaneMode;
     Int32 mAirplaneIconId;
     String mWifiDescription;
     String mMobileDescription;
     String mMobileTypeDescription;
-    String mEthernetDescription;
+    Boolean mRoaming;
+    Boolean mIsMobileTypeIconWide;
 
     AutoPtr<IViewGroup> mWifiGroup;
     AutoPtr<IViewGroup> mMobileGroup;
-    AutoPtr<IViewGroup> mEthernetGroup;
-
+    AutoPtr<IImageView> mVpn;
     AutoPtr<IImageView> mWifi;
     AutoPtr<IImageView> mMobile;
-    AutoPtr<IImageView> mWifiActivity;
-    AutoPtr<IImageView> mMobileActivity;
     AutoPtr<IImageView> mMobileType;
-    AutoPtr<IImageView> mEthernet;
     AutoPtr<IImageView> mAirplane;
+    AutoPtr<IView> mWifiAirplaneSpacer;
+    AutoPtr<IView> mWifiSignalSpacer;
 
-    AutoPtr<IView> mSpacer;
+    Int32 mWideTypeIconStartPadding;
 };
 
-
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos
 
 #endif //__ELASTOS_DROID_SYSTEMUI_STATUSBAR_SIGNALCLUSTERVIEW_H__

@@ -55,6 +55,7 @@ SOURCES += CPasswordEntryKeyboard.cpp
 SOURCES += CLockPatternUtilsCacheHelper.cpp
 SOURCES += CLockPatternUtilsCache.cpp
 SOURCES += CLockPatternUtilsCacheObserver.cpp
+SOURCES += CLockPatternUtilsHelper.cpp
 SOURCES += LockPatternView.cpp
 SOURCES += CLockPatternViewCellHelper.cpp
 SOURCES += LockPatternUtils.cpp

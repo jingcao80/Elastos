@@ -259,14 +259,14 @@ ECode WebVttParser::ParseCueTextPhase::Parse(
     if (line.GetLength() == 0) {
         mHost->YieldCue();
         mHost->mPhase = mHost->mParseCueId;
-        return NOERROR;
-    } else if (mHost->mCue != NULL) {
+    }
+    else if (mHost->mCue != NULL) {
         AutoPtr<ICharSequence> cs;
         CString::New(line, (ICharSequence**)&cs);
         AutoPtr<IVector> cts = mHost->mCueTexts;
         cts->Add(cs);
-        return NOERROR;
     }
+    return NOERROR;
 }
 
 //===============================================================

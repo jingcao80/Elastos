@@ -18,7 +18,11 @@ $   WITH all interfaceconsts DO
 $     IF type is "Byte" or type is "Int16" or type is "Int32" or type is "Char32"
 const ${type} ${interface.name}::${name};
 $     ELSE
+$        IF type is "String"
+INIT_PROI_1 const ${type} ${interface.name}::${name} = ${value};
+$        ELSE
 const ${type} ${interface.name}::${name} = ${value};
+$        END IF
 $     END IF
 $   END DO ;; all interfaceconsts
 ${InterfaceNamespaceEnd(interface)}$^

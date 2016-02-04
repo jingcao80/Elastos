@@ -117,6 +117,7 @@ module
     using interface Elastos.Core.ICharSequence;
     using interface Elastos.Core.IComparable;
     using interface Elastos.IO.ICloseable;
+    using interface Elastos.IO.IDataInputStream;
     using interface Elastos.IO.IFile;
     using interface Elastos.IO.IFileDescriptor;
     using interface Elastos.IO.IInputStream;
@@ -622,6 +623,9 @@ module
         constructor(
             [in] INetworkStatsHistory* existing,
             [in] Int64 bucketDuration);
+
+        constructor(
+            [in] IDataInputStream* dis);
 
         interface INetworkStatsHistory;
         interface IParcelable;

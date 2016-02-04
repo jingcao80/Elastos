@@ -28,7 +28,7 @@ public:
 
     CAR_OBJECT_DECL()
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ IIPackageManager* owner,
         /* [in] */ ISet* keys,
         /* [in] */ Boolean reportStatus);
@@ -41,6 +41,9 @@ public:
        /* [in] */ Boolean ordered,
        /* [in] */ Boolean sticky,
        /* [in] */ Int32 sendingUser);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     CPackageManagerService* mOwner;

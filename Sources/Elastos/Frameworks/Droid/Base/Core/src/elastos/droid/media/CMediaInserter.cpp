@@ -135,6 +135,7 @@ ECode CMediaInserter::Flush(
         mProvider->BulkInsert(mPackageName, tableUri, valuesArray, &result);
         list->Clear();
     }
+    return NOERROR;
 }
 
 } // namespace Media

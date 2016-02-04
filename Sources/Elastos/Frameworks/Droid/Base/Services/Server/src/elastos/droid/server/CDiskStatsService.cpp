@@ -1,31 +1,37 @@
 
-#include "CDiskStatsService.h"
+#include "elastos/droid/server/CDiskStatsService.h"
 #include "elastos/droid/os/SystemClock.h"
-#include "Elastos.Core.h"
 #include "elastos/droid/Manifest.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
 
-using Elastos::Core::StringUtils;
-using Libcore::IO::CLibcore;
-using Libcore::IO::ILibcore;
-using Libcore::IO::IOs;
-using Libcore::IO::CStructStatFs;
-using Libcore::IO::IStructStatFs;
-using Elastos::IO::CFile;
-using Elastos::IO::IFile;
-using Elastos::IO::CFileOutputStream;
-using Elastos::IO::IFileOutputStream;
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.IO.h"
+
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::CEnvironment;
+using Elastos::Droid::Os::IStatFs;
+using Elastos::Droid::Os::CStatFs;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Slogger;
+using Elastos::IO::CFile;
+using Elastos::IO::IFile;
+using Elastos::IO::CFileOutputStream;
+using Elastos::IO::IOutputStream;
+using Elastos::IO::ICloseable;
+
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 const String CDiskStatsService::TAG("DiskStatsService");
+
+CAR_INTERFACE_IMPL(CDiskStatsService, Object, IBinder)
+
+CAR_OBJECT_IMPL(CDiskStatsService)
 
 ECode CDiskStatsService::constructor(
     /* [in] */ IContext* context)
@@ -56,20 +62,20 @@ ECode CDiskStatsService::Dump(
     CFile::New(dataDirectory, String("system/perftest.tmp"),
         (IFile **)&tmp);
 
-    AutoPtr<IFileOutputStream> fos;
+    AutoPtr<IOutputStream> fos;
     ECode ec = NOERROR;
 
     Int64 before = SystemClock::GetUptimeMillis();
 
     do {
-        ec = CFileOutputStream::New(tmp, (IFileOutputStream**)&fos);
+        ec = CFileOutputStream::New(tmp, (IOutputStream**)&fos);
         if (FAILED(ec))
             break;
-        ec = fos->WriteBytes(*junk);
+        ec = fos->Write(junk);
     } while (0);
 
     if (fos != NULL) {
-        fos->Close();
+        ICloseable::Probe(fos)->Close();
     }
 
     Int64 after = SystemClock::GetUptimeMillis();
@@ -81,13 +87,13 @@ ECode CDiskStatsService::Dump(
     }
 
     if (FAILED(ec)) {
-       pw->PrintString(String("Test-Error: "));
-       pw->PrintStringln(StringUtils::Int32ToString(ec, 16));
+       pw->Print(String("Test-Error: "));
+       pw->Println(StringUtils::ToString(ec, 16));
     }
     else {
-       pw->PrintString(String("Latency: "));
-       pw->PrintInt64(after - before);
-       pw->PrintStringln(String("ms [512B Data Write]"));
+       pw->Print(String("Latency: "));
+       pw->Print(after - before);
+       pw->Println(String("ms [512B Data Write]"));
     }
 
     ReportFreeSpace(dataDirectory, String("Data"), pw);
@@ -112,17 +118,14 @@ void CDiskStatsService::ReportFreeSpace(
     //try {
     String p;
     path->GetPath(&p);
-    AutoPtr<ILibcore> libcore;
-    CLibcore::AcquireSingleton((ILibcore**)&libcore);
-    AutoPtr<IOs> os;
-    libcore->GetOs((IOs**)&os);
-    AutoPtr<IStructStatFs> statfs;
-    os->Statfs(p, (IStructStatFs**)&statfs);
+
+    AutoPtr<IStatFs> statfs;
+    CStatFs::New(p, (IStatFs**)&statfs);
 
     Int64 bsize, avail, total;
-    statfs->GetBsize(&bsize);
-    statfs->GetBavail(&avail);
-    statfs->GetBlocks(&total);
+    statfs->GetBlockSize(&bsize);
+    statfs->GetAvailableBlocks(&avail);
+    statfs->GetBlockCount(&total);
     if (bsize <= 0 || total <= 0) {
         // throw new IllegalArgumentException(
         //                 "Invalid stat: bsize=" + bsize + " avail=" + avail + " total=" + total);
@@ -130,14 +133,14 @@ void CDiskStatsService::ReportFreeSpace(
         return;
     }
     else {
-        pw->PrintString(name);
-        pw->PrintString(String("-Free: "));
-        pw->PrintDouble(avail * bsize / 1024);
-        pw->PrintString(String("K / ") );
-        pw->PrintDouble(total * bsize / 1024);
-        pw->PrintString(String("K total = ") );
-        pw->PrintDouble(avail * 100 / total);
-        pw->PrintStringln(String("% free") );
+        pw->Print(name);
+        pw->Print(String("-Free: "));
+        pw->Print(avail * bsize / 1024);
+        pw->Print(String("K / ") );
+        pw->Print(total * bsize / 1024);
+        pw->Print(String("K total = ") );
+        pw->Print(avail * 100 / total);
+        pw->Println(String("% free") );
     }
     // } catch (IllegalArgumentException e) {
     //     pw.print(name);

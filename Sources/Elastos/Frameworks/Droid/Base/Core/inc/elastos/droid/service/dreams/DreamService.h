@@ -2,12 +2,12 @@
 #ifndef __ELASTOS_DROID_SERVICE_DREAMS_DREAMSERVICE_H__
 #define __ELASTOS_DROID_SERVICE_DREAMS_DREAMSERVICE_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/ext/frameworkext.h>
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Service.h"
 #include "Elastos.Droid.View.h"
-#include "elastos/droid/app/Service.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/droid/app/Service.h>
+#include <elastos/droid/os/Runnable.h>
 
 using Elastos::Droid::App::Service;
 using Elastos::Droid::Os::IBinder;
@@ -110,7 +110,7 @@ namespace Dreams {
  * }
  * </pre>
  */
-class DreamService
+class ECO_PUBLIC DreamService
     : public Elastos::Droid::App::Service
     , public IDreamService
     , public IWindowCallback

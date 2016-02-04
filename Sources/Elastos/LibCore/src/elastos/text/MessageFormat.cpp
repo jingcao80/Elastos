@@ -274,12 +274,14 @@ ECode MessageFormat::FormatImpl(
         AutoPtr<IFormat> format = (*mFormats)[i];
         if (format == NULL || arg == NULL) {
             if (INumber::Probe(arg) != NULL) {
-                format = NULL;
-                NumberFormat::GetInstance((INumberFormat**)&format);
+                AutoPtr<INumberFormat> nf;
+                NumberFormat::GetInstance((INumberFormat**)&nf);
+                format = IFormat::Probe(nf);
             }
             else if (IDate::Probe(arg) != NULL) {
-                format = NULL;
-                DateFormat::GetInstance((IDateFormat**)&format);
+                AutoPtr<IDateFormat> df;
+                DateFormat::GetInstance((IDateFormat**)&df);
+                format = IFormat::Probe(df);
             }
             else {
                 buffer->Append(Object::ToString(arg));
@@ -330,7 +332,7 @@ ECode MessageFormat::HandleArgumentField(
         AutoPtr<IAttributedCharacterIteratorAttribute> fa;
         position->GetFieldAttribute((IAttributedCharacterIteratorAttribute**)&fa);
         Boolean isflag = FALSE;
-        if (IObject::Probe(fa)->Equals(MessageFormatField::ARGUMENT, &isflag), isflag && endIndex == 0) {
+        if ((fa != NULL) && IObject::Probe(fa)->Equals(MessageFormatField::ARGUMENT, &isflag), isflag && endIndex == 0) {
             position->SetBeginIndex(begin);
             position->SetEndIndex(end);
         }
@@ -746,7 +748,9 @@ ECode MessageFormat::ParseVariable(
 
     case 2: // number
         if (ch == '}') {
-            NumberFormat::GetInstance(mLocale, (INumberFormat**)value);
+            NumberFormat::GetInstance(mLocale, (INumberFormat**)&nv);
+            *value = IFormat::Probe(nv);
+            REFCOUNT_ADD(*value);
             return NOERROR;
         }
         Int32 numberStyle;

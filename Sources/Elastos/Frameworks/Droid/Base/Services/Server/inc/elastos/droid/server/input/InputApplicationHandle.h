@@ -1,53 +1,50 @@
+#ifndef __ELASTOS_DROID_SERVER_INPUT_InputApplicationHandle_H__
+#define __ELASTOS_DROID_SERVER_INPUT_InputApplicationHandle_H__
 
-#ifndef __ELASTOS_DROID_SERVER_INPUT_INPUTAPPLICATIONHANDLE_H__
-#define __ELASTOS_DROID_SERVER_INPUT_INPUTAPPLICATIONHANDLE_H__
+#include "_Elastos.Droid.Server.h"
+#include "elastos/core/Object.h"
 
-#include <elastos.h>
-#include "NativeInputApplicationHandle.h"
-#include <input/InputApplication.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Input {
 
-/**
- * Functions as a handle for an application that can receive input.
- * Enables the native input dispatcher to refer indirectly to the window manager's
- * application window token.
- * @hide
- */
-class InputApplicationHandle : public ElRefBase
+class InputApplicationHandle
+    : public Object
+    , public IInputApplicationHandle
 {
 public:
+    CAR_INTERFACE_DECL();
+
     InputApplicationHandle(
-        /* [in] */ void* appWindowToken);
+        /* [in] */ IObject* appWindowToken);
 
-    ~InputApplicationHandle();
+    virtual ~InputApplicationHandle();
 
-    static CARAPI_(android::sp<android::InputApplicationHandle>) GetHandle(
-        /* [in] */ InputApplicationHandle* inputApplicationHandleObj);
+private:
+    CARAPI_(void) NativeDispose();
 
 public:
+    // The window manager's application window token.
+    AutoPtr<IObject> mAppWindowToken;
+
     // Application name.
     String mName;
 
     // Dispatching timeout.
     Int64 mDispatchingTimeoutNanos;
 
-    // The window manager's application window token.
-    // CWindowManagerService::AppWindowToken* mAppWindowToken
-    void* mAppWindowToken;
-
 private:
     // Pointer to the native input application handle.
     // This field is lazily initialized via JNI.
-    NativeInputApplicationHandle* mNative;
+    //@SuppressWarnings("unused")
+    Int64 mPtr;
 };
 
-} // namespace Input
-} // namespace Server
-} // namespace Droid
-} // namespace Elastos
+} // Input
+} // Server
+} // Droid
+} // Elastos
 
-#endif //__ELASTOS_DROID_SERVER_INPUT_INPUTAPPLICATIONHANDLE_H__
+#endif // __ELASTOS_DROID_SERVER_INPUT_InputApplicationHandle_H__

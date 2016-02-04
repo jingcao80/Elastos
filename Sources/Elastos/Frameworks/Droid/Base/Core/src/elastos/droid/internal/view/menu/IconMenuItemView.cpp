@@ -24,11 +24,7 @@ namespace Menu {
 const Int32 IconMenuItemView::NO_ALPHA = 0xFF;
 String IconMenuItemView::sPrependShortcutLabel;
 
-#if 0
 CAR_INTERFACE_IMPL_2(IconMenuItemView, TextView, IIconMenuItemView, IMenuItemView)
-#else
-CAR_INTERFACE_IMPL_2(IconMenuItemView, Elastos::Droid::View::View, IIconMenuItemView, IMenuItemView)
-#endif
 
 IconMenuItemView::IconMenuItemView()
     : mTextAppearance(0)
@@ -45,8 +41,7 @@ ECode IconMenuItemView::constructor(
     /* [in] */ Int32 defStyleAttr,
     /* [in] */ Int32 defStyleRes)
 {
-    assert(0);
-    // FAIL_RETURN(TextView::constructor(context, attrs));
+    FAIL_RETURN(TextView::constructor(context, attrs));
 
     if (sPrependShortcutLabel.IsNull()) {
         /*
@@ -96,8 +91,7 @@ void IconMenuItemView::Initialize(
     SetFocusable(TRUE);
 
     if (mTextAppearance != -1) {
-        assert(0);
-        // SetTextAppearance(mTextAppearanceContext, mTextAppearance);
+        SetTextAppearance(mTextAppearanceContext, mTextAppearance);
     }
 
     SetTitle(title);
@@ -138,11 +132,10 @@ ECode IconMenuItemView::PerformClick(
 {
     VALIDATE_NOT_NULL(result)
     // Let the view's click listener have top priority (the More button relies on this)
-    assert(0);
-    // if (TextView::PerformClick(result), *result) {
-    //     *result = TRUE;
-    //     return NOERROR;
-    // }
+    if (TextView::PerformClick(result), *result) {
+        *result = TRUE;
+        return NOERROR;
+    }
 
     Boolean res;
     if (mItemInvoker != NULL && (mItemInvoker->InvokeItem(mItemData, &res), res)) {
@@ -168,8 +161,7 @@ ECode IconMenuItemView::SetTitle(
         SetCaptionMode(TRUE);
     }
     else if (title != NULL) {
-        assert(0);
-        // SetText(title);
+        SetText(title);
     }
 
     return NOERROR;
@@ -201,8 +193,7 @@ void IconMenuItemView::SetCaptionMode(
         CString::New(mShortcutCaption, (ICharSequence**)&text);
     }
 
-    assert(0);
-    // SetText(text);
+    SetText(text);
 }
 
 ECode IconMenuItemView::SetIcon(
@@ -217,12 +208,11 @@ ECode IconMenuItemView::SetIcon(
         icon->GetIntrinsicHeight(&height);
         icon->SetBounds(0, 0, width, height);
 
-        assert(0);
-        // // Set the compound drawables
-        // SetCompoundDrawables(NULL, icon, NULL, NULL);
+        // Set the compound drawables
+        SetCompoundDrawables(NULL, icon, NULL, NULL);
 
-        // // When there is an icon, make sure the text is at the bottom
-        // SetGravity(IGravity::BOTTOM | IGravity::CENTER_HORIZONTAL);
+        // When there is an icon, make sure the text is at the bottom
+        SetGravity(IGravity::BOTTOM | IGravity::CENTER_HORIZONTAL);
 
         /*
          * Request a layout to reposition the icon. The positioning of icon
@@ -232,11 +222,10 @@ ECode IconMenuItemView::SetIcon(
         RequestLayout();
     }
     else {
-        assert(0);
-        // SetCompoundDrawables(NULL, NULL, NULL, NULL);
+        SetCompoundDrawables(NULL, NULL, NULL, NULL);
 
-        // // When there is no icon, make sure the text is centered vertically
-        // SetGravity(IGravity::CENTER_VERTICAL | IGravity::CENTER_HORIZONTAL);
+        // When there is no icon, make sure the text is centered vertically
+        SetGravity(IGravity::CENTER_VERTICAL | IGravity::CENTER_HORIZONTAL);
     }
 
     return NOERROR;
@@ -263,8 +252,7 @@ ECode IconMenuItemView::GetItemData(
 ECode IconMenuItemView::SetVisibility(
     /* [in] */ Int32 v)
 {
-    assert(0);
-    // TextView::SetVisibility(v);
+    TextView::SetVisibility(v);
 
     if (mIconMenuView != NULL) {
         // On visibility change, mark the IconMenuView to refresh itself eventually
@@ -283,8 +271,7 @@ void IconMenuItemView::SetIconMenuView(
 //@override
 ECode IconMenuItemView::DrawableStateChanged()
 {
-    assert(0);
-    // FAIL_RETURN(TextView::DrawableStateChanged())
+    FAIL_RETURN(TextView::DrawableStateChanged())
 
     if (mItemData != NULL && mIcon != NULL) {
         // When disabled, the not-focused state and the pressed state should
@@ -292,7 +279,7 @@ ECode IconMenuItemView::DrawableStateChanged()
         Boolean isEnabled, isPressed, isFocused;
         IMenuItem::Probe(mItemData)->IsEnabled(&isEnabled);
         Boolean isInAlphaState = !isEnabled && ((IsPressed(&isPressed), isPressed)
-            || !(IsFocused(&isFocused), isFocused));
+                || !(IsFocused(&isFocused), isFocused));
         mIcon->SetAlpha(isInAlphaState ? (Int32)(mDisabledAlpha * NO_ALPHA) : NO_ALPHA);
     }
 
@@ -307,20 +294,20 @@ ECode IconMenuItemView::OnLayout(
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom)
 {
-    assert(0);
-    // FAIL_RETURN(TextView::OnLayout(changed, left, top, right, bottom))
+    FAIL_RETURN(TextView::OnLayout(changed, left, top, right, bottom))
 
     PositionIcon();
+    return NOERROR;
 }
 
-ECode IconMenuItemView::OnTextChanged(
+void IconMenuItemView::OnTextChanged(
     /* [in] */ ICharSequence* text,
     /* [in] */ Int32 start,
     /* [in] */ Int32 before,
     /* [in] */ Int32 after)
 {
-    assert(0);
-    // FAIL_RETURN(TextView::OnTextChanged(text, start, before, after))
+    TextView::OnTextChanged(text, start, before, after);
+
     // our layout params depend on the length of the text
     SetLayoutParams(IViewGroupLayoutParams::Probe(GetTextAppropriateLayoutParams()));
 }
@@ -344,13 +331,12 @@ AutoPtr<IIconMenuViewLayoutParams> IconMenuItemView::GetTextAppropriateLayoutPar
         lp = IIconMenuViewLayoutParams::Probe(_lp);
     }
 
-    assert(0);
-    // AutoPtr<ICharSequence> text;
-    // GetText((ICharSequence**)&text);
-    // AutoPtr<ITextPaint> paint;
-    // GetPaint((ITextPaint**)&paint);
     // Set the desired width of item
-    // lp->SetDesiredWidth((Int32)Layout::GetDesiredWidth(text, paint));
+    AutoPtr<ICharSequence> text;
+    GetText((ICharSequence**)&text);
+    AutoPtr<ITextPaint> paint;
+    GetPaint((ITextPaint**)&paint);
+    lp->SetDesiredWidth((Int32)Layout::GetDesiredWidth(text, paint));
 
     return lp;
 }
@@ -363,8 +349,8 @@ void IconMenuItemView::PositionIcon()
 
     // We reuse the output rectangle as a temp rect
     IRect* tmpRect = mPositionIconOutput;
-    assert(0);
-    // GetLineBounds(0, tmpRect);
+    Int32 y;
+    GetLineBounds(0, tmpRect, &y);
 
     Int32 width, top;
     GetWidth(&width);
@@ -428,9 +414,7 @@ ECode IconMenuItemView::ShowsIcon(
 ECode IconMenuItemView::SetEnabled(
     /* [in] */ Boolean enabled)
 {
-    assert(0);
-    // return TextView::SetEnabled(enabled);
-    return NOERROR;
+    return TextView::SetEnabled(enabled);
 }
 
 } // namespace Menu

@@ -185,7 +185,7 @@ ECode CCursorToBulkCursorAdaptor::GetWindow(
 ECode CCursorToBulkCursorAdaptor::OnMove(
     /* [in] */ Int32 position)
 {
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfCursorIsClosed())
         Int32 mPosition;
@@ -223,7 +223,7 @@ ECode CCursorToBulkCursorAdaptor::Requery(
 {
     VALIDATE_NOT_NULL(result)
 
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfCursorIsClosed())
 
@@ -282,7 +282,7 @@ ECode CCursorToBulkCursorAdaptor::UnregisterObserverProxyLocked()
 ECode CCursorToBulkCursorAdaptor::GetExtras(
     /* [out] */ IBundle** result)
 {
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfCursorIsClosed())
         ec = ICursor::Probe(mCursor)->GetExtras(result);
@@ -294,7 +294,7 @@ ECode CCursorToBulkCursorAdaptor::Respond(
     /* [in] */ IBundle* extras,
     /* [out] */ IBundle** result)
 {
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfCursorIsClosed())
         ec = ICursor::Probe(mCursor)->Respond(extras, result);
@@ -323,7 +323,7 @@ ECode CCursorToBulkCursorAdaptor::constructor(
     }
     mProviderName = providerName;
 
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         ec = CreateAndRegisterObserverProxyLocked(observer);
     }

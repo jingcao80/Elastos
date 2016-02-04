@@ -16,8 +16,8 @@ CAR_INTERFACE_IMPL(GpsStatus::SatelliteIterator, Object, IIterator)
 
 GpsStatus::SatelliteIterator::SatelliteIterator(
     /* [in] */ ArrayOf<IGpsSatellite* >* satellites)
-    : mIndex(0)
-    , mSatellites(satellites)
+    : mSatellites(satellites)
+    , mIndex(0)
 {
 }
 

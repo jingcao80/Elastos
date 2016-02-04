@@ -303,9 +303,9 @@ ECode FragmentState::GetInstance(
 
 AutoPtr<ITransition> InitUSE_DEFAULT_TRANSITION()
 {
-    AutoPtr<CTransitionSet> transit;
-    CTransitionSet::NewByFriend((CTransitionSet**)&transit);
-    return ITransition::Probe(transit);
+    AutoPtr<ITransition> transit;
+    CTransitionSet::New((ITransition**)&transit);
+    return transit;
 }
 
 const AutoPtr<ITransition> Fragment::USE_DEFAULT_TRANSITION = InitUSE_DEFAULT_TRANSITION();
@@ -821,37 +821,38 @@ ECode Fragment::Instantiate(
     /* [out] */ IFragment** fragment)
 {
     VALIDATE_NOT_NULL(fragment);
+    *fragment = NULL;
 //     try {
-        AutoPtr<IClassInfo> clazz;
-        HashMap<String, AutoPtr<IClassInfo> >::Iterator it = sClassMap.Find(fname);
-        if (it == sClassMap.End()) {
+    AutoPtr<IClassInfo> clazz;
+    HashMap<String, AutoPtr<IClassInfo> >::Iterator it = sClassMap.Find(fname);
+    if (it == sClassMap.End()) {
 //             // Class not found in the cache, see if it's real, and try to add it
-            AutoPtr<IClassLoader> classLoader;
-            // context->GetClassLoader((IClassLoader**)&classLoader);
-            classLoader->LoadClass(fname, (IClassInfo**)&clazz);
-            // if (!Fragment.class.isAssignableFrom(clazz)) {
-            //     throw new InstantiationException("Trying to instantiate a class " + fname
-            //             + " that is not a Fragment", new ClassCastException());
-            // }
+        AutoPtr<IClassLoader> classLoader;
+        // context->GetClassLoader((IClassLoader**)&classLoader);
+        classLoader->LoadClass(fname, (IClassInfo**)&clazz);
+        // if (!Fragment.class.isAssignableFrom(clazz)) {
+        //     throw new InstantiationException("Trying to instantiate a class " + fname
+        //             + " that is not a Fragment", new ClassCastException());
+        // }
 
-            sClassMap[fname] = clazz;
-        }
-        else {
-            clazz = it->mSecond;
-        }
+        sClassMap[fname] = clazz;
+    }
+    else {
+        clazz = it->mSecond;
+    }
 
-        AutoPtr<IInterface> obj;
-        ECode ec = clazz->CreateObject((IInterface**)&obj);
-        AutoPtr<IFragment> f = IFragment::Probe(obj);
-        if (args != NULL) {
-            AutoPtr<IClassLoader> cLoader;
+    AutoPtr<IInterface> obj;
+    FAIL_RETURN(clazz->CreateObject((IInterface**)&obj));
+    AutoPtr<IFragment> f = IFragment::Probe(obj);
+    if (args != NULL) {
+        AutoPtr<IClassLoader> cLoader;
 //TODO:
 //            args.setClassLoader(f.getClass().getClassLoader());
-            f->SetArguments(args);
-        }
-        *fragment = f;
-        REFCOUNT_ADD(*fragment);
-        return NOERROR;
+        f->SetArguments(args);
+    }
+    *fragment = f;
+    REFCOUNT_ADD(*fragment);
+    return NOERROR;
 //     } catch (ClassNotFoundException e) {
 //         throw new InstantiationException("Unable to instantiate fragment " + fname
 //                 + ": make sure class name exists, is public, and has an"

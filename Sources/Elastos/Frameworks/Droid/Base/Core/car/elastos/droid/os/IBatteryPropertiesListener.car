@@ -7,7 +7,7 @@ module
     namespace Os {
 
     [oneway]
-    interface IBatteryPropertiesListener {
+    interface IIBatteryPropertiesListener {
 
         BatteryPropertiesChanged(
             [in] IBatteryProperties* props);

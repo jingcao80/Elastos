@@ -48,7 +48,7 @@
 // #include "elastos/droid/net/wifi/p2p/CWifiP2pManager.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManager.h"
 #include "elastos/droid/view/inputmethod/CInputMethodManager.h"
-// #include "elastos/droid/view/CContextThemeWrapper.h"
+#include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/view/WindowManagerImpl.h"
 #include "elastos/droid/view/DisplayAdjustments.h"
 // #include "elastos/droid/view/CDisplayManagerAw.h"
@@ -91,7 +91,7 @@ using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::FileUtils;
-using Elastos::Droid::Os::IVibratorService;
+using Elastos::Droid::Os::IIVibratorService;
 using Elastos::Droid::Os::ServiceManager;
 // using Elastos::Droid::Os::CDropBoxManager;
 using Elastos::Droid::Os::CUserManager;
@@ -105,7 +105,7 @@ using Elastos::Droid::Os::Storage::IStorageManager;
 using Elastos::Droid::View::DisplayAdjustments;
 using Elastos::Droid::View::WindowManagerImpl;
 using Elastos::Droid::View::IContextThemeWrapper;
-// using Elastos::Droid::View::CContextThemeWrapper;
+using Elastos::Droid::View::CContextThemeWrapper;
 using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::View::Accessibility::CAccessibilityManager;
 using Elastos::Droid::View::InputMethod::IInputMethodManager;
@@ -1962,12 +1962,12 @@ ECode CContextImpl::ValidateServiceIntent(
         ai->GetTargetSdkVersion(&targetSdkVersion);
         if (targetSdkVersion >= Build::VERSION_CODES::LOLLIPOP) {
             Logger::E(TAG, "IllegalArgumentException : Service Intent must be explicit: %s",
-                Object::ToString(service).string());
+                TO_CSTR(service));
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         else {
             Logger::W(TAG, "Implicit intents with startService are not safe: %s",
-                Object::ToString(service).string()); //Debug.getCallers(2, 3));
+                TO_CSTR(service)); //Debug.getCallers(2, 3));
         }
     }
     return NOERROR;
@@ -2433,7 +2433,7 @@ ECode CContextImpl::GetSystemService(
             R::style::Theme_DeviceDefault_Dialog,
             R::style::Theme_DeviceDefault_Light_Dialog);
         AutoPtr<IContext> wrapper;
-        // CContextThemeWrapper::New(ctx, value, (IContext**)&wrapper);
+        CContextThemeWrapper::New(ctx, value, (IContext**)&wrapper);
         AutoPtr<INotificationManager> nm;
         CNotificationManager::New(wrapper, mMainThread->GetHandler(), (INotificationManager**)&nm);
         *object = TO_IINTERFACE(nm);
@@ -2580,7 +2580,7 @@ ECode CContextImpl::GetSystemService(
     }
     else if (IContext::VIBRATOR_SERVICE.Equals(name)) {
         AutoLock lock(mCacheLock);
-        AutoPtr<IVibratorService> service = IVibratorService::Probe(ServiceManager::GetService(IContext::VIBRATOR_SERVICE).Get());
+        AutoPtr<IIVibratorService> service = IIVibratorService::Probe(ServiceManager::GetService(IContext::VIBRATOR_SERVICE).Get());
         mServiceCache[name] = service.Get();
         *object = service.Get();
         REFCOUNT_ADD(*object);

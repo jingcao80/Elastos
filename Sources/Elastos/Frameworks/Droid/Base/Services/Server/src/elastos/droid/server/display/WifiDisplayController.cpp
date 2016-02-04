@@ -796,7 +796,7 @@ ECode WifiDisplayController::WifiP2pReceiver::OnReceive(
 
         if (DEBUG) {
             Slogger::D(TAG, "Received WIFI_P2P_CONNECTION_CHANGED_ACTION: networkInfo=%s",
-                Object::ToString(networkInfo).string());
+                TO_CSTR(networkInfo));
         }
 
         mHost->HandleConnectionChanged(networkInfo);
@@ -1423,7 +1423,7 @@ AutoPtr<IWifiDisplaySessionInfo> WifiDisplayController::GetSessionInfo(
     //     !address.Equals(thisAddress), session, address + " " + name,
     //     passphrase, hostAddress, (IWifiDisplaySessionInfo**)&sessionInfo);
     if (DEBUG) {
-        Slogger::D(TAG, Object::ToString(sessionInfo).string());
+        Slogger::D(TAG, TO_CSTR(sessionInfo));
     }
     return sessionInfo;
 }

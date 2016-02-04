@@ -142,6 +142,10 @@ public:
         /* [in] */ const String& paragraph,
         /* [in] */ Int32 flags);
 
+    /* private constructor used by createLineBidi() */
+    CARAPI constructor(
+        /* [in] */ Int64 pBidi);
+
     /**
      * Returns whether the base level is from left to right.
      *
@@ -225,11 +229,6 @@ public:
         /* [out] */ Boolean * result);
 
 private:
-
-    /* private constructor used by createLineBidi() */
-    CARAPI constructor(
-        /* [in] */ Int64 pBidi);
-
     static CARAPI CreateUBiDi(
         /* [in] */ ArrayOf<Char32>* texts,
         /* [in] */ Int32 textStart,

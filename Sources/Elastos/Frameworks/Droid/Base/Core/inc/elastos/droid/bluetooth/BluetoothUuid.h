@@ -2,7 +2,9 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHUUID_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHUUID_H__
 
-#include "Elastos.Droid.Core_server.h"
+//#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Os.h"
+#include "elastos/droid/ext/frameworkdef.h"
 
 using Elastos::Droid::Os::IParcelUuid;
 
@@ -55,6 +57,20 @@ public:
     static CARAPI_(Int32) GetServiceIdentifierFromParcelUuid(
         /* [in] */ IParcelUuid* parcelUuid);
 
+    static CARAPI_(Boolean) Is16BitUuid(IParcelUuid* parcelUuid){
+        //TODO
+        return FALSE;
+    };
+
+    static CARAPI_(Boolean) Is32BitUuid(IParcelUuid* parcelUuid) {
+        //TODO
+        return FALSE;
+    };
+
+    static CARAPI_(AutoPtr<IParcelUuid>) ParseUuidFrom(ArrayOf<Byte>* uuidBytes) {
+        //TODO
+        return NULL;
+    };
 public:
     /* See Bluetooth Assigned Numbers document - SDP section, to get the values of UUIDs
      * for the various services.
@@ -77,6 +93,19 @@ public:
     static const AutoPtr<IParcelUuid> NAP;
     static const AutoPtr<IParcelUuid> BNEP;
     static const AutoPtr<IParcelUuid> PBAP_PSE;
+    static const AutoPtr<IParcelUuid> MAP;
+    static const AutoPtr<IParcelUuid> MNS;
+    static const AutoPtr<IParcelUuid> MAS;
+    static const AutoPtr<IParcelUuid> BASE_UUID;
+
+    /** Length of bytes for 16 bit UUID */
+    static const Int32 UUID_BYTES_16_BIT = 2;
+    /** Length of bytes for 32 bit UUID */
+    static const Int32 UUID_BYTES_32_BIT = 4;
+    /** Length of bytes for 128 bit UUID */
+    static const Int32 UUID_BYTES_128_BIT = 16;
+
+
 
     static const AutoPtr< ArrayOf<IParcelUuid*> > RESERVED_UUIDS;
 };

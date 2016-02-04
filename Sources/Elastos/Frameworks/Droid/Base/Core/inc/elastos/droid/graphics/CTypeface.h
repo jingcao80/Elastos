@@ -21,12 +21,6 @@ CarClass(CTypeface), public Typeface
 {
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI constructor(
-        /* [in] */ Int64 ni);
-
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
 };
 
 } // namespace Graphics

@@ -98,9 +98,10 @@ ECode CAudioSystem::GetDeviceConnectionState(
 }
 
 ECode CAudioSystem::SetPhoneState(
-    /* [in] */ Int32 state)
+    /* [in] */ Int32 state,
+    /* [out] */ Int32* result)
 {
-    return AudioSystem::SetPhoneState(state);
+    return AudioSystem::SetPhoneState(state, result);
 }
 
 ECode CAudioSystem::SetForceUse(

@@ -4,6 +4,8 @@
 
 #include "_Elastos_Droid_Media_CRingtoneManagerHelper.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Media.h"
+#include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::IUri;
@@ -13,8 +15,14 @@ namespace Droid {
 namespace Media {
 
 CarClass(CRingtoneManagerHelper)
+    , public Singleton
+    , public IRingtoneManagerHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     /**
      * Returns a valid ringtone URI. No guarantees on which it returns. If it
      * cannot find one, returns null.

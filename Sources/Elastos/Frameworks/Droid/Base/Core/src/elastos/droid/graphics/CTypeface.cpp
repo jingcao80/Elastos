@@ -9,23 +9,6 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CTypeface);
-ECode CTypeface::constructor(
-    /* [in] */ Int64 ni)
-{
-    return Typeface::constructor(ni);
-}
-
-PInterface CTypeface::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_Typeface) {
-        return reinterpret_cast<PInterface>((Typeface*)this);
-    }
-    else if (riid == EIID_ITypeface) {
-        return (ITypeface*)this;
-    }
-    return Typeface::Probe(riid);
-}
 
 } // namespace Graphics
 } // namepsace Droid

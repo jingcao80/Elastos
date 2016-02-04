@@ -1,7 +1,7 @@
 
 #include "elastos/droid/webkit/native/base/ObserverList.h"
 
-// TODO using Elastos::Utility::CArrayList;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::EIID_IIterable;
 using Elastos::Utility::EIID_IIterator;
 using Elastos::Utility::EIID_IList;
@@ -111,11 +111,7 @@ ObserverList::ObserverList()
     : mIterationDepth(0)
     , mCount(0)
 {
-    AutoPtr<IArrayList> arrayList;
-    assert(0);
-    // TODO
-    // CArrayList::New((IArrayList**)&arrayList);
-    mObservers = IList::Probe(arrayList);
+    CArrayList::New((IList**)&mObservers);
 }
 
 /**

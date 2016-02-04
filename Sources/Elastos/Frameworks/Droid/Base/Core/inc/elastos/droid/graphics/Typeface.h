@@ -17,8 +17,6 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-extern const InterfaceID EIID_Typeface;
-
 /**
  * The Typeface class specifies the typeface and intrinsic style of a font.
  * This is used in the paint, along with optionally Paint settings like
@@ -29,8 +27,19 @@ class Typeface
     : public Object
     , public ITypeface
 {
+private:
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
+    };
+
 public:
     CAR_INTERFACE_DECL();
+
+    // don't allow clients to call this directly
+    CARAPI constructor(
+        /* [in] */ Int64 ni);
 
     /** Returns the typeface's intrinsic style attributes */
     virtual CARAPI GetStyle(
@@ -149,10 +158,6 @@ public:
 protected:
     Typeface();
 
-    // don't allow clients to call this directly
-    CARAPI constructor(
-        /* [in] */ Int64 ni);
-
     virtual ~Typeface();
 
 private:
@@ -178,8 +183,6 @@ private:
 
     static CARAPI_(void) NativeSetDefault(
         /* [in] */ Int64 native_instance);
-
-    static CARAPI_(AutoPtr< ArrayOf<ITypeface*> >) StaticInit();
 
     static CARAPI_(AutoPtr<IFontFamily>) MakeFamilyFromParsed(
         /* [in] */ FontListParser::Family* family);
@@ -227,6 +230,8 @@ public:
 
 private:
     Int32 mStyle;
+
+    static const StaticInitializer sInitializer;
 };
 
 } // namespace Graphics

@@ -56,6 +56,7 @@ using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::IVibrator;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::UEventObserver;
+using Elastos::Droid::Os::IUEvent;
 using Elastos::Droid::Service::Dreams::IDreamManagerInternal;
 using Elastos::Droid::Service::Dreams::IIDreamManager;
 using Elastos::Droid::Utility::SparseArray;
@@ -479,8 +480,8 @@ private:
             /* [in] */ PhoneWindowManager* host);
 
         // @Override
-        CARAPI_(void) OnUEvent(
-            /* [in] */ UEvent* event);
+        CARAPI OnUEvent(
+            /* [in] */ IUEvent* event);
 
     private:
         PhoneWindowManager* mHost;

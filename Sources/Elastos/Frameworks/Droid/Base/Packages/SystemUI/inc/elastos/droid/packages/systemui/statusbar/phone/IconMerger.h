@@ -1,80 +1,83 @@
-#ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_ICONMERGER_H__
-#define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_ICONMERGER_H__
+#ifndef  __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_PHONE_ICONMERGER_H__
+#define  __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_PHONE_ICONMERGER_H__
 
-#include "elastos/droid/os/Runnable.h"
-#include "elastos/droid/widget/LinearLayout.h"
+#include "_SystemUI.h"
+#include <elastos/droid/os/Runnable.h>
+#include <elastos/droid/widget/LinearLayout.h>
 
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Widget::LinearLayout;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
-class IconMerger;
-
-class SetVisibilityRunnable : public Runnable
+class IconMerger
+    : public LinearLayout
+    , public IIconMerger
 {
-public:
-    SetVisibilityRunnable(
-        /* [in] */ Boolean mNoreRequired,
-        /* [in] */ IconMerger* host);
-
-    virtual CARAPI Run();
 private:
-    Boolean mMoreRequired;
-    IconMerger* mHost;
-};
+    class IconRunnable : public Runnable
+    {
+    public:
+        IconRunnable(
+            /* [in] */ IconMerger* host,
+            /* [in] */ Boolean moreRequired);
 
-class IconMerger : public LinearLayout
-{
+        // @Override
+        CARAPI Run();
+
+    private:
+        IconMerger* mHost;
+        Boolean mMoreRequired;
+    };
+
 public:
+    CAR_INTERFACE_DECL();
+
     IconMerger();
 
-    IconMerger(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
     CARAPI SetOverflowIndicator(
         /* [in] */ IView* v);
 
-    //@Override
-    virtual CARAPI_(void) OnMeasure(
+protected:
+    // @Override
+    CARAPI_(void) OnMeasure(
         /* [in] */ Int32 widthMeasureSpec,
         /* [in] */ Int32 heightMeasureSpec);
 
-    virtual CARAPI_(void) OnLayout(
+    // @Override
+    CARAPI OnLayout(
         /* [in] */ Boolean changed,
-        /* [in] */ Int32 left,
-        /* [in] */ Int32 top,
-        /* [in] */ Int32 right,
-        /* [in] */ Int32 bottom);
+        /* [in] */ Int32 l,
+        /* [in] */ Int32 t,
+        /* [in] */ Int32 r,
+        /* [in] */ Int32 b);
 
-protected:
-    CARAPI Init(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
-
-    CARAPI InitIconSize(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
 private:
     CARAPI_(void) CheckOverflow(
         /* [in] */ Int32 width);
 
 private:
-    friend class SetVisibilityRunnable;
+    static const String TAG;
+    static const Boolean DEBUG;
 
     Int32 mIconSize;
     AutoPtr<IView> mMoreView;
 };
 
-}// namespace Phone
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+} // namespace Phone
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos
 
-#endif //__ELASTOS_DROID_SYSTEMUI_STATUSBAR_PHONE_ICONMERGER_H__
+#endif // __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_PHONE_ICONMERGER_H__

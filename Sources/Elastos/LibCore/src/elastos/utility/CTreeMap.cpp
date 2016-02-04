@@ -2223,7 +2223,7 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::RetainAll(
 //       CTreeMap::BoundedMap
 //==========================================================
 
-CAR_INTERFACE_IMPL_2(CTreeMap::BoundedMap, AbstractMap, INavigableMap, ISerializable)
+CAR_INTERFACE_IMPL_3(CTreeMap::BoundedMap, AbstractMap, ISortedMap, INavigableMap, ISerializable)
 
 CTreeMap::BoundedMap::BoundedMap(
     /* [in] */ Boolean ascending,

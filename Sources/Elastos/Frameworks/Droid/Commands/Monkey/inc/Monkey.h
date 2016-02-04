@@ -10,7 +10,7 @@
 using Elastos::Utility::Etl::HashSet;
 using Elastos::Droid::View::IIWindowManager;
 using Elastos::Utility::Etl::List;
-using Elastos::Droid::App::IActivityController;
+using Elastos::Droid::App::IIActivityController;
 using Elastos::Core::IRandom;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::App::IIActivityManager;

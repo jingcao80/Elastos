@@ -75,6 +75,7 @@ private:
     class MyBasicLruCache
         : public BasicLruCache
     {
+    public:
         MyBasicLruCache(
             /* [in] */ TzData* host);
 

@@ -42,7 +42,9 @@ ECode BaseMovementMethod::CanSelectArbitrarily(
 ECode BaseMovementMethod::Initialize(
     /* [in] */ ITextView* widget,
     /* [in] */ ISpannable* text)
-{}
+{
+    return NOERROR;
+}
 
 ECode BaseMovementMethod::OnKeyDown(
     /* [in] */ ITextView* widget,

@@ -11,6 +11,15 @@ module
     /**
      * @Involve
      * interface IStackScrollerDecorView
+     * interface IExpandableView
+     * interface Elastos.Droid.Widget.IFrameLayout
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
     interface IDismissView {
         SetOnButtonClickListener(
@@ -19,10 +28,14 @@ module
 
     /**
      * @Involve
-     * interface IImageButton
+     * extends interface IImageButton
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.Widget.IImageView
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
     interface IDismissViewImageButton {
-
     }
 
     } // namespace StatusBar

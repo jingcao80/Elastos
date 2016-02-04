@@ -93,11 +93,10 @@ public:
         /* [in] */ Boolean dumpAll,
         /* [in] */ const String& dumpPackage);
 
-protected:
     CARAPI_(Boolean) DumpProvider(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IPrintWriter* pw,
-        /* [in] */ String& name,
+        /* [in] */ const String& name,
         /* [in] */ ArrayOf<String>* args,
         /* [in] */ Int32 opti,
         /* [in] */ Boolean dumpAll);

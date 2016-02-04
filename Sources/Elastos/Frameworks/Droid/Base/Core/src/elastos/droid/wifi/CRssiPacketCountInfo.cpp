@@ -96,6 +96,7 @@ ECode CRssiPacketCountInfo::GetRxgood(
 {
     VALIDATE_NOT_NULL(result);
     *result = mRxgood;
+    return NOERROR;
 }
 
 ECode CRssiPacketCountInfo::SetRxgood(

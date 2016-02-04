@@ -7,8 +7,6 @@ using Elastos::Core::EIID_ICharSequence;
 namespace Elastos {
 namespace IO {
 
-CAR_INTERFACE_IMPL(CharSequenceAdapter, CharBuffer, ICharSequence)
-
 CharSequenceAdapter::CharSequenceAdapter()
 {
 }
@@ -19,6 +17,21 @@ ECode CharSequenceAdapter::constructor(
 {
     FAIL_RETURN(CharBuffer::constructor(capacity, 0))
     mSequence = chseq;
+    return NOERROR;
+}
+
+ECode CharSequenceAdapter::GetPrimitiveArray(
+    /* [out] */ Handle64* arrayHandle)
+{
+    AutoPtr<ArrayOf<Char32> > arrayTmp;
+    GetArray((ArrayOf<Char32>**)&arrayTmp);
+    if (arrayTmp == NULL)
+    {
+        *arrayHandle = 0;
+        return NOERROR;
+    }
+    Char32* primitiveArray = arrayTmp->GetPayload();
+    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
     return NOERROR;
 }
 

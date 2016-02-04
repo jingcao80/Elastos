@@ -130,18 +130,6 @@ module
     }
 
     /**
-     * A container class which represents a cue in TTML.
-     * @hide
-     */
-    /**
-     * @Involve
-     * interface ISubtitleTrackCue
-     */
-    interface ITtmlCue
-    {
-    }
-
-    /**
      * A simple TTML parser (http://www.w3.org/TR/ttaf1-dfxp/) which supports DFXP
      * presentation profile.
      * <p>
@@ -203,7 +191,7 @@ module
          * {@code null} is returned if there is no more timed text to show.
          */
         GetNextResult(
-            [out] ITtmlCue** result);
+            [out] ISubtitleTrackCue** result);
     }
 
     /**

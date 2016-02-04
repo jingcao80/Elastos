@@ -121,6 +121,25 @@ private:
         CMediaSession* mHost;
     };
 
+    class VolumeProviderCallback
+        : public Object
+        , public IVolumeProviderCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        VolumeProviderCallback(
+            /* [in] */ CMediaSession* host)
+            : mHost(host)
+        {}
+
+        CARAPI OnVolumeChanged(
+            /* [in] */ IVolumeProvider* volumeProvider);
+
+    private:
+        CMediaSession* mHost;
+    };
+
 public:
     CMediaSession();
 

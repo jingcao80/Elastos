@@ -22,12 +22,12 @@ namespace Droid {
 namespace Hardware {
 namespace Location {
 
-class GeofenceHardwareImpl
+class ECO_PUBLIC GeofenceHardwareImpl
     : public Object
     , public IGeofenceHardwareImpl
 {
 private:
-    class GeofenceTransition
+    class ECO_LOCAL GeofenceTransition
         : public Object
     {
     public:
@@ -48,7 +48,7 @@ private:
         Int32 mSourcesUsed;
     };
 
-    class Reaper
+    class ECO_LOCAL Reaper
         : public Object
         , public IProxyDeathRecipient
     {
@@ -84,7 +84,7 @@ private:
         GeofenceHardwareImpl* mHost;
     };
 
-    class GeofenceHandler : public Handler
+    class ECO_LOCAL GeofenceHandler : public Handler
     {
     public:
         GeofenceHandler(
@@ -98,7 +98,7 @@ private:
         GeofenceHardwareImpl* mHost;
     };
 
-    class CallbacksHandler : public Handler
+    class ECO_LOCAL CallbacksHandler : public Handler
     {
     public:
         CallbacksHandler(
@@ -112,7 +112,7 @@ private:
         GeofenceHardwareImpl* mHost;
     };
 
-    class ReaperHandler : public Handler
+    class ECO_LOCAL ReaperHandler : public Handler
     {
     public:
         ReaperHandler(
@@ -239,16 +239,16 @@ public:
         /* [out] */ Int32* level);
 
 private:
-    GeofenceHardwareImpl(
+    ECO_LOCAL GeofenceHardwareImpl(
         /* [in] */ IContext* context);
 
-    CARAPI AcquireWakeLock();
+    ECO_LOCAL CARAPI AcquireWakeLock();
 
-    CARAPI ReleaseWakeLock();
+    ECO_LOCAL CARAPI ReleaseWakeLock();
 
-    CARAPI_(void) UpdateGpsHardwareAvailability();
+    ECO_LOCAL CARAPI_(void) UpdateGpsHardwareAvailability();
 
-    CARAPI_(void) UpdateFusedHardwareAvailability();
+    ECO_LOCAL CARAPI_(void) UpdateFusedHardwareAvailability();
 
     /**
      * Internal generic status report function for Geofence operations.
@@ -258,20 +258,20 @@ private:
      * @param operationStatus The status of the operation as defined in GeofenceHardware class. This
      *                        status is independent of the statuses reported by different HALs.
      */
-    CARAPI ReportGeofenceOperationStatus(
+    ECO_LOCAL CARAPI ReportGeofenceOperationStatus(
         /* [in] */ Int32 operation,
         /* [in] */ Int32 geofenceId,
         /* [in] */ Int32 operationStatus);
 
-    CARAPI_(void) SetMonitorAvailability(
+    ECO_LOCAL CARAPI_(void) SetMonitorAvailability(
         /* [in] */ Int32 monitor,
         /* [in] */ Int32 val);
 
 private:
-    static const String TAG;
-    static const Boolean DEBUG;
+    ECO_LOCAL static const String TAG;
+    ECO_LOCAL static const Boolean DEBUG;
 
-    static Object sLock;
+    ECO_LOCAL static Object sLock;
 
     AutoPtr<IContext> mContext;
     static AutoPtr<IGeofenceHardwareImpl> sInstance;
@@ -290,39 +290,39 @@ private:
 
     // mGeofenceHandler message types
     AutoPtr<GeofenceHandler> mGeofenceHandler;
-    static const Int32 GEOFENCE_TRANSITION_CALLBACK;
-    static const Int32 ADD_GEOFENCE_CALLBACK;
-    static const Int32 REMOVE_GEOFENCE_CALLBACK;
-    static const Int32 PAUSE_GEOFENCE_CALLBACK;
-    static const Int32 RESUME_GEOFENCE_CALLBACK;
-    static const Int32 GEOFENCE_CALLBACK_BINDER_DIED;
+    ECO_LOCAL static const Int32 GEOFENCE_TRANSITION_CALLBACK;
+    ECO_LOCAL static const Int32 ADD_GEOFENCE_CALLBACK;
+    ECO_LOCAL static const Int32 REMOVE_GEOFENCE_CALLBACK;
+    ECO_LOCAL static const Int32 PAUSE_GEOFENCE_CALLBACK;
+    ECO_LOCAL static const Int32 RESUME_GEOFENCE_CALLBACK;
+    ECO_LOCAL static const Int32 GEOFENCE_CALLBACK_BINDER_DIED;
 
     // mCallbacksHandler message types
     AutoPtr<CallbacksHandler> mCallbacksHandler;
-    static const Int32 GEOFENCE_STATUS;
-    static const Int32 CALLBACK_ADD;
-    static const Int32 CALLBACK_REMOVE;
-    static const Int32 MONITOR_CALLBACK_BINDER_DIED;
+    ECO_LOCAL static const Int32 GEOFENCE_STATUS;
+    ECO_LOCAL static const Int32 CALLBACK_ADD;
+    ECO_LOCAL static const Int32 CALLBACK_REMOVE;
+    ECO_LOCAL static const Int32 MONITOR_CALLBACK_BINDER_DIED;
 
     // mReaperHandler message types
     AutoPtr<ReaperHandler> mReaperHandler;
-    static const Int32 REAPER_GEOFENCE_ADDED;
-    static const Int32 REAPER_MONITOR_CALLBACK_ADDED;
-    static const Int32 REAPER_REMOVED;
+    ECO_LOCAL static const Int32 REAPER_GEOFENCE_ADDED;
+    ECO_LOCAL static const Int32 REAPER_MONITOR_CALLBACK_ADDED;
+    ECO_LOCAL static const Int32 REAPER_REMOVED;
 
     // The following constants need to match GpsLocationFlags enum in gps.h
-    static const Int32 LOCATION_INVALID;
-    static const Int32 LOCATION_HAS_LAT_LONG;
-    static const Int32 LOCATION_HAS_ALTITUDE;
-    static const Int32 LOCATION_HAS_SPEED;
-    static const Int32 LOCATION_HAS_BEARING;
-    static const Int32 LOCATION_HAS_ACCURACY;
+    ECO_LOCAL static const Int32 LOCATION_INVALID;
+    ECO_LOCAL static const Int32 LOCATION_HAS_LAT_LONG;
+    ECO_LOCAL static const Int32 LOCATION_HAS_ALTITUDE;
+    ECO_LOCAL static const Int32 LOCATION_HAS_SPEED;
+    ECO_LOCAL static const Int32 LOCATION_HAS_BEARING;
+    ECO_LOCAL static const Int32 LOCATION_HAS_ACCURACY;
 
     // Resolution level constants used for permission checks.
     // These constants must be in increasing order of finer resolution.
-    static const Int32 RESOLUTION_LEVEL_NONE;
-    static const Int32 RESOLUTION_LEVEL_COARSE;
-    static const Int32 RESOLUTION_LEVEL_FINE;
+    ECO_LOCAL static const Int32 RESOLUTION_LEVEL_NONE;
+    ECO_LOCAL static const Int32 RESOLUTION_LEVEL_COARSE;
+    ECO_LOCAL static const Int32 RESOLUTION_LEVEL_FINE;
 };
 
 } //Location

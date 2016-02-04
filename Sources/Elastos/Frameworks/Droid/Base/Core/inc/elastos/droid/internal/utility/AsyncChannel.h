@@ -23,7 +23,7 @@ namespace Droid {
 namespace Internal {
 namespace Utility {
 
-class AsyncChannel
+class ECO_PUBLIC AsyncChannel
     : public Object
     , public IAsyncChannel
 {
@@ -31,7 +31,7 @@ private:
     /**
      * Helper class to send messages synchronously
      */
-    class SyncMessenger : public Object
+    class ECO_LOCAL SyncMessenger : public Object
     {
         friend class AsyncChannel;
     private:
@@ -95,7 +95,7 @@ private:
         AutoPtr<IMessenger> mMessenger;
     };
 
-    class AsyncChannelConnection
+    class ECO_LOCAL AsyncChannelConnection
         : public Object
         , public IServiceConnection
     {
@@ -115,7 +115,7 @@ private:
         AutoPtr<IWeakReference> mWeakHost;
     };
 
-    class ConnectAsyncRunnable : public Runnable
+    class ECO_LOCAL ConnectAsyncRunnable : public Runnable
     {
     public:
         ConnectAsyncRunnable(
@@ -135,7 +135,7 @@ private:
         String mDstClassName;
     };
 
-    class DeathMonitor
+    class ECO_LOCAL DeathMonitor
         : public Object
         , public IProxyDeathRecipient
     {
@@ -150,6 +150,7 @@ private:
     private:
         AsyncChannel* mOwner;
     };
+
 public:
     AsyncChannel();
 
@@ -505,7 +506,7 @@ private:
      *
      * @param status to be stored in msg.arg1
      */
-    CARAPI_(void) ReplyHalfConnected(
+    ECO_LOCAL CARAPI_(void) ReplyHalfConnected(
         /* [in] */ Int32 status);
 
     /**
@@ -514,15 +515,15 @@ private:
      *
      * @param status to be stored in msg.arg1
      */
-    CARAPI_(void) ReplyDisconnected(
+    ECO_LOCAL CARAPI_(void) ReplyDisconnected(
         /* [in] */ Int32 status);
 
 private:
     /** Log tag */
-    static const String TAG;
+    ECO_LOCAL static const String TAG;
 
     /** Enable to turn on debugging */
-    static const Boolean DBG;
+    ECO_LOCAL static const Boolean DBG;
 
     /** Context for source */
     AutoPtr<IContext> mSrcContext;

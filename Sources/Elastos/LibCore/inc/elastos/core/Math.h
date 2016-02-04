@@ -16,244 +16,6 @@ namespace Core {
 class ECO_PUBLIC Math
 {
 public:
-
-
-    /**
-     * The number of bits needed to represent a {@code Byte} value in two's
-     * complement form.
-     *
-     * @since 1.5
-     */
-    static const Int32 BYTE_SIZE;
-
-    /**
-     * Constant for the number of bits needed to represent a {@code short} in
-     * two's complement form.
-     *
-     * @since 1.5
-     */
-    static const Int32 INT16_SIZE;
-
-    /**
-     * Constant for the number of bits needed to represent an {@code int} in
-     * two's complement form.
-     *
-     * @since 1.5
-     */
-    static const Int32 INT32_SIZE;
-
-    /**
-     * Constant for the number of bits needed to represent a {@code long} in
-     * two's complement form.
-     *
-     * @since 1.5
-     */
-    static const Int32 INT64_SIZE;
-
-    /**
-     * Constant for the number of bits needed to represent a {@code float} in
-     * two's complement form.
-     *
-     * @since 1.5
-     */
-    static const Int32 FLOAT_SIZE;
-
-    /**
-     * Constant for the number of bits needed to represent a {@code double} in
-     * two's complement form.
-     *
-     * @since 1.5
-     */
-    static const Int32 DOUBLE_SIZE;
-
-    /**
-     * The maximum {@code Byte} value, 2<sup>7</sup>-1.
-     */
-    static const Byte BYTE_MAX_VALUE;
-
-    /**
-     * The minimum {@code Byte} value, -2<sup>7</sup>.
-     */
-    static const Byte BYTE_MIN_VALUE;
-
-    /**
-     * Constant for the maximum {@code short} value, 2<sup>15</sup>-1.
-     */
-    static const Int16 INT16_MAX_VALUE;
-
-    /**
-     * Constant for the minimum {@code short} value, -2<sup>15</sup>.
-     */
-    static const Int16 INT16_MIN_VALUE;
-
-    /**
-     * Constant for the maximum {@code int} value, 2<sup>31</sup>-1.
-     */
-    static const Int32 INT32_MAX_VALUE;
-
-    /**
-     * Constant for the minimum {@code int} value, -2<sup>31</sup>.
-     */
-    static const Int32 INT32_MIN_VALUE;
-
-    /**
-     * Constant for the maximum {@code long} value, 2<sup>63</sup>-1.
-     */
-    static const Int64 INT64_MAX_VALUE;
-
-    /**
-     * Constant for the minimum {@code long} value, -2<sup>63</sup>.
-     */
-    static const Int64 INT64_MIN_VALUE;
-
-
-    static const Int32 FLOAT_EXPONENT_BIAS;
-    static const Int32 FLOAT_EXPONENT_BITS;
-    static const Int32 FLOAT_MANTISSA_BITS;
-    static const Int32 FLOAT_NON_MANTISSA_BITS;
-    static const Int32 FLOAT_SIGN_MASK;
-    static const Int32 FLOAT_EXPONENT_MASK;
-    static const Int32 FLOAT_MANTISSA_MASK;
-
-    /**
-     * Constant for the maximum {@code float} value, (2 - 2<sup>-23</sup>) * 2<sup>127</sup>.
-     */
-    static const Float FLOAT_MAX_VALUE;
-
-    /**
-     * Constant for the minimum {@code float} value, 2<sup>-149</sup>.
-     */
-    static const Float FLOAT_MIN_VALUE;
-
-    static const Float FLOAT_ZERO;
-
-    /**
-     * Constant for the Not-a-Number (NaN) value of the {@code float} type.
-     */
-    static const Float FLOAT_NAN;
-
-    /**
-     * Constant for the positive infinity value of the {@code float} type.
-     */
-    static const Float FLOAT_POSITIVE_INFINITY;
-
-    /**
-     * Constant for the negative infinity value of the {@code float} type.
-     */
-    static const Float FLOAT_NEGATIVE_INFINITY;
-
-    /**
-     * Constant for the smallest positive normal value of the {@code float} type.
-     *
-     * @since 1.6
-     */
-    static const Float FLOAT_MIN_NORMAL;
-
-    /**
-     * Maximum base-2 exponent that a finite value of the {@code float} type may have.
-     * Equal to {@code Math.getExponent(Float.MAX_VALUE)}.
-     *
-     * @since 1.6
-     */
-    static const Int32 FLOAT_MAX_EXPONENT;
-
-    /**
-     * Minimum base-2 exponent that a normal value of the {@code float} type may have.
-     * Equal to {@code Math.getExponent(Float.MIN_NORMAL)}.
-     *
-     * @since 1.6
-     */
-    static const Int32 FLOAT_MIN_EXPONENT;
-
-
-    static const Int32 DOUBLE_EXPONENT_BIAS;
-    static const Int32 DOUBLE_EXPONENT_BITS;
-    static const Int32 DOUBLE_MANTISSA_BITS;
-    static const Int32 DOUBLE_NON_MANTISSA_BITS;
-    static const Int64 DOUBLE_SIGN_MASK;
-    static const Int64 DOUBLE_EXPONENT_MASK;
-    static const Int64 DOUBLE_MANTISSA_MASK;
-
-    /**
-     * Constant for the maximum {@code double} value, (2 - 2<sup>-52</sup>) *
-     * 2<sup>1023</sup>.
-     */
-    static const Double DOUBLE_MAX_VALUE;
-
-    /**
-     * Constant for the minimum {@code double} value, 2<sup>-1074</sup>.
-     */
-    static const Double DOUBLE_MIN_VALUE;
-
-    static const Double DOUBLE_ZERO;
-
-    /* 4.94065645841246544e-324 gets rounded to 9.88131e-324 */
-
-    /**
-     * Constant for the Not-a-Number (NaN) value of the {@code double} type.
-     */
-    static const Double DOUBLE_NAN;
-
-    /**
-     * Constant for the positive infinity value of the {@code double} type.
-     */
-    static const Double DOUBLE_POSITIVE_INFINITY;
-
-    /**
-     * Constant for the negative infinity value of the {@code double} type.
-     */
-    static const Double DOUBLE_NEGATIVE_INFINITY;
-
-    /**
-     * Constant for the smallest positive normal value of the {@code double} type.
-     *
-     * @since 1.6
-     */
-    static const Double DOUBLE_MIN_NORMAL;
-
-    /**
-     * Maximum base-2 exponent that a finite value of the {@code double} type may have.
-     * Equal to {@code Math.getExponent(Double.MAX_VALUE)}.
-     *
-     * @since 1.6
-     */
-    static const Int32 DOUBLE_MAX_EXPONENT;
-
-    /**
-     * Minimum base-2 exponent that a normal value of the {@code double} type may have.
-     * Equal to {@code Math.getExponent(Double.MIN_NORMAL)}.
-     *
-     * @since 1.6
-     */
-    static const Int32 DOUBLE_MIN_EXPONENT;
-
-    /**
-     * The double value closest to e, the base of the natural logarithm.
-     */
-    static const Double E;// = 2.718281828459045;
-
-    /**
-     * The double value closest to pi, the ratio of a circle's circumference to
-     * its diameter.
-     */
-    static const Double PI;// = 3.141592653589793;
-
-    /**
-     * An array with powers of ten that fit in the type <code>long</code>
-     * (<code>10^0,10^1,...,10^18</code>).
-     */
-    static const Int32 LongPowersOfTenLength = 19;
-    static const Int64 LongPowersOfTen[LongPowersOfTenLength];
-
-private:
-    /*!
-     * @brief Table for Seal's algorithm for Number of Trailing Zeros. Hacker's Delight
-     * online, Figure 5-18 (http://www.hackersdelight.org/revisions.pdf)
-     * The entries whose value is -1 are never referenced.
-     */
-    ECO_LOCAL static const Int32 IntegerNtzTable[];
-
-public:
     static CARAPI_(Boolean) Constrain(Int32 amount, Int32 low, Int32 high);
 
     static CARAPI_(Boolean) Constrain(Int64 amount, Int64 low, Int64 high);
@@ -1411,6 +1173,25 @@ public:
         /* [in] */ Int32 value);
 
     /**
+     * Compares two {@code int} values.
+     * @return 0 if lhs = rhs, less than 0 if lhs &lt; rhs, and greater than 0
+     *         if lhs &gt; rhs.
+     * @since 1.7
+     */
+    static CARAPI_(Int32) Compare(
+        /* [in] */ Int32 lhs,
+        /* [in] */ Int32 rhs);
+
+    /**
+     * Compares two {@code long} values.
+     * @return 0 if lhs = rhs, less than 0 if lhs &lt; rhs, and greater than 0 if lhs &gt; rhs.
+     * @since 1.7
+     */
+    static CARAPI_(Int32) Compare(
+        /* [in] */ Int64 lhs,
+        /* [in] */ Int64 rhs);
+
+    /**
      * Compares the two specified float values. There are two special cases:
      * <ul>
      * <li>{@code Float.NaN} is equal to {@code Float.NaN} and it is greater
@@ -1486,6 +1267,9 @@ public:
         /* [in] */ Double float2);
 
 private:
+    ECO_LOCAL Math();
+    ECO_LOCAL Math(const Math&);
+
     ECO_LOCAL static CARAPI_(Double) NativeNextAfter(
         /* [in] */ Double x,
         /* [in] */ Double y);
@@ -1510,12 +1294,244 @@ private:
         /* [in] */ Int64 bits,
         /* [in] */ Int64 digits);
 
-private:
-    ECO_LOCAL Math();
-    ECO_LOCAL Math(const Math&);
+    /*!
+     * @brief Table for Seal's algorithm for Number of Trailing Zeros. Hacker's Delight
+     * online, Figure 5-18 (http://www.hackersdelight.org/revisions.pdf)
+     * The entries whose value is -1 are never referenced.
+     */
+    ECO_LOCAL static const Int32 IntegerNtzTable[];
+
+    ECO_LOCAL static CARAPI_(AutoPtr< ArrayOf<Int64> >) INIT_LONG_POWERS_OF_TEN();
+
+public:
+    /**
+     * The number of bits needed to represent a {@code Byte} value in two's
+     * complement form.
+     *
+     * @since 1.5
+     */
+    static const Int32 BYTE_SIZE;
+
+    /**
+     * Constant for the number of bits needed to represent a {@code short} in
+     * two's complement form.
+     *
+     * @since 1.5
+     */
+    static const Int32 INT16_SIZE;
+
+    /**
+     * Constant for the number of bits needed to represent an {@code int} in
+     * two's complement form.
+     *
+     * @since 1.5
+     */
+    static const Int32 INT32_SIZE;
+
+    /**
+     * Constant for the number of bits needed to represent a {@code long} in
+     * two's complement form.
+     *
+     * @since 1.5
+     */
+    static const Int32 INT64_SIZE;
+
+    /**
+     * Constant for the number of bits needed to represent a {@code float} in
+     * two's complement form.
+     *
+     * @since 1.5
+     */
+    static const Int32 FLOAT_SIZE;
+
+    /**
+     * Constant for the number of bits needed to represent a {@code double} in
+     * two's complement form.
+     *
+     * @since 1.5
+     */
+    static const Int32 DOUBLE_SIZE;
+
+    /**
+     * The maximum {@code Byte} value, 2<sup>7</sup>-1.
+     */
+    static const Byte BYTE_MAX_VALUE;
+
+    /**
+     * The minimum {@code Byte} value, -2<sup>7</sup>.
+     */
+    static const Byte BYTE_MIN_VALUE;
+
+    /**
+     * Constant for the maximum {@code short} value, 2<sup>15</sup>-1.
+     */
+    static const Int16 INT16_MAX_VALUE;
+
+    /**
+     * Constant for the minimum {@code short} value, -2<sup>15</sup>.
+     */
+    static const Int16 INT16_MIN_VALUE;
+
+    /**
+     * Constant for the maximum {@code int} value, 2<sup>31</sup>-1.
+     */
+    static const Int32 INT32_MAX_VALUE;
+
+    /**
+     * Constant for the minimum {@code int} value, -2<sup>31</sup>.
+     */
+    static const Int32 INT32_MIN_VALUE;
+
+    /**
+     * Constant for the maximum {@code long} value, 2<sup>63</sup>-1.
+     */
+    static const Int64 INT64_MAX_VALUE;
+
+    /**
+     * Constant for the minimum {@code long} value, -2<sup>63</sup>.
+     */
+    static const Int64 INT64_MIN_VALUE;
+
+
+    static const Int32 FLOAT_EXPONENT_BIAS;
+    static const Int32 FLOAT_EXPONENT_BITS;
+    static const Int32 FLOAT_MANTISSA_BITS;
+    static const Int32 FLOAT_NON_MANTISSA_BITS;
+    static const Int32 FLOAT_SIGN_MASK;
+    static const Int32 FLOAT_EXPONENT_MASK;
+    static const Int32 FLOAT_MANTISSA_MASK;
+
+    /**
+     * Constant for the maximum {@code float} value, (2 - 2<sup>-23</sup>) * 2<sup>127</sup>.
+     */
+    static const Float FLOAT_MAX_VALUE;
+
+    /**
+     * Constant for the minimum {@code float} value, 2<sup>-149</sup>.
+     */
+    static const Float FLOAT_MIN_VALUE;
+
+    static const Float FLOAT_ZERO;
+
+    /**
+     * Constant for the Not-a-Number (NaN) value of the {@code float} type.
+     */
+    static const Float FLOAT_NAN;
+
+    /**
+     * Constant for the positive infinity value of the {@code float} type.
+     */
+    static const Float FLOAT_POSITIVE_INFINITY;
+
+    /**
+     * Constant for the negative infinity value of the {@code float} type.
+     */
+    static const Float FLOAT_NEGATIVE_INFINITY;
+
+    /**
+     * Constant for the smallest positive normal value of the {@code float} type.
+     *
+     * @since 1.6
+     */
+    static const Float FLOAT_MIN_NORMAL;
+
+    /**
+     * Maximum base-2 exponent that a finite value of the {@code float} type may have.
+     * Equal to {@code Math.getExponent(Float.MAX_VALUE)}.
+     *
+     * @since 1.6
+     */
+    static const Int32 FLOAT_MAX_EXPONENT;
+
+    /**
+     * Minimum base-2 exponent that a normal value of the {@code float} type may have.
+     * Equal to {@code Math.getExponent(Float.MIN_NORMAL)}.
+     *
+     * @since 1.6
+     */
+    static const Int32 FLOAT_MIN_EXPONENT;
+
+
+    static const Int32 DOUBLE_EXPONENT_BIAS;
+    static const Int32 DOUBLE_EXPONENT_BITS;
+    static const Int32 DOUBLE_MANTISSA_BITS;
+    static const Int32 DOUBLE_NON_MANTISSA_BITS;
+    static const Int64 DOUBLE_SIGN_MASK;
+    static const Int64 DOUBLE_EXPONENT_MASK;
+    static const Int64 DOUBLE_MANTISSA_MASK;
+
+    /**
+     * Constant for the maximum {@code double} value, (2 - 2<sup>-52</sup>) *
+     * 2<sup>1023</sup>.
+     */
+    static const Double DOUBLE_MAX_VALUE;
+
+    /**
+     * Constant for the minimum {@code double} value, 2<sup>-1074</sup>.
+     */
+    static const Double DOUBLE_MIN_VALUE;
+
+    static const Double DOUBLE_ZERO;
+
+    /* 4.94065645841246544e-324 gets rounded to 9.88131e-324 */
+
+    /**
+     * Constant for the Not-a-Number (NaN) value of the {@code double} type.
+     */
+    static const Double DOUBLE_NAN;
+
+    /**
+     * Constant for the positive infinity value of the {@code double} type.
+     */
+    static const Double DOUBLE_POSITIVE_INFINITY;
+
+    /**
+     * Constant for the negative infinity value of the {@code double} type.
+     */
+    static const Double DOUBLE_NEGATIVE_INFINITY;
+
+    /**
+     * Constant for the smallest positive normal value of the {@code double} type.
+     *
+     * @since 1.6
+     */
+    static const Double DOUBLE_MIN_NORMAL;
+
+    /**
+     * Maximum base-2 exponent that a finite value of the {@code double} type may have.
+     * Equal to {@code Math.getExponent(Double.MAX_VALUE)}.
+     *
+     * @since 1.6
+     */
+    static const Int32 DOUBLE_MAX_EXPONENT;
+
+    /**
+     * Minimum base-2 exponent that a normal value of the {@code double} type may have.
+     * Equal to {@code Math.getExponent(Double.MIN_NORMAL)}.
+     *
+     * @since 1.6
+     */
+    static const Int32 DOUBLE_MIN_EXPONENT;
+
+    /**
+     * The double value closest to e, the base of the natural logarithm.
+     */
+    static const Double E;// = 2.718281828459045;
+
+    /**
+     * The double value closest to pi, the ratio of a circle's circumference to
+     * its diameter.
+     */
+    static const Double PI;// = 3.141592653589793;
+
+    /**
+     * An array with powers of ten that fit in the type <code>long</code>
+     * (<code>10^0,10^1,...,10^18</code>).
+     */
+    static const AutoPtr< ArrayOf<Int64> > LONG_POWERS_OF_TEN;
 
 private:
-    ECO_LOCAL static AutoPtr<IRandom> mRandom;
+    ECO_LOCAL static AutoPtr<IRandom> sRandom;
 };
 
 } // namespace Core

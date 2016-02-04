@@ -11,6 +11,10 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.App.IService
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface IComponentCallbacks
+     * interface IComponentCallbacks2
      */
     interface ILoadAverageService {
     }

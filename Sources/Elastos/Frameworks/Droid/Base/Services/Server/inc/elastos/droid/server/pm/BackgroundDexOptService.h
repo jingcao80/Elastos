@@ -5,9 +5,12 @@
 #include "_Elastos.Droid.Server.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/app/job/JobService.h"
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include <elastos/core/Thread.h>
+#include <elastos/utility/etl/HashSet.h>
 
 using Elastos::Core::Thread;
+using Elastos::Utility::Etl::HashSet;
 using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
 using Elastos::Droid::App::Job::JobService;
 using Elastos::Droid::App::Job::IJobParameters;
@@ -19,6 +22,8 @@ namespace Droid {
 namespace Server {
 namespace Pm {
 
+class CPackageManagerService;
+
 class BackgroundDexOptService : public JobService
 {
 private:
@@ -28,14 +33,16 @@ private:
         OnStartJobThread(
             /* [in] */ BackgroundDexOptService* host,
             /* [in] */ CPackageManagerService* pm,
-            /* [in] */ HashSet<String>* pkgs);
+            /* [in] */ HashSet<String>* pkgs,
+            /* [in] */ IJobParameters* jobParams);
 
         CARAPI Run();
 
     private:
         BackgroundDexOptService* mHost;
         AutoPtr<CPackageManagerService> mPm;
-        AutoPtr< HashSet<String> > mPkgs;
+        AutoPtr<HashSet<String> > mPkgs;
+        AutoPtr<IJobParameters> mJobParams;
     };
 
 public:

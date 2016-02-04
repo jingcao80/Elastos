@@ -15,7 +15,7 @@
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 //#include "elastos/droid/graphics/CRect.h"
-//#include "elastos/droid/net/Uri.h"
+#include "elastos/droid/net/Uri.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
@@ -33,7 +33,7 @@ using Elastos::Droid::Content::Pm::IServiceInfo;
 using Elastos::Droid::Content::Pm::IComponentInfo;
 using Elastos::Droid::Content::Res::ITypedArray;
 //using Elastos::Droid::Graphics::CRect;
-//using Elastos::Droid::Net::Uri;
+using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IUserHandle;
@@ -718,13 +718,12 @@ ECode Intent::GetIntentOld(
         }
 
         intent->mData = NULL;
-        assert(0 && "TODO");
-        // if (isIntentFragment) {
-        //     Uri::Parse(uri.Substring(0, intentFragmentStart), (IUri**)&intent->mData);
-        // }
-        // else {
-        //     Uri::Parse(uri, (IUri**)&intent->mData);
-        // }
+        if (isIntentFragment) {
+            Uri::Parse(uri.Substring(0, intentFragmentStart), (IUri**)&intent->mData);
+        }
+        else {
+            Uri::Parse(uri, (IUri**)&intent->mData);
+        }
 
         if (intent->mAction.IsNull()) {
             // By default, if no action is specified, then use VIEW.
@@ -733,8 +732,7 @@ ECode Intent::GetIntentOld(
     }
     else {
         AutoPtr<IUri> data;
-        assert(0 && "TODO");
-        // Uri::Parse(IIntent::ACTION_VIEW, (IUri**)&data);
+        Uri::Parse(IIntent::ACTION_VIEW, (IUri**)&data);
         CIntent::NewByFriend(IIntent::ACTION_VIEW, data, (CIntent**)&intent);
     }
 

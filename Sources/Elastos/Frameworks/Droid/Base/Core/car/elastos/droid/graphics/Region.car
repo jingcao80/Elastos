@@ -128,6 +128,13 @@ module
             [out] Boolean* result);
 
         /**
+         * Recycles an instance.
+         *
+         * @hide
+         */
+        Recycle();
+
+        /**
          * Return true if the region is a single rectangle (not complex) and it
          * contains the specified rectangle. Returning false is not a guarantee
          * that the rectangle is not contained by this region, but return true is a
@@ -267,6 +274,15 @@ module
 
         GetNativeRegion(
             [out] Handle32* region);
+    }
+
+    interface IRegionHelper {
+        Obtain(
+            [out] IRegion** region);
+
+        Obtain(
+            [in] IRegion* other,
+            [out] IRegion** region);
     }
 
     } // namespace Graphics

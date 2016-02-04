@@ -2,7 +2,7 @@
 module
 {
     interface Elastos.Droid.View.IInputEvent;
-    interface Elastos.Droid.View.IInputFilterHost;
+    interface Elastos.Droid.View.IIInputFilterHost;
 
     namespace Elastos {
     namespace Droid {
@@ -17,7 +17,7 @@ module
     [oneway]
     interface IIInputFilter {
         Install(
-            [in] IInputFilterHost* host);
+            [in] IIInputFilterHost* host);
 
         Uninstall();
 

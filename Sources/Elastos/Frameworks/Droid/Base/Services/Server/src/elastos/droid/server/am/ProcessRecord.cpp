@@ -127,6 +127,326 @@ ProcessRecord::~ProcessRecord()
     Slogger::D("ProcessRecord", " =========== ~ProcessRecord(): %s", ToString().string());
 }
 
+void ProcessRecord::Dump(
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ const String& prefix)
+{
+    // Int64 now = SystemClock::GetUptimeMillis();
+
+    // pw->Print(prefix);
+    // pw->Print("user #");
+    // pw->Print(userId);
+    // pw->Print(" uid=");
+    // pw->Print(info.uid);
+    // if (uid != info.uid) {
+    //     pw->Print(" ISOLATED uid=");
+    //     pw->Print(uid);
+    // }
+    // pw->Println();
+    // if (info.className != null) {
+    //     pw->Print(prefix);
+    //     pw->Print("class=");
+    //     pw->Println(info.className);
+    // }
+    // if (info.manageSpaceActivityName != null) {
+    //     pw->Print(prefix);
+    //     pw->Print("manageSpaceActivityName=");
+    //     pw->Println(info.manageSpaceActivityName);
+    // }
+    // pw->Print(prefix);
+    // pw->Print("dir=");
+    // pw->Print(info.sourceDir);
+    // pw->Print(" publicDir=");
+    // pw->Print(info.publicSourceDir);
+    // pw->Print(" data=");
+    // pw->Println(info.dataDir);
+    // pw->Print(prefix);
+    // pw->Print("packageList={");
+    // for (int i=0; i<pkgList.size(); i++) {
+    //     if (i > 0) pw->Print(", ");
+    //     pw->Print(pkgList.keyAt(i));
+    // }
+    // pw->Println("}");
+    // if (pkgDeps != null) {
+    //     pw->Print(prefix);
+    //     pw->Print("packageDependencies={");
+    //     for (int i=0; i<pkgDeps.size(); i++) {
+    //         if (i > 0) pw->Print(", ");
+    //         pw->Print(pkgDeps.valueAt(i));
+    //     }
+    //     pw->Println("}");
+    // }
+    // pw->Print(prefix);
+    // pw->Print("compat=");
+    // pw->Println(compat);
+    // if (instrumentationClass != null || instrumentationProfileFile != null
+    //         || instrumentationArguments != null) {
+    //     pw->Print(prefix);
+    //     pw->Print("instrumentationClass=");
+    //     pw->Print(instrumentationClass);
+    //     pw->Print(" instrumentationProfileFile=");
+    //     pw->Println(instrumentationProfileFile);
+    //     pw->Print(prefix);
+    //     pw->Print("instrumentationArguments=");
+    //     pw->Println(instrumentationArguments);
+    //     pw->Print(prefix);
+    //     pw->Print("instrumentationInfo=");
+    //     pw->Println(instrumentationInfo);
+    //     if (instrumentationInfo != null) {
+    //         instrumentationInfo.dump(new PrintWriterPrinter(pw), prefix + "  ");
+    //     }
+    // }
+    // pw->Print(prefix);
+    // pw->Print("thread=");
+    // pw->Println(thread);
+    // pw->Print(prefix);
+    // pw->Print("pid=");
+    // pw->Print(pid);
+    // pw->Print(" starting=");
+    // pw->Println(starting);
+    // pw->Print(prefix);
+    // pw->Print("lastActivityTime=");
+    // TimeUtils::FormatDuration(lastActivityTime, now, pw);
+    // pw->Print(" lastPssTime=");
+    // TimeUtils::FormatDuration(lastPssTime, now, pw);
+    // pw->Print(" nextPssTime=");
+    // TimeUtils::FormatDuration(nextPssTime, now, pw);
+    // pw->Println();
+    // pw->Print(prefix);
+    // pw->Print("adjSeq=");
+    // pw->Print(adjSeq);
+    // pw->Print(" lruSeq=");
+    // pw->Print(lruSeq);
+    // pw->Print(" lastPss=");
+    // pw->Print(lastPss);
+    // pw->Print(" lastCachedPss=");
+    // pw->Println(lastCachedPss);
+    // pw->Print(prefix);
+    // pw->Print("cached=");
+    // pw->Print(cached);
+    // pw->Print(" empty=");
+    // pw->Println(empty);
+    // if (serviceb) {
+    //     pw->Print(prefix);
+    //     pw->Print("serviceb=");
+    //     pw->Print(serviceb);
+    //     pw->Print(" serviceHighRam=");
+    //     pw->Println(serviceHighRam);
+    // }
+    // if (notCachedSinceIdle) {
+    //     pw->Print(prefix);
+    //     pw->Print("notCachedSinceIdle=");
+    //     pw->Print(notCachedSinceIdle);
+    //     pw->Print(" initialIdlePss=");
+    //     pw->Println(initialIdlePss);
+    // }
+    // pw->Print(prefix);
+    // pw->Print("oom: max=");
+    // pw->Print(maxAdj);
+    // pw->Print(" curRaw=");
+    // pw->Print(curRawAdj);
+    // pw->Print(" setRaw=");
+    // pw->Print(setRawAdj);
+    // pw->Print(" cur=");
+    // pw->Print(curAdj);
+    // pw->Print(" set=");
+    // pw->Println(setAdj);
+    // pw->Print(prefix);
+    // pw->Print("curSchedGroup=");
+    // pw->Print(curSchedGroup);
+    // pw->Print(" setSchedGroup=");
+    // pw->Print(setSchedGroup);
+    // pw->Print(" systemNoUi=");
+    // pw->Print(systemNoUi);
+    // pw->Print(" trimMemoryLevel=");
+    // pw->Println(trimMemoryLevel);
+    // pw->Print(prefix);
+    // pw->Print("curProcState=");
+    // pw->Print(curProcState);
+    // pw->Print(" repProcState=");
+    // pw->Print(repProcState);
+    // pw->Print(" pssProcState=");
+    // pw->Print(pssProcState);
+    // pw->Print(" setProcState=");
+    // pw->Print(setProcState);
+    // pw->Print(" lastStateTime=");
+    // TimeUtils.formatDuration(lastStateTime, now, pw);
+    // pw->Println();
+    // if (hasShownUi || pendingUiClean || hasAboveClient || treatLikeActivity) {
+    //     pw->Print(prefix);
+    //     pw->Print("hasShownUi=");
+    //     pw->Print(hasShownUi);
+    //     pw->Print(" pendingUiClean=");
+    //     pw->Print(pendingUiClean);
+    //     pw->Print(" hasAboveClient=");
+    //     pw->Print(hasAboveClient);
+    //     pw->Print(" treatLikeActivity=");
+    //     pw->Println(treatLikeActivity);
+    // }
+    // if (setIsForeground || foregroundServices || forcingToForeground != null) {
+    //     pw->Print(prefix);
+    //     pw->Print("setIsForeground=");
+    //     pw->Print(setIsForeground);
+    //     pw->Print(" foregroundServices=");
+    //     pw->Print(foregroundServices);
+    //     pw->Print(" forcingToForeground=");
+    //     pw->Println(forcingToForeground);
+    // }
+    // if (persistent || removed) {
+    //     pw->Print(prefix);
+    //     pw->Print("persistent=");
+    //     pw->Print(persistent);
+    //     pw->Print(" removed=");
+    //     pw->Println(removed);
+    // }
+    // if (hasClientActivities || foregroundActivities || repForegroundActivities) {
+    //     pw->Print(prefix);
+    //     pw->Print("hasClientActivities=");
+    //     pw->Print(hasClientActivities);
+    //     pw->Print(" foregroundActivities=");
+    //     pw->Print(foregroundActivities);
+    //     pw->Print(" (rep=");
+    //     pw->Print(repForegroundActivities);
+    //     pw->Println(")");
+    // }
+    // if (hasStartedServices) {
+    //     pw->Print(prefix);
+    //     pw->Print("hasStartedServices=");
+    //     pw->Println(hasStartedServices);
+    // }
+    // if (setProcState >= ActivityManager.PROCESS_STATE_SERVICE) {
+    //     long wtime;
+    //     synchronized (mBatteryStats) {
+    //         wtime = mBatteryStats.getProcessWakeTime(info.uid,
+    //                 pid, SystemClock.elapsedRealtime());
+    //     }
+    //     pw->Print(prefix);
+    //     pw->Print("lastWakeTime=");
+    //     pw->Print(lastWakeTime);
+    //     pw->Print(" timeUsed=");
+    //     TimeUtils.formatDuration(wtime-lastWakeTime, pw);
+    //     pw->Println("");
+    //     pw->Print(prefix);
+    //     pw->Print("lastCpuTime=");
+    //     pw->Print(lastCpuTime);
+    //     pw->Print(" timeUsed=");
+    //     TimeUtils.formatDuration(curCpuTime-lastCpuTime, pw);
+    //     pw->Println("");
+    // }
+    // pw->Print(prefix);
+    // pw->Print("lastRequestedGc=");
+    // TimeUtils.formatDuration(lastRequestedGc, now, pw);
+    // pw->Print(" lastLowMemory=");
+    // TimeUtils.formatDuration(lastLowMemory, now, pw);
+    // pw->Print(" reportLowMemory=");
+    // pw->Println(reportLowMemory);
+    // if (killed || killedByAm || waitingToKill != null) {
+    //     pw->Print(prefix);
+    //     pw->Print("killed=");
+    //     pw->Print(killed);
+    //     pw->Print(" killedByAm=");
+    //     pw->Print(killedByAm);
+    //     pw->Print(" waitingToKill=");
+    //     pw->Println(waitingToKill);
+    // }
+    // if (debugging || crashing || crashDialog != null || notResponding
+    //         || anrDialog != null || bad) {
+    //     pw->Print(prefix);
+    //     pw->Print("debugging=");
+    //     pw->Print(debugging);
+    //     pw->Print(" crashing=");
+    //     pw->Print(crashing);
+    //     pw->Print(" ");
+    //     pw->Print(crashDialog);
+    //     pw->Print(" notResponding=");
+    //     pw->Print(notResponding);
+    //     pw->Print(" " );
+    //     pw->Print(anrDialog);
+    //     pw->Print(" bad=");
+    //     pw->Print(bad);
+
+    //     // crashing or notResponding is always set before errorReportReceiver
+    //     if (errorReportReceiver != null) {
+    //         pw->Print(" errorReportReceiver=");
+    //         pw->Print(errorReportReceiver.flattenToShortString());
+    //     }
+    //     pw->Println();
+    // }
+    // if (activities.size() > 0) {
+    //     pw->Print(prefix);
+    //     pw->Println("Activities:");
+    //     for (int i=0; i<activities.size(); i++) {
+    //         pw->Print(prefix);
+    //         pw->Print("  - ");
+    //         pw->Println(activities.get(i));
+    //     }
+    // }
+    // if (services.size() > 0) {
+    //     pw->Print(prefix);
+    //     pw->Println("Services:");
+    //     for (int i=0; i<services.size(); i++) {
+    //         pw->Print(prefix);
+    //         pw->Print("  - ");
+    //         pw->Println(services.valueAt(i));
+    //     }
+    // }
+    // if (executingServices.size() > 0) {
+    //     pw->Print(prefix);
+    //     pw->Print("Executing Services (fg=");
+    //     pw->Print(execServicesFg);
+    //     pw->Println(")");
+    //     for (int i=0; i<executingServices.size(); i++) {
+    //         pw->Print(prefix);
+    //         pw->Print("  - ");
+    //         pw->Println(executingServices.valueAt(i));
+    //     }
+    // }
+    // if (connections.size() > 0) {
+    //     pw->Print(prefix);
+    //     pw->Println("Connections:");
+    //     for (int i=0; i<connections.size(); i++) {
+    //         pw->Print(prefix);
+    //         pw->Print("  - ");
+    //         pw->Println(connections.valueAt(i));
+    //     }
+    // }
+    // if (pubProviders.size() > 0) {
+    //     pw->Print(prefix);
+    //     pw->Println("Published Providers:");
+    //     for (int i=0; i<pubProviders.size(); i++) {
+    //         pw->Print(prefix);
+    //         pw->Print("  - ");
+    //         pw->Println(pubProviders.keyAt(i));
+    //         pw->Print(prefix);
+    //         pw->Print("    -> ");
+    //         pw->Println(pubProviders.valueAt(i));
+    //     }
+    // }
+    // if (conProviders.size() > 0) {
+    //     pw->Print(prefix);
+    //     pw->Println("Connected Providers:");
+    //     for (int i=0; i<conProviders.size(); i++) {
+    //         pw->Print(prefix);
+    //         pw->Print("  - ");
+    //         pw->Println(conProviders.get(i).toShortString());
+    //     }
+    // }
+    // if (curReceiver != null) {
+    //     pw->Print(prefix);
+    //     pw->Print("curReceiver=");
+    //     pw->Println(curReceiver);
+    // }
+    // if (receivers.size() > 0) {
+    //     pw->Print(prefix);
+    //     pw->Println("Receivers:");
+    //     for (int i=0; i<receivers.size(); i++) {
+    //         pw->Print(prefix);
+    //         pw->Print("  - ");
+    //         pw->Println(receivers.valueAt(i));
+    //     }
+    // }
+}
+
 ECode ProcessRecord::SetPid(
     /* [in] */ Int32 pid)
 {

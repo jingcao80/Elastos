@@ -242,6 +242,7 @@ ECode CMediaCodecMediaImage::CheckValid()
         // throw new IllegalStateException("Image is already released");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
+    return NOERROR;
 }
 
 Int32 CMediaCodecMediaImage::ReadInt32(

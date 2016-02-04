@@ -934,11 +934,11 @@ void SharedPreferencesImpl::WriteToFile(
         return;
     }
 
-    Boolean isSync = FALSE, isDeleteFile = FALSE;
+    Boolean isDeleteFile = FALSE;
     String path;
     AutoPtr<IStructStat> stat;
     FAIL_GOTO(XmlUtils::WriteMapXml(mcr->mMapToWriteToDisk, IOutputStream::Probe(str)), failed);
-    isSync = FileUtils::Sync(str);
+    FileUtils::Sync(str);
     FAIL_GOTO(ICloseable::Probe(str)->Close(), failed);
     FAIL_GOTO(mFile->GetPath(&path), failed);
     assert(0 && "TODO");

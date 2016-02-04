@@ -121,6 +121,12 @@ public:
     CARAPI SetVerticalMargin(
         /* [in] */ Float verticalMargin);
 
+    CARAPI GetSurfaceInsets(
+        /* [out] */ IRect** surfaceInsets);
+
+    CARAPI SetSurfaceInsets(
+        /* [in] */ IRect* surfaceInsets);
+
     CARAPI GetFormat(
         /* [out] */ Int32* format);
 
@@ -174,6 +180,12 @@ public:
 
     CARAPI SetScreenOrientation(
         /* [in] */ Int32 orientation);
+
+    CARAPI GetPreferredRefreshRate(
+        /* [out] */ Float* rate);
+
+    CARAPI SetPreferredRefreshRate(
+        /* [in] */ Float rate);
 
     CARAPI GetSystemUiVisibility(
         /* [out] */ Int32* systemUiVisibility);

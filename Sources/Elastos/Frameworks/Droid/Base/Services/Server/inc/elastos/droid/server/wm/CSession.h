@@ -2,14 +2,18 @@
 #define __ELASTOS_DROID_SERVER_WM_CSESSION_H__
 
 #include "_Elastos_Droid_Server_Wm_CSession.h"
-#include "wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Droid::View::IWindowSession;
 using Elastos::Droid::View::IIWindow;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::View::IWindowManager;
 using Elastos::Droid::View::IInputChannel;
 using Elastos::Droid::View::ISurface;
 using Elastos::Droid::View::ISurfaceSession;
+using Elastos::Droid::View::IIWindowId;
+using Elastos::Droid::View::IIWindowSessionCallback;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::IClipData;
 using Elastos::Droid::Graphics::IRect;
@@ -311,8 +315,9 @@ public:
         /* [in] */ IBinder* token,
         /* [in] */ IRect* rectangle);
 
-    CARAPI_(AutoPtr<IIWindowId>) GetWindowId(
-        /* [in] */ IBinder* window);
+    CARAPI GetWindowId(
+        /* [in] */ IBinder* window,
+        /* [out] */ IIWindowId** winId);
 
     CARAPI ProxyDied();
 

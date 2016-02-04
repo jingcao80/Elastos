@@ -25,22 +25,13 @@ namespace Media {
 //============================================================================
 //              WebVttRenderingWidget::RegionLayout
 //============================================================================
-WebVttRenderingWidget::RegionLayout::RegionLayout()
-{}
-
-WebVttRenderingWidget::RegionLayout::~RegionLayout()
-{}
-
-CAR_INTERFACE_IMPL_8(WebVttRenderingWidget::RegionLayout, Object, ILinearLayout, IViewGroup, IViewParent, IViewManager, IView, IDrawableCallback, IKeyEventCallback, IAccessibilityEventSource);
-
-ECode WebVttRenderingWidget::RegionLayout::constructor(
+WebVttRenderingWidget::RegionLayout::RegionLayout(
     /* [in] */ WebVttRenderingWidget* host,
     /* [in] */ IContext* context,
     /* [in] */ ITextTrackRegion* region,
     /* [in] */ ICaptioningManagerCaptionStyle* captionStyle,
     /* [in] */ Float fontSize)
 {
-    VALIDATE_NOT_NULL(captionStyle);
     LinearLayout::constructor(context);
 
     mRegion = region;
@@ -58,8 +49,12 @@ ECode WebVttRenderingWidget::RegionLayout::constructor(
         captionStyle->GetWindowColor(&color);
         View::SetBackgroundColor(color);
     }
-    return NOERROR;
 }
+
+WebVttRenderingWidget::RegionLayout::~RegionLayout()
+{}
+
+CAR_INTERFACE_IMPL_8(WebVttRenderingWidget::RegionLayout, Object, ILinearLayout, IViewGroup, IViewParent, IViewManager, IView, IDrawableCallback, IKeyEventCallback, IAccessibilityEventSource);
 
 ECode WebVttRenderingWidget::RegionLayout::SetCaptionStyle(
     /* [in] */ ICaptioningManagerCaptionStyle* captionStyle,
@@ -99,6 +94,7 @@ ECode WebVttRenderingWidget::RegionLayout::MeasureForParent(
     widthMeasureSpec = View::MeasureSpec::MakeMeasureSpec(size, View::MeasureSpec::AT_MOST);
     heightMeasureSpec = View::MeasureSpec::MakeMeasureSpec(specHeight, View::MeasureSpec::AT_MOST);
     View::Measure(widthMeasureSpec, heightMeasureSpec);
+    return NOERROR;
 }
 
 ECode WebVttRenderingWidget::RegionLayout::PrepForPrune()
@@ -133,8 +129,7 @@ ECode WebVttRenderingWidget::RegionLayout::Put(
 
     AutoPtr<IContext> context;
     View::GetContext((IContext**)&context);
-    AutoPtr<CueLayout> cueBox = new CueLayout();
-    cueBox->constructor(mHost, context.Get(), cue, mCaptionStyle, mFontSize);
+    AutoPtr<CueLayout> cueBox = new CueLayout(mHost, context.Get(), cue, mCaptionStyle, mFontSize);
     mRegionCueBoxes->Add(ILinearLayout::Probe(cueBox));
     ViewGroup::AddView(cueBox, IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT);
 
@@ -181,25 +176,13 @@ ECode WebVttRenderingWidget::RegionLayout::GetRegion(
 //============================================================================
 //              WebVttRenderingWidget::CueLayout
 //============================================================================
-WebVttRenderingWidget::CueLayout::CueLayout()
-    : mFontSize(0)
-    , mActive(FALSE)
-    , mOrder(0)
-{}
-
-WebVttRenderingWidget::CueLayout::~CueLayout()
-{}
-
-CAR_INTERFACE_IMPL_8(WebVttRenderingWidget::CueLayout, Object, ILinearLayout, IViewGroup, IViewParent, IViewManager, IView, IDrawableCallback, IKeyEventCallback, IAccessibilityEventSource);
-
-ECode WebVttRenderingWidget::CueLayout::constructor(
+WebVttRenderingWidget::CueLayout::CueLayout(
     /* [in] */ WebVttRenderingWidget* host,
     /* [in] */ IContext* context,
     /* [in] */ ITextTrackCue* cue,
     /* [in] */ ICaptioningManagerCaptionStyle* captionStyle,
     /* [in] */ Float fontSize)
 {
-    VALIDATE_NOT_NULL(cue);
     LinearLayout::constructor(context);
 
     mCue = cue;
@@ -238,8 +221,13 @@ ECode WebVttRenderingWidget::CueLayout::constructor(
         View::SetBackgroundColor(WebVttRenderingWidget::DEBUG_CUE_BACKGROUND);
     }
 
-    return Update();
+    Update();
 }
+
+WebVttRenderingWidget::CueLayout::~CueLayout()
+{}
+
+CAR_INTERFACE_IMPL_8(WebVttRenderingWidget::CueLayout, Object, ILinearLayout, IViewGroup, IViewParent, IViewManager, IView, IDrawableCallback, IKeyEventCallback, IAccessibilityEventSource);
 
 ECode WebVttRenderingWidget::CueLayout::SetCaptionStyle(
     /* [in] */ ICaptioningManagerCaptionStyle* style,
@@ -296,10 +284,9 @@ ECode WebVttRenderingWidget::CueLayout::Update()
     mCue->GetLines((ArrayOf<IArrayOf*>**)&lines);
     Int32 lineCount = lines->GetLength();
     for (Int32 i = 0; i < lineCount; i++) {
-        AutoPtr<SpanLayout> lineBox = new SpanLayout();
         AutoPtr<IContext> context;
         View::GetContext((IContext**)&context);
-        lineBox->constructor(context, (*lines)[i]);
+        AutoPtr<SpanLayout> lineBox = new SpanLayout(context, (*lines)[i]);
         lineBox->SetAlignment(alignment);
         lineBox->SetCaptionStyle(captionStyle, fontSize);
 
@@ -387,22 +374,19 @@ ECode WebVttRenderingWidget::CueLayout::GetCue(
 //============================================================================
 //              WebVttRenderingWidget::SpanLayout
 //============================================================================
-WebVttRenderingWidget::SpanLayout::SpanLayout()
-{}
-
-WebVttRenderingWidget::SpanLayout::~SpanLayout()
-{}
-
-CAR_INTERFACE_IMPL_5(WebVttRenderingWidget::SpanLayout, Object, ISubtitleView, IView, IDrawableCallback, IKeyEventCallback, IAccessibilityEventSource);
-
-ECode WebVttRenderingWidget::SpanLayout::constructor(
+WebVttRenderingWidget::SpanLayout::SpanLayout(
     /* [in] */ IContext* context,
     /* [in] */ IArrayOf* spans)
 {
     SubtitleView::constructor(context);
     mSpans = spans;
-    return Update();
+    Update();
 }
+
+WebVttRenderingWidget::SpanLayout::~SpanLayout()
+{}
+
+CAR_INTERFACE_IMPL_5(WebVttRenderingWidget::SpanLayout, Object, ISubtitleView, IView, IDrawableCallback, IKeyEventCallback, IAccessibilityEventSource);
 
 ECode WebVttRenderingWidget::SpanLayout::Update()
 {
@@ -584,8 +568,7 @@ ECode WebVttRenderingWidget::SetActiveCues(
             mRegionBoxes->Get(region, (IInterface**)&rg);
             AutoPtr<RegionLayout> regionBox = (RegionLayout*)ILinearLayout::Probe(rg);
             if (regionBox == NULL) {
-                regionBox = new RegionLayout();
-                regionBox->constructor(this, context, region, captionStyle, fontSize);
+                regionBox = new RegionLayout(this, context, region, captionStyle, fontSize);
                 mRegionBoxes->Put(TO_IINTERFACE(region), TO_IINTERFACE(regionBox));
                 ViewGroup::AddView(regionBox, IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT);
             }
@@ -595,8 +578,7 @@ ECode WebVttRenderingWidget::SetActiveCues(
             mCueBoxes->Get(cue, (IInterface**)&cl);
             AutoPtr<CueLayout> cueBox = (CueLayout*)ILinearLayout::Probe(cl);
             if (cueBox == NULL) {
-                cueBox = new CueLayout();
-                cueBox->constructor(this, context, cue, captionStyle, fontSize);
+                cueBox = new CueLayout(this, context, cue, captionStyle, fontSize);
                 mCueBoxes->Put(TO_IINTERFACE(cue), TO_IINTERFACE(cueBox));
                 ViewGroup::AddView(cueBox, IViewGroupLayoutParams::WRAP_CONTENT, IViewGroupLayoutParams::WRAP_CONTENT);
             }

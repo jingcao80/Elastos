@@ -1,0 +1,36 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    using interface Elastos.Droid.Internal.App.IIMediaContainerService;
+    using interface Elastos.Droid.App.IIntentService;
+    using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Os.IBinder;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace DefaultContainerService {
+
+    class CDefaultContainerService {
+        interface IIntentService;
+        interface IService;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IContextWrapper;
+        interface IContext;
+    }
+
+    class CMediaContainerService {
+        interface IIMediaContainerService;
+        interface IBinder;
+    }
+
+    } //namespace DefaultContainerService
+    } //namespace Droid
+    } //namespace Elastos
+
+}

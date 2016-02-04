@@ -343,6 +343,21 @@ ECode CActivityManagerRunningAppProcessInfo::SetImportanceReasonImportance(
     return NOERROR;
 }
 
+ECode CActivityManagerRunningAppProcessInfo::GetProcessState(
+    /* [out] */ Int32* processState)
+{
+    VALIDATE_NOT_NULL(processState);
+    *processState = mProcessState;
+    return NOERROR;
+}
+
+ECode CActivityManagerRunningAppProcessInfo::SetProcessState(
+    /* [in] */ Int32 processState)
+{
+    mProcessState = processState;
+    return NOERROR;
+}
+
 } // namespace App
 } // namespace Droid
 } // namespace Elastos

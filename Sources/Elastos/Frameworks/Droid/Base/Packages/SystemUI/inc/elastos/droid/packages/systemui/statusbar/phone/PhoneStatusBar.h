@@ -478,19 +478,23 @@ public:
         /* [in] */ Int32 index,
         /* [in] */ Int32 viewIndex,
         /* [in] */ IStatusBarIcon* icon);
+
     virtual CARAPI UpdateIcon(
         /* [in] */ const String& slot,
         /* [in] */ Int32 index,
         /* [in] */ Int32 viewIndex,
         /* [in] */ IStatusBarIcon* old,
         /* [in] */ IStatusBarIcon* icon);
+
     virtual CARAPI RemoveIcon(
         /* [in] */ const String& slot,
         /* [in] */ Int32 index,
         /* [in] */ Int32 viewIndex);
+
     virtual CARAPI AddNotification(
         /* [in] */ IBinder* key,
         /* [in] */ IStatusBarNotification* notification);
+
     virtual CARAPI RemoveNotification(
         /* [in] */ IBinder* key);
 

@@ -33,7 +33,7 @@ module
     using interface Elastos.Droid.Content.IComponentName;
     using interface Elastos.Droid.View.IKeyEvent;
     using interface Elastos.Core.IRandom;
-    using interface Elastos.Droid.App.IActivityController;
+    using interface Elastos.Droid.App.IIActivityController;
 
     namespace Elastos {
     namespace Droid {
@@ -288,7 +288,7 @@ module
         constructor(
             [in] Handle32 monkey);
 
-        interface IActivityController;
+        interface IIActivityController;
     }
 
     } // namespace Monkey

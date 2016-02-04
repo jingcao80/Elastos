@@ -119,25 +119,7 @@ ECode InputStream::Skip(
     AutoPtr<IStreams> streams;
     CStreams::AcquireSingleton((IStreams**)&streams);
     Int64 result;
-    streams->SkipByReading(THIS_PROBE(IInputStream), byteCount, &result);
-
-    AutoPtr<ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(4096);
-
-    Int64 skipped = 0;
-    while (skipped < byteCount) {
-        Int32 toRead = (Int32)Elastos::Core::Math::Min(byteCount - skipped, (Int64)buffer->GetLength());
-        Int32 read = 0;
-        FAIL_RETURN(Read(buffer.Get(), 0, toRead, &read));
-        if (read == -1) {
-            break;
-        }
-        skipped += read;
-        if (read < toRead) {
-            break;
-        }
-    }
-
-    *number = skipped;
+    streams->SkipByReading(THIS_PROBE(IInputStream), byteCount, number);
     return NOERROR;
 }
 

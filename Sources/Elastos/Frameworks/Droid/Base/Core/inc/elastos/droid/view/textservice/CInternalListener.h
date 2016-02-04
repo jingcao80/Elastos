@@ -5,8 +5,8 @@
 #include "_Elastos_Droid_View_TextService_CInternalListener.h"
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::View::Internal::TextService::IITextServicesSessionListener;
-using Elastos::Droid::View::Internal::TextService::IISpellCheckerSession;
+using Elastos::Droid::Internal::TextService::IITextServicesSessionListener;
+using Elastos::Droid::Internal::TextService::IISpellCheckerSession;
 
 using Elastos::Core::Object;
 

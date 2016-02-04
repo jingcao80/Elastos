@@ -17,6 +17,12 @@ module
      * such as the native size, the managed class wrappers, and various precondition checks.</p>
      */
     interface IMarshalHelpers {
+        const Int32 SIZEOF_BYTE = 1;
+        const Int32 SIZEOF_INT32 = 4;               // Integer.SIZE / Byte.SIZE; 32 / 8
+        const Int32 SIZEOF_INT64 = 8;               // Long.SIZE / Byte.SIZE; 64 / 8
+        const Int32 SIZEOF_FLOAT = 4;               // Float.SIZE / Byte.SIZE; 32 / 8
+        const Int32 SIZEOF_DOUBLE = 8;              // Double.SIZE / Byte.SIZE; 64 / 8
+        const Int32 SIZEOF_RATIONAL = 8;            // SIZEOF_INT32 * 2;
 
         /**
          * Get the size in bytes for the native camera metadata type.
@@ -46,8 +52,8 @@ module
          * @see #isPrimitiveClass
          */
         CheckPrimitiveClass(
-            [in] IInterface* klass,
-            [out] IInterface** outcla);
+            [in] ClassID klass,
+            [out] ClassID* outcla);
 
         /**
          * Checks whether or not {@code klass} is one of the metadata-primitive classes.
@@ -70,7 +76,7 @@ module
          * @return {@code true} if primitive, {@code false} otherwise
          */
         IsPrimitiveClass(
-            [in] IInterface* klass,
+            [in] ClassID klass,
             [out] Boolean* value);
 
         /**
@@ -88,8 +94,8 @@ module
          */
         // @SuppressWarnings("unchecked")
         WrapClassIfPrimitive(
-            [in] IInterface* klass,
-            [out] IInterface** outcl);
+            [in] ClassID klass,
+            [out] ClassID* outcl);
 
         /**
          * Return a human-readable representation of the {@code nativeType}, e.g. "TYPE_INT32"

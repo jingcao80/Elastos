@@ -217,6 +217,7 @@ Int32 TextToSpeechService::SynthHandler::EnqueueSpeechItem(
 
     AutoPtr<IRunnable> runnable = new RunnableSynthHandlerEnqueueSpeechItem(this, speechItem);
     //Boolean result;
+    // TODO
     ECode ec;   // = this->Post(runnable, &result);
 
     if (!FAILED(ec)) {
@@ -1293,6 +1294,7 @@ Int32 TextToSpeechService::GetSecureSettingInt(
     AutoPtr<IContentResolver> cr;
     GetContentResolver((IContentResolver**)&cr);
     Int32 secureSettingInt;
+    // TODO
 //    Settings::Secure::GetInt32(cr.Get(), name, defaultValue, &secureSettingInt);
     return secureSettingInt;
 }

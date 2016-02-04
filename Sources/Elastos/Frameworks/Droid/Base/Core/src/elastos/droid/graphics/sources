@@ -4,6 +4,7 @@ TARGET_TYPE= lib
 include $(MAKEDIR)/../../../../../../sources.inc
 
 C_DEFINES += -DDROID_CORE
+C_DEFINES += -DSK_BUILD_FOR_ELASTOS_FRAMEWORK
 
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../inc/
@@ -48,6 +49,7 @@ SOURCES += Color.cpp
 SOURCES += CColor.cpp
 SOURCES += CColorMatrix.cpp
 SOURCES += ColorFilter.cpp
+SOURCES += CColorFilter.cpp
 SOURCES += CColorMatrixColorFilter.cpp
 SOURCES += PathEffect.cpp
 SOURCES += CComposePathEffect.cpp
@@ -90,6 +92,7 @@ SOURCES += CRect.cpp
 SOURCES += CRectHelper.cpp
 SOURCES += CRectF.cpp
 SOURCES += CRegion.cpp
+SOURCES += CRegionHelper.cpp
 SOURCES += CRegionIterator.cpp
 SOURCES += CSurfaceTexture.cpp
 SOURCES += CSumPathEffect.cpp

@@ -266,17 +266,11 @@ Int64 AlphabeticIndex::BuildImmutableIndex(
 {
     NATIVE(AlphabeticIndex)* ai = fromPeer(peer);
     UErrorCode status = U_ZERO_ERROR;
-    // TODO: There is a problem here. Waiting for new .so files.
-#if 0 // for compiling
     NATIVE(AlphabeticIndex::ImmutableIndex)* ii = ai->buildImmutableIndex(status);
     if (!U_SUCCESS(status)) {
         return 0;
     }
     return reinterpret_cast<uintptr_t>(ii);
-#else
-    assert(0);
-    return 0;
-#endif
 }
 
 } // namespace ICU

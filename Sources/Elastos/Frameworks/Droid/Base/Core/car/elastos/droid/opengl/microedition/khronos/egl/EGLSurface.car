@@ -7,13 +7,6 @@ module
     namespace Egl {
 
     interface IEGLSurface {
-
-        Equals(
-            [in] IInterface *object,
-            [out] Boolean *equals);
-
-        GetHashCode(
-            [out] Int32 *hashCode);
     }
 
     } // namepsace Egl

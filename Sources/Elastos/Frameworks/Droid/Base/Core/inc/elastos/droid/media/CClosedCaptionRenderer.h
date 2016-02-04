@@ -4,11 +4,12 @@
 
 #include "_Elastos_Droid_Media_CClosedCaptionRenderer.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/R.h"
+#include "elastos/droid/media/SubtitleTrack.h"
 #include "elastos/droid/text/style/CharacterStyle.h"
 #include "elastos/droid/view/ViewGroup.h"
 #include "elastos/droid/widget/LinearLayout.h"
 #include "elastos/droid/widget/TextView.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/Object.h>
 #include <elastos/core/StringBuilder.h>
 
@@ -568,10 +569,8 @@ public:
         AutoPtr<CCMemory> mTextMem;
     };
 
-// TODO: Need SubtitleTrack
-        // : public SubtitleTrack
     class ClosedCaptionTrack
-        : public Object
+        : public SubtitleTrack
     {
     public:
         ClosedCaptionTrack(

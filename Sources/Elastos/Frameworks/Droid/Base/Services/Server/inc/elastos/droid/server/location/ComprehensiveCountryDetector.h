@@ -2,23 +2,24 @@
 #ifndef __ELASTOS_DROID_SERVER_LOCATION_COMPREHENSIVECOUNTRYDETECTOR_H__
 #define __ELASTOS_DROID_SERVER_LOCATION_COMPREHENSIVECOUNTRYDETECTOR_H__
 
-#ifdef DROID_CORE
-#include "Elastos.Droid.Core_server.h"
-#elif defined(DROID_SERVER)
-#include "Elastos.Droid.Core.h"
-#endif
-#include "location/CountryDetectorBase.h"
-#include <elastos/TimerTask.h>
+#include "elastos/droid/ext/frameworkext.h"
+#include "_Elastos.Droid.Server.h"
 #include "elastos/droid/os/Runnable.h"
-#include <elastos/utility/etl/List.h>
+#include "elastos/droid/server/location/CountryDetectorBase.h"
+// #include "elastos/droid/telephony/PhoneStateListener.h"
+#include "elastos/utility/TimerTask.h"
+#include "Elastos.Droid.Location.h"
 
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::TimerTask;
-using Elastos::Utility::ITimer;
-using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Location::ICountry;
 using Elastos::Droid::Location::ICountryListener;
+using Elastos::Droid::Os::Runnable;
+// using Elastos::Droid::Telephony::IPhoneStateListener;
+// using Elastos::Droid::Telephony::IServiceState;
+// using Elastos::Droid::Telephony::ITelephonyManager;
+// using Elastos::Droid::Telephony::PhoneStateListener;
+using Elastos::Utility::Concurrent::IConcurrentLinkedQueue;
+using Elastos::Utility::ITimer;
+using Elastos::Utility::TimerTask;
 
 namespace Elastos {
 namespace Droid {
@@ -47,25 +48,30 @@ namespace Location {
  *
  * @hide
  */
-class ComprehensiveCountryDetector : public CountryDetectorBase
+class ComprehensiveCountryDetector
+    : public CountryDetectorBase
 {
-
 private:
-    const static String TAG;// = "CountryDetector";
-
-    class MyTimerTask : public TimerTask
+    class MyCountryListener
+        : public Object
+        , public ICountryListener
     {
     public:
-        MyTimerTask(
+        CAR_INTERFACE_DECL()
+
+        MyCountryListener(
             /* [in] */ ComprehensiveCountryDetector* host);
 
-        CARAPI Run();
+        //@Override
+        CARAPI OnCountryDetected(
+            /* [in] */ ICountry* country);
 
     private:
         ComprehensiveCountryDetector* mHost;
     };
 
-    class MyRunnable : public Runnable
+    class MyRunnable
+        : public Runnable
     {
     public:
         MyRunnable(
@@ -85,91 +91,81 @@ private:
         Boolean mStartLocationBasedDetection;
     };
 
-public:
-    /* package */ static const Boolean DEBUG;// = FALSE;
+    class MyTimeTask
+        : public TimerTask
+    {
+    public:
+        MyTimeTask(
+            /* [in] */ ComprehensiveCountryDetector* host);
+
+        CARAPI Run();
+
+    private:
+        ComprehensiveCountryDetector* mHost;
+    };
+
+#if 0 //TODO
+    class MyPhoneStateListener
+        // : public PhoneStateListener
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        MyPhoneStateListener(
+            /* [in] */ ComprehensiveCountryDetector* host);
+
+        //@Override
+        CARAPI OnServiceStateChanged(
+            /* [in] */ IServiceState* serviceState);
+
+    private:
+        ComprehensiveCountryDetector* mHost;
+    };
+#endif
 
 public:
     ComprehensiveCountryDetector(
         /* [in] */ IContext* context);
 
-    //@Override
-    CARAPI_(AutoPtr<ICountry>) DetectCountry();
+    // @Override
+    CARAPI DetectCountry(
+        /* [out] */ ICountry** country);
 
-    //@Override
-    CARAPI_(void) Stop();
+    // @Override
+    CARAPI Stop();
 
-    //@Override
-    CARAPI_(void) SetCountryListener(
+    // @Override
+    CARAPI SetCountryListener(
         /* [in] */ ICountryListener* listener);
 
-    CARAPI_(void) RunAfterDetection(
-        /* [in] */ ICountry* country,
-        /* [in] */ ICountry* detectedCountry,
-        /* [in] */ const Boolean notifyChange,
-        /* [in] */ const Boolean startLocationBasedDetection);
-
-    //@Override
-    CARAPI_(String) ToString();
+    // @Override
+    CARAPI ToString(
+        /* [out] */ String* result);
 
 protected:
     /**
      * @return the country from the mobile network.
      */
-    CARAPI_(AutoPtr<ICountry>) GetNetworkBasedCountry();
+    CARAPI GetNetworkBasedCountry(
+        /* [out] */ ICountry** country);
 
     /**
      * @return the cached location based country.
      */
-    CARAPI_(AutoPtr<ICountry>) GetLastKnownLocationBasedCountry();
+    CARAPI GetLastKnownLocationBasedCountry(
+        /* [out] */ ICountry** country);
 
     /**
      * @return the country from SIM card
      */
-    CARAPI_(AutoPtr<ICountry>) GetSimBasedCountry();
+    CARAPI GetSimBasedCountry(
+        /* [out] */ ICountry** country);
 
     /**
      * @return the country from the system's locale.
      */
-    CARAPI_(AutoPtr<ICountry>) GetLocaleCountry();
-
-    /**
-     * Run the tasks in the service's thread.
-     */
-    CARAPI_(void) RunAfterDetectionAsync(
-        /* [in] */ ICountry* country,
-        /* [in] */ ICountry* detectedCountry,
-        /* [in] */ Boolean notifyChange,
-        /* [in] */ Boolean startLocationBasedDetection);
-
-    CARAPI_(AutoPtr<CountryDetectorBase>) CreateLocationBasedCountryDetector();
-
-    CARAPI_(Boolean) IsAirplaneModeOff();
-
-    /* synchronized */
-    CARAPI_(void) AddPhoneStateListener();
-
-    /* synchronized */
-    CARAPI_(void) RemovePhoneStateListener();
-
-    CARAPI_(Boolean) IsGeoCoderImplemented();
-
-protected:
-    AutoPtr<CountryDetectorBase> mLocationBasedCountryDetector;
-    AutoPtr<ITimer> mLocationRefreshTimer;
-
-private:
-    /**
-     * Get the country from different sources in order of the reliability.
-     */
-    CARAPI_(AutoPtr<ICountry>) GetCountry();
-
-    /**
-     * Attempt to add this {@link Country} to the debug logs.
-     */
-    CARAPI_(void) AddToLogs(
-        /* [in] */ ICountry* country);
-
-    CARAPI_(Boolean) IsNetworkCountryCodeAvailable();
+    CARAPI GetLocaleCountry(
+        /* [out] */ ICountry** country);
 
     /**
      * @param notifyChange indicates whether the listener should be notified the change of the
@@ -183,13 +179,51 @@ private:
         /* [in] */ Boolean startLocationBasedDetection);
 
     /**
+     * Run the tasks in the service's thread.
+     */
+    CARAPI RunAfterDetectionAsync(
+        /* [in] */ ICountry* country,
+        /* [in] */ ICountry* detectedCountry,
+        /* [in] */ Boolean notifyChange,
+        /* [in] */ Boolean startLocationBasedDetection);
+
+    CARAPI RunAfterDetection(
+        /* [in] */ ICountry* country,
+        /* [in] */ ICountry* detectedCountry,
+        /* [in] */ Boolean notifyChange,
+        /* [in] */ Boolean startLocationBasedDetection);
+
+    CARAPI CreateLocationBasedCountryDetector(
+        /* [out] */ CountryDetectorBase** db);
+
+    CARAPI IsAirplaneModeOff(
+        /* [out] */ Boolean* isAirplaneModeOff);
+
+    CARAPI RemovePhoneStateListener();
+
+    CARAPI IsGeoCoderImplemented(
+        /* [out] */ Boolean* isGeoCoderImplemented);
+
+private:
+    /**
+     * Get the country from different sources in order of the reliability.
+     */
+    CARAPI_(AutoPtr<ICountry>) GetCountry();
+
+    /**
+     * Attempt to add this {@link Country} to the debug logs.
+     */
+    CARAPI AddToLogs(
+        /* [in] */ ICountry* country);
+
+    CARAPI_(Boolean) IsNetworkCountryCodeAvailable();
+
+    /**
      * Find the country from LocationProvider.
      */
-    /* synchronized */
-    CARAPI_(void) StartLocationBasedDetector(
+    CARAPI StartLocationBasedDetector(
         /* [in] */ ICountryListener* listener);
 
-    /* synchronized */
     CARAPI_(void) StopLocationBasedDetector();
 
     /**
@@ -202,40 +236,45 @@ private:
     /**
      * Schedule the next location refresh. We will do nothing if the scheduled task exists.
      */
-    /* synchronized */
-    CARAPI_(void) ScheduleLocationRefresh();
+    CARAPI ScheduleLocationRefresh();
 
     /**
      * Cancel the scheduled refresh task if it exists
      */
-    /* synchronized */
     CARAPI_(void) CancelLocationRefresh();
 
+    CARAPI_(void) AddPhoneStateListener();
+
+protected:
+    AutoPtr<CountryDetectorBase> mLocationBasedCountryDetector;
+    AutoPtr<ITimer> mLocationRefreshTimer;
+
 private:
+    const static String TAG;
+    /* package */ const static Boolean DEBUG;
 
     /**
      * Max length of logs to maintain for debugging.
      */
-    static const Int32 MAX_LENGTH_DEBUG_LOGS;// = 20;
+    const static Int32 MAX_LENGTH_DEBUG_LOGS;
 
     /**
      * The refresh interval when the location based country was used
      */
-    const static Int64 LOCATION_REFRESH_INTERVAL;// = 1000 * 60 * 60 * 24; // 1 day
+    const static Int64 LOCATION_REFRESH_INTERVAL; // 1 day
 
     AutoPtr<ICountry> mCountry;
-//    AutoPtr<ITelephonyManager> mTelephonyManager;
+    // AutoPtr<ITelephonyManager> mTelephonyManager;
     AutoPtr<ICountry> mCountryFromLocation;
-    Boolean mStopped;// = false;
+    Boolean mStopped;
 
-//    AutoPtr<IPhoneStateListener> mPhoneStateListener;
+    // AutoPtr<IPhoneStateListener> mPhoneStateListener;
 
     /**
      * List of the most recent country state changes for debugging. This should have
      * a max length of MAX_LENGTH_LOGS.
      */
-//    private final ConcurrentLinkedQueue<Country> mDebugLogs = new ConcurrentLinkedQueue<Country>();
-     List<AutoPtr<ICountry> > mDebugLogs;
+     AutoPtr<IConcurrentLinkedQueue> mDebugLogs;
 
     /**
      * Most recent {@link Country} result that was added to the debug logs {@link #mDebugLogs}.
@@ -243,13 +282,6 @@ private:
      * to the logs.
      */
     AutoPtr<ICountry> mLastCountryAddedToLogs;
-
-    /**
-     * Object used to synchronize access to {@link #mLastCountryAddedToLogs}. Be careful if
-     * using it to synchronize anything else in this file.
-     */
-    //private final Object mObject = new Object();
-    Object mObject;
 
     /**
      * Start time of the current session for which the detector has been active.
@@ -282,9 +314,6 @@ private:
      * The listener for receiving the notification from LocationBasedCountryDetector.
      */
     AutoPtr<ICountryListener> mLocationBasedCountryDetectionListener;
-
-    Object mLock;
-
 };
 
 } // namespace Location
@@ -293,3 +322,4 @@ private:
 } // namespace Elastos
 
 #endif //__ELASTOS_DROID_SERVER_LOCATION_COMPREHENSIVECOUNTRYDETECTOR_H__
+

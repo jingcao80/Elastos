@@ -617,6 +617,9 @@ ECode CNetworkPolicyManagerService::InnerSub_AlertObserver::LimitReached(
 //==============================================================================
 //              CNetworkPolicyManagerService
 //==============================================================================
+const String CNetworkPolicyManagerService::ACTION_NETWORK_STATS_POLL("com.android.server.action.NETWORK_STATS_POLL");
+const String CNetworkPolicyManagerService::ACTION_NETWORK_STATS_UPDATED("com.android.server.action.NETWORK_STATS_UPDATED");
+
 const Int32 CNetworkPolicyManagerService::MSG_RULES_CHANGED = 1;
 const Int32 CNetworkPolicyManagerService::MSG_METERED_IFACES_CHANGED = 2;
 const Int32 CNetworkPolicyManagerService::MSG_LIMIT_REACHED = 5;
@@ -673,6 +676,8 @@ const String CNetworkPolicyManagerService::ACTION_ALLOW_BACKGROUND("com.android.
 const String CNetworkPolicyManagerService::ACTION_SNOOZE_WARNING("com.android.server.net.action.SNOOZE_WARNING");
 
 const Int64 CNetworkPolicyManagerService::TIME_CACHE_MAX_AGE = IDateUtils::DAY_IN_MILLIS;
+
+CAR_OBJECT_IMPL(CNetworkPolicyManagerService)
 
 CAR_INTERFACE_IMPL(CNetworkPolicyManagerService, Object, IINetworkPolicyManager)
 
@@ -902,7 +907,7 @@ ECode CNetworkPolicyManagerService::SystemReady()
 
     // listen for stats update events
     AutoPtr<IIntentFilter> statsFilter;
-    CIntentFilter::New(INetworkStatsService::ACTION_NETWORK_STATS_UPDATED, (IIntentFilter**)&statsFilter);
+    CIntentFilter::New(ACTION_NETWORK_STATS_UPDATED, (IIntentFilter**)&statsFilter);
     resIntent = NULL;
     mContext->RegisterReceiver(
         mStatsReceiver, statsFilter, Elastos::Droid::Manifest::permission::READ_NETWORK_USAGE_HISTORY,
@@ -1526,7 +1531,7 @@ void CNetworkPolicyManagerService::UpdateNetworkRulesLocked()
         }
 
         if (LOGD) {
-            Slogger::D(TAG, "applying policy %s to ifaces %s", Object::ToString(policy).string(), Object::ToString(ifaces).string());
+            Slogger::D(TAG, "applying policy %s to ifaces %s", TO_CSTR(policy), TO_CSTR(ifaces));
         }
 
         Int64 waringBytes;

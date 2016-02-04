@@ -36,6 +36,9 @@ public:
     static CARAPI_(AutoPtr<IInt16Buffer>) AsInt16Buffer(
         /* [in] */ ByteBuffer* byteBuffer);
 
+    CARAPI GetPrimitiveArray(
+        /* [out] */ Handle64* arrayHandle);
+
     // @Override
     CARAPI AsReadOnlyBuffer(
         /* [out] */ IInt16Buffer** buffer);
@@ -111,7 +114,6 @@ protected:
 
 private:
     AutoPtr<ByteBuffer> mByteBuffer;
-
     Int32 mCap;
 };
 

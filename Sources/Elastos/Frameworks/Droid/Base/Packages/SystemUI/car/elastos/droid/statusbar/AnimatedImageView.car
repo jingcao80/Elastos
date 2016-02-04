@@ -9,6 +9,10 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.Widget.IImageView
+     * extends Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
     interface IAnimatedImageView {
 

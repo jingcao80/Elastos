@@ -2,17 +2,18 @@
 #include "elastos/droid/internal/app/WindowDecorActionBar.h"
 #include "elastos/droid/animation/CAnimatorSet.h"
 #include "elastos/droid/animation/ObjectAnimator.h"
-// #include "elastos/droid/app/CActionBarLayoutParams.h"
-// #include "elastos/droid/internal/app/CNavItemSelectedListener.h"
+#include "elastos/droid/app/CActionBarLayoutParams.h"
+#include "elastos/droid/internal/app/CNavItemSelectedListener.h"
 #include "elastos/droid/internal/view/menu/CMenuBuilder.h"
 #include "elastos/droid/internal/view/menu/CMenuPopupHelper.h"
 #include "elastos/droid/internal/view/ActionBarPolicy.h"
+#include "elastos/droid/internal/widget/CScrollingTabContainerView.h"
 #include "elastos/droid/utility/CTypedValue.h"
-// #include "elastos/droid/view/CContextThemeWrapper.h"
+#include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/animation/AnimationUtils.h"
-// #include "elastos/droid/view/menu/CMenuInflater.h"
+#include "elastos/droid/view/CMenuInflater.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
@@ -24,7 +25,7 @@ using Elastos::Droid::Animation::IAnimatorSetBuilder;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Animation::ObjectAnimator;
-// using Elastos::Droid::App::CActionBarLayoutParams;
+using Elastos::Droid::App::CActionBarLayoutParams;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::App::EIID_IActionBarTab;
 using Elastos::Droid::App::IFragmentManager;
@@ -35,11 +36,12 @@ using Elastos::Droid::Internal::View::Menu::CMenuBuilder;
 using Elastos::Droid::Internal::View::Menu::CMenuPopupHelper;
 using Elastos::Droid::Internal::View::Menu::EIID_IMenuBuilderCallback;
 using Elastos::Droid::Internal::View::Menu::IMenuPopupHelper;
+using Elastos::Droid::Internal::Widget::CScrollingTabContainerView;
 using Elastos::Droid::Internal::Widget::EIID_IActionBarVisibilityCallback;
 using Elastos::Droid::Internal::Widget::IAbsActionBarView;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::ITypedValue;
-// using Elastos::Droid::View::CContextThemeWrapper;
+using Elastos::Droid::View::CContextThemeWrapper;
 using Elastos::Droid::View::EIID_IView;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::View::IContextThemeWrapper;
@@ -50,7 +52,7 @@ using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::Animation::AnimationUtils;
-// using Elastos::Droid::View::Menu::CMenuInflater;
+using Elastos::Droid::View::CMenuInflater;
 using Elastos::Droid::Widget::IAdapterViewOnItemSelectedListener;
 using Elastos::Droid::Widget::IToolbar;
 using Elastos::Utility::CArrayList;
@@ -101,9 +103,7 @@ ECode WindowDecorActionBar::ActionModeImpl::GetMenuInflater(
 {
     AutoPtr<IContext> context;
     mHost->GetThemedContext((IContext**)&context);
-    assert(0);
-    return NOERROR;
-    // return CMenuInflater::New(context, menuInflater);
+    return CMenuInflater::New(context, menuInflater);
 }
 
 ECode WindowDecorActionBar::ActionModeImpl::GetMenu(
@@ -633,7 +633,7 @@ ECode WindowDecorActionBar::constructor(
 ECode WindowDecorActionBar::constructor(
     /* [in] */ IView* layout)
 {
-    Boolean isInEditMode = FALSE;
+    Boolean UNUSED(isInEditMode) = FALSE;
     assert((layout->IsInEditMode(&isInEditMode), isInEditMode));
     return Init(layout);
 }
@@ -787,8 +787,7 @@ void WindowDecorActionBar::EnsureTabsExist()
     }
 
     AutoPtr<IScrollingTabContainerView> tabScroller;
-    assert(0);
-    // CScrollingTabContainerView::New(mContext, (IScrollingTabContainerView**)&tabScroller);
+    CScrollingTabContainerView::New(mContext, (IScrollingTabContainerView**)&tabScroller);
 
     if (mHasEmbeddedTabs) {
         IView::Probe(tabScroller)->SetVisibility(IView::VISIBLE);
@@ -1620,8 +1619,7 @@ ECode WindowDecorActionBar::GetThemedContext(
 
         Int32 resId;
         if (targetThemeRes != 0 && (mContext->GetThemeResId(&resId), resId != targetThemeRes)) {
-            assert(0);
-            // CContextThemeWrapper::New(mContext, targetThemeRes, (IContext**)&mThemedContext);
+            CContextThemeWrapper::New(mContext, targetThemeRes, (IContext**)&mThemedContext);
         }
         else {
             mThemedContext = mContext;
@@ -1712,8 +1710,7 @@ ECode WindowDecorActionBar::SetListNavigationCallbacks(
     /* [in] */ IActionBarOnNavigationListener* callback)
 {
     AutoPtr<IAdapterViewOnItemSelectedListener> listener;
-    assert(0);
-    // CNavItemSelectedListener::New(callback, (IAdapterViewOnItemSelectedListener**)&listener);
+    CNavItemSelectedListener::New(callback, (IAdapterViewOnItemSelectedListener**)&listener);
     return mDecorToolbar->SetDropdownParams(adapter, listener);
 }
 

@@ -89,4 +89,6 @@ public:
 } // Droid
 } // Elastos
 
+DEFINE_CONVERSION_FOR(Elastos::Droid::Server::Wm::BlackFrame::BlackSurface, IInterface)
+
 #endif //__ELASTOS_DROID_SERVER_WM_BLACKFRAME_H__

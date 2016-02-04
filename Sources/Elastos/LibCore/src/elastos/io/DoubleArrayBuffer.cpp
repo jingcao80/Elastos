@@ -32,6 +32,21 @@ ECode DoubleArrayBuffer::constructor(
     return NOERROR;
 }
 
+ECode DoubleArrayBuffer::GetPrimitiveArray(
+    /* [out] */ Handle64* arrayHandle)
+{
+    AutoPtr<ArrayOf<Double> > arrayTmp;
+    GetArray((ArrayOf<Double>**)&arrayTmp);
+    if (arrayTmp == NULL)
+    {
+        *arrayHandle = 0;
+        return NOERROR;
+    }
+    Double* primitiveArray = arrayTmp->GetPayload();
+    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    return NOERROR;
+}
+
 ECode DoubleArrayBuffer::Get(
     /* [out] */ Double* value)
 {
@@ -141,6 +156,8 @@ ECode DoubleArrayBuffer::ProtectedArray(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     *array = mBackingArray;
+    REFCOUNT_ADD(*array)
+
     return NOERROR;
 }
 

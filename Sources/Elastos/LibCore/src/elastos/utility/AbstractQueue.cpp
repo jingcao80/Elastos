@@ -3,7 +3,7 @@
 namespace Elastos {
 namespace Utility {
 
-CAR_INTERFACE_IMPL(AbstractQueue, Object, IQueue)
+CAR_INTERFACE_IMPL(AbstractQueue, AbstractCollection, IQueue)
 
 AbstractQueue::AbstractQueue()
 {}

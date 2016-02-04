@@ -404,10 +404,19 @@ module
         GetCurrentAudioFocus(
             [out] Int32* result);
 
+        //==========================================================================================
+        // Device orientation
+        //==========================================================================================
         // Handles request to override default use of A2DP for media.
         SetBluetoothA2dpOnInt(
             [in] Boolean on);
 
+        //==========================================================================================
+        // Camera shutter sound policy.
+        // config_camera_sound_forced configuration option in config.xml defines if the camera shutter
+        // sound is forced (sound even if the device is in silent mode) or not. This option is false by
+        // default and can be overridden by country specific overlay in values-mccXXX/config.xml.
+        //==========================================================================================
         // called by android.hardware.Camera to populate CameraInfo.canDisableShutterSound
         IsCameraSoundForced(
             [out] Boolean* result);

@@ -377,7 +377,7 @@ String SyncOperation::ToKey(
     }
     else {
         Logger::V(TAG, "Converting SyncOperaton to key, invalid target: %s",
-            Object::ToString(info).string());
+            TO_CSTR(info));
         return String("");
     }
     sb.Append(" extras: ");

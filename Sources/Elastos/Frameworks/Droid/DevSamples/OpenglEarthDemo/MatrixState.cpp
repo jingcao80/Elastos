@@ -10,7 +10,7 @@ using Elastos::IO::IByteBuffer;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Opengl::IGLES20;
 using Elastos::Droid::Opengl::CGLES20;
-using Elastos::Droid::Opengl::CMatrixGL;
+using Elastos::Droid::Opengl::CMatrix;
 using Elastos::Droid::Opengl::IMatrix;
 
 namespace Elastos {
@@ -21,7 +21,7 @@ namespace OpenglEarthDemo {
 static AutoPtr<IMatrix> InitMatrix()
 {
     AutoPtr<IMatrix> matrix;
-    CMatrixGL::AcquireSingleton((IMatrix**)&matrix);
+    CMatrix::AcquireSingleton((IMatrix**)&matrix);
     return matrix;
 }
 

@@ -1,6 +1,7 @@
 
-#include "pm/BackgroundDexOptService.h"
-#include "pm/CPackageManagerService.h"
+#include "elastos/droid/server/pm/BackgroundDexOptService.h"
+#include "elastos/droid/server/pm/CPackageManagerService.h"
+#include "elastos/droid/os/ServiceManager.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
@@ -9,6 +10,8 @@ using Elastos::Droid::App::Job::IJobScheduler;
 using Elastos::Droid::App::Job::IJobInfoBuilder;
 using Elastos::Droid::App::Job::CJobInfoBuilder;
 using Elastos::Droid::App::Job::IJobInfo;
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Os::ServiceManager;
 
 namespace Elastos {
 namespace Droid {
@@ -22,10 +25,12 @@ namespace Pm {
 BackgroundDexOptService::OnStartJobThread::OnStartJobThread(
     /* [in] */ BackgroundDexOptService* host,
     /* [in] */ CPackageManagerService* pm,
-    /* [in] */ HashSet<String>* pkgs)
+    /* [in] */ HashSet<String>* pkgs,
+    /* [in] */ IJobParameters* jobParams)
     : mHost(host)
     , mPm(pm)
     , mPkgs(pkgs)
+    , mJobParams(jobParams)
 {}
 
 ECode BackgroundDexOptService::OnStartJobThread::Run()
@@ -42,7 +47,7 @@ ECode BackgroundDexOptService::OnStartJobThread::Run()
         mPm->PerformDexOpt(pkg, String(NULL) /* instruction set */, TRUE);
     }
     // ran to completion, so we abandon our timeslice and do not reschedule
-    return mHost->JobFinished(jobParams, FALSE);
+    return mHost->JobFinished(mJobParams, FALSE);
 }
 
 
@@ -55,9 +60,10 @@ const Int32 BackgroundDexOptService::BACKGROUND_DEXOPT_JOB;
 
 static AutoPtr<IComponentName> InitDexoptServiceName()
 {
-    AutoPtr<CComponentName> cn;
-    CComponentName::NewByFriend(String("android"), String("BackgroundDexOptService")/*BackgroundDexOptService.class.getName()*/);
-    return (IComponentName*)cn.Get();
+    AutoPtr<IComponentName> cn;
+    CComponentName::New(String("android"), String("BackgroundDexOptService")/*BackgroundDexOptService.class.getName()*/,
+            (IComponentName**)&cn);
+    return cn;
 }
 AutoPtr<IComponentName> BackgroundDexOptService::sDexoptServiceName = InitDexoptServiceName();
 
@@ -74,11 +80,12 @@ void BackgroundDexOptService::Schedule(
     AutoPtr<IJobScheduler> js = IJobScheduler::Probe(service);
     AutoPtr<IJobInfoBuilder> builder;
     CJobInfoBuilder::New(BACKGROUND_DEXOPT_JOB, sDexoptServiceName, (IJobInfoBuilder**)&builder);
-    builder->SetrequiresDeviceIdle(TRUE);
-    builder->SetrequiresCharging(TRUE);
+    builder->SetRequiresDeviceIdle(TRUE);
+    builder->SetRequiresCharging(TRUE);
     AutoPtr<IJobInfo> job;
     builder->Build((IJobInfo**)&job);
-    js->Schedule(job);
+    Int32 result;
+    js->Schedule(job, &result);
 }
 
 ECode BackgroundDexOptService::OnStartJob(
@@ -89,7 +96,7 @@ ECode BackgroundDexOptService::OnStartJob(
 
     Logger::I(TAG, "onIdleStart");
     AutoPtr<IInterface> p = ServiceManager::GetService(String("package"));
-    AutoPtr<CPackageManagerService> pm = p->Probe(EIID_CPackageManagerService);
+    AutoPtr<CPackageManagerService> pm = (CPackageManagerService*)(IIPackageManager*)p.Get();
     Boolean isStorageLow;
     if (pm->IsStorageLow(&isStorageLow), isStorageLow) {
         *result = FALSE;
@@ -103,7 +110,7 @@ ECode BackgroundDexOptService::OnStartJob(
 
     AutoPtr<IJobParameters> jobParams = params;
     mIdleTime->Set(TRUE);
-    AutoPtr<OnStartJobThread> thread = new OnStartJobThread(this, pm, pkgs);
+    AutoPtr<OnStartJobThread> thread = new OnStartJobThread(this, pm, pkgs, jobParams);
     thread->Start();
     *result = TRUE;
     return NOERROR;

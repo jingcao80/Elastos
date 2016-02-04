@@ -1147,52 +1147,110 @@ public:
         /*[in]*/ Int32 count,
         /* [out] */ Int32* number);
 
-//    /**
-//     * Returns the code point at {@code index} in the specified array of
-//     * character units. If the unit at {@code index} is a high-surrogate unit,
-//     * {@code index + 1} is less than the length of the array and the unit at
-//     * {@code index + 1} is a low-surrogate unit, then the supplementary code
-//     * point represented by the pair is returned; otherwise the {@code char}
-//     * value at {@code index} is returned.
-//     *
-//     * @param seq
-//     *            the source array of {@code char} units.
-//     * @param index
-//     *            the position in {@code seq} from which to retrieve the code
-//     *            point.
-//     * @return the Unicode code point or {@code char} value at {@code index} in
-//     *         {@code seq}.
-//     * @throws NullPointerException
-//     *             if {@code seq} is {@code null}.
-//     * @throws IndexOutOfBoundsException
-//     *             if the {@code index} is negative or greater than or equal to
-//     *             the length of {@code seq}.
-//     * @since 1.5
-//     */
-//    static CARAPI CodePointAt(
-//        /*[in]*/ ArrayOf<Char32>* seq,
-//        /*[in]*/ Int32 index,
-//        /* [out] */ Int32* code);
-//
-//    /**
-//     * Converts a surrogate pair into a Unicode code point. This method assumes
-//     * that the pair are valid surrogates. If the pair are <i>not</i> valid
-//     * surrogates, then the result is indeterminate. The
-//     * {@link #isSurrogatePair(char, char)} method should be used prior to this
-//     * method to validate the pair.
-//     *
-//     * @param high
-//     *            the high surrogate unit.
-//     * @param low
-//     *            the low surrogate unit.
-//     * @return the Unicode code point corresponding to the surrogate unit pair.
-//     * @see #isSurrogatePair(char, char)
-//     * @since 1.5
-//     */
-//    static CARAPI ToCodePoint(
-//        /*[in]*/ Char32 high,
-//        /*[in]*/ Char32 low,
-//        /* [out] */ Int32* value);
+   // /**
+   //  * Returns the code point at {@code index} in the specified array of
+   //  * character units. If the unit at {@code index} is a high-surrogate unit,
+   //  * {@code index + 1} is less than the length of the array and the unit at
+   //  * {@code index + 1} is a low-surrogate unit, then the supplementary code
+   //  * point represented by the pair is returned; otherwise the {@code char}
+   //  * value at {@code index} is returned.
+   //  *
+   //  * @param seq
+   //  *            the source array of {@code char} units.
+   //  * @param index
+   //  *            the position in {@code seq} from which to retrieve the code
+   //  *            point.
+   //  * @return the Unicode code point or {@code char} value at {@code index} in
+   //  *         {@code seq}.
+   //  * @throws NullPointerException
+   //  *             if {@code seq} is {@code null}.
+   //  * @throws IndexOutOfBoundsException
+   //  *             if the {@code index} is negative or greater than or equal to
+   //  *             the length of {@code seq}.
+   //  * @since 1.5
+   //  */
+   //  static CARAPI CodePointAt(
+   //      /*[in]*/ ArrayOf<Char32>* seq,
+   //      /*[in]*/ Int32 index,
+   //      /* [out] */ Int32* code);
+
+   //  /**
+   //   * Returns the code point at {@code index} in the specified sequence of
+   //   * character units. If the unit at {@code index} is a high-surrogate unit,
+   //   * {@code index + 1} is less than the length of the sequence and the unit at
+   //   * {@code index + 1} is a low-surrogate unit, then the supplementary code
+   //   * point represented by the pair is returned; otherwise the {@code char}
+   //   * value at {@code index} is returned.
+   //   *
+   //   * @param seq
+   //   *            the source sequence of {@code char} units.
+   //   * @param index
+   //   *            the position in {@code seq} from which to retrieve the code
+   //   *            point.
+   //   * @return the Unicode code point or {@code char} value at {@code index} in
+   //   *         {@code seq}.
+   //   * @throws NullPointerException
+   //   *             if {@code seq} is {@code null}.
+   //   * @throws IndexOutOfBoundsException
+   //   *             if the {@code index} is negative or greater than or equal to
+   //   *             the length of {@code seq}.
+   //   * @since 1.5
+   //   */
+   //  static CARAPI CodePointAt(
+   //      /*[in]*/ ICharSequence* seq,
+   //      /*[in]*/ Int32 index,
+   //      /* [out] */ Int32* code);
+
+   //  /**
+   //   * Returns the code point at {@code index} in the specified array of
+   //   * character units, where {@code index} has to be less than {@code limit}.
+   //   * If the unit at {@code index} is a high-surrogate unit, {@code index + 1}
+   //   * is less than {@code limit} and the unit at {@code index + 1} is a
+   //   * low-surrogate unit, then the supplementary code point represented by the
+   //   * pair is returned; otherwise the {@code char} value at {@code index} is
+   //   * returned.
+   //   *
+   //   * @param seq
+   //   *            the source array of {@code char} units.
+   //   * @param index
+   //   *            the position in {@code seq} from which to get the code point.
+   //   * @param limit
+   //   *            the index after the last unit in {@code seq} that can be used.
+   //   * @return the Unicode code point or {@code char} value at {@code index} in
+   //   *         {@code seq}.
+   //   * @throws NullPointerException
+   //   *             if {@code seq} is {@code null}.
+   //   * @throws IndexOutOfBoundsException
+   //   *             if {@code index < 0}, {@code index >= limit},
+   //   *             {@code limit < 0} or if {@code limit} is greater than the
+   //   *             length of {@code seq}.
+   //   * @since 1.5
+   //   */
+   //  static CARAPI CodePointAt(
+   //      /*[in]*/ ArrayOf<Char32>* seq,
+   //      /*[in]*/ Int32 index,
+   //      /*[in]*/ Int32 limit,
+   //      /* [out] */ Int32* code);
+
+   // /**
+   //  * Converts a surrogate pair into a Unicode code point. This method assumes
+   //  * that the pair are valid surrogates. If the pair are <i>not</i> valid
+   //  * surrogates, then the result is indeterminate. The
+   //  * {@link #isSurrogatePair(char, char)} method should be used prior to this
+   //  * method to validate the pair.
+   //  *
+   //  * @param high
+   //  *            the high surrogate unit.
+   //  * @param low
+   //  *            the low surrogate unit.
+   //  * @return the Unicode code point corresponding to the surrogate unit pair.
+   //  * @see #isSurrogatePair(char, char)
+   //  * @since 1.5
+   //  */
+   // static CARAPI ToCodePoint(
+   //     /*[in]*/ Char32 high,
+   //     /*[in]*/ Char32 low,
+   //     /* [out] */ Int32* value);
 
     /**
      * Determines the index in a subsequence of the specified character array

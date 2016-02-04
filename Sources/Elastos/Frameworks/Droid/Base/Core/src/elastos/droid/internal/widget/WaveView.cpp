@@ -850,7 +850,6 @@ ECode WaveView::Reset()
 
 AutoPtr<IAudioAttributes> WaveView::MiddleInitVibrationAttributes()
 {
-    assert(0);
     AutoPtr<IAudioAttributesBuilder> builder;
     CAudioAttributesBuilder::New((IAudioAttributesBuilder**)&builder);
     builder->SetContentType(IAudioAttributes::CONTENT_TYPE_SONIFICATION);

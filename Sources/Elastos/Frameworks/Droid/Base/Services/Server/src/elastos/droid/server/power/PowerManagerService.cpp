@@ -80,7 +80,7 @@ namespace Droid {
 namespace Server {
 namespace Power {
 
-static PowerManagerService* sPowerManagerService = NULL;
+static AutoPtr<PowerManagerService> sPowerManagerService;
 static struct power_module* sPowerModule = NULL;
 
 static nsecs_t sLastEventTime[android::USER_ACTIVITY_EVENT_LAST + 1];
@@ -2021,6 +2021,7 @@ Boolean PowerManagerService::IsWakeLockLevelSupportedInternal(
                 return FALSE;
         }
     }
+    return FALSE;
 }
 
 void PowerManagerService::UserActivityFromNative(
@@ -3110,6 +3111,7 @@ Boolean PowerManagerService::IsInteractiveInternal()
     synchronized(mLock) {
         return mInteractive;
     }
+    return FALSE;
 }
 
 Boolean PowerManagerService::IsLowPowerModeInternal()
@@ -3117,6 +3119,7 @@ Boolean PowerManagerService::IsLowPowerModeInternal()
     synchronized(mLock) {
         return mLowPowerModeEnabled;
     }
+    return FALSE;
 }
 
 Boolean PowerManagerService::SetLowPowerModeInternal(
@@ -3155,8 +3158,8 @@ Boolean PowerManagerService::SetLowPowerModeInternal(
         }
 
         UpdateLowPowerModeLocked();
-        return TRUE;
     }
+    return TRUE;
 }
 
 void PowerManagerService::HandleBatteryStateChangedLocked()

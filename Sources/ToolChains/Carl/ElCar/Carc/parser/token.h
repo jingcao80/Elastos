@@ -63,7 +63,7 @@ typedef enum CARToken {
     Token_K_callbacksink,   Token_K_delegatesink,   Token_K_namespace,
     Token_K_using,          Token_K_oneway,         Token_K_submodule,
 
-    Token_K_true,           Token_K_false,
+    Token_K_true,           Token_K_false,          Token_K_null,
 
     // Others --> Token_xxx
     Token_others    = 10000,

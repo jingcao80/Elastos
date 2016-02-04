@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sqlite3.h>
-//#include <sqlite3_android.h>
+#include <sqlite3_android.h>
 
 using Elastos::Droid::Os::CParcelFileDescriptor;
 using Elastos::Droid::Os::EIID_ICancellationSignalOnCancelListener;
@@ -291,7 +291,7 @@ void SQLiteConnection::OperationLog::EndOperation(
 Boolean SQLiteConnection::OperationLog::EndOperationDeferLog(
     /* [in] */ Int32 cookie)
 {
-    Boolean ret;
+    Boolean ret = FALSE;
     synchronized(mOperationsLock) {
         ret = EndOperationDeferLogLocked(cookie);
     }
@@ -624,8 +624,7 @@ ECode SQLiteConnection::NativeRegisterLocalizedCollators(
 {
     SQLiteConnectionNative* connection = reinterpret_cast<SQLiteConnectionNative*>(connectionPtr);
 
-    assert(0 && "TODO");
-    Int32 err;// = register_localized_collators(connection->db, locale, UTF16_STORAGE);
+    Int32 err = register_localized_collators(connection->db, locale, UTF16_STORAGE);
 
     if (err != SQLITE_OK) {
         return throw_sqlite3_exception(connection->db);
@@ -1757,7 +1756,7 @@ ECode SQLiteConnection::ExecuteForInt64(
     //} finally {
     // ReleasePreparedStatement(statement);
     //}
-    //} catch (RuntimeException ex) {\
+    //} catch (RuntimeException ex) {
         //mRecentOperations.failOperation(cookie, ex);
         //throw ex;
     //}

@@ -392,9 +392,6 @@ module
         ToString(
             [in] Int32 indentSpaces,
             [out] String* str);
-
-        WriteTo(
-            [in] IJSONStringer* stringer);
     }
 
     } // namespace Json

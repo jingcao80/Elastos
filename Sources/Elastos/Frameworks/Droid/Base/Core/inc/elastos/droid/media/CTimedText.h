@@ -7,54 +7,22 @@
 #include <elastos/utility/etl/Set.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/etl/HashMap.h>
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::IRect;
-using Elastos::Utility::Set;
+using Elastos::Utility::IList;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::Set;
 using Elastos::Core::IInteger32;
 
 namespace Elastos {
 namespace Droid {
 namespace Media {
 
-template<typename T>
-class MyList
-    : public IInterface
-    , public List<T>
-{
-public:
-    UInt32 AddRef()
-    {
-        return ElLightRefBase::AddRef();
-    }
-
-    UInt32 Release()
-    {
-        return ElLightRefBase::Release();
-    }
-
-    PInterface Probe(
-        /* [in] */ REIID riid)
-    {
-        if (riid == EIID_IInterface) {
-            return (IInterface*)this;
-        }
-        return NULL;
-    }
-
-    ECode GetInterfaceID(
-        /* [in] */ IInterface *pObject,
-        /* [out] */ InterfaceID *pIID)
-    {
-        assert(0);
-        return NOERROR;
-    }
-};
-
-
-
 CarClass(CTimedText)
+    , public Object
+    , public ITimedText
 {
 public:
     /**
@@ -64,15 +32,23 @@ public:
      * or blinked). The member variables in this class are read-only.
      * {@hide}
      */
-    /*static*/ class CharPos : public ElRefBase
+    class CharPos
+        : public Object
+        , public ICharPos
     {
     public:
+        CharPos();
+
+        ~CharPos();
+
+        CAR_INTERFACE_DECL()
+
         /**
          * Constuctor
          * @param startChar the offset of the start character.
          * @param endChar the offset of the end character.
          */
-        CharPos(
+        CARAPI constructor(
             /* [in] */ Int32 startChar,
             /* [in] */ Int32 endChar);
 
@@ -93,11 +69,15 @@ public:
      * The member variables in this class are read-only.
      * {@hide}
      */
-    /*static*/ class Justification
-        : public IInterface
-        , public ElRefBase
+    class Justification
+        : public Object
+        , public IJustification
     {
     public:
+        Justification();
+
+        ~Justification();
+
         CAR_INTERFACE_DECL()
 
         /**
@@ -105,7 +85,7 @@ public:
          * @param horizontal the horizontal justification of the text.
          * @param vertical the vertical justification of the text.
          */
-        Justification(
+        CARAPI constructor(
             /* [in] */ Int32 horizontal,
             /* [in] */ Int32 vertical);
 
@@ -126,9 +106,17 @@ public:
      * The member variables in this class are read-only.
      * {@hide}
      */
-    /*static*/ class Style : public ElRefBase
+    class Style
+        : public Object
+        , public IStyle
     {
     public:
+        Style();
+
+        ~Style();
+
+        CAR_INTERFACE_DECL()
+
         /**
          * Constructor
          * @param startChar the offset of the start character which applys this style
@@ -140,7 +128,7 @@ public:
          * @param fontSize the size of the font.
          * @param colorRGBA red, green, blue, and alpha value for color.
          */
-        Style(
+        CARAPI constructor(
             /* [in] */ Int32 startChar,
             /* [in] */ Int32 endChar,
             /* [in] */ Int32 fontId,
@@ -199,15 +187,23 @@ public:
      * The member variables in this class are read-only.
      * {@hide}
      */
-    /*static*/ class Font : public ElRefBase
+    class Font
+        : public Object
+        , public IFont
     {
     public:
+        Font();
+
+        ~Font();
+
+        CAR_INTERFACE_DECL()
+
         /**
          * Constructor
          * @param id the font ID.
          * @param name the font name.
          */
-        Font(
+        CARAPI constructor(
             /* [in] */ Int32 id,
             /* [in] */ const String& name);
 
@@ -228,9 +224,17 @@ public:
      * The member variables in this class are read-only.
      * {@hide}
      */
-    /*static*/ class Karaoke : public ElRefBase
+    class Karaoke
+        : public Object
+        , public IKaraoke
     {
     public:
+        Karaoke();
+
+        ~Karaoke();
+
+        CAR_INTERFACE_DECL()
+
         /**
          * Constructor
          * @param startTimeMs the start time (in milliseconds) to highlight
@@ -240,7 +244,7 @@ public:
          * @param startChar the offset of the start character to be highlighted.
          * @param endChar the offset of the end character to be highlighted.
          */
-        Karaoke(
+        CARAPI constructor(
             /* [in] */ Int32 startTimeMs,
             /* [in] */ Int32 endTimeMs,
             /* [in] */ Int32 startChar,
@@ -275,9 +279,17 @@ public:
      * The member variables in this class are read-only.
      * {@hide}
      */
-    /*static*/ class HyperText : public ElRefBase
+    class HyperText
+        : public Object
+        , public IHyperText
     {
     public:
+        HyperText();
+
+        ~HyperText();
+
+        CAR_INTERFACE_DECL()
+
         /**
          * Constructor
          * @param startChar the offset of the start character.
@@ -285,7 +297,7 @@ public:
          * @param url the linked-to URL.
          * @param alt the "alt" string for display.
          */
-        HyperText(
+        CARAPI constructor(
             /* [in] */ Int32 startChar,
             /* [in] */ Int32 endChar,
             /* [in] */ const String& url,
@@ -320,6 +332,12 @@ public:
      * {@hide}
      */
     CTimedText();
+
+    virtual ~CTimedText();
+
+    CAR_OBJECT_DECL();
+
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ IParcel* parcel);
@@ -410,7 +428,7 @@ private:
     /*
      * @return a set of the keys contained in this TimedText object.
      */
-    CARAPI_(AutoPtr<Set<Int32> >) KeySet();
+    CARAPI_(Set<Int32>) KeySet();
 
     /*
      * To retrieve the object associated with the key. Caller must make sure
@@ -425,59 +443,58 @@ private:
         /* [in] */ Int32 key);
 
 private:
-    static const Int32 FIRST_PUBLIC_KEY = 1;
+    static const Int32 FIRST_PUBLIC_KEY;
 
     // These keys must be in sync with the keys in TextDescription.h
-    static const Int32 KEY_DISPLAY_FLAGS = 1; // int
-    static const Int32 KEY_STYLE_FLAGS = 2; // int
-    static const Int32 KEY_BACKGROUND_COLOR_RGBA = 3; // int
-    static const Int32 KEY_HIGHLIGHT_COLOR_RGBA = 4; // int
-    static const Int32 KEY_SCROLL_DELAY = 5; // int
-    static const Int32 KEY_WRAP_TEXT = 6; // int
-    static const Int32 KEY_START_TIME = 7; // int
-    static const Int32 KEY_STRUCT_BLINKING_TEXT_LIST = 8; // List<CharPos>
-    static const Int32 KEY_STRUCT_FONT_LIST = 9; // List<Font>
-    static const Int32 KEY_STRUCT_HIGHLIGHT_LIST = 10; // List<CharPos>
-    static const Int32 KEY_STRUCT_HYPER_TEXT_LIST = 11; // List<HyperText>
-    static const Int32 KEY_STRUCT_KARAOKE_LIST = 12; // List<Karaoke>
-    static const Int32 KEY_STRUCT_STYLE_LIST = 13; // List<Style>
-    static const Int32 KEY_STRUCT_TEXT_POS = 14; // TextPos
-    static const Int32 KEY_STRUCT_JUSTIFICATION = 15; // Justification
-    static const Int32 KEY_STRUCT_TEXT = 16; // Text
-    static const Int32 LAST_PUBLIC_KEY = 16;
-    static const Int32 FIRST_PRIVATE_KEY = 101;
+    static const Int32 KEY_DISPLAY_FLAGS;
+    static const Int32 KEY_STYLE_FLAGS;
+    static const Int32 KEY_BACKGROUND_COLOR_RGBA;
+    static const Int32 KEY_HIGHLIGHT_COLOR_RGBA;
+    static const Int32 KEY_SCROLL_DELAY;
+    static const Int32 KEY_WRAP_TEXT;
+    static const Int32 KEY_START_TIME;
+    static const Int32 KEY_STRUCT_BLINKING_TEXT_LIST;
+    static const Int32 KEY_STRUCT_FONT_LIST;
+    static const Int32 KEY_STRUCT_HIGHLIGHT_LIST;
+    static const Int32 KEY_STRUCT_HYPER_TEXT_LIST;
+    static const Int32 KEY_STRUCT_KARAOKE_LIST;
+    static const Int32 KEY_STRUCT_STYLE_LIST;
+    static const Int32 KEY_STRUCT_TEXT_POS;
+    static const Int32 KEY_STRUCT_JUSTIFICATION;
+    static const Int32 KEY_STRUCT_TEXT;
+    static const Int32 LAST_PUBLIC_KEY;
+    static const Int32 FIRST_PRIVATE_KEY;
 
     // The following keys are used between TimedText.java and
     // TextDescription.cpp in order to parce the Parcel.
-    static const Int32 KEY_GLOBAL_SETTING = 101;
-    static const Int32 KEY_LOCAL_SETTING = 102;
-    static const Int32 KEY_START_CHAR = 103;
-    static const Int32 KEY_END_CHAR = 104;
-    static const Int32 KEY_FONT_ID = 105;
-    static const Int32 KEY_FONT_SIZE = 106;
-    static const Int32 KEY_TEXT_COLOR_RGBA = 107;
-    static const Int32 LAST_PRIVATE_KEY = 107;
+    static const Int32 KEY_GLOBAL_SETTING;
+    static const Int32 KEY_LOCAL_SETTING;
+    static const Int32 KEY_START_CHAR;
+    static const Int32 KEY_END_CHAR;
+    static const Int32 KEY_FONT_ID;
+    static const Int32 KEY_FONT_SIZE;
+    static const Int32 KEY_TEXT_COLOR_RGBA;
+    static const Int32 LAST_PRIVATE_KEY;
 
-    static const String TAG; // = "TimedText";
+    static const String TAG;
 
     HashMap<Int32, AutoPtr<IInterface> > mKeyObjectMap;
 
-    Int32 mDisplayFlags; // = -1;
-    Int32 mBackgroundColorRGBA; // = -1;
-    Int32 mHighlightColorRGBA; // = -1;
-    Int32 mScrollDelay; // = -1;
-    Int32 mWrapText; // = -1;
+    Int32 mDisplayFlags;
+    Int32 mBackgroundColorRGBA;
+    Int32 mHighlightColorRGBA;
+    Int32 mScrollDelay;
+    Int32 mWrapText;
 
-    typedef MyList< AutoPtr<CharPos> > CharPostList;
-    AutoPtr<CharPostList> mBlinkingPosList; // = NULL;
-    AutoPtr<CharPostList> mHighlightPosList; // = NULL;
-    AutoPtr< MyList< AutoPtr<Karaoke> > > mKaraokeList; // = NULL;
-    AutoPtr< MyList< AutoPtr<Font> > > mFontList; // = NULL;
-    AutoPtr< MyList< AutoPtr<Style> > > mStyleList; // = NULL;
-    AutoPtr< MyList< AutoPtr<HyperText> > > mHyperTextList; // = NULL;
+    AutoPtr<IList> mBlinkingPosList;
+    AutoPtr<IList> mHighlightPosList;
+    AutoPtr<IList> mKaraokeList;
+    AutoPtr<IList> mFontList;
+    AutoPtr<IList> mStyleList;
+    AutoPtr<IList> mHyperTextList;
 
-    AutoPtr<IRect> mTextBounds; // = NULL;
-    String mTextChars; // = NULL;
+    AutoPtr<IRect> mTextBounds;
+    String mTextChars;
     AutoPtr<Justification> mJustification;
 };
 

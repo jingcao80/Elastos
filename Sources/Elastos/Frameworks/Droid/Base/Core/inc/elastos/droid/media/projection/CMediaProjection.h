@@ -1,15 +1,19 @@
 #ifndef __ELASTOS_DROID_MEDIA_PROJECTION_CMEDIAPROJECTION_H__
 #define __ELASTOS_DROID_MEDIA_PROJECTION_CMEDIAPROJECTION_H__
 
+#include "Elastos.Droid.Hardware.h"
 #include "Elastos.Droid.Os.h"
 #include "_Elastos_Droid_Media_Projection_CMediaProjection.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 #include "elastos/droid/os/Runnable.h"
 
+using Elastos::Droid::Hardware::Display::IVirtualDisplayCallback;
+using Elastos::Droid::Hardware::Display::IVirtualDisplay;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Utility::IArrayMap;
+using Elastos::Droid::View::ISurface;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Media::IAudioRecord;
 
@@ -122,17 +126,16 @@ public:
     /**
      * @hide
      */
-// TODO: Need IIVirtualDisplayCallback
-    // CARAPI CreateVirtualDisplay(
-    //     /* [in] */ const String& name,
-    //     /* [in] */ Int32 width,
-    //     /* [in] */ Int32 height,
-    //     /* [in] */ Int32 dpi,
-    //     /* [in] */ Boolean isSecure,
-    //     /* [in] */ ISurface * surface,
-    //     /* [in] */ IIVirtualDisplayCallback * cb,
-    //     /* [in] */ IHandler * handler,
-    //     /* [out] */ IVirtualDisplay ** result);
+    CARAPI CreateVirtualDisplay(
+        /* [in] */ const String& name,
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 height,
+        /* [in] */ Int32 dpi,
+        /* [in] */ Boolean isSecure,
+        /* [in] */ ISurface * surface,
+        /* [in] */ IVirtualDisplayCallback * cb,
+        /* [in] */ IHandler * handler,
+        /* [out] */ IVirtualDisplay ** result);
 
     /**
      * Creates a {@link android.hardware.display.VirtualDisplay} to capture the
@@ -158,17 +161,16 @@ public:
      * @see android.hardware.display.DisplayManager#createVirtualDisplay(
      * String, int, int, int, int, Surface, VirtualDisplay.Callback, Handler)
      */
-// TODO: Need IIVirtualDisplayCallback
-    // CARAPI CreateVirtualDisplay(
-    //     /* [in] */ const String& name,
-    //     /* [in] */ Int32 width,
-    //     /* [in] */ Int32 height,
-    //     /* [in] */ Int32 dpi,
-    //     /* [in] */ Int32 flags,
-    //     /* [in] */ ISurface * surface,
-    //     /* [in] */ IIVirtualDisplayCallback * cb,
-    //     /* [in] */ IHandler * handler,
-    //     /* [out] */ IVirtualDisplay ** result);
+    CARAPI CreateVirtualDisplay(
+        /* [in] */ const String& name,
+        /* [in] */ Int32 width,
+        /* [in] */ Int32 height,
+        /* [in] */ Int32 dpi,
+        /* [in] */ Int32 flags,
+        /* [in] */ ISurface * surface,
+        /* [in] */ IVirtualDisplayCallback * cb,
+        /* [in] */ IHandler * handler,
+        /* [out] */ IVirtualDisplay ** result);
 
     /**
      * Creates an AudioRecord to capture audio played back by the system.

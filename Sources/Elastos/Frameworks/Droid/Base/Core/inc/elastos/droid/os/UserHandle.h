@@ -3,8 +3,10 @@
 #define __ELASTOS_DROID_OS_USERHANDLE_H__
 
 #include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Utility.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Core::IStringBuilder;
 using Elastos::IO::IPrintWriter;
 
@@ -117,6 +119,8 @@ public:
 
     static CARAPI_(Int32) GetCallingUserId();
 
+    static CARAPI_(AutoPtr<IUserHandle>) GetCallingUserHandle();
+
     /**
      * Returns the uid that is composed from the userId and the appId.
      * @hide
@@ -181,6 +185,9 @@ public:
 
 private:
     Int32 mHandle;
+
+    // private static final SparseArray<UserHandle> userHandles = new SparseArray<UserHandle>();
+    ECO_LOCAL static AutoPtr<ISparseArray> mUserHandles;
 };
 
 } // namespace Os

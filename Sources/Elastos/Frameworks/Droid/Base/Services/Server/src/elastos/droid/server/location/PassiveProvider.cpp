@@ -1,38 +1,43 @@
 
-#include "location/PassiveProvider.h"
+#include "elastos/droid/server/location/PassiveProvider.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 
+// using Elastos::Droid::Internal::Location::CProviderProperties;
 using Elastos::Droid::Location::ICriteria;
+using Elastos::Droid::Location::ILocationManager;
 using Elastos::Droid::Location::ILocationProvider;
-using Elastos::Droid::Location::CProviderRequest;
-using Elastos::Droid::Location::IProviderRequest;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Location {
-CAR_INTERFACE_IMPL(PassiveProvider, ILocationProviderInterface)
+
+const String PassiveProvider::TAG("PassiveProvider");
+
+CAR_INTERFACE_IMPL(PassiveProvider, Object, ILocationProviderInterface)
 
 static AutoPtr<IProviderProperties> PROPERTIES_Init()
 {
-    AutoPtr<IProviderProperties> temp;
-    CProviderProperties::New(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-        ICriteria::Criteria_POWER_LOW, ICriteria::Criteria_ACCURACY_COARSE,
-        (IProviderProperties**)&temp);
-
-    return temp;
+    // TODO:
+    // AutoPtr<IProviderProperties> temp;
+    // CProviderProperties::New(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+    //     ICriteria::Criteria_POWER_LOW, ICriteria::Criteria_ACCURACY_COARSE,
+    //     (IProviderProperties**)&temp);
+    // return temp;
+    return NULL;
 }
-
-const String PassiveProvider::TAG("PassiveProvider");
 
 AutoPtr<IProviderProperties> PassiveProvider::PROPERTIES = PROPERTIES_Init();
 
 PassiveProvider::PassiveProvider(
     /* [in] */ IILocationManager* locationManager)
     : mLocationManager(locationManager)
-{
-}
+    , mReportLocation(FALSE)
+{}
 
-//@Override
 ECode PassiveProvider::GetName(
     /* [out] */ String* name)
 {
@@ -41,7 +46,6 @@ ECode PassiveProvider::GetName(
     return NOERROR;
 }
 
-//@Override
 ECode PassiveProvider::GetProperties(
     /* [out] */ IProviderProperties** properties)
 {
@@ -51,7 +55,6 @@ ECode PassiveProvider::GetProperties(
     return NOERROR;
 }
 
-//@Override
 ECode PassiveProvider::IsEnabled(
     /* [out] */ Boolean* enable)
 {
@@ -60,35 +63,29 @@ ECode PassiveProvider::IsEnabled(
     return NOERROR;
 }
 
-//@Override
 ECode PassiveProvider::Enable()
 {
     return NOERROR;
 }
 
-//@Override
 ECode PassiveProvider::Disable()
 {
     return NOERROR;
 }
 
-//@Override
 ECode PassiveProvider::GetStatus(
     /* [in] */ IBundle* extras,
     /* [out] */ Int32* status)
 {
     VALIDATE_NOT_NULL(status);
-
     if (mReportLocation) {
         *status = ILocationProvider::AVAILABLE;
     } else {
         *status = ILocationProvider::TEMPORARILY_UNAVAILABLE;
     }
-
     return NOERROR;
 }
 
-//@Override
 ECode PassiveProvider::GetStatusUpdateTime(
     /* [out] */ Int64* time)
 {
@@ -97,22 +94,13 @@ ECode PassiveProvider::GetStatusUpdateTime(
     return NOERROR;
 }
 
-//@Override
 ECode PassiveProvider::SetRequest(
     /* [in] */ IProviderRequest* request,
     /* [in] */ IWorkSource* source)
 {
-    VALIDATE_NOT_NULL(request);
-//    CProviderRequest* _request = (CProviderRequest*)request;
-//    mReportLocation = _request->reportLocation;
-    return NOERROR;
-}
-
-//@Override
-ECode PassiveProvider::SwitchUser(
-    /* [in] */ Int32 userId)
-{
-    // nothing to do here
+    Boolean rl;
+    request->GetReportLocation(&rl);
+    mReportLocation = rl;
     return NOERROR;
 }
 
@@ -120,18 +108,16 @@ ECode PassiveProvider::UpdateLocation(
     /* [in] */ ILocation* location)
 {
     if (mReportLocation) {
-        //try {
-            // pass the location back to the location manager
-            return mLocationManager->ReportLocation(location, TRUE);
-        //} catch (RemoteException e) {
-        //    Log.e(TAG, "RemoteException calling reportLocation");
-        //}
+        // pass the location back to the location manager
+        ECode ec = mLocationManager->ReportLocation(location, TRUE);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "RemoteException calling reportLocation");
+            return E_REMOTE_EXCEPTION;
+        }
     }
-
     return NOERROR;
 }
 
-//@Override
 ECode PassiveProvider::SendExtraCommand(
     /* [in] */ const String& command,
     /* [in] */ IBundle* extras,
@@ -142,13 +128,14 @@ ECode PassiveProvider::SendExtraCommand(
     return NOERROR;
 }
 
-//@Override
 ECode PassiveProvider::Dump(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-//  pw.println("mReportLocation=" + mReportLocation);
+    StringBuilder sb("mReportLocation=");
+    sb += (mReportLocation ? "TRUE" : "FALSE");
+    pw->Println(sb.ToString());
     return NOERROR;
 }
 

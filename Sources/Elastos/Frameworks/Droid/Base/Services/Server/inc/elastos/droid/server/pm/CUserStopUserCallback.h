@@ -32,6 +32,9 @@ public:
     CARAPI UserStopAborted(
         /* [in] */ Int32 userId);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 private:
     CUserManagerService* mUm;
 };

@@ -8,9 +8,7 @@ module
     namespace Droid {
     namespace App {
 
-
     /** @hide */
-    [local]
     interface IIAppTask {
         FinishAndRemoveTask();
 

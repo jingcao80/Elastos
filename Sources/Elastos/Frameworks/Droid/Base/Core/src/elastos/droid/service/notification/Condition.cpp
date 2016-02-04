@@ -80,6 +80,112 @@ Boolean Condition::IsValidState(
     return state >= ICondition::STATE_FALSE && state <= ICondition::STATE_ERROR;
 }
 
+ECode Condition::GetId(
+    /* [out] */ IUri** id)
+{
+    VALIDATE_NOT_NULL(id);
+    *id = mId;
+    REFCOUNT_ADD(*id);
+    return NOERROR;
+}
+
+ECode Condition::SetId(
+    /* [in] */ IUri* id)
+{
+    mId = id;
+    return NOERROR;
+}
+
+ECode Condition::GetSummary(
+    /* [out] */ String* summary)
+{
+    VALIDATE_NOT_NULL(summary);
+    *summary = mSummary;
+    return NOERROR;
+}
+
+ECode Condition::SetSummary(
+    /* [in] */ const String& summary)
+{
+    mSummary = summary;
+    return NOERROR;
+}
+
+ECode Condition::GetLine1(
+    /* [out] */ String* line1)
+{
+    VALIDATE_NOT_NULL(line1);
+    *line1 = mLine1;
+    return NOERROR;
+}
+
+ECode Condition::SetLine1(
+    /* [in] */ const String& line1)
+{
+    mLine1 = line1;
+    return NOERROR;
+}
+
+ECode Condition::GetLine2(
+    /* [out] */ String* line2)
+{
+    VALIDATE_NOT_NULL(line2);
+    *line2 = mLine2;
+    return NOERROR;
+}
+
+ECode Condition::SetLine2(
+    /* [in] */ const String& line2)
+{
+    mLine2 = line2;
+    return NOERROR;
+}
+
+ECode Condition::GetIcon(
+    /* [out] */ Int32* icon)
+{
+    VALIDATE_NOT_NULL(icon);
+    *icon = mIcon;
+    return NOERROR;
+}
+
+ECode Condition::SetIcon(
+    /* [in] */ Int32 icon)
+{
+    mIcon = icon;
+    return NOERROR;
+}
+
+ECode Condition::GetState(
+    /* [out] */ Int32* state)
+{
+    VALIDATE_NOT_NULL(state);
+    *state = mState;
+    return NOERROR;
+}
+
+ECode Condition::SetState(
+    /* [in] */ Int32 state)
+{
+    mState = state;
+    return NOERROR;
+}
+
+ECode Condition::GetFlags(
+    /* [out] */ Int32* flags)
+{
+    VALIDATE_NOT_NULL(flags);
+    *flags = mFlags;
+    return NOERROR;
+}
+
+ECode Condition::SetFlags(
+    /* [in] */ Int32 flags)
+{
+    mFlags = flags;
+    return NOERROR;
+}
+
 ECode Condition::ReadFromParcel(
     /* [in] */ IParcel* source)
 {

@@ -1,15 +1,26 @@
 
-#include "CBluetoothInputDeviceStateChangeCallback.h"
+#include "elastos/droid/bluetooth/CBluetoothInputDeviceStateChangeCallback.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Bluetooth {
+
+CAR_INTERFACE_IMPL_2(CBluetoothInputDeviceStateChangeCallback, Object, IIBluetoothStateChangeCallback, IBinder);
+
+CAR_OBJECT_IMPL(CBluetoothInputDeviceStateChangeCallback);
+
+CBluetoothInputDeviceStateChangeCallback::CBluetoothInputDeviceStateChangeCallback()
+{
+}
 
 ECode CBluetoothInputDeviceStateChangeCallback::OnBluetoothStateChange(
     /* [in] */ Boolean on)
@@ -50,7 +61,7 @@ ECode CBluetoothInputDeviceStateChangeCallback::OnBluetoothStateChange(
 ECode CBluetoothInputDeviceStateChangeCallback::constructor(
     /* [in] */ IInterface* host)
 {
-    mHost = (BluetoothInputDevice*)host;
+    mHost = (BluetoothInputDevice*)(IBluetoothInputDevice::Probe(host));
     return NOERROR;
 }
 

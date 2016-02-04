@@ -115,6 +115,8 @@ static AutoPtr<ArrayOf<String> > initNON_INDEXABLES_KEYS_COLUMNS()
     AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(1);
 
     (*args)[0] = SearchIndexablesContract::BaseColumns::COLUMN_RANK;
+
+    return args;
 }
 
 const String SearchIndexablesContract::INDEXABLES_XML_RES_PATH = initINDEXABLES_XML_RES_PATH();

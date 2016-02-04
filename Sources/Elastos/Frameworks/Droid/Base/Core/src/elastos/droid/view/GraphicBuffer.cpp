@@ -308,6 +308,14 @@ ECode GraphicBuffer::IsDestroyed(
     return NOERROR;
 }
 
+ECode GraphicBuffer::GetNativeObject(
+    /* [out] */ Int64* handle)
+{
+    VALIDATE_NOT_NULL(handle)
+    *handle = mNativeObject;
+    return NOERROR;
+}
+
 ECode GraphicBuffer::Create(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,

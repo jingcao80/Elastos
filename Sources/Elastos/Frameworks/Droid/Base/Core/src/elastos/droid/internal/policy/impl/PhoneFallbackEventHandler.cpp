@@ -114,16 +114,11 @@ ECode PhoneFallbackEventHandler::OnKeyDown(
         {
             AutoPtr<ITelephonyManager> tm;
             GetTelephonyManager((ITelephonyManager**)&tm);
-            if (tm) {
-                Int32 state = 0;
-                assert(state);//TODO remove
-                //TODO begin ITelephoneManager is not ok
-                //tm->GetCallState(&state);
-                //if (ITelephonyManager::CALL_STATE_IDLE == state) {
-                //    *res = TRUE;  // suppress key event
-                //    return NOERROR;
-                //}
-                //TODO end
+            Int32 state = 0;
+            tm->GetCallState(&state);
+            if (state != ITelephonyManager::CALL_STATE_IDLE) {
+               *res = TRUE;  // suppress key event
+               return NOERROR;
             }
         }
 

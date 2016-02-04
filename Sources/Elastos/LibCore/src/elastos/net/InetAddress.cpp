@@ -550,18 +550,29 @@ ECode InetAddress::GetByAddress(
     }
     AutoPtr<ArrayOf<Byte> > addressClone;
     if(ipaddress->GetLength() == 4) {
+        AutoPtr<IInet4Address> inet4addr;
         addressClone = ipaddress->Clone();
-        CInet4Address::New(addressClone, hostname, (IInet4Address**)address);
+        FAIL_RETURN(CInet4Address::New(addressClone, hostname, (IInet4Address**)&inet4addr));
+        *address = IInetAddress::Probe(inet4addr);
+        REFCOUNT_ADD(*address);
         return NOERROR;
     }
     else if(ipaddress->GetLength() == 16){
         if(IsIPv4MappedAddress(ipaddress)) {
+            AutoPtr<IInet4Address> inet4addr;
             IPv4MappedToIPv4(ipaddress, (ArrayOf<Byte>**)&addressClone);
-            return CInet4Address::New(addressClone, hostname, (IInet4Address**)address);
+            FAIL_RETURN(CInet4Address::New(addressClone, hostname, (IInet4Address**)&inet4addr));
+            *address = IInetAddress::Probe(inet4addr);
+            REFCOUNT_ADD(*address);
+            return NOERROR;
         }
         else{
+            AutoPtr<IInet6Address> inet6addr;
             addressClone = ipaddress->Clone();
-            return CInet6Address::New(addressClone, hostname, scopeId, (IInet6Address**)address);
+            FAIL_RETURN(CInet6Address::New(addressClone, hostname, scopeId, (IInet6Address**)&inet6addr));
+            *address = IInetAddress::Probe(inet6addr);
+            REFCOUNT_ADD(*address);
+            return NOERROR;
         }
     }
     else{
@@ -708,10 +719,18 @@ ECode InetAddress::MakeInetAddress(
     VALIDATE_NOT_NULL(bytes)
 
     if (bytes->GetLength() == 4) {
-        return CInet4Address::New(bytes, hostname, (IInet4Address**)address);
+        AutoPtr<IInet4Address> inet4addr;
+        FAIL_RETURN(CInet4Address::New(bytes, hostname, (IInet4Address**)&inet4addr));
+        *address = IInetAddress::Probe(inet4addr);
+        REFCOUNT_ADD(*address);
+        return NOERROR;
     }
     else if(bytes->GetLength() == 16) {
-        return CInet6Address::New(bytes, hostname, 0, (IInet6Address**)address);
+        AutoPtr<IInet6Address> inet6addr;
+        FAIL_RETURN(CInet6Address::New(bytes, hostname, 0, (IInet6Address**)&inet6addr));
+        *address = IInetAddress::Probe(inet6addr);
+        REFCOUNT_ADD(*address);
+        return NOERROR;
     }
     else{
         return E_UNKNOWN_HOST_EXCEPTION;

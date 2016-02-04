@@ -46,6 +46,7 @@ class JSONArray
     , public IJSONArray
 {
     friend class JSONObject;
+    friend class JSONStringer;
 public:
     CAR_INTERFACE_DECL();
 
@@ -470,9 +471,6 @@ public:
         /* [in] */ Int32 indentSpaces,
         /* [out] */ String* str);
 
-    CARAPI WriteTo(
-        /* [in] */ IJSONStringer* stringer);
-
     // @Override
     CARAPI Equals(
         /* [in] */ IInterface* o,
@@ -488,6 +486,9 @@ protected:
      */
     CARAPI CheckedPut(
         /* [in] */ IInterface* value);
+
+    CARAPI WriteTo(
+        /* [in] */ IJSONStringer* stringer);
 
 private:
     AutoPtr<IList> mValues;

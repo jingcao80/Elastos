@@ -391,8 +391,8 @@ Boolean SearchDialog::Show(
 {
     if (DBG) {
         Logger::D(TAG, "show(%s, %s)",
-            Object::ToString(componentName).string(),
-            Object::ToString(appSearchData).string());
+            TO_CSTR(componentName),
+            TO_CSTR(appSearchData));
     }
 
     AutoPtr<IInterface> obj;
@@ -612,7 +612,7 @@ void SearchDialog::UpdateSearchAppIcon()
     if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
         pm->GetDefaultActivityIcon((IDrawable**)&icon);
         Logger::W(TAG, "%s not found, using generic app icon",
-            Object::ToString(mLaunchComponent).string());
+            TO_CSTR(mLaunchComponent));
     // }
     }
 

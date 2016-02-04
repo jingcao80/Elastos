@@ -1,26 +1,32 @@
 
-#ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_CCOMMANDQUEUE_H__
-#define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_CCOMMANDQUEUE_H__
+#ifndef  __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_CCOMMANDQUEUE_H__
+#define  __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_CCOMMANDQUEUE_H__
 
-#include "_Elastos_Droid_SystemUI_StatusBar_CCommandQueue.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "_Elastos_Droid_Packages_SystemUI_StatusBar_CCommandQueue.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/os/Handler.h>
 
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::HandlerBase;
-using Elastos::Droid::StatusBar::IStatusBarIcon;
-using Elastos::Droid::StatusBar::IStatusBarNotification;
-using Elastos::Droid::StatusBar::IStatusBarIconList;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Internal::StatusBar::IIStatusBar;
+using Elastos::Droid::Internal::StatusBar::IStatusBarIcon;
+using Elastos::Droid::Service::Notification::IStatusBarNotification;
+using Elastos::Droid::Internal::StatusBar::IStatusBarIconList;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 
 CarClass(CCommandQueue)
+    , public Object
+    , public ICommandQueue
+    , public IIStatusBar
+    , public IBinder
 {
 private:
-    class MyHandler : public HandlerBase
+    class MyHandler : public Handler
     {
     public:
         MyHandler(
@@ -30,24 +36,19 @@ private:
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
     private:
         CCommandQueue* mHost;
     };
 
-    class NotificationQueueEntry
-        : public ElRefBase
-        , public IInterface
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        AutoPtr<IBinder> mKey;
-        AutoPtr<IStatusBarNotification> mNotification;
-    };
-
 public:
+    CAR_OBJECT_DECL();
+
+    CAR_INTERFACE_DECL();
+
     CARAPI constructor(
-        /* [in] */ ICommandQueueCallbacks* callbacks);
+        /* [in] */ ICommandQueueCallbacks* callbacks,
+        /* [in] */ IStatusBarIconList* list);
 
     CARAPI SetIconList(
         /* [in] */ IStatusBarIconList* list);
@@ -58,17 +59,6 @@ public:
 
     CARAPI RemoveIcon(
         /* [in] */ Int32 index);
-
-    CARAPI AddNotification(
-        /* [in] */ IBinder* key,
-        /* [in] */ IStatusBarNotification* notification);
-
-    CARAPI UpdateNotification(
-        /* [in] */ IBinder* key,
-        /* [in] */ IStatusBarNotification* notification);
-
-    CARAPI RemoveNotification(
-        /* [in] */ IBinder* key);
 
     CARAPI Disable(
         /* [in] */ Int32 state);
@@ -89,11 +79,15 @@ public:
     CARAPI SetImeWindowStatus(
         /* [in] */ IBinder* token,
         /* [in] */ Int32 vis,
-        /* [in] */ Int32 backDisposition);
+        /* [in] */ Int32 backDisposition,
+        /* [in] */ Boolean showImeSwitcher);
 
-    CARAPI SetHardKeyboardStatus(
-        /* [in] */ Boolean available,
-        /* [in] */ Boolean enabled);
+    CARAPI ShowRecentApps(
+        /* [in] */ Boolean triggeredFromAltTab);
+
+    CARAPI HideRecentApps(
+        /* [in] */ Boolean triggeredFromAltTab,
+        /* [in] */ Boolean triggeredFromHomeKey);
 
     CARAPI ToggleRecentApps();
 
@@ -101,8 +95,18 @@ public:
 
     CARAPI CancelPreloadRecentApps();
 
-    CARAPI SetNavigationIconHints(
-        /* [in] */ Int32 hints);
+    CARAPI SetWindowState(
+        /* [in] */ Int32 window,
+        /* [in] */ Int32 state);
+
+    CARAPI BuzzBeepBlinked();
+
+    CARAPI NotificationLightOff();
+
+    CARAPI NotificationLightPulse(
+        /* [in] */ Int32 argb,
+        /* [in] */ Int32 onMillis,
+        /* [in] */ Int32 offMillis);
 
     CARAPI ToString(
         /* [out] */ String* info);
@@ -114,32 +118,34 @@ private:
 
     CARAPI HandleRemoveIcon(
         /* [in] */ Int32 index);
-private:
-    const static Int32 INDEX_MASK; // 0xffff;
-    const static Int32 MSG_SHIFT ; // 16;
-    const static Int32 MSG_MASK  ; // 0xffff << MSG_SHIFT;
-
-    const static Int32 OP_SET_ICON   ; // 1;
-    const static Int32 OP_REMOVE_ICON; // 2;
-
-    const static Int32 MSG_ICON                      ; // 1 << MSG_SHIFT;
-    const static Int32 MSG_ADD_NOTIFICATION          ; // 2 << MSG_SHIFT;
-    const static Int32 MSG_UPDATE_NOTIFICATION       ; // 3 << MSG_SHIFT;
-    const static Int32 MSG_REMOVE_NOTIFICATION       ; // 4 << MSG_SHIFT;
-    const static Int32 MSG_DISABLE                   ; // 5 << MSG_SHIFT;
-    const static Int32 MSG_EXPAND_NOTIFICATIONS      ; // 6 << MSG_SHIFT;
-    const static Int32 MSG_COLLAPSE_PANELS           ; // 7 << MSG_SHIFT;
-    const static Int32 MSG_EXPAND_SETTINGS           ; // 8 << MSG_SHIFT;
-    const static Int32 MSG_SET_SYSTEMUI_VISIBILITY   ; // 9 << MSG_SHIFT;
-    const static Int32 MSG_TOP_APP_WINDOW_CHANGED    ; // 10 << MSG_SHIFT;
-    const static Int32 MSG_SHOW_IME_BUTTON           ; // 11 << MSG_SHIFT;
-    const static Int32 MSG_SET_HARD_KEYBOARD_STATUS  ; // 12 << MSG_SHIFT;
-    const static Int32 MSG_TOGGLE_RECENT_APPS        ; // 13 << MSG_SHIFT;
-    const static Int32 MSG_PRELOAD_RECENT_APPS       ; // 14 << MSG_SHIFT;
-    const static Int32 MSG_CANCEL_PRELOAD_RECENT_APPS; // 15 << MSG_SHIFT;
-    const static Int32 MSG_SET_NAVIGATION_ICON_HINTS ; // 16 << MSG_SHIFT;
 
 private:
+    static const Int32 INDEX_MASK; // 0xffff;
+    static const Int32 MSG_SHIFT ; // 16;
+    static const Int32 MSG_MASK  ; // 0xffff << MSG_SHIFT;
+
+    static const Int32 OP_SET_ICON   ; // 1;
+    static const Int32 OP_REMOVE_ICON; // 2;
+
+    static const Int32 MSG_ICON;
+    static const Int32 MSG_DISABLE;
+    static const Int32 MSG_EXPAND_NOTIFICATIONS;
+    static const Int32 MSG_COLLAPSE_PANELS;
+    static const Int32 MSG_EXPAND_SETTINGS;
+    static const Int32 MSG_SET_SYSTEMUI_VISIBILITY;
+    static const Int32 MSG_TOP_APP_WINDOW_CHANGED;
+    static const Int32 MSG_SHOW_IME_BUTTON;
+    static const Int32 MSG_TOGGLE_RECENT_APPS;
+    static const Int32 MSG_PRELOAD_RECENT_APPS;
+    static const Int32 MSG_CANCEL_PRELOAD_RECENT_APPS;
+    static const Int32 MSG_SET_WINDOW_STATE;
+    static const Int32 MSG_SHOW_RECENT_APPS;
+    static const Int32 MSG_HIDE_RECENT_APPS;
+    static const Int32 MSG_BUZZ_BEEP_BLINKED;
+    static const Int32 MSG_NOTIFICATION_LIGHT_OFF;
+    static const Int32 MSG_NOTIFICATION_LIGHT_PULSE;
+
+    static const String SHOW_IME_SWITCHER_KEY;
     AutoPtr<IStatusBarIconList> mList;
     AutoPtr<ICommandQueueCallbacks> mCallbacks;
     AutoPtr<IHandler> mHandler;
@@ -147,9 +153,10 @@ private:
     Object mListLock;
 };
 
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos
 
-#endif // __ELASTOS_DROID_SYSTEMUI_STATUSBAR_CCOMMANDQUEUE_H__
+#endif // __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_CCOMMANDQUEUE_H__

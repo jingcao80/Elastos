@@ -22,10 +22,10 @@ CAR_OBJECT_IMPL(CPlaybackState)
 CPlaybackState::CPlaybackState()
     : mState(0)
     , mPosition(0)
-    , mSpeed(0)
-    , mUpdateTime(0)
     , mBufferedPosition(0)
+    , mSpeed(0)
     , mActions(0)
+    , mUpdateTime(0)
     , mActiveItemId(0)
 {
 }

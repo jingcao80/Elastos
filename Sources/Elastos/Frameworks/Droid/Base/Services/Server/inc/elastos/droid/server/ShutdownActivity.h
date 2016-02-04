@@ -18,15 +18,19 @@ class ShutdownActivity
 {
 private:
     class LocalThread
-        : public ThreadBase
+        : public Thread
     {
     public:
         LocalThread(
-            /* [in] */ ShutdownActivity* host,
-            /* [in] */ const String& name)
+            /* [in] */ ShutdownActivity* host)
             : mHost(host)
         {
-            Thread::constructor(name);
+        }
+
+        CARAPI constructor(
+            /* [in] */ const String& name)
+        {
+            return Thread::constructor(name);
         }
 
         CARAPI Run();
@@ -36,6 +40,8 @@ private:
     };
 
 public:
+    ShutdownActivity();
+
     CARAPI OnCreate(
         /* [in] */ IBundle* savedInstanceState);
 

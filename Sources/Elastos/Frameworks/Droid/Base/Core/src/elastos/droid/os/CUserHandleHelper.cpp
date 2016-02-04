@@ -64,6 +64,16 @@ ECode CUserHandleHelper::GetCallingUserId(
     return NOERROR;
 }
 
+ECode CUserHandleHelper::GetCallingUserHandle(
+    /* [out] */ IUserHandle** userHandle)
+{
+    VALIDATE_NOT_NULL(userHandle);
+    AutoPtr<IUserHandle> handle = UserHandle::GetCallingUserHandle();
+    *userHandle = handle;
+    REFCOUNT_ADD(*userHandle);
+    return NOERROR;
+}
+
 ECode CUserHandleHelper::GetUid(
     /* [in] */ Int32 userId,
     /* [in] */ Int32 appId,

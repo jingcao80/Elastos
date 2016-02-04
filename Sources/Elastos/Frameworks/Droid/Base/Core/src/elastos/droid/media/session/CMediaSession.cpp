@@ -191,6 +191,15 @@ ECode CMediaSession::CallbackMessageHandler::Post(
     return msg->SendToTarget();
 }
 
+CAR_INTERFACE_IMPL(CMediaSession::VolumeProviderCallback, Object,
+        IVolumeProviderCallback)
+
+ECode CMediaSession::VolumeProviderCallback::OnVolumeChanged(
+    /* [in] */ IVolumeProvider* volumeProvider)
+{
+    return mHost->NotifyRemoteVolumeChanged(volumeProvider);
+}
+
 CMediaSession::CMediaSession()
     : mActive(FALSE)
 {
@@ -328,13 +337,8 @@ ECode CMediaSession::SetPlaybackToRemote(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mVolumeProvider = volumeProvider;
-//TODO:
-    // volumeProvider->SetCallback(new VolumeProvider.Callback() {
-    //     @Override
-    //     public void onVolumeChanged(VolumeProvider volumeProvider) {
-    //         notifyRemoteVolumeChanged(volumeProvider);
-    //     }
-    // });
+    AutoPtr<VolumeProviderCallback> cb = new VolumeProviderCallback(this);
+    volumeProvider->SetCallback(cb);
 
     // try {
     Int32 control;

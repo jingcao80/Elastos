@@ -1,0 +1,235 @@
+
+module
+{
+    interface Elastos.Droid.Os.IParcelUuid;
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+    interface Elastos.Droid.Bluetooth.IIBluetoothGattCallback;
+    interface Elastos.Droid.Bluetooth.IIBluetoothGattServerCallback;
+    interface Elastos.Droid.Bluetooth.LE.IScanSettings;
+    interface Elastos.Droid.Bluetooth.LE.IAdvertiseData;
+    interface Elastos.Droid.Bluetooth.LE.IAdvertiseSettings;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * API for interacting with BLE / GATT
+     * @hide
+     */
+    [deprecated]
+    interface IIBluetoothGatt {
+        GetDevicesMatchingConnectionStates(
+            [in] ArrayOf<Int32>* states,
+            [out] IList** list);
+
+        StartScan(
+            [in] Int32 appIf,
+            [in] Boolean isServer,
+            [in] IScanSettings* settings,
+            [in] IList* filters,
+            [in] IList* scanStorages);
+
+        StopScan(
+            [in] Int32 appIf,
+            [in] Boolean isServer);
+
+        FlushPendingBatchResults(
+            [in] Int32 appIf,
+            [in] Boolean isServer);
+
+        StartMultiAdvertising(
+            [in] Int32 appIf,
+            [in] IAdvertiseData* advertiseData,
+            [in] IAdvertiseData* scanResponse,
+            [in] IAdvertiseSettings* settings);
+
+        StopMultiAdvertising(
+            [in] Int32 appIf);
+
+        RegisterClient(
+            [in] IParcelUuid* appId,
+            [in] IIBluetoothGattCallback* cb);
+
+        UnregisterClient(
+            [in] Int32 clientIf);
+
+        ClientConnect(
+            [in] Int32 clientIf,
+            [in] String address,
+            [in] Boolean isDirect,
+            [in] Int32 transport);
+
+        ClientDisconnect(
+            [in] Int32 clientIf,
+            [in] String address);
+
+        RefreshDevice(
+            [in] Int32 clientIf,
+            [in] String address);
+
+        DiscoverServices(
+            [in] Int32 clientIf,
+            [in] String address);
+
+        ReadCharacteristic(
+            [in] Int32 clientIf,
+            [in] String address,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstanceId,
+            [in] IParcelUuid* srvcId,
+            [in] Int32 charInstanceId,
+            [in] IParcelUuid* charId,
+            [in] Int32 authReq);
+
+        WriteCharacteristic(
+            [in] Int32 clientIf,
+            [in] String address,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstanceId,
+            [in] IParcelUuid* srvcId,
+            [in] Int32 charInstanceId,
+            [in] IParcelUuid* charId,
+            [in] Int32 writeType,
+            [in] Int32 authReq,
+            [in] ArrayOf<Byte>* value);
+
+        ReadDescriptor(
+            [in] Int32 clientIf,
+            [in] String address,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstanceId,
+            [in] IParcelUuid* srvcId,
+            [in] Int32 charInstanceId,
+            [in] IParcelUuid* charId,
+            [in] Int32 descrInstanceId,
+            [in] IParcelUuid* descrUuid,
+            [in] Int32 authReq);
+
+        WriteDescriptor(
+            [in] Int32 clientIf,
+            [in] String address,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstanceId,
+            [in] IParcelUuid* srvcId,
+            [in] Int32 charInstanceId,
+            [in] IParcelUuid* charId,
+            [in] Int32 descrInstanceId,
+            [in] IParcelUuid* descrId,
+            [in] Int32 writeType,
+            [in] Int32 authReq,
+            [in] ArrayOf<Byte>* value);
+
+        RegisterForNotification(
+            [in] Int32 clientIf,
+            [in] String address,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstanceId,
+            [in] IParcelUuid* srvcId,
+            [in] Int32 charInstanceId,
+            [in] IParcelUuid* charId,
+            [in] Boolean isEnable);
+
+        BeginReliableWrite(
+            [in] Int32 clientIf,
+            [in] String address);
+
+        EndReliableWrite(
+            [in] Int32 clientIf,
+            [in] String address,
+            [in] Boolean execute);
+
+        ReadRemoteRssi(
+            [in] Int32 clientIf,
+            [in] String address);
+
+        ConfigureMTU(
+            [in] Int32 clientIf,
+            [in] String address,
+            [in] Int32 mtu);
+
+        ConnectionParameterUpdate(
+            [in] Int32 clientIf,
+            [in] String address,
+            [in] Int32 connectionPriority);
+
+        RegisterServer(
+            [in] IParcelUuid* appId,
+            [in] IIBluetoothGattServerCallback* cb);
+
+        UnregisterServer(
+            [in] Int32 serverIf);
+
+        ServerConnect(
+            [in] Int32 servertIf,
+            [in] String address,
+            [in] Boolean isDirect,
+            [in] Int32 transport);
+
+        ServerDisconnect(
+            [in] Int32 serverIf,
+            [in] String address);
+
+        BeginServiceDeclaration(
+            [in] Int32 serverIf,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstanceId,
+            [in] Int32 minHandles,
+            [in] IParcelUuid* srvcId,
+            [in] Boolean advertisePreferred);
+
+        AddIncludedService(
+            [in] Int32 serverIf,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstanceId,
+            [in] IParcelUuid* srvcId);
+
+        AddCharacteristic(
+            [in] Int32 serverIf,
+            [in] IParcelUuid* charId,
+            [in] Int32 properties,
+            [in] Int32 permissions);
+
+        AddDescriptor(
+            [in] Int32 serverIf,
+            [in] IParcelUuid* descId,
+            [in] Int32 permissions);
+
+        EndServiceDeclaration(
+            [in] Int32 serverIf);
+
+        RemoveService(
+            [in] Int32 serverIf,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstanceId,
+            [in] IParcelUuid* srvcId);
+
+        ClearServices(
+            [in] Int32 serverIf);
+
+        SendResponse(
+            [in] Int32 serverIf,
+            [in] String address,
+            [in] Int32 requestId,
+            [in] Int32 status,
+            [in] Int32 offset,
+            [in] ArrayOf<Byte>* value);
+
+        SendNotification(
+            [in] Int32 serverIf,
+            [in] String address,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstanceId,
+            [in] IParcelUuid* srvcId,
+            [in] Int32 charInstanceId,
+            [in] IParcelUuid* charId,
+            [in] Boolean confirm,
+            [in] ArrayOf<Byte>* value);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

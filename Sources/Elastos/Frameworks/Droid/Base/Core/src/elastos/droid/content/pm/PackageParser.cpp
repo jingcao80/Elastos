@@ -22,11 +22,8 @@
 #include "elastos/droid/content/pm/CVerifierInfo.h"
 #include "elastos/droid/content/res/CAssetManager.h"
 #include "elastos/droid/content/res/CResources.h"
-#include "elastos/droid/content/res/CConfiguration.h"
-#include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/CPatternMatcher.h"
-#include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/utility/CArraySet.h"
@@ -36,7 +33,6 @@
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/Manifest.h"
-
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
@@ -45,9 +41,7 @@
 using Elastos::Droid::Content::Res::IAssetManager;
 using Elastos::Droid::Content::Res::CAssetManager;
 using Elastos::Droid::Content::Res::IConfiguration;
-using Elastos::Droid::Content::Res::CConfiguration;
 using Elastos::Droid::Content::Res::CResources;
-using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CPatternMatcher;
 using Elastos::Droid::Os::CBundle;
@@ -161,6 +155,7 @@ const AutoPtr< ArrayOf<PackageParser::SplitPermissionInfo*> > PackageParser::SPL
 const Int32 PackageParser::SDK_VERSION = Build::VERSION::SDK_INT;
 const AutoPtr< ArrayOf<String> > PackageParser::SDK_CODENAMES = Build::VERSION::ACTIVE_CODENAMES;
 const Int32 PackageParser::CERTIFICATE_BUFFER_SIZE = 4096;
+Int32 PackageParser::sParseError = IPackageManager::INSTALL_SUCCEEDED;
 Boolean PackageParser::sCompatibilityModeEnabled = TRUE;
 const Boolean PackageParser::RIGID_PARSER = FALSE;
 const Int32 PackageParser::PARSE_DEFAULT_INSTALL_LOCATION = IPackageInfo::INSTALL_LOCATION_UNSPECIFIED;
@@ -241,6 +236,8 @@ PackageParser::ParseComponentArgs::ParseComponentArgs(
 //=================================================================
 // PackageParser::PackageLite
 //=================================================================
+CAR_INTERFACE_IMPL(PackageParser::PackageLite, Object, IPackageLite)
+
 PackageParser::PackageLite::PackageLite(
     /* [in] */ const String& codePath,
     /* [in] */ ApkLite* baseApk,
@@ -269,6 +266,88 @@ AutoPtr<List<String> > PackageParser::PackageLite::GetAllCodePaths()
         }
     }
     return paths;
+}
+
+ECode PackageParser::PackageLite::GetPackageName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name)
+    *name = mPackageName;
+    return NOERROR;
+}
+
+ECode PackageParser::PackageLite::GetVersionCode(
+    /* [out] */ Int32* code)
+{
+    VALIDATE_NOT_NULL(code)
+    *code = mVersionCode;
+    return NOERROR;
+}
+
+ECode PackageParser::PackageLite::GetInstallLocation(
+    /* [out] */ Int32* location)
+{
+    VALIDATE_NOT_NULL(location)
+    *location = mInstallLocation;
+    return NOERROR;
+}
+
+ECode PackageParser::PackageLite::GetVerifiers(
+    /* [out, callee] */ ArrayOf<IVerifierInfo*> ** verifiers)
+{
+    VALIDATE_NOT_NULL(verifiers)
+    *verifiers = mVerifiers;
+    REFCOUNT_ADD(*verifiers)
+    return NOERROR;
+}
+
+ECode PackageParser::PackageLite::GetSplitNames(
+    /* [out, callee] */ ArrayOf<String> ** splitNames)
+{
+    VALIDATE_NOT_NULL(splitNames)
+    *splitNames = mSplitNames;
+    REFCOUNT_ADD(*splitNames)
+    return NOERROR;
+}
+
+ECode PackageParser::PackageLite::GetCodePath(
+    /* [out] */ String* path)
+{
+    VALIDATE_NOT_NULL(path)
+    *path = mCodePath;
+    return NOERROR;
+}
+
+ECode PackageParser::PackageLite::GetBaseCodePath(
+    /* [out] */ String* path)
+{
+    VALIDATE_NOT_NULL(path)
+    *path = mBaseCodePath;
+    return NOERROR;
+}
+
+ECode PackageParser::PackageLite::GetSplitCodePaths(
+    /* [out, callee] */ ArrayOf<String> ** paths)
+{
+    VALIDATE_NOT_NULL(paths)
+    *paths = mSplitCodePaths;
+    return NOERROR;
+}
+
+ECode PackageParser::PackageLite::GetCoreApp(
+    /* [out] */ Boolean* app)
+{
+    VALIDATE_NOT_NULL(app)
+    *app = mCoreApp;
+    return NOERROR;
+}
+
+ECode PackageParser::PackageLite::GetMultiArch(
+    /* [out] */ Boolean* arch)
+{
+    VALIDATE_NOT_NULL(arch)
+    *arch = mMultiArch;
+    return NOERROR;
 }
 
 //=================================================================
@@ -452,187 +531,6 @@ AutoPtr<List<String> > PackageParser::Package::GetAllCodePathsExcludingResourceO
 
     return paths;
 }
-
-//=================================================================
-// PackageParser::Component
-//=================================================================
-template <typename II>
-PackageParser::Component<II>::Component(
-    /* [in] */ Package* owner)
-    : mOwner(owner)
-{}
-
-template <typename II>
-PackageParser::Component<II>::Component(
-    /* [in] */ ParsePackageItemArgs* args,
-    /* [in, out] */ IPackageItemInfo* outInfo)
-{
-    Init(args, outInfo);
-}
-
-template <typename II>
-void PackageParser::Component<II>::Init(
-    /* [in] */ ParsePackageItemArgs* args,
-    /* [in, out] */ IPackageItemInfo* outInfo)
-{
-    mOwner = args->mOwner;
-    String name;
-    ECode ec = args->mSa->GetNonConfigurationString(args->mNameRes, 0, &name);
-    if (FAILED(ec) || name.IsNull()) {
-        mClassName = NULL;
-        // (*args->mOutError)[0] = (const char*)(StringBuffer(args->mTag)
-        //         + " does not specify android:name");
-        return;
-    }
-
-    String pkgName;
-    IPackageItemInfo::Probe(mOwner->mApplicationInfo)->GetPackageName(&pkgName);
-    String className = BuildClassName(pkgName, name, args->mOutError);
-    outInfo->SetName(className);
-    if (className.IsNull()) {
-        mClassName = NULL;
-        // (*args->mOutError)[0] = (const char*)(StringBuffer(args->mTag)
-        //         + " does not specify android:name");
-        return;
-    }
-
-    mClassName = className;
-
-    Int32 iconVal;
-    args->mSa->GetResourceId(args->mIconRes, 0, &iconVal);
-    if (iconVal != 0) {
-        outInfo->SetIcon(iconVal);
-        outInfo->SetNonLocalizedLabel(NULL);
-    }
-
-    Int32 logoVal;
-    args->mSa->GetResourceId(args->mLogoRes, 0, &logoVal);
-    if (logoVal != 0) {
-        outInfo->SetLogo(logoVal);
-    }
-
-    Int32 bannerVal;
-    args->mSa->GetResourceId(args->mBannerRes, 0, &bannerVal);
-    if (bannerVal != 0) {
-        outInfo->SetBanner(bannerVal);
-    }
-
-    AutoPtr<ITypedValue> v;
-    args->mSa->PeekValue(args->mLabelRes, (ITypedValue**)&v);
-    Int32 resId;
-    if (v != NULL && (v->GetResourceId(&resId), outInfo->SetLabelRes(resId), (resId == 0))) {
-        AutoPtr<ICharSequence> nonLocalizedLabel;
-        v->CoerceToString((ICharSequence**)&nonLocalizedLabel);
-        outInfo->SetNonLocalizedLabel(nonLocalizedLabel);
-    }
-
-    outInfo->SetPackageName(mOwner->mPackageName);
-}
-
-template <typename II>
-PackageParser::Component<II>::Component(
-    /* [in] */ ParseComponentArgs* args,
-    /* [in] */ IComponentInfo* outInfo)
-{
-    Init(args, (IPackageItemInfo*)outInfo);
-    if (!(*args->mOutError)[0].IsNull()) {
-        return;
-    }
-
-    if (args->mProcessRes != 0) {
-        AutoPtr<ICharSequence> pname;
-        Int32 targetSdkVersion;
-        mOwner->mApplicationInfo->GetTargetSdkVersion(&targetSdkVersion);
-        if (targetSdkVersion >= Build::VERSION_CODES::FROYO) {
-            String sname;
-            args->mSa->GetNonConfigurationString(args->mProcessRes,
-                CConfiguration::NATIVE_CONFIG_VERSION, &sname);
-            CString::New(sname, (ICharSequence**)&pname);
-        }
-        else {
-            // Some older apps have been seen to use a resource reference
-            // here that on older builds was ignored (with a warning).  We
-            // need to continue to do this for them so they don't break.
-            String sname;
-            args->mSa->GetNonResourceString(args->mProcessRes, &sname);
-            CString::New(sname, (ICharSequence**)&pname);
-        }
-        String appPackageName;
-        String appProcName;
-        IPackageItemInfo::Probe(mOwner->mApplicationInfo)->GetPackageName(&appPackageName);
-        mOwner->mApplicationInfo->GetProcessName(&appProcName);
-        String procName = BuildProcessName(appPackageName, appProcName, pname, args->mFlags,
-                args->mSepProcesses, args->mOutError);
-        outInfo->SetProcessName(procName);
-    }
-
-    if (args->mDescriptionRes != 0) {
-        Int32 descRes;
-        args->mSa->GetResourceId(args->mDescriptionRes, 0, &descRes);
-        outInfo->SetDescriptionRes(descRes);
-    }
-
-    Boolean enabled;
-    args->mSa->GetBoolean(args->mEnabledRes, TRUE, &enabled);
-    outInfo->SetEnabled(enabled);
-}
-
-template <typename II>
-PackageParser::Component<II>::Component(
-    /* [in] */ Component<II>* clone)
-{
-    mOwner = clone->mOwner;
-    Copy(clone->mIntents.Begin(), clone->mIntents.End(), mIntents.Begin());
-    mClassName = clone->mClassName;
-    mComponentName = clone->mComponentName;
-    mComponentShortName = clone->mComponentShortName;
-}
-
-template <typename II>
-PackageParser::Component<II>::~Component()
-{
-}
-
-template <typename II>
-AutoPtr<IComponentName> PackageParser::Component<II>::GetComponentName()
-{
-    if (mComponentName != NULL) {
-        return mComponentName;
-    }
-    if (!mClassName.IsNull()) {
-        String pname;
-        IPackageItemInfo::Probe(mOwner->mApplicationInfo)->GetPackageName(&pname);
-        CComponentName::New(pname, mClassName, (IComponentName**)&mComponentName);
-    }
-    return mComponentName;
-}
-
-template <typename II>
-void PackageParser::Component<II>::AppendComponentShortName(
-    /* [in] */ StringBuilder* sb)
-{
-    String pname;
-    IPackageItemInfo::Probe(mOwner->mApplicationInfo)->GetPackageName(&pname);
-    CComponentName::AppendShortString(sb, pname, mClassName);
-}
-
-template <typename II>
-void PackageParser::Component<II>::PrintComponentShortName(
-    /* [in] */ IPrintWriter* pw)
-{
-    String pname;
-    IPackageItemInfo::Probe(mOwner->mApplicationInfo)->GetPackageName(&pname);
-    CComponentName::PrintShortString(pw, pname, mClassName);
-}
-
-template <typename II>
-void PackageParser::Component<II>::SetPackageName(
-    /* [in] */ const String& PackageName)
-{
-    mComponentName = NULL;
-    mComponentShortName = NULL;
-}
-
 
 PackageParser::Permission::Permission(
     /* [in] */ Package* owner)
@@ -939,11 +837,10 @@ ECode PackageParser::SplitNameComparator::Compare(
 // PackageParser
 //===========================================================================
 
-const AutoPtr<IComparator> sSplitNameComparator = new PackageParser::SplitNameComparator();
+const AutoPtr<IComparator> PackageParser::sSplitNameComparator = new PackageParser::SplitNameComparator();
 
 PackageParser::PackageParser()
     : mOnlyCoreApps(FALSE)
-    , mParseError(IPackageManager::INSTALL_SUCCEEDED)
 {
     assert(0 && "TODO");
     // CDisplayMetrics::New((IDisplayMetrics**)&mMetrics);
@@ -1404,7 +1301,7 @@ ECode PackageParser::ParseClusterPackageLite(
                     //         "Inconsistent package " + lite->mpackageName + " in " + file
                     //         + "; expected " + packageName);
                     Logger::E(TAG, "INSTALL_PARSE_FAILED_BAD_MANIFEST : Inconsistent package %s in %s; expected %s",
-                        lite->mPackageName.string(), Object::ToString(file).string(), packageName.string());
+                        lite->mPackageName.string(), TO_CSTR(file), packageName.string());
                     return E_PACKAGE_PARSER_EXCEPTION;
                 }
                 if (versionCode != lite->mVersionCode) {
@@ -1412,7 +1309,7 @@ ECode PackageParser::ParseClusterPackageLite(
                     //         "Inconsistent version " + lite->mversionCode + " in " + file
                     //         + "; expected " + versionCode);
                     Logger::E(TAG, "INSTALL_PARSE_FAILED_BAD_MANIFEST : Inconsistent version %d in %s; expected %d",
-                        lite->mVersionCode, Object::ToString(file).string(), versionCode);
+                        lite->mVersionCode, TO_CSTR(file), versionCode);
                     return E_PACKAGE_PARSER_EXCEPTION;
                 }
             }
@@ -1426,7 +1323,7 @@ ECode PackageParser::ParseClusterPackageLite(
                 //         "Split name " + lite->mSplitName
                 //         + " defined more than once; most recent was " + file);
                 Logger::E(TAG, "INSTALL_PARSE_FAILED_BAD_MANIFEST : Split name %s  defined more than once; most recent was %s",
-                    lite->mSplitName.string(), Object::ToString(file).string());
+                    lite->mSplitName.string(), TO_CSTR(file));
                 return E_PACKAGE_PARSER_EXCEPTION;
             }
         }
@@ -1438,7 +1335,7 @@ ECode PackageParser::ParseClusterPackageLite(
         // throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
         //         "Missing base APK in " + packageDir);
         Logger::E(TAG, "INSTALL_PARSE_FAILED_BAD_MANIFEST : Missing base APK in  %s",
-            Object::ToString(packageDir).string());
+            TO_CSTR(packageDir));
         return E_PACKAGE_PARSER_EXCEPTION;
     }
 
@@ -1518,14 +1415,14 @@ ECode PackageParser::ParseClusterPackage(
     VALIDATE_NOT_NULL(pkgLite)
     *pkgLite = NULL;
 
-    AutoPtr<PackageLite> lite;
-    FAIL_RETURN(ParseClusterPackageLite(packageDir, 0, readBuffer, (PackageLite**)&lite))
-
+    AutoPtr<PackageLite> obj;
+    FAIL_RETURN(ParseClusterPackageLite(packageDir, 0, readBuffer, (PackageLite**)&obj))
+    PackageLite* lite = (PackageLite*)obj.Get();
     if (mOnlyCoreApps && !lite->mCoreApp) {
         // throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
         //         "Not a coreApp: " + packageDir);
         Logger::E(TAG, "INSTALL_PARSE_FAILED_MANIFEST_MALFORMED : Not a coreApp: %s",
-            Object::ToString(packageDir).string());
+            TO_CSTR(packageDir));
         return E_PACKAGE_PARSER_EXCEPTION;
     }
 
@@ -1563,7 +1460,7 @@ ECode PackageParser::ParseClusterPackage(
         // throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
         //         "Failed to parse base APK: " + baseApk);
         Logger::E(TAG, "INSTALL_PARSE_FAILED_NOT_APK: Failed to parse base APK: %s",
-            Object::ToString(baseApk).string());
+            TO_CSTR(baseApk));
         ec = E_PACKAGE_PARSER_EXCEPTION;
         goto _EXIT_;
     }
@@ -1604,13 +1501,14 @@ ECode PackageParser::ParseMonolithicPackage(
     AutoPtr<IIoUtils> ioUtils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
     if (mOnlyCoreApps) {
-        AutoPtr<PackageLite> lite;
-        ParseMonolithicPackageLite(apkFile, flags, readBuffer, (PackageLite**)&lite);
+        AutoPtr<PackageLite> obj;
+        ParseMonolithicPackageLite(apkFile, flags, readBuffer, (PackageLite**)&obj);
+        PackageLite* lite = (PackageLite*)obj.Get();
         if (!lite->mCoreApp) {
             // throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
             //         "Not a coreApp: " + apkFile);
             Logger::E(TAG, "INSTALL_PARSE_FAILED_MANIFEST_MALFORMED : Not a coreApp: %s",
-                Object::ToString(apkFile).string());
+                TO_CSTR(apkFile));
             return E_PACKAGE_PARSER_EXCEPTION;
         }
     }
@@ -1677,7 +1575,7 @@ ECode PackageParser::ParseBaseApk(
     String apkPath;
     apkFile->GetAbsolutePath(&apkPath);
 
-    mParseError = IPackageManager::INSTALL_SUCCEEDED;
+    sParseError = IPackageManager::INSTALL_SUCCEEDED;
     apkFile->GetAbsolutePath(&mArchiveSourcePath);
 
     if (DEBUG_JAR) Slogger::D(TAG, "Scanning base APK: %s", apkPath.string());
@@ -1702,11 +1600,11 @@ ECode PackageParser::ParseBaseApk(
     FAIL_GOTO(ec, _EXIT_)
 
     if (pkg == NULL) {
-        // throw new PackageParserException(mParseError,
+        // throw new PackageParserException(sParseError,
         //         apkPath + " (at " + parser.getPositionDescription() + "): " + outError[0]);
         String pos;
         IXmlPullParser::Probe(parser)->GetPositionDescription(&pos);
-        Logger::E(TAG, "%d %s (at %d): %s", mParseError, apkPath.string(), pos.string(),(*outError)[0].string());
+        Logger::E(TAG, "%d %s (at %d): %s", sParseError, apkPath.string(), pos.string(),(*outError)[0].string());
         ec = E_PACKAGE_PARSER_EXCEPTION;
         goto _EXIT_;
     }
@@ -1748,7 +1646,7 @@ ECode PackageParser::ParseSplitApk(
     AutoPtr<IFile> apkFile;
     CFile::New(apkPath, (IFile**)&apkFile);
 
-    mParseError = IPackageManager::INSTALL_SUCCEEDED;
+    sParseError = IPackageManager::INSTALL_SUCCEEDED;
     mArchiveSourcePath = apkPath;
 
     if (DEBUG_JAR) Slogger::D(TAG, "Scanning split APK: %s", apkPath.string());
@@ -1773,11 +1671,11 @@ ECode PackageParser::ParseSplitApk(
     FAIL_GOTO(ec, _EXIT_)
 
     if (outPkg == NULL) {
-        // throw new PackageParserException(mParseError,
+        // throw new PackageParserException(sParseError,
         //         apkPath + " (at " + parser.getPositionDescription() + "): " + outError[0]);
         String pos;
         IXmlPullParser::Probe(parser)->GetPositionDescription(&pos);
-        Logger::E(TAG, "%d %s (at %d): %s", mParseError, apkPath.string(), pos.string(),(*outError)[0].string());
+        Logger::E(TAG, "%d %s (at %d): %s", sParseError, apkPath.string(), pos.string(),(*outError)[0].string());
         ec = E_PACKAGE_PARSER_EXCEPTION;
         goto _EXIT_;
     }
@@ -1844,7 +1742,7 @@ ECode PackageParser::ParseSplitApk(
             if (foundApp) {
                 if (RIGID_PARSER) {
                     (*outError)[0] = String("<manifest> has more than one <application>");
-                    mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return NOERROR;
                 } else {
                     Slogger::W(TAG, "<manifest> has more than one <application>");
@@ -1866,7 +1764,7 @@ ECode PackageParser::ParseSplitApk(
             xpp->GetName(&name);
             sb += name;
             (*outError)[0] = sb.ToString();
-            mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+            sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return NOERROR;
 
         }
@@ -1883,7 +1781,7 @@ ECode PackageParser::ParseSplitApk(
 
     if (!foundApp) {
         (*outError)[0] = String("<manifest> does not contain an <application>");
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_EMPTY;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_EMPTY;
     }
 
     *result = pkg;
@@ -2436,7 +2334,7 @@ ECode PackageParser::ParseBaseApk(
     ECode ec = ParsePackageSplitNames(parser, attrs, flags, (ArrayOf<String>**)&packageSplit);
     // } catch (PackageParserException e) {
     if (ec == (ECode)E_PACKAGE_PARSER_EXCEPTION)
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
         return NOERROR;
     // }
 
@@ -2449,7 +2347,7 @@ ECode PackageParser::ParseBaseApk(
         StringBuilder sb("Expected base APK, but found split ");
         sb += splitName;
         (*outError)[0] = sb.ToString();
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
         return NOERROR;
     }
 
@@ -2485,7 +2383,7 @@ ECode PackageParser::ParseBaseApk(
             sb += "\": ";
             sb += nameError;
             (*outError)[0] =  sb.ToString();
-            mParseError = IPackageManager::INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
+            sParseError = IPackageManager::INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
             return NOERROR;
         }
         pkg->mSharedUserId = str;
@@ -2542,7 +2440,7 @@ ECode PackageParser::ParseBaseApk(
             if (foundApp) {
                 if (RIGID_PARSER) {
                     (*outError)[0] = "<manifest> has more than one <application>";
-                    mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return NOERROR;
                 }
                 else {
@@ -2572,12 +2470,12 @@ ECode PackageParser::ParseBaseApk(
 
             if (pkg->mOverlayTarget == NULL) {
                 (*outError)[0] = String("<overlay> does not specify a target package");
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return NOERROR;
             }
             if (pkg->mOverlayPriority < 0 || pkg->mOverlayPriority > 9999) {
                 (*outError)[0] = "<overlay> priority must be between 0 and 9999";
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return NOERROR;
             }
             XmlUtils::SkipCurrentTag(parser);
@@ -2827,7 +2725,7 @@ ECode PackageParser::ParseBaseApk(
                             (*outError)[0] = sb.ToString();
                         }
 
-                        mParseError = IPackageManager::INSTALL_FAILED_OLDER_SDK;
+                        sParseError = IPackageManager::INSTALL_FAILED_OLDER_SDK;
                         return NOERROR;
                     }
                 }
@@ -2838,7 +2736,7 @@ ECode PackageParser::ParseBaseApk(
                     sb += SDK_VERSION;
                     sb += ")";
                     (*outError)[0] = sb.ToString();
-                    mParseError = IPackageManager::INSTALL_FAILED_OLDER_SDK;
+                    sParseError = IPackageManager::INSTALL_FAILED_OLDER_SDK;
                     return NOERROR;
                 }
 
@@ -2867,7 +2765,7 @@ ECode PackageParser::ParseBaseApk(
                             (*outError)[0] = sb.ToString();
                         }
 
-                        mParseError = IPackageManager::INSTALL_FAILED_OLDER_SDK;
+                        sParseError = IPackageManager::INSTALL_FAILED_OLDER_SDK;
                         return NOERROR;
                     }
                     // If the code matches, it definitely targets this SDK.
@@ -3025,7 +2923,7 @@ ECode PackageParser::ParseBaseApk(
         else if (RIGID_PARSER) {
             // (*outError)[0] = (const char*)(
             //     StringBuffer("Bad element under <manifest>: ") + tagName);
-            mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+            sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return NOERROR;
 
         }
@@ -3041,7 +2939,7 @@ ECode PackageParser::ParseBaseApk(
 
     if (!foundApp && pkg->mInstrumentation.Begin() == pkg->mInstrumentation.End()) {
         (*outError)[0] = "<manifest> does not contain an <application> or <instrumentation>";
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_EMPTY;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_EMPTY;
     }
 
     const Int32 NP = NEW_PERMISSIONS->GetLength();
@@ -3138,7 +3036,7 @@ ECode PackageParser::ParseBaseApk(
     Int32 targetVersion;
     pkg->mApplicationInfo->GetTargetSdkVersion(&targetVersion);
     if (targetVersion < Build::VERSION_CODES::JELLY_BEAN_MR2) {
-        for (Int32 i = 0; i < pkg->mRequestedPermissionsRequired.GetSize(); i++) {
+        for (Int32 i = 0; i < (Int32)pkg->mRequestedPermissionsRequired.GetSize(); i++) {
             pkg->mRequestedPermissionsRequired[i] = TRUE;
         }
     }
@@ -3256,7 +3154,7 @@ ECode PackageParser::ParseUsesPermission(
             else {
                 if (*bit != required) {
                     (*outError)[0] = String("conflicting <uses-permission> entries");
-                    mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return NOERROR;
                 }
             }
@@ -3680,7 +3578,7 @@ ECode PackageParser::ParsePermissionGroup(
             0)// R::styleable::AndroidManifestPermissionGroup_banner)
     ) {
         sa->Recycle();
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NOERROR;
     }
 
@@ -3707,7 +3605,7 @@ ECode PackageParser::ParsePermissionGroup(
 
     if (!ParseAllMetaData(res, parser, attrs, String("<permission-group>"), perm.Get(),
             outError)) {
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NOERROR;
     }
 
@@ -3748,7 +3646,7 @@ ECode PackageParser::ParsePermission(
             0)// R::styleable::AndroidManifestPermission_banner)
     ) {
         sa->Recycle();
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NOERROR;
     }
 
@@ -3782,7 +3680,7 @@ ECode PackageParser::ParsePermission(
 
     if (level == -1) {
         (*outError)[0] = "<permission> does not specify protectionLevel";
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NOERROR;
     }
 
@@ -3797,14 +3695,14 @@ ECode PackageParser::ParsePermission(
         if ((pLevel & IPermissionInfo::PROTECTION_MASK_BASE) !=
                 IPermissionInfo::PROTECTION_SIGNATURE) {
             (*outError)[0] = "<permission>  protectionLevel specifies a flag but is not based on signature type";
-            mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+            sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return NOERROR;
         }
     }
 
     if (!ParseAllMetaData(res, parser, attrs, String("<permission>"), perm.Get(),
             outError)) {
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NOERROR;
     }
 
@@ -3845,7 +3743,7 @@ ECode PackageParser::ParsePermissionTree(
             0)// R::styleable::AndroidManifestPermissionTree_banner)
     ) {
         sa->Recycle();
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NOERROR;
     }
 
@@ -3861,7 +3759,7 @@ ECode PackageParser::ParsePermissionTree(
         // (*outError)[0] = (const char*)(
         //     StringBuffer("<permission-tree> name has less than three segments: ")
         //     + permName);
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NOERROR;
     }
 
@@ -3871,7 +3769,7 @@ ECode PackageParser::ParsePermissionTree(
 
     if (!ParseAllMetaData(res, parser, attrs, String("<permission-tree>"), perm.Get(),
             outError)) {
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NOERROR;
     }
 
@@ -3915,7 +3813,7 @@ AutoPtr<PackageParser::Instrumentation> PackageParser::ParseInstrumentation(
     AutoPtr<Instrumentation> a = new Instrumentation(mParseInstrumentationArgs, info);
     if (!(*outError)[0].IsNull()) {
         sa->Recycle();
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NULL;
     }
 
@@ -3942,13 +3840,13 @@ AutoPtr<PackageParser::Instrumentation> PackageParser::ParseInstrumentation(
 
     if (targetPackage.IsNull()) {
         (*outError)[0] = "<instrumentation> does not specify targetPackage";
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NULL;
     }
 
     if (!ParseAllMetaData(res, parser, attrs, String("<instrumentation>"), a.Get(),
             outError)) {
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return NULL;
     }
 
@@ -3980,13 +3878,13 @@ Boolean PackageParser::ParseBaseApplication(
     String name;
     sa->GetNonConfigurationString(
         R::styleable::AndroidManifestApplication_name,
-        CConfiguration::NATIVE_CONFIG_VERSION, &name);
+        IConfiguration::NATIVE_CONFIG_VERSION, &name);
     if (!name.IsNull()) {
         String clsName = BuildClassName(pkgName, name, outError);
         ai->SetClassName(clsName);
         if (clsName.IsNull()) {
             sa->Recycle();
-            mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+            sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             return FALSE;
         }
     }
@@ -3994,7 +3892,7 @@ Boolean PackageParser::ParseBaseApplication(
     String manageSpaceActivity;
     sa->GetNonConfigurationString(
         R::styleable::AndroidManifestApplication_manageSpaceActivity,
-        CConfiguration::NATIVE_CONFIG_VERSION,
+        IConfiguration::NATIVE_CONFIG_VERSION,
         &manageSpaceActivity);
     if (!manageSpaceActivity.IsNull()) {
         String name = BuildClassName(pkgName, manageSpaceActivity, outError);
@@ -4208,7 +4106,7 @@ Boolean PackageParser::ParseBaseApplication(
     String str;
     sa->GetNonConfigurationString(
         R::styleable::AndroidManifestApplication_permission,
-        CConfiguration::NATIVE_CONFIG_VERSION, &str);
+        IConfiguration::NATIVE_CONFIG_VERSION, &str);
     ai->SetPermission((!str.IsNullOrEmpty()) ? str : String(NULL));
 
     Int32 ownerSdkVersion;
@@ -4234,7 +4132,7 @@ Boolean PackageParser::ParseBaseApplication(
         if (ownerSdkVersion >= Build::VERSION_CODES::FROYO) {
             sa->GetNonConfigurationString(
                 R::styleable::AndroidManifestApplication_process,
-                CConfiguration::NATIVE_CONFIG_VERSION, &pname);
+                IConfiguration::NATIVE_CONFIG_VERSION, &pname);
         }
         else {
             // Some older apps have been seen to use a resource reference
@@ -4293,7 +4191,7 @@ Boolean PackageParser::ParseBaseApplication(
     sa->Recycle();
 
     if (!(*outError)[0].IsNull()) {
-        mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+        sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
         return FALSE;
     }
 
@@ -4313,7 +4211,7 @@ Boolean PackageParser::ParseBaseApplication(
             AutoPtr<Activity> a = ParseActivity(owner, res, parser, attrs, flags, outError, FALSE,
                     owner->mBaseHardwareAccelerated);
             if (a == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4322,7 +4220,7 @@ Boolean PackageParser::ParseBaseApplication(
         } else if (tagName.Equals("receiver")) {
             AutoPtr<Activity> a = ParseActivity(owner, res, parser, attrs, flags, outError, TRUE, FALSE);
             if (a == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4331,7 +4229,7 @@ Boolean PackageParser::ParseBaseApplication(
         } else if (tagName.Equals("service")) {
             AutoPtr<Service> s = ParseService(owner, res, parser, attrs, flags, outError);
             if (s == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4340,7 +4238,7 @@ Boolean PackageParser::ParseBaseApplication(
         } else if (tagName.Equals("provider")) {
             AutoPtr<Provider> p = ParseProvider(owner, res, parser, attrs, flags, outError);
             if (p == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4349,7 +4247,7 @@ Boolean PackageParser::ParseBaseApplication(
         } else if (tagName.Equals("activity-alias")) {
             AutoPtr<Activity> a = ParseActivityAlias(owner, res, parser, attrs, flags, outError);
             if (a == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4361,7 +4259,7 @@ Boolean PackageParser::ParseBaseApplication(
             // it can be large)
             if ((owner->mAppMetaData = ParseMetaData(res, parser, attrs, owner->mAppMetaData,
                     outError)) == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4448,7 +4346,7 @@ Boolean PackageParser::ParseBaseApplication(
                 StringBuilder sb("Bad element under <application>: ");
                 sb += tagName;
                 (*outError)[0] = sb.ToString();
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
         }
@@ -4502,7 +4400,7 @@ ECode PackageParser::ParseSplitApplication(
             AutoPtr<Activity> a = ParseActivity(owner, res, parser, attrs,
                     flags, outError, FALSE, owner->mBaseHardwareAccelerated);
             if (a == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4513,7 +4411,7 @@ ECode PackageParser::ParseSplitApplication(
             AutoPtr<Activity> a = ParseActivity(owner, res, parser, attrs,
                     flags, outError, TRUE, FALSE);
             if (a == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4523,7 +4421,7 @@ ECode PackageParser::ParseSplitApplication(
         else if (tagName.Equals("service")) {
             AutoPtr<Service> s = ParseService(owner, res, parser, attrs, flags, outError);
             if (s == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4533,7 +4431,7 @@ ECode PackageParser::ParseSplitApplication(
         else if (tagName.Equals("provider")) {
             AutoPtr<Provider> p = ParseProvider(owner, res, parser, attrs, flags, outError);
             if (p == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4543,7 +4441,7 @@ ECode PackageParser::ParseSplitApplication(
         else if (tagName.Equals("activity-alias")) {
             AutoPtr<Activity> a = ParseActivityAlias(owner, res, parser, attrs, flags, outError);
             if (a == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4556,7 +4454,7 @@ ECode PackageParser::ParseSplitApplication(
             // it can be large)
             if ((owner->mAppMetaData = ParseMetaData(res, parser, attrs, owner->mAppMetaData,
                     outError)) == NULL) {
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
 
@@ -4634,7 +4532,7 @@ ECode PackageParser::ParseSplitApplication(
                 StringBuilder sb("Bad element under <application>: ");
                 sb += tagName;
                 outError->Set(0, sb.ToString());
-                mParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return FALSE;
             }
         }
@@ -4776,7 +4674,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
     String parentName;
     sa->GetNonConfigurationString(
         R::styleable::AndroidManifestActivity_parentActivityName,
-        CConfiguration::NATIVE_CONFIG_VERSION, &parentName);
+        IConfiguration::NATIVE_CONFIG_VERSION, &parentName);
     if (!parentName.IsNull()) {
         String packageName;
         pii->GetPackageName(&packageName);
@@ -4794,7 +4692,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
     String str;
     sa->GetNonConfigurationString(
         R::styleable::AndroidManifestActivity_permission,
-        CConfiguration::NATIVE_CONFIG_VERSION, &str);
+        IConfiguration::NATIVE_CONFIG_VERSION, &str);
     if (str.IsNull()) {
         String perm;
         owner->mApplicationInfo->GetPermission(&perm);
@@ -4806,7 +4704,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
 
     sa->GetNonConfigurationString(
         R::styleable::AndroidManifestActivity_taskAffinity,
-        CConfiguration::NATIVE_CONFIG_VERSION, &str);
+        IConfiguration::NATIVE_CONFIG_VERSION, &str);
     AutoPtr<ICharSequence> cStr;
     CString::New(str, (ICharSequence**)&cStr);
     String ownerPName, ownerTaskAffinity;
@@ -5146,7 +5044,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivityAlias(
     String targetActivity;
     sa->GetNonConfigurationString(
         R::styleable::AndroidManifestActivityAlias_targetActivity,
-        CConfiguration::NATIVE_CONFIG_VERSION, &targetActivity);
+        IConfiguration::NATIVE_CONFIG_VERSION, &targetActivity);
     if (targetActivity.IsNull()) {
         (*outError)[0] = "<activity-alias> does not specify android:targetActivity";
         sa->Recycle();
@@ -5251,7 +5149,7 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivityAlias(
     String parentName;
     sa->GetNonConfigurationString(
             R::styleable::AndroidManifestActivityAlias_parentActivityName,
-            CConfiguration::NATIVE_CONFIG_VERSION, &parentName);
+            IConfiguration::NATIVE_CONFIG_VERSION, &parentName);
     if (!parentName.IsNull()) {
         String packageName;
         IPackageItemInfo::Probe(a->mInfo)->GetPackageName(&packageName);
@@ -6517,8 +6415,8 @@ AutoPtr<IApplicationInfo> PackageParser::GenerateApplicationInfo(
     return ai;
 }
 
-AutoPtr<IApplicationInfo> GenerateApplicationInfo(
-    /* [in] */ ApplicationInfo* ai,
+AutoPtr<IApplicationInfo> PackageParser::GenerateApplicationInfo(
+    /* [in] */ IApplicationInfo* ai,
     /* [in] */ Int32 flags,
     /* [in] */ PackageUserState* state,
     /* [in] */ Int32 userId)
@@ -6729,7 +6627,7 @@ ECode PackageParser::CloseQuietly(
 
 Int32 PackageParser::GetParseError()
 {
-    return mParseError;
+    return sParseError;
 }
 
 } // namespace Pm

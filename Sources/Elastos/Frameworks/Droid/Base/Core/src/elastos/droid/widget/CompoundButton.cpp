@@ -10,6 +10,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 
+using Elastos::Droid::Graphics::PorterDuffMode_NONE;
 using Elastos::Droid::Graphics::Drawable::Drawable;
 using Elastos::Droid::Graphics::Drawable::IDrawableCallback;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
@@ -104,7 +105,7 @@ CompoundButton::CompoundButton()
     : mChecked(FALSE)
     , mButtonResource(0)
     , mBroadcasting(FALSE)
-    , mButtonTintMode(NULL)
+    , mButtonTintMode(PorterDuffMode_NONE)
     , mHasButtonTint(FALSE)
     , mHasButtonTintMode(FALSE)
 {}

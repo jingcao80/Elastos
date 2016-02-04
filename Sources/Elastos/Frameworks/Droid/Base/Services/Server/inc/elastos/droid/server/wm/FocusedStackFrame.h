@@ -1,8 +1,8 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_FOCUSEDSTACKFRAME_H__
 #define __ELASTOS_DROID_SERVER_WM_FOCUSEDSTACKFRAME_H__
 
-#include "wm/TaskStack.h"
-#include <elastos/core/Object.h>
+#include "_Elastos.Droid.Server.h"
+#include "elastos/droid/server/wm/TaskStack.h"
 
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::View::ISurfaceControl;
@@ -34,7 +34,7 @@ public:
         /* [in] */ Int32 layer);
 
 private:
-    CARAPI_(void) draw(
+    CARAPI_(void) Draw(
         /* [in] */ IRect* bounds,
         /* [in] */ Int32 color);
 

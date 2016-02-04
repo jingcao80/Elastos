@@ -21,7 +21,7 @@ void* AwByteBuffer::GetDirectBufferAddress(
         Logger::E("AwByteBuffer", "AwByteBuffer::GetDirectBufferAddress, mObj is NULL");
         return NULL;
     }
-    Int32 effectiveDirectAddress;
+    Handle64 effectiveDirectAddress;
     mObj->GetEffectiveDirectAddress(&effectiveDirectAddress);
     return (void*)effectiveDirectAddress;
 }

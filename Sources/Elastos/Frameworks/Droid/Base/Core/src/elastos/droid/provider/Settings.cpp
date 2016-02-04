@@ -43,6 +43,7 @@ using Elastos::Droid::Privacy::IIPrivacySettingsManager;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::IKeyEvent;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Core::CInteger32;
@@ -58,15 +59,15 @@ namespace Elastos {
 namespace Droid {
 namespace Provider {
 
-const String Settings::JID_RESOURCE_PREFIX("android");
-const String Settings::TAG("Settings");
+INIT_PROI_3 const String Settings::JID_RESOURCE_PREFIX("android");
+INIT_PROI_3 const String Settings::TAG("Settings");
 const Boolean Settings::LOCAL_LOGV = FALSE;
-Object Settings::mLocationSettingsLock;
+INIT_PROI_3 Object Settings::sLocationSettingsLock;
 
 //================================================================================
 //              Settings::NameValueCache
 //================================================================================
-Object Settings::NameValueCache::mLock;
+INIT_PROI_3 Object Settings::NameValueCache::sLock;
 
 static AutoPtr< ArrayOf<String> > InitSelectValue()
 {
@@ -75,9 +76,9 @@ static AutoPtr< ArrayOf<String> > InitSelectValue()
     return array;
 }
 
-const AutoPtr< ArrayOf<String> > Settings::NameValueCache::SELECT_VALUE = InitSelectValue();
+INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::NameValueCache::SELECT_VALUE = InitSelectValue();
 
-const String Settings::NameValueCache::NAME_EQ_PLACEHOLDER("name=?");
+INIT_PROI_3 const String Settings::NameValueCache::NAME_EQ_PLACEHOLDER("name=?");
 
 Boolean Settings::NameValueTable::PutString(
     /* [in] */ IContentResolver* resolver,
@@ -127,8 +128,7 @@ Settings::NameValueCache::NameValueCache(
     , mCallGetCommand(getCommand)
     , mCallSetCommand(setCommand)
 {
-    assert(0 && "TODO");
-    // CHashMap::New((IHashMap**)&mValues);
+    CHashMap::New((IHashMap**)&mValues);
 }
 
 ECode Settings::NameValueCache::LazyGetProvider(
@@ -254,7 +254,7 @@ ECode Settings::NameValueCache::GetStringForUser(
             b->GetPairValue(&_value);
             // Don't update our cache for reads of other users' data
             if (isSelf) {
-                AutoLock lock(mLock);
+                AutoLock lock(sLock);
                 (*mValues)[name] = _value;
             } else {
                 if (LOCAL_LOGV)
@@ -299,7 +299,7 @@ ECode Settings::NameValueCache::GetStringForUser(
         c->GetString(0, &_value);
     }
     {
-        AutoLock lock(mLock);
+        AutoLock lock(sLock);
         mValues->Put((CoreUtils::Convert(name)).Get(), (CoreUtils::Convert(_value)).Get());
     }
     if (LOCAL_LOGV) {
@@ -337,7 +337,7 @@ static AutoPtr< ArrayOf<String> > InitVOLUMESETTINGS()
     (*array)[6] = ISettingsSystem::VOLUME_BLUETOOTH_SCO;
     return array;
 }
-const AutoPtr< ArrayOf<String> > Settings::System::VOLUME_SETTINGS = InitVOLUMESETTINGS();
+INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::System::VOLUME_SETTINGS = InitVOLUMESETTINGS();
 
 static AutoPtr<IUri> InitSystemCONTENTURI()
 {
@@ -350,11 +350,10 @@ static AutoPtr<IUri> InitSystemCONTENTURI()
     Uri::Parse(str, (IUri**)&uri);
     return uri;
 }
-const AutoPtr<IUri> Settings::System::CONTENT_URI = InitSystemCONTENTURI();
+INIT_PROI_3 const AutoPtr<IUri> Settings::System::CONTENT_URI = InitSystemCONTENTURI();
 
-const AutoPtr<Settings::NameValueCache> Settings::System::sNameValueCache = new Settings::NameValueCache(ISettingsSystem::SYS_PROP_SETTING_VERSION,
+INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::System::sNameValueCache = new Settings::NameValueCache(ISettingsSystem::SYS_PROP_SETTING_VERSION,
         CONTENT_URI, ISettings::CALL_METHOD_GET_SYSTEM, ISettings::CALL_METHOD_PUT_SYSTEM);
-
 
 static AutoPtr<IHashSet> InitSystemMOVED_TO_SECURE()
 {
@@ -395,7 +394,7 @@ static AutoPtr<IHashSet> InitSystemMOVED_TO_SECURE()
     return hs;
 }
 
-const AutoPtr<IHashSet> Settings::System::MOVED_TO_SECURE = InitSystemMOVED_TO_SECURE();
+INIT_PROI_3 const AutoPtr<IHashSet> Settings::System::MOVED_TO_SECURE = InitSystemMOVED_TO_SECURE();
 
 static AutoPtr<IHashSet> initSystemMOVED_TO_SECURE_THEN_GLOBAL()
 {
@@ -413,7 +412,7 @@ static AutoPtr<IHashSet> initSystemMOVED_TO_SECURE_THEN_GLOBAL()
     return hs;
 }
 
-const AutoPtr<IHashSet> Settings::System::MOVED_TO_SECURE_THEN_GLOBAL =
+INIT_PROI_3 const AutoPtr<IHashSet> Settings::System::MOVED_TO_SECURE_THEN_GLOBAL =
     initSystemMOVED_TO_SECURE_THEN_GLOBAL();
 
 static AutoPtr<IHashSet> InitSystemMOVED_TO_GLOBAL()
@@ -461,7 +460,7 @@ static AutoPtr<IHashSet> InitSystemMOVED_TO_GLOBAL()
     return hs;
 }
 
-const AutoPtr<IHashSet> Settings::System::MOVED_TO_GLOBAL = InitSystemMOVED_TO_GLOBAL();
+INIT_PROI_3 const AutoPtr<IHashSet> Settings::System::MOVED_TO_GLOBAL = InitSystemMOVED_TO_GLOBAL();
 
 static AutoPtr<IUri> InitSystemDefaultUri(
     /* [in] */ const String& type)
@@ -471,13 +470,13 @@ static AutoPtr<IUri> InitSystemDefaultUri(
     return uri;
 }
 
-const AutoPtr<IUri> Settings::System::DEFAULT_RINGTONE_URI = InitSystemDefaultUri(ISettingsSystem::RINGTONE);
-const AutoPtr<IUri> Settings::System::DEFAULT_NOTIFICATION_URI = InitSystemDefaultUri(ISettingsSystem::NOTIFICATION_SOUND);
-const AutoPtr<IUri> Settings::System::DEFAULT_ALARM_ALERT_URI = InitSystemDefaultUri(ISettingsSystem::ALARM_ALERT);
+INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_RINGTONE_URI = InitSystemDefaultUri(ISettingsSystem::RINGTONE);
+INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_NOTIFICATION_URI = InitSystemDefaultUri(ISettingsSystem::NOTIFICATION_SOUND);
+INIT_PROI_3 const AutoPtr<IUri> Settings::System::DEFAULT_ALARM_ALERT_URI = InitSystemDefaultUri(ISettingsSystem::ALARM_ALERT);
 
 static AutoPtr< ArrayOf<String> > InitSystemSettingsToBackup()
 {
-    AutoPtr< ArrayOf<String> > array = ArrayOf<String>::Alloc(80);
+    AutoPtr< ArrayOf<String> > array = ArrayOf<String>::Alloc(55);
     (*array)[0] = ISettingsSystem::STAY_ON_WHILE_PLUGGED_IN;
     (*array)[1] = ISettingsSystem::WIFI_USE_STATIC_IP;
     (*array)[2] = ISettingsSystem::WIFI_STATIC_IP;
@@ -537,7 +536,7 @@ static AutoPtr< ArrayOf<String> > InitSystemSettingsToBackup()
     return array;
 }
 
-const AutoPtr< ArrayOf<String> > Settings::System::SETTINGS_TO_BACKUP = InitSystemSettingsToBackup();
+INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::System::SETTINGS_TO_BACKUP = InitSystemSettingsToBackup();
 
 ECode Settings::System::GetMovedKeys(
     /* [in] */ IHashSet* outKeySet)
@@ -1024,11 +1023,11 @@ static AutoPtr<IUri> InitSecureCONTENTURI()
     Uri::Parse(str, (IUri**)&uri);
     return uri;
 }
-const AutoPtr<IUri> Settings::Secure::CONTENT_URI = InitSecureCONTENTURI();
+INIT_PROI_3 const AutoPtr<IUri> Settings::Secure::CONTENT_URI = InitSecureCONTENTURI();
 
 static AutoPtr< ArrayOf<String> > InitSecureSettingsToBackup()
 {
-    AutoPtr< ArrayOf<String> > array = ArrayOf<String>::Alloc(33);
+    AutoPtr< ArrayOf<String> > array = ArrayOf<String>::Alloc(41);
     (*array)[0] = ISettingsSecure::BUGREPORT_IN_POWER_MENU;
     (*array)[1] = ISettingsSecure::ALLOW_MOCK_LOCATION;
     (*array)[2] = ISettingsSecure::PARENTAL_CONTROL_ENABLED;
@@ -1073,9 +1072,9 @@ static AutoPtr< ArrayOf<String> > InitSecureSettingsToBackup()
 
     return array;
 }
-const AutoPtr< ArrayOf<String> > Settings::Secure::SETTINGS_TO_BACKUP = InitSecureSettingsToBackup();
+INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::Secure::SETTINGS_TO_BACKUP = InitSecureSettingsToBackup();
 
-const AutoPtr<Settings::NameValueCache> Settings::Secure::sNameValueCache = new Settings::NameValueCache(
+INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::Secure::sNameValueCache = new Settings::NameValueCache(
         ISettingsSecure::SYS_PROP_SETTING_VERSION, CONTENT_URI, ISettings::CALL_METHOD_GET_SECURE, ISettings::CALL_METHOD_PUT_SECURE);
 
 AutoPtr<IILockSettings> Settings::Secure::sLockSettings;
@@ -1093,7 +1092,7 @@ static AutoPtr<IHashSet> InitSecureMOVED_TO_LOCK_SETTINGS()
     return hs;
 }
 
-const AutoPtr<IHashSet> Settings::Secure::MOVED_TO_LOCK_SETTINGS = InitSecureMOVED_TO_LOCK_SETTINGS();
+INIT_PROI_3 const AutoPtr<IHashSet> Settings::Secure::MOVED_TO_LOCK_SETTINGS = InitSecureMOVED_TO_LOCK_SETTINGS();
 
 static AutoPtr<IHashSet> initSecureMOVED_TO_GLOBAL()
 {
@@ -1217,7 +1216,7 @@ static AutoPtr<IHashSet> initSecureMOVED_TO_GLOBAL()
     return hs;
 }
 
-const AutoPtr<IHashSet> Settings::Secure::MOVED_TO_GLOBAL = initSecureMOVED_TO_GLOBAL();
+INIT_PROI_3 const AutoPtr<IHashSet> Settings::Secure::MOVED_TO_GLOBAL = initSecureMOVED_TO_GLOBAL();
 
 static AutoPtr<ArrayOf<String> > initCLONE_TO_MANAGED_PROFILE()
 {
@@ -1239,9 +1238,9 @@ static AutoPtr<ArrayOf<String> > initCLONE_TO_MANAGED_PROFILE()
     return args;
 }
 
-const AutoPtr<ArrayOf<String> > Settings::Secure::CLONE_TO_MANAGED_PROFILE = initCLONE_TO_MANAGED_PROFILE();
+INIT_PROI_3 const AutoPtr<ArrayOf<String> > Settings::Secure::CLONE_TO_MANAGED_PROFILE = initCLONE_TO_MANAGED_PROFILE();
 
-Object Settings::Secure::sSecureLock;
+INIT_PROI_3 Object Settings::Secure::sSecureLock;
 
 ECode Settings::Secure::GetMovedKeys(
     /* [in] */ IHashSet* outKeySet)
@@ -1671,7 +1670,7 @@ ECode Settings::Secure::SetLocationProviderEnabledForUser(
     // the list of enabled providers.
     String provider;
     //TODO
-    // ISynchronize* sync = ISynchronize::Probe(mLocationSettingsLock);
+    // ISynchronize* sync = ISynchronize::Probe(sLocationSettingsLock);
     // synchronized(sync) {
         if (enabled) {
             provider = String("+") + _provider;
@@ -1689,7 +1688,7 @@ Boolean Settings::Secure::SetLocationModeForUser(
     /* [in] */ Int32 userId)
 {
     //TODO
-    // ISynchronize* sync = ISynchronize::Probe(mLocationSettingsLock);
+    // ISynchronize* sync = ISynchronize::Probe(sLocationSettingsLock);
     // synchronized(sync) {
         Boolean gps = FALSE;
         Boolean network = FALSE;
@@ -1708,7 +1707,8 @@ Boolean Settings::Secure::SetLocationModeForUser(
                 break;
             default:
                 Slogger::E("Settings::Secure", "Invalid location mode: %d" + mode);
-                return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                // return E_ILLEGAL_ARGUMENT_EXCEPTION;
+                return FALSE;
         }
         Boolean gpsSuccess = FALSE;
         Settings::Secure::SetLocationProviderEnabledForUser(
@@ -1725,7 +1725,7 @@ Int32 Settings::Secure::GetLocationModeForUser(
     /* [in] */ Int32 userId)
 {
     //TODO
-    // ISynchronize* sync = ISynchronize::Probe(mLocationSettingsLock);
+    // ISynchronize* sync = ISynchronize::Probe(sLocationSettingsLock);
     // synchronized(sync) {
         Boolean gpsEnabled = FALSE;
         Settings::Secure::IsLocationProviderEnabledForUser(
@@ -1757,7 +1757,7 @@ static AutoPtr<IUri> InitGlobalCONTENTURI()
     Uri::Parse(sb.ToString(), (IUri**)&uri);
     return uri;
 }
-const AutoPtr<IUri> Settings::Global::CONTENT_URI = InitGlobalCONTENTURI();
+INIT_PROI_3 const AutoPtr<IUri> Settings::Global::CONTENT_URI = InitGlobalCONTENTURI();
 
 static AutoPtr< ArrayOf<String> > InitGlobalSettingsToBackup()
 {
@@ -1779,9 +1779,9 @@ static AutoPtr< ArrayOf<String> > InitGlobalSettingsToBackup()
     (*array)[14] = ISettingsGlobal::DOCK_AUDIO_MEDIA_ENABLED;
     return array;
 }
-const AutoPtr< ArrayOf<String> > Settings::Global::SETTINGS_TO_BACKUP = InitGlobalSettingsToBackup();
+INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::Global::SETTINGS_TO_BACKUP = InitGlobalSettingsToBackup();
 
-const AutoPtr<Settings::NameValueCache> Settings::Global::sNameValueCache = new Settings::NameValueCache(
+INIT_PROI_3 const AutoPtr<Settings::NameValueCache> Settings::Global::sNameValueCache = new Settings::NameValueCache(
         ISettingsGlobal::SYS_PROP_SETTING_VERSION, CONTENT_URI,
         ISettings::CALL_METHOD_GET_GLOBAL, ISettings::CALL_METHOD_PUT_GLOBAL);
 
@@ -1790,9 +1790,10 @@ static AutoPtr<IHashSet> initGlobalMOVED_TO_SECURE()
     AutoPtr<IHashSet> hs;
     CHashSet::New(1, (IHashSet**)&hs);
     hs->Add(CoreUtils::Convert(ISettingsGlobal::INSTALL_NON_MARKET_APPS).Get());
+    return hs;
 }
 
-const AutoPtr<IHashSet> Settings::Global::MOVED_TO_SECURE = initGlobalMOVED_TO_SECURE();
+INIT_PROI_3 const AutoPtr<IHashSet> Settings::Global::MOVED_TO_SECURE = initGlobalMOVED_TO_SECURE();
 
 static AutoPtr<ArrayOf<String> > initGloabalMULTI_SIM_USER_PREFERRED_SUBS()
 {
@@ -1803,7 +1804,7 @@ static AutoPtr<ArrayOf<String> > initGloabalMULTI_SIM_USER_PREFERRED_SUBS()
     return str;
 }
 
-const AutoPtr<ArrayOf<String> > Settings::Global::MULTI_SIM_USER_PREFERRED_SUBS =
+INIT_PROI_3 const AutoPtr<ArrayOf<String> > Settings::Global::MULTI_SIM_USER_PREFERRED_SUBS =
     initGloabalMULTI_SIM_USER_PREFERRED_SUBS();
 
 ECode Settings::Global::ZenModeToString(
@@ -2036,11 +2037,10 @@ ECode Settings::Global::GetFloat(
     Float _value;
     if (v.IsNull()) {
         _value = def;
-    } else {
-        _value = StringUtils::ParseFloat(v);
-        if (_value = 0) {
-            _value = def;
-        }
+    }
+    else {
+        ECode ec = StringUtils::Parse(v, &_value);
+        if (FAILED(ec)) _value = def;
     }
     *value = _value;
     return NOERROR;
@@ -2097,9 +2097,9 @@ static AutoPtr<IUri> InitBookmarksContentUri()
     Uri::Parse(sb.ToString(), (IUri**)&uri);
     return uri;
 }
-AutoPtr<IUri> Settings::Bookmarks::CONTENT_URI = InitBookmarksContentUri();
+INIT_PROI_3 AutoPtr<IUri> Settings::Bookmarks::CONTENT_URI = InitBookmarksContentUri();
 
-const String Settings::Bookmarks::TAG("Bookmarks");
+INIT_PROI_3 const String Settings::Bookmarks::TAG("Bookmarks");
 
 static AutoPtr< ArrayOf<String> > IntitIntentProjection()
 {
@@ -2107,7 +2107,7 @@ static AutoPtr< ArrayOf<String> > IntitIntentProjection()
     (*array)[0] = ISettingsBookmarks::INTENT;
     return array;
 }
-const AutoPtr< ArrayOf<String> > Settings::Bookmarks::sIntentProjection = IntitIntentProjection();
+INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::Bookmarks::sIntentProjection = IntitIntentProjection();
 
 static AutoPtr< ArrayOf<String> > IntitShortcutProjection()
 {
@@ -2116,8 +2116,8 @@ static AutoPtr< ArrayOf<String> > IntitShortcutProjection()
     (*array)[1] = ISettingsBookmarks::SHORTCUT;
     return array;
 }
-const AutoPtr< ArrayOf<String> > Settings::Bookmarks::sShortcutProjection = IntitShortcutProjection();
-const String Settings::Bookmarks::sShortcutSelection = ISettingsBookmarks::SHORTCUT + String("=?");
+INIT_PROI_3 const AutoPtr< ArrayOf<String> > Settings::Bookmarks::sShortcutProjection = IntitShortcutProjection();
+INIT_PROI_3 const String Settings::Bookmarks::sShortcutSelection = ISettingsBookmarks::SHORTCUT + String("=?");
 
 ECode Settings::Bookmarks::GetIntentForShortcut(
     /* [in] */ IContentResolver* cr,

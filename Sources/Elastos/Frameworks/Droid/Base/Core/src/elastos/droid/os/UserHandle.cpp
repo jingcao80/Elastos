@@ -5,8 +5,10 @@
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/CUserHandle.h"
+#include "elastos/droid/utility/CSparseArray.h"
 #include <elastos/core/StringBuilder.h>
 
+using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Core::StringBuilder;
 
 namespace Elastos {
@@ -30,6 +32,15 @@ const AutoPtr<IUserHandle> UserHandle::ALL = InitUserHandle(IUserHandle::USER_AL
 const AutoPtr<IUserHandle> UserHandle::CURRENT = InitUserHandle(IUserHandle::USER_CURRENT);
 const AutoPtr<IUserHandle> UserHandle::CURRENT_OR_SELF = InitUserHandle(IUserHandle::USER_CURRENT_OR_SELF);
 const AutoPtr<IUserHandle> UserHandle::OWNER = InitUserHandle(IUserHandle::USER_OWNER);
+
+static AutoPtr<ISparseArray> InitmUserHandles()
+{
+    AutoPtr<ISparseArray> array;
+    CSparseArray::New((ISparseArray**)&array);
+    return array;
+}
+
+AutoPtr<ISparseArray> UserHandle::mUserHandles = InitmUserHandles();
 
 CAR_INTERFACE_IMPL_2(UserHandle, Object, IUserHandle, IParcelable)
 
@@ -198,6 +209,20 @@ Int32 UserHandle::GetUserId(
 Int32 UserHandle::GetCallingUserId()
 {
     return GetUserId(Binder::GetCallingUid());
+}
+
+AutoPtr<IUserHandle> UserHandle::GetCallingUserHandle()
+{
+    Int32 userId = GetUserId(Binder::GetCallingUid());
+    AutoPtr<IInterface> obj;
+    mUserHandles->Get(userId, (IInterface**)&obj);
+    AutoPtr<IUserHandle> userHandle = IUserHandle::Probe(obj);
+    // Intentionally not synchronized to save time
+    if (userHandle == NULL) {
+        CUserHandle::New(userId, (IUserHandle**)&userHandle);
+        mUserHandles->Put(userId, userHandle);
+    }
+    return userHandle;
 }
 
 Int32 UserHandle::GetUid(

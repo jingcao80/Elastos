@@ -23,8 +23,7 @@ public:
      * Returns the input if it is a JSON-permissible value; throws otherwise.
      */
     static CARAPI CheckDouble(
-        /* [in] */ Double d,
-        /* [out] */ Double* result);
+        /* [in] */ Double d);
 
     static CARAPI ToBoolean(
         /* [in] */ IInterface* value,
@@ -44,7 +43,7 @@ public:
 
     static CARAPI ToString(
         /* [in] */ IInterface* value,
-        /* [out] */ ICharSequence** result);
+        /* [out] */ String* result);
 
     static CARAPI TypeMismatch(
         /* [in] */ IInterface* indexOrName,

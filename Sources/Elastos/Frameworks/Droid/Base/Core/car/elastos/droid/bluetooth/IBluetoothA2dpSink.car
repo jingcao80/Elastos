@@ -1,0 +1,49 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+    interface Elastos.Droid.Bluetooth.IBluetoothAudioConfig;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * APIs for Bluetooth A2DP sink service
+     *
+     * @hide
+     */
+    [deprecated]
+    interface IIBluetoothA2dpSink {
+
+        Connect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        Disconnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
+
+        GetConnectedDevices(
+            [out] IList** devices);
+
+        GetDevicesMatchingConnectionStates(
+            [in] ArrayOf<Int32>* states,
+            [out] IList** devices);
+
+        GetConnectionState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* newState);
+
+        GetAudioConfig(
+            [in] IBluetoothDevice* device,
+            [out] IBluetoothAudioConfig** config);
+
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

@@ -18,7 +18,7 @@ module
     const E_MALFORMED_MIME_TYPE_EXCEPTION               = 0xE0060000;
     const E_RESOURCES_NOT_FOUND_EXCEPTION               = 0xE0070000;
     const E_PACKAGE_PARSER_EXCEPTION                    = 0xE0080000;
-    const E_PACKAGEMANAGER_NAME_NOT_FOUND_EXCEPTION = 0xE0090000;
+    const E_PACKAGEMANAGER_NAME_NOT_FOUND_EXCEPTION     = 0xE0090000;
 
     //==========================================================================
     // Elastos App exception codes (Family: 0x61 - E1)

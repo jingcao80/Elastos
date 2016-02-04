@@ -500,6 +500,656 @@ module
              * RivieraWaves S.A.S.
              */
             const Int32 RIVIERAWAVES = 0x0060;
+
+            /*
+             * RDA Microelectronics.
+             */
+            const Int32 RDA_MICROELECTRONICS = 0x0061;
+
+            /*
+             * Gibson Guitars.
+             */
+            const Int32 GIBSON_GUITARS = 0x0062;
+
+            /*
+             * MiCommand Inc.
+             */
+            const Int32 MICOMMAND = 0x0063;
+
+            /*
+             * Band XI International, LLC.
+             */
+            const Int32 BAND_XI_INTERNATIONAL = 0x0064;
+
+            /*
+             * Hewlett-Packard Company.
+             */
+            const Int32 HEWLETT_PACKARD = 0x0065;
+
+            /*
+             * 9Solutions Oy.
+             */
+            const Int32 NINE_SOLUTIONS = 0x0066;
+
+            /*
+             * GN Netcom A/S.
+             */
+            const Int32 GN_NETCOM = 0x0067;
+
+            /*
+             * General Motors.
+             */
+            const Int32 GENERAL_MOTORS = 0x0068;
+
+            /*
+             * A&D Engineering, Inc.
+             */
+            const Int32 A_AND_D_ENGINEERING = 0x0069;
+
+            /*
+             * MindTree Ltd.
+             */
+            const Int32 MINDTREE = 0x006A;
+
+            /*
+             * Polar Electro OY.
+             */
+            const Int32 POLAR_ELECTRO = 0x006B;
+
+            /*
+             * Beautiful Enterprise Co., Ltd.
+             */
+            const Int32 BEAUTIFUL_ENTERPRISE = 0x006C;
+
+            /*
+             * BriarTek, Inc.
+             */
+            const Int32 BRIARTEK = 0x006D;
+
+            /*
+             * Summit Data Communications, Inc.
+             */
+            const Int32 SUMMIT_DATA_COMMUNICATIONS = 0x006E;
+
+            /*
+             * Sound ID.
+             */
+            const Int32 SOUND_ID = 0x006F;
+
+            /*
+             * Monster, LLC.
+             */
+            const Int32 MONSTER = 0x0070;
+
+            /*
+             * connectBlue AB.
+             */
+            const Int32 CONNECTBLUE = 0x0071;
+
+            /*
+             * ShangHai Super Smart Electronics Co. Ltd.
+             */
+            const Int32 SHANGHAI_SUPER_SMART_ELECTRONICS = 0x0072;
+
+            /*
+             * Group Sense Ltd.
+             */
+            const Int32 GROUP_SENSE = 0x0073;
+
+            /*
+             * Zomm, LLC.
+             */
+            const Int32 ZOMM = 0x0074;
+
+            /*
+             * Samsung Electronics Co. Ltd.
+             */
+            const Int32 SAMSUNG_ELECTRONICS = 0x0075;
+
+            /*
+             * Creative Technology Ltd.
+             */
+            const Int32 CREATIVE_TECHNOLOGY = 0x0076;
+
+            /*
+             * Laird Technologies.
+             */
+            const Int32 LAIRD_TECHNOLOGIES = 0x0077;
+
+            /*
+             * Nike, Inc.
+             */
+            const Int32 NIKE = 0x0078;
+
+            /*
+             * lesswire AG.
+             */
+            const Int32 LESSWIRE = 0x0079;
+
+            /*
+             * MStar Semiconductor, Inc.
+             */
+            const Int32 MSTAR_SEMICONDUCTOR = 0x007A;
+
+            /*
+             * Hanlynn Technologies.
+             */
+            const Int32 HANLYNN_TECHNOLOGIES = 0x007B;
+
+            /*
+             * A & R Cambridge.
+             */
+            const Int32 A_AND_R_CAMBRIDGE = 0x007C;
+
+            /*
+             * Seers Technology Co. Ltd.
+             */
+            const Int32 SEERS_TECHNOLOGY = 0x007D;
+
+            /*
+             * Sports Tracking Technologies Ltd.
+             */
+            const Int32 SPORTS_TRACKING_TECHNOLOGIES = 0x007E;
+
+            /*
+             * Autonet Mobile.
+             */
+            const Int32 AUTONET_MOBILE = 0x007F;
+
+            /*
+             * DeLorme Publishing Company, Inc.
+             */
+            const Int32 DELORME_PUBLISHING_COMPANY = 0x0080;
+
+            /*
+             * WuXi Vimicro.
+             */
+            const Int32 WUXI_VIMICRO = 0x0081;
+
+            /*
+             * Sennheiser Communications A/S.
+             */
+            const Int32 SENNHEISER_COMMUNICATIONS = 0x0082;
+
+            /*
+             * TimeKeeping Systems, Inc.
+             */
+            const Int32 TIMEKEEPING_SYSTEMS = 0x0083;
+
+            /*
+             * Ludus Helsinki Ltd.
+             */
+            const Int32 LUDUS_HELSINKI = 0x0084;
+
+            /*
+             * BlueRadios, Inc.
+             */
+            const Int32 BLUERADIOS = 0x0085;
+
+            /*
+             * equinox AG.
+             */
+            const Int32 EQUINOX_AG = 0x0086;
+
+            /*
+             * Garmin International, Inc.
+             */
+            const Int32 GARMIN_INTERNATIONAL = 0x0087;
+
+            /*
+             * Ecotest.
+             */
+            const Int32 ECOTEST = 0x0088;
+
+            /*
+             * GN ReSound A/S.
+             */
+            const Int32 GN_RESOUND = 0x0089;
+
+            /*
+             * Jawbone.
+             */
+            const Int32 JAWBONE = 0x008A;
+
+            /*
+             * Topcorn Positioning Systems, LLC.
+             */
+            const Int32 TOPCORN_POSITIONING_SYSTEMS = 0x008B;
+
+            /*
+             * Qualcomm Labs, Inc.
+             */
+            const Int32 QUALCOMM_LABS = 0x008C;
+
+            /*
+             * Zscan Software.
+             */
+            const Int32 ZSCAN_SOFTWARE = 0x008D;
+
+            /*
+             * Quintic Corp.
+             */
+            const Int32 QUINTIC = 0x008E;
+
+            /*
+             * Stollman E+V GmbH.
+             */
+            const Int32 STOLLMAN_E_PLUS_V = 0x008F;
+
+            /*
+             * Funai Electric Co., Ltd.
+             */
+            const Int32 FUNAI_ELECTRIC = 0x0090;
+
+            /*
+             * Advanced PANMOBIL Systems GmbH & Co. KG.
+             */
+            const Int32 ADVANCED_PANMOBIL_SYSTEMS = 0x0091;
+
+            /*
+             * ThinkOptics, Inc.
+             */
+            const Int32 THINKOPTICS = 0x0092;
+
+            /*
+             * Universal Electronics, Inc.
+             */
+            const Int32 UNIVERSAL_ELECTRONICS = 0x0093;
+
+            /*
+             * Airoha Technology Corp.
+             */
+            const Int32 AIROHA_TECHNOLOGY = 0x0094;
+
+            /*
+             * NEC Lighting, Ltd.
+             */
+            const Int32 NEC_LIGHTING = 0x0095;
+
+            /*
+             * ODM Technology, Inc.
+             */
+            const Int32 ODM_TECHNOLOGY = 0x0096;
+
+            /*
+             * Bluetrek Technologies Limited.
+             */
+            const Int32 BLUETREK_TECHNOLOGIES = 0x0097;
+
+            /*
+             * zer01.tv GmbH.
+             */
+            const Int32 ZER01_TV = 0x0098;
+
+            /*
+             * i.Tech Dynamic Global Distribution Ltd.
+             */
+            const Int32 I_TECH_DYNAMIC_GLOBAL_DISTRIBUTION = 0x0099;
+
+            /*
+             * Alpwise.
+             */
+            const Int32 ALPWISE = 0x009A;
+
+            /*
+             * Jiangsu Toppower Automotive Electronics Co., Ltd.
+             */
+            const Int32 JIANGSU_TOPPOWER_AUTOMOTIVE_ELECTRONICS = 0x009B;
+
+            /*
+             * Colorfy, Inc.
+             */
+            const Int32 COLORFY = 0x009C;
+
+            /*
+             * Geoforce Inc.
+             */
+            const Int32 GEOFORCE = 0x009D;
+
+            /*
+             * Bose Corporation.
+             */
+            const Int32 BOSE = 0x009E;
+
+            /*
+             * Suunto Oy.
+             */
+            const Int32 SUUNTO = 0x009F;
+
+            /*
+             * Kensington Computer Products Group.
+             */
+            const Int32 KENSINGTON_COMPUTER_PRODUCTS_GROUP = 0x00A0;
+
+            /*
+             * SR-Medizinelektronik.
+             */
+            const Int32 SR_MEDIZINELEKTRONIK = 0x00A1;
+
+            /*
+             * Vertu Corporation Limited.
+             */
+            const Int32 VERTU = 0x00A2;
+
+            /*
+             * Meta Watch Ltd.
+             */
+            const Int32 META_WATCH = 0x00A3;
+
+            /*
+             * LINAK A/S.
+             */
+            const Int32 LINAK = 0x00A4;
+
+            /*
+             * OTL Dynamics LLC.
+             */
+            const Int32 OTL_DYNAMICS = 0x00A5;
+
+            /*
+             * Panda Ocean Inc.
+             */
+            const Int32 PANDA_OCEAN = 0x00A6;
+
+            /*
+             * Visteon Corporation.
+             */
+            const Int32 VISTEON = 0x00A7;
+
+            /*
+             * ARP Devices Limited.
+             */
+            const Int32 ARP_DEVICES = 0x00A8;
+
+            /*
+             * Magneti Marelli S.p.A.
+             */
+            const Int32 MAGNETI_MARELLI = 0x00A9;
+
+            /*
+             * CAEN RFID srl.
+             */
+            const Int32 CAEN_RFID = 0x00AA;
+
+            /*
+             * Ingenieur-Systemgruppe Zahn GmbH.
+             */
+            const Int32 INGENIEUR_SYSTEMGRUPPE_ZAHN = 0x00AB;
+
+            /*
+             * Green Throttle Games.
+             */
+            const Int32 GREEN_THROTTLE_GAMES = 0x00AC;
+
+            /*
+             * Peter Systemtechnik GmbH.
+             */
+            const Int32 PETER_SYSTEMTECHNIK = 0x00AD;
+
+            /*
+             * Omegawave Oy.
+             */
+            const Int32 OMEGAWAVE = 0x00AE;
+
+            /*
+             * Cinetix.
+             */
+            const Int32 CINETIX = 0x00AF;
+
+            /*
+             * Passif Semiconductor Corp.
+             */
+            const Int32 PASSIF_SEMICONDUCTOR = 0x00B0;
+
+            /*
+             * Saris Cycling Group, Inc.
+             */
+            const Int32 SARIS_CYCLING_GROUP = 0x00B1;
+
+            /*
+             * Bekey A/S.
+             */
+            const Int32 BEKEY = 0x00B2;
+
+            /*
+             * Clarinox Technologies Pty. Ltd.
+             */
+            const Int32 CLARINOX_TECHNOLOGIES = 0x00B3;
+
+            /*
+             * BDE Technology Co., Ltd.
+             */
+            const Int32 BDE_TECHNOLOGY = 0x00B4;
+
+            /*
+             * Swirl Networks.
+             */
+            const Int32 SWIRL_NETWORKS = 0x00B5;
+
+            /*
+             * Meso international.
+             */
+            const Int32 MESO_INTERNATIONAL = 0x00B6;
+
+            /*
+             * TreLab Ltd.
+             */
+            const Int32 TRELAB = 0x00B7;
+
+            /*
+             * Qualcomm Innovation Center, Inc. (QuIC).
+             */
+            const Int32 QUALCOMM_INNOVATION_CENTER = 0x00B8;
+
+            /*
+             * Johnson Controls, Inc.
+             */
+            const Int32 JOHNSON_CONTROLS = 0x00B9;
+
+            /*
+             * Starkey Laboratories Inc.
+             */
+            const Int32 STARKEY_LABORATORIES = 0x00BA;
+
+            /*
+             * S-Power Electronics Limited.
+             */
+            const Int32 S_POWER_ELECTRONICS = 0x00BB;
+
+            /*
+             * Ace Sensor Inc.
+             */
+            const Int32 ACE_SENSOR = 0x00BC;
+
+            /*
+             * Aplix Corporation.
+             */
+            const Int32 APLIX = 0x00BD;
+
+            /*
+             * AAMP of America.
+             */
+            const Int32 AAMP_OF_AMERICA = 0x00BE;
+
+            /*
+             * Stalmart Technology Limited.
+             */
+            const Int32 STALMART_TECHNOLOGY = 0x00BF;
+
+            /*
+             * AMICCOM Electronics Corporation.
+             */
+            const Int32 AMICCOM_ELECTRONICS = 0x00C0;
+
+            /*
+             * Shenzhen Excelsecu Data Technology Co.,Ltd.
+             */
+            const Int32 SHENZHEN_EXCELSECU_DATA_TECHNOLOGY = 0x00C1;
+
+            /*
+             * Geneq Inc.
+             */
+            const Int32 GENEQ = 0x00C2;
+
+            /*
+             * adidas AG.
+             */
+            const Int32 ADIDAS = 0x00C3;
+
+            /*
+             * LG Electronics.
+             */
+            const Int32 LG_ELECTRONICS = 0x00C4;
+
+            /*
+             * Onset Computer Corporation.
+             */
+            const Int32 ONSET_COMPUTER = 0x00C5;
+
+            /*
+             * Selfly BV.
+             */
+            const Int32 SELFLY = 0x00C6;
+
+            /*
+             * Quuppa Oy.
+             */
+            const Int32 QUUPPA = 0x00C7;
+
+            /*
+             * GeLo Inc.
+             */
+            const Int32 GELO = 0x00C8;
+
+            /*
+             * Evluma.
+             */
+            const Int32 EVLUMA = 0x00C9;
+
+            /*
+             * MC10.
+             */
+            const Int32 MC10 = 0x00CA;
+
+            /*
+             * Binauric SE.
+             */
+            const Int32 BINAURIC = 0x00CB;
+
+            /*
+             * Beats Electronics.
+             */
+            const Int32 BEATS_ELECTRONICS = 0x00CC;
+
+            /*
+             * Microchip Technology Inc.
+             */
+            const Int32 MICROCHIP_TECHNOLOGY = 0x00CD;
+
+            /*
+             * Elgato Systems GmbH.
+             */
+            const Int32 ELGATO_SYSTEMS = 0x00CE;
+
+            /*
+             * ARCHOS SA.
+             */
+            const Int32 ARCHOS = 0x00CF;
+
+            /*
+             * Dexcom, Inc.
+             */
+            const Int32 DEXCOM = 0x00D0;
+
+            /*
+             * Polar Electro Europe B.V.
+             */
+            const Int32 POLAR_ELECTRO_EUROPE = 0x00D1;
+
+            /*
+             * Dialog Semiconductor B.V.
+             */
+            const Int32 DIALOG_SEMICONDUCTOR = 0x00D2;
+
+            /*
+             * Taixingbang Technology (HK) Co,. LTD.
+             */
+            const Int32 TAIXINGBANG_TECHNOLOGY = 0x00D3;
+
+            /*
+             * Kawantech.
+             */
+            const Int32 KAWANTECH = 0x00D4;
+
+            /*
+             * Austco Communication Systems.
+             */
+            const Int32 AUSTCO_COMMUNICATION_SYSTEMS = 0x00D5;
+
+            /*
+             * Timex Group USA, Inc.
+             */
+            const Int32 TIMEX_GROUP_USA = 0x00D6;
+
+            /*
+             * Qualcomm Technologies, Inc.
+             */
+            const Int32 QUALCOMM_TECHNOLOGIES = 0x00D7;
+
+            /*
+             * Qualcomm Connected Experiences, Inc.
+             */
+            const Int32 QUALCOMM_CONNECTED_EXPERIENCES = 0x00D8;
+
+            /*
+             * Voyetra Turtle Beach.
+             */
+            const Int32 VOYETRA_TURTLE_BEACH = 0x00D9;
+
+            /*
+             * txtr GmbH.
+             */
+            const Int32 TXTR = 0x00DA;
+
+            /*
+             * Biosentronics.
+             */
+            const Int32 BIOSENTRONICS = 0x00DB;
+
+            /*
+             * Procter & Gamble.
+             */
+            const Int32 PROCTER_AND_GAMBLE = 0x00DC;
+
+            /*
+             * Hosiden Corporation.
+             */
+            const Int32 HOSIDEN = 0x00DD;
+
+            /*
+             * Muzik LLC.
+             */
+            const Int32 MUZIK = 0x00DE;
+
+            /*
+             * Misfit Wearables Corp.
+             */
+            const Int32 MISFIT_WEARABLES = 0x00DF;
+
+            /*
+             * Google.
+             */
+            const Int32 GOOGLE = 0x00E0;
+
+            /*
+             * Danlers Ltd.
+             */
+            const Int32 DANLERS = 0x00E1;
+
+            /*
+             * Semilink Inc.
+             */
+            const Int32 SEMILINK = 0x00E2;
         }
 
     } // Bluetooth

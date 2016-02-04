@@ -1,5 +1,6 @@
 
 #include "elastos/droid/hardware/input/TouchCalibration.h"
+#include "elastos/droid/hardware/input/CTouchCalibration.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/StringBuilder.h>
 
@@ -10,33 +11,50 @@ namespace Droid {
 namespace Hardware {
 namespace Input {
 
-const AutoPtr<ITouchCalibration> TouchCalibration::IDENTITY = new TouchCalibration();
+const AutoPtr<ITouchCalibration> TouchCalibration::IDENTITY = TouchCalibration::INIT_IDENTITY();
+
+AutoPtr<ITouchCalibration> TouchCalibration::INIT_IDENTITY()
+{
+    AutoPtr<ITouchCalibration> tc;
+    CTouchCalibration::New((ITouchCalibration**)&tc);
+    return tc;
+}
 
 CAR_INTERFACE_IMPL_2(TouchCalibration, Object, ITouchCalibration, IParcelable)
 
 TouchCalibration::TouchCalibration()
-    :TouchCalibration(1,0,0,0,1,0)
+    : mXScale(0)
+    , mXYMix(0)
+    , mXOffset(0)
+    , mYXMix(0)
+    , mYScale(0)
+    , mYOffset(0)
+{}
+
+ECode TouchCalibration::constructor()
 {
+    return constructor(1, 0, 0, 0, 1, 0);
 }
 
-TouchCalibration::TouchCalibration(
+ECode TouchCalibration::constructor(
     /* [in] */ Float xScale,
     /* [in] */ Float xyMix,
     /* [in] */ Float xOffset,
     /* [in] */ Float yxMix,
     /* [in] */ Float yScale,
     /* [in] */ Float yOffset)
-    : mXScale(xScale)
-    , mXYMix(xyMix)
-    , mXOffset(xOffset)
-    , mYXMix(yxMix)
-    , mYScale(yScale)
-    , mYOffset(yOffset)
 {
+    mXScale = xScale;
+    mXYMix = xyMix;
+    mXOffset = xOffset;
+    mYXMix = yxMix;
+    mYScale = yScale;
+    mYOffset = yOffset;
+    return NOERROR;
 }
 
-TouchCalibration::TouchCalibration(
-   /* [in] */ IParcel* source)
+ECode TouchCalibration::ReadFromParcel(
+    /* [in] */ IParcel* source)
 {
     source->ReadFloat(&mXScale);
     source->ReadFloat(&mXYMix);
@@ -44,31 +62,18 @@ TouchCalibration::TouchCalibration(
     source->ReadFloat(&mYXMix);
     source->ReadFloat(&mYScale);
     source->ReadFloat(&mYOffset);
-}
-
-ECode TouchCalibration::ReadFromParcel(
-    /* [in] */ IParcel* source)
-{
-    FAIL_RETURN(source->ReadFloat(&mXScale))
-    FAIL_RETURN(source->ReadFloat(&mXYMix))
-    FAIL_RETURN(source->ReadFloat(&mXOffset))
-    FAIL_RETURN(source->ReadFloat(&mYXMix))
-    FAIL_RETURN(source->ReadFloat(&mYScale))
-    FAIL_RETURN(source->ReadFloat(&mYOffset))
-
     return NOERROR;
 }
 
 ECode TouchCalibration::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    FAIL_RETURN(dest->WriteFloat(mXScale));
-    FAIL_RETURN(dest->WriteFloat(mXYMix));
-    FAIL_RETURN(dest->WriteFloat(mXOffset));
-    FAIL_RETURN(dest->WriteFloat(mYXMix));
-    FAIL_RETURN(dest->WriteFloat(mYScale));
-    FAIL_RETURN(dest->WriteFloat(mYOffset));
-
+    dest->WriteFloat(mXScale);
+    dest->WriteFloat(mXYMix);
+    dest->WriteFloat(mXOffset);
+    dest->WriteFloat(mYXMix);
+    dest->WriteFloat(mYScale);
+    dest->WriteFloat(mYOffset);
     return NOERROR;
 }
 
@@ -95,11 +100,12 @@ ECode TouchCalibration::Equals(
     /* [in] */ IInterface* another,
     /* [out] */ Boolean* result)
 {
-    if (another == THIS_PROBE(IInterface)) {
+    if (IInterface::Probe(another) == THIS_PROBE(IInterface)) {
         *result = TRUE;
         return NOERROR;
-    } else if (ITouchCalibration::Probe(another) != NULL) {
-        AutoPtr<TouchCalibration> cal = (TouchCalibration*)ITouchCalibration::Probe(another);
+    }
+    else if (ITouchCalibration::Probe(another) != NULL) {
+        TouchCalibration* cal = (TouchCalibration*)ITouchCalibration::Probe(another);
 
         *result = (cal->mXScale == mXScale)  &&
                 (cal->mXYMix   == mXYMix)   &&
@@ -108,7 +114,8 @@ ECode TouchCalibration::Equals(
                 (cal->mYScale  == mYScale)  &&
                 (cal->mYOffset == mYOffset);
         return NOERROR;
-    } else {
+    }
+    else {
         *result = FALSE;
         return NOERROR;
     }

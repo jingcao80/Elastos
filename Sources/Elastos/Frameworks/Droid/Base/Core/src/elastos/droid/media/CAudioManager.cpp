@@ -12,8 +12,7 @@
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/SystemProperties.h"
-//TODO: Need Settings.h
-// #include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
@@ -45,8 +44,7 @@ using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Provider::ISettingsSystem;
-//TODO: Need Settings.h
-// using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::Widget::IVolumePanel;
 using Elastos::Core::CInteger32;
@@ -1111,8 +1109,6 @@ ECode CAudioManager::SetParameter(
 ECode CAudioManager::SetParameters(
     /* [in] */ const String& keyValuePairs)
 {
-    Int32 value;
-    //value return keyValuePairs list of parameters key value pairs in the form: key1=value1;key2=value2;...
     return AudioSystem::SetParameters(keyValuePairs);
 }
 
@@ -1196,10 +1192,10 @@ Boolean CAudioManager::QuerySoundEffectsEnabled(
     // todo: Eric audio service ready?
     AutoPtr<IContentResolver> contentResolver;
     mContext->GetContentResolver((IContentResolver**)&contentResolver);
-//TODO: Need Settings.h
-    // return Settings::System::GetInt32(contentResolver,
-    //         ISettingsSystem::SOUND_EFFECTS_ENABLED, 0, user) != 0;
-    return TRUE;
+    Int32 value;
+    Settings::System::GetInt32ForUser(contentResolver,
+            ISettingsSystem::SOUND_EFFECTS_ENABLED, 0, user, &value);
+    return  value != 0;
 }
 
 ECode CAudioManager::LoadSoundEffects()

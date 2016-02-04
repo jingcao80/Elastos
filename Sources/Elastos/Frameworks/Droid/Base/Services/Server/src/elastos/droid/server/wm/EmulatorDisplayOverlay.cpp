@@ -1,5 +1,8 @@
 
-#include "wm/EmulatorDisplayOverlay.h"
+#include <Elastos.Droid.Graphics.h>
+#include <Elastos.Droid.View.h>
+#include "elastos/droid/server/wm/EmulatorDisplayOverlay.h"
+#include "elastos/droid/R.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;

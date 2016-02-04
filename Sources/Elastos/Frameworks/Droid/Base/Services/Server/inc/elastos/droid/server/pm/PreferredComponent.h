@@ -7,6 +7,7 @@
 #include "Elastos.Droid.Content.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.IO.h>
+#include <elastos/core/Object.h>
 
 using Elastos::IO::IPrintWriter;
 using Elastos::Utility::IList;
@@ -18,6 +19,8 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Pm {
+
+extern "C" const InterfaceID EIID_IPreferredComponentCallbacks;
 
 class PreferredComponent : public Object
 {

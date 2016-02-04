@@ -1,5 +1,6 @@
 
-#include "CETC1.h"
+#include "elastos/droid/opengl/CETC1.h"
+
 #include "utils/misc.h"
 #include <math.h>
 #include <stdio.h>
@@ -10,23 +11,28 @@
 #include <skia/core/SkBitmap.h>
 #include <gl.h>
 #include <ETC1/etc1.h>
-#include "poly.h"
 #include <elastos/utility/logging/Slogger.h>
 
 #define LOGD(msg) SLOGGERD("CETC1", msg)
 
-using Elastos::IO::INIOAccessHelper;
-using Elastos::IO::CNIOAccessHelper;
+using Elastos::IO::INIOAccess;
+using Elastos::IO::CNIOAccess;
 
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
+
+CAR_INTERFACE_IMPL(CETC1, Singleton, IETC1)
+
+CAR_SINGLETON_IMPL(CETC1)
 
 ECode CETC1::GetPointer(
     /* [in] */ Elastos::IO::IBuffer* buffer,
     /* [in, out] */ Int32 *remaining,
     /* [out] */ Handle32* rst)
 {
+    VALIDATE_NOT_NULL(rst)
+
     Int32 position;
     Int32 limit;
     Int32 elementSizeShift;
@@ -37,8 +43,8 @@ ECode CETC1::GetPointer(
     buffer->GetElementSizeShift(&elementSizeShift);
     *remaining = (limit - position) << elementSizeShift;
 
-    AutoPtr<INIOAccessHelper> helper;
-    CNIOAccessHelper::AcquireSingleton((INIOAccessHelper**)&helper);
+    AutoPtr<INIOAccess> helper;
+    CNIOAccess::AcquireSingleton((INIOAccess**)&helper);
 
     helper->GetBasePointer(buffer, &pointer);
     if (pointer != 0L) {
@@ -106,6 +112,8 @@ ECode CETC1::GetEncodedDataSize(
     /* [in] */ Int32 height,
     /* [out] */ Int32* size)
 {
+    VALIDATE_NOT_NULL(size)
+
     *size = etc1_get_encoded_data_size(width, height);
     return NOERROR;
 }
@@ -204,6 +212,8 @@ ECode CETC1::IsValid(
     /* [in] */ Elastos::IO::IBuffer* header,
     /* [out] */ Boolean* isvalid)
 {
+    VALIDATE_NOT_NULL(isvalid)
+
     Boolean result = FALSE;
     BufferHelper headerB(header);
     Boolean headerCheck;
@@ -224,6 +234,8 @@ ECode CETC1::GetWidth(
     /* [in] */ Elastos::IO::IBuffer* header,
     /* [out] */ Int32* width)
 {
+    VALIDATE_NOT_NULL(width)
+
     Int32 result = 0;
     BufferHelper headerB(header);
     Boolean headerCheck;
@@ -244,6 +256,8 @@ ECode CETC1::GetHeight(
     /* [in] */ Elastos::IO::IBuffer* header,
     /* [out] */ Int32* height)
 {
+    VALIDATE_NOT_NULL(height)
+
     Int32 result = 0;
     BufferHelper headerB(header);
     Boolean headerCheck;

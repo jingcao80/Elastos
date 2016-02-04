@@ -6,6 +6,10 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
+CAR_SINGLETON_IMPL(CRingtoneManagerHelper)
+
+CAR_INTERFACE_IMPL(CRingtoneManagerHelper, Singleton, IRingtoneManagerHelper)
+
 ECode CRingtoneManagerHelper::GetValidRingtoneUri(
     /* [in] */ IContext* context,
     /* [out] */ IUri** result)

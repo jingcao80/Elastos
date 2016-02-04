@@ -8,11 +8,13 @@ module
 
 
         /**
-         * Public API for controlling the Bluetooth Headset Service. This includes both Bluetooth Headset and Handsfree (v1.5) profiles.
+         * Public API for controlling the Bluetooth Headset Service.
+         * This includes both Bluetooth Headset and Handsfree (v1.5) profiles.
          * <p>
          * BluetoothHeadset is a proxy object for controlling the Bluetooth Headset Service via IPC.
          * <p>
-         * Use getProfileProxy(Context, BluetoothProfile.ServiceListener, int) to get the BluetoothHeadset proxy object. Use closeProfileProxy(int, BluetoothProfile) to close the service connection.
+         * Use getProfileProxy(Context, BluetoothProfile.ServiceListener, int) to get the BluetoothHeadset proxy object.
+         * Use closeProfileProxy(int, BluetoothProfile) to close the service connection.
          *
          * @sa getProfileProxy(Context, BluetoothProfile.ServiceListener, int)
          * @sa closeProfileProxy(int, BluetoothProfile)
@@ -204,7 +206,7 @@ module
              * @sa #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT
              */
             const String EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS =
-                    "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_ARGS";
+                "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_ARGS";
 
             /**
              * The intent category to be used with  #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT
@@ -213,7 +215,12 @@ module
              * @sa #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT
              */
             const String VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID_CATEGORY  =
-                    "android.bluetooth.headset.intent.category.companyid";
+                "android.bluetooth.headset.intent.category.companyid";
+
+            /**
+             * A vendor-specific command for unsolicited result code.
+             */
+            const String VENDOR_RESULT_CODE_COMMAND_ANDROID = "+ANDROID";
 
             /**
              * Headset state when SCO audio is connected.
@@ -300,7 +307,7 @@ module
              * will transition from #STATE_CONNECTED to
              * #STATE_DISCONNECTED. If the disconnect is initiated by the
              * host (local) device the state will transition from
-             * #STATE_CONNECTED} to state #STATE_DISCONNECTING to
+             * #STATE_CONNECTED to state #STATE_DISCONNECTING to
              * state #STATE_DISCONNECTED. The transition to
              * #STATE_DISCONNECTING can be used to distinguish between the
              * two scenarios.
@@ -564,17 +571,6 @@ module
                 [in] Int32 type);
 
             /**
-             * Notify Headset of phone roam state change.
-             * This is a backdoor for phone app to call BluetoothHeadset since
-             * there is currently not a good way to get roaming state change outside
-             * of phone app.
-             *
-             * @hide
-             */
-            RoamChanged(
-                [in] Boolean roaming);
-
-            /**
              * Send Headset of CLCC response
              *
              * @hide
@@ -587,6 +583,52 @@ module
                 [in] Boolean mpty,
                 [in] String number,
                 [in] Int32 type);
+
+            /**
+             * Sends a vendor-specific unsolicited result code to the headset.
+             *
+             * <p>The actual string to be sent is <code>command + ": " + arg</code>.
+             * For example, if {@code command} is {@link #VENDOR_RESULT_CODE_COMMAND_ANDROID} and {@code arg}
+             * is {@code "0"}, the string <code>"+ANDROID: 0"</code> will be sent.
+             *
+             * <p>Currently only {@link #VENDOR_RESULT_CODE_COMMAND_ANDROID} is allowed as {@code command}.
+             *
+             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+             *
+             * @param device Bluetooth headset.
+             * @param command A vendor-specific command.
+             * @param arg The argument that will be attached to the command.
+             * @return {@code false} if there is no headset connected, or if the command is not an allowed
+             *         vendor-specific unsolicited result code, or on error. {@code true} otherwise.
+             * @throws IllegalArgumentException if {@code command} is {@code null}.
+             */
+            SendVendorSpecificResultCode(
+                [in] IBluetoothDevice* device,
+                [in] String command,
+                [in] String arg,
+                [out] Boolean* result);
+
+            /**
+             * enable WBS codec setting.
+             *
+             * @return true if successful
+             *         false if there was some error such as
+             *               there is no connected headset
+             * @hide
+             */
+            EnableWBS(
+                [out] Boolean* result);
+
+            /**
+             * disable WBS codec settting. It set NBS codec.
+             *
+             * @return true if successful
+             *         false if there was some error such as
+             *               there is no connected headset
+             * @hide
+             */
+            DisableWBS(
+                [out] Boolean* result);
         }
 
     } // Bluetooth

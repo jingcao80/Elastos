@@ -4421,7 +4421,7 @@ void Editor::OnDraw(
             Boolean active;
             imm->IsActive(IView::Probe(mTextView), &active);
             if (active) {
-                Boolean reported = FALSE;
+                Boolean UNUSED(reported) = FALSE;
                 if (ims->mContentChanged || ims->mSelectionModeChanged) {
                     // We are in extract mode and the content has changed
                     // in some way... just report complete new text to the

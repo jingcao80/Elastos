@@ -2,17 +2,15 @@
 #ifndef __ELASTOS_DROID_SERVER_LOCATION_COUNTRYDETECTORBASE_H__
 #define __ELASTOS_DROID_SERVER_LOCATION_COUNTRYDETECTORBASE_H__
 
-#ifdef DROID_CORE
-#include "Elastos.Droid.Core_server.h"
-#elif defined(DROID_SERVER)
-#include "Elastos.Droid.Core.h"
-#endif
+#include "elastos/droid/ext/frameworkext.h"
+#include "_Elastos.Droid.Server.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Location::ICountry;
 using Elastos::Droid::Location::ICountryListener;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::CHandler;
+
 namespace Elastos {
 namespace Droid {
 namespace Server {
@@ -27,15 +25,12 @@ namespace Location {
  *
  * @hide
  */
-class CountryDetectorBase : public ElRefBase
+class CountryDetectorBase
+    : public Object
 {
 public:
     CountryDetectorBase(
-        /* [in] */ IContext* ctx)
-    {
-        mContext = ctx;
-        CHandler::New((IHandler**)&mHandler);
-    }
+        /* [in] */ IContext* ctx);
 
     /**
      * Start detecting the country that the user is in.
@@ -44,34 +39,25 @@ public:
      *         be returned.
      */
     virtual CARAPI DetectCountry(
-                /* [out] */ ICountry** country) = 0;
+        /* [out] */ ICountry** country) = 0;
 
     /**
      * Register a listener to receive the notification when the country is detected or changed.
      * <p>
      * The previous listener will be replaced if it exists.
      */
-    virtual CARAPI_(void) SetCountryListener(
-        /* [in] */ ICountryListener* listener)
-    {
-        mListener = listener;
-    }
+    CARAPI SetCountryListener(
+        /* [in] */ ICountryListener* listener);
 
     /**
      * Stop detecting the country. The detector should release all system services and be ready to
      * be freed
      */
-    virtual CARAPI_(void) Stop() = 0;
+    virtual CARAPI Stop() = 0;
 
 protected:
-
-    virtual CARAPI_(void) NotifyListener(
-        /* [in] */ ICountry* country)
-    {
-        if (mListener != NULL) {
-            mListener->OnCountryDetected(country);
-        }
-    }
+    CARAPI NotifyListener(
+        /* [in] */ ICountry* country);
 
 protected:
     AutoPtr<IHandler> mHandler;

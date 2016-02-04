@@ -38,6 +38,25 @@ class ECO_PUBLIC FileOutputStream
     : public OutputStream
     , public IFileOutputStream
 {
+private:
+    class _Closable
+        : public Object
+        , public ICloseable
+    {
+    public:
+        _Closable(
+            /* [in] */ FileOutputStream* host)
+            : mHost(host)
+        {}
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI Close();
+
+    private:
+        FileOutputStream* mHost;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 

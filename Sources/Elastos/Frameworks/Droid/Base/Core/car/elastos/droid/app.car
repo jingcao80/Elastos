@@ -69,7 +69,6 @@ module
     merge("app/OnActivityPausedListener.car");
     merge("app/PackageInstallObserver.car");
     merge("app/PackageDeleteObserver.car");
-    merge("app/PendingIntent.car");
     merge("app/Presentation.car");
     merge("app/ProfilerInfo.car");
     merge("app/ProgressDialog.car");
@@ -782,6 +781,13 @@ module
         interface IActivityManagerHelper;
     }
 
+    class CActivityManagerAppTask {
+        constructor(
+            [in] IIAppTask* task);
+
+        interface IActivityManagerAppTask;
+    }
+
     class CActivityManagerStackInfo {
          constructor();
 
@@ -1036,6 +1042,10 @@ module
         constructor();
 
         interface IApplication;
+        interface IContextWrapper;
+        interface IContext;
+        interface IComponentCallbacks2;
+        interface IComponentCallbacks;
     }
 
     class CInstrumentation {
@@ -1102,6 +1112,10 @@ module
         interface INotificationBuilder;
     }
 
+    singleton class CNotificationBuilderHelper {
+        interface INotificationBuilderHelper;
+    }
+
     [local]
     class CNotificationBigPictureStyle {
         constructor();
@@ -1162,6 +1176,10 @@ module
 
         interface INotification;
         interface IParcelable;
+    }
+
+    singleton class CNotificationHelper {
+        interface INotificationHelper;
     }
 
     class CNotificationManager {

@@ -2262,6 +2262,7 @@ ECode Uri::GetQueryParameterNames(
     AutoPtr<ICollections> helper;
     CCollections::AcquireSingleton((ICollections**)&helper);
     helper->UnmodifiableSet(names, result);
+    return NOERROR;
 }
 
 ECode Uri::GetQueryParameters(

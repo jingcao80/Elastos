@@ -332,6 +332,9 @@ ECode Bidi::CreateLineBidi(
     /* [in] */ Int32 lineLimit,
     /* [out] */ IBidi** lineBidi)
 {
+    VALIDATE_NOT_NULL(lineBidi)
+    *lineBidi = NULL;
+
     if (lineStart < 0 || lineLimit < 0 || lineLimit > mLength || lineStart > lineLimit) {
         //throw new IllegalArgumentException("Invalid ranges (start=" + lineStart + ", " +
         //        "limit=" + lineLimit + ", length=" + length + ")");
@@ -364,12 +367,7 @@ ECode Bidi::CreateLineBidi(
     else {
         Int64 line;
         Ubidi_setLine(parent, lineStart, lineLimit, &line);
-        AutoPtr<CBidi> temp = new CBidi();
-        ec = temp->constructor(line);
-        if (SUCCEEDED(ec)) {
-            *lineBidi = IBidi::Probe(temp);
-            REFCOUNT_ADD(*lineBidi);
-        }
+        ec = CBidi::New(line, lineBidi);
     }
     Ubidi_close(parent);
     return ec;
@@ -380,9 +378,11 @@ ECode Bidi::CreateEmptyLineBidi(
     /* [out] */ IBidi** lineBidi)
 {
     VALIDATE_NOT_NULL(lineBidi);
+    *lineBidi = NULL;
+
     // ICU4C doesn't allow this case, but the RI does.
-    AutoPtr<CBidi> result = new CBidi();
-    FAIL_RETURN(result->constructor(parent))
+    AutoPtr<CBidi> result;
+    FAIL_RETURN(CBidi::NewByFriend(parent, (CBidi**)&result))
     result->mLength = 0;
     result->mOffsetLevel = NULL;
     result->mRuns = NULL;

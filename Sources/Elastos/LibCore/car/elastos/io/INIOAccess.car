@@ -28,6 +28,19 @@ module
             [out] IInterface** result);
 
         /**
+         * Returns the number of bytes remaining in the given Buffer. That is,
+         * this scales <code>remaining()</code> by the byte-size of elements
+         * of this Buffer.
+         *
+         * @param Buffer b the Buffer to be queried
+         * @return the number of remaining bytes
+         * Please remaining this function !!! zhangjingcheng
+         */
+        GetRemainingBytes(
+            [in] IBuffer* b,
+            [out] Int32* remaining);
+
+        /**
          * Returns the offset in bytes from the start of the underlying
          * Java array object containing the data of the given Buffer to
          * the actual start of the data. The start of the data takes into

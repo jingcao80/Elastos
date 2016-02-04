@@ -19,6 +19,7 @@ using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
@@ -156,7 +157,7 @@ ECode PacManager::ServiceConnection::OnServiceConnected(
     Object& lockObj = mHost->mProxyLock;
     synchronized(lockObj) {
         Logger::D("PacManager::ServiceConnection", "Adding service %s %s",
-            PacManager::PAC_SERVICE_NAME.string(), Object::ToString(binder).string());
+            PacManager::PAC_SERVICE_NAME.string(), TO_CSTR(binder));
 
         AutoPtr<IServiceManager> srvMrg;
         CServiceManager::AcquireSingleton((IServiceManager**)&srvMrg);

@@ -24,8 +24,6 @@ using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IServiceManager;
-using Elastos::Droid::Os::ISystemClock;
-using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Provider::ISettings;
 
 

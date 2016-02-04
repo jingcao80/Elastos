@@ -455,7 +455,8 @@ ECode CNativeDecimalFormat::UpdateFieldPosition(
     Int32 field;
     FAIL_RETURN(TranslateFieldId(fp, &field))
     if (field != -1) {
-        for(Boolean next; next; fpi->Next(&next)) {
+        Boolean next = false;
+        while (fpi->Next(&next), next) {
             Int32 id;
             fpi->FieldId(&id);
             if (id == field) {

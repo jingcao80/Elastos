@@ -1,49 +1,47 @@
-#include "elastos/droid/systemui/statusbar/phone/IconMerger.h"
-#include "elastos/droid/systemui/SystemUIR.h"
 
-using Elastos::Droid::SystemUI::SystemUIR;
+#include "elastos/droid/packages/systemui/statusbar/phone/IconMerger.h"
+#include "../../R.h"
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 namespace Phone {
 
+IconMerger::IconRunnable::IconRunnable(
+    /* [in] */ IconMerger* host,
+    /* [in] */ Boolean moreRequired)
+    : mHost(host)
+    , mMoreRequired(moreRequired)
+{}
 
-IconMerger::IconMerger()
-    : mIconSize(0)
+ECode IconMerger::IconRunnable::Run()
 {
-}
-
-IconMerger::IconMerger(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-    : LinearLayout(context, attrs)
-    , mIconSize(0)
-{
-    ASSERT_SUCCEEDED(InitIconSize(context, attrs));
-}
-
-ECode IconMerger::Init(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-{
-    ASSERT_SUCCEEDED(LinearLayout::Init(context, attrs));
-    ASSERT_SUCCEEDED(InitIconSize(context, attrs));
+    mHost->mMoreView->SetVisibility(mMoreRequired ? IView::VISIBLE : IView::GONE);
     return NOERROR;
 }
 
-ECode IconMerger::InitIconSize(
+const String IconMerger::TAG("IconMerger");
+const Boolean IconMerger::DEBUG = FALSE;
+CAR_INTERFACE_IMPL(IconMerger, LinearLayout, IIconMerger);
+IconMerger::IconMerger()
+    : mIconSize(0)
+{}
+
+ECode IconMerger::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
+    LinearLayout::constructor(context, attrs);
+
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
-    res->GetDimensionPixelSize(SystemUIR::dimen::status_bar_icon_size, &mIconSize);
+    res->GetDimensionPixelSize(R::dimen::status_bar_icon_size, &mIconSize);
 
-    // if (DEBUG) {
-    //     setBackgroundColor(0x800099FF);
-    // }
+    if (DEBUG) {
+        SetBackgroundColor(0x800099FF);
+    }
     return NOERROR;
 }
 
@@ -60,11 +58,12 @@ void IconMerger::OnMeasure(
 {
     LinearLayout::OnMeasure(widthMeasureSpec, heightMeasureSpec);
     // we need to constrain this to an integral multiple of our children
-    Int32 width = GetMeasuredWidth();
-    SetMeasuredDimension(width - (width % mIconSize), GetMeasuredHeight());
+    Int32 width = 0, height = 0;
+    GetMeasuredWidth(&width);
+    SetMeasuredDimension(width - (width % mIconSize), (GetMeasuredHeight(&height), height));
 }
 
-void IconMerger::OnLayout(
+ECode IconMerger::OnLayout(
     /* [in] */ Boolean changed,
     /* [in] */ Int32 l,
     /* [in] */ Int32 t,
@@ -73,6 +72,7 @@ void IconMerger::OnLayout(
 {
     LinearLayout::OnLayout(changed, l, t, r, b);
     CheckOverflow(r - l);
+    return NOERROR;
 }
 
 void IconMerger::CheckOverflow(
@@ -80,44 +80,31 @@ void IconMerger::CheckOverflow(
 {
     if (mMoreView == NULL) return;
 
-        Int32 N = GetChildCount();
-        Int32 visibleChildren = 0, visibility;
-        for (Int32 i = 0; i < N; i++) {
-            AutoPtr<IView> childView = GetChildAt(i);
-            childView->GetVisibility(&visibility);
-            if (visibility != IView::GONE) visibleChildren++;
-        }
+    Int32 N = 0;
+    GetChildCount(&N);
+    Int32 visibleChildren = 0, visibility = 0;
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IView> child;
+        GetChildAt(i, (IView**)&child);
+        child->GetVisibility(&visibility);
+        if (visibility != IView::GONE) visibleChildren++;
+    }
 
-        mMoreView->GetVisibility(&visibility);
-        Boolean overflowShown = (visibility == IView::VISIBLE);
-        // let's assume we have one more slot if the more icon is already showing
-        if (overflowShown) visibleChildren--;
-        Boolean moreRequired = visibleChildren * mIconSize > width;
-        if (moreRequired != overflowShown) {
-            AutoPtr<IRunnable> runnable = new SetVisibilityRunnable(moreRequired, this);
-            Post(runnable);
-        }
+    mMoreView->GetVisibility(&visibility);
+    Boolean overflowShown = (visibility == IView::VISIBLE);
+    // let's assume we have one more slot if the more icon is already showing
+    if (overflowShown) visibleChildren --;
+    Boolean moreRequired = visibleChildren * mIconSize > width;
+    if (moreRequired != overflowShown) {
+        AutoPtr<IRunnable> run = new IconRunnable(this, moreRequired);
+        Boolean tmp = FALSE;
+        Post(run, &tmp);
+    }
 }
 
-//=================================================================================
-//            SetVisibilityRunnable
-//=================================================================================
-SetVisibilityRunnable::SetVisibilityRunnable(
-    /* [in] */ Boolean moreRequired,
-    /* [in] */ IconMerger* host)
-    : mMoreRequired(moreRequired)
-    , mHost(host)
-{
-}
-
-ECode SetVisibilityRunnable::Run()
-{
-    mHost->mMoreView->SetVisibility(mMoreRequired ? IView::VISIBLE : IView::GONE);
-    return NOERROR;
-}
-
-}// namespace Phone
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+} // namespace Phone
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos

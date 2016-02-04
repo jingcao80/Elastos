@@ -1,0 +1,53 @@
+module
+{
+    interface Elastos.Droid.View.IGraphicBuffer;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace View {
+
+    /**
+     * Programming interface to the system assets atlas. This atlas, when
+     * present, holds preloaded drawable in a single, shareable graphics
+     * buffer. This allows multiple processes to share the same data to
+     * save up on memory.
+     *
+     * @hide
+     */
+    interface IIAssetAtlas {
+
+        /**
+         * Indicates whether the atlas is compatible with the specified
+         * parent process id. If the atlas' ppid does not match, this
+         * method will return false.
+         */
+        IsCompatible(
+            [in] Int32 ppid,
+            [out] Boolean* result);
+
+        /**
+         * Returns the atlas buffer (texture) or null if the atlas is
+         * not available yet.
+         */
+        GetBuffer(
+            [out] IGraphicBuffer** buffer);
+
+        /**
+         * Returns the map of the bitmaps stored in the atlas or null
+         * if the atlas is not available yet.
+         *
+         * Each bitmap is represented by several entries in the array:
+         * long0: SkBitmap*, the native bitmap object
+         * long1: x position
+         * long2: y position
+         * long3: rotated, 1 if the bitmap must be rotated, 0 otherwise
+         */
+        GetMap(
+            [out, callee] ArrayOf<Int64>* map);
+    }
+
+
+    } // namespace View
+    } // namepsace Droid
+    } // namespace Elastos
+}

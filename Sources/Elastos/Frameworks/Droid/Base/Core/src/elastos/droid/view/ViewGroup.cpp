@@ -18,9 +18,10 @@
 #include "elastos/droid/view/animation/CTransformation.h"
 #include "elastos/droid/view/animation/AnimationUtils.h"
 #include "elastos/droid/view/animation/LayoutAnimationController.h"
-#include <elastos/utility/logging/Logger.h>
+
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/etl/Algorithm.h>
 
 using Elastos::Droid::Animation::CLayoutTransition;
 using Elastos::Droid::Animation::EIID_ITransitionListener;
@@ -50,7 +51,6 @@ using Elastos::Core::StringUtils;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::CCollections;
 using Elastos::Utility::CArrayList;
-using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -1326,6 +1326,7 @@ ECode ViewGroup::SetDescendantFocusability(
         case FOCUS_BLOCK_DESCENDANTS:
             break;
         default:
+        Slogger::E("ViewGroup", "must be one of FOCUS_BEFORE_DESCENDANTS, FOCUS_AFTER_DESCENDANTS, FOCUS_BLOCK_DESCENDANTS");
 //            throw new IllegalArgumentException("must be one of FOCUS_BEFORE_DESCENDANTS, "
 //                    + "FOCUS_AFTER_DESCENDANTS, FOCUS_BLOCK_DESCENDANTS");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1721,7 +1722,7 @@ ECode ViewGroup::ClearChildFocus(
     /* [in] */ IView* child)
 {
     if (DBG) {
-        Slogger::D(VG_TAG, /*this + */" clearChildFocus()");
+        Slogger::D(VG_TAG, "ViewGroup %p: clearChildFocus()", this);
     }
 
     mFocused = NULL;
@@ -6754,7 +6755,30 @@ ECode ViewGroup::StartViewTransition(
 ECode ViewGroup::EndViewTransition(
     /* [in] */ IView* view)
 {
-    assert(0 && "TODO");
+    if (mTransitioningViews.GetSize() != 0) {
+        mTransitioningViews.Remove(view);
+        Boolean contains;
+        if (mDisappearingChildren != NULL && (mDisappearingChildren->Contains(view, &contains), contains)) {
+            mDisappearingChildren->Remove(view);
+            if (mVisibilityChangingChildren.GetSize() != 0){
+                AutoPtr<IView> param = view;
+                if (Find(mVisibilityChangingChildren.Begin(), mVisibilityChangingChildren.End(), param)
+                    != mVisibilityChangingChildren.End())
+                {
+                    mVisibilityChangingChildren.Remove(view);
+                }
+            } else {
+                View* impl = (View*)view;
+                if (impl->mAttachInfo != NULL) {
+                    impl->DispatchDetachedFromWindow();
+                }
+                if (impl->mParent != NULL) {
+                    impl->mParent = NULL;
+                }
+            }
+            Invalidate();
+        }
+    }
     return NOERROR;
 }
 
@@ -6877,8 +6901,8 @@ ECode ViewGroup::DrawableStateChanged()
 
     if ((mGroupFlags & FLAG_NOTIFY_CHILDREN_ON_DRAWABLE_STATE_CHANGE) != 0) {
         if ((mGroupFlags & FLAG_ADD_STATES_FROM_CHILDREN) != 0) {
-//            throw new IllegalStateException("addStateFromChildren cannot be enabled if a"
-//                    + " child has duplicateParentState set to TRUE");
+            SLOGGERE("ViewGroup", "addStateFromChildren cannot be enabled if a" \
+                " child has duplicateParentState set to TRUE");
             return E_ILLEGAL_STATE_EXCEPTION;
         }
 

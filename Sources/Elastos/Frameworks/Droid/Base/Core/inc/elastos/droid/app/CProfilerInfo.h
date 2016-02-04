@@ -54,7 +54,7 @@ public:
     CARAPI GetProfileFd(
         /* [out] */ IParcelFileDescriptor** fd);
 
-    CARAPI SetProfiledFd(
+    CARAPI SetProfileFd(
         /* [in] */ IParcelFileDescriptor* fd);
 
     /* Indicates sample profiling when nonzero, interval in microseconds. */

@@ -15,14 +15,14 @@ namespace Media {
 static const Boolean DBG = TRUE;
 
 const Int32 AudioSystem::NUM_STREAM_TYPES = 10;
-AutoPtr<IAudioSystemErrorCallback> AudioSystem::mErrorCallback;
+AutoPtr<IAudioSystemErrorCallback> AudioSystem::sErrorCallback;
 const Int32 AudioSystem::NUM_DEVICE_STATES = 1;
 const Int32 AudioSystem::NUM_FORCE_CONFIG = 13;
 const Int32 AudioSystem::NUM_FORCE_USE = 6;
-Object AudioSystem::sStatiAudioSystemLock;
-Boolean AudioSystem::sInitAudioSystem = FALSE;
+Object AudioSystem::sLock;
+AudioSystem::StaticInitializer AudioSystem::sInitializer;
 
-static void android_media_AudioSystem_error_callback(android::status_t err)
+static void elastos_media_AudioSystem_error_callback(android::status_t err)
 {
     Int32 error = IAudioSystem::AUDIO_STATUS_ERROR;
     switch (err) {
@@ -40,13 +40,10 @@ static void android_media_AudioSystem_error_callback(android::status_t err)
     AudioSystem::ErrorCallbackFromNative(error);
 }
 
-// AudioSystem::AudioSystem()
-// {
-//     if (!sInitAudioSystem) {
-//         android::AudioSystem::setErrorCallback(android_media_AudioSystem_error_callback);
-//         sInitAudioSystem = TRUE;
-//     }
-// }
+AudioSystem::StaticInitializer::StaticInitializer()
+{
+    android::AudioSystem::setErrorCallback(elastos_media_AudioSystem_error_callback);
+}
 
 ECode AudioSystem::GetNumStreamTypes(
     /* [out] */ Int32* result)
@@ -145,8 +142,8 @@ ECode AudioSystem::GetParameters(
 ECode AudioSystem::SetErrorCallback(
     /* [in] */ IAudioSystemErrorCallback* cb)
 {
-    synchronized(sStatiAudioSystemLock) {
-        mErrorCallback = cb;
+    synchronized(sLock) {
+        sErrorCallback = cb;
         if (cb != NULL) {
             Int32 val;
             CheckAudioFlinger(&val);
@@ -278,10 +275,12 @@ ECode AudioSystem::GetDeviceConnectionState(
 }
 
 ECode AudioSystem::SetPhoneState(
-    /* [in] */ Int32 state)
+    /* [in] */ Int32 state,
+    /* [out] */ Int32* result)
 {
-    return CheckAudioSystemCommand(
+    *result = CheckAudioSystemCommand(
         android::AudioSystem::setPhoneState((audio_mode_t)state));
+    return NOERROR;
 }
 
 ECode AudioSystem::SetForceUse(
@@ -886,6 +885,7 @@ ECode AudioSystem::GetAudioHwSyncForSession(
 {
     VALIDATE_NOT_NULL(result)
     *result = (Int32)android::AudioSystem::getAudioHwSyncForSession((audio_session_t)sessionId);
+    return NOERROR;
 }
 
 void AudioSystem::ErrorCallbackFromNative(
@@ -893,9 +893,9 @@ void AudioSystem::ErrorCallbackFromNative(
 {
     if (DBG) Logger::E("AudioSystem", "ErrorCallbackFromNative error: %d", error);
     AutoPtr<IAudioSystemErrorCallback> errorCallback;
-    synchronized(sStatiAudioSystemLock) {
-        if (mErrorCallback != NULL) {
-            errorCallback = mErrorCallback;
+    synchronized(sLock) {
+        if (sErrorCallback != NULL) {
+            errorCallback = sErrorCallback;
         }
     }
     if (errorCallback != NULL) {

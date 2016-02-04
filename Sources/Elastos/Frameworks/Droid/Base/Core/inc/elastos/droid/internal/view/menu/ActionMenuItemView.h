@@ -2,20 +2,15 @@
 #define __ELASTOS_DROID_INTERNAL_VIEW_MENU_ACTIONMENUITEMVIEW_H__
 
 #include "Elastos.Droid.Widget.h"
-
-#if 0
+#include "elastos/droid/widget/ListPopupWindow.h"
 #include "elastos/droid/widget/TextView.h"
-#else
-#include "elastos/droid/view/View.h"
-using Elastos::Droid::View::IMotionEvent;
-using Elastos::Droid::View::IView;
-#endif
 
 using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IViewOnLongClickListener;
 using Elastos::Droid::Widget::IActionMenuChildView;
 using Elastos::Droid::Widget::IListPopupWindow;
-// using Elastos::Droid::Widget::TextView;
+using Elastos::Droid::Widget::ListPopupWindow;
+using Elastos::Droid::Widget::TextView;
 
 namespace Elastos {
 namespace Droid {
@@ -24,11 +19,7 @@ namespace View {
 namespace Menu {
 
 class ActionMenuItemView
-#if 0
     : public TextView
-#else
-    : public Elastos::Droid::View::View
-#endif
     , public IActionMenuItemView
     , public IMenuItemView
     , public IViewOnClickListener
@@ -59,9 +50,7 @@ private:
     };
 
     class ActionMenuItemForwardingListener
-    #if 0
-        : public ForwardingListener
-    #endif
+        : public ListPopupWindow::ForwardingListener
     {
     public:
         ActionMenuItemForwardingListener(
@@ -215,8 +204,7 @@ private:
     AutoPtr<ICharSequence> mTitle;
     AutoPtr<IDrawable> mIcon;
     AutoPtr<IMenuBuilderItemInvoker> mItemInvoker;
-    // TODO:
-    // AutoPtr<IForwardingListener> mForwardingListener;
+    AutoPtr<ListPopupWindow::ForwardingListener> mForwardingListener;
     AutoPtr<IPopupCallback> mPopupCallback;
 
     Boolean mAllowTextWithIcon;

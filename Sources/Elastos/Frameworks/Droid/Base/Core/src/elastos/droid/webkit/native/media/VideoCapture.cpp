@@ -237,17 +237,17 @@ Boolean VideoCapture::Allocate(
     // Generate one texture pointer and bind it as an external texture.
     AutoPtr<IGLES20> gles20;
     //TODO CGLES20::AcquireSingleton((IGLES20**)&gles20);
-    gles20->glGenTextures(1, mGlTextures, 0);
-    gles20->glBindTexture(GL_TEXTURE_EXTERNAL_OES, (*mGlTextures)[0]);
+    gles20->GlGenTextures(1, mGlTextures, 0);
+    gles20->GlBindTexture(GL_TEXTURE_EXTERNAL_OES, (*mGlTextures)[0]);
     // No mip-mapping with camera source.
-    gles20->glTexParameterf(GL_TEXTURE_EXTERNAL_OES,
+    gles20->GlTexParameterf(GL_TEXTURE_EXTERNAL_OES,
             IGLES20::_GL_TEXTURE_MIN_FILTER, IGLES20::_GL_LINEAR);
-    gles20->glTexParameterf(GL_TEXTURE_EXTERNAL_OES,
+    gles20->GlTexParameterf(GL_TEXTURE_EXTERNAL_OES,
             IGLES20::_GL_TEXTURE_MAG_FILTER, IGLES20::_GL_LINEAR);
     // Clamp to edge is only option.
-    gles20->glTexParameteri(GL_TEXTURE_EXTERNAL_OES,
+    gles20->GlTexParameteri(GL_TEXTURE_EXTERNAL_OES,
             IGLES20::_GL_TEXTURE_WRAP_S, IGLES20::_GL_CLAMP_TO_EDGE);
-    gles20->glTexParameteri(GL_TEXTURE_EXTERNAL_OES,
+    gles20->GlTexParameteri(GL_TEXTURE_EXTERNAL_OES,
             IGLES20::_GL_TEXTURE_WRAP_T, IGLES20::_GL_CLAMP_TO_EDGE);
 
     //TODO CSurfaceTexture::New((*mGlTextures[0]), (ISurfaceTexture**)&mSurfaceTexture);
@@ -332,7 +332,7 @@ void VideoCapture::Deallocate()
         if (mGlTextures != NULL) {
             AutoPtr<IGLES20> gles20;
             //TODO CGLES20::AcquireSingleton((IGLES20**)&gles20);
-            gles20->glDeleteTextures(1, mGlTextures, 0);
+            gles20->GlDeleteTextures(1, mGlTextures, 0);
         }
         mCaptureFormat = NULL;
         mCamera->Release();

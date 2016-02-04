@@ -2,13 +2,17 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHPAN_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHPAN_H__
 
-#include "Elastos.Droid.Core_server.h"
+//#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -17,19 +21,20 @@ namespace Bluetooth {
 class CBluetoothPanStateChangeCallback;
 
 class BluetoothPan
-    : public ElRefBase
+    : public Object
+    , public IBluetoothPan
     , public IBluetoothProfile
 {
 private:
     class ServiceConnection
-        : public ElRefBase
+        : public Object
         , public IServiceConnection
     {
     public:
+        CAR_INTERFACE_DECL();
+
         ServiceConnection(
             /* [in] */ BluetoothPan* host);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI OnServiceConnected(
             /* [in] */ IComponentName* name,
@@ -43,13 +48,15 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
+    BluetoothPan();
+
     BluetoothPan(
         /* [in] */ IContext* context,
         /* [in] */ IBluetoothProfileServiceListener* listener);
 
     ~BluetoothPan();
-
-    CAR_INTERFACE_DECL()
 
     CARAPI Close();
 
@@ -62,11 +69,11 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI GetConnectedDevices(
-        /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices);
+        /* [out] */ IList** devices);// IBluetoothDevice
 
     CARAPI GetDevicesMatchingConnectionStates(
         /* [in] */ ArrayOf<Int32>* states,
-        /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices);
+        /* [out] */ IList** devices);// IBluetoothDevice
 
     CARAPI GetConnectionState(
         /* [in] */ IBluetoothDevice* device,
@@ -83,79 +90,6 @@ private:
 
     CARAPI_(Boolean) IsValidDevice(
         /* [in] */ IBluetoothDevice* device);
-
-public:
-    /**
-     * Intent used to broadcast the change in connection state of the Pan
-     * profile.
-     *
-     * <p>This intent will have 4 extras:
-     * <ul>
-     *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
-     *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile.</li>
-     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
-     *   <li> {@link #EXTRA_LOCAL_ROLE} - Which local role the remote device is
-     *   bound to. </li>
-     * </ul>
-     *
-     * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
-     * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
-     * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
-     *
-     * <p> {@link #EXTRA_LOCAL_ROLE} can be one of {@link #LOCAL_NAP_ROLE} or
-     * {@link #LOCAL_PANU_ROLE}
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
-     * receive.
-     */
-    // @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    static const String ACTION_CONNECTION_STATE_CHANGED;
-
-    /**
-     * Extra for {@link #ACTION_CONNECTION_STATE_CHANGED} intent
-     * The local role of the PAN profile that the remote device is bound to.
-     * It can be one of {@link #LOCAL_NAP_ROLE} or {@link #LOCAL_PANU_ROLE}.
-     */
-    static const String EXTRA_LOCAL_ROLE;
-
-    static const Int32 PAN_ROLE_NONE = 0;
-    /**
-     * The local device is acting as a Network Access Point.
-     */
-    static const Int32 LOCAL_NAP_ROLE = 1;
-    static const Int32 REMOTE_NAP_ROLE = 1;
-
-    /**
-     * The local device is acting as a PAN User.
-     */
-    static const Int32 LOCAL_PANU_ROLE = 2;
-    static const Int32 REMOTE_PANU_ROLE = 2;
-
-    /**
-     * Return codes for the connect and disconnect Bluez / Dbus calls.
-     * @hide
-     */
-    static const Int32 PAN_DISCONNECT_FAILED_NOT_CONNECTED = 1000;
-
-    /**
-     * @hide
-     */
-    static const Int32 PAN_CONNECT_FAILED_ALREADY_CONNECTED = 1001;
-
-    /**
-     * @hide
-     */
-    static const Int32 PAN_CONNECT_FAILED_ATTEMPT_FAILED = 1002;
-
-    /**
-     * @hide
-     */
-    static const Int32 PAN_OPERATION_GENERIC_FAILURE = 1003;
-
-    /**
-     * @hide
-     */
-    static const Int32 PAN_OPERATION_SUCCESS = 1004;
-
 private:
     const static String TAG;
     const static Boolean DBG;

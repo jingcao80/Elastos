@@ -1,5 +1,6 @@
 
-#include "pm/Installer.h"
+#include "Elastos.Droid.Net.h"
+#include "elastos/droid/server/pm/Installer.h"
 #include "elastos/droid/os/Build.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -70,7 +71,7 @@ Int32 Installer::Patchoat(
 
     Int32 result;
     mInstaller->Patchoat(apkPath, uid, isPublic, pkgName, instructionSet, &result);
-    return result
+    return result;
 }
 
 Int32 Installer::Patchoat(
@@ -86,7 +87,7 @@ Int32 Installer::Patchoat(
 
     Int32 result;
     mInstaller->Patchoat(apkPath, uid, isPublic, instructionSet, &result);
-    return result
+    return result;
 }
 
 Int32 Installer::Dexopt(
@@ -136,7 +137,7 @@ Int32 Installer::Idmap(
     builder.AppendChar(' ');
     builder.Append(uid);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -158,7 +159,7 @@ Int32 Installer::Movedex(
     builder.AppendChar(' ');
     builder.Append(instructionSet);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -177,7 +178,7 @@ Int32 Installer::Rmdex(
     builder.AppendChar(' ');
     builder.Append(instructionSet);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -191,7 +192,7 @@ Int32 Installer::Remove(
     builder.AppendChar(' ');
     builder.Append(userId);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -205,7 +206,7 @@ Int32 Installer::Rename(
     builder.AppendChar(' ');
     builder.Append(newname);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -222,7 +223,7 @@ Int32 Installer::FixUid(
     builder.AppendChar(' ');
     builder.Append(gid);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -236,7 +237,7 @@ Int32 Installer::DeleteCacheFiles(
     builder.AppendChar(' ');
     builder.Append(userId);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -250,7 +251,7 @@ Int32 Installer::DeleteCodeCacheFiles(
     builder.AppendChar(' ');
     builder.Append(userId);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -270,7 +271,7 @@ Int32 Installer::CreateUserData(
     builder.AppendChar(' ');
     builder.Append(!seinfo.IsNull() ? seinfo : "!");
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -281,7 +282,7 @@ Int32 Installer::CreateUserConfig(
     builder.AppendChar(' ');
     builder.Append(userId);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -289,11 +290,11 @@ Int32 Installer::RemoveUserDataDirs(
     /* [in] */ Int32 userId)
 {
     StringBuilder builder;
-    builder.AppendCStr("rmuser");
+    builder.Append("rmuser");
     builder.AppendChar(' ');
     builder.Append(userId);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -302,13 +303,13 @@ Int32 Installer::ClearUserData(
     /* [in] */ Int32 userId)
 {
     StringBuilder builder;
-    builder.AppendCStr("rmuserdata");
+    builder.Append("rmuserdata");
     builder.AppendChar(' ');
     builder.Append(name);
     builder.AppendChar(' ');
     builder.Append(userId);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -324,7 +325,7 @@ Int32 Installer::MarkBootComplete(
     builder.AppendChar(' ');
     builder.Append(instructionSet);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -345,9 +346,9 @@ Int32 Installer::FreeCache(
     StringBuilder builder;
     builder.Append("freecache");
     builder.AppendChar(' ');
-    builder.Append(StringUtils::Int64ToString(freeStorageSize));
+    builder.Append(StringUtils::ToString(freeStorageSize));
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -391,7 +392,7 @@ Int32 Installer::GetSizeInfo(
     builder.Append((*instructionSets)[0]);
 
     String s;
-    mInstaller->Transaction(builder.ToString(), &s);
+    mInstaller->Transact(builder.ToString(), &s);
     AutoPtr< ArrayOf<String> > res;
     StringUtils::Split(s, String(" "), (ArrayOf<String>**)&res);
 
@@ -439,7 +440,7 @@ Int32 Installer::LinkNativeLibraryDirectory(
     builder.Append(userId);
 
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result;
 }
 
@@ -456,7 +457,7 @@ Boolean Installer::RestoreconData(
     builder.AppendChar(' ');
     builder.Append(uid);
     Int32 result;
-    mInstaller->Execute(builder.toString(), &result);
+    mInstaller->Execute(builder.ToString(), &result);
     return result == 0;
 }
 

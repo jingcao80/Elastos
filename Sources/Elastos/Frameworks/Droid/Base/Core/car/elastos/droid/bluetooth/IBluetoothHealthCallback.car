@@ -10,26 +10,26 @@ module
     namespace Droid {
     namespace Bluetooth {
 
-        /**
-         * This abstract class is used to implement BluetoothHealth callbacks.
-         *
-         * @sa BluetoothHealth
-         *@hide
-         */
-        interface IIBluetoothHealthCallback
-        {
-            OnHealthAppConfigurationStatusChange(
-                [in] IBluetoothHealthAppConfiguration* config,
-                [in] Int32 status);
+    /**
+     * This abstract class is used to implement BluetoothHealth callbacks.
+     *
+     * @sa BluetoothHealth
+     *@hide
+     */
+    interface IIBluetoothHealthCallback
+    {
+        OnHealthAppConfigurationStatusChange(
+            [in] IBluetoothHealthAppConfiguration* config,
+            [in] Int32 status);
 
-            OnHealthChannelStateChange(
-                [in] IBluetoothHealthAppConfiguration* config,
-                [in] IBluetoothDevice* device,
-                [in] Int32 prevState,
-                [in] Int32 newState,
-                [in] IParcelFileDescriptor* fd,
-                [in] Int32 id);
-        }
+        OnHealthChannelStateChange(
+            [in] IBluetoothHealthAppConfiguration* config,
+            [in] IBluetoothDevice* device,
+            [in] Int32 prevState,
+            [in] Int32 newState,
+            [in] IParcelFileDescriptor* fd,
+            [in] Int32 id);
+    }
 
     } // Bluetooth
     } // Droid

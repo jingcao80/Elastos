@@ -178,7 +178,7 @@ private:
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
     private:
-        AutoPtr<CEnumMap> mEnumMap;
+        CEnumMap* mEnumMap;
     };
 
     class EnumMapKeySetType
@@ -260,7 +260,7 @@ private:
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
     private:
-        AutoPtr<CEnumMap> mEnumMap;
+        CEnumMap* mEnumMap;
     };
 
     class EnumMapValueCollectionType
@@ -356,7 +356,7 @@ private:
             /* [out, callee] */ ArrayOf<IInterface*>** outArray);
 
     private:
-        AutoPtr<CEnumMap> mEnumMap;
+        CEnumMap* mEnumMap;
     };
 
     class EnumMapEntrySetType

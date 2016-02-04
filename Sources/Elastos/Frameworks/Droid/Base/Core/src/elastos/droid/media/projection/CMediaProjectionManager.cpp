@@ -141,12 +141,13 @@ ECode CMediaProjectionManager::AddCallback(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<CallbackDelegate> delegate = new CallbackDelegate(this, callback, handler);
-    IMap::Probe(mCallbacks)->Put(callback, (IInterface*)(IObject*)delegate);
+    IMap::Probe(mCallbacks)->Put(callback, (IObject*)delegate);
     // try {
-        mService->AddCallback(IIMediaProjectionWatcherCallback::Probe(delegate));
+    mService->AddCallback(IIMediaProjectionWatcherCallback::Probe(delegate));
     // } catch (RemoteException e) {
     //     Log.e(TAG, "Unable to add callbacks to MediaProjection service", e);
     // }
+    return NOERROR;
 }
 
 ECode CMediaProjectionManager::RemoveCallback(
@@ -159,12 +160,13 @@ ECode CMediaProjectionManager::RemoveCallback(
     AutoPtr<CallbackDelegate> delegate;
     IMap::Probe(mCallbacks)->Remove(callback, (IInterface**)&delegate);
     // try {
-        if (delegate != NULL) {
-            mService->RemoveCallback(IIMediaProjectionWatcherCallback::Probe(delegate));
-        }
+    if (delegate != NULL) {
+        mService->RemoveCallback(IIMediaProjectionWatcherCallback::Probe(delegate));
+    }
     // } catch (RemoteException e) {
     //     Log.e(TAG, "Unable to add callbacks to MediaProjection service", e);
     // }
+    return NOERROR;
 }
 
 } // namespace Projection

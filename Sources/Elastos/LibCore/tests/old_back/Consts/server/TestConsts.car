@@ -1,6 +1,8 @@
 
 module
 {
+    importlib("Elastos.CoreLibrary.eco");
+
     interface IConstsDef {
         const Byte bt1 = 3;
         const Byte bt2 = 0x6;
@@ -26,6 +28,8 @@ module
         const Double d1 = 1;
 
         const String s1 = "IConstsDef";
+
+        const String s2 = NULL;
 
         const Int32 i5 = 1 << 0;
         const Int32 i6 = 1 << 1;

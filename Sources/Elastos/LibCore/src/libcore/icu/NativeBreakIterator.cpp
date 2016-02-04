@@ -530,7 +530,7 @@ Int32 NativeBreakIterator::LastImpl(
     /* [in] */ Int64 address,
     /* [in] */ const String& text)
 {
-    Int32 rev;
+    Int32 rev = 0;
     synchronized(mLock) {
         BreakIteratorAccessor it(address, text, false);
         rev = it->last();

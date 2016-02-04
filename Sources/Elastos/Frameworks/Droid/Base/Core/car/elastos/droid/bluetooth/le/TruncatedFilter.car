@@ -1,0 +1,38 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.LE.IScanFilter;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+    namespace LE {
+
+    /**
+     * A special scan filter that lets the client decide how the scan record should be stored.
+     *
+     * @hide
+     */
+    //@SystemApi
+    interface ITruncatedFilter {
+        /**
+         * Returns the scan filter.
+         */
+        GetFilter(
+            [out] IScanFilter** filter);
+
+        /**
+         * Returns a list of descriptor for scan result storage.
+         */
+        GetStorageDescriptors(
+            [out] IList** list);//List<ResultStorageDescriptor>
+    }
+
+
+    } // LE
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

@@ -2,12 +2,12 @@
 #ifndef __ELASTOS_DROID_SERVER_AM_APPNOTRESPONDINGDIALOG_H__
 #define __ELASTOS_DROID_SERVER_AM_APPNOTRESPONDINGDIALOG_H__
 
-#include "BaseErrorDialog.h"
-#include "ProcessRecord.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/server/am/BaseErrorDialog.h"
+#include "elastos/droid/server/am/ProcessRecord.h"
 
-using namespace Elastos::Core;
-using Elastos::Droid::Os::HandlerBase;
+using Elastos::Droid::Os::Handler;
 
 namespace Elastos {
 namespace Droid {
@@ -18,7 +18,7 @@ class AppNotRespondingDialog : public BaseErrorDialog
 {
 private:
     class MyHandler
-        : public HandlerBase
+        : public Handler
     {
     public:
         MyHandler(
@@ -34,9 +34,6 @@ private:
     };
 
 public:
-    // friend class PositiveButtonOnClickListener;
-    // friend class NeutralButtonOnClickListener;
-
     AppNotRespondingDialog(
         /* [in] */ CActivityManagerService* service,
         /* [in] */ IContext* context,
@@ -44,7 +41,7 @@ public:
         /* [in] */ ActivityRecord* activity,
         /* [in] */ Boolean aboveSystem);
 
-    CARAPI_(void) OnStop();
+    CARAPI OnStop();
 
 private:
     static const String TAG;

@@ -39,10 +39,10 @@ private:
 
         CARAPI Close();
 
-        AutoPtr<IFileDescriptor> GetFD();
+        CARAPI_(AutoPtr<IFileDescriptor>) GetFD();
 
     private:
-        AutoPtr<ServerSocketChannelImpl> mChannelImpl;
+        ServerSocketChannelImpl* mChannelImpl;
     };
 
 public:

@@ -96,18 +96,27 @@ ECode HttpsConnection::InnerSub_X509TrustManager::CheckServerTrusted(
     return NOERROR;
 }
 
+
+//===========================================================
+// HttpsConnection::StaticInitializer
+//===========================================================
+HttpsConnection::StaticInitializer::StaticInitializer()
+{
+    // TODO:
+    // This initialization happens in the zygote. It triggers some
+    // lazy initialization that can will benefit later invocations of
+    // initializeEngine().
+    // InitializeEngine(NULL);
+}
+
 //===========================================================
 // HttpsConnection
 //===========================================================
-AutoPtr<IObject> HttpsConnection::sLock = InitLock();
 AutoPtr<ISSLSocketFactory> HttpsConnection::sSslSocketFactory;
+Object HttpsConnection::sLock;
+const HttpsConnection::StaticInitializer HttpsConnection::sInitializer;
 
 CAR_INTERFACE_IMPL(HttpsConnection, Connection, IHttpsConnection)
-
-// This initialization happens in the zygote. It triggers some
-// lazy initialization that can will benefit later invocations of
-// initializeEngine().
-ECode HttpsConnection::mEnableStaticBlock = InitializeEngine(NULL);
 
 HttpsConnection::HttpsConnection()
     : mSuspended(FALSE)
@@ -264,15 +273,15 @@ ECode HttpsConnection::OpenConnection(
         AutoPtr<IHttpRequest> httpReq = IHttpRequest::Probe(proxyReq);
         ec = proxyConnection->SendRequestHeader(httpReq);
         if (ec == (ECode)E_PARSE_EXCEPTION
-                || ec == E_HTTP_EXCEPTION
-                || ec == E_IO_EXCEPTION ) {
+                || ec == (ECode)E_HTTP_EXCEPTION
+                || ec == (ECode)E_IO_EXCEPTION ) {
             Logger::E("HttpsConnection", String("failed to send a CONNECT request"));
             return ec;
         }
         ec = proxyConnection->Flush();
         if (ec == (ECode)E_PARSE_EXCEPTION
-                || ec == E_HTTP_EXCEPTION
-                || ec == E_IO_EXCEPTION ) {
+                || ec == (ECode)E_HTTP_EXCEPTION
+                || ec == (ECode)E_IO_EXCEPTION ) {
             Logger::E("HttpsConnection", String("failed to send a CONNECT request"));
             return ec;
         }
@@ -285,8 +294,8 @@ ECode HttpsConnection::OpenConnection(
             statusLine = NULL;
             ec = proxyConnection->ParseResponseHeader(headers, (IStatusLine**)&statusLine);
             if (ec == (ECode)E_PARSE_EXCEPTION
-                    || ec == E_HTTP_EXCEPTION
-                    || ec == E_IO_EXCEPTION ) {
+                    || ec == (ECode)E_HTTP_EXCEPTION
+                    || ec == (ECode)E_IO_EXCEPTION ) {
                 Logger::E("HttpsConnection", String("failed to send a CONNECT request"));
                 return ec;
             }
@@ -443,7 +452,7 @@ ECode HttpsConnection::CloseConnection()
         RestartConnection(FALSE);
     }
 
-    ECode ec;
+    ECode ec = NOERROR;
     Boolean isOpen;
     if (mHttpClientConnection != NULL && (mHttpClientConnection->IsOpen(&isOpen), isOpen)) {
         ec = mHttpClientConnection->Close();
@@ -455,7 +464,6 @@ ECode HttpsConnection::CloseConnection()
             HttpLog::V(String("HttpsConnection.closeConnection(): failed closing connection ") + smHost);
         }
     }
-
     return ec;
 }
 
@@ -467,7 +475,6 @@ ECode HttpsConnection::RestartConnection(
     }
 
     synchronized(mSuspendLock) {
-
         if (mSuspended) {
             mSuspended = FALSE;
             mAborted = !proceed;
@@ -484,13 +491,6 @@ ECode HttpsConnection::GetScheme(
 
     *result = String("https");
     return NOERROR;
-}
-
-AutoPtr<IObject> HttpsConnection::InitLock()
-{
-    AutoPtr<IObject> rev;
-    Elastos::Core::CObject::New((IObject**)&rev);
-    return rev;
 }
 
 } // namespace Http

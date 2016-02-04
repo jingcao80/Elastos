@@ -239,8 +239,8 @@ private:
     };
 
     class HardKeyboardListener
-        : public ElRefBase
-        , public CWindowManagerService::IOnHardKeyboardStatusChangeListener
+        : public Object
+        , public IOnHardKeyboardStatusChangeListener
     {
     public:
         HardKeyboardListener(
@@ -249,11 +249,11 @@ private:
         CAR_INTERFACE_DECL()
 
         //@Override
-        CARAPI_(void) OnHardKeyboardStatusChange(
+        CARAPI OnHardKeyboardStatusChange(
             /* [in] */ Boolean available,
             /* [in] */ Boolean enabled);
 
-        CARAPI_(void) HandleHardKeyboardStatusChange(
+        CARAPI HandleHardKeyboardStatusChange(
             /* [in] */ Boolean available,
             /* [in] */ Boolean enabled);
 

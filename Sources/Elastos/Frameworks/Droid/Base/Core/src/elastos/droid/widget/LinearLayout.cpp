@@ -7,6 +7,7 @@
 #include "elastos/droid/widget/ActionMenuPresenter.h"
 #include <elastos/core/Math.h>
 #include "elastos/droid/R.h"
+
 using Elastos::Droid::View::Gravity;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IViewGroupMarginLayoutParams;
@@ -17,12 +18,11 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-const Int32 LinearLayout::VERTICAL_GRAVITY_COUNT;
-const Int32 LinearLayout::INDEX_CENTER_VERTICAL;
-const Int32 LinearLayout::INDEX_TOP;
-const Int32 LinearLayout::INDEX_BOTTOM;
-const Int32 LinearLayout::INDEX_FILL;
-
+const Int32 LinearLayout::VERTICAL_GRAVITY_COUNT = 4;
+const Int32 LinearLayout::INDEX_CENTER_VERTICAL = 0;
+const Int32 LinearLayout::INDEX_TOP = 1;
+const Int32 LinearLayout::INDEX_BOTTOM = 2;
+const Int32 LinearLayout::INDEX_FILL = 3;
 
 CAR_INTERFACE_IMPL(LinearLayout::LayoutParams, MarginLayoutParams, ILinearLayoutLayoutParams);
 LinearLayout::LayoutParams::LayoutParams()

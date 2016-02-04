@@ -529,6 +529,7 @@ void TableLayout::TrackCollapsedColumns(
             // collapsed; otherwise, this might affect the default
             // visibility of the row's children
             if (isCollapsed) {
+                // TODO
                 // row->SetColumnCollapsed(columnIndex, isCollapsed);
             }
         }

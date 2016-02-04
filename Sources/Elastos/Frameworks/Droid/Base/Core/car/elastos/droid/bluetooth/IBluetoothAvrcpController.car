@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * APIs for Bluetooth AVRCP controller service
+     *
+     * @hide
+     */
+    [deprecated]
+    interface IIBluetoothAvrcpController {
+
+        GetConnectedDevices(
+            [out] IList** devices);
+
+        GetDevicesMatchingConnectionStates(
+            [in] ArrayOf<Int32>* states,
+            [out] IList** devices);
+
+        GetConnectionState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* newState);
+
+        SendPassThroughCmd(
+            [in] IBluetoothDevice* device,
+            [in] Int32 keyCode,
+            [in] Int32 keyState);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

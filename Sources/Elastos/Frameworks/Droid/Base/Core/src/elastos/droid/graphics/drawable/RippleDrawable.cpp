@@ -514,7 +514,7 @@ ECode RippleDrawable::CanApplyTheme(
     /* [out] */ Boolean* can)
 {
     VALIDATE_NOT_NULL(can);
-    *can = (LayerDrawable::CanApplyTheme(can), *can) || mState != NULL && mState->mTouchThemeAttrs != NULL;
+    *can = (LayerDrawable::CanApplyTheme(can), *can) || (mState != NULL && mState->mTouchThemeAttrs != NULL);
     return NOERROR;
 }
 

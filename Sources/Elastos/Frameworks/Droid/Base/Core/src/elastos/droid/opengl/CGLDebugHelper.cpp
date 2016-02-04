@@ -1,15 +1,20 @@
 
-#include "CGLDebugHelper.h"
-#include "GLErrorWrapper.h"
-#include "GLLogWrapper.h"
+#include "elastos/droid/opengl/CGLDebugHelper.h"
+#include "elastos/droid/opengl/GLErrorWrapper.h"
+#include "elastos/droid/opengl/GLLogWrapper.h"
+#include "elastos/droid/opengl/EGLLogWrapper.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "EGLLogWrapper.h"
+
+#include "Elastos.CoreLibrary.IO.h"
 
 using Elastosx::Microedition::Khronos::Opengles::EIID_IGL;
 
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
+CAR_INTERFACE_IMPL(CGLDebugHelper, Singleton, IGLDebugHelper)
+
+CAR_SINGLETON_IMPL(CGLDebugHelper)
 
 ECode CGLDebugHelper::Wrap(
     /* [in] */ IGL* gl,
@@ -17,6 +22,8 @@ ECode CGLDebugHelper::Wrap(
     /* [in] */ Elastos::IO::IWriter* log,
     /* [out] */ IGL** glInstance)
 {
+    VALIDATE_NOT_NULL(glInstance)
+
     AutoPtr<IGL> rst;
     if ( configFlags != 0 ) {
         rst = (IGL*)(new GLErrorWrapper(gl, configFlags))->Probe(EIID_IGL);
@@ -37,8 +44,11 @@ ECode CGLDebugHelper::Wrap(
     /* [in] */ Elastos::IO::IWriter* log,
     /* [out] */ IEGL** eglInterface)
 {
+    VALIDATE_NOT_NULL(eglInterface)
+
     if (log != NULL) {
-        *eglInterface = new EGLLogWrapper(egl, configFlags, log);
+        IEGL11* tmp = new EGLLogWrapper(egl, configFlags, log);
+        *eglInterface = IEGL::Probe(tmp);
     }
     REFCOUNT_ADD(*eglInterface)
     return NOERROR;

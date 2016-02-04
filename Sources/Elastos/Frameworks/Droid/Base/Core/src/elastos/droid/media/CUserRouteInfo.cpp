@@ -14,6 +14,13 @@ namespace Media {
 CUserRouteInfo::CUserRouteInfo()
 {}
 
+CUserRouteInfo::~CUserRouteInfo()
+{}
+
+CAR_OBJECT_IMPL(CUserRouteInfo)
+
+CAR_INTERFACE_IMPL(CUserRouteInfo, Object, IMediaRouterUserRouteInfo, )
+
 ECode CUserRouteInfo::constructor(
     /* [in] */ IRouteCategory* category)
 {

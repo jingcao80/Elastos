@@ -2,13 +2,13 @@
 #include "elastos/droid/internal/view/StandaloneActionMode.h"
 #include "elastos/droid/internal/view/menu/CMenuBuilder.h"
 #include "elastos/droid/internal/view/menu/CMenuPopupHelper.h"
-// #include "elastos/droid/view/CMenuInflater.h"
+#include "elastos/droid/view/CMenuInflater.h"
 
 using Elastos::Droid::Internal::View::Menu::EIID_IMenuBuilderCallback;
 using Elastos::Droid::Internal::View::Menu::CMenuBuilder;
 using Elastos::Droid::Internal::View::Menu::CMenuPopupHelper;
 using Elastos::Droid::Internal::View::Menu::IMenuPopupHelper;
-// using Elastos::Droid::View::CMenuInflater;
+using Elastos::Droid::View::CMenuInflater;
 using Elastos::Droid::View::EIID_IView;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::Accessibility::IAccessibilityEventSource;
@@ -186,9 +186,7 @@ ECode StandaloneActionMode::GetMenuInflater(
     VALIDATE_NOT_NULL(menuInflater);
     AutoPtr<IContext> context;
     IView::Probe(mContextView)->GetContext((IContext**)&context);
-    assert(0);
-    return NOERROR;
-    // return CMenuInflater::New(context, menuInflater);
+    return CMenuInflater::New(context, menuInflater);
 }
 
 ECode StandaloneActionMode::OnMenuItemSelected(

@@ -2,21 +2,24 @@
 #ifndef __ELASTOS_DROID_SERVER_LOCATION_LOCATIONFUDGER_H__
 #define __ELASTOS_DROID_SERVER_LOCATION_LOCATIONFUDGER_H__
 
-#ifdef DROID_CORE
-#include "Elastos.Droid.Core_server.h"
-#elif defined(DROID_SERVER)
-#include "Elastos.Droid.Core.h"
-#endif
+#include "elastos/droid/ext/frameworkext.h"
+#include "_Elastos.Droid.Server.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Location.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Security.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/database/ContentObserver.h"
 
-using Elastos::IO::IPrintWriter;
-using Elastos::IO::IFileDescriptor;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Location::ILocation;
+using Elastos::Droid::Os::IHandler;
 using Elastos::Security::ISecureRandom;
-using Elastos::Droid::Net::IUri;
+using Elastos::IO::IPrintWriter;
+using Elastos::IO::IFileDescriptor;
 
 namespace Elastos {
 namespace Droid {
@@ -29,32 +32,28 @@ namespace Location {
  * <p>The goal is just to prevent applications with only
  * the coarse location permission from receiving a fine location.
  */
-class LocationFudger : public ElRefBase
+class LocationFudger
+    : public Object
 {
-public:
-    /**
-     * This is the fastest interval that applications can receive coarse
-     * locations.
-     */
-    static const Int64 FASTEST_INTERVAL_MS;// = 10 * 60 * 1000;  // 10 minutes
-
 private:
-
-    class ConstructorContentObserver : public ContentObserver
+    class SettingsObserver
+        : public ContentObserver
     {
     public:
-        ConstructorContentObserver(
+        SettingsObserver(
             /* [in] */ IHandler* handler,
             /* [in] */ LocationFudger* host);
 
-        virtual CARAPI OnChange(
+        //@override
+        CARAPI OnChange(
             /* [in] */ Boolean selfChange);
-    private:
 
+    private:
+        AutoPtr<IHandler> mHandler;
         LocationFudger* mHost;
     };
-public:
 
+public:
     LocationFudger(
         /* [in] */ IContext* context,
         /* [in] */ IHandler* handler);
@@ -62,20 +61,14 @@ public:
     /**
      * Get the cached coarse location, or generate a new one and cache it.
      */
-    CARAPI_(AutoPtr<ILocation>) GetOrCreate(
-        /* [in] */ ILocation* location);
-
-    CARAPI_(void) Dump(
-        /* [in] */ IFileDescriptor* fd,
-        /* [in] */ IPrintWriter* pw,
-        /* [in] */ ArrayOf<String>* args);
+    CARAPI GetOrCreate(
+        /* [in] */ ILocation* location,
+        /* [out] */ ILocation** outLocation);
 
 private:
-
     CARAPI_(AutoPtr<ILocation>) AddCoarseLocationExtraLocked(
         /* [in] */ ILocation* location);
 
-    CARAPI_(Double) NextOffsetLocked();
     /**
      * Create a coarse location.
      *
@@ -113,6 +106,8 @@ private:
      */
     CARAPI_(void) UpdateRandomOffsetLocked();
 
+    CARAPI_(Double) NextOffsetLocked();
+
     static CARAPI_(Double) WrapLatitude(
         /* [in] */ Double lat);
 
@@ -129,7 +124,14 @@ private:
         /* [in] */ Double distance,
         /* [in] */ Double lat);
 
-     /**
+public:
+    CARAPI Dump(
+        /* [in] */ IFileDescriptor* fd,
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ ArrayOf<String>* args);
+
+private:
+    /**
      * This is the main control: call this to set the best location accuracy
      * allowed for coarse applications and all derived values.
      */
@@ -148,29 +150,34 @@ private:
     CARAPI_(Float) LoadCoarseAccuracy();
 
 private:
-
-    static const Boolean D;// = FALSE;
-    static const String TAG;// = "LocationFudge";
+    const static Boolean D;
+    const static String TAG;
 
     /**
      * Default coarse accuracy in meters.
      */
-    static const Float DEFAULT_ACCURACY_IN_METERS;// = 2000.0f;
+    const static Float DEFAULT_ACCURACY_IN_METERS;
 
     /**
      * Minimum coarse accuracy in meters.
      */
-    static const Float MINIMUM_ACCURACY_IN_METERS;// = 200.0f;
+    const static Float MINIMUM_ACCURACY_IN_METERS;
 
     /**
      * Secure settings key for coarse accuracy.
      */
-    static const String COARSE_ACCURACY_CONFIG_NAME;// = "locationCoarseAccuracy";
+    const static String COARSE_ACCURACY_CONFIG_NAME;
+
+    /**
+     * This is the fastest interval that applications can receive coarse
+     * locations.
+     */
+    const static Int64 FASTEST_INTERVAL_MS;  // 10 minutes
 
     /**
      * The duration until we change the random offset.
      */
-    static const Int64 CHANGE_INTERVAL_MS;// = 60 * 60 * 1000;  // 1 hour
+    const static Int64 CHANGE_INTERVAL_MS;  // 1 hour
 
     /**
      * The percentage that we change the random offset at every interval.
@@ -178,7 +185,7 @@ private:
      * <p>0.0 indicates the random offset doesn't change. 1.0
      * indicates the random offset is completely replaced every interval.
      */
-    static const Double CHANGE_PER_INTERVAL;// = 0.03;  // 3% change
+    const static Double CHANGE_PER_INTERVAL;  // 3% change
 
     // Pre-calculated weights used to move the random offset.
     //
@@ -189,14 +196,14 @@ private:
     // algebra results in the following sqrt calculation to
     // weigh in a new offset while keeping the final standard
     // deviation unchanged.
-    static const Double NEW_WEIGHT;// = CHANGE_PER_INTERVAL;
-    static const Double PREVIOUS_WEIGHT;// = Math.sqrt(1 - NEW_WEIGHT * NEW_WEIGHT);
+    const static Double NEW_WEIGHT;
+    const static Double PREVIOUS_WEIGHT;
 
     /**
      * This number actually varies because the earth is not round, but
      * 111,000 meters is considered generally acceptable.
      */
-    static const Int32 APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR;// = 111000;
+    const static Int32 APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR = 111000;
 
     /**
      * Maximum latitude.
@@ -205,14 +212,9 @@ private:
      * to keep cosine(MAX_LATITUDE) to a non-zero value, so that we avoid
      * divide by zero fails.
      */
-    static const Double MAX_LATITUDE;/* = 90.0 -
-            (1.0 / APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR);*/
+    const static Double MAX_LATITUDE;
 
-    static Boolean sHavaNextNextGaussian;
-
-    static Double sNextNextGaussian;
-
-    Object mLock;
+    AutoPtr<ISecureRandom> mRandom;
 
     /**
      * Used to monitor coarse accuracy secure setting for changes.
@@ -249,8 +251,6 @@ private:
      * This value should only be set by {@link #setAccuracyInMetersLocked(float)}.
      */
     Double mStandardDeviationInMeters;
-
-
 };
 
 } // namespace Location

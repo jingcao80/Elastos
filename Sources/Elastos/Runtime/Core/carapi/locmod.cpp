@@ -69,7 +69,7 @@ ECode AcquireClassObjectFromLocalModule(
     localModule = NULL;
     DUMP_CLSID(rclsid, uunm)
     Void* module = dlopen(uunm, RTLD_NOW);
-    if (NULL == module){
+    if (NULL == module) {
         ec = E_FILE_NOT_FOUND;
         ALOGE("<%s, %d> dlopen '%s' failed.\n", __FILE__, __LINE__, uunm);
         ALOGE("error: %s\n", dlerror());

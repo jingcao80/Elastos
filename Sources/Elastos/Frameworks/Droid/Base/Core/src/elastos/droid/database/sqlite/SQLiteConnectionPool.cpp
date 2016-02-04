@@ -520,7 +520,7 @@ ECode SQLiteConnectionPool::WaitForConnection(
             (connectionFlags & CONNECTION_FLAG_PRIMARY_CONNECTION_AFFINITY) != 0;
 
     AutoPtr<ConnectionWaiter> waiter;
-    Int32 nonce;
+    Int32 nonce = 0;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfClosedLocked())
 

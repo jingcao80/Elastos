@@ -5,7 +5,8 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/server/pm/CKeySetHandle.h"
 #include "elastos/droid/server/pm/PackageSetting.h"
-#include "Elastos.CoreLibrary.Security.h"
+#include <Elastos.CoreLibrary.Security.h>
+#include <Elastos.CoreLibrary.External.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Security::IPublicKey;
@@ -139,13 +140,13 @@ public:
     //                     PackageManagerService.DumpState dumpState);
 
     CARAPI WriteKeySetManagerServiceLPr(
-        /* [in] */ IXmlPullParser* serializer);
+        /* [in] */ IXmlSerializer* serializer);
 
     CARAPI WritePublicKeysLPr(
-        /* [in] */ IXmlPullParser* serializer);
+        /* [in] */ IXmlSerializer* serializer);
 
     CARAPI WriteKeySetsLPr(
-        /* [in] */ IXmlPullParser* serializer);
+        /* [in] */ IXmlSerializer* serializer);
 
     CARAPI ReadKeySetsLPw(
         /* [in] */ IXmlPullParser* parser);
@@ -158,7 +159,7 @@ public:
 
     CARAPI ReadIdentifierLPw(
         /* [in] */ IXmlPullParser* parser,
-        /* [out] */ Int64 value);
+        /* [out] */ Int64* value);
 
     CARAPI ReadPublicKeyLPw(
         /* [in] */ IXmlPullParser* parser);

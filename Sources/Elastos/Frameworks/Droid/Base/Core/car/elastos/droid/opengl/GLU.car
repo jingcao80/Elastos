@@ -16,7 +16,7 @@ module
      * @return the error string for the input error code, or NULL if the input
      *         was not a valid GL or GLU error code.
      */
-        gluErrorString(
+        GluErrorString(
             [in] Int32 error,
             [out] String* str);
 
@@ -35,7 +35,7 @@ module
      * @param upY up vector Y
      * @param upZ up vector Z
      */
-        gluLookAt(
+        GluLookAt(
             [in] IGL10* gl,
             [in] Float eyeX,
             [in] Float eyeY,
@@ -56,7 +56,7 @@ module
      * @param bottom
      * @param top
      */
-        gluOrtho2D(
+        GluOrtho2D(
             [in] IGL10* gl,
             [in] Float left,
             [in] Float right,
@@ -77,7 +77,7 @@ module
      * @param zFar specifies the distance from the viewer to the far clipping
      *        plane (always positive).
      */
-        gluPerspective(
+        GluPerspective(
             [in] IGL10* gl,
             [in] Float fovy,
             [in] Float aspectp,
@@ -109,9 +109,9 @@ module
      * @param winOffset the offset into the win array where the win vector data
      *        starts.
      * @return A return value of GL_TRUE indicates success, a return value of
-     *         GL_FALSE indicates failure.
+     *         Gl_FALSE indicates failure.
      */
-        gluProject(
+        GluProject(
             [in] Float objX,
             [in] Float objY,
             [in] Float objZ,
@@ -152,7 +152,7 @@ module
      * @return A return value of GL10.GL_TRUE indicates success, a return value
      *         of GL10.GL_FALSE indicates failure.
      */
-        gluUnProject(
+        GluUnProject(
             [in] Float winX,
             [in] Float winY,
             [in] Float winZ,

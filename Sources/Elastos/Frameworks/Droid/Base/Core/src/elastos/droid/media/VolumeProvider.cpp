@@ -54,6 +54,7 @@ ECode VolumeProvider::SetCurrentVolume(
     if (mCallback != NULL) {
         mCallback->OnVolumeChanged(this);
     }
+    return NOERROR;
 }
 
 ECode VolumeProvider::OnSetVolumeTo(

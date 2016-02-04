@@ -94,8 +94,8 @@ ECode DhcpRequestPacket::DoNextOp(
 {
     AutoPtr<IInetAddress> clientRequest =
             mRequestedIp == NULL ? mClientIp : mRequestedIp;
-    Logger::V(TAG, "requested IP is %s and client IP is ", Object::ToString(mRequestedIp).string(),
-            Object::ToString(mClientIp).string());
+    Logger::V(TAG, "requested IP is %s and client IP is ", TO_CSTR(mRequestedIp),
+            TO_CSTR(mClientIp));
     return machine->OnRequestReceived(mBroadcast, mTransId, mClientMac,
             clientRequest, mRequestedParams, mHostName);
 }

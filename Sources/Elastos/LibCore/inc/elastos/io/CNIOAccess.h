@@ -37,6 +37,10 @@ public:
         /* [in] */ IBuffer* b,
         /* [out] */ IInterface** result);
 
+    CARAPI GetRemainingBytes(
+        /* [in] */ IBuffer* b,
+        /* [out] */ Int32* remaining);
+
     /**
      * Returns the offset in bytes from the start of the underlying
      * Java array object containing the data of the given Buffer to

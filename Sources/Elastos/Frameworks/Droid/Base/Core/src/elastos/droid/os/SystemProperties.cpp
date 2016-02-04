@@ -210,7 +210,7 @@ void SystemProperties::NativeSet(
     /* [in] */ const String& key,
     /* [in] */ const String& val)
 {
-    Int32 err;
+    Int32 UNUSED(err);
     String value = val;
     if (value.IsNull()) {
         value = String("");       /* NULL pointer not allowed here */

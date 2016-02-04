@@ -207,11 +207,7 @@ ECode FileChannelImpl::CheckWritable()
 
 ECode FileChannelImpl::ImplCloseChannel()
 {
-    if (ICloseable::Probe(mStream) != NULL)
-    {
-        return ((ICloseable*) mStream.Get())->Close();
-    }
-    return NOERROR;
+    return mStream->Close();
 }
 
 ECode FileChannelImpl::BasicLock(
@@ -445,7 +441,7 @@ ECode FileChannelImpl::Map(
     return NOERROR;
 }
 
-ECode FileChannelImpl::GetPosition(
+ECode FileChannelImpl::Position(
     /* [out] */ Int64* position)
 {
     FAIL_RETURN(CheckOpen());
@@ -454,20 +450,17 @@ ECode FileChannelImpl::GetPosition(
     return CLibcore::sOs->Lseek(mFd, 0L, seek_cur, position);
 }
 
-ECode FileChannelImpl::SetPosition(
+ECode FileChannelImpl::Position(
     /* [in] */ Int64 newPosition)
 {
-    ECode ecRet;
-    ecRet = CheckOpen();
-    if(newPosition < 0)
+    FAIL_RETURN(CheckOpen());
+    if (newPosition < 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
     Int32 seek_cur = OsConstants::_SEEK_CUR;
     Int64 result = 0;
-    assert(NOERROR == ecRet);
-    ecRet = CLibcore::sOs->Lseek(mFd, newPosition, seek_cur, &result);
-    assert(NOERROR == ecRet);
-    return NOERROR;
+    return CLibcore::sOs->Lseek(mFd, newPosition, seek_cur, &result);
 }
 
 ECode FileChannelImpl::Read(
@@ -482,8 +475,9 @@ ECode FileChannelImpl::Read(
     /* [in] */ Int64 position,
     /* [out] */ Int32* number)
 {
-    if(position < 0)
+    if (position < 0) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
     return ReadImpl(buffer, position, number);
 }
@@ -645,11 +639,11 @@ ECode FileChannelImpl::TransferFrom(
         Int64 size;
         fileSrc->GetSize(&size);
         Int64 filePosition;
-        fileSrc->GetPosition(&filePosition);
+        fileSrc->Position(&filePosition);
         count = Elastos::Core::Math::Min(count, size-filePosition);
         AutoPtr<IMappedByteBuffer> buffer;
         fileSrc->Map(Elastos::IO::Channels::FileChannelMapMode_READ_ONLY, filePosition, count, (IMappedByteBuffer**)&buffer);
-        ecRet = fileSrc->SetPosition(filePosition + count);
+        ecRet = fileSrc->Position(filePosition + count);
         if(NOERROR != ecRet)
             return ecRet;
 
@@ -881,7 +875,7 @@ ECode FileChannelImpl::CalculateTotalRemaining(
     VALIDATE_NOT_NULL(ret)
     *ret = 0;
 
-    Int32 count, i, remaining;
+    Int32 count = 0, i, remaining;
     Int32 LEN = offset + length;
     for (i = offset; i < LEN; ++i) {
         IBuffer::Probe((*buffers)[i])->GetRemaining(&remaining);

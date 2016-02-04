@@ -1,56 +1,153 @@
 
-#include "CNetworkManagementService.h"
-#include "NetworkManagementSocketTagger.h"
-#include "elastos/droid/net/LockdownVpnTracker.h"
-#include "elastos/droid/os/Binder.h"
-#include "elastos/droid/os/SystemClock.h"
-#include "elastos/droid/Manifest.h"
-#include <elastos/core/StringUtils.h>
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringBuffer.h>
+#include "elastos/droid/server/CNetworkManagementService.h"
+#include "elastos/droid/server/FgThread.h"
+#include "elastos/droid/server/NativeDaemonEvent.h"
+#include "elastos/droid/server/Watchdog.h"
+#include "elastos/droid/server/net/LockdownVpnTracker.h"
+#include <elastos/droid/Manifest.h>
+#include <elastos/droid/os/SystemClock.h>
 #include <Elastos.CoreLibrary.h>
+#include <Elastos.Droid.Wifi.h>
 #include <cutils/log.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringBuffer.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/droid/Manifest.h>
+#include <elastos/droid/net/IpPrefix.h>
+#include <elastos/droid/net/ReturnOutValue.h>
+#include <elastos/droid/os/Binder.h>
+#include <elastos/droid/os/Looper.h>
+#include <elastos/droid/os/Process.h>
+#include <elastos/droid/os/ServiceManager.h>
+#include <elastos/droid/os/SystemClock.h>
+#include <elastos/droid/os/SystemProperties.h>
+#include <elastos/droid/server/NetworkManagementSocketTagger.h>
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Core::ICharSequence;
+using Elastos::Core::CObject;
 using Elastos::Core::CString;
+using Elastos::Core::CSystem;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::ISystem;
 using Elastos::Core::StringBuffer;
 using Elastos::Core::StringUtils;
-using Elastos::IO::IFile;
-using Elastos::IO::CFile;
-using Elastos::Utility::IList;
-using Elastos::Utility::IIterator;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Os::Binder;
+using Elastos::Droid::App::IService;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::Net::CNetworkStatsFactory;
+using Elastos::Droid::Manifest;
+using Elastos::Droid::Net::CConnectivityManager;
+using Elastos::Droid::Net::CConnectivityManagerHelper;
+using Elastos::Droid::Net::CIpPrefix;
+using Elastos::Droid::Net::IConnectivityManager;
+using Elastos::Droid::Net::IConnectivityManagerHelper;
+using Elastos::Droid::Net::IIpPrefix;
+using Elastos::Droid::Net::ITrafficStats;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::CRemoteCallbackList;
-using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::CSystemProperties;
-using Elastos::Droid::Internal::Net::CNetworkStatsFactory;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::EIID_IINetworkManagementService;
+using Elastos::Droid::Os::IBatteryStats;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Server::Net::LockdownVpnTracker;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Utility::CSparseBooleanArray;
+using Elastos::IO::CFile;
+using Elastos::IO::IBuffer;
+using Elastos::IO::IDataInput;
+using Elastos::IO::IInputStream;
+using Elastos::IO::IReader;
+using Elastos::Net::CInetAddressHelper;
+using Elastos::Net::CURI;
+using Elastos::Net::IInetAddressHelper;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::CStringTokenizer;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::IStringTokenizer;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::IIterable;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
-CAR_INTERFACE_IMPL(CNetworkManagementService::NetdCallbackReceiver, INativeDaemonConnectorCallbacks)
+//=============================================================================
+// CNetworkManagementService::IdleTimerParams
+//=============================================================================
+CNetworkManagementService::IdleTimerParams::IdleTimerParams(
+    /* [in] */ Int32 timeout,
+    /* [in] */ Int32 type)
+    : mTimeout(timeout)
+    , mType(type)
+    , mNetworkCount(1)
+{}
 
-//
-// Netd Callback handling
-//
+//=============================================================================
+// CNetworkManagementService::NetdCallbackReceiver::ReceiverRunnable
+//=============================================================================
+CAR_INTERFACE_IMPL(CNetworkManagementService::NetdCallbackReceiver::ReceiverRunnable, Object, IRunnable)
+
+CNetworkManagementService::NetdCallbackReceiver::ReceiverRunnable::ReceiverRunnable(
+    /* [in] */ CNetworkManagementService* host)
+    : mHost(host)
+{}
+
+ECode CNetworkManagementService::NetdCallbackReceiver::ReceiverRunnable::Run()
+{
+    mHost->PrepareNativeDaemon();
+    return NOERROR;
+}
+
+//=============================================================================
+// CNetworkManagementService::NetdCallbackReceiver
+//=============================================================================
+CAR_INTERFACE_IMPL(CNetworkManagementService::NetdCallbackReceiver, Object, INativeDaemonConnectorCallbacks)
+
+CNetworkManagementService::NetdCallbackReceiver::NetdCallbackReceiver(
+    /* [in] */ CNetworkManagementService* host)
+    : mHost(host)
+{}
+
 ECode CNetworkManagementService::NetdCallbackReceiver::OnDaemonConnected()
 {
     // event is dispatched from internal NDC thread, so we prepare the
     // daemon back on main thread.
-    if (mOwner->mConnectedSignal != NULL) {
-        mOwner->mConnectedSignal->CountDown();
-        mOwner->mConnectedSignal = NULL;
+    if (mHost->mConnectedSignal != NULL) {
+        mHost->mConnectedSignal->CountDown();
+        mHost->mConnectedSignal = NULL;
     }
     else {
-        AutoPtr<IRunnable> task = new ReceiverRunnable(mOwner);
+        AutoPtr<IRunnable> task = new ReceiverRunnable(mHost);
         Boolean result;
-        mOwner->mMainHandler->Post(task, &result);
+        mHost->mFgHandler->Post(task, &result);
     }
+    return NOERROR;
+}
+
+ECode CNetworkManagementService::NetdCallbackReceiver::OnCheckHoldWakeLock(
+    /* [in] */ Int32 code,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    *result = code == NetdResponseCode::InterfaceClassActivity;
     return NOERROR;
 }
 
@@ -60,6 +157,8 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
     /* [in] */ const ArrayOf<String>& cooked,
     /* [out] */ Boolean* result)
 {
+    String errorMessage;
+    errorMessage.AppendFormat("Invalid event from daemon (%s)", raw.string());
     switch (code) {
     case NetdResponseCode::InterfaceChange:
         /*
@@ -70,30 +169,30 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
          *         "NNN Iface linkstatus <name> <up/down>"
          */
         if (cooked.GetLength() < 4 || !cooked[1].Equals("Iface")) {
-            //throw new IllegalStateException(String.format("Invalid event from daemon (%s)", raw));
+            Logger::E(TAG, "%s", errorMessage.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         if (cooked[2].Equals("added")) {
-            mOwner->NotifyInterfaceAdded(cooked[3]);
+            mHost->NotifyInterfaceAdded(cooked[3]);
             *result = TRUE;
             return NOERROR;
         }
         else if (cooked[2].Equals("removed")) {
-            mOwner->NotifyInterfaceRemoved(cooked[3]);
+            mHost->NotifyInterfaceRemoved(cooked[3]);
             *result = TRUE;
             return NOERROR;
         }
         else if (cooked[2].Equals("changed") && cooked.GetLength() == 5) {
-            mOwner->NotifyInterfaceStatusChanged(cooked[3], cooked[4].Equals("up"));
+            mHost->NotifyInterfaceStatusChanged(cooked[3], cooked[4].Equals("up"));
             *result = TRUE;
             return NOERROR;
         }
         else if (cooked[2].Equals("linkstate") && cooked.GetLength() == 5) {
-            mOwner->NotifyInterfaceLinkStateChanged(cooked[3], cooked[4].Equals("up"));
+            mHost->NotifyInterfaceLinkStateChanged(cooked[3], cooked[4].Equals("up"));
             *result = TRUE;
             return NOERROR;
         }
-        //throw new IllegalStateException(String.format("Invalid event from daemon (%s)", raw));
+        Logger::E(TAG, "%s", errorMessage.string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // break;
     case NetdResponseCode::BandwidthControl:
@@ -102,15 +201,15 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
          * Format: "NNN limit alert <alertName> <ifaceName>"
          */
         if (cooked.GetLength() < 5 || !cooked[1].Equals("limit")) {
-            //throw new IllegalStateException(String.format("Invalid event from daemon (%s)", raw));
+            Logger::E(TAG, "%s", errorMessage.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
         if (cooked[2].Equals("alert")) {
-            mOwner->NotifyLimitReached(cooked[3], cooked[4]);
+            mHost->NotifyLimitReached(cooked[3], cooked[4]);
             *result = TRUE;
             return NOERROR;
         }
-        //throw new IllegalStateException(String.format("Invalid event from daemon (%s)", raw));
+        Logger::E(TAG, "%s", errorMessage.string());
         return E_ILLEGAL_STATE_EXCEPTION;
         // break;
     case NetdResponseCode::InterfaceClassActivity:
@@ -120,13 +219,166 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
          * Format: "NNN IfaceClass <active/idle> <label>"
          */
         if (cooked.GetLength() < 4 || !cooked[1].Equals("IfaceClass")) {
-            //throw new IllegalStateException(String.format("Invalid event from daemon (%s)", raw));
+            Logger::E(TAG, "%s", errorMessage.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
+        Int64 timestampNanos = 0;
+        if (cooked.GetLength() == 5) {
+            // try {
+            timestampNanos = StringUtils::ParseInt64(cooked[4]);
+            // } catch(NumberFormatException ne) {}
+        } else {
+            timestampNanos = SystemClock::GetElapsedRealtimeNanos();
+        }
         Boolean isActive = cooked[2].Equals("active");
-        mOwner->NotifyInterfaceClassActivity(cooked[3], isActive);
+        mHost->NotifyInterfaceClassActivity(StringUtils::ParseInt32(cooked[3]),
+                isActive ? IDataConnectionRealTimeInfo::DC_POWER_STATE_HIGH
+                : IDataConnectionRealTimeInfo::DC_POWER_STATE_LOW, timestampNanos, FALSE);
         *result = TRUE;
         return NOERROR;
+        // break;
+    }
+    case NetdResponseCode::InterfaceAddressChange:
+    {
+        /*
+         * A network address change occurred
+         * Format: "NNN Address updated <addr> <iface> <flags> <scope>"
+         *         "NNN Address removed <addr> <iface> <flags> <scope>"
+         */
+        if (cooked.GetLength() < 7 || !cooked[1].Equals("Address")) {
+            Logger::E(TAG, "%s", errorMessage.string());
+            return E_ILLEGAL_STATE_EXCEPTION;
+        }
+
+        String iface = cooked[4];
+        AutoPtr<ILinkAddress> address;
+        // try {
+        ECode ec;
+        do {
+            Int32 flags;
+            ec = StringUtils::Parse(cooked[5], &flags);
+            if (FAILED(ec)) break;
+            Int32 scope;
+            ec = StringUtils::Parse(cooked[6], &scope);
+            if (FAILED(ec)) break;
+            ec = CLinkAddress::New(cooked[3], flags, scope, (ILinkAddress**)&address);
+        } while(FALSE);
+        if (FAILED(ec)) {
+        // } catch(NumberFormatException e) {     // Non-numeric lifetime or scope.
+            if ((ECode)E_NUMBER_FORMAT_EXCEPTION == ec) {
+                Logger::E(TAG, "%s %d", errorMessage.string(), ec);
+                return E_ILLEGAL_STATE_EXCEPTION;
+            }
+        // } catch(IllegalArgumentException e) {  // Malformed/invalid IP address.
+            else if ((ECode)E_ILLEGAL_ARGUMENT_EXCEPTION == ec) {
+                Logger::E(TAG, "%s %d", errorMessage.string(), ec);
+                return E_ILLEGAL_STATE_EXCEPTION;
+            }
+            else
+                return ec;
+        // }
+        }
+
+        if (cooked[2].Equals("updated")) {
+            mHost->NotifyAddressUpdated(iface, address);
+        } else {
+            mHost->NotifyAddressRemoved(iface, address);
+        }
+        *result = TRUE;
+        return NOERROR;
+        // break;
+    }
+    case NetdResponseCode::InterfaceDnsServerInfo:
+    {
+        /*
+         * Information about available DNS servers has been received.
+         * Format: "NNN DnsInfo servers <interface> <lifetime> <servers>"
+         */
+        Int64 lifetime;  // Actually a 32-bit unsigned integer.
+
+        if (cooked.GetLength() == 6 &&
+            cooked[1].Equals("DnsInfo") &&
+            cooked[2].Equals("servers")) {
+            // try {
+            ECode ec = StringUtils::Parse(cooked[4], &lifetime);
+            // } catch (NumberFormatException e) {
+            if (FAILED(ec)) {
+                if ((ECode)E_NUMBER_FORMAT_EXCEPTION == ec) {
+                    Logger::E(TAG, "%s", errorMessage.string());
+                    return E_ILLEGAL_STATE_EXCEPTION;
+                }
+                return ec;
+            }
+            // }
+            AutoPtr<ArrayOf<String> > servers;
+            StringUtils::Split(cooked[5], ",", (ArrayOf<String>**)&servers);
+            mHost->NotifyInterfaceDnsServerInfo(cooked[3], lifetime, servers);
+        }
+        *result = TRUE;
+        return NOERROR;
+        // break;
+    }
+    case NetdResponseCode::RouteChange:
+    {
+        /*
+         * A route has been updated or removed.
+         * Format: "NNN Route <updated|removed> <dst> [via <gateway] [dev <iface>]"
+         */
+        if (!cooked[1].Equals("Route") || cooked.GetLength() < 6) {
+            Logger::E(TAG, "%s", errorMessage.string());
+            return E_ILLEGAL_STATE_EXCEPTION;
+        }
+
+        String via = String(NULL);
+        String dev = String(NULL);
+        Boolean valid = TRUE;
+        for (Int32 i = 4; (i + 1) < cooked.GetLength() && valid; i += 2) {
+            if (cooked[i].Equals("dev")) {
+                if (dev == String(NULL)) {
+                    dev = cooked[i+1];
+                } else {
+                    valid = FALSE;  // Duplicate interface.
+                }
+            } else if (cooked[i].Equals("via")) {
+                if (via == String(NULL)) {
+                    via = cooked[i+1];
+                } else {
+                    valid = FALSE;  // Duplicate gateway.
+                }
+            } else {
+                valid = FALSE;      // Unknown syntax.
+            }
+        }
+        if (valid) {
+            // try {
+            ECode ec;
+            do {
+                // InetAddress.parseNumericAddress(null) inexplicably returns ::1.
+                AutoPtr<IInetAddressHelper> helper;
+                CInetAddressHelper::AcquireSingleton((IInetAddressHelper**)&helper);
+                AutoPtr<IInetAddress> gateway;
+                if (via != String(NULL)) {
+                    if (FAILED(ec = helper->ParseNumericAddress(via, (IInetAddress**)&gateway))) break;
+                }
+                AutoPtr<IIpPrefix> ipPrefix;
+                ec = CIpPrefix::New(cooked[3], (IIpPrefix**)&ipPrefix);
+                if (FAILED(ec)) break;
+                AutoPtr<IRouteInfo> route;
+                ec = CRouteInfo::New(ipPrefix, gateway, dev, (IRouteInfo**)&route);
+                if (FAILED(ec)) break;
+                ec = mHost->NotifyRouteChange(cooked[2], route);
+                if (FAILED(ec)) break;
+                *result = TRUE;
+                return NOERROR;
+            } while(FALSE);
+            // } catch (IllegalArgumentException e) {}
+            if (FAILED(ec)) {
+                if ((ECode)E_ILLEGAL_ARGUMENT_EXCEPTION != ec)
+                    return ec;
+            }
+        }
+        Logger::E(TAG, "%s", errorMessage.string());
+        return E_ILLEGAL_STATE_EXCEPTION;
         // break;
     }
     default: break;
@@ -135,69 +387,171 @@ ECode CNetworkManagementService::NetdCallbackReceiver::OnEvent(
     return NOERROR;
 }
 
+//=============================================================================
+// CNetworkManagementService::InnerSub_PhoneStateListener
+//=============================================================================
+CNetworkManagementService::InnerSub_PhoneStateListener::InnerSub_PhoneStateListener(
+    /* [in] */ CNetworkManagementService* host)
+    : mHost(host)
+{}
+
+ECode CNetworkManagementService::InnerSub_PhoneStateListener::OnDataConnectionRealTimeInfoChanged(
+    /* [in] */ IDataConnectionRealTimeInfo* dcRtInfo)
+{
+    if (DBG) Slogger::D(TAG, "onDataConnectionRealTimeInfoChanged: %s", TO_CSTR(dcRtInfo));
+    mHost->NotifyInterfaceClassActivity(IConnectivityManager::TYPE_MOBILE,
+            Ptr(dcRtInfo)->Func(dcRtInfo->GetDcPowerState), Ptr(dcRtInfo)->Func(dcRtInfo->GetTime), TRUE);
+    return NOERROR;
+}
+
+//=============================================================================
+// CNetworkManagementService::TimerRunnable
+//=============================================================================
+CAR_INTERFACE_IMPL(CNetworkManagementService::TimerRunnable, Object, IRunnable)
+
+CNetworkManagementService::TimerRunnable::TimerRunnable(
+    /* [in] */ CNetworkManagementService* host,
+    /* [in] */ Int32 type)
+    : mHost(host)
+    , mType(type)
+{}
+
+ECode CNetworkManagementService::TimerRunnable::Run()
+{
+    return mHost->NotifyInterfaceClassActivity(mType,
+            IDataConnectionRealTimeInfo::DC_POWER_STATE_HIGH,
+            SystemClock::GetElapsedRealtimeNanos(), FALSE);
+}
+
+//=============================================================================
+// CNetworkManagementService::RemoveRunnable
+//=============================================================================
+CAR_INTERFACE_IMPL(CNetworkManagementService::RemoveRunnable, Object, IRunnable)
+
+CNetworkManagementService::RemoveRunnable::RemoveRunnable(
+    /* [in] */ CNetworkManagementService* host,
+    /* [in] */ IdleTimerParams* params)
+    : mHost(host)
+    , mParams(params)
+{}
+
+ECode CNetworkManagementService::RemoveRunnable::Run()
+{
+    return mHost->NotifyInterfaceClassActivity(mParams->mType,
+            IDataConnectionRealTimeInfo::DC_POWER_STATE_LOW,
+            SystemClock::GetElapsedRealtimeNanos(), FALSE);
+}
+
+//=============================================================================
+// CNetworkManagementService
+//=============================================================================
 const String CNetworkManagementService::LIMIT_GLOBAL_ALERT("globalAlert");
 const String CNetworkManagementService::TAG("NetworkManagementService");
 const Boolean CNetworkManagementService::DBG = FALSE;
 const String CNetworkManagementService::NETD_TAG("NetdConnector");
-const String CNetworkManagementService::ADD("add");
-const String CNetworkManagementService::REMOVE("remove");
-const String CNetworkManagementService::ALLOW("allow");
-const String CNetworkManagementService::DENY("deny");
-const String CNetworkManagementService::DEFAULT("default");
-const String CNetworkManagementService::SECONDARY("secondary");
+const String CNetworkManagementService::NETD_SOCKET_NAME("netd");
+const Int32 CNetworkManagementService::MAX_UID_RANGES_PER_COMMAND = 10;
+const Int32 CNetworkManagementService::DAEMON_MSG_MOBILE_CONN_REAL_TIME_INFO = 1;
+
+CAR_OBJECT_IMPL(CNetworkManagementService)
+
+CAR_INTERFACE_IMPL_2(CNetworkManagementService, Object, IBinder, IINetworkManagementService)
 
 CNetworkManagementService::CNetworkManagementService()
-    : mActiveQuotas(50)
-    , mActiveAlerts(50)
-    , mUidRejectOnQuota(20)
-    , mActiveIdleTimers(20)
-    , mBandwidthControlEnabled(FALSE)
+    : mBandwidthControlEnabled(FALSE)
     , mFirewallEnabled(FALSE)
+    , mMobileActivityFromRadio(FALSE)
+    , mLastPowerStateFromRadio(IDataConnectionRealTimeInfo::DC_POWER_STATE_LOW)
+    , mNetworkActive(FALSE)
 {
-    CHandler::New((IHandler**)&mMainHandler);
     CCountDownLatch::New(1, (ICountDownLatch**)&mConnectedSignal);
     CRemoteCallbackList::New((IRemoteCallbackList**)&mObservers);
     CNetworkStatsFactory::New((INetworkStatsFactory**)&mStatsFactory);
+    Elastos::Core::CObject::New((IObject**)&mIdleTimerLock);
+    CRemoteCallbackList::New((IRemoteCallbackList**)&mNetworkActivityListeners);
 }
 
-/**
- * Constructs a new NetworkManagementService instance
- *
- * @param context  Binder context for this service
- */
 ECode CNetworkManagementService::constructor(
-    /* [in] */ IContext* context)
+    /* [in] */ IContext* context,
+    /* [in] */ const String& socket)
 {
     mContext = context;
+
+    // make sure this is on the same looper as our NativeDaemonConnector for sync purposes
+    CHandler::New(Ptr(IHandler::Probe(FgThread::Get()))->Func(IHandler::GetLooper), (IHandler**)&mFgHandler);
 
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
     String value;
     if (sysProp->Get(String("ro.product.device"), &value), String("simulator").Equals(value)) {
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector = NULL;
+        mThread = NULL;
+        mDaemonHandler = NULL;
+        mPhoneStateListener = NULL;
         return NOERROR;
     }
 
-    mConnector = new NativeDaemonConnector(
-            new NetdCallbackReceiver(this), String("netd"), 10, NETD_TAG, 160);
-    CThread::New(mConnector, NETD_TAG, (IThread**)&mThread);
+    // Don't need this wake lock, since we now have a time stamp for when
+    // the network actually went inactive.  (It might be nice to still do this,
+    // but I don't want to do it through the power manager because that pollutes the
+    // battery stats history with pointless noise.)
+    //PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+    AutoPtr<IPowerManagerWakeLock> wl; //pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, NETD_TAG);
 
-//     // Add ourself to the Watchdog monitors.
-// //    Watchdog.getInstance().addMonitor(this);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector = new NativeDaemonConnector(
+    //         new NetdCallbackReceiver(this), socket, 10, NETD_TAG, 160, wl,
+    //         Ptr(FgThread::Get())->Func(IHandler::GetLooper));
+    // CThread::New(mConnector, NETD_TAG, (IThread**)&mThread);
+
+    CHandler::New(Ptr(IHandler::Probe(FgThread::Get()))->Func(IHandler::GetLooper), (IHandler**)&mDaemonHandler);
+
+    // TODO: Waiting for PhoneStateListener
+    assert(0);
+    // mPhoneStateListener = new InnerSub_PhoneStateListener(this);
+    // mPhoneStateListener->constructor(ISubscriptionManager::DEFAULT_SUB_ID,
+    //         Ptr(mDaemonHandler)->Func(mDaemonHandler->GetLooper));
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
+    AutoPtr<ITelephonyManager> tm = ITelephonyManager::Probe(obj);
+    if (tm != NULL) {
+        tm->Listen(mPhoneStateListener,
+                IPhoneStateListener::LISTEN_DATA_CONNECTION_REAL_TIME_INFO);
+    }
+
+    // Add ourself to the Watchdog monitors.
+    Watchdog::GetInstance()->AddMonitor(this);
     return NOERROR;
 }
 
-AutoPtr<CNetworkManagementService> CNetworkManagementService::Create(
-    /* [in] */ IContext* context)
+ECode CNetworkManagementService::Create(
+    /* [in] */ IContext* context,
+    /* [in] */ const String& socket,
+    /* [out] */ INetworkManagementService** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     AutoPtr<CNetworkManagementService> service;
-    CNetworkManagementService::NewByFriend(context, (CNetworkManagementService**)&service);
+    CNetworkManagementService::NewByFriend(context, socket, (CNetworkManagementService**)&service);
     AutoPtr<ICountDownLatch> connectedSignal = service->mConnectedSignal;
     if (DBG) Slogger::D(TAG, "Creating NetworkManagementService");
     service->mThread->Start();
     if (DBG) Slogger::D(TAG, "Awaiting socket connection");
     connectedSignal->Await();
     if (DBG) Slogger::D(TAG, "Connected");
-    return service;
+    *result = INetworkManagementService::Probe(service);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode CNetworkManagementService::Create(
+    /* [in] */ IContext* context,
+    /* [out] */ INetworkManagementService** result)
+{
+    return Create(context, NETD_SOCKET_NAME, result);
 }
 
 void CNetworkManagementService::SystemReady()
@@ -207,7 +561,7 @@ void CNetworkManagementService::SystemReady()
 }
 
 ECode CNetworkManagementService::RegisterObserver(
-    /* [in] */ INetworkManagementEventObserver* observer)
+    /* [in] */ IINetworkManagementEventObserver* observer)
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
         Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
@@ -216,7 +570,7 @@ ECode CNetworkManagementService::RegisterObserver(
 }
 
 ECode CNetworkManagementService::UnregisterObserver(
-    /* [in] */ INetworkManagementEventObserver* observer)
+    /* [in] */ IINetworkManagementEventObserver* observer)
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
         Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
@@ -224,117 +578,360 @@ ECode CNetworkManagementService::UnregisterObserver(
     return mObservers->Unregister(observer, &result);
 }
 
-/**
- * Notify our observers of an interface status change
- */
-void CNetworkManagementService::NotifyInterfaceStatusChanged(
+ECode CNetworkManagementService::NotifyInterfaceStatusChanged(
     /* [in] */ const String& iface,
     /* [in] */ Boolean up)
 {
     Int32 length;
     mObservers->BeginBroadcast(&length);
+    ECode ec = NOERROR;
+    // try {
     for (Int32 i = 0; i < length; i++) {
-        AutoPtr<INetworkManagementEventObserver> observer;
+        // try {
+        AutoPtr<IINetworkManagementEventObserver> observer;
         mObservers->GetBroadcastItem(i, (IInterface**)&observer);
-        observer->InterfaceStatusChanged(iface, up);
+        ec = observer->InterfaceStatusChanged(iface, up);
+        // } catch (RemoteException e) {
+        // } catch (RuntimeException e) {
+        // }
+        if (FAILED(ec)) {
+            if ((ECode)E_REMOTE_EXCEPTION == ec || (ECode)E_RUNTIME_EXCEPTION == ec) {
+                continue;
+            }
+            break;
+        }
     }
+    // } finally {
     mObservers->FinishBroadcast();
+    // }
+    return ec;
 }
 
-/**
- * Notify our observers of an interface link state change
- * (typically, an Ethernet cable has been plugged-in or unplugged).
- */
-void CNetworkManagementService::NotifyInterfaceLinkStateChanged(
+ECode CNetworkManagementService::NotifyInterfaceLinkStateChanged(
     /* [in] */ const String& iface,
     /* [in] */ Boolean up)
 {
     Int32 length;
     mObservers->BeginBroadcast(&length);
+    ECode ec = NOERROR;
+    // try {
     for (Int32 i = 0; i < length; i++) {
-        AutoPtr<INetworkManagementEventObserver> observer;
+        // try {
+        AutoPtr<IINetworkManagementEventObserver> observer;
         mObservers->GetBroadcastItem(i, (IInterface**)&observer);
-        observer->InterfaceLinkStateChanged(iface, up);
+        ec = observer->InterfaceLinkStateChanged(iface, up);
+        // } catch (RemoteException e) {
+        // } catch (RuntimeException e) {
+        // }
+        if (FAILED(ec)) {
+            if ((ECode)E_REMOTE_EXCEPTION == ec || (ECode)E_RUNTIME_EXCEPTION == ec) {
+                continue;
+            }
+            break;
+        }
     }
+    // } finally {
     mObservers->FinishBroadcast();
+    // }
+    return ec;
 }
 
-/**
- * Notify our observers of an interface addition.
- */
-void CNetworkManagementService::NotifyInterfaceAdded(
+ECode CNetworkManagementService::NotifyInterfaceAdded(
     /* [in] */ const String& iface)
 {
     Int32 length;
     mObservers->BeginBroadcast(&length);
+    ECode ec = NOERROR;
     for (Int32 i = 0; i < length; i++) {
-        AutoPtr<INetworkManagementEventObserver> observer;
+        // try {
+        AutoPtr<IINetworkManagementEventObserver> observer;
         mObservers->GetBroadcastItem(i, (IInterface**)&observer);
-        observer->InterfaceAdded(iface);
+        ec = observer->InterfaceAdded(iface);
+        // } catch (RemoteException e) {
+        // } catch (RuntimeException e) {
+        // }
+        if (FAILED(ec)) {
+            if ((ECode)E_REMOTE_EXCEPTION == ec || (ECode)E_RUNTIME_EXCEPTION == ec) {
+                continue;
+            }
+            break;
+        }
     }
+    // } finally {
     mObservers->FinishBroadcast();
+    // }
+    return ec;
 }
 
-/**
- * Notify our observers of an interface removal.
- */
-void CNetworkManagementService::NotifyInterfaceRemoved(
+ECode CNetworkManagementService::NotifyInterfaceRemoved(
     /* [in] */ const String& iface)
 {
     // netd already clears out quota and alerts for removed ifaces; update
     // our sanity-checking state.
-    mActiveAlerts.Erase(iface);
-    mActiveQuotas.Erase(iface);
+    mActiveAlerts->Remove(StringUtils::ParseCharSequence(iface));
+    mActiveQuotas->Remove(StringUtils::ParseCharSequence(iface));
 
     Int32 length;
     mObservers->BeginBroadcast(&length);
+    ECode ec = NOERROR;
     for (Int32 i = 0; i < length; i++) {
-        AutoPtr<INetworkManagementEventObserver> observer;
+        // try {
+        AutoPtr<IINetworkManagementEventObserver> observer;
         mObservers->GetBroadcastItem(i, (IInterface**)&observer);
-        observer->InterfaceRemoved(iface);
+        ec = observer->InterfaceRemoved(iface);
+        // } catch (RemoteException e) {
+        // } catch (RuntimeException e) {
+        // }
+        if (FAILED(ec)) {
+            if ((ECode)E_REMOTE_EXCEPTION == ec || (ECode)E_RUNTIME_EXCEPTION == ec) {
+                continue;
+            }
+            break;
+        }
     }
+    // } finally {
     mObservers->FinishBroadcast();
+    // }
+    return ec;
 }
 
-/**
- * Notify our observers of a limit reached.
- */
-void CNetworkManagementService::NotifyLimitReached(
+ECode CNetworkManagementService::NotifyLimitReached(
     /* [in] */ const String& limitName,
     /* [in] */ const String& iface)
 {
     Int32 length;
     mObservers->BeginBroadcast(&length);
+    ECode ec = NOERROR;
     for (Int32 i = 0; i < length; i++) {
-        AutoPtr<INetworkManagementEventObserver> observer;
+        // try {
+        AutoPtr<IINetworkManagementEventObserver> observer;
         mObservers->GetBroadcastItem(i, (IInterface**)&observer);
-        observer->LimitReached(limitName, iface);
+        ec = observer->LimitReached(limitName, iface);
+        // } catch (RemoteException e) {
+        // } catch (RuntimeException e) {
+        // }
+        if (FAILED(ec)) {
+            if ((ECode)E_REMOTE_EXCEPTION == ec || (ECode)E_RUNTIME_EXCEPTION == ec) {
+                continue;
+            }
+            break;
+        }
     }
+    // } finally {
     mObservers->FinishBroadcast();
+    // }
+    return ec;
 }
 
-/**
- * Notify our observers of a change in the data activity state of the interface
- */
-void CNetworkManagementService::NotifyInterfaceClassActivity(
-    /* [in] */ const String& label,
-    /* [in] */ Boolean active)
+ECode CNetworkManagementService::NotifyInterfaceClassActivity(
+    /* [in] */ Int32 type,
+    /* [in] */ Int32 powerState,
+    /* [in] */ Int64 tsNanos,
+    /* [in] */ Boolean fromRadio)
+{
+    Boolean isMobile;
+    AutoPtr<IConnectivityManagerHelper> helper;
+    CConnectivityManagerHelper::AcquireSingleton((IConnectivityManagerHelper**)&helper);
+    helper->IsNetworkTypeMobile(type, &isMobile);
+    if (isMobile) {
+        if (!fromRadio) {
+            if (mMobileActivityFromRadio) {
+                // If this call is not coming from a report from the radio itself, but we
+                // have previously received reports from the radio, then we will take the
+                // power state to just be whatever the radio last reported.
+                powerState = mLastPowerStateFromRadio;
+            }
+        } else {
+            mMobileActivityFromRadio = true;
+        }
+        if (mLastPowerStateFromRadio != powerState) {
+            mLastPowerStateFromRadio = powerState;
+            // try {
+            ECode ec = Ptr(this)->Func(this->GetBatteryStats)->NoteMobileRadioPowerState(powerState, tsNanos);
+            // } catch (RemoteException e) {
+            if (FAILED(ec)) {
+                if ((ECode)E_REMOTE_EXCEPTION != ec)
+                    return ec;
+            }
+            // }
+        }
+    }
+
+    Boolean isActive = powerState == IDataConnectionRealTimeInfo::DC_POWER_STATE_MEDIUM
+            || powerState == IDataConnectionRealTimeInfo::DC_POWER_STATE_HIGH;
+
+    ECode ec = NOERROR;
+    if (!isMobile || fromRadio || !mMobileActivityFromRadio) {
+        // Report the change in data activity.  We don't do this if this is a change
+        // on the mobile network, that is not coming from the radio itself, and we
+        // have previously seen change reports from the radio.  In that case only
+        // the radio is the authority for the current state.
+        Int32 length;
+        mObservers->BeginBroadcast(&length);
+        // try {
+            for (Int32 i = 0; i < length; i++) {
+                // try {
+                AutoPtr<IInterface> obj;
+                mObservers->GetBroadcastItem(i, (IInterface**)&obj);
+                AutoPtr<IINetworkManagementEventObserver> observer = IINetworkManagementEventObserver::Probe(obj);
+                ec = observer->InterfaceClassDataActivityChanged(StringUtils::ToString(type), isActive, tsNanos);
+                // } catch (RemoteException e) {
+                // } catch (RuntimeException e) {
+                // }
+                if (FAILED(ec)) {
+                    if ((ECode)E_REMOTE_EXCEPTION == ec || (ECode)E_RUNTIME_EXCEPTION == ec) {
+                        continue;
+                    }
+                    break;
+                }
+            }
+        // } finally {
+        mObservers->FinishBroadcast();
+        // }
+        if(FAILED(ec)) return ec;
+    }
+
+    Boolean report = FALSE;
+    synchronized(mIdleTimerLock) {
+        if (Ptr(mActiveIdleTimers)->Func(IHashMap::IsEmpty)) {
+            // If there are no idle timers, we are not monitoring activity, so we
+            // are always considered active.
+            isActive = TRUE;
+        }
+        if (mNetworkActive != isActive) {
+            mNetworkActive = isActive;
+            report = isActive;
+        }
+    }
+    if (report) {
+        ReportNetworkActive();
+    }
+    return NOERROR;
+}
+
+ECode CNetworkManagementService::NotifyAddressUpdated(
+    /* [in] */ const String& iface,
+    /* [in] */ ILinkAddress* address)
 {
     Int32 length;
     mObservers->BeginBroadcast(&length);
+    ECode ec = NOERROR;
+    // try {
     for (Int32 i = 0; i < length; i++) {
-        AutoPtr<INetworkManagementEventObserver> observer;
+        // try {
+        AutoPtr<IINetworkManagementEventObserver> observer;
         mObservers->GetBroadcastItem(i, (IInterface**)&observer);
-        observer->InterfaceClassDataActivityChanged(label, active);
+        ec = observer->AddressUpdated(iface, address);
+        // } catch (RemoteException e) {
+        // } catch (RuntimeException e) {
+        // }
+        if (FAILED(ec)) {
+            if ((ECode)E_REMOTE_EXCEPTION == ec || (ECode)E_RUNTIME_EXCEPTION == ec) {
+                continue;
+            }
+            break;
+        }
     }
+    // } finally {
     mObservers->FinishBroadcast();
+    // }
+    return ec;
 }
 
-/**
- * Prepare native daemon once connected, enabling modules and pushing any
- * existing in-memory rules.
- */
-void CNetworkManagementService::PrepareNativeDaemon()
+ECode CNetworkManagementService::NotifyAddressRemoved(
+        /* [in] */ const String& iface,
+        /* [in] */ ILinkAddress* address)
+{
+    Int32 length;
+    mObservers->BeginBroadcast(&length);
+    ECode ec = NOERROR;
+    // try {
+    for (Int32 i = 0; i < length; i++) {
+        // try {
+        AutoPtr<IINetworkManagementEventObserver> observer;
+        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        ec = observer->AddressRemoved(iface, address);
+        // } catch (RemoteException e) {
+        // } catch (RuntimeException e) {
+        // }
+        if (FAILED(ec)) {
+            if ((ECode)E_REMOTE_EXCEPTION == ec || (ECode)E_RUNTIME_EXCEPTION == ec) {
+                continue;
+            }
+            break;
+        }
+    }
+    // } finally {
+    mObservers->FinishBroadcast();
+    // }
+    return ec;
+}
+
+ECode CNetworkManagementService::NotifyInterfaceDnsServerInfo(
+        /* [in] */ const String& iface,
+        /* [in] */ Int64 lifetime,
+        /* [in] */ ArrayOf<String>* addresses)
+{
+    Int32 length;
+    mObservers->BeginBroadcast(&length);
+    ECode ec = NOERROR;
+    // try {
+    for (Int32 i = 0; i < length; i++) {
+        // try {
+        AutoPtr<IINetworkManagementEventObserver> observer;
+        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        ec = observer->InterfaceDnsServerInfo(iface, lifetime,
+                        addresses);
+        // } catch (RemoteException e) {
+        // } catch (RuntimeException e) {
+        // }
+        if (FAILED(ec)) {
+            if ((ECode)E_REMOTE_EXCEPTION == ec || (ECode)E_RUNTIME_EXCEPTION == ec) {
+                continue;
+            }
+            break;
+        }
+    }
+    // } finally {
+    mObservers->FinishBroadcast();
+    // }
+    return ec;
+}
+
+ECode CNetworkManagementService::NotifyRouteChange(
+        /* [in] */ const String& action,
+        /* [in] */ IRouteInfo* route)
+{
+    Int32 length;
+    mObservers->BeginBroadcast(&length);
+    ECode ec = NOERROR;
+    // try {
+    for (Int32 i = 0; i < length; i++) {
+        // try {
+        AutoPtr<IINetworkManagementEventObserver> observer;
+        mObservers->GetBroadcastItem(i, (IInterface**)&observer);
+        if (action.Equals("updated")) {
+            ec = observer->RouteUpdated(route);
+        } else {
+            ec = observer->RouteRemoved(route);
+        }
+        // } catch (RemoteException e) {
+        // } catch (RuntimeException e) {
+        // }
+        if (FAILED(ec)) {
+            if ((ECode)E_REMOTE_EXCEPTION == ec || (ECode)E_RUNTIME_EXCEPTION == ec) {
+                continue;
+            }
+            break;
+        }
+    }
+    // } finally {
+    mObservers->FinishBroadcast();
+    // }
+    return ec;
+}
+
+ECode CNetworkManagementService::PrepareNativeDaemon()
 {
     mBandwidthControlEnabled = FALSE;
 
@@ -351,7 +948,9 @@ void CNetworkManagementService::PrepareNativeDaemon()
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
         args->Set(0, cseq.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
         mBandwidthControlEnabled = TRUE;
         // } catch (NativeDaemonConnectorException e) {
         //     Log.wtf(TAG, "problem enabling bandwidth controls", e);
@@ -363,48 +962,72 @@ void CNetworkManagementService::PrepareNativeDaemon()
 
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
-    sysProp->Set(NetworkManagementSocketTagger::PROP_QTAGUID_ENABLED,
+    sysProp->Set(INetworkManagementSocketTagger::PROP_QTAGUID_ENABLED,
             mBandwidthControlEnabled ? String("1") : String("0"));
 
+    if (mBandwidthControlEnabled) {
+        // try {
+        ECode ec = Ptr(this)->Func(this->GetBatteryStats)->NoteNetworkStatsEnabled();
+        // } catch (RemoteException e) {
+        if (FAILED(ec)) {
+            if ((ECode)E_REMOTE_EXCEPTION != ec)
+                return ec;
+        }
+        // }
+    }
+
     // push any existing quota or UID rules
-    {
-        AutoLock lock(mQuotaLock);
-
-        if (mActiveQuotas.Begin() != mActiveQuotas.End()) {
-            Slogger::D(TAG, "pushing %d active quota rules", mActiveQuotas.GetSize());
-            HashMap<String, Int64>::Iterator iter;
-            for(iter = mActiveQuotas.Begin(); iter != mActiveQuotas.End(); ++iter) {
-                SetInterfaceQuota(iter->mFirst, iter->mSecond);
+    synchronized(mQuotaLock) {
+        Int32 size;
+        mActiveQuotas->GetSize(&size);
+        if (size > 0) {
+            Slogger::D(TAG, "pushing %d active quota rules", size);
+            AutoPtr<IHashMap> activeQuotas = mActiveQuotas;
+            CHashMap::New((IHashMap**)&mActiveQuotas);
+            FOR_EACH(iter, Ptr(activeQuotas)->Func(activeQuotas->GetEntrySet)) {
+                AutoPtr<IMapEntry> entry = IMapEntry::Probe(Ptr(iter)->Func(iter->GetNext));
+                AutoPtr<IInterface> key;
+                AutoPtr<IInterface> value;
+                entry->GetKey((IInterface**)&key);
+                entry->GetValue((IInterface**)&value);
+                SetInterfaceQuota(Object::ToString(key), Ptr(IInteger64::Probe(value))->Func(IInteger64::GetValue));
             }
-            mActiveQuotas.Clear();
         }
 
-        if (mActiveAlerts.Begin() != mActiveAlerts.End()) {
-            Slogger::D(TAG, "pushing %d active alert rules", mActiveAlerts.GetSize());
-            HashMap<String, Int64>::Iterator iter;
-            for(iter = mActiveAlerts.Begin(); iter != mActiveAlerts.End(); ++iter) {
-                SetInterfaceAlert(iter->mFirst, iter->mSecond);
+        mActiveAlerts->GetSize(&size);
+        if (size > 0) {
+            Slogger::D(TAG, "pushing %d active quota rules", size);
+            AutoPtr<IHashMap> activeAlerts = mActiveAlerts;
+            CHashMap::New((IHashMap**)&mActiveAlerts);
+            FOR_EACH(iter, Ptr(activeAlerts)->Func(activeAlerts->GetEntrySet)) {
+                AutoPtr<IMapEntry> entry = IMapEntry::Probe(Ptr(iter)->Func(iter->GetNext));
+                AutoPtr<IInterface> key;
+                AutoPtr<IInterface> value;
+                entry->GetKey((IInterface**)&key);
+                entry->GetValue((IInterface**)&value);
+                SetInterfaceAlert(Object::ToString(key), Ptr(IInteger64::Probe(value))->Func(IInteger64::GetValue));
             }
-            mActiveAlerts.Clear();
         }
 
-        if (mUidRejectOnQuota.Begin() != mUidRejectOnQuota.End()) {
-            Slogger::D(TAG, "pushing %d active uid rules", mUidRejectOnQuota.GetSize());
-            HashMap<Int32, Boolean>::Iterator iter;
-            for(iter = mUidRejectOnQuota.Begin(); iter != mUidRejectOnQuota.End(); ++iter) {
-                SetUidNetworkRules(iter->mFirst, iter->mSecond);
+        mUidRejectOnQuota->GetSize(&size);
+        if (size > 0) {
+            Slogger::D(TAG, "pushing %d active uid rules", size);
+            AutoPtr<ISparseBooleanArray> uidRejectOnQuota = mUidRejectOnQuota;
+            CSparseBooleanArray::New((ISparseBooleanArray**)&mUidRejectOnQuota);
+            for (Int32 i = 0; i < Ptr(uidRejectOnQuota)->Func(uidRejectOnQuota->GetSize); i++) {
+                Int32 key;
+                Boolean value;
+                uidRejectOnQuota->KeyAt(i, &key);
+                uidRejectOnQuota->ValueAt(i, &value);
+                SetUidNetworkRules(key, value);
             }
-            mUidRejectOnQuota.Clear();
         }
     }
 
     // TODO: Push any existing firewall state
     SetFirewallEnabled(mFirewallEnabled || LockdownVpnTracker::IsEnabled());
+    return NOERROR;
 }
-
-// //
-// // IINetworkManagementService members
-// //
 
 ECode CNetworkManagementService::ListInterfaces(
     /* [out, callee] */ ArrayOf<String>** result)
@@ -420,7 +1043,9 @@ ECode CNetworkManagementService::ListInterfaces(
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
     args->Set(0, cseq.Get());
     AutoPtr< ArrayOf<NativeDaemonEvent*> > events;
-    mConnector->ExecuteForList(String("interface"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->ExecuteForList(String("interface"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
     AutoPtr< ArrayOf<String> > resArray = NativeDaemonEvent::FilterMessageList(
             *events, NetdResponseCode::InterfaceListResult);
     *result = resArray;
@@ -450,7 +1075,9 @@ ECode CNetworkManagementService::GetInterfaceConfig(
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
     args->Set(0, cseq0.Get());
     args->Set(1, cseq1.Get());
-    FAIL_RETURN(mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event));
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // FAIL_RETURN(mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event));
      // } catch (NativeDaemonConnectorException e) {
      //     throw e.rethrowAsParcelableException();
      // }
@@ -458,23 +1085,25 @@ ECode CNetworkManagementService::GetInterfaceConfig(
     FAIL_RETURN(event->CheckCode(NetdResponseCode::InterfaceGetCfgResult));
      // Rsp: 213 xx:xx:xx:xx:xx:xx yyy.yyy.yyy.yyy zzz flag1 flag2 flag3
 
-    AutoPtr<StringTokenizer> st = new StringTokenizer(event->GetMessage());
+    AutoPtr<IStringTokenizer> st;
+    CStringTokenizer::New(event->GetMessage(), (IStringTokenizer**)&st);
 
     AutoPtr<IInterfaceConfiguration> cfg;
     // try {
     CInterfaceConfiguration::New((IInterfaceConfiguration**)&cfg);
-    String delim(" ");
-    cfg->SetHardwareAddress(String(st->NextToken(delim)));
+    String delim(" "), nextToken;
+    st->GetNextToken(delim, &nextToken);
+    cfg->SetHardwareAddress(nextToken);
     AutoPtr<IInetAddress> addr;
     Int32 prefixLength = 0;
     // try {
-    NetworkUtils::NumericToInetAddress(String(st->NextToken()), (IInetAddress**)&addr);
+    NetworkUtils::NumericToInetAddress(Ptr(st)->Func(st->GetNextToken), (IInetAddress**)&addr);
     // } catch (IllegalArgumentException iae) {
     //     Slog.e(TAG, "Failed to parse ipaddr", iae);
     // }
 
     // try {
-    prefixLength = atoi(st->NextToken());
+    prefixLength = atoi(Ptr(st)->Func(st->GetNextToken));
     // } catch (NumberFormatException nfe) {
     //     Slog.e(TAG, "Failed to parse prefixLength", nfe);
     // }
@@ -482,8 +1111,8 @@ ECode CNetworkManagementService::GetInterfaceConfig(
     AutoPtr<ILinkAddress> linkAddr;
     CLinkAddress::New(addr, prefixLength, (ILinkAddress**)&linkAddr);
     cfg->SetLinkAddress(linkAddr);
-    while (st->HasMoreTokens()) {
-        cfg->SetFlag(String(st->NextToken()));
+    while (Ptr(st)->Func(st->HasMoreTokens)) {
+        cfg->SetFlag(Ptr(st)->Func(st->GetNextToken));
     }
     // } catch (NoSuchElementException nsee) {
     //     throw new IllegalStateException("Invalid response from daemon: " + event);
@@ -503,14 +1132,14 @@ ECode CNetworkManagementService::SetInterfaceConfig(
     cfg->GetLinkAddress((ILinkAddress**)&linkAddr);
     AutoPtr<IInetAddress> inetAddr;
     if (linkAddr == NULL || (linkAddr->GetAddress((IInetAddress**)&inetAddr), inetAddr == NULL)) {
-        //throw new IllegalStateException("NULL LinkAddress given");
+        Logger::E(TAG, "NULL LinkAddress given");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     String hostAddr;
     inetAddr->GetHostAddress(&hostAddr);
     Int32 prefixLength;
-    linkAddr->GetNetworkPrefixLength(&prefixLength);
+    linkAddr->GetPrefixLength(&prefixLength);
 
     AutoPtr<ICharSequence> cseq0;
     CString::New(String("getcfg"), (ICharSequence**)&cseq0);
@@ -525,20 +1154,23 @@ ECode CNetworkManagementService::SetInterfaceConfig(
     args->Set(1, cseq1.Get());
     args->Set(2, cseq2.Get());
     args->Set(3, iint3.Get());
-    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
-        String("interface"), args);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
+    //     String("interface"), args);
 
-    AutoPtr< ArrayOf<String> > flags;
-    cfg->GetFlags((ArrayOf<String>**)&flags);
-    for (Int32 i = 0; i < flags->GetLength(); i++) {
-        AutoPtr<ICharSequence> flag;
-        CString::New((*flags)[i], (ICharSequence**)&flag);
-        cmd->AppendArg(flag);
-    }
+    // AutoPtr<IIterable> flags;
+    // cfg->GetFlags((IIterable**)&flags);
+    // AutoPtr<IIterator> iter;
+    // flags->GetIterator((IIterator**)&iter);
+    // while(Ptr(iter)->Func(iter->HasNext)) {
+    //     AutoPtr<ICharSequence> flag = ICharSequence::Probe(Ptr(iter)->Func(iter->GetNext));
+    //     cmd->AppendArg(flag);
+    // }
 
     // try {
-    AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    // AutoPtr<NativeDaemonEvent> event;
+    // mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -587,15 +1219,15 @@ ECode CNetworkManagementService::SetInterfaceIpv6PrivacyExtensions(
     args->Set(2, cseq2.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
     return NOERROR;
 }
 
-// /* TODO: This is right now a IPv4 only function. Works for wifi which loses its
-//    IPv6 addresses on interface down, but we need to do full clean up here */
 ECode CNetworkManagementService::ClearInterfaceAddresses(
     /* [in] */ const String& iface)
 {
@@ -610,7 +1242,9 @@ ECode CNetworkManagementService::ClearInterfaceAddresses(
     args->Set(1, cseq1.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -634,7 +1268,9 @@ ECode CNetworkManagementService::EnableIpv6(
     args->Set(2, cseq2.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -658,7 +1294,9 @@ ECode CNetworkManagementService::DisableIpv6(
     args->Set(2, cseq2.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -666,103 +1304,83 @@ ECode CNetworkManagementService::DisableIpv6(
 }
 
 ECode CNetworkManagementService::AddRoute(
-    /* [in] */ const String& interfaceName,
+    /* [in] */ Int32 netId,
     /* [in] */ IRouteInfo* route)
 {
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    return ModifyRoute(interfaceName, ADD, route, DEFAULT);
+    return ModifyRoute(String("add"), StringUtils::ToString(netId), route);
 }
 
 ECode CNetworkManagementService::RemoveRoute(
-    /* [in] */ const String& interfaceName,
+    /* [in] */ Int32 netId,
     /* [in] */ IRouteInfo* route)
 {
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    return ModifyRoute(interfaceName, REMOVE, route, DEFAULT);
-}
-
-ECode CNetworkManagementService::AddSecondaryRoute(
-    /* [in] */ const String& interfaceName,
-    /* [in] */ IRouteInfo* route)
-{
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    return ModifyRoute(interfaceName, ADD, route, SECONDARY);
-}
-
-ECode CNetworkManagementService::RemoveSecondaryRoute(
-    /* [in] */ const String& interfaceName,
-    /* [in] */ IRouteInfo* route)
-{
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    return ModifyRoute(interfaceName, REMOVE, route, SECONDARY);
+    return ModifyRoute(String("remove"), StringUtils::ToString(netId), route);
 }
 
 ECode CNetworkManagementService::ModifyRoute(
     /* [in] */ const String& interfaceName,
     /* [in] */ const String& action,
-    /* [in] */ IRouteInfo* route,
-    /* [in] */ const String& type)
+    /* [in] */ IRouteInfo* route)
 {
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("route"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(action, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(interfaceName, (ICharSequence**)&cseq2);
-    AutoPtr<ICharSequence> cseq3;
-    CString::New(type, (ICharSequence**)&cseq3);
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
-    args->Set(3, cseq3.Get());
-    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
-        String("interface"), args);
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
 
-    // create triplet: dest-ip-addr prefixlength gateway-ip-addr
-    AutoPtr<ILinkAddress> la;
-    route->GetDestination((ILinkAddress**)&la);
-    AutoPtr<IInetAddress> netAddr;
-    la->GetAddress((IInetAddress**)&netAddr);
+    // TODO: Waiting for NativeDaemonConnector::Command
+    assert(0);
+    // AutoPtr<NativeDaemonConnector::Command> cmd;
+    // CCommand::New(String("network"), String("route"), action, netId, (NativeDaemonConnector::Command**)&cmd);
 
-    String str;
-    netAddr->GetHostAddress(&str);
-    AutoPtr<ICharSequence> istr;
-    CString::New(str, (ICharSequence**)&istr);
-    cmd->AppendArg(istr);
+    // // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
+    // cmd->AppendArg(Ptr(route)->Func(route->GetInterface));
+    // cmd->AppendArg(Object::ToString(Ptr(route)->Func(route->GetDestination)));
 
-    Int32 num;
-    la->GetNetworkPrefixLength(&num);
-    AutoPtr<IInteger32> inum;
-    CInteger32::New(num, (IInteger32**)&inum);
-    cmd->AppendArg(inum);
+    // switch (Ptr(route)->Func(route->GetType)) {
+    //     case IRouteInfo::RTN_UNICAST:
+    //         if (Ptr(route)->Func(route->HasGateway)) {
+    //             cmd->AppendArg(Ptr(route)->GetPtr(route->GetGateway)->Func(IInetAddress::GetHostAddress));
+    //         }
+    //         break;
+    //     case IRouteInfo::RTN_UNREACHABLE:
+    //         cmd->AppendArg(String("unreachable"));
+    //         break;
+    //     case IRouteInfo::RTN_THROW:
+    //         cmd->AppendArg(String("throw"));
+    //         break;
+    // }
 
-    AutoPtr<IInetAddress> gateway;
-    route->GetGateway((IInetAddress**)&gateway);
-    if (gateway == NULL) {
-        if (IInet4Address::Probe(netAddr) != NULL) {
-            AutoPtr<ICharSequence> istr0;
-            CString::New(String("0.0.0.0"), (ICharSequence**)&istr0);
-            cmd->AppendArg(istr0);
-        }
-        else {
-            AutoPtr<ICharSequence> istr0;
-            CString::New(String("::0"), (ICharSequence**)&istr0);
-            cmd->AppendArg(istr0);
-        }
-    }
-    else {
-        gateway->GetHostAddress(&str);
-        AutoPtr<ICharSequence> istr0;
-        CString::New(str, (ICharSequence**)&istr0);
-        cmd->AppendArg(istr0);
-    }
+    // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ECode ec = mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    // // } catch (NativeDaemonConnectorException e) {
+    // if (FAILED(ec)) {
+    //     if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+    //         return E_ILLEGAL_STATE_EXCEPTION;
+    //     return ec;
+    // }
+    // // }
+    return NOERROR;
+}
+
+// @Override
+ECode CNetworkManagementService::SetMtu(
+    /* [in] */ const String& iface,
+    /* [in] */ Int32 mtu)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+
+    AutoPtr<NativeDaemonEvent> event;
+    // try {
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ECode ec = mConnector.execute("interface", "setmtu", iface, mtu, (NativeDaemonEvent**)&event);
+    // // } catch (NativeDaemonConnectorException e) {
+    // if (FAILED(ec)) {
+    //     if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+    //         return E_ILLEGAL_STATE_EXCEPTION;
+    //     return ec;
+    // }
+    // // }
     return NOERROR;
 }
 
@@ -778,11 +1396,11 @@ ECode CNetworkManagementService::ReadRouteList(
 
     AutoPtr< List<String> > strList = new List<String>();
     AutoPtr<IDataInputStream> in;
-    CDataInputStream::New(fstream, (IDataInputStream**)&in);
+    CDataInputStream::New(IInputStream::Probe(fstream), (IDataInputStream**)&in);
     AutoPtr<IBufferedReader> br;
     AutoPtr<IInputStreamReader> isReader;
-    CInputStreamReader::New(in, (IInputStreamReader**)&isReader);
-    CBufferedReader::New(isReader, (IBufferedReader**)&br);
+    CInputStreamReader::New(IInputStream::Probe(in), (IInputStreamReader**)&isReader);
+    CBufferedReader::New(IReader::Probe(isReader), (IBufferedReader**)&br);
     String s;
 
     // throw away the title line
@@ -824,25 +1442,26 @@ ECode CNetworkManagementService::GetRoutes(
                 String gate = (*fields)[2];
                 String flags = (*fields)[3]; // future use?
                 String mask = (*fields)[7];
-//                try {
-                    // address stored as a hex string, ex: 0014A8C0
+                // try {
+                // address stored as a hex string, ex: 0014A8C0
                 AutoPtr<IInetAddress> destAddr;
-                NetworkUtils::Int32ToInetAddress((Int32)StringUtils::ParseInt64(dest, 16), (IInetAddress**)&destAddr);
-                Int32 prefixLength = NetworkUtils::NetmaskIntToPrefixLength((Int32)StringUtils::ParseInt64(mask, 16));
+                NetworkUtils::IntToInetAddress((Int32)StringUtils::ParseInt64(dest, 16), (IInetAddress**)&destAddr);
+                Int32 prefixLength;
+                NetworkUtils::NetmaskIntToPrefixLength((Int32)StringUtils::ParseInt64(mask, 16), &prefixLength);
                 AutoPtr<ILinkAddress> linkAddress;
                 CLinkAddress::New(destAddr, prefixLength, (ILinkAddress**)&linkAddress);
 
                 // address stored as a hex string, ex 0014A8C0
                 AutoPtr<IInetAddress> gatewayAddr;
-                NetworkUtils::Int32ToInetAddress((Int32)StringUtils::ParseInt64(gate, 16), (IInetAddress**)&gatewayAddr);
+                NetworkUtils::IntToInetAddress((Int32)StringUtils::ParseInt64(gate, 16), (IInetAddress**)&gatewayAddr);
 
                 AutoPtr<IRouteInfo> route;
                 CRouteInfo::New(linkAddress, gatewayAddr, (IRouteInfo**)&route);
                 routes.PushBack(route);
-//                } catch (Exception e) {
-//                    Logger::E(TAG, "Error parsing route " + s + " : " + e);
-//                    continue;
-//                }
+                // } catch (Exception e) {
+                //     Logger::E(TAG, "Error parsing route " + s + " : " + e);
+                //     continue;
+                // }
             }
         }
     }
@@ -864,7 +1483,7 @@ ECode CNetworkManagementService::GetRoutes(
                 String gate = (*fields)[4];
 
 //                try {
-                    // prefix length stored as a hex string, ex 40
+                // prefix length stored as a hex string, ex 40
                 Int32 prefixLength = StringUtils::ParseInt32(prefix, 16);
 
                 // address stored as a 32 char hex string
@@ -923,7 +1542,9 @@ ECode CNetworkManagementService::GetIpForwardingEnabled(
     args->Set(0, cseq0.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("ipfwd"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("ipfwd"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -945,7 +1566,9 @@ ECode CNetworkManagementService::SetIpForwardingEnabled(
     args->Set(0, cseq0.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("ipfwd"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("ipfwd"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -964,17 +1587,21 @@ ECode CNetworkManagementService::StartTethering(
     CString::New(String("start"), (ICharSequence**)&cseq0);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
     args->Set(0, cseq0.Get());
-    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
-        String("tether"), args);
-    for (Int32 i = 0; i < dhcpRange->GetLength(); i++) {
-        AutoPtr<ICharSequence> str;
-        CString::New((*dhcpRange)[i], (ICharSequence**)&str);
-        cmd->AppendArg(str);
-    }
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
+        // String("tether"), args);
+    // for (Int32 i = 0; i < dhcpRange->GetLength(); i++) {
+    //     AutoPtr<ICharSequence> str;
+    //     CString::New((*dhcpRange)[i], (ICharSequence**)&str);
+    //     cmd->AppendArg(str);
+    // }
 
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -991,7 +1618,9 @@ ECode CNetworkManagementService::StopTethering()
     args->Set(0, cseq0.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1012,7 +1641,9 @@ ECode CNetworkManagementService::IsTetheringStarted(
 
     AutoPtr<NativeDaemonEvent> event;
     // try {
-    mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1021,50 +1652,6 @@ ECode CNetworkManagementService::IsTetheringStarted(
     FAIL_RETURN(event->CheckCode(NetdResponseCode::TetherStatusResult));
     *result = event->GetMessage().EndWith("started");
     return NOERROR;
-}
-
-// TODO(BT) Remove
-ECode CNetworkManagementService::StartReverseTethering(
-    /* [in] */ const String& iface)
-{
-    if (DBG) Slogger::D(TAG, "startReverseTethering in");
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    // cmd is "tether start first_start first_stop second_start second_stop ..."
-    // an odd number of addrs will fail
-    StringBuffer cmd("tether start-reverse");
-    cmd += String(" ");
-    cmd += iface;
-//    if (DBG) Slogger::D(TAG, "startReverseTethering cmd: " + cmd);
-//    try {
-    String strcmd = cmd.ToString();
-    List<String> responses;
-    FAIL_RETURN(mConnector->DoCommand(strcmd, responses));
-//    } catch (NativeDaemonConnectorException e) {
-//        throw new IllegalStateException("Unable to communicate to native daemon");
-//    }
-//     BluetoothTetheringDataTracker.getInstance().startReverseTether(iface);
-//     return NOERROR;
-    assert(0);
-    return E_NOT_IMPLEMENTED;
-}
-
-// TODO(BT) Remove
-ECode CNetworkManagementService::StopReverseTethering()
-{
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-//    try {
-    String cmd("tether stop-reverse");
-    List<String> responses;
-    FAIL_RETURN(mConnector->DoCommand(cmd, responses));
-//    } catch (NativeDaemonConnectorException e) {
-//        throw new IllegalStateException("Unable to communicate to native daemon to stop tether");
-//    }
-//     BluetoothTetheringDataTracker.getInstance().stopReverseTether();
-//     return NOERROR;
-    assert(0);
-    return E_NOT_IMPLEMENTED;
 }
 
 ECode CNetworkManagementService::TetherInterface(
@@ -1084,10 +1671,26 @@ ECode CNetworkManagementService::TetherInterface(
     args->Set(2, cseq2.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
-    // } catch (NativeDaemonConnectorException e) {
-    //     throw e.rethrowAsParcelableException();
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ECode ec = mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
+    // // } catch (NativeDaemonConnectorException e) {
+    // if (FAILED(ec)) {
+    //     if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+    //         return E_ILLEGAL_STATE_EXCEPTION;
+    //     return ec;
     // }
+    // // }
+    AutoPtr<IList> routes;
+    CArrayList::New((IList**)&routes);
+        // The RouteInfo constructor truncates the LinkAddress to a network prefix, thus making it
+        // suitable to use as a route destination.
+    AutoPtr<IRouteInfo> routeInfo;
+    AutoPtr<IInterfaceConfiguration> interfaceConf;
+    GetInterfaceConfig(iface, (IInterfaceConfiguration**)&interfaceConf);
+    CRouteInfo::New(Ptr(interfaceConf)->Func(interfaceConf->GetLinkAddress), NULL, iface, (IRouteInfo**)&routeInfo);
+    routes->Add(routeInfo);
+    AddInterfaceToLocalNetwork(iface, routes);
     return NOERROR;
 }
 
@@ -1108,10 +1711,17 @@ ECode CNetworkManagementService::UntetherInterface(
     args->Set(2, cseq2.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
-    // } catch (NativeDaemonConnectorException e) {
-    //     throw e.rethrowAsParcelableException();
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ECode ec = mConnector->Execute(String("tether"), args, (NativeDaemonEvent**)&event);
+    // // } catch (NativeDaemonConnectorException e) {
+    // if (FAILED(ec)) {
+    //     if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+    //         return E_ILLEGAL_STATE_EXCEPTION;
+    //     return ec;
     // }
+    // // }
+    RemoveInterfaceFromLocalNetwork(iface);
     return NOERROR;
 }
 
@@ -1130,7 +1740,9 @@ ECode CNetworkManagementService::ListTetheredInterfaces(
     args->Set(1, cseq1.Get());
     // try {
     AutoPtr<ArrayOf<NativeDaemonEvent*> > events;
-    mConnector->ExecuteForList(String("tether"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->ExecuteForList(String("tether"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
     AutoPtr< ArrayOf<String> > resArray = NativeDaemonEvent::FilterMessageList(*events, NetdResponseCode::TetherInterfaceListResult);
     *result = resArray;
     REFCOUNT_ADD(*result);
@@ -1141,31 +1753,40 @@ ECode CNetworkManagementService::ListTetheredInterfaces(
 }
 
 ECode CNetworkManagementService::SetDnsForwarders(
+    /* [in] */ INetwork* network,
     /* [in] */ ArrayOf<String>* dns)
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
 
+    Int32 netId = (network != NULL) ? Ptr(network)->Func(network->GetNetId) : IConnectivityManager::NETID_UNSET;
     AutoPtr<ICharSequence> cseq0;
     CString::New(String("dns"), (ICharSequence**)&cseq0);
     AutoPtr<ICharSequence> cseq1;
     CString::New(String("set"), (ICharSequence**)&cseq1);
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+    AutoPtr<IInteger32> i32;
+    CInteger32::New(netId, (IInteger32**)&i32);
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
     args->Set(0, cseq0.Get());
     args->Set(1, cseq1.Get());
-    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
-            String("tether"), args);
-    for (Int32 i = 0; i < dns->GetLength(); i++) {
-        AutoPtr<IInetAddress> inetAddr;
-        NetworkUtils::NumericToInetAddress((*dns)[i], (IInetAddress**)&inetAddr);
-        String str;
-        inetAddr->GetHostAddress(&str);
-        AutoPtr<ICharSequence> cseq;
-        CString::New(str, (ICharSequence**)&cseq);
-        cmd->AppendArg(cseq);
-    }
+    args->Set(2, i32.Get());
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
+    //         String("tether"), args);
+    // for (Int32 i = 0; i < dns->GetLength(); i++) {
+    //     AutoPtr<IInetAddress> inetAddr;
+    //     NetworkUtils::NumericToInetAddress((*dns)[i], (IInetAddress**)&inetAddr);
+    //     String str;
+    //     inetAddr->GetHostAddress(&str);
+    //     AutoPtr<ICharSequence> cseq;
+    //     CString::New(str, (ICharSequence**)&cseq);
+    //     cmd->AppendArg(cseq);
+    // }
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
     return NOERROR;
 }
 
@@ -1186,7 +1807,9 @@ ECode CNetworkManagementService::GetDnsForwarders(
     args->Set(1, cseq1.Get());
     // try {
     AutoPtr<ArrayOf<NativeDaemonEvent*> > events;
-    mConnector->ExecuteForList(String("tether"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->ExecuteForList(String("tether"), args, (ArrayOf<NativeDaemonEvent*>**)&events);
     AutoPtr< ArrayOf<String> > resArray = NativeDaemonEvent::FilterMessageList(*events, NetdResponseCode::TetherDnsFwdTgtListResult);
     *result = resArray;
     REFCOUNT_ADD(*result);
@@ -1211,48 +1834,59 @@ ECode CNetworkManagementService::ModifyNat(
     args->Set(0, cseq0.Get());
     args->Set(1, cseq1.Get());
     args->Set(2, cseq2.Get());
-    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
-        String("nat"), args);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
+    //     String("nat"), args);
 
-     AutoPtr<INetworkInterface> internalNetworkInterface;
-     AutoPtr<INetworkInterfaceHelper> helper;
-     CNetworkInterfaceHelper::AcquireSingleton((INetworkInterfaceHelper**)&helper);
-     helper->GetByName(internalInterface, (INetworkInterface**)&internalNetworkInterface);
+    //  AutoPtr<INetworkInterface> internalNetworkInterface;
+    //  AutoPtr<INetworkInterfaceHelper> helper;
+    //  CNetworkInterfaceHelper::AcquireSingleton((INetworkInterfaceHelper**)&helper);
+    //  helper->GetByName(internalInterface, (INetworkInterface**)&internalNetworkInterface);
 
-     if (internalNetworkInterface == NULL) {
-        AutoPtr<ICharSequence> cseq;
-        CString::New(String("0"), (ICharSequence**)&cseq);
-        cmd->AppendArg(cseq);
-     } else {
-        AutoPtr<IList> interfaceAddresses;
-        internalNetworkInterface->GetInterfaceAddresses((IList**)&interfaceAddresses);
-        AutoPtr<IIterator> emu;
-        FAIL_RETURN(interfaceAddresses->GetIterator((IIterator**)&emu));
-        Boolean hasNext;
-        while (emu->HasNext(&hasNext), hasNext ) {
-            AutoPtr<IInterfaceAddress> ia;
-            emu->Next((IInterface**)&ia);
-            AutoPtr<IInetAddress> addrIn;
-            AutoPtr<IInetAddress> addrOut;
-            Int16 prefixLen;
-            ia->GetAddress((IInetAddress**)&addrIn);
-            ia->GetNetworkPrefixLength(&prefixLen);
-            NetworkUtils::GetNetworkPart(addrIn, (Int32)prefixLen, (IInetAddress**)&addrOut);
-            String str;
-            addrOut->GetHostAddress(&str);
-            AutoPtr<ICharSequence> c0;
-            CString::New(str, (ICharSequence**)&c0);
-            AutoPtr<ICharSequence> c1;
-            CString::New(String("/"), (ICharSequence**)&c1);
-            AutoPtr<IInteger16> i2;
-            CInteger16::New(prefixLen, (IInteger16**)&i2);
-            cmd->AppendArg(c0);
-            cmd->AppendArg(c1);
-            cmd->AppendArg(i2);
-        }
-    }
+    //  if (internalNetworkInterface == NULL) {
+    //     AutoPtr<ICharSequence> cseq;
+    //     CString::New(String("0"), (ICharSequence**)&cseq);
+    //     cmd->AppendArg(cseq);
+    //  } else {
+    //     // Don't touch link-local routes, as link-local addresses aren't routable,
+    //     // kernel creates link-local routes on all interfaces automatically
+    //     AutoPtr<IList> list;
+    //     internalNetworkInterface->GetInterfaceAddresses((IList**)&list);
+    //     AutoPtr<IList> interfaceAddresses;
+    //     ExcludeLinkLocal(list, (IList**)&interfaceAddresses);
+    //     AutoPtr<IInteger32> i32;
+    //     CInteger32::New(Ptr(interfaceAddresses)->Func(IList::GetSize), (IInteger32**)&i32);
+    //     cmd->AppendArg(i32);
+    //     AutoPtr<IIterator> emu;
+    //     FAIL_RETURN(interfaceAddresses->GetIterator((IIterator**)&emu));
+    //     Boolean hasNext;
+    //     while (emu->HasNext(&hasNext), hasNext ) {
+    //         AutoPtr<IInterfaceAddress> ia;
+    //         emu->Next((IInterface**)&ia);
+    //         AutoPtr<IInetAddress> addrIn;
+    //         AutoPtr<IInetAddress> addrOut;
+    //         Int16 prefixLen;
+    //         ia->GetAddress((IInetAddress**)&addrIn);
+    //         ia->GetNetworkPrefixLength(&prefixLen);
+    //         NetworkUtils::GetNetworkPart(addrIn, (Int32)prefixLen, (IInetAddress**)&addrOut);
+    //         String str;
+    //         addrOut->GetHostAddress(&str);
+    //         AutoPtr<ICharSequence> c0;
+    //         CString::New(str, (ICharSequence**)&c0);
+    //         AutoPtr<ICharSequence> c1;
+    //         CString::New(String("/"), (ICharSequence**)&c1);
+    //         AutoPtr<IInteger16> i2;
+    //         CInteger16::New(prefixLen, (IInteger16**)&i2);
+    //         cmd->AppendArg(c0);
+    //         cmd->AppendArg(c1);
+    //         cmd->AppendArg(i2);
+    //     }
+    // }
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
     return NOERROR;
 }
 
@@ -1285,10 +1919,14 @@ ECode CNetworkManagementService::ListTtys(
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
 
-    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
-        String("list_ttys"), NULL);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
+    //     String("list_ttys"), NULL);
     AutoPtr<ArrayOf<NativeDaemonEvent*> > events;
-    mConnector->ExecuteForList(cmd, (ArrayOf<NativeDaemonEvent*>**)&events);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->ExecuteForList(cmd, (ArrayOf<NativeDaemonEvent*>**)&events);
     AutoPtr< ArrayOf<String> > resArray = NativeDaemonEvent::FilterMessageList(*events, NetdResponseCode::TtyListResult);
     *result = resArray;
     REFCOUNT_ADD(*result);
@@ -1339,7 +1977,9 @@ ECode CNetworkManagementService::AttachPppd(
     args->Set(4, cseq4.Get());
     args->Set(5, cseq5.Get());
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("pppd"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("pppd"), args, (NativeDaemonEvent**)&event);
     return NOERROR;
 }
 
@@ -1357,7 +1997,9 @@ ECode CNetworkManagementService::DetachPppd(
     args->Set(1, cseq1.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("pppd"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("pppd"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1376,7 +2018,9 @@ ECode CNetworkManagementService::StartAccessPoint(
     cmd += wlanIface;
     String strcmd = cmd.ToString();
     List<String> responses;
-    FAIL_RETURN(mConnector->DoCommand(strcmd, responses));
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // FAIL_RETURN(mConnector->DoCommand(strcmd, responses));
     if (wifiConfig == NULL) {
         AutoPtr<ICharSequence> cseq0;
         CString::New(String("set"), (ICharSequence**)&cseq0);
@@ -1386,37 +2030,39 @@ ECode CNetworkManagementService::StartAccessPoint(
         args->Set(0, cseq0.Get());
         args->Set(1, cseq1.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
     } else {
         String strSSID;
         wifiConfig->GetSSID(&strSSID);
         String strPreShareKey;
         wifiConfig->GetPreSharedKey(&strPreShareKey);
-        AutoPtr<ICharSequence> cseq0;
-        CString::New(String("set"), (ICharSequence**)&cseq0);
-        AutoPtr<ICharSequence> cseq1;
-        CString::New(wlanIface, (ICharSequence**)&cseq1);
-        AutoPtr<ICharSequence> cseq2;
-        CString::New(strSSID, (ICharSequence**)&cseq2);
-        AutoPtr<ICharSequence> cseq3;
-        CString::New(GetSecurityType(wifiConfig), (ICharSequence**)&cseq3);
-        AutoPtr<ICharSequence> cseq4;
-        CString::New(strPreShareKey, (ICharSequence**)&cseq4);
-        AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(5);
-        args->Set(0, cseq0.Get());
-        args->Set(1, cseq1.Get());
-        args->Set(2, cseq2.Get());
-        args->Set(3, cseq3.Get());
-        args->Set(4, cseq4.Get());
+        // TODO: Waiting for NativeDaemonConnector::SensitiveArg
+        assert(0);
+        // AutoPtr<NativeDaemonConnector::SensitiveArg> sensitiveArg;
+        // CSensitiveArg::New(strPreShareKey, (ISensitiveArg**)&sensitiveArg);
+        // AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(7);
+        // args->Set(0, StringUtils::ParseCharSequence(String("set")).Get());
+        // args->Set(1, StringUtils::ParseCharSequence(wlanIface).Get());
+        // args->Set(2, StringUtils::ParseCharSequence(strSSID).Get());
+        // args->Set(3, StringUtils::ParseCharSequence(String("broadcast")).Get());
+        // args->Set(4, StringUtils::ParseCharSequence(String("6")).Get());
+        // args->Set(5, StringUtils::ParseCharSequence(GetSecurityType(wifiConfig)).Get());
+        // args->Set(6, sensitiveArg.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
     }
     AutoPtr<ICharSequence> cseq;
     CString::New(String("startap"), (ICharSequence**)&cseq);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
     args->Set(0, cseq.Get());
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
     return NOERROR;
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
@@ -1438,7 +2084,6 @@ String CNetworkManagementService::GetSecurityType(
     }
 }
 
-// /* @param mode can be "AP", "STA" or "P2P" */
 ECode CNetworkManagementService::WifiFirmwareReload(
     /* [in] */ const String& wlanIface,
     /* [in] */ const String& mode)
@@ -1457,7 +2102,9 @@ ECode CNetworkManagementService::WifiFirmwareReload(
     args->Set(2, cseq2.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -1475,7 +2122,9 @@ ECode CNetworkManagementService::StopAccessPoint(
     args->Set(0, cseq0.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
     WifiFirmwareReload(wlanIface, String("STA"));
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
@@ -1499,48 +2148,49 @@ ECode CNetworkManagementService::SetAccessPoint(
         args->Set(0, cseq0.Get());
         args->Set(1, cseq1.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
      } else {
         String ssid;
         wifiConfig->GetSSID(&ssid);
         String presharedKey;
         wifiConfig->GetPreSharedKey(&presharedKey);
 
-        AutoPtr<ICharSequence> cseq0;
-        CString::New(String("set"), (ICharSequence**)&cseq0);
-        AutoPtr<ICharSequence> cseq1;
-        CString::New(wlanIface, (ICharSequence**)&cseq1);
-        AutoPtr<ICharSequence> cseq2;
-        CString::New(ssid, (ICharSequence**)&cseq2);
-        AutoPtr<ICharSequence> cseq3;
-        CString::New(GetSecurityType(wifiConfig), (ICharSequence**)&cseq3);
-        AutoPtr<ICharSequence> cseq4;
-        CString::New(presharedKey, (ICharSequence**)&cseq4);
-        AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(5);
-        args->Set(0, cseq0.Get());
-        args->Set(1, cseq1.Get());
-        args->Set(2, cseq2.Get());
-        args->Set(3, cseq3.Get());
-        args->Set(4, cseq4.Get());
+        // TODO: Waiting for NativeDaemonConnector::SensitiveArg
+        assert(0);
+        // AutoPtr<ISensitiveArg> sensitiveArg;
+        // CSensitiveArg::New(presharedKey, (ISensitiveArg**)&sensitiveArg);
+        // AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(7);
+        // args->Set(0, StringUtils::ParseCharSequence(String("set")).Get());
+        // args->Set(1, StringUtils::ParseCharSequence(wlanIface).Get());
+        // args->Set(2, StringUtils::ParseCharSequence(ssid).Get());
+        // args->Set(3, StringUtils::ParseCharSequence(String("broadcast")).Get());
+        // args->Set(4, StringUtils::ParseCharSequence(String("6")).Get());
+        // args->Set(5, StringUtils::ParseCharSequence(GetSecurityType(wifiConfig)).Get());
+        // args->Set(6, sensitiveArg.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
-     }
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("softap"), args, (NativeDaemonEvent**)&event);
+    }
     return NOERROR;
 }
 
 ECode CNetworkManagementService::AddIdleTimer(
     /* [in] */ const String& iface,
     /* [in] */ Int32 timeout,
-    /* [in] */ const String& label)
+    /* [in] */ Int32 type)
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
 
     if (DBG) Slogger::D(TAG, "Adding idletimer");
 
-    {
-        AutoLock lock(mIdleTimerLock);
-        AutoPtr<IdleTimerParams> params = mActiveIdleTimers[iface];
+    synchronized(mIdleTimerLock) {
+        AutoPtr<IInterface> value;
+        mActiveIdleTimers->Get(StringUtils::ParseCharSequence(iface), (IInterface**)&value);
+        AutoPtr<IdleTimerParams> params = (IdleTimerParams*)IObject::Probe(value);
         if (params != NULL) {
             // the interface already has idletimer, update network count
             params->mNetworkCount++;
@@ -1551,18 +2201,31 @@ ECode CNetworkManagementService::AddIdleTimer(
         AutoPtr<ICharSequence> cseq1;
         CString::New(iface, (ICharSequence**)&cseq1);
         AutoPtr<ICharSequence> cseq2;
-        CString::New(StringUtils::Int32ToString(timeout), (ICharSequence**)&cseq2);
+        CString::New(StringUtils::ToString(timeout), (ICharSequence**)&cseq2);
         AutoPtr<ICharSequence> cseq3;
-        CString::New(label, (ICharSequence**)&cseq3);
+        CString::New(StringUtils::ToString(type), (ICharSequence**)&cseq3);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
         args->Set(0, cseq0.Get());
         args->Set(1, cseq1.Get());
         args->Set(2, cseq2.Get());
         args->Set(3, cseq3.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("idletimer"), args, (NativeDaemonEvent**)&event);
-        AutoPtr<IdleTimerParams> timer = new IdleTimerParams(timeout, label);
-        mActiveIdleTimers[iface] = timer;
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("idletimer"), args, (NativeDaemonEvent**)&event);
+        AutoPtr<IdleTimerParams> timer = new IdleTimerParams(timeout, type);
+        mActiveIdleTimers->Put(StringUtils::ParseCharSequence(iface), TO_IINTERFACE(timer));
+
+        // Networks start up.
+        AutoPtr<IConnectivityManagerHelper> helper;
+        CConnectivityManagerHelper::AcquireSingleton((IConnectivityManagerHelper**)&helper);
+        Boolean isNetworkTypeMobile;
+        helper->IsNetworkTypeMobile(type, &isNetworkTypeMobile);
+        if (isNetworkTypeMobile) {
+            mNetworkActive = FALSE;
+        }
+        Boolean tmp;
+        mDaemonHandler->Post(new TimerRunnable(this, type), &tmp);
     }
 
     return NOERROR;
@@ -1576,9 +2239,10 @@ ECode CNetworkManagementService::RemoveIdleTimer(
 
     if (DBG) Slogger::D(TAG, "Removing idletimer");
 
-    {
-        AutoLock lock(mIdleTimerLock);
-        AutoPtr<IdleTimerParams> params = mActiveIdleTimers[iface];
+    synchronized(mIdleTimerLock) {
+        AutoPtr<IInterface> value;
+        mActiveIdleTimers->Get(StringUtils::ParseCharSequence(iface), (IInterface**)&value);
+        AutoPtr<IdleTimerParams> params = (IdleTimerParams*)IObject::Probe(value);
         if (params == NULL || --(params->mNetworkCount) > 0) {
             return NOERROR;
         }
@@ -1587,17 +2251,21 @@ ECode CNetworkManagementService::RemoveIdleTimer(
         AutoPtr<ICharSequence> cseq1;
         CString::New(iface, (ICharSequence**)&cseq1);
         AutoPtr<ICharSequence> cseq2;
-        CString::New(StringUtils::Int32ToString(params->mTimeout), (ICharSequence**)&cseq2);
+        CString::New(StringUtils::ToString(params->mTimeout), (ICharSequence**)&cseq2);
         AutoPtr<ICharSequence> cseq3;
-        CString::New(params->mLabel, (ICharSequence**)&cseq3);
+        CString::New(StringUtils::ToString(params->mType), (ICharSequence**)&cseq3);
         AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
         args->Set(0, cseq0.Get());
         args->Set(1, cseq1.Get());
         args->Set(2, cseq2.Get());
         args->Set(3, cseq3.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("idletimer"), args, (NativeDaemonEvent**)&event);
-        mActiveIdleTimers.Erase(iface);
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("idletimer"), args, (NativeDaemonEvent**)&event);
+        mActiveIdleTimers->Remove(StringUtils::ParseCharSequence(iface));
+        Boolean tmp;
+        mDaemonHandler->Post(new RemoveRunnable(this, params), &tmp);
     }
     return NOERROR;
 }
@@ -1610,7 +2278,13 @@ ECode CNetworkManagementService::GetNetworkStatsSummaryDev(
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    return mStatsFactory->ReadNetworkStatsSummaryDev(result);
+    // try {
+    ECode ec = mStatsFactory->ReadNetworkStatsSummaryDev(result);
+    // } catch (IOException e) {
+    if ((ECode)E_IO_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
+    // }
+    return ec;
 }
 
 ECode CNetworkManagementService::GetNetworkStatsSummaryXt(
@@ -1621,7 +2295,13 @@ ECode CNetworkManagementService::GetNetworkStatsSummaryXt(
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    return mStatsFactory->ReadNetworkStatsSummaryXt(result);
+    // try {
+    ECode ec = mStatsFactory->ReadNetworkStatsSummaryXt(result);
+    // } catch (IOException e) {
+    if ((ECode)E_IO_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
+    // }
+    return ec;
 }
 
 ECode CNetworkManagementService::GetNetworkStatsDetail(
@@ -1632,7 +2312,13 @@ ECode CNetworkManagementService::GetNetworkStatsDetail(
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    return mStatsFactory->ReadNetworkStatsDetail(INetworkStats::UID_ALL, result);
+    // try {
+    ECode ec = mStatsFactory->ReadNetworkStatsDetail(INetworkStats::UID_ALL, NULL, INetworkStats::TAG_ALL, NULL, result);
+    // } catch (IOException e) {
+    if ((ECode)E_IO_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
+    // }
+    return ec;
 }
 
 ECode CNetworkManagementService::SetInterfaceQuota(
@@ -1647,11 +2333,11 @@ ECode CNetworkManagementService::SetInterfaceQuota(
     if (!mBandwidthControlEnabled)
         return NOERROR;
 
-    {
-        AutoLock lock(mQuotaLock);
-        HashMap<String, Int64>::Iterator iter = mActiveQuotas.Find(iface);
-        if (iter != mActiveQuotas.End()) {
-            //throw new IllegalStateException("iface " + iface + " already has quota");
+    synchronized(mQuotaLock) {
+        Boolean isContainsKey;
+        mActiveQuotas->ContainsKey(StringUtils::ParseCharSequence(iface), &isContainsKey);
+        if (isContainsKey) {
+            Logger::E(TAG, "iface %s already has quota", iface.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
 
@@ -1667,8 +2353,10 @@ ECode CNetworkManagementService::SetInterfaceQuota(
         args->Set(1, cseq1.Get());
         args->Set(2, iint2.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
-        mActiveQuotas[iface] = quotaBytes;
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
+        mActiveQuotas->Put(StringUtils::ParseCharSequence(iface), iint2);
     }
     return NOERROR;
 }
@@ -1684,15 +2372,15 @@ ECode CNetworkManagementService::RemoveInterfaceQuota(
     if (!mBandwidthControlEnabled)
         return NOERROR;
 
-    {
-        AutoLock lock(mQuotaLock);
-        HashMap<String, Int64>::Iterator iter = mActiveQuotas.Find(iface);
-        if (iter != mActiveQuotas.End()) {
+    synchronized(mQuotaLock) {
+        Boolean isContainsKey;
+        mActiveQuotas->ContainsKey(StringUtils::ParseCharSequence(iface), &isContainsKey);
+        if (isContainsKey) {
             // TODO: eventually consider throwing
             return NOERROR;
         }
-        mActiveQuotas.Erase(iface);
-        mActiveAlerts.Erase(iface);
+        mActiveQuotas->Remove(StringUtils::ParseCharSequence(iface));
+        mActiveAlerts->Remove(StringUtils::ParseCharSequence(iface));
         // TODO: support quota shared across interfaces
         AutoPtr<ICharSequence> cseq0;
         CString::New(String("removeiquota"), (ICharSequence**)&cseq0);
@@ -1702,7 +2390,9 @@ ECode CNetworkManagementService::RemoveInterfaceQuota(
         args->Set(0, cseq0.Get());
         args->Set(1, cseq1.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
     }
     return NOERROR;
 }
@@ -1720,17 +2410,18 @@ ECode CNetworkManagementService::SetInterfaceAlert(
         return NOERROR;
 
     // quick sanity check
-    HashMap<String, Int64>::Iterator iter = mActiveQuotas.Find(iface);
-    if (iter != mActiveQuotas.End()) {
-        //throw new IllegalStateException("setting alert requires existing quota on iface");
+    Boolean isContainsKey;
+    mActiveQuotas->ContainsKey(StringUtils::ParseCharSequence(iface), &isContainsKey);
+    if (isContainsKey) {
+        Logger::E(TAG, "setting alert requires existing quota on iface");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    {
-        AutoLock lock(mQuotaLock);
-        HashMap<String, Int64>::Iterator iter2 = mActiveAlerts.Find(iface);
-        if (iter2 != mActiveAlerts.End()) {
-            //throw new IllegalStateException("iface " + iface + " already has alert");
+    synchronized(mQuotaLock) {
+        Boolean isContainsKey;
+        mActiveAlerts->ContainsKey(StringUtils::ParseCharSequence(iface), &isContainsKey);
+        if (isContainsKey) {
+            Logger::E(TAG, "iface %s already has alert", iface.string());
             return E_ILLEGAL_STATE_EXCEPTION;
         }
          // TODO: support alert shared across interfaces
@@ -1745,8 +2436,10 @@ ECode CNetworkManagementService::SetInterfaceAlert(
         args->Set(1, cseq1.Get());
         args->Set(2, iint2.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
-        mActiveAlerts[iface] = alertBytes;
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
+        mActiveAlerts->Put(StringUtils::ParseCharSequence(iface), iint2);
     }
     return NOERROR;
 }
@@ -1762,10 +2455,10 @@ ECode CNetworkManagementService::RemoveInterfaceAlert(
     if (!mBandwidthControlEnabled)
         return NOERROR;
 
-    {
-        AutoLock lock(mQuotaLock);
-        HashMap<String, Int64>::Iterator iter = mActiveAlerts.Find(iface);
-        if (iter != mActiveAlerts.End()) {
+    synchronized(mQuotaLock) {
+        Boolean isContainsKey;
+        mActiveAlerts->ContainsKey(StringUtils::ParseCharSequence(iface), &isContainsKey);
+        if (isContainsKey) {
             // TODO: eventually consider throwing
             return NOERROR;
         }
@@ -1779,8 +2472,10 @@ ECode CNetworkManagementService::RemoveInterfaceAlert(
         args->Set(0, cseq0.Get());
         args->Set(1, cseq1.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
-        mActiveAlerts.Erase(iface);
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
+        mActiveAlerts->Remove(StringUtils::ParseCharSequence(iface));
     }
     return NOERROR;
 }
@@ -1804,7 +2499,9 @@ ECode CNetworkManagementService::SetGlobalAlert(
     args->Set(0, cseq0.Get());
     args->Set(1, iint1.Get());
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
     return NOERROR;
 }
 
@@ -1820,9 +2517,9 @@ ECode CNetworkManagementService::SetUidNetworkRules(
     if (!mBandwidthControlEnabled)
         return NOERROR;
 
-    {
-        AutoLock lock(mQuotaLock);
-        Boolean oldRejectOnQuota = mUidRejectOnQuota[uid];
+    synchronized(mQuotaLock) {
+        Boolean oldRejectOnQuota;
+        mUidRejectOnQuota->Get(uid, &oldRejectOnQuota);
         if (oldRejectOnQuota == rejectOnQuotaInterfaces) {
             // TODO: eventually consider throwing
             return NOERROR;
@@ -1840,12 +2537,14 @@ ECode CNetworkManagementService::SetUidNetworkRules(
         args->Set(1, cseq1.Get());
         args->Set(2, iint2.Get());
         AutoPtr<NativeDaemonEvent> event;
-        mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
 
         if (rejectOnQuotaInterfaces) {
-            mUidRejectOnQuota[uid] = TRUE;
+            mUidRejectOnQuota->Put(uid, TRUE);
         } else {
-            mUidRejectOnQuota.Erase(uid);
+            mUidRejectOnQuota->Delete(uid);
         }
     }
     return NOERROR;
@@ -1855,7 +2554,7 @@ ECode CNetworkManagementService::IsBandwidthControlEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
+    *result = FALSE;
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
@@ -1872,11 +2571,16 @@ ECode CNetworkManagementService::GetNetworkStatsUidDetail(
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    return mStatsFactory->ReadNetworkStatsDetail(uid, result);
+    // try {
+    ECode ec = mStatsFactory->ReadNetworkStatsDetail(uid, NULL, INetworkStats::TAG_ALL, NULL, result);
+    // } catch (IOException e) {
+    if ((ECode)E_IO_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
+    // }
+    return ec;
 }
 
 ECode CNetworkManagementService::GetNetworkStatsTethering(
-    /* [in] */ ArrayOf<String>* ifacePairs,
     /* [out] */ INetworkStats** result)
 {
     VALIDATE_NOT_NULL(result);
@@ -1885,236 +2589,210 @@ ECode CNetworkManagementService::GetNetworkStatsTethering(
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
         Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
 
-    if (ifacePairs->GetLength() % 2 != 0) {
-        //throw new IllegalArgumentException("unexpected ifacePairs; length=" + ifacePairs.length);
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-
     AutoPtr<INetworkStats> stats;
     CNetworkStats::New(SystemClock::GetElapsedRealtime(), 1, (INetworkStats**)&stats);
-    for (Int32 i = 0; i < ifacePairs->GetLength(); i += 2) {
-        String ifaceIn = (*ifacePairs)[i];
-        String ifaceOut = (*ifacePairs)[i + 1];
-        if (ifaceIn != NULL && ifaceOut != NULL) {
-            AutoPtr<INetworkStatsEntry> entry;
-            GetNetworkStatsTethering(ifaceIn, ifaceOut, (INetworkStatsEntry**)&entry);
-            stats->CombineValues(entry);
+    ECode ec;
+        // try {
+    do {
+        AutoPtr<ArrayOf<NativeDaemonEvent*> > events;
+        // TODO: Waiting for NativeDaemonConnector
+        assert(0);
+        // ec = mConnector->ExecuteForList(
+        //         String("bandwidth"), String("gettetherstats"), (ArrayOf<NativeDaemonEvent*>**)&events);
+        if (FAILED(ec)) break;
+        for (Int32 i = 0; i < events->GetLength(); ++i) {
+            AutoPtr<NativeDaemonEvent> event = (*events)[i];
+            if (event->GetCode() != NetdResponseCode::TetheringStatsListResult) continue;
+
+            // 114 ifaceIn ifaceOut rx_bytes rx_packets tx_bytes tx_packets
+            AutoPtr<IStringTokenizer> tok;
+            CStringTokenizer::New(event->GetMessage(), (IStringTokenizer**)&tok);
+            // try {
+            do {
+                String ifaceIn;
+                tok->GetNextToken(&ifaceIn);
+                String ifaceOut;
+                tok->GetNextToken(&ifaceOut);
+
+                AutoPtr<INetworkStatsEntry> entry;
+                CNetworkStatsEntry::New((INetworkStatsEntry**)&entry);
+                entry->SetIface(ifaceOut);
+                entry->SetUid(ITrafficStats::UID_TETHERING);
+                entry->SetSet(INetworkStats::SET_DEFAULT);
+                entry->SetTag(INetworkStats::TAG_NONE);
+                Int64 i64;
+                ec = StringUtils::Parse(Ptr(tok)->Func(tok->GetNextToken), &i64);
+                if (FAILED(ec)) break;
+                entry->SetRxBytes(i64);
+                ec = StringUtils::Parse(Ptr(tok)->Func(tok->GetNextToken), &i64);
+                if (FAILED(ec)) break;
+                entry->SetRxPackets(i64);
+                ec = StringUtils::Parse(Ptr(tok)->Func(tok->GetNextToken), &i64);
+                if (FAILED(ec)) break;
+                entry->SetTxBytes(i64);
+                ec = StringUtils::Parse(Ptr(tok)->Func(tok->GetNextToken), &i64);
+                if (FAILED(ec)) break;
+                entry->SetTxPackets(i64);
+                stats->CombineValues(entry);
+            } while(FALSE);
+            if (FAILED(ec)) {
+                // } catch (NoSuchElementException e) {
+                if ((ECode)E_NO_SUCH_ELEMENT_EXCEPTION == ec) {
+                    Logger::E(TAG, "problem parsing tethering stats: %s", TO_CSTR(event));
+                    return E_ILLEGAL_STATE_EXCEPTION;
+                }
+                // } catch (NumberFormatException e) {
+                else if ((ECode)E_NUMBER_FORMAT_EXCEPTION == ec) {
+                    Logger::E(TAG, "problem parsing tethering stats: %s", TO_CSTR(event));
+                    return E_ILLEGAL_STATE_EXCEPTION;
+                }
+                else
+                    return ec;
+                // }
+            }
+        }
+    } while(FALSE);
+    // } catch (NativeDaemonConnectorException e) {
+    if (FAILED(ec)) {
+        if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+            return E_ILLEGAL_STATE_EXCEPTION;
+        return ec;
+    }
+    // }
+    FUNC_RETURN(stats)
+}
+
+ECode CNetworkManagementService::SetDnsServersForNetwork(
+    /* [in] */ Int32 netId,
+    /* [in] */ ArrayOf<String>* servers,
+    /* [in] */ const String& domains)
+{
+    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
+            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
+
+    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
+    args->Set(0, StringUtils::ParseCharSequence(String("setnetdns")));
+    args->Set(1, StringUtils::ParseCharSequence(StringUtils::ToString(netId)));
+    args->Set(2, StringUtils::ParseCharSequence((domains.IsNull() ? String("") : domains)));
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
+    //     String("resolver"), args);
+
+    // for (Int32 i = 0; i < servers->GetLength(); i++) {
+    //     AutoPtr<IInetAddress> addr;
+    //     NetworkUtils::NumericToInetAddress((*servers)[i], (IInetAddress**)&addr);
+    //     Boolean bol;
+    //     addr->IsAnyLocalAddress(&bol);
+    //     if (bol == FALSE) {
+    //         String str;
+    //         addr->GetHostAddress(&str);
+    //         AutoPtr<ICharSequence> cseq;
+    //         CString::New(str, (ICharSequence**)&cseq);
+    //         cmd->AppendArg(cseq);
+    //     }
+    // }
+
+    AutoPtr<NativeDaemonEvent> event;
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
+    return NOERROR;
+}
+
+ECode CNetworkManagementService::AddVpnUidRanges(
+    /* [in] */ Int32 netId,
+    /* [in] */ ArrayOf<IUidRange*>* ranges)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+    AutoPtr<ArrayOf<IInterface*> > argv = ArrayOf<IInterface*>::Alloc(3 + MAX_UID_RANGES_PER_COMMAND);
+    argv->Set(0, StringUtils::ParseCharSequence(String("users")));
+    argv->Set(1, StringUtils::ParseCharSequence(String("add")));
+    argv->Set(2, StringUtils::ParseCharSequence(StringUtils::ToString(netId)));
+    Int32 argc = 3;
+    // Avoid overly long commands by limiting number of UID ranges per command.
+    for (Int32 i = 0; i < ranges->GetLength(); i++) {
+        argv->Set(argc++, (*ranges)[i]);
+        if (i == (ranges->GetLength() - 1) || argc == argv->GetLength()) {
+            // try {
+            ECode ec;
+            do {
+                AutoPtr<ArrayOf<IInterface*> > subArray;
+                ec = Arrays::CopyOf(argv, argc, (ArrayOf<IInterface*>**)&subArray);
+                if (FAILED(ec)) break;
+                // TODO: Waiting for NativeDaemonConnector
+                assert(0);
+                // ec = mConnector->Execute(String("network"), subArray);
+                if (FAILED(ec)) break;
+            } while(FALSE);
+            // } catch (NativeDaemonConnectorException e) {
+            if (FAILED(ec)) {
+                if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+                    return E_ILLEGAL_STATE_EXCEPTION;
+                return ec;
+            }
+            // }
+            argc = 3;
         }
     }
-    *result = stats;
-    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
-ECode CNetworkManagementService::GetNetworkStatsTethering(
-    /* [in] */ const String& ifaceIn,
-    /* [in] */ const String& ifaceOut,
-    /* [out] */ INetworkStatsEntry** result)
+ECode CNetworkManagementService::RemoveVpnUidRanges(
+    /* [in] */ Int32 netId,
+    /* [in] */ ArrayOf<IUidRange*>* ranges)
 {
-    VALIDATE_NOT_NULL(result);
-    *result = NULL;
-
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("gettetherstats"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(ifaceIn, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(ifaceOut, (ICharSequence**)&cseq2);
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
-    AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("bandwidth"), args, (NativeDaemonEvent**)&event);
-
-    FAIL_RETURN(event->CheckCode(NetdResponseCode::TetheringStatsResult));
-
-    // 221 ifaceIn ifaceOut rx_bytes rx_packets tx_bytes tx_packets
-    AutoPtr<ArrayOf<String> > values;
-    StringUtils::Split(event->GetMessage(), String(" \t\n\r\f"), (ArrayOf<String>**)&values);
-
-    Int32 index = 0;
-    index++;
-    index++;
-
-    AutoPtr<INetworkStatsEntry> entry;
-    CNetworkStatsEntry::New((INetworkStatsEntry**)&entry);
-    entry->SetIface(ifaceIn);
-    entry->SetUid(ITrafficStats::UID_TETHERING);
-    entry->SetSet(INetworkStats::SET_DEFAULT);
-    entry->SetTag(INetworkStats::TAG_NONE);
-    entry->SetRxBytes(StringUtils::ParseInt64((*values)[index++]));
-    entry->SetRxPackets(StringUtils::ParseInt64((*values)[index++]));
-    entry->SetTxBytes(StringUtils::ParseInt64((*values)[index++]));
-    entry->SetTxPackets(StringUtils::ParseInt64((*values)[index++]));
-    *result = entry;
-    REFCOUNT_ADD(*result);
-    return NOERROR;
-}
-
-ECode CNetworkManagementService::SetInterfaceThrottle(
-    /* [in] */ const String& iface,
-    /* [in] */ Int32 rxKbps,
-    /* [in] */ Int32 txKbps)
-{
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("setthrottle"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
-    AutoPtr<IInteger32> iint2;
-    CInteger32::New(rxKbps, (IInteger32**)&iint2);
-    AutoPtr<IInteger32> iint3;
-    CInteger32::New(txKbps, (IInteger32**)&iint3);
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(4);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, iint2.Get());
-    args->Set(3, iint3.Get());
-    // try {
-    AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
-    // } catch (NativeDaemonConnectorException e) {
-    //     throw e.rethrowAsParcelableException();
-    // }
-    return NOERROR;
-}
-
-ECode CNetworkManagementService::GetInterfaceThrottle(
-    /* [in] */ const String& iface,
-    /* [in] */ Boolean rx,
-    /* [out] */ Int32* throttle)
-{
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("getthrottle"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
-    AutoPtr<ICharSequence> cseq2;
-    CString::New(rx ? String("rx") : String("tx"), (ICharSequence**)&cseq2);
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    args->Set(2, cseq2.Get());
-    AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("interface"), args, (NativeDaemonEvent**)&event);
-
-    if (rx) {
-        FAIL_RETURN(event->CheckCode(NetdResponseCode::InterfaceRxThrottleResult));
-    } else {
-        FAIL_RETURN(event->CheckCode(NetdResponseCode::InterfaceTxThrottleResult));
-    }
-
-    const char* str = event->GetMessage();
-    *throttle = atoi(str);
-    return NOERROR;
-}
-
-ECode CNetworkManagementService::GetInterfaceRxThrottle(
-    /* [in] */ const String& iface,
-    /* [out] */ Int32* result)
-{
-    VALIDATE_NOT_NULL(result);
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    return GetInterfaceThrottle(iface, TRUE, result);
-}
-
-ECode CNetworkManagementService::GetInterfaceTxThrottle(
-    /* [in] */ const String& iface,
-    /* [out] */ Int32* result)
-{
-    VALIDATE_NOT_NULL(result);
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    return GetInterfaceThrottle(iface, FALSE, result);
-}
-
-ECode CNetworkManagementService::SetDefaultInterfaceForDns(
-    /* [in] */ const String& iface)
-{
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("setdefaultif"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    // try {
-    AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("resolver"), args, (NativeDaemonEvent**)&event);
-    // } catch (NativeDaemonConnectorException e) {
-    //     throw e.rethrowAsParcelableException();
-    // }
-    return NOERROR;
-}
-
-ECode CNetworkManagementService::SetDnsServersForInterface(
-    /* [in] */ const String& iface,
-    /* [in] */ ArrayOf<String>* servers)
-{
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("setifdns"), (ICharSequence**)&cseq0);
-    AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
-    args->Set(0, cseq0.Get());
-    args->Set(1, cseq1.Get());
-    AutoPtr<NativeDaemonConnector::Command> cmd = new NativeDaemonConnector::Command(
-        String("resolver"), args);
-
-    for (Int32 i = 0; i < servers->GetLength(); i++) {
-        AutoPtr<IInetAddress> addr;
-        NetworkUtils::NumericToInetAddress((*servers)[i], (IInetAddress**)&addr);
-        Boolean bol;
-        addr->IsAnyLocalAddress(&bol);
-        if (bol == FALSE) {
-            String str;
-            addr->GetHostAddress(&str);
-            AutoPtr<ICharSequence> cseq;
-            CString::New(str, (ICharSequence**)&cseq);
-            cmd->AppendArg(cseq);
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+    AutoPtr<ArrayOf<IInterface*> > argv = ArrayOf<IInterface*>::Alloc(3 + MAX_UID_RANGES_PER_COMMAND);
+    argv->Set(0, StringUtils::ParseCharSequence(String("users")));
+    argv->Set(1, StringUtils::ParseCharSequence(String("remove")));
+    argv->Set(2, StringUtils::ParseCharSequence(StringUtils::ToString(netId)));
+    Int32 argc = 3;
+    // Avoid overly long commands by limiting number of UID ranges per command.
+    for (Int32 i = 0; i < ranges->GetLength(); i++) {
+        argv->Set(argc++, (*ranges)[i]);
+        if (i == (ranges->GetLength() - 1) || argc == argv->GetLength()) {
+            // try {
+            ECode ec;
+            do {
+                AutoPtr<ArrayOf<IInterface*> > subArray;
+                ec = Arrays::CopyOf(argv, argc, (ArrayOf<IInterface*>**)&subArray);
+                if (FAILED(ec)) break;
+                // TODO: Waiting for NativeDaemonConnector
+                assert(0);
+                // ec = mConnector->Execute(String("network"), subArray);
+                if (FAILED(ec)) break;
+            } while(FALSE);
+            // } catch (NativeDaemonConnectorException e) {
+            if (FAILED(ec)) {
+                if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+                    return E_ILLEGAL_STATE_EXCEPTION;
+                return ec;
+            }
+            // }
+            argc = 3;
         }
     }
-
-    AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(cmd, (NativeDaemonEvent**)&event);
     return NOERROR;
 }
 
-ECode CNetworkManagementService::FlushDefaultDnsCache()
+ECode CNetworkManagementService::FlushNetworkDnsCache(
+    /* [in] */ Int32 netId)
 {
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
     AutoPtr<ICharSequence> cseq0;
-    CString::New(String("flushdefaultif"), (ICharSequence**)&cseq0);
-    AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
-    args->Set(0, cseq0.Get());
-    AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("resolver"), args, (NativeDaemonEvent**)&event);
-    return NOERROR;
-}
-
-ECode CNetworkManagementService::FlushInterfaceDnsCache(
-    /* [in] */ const String& iface)
-{
-    FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
-            Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL/*CONNECTIVITY_INTERNAL*/, TAG));
-    AutoPtr<ICharSequence> cseq0;
-    CString::New(String("flushif"), (ICharSequence**)&cseq0);
+    CString::New(String("flushnet"), (ICharSequence**)&cseq0);
     AutoPtr<ICharSequence> cseq1;
-    CString::New(iface, (ICharSequence**)&cseq1);
+    CString::New(StringUtils::ToString(netId), (ICharSequence**)&cseq1);
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
     args->Set(0, cseq0.Get());
     args->Set(1, cseq1.Get());
     // try {
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("resolver"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("resolver"), args, (NativeDaemonEvent**)&event);
     // } catch (NativeDaemonConnectorException e) {
     //     throw e.rethrowAsParcelableException();
     // }
@@ -2131,7 +2809,9 @@ ECode CNetworkManagementService::SetFirewallEnabled(
     AutoPtr< ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(1);
     args->Set(0, cseq0.Get());
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
     mFirewallEnabled = enabled;
     return NOERROR;
 }
@@ -2140,7 +2820,7 @@ ECode CNetworkManagementService::IsFirewallEnabled(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = NULL;
+    *result = FALSE;
 
     FAIL_RETURN(EnforceSystemUid());
     *result = mFirewallEnabled;
@@ -2153,7 +2833,7 @@ ECode CNetworkManagementService::SetFirewallInterfaceRule(
 {
     EnforceSystemUid();
 //     Preconditions::CheckState(mFirewallEnabled);
-    String rule = allow ? ALLOW : DENY;
+    String rule = allow ? String("allow") : String("deny");
 
     AutoPtr<ICharSequence> cseq0;
     CString::New(String("set_interface_rule"), (ICharSequence**)&cseq0);
@@ -2166,7 +2846,9 @@ ECode CNetworkManagementService::SetFirewallInterfaceRule(
     args->Set(1, cseq1.Get());
     args->Set(2, cseq2.Get());
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
     return NOERROR;
 }
 
@@ -2176,7 +2858,7 @@ ECode CNetworkManagementService::SetFirewallEgressSourceRule(
 {
     FAIL_RETURN(EnforceSystemUid());
 //     Preconditions::CheckState(mFirewallEnabled);
-    String rule = allow ? ALLOW : DENY;
+    String rule = allow ? String("allow") : String("deny");
 
     AutoPtr<ICharSequence> cseq0;
     CString::New(String("set_egress_source_rule"), (ICharSequence**)&cseq0);
@@ -2189,7 +2871,9 @@ ECode CNetworkManagementService::SetFirewallEgressSourceRule(
     args->Set(1, cseq1.Get());
     args->Set(2, cseq2.Get());
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
     return NOERROR;
 }
 
@@ -2200,7 +2884,7 @@ ECode CNetworkManagementService::SetFirewallEgressDestRule(
 {
     FAIL_RETURN(EnforceSystemUid());
 //     Preconditions::CheckState(mFirewallEnabled);
-    String rule = allow ? ALLOW : DENY;
+    String rule = allow ? String("allow") : String("deny");
 
     AutoPtr<ICharSequence> cseq0;
     CString::New(String("set_egress_dest_rule"), (ICharSequence**)&cseq0);
@@ -2216,7 +2900,9 @@ ECode CNetworkManagementService::SetFirewallEgressDestRule(
     args->Set(2, iint2.Get());
     args->Set(3, cseq3.Get());
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
     return NOERROR;
 }
 
@@ -2226,7 +2912,7 @@ ECode CNetworkManagementService::SetFirewallUidRule(
 {
     FAIL_RETURN(EnforceSystemUid());
     // Preconditions::CheckState(mFirewallEnabled);
-    String rule = allow ? ALLOW : DENY;
+    String rule = allow ? String("allow") : String("deny");
 
     AutoPtr<ICharSequence> cseq0;
     CString::New(String("set_uid_rule"), (ICharSequence**)&cseq0);
@@ -2239,7 +2925,9 @@ ECode CNetworkManagementService::SetFirewallUidRule(
     args->Set(1, iint1.Get());
     args->Set(2, cseq2.Get());
     AutoPtr<NativeDaemonEvent> event;
-    mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Execute(String("firewall"), args, (NativeDaemonEvent**)&event);
     return NOERROR;
 }
 
@@ -2253,48 +2941,537 @@ ECode CNetworkManagementService::EnforceSystemUid()
     return NOERROR;
 }
 
-// //@Override
-// ECode CNetworkManagementService::Monitor()
-// {
-//     if (mConnector != NULL) {
-//         mConnector->Monitor();
-//     }
-//     return NOERROR;
-// }
+ECode CNetworkManagementService::StartClatd(
+        /* [in] */ const String& interfaceName)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
 
-// //@Override
-// void CNetworkManagementService::Dump(
-//     /* [in] */ IFileDescriptor* fd,
-//     /* [in] */ IPrintWriter* pw,
-//     /* [in] */ ArrayOf<String>* args)
-// {
-//     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::DUMP, TAG));
+    // try {
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ECode ec = mConnector->Execute(String("clatd"), String("start"), interfaceName);
+    // // } catch (NativeDaemonConnectorException e) {
+    // if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+    //     return E_ILLEGAL_STATE_EXCEPTION;
+    // // }
+    // return ec;
+}
 
-//     pw->Println("NetworkManagementService NativeDaemonConnector Log:");
-//     mConnector->Dump(fd, pw, args);
-//     pw->Println();
+ECode CNetworkManagementService::StopClatd()
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
 
-//     pw->Print("Bandwidth control enabled: "); pw->Println(mBandwidthControlEnabled);
+    // try {
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ECode ec = mConnector->Execute(String("clatd"), String("stop"));
+    // // } catch (NativeDaemonConnectorException e) {
+    // if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+    //     return E_ILLEGAL_STATE_EXCEPTION;
+    // // }
+    // return ec;
+}
 
-//     {
-//         AutoLock lock(mQuotaLock);
-//         pw->Print("Active quota ifaces: "); pw->Println(mActiveQuotas.ToString());
-//         pw->Print("Active alert ifaces: "); pw->Println(mActiveAlerts.ToString());
-//     }
+ECode CNetworkManagementService::IsClatdStarted(
+        /* [out] */ Boolean* result)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
 
-//     {
-//         AutoLock lock(mUidRejectOnQuota);
-//         pw->Print("UID reject on quota ifaces: [");
-//         const Int32 size = mUidRejectOnQuota.GetSize();
-//         for (Int32 i = 0; i < size; i++) {
-//             pw->Print(mUidRejectOnQuota.keyAt(i));
-//             if (i < size - 1) pw->Print(",");
-//         }
-//         pw->Println("]");
-//     }
+    AutoPtr<NativeDaemonEvent> event;
+    // try {
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ECode ec = mConnector->Execute(String("clatd"), String("status"), (NativeDaemonEvent**)&event);
+    // // } catch (NativeDaemonConnectorException e) {
+    // if (FAILED(ec)) {
+    //     if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+    //         return E_ILLEGAL_STATE_EXCEPTION;
+    //     return ec;
+    // }
+    // // }
 
-//     pw->Print("Firewall enabled: "); pw->Println(mFirewallEnabled);
-// }
+    event->CheckCode(NetdResponseCode::ClatdStatusResult);
+    *result = event->GetMessage().EndWith("started");
+    return NOERROR;
+}
+
+ECode CNetworkManagementService::RegisterNetworkActivityListener(
+        /* [in] */ INetworkActivityListener* listener)
+{
+    Boolean tmp;
+    return mNetworkActivityListeners->Register(listener, &tmp);
+}
+
+ECode CNetworkManagementService::UnregisterNetworkActivityListener(
+        /* [in] */ INetworkActivityListener* listener)
+{
+    Boolean tmp;
+    return mNetworkActivityListeners->Unregister(listener, &tmp);
+}
+
+ECode CNetworkManagementService::ExcludeLinkLocal(
+    /* [in] */ IList* addresses,
+    /* [out] */ IList** result)
+{
+    AutoPtr<IArrayList> filtered;
+    CArrayList::New(Ptr(addresses)->Func(addresses->GetSize), (IArrayList**)&filtered);
+    FOR_EACH(iter, addresses) {
+        AutoPtr<IInterfaceAddress> ia = IInterfaceAddress::Probe(Ptr(iter)->Func(iter->GetNext));
+        if (!Ptr(ia)->GetPtr(ia->GetAddress)->Func(IInetAddress::IsLinkLocalAddress))
+            filtered->Add(ia);
+    }
+    FUNC_RETURN(IList::Probe(filtered))
+}
+
+ECode CNetworkManagementService::ReportNetworkActive()
+{
+    Int32 length;
+    mNetworkActivityListeners->BeginBroadcast(&length);
+    // try {
+    ECode ec = NOERROR;
+    for (Int32 i = 0; i < length; i++) {
+        // try {
+        AutoPtr<IInterface> obj;
+        do {
+            ec = mNetworkActivityListeners->GetBroadcastItem(i, (IInterface**)&obj);
+            if (FAILED(ec)) break;
+            ec = INetworkActivityListener::Probe(obj)->OnNetworkActive();
+        } while(FALSE);
+        if (FAILED(ec)) {
+        // } catch (RemoteException e) {
+        // } catch (RuntimeException e) {
+            if ((ECode)E_REMOTE_EXCEPTION == ec || (ECode)E_RUNTIME_EXCEPTION == ec)
+                continue;
+            break;
+        // }
+        }
+    }
+    // } finally {
+    mNetworkActivityListeners->FinishBroadcast();
+    // }
+    return ec;
+}
+
+ECode CNetworkManagementService::IsNetworkActive(
+        /* [out] */ Boolean* result)
+{
+    synchronized(mNetworkActivityListeners) {
+        *result = mNetworkActive || Ptr(mActiveIdleTimers)->Func(IHashMap::IsEmpty);
+    }
+    return NOERROR;
+}
+
+ECode CNetworkManagementService::Monitor()
+{
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // if (mConnector != NULL) {
+    //     mConnector->Monitor();
+    // }
+    return NOERROR;
+}
+
+void CNetworkManagementService::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::DUMP, TAG);
+
+    pw->Println(String("NetworkManagementService NativeDaemonConnector Log:"));
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // mConnector->Dump(fd, pw, args);
+    pw->Println();
+
+    pw->Print(String("Bandwidth control enabled: "));
+    pw->Println(mBandwidthControlEnabled);
+    pw->Print(String("mMobileActivityFromRadio="));
+    pw->Print(mMobileActivityFromRadio);
+    pw->Print(String(" mLastPowerStateFromRadio="));
+    pw->Println(mLastPowerStateFromRadio);
+    pw->Print(String("mNetworkActive="));
+    pw->Println(mNetworkActive);
+
+    synchronized(mQuotaLock) {
+        pw->Print(String("Active quota ifaces: "));
+        pw->Println(Object::ToString(mActiveQuotas));
+        pw->Print(String("Active alert ifaces: "));
+        pw->Println(Object::ToString(mActiveAlerts));
+    }
+
+    synchronized(mUidRejectOnQuota) {
+        pw->Print(String("UID reject on quota ifaces: ["));
+        Int32 size;
+        mUidRejectOnQuota->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
+            Int32 key;
+            mUidRejectOnQuota->KeyAt(i, &key);
+            pw->Print(key);
+            if (i < size - 1) pw->Print(String(","));
+        }
+        pw->Println(String("]"));
+    }
+
+    synchronized(mIdleTimerLock) {
+        pw->Println(String("Idle timers:"));
+        FOR_EACH(iter, Ptr(mActiveIdleTimers)->Func(mActiveIdleTimers->GetEntrySet)) {
+            AutoPtr<IMapEntry> ent = IMapEntry::Probe(Ptr(iter)->Func(iter->GetNext));
+            pw->Print(String("  "));
+            pw->Print(Ptr(ent)->Func(ent->GetKey));
+            pw->Println(String(":"));
+            AutoPtr<IInterface> obj;
+            ent->GetValue((IInterface**)&obj);
+            AutoPtr<IdleTimerParams> params = (IdleTimerParams*)IObject::Probe(obj);
+            pw->Print(String("    timeout="));
+            pw->Print(params->mTimeout);
+            pw->Print(String(" type="));
+            pw->Print(params->mType);
+            pw->Print(String(" networkCount="));
+            pw->Println(params->mNetworkCount);
+        }
+    }
+
+    pw->Print(String("Firewall enabled: "));
+    pw->Println(mFirewallEnabled);
+}
+
+ECode CNetworkManagementService::GetBatteryStats(
+    /* [out] */ IIBatteryStats** result)
+{
+    synchronized(this) {
+        if (mBatteryStats != NULL) {
+            FUNC_RETURN(mBatteryStats)
+        }
+        AutoPtr<IServiceManager> helper;
+        CServiceManager::AcquireSingleton((IServiceManager**)&helper);
+        AutoPtr<IInterface> service;
+        helper->GetService(IBatteryStats::SERVICE_NAME, (IInterface**)&service);
+        mBatteryStats = IIBatteryStats::Probe(service);
+        FUNC_RETURN(mBatteryStats)
+    }
+    return NOERROR;
+}
+
+ECode CNetworkManagementService::CreatePhysicalNetwork(
+    /* [in] */ Int32 netId)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+
+    // try {
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ECode ec = mConnector->Execute(String("network"), String("create"), netId);
+    // // } catch (NativeDaemonConnectorException e) {
+    // if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+    //     return E_ILLEGAL_STATE_EXCEPTION;
+    // // }
+    // return ec;
+}
+
+ECode CNetworkManagementService::CreateVirtualNetwork(
+    /* [in] */ Int32 netId,
+    /* [in] */ Boolean hasDNS,
+    /* [in] */ Boolean secure)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+
+    // try {
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(5);
+    args->Set(0, StringUtils::ParseCharSequence(String("create")));
+    args->Set(1, StringUtils::ParseCharSequence(StringUtils::ToString(netId)));
+    args->Set(2, StringUtils::ParseCharSequence(String("vpn")));
+    if (hasDNS)
+        args->Set(3, StringUtils::ParseCharSequence(String("1")));
+    else
+        args->Set(3, StringUtils::ParseCharSequence(String("0")));
+    if (secure)
+        args->Set(3, StringUtils::ParseCharSequence(String("1")));
+    else
+        args->Set(3, StringUtils::ParseCharSequence(String("0")));
+    AutoPtr<NativeDaemonEvent> tmp;
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ECode ec = mConnector->Execute(String("network"), args, (NativeDaemonEvent**)&tmp);
+    // // } catch (NativeDaemonConnectorException e) {
+    // if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+    //     return E_ILLEGAL_STATE_EXCEPTION;
+    // // }
+    // return ec;
+}
+
+ECode CNetworkManagementService::RemoveNetwork(
+    /* [in] */ Int32 netId)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+
+    // try {
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ECode ec = mConnector->Execute(String("network"), String("destroy"), netId);
+    // // } catch (NativeDaemonConnectorException e) {
+    // if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+    //     return E_ILLEGAL_STATE_EXCEPTION;
+    // // }
+    // return ec;
+}
+
+ECode CNetworkManagementService::AddInterfaceToNetwork(
+    /* [in] */ const String& iface,
+    /* [in] */ Int32 netId)
+{
+    return ModifyInterfaceInNetwork(String("add"), StringUtils::ToString(netId), iface);
+}
+
+ECode CNetworkManagementService::RemoveInterfaceFromNetwork(
+    /* [in] */ const String& iface,
+    /* [in] */ Int32 netId)
+{
+    return ModifyInterfaceInNetwork(String("remove"), StringUtils::ToString(netId), iface);
+}
+
+ECode CNetworkManagementService::AddLegacyRouteForNetId(
+    /* [in] */ Int32 netId,
+    /* [in] */ IRouteInfo* routeInfo,
+    /* [in] */ Int32 uid)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+
+    // TODO: Waiting for NativeDaemonConnector::Command
+    assert(0);
+    // AutoPtr<ICommand> cmd;
+    // CCommand::New(String("network"), String("route"), String("legacy"), uid, String("add"), netId, (ICommand**)&cmd);
+
+    // // create triplet: interface dest-ip-addr/prefixlength gateway-ip-addr
+    // AutoPtr<ILinkAddress> la;
+    // routeInfo->GetDestinationLinkAddress((ILinkAddress**)&la);
+    // cmd->AppendArg(Ptr(routeInfo)->Func(routeInfo->GetInterface));
+    // cmd->AppendArg(Ptr(la)-GetPtr(la->GetAddress)->Func(IInetAddress::GetHostAddress) + "/" + Ptr(la)->Func(la->GetPrefixLength));
+    // if (Ptr(routeInfo)->Func(routeInfo->HasGateway)) {
+    //     cmd->AppendArg(Ptr(routeInfo)->GetPtr(routeInfo->GetGateway)->Func(IInetAddress::GetHostAddress));
+    // }
+
+    // try {
+    ECode ec;
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ec = mConnector->Execute(cmd);
+    // } catch (NativeDaemonConnectorException e) {
+    if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
+    // }
+    return ec;
+}
+
+ECode CNetworkManagementService::SetDefaultNetId(
+    /* [in] */ Int32 netId)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+
+    // try {
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(3);
+    args->Set(0, StringUtils::ParseCharSequence(String("default")));
+    args->Set(1, StringUtils::ParseCharSequence(String("set")));
+    AutoPtr<IInteger32> i32;
+    CInteger32::New(netId, (IInteger32**)&i32);
+    args->Set(2, i32);
+    AutoPtr<NativeDaemonEvent> tmp;
+    ECode ec;
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ec = mConnector->Execute(String("network"), args, (NativeDaemonEvent**)&tmp);
+    // } catch (NativeDaemonConnectorException e) {
+    if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
+    // }
+    return ec;
+}
+
+ECode CNetworkManagementService::ClearDefaultNetId()
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+
+    // try {
+    AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
+    args->Set(0, StringUtils::ParseCharSequence(String("default")));
+    args->Set(1, StringUtils::ParseCharSequence(String("clear")));
+    AutoPtr<NativeDaemonEvent> tmp;
+    ECode ec;
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ec = mConnector->Execute(String("network"), args, (NativeDaemonEvent**)&tmp);
+    // } catch (NativeDaemonConnectorException e) {
+    if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
+    // }
+    return ec;
+}
+
+ECode CNetworkManagementService::SetPermission(
+    /* [in] */ const String& permission,
+    /* [in] */ ArrayOf<Int32>* uids)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+
+    AutoPtr<ArrayOf<IInterface*> > argv = ArrayOf<IInterface*>::Alloc(4 + MAX_UID_RANGES_PER_COMMAND);
+    argv->Set(0, StringUtils::ParseCharSequence(String("permission")));
+    argv->Set(1, StringUtils::ParseCharSequence(String("user")));
+    argv->Set(2, StringUtils::ParseCharSequence(String("set")));
+    argv->Set(3, StringUtils::ParseCharSequence(permission));
+    Int32 argc = 4;
+    // Avoid overly long commands by limiting number of UIDs per command.
+    for (Int32 i = 0; i < uids->GetLength(); ++i) {
+        AutoPtr<IInteger32> i32;
+        CInteger32::New((*uids)[i], (IInteger32**)&i32);
+        argv->Set(argc++, i32);
+        if (i == uids->GetLength() - 1 || argc == argv->GetLength()) {
+            // try {
+            AutoPtr<NativeDaemonEvent> tmp;
+            ECode ec;
+            // TODO: Waiting for NativeDaemonConnector
+            assert(0);
+            // ec = mConnector->Execute(String("network"), Arrays::CopyOf(argv, argc), (NativeDaemonEvent**)&tmp);
+            // } catch (NativeDaemonConnectorException e) {
+            if (FAILED(ec)) {
+                if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+                    return E_ILLEGAL_STATE_EXCEPTION;
+                return ec;
+            }
+            // }
+            argc = 4;
+        }
+    }
+    return NOERROR;
+}
+
+ECode CNetworkManagementService::ClearPermission(
+    /* [in] */ ArrayOf<Int32>* uids)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+
+    AutoPtr<ArrayOf<IInterface*> > argv = ArrayOf<IInterface*>::Alloc(3 + MAX_UID_RANGES_PER_COMMAND);
+    argv->Set(0, StringUtils::ParseCharSequence(String("permission")));
+    argv->Set(1, StringUtils::ParseCharSequence(String("user")));
+    argv->Set(2, StringUtils::ParseCharSequence(String("clear")));
+    Int32 argc = 3;
+    // Avoid overly long commands by limiting number of UIDs per command.
+    for (Int32 i = 0; i < uids->GetLength(); ++i) {
+        AutoPtr<IInteger32> i32;
+        CInteger32::New((*uids)[i], (IInteger32**)&i32);
+        argv->Set(argc++, i32);
+        if (i == uids->GetLength() - 1 || argc == argv->GetLength()) {
+            // try {
+            ECode ec;
+            // TODO: Waiting for NativeDaemonConnector
+            assert(0);
+            // ec = mConnector->Execute(String("network"), Arrays::CopyOf(argv, argc));
+            // } catch (NativeDaemonConnectorException e) {
+            if (FAILED(ec)) {
+                if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+                    return E_ILLEGAL_STATE_EXCEPTION;
+                return ec;
+            }
+            // }
+            argc = 3;
+        }
+    }
+    return NOERROR;
+}
+
+ECode CNetworkManagementService::AllowProtect(
+    /* [in] */ Int32 uid)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+
+    // try {
+    AutoPtr<ArrayOf<IInterface*> > argv = ArrayOf<IInterface*>::Alloc(3);
+    argv->Set(0, StringUtils::ParseCharSequence(String("protect")));
+    argv->Set(1, StringUtils::ParseCharSequence(String("allow")));
+    argv->Set(2, StringUtils::ParseCharSequence(StringUtils::ToString(uid)));
+    AutoPtr<NativeDaemonEvent> tmp;
+    ECode ec;
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ec = mConnector->Execute(String("network"), argv, (NativeDaemonEvent**)&tmp);
+    // } catch (NativeDaemonConnectorException e) {
+    if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
+    // }
+    return ec;
+}
+
+ECode CNetworkManagementService::DenyProtect(
+    /* [in] */ Int32 uid)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+
+    // try {
+    AutoPtr<ArrayOf<IInterface*> > argv = ArrayOf<IInterface*>::Alloc(3);
+    argv->Set(0, StringUtils::ParseCharSequence(String("protect")));
+    argv->Set(1, StringUtils::ParseCharSequence(String("deny")));
+    argv->Set(2, StringUtils::ParseCharSequence(StringUtils::ToString(uid)));
+    AutoPtr<NativeDaemonEvent> tmp;
+    ECode ec;
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ec = mConnector->Execute(String("network"), argv, (NativeDaemonEvent**)&tmp);
+    // } catch (NativeDaemonConnectorException e) {
+    if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
+    // }
+    return ec;
+}
+
+ECode CNetworkManagementService::AddInterfaceToLocalNetwork(
+    /* [in] */ const String& iface,
+    /* [in] */ IList* routes)
+{
+    ModifyInterfaceInNetwork(String("add"), String("local"), iface);
+
+    FOR_EACH(iter, routes) {
+        AutoPtr<IRouteInfo> route = IRouteInfo::Probe(Ptr(iter)->Func(iter->GetNext));
+        if (!Ptr(route)->Func(route->IsDefaultRoute)) {
+            ModifyRoute(String("add"), String("local"), route);
+        }
+    }
+    return NOERROR;
+}
+
+ECode CNetworkManagementService::RemoveInterfaceFromLocalNetwork(
+    /* [in] */ const String& iface)
+{
+    return ModifyInterfaceInNetwork(String("remove"), String("local"), iface);
+}
+
+ECode CNetworkManagementService::ModifyInterfaceInNetwork(
+    /* [in] */ const String& action,
+    /* [in] */ const String& netId,
+    /* [in] */ const String& iface)
+{
+    mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::CONNECTIVITY_INTERNAL, TAG);
+    // try {
+    AutoPtr<ArrayOf<IInterface*> > argv = ArrayOf<IInterface*>::Alloc(4);
+    argv->Set(0, StringUtils::ParseCharSequence(String("interface")));
+    argv->Set(1, StringUtils::ParseCharSequence(action));
+    argv->Set(2, StringUtils::ParseCharSequence(netId));
+    argv->Set(3, StringUtils::ParseCharSequence(iface));
+    AutoPtr<NativeDaemonEvent> tmp;
+    ECode ec;
+    // TODO: Waiting for NativeDaemonConnector
+    assert(0);
+    // ec = mConnector->Execute(String("network"), argv, (NativeDaemonEvent**)&tmp);
+    // } catch (NativeDaemonConnectorException e) {
+    if ((ECode)E_NATIVE_DAEMON_CONNECTOR_EXCEPTION == ec)
+        return E_ILLEGAL_STATE_EXCEPTION;
+    // }
+    return ec;
+}
+
+ECode CNetworkManagementService::ToString(
+    /* [out] */ String* str)
+{
+    return IObject::Probe(TO_IINTERFACE(this))->ToString(str);
+}
 
 } // namespace Server
 } // namepsace Droid

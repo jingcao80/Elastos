@@ -1,41 +1,51 @@
-#include "elastos/droid/systemui/CSwipeHelper.h"
+
+#include "elastos/droid/packages/systemui/CSwipeHelper.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include "R.h"
+#include <elastos/droid/R.h>
 #include <elastos/core/Math.h>
-#include "elastos/droid/graphics/CRectF.h"
-#include "elastos/droid/view/animation/CLinearInterpolator.h"
-#include "elastos/droid/view/CViewConfigurationHelper.h"
-#include "elastos/droid/os/CHandler.h"
-#include "elastos/droid/animation/CObjectAnimatorHelper.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
-using Elastos::Core::Math;
-using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::IMatrix;
 using Elastos::Droid::Graphics::CRectF;
-using Elastos::Droid::Animation::IObjectAnimatorHelper;
-using Elastos::Droid::Animation::CObjectAnimatorHelper;
-using Elastos::Droid::View::IViewParent;
-using Elastos::Droid::View::IViewConfigurationHelper;
-using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::Graphics::IRectF;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 using Elastos::Droid::View::Accessibility::IAccessibilityEventSource;
+using Elastos::Droid::View::Animation::CAnimationUtils;
+using Elastos::Droid::View::Animation::IAnimationUtils;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::CVelocityTrackerHelper;
+using Elastos::Droid::View::IVelocityTrackerHelper;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::IViewConfigurationHelper;
 using Elastos::Droid::View::Animation::CLinearInterpolator;
+using Elastos::Core::Math;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
-
-CAR_INTERFACE_IMPL(CSwipeHelper::AnimatorUpdateListenerOne, IAnimatorUpdateListener)
-
 
 //===============================================================================
 //          CSwipeHelper::WatchLongPressRunnable
 //===============================================================================
 CSwipeHelper::WatchLongPressRunnable::WatchLongPressRunnable(
-    /* [in] */ CSwipeHelper* host)
+    /* [in] */ CSwipeHelper* host,
+    /* [in] */ IMotionEvent* ev)
     : mHost(host)
-{
-}
+    , mEv(ev)
+{}
 
 ECode CSwipeHelper::WatchLongPressRunnable::Run()
 {
@@ -45,7 +55,11 @@ ECode CSwipeHelper::WatchLongPressRunnable::Run()
         AutoPtr<IAccessibilityEventSource> ae = IAccessibilityEventSource::Probe(mHost->mCurrView.Get());
         assert(ae != NULL);
         ae->SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_LONG_CLICKED);
-        mHost->mLongPressListener->OnLongClick(mHost->mCurrView, &result);
+        mHost->mCurrView->GetLocationOnScreen(mHost->mTmpPos);
+        Float raw = 0;
+        const Int32 x = (Int32) (mEv->GetRawX(&raw), raw) - (*mHost->mTmpPos)[0];
+        const Int32 y = (Int32) (mEv->GetRawY(&raw), raw) - (*mHost->mTmpPos)[1];
+        mHost->mLongPressListener->OnLongPress(mHost->mCurrView, x, y, &result);
     }
     return NOERROR;
 }
@@ -53,10 +67,12 @@ ECode CSwipeHelper::WatchLongPressRunnable::Run()
 CSwipeHelper::AnimatorListenerAdapterOne::AnimatorListenerAdapterOne(
     /* [in] */ CSwipeHelper* host,
     /* [in] */ IView* animView,
-    /* [in] */ IView* view)
+    /* [in] */ IView* view,
+    /* [in] */ IRunnable* run)
     : mHost(host)
-    , mAnimView(animView)
     , mView(view)
+    , mAnimView(animView)
+    , mRun(run)
 {
 }
 
@@ -64,10 +80,31 @@ ECode CSwipeHelper::AnimatorListenerAdapterOne::OnAnimationEnd(
     /* [in] */ IAnimator* animation)
 {
     mHost->mCallback->OnChildDismissed(mView);
+    if (mRun != NULL) {
+        mRun->Run();
+    }
     mAnimView->SetLayerType(IView::LAYER_TYPE_NONE, NULL);
     return NOERROR;
 }
 
+CSwipeHelper::AnimatorListenerAdapter2::AnimatorListenerAdapter2(
+    /* [in] */ CSwipeHelper* host,
+    /* [in] */ IView* animView,
+    /* [in] */ Boolean canAnimViewBeDismissed)
+    : mHost(host)
+    , mAnimView(animView)
+    , mCanAnimViewBeDismissed(canAnimViewBeDismissed)
+{}
+
+ECode CSwipeHelper::AnimatorListenerAdapter2::OnAnimationEnd(
+    /* [in] */ IAnimator* animation)
+{
+    mHost->UpdateSwipeProgressFromOffset(mAnimView, mCanAnimViewBeDismissed);
+    mHost->mCallback->OnChildSnappedBack(mAnimView);
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(CSwipeHelper::AnimatorUpdateListenerOne, Object, IAnimatorUpdateListener);
 CSwipeHelper::AnimatorUpdateListenerOne::AnimatorUpdateListenerOne(
     /* [in] */ CSwipeHelper* host,
     /* [in] */ IView* animView,
@@ -81,10 +118,8 @@ CSwipeHelper::AnimatorUpdateListenerOne::AnimatorUpdateListenerOne(
 ECode CSwipeHelper::AnimatorUpdateListenerOne::OnAnimationUpdate(
     /* [in] */ IValueAnimator* animation)
 {
-    if (CSwipeHelper::FADE_OUT_DURING_SWIPE && mCanAnimViewBeDismissed) {
-        mAnimView->SetAlpha(mHost->GetAlphaForOffset(mAnimView));
-    }
-    return mHost->InvalidateGlobalRegion(mAnimView);
+    mHost->UpdateSwipeProgressFromOffset(mAnimView, mCanAnimViewBeDismissed);
+    return NOERROR;
 }
 
 //===============================================================================
@@ -108,46 +143,68 @@ const Boolean CSwipeHelper::DISMISS_IF_SWIPED_FAR_ENOUGH = TRUE;
 AutoPtr<ILinearInterpolator> CSwipeHelper::sLinearInterpolator = InitLinearInterpolator();
 const Int32 CSwipeHelper::SNAP_ANIM_LEN = 150;//SLOW_ANIMATIONS ? 1000 : 150; // ms
 
+CAR_OBJECT_IMPL(CSwipeHelper);
+CAR_INTERFACE_IMPL_2(CSwipeHelper, Object, ISwipeHelper, IGefingerpoken);
 CSwipeHelper::CSwipeHelper()
     : SWIPE_ESCAPE_VELOCITY(100.f)
     , DEFAULT_ESCAPE_ANIMATION_DURATION(200)
     , MAX_ESCAPE_ANIMATION_DURATION(400)
     , MAX_DISMISS_VELOCITY(2000)
-    , mMinAlpha(0.0f)
-    , mCallback(NULL)
+    , mMinSwipeProgress(0)
+    , mMaxSwipeProgress(1.0)
     , mPagingTouchSlop(0.0f)
+    , mCallback(NULL)
     , mSwipeDirection(0)
     , mInitialTouchPos(0)
     , mDragging(FALSE)
     , mCanCurrViewBeDimissed(FALSE)
-    , mDensityScale(FALSE)
+    , mDensityScale(0)
     , mLongPressSent(FALSE)
     , mLongPressTimeout(0)
-{}
+    , mFalsingThreshold(0)
+    , mTouchAboveFalsingThreshold(FALSE)
+{
+    mTmpPos = ArrayOf<Int32>::Alloc(2);
+}
 
 ECode CSwipeHelper::constructor(
     /* [in] */ Int32 swipeDirection,
     /* [in] */ ISwipeHelperCallback* callback,
-    /* [in] */ Float densityScale,
-    /* [in] */ Float pagingTouchSlop)
+    /* [in] */ IContext* context)
 {
     mCallback = callback;
     CHandler::New((IHandler**)&mHandler);
     mSwipeDirection = swipeDirection;
-    mVelocityTracker = VelocityTracker::Obtain();
-    mDensityScale = densityScale;
-    mPagingTouchSlop = pagingTouchSlop;
+    AutoPtr<IVelocityTrackerHelper> vtHelper;
+    CVelocityTrackerHelper::AcquireSingleton((IVelocityTrackerHelper**)&vtHelper);
+    vtHelper->Obtain((IVelocityTracker**)&mVelocityTracker);
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    AutoPtr<IDisplayMetrics> dm;
+    res->GetDisplayMetrics((IDisplayMetrics**)&dm);
+    dm->GetDensity(&mDensityScale);
 
     AutoPtr<IViewConfigurationHelper> helper;
     CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
+    AutoPtr<IViewConfiguration> vc;
+    helper->Get(context, (IViewConfiguration**)&vc);
+    Int32 value = 0;
+    vc->GetScaledPagingTouchSlop(&value);
+    mPagingTouchSlop = value;
     Int32 timeOUt;
     helper->GetLongPressTimeout(&timeOUt);
     mLongPressTimeout = (Int64) (timeOUt * 1.5f); // extra long-press!
+
+    AutoPtr<IAnimationUtils> au;
+    CAnimationUtils::AcquireSingleton((IAnimationUtils**)&au);
+    au->LoadInterpolator(context, Elastos::Droid::R::interpolator::fast_out_linear_in,
+        (IInterpolator**)&mFastOutLinearInInterpolator);
+    res->GetDimensionPixelSize(R::dimen::swipe_helper_falsing_threshold, &mFalsingThreshold);
     return NOERROR;
 }
 
 ECode CSwipeHelper::SetLongPressListener(
-    /* [in] */ IViewOnLongClickListener* listener)
+    /* [in] */ ISwipeHelperLongPressListener* listener)
 {
     mLongPressListener = listener;
     return NOERROR;
@@ -187,7 +244,7 @@ Float CSwipeHelper::GetTranslation(
 }
 
 Float CSwipeHelper::GetVelocity(
-    /* [in] */ VelocityTracker* vt)
+    /* [in] */ IVelocityTracker* vt)
 {
     Float x, y;
     vt->GetXVelocity(&x);
@@ -212,7 +269,7 @@ AutoPtr<IObjectAnimator> CSwipeHelper::CreateTranslationAnimation(
 }
 
 Float CSwipeHelper::GetPerpendicularVelocity(
-    /* [in] */ VelocityTracker* vt)
+    /* [in] */ IVelocityTracker* vt)
 {
     Float x, y;
     vt->GetYVelocity(&y);
@@ -241,27 +298,56 @@ Float CSwipeHelper::GetSize(
     return mSwipeDirection == ISwipeHelper::X ? mw : mh;
 }
 
-ECode CSwipeHelper::SetMinAlpha(
-    /* [in] */ Float minAlpha)
+ECode CSwipeHelper::SetMinSwipeProgress(
+    /* [in] */ Float minSwipeProgress)
 {
-    mMinAlpha = minAlpha;
+    mMinSwipeProgress = minSwipeProgress;
     return NOERROR;
 }
 
-Float CSwipeHelper::GetAlphaForOffset(
+ECode CSwipeHelper::SetMaxSwipeProgress(
+    /* [in] */ Float maxSwipeProgress)
+{
+    mMaxSwipeProgress = maxSwipeProgress;
+    return NOERROR;
+}
+
+Float CSwipeHelper::GetSwipeProgressForOffset(
     /* [in] */ IView* view)
 {
-    using Elastos::Core::Math;
     Float viewSize = GetSize(view);
-    Float fadeSize = ISwipeHelper::ALPHA_FADE_END * viewSize;
+    Float fadeSize = SWIPE_PROGRESS_FADE_END * viewSize;
     Float result = 1.0f;
     Float pos = GetTranslation(view);
-    if (pos >= viewSize * ISwipeHelper::ALPHA_FADE_START) {
-        result = 1.0f - (pos - viewSize * ISwipeHelper::ALPHA_FADE_START) / fadeSize;
-    } else if (pos < viewSize * (1.0f - ISwipeHelper::ALPHA_FADE_START)) {
-        result = 1.0f + (viewSize * ISwipeHelper::ALPHA_FADE_START + pos) / fadeSize;
+    if (pos >= viewSize * SWIPE_PROGRESS_FADE_START) {
+        result = 1.0f - (pos - viewSize * SWIPE_PROGRESS_FADE_START) / fadeSize;
     }
-    return Math::Max(mMinAlpha, result);
+    else if (pos < viewSize * (1.0f - SWIPE_PROGRESS_FADE_START)) {
+        result = 1.0f + (viewSize * SWIPE_PROGRESS_FADE_START + pos) / fadeSize;
+    }
+    return Elastos::Core::Math::Min(Elastos::Core::Math::Max(mMinSwipeProgress, result), mMaxSwipeProgress);
+}
+
+void CSwipeHelper::UpdateSwipeProgressFromOffset(
+    /* [in] */ IView* animView,
+    /* [in] */ Boolean dismissable)
+{
+    Float swipeProgress = GetSwipeProgressForOffset(animView);
+    Boolean result = FALSE;
+    mCallback->UpdateSwipeProgress(animView, dismissable, swipeProgress, &result);
+    if (!result) {
+        if (FADE_OUT_DURING_SWIPE && dismissable) {
+            Float alpha = swipeProgress;
+            if (alpha != 0.f && alpha != 1.f) {
+                animView->SetLayerType(IView::LAYER_TYPE_HARDWARE, NULL);
+            }
+            else {
+                animView->SetLayerType(IView::LAYER_TYPE_NONE, NULL);
+            }
+            animView->SetAlpha(GetSwipeProgressForOffset(animView));
+        }
+    }
+    InvalidateGlobalRegion(animView);
 }
 
 // invalidate the view's own bounds all the way up the view hierarchy
@@ -338,6 +424,7 @@ ECode CSwipeHelper::OnInterceptTouchEvent(
     ev->GetAction(&action);
     switch (action) {
         case IMotionEvent::ACTION_DOWN:
+            mTouchAboveFalsingThreshold = FALSE;
             mDragging = FALSE;
             mLongPressSent = FALSE;
             mCurrView = NULL;
@@ -352,7 +439,7 @@ ECode CSwipeHelper::OnInterceptTouchEvent(
 
                 if (mLongPressListener != NULL) {
                     if (mWatchLongPress == NULL) {
-                        mWatchLongPress = new WatchLongPressRunnable(this);
+                        mWatchLongPress = new WatchLongPressRunnable(this, ev);
                     }
 
                     Boolean result;
@@ -379,22 +466,39 @@ ECode CSwipeHelper::OnInterceptTouchEvent(
             break;
 
         case IMotionEvent::ACTION_UP:
-        case IMotionEvent::ACTION_CANCEL:
+        case IMotionEvent::ACTION_CANCEL: {
+            Boolean captured = (mDragging || mLongPressSent);
             mDragging = FALSE;
             mCurrView = NULL;
             mCurrAnimView = NULL;
             mLongPressSent = FALSE;
             RemoveLongPressCallback();
+            if (captured) {
+                *result = TRUE;
+                return NOERROR;
+            }
             break;
+        }
     }
 
-    *result = mDragging;
+    *result = mDragging || mLongPressSent;
     return NOERROR;
 }
 
 ECode CSwipeHelper::DismissChild(
     /* [in] */ IView* view,
     /* [in] */ Float velocity)
+{
+    return DismissChild(view, velocity, NULL, 0, FALSE, 0);
+}
+
+ECode CSwipeHelper::DismissChild(
+    /* [in] */ IView* view,
+    /* [in] */ Float velocity,
+    /* [in] */ IRunnable* endAction,
+    /* [in] */ Int64 delay,
+    /* [in] */ Boolean useAccelerateInterpolator,
+    /* [in] */ Int64 fixedDuration)
 {
     using Elastos::Core::Math;
 
@@ -409,30 +513,44 @@ ECode CSwipeHelper::DismissChild(
             // if we use the Menu to dismiss an item in landscape, animate up
             || (velocity == 0 && GetTranslation(animView) == 0 && mSwipeDirection == Y)) {
         newPos = -GetSize(animView);
-    } else {
+    }
+    else {
         newPos = GetSize(animView);
     }
-    Int32 duration = MAX_ESCAPE_ANIMATION_DURATION;
-    if (velocity != 0) {
-        duration = Math::Min(duration,
-            (Int32) (Math::Abs(newPos - GetTranslation(animView)) * 1000.0f / Math::Abs(velocity)));
-    } else {
-        duration = DEFAULT_ESCAPE_ANIMATION_DURATION;
+    Int64 duration = 0;
+    if (fixedDuration == 0) {
+        duration = MAX_ESCAPE_ANIMATION_DURATION;
+        if (velocity != 0) {
+            duration = Math::Min(duration,
+                (Int64)(Math::Abs(newPos - GetTranslation(animView)) * 1000.0f / Math::Abs(velocity)));
+        }
+        else {
+            duration = DEFAULT_ESCAPE_ANIMATION_DURATION;
+        }
+    }
+    else {
+        duration = fixedDuration;
     }
 
     animView->SetLayerType(IView::LAYER_TYPE_HARDWARE, NULL);
     AutoPtr<IObjectAnimator> anim = CreateTranslationAnimation(animView, newPos);
-    if (anim) {
-        anim->SetInterpolator(sLinearInterpolator);
-        anim->SetDuration(duration);
-
-        AutoPtr<AnimatorListenerAdapterOne> adapter = new AnimatorListenerAdapterOne(this, animView, view);
-        anim->AddListener(adapter);
-        AutoPtr<AnimatorUpdateListenerOne> listener = new AnimatorUpdateListenerOne(this, animView, canAnimViewBeDismissed);
-        anim->AddUpdateListener(listener);
-
-        anim->Start();
+    if (useAccelerateInterpolator) {
+        IAnimator::Probe(anim)->SetInterpolator(ITimeInterpolator::Probe(mFastOutLinearInInterpolator));
     }
+    else {
+        IAnimator::Probe(anim)->SetInterpolator(ITimeInterpolator::Probe(sLinearInterpolator));
+    }
+    IAnimator::Probe(anim)->SetDuration(duration);
+    if (delay > 0) {
+        IAnimator::Probe(anim)->SetStartDelay(delay);
+    }
+
+    AutoPtr<AnimatorListenerAdapterOne> adapter = new AnimatorListenerAdapterOne(this, animView, view, endAction);
+    IAnimator::Probe(anim)->AddListener(adapter);
+    AutoPtr<AnimatorUpdateListenerOne> listener = new AnimatorUpdateListenerOne(this, animView, canAnimViewBeDismissed);
+    IValueAnimator::Probe(anim)->AddUpdateListener(listener);
+
+    IAnimator::Probe(anim)->Start();
     return NOERROR;
 }
 
@@ -446,13 +564,14 @@ ECode CSwipeHelper::SnapChild(
     mCallback->CanChildBeDismissed(view, &canAnimViewBeDismissed);
 
     AutoPtr<IObjectAnimator> anim = CreateTranslationAnimation(animView, 0);
-    if (anim) {
-        Int32 duration = SNAP_ANIM_LEN;
-        anim->SetDuration(duration);
-        AutoPtr<AnimatorUpdateListenerOne> listener = new AnimatorUpdateListenerOne(this, animView, canAnimViewBeDismissed);
-        anim->AddUpdateListener(listener);
-        anim->Start();
-    }
+    Int32 duration = SNAP_ANIM_LEN;
+    IAnimator::Probe(anim)->SetDuration(duration);
+    AutoPtr<AnimatorUpdateListenerOne> listener = new AnimatorUpdateListenerOne(this, animView, canAnimViewBeDismissed);
+    IValueAnimator::Probe(anim)->AddUpdateListener(listener);
+    IAnimator::Probe(anim)->Start();
+
+    AutoPtr<AnimatorListenerAdapter2> adapter = new AnimatorListenerAdapter2(this, animView, canAnimViewBeDismissed);
+    IAnimator::Probe(anim)->AddListener(adapter);
 
     return NOERROR;
 }
@@ -471,11 +590,20 @@ ECode CSwipeHelper::OnTouchEvent(
     }
 
     if (!mDragging) {
-        // We are not doing anything, make sure the long press callback
-        // is not still ticking like a bomb waiting to go off.
-        RemoveLongPressCallback();
-        *result = FALSE;
-        return NOERROR;
+        AutoPtr<IView> v;
+        mCallback->GetChildAtPosition(ev, (IView**)&v);
+        if (v.Get() != NULL) {
+            // We are dragging directly over a card, make sure that we also catch the gesture
+            // even if nobody else wants the touch event.
+            return OnInterceptTouchEvent(ev, result);
+        }
+        else {
+            // We are not doing anything, make sure the long press callback
+            // is not still ticking like a bomb waiting to go off.
+            RemoveLongPressCallback();
+            *result = FALSE;
+            return NOERROR;
+        }
     }
 
     mVelocityTracker->AddMovement(ev);
@@ -486,6 +614,10 @@ ECode CSwipeHelper::OnTouchEvent(
         case IMotionEvent::ACTION_MOVE:
             if (mCurrView != NULL) {
                 Float delta = GetPos(ev) - mInitialTouchPos;
+                Float absDelta = Elastos::Core::Math::Abs(delta);
+                if (absDelta >= GetFalsingThreshold()) {
+                    mTouchAboveFalsingThreshold = TRUE;
+                }
                 // don't let items that can't be dismissed be dragged more than
                 // maxScrollDistance
                 Boolean canChildBeDismissed;
@@ -493,17 +625,14 @@ ECode CSwipeHelper::OnTouchEvent(
                 if (CONSTRAIN_SWIPE && !canChildBeDismissed) {
                     Float size = GetSize(mCurrAnimView);
                     Float maxScrollDistance = 0.15f * size;
-                    if (Math::Abs(delta) >= size) {
+                    if (absDelta >= size) {
                         delta = delta > 0 ? maxScrollDistance : -maxScrollDistance;
                     } else {
-                        delta = maxScrollDistance * (Float) Math::Sin((delta/size)*(Math::DOUBLE_PI/2));
+                        delta = maxScrollDistance * (Float) Math::Sin((delta / size) * (Math::PI / 2));
                     }
                 }
                 SetTranslation(mCurrAnimView, delta);
-                if (FADE_OUT_DURING_SWIPE && mCanCurrViewBeDimissed) {
-                    mCurrAnimView->SetAlpha(GetAlphaForOffset(mCurrAnimView));
-                }
-                InvalidateGlobalRegion(mCurrView);
+                UpdateSwipeProgressFromOffset(mCurrAnimView, mCanCurrViewBeDimissed);
             }
             break;
 
@@ -523,9 +652,13 @@ ECode CSwipeHelper::OnTouchEvent(
                         (Math::Abs(velocity) > Math::Abs(perpendicularVelocity)) &&
                         (velocity > 0) == (GetTranslation(mCurrAnimView) > 0);
 
+                Boolean tmp = FALSE;
+                Boolean falsingDetected = (mCallback->IsAntiFalsingNeeded(&tmp), tmp)
+                        && !mTouchAboveFalsingThreshold;
+
                 Boolean dismissChild;
                 mCallback->CanChildBeDismissed(mCurrView, &dismissChild);
-                dismissChild = (dismissChild && (childSwipedFastEnough || childSwipedFarEnough));
+                dismissChild = (dismissChild && !falsingDetected && (childSwipedFastEnough || childSwipedFarEnough));
 
                 if (dismissChild) {
                     // flingadingy
@@ -544,7 +677,14 @@ ECode CSwipeHelper::OnTouchEvent(
     return NOERROR;
 }
 
+Int32 CSwipeHelper::GetFalsingThreshold()
+{
+    Float factor = 0;
+    mCallback->GetFalsingThresholdFactor(&factor);
+    return (Int32) (mFalsingThreshold * factor);
+}
 
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos

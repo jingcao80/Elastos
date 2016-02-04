@@ -16,8 +16,8 @@
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/view/LayoutInflater.h"
-// #include "elastos/droid/widget/ListView.h"
-// #include "elastos/droid/widget/Toast.h"
+#include "elastos/droid/widget/ListView.h"
+#include "elastos/droid/widget/Toast.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
@@ -58,8 +58,8 @@ using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemLongClickListener;
 using Elastos::Droid::Widget::IAbsListView;
 using Elastos::Droid::Widget::IToast;
-// using Elastos::Droid::Widget::ListView;
-// using Elastos::Droid::Widget::Toast;
+using Elastos::Droid::Widget::ListView;
+using Elastos::Droid::Widget::Toast;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::CSystem;
 using Elastos::Core::EIID_IComparator;
@@ -695,9 +695,7 @@ ResolverActivity::ItemLongClickListener::OnItemLongClick(
     /* [out] */ Boolean* clicked)
 {
     VALIDATE_NOT_NULL(clicked);
-    Int32 hvCount;
-    assert(0);
-    // ((ListView*)mHost->mListView.Get())->GetHeaderViewsCount(&hvCount);
+    Int32 hvCount = ((ListView*)mHost->mListView.Get())->GetHeaderViewsCount();
     position -= hvCount;
     if (position < 0) {
         // Header views don't count.
@@ -1268,9 +1266,7 @@ ECode ResolverActivity::OnItemClick(
     /* [in] */ Int32 position,
     /* [in] */ Int64 id)
 {
-    Int32 hvCount;
-    assert(0);
-    // ((ListView*)mListView.Get())->GetHeaderViewsCount(&hvCount);
+    Int32 hvCount = ((ListView*)mListView.Get())->GetHeaderViewsCount();
     position -= hvCount;
     if (position < 0) {
         // Header views don't count.
@@ -1292,9 +1288,8 @@ ECode ResolverActivity::OnItemClick(
         params->Set(0, label);
         String strText = StringUtils::Format(format, params);
 
-        assert(0);
         AutoPtr<IToast> toast;
-        // Toast::MakeText(this, CoreUtils::Convert(strText), IToast::LENGTH_LONG, (IToast**)&toast);
+        Toast::MakeText(this, CoreUtils::Convert(strText), IToast::LENGTH_LONG, (IToast**)&toast);
         toast->Show();
         return NOERROR;
     }

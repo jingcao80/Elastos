@@ -1,5 +1,6 @@
 
-#include "pm/GrantedPermissions.h"
+#include "Elastos.Droid.Content.h"
+#include "elastos/droid/server/pm/GrantedPermissions.h"
 
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 

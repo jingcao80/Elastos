@@ -98,6 +98,25 @@ ECode CAtomicInteger64::GetAndSet(
     }
 }
 
+static int dvmQuasiAtomicCas64(int64_t oldvalue, int64_t newvalue,
+    volatile int64_t* addr)
+{
+    int64_t prev;
+    int status;
+    do {
+        __asm__ __volatile__ ("@ dvmQuasiAtomicCas64\n"
+            "ldrexd     %0, %H0, [%3]\n"
+            "mov        %1, #0\n"
+            "teq        %0, %4\n"
+            "teqeq      %H0, %H4\n"
+            "strexdeq   %1, %5, %H5, [%3]"
+            : "=&r" (prev), "=&r" (status), "+m"(*addr)
+            : "r" (addr), "Ir" (oldvalue), "r" (newvalue)
+            : "cc");
+    } while (__builtin_expect(status != 0, 0));
+    return prev != oldvalue;
+}
+
 /**
  * Atomically sets the value to the given updated value
  * if the current value {@code ==} the expected value.
@@ -116,9 +135,9 @@ ECode CAtomicInteger64::CompareAndSet(
 
     assert(0 && "TODO");
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
-//    int ret = dvmQuasiAtomicCas64(expect, update, address);
-//
-//    *result = (ret == 0);
+    int ret = dvmQuasiAtomicCas64(expect, update, address);
+
+    *result = (ret == 0);
     return NOERROR;
 }
 
@@ -143,9 +162,9 @@ ECode CAtomicInteger64::WeakCompareAndSet(
 
     assert(0 && "TODO");
     // Note: android_atomic_cmpxchg() returns 0 on success, not failure.
-//    int ret = dvmQuasiAtomicCas64(expect, update, address);
-//
-//    *result = (ret == 0);
+    int ret = dvmQuasiAtomicCas64(expect, update, address);
+
+    *result = (ret == 0);
     return NOERROR;
 }
 

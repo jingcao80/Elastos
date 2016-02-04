@@ -1,5 +1,8 @@
 
-#include "wm/StackTapPointerEventListener.h"
+#include "elastos/droid/server/wm/StackTapPointerEventListener.h"
+#include "elastos/droid/server/wm/DisplayContent.h"
+
+using Elastos::Droid::View::EIID_IPointerEventListener;
 
 namespace Elastos {
 namespace Droid {
@@ -26,6 +29,8 @@ StackTapPointerEventListener::StackTapPointerEventListener(
     mMotionSlop = (Int32)(dpi * TAP_MOTION_SLOP_INCHES);
 }
 
+CAR_INTERFACE_IMPL(StackTapPointerEventListener, Object, IPointerEventListener)
+
 ECode StackTapPointerEventListener::OnPointerEvent(
     /* [in] */ IMotionEvent* motionEvent)
 {
@@ -43,7 +48,7 @@ ECode StackTapPointerEventListener::OnPointerEvent(
                 motionEvent->FindPointerIndex(mPointerId, &index);
                 Int64 eventTime, downTime;
                 Float x, y;
-                motionEvent->GetEventTime(&eventTime);
+                IInputEvent::Probe(motionEvent)->GetEventTime(&eventTime);
                 motionEvent->GetDownTime(&downTime);
                 if ((eventTime - downTime) > TAP_TIMEOUT_MSEC
                         || (motionEvent->GetX(index, &x), (x - mDownX) > mMotionSlop)
@@ -61,18 +66,19 @@ ECode StackTapPointerEventListener::OnPointerEvent(
             if (motionEvent->GetPointerId(index, &id), mPointerId == id) {
                 Float ex, ey;
                 motionEvent->GetX(index, &ex);
-                motionEvent->GetY(index, &ey)
+                motionEvent->GetY(index, &ey);
                 Int32 x = (Int32)ex;
                 Int32 y = (Int32)ey;
                 Int64 eventTime, downTime;
-                motionEvent->GetEventTime(&eventTime);
+                IInputEvent::Probe(motionEvent)->GetEventTime(&eventTime);
                 motionEvent->GetDownTime(&downTime);
                 Boolean contains;
                 if ((eventTime - downTime) < TAP_TIMEOUT_MSEC
                         && (x - mDownX) < mMotionSlop && (y - mDownY) < mMotionSlop
                         && (mTouchExcludeRegion->Contains(x, y, &contains), !contains)) {
                     AutoPtr<IMessage> msg;
-                    mService->mH->ObtainMessage(H::TAP_OUTSIDE_STACK, x, y, mDisplayContent, (IMessage**)&msg);
+                    mService->mH->ObtainMessage(CWindowManagerService::H::TAP_OUTSIDE_STACK, x, y,
+                            (IObject*)mDisplayContent.Get(), (IMessage**)&msg);
                     msg->SendToTarget();
                 }
                 mPointerId = -1;

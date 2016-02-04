@@ -25,6 +25,7 @@ ECode CharArrayReader::constructor(
     /* [in] */ ArrayOf<Char32>* buf)
 {
     VALIDATE_NOT_NULL(buf);
+    FAIL_RETURN(Reader::constructor());
 
     mBuf = buf;
     mCount = mBuf->GetLength();
@@ -49,6 +50,8 @@ ECode CharArrayReader::constructor(
 //      throw new IllegalArgumentException();
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+
+    FAIL_RETURN(Reader::constructor());
 
     mBuf = buf;
     mPos = offset;

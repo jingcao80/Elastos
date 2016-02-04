@@ -151,18 +151,15 @@ ECode SelectorImpl::constructor(
     /* [in] */ ISelectorProvider* selectorProvider)
 {
     AbstractSelector::constructor(selectorProvider);
-    ECode result = NOERROR;
     AutoPtr<ArrayOf<IFileDescriptor*> > fds;
-    result = CLibcore::sOs->Pipe((ArrayOf<IFileDescriptor*>**)&fds);
-    assert(result == NOERROR);
+    FAIL_RETURN(CLibcore::sOs->Pipe((ArrayOf<IFileDescriptor*>**)&fds));
 
     Int32 fdint = 0;
     (*fds)[0]->GetDescriptor(&fdint);
     mWakeupIn->SetDescriptor(fdint);
     (*fds)[1]->GetDescriptor(&fdint);
     mWakeupOut->SetDescriptor(fdint);
-    result = IoUtils::SetBlocking(mWakeupIn, FALSE);
-    assert(result == NOERROR);
+    FAIL_RETURN(IoUtils::SetBlocking(mWakeupIn, FALSE));
 
     AutoPtr<IStructPollfd> structfd;
     CStructPollfd::New((IStructPollfd**)&structfd);

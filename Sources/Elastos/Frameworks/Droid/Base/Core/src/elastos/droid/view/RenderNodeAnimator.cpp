@@ -46,7 +46,7 @@ void ThreadDestructor(void* st)
 
 Boolean InitTLS()
 {
-    Int32 result = pthread_key_create(&RenderNodeAnimator::sAnimationHelper, ThreadDestructor);
+    Int32 UNUSED(result) = pthread_key_create(&RenderNodeAnimator::sAnimationHelper, ThreadDestructor);
     assert(result == 0);
     return TRUE;
 }

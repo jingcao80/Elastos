@@ -2,6 +2,9 @@
 #define __ELASTOS_DROID_SERVER_PM_CUSERMANAGERSERVICE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.CoreLibrary.External.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.Droid.Internal.h"
 #include "_Elastos_Droid_Server_Pm_CUserManagerService.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/os/Runnable.h"
@@ -40,7 +43,7 @@ CarClass(CUserManagerService)
     , public IBinder
 {
 public:
-    class RestrictionsPinState : Object
+    class RestrictionsPinState : public Object
     {
     public:
         RestrictionsPinState()
@@ -218,6 +221,12 @@ public:
 
     CARAPI_(AutoPtr< ArrayOf<Int32> >) GetUserIdsLPr();
 
+    CARAPI CreateProfileForUser(
+        /* [in] */ const String& name,
+        /* [in] */ Int32 flags,
+        /* [in] */ Int32 userHandle,
+        /* [out] */ IUserInfo** userInfo);
+
     // @Override
     CARAPI CreateUser(
         /* [in] */ const String& name,
@@ -300,9 +309,9 @@ private:
     //         File dataDir, File baseUserPath);
     CARAPI Init(
         /* [in] */ IContext* context,
-        /* [in] */ CPackageManagerService* pm,
-        /* [in] */ Object* installLock,
-        /* [in] */ Object* packagesLock,
+        /* [in] */ IIPackageManager* pm,
+        /* [in] */ IObject* installLock,
+        /* [in] */ IObject* packagesLock,
         /* [in] */ IFile* dataDir,
         /* [in] */ IFile* baseUserPath);
 
@@ -480,6 +489,9 @@ private:
 
     CARAPI_(String) RestrictionsFileNameToPackage(
         /* [in] */ const String& fileName);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     static const String TAG;

@@ -347,7 +347,7 @@ ECode CAudioTrack::AudioParamCheck(
     }
 
     Boolean b;
-    if (!CAudioFormat::IsValidEncoding(audioFormat, &b), b) {
+    if (CAudioFormat::IsValidEncoding(audioFormat, &b), !b) {
         // throw new IllegalArgumentException("Unsupported audio encoding.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -620,7 +620,7 @@ ECode CAudioTrack::GetMinBufferSize(
     //     return NOERROR;
     // }
     Boolean b;
-    if (!CAudioFormat::IsValidEncoding(audioFormat, &b), b) {
+    if (CAudioFormat::IsValidEncoding(audioFormat, &b), !b) {
         Logger::E(TAG, "getMinBufferSize(): Invalid audio format.");
         *size = IAudioTrack::ERROR_BAD_VALUE;
         return NOERROR;
@@ -1823,7 +1823,13 @@ Int32 CAudioTrack::NativeSetAuxEffectSendLevel(
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
     assert(lpTrack != NULL);
 
-    lpTrack->setAuxEffectSendLevel(level);
+    android::status_t status = lpTrack->setAuxEffectSendLevel(level);
+    if (status != android::NO_ERROR) {
+        //TODO:
+        // ALOGE("AudioTrack::setAuxEffectSendLevel() for level %g failed with status %d",
+        //         level, status);
+    }
+    return (Int32) status;
 }
 
 } // namespace Media

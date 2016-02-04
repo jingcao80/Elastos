@@ -258,6 +258,7 @@ ECode CBitSet::Get(
     /* [out] */ IBitSet** bs)
 {
     VALIDATE_NOT_NULL(bs);
+    *bs = NULL;
 
     FAIL_RETURN(CheckRange(fromIndex, toIndex));
     Int32 last = 64 * mInt64Count;
@@ -297,7 +298,7 @@ ECode CBitSet::Get(
 
     // shift all the elements in the new BitSet to the right
     Int32 numBitsToShift = fromIndex % 64;
-    Int32 actualLen = newBits->GetLength();
+    Int32 UNUSED(actualLen) = newBits->GetLength();
     if (numBitsToShift != 0) {
         for (Int32 i = 0; i < newBits->GetLength(); i++) {
             // shift the current element to the right regardless of
@@ -835,7 +836,7 @@ ECode CBitSet::ValueOf(
     AutoPtr< ArrayOf<Int64> > longs = ArrayForBits(remaining * 8);
     Int32 i = 0;
     Int64 lvalue = 0;
-    while(remaining >= sizeof(Int64)) {
+    while (remaining >= sizeof(Int64)) {
         byteBuffer->GetInt64(&lvalue);
         (*longs)[i++] = lvalue;
         (IBuffer::Probe(byteBuffer))->GetRemaining(&remaining);

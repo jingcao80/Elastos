@@ -3,74 +3,51 @@
 
 #include "_Elastos_Droid_Server_CCommonTimeManagementService.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/server/net/BaseNetworkObserver.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 //#include "elastos/droid/os/CommonTimeConfig.h"
 #include "elastos/droid/os/Runnable.h"
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Net.h>
 
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IINetworkManagementService;
-using Elastos::Droid::Net::INetworkManagementEventObserver;
+using Elastos::Droid::Net::IINetworkManagementEventObserver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::IO::IPrintWriter;
 using Elastos::IO::IFileDescriptor;
 //using Elastos::Droid::Os::CommonTimeConfig;
+using Elastos::Droid::Server::Net::BaseNetworkObserver;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
+
 /**
  * @hide
  * <p>CCommonTimeManagementService manages the configuration of the native Common Time service,
  * reconfiguring the native service as appropriate in response to changes in network configuration.
  */
 CarClass(CCommonTimeManagementService)
+    , public Object
+    , public IBinder
 {
-private:
-    class ReconnectRunnable : public Runnable
-    {
-    public:
-        ReconnectRunnable(
-            /* [in] */ CCommonTimeManagementService* owner)
-            : mOwner(owner)
-        {}
-
-        CARAPI Run();
-
-    private:
-        CCommonTimeManagementService* mOwner;
-    };
-
-    class NoInterfaceRunnable : public Runnable
-    {
-    public:
-        NoInterfaceRunnable(
-            /* [in] */ CCommonTimeManagementService* owner)
-            : mOwner(owner)
-        {}
-
-        CARAPI Run();
-
-    private:
-        CCommonTimeManagementService* mOwner;
-    };
-
-
+public:
     /*
      * Callback handler implementations.
      */
     class IfaceObserver
-        : public INetworkManagementEventObserver
-        , public IBinder
-        , public ElRefBase
+        : public BaseNetworkObserver
     {
     public:
-        IfaceObserver(
-            /* [in] */ CCommonTimeManagementService* owner);
+        IfaceObserver();
 
-        CAR_INTERFACE_DECL();
+        constructor(
+            /* [in] */ IBinder* commonTimeManagementService);
 
         CARAPI InterfaceStatusChanged(
             /* [in] */ const String& iface,
@@ -85,22 +62,54 @@ private:
 
         CARAPI InterfaceRemoved(
             /* [in] */ const String& iface);
-
-        CARAPI LimitReached(
-            /* [in] */ const String& limitName,
-            /* [in] */ const String& iface);
-
-        CARAPI InterfaceClassDataActivityChanged(
-            /* [in] */ const String& label,
-            /* [in] */ Boolean active);
-
-        CARAPI GetHashCode(
-            /* [out] */ Int32* hash);
-
-        CARAPI ToString(
-            /* [out] */ String* result);
     private:
-        AutoPtr<CCommonTimeManagementService> mOwner;
+        AutoPtr<CCommonTimeManagementService> mHost;
+    };
+
+    /*
+     * Inner helper classes
+     */
+    class InterfaceScoreRule
+        : public Object
+    {
+        friend class CCommonTimeManagementService;
+    public:
+        InterfaceScoreRule(
+            /* [in] */ const String& prefix,
+            /* [in] */ Byte score);
+    public:
+        const String mPrefix;
+        const Byte mScore;
+    };
+private:
+    class ReconnectRunnable
+        : public Runnable
+    {
+    public:
+        ReconnectRunnable(
+            /* [in] */ CCommonTimeManagementService* owner)
+            : mHost(owner)
+        {}
+
+        CARAPI Run();
+
+    private:
+        CCommonTimeManagementService* mHost;
+    };
+
+    class NoInterfaceRunnable
+        : public Runnable
+    {
+    public:
+        NoInterfaceRunnable(
+            /* [in] */ CCommonTimeManagementService* owner)
+            : mHost(owner)
+        {}
+
+        CARAPI Run();
+
+    private:
+        CCommonTimeManagementService* mHost;
     };
 
     class ConnectivityMangerObserver
@@ -124,7 +133,7 @@ private:
             return NOERROR;
         }
     private:
-        AutoPtr<CCommonTimeManagementService> mOwner;
+        AutoPtr<CCommonTimeManagementService> mHost;
     };
 
 /*
@@ -136,7 +145,7 @@ private:
         };
 */
     class CTServerDiedListener
-        : public ElRefBase
+        : public Object
     {
     public:
         CTServerDiedListener(
@@ -145,26 +154,20 @@ private:
         CARAPI OnServerDied();
 
     private:
-        AutoPtr<CCommonTimeManagementService> mOwner;
+        AutoPtr<CCommonTimeManagementService> mHost;
     };
 
-    /*
-     * Inner helper classes
-     */
-    class InterfaceScoreRule
-        : public ElRefBase
+    class StaticInitializer
     {
-        friend class CCommonTimeManagementService;
     public:
-        InterfaceScoreRule(
-            /* [in] */ const String& prefix,
-            /* [in] */ Byte score);
-    public:
-        const String mPrefix;
-        const Byte mScore;
+        StaticInitializer();
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CCommonTimeManagementService();
 
     /*
@@ -172,8 +175,6 @@ public:
      */
     CARAPI constructor(
         /* [in] */ IContext *context);
-
-    static CARAPI_(Boolean) Initstatic();
 
     CARAPI ToString(
         /* [out] */ String* result);
@@ -204,19 +205,17 @@ private:
     /*
      * Constants and globals.
      */
-    const static String TAG;
-    const static Int32 NATIVE_SERVICE_RECONNECT_TIMEOUT = 5000;
-    const static String AUTO_DISABLE_PROP;
-    const static String ALLOW_WIFI_PROP;
-    const static String SERVER_PRIO_PROP;
-    const static String NO_INTERFACE_TIMEOUT_PROP;
+    static const String TAG;
+    static const Int32 NATIVE_SERVICE_RECONNECT_TIMEOUT = 5000;
+    static const String AUTO_DISABLE_PROP;
+    static const String ALLOW_WIFI_PROP;
+    static const String SERVER_PRIO_PROP;
+    static const String NO_INTERFACE_TIMEOUT_PROP;
     static Boolean AUTO_DISABLE;
     static Boolean ALLOW_WIFI;
     static Byte BASE_SERVER_PRIO;
     static Int32 NO_INTERFACE_TIMEOUT;
     static AutoPtr<ArrayOf<InterfaceScoreRule* > > IFACE_SCORE_RULES;
-
-    const static Boolean staticParagraph;
 
     /*
      * Internal state
@@ -240,10 +239,14 @@ private:
 
     AutoPtr<IRunnable> mReconnectRunnable;
     AutoPtr<IRunnable> mNoInterfaceRunnable;
+    static const StaticInitializer sInitializer;
 };
 
 }//namespace Server
 }//namespace Droid
 }//namespace Elastos
+
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::Server::CCommonTimeManagementService::InterfaceScoreRule, IInterface)
 
 #endif //__ELASTOS_DROID_SERVER_CCOMMONTIMEMANAGEMENTSERVICE_H__

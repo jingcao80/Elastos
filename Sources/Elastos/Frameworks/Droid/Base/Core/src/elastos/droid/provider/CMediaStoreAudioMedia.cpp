@@ -5,6 +5,7 @@
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/provider/CMediaStoreAudioMedia.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
@@ -13,6 +14,7 @@ using Elastos::IO::IFile;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -24,15 +26,13 @@ CAR_INTERFACE_IMPL(CMediaStoreAudioMedia, Singleton, IMediaStoreAudioMedia)
 
 AutoPtr<ArrayOf<String> > CMediaStoreAudioMedia::initEXTERNAL_PATHS()
 {
-    String secondary_storage;
     AutoPtr<ISystem> system;
-    // CSystem::AcquireSingleton((ISystem**)&system);
+    CSystem::AcquireSingleton((ISystem**)&system);
+    String secondary_storage;
     system->GetEnv(String("SECONDARY_STORAGE"), &secondary_storage);
     AutoPtr<ArrayOf<String> > str;
     if (!secondary_storage.IsNullOrEmpty()) {
-        // str = secondary_storage.split(":");
-    } else {
-        str = NULL;
+        StringUtils::Split(secondary_storage, String(":"), (ArrayOf<String>**)&str);
     }
     return str;
 }

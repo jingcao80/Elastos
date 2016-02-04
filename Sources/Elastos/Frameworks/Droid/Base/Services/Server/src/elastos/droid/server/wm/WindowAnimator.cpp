@@ -1,21 +1,25 @@
 
-#include "wm/WindowAnimator.h"
-#include "wm/AppWindowAnimator.h"
-#include "wm/ScreenRotationAnimation.h"
+#include "elastos/droid/server/wm/WindowAnimator.h"
+#include "elastos/droid/server/wm/AppWindowAnimator.h"
+#include "elastos/droid/server/wm/ScreenRotationAnimation.h"
+#include "elastos/droid/server/wm/AccessibilityController.h"
+#include "elastos/droid/server/wm/DisplayContent.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Handler.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Core::StringBuilder;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::View::ISurfaceControlHelper;
 using Elastos::Droid::View::CSurfaceControlHelper;
 using Elastos::Droid::View::Animation::IAlphaAnimation;
 using Elastos::Droid::View::Animation::CAlphaAnimation;
-using Elastos::Droid::Utility::ISparseArray;
-using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Droid::Utility::ISparseInt32Array;
+using Elastos::Droid::Utility::CSparseInt32Array;
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -28,10 +32,9 @@ namespace Wm {
 
 ECode WindowAnimator::AnimationRunnable::Run()
 {
-    synchronized (mHost->mWindowMapLock) {
-        mHost->mService->mAnimationScheduled = FALSE;
-        mHost->AnimateLocked();
-    }
+    AutoLock lock(mHost->mService->mWindowMapLock);
+    mHost->mService->mAnimationScheduled = FALSE;
+    mHost->AnimateLocked();
     return NOERROR;
 }
 
@@ -41,7 +44,7 @@ ECode WindowAnimator::AnimationRunnable::Run()
 //==============================================================================
 
 const String WindowAnimator::TAG("WindowAnimator");
-const Int64 KEYGUARD_ANIM_TIMEOUT_MS;
+const Int64 WindowAnimator::KEYGUARD_ANIM_TIMEOUT_MS;
 const Int32 WindowAnimator::KEYGUARD_NOT_SHOWN;
 const Int32 WindowAnimator::KEYGUARD_ANIMATING_IN;
 const Int32 WindowAnimator::KEYGUARD_SHOWN;
@@ -65,11 +68,6 @@ WindowAnimator::WindowAnimator(
     mAnimationRunnable = new AnimationRunnable(this);
 }
 
-WindowAnimator::~WindowAnimator()
-{
-    mDisplayContentsAnimators.Clear();
-}
-
 String WindowAnimator::ForceHidingToString()
 {
     switch (mForceHiding) {
@@ -77,7 +75,7 @@ String WindowAnimator::ForceHidingToString()
         case KEYGUARD_ANIMATING_IN: return String("KEYGUARD_ANIMATING_IN");
         case KEYGUARD_SHOWN:        return String("KEYGUARD_SHOWN");
         case KEYGUARD_ANIMATING_OUT:return String("KEYGUARD_ANIMATING_OUT");
-        default: return String("KEYGUARD STATE UNKNOWN ") + StringUtils::Int32ToString(mForceHiding);
+        default: return String("KEYGUARD STATE UNKNOWN ") + StringUtils::ToString(mForceHiding);
     }
 }
 
@@ -115,8 +113,8 @@ void WindowAnimator::HideWallpapersLocked(
 {
     AutoPtr<WindowState> wallpaperTarget = mService->mWallpaperTarget;
     AutoPtr<WindowState> lowerWallpaperTarget = mService->mLowerWallpaperTarget;
-    List< AutoPtr<WindowToken> > wallpaperTokens = mService.mWallpaperTokens;
-    if ((wallpaperTarget == w && lowerWallpaperTarget == NULL) || wallpaperTarget == NULL) {
+    List< AutoPtr<WindowToken> > wallpaperTokens = mService->mWallpaperTokens;
+    if ((wallpaperTarget.Get() == w && lowerWallpaperTarget == NULL) || wallpaperTarget == NULL) {
         List<AutoPtr<WindowToken> >::ReverseIterator rit = wallpaperTokens.RBegin();
         for (; rit != wallpaperTokens.REnd(); ++rit) {
             AutoPtr<WindowToken> token = *rit;
@@ -151,8 +149,8 @@ void WindowAnimator::UpdateAppWindowsLocked(
         List<AutoPtr<Task> >::ReverseIterator taskRit = tasks->RBegin();
         for (; taskRit != tasks->REnd(); ++taskRit) {
             AppTokenList tokens = (*taskRit)->mAppTokens;
-            AppTokenList::ReverseIterator tokenRit = tokens->RBegin();
-            for (; tokenRit != tokens->REnd(); ++tokenRit) {
+            AppTokenList::ReverseIterator tokenRit = tokens.RBegin();
+            for (; tokenRit != tokens.REnd(); ++tokenRit) {
                 AutoPtr<AppWindowAnimator> appAnimator = (*tokenRit)->mAppAnimator;
                 Boolean wasAnimating = appAnimator->mAnimation != NULL
                         && appAnimator->mAnimation != AppWindowAnimator::sDummyAnimation;
@@ -161,11 +159,15 @@ void WindowAnimator::UpdateAppWindowsLocked(
                 }
                 else if (wasAnimating) {
                     // stopped animating, do one more pass through the layout
+                    AutoPtr<IInterface> obj;
+                    appAnimator->mWeakAppToken->Resolve(EIID_IInterface, (IInterface**)&obj);
+                    String str;
+                    ((AppWindowToken*)(IObject*)obj.Get())->ToString(&str);
                     SetAppLayoutChanges(appAnimator,
                             IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER,
-                            String("appToken ") + appAnimator->mAppToken + String(" done"));
+                            String("appToken ") + str + " done");
                     if (CWindowManagerService::DEBUG_ANIM) Slogger::V(TAG,
-                            "updateWindowsApps...: done animating %p", appAnimator->mAppToken.Get());
+                            "updateWindowsApps...: done animating %p", str.string());
                 }
             }
         }
@@ -181,10 +183,14 @@ void WindowAnimator::UpdateAppWindowsLocked(
             }
             else if (wasAnimating) {
                 // stopped animating, do one more pass through the layout
+                AutoPtr<IInterface> obj;
+                appAnimator->mWeakAppToken->Resolve(EIID_IInterface, (IInterface**)&obj);
+                String str;
+                ((AppWindowToken*)(IObject*)obj.Get())->ToString(&str);
                 SetAppLayoutChanges(appAnimator, IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER,
-                        String("exiting appToken ") + appAnimator->mAppToken + String(" done"));
+                        String("exiting appToken ") + str + " done");
                 if (CWindowManagerService::DEBUG_ANIM) Slogger::V(TAG,
-                        "updateWindowsApps...: done animating exiting %p", appAnimator->mAppToken.Get());
+                        "updateWindowsApps...: done animating exiting %p", str.string());
             }
         }
     }
@@ -209,7 +215,7 @@ void WindowAnimator::UpdateWindowsLocked(
             }
             AutoPtr<WindowStateAnimator> winAnimator = win->mWinAnimator;
             Int32 privateFlags;
-            if (win->mAttrs->GetPrivateFlags(&privateFlags), (privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
+            if (win->mAttrs->GetPrivateFlags(&privateFlags), (privateFlags & IWindowManagerLayoutParams::PRIVATE_FLAG_KEYGUARD) != 0) {
                 if (!winAnimator->mAnimating) {
                     // Create a new animation to delay until keyguard is gone on its own.
                     winAnimator->mAnimation = NULL;
@@ -233,11 +239,11 @@ void WindowAnimator::UpdateWindowsLocked(
     imeTarget->GetAttrs((IWindowManagerLayoutParams**)&lp);
     Int32 flags;
     Boolean showImeOverKeyguard = imeTarget != NULL && imeTarget->IsVisibleNow() &&
-            (lp->GetFlags(&flags), (flags & FLAG_SHOW_WHEN_LOCKED) != 0);
+            (lp->GetFlags(&flags), (flags & IWindowManagerLayoutParams::FLAG_SHOW_WHEN_LOCKED) != 0);
     AutoPtr<IWindowState> ws;
     mPolicy->GetWinShowWhenLockedLw((IWindowState**)&ws);
     AutoPtr<WindowState> winShowWhenLocked = (WindowState*)ws.Get();
-    AutoPtr<AppWindowToken> appShowWhenLocked = winShowWhenLocked == NULL ? NULL : winShowWhenLocked.mAppToken;
+    AutoPtr<AppWindowToken> appShowWhenLocked = winShowWhenLocked == NULL ? NULL : winShowWhenLocked->mAppToken;
 
     WindowList::ReverseIterator winRit = windows->RBegin();
     for (; winRit != windows->REnd(); ++winRit) {
@@ -264,6 +270,7 @@ void WindowAnimator::UpdateWindowsLocked(
                 }
             }
 
+            Boolean isForceHiding;
             if (mPolicy->IsForceHiding(win->mAttrs, &isForceHiding), isForceHiding) {
                 if (!wasAnimating && nowAnimating) {
                     // if (WindowManagerService.DEBUG_ANIM ||
@@ -307,10 +314,11 @@ void WindowAnimator::UpdateWindowsLocked(
                 //         + " anim=" + win.mWinAnimator.mAnimation);
             }
             else {
+                Boolean result;
                 mPolicy->CanBeForceHidden(win, win->mAttrs, &result);
                 if (result) {
                     Boolean hideWhenLocked = !((win->mIsImWindow && showImeOverKeyguard) ||
-                            (appShowWhenLocked != NULL && appShowWhenLocked == win->mAppToken.Get()));
+                            (appShowWhenLocked != NULL && appShowWhenLocked.Get() == win->mAppToken));
                     Boolean changed;
                     if (((mForceHiding == KEYGUARD_ANIMATING_IN)
                                 && (!winAnimator->IsAnimating() || hideWhenLocked))
@@ -500,8 +508,8 @@ void WindowAnimator::TestTokenMayBeDrawnLocked(
 {
     // See if any windows have been drawn, so they (and others
     // associated with them) can now be shown.
-    AutoPtr< List<AutoPtr<TaskStack> > > tasks = mService->GetDisplayContentLocked(displayId)->GetTasks();
-    List<AutoPtr<TaskStack> >::Iterator it = tasks->Begin();
+    AutoPtr< List<AutoPtr<Task> > > tasks = mService->GetDisplayContentLocked(displayId)->GetTasks();
+    List<AutoPtr<Task> >::Iterator it = tasks->Begin();
     for (; it != tasks->End(); ++it) {
         AppTokenList tokens = (*it)->mAppTokens;
         AppTokenList::Iterator tokenIt = tokens.Begin();
@@ -557,7 +565,6 @@ void WindowAnimator::AnimateLocked()
         return;
     }
 
-    mPendingLayoutChanges.Clear();
     mCurrentTime = SystemClock::GetUptimeMillis();
     mBulkUpdateParams = CWindowManagerService::LayoutFields::SET_ORIENTATION_CHANGE_COMPLETE;
     Boolean wasAnimating = mAnimating;
@@ -595,8 +602,8 @@ void WindowAnimator::AnimateLocked()
                         && displayId == IDisplay::DEFAULT_DISPLAY) {
                     // We just finished rotation animation which means we did not
                     // anounce the rotation and waited for it to end, announce now.
-                    mService->mAccessibilityController->OnRotationChangedLocked(
-                            mService->GetDefaultDisplayContentLocked(), mService->mRotation);
+                    AutoPtr<DisplayContent> dc = mService->GetDefaultDisplayContentLocked();
+                    mService->mAccessibilityController->OnRotationChangedLocked(dc, mService->mRotation);
                 }
             }
         }
@@ -617,12 +624,12 @@ void WindowAnimator::AnimateLocked()
         Int32 displayId = it->mFirst;
         TestTokenMayBeDrawnLocked(displayId);
 
-        AutoPtr<ScreenRotationAnimation> screenRotationAnimation = (*it)->mScreenRotationAnimation;
+        AutoPtr<ScreenRotationAnimation> screenRotationAnimation = it->mSecond->mScreenRotationAnimation;
         if (screenRotationAnimation != NULL) {
             screenRotationAnimation->UpdateSurfacesInTransaction();
         }
 
-        mAnimating |= mServic->GetDisplayContentLocked(displayId)->AnimateDimLayers();
+        mAnimating |= mService->GetDisplayContentLocked(displayId)->AnimateDimLayers();
 
         //TODO (multidisplay): Magnification is supported only for the default display.
         if (mService->mAccessibilityController != NULL
@@ -658,7 +665,7 @@ void WindowAnimator::AnimateLocked()
         AutoPtr<DisplayContent> displayContent = (DisplayContent*)(IObject*)value.Get();
         Int32 pendingChanges = GetPendingLayoutChanges(displayContent->GetDisplayId());
         if ((pendingChanges & IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
-            mBulkUpdateParams |= SET_WALLPAPER_ACTION_PENDING;
+            mBulkUpdateParams |= CWindowManagerService::LayoutFields::SET_WALLPAPER_ACTION_PENDING;
         }
         if (pendingChanges != 0) {
             hasPendingLayoutChanges = TRUE;
@@ -731,9 +738,11 @@ void WindowAnimator::SetAppLayoutChanges(
     /* [in] */ const String& s)
 {
     // Used to track which displays layout changes have been done.
-    AutoPtr<ISparseArray> displays;
-    CSparseArray::New(2, (ISparseArray**)&displays);
-    WindowList windows = appAnimator->mAppToken->mAllAppWindows;
+    AutoPtr<ISparseInt32Array> displays;
+    CSparseInt32Array::New(2, (ISparseInt32Array**)&displays);
+    AutoPtr<IInterface> obj;
+    appAnimator->mWeakAppToken->Resolve(EIID_IInterface, (IInterface**)&obj);
+    WindowList windows = ((AppWindowToken*)(IObject*)obj.Get())->mAllAppWindows;
     WindowList::ReverseIterator rit = windows.RBegin();
     for (; rit != windows.REnd(); ++rit) {
         Int32 displayId = (*rit)->GetDisplayId();
@@ -782,7 +791,6 @@ AutoPtr<ScreenRotationAnimation> WindowAnimator::GetScreenRotationAnimationLocke
     }
     return GetDisplayContentsAnimatorLocked(displayId)->mScreenRotationAnimation;
 }
-
 
 } // Wm
 } // Server
