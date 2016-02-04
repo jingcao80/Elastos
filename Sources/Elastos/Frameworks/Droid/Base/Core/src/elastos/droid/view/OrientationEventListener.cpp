@@ -10,6 +10,10 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
+const String OrientationEventListener::TAG("OrientationEventListener");
+const Boolean OrientationEventListener::DEBUG = FALSE;
+const Boolean OrientationEventListener::localLOGV = FALSE;
+
 CAR_INTERFACE_IMPL(OrientationEventListener, Object, IOrientationEventListener)
 CAR_INTERFACE_IMPL(OrientationEventListener::SensorEventListenerImpl, Object, ISensorEventListener)
 

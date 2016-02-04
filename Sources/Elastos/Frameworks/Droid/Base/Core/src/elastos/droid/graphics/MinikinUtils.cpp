@@ -36,7 +36,7 @@ namespace Graphics {
 
 // Do an sprintf starting at offset n, abort on overflow
 static int snprintfcat(char* buf, int off, int size, const char* format, ...)
-        __attribute__((__format__(__printf__, 4, 5)));
+        __attribute__((__format__(__printf__, 4, 5))) __attribute__((__unused__));
 static int snprintfcat(char* buf, int off, int size, const char* format, ...) {
     va_list args;
     va_start(args, format);

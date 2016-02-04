@@ -10,16 +10,18 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
+DecoderCapabilities::StaticInitializer::StaticInitializer()
+{
+    Native_init();
+}
+
 //=================================================================================
 //              DecoderCapabilities
 //=================================================================================
-Boolean DecoderCapabilities::InitStatic()
-{
-    Native_init();
-    return TRUE;
-}
+static Object sLock;
+android::MediaProfiles *ssProfiles = NULL;
 
-Boolean DecoderCapabilities::mInit = InitStatic();
+const DecoderCapabilities::StaticInitializer DecoderCapabilities::sInitializer;
 
 ECode DecoderCapabilities::GetVideoDecoders(
     /* [out, callee] */ ArrayOf<VideoDecoder>** result)
@@ -58,9 +60,6 @@ ECode DecoderCapabilities::GetAudioDecoders(
 //---------------------------------------------------
 //    Native method : android_media_MediaProfiles.cpp
 //---------------------------------------------------
-
-static Object sLock;
-android::MediaProfiles *ssProfiles = NULL;
 
 void DecoderCapabilities::Native_init()
 {

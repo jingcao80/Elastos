@@ -1,5 +1,6 @@
 
 #include "DroidRuntime.h"
+#include <elastos/coredef.h>
 #include <elastos/utility/logging/Logger.h>
 #include <signal.h>
 #include <sys/stat.h>
@@ -172,7 +173,7 @@ ECode DroidRuntime::CallMain(
 static void BlockSignals()
 {
     sigset_t mask;
-    int cc;
+    int UNUSED(cc);
 
     sigemptyset(&mask);
     sigaddset(&mask, SIGQUIT);

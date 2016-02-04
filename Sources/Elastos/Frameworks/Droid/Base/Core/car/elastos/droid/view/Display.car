@@ -578,6 +578,20 @@ module
             [out] Boolean* result);
     }
 
+
+    interface IDisplayHelper {
+        /**
+         * @hide
+         */
+        TypeToString(
+            [in] Int32 type,
+            [out] String* str);
+
+        StateToString(
+            [in] Int32 state,
+            [out] String* str);
+    }
+
     } // namespace View
     } // namepsace Droid
     } // namespace Elastos

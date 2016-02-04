@@ -242,6 +242,12 @@ module
          */
         const Int32 MODE_INHERIT_EXISTING = 2;
 
+        SetMode(
+            [in] Int32 mode);
+
+        SetInstallFlags(
+            [in] Int32 flags);
+
         /**
          * Provide value of {@link PackageInfo#installLocation}, which may be used
          * to determine where the app will be staged. Defaults to
@@ -249,6 +255,9 @@ module
          */
         SetInstallLocation(
             [in] Int32 installLocation);
+
+        SetSizeBytes(
+            [in] Int64 bytes);
 
         /**
          * Optionally indicate the total size (in bytes) of all APKs that will be
@@ -288,6 +297,9 @@ module
         SetAppLabel(
             [in] ICharSequence* appLabel);
 
+        SetAppIconLastModified(
+            [in] Int64 lastModified);
+
         /**
          * Optionally set the URI where this package was downloaded from. Used for
          * verification purposes.
@@ -305,6 +317,13 @@ module
          */
         SetReferrerUri(
             [in] IUri* referrerUri);
+
+        SetInstallFlagsInternal();
+
+        SetInstallFlagsExternal();
+
+        SetAbiOverride(
+            [in] String abiOverride);
 
         GetMode(
             [out] Int32* mode);
@@ -350,17 +369,33 @@ module
      */
     [local]
     interface IPackageInstallerSessionInfo {
+
+        SetSessionId(
+            [in] Int32 id);
+
         /**
          * Return the ID for this session.
          */
         GetSessionId(
             [out] Int32* id);
 
+        SetInstallerPackageName(
+            [in] String packageName);
+
         /**
          * Return the package name of the app that owns this session.
          */
         GetInstallerPackageName(
             [out] String* name);
+
+        SetResolvedBaseCodePath(
+            [in] String path);
+
+        GetResolvedBaseCodePath(
+            [out] String* path);
+
+        SetProgress(
+            [in] Float progress);
 
         /**
          * Return current overall progress of this session, between 0 and 1.
@@ -373,6 +408,15 @@ module
          */
         GetProgress(
             [out] Float* progress);
+
+        SetSealed(
+            [in] Boolean sealed);
+
+        IsSealed(
+            [out] Boolean* isSealed);
+
+        SetActive(
+            [in] Boolean active);
 
         /**
          * Return if this session is currently active.
@@ -393,6 +437,21 @@ module
         IsOpen(
             [out] Boolean* open);
 
+        SetMode(
+            [in] Int32 mode);
+
+        GetMode(
+            [out] Int32* mode);
+
+        SetSizeBytes(
+            [in] Int64 sizeBytes);
+
+        GetSizeBytes(
+            [out] Int64* sizeBytes);
+
+        SetAppPackageName(
+            [in] String name);
+
         /**
          * Return the package name this session is working with. May be {@code null}
          * if unknown.
@@ -400,12 +459,18 @@ module
         GetAppPackageName(
             [out] String* name);
 
+        SetAppIcon(
+            [in] IBitmap* icon);
+
         /**
          * Return an icon representing the app being installed. May be {@code null}
          * if unavailable.
          */
         GetAppIcon(
             [out] IBitmap** icon);
+
+        SetAppLabel(
+            [in] ICharSequence* label);
 
         /**
          * Return a label representing the app being installed. May be {@code null}

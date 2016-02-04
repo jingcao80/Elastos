@@ -80,6 +80,7 @@ module
     * @implements Elastos.Droid.Graphics.Drawable.IDrawable
     * @Involve
     * interface IDrawable
+    * interface IDrawableCallback
     */
     interface IDrawableContainer {
         /**

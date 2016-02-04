@@ -146,17 +146,21 @@ public:
         CARAPI Execute(
             /* [in] */ IRunnable* command);
 
-        CARAPI_(void) Shutdown();
+        CARAPI Shutdown();
 
-        CARAPI_(AutoPtr<IList>) ShutdownNow();
+        CARAPI ShutdownNow(
+            /* [out] */ IList** tasks);
 
-        CARAPI_(Boolean) IsShutdown();
+        CARAPI IsShutdown(
+            /* [out] */ Boolean* result);
 
-        CARAPI_(Boolean) IsTerminated();
+        CARAPI IsTerminated(
+            /* [out] */ Boolean* result);
 
-        CARAPI_(Boolean) AwaitTermination(
+        CARAPI AwaitTermination(
             /* [in] */ Int64 timeout,
-            /* [in] */ ITimeUnit* unit);
+            /* [in] */ ITimeUnit* unit,
+            /* [out] */ Boolean* result);
 
         CARAPI Submit(
             /* [in] */ IRunnable* task,

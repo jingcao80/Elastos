@@ -1,7 +1,6 @@
 
 #include "elastos/droid/media/CAsyncPlayer.h"
-// TODO: Need CMediaPlayer
-// #include "elastos/droid/media/CMediaPlayer.h"
+#include "elastos/droid/media/CMediaPlayer.h"
 #include "elastos/droid/os/SystemClock.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
@@ -149,8 +148,7 @@ void CAsyncPlayer::StartSound(
         if (mDebug) Logger::D(mTag, "Starting playback");
 
         AutoPtr<IMediaPlayer> player;
-// TODO: Need CMediaPlayer
-        // CMediaPlayer::New((IMediaPlayer**)&player);
+        CMediaPlayer::New((IMediaPlayer**)&player);
         ec = player->SetAudioStreamType(cmd->mStream);
         if (FAILED(ec)) break;
 

@@ -735,8 +735,8 @@ Boolean Monkey::GetSystemInterfaces()
         return FALSE;
     }
 
-    AutoPtr<IActivityController> iac;
-    CActivityController::New((Handle32)this, (IActivityController**)&iac);
+    AutoPtr<IIActivityController> iac;
+    CActivityController::New((Handle32)this, (IIActivityController**)&iac);
     ECode ec = mAm->SetActivityController(iac.Get());
     FAIL_GOTO(ec, _Exit_)
 
@@ -1143,31 +1143,31 @@ String Monkey::NextArg()
 void Monkey::ShowUsage()
 {
     StringBuilder usage;
-    usage.AppendCStr("usage: monkey [-p ALLOWED_PACKAGE [-p ALLOWED_PACKAGE] ...]\n");
-    usage.AppendCStr("              [-c MAIN_CATEGORY [-c MAIN_CATEGORY] ...]\n");
-    usage.AppendCStr("              [--ignore-crashes] [--ignore-timeouts]\n");
-    usage.AppendCStr("              [--ignore-security-exceptions]\n");
-    usage.AppendCStr("              [--monitor-native-crashes] [--ignore-native-crashes]\n");
-    usage.AppendCStr("              [--kill-process-after-error] [--hprof]\n");
-    usage.AppendCStr("              [--pct-touch PERCENT] [--pct-motion PERCENT]\n");
-    usage.AppendCStr("              [--pct-trackball PERCENT] [--pct-syskeys PERCENT]\n");
-    usage.AppendCStr("              [--pct-nav PERCENT] [--pct-majornav PERCENT]\n");
-    usage.AppendCStr("              [--pct-appswitch PERCENT] [--pct-flip PERCENT]\n");
-    usage.AppendCStr("              [--pct-anyevent PERCENT] [--pct-pinchzoom PERCENT]\n");
-    usage.AppendCStr("              [--pkg-blacklist-file PACKAGE_BLACKLIST_FILE]\n");
-    usage.AppendCStr("              [--pkg-whitelist-file PACKAGE_WHITELIST_FILE]\n");
-    usage.AppendCStr("              [--wait-dbg] [--dbg-no-events]\n");
-    usage.AppendCStr("              [--setup scriptfile] [-f scriptfile [-f scriptfile] ...]\n");
-    usage.AppendCStr("              [--port port]\n");
-    usage.AppendCStr("              [-s SEED] [-v [-v] ...]\n");
-    usage.AppendCStr("              [--throttle MILLISEC] [--randomize-throttle]\n");
-    usage.AppendCStr("              [--profile-wait MILLISEC]\n");
-    usage.AppendCStr("              [--device-sleep-time MILLISEC]\n");
-    usage.AppendCStr("              [--randomize-script]\n");
-    usage.AppendCStr("              [--script-log]\n");
-    usage.AppendCStr("              [--bugreport]\n");
-    usage.AppendCStr("              [--periodic-bugreport]\n");
-    usage.AppendCStr("              COUNT\n");
+    usage.Append("usage: monkey [-p ALLOWED_PACKAGE [-p ALLOWED_PACKAGE] ...]\n");
+    usage.Append("              [-c MAIN_CATEGORY [-c MAIN_CATEGORY] ...]\n");
+    usage.Append("              [--ignore-crashes] [--ignore-timeouts]\n");
+    usage.Append("              [--ignore-security-exceptions]\n");
+    usage.Append("              [--monitor-native-crashes] [--ignore-native-crashes]\n");
+    usage.Append("              [--kill-process-after-error] [--hprof]\n");
+    usage.Append("              [--pct-touch PERCENT] [--pct-motion PERCENT]\n");
+    usage.Append("              [--pct-trackball PERCENT] [--pct-syskeys PERCENT]\n");
+    usage.Append("              [--pct-nav PERCENT] [--pct-majornav PERCENT]\n");
+    usage.Append("              [--pct-appswitch PERCENT] [--pct-flip PERCENT]\n");
+    usage.Append("              [--pct-anyevent PERCENT] [--pct-pinchzoom PERCENT]\n");
+    usage.Append("              [--pkg-blacklist-file PACKAGE_BLACKLIST_FILE]\n");
+    usage.Append("              [--pkg-whitelist-file PACKAGE_WHITELIST_FILE]\n");
+    usage.Append("              [--wait-dbg] [--dbg-no-events]\n");
+    usage.Append("              [--setup scriptfile] [-f scriptfile [-f scriptfile] ...]\n");
+    usage.Append("              [--port port]\n");
+    usage.Append("              [-s SEED] [-v [-v] ...]\n");
+    usage.Append("              [--throttle MILLISEC] [--randomize-throttle]\n");
+    usage.Append("              [--profile-wait MILLISEC]\n");
+    usage.Append("              [--device-sleep-time MILLISEC]\n");
+    usage.Append("              [--randomize-script]\n");
+    usage.Append("              [--script-log]\n");
+    usage.Append("              [--bugreport]\n");
+    usage.Append("              [--periodic-bugreport]\n");
+    usage.Append("              COUNT\n");
     PFL_EX(usage.ToString().string());
 }
 

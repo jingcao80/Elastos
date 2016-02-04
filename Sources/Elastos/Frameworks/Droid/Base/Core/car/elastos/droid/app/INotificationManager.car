@@ -21,7 +21,7 @@ module
     [deprecated]
     interface IINotificationManager {
         CancelAllNotifications(
-            [in]String pkg,
+            [in] String pkg,
             [in] Int32 userId);
 
         EnqueueToast(
@@ -51,10 +51,12 @@ module
 
         SetNotificationsEnabledForPackage(
             [in] String pkg,
+            [in] Int32 uid,
             [in] Boolean enabled);
 
         AreNotificationsEnabledForPackage(
             [in] String pkg,
+            [in] Int32 uid,
             [out] Boolean* res);
 
         SetPackagePriority(
@@ -163,7 +165,7 @@ module
             [in] ArrayOf<IUri*>* conditionIds);
 
         GetAutomaticZenModeConditions(
-            [out] ICondition** condition);
+            [out, callee] ArrayOf<ICondition*>* condition);
     }
 
     } // namespace App

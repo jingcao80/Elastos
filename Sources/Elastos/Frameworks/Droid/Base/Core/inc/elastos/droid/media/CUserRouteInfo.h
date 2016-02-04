@@ -19,16 +19,21 @@ namespace Media {
  *
  * @see MediaRouter.RouteInfo
  */
-CarClass(CUserRouteInfo), public MediaRouteInfo
+CarClass(CUserRouteInfo)
+    , public MediaRouteInfo
+    , public IMediaRouterUserRouteInfo
 {
 public:
     CUserRouteInfo();
 
+    virtual ~CUserRouteInfo();
+
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI constructor(
         /* [in] */ IRouteCategory* category);
-
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
 
     /**
      * Set the user-visible name of this route.

@@ -10,6 +10,7 @@
 
 using Elastos::Droid::Accounts::IAccount;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Database::IIContentObserver;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Content::IContext;
@@ -37,6 +38,7 @@ namespace Content {
 CarClass(CContentService)
     , public Object
     , public IIContentService
+    , public IBinder
 {
 public:
     class ObserverNode;
@@ -450,6 +452,11 @@ private:
         /* [in] */ Int32 userHandle,
         /* [in] */ const String& message);
 
+    CARAPI ToString(
+        /* [out] */ String* str)
+    {
+        return Object::ToString(str);
+    }
 private:
     static const String TAG;
     static const Boolean DBG;

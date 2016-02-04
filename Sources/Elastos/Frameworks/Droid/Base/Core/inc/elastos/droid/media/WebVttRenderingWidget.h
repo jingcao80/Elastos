@@ -32,18 +32,16 @@ private:
         : public LinearLayout
     {
     public:
-        RegionLayout();
-
-        ~RegionLayout();
-
-        CAR_INTERFACE_DECL();
-
-        CARAPI constructor(
+        RegionLayout(
             /* [in] */ WebVttRenderingWidget* host,
             /* [in] */ IContext* context,
             /* [in] */ ITextTrackRegion* region,
             /* [in] */ ICaptioningManagerCaptionStyle* captionStyle,
             /* [in] */ Float fontSize);
+
+        ~RegionLayout();
+
+        CAR_INTERFACE_DECL();
 
         CARAPI SetCaptionStyle(
             /* [in] */ ICaptioningManagerCaptionStyle* captionStyle,
@@ -77,18 +75,16 @@ private:
     {
         friend class WebVttRenderingWidget;
     public:
-        CueLayout();
-
-        ~CueLayout();
-
-        CAR_INTERFACE_DECL();
-
-        CARAPI constructor(
+        CueLayout(
             /* [in] */ WebVttRenderingWidget* host,
             /* [in] */ IContext* context,
             /* [in] */ ITextTrackCue* cue,
             /* [in] */ ICaptioningManagerCaptionStyle* captionStyle,
             /* [in] */ Float fontSize);
+
+        ~CueLayout();
+
+        CAR_INTERFACE_DECL();
 
         CARAPI SetCaptionStyle(
             /* [in] */ ICaptioningManagerCaptionStyle* style,
@@ -130,15 +126,13 @@ private:
         : public SubtitleView
     {
     public:
-        SpanLayout();
+        SpanLayout(
+            /* [in] */ IContext* context,
+            /* [in] */ IArrayOf* spans);
 
         ~SpanLayout();
 
         CAR_INTERFACE_DECL();
-
-        CARAPI constructor(
-            /* [in] */ IContext* context,
-            /* [in] */ IArrayOf* spans);
 
         CARAPI Update();
 

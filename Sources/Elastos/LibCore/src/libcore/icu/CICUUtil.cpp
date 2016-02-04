@@ -259,9 +259,11 @@ ECode CICUUtil::AddLikelySubtags(
     /* [out] */ ILocale** target)
 {
     VALIDATE_NOT_NULL(locale)
-    VALIDATE_NOT_NULL(*target);
+    VALIDATE_NOT_NULL(target);
 
-    *target = ICUUtil::AddLikelySubtags(locale);
+    AutoPtr<ILocale> l = ICUUtil::AddLikelySubtags(locale);
+    *target = l;
+    REFCOUNT_ADD(*target);
     return NOERROR;
 }
 

@@ -14,14 +14,14 @@ module
      */
     [deprecated]
     interface IGL10Ext {
-        glQueryMatrixxOES(
+        GlQueryMatrixxOES(
             [in] ArrayOf<Int32>* mantissa,
             [in] Int32 mantissaOffset,
             [in] ArrayOf<Int32>* exponent,
             [in] Int32 exponentOffset,
             [out] Int32* matrixxOES);
 
-        glQueryMatrixxOES(
+        GlQueryMatrixxOES(
             [in] IInt32Buffer* mantissa,
             [in] IInt32Buffer* exponent,
             [out] Int32* matrixxOES);

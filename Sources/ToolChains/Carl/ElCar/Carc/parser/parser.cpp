@@ -3537,15 +3537,21 @@ int P_InterfaceConstString(InterfaceDescriptor *pDesc)
         return Ret_AbortOnError;
     }
 
-    if (GetToken(s_pFile) != Token_string) {
+    CARToken token =  GetToken(s_pFile);
+    if (token != Token_string && token != Token_K_null) {
         ErrorReport(CAR_E_UnexpectSymbol);
         return Ret_AbortOnError;
     }
 
     pDesc->mConsts[r]->mType = TYPE_STRING;
-    char *str = (char*)malloc(strlen(g_szCurrentToken) + 1);
-    strcpy(str, g_szCurrentToken);
-    pDesc->mConsts[r]->mV.mStrValue = str;
+    if (token != Token_K_null) {
+        char *str = (char*)malloc(strlen(g_szCurrentToken) + 1);
+        strcpy(str, g_szCurrentToken);
+        pDesc->mConsts[r]->mV.mStrValue = str;
+    }
+    else {
+        pDesc->mConsts[r]->mV.mStrValue = NULL;
+    }
 
     if (GetToken(s_pFile) != Token_S_semicolon) {
         ErrorReport(CAR_E_ExpectSymbol, ";");

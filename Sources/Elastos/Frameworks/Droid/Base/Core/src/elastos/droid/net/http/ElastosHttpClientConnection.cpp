@@ -376,7 +376,7 @@ ECode ElastosHttpClientConnection::ParseResponseHeader(
     CParserCursor::New(0, Ptr(current)->Func(current->GetLength), (IParserCursor**)&newParserCursor);
     ILineParser::Probe(defaultBasicLineParser)->ParseStatusLine(current, newParserCursor, (IStatusLine**)&statusline);
 
-    if (HttpLog::LOGV) HttpLog::V("read: %s", Object::ToString(statusline).string());
+    if (HttpLog::LOGV) HttpLog::V("read: %s", TO_CSTR(statusline));
     Int32 statusCode;
     statusline->GetStatusCode(&statusCode);
     // Parse header body

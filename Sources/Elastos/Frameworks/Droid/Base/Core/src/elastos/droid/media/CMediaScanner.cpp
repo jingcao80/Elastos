@@ -269,7 +269,7 @@ static AutoPtr< ArrayOf<String> > InitID3_GENRES()
     array->Set(130, String("Terror"));
     array->Set(131, String("Indie"));
     array->Set(132, String("Britpop"));
-    array->Set(133, String("Negerpunk"));
+    array->Set(133, String(NULL));
     array->Set(134, String("Polsk Punk"));
     array->Set(135, String("Beat"));
     array->Set(136, String("Christian Gangsta"));
@@ -292,17 +292,27 @@ static AutoPtr< ArrayOf<String> > InitID3_GENRES()
 AutoPtr< ArrayOf<String> > CMediaScanner::FILES_PRESCAN_PROJECTION = InitFILES_PRESCAN_PROJECTION();
 AutoPtr< ArrayOf<String> > CMediaScanner::ID_PROJECTION = InitID_PROJECTION();
 AutoPtr< ArrayOf<String> > CMediaScanner::PLAYLIST_MEMBERS_PROJECTION = InitPLAYLIST_MEMBERS_PROJECTION();
-AutoPtr< ArrayOf<String> > CMediaScanner::ID3_GENRES = InitID3_GENRES();
+
 
 const String CMediaScanner::TAG("MediaScanner");
+
+const Int32 CMediaScanner::FILES_PRESCAN_ID_COLUMN_INDEX = 0;
+const Int32 CMediaScanner::FILES_PRESCAN_PATH_COLUMN_INDEX = 1;
+const Int32 CMediaScanner::FILES_PRESCAN_FORMAT_COLUMN_INDEX = 2;
+const Int32 CMediaScanner::FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX = 3;
+
 const String CMediaScanner::RINGTONES_DIR("/ringtones/");
 const String CMediaScanner::NOTIFICATIONS_DIR("/notifications/");
 const String CMediaScanner::ALARMS_DIR("/alarms/");
 const String CMediaScanner::MUSIC_DIR("/music/");
 const String CMediaScanner::PODCAST_DIR("/podcasts/");
 
+AutoPtr< ArrayOf<String> > CMediaScanner::ID3_GENRES = InitID3_GENRES();
+
 const Boolean CMediaScanner::ENABLE_BULK_INSERTS = TRUE;
 const String CMediaScanner::DEFAULT_RINGTONE_PROPERTY_PREFIX("ro.config.");
+HashMap<String, String> CMediaScanner::mNoMediaPaths;
+HashMap<String, String> CMediaScanner::mMediaPaths;
 
 //-----------------------------
 //    CMediaScanner::WplHandler
@@ -378,7 +388,7 @@ String CMediaScanner::FileEntry::ToString()
 //    CMediaScanner::MyMediaScannerClient
 //---------------------------------------
 
-CAR_INTERFACE_IMPL(CMediaScanner::MyMediaScannerClient, IMediaScannerClient);
+CAR_INTERFACE_IMPL(CMediaScanner::MyMediaScannerClient, Object, IMediaScannerClient);
 
 CMediaScanner::MyMediaScannerClient::MyMediaScannerClient(
     /* [in] */ CMediaScanner* owner)
@@ -407,6 +417,7 @@ AutoPtr<CMediaScanner::FileEntry> CMediaScanner::MyMediaScannerClient::BeginFile
     mMimeType = mimeType;
     mFileType = 0;
     mFileSize = fileSize;
+    mIsDrm = FALSE;
 
     if (!isDirectory) {
         if (!noMedia && IsNoMediaFile(path)) {
@@ -481,7 +492,6 @@ AutoPtr<CMediaScanner::FileEntry> CMediaScanner::MyMediaScannerClient::BeginFile
     mLastModified = lastModified;
     mWriter = NULL;
     mCompilation = 0;
-    mIsDrm = FALSE;
     mWidth = 0;
     mHeight = 0;
 
@@ -1162,7 +1172,10 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
         // If the rowId of the inserted file is needed, it gets inserted immediately,
         // bypassing the bulk inserter.
         if (inserter == NULL || needToSetSettings) {
-            mOwner->mMediaProvider->Insert(tableUri, values, (IUri**)&result);
+            if (inserter != NULL) {
+                inserter->FlushAll();
+            }
+            mOwner->mMediaProvider->Insert(mPackageName, tableUri, values, (IUri**)&result);
         } else if (entry->mFormat == (Int32)IMtpConstants::FORMAT_ASSOCIATION) {
             inserter->InsertwithPriority(tableUri, values);
         } else {
@@ -1207,7 +1220,7 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
         }
         Int32 tempValue;
         String nullStr;
-        mOwner->mMediaProvider->Update(result, values, nullStr, NULL, &tempValue);
+        mOwner->mMediaProvider->Update(mPackageName, result, values, nullStr, NULL, &tempValue);
     }
 
     if(needToSetSettings) {
@@ -1280,6 +1293,7 @@ Int32 CMediaScanner::MyMediaScannerClient::GetFileTypeFromDrm(
 //    }
 //
 //    if (mDrmManagerClient->CanHandle(path, NULL)) {
+//        mIsDrm = TRUE;
 //        String drmMimetype = mDrmManagerClient->GetOriginalMimeType(path);
 //        if (drmMimetype != NULL) {
 //            mMimeType = drmMimetype;
@@ -1295,8 +1309,10 @@ Int32 CMediaScanner::MyMediaScannerClient::GetFileTypeFromDrm(
 
 CMediaScanner::MediaBulkDeleter::MediaBulkDeleter(
     /* [in] */ IIContentProvider* provider,
+    /* [in] */ const String& packageName,
     /* [in] */ IUri* baseUri)
     : mProvider(provider)
+    , mPackageName(packageName)
     , mBaseUri(baseUri)
 {
     mWhereArgs.Resize(100);
@@ -1331,7 +1347,7 @@ ECode CMediaScanner::MediaBulkDeleter::Flush() // throws RemoteException
         Int32 numrows;
         String tempText;
         whereClause.ToString(&tempText);
-        mProvider->Delete(mBaseUri, String("_id") + String(" IN (") + tempText + String(")"), foo, &numrows);
+        mProvider->Delete(mPackageName, mBaseUri, String("_id") + String(" IN (") + tempText + String(")"), foo, &numrows);
         //Logger::I("@@@@@@@@@", String("rows deleted: ") + StringUtils::Int32ToString(numrows));
         whereClause.Reset();
         mWhereArgs.Clear();
@@ -1340,7 +1356,6 @@ ECode CMediaScanner::MediaBulkDeleter::Flush() // throws RemoteException
 }
 
 //-----------------------------------
-
 CMediaScanner::CMediaScanner()
     : mNativeContext(NULL)
     , mProcessPlaylists(FALSE)
@@ -1367,12 +1382,15 @@ CMediaScanner::~CMediaScanner()
     Finalize();
 }
 
+CAR_INTERFACE_IMPL(CMediaScanner, Object, IMediaScanner)
+
 ECode CMediaScanner::constructor(
     /* [in] */ IContext * c)
 {
     FAIL_RETURN(NativeSetup());
 
     mContext = c;
+        GetPackageName(&mPackageName);
     mBitmapOptions->SetInSampleSize(1);
     mBitmapOptions->SetInJustDecodeBounds(TRUE);
 
@@ -1397,6 +1415,20 @@ ECode CMediaScanner::StopScan()
         }
     }
     return NOERROR;
+}
+
+CMediaScanner::ClearMediaPathCache(
+    /* [in] */ Boolean clearMediaPaths,
+    /* [in] */ Boolean clearNoMediaPaths)
+{
+    synchronized (this) {
+        if (clearMediaPaths) {
+            mMediaPaths.Clear();
+        }
+        if (clearNoMediaPaths) {
+            mNoMediaPaths.Clear();
+        }
+    }
 }
 
 void CMediaScanner::SetDefaultRingtoneFileNames()
@@ -1536,7 +1568,7 @@ ECode CMediaScanner::Prescan( //throws RemoteException
     ECode ec = NOERROR;
     AutoPtr<IUri> uri;
     builder->Build((IUri**)&uri);
-    AutoPtr<MediaBulkDeleter> deleter = new MediaBulkDeleter(mMediaProvider, uri);
+    AutoPtr<MediaBulkDeleter> deleter = new MediaBulkDeleter(mMediaProvider, mPackageName, uri);
 
     // Build the list of files from the content provider
 //    try {
@@ -1590,7 +1622,7 @@ ECode CMediaScanner::Prescan( //throws RemoteException
                 c = NULL;
             }
 
-            ec = mMediaProvider->Query(limitUri, FILES_PRESCAN_PROJECTION,
+            ec = mMediaProvider->Query(mPackageName, limitUri, FILES_PRESCAN_PROJECTION,
                 where, selectionArgs, String("_id"), NULL, (ICursor**)&c);
             FAIL_GOTO(ec, _EXIT_)
 
@@ -1645,7 +1677,7 @@ ECode CMediaScanner::Prescan( //throws RemoteException
                                 CFile::New(path, (IFile**)&file);
                                 file->GetParent(&parentPath);
                                 bundle = NULL;
-                                mMediaProvider->Call(IMediaStore::UNHIDE_CALL, parentPath, NULL, (IBundle**)&bundle);
+                                mMediaProvider->Call(mPackageName, IMediaStore::UNHIDE_CALL, parentPath, NULL, (IBundle**)&bundle);
                             }
                         }
                     }
@@ -1667,7 +1699,7 @@ _EXIT_:
 
     // compute original size of images
     mOriginalCount = 0;
-    ec = mMediaProvider->Query(mImagesUri, ID_PROJECTION, nullStr, NULL, nullStr, NULL, (ICursor**)&c);
+    ec = mMediaProvider->Query(mPackageName, mImagesUri, ID_PROJECTION, nullStr, NULL, nullStr, NULL, (ICursor**)&c);
     if (c != NULL) {
         c->GetCount(&mOriginalCount);
         c->Close();
@@ -1697,6 +1729,7 @@ void CMediaScanner::PruneDeadThumbnailFiles()
     CFile::New(directory, (IFile**)&file);
     AutoPtr< ArrayOf<String> > files;
     file->List((ArrayOf<String>**)&files);
+    AutoPtr<ICursor> c;
     if (files == NULL) {
         files = ArrayOf<String>::Alloc(0);
     }
@@ -1707,11 +1740,10 @@ void CMediaScanner::PruneDeadThumbnailFiles()
     }
 
 //    try {
-        AutoPtr<ICursor> c;
         AutoPtr< ArrayOf<String> > tempArray = ArrayOf<String>::Alloc(1);
         tempArray->Set(0, String("_data"));
         String nullStr;
-        mMediaProvider->Query(mThumbsUri, tempArray, nullStr, NULL, nullStr, NULL, (ICursor**)&c);
+        mMediaProvider->Query(mPackageName, mThumbsUri, tempArray, nullStr, NULL, nullStr, NULL, (ICursor**)&c);
         Logger::V(TAG, "pruneDeadThumbnailFiles... " /*+ c*/);
         Boolean tempState;
         if (c != NULL && (c->MoveToFirst(&tempState), tempState)) {
@@ -1770,6 +1802,15 @@ ECode CMediaScanner::Postscan(
     return NOERROR;
 }
 
+void CMediaScanner::ReleaseResources()
+{
+    // release the DrmManagerClient resources
+    // if (mDrmManagerClient != NULL) {
+    //     mDrmManagerClient->Release();
+    //     mDrmManagerClient = NULL;
+    // }
+}
+
 ECode CMediaScanner::Initialize(
     /* [in] */ const String& volumeName)
 {
@@ -1793,8 +1834,12 @@ ECode CMediaScanner::Initialize(
     images->GetContentUri(volumeName, (IUri**)&mImagesUri);
     thumbnails->GetContentUri(volumeName, (IUri**)&mThumbsUri);
     files->GetContentUri(volumeName, (IUri**)&mFilesUri);
+    AutoPtr<IUriBuilder> iub;
+    mFilesUri->BuildUpon((IUriBuilder**)&iub);
+    iub->AppendQueryParameter(String("nonotify"), String("1"));
+    iub->Build((IUri**)&mFilesUriNoNotify);
 
-    if (!volumeName.Equals("internal")) {
+    if (!volumeName.Equals(String("internal"))) {
         // we only support playlists on external media
         mProcessPlaylists = TRUE;
         mProcessGenres = TRUE;
@@ -1830,7 +1875,7 @@ ECode CMediaScanner::ScanDirectories(
     if (ENABLE_BULK_INSERTS) {
         mMediaInserter = NULL;
         // create MediaInserter for bulk inserts
-        CMediaInserter::New(mMediaProvider, 500, (IMediaInserter**)&mMediaInserter);
+        CMediaInserter::New(mMediaProvider, mPackageName, 500, (IMediaInserter**)&mMediaInserter);
     }
 
     for (Int32 i = 0; i < directories->GetLength(); i++) {
@@ -1874,7 +1919,7 @@ _EXIT_:
     else if (ec == (ECode)E_REMOTE_EXCEPTION) {
         Logger::E(TAG, "RemoteException in CMediaScanner.scan()");
     }
-
+    ReleaseReSources();
     ExitScan();
     return NOERROR;
 }
@@ -1898,6 +1943,13 @@ ECode CMediaScanner::ScanSingleFile(
     FAIL_GOTO(ec, _EXIT_)
 
     CFile::New(path, (IFile**)&file);
+    Boolean isExist = FALSE;
+    file->Exists(&isExist);
+    if (isExist) {
+        *result = NULL;
+        ReleaseResources();
+        return NOERROR;
+    }
 
     // lastModified is in milliseconds on Files.
     file->LastModified(&tempValue);
@@ -1905,12 +1957,16 @@ ECode CMediaScanner::ScanSingleFile(
 
     // always scan the file, so we can return the content://media Uri for existing files
     file->GetLength(&tempValue);
-    temp = mClient->DoScanFile(path, mimeType, lastModifiedSeconds, tempValue, FALSE, TRUE, FALSE);
+    Boolean isNoMediaPath = FALSE;
+    IsNoMediaPath(path, &isNoMediaPath);
+    temp = mClient->DoScanFile(path, mimeType, lastModifiedSeconds, tempValue, FALSE, TRUE, isNoMediaPath);
     *result = temp;
     REFCOUNT_ADD(*result);
+    ReleaseResources();
     return NOERROR;
 
 _EXIT_:
+    ReleaseResources();
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
         Logger::E(TAG, "RemoteException in CMediaScanner.scanFile()");
     }
@@ -1994,30 +2050,45 @@ ECode CMediaScanner::IsNoMediaPath(
     }
 
     // return true if file or any parent directory has name starting with a dot
-    if (path.IndexOf("/.") >= 0) {
+    if (path.IndexOf(String("/.")) >= 0) {
         *result = TRUE;
         return NOERROR;
     }
 
-    // now check to see if any parent directories have a ".nomedia" file
-    // start from 1 so we don't bother checking in the root directory
-    Int32 offset = 1;
-    while (offset >= 0) {
-        Int32 slashIndex = path.IndexOf('/', offset);
-        if (slashIndex > offset) {
-            slashIndex++; // move past slash
-            //File file = new File(path->Substring(0, slashIndex) + ".nomedia");
-            AutoPtr<IFile> file;
-            CFile::New(String(path.Substring(0, slashIndex) + ".nomedia"), (IFile**)&file);
-            Boolean isExist;
-            if ((file->Exists(&isExist), isExist)) {
-                // we have a .nomedia in one of the parent directories
+    Int32 firstSlash = path.LastIndexOf('/');
+    if (firstSlash <= 0) {
+        *result = FALSE;
+    }
+    String parent = path.SubString(0, firstSlash);
+    synchronized(this) {
+        HashMap<String, String>::Iterator it = mNoMediaPaths.Find(parent);
+        if (it != mNoMediaPaths.End()) {
                 *result = TRUE;
                 return NOERROR;
+        } else {
+            // check to see if any parent directories have a ".nomedia" file
+            // start from 1 so we don't bother checking in the root directory
+            Int32 offset = 1;
+            while (offset >= 0) {
+                Int32 slashIndex = path.IndexOf('/', offset);
+                if (slashIndex > offset) {
+                    slashIndex++; // move past slash
+                    AutoPtr<IFile> file;
+                    CFile::New(String(path.Substring(0, slashIndex)) + String(".nomedia"), (IFile**)&file);
+                    file->Exists(&isExist);
+                    if (isExist) {
+                        // we have a .nomedia in one of the parent directories
+                        mNoMediaPaths->Insert(parent, String(""));
+                        *result = TRUE;
+                        return NOERROR;
+                    }
+                }
+                offset = slashIndex;
             }
+            mMediaPaths->Insert(parent, String(""));
         }
-        offset = slashIndex;
     }
+
     *result = IsNoMediaFile(path);
     return NOERROR;
 }
@@ -2078,7 +2149,7 @@ ECode CMediaScanner::ScanMtpFile(
             AutoPtr<IUri> uri;
             files->GetMtpObjectsUri(volumeName, (IUri**)&uri);
             Int32 retValue;
-            mMediaProvider->Update(uri, values, String("_id=?"), whereArgs, &retValue);
+            mMediaProvider->Update(mPackageName, uri, values, String("_id=?"), whereArgs, &retValue);
 //        } catch (RemoteException e) {
 //            Logger::E(TAG, "RemoteException in scanMtpFile"/*, e*/);
 //        }
@@ -2097,7 +2168,7 @@ ECode CMediaScanner::ScanMtpFile(
 
             AutoPtr<FileEntry> entry = MakeEntryFor(path);
             if (entry != NULL) {
-                mMediaProvider->Query(mFilesUri, FILES_PRESCAN_PROJECTION,
+                mMediaProvider->Query(mPackageName, mFilesUri, FILES_PRESCAN_PROJECTION,
                         nullStr, NULL, nullStr, NULL, (ICursor**)&fileList);
                 ProcessPlayList(entry, fileList);
             }
@@ -2121,6 +2192,7 @@ ECode CMediaScanner::ScanMtpFile(
         if (fileList != NULL) {
             fileList->Close();
         }
+        ReleaseResources();
 //    }
     return NOERROR;
 }
@@ -2131,48 +2203,17 @@ AutoPtr<CMediaScanner::FileEntry> CMediaScanner::MakeEntryFor(
     AutoPtr<FileEntry> fileEntry;
     String where;
     AutoPtr< ArrayOf<String> > selectionArgs;
+    AutoPtr<ICursor> c;
 
 //    try {
-        Boolean hasWildCards = path.Contains("_") || path.Contains("%");
-
-        if (hasWildCards || !mCaseInsensitivePaths) {
-            // if there are wildcard characters in the path, the "like" match
-            // will be slow, and it's worth trying an "=" comparison
-            // first, since in most cases the case will match.
-            // Also, we shouldn't do a "like" match on case-sensitive filesystems
-            where = IMediaStoreFilesFileColumns::DATA + "=?";
-            selectionArgs = ArrayOf<String>::Alloc(1);
-            selectionArgs->Set(0, path);
-        }
-        else {
-            // if there are no wildcard characters in the path, then the "like"
-            // match will be just as fast as the "=" case, because of the index
-            where = "_data LIKE ?1 AND lower(_data)=lower(?1)";
-            selectionArgs = ArrayOf<String>::Alloc(1);
-            selectionArgs->Set(0, path);
-        }
-
+        where = IMediaStoreMediaColumns::DATA + String("=?");
+        AutoPtr<ArrayOf<String> > selectionArgs = ArrayOf<String>::Alloc(1);
+        (*selectionArgs)[0] = path;
+        // Boolean hasWildCards = path.Contains("_") || path.Contains("%");
         String nullStr;
-        AutoPtr<ICursor> c;
-        mMediaProvider->Query(mFilesUri, FILES_PRESCAN_PROJECTION, where, selectionArgs,
+        mMediaProvider->Query(mPackageName, mFilesUriNoNotify.Get(), FILES_PRESCAN_PROJECTION, where, selectionArgs,
             nullStr, NULL, (ICursor**)&c);
         Boolean is;
-        if (!(c->MoveToFirst(&is), is) && hasWildCards && mCaseInsensitivePaths) {
-            // Try again with case-insensitive match. This will be slower, especially
-            // if the path contains wildcard characters.
-            // The 'like' makes it use the index, the 'lower()' makes it correct
-            // when the path contains sqlite wildcard characters,
-            where = "_data LIKE ?1 AND lower(_data)=lower(?1)";
-            selectionArgs = ArrayOf<String>::Alloc(1);
-            selectionArgs->Set(0, path);
-            c->Close();
-            c = NULL;
-            mMediaProvider->Query(mFilesUri, FILES_PRESCAN_PROJECTION, where, selectionArgs,
-                nullStr, NULL, (ICursor**)&c);
-            // TODO update the path in the db with the correct case so the fast
-            // path works next time?
-        }
-
         if ((c->MoveToFirst(&is), is)) {
             Int64 rowId;
             c->GetInt64(FILES_PRESCAN_ID_COLUMN_INDEX, &rowId);
@@ -2337,7 +2378,7 @@ ECode CMediaScanner::ProcessCachedPlaylist(
             CInteger64::New(entry->mBestmatchid, (IInteger64**)&integer64);
             FAIL_RETURN(values->PutInt64(String("audio_id"), integer64));
             AutoPtr<IUri> tempUri;
-            FAIL_RETURN(mMediaProvider->Insert(playlistUri, values, (IUri**)&tempUri));
+            FAIL_RETURN(mMediaProvider->Insert(mPackageName, playlistUri, values, (IUri**)&tempUri));
 //            } catch (RemoteException e) {
 //                Logger::E(TAG, "RemoteException in MediaScanner.processCachedPlaylist()"/*, e*/);
 //                return;
@@ -2532,7 +2573,7 @@ ECode CMediaScanner::ProcessPlayList( // throws RemoteException
         CString::New(path, (ICharSequence**)&seq);
         values->PutString(String("_data"), seq);
 
-        mMediaProvider->Insert(mPlaylistsUri, values, (IUri**)&uri);
+        mMediaProvider->Insert(mPackageName, mPlaylistsUri, values, (IUri**)&uri);
         contentUris->ParseId(uri, &rowId);
 
         Uri::WithAppendedPath(uri, IMediaStoreAudioPlaylistsMembers::CONTENT_DIRECTORY,
@@ -2542,12 +2583,12 @@ ECode CMediaScanner::ProcessPlayList( // throws RemoteException
         contentUris->WithAppendedId(mPlaylistsUri, rowId, (IUri**)&uri);
         String nullStr;
         Int32 tempValue;
-        mMediaProvider->Update(uri, values, nullStr, NULL, &tempValue);
+        mMediaProvider->Update(mPackageName, uri, values, nullStr, NULL, &tempValue);
 
         // delete members of existing playlist
         Uri::WithAppendedPath(uri, IMediaStoreAudioPlaylistsMembers::CONTENT_DIRECTORY,
             (IUri**)&membersUri);
-        mMediaProvider->Delete(membersUri, nullStr, NULL, &tempValue);
+        mMediaProvider->Delete(mPackageName, membersUri, nullStr, NULL, &tempValue);
     }
 
     String playListDirectory = path.Substring(0, lastSlash + 1);
@@ -2581,7 +2622,7 @@ ECode CMediaScanner::ProcessPlayLists() //throws RemoteException
         // use the files uri and projection because we need the format column,
         // but restrict the query to just audio files
         String nullStr;
-        mMediaProvider->Query(mFilesUri, FILES_PRESCAN_PROJECTION, String("media_type=2") ,
+        mMediaProvider->Query(mPackageName, mFilesUri, FILES_PRESCAN_PROJECTION, String("media_type=2") ,
             NULL, nullStr, NULL, (ICursor**)&fileList);
         while (iterator != mPlayLists.End()) {
             AutoPtr<FileEntry> entry = *iterator;

@@ -134,6 +134,7 @@ ECode DocumentsProvider::IsChildDocument(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
+    return NOERROR;
 }
 
 //@SuppressWarnings("unused")
@@ -227,6 +228,7 @@ EXIT:
     CIoUtils::AcquireSingleton((IIoUtils**)&iou);
     iou->CloseQuietly(ICloseable::Probe(cursor));
     // }
+    return NOERROR;
 }
 
 //@SuppressWarnings("unused")
@@ -321,6 +323,7 @@ EXIT:
         return NOERROR;
     }
 // }
+    return NOERROR;
 }
 
 //@Override
@@ -366,6 +369,7 @@ EXIT:
         return NOERROR;;
     }
     // }
+    return NOERROR;
 }
 
 //@Override

@@ -22,7 +22,7 @@ module
      */
     /**
      * @Involve
-     * interface Elastos.Droid.SystemUI.StatusBar.IExpandableOutlineView
+     * interface Elastos.Droid.Packages.SystemUI.StatusBar.IExpandableOutlineView
      * interface IExpandableView
      * interface Elastos.Droid.Widget.IFrameLayout
      * extends Elastos.Droid.View.IView

@@ -1,0 +1,15 @@
+
+module
+{
+    namespace Elastos {
+    namespace Apps {
+    namespace PackageInstaller {
+
+    interface IPackageInstallerActivity {
+    }
+
+    } // namespace PackageInstaller
+    } // namespace Apps
+    } // namespace Elastos
+}
+

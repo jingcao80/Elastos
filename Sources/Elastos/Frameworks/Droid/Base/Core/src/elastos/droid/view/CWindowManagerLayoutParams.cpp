@@ -468,6 +468,22 @@ ECode CWindowManagerLayoutParams::SetVerticalMargin(
     return NOERROR;
 }
 
+ECode CWindowManagerLayoutParams::GetSurfaceInsets(
+    /* [out] */ IRect** surfaceInsets)
+{
+    VALIDATE_NOT_NULL(surfaceInsets)
+    *surfaceInsets = mSurfaceInsets;
+    REFCOUNT_ADD(*surfaceInsets)
+    return NOERROR;
+}
+
+ECode CWindowManagerLayoutParams::SetSurfaceInsets(
+    /* [in] */ IRect* surfaceInsets)
+{
+    mSurfaceInsets = surfaceInsets;
+    return NOERROR;
+}
+
 ECode CWindowManagerLayoutParams::GetFormat(
     /* [out] */ Int32* format)
 {
@@ -602,6 +618,21 @@ ECode CWindowManagerLayoutParams::SetScreenOrientation(
     /* [in] */ Int32 orientation)
 {
     mScreenOrientation = orientation;
+    return NOERROR;
+}
+
+ECode CWindowManagerLayoutParams::GetPreferredRefreshRate(
+    /* [out] */ Float* rate)
+{
+    VALIDATE_NOT_NULL(rate)
+    *rate = mPreferredRefreshRate;
+    return NOERROR;
+}
+
+ECode CWindowManagerLayoutParams::SetPreferredRefreshRate(
+    /* [in] */ Float rate)
+{
+    mPreferredRefreshRate = rate;
     return NOERROR;
 }
 

@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_INTERNAL_OS_PROCESSCPUTRACKER_H__
 #define __ELASTOS_DROID_INTERNAL_OS_PROCESSCPUTRACKER_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/ext/frameworkext.h>
 #include "Elastos.Droid.Internal.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/List.h>
@@ -14,7 +14,7 @@ namespace Droid {
 namespace Internal {
 namespace Os {
 
-class ProcessCpuTracker
+class ECO_PUBLIC ProcessCpuTracker
     : public Object
     , public IProcessCpuTracker
 {
@@ -37,62 +37,125 @@ public:
         CARAPI GetUid(
             /* [out] */ Int32* uid);
 
+        CARAPI GetBatteryStats(
+            /* [out] */ IBatteryStatsImplUidProc** batteryStats);
+
+        CARAPI SetBatteryStats(
+            /* [in] */ IBatteryStatsImplUidProc* batteryStats);
+
         CARAPI GetInteresting(
             /* [out] */ Boolean* interesting);
+
+        CARAPI SetInteresting(
+            /* [in] */ Boolean interesting);
 
         CARAPI GetBaseName(
             /* [out] */ String* name);
 
+        CARAPI SetBaseName(
+            /* [in] */ const String& baseName);
+
         CARAPI GetName(
             /* [out] */ String* name);
+
+        CARAPI SetName(
+            /* [in] */ const String& name);
 
         CARAPI GetNameWidth(
             /* [out] */ Int32* width);
 
+        CARAPI SetNameWidth(
+            /* [in] */ Int32 nameWidth);
+
         CARAPI GetVsize(
             /* [out] */ Int64* vsize);
+
+        CARAPI SetVsize(
+            /* [in] */ Int64 vsize);
 
         CARAPI GetBaseUptime(
             /* [out] */ Int64* time);
 
+        CARAPI SetBaseUptime(
+            /* [in] */ Int64 baseUptime);
+
         CARAPI GetRelUptime(
             /* [out] */ Int64* time);
+
+        CARAPI SetRelUptime(
+            /* [in] */ Int64 relUptime);
 
         CARAPI GetBaseUtime(
             /* [out] */ Int64* time);
 
+        CARAPI SetBaseUtime(
+            /* [in] */ Int64 baseUtime);
+
         CARAPI GetBaseStime(
             /* [out] */ Int64* time);
+
+        CARAPI SetBaseStime(
+            /* [in] */ Int64 baseStime);
 
         CARAPI GetRelUtime(
             /* [out] */ Int32* time);
 
+        CARAPI SetRelUtime(
+            /* [in] */ Int32 relUtime);
+
         CARAPI GetRelStime(
             /* [out] */ Int32* time);
+
+        CARAPI SetRelStime(
+            /* [in] */ Int32 relStime);
 
         CARAPI GetBaseMinfaults(
             /* [out] */ Int64* faults);
 
+        CARAPI SetBaseMinfaults(
+            /* [in] */ Int64 baseMinfaults);
+
         CARAPI GetBaseMajfaults(
             /* [out] */ Int64* faults);
+
+        CARAPI SetBaseMajfaults(
+            /* [in] */ Int64 baseMajfaults);
 
         CARAPI GetRelMinfaults(
             /* [out] */ Int32* faults);
 
+        CARAPI SetRelMinfaults(
+            /* [in] */ Int32 relMinfaults);
+
         CARAPI GetRelMajfaults(
             /* [out] */ Int32* faults);
+
+        CARAPI SetRelMajfaults(
+            /* [in] */ Int32 relMajfaults);
 
         CARAPI GetActive(
             /* [out] */ Boolean* active);
 
+        CARAPI SetActive(
+            /* [in] */ Boolean active);
+
         CARAPI GetWorking(
             /* [out] */ Boolean* working);
+
+        CARAPI SetWorking(
+            /* [in] */ Boolean working);
 
         CARAPI GetAdded(
             /* [out] */ Boolean* added);
 
+        CARAPI SetAdded(
+            /* [in] */ Boolean added);
+
         CARAPI GetRemoved(
             /* [out] */ Boolean* removed);
+
+        CARAPI SetRemoved(
+            /* [in] */ Boolean removed);
 
     public:
         Int32 mPid;
@@ -103,7 +166,7 @@ public:
         AutoPtr< List< AutoPtr<Stats> > > mThreadStats;
         AutoPtr< List< AutoPtr<Stats> > > mWorkingThreads;
 
-        AutoPtr<IBatteryStatsImplUidProc> batteryStats;
+        AutoPtr<IBatteryStatsImplUidProc> mBatteryStats;
 
         Boolean mInteresting;
 
@@ -210,10 +273,10 @@ public:
         /* [out] */ String* str);
 
 private:
-    static AutoPtr<ArrayOf<Int32> > InitPROCESS_STATS_FORMAT();
-    static AutoPtr<ArrayOf<Int32> > InitPROCESS_FULL_STATS_FORMAT();
-    static AutoPtr<ArrayOf<Int32> > InitSYSTEM_CPU_FORMAT();
-    static AutoPtr<ArrayOf<Int32> > InitLOAD_AVERAGE_FORMAT();
+    ECO_LOCAL static AutoPtr<ArrayOf<Int32> > InitPROCESS_STATS_FORMAT();
+    ECO_LOCAL static AutoPtr<ArrayOf<Int32> > InitPROCESS_FULL_STATS_FORMAT();
+    ECO_LOCAL static AutoPtr<ArrayOf<Int32> > InitSYSTEM_CPU_FORMAT();
+    ECO_LOCAL static AutoPtr<ArrayOf<Int32> > InitLOAD_AVERAGE_FORMAT();
 
     CARAPI_(AutoPtr< ArrayOf<Int32> >) CollectStats(
         /* [in] */ const String& statsFile,
@@ -267,11 +330,11 @@ protected:
     static const Int32 PROCESS_FULL_STAT_VSIZE = 5;
 
 private:
-    static const String TAG;
-    static const Boolean DEBUG;
-    static const Boolean localLOGV;
+    ECO_LOCAL static const String TAG;
+    ECO_LOCAL static const Boolean DEBUG;
+    ECO_LOCAL static const Boolean localLOGV;
 
-    static const AutoPtr< ArrayOf<Int32> > PROCESS_STATS_FORMAT;
+    ECO_LOCAL static const AutoPtr< ArrayOf<Int32> > PROCESS_STATS_FORMAT;
 
     /** Stores user time and system time in 100ths of a second. */
     AutoPtr< ArrayOf<Int64> > mProcessStatsData;
@@ -280,16 +343,16 @@ private:
     AutoPtr< ArrayOf<Int64> > mSinglePidStatsData;
     Object mSinglePidStatsDataLock;
 
-    static const AutoPtr< ArrayOf<Int32> > PROCESS_FULL_STATS_FORMAT;
+    ECO_LOCAL static const AutoPtr< ArrayOf<Int32> > PROCESS_FULL_STATS_FORMAT;
 
     AutoPtr< ArrayOf<String> > mProcessFullStatsStringData;
     AutoPtr< ArrayOf<Int64> > mProcessFullStatsData;
 
-    static const AutoPtr< ArrayOf<Int32> >SYSTEM_CPU_FORMAT;
+    ECO_LOCAL static const AutoPtr< ArrayOf<Int32> >SYSTEM_CPU_FORMAT;
 
     AutoPtr< ArrayOf<Int64> > mSystemCpuData;
 
-    static const AutoPtr< ArrayOf<Int32> > LOAD_AVERAGE_FORMAT;
+    ECO_LOCAL static const AutoPtr< ArrayOf<Int32> > LOAD_AVERAGE_FORMAT;
 
     AutoPtr< ArrayOf<Float> > mLoadAverageData;
 

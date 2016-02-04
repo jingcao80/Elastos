@@ -4,6 +4,7 @@
 
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.View.h"
 #include "_Elastos_Droid_Media_CAudioManager.h"
 #include "elastos/droid/ext/frameworkext.h"

@@ -103,7 +103,6 @@ ECode CAmrInputStream::Read(
         mBufOut = 0;
         mBufIn = 0;
 
-        Int32 n;
         // fetch a 20 msec frame of pcm
         for (Int32 i = 0; i < SAMPLES_PER_FRAME * 2; ) {
             Int32 n;

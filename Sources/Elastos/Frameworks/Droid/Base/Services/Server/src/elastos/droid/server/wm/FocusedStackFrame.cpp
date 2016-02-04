@@ -1,5 +1,9 @@
 
-#include "wm/FocusedStackFrame.h"
+#include <Elastos.Droid.Graphics.h>
+#include <Elastos.Droid.View.h>
+#include "elastos/droid/server/wm/FocusedStackFrame.h"
+#include "elastos/droid/server/wm/WindowState.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
@@ -48,11 +52,11 @@ FocusedStackFrame::FocusedStackFrame(
     mSurfaceControl = ctrl;
 }
 
-void FocusedStackFrame::draw(
+void FocusedStackFrame::Draw(
     /* [in] */ IRect* bounds,
     /* [in] */ Int32 color)
 {
-    if (FALSE && DEBUG_STACK) {
+    if (FALSE && CWindowManagerService::DEBUG_STACK) {
         String str;
         bounds->ToShortString(&str);
         Slogger::I(TAG, "draw: bounds=%s color=%d", str.string(), color);
@@ -64,8 +68,7 @@ void FocusedStackFrame::draw(
     // } catch (IllegalArgumentException e) {
     // } catch (Surface.OutOfResourcesException e) {
     // }
-    if (c == nu
-        ) {
+    if (c == NULL) {
         return;
     }
 
@@ -75,19 +78,20 @@ void FocusedStackFrame::draw(
 
     // Top
     mTmpDrawRect->Set(0, 0, w, THICKNESS);
-    c->ClipRect(mTmpDrawRect, RegionOp_REPLACE);
+    Boolean result;
+    c->ClipRect(mTmpDrawRect, RegionOp_REPLACE, &result);
     c->DrawColor(color);
     // Left (not including Top or Bottom stripe).
     mTmpDrawRect->Set(0, THICKNESS, THICKNESS, h - THICKNESS);
-    c->ClipRect(mTmpDrawRect, RegionOp_REPLACE);
+    c->ClipRect(mTmpDrawRect, RegionOp_REPLACE, &result);
     c->DrawColor(color);
     // Right (not including Top or Bottom stripe).
     mTmpDrawRect->Set(w - THICKNESS, THICKNESS, w, h - THICKNESS);
-    c->ClipRect(mTmpDrawRect, RegionOp_REPLACE);
+    c->ClipRect(mTmpDrawRect, RegionOp_REPLACE, &result);
     c->DrawColor(color);
     // Bottom
     mTmpDrawRect->Set(0, h - THICKNESS, w, h);
-    c->ClipRect(mTmpDrawRect, RegionOp_REPLACE);
+    c->ClipRect(mTmpDrawRect, RegionOp_REPLACE, &result);
     c->DrawColor(color);
 
     mSurface->UnlockCanvasAndPost(c);
@@ -96,7 +100,7 @@ void FocusedStackFrame::draw(
 void FocusedStackFrame::PositionSurface(
     /* [in] */ IRect* bounds)
 {
-    if (FALSE && DEBUG_STACK) {
+    if (FALSE && CWindowManagerService::DEBUG_STACK) {
         String str;
         bounds->ToShortString(&str);
         Slogger::I(TAG, "positionSurface: bounds=%s", str.string());
@@ -113,7 +117,7 @@ void FocusedStackFrame::PositionSurface(
 void FocusedStackFrame::SetVisibility(
     /* [in] */ Boolean on)
 {
-    if (FALSE && DEBUG_STACK) {
+    if (FALSE && CWindowManagerService::DEBUG_STACK) {
         String str1, str2;
         mLastBounds->ToShortString(&str1);
         mBounds->ToShortString(&str2);
@@ -145,7 +149,7 @@ void FocusedStackFrame::SetBounds(
     /* [in] */ TaskStack* stack)
 {
     stack->GetBounds(mBounds);
-    if (FALSE && DEBUG_STACK) Slogger::I(TAG, "setBounds: bounds=%p", mBounds.Get());
+    if (FALSE && CWindowManagerService::DEBUG_STACK) Slogger::I(TAG, "setBounds: bounds=%p", mBounds.Get());
 }
 
 void FocusedStackFrame::SetLayer(

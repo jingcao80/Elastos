@@ -1,15 +1,21 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_VIEWSERVER_H__
 #define __ELASTOS_DROID_SERVER_WM_VIEWSERVER_H__
 
-#include "wm/CWindowManagerService.h"
+#include "_Elastos.Droid.Server.h"
+#include <Elastos.CoreLibrary.Net.h>
+#include "elastos/droid/os/Runnable.h"
 
-using Elastos::Core::IRunnable;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Net::IServerSocket;
+using Elastos::Net::ISocket;
+using Elastos::Core::IThread;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wm {
+
+class CWindowManagerService;
 
 /**
  * The ViewServer is local socket server that can be used to communicate with the
@@ -24,7 +30,7 @@ class ViewServer
 public:
     class ViewServerWorker
         : public Runnable
-        , public CWindowManagerService::IWindowChangeListener
+        , public IWindowChangeListener
     {
     public:
         ViewServerWorker(
@@ -35,9 +41,9 @@ public:
 
         CARAPI Run();
 
-        CARAPI_(void) WindowsChanged();
+        CARAPI WindowsChanged();
 
-        CARAPI_(void) FocusChanged();
+        CARAPI FocusChanged();
 
     private:
         CARAPI_(Boolean) WindowManagerAutolistLoop();

@@ -584,7 +584,7 @@ ECode Paint::SetColorFilter(
 {
     Int64 filterNative = 0;
     if (filter != NULL) {
-        ColorFilter* cf = (ColorFilter*)(IColorFilter*)filter->Probe(EIID_ColorFilter);
+        ColorFilter* cf = (ColorFilter*)filter;
         assert(cf != NULL);
         filterNative = cf->mNativeInstance;
     }
@@ -672,8 +672,7 @@ ECode Paint::SetTypeface(
 {
     Int64 typefaceNative = 0;
     if (typeface != NULL) {
-        Typeface* t = (Typeface*)(ITypeface*)typeface->Probe(EIID_Typeface);
-        typefaceNative = t->mNativeInstance;
+        typefaceNative = ((Typeface*)typeface)->mNativeInstance;
     }
     NativeSetTypeface(mNativePaint, typefaceNative);
     mTypeface = typeface;

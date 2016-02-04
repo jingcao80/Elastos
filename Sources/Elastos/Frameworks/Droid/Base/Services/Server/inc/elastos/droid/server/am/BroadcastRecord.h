@@ -109,4 +109,10 @@ public:
 } // namespace Droid
 } // namespace Elastos
 
+template <>
+struct Conversion<Elastos::Droid::Server::Am::BroadcastRecord*, IInterface*>
+{
+    enum { exists = TRUE, exists2Way = FALSE, sameType = FALSE };
+};
+
 #endif //__ELASTOS_DROID_SERVER_AM_BROADCASTRECORD_H__

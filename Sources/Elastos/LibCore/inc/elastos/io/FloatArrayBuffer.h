@@ -32,6 +32,9 @@ public:
         /* [in] */ Int32 offset,
         /* [in] */ Boolean isReadOnly);
 
+    CARAPI GetPrimitiveArray(
+        /* [out] */ Handle64* arrayHandle);
+
     CARAPI Get(
         /* [out] */ Float* value);
 
@@ -95,6 +98,9 @@ public:
     AutoPtr< ArrayOf<Float> > mBackingArray;
     Int32 mArrayOffset;
     Boolean mIsReadOnly;
+
+private:
+    AutoPtr< ArrayOf<Float> > mArrayTemp;
 };
 } // namespace IO
 } // namespace Elastos

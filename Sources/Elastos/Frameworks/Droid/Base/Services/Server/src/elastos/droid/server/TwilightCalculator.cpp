@@ -1,7 +1,9 @@
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "TwilightCalculator.h"
-#include <util/FloatMath.h>
+#include "elastos/droid/server/TwilightCalculator.h"
+#include <elastos/droid/utility/FloatMath.h>
+#include <elastos/core/Math.h>
+#include <Elastos.Droid.Text.h>
 
 using Elastos::Core::Math;
 using Elastos::Droid::Text::Format::IDateUtils;
@@ -15,7 +17,7 @@ const Int32 TwilightCalculator::DAY;
 
 const Int32 TwilightCalculator::NIGHT;
 
-const Float TwilightCalculator::DEGREES_TO_RADIANS = (Float) (Elastos::Core::Math::DOUBLE_PI / 180.0f);
+const Float TwilightCalculator::DEGREES_TO_RADIANS = (Float) (Elastos::Core::Math::PI / 180.0f);
 
 const Float TwilightCalculator::J0 = 0.0009f;
 
@@ -53,7 +55,7 @@ void TwilightCalculator::CalculateTwilight(
             * FloatMath::Sin(2 * meanAnomaly) + C3 * FloatMath::Sin(3 * meanAnomaly);
 
     // ecliptic longitude
-    Float solarLng = trueAnomaly + 1.796593063f + (Float) Elastos::Core::Math::DOUBLE_PI;
+    Float solarLng = trueAnomaly + 1.796593063f + (Float) Elastos::Core::Math::PI;
 
     // solar transit in days since 2000
     Double arcLongitude = -longitude / 360;
@@ -82,7 +84,7 @@ void TwilightCalculator::CalculateTwilight(
         return;
     }
 
-    Float hourAngle = (Float) (Elastos::Core::Math::Acos(cosHourAngle) / (2 * Elastos::Core::Math::DOUBLE_PI));
+    Float hourAngle = (Float) (Elastos::Core::Math::Acos(cosHourAngle) / (2 * Elastos::Core::Math::PI));
 
     mSunset = Elastos::Core::Math::Round((solarTransitJ2000 + hourAngle) * IDateUtils::DAY_IN_MILLIS) + UTC_2000;
     mSunrise = Elastos::Core::Math::Round((solarTransitJ2000 - hourAngle) * IDateUtils::DAY_IN_MILLIS) + UTC_2000;

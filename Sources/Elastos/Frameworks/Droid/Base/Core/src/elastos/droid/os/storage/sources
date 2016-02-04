@@ -6,11 +6,10 @@ C_DEFINES += -DDROID_CORE
 INCLUDES += ../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/
 
-#SOURCES = COnObbStateChangeListener.cpp
 SOURCES += StorageEventListener.cpp
-#SOURCES += CMountServiceBinderListener.cpp
-#SOURCES += CObbActionListener.cpp
-#SOURCES += CStorageManager.cpp
-#SOURCES += CStorageManagerHelper.cpp
-#SOURCES += CStorageVolume.cpp
-#SOURCES += CStorageVolumeHelper.cpp
+SOURCES += CMountServiceBinderListener.cpp
+SOURCES += CObbActionListener.cpp
+SOURCES += CStorageManager.cpp
+SOURCES += CStorageManagerHelper.cpp
+SOURCES += CStorageVolume.cpp
+SOURCES += CStorageVolumeHelper.cpp

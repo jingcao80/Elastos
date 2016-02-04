@@ -4,3 +4,4 @@ DIRS += params
 DIRS += utils
 DIRS += legacy
 DIRS += impl
+DIRS += marshal

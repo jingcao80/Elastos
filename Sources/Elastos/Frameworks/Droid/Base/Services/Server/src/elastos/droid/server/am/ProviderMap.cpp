@@ -505,11 +505,12 @@ Boolean ProviderMap::DumpProvidersLocked(
 Boolean ProviderMap::DumpProvider(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IPrintWriter* pw,
-    /* [in] */ String& name,
+    /* [in] */ const String& _name,
     /* [in] */ ArrayOf<String>* args,
     /* [in] */ Int32 opti,
     /* [in] */ Boolean dumpAll)
 {
+    String name = _name;
     List<AutoPtr<ContentProviderRecord> > allProviders;
     List<AutoPtr<ContentProviderRecord> > providers;
 

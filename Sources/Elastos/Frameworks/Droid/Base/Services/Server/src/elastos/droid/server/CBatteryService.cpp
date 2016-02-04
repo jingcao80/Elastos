@@ -1,47 +1,31 @@
 
-#include "CBatteryService.h"
-#include "am/CBatteryStatsService.h"
+#include "elastos/droid/server/CBatteryService.h"
+#include "elastos/droid/server/CBatteryBinderService.h"
+#include "elastos/droid/server/am/CBatteryStatsService.h"
+#include "elastos/droid/server/lights/LightsManager.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/FileUtils.h"
 #include "elastos/droid/os/Handler.h"
+#include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/R.h"
+#include "elastos/droid/Manifest.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.CoreLibrary.IO.h>
 
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <linux/ioctl.h>
-#include <hardware/power.h>
-#include <hardware_legacy/power.h>
-#include <cutils/android_reboot.h>
-
-using Elastos::Core::StringUtils;
-using Elastos::Core::StringBuilder;
-using Elastos::Core::EIID_IRunnable;
-using Elastos::IO::IFile;
-using Elastos::IO::CFile;
-using Elastos::IO::IFileOutputStream;
-using Elastos::IO::CFileOutputStream;
-using Elastos::IO::IFileDescriptor;
-using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::R;
+using Elastos::Droid::Manifest;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::EIID_IBinder;
@@ -50,19 +34,54 @@ using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
-using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IDropBoxManager;
-using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Os::EIID_IIBatteryPropertiesListener;
+using Elastos::Droid::Os::EIID_IBatteryManagerInternal;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Server::Am::CBatteryStatsService;
+using Elastos::Droid::Server::Lights::LightsManager;
+using Elastos::Droid::Server::Lights::EIID_ILightsManager;
+
+using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IFile;
+using Elastos::IO::CFile;
+using Elastos::IO::IFileOutputStream;
+using Elastos::IO::CFileOutputStream;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
+
+
+//=====================================================================
+// CBatteryService::BootPhaseContentObserver
+//=====================================================================
+CBatteryService::BootPhaseContentObserver::BootPhaseContentObserver(
+    /* [in] */ CBatteryService* host)
+    : mHost(host)
+{
+}
+
+// @Override
+ECode CBatteryService::BootPhaseContentObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    synchronized(mHost->mLock) {
+        mHost->UpdateBatteryWarningLevelLocked();
+    }
+    return NOERROR;
+}
 
 //=====================================================================
 // CBatteryService::ShutdownIfNoPowerLockedRunnable
@@ -70,9 +89,6 @@ namespace Server {
 ECode CBatteryService::ShutdownIfNoPowerLockedRunnable::Run()
 {
     if (ActivityManagerNative::IsSystemReady()) {
-        AutoPtr<ISystemProperties> sysProp;
-        CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
-        sysProp->Set(String("sys.battery_zero"), String("1"));
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_REQUEST_SHUTDOWN, (IIntent**)&intent);
         intent->PutBooleanExtra(IIntent::EXTRA_KEY_CONFIRM, FALSE);
@@ -85,32 +101,6 @@ ECode CBatteryService::ShutdownIfNoPowerLockedRunnable::Run()
     }
     return NOERROR;
 }
-
-
-//=====================================================================
-// CBatteryService::ShutdownIfInBootFastModeRunnable
-//=====================================================================
-ECode CBatteryService::ShutdownIfInBootFastModeRunnable::Run()
-{
-    Slogger::D(TAG, "shutdownIfInBootFastModeLocked now shutdown!");
-    mHost->NativeShutdown(); //acquire a wakelock named battery
-    if (ActivityManagerNative::IsSystemReady()) {
-        AutoPtr<ISystemProperties> sysProp;
-        CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
-        sysProp->Set(String("sys.battery_zero"), String("1"));
-        AutoPtr<IIntent> intent;
-        CIntent::New(IIntent::ACTION_REQUEST_SHUTDOWN, (IIntent**)&intent);
-        intent->PutBooleanExtra(IIntent::EXTRA_KEY_CONFIRM, FALSE);
-        intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
-        AutoPtr<IUserHandleHelper> helper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-        AutoPtr<IUserHandle> CURRENT;
-        helper->GetCURRENT((IUserHandle**)&CURRENT);
-        mHost->mContext->StartActivityAsUser(intent, CURRENT);
-    }
-    return NOERROR;
-}
-
 
 //=====================================================================
 // CBatteryService::ShutdownIfOverTempRunnable
@@ -120,7 +110,6 @@ ECode CBatteryService::ShutdownIfOverTempRunnable::Run()
     if (ActivityManagerNative::IsSystemReady()) {
         AutoPtr<ISystemProperties> sysProp;
         CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
-        sysProp->Set(String("sys.temperature_high"), String("1"));
         AutoPtr<IIntent> intent;
         CIntent::New(IIntent::ACTION_REQUEST_SHUTDOWN, (IIntent**)&intent);
         intent->PutBooleanExtra(IIntent::EXTRA_KEY_CONFIRM, FALSE);
@@ -214,29 +203,19 @@ ECode CBatteryService::SendIntentRunnable::Run()
 
 
 //=====================================================================
-// CBatteryService::PowerSupplyObserver
-//=====================================================================
-void CBatteryService::PowerSupplyObserver::OnUEvent(
-    /* [in] */ UEventObserver::UEvent* event)
-{
-    AutoLock Lock(mHost->mLock);
-    mHost->UpdateLocked();
-}
-
-
-//=====================================================================
 // CBatteryService::InvalidChargerObserver
 //=====================================================================
-void CBatteryService::InvalidChargerObserver::OnUEvent(
-    /* [in] */ UEventObserver::UEvent* event)
+ECode CBatteryService::InvalidChargerObserver::OnUEvent(
+    /* [in] */ IUEvent* event)
 {
-    String result = event->Get(String("SWITCH_STATE"));
-    Int32 invalidCharger = CString("1").Equals(result) ? 1 : 0;
+    String result;
+    event->Get(String("SWITCH_STATE"), &result);
+    Int32 invalidCharger = result.Equals("1") ? 1 : 0;
     AutoLock Lock(mHost->mLock);
     if (mHost->mInvalidCharger != invalidCharger) {
         mHost->mInvalidCharger = invalidCharger;
-        mHost->UpdateLocked();
     }
+    return NOERROR;
 }
 
 
@@ -245,11 +224,12 @@ void CBatteryService::InvalidChargerObserver::OnUEvent(
 //=====================================================================
 CBatteryService::Led::Led(
     /* [in] */ IContext* context,
-    /* [in] */ LightsService* lights,
+    /* [in] */ ILightsManager* lights,
     /* [in] */ CBatteryService* host)
     : mHost(host)
 {
-    mBatteryLight = lights->GetLight(LightsService::_LIGHT_ID_BATTERY);
+    LightsManager* lm = (LightsManager*)lights;
+    mBatteryLight = lm->GetLight(LightsManager::LIGHT_ID_BATTERY);
 
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
@@ -262,8 +242,9 @@ CBatteryService::Led::Led(
 
 ECode CBatteryService::Led::UpdateLightsLocked()
 {
-    Int32 level = mHost->mBatteryLevel;
-    Int32 status = mHost->mBatteryStatus;
+    Int32 level, status;
+    mHost->mBatteryProps->GetBatteryLevel(&level);
+    mHost->mBatteryProps->GetBatteryStatus(&status);
     if (level < mHost->mLowBatteryWarningLevel) {
         if (status == IBatteryManager::BATTERY_STATUS_CHARGING) {
             // Solid red when battery is charging
@@ -271,7 +252,7 @@ ECode CBatteryService::Led::UpdateLightsLocked()
         }
         else {
             // Flash red when battery is low and not charging
-            mBatteryLight->SetFlashing(mBatteryLowARGB, LightsService::_LIGHT_FLASH_TIMED,
+            mBatteryLight->SetFlashing(mBatteryLowARGB, Light::LIGHT_FLASH_TIMED,
                     mBatteryLedOn, mBatteryLedOff);
         }
     }
@@ -295,37 +276,169 @@ ECode CBatteryService::Led::UpdateLightsLocked()
 
 
 //=====================================================================
-// CBatteryService::
+// CBatteryService::BatteryListener
+//=====================================================================
+
+CAR_INTERFACE_IMPL_2(CBatteryService::BatteryListener, Object, IIBatteryPropertiesListener, IBinder)
+
+CBatteryService::BatteryListener::BatteryListener()
+{}
+
+ECode CBatteryService::BatteryListener::constructor(
+    /* [in] */ ISystemService* batteryService)
+{
+    mHost = (CBatteryService*)batteryService;
+    return NOERROR;
+}
+
+// //@Override
+ECode CBatteryService::BatteryListener::BatteryPropertiesChanged(
+    /* [in] */ IBatteryProperties* props)
+{
+    Int64 identity = Binder::ClearCallingIdentity();
+    mHost->Update(props);
+    Binder::RestoreCallingIdentity(identity);
+    return NOERROR;
+}
+
+ECode CBatteryService::BatteryListener::ToString(
+    /* [out] */ String* str)
+{
+    return Object::ToString(str);
+}
+
+//=====================================================================
+// CBatteryService::BinderService
+//=====================================================================
+CBatteryService::BinderService::BinderService()
+{
+}
+
+ECode CBatteryService::BinderService::constructor(
+    /* [in] */ ISystemService* batteryService)
+{
+    mHost = (CBatteryService*)batteryService;
+    return NOERROR;
+}
+
+// //@Override
+ECode CBatteryService::BinderService::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    Int32 permission;
+    mHost->mContext->CheckCallingOrSelfPermission(Manifest::permission::DUMP, &permission);
+    if (permission != IPackageManager::PERMISSION_GRANTED) {
+        pw->Print(String("Permission Denial: can't dump Battery service from from pid="));
+        pw->Print(Binder::GetCallingPid());
+        pw->Print(String(", uid="));
+        pw->Println(Binder::GetCallingUid());
+        return NOERROR;
+    }
+
+    mHost->DumpInternal(pw, args);
+    return NOERROR;
+}
+
+ECode CBatteryService::BinderService::ToString(
+    /* [out] */ String* str)
+{
+    return Object::ToString(str);
+}
+
+//=====================================================================
+// CBatteryService::LocalService
+//=====================================================================
+
+CAR_INTERFACE_IMPL(CBatteryService::LocalService, Object, IBatteryManagerInternal)
+
+CBatteryService::LocalService::LocalService(
+    /* [in] */ CBatteryService* host)
+{
+    mHost = host;
+}
+
+//@Override
+ECode CBatteryService::LocalService::IsPowered(
+    /* [in] */ Int32 plugTypeSet,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    synchronized(mHost->mLock) {
+        *result = mHost->IsPoweredLocked(plugTypeSet);
+    }
+    return NOERROR;
+}
+
+//@Override
+ECode CBatteryService::LocalService::GetPlugType(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    synchronized(mHost->mLock) {
+        *result = mHost->mPlugType;
+    }
+    return NOERROR;
+}
+
+//@Override
+ECode CBatteryService::LocalService::GetBatteryLevel(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    synchronized(mHost->mLock) {
+        mHost->mBatteryProps->GetBatteryLevel(result);
+    }
+    return NOERROR;
+}
+
+//@Override
+ECode CBatteryService::LocalService::GetBatteryLevelLow(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    synchronized(mHost->mLock) {
+        *result = mHost->mBatteryLevelLow;
+    }
+    return NOERROR;
+}
+
+//@Override
+ECode CBatteryService::LocalService::GetInvalidCharger(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
+    synchronized(mHost->mLock) {
+        *result = mHost->mInvalidCharger;
+    }
+    return NOERROR;
+}
+
+
+//=====================================================================
+// CBatteryService
 //=====================================================================
 const String CBatteryService::TAG("CBatteryService");
 const Boolean CBatteryService::DEBUG = FALSE;
 const Int32 CBatteryService::BATTERY_SCALE;
 const Int32 CBatteryService::DUMP_MAX_LENGTH;
 const Int32 CBatteryService::BATTERY_PLUGGED_NONE;
-const Int32 CBatteryService::BOOT_FAST_REAL_SHUT_DOWN_LEVEL;
 
 static AutoPtr< ArrayOf<String> > InitDUMPSYS_ARGS()
 {
     AutoPtr< ArrayOf<String> > marray = ArrayOf<String>::Alloc(2);
     marray->Set(0, String("--checkin"));
-    marray->Set(1, String("-u"));
+    marray->Set(1, String("--unplugged"));
     return marray;
 }
 const AutoPtr< ArrayOf<String> > CBatteryService::DUMPSYS_ARGS = InitDUMPSYS_ARGS();
-const String CBatteryService::BATTERY_STATS_SERVICE_NAME("batteryinfo");
 const String CBatteryService::DUMPSYS_DATA_PATH("/data/system/");
+
+CAR_OBJECT_IMPL(CBatteryService)
 
 CBatteryService::CBatteryService()
     : mCriticalBatteryLevel(0)
-    , mAcOnline(FALSE)
-    , mUsbOnline(FALSE)
-    , mWirelessOnline(FALSE)
-    , mBatteryStatus(0)
-    , mBatteryHealth(0)
-    , mBatteryPresent(FALSE)
-    , mBatteryLevel(0)
-    , mBatteryVoltage(0)
-    , mBatteryTemperature(0)
     , mBatteryLevelCritical(FALSE)
     , mLastBatteryStatus(0)
     , mLastBatteryHealth(0)
@@ -341,349 +454,36 @@ CBatteryService::CBatteryService()
     , mShutdownBatteryTemperature(0)
     , mPlugType(0)
     , mLastPlugType(-1)
+    , mBatteryLevelLow(FALSE)
     , mDischargeStartTime(0)
     , mDischargeStartLevel(0)
     , mUpdatesStopped(FALSE)
     , mSentLowBatteryBroadcast(FALSE)
 {
-    mPowerSupplyObserver = new PowerSupplyObserver(this);
     mInvalidChargerObserver = new InvalidChargerObserver(this);
 }
 
-#define POWER_SUPPLY_PATH "/sys/class/power_supply"
-
-struct BatteryManagerConstants {
-    Int32 statusUnknown;
-    Int32 statusCharging;
-    Int32 statusDischarging;
-    Int32 statusNotCharging;
-    Int32 statusFull;
-    Int32 healthUnknown;
-    Int32 healthGood;
-    Int32 healthOverheat;
-    Int32 healthDead;
-    Int32 healthOverVoltage;
-    Int32 healthUnspecifiedFailure;
-    Int32 healthCold;
-};
-static BatteryManagerConstants gConstants;
-static Boolean gConstantsInitialized = FALSE;
-
-struct PowerSupplyPaths {
-    char* acOnlinePath;
-    char* usbOnlinePath;
-    char* wirelessOnlinePath;
-    char* batteryStatusPath;
-    char* batteryHealthPath;
-    char* batteryPresentPath;
-    char* batteryCapacityPath;
-    char* batteryVoltagePath;
-    char* batteryTemperaturePath;
-    char* batteryTechnologyPath;
-};
-static PowerSupplyPaths gPaths;
-
-static Int32 gVoltageDivisor = 1;
-
-static Int32 ReadFromFile(const char* path, char* buf, size_t size);
-
-static Boolean InitgPaths()
-{
-    char    path[PATH_MAX];
-    struct dirent* entry;
-
-    DIR* dir = opendir(POWER_SUPPLY_PATH);
-    if (dir == NULL) {
-        Slogger::E("CBatteryService", "Could not open %s\n", POWER_SUPPLY_PATH);
-    }
-    else {
-        while ((entry = readdir(dir))) {
-            const char* name = entry->d_name;
-
-            // ignore "." and ".."
-            if (name[0] == '.' && (name[1] == 0 || (name[1] == '.' && name[2] == 0))) {
-                continue;
-            }
-
-            char buf[20];
-            // Look for "type" file in each subdirectory
-            snprintf(path, sizeof(path), "%s/%s/type", POWER_SUPPLY_PATH, name);
-            int length = ReadFromFile(path, buf, sizeof(buf));
-            if (length > 0) {
-                if (buf[length - 1] == '\n')
-                    buf[length - 1] = 0;
-
-                if (strcmp(buf, "Mains") == 0) {
-                    snprintf(path, sizeof(path), "%s/%s/online", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.acOnlinePath = strdup(path);
-                }
-                else if (strcmp(buf, "USB") == 0) {
-                    snprintf(path, sizeof(path), "%s/%s/online", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.usbOnlinePath = strdup(path);
-                }
-                else if (strcmp(buf, "Wireless") == 0) {
-                    snprintf(path, sizeof(path), "%s/%s/online", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.wirelessOnlinePath = strdup(path);
-                }
-                else if (strcmp(buf, "Battery") == 0) {
-                    snprintf(path, sizeof(path), "%s/%s/status", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.batteryStatusPath = strdup(path);
-                    snprintf(path, sizeof(path), "%s/%s/health", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.batteryHealthPath = strdup(path);
-                    snprintf(path, sizeof(path), "%s/%s/present", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.batteryPresentPath = strdup(path);
-                    snprintf(path, sizeof(path), "%s/%s/capacity", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.batteryCapacityPath = strdup(path);
-
-                    snprintf(path, sizeof(path), "%s/%s/voltage_now", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0) {
-                        gPaths.batteryVoltagePath = strdup(path);
-                        // voltage_now is in microvolts, not millivolts
-                        gVoltageDivisor = 1000;
-                    } else {
-                        snprintf(path, sizeof(path), "%s/%s/batt_vol", POWER_SUPPLY_PATH, name);
-                        if (access(path, R_OK) == 0)
-                            gPaths.batteryVoltagePath = strdup(path);
-                    }
-
-                    snprintf(path, sizeof(path), "%s/%s/temp", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0) {
-                        gPaths.batteryTemperaturePath = strdup(path);
-                    } else {
-                        snprintf(path, sizeof(path), "%s/%s/batt_temp", POWER_SUPPLY_PATH, name);
-                        if (access(path, R_OK) == 0)
-                            gPaths.batteryTemperaturePath = strdup(path);
-                    }
-
-                    snprintf(path, sizeof(path), "%s/%s/technology", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.batteryTechnologyPath = strdup(path);
-                }
-            }
-        }
-        closedir(dir);
-    }
-
-    if (!gPaths.acOnlinePath)
-        Slogger::E("CBatteryService", "acOnlinePath not found");
-    if (!gPaths.usbOnlinePath)
-        Slogger::E("CBatteryService", "usbOnlinePath not found");
-    if (!gPaths.wirelessOnlinePath)
-        Slogger::E("CBatteryService", "wirelessOnlinePath not found");
-    if (!gPaths.batteryStatusPath)
-        Slogger::E("CBatteryService", "batteryStatusPath not found");
-    if (!gPaths.batteryHealthPath)
-        Slogger::E("CBatteryService", "batteryHealthPath not found");
-    if (!gPaths.batteryPresentPath)
-        Slogger::E("CBatteryService", "batteryPresentPath not found");
-    if (!gPaths.batteryCapacityPath)
-        Slogger::E("CBatteryService", "batteryCapacityPath not found");
-    if (!gPaths.batteryVoltagePath)
-        Slogger::E("CBatteryService", "batteryVoltagePath not found");
-    if (!gPaths.batteryTemperaturePath)
-        Slogger::E("CBatteryService", "batteryTemperaturePath not found");
-    if (!gPaths.batteryTechnologyPath)
-        Slogger::E("CBatteryService", "batteryTechnologyPath not found");
-    return TRUE;
-}
-
-static Boolean gPathsInitialized = InitgPaths();
-
-static void InitgConstants()
-{
-    if (gConstantsInitialized) return;
-
-    gConstants.statusUnknown = IBatteryManager::BATTERY_STATUS_UNKNOWN;
-    gConstants.statusCharging = IBatteryManager::BATTERY_STATUS_CHARGING;
-    gConstants.statusDischarging = IBatteryManager::BATTERY_STATUS_DISCHARGING;
-    gConstants.statusNotCharging = IBatteryManager::BATTERY_STATUS_NOT_CHARGING;
-    gConstants.statusFull = IBatteryManager::BATTERY_STATUS_FULL;
-    gConstants.healthUnknown = IBatteryManager::BATTERY_HEALTH_UNKNOWN;
-    gConstants.healthGood = IBatteryManager::BATTERY_HEALTH_GOOD;
-    gConstants.healthOverheat = IBatteryManager::BATTERY_HEALTH_OVERHEAT;
-    gConstants.healthDead = IBatteryManager::BATTERY_HEALTH_DEAD;
-    gConstants.healthOverVoltage = IBatteryManager::BATTERY_HEALTH_OVER_VOLTAGE;
-    gConstants.healthUnspecifiedFailure = IBatteryManager::BATTERY_HEALTH_UNSPECIFIED_FAILURE;
-    gConstants.healthCold = IBatteryManager::BATTERY_HEALTH_COLD;
-    gConstantsInitialized = TRUE;
-}
-
-static Int32 GetBatteryStatus(const char* status)
-{
-    InitgConstants();
-    switch (status[0]) {
-        case 'C': return gConstants.statusCharging;         // Charging
-        case 'D': return gConstants.statusDischarging;      // Discharging
-        case 'F': return gConstants.statusFull;             // Full
-        case 'N': return gConstants.statusNotCharging;      // Not charging
-        case 'U': return gConstants.statusUnknown;          // Unknown
-
-        default: {
-            Slogger::W("CBatteryService", "Unknown battery status '%s'", status);
-            return gConstants.statusUnknown;
-        }
-    }
-}
-
-static Int32 GetBatteryHealth(const char* status)
-{
-    InitgConstants();
-    switch (status[0]) {
-        case 'C': return gConstants.healthCold;         // Cold
-        case 'D': return gConstants.healthDead;         // Dead
-        case 'G': return gConstants.healthGood;         // Good
-        case 'O': {
-            if (strcmp(status, "Overheat") == 0) {
-                return gConstants.healthOverheat;
-            }
-            else if (strcmp(status, "Over voltage") == 0) {
-                return gConstants.healthOverVoltage;
-            }
-            Slogger::W("CBatteryService", "Unknown battery health[1] '%s'", status);
-            return gConstants.healthUnknown;
-        }
-
-        case 'U': {
-            if (strcmp(status, "Unspecified failure") == 0) {
-                return gConstants.healthUnspecifiedFailure;
-            }
-            else if (strcmp(status, "Unknown") == 0) {
-                return gConstants.healthUnknown;
-            }
-            // fall through
-        }
-
-        default: {
-            Slogger::W("CBatteryService", "Unknown battery health[2] '%s'", status);
-            return gConstants.healthUnknown;
-        }
-    }
-}
-
-static Int32 ReadFromFile(const char* path, char* buf, size_t size)
-{
-    if (!path)
-        return -1;
-    int fd = open(path, O_RDONLY, 0);
-    if (fd == -1) {
-        Slogger::E("CBatteryService", "Could not open '%s'", path);
-        return -1;
-    }
-
-    ssize_t count = read(fd, buf, size);
-    if (count > 0) {
-        while (count > 0 && buf[count-1] == '\n')
-            count--;
-        buf[count] = '\0';
-    } else {
-        buf[0] = '\0';
-    }
-
-    close(fd);
-    return count;
-}
-
-static void SetBooleanField(const char* path, Boolean* field)
-{
-    const int SIZE = 16;
-    char buf[SIZE];
-
-    Boolean value = FALSE;
-    if (ReadFromFile(path, buf, SIZE) > 0) {
-        if (buf[0] != '0') {
-            value = TRUE;
-        }
-    }
-    *field = value;
-}
-
-static void SetInt32Field(const char* path, Int32* field)
-{
-    const int SIZE = 128;
-    char buf[SIZE];
-
-    Int32 value = 0;
-    if (ReadFromFile(path, buf, SIZE) > 0) {
-        value = atoi(buf);
-    }
-    *field = value;
-}
-
-static void SetVoltageField(const char* path, Int32* field)
-{
-    const int SIZE = 128;
-    char buf[SIZE];
-
-    Int32 value = 0;
-    if (ReadFromFile(path, buf, SIZE) > 0) {
-        value = atoi(buf);
-        value /= gVoltageDivisor;
-    }
-    *field = value;
-}
-
-void CBatteryService::NativeUpdate()
-{
-    SetBooleanField(gPaths.acOnlinePath, &mAcOnline);
-    SetBooleanField(gPaths.usbOnlinePath, &mUsbOnline);
-    SetBooleanField(gPaths.wirelessOnlinePath, &mWirelessOnline);
-    SetBooleanField(gPaths.batteryPresentPath, &mBatteryPresent);
-
-    SetInt32Field(gPaths.batteryCapacityPath, &mBatteryLevel);
-    SetVoltageField(gPaths.batteryVoltagePath, &mBatteryVoltage);
-    SetInt32Field(gPaths.batteryTemperaturePath, &mBatteryTemperature);
-
-    const int SIZE = 128;
-    char buf[SIZE];
-
-    if (ReadFromFile(gPaths.batteryStatusPath, buf, SIZE) > 0) {
-        mBatteryStatus = GetBatteryStatus(buf);
-    }
-    else {
-        InitgConstants();
-        mBatteryStatus = gConstants.statusUnknown;
-    }
-
-    if (ReadFromFile(gPaths.batteryHealthPath, buf, SIZE) > 0) {
-        mBatteryHealth = GetBatteryHealth(buf);
-    }
-
-    if (ReadFromFile(gPaths.batteryTechnologyPath, buf, SIZE) > 0) {
-        mBatteryTechnology = buf;
-    }
-}
-
-void CBatteryService::NativeShutdown()
-{
-    Slogger::D("CBatteryService", "android_server_BatteryService_shutDownNotFromPMS");
-    acquire_wake_lock(PARTIAL_WAKE_LOCK, "battery");
-    //android_reboot(ANDROID_RB_POWEROFF, 0, 0);
-}
-
 ECode CBatteryService::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ Handle32 lights)
+    /* [in] */ IContext* context)
 {
+    FAIL_RETURN(SystemService::constructor(context))
+
     mContext = context;
     CHandler::New(TRUE/*async*/, (IHandler**)&mHandler);
-    mLed = new Led(context, (LightsService*)lights, this);
+
+    AutoPtr<IInterface> lmObj = GetLocalService(EIID_ILightsManager);
+    mLed = new Led(context, ILightsManager::Probe(lmObj), this);
     mBatteryStats = CBatteryStatsService::GetService();
+    assert(0 && "TODO");
+    // CBatteryProperties::New((IBatteryProperties**)&mLastBatteryProps);
 
     AutoPtr<IResources> res;
     mContext->GetResources((IResources**)&res);
     res->GetInteger(R::integer::config_criticalBatteryWarningLevel, &mCriticalBatteryLevel);
     res->GetInteger(R::integer::config_lowBatteryWarningLevel, &mLowBatteryWarningLevel);
-    res->GetInteger(R::integer::config_lowBatteryCloseWarningLevel, &mLowBatteryCloseWarningLevel);
+    res->GetInteger(R::integer::config_lowBatteryCloseWarningBump, &mLowBatteryCloseWarningLevel);
+    mLowBatteryCloseWarningLevel += mLowBatteryWarningLevel;
     res->GetInteger(R::integer::config_shutdownBatteryTemperature, &mShutdownBatteryTemperature);
-
-    mPowerSupplyObserver->StartObserving(String("SUBSYSTEM=power_supply"));
 
     // watch for invalid charger messages if the invalid_charger switch exists
     AutoPtr<IFile> f;
@@ -695,26 +495,76 @@ ECode CBatteryService::constructor(
             String("DEVPATH=/devices/virtual/switch/invalid_charger"));
     }
 
-    // set initial status
-    AutoLock lock(mLock);
-    UpdateLocked();
-
     return NOERROR;
 }
 
-void CBatteryService::SystemReady()
+// @Override
+ECode CBatteryService::OnStart()
 {
-    // check our power situation now that it is safe to display the shutdown dialog.
-    AutoLock lock(mLock);
-    ShutdownIfNoPowerLocked();
-    ShutdownIfOverTempLocked();
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> obj;
+    sm->GetService(String("batteryproperties"), (IInterface**)&obj);
+    AutoPtr<IIBatteryPropertiesRegistrar> batteryPropertiesRegistrar =
+        IIBatteryPropertiesRegistrar::Probe(obj);
+    assert(0 && "TODO");
+    // try {
+    // batteryPropertiesRegistrar->RegisterListener(new BatteryListener());
+    // } catch (RemoteException e) {
+    //     // Should never happen.
+    // }
+
+    AutoPtr<IBinder> bindService;
+    CBatteryBinderService::New(this, (IBinder**)&bindService);
+    PublishBinderService(String("battery"), bindService);
+    AutoPtr<LocalService> localService = new LocalService(this);
+    PublishLocalService(EIID_IBatteryManagerInternal, TO_IINTERFACE(localService));
+    return NOERROR;
 }
 
-Boolean CBatteryService::IsPowered(
-    /* [in] */ Int32 plugTypeSet)
+// @Override
+ECode CBatteryService::OnBootPhase(
+    /* [in] */ Int32 phase)
 {
-    AutoLock lock(mLock);
-    return IsPoweredLocked(plugTypeSet);
+    if (phase == PHASE_ACTIVITY_MANAGER_READY) {
+        // check our power situation now that it is safe to display the shutdown dialog.
+        synchronized(mLock) {
+            AutoPtr<BootPhaseContentObserver> obs = new BootPhaseContentObserver(this);
+            obs->constructor(mHandler);
+
+            AutoPtr<IContentResolver> resolver;
+            mContext->GetContentResolver((IContentResolver**)&resolver);
+            AutoPtr<IUri> uri;
+            Settings::Global::GetUriFor(
+                ISettingsGlobal::LOW_POWER_MODE_TRIGGER_LEVEL, (IUri**)&uri);
+            resolver->RegisterContentObserver(uri,
+                FALSE, (ContentObserver*)obs.Get(), UserHandle::USER_ALL);
+            UpdateBatteryWarningLevelLocked();
+        }
+    }
+    return NOERROR;
+}
+
+ECode CBatteryService::UpdateBatteryWarningLevelLocked()
+{
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    Int32 defWarnLevel;
+    res->GetInteger(R::integer::config_lowBatteryWarningLevel, &defWarnLevel);
+    Settings::Global::GetInt32(resolver,
+        ISettingsGlobal::LOW_POWER_MODE_TRIGGER_LEVEL, defWarnLevel, &mLowBatteryWarningLevel);
+    if (mLowBatteryWarningLevel == 0) {
+        mLowBatteryWarningLevel = defWarnLevel;
+    }
+    if (mLowBatteryWarningLevel < mCriticalBatteryLevel) {
+        mLowBatteryWarningLevel = mCriticalBatteryLevel;
+    }
+    res->GetInteger(R::integer::config_lowBatteryCloseWarningBump, &mLowBatteryCloseWarningLevel);
+    mLowBatteryCloseWarningLevel += mLowBatteryWarningLevel;
+    ProcessValuesLocked(TRUE);
+    return NOERROR;
 }
 
 Boolean CBatteryService::IsPoweredLocked(
@@ -722,37 +572,46 @@ Boolean CBatteryService::IsPoweredLocked(
 {
     // assume we are powered if battery state is unknown so
     // the "stay on while plugged in" option will work.
-    if (mBatteryStatus == IBatteryManager::BATTERY_STATUS_UNKNOWN) {
+    Int32 status;
+    mBatteryProps->GetBatteryStatus(&status);
+    if (status == IBatteryManager::BATTERY_STATUS_UNKNOWN) {
         return TRUE;
     }
-    if ((plugTypeSet & IBatteryManager::BATTERY_PLUGGED_AC) != 0 && mAcOnline) {
+
+    Boolean bval;
+    mBatteryProps->GetChargerAcOnline(&bval);
+    if ((plugTypeSet & IBatteryManager::BATTERY_PLUGGED_AC) != 0 && bval) {
         return TRUE;
     }
-    if ((plugTypeSet & IBatteryManager::BATTERY_PLUGGED_USB) != 0 && mUsbOnline) {
+    mBatteryProps->GetChargerUsbOnline(&bval);
+    if ((plugTypeSet & IBatteryManager::BATTERY_PLUGGED_USB) != 0 && bval) {
         return TRUE;
     }
-    if ((plugTypeSet & IBatteryManager::BATTERY_PLUGGED_WIRELESS) != 0 && mWirelessOnline) {
+    mBatteryProps->GetChargerWirelessOnline(&bval);
+    if ((plugTypeSet & IBatteryManager::BATTERY_PLUGGED_WIRELESS) != 0 && bval) {
         return TRUE;
     }
     return FALSE;
 }
 
-Int32 CBatteryService::GetPlugType()
+Boolean CBatteryService::ShouldSendBatteryLowLocked()
 {
-    AutoLock lock(mLock);
-    return mPlugType;
-}
+    Boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
+    Boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
 
-Int32 CBatteryService::GetBatteryLevel()
-{
-    AutoLock lock(mLock);
-    return mBatteryLevel;
-}
-
-Boolean CBatteryService::IsBatteryLow()
-{
-    AutoLock lock(mLock);
-    return (mBatteryPresent && mBatteryLevel <= mLowBatteryWarningLevel);
+    /* The ACTION_BATTERY_LOW broadcast is sent in these situations:
+     * - is just un-plugged (previously was plugged) and battery level is
+     *   less than or equal to WARNING, or
+     * - is not plugged and battery level falls to WARNING boundary
+     *   (becomes <= mLowBatteryWarningLevel).
+     */
+    Int32 status, level;
+    mBatteryProps->GetBatteryStatus(&status);
+    mBatteryProps->GetBatteryLevel(&level);
+    return !plugged
+            && status != IBatteryManager::BATTERY_STATUS_UNKNOWN
+            && level <= mLowBatteryWarningLevel
+            && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel);
 }
 
 void CBatteryService::ShutdownIfNoPowerLocked()
@@ -760,68 +619,69 @@ void CBatteryService::ShutdownIfNoPowerLocked()
     // shut down gracefully if our battery is critically low and we are not powered.
     // wait until the system has booted before attempting to display the shutdown dialog.
     Boolean isPoweredLocked = IsPoweredLocked(IBatteryManager::BATTERY_PLUGGED_ANY);
-    if (mBatteryLevel == 0 && !isPoweredLocked) {
+    Int32 batteryLevel;
+    mBatteryProps->GetBatteryLevel(&batteryLevel);
+    if (batteryLevel == 0 && !isPoweredLocked) {
         AutoPtr<ShutdownIfNoPowerLockedRunnable> run = new ShutdownIfNoPowerLockedRunnable(this);
         Boolean b;
         mHandler->Post(run, &b);
     }
 }
 
-void CBatteryService::ShutdownIfInBootFastModeLocked()
-{
-    // shut down gracefully if our battery is boot fast mode and critically low and we are not powered.
-    // wait until the system has booted before attempting to display the shutdown dialog.
-    if (ActivityManagerNative::IsSystemReady()) {
-        AutoPtr<IInterface> service;
-        mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&service);
-        AutoPtr<IPowerManager> power = IPowerManager::Probe(service);
-        Boolean bootstats;
-        power->IsBootFastStatus(&bootstats);
-        if (mBatteryLevel < BOOT_FAST_REAL_SHUT_DOWN_LEVEL
-                && !IsPoweredLocked(IBatteryManager::BATTERY_PLUGGED_ANY) && bootstats) {
-            AutoPtr<ShutdownIfInBootFastModeRunnable> run = new ShutdownIfInBootFastModeRunnable(this);
-            Boolean b;
-            mHandler->Post(run, &b);
-        }
-    }
-}
 
 void CBatteryService::ShutdownIfOverTempLocked()
 {
     // shut down gracefully if temperature is too high (> 68.0C by default)
     // wait until the system has booted before attempting to display the
     // shutdown dialog.
-    if (mBatteryTemperature > mShutdownBatteryTemperature) {
+    Int32 batteryTemperature;
+    mBatteryProps->GetBatteryTemperature(&batteryTemperature);
+    if (batteryTemperature > mShutdownBatteryTemperature) {
         AutoPtr<ShutdownIfOverTempRunnable> run = new ShutdownIfOverTempRunnable(this);
         Boolean b;
         mHandler->Post(run, &b);
     }
 }
 
-void CBatteryService::UpdateLocked()
+void CBatteryService::Update(
+    /* [in] */ IBatteryProperties* props)
 {
-    if (!mUpdatesStopped) {
-        // Update the values of mAcOnline, et. all.
-        NativeUpdate();
-
-        // Process the new values.
-        ProcessValuesLocked();
+    synchronized (mLock) {
+        if (!mUpdatesStopped) {
+            mBatteryProps = props;
+            // Process the new values.
+            ProcessValuesLocked(FALSE);
+        } else {
+            mLastBatteryProps->Set(props);
+        }
     }
 }
 
-void CBatteryService::ProcessValuesLocked()
+void CBatteryService::ProcessValuesLocked(
+    /* [in] */ Boolean force)
 {
     Boolean logOutlier = FALSE;
     Int64 dischargeDuration = 0;
 
-    mBatteryLevelCritical = (mBatteryLevel <= mCriticalBatteryLevel);
-    if (mAcOnline) {
+    Int32 status, health, level, temperature, voltage;
+    Boolean present;
+    mBatteryProps->GetBatteryLevel(&level);
+    mBatteryProps->GetBatteryStatus(&status);
+    mBatteryProps->GetBatteryHealth(&health);
+    mBatteryProps->GetBatteryTemperature(&temperature);
+    mBatteryProps->GetBatteryVoltage(&voltage);
+    mBatteryProps->GetBatteryPresent(&present);
+
+    mBatteryLevelCritical = (level <= mCriticalBatteryLevel);
+
+    Boolean bval;
+    if (mBatteryProps->GetChargerAcOnline(&bval), bval) {
         mPlugType = IBatteryManager::BATTERY_PLUGGED_AC;
     }
-    else if (mUsbOnline) {
+    if (mBatteryProps->GetChargerUsbOnline(&bval), bval) {
         mPlugType = IBatteryManager::BATTERY_PLUGGED_USB;
     }
-    else if (mWirelessOnline) {
+    if (mBatteryProps->GetChargerWirelessOnline(&bval), bval) {
         mPlugType = IBatteryManager::BATTERY_PLUGGED_WIRELESS;
     }
     else {
@@ -829,56 +689,30 @@ void CBatteryService::ProcessValuesLocked()
     }
 
     if (DEBUG) {
-        StringBuilder sb("Processing new values: ");
-        sb += "mAcOnline=";
-        sb += mAcOnline;
-        sb += ", mUsbOnline=";
-        sb += mUsbOnline;
-        sb += ", mWirelessOnline=";
-        sb += mWirelessOnline;
-        sb += ", mBatteryStatus=";
-        sb += mBatteryStatus;
-        sb += ", mBatteryHealth=";
-        sb += mBatteryHealth;
-        sb += ", mBatteryPresent=";
-        sb += mBatteryPresent;
-        sb += ", mBatteryLevel=";
-        sb += mBatteryLevel;
-        sb += ", mBatteryTechnology=";
-        sb += mBatteryTechnology;
-        sb += ", mBatteryVoltage=";
-        sb += mBatteryVoltage;
-        sb += ", mBatteryTemperature=";
-        sb += mBatteryTemperature;
-        sb += ", mBatteryLevelCritical=";
-        sb += mBatteryLevelCritical;
-        sb += ", mPlugType=";
-        sb += mPlugType;
-        Slogger::D(TAG, sb.ToString());
+        Slogger::D(TAG,  "Processing new values: %s", TO_CSTR(mBatteryProps));
     }
 
     // TODO:
     // Let the battery stats keep track of the current level.
     // try {
-    mBatteryStats->SetBatteryState(mBatteryStatus, mBatteryHealth,
-            mPlugType, mBatteryLevel, mBatteryTemperature,
-            mBatteryVoltage);
+
+    mBatteryStats->SetBatteryState(status, health,
+        mPlugType, level, temperature, voltage);
     // } catch (RemoteException e) {
     //     Should never happen.
     // }
 
     ShutdownIfNoPowerLocked();
-    ShutdownIfInBootFastModeLocked();
     ShutdownIfOverTempLocked();
 
-    if (mBatteryStatus != mLastBatteryStatus ||
-            mBatteryHealth != mLastBatteryHealth ||
-            mBatteryPresent != mLastBatteryPresent ||
-            mBatteryLevel != mLastBatteryLevel ||
+    if (force || (status != mLastBatteryStatus ||
+            health != mLastBatteryHealth ||
+            present != mLastBatteryPresent ||
+            level != mLastBatteryLevel ||
             mPlugType != mLastPlugType ||
-            mBatteryVoltage != mLastBatteryVoltage ||
-            mBatteryTemperature != mLastBatteryTemperature ||
-            mInvalidCharger != mLastInvalidCharger) {
+            voltage != mLastBatteryVoltage ||
+            temperature != mLastBatteryTemperature ||
+            mInvalidCharger != mLastInvalidCharger)) {
 
         if (mPlugType != mLastPlugType) {
             if (mLastPlugType == BATTERY_PLUGGED_NONE) {
@@ -886,11 +720,11 @@ void CBatteryService::ProcessValuesLocked()
 
                 // There's no value in this data unless we've discharged at least once and the
                 // battery level has changed; so don't log until it does.
-                if (mDischargeStartTime != 0 && mDischargeStartLevel != mBatteryLevel) {
+                if (mDischargeStartTime != 0 && mDischargeStartLevel != level) {
                     dischargeDuration = SystemClock::GetElapsedRealtime() - mDischargeStartTime;
                     logOutlier = TRUE;
                     //EventLog::WriteEvent(EventLogTags::BATTERY_DISCHARGE, dischargeDuration,
-                    //        mDischargeStartLevel, mBatteryLevel);
+                    //        mDischargeStartLevel, level);
                     // make sure we see a discharge event before logging again
                     mDischargeStartTime = 0;
                 }
@@ -898,22 +732,22 @@ void CBatteryService::ProcessValuesLocked()
             else if (mPlugType == BATTERY_PLUGGED_NONE) {
                 // charging -> discharging or we just powered up
                 mDischargeStartTime = SystemClock::GetElapsedRealtime();
-                mDischargeStartLevel = mBatteryLevel;
+                mDischargeStartLevel = level;
             }
         }
-        if (mBatteryStatus != mLastBatteryStatus ||
-            mBatteryHealth != mLastBatteryHealth ||
-            mBatteryPresent != mLastBatteryPresent ||
+        if (status != mLastBatteryStatus ||
+            health != mLastBatteryHealth ||
+            present != mLastBatteryPresent ||
             mPlugType != mLastPlugType) {
             //EventLog::WriteEvent(EventLogTags::BATTERY_STATUS,
-            //    mBatteryStatus, mBatteryHealth, mBatteryPresent ? 1 : 0,
+            //    status, health, present ? 1 : 0,
             //    mPlugType, mBatteryTechnology);
         }
-        if (mBatteryLevel != mLastBatteryLevel ||
-            mBatteryVoltage != mLastBatteryVoltage ||
-            mBatteryTemperature != mLastBatteryTemperature) {
+        if (level != mLastBatteryLevel) {
+            // Don't do this just from voltage or temperature changes, that is
+            // too noisy.
             //EventLog::WriteEvent(EventLogTags::BATTERY_LEVEL,
-            //        mBatteryLevel, mBatteryVoltage, mBatteryTemperature);
+            //        level, mBatteryVoltage, mBatteryTemperature);
         }
         if (mBatteryLevelCritical && !mLastBatteryLevelCritical &&
                 mPlugType == BATTERY_PLUGGED_NONE) {
@@ -923,19 +757,27 @@ void CBatteryService::ProcessValuesLocked()
             logOutlier = TRUE;
         }
 
-        const Boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
-        const Boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
-
-        /* The ACTION_BATTERY_LOW broadcast is sent in these situations:
-         * - is just un-plugged (previously was plugged) and battery level is
-         *   less than or equal to WARNING, or
-         * - is not plugged and battery level falls to WARNING boundary
-         *   (becomes <= mLowBatteryWarningLevel).
-         */
-        const Boolean sendBatteryLow = !plugged
-                && mBatteryStatus != IBatteryManager::BATTERY_STATUS_UNKNOWN
-                && mBatteryLevel <= mLowBatteryWarningLevel
-                && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel);
+        if (!mBatteryLevelLow) {
+            // Should we now switch in to low battery mode?
+            if (mPlugType == BATTERY_PLUGGED_NONE
+                    && level <= mLowBatteryWarningLevel) {
+                mBatteryLevelLow = TRUE;
+            }
+        }
+        else {
+            // Should we now switch out of low battery mode?
+            if (mPlugType != BATTERY_PLUGGED_NONE) {
+                mBatteryLevelLow = FALSE;
+            }
+            else if (level >= mLowBatteryCloseWarningLevel)  {
+                mBatteryLevelLow = FALSE;
+            }
+            else if (force && level >= mLowBatteryWarningLevel) {
+                // If being forced, the previous state doesn't matter, we will just
+                // absolutely check to see if we are now above the warning level.
+                mBatteryLevelLow = FALSE;
+            }
+        }
 
         SendIntentLocked();
 
@@ -952,7 +794,7 @@ void CBatteryService::ProcessValuesLocked()
             mHandler->Post(run, &b);
         }
 
-        if (sendBatteryLow) {
+        if (ShouldSendBatteryLowLocked()) {
             AutoPtr<ActionBatteryLowRunnable> run = new ActionBatteryLowRunnable(this);
             mHandler->Post(run, &b);
         }
@@ -970,13 +812,13 @@ void CBatteryService::ProcessValuesLocked()
             LogOutlierLocked(dischargeDuration);
         }
 
-        mLastBatteryStatus = mBatteryStatus;
-        mLastBatteryHealth = mBatteryHealth;
-        mLastBatteryPresent = mBatteryPresent;
-        mLastBatteryLevel = mBatteryLevel;
+        mLastBatteryStatus = status;
+        mLastBatteryHealth = health;
+        mLastBatteryPresent = present;
+        mLastBatteryLevel = level;
         mLastPlugType = mPlugType;
-        mLastBatteryVoltage = mBatteryVoltage;
-        mLastBatteryTemperature = mBatteryTemperature;
+        mLastBatteryVoltage = voltage;
+        mLastBatteryTemperature = temperature;
         mLastBatteryLevelCritical = mBatteryLevelCritical;
         mLastInvalidCharger = mInvalidCharger;
     }
@@ -990,48 +832,33 @@ void CBatteryService::SendIntentLocked()
     intent->AddFlags(IIntent::FLAG_RECEIVER_REGISTERED_ONLY
             | IIntent::FLAG_RECEIVER_REPLACE_PENDING);
 
-    Int32 icon = GetIconLocked(mBatteryLevel);
+    Boolean present;
+    Int32 status, health, level, temperature, voltage, technology;
+    mBatteryProps->GetBatteryLevel(&level);
+    mBatteryProps->GetBatteryStatus(&status);
+    mBatteryProps->GetBatteryHealth(&health);
+    mBatteryProps->GetBatteryTemperature(&temperature);
+    mBatteryProps->GetBatteryVoltage(&voltage);
+    mBatteryProps->GetBatteryPresent(&present);
+    mBatteryProps->GetBatteryTechnology(&technology);
 
-    intent->PutExtra(IBatteryManager::EXTRA_STATUS, mBatteryStatus);
-    intent->PutExtra(IBatteryManager::EXTRA_HEALTH, mBatteryHealth);
-    intent->PutBooleanExtra(IBatteryManager::EXTRA_PRESENT, mBatteryPresent);
-    intent->PutExtra(IBatteryManager::EXTRA_LEVEL, mBatteryLevel);
+    Int32 icon = GetIconLocked(level);
+
+    intent->PutExtra(IBatteryManager::EXTRA_STATUS, status);
+    intent->PutExtra(IBatteryManager::EXTRA_HEALTH, health);
+    intent->PutBooleanExtra(IBatteryManager::EXTRA_PRESENT, present);
+    intent->PutExtra(IBatteryManager::EXTRA_LEVEL, level);
     intent->PutExtra(IBatteryManager::EXTRA_SCALE, BATTERY_SCALE);
     intent->PutExtra(IBatteryManager::EXTRA_ICON_SMALL, icon);
     intent->PutExtra(IBatteryManager::EXTRA_PLUGGED, mPlugType);
-    intent->PutExtra(IBatteryManager::EXTRA_VOLTAGE, mBatteryVoltage);
-    intent->PutExtra(IBatteryManager::EXTRA_TEMPERATURE, mBatteryTemperature);
-    intent->PutExtra(IBatteryManager::EXTRA_TECHNOLOGY, mBatteryTechnology);
+    intent->PutExtra(IBatteryManager::EXTRA_VOLTAGE, voltage);
+    intent->PutExtra(IBatteryManager::EXTRA_TEMPERATURE, temperature);
+    intent->PutExtra(IBatteryManager::EXTRA_TECHNOLOGY, technology);
     intent->PutExtra(IBatteryManager::EXTRA_INVALID_CHARGER, mInvalidCharger);
 
     if (DEBUG) {
-        StringBuilder sb("Sending ACTION_BATTERY_CHANGED.  level:");
-        sb += mBatteryLevel;
-        sb += ", scale:";
-        sb += BATTERY_SCALE;
-        sb += ", status:";
-        sb += mBatteryStatus;
-        sb += ", health:";
-        sb += mBatteryHealth;
-        sb += ", present:";
-        sb += mBatteryPresent;
-        sb += ", voltage: ";
-        sb += mBatteryVoltage;
-        sb += ", temperature: ";
-        sb += mBatteryTemperature;
-        sb += "technology: ";
-        sb += mBatteryTechnology;
-        sb += ", AC powered:";
-        sb += mAcOnline;
-        sb += ", USB powered:";
-        sb += mUsbOnline;
-        sb += ", Wireless powered:";
-        sb += mWirelessOnline;
-        sb += ", icon";
-        sb += icon;
-        sb += ", invalid charger:";
-        sb += mInvalidCharger;
-        Slogger::D(TAG, sb.ToString());
+        Slogger::D(TAG, "Sending ACTION_BATTERY_CHANGED. icon:%d, invalid charger:%d. %s",
+            icon, mInvalidCharger, TO_CSTR(mBatteryProps));
     }
 
     AutoPtr<SendIntentRunnable> run = new SendIntentRunnable(this, intent);
@@ -1041,7 +868,10 @@ void CBatteryService::SendIntentLocked()
 
 void CBatteryService::LogBatteryStatsLocked()
 {
-    AutoPtr<IInterface> service = ServiceManager::GetService(BATTERY_STATS_SERVICE_NAME);
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> service;
+    sm->GetService(IBatteryStats::SERVICE_NAME, (IInterface**)&service);
     AutoPtr<IBinder> batteryInfoService = IBinder::Probe(service);
     if (batteryInfoService == NULL) return;
 
@@ -1059,15 +889,14 @@ void CBatteryService::LogBatteryStatsLocked()
     // try {
     // dump the service to a file
     StringBuilder sb(DUMPSYS_DATA_PATH);
-    sb += BATTERY_STATS_SERVICE_NAME;
+    sb += IBatteryStats::SERVICE_NAME;
     sb += ".dump";
     CFile::New(sb.ToString(), (IFile**)&dumpFile);
     CFileOutputStream::New(dumpFile, (IFileOutputStream**)&dumpStream);
     AutoPtr<IFileDescriptor> fd;
     dumpStream->GetFD((IFileDescriptor**)&fd);
     // batteryInfoService->Dump(fd, DUMPSYS_ARGS);
-    Boolean b;
-    FileUtils::Sync(dumpStream, &b);
+    FileUtils::Sync(dumpStream);
 
     // add dump file to drop box
     db->AddFile(String("BATTERY_DISCHARGE_INFO"), dumpFile, IDropBoxManager::IS_TEXT);
@@ -1079,7 +908,7 @@ void CBatteryService::LogBatteryStatsLocked()
     // make sure we clean up
     if (dumpStream != NULL) {
         //try {
-        dumpStream->Close();
+        ICloseable::Probe(dumpStream)->Close();
         //} catch (IOException e) {
         //    Slog.e(TAG, "failed to close dumpsys output stream");
         //}
@@ -1098,27 +927,28 @@ void CBatteryService::LogBatteryStatsLocked()
 void CBatteryService::LogOutlierLocked(
     /* [in] */ Int64 duration)
 {
+    Int32  level;
+    mBatteryProps->GetBatteryLevel(&level);
+
     AutoPtr<IContentResolver> cr;
     mContext->GetContentResolver((IContentResolver**)&cr);
     String dischargeThresholdString;
-    AutoPtr<ISettingsGlobal> settingsGlobal;
-    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal);
-    settingsGlobal->GetString(cr,
+    Settings::Global::GetString(cr,
             ISettingsGlobal::BATTERY_DISCHARGE_THRESHOLD, &dischargeThresholdString);
     String durationThresholdString;
-    settingsGlobal->GetString(cr,
+    Settings::Global::GetString(cr,
             ISettingsGlobal::BATTERY_DISCHARGE_DURATION_THRESHOLD, &durationThresholdString);
 
     if (!dischargeThresholdString.IsNull() && !durationThresholdString.IsNull()) {
         //try {
         Int64 durationThreshold;
         Int32 dischargeThreshold;
-        ECode ec = StringUtils::ParseInt64(durationThresholdString, &durationThreshold);
+        ECode ec = StringUtils::Parse(durationThresholdString, &durationThreshold);
         if (FAILED(ec)) goto EXCEPTION;
-        ec = StringUtils::ParseInt32(dischargeThresholdString, &dischargeThreshold);
+        ec = StringUtils::Parse(dischargeThresholdString, &dischargeThreshold);
         if (FAILED(ec)) goto EXCEPTION;
         if (duration <= durationThreshold &&
-                mDischargeStartLevel - mBatteryLevel >= dischargeThreshold) {
+                mDischargeStartLevel - level >= dischargeThreshold) {
             // If the discharge cycle is bad enough we want to know about it.
             LogBatteryStatsLocked();
         }
@@ -1133,7 +963,7 @@ void CBatteryService::LogOutlierLocked(
             StringBuilder sb("duration: ");
             sb += duration;
             sb += " discharge: ";
-            sb += (mDischargeStartLevel - mBatteryLevel);
+            sb += (mDischargeStartLevel - level);
             Slogger::V(TAG, sb.ToString());
         }
         //} catch (NumberFormatException e) {
@@ -1150,18 +980,22 @@ EXCEPTION:
 }
 
 Int32 CBatteryService::GetIconLocked(
-    /* [in] */ Int32 level)
+    /* [in] */ Int32 inLevel)
 {
-    if (mBatteryStatus == IBatteryManager::BATTERY_STATUS_CHARGING) {
+    Int32 status, level;
+    mBatteryProps->GetBatteryLevel(&level);
+    mBatteryProps->GetBatteryStatus(&status);
+
+    if (status == IBatteryManager::BATTERY_STATUS_CHARGING) {
         return R::drawable::stat_sys_battery_charge;
     }
-    else if (mBatteryStatus == IBatteryManager::BATTERY_STATUS_DISCHARGING) {
+    else if (status == IBatteryManager::BATTERY_STATUS_DISCHARGING) {
         return R::drawable::stat_sys_battery;
     }
-    else if (mBatteryStatus == IBatteryManager::BATTERY_STATUS_NOT_CHARGING
-            || mBatteryStatus == IBatteryManager::BATTERY_STATUS_FULL) {
+    else if (status == IBatteryManager::BATTERY_STATUS_NOT_CHARGING
+            || status == IBatteryManager::BATTERY_STATUS_FULL) {
         if (IsPoweredLocked(IBatteryManager::BATTERY_PLUGGED_ANY)
-                && mBatteryLevel >= 100) {
+                && level >= 100) {
             return R::drawable::stat_sys_battery_charge;
         }
         else {
@@ -1176,8 +1010,86 @@ Int32 CBatteryService::GetIconLocked(
 ECode CBatteryService::ToString(
     /* [out] */ String* str)
 {
+    return Object::ToString(str);
+}
+
+ECode CBatteryService::DumpInternal(
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    // synchronized (mLock) {
+    //     if (args == null || args.length == 0 || "-a".equals(args[0])) {
+    //         pw.println("Current Battery Service state:");
+    //         if (mUpdatesStopped) {
+    //             pw.println("  (UPDATES STOPPED -- use 'reset' to restart)");
+    //         }
+    //         pw.println("  AC powered: " + mBatteryProps.chargerAcOnline);
+    //         pw.println("  USB powered: " + mBatteryProps.chargerUsbOnline);
+    //         pw.println("  Wireless powered: " + mBatteryProps.chargerWirelessOnline);
+    //         pw.println("  status: " + mBatteryProps.batteryStatus);
+    //         pw.println("  health: " + mBatteryProps.batteryHealth);
+    //         pw.println("  present: " + mBatteryProps.batteryPresent);
+    //         pw.println("  level: " + mBatteryProps.batteryLevel);
+    //         pw.println("  scale: " + BATTERY_SCALE);
+    //         pw.println("  voltage: " + mBatteryProps.batteryVoltage);
+    //         pw.println("  temperature: " + mBatteryProps.batteryTemperature);
+    //         pw.println("  technology: " + mBatteryProps.batteryTechnology);
+    //     } else if (args.length == 3 && "set".equals(args[0])) {
+    //         String key = args[1];
+    //         String value = args[2];
+    //         try {
+    //             if (!mUpdatesStopped) {
+    //                 mLastBatteryProps.set(mBatteryProps);
+    //             }
+    //             boolean update = true;
+    //             if ("ac".equals(key)) {
+    //                 mBatteryProps.chargerAcOnline = Integer.parseInt(value) != 0;
+    //             } else if ("usb".equals(key)) {
+    //                 mBatteryProps.chargerUsbOnline = Integer.parseInt(value) != 0;
+    //             } else if ("wireless".equals(key)) {
+    //                 mBatteryProps.chargerWirelessOnline = Integer.parseInt(value) != 0;
+    //             } else if ("status".equals(key)) {
+    //                 mBatteryProps.batteryStatus = Integer.parseInt(value);
+    //             } else if ("level".equals(key)) {
+    //                 mBatteryProps.batteryLevel = Integer.parseInt(value);
+    //             } else if ("invalid".equals(key)) {
+    //                 mInvalidCharger = Integer.parseInt(value);
+    //             } else {
+    //                 pw.println("Unknown set option: " + key);
+    //                 update = false;
+    //             }
+    //             if (update) {
+    //                 long ident = Binder.clearCallingIdentity();
+    //                 try {
+    //                     mUpdatesStopped = true;
+    //                     processValuesLocked(false);
+    //                 } finally {
+    //                     Binder.restoreCallingIdentity(ident);
+    //                 }
+    //             }
+    //         } catch (NumberFormatException ex) {
+    //             pw.println("Bad value: " + value);
+    //         }
+    //     } else if (args.length == 1 && "reset".equals(args[0])) {
+    //         long ident = Binder.clearCallingIdentity();
+    //         try {
+    //             if (mUpdatesStopped) {
+    //                 mUpdatesStopped = false;
+    //                 mBatteryProps.set(mLastBatteryProps);
+    //                 processValuesLocked(false);
+    //             }
+    //         } finally {
+    //             Binder.restoreCallingIdentity(ident);
+    //         }
+    //     } else {
+    //         pw.println("Dump current battery state, or:");
+    //         pw.println("  set [ac|usb|wireless|status|level|invalid] <value>");
+    //         pw.println("  reset");
+    //     }
+    // }
     return NOERROR;
 }
+
 
 } // namespace Server
 } // namespace Droid

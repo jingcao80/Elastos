@@ -1,35 +1,180 @@
 #include "elastos/droid/view/CAccessibilityInteractionConnection.h"
 #include "elastos/droid/view/ViewRootImpl.h"
 
+using Elastos::Droid::View::Accessibility::EIID_IIAccessibilityInteractionConnection;
 namespace Elastos {
 namespace Droid {
 namespace View {
 
+CAR_INTERFACE_IMPL(CAccessibilityInteractionConnection, Object, IIAccessibilityInteractionConnection)
+
+CAR_OBJECT_IMPL(CAccessibilityInteractionConnection)
+
 ECode CAccessibilityInteractionConnection::constructor(
-    /* [in] */ Handle32 viewRootImpl)
+    /* [in] */ IWeakReference* viewRootImpl)
 {
-    mViewRootImpl = (ViewRootImpl*)viewRootImpl;
+    mViewRootImpl = viewRootImpl;
     return NOERROR;
 }
 
 ECode CAccessibilityInteractionConnection::FindAccessibilityNodeInfoByAccessibilityId(
     /* [in] */ Int64 accessibilityNodeId,
+    /* [in] */ IRegion* interactiveRegion,
     /* [in] */ Int32 interactionId,
-    /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
+    /* [in] */ IIAccessibilityInteractionConnectionCallback* callback,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 interrogatingPid,
-    /* [in] */ Int64 interrogatingTid)
+    /* [in] */ Int64 interrogatingTid,
+    /* [in] */ IMagnificationSpec* spec)
 {
-    if (mViewRootImpl != NULL && mViewRootImpl->mView != NULL) {
-        AutoPtr<IAccessibilityInteractionController> controller;
-        controller = mViewRootImpl->GetAccessibilityInteractionController();
-        controller->FindAccessibilityNodeInfoByAccessibilityIdClientThread(
-            accessibilityNodeId, interactionId, callback, flags,
-            interrogatingPid, interrogatingTid);
+    AutoPtr<IViewRootImpl> viewRoot;
+    if (mViewRootImpl != NULL) {
+        mViewRootImpl->Resolve(EIID_IViewRootImpl, (IInterface**)&viewRoot);
     }
-    else {
+
+    if (viewRoot != NULL && ((ViewRootImpl*)viewRoot.Get())->mView != NULL) {
+        AutoPtr<IAccessibilityInteractionController> controller;
+        viewRoot->GetAccessibilityInteractionController((IAccessibilityInteractionController**)&controller);
+        controller->FindAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityNodeId,
+                    interactiveRegion, interactionId, callback, flags, interrogatingPid,
+                    interrogatingTid, spec);
+    } else {
         // We cannot make the call and notify the caller so it does not wait.
-        callback->SetFindAccessibilityNodeInfosResult(NULL, interactionId);
+        // try {
+            callback->SetFindAccessibilityNodeInfosResult(NULL, interactionId);
+        // } catch (RemoteException re) {
+            /* best effort - ignore */
+        // }
+    }
+    return NOERROR;
+}
+
+ECode CAccessibilityInteractionConnection::FindAccessibilityNodeInfosByViewId(
+    /* [in] */ Int64 accessibilityNodeId,
+    /* [in] */ const String& viewId,
+    /* [in] */ IRegion* interactiveRegion,
+    /* [in] */ Int32 interactionId,
+    /* [in] */ IIAccessibilityInteractionConnectionCallback* callback,
+    /* [in] */ Int32 flags,
+    /* [in] */ Int32 interrogatingPid,
+    /* [in] */ Int64 interrogatingTid,
+    /* [in] */ IMagnificationSpec* spec)
+{
+    AutoPtr<IViewRootImpl> viewRoot;
+    if (mViewRootImpl != NULL) {
+        mViewRootImpl->Resolve(EIID_IViewRootImpl, (IInterface**)&viewRoot);
+    }
+
+    if (viewRoot != NULL && ((ViewRootImpl*)viewRoot.Get())->mView != NULL) {
+        AutoPtr<IAccessibilityInteractionController> controller;
+        viewRoot->GetAccessibilityInteractionController((IAccessibilityInteractionController**)&controller);
+        controller->FindAccessibilityNodeInfosByViewIdClientThread(accessibilityNodeId,
+                            viewId, interactiveRegion, interactionId, callback, flags,
+                            interrogatingPid, interrogatingTid, spec);
+    } else {
+        // We cannot make the call and notify the caller so it does not wait.
+        // try {
+            callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
+        // } catch (RemoteException re) {
+            /* best effort - ignore */
+        // }
+    }
+    return NOERROR;
+}
+
+ECode CAccessibilityInteractionConnection::FindAccessibilityNodeInfosByText(
+    /* [in] */ Int64 accessibilityNodeId,
+    /* [in] */ const String& text,
+    /* [in] */ IRegion* interactiveRegion,
+    /* [in] */ Int32 interactionId,
+    /* [in] */ IIAccessibilityInteractionConnectionCallback* callback,
+    /* [in] */ Int32 flags,
+    /* [in] */ Int32 interrogatingPid,
+    /* [in] */ Int64 interrogatingTid,
+    /* [in] */ IMagnificationSpec* spec)
+{
+    AutoPtr<IViewRootImpl> viewRoot;
+    if (mViewRootImpl != NULL) {
+        mViewRootImpl->Resolve(EIID_IViewRootImpl, (IInterface**)&viewRoot);
+    }
+
+    if (viewRoot != NULL && ((ViewRootImpl*)viewRoot.Get())->mView != NULL) {
+        AutoPtr<IAccessibilityInteractionController> controller;
+        viewRoot->GetAccessibilityInteractionController((IAccessibilityInteractionController**)&controller);
+        controller->FindAccessibilityNodeInfosByTextClientThread(accessibilityNodeId, text,
+                            interactiveRegion, interactionId, callback, flags, interrogatingPid,
+                            interrogatingTid, spec);
+    } else {
+        // We cannot make the call and notify the caller so it does not wait.
+        // try {
+            callback->SetFindAccessibilityNodeInfosResult(NULL, interactionId);
+        // } catch (RemoteException re) {
+            /* best effort - ignore */
+        // }
+    }
+    return NOERROR;
+}
+
+ECode CAccessibilityInteractionConnection::FindFocus(
+    /* [in] */ Int64 accessibilityNodeId,
+    /* [in] */ Int32 focusType,
+    /* [in] */ IRegion* interactiveRegion,
+    /* [in] */ Int32 interactionId,
+    /* [in] */ IIAccessibilityInteractionConnectionCallback* callback,
+    /* [in] */ Int32 flags,
+    /* [in] */ Int32 interrogatingPid,
+    /* [in] */ Int64 interrogatingTid,
+    /* [in] */ IMagnificationSpec* spec)
+{
+    AutoPtr<IViewRootImpl> viewRoot;
+    if (mViewRootImpl != NULL) {
+        mViewRootImpl->Resolve(EIID_IViewRootImpl, (IInterface**)&viewRoot);
+    }
+
+    if (viewRoot != NULL && ((ViewRootImpl*)viewRoot.Get())->mView != NULL) {
+        AutoPtr<IAccessibilityInteractionController> controller;
+        viewRoot->GetAccessibilityInteractionController((IAccessibilityInteractionController**)&controller);
+        controller->FindFocusClientThread(accessibilityNodeId, focusType, interactiveRegion,
+            interactionId, callback, flags, interrogatingPid, interrogatingTid, spec);
+    } else {
+        // We cannot make the call and notify the caller so it does not wait.
+        // try {
+            callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
+        // } catch (RemoteException re) {
+            /* best effort - ignore */
+        // }
+    }
+    return NOERROR;
+}
+
+ECode CAccessibilityInteractionConnection::FocusSearch(
+    /* [in] */ Int64 accessibilityNodeId,
+    /* [in] */ Int32 direction,
+    /* [in] */ IRegion* interactiveRegion,
+    /* [in] */ Int32 interactionId,
+    /* [in] */ IIAccessibilityInteractionConnectionCallback* callback,
+    /* [in] */ Int32 flags,
+    /* [in] */ Int32 interrogatingPid,
+    /* [in] */ Int64 interrogatingTid,
+    /* [in] */ IMagnificationSpec* spec)
+{
+    AutoPtr<IViewRootImpl> viewRoot;
+    if (mViewRootImpl != NULL) {
+        mViewRootImpl->Resolve(EIID_IViewRootImpl, (IInterface**)&viewRoot);
+    }
+
+    if (viewRoot != NULL && ((ViewRootImpl*)viewRoot.Get())->mView != NULL) {
+        AutoPtr<IAccessibilityInteractionController> controller;
+        viewRoot->GetAccessibilityInteractionController((IAccessibilityInteractionController**)&controller);
+        controller->FocusSearchClientThread(accessibilityNodeId, direction, interactiveRegion,
+            interactionId, callback, flags, interrogatingPid, interrogatingTid, spec);
+    } else {
+        // We cannot make the call and notify the caller so it does not wait.
+        // try {
+            callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
+        // } catch (RemoteException re) {
+            /* best effort - ignore */
+        // }
     }
     return NOERROR;
 }
@@ -39,117 +184,59 @@ ECode CAccessibilityInteractionConnection::PerformAccessibilityAction(
     /* [in] */ Int32 action,
     /* [in] */ IBundle* arguments,
     /* [in] */ Int32 interactionId,
-    /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
-    /* [in] */ Int32 flags,
-    /* [in] */ Int32 interogatingPid,
-    /* [in] */ Int64 interrogatingTid)
-{
-    if (mViewRootImpl != NULL && mViewRootImpl->mView != NULL) {
-        AutoPtr<IAccessibilityInteractionController> controller;
-        controller = mViewRootImpl->GetAccessibilityInteractionController();
-        controller->PerformAccessibilityActionClientThread(
-            accessibilityNodeId, action, arguments, interactionId,
-            callback, flags, interogatingPid, interrogatingTid);
-    }
-    else {
-        // We cannot make the call and notify the caller so it does not wait.
-        callback->SetPerformAccessibilityActionResult(FALSE, interactionId);
-
-    }
-    return NOERROR;
-}
-
-ECode CAccessibilityInteractionConnection::FindAccessibilityNodeInfoByViewId(
-    /* [in] */ Int64 accessibilityNodeId,
-    /* [in] */ Int32 viewId,
-    /* [in] */ Int32 interactionId,
-    /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
+    /* [in] */ IIAccessibilityInteractionConnectionCallback* callback,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 interrogatingPid,
     /* [in] */ Int64 interrogatingTid)
 {
-    if (mViewRootImpl != NULL && mViewRootImpl->mView != NULL) {
-        AutoPtr<IAccessibilityInteractionController> controller;
-        controller = mViewRootImpl->GetAccessibilityInteractionController();
-        controller->FindAccessibilityNodeInfoByViewIdClientThread(
-            accessibilityNodeId, viewId, interactionId, callback,
-            flags, interrogatingPid, interrogatingTid);
+    AutoPtr<IViewRootImpl> viewRoot;
+    if (mViewRootImpl != NULL) {
+        mViewRootImpl->Resolve(EIID_IViewRootImpl, (IInterface**)&viewRoot);
     }
-    else {
-        // We cannot make the call and notify the caller so it does not wait.
-        callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
 
-    }
-    return NOERROR;
-}
-
-ECode CAccessibilityInteractionConnection::FindAccessibilityNodeInfosByText(
-    /* [in] */ Int64 accessibilityNodeId,
-    /* [in] */ const String& text,
-    /* [in] */ Int32 interactionId,
-    /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
-    /* [in] */ Int32 flags,
-    /* [in] */ Int32 interrogatingPid,
-    /* [in] */ Int64 interrogatingTid)
-{
-    if (mViewRootImpl != NULL && mViewRootImpl->mView != NULL) {
+    if (viewRoot != NULL && ((ViewRootImpl*)viewRoot.Get())->mView != NULL) {
         AutoPtr<IAccessibilityInteractionController> controller;
-        controller = mViewRootImpl->GetAccessibilityInteractionController();
-        controller->FindAccessibilityNodeInfosByTextClientThread(accessibilityNodeId, text,
+        viewRoot->GetAccessibilityInteractionController((IAccessibilityInteractionController**)&controller);
+        controller->PerformAccessibilityActionClientThread(accessibilityNodeId, action, arguments,
             interactionId, callback, flags, interrogatingPid, interrogatingTid);
-    }
-    else {
+    } else {
         // We cannot make the call and notify the caller so it does not wait.
-        callback->SetFindAccessibilityNodeInfosResult(NULL, interactionId);
-
+        // try {
+            callback->SetPerformAccessibilityActionResult(FALSE, interactionId);
+        // } catch (RemoteException re) {
+            /* best effort - ignore */
+        // }
     }
     return NOERROR;
 }
 
-ECode CAccessibilityInteractionConnection::FindFocus(
+ECode CAccessibilityInteractionConnection::ComputeClickPointInScreen(
     /* [in] */ Int64 accessibilityNodeId,
-    /* [in] */ Int32 focusType,
+    /* [in] */ IRegion* interactiveRegion,
     /* [in] */ Int32 interactionId,
-    /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
-    /* [in] */ Int32 flags,
+    /* [in] */ IIAccessibilityInteractionConnectionCallback* callback,
     /* [in] */ Int32 interrogatingPid,
-    /* [in] */ Int64 interrogatingTid)
+    /* [in] */ Int64 interrogatingTid,
+    /* [in] */ IMagnificationSpec* spec)
 {
-    if (mViewRootImpl != NULL && mViewRootImpl->mView != NULL) {
+    AutoPtr<IViewRootImpl> viewRoot;
+    if (mViewRootImpl != NULL) {
+        mViewRootImpl->Resolve(EIID_IViewRootImpl, (IInterface**)&viewRoot);
+    }
+
+    if (viewRoot != NULL && ((ViewRootImpl*)viewRoot.Get())->mView != NULL) {
         AutoPtr<IAccessibilityInteractionController> controller;
-        controller = mViewRootImpl->GetAccessibilityInteractionController();
-        controller->FindFocusClientThread(
-            accessibilityNodeId, focusType, interactionId,
-            callback, flags, interrogatingPid, interrogatingTid);
-    }
-    else {
+        viewRoot->GetAccessibilityInteractionController((IAccessibilityInteractionController**)&controller);
+        controller->ComputeClickPointInScreenClientThread(accessibilityNodeId,
+            interactiveRegion, interactionId, callback, interrogatingPid,
+            interrogatingTid, spec);
+    } else {
         // We cannot make the call and notify the caller so it does not wait.
-        callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
-
-    }
-    return NOERROR;
-}
-
-ECode CAccessibilityInteractionConnection::FocusSearch(
-    /* [in] */ Int64 accessibilityNodeId,
-    /* [in] */ Int32 direction,
-    /* [in] */ Int32 interactionId,
-    /* [in] */ IAccessibilityInteractionConnectionCallback* callback,
-    /* [in] */ Int32 flags,
-    /* [in] */ Int32 interrogatingPid,
-    /* [in] */ Int64 interrogatingTid)
-{
-    if (mViewRootImpl != NULL && mViewRootImpl->mView != NULL) {
-        AutoPtr<IAccessibilityInteractionController> controller;
-        controller = mViewRootImpl->GetAccessibilityInteractionController();
-        controller->FocusSearchClientThread(
-            accessibilityNodeId, direction, interactionId,
-            callback, flags, interrogatingPid, interrogatingTid);
-    }
-    else {
-        // We cannot make the call and notify the caller so it does not wait.
-        callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
-
+        // try {
+            callback->SetComputeClickPointInScreenActionResult(FALSE, interactionId);
+        // } catch (RemoteException re) {
+            /* best effort - ignore */
+        // }
     }
     return NOERROR;
 }

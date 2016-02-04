@@ -156,10 +156,6 @@ ECode CTreeSet::GetDescendingIterator(
 
     AutoPtr<INavigableSet> res;
     GetDescendingSet((INavigableSet**)&res);
-    if (IIterable::Probe(res)) {
-        *outiter = NULL;
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
     return res->GetIterator(outiter);
 }
 

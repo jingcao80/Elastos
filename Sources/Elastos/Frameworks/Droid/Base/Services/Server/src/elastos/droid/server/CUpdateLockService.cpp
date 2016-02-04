@@ -1,13 +1,14 @@
 
-#include "CUpdateLockService.h"
-#include "elastos/droid/os/Binder.h"
-#include "elastos/droid/Manifest.h"
+#include "elastos/droid/server/CUpdateLockService.h"
+#include <elastos/droid/os/Binder.h>
+#include <elastos/droid/Manifest.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.CoreLibrary.IO.h>
 
-using Elastos::Core::ISystem;
-using Elastos::Core::CSystem;
-using Elastos::Core::StringBuilder;
+using Elastos::Droid::Manifest;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Pm::IPackageManager;
@@ -17,7 +18,12 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::EIID_IIUpdateLock;
 using Elastos::Utility::Logging::Slogger;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -31,8 +37,8 @@ CUpdateLockService::LockWatcher::LockWatcher(
     /* [in] */ IHandler* h,
     /* [in] */ const String& tag,
     /* [in] */ CUpdateLockService* owner)
-        : TokenWatcher(h, tag)
-        , mOwner(owner)
+    : TokenWatcher(h, tag)
+    , mOwner(owner)
 {
 }
 
@@ -51,6 +57,10 @@ ECode CUpdateLockService::LockWatcher::Released()
     }
     return mOwner->SendLockChangedBroadcast(TRUE);
 }
+
+CAR_INTERFACE_IMPL_2(CUpdateLockService, Object, IIUpdateLock, IBinder)
+
+CAR_OBJECT_IMPL(CUpdateLockService)
 
 ECode CUpdateLockService::constructor(
     /* [in] */ IContext* context)
@@ -145,7 +155,7 @@ ECode CUpdateLockService::Dump(
         b += Binder::GetCallingPid();
         b += ", uid=";
         b += Binder::GetCallingUid();
-        pw->PrintStringln(b.ToString());
+        pw->Println(b.ToString());
         return NOERROR;
     }
 

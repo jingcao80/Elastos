@@ -12,9 +12,9 @@
 using Elastos::Droid::App::Service;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Text::Method::IWordIterator;
-using Elastos::Droid::View::Internal::TextService::IISpellCheckerSessionListener;
-using Elastos::Droid::View::Internal::TextService::IISpellCheckerService;
-using Elastos::Droid::View::Internal::TextService::IISpellCheckerSession;
+using Elastos::Droid::Internal::TextService::IISpellCheckerSessionListener;
+using Elastos::Droid::Internal::TextService::IISpellCheckerService;
+using Elastos::Droid::Internal::TextService::IISpellCheckerSession;
 using Elastos::Droid::View::TextService::ISentenceSuggestionsInfo;
 using Elastos::Droid::View::TextService::ISuggestionsInfo;
 using Elastos::Droid::View::TextService::ITextInfo;
@@ -23,7 +23,7 @@ using Elastos::Utility::IArrayList;
 namespace Elastos {
 namespace Droid {
 namespace Service {
-namespace Textservice {
+namespace TextService {
 
 /**
  * SpellCheckerService provides an abstract base class for a spell checker.
@@ -340,7 +340,7 @@ private:
     AutoPtr<ISpellCheckerServiceBinder> mBinder;
 };
 
-} // namespace Textservice
+} // namespace TextService
 } // namespace Service
 } // namepsace Droid
 } // namespace Elastos

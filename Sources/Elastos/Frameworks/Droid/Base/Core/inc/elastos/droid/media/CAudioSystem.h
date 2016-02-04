@@ -122,7 +122,8 @@ public:
         /* [out] */ Int32* result);
 
     CARAPI SetPhoneState(
-        /* [in] */ Int32 state);
+        /* [in] */ Int32 state,
+        /* [out] */ Int32* result);
 
     CARAPI SetForceUse(
         /* [in] */ Int32 usage,

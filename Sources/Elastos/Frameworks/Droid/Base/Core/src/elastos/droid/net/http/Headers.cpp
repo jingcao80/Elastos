@@ -147,7 +147,7 @@ ECode Headers::ParseHeader(
     String val;
     buffer->SubstringTrimmed(pos, Ptr(buffer)->Func(buffer->GetLength), &val);
     if (HttpLog::LOGV) {
-        HttpLog::V("hdr %d %s", Ptr(buffer)->Func(buffer->GetLength), Object::ToString(buffer).string());
+        HttpLog::V("hdr %d %s", Ptr(buffer)->Func(buffer->GetLength), TO_CSTR(buffer));
     }
 
     switch (name.GetHashCode()) {
@@ -583,7 +583,7 @@ ECode Headers::GetHeaders(
             mExtraHeaderNames->Get(i, (IInterface**)&name);
             mExtraHeaderValues->Get(i, (IInterface**)&value);
             HttpLog::V("Headers.getHeaders() extra: %d %s %s", i,
-                      Object::ToString(name).string(), Object::ToString(value).string());
+                      TO_CSTR(name), TO_CSTR(value));
         }
         hcb->Header(Object::ToString(name), Object::ToString(value));
     }

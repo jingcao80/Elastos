@@ -294,7 +294,7 @@ ECode TrafficStats::StopDataProfiling(
 ECode TrafficStats::IncrementOperationCount(
     /* [in] */ Int32 operationCount)
 {
-    Int32 tag;
+    Int32 tag = 0;
     GetThreadStatsTag(&tag);
     IncrementOperationCount(tag, operationCount);
     return NOERROR;

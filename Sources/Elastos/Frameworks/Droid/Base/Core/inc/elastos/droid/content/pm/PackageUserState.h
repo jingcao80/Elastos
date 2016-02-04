@@ -2,7 +2,6 @@
 #ifndef __ELASTOS_DROID_CONTENT_PM_CPACKAGEUSERSTATE_H__
 #define __ELASTOS_DROID_CONTENT_PM_CPACKAGEUSERSTATE_H__
 
-#include "Elastos.Droid.Content.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashSet.h>
 
@@ -17,7 +16,7 @@ namespace Pm {
  * Per-user state information about a package.
  * @hide
  */
-class PackageUserState
+class ECO_PUBLIC PackageUserState
     : public Object
 {
 public:

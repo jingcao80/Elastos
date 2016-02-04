@@ -71,6 +71,10 @@ module
             [in] String paragraph,
             [in] Int32 flags);
 
+        /* private constructor used by createLineBidi() */
+        constructor(
+            [in] Int64 pBidi);
+
         interface IBidi;
     }
 

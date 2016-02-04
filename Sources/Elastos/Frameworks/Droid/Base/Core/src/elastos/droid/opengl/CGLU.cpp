@@ -1,19 +1,29 @@
 
-#include "CGLU.h"
-#include "CMatrixGL.h"
+#include "elastos/droid/opengl/CGLU.h"
+#include "elastos/droid/opengl/CMatrix.h"
+
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
+
+using Elastos::Core::AutoLock;
 
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
 
 AutoPtr<ArrayOf<Float> > CGLU::sScratch = ArrayOf<Float>::Alloc(32);
-Mutex CGLU::sLock;
+Object CGLU::sLock;
 
-ECode CGLU::gluErrorString(
+CAR_INTERFACE_IMPL(CGLU, Singleton, IGLU)
+
+CAR_SINGLETON_IMPL(CGLU)
+
+ECode CGLU::GluErrorString(
     /* [in] */ Int32 error,
     /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str)
+
     switch (error) {
     case IGL10::_GL_NO_ERROR:
         *str = String("no error");
@@ -35,7 +45,7 @@ ECode CGLU::gluErrorString(
     return NOERROR;
 }
 
-ECode CGLU::gluLookAt(
+ECode CGLU::GluLookAt(
     /* [in] */ IGL10* gl,
     /* [in] */ Float eyeX,
     /* [in] */ Float eyeY,
@@ -50,7 +60,7 @@ ECode CGLU::gluLookAt(
     {
         AutoLock lock(sLock);
         AutoPtr<IMatrix> matrix;
-        CMatrixGL::AcquireSingleton((IMatrix**)&matrix);
+        CMatrix::AcquireSingleton((IMatrix**)&matrix);
         matrix->SetLookAtM(sScratch, 0, eyeX, eyeY, eyeZ, centerX, centerY, centerZ,
                 upX, upY, upZ);
         gl->GlMultMatrixf(sScratch, 0);
@@ -58,7 +68,7 @@ ECode CGLU::gluLookAt(
     return NOERROR;
 }
 
-ECode CGLU::gluOrtho2D(
+ECode CGLU::GluOrtho2D(
     /* [in] */ IGL10* gl,
     /* [in] */ Float left,
     /* [in] */ Float right,
@@ -69,14 +79,14 @@ ECode CGLU::gluOrtho2D(
     return NOERROR;
 }
 
-ECode CGLU::gluPerspective(
+ECode CGLU::GluPerspective(
     /* [in] */ IGL10* gl,
     /* [in] */ Float fovy,
     /* [in] */ Float aspect,
     /* [in] */ Float zNear,
     /* [in] */ Float zFar)
 {
-    Float top = zNear * (Float) Elastos::Core::Math::Tan(fovy * (Elastos::Core::Math::DOUBLE_PI / 360.0));
+    Float top = zNear * (Float) Elastos::Core::Math::Tan(fovy * (Elastos::Core::Math::PI / 360.0));
     Float bottom = -top;
     Float left = bottom * aspect;
     Float right = top * aspect;
@@ -84,7 +94,7 @@ ECode CGLU::gluPerspective(
     return NOERROR;
 }
 
-ECode CGLU::gluProject(
+ECode CGLU::GluProject(
     /* [in] */ Float objX,
     /* [in] */ Float objY,
     /* [in] */ Float objZ,
@@ -98,13 +108,15 @@ ECode CGLU::gluProject(
     /* [in] */ Int32 winOffset,
     /* [out] */ Int32* rst)
 {
+    VALIDATE_NOT_NULL(rst)
+
     {
         AutoLock lock(sLock);
         Int32 M_OFFSET = 0; // 0..15
         Int32 V_OFFSET = 16; // 16..19
         Int32 V2_OFFSET = 20; // 20..23
         AutoPtr<IMatrix> matrix;
-        CMatrixGL::AcquireSingleton((IMatrix**)&matrix);
+        CMatrix::AcquireSingleton((IMatrix**)&matrix);
         matrix->MultiplyMM(sScratch, M_OFFSET, project, projectOffset,
                 model, modelOffset);
 
@@ -139,7 +151,7 @@ ECode CGLU::gluProject(
 }
 
 
-ECode CGLU::gluUnProject(
+ECode CGLU::GluUnProject(
     /* [in] */ Float winX,
     /* [in] */ Float winY,
     /* [in] */ Float winZ,
@@ -153,12 +165,14 @@ ECode CGLU::gluUnProject(
     /* [in] */ Int32 objOffset,
     /* [out] */ Int32* rst)
 {
+    VALIDATE_NOT_NULL(rst)
+
     {
         Int32 PM_OFFSET = 0; // 0..15
         Int32 INVPM_OFFSET = 16; // 16..31
         Int32 V_OFFSET = 0; // 0..3 Reuses PM_OFFSET space
         AutoPtr<IMatrix> matrix;
-        CMatrixGL::AcquireSingleton((IMatrix**)&matrix);
+        CMatrix::AcquireSingleton((IMatrix**)&matrix);
         matrix->MultiplyMM(sScratch, PM_OFFSET, project, projectOffset,
                 model, modelOffset);
 

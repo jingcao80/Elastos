@@ -7,9 +7,6 @@ module
 
     interface IWatchdogMonitor {
         Monitor();
-
-        ToString(
-            [out] String* str);
     }
 
     } // namespace Server

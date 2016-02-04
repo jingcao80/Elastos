@@ -1,0 +1,103 @@
+
+module
+{
+
+    interface Elastos.Droid.Os.IParcelUuid;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * Callback definitions for interacting with BLE / GATT
+     * @hide
+     */
+    [oneway, deprecated]
+    interface IIBluetoothGattServerCallback {
+        OnServerRegistered(
+            [in] Int32 status,
+            [in] Int32 serverIf);
+
+        OnScanResult(
+            [in] String address,
+            [in] Int32 rssi,
+            [in] ArrayOf<Byte>* advData);
+
+        OnServerConnectionState(
+            [in] Int32 status,
+            [in] Int32 serverIf,
+            [in] Boolean connected,
+            [in] String address);
+
+        OnServiceAdded(
+            [in] Int32 status,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstId,
+            [in] IParcelUuid* srvcId);
+
+        OnCharacteristicReadRequest(
+            [in] String address,
+            [in] Int32 transId,
+            [in] Int32 offset,
+            [in] Boolean isLong,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstId,
+            [in] IParcelUuid* srvcId,
+            [in] Int32 charInstId,
+            [in] IParcelUuid* charId);
+
+        OnDescriptorReadRequest(
+            [in] String address,
+            [in] Int32 transId,
+            [in] Int32 offset,
+            [in] Boolean isLong,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstId,
+            [in] IParcelUuid* srvcId,
+            [in] Int32 charInstId,
+            [in] IParcelUuid* charId,
+            [in] IParcelUuid* descrId);
+
+        OnCharacteristicWriteRequest(
+            [in] String address,
+            [in] Int32 transId,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [in] Boolean isPrep,
+            [in] Boolean needRsp,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstId,
+            [in] IParcelUuid* srvcId,
+            [in] Int32 charInstId,
+            [in] IParcelUuid* charId,
+            [in] ArrayOf<Byte>* value);
+
+        OnDescriptorWriteRequest(
+            [in] String address,
+            [in] Int32 transId,
+            [in] Int32 offset,
+            [in] Int32 length,
+            [in] Boolean isPrep,
+            [in] Boolean needRsp,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstId,
+            [in] IParcelUuid* srvcId,
+            [in] Int32 charInstId,
+            [in] IParcelUuid* charId,
+            [in] IParcelUuid* descrId,
+            [in] ArrayOf<Byte>* value);
+
+        OnExecuteWrite(
+            [in] String address,
+            [in] Int32 transId,
+            [in] Boolean execWrite);
+
+        OnNotificationSent(
+            [in] String address,
+            [in] Int32 status);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

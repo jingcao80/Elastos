@@ -2,12 +2,15 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHPBAP_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHPBAP_H__
 
-#include "Elastos.Droid.Core_server.h"
+//#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Os::IBinder;
 
 namespace Elastos {
@@ -16,41 +19,20 @@ namespace Bluetooth {
 
 class CBluetoothPbapStateChangeCallback;
 
-class BluetoothPbap : public ElRefBase
+class BluetoothPbap
+    : public Object
+    , public IBluetoothPbap
 {
-public:
-    interface IServiceListener : public IInterface
-    {
-    public:
-         /**
-         * Called to notify the client when this proxy object has been
-         * connected to the BluetoothPbap service. Clients must wait for
-         * this callback before making IPC calls on the BluetoothPbap
-         * service.
-         */
-        virtual CARAPI_(void) OnServiceConnected(
-            /* [in] */ BluetoothPbap* proxy) = 0;
-
-        /**
-         * Called to notify the client that this proxy object has been
-         * disconnected from the BluetoothPbap service. Clients must not
-         * make IPC calls on the BluetoothPbap service after this callback.
-         * This callback will currently only occur if the application hosting
-         * the BluetoothPbap service, but may be called more often in future.
-         */
-        virtual CARAPI_(void) OnServiceDisconnected() = 0;
-    };
-
 private:
     class ServiceConnection
-        : public ElRefBase
+        : public Object
         , public IServiceConnection
     {
     public:
+        CAR_INTERFACE_DECL();
+
         ServiceConnection(
             /* [in] */ BluetoothPbap* host);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI OnServiceConnected(
             /* [in] */ IComponentName* name,
@@ -64,13 +46,17 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL();
+
+    BluetoothPbap();
+
     BluetoothPbap(
         /* [in] */ IContext* context,
-        /* [in] */ IServiceListener* listener);
+        /* [in] */ IBluetoothPbapServiceListener* listener);
 
     ~BluetoothPbap();
 
-    CARAPI_(void) Close();
+    CARAPI Close();
 
     CARAPI GetState(
         /* [out] */ Int32* state);
@@ -95,33 +81,33 @@ public:
     static CARAPI_(Boolean) DoesClassMatchSink(
         /* [in] */ IBluetoothClass* btClass);
 
-public:
-    /** int extra for PBAP_STATE_CHANGED_ACTION */
-    static const String PBAP_STATE;
-
-    /** int extra for PBAP_STATE_CHANGED_ACTION */
-    static const String PBAP_PREVIOUS_STATE;
-
-    /** Indicates the state of a pbap connection state has changed.
-     *  This intent will always contain PBAP_STATE, PBAP_PREVIOUS_STATE and
-     *  BluetoothIntent.ADDRESS extras.
-     */
-    static const String PBAP_STATE_CHANGED_ACTION;
-
-    /** There was an error trying to obtain the state */
-    static const Int32 STATE_ERROR        = -1;
-    /** No client currently connected */
-    static const Int32 STATE_DISCONNECTED = 0;
-    /** Connection attempt in progress */
-    static const Int32 STATE_CONNECTING   = 1;
-    /** Client is currently connected */
-    static const Int32 STATE_CONNECTED    = 2;
-
-    static const Int32 RESULT_FAILURE = 0;
-    static const Int32 RESULT_SUCCESS = 1;
-    /** Connection canceled before completion. */
-    static const Int32 RESULT_CANCELED = 2;
-
+//public:
+//    /** int extra for PBAP_STATE_CHANGED_ACTION */
+//    static const String PBAP_STATE;
+//
+//    /** int extra for PBAP_STATE_CHANGED_ACTION */
+//    static const String PBAP_PREVIOUS_STATE;
+//
+//    /** Indicates the state of a pbap connection state has changed.
+//     *  This intent will always contain PBAP_STATE, PBAP_PREVIOUS_STATE and
+//     *  BluetoothIntent.ADDRESS extras.
+//     */
+//    static const String PBAP_STATE_CHANGED_ACTION;
+//
+//    /** There was an error trying to obtain the state */
+//    static const Int32 STATE_ERROR        = -1;
+//    /** No client currently connected */
+//    static const Int32 STATE_DISCONNECTED = 0;
+//    /** Connection attempt in progress */
+//    static const Int32 STATE_CONNECTING   = 1;
+//    /** Client is currently connected */
+//    static const Int32 STATE_CONNECTED    = 2;
+//
+//    static const Int32 RESULT_FAILURE = 0;
+//    static const Int32 RESULT_SUCCESS = 1;
+//    /** Connection canceled before completion. */
+//    static const Int32 RESULT_CANCELED = 2;
+//
 private:
     const static String TAG;
     const static Boolean DBG;
@@ -129,7 +115,7 @@ private:
 
 private:
     AutoPtr<IContext> mContext;
-    AutoPtr<IServiceListener> mServiceListener;
+    AutoPtr<IBluetoothPbapServiceListener> mServiceListener;
     AutoPtr<IBluetoothAdapter> mAdapter;
     AutoPtr<IIBluetoothPbap> mService;
     AutoPtr<IIBluetoothStateChangeCallback> mBluetoothStateChangeCallback;

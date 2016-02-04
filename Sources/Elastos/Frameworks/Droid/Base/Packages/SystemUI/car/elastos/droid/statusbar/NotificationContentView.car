@@ -1,0 +1,70 @@
+module
+{
+    using interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Packages {
+    namespace SystemUI {
+    namespace StatusBar {
+
+    /**
+     * A frame layout containing the actual payload of the notification, including the contracted and
+     * expanded layout. This class is responsible for clipping the content and and switching between the
+     * expanded and contracted view depending on its clipped size.
+     */
+    /**
+     * @Involve
+     * interface IFrameLayout
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
+     */
+    [local]
+    interface INotificationContentView {
+        Reset();
+
+        GetContractedChild(
+            [out] IView** view);
+
+        GetExpandedChild(
+            [out] IView** view);
+
+        SetContractedChild(
+            [in] IView* child);
+
+        SetExpandedChild(
+            [in] IView* child);
+
+        SetActualHeight(
+            [in] Int32 actualHeight);
+
+        GetMaxHeight(
+            [out] Int32* height);
+
+        GetMinHeight(
+            [out] Int32* height);
+
+        SetClipTopAmount(
+            [in] Int32 clipTopAmount);
+
+        NotifyContentUpdated();
+
+        IsContentExpandable(
+            [out] Boolean* result);
+
+        SetDark(
+            [in] Boolean dark,
+            [in] Boolean fade);
+    }
+
+    } // namespace StatusBar
+    } // namespace SystemUI
+    } // namespace Packages
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,14 +1,13 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_WINDOWANIMATOR_H__
 #define __ELASTOS_DROID_SERVER_WM_WINDOWANIMATOR_H__
 
-#include "wm/CWindowManagerService.h"
-#include "wm/WindowState.h"
-#include "wm/WindowStateAnimator.h"
-#include "wm/DimAnimator.h"
-#include "wm/DimSurface.h"
-#include <elastos/utility/etl/List.h>
+#include "_Elastos.Droid.Server.h"
+#include "elastos/droid/server/wm/WindowState.h"
+#include "elastos/droid/server/wm/WindowToken.h"
+#include "elastos/droid/server/wm/ScreenRotationAnimation.h"
+#include "elastos/droid/os/Runnable.h"
 #include <elastos/utility/etl/HashMap.h>
-#include <os/Runnable.h>
+#include <elastos/utility/etl/List.h>
 
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::HashMap;
@@ -21,9 +20,9 @@ namespace Droid {
 namespace Server {
 namespace Wm {
 
+class CWindowManagerService;
 class AppWindowAnimator;
-class WindowToken;
-class ScreenRotationAnimation;
+class WindowStateAnimator;
 
 /**
  * Singleton class that carries out the animations and Surface operations in a separate task
@@ -50,7 +49,7 @@ private:
     class DisplayContentsAnimator : public Object
     {
     public:
-        DisplayContentsAnimator();
+        DisplayContentsAnimator() {}
 
     public:
         AutoPtr<ScreenRotationAnimation> mScreenRotationAnimation;
@@ -60,8 +59,6 @@ public:
     WindowAnimator(
         /* [in] */ CWindowManagerService* service);
 
-    ~WindowAnimator();
-
     CARAPI_(void) AddDisplayLocked(
         /* [in] */ Int32 displayId);
 
@@ -69,10 +66,7 @@ public:
         /* [in] */ Int32 displayId);
 
     CARAPI_(void) HideWallpapersLocked(
-        /* [in] */ WindowState* w,
-        /* [in] */ WindowState* wallpaperTarget,
-        /* [in] */ WindowState* lowerWallpaperTarget,
-        /* [in] */ List< AutoPtr<WindowToken> >& wallpaperTokens);
+        /* [in] */ WindowState* w);
 
     static CARAPI_(String) BulkUpdateParamsToString(
         /* [in] */ Int32 bulkUpdateParams);
@@ -177,6 +171,8 @@ private:
     Int32 mAnimTransactionSequence;
 
     friend class AnimationRunnable;
+    typedef List<AutoPtr<AppWindowToken> > AppTokenList;
+    typedef List<AutoPtr<WindowState> > WindowList;
 };
 
 } // Wm

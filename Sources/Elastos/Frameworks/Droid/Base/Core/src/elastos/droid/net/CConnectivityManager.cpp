@@ -807,11 +807,7 @@ ECode CConnectivityManager::RequestNetworkForFeatureLocked(
         // delay = mService.getRestoreDefaultNetworkDelay(type);
     // } catch (RemoteException e) {}
     ECode ec = mService->GetRestoreDefaultNetworkDelay(type, &delay);
-    if (FAILED(ec))
-    {
-        if (ec != E_REMOTE_EXCEPTION)
-            return ec;
-    }
+    if (FAILED(ec) && ec != (ECode)E_REMOTE_EXCEPTION) return ec;
     LegacyRequest* pl = new LegacyRequest;
     AutoPtr<IInterface> l = pl->Probe(EIID_IObject);
     pl->mNetworkCapabilities = netCap;
@@ -898,7 +894,7 @@ ECode CConnectivityManager::RequestRouteToHostAddress(
     AutoPtr<ArrayOf<Byte> > address;
     hostAddress->GetAddress((ArrayOf<Byte>**)&address);
     ECode ec = mService->RequestRouteToHostAddress(networkType, address, result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = FALSE;
         return NOERROR;
     }
@@ -948,7 +944,7 @@ ECode CConnectivityManager::GetMobileDataEnabled(
         // } catch (RemoteException e) { }
         AutoPtr<IITelephony> it = IITelephony::Probe(b);
         ECode ec = it->GetDataEnabled(result);
-        if (E_REMOTE_EXCEPTION == ec) {
+        if ((ECode)E_REMOTE_EXCEPTION == ec) {
             return NOERROR;
         }
         return ec;
@@ -1012,18 +1008,18 @@ ECode CConnectivityManager::AddDefaultNetworkActiveListener(
     AutoPtr<IINetworkManagementService> nms;
     ECode ec = GetNetworkManagementService((IINetworkManagementService**)&nms);
     if (FAILED(ec)) {
-        if (E_REMOTE_EXCEPTION == ec)
+        if ((ECode)E_REMOTE_EXCEPTION == ec)
             return NOERROR;
         return ec;
     }
     ec = nms->RegisterNetworkActivityListener(rl);
     if (FAILED(ec)) {
-        if (E_REMOTE_EXCEPTION == ec)
+        if ((ECode)E_REMOTE_EXCEPTION == ec)
             return NOERROR;
         return ec;
     }
     ec = IMap::Probe(mNetworkActivityListeners)->Put(l, rl);
-    if (E_REMOTE_EXCEPTION == ec)
+    if ((ECode)E_REMOTE_EXCEPTION == ec)
         return NOERROR;
     return ec;
 }
@@ -1035,7 +1031,7 @@ ECode CConnectivityManager::RemoveDefaultNetworkActiveListener(
     IMap::Probe(mNetworkActivityListeners)->Get(l, (IInterface**)&itmp);
     AutoPtr<INetworkActivityListener> rl = INetworkActivityListener::Probe(itmp);
     if (NULL == rl) {
-        Logger::E(TAG, "Listener not registered: %s", Object::ToString(l).string());
+        Logger::E(TAG, "Listener not registered: %s", TO_CSTR(l));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     // try {
@@ -1045,12 +1041,12 @@ ECode CConnectivityManager::RemoveDefaultNetworkActiveListener(
     AutoPtr<IINetworkManagementService> nms;
     ECode ec = GetNetworkManagementService((IINetworkManagementService**)&nms);
     if (FAILED(ec)) {
-        if (E_REMOTE_EXCEPTION == ec)
+        if ((ECode)E_REMOTE_EXCEPTION == ec)
             return NOERROR;
         return ec;
     }
     ec = nms->RegisterNetworkActivityListener(rl);
-    if (E_REMOTE_EXCEPTION == ec)
+    if ((ECode)E_REMOTE_EXCEPTION == ec)
         return NOERROR;
     return ec;
 }
@@ -1065,14 +1061,14 @@ ECode CConnectivityManager::IsDefaultNetworkActive(
     AutoPtr<IINetworkManagementService> nms;
     ECode ec = GetNetworkManagementService((IINetworkManagementService**)&nms);
     if (FAILED(ec)) {
-        if (E_REMOTE_EXCEPTION != ec) {
+        if ((ECode)E_REMOTE_EXCEPTION != ec) {
             return ec;
         }
         *result = FALSE;
         return NOERROR;
     }
     ec = nms->IsNetworkActive(result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = FALSE;
         return NOERROR;
     }
@@ -1187,7 +1183,7 @@ ECode  CConnectivityManager::Tether(
     *result = TETHER_ERROR_UNSUPPORTED;
 
     ECode ec = mService->Tether(iface, result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = TETHER_ERROR_SERVICE_UNAVAIL;
         return NOERROR;
     }
@@ -1202,7 +1198,7 @@ ECode CConnectivityManager::Untether(
     *result = TETHER_ERROR_UNSUPPORTED;
 
     ECode ec = mService->Untether(iface, result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = TETHER_ERROR_SERVICE_UNAVAIL;
         return NOERROR;
     }
@@ -1216,7 +1212,7 @@ ECode CConnectivityManager::IsTetheringSupported(
     result = FALSE;
 
     ECode ec = mService->IsTetheringSupported(result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = FALSE;
         return NOERROR;
     }
@@ -1231,7 +1227,7 @@ ECode CConnectivityManager::GetTetherableUsbRegexs(
 
     AutoPtr <ArrayOf<String> > outputArray;
     ECode ec = mService->GetTetherableUsbRegexs((ArrayOf<String>**)&outputArray);
-    if (E_REMOTE_EXCEPTION == ec) outputArray = ArrayOf<String>::Alloc(0);
+    if ((ECode)E_REMOTE_EXCEPTION == ec) outputArray = ArrayOf<String>::Alloc(0);
     *result = outputArray;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -1245,7 +1241,7 @@ ECode CConnectivityManager::GetTetherableWifiRegexs(
 
     AutoPtr<ArrayOf<String> > outputArray;
     ECode ec = mService->GetTetherableWifiRegexs((ArrayOf<String>**)&outputArray);
-    if (E_REMOTE_EXCEPTION == ec) outputArray = ArrayOf<String>::Alloc(0);
+    if ((ECode)E_REMOTE_EXCEPTION == ec) outputArray = ArrayOf<String>::Alloc(0);
     *result = outputArray;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -1259,7 +1255,7 @@ ECode CConnectivityManager::GetTetherableBluetoothRegexs(
 
     AutoPtr<ArrayOf<String> > outputArray;
     ECode ec = mService->GetTetherableBluetoothRegexs((ArrayOf<String>**)&outputArray);
-    if (E_REMOTE_EXCEPTION == ec) outputArray = ArrayOf<String>::Alloc(0);
+    if ((ECode)E_REMOTE_EXCEPTION == ec) outputArray = ArrayOf<String>::Alloc(0);
     *result = outputArray.Get();
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -1273,7 +1269,7 @@ ECode CConnectivityManager::SetUsbTethering(
     *result = TETHER_ERROR_UNSUPPORTED;
 
     ECode ec = mService->SetUsbTethering(enabled, result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = TETHER_ERROR_SERVICE_UNAVAIL;
         return NOERROR;
     }
@@ -1288,7 +1284,7 @@ ECode CConnectivityManager::GetLastTetherError(
     *result = TETHER_ERROR_UNSUPPORTED;
 
     ECode ec = mService->GetLastTetherError(iface, result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = TETHER_ERROR_SERVICE_UNAVAIL;
         return NOERROR;
     }
@@ -1300,7 +1296,7 @@ ECode CConnectivityManager::ReportInetCondition(
     /* [in] */ Int32 percentage)
 {
     ECode ec = mService->ReportInetCondition(networkType, percentage);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1312,7 +1308,7 @@ ECode CConnectivityManager::ReportBadNetwork(
     VALIDATE_NOT_NULL(network)
 
     ECode ec = mService->ReportBadNetwork(network);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1324,7 +1320,7 @@ ECode CConnectivityManager::SetGlobalProxy(
     VALIDATE_NOT_NULL(proxyp)
 
     ECode ec = mService->SetGlobalProxy(proxyp);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1337,7 +1333,7 @@ ECode CConnectivityManager::GetGlobalProxy(
     *result = NULL;
 
     ECode ec = mService->GetGlobalProxy(result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = NULL;
         return NOERROR;
     }
@@ -1351,7 +1347,7 @@ ECode CConnectivityManager::GetProxy(
     *result = NULL;
 
     ECode ec = mService->GetProxy(result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = NULL;
         return NOERROR;
     }
@@ -1363,7 +1359,7 @@ ECode CConnectivityManager::SetDataDependency(
     /* [in] */ Boolean met)
 {
     ECode ec = mService->SetDataDependency(networkType, met);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1377,7 +1373,7 @@ ECode CConnectivityManager::IsNetworkSupported(
     *result = FALSE;
 
     ECode ec = mService->IsNetworkSupported(networkType, result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = FALSE;
         return NOERROR;
     }
@@ -1391,7 +1387,7 @@ ECode CConnectivityManager::IsActiveNetworkMetered(
     *result = FALSE;
 
     ECode ec = mService->IsActiveNetworkMetered(result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = FALSE;
         return NOERROR;
     }
@@ -1406,7 +1402,7 @@ ECode CConnectivityManager::UpdateLockdownVpn(
     *result = FALSE;
 
     ECode ec = mService->UpdateLockdownVpn(result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = FALSE;
         return NOERROR;
     }
@@ -1424,7 +1420,7 @@ ECode CConnectivityManager::CaptivePortalCheckCompleted(
     // } catch (RemoteException e) {
     // }
     ECode ec = mService->CaptivePortalCheckCompleted(info, isCaptivePortal);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1440,7 +1436,7 @@ ECode CConnectivityManager::SupplyMessenger(
     ECode ec = mService->SupplyMessenger(networkType, messenger);
     //} catch (RemoteException e) {
     //}
-    if (E_REMOTE_EXCEPTION == ec)
+    if ((ECode)E_REMOTE_EXCEPTION == ec)
         return NOERROR;
     return ec;
 }
@@ -1456,7 +1452,7 @@ ECode CConnectivityManager::CheckMobileProvisioning(
     ECode ec = mService->CheckMobileProvisioning(suggestedTimeOutMs, &timeOutMs);
     // } catch (RemoteException e) {
     // }
-    if (E_REMOTE_EXCEPTION == ec)
+    if ((ECode)E_REMOTE_EXCEPTION == ec)
         return NOERROR;
     *result = timeOutMs;
     return ec;
@@ -1475,7 +1471,7 @@ ECode CConnectivityManager::GetMobileProvisioningUrl(
     if (FAILED(ec)) {
         *result = String(NULL);
     }
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1494,7 +1490,7 @@ ECode CConnectivityManager::GetMobileRedirectedProvisioningUrl(
     if (FAILED(ec)) {
         *result = String(NULL);
     }
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1515,7 +1511,7 @@ ECode CConnectivityManager::GetLinkQualityInfo(
     // }
 
     ECode ec = mService->GetLinkQualityInfo(networkType, result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = NULL;
         return NOERROR;
     }
@@ -1532,7 +1528,7 @@ ECode CConnectivityManager::GetActiveLinkQualityInfo(
     //     return NULL;
     // }
     ECode ec = mService->GetActiveLinkQualityInfo(result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = NULL;
         return NOERROR;
     }
@@ -1549,7 +1545,7 @@ ECode CConnectivityManager::GetAllLinkQualityInfo(
     //     return NULL;
     // }
     ECode ec = mService->GetAllLinkQualityInfo(result);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         *result = NULL;
         return NOERROR;
     }
@@ -1566,7 +1562,7 @@ ECode CConnectivityManager::SetProvisioningNotificationVisible(
     // } catch (RemoteException e) {
     // }
     ECode ec = mService->SetProvisioningNotificationVisible(visible, networkType, action);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1580,7 +1576,7 @@ ECode CConnectivityManager::SetAirplaneMode(
     // } catch (RemoteException e) {
     // }
     ECode ec = mService->SetAirplaneMode(enable);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1594,7 +1590,7 @@ ECode CConnectivityManager::RegisterNetworkFactory(
     //     mService.registerNetworkFactory(messenger, name);
     // } catch (RemoteException e) { }
     ECode ec = mService->RegisterNetworkFactory(messenger, name);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1607,7 +1603,7 @@ ECode CConnectivityManager::UnregisterNetworkFactory(
     //     mService.unregisterNetworkFactory(messenger);
     // } catch (RemoteException e) { }
     ECode ec = mService->UnregisterNetworkFactory(messenger);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1625,7 +1621,7 @@ ECode CConnectivityManager::RegisterNetworkAgent(
     //     mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc);
     // } catch (RemoteException e) { }
     ECode ec = mService->RegisterNetworkAgent(messenger, ni, lp, nc, score, misc);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1754,7 +1750,7 @@ ECode CConnectivityManager::SendRequestForNetwork(
     }
     // try {
     ECode ec = IncCallbackHandlerRefCount();
-    if (FAILED(ec) && ec != E_REMOTE_EXCEPTION) {
+    if (FAILED(ec) && ec != (ECode)E_REMOTE_EXCEPTION) {
         return ec;
     }
     synchronized(sNetworkCallback) {
@@ -1764,13 +1760,13 @@ ECode CConnectivityManager::SendRequestForNetwork(
         CBinder::New((IBinder**)&binder);
         if (LISTEN == action) {
             ec = mService->ListenForNetwork(need, msg, binder, (INetworkRequest**)&(((ConnectivityManagerNetworkCallback*)networkCallback)->mNetworkRequest));
-            if (FAILED(ec) && ec != E_REMOTE_EXCEPTION) {
+            if (FAILED(ec) && ec != (ECode)E_REMOTE_EXCEPTION) {
                 return ec;
             }
         }
         else {
             ec = mService->RequestNetwork(need, msg, timeoutSec, binder, legacyType, (INetworkRequest**)&(((ConnectivityManagerNetworkCallback*)networkCallback)->mNetworkRequest));
-            if (FAILED(ec) && ec != E_REMOTE_EXCEPTION) {
+            if (FAILED(ec) && ec != (ECode)E_REMOTE_EXCEPTION) {
                 return ec;
             }
         }
@@ -1836,7 +1832,7 @@ ECode CConnectivityManager::RequestNetwork(
     request->GetNetworkCapabilities((INetworkCapabilities**)&nc);
     AutoPtr<INetworkRequest> nr;
     ECode ec = mService->PendingRequestForNetwork(nc, operation, (INetworkRequest**)&nr);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;
@@ -1880,7 +1876,7 @@ ECode CConnectivityManager::UnregisterNetworkCallback(
     //     mService.releaseNetworkRequest(networkCallback.networkRequest);
     // } catch (RemoteException e) {}
     ECode ec = mService->ReleaseNetworkRequest(((ConnectivityManagerNetworkCallback*)networkCallback)->mNetworkRequest);
-    if (E_REMOTE_EXCEPTION == ec) {
+    if ((ECode)E_REMOTE_EXCEPTION == ec) {
         return NOERROR;
     }
     return ec;

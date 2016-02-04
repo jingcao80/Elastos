@@ -229,7 +229,7 @@ ECode CResourcesManager::GetTopLevelResources(
                     Float applicationScale;
                     ci->GetApplicationScale(&applicationScale);
                     Logger::W(TAG, "Returning cached resources %s %s : appScale=%f",
-                        Object::ToString(r).string(), resDir.string(), applicationScale);
+                        TO_CSTR(r), resDir.string(), applicationScale);
                 }
                 *result = r;
                 REFCOUNT_ADD(*result)
@@ -319,8 +319,8 @@ ECode CResourcesManager::GetTopLevelResources(
         Float applicationScale;
         ci->GetApplicationScale(&applicationScale);
         Logger::I(TAG, "Created app resources %s %s: %s appScale=%f",
-            resDir.string(), Object::ToString(r).string(),
-            Object::ToString(c).string(), applicationScale);
+            resDir.string(), TO_CSTR(r),
+            TO_CSTR(c), applicationScale);
     }
 
     synchronized(this) {

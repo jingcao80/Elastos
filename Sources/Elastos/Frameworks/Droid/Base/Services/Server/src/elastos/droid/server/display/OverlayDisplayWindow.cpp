@@ -331,18 +331,18 @@ void OverlayDisplayWindow::Relayout()
 void OverlayDisplayWindow::Dump(
     /* [in] */ IPrintWriter* pw)
 {
-    // pw->PrintStringln(String("mWindowVisible=") + mWindowVisible);
-    // pw->PrintStringln(String("mWindowX=") + mWindowX);
-    // pw->PrintStringln(String("mWindowY=") + mWindowY);
-    // pw->PrintStringln(String("mWindowScale=") + mWindowScale);
-    // pw->PrintStringln(String("mWindowParams=") + mWindowParams);
+    // pw->Println(String("mWindowVisible=") + mWindowVisible);
+    // pw->Println(String("mWindowX=") + mWindowX);
+    // pw->Println(String("mWindowY=") + mWindowY);
+    // pw->Println(String("mWindowScale=") + mWindowScale);
+    // pw->Println(String("mWindowParams=") + mWindowParams);
     // if (mTextureView != NULL) {
-    //     pw->PrintStringln(String("mTextureView.getScaleX()=") + mTextureView.getScaleX());
-    //     pw->PrintStringln(String("mTextureView.getScaleY()=") + mTextureView.getScaleY());
+    //     pw->Println(String("mTextureView.getScaleX()=") + mTextureView.getScaleX());
+    //     pw->Println(String("mTextureView.getScaleY()=") + mTextureView.getScaleY());
     // }
-    // pw->PrintStringln(String("mLiveTranslationX=") + mLiveTranslationX);
-    // pw->PrintStringln(String("mLiveTranslationY=") + mLiveTranslationY);
-    // pw->PrintStringln(String("mLiveScale=") + mLiveScale);
+    // pw->Println(String("mLiveTranslationX=") + mLiveTranslationX);
+    // pw->Println(String("mLiveTranslationY=") + mLiveTranslationY);
+    // pw->Println(String("mLiveScale=") + mLiveScale);
 }
 
 Boolean OverlayDisplayWindow::UpdateDefaultDisplayInfo()

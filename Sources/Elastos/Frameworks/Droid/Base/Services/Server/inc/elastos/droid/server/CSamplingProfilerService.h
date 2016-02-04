@@ -6,10 +6,9 @@
 #include "_Elastos_Droid_Server_CSamplingProfilerService.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/FileObserver.h"
+#include <Elastos.Droid.Content.h>
 
-using Elastos::IO::IFile;
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IPrintWriter;
+using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::ContentObserver;
@@ -17,15 +16,21 @@ using Elastos::Droid::Database::IContentObserver;
 using Elastos::Droid::Os::FileObserver;
 using Elastos::Droid::Os::IFileObserver;
 using Elastos::Droid::Os::IDropBoxManager;
+using Elastos::IO::IFile;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 CarClass(CSamplingProfilerService)
+    , public Object
+    , public IBinder
 {
 private:
-    class SamplingProfilerSettingsObserver : public ContentObserver
+    class SamplingProfilerSettingsObserver
+        : public ContentObserver
     {
     public:
         SamplingProfilerSettingsObserver(
@@ -39,7 +44,8 @@ private:
         AutoPtr<IContentResolver> mContentResolver;
     };
 
-    class MyFileObserver : public FileObserver
+    class MyFileObserver
+        : public FileObserver
     {
     public:
         MyFileObserver(
@@ -58,6 +64,10 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IContext *context);
 

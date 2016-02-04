@@ -1,12 +1,13 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_DRAGSTATE_H__
 #define __ELASTOS_DROID_SERVER_WM_DRAGSTATE_H__
 
-#include "wm/CWindowManagerService.h"
-#include "input/InputApplicationHandle.h"
-#include "input/InputWindowHandle.h"
+// #include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/input/InputApplicationHandle.h"
+#include "elastos/droid/server/input/InputWindowHandle.h"
+#include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::View::ISurfacecontrol;
+using Elastos::Droid::View::ISurfaceControl;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IDragEvent;
 using Elastos::Droid::View::IInputChannel;
@@ -15,11 +16,16 @@ using Elastos::Droid::Content::IClipData;
 using Elastos::Droid::Graphics::IRegion;
 using Elastos::Droid::Server::Input::InputApplicationHandle;
 using Elastos::Droid::Server::Input::InputWindowHandle;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wm{
+
+class CWindowManagerService;
+class DragInputEventReceiver;
+class WindowState;
 
 class DragState : public Object
 {
@@ -116,7 +122,7 @@ public:
     Float mThumbOffsetY;
     AutoPtr<IInputChannel> mServerChannel;
     AutoPtr<IInputChannel> mClientChannel;
-    AutoPtr<CWindowManagerService::DragInputEventReceiver> mInputEventReceiver;
+    AutoPtr<DragInputEventReceiver> mInputEventReceiver;
     AutoPtr<InputApplicationHandle> mDragApplicationHandle;
     AutoPtr<InputWindowHandle> mDragWindowHandle;
     AutoPtr<WindowState> mTargetWindow;

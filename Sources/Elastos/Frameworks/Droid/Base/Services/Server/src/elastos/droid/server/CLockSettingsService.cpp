@@ -1,68 +1,168 @@
 
+#include "elastos/droid/server/CLockSettingsService.h"
+#include <elastos/droid/Manifest.h>
+#include <elastos/droid/os/Binder.h>
+#include <elastos/droid/os/UserHandle.h>
+#include <elastos/droid/provider/Settings.h>
+#include <elastos/droid/text/TextUtils.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
-#include <text/TextUtils.h>
-#include "CLockSettingsService.h"
-#include "elastos/droid/os/Binder.h"
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/etl/Algorithm.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.Database.h>
+#include <Elastos.Droid.Internal.h>
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Utility.h>
+
+using Elastos::Droid::Manifest;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::IContentValues;
+using Elastos::Droid::Content::CContentValues;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Database::ICursor;
+using Elastos::Droid::Database::Sqlite::ISQLiteProgram;
+using Elastos::Droid::Database::Sqlite::ISQLiteStatement;
+using Elastos::Droid::Database::Sqlite::EIID_ISQLiteOpenHelper;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
+using Elastos::Droid::Internal::Widget::EIID_IILockSettings;
+// using Elastos::Droid::Internal::Widget::ILockPatternUtilsHelper;
+// using Elastos::Droid::Internal::Widget::CLockPatternUtilsHelper;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IProcess;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::CEnvironment;
+using Elastos::Droid::Os::IEnvironment;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Provider::CSettingsSecure;
+using Elastos::Droid::Text::TextUtils;
+// using Elastos::Droid::Security::IKeyStore;
+// using Elastos::Droid::Security::IKeyStoreHelper;
+// using Elastos::Droid::Security::IKeyStoreHelper;
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::CString;
-using Elastos::Core::CString;
 using Elastos::Core::CInteger32;
 using Elastos::Core::IInteger32;
-using Elastos::Droid::Content::IContentResolver;
-using Elastos::Droid::Content::IContentValues;
-using Elastos::Droid::Content::CContentValues;
-using Elastos::Droid::Database::ICursor;
-using Elastos::Droid::Database::Sqlite::EIID_ISQLiteOpenHelper;
-using Elastos::Droid::Provider::ISettingsSecure;
-using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Os::CSystemProperties;
-using Elastos::Droid::Os::CUserHandleHelper;
-using Elastos::Droid::Os::IUserHandleHelper;
-using Elastos::Droid::Os::Binder;
-using Elastos::Droid::Os::IProcess;
-using Elastos::Droid::Os::CEnvironment;
-using Elastos::Droid::Os::IEnvironment;
-using Elastos::Droid::Provider::ISettingsSecure;
-using Elastos::Droid::Provider::CSettingsSecure;
-using Elastos::Droid::Text::TextUtils;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::IList;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Slogger;
 using Elastos::IO::CFile;
 using Elastos::IO::IFile;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IDataInput;
+using Elastos::IO::IDataOutput;
 using Elastos::IO::IRandomAccessFile;
 using Elastos::IO::CRandomAccessFile;
 
 namespace Elastos {
 namespace Droid {
-namespace Widget {
-namespace Internal {
+namespace Server {
+
+static AutoPtr<ArrayOf<String> > InitCOLUMNS_FOR_QUERY()
+{
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(1);
+    array->Set(0, String("value")/*COLUMN_VALUE*/);
+    return NOERROR;
+}
+
+static AutoPtr<ArrayOf<String> > InitVALID_SETTINGS()
+{
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(16);
+    array->Set(0, ILockPatternUtils::LOCKOUT_PERMANENT_KEY);
+    array->Set(1, ILockPatternUtils::LOCKOUT_ATTEMPT_DEADLINE);
+    array->Set(2, ILockPatternUtils::PATTERN_EVER_CHOSEN_KEY);
+    array->Set(3, ILockPatternUtils::PASSWORD_TYPE_KEY);
+
+    array->Set(4, ILockPatternUtils::PASSWORD_TYPE_ALTERNATE_KEY);
+    array->Set(5, ILockPatternUtils::LOCK_PASSWORD_SALT_KEY);
+    array->Set(6, ILockPatternUtils::DISABLE_LOCKSCREEN_KEY);
+    array->Set(7, ILockPatternUtils::LOCKSCREEN_OPTIONS);
+
+    array->Set(8, ILockPatternUtils::LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK);
+    array->Set(9, ILockPatternUtils::BIOMETRIC_WEAK_EVER_CHOSEN_KEY);
+    array->Set(10, ILockPatternUtils::LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS);
+    array->Set(11, ILockPatternUtils::PASSWORD_HISTORY_KEY);
+
+    array->Set(12, ISettingsSecure::LOCK_PATTERN_ENABLED);
+    array->Set(13, ISettingsSecure::LOCK_BIOMETRIC_WEAK_FLAGS);
+    array->Set(14, ISettingsSecure::LOCK_PATTERN_VISIBLE);
+    array->Set(15, ISettingsSecure::LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
+    return array;
+}
+
+// These are protected with a read permission
+
+AutoPtr<ArrayOf<String> > InitREAD_PROFILE_PROTECTED_SETTINGS()
+{
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(16);
+    array->Set(0, ISettingsSecure::LOCK_SCREEN_OWNER_INFO_ENABLED);
+    array->Set(1, ISettingsSecure::LOCK_SCREEN_OWNER_INFO);
+    return array;
+}
+
+String CLockSettingsService::PERMISSION("android.permission.ACCESS_KEYGUARD_SECURE_STORAGE");
+String CLockSettingsService::SYSTEM_DEBUGGABLE("ro.debuggable");
+String CLockSettingsService::TAG("LockSettingsService");
+String CLockSettingsService::TABLE("locksettings");
+String CLockSettingsService::COLUMN_KEY("name");
+String CLockSettingsService::COLUMN_USERID("user");
+String CLockSettingsService::COLUMN_VALUE("value");
+
+AutoPtr<ArrayOf<String> > CLockSettingsService::COLUMNS_FOR_QUERY = InitCOLUMNS_FOR_QUERY();
+
+String CLockSettingsService::SYSTEM_DIRECTORY("/system/");
+String CLockSettingsService::LOCK_PATTERN_FILE("gesture.key");
+String CLockSettingsService::LOCK_PASSWORD_FILE("password.key");
+AutoPtr<ArrayOf<String> > CLockSettingsService::VALID_SETTINGS = InitVALID_SETTINGS();
+AutoPtr<ArrayOf<String> > CLockSettingsService::READ_PROFILE_PROTECTED_SETTINGS = InitREAD_PROFILE_PROTECTED_SETTINGS();
+
+
+//===========================================================================
+// CLockSettingsService::DatabaseHelper
+//===========================================================================
 
 String CLockSettingsService::DatabaseHelper::TAG("LockSettingsDB");
-String CLockSettingsService::DatabaseHelper::DATABASE_NAME = String("locksettings.db");
-const Int32 CLockSettingsService::DatabaseHelper::DATABASE_VERSION = 1;
+String CLockSettingsService::DatabaseHelper::DATABASE_NAME("locksettings.db");
+const Int32 CLockSettingsService::DatabaseHelper::DATABASE_VERSION = 2;
 
-CAR_INTERFACE_IMPL(CLockSettingsService::DatabaseHelper, ISQLiteOpenHelper);
-
-CLockSettingsService::DatabaseHelper::DatabaseHelper(
+ECode CLockSettingsService::DatabaseHelper::constructor(
     /* [in] */ IContext* context,
     /* [in] */ CLockSettingsService* host)
-    : mHost(host)
 {
-    SQLiteOpenHelper::Init(context, DATABASE_NAME, NULL, DATABASE_VERSION);
+    mHost = host;
+    SQLiteOpenHelper::constructor(context, DATABASE_NAME, NULL, DATABASE_VERSION);
     SetWriteAheadLoggingEnabled(TRUE);
+    return NOERROR;
 }
 
 void CLockSettingsService::DatabaseHelper::CreateTable(
     /* [in] */ ISQLiteDatabase* db)
 {
     StringBuilder sb("CREATE TABLE ");
-    sb += TABLE + " (" +
-            "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            COLUMN_KEY + " TEXT," +
-            COLUMN_USERID + " INTEGER," +
-            COLUMN_VALUE + " TEXT" +
-            ");";
+    sb += CLockSettingsService::TABLE + " (" +
+        "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        CLockSettingsService::COLUMN_KEY + " TEXT," +
+        CLockSettingsService::COLUMN_USERID + " INTEGER," +
+        CLockSettingsService::COLUMN_VALUE + " TEXT" +
+        ");";
 
     db->ExecSQL(sb.ToString());
 }
@@ -93,14 +193,83 @@ ECode CLockSettingsService::DatabaseHelper::OnUpgrade(
     /* [in] */ Int32 oldVersion,
     /* [in] */ Int32 currentVersion)
 {
-    // Nothing yet
+    Int32 upgradeVersion = oldVersion;
+    if (upgradeVersion == 1) {
+        // Set the initial value for {@link LockPatternUtils#LOCKSCREEN_WIDGETS_ENABLED}
+        // during upgrade based on whether each user previously had widgets in keyguard.
+        MaybeEnableWidgetSettingForUsers(db);
+        upgradeVersion = 2;
+    }
+
+    if (upgradeVersion != DATABASE_VERSION) {
+        Slogger::W(TAG, "Failed to upgrade database!");
+    }
     return NOERROR;
+}
+
+ECode CLockSettingsService::DatabaseHelper::MaybeEnableWidgetSettingForUsers(
+    /* [in] */ ISQLiteDatabase* db)
+{
+    AutoPtr<IInterface> service;
+    mHost->mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&service);
+    AutoPtr<IUserManager> um = IUserManager::Probe(service);
+    AutoPtr<IContentResolver> cr;
+    mHost->mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<IList> users;
+    um->GetUsers((IList**)&users);
+    Int32 size;
+    users->GetSize(&size);
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> obj;
+        users->Get(i, (IInterface**)&obj);
+        IUserInfo* ui = IUserInfo::Probe(obj);
+        Int32 userId;
+        ui->GetId(&userId);
+        Boolean enabled;
+        mHost->mLockPatternUtils->HasWidgetsEnabledInKeyguard(userId, &enabled);
+        // Slogger::V(TAG, "Widget upgrade uid=" + userId + ", enabled="
+        //         + enabled + ", w[]=" + mLockPatternUtils->GetAppWidgets());
+        LoadSetting(db, ILockPatternUtils::LOCKSCREEN_WIDGETS_ENABLED, userId, enabled);
+    }
+    return NOERROR;
+}
+
+ECode CLockSettingsService::DatabaseHelper::LoadSetting(
+    /* [in] */ ISQLiteDatabase* db,
+    /* [in] */ const String& key,
+    /* [in] */ Int32 userId,
+    /* [in] */ Boolean value)
+{
+    AutoPtr<ISQLiteStatement> stmt;
+    // try {
+    ECode ec = db->CompileStatement(
+        String("INSERT OR REPLACE INTO Locksettings(name,user,value) VALUES(?,?,?);"),
+        (ISQLiteStatement**)&stmt);
+    ISQLiteProgram* sp = ISQLiteProgram::Probe(stmt);
+    FAIL_GOTO(ec, _EXIT_)
+
+    ec = sp->BindString(1, key);
+    FAIL_GOTO(ec, _EXIT_)
+
+    ec = sp->BindInt64(2, userId);
+    FAIL_GOTO(ec, _EXIT_)
+
+    ec = sp->BindInt64(3, value ? 1 : 0);
+    FAIL_GOTO(ec, _EXIT_)
+
+    ec = stmt->Execute();
+    FAIL_GOTO(ec, _EXIT_)
+
+    // } finally {
+_EXIT_:
+    if (stmt != NULL) ICloseable::Probe(stmt)->Close();
+    // }
+    return ec;
 }
 
 ECode CLockSettingsService::DatabaseHelper::GetDatabaseName(
     /* [out] */ String* name)
 {
-    VALIDATE_NOT_NULL(name);
     return SQLiteOpenHelper::GetDatabaseName(name);
 }
 
@@ -113,14 +282,12 @@ ECode CLockSettingsService::DatabaseHelper::SetWriteAheadLoggingEnabled(
 ECode CLockSettingsService::DatabaseHelper::GetWritableDatabase(
     /* [out] */ ISQLiteDatabase** database)
 {
-    VALIDATE_NOT_NULL(database);
     return SQLiteOpenHelper::GetWritableDatabase(database);
 }
 
 ECode CLockSettingsService::DatabaseHelper::GetReadableDatabase(
     /* [out] */ ISQLiteDatabase** database)
 {
-    VALIDATE_NOT_NULL(database);
     return SQLiteOpenHelper::GetReadableDatabase(database);
 }
 
@@ -149,56 +316,99 @@ ECode CLockSettingsService::DatabaseHelper::OnOpen(
     return SQLiteOpenHelper::OnOpen(db);
 }
 
+//===========================================================================
+// CLockSettingsService::UserAddedBroadcastReceiver
+//===========================================================================
+CLockSettingsService::UserAddedBroadcastReceiver::UserAddedBroadcastReceiver(
+    /* [in] */ CLockSettingsService* host)
+    : mHost(host)
+{}
 
-//class CLockSettingsService's implement.
-String CLockSettingsService::TAG("LockSettingsService");
-String CLockSettingsService::TABLE = String("locksettings");
-String CLockSettingsService::COLUMN_KEY = String("name");
-String CLockSettingsService::COLUMN_USERID = String("user");
-String CLockSettingsService::COLUMN_VALUE = String("value");
-
-AutoPtr<ArrayOf<String> > CLockSettingsService::COLUMNS_FOR_QUERY;
-
-String CLockSettingsService::SYSTEM_DIRECTORY = String("/system/");
-String CLockSettingsService::LOCK_PATTERN_FILE = String("gesture.key");
-String CLockSettingsService::LOCK_PASSWORD_FILE = String("password.key");
-AutoPtr<ArrayOf<String> > CLockSettingsService::VALID_SETTINGS;
-Boolean CLockSettingsService::sInitArray = CLockSettingsService::InitArray();
-
-Boolean CLockSettingsService::InitArray()
+ECode CLockSettingsService::UserAddedBroadcastReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
 {
-    COLUMNS_FOR_QUERY = ArrayOf<String>::Alloc(1);
-    COLUMNS_FOR_QUERY->Set(0, COLUMN_VALUE);
+    String action;
+    intent->GetAction(&action);
+    if (action.Equals(IIntent::ACTION_USER_ADDED)) {
+        Int32 userHandle;
+        Int32 userSysUid = UserHandle::GetUid(userHandle, IProcess::SYSTEM_UID);
+        intent->GetInt32Extra(IIntent::EXTRA_USER_HANDLE, 0, &userHandle);
 
-    VALID_SETTINGS = ArrayOf<String>::Alloc(16);
-    VALID_SETTINGS->Set(0, String("lockscreen.lockedoutpermanently") /*LockPatternUtils.LOCKOUT_PERMANENT_KEY*/);
-    VALID_SETTINGS->Set(1, String("lockscreen.lockoutattemptdeadline") /*LockPatternUtils.LOCKOUT_ATTEMPT_DEADLINE*/);
-    VALID_SETTINGS->Set(2, String("lockscreen.patterneverchosen") /*LockPatternUtils.PATTERN_EVER_CHOSEN_KEY*/);
-    VALID_SETTINGS->Set(3, String("lockscreen.password_type") /*LockPatternUtils.PASSWORD_TYPE_KEY*/);
+        assert(0 && "TODO");
+        // AutoPtr<IKeyStoreHelper> helper;
+        // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+        // AutoPtr<IKeyStore> ks;
+        // helper->GetInstance((IKeyStore**)&ks);
 
-    VALID_SETTINGS->Set(4, String("lockscreen.password_type_alternate") /*LockPatternUtils.PASSWORD_TYPE_ALTERNATE_KEY*/);
-    VALID_SETTINGS->Set(5, String("lockscreen.password_salt") /*LockPatternUtils.LOCK_PASSWORD_SALT_KEY*/);
-    VALID_SETTINGS->Set(6, String("lockscreen.disabled") /*LockPatternUtils.DISABLE_LOCKSCREEN_KEY*/);
-    VALID_SETTINGS->Set(7, String("lockscreen.options") /*LockPatternUtils.LOCKSCREEN_OPTIONS*/);
+        // // Clear up keystore in case anything was left behind by previous users
+        // ks->ResetUid(userSysUid);
 
-    VALID_SETTINGS->Set(8, String("lockscreen.biometric_weak_fallback") /*LockPatternUtils.LOCKSCREEN_BIOMETRIC_WEAK_FALLBACK*/);
-    VALID_SETTINGS->Set(9, String("lockscreen.biometricweakeverchosen") /*LockPatternUtils.BIOMETRIC_WEAK_EVER_CHOSEN_KEY*/);
-    VALID_SETTINGS->Set(10, String("lockscreen.power_button_instantly_locks") /*LockPatternUtils.LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS*/);
-    VALID_SETTINGS->Set(11, String("lockscreen.passwordhistory") /*LockPatternUtils.PASSWORD_HISTORY_KEY*/);
-
-    VALID_SETTINGS->Set(12, String("lock_pattern_autolock")/*ISettingsSecure::LOCK_PATTERN_ENABLED*/);
-    VALID_SETTINGS->Set(13, String("lock_biometric_weak_flags")/*ISettingsSecure::LOCK_BIOMETRIC_WEAK_FLAGS*/);
-    VALID_SETTINGS->Set(14, String("lock_pattern_visible_pattern")/*ISettingsSecure::LOCK_PATTERN_VISIBLE*/);
-    VALID_SETTINGS->Set(15, String("lock_pattern_tactile_feedback_enabled")/*ISettingsSecure::LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED*/);
-    return TRUE;
+        // If this user has a parent, sync with its keystore password
+        AutoPtr<IInterface> service;
+        mHost->mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&service);
+        AutoPtr<IUserManager> um = IUserManager::Probe(service);
+        AutoPtr<IUserInfo> parentInfo;
+        um->GetProfileParent(userHandle, (IUserInfo**)&parentInfo);
+        if (parentInfo != NULL) {
+            Int32 id;
+            parentInfo->GetId(&id);
+            Int32 parentSysUid = UserHandle::GetUid(id, IProcess::SYSTEM_UID);
+            // ks->SyncUid(parentSysUid, userSysUid);
+        }
+    }
+    return NOERROR;
 }
+
+//===========================================================================
+// CLockSettingsService::LockSettingsObserver
+//===========================================================================
+CAR_INTERFACE_IMPL(CLockSettingsService::LockSettingsObserver, Object, IProxyDeathRecipient)
+CLockSettingsService::LockSettingsObserver::LockSettingsObserver(
+    /* [in] */ CLockSettingsService* lss)
+    : mHost(lss)
+{}
+
+ECode CLockSettingsService::LockSettingsObserver::ProxyDied()
+{
+    AutoPtr<LockSettingsObserver> lss = this;
+    List<AutoPtr<LockSettingsObserver> >::Iterator it;
+    it = Find(mHost->mObservers.Begin(), mHost->mObservers.End(), lss);
+    if (it != mHost->mObservers.End()) {
+        mHost->mObservers.Erase(it);
+    }
+
+    return NOERROR;
+}
+
+//===========================================================================
+// CLockSettingsService
+//===========================================================================
+
+CAR_INTERFACE_IMPL_2(CLockSettingsService, Object, IILockSettings, IBinder)
+
+CAR_OBJECT_IMPL(CLockSettingsService)
+
+CLockSettingsService::CLockSettingsService()
+    : mFirstCallToVold(TRUE)
+{}
 
 ECode CLockSettingsService::constructor(
     /* [in] */ IContext* context)
 {
     mContext = context;
     // Open the database
-    mOpenHelper = new DatabaseHelper(mContext, this);
+    mOpenHelper = new DatabaseHelper();
+    mOpenHelper->constructor(mContext, this);
+    CLockPatternUtils::New(context, (ILockPatternUtils**)&mLockPatternUtils);
+
+    AutoPtr<IIntentFilter> filter;
+    CIntentFilter::New((IIntentFilter**)&filter);
+    filter->AddAction(IIntent::ACTION_USER_ADDED);
+    AutoPtr<IIntent> intent;
+    mContext->RegisterReceiverAsUser(mBroadcastReceiver, UserHandle::ALL, filter,
+        String(NULL), NULL, (IIntent**)&intent);
+
     return NOERROR;
 }
 
@@ -211,80 +421,118 @@ ECode CLockSettingsService::SystemReady()
 
 void CLockSettingsService::MigrateOldData()
 {
-    //try {
+    // These Settings moved before multi-user was enabled, so we only have to do it for the
+    // root user.
+    ECode ec = NOERROR;
     String data;
-    if ((GetString(String("migrated"), String(NULL), 0, &data), data) != NULL) {
-        // Already migrated
-        return;
+    GetString(String("migrated"), String(NULL), 0, &data);
+    if (data == NULL) {
+        AutoPtr<IContentResolver> cr;
+        mContext->GetContentResolver((IContentResolver**)&cr);
+        Int32 length = VALID_SETTINGS->GetLength();
+        for (Int32 i = 0; i < length; ++i) {
+            String validSetting = (*VALID_SETTINGS)[i];
+            String value;
+            Settings::Secure::GetString(cr, validSetting, &value);
+            if (value != NULL) {
+                SetString(validSetting, value, 0);
+            }
+        }
+        // No need to move the password / pattern files. They're already in the right place.
+        SetString(String("migrated"), String("TRUE"), 0);
+        Slogger::I(TAG, "Migrated lock settings to new location");
     }
 
-    AutoPtr<IContentResolver> cr;
-    mContext->GetContentResolver((IContentResolver**)&cr);
-    for (Int32 i = 0; i < VALID_SETTINGS->GetLength(); i++) {
-        String validSetting = (*VALID_SETTINGS)[i];
-        String value;
-        AutoPtr<ISettingsSecure> settingsSecure;
-        CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
-        settingsSecure->GetString(cr, validSetting, &value);
-        if (value != NULL) {
-            SetString(validSetting, value, 0);
+    // These Settings changed after multi-user was enabled, hence need to be moved per user.
+    GetString(String("migrated_user_specific"), String(NULL), 0, &data);
+    if (data == NULL) {
+        AutoPtr<IInterface> service;
+        mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&service);
+        AutoPtr<IUserManager> um = IUserManager::Probe(service);
+        AutoPtr<IContentResolver> cr;
+        mContext->GetContentResolver((IContentResolver**)&cr);
+        AutoPtr<IList> users;
+        um->GetUsers((IList**)&users);
+        Int32 size;
+        users->GetSize(&size);
+        Boolean bval;
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> obj;
+            users->Get(i, (IInterface**)&obj);
+            IUserInfo* ui = IUserInfo::Probe(obj);
+            // Migrate owner info
+            Int32 userId;
+            ui->GetId(&userId);
+            String OWNER_INFO = ISettingsSecure::LOCK_SCREEN_OWNER_INFO;
+            String ownerInfo;
+            Settings::Secure::GetStringForUser(cr, OWNER_INFO, userId, &ownerInfo);
+            if (ownerInfo != NULL) {
+                SetString(OWNER_INFO, ownerInfo, userId);
+                Settings::Secure::PutStringForUser(cr, ownerInfo, String(""), userId, &bval);
+            }
+
+            // Migrate owner info enabled.  Note there was a bug where older platforms only
+            // stored this value if the checkbox was toggled at least once. The code detects
+            // this case by handling the exception.
+            String OWNER_INFO_ENABLED = ISettingsSecure::LOCK_SCREEN_OWNER_INFO_ENABLED;
+            Boolean enabled;
+
+            Int32 ivalue;
+            Int64 lvalue;
+            ec = Settings::Secure::GetInt32ForUser(cr, OWNER_INFO_ENABLED, userId, &ivalue);
+            if (ec == (ECode)E_SETTING_NOT_FOUND_EXCEPTION) {
+                // Setting was never stored. Store it if the string is not empty.
+                if (!TextUtils::IsEmpty(ownerInfo)) {
+                    GetInt64(OWNER_INFO_ENABLED, 1, userId, &lvalue);
+                }
+            }
+            else {
+                enabled = ivalue != 0;
+                GetInt64(OWNER_INFO_ENABLED, enabled ? 1 : 0, userId, &lvalue);
+            }
+
+            Settings::Secure::PutInt32ForUser(cr, OWNER_INFO_ENABLED, 0, userId, &bval);
+        }
+
+        // No need to move the password / pattern files. They're already in the right place.
+        SetString(String("migrated_user_specific"), String("TRUE"), 0);
+        Slogger::I("CLockSettingsService", "Migrated per-user lock settings to new location");
+    }
+
+// _EXIT_:
+//     if (ec == (ECode)E_REMOTE_EXCEPTION) {
+//         Slogger::E("CLockSettingsService", "Unable to migrate old data");
+//     }
+}
+
+ECode CLockSettingsService::CheckWritePermission(
+    /* [in] */ Int32 userId)
+{
+    return mContext->EnforceCallingOrSelfPermission(PERMISSION, String("LockSettingsWrite"));
+}
+
+ECode CLockSettingsService::CheckPasswordReadPermission(
+    /* [in] */ Int32 userId)
+{
+    return mContext->EnforceCallingOrSelfPermission(PERMISSION, String("LockSettingsRead"));
+}
+
+ECode CLockSettingsService::CheckReadPermission(
+    /* [in] */ const String& requestedKey,
+    /* [in] */ Int32 userId)
+{
+    Int32 callingUid = Binder::GetCallingUid();
+    Int32 perm;
+    for (Int32 i = 0; i < READ_PROFILE_PROTECTED_SETTINGS->GetLength(); i++) {
+        String key = (*READ_PROFILE_PROTECTED_SETTINGS)[i];
+        mContext->CheckCallingOrSelfPermission(Manifest::permission::READ_PROFILE, &perm);
+        if (key.Equals(requestedKey) && perm != IPackageManager::PERMISSION_GRANTED) {
+            Slogger::E(TAG, "uid=%d needs permission %s to read %s for user %d.",
+                callingUid, Manifest::permission::READ_PROFILE.string(), requestedKey.string(), userId);
+            return E_SECURITY_EXCEPTION;
         }
     }
-    // No need to move the password / pattern files. They're already in the right place.
-    SetString(String("migrated"), String("TRUE"), 0);
-        //Slog.i(TAG, "Migrated lock settings to new location");
-    /*} catch (RemoteException re) {
-        Slog.e(TAG, "Unable to migrate old data");
-    }*/
-}
-
-void CLockSettingsService::CheckWritePermission(
-    /* [in] */ Int32 userId)
-{
-    Int32 callingUid = Binder::GetCallingUid();
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-
-    Int32 appId = 0;
-    helper->GetAppId(callingUid, &appId);
-    if (appId != IProcess::SYSTEM_UID) {
-        assert(0);
-        // throw new SecurityException("uid=" + callingUid
-        //         + " not authorized to write lock settings");
-    }
-}
-
-void CLockSettingsService::CheckPasswordReadPermission(
-    /* [in] */ Int32 userId)
-{
-    Int32 callingUid = Binder::GetCallingUid();
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-
-    Int32 appId = 0;
-    helper->GetAppId(callingUid, &appId);
-    if (appId != IProcess::SYSTEM_UID) {
-        assert(0);
-        // throw new SecurityException("uid=" + callingUid
-        //         + " not authorized to read lock password");
-    }
-}
-
-void CLockSettingsService::CheckReadPermission(
-    /* [in] */ Int32 userId)
-{
-    Int32 callingUid = Binder::GetCallingUid();
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-
-    Int32 appId = 0, uId = 0;
-    helper->GetAppId(callingUid, &appId);
-    helper->GetUserId(callingUid, &uId);
-    if (appId != IProcess::SYSTEM_UID && uId != userId) {
-        assert(0);
-        // throw new SecurityException("uid=" + callingUid
-        //         + " not authorized to read settings of user " + userId);
-    }
+    return NOERROR;
 }
 
 ECode CLockSettingsService::SetBoolean(
@@ -292,10 +540,9 @@ ECode CLockSettingsService::SetBoolean(
     /* [in] */ Boolean value,
     /* [in] */ Int32 userId)
 {
-    CheckWritePermission(userId);
+    FAIL_RETURN(CheckWritePermission(userId))
 
-    WriteToDb(key, value ? String("1") : String("0"), userId);
-    return NOERROR;
+    return WriteToDb(key, value ? String("1") : String("0"), userId);
 }
 
 ECode CLockSettingsService::SetInt64(
@@ -303,10 +550,9 @@ ECode CLockSettingsService::SetInt64(
     /* [in] */ Int64 value,
     /* [in] */ Int32 userId)
 {
-    CheckWritePermission(userId);
+    FAIL_RETURN(CheckWritePermission(userId))
 
-    WriteToDb(key, StringUtils::Int64ToString(value), userId);
-    return NOERROR;
+    return WriteToDb(key, StringUtils::ToString(value), userId);
 }
 
 ECode CLockSettingsService::SetString(
@@ -314,10 +560,9 @@ ECode CLockSettingsService::SetString(
     /* [in] */ const String& value,
     /* [in] */ Int32 userId)
 {
-    CheckWritePermission(userId);
+    FAIL_RETURN(CheckWritePermission(userId))
 
-    WriteToDb(key, value, userId);
-    return NOERROR;
+    return WriteToDb(key, value, userId);
 }
 
 ECode CLockSettingsService::GetBoolean(
@@ -326,8 +571,10 @@ ECode CLockSettingsService::GetBoolean(
     /* [in] */ Int32 userId,
     /* [out] */ Boolean* res)
 {
-    //checkReadPermission(userId);
     VALIDATE_NOT_NULL(res);
+    *res = FALSE;
+
+    FAIL_RETURN(CheckReadPermission(key, userId))
     String value;
     FAIL_RETURN(ReadFromDb(key, String(NULL), userId, &value))
     *res = TextUtils::IsEmpty(value) ?
@@ -342,7 +589,9 @@ ECode CLockSettingsService::GetInt64(
     /* [out] */ Int64* res)
 {
     VALIDATE_NOT_NULL(res);
-    //checkReadPermission(userId);
+    *res = 0;
+
+    CheckReadPermission(key, userId);
 
     String value;
     FAIL_RETURN(ReadFromDb(key, String(NULL), userId, &value))
@@ -357,12 +606,102 @@ ECode CLockSettingsService::GetString(
     /* [out] */ String* retValue)
 {
     VALIDATE_NOT_NULL(retValue);
-    //checkReadPermission(userId);
+    *retValue = "";
+
+    FAIL_RETURN(CheckReadPermission(key, userId))
     return ReadFromDb(key, defaultValue, userId, retValue);
 }
 
-String CLockSettingsService::GetLockPatternFilename(
+ECode CLockSettingsService::RegisterObserver(
+    /* [in] */ IILockSettingsObserver* remote)
+{
+    AutoPtr<ISystemProperties> sysprop;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sysprop);
+    synchronized(mObserversLock) {
+        List<AutoPtr<LockSettingsObserver> >::Iterator it = mObservers.Begin();
+        for (; it != mObservers.End(); ++it) {
+            LockSettingsObserver* lso = *it;
+            if (lso->mRemote.Get() == remote) {
+                String value;
+                sysprop->Get(SYSTEM_DEBUGGABLE, String("0"), &value);
+                Boolean isDebuggable = value.Equals("1");
+                if (isDebuggable) {
+                    Slogger::E(TAG, "Observer was already registered.");
+                    return E_ILLEGAL_STATE_EXCEPTION;
+                }
+                else {
+                    Slogger::E(TAG, "Observer was already registered.");
+                    return NOERROR;
+                }
+            }
+        }
+
+        AutoPtr<LockSettingsObserver> o = new LockSettingsObserver(this);
+        o->mRemote = remote;
+        AutoPtr<IBinder> binder = IBinder::Probe(o->mRemote);
+        IProxy* proxy = ((IProxy*)o->mRemote->Probe(EIID_IProxy));
+        if (proxy != NULL) proxy->LinkToDeath((IProxyDeathRecipient*)o.Get(), 0);
+        mObservers.PushBack(o);
+    }
+    return NOERROR;
+}
+
+ECode CLockSettingsService::UnregisterObserver(
+    /* [in] */ IILockSettingsObserver* remote)
+{
+    synchronized(mObserversLock) {
+        List<AutoPtr<LockSettingsObserver> >::Iterator it = mObservers.Begin();
+        for (; it != mObservers.End(); ++it) {
+            LockSettingsObserver* lso = *it;
+            if (lso->mRemote.Get() == remote) {
+                mObservers.Erase(it);
+                return NOERROR;
+            }
+        }
+    }
+    return NOERROR;
+}
+
+ECode CLockSettingsService::NotifyObservers(
+    /* [in] */ const String& key,
     /* [in] */ Int32 userId)
+{
+    synchronized(mObserversLock) {
+        ECode ec = NOERROR;
+        List<AutoPtr<LockSettingsObserver> >::Iterator it = mObservers.Begin();
+        for (; it != mObservers.End(); ++it) {
+            LockSettingsObserver* lso = *it;
+            ec = lso->mRemote->OnLockSettingChanged(key, userId);
+            if (ec == (ECode)E_REMOTE_EXCEPTION) {
+                // The stack trace is not really helpful here.
+                Slogger::E(TAG, "Failed to notify ILockSettingsObserver: ");
+            }
+        }
+    }
+    return NOERROR;
+}
+
+Int32 CLockSettingsService::GetUserParentOrSelfId(
+    /* [in] */ Int32 userId)
+{
+    if (userId != 0) {
+        AutoPtr<IInterface> obj;
+        mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
+        AutoPtr<IUserManager> um = IUserManager::Probe(obj);
+        AutoPtr<IUserInfo> pi;
+        um->GetProfileParent(userId, (IUserInfo**)&pi);
+        if (pi != NULL) {
+            Int32 id;
+            pi->GetId(&id);
+            return id;
+        }
+    }
+    return userId;
+}
+
+
+String CLockSettingsService::GetLockPatternFilename(
+    /* [in] */ Int32 uid)
 {
     AutoPtr<IEnvironment> env;
     CEnvironment::AcquireSingleton((IEnvironment**)&env);
@@ -372,6 +711,8 @@ String CLockSettingsService::GetLockPatternFilename(
     String absPath;
     dataDir->GetAbsolutePath(&absPath);
     String dataSystemDirectory = absPath + SYSTEM_DIRECTORY;
+
+    Int32 userId = GetUserParentOrSelfId(uid);
     if (userId == 0) {
         // Leave it in the same place for user 0
         return dataSystemDirectory + LOCK_PATTERN_FILE;
@@ -386,8 +727,9 @@ String CLockSettingsService::GetLockPatternFilename(
 }
 
 String CLockSettingsService::GetLockPasswordFilename(
-    /* [in] */ Int32 userId)
+    /* [in] */ Int32 uid)
 {
+    Int32 userId = GetUserParentOrSelfId(uid);
     AutoPtr<IEnvironment> env;
     CEnvironment::AcquireSingleton((IEnvironment**)&env);
     AutoPtr<IFile> dataDir;
@@ -424,6 +766,50 @@ ECode CLockSettingsService::HavePassword(
     return NOERROR;
 }
 
+void CLockSettingsService::MaybeUpdateKeystore(
+    /* [in] */ const String& password,
+    /* [in] */ Int32 userHandle)
+{
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IUserManager> um = IUserManager::Probe(obj);
+
+    assert(0 && "TODO");
+    // AutoPtr<IKeyStoreHelper> helper;
+    // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+    // AutoPtr<IKeyStore> ks;
+    // helper->GetInstance((IKeyStore**)&ks);
+
+    AutoPtr<IList> profiles;
+    um->GetProfiles(userHandle, (IList**)&profiles);
+    Boolean shouldReset = TextUtils::IsEmpty(password);
+
+    // For historical reasons, don't wipe a non-empty keystore if we have a single user with a
+    // single profile.
+    Int32 size;
+    profiles->GetSize(&size);
+    if (userHandle == IUserHandle::USER_OWNER && size == 1) {
+        // if (!ks->IsEmpty()) {
+        //     shouldReset = FALSE;
+        // }
+    }
+
+    // AutoPtr<IIterator> it;
+    // profiles->GetIterator((IIterator**)&it);
+    // Boolean hasNext;
+    // while (it->HasNext(&hasNext)) {
+    //     AutoPtr<IInterface> obj;
+    //     it->GetNext((IInterface**)&obj);
+    //     IUserInfo* ui = IUserInfo::Probe(obj);
+    //     Int32 profileUid = UserHandle::GetUid(pi.id, IProcess::SYSTEM_UID);
+    //     if (shouldReset) {
+    //         ks->ResetUid(profileUid);
+    //     } else {
+    //         ks->PasswordUid(password, profileUid);
+    //     }
+    // }
+}
+
 ECode CLockSettingsService::HavePattern(
     /* [in] */ Int32 userId,
     /* [out] */ Boolean* res)
@@ -439,134 +825,240 @@ ECode CLockSettingsService::HavePattern(
 }
 
 ECode CLockSettingsService::SetLockPattern(
-    /* [in] */ const ArrayOf<Byte>& hash,
+    /* [in] */ const String& pattern,
+    /* [in] */ Int32 userId)
+{
+    FAIL_RETURN(CheckWritePermission(userId))
+
+    MaybeUpdateKeystore(pattern, userId);
+
+    AutoPtr<ArrayOf<Byte> > hash;
+
+    assert(0 && "TODO");
+    // AutoPtr<ILockPatternUtilsHelper> helper;
+    // CLockPatternUtilsHelper::AcquireSingleton((ILockPatternUtilsHelper**)&helper);
+    // AutoPtr<IList> list;
+    // helper->StringToPattern(pattern, (IList**)&list);
+    // helper->PatternToHash(list, (ArrayOf<Byte>**)&hash);
+
+    return WriteFile(GetLockPatternFilename(userId), hash);
+}
+
+ECode CLockSettingsService::SetLockPassword(
+    /* [in] */ const String& password,
     /* [in] */ Int32 userId)
 {
     CheckWritePermission(userId);
 
-    WriteFile(GetLockPatternFilename(userId), (ArrayOf<Byte>*)&hash);
-    return NOERROR;
+    MaybeUpdateKeystore(password, userId);
+
+    AutoPtr<ArrayOf<Byte> > hash;
+    mLockPatternUtils->PasswordToHash(password, userId, (ArrayOf<Byte>**)&hash);
+    return WriteFile(GetLockPasswordFilename(userId), hash);
 }
 
 ECode CLockSettingsService::CheckPattern(
-    /* [in] */ const ArrayOf<Byte>& hash,
+    /* [in] */ const String& pattern,
     /* [in] */ Int32 userId,
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    CheckPasswordReadPermission(userId);
+    *res = FALSE;
+    FAIL_RETURN(CheckPasswordReadPermission(userId))
+
+    assert(0 && "TODO");
+    // AutoPtr<ILockPatternUtilsHelper> helper;
+    // CLockPatternUtilsHelper::AcquireSingleton((ILockPatternUtilsHelper**)&helper);
+    AutoPtr<IList> list;
+    AutoPtr<ArrayOf<Byte> > bytes;
+    Boolean matched;
+
     // try {
     // Read all the bytes from the file
     AutoPtr<IRandomAccessFile> raf;
-    CRandomAccessFile::New(GetLockPatternFilename(userId), String("r"), (IRandomAccessFile**)&raf);
+    CRandomAccessFile::New(GetLockPatternFilename(userId),
+        String("r"), (IRandomAccessFile**)&raf);
 
     Int64 len = 0;
     raf->GetLength(&len);
     AutoPtr<ArrayOf<Byte> > stored = ArrayOf<Byte>::Alloc((Int32)len);
     Int32 got = 0;
-    FAIL_GOTO(raf->ReadBytes(stored, 0, stored->GetLength(), &got), ERROR);
-    raf->Close();
+    FAIL_GOTO(raf->Read(stored, 0, stored->GetLength(), &got), ERROR);
+    ICloseable::Probe(raf)->Close();
     if (got <= 0) {
         *res = TRUE;
         return NOERROR;
     }
-    // Compare the hash from the file with the entered pattern's hash
-    *res = stored->Equals(&hash);
+
+    assert(0 && "TODO");
+    // helper->StringToPattern(pattern, (IList**)&list);
+    // helper->PatternToHash(list, (ArrayOf<Byte>**)&bytes);
+    matched = Arrays::Equals(stored, bytes);
+    if (matched && !TextUtils::IsEmpty(pattern)) {
+        MaybeUpdateKeystore(pattern, userId);
+    }
+    *res = matched;
     return NOERROR;
     // } catch (FileNotFoundException fnfe) {
-    //     Slog.e(TAG, "Cannot read file " + fnfe);
-    //     return true;
+    //     Slogger::E(TAG, "Cannot read file " + fnfe);
+    //     return TRUE;
     // } catch (IOException ioe) {
-    //     Slog.e(TAG, "Cannot read file " + ioe);
-    //     return true;
+    //     Slogger::E(TAG, "Cannot read file " + ioe);
+    //     return TRUE;
     // }
 ERROR:
-    raf->Close();
+    ICloseable::Probe(raf)->Close();
     *res = TRUE;
     return NOERROR;
 }
 
-ECode CLockSettingsService::SetLockPassword(
-    /* [in] */ const ArrayOf<Byte>& hash,
-    /* [in] */ Int32 userId)
-{
-    CheckWritePermission(userId);
-
-    WriteFile(GetLockPasswordFilename(userId), (ArrayOf<Byte>*)&hash);
-    return NOERROR;
-}
-
 ECode CLockSettingsService::CheckPassword(
-    /* [in] */ const ArrayOf<Byte>& hash,
+    /* [in] */ const String& password,
     /* [in] */ Int32 userId,
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    CheckPasswordReadPermission(userId);
+    *res = FALSE;
+    FAIL_RETURN(CheckPasswordReadPermission(userId))
+
+    Int64 len = 0;
+    Int32 got = 0;
+    Boolean matched;
+    AutoPtr<ArrayOf<Byte> > hash;
+    AutoPtr<ArrayOf<Byte> > stored;
 
     // try {
     // Read all the bytes from the file
     AutoPtr<IRandomAccessFile> raf;
-    CRandomAccessFile::New(GetLockPasswordFilename(userId), String("r"), (IRandomAccessFile**)&raf);
-    Int64 len = 0;
+    ECode ec = CRandomAccessFile::New(GetLockPasswordFilename(userId), String("r"), (IRandomAccessFile**)&raf);
+    FAIL_GOTO(ec, ERROR)
+
     raf->GetLength(&len);
-    AutoPtr<ArrayOf<Byte> > stored = ArrayOf<Byte>::Alloc((Int32)len);
-    Int32 got = 0;
-    FAIL_GOTO(raf->ReadBytes(stored, 0, stored->GetLength(), &got), ERROR);
-    raf->Close();
+    stored = ArrayOf<Byte>::Alloc((Int32)len);
+    FAIL_GOTO(raf->Read(stored, 0, stored->GetLength(), &got), ERROR);
+    ICloseable::Probe(raf)->Close();
     if (got <= 0) {
         *res = TRUE;
         return NOERROR;
     }
     // Compare the hash from the file with the entered password's hash
-    *res = stored->Equals(&hash);
+    mLockPatternUtils->PasswordToHash(password, userId, (ArrayOf<Byte>**)&hash);
+    matched = Arrays::Equals(stored, hash);
+    if (matched && !TextUtils::IsEmpty(password)) {
+        MaybeUpdateKeystore(password, userId);
+    }
+    *res = matched;
     return NOERROR;
     // } catch (FileNotFoundException fnfe) {
-    //     Slog.e(TAG, "Cannot read file " + fnfe);
-    //     return true;
+    //     Slogger::E(TAG, "Cannot read file " + fnfe);
+    //     return TRUE;
     // } catch (IOException ioe) {
-    //     Slog.e(TAG, "Cannot read file " + ioe);
-    //     return true;
+    //     Slogger::E(TAG, "Cannot read file " + ioe);
+    //     return TRUE;
     // }
 ERROR:
-    raf->Close();
+    ICloseable::Probe(raf)->Close();
     *res = TRUE;
+    return NOERROR;
+}
+
+ECode CLockSettingsService::CheckVoldPassword(
+    /* [in] */ Int32 userId,
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+
+    if (!mFirstCallToVold) {
+        return NOERROR;
+    }
+    mFirstCallToVold = FALSE;
+
+    FAIL_RETURN(CheckPasswordReadPermission(userId))
+
+    // There's no guarantee that this will safely connect, but if it fails
+    // we will simply show the lock screen when we shouldn't, so relatively
+    // benign. There is an outside chance something nasty would happen if
+    // this service restarted before vold stales out the password in this
+    // case. The nastiness is limited to not showing the lock screen when
+    // we should, within the first minute of decrypting the phone if this
+    // service can't connect to vold, it restarts, and then the new instance
+    // does successfully connect.
+    AutoPtr<IIMountService> service = GetMountService();
+    String password;
+    service->GetPassword(&password);
+    service->ClearPassword();
+    if (password == NULL) {
+        return NOERROR;
+    }
+
+    Boolean bval;
+    mLockPatternUtils->IsLockPatternEnabled(&bval);
+    if (bval) {
+        if (CheckPattern(password, userId, &bval), bval) {
+            *res = TRUE;
+            return NOERROR;
+        }
+    }
+
+    mLockPatternUtils->IsLockPasswordEnabled(&bval);
+    if (bval) {
+        if (CheckPassword(password, userId, &bval), bval) {
+            *res = TRUE;
+            return NOERROR;
+        }
+    }
+
     return NOERROR;
 }
 
 ECode CLockSettingsService::RemoveUser(
     /* [in] */ Int32 userId)
 {
-    CheckWritePermission(userId);
+    FAIL_RETURN(CheckWritePermission(userId))
 
     AutoPtr<ISQLiteDatabase> db;
     mOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&db);
-    //try {
-    AutoPtr<IFile> file;
-    CFile::New(GetLockPasswordFilename(userId), (IFile**)&file);
-    Boolean exist = FALSE, isDeleted = FALSE;
-    if (file->Exists(&exist), exist) {
-        file->Delete(&isDeleted);
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&service);
+    AutoPtr<IUserManager> um = IUserManager::Probe(service);
+    AutoPtr<IUserInfo> parentInfo;
+    um->GetProfileParent(userId, (IUserInfo**)&parentInfo);
+    if (parentInfo == NULL) {
+        //try {
+        AutoPtr<IFile> file;
+        CFile::New(GetLockPasswordFilename(userId), (IFile**)&file);
+        Boolean exist = FALSE, isDeleted = FALSE;
+        if (file->Exists(&exist), exist) {
+            file->Delete(&isDeleted);
+        }
+
+        file = NULL;
+        CFile::New(GetLockPatternFilename(userId), (IFile**)&file);
+        if (file->Exists(&exist), exist) {
+            file->Delete(&isDeleted);
+        }
+
+        db->BeginTransaction();
+        Int32 value = 0;
+        db->Delete(TABLE, COLUMN_USERID + String("='") + StringUtils::ToString(userId) + String("'"), NULL, &value);
+        db->SetTransactionSuccessful();
+        //} finally {
+        db->EndTransaction();
+        //}
     }
 
-    file = NULL;
-    CFile::New(GetLockPatternFilename(userId), (IFile**)&file);
-    if (file->Exists(&exist), exist) {
-        file->Delete(&isDeleted);
-    }
-
-    db->BeginTransaction();
-    Int32 value = 0;
-    db->Delete(TABLE, COLUMN_USERID + String("='") + StringUtils::Int32ToString(userId) + String("'"), NULL, &value);
-    db->SetTransactionSuccessful();
-    //} finally {
-    db->EndTransaction();
-    //}
-
+    assert(0 && "TODO");
+    // AutoPtr<IKeyStoreHelper> helper;
+    // CKeyStoreHelper::AcquireSingleton((IKeyStoreHelper**)&helper);
+    // AutoPtr<IKeyStore> ks;
+    // helper->GetInstance((IKeyStore**)&ks);
+    // Int32 userUid = UserHandle::GetUid(userId, IProcess::SYSTEM_UID);
+    // ks->ResetUid(userUid);
     return NOERROR;
 }
 
-void CLockSettingsService::WriteFile(
+ECode CLockSettingsService::WriteFile(
     /* [in] */ const String& name,
     /* [in] */ ArrayOf<Byte>* hash)
 {
@@ -574,19 +1066,20 @@ void CLockSettingsService::WriteFile(
     // Write the hash to file
     AutoPtr<IRandomAccessFile> raf;
     CRandomAccessFile::New(name, String("rw"), (IRandomAccessFile**)&raf);
-    // Truncate the file if pattern is null, to clear the lock
+    // Truncate the file if pattern is NULL, to clear the lock
     if (hash == NULL || hash->GetLength() == 0) {
         raf->SetLength(0);
     } else {
-        raf->WriteBytes(*hash, 0, hash->GetLength());
+        IDataOutput::Probe(raf)->Write(hash, 0, hash->GetLength());
     }
-    raf->Close();
+    ICloseable::Probe(raf)->Close();
     // } catch (IOException ioe) {
-    //     Slog.e(TAG, "Error writing to file " + ioe);
+    //     Slogger::E(TAG, "Error writing to file " + ioe);
     // }
+    return NOERROR;
 }
 
-void CLockSettingsService::WriteToDb(
+ECode CLockSettingsService::WriteToDb(
     /* [in] */ const String& key,
     /* [in] */ const String& value,
     /* [in] */ Int32 userId)
@@ -594,42 +1087,49 @@ void CLockSettingsService::WriteToDb(
     AutoPtr<ISQLiteDatabase> database;
     mOpenHelper->GetWritableDatabase((ISQLiteDatabase**)&database);
     WriteToDb(database, key, value, userId);
+    NotifyObservers(key, userId);
+    return NOERROR;
 }
 
-void CLockSettingsService::WriteToDb(
+ECode CLockSettingsService::WriteToDb(
     /* [in] */ ISQLiteDatabase* db,
     /* [in] */ const String& key,
     /* [in] */ const String& value,
     /* [in] */ Int32 userId)
 {
+    ECode ec = NOERROR;
     AutoPtr<IContentValues> cv;
     CContentValues::New((IContentValues**)&cv);
     AutoPtr<ICharSequence> strValue;
     CString::New(key, (ICharSequence**)&strValue);
-    cv->PutString(COLUMN_KEY, strValue);
+    cv->Put(COLUMN_KEY, strValue);
 
     AutoPtr<IInteger32> intValue;
     CInteger32::New(userId, (IInteger32**)&intValue);
-    cv->PutInt32(COLUMN_USERID, intValue);
+    cv->Put(COLUMN_USERID, intValue);
 
     strValue = NULL;
     CString::New(value, (ICharSequence**)&strValue);
-    cv->PutString(COLUMN_VALUE, strValue);
+    cv->Put(COLUMN_VALUE, strValue);
 
     db->BeginTransaction();
     //try {
     AutoPtr<ArrayOf<String> > keys = ArrayOf<String>::Alloc(2);
     keys->Set(0, key);
-    keys->Set(1, StringUtils::Int32ToString(userId));
+    keys->Set(1, StringUtils::ToString(userId));
     Int32 tmp = 0;
-    db->Delete(TABLE, COLUMN_KEY + String("=? AND ") + COLUMN_USERID + String("=?"), keys, &tmp);
+    ec = db->Delete(TABLE, COLUMN_KEY + String("=? AND ") + COLUMN_USERID + String("=?"), keys, &tmp);
+    FAIL_RETURN(ec)
 
     Int64 id = 0;
-    db->Insert(TABLE, String(NULL), cv, &id);
+    ec = db->Insert(TABLE, String(NULL), cv, &id);
+    FAIL_RETURN(ec)
+
     db->SetTransactionSuccessful();
     //} finally {
-    db->EndTransaction();
+    ec = db->EndTransaction();
     //}
+    return ec;
 }
 
 ECode CLockSettingsService::ReadFromDb(
@@ -638,6 +1138,9 @@ ECode CLockSettingsService::ReadFromDb(
     /* [in] */ Int32 userId,
     /* [out]*/ String* value)
 {
+    VALIDATE_NOT_NULL(value)
+    *value = NULL;
+
     AutoPtr<ICursor> cursor;
     String result = defaultValue;
     AutoPtr<ISQLiteDatabase> db;
@@ -646,7 +1149,7 @@ ECode CLockSettingsService::ReadFromDb(
     assert(db != NULL);
     String selection = COLUMN_USERID + String("=? AND ") + COLUMN_KEY + String("=?");
     AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(2);
-    args->Set(0, StringUtils::Int32ToString(userId));
+    args->Set(0, StringUtils::ToString(userId));
     args->Set(1, key);
     FAIL_RETURN(db->Query(TABLE, COLUMNS_FOR_QUERY, selection, args, String(NULL),
         String(NULL), String(NULL), (ICursor**)&cursor))
@@ -657,13 +1160,25 @@ ECode CLockSettingsService::ReadFromDb(
         if (succeeded) {
             cursor->GetString(0, &result);
         }
-        cursor->Close();
+        ICloseable::Probe(cursor)->Close();
     }
     *value = result;
     return NOERROR;
 }
 
-}// namespace Internal
-}// namespace Widget
+AutoPtr<IIMountService> CLockSettingsService::GetMountService()
+{
+    AutoPtr<IServiceManager> sm;
+    CServiceManager::AcquireSingleton((IServiceManager**)&sm);
+    AutoPtr<IInterface> obj;
+    sm->GetService(String("mount"), (IInterface**)&obj);
+    if (obj != NULL) {
+        return IIMountService::Probe(obj);
+    }
+    return NULL;
+}
+
+
+}// namespace Server
 }// namespace Droid
 }// namespace Elastos

@@ -234,7 +234,7 @@ ECode CTvInputManager::TvInputClient::OnSessionReleased(
         mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
         mHost->mSessionCallbackRecordMap->Delete(seq);
         if (record == NULL) {
-            Logger::E(TAG, String("Callback not found for seq:") + seq);
+            Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
         }
         ((CTvInputManagerSession*)record->mSession.Get())->ReleaseInternal();
@@ -253,7 +253,7 @@ ECode CTvInputManager::TvInputClient::OnSessionEvent(
         AutoPtr<SessionCallbackRecord> record;
         mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
         if (record == NULL) {
-            Logger::E(TAG, String("Callback not found for seq ") + seq);
+            Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
         }
         record->PostSessionEvent(eventType, eventArgs);
@@ -270,7 +270,7 @@ ECode CTvInputManager::TvInputClient::OnChannelRetuned(
         AutoPtr<SessionCallbackRecord> record;
         mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
         if (record == NULL) {
-            Logger::E(TAG, String("Callback not found for seq ") + seq);
+            Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
         }
         record->PostChannelRetuned(channelUri);
@@ -287,7 +287,7 @@ ECode CTvInputManager::TvInputClient::OnTracksChanged(
         AutoPtr<SessionCallbackRecord> record;
         mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
         if (record == NULL) {
-            Logger::E(TAG, String("Callback not found for seq ") + seq);
+            Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
         }
         record->PostTracksChanged(tracks);
@@ -305,7 +305,7 @@ ECode CTvInputManager::TvInputClient::OnTrackSelected(
         AutoPtr<SessionCallbackRecord> record;
         mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
         if (record == NULL) {
-            Logger::E(TAG, String("Callback not found for seq ") + seq);
+            Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
         }
         record->PostTrackSelected(type, trackId);
@@ -321,7 +321,7 @@ ECode CTvInputManager::TvInputClient::OnVideoAvailable(
         AutoPtr<SessionCallbackRecord> record;
         mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
         if (record == NULL) {
-            Logger::E(TAG, String("Callback not found for seq ") + seq);
+            Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
         }
         record->PostVideoAvailable();
@@ -338,7 +338,7 @@ ECode CTvInputManager::TvInputClient::OnVideoUnavailable(
         AutoPtr<SessionCallbackRecord> record;
         mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
         if (record == NULL) {
-            Logger::E(TAG, String("Callback not found for seq ") + seq);
+            Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
         }
         record->PostVideoUnavailable(reason);
@@ -354,7 +354,7 @@ ECode CTvInputManager::TvInputClient::OnContentAllowed(
         AutoPtr<SessionCallbackRecord> record;
         mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
         if (record == NULL) {
-            Logger::E(TAG, String("Callback not found for seq ") + seq);
+            Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
         }
         record->PostContentAllowed();
@@ -371,7 +371,7 @@ ECode CTvInputManager::TvInputClient::OnContentBlocked(
         AutoPtr<SessionCallbackRecord> record;
         mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
         if (record == NULL) {
-            Logger::E(TAG, String("Callback not found for seq ") + seq);
+            Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
         }
         AutoPtr<ITvContentRating> r;
@@ -393,7 +393,7 @@ ECode CTvInputManager::TvInputClient::OnLayoutSurface(
         AutoPtr<SessionCallbackRecord> record;
         mHost->mSessionCallbackRecordMap->Get(seq, (IInterface**)&record);
         if (record == NULL) {
-            Logger::E(TAG, String("Callback not found for seq ") + seq);
+            Logger::E(TAG, "Callback not found for seq %d", seq);
             return NOERROR;
         }
         record->PostLayoutSurface(left, top, right, bottom);
@@ -811,7 +811,7 @@ ECode CTvInputManager::UnregisterCallback(
             AutoPtr<TvInputCallbackRecord> record = (TvInputCallbackRecord*)(IObject*)(*array)[i];
             AutoPtr<ITvInputManagerTvInputCallback> cb;
             record->GetCallback((ITvInputManagerTvInputCallback**)&cb);
-            if (cb == callback) {
+            if (cb.Get() == callback) {
                 mCallbackRecords->Remove((IInterface*)(IObject*)record);
                 break;
             }

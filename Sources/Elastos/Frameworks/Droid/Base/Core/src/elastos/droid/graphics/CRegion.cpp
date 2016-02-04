@@ -639,9 +639,8 @@ Int64 CRegion::NativeCreateFromParcel(
         return 0;
     }
 
-    Handle32 data;
-    parcel->GetElementPayload(&data);
-    android::Parcel* p = (android::Parcel*)data;
+    android::Parcel* p;
+    parcel->GetElementPayload((Handle32*)&p);
 
     SkRegion* region = new SkRegion;
     size_t size = p->readInt32();
@@ -659,9 +658,8 @@ Boolean CRegion::NativeWriteToParcel(
         return FALSE;
     }
 
-    Handle32 data;
-    parcel->GetElementPayload(&data);
-    android::Parcel* p = (android::Parcel*)data;
+    android::Parcel* p;
+    parcel->GetElementPayload((Handle32*)&p);
 
     size_t size = region->writeToMemory(NULL);
     p->writeInt32(size);

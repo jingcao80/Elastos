@@ -3,8 +3,12 @@
 #define __ELASTOS_DROID_MEDIA_CRINGTONEMANAGER_H__
 
 #include "_Elastos_Droid_Media_CRingtoneManager.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Database.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/utility/etl/List.h>
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Content::IContext;
@@ -17,9 +21,17 @@ namespace Droid {
 namespace Media {
 
 CarClass(CRingtoneManager)
+    , public Object
+    , public IRingtoneManager
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CRingtoneManager();
+
+    virtual ~CRingtoneManager();
 
     /**
      * Constructs a RingtoneManager. This constructor is recommended as its
@@ -89,7 +101,10 @@ public:
      *
      * @return Whether DRM ringtones will be included.
      * @see #setIncludeDrm(Boolean)
+     * Obsolete - always returns false
+     * @deprecated DRM ringtones are no longer supported
      */
+    //@Deprecated
     CARAPI GetIncludeDrm(
         /* [out] */ Boolean* result);
 
@@ -97,7 +112,10 @@ public:
      * Sets whether to include DRM ringtones.
      *
      * @param includeDrm Whether to include DRM ringtones.
+     * Obsolete - no longer has any effect
+     * @deprecated DRM ringtones are no longer supported
      */
+    //@Deprecated
     CARAPI SetIncludeDrm(
         /* [in] */ Boolean includeDrm);
 
@@ -255,8 +273,6 @@ private:
 
     CARAPI_(AutoPtr<ICursor>) GetInternalRingtones();
 
-    CARAPI_(AutoPtr<ICursor>) GetDrmRingtones();
-
     CARAPI_(AutoPtr<ICursor>) GetMediaRingtones();
 
     CARAPI_(void) SetFilterColumnsList(
@@ -271,8 +287,7 @@ private:
      * @return The where clause.
      */
     static CARAPI_(String) ConstructBooleanTrueWhereClause(
-        /* [in] */ List<String>* columns,
-        /* [in] */ Boolean includeDrm);
+        /* [in] */ List<String>* columns);
 
     CARAPI_(AutoPtr<ICursor>) Query(
         /* [in] */ IUri* uri,
@@ -311,14 +326,6 @@ private:
             MediaStore.Audio.Media.TITLE_KEY
         };*/
 
-    static AutoPtr< ArrayOf<String> > DRM_COLUMNS;
-        /* = new String[] {
-            DrmStore.Audio._ID,
-            DrmStore.Audio.TITLE,
-            "\"" + DrmStore.Audio.CONTENT_URI + "\"",
-            DrmStore.Audio.TITLE + " AS " + MediaStore.Audio.Media.TITLE_KEY
-        };*/
-
     static AutoPtr< ArrayOf<String> > MEDIA_COLUMNS;
         /* = new String[] {
             MediaStore.Audio.Media._ID,
@@ -344,8 +351,6 @@ private:
     Boolean mStopPreviousRingtone; // = TRUE;
 
     AutoPtr<IRingtone> mPreviousRingtone;
-
-    Boolean mIncludeDrm;
 };
 
 } // namespace Media

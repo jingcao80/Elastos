@@ -1,0 +1,52 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+    interface Elastos.Droid.Bluetooth.LE.IScanRecord;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+    namespace LE {
+
+    /**
+     * ScanResult for Bluetooth LE scan.
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IScanResult {
+
+        /**
+         * Returns the remote bluetooth device identified by the bluetooth device address.
+         */
+        GetDevice(
+            [out] IBluetoothDevice** device);
+
+        /**
+         * Returns the scan record, which is a combination of advertisement and scan response.
+         */
+        //@Nullable
+        GetScanRecord(
+            [out] IScanRecord** record);
+
+        /**
+         * Returns the received signal strength in dBm. The valid range is [-127, 127].
+         */
+        GetRssi(
+            [out] Int32* rssi);
+
+        /**
+         * Returns timestamp since boot when the scan record was observed.
+         */
+        GetTimestampNanos(
+            [out] Int64* nanos);
+    }
+
+
+    } // LE
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

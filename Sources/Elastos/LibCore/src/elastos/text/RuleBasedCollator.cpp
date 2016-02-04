@@ -108,7 +108,7 @@ ECode RuleBasedCollator::Equals(
 {
     VALIDATE_NOT_NULL(result);
 
-    if (ICollator::Probe(object)) {
+    if (ICollator::Probe(object) == NULL) {
         *result = false;
         return NOERROR;
     }

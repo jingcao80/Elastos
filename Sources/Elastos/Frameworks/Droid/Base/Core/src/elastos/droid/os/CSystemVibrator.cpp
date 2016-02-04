@@ -24,7 +24,7 @@ CSystemVibrator::CSystemVibrator()
 ECode CSystemVibrator::constructor()
 {
     FAIL_RETURN(Vibrator::constructor())
-    mService = IVibratorService::Probe(ServiceManager::GetService(String("vibrator")).Get());
+    mService = IIVibratorService::Probe(ServiceManager::GetService(String("vibrator")).Get());
     return NOERROR;
 }
 
@@ -32,7 +32,7 @@ ECode CSystemVibrator::constructor(
     /* [in] */ IContext* context)
 {
     FAIL_RETURN(Vibrator::constructor(context))
-    mService = IVibratorService::Probe(ServiceManager::GetService(String("vibrator")).Get());
+    mService = IIVibratorService::Probe(ServiceManager::GetService(String("vibrator")).Get());
     return NOERROR;
 }
 
@@ -115,7 +115,7 @@ ECode CSystemVibrator::Cancel()
     if (mService == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
-    if(FAILED(mService->CancelVibrate(mToken))) {
+    if (FAILED(mService->CancelVibrate(mToken))) {
         // Log.w(TAG, "Failed to cancel vibration.", e);
     }
     return NOERROR;

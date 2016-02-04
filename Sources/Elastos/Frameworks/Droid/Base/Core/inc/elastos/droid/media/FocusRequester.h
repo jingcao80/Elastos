@@ -32,8 +32,7 @@ public:
         /* [in] */ IIAudioFocusDispatcher* afl,
         /* [in] */ IBinder* source,
         /* [in] */ const String& id,
-//TODO: Need MediaFocusControl::AudioFocusDeathHandler
-        // /* [in] */ AudioFocusDeathHandler* hdlr,
+        /* [in] */ IProxyDeathRecipient* hdlr,
         /* [in] */ const String& pn,
         /* [in] */ Int32 uid);
 
@@ -95,8 +94,7 @@ private:
     static String TAG;
     static Boolean DEBUG;
 
-//TODO: Need MediaFocusControl::AudioFocusDeathHandler
-    // AutoPtr<AudioFocusDeathHandler> mDeathHandler;
+    AutoPtr<IProxyDeathRecipient> mDeathHandler;
     AutoPtr<IIAudioFocusDispatcher> mFocusDispatcher; // may be null
     AutoPtr<IBinder> mSourceRef;
     String mClientId;

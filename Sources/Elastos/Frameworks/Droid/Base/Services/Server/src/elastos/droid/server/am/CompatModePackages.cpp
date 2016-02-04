@@ -2,6 +2,7 @@
 #include "elastos/droid/server/am/CompatModePackages.h"
 #include "elastos/droid/server/am/CActivityManagerService.h"
 #include "elastos/droid/server/am/ActivityRecord.h"
+#include "elastos/droid/server/am/ActivityStack.h"
 #include "Elastos.CoreLibrary.External.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.Droid.App.h"
@@ -10,6 +11,7 @@
 #include <elastos/droid/app/AppGlobals.h>
 #include <elastos/droid/utility/Xml.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -22,6 +24,7 @@ using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
 using Elastos::Droid::Internal::Utility::IFastXmlSerializer;
 using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Droid::Utility::Xml;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::IO::CFile;
 using Elastos::IO::ICloseable;
@@ -230,8 +233,7 @@ Int32 CompatModePackages::ComputeCompatModeLocked(
 
 Boolean CompatModePackages::GetFrontActivityAskCompatModeLocked()
 {
-    assert(0);
-    AutoPtr<ActivityRecord> r;// = mService->GetFocusedStack()->GetTopRunningActivityLocked(NULL);
+    AutoPtr<ActivityRecord> r = mService->GetFocusedStack()->TopRunningActivityLocked(NULL);
     if (r == NULL) {
         return FALSE;
     }
@@ -247,8 +249,7 @@ Boolean CompatModePackages::GetPackageAskCompatModeLocked(
 void CompatModePackages::SetFrontActivityAskCompatModeLocked(
     /* [in] */ Boolean ask)
 {
-    assert(0);
-    AutoPtr<ActivityRecord> r;// = mService->GetFocusedStack()->GetTopRunningActivityLocked(NULL);
+    AutoPtr<ActivityRecord> r = mService->GetFocusedStack()->TopRunningActivityLocked(NULL);
     if (r != NULL) {
         SetPackageAskCompatModeLocked(r->mPackageName, ask);
     }
@@ -276,8 +277,7 @@ void CompatModePackages::SetPackageAskCompatModeLocked(
 
 Int32 CompatModePackages::GetFrontActivityScreenCompatModeLocked()
 {
-    assert(0);
-    AutoPtr<ActivityRecord> r;// = mService->GetFocusedStack()->GetTopRunningActivityLocked(NULL);
+    AutoPtr<ActivityRecord> r = mService->GetFocusedStack()->TopRunningActivityLocked(NULL);
     if (r == NULL) {
         return IActivityManager::COMPAT_MODE_UNKNOWN;
     }
@@ -289,8 +289,7 @@ Int32 CompatModePackages::GetFrontActivityScreenCompatModeLocked()
 void CompatModePackages::SetFrontActivityScreenCompatModeLocked(
     /* [in] */ Int32 mode)
 {
-    assert(0);
-    AutoPtr<ActivityRecord> r;// = mService->GetFocusedStack()->GetTopRunningActivityLocked(NULL);
+    AutoPtr<ActivityRecord> r = mService->GetFocusedStack()->TopRunningActivityLocked(NULL);
     if (r == NULL) {
         Slogger::W(TAG, "setFrontActivityScreenCompatMode failed: no top activity");
         return;
@@ -391,36 +390,36 @@ void CompatModePackages::SetPackageScreenCompatModeLocked(
         Boolean result;
         mHandler->SendEmptyMessageDelayed(MSG_WRITE, 10000, &result);
 
-        assert(0);
-        // AutoPtr<ActivityStack> stack = mService->GetFocusedStack();
-        // AutoPtr<ActivityRecord> starting = stack->RestartPackage(packageName);
+        AutoPtr<ActivityStack> stack = mService->GetFocusedStack();
+        AutoPtr<ActivityRecord> starting = stack->RestartPackage(packageName);
 
-        // // Tell all processes that loaded this package about the change.
-        // List< AutoPtr<ProcessRecord> >::ReverseIterator prRit = mService->mLruProcesses.RBegin();
-        // for (; prRit != mService->mLruProcesses.REnd(); ++prRit) {
-        //     AutoPtr<ProcessRecord> app = *prRit;
-        //     HashSet<String>::Iterator fit = app->mPkgList.Find(packageName);
-        //     if (fit == app->mPkgList.End()) {
-        //         continue;
-        //     }
+        // Tell all processes that loaded this package about the change.
+        List< AutoPtr<ProcessRecord> >::ReverseIterator prRit = mService->mLruProcesses.RBegin();
+        for (; prRit != mService->mLruProcesses.REnd(); ++prRit) {
+            AutoPtr<ProcessRecord> app = *prRit;
+            Boolean res;
+            app->mPkgList->ContainsKey(CoreUtils::Convert(packageName), &res);
+            if (!res) {
+                continue;
+            }
 
-        //     if (app->mThread != NULL) {
-        //         if (DEBUG_CONFIGURATION) {
-        //             String str;
-        //             IObject::Probe(ci)->ToString(&str);
-        //             Slogger::V(TAG, "Sending to proc %s new compat %s",
-        //                 app->mProcessName.string(), str.string());
-        //         }
-        //         app->mThread->UpdatePackageCompatibilityInfo(packageName, ci);
-        //     }
-        // }
+            if (app->mThread != NULL) {
+                if (DEBUG_CONFIGURATION) {
+                    String str;
+                    IObject::Probe(ci)->ToString(&str);
+                    Slogger::V(TAG, "Sending to proc %s new compat %s",
+                        app->mProcessName.string(), str.string());
+                }
+                app->mThread->UpdatePackageCompatibilityInfo(packageName, ci);
+            }
+        }
 
-        // if (starting != NULL) {
-        //     stack->EnsureActivityConfigurationLocked(starting, 0);
-        //     // And we need to make sure at this point that all other activities
-        //     // are made visible with the correct configuration.
-        //     stack->EnsureActivitiesVisibleLocked(starting, 0);
-        // }
+        if (starting != NULL) {
+            stack->EnsureActivityConfigurationLocked(starting, 0);
+            // And we need to make sure at this point that all other activities
+            // are made visible with the correct configuration.
+            stack->EnsureActivitiesVisibleLocked(starting, 0);
+        }
     }
 }
 

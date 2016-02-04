@@ -31,32 +31,15 @@ CarClass(CMediaRouter)
 {
 public:
     /*static*/
-    class CallbackInfo : public ElRefBase
-    {
-    public:
-        CallbackInfo(
-            /* [in] */ ICallback* cb,
-            /* [in] */ Int32 type,
-            /* [in] */ IMediaRouter* router);
-
-    public:
-        AutoPtr<ICallback> mCb;
-
-        Int32 mType;
-
-        AutoPtr<IMediaRouter> mRouter;
-    };
-
-    /*static*/
     class Static // implements DisplayManager.DisplayListener
-        : public ElRefBase
+        : public Object
         , public IDisplayListener
     {
     friend class CMediaRouter;
 
     private:
         class MyAudioRoutesObserver
-            : public ElRefBase
+            : public Object
             , public IIAudioRoutesObserver
         {
         public:
@@ -73,7 +56,7 @@ public:
         };
 
         class MyRunnable
-            : public ElRefBase
+            : public Object
             , public IRunnable
         {
         public:
@@ -94,7 +77,11 @@ public:
     public:
         CAR_INTERFACE_DECL();
 
-        Static(
+        Static();
+
+        ~Static();
+
+        CARAPI constructor(
             /* [in] */ IContext* appContext,
             /* [in] */ CMediaRouter* owner);
 
@@ -110,7 +97,7 @@ public:
         CARAPI OnDisplayRemoved(
             /* [in] */ Int32 displayId);
 
-        CARAPI_(AutoPtr< ArrayOf<IDisplay*> >) GetAllPresentationDisplays();
+        CARAPI_(AutoPtr<ArrayOf<AutoPtr<IDisplay> > >) GetAllPresentationDisplays();
 
     private:
         // Called after sStatic is initialized
@@ -123,29 +110,490 @@ public:
         CARAPI_(void) UpdatePresentationDisplays(
             /* [in] */ Int32 changedDisplayId);
 
+        CARAPI_(Boolean) IsBluetoothA2dpOn();
+
+        CARAPI_(void) UpdateDiscoveryRequest();
+
+        CARAPI_(void) SetSelectedRoute(
+            /* [in] */ RouteInfo* info,
+            /* [in] */ Boolean explicit);
+
+        CARAPI_(void) RebindAsUser(
+            /* [in] */ Int32 userId);
+
+        CARAPI_(void) PublishClientDiscoveryRequest();
+
+        CARAPI_(void) PublishClientSelectedRoute(
+            /* [in] */ Boolean explicit);
+
+        CARAPI_(void) UpdateClientState();
+
+        CARAPI_(void) RequestSetVolume(
+            /* [in] */ RouteInfo* route,
+            /* [in] */ Int32 volume);
+
+        CARAPI_(void) RequestUpdateVolume(
+            /* [in] */ RouteInfo* route,
+            /* [in] */ Int32 direction);
+
+        CARAPI FindGlobalRoute(
+            /* [in] */ const String& globalRouteId,
+            /* [out] */ RouteInfo** result);
+
     public:
+        AutoPtr<IContext> mAppContext;
         AutoPtr<IResources> mResources;
-
         AutoPtr<IIAudioService> mAudioService;
-
+        AutoPtr<IDisplayManager> mDisplayService;
+        AutoPtr<IIMediaRouterService> mMediaRouterService;
         AutoPtr<IHandler> mHandler;
+        List< AutoPtr<CallbackInfo> > mCallbacks; // = new CopyOnWriteArrayList<CallbackInfo>();
+
+        List< AutoPtr<RouteInfo> > mRoutes; // = new ArrayList<RouteInfo>();
+        List< AutoPtr<IMediaRouterRouteCategory> > mCategories; // = new ArrayList<RouteCategory>();
+
+        AutoPtr<IMediaRouterRouteCategory> mSystemCategory;
+
+        AutoPtr<IAudioRoutesInfo> mCurAudioRoutesInfo; // = new AudioRoutesInfo();
+
+        AutoPtr<IMediaRouterRouteInfo> mDefaultAudioVideo;
+        AutoPtr<IMediaRouterRouteInfo> mBluetoothA2dpRoute;
+
+        AutoPtr<IMediaRouterRouteInfo> mSelectedRoute;
+
+        Boolean mCanConfigureWifiDisplays;
+        Boolean mActivelyScanningWifiDisplays;
+        String mPreviousActiveWifiDisplayAddress;
+
+        Int32 mDiscoveryRequestRouteTypes;
+        Boolean mDiscoverRequestActiveScan;
+
+        Int32 mCurrentUserId = -1;
+        AutoPtr<IIMediaRouterClient> mClient;
+        AutoPtr<IMediaRouterClientState> mClientState;
+
+        AutoPtr<IIAudioRoutesObserver> mAudioRoutesObserver;
 
     private:
-        AutoPtr<IDisplayManager> mDisplayService;
-
-        List< AutoPtr<CallbackInfo> > mCallbacks; // = new CopyOnWriteArrayList<CallbackInfo>();
-        List< AutoPtr<IRouteInfo> > mRoutes; // = new ArrayList<RouteInfo>();
-        List< AutoPtr<IRouteCategory> > mCategories; // = new ArrayList<RouteCategory>();
-
-        AutoPtr<IRouteCategory> mSystemCategory;
-        AutoPtr<IAudioRoutesInfo> mCurAudioRoutesInfo; // = new AudioRoutesInfo();
-        AutoPtr<IRouteInfo> mDefaultAudioVideo;
-        AutoPtr<IRouteInfo> mBluetoothA2dpRoute;
-        AutoPtr<IRouteInfo> mSelectedRoute;
-        AutoPtr<IWifiDisplayStatus> mLastKnownWifiDisplayStatus;
-        AutoPtr<IIAudioRoutesObserver> mAudioRoutesObserver; // = new MyAudioRoutesObserver();
-
         CMediaRouter* mOwner;
+    };
+
+    /*static*/
+    class RouteInfo
+        : public IMediaRouterRouteInfo
+        , public Object
+    {
+        friend class CMediaRouter;
+    public:
+        RouteInfo();
+
+        virtual ~RouteInfo();
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IMediaRouterRouteCategory* category);
+
+        CARAPI GetName(
+            /* [out] */ ICharSequence ** result);
+
+        CARAPI GetName(
+            /* [in] */ IContext * context,
+            /* [out] */ ICharSequence ** result);
+
+        CARAPI GetName(
+            /* [in] */ IResources* res,
+            /* [out] */ ICharSequence** result);
+
+        CARAPI GetDescription(
+            /* [out] */ ICharSequence ** result);
+
+        CARAPI GetStatus(
+            /* [out] */ ICharSequence ** result);
+
+        CARAPI SetRealStatusCode(
+            /* [in] */ Int32 statusCode,
+            /* [out] */ Boolean* result);
+
+        CARAPI ResolveStatusCode(
+            /* [out] */ Boolean* result);
+
+        CARAPI GetStatusCode(
+            /* [out] */ Int32 * result);
+
+        CARAPI GetSupportedTypes(
+            /* [out] */ Int32 * result);
+
+        CARAPI MatchesTypes(
+            /* [in] */ Int32 types,
+            /* [out] */ Boolean * result);
+
+        CARAPI GetGroup(
+            /* [out] */ IMediaRouterRouteGroup ** result);
+
+        CARAPI GetCategory(
+            /* [out] */ IMediaRouterRouteCategory ** result);
+
+        CARAPI GetIconDrawable(
+            /* [out] */ IDrawable ** result);
+
+        CARAPI SetTag(
+            /* [in] */ IInterface * tag);
+
+        CARAPI GetTag(
+            /* [out] */ IInterface ** result);
+
+        CARAPI GetPlaybackType(
+            /* [out] */ Int32 * result);
+
+        CARAPI GetPlaybackStream(
+            /* [out] */ Int32 * result);
+
+        CARAPI GetVolume(
+            /* [out] */ Int32 * result);
+
+        CARAPI RequestSetVolume(
+            /* [in] */ Int32 volume);
+
+        CARAPI RequestUpdateVolume(
+            /* [in] */ Int32 direction);
+
+        CARAPI GetVolumeMax(
+            /* [out] */ Int32 * result);
+
+        CARAPI GetVolumeHandling(
+            /* [out] */ Int32 * result);
+
+        CARAPI GetPresentationDisplay(
+            /* [out] */ IDisplay ** result);
+
+        CARAPI UpdatePresentationDisplay(
+            /* [out] */ Boolean* result);
+
+        CARAPI GetDeviceAddress(
+            /* [out] */ String * result);
+
+        CARAPI IsEnabled(
+            /* [out] */ Boolean * result);
+
+        CARAPI IsConnecting(
+            /* [out] */ Boolean * result);
+
+        CARAPI IsSelected(
+            /* [out] */ Boolean * result);
+
+        CARAPI IsDefault(
+            /* [out] */ Boolean * result);
+
+        CARAPI Select();
+
+        CARAPI SetStatusInt(
+            /* [in] */ ICharSequence* status);
+
+        CARAPI RouteUpdated();
+
+        CARAPI ToString(
+            /* [out] */ String* result);
+
+    private:
+        CARAPI_(Display) ChoosePresentationDisplay();
+
+    public:
+        AutoPtr<ICharSequence> mName;
+        Int32 mNameResId;
+        AutoPtr<ICharSequence> mDescription;
+        AutoPtr<ICharSequence> mStatus;
+        Int32 mSupportedTypes;
+        AutoPtr<IMediaRouterRouteGroup> mGroup;
+        AutoPtr<IMediaRouterRouteCategory> mCategory;
+        AutoPtr<IDrawable> mIcon;
+        // playback information
+        Int32 mPlaybackType = PLAYBACK_TYPE_LOCAL;
+        Int32 mVolumeMax = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
+        Int32 mVolume = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME;
+        Int32 mVolumeHandling = RemoteControlClient.DEFAULT_PLAYBACK_VOLUME_HANDLING;
+        Int32 mPlaybackStream = AudioManager.STREAM_MUSIC;
+        AutoPtr<IMediaRouterVolumeCallbackInfo> mVcb;
+        AutoPtr<IDisplay> mPresentationDisplay;
+        Int32 mPresentationDisplayId = -1;
+
+        String mDeviceAddress;
+        Boolean mEnabled = TRUE;
+
+        // An id by which the route is known to the media router service.
+        // Null if this route only exists as an artifact within this process.
+        String mGlobalRouteId;
+        AutoPtr<IIRemoteVolumeObserver> mRemoteVolObserver;
+
+    private:
+        // A predetermined connection status that can override mStatus
+        Int32 mRealStatusCode;
+        Int32 mResolvedStatusCode;
+
+        Object mTag;
+    };
+
+    /*static*/
+    class UserRouteInfo
+        : public RouteInfo
+        , public IMediaRouterUserRouteInfo
+    {
+    public:
+        class SessionVolumeProvider
+            : public VolumeProvider
+            , public IMediaRouterUserRouteInfoSessionVolumeProvider
+        {
+        public:
+            SessionVolumeProvider();
+
+            ~SessionVolumeProvider();
+
+            CAR_INTERFACE_DECL()
+
+            CARAPI constructor(
+                /* [in] */ Int32 volumeControl,
+                /* [in] */ Int32 maxVolume,
+                /* [in] */ Int32 currentVolume);
+
+            CARAPI OnSetVolumeTo(
+                /* [in] */ Int32 volume);
+
+            CARAPI OnAdjustVolume(
+                /* [in] */ Int32 direction);
+        };
+    public:
+        UserRouteInfo();
+
+        virtual ~UserRouteInfo();
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IMediaRouterRouteCategory* category);
+
+        CARAPI SetName(
+            /* [in] */ ICharSequence * name);
+
+        CARAPI SetName(
+            /* [in] */ Int32 resId);
+
+        CARAPI SetDescription(
+            /* [in] */ ICharSequence * description);
+
+        CARAPI SetStatus(
+            /* [in] */ ICharSequence * status) ;
+
+        CARAPI SetRemoteControlClient(
+            /* [in] */ IRemoteControlClient * rcc);
+
+        CARAPI GetRemoteControlClient(
+            /* [out] */ IRemoteControlClient ** result);
+
+        CARAPI SetIconDrawable(
+            /* [in] */ IDrawable * icon);
+
+        CARAPI SetIconResource(
+            /* [in] */ Int32 resId);
+
+        CARAPI SetVolumeCallback(
+            /* [in] */ IMediaRouterVolumeCallback * vcb);
+
+        CARAPI SetPlaybackType(
+            /* [in] */ Int32 type);
+
+        CARAPI SetVolumeHandling(
+            /* [in] */ Int32 volumeHandling);
+
+        CARAPI SetVolume(
+            /* [in] */ Int32 volume);
+
+        CARAPI RequestSetVolume(
+            /* [in] */ Int32 volume);
+
+        CARAPI RequestUpdateVolume(
+            /* [in] */ Int32 direction);
+
+        CARAPI SetVolumeMax(
+            /* [in] */ Int32 volumeMax);
+
+        CARAPI SetPlaybackStream(
+            /* [in] */ Int32 stream);
+
+    private:
+        CARAPI_(void) UpdatePlaybackInfoOnRcc();
+
+        CARAPI_(void) ConfigureSessionVolume();
+    public:
+        AutoPtr<IRemoteControlClient> mRcc;
+        AutoPtr<IMediaRouterUserRouteInfoSessionVolumeProvider> mSvp;
+    };
+
+    /*static*/
+    class RouteGroup
+        : public RouteInfo
+        , public IMediaRouterRouteGroup
+    {
+        friend class CMediaRouter;
+    public:
+        RouteGroup();
+
+        virtual ~RouteGroup();
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ IMediaRouterRouteCategory* category);
+
+        CARAPI GetName(
+            /* [in] */ IResources* res,
+            /* [out] */ ICharSequence** result);
+
+        CARAPI AddRoute(
+            /* [in] */ IMediaRouterRouteInfo * route);
+
+        CARAPI AddRoute(
+            /* [in] */ IMediaRouterRouteInfo * route,
+            /* [in] */ Int32 insertAt);
+
+        CARAPI RemoveRoute(
+            /* [in] */ IMediaRouterRouteInfo * route);
+
+        CARAPI RemoveRoute(
+            /* [in] */ Int32 index);
+
+        CARAPI GetRouteCount(
+            /* [out] */ Int32 * result);
+
+        CARAPI GetRouteAt(
+            /* [in] */ Int32 index,
+            /* [out] */ IMediaRouterRouteInfo ** result);
+
+        CARAPI SetIconDrawable(
+            /* [in] */ IDrawable * icon);
+
+        CARAPI SetIconResource(
+            /* [in] */ Int32 resId);
+
+        CARAPI RequestSetVolume(
+            /* [in] */ Int32 volume);
+
+        CARAPI RequestUpdateVolume(
+            /* [in] */ Int32 direction);
+
+        CARAPI_(void) MemberNameChanged(
+            /* [in] */ RouteInfo* info,
+            /* [in] */ ICharSequence* name);
+
+        CARAPI_(void) MemberStatusChanged(
+            /* [in] */ RouteInfo* info,
+            /* [in] */ ICharSequence* status);
+
+        CARAPI_(void) MemberVolumeChanged(
+            /* [in] */ RouteInfo* info);
+
+        CARAPI_(void) UpdateVolume();
+
+        CARAPI_(void) RouteUpdated();
+
+        CARAPI_(void) UpdateName();
+
+        CARAPI ToString(
+            /* [out] */ String* result);
+
+    public:
+        AutoPtr<IArrayList> mRoutes;
+
+    private:
+        Boolean mUpdateName;
+    };
+
+    /*static*/
+    class RouteCategory
+        : public Object
+        , public IMediaRouterRouteCategory
+    {
+    public:
+        RouteCategory();
+
+        virtual ~RouteCategory();
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ ICharSequence* name,
+            /* [in] */ Int32 types,
+            /* [in] */ Boolean groupable);
+
+        CARAPI constructor(
+            /* [in] */ Int32 nameResId,
+            /* [in] */ Int32 types,
+            /* [in] */ Boolean groupable);
+
+        CARAPI GetName(
+            /* [out] */ ICharSequence** result);
+
+        CARAPI GetName(
+            /* [in] */ IContext* context,
+            /* [out] */ ICharSequence** result);
+
+        CARAPI GetName(
+            /* [in] */ IResources* res,
+            /* [out] */ ICharSequence** result);
+
+        CARAPI GetRoutes(
+            /* [in] */ IList* outList,
+            /* [out] */ IList** result);
+
+        CARAPI GetSupportedTypes(
+            /* [out] */ Int32 * result);
+
+        CARAPI IsGroupable(
+            /* [out] */ Boolean * result);
+
+        CARAPI IsSystem(
+            /* [out] */ Boolean * result);
+
+        CARAPI ToString(
+            /* [out] */ String* result);
+
+    public:
+        AutoPtr<ICharSequence> mName;
+        Int32 mNameResId;
+        Int32 mTypes;
+        Boolean mGroupable;
+        Boolean mIsSystem;
+    };
+
+    /*static*/
+    class CallbackInfo
+        : public Object
+        , public IMediaRouterRouteCallbackInfo
+    {
+    public:
+        CallbackInfo();
+
+        virtual ~CallbackInfo();
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI constructor(
+            /* [in] */ ICallback* cb,
+            /* [in] */ Int32 type,
+            /* [in] */ IMediaRouter* router);
+
+        CARAPI FilterRouteEvent(
+            /* [in] */ IMediaRouterRouteInfo* route,
+            /* [out] */ Boolean* result);
+
+        CARAPI FilterRouteEvent(
+            /* [in] */ Int32 supportedTypes,
+            /* [out] */ Boolean* result);
+
+    public:
+        Int32 mType;
+        Int32 mFlags;
+        AutoPtr<ICallback> mCb;
+        AutoPtr<IMediaRouter> mRouter;
     };
 
     /**
@@ -162,52 +610,72 @@ public:
         CARAPI OnRouteSelected(
             /* [in] */ IMediaRouter* router,
             /* [in] */ Int32 type,
-            /* [in] */ IRouteInfo* info);
+            /* [in] */ IMediaRouterRouteInfo* info);
 
         CARAPI OnRouteUnselected(
             /* [in] */ IMediaRouter* router,
             /* [in] */ Int32 type,
-            /* [in] */ IRouteInfo* info);
+            /* [in] */ IMediaRouterRouteInfo* info);
 
         CARAPI OnRouteAdded(
             /* [in] */ IMediaRouter* router,
-            /* [in] */ IRouteInfo* info);
+            /* [in] */ IMediaRouterRouteInfo* info);
 
         CARAPI OnRouteRemoved(
             /* [in] */ IMediaRouter* router,
-            /* [in] */ IRouteInfo* info);
+            /* [in] */ IMediaRouterRouteInfo* info);
 
         CARAPI OnRouteChanged(
             /* [in] */ IMediaRouter* router,
-            /* [in] */ IRouteInfo* info);
+            /* [in] */ IMediaRouterRouteInfo* info);
 
         CARAPI OnRouteGrouped(
             /* [in] */ IMediaRouter* router,
-            /* [in] */ IRouteInfo* info,
+            /* [in] */ IMediaRouterRouteInfo* info,
             /* [in] */ IRouteGroup* group,
             /* [in] */ Int32 index);
 
         CARAPI OnRouteUngrouped(
             /* [in] */ IMediaRouter* router,
-            /* [in] */ IRouteInfo* info,
+            /* [in] */ IMediaRouterRouteInfo* info,
             /* [in] */ IRouteGroup* group);
 
         CARAPI OnRouteVolumeChanged(
             /* [in] */ IMediaRouter* router,
-            /* [in] */ IRouteInfo* info);
+            /* [in] */ IMediaRouterRouteInfo* info);
     };
 
-    class VolumeCallbackInfo : public ElRefBase
+    class VolumeCallbackInfo
+        : public Object
+        , public IMediaRouterVolumeCallbackInfo
     {
     public:
-        VolumeCallbackInfo(
+        CAR_INTERFACE_DECL()
+
+        VolumeCallbackInfo();
+
+        virtual ~VolumeCallbackInfo();
+
+        CARAPI constructor(
             /* [in] */ IVolumeCallback* vcb,
-            /* [in] */ IRouteInfo* route);
+            /* [in] */ IMediaRouterRouteInfo* route);
+
+        CARAPI SetVolumeCallback(
+            /* [in] */ IMediaRouterVolumeCallback* vcb);
+
+        CARAPI GetVolumeCallback(
+            /* [out] */ IMediaRouterVolumeCallback** vcb);
+
+        CARAPI SetRouteInfo(
+            /* [in] */ IMediaRouterRouteInfo* route);
+
+        CARAPI GetRouteInfo(
+            /* [out] */ IMediaRouterRouteInfo** route);
 
     public:
         AutoPtr<IVolumeCallback> mVcb;
 
-        AutoPtr<IRouteInfo> mRoute;
+        AutoPtr<IMediaRouterRouteInfo> mRoute;
     };
 
     /*static*/ class VolumeChangeReceiver : public BroadcastReceiver
@@ -244,7 +712,12 @@ public:
         }
     };
 
+public:
     CMediaRouter();
+
+    virtual ~CMediaRouter();
+
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IContext* context);
@@ -253,13 +726,13 @@ public:
      * @hide for use by framework routing UI
      */
     CARAPI GetSystemAudioRoute(
-        /* [out] */ IRouteInfo** result);
+        /* [out] */ IMediaRouterRouteInfo** result);
 
     /**
      * @hide for use by framework routing UI
      */
     CARAPI GetSystemAudioCategory(
-        /* [out] */ IRouteCategory** result);
+        /* [out] */ IMediaRouterRouteCategory** result);
 
     /**
      * Return the currently selected route for the given types
@@ -269,7 +742,7 @@ public:
      */
     CARAPI GetSelectedRoute(
         /* [in] */ Int32 type,
-        /* [out] */ IRouteInfo** result);
+        /* [out] */ IMediaRouterRouteInfo** result);
 
     /**
      * Add a callback to listen to events about specific kinds of media routes.
@@ -300,14 +773,14 @@ public:
      */
     CARAPI SelectRoute(
         /* [in] */ Int32 types,
-        /* [in] */ IRouteInfo* route);
+        /* [in] */ IMediaRouterRouteInfo* route);
 
     /**
      * @hide internal use
      */
     CARAPI SelectRouteInt(
         /* [in] */ Int32 types,
-        /* [in] */ IRouteInfo* route);
+        /* [in] */ IMediaRouterRouteInfo* route);
 
     /**
      * Add an app-specified route for media to the MediaRouter.
@@ -324,7 +797,7 @@ public:
      * @hide Framework use only
      */
     CARAPI AddRouteInt(
-        /* [in] */ IRouteInfo* info);
+        /* [in] */ IMediaRouterRouteInfo* info);
 
     /**
      * Remove an app-specified route for media from the MediaRouter.
@@ -346,7 +819,7 @@ public:
      * @hide internal use only
      */
     CARAPI RemoveRouteInt32(
-        /* [in] */ IRouteInfo* info);
+        /* [in] */ IMediaRouterRouteInfo* info);
 
     /**
      * Return the number of {@link MediaRouter.RouteCategory categories} currently
@@ -366,7 +839,7 @@ public:
      */
     CARAPI GetCategoryAt(
         /* [in] */ Int32 index,
-        /* [out] */ IRouteCategory** result);
+        /* [out] */ IMediaRouterRouteCategory** result);
 
     /**
      * Return the number of {@link MediaRouter.RouteInfo routes} currently known
@@ -385,7 +858,7 @@ public:
      */
     CARAPI GetRouteAt(
         /* [in] */ Int32 index,
-        /* [out] */ IRouteInfo** result);
+        /* [out] */ IMediaRouterRouteInfo** result);
 
     /**
      * Create a new user route that may be modified and registered for use by the application.
@@ -398,7 +871,7 @@ public:
      * @see #createRouteCategory(CharSequence)
      */
     CARAPI CreateUserRoute(
-        /* [in] */ IRouteCategory* category,
+        /* [in] */ IMediaRouterRouteCategory* category,
         /* [out] */ IUserRouteInfo** result);
 
     /**
@@ -411,7 +884,7 @@ public:
     CARAPI CreateRouteCategory(
         /* [in] */ ICharSequence* name,
         /* [in] */ Boolean isGroupable,
-        /* [out] */ IRouteCategory** result);
+        /* [out] */ IMediaRouterRouteCategory** result);
 
     /**
      * Create a new route category. Each route must belong to a category.
@@ -423,38 +896,40 @@ public:
     CARAPI CreateRouteCategory(
         /* [in] */ Int32 nameResId,
         /* [in] */ Boolean isGroupable,
-        /* [out] */ IRouteCategory** result);
+        /* [out] */ IMediaRouterRouteCategory** result);
 
     static CARAPI_(String) TypesToString(
         /* [in] */ Int32 types);
 
-    static CARAPI_(void) UpdateRoute(
-        /* [in] */ IRouteInfo* info);
+    static CARAPI UpdateRoute(
+        /* [in] */ IMediaRouterRouteInfo* info);
 
-    static CARAPI_(Int32) GetRouteCountStatic();
+    static CARAPI GetRouteCountStatic(
+        /* [out] */ Int32* result);
 
-    static CARAPI_(AutoPtr<IRouteInfo>) GetRouteAtStatic(
-        /* [in] */ Int32 index);
+    static CARAPI_(AutoPtr<IMediaRouterRouteInfo>) GetRouteAtStatic(
+        /* [in] */ Int32 index,
+        /* [out] */ IMediaRouterRouteInfo** result);
 
     static CARAPI_(void) DispatchRouteVolumeChanged(
-        /* [in] */ IRouteInfo* info);
+        /* [in] */ IMediaRouterRouteInfo* info);
 
     static CARAPI_(void) DispatchRouteGrouped(
-        /* [in] */ IRouteInfo* info,
+        /* [in] */ IMediaRouterRouteInfo* info,
         /* [in] */ IRouteGroup* group,
         /* [in] */ Int32 index);
 
     static CARAPI_(void) DispatchRouteUngrouped(
-        /* [in] */ IRouteInfo* info,
+        /* [in] */ IMediaRouterRouteInfo* info,
         /* [in] */ IRouteGroup* group);
 
     static CARAPI_(void) RemoveRoute(
-        /* [in] */ IRouteInfo* info);
+        /* [in] */ IMediaRouterRouteInfo* info);
 
 private:
     static CARAPI_(void) SelectRouteStatic(
         /* [in] */ Int32 types,
-        /* [in] */ IRouteInfo* route);
+        /* [in] */ RouteInfo* route);
 
     /**
      * Compare the device address of a display and a route.
@@ -462,30 +937,30 @@ private:
      */
     static CARAPI_(Boolean) MatchesDeviceAddress(
         /* [in] */ IWifiDisplay* display,
-        /* [in] */ IRouteInfo* info);
+        /* [in] */ RouteInfo* info);
 
     static CARAPI_(void) AddRouteStatic(
-        /* [in] */ IRouteInfo* info);
+        /* [in] */ RouteInfo* info);
 
     CARAPI_(void) RemoveRouteAt(
         /* [in] */ Int32 routeIndex);
 
     static CARAPI_(void) DispatchRouteSelected(
         /* [in] */ Int32 type,
-        /* [in] */ IRouteInfo* info);
+        /* [in] */ RouteInfo* info);
 
     static CARAPI_(void) DispatchRouteUnselected(
         /* [in] */ Int32 type,
-        /* [in] */ IRouteInfo* info);
+        /* [in] */ RouteInfo* info);
 
     static CARAPI_(void) DispatchRouteChanged(
-        /* [in] */ IRouteInfo* info);
+        /* [in] */ RouteInfo* info);
 
     static CARAPI_(void) DispatchRouteAdded(
-        /* [in] */ IRouteInfo* info);
+        /* [in] */ RouteInfo* info);
 
     static CARAPI_(void) DispatchRouteRemoved(
-        /* [in] */ IRouteInfo* info);
+        /* [in] */ RouteInfo* info);
 
     static CARAPI_(void) DispatchRoutePresentationDisplayChanged(
         /* [in] */ IRouteInfo* info);
@@ -514,13 +989,14 @@ private:
         /* [in] */ IWifiDisplay* d);
 
     static CARAPI_(AutoPtr<IDisplay>) ChoosePresentationDisplayForRoute(
-        /* [in] */ IRouteInfo* route,
+        /* [in] */ RouteInfo* route,
         /* [in] */ ArrayOf<IDisplay*>* displays);
 
 public:
     static AutoPtr<Static> sStatic;
-
-    static const String TAG; // = "MediaRouter";
+private:
+    static const String TAG;
+    static const Boolean DEBUG;
 
 private:
     static HashMap< AutoPtr<IContext>, AutoPtr<IMediaRouter> > sRouters; // = new HashMap<Context, MediaRouter>();

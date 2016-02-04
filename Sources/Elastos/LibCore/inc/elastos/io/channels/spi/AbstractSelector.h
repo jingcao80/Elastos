@@ -23,21 +23,20 @@ class AbstractSelector
     , public IAbstractSelector
 {
 protected:
+    class WakeupRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
-class WakeupRunnable
-    : public Object
-    , public IRunnable
-{
-public:
-    CAR_INTERFACE_DECL()
+        WakeupRunnable(
+            /* [in] */ AbstractSelector* selector);
 
-    WakeupRunnable(
-        /* [in] */ AbstractSelector* selector);
-
-    CARAPI Run();
-private:
-    AbstractSelector* mSelector;
-};
+        CARAPI Run();
+    private:
+        AbstractSelector* mSelector;
+    };
 
 public:
     AbstractSelector();

@@ -1,10 +1,10 @@
 #ifndef __ELASTOS_DROID_SERVICE_NOTIFICATION_NOTIFICATIONLISTENERERVICE_H__
 #define __ELASTOS_DROID_SERVICE_NOTIFICATION_NOTIFICATIONLISTENERERVICE_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/ext/frameworkext.h>
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Utility.h"
-#include "elastos/droid/app/Service.h"
+#include <elastos/droid/app/Service.h>
 
 using Elastos::Droid::App::Service;
 using Elastos::Droid::App::IINotificationManager;
@@ -34,7 +34,7 @@ namespace Notification {
  *     &lt;/intent-filter>
  * &lt;/service></pre>
  */
-class NotificationListenerService
+class ECO_PUBLIC NotificationListenerService
     : public Elastos::Droid::App::Service
     , public INotificationListenerService
 {
@@ -203,7 +203,7 @@ public:
     };
 
 private:
-    class INotificationListenerWrapper
+    class ECO_LOCAL INotificationListenerWrapper
         : public Object
         , public IINotificationListener
         , public IBinder

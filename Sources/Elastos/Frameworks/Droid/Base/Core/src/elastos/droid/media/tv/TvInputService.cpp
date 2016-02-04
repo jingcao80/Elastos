@@ -257,8 +257,7 @@ ECode TvInputService::ServiceHandler::HandleMessage(
             mHost->OnHdmiDeviceAdded(deviceInfo, (ITvInputInfo**)&inputInfo);
             if (inputInfo != NULL) {
                 Int32 id;
-//TODO: Need IHdmiDeviceInfo
-                // deviceInfo->GetId(&id);
+                deviceInfo->GetId(&id);
                 BroadcastAddHdmiTvInput(id, inputInfo);
             }
             return NOERROR;

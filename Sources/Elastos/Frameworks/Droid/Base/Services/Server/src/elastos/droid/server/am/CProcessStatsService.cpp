@@ -273,9 +273,8 @@ Boolean CProcessStatsService::ShouldWriteNowLocked(
         AutoPtr<IProcessStatsHelper> psHelper;
         CProcessStatsHelper::AcquireSingleton((IProcessStatsHelper**)&psHelper);
         Int64 commit_period, commit_uptime_period;
-        assert(0);
-        // ps->GetCOMMIT_PERIOD(&commit_period);
-        // ps->GetCOMMIT_UPTIME_PERIOD(&commit_uptime_period);
+        psHelper->GetCOMMIT_PERIOD(&commit_period);
+        psHelper->GetCOMMIT_UPTIME_PERIOD(&commit_uptime_period);
         if (SystemClock::GetElapsedRealtime() > (realtime + commit_period) &&
             SystemClock::GetUptimeMillis() > (uptime + commit_uptime_period)) {
             mCommitPending = TRUE;
@@ -694,9 +693,8 @@ ECode CProcessStatsService::GetCurrentStats(
             Int64 now = SystemClock::GetUptimeMillis();
             mProcessStats->SetTimePeriodEndRealtime(SystemClock::GetElapsedRealtime());
             mProcessStats->SetTimePeriodEndUptime(now);
-            assert(0);
-            // if (FAILED(mProcessStats->WriteToParcel(current, now)))
-            //     break;
+            if (FAILED(mProcessStats->WriteToParcel(current, now)))
+                break;
         }
         AutoPtr<List<String> > files = GetCommittedFiles(0, FALSE, TRUE);
         *historic = NULL;
@@ -737,14 +735,13 @@ ECode CProcessStatsService::GetStatsOverTime(
     do {
         AutoPtr<IParcel> current;// = Parcel.obtain();
         CParcel::New((IParcel**)&current);
-        Int64 curTime;
+        Int64 curTime = 0;
         synchronized (mAm) {
             Int64 now = SystemClock::GetUptimeMillis();
             Int64 endRealtime = SystemClock::GetElapsedRealtime();
             mProcessStats->SetTimePeriodEndRealtime(endRealtime);
             mProcessStats->SetTimePeriodEndUptime(now);
-            assert(0);
-            // ec = mProcessStats->WriteToParcel(current, now);
+            ec = mProcessStats->WriteToParcel(current, now);
             if (FAILED(ec))
                 break;
             Int64 startRealtime;
@@ -850,8 +847,7 @@ void CProcessStatsService::DumpAggregatedStats(
     AutoPtr<IProcessStatsHelper> psHelper;
     CProcessStatsHelper::AcquireSingleton((IProcessStatsHelper**)&psHelper);
     Int64 commit_period;
-    assert(0);
-    // psHelper->GetCOMMIT_PERIOD(&commit_period);
+    psHelper->GetCOMMIT_PERIOD(&commit_period);
     AutoPtr<IParcelFileDescriptor> pfd;
     GetStatsOverTime(aggregateHours * 60 * 60 * 1000 - (commit_period / 2),
         (IParcelFileDescriptor**)&pfd);
@@ -921,9 +917,8 @@ void CProcessStatsService::Dump(
 {
     AutoPtr<IBinderHelper> bHelper;
     CBinderHelper::AcquireSingleton((IBinderHelper**)&bHelper);
-    assert(0);
-    if (0/*mAm->CheckCallingPermission(Manifest::permission::DUMP)
-            != IPackageManager::PERMISSION_GRANTED*/) {
+    if (mAm->CheckCallingPermission(Manifest::permission::DUMP)
+            != IPackageManager::PERMISSION_GRANTED) {
         Int32 pid, uid;
         bHelper->GetCallingPid(&pid);
         bHelper->GetCallingUid(&uid);

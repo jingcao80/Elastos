@@ -40,7 +40,7 @@ ECode InputFilter::H::HandleMessage(
 
     switch (what) {
         case InputFilter::MSG_INSTALL:
-            mHost->mInputFilterHost = IInputFilterHost::Probe(obj);
+            mHost->mInputFilterHost = IIInputFilterHost::Probe(obj);
             // if (mInboundInputEventConsistencyVerifier != null) {
             //     mInboundInputEventConsistencyVerifier.reset();
             // }
@@ -89,7 +89,7 @@ ECode InputFilter::constructor(
 }
 
 ECode InputFilter::Install(
-    /* [in] */ IInputFilterHost* host)
+    /* [in] */ IIInputFilterHost* host)
 {
     AutoPtr<IMessage> msg;
     mH->ObtainMessage(MSG_INSTALL, host, (IMessage**)&msg);

@@ -2,7 +2,7 @@ module
 {
     using interface Elastos.Core.IRunnable;
 
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.INetworkController;
+    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.INetworkControllerImpl;
     interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.ISecurityController;
 
     namespace Elastos {
@@ -19,9 +19,8 @@ module
      * interface ISecurityControllerCallback
      */
     interface ISignalClusterView {
-
         SetNetworkController(
-            [in] INetworkController* nc);
+            [in] INetworkControllerImpl* nc);
 
         SetSecurityController(
             [in] ISecurityController* sc);
@@ -63,6 +62,14 @@ module
     /**
      * @Involve
      * interface IExpandableView
+     * interface Elastos.Droid.Widget.IFrameLayout
+     * extends Elastos.Droid.View.IView
+     * extends Elastos.Droid.View.IViewGroup
+     * interface Elastos.Droid.View.IViewParent
+     * interface Elastos.Droid.View.IViewManager
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
     interface IStackScrollerDecorView {
         PerformVisibilityAnimation(

@@ -248,12 +248,12 @@ module
         const Int32 _GL__DECODE_EXT                                           = 0x8A49;
         const Int32 _GL__SKIP_DECODE_EXT                                      = 0x8A4A;
 
-        glBlendBarrierKHR(
+        GlBlendBarrierKHR(
         );
 
         // C function void glDebugMessageControlKHR ( GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled )
 
-        glDebugMessageControlKHR(
+        GlDebugMessageControlKHR(
             [in] Int32 source,
             [in] Int32 type,
             [in] Int32 severity,
@@ -265,7 +265,7 @@ module
 
         // C function void glDebugMessageControlKHR ( GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled )
 
-        glDebugMessageControlKHR(
+        GlDebugMessageControlKHR(
             [in] Int32 source,
             [in] Int32 type,
             [in] Int32 severity,
@@ -276,7 +276,7 @@ module
 
         // C function void glDebugMessageInsertKHR ( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *buf )
 
-        glDebugMessageInsertKHR(
+        GlDebugMessageInsertKHR(
             [in] Int32 source,
             [in] Int32 type,
             [in] Int32 id,
@@ -286,12 +286,12 @@ module
 
         // C function void glDebugMessageCallbackKHR ( GLDEBUGPROCKHR callback, const void *userParam )
 
-        glDebugMessageCallbackKHR(
+        GlDebugMessageCallbackKHR(
             [in] IDebugProcKHR* cb);
 
         // C function GLuint glGetDebugMessageLogKHR ( GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog )
 
-        glGetDebugMessageLogKHR(
+        GlGetDebugMessageLogKHR(
             [in] Int32 count,
             [in] Int32 bufSize,
             [in] ArrayOf<Int32>* sources,
@@ -310,7 +310,7 @@ module
 
         // C function GLuint glGetDebugMessageLogKHR ( GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog )
 
-        glGetDebugMessageLogKHR(
+        GlGetDebugMessageLogKHR(
             [in] Int32 count,
             [in] IInt32Buffer* sources,
             [in] IInt32Buffer* types,
@@ -322,7 +322,7 @@ module
 
         // C function GLuint glGetDebugMessageLogKHR ( GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog )
 
-        glGetDebugMessageLogKHR(
+        GlGetDebugMessageLogKHR(
             [in] Int32 count,
             [in] ArrayOf<Int32>* sources,
             [in] Int32 sourcesOffset,
@@ -336,7 +336,7 @@ module
 
         // C function GLuint glGetDebugMessageLogKHR ( GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog )
 
-        glGetDebugMessageLogKHR(
+        GlGetDebugMessageLogKHR(
             [in] Int32 count,
             [in] IInt32Buffer* sources,
             [in] IInt32Buffer* types,
@@ -346,7 +346,7 @@ module
 
         // C function void glPushDebugGroupKHR ( GLenum source, GLuint id, GLsizei length, const GLchar *message )
 
-        glPushDebugGroupKHR(
+        GlPushDebugGroupKHR(
             [in] Int32 source,
             [in] Int32 id,
             [in] Int32 length,
@@ -355,12 +355,12 @@ module
 
         // C function void glPopDebugGroupKHR ( void )
 
-        glPopDebugGroupKHR(
+        GlPopDebugGroupKHR(
         );
 
         // C function void glObjectLabelKHR ( GLenum identifier, GLuint name, GLsizei length, const GLchar *label )
 
-        glObjectLabelKHR(
+        GlObjectLabelKHR(
             [in] Int32 identifier,
             [in] Int32 name,
             [in] Int32 length,
@@ -369,37 +369,37 @@ module
 
         // C function void glGetObjectLabelKHR ( GLenum identifier, GLuint name, GLsizei bufSize, GLsizei *length, GLchar *label )
 
-        glGetObjectLabelKHR(
+        GlGetObjectLabelKHR(
             [in] Int32 identifier,
             [in] Int32 name,
             [out] String* result);
 
         // C function void glObjectPtrLabelKHR ( const void *ptr, GLsizei length, const GLchar *label )
 
-        glObjectPtrLabelKHR(
+        GlObjectPtrLabelKHR(
             [in] Int64 ptr,
             [in] String label);
 
         // C function void glGetObjectPtrLabelKHR ( const void *ptr, GLsizei bufSize, GLsizei *length, GLchar *label )
 
-        glGetObjectPtrLabelKHR(
+        GlGetObjectPtrLabelKHR(
             [in] Int64 ptr,
             [out] String* label);
 
         // C function void glGetPointervKHR ( GLenum pname, void **params )
 
-        glGetDebugMessageCallbackKHR(
+        GlGetDebugMessageCallbackKHR(
             [out] IDebugProcKHR** khr);
 
         // C function void glMinSampleShadingOES ( GLfloat value )
 
-        glMinSampleShadingOES(
+        GlMinSampleShadingOES(
             [in] Float value
         );
 
         // C function void glTexStorage3DMultisampleOES ( GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations )
 
-        glTexStorage3DMultisampleOES(
+        GlTexStorage3DMultisampleOES(
             [in] Int32 target,
             [in] Int32 samples,
             [in] Int32 internalformat,
@@ -411,7 +411,7 @@ module
 
         // C function void glCopyImageSubDataEXT ( GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei srcWidth, GLsizei srcHeight, GLsizei srcDepth )
 
-        glCopyImageSubDataEXT(
+        GlCopyImageSubDataEXT(
             [in] Int32 srcName,
             [in] Int32 srcTarget,
             [in] Int32 srcLevel,
@@ -431,28 +431,28 @@ module
 
         // C function void glEnableiEXT ( GLenum target, GLuint index )
 
-        glEnableiEXT(
+        GlEnableiEXT(
             [in] Int32 target,
             [in] Int32 index
         );
 
         // C function void glDisableiEXT ( GLenum target, GLuint index )
 
-        glDisableiEXT(
+        GlDisableiEXT(
             [in] Int32 target,
             [in] Int32 index
         );
 
         // C function void glBlendEquationiEXT ( GLuint buf, GLenum mode )
 
-        glBlendEquationiEXT(
+        GlBlendEquationiEXT(
             [in] Int32 buf,
             [in] Int32 mode
         );
 
         // C function void glBlendEquationSeparateiEXT ( GLuint buf, GLenum modeRGB, GLenum modeAlpha )
 
-        glBlendEquationSeparateiEXT(
+        GlBlendEquationSeparateiEXT(
             [in] Int32 buf,
             [in] Int32 modeRGB,
             [in] Int32 modeAlpha
@@ -460,7 +460,7 @@ module
 
         // C function void glBlendFunciEXT ( GLuint buf, GLenum src, GLenum dst )
 
-        glBlendFunciEXT(
+        GlBlendFunciEXT(
             [in] Int32 buf,
             [in] Int32 src,
             [in] Int32 dst
@@ -468,7 +468,7 @@ module
 
         // C function void glBlendFuncSeparateiEXT ( GLuint buf, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha )
 
-        glBlendFuncSeparateiEXT(
+        GlBlendFuncSeparateiEXT(
             [in] Int32 buf,
             [in] Int32 srcRGB,
             [in] Int32 dstRGB,
@@ -478,7 +478,7 @@ module
 
         // C function void glColorMaskiEXT ( GLuint index, GLboolean r, GLboolean g, GLboolean b, GLboolean a )
 
-        glColorMaskiEXT(
+        GlColorMaskiEXT(
             [in] Int32 index,
             [in] Boolean r,
             [in] Boolean g,
@@ -488,7 +488,7 @@ module
 
         // C function GLboolean glIsEnablediEXT ( GLenum target, GLuint index )
 
-        glIsEnablediEXT(
+        GlIsEnablediEXT(
             [in] Int32 target,
             [in] Int32 index,
             [out] Boolean* result
@@ -496,7 +496,7 @@ module
 
         // C function void glFramebufferTextureEXT ( GLenum target, GLenum attachment, GLuint texture, GLint level )
 
-        glFramebufferTextureEXT(
+        GlFramebufferTextureEXT(
             [in] Int32 target,
             [in] Int32 attachment,
             [in] Int32 texture,
@@ -505,7 +505,7 @@ module
 
         // C function void glPrimitiveBoundingBoxEXT ( GLfloat minX, GLfloat minY, GLfloat minZ, GLfloat minW, GLfloat maxX, GLfloat maxY, GLfloat maxZ, GLfloat maxW )
 
-        glPrimitiveBoundingBoxEXT(
+        GlPrimitiveBoundingBoxEXT(
             [in] Float minX,
             [in] Float minY,
             [in] Float minZ,
@@ -518,14 +518,14 @@ module
 
         // C function void glPatchParameteriEXT ( GLenum pname, GLint value )
 
-        glPatchParameteriEXT(
+        GlPatchParameteriEXT(
             [in] Int32 pname,
             [in] Int32 value
         );
 
         // C function void glTexParameterIivEXT ( GLenum target, GLenum pname, const GLint *params )
 
-        glTexParameterIivEXT(
+        GlTexParameterIivEXT(
             [in] Int32 target,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
@@ -534,7 +534,7 @@ module
 
         // C function void glTexParameterIivEXT ( GLenum target, GLenum pname, const GLint *params )
 
-        glTexParameterIivEXT(
+        GlTexParameterIivEXT(
             [in] Int32 target,
             [in] Int32 pname,
             [in] IInt32Buffer* params
@@ -542,7 +542,7 @@ module
 
         // C function void glTexParameterIuivEXT ( GLenum target, GLenum pname, const GLuint *params )
 
-        glTexParameterIuivEXT(
+        GlTexParameterIuivEXT(
             [in] Int32 target,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
@@ -551,7 +551,7 @@ module
 
         // C function void glTexParameterIuivEXT ( GLenum target, GLenum pname, const GLuint *params )
 
-        glTexParameterIuivEXT(
+        GlTexParameterIuivEXT(
             [in] Int32 target,
             [in] Int32 pname,
             [in] IInt32Buffer* params
@@ -559,7 +559,7 @@ module
 
         // C function void glGetTexParameterIivEXT ( GLenum target, GLenum pname, GLint *params )
 
-        glGetTexParameterIivEXT(
+        GlGetTexParameterIivEXT(
             [in] Int32 target,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
@@ -568,7 +568,7 @@ module
 
         // C function void glGetTexParameterIivEXT ( GLenum target, GLenum pname, GLint *params )
 
-        glGetTexParameterIivEXT(
+        GlGetTexParameterIivEXT(
             [in] Int32 target,
             [in] Int32 pname,
             [in] IInt32Buffer* params
@@ -576,7 +576,7 @@ module
 
         // C function void glGetTexParameterIuivEXT ( GLenum target, GLenum pname, GLuint *params )
 
-        glGetTexParameterIuivEXT(
+        GlGetTexParameterIuivEXT(
             [in] Int32 target,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
@@ -585,7 +585,7 @@ module
 
         // C function void glGetTexParameterIuivEXT ( GLenum target, GLenum pname, GLuint *params )
 
-        glGetTexParameterIuivEXT(
+        GlGetTexParameterIuivEXT(
             [in] Int32 target,
             [in] Int32 pname,
             [in] IInt32Buffer* params
@@ -593,7 +593,7 @@ module
 
         // C function void glSamplerParameterIivEXT ( GLuint sampler, GLenum pname, const GLint *param )
 
-        glSamplerParameterIivEXT(
+        GlSamplerParameterIivEXT(
             [in] Int32 sampler,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* param,
@@ -602,7 +602,7 @@ module
 
         // C function void glSamplerParameterIivEXT ( GLuint sampler, GLenum pname, const GLint *param )
 
-        glSamplerParameterIivEXT(
+        GlSamplerParameterIivEXT(
             [in] Int32 sampler,
             [in] Int32 pname,
             [in] IInt32Buffer* param
@@ -610,7 +610,7 @@ module
 
         // C function void glSamplerParameterIuivEXT ( GLuint sampler, GLenum pname, const GLuint *param )
 
-        glSamplerParameterIuivEXT(
+        GlSamplerParameterIuivEXT(
             [in] Int32 sampler,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* param,
@@ -619,7 +619,7 @@ module
 
         // C function void glSamplerParameterIuivEXT ( GLuint sampler, GLenum pname, const GLuint *param )
 
-        glSamplerParameterIuivEXT(
+        GlSamplerParameterIuivEXT(
             [in] Int32 sampler,
             [in] Int32 pname,
             [in] IInt32Buffer* param
@@ -627,7 +627,7 @@ module
 
         // C function void glGetSamplerParameterIivEXT ( GLuint sampler, GLenum pname, GLint *params )
 
-        glGetSamplerParameterIivEXT(
+        GlGetSamplerParameterIivEXT(
             [in] Int32 sampler,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
@@ -636,7 +636,7 @@ module
 
         // C function void glGetSamplerParameterIivEXT ( GLuint sampler, GLenum pname, GLint *params )
 
-        glGetSamplerParameterIivEXT(
+        GlGetSamplerParameterIivEXT(
             [in] Int32 sampler,
             [in] Int32 pname,
             [in] IInt32Buffer* params
@@ -644,7 +644,7 @@ module
 
         // C function void glGetSamplerParameterIuivEXT ( GLuint sampler, GLenum pname, GLuint *params )
 
-        glGetSamplerParameterIuivEXT(
+        GlGetSamplerParameterIuivEXT(
             [in] Int32 sampler,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
@@ -653,7 +653,7 @@ module
 
         // C function void glGetSamplerParameterIuivEXT ( GLuint sampler, GLenum pname, GLuint *params )
 
-        glGetSamplerParameterIuivEXT(
+        GlGetSamplerParameterIuivEXT(
             [in] Int32 sampler,
             [in] Int32 pname,
             [in] IInt32Buffer* params
@@ -661,7 +661,7 @@ module
 
         // C function void glTexBufferEXT ( GLenum target, GLenum internalformat, GLuint buffer )
 
-        glTexBufferEXT(
+        GlTexBufferEXT(
             [in] Int32 target,
             [in] Int32 internalformat,
             [in] Int32 buffer
@@ -669,7 +669,7 @@ module
 
         // C function void glTexBufferRangeEXT ( GLenum target, GLenum internalformat, GLuint buffer, GLintptr offset, GLsizeiptr size )
 
-        glTexBufferRangeEXT(
+        GlTexBufferRangeEXT(
             [in] Int32 target,
             [in] Int32 internalformat,
             [in] Int32 buffer,

@@ -807,14 +807,14 @@ ECode AbstractList::Remove(
 ECode AbstractList::RemoveAll(
     /* [in] */ ICollection* collection)
 {
-    return AbstractCollection::Remove(collection);
+    return AbstractCollection::RemoveAll(collection);
 }
 
 ECode AbstractList::RemoveAll(
     /* [in] */ ICollection* collection,
     /* [out] */ Boolean* result)
 {
-    return AbstractCollection::Remove(collection, result);
+    return AbstractCollection::RemoveAll(collection, result);
 }
 
 ECode AbstractList::RetainAll(

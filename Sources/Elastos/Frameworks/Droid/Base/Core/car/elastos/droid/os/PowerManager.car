@@ -90,6 +90,18 @@ module
          */
         SetWorkSource(
             [in] IWorkSource* ws);
+
+        /** @hide */
+        SetTag(
+            [in] String tag);
+
+        /** @hide */
+        SetHistoryTag(
+            [in] String tag);
+
+        /** @hide */
+        SetUnimportantForLogging(
+            [in] Boolean tag);
     }
 
     interface IPowerManager

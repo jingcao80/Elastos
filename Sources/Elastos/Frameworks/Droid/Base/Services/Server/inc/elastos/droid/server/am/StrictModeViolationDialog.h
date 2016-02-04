@@ -6,9 +6,7 @@
 #include "elastos/droid/server/am/BaseErrorDialog.h"
 #include "elastos/droid/server/am/AppErrorResult.h"
 #include "elastos/droid/server/am/ProcessRecord.h"
-#include "elastos/droid/os/HandlerBase.h"
-
-using namespace Elastos::Core;
+#include "elastos/droid/os/Handler.h"
 
 namespace Elastos {
 namespace Droid {
@@ -20,7 +18,7 @@ class StrictModeViolationDialog
 {
 private:
     class MyHandler
-        : public HandlerBase
+        : public Handler
     {
     public:
         MyHandler(

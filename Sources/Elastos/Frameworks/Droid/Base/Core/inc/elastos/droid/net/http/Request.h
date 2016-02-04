@@ -3,6 +3,7 @@
 #define __ELASTOS_DROID_NET_HTTP_REQUEST_H__
 
 #include "Elastos.Droid.Net.h"
+#include "Elastos.CoreLibrary.Apache.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
@@ -11,8 +12,8 @@ using Elastos::Utility::IMap;
 
 using Org::Apache::Http::IHttpHost;
 using Org::Apache::Http::IHttpRequest;
+using Org::Apache::Http::IHttpRequestInterceptor;
 using Org::Apache::Http::Message::IBasicHttpRequest;
-using Org::Apache::Http::Protocol::IRequestContent;
 
 namespace Elastos {
 namespace Droid {
@@ -179,7 +180,7 @@ private:
         /* [in] */ IInputStream* bodyProvider,
         /* [in] */ Int32 bodyLength);
 
-    static CARAPI_(AutoPtr<IRequestContent>) InitRequestContentProcessor();
+    static CARAPI_(AutoPtr<IHttpRequestInterceptor>) InitRequestContentProcessor();
 
 public:
     /** The eventhandler to call as the request progresses */
@@ -207,7 +208,7 @@ private:
      * Processor used to set content-length and transfer-encoding
      * headers.
      */
-    static AutoPtr<IRequestContent> mRequestContentProcessor;
+    static AutoPtr<IHttpRequestInterceptor> mRequestContentProcessor;
 
     AutoPtr<IConnection> mConnection;
 

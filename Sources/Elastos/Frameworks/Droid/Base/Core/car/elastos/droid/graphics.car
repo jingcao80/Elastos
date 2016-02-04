@@ -240,6 +240,10 @@ module
         interface IColor;
     }
 
+    class CColorFilter {
+        interface IColorFilter;
+    }
+
     class CColorMatrix {
         /**
          * Create a new colormatrix initialized to identity (as if reset() had
@@ -918,6 +922,10 @@ module
 
         interface IRegion;
         interface IParcelable;
+    }
+
+    singleton class CRegionHelper {
+        interface IRegionHelper;
     }
 
     class CRegionIterator {

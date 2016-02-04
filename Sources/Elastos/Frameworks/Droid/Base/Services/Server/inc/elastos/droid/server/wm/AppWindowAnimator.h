@@ -1,30 +1,27 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_APPWINDOWANIMATOR_H__
 #define __ELASTOS_DROID_SERVER_WM_APPWINDOWANIMATOR_H__
 
-#include "wm/CWindowManagerService.h"
-#include "wm/WindowStateAnimator.h"
-#include "wm/WindowAnimator.h"
+#include "_Elastos.Droid.Server.h"
+#include <Elastos.Droid.View.h>
 #include "elastos/droid/view/animation/Animation.h"
-#include <elastos/core/Object.h>
+#include "elastos/droid/server/wm/WindowStateAnimator.h"
+#include "elastos/droid/server/wm/WindowAnimator.h"
 #include <elastos/utility/etl/List.h>
 
-using Elastos::Utility::Etl::List;
+using Elastos::Droid::View::ISurfaceControl;
 using Elastos::Droid::View::Animation::Animation;
-using Elastos::Droid::View::Animation::IAnimation;
 using Elastos::Droid::View::Animation::ITransformation;
 using Elastos::Droid::View::Animation::IAnimationAnimationListener;
 using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Droid::View::Animation::IAnimation;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Content::IContext;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wm {
-
-class AppWindowToken;
-class WindowAnimator;
-class WindowStateAnimator;
 
 class AppWindowAnimator : public Object
 {
@@ -32,14 +29,16 @@ public:
     // This is an animation that does nothing: it just immediately finishes
     // itself every time it is called.  It is used as a stub animation in cases
     // where we want to synchronize multiple things that may be animating.
-    class DummyAnimation
-        : public Animation
+    class DummyAnimation : public Elastos::Droid::View::Animation::Animation
     {
     public:
         CARAPI GetTransformation(
             /* [in] */ Int64 currentTime,
             /* [in, out] */ ITransformation* outTransformation,
             /* [out] */ Boolean* result);
+
+        CARAPI Clone(
+            /* [out] */ IInterface** obj);
     };
 
 public:

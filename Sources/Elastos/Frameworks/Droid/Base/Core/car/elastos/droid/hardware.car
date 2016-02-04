@@ -160,6 +160,27 @@ module
     merge("hardware/camera2/marshal/MarshalQueryable.car");
     merge("hardware/camera2/marshal/MarshalRegistry.car");
 
+    merge("hardware/camera2/marshal/impl/MarshalQueryableArray.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableBlackLevelPattern.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableBoolean.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableColorSpaceTransform.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableEnum.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableHighSpeedVideoConfiguration.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableMeteringRectangle.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableNativeByteToInteger.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryablePair.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableParcelable.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryablePrimitive.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableRange.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableRect.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableReprocessFormatsMap.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableRggbChannelVector.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableSize.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableSizeF.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableStreamConfiguration.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableStreamConfigurationDuration.car");
+    merge("hardware/camera2/marshal/impl/MarshalQueryableString.car");
+
     merge("hardware/camera2/params/BlackLevelPattern.car");
     merge("hardware/camera2/params/ColorSpaceTransform.car");
     merge("hardware/camera2/params/Face.car");
@@ -213,6 +234,7 @@ module
     interface Elastos.Droid.Hardware.Camera2.Impl.ICameraMetadataNativeKey;
     interface Elastos.Droid.Hardware.Camera2.Utils.ITypeReference;
     interface Elastos.Droid.Hardware.Camera2.Dispatch.IDispatchable;
+    interface Elastos.Droid.Hardware.Camera2.Marshal.IMarshalQueryable;
     interface Elastos.Droid.Hardware.IParameters;
     interface Elastos.Droid.Hardware.ICameraArea;
     interface Elastos.Droid.Hardware.IHardwareCamera;
@@ -987,6 +1009,119 @@ module
         }
     } //namespace Legacy
 
+    namespace Marshal {
+        singleton class CMarshalHelpers {
+            interface IMarshalHelpers;
+        }
+
+        singleton class CMarshalRegistry {
+            interface IMarshalRegistryHelper;
+        }
+
+        namespace Impl {
+            class CMarshalQueryableArray {
+                interface IMarshalQueryableArray;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableBlackLevelPattern {
+                interface IMarshalQueryableBlackLevelPattern;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableBoolean {
+                interface IMarshalQueryableBoolean;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableColorSpaceTransform {
+                interface IMarshalQueryableColorSpaceTransform;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableEnum {
+                interface IMarshalQueryableEnum;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableHighSpeedVideoConfiguration {
+                interface IMarshalQueryableHighSpeedVideoConfiguration;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableMeteringRectangle {
+                interface IMarshalQueryableMeteringRectangle;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableNativeByteToInteger {
+                interface IMarshalQueryableNativeByteToInteger;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryablePair {
+                interface IMarshalQueryablePair;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableParcelable {
+                interface IMarshalQueryableParcelable;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryablePrimitive {
+                interface IMarshalQueryablePrimitive;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableRange {
+                interface IMarshalQueryableRange;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableRect {
+                interface IMarshalQueryableRect;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableReprocessFormatsMap {
+                interface IMarshalQueryableReprocessFormatsMap;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableRggbChannelVector {
+                interface IMarshalQueryableRggbChannelVector;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableSize {
+                interface IMarshalQueryableSize;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableSizeF {
+                interface IMarshalQueryableSizeF;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableStreamConfiguration {
+                interface IMarshalQueryableStreamConfiguration;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableStreamConfigurationDuration {
+                interface IMarshalQueryableStreamConfigurationDuration;
+                interface IMarshalQueryable;
+            }
+
+            class CMarshalQueryableString {
+                interface IMarshalQueryableString;
+                interface IMarshalQueryable;
+            }
+
+        } //namespace Impl
+    } //namespace Marshal
+
     namespace Params {
         [deprecated]
         class CBlackLevelPattern {
@@ -1344,6 +1479,25 @@ module
 
         singleton class CInputManagerHelper {
             interface IInputManagerHelper;
+        }
+
+        class CTouchCalibration {
+            constructor();
+
+            constructor(
+                [in] Float xScale,
+                [in] Float xyMix,
+                [in] Float xOffset,
+                [in] Float yxMix,
+                [in] Float yScale,
+                [in] Float yOffset);
+
+            interface ITouchCalibration;
+            interface IParcelable;
+        }
+
+        singleton class CTouchCalibrationHelper {
+            interface ITouchCalibrationHelper;
         }
 
     } // namespace Input

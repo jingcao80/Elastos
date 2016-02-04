@@ -100,7 +100,7 @@ ECode ConnectionThread::Run()
         else {
             if (HttpLog::LOGV) {
                 HttpLog::V("ConnectionThread: new request %s %s",
-                        Object::ToString(((Request*)request.Get())->mHost).string(), Object::ToString(request).string());
+                        Object::ToString(((Request*)request.Get())->mHost).string(), TO_CSTR(request));
             }
 
             mConnectionManager->GetConnection(mContext, ((Request*)request.Get())->mHost, (IConnection**)&mConnection);

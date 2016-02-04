@@ -1,11 +1,14 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_POINTEREVENTDISPATCHER_H__
 #define __ELASTOS_DROID_SERVER_WM_POINTEREVENTDISPATCHER_H__
 
-#include "view/InputEventReceiver.h"
+#include "elastos/droid/view/InputEventReceiver.h"
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::View::IPointerEventListener;
 using Elastos::Droid::View::IInputChannel;
+using Elastos::Droid::View::InputEventReceiver;
+using Elastos::Droid::View::IInputEvent;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {

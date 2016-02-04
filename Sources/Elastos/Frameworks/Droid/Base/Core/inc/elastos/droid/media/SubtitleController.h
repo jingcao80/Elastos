@@ -14,6 +14,7 @@ using Elastos::Droid::Os::IHandlerCallback;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::View::Accessibility::ICaptioningManager;
 using Elastos::Droid::View::Accessibility::ICaptioningManagerCaptioningChangeListener;
+using Elastos::Droid::View::Accessibility::ICaptioningManagerCaptionStyle;
 using Elastos::Utility::IVector;
 
 namespace Elastos {
@@ -32,17 +33,17 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        MyHandlerCallback();
-
-        CARAPI constructor(
-            /* [in] */ SubtitleController* host);
+        MyHandlerCallback(
+            /* [in] */ SubtitleController* host)
+            : mHost(host)
+        {}
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg,
             /* [out] */ Boolean* result);
 
     private:
-        AutoPtr<SubtitleController> mHost;
+        SubtitleController* mHost;
     };
 
     class MyCaptioningChangeListener
@@ -52,10 +53,10 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
-        MyCaptioningChangeListener();
-
-        CARAPI constructor(
-            /* [in] */ SubtitleController* host);
+        MyCaptioningChangeListener(
+            /* [in] */ SubtitleController* host)
+            : mHost(host)
+        {}
 
         CARAPI OnEnabledChanged(
             /* [in] */ Boolean enabled);
@@ -63,8 +64,14 @@ private:
         CARAPI OnLocaleChanged(
             /* [in] */ ILocale* locale);
 
+        CARAPI OnUserStyleChanged(
+            /* [in] */ ICaptioningManagerCaptionStyle* userStyle);
+
+        CARAPI OnFontScaleChanged(
+            /* [in] */ Float fontScale);
+
     private:
-        AutoPtr<SubtitleController> mHost;
+        SubtitleController* mHost;
     };
 
 public:

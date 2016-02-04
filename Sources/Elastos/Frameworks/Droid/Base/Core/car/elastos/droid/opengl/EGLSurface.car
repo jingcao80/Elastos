@@ -14,9 +14,6 @@ module
      * interface IEGLObjectHandle
      */
     interface IEGLSurface {
-        Equals(
-            [in] IInterface* o,
-            [out] Boolean* result);
     }
 
     } // namespace Opengl

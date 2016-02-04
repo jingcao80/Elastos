@@ -1,6 +1,5 @@
 #include "elastos/droid/media/CMediaHTTPService.h"
-// TODO: Need CMediaHTTPConnection
-// #include "elastos/droid/media/CMediaHTTPConnection.h"
+#include "elastos/droid/media/CMediaHTTPConnection.h"
 
 using Elastos::Droid::Os::EIID_IBinder;
 
@@ -31,8 +30,7 @@ ECode CMediaHTTPService::MakeHTTPConnection(
     /* [out] */ IIMediaHTTPConnection** result)
 {
     AutoPtr<IIMediaHTTPConnection> conn;
-// TODO: Need CMediaHTTPConnection
-    // CMediaHTTPConnection::New((IIMediaHTTPConnection**)&conn);
+    CMediaHTTPConnection::New((IIMediaHTTPConnection**)&conn);
     *result = IIMediaHTTPConnection::Probe(conn);
     REFCOUNT_ADD(*result);
     return NOERROR;

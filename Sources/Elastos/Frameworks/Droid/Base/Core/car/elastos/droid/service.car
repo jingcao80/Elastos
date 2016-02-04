@@ -69,26 +69,28 @@ module
     interface Elastos.Droid.Content.IComponentName;
     interface Elastos.Droid.Content.Pm.IPackageManager;
     interface Elastos.Droid.Content.Pm.IServiceInfo;
-    interface Elastos.Droid.Graphics.IRect;
     interface Elastos.Droid.Hardware.Soundtrigger.IIRecognitionStatusCallback;
     interface Elastos.Droid.Hardware.Soundtrigger.IKeyphraseEnrollmentInfo;
-    interface Elastos.Droid.Internal.App.IIVoiceInteractionManagerService;
-    interface Elastos.Droid.Internal.App.IIVoiceInteractorCallback;
-    interface Elastos.Droid.Internal.Os.IHandlerCallerCallback;
     interface Elastos.Droid.Media.IAudioFormat;
     interface Elastos.Droid.Net.IUri;
     interface Elastos.Droid.Preference.IPreferenceActivity;
     interface Elastos.Droid.Preference.IPreferenceFragmentOnPreferenceStartFragmentCallback;
     interface Elastos.Droid.Preference.IPreferenceManagerOnPreferenceTreeClickListener;
+    interface Elastos.Droid.Graphics.IRect;
     interface Elastos.Droid.View.IContextThemeWrapper;
     interface Elastos.Droid.View.IKeyEventCallback;
     interface Elastos.Droid.View.ILayoutInflaterFactory;
     interface Elastos.Droid.View.ILayoutInflaterFactory2;
-    interface Elastos.Droid.View.Internal.TextService.IISpellCheckerService;
-    interface Elastos.Droid.View.Internal.TextService.IISpellCheckerSession;
-    interface Elastos.Droid.View.Internal.TextService.IISpellCheckerSessionListener;
     interface Elastos.Droid.View.IWindowCallback;
-    interface Elastos.Utility.ILocale;
+    interface Elastos.Droid.Internal.Os.IHandlerCallerCallback;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractionManagerService;
+    interface Elastos.Droid.Internal.App.IIVoiceInteractorCallback;
+    interface Elastos.Droid.Internal.TextService.IITextServicesManager;
+    interface Elastos.Droid.Internal.TextService.IISpellCheckerService;
+    interface Elastos.Droid.Internal.TextService.IISpellCheckerSession;
+    interface Elastos.Droid.Internal.TextService.IISpellCheckerSessionListener;
+    using interface Elastos.Utility.ILocale;
+    using interface Elastos.Core.ICloneable;
 
     namespace Elastos {
     namespace Droid {
@@ -99,12 +101,13 @@ module
         class CDreamService {
             constructor();
 
+            interface IDreamService;
+            interface IService;
             interface IContext;
             interface IContextWrapper;
-            interface IService;
             interface IComponentCallbacks2;
+            interface IComponentCallbacks;
             interface IWindowCallback;
-            interface IDreamService;
         }
 
         singleton class CSandman {
@@ -146,7 +149,7 @@ module
 
     }// namespace Persistentdata
 
-    namespace Textservice {
+    namespace TextService {
 
         class CInternalISpellCheckerSession {
             constructor(
@@ -169,7 +172,7 @@ module
             interface IBinder;
         }
 
-    }// namespace Textservice
+    }// namespace TextService
 
     namespace Trust {
 
@@ -443,6 +446,7 @@ module
 
             interface IStatusBarNotification;
             interface IParcelable;
+            interface ICloneable;
         }
 
         class CZenModeConfigDowntimeInfo {

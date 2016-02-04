@@ -36,6 +36,9 @@ public:
     static CARAPI_(AutoPtr<IDoubleBuffer>) AsDoubleBuffer(
         /* [in] */ ByteBuffer* byteBuffer);
 
+    CARAPI GetPrimitiveArray(
+        /* [out] */ Handle64* arrayHandle);
+
     // @Override
     CARAPI AsReadOnlyBuffer(
         /* [out] */ IDoubleBuffer** buffer);

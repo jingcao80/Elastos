@@ -6,6 +6,7 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/utility/Pools.h"
+#include "elastos/droid/view/InputEventSender.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::IRect;
@@ -21,6 +22,7 @@ using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Droid::Utility::Pools;
 using Elastos::Droid::View::IInputChannel;
 using Elastos::Droid::View::IInputEvent;
+using Elastos::Droid::View::InputEventSender;
 using Elastos::Droid::View::ISurface;
 using Elastos::Droid::View::IView;
 using Elastos::Utility::IArrayList;
@@ -60,10 +62,8 @@ private:
         CTvInputManagerSession* mHost;
     };
 
-//TODO: Need InputEventSender
-        // : public InputEventSender
     class TvInputEventSender
-        : public Object
+        : public InputEventSender
     {
     public:
         TvInputEventSender(

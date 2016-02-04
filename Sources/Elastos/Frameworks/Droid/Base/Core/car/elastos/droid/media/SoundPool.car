@@ -620,8 +620,7 @@ module
          * @throws IllegalArgumentException
          */
         SetMaxStreams(
-            [in] Int32 maxStreams,
-            [out] ISoundPoolBuilder ** result);
+            [in] Int32 maxStreams);
 
         /**
          * Sets the {@link AudioAttributes}. For examples, game applications will use attributes
@@ -630,8 +629,7 @@ module
          * @return
          */
         SetAudioAttributes(
-            [in] IAudioAttributes * attributes,
-            [out] ISoundPoolBuilder ** result);
+            [in] IAudioAttributes * attributes);
 
         Build(
             [out] ISoundPool ** result);

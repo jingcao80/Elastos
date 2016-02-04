@@ -2,7 +2,10 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHSERVERSOCKET_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHSERVERSOCKET_H__
 
-#include "BluetoothSocket.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/ext/frameworkdef.h"
+#include "elastos/droid/bluetooth/BluetoothSocket.h"
 
 using Elastos::Droid::Os::IParcelUuid;
 using Elastos::Droid::Os::IHandler;
@@ -12,11 +15,15 @@ namespace Droid {
 namespace Bluetooth {
 
 class BluetoothServerSocket
-    : public ElRefBase
+    : public Object
     , public IBluetoothServerSocket
     , public ICloseable
 {
 public:
+    CAR_INTERFACE_DECL();
+
+    BluetoothServerSocket();
+
     BluetoothServerSocket(
         /* [in] */ Int32 type,
         /* [in] */ Boolean auth,
@@ -28,8 +35,6 @@ public:
         /* [in] */ Boolean auth,
         /* [in] */ Boolean encrypt,
         /* [in] */ IParcelUuid* uuid);
-
-    CAR_INTERFACE_DECL()
 
     CARAPI Accept(
         /* [out] */ IBluetoothSocket** socket);

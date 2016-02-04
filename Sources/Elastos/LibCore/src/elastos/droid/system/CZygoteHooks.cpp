@@ -109,8 +109,8 @@ void CZygoteHooks::WaitUntilAllThreadsStopped()
     }
 }
 
-static void EnableDebugger()
-{
+// static void EnableDebugger()
+// {
 //   // To let a non-privileged gdbserver attach to this
 //   // process, we must set our dumpable flag.
 // #if defined(HAVE_PRCTL)
@@ -125,10 +125,10 @@ static void EnableDebugger()
 //   if (setrlimit(RLIMIT_CORE, &rl) == -1) {
 //     PLOG(ERROR) << "setrlimit(RLIMIT_CORE) failed for pid " << getpid();
 //   }
-}
+// }
 
-static void EnableDebugFeatures(uint32_t debug_flags)
-{
+// static void EnableDebugFeatures(uint32_t debug_flags)
+// {
   // // Must match values in dalvik.system.Zygote.
   // enum {
   //   DEBUG_ENABLE_DEBUGGER           = 1,
@@ -170,7 +170,7 @@ static void EnableDebugFeatures(uint32_t debug_flags)
   // if (debug_flags != 0) {
   //   LOG(ERROR) << StringPrintf("Unknown bits set in debug_flags: %#x", debug_flags);
   // }
-}
+// }
 
 }// namespace System
 }// namespace Droid

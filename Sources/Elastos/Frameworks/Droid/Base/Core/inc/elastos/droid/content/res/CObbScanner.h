@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_CONTENT_RES_COBBSCANNER_H__
 
 #include "_Elastos_Droid_Content_Res_CObbScanner.h"
-#include <elastos/core/Object.h>
+#include <elastos/core/Singleton.h>
 
 namespace Elastos {
 namespace Droid {
@@ -11,13 +11,13 @@ namespace Content {
 namespace Res {
 
 CarClass(CObbScanner)
-    , public Object
+    , public Singleton
     , public IObbScanner
 {
 public:
     CAR_INTERFACE_DECL()
 
-    CAR_OBJECT_DECL()
+    CAR_SINGLETON_DECL()
 
     CARAPI GetObbInfo(
         /* [in] */ const String& filePath,

@@ -179,10 +179,10 @@ public:
             for(Int32 i = 0; i < size; i ++) {
                 K key = (*keys)[i];
                 Int32 index;
-                if(keyToIndex.Find(key) != keyToIndex.End()) {
+                if (keyToIndex.Find(key) != keyToIndex.End()) {
                     index = keyToIndex.Find(key)->mSecond;
                 }
-                if (keyToIndex.Find(key) == keyToIndex.End()) {
+                else {
                     index = keyToIndex.GetSize();
                     keyToIndex[key] = index;
                 }

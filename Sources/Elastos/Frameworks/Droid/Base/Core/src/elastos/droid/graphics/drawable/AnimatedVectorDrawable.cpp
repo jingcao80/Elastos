@@ -370,9 +370,9 @@ ECode AnimatedVectorDrawable::CanApplyTheme(
     /* [out] */ Boolean* can)
 {
     Boolean tmp = FALSE;
-    *can = (Drawable::CanApplyTheme(&tmp), tmp) || mAnimatedVectorState != NULL
+    *can = (Drawable::CanApplyTheme(&tmp), tmp) || (mAnimatedVectorState != NULL
             && mAnimatedVectorState->mVectorDrawable != NULL
-            && (IDrawable::Probe(mAnimatedVectorState->mVectorDrawable)->CanApplyTheme(can), *can);
+            && (IDrawable::Probe(mAnimatedVectorState->mVectorDrawable)->CanApplyTheme(&tmp), tmp));
 
     return NOERROR;
 }

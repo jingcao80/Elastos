@@ -9,8 +9,8 @@
 
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::View::Internal::TextService::IISpellCheckerSession;
-using Elastos::Droid::View::Internal::TextService::IISpellCheckerSessionListener;
+using Elastos::Droid::Internal::TextService::IISpellCheckerSession;
+using Elastos::Droid::Internal::TextService::IISpellCheckerSessionListener;
 
 using Elastos::Core::Object;
 using Elastos::Utility::IQueue;

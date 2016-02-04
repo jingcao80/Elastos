@@ -42,8 +42,8 @@ CAR_INTERFACE_IMPL(AudioEffect, Object, IAudioEffect)
 AudioEffect::NativeEventHandler::NativeEventHandler(
     /* [in] */ AudioEffect* ae,
     /* [in] */ ILooper* looper)
-    : mAudioEffect(ae)
-    , Handler(looper)
+    : Handler(looper)
+    , mAudioEffect(ae)
 {
 }
 
@@ -895,7 +895,7 @@ Int32 AudioEffect::NativeSetup(
     /* [in] */ ArrayOf<Int32>* jId,
     /* [in] */ ArrayOf<IAudioEffectDescriptor*>* javadesc)
 {
-    AudioEffectJniStorage* lpJniStorage;
+    AudioEffectJniStorage* lpJniStorage = NULL;
     Int32 lStatus = AUDIOEFFECT_ERROR_NO_MEMORY;
     android::AudioEffect* lpAudioEffect = NULL;
     const char *typeStr = NULL;
@@ -1361,7 +1361,6 @@ AutoPtr<ArrayOf<IAudioEffectDescriptor* > > AudioEffect::NativeQueryPreProcessin
     String jdescConnect;
     String jdescName;
     String jdescImplementor;
-    IObject* jdesc = NULL;
 
     for (uint32_t i = 0; i < numEffects; i++) {
 

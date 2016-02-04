@@ -642,6 +642,8 @@ private:
         /* [in] */ ITransitionValues* newValues,
         /* [in] */ const String& key);
 
+    static CARAPI_(AutoPtr< ArrayOf<Int32> >) Init_DEFAULT_MATCH_ORDER();
+
 public:
     static Boolean DBG;
 

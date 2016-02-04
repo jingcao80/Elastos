@@ -2,75 +2,115 @@
 #ifndef __ELASTOS_DROID_SERVER_CNETWORKMANAGEMENTSERVICE_H__
 #define __ELASTOS_DROID_SERVER_CNETWORKMANAGEMENTSERVICE_H__
 
-#include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/droid/ext/frameworkdef.h>
 #include "_Elastos_Droid_Server_CNetworkManagementService.h"
-#include "NativeDaemonConnector.h"
-#include "elastos/droid/net/NetworkUtils.h"
-#include "elastos/droid/os/Runnable.h"
+// #include "elastos/droid/server/NativeDaemonConnector.h"
+#include "_Elastos.Droid.Server.h"
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Net.h>
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.Droid.Net.h>
+#include <elastos/core/Thread.h>
+#include <elastos/droid/net/NetworkStats.h>
+#include <elastos/droid/net/NetworkUtils.h>
+#include <elastos/droid/net/Proxy.h>
+#include <elastos/droid/net/UidRange.h>
+#include <elastos/droid/net/http/Connection.h>
+#include <elastos/droid/os/Handler.h>
+#include <elastos/droid/os/Runnable.h>
 #include <elastos/utility/etl/List.h>
-#include <elastos/utility/etl/HashMap.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.Telephony.h>
+#include <Elastos.Droid.Internal.h>
+#include <Elastos.Droid.Utility.h>
 
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Core::IInteger16;
 using Elastos::Core::CInteger16;
-using Elastos::Core::IInteger32;
 using Elastos::Core::CInteger32;
-using Elastos::Core::IInteger64;
 using Elastos::Core::CInteger64;
-using Elastos::IO::IDataInputStream;
-using Elastos::IO::CDataInputStream;
-using Elastos::IO::IFileInputStream;
-using Elastos::IO::CFileInputStream;
-using Elastos::IO::IBufferedReader;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::IInteger16;
+using Elastos::Core::IInteger32;
+using Elastos::Core::IInteger64;
+using Elastos::Core::IRunnable;
+using Elastos::Core::IThread;
+using Elastos::Core::Thread;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Internal::App::IIBatteryStats;
+using Elastos::Droid::Internal::Net::INetworkStatsFactory;
+using Elastos::Droid::Net::CInterfaceConfiguration;
+using Elastos::Droid::Net::CLinkAddress;
+using Elastos::Droid::Net::CNetworkStats;
+using Elastos::Droid::Net::CNetworkStatsEntry;
+using Elastos::Droid::Net::CRouteInfo;
+using Elastos::Droid::Net::IINetworkManagementEventObserver;
+using Elastos::Droid::Net::IInterfaceConfiguration;
+using Elastos::Droid::Net::ILinkAddress;
+using Elastos::Droid::Net::INetwork;
+using Elastos::Droid::Net::INetworkStats;
+using Elastos::Droid::Net::INetworkStatsEntry;
+using Elastos::Droid::Net::IRouteInfo;
+using Elastos::Droid::Net::ITrafficStats;
+using Elastos::Droid::Net::IUidRange;
+using Elastos::Droid::Net::NetworkUtils;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IINetworkManagementService;
+using Elastos::Droid::Os::INetworkActivityListener;
+using Elastos::Droid::Os::IProcess;
+using Elastos::Droid::Os::IRemoteCallbackList;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Server::INativeDaemonConnectorCallbacks;
+using Elastos::Droid::Server::IWatchdogMonitor;
+using Elastos::Droid::Telephony::IDataConnectionRealTimeInfo;
+using Elastos::Droid::Telephony::IPhoneStateListener;
+using Elastos::Droid::Utility::ISparseBooleanArray;
+using Elastos::Droid::Wifi::IWifiConfiguration;
+using Elastos::Droid::Wifi::IWifiConfigurationKeyMgmt;
 using Elastos::IO::CBufferedReader;
-using Elastos::IO::IInputStreamReader;
+using Elastos::IO::CDataInputStream;
+using Elastos::IO::CFileInputStream;
 using Elastos::IO::CInputStreamReader;
-using Elastos::Net::IInetAddress;
+using Elastos::IO::IBufferedReader;
+using Elastos::IO::IDataInputStream;
+using Elastos::IO::IFile;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IFileInputStream;
+using Elastos::IO::IInputStreamReader;
+using Elastos::IO::IPrintWriter;
+using Elastos::Net::CNetworkInterfaceHelper;
 using Elastos::Net::IInet4Address;
+using Elastos::Net::IInetAddress;
 using Elastos::Net::IInterfaceAddress;
 using Elastos::Net::INetworkInterface;
 using Elastos::Net::INetworkInterfaceHelper;
-using Elastos::Net::CNetworkInterfaceHelper;
-using Elastos::Utility::Concurrent::ICountDownLatch;
 using Elastos::Utility::Concurrent::CCountDownLatch;
-
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Net::IInterfaceConfiguration;
-using Elastos::Droid::Net::CInterfaceConfiguration;
-using Elastos::Droid::Net::ILinkAddress;
-using Elastos::Droid::Net::CLinkAddress;
-using Elastos::Droid::Net::INetworkManagementEventObserver;
-using Elastos::Droid::Net::INetworkStats;
-using Elastos::Droid::Net::CNetworkStats;
-using Elastos::Droid::Net::INetworkStatsEntry;
-using Elastos::Droid::Net::CNetworkStatsEntry;
-using Elastos::Droid::Net::NetworkUtils;
-using Elastos::Droid::Net::IRouteInfo;
-using Elastos::Droid::Net::CRouteInfo;
-using Elastos::Droid::Net::ITrafficStats;
-using Elastos::Droid::Wifi::IWifiConfiguration;
-using Elastos::Droid::Wifi::IWifiConfigurationKeyMgmt;
-using Elastos::Droid::Os::Runnable;
-using Elastos::Droid::Os::IProcess;
-using Elastos::Droid::Os::IRemoteCallbackList;
-using Elastos::Droid::Internal::Net::INetworkStatsFactory;
+using Elastos::Utility::Concurrent::ICountDownLatch;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 CarClass(CNetworkManagementService)
+    , public Object
+    , public IBinder
+    , public IINetworkManagementService
+    , public IWatchdogMonitor
 {
 public:
     class NetdResponseCode
     {
     public:
-        /* Keep in sync with system/netd/ResponseCode.h */
+        /* Keep in sync with system/netd/server/ResponseCode.h */
         static const Int32 InterfaceListResult       = 110;
         static const Int32 TetherInterfaceListResult = 111;
         static const Int32 TetherDnsFwdTgtListResult = 112;
         static const Int32 TtyListResult             = 113;
+        static const Int32 TetheringStatsListResult  = 114;
 
         static const Int32 TetherStatusResult        = 210;
         static const Int32 IpFwdStatusResult         = 211;
@@ -78,70 +118,70 @@ public:
         static const Int32 SoftapStatusResult        = 214;
         static const Int32 InterfaceRxCounterResult  = 216;
         static const Int32 InterfaceTxCounterResult  = 217;
-        static const Int32 InterfaceRxThrottleResult = 218;
-        static const Int32 InterfaceTxThrottleResult = 219;
         static const Int32 QuotaCounterResult        = 220;
         static const Int32 TetheringStatsResult      = 221;
         static const Int32 DnsProxyQueryResult       = 222;
+        static const Int32 ClatdStatusResult         = 223;
 
         static const Int32 InterfaceChange           = 600;
         static const Int32 BandwidthControl          = 601;
         static const Int32 InterfaceClassActivity    = 613;
+        static const Int32 InterfaceAddressChange    = 614;
+        static const Int32 InterfaceDnsServerInfo    = 615;
+        static const Int32 RouteChange               = 616;
     };
 
 private:
     /** Set of interfaces with active idle timers. */
-    class IdleTimerParams : public ElRefBase
+    class IdleTimerParams
+        : public Object
     {
     public:
         IdleTimerParams(
             /* [in] */ Int32 timeout,
-            /* [in] */ const String& label)
-            : mTimeout(timeout)
-            , mLabel(label)
-            , mNetworkCount(1)
-        {}
+            /* [in] */ Int32 type);
 
     public:
         Int32 mTimeout;
-        String mLabel;
+        Int32 mType;
         Int32 mNetworkCount;
     };
 
     class NetdCallbackReceiver
-        : public ElRefBase
+        : public Object
         , public INativeDaemonConnectorCallbacks
     {
     private:
         class ReceiverRunnable
-            : public Runnable
+            : public Object
+            , public IRunnable
         {
         public:
-            ReceiverRunnable(
-                /* [in] */ CNetworkManagementService* owner)
-                : mOwner(owner)
-            {}
+            CAR_INTERFACE_DECL()
 
-            virtual CARAPI Run()
-            {
-                mOwner->PrepareNativeDaemon();
-                return NOERROR;
-            }
+            ReceiverRunnable(
+                /* [in] */ CNetworkManagementService* owner);
+
+            virtual CARAPI Run();
 
         private:
-            CNetworkManagementService* mOwner;
+            CNetworkManagementService* mHost;
         };
 
     public:
-        NetdCallbackReceiver(
-            /* [in] */ CNetworkManagementService* owner)
-            : mOwner(owner)
-        {}
-
         CAR_INTERFACE_DECL()
+
+        NetdCallbackReceiver(
+            /* [in] */ CNetworkManagementService* owner);
 
         CARAPI OnDaemonConnected();
 
+        // @Override
+        CARAPI OnCheckHoldWakeLock(
+            /* [in] */ Int32 code,
+            /* [out] */ Boolean* result);
+
+        // @Override
         CARAPI OnEvent(
             /* [in] */ Int32 code,
             /* [in] */ const String& raw,
@@ -149,25 +189,90 @@ private:
             /* [out] */ Boolean* result);
 
     private:
-        CNetworkManagementService* mOwner;
+        CNetworkManagementService* mHost;
+    };
+
+    class InnerSub_PhoneStateListener
+        // : public PhoneStateListener
+        : public Object
+    {
+    public:
+        InnerSub_PhoneStateListener(
+            /* [in] */ CNetworkManagementService* host);
+
+        // @Override
+        ECode OnDataConnectionRealTimeInfoChanged(
+            /* [in] */ IDataConnectionRealTimeInfo* dcRtInfo);
+
+    private:
+        CNetworkManagementService* mHost;
+    };
+
+    class TimerRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        TimerRunnable(
+            /* [in] */ CNetworkManagementService* host,
+            /* [in] */ Int32 type);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        CNetworkManagementService* mHost;
+        Int32 mType;
+    };
+
+    class RemoveRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        RemoveRunnable(
+            /* [in] */ CNetworkManagementService* host,
+            /* [in] */ IdleTimerParams* params);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        CNetworkManagementService* mHost;
+        IdleTimerParams* mParams;
     };
 
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CNetworkManagementService();
 
     CARAPI constructor(
-        /* [in] */ IContext* context);
+        /* [in] */ IContext* context,
+        /* [in] */ const String& socket);
 
-    static CARAPI_(AutoPtr<CNetworkManagementService>) Create(
-        /* [in] */ IContext* context);
+    static CARAPI Create(
+        /* [in] */ IContext* context,
+        /* [in] */ const String& socket,
+        /* [out] */ INetworkManagementService** result);
+
+    static CARAPI Create(
+        /* [in] */ IContext* context,
+        /* [out] */ INetworkManagementService** result);
 
     CARAPI_(void) SystemReady();
 
     CARAPI RegisterObserver(
-        /* [in] */ INetworkManagementEventObserver* observer);
+        /* [in] */ IINetworkManagementEventObserver* observer);
 
     CARAPI UnregisterObserver(
-        /* [in] */ INetworkManagementEventObserver* observer);
+        /* [in] */ IINetworkManagementEventObserver* observer);
 
     CARAPI ListInterfaces(
         /* [out] */ ArrayOf<String>** interfaces);
@@ -200,24 +305,21 @@ public:
         /* [in] */ const String& iface);
 
     CARAPI AddRoute(
-        /* [in] */ const String& interfaceName,
+        /* [in] */ Int32 netId,
         /* [in] */ IRouteInfo* route);
 
     CARAPI RemoveRoute(
-        /* [in] */ const String& interfaceName,
-        /* [in] */ IRouteInfo* route);
-
-    CARAPI AddSecondaryRoute(
-        /* [in] */ const String& interfaceName,
-        /* [in] */ IRouteInfo* route);
-
-    CARAPI RemoveSecondaryRoute(
-        /* [in] */ const String& interfaceName,
+        /* [in] */ Int32 netId,
         /* [in] */ IRouteInfo* route);
 
     CARAPI GetRoutes(
         /* [in] */ const String& interfaceName,
         /* [out, callee] */ ArrayOf<IRouteInfo*>** result);
+
+    // @Override
+    CARAPI SetMtu(
+        /* [in] */ const String& iface,
+        /* [in] */ Int32 mtu);
 
     CARAPI Shutdown();
 
@@ -235,11 +337,6 @@ public:
     CARAPI IsTetheringStarted(
         /* [out] */ Boolean* result);
 
-    CARAPI StartReverseTethering(
-        /* [in] */ const String& iface);
-
-    CARAPI StopReverseTethering();
-
     CARAPI TetherInterface(
         /* [in] */ const String& iface);
 
@@ -250,6 +347,7 @@ public:
         /* [out] */ ArrayOf<String>** result);
 
     CARAPI SetDnsForwarders(
+        /* [in] */ INetwork* network,
         /* [in] */ ArrayOf<String>* dns);
 
     CARAPI GetDnsForwarders(
@@ -294,7 +392,7 @@ public:
     CARAPI AddIdleTimer(
         /* [in] */ const String& iface,
         /* [in] */ Int32 timeout,
-        /* [in] */ const String& label);
+        /* [in] */ Int32 type);
 
     CARAPI RemoveIdleTimer(
         /* [in] */ const String& iface);
@@ -337,33 +435,25 @@ public:
         /* [out] */ INetworkStats** stats);
 
     CARAPI GetNetworkStatsTethering(
-        /* [in] */ ArrayOf<String>* ifacePairs,
         /* [out] */ INetworkStats** stats);
 
-    CARAPI SetInterfaceThrottle(
-        /* [in] */ const String& iface,
-        /* [in] */ Int32 rxKbps,
-        /* [in] */ Int32 txKbps);
-
-    CARAPI GetInterfaceRxThrottle(
-        /* [in] */ const String& iface,
-        /* [out] */ Int32* rxThrottle);
-
-    CARAPI GetInterfaceTxThrottle(
-        /* [in] */ const String& iface,
-        /* [out] */ Int32* txThrottle);
-
-    CARAPI SetDefaultInterfaceForDns(
+    CARAPI SetDnsServersForNetwork(
+        /* [in] */ Int32 netId,
+        /* [in] */ ArrayOf<String>* servers,
         /* [in] */ const String& iface);
 
-    CARAPI SetDnsServersForInterface(
-        /* [in] */ const String& iface,
-        /* [in] */ ArrayOf<String>* servers);
+    // @Override
+    CARAPI AddVpnUidRanges(
+        /* [in] */ Int32 netId,
+        /* [in] */ ArrayOf<IUidRange*>* ranges);
 
-    CARAPI FlushDefaultDnsCache();
+    // @Override
+    CARAPI RemoveVpnUidRanges(
+        /* [in] */ Int32 netId,
+        /* [in] */ ArrayOf<IUidRange*>* ranges);
 
-    CARAPI FlushInterfaceDnsCache(
-        /* [in] */ const String& iface);
+    CARAPI FlushNetworkDnsCache(
+        /* [in] */ Int32 netId);
 
     CARAPI SetFirewallEnabled(
         /* [in] */ Boolean enabled);
@@ -390,7 +480,98 @@ public:
 
     static CARAPI EnforceSystemUid();
 
+    // @Override
+    CARAPI StartClatd(
+        /* [in] */ const String& interfaceName);
+
+    // @Override
+    CARAPI StopClatd();
+
+    // @Override
+    CARAPI IsClatdStarted(
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI RegisterNetworkActivityListener(
+        /* [in] */ INetworkActivityListener* listener);
+
+    // @Override
+    CARAPI UnregisterNetworkActivityListener(
+        /* [in] */ INetworkActivityListener* listener);
+
+    // @Override
+    CARAPI IsNetworkActive(
+        /* [out] */ Boolean* result);
+
+    /** {@inheritDoc} */
+    // @Override
     CARAPI Monitor();
+
+    // @Override
+    CARAPI CreatePhysicalNetwork(
+        /* [in] */ Int32 netId);
+
+    // @Override
+    CARAPI CreateVirtualNetwork(
+        /* [in] */ Int32 netId,
+        /* [in] */ Boolean hasDNS,
+        /* [in] */ Boolean secure);
+
+    // @Override
+    CARAPI RemoveNetwork(
+        /* [in] */ Int32 netId);
+
+    // @Override
+    CARAPI AddInterfaceToNetwork(
+        /* [in] */ const String& iface,
+        /* [in] */ Int32 netId);
+
+    // @Override
+    CARAPI RemoveInterfaceFromNetwork(
+        /* [in] */ const String& iface,
+        /* [in] */ Int32 netId);
+
+    // @Override
+    CARAPI AddLegacyRouteForNetId(
+        /* [in] */ Int32 netId,
+        /* [in] */ IRouteInfo* routeInfo,
+        /* [in] */ Int32 uid);
+
+    // @Override
+    CARAPI SetDefaultNetId(
+        /* [in] */ Int32 netId);
+
+    // @Override
+    CARAPI ClearDefaultNetId();
+
+    // @Override
+    CARAPI SetPermission(
+        /* [in] */ const String& permission,
+        /* [in] */ ArrayOf<Int32>* uids);
+
+    // @Override
+    CARAPI ClearPermission(
+        /* [in] */ ArrayOf<Int32>* uids);
+
+    // @Override
+    CARAPI AllowProtect(
+        /* [in] */ Int32 uid);
+
+    // @Override
+    CARAPI DenyProtect(
+        /* [in] */ Int32 uid);
+
+    // @Override
+    CARAPI AddInterfaceToLocalNetwork(
+        /* [in] */ const String& iface,
+        /* [in] */ IList* routes);
+
+    // @Override
+    CARAPI RemoveInterfaceFromLocalNetwork(
+        /* [in] */ const String& iface);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 protected:
     void Dump(
@@ -399,35 +580,39 @@ protected:
         /* [in] */ ArrayOf<String>* args);
 
 private:
-    CARAPI_(void) NotifyInterfaceStatusChanged(
+    CARAPI NotifyInterfaceStatusChanged(
         /* [in] */ const String& iface,
         /* [in] */ Boolean up);
 
-    CARAPI_(void) NotifyInterfaceLinkStateChanged(
+    CARAPI NotifyInterfaceLinkStateChanged(
         /* [in] */ const String& iface,
         /* [in] */ Boolean up);
 
-    CARAPI_(void) NotifyInterfaceAdded(
+    CARAPI NotifyInterfaceAdded(
         /* [in] */ const String& iface);
 
-    CARAPI_(void) NotifyInterfaceRemoved(
+    CARAPI NotifyInterfaceRemoved(
         /* [in] */ const String& iface);
 
-    CARAPI_(void) NotifyLimitReached(
+    CARAPI NotifyLimitReached(
         /* [in] */ const String& limitName,
         /* [in] */ const String& iface);
 
-    CARAPI_(void) NotifyInterfaceClassActivity(
-        /* [in] */ const String& label,
-        /* [in] */ Boolean active);
+    /**
+     * Notify our observers of a change in the data activity state of the interface
+     */
+    CARAPI NotifyInterfaceClassActivity(
+        /* [in] */ Int32 type,
+        /* [in] */ Int32 powerState,
+        /* [in] */ Int64 tsNanos,
+        /* [in] */ Boolean fromRadio);
 
-    CARAPI_(void) PrepareNativeDaemon();
+    CARAPI PrepareNativeDaemon();
 
     CARAPI ModifyRoute(
         /* [in] */ const String& interfaceName,
         /* [in] */ const String& action,
-        /* [in] */ IRouteInfo* route,
-        /* [in] */ const String& type);
+        /* [in] */ IRouteInfo* route);
 
     CARAPI ReadRouteList(
         /* [in] */ const String& filename,
@@ -441,15 +626,48 @@ private:
     static CARAPI_(String) GetSecurityType(
         /* [in] */ IWifiConfiguration* wifiConfig);
 
-    CARAPI GetNetworkStatsTethering(
-        /* [in] */ const String& ifaceIn,
-        /* [in] */ const String& ifaceOut,
-        /* [out] */ INetworkStatsEntry** result);
+    CARAPI GetBatteryStats(
+        /* [out] */ IIBatteryStats** result);
 
-    CARAPI GetInterfaceThrottle(
+    /**
+     * Notify our observers of a new or updated interface address.
+     */
+    CARAPI NotifyAddressUpdated(
         /* [in] */ const String& iface,
-        /* [in] */ Boolean rx,
-        /* [out] */ Int32* throttle);
+        /* [in] */ ILinkAddress* address);
+
+    /**
+     * Notify our observers of a deleted interface address.
+     */
+    CARAPI NotifyAddressRemoved(
+        /* [in] */ const String& iface,
+        /* [in] */ ILinkAddress* address);
+
+    /**
+     * Notify our observers of DNS server information received.
+     */
+    CARAPI NotifyInterfaceDnsServerInfo(
+        /* [in] */ const String& iface,
+        /* [in] */ Int64 lifetime,
+        /* [in] */ ArrayOf<String>* addresses);
+
+    /**
+     * Notify our observers of a route change.
+     */
+    CARAPI NotifyRouteChange(
+        /* [in] */ const String& action,
+        /* [in] */ IRouteInfo* route);
+
+    CARAPI ExcludeLinkLocal(
+        /* [in] */ IList* addresses,
+        /* [out] */ IList** result);
+
+    CARAPI ReportNetworkActive();
+
+    CARAPI ModifyInterfaceInNetwork(
+        /* [in] */ const String& action,
+        /* [in] */ const String& netId,
+        /* [in] */ const String& iface);
 
 public:
     /**
@@ -462,15 +680,10 @@ private:
     static const String TAG;
     static const Boolean DBG;
     static const String NETD_TAG;
+    static const String NETD_SOCKET_NAME;
+    static const Int32 MAX_UID_RANGES_PER_COMMAND;
 
-    static const String ADD;
-    static const String REMOVE;
-
-    static const String ALLOW;
-    static const String DENY;
-
-    static const String DEFAULT;
-    static const String SECONDARY;
+    static const Int32 DAEMON_MSG_MOBILE_CONN_REAL_TIME_INFO;
 
     /**
      * Binder context for this service
@@ -480,9 +693,13 @@ private:
     /**
      * connector object for communicating with netd
      */
-    AutoPtr<NativeDaemonConnector> mConnector;
+    // AutoPtr<NativeDaemonConnector> mConnector;
 
-    AutoPtr<IHandler> mMainHandler;
+    AutoPtr<IHandler> mFgHandler;
+    AutoPtr<IHandler> mDaemonHandler;
+    AutoPtr<IPhoneStateListener> mPhoneStateListener;
+
+    AutoPtr<IIBatteryStats> mBatteryStats;
 
     AutoPtr<IThread> mThread;
     AutoPtr<ICountDownLatch> mConnectedSignal;
@@ -493,18 +710,24 @@ private:
 
     Object mQuotaLock;
     /** Set of interfaces with active quotas. */
-    HashMap<String, Int64> mActiveQuotas;
+    AutoPtr<IHashMap> mActiveQuotas;
     /** Set of interfaces with active alerts. */
-    HashMap<String, Int64> mActiveAlerts;
+    AutoPtr<IHashMap> mActiveAlerts;
     /** Set of UIDs with active reject rules. */
-    HashMap<Int32, Boolean> mUidRejectOnQuota;
+    AutoPtr<ISparseBooleanArray> mUidRejectOnQuota;
 
-    Object mIdleTimerLock;
+    AutoPtr<IObject> mIdleTimerLock;
 
-    HashMap<String, AutoPtr<IdleTimerParams> > mActiveIdleTimers;
+    AutoPtr<IHashMap> mActiveIdleTimers;
 
     volatile Boolean mBandwidthControlEnabled;
     volatile Boolean mFirewallEnabled;
+
+    Boolean mMobileActivityFromRadio;
+    Int32 mLastPowerStateFromRadio;
+
+    AutoPtr<IRemoteCallbackList> mNetworkActivityListeners;
+    Boolean mNetworkActive;
 };
 
 } // namespace Server

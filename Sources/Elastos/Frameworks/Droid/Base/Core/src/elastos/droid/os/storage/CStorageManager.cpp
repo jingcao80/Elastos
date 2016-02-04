@@ -5,11 +5,16 @@
 #include "elastos/droid/os/storage/CMountServiceBinderListener.h"
 #include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/os/CMessageHelper.h"
+#include "Elastos.Droid.Provider.h"
+
 #include <elastos/utility/logging/Logger.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuffer.h>
+#include <elastos/core/Math.h>
 
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
@@ -17,12 +22,24 @@ using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Provider::ISettingsGlobal;
+
 namespace Elastos {
 namespace Droid {
 namespace Os {
 namespace Storage {
 
-CAR_INTERFACE_IMPL(CStorageManager::StorageEvent, IInterface)
+const Int32 CStorageManager::CRYPT_TYPE_PASSWORD = 0;
+const Int32 CStorageManager::CRYPT_TYPE_DEFAULT = 1;
+const Int32 CStorageManager::CRYPT_TYPE_PATTERN = 2;
+const Int32 CStorageManager::CRYPT_TYPE_PIN = 3;
+const String CStorageManager::SYSTEM_LOCALE_KEY("SystemLocale");
+const String CStorageManager::OWNER_INFO_KEY("OwnerInfo");
+const String CStorageManager::PATTERN_VISIBLE_KEY("PatternVisible");
+const String CStorageManager::TAG("StorageManager");
+const Int32 CStorageManager::DEFAULT_THRESHOLD_PERCENTAGE = 10;
+const Int64 CStorageManager::DEFAULT_THRESHOLD_MAX_BYTES = 500 * ITrafficStats::MB_IN_BYTES;
+const Int64 CStorageManager::DEFAULT_FULL_THRESHOLD_BYTES = ITrafficStats::MB_IN_BYTES;
 
 CStorageManager::StorageEvent::StorageEvent(
     /* [in] */ Int32 what)
@@ -42,8 +59,9 @@ ECode CStorageManager::ObbHandler::HandleMessage(
         return NOERROR;
     }
 
-    AutoPtr<IInterface> obj;
-    msg->GetObj((IInterface**)&obj);
+    AutoPtr<IInterface> tmp;
+    msg->GetObj((IInterface**)&tmp);
+    AutoPtr<IObject> obj = IObject::Probe(tmp);
     StorageEvent* e = (StorageEvent*)obj.Get();
 
     Int32 what;
@@ -82,7 +100,7 @@ AutoPtr<IOnObbStateChangeListener> CStorageManager::ObbListenerDelegate::GetList
         return NULL;
     }
     AutoPtr<IInterface> obj;
-    mObbEventListenerRef->Resolve(EIID_IOnObbStateChangeListener, (IInterface**)&obj);
+    mObbEventListenerRef->Resolve(EIID_IInterface, (IInterface**)&obj);
     AutoPtr<IOnObbStateChangeListener> listener;
     if (obj != NULL)
         listener = IOnObbStateChangeListener::Probe(obj);
@@ -103,8 +121,9 @@ ECode CStorageManager::ListenerHandler::HandleMessage(
 {
     Int32 what;
     msg->GetWhat(&what);
-    AutoPtr<IInterface> obj;
-    msg->GetObj((IInterface**)&obj);
+    AutoPtr<IInterface> tmp;
+    msg->GetObj((IInterface**)&tmp);
+    AutoPtr<IObject> obj = IObject::Probe(tmp);
     StorageEvent* e = (StorageEvent*)obj.Get();
 
     if (what == StorageEvent::EVENT_UMS_CONNECTION_CHANGED) {
@@ -156,32 +175,32 @@ void CStorageManager::ListenerDelegate::SendStorageStateChanged(
     mHandler->SendMessage(e->GetMessage(), &result);
 }
 
-const String CStorageManager::TAG("StorageManager");
+CAR_INTERFACE_IMPL(CStorageManager, Object, IStorageManager)
+CAR_OBJECT_IMPL(CStorageManager)
 
 CStorageManager::CStorageManager()
 {
     CAtomicInteger32::New(0, (IAtomicInteger32**)&mNextNonce);
-    AutoPtr<CObbActionListener> cobbal;
-    CObbActionListener::NewByFriend(this, (CObbActionListener**)&cobbal);
-    mObbActionListener = cobbal;
+    CObbActionListener::New(this, (IIObbActionListener**)&mObbActionListener);
 }
 
 ECode CStorageManager::constructor(
+    /* [in] */ IContentResolver* resolver,
     /* [in] */ ILooper* tgtLooper)
 {
-    //todo: for java compatible
-    // mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
+    mResolver = resolver;
+    mTgtLooper = tgtLooper;
     AutoPtr<IServiceManager> serviceManager;
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
     assert(serviceManager != NULL);
     AutoPtr<IInterface> service;
     serviceManager->GetService(String("mount"), (IInterface**)&service);
-    mMountService = IMountService::Probe(service);
+    mMountService = IIMountService::Probe(service);
     if (mMountService == NULL) {
         Logger::E(TAG, "Unable to connect to mount service! - is it running yet?");
         return NOERROR;
     }
-    mTgtLooper = tgtLooper;
+
     return NOERROR;
 }
 
@@ -209,9 +228,7 @@ ECode CStorageManager::RegisterListener(
     AutoLock lock(mListenersLock);
     if (mBinderListener == NULL ) {
         // try {
-        AutoPtr<CMountServiceBinderListener> cmsbl;
-        CMountServiceBinderListener::NewByFriend(this, (CMountServiceBinderListener**)&cmsbl);
-        mBinderListener = cmsbl;
+        CMountServiceBinderListener::New(this, (IIMountServiceListener**)&mBinderListener);
         if (FAILED(mMountService->RegisterListener(mBinderListener))) {
         // } catch (RemoteException rex) {
             Logger::E(TAG, "Register mBinderListener failed");
@@ -561,6 +578,44 @@ ECode CStorageManager::GetPrimaryVolume(
     AutoPtr<IStorageManagerHelper> helper;
     CStorageManagerHelper::AcquireSingleton((IStorageManagerHelper**)&helper);
     return helper->GetPrimaryVolume(list, result);
+}
+
+ECode CStorageManager::GetStorageBytesUntilLow(
+    /* [in] */ IFile* path,
+    /* [out] */ Int64* result)
+{
+    Int64 usableSpace, fullBytes;
+    path->GetUsableSpace(&usableSpace);
+    GetStorageFullBytes(path, &fullBytes);
+    *result = usableSpace - fullBytes;
+    return NOERROR;
+}
+
+ECode CStorageManager::GetStorageLowBytes(
+    /* [in] */ IFile* path,
+    /* [out] */ Int64* result)
+{
+    Int64 lowPercent;
+    Settings::Global::GetInt64(mResolver,
+            ISettingsGlobal::SYS_STORAGE_THRESHOLD_PERCENTAGE, DEFAULT_THRESHOLD_PERCENTAGE, &lowPercent);
+    Int64 totalSpace;
+    path->GetTotalSpace(&totalSpace);
+    Int64 lowBytes = (totalSpace * lowPercent) / 100;
+
+    Int64 maxLowBytes;
+    Settings::Global::GetInt64(mResolver,
+            ISettingsGlobal::SYS_STORAGE_THRESHOLD_MAX_BYTES, DEFAULT_THRESHOLD_MAX_BYTES, &maxLowBytes);
+
+    *result = Elastos::Core::Math::Min(lowBytes, maxLowBytes);
+    return NOERROR;
+}
+
+ECode CStorageManager::GetStorageFullBytes(
+    /* [in] */ IFile* path,
+    /* [out] */ Int64* result)
+{
+    return Settings::Global::GetInt64(mResolver,
+            ISettingsGlobal::SYS_STORAGE_FULL_THRESHOLD_BYTES, DEFAULT_FULL_THRESHOLD_BYTES, result);
 }
 
 } // namespace Storage

@@ -687,7 +687,6 @@ void CInputManager::SendMessageToInputDeviceListenersLocked(
     /* [in] */ Int32 what,
     /* [in] */ Int32 deviceId)
 {
-    Boolean result;
     List<AutoPtr<InputDeviceListenerDelegate> >::Iterator iter = mInputDeviceListeners.Begin();
     for (; iter != mInputDeviceListeners.End(); ++iter) {
         AutoPtr<IMessage> msg;

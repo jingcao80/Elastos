@@ -1,16 +1,14 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/media/tv/CTvContentRatingSystemInfo.h"
-// TODO: Need CUriBuilder
-// #include "elastos/droid/net/CUriBuilder.h"
+#include "elastos/droid/net/CUriBuilder.h"
 #include <elastos/utility/Objects.h>
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriBuilder;
-// TODO: Need CUriBuilder
-// using Elastos::Droid::Net::CUriBuilder;
+using Elastos::Droid::Net::CUriBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Objects;
 
@@ -86,8 +84,7 @@ ECode CTvContentRatingSystemInfo::CreateTvContentRatingSystemInfo(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IUriBuilder> builder;
-// TODO: Need CUriBuilder
-    // CUriBuilder::New((IUriBuilder**)&builder);
+    CUriBuilder::New((IUriBuilder**)&builder);
     builder->Scheme(IContentResolver::SCHEME_ANDROID_RESOURCE);
     String pkgName;
     IPackageItemInfo::Probe(applicationInfo)->GetPackageName(&pkgName);

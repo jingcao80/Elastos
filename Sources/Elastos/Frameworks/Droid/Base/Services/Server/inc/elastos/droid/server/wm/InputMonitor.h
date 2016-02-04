@@ -1,17 +1,19 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_INPUTMONITOR_H__
 #define __ELASTOS_DROID_SERVER_WM_INPUTMONITOR_H__
 
-#include "wm/WindowState.h"
-#include "wm/AppWindowToken.h"
-#include "wm/WindowToken.h"
-#include "input/CInputManagerService.h"
-#include "input/InputApplicationHandle.h"
-#include "input/InputWindowHandle.h"
+#include "_Elastos.Droid.Server.h"
+#define HASH_FOR_OS
+#include "elastos/droid/ext/frameworkhash.h"
+#include "elastos/droid/server/wm/WindowToken.h"
+#include "elastos/droid/server/input/InputWindowHandle.h"
+#include "elastos/droid/server/input/CInputManagerService.h"
 
+using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::View::IKeyEvent;
-using Elastos::Droid::Server::Input::CInputManagerService;
-using Elastos::Droid::Server::Input::InputApplicationHandle;
+using Elastos::Droid::Server::Input::IWindowManagerCallbacks;
+using Elastos::Droid::Server::Input::IInputApplicationHandle;
 using Elastos::Droid::Server::Input::InputWindowHandle;
+using Elastos::Droid::Server::Input::IInputWindowHandle;
 
 namespace Elastos {
 namespace Droid {
@@ -19,31 +21,36 @@ namespace Server {
 namespace Wm {
 
 class CWindowManagerService;
+class AppWindowToken;
+class WindowState;
 
 class InputMonitor
     : public Object
-    , public CInputManagerService::WindowManagerCallbacks
+    , public IWindowManagerCallbacks
 {
 public:
     InputMonitor(
         /* [in] */ CWindowManagerService* service);
 
+    CAR_INTERFACE_DECL()
+
     /* Notifies the window manager about a broken input channel.
      *
      * Called by the InputManager.
      */
-    CARAPI_(void) NotifyInputChannelBroken(
-        /* [in] */ InputWindowHandle* inputWindowHandle);
+    CARAPI NotifyInputChannelBroken(
+        /* [in] */ IInputWindowHandle* inputWindowHandle);
 
     /* Notifies the window manager about an application that is not responding.
      * Returns a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
      *
      * Called by the InputManager.
      */
-    CARAPI_(Int64) NotifyANR(
-        /* [in] */ InputApplicationHandle* inputApplicationHandle,
-        /* [in] */ InputWindowHandle* inputWindowHandle,
-        /* [in] */ const String& reason);
+    CARAPI NotifyANR(
+        /* [in] */ IInputApplicationHandle* inputApplicationHandle,
+        /* [in] */ IInputWindowHandle* inputWindowHandle,
+        /* [in] */ const String& reason,
+        /* [out] */ Int64* timeout);
 
     CARAPI_(void) SetUpdateInputWindowsNeededLw();
 
@@ -52,52 +59,58 @@ public:
         /* [in] */ Boolean force);
 
     /* Notifies that the input device configuration has changed. */
-    CARAPI_(void) NotifyConfigurationChanged();
+    CARAPI NotifyConfigurationChanged();
 
     /* Waits until the built-in input devices have been configured. */
     CARAPI_(Boolean) WaitForInputDevicesReady(
         /* [in] */ Int64 timeoutMillis);
 
     /* Notifies that the lid switch changed state. */
-    CARAPI_(void) NotifyLidSwitchChanged(
+    CARAPI NotifyLidSwitchChanged(
         /* [in] */ Int64 whenNanos,
         /* [in] */ Boolean lidOpen);
 
     /* Notifies that the camera lens cover state has changed. */
     // @Override
-    CARAPI_(void) NotifyCameraLensCoverSwitchChanged(
+    CARAPI NotifyCameraLensCoverSwitchChanged(
         /* [in] */ Int64 whenNanos,
         /* [in] */ Boolean lensCovered);
 
     /* Provides an opportunity for the window manager policy to intercept early motion event
      * processing when the device is in a non-interactive state since these events are normally
      * dropped. */
-    CARAPI_(Int32) InterceptKeyBeforeQueueing(
+    CARAPI InterceptKeyBeforeQueueing(
         /* [in] */ IKeyEvent* event,
-        /* [in] */ Int32 policyFlags);
-
-    /* Provides an opportunity for the window manager policy to intercept early
-     * motion event processing when the screen is off since these events are normally
-     * dropped. */
-    CARAPI_(Int32) InterceptMotionBeforeQueueingWhenScreenOff(
-        /* [in] */ Int32 policyFlags);
+        /* [in] */ Int32 policyFlags,
+        /* [out] */ Int32* result);
 
     /* Provides an opportunity for the window manager policy to process a key before
      * ordinary dispatch. */
-    CARAPI_(Int64) InterceptKeyBeforeDispatching(
-        /* [in] */ InputWindowHandle* focus,
+    // @Override
+    CARAPI InterceptMotionBeforeQueueingNonInteractive(
+        /* [in] */ Int64 whenNanos,
+        /* [in] */ Int32 policyFlags,
+        /* [out] */ Int32* ret);
+
+    /* Provides an opportunity for the window manager policy to process a key before
+     * ordinary dispatch. */
+    CARAPI InterceptKeyBeforeDispatching(
+        /* [in] */ IInputWindowHandle* focus,
         /* [in] */ IKeyEvent* event,
-        /* [in] */ Int32 policyFlags);
+        /* [in] */ Int32 policyFlags,
+        /* [out] */ Int64* ret);
 
     /* Provides an opportunity for the window manager policy to process a key that
      * the application did not handle. */
-    CARAPI_(AutoPtr<IKeyEvent>) DispatchUnhandledKey(
-        /* [in] */ InputWindowHandle* focus,
+    CARAPI DispatchUnhandledKey(
+        /* [in] */ IInputWindowHandle* focus,
         /* [in] */ IKeyEvent* event,
-        /* [in] */ Int32 policyFlags);
+        /* [in] */ Int32 policyFlags,
+        /* [out] */ IKeyEvent** keyEvent);
 
     /* Callback to get pointer layer. */
-    CARAPI_(Int32) GetPointerLayer();
+    CARAPI GetPointerLayer(
+        /* [out] */ Int32* ret);
 
     CARAPI_(void) SetInputFocusLw(
         /* [in] */ WindowState* newWindow,

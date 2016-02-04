@@ -102,6 +102,9 @@ module
         GetCallingUserId(
             [out] Int32* userId);
 
+        GetCallingUserHandle(
+            [out] IUserHandle** userHandle);
+
         /**
          * Returns the uid that is composed from the userId and the appId.
          * @hide

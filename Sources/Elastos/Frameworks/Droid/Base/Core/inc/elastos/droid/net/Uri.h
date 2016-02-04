@@ -32,7 +32,7 @@ namespace Net {
  * forgiving--in the face of invalid input, it will return garbage
  * rather than throw an exception unless otherwise specified.
  */
-class Uri
+class ECO_PUBLIC Uri
     : public Object
     , public IParcelable
     , public IComparable

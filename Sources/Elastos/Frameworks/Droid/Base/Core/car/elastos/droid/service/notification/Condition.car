@@ -31,6 +31,48 @@ module
 
         Copy(
             [out] ICondition** ret);
+
+        GetId(
+            [out] IUri** id);
+
+        SetId(
+            [in] IUri* id);
+
+        GetSummary(
+            [out] String* summary);
+
+        SetSummary(
+            [in] String summary);
+
+        GetLine1(
+            [out] String* line1);
+
+        SetLine1(
+            [in] String line1);
+
+        GetLine2(
+            [out] String* line2);
+
+        SetLine2(
+            [in] String line2);
+
+        GetIcon(
+            [out] Int32* icon);
+
+        SetIcon(
+            [in] Int32 icon);
+
+        GetState(
+            [out] Int32* state);
+
+        SetState(
+            [in] Int32 state);
+
+        GetFlags(
+            [out] Int32* flags);
+
+        SetFlags(
+            [in] Int32 flags);
     }
 
     interface IConditionHelper {

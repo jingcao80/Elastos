@@ -14,8 +14,14 @@ namespace Os {
 namespace Storage {
 
 CarClass(CObbActionListener)
+    , public Object
+    , public IIObbActionListener
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IStorageManager* host);
 

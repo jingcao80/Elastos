@@ -7,6 +7,7 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Database::IDatabaseErrorHandler;
+using Elastos::Droid::Database::Sqlite::ISQLiteOpenHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -25,7 +26,7 @@ namespace Sqlite {
  * @param version number of the database (starting at 1); if the database is older,
  *     {@link #onUpgrade} will be used to upgrade the database
  */
-class SQLiteOpenHelper
+class ECO_PUBLIC SQLiteOpenHelper
     : public Object
     , public ISQLiteOpenHelper
 {
@@ -226,12 +227,12 @@ public:
         /* [in] */ ISQLiteDatabase* db);
 
 private:
-    CARAPI GetDatabaseLocked(
+    ECO_LOCAL CARAPI GetDatabaseLocked(
         /* [in] */ Boolean writable,
         /* [out] */ ISQLiteDatabase** result);
 
 private:
-    static const String TAG;
+    ECO_LOCAL static const String TAG;
 
     // When true, getReadableDatabase returns a read-only database if it is just being opened.
     // The database handle is reopened in read/write mode when getWritableDatabase is called.
@@ -239,7 +240,7 @@ private:
     // many applications.  For debugging purposes it can be useful to turn on strict
     // read-only semantics to catch applications that call getReadableDatabase when they really
     // wanted getWritableDatabase.
-    static const Boolean DEBUG_STRICT_READONLY = FALSE;
+    ECO_LOCAL static const Boolean DEBUG_STRICT_READONLY = FALSE;
 
     AutoPtr<IContext> mContext;
     String mName;

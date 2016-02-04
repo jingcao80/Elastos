@@ -1,9 +1,19 @@
 
-#include "CBluetoothHealthCallbackWrapper.h"
+#include "elastos/droid/bluetooth/CBluetoothHealthCallbackWrapper.h"
+
+using Elastos::Droid::Os::EIID_IBinder;
 
 namespace Elastos {
 namespace Droid {
 namespace Bluetooth {
+
+CAR_INTERFACE_IMPL_2(CBluetoothHealthCallbackWrapper, Object, IIBluetoothHealthCallback, IBinder);
+
+CAR_OBJECT_IMPL(CBluetoothHealthCallbackWrapper);
+
+CBluetoothHealthCallbackWrapper::CBluetoothHealthCallbackWrapper()
+{
+}
 
 ECode CBluetoothHealthCallbackWrapper::OnHealthAppConfigurationStatusChange(
     /* [in] */ IBluetoothHealthAppConfiguration* config,

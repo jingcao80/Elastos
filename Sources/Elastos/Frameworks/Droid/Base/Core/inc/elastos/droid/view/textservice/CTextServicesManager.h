@@ -6,7 +6,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::View::Internal::TextService::IITextServicesManager;
+using Elastos::Droid::Internal::TextService::IITextServicesManager;
 
 using Elastos::Core::Object;
 

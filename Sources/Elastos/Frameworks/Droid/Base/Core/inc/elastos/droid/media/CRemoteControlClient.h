@@ -3,19 +3,96 @@
 #define __ELASTOS_DROID_MEDIA_CREMOTECONTROLCLIENT_H__
 
 #include "_Elastos_Droid_Media_CRemoteControlClient.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.App.h"
+#include "elastos/droid/media/CMediaMetadata.h"
+#include "elastos/droid/media/MediaMetadataEditor.h"
+#include <elastos/core/Object.h>
+#include <elastos/droid/os/Handler.h>
 
-using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::HandlerBase;
 using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::Graphics::IBitmap;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Media::Session::IMediaSession;
+using Elastos::Droid::Media::Session::IMediaSessionCallback;
+using Elastos::Droid::Media::Session::IMediaSessionLegacyHelper;
+using Elastos::Droid::Media::Session::IPlaybackState;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::IResultReceiver;
 
 namespace Elastos {
 namespace Droid {
 namespace Media {
 
 CarClass(CRemoteControlClient)
+    , public Object
+    , public IRemoteControlClient
 {
+private:
+    class MediaSessionCallback
+        : public Object
+        , public IMediaSessionCallback
+    {
+    public:
+        MediaSessionCallback();
+
+        ~MediaSessionCallback();
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI OnSeekTo(
+            /* [in] */ Int64 pos);
+
+        CARAPI OnSetRating(
+            /* [in] */ IRating* rating);
+
+        //override for compile
+        CARAPI OnCommand(
+            /* [in] */ const String& command,
+            /* [in] */ IBundle * arg,
+            /* [in] */ IResultReceiver * cb);
+
+        CARAPI OnMediaButtonEvent(
+            /* [in] */ IIntent * mediaButtonIntent,
+            /* [out] */ Boolean * result);
+
+        CARAPI OnPlay();
+
+        CARAPI OnPlayFromMediaId(
+            /* [in] */ const String& mediaId,
+            /* [in] */ IBundle * extras);
+
+        CARAPI OnPlayFromSearch(
+            /* [in] */ const String& query,
+            /* [in] */ IBundle * extras);
+
+        CARAPI OnSkipToQueueItem(
+            /* [in] */ Int64 id);
+
+        CARAPI OnPause();
+
+        CARAPI OnSkipToNext();
+
+        CARAPI OnSkipToPrevious();
+
+        CARAPI OnFastForward();
+
+        CARAPI OnRewind();
+
+        CARAPI OnStop();
+
+        CARAPI OnCustomAction(
+            /* [in] */ const String& action,
+            /* [in] */ IBundle * extras);
+    };
+
 public:
     /**
      * Class used to modify metadata in a {@link RemoteControlClient} object.
@@ -26,8 +103,8 @@ public:
      * instance of the MetadataEditor.
      */
     class MetadataEditor
-        : public ElRefBase
-        , public IMetadataEditor
+        : public MediaMetadataEditor
+        , public IRemoteControlClientMetadataEditor
     {
     friend class CRemoteControlClient;
 
@@ -42,7 +119,7 @@ public:
          * @hide
          */
         CARAPI Clone(
-            /* [out] */ IMetadataEditor** result);
+            /* [out] */ IInterface** result);
 
         /**
          * Adds textual information to be displayed.
@@ -68,7 +145,7 @@ public:
         /*synchronized*/ CARAPI PutString(
             /* [in] */ Int32 key,
             /* [in] */ const String& value,
-            /* [out] */ IMetadataEditor** result);
+            /* [out] */ IRemoteControlClientMetadataEditor** result);
 
         /**
          * Adds numerical information to be displayed.
@@ -88,7 +165,7 @@ public:
         /*synchronized*/ CARAPI PutInt64(
             /* [in] */ Int32 key,
             /* [in] */ Int64 value,
-            /* [out] */ IMetadataEditor** result);
+            /* [out] */ IRemoteControlClientMetadataEditor** result);
 
         /**
          * Sets the album / artwork picture to be displayed on the remote control.
@@ -103,7 +180,12 @@ public:
         /*synchronized*/ CARAPI PutBitmap(
             /* [in] */ Int32 key,
             /* [in] */ IBitmap* bitmap,
-            /* [out] */ IMetadataEditor** result);
+            /* [out] */ IRemoteControlClientMetadataEditor** result);
+
+        /*synchronized*/ CARAPI PutObject(
+            /* [in] */ Int32 key,
+            /* [in] */ IInterface* value,
+            /* [out] */ IRemoteControlClientMetadataEditor** result);
 
         /**
          * Clears all the metadata that has been set since the MetadataEditor instance was
@@ -119,22 +201,19 @@ public:
          */
         /*synchronized*/ CARAPI Apply();
 
-    protected:
-        /**
-         * @hide
-         */
-        Boolean mMetadataChanged;
-        Boolean mArtworkChanged;
-        AutoPtr<IBitmap> mEditorArtwork;
-        AutoPtr<IBundle> mEditorMetadata;
-
     private:
-        Boolean mApplied; // = FALSE;
         Object mThisLock;
         CRemoteControlClient* mOwner;
     };
 
+public:
     CRemoteControlClient();
+
+    virtual ~CRemoteControlClient();
+
+    CAR_OBJECT_DECL();
+
+    CAR_INTERFACE_DECL();
 
     /**
      * Class constructor.
@@ -172,6 +251,21 @@ public:
         /* [in] */ ILooper* looper);
 
     /**
+     * @hide
+     */
+    CARAPI RegisterWithSession(
+        /* [in] */ IMediaSessionLegacyHelper * helper);
+
+    /**
+     * @hide
+     */
+    CARAPI UnregisterWithSession(
+        /* [in] */ IMediaSessionLegacyHelper * helper);
+
+    CARAPI GetMediaSession(
+        /* [out] */ IMediaSession ** result);
+
+    /**
      * Creates a {@link MetadataEditor}.
      * @param startEmpty Set to false if you want the MetadataEditor to contain the metadata that
      *     was previously applied to the RemoteControlClient, or true if it is to be created empty.
@@ -179,7 +273,7 @@ public:
      */
     CARAPI EditMetadata(
         /* [in] */ Boolean startEmpty,
-        /* [out] */ IMetadataEditor** result);
+        /* [out] */ IRemoteControlClientMetadataEditor** result);
 
     /**
      * Sets the current playback state.
@@ -197,6 +291,17 @@ public:
     CARAPI SetPlaybackState(
         /* [in] */ Int32 state);
 
+    CARAPI SetPlaybackState(
+        /* [in] */ Int32 state,
+        /* [in] */ Int64 timeInMs,
+        /* [in] */ Float playbackSpeed);
+
+    CARAPI SetPlaybackState(
+        /* [in] */ Int32 state,
+        /* [in] */ Int64 timeInMs,
+        /* [in] */ Float playbackSpeed,
+        /* [in] */ Boolean hasPosition);
+
     /**
      * Sets the flags for the media transport control buttons that this client supports.
      * @param transportControlFlags A combination of the following flags:
@@ -212,21 +317,6 @@ public:
     CARAPI SetTransportControlFlags(
         /* [in] */ Int32 transportControlFlags);
 
-    /**
-     * @hide
-     * Set information describing information related to the playback of media so the system
-     * can implement additional behavior to handle non-local playback usecases.
-     * @param what a key to specify the type of information to set. Valid keys are
-     *        {@link #PLAYBACKINFO_PLAYBACK_TYPE},
-     *        {@link #PLAYBACKINFO_USES_STREAM},
-     *        {@link #PLAYBACKINFO_VOLUME},
-     *        {@link #PLAYBACKINFO_VOLUME_MAX},
-     *        and {@link #PLAYBACKINFO_VOLUME_HANDLING}.
-     * @param value the value for the supplied information to set.
-     */
-    CARAPI SetPlaybackInformation(
-        /* [in] */ Int32 what,
-        /* [in] */ Int32 value);
     /**
      * @hide
      * Return playback information represented as an integer value.
@@ -252,64 +342,36 @@ public:
         /* [out] */ IPendingIntent** result);
 
     /**
-     * @hide
-     * Accessor to IRemoteControlClient
+     * Sets the listener to be called whenever the metadata is updated.
+     * New metadata values will be received in the same thread as the one in which
+     * RemoteControlClient was created.
+     * @param l the metadata update listener
      */
-    CARAPI GetIRemoteControlClient(
-        /* [out] */ IIRemoteControlClient** result);
+    CARAPI SetMetadataUpdateListener(
+        /* [in] */ IRemoteControlClientOnMetadataUpdateListener * l);
+
+    CARAPI SetPlaybackPositionUpdateListener(
+        /* [in] */ IRemoteControlClientOnPlaybackPositionUpdateListener * l);
+
+    CARAPI SetOnGetPlaybackPositionListener(
+        /* [in] */ IRemoteControlClientOnGetPlaybackPositionListener * l);
+
+     //===========================================================
+    // Internal utilities
 
     /**
-     * @hide
-     * To be only used by AudioManager after it has received the unique id from
-     * IAudioService.registerRemoteControlClient()
-     * @param id the unique identifier of the RemoteControlStackEntry in AudioService with which
-     *              this RemoteControlClient is associated.
+     * Returns whether, for the given playback state, the playback position is expected to
+     * be changing.
+     * @param playstate the playback state to evaluate
+     * @return true during any form of playback, false if it's not playing anything while in this
+     *     playback state
      */
-    CARAPI SetRcseId(
-        /* [in] */ Int32 id);
-
-    /**
-     * @hide
-     */
-    CARAPI GetRcseId(
-        /* [out] */ Int32* result);
-
-
+    static CARAPI PlaybackPositionShouldMove(
+        /* [in] */ Int32 playstate,
+        /* [out] */ Boolean* result);
 private:
-    /**
-     * The IRemoteControlClient implementation
-     */
-    class MyRemoteControlClient
-        : public ElRefBase
-        , public IIRemoteControlClient
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        MyRemoteControlClient(
-            /* [in] */ CRemoteControlClient* owner);
-
-        CARAPI OnInformationRequested(
-            /* [in] */ Int32 clientGeneration,
-            /* [in] */ Int32 infoFlags,
-            /* [in] */ Int32 artWidth,
-            /* [in] */ Int32 artHeight);
-
-        CARAPI SetCurrentClientGenerationId(
-            /* [in] */ Int32 clientGeneration);
-
-        CARAPI PlugRemoteControlDisplay(
-            /* [in] */ IIRemoteControlDisplay* rcd);
-
-        CARAPI UnplugRemoteControlDisplay(
-            /* [in] */ IIRemoteControlDisplay* rcd);
-
-    private:
-        CRemoteControlClient* mOwner;
-    };
-
     class EventHandler
-        : public HandlerBase
+        : public Handler
     {
     public:
         EventHandler(
@@ -325,86 +387,46 @@ private:
         CRemoteControlClient* mOwner;
     };
 
-    //===========================================================
-    // Communication with IRemoteControlDisplay
-    CARAPI_(void) DetachFromDisplay_syncCacheLock();
-
-    CARAPI_(void) SendPlaybackState_syncCacheLock();
-
-    CARAPI_(void) SendMetadata_syncCacheLock();
-
-    CARAPI_(void) SendTransportControlFlags_syncCacheLock();
-
-    CARAPI_(void) SendArtwork_syncCacheLock();
-
-    CARAPI_(void) SendMetadataWithArtwork_syncCacheLock();
-
+private:
     static CARAPI_(AutoPtr<IIAudioService>) GetService();
-
-    CARAPI_(void) SendAudioServiceNewPlaybackInfo_syncCacheLock(
-        /* [in] */ Int32 what,
-        /* [in] */ Int32 value);
-
-
-    //===========================================================
-    // Message handlers
-    CARAPI_(void) OnNewInternalClientGen(
-        /* [in] */ Int32 clientGeneration,
-        /* [in] */ Int32 artWidth,
-        /* [in] */ Int32 artHeight);
-
-    CARAPI_(void) OnNewCurrentClientGen(
-        /* [in] */ Int32 clientGeneration);
-
-    CARAPI_(void) OnPlugDisplay(
-        /* [in] */ IIRemoteControlDisplay* rcd);
-
-    CARAPI_(void) OnUnplugDisplay(
-        /* [in] */ IIRemoteControlDisplay* rcd);
 
     //===========================================================
     // Internal utilities
 
-    /**
-     * Scale a bitmap to fit the smallest dimension by uniformly scaling the incoming bitmap.
-     * If the bitmap fits, then do nothing and return the original.
-     *
-     * @param bitmap
-     * @param maxWidth
-     * @param maxHeight
-     * @return
-     */
+    CARAPI_(void) SetPlaybackStateInt(
+        /* [in] */ Int32 state,
+        /* [in] */ Int64 timeInMs,
+        /* [in] */ Float playbackSpeed,
+        /* [in] */ Boolean hasPosition);
 
-    CARAPI_(AutoPtr<IBitmap>) ScaleBitmapIfTooBig(
-        /* [in] */ IBitmap* bitmap,
-        /* [in] */ Int32 maxWidth,
-        /* [in] */ Int32 maxHeight);
+    CARAPI_(void) OnPositionDriftCheck();
 
-    /**
-     *  Fast routine to go through an array of allowed keys and return whether the key is part
-     *  of that array
-     * @param key the key value
-     * @param validKeys the array of valid keys for a given type
-     * @return true if the key is part of the array, false otherwise
-     */
-    static CARAPI_(Boolean) ValidTypeForKey(
+    static Int64 GetCheckPeriodFromSpeed(
+        /*[in] */ Float speed);
+
+    CARAPI_(void) OnSeekTo(
+        /* [in] */ Int32 generationId,
+        /* [in] */ Int64 timeMs);
+
+    CARAPI_(void) OnUpdateMetadata(
+        /* [in] */ Int32 generationId,
         /* [in] */ Int32 key,
-        /* [in] */ ArrayOf<Int32>* validKeys);
+        /* [in] */ IInterface* value);
 
 private:
-    const static String TAG; // = "RemoteControlClient";
+    const static String TAG;
+    const static Boolean DEBUG;
 
-    const static Int32 PLAYBACK_TYPE_MIN;// = PLAYBACK_TYPE_LOCAL;
-    const static Int32 PLAYBACK_TYPE_MAX;// = PLAYBACK_TYPE_REMOTE;
+    const static Int32 PLAYBACK_TYPE_MIN;
+    const static Int32 PLAYBACK_TYPE_MAX;
+    const static Int64 POSITION_REFRESH_PERIOD_PLAYING_MS;
+    const static Int64 POSITION_REFRESH_PERIOD_MIN_MS;
+    const static Int64 POSITION_DRIFT_MAX_MS;
 
-    static AutoPtr< ArrayOf<Int32> > METADATA_KEYS_TYPE_STRING;
-    static AutoPtr< ArrayOf<Int32> > METADATA_KEYS_TYPE_LONG;
+    const static Int32 MSG_POSITION_DRIFT_CHECK;
 
-    Int32 mPlaybackType; // = PLAYBACK_TYPE_LOCAL;
-    Int32 mPlaybackVolumeMax; // = DEFAULT_PLAYBACK_VOLUME;
-    Int32 mPlaybackVolume; // = DEFAULT_PLAYBACK_VOLUME;
-    Int32 mPlaybackVolumeHandling; // = DEFAULT_PLAYBACK_VOLUME_HANDLING;
-    Int32 mPlaybackStream; // = AudioManager.STREAM_MUSIC;
+
+    AutoPtr<IMediaSession> mSession;
 
     /**
      * Lock for all cached data
@@ -415,13 +437,23 @@ private:
      * Cache for the playback state.
      * Access synchronized on mCacheLock
      */
-    Int32 mPlaybackState; // = PLAYSTATE_NONE;
+    Int32 mPlaybackState;
 
     /**
      * Time of last play state change
      * Access synchronized on mCacheLock
      */
-    Int64 mPlaybackStateChangeTimeMs; // = 0;
+    Int64 mPlaybackStateChangeTimeMs;
+
+    /**
+     * Last playback position in ms reported by the user
+     */
+    Int64 mPlaybackPositionMs;
+
+    /**
+     * Last playback speed reported by the user
+     */
+    Float mPlaybackSpeed;
 
     /**
      * Cache for the artwork bitmap.
@@ -430,31 +462,37 @@ private:
      * accessed to be resized, in which case a copy will be made. This would add overhead in
      * Bundle operations.
      */
-    AutoPtr<IBitmap> mArtwork;
-
-    Int32 ARTWORK_DEFAULT_SIZE; // = 256;
-    Int32 ARTWORK_INVALID_SIZE; // = -1;
-
-    Int32 mArtworkExpectedWidth; // = ARTWORK_DEFAULT_SIZE;
-    Int32 mArtworkExpectedHeight; // = ARTWORK_DEFAULT_SIZE;
+    AutoPtr<IBitmap> mOriginalArtwork;
 
     /**
      * Cache for the transport control mask.
      * Access synchronized on mCacheLock
      */
-    Int32 mTransportControlFlags; // = FLAGS_KEY_MEDIA_NONE;
-
+    Int32 mTransportControlFlags;
     /**
      * Cache for the metadata strings.
      * Access synchronized on mCacheLock
      * This is re-initialized in apply() and so cannot be final.
      */
-    AutoPtr<IBundle> mMetadata; // = new Bundle();
+    AutoPtr<IBundle> mMetadata;
+
+    AutoPtr<IRemoteControlClientOnPlaybackPositionUpdateListener> mPositionUpdateListener;
+
+    /**
+     * Provider registered by user of RemoteControlClient to provide the current playback position.
+     */
+    AutoPtr<IRemoteControlClientOnGetPlaybackPositionListener> mPositionProvider;
+
+    /**
+     * Listener registered by user of RemoteControlClient to receive edit changes to metadata
+     * it exposes.
+     */
+    AutoPtr<IRemoteControlClientOnMetadataUpdateListener> mMetadataUpdateListener;
 
     /**
      * The current remote control client generation ID across the system
      */
-    Int32 mCurrentClientGenId; // = -1;
+    Int32 mCurrentClientGenId;
 
     /**
      * The remote control client generation ID, the last time it was told it was the current RC.
@@ -462,8 +500,7 @@ private:
      * client is the "focused" one, and that whenever this client's info is updated, it needs to
      * send it to the known IRemoteControlDisplay interfaces.
      */
-    Int32 mInternalClientGenId; // = -2;
-
+    Int32 mInternalClientGenId;
     /**
      * The media button intent description associated with this remote control client
      * (can / should include target component for intent handling)
@@ -471,36 +508,24 @@ private:
     AutoPtr<IPendingIntent> mRcMediaIntent;
 
     /**
-     * The remote control display to which this client will send information.
-     * NOTE: Only one IRemoteControlDisplay supported in this implementation
+     * Reflects whether any "plugged in" IRemoteControlDisplay has mWantsPositonSync set to true.
      */
-    AutoPtr<IIRemoteControlDisplay> mRcDisplay;
+    // TODO consider using a ref count for IRemoteControlDisplay requiring sync instead
+    Boolean mNeedsPositionSync;
 
     /**
-     * The IRemoteControlClient implementation
+     * Cache for the current playback state using Session APIs.
      */
-    AutoPtr<IIRemoteControlClient> mIRCC; // = new IRemoteControlClient.Stub()
+    AutoPtr<IPlaybackState> mSessionPlaybackState;
 
     /**
-     * Unique identifier of the RemoteControlStackEntry in AudioService with which
-     * this RemoteControlClient is associated.
+     * Cache for metadata using Session APIs. This is re-initialized in apply().
      */
-    Int32 mRcseId; // = RCSE_ID_UNREGISTERED;
+    AutoPtr<IMediaMetadata> mMediaMetadata;
 
     AutoPtr<EventHandler> mEventHandler;
 
-    const static Int32 MSG_REQUEST_PLAYBACK_STATE;// = 1;
-    const static Int32 MSG_REQUEST_METADATA;// = 2;
-    const static Int32 MSG_REQUEST_TRANSPORTCONTROL;// = 3;
-    const static Int32 MSG_REQUEST_ARTWORK;// = 4;
-    const static Int32 MSG_NEW_INTERNAL_CLIENT_GEN;// = 5;
-    const static Int32 MSG_NEW_CURRENT_CLIENT_GEN;// = 6;
-    const static Int32 MSG_PLUG_DISPLAY;// = 7;
-    const static Int32 MSG_UNPLUG_DISPLAY;// = 8;
-
-    //===========================================================
-    // Communication with AudioService
-    static AutoPtr<IIAudioService> sService;
+    AutoPtr<IMediaSessionCallback> mTransportListener;
 };
 
 } // namespace Media

@@ -141,6 +141,7 @@ ECode CCalls::AddCall(
     assert(0 && "TODO"); // IPhoneAccountHandle
     // return AddCall(ci, context, number, presentation, callType, features, accountHandle,
     //                 start, duration, dataUsage, FALSE);
+    return NOERROR;
 }
 
 ECode CCalls::AddCall(

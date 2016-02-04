@@ -1,8 +1,9 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_DIMLAYER_H__
 #define __ELASTOS_DROID_SERVER_WM_DIMLAYER_H__
 
-#include "wm/DisplayContent.h"
-#include "wm/TaskStack.h"
+#include "_Elastos.Droid.Server.h"
+#include <Elastos.CoreLibrary.IO.h>
+#include <elastos/core/Object.h>
 
 using Elastos::IO::IPrintWriter;
 using Elastos::Droid::Graphics::IRect;
@@ -12,6 +13,10 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wm {
+
+class CWindowManagerService;
+class DisplayContent;
+class TaskStack;
 
 class DimLayer : public Object
 {

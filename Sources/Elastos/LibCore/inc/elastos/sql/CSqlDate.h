@@ -12,6 +12,7 @@ namespace Sql {
 
 CarClass(CSqlDate)
     , public Date
+    , public ISQLDate
 {
 public:
     CAR_INTERFACE_DECL();

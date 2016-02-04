@@ -2,18 +2,11 @@
 #ifndef __ELASTOS_DROID_INTERNAL_VIEW_MENU_ListMenuItemView_H__
 #define __ELASTOS_DROID_INTERNAL_VIEW_MENU_ListMenuItemView_H__
 
-#if 0
 #include "elastos/droid/widget/LinearLayout.h"
-#else
-#include "elastos/droid/view/ViewGroup.h"
-
-using Elastos::Droid::View::ViewGroup;
-
-#endif
 
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::Accessibility::IAccessibilityNodeInfo;
-// using Elastos::Droid::Widget::LinearLayout;
+using Elastos::Droid::Widget::LinearLayout;
 using Elastos::Droid::Widget::IImageView;
 using Elastos::Droid::Widget::IRadioButton;
 using Elastos::Droid::Widget::ITextView;
@@ -26,11 +19,7 @@ namespace View {
 namespace Menu {
 
 class ListMenuItemView
-#if 0
     : public LinearLayout
-#else
-    : public ViewGroup
-#endif
     , public IListMenuItemView
     , public IMenuItemView
 {
@@ -94,17 +83,6 @@ public:
         /* [in] */ Boolean enabled);
 
 protected:
-    CARAPI OnLayout(
-        /* [in] */ Boolean changed,
-        /* [in] */ Int32 l,
-        /* [in] */ Int32 t,
-        /* [in] */ Int32 r,
-        /* [in] */ Int32 b)
-    {
-        assert(0 && "TODO:delete");
-        return NOERROR;
-    }
-
     //Override
     CARAPI OnFinishInflate();
 

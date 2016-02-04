@@ -6,6 +6,8 @@
 #include <elastos/core/Singleton.h>
 
 using Elastos::Core::Singleton;
+using Elastos::Core::IStringBuilder;
+using Elastos::IO::IPrintWriter;
 
 namespace Elastos {
 namespace Droid {
@@ -67,6 +69,26 @@ public:
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source,
         /* [out] */ IComponentName** cn);
+
+    CARAPI AppendShortClassName(
+        /* [in] */ IStringBuilder* sb,
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& className);
+
+    CARAPI PrintShortClassName(
+        /* [in] */ IPrintWriter* sb,
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& className);
+
+    CARAPI AppendShortString(
+        /* [in] */ IStringBuilder* sb,
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& className);
+
+    CARAPI PrintShortString(
+        /* [in] */ IPrintWriter* sb,
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& className);
 };
 
 } // namespace Content

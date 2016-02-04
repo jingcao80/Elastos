@@ -12,17 +12,17 @@ namespace Method {
 // These bits are privately used by the meta key key listener.
 // They are deliberately assigned values outside of the representable range of an 'Int32'
 // so as not to conflict with any meta key states publicly defined by KeyEvent.
-const Int64 MetaKeyKeyListener::META_CAP_USED = 1L << 32;
-const Int64 MetaKeyKeyListener::META_ALT_USED = 1L << 33;
-const Int64 MetaKeyKeyListener::META_SYM_USED = 1L << 34;
+const Int64 MetaKeyKeyListener::META_CAP_USED = 1LL << 32;
+const Int64 MetaKeyKeyListener::META_ALT_USED = 1LL << 33;
+const Int64 MetaKeyKeyListener::META_SYM_USED = 1LL << 34;
 
-const Int64 MetaKeyKeyListener::META_CAP_PRESSED = 1L << 40;
-const Int64 MetaKeyKeyListener::META_ALT_PRESSED = 1L << 41;
-const Int64 MetaKeyKeyListener::META_SYM_PRESSED = 1L << 42;
+const Int64 MetaKeyKeyListener::META_CAP_PRESSED = 1LL << 40;
+const Int64 MetaKeyKeyListener::META_ALT_PRESSED = 1LL << 41;
+const Int64 MetaKeyKeyListener::META_SYM_PRESSED = 1LL << 42;
 
-const Int64 MetaKeyKeyListener::META_CAP_RELEASED = 1L << 48;
-const Int64 MetaKeyKeyListener::META_ALT_RELEASED = 1L << 49;
-const Int64 MetaKeyKeyListener::META_SYM_RELEASED = 1L << 50;
+const Int64 MetaKeyKeyListener::META_CAP_RELEASED = 1LL << 48;
+const Int64 MetaKeyKeyListener::META_ALT_RELEASED = 1LL << 49;
+const Int64 MetaKeyKeyListener::META_SYM_RELEASED = 1LL << 50;
 
 const Int64 MetaKeyKeyListener::META_SHIFT_MASK = IMetaKeyKeyListener::META_SHIFT_ON | IMetaKeyKeyListener::META_CAP_LOCKED | META_CAP_USED | META_CAP_PRESSED | META_CAP_RELEASED;
 const Int64 MetaKeyKeyListener::META_ALT_MASK = IMetaKeyKeyListener::META_ALT_ON | IMetaKeyKeyListener::META_ALT_LOCKED | META_ALT_USED | META_ALT_PRESSED | META_ALT_RELEASED;
@@ -329,6 +329,7 @@ ECode MetaKeyKeyListener::ClearMetaKeyState(
     if ((states & IMetaKeyKeyListener::META_SELECTING) != 0) {
         return ISpannable::Probe(content)->RemoveSpan(SELECTING);
     }
+    return NOERROR;
 }
 
 ECode MetaKeyKeyListener::ResetLockedMeta(

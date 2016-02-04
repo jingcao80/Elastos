@@ -444,7 +444,7 @@ Boolean AutoScrollHelper::ShouldAnimate()
     CanTargetScrollVertically(verticalDirection, &res1);
     CanTargetScrollHorizontally(horizontalDirection, &res2);
 
-    return verticalDirection != 0 && res1 || horizontalDirection != 0 && res2;
+    return (verticalDirection != 0 && res1) || (horizontalDirection != 0 && res2);
 }
 
 void AutoScrollHelper::StartAnimating()

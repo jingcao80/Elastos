@@ -8,9 +8,10 @@
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/Environment.h"
-#include "util/Xml.h"
-#include "util/XmlUtils.h"
-#include "util/JournaledFile.h"
+#include "elastos/droid/utility/Xml.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
+#include <Elastos.CoreLibrary.Libcore.h>
+#include <Elastos.CoreLibrary.Text.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
@@ -28,19 +29,22 @@ using Elastos::IO::CFileInputStream;
 using Elastos::IO::CFileOutputStream;
 using Elastos::IO::IBufferedOutputStream;
 using Elastos::IO::CBufferedOutputStream;
-using Elastos::IO::IIoUtils;
-using Elastos::IO::CIoUtils;
 using Elastos::IO::IFlushable;
+using Elastos::IO::ICloseable;
 using Elastos::Text::ISimpleDateFormat;
 using Elastos::Text::CSimpleDateFormat;
 using Elastos::Utility::IDate;
 using Elastos::Utility::CDate;
-using Elastos::Droid::Internal::Utility::JournaledFile;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::Utility::CFastXmlSerializer;
-using Elastos::Droid::Utility::IFastXmlSerializer;
+using Libcore::IO::IIoUtils;
+using Libcore::IO::CIoUtils;
+using Elastos::Droid::Internal::Utility::IFastXmlSerializer;
+using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
 using Elastos::Droid::Utility::Xml;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::Pm::CPackageCleanItem;
 using Elastos::Droid::Content::Pm::CUserInfo;
 using Elastos::Droid::Content::Pm::CVerifierDeviceIdentityHelper;
@@ -50,6 +54,10 @@ using Elastos::Droid::Content::Pm::IVerifierDeviceIdentityHelper;
 using Elastos::Droid::Content::Pm::CPermissionInfo;
 using Elastos::Droid::Content::Pm::IPermissionInfoHelper;
 using Elastos::Droid::Content::Pm::CPermissionInfoHelper;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::Pm::IComponentInfo;
+using Elastos::Droid::Net::IUriBuilder;
+using Elastos::Droid::Net::CUriBuilder;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::IProcess;
@@ -57,9 +65,12 @@ using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::IUserManager;
 using Elastos::Droid::Server::Pm::CPackageManagerService;
 using Elastos::Droid::Server::Pm::PackageSettingBase;
-using Elastos::Droid::Utility::XmlUtils;
+using Elastos::Droid::Internal::Utility::XmlUtils;
+using Elastos::Droid::Internal::Utility::IJournaledFile;
+using Elastos::Droid::Internal::Utility::CJournaledFile;
 using Elastos::Droid::Utility::ILogHelper;
 
 namespace Elastos {
@@ -71,9 +82,9 @@ namespace Pm {
 //                  Settings::DatabaseVersion
 //==============================================================================
 
-static const Int32 Settings::DatabaseVersion::FIRST_VERSION;
-static const Int32 Settings::DatabaseVersion::SIGNATURE_END_ENTITY;
-static const Int32 Settings::DatabaseVersion::SIGNATURE_MALFORMED_RECOVER;
+const Int32 Settings::DatabaseVersion::FIRST_VERSION;
+const Int32 Settings::DatabaseVersion::SIGNATURE_END_ENTITY;
+const Int32 Settings::DatabaseVersion::SIGNATURE_MALFORMED_RECOVER;
 
 
 //==============================================================================
@@ -150,7 +161,6 @@ void Settings::Init(
     /* [in] */ IContext* context,
     /* [in] */ IFile* dataDir)
 {
-    mContext = context;
     CFile::New(dataDir, String("system"), (IFile**)&mSystemDir);
     Boolean result;
     String temp;
@@ -162,7 +172,7 @@ void Settings::Init(
     CFile::New(mSystemDir, String("packages.xml"), (IFile**)&mSettingsFilename);
     CFile::New(mSystemDir, String("packages-backup.xml"), (IFile**)&mBackupSettingsFilename);
     CFile::New(mSystemDir, String("packages.list"), (IFile**)&mPackageListFilename);
-    FileUtils::SetPermissions(mPackageListFilename, 0660, SYSTEM_UID, PACKAGE_INFO_GID);
+    FileUtils::SetPermissions(mPackageListFilename, 0660, IProcess::SYSTEM_UID, IProcess::PACKAGE_INFO_GID);
 
     // Deprecated: Needed for migration
     CFile::New(mSystemDir, String("packages-stopped.xml"), (IFile**)&mStoppedPackagesFilename);
@@ -247,7 +257,7 @@ AutoPtr<SharedUserSetting> Settings::GetSharedUserLPw(
             return NULL;
         }
         s = new SharedUserSetting(name, pkgFlags);
-        s->mUserId = NewUserIdLPw(s);
+        s->mUserId = NewUserIdLPw((IObject*)s);
         Slogger::I(CPackageManagerService::TAG, "New shared user %s: id=%d", name.string(), s->mUserId);
         // < 0 means we couldn't assign a userid; fall out and return
         // s, which is currently null
@@ -443,7 +453,7 @@ void Settings::TransferPermissionsLPw(
                 bp->mPackageSetting = NULL;
                 bp->mPerm = NULL;
                 if (bp->mPendingInfo != NULL) {
-                    bp->mPendingInfo->SetPackageName(newPkg);
+                    IPackageItemInfo::Probe(bp->mPendingInfo)->SetPackageName(newPkg);
                 }
                 bp->mUid = 0;
                 bp->mGids = NULL;
@@ -543,7 +553,7 @@ AutoPtr<PackageSetting> Settings::GetPackageLPw(
             name = origPackage->mName;
             // Update new package state.
             Int64 time;
-            codePath->LastModified(&time);
+            codePath->GetLastModified(&time);
             p->SetTimeStamp(time);
         }
         else {
@@ -551,7 +561,7 @@ AutoPtr<PackageSetting> Settings::GetPackageLPw(
                     legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
                     String(NULL) /* cpuAbiOverrideString */, vc, pkgFlags);
             Int64 time;
-            codePath->LastModified(&time);
+            codePath->GetLastModified(&time);
             p->SetTimeStamp(time);
             p->mSharedUser = sharedUser;
             // If this is not a system app, it starts out stopped.
@@ -561,15 +571,19 @@ AutoPtr<PackageSetting> Settings::GetPackageLPw(
 //                    e.fillInStackTrace();
 //                    Slog.i(PackageManagerService.TAG, "Stopping package " + name, e);
                 }
-                AutoPtr< List< AutoPtr<IUserInfo> > > users = GetAllUsers();
+                AutoPtr<IList> users = GetAllUsers();
                 Int32 installUserId = 0;
                 if (installUser != NULL) {
                     installUser->GetIdentifier(&installUserId);
                 }
                 if (users != NULL && allowInstall) {
-                    List< AutoPtr<IUserInfo> >::Iterator it;
-                    for (it = users->Begin(); it != users->End(); ++it) {
-                        AutoPtr<IUserInfo> user = *it;
+                    AutoPtr<IIterator> it;
+                    users->GetIterator((IIterator**)&it);
+                    Boolean hasNext;
+                    while (it->HasNext(&hasNext), hasNext) {
+                        AutoPtr<IInterface> value;
+                        it->GetNext((IInterface**)&value);
+                        AutoPtr<IUserInfo> user = IUserInfo::Probe(value);
                         assert(user != NULL);
                         // By default we consider this app to be installed
                         // for the user if no user has been specified (which
@@ -580,7 +594,7 @@ AutoPtr<PackageSetting> Settings::GetPackageLPw(
                         Int32 userId;
                         user->GetId(&userId);
                         Boolean installed = installUser == NULL
-                                || (installUserId == IUserHandle::USER_ALL)
+                                || ((installUserId == IUserHandle::USER_ALL)
                                         && !IsAdbInstallDisallowed(userManager, userId))
                                 || installUserId == userId;
                         p->SetUserState(userId, IPackageManager::COMPONENT_ENABLED_STATE_DEFAULT,
@@ -618,12 +632,17 @@ AutoPtr<PackageSetting> Settings::GetPackageLPw(
                     p->mGrantedPermissions.Clear();
                     p->mGrantedPermissions.Insert(dis->mGrantedPermissions.Begin(), dis->mGrantedPermissions.End());
                     // Clone component info
-                    AutoPtr< List< AutoPtr<IUserInfo> > > users = GetAllUsers();
+                    AutoPtr<IList> users = GetAllUsers();
                     if (users != NULL) {
-                        List< AutoPtr<IUserInfo> >::Iterator it;
-                        for (it = users->Begin(); it != users->End(); ++it) {
+                        AutoPtr<IIterator> it;
+                        users->GetIterator((IIterator**)&it);
+                        Boolean hasNext;
+                        while (it->HasNext(&hasNext), hasNext) {
+                            AutoPtr<IInterface> value;
+                            it->GetNext((IInterface**)&value);
+                            AutoPtr<IUserInfo> userInfo = IUserInfo::Probe(value);
                             Int32 userId;
-                            (*it)->GetId(&userId);
+                            userInfo->GetId(&userId);
                             p->SetDisabledComponentsCopy(
                                     dis->GetDisabledComponents(userId), userId);
                             p->SetEnabledComponentsCopy(
@@ -637,7 +656,7 @@ AutoPtr<PackageSetting> Settings::GetPackageLPw(
                 }
                 else {
                     // Assign new user id
-                    p->mAppId = NewUserIdLPw(p);
+                    p->mAppId = NewUserIdLPw((IObject*)p);
                 }
             }
         }
@@ -657,14 +676,19 @@ AutoPtr<PackageSetting> Settings::GetPackageLPw(
             // The caller has explicitly specified the user they want this
             // package installed for, and the package already exists.
             // Make sure it conforms to the new request.
-            AutoPtr< List< AutoPtr<IUserInfo> > > users = GetAllUsers();
+            AutoPtr<IList> users = GetAllUsers();
             if (users != NULL) {
                 Int32 id;
                 installUser->GetIdentifier(&id);
-                List< AutoPtr<IUserInfo> >::Iterator it;
-                for (it = users->Begin(); it != users->End(); ++it) {
+                AutoPtr<IIterator> it;
+                users->GetIterator((IIterator**)&it);
+                Boolean hasNext;
+                while (it->HasNext(&hasNext), hasNext) {
+                    AutoPtr<IInterface> value;
+                    it->GetNext((IInterface**)&value);
+                    AutoPtr<IUserInfo> userInfo = IUserInfo::Probe(value);
                     Int32 userId;
-                    (*it)->GetId(&userId);
+                    userInfo->GetId(&userId);
                     if ((id == IUserHandle::USER_ALL && !IsAdbInstallDisallowed(userManager, userId))
                             || id == userId) {
                         Boolean installed = p->GetInstalled(userId);
@@ -700,7 +724,7 @@ void Settings::InsertPackageSettingLPw(
     pkg->mApplicationInfo->GetResourcePath(&resourcePath);
     pkg->mApplicationInfo->GetNativeLibraryRootDir(&legacyNativeLibraryPath);
     // Update code path if needed
-    if (!Objects::Equals(codePath, p->mCodePathString)) {
+    if (!codePath.Equals(p->mCodePathString)) {
         Slogger::W(CPackageManagerService::TAG, "Code path for pkg : %s  changing from %s  to ", p->mPkg->mPackageName.string(),
                p->mCodePathString.string(), codePath.string());
         p->mCodePath = NULL;
@@ -716,13 +740,13 @@ void Settings::InsertPackageSettingLPw(
         p->mResourcePathString = resourcePath;
     }
     // Update the native library paths if needed
-    if (!Objects::Equals(legacyNativeLibraryPath, p->mLegacyNativeLibraryPathString)) {
+    if (!legacyNativeLibraryPath.Equals(p->mLegacyNativeLibraryPathString)) {
         p->mLegacyNativeLibraryPathString = legacyNativeLibraryPath;
     }
 
     // Update the required Cpu Abi
-    pkg->mApplicationInfo->GetprimaryCpuAbi(&p->mPrimaryCpuAbiString);
-    pkg->mApplicationInfo->GetsecondaryCpuAbi(&p->mSecondaryCpuAbiString);
+    pkg->mApplicationInfo->GetPrimaryCpuAbi(&p->mPrimaryCpuAbiString);
+    pkg->mApplicationInfo->GetSecondaryCpuAbi(&p->mSecondaryCpuAbiString);
     p->mCpuAbiOverrideString = pkg->mCpuAbiOverride;
     // Update version code if needed
     if (pkg->mVersionCode != p->mVersionCode) {
@@ -803,7 +827,7 @@ void Settings::UpdateSharedUserPermsLPw(
         if (sus->mGrantedPermissions.Find(eachPerm) == sus->mGrantedPermissions.End()) {
             continue;
         }
-        HashSet<PackageSetting*>::Iterator pit;
+        HashSet<AutoPtr<PackageSetting> >::Iterator pit;
         for (pit = sus->mPackages.Begin(); pit != sus->mPackages.End(); ++pit) {
             PackageSetting* pkg = *pit;
             if (pkg->mPkg != NULL &&
@@ -880,7 +904,7 @@ void Settings::ReplacePackageLPw(
             p->mSharedUser->AddPackage(newp);
         }
         else {
-            ReplaceUserIdLPw(p->mAppId, newp);
+            ReplaceUserIdLPw(p->mAppId, (IObject*)newp);
         }
     }
     mPackages[name] = newp;
@@ -1016,7 +1040,7 @@ AutoPtr<CrossProfileIntentResolver> Settings::EditCrossProfileIntentResolverLPw(
     }
     if (cpir == NULL) {
         cpir = new CrossProfileIntentResolver();
-        mPreferredActivities[userId] = pir;
+        mCrossProfileIntentResolvers[userId] = cpir;
     }
     return cpir;
 }
@@ -1025,7 +1049,7 @@ AutoPtr<IFile> Settings::GetUserPackagesStateFile(
     /* [in] */ Int32 userId)
 {
     AutoPtr<IFile> stateFile;
-    AutoPtr<IFile> dir = Environment::GetUserSystemDirectory(userId, (IFile**)&dir);
+    AutoPtr<IFile> dir = Environment::GetUserSystemDirectory(userId);
     CFile::New(dir, String("package-restrictions.xml"), (IFile**)&stateFile);
     return stateFile;
 }
@@ -1034,36 +1058,46 @@ AutoPtr<IFile> Settings::GetUserPackagesStateBackupFile(
     /* [in] */ Int32 userId)
 {
     AutoPtr<IFile> backupFile;
-    AutoPtr<IFile> dir = Environment::GetUserSystemDirectory(userId, (IFile**)&dir);
+    AutoPtr<IFile> dir = Environment::GetUserSystemDirectory(userId);
     CFile::New(dir, String("package-restrictions-backup.xml"), (IFile**)&backupFile);
     return backupFile;
 }
 
 void Settings::WriteAllUsersPackageRestrictionsLPr()
 {
-    AutoPtr< List< AutoPtr<IUserInfo> > > users = GetAllUsers();
+    AutoPtr<IList> users = GetAllUsers();
     if (users == NULL) return;
 
-    List< AutoPtr<IUserInfo> >::Iterator it;
-    for (it = users->Begin(); it != users->End(); ++it) {
+    AutoPtr<IIterator> it;
+    users->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
+        it->GetNext((IInterface**)&value);
+        AutoPtr<IUserInfo> userInfo = IUserInfo::Probe(value);
         Int32 userId;
-        (*it)->GetId(&userId);
+        userInfo->GetId(&userId);
         WritePackageRestrictionsLPr(userId);
     }
 }
 
 void Settings::ReadAllUsersPackageRestrictionsLPr()
 {
-    AutoPtr< List< AutoPtr<IUserInfo> > > users = GetAllUsers();
+    AutoPtr<IList> users = GetAllUsers();
     if (users == NULL) {
         ReadPackageRestrictionsLPr(0);
         return;
     }
 
-    List< AutoPtr<IUserInfo> >::Iterator it;
-    for (it = users->Begin(); it != users->End(); ++it) {
+    AutoPtr<IIterator> it;
+    users->GetIterator((IIterator**)&it);
+    Boolean hasNext;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> value;
+        it->GetNext((IInterface**)&value);
+        AutoPtr<IUserInfo> userInfo = IUserInfo::Probe(value);
         Int32 userId;
-        (*it)->GetId(&userId);
+        userInfo->GetId(&userId);
         ReadPackageRestrictionsLPr(userId);
     }
 }
@@ -1139,13 +1173,13 @@ ECode Settings::ReadPersistentPreferredActivitiesLPw(
     Int32 outerDepth;
     parser->GetDepth(&outerDepth);
     Int32 type, depth;
-    while ((parser->GetNext(&type), type != IXmlPullParser::END_DOCUMENT)
+    while ((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
             && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&depth), depth > outerDepth))) {
         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
             continue;
         }
         String tagName;
-        parser->GetName();
+        parser->GetName(&tagName);
         if (tagName.Equals(TAG_ITEM)) {
             AutoPtr<PersistentPreferredActivity> ppa = new PersistentPreferredActivity(parser);
             EditPersistentPreferredActivitiesLPw(userId)->AddFilter(ppa);
@@ -1167,7 +1201,7 @@ ECode Settings::ReadCrossProfileIntentFiltersLPw(
     Int32 outerDepth;
     parser->GetDepth(&outerDepth);
     Int32 type, depth;
-    while ((parser->GetNext(&type), type != IXmlPullParser::END_DOCUMENT)
+    while ((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
             && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&depth), depth > outerDepth))) {
         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
             continue;
@@ -1203,7 +1237,7 @@ void Settings::ReadPackageRestrictionsLPr(
     if (backupFile->Exists(&result), result) {
         //try {
         CFileInputStream::New(backupFile, (IFileInputStream**)&str);
-        mReadMessages->AppendString(String("Reading from backup stopped packages file\n"));
+        mReadMessages->Append(String("Reading from backup stopped packages file\n"));
         CPackageManagerService::ReportSettingsProblem(ILogHelper::INFO,
                 String("Need to read from backup stopped packages file"));
         if (userPackagesStateFile->Exists(&result), result) {
@@ -1219,10 +1253,13 @@ void Settings::ReadPackageRestrictionsLPr(
         // }
     }
 
+    AutoPtr<PackageSetting> ps;
+    AutoPtr<IXmlPullParser> parser;
+
     //try
     if (str == NULL) {
         if (userPackagesStateFile->Exists(&result), !result) {
-            mReadMessages->AppendString(String("No stopped packages file found\n"));
+            mReadMessages->Append(String("No stopped packages file found\n"));
             CPackageManagerService::ReportSettingsProblem(ILogHelper::INFO,
                      String("No stopped packages file; assuming all started"));
             // At first boot, make sure no packages are stopped.
@@ -1245,8 +1282,9 @@ void Settings::ReadPackageRestrictionsLPr(
         }
         FAIL_GOTO(ecode = CFileInputStream::New(userPackagesStateFile, (IFileInputStream**)&str), EXIT);
     }
-    AutoPtr<IXmlPullParser> parser = Xml::NewPullParser();
-    FAIL_GOTO(ecode = parser->SetInput(str, String(NULL)), EXIT);
+
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    FAIL_GOTO(ecode = parser->SetInput(IInputStream::Probe(str), String(NULL)), EXIT);
 
     Int32 type;
     while ((parser->Next(&type), type) != IXmlPullParser::START_TAG
@@ -1255,15 +1293,14 @@ void Settings::ReadPackageRestrictionsLPr(
     }
 
     if (type != IXmlPullParser::START_TAG) {
-        mReadMessages->AppendString(String("No start tag found in package restrictions file\n"));
+        mReadMessages->Append(String("No start tag found in package restrictions file\n"));
         CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                 String("No start tag found in package manager stopped packages"));
         return;
     }
 
     Int32 outerDepth, outerDepth1;
-    FAIL_GOTO(ecode = parser->GetDepth(&outerDepth), EXIT);
-    AutoPtr<PackageSetting> ps;
+    FAIL_GOTO(ecode = parser->GetDepth(&outerDepth), EXIT)
     while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
            && (type != IXmlPullParser::END_TAG
                    || (parser->GetDepth(&outerDepth1), outerDepth1) > outerDepth)) {
@@ -1302,16 +1339,16 @@ void Settings::ReadPackageRestrictionsLPr(
             // For backwards compatibility with the previous name of "blocked", which
             // now means hidden, read the old attribute as well.
             String blockedStr;
-            FAIL_GOTO(parser->GetAttributeValue(String(NULL), ATTR_BLOCKED, &blockedStr), EXIT)
+            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), ATTR_BLOCKED, &blockedStr), EXIT)
             Boolean hidden = blockedStr.IsNull() ? FALSE : StringUtils::ParseBoolean(blockedStr);
             String hiddenStr;
-            FAIL_GOTO(parser->GetAttributeValue(String(NULL), ATTR_HIDDEN), EXIT)
+            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), ATTR_HIDDEN, &hiddenStr), EXIT)
             hidden = hiddenStr.IsNull() ? hidden : StringUtils::ParseBoolean(hiddenStr);
             String notLaunchedStr;
             FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), ATTR_NOT_LAUNCHED, &notLaunchedStr), EXIT)
-            Boolean notLaunched = stoppedStt.IsNull() ? FALSE : StringUtils::ParseBoolean(notLaunchedStr);
+            Boolean notLaunched = stoppedStr.IsNull() ? FALSE : StringUtils::ParseBoolean(notLaunchedStr);
             String blockUninstallStr;
-            FAIL_GOTO(parser->GetAttributeValue(String(NULL, ATTR_BLOCK_UNINSTALL, &blockUninstallStr), EXIT)
+            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), ATTR_BLOCK_UNINSTALL, &blockUninstallStr), EXIT)
             Boolean blockUninstall = blockUninstallStr.IsNull() ? FALSE : StringUtils::ParseBoolean(blockUninstallStr);
 
             AutoPtr<HashSet<String> > enabledComponents;
@@ -1361,7 +1398,7 @@ void Settings::ReadPackageRestrictionsLPr(
         }
     }
 
-    FAIL_GOTO(ecode = str->Close(), EXIT);
+    FAIL_GOTO(ecode = ICloseable::Probe(str)->Close(), EXIT);
 
     // } catch (XmlPullParserException e) {
     //     mReadMessages.append("Error reading: " + e.toString());
@@ -1385,14 +1422,14 @@ void Settings::ReadPackageRestrictionsLPr(
 //     }
 
 EXIT:
-    if (E_XML_PULL_PARSER_EXCEPTION == ecode) {
-        mReadMessages->AppendString(String("Error reading:  + e.toString()"));
+    if ((ECode)E_XML_PULL_PARSER_EXCEPTION == ecode) {
+        mReadMessages->Append(String("Error reading:  + e.toString()"));
         CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR,
                 String("Error reading stopped packages: "));
         Slogger::E(CPackageManagerService::TAG, "Error reading package manager stopped packages, e");
     }
-    else if (E_IO_EXCEPTION == ecode) {
-        mReadMessages->AppendString(String("Error reading:  + e.toString()"));
+    else if ((ECode)E_IO_EXCEPTION == ecode) {
+        mReadMessages->Append(String("Error reading:  + e.toString()"));
         CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR, String("Error reading settings:  + e"));
         Slogger::E(CPackageManagerService::TAG, "Error reading package manager stopped packages, e");
     }
@@ -1442,8 +1479,8 @@ ECode Settings::WritePreferredActivitiesLPr(
         pir = it->mSecond;
     }
     if (pir != NULL) {
-        AutoPtr< Set< AutoPtr<PreferredActivity> > > set = pir->FilterSet();
-        Set< AutoPtr<PreferredActivity> >::Iterator sit;
+        AutoPtr<HashSet<AutoPtr<PreferredActivity> > > set = pir->FilterSet();
+        HashSet<AutoPtr<PreferredActivity> >::Iterator sit;
         for (sit = set->Begin(); sit != set->End(); ++sit) {
             serializer->WriteStartTag(String(NULL), TAG_ITEM);
             (*sit)->WriteToXml(serializer, full);
@@ -1458,17 +1495,17 @@ ECode Settings::WritePersistentPreferredActivitiesLPr(
     /* [in] */ IXmlSerializer* serializer,
     /* [in] */ Int32 userId)
 {
-    serializer->StartTag(String(NULL), TAG_PERSISTENT_PREFERRED_ACTIVITIES);
+    serializer->WriteStartTag(String(NULL), TAG_PERSISTENT_PREFERRED_ACTIVITIES);
     AutoPtr<PersistentPreferredIntentResolver> ppir;
     HashMap<Int32, AutoPtr<PersistentPreferredIntentResolver> >::Iterator it = mPersistentPreferredActivities.Find(userId);
     if (it != mPersistentPreferredActivities.End()) {
         ppir = it->mSecond;
     }
     if (ppir != NULL) {
-        AutoPtr< Set< AutoPtr<PersistentPreferredActivity> > > ppas = ppir->FilterSet();
-        Set< AutoPtr<PersistentPreferredActivity> >::Iterator ppaIt = ppas->Begin();
+        AutoPtr<HashSet< AutoPtr<PersistentPreferredActivity> > > ppas = ppir->FilterSet();
+        HashSet<AutoPtr<PersistentPreferredActivity> >::Iterator ppaIt = ppas->Begin();
         for (; ppaIt != ppas->End(); ++ppaIt) {
-            serializer->StartTag(String(NULL), TAG_ITEM);
+            serializer->WriteStartTag(String(NULL), TAG_ITEM);
             (*ppaIt)->WriteToXml(serializer);
             serializer->WriteEndTag(String(NULL), TAG_ITEM);
         }
@@ -1481,17 +1518,17 @@ ECode Settings::WriteCrossProfileIntentFiltersLPr(
     /* [in] */ IXmlSerializer* serializer,
     /* [in] */ Int32 userId)
 {
-    serializer->StartTag(String(NULL), TAG_CROSS_PROFILE_INTENT_FILTERS);
+    serializer->WriteStartTag(String(NULL), TAG_CROSS_PROFILE_INTENT_FILTERS);
     AutoPtr<CrossProfileIntentResolver> cpir;
     HashMap<Int32, AutoPtr<CrossProfileIntentResolver> >::Iterator it = mCrossProfileIntentResolvers.Find(userId);
     if (it != mCrossProfileIntentResolvers.End()) {
         cpir = it->mSecond;
     }
     if (cpir != NULL) {
-        AutoPtr< Set< AutoPtr<CrossProfileIntentFilter> > > cpifs = ppir->FilterSet();
-        Set< AutoPtr<CrossProfileIntentFilter> >::Iterator cpifIt = cpifs->Begin();
+        AutoPtr<HashSet< AutoPtr<CrossProfileIntentFilter> > > cpifs = cpir->FilterSet();
+        HashSet<AutoPtr<CrossProfileIntentFilter> >::Iterator cpifIt = cpifs->Begin();
         for (; cpifIt != cpifs->End(); ++cpifIt) {
-            serializer->StartTag(String(NULL), TAG_ITEM);
+            serializer->WriteStartTag(String(NULL), TAG_ITEM);
             (*cpifIt)->WriteToXml(serializer);
             serializer->WriteEndTag(String(NULL), TAG_ITEM);
         }
@@ -1512,7 +1549,6 @@ void Settings::WritePackageRestrictionsLPr(
     AutoPtr<IFile> backupFile = GetUserPackagesStateBackupFile(userId);
     String temp;
     Boolean result;
-    ECode ecode = NOERROR;
     userPackagesStateFile->GetParent(&temp);
     AutoPtr<IFile> stateFileParent;
     CFile::New(temp, (IFile**)&stateFileParent);
@@ -1529,23 +1565,22 @@ void Settings::WritePackageRestrictionsLPr(
                         + String("current changes will be lost at reboot"));
                 return;
             }
-        } else {
+        }
+        else {
             userPackagesStateFile->Delete(&result);
             Slogger::W(CPackageManagerService::TAG, "Preserving older stopped packages backup");
         }
     }
     //try
     AutoPtr<IFileOutputStream> fstr;
-    FAIL_GOTO(ecode = CFileOutputStream::New(userPackagesStateFile, (IFileOutputStream**)&fstr), EXIT);
+    CFileOutputStream::New(userPackagesStateFile, (IFileOutputStream**)&fstr);
     AutoPtr<IBufferedOutputStream> str;
-    FAIL_GOTO(ecode = CBufferedOutputStream::New(fstr, (IBufferedOutputStream**)&str), EXIT);
+    CBufferedOutputStream::New(IOutputStream::Probe(fstr), (IBufferedOutputStream**)&str);
 
-    AutoPtr<IFastXmlSerializer> serializer;
-    CFastXmlSerializer::New((IFastXmlSerializer**)&serializer);
-    serializer->SetOutput(str, String("utf-8"));
-    AutoPtr<IBoolean> objBoolean;
-    CBoolean::New(TRUE, (IBoolean**)&objBoolean);
-    serializer->StartDocument(String(NULL), objBoolean);
+    AutoPtr<IXmlSerializer> serializer;
+    CFastXmlSerializer::New((IXmlSerializer**)&serializer);
+    serializer->SetOutput(IOutputStream::Probe(str), String("utf-8"));
+    serializer->StartDocument(String(NULL), TRUE);
     serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
 
     serializer->WriteStartTag(String(NULL), TAG_PACKAGE_RESTRICTIONS);
@@ -1584,7 +1619,7 @@ void Settings::WritePackageRestrictionsLPr(
                 serializer->WriteAttribute(String(NULL), ATTR_ENABLED,
                         StringUtils::ToString(ustate->mEnabled));
                 if (!ustate->mLastDisableAppCaller.IsNull()) {
-                    serialize->WriteAttribute(String(NULL), ATTR_ENABLED_CALLER, ustate->mLastDisableAppCaller);
+                    serializer->WriteAttribute(String(NULL), ATTR_ENABLED_CALLER, ustate->mLastDisableAppCaller);
                 }
             }
             if (ustate->mEnabledComponents != NULL
@@ -1624,16 +1659,16 @@ void Settings::WritePackageRestrictionsLPr(
     serializer->WriteEndTag(String(NULL), TAG_PACKAGE_RESTRICTIONS);
     serializer->EndDocument();
 
-    FAIL_GOTO(ecode = IFlushable::Probe(str)->Flush(), EXIT);
-    FAIL_GOTO(ecode = FileUtils::Sync(fstr, &result), EXIT);
-    FAIL_GOTO(ecode = str->Close(), EXIT);
+    IFlushable::Probe(str)->Flush();
+    result = FileUtils::Sync(fstr);
+    ICloseable::Probe(str)->Close();
 
     // New settings successfully written, old ones are no longer
     // needed.
-    FAIL_GOTO(ecode = backupFile->Delete(&result), EXIT);
-    FAIL_GOTO(ecode = FileUtils::SetPermissions((userPackagesStateFile->ToString(&temp), temp),
+    backupFile->Delete(&result);
+    FileUtils::SetPermissions((userPackagesStateFile->ToString(&temp), temp),
             FileUtils::sS_IRUSR|FileUtils::sS_IWUSR
-            |FileUtils::sS_IRGRP|FileUtils::sS_IWGRP, -1, -1), EXIT);
+            |FileUtils::sS_IRGRP|FileUtils::sS_IWGRP, -1, -1);
 
     // Done, all is good!
     return;
@@ -1643,19 +1678,13 @@ void Settings::WritePackageRestrictionsLPr(
     //             + " current changes will be lost at reboot", e);
     // }
 
-EXIT:
-    if (E_IO_EXCEPTION == ecode) {
-        Slogger::E(CPackageManagerService::TAG,
-            String("Unable to write package manager user packages state, ")
-            + String(" current changes will be lost at reboot e"));
-    }
     // Clean up partially written files
-    if (userPackagesStateFile->Exists(&result), result) {
-        if (userPackagesStateFile->Delete(&result), !result) {
-            Slogger::I(CPackageManagerService::TAG, String("Failed to clean up mangled file: ")
-                    + (mStoppedPackagesFilename->ToString(&temp), temp));
-        }
-    }
+    // if (userPackagesStateFile->Exists(&result), result) {
+    //     if (userPackagesStateFile->Delete(&result), !result) {
+    //         Slogger::I(CPackageManagerService::TAG, String("Failed to clean up mangled file: ")
+    //                 + (mStoppedPackagesFilename->ToString(&temp), temp));
+    //     }
+    // }
 }
 
 void Settings::ReadStoppedLPw()
@@ -1663,11 +1692,10 @@ void Settings::ReadStoppedLPw()
     AutoPtr<IFileInputStream> str;
     Boolean result;
     String temp;
-    ECode ecode = NOERROR;
     if (mBackupStoppedPackagesFilename->Exists(&result), result) {
         //try {
         CFileInputStream::New(mBackupStoppedPackagesFilename, (IFileInputStream**)&str);
-        mReadMessages->AppendString(String("Reading from backup stopped packages file\n"));
+        mReadMessages->Append(String("Reading from backup stopped packages file\n"));
         CPackageManagerService::ReportSettingsProblem(ILogHelper::INFO,
                 String("Need to read from backup stopped packages file"));
         if (mSettingsFilename->Exists(&result), result) {
@@ -1685,7 +1713,7 @@ void Settings::ReadStoppedLPw()
     //try
     if (str == NULL) {
         if (mStoppedPackagesFilename->Exists(&result), !result) {
-            mReadMessages->AppendString(String("No stopped packages file found\n"));
+            mReadMessages->Append(String("No stopped packages file found\n"));
             CPackageManagerService::ReportSettingsProblem(ILogHelper::INFO,
                     String("No stopped packages file file; assuming all started"));
             // At first boot, make sure no packages are stopped.
@@ -1701,8 +1729,9 @@ void Settings::ReadStoppedLPw()
         }
         CFileInputStream::New(mStoppedPackagesFilename, (IFileInputStream**)&str);
     }
-    AutoPtr<IXmlPullParser> parser = Xml::NewPullParser();
-    parser->SetInput(str, String(NULL));
+    AutoPtr<IXmlPullParser> parser;
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    parser->SetInput(IInputStream::Probe(str), String(NULL));
 
     Int32 type;
     while ((parser->Next(&type), type) != IXmlPullParser::START_TAG
@@ -1711,7 +1740,7 @@ void Settings::ReadStoppedLPw()
     }
 
     if (type != IXmlPullParser::START_TAG) {
-        mReadMessages->AppendString(String("No start tag found in stopped packages file\n"));
+        mReadMessages->Append(String("No start tag found in stopped packages file\n"));
         CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                 String("No start tag found in package manager stopped packages"));
         return;
@@ -1741,22 +1770,24 @@ void Settings::ReadStoppedLPw()
             if (ps != NULL) {
                 ps->SetStopped(TRUE, 0);
                 parser->GetAttributeValue(String(NULL), ATTR_NOT_LAUNCHED, &temp);
-                if (CString("1").Equals(temp)) {
+                if (temp.Equals("1")) {
                     ps->SetNotLaunched(TRUE, 0);
                 }
-            } else {
+            }
+            else {
                 Slogger::W(CPackageManagerService::TAG,
                         String("No package known for stopped package: ") + name);
             }
             XmlUtils::SkipCurrentTag(parser);
-        } else {
+        }
+        else {
             Slogger::W(CPackageManagerService::TAG, String("Unknown element under <stopped-packages>: ")
                   + (parser->GetName(&temp), temp.IsNull() ? String("NULL") : temp));
             XmlUtils::SkipCurrentTag(parser);
         }
     }
 
-    str->Close();
+    ICloseable::Probe(str)->Close();
 
     // } catch (XmlPullParserException e) {
     //     mReadMessages->append("Error reading: " + e.toString());
@@ -1770,18 +1801,18 @@ void Settings::ReadStoppedLPw()
     //     Log.wtf(CPackageManagerService::TAG, "Error reading package manager stopped packages", e);
 
     // }
-EXIT:
-    if (E_IO_EXCEPTION == ecode) {
-        mReadMessages->AppendString(String("Error reading:  + e.toString()"));
-        CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR,
-                String("Error reading stopped packages:  + e"));
-        Slogger::E(CPackageManagerService::TAG, "Error reading package manager stopped packages, e");
-    }
-    else if (E_XML_PULL_PARSER_EXCEPTION == ecode) {
-        mReadMessages->AppendString(String("Error reading:  + e.toString()"));
-        CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR, String("Error reading settings: +e"));
-        Slogger::E(CPackageManagerService::TAG, "Error reading package manager stopped packages, e");
-    }
+// EXIT:
+//     if ((ECode)E_IO_EXCEPTION == ecode) {
+//         mReadMessages->Append(String("Error reading:  + e.toString()"));
+//         CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR,
+//                 String("Error reading stopped packages:  + e"));
+//         Slogger::E(CPackageManagerService::TAG, "Error reading package manager stopped packages, e");
+//     }
+//     else if ((ECode)E_XML_PULL_PARSER_EXCEPTION == ecode) {
+//         mReadMessages->Append(String("Error reading:  + e.toString()"));
+//         CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR, String("Error reading settings: +e"));
+//         Slogger::E(CPackageManagerService::TAG, "Error reading package manager stopped packages, e");
+//     }
 }
 
 void Settings::WriteLPr()
@@ -1791,9 +1822,6 @@ void Settings::WriteLPr()
     // Keep the old settings around until we know the new ones have
     // been successfully written.
     Boolean result;
-    ECode ecode = NOERROR;
-    String temp;
-    Int32 val;
     if (mSettingsFilename->Exists(&result), result) {
         // Presence of backup settings file indicates that we failed
         // to persist settings earlier. So preserve the older
@@ -1817,169 +1845,210 @@ void Settings::WriteLPr()
     mPastSignatures.Clear();
 
     //try
-    AutoPtr<IFileOutputStream> fstr;
-    CFileOutputStream::New(mSettingsFilename, (IFileOutputStream**)&fstr);
-    AutoPtr<IBufferedOutputStream> str;
-    CBufferedOutputStream::New(fstr, (IBufferedOutputStream**)&str);
-
-    //XmlSerializer serializer = XmlUtils.serializerInstance();
-    AutoPtr<IFastXmlSerializer> serializer;
-    CFastXmlSerializer::New((IFastXmlSerializer**)&serializer);
-    FAIL_GOTO(ecode = serializer->SetOutput(str, String("utf-8")), EXIT);
-
-    AutoPtr<IBoolean> ibObj;
-    CBoolean::New(TRUE, (IBoolean**)&ibObj);
-    FAIL_GOTO(ecode = serializer->StartDocument(String(NULL), ibObj), EXIT);
-    FAIL_GOTO(ecode = serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE), EXIT);
-
-    FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), String("packages")), EXIT);
-
-    FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), String("last-platform-version")), EXIT);
-    FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), String("internal"), StringUtils::ToString(mInternalSdkPlatform)), EXIT);
-    FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), String("external"), StringUtils::ToString(mExternalSdkPlatform)), EXIT);
-    FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), String("fingerprint"), mFingerprint), EXIT)
-    FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), String("last-platform-version")), EXIT);
-
-    FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), String("database-version")), EXIT)
-    FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), String("internal"), StringUtils::ToString(mInternalDatabaseVersion)), EXIT)
-    FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), String("external"), StringUtils::ToString(mExternalDatabaseVersion)), EXIT)
-    FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), String("database-version")) ,EXIT)
-
-    if (mVerifierDeviceIdentity != NULL) {
-        FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), String("verifier")), EXIT);
-        mVerifierDeviceIdentity->ToString(&temp);
-        FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), String("device"), temp), EXIT);
-        FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), String("verifier")), EXIT);
-    }
-
-    if (mReadExternalStorageEnforced != NULL) {
-        Boolean value;
-        mReadExternalStorageEnforced->GetValue(&value);
-        FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), TAG_READ_EXTERNAL_STORAGE), EXIT);
-        FAIL_GOTO(ecode = serializer->WriteAttribute(
-                String(NULL), ATTR_ENFORCEMENT, value ? String("1") : String("0")), EXIT);
-        FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), TAG_READ_EXTERNAL_STORAGE), EXIT);
-    }
-
-    FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), String("permission-trees")), EXIT);
-    HashMap<String, AutoPtr<BasePermission> >::Iterator it = mPermissionTrees.Begin();
-    for (; it != mPermissionTrees.End(); it++) {
-        AutoPtr<BasePermission> bp = it->mSecond;
-        WritePermissionLPr(serializer, bp);
-    }
-
-    FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), String("permission-trees")), EXIT);
-
-    FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), String("permissions")), EXIT);
-
-    HashMap<String, AutoPtr<BasePermission> >::Iterator it2 = mPermissions.Begin();
-    for (; it2 != mPermissions.End(); it2++) {
-        AutoPtr<BasePermission> bp = it2->mSecond;
-        WritePermissionLPr(serializer, bp);
-    }
-
-    FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), String("permissions")), EXIT);
-
-    HashMap<String, AutoPtr<PackageSetting> >::Iterator it3 = mPackages.Begin();
-    for (; it3 != mPackages.End(); it3++) {
-        AutoPtr<PackageSetting> pkg = it3->mSecond;
-        WritePackageLPr(serializer, pkg);
-    }
-
-    HashMap<String, AutoPtr<PackageSetting> >::Iterator it4 = mDisabledSysPackages.Begin();
-    for (; it4 != mDisabledSysPackages.End(); it4++) {
-        AutoPtr<PackageSetting> pkg = it4->mSecond;
-        WriteDisabledSysPackageLPr(serializer, pkg);
-    }
-
-    HashMap<String, AutoPtr<SharedUserSetting> >::Iterator it5 = mSharedUsers.Begin();
-    for (; it5 != mSharedUsers.End(); it5++) {
-        AutoPtr<SharedUserSetting> user = it5->mSecond;
-        FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), String("shared-user")), EXIT);
-        FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), ATTR_NAME, user->mName), EXIT);
-        FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), String("userId"),
-                StringUtils::ToString(user->mUserId)), EXIT);
-        user->mSignatures->WriteXml(serializer, String("sigs"), mPastSignatures);
-        FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), String("perms")), EXIT);
-
-        HashSet<String>::Iterator it6 = user->mGrantedPermissions.Begin();
-        for (; it6 != user->mGrantedPermissions.End(); it6++) {
-            String name = (*it6);
-            FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), TAG_ITEM), EXIT);
-            FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), ATTR_NAME, name), EXIT);
-            FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), TAG_ITEM), EXIT);
-        }
-        FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), String("perms")), EXIT);
-        FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), String("shared-user")), EXIT);
-    }
-
-    if (!mPackagesToBeCleaned.IsEmpty()) {
-        List< AutoPtr<IPackageCleanItem> >::Iterator it7 = mPackagesToBeCleaned.Begin();
-        for (; it7 != mPackagesToBeCleaned.End(); it7++) {
-            AutoPtr<IPackageCleanItem> item = it7->Get();
-            String userStr = StringUtils::ToString(item->GetUserId(&val), val);
-            FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), String("cleaning-package")), EXIT);
-            FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), ATTR_NAME, (item->GetPackageName(&temp), temp)), EXIT);
-            FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), ATTR_CODE, (item->GetAndCode(&result), result) ? String("true") : String("FALSE")), EXIT);
-            FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), ATTR_USER, userStr), EXIT);
-            FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), String("cleaning-package")), EXIT);
-        }
-    }
-
-    if (!mRenamedPackages.IsEmpty()) {
-        HashMap<String, String>::Iterator it8 = mRenamedPackages.Begin();
-        for (; it8 != mRenamedPackages.End(); it8++) {
-            FAIL_GOTO(ecode = serializer->WriteStartTag(String(NULL), String("renamed-package")), EXIT);
-            FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), String("new"), it8->mFirst), EXIT);
-            FAIL_GOTO(ecode = serializer->WriteAttribute(String(NULL), String("old"), it8->mSecond), EXIT);
-            FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), String("renamed-package")), EXIT);
-        }
-    }
-
-    mKeySetManagerService->WriteKeySetManagerServiceLPr(serializer);
-
-    FAIL_GOTO(ecode = serializer->WriteEndTag(String(NULL), String("packages")), EXIT);
-
-    FAIL_GOTO(ecode = serializer->EndDocument(), EXIT);
-
-    FAIL_GOTO(ecode = IFlushable::Probe(str)->Flush(), EXIT);
-    FAIL_GOTO(ecode = FileUtils::Sync(fstr, &result), EXIT);
-    FAIL_GOTO(ecode = str->Close(), EXIT);
-
-    // New settings successfully written, old ones are no longer
-    // needed.
-    FAIL_GOTO(ecode = mBackupSettingsFilename->Delete(&result), EXIT);
-    mSettingsFilename->ToString(&temp);
-    FAIL_GOTO(ecode = FileUtils::SetPermissions(temp,
-            FileUtils::sS_IRUSR|FileUtils::sS_IWUSR
-            |FileUtils::sS_IRGRP|FileUtils::sS_IWGRP,
-        -1, -1), EXIT);
-
-    // Write package list file now, use a JournaledFile.
-    AutoPtr<IFile> tempFile;
-    String absolutePath;
-    mPackageListFilename->GetAbsolutePath(&absolutePath);
-    FAIL_GOTO(ecode = CFile::New(absolutePath + ".tmp", (IFile**)&tempFile), EXIT);
-    AutoPtr<JournaledFile> journal = new JournaledFile(mPackageListFilename, tempFile);
-
-    AutoPtr<IFile> writeTarget = journal->ChooseForWrite();
-    fstr = NULL;
-    FAIL_GOTO(ecode = CFileOutputStream::New(writeTarget, (IFileOutputStream**)&fstr), EXIT);
-    str = NULL;
-    FAIL_GOTO(ecode = CBufferedOutputStream::New(fstr, (IBufferedOutputStream**)&str), EXIT);
-    //try
     ECode ec = NOERROR;
+    String temp;
+    Int32 val;
     do {
+        AutoPtr<IFileOutputStream> fstr;
+        CFileOutputStream::New(mSettingsFilename, (IFileOutputStream**)&fstr);
+        AutoPtr<IBufferedOutputStream> str;
+        CBufferedOutputStream::New(IOutputStream::Probe(fstr), (IBufferedOutputStream**)&str);
+
+        //XmlSerializer serializer = XmlUtils.serializerInstance();
+        AutoPtr<IXmlSerializer> serializer;
+        CFastXmlSerializer::New((IXmlSerializer**)&serializer);
+        ec = serializer->SetOutput(IOutputStream::Probe(str), String("utf-8"));
+        if (FAILED(ec)) break;
+
+        ec = serializer->StartDocument(String(NULL), TRUE);
+        if (FAILED(ec)) break;
+        ec = serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
+        if (FAILED(ec)) break;
+
+        ec = serializer->WriteStartTag(String(NULL), String("packages"));
+        if (FAILED(ec)) break;
+
+        ec = serializer->WriteStartTag(String(NULL), String("last-platform-version"));
+        if (FAILED(ec)) break;
+        ec = serializer->WriteAttribute(String(NULL), String("internal"), StringUtils::ToString(mInternalSdkPlatform));
+        if (FAILED(ec)) break;
+        ec = serializer->WriteAttribute(String(NULL), String("external"), StringUtils::ToString(mExternalSdkPlatform));
+        if (FAILED(ec)) break;
+        ec = serializer->WriteAttribute(String(NULL), String("fingerprint"), mFingerprint);
+        if (FAILED(ec)) break;
+        ec = serializer->WriteEndTag(String(NULL), String("last-platform-version"));
+        if (FAILED(ec)) break;
+
+        ec = serializer->WriteStartTag(String(NULL), String("database-version"));
+        if (FAILED(ec)) break;
+        ec = serializer->WriteAttribute(String(NULL), String("internal"), StringUtils::ToString(mInternalDatabaseVersion));
+        if (FAILED(ec)) break;
+        ec = serializer->WriteAttribute(String(NULL), String("external"), StringUtils::ToString(mExternalDatabaseVersion));
+        if (FAILED(ec)) break;
+        ec = serializer->WriteEndTag(String(NULL), String("database-version"));
+        if (FAILED(ec)) break;
+
+        if (mVerifierDeviceIdentity != NULL) {
+            ec = serializer->WriteStartTag(String(NULL), String("verifier"));
+            if (FAILED(ec)) break;
+            mVerifierDeviceIdentity->ToString(&temp);
+            ec = serializer->WriteAttribute(String(NULL), String("device"), temp);
+            if (FAILED(ec)) break;
+            ec = serializer->WriteEndTag(String(NULL), String("verifier"));
+            if (FAILED(ec)) break;
+        }
+
+        if (mReadExternalStorageEnforced != NULL) {
+            Boolean value;
+            mReadExternalStorageEnforced->GetValue(&value);
+            ec = serializer->WriteStartTag(String(NULL), TAG_READ_EXTERNAL_STORAGE);
+            if (FAILED(ec)) break;
+            ec = serializer->WriteAttribute(
+                    String(NULL), ATTR_ENFORCEMENT, value ? String("1") : String("0"));
+            if (FAILED(ec)) break;
+            ec = serializer->WriteEndTag(String(NULL), TAG_READ_EXTERNAL_STORAGE);
+            if (FAILED(ec)) break;
+        }
+
+        ec = serializer->WriteStartTag(String(NULL), String("permission-trees"));
+        if (FAILED(ec)) break;
+        HashMap<String, AutoPtr<BasePermission> >::Iterator it = mPermissionTrees.Begin();
+        for (; it != mPermissionTrees.End(); it++) {
+            AutoPtr<BasePermission> bp = it->mSecond;
+            WritePermissionLPr(serializer, bp);
+        }
+
+        ec = serializer->WriteEndTag(String(NULL), String("permission-trees"));
+        if (FAILED(ec)) break;
+
+        ec = serializer->WriteStartTag(String(NULL), String("permissions"));
+        if (FAILED(ec)) break;
+
+        HashMap<String, AutoPtr<BasePermission> >::Iterator it2 = mPermissions.Begin();
+        for (; it2 != mPermissions.End(); it2++) {
+            AutoPtr<BasePermission> bp = it2->mSecond;
+            WritePermissionLPr(serializer, bp);
+        }
+
+        ec = serializer->WriteEndTag(String(NULL), String("permissions"));
+        if (FAILED(ec)) break;
+
+        HashMap<String, AutoPtr<PackageSetting> >::Iterator it3 = mPackages.Begin();
+        for (; it3 != mPackages.End(); it3++) {
+            AutoPtr<PackageSetting> pkg = it3->mSecond;
+            WritePackageLPr(serializer, pkg);
+        }
+
+        HashMap<String, AutoPtr<PackageSetting> >::Iterator it4 = mDisabledSysPackages.Begin();
+        for (; it4 != mDisabledSysPackages.End(); it4++) {
+            AutoPtr<PackageSetting> pkg = it4->mSecond;
+            WriteDisabledSysPackageLPr(serializer, pkg);
+        }
+
+        HashMap<String, AutoPtr<SharedUserSetting> >::Iterator it5 = mSharedUsers.Begin();
+        for (; it5 != mSharedUsers.End(); it5++) {
+            AutoPtr<SharedUserSetting> user = it5->mSecond;
+            ec = serializer->WriteStartTag(String(NULL), String("shared-user"));
+            if (FAILED(ec)) break;
+            ec = serializer->WriteAttribute(String(NULL), ATTR_NAME, user->mName);
+            if (FAILED(ec)) break;
+            ec = serializer->WriteAttribute(String(NULL), String("userId"),
+                    StringUtils::ToString(user->mUserId));
+            if (FAILED(ec)) break;
+            user->mSignatures->WriteXml(serializer, String("sigs"), mPastSignatures);
+            ec = serializer->WriteStartTag(String(NULL), String("perms"));
+            if (FAILED(ec)) break;
+
+            HashSet<String>::Iterator it6 = user->mGrantedPermissions.Begin();
+            for (; it6 != user->mGrantedPermissions.End(); it6++) {
+                String name = (*it6);
+                ec = serializer->WriteStartTag(String(NULL), TAG_ITEM);
+                if (FAILED(ec)) break;
+                ec = serializer->WriteAttribute(String(NULL), ATTR_NAME, name);
+                if (FAILED(ec)) break;
+                ec = serializer->WriteEndTag(String(NULL), TAG_ITEM);
+                if (FAILED(ec)) break;
+            }
+            ec = serializer->WriteEndTag(String(NULL), String("perms"));
+            if (FAILED(ec)) break;
+            ec = serializer->WriteEndTag(String(NULL), String("shared-user"));
+            if (FAILED(ec)) break;
+        }
+
+        if (!mPackagesToBeCleaned.IsEmpty()) {
+            List< AutoPtr<IPackageCleanItem> >::Iterator it7 = mPackagesToBeCleaned.Begin();
+            for (; it7 != mPackagesToBeCleaned.End(); it7++) {
+                AutoPtr<IPackageCleanItem> item = it7->Get();
+                String userStr = StringUtils::ToString(item->GetUserId(&val), val);
+                ec = serializer->WriteStartTag(String(NULL), String("cleaning-package"));
+                if (FAILED(ec)) break;
+                ec = serializer->WriteAttribute(String(NULL), ATTR_NAME, (item->GetPackageName(&temp), temp));
+                if (FAILED(ec)) break;
+                ec = serializer->WriteAttribute(String(NULL), ATTR_CODE,
+                        (item->GetAndCode(&result), result) ? String("true") : String("FALSE"));
+                if (FAILED(ec)) break;
+                ec = serializer->WriteAttribute(String(NULL), ATTR_USER, userStr);
+                if (FAILED(ec)) break;
+                ec = serializer->WriteEndTag(String(NULL), String("cleaning-package"));
+                if (FAILED(ec)) break;
+            }
+        }
+
+        if (!mRenamedPackages.IsEmpty()) {
+            HashMap<String, String>::Iterator it8 = mRenamedPackages.Begin();
+            for (; it8 != mRenamedPackages.End(); it8++) {
+                ec = serializer->WriteStartTag(String(NULL), String("renamed-package"));
+                ec = serializer->WriteAttribute(String(NULL), String("new"), it8->mFirst);
+                ec = serializer->WriteAttribute(String(NULL), String("old"), it8->mSecond);
+                ec = serializer->WriteEndTag(String(NULL), String("renamed-package"));
+            }
+        }
+
+        mKeySetManagerService->WriteKeySetManagerServiceLPr(serializer);
+
+        ec = serializer->WriteEndTag(String(NULL), String("packages"));
+        if (FAILED(ec)) break;
+
+        ec = serializer->EndDocument();
+        if (FAILED(ec)) break;
+
+        IFlushable::Probe(str)->Flush();
+        FileUtils::Sync(fstr);
+        ICloseable::Probe(str)->Close();
+
+        // New settings successfully written, old ones are no longer
+        // needed.
+        mBackupSettingsFilename->Delete(&result);
+        mSettingsFilename->ToString(&temp);
+        FileUtils::SetPermissions(temp,
+                FileUtils::sS_IRUSR | FileUtils::sS_IWUSR | FileUtils::sS_IRGRP | FileUtils::sS_IWGRP,
+                -1, -1);
+
+        // Write package list file now, use a JournaledFile.
+        AutoPtr<IFile> tempFile;
+        String absolutePath;
+        mPackageListFilename->GetAbsolutePath(&absolutePath);
+        CFile::New(absolutePath + ".tmp", (IFile**)&tempFile);
+        AutoPtr<IJournaledFile> journal;
+        CJournaledFile::New(mPackageListFilename, tempFile, (IJournaledFile**)&journal);
+
+        AutoPtr<IFile> writeTarget;
+        journal->ChooseForWrite((IFile**)&writeTarget);
+        fstr = NULL;
+        CFileOutputStream::New(writeTarget, (IFileOutputStream**)&fstr);
+        str = NULL;
+        CBufferedOutputStream::New(IOutputStream::Probe(fstr), (IBufferedOutputStream**)&str);
+        //try
         AutoPtr<IFileDescriptor> fd;
         fstr->GetFD((IFileDescriptor**)&fd);
-        FileUtils::SetPermissions(fd, 0660, SYSTEM_UID, PACKAGE_INFO_GID);
+        FileUtils::SetPermissions(fd, 0660, IProcess::SYSTEM_UID, IProcess::PACKAGE_INFO_GID);
 
         StringBuilder sb;
         HashMap<String, AutoPtr<PackageSetting> >::Iterator it9 = mPackages.Begin();
         for (; it9 != mPackages.End(); it9++) {
             AutoPtr<PackageSetting> pkg = it9->mSecond;
             if (pkg->mPkg == NULL || pkg->mPkg->mApplicationInfo == NULL) {
-                Slogger::W(TAG, "Skipping " + pkg + " due to missing metadata");
+                Slogger::W(TAG, "Skipping %p due to missing metadata", pkg.Get());
                 continue;
             }
 
@@ -1987,7 +2056,7 @@ void Settings::WriteLPr()
             String dataPath;
             ai->GetDataDir(&dataPath);
             Int32 flags;
-            Boolean isDebug = (ai->GetFlags(&flags), (flags & IApplicationInfo.FLAG_DEBUGGABLE) != 0);
+            Boolean isDebug = (ai->GetFlags(&flags), (flags & IApplicationInfo::FLAG_DEBUGGABLE) != 0);
             AutoPtr< ArrayOf<Int32> > gids = pkg->GetGids();
 
             // Avoid any application that has a space in its path.
@@ -2013,7 +2082,7 @@ void Settings::WriteLPr()
             //
             //sb.setLength(0);
 
-            sb.Append((ai->GetPackageName(&temp), temp));
+            sb.Append((IPackageItemInfo::Probe(ai)->GetPackageName(&temp), temp));
             sb.Append(" ");
             ai->GetUid(&val);
             sb.Append(val);
@@ -2034,43 +2103,27 @@ void Settings::WriteLPr()
             }
             sb.Append("\n");
             AutoPtr<ArrayOf<Byte> > bytes = sb.ToString().GetBytes();
-            ec = str->WriteBytes(bytes);
-            if (FAILED(ec)) {
-                break;
-            }
+            IOutputStream::Probe(str)->Write(bytes);
         }
 
-        if (FAILED(ec)) break;
-        ec = IFlushable::Probe(str)->Flush();
-        if (FAILED(ec)) break;
-        ec = FileUtils::Sync(fstr, &result);
-        if (FAILED(ec)) break;
-        ec = str->Close();
-        if (FAILED(ec)) break;
-        ec = journal->Commit();
-        if (FAILED(ec)) break;
+        IFlushable::Probe(str)->Flush();
+        FileUtils::Sync(fstr);
+        ICloseable::Probe(str)->Close();
+        journal->Commit();
         // } catch (Exception e) {
         //     IoUtils.closeQuietly(str);
         //     journal.rollback();
         // }
-    } while(0);
 
-    if (FAILED(ec)) {
-        Slogger::E(TAG, "Failed to write packages.list 0x%08x", ec);
-        AutoPtr<IIoUtils> ioUtils;
-        CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils);
-        ioUtils->CloseQuietly(str);
-        journal->Rollback();
-    }
+        mPackageListFilename->ToString(&temp);
+        FileUtils::SetPermissions(temp,
+                FileUtils::sS_IRUSR|FileUtils::sS_IWUSR
+                |FileUtils::sS_IRGRP|FileUtils::sS_IWGRP,
+                -1, -1);
 
-    mPackageListFilename->ToString(&temp);
-    ecode = FileUtils::SetPermissions(temp,
-            FileUtils::sS_IRUSR|FileUtils::sS_IWUSR
-            |FileUtils::sS_IRGRP|FileUtils::sS_IWGRP,
-            -1, -1);
-
-    WriteAllUsersPackageRestrictionsLPr();
-    return;
+        WriteAllUsersPackageRestrictionsLPr();
+        return;
+    } while (0);
     // } catch(XmlPullParserException e) {
     //     Log.wtf(CPackageManagerService::TAG, "Unable to write package manager settings, "
     //             + "current changes will be lost at reboot", e);
@@ -2079,21 +2132,19 @@ void Settings::WriteLPr()
     //             + "current changes will be lost at reboot", e);
     // }
     //Debug.stopMethodTracing();
-EXIT:
-    if (E_XML_PULL_PARSER_EXCEPTION == ecode) {
-        Slogger::E(CPackageManagerService::TAG, String("Unable to write package manager settings, ")
-                    + String("current changes will be lost at reboot exception E_XML_PULL_PARSER_EXCEPTION"));
+
+    if ((ECode)E_XML_PULL_PARSER_EXCEPTION == ec) {
+        Slogger::E(CPackageManagerService::TAG, "Unable to write package manager settings, current changes will be lost at reboot exception E_XML_PULL_PARSER_EXCEPTION");
     }
-    else if (E_IO_EXCEPTION == ecode) {
-            Slogger::E(CPackageManagerService::TAG, String("Unable to write package manager settings, ")
-                    + String("current changes will be lost at reboot E_IO_EXCEPTION"));
+    else if ((ECode)E_IO_EXCEPTION == ec) {
+        Slogger::E(CPackageManagerService::TAG, "Unable to write package manager settings, current changes will be lost at reboot E_IO_EXCEPTION");
     }
 
     // Clean up partially written files
     if (mSettingsFilename->Exists(&result), result) {
         if (mSettingsFilename->Delete(&result), !result) {
-            Slogger::E(CPackageManagerService::TAG, String("Failed to clean up mangled file: ")
-                    + (mSettingsFilename->ToString(&temp), temp));
+            Slogger::E(CPackageManagerService::TAG, "Failed to clean up mangled file: %s"
+                    , (mSettingsFilename->ToString(&temp), temp.string()));
         }
     }
 }
@@ -2109,9 +2160,9 @@ ECode Settings::WriteDisabledSysPackageLPr(
         serializer->WriteAttribute(String(NULL), String("realName"), pkg->mRealName);
     }
     serializer->WriteAttribute(String(NULL), String("codePath"), pkg->mCodePathString);
-    serializer->WriteAttribute(String(NULL), String("ft"), StringUtils::Int64ToHexString(pkg->mTimeStamp));
-    serializer->WriteAttribute(String(NULL), String("it"), StringUtils::Int64ToHexString(pkg->mFirstInstallTime));
-    serializer->WriteAttribute(String(NULL), String("ut"), StringUtils::Int64ToHexString(pkg->mLastUpdateTime));
+    serializer->WriteAttribute(String(NULL), String("ft"), StringUtils::ToHexString(pkg->mTimeStamp));
+    serializer->WriteAttribute(String(NULL), String("it"), StringUtils::ToHexString(pkg->mFirstInstallTime));
+    serializer->WriteAttribute(String(NULL), String("ut"), StringUtils::ToHexString(pkg->mLastUpdateTime));
     serializer->WriteAttribute(String(NULL), String("version"), StringUtils::ToString(pkg->mVersionCode));
     if (!pkg->mResourcePathString.Equals(pkg->mCodePathString)) {
         serializer->WriteAttribute(String(NULL), String("resourcePath"), pkg->mResourcePathString);
@@ -2250,7 +2301,7 @@ ECode Settings::WriteSigningKeySetsLPr(
         AutoPtr<ArrayOf<Int64> > sets = data->GetSigningKeySets();
         for (Int32 i = 0; i < sets->GetLength(); ++i) {
             serializer->WriteStartTag(String(NULL), String("signing-keyset"));
-            serializer->WriteAttribute(String(NULL), String("identifier"), StringUtils::ToString((*sets)[i]);
+            serializer->WriteAttribute(String(NULL), String("identifier"), StringUtils::ToString((*sets)[i]));
             serializer->WriteEndTag(String(NULL), String("signing-keyset"));
         }
     }
@@ -2265,7 +2316,7 @@ ECode Settings::WriteUpgradeKeySetsLPr(
         AutoPtr<ArrayOf<Int64> > sets = data->GetUpgradeKeySets();
         for (Int32 i = 0; i < sets->GetLength(); ++i) {
             serializer->WriteStartTag(String(NULL), String("upgrade-keyset"));
-            serializer->WriteAttribute(String(NULL), String("identifier"), StringUtils::ToString((*sets)[i]);
+            serializer->WriteAttribute(String(NULL), String("identifier"), StringUtils::ToString((*sets)[i]));
             serializer->WriteEndTag(String(NULL), String("upgrade-keyset"));
         }
     }
@@ -2307,12 +2358,13 @@ ECode Settings::WritePermissionLPr(
             String temp;
             if (pi != NULL) {
                 serializer->WriteAttribute(String(NULL), String("type"), String("dynamic"));
-                pi->GetIcon(&val);
+                AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(pi);
+                pii->GetIcon(&val);
                 if (val != 0) {
                     serializer->WriteAttribute(String(NULL), String("icon"), StringUtils::ToString(val));
                 }
                 AutoPtr<ICharSequence> label;
-                pi->GetNonLocalizedLabel((ICharSequence**)&label);
+                pii->GetNonLocalizedLabel((ICharSequence**)&label);
                 if (label != NULL) {
                     serializer->WriteAttribute( String(NULL), String("label"), (label->ToString(&temp), temp));
                 }
@@ -2354,11 +2406,10 @@ Boolean Settings::ReadLPw(
     AutoPtr<IFileInputStream> str;
     Boolean result;
     String temp;
-    ECode ecode = NOERROR;
     if (mBackupSettingsFilename->Exists(&result), result) {
         //try {
         CFileInputStream::New(mBackupSettingsFilename, (IFileInputStream**)&str);
-        mReadMessages->AppendString(String("Reading from backup settings file\n"));
+        mReadMessages->Append(String("Reading from backup settings file\n"));
         CPackageManagerService::ReportSettingsProblem(ILogHelper::INFO,
                 String("Need to read from backup settings file"));
         if (mSettingsFilename->Exists(&result), result) {
@@ -2366,9 +2417,8 @@ Boolean Settings::ReadLPw(
             // ignore the settings since it might have been
             // corrupted.
             mSettingsFilename->ToString(&temp);
-            Slogger::W(CPackageManagerService::TAG, String("Cleaning up settings file ")
-                    + temp);
-            FAIL_GOTO(ecode = mSettingsFilename->Delete(&result), EXIT);
+            Slogger::W(CPackageManagerService::TAG, "Cleaning up settings file %s", temp.string());
+            mSettingsFilename->Delete(&result);
         }
         //} catch (java.io.IOException e) {
         //    // We'll try for the normal settings file.
@@ -2379,211 +2429,220 @@ Boolean Settings::ReadLPw(
     mPastSignatures.Clear();
 
     //try {
-    if (str == NULL) {
-        if (mSettingsFilename->Exists(&result), !result) {
-            mReadMessages->AppendString(String("No settings file found\n"));
-            CPackageManagerService::ReportSettingsProblem(ILogHelper::INFO,
-                    String("No settings file; creating initial state"));
-            mInternalSdkPlatform = mExternalSdkPlatform = sdkVersion;
-            mFingerprint = Build::FINGERPRINT;
-            return FALSE;
+    ECode ec = NOERROR;
+    do {
+        if (str == NULL) {
+            if (mSettingsFilename->Exists(&result), !result) {
+                mReadMessages->Append(String("No settings file found\n"));
+                CPackageManagerService::ReportSettingsProblem(ILogHelper::INFO,
+                        String("No settings file; creating initial state"));
+                mInternalSdkPlatform = mExternalSdkPlatform = sdkVersion;
+                mFingerprint = Build::FINGERPRINT;
+                return FALSE;
+            }
+            CFileInputStream::New(mSettingsFilename, (IFileInputStream**)&str);
         }
-        CFileInputStream::New(mSettingsFilename, (IFileInputStream**)&str);
-    }
-    AutoPtr<IXmlPullParser> parser = Xml::NewPullParser();
-    parser->SetInput(str, String(NULL));
-    Int32 type;
-    while ((parser->Next(&type), type) != IXmlPullParser::START_TAG
-            && type != IXmlPullParser::END_DOCUMENT) {
-        ;
-    }
-
-    if (type != IXmlPullParser::START_TAG) {
-        mReadMessages->AppendString(String("No start tag found in settings file\n"));
-        CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
-               String("No start tag found in package manager settings"));
-        // Logger::Wtf(CPackageManagerService.TAG,
-        //         "No start tag found in package manager settings");
-        return FALSE;
-    }
-
-    Int32 outerDepth, val;
-    FAIL_GOTO(ecode = parser->GetDepth(&outerDepth), EXIT);
-    while ((parser->Next(&type), type) != IXmlPullParser::END_DOCUMENT
-            && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&val), val) > outerDepth)) {
-
-        if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
-            continue;
+        AutoPtr<IXmlPullParser> parser;
+        Xml::NewPullParser((IXmlPullParser**)&parser);
+        parser->SetInput(IInputStream::Probe(str), String(NULL));
+        Int32 type;
+        while ((parser->Next(&type), type) != IXmlPullParser::START_TAG
+                && type != IXmlPullParser::END_DOCUMENT) {
+            ;
         }
 
         if (type != IXmlPullParser::START_TAG) {
-            continue;
+            mReadMessages->Append(String("No start tag found in settings file\n"));
+            CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
+                   String("No start tag found in package manager settings"));
+            // Logger::Wtf(CPackageManagerService.TAG,
+            //         "No start tag found in package manager settings");
+            return FALSE;
         }
 
-        String tagName;
-        FAIL_GOTO(ecode = parser->GetName(&tagName), EXIT);
-        Boolean x = tagName.Equals("package");
-        if (tagName.Equals("package")) {
-            ReadPackageLPw(parser);
-        }
-        else if (tagName.Equals("permissions")) {
-            ReadPermissionsLPw(mPermissions, parser);
-        }
-        else if (tagName.Equals("permission-trees")) {
-            ReadPermissionsLPw(mPermissionTrees, parser);
-        }
-        else if (tagName.Equals("shared-user")) {
-            ReadSharedUserLPw(parser);
-        }
-        else if (tagName.Equals("preferred-packages")) {
-            // no longer used.
-        }
-        else if (tagName.Equals("preferred-activities")) {
-            // Upgrading from old single-user implementation;
-            // these are the preferred activities for user 0.
-            ReadPreferredActivitiesLPw(parser, 0);
-        }
-        else if (tagName.Equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
-            // TODO: check whether this is okay! as it is very
-            // similar to how preferred-activities are treated
-            ReadPersistentPreferredActivitiesLPw(parser, 0);
-        }
-        else if (tagName.Equals(TAG_CROSS_PROFILE_INTENT_FILTERS)) {
-            // TODO: check whether this is okay! as it is very
-            // similar to how preferred-activities are treated
-            ReadCrossProfileIntentFiltersLPw(parser, 0);
-        }
-        else if (tagName.Equals("updated-package")) {
-            ReadDisabledSysPackageLPw(parser);
-        }
-        else if (tagName.Equals("cleaning-package")) {
-            String name;
-            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), ATTR_NAME, &name), EXIT);
-            String userStr;
-            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), ATTR_USER, &userStr), EXIT);
-            String codeStr;
-            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), ATTR_CODE, &codeStr), EXIT);
-            if (!name.IsNull()) {
-                Int32 userId = 0;
-                Boolean andCode = TRUE;
-                //try {
+        Int32 outerDepth, val;
+        parser->GetDepth(&outerDepth);
+        while ((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
+                && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&val), val > outerDepth))) {
+            if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
+                continue;
+            }
+
+            if (type != IXmlPullParser::START_TAG) {
+                continue;
+            }
+
+            String tagName;
+            parser->GetName(&tagName);
+            if (tagName.Equals("package")) {
+                ReadPackageLPw(parser);
+            }
+            else if (tagName.Equals("permissions")) {
+                ReadPermissionsLPw(mPermissions, parser);
+            }
+            else if (tagName.Equals("permission-trees")) {
+                ReadPermissionsLPw(mPermissionTrees, parser);
+            }
+            else if (tagName.Equals("shared-user")) {
+                ReadSharedUserLPw(parser);
+            }
+            else if (tagName.Equals("preferred-packages")) {
+                // no longer used.
+            }
+            else if (tagName.Equals("preferred-activities")) {
+                // Upgrading from old single-user implementation;
+                // these are the preferred activities for user 0.
+                ReadPreferredActivitiesLPw(parser, 0);
+            }
+            else if (tagName.Equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
+                // TODO: check whether this is okay! as it is very
+                // similar to how preferred-activities are treated
+                ReadPersistentPreferredActivitiesLPw(parser, 0);
+            }
+            else if (tagName.Equals(TAG_CROSS_PROFILE_INTENT_FILTERS)) {
+                // TODO: check whether this is okay! as it is very
+                // similar to how preferred-activities are treated
+                ReadCrossProfileIntentFiltersLPw(parser, 0);
+            }
+            else if (tagName.Equals("updated-package")) {
+                ReadDisabledSysPackageLPw(parser);
+            }
+            else if (tagName.Equals("cleaning-package")) {
+                String name;
+                ec = parser->GetAttributeValue(String(NULL), ATTR_NAME, &name);
+                if (FAILED(ec)) break;
+                String userStr;
+                ec = parser->GetAttributeValue(String(NULL), ATTR_USER, &userStr);
+                if (FAILED(ec)) break;
+                String codeStr;
+                ec = parser->GetAttributeValue(String(NULL), ATTR_CODE, &codeStr);
+                if (FAILED(ec)) break;
+                if (!name.IsNull()) {
+                    Int32 userId = 0;
+                    Boolean andCode = TRUE;
+                    //try {
                     if (!userStr.IsNull()) {
                         userId = StringUtils::ParseInt32(userStr);
                     }
+                    // } catch (NumberFormatException e) {
+                    // }
+                    if (!codeStr.IsNull()) {
+                        andCode = StringUtils::ParseInt32(codeStr);
+                    }
+                    AutoPtr<IPackageCleanItem> pkg;
+                    CPackageCleanItem::New(userId, name, andCode, (IPackageCleanItem**)&pkg);
+                    AddPackageToCleanLPw(pkg);
+                }
+
+            }
+            else if (tagName.Equals("renamed-package")) {
+                String nname;
+                ec = parser->GetAttributeValue(String(NULL), String("new"), &nname);
+                if (FAILED(ec)) break;
+                String oname;
+                ec = parser->GetAttributeValue(String(NULL), String("old"), &oname);
+                if (FAILED(ec)) break;
+                if (!nname.IsNull() && !oname.IsNull()) {
+                    mRenamedPackages[nname] = oname;
+                }
+            }
+            else if (tagName.Equals("last-platform-version")) {
+                mInternalSdkPlatform = mExternalSdkPlatform = 0;
+                //try {
+                String internal;
+                ec = parser->GetAttributeValue(String(NULL), String("internal"), &internal);
+                if (FAILED(ec)) break;
+                if (!internal.IsNull()) {
+                    mInternalSdkPlatform = StringUtils::ParseInt32(internal);
+                }
+                String external;
+                ec = parser->GetAttributeValue(String(NULL), String("external"), &external);
+                if (FAILED(ec)) break;
+                if (!external.IsNull()) {
+                    mExternalSdkPlatform = StringUtils::ParseInt32(external);
+                }
                 // } catch (NumberFormatException e) {
                 // }
-                if (!codeStr.IsNull()) {
-                    andCode = StringUtils::ParseInt32(codeStr);
+                ec = parser->GetAttributeValue(String(NULL), String("fingerprint"), &mFingerprint);
+                if (FAILED(ec)) break;
+            }
+            else if (tagName.Equals("database-version")) {
+                mInternalDatabaseVersion = mExternalDatabaseVersion = 0;
+                // try {
+                String internalDbVersionString;
+                ec = parser->GetAttributeValue(String(NULL), String("internal"), &internalDbVersionString);
+                if (FAILED(ec)) break;
+                if (!internalDbVersionString.IsNull()) {
+                    mInternalDatabaseVersion = StringUtils::ParseInt32(internalDbVersionString);
                 }
-                AutoPtr<IPackageCleanItem> pkg;
-                CPackageCleanItem::New(userId, name, andCode, (IPackageCleanItem**)&pkg);
-                AddPackageToCleanLPw(pkg);
+                String externalDbVersionString;
+                ec = parser->GetAttributeValue(String(NULL), String("external"), &externalDbVersionString);
+                if (FAILED(ec)) break;
+                if (!externalDbVersionString.IsNull()) {
+                    mExternalDatabaseVersion = StringUtils::ParseInt32(externalDbVersionString);
+                }
+                // } catch (NumberFormatException ignored) {
+                // }
             }
+            else if (tagName.Equals("verifier")) {
+                String deviceIdentity;
+                ec = parser->GetAttributeValue(String(NULL), String("device"), &deviceIdentity);
+                if (FAILED(ec)) break;
+                //try {
+                AutoPtr<IVerifierDeviceIdentityHelper> vdiHelper;
+                CVerifierDeviceIdentityHelper::AcquireSingleton((IVerifierDeviceIdentityHelper**)&vdiHelper);
+                mVerifierDeviceIdentity = NULL;
+                vdiHelper->Parse(deviceIdentity, (IVerifierDeviceIdentity**)&mVerifierDeviceIdentity);
+                //} catch (IllegalArgumentException e) {
+                    // Slogger::W(CPackageManagerService::TAG, "Discard invalid verifier device id: "
+                    //         + e.getMessage());
+                //}
+            }
+            else if (TAG_READ_EXTERNAL_STORAGE.Equals(tagName)) {
+                String enforcement;
+                ec = parser->GetAttributeValue(String(NULL), ATTR_ENFORCEMENT, &enforcement);
+                if (FAILED(ec)) break;
+                mReadExternalStorageEnforced = NULL;
+                CBoolean::New(enforcement.Equals("1"), (IBoolean**)&mReadExternalStorageEnforced);
+            }
+            else if (tagName.Equals("keyset-settings")) {
+                mKeySetManagerService->ReadKeySetsLPw(parser);
+            }
+            else {
+                // Slogger::W(CPackageManagerService::TAG, String("Unknown element under <packages>: ")
+                //         + (parser->GetName(&temp), temp.IsNull() ? String("NULL") : temp));
+                XmlUtils::SkipCurrentTag(parser);
+            }
+        }
+        ICloseable::Probe(str)->Close();
+        // } catch (XmlPullParserException e) {
+        // mReadMessages.append("Error reading: " + e.toString());
+        // PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
+        // Log.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
 
-        }
-        else if (tagName.Equals("renamed-package")) {
-            String nname;
-            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), String("new"), &nname), EXIT);
-            String oname;
-            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), String("old"), &oname), EXIT);
-            if (!nname.IsNull() && !oname.IsNull()) {
-                mRenamedPackages[nname] = oname;
-            }
-        }
-        else if (tagName.Equals("last-platform-version")) {
-            mInternalSdkPlatform = mExternalSdkPlatform = 0;
-            //try {
-            String internal;
-            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), String("internal"), &internal), EXIT);
-            if (!internal.IsNull()) {
-                mInternalSdkPlatform = StringUtils::ParseInt32(internal);
-            }
-            String external;
-            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), String("external"), &external), EXIT);
-            if (!external.IsNull()) {
-                mExternalSdkPlatform = StringUtils::ParseInt32(external);
-            }
-            // } catch (NumberFormatException e) {
-            // }
-            parser->GetAttributeValue(String(NULL), String("fingerprint"), &mFingerprint);
-        }
-        else if (tagName.Equals("database-version")) {
-            mInternalDatabaseVersion = mExternalDatabaseVersion = 0;
-            // try {
-            String internalDbVersionString;
-            parser->GetAttributeValue(String(NULL), String("internal"), &internalDbVersionString);
-            if (!internalDbVersionString.IsNull()) {
-                mInternalDatabaseVersion = StringUtils::ParseInt32(internalDbVersionString);
-            }
-            String externalDbVersionString;
-            parser->GetAttributeValue(String(NULL), String("external"), &externalDbVersionString);
-            if (!externalDbVersionString.IsNull()) {
-                mExternalDatabaseVersion = StringUtils::ParseInt32(externalDbVersionString);
-            }
-            // } catch (NumberFormatException ignored) {
-            // }
-        }
-        else if (tagName.Equals("verifier")) {
-            String deviceIdentity;
-            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), String("device"), &deviceIdentity), EXIT);
-            //try {
-            AutoPtr<IVerifierDeviceIdentityHelper> vdiHelper;
-            CVerifierDeviceIdentityHelper::AcquireSingleton((IVerifierDeviceIdentityHelper**)&vdiHelper);
-            mVerifierDeviceIdentity = NULL;
-            ecode = vdiHelper->Parse(deviceIdentity, (IVerifierDeviceIdentity**)&mVerifierDeviceIdentity);
-            if (FAILED(ecode)) {
-                Slogger::W(CPackageManagerService::TAG, "Discard invalid verifier device id: ");
-            }
-            //} catch (IllegalArgumentException e) {
-                // Slogger::W(CPackageManagerService::TAG, "Discard invalid verifier device id: "
-                //         + e.getMessage());
-            //}
-        }
-        else if (TAG_READ_EXTERNAL_STORAGE.Equals(tagName)) {
-            String enforcement;
-            FAIL_GOTO(ecode = parser->GetAttributeValue(String(NULL), ATTR_ENFORCEMENT, &enforcement), EXIT);
-            mReadExternalStorageEnforced = NULL;
-            CBoolean::New(CString("1").Equals(enforcement), (IBoolean**)&mReadExternalStorageEnforced);
-        }
-        else if (tagName.Equals("keyset-settings")) {
-            mKeySetManagerService->ReadKeySetsLPw(parser);
-        }
-        else {
-            // Slogger::W(CPackageManagerService::TAG, String("Unknown element under <packages>: ")
-            //         + (parser->GetName(&temp), temp.IsNull() ? String("NULL") : temp));
-            FAIL_GOTO(ecode = XmlUtils::SkipCurrentTag(parser), EXIT);
-        }
-    }
-    str->Close();
-    // } catch (XmlPullParserException e) {
-    // mReadMessages.append("Error reading: " + e.toString());
-    // PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
-    // Log.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
+        // } catch (java.io.IOException e) {
+        //     mReadMessages.append("Error reading: " + e.toString());
+        //     PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
+        //     Log.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
+        // }
+    } while (0);
 
-    // } catch (java.io.IOException e) {
-    //     mReadMessages.append("Error reading: " + e.toString());
-    //     PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
-    //     Log.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
-    // }
 
-EXIT:
-    if (E_XML_PULL_PARSER_EXCEPTION == ecode) {
-        String str("Error reading accounts ecode = XmlPullParserException");
-        mReadMessages->AppendString(String("Error reading: "));
+    if ((ECode)E_XML_PULL_PARSER_EXCEPTION == ec) {
+        mReadMessages->Append("Error reading: ");
         CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR, String("Error reading settings: "));
-        Slogger::W(TAG, str);
+        Slogger::W(TAG, "Error reading accounts ecode = XmlPullParserException");
     }
-    else if (E_IO_EXCEPTION == ecode) {
-        mReadMessages->AppendString(String("Error reading: "));
+    else if ((ECode)E_IO_EXCEPTION == ec) {
+        mReadMessages->Append("Error reading: ");
         CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR, String("Error reading settings: "));
     }
 
-    Int32 N = mPendingPackages.GetSize();
-    List< AutoPtr<PendingPackage> >::Iterator it = mPendingPackages.Begin();
+    List<AutoPtr<PendingPackage> >::Iterator it = mPendingPackages.Begin();
     for (; it != mPendingPackages.End(); it++) {
         AutoPtr<PendingPackage> pp = (*it).Get();
         AutoPtr<IInterface> idObj = GetUserIdLPr(pp->mSharedId);
-        if (idObj.Get() != NULL && idObj->Probe(EIID_SharedUserSetting)) {
+        if (idObj != NULL && idObj->Probe(EIID_SharedUserSetting)) {
             SharedUserSetting* sus = reinterpret_cast<SharedUserSetting*>(idObj->Probe(EIID_SharedUserSetting));
             AutoPtr<PackageSetting> p = GetPackageLPw(pp->mName, NULL, pp->mRealName,
                     sus, pp->mCodePath, pp->mResourcePath,
@@ -2596,15 +2655,17 @@ EXIT:
                 continue;
             }
             p->CopyFrom((PackageSettingBase*)pp);
-        } else if (idObj != NULL) {
-            String msg = String("Bad package setting: package ") + pp->mName + String(" has shared uid ")
-                    + StringUtils::ToString(pp->mSharedId) + String(" that is not a shared uid\n");
-            mReadMessages->AppendString(msg);
+        }
+        else if (idObj != NULL) {
+            String msg = String("Bad package setting: package ") + pp->mName + " has shared uid "
+                    + StringUtils::ToString(pp->mSharedId) + " that is not a shared uid\n";
+            mReadMessages->Append(msg);
             CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR, msg);
-        } else {
-            String msg = String("Bad package setting: package ") + String(pp->mName) + String(" has shared uid ")
-                    + StringUtils::ToString(pp->mSharedId) + String(" that is not defined\n");
-            mReadMessages->AppendString(msg);
+        }
+        else {
+            String msg = String("Bad package setting: package ") + pp->mName + " has shared uid "
+                    + StringUtils::ToString(pp->mSharedId) + " that is not defined\n";
+            mReadMessages->Append(msg);
             CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR, msg);
         }
     }
@@ -2618,7 +2679,8 @@ EXIT:
             mStoppedPackagesFilename->Delete(&result);
             // Migrate to new file format
             WritePackageRestrictionsLPr(0);
-        } else {
+        }
+        else {
             Int32 size;
             if (users->GetSize(&size), size == 0) {
                 ReadPackageRestrictionsLPr(0);
@@ -2652,8 +2714,8 @@ EXIT:
         }
     }
 
-    mReadMessages->AppendString(String("Read completed successfully: ") + StringUtils::ToString(mPackages.GetSize()) + String(" packages, ")
-             + StringUtils::ToString(mSharedUsers.GetSize()) + String(" shared uids\n"));
+    mReadMessages->Append(String("Read completed successfully: ") + StringUtils::ToString((Int32)mPackages.GetSize()) +
+            " packages, " + StringUtils::ToString((Int32)mSharedUsers.GetSize()) + " shared uids\n");
     return TRUE;
 }
 
@@ -2667,8 +2729,8 @@ void Settings::ReadDefaultPreferredAppsLPw(
         AutoPtr<PackageSetting> ps = it->mSecond;
         if ((ps->mPkgFlags & IApplicationInfo::FLAG_SYSTEM) != 0 && ps->mPkg != NULL
                 && ps->mPkg->mPreferredActivityFilters != NULL) {
-            AutoPtr< List< AutoPtr<PackageParser::ActivityIntentInfo> > > intents = ps->mPkg->mPreferredActivityFilters;
-            List< AutoPtr<ActivityIntentInfo> >::Iterator it = intents->Begin();
+            AutoPtr<List< AutoPtr<PackageParser::ActivityIntentInfo> > > intents = ps->mPkg->mPreferredActivityFilters;
+            List< AutoPtr<PackageParser::ActivityIntentInfo> >::Iterator it = intents->Begin();
             for (; it != intents->End(); ++it) {
                 AutoPtr<PackageParser::ActivityIntentInfo> aii = *it;
                 AutoPtr<IComponentName> cn;
@@ -2694,7 +2756,6 @@ void Settings::ReadDefaultPreferredAppsLPw(
 
     AutoPtr<ArrayOf<IFile*> > preferredFiles;
     preferredDir->ListFiles((ArrayOf<IFile*>**)&preferredFiles);
-    ECode ecode = NOERROR;
     // Iterate over the files in the directory and scan .xml files
     for (Int32 i = 0; preferredFiles != NULL && i < preferredFiles->GetLength(); i++) {
         AutoPtr<IFile> f = (*preferredFiles)[i];
@@ -2712,9 +2773,10 @@ void Settings::ReadDefaultPreferredAppsLPw(
 
         AutoPtr<IFileInputStream> str;
         //try
-        FAIL_GOTO(ecode = CFileInputStream::New(f, (IFileInputStream**)&str), EXIT);
-        AutoPtr<IXmlPullParser> parser = Xml::NewPullParser();
-        FAIL_GOTO(ecode = parser->SetInput(str, String(NULL)), EXIT);
+        CFileInputStream::New(f, (IFileInputStream**)&str);
+        AutoPtr<IXmlPullParser> parser;
+        Xml::NewPullParser((IXmlPullParser**)&parser);
+        parser->SetInput(IInputStream::Probe(str), String(NULL));
 
         Int32 type;
         while ((parser->Next(&type), type) != IXmlPullParser::START_TAG
@@ -2723,13 +2785,12 @@ void Settings::ReadDefaultPreferredAppsLPw(
         }
 
         if (type != IXmlPullParser::START_TAG) {
-            Slogger::W(TAG, String("Preferred apps file ") + (f->ToString(&temp), temp) + String(" does not have start tag"));
+            Slogger::W(TAG, "Preferred apps file %p does not have start tag", f.Get());
             continue;
         }
         parser->GetName(&temp);
         if (!temp.Equals("preferred-activities")) {
-            Slogger::W(TAG, String("Preferred apps file ") + (f->ToString(&temp), temp)
-                    + String(" does not start with 'preferred-activities'"));
+            Slogger::W(TAG, "Preferred apps file %p does not start with 'preferred-activities'", f.Get());
             continue;
         }
         ReadDefaultPreferredActivitiesLPw(service, parser, userId);
@@ -2745,17 +2806,9 @@ void Settings::ReadDefaultPreferredAppsLPw(
         //         }
         //     }
         // }
-
-        EXIT:
-        if (E_XML_PULL_PARSER_EXCEPTION == ecode) {
-            Slogger::W(TAG, String("Error reading apps file ") + (f->ToString(&temp), temp));
-        }
-        else if (E_IO_EXCEPTION == ecode) {
-            Slogger::W(TAG, String("Error reading apps file ") + (f->ToString(&temp), temp));
-        }
         if (str != NULL) {
             //try {
-            str->Close();
+            ICloseable::Probe(str)->Close();
             // } catch (IOException e) {
             // }
         }
@@ -2852,7 +2905,7 @@ void Settings::ApplyDefaultPreferredActivityLPw(
                 AutoPtr<IUri> uri;
                 builder->Build((IUri**)&uri);
                 finalIntent->SetData(uri);
-                applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                ApplyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
                         scheme, NULL, auth, path, userId);
                 doAuth = doScheme = FALSE;
             }
@@ -2869,7 +2922,7 @@ void Settings::ApplyDefaultPreferredActivityLPw(
                 AutoPtr<IUri> uri;
                 builder->Build((IUri**)&uri);
                 finalIntent->SetData(uri);
-                applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                ApplyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
                         scheme, NULL, auth, NULL, userId);
                 doScheme = FALSE;
             }
@@ -2889,7 +2942,7 @@ void Settings::ApplyDefaultPreferredActivityLPw(
         doNonData = FALSE;
     }
 
-    tmpPa->countDataTypes(&count);
+    tmpPa->CountDataTypes(&count);
     for (Int32 idata = 0; idata < count; idata++) {
         String mimeType;
         tmpPa->GetDataType(idata, &mimeType);
@@ -2940,7 +2993,7 @@ void Settings::ApplyDefaultPreferredActivityLPw(
     /* [in] */ IPatternMatcher* path,
     /* [in] */ Int32 userId)
 {
-    Int32 type;
+    String type;
     intent->GetType(&type);
     AutoPtr<List<AutoPtr<IResolveInfo> > > ri = service->mActivities->QueryIntent(intent,
             type, flags, 0);
@@ -2957,14 +3010,15 @@ void Settings::ApplyDefaultPreferredActivityLPw(
             AutoPtr<IResolveInfo> resolveInfo = *it;
             AutoPtr<IActivityInfo> ai;
             resolveInfo->GetActivityInfo((IActivityInfo**)&ai);
+            AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(ai);
             String pkgName, aiName;
-            ai->GetPackageName(&pkgName);
-            ai->GetName(&aiName);
+            pii->GetPackageName(&pkgName);
+            pii->GetName(&aiName);
             AutoPtr<IComponentName> cn;
             CComponentName::New(pkgName, aiName, (IComponentName**)&cn);
             set->Set(i, cn);
             AutoPtr<IApplicationInfo> appInfo;
-            ai->GetApplicationInfo((IApplicationInfo**)&appInfo);
+            IComponentInfo::Probe(ai)->GetApplicationInfo((IApplicationInfo**)&appInfo);
             Int32 flags;
             String cnPkgName, className;
             if (appInfo->GetFlags(&flags), (flags & IApplicationInfo::FLAG_SYSTEM) == 0) {
@@ -3028,17 +3082,17 @@ void Settings::ApplyDefaultPreferredActivityLPw(
                 ssp->GetType(&type);
                 filter->AddDataSchemeSpecificPart(p, type);
             }
-            if (!auth.IsNull()) {
+            if (auth != NULL) {
                 filter->AddDataAuthority(auth);
             }
-            if (!path.IsNull()) {
+            if (path != NULL) {
                 filter->AddDataPath(path);
             }
             String intentT;
             if (intent->GetType(&intentT), !intentT.IsNull()) {
                 // try {
                 if (FAILED(filter->AddDataType(intentT))) {
-                    Slogger::W(TAG, "Malformed mimetype %s for %p", intentT.string(), cn.Get());
+                    Slogger::W(TAG, "Malformed mimetype %s for %p", intentT.string(), cn);
                 }
                 // } catch (IntentFilter.MalformedMimeTypeException ex) {
                 //     Slog.w(TAG, "Malformed mimetype " + intent.getType() + " for " + cn);
@@ -3089,7 +3143,7 @@ ECode Settings::ReadDefaultPreferredActivitiesLPw(
     Int32 outerDepth;
     parser->GetDepth(&outerDepth);
     Int32 type, depth;
-    while ((type = parser->GetNext(&type), type != XmlPullParser.END_DOCUMENT)
+    while ((type = parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
             && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&depth), depth > outerDepth))) {
         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
             continue;
@@ -3107,7 +3161,7 @@ ECode Settings::ReadDefaultPreferredActivitiesLPw(
                 parser->GetPositionDescription(&des);
                 CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                         String("Error in package manager settings: <preferred-activity> ")
-                                + tmpPa.mPref->GetParseError() + " at " + des);
+                                + tmpPa->mPref->GetParseError() + " at " + des);
             }
         }
         else {
@@ -3169,7 +3223,7 @@ ECode Settings::ReadPermissionsLPw(
             String ptype;
             parser->GetAttributeValue(String(NULL), String("type"), &ptype);
             if (!name.IsNull() && !sourcePackage.IsNull()) {
-                Boolean dynamic = CString("dynamic").Equals(ptype);
+                Boolean dynamic = ptype.Equals("dynamic");
                 AutoPtr<BasePermission> bp = new BasePermission(name, sourcePackage,
                         dynamic ? BasePermission::TYPE_DYNAMIC : BasePermission::TYPE_NORMAL);
                 bp->mProtectionLevel = ReadInt32(parser, String(NULL), String("protection"),
@@ -3181,29 +3235,33 @@ ECode Settings::ReadPermissionsLPw(
                 if (dynamic) {
                     AutoPtr<IPermissionInfo> pi;
                     CPermissionInfo::New((IPermissionInfo**)&pi);
-                    pi->SetPackageName(sourcePackage);
-                    pi->SetName(name);
-                    pi->SetIcon(ReadInt32(parser, String(NULL), String("icon"), 0));
+                    AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(pi);
+                    pii->SetPackageName(sourcePackage);
+                    pii->SetName(name);
+                    pii->SetIcon(ReadInt32(parser, String(NULL), String("icon"), 0));
 
                     parser->GetAttributeValue(String(NULL), String("label"), &temp);
                     AutoPtr<ICharSequence> csq;
                     CString::New(temp, (ICharSequence**)&csq);
 
-                    pi->SetNonLocalizedLabel(csq);
+                    pii->SetNonLocalizedLabel(csq);
                     pi->SetProtectionLevel(bp->mProtectionLevel);
                     bp->mPendingInfo = pi;
                 }
 
                 out[bp->mName] = bp;
-            } else {
+            }
+            else {
                 CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                         String("Error in package manager settings: permissions has") + String(" no name at ")
                                 + (parser->GetPositionDescription(&temp), temp));
             }
-        } else {
+        }
+        else {
             CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
-                    String("Unknown element reading permissions: ") + (parser->GetName(&temp), temp.IsNull() ? String("NULL") : temp) + String(" at ")
-                            + (parser->GetPositionDescription(&temp), temp));
+                    String("Unknown element reading permissions: ") +
+                    (parser->GetName(&temp), temp.IsNull() ? String("NULL") : temp) + String(" at ")
+                    + (parser->GetPositionDescription(&temp), temp));
         }
         XmlUtils::SkipCurrentTag(parser);
     }
@@ -3272,12 +3330,13 @@ ECode Settings::ReadDisabledSysPackageLPw(
         ps->SetTimeStamp(timeStamp);
         // } catch (NumberFormatException e) {
         // }
-    } else {
+    }
+    else {
         parser->GetAttributeValue(String(NULL), String("ts"), &timeStampStr);
         if (!timeStampStr.IsNull()) {
             //try {
-                Int64 timeStamp = StringUtils::ParseInt64(timeStampStr);
-                ps->SetTimeStamp(timeStamp);
+            Int64 timeStamp = StringUtils::ParseInt64(timeStampStr);
+            ps->SetTimeStamp(timeStamp);
             // } catch (NumberFormatException e) {
             // }
         }
@@ -3319,7 +3378,8 @@ ECode Settings::ReadDisabledSysPackageLPw(
         parser->GetName(&tagName);
         if (tagName.Equals("perms")) {
             ReadGrantedPermissionsLPw(parser, ps->mGrantedPermissions);
-        } else {
+        }
+        else {
             CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                     String("Unknown element under <updated-package>: ") + (parser->GetName(&temp), temp.IsNull() ? String("NULL") : temp));
             XmlUtils::SkipCurrentTag(parser);
@@ -3393,7 +3453,7 @@ ECode Settings::ReadPackageLPw(
         // For backward compatibility
         parser->GetAttributeValue(String(NULL), String("system"), &systemStr);
         if (!systemStr.IsNull()) {
-            pkgFlags |= (CString("true").EqualsIgnoreCase(systemStr)) ? IApplicationInfo::FLAG_SYSTEM
+            pkgFlags |= (systemStr.EqualsIgnoreCase("true")) ? IApplicationInfo::FLAG_SYSTEM
                     : 0;
         }
         else {
@@ -3449,12 +3509,12 @@ ECode Settings::ReadPackageLPw(
     if (name.IsNull()) {
         sb += "Error in package manager settings: <package> has no name at ";
         sb += parserPositionDesc;
-        CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN, (sb.ToString(&msg), msg));
+        CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN, sb.ToString());
     }
     else if (codePathStr.IsNull()) {
         sb += "Error in package manager settings: <package> has no codePath at ";
         sb += parserPositionDesc;
-        CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN, (sb.ToString(&msg), msg));
+        CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN, sb.ToString());
     }
     else if (userId > 0) {
         AutoPtr<IFile> codePath, resourcePath;
@@ -3469,7 +3529,7 @@ ECode Settings::ReadPackageLPw(
             sb += ": userId=";
             sb += userId;
             sb += " pkg=";
-            Slogger::I(CPackageManagerService::TAG, sb.ToString);
+            Slogger::I(CPackageManagerService::TAG, sb.ToString());
         if (packageSetting == NULL) {
             sb += "Failure adding uid ";
             sb += userId;
@@ -3502,7 +3562,7 @@ ECode Settings::ReadPackageLPw(
                 sb += ": sharedUserId=";
                 sb += userId;
                 sb += " pkg=";
-               Slogger::I(CPackageManagerService::TAG, (sb.ToString(&msg), msg));
+               Slogger::I(CPackageManagerService::TAG, sb.ToString());
         }
         else {
             sb += "Error in package manager settings: package ";
@@ -3511,7 +3571,7 @@ ECode Settings::ReadPackageLPw(
             sb += sharedIdStr;
             sb += " at ";
             sb += parserPositionDesc;
-            CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN, (sb.ToString(&msg), msg));
+            CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN, sb.ToString());
         }
     }
     else {
@@ -3521,7 +3581,7 @@ ECode Settings::ReadPackageLPw(
         sb += idStr;
         sb += " at ";
         sb += parserPositionDesc;
-        CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN, (sb.ToString(&msg), msg));
+        CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN, sb.ToString());
     }
 //     } catch (NumberFormatException e) {
 //         PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -3529,7 +3589,7 @@ ECode Settings::ReadPackageLPw(
 //                         + idStr + " at " + parser.getPositionDescription());
 //     }
     if (packageSetting != NULL) {
-        packageSetting->mUidError = CString("true").Equals(uidError);
+        packageSetting->mUidError = uidError.Equals("true");
         packageSetting->mInstallerPackageName = installerPackageName;
         packageSetting->mLegacyNativeLibraryPathString = legacyNativeLibraryPathStr;
         packageSetting->mPrimaryCpuAbiString = primaryCpuAbiString;
@@ -3665,12 +3725,14 @@ ECode Settings::ReadDisabledComponentsLPw(
             parser->GetAttributeValue(String(NULL), ATTR_NAME, &name);
             if (!name.IsNull()) {
                 packageSetting->AddDisabledComponent(name, userId);
-            } else {
+            }
+            else {
                 CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                         String("Error in package manager settings: <disabled-components> has")
                                 + String(" no name at ") + (parser->GetPositionDescription(&positionDes), positionDes));
             }
-        } else {
+        }
+        else {
             CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                     String("Unknown element under <disabled-components>: ") + (parser->GetName(&name), name.IsNull() ? String("NULL") : name));
         }
@@ -3705,12 +3767,14 @@ ECode Settings::ReadEnabledComponentsLPw(
             parser->GetAttributeValue(String(NULL), ATTR_NAME, &name);
             if (!name.IsNull()) {
                 packageSetting->AddEnabledComponent(name, userId);
-            } else {
+            }
+            else {
                 CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                         String("Error in package manager settings: <enabled-components> has")
                                 + String(" no name at ") + (parser->GetPositionDescription(&positionDes), positionDes));
             }
-        } else {
+        }
+        else {
             CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                     String("Unknown element under <enabled-components>: ") + (parser->GetName(&name), name.IsNull() ? String("NULL") : name));
         }
@@ -3728,36 +3792,35 @@ ECode Settings::ReadSharedUserLPw(
     Int32 pkgFlags = 0;
     AutoPtr<SharedUserSetting> su;
     //try
-    {
-        parser->GetAttributeValue(String(NULL), ATTR_NAME, &name);
-        parser->GetAttributeValue(String(NULL), String("userId"), &idStr);
-        Int32 userId = !idStr.IsNull() ? StringUtils::ParseInt32(idStr) : 0;
-        parser->GetAttributeValue(String(NULL), String("system"), &temp);
-        if (CString("true").Equals(temp)) {
-            pkgFlags |= IApplicationInfo::FLAG_SYSTEM;
+    parser->GetAttributeValue(String(NULL), ATTR_NAME, &name);
+    parser->GetAttributeValue(String(NULL), String("userId"), &idStr);
+    Int32 userId = !idStr.IsNull() ? StringUtils::ParseInt32(idStr) : 0;
+    parser->GetAttributeValue(String(NULL), String("system"), &temp);
+    if (temp.Equals("true")) {
+        pkgFlags |= IApplicationInfo::FLAG_SYSTEM;
+    }
+    if (name.IsNull()) {
+        CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
+                String("Error in package manager settings: <shared-user> has no name at ")
+                        + (parser->GetPositionDescription(&temp), temp));
+    }
+    else if (userId == 0) {
+        CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
+                String("Error in package manager settings: shared-user ") + name
+                        + String(" has bad userId ") + idStr + String(" at ")
+                        + (parser->GetPositionDescription(&temp), temp));
+    }
+    else {
+        if ((su = AddSharedUserLPw(name, userId, pkgFlags)) == NULL) {
+            CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR, String("Occurred while parsing settings at ")
+                    + (parser->GetPositionDescription(&temp), temp));
         }
-        if (name.IsNull()) {
-            CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
-                    String("Error in package manager settings: <shared-user> has no name at ")
-                            + (parser->GetPositionDescription(&temp), temp));
-        } else if (userId == 0) {
-            CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
-                    String("Error in package manager settings: shared-user ") + name
-                            + String(" has bad userId ") + idStr + String(" at ")
-                            + (parser->GetPositionDescription(&temp), temp));
-        } else {
-            if ((su = AddSharedUserLPw(name, userId, pkgFlags)) == NULL) {
-                CPackageManagerService::ReportSettingsProblem(ILogHelper::ERROR, String("Occurred while parsing settings at ")
-                                + (parser->GetPositionDescription(&temp), temp));
-            }
-        }
+    }
     // } catch (NumberFormatException e) {
     //     CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
     //             "Error in package manager settings: package " + name + " has bad userId "
     //                     + idStr + " at " + parser->GetPositionDescription());
     // }
-    }
-    ;
 
     if (su != NULL) {
         Int32 outerDepth, outerDepth1;
@@ -3777,9 +3840,11 @@ ECode Settings::ReadSharedUserLPw(
             parser->GetName(&tagName);
             if (tagName.Equals("sigs")) {
                 su->mSignatures->ReadXml(parser, mPastSignatures);
-            } else if (tagName.Equals("perms")) {
+            }
+            else if (tagName.Equals("perms")) {
                 ReadGrantedPermissionsLPw(parser, su->mGrantedPermissions);
-            } else {
+            }
+            else {
                 CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                         String("Unknown element under <shared-user>: ") + (parser->GetName(&temp), temp.IsNull() ? String("NULL") : temp));
                 XmlUtils::SkipCurrentTag(parser);
@@ -3817,12 +3882,14 @@ ECode Settings::ReadGrantedPermissionsLPw(
             parser->GetAttributeValue(String(NULL), ATTR_NAME, &name);
             if (!name.IsNull()) {
                 outPerms.Insert(name);
-            } else {
+            }
+            else {
                 CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                         String("Error in package manager settings: <perms> has") + String(" no name at ")
                                 + (parser->GetPositionDescription(&temp), temp));
             }
-        } else {
+        }
+        else {
             CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                     String("Unknown element under <perms>: ") + (parser->GetName(&temp), temp.IsNull() ? String("NULL") : temp));
         }
@@ -3893,8 +3960,8 @@ void Settings::RemoveCrossProfileIntentFiltersLPw(
             Int32 sourceUserId = it->mFirst;
             AutoPtr<CrossProfileIntentResolver> cpir = it->mSecond;
             Boolean needsWriting = false;
-            AutoPtr<Set<AutoPtr<CrossProfileIntentFilter> > > cpifs = cpir->FilterSet();
-            Set<AutoPtr<CrossProfileIntentFilter> >::Iterator cpifIt = cpifs->Begin();
+            AutoPtr<HashSet<AutoPtr<CrossProfileIntentFilter> > > cpifs = cpir->FilterSet();
+            HashSet<AutoPtr<CrossProfileIntentFilter> >::Iterator cpifIt = cpifs->Begin();
             for (; cpifIt != cpifs->End(); ++cpifIt) {
                 AutoPtr<CrossProfileIntentFilter> cpif = *cpifIt;
                 if (cpif->GetTargetUserId() == userId) {
@@ -3921,11 +3988,11 @@ Int32 Settings::NewUserIdLPw(
     /* [in] */ IInterface* obj)
 {
     // Let's be stupidly inefficient for now...
-    List< AutoPtr<IInterface> >::Iterator it = mUserIds.Begin();
-    for (Int32 i = 0; it < mUserIds.End(); ++it, ++i) {
-        if (i == mFirstAvailableUidit) break;
+    List<AutoPtr<IInterface> >::Iterator it = mUserIds.Begin();
+    for (Int32 i = 0; it != mUserIds.End(); ++it, ++i) {
+        if (i == mFirstAvailableUid) break;
     }
-    for (Int32 i = mFirstAvailableUidit; it != mUserIds.End(); ++it, ++i) {
+    for (Int32 i = mFirstAvailableUid; it != mUserIds.End(); ++it, ++i) {
         if (*it == NULL) {
             *it = obj;
             return IProcess::FIRST_APPLICATION_UID + i;
@@ -3993,10 +4060,11 @@ Boolean Settings::IsEnabledLPr(
     if ((flags & IPackageManager::GET_DISABLED_COMPONENTS) != 0) {
         return TRUE;
     }
+    AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(componentInfo);
     String pkgName;
-    componentInfo->GetPackageName(&pkgName);
+    pii->GetPackageName(&pkgName);
     String name;
-    componentInfo->GetName(&name);
+    pii->GetName(&name);
     AutoPtr<PackageSetting> packageSettings;
     HashMap<String, AutoPtr<PackageSetting> >::Iterator it = mPackages.Find(pkgName);
     if (it != mPackages.End()) {
@@ -4015,7 +4083,7 @@ Boolean Settings::IsEnabledLPr(
     }
     AutoPtr<PackageUserState> ustate = packageSettings->ReadUserState(userId);
     if ((flags & IPackageManager::GET_DISABLED_UNTIL_USED_COMPONENTS) != 0) {
-        if (ustate->mEnabled == COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+        if (ustate->mEnabled == IPackageManager::COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
             return TRUE;
         }
     }
@@ -4045,7 +4113,8 @@ ECode Settings::GetInstallerPackageNameLPr(
     /* [in] */ const String& packageName,
     /* [out] */ String* name)
 {
-    assert(name != NULL);
+    VALIDATE_NOT_NULL(name)
+    *name = String(NULL);
 
     AutoPtr<PackageSetting> pkg;
     HashMap<String, AutoPtr<PackageSetting> >::Iterator it = mPackages.Find(packageName);
@@ -4065,7 +4134,8 @@ ECode Settings::GetApplicationEnabledSettingLPr(
     /* [in] */ Int32 userId,
     /* [out] */ Int32* result)
 {
-    assert(result != NULL);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
 
     AutoPtr<PackageSetting> pkg;
     HashMap<String, AutoPtr<PackageSetting> >::Iterator it = mPackages.Find(packageName);
@@ -4110,7 +4180,8 @@ ECode Settings::SetPackageStoppedStateLPw(
     /* [in] */ Int32 userId,
     /* [out] */ Boolean* result)
 {
-    assert(result);
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
     AutoPtr<IUserHandleHelper> helper;
     CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
     Int32 appId;
@@ -4150,42 +4221,28 @@ ECode Settings::SetPackageStoppedStateLPw(
             }
             pkgSetting->SetNotLaunched(FALSE, userId);
         }
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
     }
-    return FALSE;
+    *result = FALSE;
+    return NOERROR;
 }
 
-AutoPtr< List< AutoPtr<IUserInfo> > > Settings::GetAllUsers()
+AutoPtr<IList> Settings::GetAllUsers()
 {
     Int64 id = Binder::ClearCallingIdentity();
-    Int32 val;
-    Boolean hasNext;
-    ECode ecode = NOERROR;
     //try {
-    AutoPtr<IObjectContainer> users;
-    AutoPtr<IObjectEnumerator> objEnumerator;
-    ecode = CUserManagerService::GetInstance()->GetUsers(FALSE, (IObjectContainer**)&users);
-    Binder::RestoreCallingIdentity(id);
-    users->GetObjectCount(&val);
-
-    if (SUCCEEDED(ecode) && val > 0) {
-        users->GetObjectEnumerator((IObjectEnumerator**)&objEnumerator);
-
-        AutoPtr< List< AutoPtr<IUserInfo> > > usersList = new List< AutoPtr<IUserInfo> >();
-        while(objEnumerator->MoveNext(&hasNext), hasNext) {
-            AutoPtr<IUserInfo> userInfo;
-            objEnumerator->Current((IInterface**)&userInfo);
-            usersList->PushBack(userInfo);
-        }
-
-        return usersList;
+    AutoPtr<IList> users;
+    if (FAILED(CUserManagerService::GetInstance()->GetUsers(FALSE, (IList**)&users))) {
+        users = NULL;
     }
     // } catch (NullPointerException npe) {
     //     // packagemanager not yet initialized
     // } finally {
     //     Binder.restoreCallingIdentity(id);
     // }
-    return NULL;
+    Binder::RestoreCallingIdentity(id);
+    return users;
 }
 
 void Settings::PrintFlags(
@@ -4193,17 +4250,17 @@ void Settings::PrintFlags(
     /* [in] */ Int32 val,
     /* [in] */ ArrayOf<IInterface*>& spec)
 {
-    pw->PrintString(String("[ "));
+    pw->Print(String("[ "));
     for (Int32 i = 0; i < spec.GetLength(); i += 2) {
         AutoPtr<IInteger32> mask = (IInteger32*)spec[i]->Probe(EIID_IInteger32);
         Int32 maskValue;
         mask->GetValue(&maskValue);
         if ((val & maskValue) != 0) {
-            pw->PrintObject(spec[i+1]);
-            pw->PrintString(String(" "));
+            pw->Print(spec[i+1]);
+            pw->Print(String(" "));
         }
     }
-    pw->PrintString(String("]"));
+    pw->Print(String("]"));
 }
 
 } // namespace Pm

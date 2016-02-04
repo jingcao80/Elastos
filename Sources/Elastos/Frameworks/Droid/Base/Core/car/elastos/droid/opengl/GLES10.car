@@ -250,92 +250,92 @@ module
         const Int32 _GL_ZERO                                  = 0;
 
         // C function void glActiveTexture ( GLenum texture )
-        glActiveTexture(
+        GlActiveTexture(
             [in] Int32 texture);
 
         // C function void glAlphaFunc ( GLenum func, GLclampf ref )
-        glAlphaFunc(
+        GlAlphaFunc(
             [in] Int32 func,
             [in] Float ref);
 
         // C function void glAlphaFuncx ( GLenum func, GLclampx ref )
-        glAlphaFuncx(
+        GlAlphaFuncx(
             [in] Int32 func,
             [in] Int32 ref);
 
         // C function void glBindTexture ( GLenum target, GLuint texture )
-        glBindTexture(
+        GlBindTexture(
             [in] Int32 target,
             [in] Int32 texture);
 
         // C function void glBlendFunc ( GLenum sfactor, GLenum dfactor )
-        glBlendFunc(
+        GlBlendFunc(
             [in] Int32 sfactor,
             [in] Int32 dfactor);
 
         // C function void glClear ( GLbitfield mask )
-        glClear(
+        GlClear(
             [in] Int32 mask);
 
         // C function void glClearColor ( GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha )
-        glClearColor(
+        GlClearColor(
             [in] Float red,
             [in] Float green,
             [in] Float blue,
             [in] Float alpha);
 
         // C function void glClearColorx ( GLclampx red, GLclampx green, GLclampx blue, GLclampx alpha )
-        glClearColorx(
+        GlClearColorx(
             [in] Int32 red,
             [in] Int32 green,
             [in] Int32 blue,
             [in] Int32 alpha);
 
         // C function void glClearDepthf ( GLclampf depth )
-        glClearDepthf(
+        GlClearDepthf(
             [in] Float depth);
 
         // C function void glClearDepthx ( GLclampx depth )
-        glClearDepthx(
+        GlClearDepthx(
             [in] Int32 depth);
 
         // C function void glClearStencil ( GLint s )
-        glClearStencil(
+        GlClearStencil(
             [in] Int32 s);
 
         // C function void glClientActiveTexture ( GLenum texture )
-        glClientActiveTexture(
+        GlClientActiveTexture(
             [in] Int32 texture);
 
         // C function void glColor4f ( GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha )
-        glColor4f(
+        GlColor4f(
             [in] Float red,
             [in] Float green,
             [in] Float blue,
             [in] Float alpha);
 
         // C function void glColor4x ( GLfixed red, GLfixed green, GLfixed blue, GLfixed alpha )
-        glColor4x(
+        GlColor4x(
             [in] Int32 red,
             [in] Int32 green,
             [in] Int32 blue,
             [in] Int32 alpha);
 
         // C function void glColorMask ( GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha )
-        glColorMask(
+        GlColorMask(
             [in] Boolean red,
             [in] Boolean green,
             [in] Boolean blue,
             [in] Boolean alpha);
 
-        glColorPointer(
+        GlColorPointer(
             [in] Int32 size,
             [in] Int32 type,
             [in] Int32 stride,
             [in] IBuffer* pointer);
 
         // C function void glCompressedTexImage2D ( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data )
-        glCompressedTexImage2D(
+        GlCompressedTexImage2D(
             [in] Int32 target,
             [in] Int32 level,
             [in] Int32 internalformat,
@@ -346,7 +346,7 @@ module
             [in] IBuffer* data);
 
         // C function void glCompressedTexSubImage2D ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid *data )
-        glCompressedTexSubImage2D(
+        GlCompressedTexSubImage2D(
             [in] Int32 target,
             [in] Int32 level,
             [in] Int32 xoffset,
@@ -358,7 +358,7 @@ module
             [in] IBuffer* data);
 
         // C function void glCopyTexImage2D ( GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border )
-        glCopyTexImage2D(
+        GlCopyTexImage2D(
             [in] Int32 target,
             [in] Int32 level,
             [in] Int32 internalformat,
@@ -369,7 +369,7 @@ module
             [in] Int32 border);
 
         // C function void glCopyTexSubImage2D ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height )
-        glCopyTexSubImage2D(
+        GlCopyTexSubImage2D(
             [in] Int32 target,
             [in] Int32 level,
             [in] Int32 xoffset,
@@ -380,111 +380,111 @@ module
             [in] Int32 height);
 
         // C function void glCullFace ( GLenum mode )
-        glCullFace(
+        GlCullFace(
             [in] Int32 mode);
 
         // C function void glDeleteTextures ( GLsizei n, const GLuint *textures )
-        glDeleteTextures(
+        GlDeleteTextures(
             [in] Int32 n,
             [in] ArrayOf<Int32>* textures,
             [in] Int32 offset);
 
         // C function void glDeleteTextures ( GLsizei n, const GLuint *textures )
-        glDeleteTextures(
+        GlDeleteTextures(
             [in] Int32 n,
             [in] IInt32Buffer* textures);
 
         // C function void glDepthFunc ( GLenum func )
-        glDepthFunc(
+        GlDepthFunc(
             [in] Int32 func);
 
         // C function void glDepthMask ( GLboolean flag )
-        glDepthMask(
+        GlDepthMask(
             [in] Boolean flag);
 
         // C function void glDepthRangef ( GLclampf zNear, GLclampf zFar )
-        glDepthRangef(
+        GlDepthRangef(
             [in] Float zNear,
             [in] Float zFar);
 
         // C function void glDepthRangex ( GLclampx zNear, GLclampx zFar )
-        glDepthRangex(
+        GlDepthRangex(
             [in] Int32 zNear,
             [in] Int32 zFar);
 
         // C function void glDisable ( GLenum cap )
-        glDisable(
+        GlDisable(
             [in] Int32 cap);
 
         // C function void glDisableClientState ( GLenum array )
-        glDisableClientState(
+        GlDisableClientState(
             [in] Int32 array);
 
         // C function void glDrawArrays ( GLenum mode, GLint first, GLsizei count )
-        glDrawArrays(
+        GlDrawArrays(
             [in] Int32 mode,
             [in] Int32 first,
             [in] Int32 count);
 
         // C function void glDrawElements ( GLenum mode, GLsizei count, GLenum type, const GLvoid *indices )
-        glDrawElements(
+        GlDrawElements(
             [in] Int32 mode,
             [in] Int32 count,
             [in] Int32 type,
             [in] IBuffer* indices);
 
         // C function void glEnable ( GLenum cap )
-        glEnable(
+        GlEnable(
             [in] Int32 cap);
 
         // C function void glEnableClientState ( GLenum array )
-        glEnableClientState(
+        GlEnableClientState(
             [in] Int32 array);
 
         // C function void glFinish ( void )
-        glFinish();
+        GlFinish();
 
         // C function void glFlush ( void )
-        glFlush();
+        GlFlush();
 
         // C function void glFogf ( GLenum pname, GLfloat param )
-        glFogf(
+        GlFogf(
             [in] Int32 pname,
             [in] Float param);
 
         // C function void glFogfv ( GLenum pname, const GLfloat *params )
-        glFogfv(
+        GlFogfv(
             [in] Int32 pname,
             [in] ArrayOf<Float>* params,
             [in] Int32 offset);
 
         // C function void glFogfv ( GLenum pname, const GLfloat *params )
-        glFogfv(
+        GlFogfv(
             [in] Int32 pname,
             [in] IFloatBuffer* params);
 
         // C function void glFogx ( GLenum pname, GLfixed param )
-        glFogx(
+        GlFogx(
             [in] Int32 pname,
             [in] Int32 param);
 
         // C function void glFogxv ( GLenum pname, const GLfixed *params )
-        glFogxv(
+        GlFogxv(
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
             [in] Int32 offset);
 
         // C function void glFogxv ( GLenum pname, const GLfixed *params )
-        glFogxv(
+        GlFogxv(
             [in] Int32 pname,
             [in] IInt32Buffer* params);
 
         // C function void glFrontFace ( GLenum mode )
-        glFrontFace(
+        GlFrontFace(
             [in] Int32 mode);
 
         // C function void glFrustumf ( GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar )
-        glFrustumf(
+        GlFrustumf(
             [in] Float left,
             [in] Float right,
             [in] Float bottom,
@@ -493,7 +493,7 @@ module
             [in] Float zFar);
 
         // C function void glFrustumx ( GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar )
-        glFrustumx(
+        GlFrustumx(
             [in] Int32 left,
             [in] Int32 right,
             [in] Int32 bottom,
@@ -502,28 +502,28 @@ module
             [in] Int32 zFar);
 
         // C function void glGenTextures ( GLsizei n, GLuint *textures )
-        glGenTextures(
+        GlGenTextures(
             [in] Int32 n,
             [in] ArrayOf<Int32>* textures,
             [in] Int32 offset);
 
         // C function void glGenTextures ( GLsizei n, GLuint *textures )
-        glGenTextures(
+        GlGenTextures(
             [in] Int32 n,
             [in] IInt32Buffer* textures);
 
         // C function GLenum glGetError ( void )
-        glGetError(
+        GlGetError(
             [out] Int32* error);
 
         // C function void glGetIntegerv ( GLenum pname, GLint *params )
-        glGetIntegerv(
+        GlGetIntegerv(
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
             [in] Int32 offset);
 
         // C function void glGetIntegerv ( GLenum pname, GLint *params )
-        glGetIntegerv(
+        GlGetIntegerv(
             [in] Int32 pname,
             [in] IInt32Buffer* params);
 
@@ -544,180 +544,180 @@ module
          */
 
         // C function const GLubyte * glGetString ( GLenum name )
-        glGetString(
+        GlGetString(
             [in] Int32 name,
             [out] String* str);
 
         // C function void glHint ( GLenum target, GLenum mode )
-        glHint(
+        GlHint(
             [in] Int32 target,
             [in] Int32 mode);
 
         // C function void glLightModelf ( GLenum pname, GLfloat param )
-        glLightModelf(
+        GlLightModelf(
             [in] Int32 pname,
             [in] Float param);
 
         // C function void glLightModelfv ( GLenum pname, const GLfloat *params )
-        glLightModelfv(
+        GlLightModelfv(
             [in] Int32 pname,
             [in] ArrayOf<Float>* params,
             [in] Int32 offset);
 
         // C function void glLightModelfv ( GLenum pname, const GLfloat *params )
-        glLightModelfv(
+        GlLightModelfv(
             [in] Int32 pname,
             [in] IFloatBuffer* params);
 
         // C function void glLightModelx ( GLenum pname, GLfixed param )
-        glLightModelx(
+        GlLightModelx(
             [in] Int32 pname,
             [in] Int32 param);
 
         // C function void glLightModelxv ( GLenum pname, const GLfixed *params )
-        glLightModelxv(
+        GlLightModelxv(
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
             [in] Int32 offset);
 
         // C function void glLightModelxv ( GLenum pname, const GLfixed *params )
-        glLightModelxv(
+        GlLightModelxv(
             [in] Int32 pname,
             [in] IInt32Buffer* params);
 
         // C function void glLightf ( GLenum light, GLenum pname, GLfloat param )
-        glLightf(
+        GlLightf(
             [in] Int32 light,
             [in] Int32 pname,
             [in] Float param);
 
         // C function void glLightfv ( GLenum light, GLenum pname, const GLfloat *params )
-        glLightfv(
+        GlLightfv(
             [in] Int32 light,
             [in] Int32 pname,
             [in] ArrayOf<Float>* params,
             [in] Int32 offset);
 
         // C function void glLightfv ( GLenum light, GLenum pname, const GLfloat *params )
-        glLightfv(
+        GlLightfv(
             [in] Int32 light,
             [in] Int32 pname,
             [in] IFloatBuffer* params);
 
         // C function void glLightx ( GLenum light, GLenum pname, GLfixed param )
-        glLightx(
+        GlLightx(
             [in] Int32 light,
             [in] Int32 pname,
             [in] Int32 param);
 
         // C function void glLightxv ( GLenum light, GLenum pname, const GLfixed *params )
-        glLightxv(
+        GlLightxv(
             [in] Int32 light,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
             [in] Int32 offset);
 
         // C function void glLightxv ( GLenum light, GLenum pname, const GLfixed *params )
-        glLightxv(
+        GlLightxv(
             [in] Int32 light,
             [in] Int32 pname,
             [in] IInt32Buffer* params);
 
         // C function void glLineWidth ( GLfloat width )
-        glLineWidth(
+        GlLineWidth(
             [in] Float width);
 
         // C function void glLineWidthx ( GLfixed width )
-        glLineWidthx(
+        GlLineWidthx(
             [in] Int32 width);
 
         // C function void glLoadIdentity ( void )
-        glLoadIdentity();
+        GlLoadIdentity();
 
         // C function void glLoadMatrixf ( const GLfloat *m )
-        glLoadMatrixf(
+        GlLoadMatrixf(
             [in] ArrayOf<Float>* m,
             [in] Int32 offset);
 
         // C function void glLoadMatrixf ( const GLfloat *m )
-        glLoadMatrixf(
+        GlLoadMatrixf(
             [in] IFloatBuffer* m);
 
         // C function void glLoadMatrixx ( const GLfixed *m )
-        glLoadMatrixx(
+        GlLoadMatrixx(
             [in] ArrayOf<Int32>* m,
             [in] Int32 offset);
 
         // C function void glLoadMatrixx ( const GLfixed *m )
-        glLoadMatrixx(
+        GlLoadMatrixx(
             [in] IInt32Buffer* m);
 
         // C function void glLogicOp ( GLenum opcode )
-        glLogicOp(
+        GlLogicOp(
             [in] Int32 opcode);
 
         // C function void glMaterialf ( GLenum face, GLenum pname, GLfloat param )
-        glMaterialf(
+        GlMaterialf(
             [in] Int32 face,
             [in] Int32 pname,
             [in] Float param);
 
         // C function void glMaterialfv ( GLenum face, GLenum pname, const GLfloat *params )
-        glMaterialfv(
+        GlMaterialfv(
             [in] Int32 face,
             [in] Int32 pname,
             [in] ArrayOf<Float>* params,
             [in] Int32 offset);
 
         // C function void glMaterialfv ( GLenum face, GLenum pname, const GLfloat *params )
-        glMaterialfv(
+        GlMaterialfv(
             [in] Int32 face,
             [in] Int32 pname,
             [in] IFloatBuffer* params);
 
         // C function void glMaterialx ( GLenum face, GLenum pname, GLfixed param )
-        glMaterialx(
+        GlMaterialx(
             [in] Int32 face,
             [in] Int32 pname,
             [in] Int32 param);
 
         // C function void glMaterialxv ( GLenum face, GLenum pname, const GLfixed *params )
-        glMaterialxv(
+        GlMaterialxv(
             [in] Int32 face,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
             [in] Int32 offset);
 
         // C function void glMaterialxv ( GLenum face, GLenum pname, const GLfixed *params )
-        glMaterialxv(
+        GlMaterialxv(
             [in] Int32 face,
             [in] Int32 pname,
             [in] IInt32Buffer* params);
 
         // C function void glMatrixMode ( GLenum mode )
-        glMatrixMode(
+        GlMatrixMode(
             [in] Int32 mode);
 
         // C function void glMultMatrixf ( const GLfloat *m )
-        glMultMatrixf(
+        GlMultMatrixf(
             [in] ArrayOf<Float>* m,
             [in] Int32 offset);
 
         // C function void glMultMatrixf ( const GLfloat *m )
-        glMultMatrixf(
+        GlMultMatrixf(
             [in] IFloatBuffer* m);
 
         // C function void glMultMatrixx ( const GLfixed *m )
-        glMultMatrixx(
+        GlMultMatrixx(
             [in] ArrayOf<Int32>* m,
             [in] Int32 offset);
 
         // C function void glMultMatrixx ( const GLfixed *m )
-        glMultMatrixx(
+        GlMultMatrixx(
             [in] IInt32Buffer* m);
 
         // C function void glMultiTexCoord4f ( GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q )
-        glMultiTexCoord4f(
+        GlMultiTexCoord4f(
             [in] Int32 target,
             [in] Float s,
             [in] Float t,
@@ -725,7 +725,7 @@ module
             [in] Float q);
 
         // C function void glMultiTexCoord4x ( GLenum target, GLfixed s, GLfixed t, GLfixed r, GLfixed q )
-        glMultiTexCoord4x(
+        GlMultiTexCoord4x(
             [in] Int32 target,
             [in] Int32 s,
             [in] Int32 t,
@@ -733,24 +733,24 @@ module
             [in] Int32 q);
 
         // C function void glNormal3f ( GLfloat nx, GLfloat ny, GLfloat nz )
-        glNormal3f(
+        GlNormal3f(
             [in] Float nx,
             [in] Float ny,
             [in] Float nz);
 
         // C function void glNormal3x ( GLfixed nx, GLfixed ny, GLfixed nz )
-        glNormal3x(
+        GlNormal3x(
             [in] Int32 nx,
             [in] Int32 ny,
             [in] Int32 nz);
 
-        glNormalPointer(
+        GlNormalPointer(
             [in] Int32 type,
             [in] Int32 stride,
             [in] IBuffer* pointer);
 
         // C function void glOrthof ( GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar )
-        glOrthof(
+        GlOrthof(
             [in] Float left,
             [in] Float right,
             [in] Float bottom,
@@ -759,7 +759,7 @@ module
             [in] Float zFar);
 
         // C function void glOrthox ( GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar )
-        glOrthox(
+        GlOrthox(
             [in] Int32 left,
             [in] Int32 right,
             [in] Int32 bottom,
@@ -768,36 +768,36 @@ module
             [in] Int32 zFar);
 
         // C function void glPixelStorei ( GLenum pname, GLint param )
-        glPixelStorei(
+        GlPixelStorei(
             [in] Int32 pname,
             [in] Int32 param);
 
         // C function void glPointSize ( GLfloat size )
-        glPointSize(
+        GlPointSize(
             [in] Float size);
 
         // C function void glPointSizex ( GLfixed size )
-        glPointSizex(
+        GlPointSizex(
             [in] Int32 size);
 
         // C function void glPolygonOffset ( GLfloat factor, GLfloat units )
-        glPolygonOffset(
+        GlPolygonOffset(
             [in] Float factor,
             [in] Float units);
 
         // C function void glPolygonOffsetx ( GLfixed factor, GLfixed units )
-        glPolygonOffsetx(
+        GlPolygonOffsetx(
             [in] Int32 factor,
             [in] Int32 units);
 
         // C function void glPopMatrix ( void )
-        glPopMatrix();
+        GlPopMatrix();
 
         // C function void glPushMatrix ( void )
-        glPushMatrix();
+        GlPushMatrix();
 
         // C function void glReadPixels ( GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels )
-        glReadPixels(
+        GlReadPixels(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 width,
@@ -807,114 +807,114 @@ module
             [in] IBuffer* pixels);
 
         // C function void glRotatef ( GLfloat angle, GLfloat x, GLfloat y, GLfloat z )
-        glRotatef(
+        GlRotatef(
             [in] Float angle,
             [in] Float x,
             [in] Float y,
             [in] Float z);
 
         // C function void glRotatex ( GLfixed angle, GLfixed x, GLfixed y, GLfixed z )
-        glRotatex(
+        GlRotatex(
             [in] Int32 angle,
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 z);
 
         // C function void glSampleCoverage ( GLclampf value, GLboolean invert )
-        glSampleCoverage(
+        GlSampleCoverage(
             [in] Float value,
             [in] Boolean invert);
 
         // C function void glSampleCoveragex ( GLclampx value, GLboolean invert )
-        glSampleCoveragex(
+        GlSampleCoveragex(
             [in] Int32 value,
             [in] Boolean invert);
 
         // C function void glScalef ( GLfloat x, GLfloat y, GLfloat z )
-        glScalef(
+        GlScalef(
             [in] Float x,
             [in] Float y,
             [in] Float z);
 
         // C function void glScalex ( GLfixed x, GLfixed y, GLfixed z )
-        glScalex(
+        GlScalex(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 z);
 
         // C function void glScissor ( GLint x, GLint y, GLsizei width, GLsizei height )
-        glScissor(
+        GlScissor(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 width,
             [in] Int32 height);
 
         // C function void glShadeModel ( GLenum mode )
-        glShadeModel(
+        GlShadeModel(
             [in] Int32 mode);
 
         // C function void glStencilFunc ( GLenum func, GLint ref, GLuint mask )
-        glStencilFunc(
+        GlStencilFunc(
             [in] Int32 func,
             [in] Int32 ref,
             [in] Int32 mask);
 
         // C function void glStencilMask ( GLuint mask )
-        glStencilMask(
+        GlStencilMask(
             [in] Int32 mask);
 
         // C function void glStencilOp ( GLenum fail, GLenum zfail, GLenum zpass )
-        glStencilOp(
+        GlStencilOp(
             [in] Int32 fail,
             [in] Int32 zfail,
             [in] Int32 zpass);
 
-        glTexCoordPointer(
+        GlTexCoordPointer(
             [in] Int32 size,
             [in] Int32 type,
             [in] Int32 stride,
             [in] IBuffer* pointer);
 
         // C function void glTexEnvf ( GLenum target, GLenum pname, GLfloat param )
-        glTexEnvf(
+        GlTexEnvf(
             [in] Int32 target,
             [in] Int32 pname,
             [in] Float param);
 
         // C function void glTexEnvfv ( GLenum target, GLenum pname, const GLfloat *params )
-        glTexEnvfv(
+        GlTexEnvfv(
             [in] Int32 target,
             [in] Int32 pname,
             [in] ArrayOf<Float>* params,
             [in] Int32 offset);
 
         // C function void glTexEnvfv ( GLenum target, GLenum pname, const GLfloat *params )
-        glTexEnvfv(
+        GlTexEnvfv(
             [in] Int32 target,
             [in] Int32 pname,
             [in] IFloatBuffer* params);
 
         // C function void glTexEnvx ( GLenum target, GLenum pname, GLfixed param )
-        glTexEnvx(
+        GlTexEnvx(
             [in] Int32 target,
             [in] Int32 pname,
             [in] Int32 param);
 
         // C function void glTexEnvxv ( GLenum target, GLenum pname, const GLfixed *params )
-        glTexEnvxv(
+        GlTexEnvxv(
             [in] Int32 target,
             [in] Int32 pname,
             [in] ArrayOf<Int32>* params,
             [in] Int32 offset);
 
         // C function void glTexEnvxv ( GLenum target, GLenum pname, const GLfixed *params )
-        glTexEnvxv(
+        GlTexEnvxv(
             [in] Int32 target,
             [in] Int32 pname,
             [in] IInt32Buffer* params);
 
         // C function void glTexImage2D ( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels )
-        glTexImage2D(
+        GlTexImage2D(
             [in] Int32 target,
             [in] Int32 level,
             [in] Int32 internalformat,
@@ -926,19 +926,19 @@ module
             [in] IBuffer* pixels);
 
         // C function void glTexParameterf ( GLenum target, GLenum pname, GLfloat param )
-        glTexParameterf(
+        GlTexParameterf(
             [in] Int32 target,
             [in] Int32 pname,
             [in] Float param);
 
         // C function void glTexParameterx ( GLenum target, GLenum pname, GLfixed param )
-        glTexParameterx(
+        GlTexParameterx(
             [in] Int32 target,
             [in] Int32 pname,
             [in] Int32 param);
 
         // C function void glTexSubImage2D ( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels )
-        glTexSubImage2D(
+        GlTexSubImage2D(
             [in] Int32 target,
             [in] Int32 level,
             [in] Int32 xoffset,
@@ -950,25 +950,25 @@ module
             [in] IBuffer* pixels);
 
         // C function void glTranslatef ( GLfloat x, GLfloat y, GLfloat z )
-        glTranslatef(
+        GlTranslatef(
             [in] Float x,
             [in] Float y,
             [in] Float z);
 
         // C function void glTranslatex ( GLfixed x, GLfixed y, GLfixed z )
-        glTranslatex(
+        GlTranslatex(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 z);
 
-        glVertexPointer(
+        GlVertexPointer(
             [in] Int32 size,
             [in] Int32 type,
             [in] Int32 stride,
             [in] IBuffer* pointer);
 
         // C function void glViewport ( GLint x, GLint y, GLsizei width, GLsizei height )
-        glViewport(
+        GlViewport(
             [in] Int32 x,
             [in] Int32 y,
             [in] Int32 width,

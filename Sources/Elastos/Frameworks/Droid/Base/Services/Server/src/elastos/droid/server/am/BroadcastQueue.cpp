@@ -11,13 +11,19 @@
 
 using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::Pm::EIID_IResolveInfo;
+using Elastos::Droid::Content::Pm::IComponentInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::IProcess;
-using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Utility::Logging::Slogger;
@@ -182,7 +188,7 @@ ECode BroadcastQueue::ProcessCurBroadcastLocked(
     r->mReceiver = IBinder::Probe(app->mThread.Get());
     r->mCurApp = app;
     app->mCurReceiver = r;
-    app->ForceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
+    app->ForceProcessStateUpTo(IActivityManager::PROCESS_STATE_RECEIVER);
     mService->UpdateLruProcessLocked(app, FALSE, NULL);
     mService->UpdateOomAdjLocked();
 
@@ -204,7 +210,7 @@ ECode BroadcastQueue::ProcessCurBroadcastLocked(
     AutoPtr<IIntent> intent;
     CIntent::New(r->mIntent, (IIntent**)&intent);
     AutoPtr<IApplicationInfo> info;
-    r->mCurReceiver->GetApplicationInfo((IApplicationInfo**)&info);
+    IComponentInfo::Probe(r->mCurReceiver)->GetApplicationInfo((IApplicationInfo**)&info);
     if (FAILED(app->mThread->ScheduleReceiver(intent, r->mCurReceiver,
             mService->CompatibilityInfoForPackageLocked(info), r->mResultCode,
             r->mResultData, r->mResultExtras, r->mOrdered, r->mUserId, app->mRepProcState))) {
@@ -212,7 +218,7 @@ ECode BroadcastQueue::ProcessCurBroadcastLocked(
     }
     if (DEBUG_BROADCAST)
         Slogger::V(TAG, "Process cur broadcast %s DELIVERED for app ",
-            r->ToString().string(), app.ToString().string());
+            r->ToString().string(), app->ToString().string());
     started = TRUE;
     // } finally {
 failed:
@@ -387,15 +393,15 @@ Boolean BroadcastQueue::FinishReceiverLocked(
         if (receiver != NULL && nextReceiver != NULL) {
             AutoPtr<IApplicationInfo> appInfo;
             IComponentInfo::Probe(receiver)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-            appInfo->GetUid(&uid)
-            IPackageItemInfo::Probe(receiver)->GetProcessName(&processName);
+            appInfo->GetUid(&uid);
+            IComponentInfo::Probe(receiver)->GetProcessName(&processName);
             appInfo = NULL;
             IComponentInfo::Probe(nextReceiver)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-            appInfo->GetUid(&nextUid)
-            IPackageItemInfo::Probe(nextReceiver)->GetProcessName(&nextProcessName);
+            appInfo->GetUid(&nextUid);
+            IComponentInfo::Probe(nextReceiver)->GetProcessName(&nextProcessName);
         }
         if (receiver == NULL || nextReceiver == NULL || uid != nextUid
-            || !mProcessName.Equals(nextProcessName)) {
+            || !processName.Equals(nextProcessName)) {
             // In this case, we are ready to process the next receiver for the current broadcast,
             // but are on a queue that would like to wait for services to finish before moving
             // on.  If there are background services currently starting, then we will go into a
@@ -450,7 +456,7 @@ ECode BroadcastQueue::PerformReceiveLocked(
             // If we have an app thread, do the call through that so it is
             // correctly ordered with other one-way calls.
             return app->mThread->ScheduleRegisteredReceiver(receiver, intent, resultCode,
-                    data, extras, ordered, sticky, sendingUser);
+                    data, extras, ordered, sticky, sendingUser, app->mRepProcState);
         }
         else {
             Slogger::E(TAG, "app.thread must not be null");
@@ -516,8 +522,9 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
     }
 
     if (r->mAppOp != IAppOpsManager::OP_NONE) {
-        Int32 mode = mService->mAppOpsService->NoteOperation(r->mAppOp,
-                filter->mReceiverList->mUid, filter->mPackageName);
+        Int32 mode;
+        mService->mAppOpsService->NoteOperation(r->mAppOp,
+                filter->mReceiverList->mUid, filter->mPackageName, &mode);
         if (mode != IAppOpsManager::MODE_ALLOWED) {
             if (DEBUG_BROADCAST)
                 Slogger::V(TAG, "App op %d not allowed for broadcast to uid %d, pkg %s",
@@ -526,8 +533,9 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
         }
     }
     if (!skip) {
-        skip = !mService->mIntentFirewall->CheckBroadcast(r->mIntent, r->mCallingUid,
-                r->mCallingPid, r->mResolvedType, filter->mReceiverList->mUid);
+        assert(0);
+        // skip = !mService->mIntentFirewall->CheckBroadcast(r->mIntent, r->mCallingUid,
+        //         r->mCallingPid, r->mResolvedType, filter->mReceiverList->mUid);
     }
 
     if (filter->mReceiverList->mApp == NULL || filter->mReceiverList->mApp->mCrashing) {
@@ -595,7 +603,7 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
 ECode BroadcastQueue::ProcessNextBroadcast(
     /* [in] */ Boolean fromMsg)
 {
-    AutoLock lock(mService->mLock);
+    AutoLock lock(mService);
     AutoPtr<BroadcastRecord> r;
     if (DEBUG_BROADCAST) {
         Slogger::V(TAG, "processNextBroadcast [%s]: %d broadcasts, %d ordered broadcasts"
@@ -624,7 +632,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
 
         for (Int32 i = 0; i < N; i++) {
             AutoPtr<IInterface> target;
-            mReceivers->Get(i, (IInterface**)&target);
+            r->mReceivers->Get(i, (IInterface**)&target);
             if (DEBUG_BROADCAST) {
                 String str;
                 IObject::Probe(target)->ToString(&str);
@@ -636,7 +644,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         AddBroadcastToHistoryLocked(r);
         if (DEBUG_BROADCAST_LIGHT) {
             Slogger::V(TAG, "Done with parallel broadcast [%s] %s",
-                mQueueName.string(), r->toString().string());
+                mQueueName.string(), r->ToString().string());
         }
     }
 
@@ -653,12 +661,12 @@ ECode BroadcastQueue::ProcessNextBroadcast(
 
         Boolean isDead;
         {
-            AutoLock lock(mService->mPidsSelfLocked);
+            AutoLock lock(mService->mPidsSelfLockedLock);
             HashMap<Int32, AutoPtr<ProcessRecord> >::Iterator it =
                 mService->mPidsSelfLocked.Find(mPendingBroadcast->mCurApp->mPid);
             AutoPtr<ProcessRecord> proc;
             if (it != mService->mPidsSelfLocked.End())
-                proc = *it;
+                proc = it->mSecond;
             isDead = proc == NULL || proc->mCrashing;
         }
         if (!isDead) {
@@ -838,7 +846,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
     String permission;
     aInfo->GetPermission(&permission);
     String processName;
-    aInfo->GetProcessName(&processName);
+    IComponentInfo::Probe(aInfo)->GetProcessName(&processName);
     String packageName;
     IPackageItemInfo::Probe(aInfo)->GetPackageName(&packageName);
     String name;
@@ -898,7 +906,8 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         }
     }
     if (r->mAppOp != IAppOpsManager::OP_NONE) {
-        Int32 mode = mService->mAppOpsService->NoteOperation(r->mAppOp, appUid, appPackageName);
+        Int32 mode;
+        mService->mAppOpsService->NoteOperation(r->mAppOp, appUid, appPackageName, &mode);
         if (mode != IAppOpsManager::MODE_ALLOWED) {
             if (DEBUG_BROADCAST)
                 Slogger::V(TAG, "App op %d not allowed for broadcast to uid %d pkg %s",
@@ -907,8 +916,9 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         }
     }
     if (!skip) {
-        skip = !mService->mIntentFirewall->CheckBroadcast(r->mIntent, r->mCallingUid,
-            r->mCallingPid, r->mResolvedType, appUid);
+        assert(0);
+        // skip = !mService->mIntentFirewall->CheckBroadcast(r->mIntent, r->mCallingUid,
+        //     r->mCallingPid, r->mResolvedType, appUid);
     }
     Boolean isSingleton = FALSE;
     if (FAILED(mService->IsSingleton(processName, appInfo, name, flags, &isSingleton))) {
@@ -1068,7 +1078,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
 }
 
 void BroadcastQueue::SetBroadcastTimeoutLocked(
-    /* [in] */ Millisecond64 timeoutTime)
+    /* [in] */ Int64 timeoutTime)
 {
     if (!mPendingBroadcastTimeoutMessage) {
         AutoPtr<IMessage> msg;
@@ -1178,8 +1188,11 @@ void BroadcastQueue::BroadcastTimeoutLocked(
         AutoPtr<BroadcastFilter> bf = (BroadcastFilter*)IBroadcastFilter::Probe(curReceiver);
         if (bf->mReceiverList->mPid != 0
                 && bf->mReceiverList->mPid != CActivityManagerService::MY_PID) {
-            AutoLock lock(mService->mPidsSelfLock);
-            app = mService->mPidsSelfLocked[bf->mReceiverList->mPid];
+            AutoLock lock(mService->mPidsSelfLockedLock);
+            HashMap<Int32, AutoPtr<ProcessRecord> >::Iterator it =
+                mService->mPidsSelfLocked.Find(bf->mReceiverList->mPid);
+            if (it != mService->mPidsSelfLocked.End())
+                app = it->mSecond;
         }
     }
     else {
@@ -1235,7 +1248,8 @@ void BroadcastQueue::LogBroadcastReceiverDiscardLocked(
     /* [in] */ BroadcastRecord* r)
 {
     if (r->mNextReceiver > 0) {
-        AutoPtr<IInterface> curReceiver = (*r->mReceivers)[r->mNextReceiver-1];
+        AutoPtr<IInterface> curReceiver;
+        r->mReceivers->Get(r->mNextReceiver-1, (IInterface**)&curReceiver);
         AutoPtr<BroadcastFilter> bFilter = (BroadcastFilter*)IBroadcastFilter::Probe(curReceiver);
         if (bFilter != NULL) {
             String filter = bFilter->ToString();
@@ -1297,14 +1311,14 @@ Boolean BroadcastQueue::DumpLocked(
                 }
                 needSep = TRUE;
                 printed = TRUE;
-                pw->PrintStringln(String("  Active broadcasts [") + mQueueName + "]:");
+                pw->Println(String("  Active broadcasts [") + mQueueName + "]:");
             }
             StringBuilder sb("  Active Broadcast ");
             sb += mQueueName;
             sb += " #";
             sb += i;
             sb += ":";
-            pw->PrintStringln(sb.ToString());
+            pw->Println(sb.ToString());
             br->Dump(pw, String("    "));
         }
         printed = FALSE;
@@ -1321,14 +1335,14 @@ Boolean BroadcastQueue::DumpLocked(
                 }
                 needSep = TRUE;
                 printed = TRUE;
-                pw->PrintStringln(String("  Active ordered broadcasts [") + mQueueName + "]:");
+                pw->Println(String("  Active ordered broadcasts [") + mQueueName + "]:");
             }
             StringBuilder sb("  Active Ordered Broadcast ");
             sb += mQueueName;
             sb += " #";
             sb += i;
             sb += ":";
-            pw->PrintStringln(sb.ToString());
+            pw->Println(sb.ToString());
             br->Dump(pw, String("    "));
         }
         if (dumpPackage.IsNull() || (mPendingBroadcast != NULL
@@ -1336,12 +1350,12 @@ Boolean BroadcastQueue::DumpLocked(
             if (needSep) {
                 pw->Println();
             }
-            pw->PrintStringln(String("  Pending broadcast [") + mQueueName + "]:");
+            pw->Println(String("  Pending broadcast [") + mQueueName + "]:");
             if (mPendingBroadcast != NULL) {
                 mPendingBroadcast->Dump(pw, String("    "));
             }
             else {
-                pw->PrintStringln(String("    (null)"));
+                pw->Println(String("    (null)"));
             }
             needSep = TRUE;
         }
@@ -1362,24 +1376,24 @@ Boolean BroadcastQueue::DumpLocked(
                 pw->Println();
             }
             needSep = TRUE;
-            pw->PrintStringln(String("  Historical broadcasts [") + mQueueName + "]:");
+            pw->Println(String("  Historical broadcasts [") + mQueueName + "]:");
             printed = TRUE;
         }
         if (dumpAll) {
-            pw->PrintString(String("  Historical Broadcast ") + mQueueName + " #");
-            pw->PrintInt32(i);
-            pw->PrintStringln(String(":"));
+            pw->Print(String("  Historical Broadcast ") + mQueueName + " #");
+            pw->Print(i);
+            pw->Println(String(":"));
             r->Dump(pw, String("    "));
         }
         else {
-            pw->PrintString(String("  #"));
-            pw->PrintInt32(i);
-            pw->PrintString(String(": "));
+            pw->Print(String("  #"));
+            pw->Print(i);
+            pw->Print(String(": "));
             pw->Println(r->ToString());
-            pw->PrintString(String("    "));
+            pw->Print(String("    "));
             String intentStr;
             r->mIntent->ToShortString(FALSE, TRUE, TRUE, FALSE, &intentStr);
-            pw->PrintStringln(intentStr);
+            pw->Println(intentStr);
             AutoPtr<IComponentName> name;
             r->mIntent->GetComponent((IComponentName**)&name);
             if (r->mTargetComp != NULL && r->mTargetComp != name) {
@@ -1391,10 +1405,8 @@ Boolean BroadcastQueue::DumpLocked(
             AutoPtr<IBundle> bundle;
             r->mIntent->GetExtras((IBundle**)&bundle);
             if (bundle != NULL) {
-                pw->PrintString(String("    extras: "));
-                String bundleStr;
-                bundle->ToString(&bundleStr);
-                pw->PrintStringln(bundleStr);
+                pw->Print(String("    extras: "));
+                pw->Println(bundle);
             }
         }
     }
@@ -1414,26 +1426,24 @@ Boolean BroadcastQueue::DumpLocked(
                     pw->Println();
                 }
                 needSep = TRUE;
-                pw->PrintStringln(String("  Historical broadcasts summary [") + mQueueName + "]:");
+                pw->Println(String("  Historical broadcasts summary [") + mQueueName + "]:");
                 printed = TRUE;
             }
             if (!dumpAll && i >= 50) {
-                pw->PrintStringln(String("  ..."));
+                pw->Println(String("  ..."));
                 break;
             }
-            pw->PrintString(String("  #"));
-            pw->PrintInt32(i);
-            pw->PrintString(String(": "));
+            pw->Print(String("  #"));
+            pw->Print(i);
+            pw->Print(String(": "));
             String iStr;
             intent->ToShortString(FALSE, TRUE, TRUE, FALSE, &iStr);
-            pw->PrintStringln(iStr);
+            pw->Println(iStr);
             AutoPtr<IBundle> bundle;
             intent->GetExtras((IBundle**)&bundle);
             if (bundle != NULL) {
-                pw->PrintString(String("    extras: "));
-                String bundleStr;
-                bundle->ToString(&bundleStr);
-                pw->PrintStringln(bundleStr);
+                pw->Print(String("    extras: "));
+                pw->Println(bundle);
             }
         }
     }

@@ -1,9 +1,11 @@
 #ifndef __ELASTOS_DROID_OPENGL_GLLOGWRAPPER_H__
 #define __ELASTOS_DROID_OPENGL_GLLOGWRAPPER_H__
 
+#include "Elastos.Droid.Opengl.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/opengl/GLWrapperBase.h"
+
 #include <elastos/core/StringBuilder.h>
-#include "GLWrapperBase.h"
 
 using Elastos::IO::IWriter;
 using Elastos::IO::IBuffer;
@@ -22,7 +24,7 @@ class GLLogWrapper
 {
 private:
     class PointerInfo
-        : public ElRefBase
+        : public Object
     {
     public:
         PointerInfo(
@@ -69,73 +71,73 @@ public:
         /* [in] */ IWriter* log,
         /* [in] */ Boolean logArgumentNames);
 
-    CARAPI glActiveTexture(
+    CARAPI GlActiveTexture(
         /* [in] */ Int32 texture);
 
-    CARAPI glAlphaFunc(
+    CARAPI GlAlphaFunc(
         /* [in] */ Int32 func,
         /* [in] */ Float ref);
 
-    CARAPI glAlphaFuncx(
+    CARAPI GlAlphaFuncx(
         /* [in] */ Int32 func,
         /* [in] */ Int32 ref);
 
-    CARAPI glBlendFunc(
+    CARAPI GlBlendFunc(
         /* [in] */ Int32 sfactor,
         /* [in] */ Int32 dfactor);
 
-    CARAPI glClear(
+    CARAPI GlClear(
         /* [in] */ Int32 mask);
 
-    CARAPI glClearColor(
+    CARAPI GlClearColor(
         /* [in] */ Float red,
         /* [in] */ Float green,
         /* [in] */ Float blue,
         /* [in] */ Float alpha);
 
-    CARAPI glClearColorx(
+    CARAPI GlClearColorx(
         /* [in] */ Int32 red,
         /* [in] */ Int32 green,
         /* [in] */ Int32 blue,
         /* [in] */ Int32 alpha);
 
-    CARAPI glClearDepthf(
+    CARAPI GlClearDepthf(
         /* [in] */ Float depth);
 
-    CARAPI glClearDepthx(
+    CARAPI GlClearDepthx(
         /* [in] */ Int32 depth);
 
-    CARAPI glClearStencil(
+    CARAPI GlClearStencil(
         /* [in] */ Int32 s);
 
-    CARAPI glClientActiveTexture(
+    CARAPI GlClientActiveTexture(
         /* [in] */ Int32 texture);
 
-    CARAPI glColor4f(
+    CARAPI GlColor4f(
         /* [in] */ Float red,
         /* [in] */ Float green,
         /* [in] */ Float blue,
         /* [in] */ Float alpha);
 
-    CARAPI glColor4x(
+    CARAPI GlColor4x(
         /* [in] */ Int32 red,
         /* [in] */ Int32 green,
         /* [in] */ Int32 blue,
         /* [in] */ Int32 alpha);
 
-    CARAPI glColorMask(
+    CARAPI GlColorMask(
         /* [in] */ Boolean red,
         /* [in] */ Boolean green,
         /* [in] */ Boolean blue,
         /* [in] */ Boolean alpha);
 
-    CARAPI glColorPointer(
+    CARAPI GlColorPointer(
         /* [in] */ Int32 size,
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ IBuffer* pointer);
 
-    CARAPI glCompressedTexSubImage2D(
+    CARAPI GlCompressedTexSubImage2D(
         /* [in] */ Int32 target,
         /* [in] */ Int32 level,
         /* [in] */ Int32 xoffset,
@@ -146,7 +148,7 @@ public:
         /* [in] */ Int32 imageSize,
         /* [in] */ IBuffer* data);
 
-    CARAPI glCopyTexSubImage2D(
+    CARAPI GlCopyTexSubImage2D(
         /* [in] */ Int32 target,
         /* [in] */ Int32 level,
         /* [in] */ Int32 xoffset,
@@ -156,83 +158,83 @@ public:
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
 
-    CARAPI glCullFace(
+    CARAPI GlCullFace(
         /* [in] */ Int32 mode);
 
-    CARAPI glDeleteTextures(
+    CARAPI GlDeleteTextures(
         /* [in] */ Int32 n,
         /* [in] */ ArrayOf<Int32>* textures,
         /* [in] */ Int32 offset);
 
-    CARAPI glDeleteTextures(
+    CARAPI GlDeleteTextures(
         /* [in] */ Int32 n,
         /* [in] */ IInt32Buffer* textures);
 
-    CARAPI glDepthFunc(
+    CARAPI GlDepthFunc(
         /* [in] */ Int32 func);
 
-    CARAPI glDepthMask(
+    CARAPI GlDepthMask(
         /* [in] */ Boolean flag);
 
-    CARAPI glDepthRangef(
+    CARAPI GlDepthRangef(
         /* [in] */ Float zNear,
         /* [in] */ Float zFar);
 
-    CARAPI glDepthRangex(
+    CARAPI GlDepthRangex(
         /* [in] */ Int32 zNear,
         /* [in] */ Int32 zFar);
 
-    CARAPI glDisable(
+    CARAPI GlDisable(
         /* [in] */ Int32 cap);
 
-    CARAPI glDisableClientState(
+    CARAPI GlDisableClientState(
         /* [in] */ Int32 array);
 
-    CARAPI glDrawArrays(
+    CARAPI GlDrawArrays(
         /* [in] */ Int32 mode,
         /* [in] */ Int32 first,
         /* [in] */ Int32 count);
 
-    CARAPI glDrawElements(
+    CARAPI GlDrawElements(
         /* [in] */ Int32 mode,
         /* [in] */ Int32 count,
         /* [in] */ Int32 type,
         /* [in] */ IBuffer* indices);
 
-    CARAPI glFinish();
+    CARAPI GlFinish();
 
-    CARAPI glFlush();
+    CARAPI GlFlush();
 
-    CARAPI glFogf(
+    CARAPI GlFogf(
         /* [in] */ Int32 pname,
         /* [in] */ Float param);
 
-    CARAPI glFogfv(
+    CARAPI GlFogfv(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glFogfv(
+    CARAPI GlFogfv(
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glFogx(
+    CARAPI GlFogx(
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glFogxv(
+    CARAPI GlFogxv(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glFogxv(
+    CARAPI GlFogxv(
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glFrontFace(
+    CARAPI GlFrontFace(
         /* [in] */ Int32 mode);
 
-    CARAPI glFrustumf(
+    CARAPI GlFrustumf(
         /* [in] */ Float left,
         /* [in] */ Float right,
         /* [in] */ Float bottom,
@@ -240,7 +242,7 @@ public:
         /* [in] */ Float zNear,
         /* [in] */ Float zFar);
 
-    CARAPI glFrustumx(
+    CARAPI GlFrustumx(
         /* [in] */ Int32 left,
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom,
@@ -248,188 +250,188 @@ public:
         /* [in] */ Int32 zNear,
         /* [in] */ Int32 zFar);
 
-    CARAPI glGenTextures(
+    CARAPI GlGenTextures(
         /* [in] */ Int32 n,
         /* [in] */ ArrayOf<Int32>* textures,
         /* [in] */ Int32 offset);
 
-    CARAPI glGenTextures(
+    CARAPI GlGenTextures(
         /* [in] */ Int32 n,
         /* [in] */ IInt32Buffer* textures);
 
-    CARAPI glGetError(
+    CARAPI GlGetError(
         /* [out] */ Int32* error);
 
-    CARAPI glGetString(
+    CARAPI GlGetString(
         /* [in] */ Int32 name,
         /* [out] */ String* str);
 
-    CARAPI glHint(
+    CARAPI GlHint(
         /* [in] */ Int32 target,
         /* [in] */ Int32 mode);
 
-    CARAPI glLightModelf(
+    CARAPI GlLightModelf(
         /* [in] */ Int32 pname,
         /* [in] */ Float param);
 
-    CARAPI glLightModelfv(
+    CARAPI GlLightModelfv(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glLightModelfv(
+    CARAPI GlLightModelfv(
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glLightModelx(
+    CARAPI GlLightModelx(
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glLightModelxv(
+    CARAPI GlLightModelxv(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glLightModelxv(
+    CARAPI GlLightModelxv(
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glLightf(
+    CARAPI GlLightf(
         /* [in] */ Int32 light,
         /* [in] */ Int32 pname,
         /* [in] */ Float param);
 
-    CARAPI glLightfv(
+    CARAPI GlLightfv(
         /* [in] */ Int32 light,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glLightfv(
+    CARAPI GlLightfv(
         /* [in] */ Int32 light,
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glLightx(
+    CARAPI GlLightx(
         /* [in] */ Int32 light,
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glLightxv(
+    CARAPI GlLightxv(
         /* [in] */ Int32 light,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glLightxv(
+    CARAPI GlLightxv(
         /* [in] */ Int32 light,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glLineWidth(
+    CARAPI GlLineWidth(
         /* [in] */ Float width);
 
-    CARAPI glLineWidthx(
+    CARAPI GlLineWidthx(
         /* [in] */ Int32 width);
 
-    CARAPI glLoadIdentity();
+    CARAPI GlLoadIdentity();
 
-    CARAPI glLoadMatrixf(
+    CARAPI GlLoadMatrixf(
         /* [in] */ ArrayOf<Float>* m,
         /* [in] */ Int32 offset);
 
-    CARAPI glLoadMatrixf(
+    CARAPI GlLoadMatrixf(
         /* [in] */ IFloatBuffer* m);
 
-    CARAPI glLoadMatrixx(
+    CARAPI GlLoadMatrixx(
         /* [in] */ ArrayOf<Int32>* m,
         /* [in] */ Int32 offset);
 
-    CARAPI glLoadMatrixx(
+    CARAPI GlLoadMatrixx(
         /* [in] */ IInt32Buffer* m);
 
-    CARAPI glLogicOp(
+    CARAPI GlLogicOp(
         /* [in] */ Int32 opcode);
 
-    CARAPI glMaterialf(
+    CARAPI GlMaterialf(
         /* [in] */ Int32 face,
         /* [in] */ Int32 pname,
         /* [in] */ Float param);
 
-    CARAPI glMaterialfv(
+    CARAPI GlMaterialfv(
         /* [in] */ Int32 face,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glMaterialfv(
+    CARAPI GlMaterialfv(
         /* [in] */ Int32 face,
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glMaterialx(
+    CARAPI GlMaterialx(
         /* [in] */ Int32 face,
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glMaterialxv(
+    CARAPI GlMaterialxv(
         /* [in] */ Int32 face,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glMaterialxv(
+    CARAPI GlMaterialxv(
         /* [in] */ Int32 face,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glMatrixMode(
+    CARAPI GlMatrixMode(
         /* [in] */ Int32 mode);
 
-    CARAPI glMultMatrixf(
+    CARAPI GlMultMatrixf(
         /* [in] */ ArrayOf<Float>* m,
         /* [in] */ Int32 offset);
 
-    CARAPI glMultMatrixf(
+    CARAPI GlMultMatrixf(
         /* [in] */ IFloatBuffer* m);
 
-    CARAPI glMultMatrixx(
+    CARAPI GlMultMatrixx(
         /* [in] */ ArrayOf<Int32>* m,
         /* [in] */ Int32 offset);
 
-    CARAPI glMultMatrixx(
+    CARAPI GlMultMatrixx(
         /* [in] */ IInt32Buffer* m);
 
-    CARAPI glMultiTexCoord4f(
+    CARAPI GlMultiTexCoord4f(
         /* [in] */ Int32 target,
         /* [in] */ Float s,
         /* [in] */ Float t,
         /* [in] */ Float r,
         /* [in] */ Float q);
 
-    CARAPI glMultiTexCoord4x(
+    CARAPI GlMultiTexCoord4x(
         /* [in] */ Int32 target,
         /* [in] */ Int32 s,
         /* [in] */ Int32 t,
         /* [in] */ Int32 r,
         /* [in] */ Int32 q);
 
-    CARAPI glNormal3f(
+    CARAPI GlNormal3f(
         /* [in] */ Float nx,
         /* [in] */ Float ny,
         /* [in] */ Float nz);
 
-    CARAPI glNormal3x(
+    CARAPI GlNormal3x(
         /* [in] */ Int32 nx,
         /* [in] */ Int32 ny,
         /* [in] */ Int32 nz);
 
-    CARAPI glNormalPointer(
+    CARAPI GlNormalPointer(
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ IBuffer* pointer);
 
-    CARAPI glOrthof(
+    CARAPI GlOrthof(
         /* [in] */ Float left,
         /* [in] */ Float right,
         /* [in] */ Float bottom,
@@ -437,7 +439,7 @@ public:
         /* [in] */ Float zNear,
         /* [in] */ Float zFar);
 
-    CARAPI glOrthox(
+    CARAPI GlOrthox(
         /* [in] */ Int32 left,
         /* [in] */ Int32 right,
         /* [in] */ Int32 bottom,
@@ -445,29 +447,29 @@ public:
         /* [in] */ Int32 zNear,
         /* [in] */ Int32 zFar);
 
-    CARAPI glPixelStorei(
+    CARAPI GlPixelStorei(
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glPointSize(
+    CARAPI GlPointSize(
         /* [in] */ Float size);
 
-    CARAPI glPointSizex(
+    CARAPI GlPointSizex(
         /* [in] */ Int32 size);
 
-    CARAPI glPolygonOffset(
+    CARAPI GlPolygonOffset(
         /* [in] */ Float factor,
         /* [in] */ Float units);
 
-    CARAPI glPolygonOffsetx(
+    CARAPI GlPolygonOffsetx(
         /* [in] */ Int32 factor,
         /* [in] */ Int32 units);
 
-    CARAPI glPopMatrix();
+    CARAPI GlPopMatrix();
 
-    CARAPI glPushMatrix();
+    CARAPI GlPushMatrix();
 
-    CARAPI glReadPixels(
+    CARAPI GlReadPixels(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ Int32 width,
@@ -476,60 +478,60 @@ public:
         /* [in] */ Int32 type,
         /* [in] */ IBuffer* pixels);
 
-    CARAPI glRotatef(
+    CARAPI GlRotatef(
         /* [in] */ Float angle,
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [in] */ Float z);
 
-    CARAPI glRotatex(
+    CARAPI GlRotatex(
         /* [in] */ Int32 angle,
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ Int32 z);
 
-    CARAPI glSampleCoverage(
+    CARAPI GlSampleCoverage(
         /* [in] */ Float value,
         /* [in] */ Boolean invert);
 
-    CARAPI glSampleCoveragex(
+    CARAPI GlSampleCoveragex(
         /* [in] */ Int32 value,
         /* [in] */ Boolean invert);
 
-    CARAPI glScalef(
+    CARAPI GlScalef(
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [in] */ Float z);
 
-    CARAPI glScalex(
+    CARAPI GlScalex(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ Int32 z);
 
-    CARAPI glScissor(
+    CARAPI GlScissor(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
 
-    CARAPI glShadeModel(
+    CARAPI GlShadeModel(
         /* [in] */ Int32 mode);
 
-    CARAPI glStencilFunc(
+    CARAPI GlStencilFunc(
         /* [in] */ Int32 func,
         /* [in] */ Int32 ref,
         /* [in] */ Int32 mask);
 
-    CARAPI glStencilMask(
+    CARAPI GlStencilMask(
         /* [in] */ Int32 mask);
 
-    CARAPI glTexCoordPointer(
+    CARAPI GlTexCoordPointer(
         /* [in] */ Int32 size,
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ IBuffer* pointer);
 
-    CARAPI glTexImage2D(
+    CARAPI GlTexImage2D(
         /* [in] */ Int32 target,
         /* [in] */ Int32 level,
         /* [in] */ Int32 internalformat,
@@ -540,12 +542,12 @@ public:
         /* [in] */ Int32 type,
         /* [in] */ IBuffer* pixels);
 
-    CARAPI glTexParameterx(
+    CARAPI GlTexParameterx(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glTexSubImage2D(
+    CARAPI GlTexSubImage2D(
         /* [in] */ Int32 target,
         /* [in] */ Int32 level,
         /* [in] */ Int32 xoffset,
@@ -556,56 +558,56 @@ public:
         /* [in] */ Int32 type,
         /* [in] */ IBuffer* pixels);
 
-    CARAPI glTranslatef(
+    CARAPI GlTranslatef(
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [in] */ Float z);
 
-    CARAPI glTranslatex(
+    CARAPI GlTranslatex(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ Int32 z);
 
-    CARAPI glVertexPointer(
+    CARAPI GlVertexPointer(
         /* [in] */ Int32 size,
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ IBuffer* pointer);
 
-    CARAPI glViewport(
+    CARAPI GlViewport(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
 
-    CARAPI glEnable(
+    CARAPI GlEnable(
         /* [in] */ Int32 cap);
 
-    CARAPI glEnableClientState(
+    CARAPI GlEnableClientState(
         /* [in] */ Int32 array);
 
 
-    CARAPI glTexParameterf(
+    CARAPI GlTexParameterf(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ Float param);
 
-    CARAPI glTexParameterfv(
+    CARAPI GlTexParameterfv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glTexParameterfv(
+    CARAPI GlTexParameterfv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glBindTexture(
+    CARAPI GlBindTexture(
         /* [in] */ Int32 target,
         /* [in] */ Int32 texture);
 
-    CARAPI glCompressedTexImage2D(
+    CARAPI GlCompressedTexImage2D(
         /* [in] */ Int32 target,
         /* [in] */ Int32 level,
         /* [in] */ Int32 internalformat,
@@ -615,7 +617,7 @@ public:
         /* [in] */ Int32 imageSize,
         /* [in] */ IBuffer* data);
 
-    CARAPI glCopyTexImage2D(
+    CARAPI GlCopyTexImage2D(
         /* [in] */ Int32 target,
         /* [in] */ Int32 level,
         /* [in] */ Int32 internalformat,
@@ -625,674 +627,674 @@ public:
         /* [in] */ Int32 height,
         /* [in] */ Int32 border);
 
-    CARAPI glGetIntegerv(
+    CARAPI GlGetIntegerv(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetIntegerv(
+    CARAPI GlGetIntegerv(
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glStencilOp(
+    CARAPI GlStencilOp(
         /* [in] */ Int32 fail,
         /* [in] */ Int32 zfail,
         /* [in] */ Int32 zpass);
 
-    CARAPI glTexEnvf(
+    CARAPI GlTexEnvf(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ Float param);
 
-    CARAPI glTexEnvfv(
+    CARAPI GlTexEnvfv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glTexEnvfv(
+    CARAPI GlTexEnvfv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glTexEnvx(
+    CARAPI GlTexEnvx(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glTexEnvxv(
+    CARAPI GlTexEnvxv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glTexEnvxv(
+    CARAPI GlTexEnvxv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glQueryMatrixxOES(
+    CARAPI GlQueryMatrixxOES(
         /* [in] */ ArrayOf<Int32>* mantissa,
         /* [in] */ Int32 mantissaOffset,
         /* [in] */ ArrayOf<Int32>* exponent,
         /* [in] */ Int32 exponentOffset,
         /* [out] */ Int32* matrixxOES);
 
-    CARAPI glQueryMatrixxOES(
+    CARAPI GlQueryMatrixxOES(
         /* [in] */ IInt32Buffer* mantissa,
         /* [in] */ IInt32Buffer* exponent,
         /* [out] */ Int32* matrixxOES);
 
-    CARAPI glGetPointerv(
+    CARAPI GlGetPointerv(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<IBuffer*>* params);
 
-    CARAPI glBindBuffer(
+    CARAPI GlBindBuffer(
         /* [in] */ Int32 target,
         /* [in] */ Int32 buffer);
 
-    CARAPI glBufferData(
+    CARAPI GlBufferData(
         /* [in] */ Int32 target,
         /* [in] */ Int32 size,
         /* [in] */ IBuffer* data,
         /* [in] */ Int32 usage);
 
-    CARAPI glBufferSubData(
+    CARAPI GlBufferSubData(
         /* [in] */ Int32 target,
         /* [in] */ Int32 offset,
         /* [in] */ Int32 size,
         /* [in] */ IBuffer* data);
 
-    CARAPI glClipPlanef(
+    CARAPI GlClipPlanef(
         /* [in] */ Int32 plane,
         /* [in] */ ArrayOf<Float>* equation,
         /* [in] */ Int32 offset);
 
-    CARAPI glClipPlanef(
+    CARAPI GlClipPlanef(
         /* [in] */ Int32 plane,
         /* [in] */ IFloatBuffer* equation);
 
-    CARAPI glClipPlanex(
+    CARAPI GlClipPlanex(
         /* [in] */ Int32 plane,
         /* [in] */ ArrayOf<Int32>* equation,
         /* [in] */ Int32 offset);
 
-    CARAPI glClipPlanex(
+    CARAPI GlClipPlanex(
         /* [in] */ Int32 plane,
         /* [in] */ IInt32Buffer* equation);
 
-    CARAPI glColor4ub(
+    CARAPI GlColor4ub(
         /* [in] */ Byte red,
         /* [in] */ Byte green,
         /* [in] */ Byte blue,
         /* [in] */ Byte alpha);
 
-    CARAPI glColorPointer(
+    CARAPI GlColorPointer(
         /* [in] */ Int32 size,
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ Int32 offset);
 
-    CARAPI glDeleteBuffers(
+    CARAPI GlDeleteBuffers(
         /* [in] */ Int32 n,
         /* [in] */ ArrayOf<Int32>* buffers,
         /* [in] */ Int32 offset);
 
-    CARAPI glDeleteBuffers(
+    CARAPI GlDeleteBuffers(
         /* [in] */ Int32 n,
         /* [in] */ IInt32Buffer* buffers
     );
 
-    CARAPI glDrawElements(
+    CARAPI GlDrawElements(
         /* [in] */ Int32 mode,
         /* [in] */ Int32 count,
         /* [in] */ Int32 type,
         /* [in] */ Int32 offset);
 
-    CARAPI glGenBuffers(
+    CARAPI GlGenBuffers(
         /* [in] */ Int32 n,
         /* [in] */ ArrayOf<Int32>* buffers,
         /* [in] */ Int32 offset);
 
-    CARAPI glGenBuffers(
+    CARAPI GlGenBuffers(
         /* [in] */ Int32 n,
         /* [in] */ IInt32Buffer* buffers);
 
-    CARAPI glGetBooleanv(
+    CARAPI GlGetBooleanv(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Boolean>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetBooleanv(
+    CARAPI GlGetBooleanv(
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glGetBufferParameteriv(
+    CARAPI GlGetBufferParameteriv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetBufferParameteriv(
+    CARAPI GlGetBufferParameteriv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glGetClipPlanef(
+    CARAPI GlGetClipPlanef(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* eqn,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetClipPlanef(
+    CARAPI GlGetClipPlanef(
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* eqn);
 
-    CARAPI glGetClipPlanex(
+    CARAPI GlGetClipPlanex(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* eqn,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetClipPlanex(
+    CARAPI GlGetClipPlanex(
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* eqn);
 
-    CARAPI glGetFixedv(
+    CARAPI GlGetFixedv(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetFixedv(
+    CARAPI GlGetFixedv(
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glGetFloatv(
+    CARAPI GlGetFloatv(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetFloatv(
+    CARAPI GlGetFloatv(
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glGetLightfv(
+    CARAPI GlGetLightfv(
         /* [in] */ Int32 light,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetLightfv(
+    CARAPI GlGetLightfv(
         /* [in] */ Int32 light,
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glGetLightxv(
+    CARAPI GlGetLightxv(
         /* [in] */ Int32 light,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetLightxv(
+    CARAPI GlGetLightxv(
         /* [in] */ Int32 light,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glGetMaterialfv(
+    CARAPI GlGetMaterialfv(
         /* [in] */ Int32 face,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetMaterialfv(
+    CARAPI GlGetMaterialfv(
         /* [in] */ Int32 face,
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glGetMaterialxv(
+    CARAPI GlGetMaterialxv(
         /* [in] */ Int32 face,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetMaterialxv(
+    CARAPI GlGetMaterialxv(
         /* [in] */ Int32 face,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glGetTexEnviv(
+    CARAPI GlGetTexEnviv(
         /* [in] */ Int32 env,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetTexEnviv(
+    CARAPI GlGetTexEnviv(
         /* [in] */ Int32 env,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glGetTexEnvxv(
+    CARAPI GlGetTexEnvxv(
         /* [in] */ Int32 env,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetTexEnvxv(
+    CARAPI GlGetTexEnvxv(
         /* [in] */ Int32 env,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glGetTexParameterfv(
+    CARAPI GlGetTexParameterfv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetTexParameterfv(
+    CARAPI GlGetTexParameterfv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glGetTexParameteriv(
+    CARAPI GlGetTexParameteriv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetTexParameteriv(
+    CARAPI GlGetTexParameteriv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glGetTexParameterxv(
+    CARAPI GlGetTexParameterxv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetTexParameterxv(
+    CARAPI GlGetTexParameterxv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glIsBuffer(
+    CARAPI GlIsBuffer(
         /* [in] */ Int32 buffer,
         /* [out] */ Boolean* result);
 
-    CARAPI glIsEnabled(
+    CARAPI GlIsEnabled(
         /* [in] */ Int32 cap,
         /* [out] */ Boolean* result);
 
-    CARAPI glIsTexture(
+    CARAPI GlIsTexture(
         /* [in] */ Int32 texture,
         /* [out] */ Boolean* result);
 
-    CARAPI glNormalPointer(
+    CARAPI GlNormalPointer(
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ Int32 offset);
 
-    CARAPI glPointParameterf(
+    CARAPI GlPointParameterf(
         /* [in] */ Int32 pname,
         /* [in] */ Float param);
 
-    CARAPI glPointParameterfv(
+    CARAPI GlPointParameterfv(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glPointParameterfv(
+    CARAPI GlPointParameterfv(
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glPointParameterx(
+    CARAPI GlPointParameterx(
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glPointParameterxv(
+    CARAPI GlPointParameterxv(
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glPointParameterxv(
+    CARAPI GlPointParameterxv(
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glPointSizePointerOES(
+    CARAPI GlPointSizePointerOES(
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ IBuffer* pointer);
 
-    CARAPI glTexCoordPointer(
+    CARAPI GlTexCoordPointer(
         /* [in] */ Int32 size,
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ Int32 offset);
 
-    CARAPI glTexEnvi(
+    CARAPI GlTexEnvi(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glTexEnviv(
+    CARAPI GlTexEnviv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glTexEnviv(
+    CARAPI GlTexEnviv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glTexParameteri(
+    CARAPI GlTexParameteri(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glTexParameteriv(
+    CARAPI GlTexParameteriv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glTexParameteriv(
+    CARAPI GlTexParameteriv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glTexParameterxv(
+    CARAPI GlTexParameterxv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glTexParameterxv(
+    CARAPI GlTexParameterxv(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glVertexPointer(
+    CARAPI GlVertexPointer(
         /* [in] */ Int32 size,
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ Int32 offset);
 
-    CARAPI glCurrentPaletteMatrixOES(
+    CARAPI GlCurrentPaletteMatrixOES(
         /* [in] */ Int32 matrixpaletteindex);
 
-    CARAPI glDrawTexfOES(
+    CARAPI GlDrawTexfOES(
         /* [in] */ Float x,
         /* [in] */ Float y,
         /* [in] */ Float z,
         /* [in] */ Float width,
         /* [in] */ Float height);
 
-    CARAPI glDrawTexfvOES(
+    CARAPI GlDrawTexfvOES(
         /* [in] */ ArrayOf<Float>* coords,
         /* [in] */ Int32 offset);
 
-    CARAPI glDrawTexfvOES(
+    CARAPI GlDrawTexfvOES(
         /* [in] */ IFloatBuffer* coords);
 
-    CARAPI glDrawTexiOES(
+    CARAPI GlDrawTexiOES(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ Int32 z,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
 
-    CARAPI glDrawTexivOES(
+    CARAPI GlDrawTexivOES(
         /* [in] */ ArrayOf<Int32>* coords,
         /* [in] */ Int32 offset);
 
-    CARAPI glDrawTexivOES(
+    CARAPI GlDrawTexivOES(
         /* [in] */ IInt32Buffer* coords);
 
-    CARAPI glDrawTexsOES(
+    CARAPI GlDrawTexsOES(
         /* [in] */ Int16 x,
         /* [in] */ Int16 y,
         /* [in] */ Int16 z,
         /* [in] */ Int16 width,
         /* [in] */ Int16 height);
 
-    CARAPI glDrawTexsvOES(
+    CARAPI GlDrawTexsvOES(
         /* [in] */ ArrayOf<Int16>* coords,
         /* [in] */ Int32 offset);
 
-    CARAPI glDrawTexsvOES(
+    CARAPI GlDrawTexsvOES(
         /* [in] */ IInt16Buffer* coords);
 
-    CARAPI glDrawTexxOES(
+    CARAPI GlDrawTexxOES(
         /* [in] */ Int32 x,
         /* [in] */ Int32 y,
         /* [in] */ Int32 z,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
 
-    CARAPI glDrawTexxvOES(
+    CARAPI GlDrawTexxvOES(
         /* [in] */ ArrayOf<Int32>* coords,
         /* [in] */ Int32 offset);
 
-    CARAPI glDrawTexxvOES(
+    CARAPI GlDrawTexxvOES(
         /* [in] */ IInt32Buffer* coords);
 
-    CARAPI glLoadPaletteFromModelViewMatrixOES();
+    CARAPI GlLoadPaletteFromModelViewMatrixOES();
 
-    CARAPI glMatrixIndexPointerOES(
+    CARAPI GlMatrixIndexPointerOES(
         /* [in] */ Int32 size,
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ IBuffer* pointer);
 
-    CARAPI glMatrixIndexPointerOES(
+    CARAPI GlMatrixIndexPointerOES(
         /* [in] */ Int32 size,
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ Int32 offset);
 
-    CARAPI glWeightPointerOES(
+    CARAPI GlWeightPointerOES(
         /* [in] */ Int32 size,
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ IBuffer* pointer);
 
-    CARAPI glWeightPointerOES(
+    CARAPI GlWeightPointerOES(
         /* [in] */ Int32 size,
         /* [in] */ Int32 type,
         /* [in] */ Int32 stride,
         /* [in] */ Int32 offset);
 
-    CARAPI glBindFramebufferOES(
+    CARAPI GlBindFramebufferOES(
         /* [in] */ Int32 target,
         /* [in] */ Int32 framebuffer);
 
-    CARAPI glBindRenderbufferOES(
+    CARAPI GlBindRenderbufferOES(
         /* [in] */ Int32 target,
         /* [in] */ Int32 renderbuffer);
 
-    CARAPI glBlendEquation(
+    CARAPI GlBlendEquation(
         /* [in] */ Int32 mode);
 
-    CARAPI glBlendEquationSeparate(
+    CARAPI GlBlendEquationSeparate(
         /* [in] */ Int32 modeRGB,
         /* [in] */ Int32 modeAlpha);
 
-    CARAPI glBlendFuncSeparate(
+    CARAPI GlBlendFuncSeparate(
         /* [in] */ Int32 srcRGB,
         /* [in] */ Int32 dstRGB,
         /* [in] */ Int32 srcAlpha,
         /* [in] */ Int32 dstAlpha);
 
-    CARAPI glCheckFramebufferStatusOES(
+    CARAPI GlCheckFramebufferStatusOES(
         /* [in] */ Int32 target,
         /* [out] */ Int32* status);
 
-    CARAPI glDeleteFramebuffersOES(
+    CARAPI GlDeleteFramebuffersOES(
         /* [in] */ Int32 n,
         /* [in] */ ArrayOf<Int32>* framebuffers,
         /* [in] */ Int32 offset);
 
-    CARAPI glDeleteFramebuffersOES(
+    CARAPI GlDeleteFramebuffersOES(
         /* [in] */ Int32 n,
         /* [in] */ IInt32Buffer* framebuffers);
 
-    CARAPI glDeleteRenderbuffersOES(
+    CARAPI GlDeleteRenderbuffersOES(
         /* [in] */ Int32 n,
         /* [in] */ ArrayOf<Int32>* renderbuffers,
         /* [in] */ Int32 offset);
 
-    CARAPI glDeleteRenderbuffersOES(
+    CARAPI GlDeleteRenderbuffersOES(
         /* [in] */ Int32 n,
         /* [in] */ IInt32Buffer* renderbuffers);
 
-    CARAPI glFramebufferRenderbufferOES(
+    CARAPI GlFramebufferRenderbufferOES(
         /* [in] */ Int32 target,
         /* [in] */ Int32 attachment,
         /* [in] */ Int32 renderbuffertarget,
         /* [in] */ Int32 renderbuffer);
 
-    CARAPI glFramebufferTexture2DOES(
+    CARAPI GlFramebufferTexture2DOES(
         /* [in] */ Int32 target,
         /* [in] */ Int32 attachment,
         /* [in] */ Int32 textarget,
         /* [in] */ Int32 texture,
         /* [in] */ Int32 level);
 
-    CARAPI glGenerateMipmapOES(
+    CARAPI GlGenerateMipmapOES(
         /* [in] */ Int32 target);
 
-    CARAPI glGenFramebuffersOES(
+    CARAPI GlGenFramebuffersOES(
         /* [in] */ Int32 n,
         /* [in] */ ArrayOf<Int32>* framebuffers,
         /* [in] */ Int32 offset);
 
-    CARAPI glGenFramebuffersOES(
+    CARAPI GlGenFramebuffersOES(
         /* [in] */ Int32 n,
         /* [in] */ IInt32Buffer* framebuffers);
 
-    CARAPI glGenRenderbuffersOES(
+    CARAPI GlGenRenderbuffersOES(
         /* [in] */ Int32 n,
         /* [in] */ ArrayOf<Int32>* renderbuffers,
         /* [in] */ Int32 offset);
 
-    CARAPI glGenRenderbuffersOES(
+    CARAPI GlGenRenderbuffersOES(
         /* [in] */ Int32 n,
         /* [in] */ IInt32Buffer* renderbuffers);
 
-    CARAPI glGetFramebufferAttachmentParameterivOES(
+    CARAPI GlGetFramebufferAttachmentParameterivOES(
         /* [in] */ Int32 target,
         /* [in] */ Int32 attachment,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetFramebufferAttachmentParameterivOES(
+    CARAPI GlGetFramebufferAttachmentParameterivOES(
         /* [in] */ Int32 target,
         /* [in] */ Int32 attachment,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glGetRenderbufferParameterivOES(
+    CARAPI GlGetRenderbufferParameterivOES(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetRenderbufferParameterivOES(
+    CARAPI GlGetRenderbufferParameterivOES(
         /* [in] */ Int32 target,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glGetTexGenfv(
+    CARAPI GlGetTexGenfv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetTexGenfv(
+    CARAPI GlGetTexGenfv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glGetTexGeniv(
+    CARAPI GlGetTexGeniv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetTexGeniv(
+    CARAPI GlGetTexGeniv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glGetTexGenxv(
+    CARAPI GlGetTexGenxv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glGetTexGenxv(
+    CARAPI GlGetTexGenxv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glIsFramebufferOES(
+    CARAPI GlIsFramebufferOES(
         /* [in] */ Int32 framebuffer,
         /* [out] */ Boolean* result);
 
-    CARAPI glIsRenderbufferOES(
+    CARAPI GlIsRenderbufferOES(
         /* [in] */ Int32 renderbuffer,
         /* [out] */ Boolean* result);
 
-    CARAPI glRenderbufferStorageOES(
+    CARAPI GlRenderbufferStorageOES(
         /* [in] */ Int32 target,
         /* [in] */ Int32 internalformat,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);
 
-    CARAPI glTexGenf(
+    CARAPI GlTexGenf(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ Float param);
 
-    CARAPI glTexGenfv(
+    CARAPI GlTexGenfv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Float>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glTexGenfv(
+    CARAPI GlTexGenfv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ IFloatBuffer* params);
 
-    CARAPI glTexGeni(
+    CARAPI GlTexGeni(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glTexGeniv(
+    CARAPI GlTexGeniv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glTexGeniv(
+    CARAPI GlTexGeniv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
 
-    CARAPI glTexGenx(
+    CARAPI GlTexGenx(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ Int32 param);
 
-    CARAPI glTexGenxv(
+    CARAPI GlTexGenxv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ ArrayOf<Int32>* params,
         /* [in] */ Int32 offset);
 
-    CARAPI glTexGenxv(
+    CARAPI GlTexGenxv(
         /* [in] */ Int32 coord,
         /* [in] */ Int32 pname,
         /* [in] */ IInt32Buffer* params);
@@ -1545,8 +1547,9 @@ private:
         CARAPI_(String) ParamsToString(
             /* [in] */ ArrayOf<T>* array);
 
-    CARAPI_(String) ParamsToString(
-        /* [in] */ IBuffer* buf);
+    template<typename T>
+        CARAPI_(String) ParamsToString(
+            /* [in] */ T* buf);
 
 private:
     static const Int32 FORMAT_INT = 0;

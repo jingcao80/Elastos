@@ -3,14 +3,14 @@
 #define __ELASTOS_DROID_SERVER_WIREDACCESSORYMANAGER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "input/CInputManagerService.h"
+#include "elastos/droid/server/input/CInputManagerService.h"
 #include "elastos/droid/os/UEventObserver.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "elastos/droid/os/Handler.h"
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Utility::Etl::List;
 using Elastos::Droid::Os::UEventObserver;
-using Elastos::Droid::Os::HandlerBase;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Server::Input::CInputManagerService;
 
@@ -25,13 +25,13 @@ friend class WiredAccessoryObserver;
 
 public:
     class MyHandler
-        : public HandlerBase
+        : public Handler
     {
     public:
         MyHandler(
             /* [in] */ ILooper* looper,
             /* [in] */ WiredAccessoryManager* service)
-            : HandlerBase(looper, NULL, TRUE)
+            : Handler(looper, NULL, TRUE)
             , mHost(service)
         {}
 
@@ -47,13 +47,14 @@ public:
     {
     private:
         class UEventInfo
-            : public ElRefBase
+            : public Object
         {
         public:
             UEventInfo(
                 /* [in] */ const String& devName,
                 /* [in] */ Int32 state1Bits,
-                /* [in] */ Int32 state2Bits);
+                /* [in] */ Int32 state2Bits,
+                /* [in] */ Int32 stateNbits);
 
             String GetDevName();
 
@@ -71,6 +72,7 @@ public:
             String mDevName;
             Int32 mState1Bits;
             Int32 mState2Bits;
+            Int32 mStateNbits;
         };
 
     public:
@@ -82,7 +84,7 @@ public:
         CARAPI_(void) Init();
 
         CARAPI_(void) OnUEvent(
-            /* [in] */ UEventObserver::UEvent* event);
+            /* [in] */ IUEvent* event);
 
     private:
         CARAPI_(AutoPtr< List<AutoPtr<UEventInfo> > >) MakeObservedUEventList();
@@ -129,13 +131,15 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ CInputManagerService* inputManager);
 
-    CARAPI_(void) NotifyWiredAccessoryChanged(
+    CARAPI NotifyWiredAccessoryChanged(
         /* [in] */ Int64 whenNanos,
         /* [in] */ Int32 switchValues,
         /* [in] */ Int32 switchMask);
 
+    CARAPI SystemReady();
+
 private:
-    CARAPI_(void) BootCompleted();
+    CARAPI_(void) OnSystemReady();
 
     CARAPI_(void) UpdateLocked(
         /* [in] */ const String& newName,
@@ -170,9 +174,11 @@ private:
     static const Int32 BIT_USB_HEADSET_ANLG = (1 << 2);
     static const Int32 BIT_USB_HEADSET_DGTL = (1 << 3);
     static const Int32 BIT_HDMI_AUDIO = (1 << 4);
-    static const Int32 SUPPORTED_HEADSETS = (BIT_HEADSET|BIT_HEADSET_NO_MIC|
-                                                   BIT_USB_HEADSET_ANLG|BIT_USB_HEADSET_DGTL|
-                                                   BIT_HDMI_AUDIO);
+    static const Int32 BIT_LINEOUT = (1 << 4);
+    static const Int32 SUPPORTED_HEADSETS =
+        (BIT_HEADSET|BIT_HEADSET_NO_MIC|
+        BIT_USB_HEADSET_ANLG|BIT_USB_HEADSET_DGTL|
+        BIT_HDMI_AUDIO|BIT_LINEOUT);
 
     static const String NAME_H2W;
     static const String NAME_USB_AUDIO;
@@ -180,6 +186,8 @@ private:
     static const String NAME_HDMI;
 
     static const Int32 MSG_NEW_DEVICE_STATE = 1;
+    static const Int32 MSG_SYSTEM_READY = 2;
+
 
     Object mLock;
 

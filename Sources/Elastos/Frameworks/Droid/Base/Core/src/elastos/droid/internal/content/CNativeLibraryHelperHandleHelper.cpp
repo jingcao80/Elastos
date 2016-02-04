@@ -17,18 +17,18 @@ ECode CNativeLibraryHelperHandleHelper::Create(
     return CNativeLibraryHelperHandle::Create(packageFile, handle);
 }
 
-ECode CNativeLibraryHelperHandleHelper::Create(
-    /* [in] */ Handle32 pkg,
+ECode CNativeLibraryHelperHandleHelper::CreatePackage(
+    /* [in] */ Handle64 pkg,
     /* [out] */ INativeLibraryHelperHandle** handle)
 {
-    return CNativeLibraryHelperHandle::Create(pkg, handle);
+    return CNativeLibraryHelperHandle::CreatePackage(pkg, handle);
 }
 
-ECode CNativeLibraryHelperHandleHelper::Create(
-    /* [in] */ IPackageLite* lite,
+ECode CNativeLibraryHelperHandleHelper::CreatePackageLite(
+    /* [in] */ Handle64 lite,
     /* [out] */ INativeLibraryHelperHandle** handle)
 {
-    return CNativeLibraryHelperHandle::Create(lite, handle);
+    return CNativeLibraryHelperHandle::CreatePackageLite(lite, handle);
 }
 
 } // namespace Content

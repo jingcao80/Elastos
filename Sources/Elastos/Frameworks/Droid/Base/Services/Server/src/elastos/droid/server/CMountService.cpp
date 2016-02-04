@@ -207,7 +207,7 @@ CMountService::ObbState::ObbState(
     /* [in] */ const String& rawPath,
     /* [in] */ const String& canonicalPath,
     /* [in] */ Int32 callingUid,
-    /* [in] */ IObbActionListener* token,
+    /* [in] */ IIObbActionListener* token,
     /* [in] */ Int32 nonce,
     /* [in] */ CMountService* host)
     : mRawPath(rawPath)
@@ -436,7 +436,7 @@ ECode CMountService::UsbBroadcastReceiver::OnReceive(
 
 
 CMountService::MountServiceBinderListener::MountServiceBinderListener(
-    /* [in] */ IMountServiceListener* listener,
+    /* [in] */ IIMountServiceListener* listener,
     /* [in] */ CMountService* host)
     : mListener(listener)
     , mHost(host)
@@ -447,7 +447,7 @@ CAR_INTERFACE_IMPL(CMountService::MountServiceBinderListener, IProxyDeathRecipie
 ECode CMountService::MountServiceBinderListener::ProxyDied()
 {
     if (LOCAL_LOGD) {
-        Slogger::D(TAG, "An IMountServiceListener has died!");
+        Slogger::D(TAG, "An IIMountServiceListener has died!");
     }
     AutoLock lock(mHost->mListenersLock);
     AutoPtr<IProxy> proxy = (IProxy*)mListener->Probe(EIID_IProxy);
@@ -1318,12 +1318,12 @@ ECode CMountService::OnEvent(
 
     if (DEBUG_EVENTS) {
         StringBuilder builder("OnEvent::");
-        builder.AppendCStr(" raw= ");
+        builder.Append(" raw= ");
         builder.AppendString(raw);
         //if (cooked != NULL) {
-        builder.AppendCStr(" cooked = " );
+        builder.Append(" cooked = " );
         for (Int32 i = 0; i < cooked.GetLength(); i++) {
-                builder.AppendCStr(" ");
+                builder.Append(" ");
                 builder.AppendString(cooked[i]);
         }
         //}
@@ -2095,7 +2095,7 @@ void CMountService::SystemReady()
 }
 
 ECode CMountService::RegisterListener(
-    /* [in] */ IMountServiceListener* listener)
+    /* [in] */ IIMountServiceListener* listener)
 {
     AutoLock lock(mListenersLock);
     AutoPtr<MountServiceBinderListener> bl = new MountServiceBinderListener(listener, this);
@@ -2115,7 +2115,7 @@ ECode CMountService::RegisterListener(
 }
 
 ECode CMountService::UnregisterListener(
-    /* [in] */ IMountServiceListener* listener)
+    /* [in] */ IIMountServiceListener* listener)
 {
     AutoLock lock(mListenersLock);
     List<AutoPtr<MountServiceBinderListener> >::Iterator iter = mListeners.Begin();
@@ -3083,7 +3083,7 @@ ECode CMountService::MountObb(
     /* [in] */ const String& rawPath,
     /* [in] */ const String& canonicalPath,
     /* [in] */ const String& key,
-    /* [in] */ IObbActionListener* token,
+    /* [in] */ IIObbActionListener* token,
     /* [in] */ Int32 nonce)
 {
     // Preconditions.checkNotNull(rawPath, "rawPath cannot be NULL");
@@ -3113,7 +3113,7 @@ ECode CMountService::MountObb(
 ECode CMountService::UnmountObb(
     /* [in] */ const String& rawPath,
     /* [in] */ Boolean force,
-    /* [in] */ IObbActionListener* token,
+    /* [in] */ IIObbActionListener* token,
     /* [in] */ Int32 nonce)
 {
     // Preconditions.checkNotNull(rawPath, "rawPath cannot be NULL");

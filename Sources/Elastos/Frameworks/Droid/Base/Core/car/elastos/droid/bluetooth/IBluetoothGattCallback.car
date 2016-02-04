@@ -1,0 +1,128 @@
+
+module
+{
+
+    interface Elastos.Droid.Os.IParcelUuid;
+    interface Elastos.Droid.Bluetooth.LE.IAdvertiseSettings;
+    interface Elastos.Droid.Bluetooth.LE.IScanResult;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+    /**
+     * Callback definitions for interacting with BLE / GATT
+     * @hide
+     */
+    [oneway, deprecated]
+    interface IIBluetoothGattCallback {
+        OnClientRegistered(
+            [in] Int32 status,
+            [in] Int32 clientIf);
+
+        OnClientConnectionState(
+            [in] Int32 status,
+            [in] Int32 clientIf,
+            [in] Boolean connected,
+            [in] String address);
+
+        OnScanResult(
+            [in] IScanResult* scanResult);
+
+        OnBatchScanResults(
+            [in] IList* batchResults);
+
+        OnGetService(
+            [in] String address,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstId,
+            [in] IParcelUuid* srvcUuid);
+
+        OnGetIncludedService(
+            [in] String address,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstId,
+            [in] IParcelUuid* srvcUuid,
+            [in] Int32 inclSrvcType,
+            [in] Int32 inclSrvcInstId,
+            [in] IParcelUuid* inclSrvcUuid);
+
+        OnGetCharacteristic(
+            [in] String address,
+            [in] Int32 srvcType,
+            [in] Int32 srvcInstId,
+            [in] IParcelUuid* srvcUuid,
+            [in] Int32 charInstId,
+            [in] IParcelUuid* charUuid,
+            [in] Int32 charProps);
+
+        OnGetDescriptor(
+            [in] String address, [in] Int32 srvcType,
+            [in] Int32 srvcInstId, [in] IParcelUuid* srvcUuid,
+            [in] Int32 charInstId, [in] IParcelUuid* charUuid,
+            [in] Int32 descrInstId, [in] IParcelUuid* descrUuid);
+
+        OnSearchComplete(
+            [in] String address,
+            [in] Int32 status);
+
+        OnCharacteristicRead(
+            [in] String address, [in] Int32 status, [in] Int32 srvcType,
+            [in] Int32 srvcInstId, [in] IParcelUuid* srvcUuid,
+            [in] Int32 charInstId, [in] IParcelUuid* charUuid,
+            [in] ArrayOf<Byte>* value);
+
+        OnCharacteristicWrite(
+            [in] String address, [in] Int32 status, [in] Int32 srvcType,
+            [in] Int32 srvcInstId, [in] IParcelUuid* srvcUuid,
+            [in] Int32 charInstId, [in] IParcelUuid* charUuid);
+
+        OnExecuteWrite(
+            [in] String address,
+            [in] Int32 status);
+
+        OnDescriptorRead(
+            [in] String address, [in] Int32 status, [in] Int32 srvcType,
+            [in] Int32 srvcInstId, [in] IParcelUuid* srvcUuid,
+            [in] Int32 charInstId, [in] IParcelUuid* charUuid,
+            [in] Int32 descrInstId, [in] IParcelUuid* descrUuid,
+            [in] ArrayOf<Byte>* value);
+
+        OnDescriptorWrite(
+            [in] String address, [in] Int32 status, [in] Int32 srvcType,
+            [in] Int32 srvcInstId, [in] IParcelUuid* srvcUuid,
+            [in] Int32 charInstId, [in] IParcelUuid* charUuid,
+            [in] Int32 descrInstId, [in] IParcelUuid* descrUuid);
+
+        OnNotify(
+            [in] String address, [in] Int32 srvcType,
+            [in] Int32 srvcInstId, [in] IParcelUuid* srvcUuid,
+            [in] Int32 charInstId, [in] IParcelUuid* charUuid,
+            [in] ArrayOf<Byte>* value);
+
+        OnReadRemoteRssi(
+            [in] String address,
+            [in] Int32 rssi,
+            [in] Int32 status);
+
+        OnMultiAdvertiseCallback(
+            [in] Int32 status,
+            [in] Boolean isStart,
+            [in] IAdvertiseSettings* advertiseSettings);
+
+        OnConfigureMTU(
+            [in] String address,
+            [in] Int32 mtu,
+            [in] Int32 status);
+
+        OnFoundOrLost(
+            [in] Boolean onFound,
+            [in] IScanResult* scanResult);
+    }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

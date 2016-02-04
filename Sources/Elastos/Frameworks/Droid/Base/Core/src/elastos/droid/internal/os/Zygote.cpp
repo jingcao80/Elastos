@@ -46,8 +46,6 @@ namespace Droid {
 namespace Internal {
 namespace Os {
 
-static pid_t sSystemServerPid;
-
 AutoPtr<IZygoteHooks> InitZygoteHooks()
 {
     AutoPtr<IZygoteHooks> hooks;
@@ -153,7 +151,7 @@ void Zygote::AppendQuotedShellArgs(
 }
 
 using android::String8;
-static pid_t gSystemServerPid = 0;
+static pid_t sSystemServerPid = 0;
 
 // Must match values in com.android.internal.os.Zygote.
 enum MountExternalKind {
@@ -193,7 +191,7 @@ static void SigChldHandler(int /*signal_number*/)
         // If the just-crashed process is the system_server, bring down zygote
         // so that it is restarted by init and system server will be restarted
         // from there.
-        if (pid == gSystemServerPid) {
+        if (pid == sSystemServerPid) {
             Logger::E(TAG, "Exit zygote because system server (%d) has terminated");
             kill(getpid(), SIGKILL);
         }
@@ -704,7 +702,7 @@ Int32 Zygote::NativeForkSystemServer(
     if (pid > 0) {
         // The zygote process checks whether the child process has died or not.
         Logger::I(TAG, "System server process %d has been created", pid);
-        gSystemServerPid = pid;
+        sSystemServerPid = pid;
         // There is a slight window that the system server process has crashed
         // but it went unnoticed because we haven't published its pid yet. So
          // we recheck here just to make sure that all is well.

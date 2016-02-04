@@ -9,7 +9,7 @@ namespace Droid {
 namespace Graphics {
 
 CAR_SINGLETON_IMPL(CColor);
-CAR_INTERFACE_IMPL(CColor, Object, IColor);
+CAR_INTERFACE_IMPL(CColor, Singleton, IColor);
 ECode CColor::Alpha(
     /* [in] */ Int32 color,
     /* [out] */ Int32* alpha)

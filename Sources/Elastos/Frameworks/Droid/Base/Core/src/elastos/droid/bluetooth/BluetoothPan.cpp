@@ -1,14 +1,14 @@
-
-#include "BluetoothPan.h"
-#include "CBluetoothAdapter.h"
-#include "CBluetoothPanStateChangeCallback.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/bluetooth/BluetoothPan.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/droid/bluetooth/CBluetoothPanStateChangeCallback.h"
 #include "elastos/droid/content/CIntent.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::CIntent;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -17,13 +17,12 @@ namespace Bluetooth {
 //====================================================
 // BluetoothPan::ServiceConnection
 //====================================================
+CAR_INTERFACE_IMPL(BluetoothPan::ServiceConnection, Object, IServiceConnection);
 
 BluetoothPan::ServiceConnection::ServiceConnection(
     /* [in] */ BluetoothPan* host)
     : mHost(host)
 {}
-
-CAR_INTERFACE_IMPL(BluetoothPan::ServiceConnection, IServiceConnection)
 
 ECode BluetoothPan::ServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
@@ -57,18 +56,23 @@ ECode BluetoothPan::ServiceConnection::OnServiceDisconnected(
 const String BluetoothPan::TAG("BluetoothPan");
 const Boolean BluetoothPan::DBG = TRUE;
 const Boolean BluetoothPan::VDBG = FALSE;
-const String BluetoothPan::ACTION_CONNECTION_STATE_CHANGED("android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED");
-const String BluetoothPan::EXTRA_LOCAL_ROLE("android.bluetooth.pan.extra.LOCAL_ROLE");
-const Int32 BluetoothPan::PAN_ROLE_NONE;
-const Int32 BluetoothPan::LOCAL_NAP_ROLE;
-const Int32 BluetoothPan::REMOTE_NAP_ROLE;
-const Int32 BluetoothPan::LOCAL_PANU_ROLE;
-const Int32 BluetoothPan::REMOTE_PANU_ROLE;
-const Int32 BluetoothPan::PAN_DISCONNECT_FAILED_NOT_CONNECTED;
-const Int32 BluetoothPan::PAN_CONNECT_FAILED_ALREADY_CONNECTED;
-const Int32 BluetoothPan::PAN_CONNECT_FAILED_ATTEMPT_FAILED;
-const Int32 BluetoothPan::PAN_OPERATION_GENERIC_FAILURE;
-const Int32 BluetoothPan::PAN_OPERATION_SUCCESS;
+//const String BluetoothPan::ACTION_CONNECTION_STATE_CHANGED("android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED");
+//const String BluetoothPan::EXTRA_LOCAL_ROLE("android.bluetooth.pan.extra.LOCAL_ROLE");
+//const Int32 BluetoothPan::PAN_ROLE_NONE;
+//const Int32 BluetoothPan::LOCAL_NAP_ROLE;
+//const Int32 BluetoothPan::REMOTE_NAP_ROLE;
+//const Int32 BluetoothPan::LOCAL_PANU_ROLE;
+//const Int32 BluetoothPan::REMOTE_PANU_ROLE;
+//const Int32 BluetoothPan::PAN_DISCONNECT_FAILED_NOT_CONNECTED;
+//const Int32 BluetoothPan::PAN_CONNECT_FAILED_ALREADY_CONNECTED;
+//const Int32 BluetoothPan::PAN_CONNECT_FAILED_ATTEMPT_FAILED;
+//const Int32 BluetoothPan::PAN_OPERATION_GENERIC_FAILURE;
+//const Int32 BluetoothPan::PAN_OPERATION_SUCCESS;
+CAR_INTERFACE_IMPL_2(BluetoothPan, Object, IBluetoothPan, IBluetoothProfile);
+
+BluetoothPan::BluetoothPan()
+{
+}
 
 BluetoothPan::BluetoothPan(
     /* [in] */ IContext* context,
@@ -76,7 +80,7 @@ BluetoothPan::BluetoothPan(
     : mContext(context)
     , mServiceListener(listener)
 {
-    CBluetoothPanStateChangeCallback::New(this, (IIBluetoothStateChangeCallback**)&mStateChangeCallback);
+    CBluetoothPanStateChangeCallback::New(TO_IINTERFACE(this), (IIBluetoothStateChangeCallback**)&mStateChangeCallback);
     mConnection = new ServiceConnection(this);
 
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
@@ -103,8 +107,6 @@ BluetoothPan::BluetoothPan(
         Logger::D(TAG, "BluetoothPan(), bindService called");
     }
 }
-
-CAR_INTERFACE_IMPL(BluetoothPan, IBluetoothProfile)
 
 ECode BluetoothPan::Close()
 {
@@ -189,7 +191,7 @@ ECode BluetoothPan::Disconnect(
 }
 
 ECode BluetoothPan::GetConnectedDevices(
-    /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices)
+    /* [out, callee] */ IList** devices)
 {
     VALIDATE_NOT_NULL(devices)
     *devices = NULL;
@@ -204,14 +206,14 @@ ECode BluetoothPan::GetConnectedDevices(
         // }
     }
     if (mPanService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
+    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
     REFCOUNT_ADD(*devices)
     return NOERROR;
 }
 
 ECode BluetoothPan::GetDevicesMatchingConnectionStates(
     /* [in] */ ArrayOf<Int32>* states,
-    /* [out, callee] */ ArrayOf<IBluetoothDevice *>** devices)
+    /* [out] */ IList** devices)
 {
     VALIDATE_NOT_NULL(devices)
     *devices = NULL;
@@ -226,7 +228,7 @@ ECode BluetoothPan::GetDevicesMatchingConnectionStates(
         // }
     }
     if (mPanService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
+    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
     REFCOUNT_ADD(*devices)
     return NOERROR;
 }

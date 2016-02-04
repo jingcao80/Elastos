@@ -23,6 +23,21 @@ ECode ByteBufferAsDoubleBuffer::constructor(
     return NOERROR;
 }
 
+ECode ByteBufferAsDoubleBuffer::GetPrimitiveArray(
+    /* [out] */ Handle64* arrayHandle)
+{
+    AutoPtr<ArrayOf<Double> > arrayTmp;
+    GetArray((ArrayOf<Double>**)&arrayTmp);
+    if (arrayTmp == NULL)
+    {
+        *arrayHandle = 0;
+        return NOERROR;
+    }
+    Double* primitiveArray = arrayTmp->GetPayload();
+    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    return NOERROR;
+}
+
 AutoPtr<IDoubleBuffer> ByteBufferAsDoubleBuffer::AsDoubleBuffer(
     /* [in] */ ByteBuffer* mByteBuffer)
 {

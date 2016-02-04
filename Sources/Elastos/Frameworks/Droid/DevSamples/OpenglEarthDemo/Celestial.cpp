@@ -12,7 +12,7 @@ using Elastos::IO::CByteOrderHelper;
 using Elastos::IO::IByteBuffer;
 using Elastos::Droid::Opengl::IGLES20;
 using Elastos::Droid::Opengl::CGLES20;
-using Elastos::Droid::Opengl::CMatrixGL;
+using Elastos::Droid::Opengl::CMatrix;
 using Elastos::Droid::Opengl::IMatrix;
 using Elastos::Droid::Content::Res::IResources;
 

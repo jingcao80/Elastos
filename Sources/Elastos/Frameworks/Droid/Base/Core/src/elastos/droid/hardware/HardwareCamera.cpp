@@ -3190,7 +3190,8 @@ ECode HardwareCamera::StartSmoothZoom(
         sprintf(msg, "invalid zoom value=%d", value);
         // jniThrowException(env, "java/lang/IllegalArgumentException", msg);
         return E_RUNTIME_EXCEPTION;
-    } else if (rc != NOERROR) {
+    }
+    else if (rc != NOERROR) {
         // jniThrowRuntimeException(env, "start smooth zoom failed");
         return E_RUNTIME_EXCEPTION;
     }

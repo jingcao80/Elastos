@@ -1739,7 +1739,7 @@ private:
      * @return true if the parameter is set successfully, false otherwise
      * {@hide}
      */
-    CARAPI_(Boolean) NativeSetParameter(
+    CARAPI NativeSetParameter(
         /* [in] */ Int32 key,
         /* [in] */ IParcel* value);
 

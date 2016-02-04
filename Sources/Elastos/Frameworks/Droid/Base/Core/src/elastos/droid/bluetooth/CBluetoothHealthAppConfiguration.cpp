@@ -1,5 +1,5 @@
 
-#include "CBluetoothHealthAppConfiguration.h"
+#include "elastos/droid/bluetooth/CBluetoothHealthAppConfiguration.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/core/StringBuilder.h>
 
@@ -8,6 +8,10 @@ using Elastos::Core::StringBuilder;
 namespace Elastos {
 namespace Droid {
 namespace Bluetooth {
+
+CAR_INTERFACE_IMPL_2(CBluetoothHealthAppConfiguration, Object, IBluetoothHealthAppConfiguration, IParcelable);
+
+CAR_OBJECT_IMPL(CBluetoothHealthAppConfiguration);
 
 CBluetoothHealthAppConfiguration::CBluetoothHealthAppConfiguration()
     : mDataType(0)
@@ -116,15 +120,15 @@ ECode CBluetoothHealthAppConfiguration::WriteToParcel(
     return NOERROR;
 }
 
-ECode CBluetoothHealthAppConfiguration::constructor()
-{
-    mName = String("");
-    mDataType = 0;
-    mRole = 0;
-    mChannelType = 0;
-
-    return NOERROR;
-}
+//ECode CBluetoothHealthAppConfiguration::constructor()
+//{
+//    mName = String("");
+//    mDataType = 0;
+//    mRole = 0;
+//    mChannelType = 0;
+//
+//    return NOERROR;
+//}
 
 ECode CBluetoothHealthAppConfiguration::constructor(
     /* [in] */ const String& name,

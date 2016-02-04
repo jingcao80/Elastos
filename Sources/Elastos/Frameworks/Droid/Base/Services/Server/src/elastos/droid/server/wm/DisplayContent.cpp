@@ -1,6 +1,7 @@
 
-#include "wm/DisplayContent.h"
-#include "am/ActivityStackSupervisor.h"
+#include "elastos/droid/server/wm/DisplayContent.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/am/ActivityStackSupervisor.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -9,13 +10,13 @@ using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::View::CDisplayInfo;
 using Elastos::Droid::Graphics::RegionOp_DIFFERENCE;
 using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CRegion;
+using Elastos::Droid::Server::Am::ActivityStackSupervisor;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Wm {
-
-CAR_INTERFACE_IMPL(DisplayContent, IInterface)
 
 DisplayContent::DisplayContent(
     /* [in] */ IDisplay* display,
@@ -51,9 +52,9 @@ Int32 DisplayContent::GetDisplayId()
     return mDisplayId;
 }
 
-List< AutoPtr<WindowState> >& DisplayContent::GetWindowList()
+AutoPtr<List<AutoPtr<WindowState> > > DisplayContent::GetWindowList()
 {
-    return mWindows;
+    return &mWindows;
 }
 
 AutoPtr<IDisplay> DisplayContent::GetDisplay()
@@ -80,12 +81,12 @@ Boolean DisplayContent::IsPrivate()
     return (mDisplay->GetFlags(&flags), flags & IDisplay::FLAG_PRIVATE) != 0;
 }
 
-AutoPtr< List<AutoPtr<TaskStack> > > DisplayContent::GetStacks()
+AutoPtr<List<AutoPtr<TaskStack> > > DisplayContent::GetStacks()
 {
     return &mStacks;
 }
 
-AutoPtr< List<AutoPtr<Task> > > DisplayContent::GetTasks()
+AutoPtr<List<AutoPtr<Task> > > DisplayContent::GetTasks()
 {
     mTmpTaskHistory.Clear();
     List<AutoPtr<TaskStack> >::Iterator it = mStacks.Begin();
@@ -102,7 +103,7 @@ AutoPtr< List<AutoPtr<Task> > > DisplayContent::GetTasks()
 AutoPtr<TaskStack> DisplayContent::GetHomeStack()
 {
     if (mHomeStack == NULL && mDisplayId == IDisplay::DEFAULT_DISPLAY) {
-        Slogger::E(TAG, "getHomeStack: Returning null from this=%p", this);
+        Slogger::E(CWindowManagerService::TAG, "getHomeStack: Returning null from this=%p", this);
     }
     return mHomeStack;
 }
@@ -141,13 +142,13 @@ ECode DisplayContent::AttachStack(
 {
     if (stack->mStackId == ActivityStackSupervisor::HOME_STACK_ID) {
         if (mHomeStack != NULL) {
-            Slogger::E(TAG, "attachStack: HOME_STACK_ID (0) not first.");
+            Slogger::E(CWindowManagerService::TAG, "attachStack: HOME_STACK_ID (0) not first.");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         mHomeStack = stack;
     }
     mStacks.PushBack(stack);
-    layoutNeeded = TRUE;
+    mLayoutNeeded = TRUE;
     return NOERROR;
 }
 
@@ -155,14 +156,14 @@ void DisplayContent::MoveStack(
     /* [in] */ TaskStack* stack,
     /* [in] */ Boolean toTop)
 {
-    mStacks.Erase(stack);
+    mStacks.Remove(stack);
     mStacks.Insert(toTop ? mStacks.End() : mStacks.Begin(), stack);
 }
 
 void DisplayContent::DetachStack(
     /* [in] */ TaskStack* stack)
 {
-    mStacks.Erase(stack);
+    mStacks.Remove(stack);
 }
 
 void DisplayContent::Resize(
@@ -195,17 +196,19 @@ void DisplayContent::SetTouchExcludeRegion(
     Int32 width, height;
     mDisplayInfo->GetLogicalWidth(&width);
     mDisplayInfo->GetLogicalHeight(&height);
-    mTouchExcludeRegion->Set(0, 0, width, height);
+    Boolean result;
+    mTouchExcludeRegion->Set(0, 0, width, height, &result);
 
     AutoPtr<WindowList> windows = GetWindowList();
     WindowList::ReverseIterator rit = windows->RBegin();
     for (; rit != windows->REnd(); ++rit) {
         AutoPtr<WindowState> win = *rit;
         AutoPtr<TaskStack> stack = win->GetStack();
-        if (win->IsVisibleLw() && stack != NULL && stack != focusedStack) {
+        Boolean isVisible;
+        if ((win->IsVisibleLw(&isVisible), isVisible) && stack != NULL && stack.Get() != focusedStack) {
             mTmpRect->Set(win->mVisibleFrame);
-            mTmpRect->Intersect(win->mVisibleInsets);
-            mTouchExcludeRegion->Op(mTmpRect, RegionOp_DIFFERENCE);
+            mTmpRect->Intersect(win->mVisibleInsets, &result);
+            mTouchExcludeRegion->Op(mTmpRect, RegionOp_DIFFERENCE, &result);
         }
     }
 }
@@ -218,13 +221,14 @@ void DisplayContent::SwitchUserStacks(
     for (; it != windows->End(); ++it) {
         AutoPtr<WindowState> win = *it;
         if (win->IsHiddenFromUserLocked()) {
-            if (DEBUG_VISIBILITY) {
+            if (CWindowManagerService::DEBUG_VISIBILITY) {
                 Int32 type;
                 win->mAttrs->GetType(&type);
-                Slogger::W(TAG, "user changing %d hiding %p, attrs=%d, belonging to %d"
-                        , newUserId, win.Get(), type, mOwnerUid);
+                Slogger::W(CWindowManagerService::TAG, "user changing %d hiding %p, attrs=%d, belonging to %d"
+                        , newUserId, win.Get(), type, win->mOwnerUid);
             }
-            win->HideLw(FALSE);
+            Boolean result;
+            win->HideLw(FALSE, &result);
         }
     }
 
@@ -311,16 +315,16 @@ void DisplayContent::CheckForDeferredActions()
             if (stack->mDeferDetach) {
                 mService->DetachStackLocked(this, stack);
             }
-            AutoPtr< List<AutoPtr<Task> > > tasks = stack->GetTasks();
+            AutoPtr<List<AutoPtr<Task> > > tasks = stack->GetTasks();
             List<AutoPtr<Task> >::ReverseIterator taskRit = tasks->RBegin();
             for (; taskRit != tasks->REnd(); ++taskRit) {
                 AutoPtr<Task> task = *taskRit;
-                AppTokenList tokens = task->mAppTokens;
-                AppTokenList::ReverseIterator tokenRit = tokens.RBegin();
+                List<AutoPtr<AppWindowToken> > tokens = task->mAppTokens;
+                List<AutoPtr<AppWindowToken> >::ReverseIterator tokenRit = tokens.RBegin();
                 for (; tokenRit != tokens.REnd(); ++tokenRit) {
                     AutoPtr<AppWindowToken> wtoken = *tokenRit;
                     if (wtoken->mDeferRemoval) {
-                        stack->mExitingAppTokens.Erase(wtoken);
+                        stack->mExitingAppTokens.Remove(wtoken);
                         wtoken->mDeferRemoval = FALSE;
                         mService->RemoveAppFromTaskLocked(wtoken);
                     }

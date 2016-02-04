@@ -9,12 +9,11 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CLightingColorFilter);
-
+CAR_INTERFACE_IMPL(CLightingColorFilter, ColorFilter, ILightingColorFilter);
 CLightingColorFilter::CLightingColorFilter()
     : mMul(0)
     , mAdd(0)
-{
-}
+{}
 
 ECode CLightingColorFilter::constructor(
     /* [in] */ Int32 mul,
@@ -24,35 +23,6 @@ ECode CLightingColorFilter::constructor(
     mAdd = add;
     Update();
     return NOERROR;
-}
-
-PInterface CLightingColorFilter::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_ColorFilter) {
-        return reinterpret_cast<PInterface>((ColorFilter*)this);
-    }
-    else if (riid == EIID_ILightingColorFilter) {
-        return (ILightingColorFilter*)this;
-    }
-    return ColorFilter::Probe(riid);
-}
-
-UInt32 CLightingColorFilter::AddRef()
-{
-    return ColorFilter::AddRef();
-}
-
-UInt32 CLightingColorFilter::Release()
-{
-    return ColorFilter::Release();
-}
-
-ECode CLightingColorFilter::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return ColorFilter::GetInterfaceID(object, iid);
 }
 
 ECode CLightingColorFilter::GetColorMultiply(

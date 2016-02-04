@@ -3,7 +3,9 @@
 
 #include "Buffer.h"
 
+using Elastos::Core::IAppendable;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::IComparable;
 
 namespace Elastos {
 namespace IO {
@@ -25,7 +27,11 @@ namespace IO {
  */
 class CharBuffer
     : public Buffer
+    , public IComparable
     , public ICharBuffer
+    , public ICharSequence
+    , public IAppendable
+    , public IReadable
 {
 public:
     CAR_INTERFACE_DECL()
@@ -192,7 +198,7 @@ public:
      *                if {@code otherBuffer} is not a char buffer.
      */
     virtual CARAPI CompareTo(
-        /* [in] */ ICharBuffer* otherBuffer,
+        /* [in] */ IInterface* otherBuffer,
         /* [out] */ Int32* result);
 
     /**
@@ -507,7 +513,7 @@ public:
      *      the char to write.
      * @return this buffer.
      */
-    virtual CARAPI Append(
+    virtual CARAPI AppendChar(
         /* [in] */ Char32 c);
 
     virtual CARAPI Append(

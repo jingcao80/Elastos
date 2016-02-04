@@ -69,6 +69,30 @@ public:
     CARAPI SetDescription(
         /* [in] */ ICharSequence* description);
 
+    CARAPI GetStackId(
+        /* [out] */ Int32* stackId);
+
+    CARAPI SetStackId(
+        /* [in] */ Int32 stackId);
+
+    CARAPI GetUserId(
+        /* [out] */ Int32* userId);
+
+    CARAPI SetUserId(
+        /* [in] */ Int32 userId);
+
+    CARAPI GetFirstActiveTime(
+        /* [out] */ Int64* firstActiveTime);
+
+    CARAPI SetFirstActiveTime(
+        /* [in] */ Int64 firstActiveTime);
+
+    CARAPI GetLastActiveTime(
+        /* [out] */ Int64* lastActiveTime);
+
+    CARAPI SetLastActiveTime(
+        /* [in] */ Int64 lastActiveTime);
+
     /**
      * The recent activity values for the highest activity in the stack to have set the values.
      * {@link Activity#setTaskDescription(android.app.ActivityManager.TaskDescription)}.
@@ -87,6 +111,12 @@ public:
 
     CARAPI SetAffiliatedTaskId(
         /* [in] */ Int32 id);
+
+    CARAPI GetAffiliatedTaskColor(
+        /* [out] */ Int32* color);
+
+    CARAPI SetAffiliatedTaskColor(
+        /* [in] */ Int32 color);
 
 private:
     /**

@@ -13,7 +13,7 @@ namespace Os {
  * SELinux interaction.
  * {@hide}
  */
-class SELinux
+class ECO_PUBLIC SELinux
 {
 public:
     /**

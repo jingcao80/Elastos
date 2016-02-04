@@ -249,9 +249,9 @@ public:
             }
             else {
                 ELA_ASSERT_WITH_BLOCK(buf->RefCount() == 0) {
-                    printf(" >> %s %d\n >> Ref count of share buffer %d isn't zero,"
+                    printf(" >> %s %d\n >> this: %p Ref count of share buffer %d isn't zero,"
                             " and CarQuintetFlag_AutoRefCounted isn't set too. mFlags:%08x, mSize:%d\n",
-                            __FILE__, __LINE__, buf->RefCount(), mFlags, mSize);
+                            __FILE__, __LINE__, this, buf->RefCount(), mFlags, mSize);
                 }
 
                 SharedBuffer::Dealloc(buf, releaseOp);

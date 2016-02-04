@@ -57,8 +57,7 @@ ECode IconMenuView::SavedState::constructor(
     /* [in] */ IParcelable* superState,
     /* [in] */ Int32 focusedPosition)
 {
-    assert(0);
-    // ViewBaseSavedState::constructor(superState);
+    View::BaseSavedState::constructor(superState);
     mFocusedPosition = focusedPosition;
     return NOERROR;
 }
@@ -80,8 +79,7 @@ ECode IconMenuView::SavedState::GetFocusedPosition(
 ECode IconMenuView::SavedState::ReadFromParcel(
     /* [in] */ IParcel *source)
 {
-    assert(0);
-    // ViewBaseSavedState::ReadFromParcel(source);
+    View::BaseSavedState::ReadFromParcel(source);
     source->ReadInt32(&mFocusedPosition);
     return NOERROR;
 }
@@ -89,8 +87,7 @@ ECode IconMenuView::SavedState::ReadFromParcel(
 ECode IconMenuView::SavedState::WriteToParcel(
     /* [in] */ IParcel *dest)
 {
-    assert(0);
-    // ViewBaseSavedState::WriteToParcel(dest);
+    View::BaseSavedState::WriteToParcel(dest);
     dest->WriteInt32(mFocusedPosition);
     return NOERROR;
 }

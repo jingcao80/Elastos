@@ -39,17 +39,32 @@ public:
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 
+    CARAPI SetSessionId(
+        /* [in] */ Int32 id);
+
     /**
      * Return the ID for this session.
      */
     CARAPI GetSessionId(
         /* [out] */ Int32* id);
 
+    CARAPI SetInstallerPackageName(
+        /* [in] */ const String& packageName);
+
     /**
      * Return the package name of the app that owns this session.
      */
     CARAPI GetInstallerPackageName(
         /* [out] */ String* name);
+
+    CARAPI GetResolvedBaseCodePath(
+        /* [out] */ String* path);
+
+    CARAPI SetResolvedBaseCodePath(
+        /* [in] */ const String& path);
+
+    CARAPI SetProgress(
+        /* [in] */ Float progress);
 
     /**
      * Return current overall progress of this session, between 0 and 1.
@@ -62,6 +77,15 @@ public:
      */
     CARAPI GetProgress(
         /* [out] */ Float* progress);
+
+    CARAPI SetSealed(
+        /* [in] */ Boolean sealed);
+
+    CARAPI IsSealed(
+        /* [out] */ Boolean* isSealed);
+
+    CARAPI SetActive(
+        /* [in] */ Boolean active);
 
     /**
      * Return if this session is currently active.
@@ -82,6 +106,21 @@ public:
     CARAPI IsOpen(
         /* [out] */ Boolean* open);
 
+    CARAPI SetMode(
+        /* [in] */ Int32 mode);
+
+    CARAPI GetMode(
+        /* [out] */ Int32* mode);
+
+    CARAPI SetSizeBytes(
+        /* [in] */ Int64 sizeBytes);
+
+    CARAPI GetSizeBytes(
+        /* [out] */ Int64* sizeBytes);
+
+    CARAPI SetAppPackageName(
+        /* [in] */ const String& name);
+
     /**
      * Return the package name this session is working with. May be {@code null}
      * if unknown.
@@ -89,12 +128,18 @@ public:
     CARAPI GetAppPackageName(
         /* [out] */ String* name);
 
+    CARAPI SetAppIcon(
+        /* [in] */ IBitmap* icon);
+
     /**
      * Return an icon representing the app being installed. May be {@code null}
      * if unavailable.
      */
     CARAPI GetAppIcon(
         /* [out] */ IBitmap** icon);
+
+    CARAPI SetAppLabel(
+        /* [in] */ ICharSequence* label);
 
     /**
      * Return a label representing the app being installed. May be {@code null}

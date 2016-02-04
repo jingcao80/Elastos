@@ -2,6 +2,7 @@
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/os/CHandlerThread.h"
+#include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/wifi/CWifiScanner.h"
 #include "elastos/droid/wifi/CWifiScannerHotlistSettings.h"
 #include "elastos/droid/wifi/CWifiScannerWifiChangeSettings.h"
@@ -10,6 +11,7 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::CHandlerThread;
+using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Internal::Utility::CAsyncChannel;
 using Elastos::Droid::Internal::Utility::IProtocol;
 using Elastos::Core::AutoLock;
@@ -155,9 +157,7 @@ ECode CWifiScanner::ServiceHandler::HandleMessage(
 static AutoPtr<ISparseArray> sListenerMap_Init()
 {
     AutoPtr<ISparseArray> array;
-    assert(0);
-    // TODO
-    // CSparseArray::New((ISparseArray**)&array);
+    CSparseArray::New((ISparseArray**)&array);
     return array;
 }
 

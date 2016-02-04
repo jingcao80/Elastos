@@ -166,7 +166,7 @@ ECode ProxyInfo::GetSocketAddress(
     ECode ec = CInetSocketAddress::New(mHost, mPort, (IInetSocketAddress**)&result);
     // } catch (IllegalArgumentException e) { }
     if (FAILED(ec)) {
-        if (ec != E_ILLEGAL_ARGUMENT_EXCEPTION) return ec;
+        if (ec != (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) return ec;
     }
     return NOERROR;
 }
@@ -254,12 +254,12 @@ ECode ProxyInfo::MakeProxy(
         AutoPtr<IInetSocketAddress> inetSocketAddress;
         ECode ec = CInetSocketAddress::New(mHost, mPort, (IInetSocketAddress**)&inetSocketAddress);
         if (FAILED(ec)) {
-            if (ec != E_ILLEGAL_ARGUMENT_EXCEPTION) return ec;
+            if (ec != (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) return ec;
         }
         AutoPtr<Elastos::Net::IProxy> proxy;
         ec = Elastos::Net::CProxy::New(Elastos::Net::ProxyType_HTTP, ISocketAddress::Probe(inetSocketAddress), (Elastos::Net::IProxy**)&proxy);
         if (FAILED(ec)) {
-            if (ec != E_ILLEGAL_ARGUMENT_EXCEPTION) return ec;
+            if (ec != (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) return ec;
         }
         // } catch (IllegalArgumentException e) {
         // }

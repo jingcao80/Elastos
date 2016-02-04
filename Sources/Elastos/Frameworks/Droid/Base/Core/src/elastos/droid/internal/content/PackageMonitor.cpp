@@ -2,15 +2,17 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Net.h"
 #include "elastos/droid/internal/content/PackageMonitor.h"
-// #include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/internal/os/BackgroundThread.h"
+#include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/os/CHandler.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IActivity;
-// using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::EIID_IBroadcastReceiver;
+using Elastos::Droid::Internal::Os::BackgroundThread;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Core::AutoLock;
@@ -24,27 +26,13 @@ namespace Content {
 static AutoPtr<IIntentFilter> InitPackageFilt()
 {
     AutoPtr<IIntentFilter> filter;
-    assert(0 && "CIntentFilter is not implemented!");
-// #ifdef DROID_CORE
-//     AutoPtr<CIntentFilter> cfilter;
-//     ASSERT_SUCCEEDED(CIntentFilter::NewByFriend((CIntentFilter**)&cfilter))
-//     filter = cfilter;
-// #else
-//     ASSERT_SUCCEEDED(CIntentFilter::New((IIntentFilter**)&filter))
-// #endif
-
-    ASSERT_SUCCEEDED(filter->AddAction(
-        String("android.intent.action.PACKAGE_ADDED")/*IIntent::ACTION_PACKAGE_ADDED*/))
-    ASSERT_SUCCEEDED(filter->AddAction(
-        String("android.intent.action.PACKAGE_REMOVED")/*IIntent::ACTION_PACKAGE_REMOVED*/))
-    ASSERT_SUCCEEDED(filter->AddAction(
-        String("android.intent.action.PACKAGE_CHANGED")/*IIntent::ACTION_PACKAGE_CHANGED*/))
-    ASSERT_SUCCEEDED(filter->AddAction(
-        String("android.intent.action.QUERY_PACKAGE_RESTART")/*IIntent::ACTION_QUERY_PACKAGE_RESTART*/))
-    ASSERT_SUCCEEDED(filter->AddAction(
-        String("android.intent.action.PACKAGE_RESTARTED")/*IIntent::ACTION_PACKAGE_RESTARTED*/))
-    ASSERT_SUCCEEDED(filter->AddAction(
-        String("android.intent.action.UID_REMOVED")/*IIntent::ACTION_UID_REMOVED*/))
+    ASSERT_SUCCEEDED(CIntentFilter::New((IIntentFilter**)&filter))
+    ASSERT_SUCCEEDED(filter->AddAction(IIntent::ACTION_PACKAGE_ADDED))
+    ASSERT_SUCCEEDED(filter->AddAction(IIntent::ACTION_PACKAGE_REMOVED))
+    ASSERT_SUCCEEDED(filter->AddAction(IIntent::ACTION_PACKAGE_CHANGED))
+    ASSERT_SUCCEEDED(filter->AddAction(IIntent::ACTION_QUERY_PACKAGE_RESTART))
+    ASSERT_SUCCEEDED(filter->AddAction(IIntent::ACTION_PACKAGE_RESTARTED))
+    ASSERT_SUCCEEDED(filter->AddAction(IIntent::ACTION_UID_REMOVED))
     ASSERT_SUCCEEDED(filter->AddDataScheme(String("package")))
     return filter;
 }
@@ -52,40 +40,18 @@ static AutoPtr<IIntentFilter> InitPackageFilt()
 static AutoPtr<IIntentFilter> InitNonDataFilt()
 {
     AutoPtr<IIntentFilter> filter;
-    assert(0 && "CIntentFilter is not implemented!");
-// #ifdef DROID_CORE
-//     AutoPtr<CIntentFilter> cfilter;
-//     ASSERT_SUCCEEDED(CIntentFilter::NewByFriend((CIntentFilter**)&cfilter))
-//     filter = cfilter;
-// #else
-//     ASSERT_SUCCEEDED(CIntentFilter::New((IIntentFilter**)&filter))
-// #endif
-
-    ASSERT_SUCCEEDED(filter->AddAction(
-        String("android.intent.action.UID_REMOVED")/*IIntent::ACTION_UID_REMOVED*/))
-    ASSERT_SUCCEEDED(filter->AddAction(
-        String("android.intent.action.USER_STOPPED")/*IIntent::ACTION_USER_STOPPED*/))
+    ASSERT_SUCCEEDED(CIntentFilter::New((IIntentFilter**)&filter))
+    ASSERT_SUCCEEDED(filter->AddAction(IIntent::ACTION_UID_REMOVED))
+    ASSERT_SUCCEEDED(filter->AddAction(IIntent::ACTION_USER_STOPPED))
     return filter;
 }
 
 static AutoPtr<IIntentFilter> InitExternalFilt()
 {
     AutoPtr<IIntentFilter> filter;
-    assert(0 && "CIntentFilter is not implemented!");
-// #ifdef DROID_CORE
-//     AutoPtr<CIntentFilter> cfilter;
-//     ASSERT_SUCCEEDED(CIntentFilter::NewByFriend((CIntentFilter**)&cfilter))
-//     filter = cfilter;
-// #else
-//     ASSERT_SUCCEEDED(CIntentFilter::New((IIntentFilter**)&filter))
-// #endif
-
-    ASSERT_SUCCEEDED(filter->AddAction(
-        String("android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE")
-        /*IIntent::ACTION_EXTERNAL_APPLICATIONS_AVAILABLE*/))
-    ASSERT_SUCCEEDED(filter->AddAction(
-        String("android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE")
-        /*IIntent::ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)*/))
+    ASSERT_SUCCEEDED(CIntentFilter::New((IIntentFilter**)&filter))
+    ASSERT_SUCCEEDED(filter->AddAction(IIntent::ACTION_EXTERNAL_APPLICATIONS_AVAILABLE))
+    ASSERT_SUCCEEDED(filter->AddAction(IIntent::ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE))
     return filter;
 }
 
@@ -129,8 +95,7 @@ ECode PackageMonitor::Register(
     mRegisteredContext = context;
     mRegisteredHandler = NULL;
     if (NULL == thread) {
-        assert(0 && "BackgroundThread is not implemented!");
-        // BackgroundThread::GetHandler((IHandler**)&mRegisteredHandler);
+        mRegisteredHandler = BackgroundThread::GetHandler();
     }
     else {
         CHandler::New(thread, (IHandler**)&mRegisteredHandler);

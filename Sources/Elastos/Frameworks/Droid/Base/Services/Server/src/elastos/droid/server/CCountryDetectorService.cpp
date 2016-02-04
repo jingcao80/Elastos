@@ -1,18 +1,27 @@
 
-#include "CCountryDetectorService.h"
+#include "elastos/droid/server/CCountryDetectorService.h"
 #include "elastos/droid/os/Process.h"
-#include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Handler.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Location.h>
+#include <Elastos.Droid.Internal.h>
 
-using Elastos::Core::CThread;
-using Elastos::Core::IThread;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
-using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::ILooperHelper;
+using Elastos::Droid::Os::CLooperHelper;
 using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Location::EIID_IICountryDetector;
 using Elastos::Droid::Location::EIID_ICountryListener;
+using Elastos::Droid::Internal::Os::IBackgroundThreadHelper;
+using Elastos::Droid::Internal::Os::CBackgroundThreadHelper;
 using Elastos::Utility::Logging::Slogger;
+using Elastos::Core::CThread;
+using Elastos::Core::IThread;
+using Elastos::Core::EIID_IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -29,11 +38,12 @@ ECode CCountryDetectorService::CountryDetectedRunnable::Run()
 
 ECode CCountryDetectorService::SetCountryListenerRunnable::Run()
 {
+    assert(0 && "TODO");
     // TODO mHost->mCountryDetector->SetCountryListener(mListener);
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CCountryDetectorService::Receiver, IProxyDeathRecipient);
+CAR_INTERFACE_IMPL(CCountryDetectorService::Receiver, Object, IProxyDeathRecipient);
 
 CCountryDetectorService::Receiver::Receiver(
     /* [in] */ IICountryListener* listener,
@@ -59,7 +69,7 @@ ECode CCountryDetectorService::Receiver::GetListener(
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(CCountryDetectorService::LocationBasedDetectorListener, ICountryListener);
+CAR_INTERFACE_IMPL(CCountryDetectorService::LocationBasedDetectorListener, Object, ICountryListener);
 
 CCountryDetectorService::LocationBasedDetectorListener::LocationBasedDetectorListener(
     /* [in] */ CCountryDetectorService* owner)
@@ -74,6 +84,10 @@ ECode CCountryDetectorService::LocationBasedDetectorListener::OnCountryDetected(
     Boolean result;
     return mHost->mHandler->Post(runnable, &result);
 }
+
+CAR_INTERFACE_IMPL_3(CCountryDetectorService, Object, IICountryDetector, IBinder, IRunnable)
+
+CAR_OBJECT_IMPL(CCountryDetectorService)
 
 ECode CCountryDetectorService::constructor(
     /* [in] */ IContext *context)
@@ -91,11 +105,12 @@ ECode CCountryDetectorService::DetectCountry(
     *country = NULL;
 
     if (!mSystemReady) {
-        //throw new RemoteException();
-        return E_REMOTE_EXCEPTION;
+        return NOERROR;   // server not yet active
     }
-    // return mCountryDetector->DetectCountry(country);
-    return E_NOT_IMPLEMENTED;
+
+    assert(0 && "TODO");
+    // return mCountryDetector->DetectCountry();
+    return NOERROR;
 }
 
 ECode CCountryDetectorService::AddCountryListener(
@@ -168,33 +183,36 @@ ECode CCountryDetectorService::NotifyReceivers(
     return NOERROR;
 }
 
-ECode CCountryDetectorService::SystemReady()
+ECode CCountryDetectorService::SystemRunning()
 {
     // Shall we wait for the initialization finish.
-    AutoPtr<IThread> thread;
-    CThread::New(this, String("CountryDetectorService"),
-        (IThread **)&thread);
-    thread->Start();
+    AutoPtr<IBackgroundThreadHelper> helper;
+    CBackgroundThreadHelper::AcquireSingleton((IBackgroundThreadHelper**)&helper);
+    AutoPtr<IHandler> hander;
+    helper->GetHandler((IHandler**)&hander);
+    Boolean bval;
+    hander->Post(this, &bval);
     return NOERROR;
 }
 
 ECode CCountryDetectorService::Initialize()
 {
-    // CComprehensiveCountryDetector::New(mContext,
-    //     (IComprehensiveCountryDetector **)&mCountryDetector);
-
+    assert(0 && "TODO");
+    // mCountryDetector = new ComprehensiveCountryDetector(mContext);
     mLocationBasedDetectorListener = new LocationBasedDetectorListener(this);
     return NOERROR;
 }
 
 ECode CCountryDetectorService::Run()
 {
+    AutoPtr<ILooperHelper> helper;
+    CLooperHelper::AcquireSingleton((ILooperHelper**)&helper);
     Process::SetThreadPriority(IProcess::THREAD_PRIORITY_BACKGROUND);
-    Looper::Prepare();
+    helper->Prepare();
     CHandler::New((IHandler**)&mHandler);
     Initialize();
     mSystemReady = TRUE;
-    Looper::Loop();
+    helper->Loop();
 
     return NOERROR;
 }

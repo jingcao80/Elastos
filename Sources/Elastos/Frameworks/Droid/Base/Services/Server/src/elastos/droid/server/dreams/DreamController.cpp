@@ -1,18 +1,28 @@
 
-#include "dreams/DreamController.h"
+#include "elastos/droid/server/dreams/DreamController.h"
+#include <elastos/droid/os/UserHandle.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.View.h>
+#include <Elastos.Droid.Service.h>
+#include <Elastos.CoreLibrary.IO.h>
 
-using Elastos::Core::StringBuilder;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::IUserHandleHelper;
-using Elastos::Droid::Os::CUserHandleHelper;
+using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::View::IWindowManagerGlobal;
 using Elastos::Droid::View::CWindowManagerGlobal;
+using Elastos::Droid::View::IWindowManagerGlobalHelper;
+using Elastos::Droid::View::CWindowManagerGlobalHelper;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Service::Dreams::IDreamService;
+using Elastos::Droid::Content::EIID_IServiceConnection;
+
+using Elastos::Core::StringBuilder;
+using Elastos::Core::EIID_IRunnable;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -22,14 +32,13 @@ namespace Dreams {
 
 const String DreamController::TAG("DreamController");
 const Int32 DreamController::DREAM_CONNECTION_TIMEOUT;
-
-CAR_INTERFACE_IMPL(DreamController::_Runnable, IRunnable)
+const Int32 DreamController::DREAM_FINISH_TIMEOUT;
 
 ECode DreamController::ProxyDiedRunnable::Run()
 {
     mDRHost->mService = NULL;
     if (mDRHost->mHost->mCurrentDream.Get() == mDRHost) {
-        mDRHost->mHost->StopDream();
+        mDRHost->mHost->StopDream(TRUE /*immediate*/);
     }
     return NOERROR;
 }
@@ -47,7 +56,7 @@ ECode DreamController::DisconnectedRunnable::Run()
 {
     mDRHost->mService = NULL;
     if (mDRHost->mHost->mCurrentDream.Get() == mDRHost) {
-        mDRHost->mHost->StopDream();
+        mDRHost->mHost->StopDream(TRUE /*immediate*/);
     }
     return NOERROR;
 }
@@ -62,23 +71,33 @@ ECode DreamController::StopUnconnectedDreamRunnable::Run()
 {
     if (mDCHost->mCurrentDream != NULL && mDCHost->mCurrentDream->mBound && !mDCHost->mCurrentDream->mConnected) {
         Slogger::W(TAG, "Bound dream did not connect in the time allotted");
-        mDCHost->StopDream();
+        mDCHost->StopDream(TRUE /*immediate*/);
     }
     return NOERROR;
 }
 
-CAR_INTERFACE_IMPL(DreamController::DreamRecord, IServiceConnection)
+ECode DreamController::StopStubbornDreamRunnable::Run()
+{
+    Slogger::W(TAG, "Stubborn dream did not finish itself in the time allotted");
+    mDCHost->StopDream(TRUE /*immediate*/);
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(DreamController::DreamRecord, Object, IServiceConnection)
 
 DreamController::DreamRecord::DreamRecord(
     /* [in] */ IBinder* token,
     /* [in] */ IComponentName* name,
     /* [in] */ Boolean isTest,
+    /* [in] */ Boolean canDoze,
     /* [in] */ Int32 userId,
     /* [in] */ DreamController* host)
     : mToken(token)
     , mName(name)
     , mIsTest(isTest)
+    , mCanDoze(canDoze)
     , mUserId(userId)
+    , mWakingGently(FALSE)
     , mHost(host)
 {}
 
@@ -117,8 +136,8 @@ DreamController::DreamController(
     , mHandler(handler)
     , mListener(listener)
 {
-    AutoPtr<IWindowManagerGlobal> windowMangerGlobal;
-    CWindowManagerGlobal::AcquireSingleton((IWindowManagerGlobal**)&windowMangerGlobal);
+    AutoPtr<IWindowManagerGlobalHelper> windowMangerGlobal;
+    CWindowManagerGlobalHelper::AcquireSingleton((IWindowManagerGlobalHelper**)&windowMangerGlobal);
     windowMangerGlobal->GetWindowManagerService((IIWindowManager**)&mIWindowManager);
 
     CIntent::New(IIntent::ACTION_DREAMING_STARTED, (IIntent**)&mDreamingStartedIntent);
@@ -128,38 +147,45 @@ DreamController::DreamController(
 
     CIntent::New(IIntent::ACTION_CLOSE_SYSTEM_DIALOGS, (IIntent**)&mCloseNotificationShadeIntent);
     mStopUnconnectedDreamRunnable = new StopUnconnectedDreamRunnable(this);
+    mStopStubbornDreamRunnable = new StopStubbornDreamRunnable(this);
 }
 
 ECode DreamController::Dump(
     /* [in] */ IPrintWriter* pw)
 {
-    pw->PrintStringln(String("Dreamland:"));
+    pw->Println(String("Dreamland:"));
     if (mCurrentDream != NULL) {
-        pw->PrintStringln(String("  mCurrentDream:"));
+        pw->Println(String("  mCurrentDream:"));
         String tokens;
         mCurrentDream->mToken->ToString(&tokens);
-        pw->PrintStringln(String("    mToken=") + tokens);
+        pw->Println(String("    mToken=") + tokens);
         String names;
         mCurrentDream->mName->ToString(&names);
-        pw->PrintStringln(String("    mName=") + names);
+        pw->Println(String("    mName=") + names);
         StringBuilder sb1("    mIsTest=");
         sb1 += mCurrentDream->mIsTest;
-        pw->PrintStringln(sb1.ToString());
+        pw->Println(sb1.ToString());
+        StringBuilder sb6("    mCanDoze=");
+        sb6 += mCurrentDream->mCanDoze;
+        pw->Println(sb6.ToString());
         StringBuilder sb2("    mUserId=");
         sb2 += mCurrentDream->mUserId;
-        pw->PrintStringln(sb2.ToString());
+        pw->Println(sb2.ToString());
         StringBuilder sb3("    mBound=");
         sb3 += mCurrentDream->mBound;
-        pw->PrintStringln(sb3.ToString());
+        pw->Println(sb3.ToString());
         StringBuilder sb4("    mService=");
         sb4 += mCurrentDream->mService;
-        pw->PrintStringln(sb4.ToString());
+        pw->Println(sb4.ToString());
         StringBuilder sb5("    mSentStartBroadcast=");
         sb5 += mCurrentDream->mSentStartBroadcast;
-        pw->PrintStringln(sb5.ToString());
+        pw->Println(sb5.ToString());
+        StringBuilder sb7("    mWakingGently=");
+        sb7 += mCurrentDream->mWakingGently;
+        pw->Println(sb7.ToString());
     }
     else {
-        pw->PrintStringln(String("  mCurrentDream: NULL"));
+        pw->Println(String("  mCurrentDream: NULL"));
     }
     return NOERROR;
 }
@@ -168,27 +194,25 @@ ECode DreamController::StartDream(
     /* [in] */ IBinder* token,
     /* [in] */ IComponentName* name,
     /* [in] */ Boolean isTest,
+    /* [in] */ Boolean canDoze,
     /* [in] */ Int32 userId)
 {
-    StopDream();
+    StopDream(TRUE /*immediate*/);
 
     // Close the notification shade. Don't need to send to all, but better to be explicit.
-    AutoPtr<IUserHandleHelper> uhHelper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
-    AutoPtr<IUserHandle> userHandleAll;
-    uhHelper->GetALL((IUserHandle**)&userHandleAll);
-    mContext->SendBroadcastAsUser(mCloseNotificationShadeIntent, userHandleAll);
+    mContext->SendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle::ALL);
 
-    Slogger::I(TAG, "Starting dream: name=%p, isTest=%d, userId=%d", name, isTest, userId);
+    Slogger::I(TAG, "Starting dream: name=%p, isTest=%d, canDoze=%d, userId=%d",
+        name, isTest, canDoze, userId);
 
-    mCurrentDream = new DreamRecord(token, name, isTest, userId, this);
+    mCurrentDream = new DreamRecord(token, name, isTest, canDoze, userId, this);
 
     // try {
     if (FAILED(mIWindowManager->AddWindowToken(token, IWindowManagerLayoutParams::TYPE_DREAM))) {
     // } catch (RemoteException ex) {
         // Slog.e(TAG, "Unable to add window token for dream.", ex);
         Slogger::E(TAG, "Unable to add window token for dream.");
-        StopDream();
+        StopDream(TRUE /*immediate*/);
         return NOERROR;
     }
 
@@ -198,45 +222,58 @@ ECode DreamController::StartDream(
     intent->SetComponent(name);
     intent->AddFlags(IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
     // try {
-    Boolean bindService;
-    FAIL_RETURN(mContext->BindService(intent, mCurrentDream,
-                IContext::BIND_AUTO_CREATE, userId, &bindService));
-    if (!bindService) {
-        Slogger::E(TAG, "Unable to bind dream service: %p", intent.Get());
-        StopDream();
+    AutoPtr<IUserHandle> uh;
+    CUserHandle::New(userId, (IUserHandle**)&uh);
+    Boolean result;
+    ECode ec = mContext->BindServiceAsUser(intent, mCurrentDream,
+        IContext::BIND_AUTO_CREATE, uh, &result);
+    if (!result || (ec == (ECode)E_SECURITY_EXCEPTION)) {
+        Slogger::E(TAG, "Unable to bind dream service: %s", TO_CSTR(intent));
+        StopDream(TRUE /*immediate*/);
         return NOERROR;
     }
-    // } catch (SecurityException ex) {
-        // Slogger::E(TAG, "Unable to bind dream service: " + intent, ex);
-        // StopDream();
-        // return;
-    // }
 
     mCurrentDream->mBound = TRUE;
-    Boolean result;
     mHandler->PostDelayed(mStopUnconnectedDreamRunnable, DREAM_CONNECTION_TIMEOUT, &result);
     return NOERROR;
 }
 
-ECode DreamController::StopDream()
+ECode DreamController::StopDream(
+    /* [in] */ Boolean immediate)
 {
     if (mCurrentDream == NULL) {
         return NOERROR;
     }
 
+    Boolean bval;
+    if (!immediate) {
+        if (mCurrentDream->mWakingGently) {
+            return NOERROR; // already waking gently
+        }
+
+        if (mCurrentDream->mService != NULL) {
+            // Give the dream a moment to wake up and finish itself gently.
+            mCurrentDream->mWakingGently = TRUE;
+            // try {
+            mCurrentDream->mService->WakeUp();
+            mHandler->PostDelayed(mStopStubbornDreamRunnable, DREAM_FINISH_TIMEOUT, &bval);
+            return NOERROR;
+            // } catch (RemoteException ex) {
+            //     // oh well, we tried, finish immediately instead
+            // }
+        }
+    }
+
     AutoPtr<DreamRecord> oldDream = mCurrentDream;
     mCurrentDream = NULL;
-    Slogger::I(TAG, "Stopping dream: name=%p, isTest=%d, userId=%d", oldDream->mName.Get(), oldDream->mIsTest
-            , oldDream->mUserId);
+    Slogger::I(TAG, "Stopping dream: name=%p, isTest=%d, canDoze=%d, userId=%d",
+        oldDream->mName.Get(), oldDream->mIsTest, oldDream->mCanDoze, oldDream->mUserId);
 
     mHandler->RemoveCallbacks(mStopUnconnectedDreamRunnable);
+    mHandler->RemoveCallbacks(mStopStubbornDreamRunnable);
 
     if (oldDream->mSentStartBroadcast) {
-       AutoPtr<IUserHandleHelper> uhHelper;
-       CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
-       AutoPtr<IUserHandle> userHandleAll;
-       uhHelper->GetALL((IUserHandle**)&userHandleAll);
-       mContext->SendBroadcastAsUser(mDreamingStoppedIntent, userHandleAll);
+       mContext->SendBroadcastAsUser(mDreamingStoppedIntent, UserHandle::ALL);
     }
 
     if (oldDream->mService != NULL) {
@@ -264,14 +301,13 @@ ECode DreamController::StopDream()
     }
 
     // try {
-        mIWindowManager->RemoveWindowToken(oldDream->mToken);
-    // } catch (RemoteException ex) {
-        // Slog.w(TAG, "Error removing window token for dream.", ex);
-    // }
+    ECode ec = mIWindowManager->RemoveWindowToken(oldDream->mToken);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        Slogger::W(TAG, "Error removing window token for dream.");
+    }
 
     AutoPtr<StopDreamRunnable> runnable = new StopDreamRunnable(this, oldDream);
-    Boolean result;
-    mHandler->Post(runnable, &result);
+    mHandler->Post(runnable, &bval);
     return NOERROR;
 }
 
@@ -281,22 +317,18 @@ void DreamController::Attach(
     // try {
     AutoPtr<IProxy> proxy = (IProxy*)service->Probe(EIID_IProxy);
     proxy->LinkToDeath(mCurrentDream, 0);
-    ECode ec = service->Attach(mCurrentDream->mToken);
-    if (ec != NOERROR) {
+    ECode ec = service->Attach(mCurrentDream->mToken, mCurrentDream->mCanDoze);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
     // } catch (RemoteException ex) {
         // Slog.e(TAG, "The dream service died unexpectedly.", ex);
-        StopDream();
+        StopDream(TRUE /*immediate*/);
         return;
     }
 
     mCurrentDream->mService = service;
 
     if (!mCurrentDream->mIsTest) {
-        AutoPtr<IUserHandleHelper> uhHelper;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&uhHelper);
-        AutoPtr<IUserHandle> userHandleAll;
-        uhHelper->GetALL((IUserHandle**)&userHandleAll);
-        mContext->SendBroadcastAsUser(mDreamingStartedIntent, userHandleAll);
+        mContext->SendBroadcastAsUser(mDreamingStartedIntent, UserHandle::ALL);
         mCurrentDream->mSentStartBroadcast = TRUE;
     }
 }

@@ -223,17 +223,15 @@ module
             [out] IMappedByteBuffer** buffer);
 
         /**
-         * Returns the current value of the file position pointer.
+         * Returns the current position as a positive integer number of bytes from
+         * the start of the file.
          *
-         * @return the current position as a positive integer number of bytes from
-         *         the start of the file.
-         * @return ECode = NOERROR(0) if success, else as follows:
-         * Value | Meaning |
-         * :-|:------------|
-         * ClosedChannelException |  if this channel is closed.
-         * IOException | if another I/O error occurs.
+         * @throws ClosedChannelException
+         *             if this channel is closed.
+         * @throws IOException
+         *             if another I/O error occurs.
          */
-        GetPosition(
+        Position(
             [out] Int64* position);
 
         /**
@@ -246,15 +244,16 @@ module
          * succeed but they will fill the bytes between the current end of file and
          * the new position with the required number of (unspecified) byte values.
          *
-         * @param offset
-         *            the new file position, in bytes.
-         * @return the receiver.
-         * IllegalArgumentException |if the new position is negative.
-         * ClosedChannelException | if this channel is closed.
-         * IOException | if another I/O error occurs.
+         * @return this.
+         * @throws IllegalArgumentException
+         *             if the new position is negative.
+         * @throws ClosedChannelException
+         *             if this channel is closed.
+         * @throws IOException
+         *             if another I/O error occurs.
          */
-        SetPosition(
-            [in]  Int64 offset);
+        Position(
+            [in]  Int64 newPosition);
 
         /**
          * Reads bytes from this file channel into the given buffer.

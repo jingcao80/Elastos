@@ -1,8 +1,9 @@
 #ifndef __ELASTOS_DROID_SERVER_PM_LAUNCHERAPPSSERVICE_H__
 #define __ELASTOS_DROID_SERVER_PM_LAUNCHERAPPSSERVICE_H__
 
-#include "SystemService.h"
+#include "elastos/droid/server/SystemService.h"
 
+using Elastos::Droid::Server::SystemService;
 using Elastos::Droid::Content::Pm::IILauncherApps;
 
 namespace Elastos {

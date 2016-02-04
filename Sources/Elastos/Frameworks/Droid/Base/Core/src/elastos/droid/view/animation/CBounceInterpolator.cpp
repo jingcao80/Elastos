@@ -9,6 +9,7 @@
 #include "elastos/droid/internal/view/animation/NativeInterpolatorFactoryHelper.h"
 #include "elastos/droid/ext/frameworkext.h"
 
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Internal::View::Animation::EIID_INativeInterpolatorFactory;
 using Elastos::Droid::Internal::View::Animation::NativeInterpolatorFactoryHelper;
 
@@ -19,7 +20,8 @@ namespace Animation {
 
 CAR_OBJECT_IMPL(CBounceInterpolator);
 
-CAR_INTERFACE_IMPL_3(CBounceInterpolator, Object, IBounceInterpolator, INativeInterpolatorFactory, IInterpolator);
+CAR_INTERFACE_IMPL_4(CBounceInterpolator, Object, IBounceInterpolator,
+        INativeInterpolatorFactory, IInterpolator, ITimeInterpolator);
 
 CBounceInterpolator::CBounceInterpolator()
 {}

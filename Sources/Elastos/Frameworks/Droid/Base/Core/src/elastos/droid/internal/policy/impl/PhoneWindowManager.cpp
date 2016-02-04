@@ -1025,10 +1025,13 @@ PhoneWindowManager::HDMIUEventObserver::HDMIUEventObserver(
 {
 }
 
-void PhoneWindowManager::HDMIUEventObserver::OnUEvent(
-    /* [in] */ UEvent* event)
+ECode PhoneWindowManager::HDMIUEventObserver::OnUEvent(
+    /* [in] */ IUEvent* event)
 {
-    mHost->SetHdmiPlugged(String("1").Equals(event->Get(String("SWITCH_STATE"))));
+    String str;
+    event->Get(String("SWITCH_STATE"), &str);
+    mHost->SetHdmiPlugged(str.Equals("1"));
+    return NOERROR;
 }
 
 //==============================================================================
@@ -4054,15 +4057,16 @@ void PhoneWindowManager::PreloadRecentApps()
     mPreloadedRecentApps = TRUE;
     //try {
     AutoPtr<IIStatusBarService> statusbar = GetStatusBarService();
-    ECode ecode;
+    ECode ec = NOERROR;
     if (statusbar != NULL) {
-        ecode = statusbar->PreloadRecentApps();
+        ec = statusbar->PreloadRecentApps();
     }
     //} catch (RemoteException e) {
     //    Slog.e(TAG, "RemoteException when preloading recent apps", e);
     //    // re-acquire status bar service next time it is needed.
-    if ((unsigned)ecode == E_REMOTE_EXCEPTION)
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
         mStatusBarService = NULL;
+    }
     //}
 }
 
@@ -4072,15 +4076,16 @@ void PhoneWindowManager::CancelPreloadRecentApps()
         mPreloadedRecentApps = FALSE;
         //try {
         AutoPtr<IIStatusBarService> statusbar = GetStatusBarService();
-        ECode ecode;
+        ECode ec = NOERROR;
         if (statusbar != NULL) {
-            ecode = statusbar->CancelPreloadRecentApps();
+            ec = statusbar->CancelPreloadRecentApps();
         }
         //} catch (RemoteException e) {
         //    Slog.e(TAG, "RemoteException when cancelling recent apps preload", e);
         // re-acquire status bar service next time it is needed.
-        if ((unsigned)ecode == E_REMOTE_EXCEPTION)
+        if (ec == (ECode)E_REMOTE_EXCEPTION) {
             mStatusBarService = NULL;
+        }
         //}
     }
 }
@@ -4090,15 +4095,16 @@ void PhoneWindowManager::ToggleRecentApps()
     mPreloadedRecentApps = FALSE; // preloading no longer needs to be canceled
     //try {
     AutoPtr<IIStatusBarService> statusbar = GetStatusBarService();
-    ECode ecode;
+    ECode ec = NOERROR;
     if (statusbar != NULL) {
-        ecode = statusbar->ToggleRecentApps();
+        ec = statusbar->ToggleRecentApps();
     }
     //} catch (RemoteException e) {
     //    Slog.e(TAG, "RemoteException when toggling recent apps", e);
     //    // re-acquire status bar service next time it is needed.
-    if ((unsigned)ecode == E_REMOTE_EXCEPTION)
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
         mStatusBarService = NULL;
+    }
     //}
 }
 
@@ -4108,15 +4114,16 @@ void PhoneWindowManager::ShowRecentApps(
     mPreloadedRecentApps = FALSE; // preloading no longer needs to be canceled
     //try {
     AutoPtr<IIStatusBarService> statusbar = GetStatusBarService();
-    ECode ecode;
+    ECode ec = NOERROR;
     if (statusbar != NULL) {
-        ecode = statusbar->ShowRecentApps(triggeredFromAltTab);
+        ec = statusbar->ShowRecentApps(triggeredFromAltTab);
     }
     //} catch (RemoteException e) {
     //    Slog.e(TAG, "RemoteException when showing recent apps", e);
     //    // re-acquire status bar service next time it is needed.
-    if ((unsigned)ecode == E_REMOTE_EXCEPTION)
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
         mStatusBarService = NULL;
+    }
     //}
 }
 
@@ -4127,15 +4134,16 @@ void PhoneWindowManager::HideRecentApps(
     mPreloadedRecentApps = FALSE; // preloading no longer needs to be canceled
     //try {
     AutoPtr<IIStatusBarService> statusbar = GetStatusBarService();
-    ECode ecode;
+    ECode ec = NOERROR;
     if (statusbar != NULL) {
-        ecode = statusbar->HideRecentApps(triggeredFromAltTab, triggeredFromHome);
+        ec = statusbar->HideRecentApps(triggeredFromAltTab, triggeredFromHome);
     }
     //} catch (RemoteException e) {
     //    Slog.e(TAG, "RemoteException when closing recent apps", e);
     //    // re-acquire status bar service next time it is needed.
-    if ((unsigned)ecode == E_REMOTE_EXCEPTION)
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
         mStatusBarService = NULL;
+    }
     //}
 }
 

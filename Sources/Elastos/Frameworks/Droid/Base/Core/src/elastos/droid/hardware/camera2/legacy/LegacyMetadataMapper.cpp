@@ -1644,10 +1644,10 @@ ECode LegacyMetadataMapper::CreateRequestTemplate(
         c->Get(CameraCharacteristics::LENS_INFO_MINIMUM_FOCUS_DISTANCE, (IInterface**)&tmp);
         AutoPtr<IFloat> floatObj = IFloat::Probe(tmp);
         Float minimumFocusDistance;
-        Int32 afMode;
+        Int32 afMode = 0;
         if (floatObj != NULL) {
             floatObj->GetValue(&minimumFocusDistance);
-            if(minimumFocusDistance == LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS) {
+            if (minimumFocusDistance == LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS) {
                 // Cannot control auto-focus with fixed-focus cameras
                 afMode = ICameraMetadata::CONTROL_AF_MODE_OFF;
             }

@@ -345,13 +345,13 @@ Float LogicalDisplay::GetRequestedRefreshRateLocked()
 void LogicalDisplay::DumpLocked(
     /* [in] */ IPrintWriter* pw)
 {
-//    pw->PrintStringln(String("mDisplayId=") + StringUtils::Int32ToString(mDisplayId));
-//    pw->PrintStringln(String("mLayerStack=") + StringUtils::Int32ToString(mLayerStack));
-//    pw->PrintStringln(String("mHasContent=") + StringUtils::BooleanToString(mHasContent));
-//    pw->PrintStringln(String("mPrimaryDisplayDevice=") + (mPrimaryDisplayDevice != NULL ?
+//    pw->Println(String("mDisplayId=") + StringUtils::Int32ToString(mDisplayId));
+//    pw->Println(String("mLayerStack=") + StringUtils::Int32ToString(mLayerStack));
+//    pw->Println(String("mHasContent=") + StringUtils::BooleanToString(mHasContent));
+//    pw->Println(String("mPrimaryDisplayDevice=") + (mPrimaryDisplayDevice != NULL ?
 //        mPrimaryDisplayDevice->GetNameLocked() : "NULL"));
-//    pw->PrintStringln(String("mBaseDisplayInfo=") + mBaseDisplayInfo->ToString());
-//    pw->PrintStringln(String("mOverrideDisplayInfo=") + mOverrideDisplayInfo->ToString());
+//    pw->Println(String("mBaseDisplayInfo=") + mBaseDisplayInfo->ToString());
+//    pw->Println(String("mOverrideDisplayInfo=") + mOverrideDisplayInfo->ToString());
     assert(0);
 }
 

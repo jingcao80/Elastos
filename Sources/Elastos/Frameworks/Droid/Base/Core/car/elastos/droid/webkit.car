@@ -10,6 +10,7 @@ module
     merge("webkit/ValueCallback.car");
     merge("webkit/GeolocationPermissions.car");
     merge("webkit/HttpAuthHandler.car");
+    merge("webkit/IWebViewUpdateService.car");
     merge("webkit/JsDialogHelper.car");
     merge("webkit/JsResult.car");
     merge("webkit/JsPromptResult.car");

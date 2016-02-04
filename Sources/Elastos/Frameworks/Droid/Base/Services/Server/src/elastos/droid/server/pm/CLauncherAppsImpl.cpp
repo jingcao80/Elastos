@@ -1,21 +1,30 @@
 
-#include "pm/CLauncherAppsImpl.h"
+#include "elastos/droid/server/pm/CLauncherAppsImpl.h"
 #include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/app/AppGlobals.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::AppGlobals;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::IPackageInfo;
 using Elastos::Droid::Content::Pm::IIPackageManager;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IActivityInfo;
+using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Content::Pm::EIID_IILauncherApps;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::Pm::IComponentInfo;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Provider::ISettings;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
@@ -89,7 +98,7 @@ ECode CLauncherAppsImpl::MyPackageMonitor::OnPackageAdded(
     mHost->mListeners->BeginBroadcast(&n);
     for (Int32 i = 0; i < n; i++) {
         AutoPtr<IInterface> item;
-        mHost->mListeners->GetBroadcastItme(i, (IInterface**)&item);
+        mHost->mListeners->GetBroadcastItem(i, (IInterface**)&item);
         AutoPtr<IOnAppsChangedListener> listener = IOnAppsChangedListener::Probe(item);
         AutoPtr<IInterface> cookie;
         mHost->mListeners->GetBroadcastCookie(i, (IInterface**)&cookie);
@@ -120,7 +129,7 @@ ECode CLauncherAppsImpl::MyPackageMonitor::OnPackageRemoved(
     mHost->mListeners->BeginBroadcast(&n);
     for (Int32 i = 0; i < n; i++) {
         AutoPtr<IInterface> item;
-        mHost->mListeners->GetBroadcastItme(i, (IInterface**)&item);
+        mHost->mListeners->GetBroadcastItem(i, (IInterface**)&item);
         AutoPtr<IOnAppsChangedListener> listener = IOnAppsChangedListener::Probe(item);
         AutoPtr<IInterface> cookie;
         mHost->mListeners->GetBroadcastCookie(i, (IInterface**)&cookie);
@@ -150,7 +159,7 @@ ECode CLauncherAppsImpl::MyPackageMonitor::OnPackageModified(
     mHost->mListeners->BeginBroadcast(&n);
     for (Int32 i = 0; i < n; i++) {
         AutoPtr<IInterface> item;
-        mHost->mListeners->GetBroadcastItme(i, (IInterface**)&item);
+        mHost->mListeners->GetBroadcastItem(i, (IInterface**)&item);
         AutoPtr<IOnAppsChangedListener> listener = IOnAppsChangedListener::Probe(item);
         AutoPtr<IInterface> cookie;
         mHost->mListeners->GetBroadcastCookie(i, (IInterface**)&cookie);
@@ -180,7 +189,7 @@ ECode CLauncherAppsImpl::MyPackageMonitor::OnPackagesAvailable(
     mHost->mListeners->BeginBroadcast(&n);
     for (Int32 i = 0; i < n; i++) {
         AutoPtr<IInterface> item;
-        mHost->mListeners->GetBroadcastItme(i, (IInterface**)&item);
+        mHost->mListeners->GetBroadcastItem(i, (IInterface**)&item);
         AutoPtr<IOnAppsChangedListener> listener = IOnAppsChangedListener::Probe(item);
         AutoPtr<IInterface> cookie;
         mHost->mListeners->GetBroadcastCookie(i, (IInterface**)&cookie);
@@ -189,7 +198,7 @@ ECode CLauncherAppsImpl::MyPackageMonitor::OnPackagesAvailable(
         // try {
         Boolean isReplacing;
         IsReplacing(&isReplacing);
-        if (FAILED(listener->OnPackagesAvailable(user, packageName, isReplacing))) {
+        if (FAILED(listener->OnPackagesAvailable(user, packages, isReplacing))) {
             Logger::D(TAG, "Callback failed ");
         }
         // } catch (RemoteException re) {
@@ -212,7 +221,7 @@ ECode CLauncherAppsImpl::MyPackageMonitor::OnPackagesUnavailable(
     mHost->mListeners->BeginBroadcast(&n);
     for (Int32 i = 0; i < n; i++) {
         AutoPtr<IInterface> item;
-        mHost->mListeners->GetBroadcastItme(i, (IInterface**)&item);
+        mHost->mListeners->GetBroadcastItem(i, (IInterface**)&item);
         AutoPtr<IOnAppsChangedListener> listener = IOnAppsChangedListener::Probe(item);
         AutoPtr<IInterface> cookie;
         mHost->mListeners->GetBroadcastCookie(i, (IInterface**)&cookie);
@@ -221,7 +230,7 @@ ECode CLauncherAppsImpl::MyPackageMonitor::OnPackagesUnavailable(
         // try {
         Boolean isReplacing;
         IsReplacing(&isReplacing);
-        if (FAILED(listener->OnPackagesUnavailable(user, packageName, isReplacing))) {
+        if (FAILED(listener->OnPackagesUnavailable(user, packages, isReplacing))) {
             Logger::D(TAG, "Callback failed ");
         }
         // } catch (RemoteException re) {
@@ -278,7 +287,7 @@ ECode CLauncherAppsImpl::constructor(
 ECode CLauncherAppsImpl::AddOnAppsChangedListener(
     /* [in] */ IOnAppsChangedListener* listener)
 {
-    synchronized (mListeners) {
+    synchronized (mListenersLock) {
         if (DEBUG) {
             Logger::D(TAG, "Adding listener from %p", Binder::GetCallingUserHandle().Get());
         }
@@ -289,9 +298,10 @@ ECode CLauncherAppsImpl::AddOnAppsChangedListener(
             }
             StartWatchingPackageBroadcasts();
         }
-        FAIL_RETURN(mListeners->Unregister(listener))
+        Boolean result;
+        FAIL_RETURN(mListeners->Unregister(listener, &result))
         AutoPtr<IUserHandle> handle = Binder::GetCallingUserHandle();
-        FAIL_RETURN(mListeners->Register(listener, handle))
+        FAIL_RETURN(mListeners->Register(listener, handle, &result))
     }
     return NOERROR;
 }
@@ -299,11 +309,12 @@ ECode CLauncherAppsImpl::AddOnAppsChangedListener(
 ECode CLauncherAppsImpl::RemoveOnAppsChangedListener(
     /* [in] */ IOnAppsChangedListener* listener)
 {
-    synchronized (mListeners) {
+    synchronized (mListenersLock) {
         if (DEBUG) {
             Logger::D(TAG, "Removing listener from %p", Binder::GetCallingUserHandle().Get());
         }
-        FAIL_RETURN(mListeners->Unregister(listener))
+        Boolean result;
+        FAIL_RETURN(mListeners->Unregister(listener, &result))
         Int32 count;
         if (mListeners->GetRegisteredCallbackCount(&count), count == 0) {
             StopWatchingPackageBroadcasts();
@@ -327,7 +338,7 @@ void CLauncherAppsImpl::StopWatchingPackageBroadcasts()
 
 void CLauncherAppsImpl::CheckCallbackCount()
 {
-    synchronized (mListeners) {
+    synchronized (mListenersLock) {
         Int32 count;
         mListeners->GetRegisteredCallbackCount(&count);
         if (DEBUG) {
@@ -399,23 +410,18 @@ ECode CLauncherAppsImpl::GetLauncherActivities(
     FAIL_RETURN(EnsureInUserProfiles(user,
             String("Cannot retrieve activities for unrelated profile ") + str))
     if (!IsUserEnabled(user)) {
-        AutoPtr<IArrayList> al;
-        CArrayList::New((IArrayList**)&al);
-        *list = IList::Probe(al);
-        REFCOUNT_ADD(*list)
-        return NOERROR;
+        return CArrayList::New(list);
     }
 
     AutoPtr<IIntent> mainIntent;
     CIntent::New(IIntent::ACTION_MAIN, NULL, (IIntent**)&mainIntent);
     mainIntent->AddCategory(IIntent::CATEGORY_LAUNCHER);
     mainIntent->SetPackage(packageName);
-    Int64 ident;
-    Binder::ClearCallingIdentity();
+    Int64 ident = Binder::ClearCallingIdentity();
     // try {
     Int32 id;
     user->GetIdentifier(&id);
-    ECode = mPm->QueryIntentActivitiesAsUser(mainIntent, 0 /* flags */, id, list);
+    ECode ec = mPm->QueryIntentActivitiesAsUser(mainIntent, 0 /* flags */, id, list);
     Binder::RestoreCallingIdentity(ident);
     return ec;
     // } finally {
@@ -512,7 +518,7 @@ ECode CLauncherAppsImpl::IsActivityEnabled(
     Int32 id;
     user->GetIdentifier(&id);
     AutoPtr<IActivityInfo> info;
-    ECode ec = pm->GetPackageInfo(packageName, 0, id, (IActivityInfo**)&info);
+    ECode ec = pm->GetActivityInfo(component, 0, id, (IActivityInfo**)&info);
     if (FAILED(ec)) {
         Binder::RestoreCallingIdentity(ident);
         return ec;
@@ -544,9 +550,9 @@ ECode CLauncherAppsImpl::StartActivityAsUser(
     CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&launchIntent);
     launchIntent->AddCategory(IIntent::CATEGORY_LAUNCHER);
     launchIntent->SetSourceBounds(sourceBounds);
-    launchIntent->AddFlags(Intent.::LAG_ACTIVITY_NEW_TASK);
+    launchIntent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
     String pkgName;
-    component->GetPackagenAME(&pkgName);
+    component->GetPackageName(&pkgName);
     launchIntent->SetPackage(pkgName);
 
     Int64 ident = Binder::ClearCallingIdentity();
@@ -561,7 +567,7 @@ ECode CLauncherAppsImpl::StartActivityAsUser(
         return ec;
     }
     Boolean exported;
-    if (info->GetExported(&exported), !exported) {
+    if (IComponentInfo::Probe(info)->GetExported(&exported), !exported) {
         Logger::E(TAG, "Cannot launch non-exported components %p", component);
         Binder::RestoreCallingIdentity(ident);
         return E_SECURITY_EXCEPTION;
@@ -586,11 +592,11 @@ ECode CLauncherAppsImpl::StartActivityAsUser(
         AutoPtr<IActivityInfo> activityInfo;
         ri->GetActivityInfo((IActivityInfo**)&activityInfo);
         String aiPkgName, pkgName;
-        activityInfo->GetPackageName(&pkgName);
+        IPackageItemInfo::Probe(activityInfo)->GetPackageName(&pkgName);
         component->GetPackageName(&pkgName);
         if (aiPkgName.Equals(pkgName)) {
             String aiName, className;
-            activityInfo->GetName(&aiName);
+            IPackageItemInfo::Probe(activityInfo)->GetName(&aiName);
             component->GetClassName(&className);
             if (aiName.Equals(className)) {
                 // Found an activity with category launcher that matches
@@ -643,6 +649,13 @@ ECode CLauncherAppsImpl::ShowAppDetailsAsUser(
     // } finally {
     //     Binder.restoreCallingIdentity(ident);
     // }
+}
+
+ECode CLauncherAppsImpl::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    return Object::ToString(str);
 }
 
 } // namespace Pm

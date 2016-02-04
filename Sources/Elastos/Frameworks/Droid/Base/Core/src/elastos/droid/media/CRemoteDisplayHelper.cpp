@@ -6,6 +6,10 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
+CAR_SINGLETON_IMPL(CRemoteDisplayHelper)
+
+CAR_INTERFACE_IMPL(CRemoteDisplayHelper, Singleton, IRemoteDisplayHelper)
+
 ECode CRemoteDisplayHelper::Listen(
     /* [in] */ const String& iface,
     /* [in] */ IRemoteDisplayListener* listener,

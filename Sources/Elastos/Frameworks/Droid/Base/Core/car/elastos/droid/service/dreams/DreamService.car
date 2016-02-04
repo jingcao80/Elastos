@@ -13,10 +13,10 @@ module
 
     /**
      * @Involve
-     * extends Elastos.Droid.Content.IContext
-     * extends Elastos.Droid.Content.IContextWrapper
      * extends Elastos.Droid.App.IService
-     *
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.Content.IComponentCallbacks
      * interface Elastos.Droid.Content.IComponentCallbacks2
      * interface Elastos.Droid.View.IWindowCallback
      */

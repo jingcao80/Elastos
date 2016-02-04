@@ -38,8 +38,7 @@ CIdentityHashMap::CIdentityHashMap()
 
 ECode CIdentityHashMap::constructor()
 {
-    this->constructor(DEFAULT_MAX_SIZE);
-    return NOERROR;
+    return constructor(DEFAULT_MAX_SIZE);
 }
 
 ECode CIdentityHashMap::constructor(
@@ -62,7 +61,7 @@ ECode CIdentityHashMap::constructor(
 {
     Int32 maplen = 0;
     map->GetSize(&maplen);
-    this->constructor(maplen < 6 ? 11 : maplen * 2);
+    FAIL_RETURN(constructor(maplen < 6 ? 11 : maplen * 2));
     return PutAllImpl(map);
 }
 

@@ -7,7 +7,7 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
-// #include "elastos/droid/widget/BaseAdapter.h"
+#include "elastos/droid/widget/BaseAdapter.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
@@ -21,7 +21,7 @@ using Elastos::Droid::View::IViewOnKeyListener;
 using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Droid::Widget::IPopupWindowOnDismissListener;
 using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
-// using Elastos::Droid::Widget::BaseAdapter;
+using Elastos::Droid::Widget::BaseAdapter;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::IListPopupWindow;
 using Elastos::Droid::Widget::ISpinnerAdapter;
@@ -49,11 +49,7 @@ class MenuPopupHelper
 {
 private:
     class MenuAdapter
-    #if 0
         : public BaseAdapter
-    #else
-        : public Object
-    #endif
     {
     public:
         MenuAdapter(

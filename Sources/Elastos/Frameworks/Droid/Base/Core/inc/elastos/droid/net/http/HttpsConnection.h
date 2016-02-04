@@ -47,6 +47,13 @@ private:
             /* [in] */ ArrayOf<ICertificate*>* chain,
             /* [in] */ const String& authType);
     };
+
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -108,8 +115,6 @@ public:
 private:
     static CARAPI_(AutoPtr<ISSLSocketFactory>) GetSocketFactory();
 
-    static CARAPI_(AutoPtr<IObject>) InitLock();
-
 private:
     /**
      * SSL socket factory
@@ -136,9 +141,8 @@ private:
     // Used when connecting through a proxy.
     AutoPtr<IHttpHost> mProxyHost;
 
-    static ECode mEnableStaticBlock;
-
-    static AutoPtr<IObject> sLock;
+    static Object sLock;
+    static const StaticInitializer sInitializer;
 };
 
 } // namespace Http

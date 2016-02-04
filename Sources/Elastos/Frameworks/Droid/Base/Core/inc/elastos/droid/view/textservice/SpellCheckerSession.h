@@ -9,9 +9,9 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::View::Internal::TextService::IITextServicesSessionListener;
-using Elastos::Droid::View::Internal::TextService::IISpellCheckerSessionListener;
-using Elastos::Droid::View::Internal::TextService::IITextServicesManager;
+using Elastos::Droid::Internal::TextService::IITextServicesSessionListener;
+using Elastos::Droid::Internal::TextService::IISpellCheckerSessionListener;
+using Elastos::Droid::Internal::TextService::IITextServicesManager;
 
 namespace Elastos {
 namespace Droid {

@@ -25,10 +25,11 @@ namespace Os {
  * removed
  *
  */
-class TokenWatcher
+class ECO_PUBLIC TokenWatcher
+    : public Object
 {
 private:
-    class NotificationTaskRunnable
+    class ECO_LOCAL NotificationTaskRunnable
         : public Runnable
     {
     public:
@@ -42,7 +43,7 @@ private:
         TokenWatcher* mHost;
     };
 
-    class Death
+    class ECO_LOCAL Death
         : public Object
         , public IProxyDeathRecipient
     {
@@ -77,6 +78,8 @@ public:
     TokenWatcher(
         /* [in] */ IHandler* h,
         /* [in] */ const String& tag);
+
+    virtual ~TokenWatcher();
 
     /**
      * Called when the number of active tokens goes from 0 to 1.
@@ -118,11 +121,11 @@ public:
         /* [in] */ IPrintWriter* pw);
 
 private:
-    CARAPI_(AutoPtr< List<String> >) DumpInternal();
+    ECO_LOCAL CARAPI_(AutoPtr< List<String> >) DumpInternal();
 
-    CARAPI NotificationTask();
+    ECO_LOCAL CARAPI NotificationTask();
 
-    CARAPI_(void) SendNotificationLocked(
+    ECO_LOCAL CARAPI_(void) SendNotificationLocked(
         /* [in] */ Boolean on);
 
 private:

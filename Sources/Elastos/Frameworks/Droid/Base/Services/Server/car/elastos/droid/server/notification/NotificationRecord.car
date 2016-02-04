@@ -1,0 +1,28 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Notification {
+
+    /**
+     * Holds data about notifications that should not be shared with the
+     * {@link android.service.notification.NotificationListenerService}s.
+     *
+     * <p>These objects should not be mutated unless the code is synchronized
+     * on {@link NotificationManagerService#mNotificationList}, and any
+     * modification should be followed by a sorting of that list.</p>
+     *
+     * <p>Is sortable by {@link NotificationComparator}.</p>
+     *
+     * {@hide}
+     */
+    interface INotificationRecord {
+
+    }
+
+    } // namespace Notification
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

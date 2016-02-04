@@ -1,0 +1,25 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Hardware {
+    namespace Camera2 {
+    namespace Marshal {
+    namespace Impl {
+
+    /**
+     * Marshal {@link String} to/from {@link #TYPE_BYTE}.
+     *
+     * @invoke interface IMarshalQueryable
+     */
+    interface IMarshalQueryableString {
+    }
+
+    } // namespace Impl
+    } // namespace Marshal
+    } // namespace Camera2
+    } // namespace Hardware
+    } // namespace Droid
+    } // namespace Elastos
+}

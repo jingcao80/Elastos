@@ -24,7 +24,7 @@ module
      * interface Elastos.Droid.Content.IDialogInterface
      * interface IWindowCallback
      * interface IKeyEventCallback
-     * interface IOnCreateContextMenuListener
+     * interface IViewOnCreateContextMenuListener
      * interface IOnWindowDismissedCallback
      * interface IDialog
      */

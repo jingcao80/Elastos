@@ -14,7 +14,7 @@ using Elastos::Droid::Content::IDialogInterfaceOnCancelListener;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
-using Elastos::Droid::Os::Storage::IMountService;
+using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Os::Storage::IStorageEventListener;
 using Elastos::Droid::Os::Storage::IStorageVolume;
 using Elastos::Droid::Os::Storage::IStorageManager;
@@ -108,7 +108,7 @@ public:
     CARAPI UpdateProgressDialog(
         /* [in] */ Int32 msg);
 
-    CARAPI_(AutoPtr<IMountService>) GetMountService();
+    CARAPI_(AutoPtr<IIMountService>) GetMountService();
 
 protected:
     CARAPI_(void) Fail(
@@ -127,7 +127,7 @@ private:
     AutoPtr<IStorageVolume> mStorageVolume;
 
     // Access using getMountService()
-    AutoPtr<IMountService> mMountService;
+    AutoPtr<IIMountService> mMountService;
 
     AutoPtr<IStorageManager> mStorageManager;
 

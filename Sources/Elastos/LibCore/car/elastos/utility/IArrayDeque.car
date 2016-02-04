@@ -48,8 +48,12 @@ module
 
     /**
      * @Involve
-     * interface IIterable;
+     * interface IAbstractCollection
      * interface ICollection;
+     * interface IIterable;
+     * interface IDeque
+     * interface ICloneable
+     * interface ISerializable
      */
     [deprecated]
     interface IArrayDeque {

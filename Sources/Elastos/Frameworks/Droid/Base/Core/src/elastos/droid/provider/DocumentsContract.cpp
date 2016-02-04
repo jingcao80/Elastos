@@ -321,7 +321,6 @@ Boolean DocumentsContract::IsDocumentsProvider(
     /* [in] */ IContext* context,
     /* [in] */ const String& authority)
 {
-    VALIDATE_NOT_NULL(context);
     AutoPtr<IIntent> intent;
     CIntent::New(IDocumentsContract::PROVIDER_INTERFACE, (IIntent**)&intent);
     AutoPtr<IIPackageManager> pmr;
@@ -505,6 +504,7 @@ ECode DocumentsContract::GetDocumentThumbnail(
 EXIT:
     CContentProviderClient::ReleaseQuietly(client);
     // }
+    return NOERROR;
 }
 
 ECode DocumentsContract::GetDocumentThumbnail(
@@ -623,6 +623,7 @@ EXIT:
     iou->CloseQuietly(ICloseable::Probe(afd));
     }
     //     }
+    return NOERROR;
 }
 
 ECode DocumentsContract::CreateDocument(
@@ -657,6 +658,7 @@ ECode DocumentsContract::CreateDocument(
 EXIT:
     CContentProviderClient::ReleaseQuietly(client);
     // }
+    return NOERROR;
 }
 
 /** {@hide} */
@@ -717,6 +719,7 @@ EXIT:
     CContentProviderClient::ReleaseQuietly(client);
     //     ContentProviderClient.releaseQuietly(client);
     // }
+    return NOERROR;
 }
 
 /** {@hide} */
@@ -775,6 +778,7 @@ ECode DocumentsContract::DeleteDocument(
     // } finally {
 EXIT:
     CContentProviderClient::ReleaseQuietly(client);
+    return NOERROR;
 }
 
 /** {@hide} */

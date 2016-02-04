@@ -29,10 +29,8 @@ ECode StringReader::constructor(
     if (str.IsNull()) {
         return E_NULL_POINTER_EXCEPTION;
     }
+    FAIL_RETURN(Reader::constructor());
     mStr = str;
-    if (mStr.IsNull())
-        return E_OUT_OF_MEMORY_ERROR;
-
     mCount = mStr.GetLength();
 
     return NOERROR;

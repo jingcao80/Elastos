@@ -1,7 +1,9 @@
 
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/content/pm/PackageUserState.h"
 #include <Elastos.CoreLibrary.h>
 
+using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 

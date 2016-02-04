@@ -65,10 +65,10 @@ E ProcessMap<E>::Get(
     if (it != mMap->End()) {
         uids = it->mSecond;
     }
-    if (uids == NULL) return NULL;
+    if (uids == NULL) return E(NULL);
     Int32ObjectMapIterator it2 = uids->Find(uid);
     if (it2 != uids->End()) return it2->mSecond;
-    else return NULL;
+    else return E(NULL);
 }
 
 template <typename E>

@@ -74,7 +74,6 @@ Boolean BaseKeyListener::BackspaceOrForwardDelete(
     }
 
     // Alt+Backspace or Alt+ForwardDelete deletes the current line, if possible.
-    Boolean bIsAltPressed;
     Int32 tmpOut;
     if ((GetMetaState(ICharSequence::Probe(content), IKeyEvent::META_ALT_ON, event, &tmpOut), tmpOut) == 1) {
         if (DeleteLine(view, content)) {

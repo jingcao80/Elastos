@@ -6,16 +6,14 @@
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/media/tv/CTvContentRating.h"
 #include "elastos/droid/media/tv/TvInputService.h"
-//TODO: Need CDispatcherState
-// #include "elastos/droid/view/CDispatcherState.h"
+#include "elastos/droid/view/CDispatcherState.h"
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
 #include "elastos/droid/os/CHandler.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::IPixelFormat;
-//TODO: Need CDispatcherState
-// using Elastos::Droid::View::CDispatcherState;
+using Elastos::Droid::View::CDispatcherState;
 using Elastos::Droid::View::CWindowManagerLayoutParams;
 using Elastos::Droid::View::EIID_IKeyEventCallback;
 using Elastos::Droid::View::IDispatcherState;
@@ -159,8 +157,7 @@ CAR_INTERFACE_IMPL(TvInputServiceSession, Object, IKeyEventCallback)
 TvInputServiceSession::TvInputServiceSession()
     : mOverlayViewEnabled(FALSE)
 {
-//TODO: Need CDispatcherState
-    // CDispatcherState::New((IDispatcherState**)&mDispatcherState);
+    CDispatcherState::New((IDispatcherState**)&mDispatcherState);
 }
 
 TvInputServiceSession::~TvInputServiceSession()

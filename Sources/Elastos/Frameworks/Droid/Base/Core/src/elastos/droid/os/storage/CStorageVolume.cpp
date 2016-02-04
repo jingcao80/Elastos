@@ -1,8 +1,10 @@
 
 #include "elastos/droid/os/storage/CStorageVolume.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Droid::Content::Res::IResources;
 
 namespace Elastos {
@@ -11,6 +13,10 @@ namespace Os {
 namespace Storage {
 
 const String CStorageVolume::EXTRA_STORAGE_VOLUME = String("storage_volume");
+
+CAR_INTERFACE_IMPL_2(CStorageVolume, Object, IStorageVolume, IParcelable)
+
+CAR_OBJECT_IMPL(CStorageVolume)
 
 CStorageVolume::CStorageVolume()
     : mStorageId(0)
@@ -299,6 +305,12 @@ ECode CStorageVolume::ToString(
     builder += mMaxFileSize;
     builder += String(" mOwner=");
     builder += mOwner;
+    builder += String(" mUuid=");
+    builder += mUuid;
+    builder += String(" mUserLabel=");
+    builder += mUserLabel;
+    builder += String(" mState=");
+    builder += mState;
     builder += String("]");
     *pStr = builder.ToString();
     return NOERROR;
@@ -320,7 +332,10 @@ ECode CStorageVolume::WriteToParcel(
     pParcel->WriteInt32(mMtpReserveSpace);
     pParcel->WriteInt32(mAllowMassStorage ? 1 : 0);
     pParcel->WriteInt64(mMaxFileSize);
-//    pParcel->WriteParcelable(mOwner, flags);
+   pParcel->WriteInterfacePtr(mOwner);
+   pParcel->WriteString(mUuid);
+   pParcel->WriteString(mUserLabel);
+   pParcel->WriteString(mState);
     return NOERROR;
 }
 
@@ -355,7 +370,84 @@ ECode CStorageVolume::ReadFromParcel(
 
     in->ReadInt64(&mMaxFileSize);
 
-//    mOwner = in->ReadParcelable(NULL);
+    Handle32 ptr;
+    in->ReadInterfacePtr(&ptr);
+    mOwner = reinterpret_cast<IUserHandle*>(ptr);
+    in->ReadString(&mUuid);
+    in->ReadString(&mUserLabel);
+    in->ReadString(&mState);
+    return NOERROR;
+}
+
+ECode CStorageVolume::SetUuid(
+    /* [in] */ const String& uuid)
+{
+    mUuid = uuid;
+    return NOERROR;
+}
+
+ECode CStorageVolume::GetUuid(
+    /* [out] */ String* uuid)
+{
+    VALIDATE_NOT_NULL(uuid)
+
+    *uuid = mUuid;
+    return NOERROR;
+}
+
+ECode CStorageVolume::GetFatVolumeId(
+    /* [out] */ Int32* id)
+{
+    VALIDATE_NOT_NULL(id)
+
+    if (mUuid == NULL || mUuid.GetLength() != 9) {
+        *id = -1;
+        return NOERROR;
+    }
+    // try {
+    String r;
+    StringUtils::Replace(mUuid, "-", "", &r);
+    Int64 tmp;
+    ECode ec = StringUtils::Parse(r, 16, &tmp);
+    if (FAILED(ec)) {
+        *id = -1;
+    } else {
+        *id = tmp;
+    }
+    return ec;
+    // } catch (NumberFormatException e) {
+        // return -1;
+    // }
+}
+
+ECode CStorageVolume::SetUserLabel(
+    /* [in] */ const String& userLabel)
+{
+    mUserLabel = userLabel;
+    return NOERROR;
+}
+
+ECode CStorageVolume::GetUserLabel(
+    /* [out] */ String* userLabel)
+{
+    VALIDATE_NOT_NULL(userLabel)
+
+    *userLabel = mUserLabel;
+    return NOERROR;
+}
+
+ECode CStorageVolume::SetState(
+    /* [in] */ const String& state)
+{
+    mState = state;
+    return NOERROR;
+}
+
+ECode CStorageVolume::GetState(
+    /* [out] */ String* state)
+{
+    VALIDATE_NOT_NULL(state)
+    *state = mState;
     return NOERROR;
 }
 

@@ -1157,7 +1157,6 @@ AutoPtr<ArrayOf<MobileDataStateTracker::NetworkDataEntry*> > MobileDataStateTrac
 {
     AutoPtr<ArrayOf<NetworkDataEntry*> > rev;
     // TODO: Waiting for ITelephonyManager
-    assert(0);
     // NetworkDataEntry* array[] = {
     //     new NetworkDataEntry(ITelephonyManager::NETWORK_TYPE_EDGE,      237,     118, UNKNOWN),
     //     new NetworkDataEntry(ITelephonyManager::NETWORK_TYPE_GPRS,       48,      40, UNKNOWN),

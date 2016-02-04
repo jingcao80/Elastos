@@ -131,6 +131,7 @@ ECode CLoudnessEnhancer::SetParameterListener(
         }
         mParamListener = listener;
     }
+    return NOERROR;
 }
 
 ECode CLoudnessEnhancer::GetProperties(

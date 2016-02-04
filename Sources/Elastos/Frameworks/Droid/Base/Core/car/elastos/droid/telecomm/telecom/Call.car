@@ -1,0 +1,205 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Telecomm.Telecom.ICallListener;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecomm {
+    namespace Telecom {
+
+        interface ICallDetails {
+            GetHandle(
+                [out] IUri** res);
+
+            GetHandlePresentation(
+                [out] Int32* res);
+
+            GetCallerDisplayName(
+                [out] String* res);
+
+            GetCallerDisplayNamePresentation(
+                [out] Int32* res);
+
+            GetAccountHandle(
+                [out] IPhoneAccountHandle** res);
+
+            GetCallCapabilities(
+                [out] Int32* res);
+
+            GetCallProperties(
+                [out] Int32* res);
+
+            GetDisconnectCause(
+                [out] IDisconnectCause** res);
+
+            GetConnectTimeMillis(
+                [out] Int64* res);
+
+            GetGatewayInfo(
+                [out] IGatewayInfo** res);
+
+            GetVideoState(
+                [out] Int32* res);
+
+            GetStatusHints(
+                [out] IStatusHints** res);
+
+            GetExtras(
+                [out] IBundle** res);
+        }
+
+        /**
+         *  Encapsulates all audio states during a call.
+         *  @hide
+         */
+        interface ICall {
+            GetHandle(
+                [out] IUri** res);
+
+            GetHandlePresentation(
+                [out] Int32* res);
+
+            GetCallerDisplayName(
+                [out] String* res);
+
+            GetCallerDisplayNamePresentation(
+                [out] Int32* res);
+
+            GetAccountHandle(
+                [out] IPhoneAccountHandle** res);
+
+            GetCallCapabilities(
+                [out] Int32* res);
+
+            GetCallProperties(
+                [out] Int32* res);
+
+            GetDisconnectCause(
+                [out] IDisconnectCause** res);
+
+            GetConnectTimeMillis(
+                [out] Int64* res);
+
+            GetGatewayInfo(
+                [out] IGatewayInfo** res);
+
+            GetVideoState(
+                [out] Int32* res);
+
+            GetStatusHints(
+                [out] IStatusHints** res);
+
+            GetExtras(
+                [out] IBundle** res);
+
+            GetRemainingPostDialSequence(
+                [out] String* res);
+
+            Answer(
+                [in] Int32 videoState);
+
+            Reject(
+                [in] Boolean rejectWithMessage,
+                [in] String textMessage);
+
+            Disconnect();
+
+            Hold();
+
+            Unhold();
+
+            PlayDtmfTone(
+                [in] Char32 digit);
+
+            StopDtmfTone();
+
+            PostDialContinue(
+                [in] Boolean proceed);
+
+            PhoneAccountSelected(
+                [in] IPhoneAccountHandle* accountHandle);
+
+            Conference(
+                [in] ICall* callToConferenceWith);
+
+            SplitFromConference();
+
+            MergeConference();
+
+            SwapConference();
+
+            GetParent(
+                [out] ICall** res);
+
+            GetChildren(
+                [out] IList** res);
+
+            GetConferenceableCalls(
+                [out] IList** res);
+
+            GetState(
+                [out] Int32* res);
+
+            GetCannedTextResponses(
+                [out] IList** res);
+
+            GetVideoCall(
+                [out] IInCallServiceVideoCall** res);
+
+            GetDetails(
+                [out] ICallDetails** res);
+
+            AddListener(
+                [in] ICallListener* listener);
+
+            RemoveListener(
+                [in] ICallListener* listener);
+
+
+       }
+
+       interface ICallListener {
+            OnStateChanged(
+                [in] ICall* call,
+                [in] Int32 state);
+
+            OnParentChanged(
+                [in] ICall* call,
+                [in] ICall* parent);
+
+            OnChildrenChanged(
+                [in] ICall* call,
+                [in] IList* children);
+
+            OnDetailsChanged(
+                [in] ICall* call,
+                [in] ICallDetails* details);
+
+            OnCannedTextResponsesLoaded(
+                [in] ICall* call,
+                [in] IList* cannedTextResponses);
+
+            OnPostDialWait(
+                [in] ICall* call,
+                [in] String remainingPostDialSequence);
+
+            OnVideoCallChanged(
+                [in] ICall* call,
+                [in] IInCallServiceVideoCall* videoCall);
+
+            OnCallDestroyed(
+                [in] ICall* call);
+
+            OnConferenceableCallsChanged(
+                [in] ICall* call,
+                [in] IList* conferenceableCalls);
+        }
+    } // namespace Telecom
+    } // namespace Telecomm
+    } // namespace Droid
+    } // namespace Elastos
+}

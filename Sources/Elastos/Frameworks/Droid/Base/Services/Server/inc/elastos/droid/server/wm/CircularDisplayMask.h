@@ -41,7 +41,7 @@ private:
 private:
     static const String TAG;
 
-    static cosnt Int32 STROKE_WIDTH = 2;
+    static const Int32 STROKE_WIDTH = 2;
     // size of the chin
     Int32 mScreenOffset;
     // Display dimensions

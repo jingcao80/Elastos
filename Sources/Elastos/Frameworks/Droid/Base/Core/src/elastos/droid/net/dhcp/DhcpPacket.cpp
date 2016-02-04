@@ -655,7 +655,7 @@ ECode DhcpPacket::DecodeFullPacket(
     }
     AutoPtr<DhcpPacket> newPacket;
     switch(dhcpType) {
-        case -1:
+        case (Byte)-1:
             FUNC_RETURN(NULL)
         case DHCP_MESSAGE_TYPE_DISCOVER:
             newPacket = new DhcpDiscoverPacket();

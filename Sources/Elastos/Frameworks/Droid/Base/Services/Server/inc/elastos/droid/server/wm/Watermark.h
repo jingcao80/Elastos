@@ -7,6 +7,7 @@
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::ISurfaceSession;
 using Elastos::Droid::View::ISurfaceControl;
+using Elastos::Droid::View::ISurface;
 using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::Utility::IDisplayMetrics;
 
@@ -44,6 +45,7 @@ private:
     Int32 mDeltaY;
 
     AutoPtr<ISurfaceControl> mSurfaceControl;
+    AutoPtr<ISurface> mSurface;
     Int32 mLastDW;
     Int32 mLastDH;
     Boolean mDrawNeeded;

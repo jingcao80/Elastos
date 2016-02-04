@@ -69,8 +69,8 @@ CMediaSessionManager::SessionsChangedWrapper::SessionsChangedWrapper(
     /* [in] */ IContext * context)
     : mListener(listener)
     , mHandler(handler)
-    , mHost(host)
     , mContext(context)
+    , mHost(host)
 {
     mStub = new ActiveSessionsListener(this, mContext, mListener, mHandler);
 }

@@ -163,8 +163,8 @@ ECode AwSettings::SetVideoOverlayForEmbeddedVideoEnabledRunnable::Run()
 //===============================================================
 //              AwSettings::LazyDefaultUserAgent
 //===============================================================
-
-const String AwSettings::LazyDefaultUserAgent::sInstance = AwSettings::NativeGetDefaultUserAgent();
+// TODO
+const String AwSettings::LazyDefaultUserAgent::sInstance;// = AwSettings::NativeGetDefaultUserAgent();
 
 //===============================================================
 //             AwSettings::EventHandler::InnerHandler

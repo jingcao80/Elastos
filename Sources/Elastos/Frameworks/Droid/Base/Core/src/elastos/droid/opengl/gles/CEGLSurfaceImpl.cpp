@@ -1,9 +1,46 @@
-#include "CEGLSurfaceImpl.h"
+#include "elastos/droid/opengl/gles/CEGLSurfaceImpl.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
 namespace Gles {
+
+UInt32 CEGLSurfaceImpl::AddRef()
+{
+    return ElRefBase::AddRef();
+}
+
+UInt32 CEGLSurfaceImpl::Release()
+{
+    return ElRefBase::Release();
+}
+
+PInterface CEGLSurfaceImpl::Probe(
+    /* [in] */ REIID riid)
+{
+    if (riid == EIID_IInterface) {
+        return (IInterface*)(Elastosx::Microedition::Khronos::Egl::IEGLSurface*)this;
+    }
+    else if (riid == Elastosx::Microedition::Khronos::Egl::EIID_IEGLSurface) {
+        return (Elastosx::Microedition::Khronos::Egl::IEGLSurface*)this;
+    }
+    return Object::Probe(riid);
+}
+
+ECode CEGLSurfaceImpl::GetInterfaceID(
+    /* [in] */ IInterface* object,
+    /* [out] */ InterfaceID* iid)
+{
+    VALIDATE_NOT_NULL(iid)
+
+    if (object == (IInterface*)(Elastosx::Microedition::Khronos::Egl::IEGLSurface*)this) {
+        *iid = Elastosx::Microedition::Khronos::Egl::EIID_IEGLSurface;
+        return NOERROR;
+    }
+    return Object::GetInterfaceID(object, iid);
+}
+
+CAR_OBJECT_IMPL(CEGLSurfaceImpl)
 
 ECode CEGLSurfaceImpl::constructor()
 {
@@ -13,7 +50,7 @@ ECode CEGLSurfaceImpl::constructor()
 }
 
 ECode CEGLSurfaceImpl::constructor(
-    /* [in] */ Int32 surface)
+    /* [in] */ Int64 surface)
 {
     mEGLSurface = surface;
     mNativePixelRef = 0;
@@ -40,7 +77,7 @@ ECode CEGLSurfaceImpl::GetHashCode(
     return NOERROR;
 }
 
-Int32 CEGLSurfaceImpl::GetEGLSurface()
+Int64 CEGLSurfaceImpl::GetEGLSurface()
 {
     return mEGLSurface;
 }

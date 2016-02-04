@@ -27,6 +27,7 @@
 #include "elastos/droid/server/pm/Settings.h"
 #include "elastos/droid/server/pm/CUserManagerService.h"
 #include "elastos/droid/server/pm/CPackageInstallerService.h"
+#include "elastos/droid/server/pm/PackageVerificationState.h"
 #include "elastos/droid/server/ServiceThread.h"
 
 using Elastos::Core::IInteger32;
@@ -74,6 +75,8 @@ using Elastos::Droid::Content::Pm::IPackageInfoLite;
 using Elastos::Droid::Content::Pm::IIPackageMoveObserver;
 using Elastos::Droid::Content::Pm::IKeySet;
 using Elastos::Droid::Content::Pm::PackageParser;
+using Elastos::Droid::Content::Pm::IPackageInstallerSessionParams;
+using Elastos::Droid::Content::Pm::IIPackageInstaller;
 using Elastos::Droid::Internal::App::IIMediaContainerService;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::Runnable;
@@ -87,6 +90,7 @@ using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Text::Format::IDateUtils;
 using Elastos::Droid::Utility::ISparseArray;
+using Elastos::Droid::Utility::IAtomicFile;
 
 namespace Elastos {
 namespace Droid {
@@ -94,6 +98,176 @@ namespace Server {
 namespace Pm {
 
 class PackageVerificationState;
+
+class OriginInfo : public Object
+{
+public:
+    static CARAPI_(AutoPtr<OriginInfo>) FromNothing();
+
+    static CARAPI_(AutoPtr<OriginInfo>) FromUntrustedFile(
+        /* [in] */ IFile* file);
+
+    static CARAPI_(AutoPtr<OriginInfo>) FromExistingFile(
+        /* [in] */ IFile* file);
+
+    static CARAPI_(AutoPtr<OriginInfo>) FromStagedFile(
+        /* [in] */ IFile* file);
+
+    static CARAPI_(AutoPtr<OriginInfo>) FromStagedContainer(
+        /* [in] */ const String& cid);
+
+private:
+    OriginInfo(
+        /* [in] */ IFile* file,
+        /* [in] */ const String& cid,
+        /* [in] */ Boolean staged,
+        /* [in] */ Boolean existing);
+
+public:
+    /**
+     * Location where install is coming from, before it has been
+     * copied/renamed into place. This could be a single monolithic APK
+     * file, or a cluster directory. This location may be untrusted.
+     */
+    AutoPtr<IFile> mFile;
+    String mCid;
+
+    /**
+     * Flag indicating that {@link #file} or {@link #cid} has already been
+     * staged, meaning downstream users don't need to defensively copy the
+     * contents.
+     */
+    Boolean mStaged;
+
+    /**
+     * Flag indicating that {@link #file} or {@link #cid} is an already
+     * installed app that is being moved.
+     */
+    Boolean mExisting;
+
+    String mResolvedPath;
+    AutoPtr<IFile> mResolvedFile;
+};
+
+class InstallArgs : public Object
+{
+public:
+    InstallArgs()
+        : mInstallFlags(0)
+        , mIsEpk(FALSE)
+    {}
+
+    InstallArgs(
+        /* [in] */ OriginInfo* origin,
+        /* [in] */ IIPackageInstallObserver2* observer,
+        /* [in] */ Int32 installFlags,
+        /* [in] */ const String& installerPackageName,
+        /* [in] */ IManifestDigest* manifestDigest,
+        /* [in] */ IUserHandle* user,
+        /* [in] */ ArrayOf<String>* instructionSets,
+        /* [in] */ const String& abiOverride,
+        /* [in] */ CPackageManagerService* owner);
+
+    CARAPI_(void) Init(
+        /* [in] */ OriginInfo* origin,
+        /* [in] */ IIPackageInstallObserver2* observer,
+        /* [in] */ Int32 installFlags,
+        /* [in] */ const String& installerPackageName,
+        /* [in] */ IManifestDigest* manifestDigest,
+        /* [in] */ IUserHandle* user,
+        /* [in] */ ArrayOf<String>* instructionSets,
+        /* [in] */ const String& abiOverride,
+        /* [in] */ CPackageManagerService* owner);
+
+    virtual ~InstallArgs() {};
+
+    virtual CARAPI CopyPkg(
+        /* [in] */ IIMediaContainerService* imcs,
+        /* [in] */ Boolean temp,
+        /* [out] */ Int32* result) = 0;
+
+    virtual CARAPI_(Int32) DoPreInstall(
+        /* [in] */ Int32 status) = 0;
+
+    /**
+     * Rename package into final resting place. All paths on the given
+     * scanned package should be updated to reflect the rename.
+     */
+    virtual CARAPI_(Boolean) DoRename(
+        /* [in] */ Int32 status,
+        /* [in] */ PackageParser::Package* pkg,
+        /* [in] */ const String& oldCodePath) = 0;
+
+    virtual CARAPI_(Int32) DoPostInstall(
+        /* [in] */ Int32 status,
+        /* [in] */ Int32 uid) = 0;
+
+    /** @see PackageSettingBase#codePathString */
+    virtual CARAPI_(String) GetCodePath() = 0;
+
+    /** @see PackageSettingBase#resourcePathString */
+    virtual CARAPI_(String) GetResourcePath() = 0;
+
+    virtual CARAPI_(String) GetLegacyNativeLibraryPath() = 0;
+
+    // Need installer lock especially for dex file removal.
+    virtual CARAPI CleanUpResourcesLI() = 0;
+
+    virtual CARAPI_(Boolean) DoPostDeleteLI(
+        /* [in] */ Boolean del) = 0;
+
+    virtual CARAPI CheckFreeStorage(
+        /* [in] */ IIMediaContainerService* imcs,
+        /* [out] */ Boolean* result) = 0;
+
+    /**
+     * Called before the source arguments are copied. This is used mostly
+     * for MoveParams when it needs to read the source file to put it in the
+     * destination.
+     */
+    CARAPI_(Int32) DoPreCopy();
+
+    /**
+     * Called after the source arguments are copied. This is used mostly for
+     * MoveParams when it needs to read the source file to put it in the
+     * destination.
+     *
+     * @return
+     */
+    CARAPI_(Int32) DoPostCopy(
+        /* [in] */ Int32 uid);
+
+    CARAPI_(AutoPtr<IUserHandle>) GetUser();
+
+protected:
+    CARAPI_(Boolean) IsFwdLocked();
+
+    CARAPI_(Boolean) IsExternal();
+
+public:
+    /** @see InstallParams#origin */
+    AutoPtr<OriginInfo> mOrigin;
+
+    AutoPtr<IIPackageInstallObserver2> mObserver;
+    // Always refers to PackageManager flags only
+    Int32 mInstallFlags;
+    AutoPtr<IUri> mPackageURI;
+    String mInstallerPackageName;
+    AutoPtr<IManifestDigest> mManifestDigest;
+    AutoPtr<IUserHandle> mUser;
+    String mAbiOverride;
+
+    // The list of instruction sets supported by this app. This is currently
+    // only used during the rmdex() phase to clean up resources. We can get rid of this
+    // if we move dex files under the common app path.
+    /* nullable */ AutoPtr< ArrayOf<String> > mInstructionSets;
+
+    CPackageManagerService* mHost;
+    // for epk
+    Boolean mIsEpk;
+
+    friend class CPackageManagerService;
+};
 
 /**
  * Keep track of all those .apks everywhere.
@@ -197,7 +371,6 @@ public:/* package */
     };
 
     class PackageInstalledInfo;
-    class InstallArgs;
 
     // Recordkeeping of restore-after-install operations that are currently in flight
     // between the Package Manager and the Backup Manager
@@ -414,56 +587,6 @@ public:/* package */
         AutoPtr<IIPackageStatsObserver> mObserver;
     };
 
-    class OriginInfo : public Object
-    {
-    public:
-        static CARAPI_(AutoPtr<OriginInfo>) FromNothing();
-
-        static CARAPI_(AutoPtr<OriginInfo>) FromUntrustedFile(
-            /* [in] */ IFile* file);
-
-        static CARAPI_(AutoPtr<OriginInfo>) FromExistingFile(
-            /* [in] */ IFile* file);
-
-        static CARAPI_(AutoPtr<OriginInfo>) FromStagedFile(
-            /* [in] */ IFile* file);
-
-        static CARAPI_(AutoPtr<OriginInfo>) FromStagedContainer(
-            /* [in] */ const String& cid);
-
-    private:
-        OriginInfo(
-            /* [in] */ IFile* file,
-            /* [in] */ const String& cid,
-            /* [in] */ Boolean staged,
-            /* [in] */ Boolean existing);
-
-    public:
-        /**
-         * Location where install is coming from, before it has been
-         * copied/renamed into place. This could be a single monolithic APK
-         * file, or a cluster directory. This location may be untrusted.
-         */
-        AutoPtr<IFile> mFile;
-        String mCid;
-
-        /**
-         * Flag indicating that {@link #file} or {@link #cid} has already been
-         * staged, meaning downstream users don't need to defensively copy the
-         * contents.
-         */
-        Boolean mStaged;
-
-        /**
-         * Flag indicating that {@link #file} or {@link #cid} is an already
-         * installed app that is being moved.
-         */
-        Boolean mExisting;
-
-        String mResolvedPath;
-        AutoPtr<IFile> mResolvedFile;
-    };
-
     class InstallParams : public HandlerParams
     {
     private:
@@ -533,124 +656,6 @@ public:/* package */
     private:
         AutoPtr<InstallArgs> mArgs;
         Int32 mRet;
-    };
-
-    class InstallArgs : public Object
-    {
-    public:
-        InstallArgs()
-            : mInstallFlags(0)
-            , mIsEpk(FALSE)
-        {}
-
-        InstallArgs(
-            /* [in] */ OriginInfo* origin,
-            /* [in] */ IIPackageInstallObserver2* observer,
-            /* [in] */ Int32 installFlags,
-            /* [in] */ const String& installerPackageName,
-            /* [in] */ IManifestDigest* manifestDigest,
-            /* [in] */ IUserHandle* user,
-            /* [in] */ ArrayOf<String>* instructionSets,
-            /* [in] */ const String& abiOverride,
-            /* [in] */ CPackageManagerService* owner);
-
-        CARAPI_(void) Init(
-            /* [in] */ OriginInfo* origin,
-            /* [in] */ IIPackageInstallObserver2* observer,
-            /* [in] */ Int32 installFlags,
-            /* [in] */ const String& installerPackageName,
-            /* [in] */ IManifestDigest* manifestDigest,
-            /* [in] */ IUserHandle* user,
-            /* [in] */ ArrayOf<String>* instructionSets,
-            /* [in] */ const String& abiOverride,
-            /* [in] */ CPackageManagerService* owner);
-
-        virtual ~InstallArgs() {};
-
-        virtual CARAPI CopyPkg(
-            /* [in] */ IIMediaContainerService* imcs,
-            /* [in] */ Boolean temp,
-            /* [out] */ Int32* result) = 0;
-
-        virtual CARAPI_(Int32) DoPreInstall(
-            /* [in] */ Int32 status) = 0;
-
-        /**
-         * Rename package into final resting place. All paths on the given
-         * scanned package should be updated to reflect the rename.
-         */
-        virtual CARAPI_(Boolean) DoRename(
-            /* [in] */ Int32 status,
-            /* [in] */ PackageParser::Package* pkg,
-            /* [in] */ const String& oldCodePath) = 0;
-
-        virtual CARAPI_(Int32) DoPostInstall(
-            /* [in] */ Int32 status,
-            /* [in] */ Int32 uid) = 0;
-
-        /** @see PackageSettingBase#codePathString */
-        virtual CARAPI_(String) GetCodePath() = 0;
-
-        /** @see PackageSettingBase#resourcePathString */
-        virtual CARAPI_(String) GetResourcePath() = 0;
-
-        virtual CARAPI_(String) GetLegacyNativeLibraryPath() = 0;
-
-        // Need installer lock especially for dex file removal.
-        virtual CARAPI CleanUpResourcesLI() = 0;
-
-        virtual CARAPI_(Boolean) DoPostDeleteLI(
-            /* [in] */ Boolean del) = 0;
-
-        virtual CARAPI CheckFreeStorage(
-            /* [in] */ IIMediaContainerService* imcs,
-            /* [out] */ Boolean* result) = 0;
-
-        /**
-         * Called before the source arguments are copied. This is used mostly
-         * for MoveParams when it needs to read the source file to put it in the
-         * destination.
-         */
-        CARAPI_(Int32) DoPreCopy();
-
-        /**
-         * Called after the source arguments are copied. This is used mostly for
-         * MoveParams when it needs to read the source file to put it in the
-         * destination.
-         *
-         * @return
-         */
-        CARAPI_(Int32) DoPostCopy(
-            /* [in] */ Int32 uid);
-
-        CARAPI_(AutoPtr<IUserHandle>) GetUser();
-
-    protected:
-        CARAPI_(Boolean) IsFwdLocked();
-
-        CARAPI_(Boolean) IsExternal();
-
-    public:
-        /** @see InstallParams#origin */
-        AutoPtr<OriginInfo> mOrigin;
-
-        AutoPtr<IIPackageInstallObserver2> mObserver;
-        // Always refers to PackageManager flags only
-        Int32 mInstallFlags;
-        AutoPtr<IUri> mPackageURI;
-        String mInstallerPackageName;
-        AutoPtr<IManifestDigest> mManifestDigest;
-        AutoPtr<IUserHandle> mUser;
-        String mAbiOverride;
-
-        // The list of instruction sets supported by this app. This is currently
-        // only used during the rmdex() phase to clean up resources. We can get rid of this
-        // if we move dex files under the common app path.
-        /* nullable */ AutoPtr< ArrayOf<String> > mInstructionSets;
-
-        CPackageManagerService* mHost;
-        // for epk
-        Boolean mIsEpk;
     };
 
     /**
@@ -1225,13 +1230,11 @@ private:
             /* [in] */ IIPackageDeleteObserver2* observer,
             /* [in] */ Int32 userId,
             /* [in] */ Int32 flags,
-            /* [in] */ Int32 uid,
             /* [in] */ CPackageManagerService* host)
             : mPackageName(packageName)
             , mObserver(observer)
             , mUserId(userId)
             , mFlags(flags)
-            , mUid(uid)
             , mHost(host)
         {}
 
@@ -1242,7 +1245,6 @@ private:
         AutoPtr<IIPackageDeleteObserver2> mObserver;
         Int32 mUserId;
         Int32 mFlags;
-        Int32 mUid;
         CPackageManagerService* mHost;
     };
 
@@ -1372,7 +1374,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ Handle32 installer,
+        /* [in] */ Handle64 installer,
         /* [in] */ Boolean factoryTest,
         /* [in] */ Boolean onlyCore);
 
@@ -1562,6 +1564,24 @@ public:
         /* [in] */ const String& permName,
         /* [in] */ Int32 uid,
         /* [out] */ Int32* result);
+
+    /**
+     * Checks if the request is from the system or an app that has INTERACT_ACROSS_USERS
+     * or INTERACT_ACROSS_USERS_FULL permissions, if the userid is not for the caller.
+     * @param checkShell TODO(yamasani):
+     * @param message the message to log on security exception
+     */
+    CARAPI EnforceCrossUserPermission(
+        /* [in] */ Int32 callingUid,
+        /* [in] */ Int32 userId,
+        /* [in] */ Boolean requireFullPermission,
+        /* [in] */ Boolean checkShell,
+        /* [in] */ const String& message);
+
+    CARAPI EnforceShellRestriction(
+        /* [in] */ const String& restriction,
+        /* [in] */ Int32 callingUid,
+        /* [in] */ Int32 userHandle);
 
     static CARAPI_(Boolean) CompareStrings(
         /* [in] */ ICharSequence* s1,
@@ -1959,7 +1979,7 @@ public:
         /* [in] */ Int32 userId,
         /* [in] */ Int32 flags);
 
-    CARAPI_(Boolean) LocationIsPrivileged(
+    static CARAPI_(Boolean) LocationIsPrivileged(
         /* [in] */ IFile* path);
 
     CARAPI SetBlockUninstallForUser(
@@ -2100,7 +2120,7 @@ public:
 
     // protected void dump(FileDescriptor fd, PrintWriter pw, String[] args)
 
-    CARAPI_(String) GetEncryptKey();
+    static CARAPI_(String) GetEncryptKey();
 
     CARAPI UpdateExternalMediaStatus(
         /* [in] */ Boolean mediaStatus,
@@ -2164,6 +2184,9 @@ public:
         /* [in] */ IKeySet* ks,
         /* [out] */ Boolean* result);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 private:
     static CARAPI_(void) GetDefaultDisplayMetrics(
         /* [in] */ IContext* context,
@@ -2174,24 +2197,6 @@ private:
     CARAPI CheckValidCaller(
         /* [in] */ Int32 uid,
         /* [in] */ Int32 userId);
-
-    /**
-     * Checks if the request is from the system or an app that has INTERACT_ACROSS_USERS
-     * or INTERACT_ACROSS_USERS_FULL permissions, if the userid is not for the caller.
-     * @param checkShell TODO(yamasani):
-     * @param message the message to log on security exception
-     */
-    CARAPI EnforceCrossUserPermission(
-        /* [in] */ Int32 callingUid,
-        /* [in] */ Int32 userId,
-        /* [in] */ Boolean requireFullPermission,
-        /* [in] */ Boolean checkShell,
-        /* [in] */ const String& message);
-
-    CARAPI EnforceShellRestriction(
-        /* [in] */ const String& restriction,
-        /* [in] */ Int32 callingUid,
-        /* [in] */ Int32 userHandle);
 
     CARAPI_(AutoPtr<BasePermission>) FindPermissionTreeLP(
         /* [in] */ const String& permName);
@@ -2880,9 +2885,6 @@ private:
     CARAPI_(Boolean) UserNeedsBadging(
         /* [in] */ Int32 userId);
 
-    CARAPI ToString(
-        /* [out] */ String* str);
-
 public:/*package*/
     static const String TAG;
     static const Boolean DEBUG_SETTINGS = FALSE;
@@ -3175,9 +3177,9 @@ private:
 
     AutoPtr<PackageUsage> mPackageUsage;
 
-    static AutoPtr<IComparator> mResolvePrioritySorter;
+    static AutoPtr<IComparator> sResolvePrioritySorter;
 
-    static AutoPtr<IComparator> mProviderInitOrderSorter;
+    static AutoPtr<IComparator> sProviderInitOrderSorter;
 
     Boolean mMediaMounted;
 

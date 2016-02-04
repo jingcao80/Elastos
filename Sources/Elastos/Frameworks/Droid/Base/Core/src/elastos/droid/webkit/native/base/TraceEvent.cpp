@@ -187,7 +187,7 @@ AutoPtr<TraceEvent::BasicLooperMonitor> BasicLooperMonitor_Create()
     return instant;
 }
 
-const AutoPtr<TraceEvent::BasicLooperMonitor> TraceEvent::LooperMonitorHolder::sInstance = BasicLooperMonitor_Create();
+const AutoPtr<TraceEvent::BasicLooperMonitor> TraceEvent::LooperMonitorHolder::sInstance;// = BasicLooperMonitor_Create();
 
 //===============================================================
 //                         TraceEvent
@@ -420,6 +420,7 @@ String TraceEvent::GetCallerName()
     // '4' Was derived using the above commented out code snippet.
     return stack[4].getClassName() + "." + stack[4].getMethodName();
 #endif
+    return String(NULL);
 }
 
 void TraceEvent::NativeRegisterEnabledObserver()

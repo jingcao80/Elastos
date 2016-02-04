@@ -14,10 +14,6 @@ module
     merge("../../../car/elastos/droid/graphics.car");
     }
 
-    submodule Elastos.Droid.Opengl {
-    merge("../../../car/elastos/droid/opengl.car");
-    }
-
     submodule Elastos.Droid.Internal {
     merge("../../../car/elastos/droid/internal/app.car");
     merge("../../../car/elastos/droid/internal/appwidget.car");
@@ -64,6 +60,10 @@ module
 
     submodule Elastos.Droid.View {
     merge("../../../car/elastos/droid/view.car");
+    }
+
+    submodule Elastos.Droid.Opengl {
+    merge("../../../car/elastos/droid/opengl.car");
     }
 
     submodule Elastos.Droid.Hardware {
@@ -163,7 +163,10 @@ module
     merge("../../../car/elastos/droid/keystore.car");
     }
 
-    //merge("../../../car/elastos/droid/bluetooth.car");
+    submodule Elastos.Droid.Bluetooth {
+    merge("../../../car/elastos/droid/bluetooth.car");
+    }
+
     //merge("../../../car/elastos/droid/menu1.car");
     //merge("../../../car/elastos/droid/menu2.car");
     //merge("../../../car/elastos/droid/app/ResolverActivity.car");
@@ -176,6 +179,10 @@ module
 
     submodule Elastos.Droid.Telephony {
     merge("../../../car/elastos/droid/telephony.car");
+    }
+
+    submodule Elastos.Droid.Telecomm {
+    merge("../../../car/elastos/droid/telecomm.car");
     }
 
     submodule Elastos.Droid.Webkit {

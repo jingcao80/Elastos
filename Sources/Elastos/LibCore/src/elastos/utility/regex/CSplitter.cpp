@@ -142,7 +142,7 @@ ECode CSplitter::Split(
     Boolean result;
     String subStr;
 
-    while (list.GetSize() + 1 != limit && (matcher->Find(&result), result)) {
+    while ((list.GetSize() + 1) != limit && (matcher->Find(&result), result)) {
         matcher->Start(&end);
         subStr = input.Substring(begin, end);
         list.PushBack(subStr);

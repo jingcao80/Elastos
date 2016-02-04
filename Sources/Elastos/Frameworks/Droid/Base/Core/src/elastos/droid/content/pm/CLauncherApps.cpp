@@ -158,7 +158,7 @@ ECode CLauncherApps::MyOnAppsChangedListener::OnPackageRemoved(
 {
     if (CLauncherApps::DEBUG) {
         Logger::D(CLauncherApps::TAG, "OnPackageRemoved %s, %s",
-            Object::ToString(user).string(), packageName.string());
+            TO_CSTR(user), packageName.string());
     }
 
     AutoPtr<ILauncherApps> la;
@@ -189,7 +189,7 @@ ECode CLauncherApps::MyOnAppsChangedListener::OnPackageAdded(
 {
     if (CLauncherApps::DEBUG) {
         Logger::D(CLauncherApps::TAG, "OnPackageAdded %s, %s",
-            Object::ToString(user).string(), packageName.string());
+            TO_CSTR(user), packageName.string());
     }
 
     AutoPtr<ILauncherApps> la;
@@ -220,7 +220,7 @@ ECode CLauncherApps::MyOnAppsChangedListener::OnPackageChanged(
 {
     if (CLauncherApps::DEBUG) {
         Logger::D(CLauncherApps::TAG, "OnPackageChanged %s, %s",
-            Object::ToString(user).string(), packageName.string());
+            TO_CSTR(user), packageName.string());
     }
 
     AutoPtr<ILauncherApps> la;
@@ -252,7 +252,7 @@ ECode CLauncherApps::MyOnAppsChangedListener::OnPackagesAvailable(
 {
     if (CLauncherApps::DEBUG) {
         Logger::D(CLauncherApps::TAG, "OnPackagesAvailable %s, %s",
-            Object::ToString(user).string(), Arrays::ToString(packageNames).string());
+            TO_CSTR(user), Arrays::ToString(packageNames).string());
     }
 
     AutoPtr<ILauncherApps> la;
@@ -284,7 +284,7 @@ ECode CLauncherApps::MyOnAppsChangedListener::OnPackagesUnavailable(
 {
     if (CLauncherApps::DEBUG) {
         Logger::D(CLauncherApps::TAG, "OnPackagesUnavailable %s, %s",
-            Object::ToString(user).string(), Arrays::ToString(packageNames).string());
+            TO_CSTR(user), Arrays::ToString(packageNames).string());
     }
 
     AutoPtr<ILauncherApps> la;
@@ -390,7 +390,7 @@ ECode CLauncherApps::GetActivityList(
             AutoPtr<IComponentName> cn;
             lai->GetComponentName((IComponentName**)&cn);
             Logger::V(TAG, "Returning activity for profile %s : %s",
-                Object::ToString(user).string(), Object::ToString(cn).string());
+                TO_CSTR(user), TO_CSTR(cn));
         }
         lais->Add(TO_IINTERFACE(lai));
     }
@@ -454,7 +454,7 @@ ECode CLauncherApps::StartMainActivity(
 {
     if (DEBUG) {
         Logger::I(TAG, "StartMainActivity %s user %s",
-            Object::ToString(component).string(), Object::ToString(user).string());
+            TO_CSTR(component), TO_CSTR(user));
     }
     // try {
     return mService->StartActivityAsUser(component, sourceBounds, opts, user);

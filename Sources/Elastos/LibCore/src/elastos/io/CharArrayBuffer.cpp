@@ -36,6 +36,21 @@ ECode CharArrayBuffer::constructor(
     return NOERROR;
 }
 
+ECode CharArrayBuffer::GetPrimitiveArray(
+    /* [out] */ Handle64* arrayHandle)
+{
+    AutoPtr<ArrayOf<Char32> > arrayTmp;
+    GetArray((ArrayOf<Char32>**)&arrayTmp);
+    if (arrayTmp == NULL)
+    {
+        *arrayHandle = 0;
+        return NOERROR;
+    }
+    Char32* primitiveArray = arrayTmp->GetPayload();
+    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    return NOERROR;
+}
+
 ECode CharArrayBuffer::Get(
     /* [out] */ Char32* value)
 {
@@ -234,6 +249,7 @@ ECode CharArrayBuffer::ProtectedArray(
     }
     *array = mBackingArray;
     REFCOUNT_ADD(*array)
+
     return NOERROR;
 }
 

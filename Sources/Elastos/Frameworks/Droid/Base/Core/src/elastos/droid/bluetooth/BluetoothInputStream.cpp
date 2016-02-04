@@ -1,11 +1,10 @@
 
-#include "BluetoothInputStream.h"
-#include "BluetoothSocket.h"
+#include "elastos/droid/bluetooth/BluetoothInputStream.h"
+#include "elastos/droid/bluetooth/BluetoothSocket.h"
 #include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Utility::Logging::Slogger;
 using Elastos::IO::EIID_ICloseable;
-using Elastos::IO::EIID_IInputStream;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -15,8 +14,6 @@ BluetoothInputStream::BluetoothInputStream(
     /* [in] */ BluetoothSocket* s)
     : mSocket(s)
 {}
-
-CAR_INTERFACE_IMPL_2(BluetoothInputStream, IInputStream, ICloseable)
 
 ECode BluetoothInputStream::Available(
     /* [out] */ Int32* number)
@@ -70,48 +67,47 @@ ECode BluetoothInputStream::ReadBytes(
     return mSocket->Read(buffer, offset, length, number);
 }
 
-ECode BluetoothInputStream::Mark(
-    /* [in] */ Int32 readLimit)
-{
-    return InputStream::Mark(readLimit);
-}
-
-ECode BluetoothInputStream::IsMarkSupported(
-    /* [out] */ Boolean* supported)
-{
-    return InputStream::IsMarkSupported(supported);
-}
-
-ECode BluetoothInputStream::ReadBytes(
-    /* [out] */ ArrayOf<Byte>* buffer,
-    /* [out] */ Int32* number)
-{
-    return InputStream::ReadBytes(buffer, number);
-}
-
-ECode BluetoothInputStream::Reset()
-{
-    return InputStream::Reset();
-}
-
-ECode BluetoothInputStream::Skip(
-    /* [in] */ Int64 byteCount,
-    /* [out] */ Int64* number)
-{
-    return InputStream::Skip(byteCount, number);
-}
-
-ECode BluetoothInputStream::GetLock(
-    /* [out] */ IInterface** lockobj)
-{
-    VALIDATE_NOT_NULL(lockobj);
-    AutoPtr<IInterface> obj = InputStream::GetLock();
-    *lockobj = obj;
-    REFCOUNT_ADD(*lockobj);
-    return NOERROR;
-}
+//ECode BluetoothInputStream::Mark(
+//    /* [in] */ Int32 readLimit)
+//{
+//    return InputStream::Mark(readLimit);
+//}
+//
+//ECode BluetoothInputStream::IsMarkSupported(
+//    /* [out] */ Boolean* supported)
+//{
+//    return InputStream::IsMarkSupported(supported);
+//}
+//
+//ECode BluetoothInputStream::ReadBytes(
+//    /* [out] */ ArrayOf<Byte>* buffer,
+//    /* [out] */ Int32* number)
+//{
+//    return InputStream::ReadBytes(buffer, number);
+//}
+//
+//ECode BluetoothInputStream::Reset()
+//{
+//    return InputStream::Reset();
+//}
+//
+//ECode BluetoothInputStream::Skip(
+//    /* [in] */ Int64 byteCount,
+//    /* [out] */ Int64* number)
+//{
+//    return InputStream::Skip(byteCount, number);
+//}
+//
+//ECode BluetoothInputStream::GetLock(
+//    /* [out] */ IInterface** lockobj)
+//{
+//    VALIDATE_NOT_NULL(lockobj);
+//    AutoPtr<IInterface> obj = InputStream::GetLock();
+//    *lockobj = obj;
+//    REFCOUNT_ADD(*lockobj);
+//    return NOERROR;
+//}
 
 } // Bluetooth
 } // Droid
 } // Elastos
-

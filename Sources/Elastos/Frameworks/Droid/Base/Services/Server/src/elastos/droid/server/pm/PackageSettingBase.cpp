@@ -1,5 +1,5 @@
 
-#include "pm/PackageSettingBase.h"
+#include "elastos/droid/server/pm/PackageSettingBase.h"
 
 using Elastos::Droid::Content::Pm::IPackageManager;
 
@@ -50,11 +50,10 @@ PackageSettingBase::PackageSettingBase(
     , mCodePathString(base->mCodePathString)
     , mResourcePath(base->mResourcePath)
     , mResourcePathString(base->mResourcePathString)
-    , mLegacyNativeLibraryPathString(base->mLegacyNativeLibraryPathString;
-    , mPrimaryCpuAbiString(base->mPrimaryCpuAbiString;
-    , mSecondaryCpuAbiString(base->mSecondaryCpuAbiString;
-    , mCpuAbiOverrideString(base->mCpuAbiOverrideString;
-    , mNativeLibraryPathString(base->mNativeLibraryPathString)
+    , mLegacyNativeLibraryPathString(base->mLegacyNativeLibraryPathString)
+    , mPrimaryCpuAbiString(base->mPrimaryCpuAbiString)
+    , mSecondaryCpuAbiString(base->mSecondaryCpuAbiString)
+    , mCpuAbiOverrideString(base->mCpuAbiOverrideString)
     , mTimeStamp(base->mTimeStamp)
     , mFirstInstallTime(base->mFirstInstallTime)
     , mLastUpdateTime(base->mLastUpdateTime)

@@ -3,8 +3,12 @@
 #define __ELASTOS_DROID_OS_STORAGE_CSTORAGEVOLUME_H__
 
 #include "_Elastos_Droid_Os_Storage_CStorageVolume.h"
-#include "elastos/droid/ext/frameworkdef.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include <elastos/core/Object.h>
 
+using Elastos::Core::Object;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
 using Elastos::Droid::Content::IContext;
@@ -16,8 +20,15 @@ namespace Os {
 namespace Storage {
 
 CarClass(CStorageVolume)
+    , public Object
+    , public IStorageVolume
+    , public IParcelable
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CStorageVolume();
 
     ~CStorageVolume();
@@ -100,6 +111,31 @@ public:
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* in);
 
+    CARAPI SetUuid(
+        /* [in] */ const String& uuid);
+
+    CARAPI GetUuid(
+        /* [out] */ String* uuid);
+
+    /**
+     * Parse and return volume UUID as FAT volume ID, or return -1 if unable to
+     * parse or UUID is unknown.
+     */
+    CARAPI GetFatVolumeId(
+        /* [out] */ Int32* id);
+
+    CARAPI SetUserLabel(
+        /* [in] */ const String& userLabel);
+
+    CARAPI GetUserLabel(
+        /* [out] */ String* userLabel);
+
+    CARAPI SetState(
+        /* [in] */ const String& state);
+
+    CARAPI GetState(
+        /* [out] */ String* state);
+
 public:
     // StorageVolume extra for ACTION_MEDIA_REMOVED, ACTION_MEDIA_UNMOUNTED, ACTION_MEDIA_CHECKING,
     // ACTION_MEDIA_NOFS, ACTION_MEDIA_MOUNTED, ACTION_MEDIA_SHARED, ACTION_MEDIA_UNSHARED,
@@ -120,6 +156,10 @@ private:
     Int64 mMaxFileSize;
     /** When set, indicates exclusive ownership of this volume */
     AutoPtr<IUserHandle> mOwner;
+
+    String mUuid;
+    String mUserLabel;
+    String mState;
 };
 
 } // namespace Storage

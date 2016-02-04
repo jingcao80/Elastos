@@ -1,0 +1,26 @@
+module
+{
+    using interface Elastos.Droid.Os.IHandler;
+
+    interface Elastos.Droid.Server.Twilight.ITwilightListener;
+    interface Elastos.Droid.Server.Twilight.ITwilightState;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Twilight {
+
+    interface ITwilightManager {
+        RegisterListener(
+            [in] ITwilightListener* listener,
+            [in] IHandler* handler);
+
+        GetCurrentState(
+            [out] ITwilightState** state);
+    }
+
+    } // namespace Twilight
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

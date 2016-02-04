@@ -65,7 +65,7 @@ ECode MultiTapKeyListener::Timeout::Run()
 /*****************************MultiTapKeyListener*****************************/
 static AutoPtr<HashMap<Int32, String> > InitStaticRecs()
 {
-    AutoPtr<HashMap<Int32, String> > ret;
+    AutoPtr<HashMap<Int32, String> > ret = new HashMap<Int32, String>();
     (*ret)[IKeyEvent::KEYCODE_1] = ".,1!@#$%^&*:/?'=()";
     (*ret)[IKeyEvent::KEYCODE_2] = "abc2ABC";
     (*ret)[IKeyEvent::KEYCODE_3] = "def3DEF";

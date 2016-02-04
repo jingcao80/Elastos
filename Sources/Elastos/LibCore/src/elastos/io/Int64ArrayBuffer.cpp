@@ -33,6 +33,21 @@ ECode Int64ArrayBuffer::constructor(
     return NOERROR;
 }
 
+ECode Int64ArrayBuffer::GetPrimitiveArray(
+    /* [out] */ Handle64* arrayHandle)
+{
+    AutoPtr<ArrayOf<Int64> > arrayTmp;
+    GetArray((ArrayOf<Int64>**)&arrayTmp);
+    if (arrayTmp == NULL)
+    {
+        *arrayHandle = 0;
+        return NOERROR;
+    }
+    Int64* primitiveArray = arrayTmp->GetPayload();
+    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    return NOERROR;
+}
+
 ECode Int64ArrayBuffer::Get(
     /* [out] */ Int64* value)
 {
@@ -145,6 +160,8 @@ ECode Int64ArrayBuffer::ProtectedArray(
         return E_READ_ONLY_BUFFER_EXCEPTION;
     }
     *array = mBackingArray;
+    REFCOUNT_ADD(*array)
+
     return NOERROR;
 }
 

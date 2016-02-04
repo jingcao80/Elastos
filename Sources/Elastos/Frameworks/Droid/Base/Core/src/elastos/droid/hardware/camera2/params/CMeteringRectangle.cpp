@@ -211,7 +211,6 @@ ECode CMeteringRectangle::Equals(
     }
 
     if (IMeteringRectangle::Probe(obj) != NULL) {
-        Boolean ret;
         CMeteringRectangle* cOther = (CMeteringRectangle*)IMeteringRectangle::Probe(obj);
         *value = (mX == cOther->mX
             && mY == cOther->mY

@@ -55,6 +55,7 @@ module
     merge("os/SystemProperties.car");
     merge("os/SystemService.car");
     merge("os/Trace.car");
+    merge("os/UEventObserver.car");
     merge("os/UserHandle.car");
     merge("os/UserManager.car");
     merge("os/Vibrator.car");
@@ -73,7 +74,6 @@ module
     merge("os/storage/IMountServiceListener.car");
     merge("os/storage/IMountShutdownObserver.car");
     merge("os/storage/IObbActionListener.car");
-    merge("os/storage/MountServiceListener.car");
     merge("os/storage/OnObbStateChangeListener.car");
     merge("os/storage/StorageEventListener.car");
     merge("os/storage/StorageManager.car");
@@ -89,63 +89,67 @@ module
     using interface Elastos.IO.IOutputStream;
     using interface Elastos.IO.IFileInputStream;
     using interface Elastos.IO.IFileOutputStream;
+    using interface Elastos.IO.IFileDescriptor;
     using interface Elastos.Utility.IUUID;
 
     interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.IContentResolver;
+    interface Elastos.Droid.Os.ILooper;
     interface Elastos.Droid.Internal.Utility.IXmlUtilsWriteMapCallback;
 
     namespace Elastos {
     namespace Droid {
     namespace Os {
 
-    // namespace Storage {
-    //     class CStorageManager {
-    //         constructor(
-    //             [in] ILooper* tgtLooper);
+    namespace Storage {
+        class CStorageManager {
+            constructor(
+                [in] IContentResolver* resolver,
+                [in] ILooper* tgtLooper);
 
-    //         interface IStorageManager;
-    //     }
+            interface IStorageManager;
+        }
 
-    //     singleton class CStorageManagerHelper {
-    //         interface IStorageManagerHelper;
-    //     }
+        singleton class CStorageManagerHelper {
+            interface IStorageManagerHelper;
+        }
 
-    //     class CMountServiceBinderListener {
-    //         constructor(
-    //             [in] IStorageManager* host);
+        class CMountServiceBinderListener {
+            constructor(
+                [in] IStorageManager* host);
 
-    //         interface IMountServiceListener;
-    //     }
+            interface IIMountServiceListener;
+        }
 
-    //     class CObbActionListener {
-    //         constructor(
-    //             [in] IStorageManager* host);
+        class CObbActionListener {
+            constructor(
+                [in] IStorageManager* host);
 
-    //         interface IObbActionListener;
-    //     }
+            interface IIObbActionListener;
+        }
 
-    //     class CStorageVolume {
-    //         constructor();
+        class CStorageVolume {
+            constructor();
 
-    //         constructor(
-    //             [in] IFile* path,
-    //             [in] Int32 descriptionId,
-    //             [in] Boolean primary,
-    //             [in] Boolean removable,
-    //             [in] Boolean emulated,
-    //             [in] Int32 mtpReserveSpace,
-    //             [in] Boolean allowMassStorage,
-    //             [in] Int64 maxFileSize,
-    //             [in] IUserHandle* owner);
+            constructor(
+                [in] IFile* path,
+                [in] Int32 descriptionId,
+                [in] Boolean primary,
+                [in] Boolean removable,
+                [in] Boolean emulated,
+                [in] Int32 mtpReserveSpace,
+                [in] Boolean allowMassStorage,
+                [in] Int64 maxFileSize,
+                [in] IUserHandle* owner);
 
-    //         interface IStorageVolume;
-    //         interface IParcelable;
-    //     }
+            interface IStorageVolume;
+            interface IParcelable;
+        }
 
-    //     singleton class CStorageVolumeHelper {
-    //         interface IStorageVolumeHelper;
-    //     }
-    // }
+        singleton class CStorageVolumeHelper {
+            interface IStorageVolumeHelper;
+        }
+    }
 
     // class CBinderDeathRecipient {
     //     interface IProxyDeathRecipient;
@@ -345,6 +349,15 @@ module
 
         constructor(
             [in] IParcelFileDescriptor* pfd);
+
+        /** {@hide} */
+        constructor(
+            [in] IFileDescriptor* fd);
+
+        /** {@hide} */
+        constructor(
+            [in] IFileDescriptor* fd,
+            [in] IFileDescriptor* commChannel);
 
         interface IParcelFileDescriptor;
         interface IParcelable;

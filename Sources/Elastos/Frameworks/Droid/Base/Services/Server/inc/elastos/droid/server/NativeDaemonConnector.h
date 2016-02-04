@@ -3,44 +3,75 @@
 #define __ELASTOS_DROID_SERVER_NATIVEDAEMONCONNECTOR_H__
 
 #include "elastos/droid/ext/frameworkdef.h"
-#include "NativeDaemonEvent.h"
-#include <Elastos.CoreLibrary.h>
+#include "elastos/droid/server/NativeDaemonEvent.h"
 #include <elastos/utility/etl/List.h>
-#include <elastos/Queue.h>  // TODO delete
-#include <elastos/BlockingQueue.h>  // TODO delete
 #include <elastos/core/StringBuilder.h>
+#include <Elastos.Droid.Os.h>
 
-using Elastos::Core::IRunnable;
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Queue;  // TODO delete
-using Elastos::Utility::BlockingQueue; // TODO delete
-using Elastos::Utility::Concurrent::IBlockingQueue;
-using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
-using Elastos::Core::StringBuilder;
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IPrintWriter;
-using Elastos::IO::IOutputStream;
-
+using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IHandlerCallback;
-
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::Net::ILocalSocketAddress;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::IRunnable;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
+using Elastos::IO::IOutputStream;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::Concurrent::IBlockingQueue;
+using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
+/**
+ * Generic connector class for interfacing with a native daemon which uses the
+ * {@code libsysutils} FrameworkListener protocol.
+ */
 class NativeDaemonConnector
-    : public ElRefBase
+    : public Object
     , public IRunnable
     , public IHandlerCallback
-    , public IWeakReferenceSource
 {
 public:
     /**
-     * Command builder that handles argument list building.
+     * Wrapper around argument that indicates it's sensitive and shouldn't be
+     * logged.
      */
-    class Command : public ElRefBase
+    class SensitiveArg
+        : public Object
+        , public ISensitiveArg
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SensitiveArg(
+            /* [in] */ IInterface* arg)
+        {
+            mArg = arg;
+        }
+
+        //@Override
+        CARAPI ToString(
+            /* [out] */ String* str)
+        {
+            VALIDATE_NOT_NULL(str)
+            *str = Object::ToString(mArg);
+            return NOERROR;
+        }
+    private:
+        AutoPtr<IInterface> mArg;
+    };
+
+    /**
+     * Command builder that handles argument list building. Any arguments must
+     * be separated from base command so they can be properly escaped.
+     */
+    class Command
+        : public Object
     {
         friend class NativeDaemonConnector;
 
@@ -58,23 +89,20 @@ public:
     };
 
 private:
-    class ResponseQueue : public ElRefBase
+    class ResponseQueue : public Object
     {
     private:
-        class PendingCmd : public ElRefBase
+        class PendingCmd : public Object
         {
         public:
             PendingCmd(
-                    /* [in] */ Int32 c,
-                    /* [in] */ const String& r);
+                    /* [in] */ Int32 cmdNum,
+                    /* [in] */ const String& logCmd);
         public:
             Int32 mCmdNum;
-            // public BlockingQueue<NativeDaemonEvent> responses = new ArrayBlockingQueue<NativeDaemonEvent>(10);
-            //AutoPtr<IBlockingQueue> mResponses;
-            Queue< AutoPtr<NativeDaemonEvent> > mResponses; // TODO delete
-            Object mResponsesLock;
+            String mLogCmd;
+            AutoPtr<IBlockingQueue> mResponses; //new ArrayBlockingQueue<NativeDaemonEvent>(10);
 
-            String mRequest;
             // The availableResponseCount member is used to track when we can remove this
             // instance from the ResponseQueue.
             // This is used under the protection of a sync of the mPendingCmds object.
@@ -118,26 +146,24 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     NativeDaemonConnector(
         /* [in] */ INativeDaemonConnectorCallbacks* callbacks,
         /* [in] */ const String& socket,
         /* [in] */ Int32 responseQueueSize,
         /* [in] */ const String& logTag,
-        /* [in] */ Int32 maxLogSize);
+        /* [in] */ Int32 maxLogSize,
+        /* [in] */ IPowerManagerWakeLock* wl);
 
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
-
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface* pObject,
-        /* [in] */ InterfaceID* pIID);
-
-    CARAPI GetWeakReference(
-        /* [out] */ IWeakReference** weakReference);
+    NativeDaemonConnector(
+        /* [in] */ INativeDaemonConnectorCallbacks* callbacks,
+        /* [in] */ const String& socket,
+        /* [in] */ Int32 responseQueueSize,
+        /* [in] */ const String& logTag,
+        /* [in] */ Int32 maxLogSize,
+        /* [in] */ IPowerManagerWakeLock* wl,
+        /* [in] */ ILooper* looper);
 
     CARAPI Run();
 
@@ -174,15 +200,6 @@ public:
         /* [in] */ ArrayOf<IInterface*>* args,
         /* [out, callee] */ ArrayOf<NativeDaemonEvent*>** events);
 
-    CARAPI DoCommand(
-        /* [in] */ const String& cmd,
-        /* [out] */ List<String>& responses);
-
-    CARAPI DoListCommand(
-        /* [in] */ const String& cmd,
-        /* [in] */ Int32 expectedCode,
-        /* [out, callee] */ ArrayOf<String>** responses);
-
     static CARAPI_(void) AppendEscaped(
         /* [in] */ StringBuilder& builder,
         /* [in] */ const String& arg);
@@ -197,8 +214,12 @@ public:
 private:
     CARAPI ListenToSocket();
 
+    AutoPtr<ILocalSocketAddress> DetermineSocketAddress();
+
     CARAPI MakeCommand(
-        /* [in] */ StringBuilder& builder,
+        /* [in] */ StringBuilder& rawBuilder,
+        /* [in] */ StringBuilder& logBuilder,
+        /* [in] */ Int32 sequenceNumber,
         /* [in] */ const String& cmd,
         /* [in] */ ArrayOf<IInterface*>* args);
 
@@ -210,6 +231,7 @@ private:
 
 private:
     static const Boolean LOGD;
+    static const Boolean VDBG;
 
     static const Int32 DEFAULT_TIMEOUT = 1 * 60 * 1000; /* 1 minute */
     static const Int64 WARN_EXECUTE_DELAY_MS = 500; /* .5 sec */
@@ -223,6 +245,10 @@ private:
     // AutoPtr<ILocalLog> mLocalLog;
 
     AutoPtr<ResponseQueue> mResponseQueue;
+
+    AutoPtr<IPowerManagerWakeLock> mWakeLock;
+
+    AutoPtr<ILooper> mLooper;
 
     AutoPtr<INativeDaemonConnectorCallbacks> mCallbacks;
     AutoPtr<IHandler> mCallbackHandler;

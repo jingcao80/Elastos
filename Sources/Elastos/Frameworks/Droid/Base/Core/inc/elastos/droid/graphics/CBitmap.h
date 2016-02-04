@@ -720,7 +720,7 @@ public:
     CARAPI PrepareToDraw();
 
     CARAPI GetNativeBitmap(
-        /* [out] */ Handle32* bitmap);
+        /* [out] */ Handle64* bitmap);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);

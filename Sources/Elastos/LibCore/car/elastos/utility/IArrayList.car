@@ -9,6 +9,8 @@ module
      * interface IIterable;
      * interface ICollection;
      * interface IList;
+     * interface ICloneable
+     * interface IRandomAccess
      */
     [deprecated]
     interface IArrayList {

@@ -1,6 +1,6 @@
 
 #include "elastos/droid/server/am/IntentBindRecord.h"
-// #include "elastos/droid/server/am/CServiceRecord.h"
+#include "elastos/droid/server/am/CServiceRecord.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 
@@ -36,8 +36,7 @@ void IntentBindRecord::Dump(
 {
     pw->Print(prefix);
     pw->Print(String("service="));
-    assert(0);
-    // pw->Println(mService->ToString());
+    pw->Println(mService->ToString());
     DumpInService(pw, prefix);
 }
 
@@ -72,8 +71,7 @@ void IntentBindRecord::DumpInService(
         pw->Print(String("* Client AppBindRecord{"));
         pw->Print(StringUtils::ToString((Int32)a.Get(), 16));
         pw->PrintChar(' ');
-        assert(0);
-        // pw->Print(a->mClient->ToString());
+        pw->Print(a->mClient->ToString());
         pw->Println('}');
         a->DumpInIntentBind(pw, prefix + "  ");
     }
@@ -107,8 +105,7 @@ String IntentBindRecord::ToString()
     if ((CollectFlags()& IContext::BIND_AUTO_CREATE) != 0) {
         sb += "CR ";
     }
-    assert(0);
-    // sb += mService->mShortName;
+    sb += mService->mShortName;
     sb += ':';
     if (mIntent != NULL) {
         AutoPtr<IIntent> intent;

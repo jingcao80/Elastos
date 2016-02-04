@@ -1,0 +1,103 @@
+
+module
+{
+
+    interface Elastos.Droid.Telecomm.Telecom.IVideoProfile;
+    interface Elastos.Droid.Telecomm.Telecom.ICameraCapabilities;
+    interface Elastos.Droid.View.ISurface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecomm {
+    namespace Telecom {
+
+        /**
+         *  Encapsulates all audio states during a call.
+         *  @hide
+         *
+         * @Involve
+         * interface Elastos.Droid.Content.IContext
+         * interface Elastos.Droid.Content.IContextWrapper
+         * interface IComponentCallbacks
+         * interface IComponentCallbacks2
+         * interface IService
+         */
+        interface IInCallService {
+            /**
+             * The {@link Intent} that must be declared as handled by the service.
+             *
+             * @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
+             */
+            const String SERVICE_INTERFACE = "android.telecom.InCallService";
+
+            GetPhone(
+                [out] IPhone** res);
+
+            OnPhoneCreated(
+                [in] IPhone* phone);
+
+            OnPhoneDestroyed(
+                [in] IPhone* phone);
+        }
+
+        interface IVideoCallListener {
+            OnSessionModifyRequestReceived(
+                [in] IVideoProfile* videoProfile);
+
+            OnSessionModifyResponseReceived(
+                [in] Int32 status,
+                [in] IVideoProfile* requestedProfile,
+                [in] IVideoProfile* responseProfile);
+
+            OnCallSessionEvent(
+                [in] Int32 event);
+
+            OnPeerDimensionsChanged(
+                [in] Int32 width,
+                [in] Int32 height);
+
+            OnCallDataUsageChanged(
+                [in] Int32 dataUsage);
+
+            OnCameraCapabilitiesChanged(
+                [in] ICameraCapabilities* cameraCapabilities);
+        }
+
+        interface IInCallServiceVideoCall {
+            SetVideoCallListener(
+                [in] IVideoCallListener* videoCallListener);
+
+            SetCamera(
+                [in] String cameraId);
+
+            SetPreviewSurface(
+                [in] ISurface* surface);
+
+            SetDisplaySurface(
+                [in] ISurface* surface);
+
+            SetDeviceOrientation(
+                [in] Int32 rotation);
+
+            SetZoom(
+                [in] Float value);
+
+            SendSessionModifyRequest(
+                [in] IVideoProfile* requestProfile);
+
+            SendSessionModifyResponse(
+                [in] IVideoProfile* responseProfile);
+
+            RequestCameraCapabilities();
+
+            RequestCallDataUsage();
+
+            SetPauseImage(
+                [in] String uri);
+        }
+
+    } // namespace Telecom
+    } // namespace Telecomm
+    } // namespace Droid
+    } // namespace Elastos
+}

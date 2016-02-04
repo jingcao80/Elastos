@@ -1,36 +1,43 @@
 
-#include "elastos/droid/net/NetworkStatsCollection.h"
-#include "util/ArrayUtils.h"
+#include "elastos/droid/server/net/NetworkStatsCollection.h"
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Libcore.h>
+#include <Elastos.Droid.Text.h>
+#include <Elastos.Droid.Utility.h>
 #include <elastos/core/Math.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/droid/R.h>
+#include <elastos/droid/internal/utility/ArrayUtils.h>
+#include <elastos/droid/net/ReturnOutValue.h>
+#include <elastos/utility/Arrays.h>
 #include <elastos/utility/etl/List.h>
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
-using Elastos::Utility::Etl::List;
-using Elastos::IO::CDataInputStream;
-using Elastos::IO::IBufferedInputStream;
-using Elastos::IO::CBufferedInputStream;
-using Elastos::IO::IDataInput;
-using Elastos::IO::IFileInputStream;
-using Elastos::IO::IIoUtils;
-using Elastos::IO::CIoUtils;
-using Elastos::IO::ICloseable;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Net::CNetworkStats;
-using Elastos::Droid::Net::INetworkStatsEntry;
-using Elastos::Droid::Net::CNetworkStatsEntry;
-using Elastos::Droid::Net::CNetworkStatsHistory;
-using Elastos::Droid::Net::INetworkStatsHistory;
-using Elastos::Droid::Net::INetworkStatsHistoryEntry;
-using Elastos::Droid::Net::ITrafficStats;
-using Elastos::Droid::Net::INetworkStatsHelper;
-using Elastos::Droid::Net::CNetworkStatsHelper;
-using Elastos::Droid::Utility::IAtomicFile;
-using Elastos::Droid::Utility::CAtomicFile;
+using Elastos::Core::ISystem;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
+using Elastos::Droid::Internal::Utility::EIID_IFileRotatorReader;
+using Elastos::Droid::Net::CNetworkStats;
+using Elastos::Droid::Net::CNetworkStatsEntry;
+using Elastos::Droid::Net::CNetworkStatsHelper;
+using Elastos::Droid::Net::CNetworkStatsHistory;
+using Elastos::Droid::Net::INetworkStatsHelper;
+using Elastos::Droid::Net::ITrafficStats;
 using Elastos::Droid::Text::Format::IDateUtils;
-
+using Elastos::Droid::Utility::CAtomicFile;
+using Elastos::Droid::Utility::IAtomicFile;
+using Elastos::IO::CBufferedInputStream;
+using Elastos::IO::CDataInputStream;
+using Elastos::IO::IBuffer;
+using Elastos::IO::IBufferedInputStream;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IFileInputStream;
+using Elastos::IO::IPrintWriter;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::IDate;
+using Elastos::Utility::Logging::Slogger;
+using Libcore::IO::CIoUtils;
+using Libcore::IO::IIoUtils;
 
 #ifndef HASH_FUNC_FOR_AUTOPTR_NETWORKIDENTITYSET
 #define HASH_FUNC_FOR_AUTOPTR_NETWORKIDENTITYSET
@@ -47,7 +54,9 @@ namespace Net {
 extern "C" const InterfaceID EIID_NetworkStatsCollection =
         { 0x49f54c2c, 0x4329, 0x4fba, { 0xb0, 0x45, 0x5c, 0xe3, 0x59, 0x20, 0xad, 0x12 } };
 
-
+//=============================================================================
+// NetworkStatsCollection::Key
+//=============================================================================
 NetworkStatsCollection::Key::Key(
     /* [in] */ NetworkIdentitySet* ident,
     /* [in] */ Int32 uid,
@@ -59,7 +68,7 @@ NetworkStatsCollection::Key::Key(
     , mTag(tag)
 {
     Int32 hashCode;
-    IObject::Probe(ident)->GetHashCode(&hashCode);
+    IObject::Probe(TO_IINTERFACE(ident))->GetHashCode(&hashCode);
     AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(4);
     (*array)[0] = hashCode;
     (*array)[1] = mUid;
@@ -75,7 +84,9 @@ Boolean NetworkStatsCollection::Key::Equals(
             && mIdent == o->mIdent;
 }
 
-
+//=============================================================================
+// NetworkStatsCollection
+//=============================================================================
 const Int32 NetworkStatsCollection::FILE_MAGIC;
 const Int32 NetworkStatsCollection::VERSION_NETWORK_INIT;
 const Int32 NetworkStatsCollection::VERSION_UID_INIT;
@@ -83,6 +94,8 @@ const Int32 NetworkStatsCollection::VERSION_UID_WITH_IDENT;
 const Int32 NetworkStatsCollection::VERSION_UID_WITH_TAG;
 const Int32 NetworkStatsCollection::VERSION_UID_WITH_SET;
 const Int32 NetworkStatsCollection::VERSION_UNIFIED_INIT;
+
+CAR_INTERFACE_IMPL(NetworkStatsCollection, Object, IFileRotatorReader)
 
 NetworkStatsCollection::NetworkStatsCollection(
     /* [in] */ Int64 bucketDuration)
@@ -93,45 +106,6 @@ NetworkStatsCollection::NetworkStatsCollection(
     , mDirty(FALSE)
 {
     Reset();
-}
-
-PInterface NetworkStatsCollection::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IWeakReferenceSource*)this;
-    }
-    else if (riid == EIID_IWeakReferenceSource) {
-        return (IWeakReferenceSource*)this;
-    }
-    else if (riid == EIID_NetworkStatsCollection) {
-        return reinterpret_cast<PInterface>(this);
-    }
-
-    return NULL;
-}
-
-UInt32 NetworkStatsCollection::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 NetworkStatsCollection::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode NetworkStatsCollection::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [in] */ InterfaceID* iid)
-{
-    if (object == (IInterface*)(IWeakReferenceSource*)this) {
-        *iid = EIID_IWeakReferenceSource;
-    }
-    else {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-    return NOERROR;
 }
 
 ECode NetworkStatsCollection::GetWeakReference(
@@ -253,7 +227,9 @@ AutoPtr<INetworkStats> NetworkStatsCollection::GetSummary(
             historyEntry = newEntry;
 
             String ifaceAll;
-            NetworkStats::GetIFACE_ALL(&ifaceAll);
+            AutoPtr<INetworkStatsHelper> helper;
+            CNetworkStatsHelper::AcquireSingleton((INetworkStatsHelper**)&helper);
+            helper->GetIFACE_ALL(&ifaceAll);
             entry->SetIface(ifaceAll);
             entry->SetUid(key->mUid);
             entry->SetSet(key->mSet);
@@ -386,7 +362,6 @@ ECode NetworkStatsCollection::Read(
     Int32 magic;
     dataInput->ReadInt32(&magic);
     if (magic != FILE_MAGIC) {
-        //throw new ProtocolException("unexpected magic: " + magic);
         Slogger::E("NetworkStatsCollection", "unexpected magic: %d", magic);
         return E_IO_EXCEPTION;
     }
@@ -399,7 +374,8 @@ ECode NetworkStatsCollection::Read(
             Int32 identSize;
             dataInput->ReadInt32(&identSize);
             for (Int32 i = 0; i < identSize; i++) {
-               AutoPtr<NetworkIdentitySet> ident = new NetworkIdentitySet(dataInput);
+               AutoPtr<NetworkIdentitySet> ident = new NetworkIdentitySet();
+               ident->constructor(IDataInput::Probe(dataInput));
 
                 Int32 size;
                 dataInput->ReadInt32(&size);
@@ -490,8 +466,8 @@ ECode NetworkStatsCollection::ReadLegacyNetwork(
     FAIL_RETURN(inputFile->OpenRead((IFileInputStream**)&inStream))
 
     AutoPtr<IBufferedInputStream> buffered;
-    CBufferedInputStream::New(inStream, (IBufferedInputStream**)&buffered);
-    FAIL_RETURN(CDataInputStream::New(buffered, (IDataInputStream**)&in))
+    CBufferedInputStream::New(IInputStream::Probe(inStream), (IBufferedInputStream**)&buffered);
+    FAIL_RETURN(CDataInputStream::New(IInputStream::Probe(buffered), (IDataInputStream**)&in))
 
     // verify file magic header intact
     AutoPtr<IDataInput> dataInput = IDataInput::Probe(in);
@@ -511,7 +487,8 @@ ECode NetworkStatsCollection::ReadLegacyNetwork(
             Int32 size;
             dataInput->ReadInt32(&size);
             for (Int32 i = 0; i < size; i++) {
-                AutoPtr<NetworkIdentitySet> ident = new NetworkIdentitySet(dataInput);
+                AutoPtr<NetworkIdentitySet> ident = new NetworkIdentitySet();
+                ident->constructor(dataInput);
                 AutoPtr<INetworkStatsHistory> history;
                 CNetworkStatsHistory::New(in, (INetworkStatsHistory**)&history);
 
@@ -549,8 +526,8 @@ ECode NetworkStatsCollection::ReadLegacyUid(
     AutoPtr<IFileInputStream> inStream;
     FAIL_RETURN(inputFile->OpenRead((IFileInputStream**)&inStream))
     AutoPtr<IBufferedInputStream> buffered;
-    CBufferedInputStream::New(inStream, (IBufferedInputStream**)&buffered);
-    FAIL_RETURN(CDataInputStream::New(buffered, (IDataInputStream**)&dataInputStream))
+    CBufferedInputStream::New(IInputStream::Probe(inStream), (IBufferedInputStream**)&buffered);
+    FAIL_RETURN(CDataInputStream::New(IInputStream::Probe(buffered), (IDataInputStream**)&dataInputStream))
 
     // verify file magic header intact
     AutoPtr<IDataInput> in = IDataInput::Probe(dataInputStream);
@@ -585,7 +562,8 @@ ECode NetworkStatsCollection::ReadLegacyUid(
             Int32 identSize;
             in->ReadInt32(&identSize);
             for (Int32 i = 0; i < identSize; i++) {
-                AutoPtr<NetworkIdentitySet> ident = new NetworkIdentitySet(in);
+                AutoPtr<NetworkIdentitySet> ident = new NetworkIdentitySet();
+                ident->constructor(in);
 
                 Int32 size;
                 in->ReadInt32(&size);
@@ -643,7 +621,7 @@ void NetworkStatsCollection::RemoveUids(
     List<AutoPtr<Key> >::Iterator keyIt = knownKeys.Begin();
     for(; keyIt != knownKeys.End(); ++keyIt) {
         AutoPtr<Key> key = *keyIt;
-        if(ArrayUtils::Contains(uids, key->mUid)) {
+        if(uids->Contains(key->mUid)) {
             // only migrate combined TAG_NONE history
             if (key->mTag == INetworkStats::TAG_NONE) {
                 HashMap<AutoPtr<Key>, AutoPtr<INetworkStatsHistory>, HashPK, PKEq>::Iterator historyIt = mStats.Find(key);
@@ -698,19 +676,21 @@ void NetworkStatsCollection::Dump(
     List<AutoPtr<Key> >::Iterator keyIt = keys.Begin();
     for(; keyIt != keys.End(); ++keyIt) {
         AutoPtr<Key> key = *keyIt;
-        pw->PrintString(String("ident="));
-        // pw->PrintString(key->mIdent->ToString());
-        pw->PrintString(String(" uid="));
-        pw->PrintInt32(key->mUid);
-        pw->PrintString(String(" set="));
+        IPrintWriter::Probe(pw)->Print(String("ident="));
+        String s;
+        key->mIdent->ToString(&s);
+        IPrintWriter::Probe(pw)->Print(s);
+        IPrintWriter::Probe(pw)->Print(String(" uid="));
+        IPrintWriter::Probe(pw)->Print(key->mUid);
+        IPrintWriter::Probe(pw)->Print(String(" set="));
         AutoPtr<INetworkStatsHelper> helper;
         CNetworkStatsHelper::AcquireSingleton((INetworkStatsHelper**)&helper);
         String value;
         helper->SetToString(key->mSet, &value);
-        pw->PrintString(value);
-        pw->PrintString(String(" tag="));
+        IPrintWriter::Probe(pw)->Print(value);
+        IPrintWriter::Probe(pw)->Print(String(" tag="));
         helper->TagToString(key->mTag, &value);
-        pw->PrintStringln(value);
+        IPrintWriter::Probe(pw)->Print(value);
 
         HashMap<AutoPtr<Key>, AutoPtr<INetworkStatsHistory>, HashPK, PKEq>::Iterator hit = mStats.Find(key);
         AutoPtr<INetworkStatsHistory> history;
@@ -725,9 +705,8 @@ Boolean NetworkStatsCollection::TemplateMatches(
     /* [in] */ INetworkTemplate* templ,
     /* [in] */ NetworkIdentitySet* identSet)
 {
-    NetworkIdentitySet::Iterator it = identSet->Begin();
-    for(; it != identSet->End(); ++it) {
-        AutoPtr<INetworkIdentity> ident = *it;
+    FOR_EACH(iter, identSet) {
+        AutoPtr<INetworkIdentity> ident = INetworkIdentity::Probe(Ptr(iter)->Func(iter->GetNext));
         Boolean matches;
         if(templ->Matches(ident, &matches), matches) {
             return TRUE;

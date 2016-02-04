@@ -8,8 +8,8 @@ using Elastos::IO::IInputStreamReader;
 using Elastos::IO::IBufferedReader;
 using Elastos::IO::CInputStreamReader;
 using Elastos::IO::CBufferedReader;
-using Elastos::Droid::App::IActivityController;
-using Elastos::Droid::App::EIID_IActivityController;
+using Elastos::Droid::App::IIActivityController;
+using Elastos::Droid::App::EIID_IIActivityController;
 
 namespace Elastos {
 namespace Droid {
@@ -239,7 +239,7 @@ ECode MyActivityController::Run()
 {
     PrintMessageForState();
 
-    mHost->GetAm()->SetActivityController(THIS_PROBE(IActivityController));
+    mHost->GetAm()->SetActivityController(THIS_PROBE(IIActivityController));
     mState = STATE_NORMAL;
 
     AutoPtr<IInputStreamReader> converter;

@@ -22,7 +22,7 @@ using Elastos::Droid::Opengl::IGLES20;
 using Elastosx::Microedition::Khronos::Opengles::IGL10;
 using Elastos::Droid::Opengl::CGLES20;
 using Elastos::Droid::Opengl::IMatrix;
-using Elastos::Droid::Opengl::CMatrixGL;
+using Elastos::Droid::Opengl::CMatrix;
 using Elastos::Droid::Opengl::IGLUtils;
 using Elastos::Droid::Opengl::CGLUtils;
 using Elastos::Droid::Graphics::IBitmapFactory;

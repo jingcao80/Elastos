@@ -2,6 +2,9 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_CBLUETOOTHHEALTHAPPCONFIGURATION_H__
 #define __ELASTOS_DROID_BLUETOOTH_CBLUETOOTHHEALTHAPPCONFIGURATION_H__
 
+#include "Elastos.Droid.Bluetooth.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/ext/frameworkdef.h"
 #include "_Elastos_Droid_Bluetooth_CBluetoothHealthAppConfiguration.h"
 
 namespace Elastos {
@@ -9,8 +12,15 @@ namespace Droid {
 namespace Bluetooth {
 
 CarClass(CBluetoothHealthAppConfiguration)
+    , public Object
+    , public IBluetoothHealthAppConfiguration
+    , public IParcelable
 {
 public:
+    CAR_INTERFACE_DECL();
+
+    CAR_OBJECT_DECL();
+
     CBluetoothHealthAppConfiguration();
 
     CARAPI Equals(
@@ -40,8 +50,6 @@ public:
 
     CARAPI WriteToParcel(
         /* [in] */ IParcel* dest);
-
-    CARAPI constructor();
 
     CARAPI constructor(
         /* [in] */ const String& name,

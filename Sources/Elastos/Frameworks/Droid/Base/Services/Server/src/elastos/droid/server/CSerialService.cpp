@@ -1,5 +1,5 @@
 
-#include "CSerialService.h"
+#include "elastos/droid/server/CSerialService.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Logger.h>
@@ -7,20 +7,28 @@
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/R.h"
 #include <fcntl.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Utility.h>
 
-using Elastos::Utility::Etl::List;
+using Elastos::Droid::Os::CParcelFileDescriptor;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Hardware::EIID_IISerialManager;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::IO::CFile;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::CFileDescriptor;
-using Elastos::Droid::Os::CParcelFileDescriptor;
-using Elastos::Droid::Content::Res::IResources;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
+
+CAR_INTERFACE_IMPL_2(CSerialService, Object, IISerialManager, IBinder)
+
+CAR_OBJECT_IMPL(CSerialService)
 
 ECode CSerialService::constructor(
     /* [in] */ IContext* context)
@@ -69,7 +77,15 @@ ECode CSerialService::OpenSerialPort(
     *descriptor = NULL;
 
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(Elastos::Droid::Manifest::permission::SERIAL_PORT, String(NULL)));
-    return NativeOpen(path, descriptor);
+
+    for (Int32 i = 0; i < mSerialPorts->GetLength(); i++) {
+        if ((*mSerialPorts)[i].Equals(path)) {
+            return NativeOpen(path, descriptor);
+        }
+    }
+
+    Logger::E("CSerialService", "Invalid serial port ", path.string());
+    return E_ILLEGAL_ARGUMENT_EXCEPTION;
 }
 
 ECode CSerialService::NativeOpen(

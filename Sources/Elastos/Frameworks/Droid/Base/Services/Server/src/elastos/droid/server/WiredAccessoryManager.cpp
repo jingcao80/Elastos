@@ -1,5 +1,5 @@
 
-#include "WiredAccessoryManager.h"
+#include "elastos/droid/server/WiredAccessoryManager.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Handler.h"
@@ -7,7 +7,20 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.View.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.CoreLibrary.IO.h>
 
+using Elastos::Droid::R;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::View::IInputDevice;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
 using Elastos::IO::ICloseable;
@@ -17,14 +30,6 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
-using Elastos::Droid::Os::Looper;
-using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::View::IInputDevice;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntentFilter;
-using Elastos::Droid::Content::CIntentFilter;
-using Elastos::Utility::Logging::Logger;
-using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -49,6 +54,11 @@ ECode WiredAccessoryManager::MyHandler::HandleMessage(
             seq->ToString(&info);
             mHost->HandleMsgNewDeviceState(arg1, arg2, info);
             break;
+
+        case WiredAccessoryManager::MSG_SYSTEM_READY:
+            mHost->OnSystemReady();
+            mHost->mWakeLock->ReleaseLock();
+            break;
         }
     }
 
@@ -59,7 +69,7 @@ ECode WiredAccessoryManager::WiredAccessoryManagerReceiver::OnReceive(
     /* [in] */ IContext* ctx,
     /* [in] */ IIntent* intent)
 {
-    mHost->BootCompleted();
+    mHost->OnSystemReady();
     return NOERROR;
 }
 
@@ -71,6 +81,7 @@ const Int32 WiredAccessoryManager::BIT_HEADSET_NO_MIC;
 const Int32 WiredAccessoryManager::BIT_USB_HEADSET_ANLG;
 const Int32 WiredAccessoryManager::BIT_USB_HEADSET_DGTL;
 const Int32 WiredAccessoryManager::BIT_HDMI_AUDIO;
+const Int32 WiredAccessoryManager::BIT_LINEOUT;
 const Int32 WiredAccessoryManager::SUPPORTED_HEADSETS;
 
 const String WiredAccessoryManager::NAME_H2W("h2w");
@@ -79,14 +90,17 @@ const String WiredAccessoryManager::NAME_HDMI_AUDIO("hdmi_audio");
 const String WiredAccessoryManager::NAME_HDMI("hdmi");
 
 const Int32 WiredAccessoryManager::MSG_NEW_DEVICE_STATE;
+const Int32 WiredAccessoryManager::MSG_SYSTEM_READY;
 
 WiredAccessoryManager::WiredAccessoryObserver::UEventInfo::UEventInfo(
     /* [in] */ const String& devName,
     /* [in] */ Int32 state1Bits,
-    /* [in] */ Int32 state2Bits)
+    /* [in] */ Int32 state2Bits,
+    /* [in] */ Int32 stateNBits)
     : mDevName(devName)
     , mState1Bits(state1Bits)
     , mState2Bits(state2Bits)
+    , mStateNBits(stateNBits)
 {}
 
 String WiredAccessoryManager::WiredAccessoryObserver::UEventInfo::GetDevName()
@@ -122,9 +136,10 @@ Int32 WiredAccessoryManager::WiredAccessoryObserver::UEventInfo::ComputeNewHeads
     /* [in] */ Int32 headsetState,
     /* [in] */ Int32 switchState)
 {
-    Int32 preserveMask = ~(mState1Bits | mState2Bits);
+    Int32 preserveMask = ~(mState1Bits | mState2Bits| mStateNBits);
     Int32 setBits = ((switchState == 1) ? mState1Bits :
-                  ((switchState == 2) ? mState2Bits : 0));
+                  ((switchState == 2) ? mState2Bits :
+                    ((switchState == mStateNbits) ? mStateNbits : 0)));
 
     return ((headsetState & preserveMask) | setBits);
 }
@@ -195,23 +210,17 @@ WiredAccessoryManager::WiredAccessoryObserver::MakeObservedUEventList()
     AutoPtr<WiredAccessoryManager::WiredAccessoryObserver::UEventInfo> uei;
 
     // Monitor h2w
-    /*modified by chenjd,2013-03-19, start {{--------------------
-    *let the multi audio manager to due with h2w device
-    */
-    /*
     if (!mUseDevInputEventForAudioJack) {
-        uei = new UEventInfo(NAME_H2W, BIT_HEADSET, BIT_HEADSET_NO_MIC);
-        if (uei.checkSwitchExists()) {
-            retVal.add(uei);
+        uei = new UEventInfo(NAME_H2W, BIT_HEADSET, BIT_HEADSET_NO_MIC, BIT_LINEOUT);
+        if (uei->CheckSwitchExists()) {
+            retVal->PuashBack(uei);
         } else {
-            Slog.w(TAG, "This kernel does not have wired headset support");
+            Slogger::W(mHost->TAG, "This kernel does not have wired headset support");
         }
     }
-    */
-    /*modified by chenjd, end ----------------------------}}*/
 
     // Monitor USB
-    uei = new UEventInfo(NAME_USB_AUDIO, BIT_USB_HEADSET_ANLG, BIT_USB_HEADSET_DGTL);
+    uei = new UEventInfo(NAME_USB_AUDIO, BIT_USB_HEADSET_ANLG, BIT_USB_HEADSET_DGTL, 0);
     if (uei->CheckSwitchExists()) {
         retVal->PushBack(uei);
     } else {
@@ -226,11 +235,11 @@ WiredAccessoryManager::WiredAccessoryObserver::MakeObservedUEventList()
     //
     // If the kernel does not have an "hdmi_audio" switch, just fall back on the older
     // "hdmi" switch instead.
-    uei = new UEventInfo(NAME_HDMI_AUDIO, BIT_HDMI_AUDIO, 0);
+    uei = new UEventInfo(NAME_HDMI_AUDIO, BIT_HDMI_AUDIO, 0, 0);
     if (uei->CheckSwitchExists()) {
         retVal->PushBack(uei);
     } else {
-        uei = new UEventInfo(NAME_HDMI, BIT_HDMI_AUDIO, 0);
+        uei = new UEventInfo(NAME_HDMI, BIT_HDMI_AUDIO, 0, 0);
         if (uei->CheckSwitchExists()) {
             retVal->PushBack(uei);
         } else {
@@ -243,7 +252,7 @@ WiredAccessoryManager::WiredAccessoryObserver::MakeObservedUEventList()
 
 // @Override
 void WiredAccessoryManager::WiredAccessoryObserver::OnUEvent(
-    /* [in] */ UEventObserver::UEvent* event)
+    /* [in] */ IUEvent* event)
 {
     if (mHost->LOG) Slogger::V(mHost->TAG, "Headset UEVENT: %s", event->ToString().string());
 
@@ -298,16 +307,9 @@ WiredAccessoryManager::WiredAccessoryManager(
     resouces->GetBoolean(R::bool_::config_useDevInputEventForAudioJack, &mUseDevInputEventForAudioJack);
 
     mObserver = new WiredAccessoryObserver(this);
-
-    AutoPtr<WiredAccessoryManagerReceiver> receiver = new WiredAccessoryManagerReceiver(this);
-    AutoPtr<IIntentFilter> filter;
-    CIntentFilter::New(IIntent::ACTION_BOOT_COMPLETED, (IIntentFilter**)&filter);
-
-    AutoPtr<IIntent> intent;
-    context->RegisterReceiver(receiver, filter, String(NULL), NULL, (IIntent**)&intent);
 }
 
-void WiredAccessoryManager::BootCompleted()
+void WiredAccessoryManager::OnSystemReady()
 {
     if (mUseDevInputEventForAudioJack) {
         Int32 switchValues = 0;
@@ -317,8 +319,14 @@ void WiredAccessoryManager::BootCompleted()
         if (mInputManager->GetSwitchState(-1, IInputDevice::SOURCE_ANY, CInputManagerService::_SW_MICROPHONE_INSERT) == 1) {
             switchValues |= CInputManagerService::SW_MICROPHONE_INSERT_BIT;
         }
+        if (mInputManager->GetSwitchState(-1, IInputDevice::SOURCE_ANY, CInputManagerService::SW_LINEOUT_INSERT) == 1) {
+            switchValues |= CInputManagerService::SW_LINEOUT_INSERT_BIT;
+        }
+
         NotifyWiredAccessoryChanged(0, switchValues,
-                CInputManagerService::SW_HEADPHONE_INSERT_BIT | CInputManagerService::SW_MICROPHONE_INSERT_BIT);
+            CInputManagerService::SW_HEADPHONE_INSERT_BIT
+            | CInputManagerService::SW_MICROPHONE_INSERT_BIT
+            | CInputManagerService::SW_LINEOUT_INSERT_BIT);
     }
 
     mObserver->Init();
@@ -338,13 +346,19 @@ void WiredAccessoryManager::NotifyWiredAccessoryChanged(
         AutoLock lock(mLock);
         Int32 headset;
         mSwitchValues = (mSwitchValues & ~switchMask) | switchValues;
-        switch (mSwitchValues & (CInputManagerService::SW_HEADPHONE_INSERT_BIT | CInputManagerService::SW_MICROPHONE_INSERT_BIT)) {
+        switch (mSwitchValues & (CInputManagerService::SW_HEADPHONE_INSERT_BIT
+            | CInputManagerService::SW_MICROPHONE_INSERT_BIT
+            | CInputManagerService::SW_LINEOUT_INSERT_BIT)) {
             case 0:
                 headset = 0;
                 break;
 
             case CInputManagerService::SW_HEADPHONE_INSERT_BIT:
                 headset = BIT_HEADSET_NO_MIC;
+                break;
+
+            case CInputManagerService::SW_LINEOUT_INSERT_BIT:
+                headset = BIT_LINEOUT;
                 break;
 
             case CInputManagerService::SW_HEADPHONE_INSERT_BIT | CInputManagerService::SW_MICROPHONE_INSERT_BIT:
@@ -360,19 +374,23 @@ void WiredAccessoryManager::NotifyWiredAccessoryChanged(
                 break;
         }
 
-        UpdateLocked(NAME_H2W, (mHeadsetState & ~(BIT_HEADSET | BIT_HEADSET_NO_MIC)) | headset);
+        UpdateLocked(NAME_H2W, (mHeadsetState & ~(BIT_HEADSET | BIT_HEADSET_NO_MIC | BIT_LINEOUT)) | headset);
     }
 }
 
-/**
- * Compare the existing headset state with the new state and pass along accordingly. Note
- * that this only supports a single headset at a time. Inserting both a usb and jacked headset
- * results in support for the last one plugged in. Similarly, unplugging either is seen as
- * unplugging all.
- *
- * @param newName One of the NAME_xxx variables defined above.
- * @param newState 0 or one of the BIT_xxx variables defined above.
- */
+ECode WiredAccessoryManager::SystemReady()
+{
+    synchronized (mLock) {
+        mWakeLock->AcquireLock();
+
+        AutoPtr<IMessage> msg;
+        mHandler->ObtainMessage(MSG_SYSTEM_READY, 0, 0, NULL, (IMessage**)&msg);
+        Boolean bval;
+        mHandler->SendMessage(msg, &bval);
+    }
+    return NOERROR;
+}
+
 void WiredAccessoryManager::UpdateLocked(
     /* [in] */ const String& newName,
     /* [in] */ Int32 newState)
@@ -381,7 +399,7 @@ void WiredAccessoryManager::UpdateLocked(
     Int32 headsetState = newState & SUPPORTED_HEADSETS;
     Int32 usb_headset_anlg = headsetState & BIT_USB_HEADSET_ANLG;
     Int32 usb_headset_dgtl = headsetState & BIT_USB_HEADSET_DGTL;
-    Int32 h2w_headset = headsetState & (BIT_HEADSET | BIT_HEADSET_NO_MIC);
+    Int32 h2w_headset = headsetState & (BIT_HEADSET | BIT_HEADSET_NO_MIC | BIT_LINEOUT);
     Boolean h2wStateChange = TRUE;
     Boolean usbStateChange = TRUE;
     if (LOG) Slogger::V(TAG, "newName=%s newState=%d headsetState=%d prev headsetState=%d", newName.string()
@@ -397,7 +415,7 @@ void WiredAccessoryManager::UpdateLocked(
     // reject all suspect transitions: only accept state changes from:
     // - a: 0 headset to 1 headset
     // - b: 1 headset to 0 headset
-    if (h2w_headset == (BIT_HEADSET | BIT_HEADSET_NO_MIC)) {
+    if (h2w_headset == (BIT_HEADSET | BIT_HEADSET_NO_MIC | BIT_LINEOUT)) {
         Logger::E(TAG, "Invalid combination, unsetting h2w flag");
         h2wStateChange = FALSE;
     }
@@ -450,7 +468,8 @@ void WiredAccessoryManager::SetDeviceStateLocked(
     /* [in] */ const String& headsetName)
 {
     if ((headsetState & headset) != (prevHeadsetState & headset)) {
-        Int32 device;
+        Int32 outDevice = 0;
+        Int32 inDevice = 0;
         Int32 state;
 
         if ((headsetState & headset) != 0) {
@@ -460,15 +479,18 @@ void WiredAccessoryManager::SetDeviceStateLocked(
         }
 
         if (headset == BIT_HEADSET) {
-            device = IAudioManager::DEVICE_OUT_WIRED_HEADSET;
+            outDevice = IAudioManager::DEVICE_OUT_WIRED_HEADSET;
+            inDevice = IAudioManager::DEVICE_IN_WIRED_HEADSET;
         } else if (headset == BIT_HEADSET_NO_MIC){
-            device = IAudioManager::DEVICE_OUT_WIRED_HEADPHONE;
+            outDevice = IAudioManager::DEVICE_OUT_WIRED_HEADPHONE;
+        } else if (headset == BIT_LINEOUT){
+            outDevice = IAudioManager::DEVICE_OUT_LINE;
         } else if (headset == BIT_USB_HEADSET_ANLG) {
-            device = IAudioManager::DEVICE_OUT_ANLG_DOCK_HEADSET;
+            outDevice = IAudioManager::DEVICE_OUT_ANLG_DOCK_HEADSET;
         } else if (headset == BIT_USB_HEADSET_DGTL) {
-            device = IAudioManager::DEVICE_OUT_DGTL_DOCK_HEADSET;
+            outDevice = IAudioManager::DEVICE_OUT_DGTL_DOCK_HEADSET;
         } else if (headset == BIT_HDMI_AUDIO) {
-            device = IAudioManager::DEVICE_OUT_AUX_DIGITAL;
+            outDevice = IAudioManager::DEVICE_OUT_HDMI;
         } else {
             Slogger::E(TAG, "setDeviceState() invalid headset type: %d", headset);
             return;
@@ -479,7 +501,12 @@ void WiredAccessoryManager::SetDeviceStateLocked(
             else Slogger::V(TAG, "device %s disconnected", headsetName.string());
         }
 
-        mAudioManager->SetWiredDeviceConnectionState(device, state, headsetName);
+        if (outDevice != 0) {
+            mAudioManager->SetWiredDeviceConnectionState(outDevice, state, headsetName);
+        }
+        if (inDevice != 0) {
+            mAudioManager->SetWiredDeviceConnectionState(inDevice, state, headsetName);
+        }
     }
 }
 

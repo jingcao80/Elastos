@@ -4,113 +4,124 @@ module
 
     interface Elastos.Droid.Bluetooth.IBluetoothDevice;
 
+    using interface Elastos.Utility.IList;
+
     namespace Elastos {
     namespace Droid {
     namespace Bluetooth {
 
-        /**
-         * API for Bluetooth Headset service
-         *
-         * {@hide}
-         */
-        [deprecated]
-        interface IIBluetoothHeadset {
-            // Public API
-            Connect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+    /**
+     * API for Bluetooth Headset service
+     *
+     * {@hide}
+     */
+    [deprecated]
+    interface IIBluetoothHeadset {
+        // Public API
+        Connect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            Disconnect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        Disconnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            // Mike TODO: wait for list car interface
-            GetConnectedDevices(
-                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+        GetConnectedDevices(
+            [out] IList** devices);
 
-            GetDevicesMatchingConnectionStates(
-                [in] ArrayOf<Int32>* states,
-                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+        GetDevicesMatchingConnectionStates(
+            [in] ArrayOf<Int32>* states,
+            [out] IList** devices);
 
-            GetConnectionState(
-                [in] IBluetoothDevice* device,
-                [out] Int32* state);
+        GetConnectionState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* state);
 
-            SetPriority(
-                [in] IBluetoothDevice* device,
-                [in] Int32 priority,
-                [out] Boolean* result);
+        SetPriority(
+            [in] IBluetoothDevice* device,
+            [in] Int32 priority,
+            [out] Boolean* result);
 
-            GetPriority(
-                [in] IBluetoothDevice* device,
-                [out] Int32* priority);
+        GetPriority(
+            [in] IBluetoothDevice* device,
+            [out] Int32* priority);
 
-            StartVoiceRecognition(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        StartVoiceRecognition(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            StopVoiceRecognition(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        StopVoiceRecognition(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            IsAudioConnected(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* isAudioConnected);
+        IsAudioConnected(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* isAudioConnected);
 
-            // APIs that can be made public in future
-            GetBatteryUsageHint(
-                [in] IBluetoothDevice* device,
-                [out] Int32* batteryUsage);
 
-            // Internal functions, not be made public
-            AcceptIncomingConnect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        SendVendorSpecificResultCode(
+            [in] IBluetoothDevice* device,
+            [in] String command,
+            [in] String arg,
+            [out] Boolean* isAudioConnected);
 
-            RejectIncomingConnect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        // APIs that can be made public in future
+        GetBatteryUsageHint(
+            [in] IBluetoothDevice* device,
+            [out] Int32* batteryUsage);
 
-            GetAudioState(
-                [in] IBluetoothDevice* device,
-                [out] Int32* state);
+        // Internal functions, not be made public
+        AcceptIncomingConnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            IsAudioOn(
-                [out] Boolean* isAudioOn);
+        RejectIncomingConnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            ConnectAudio(
-                [out] Boolean* result);
+        GetAudioState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* state);
 
-            DisconnectAudio(
-                [out] Boolean* result);
+        IsAudioOn(
+            [out] Boolean* isAudioOn);
 
-            StartScoUsingVirtualVoiceCall(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        ConnectAudio(
+            [out] Boolean* result);
 
-            StopScoUsingVirtualVoiceCall(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        DisconnectAudio(
+            [out] Boolean* result);
 
-            PhoneStateChanged(
-                [in] Int32 numActive,
-                [in] Int32 numHeld,
-                [in] Int32 callState,
-                [in] String number,
-                [in] Int32 type);
+        StartScoUsingVirtualVoiceCall(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            RoamChanged(
-                [in] Boolean roam);
+        StopScoUsingVirtualVoiceCall(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            ClccResponse(
-                [in] Int32 index,
-                [in] Int32 direction,
-                [in] Int32 status,
-                [in] Int32 mode,
-                [in] Boolean mpty,
-                [in] String number,
-                [in] Int32 type);
-        }
+        PhoneStateChanged(
+            [in] Int32 numActive,
+            [in] Int32 numHeld,
+            [in] Int32 callState,
+            [in] String number,
+            [in] Int32 type);
+
+        ClccResponse(
+            [in] Int32 index,
+            [in] Int32 direction,
+            [in] Int32 status,
+            [in] Int32 mode,
+            [in] Boolean mpty,
+            [in] String number,
+            [in] Int32 type);
+
+        EnableWBS(
+            [out] Boolean* result);
+
+        DisableWBS(
+            [out] Boolean* result);
+    }
 
     } // Bluetooth
     } // Droid

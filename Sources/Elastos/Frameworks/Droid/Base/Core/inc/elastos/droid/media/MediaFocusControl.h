@@ -1,12 +1,34 @@
 #ifndef __ELASTOS_DROID_MEDIA_MEDIAFOCUSCONTROL_H__
 #define __ELASTOS_DROID_MEDIA_MEDIAFOCUSCONTROL_H__
 
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.View.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
 #include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/os/Handler.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::App::IKeyguardManager;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::IPendingIntentOnFinished;
+using Elastos::Droid::Content::BroadcastReceiver;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Database::ContentObserver;
+using Elastos::Droid::Os::Handler;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::IO::IPrintWriter;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IStack;
 
 namespace Elastos {
 namespace Droid {
@@ -20,6 +42,7 @@ class MediaFocusControl
     : public Object
     , public IPendingIntentOnFinished
 {
+    friend class PlayerRecord;
 private:
     class NotificationListenerObserver
         : public ContentObserver
@@ -40,7 +63,7 @@ private:
         : public Handler
     {
     public:
-        NativeEventHandler(
+        MediaEventHandler(
             /* [in] */ MediaFocusControl* host,
             /* [in] */ ILooper* looper)
                 : Handler(looper)
@@ -87,7 +110,7 @@ private:
             , mCb(cb)
         {}
 
-        CARAPI BinderDied();
+        CARAPI ProxyDied();
 
         CARAPI GetBinder(
             /* [out] */ IBinder** result);
@@ -139,9 +162,9 @@ private:
 
         CARAPI ReleaseResources();
 
-        CARAPI BinderDied();
+        CARAPI ProxyDied();
 
-    private:
+    public:
         /** may never be null */
         AutoPtr<IIRemoteControlDisplay> mRcDisplay;
         AutoPtr<IBinder> mRcDisplayBinder;
@@ -155,6 +178,12 @@ private:
 
 public:
     MediaFocusControl();
+
+    MediaFocusControl(
+        /* [in] */ ILooper* looper,
+        /* [in] */ IContext* cntxt,
+        /* [in] */ IAudioServiceVolumeController* volumeCtrl,
+        /* [in] */ IAudioService* as);
 
     virtual ~MediaFocusControl();
 
@@ -173,23 +202,6 @@ public:
         /* [in] */ const String& resultData,
         /* [in] */ IBundle* resultExtras);
 
-protected:
-    CARAPI_(void) Dump(
-        /* [in] */ IPrintWriter* pw);
-
-    CARAPI_(Boolean) RegisterRemoteController(
-        /* [in] */ IIRemoteControlDisplay* rcd,
-        /* [in] */ Int32 w,
-        /* [in] */ Int32 h,
-        /* [in] */ IComponentName* listenerComp);
-
-    CARAPI_(Boolean) RegisterRemoteControlDisplay(
-        /* [in] */ IIRemoteControlDisplay* rcd,
-        /* [in] */ Int32 w,
-        /* [in] */ Int32 h);
-
-    CARAPI_(void) DiscardAudioFocusOwner();
-
     CARAPI_(Int32) GetCurrentAudioFocus();
 
     /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int)  */
@@ -204,11 +216,70 @@ protected:
     /** @see AudioManager#abandonAudioFocus(AudioManager.OnAudioFocusChangeListener)  */
     CARAPI_(Int32) AbandonAudioFocus(
         /* [in] */ IIAudioFocusDispatcher* fl,
-        /* [in] */ const String* clientId);
+        /* [in] */ const String& clientId);
 
     CARAPI_(void) UnregisterAudioFocusClient(
         /* [in] */ const String& clientId);
 
+    CARAPI_(void) DiscardAudioFocusOwner();
+
+    CARAPI_(Boolean) RegisterRemoteController(
+        /* [in] */ IIRemoteControlDisplay* rcd,
+        /* [in] */ Int32 w,
+        /* [in] */ Int32 h,
+        /* [in] */ IComponentName* listenerComp);
+
+    CARAPI_(Boolean) RegisterRemoteControlDisplay(
+        /* [in] */ IIRemoteControlDisplay* rcd,
+        /* [in] */ Int32 w,
+        /* [in] */ Int32 h);
+
+    /**
+     * Unregister an IRemoteControlDisplay.
+     * No effect if the IRemoteControlDisplay hasn't been successfully registered.
+     * @see android.media.IAudioService#unregisterRemoteControlDisplay(android.media.IRemoteControlDisplay)
+     * @param rcd the IRemoteControlDisplay to unregister. No effect if null.
+     */
+    CARAPI_(void) UnregisterRemoteControlDisplay(
+        /* [in] */ IIRemoteControlDisplay* rcd);
+
+    /**
+     * Update the size of the artwork used by an IRemoteControlDisplay.
+     * @see android.media.IAudioService#remoteControlDisplayUsesBitmapSize(android.media.IRemoteControlDisplay, int, int)
+     * @param rcd the IRemoteControlDisplay with the new artwork size requirement
+     * @param w the maximum width of the expected bitmap. Negative or zero values indicate this
+     *   display doesn't need to receive artwork.
+     * @param h the maximum height of the expected bitmap. Negative or zero values indicate this
+     *   display doesn't need to receive artwork.
+     */
+    CARAPI_(void) RemoteControlDisplayUsesBitmapSize(
+        /* [in] */ IIRemoteControlDisplay* rcd,
+        /* [in] */ Int32 w,
+        /* [in] */ Int32 h);
+
+    /**
+     * Controls whether a remote control display needs periodic checks of the RemoteControlClient
+     * playback position to verify that the estimated position has not drifted from the actual
+     * position. By default the check is not performed.
+     * The IRemoteControlDisplay must have been previously registered for this to have any effect.
+     * @param rcd the IRemoteControlDisplay for which the anti-drift mechanism will be enabled
+     *     or disabled. Not null.
+     * @param wantsSync if true, RemoteControlClient instances which expose their playback position
+     *     to the framework will regularly compare the estimated playback position with the actual
+     *     position, and will update the IRemoteControlDisplay implementation whenever a drift is
+     *     detected.
+     */
+    CARAPI_(void) RemoteControlDisplayWantsPlaybackPositionSync(
+        /* [in] */ IIRemoteControlDisplay* rcd,
+        /* [in] */ Boolean wantsSync);
+
+    CARAPI_(void) Dump(
+        /* [in] */ IPrintWriter* pw);
+
+    CARAPI_(void) SetRemoteStreamVolume(
+        /* [in] */ Int32 vol);
+
+protected:
     /**
      * No-op if the key code for keyEvent is not a valid media key
      * (see {@link #isValidMediaKeyEvent(KeyEvent)})
@@ -277,45 +348,6 @@ protected:
         /* [in] */ IIRemoteControlClient* rcClient);
 
     /**
-     * Unregister an IRemoteControlDisplay.
-     * No effect if the IRemoteControlDisplay hasn't been successfully registered.
-     * @see android.media.IAudioService#unregisterRemoteControlDisplay(android.media.IRemoteControlDisplay)
-     * @param rcd the IRemoteControlDisplay to unregister. No effect if null.
-     */
-    CARAPI_(void) UnregisterRemoteControlDisplay(
-        /* [in] */ IIRemoteControlDisplay* rcd);
-
-    /**
-     * Update the size of the artwork used by an IRemoteControlDisplay.
-     * @see android.media.IAudioService#remoteControlDisplayUsesBitmapSize(android.media.IRemoteControlDisplay, int, int)
-     * @param rcd the IRemoteControlDisplay with the new artwork size requirement
-     * @param w the maximum width of the expected bitmap. Negative or zero values indicate this
-     *   display doesn't need to receive artwork.
-     * @param h the maximum height of the expected bitmap. Negative or zero values indicate this
-     *   display doesn't need to receive artwork.
-     */
-    CARAPI_(void) RemoteControlDisplayUsesBitmapSize(
-        /* [in] */ IIRemoteControlDisplay* rcd,
-        /* [in] */ Int32 w,
-        /* [in] */ Int32 h);
-
-    /**
-     * Controls whether a remote control display needs periodic checks of the RemoteControlClient
-     * playback position to verify that the estimated position has not drifted from the actual
-     * position. By default the check is not performed.
-     * The IRemoteControlDisplay must have been previously registered for this to have any effect.
-     * @param rcd the IRemoteControlDisplay for which the anti-drift mechanism will be enabled
-     *     or disabled. Not null.
-     * @param wantsSync if true, RemoteControlClient instances which expose their playback position
-     *     to the framework will regularly compare the estimated playback position with the actual
-     *     position, and will update the IRemoteControlDisplay implementation whenever a drift is
-     *     detected.
-     */
-    CARAPI_(void) RemoteControlDisplayWantsPlaybackPositionSync(
-        /* [in] */ IIRemoteControlDisplay* rcd,
-        /* [in] */ Boolean wantsSync);
-
-    /**
      * Checks if a remote client is active on the supplied stream type. Update the remote stream
      * volume state if found and playing
      * @param streamType
@@ -336,9 +368,6 @@ protected:
     CARAPI_(Int32) GetRemoteStreamMaxVolume();
 
     CARAPI_(Int32) GetRemoteStreamVolume();
-
-    CARAPI_(void) SetRemoteStreamVolume(
-        /* [in] */ Int32 vol);
 
     /**
      * Call to make AudioService reevaluate whether it's in a mode where remote players should
@@ -375,7 +404,7 @@ private:
         /* [in] */ ArrayOf<String>* enabledArray);
 
     static CARAPI_(void) SendMsg(
-        /* [in] */ IHandler handler,
+        /* [in] */ IHandler* handler,
         /* [in] */ Int32 msg,
         /* [in] */ Int32 existingMsgPolicy,
         /* [in] */ Int32 arg1,
@@ -685,7 +714,7 @@ private:
     AutoPtr<IAppOpsManager> mAppOps;
     AutoPtr<IKeyguardManager> mKeyguardManager;
     AutoPtr<IAudioService> mAudioService;
-    AutoPtr<INotificationListenerObserver> mNotifListenerObserver;
+    AutoPtr<NotificationListenerObserver> mNotifListenerObserver;
 
     static AutoPtr<IUri> ENABLED_NOTIFICATION_LISTENERS_URI;
 
@@ -770,7 +799,7 @@ private:
      * be controlled by the volume keys ("main"), so we don't have to iterate over the RC stack
      * every time we need this info.
      */
-    AutoPtr<IRemotePlaybackState> mMainRemote;
+    AutoPtr<IPlayerRecordRemotePlaybackState> mMainRemote;
     /**
      * Indicates whether the "main" RemoteControlClient is considered active.
      * Use synchronized on mMainRemote.

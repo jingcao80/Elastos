@@ -114,6 +114,7 @@ module
     merge("content/pm/VerifierDeviceIdentity.car");
     merge("content/pm/VerifierInfo.car");
     merge("content/pm/XmlSerializerAndParser.car");
+    merge("content/pm/PackageParser.car");
 
     merge("content/res/AssetFileDescriptor.car");
     merge("content/res/AssetManager.car");
@@ -958,6 +959,10 @@ module
         interface IActivityInfoHelper;
     }
 
+    singleton class CPackageParserHelper {
+        interface IPackageParserHelper;
+    }
+
     class CApplicationInfo {
         constructor();
 
@@ -1186,9 +1191,9 @@ module
         interface IComparator;
     }
 
-//    singleton class CPackageManagerHelper {
-//        interface IPackageManagerHelper;
-//    }
+    singleton class CPackageManagerHelper {
+        interface IPackageManagerHelper;
+    }
 
     class CPackageStats {
         constructor();
@@ -1198,6 +1203,10 @@ module
 
         constructor(
             [in] IPackageStats* pStats);
+
+        constructor(
+            [in] String pkgName,
+            [in] Int32 userHanlde);
 
         interface IPackageStats;
         interface IParcelable;
@@ -1420,6 +1429,16 @@ module
         constructor();
 
         interface IVerifierInfo;
+        interface IParcelable;
+    }
+
+    class CKeySet {
+        constructor(
+            [in] IBinder* b);
+
+        constructor();
+
+        interface IKeySet;
         interface IParcelable;
     }
 

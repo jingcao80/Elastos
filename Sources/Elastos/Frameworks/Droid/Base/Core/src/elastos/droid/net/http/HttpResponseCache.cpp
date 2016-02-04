@@ -100,6 +100,7 @@ ECode HttpResponseCache::Get(
     // TODO: Waiting for Com::Squareup::Okhttp::IHttpResponseCache
     assert(0);
     // return mDelegate->Get(uri, requestMethod, requestHeaders, result);
+    return NOERROR;
 }
 
 ECode HttpResponseCache::Put(

@@ -43,10 +43,10 @@ void DumpMemory(
         size_t count = overallSize / infoSize;
 
         snprintf(buffer, SIZE, " Allocation count %i\n", count);
-        //result.AppendCStr(buffer);
+        //result.Append(buffer);
         strcat(result, buffer);
         snprintf(buffer, SIZE, " Total memory %i\n", totalMemory);
-        //result.AppendCStr(buffer);
+        //result.Append(buffer);
         strcat(result, buffer);
 
         AllocEntry * entries = new AllocEntry[count];
@@ -99,18 +99,18 @@ void DumpMemory(
             AllocEntry *e = &entries[i];
 
             snprintf(buffer, SIZE, "size %8i, dups %4i, ", e->size, e->dups);
-            //result.AppendCStr(buffer);
+            //result.Append(buffer);
             strcat(result, buffer);
             for (size_t ct = 0; (ct < backtraceSize) && e->backtrace[ct]; ct++) {
                 if (ct) {
-                    //result.AppendCStr(", ");
+                    //result.Append(", ");
                     strcat(result, ", ");
                 }
                 snprintf(buffer, SIZE, "0x%08x", e->backtrace[ct]);
-                //result.AppendCStr(buffer);
+                //result.Append(buffer);
                 strcat(result, buffer);
             }
-            //result.AppendCStr("\n");
+            //result.Append("\n");
             strcat(result, "\n");
         }
 

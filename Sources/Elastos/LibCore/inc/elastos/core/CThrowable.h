@@ -24,6 +24,8 @@ public:
 
     CThrowable();
 
+    ~CThrowable();
+
     CARAPI constructor();
 
     CARAPI constructor(
@@ -232,7 +234,8 @@ private:
     /**
      * The cause of this Throwable. Null when there is no cause.
      */
-    AutoPtr<IThrowable> mCause;// = this;
+    // should not use AutoPtr<IThrowable>
+    IThrowable* mCause;
 
     /**
      * Throwables suppressed by this throwable. Null when suppressed exceptions

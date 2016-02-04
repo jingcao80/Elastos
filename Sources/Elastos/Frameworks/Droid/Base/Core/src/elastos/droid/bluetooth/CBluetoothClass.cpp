@@ -1,5 +1,5 @@
 
-#include "CBluetoothClass.h"
+#include "elastos/droid/bluetooth/CBluetoothClass.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/core/StringUtils.h>
 
@@ -8,6 +8,14 @@ using Elastos::Core::StringUtils;
 namespace Elastos {
 namespace Droid {
 namespace Bluetooth {
+
+CAR_INTERFACE_IMPL_2(CBluetoothClass, Object, IBluetoothClass, IParcelable);
+
+CAR_OBJECT_IMPL(CBluetoothClass);
+
+CBluetoothClass::CBluetoothClass()
+{
+}
 
 ECode CBluetoothClass::GetHashCode(
     /* [out] */ Int32* code)
@@ -37,7 +45,7 @@ ECode CBluetoothClass::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    *str = StringUtils::Int32ToHexString(mClass);
+    *str = StringUtils::ToHexString(mClass);
     return NOERROR;
 }
 

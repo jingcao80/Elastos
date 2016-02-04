@@ -128,11 +128,23 @@ module
         SetLastLoggedInTime(
             [in] Int64 lastLoggedInTime);
 
+        GetProfileGroupId(
+            [out] Int32* id);
+
+        SetProfileGroupId(
+            [in] Int32 id);
+
         GetPartial(
             [out] Boolean* partial);
 
         SetPartial(
             [in] Boolean partial);
+
+        GetGuestToRemove(
+            [out] Boolean* value);
+
+        SetGuestToRemove(
+            [in] Boolean value);
     }
 
     } // namespace Pm

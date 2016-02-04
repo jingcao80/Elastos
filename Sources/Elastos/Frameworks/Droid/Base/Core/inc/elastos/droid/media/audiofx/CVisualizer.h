@@ -326,15 +326,7 @@ public:
         /* [out] */ Int32* result);
 
 private:
-    //---------------------------------------------------------
-    // Interface definitions
-    //--------------------
-    static CARAPI_(void) ensureArraySize(
-        /* [in] */ ArrayOf<Byte>* arrayIn,
-        /* [in] */ uint32_t size,
-        /* [out] */ ArrayOf<Byte>** arrayOut);
-
-    static CARAPI_(void) captureCallback(
+    friend void captureCallback(
         /* [in] */ void* user,
         /* [in] */ uint32_t waveformSize,
         /* [in] */ uint8_t *waveform,
@@ -342,11 +334,14 @@ private:
         /* [in] */ uint8_t *fft,
         /* [in] */ uint32_t samplingrate);
 
-    static CARAPI_(void) android_media_visualizer_effect_callback(
+    friend void elastos_media_visualizer_effect_callback(
         /* [in] */ int event,
         /* [in] */ void* user,
         /* [in] */ void* info);
 
+    //---------------------------------------------------------
+    // Interface definitions
+    //--------------------
     static CARAPI_(void) Native_Init();
 
     CARAPI_(Int32) Native_Setup(

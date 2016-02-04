@@ -57,6 +57,7 @@ ECode HashSet::constructor(
     /* [in] */ IMap* backingMap)
 {
     mBackingMap = backingMap;
+    GetWeakReference((IWeakReference**)&mWeakThis);
     return NOERROR;
 }
 
@@ -66,7 +67,7 @@ ECode HashSet::Add(
 {
     VALIDATE_NOT_NULL(modified)
     AutoPtr<IInterface> outface;
-    mBackingMap->Put(object, this->Probe(EIID_IInterface), (IInterface**)&outface);
+    mBackingMap->Put(object, mWeakThis, (IInterface**)&outface);
     *modified = outface == NULL;
     return NOERROR;
 }
@@ -167,7 +168,7 @@ ECode HashSet::ReadObject(
         AutoPtr<IInterface> key;
         // stream->ReadObject((IInterface**)&key);
         AutoPtr<IInterface> outface;
-        mBackingMap->Put(key, this->Probe(EIID_IInterface), (IInterface**)&outface);
+        mBackingMap->Put(key, mWeakThis, (IInterface**)&outface);
     }
     return E_NOT_IMPLEMENTED;
 }

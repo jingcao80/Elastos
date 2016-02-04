@@ -10,7 +10,7 @@ module
     [deprecated]
     interface IGLES10Ext {
         // C function GLbitfield glQueryMatrixxOES ( GLfixed *mantissa, GLint *exponent )
-        glQueryMatrixxOES(
+        GlQueryMatrixxOES(
             [in] ArrayOf<Int32>* mantissa,
             [in] Int32 mantissaOffset,
             [in] ArrayOf<Int32>* exponent,
@@ -18,7 +18,7 @@ module
             [out] Int32* matrixx);
 
         // C function GLbitfield glQueryMatrixxOES ( GLfixed *mantissa, GLint *exponent )
-        glQueryMatrixxOES(
+        GlQueryMatrixxOES(
             [in] IInt32Buffer* mantissa,
             [in] IInt32Buffer* exponent,
             [out] Int32* matrixx);

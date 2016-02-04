@@ -13,6 +13,7 @@
 #include "elastos/droid/server/pm/PersistentPreferredIntentResolver.h"
 #include "elastos/droid/server/pm/CrossProfileIntentResolver.h"
 #include "elastos/droid/server/pm/KeySetManagerService.h"
+#include "elastos/droid/server/pm/PackageKeySetData.h"
 #include "elastos/droid/content/pm/PackageParser.h"
 #include <elastos/core/StringBuilder.h>
 
@@ -452,7 +453,7 @@ private:
     CARAPI_(String) CompToString(
         /* [in] */ HashSet<String>* cmp);
 
-    CARAPI_(AutoPtr< List< AutoPtr<IUserInfo> > >) GetAllUsers();
+    CARAPI_(AutoPtr<IList>) GetAllUsers();
 
 public:
     static const String TAG_CROSS_PROFILE_INTENT_FILTERS;

@@ -272,13 +272,12 @@ ECode CRestrictionsManager::LoadRestriction(
 
     String key, title, description;
     Int32 restrictionType, entries, entryValues;
-    assert(0 && "TODO");
-    // a->GetString(R::styleable::RestrictionEntry_key, &key);
-    // a->GetInt32(R::styleable::RestrictionEntry_restrictionType, -1, &restrictionType);
-    // a->GetString(R::styleable::RestrictionEntry_title, &title);
-    // a->GetString(R::styleable::RestrictionEntry_description, &description);
-    // a->GetResourceId(R::styleable::RestrictionEntry_entries, 0, &entries);
-    // a->GetResourceId(R::styleable::RestrictionEntry_entryValues, 0, &entryValues);
+    a->GetString(R::styleable::RestrictionEntry_key, &key);
+    a->GetInt32(R::styleable::RestrictionEntry_restrictionType, -1, &restrictionType);
+    a->GetString(R::styleable::RestrictionEntry_title, &title);
+    a->GetString(R::styleable::RestrictionEntry_description, &description);
+    a->GetResourceId(R::styleable::RestrictionEntry_entries, 0, &entries);
+    a->GetResourceId(R::styleable::RestrictionEntry_entryValues, 0, &entryValues);
 
     if (restrictionType == -1) {
         Logger::W(TAG, "restrictionType cannot be omitted");

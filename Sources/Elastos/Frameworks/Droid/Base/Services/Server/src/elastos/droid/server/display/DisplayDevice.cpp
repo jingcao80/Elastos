@@ -141,13 +141,13 @@ void DisplayDevice::PopulateViewportLocked(
 void DisplayDevice::DumpLocked(
     /* [in] */ IPrintWriter* pw)
 {
-    //pw->PrintStringln(String("mAdapter=") + mDisplayAdapter->GetName());
-    // pw->PrintStringln(String("mDisplayToken=") + mDisplayToken);
-    // pw->PrintStringln(String("mCurrentLayerStack=") + mCurrentLayerStack);
-    // pw->PrintStringln(String("mCurrentOrientation=") + mCurrentOrientation);
-    // pw->PrintStringln(String("mCurrentLayerStackRect=") + mCurrentLayerStackRect);
-    // pw->PrintStringln(String("mCurrentDisplayRect=") + mCurrentDisplayRect);
-    // pw->PrintStringln(String("mCurrentSurface=") + mCurrentSurface);
+    //pw->Println(String("mAdapter=") + mDisplayAdapter->GetName());
+    // pw->Println(String("mDisplayToken=") + mDisplayToken);
+    // pw->Println(String("mCurrentLayerStack=") + mCurrentLayerStack);
+    // pw->Println(String("mCurrentOrientation=") + mCurrentOrientation);
+    // pw->Println(String("mCurrentLayerStackRect=") + mCurrentLayerStackRect);
+    // pw->Println(String("mCurrentDisplayRect=") + mCurrentDisplayRect);
+    // pw->Println(String("mCurrentSurface=") + mCurrentSurface);
     assert(0);
 }
 

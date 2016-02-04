@@ -293,8 +293,7 @@ module
          */
         OnRectangleOnScreenRequested(
             [in] IBinder* token,
-            [in] IRect* rectangle,
-            [in] Boolean immediate);
+            [in] IRect* rectangle);
 
         GetWindowId(
             [in] IBinder* window,

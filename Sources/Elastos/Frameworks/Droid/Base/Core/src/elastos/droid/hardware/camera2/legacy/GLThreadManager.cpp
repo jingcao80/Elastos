@@ -59,7 +59,7 @@ ECode GLThreadManager::MyHandlerCallback::HandleMessage(
     //try {
     Int32 what;
     msg->GetWhat(&what);
-    ECode ec;
+    ECode ec = NOERROR;
     switch (what) {
         case GLThreadManager::MSG_NEW_CONFIGURATION:
         {

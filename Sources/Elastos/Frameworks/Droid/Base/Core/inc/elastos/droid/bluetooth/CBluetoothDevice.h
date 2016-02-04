@@ -3,8 +3,12 @@
 #define __ELASTOS_DROID_BLUETOOTH_CBLUETOOTHDEVICE_H__
 
 #include "_Elastos_Droid_Bluetooth_CBluetoothDevice.h"
-#include "CBluetoothDeviceManagerCallback.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include <elastos/core/Object.h>
+#include "elastos/droid/ext/frameworkdef.h"
+#include "elastos/droid/bluetooth/CBluetoothDeviceManagerCallback.h"
 
+using Elastos::Droid::Content::IContext;
 using Elastos::Utility::IUUID;
 using Elastos::Droid::Os::IParcelUuid;
 
@@ -13,8 +17,17 @@ namespace Droid {
 namespace Bluetooth {
 
 CarClass(CBluetoothDevice)
+    , public Object
+    , public IBluetoothDevice
+    , public IParcelable
 {
 public:
+    CAR_INTERFACE_DECL();
+
+    CAR_OBJECT_DECL();
+
+    CBluetoothDevice();
+
     static CARAPI_(AutoPtr<IIBluetooth>) GetService();
 
     CARAPI Equals(
@@ -33,6 +46,9 @@ public:
     CARAPI GetName(
         /* [out] */ String* name);
 
+    CARAPI GetType(
+        /* [out] */ Int32* type);
+
     CARAPI GetAlias(
         /* [out] */ String* alias);
 
@@ -44,6 +60,10 @@ public:
         /* [out] */ String* name);
 
     CARAPI CreateBond(
+        /* [out] */ Boolean* result);
+
+    CARAPI CreateBond(
+        /* [in] */ Int32 transport,
         /* [out] */ Boolean* result);
 
     CARAPI CreateBondOutOfBand(
@@ -65,6 +85,9 @@ public:
     CARAPI GetBondState(
         /* [in] */ Int32* state);
 
+    CARAPI IsConnected(
+        /* [out] */ Boolean* connected);
+
     CARAPI GetBluetoothClass(
         /* [out] */ IBluetoothClass** bluetoothClass);
 
@@ -79,6 +102,9 @@ public:
         /* [out, callee] */ ArrayOf<IParcelUuid*>** uuids);
 
     CARAPI FetchUuidsWithSdp(
+        /* [out] */ Boolean* result);
+
+    CARAPI FetchMasInstances(
         /* [out] */ Boolean* result);
 
     CARAPI GetServiceChannel(
@@ -106,6 +132,20 @@ public:
     CARAPI IsBluetoothDock(
         /* [out] */ Boolean* isBluetoothDock);
 
+    CARAPI GetPhonebookAccessPermission(
+        /* [out] */ Int32* result);
+
+    CARAPI SetPhonebookAccessPermission(
+        /* [in] */ Int32 value,
+        /* [out] */ Boolean* result);
+
+    CARAPI GetMessageAccessPermission(
+        /* [out] */ Int32* result);
+
+    CARAPI SetMessageAccessPermission(
+        /* [in] */ Int32 value,
+        /* [out] */ Boolean* result);
+
     CARAPI CreateRfcommSocket(
         /* [in] */ Int32 channel,
         /* [out] */ IBluetoothSocket** socket);
@@ -125,13 +165,24 @@ public:
     CARAPI CreateScoSocket(
         /* [out] */ IBluetoothSocket** socket);
 
+    CARAPI ConnectGatt(
+        /* [in] */ IContext* context,
+        /* [in] */ Boolean autoConnect,
+        /* [in] */ IBluetoothGattCallback* cb,
+        /* [out] */ IBluetoothGatt** btGatt);
+
+    CARAPI ConnectGatt(
+        /* [in] */ IContext* context,
+        /* [in] */ Boolean autoConnect,
+        /* [in] */ IBluetoothGattCallback* cb,
+        /* [in] */ Int32 transport,
+        /* [out] */ IBluetoothGatt** btGatt);
+
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 
     static CARAPI_(AutoPtr< ArrayOf<Byte> >) ConvertPinToBytes(
         /* [in] */ const String& pin);
-
-    CARAPI constructor();
 
     CARAPI constructor(
         /* [in] */ const String& address);

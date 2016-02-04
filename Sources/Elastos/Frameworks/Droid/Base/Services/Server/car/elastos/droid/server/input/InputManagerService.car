@@ -1,0 +1,105 @@
+module
+{
+    using interface Elastos.Droid.Content.Res.IResources;
+    using interface Elastos.Droid.Hardware.Input.IKeyboardLayout;
+    using interface Elastos.Droid.Hardware.Input.ITouchCalibration;
+    using interface Elastos.Droid.Hardware.Input.IInputDevicesChangedListener;
+    using interface Elastos.Droid.Hardware.Input.IInputDeviceIdentifier;
+    using interface Elastos.Droid.Os.IBinder;
+    using interface Elastos.Droid.Text.IInputFilter;
+    using interface Elastos.Droid.View.IKeyEvent;
+    using interface Elastos.Droid.View.IInputChannel;
+    using interface Elastos.Droid.View.IInputEvent;
+    using interface Elastos.Droid.View.IInputDevice;
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+
+    interface Elastos.Droid.Server.Input.IWindowManagerCallbacks;
+    interface Elastos.Droid.Server.Input.IWiredAccessoryCallbacks;
+    interface Elastos.Droid.Server.Input.IKeyboardLayoutVisitor;
+    interface Elastos.Droid.Server.Input.IInputWindowHandle;
+    interface Elastos.Droid.Server.Input.IInputApplicationHandle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Input {
+
+    /**
+     * Callback interface implemented by the Window Manager.
+     */
+    [local, deprecated]
+    interface IWindowManagerCallbacks {
+        NotifyConfigurationChanged();
+
+        NotifyLidSwitchChanged(
+            [in] Int64 whenNanos,
+            [in] Boolean lidOpen);
+
+        NotifyCameraLensCoverSwitchChanged(
+            [in] Int64 whenNanos,
+            [in] Boolean lensCovered);
+
+        NotifyInputChannelBroken(
+            [in] IInputWindowHandle* inputWindowHandle);
+
+        NotifyANR(
+            [in] IInputApplicationHandle* inputApplicationHandle,
+            [in] IInputWindowHandle* inputWindowHandle,
+            [in] String reason,
+            [out] Int64* ret);
+
+        InterceptKeyBeforeQueueing(
+            [in] IKeyEvent* event,
+            [in] Int32 policyFlags,
+            [out] Int32* ret);
+
+        InterceptMotionBeforeQueueingNonInteractive(
+            [in] Int64 whenNanos,
+            [in] Int32 policyFlags,
+            [out] Int32* ret);
+
+        InterceptKeyBeforeDispatching(
+            [in] IInputWindowHandle* focus,
+            [in] IKeyEvent* event,
+            [in] Int32 policyFlags,
+            [out] Int64* ret);
+
+        DispatchUnhandledKey(
+            [in] IInputWindowHandle* focus,
+            [in] IKeyEvent* event,
+            [in] Int32 policyFlags,
+            [out] IKeyEvent** keyEvent);
+
+        GetPointerLayer(
+            [out] Int32* ret);
+    }
+
+    /**
+     * Callback interface implemented by WiredAccessoryObserver.
+     */
+    interface IWiredAccessoryCallbacks {
+        NotifyWiredAccessoryChanged(
+            [in] Int64 whenNanos,
+            [in] Int32 switchValues,
+            [in] Int32 switchMask);
+
+        SystemReady();
+    }
+
+    [local, deprecated]
+    interface IKeyboardLayoutVisitor {
+        VisitKeyboardLayout(
+            [in] IResources* resources,
+            [in] String descriptor,
+            [in] String label,
+            [in] String collection,
+            [in] Int32 keyboardLayoutResId,
+            [in] Int32 priority);
+    }
+
+    } // Input
+    } // Server
+    } // Droid
+    } // Elastos
+}

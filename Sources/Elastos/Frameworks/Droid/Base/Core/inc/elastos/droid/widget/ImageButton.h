@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_WIDGET_IMAGEBUTTON_H__
 #define __ELASTOS_DROID_WIDGET_IMAGEBUTTON_H__
 
-#include "elastos/droid/widget/ImageView.h"
+#include <elastos/droid/widget/ImageView.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
@@ -59,7 +59,7 @@ namespace Widget {
  * {@link android.R.styleable#View View Attributes}
  * </p>
  */
-class ImageButton
+class ECO_PUBLIC ImageButton
     : public Elastos::Droid::Widget::ImageView
     , public IImageButton
 {

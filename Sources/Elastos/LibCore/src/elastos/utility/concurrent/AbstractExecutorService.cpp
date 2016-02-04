@@ -14,7 +14,7 @@ namespace Elastos {
 namespace Utility {
 namespace Concurrent {
 
-CAR_INTERFACE_IMPL(AbstractExecutorService, Object, IAbstractExecutorService)
+CAR_INTERFACE_IMPL_3(AbstractExecutorService, Object, IAbstractExecutorService, IExecutorService, IExecutor)
 
 AutoPtr<IRunnableFuture> AbstractExecutorService::NewTaskFor(
     /* [in] */ IRunnable* runnable,

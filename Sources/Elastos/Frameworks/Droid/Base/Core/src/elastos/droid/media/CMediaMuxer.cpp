@@ -193,7 +193,6 @@ ECode CMediaMuxer::AddTrack(
     if (mapSize > 0) {
         keys = ArrayOf<String>::Alloc(mapSize);
         values = ArrayOf<IInterface*>::Alloc(mapSize);
-        Int32 i = 0;
 
         AutoPtr<ISet> entrySet;
         formatMap->GetEntrySet((ISet**)&entrySet);
@@ -282,6 +281,7 @@ ECode CMediaMuxer::WriteSampleData(
     NativeWriteSampleData(mNativeObject, trackIndex, byteBuf,
             offset, size,
             presentationTimeUs, flags);
+    return NOERROR;
 }
 
 ECode CMediaMuxer::ReleaseResources()
@@ -311,6 +311,7 @@ Int64 CMediaMuxer::NativeSetup(
     // sp<MediaMuxer> muxer = new MediaMuxer(fd, fileFormat);
     // muxer->incStrong(clazz);
     // return reinterpret_cast<jlong>(muxer.get());
+    return 0;
 }
 
 void CMediaMuxer::NativeRelease(
@@ -389,6 +390,7 @@ Int32 CMediaMuxer::NativeAddTrack(
     //     return -1;
     // }
     // return trackIndex;
+    return 0;
 }
 
 void CMediaMuxer::NativeSetOrientationHint(

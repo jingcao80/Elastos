@@ -31,6 +31,38 @@ ECode CComponentNameHelper::ReadFromParcel(
     return CComponentName::ReadFromParcel(source, cn);
 }
 
+ECode CComponentNameHelper::AppendShortClassName(
+    /* [in] */ IStringBuilder* sb,
+    /* [in] */ const String& packageName,
+    /* [in] */ const String& className)
+{
+    return CComponentName::AppendShortClassName(sb, packageName, className);
+}
+
+ECode CComponentNameHelper::PrintShortClassName(
+    /* [in] */ IPrintWriter* sb,
+    /* [in] */ const String& packageName,
+    /* [in] */ const String& className)
+{
+    return CComponentName::PrintShortClassName(sb, packageName, className);
+}
+
+ECode CComponentNameHelper::AppendShortString(
+    /* [in] */ IStringBuilder* sb,
+    /* [in] */ const String& packageName,
+    /* [in] */ const String& className)
+{
+    return CComponentName::AppendShortString(sb, packageName, className);
+}
+
+ECode CComponentNameHelper::PrintShortString(
+    /* [in] */ IPrintWriter* sb,
+    /* [in] */ const String& packageName,
+    /* [in] */ const String& className)
+{
+    return CComponentName::PrintShortString(sb, packageName, className);
+}
+
 } // namespace Content
 } // namespace Droid
 } // namespace Elastos

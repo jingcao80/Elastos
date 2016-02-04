@@ -15,7 +15,7 @@ ECode CWMSUserSwitchObserver::constructor(
 
 ECode CWMSUserSwitchObserver::OnUserSwitching(
     /* [in] */ Int32 newUserId,
-    /* [in] */ IRemoteCallback* reply)
+    /* [in] */ IIRemoteCallback* reply)
 {
     mOwner->SwitchUser(newUserId, reply);
     return NOERROR;

@@ -66,9 +66,7 @@ ECode ReceiverList::ProxyDied()
 {
     Slogger::W("ReceiverList", " >> %p ProxyDied()", (IProxyDeathRecipient*)this);
     mLinkedToDeath = FALSE;
-    assert(0);
-    return NOERROR;
-    // return mOwner->UnregisterReceiver(mReceiver);
+    return mOwner->UnregisterReceiver(mReceiver);
 }
 
 void ReceiverList::DumpLocal(

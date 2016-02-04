@@ -453,7 +453,7 @@ void AppWidgetServiceImpl::DumpAppWidgetId(
     //     pw->PrintString("    provider=");
     //             String str;
     //             id->provider->info->mProvider->FlattenToShortString(&str);
-    //             pw->PrintStringln(str);
+    //             pw->Println(str);
     // }
     // if (id->host != NULL) {
     //     pw->PrintString("    host.callbacks="); pw->PrintObjectln((IInterface*)id->host->callbacks);
@@ -478,7 +478,7 @@ void AppWidgetServiceImpl::Dump(
     // Int32 uid;
     // binderHelper->GetCallingUid(&uid);
     // if (selfPermission != IPackageManager::PERMISSION_GRANTED) {
-    //     pw->PrintStringln("Permission Denial: can't dump from from pid="
+    //     pw->Println("Permission Denial: can't dump from from pid="
     //             + StringUtils::Int32ToString(pid)
     //             + ", uid=" + StringUtils::Int32ToString(uid));
     //     return;
@@ -488,7 +488,7 @@ void AppWidgetServiceImpl::Dump(
     // {
     //     AutoLock lock(mAppWidgetIdsLock);
     //     //int N = mInstalledProviders.size();
-    //     pw->PrintStringln("Providers:");
+    //     pw->Println("Providers:");
     //     //for (int i=0; i<N; i++)
     //     List<Provider*>::Iterator iter1;
     //     for(iter1 = mInstalledProviders->Begin(); iter1 != mInstalledProviders->End(); iter1++) {
@@ -496,8 +496,8 @@ void AppWidgetServiceImpl::Dump(
     //     }
 
     //     //N = mAppWidgetIds.size();
-    //     pw->PrintStringln(" ");
-    //     pw->PrintStringln("AppWidgetIds:");
+    //     pw->Println(" ");
+    //     pw->Println("AppWidgetIds:");
     //     //for (int i=0; i<N; i++)
     //     List<AppWidgetId*>::Iterator iter2;
     //     for(iter2 = mAppWidgetIds->Begin(); iter2 != mAppWidgetIds->End(); iter2++) {
@@ -505,8 +505,8 @@ void AppWidgetServiceImpl::Dump(
     //     }
 
     //     //N = mHosts.size();
-    //     pw->PrintStringln(" ");
-    //     pw->PrintStringln("Hosts:");
+    //     pw->Println(" ");
+    //     pw->Println("Hosts:");
     //     //for (int i=0; i<N; i++)
     //     List<Host*>::Iterator iter3;
     //     for(iter3 = mHosts->Begin(); iter3 != mHosts->End(); iter3++) {
@@ -514,8 +514,8 @@ void AppWidgetServiceImpl::Dump(
     //     }
 
     //     //N = mDeletedProviders.size();
-    //     pw->PrintStringln(" ");
-    //     pw->PrintStringln("Deleted Providers:");
+    //     pw->Println(" ");
+    //     pw->Println("Deleted Providers:");
     //     //for (int i=0; i<N; i++)
     //     List<Provider*>::Iterator iter4;
     //     for(iter4 = mDeletedProviders->Begin(); iter4 != mDeletedProviders->End(); iter4++) {
@@ -523,8 +523,8 @@ void AppWidgetServiceImpl::Dump(
     //     }
 
     //     //N = mDeletedHosts.size();
-    //     pw->PrintStringln(" ");
-    //     pw->PrintStringln("Deleted Hosts:");
+    //     pw->Println(" ");
+    //     pw->Println("Deleted Hosts:");
     //     //for (int i=0; i<N; i++)
     //     List<Provider*>::Iterator iter5;
     //     for(iter5 = mDeletedProviders->Begin(); iter5 != mDeletedProviders->End(); iter5++) {

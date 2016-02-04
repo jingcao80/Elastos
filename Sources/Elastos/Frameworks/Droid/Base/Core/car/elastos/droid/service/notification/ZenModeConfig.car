@@ -5,13 +5,38 @@ module
     using interface Org.Xmlpull.V1.IXmlPullParser;
 
     interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Content.IComponentName;
 
     namespace Elastos {
     namespace Droid {
     namespace Service {
     namespace Notification {
 
-    interface IZenModeConfigDowntimeInfo {}
+    interface IZenModeConfigDowntimeInfo {
+        GetStartHour(
+            [out] Int32* startHour);
+
+        SetStartHour(
+            [in] Int32 startHour);
+
+        GetStartMinute(
+            [out] Int32* startMinute);
+
+        SetStartMinute(
+            [in] Int32 startMinute);
+
+        GetEndHour(
+            [out] Int32* endHour);
+
+        SetEndHour(
+            [in] Int32 endHour);
+
+        GetEndMinute(
+            [out] Int32* endMinute);
+
+        SetEndMinute(
+            [in] Int32 endMinute);
+    }
 
     /**
      * Persisted configuration for zen mode.
@@ -21,6 +46,7 @@ module
      * @Involve
      * interface IParcelable
      */
+    [deprecated]
     interface IZenModeConfig {
         const String SLEEP_MODE_NIGHTS = "nights";
         const String SLEEP_MODE_WEEKNIGHTS = "weeknights";
@@ -42,6 +68,84 @@ module
 
         ToDowntimeInfo(
             [out] IZenModeConfigDowntimeInfo** ret);
+
+        GetAllowCalls(
+            [out] Boolean* allowCalls);
+
+        SetAllowCalls(
+            [in] Boolean allowCalls);
+
+        GetAllowMessages(
+            [out] Boolean* allowMessages);
+
+        SetAllowMessages(
+            [in] Boolean allowMessages);
+
+        GetAllowEvents(
+            [out] Boolean* allowEvents);
+
+        SetAllowEvents(
+            [in] Boolean allowEvents);
+
+        GetAllowFrom(
+            [out] Int32* allowFrom);
+
+        SetAllowFrom(
+            [in] Int32 allowFrom);
+
+        GetSleepMode(
+            [out] String* sleepMode);
+
+        SetSleepMode(
+            [in] String sleepMode);
+
+        GetSleepStartHour(
+            [out] Int32* sleepStartHour);
+
+        SetSleepStartHour(
+            [in] Int32 sleepStartHour);
+
+        GetSleepStartMinute(
+            [out] Int32* sleepStartMinute);
+
+        SetSleepStartMinute(
+            [in] Int32 sleepStartMinute);
+
+        GetSleepEndHour(
+            [out] Int32* sleepEndHour);
+
+        SetSleepEndHour(
+            [in] Int32 sleepEndHour);
+
+        GetSleepEndMinute(
+            [out] Int32* sleepEndMinute);
+
+        SetSleepEndMinute(
+            [in] Int32 sleepEndMinute);
+
+        GetConditionComponents(
+            [out, callee] ArrayOf<IComponentName*>* conditionComponents);
+
+        SetConditionComponents(
+            [in] ArrayOf<IComponentName*>* conditionComponents);
+
+        GetConditionIds(
+            [out, callee] ArrayOf<IUri*>* conditionIds);
+
+        SetConditionIds(
+            [in] ArrayOf<IUri*>* conditionIds);
+
+        GetExitCondition(
+            [out] ICondition** exitCondition);
+
+        SetExitCondition(
+            [in] ICondition* exitCondition);
+
+        GetExitConditionComponent(
+            [out] IComponentName** exitConditionComponent);
+
+        SetExitConditionComponent(
+            [in] IComponentName* exitConditionComponent);
     }
 
     interface IZenModeConfigHelper {

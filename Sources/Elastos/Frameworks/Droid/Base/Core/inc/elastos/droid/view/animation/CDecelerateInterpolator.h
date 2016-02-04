@@ -5,6 +5,7 @@
 #include "_Elastos_Droid_View_Animation_CDecelerateInterpolator.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesTheme;
@@ -19,6 +20,7 @@ namespace Animation {
 CarClass(CDecelerateInterpolator)
     , public Object
     , public IDecelerateInterpolator
+    , public ITimeInterpolator
     , public INativeInterpolatorFactory
     , public IInterpolator
 {

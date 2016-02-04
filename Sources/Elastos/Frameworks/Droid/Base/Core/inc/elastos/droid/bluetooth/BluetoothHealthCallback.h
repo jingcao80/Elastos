@@ -2,7 +2,9 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEALTHCALLBACK_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEALTHCALLBACK_H__
 
-#include "Elastos.Droid.Core_server.h"
+//#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include <elastos/core/Object.h>
 #include "elastos/droid/ext/frameworkdef.h"
 
 using Elastos::Droid::Os::IParcelFileDescriptor;
@@ -15,8 +17,14 @@ namespace Bluetooth {
  * This abstract class is used to implement {@link BluetoothHealth} callbacks.
  */
 class BluetoothHealthCallback
+    : public Object
+    , public IBluetoothHealthCallback
 {
 public:
+    CAR_INTERFACE_DECL();
+
+    BluetoothHealthCallback();
+
     virtual ~BluetoothHealthCallback() = 0;
 
     /**

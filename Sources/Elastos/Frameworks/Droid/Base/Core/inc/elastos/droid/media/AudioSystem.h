@@ -13,6 +13,13 @@ namespace Media {
 
 class AudioSystem
 {
+private:
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
+    };
+
 public:
     static CARAPI GetNumStreamTypes(
         /* [out] */ Int32* result);
@@ -115,7 +122,8 @@ public:
         /* [out] */ Int32* result);
 
     static CARAPI SetPhoneState(
-        /* [in] */ Int32 state);
+        /* [in] */ Int32 state,
+        /* [out] */ Int32* result);
 
     static CARAPI SetForceUse(
         /* [in] */ Int32 usage,
@@ -212,8 +220,7 @@ private:
     // Expose only the getter method publicly so we can change it in the future
     static const Int32 NUM_STREAM_TYPES;
 
-    static AutoPtr<IAudioSystemErrorCallback> mErrorCallback;
-    static Boolean sInitAudioSystem;
+    static AutoPtr<IAudioSystemErrorCallback> sErrorCallback;
 
     static const Int32 NUM_DEVICE_STATES;
 
@@ -221,7 +228,8 @@ private:
 
     static const Int32 NUM_FORCE_USE;
 
-    static Object sStatiAudioSystemLock;
+    static Object sLock;
+    static StaticInitializer sInitializer;
 };
 
 } // namespace Media

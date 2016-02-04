@@ -1335,7 +1335,7 @@ ECode VectorDrawable::CanApplyTheme(
 {
     VALIDATE_NOT_NULL(can);
     Boolean tmp = FALSE;
-    *can = (Drawable::CanApplyTheme(can), *can) || mVectorState.Get() != NULL && (mVectorState->CanApplyTheme(&tmp), tmp);
+    *can = (Drawable::CanApplyTheme(&tmp), tmp) || (mVectorState != NULL && (mVectorState->CanApplyTheme(&tmp), tmp));
     return NOERROR;
 }
 
@@ -1379,7 +1379,7 @@ ECode VectorDrawable::GetPixelSize(
     /* [out] */ Float* size)
 {
     VALIDATE_NOT_NULL(size);
-    if (mVectorState.Get() == NULL && mVectorState->mVPathRenderer.Get() == NULL ||
+    if ((mVectorState == NULL && mVectorState->mVPathRenderer == NULL) ||
             mVectorState->mVPathRenderer->mBaseWidth == 0 ||
             mVectorState->mVPathRenderer->mBaseHeight == 0 ||
             mVectorState->mVPathRenderer->mViewportHeight == 0 ||

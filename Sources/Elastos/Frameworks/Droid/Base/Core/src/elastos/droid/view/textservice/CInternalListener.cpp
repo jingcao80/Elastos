@@ -2,7 +2,7 @@
 #include "elastos/droid/view/textservice/CInternalListener.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::View::Internal::TextService::EIID_IITextServicesSessionListener;
+using Elastos::Droid::Internal::TextService::EIID_IITextServicesSessionListener;
 
 using Elastos::Utility::Logging::Logger;
 

@@ -485,7 +485,7 @@ ECode BitmapRegionDecoder::NativeNewInstance(
         ec = CreateBitmapRegionDecoder(stream, decoder);
         stream->unref(); // the decoder now holds a reference
     }
-    return NOERROR;
+    return ec;
 }
 
 ECode BitmapRegionDecoder::NativeNewInstance(

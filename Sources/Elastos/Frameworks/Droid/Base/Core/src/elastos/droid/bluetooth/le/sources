@@ -1,0 +1,23 @@
+TARGET_NAME= le
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = AdvertiseCallback.cpp
+SOURCES += AdvertiseData.cpp
+SOURCES += AdvertiseSettings.cpp
+SOURCES += BluetoothLeAdvertiser.cpp
+SOURCES += BluetoothLeScanner.cpp
+SOURCES += BluetoothLeUtils.cpp
+SOURCES += ResultStorageDescriptor.cpp
+SOURCES += ScanCallback.cpp
+SOURCES += ScanFilter.cpp
+SOURCES += ScanRecord.cpp
+SOURCES += ScanResult.cpp
+SOURCES += ScanSettings.cpp
+SOURCES += TruncatedFilter.cpp

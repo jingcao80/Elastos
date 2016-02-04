@@ -2,19 +2,32 @@
 #define __ELASTOS_DROID_SERVER_CDISKSTATSSERVICE_H__
 
 #include "_Elastos_Droid_Server_CDiskStatsService.h"
+#include <elastos/core/Object.h>
+#include <Elastos.Droid.Content.h>
 
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Content::IContext;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
-using Elastos::Droid::Content::IContext;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
+/**
+ * This service exists only as a "dumpsys" target which reports
+ * statistics about the status of the disk.
+ */
 CarClass(CDiskStatsService)
+    , public Object
+    , public IBinder
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 

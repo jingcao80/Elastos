@@ -2,7 +2,6 @@
 module
 {
     merge("json/Exceptions.car");
-    merge("json/IJSON.car");
     merge("json/IJSONArray.car");
     merge("json/IJSONObject.car");
     merge("json/IJSONStringer.car");
@@ -13,10 +12,6 @@ module
 
     namespace Org {
     namespace Json {
-
-    singleton class CJSON {
-        interface IJSON;
-    }
 
     class CJSONArray {
         constructor();

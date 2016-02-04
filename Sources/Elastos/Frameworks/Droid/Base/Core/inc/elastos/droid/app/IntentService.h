@@ -43,13 +43,13 @@ namespace App {
  *
  * @see android.os.AsyncTask
  */
-class IntentService
+class ECO_PUBLIC IntentService
     : public Service
     , public IIntentService
 {
 
 private:
-    class ServiceHandler
+    class ECO_LOCAL ServiceHandler
         : public Handler
     {
     public:

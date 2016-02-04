@@ -65,11 +65,9 @@ void AnimatedStateListDrawable::AnimationDrawableTransition::Stop()
 AnimatedStateListDrawable::AnimatedVectorDrawableTransition::AnimatedVectorDrawableTransition(
     /* [in] */ IAnimatedVectorDrawable* avd,
     /* [in] */ Boolean reversed)
-    : mReversed(FALSE)
-{
-    mAvd = avd;
-    mReversed = reversed;
-}
+    : mAvd(avd)
+    , mReversed(reversed)
+{}
 
 Boolean AnimatedStateListDrawable::AnimatedVectorDrawableTransition::CanReverse()
 {
@@ -103,6 +101,7 @@ void AnimatedStateListDrawable::AnimatedVectorDrawableTransition::Stop()
 
 const Int32 AnimatedStateListDrawable::AnimatedStateListState::REVERSE_SHIFT = 32;
 const Int32 AnimatedStateListDrawable::AnimatedStateListState::REVERSE_MASK = 0x1;
+
 AnimatedStateListDrawable::AnimatedStateListState::AnimatedStateListState(
     /* [in] */ /*@Nullable*/ AnimatedStateListState* orig,
     /* [in] */ /*@NonNull*/ AnimatedStateListDrawable* owner,

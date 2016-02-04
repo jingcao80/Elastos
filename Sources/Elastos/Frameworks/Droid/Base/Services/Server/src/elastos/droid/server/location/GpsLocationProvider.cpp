@@ -1,214 +1,655 @@
-
-#include "location/GpsLocationProvider.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Telephony.h"
+#include "Elastos.CoreLibrary.Libcore.h"
+#include "Elastos.CoreLibrary.Net.h"
+#include "elastos/droid/app/AppOpsManager.h"
+#include "elastos/droid/hardware/location/GeofenceHardwareImpl.h"
+#include "elastos/droid/os/AsyncTask.h"
+#include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/server/location/CNetInitiatedListener.h"
+#include "elastos/droid/server/location/CGpsGeofenceHardwareService.h"
+#include "elastos/droid/server/location/CGpsStatusProviderService.h"
+#include "elastos/droid/server/location/GpsLocationProvider.h"
+#include "elastos/droid/server/location/GpsXtraDownloader.h"
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Core::ICharSequence;
-using Elastos::Core::StringBuilder;
-using Elastos::Core::ISystem;
-using Elastos::Core::CSystem;
-using Elastos::Droid::Utility::INtpTrustedTimeHelper;
-using Elastos::Droid::Utility::CNtpTrustedTimeHelper;
+using Elastos::Droid::App::AppOpsManager;
+using Elastos::Droid::App::CPendingIntentHelper;
+using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::ICursor;
-using Elastos::Droid::Os::CBinderHelper;
-using Elastos::Droid::Os::IBinderHelper;
-using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Os::IUserHandleHelper;
-using Elastos::Droid::Os::CUserHandleHelper;
-using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::Os::IPowerManager;
-using Elastos::Droid::Os::EIID_IPowerManager;
-using Elastos::Droid::Location::ILocationProvider;
+using Elastos::Droid::Hardware::Location::GeofenceHardwareImpl;
+using Elastos::Droid::Hardware::Location::IGeofenceHardware;
+// using Elastos::Droid::Internal::Location::CProviderProperties;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
+using Elastos::Droid::Location::CLocation;
+using Elastos::Droid::Location::CLocationRequestHelper;
 using Elastos::Droid::Location::ICriteria;
-using Elastos::Droid::Location::IGpsNiNotification;
-using Elastos::Droid::Location::CGpsNiNotification;
-using Elastos::Droid::Net::IConnectivityManager;
+using Elastos::Droid::Location::EIID_IINetInitiatedListener;
+using Elastos::Droid::Location::EIID_IIGpsGeofenceHardware;
+using Elastos::Droid::Location::EIID_IIGpsStatusProvider;
+using Elastos::Droid::Location::EIID_ILocationListener;
+using Elastos::Droid::Location::ILocationManager;
+using Elastos::Droid::Location::ILocationProvider;
+using Elastos::Droid::Location::ILocationRequest;
+using Elastos::Droid::Location::ILocationRequestHelper;
+using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::INetworkInfo;
-using Elastos::Droid::Net::CUri;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Os::AsyncTask;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::Os::CWorkSource;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IBatteryStats;
+using Elastos::Droid::Os::IServiceManager;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::Provider::ISettingsGlobal;
-using Elastos::Droid::Location::CGpsNetInitiatedHandler;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Server::Location::CNetInitiatedListener;
+using Elastos::Droid::Server::Location::CGpsGeofenceHardwareService;
+using Elastos::Droid::Server::Location::CGpsStatusProviderService;
+using Elastos::Droid::Server::Location::GpsXtraDownloader;
+using Elastos::Droid::Telephony::ICellLocation;
+using Elastos::Droid::Telephony::ITelephonyManager;
+using Elastos::Droid::Telephony::Gsm::IGsmCellLocation;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::CNtpTrustedTimeHelper;
+using Elastos::Droid::Utility::INtpTrustedTimeHelper;
+using Elastos::Droid::Utility::ITrustedTime;
+using Elastos::Droid::R;
+using Elastos::Core::AutoLock;
+using Elastos::Core::CString;
+using Elastos::Core::CSystem;
+using Elastos::Core::IAppendable;
+using Elastos::Core::ISystem;
+using Elastos::Core::Math;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::IO::CByteArrayOutputStream;
+using Elastos::IO::CFile;
+using Elastos::IO::CFileInputStream;
+using Elastos::IO::CStringReader;
+using Elastos::IO::IByteArrayOutputStream;
+using Elastos::IO::ICloseable;
+using Elastos::IO::IFile;
+using Elastos::IO::IFileInputStream;
+using Elastos::IO::IInputStream;
+using Elastos::IO::IReader;
+using Elastos::IO::IOutputStream;
+using Elastos::Net::CInetAddressHelper;
+using Elastos::Net::IInetAddressHelper;
+using Elastos::Utility::CDate;
+using Elastos::Utility::CProperties;
+using Elastos::Utility::IDate;
+using Elastos::Utility::IHashTable;
+using Elastos::Utility::IIterable;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IList;
+using Elastos::Utility::Logging::Logger;
+using Libcore::IO::CIoUtils;
+using Libcore::IO::IIoUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Location {
 
-static AutoPtr<IProviderProperties> InitGpsLocationProvider()
+static AutoPtr<IProviderProperties> InitPROPERTIES()
 {
-    GpsLocationProvider::Class_init_native();
-    AutoPtr<IProviderProperties> temp;
+#if 0 //TODO  CProviderProperties
+    AutoPtr<IProviderProperties> pp;
     CProviderProperties::New(TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE,
-            ICriteria::POWER_HIGH, ICriteria::ACCURACY_FINE, (IProviderProperties**)&temp);
-    return temp;
+        ICriteria::POWER_HIGH, ICriteria::ACCURACY_FINE, (IProviderProperties**)&pp);
+    return pp;
+#endif
+    return NULL;
 }
-const String GpsLocationProvider::TAG("GpsLocationProvider");
 
-const Boolean GpsLocationProvider::DEBUG = FALSE;//Log.isLoggable(TAG, Log.DEBUG);
-const Boolean GpsLocationProvider::VERBOSE = FALSE;//Log.isLoggable(TAG, Log.VERBOSE);
+//===========================================
+//GpsLocationProvider::MyRunnable
+//===========================================
 
-const AutoPtr<IProviderProperties> GpsLocationProvider::PROPERTIES = InitGpsLocationProvider();
+GpsLocationProvider::MyRunnable::MyRunnable(
+    /* [in] */ GpsLocationProvider* host)
+    : mHost(host)
+{}
 
-// these need to match GpsPositionMode enum in gps.h
-const Int32 GpsLocationProvider::GPS_POSITION_MODE_STANDALONE = 0;
-const Int32 GpsLocationProvider::GPS_POSITION_MODE_MS_BASED = 1;
-const Int32 GpsLocationProvider::GPS_POSITION_MODE_MS_ASSISTED = 2;
-
-// these need to match GpsPositionRecurrence enum in gps.h
-const Int32 GpsLocationProvider::GPS_POSITION_RECURRENCE_PERIODIC = 0;
-const Int32 GpsLocationProvider::GPS_POSITION_RECURRENCE_SINGLE = 1;
-
-// these need to match GpsStatusValue defines in gps.h
-const Int32 GpsLocationProvider::GPS_STATUS_NONE = 0;
-const Int32 GpsLocationProvider::GPS_STATUS_SESSION_BEGIN = 1;
-const Int32 GpsLocationProvider::GPS_STATUS_SESSION_END = 2;
-const Int32 GpsLocationProvider::GPS_STATUS_ENGINE_ON = 3;
-const Int32 GpsLocationProvider::GPS_STATUS_ENGINE_OFF = 4;
-
-// these need to match GpsApgsStatusValue defines in gps.h
-/** AGPS status event values. */
-const Int32 GpsLocationProvider::GPS_REQUEST_AGPS_DATA_CONN = 1;
-const Int32 GpsLocationProvider::GPS_RELEASE_AGPS_DATA_CONN = 2;
-const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONNECTED = 3;
-const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONN_DONE = 4;
-const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONN_FAILED = 5;
-
-// these need to match GpsLocationFlags enum in gps.h
-const Int32 GpsLocationProvider::LOCATION_INVALID = 0;
-const Int32 GpsLocationProvider::LOCATION_HAS_LAT_LONG = 1;
-const Int32 GpsLocationProvider::LOCATION_HAS_ALTITUDE = 2;
-const Int32 GpsLocationProvider::LOCATION_HAS_SPEED = 4;
-const Int32 GpsLocationProvider::LOCATION_HAS_BEARING = 8;
-const Int32 GpsLocationProvider::LOCATION_HAS_ACCURACY = 16;
-
-// IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
-const Int32 GpsLocationProvider::GPS_DELETE_EPHEMERIS = 0x0001;
-const Int32 GpsLocationProvider::GPS_DELETE_ALMANAC = 0x0002;
-const Int32 GpsLocationProvider::GPS_DELETE_POSITION = 0x0004;
-const Int32 GpsLocationProvider::GPS_DELETE_TIME = 0x0008;
-const Int32 GpsLocationProvider::GPS_DELETE_IONO = 0x0010;
-const Int32 GpsLocationProvider::GPS_DELETE_UTC = 0x0020;
-const Int32 GpsLocationProvider::GPS_DELETE_HEALTH = 0x0040;
-const Int32 GpsLocationProvider::GPS_DELETE_SVDIR = 0x0080;
-const Int32 GpsLocationProvider::GPS_DELETE_SVSTEER = 0x0100;
-const Int32 GpsLocationProvider::GPS_DELETE_SADATA = 0x0200;
-const Int32 GpsLocationProvider::GPS_DELETE_RTI = 0x0400;
-const Int32 GpsLocationProvider::GPS_DELETE_CELLDB_INFO = 0x8000;
-const Int32 GpsLocationProvider::GPS_DELETE_ALL = 0xFFFF;
-
-// The GPS_CAPABILITY_* flags must match the values in gps.h
-const Int32 GpsLocationProvider::GPS_CAPABILITY_SCHEDULING = 0x0000001;
-const Int32 GpsLocationProvider::GPS_CAPABILITY_MSB = 0x0000002;
-const Int32 GpsLocationProvider::GPS_CAPABILITY_MSA = 0x0000004;
-const Int32 GpsLocationProvider::GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
-const Int32 GpsLocationProvider::GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010;
-
-// these need to match AGpsType enum in gps.h
-const Int32 GpsLocationProvider::AGPS_TYPE_SUPL = 1;
-const Int32 GpsLocationProvider::AGPS_TYPE_C2K = 2;
-
-// for mAGpsDataConnectionState
-const Int32 GpsLocationProvider::AGPS_DATA_CONNECTION_CLOSED = 0;
-const Int32 GpsLocationProvider::AGPS_DATA_CONNECTION_OPENING = 1;
-const Int32 GpsLocationProvider::AGPS_DATA_CONNECTION_OPEN = 2;
-
-// Handler messages
-const Int32 GpsLocationProvider::CHECK_LOCATION = 1;
-const Int32 GpsLocationProvider::ENABLE = 2;
-const Int32 GpsLocationProvider::SET_REQUEST = 3;
-const Int32 GpsLocationProvider::UPDATE_NETWORK_STATE = 4;
-const Int32 GpsLocationProvider::INJECT_NTP_TIME = 5;
-const Int32 GpsLocationProvider::DOWNLOAD_XTRA_DATA = 6;
-const Int32 GpsLocationProvider::UPDATE_LOCATION = 7;
-const Int32 GpsLocationProvider::ADD_LISTENER = 8;
-const Int32 GpsLocationProvider::REMOVE_LISTENER = 9;
-const Int32 GpsLocationProvider::INJECT_NTP_TIME_FINISHED = 10;
-const Int32 GpsLocationProvider::DOWNLOAD_XTRA_DATA_FINISHED = 11;
-
-// Request setid
-const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_SETID_IMSI = 1;
-const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_SETID_MSISDN = 2;
-
-// Request ref location
-const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_REFLOC_CELLID = 1;
-const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_REFLOC_MAC = 2;
-
-// ref. location info
-const Int32 GpsLocationProvider::AGPS_REF_LOCATION_TYPE_GSM_CELLID = 1;
-const Int32 GpsLocationProvider::AGPS_REF_LOCATION_TYPE_UMTS_CELLID = 2;
-const Int32 GpsLocationProvider::AGPS_REG_LOCATION_TYPE_MAC        = 3;
-
-// set id info
-const Int32 GpsLocationProvider::AGPS_SETID_TYPE_NONE = 0;
-const Int32 GpsLocationProvider::AGPS_SETID_TYPE_IMSI = 1;
-const Int32 GpsLocationProvider::AGPS_SETID_TYPE_MSISDN = 2;
-
-const String GpsLocationProvider::PROPERTIES_FILE("/etc/gps.conf");
-
-// turn off GPS fix icon if we haven't received a fix in 10 seconds
-const Int64 GpsLocationProvider::RECENT_FIX_TIMEOUT = 10 * 1000;
-
-// stop trying if we do not receive a fix within 60 seconds
-const Int32 GpsLocationProvider::NO_FIX_TIMEOUT = 60 * 1000;
-
-// if the fix interval is below this we leave GPS on,
-// if above then we cycle the GPS driver.
-// Typical hot TTTF is ~5 seconds, so 10 seconds seems sane.
-const Int32 GpsLocationProvider::GPS_POLLING_THRESHOLD_INTERVAL = 10 * 1000;
-
-// how often to request NTP time, in milliseconds
-// current setting 24 hours
-const Int64 GpsLocationProvider::NTP_INTERVAL = 24L * 60L * 60L * 1000L;
-// how long to wait if we have a network error in NTP or XTRA downloading
-// current setting - 5 minutes
-const Int64 GpsLocationProvider::RETRY_INTERVAL = 5L * 60L * 1000;
-
-// states for injecting ntp and downloading xtra data
-const Int32 GpsLocationProvider::STATE_PENDING_NETWORK = 0;
-const Int32 GpsLocationProvider::STATE_DOWNLOADING = 1;
-const Int32 GpsLocationProvider::STATE_IDLE = 2;
-
-// Wakelocks
-const String GpsLocationProvider::WAKELOCK_KEY("GpsLocationProvider");
-
-// Alarms
-const String GpsLocationProvider::ALARM_WAKEUP("com.android.internal.location.ALARM_WAKEUP");
-const String GpsLocationProvider::ALARM_TIMEOUT("com.android.internal.location.ALARM_TIMEOUT");
-
-// for GPS SV statistics
-const Int32 GpsLocationProvider::MAX_SVS = 32;
-const Int32 GpsLocationProvider::EPHEMERIS_MASK = 0;
-const Int32 GpsLocationProvider::ALMANAC_MASK = 1;
-const Int32 GpsLocationProvider::USED_FOR_FIX_MASK = 2;
-
-CAR_INTERFACE_IMPL(GpsLocationProvider, ILocationProviderInterface)
-CAR_INTERFACE_IMPL(GpsLocationProvider::ConstructorRunnable, IRunnable)
-CAR_INTERFACE_IMPL(GpsLocationProvider::NetworkLocationListener, ILocationListener)
-
-AutoPtr<IIGpsStatusProvider> GpsLocationProvider::GetGpsStatusProvider()
+ECode GpsLocationProvider::MyRunnable::Run()
 {
-    return mGpsStatusProvider;
+    AutoPtr<IInterface> lmObj;
+    mHost->mContext->GetSystemService(IContext::LOCATION_SERVICE, (IInterface**)&lmObj);
+    AutoPtr<ILocationManager> locManager = ILocationManager::Probe(lmObj);
+    const Int64 minTime = 0;
+    const Float minDistance = 0;
+    const Boolean oneShot = FALSE;
+    AutoPtr<ILocationRequestHelper> lrh;
+    CLocationRequestHelper::AcquireSingleton((ILocationRequestHelper**)&lrh);
+    AutoPtr<ILocationRequest> request;
+    lrh->CreateFromDeprecatedProvider(ILocationManager::PASSIVE_PROVIDER,
+        minTime, minDistance, oneShot, (ILocationRequest**)&request);
+    // Don't keep track of this request since it's done on behalf of other clients
+    // (which are kept track of separately).
+    request->SetHideFromAppOps(TRUE);
+    AutoPtr<ILooper> looper;
+    mHost->mHandler->GetLooper((ILooper**)&looper);
+    locManager->RequestLocationUpdates(request, new NetworkLocationListener(mHost), looper);
+    return NOERROR;
 }
-/*****************************************************************************/
-/******       GpsLocationProvider::NetworkLocationListener Start       *******/
-/*****************************************************************************/
+
+//===========================================
+//GpsLocationProvider::MyRunnable2
+//===========================================
+
+GpsLocationProvider::MyRunnable2::MyRunnable2(
+    /* [in] */ GpsLocationProvider* host)
+    : mHost(host)
+{}
+
+ECode GpsLocationProvider::MyRunnable2::Run()
+{
+    Int64 delay;
+
+    // force refresh NTP cache when outdated
+    Int64 cacheAge;
+    ITrustedTime::Probe(mHost->mNtpTime)->GetCacheAge(&cacheAge);
+    if (cacheAge >= NTP_INTERVAL) {
+        Boolean isRefreshed;
+        ITrustedTime::Probe(mHost->mNtpTime)->ForceRefresh(&isRefreshed);
+    }
+
+    // only update when NTP time is fresh
+    if (cacheAge < NTP_INTERVAL) {
+        Int64 time;
+        mHost->mNtpTime->GetCachedNtpTime(&time);
+        Int64 timeReference;
+        mHost->mNtpTime->GetCachedNtpTimeReference(&timeReference);
+        Int64 certainty;
+        ITrustedTime::Probe(mHost->mNtpTime)->GetCacheCertainty(&certainty);
+        AutoPtr<ISystem> sys;
+        CSystem::AcquireSingleton((ISystem**)&sys);
+        Int64 now;
+        sys->GetCurrentTimeMillis(&now);
+        AutoPtr<IDate> date;
+        CDate::New(time, (IDate**)&date);
+        String dateStr;
+        IObject::Probe(date)->ToString(&dateStr);
+        Logger::D(TAG, "NTP server returned: %ld (%s) reference: %ld certainty: %ld system time offset: %ld",
+            time, dateStr.string(), timeReference, certainty, (time - now));
+        mHost->Native_inject_time(time, timeReference, (Int32)certainty);
+        delay = NTP_INTERVAL;
+    }
+    else {
+        if (DEBUG) Logger::D(TAG, "requestTime failed");
+        delay = RETRY_INTERVAL;
+    }
+
+    mHost->SendMessage(INJECT_NTP_TIME_FINISHED, 0, NULL);
+
+    if (mHost->mPeriodicTimeInjection) {
+        // send delayed message for next NTP injection
+        // since this is delayed and not urgent we do not hold a wake lock here
+        Boolean res;
+        mHost->mHandler->SendEmptyMessageDelayed(INJECT_NTP_TIME, delay, &res);
+    }
+
+    // release wake lock held by task
+    mHost->mWakeLock->ReleaseLock();
+    return NOERROR;
+}
+
+//===========================================
+//GpsLocationProvider::MyRunnable3
+//===========================================
+
+GpsLocationProvider::MyRunnable3::MyRunnable3(
+    /* [in] */ GpsLocationProvider* host)
+    : mHost(host)
+{}
+
+ECode GpsLocationProvider::MyRunnable3::Run()
+{
+    AutoPtr<GpsXtraDownloader> xtraDownloader = new GpsXtraDownloader(mHost->mContext, mHost->mProperties);
+    AutoPtr<ArrayOf<Byte> > data = xtraDownloader->DownloadXtraData();
+    if (data != NULL) {
+        if (DEBUG) {
+            Logger::D(TAG, "calling Native_inject_xtra_data");
+        }
+        mHost->Native_inject_xtra_data(data, data->GetLength());
+    }
+
+    mHost->SendMessage(DOWNLOAD_XTRA_DATA_FINISHED, 0, NULL);
+
+    if (data == NULL) {
+        // try again later
+        // since this is delayed and not urgent we do not hold a wake lock here
+        Boolean res;
+        mHost->mHandler->SendEmptyMessageDelayed(DOWNLOAD_XTRA_DATA, RETRY_INTERVAL, &res);
+    }
+
+    // release wake lock held by task
+    mHost->mWakeLock->ReleaseLock();
+    return NOERROR;
+}
+
+//===========================================
+//GpsLocationProvider::GpsRequest
+//===========================================
+
+GpsLocationProvider::GpsRequest::GpsRequest(
+    /* [in] */ IProviderRequest* request,
+    /* [in] */ IWorkSource* source)
+    : mRequest(request)
+    , mSource(source)
+{
+}
+
+//===========================================
+//GpsLocationProvider::MyListenerHelper
+//===========================================
+
+ECode GpsLocationProvider::MyListenerHelper::IsSupported(
+    /* [out] */ Boolean* isSupported)
+{
+    VALIDATE_NOT_NULL(isSupported)
+    *isSupported = GpsLocationProvider::IsSupported();
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::MyListenerHelper::RegisterWithService(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = TRUE;
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::MyListenerHelper::UnregisterFromService()
+{
+    return NOERROR;
+}
+
+//===========================================
+//GpsLocationProvider::GpsStatusProviderService
+//===========================================
+
+CAR_INTERFACE_IMPL_2(GpsLocationProvider::GpsStatusProviderService, Object, IIGpsStatusProvider, IBinder)
+
+ECode GpsLocationProvider::GpsStatusProviderService::constructor(
+    /* [in] */ ILocationProviderInterface* host)
+{
+    mHost = (GpsLocationProvider*)host;
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::GpsStatusProviderService::AddGpsStatusListener(
+    /* [in] */ IIGpsStatusListener* listener)
+{
+    Boolean res;
+    return mHost->mListenerHelper->AddListener(listener, &res);
+}
+
+ECode GpsLocationProvider::GpsStatusProviderService::RemoveGpsStatusListener(
+    /* [in] */ IIGpsStatusListener* listener)
+{
+    Boolean res;
+    return mHost->mListenerHelper->RemoveListener(listener, &res);
+}
+
+//===========================================
+//GpsLocationProvider::MyGpsMeasurementsProvider
+//===========================================
+
+GpsLocationProvider::MyGpsMeasurementsProvider::MyGpsMeasurementsProvider(
+    /* [in] */ GpsLocationProvider* host)
+    : mHost(host)
+{}
+
+ECode GpsLocationProvider::MyGpsMeasurementsProvider::IsSupported(
+    /* [out] */ Boolean* isSupported)
+{
+    VALIDATE_NOT_NULL(isSupported)
+    *isSupported = GpsLocationProvider::Native_is_measurement_supported();
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::MyGpsMeasurementsProvider::RegisterWithService(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mHost->Native_start_measurement_collection();
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::MyGpsMeasurementsProvider::UnregisterFromService()
+{
+    mHost->Native_stop_measurement_collection();
+    return NOERROR;
+}
+
+//===========================================
+//GpsLocationProvider::MyGpsNavigationMessageProvider
+//===========================================
+GpsLocationProvider::MyGpsNavigationMessageProvider::MyGpsNavigationMessageProvider(
+    /* [in] */ GpsLocationProvider* host)
+    : mHost(host)
+{
+}
+
+ECode GpsLocationProvider::MyGpsNavigationMessageProvider::IsSupported(
+    /* [out] */ Boolean* isSupported)
+{
+    VALIDATE_NOT_NULL(isSupported)
+    *isSupported = GpsLocationProvider::Native_is_navigation_message_supported();
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::MyGpsNavigationMessageProvider::RegisterWithService(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mHost->Native_start_navigation_message_collection();
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::MyGpsNavigationMessageProvider::UnregisterFromService()
+{
+    mHost->Native_stop_navigation_message_collection();
+    return NOERROR;
+}
+
+//===========================================
+//GpsLocationProvider::MyBroadcastReceiver
+//===========================================
+
+GpsLocationProvider::MyBroadcastReceiver::MyBroadcastReceiver(
+    /* [in] */ GpsLocationProvider* host)
+    : mHost(host)
+{}
+
+ECode GpsLocationProvider::MyBroadcastReceiver::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    String action;
+    intent->GetAction(&action);
+
+    if (DEBUG) Logger::D(TAG, "receive broadcast intent, action: %s", action.string());
+    if (action.Equals(GpsLocationProvider::ALARM_WAKEUP)) {
+        mHost->StartNavigating(FALSE);
+    }
+    else if (action.Equals(GpsLocationProvider::ALARM_TIMEOUT)) {
+        mHost->Hibernate();
+    }
+#if 0 //TODO IIntents
+    else if (action.Equals(IIntents::DATA_SMS_RECEIVED_ACTION)) {
+        mHost->CheckSmsSuplInit(intent);
+    }
+    else if (action.Equals(IIntents::WAP_PUSH_RECEIVED_ACTION)) {
+        mHost->CheckWapSuplInit(intent);
+    }
+#endif
+    else if (action.Equals(IConnectivityManager::CONNECTIVITY_ACTION)) {
+        Int32 networkState;
+        Boolean b1;
+        if (intent->GetBooleanExtra(IConnectivityManager::EXTRA_NO_CONNECTIVITY, FALSE, &b1), b1) {
+            networkState = ILocationProvider::TEMPORARILY_UNAVAILABLE;
+        }
+        else {
+            networkState = ILocationProvider::AVAILABLE;
+        }
+
+        // retrieve NetworkInfo result for this UID
+        AutoPtr<IParcelable> p1;
+        intent->GetParcelableExtra(IConnectivityManager::EXTRA_NETWORK_INFO,(IParcelable**)&p1);
+        AutoPtr<INetworkInfo> info = INetworkInfo::Probe(p1);
+        AutoPtr<IInterface> serviceTemp;
+        mHost->mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&serviceTemp);
+        AutoPtr<IConnectivityManager> connManager = IConnectivityManager::Probe(serviceTemp);
+        Int32 type;
+        info->GetType(&type);
+        info = NULL;
+        connManager->GetNetworkInfo(type, (INetworkInfo**)&info);
+        mHost->UpdateNetworkState(networkState, info);
+    }
+    else if (IPowerManager::ACTION_POWER_SAVE_MODE_CHANGED.Equals(action)
+        || IIntent::ACTION_SCREEN_OFF.Equals(action)
+        || IIntent::ACTION_SCREEN_ON.Equals(action)) {
+        mHost->UpdateLowPowerMode();
+    }
+    else if (action.Equals(GpsLocationProvider::SIM_STATE_CHANGED)
+        || action.Equals(ITelephonyIntents::ACTION_SUBINFO_CONTENT_CHANGE)
+        || action.Equals(ITelephonyIntents::ACTION_SUBINFO_RECORD_UPDATED)) {
+        Logger::D(TAG, "received SIM realted action: %s", action.string());
+        AutoPtr<IInterface> serviceTemp;
+        mHost->mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&serviceTemp);
+        AutoPtr<ITelephonyManager> phone = ITelephonyManager::Probe(serviceTemp);
+        String mccMnc;
+        phone->GetSimOperator(&mccMnc);
+        if (!TextUtils::IsEmpty(mccMnc)) {
+            Logger::D(TAG, "SIM MCC/MNC is available: %s", mccMnc.string());
+            synchronized(this) {
+                mHost->ReloadGpsProperties(context, mHost->mProperties);
+                mHost->mNIHandler->SetSuplEsEnabled(mHost->mSuplEsEnabled);
+            }
+        }
+        else {
+            Logger::D(TAG, "SIM MCC/MNC is still not available");
+        }
+    }
+    return NOERROR;
+}
+
+//===========================================
+//GpsLocationProvider::GpsGeofenceHardwareService
+//===========================================
+
+CAR_INTERFACE_IMPL_2(GpsLocationProvider::GpsGeofenceHardwareService, Object, IIGpsGeofenceHardware, IBinder)
+
+ECode GpsLocationProvider::GpsGeofenceHardwareService::constructor(
+    /* [in] */ ILocationProviderInterface* host)
+{
+    mHost = (GpsLocationProvider*)host;
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::GpsGeofenceHardwareService::IsHardwareGeofenceSupported(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mHost->Native_is_geofence_supported();
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::GpsGeofenceHardwareService::AddCircularHardwareGeofence(
+    /* [in] */ Int32 geofenceId,
+    /* [in] */ Double latitude,
+    /* [in] */ Double longitude,
+    /* [in] */ Double radius,
+    /* [in] */ Int32 lastTransition,
+    /* [in] */ Int32 monitorTransitions,
+    /* [in] */ Int32 notificationResponsiveness,
+    /* [in] */ Int32 unknownTimer,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mHost->Native_add_geofence(geofenceId, latitude, longitude, radius,
+            lastTransition, monitorTransitions, notificationResponsiveness, unknownTimer);
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::GpsGeofenceHardwareService::RemoveHardwareGeofence(
+    /* [in] */ Int32 geofenceId,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mHost->Native_remove_geofence(geofenceId);
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::GpsGeofenceHardwareService::PauseHardwareGeofence(
+    /* [in] */ Int32 geofenceId,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mHost->Native_pause_geofence(geofenceId);
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::GpsGeofenceHardwareService::ResumeHardwareGeofence(
+    /* [in] */ Int32 geofenceId,
+    /* [in] */ Int32 monitorTransition,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mHost->Native_resume_geofence(geofenceId, monitorTransition);
+    return NOERROR;
+}
+
+//===========================================
+//GpsLocationProvider::NetInitiatedListener
+//===========================================
+
+CAR_INTERFACE_IMPL_2(GpsLocationProvider::NetInitiatedListener, Object, IINetInitiatedListener, IBinder)
+
+ECode GpsLocationProvider::NetInitiatedListener::constructor(
+    /* [in] */ ILocationProviderInterface* host)
+{
+    mHost = (GpsLocationProvider*)host;
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::NetInitiatedListener::SendNiResponse(
+    /* [in] */ Int32 notificationId,
+    /* [in] */ Int32 userResponse,
+    /* [out] */ Boolean* result)
+{
+    // TODO Add Permission check
+    VALIDATE_NOT_NULL(result)
+
+    if (DEBUG) Logger::D(TAG, "sendNiResponse, notifId: %d, response: %d", notificationId, userResponse);
+    mHost->Native_send_ni_response(notificationId, userResponse);
+    *result = TRUE;
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::NetInitiatedListener::ToString(
+    /* [out] */ String* s)
+{
+    return NOERROR;
+}
+
+//===========================================
+//GpsLocationProvider::ProviderHandler
+//===========================================
+
+GpsLocationProvider::ProviderHandler::ProviderHandler(
+    /* [in] */ ILooper* looper,
+    /* [in] */ GpsLocationProvider* host)
+    : Handler(looper, NULL, TRUE /*async*/)
+    , mHost(host)
+{
+}
+
+ECode GpsLocationProvider::ProviderHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    Int32 message;
+    msg->GetWhat(&message);
+    switch (message) {
+        case ENABLE: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            if (arg1 == 1) {
+                mHost->HandleEnable();
+            }
+            else {
+                mHost->HandleDisable();
+            }
+            break;
+        }
+        case SET_REQUEST:{
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            AutoPtr<GpsRequest> gpsRequest = (GpsRequest*)(IObject::Probe(obj));
+            mHost->HandleSetRequest(gpsRequest->mRequest, gpsRequest->mSource);
+            break;
+        }
+        case UPDATE_NETWORK_STATE: {
+            Int32 arg1;
+            msg->GetArg1(&arg1);
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            mHost->HandleUpdateNetworkState(arg1, INetworkInfo::Probe(obj));
+            break;
+        }
+        case INJECT_NTP_TIME:
+            mHost->HandleInjectNtpTime();
+            break;
+        case DOWNLOAD_XTRA_DATA:
+            if (mHost->mSupportsXtra) {
+                mHost->HandleDownloadXtraData();
+            }
+            break;
+        case INJECT_NTP_TIME_FINISHED:
+            mHost->mInjectNtpTimePending = STATE_IDLE;
+            break;
+        case DOWNLOAD_XTRA_DATA_FINISHED:
+            mHost->mDownloadXtraDataPending = STATE_IDLE;
+            break;
+        case UPDATE_LOCATION: {
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            mHost->HandleUpdateLocation(ILocation::Probe(obj));
+            break;
+        }
+    }
+    Int32 arg2;
+    msg->GetArg2(&arg2);
+    if (arg2 == 1) {
+        // wakelock was taken for this message, release it
+        mHost->mWakeLock->ReleaseLock();
+    }
+    return NOERROR;
+}
+
+//===========================================
+//GpsLocationProvider::NetworkLocationListener
+//===========================================
+
+CAR_INTERFACE_IMPL(GpsLocationProvider::NetworkLocationListener, Object, ILocationListener)
 
 GpsLocationProvider::NetworkLocationListener::NetworkLocationListener(
-    /* [in] */ GpsLocationProvider* host) : mHost(host)
+    /* [in] */ GpsLocationProvider* host)
+    : mHost(host)
 {}
 
 ECode GpsLocationProvider::NetworkLocationListener::OnLocationChanged(
     /* [in] */ ILocation* location)
 {
+    // this callback happens on mHandler looper
     String provider;
     location->GetProvider(&provider);
-    if(provider.Equals(ILocationManager::NETWORK_PROVIDER))
-    {
+    if (ILocationManager::NETWORK_PROVIDER.Equals(provider)) {
         mHost->HandleUpdateLocation(location);
     }
     return NOERROR;
@@ -234,35 +675,165 @@ ECode GpsLocationProvider::NetworkLocationListener::OnProviderDisabled(
     return NOERROR;
 }
 
-/*****************************************************************************/
-/********       GpsLocationProvider::ConstructorRunnable Start       *********/
-/*****************************************************************************/
+//===========================================
+//GpsLocationProvider
+//===========================================
 
-GpsLocationProvider::ConstructorRunnable::ConstructorRunnable(
-    /* [in] */ GpsLocationProvider* host) : mHost(host)
-{}
+const String GpsLocationProvider::TAG("GpsLocationProvider");
+const Boolean GpsLocationProvider::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+const Boolean GpsLocationProvider::VERBOSE = Logger::IsLoggable(TAG, Logger::VERBOSE);
+const AutoPtr<IProviderProperties> GpsLocationProvider::PROPERTIES = InitPROPERTIES();
 
-ECode GpsLocationProvider::ConstructorRunnable::Run()
-{
-    AutoPtr<IInterface> svTemp;
-    mHost->mContext->GetSystemService(IContext::LOCATION_SERVICE, (IInterface**)&svTemp);
-    AutoPtr<ILocationManager> locManager = (ILocationManager*)svTemp->Probe(EIID_ILocationManager);
-    AutoPtr<ILooper> lp;
-    mHandler->GetLooper((ILooper**)&lp);
-    AutoPtr<ILocationListener> ls = new NetworkLocationListener(mHost);
-    locManager->RequestLocationUpdates(ILocationManager::PASSIVE_PROVIDER,
-            0, 0, ls, lp);
-    return NOERROR;
-}
+// these need to match GpsPositionMode enum in gps.h
+const Int32 GpsLocationProvider::GPS_POSITION_MODE_STANDALONE;
+const Int32 GpsLocationProvider::GPS_POSITION_MODE_MS_BASED;
+const Int32 GpsLocationProvider::GPS_POSITION_MODE_MS_ASSISTED;
 
-Boolean GpsLocationProvider::IsSupported()
-{
-    return Native_is_supported();
-}
+// these need to match GpsPositionRecurrence enum in gps.h
+const Int32 GpsLocationProvider::GPS_POSITION_RECURRENCE_PERIODIC;
+const Int32 GpsLocationProvider::GPS_POSITION_RECURRENCE_SINGLE;
 
-GpsLocationProvider::GpsLocationProvider(
-    /* [in] */ IContext* context,
-    /* [in] */ IILocationManager* ilocationManager)
+// these need to match GpsStatusValue defines in gps.h
+const Int32 GpsLocationProvider::GPS_STATUS_NONE;
+const Int32 GpsLocationProvider::GPS_STATUS_SESSION_BEGIN;
+const Int32 GpsLocationProvider::GPS_STATUS_SESSION_END;
+const Int32 GpsLocationProvider::GPS_STATUS_ENGINE_ON;
+const Int32 GpsLocationProvider::GPS_STATUS_ENGINE_OFF;
+
+// these need to match GpsApgsStatusValue defines in gps.h
+/** AGPS status event values. */
+const Int32 GpsLocationProvider::GPS_REQUEST_AGPS_DATA_CONN;
+const Int32 GpsLocationProvider::GPS_RELEASE_AGPS_DATA_CONN;
+const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONNECTED;
+const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONN_DONE;
+const Int32 GpsLocationProvider::GPS_AGPS_DATA_CONN_FAILED;
+
+// these need to match GpsLocationFlags enum in gps.h
+const Int32 GpsLocationProvider::LOCATION_INVALID;
+const Int32 GpsLocationProvider::LOCATION_HAS_LAT_LONG;
+const Int32 GpsLocationProvider::LOCATION_HAS_ALTITUDE;
+const Int32 GpsLocationProvider::LOCATION_HAS_SPEED;
+const Int32 GpsLocationProvider::LOCATION_HAS_BEARING;
+const Int32 GpsLocationProvider::LOCATION_HAS_ACCURACY;
+
+// IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
+const Int32 GpsLocationProvider::GPS_DELETE_EPHEMERIS;
+const Int32 GpsLocationProvider::GPS_DELETE_ALMANAC;
+const Int32 GpsLocationProvider::GPS_DELETE_POSITION;
+const Int32 GpsLocationProvider::GPS_DELETE_TIME;
+const Int32 GpsLocationProvider::GPS_DELETE_IONO;
+const Int32 GpsLocationProvider::GPS_DELETE_UTC;
+const Int32 GpsLocationProvider::GPS_DELETE_HEALTH;
+const Int32 GpsLocationProvider::GPS_DELETE_SVDIR;
+const Int32 GpsLocationProvider::GPS_DELETE_SVSTEER;
+const Int32 GpsLocationProvider::GPS_DELETE_SADATA;
+const Int32 GpsLocationProvider::GPS_DELETE_RTI;
+const Int32 GpsLocationProvider::GPS_DELETE_CELLDB_INFO;
+const Int32 GpsLocationProvider::GPS_DELETE_ALL;
+
+// The GPS_CAPABILITY_* flags must match the values in gps.h
+const Int32 GpsLocationProvider::GPS_CAPABILITY_SCHEDULING;
+const Int32 GpsLocationProvider::GPS_CAPABILITY_MSB;
+const Int32 GpsLocationProvider::GPS_CAPABILITY_MSA;
+const Int32 GpsLocationProvider::GPS_CAPABILITY_SINGLE_SHOT;
+const Int32 GpsLocationProvider::GPS_CAPABILITY_ON_DEMAND_TIME;
+
+// The AGPS SUPL mode
+const Int32 GpsLocationProvider::AGPS_SUPL_MODE_MSA;
+const Int32 GpsLocationProvider::AGPS_SUPL_MODE_MSB;
+
+// these need to match AGpsType enum in gps.h
+const Int32 GpsLocationProvider::AGPS_TYPE_SUPL;
+const Int32 GpsLocationProvider::AGPS_TYPE_C2K;
+
+// these must match the definitions in gps.h
+const Int32 GpsLocationProvider::APN_INVALID;
+const Int32 GpsLocationProvider::APN_IPV4;
+const Int32 GpsLocationProvider::APN_IPV6;
+const Int32 GpsLocationProvider::APN_IPV4V6;
+
+// for mAGpsDataConnectionState
+const Int32 GpsLocationProvider::AGPS_DATA_CONNECTION_CLOSED;
+const Int32 GpsLocationProvider::AGPS_DATA_CONNECTION_OPENING;
+const Int32 GpsLocationProvider::AGPS_DATA_CONNECTION_OPEN;
+
+// Handler messages
+const Int32 GpsLocationProvider::CHECK_LOCATION;
+const Int32 GpsLocationProvider::ENABLE;
+const Int32 GpsLocationProvider::SET_REQUEST;
+const Int32 GpsLocationProvider::UPDATE_NETWORK_STATE;
+const Int32 GpsLocationProvider::INJECT_NTP_TIME;
+const Int32 GpsLocationProvider::DOWNLOAD_XTRA_DATA;
+const Int32 GpsLocationProvider::UPDATE_LOCATION;
+const Int32 GpsLocationProvider::ADD_LISTENER;
+const Int32 GpsLocationProvider::REMOVE_LISTENER;
+const Int32 GpsLocationProvider::INJECT_NTP_TIME_FINISHED;
+const Int32 GpsLocationProvider::DOWNLOAD_XTRA_DATA_FINISHED;
+
+// Request setid
+const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_SETID_IMSI;
+const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_SETID_MSISDN;
+
+// Request ref location
+const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_REFLOC_CELLID;
+const Int32 GpsLocationProvider::AGPS_RIL_REQUEST_REFLOC_MAC;
+
+// ref. location info
+const Int32 GpsLocationProvider::AGPS_REF_LOCATION_TYPE_GSM_CELLID;
+const Int32 GpsLocationProvider::AGPS_REF_LOCATION_TYPE_UMTS_CELLID;
+const Int32 GpsLocationProvider::AGPS_REG_LOCATION_TYPE_MAC       ;
+
+// set id info
+const Int32 GpsLocationProvider::AGPS_SETID_TYPE_NONE;
+const Int32 GpsLocationProvider::AGPS_SETID_TYPE_IMSI;
+const Int32 GpsLocationProvider::AGPS_SETID_TYPE_MSISDN;
+
+const String GpsLocationProvider::PROPERTIES_FILE_PREFIX("/etc/gps");
+const String GpsLocationProvider::PROPERTIES_FILE_SUFFIX(".conf");
+const String GpsLocationProvider::DEFAULT_PROPERTIES_FILE = PROPERTIES_FILE_PREFIX + PROPERTIES_FILE_SUFFIX;
+
+const Int32 GpsLocationProvider::GPS_GEOFENCE_UNAVAILABLE;
+const Int32 GpsLocationProvider::GPS_GEOFENCE_AVAILABLE;
+
+// GPS Geofence errors. Should match gps.h constants.
+const Int32 GpsLocationProvider::GPS_GEOFENCE_OPERATION_SUCCESS;
+const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_TOO_MANY_GEOFENCES;
+const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_ID_EXISTS;
+const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_ID_UNKNOWN;
+const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_INVALID_TRANSITION;
+const Int32 GpsLocationProvider::GPS_GEOFENCE_ERROR_GENERIC;
+
+// TCP/IP constants.
+// Valid TCP/UDP port range is (0, 65535].
+const Int32 GpsLocationProvider::TCP_MIN_PORT;
+const Int32 GpsLocationProvider::TCP_MAX_PORT;
+
+// Value of batterySaverGpsMode such that GPS isn't affected by battery saver mode.
+const Int32 GpsLocationProvider::BATTERY_SAVER_MODE_NO_CHANGE;
+// Value of batterySaverGpsMode such that GPS is disabled when battery saver mode
+// is enabled and the screen is off.
+const Int32 GpsLocationProvider::BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF;
+// Secure setting for GPS behavior when battery saver mode is on.
+const String GpsLocationProvider::BATTERY_SAVER_GPS_MODE("batterySaverGpsMode");
+const String GpsLocationProvider::WAKELOCK_KEY("GpsLocationProvider");
+
+// Alarms
+const String GpsLocationProvider::ALARM_WAKEUP("com.android.internal.location.ALARM_WAKEUP");
+const String GpsLocationProvider::ALARM_TIMEOUT("com.android.internal.location.ALARM_TIMEOUT");
+
+// SIM/Carrier info.
+const String GpsLocationProvider::SIM_STATE_CHANGED("android.intent.action.SIM_STATE_CHANGED");
+
+const Int32 GpsLocationProvider::MAX_SVS;
+const Int32 GpsLocationProvider::EPHEMERIS_MASK;
+const Int32 GpsLocationProvider::ALMANAC_MASK;
+const Int32 GpsLocationProvider::USED_FOR_FIX_MASK;
+
+// Boolean GpsLocationProvider::class_init_Native_value = GpsLocationProvider::Class_init_Native();
+
+CAR_INTERFACE_IMPL(GpsLocationProvider, Object, ILocationProviderInterface)
+
+GpsLocationProvider::GpsLocationProvider()
     : mLocationFlags(LOCATION_INVALID)
     , mStatus(ILocationProvider::TEMPORARILY_UNAVAILABLE)
     , mStatusUpdateTime(SystemClock::GetElapsedRealtime())
@@ -275,349 +846,155 @@ GpsLocationProvider::GpsLocationProvider(
     , mEngineOn(FALSE)
     , mFixInterval(1000)
     , mStarted(FALSE)
+    , mSingleShot(FALSE)
     , mEngineCapabilities(0)
     , mSupportsXtra(FALSE)
     , mFixRequestTime(0)
     , mTimeToFirstFix(0)
-    , mLastFixTime(0)
+    , mLastFixTime(0L)
     , mPositionMode(0)
-    , mSuplServerPort(0)
+    , mDisableGps(FALSE)
+    , mSuplServerPort(TCP_MIN_PORT)
     , mC2KServerPort(0)
-    , mContext(context)
-    , mILocationManager(ilocationManager)
+    , mSuplEsEnabled(FALSE)
+    , mApnIpType(0)
     , mAGpsDataConnectionState(0)
-    , mAGpsDataConnectionIpAddr(0)
     , mSvCount(0)
 {
     CLocation::New(ILocationManager::GPS_PROVIDER, (ILocation**)&mLocation);
+
     CBundle::New((IBundle**)&mLocationExtras);
 
-    mBroadcastReciever = new MyBroadcastReceiver(this);
-    PFL_EX("Not Init mGpsStatusProvider && mNetInitiatedListener")
-    // preallocated arrays, to avoid memory allocation in reportStatus()
+    mListenerHelper = (GpsStatusListenerHelper*)(new MyListenerHelper());
+
+    CWorkSource::New((IWorkSource**)&mClientSource);
+
+    CGpsStatusProviderService::New(this, (IIGpsStatusProvider**)&mGpsStatusProvider);
+
+    mGpsMeasurementsProvider = (GpsMeasurementsProvider*)(new MyGpsMeasurementsProvider(this));
+    mGpsNavigationMessageProvider = (GpsNavigationMessageProvider*)(new MyGpsNavigationMessageProvider(this));
+    mBroadcastReceiver = new MyBroadcastReceiver(this);
+
+    CGpsGeofenceHardwareService::New(this, (IIGpsGeofenceHardware**)&mGpsGeofenceBinder);
+    CNetInitiatedListener::New(this, (IINetInitiatedListener**)&mNetInitiatedListener);
+
     mSvs = ArrayOf<Int32>::Alloc(MAX_SVS);
     mSnrs = ArrayOf<Float>::Alloc(MAX_SVS);
     mSvElevations = ArrayOf<Float>::Alloc(MAX_SVS);
     mSvAzimuths = ArrayOf<Float>::Alloc(MAX_SVS);
     mSvMasks = ArrayOf<Int32>::Alloc(3);
-    // preallocated to avoid memory allocation in reportNmea()
     mNmeaBuffer = ArrayOf<Byte>::Alloc(120);
+}
 
-    CGpsNetInitialtedHandler::New(context, (IGpsNetInitiatedHandler**)&mNIHandler);
-
-    AutoPtr<INtpTrustedTimeHelper> helper;
-    CNtpTrustedTimeHelper::AcquireSingleton((INtpTrustedTimeHelper**)&helper);
-    helper->GetInstance(context, (INtpTrustedTimeHelper**)&mNtpTime);
+GpsLocationProvider::GpsLocationProvider(
+    /* [in] */ IContext* context,
+    /* [in] */ IILocationManager* ilocationManager,
+    /* [in] */ ILooper* looper)
+    : mContext(context)
+    , mILocationManager(ilocationManager)
+{
+    AutoPtr<INtpTrustedTimeHelper> ntth;
+    CNtpTrustedTimeHelper::AcquireSingleton((INtpTrustedTimeHelper**)&ntth);
+    ntth->GetInstance(context, (INtpTrustedTime**)&mNtpTime);
 
     mLocation->SetExtras(mLocationExtras);
-    AutoPtr<IInterface> svTemp;
-    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&svTemp);
-    AutoPtr<IPowerManager> powerManager = (IPowerManager*)svTemp->Probe(EIID_IPowerManager);
-    powerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, WAKELOCK_KEY, (IPowerManagerWakeLock**)&mWakeLock);
+
+    // Create a wake lock
+    AutoPtr<IInterface> pmObj;
+    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&pmObj);
+    mPowerManager = IPowerManager::Probe(pmObj);
+    mPowerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, WAKELOCK_KEY, (IPowerManagerWakeLock**)&mWakeLock);
+
     mWakeLock->SetReferenceCounted(TRUE);
 
-    svTemp = NULL;
-    mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&svTemp);
-    mAlarmManager = (IAlarmManager*)svTemp->Probe(EIID_IAlarmManager);
-    AutoPtr<IPendingIntentHelper> helper;
-    CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
-    AutoPtr<IIntent> wakeupIntent;
-    AutoPtr<IIntent> timeoutIntent;
-    CIntent::New(ALARM_WAKEUP, (IIntent**)&wakeupIntent);
-    CIntent::New(ALARM_TIMEOUT, (IIntent**)&timeoutIntent);
-    helper->GetBroadcast(mContext, 0, wakeupIntent, 0, (IPendingIntent**)&mWakeupIntent);
-    helper->GetBroadcast(mContext, 0, timeoutIntent, 0, (IPendingIntent**)&mTimeoutIntent);
+    AutoPtr<IInterface> amObj;
+    mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&amObj);
+    mAlarmManager = IAlarmManager::Probe(amObj);
 
-    svTemp = NULL;
-    context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&svTemp);
-    mConnMgr = (IConnectivityManager*)svTemp->Probe(EIID_IConnectivityManager);
+    AutoPtr<IIntent> i1, i2;
+    CIntent::New(ALARM_WAKEUP, (IIntent**)&i1);
+    CIntent::New(ALARM_TIMEOUT, (IIntent**)&i2);
+    AutoPtr<IPendingIntentHelper> pih;
+    CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&pih);
+    pih->GetBroadcast(mContext, 0, i1, 0, (IPendingIntent**)&mWakeupIntent);
+    pih->GetBroadcast(mContext, 0, i2, 0, (IPendingIntent**)&mTimeoutIntent);
 
+    AutoPtr<IInterface> cmObj;
+    mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&cmObj);
+    mConnMgr = IConnectivityManager::Probe(cmObj);
+
+    // App ops service to keep track of who is accessing the GPS
     AutoPtr<IServiceManager> sm;
     CServiceManager::AcquireSingleton((IServiceManager**)&sm);
-    svTemp = NULL;
-    sm->GetService(String("batteryinfo"), (IInterface**)&svTemp);
-    mBatteryStats = (IIBatteryStats*)svTemp->Probe(EIID_iIBatteryStats);
-    CProperties::New((IProperties)&mProperties);
+    AutoPtr<IInterface> aosObj;
+    sm->GetService(IContext::APP_OPS_SERVICE, (IInterface**)&aosObj);
+    mAppOpsService = IIAppOpsService::Probe(aosObj);
 
-    AutoPtr<IFile> file;
-    CFile::New(PROPERTIES_FILE, (IFile**)&file);
-    AutoPtr<IFileInputStream> stream;
-    CFileInputStream::New(file, (IFileInputStream**)&stream);
-    mProperties->Load(stream);
-    stream->Close();
+    // Battery statistics service to be notified when GPS turns on or off
+    AutoPtr<IInterface> bsObj;
+    sm->GetService(IBatteryStats::SERVICE_NAME, (IInterface**)&bsObj);
+    mBatteryStats = IIBatteryStats::Probe(bsObj);
 
-    mProperties->GetProperty(String("SUPL_HOST"), &mSuplServerHost);
-    String portString;
-    mProperties->GetProperty(String("SUPL_PORT"), &portString);
-    if (mSuplServerHost != NULL && portString != NULL) {
-        mSuplServerPort = StringUtils::ParseInt32(portString);
-    }
+    // Load GPS configuration.
+    CProperties::New((IProperties**)&mProperties);
+    ReloadGpsProperties(mContext, mProperties);
 
-    mProperties->GetProperty(String("C2K_HOST"), &mC2KServerHost);
-    mProperties->GetProperty(String("C2K_PORT"), &portString);
-    if (mC2KServerHost != NULL && portString != NULL) {
-        mC2KServerPort = StringUtils::ParseInt32(portString);
-    }
+    // Create a GPS net-initiated handler.
+    //TODO
+    // CGpsNetInitiatedHandler::New(context, mNetInitiatedListener, mSuplEsEnabled, (IGpsNetInitiatedHandler**)&mNIHandler);
 
-    mHandler = new ProviderHandler(this);
+    // construct handler, listen for events
+    mHandler = new ProviderHandler(looper, this);
     ListenForBroadcasts();
 
     // also listen for PASSIVE_PROVIDER updates
-    AutoPtr<IRunnable> runnable = new ConstructorRunnable(this);
-    Boolean result;
-    mHandler->Post(runnable, &result)
+    Boolean res;
+    mHandler->Post((IRunnable*)(new MyRunnable(this)), &res);
 }
 
-/**
- * Returns the name of this provider.
- */
-//@Override
-ECode GpsLocationProvider::GetName(
-    /* [out] */ String* name)
+ECode GpsLocationProvider::GetGpsStatusProvider(
+    /* [out] */ IIGpsStatusProvider** gsp)
 {
-    VALIDATE_NOT_NULL(name);
-    *name = ILocationManager::GPS_PROVIDER;
+    VALIDATE_NOT_NULL(gsp)
+    *gsp = mGpsStatusProvider.Get();
+    REFCOUNT_ADD(*gsp)
     return NOERROR;
 }
 
-//@Override
-ECode GpsLocationProvider::GetProperties(
-    /* [out] */ IProviderProperties** properties)
+ECode GpsLocationProvider::GetGpsGeofenceProxy(
+    /* [out] */ IIGpsGeofenceHardware** ggh)
 {
-    VALIDATE_NOT_NULL(properties);
-    *properties = PROPERTIES;
-    REFCOUNT_ADD(*properties);
+    VALIDATE_NOT_NULL(ggh)
+    *ggh = mGpsGeofenceBinder.Get();
+    REFCOUNT_ADD(*ggh)
     return NOERROR;
 }
 
-void GpsLocationProvider::UpdateNetworkState(
-    /* [in] */ Int32 state,
-    /* [in] */ INetworkInfo* info)
+ECode GpsLocationProvider::GetGpsMeasurementsProvider(
+    /* [out] */ GpsMeasurementsProvider** gmp)
 {
-     SendMessage(UPDATE_NETWORK_STATE, state, info);
-}
-
-/**
- * Enables this provider.  When enabled, calls to getStatus()
- * must be handled.  Hardware may be started up
- * when the provider is enabled.
- */
-//@Override
-ECode GpsLocationProvider::Enable()
-{
-    SendMessage(ENABLE, 1, NULL);
+    VALIDATE_NOT_NULL(gmp)
+    *gmp = mGpsMeasurementsProvider.Get();
+    REFCOUNT_ADD(*gmp)
     return NOERROR;
 }
 
-/**
- * Disables this provider.  When disabled, calls to getStatus()
- * need not be handled.  Hardware may be shut
- * down while the provider is disabled.
- */
-//@Override
-ECode GpsLocationProvider::Disable()
+ECode GpsLocationProvider::GetGpsNavigationMessageProvider(
+    /* [out] */ GpsNavigationMessageProvider** gnmp)
 {
-    SendMessage(ENABLE, 0, NULL);
-    return NOERROR;
-}
-
-//@Override
-ECode GpsLocationProvider::IsEnabled(
-    /* [out] */ Boolean* enable)
-{
-    VALIDATE_NOT_NULL(enable);
-    {
-        AutoLock lock(mLock);
-        * enable = mEnabled;
-        return NOERROR;
-    }
-}
-
-//@Override
-ECode GpsLocationProvider::GetStatus(
-    /* [in] */ IBundle* extras,
-    /* [out] */ Int32* status)
-{
-    VALIDATE_NOT_NULL(status);
-    if (extras != NULL) {
-        extras->PutInt32(String("satellites"), mSvCount);
-    }
-    *status = mStatus;
-
-    return NOERROR;
-}
-
-//@Override
-ECode GpsLocationProvider::GetStatusUpdateTime(
-    /* [out] */ Int64* time)
-{
-    VALIDATE_NOT_NULL(time);
-    *time = mStatusUpdateTime;
-    return NOERROR;
-}
-
-//@Override
-ECode GpsLocationProvider::SetRequest(
-    /* [in] */ IProviderRequest* request,
-    /* [in] */ IWorkSource* source)
-{
-    SendMessage(SET_REQUEST, 0, new GpsRequest(request, source));
-}
-
-//@Override
-ECode GpsLocationProvider::SwitchUser(
-    /* [in] */ Int32 userId)
-{
-    // nothing to do here
-
-    return NOERROR;
-}
-
-//@Override
-ECode GpsLocationProvider::SendExtraCommand(
-    /* [in] */ const String& command,
-    /* [in] */ IBundle* extras,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(extras);
-    VALIDATE_NOT_NULL(result);
-
-    AutoPtr<IBinderHelper> binderHelper;
-    CBinderHelper::AcquireSingleton((IBinderHelper**)&binderHelper);
-    Int64 identity;
-    binderHelper->ClearCallingIdentity(&identity);
-    *result = FALSE;
-
-    if (command.Equals("delete_aiding_data")) {
-        *result = DeleteAidingData(extras);
-    } else if (command.Equals("force_time_injection")) {
-        SendMessage(INJECT_NTP_TIME, 0, null);
-        *result = TRUE;
-    } else if (command.Equals("force_xtra_injection")) {
-        if (mSupportsXtra) {
-            XtraDownloadRequest();
-            *result = TRUE;
-        }
-    } else {
-//        Log.w(TAG, "sendExtraCommand: unknown command " + command);
-    }
-
-    binderHelper->RestoreCallingIdentity(identity);
-
-    return NOERROR;
-}
-
-AutoPtr<IINetInitiatedListener> GpsLocationProvider::GetNetInitiatedListener()
-{
-    return mNetInitiatedListener;
-}
-
-// Called by JNI function to report an NI request.
-void GpsLocationProvider::ReportNiNotification(
-    /* [in] */ Int32 notificationId,
-    /* [in] */ Int32 niType,
-    /* [in] */ Int32 notifyFlags,
-    /* [in] */ Int32 timeout,
-    /* [in] */ Int32 defaultResponse,
-    /* [in] */ const String& requestorId,
-    /* [in] */ const String& text,
-    /* [in] */ Int32 requestorIdEncoding,
-    /* [in] */ Int32 textEncoding,
-    /* [in] */ const String& extras  // Encoded extra data
-    )
-{
-//    Log.i(TAG, "reportNiNotification: entered");
-//    Log.i(TAG, "notificationId: " + notificationId +
-//            ", niType: " + niType +
-//            ", notifyFlags: " + notifyFlags +
-//            ", timeout: " + timeout +
-//            ", defaultResponse: " + defaultResponse);
-
-//    Log.i(TAG, "requestorId: " + requestorId +
-//            ", text: " + text +
-//            ", requestorIdEncoding: " + requestorIdEncoding +
-//            ", textEncoding: " + textEncoding);
-    AutoPtr<IGpsNiNotification> notification;
-    CGpsNiNotification::New((IGpsNiNotification**)&notification);
-    notification->SetNotificationId(notificationId);
-    notification->SetNiType(niType);
-    notification->SetNeedNotify((notifyFlags & GpsNetInitiatedHandler::GPS_NI_NEED_NOTIFY) != 0);
-    notification->SetNeedVerify((notifyFlags & GpsNetInitiatedHandler::GPS_NI_NEED_VERIFY) != 0);
-    notification->SetPrivacyOverride((notifyFlags & GpsNetInitiatedHandler::GPS_NI_PRIVACY_OVERRIDE) != 0);
-    notification->SetTimeOut(timeout);
-    notification->SetDefaultResponse(defaultResponse);
-    notification->SetRequestorId(requestorId);
-    notification->SetText(text);
-    notification->SetRequestorIdEncoding(requestorIdEncoding);
-    notification->SetTextEncoding(textEncoding);
-
-    // Process extras, assuming the format is
-    // one of more lines of "key = value"
-    AutoPtr<IBundle> bundle;// = new Bundle();
-    CBundle::New((IBundle**)&bundle);
-    String extrasTemp(extras);
-    if (extrasTemp.IsNull())
-    {
-        extrasTemp = "";
-    }
-    AutoPtr<IProperties> extraProp;// = new Properties();
-    CProperties::New((IProperties**)&extraProp);
-
-    //try {
-        extraProp->Load(new StringReader(extrasTemp));
-    //}
-    //catch (IOException e)
-    //{
-    //    Log.e(TAG, "reportNiNotification cannot parse extras data: " + extras);
-    //}
-
-    for (Entry<Object, Object> ent : extraProp.entrySet())
-    {
-        bundle->PutString((String) ent.getKey(), (String) ent.getValue());
-    }
-
-    notification->extras = bundle;
-
-    mNIHandler->HandleNiNotification(notification);
-}
-
-//@Override
-ECode GpsLocationProvider::Dump(
-    /* [in] */ IFileDescriptor* fd,
-    /* [in] */ IPrintWriter* pw,
-    /* [in] */ ArrayOf<String>* args)
-{
-    AutoPtr<StringBuilder> s = new StringBuilder();
-    s->AppendCStr("  mFixInterval=");
-    s->AppendInt32(mFixInterval);
-    s->AppendCStr("\n");
-    s->AppendCStr("  mEngineCapabilities=0x");
-//    s->Append(Integer.toHexString(mEngineCapabilities))
-    s->AppendCStr(" (");
-    if (HasCapability(GPS_CAPABILITY_SCHEDULING)) s->AppendCStr("SCHED ");
-    if (HasCapability(GPS_CAPABILITY_MSB)) s->AppendCStr("MSB ");
-    if (HasCapability(GPS_CAPABILITY_MSA)) s->AppendCStr("MSA ");
-    if (HasCapability(GPS_CAPABILITY_SINGLE_SHOT)) s->AppendCStr("SINGLE_SHOT ");
-    if (HasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) s->AppendCStr("ON_DEMAND_TIME ");
-    s->AppendCStr(")\n");
-
-    s->AppendCStr(Native_get_internal_state());
-    AutoPtr<ICharSequence> cs;
-    s->SubSequence(0, s->GetLength(), (ICharSequence**)&cs);
-    pw->AppendCharSequence(cs);
-
+    VALIDATE_NOT_NULL(gnmp)
+    *gnmp = mGpsNavigationMessageProvider.Get();
+    REFCOUNT_ADD(*gnmp)
     return NOERROR;
 }
 
 void GpsLocationProvider::CheckSmsSuplInit(
     /* [in] */ IIntent* intent)
 {
-#if 0
-    assert(intent);
-    AutoPtr<ArrayOf<ISmsMessage*> > messages = CIntents::GetMessagesFromIntent(intent);
-    for (Int32 i=0; i <messages.length; i++) {
-        AutoPtr<ArrayOf<Byte> > supl_init;
-        messages[i]->GetUserData(supl_init);
+#if 0 //TODO
+    SmsMessage[] messages = Intents.getMessagesFromIntent(intent);
+    for (int i=0; i <messages.length; i++) {
+        byte[] supl_init = messages[i].getUserData();
         Native_agps_ni_message(supl_init,supl_init.length);
     }
 #endif
@@ -626,37 +1003,215 @@ void GpsLocationProvider::CheckSmsSuplInit(
 void GpsLocationProvider::CheckWapSuplInit(
     /* [in] */ IIntent* intent)
 {
-    assert(intent != NULL);
     AutoPtr<ArrayOf<Byte> > supl_init;
-    intent->GetExtra(String("data"), (IInterface**)&supl_init);
-    Native_agps_ni_message(supl_init, supl_init.Get()->GetLength());
+    intent->GetByteArrayExtra(String("data"), (ArrayOf<Byte>**)&supl_init);
+    Native_agps_ni_message(supl_init.Get(), supl_init->GetLength());
+}
+
+void GpsLocationProvider::UpdateLowPowerMode()
+{
+    Boolean disableGps;
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ISettingsSecure> ss;
+    CSettingsSecure::AcquireSingleton((ISettingsSecure**)&ss);
+    Int32 v;
+    ss->GetInt32(cr.Get(), BATTERY_SAVER_GPS_MODE, BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF, &v);
+    switch (v) {
+        case BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF:
+            Boolean isPowerSaveMode, isInteractive;
+            mPowerManager->IsPowerSaveMode(&isPowerSaveMode);
+            mPowerManager->IsInteractive(&isInteractive);
+            disableGps = isPowerSaveMode && !isInteractive;
+            break;
+        default:
+            disableGps = FALSE;
+    }
+    if (disableGps != mDisableGps) {
+        mDisableGps = disableGps;
+        UpdateRequirements();
+    }
+}
+
+Boolean GpsLocationProvider::IsSupported()
+{
+    return Native_is_supported();
+}
+
+void GpsLocationProvider::ReloadGpsProperties(
+    /* [in] */ IContext* context,
+    /* [in] */ IProperties* properties)
+{
+    Int32 size;
+    IHashTable::Probe(properties)->GetSize(&size);
+    Logger::D(TAG, "Reset GPS properties, previous size = %d", size);
+    LoadPropertiesFromResource(context, properties);
+    Boolean isPropertiesLoadedFromFile = FALSE;
+    AutoPtr<ISystemProperties> sp;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
+    String gh;
+    sp->Get(String("ro.hardware.gps"), &gh);
+    const String gpsHardware = gh;
+    if (!TextUtils::IsEmpty(gpsHardware)) {
+        const String propFilename =
+                PROPERTIES_FILE_PREFIX + "." + gpsHardware + PROPERTIES_FILE_SUFFIX;
+        isPropertiesLoadedFromFile =
+                LoadPropertiesFromFile(propFilename, properties);
+    }
+    if (!isPropertiesLoadedFromFile) {
+        LoadPropertiesFromFile(DEFAULT_PROPERTIES_FILE, properties);
+    }
+    IHashTable::Probe(properties)->GetSize(&size);
+    Logger::D(TAG, "GPS properties reloaded, size = %d", size);
+
+    // TODO: we should get rid of C2K specific setting.
+    String s1, s2;
+    properties->GetProperty(String("SUPL_HOST"), &s1);
+    properties->GetProperty(String("SUPL_PORT"), &s2);
+    SetSuplHostPort(s1, s2);
+    properties->GetProperty(String("C2K_HOST"), &mC2KServerHost);
+    String portString;
+    properties->GetProperty(String("C2K_PORT"), &portString);
+    if (!mC2KServerHost.IsNull() && !portString.IsNull()) {
+        ECode ec = mC2KServerPort = StringUtils::ParseInt32(portString);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "unable to parse C2K_PORT: %s", portString.string());
+            // return E_NUMBER_FORMAT_EXCEPTION;
+        }
+    }
+
+    // Convert properties to string contents and send it to HAL.
+    AutoPtr<IByteArrayOutputStream> baos;
+    CByteArrayOutputStream::New(4096, (IByteArrayOutputStream**)&baos);
+    ECode ec = properties->Store(IOutputStream::Probe(baos), String(NULL));
+    if (FAILED(ec)) {
+        Logger::W(TAG, "failed to dump properties contents");
+        // return E_IO_EXCEPTION;
+    }
+    String str;
+    baos->ToString(&str);
+    Native_configuration_update(str);
+    Logger::D(TAG, "final config = %s", str.string());
+
+    // SUPL_ES configuration.
+    String suplESProperty;
+    mProperties->GetProperty(String("SUPL_ES"), &suplESProperty);
+    if (!suplESProperty.IsNull()) {
+        // try {
+        mSuplEsEnabled = (StringUtils::ParseInt32(suplESProperty) == 1);
+        // } catch (NumberFormatException e) {
+        //     Log.e(TAG, "unable to parse SUPL_ES: " + suplESProperty);
+        // }
+    }
+}
+
+void GpsLocationProvider::LoadPropertiesFromResource(
+    /* [in] */ IContext* context,
+    /* [in] */ IProperties* properties)
+{
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    AutoPtr<ArrayOf<String> > configValues;
+    res->GetStringArray(R::array::config_gpsParameters, (ArrayOf<String>**)&configValues);
+    for (Int32 i = 0; i < configValues->GetLength(); i++) {
+        String item = (*configValues)[i];
+        Logger::D(TAG, "GpsParamsResource: %s", item.string());
+        // We need to support "KEY =", but not "=VALUE".
+        AutoPtr<ArrayOf<String> > split;
+        StringUtils::Split(item, "=", (ArrayOf<String>**)&split);
+        if (split->GetLength() == 2) {
+            String s;
+            properties->SetProperty((*split)[0].Trim().ToUpperCase(), (*split)[1], &s);
+        }
+        else {
+            Logger::W(TAG, "malformed contents: %s", item.string());
+        }
+    }
+}
+
+Boolean GpsLocationProvider::LoadPropertiesFromFile(
+    /* [in] */ String filename,
+    /* [in] */ IProperties* properties)
+{
+
+    AutoPtr<IFile> file;
+    CFile::New(filename, (IFile**)&file);
+    AutoPtr<IFileInputStream> stream;
+    CFileInputStream::New(file, (IFileInputStream**)&stream);
+    ECode ec = properties->Load(IInputStream::Probe(stream));
+    if (FAILED(ec)) {
+        Logger::W(TAG, "Could not open GPS configuration file %s", filename.string());
+        return FALSE;
+    }
+    AutoPtr<IIoUtils> iu;
+    CIoUtils::AcquireSingleton((IIoUtils**)&iu);
+    iu->CloseQuietly(ICloseable::Probe(stream));
+    return TRUE;
 }
 
 void GpsLocationProvider::ListenForBroadcasts()
 {
-    AutoPtr<IIntentFilter> intentFilter;// = new IntentFilter();
+    AutoPtr<IIntentFilter> intentFilter;
     CIntentFilter::New((IIntentFilter**)&intentFilter);
-    intentFilter->AddAction(IIntents::DATA_SMS_RECEIVED_ACTION);
+    //TODO IIntents
+    // intentFilter->AddAction(IIntents::DATA_SMS_RECEIVED_ACTION);
     intentFilter->AddDataScheme(String("sms"));
-    intentFilter->AddDataAuthority(String("localhost"),String("7275"));
-    mContext->RegisterReceiver(mBroadcastReciever, intentFilter, NULL, mHandler);
-    intentFilter = NULL;
+    intentFilter->AddDataAuthority(String("localhost"), String("7275"));
+    AutoPtr<IIntent> intent;
+    mContext->RegisterReceiver(mBroadcastReceiver, intentFilter, String(NULL), mHandler, (IIntent**)&intent);
 
+    intentFilter = NULL;
     CIntentFilter::New((IIntentFilter**)&intentFilter);
-    intentFilter->AddAction(IIntents::WAP_PUSH_RECEIVED_ACTION);
-    //try {
-        intentFilter->AddDataType(String("application/vnd.omaloc-supl-init"));
-    //} catch (IntentFilter.MalformedMimeTypeException e) {
-    //    Log.w(TAG, "Malformed SUPL init mime type");
-    //}
-//    mContext->RegisterReceiver(mBroadcastReciever, intentFilter, NULL, mHandler);
-    intentFilter = NULL;
+    //TODO IIntents
+    // intentFilter->AddAction(IIntents::WAP_PUSH_RECEIVED_ACTION);
+    ECode ec = intentFilter->AddDataType(String("application/vnd.omaloc-supl-init"));
+    if (FAILED(ec)) {
+        Logger::W(TAG, "Malformed SUPL init mime type");
+        // return E_INTENTFILTER_MALFORMED_MIME_TYPE_EXCEPTION;
+    }
+    intent = NULL;
+    mContext->RegisterReceiver(mBroadcastReceiver, intentFilter, String(NULL), mHandler, (IIntent**)&intent);
 
+    intentFilter = NULL;
     CIntentFilter::New((IIntentFilter**)&intentFilter);
     intentFilter->AddAction(ALARM_WAKEUP);
     intentFilter->AddAction(ALARM_TIMEOUT);
     intentFilter->AddAction(IConnectivityManager::CONNECTIVITY_ACTION);
-    mContext->RegisterReceiver(mBroadcastReciever, intentFilter, NULL, mHandler);
+    intentFilter->AddAction(IPowerManager::ACTION_POWER_SAVE_MODE_CHANGED);
+    intentFilter->AddAction(IIntent::ACTION_SCREEN_OFF);
+    intentFilter->AddAction(IIntent::ACTION_SCREEN_ON);
+    intentFilter->AddAction(SIM_STATE_CHANGED);
+    // TODO: remove the use TelephonyIntents. We are using it because SIM_STATE_CHANGED
+    // is not reliable at the moment.
+    intentFilter->AddAction(ITelephonyIntents::ACTION_SUBINFO_CONTENT_CHANGE);
+    intentFilter->AddAction(ITelephonyIntents::ACTION_SUBINFO_RECORD_UPDATED);
+    intent = NULL;
+    mContext->RegisterReceiver(mBroadcastReceiver, intentFilter, String(NULL), mHandler, (IIntent**)&intent);
+}
+
+ECode GpsLocationProvider::GetName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name)
+    *name = ILocationManager::GPS_PROVIDER;
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::GetProperties(
+    /* [out] */ IProviderProperties* properties)
+{
+    // VALIDATE_NOT_NULL(properties)
+    // *properties = PROPERTIES;
+    // REFCOUNT_ADD(*properties)
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::UpdateNetworkState(
+    /* [in] */ Int32 state,
+    /* [in] */ INetworkInfo* info)
+{
+    SendMessage(UPDATE_NETWORK_STATE, state, info);
+    return NOERROR;
 }
 
 void GpsLocationProvider::HandleUpdateNetworkState(
@@ -665,74 +1220,73 @@ void GpsLocationProvider::HandleUpdateNetworkState(
 {
     mNetworkAvailable = (state == ILocationProvider::AVAILABLE);
 
-//    if (DEBUG) {
-//        Log.d(TAG, "updateNetworkState " + (mNetworkAvailable ? "available" : "unavailable")
-//            + " info: " + info);
-//    }
-#if 0
+    if (DEBUG) {
+        String infoStr;
+        IObject::Probe(info)->ToString(&infoStr);
+        Logger::D(TAG, "updateNetworkState %s info: %s",
+            (mNetworkAvailable ? "available" : "unavailable"), infoStr.string());
+    }
+
     if (info != NULL) {
-        Boolean dataEnabled = FALSE;
-
-        AutoPtr<ISettingsGlobal> settingGlobal;
-        CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingGlobal);
-
-        AutoPtr<IContentResolver> resolver;
-        mContext->GetContentResolver((IContentResolver**)&resolver);
-
-        Int32 getInt;
-        settingGlobal->GetInt32(resolver, ISettingsGlobal::MOBILE_DATA, 1, &getInt);
-
-        dataEnabled = getInt == 1;
-
-        Boolean tmp = FALSE;
-        info->IsAvailable(&tmp);
-        Boolean networkAvailable = tmp && dataEnabled;
+        AutoPtr<ISettingsGlobal> sg;
+        CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+        AutoPtr<IContentResolver> cr;
+        mContext->GetContentResolver((IContentResolver**)&cr);
+        Int32 v;
+        sg->GetInt32(cr, ISettingsGlobal::MOBILE_DATA, 1, &v);
+        Boolean dataEnabled = v == 1;
+        Boolean isAvailable;
+        info->IsAvailable(&isAvailable);
+        Boolean networkAvailable = isAvailable && dataEnabled;
         String defaultApn = GetSelectedApn();
-        if (defaultApn == NULL) {
+        if (defaultApn.IsNull()) {
             defaultApn = "dummy-apn";
         }
 
-        Boolean connected;
+        Boolean isConnected;
+        info->IsConnected(&isConnected);
         Int32 type;
-        Boolean roaming;
-        String extraInfo;
-
-        info->IsConnected(&connected);
         info->GetType(&type);
-        info->IsRoaming(&roaming);
+        Boolean isRoaming;
+        info->IsRoaming(&isRoaming);
+        String extraInfo;
         info->GetExtraInfo(&extraInfo);
-
-        Native_update_network_state(connected, type,
-                                    roaming, networkAvailable,
-                                    extraInfo, defaultApn);
+        Native_update_network_state(isConnected, type, isRoaming, networkAvailable,
+            extraInfo, defaultApn);
     }
-
     Int32 type;
-    if (info != NULL && (info->GetType(&type), type == ConnectivityManager::TYPE_MOBILE_SUPL)
-            && mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
-        String apnName;
-        info->GetExtraInfo(&apnName);
+    info->GetType(&type);
+    if (info != NULL && type == IConnectivityManager::TYPE_MOBILE_SUPL
+        && mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
         if (mNetworkAvailable) {
-            if (apnName.GetLength() == 0) {
+            String apnName;
+            info->GetExtraInfo(&apnName);
+            if (apnName.IsNull()) {
                 /* Assign a dummy value in the case of C2K as otherwise we will have a runtime
-                exception in the following call to native_agps_data_conn_open*/
+                exception in the following call to Native_agps_data_conn_open*/
                 apnName = "dummy-apn";
             }
             mAGpsApn = apnName;
-//            if (DEBUG) Log.d(TAG, "mAGpsDataConnectionIpAddr " + mAGpsDataConnectionIpAddr);
-            if (mAGpsDataConnectionIpAddr != 0xffffffff) {
-                Boolean route_result;
-//                if (DEBUG) Log.d(TAG, "call requestRouteToHost");
-                mConnMgr->RequestRouteToHost(ConnectivityManager::TYPE_MOBILE_SUPL,
-                    mAGpsDataConnectionIpAddr, &route_result);
-//                if (route_result == false) Log.d(TAG, "call requestRouteToHost failed");
+            mApnIpType = GetApnIpType(apnName);
+            SetRouting();
+            if (DEBUG) {
+                StringBuilder sb("Native_agps_data_conn_open: mAgpsApn=");
+                //TODO
+                // sb += mAGpsApn;
+                sb += ", mApnIpType=";
+                sb += mApnIpType;
+                String message = sb.ToString();
+                Logger::D(TAG, message.string());
             }
-//            if (DEBUG) Log.d(TAG, "call native_agps_data_conn_open");
-            Native_agps_data_conn_open(apnName);
+            Native_agps_data_conn_open(mAGpsApn, mApnIpType);
             mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
-        } else {
-//            if (DEBUG) Log.d(TAG, "call native_agps_data_conn_failed");
-            mAGpsApn = "";
+        }
+        else {
+            String s;
+            IObject::Probe(info)->ToString(&s);
+            Logger::E(TAG, "call Native_agps_data_conn_failed, info: %s", s.string());
+            mAGpsApn = NULL;
+            mApnIpType = APN_INVALID;
             mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
             Native_agps_data_conn_failed();
         }
@@ -740,18 +1294,16 @@ void GpsLocationProvider::HandleUpdateNetworkState(
 
     if (mNetworkAvailable) {
         if (mInjectNtpTimePending == STATE_PENDING_NETWORK) {
-//            SendMessage(INJECT_NTP_TIME, 0, null);
+            SendMessage(INJECT_NTP_TIME, 0, NULL);
         }
         if (mDownloadXtraDataPending == STATE_PENDING_NETWORK) {
-//            SendMessage(DOWNLOAD_XTRA_DATA, 0, null);
+            SendMessage(DOWNLOAD_XTRA_DATA, 0, NULL);
         }
     }
-#endif
 }
 
 void GpsLocationProvider::HandleInjectNtpTime()
 {
-/*
     if (mInjectNtpTimePending == STATE_DOWNLOADING) {
         // already downloading data
         return;
@@ -764,54 +1316,12 @@ void GpsLocationProvider::HandleInjectNtpTime()
     mInjectNtpTimePending = STATE_DOWNLOADING;
 
     // hold wake lock while task runs
-    mWakeLock.acquire();
-    AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
-        @Override
-        public void run() {
-            long delay;
-
-            // force refresh NTP cache when outdated
-            if (mNtpTime.getCacheAge() >= NTP_INTERVAL) {
-                mNtpTime.forceRefresh();
-            }
-
-            // only update when NTP time is fresh
-            if (mNtpTime.getCacheAge() < NTP_INTERVAL) {
-                long time = mNtpTime.getCachedNtpTime();
-                long timeReference = mNtpTime.getCachedNtpTimeReference();
-                long certainty = mNtpTime.getCacheCertainty();
-                long now = System.currentTimeMillis();
-
-                Log.d(TAG, "NTP server returned: "
-                        + time + " (" + new Date(time)
-                        + ") reference: " + timeReference
-                        + " certainty: " + certainty
-                        + " system time offset: " + (time - now));
-
-                native_inject_time(time, timeReference, (int) certainty);
-                delay = NTP_INTERVAL;
-            } else {
-                if (DEBUG) Log.d(TAG, "requestTime failed");
-                delay = RETRY_INTERVAL;
-            }
-
-            SendMessage(INJECT_NTP_TIME_FINISHED, 0, null);
-
-            if (mPeriodicTimeInjection) {
-                // send delayed message for next NTP injection
-                // since this is delayed and not urgent we do not hold a wake lock here
-                mHandler.sendEmptyMessageDelayed(INJECT_NTP_TIME, delay);
-            }
-
-            // release wake lock held by task
-            mWakeLock.release();
-        }
-    });*/
+    mWakeLock->AcquireLock();
+    AsyncTask::THREAD_POOL_EXECUTOR->Execute((IRunnable*)(new MyRunnable2(this)));
 }
 
 void GpsLocationProvider::HandleDownloadXtraData()
 {
-/*
     if (mDownloadXtraDataPending == STATE_DOWNLOADING) {
         // already downloading data
         return;
@@ -824,102 +1334,157 @@ void GpsLocationProvider::HandleDownloadXtraData()
     mDownloadXtraDataPending = STATE_DOWNLOADING;
 
     // hold wake lock while task runs
-    mWakeLock.acquire();
-    AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
-        @Override
-        public void run() {
-            GpsXtraDownloader xtraDownloader = new GpsXtraDownloader(mContext, mProperties);
-            byte[] data = xtraDownloader.downloadXtraData();
-            if (data != null) {
-                if (DEBUG) {
-                    Log.d(TAG, "calling native_inject_xtra_data");
-                }
-                native_inject_xtra_data(data, data.length);
-            }
-
-            SendMessage(DOWNLOAD_XTRA_DATA_FINISHED, 0, null);
-
-            if (data == null) {
-                // try again later
-                // since this is delayed and not urgent we do not hold a wake lock here
-                mHandler.sendEmptyMessageDelayed(DOWNLOAD_XTRA_DATA, RETRY_INTERVAL);
-            }
-
-            // release wake lock held by task
-            mWakeLock.release();
-        }
-    });*/
+    mWakeLock->AcquireLock();
+    AsyncTask::THREAD_POOL_EXECUTOR->Execute((IRunnable*)(new MyRunnable3(this)));
 }
 
 void GpsLocationProvider::HandleUpdateLocation(
     /* [in] */ ILocation* location)
 {
-    assert(location);
-
-    Boolean bAccuracy = FALSE;
-    location->HasAccuracy(&bAccuracy);
-    if (bAccuracy) {
-
-        Double latitude;
-        Double longitude;
-        Float accuracy;
-
+    Boolean hasAccuracy;
+    location->HasAccuracy(&hasAccuracy);
+    if (hasAccuracy) {
+        Double latitude, longitude;
         location->GetLatitude(&latitude);
         location->GetLongitude(&longitude);
+        Float accuracy;
         location->GetAccuracy(&accuracy);
-
         Native_inject_location(latitude, longitude, accuracy);
     }
 }
 
-void GpsLocationProvider::HandleEnable()
+ECode GpsLocationProvider::Enable()
 {
-//    if (DEBUG) Log.d(TAG, "handleEnable");
-
-    //synchronized(mLock)
-    {
-        AutoLock lock(mLock);
-        if (mEnabled) return;
+    synchronized(this) {
+        if (mEnabled) return E_NULL_POINTER_EXCEPTION;
         mEnabled = TRUE;
     }
+
+    SendMessage(ENABLE, 1, NULL);
+    return NOERROR;
+}
+
+void GpsLocationProvider::SetSuplHostPort(
+    /* [in] */ const String& hostString,
+    /* [in] */ const String& portString)
+{
+    if (!hostString.IsNull()) {
+        mSuplServerHost = hostString;
+    }
+    if (!portString.IsNull()) {
+        // try {
+        mSuplServerPort = StringUtils::ParseInt32(portString);
+        // } catch (NumberFormatException e) {
+            // Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
+        // }
+    }
+    if (!mSuplServerHost.IsNull()
+        && mSuplServerPort > TCP_MIN_PORT
+        && mSuplServerPort <= TCP_MAX_PORT) {
+        Native_set_agps_server(AGPS_TYPE_SUPL, mSuplServerHost, mSuplServerPort);
+    }
+}
+
+Int32 GpsLocationProvider::GetSuplMode(
+    /* [in] */ IProperties* properties,
+    /* [in] */ Boolean agpsEnabled,
+    /* [in] */ Boolean singleShot)
+{
+    if (agpsEnabled) {
+        String modeString;
+        properties->GetProperty(String("SUPL_MODE"), &modeString);
+        Int32 suplMode = 0;
+        if (!TextUtils::IsEmpty(modeString)) {
+            // try {
+            suplMode = StringUtils::ParseInt32(modeString);
+            // } catch (NumberFormatException e) {
+            //     Log.e(TAG, "unable to parse SUPL_MODE: " + modeString);
+            //     return GPS_POSITION_MODE_STANDALONE;
+            // }
+        }
+        if (singleShot
+            && HasCapability(GPS_CAPABILITY_MSA)
+            && (suplMode & AGPS_SUPL_MODE_MSA) != 0) {
+            return GPS_POSITION_MODE_MS_ASSISTED;
+        }
+        else if (HasCapability(GPS_CAPABILITY_MSB)
+            && (suplMode & AGPS_SUPL_MODE_MSB) != 0) {
+            return GPS_POSITION_MODE_MS_BASED;
+        }
+    }
+    return GPS_POSITION_MODE_STANDALONE;
+}
+
+void GpsLocationProvider::HandleEnable()
+{
+    if (DEBUG) Logger::D(TAG, "handleEnable");
 
     Boolean enabled = Native_init();
 
     if (enabled) {
         mSupportsXtra = Native_supports_xtra();
-        if (mSuplServerHost != NULL) {
+
+        // TODO: remove the following Native calls if we can make sure they are redundant.
+        if (!mSuplServerHost.IsNull()) {
             Native_set_agps_server(AGPS_TYPE_SUPL, mSuplServerHost, mSuplServerPort);
         }
-        if (mC2KServerHost != NULL) {
+        if (!mC2KServerHost.IsNull()) {
             Native_set_agps_server(AGPS_TYPE_C2K, mC2KServerHost, mC2KServerPort);
         }
-    } else {
-        //synchronized(mLock)
-        {
-            AutoLock lock(mLock);
+    }
+    else {
+        synchronized(this) {
             mEnabled = FALSE;
         }
-//        Log.w(TAG, "Failed to enable location provider");
+        Logger::W(TAG, "Failed to enable location provider");
     }
+}
+
+ECode GpsLocationProvider::Disable()
+{
+    synchronized(this) {
+        if (!mEnabled) return E_NULL_POINTER_EXCEPTION;
+        mEnabled = FALSE;
+    }
+
+    SendMessage(ENABLE, 0, NULL);
+    return NOERROR;
 }
 
 void GpsLocationProvider::HandleDisable()
 {
-//    if (DEBUG) Log.d(TAG, "handleDisable");
+    if (DEBUG) Logger::D(TAG, "handleDisable");
 
-    //synchronized(mLock)
-    {
-        AutoLock lock(mLock);
-        if (!mEnabled) return;
-        mEnabled = FALSE;
-    }
-
+    AutoPtr<IWorkSource> ws;
+    CWorkSource::New((IWorkSource**)&ws);
+    UpdateClientUids(ws);
     StopNavigating();
-//    mAlarmManager->Cancel(mWakeupIntent);
-//    mAlarmManager->Cancel(mTimeoutIntent);
+    mAlarmManager->Cancel(mWakeupIntent);
+    mAlarmManager->Cancel(mTimeoutIntent);
 
     // do this before releasing wakelock
     Native_cleanup();
+}
+
+ECode GpsLocationProvider::IsEnabled(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    synchronized(this) {
+        *result = mEnabled;
+    }
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::GetStatus(
+    /* [in] */ IBundle* extras,
+    /* [out] */ Int32* status)
+{
+    if (extras != NULL) {
+        extras->PutInt32(String("satellites"), mSvCount);
+    }
+    *status = mStatus;
+    return NOERROR;
 }
 
 void GpsLocationProvider::UpdateStatus(
@@ -933,166 +1498,221 @@ void GpsLocationProvider::UpdateStatus(
         mStatusUpdateTime = SystemClock::GetElapsedRealtime();
     }
 }
-#if 0
+
+ECode GpsLocationProvider::GetStatusUpdateTime(
+    /* [out] */ Int64* time)
+{
+    VALIDATE_NOT_NULL(time)
+    *time = mStatusUpdateTime;
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::SetRequest(
+    /* [in] */ IProviderRequest* request,
+    /* [in] */ IWorkSource* source)
+{
+    SendMessage(SET_REQUEST, 0, (IObject*)(new GpsRequest(request, source)));
+    return NOERROR;
+}
+
 void GpsLocationProvider::HandleSetRequest(
     /* [in] */ IProviderRequest* request,
     /* [in] */ IWorkSource* source)
 {
-    assert(request != NULL);
-    assert(source != NULL);
+    mProviderRequest = request;
+    mWorkSource = source;
+    UpdateRequirements();
+}
 
-//    if (DEBUG) Log.d(TAG, "setRequest " + request);
+void GpsLocationProvider::UpdateRequirements()
+{
+    if (mProviderRequest == NULL || mWorkSource == NULL) {
+        return;
+    }
 
-    if (((CProviderRequest*))(request.Get()))->reportLocation) {
-        // update client uids
-        Int32 size = 0;
-        source->Size(&size);
-        AutoPtr<ArrayOf<Int32> > uids = ArrayOf<Int32>::Alloc(size);
-        for (Int32 i=0; i < size; i++) {
-            source->Get(i, &uids[i]);
+    Boolean singleShot = FALSE;
+
+    // see if the request is for a single update
+    AutoPtr<IList> requests;
+    mProviderRequest->GetLocationRequests((IList**)&requests);
+    Int32 size;
+    requests->GetSize(&size);
+    if (requests != NULL && size > 0) {
+        // if any request has zero or more than one updates
+        // requested, then this is not single-shot mode
+        singleShot = TRUE;
+
+        AutoPtr<IIterator> iter;
+        IIterable::Probe(requests)->GetIterator((IIterator**)&iter);
+        Boolean hasNext;
+        while(iter->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            iter->GetNext((IInterface**)&obj);
+            AutoPtr<ILocationRequest> lr = ILocationRequest::Probe(obj);
+            Int32 nu;
+            lr->GetNumUpdates(&nu);
+            if (nu != 1) {
+                singleShot = FALSE;
+            }
         }
-
-        UpdateClientUids(uids);
-
-        Int32 interval = (Int32) ((CProviderRequest*))(request.Get()))->interval;
-
-        mFixInterval = interval;
+    }
+    String s;
+    IObject::Probe(mProviderRequest)->ToString(&s);
+    if (DEBUG) Logger::D(TAG, "setRequest %s", s.string());
+    Boolean reportLocation;
+    mProviderRequest->GetReportLocation(&reportLocation);
+    if (reportLocation && !mDisableGps) {
+        // update client uids
+        UpdateClientUids(mWorkSource);
+        Int64 interval;
+        mProviderRequest->GetInterval(&interval);
+        mFixInterval = (Int32)interval;
 
         // check for overflow
         if (mFixInterval != interval) {
-//            Log.w(TAG, "interval overflow: " + interval);
-            mFixInterval = Elastos::Core::Math::Integer_MAX_VALUE;
+            Logger::W(TAG, "interval overflow: %ld", interval);
+            mFixInterval = Elastos::Core::Math::INT32_MAX_VALUE;
         }
 
         // apply request to GPS engine
         if (mStarted && HasCapability(GPS_CAPABILITY_SCHEDULING)) {
             // change period
             if (!Native_set_position_mode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
-                    mFixInterval, 0, 0)) {
-//                Log.e(TAG, "set_position_mode failed in setMinTime()");
+                mFixInterval, 0, 0)) {
+                Logger::E(TAG, "set_position_mode failed in setMinTime()");
             }
-        } else if (!mStarted) {
-            // start GPS
-            StartNavigating();
         }
-    } else {
-        UpdateClientUids(new int[0]);
+        else if (!mStarted) {
+            // start GPS
+            StartNavigating(singleShot);
+        }
+    }
+    else {
+        AutoPtr<IWorkSource> ws;
+        CWorkSource::New((IWorkSource**)&ws);
+        UpdateClientUids(ws);
 
         StopNavigating();
         mAlarmManager->Cancel(mWakeupIntent);
         mAlarmManager->Cancel(mTimeoutIntent);
     }
 }
-#endif
+
 void GpsLocationProvider::UpdateClientUids(
-    /* [in] */ ArrayOf<Int32>* uids)
+    /* [in] */ IWorkSource* source)
 {
-    assert(uids != NULL);
+    // Update work source.
+    AutoPtr<ArrayOf<IWorkSource*> > changes;
+    mClientSource->SetReturningDiffs(source, (ArrayOf<IWorkSource*>**)&changes);
+    if (changes == NULL) {
+        return;
+    }
+    AutoPtr<IWorkSource> newWork = (*changes)[0];
+    AutoPtr<IWorkSource> goneWork = (*changes)[1];
 
-    Int32 uidsSize = uids->GetLength();
-    Int32 clientUidsSize = mClientUids.Get()->GetLength();
-
-    // Find uid's that were not previously tracked
-    for (Int32 i = 0; i < uidsSize; i++) {
-        Boolean newUid = TRUE;
-        for (Int32 j = 0; j < clientUidsSize; j++) {
-            if ((*uids)[i] == (*(mClientUids.Get()))[j]) {
-                newUid = FALSE;
-                break;
+    // Update sources that were not previously tracked.
+    if (newWork != NULL) {
+        Int32 lastuid = -1;
+        Int32 val;
+        newWork->GetSize(&val);
+        for (Int32 i=0; i < val; i++) {
+            Int32 uid;
+            newWork->Get(i, &uid);
+            AutoPtr<IBinder> binder;
+            ECode ec = AppOpsManager::GetToken(mAppOpsService, (IBinder**)&binder);
+            if (FAILED(ec)) {
+                Logger::W(TAG, "RemoteException%08x", ec);
+                // return E_REMOTE_EXCEPTION;
             }
-        }
-        if (newUid) {
-            //try {
-//                mBatteryStats->NoteStartGps((*uids)[i]);
-            //} catch (RemoteException e) {
-            //    Log.w(TAG, "RemoteException", e);
-            //}
+            String name;
+            newWork->GetName(i, &name);
+            Int32 ii;
+            mAppOpsService->StartOperation(binder, AppOpsManager::OP_GPS, uid, name, &ii);
+            if (uid != lastuid) {
+                lastuid = uid;
+                mBatteryStats->NoteStartGps(uid);
+            }
         }
     }
 
-    // Find uid'd that were tracked but have now disappeared
-    for (Int32 i = 0; i < clientUidsSize; i++) {
-        Boolean oldUid = TRUE;
-        for (Int32 j = 0; j < uidsSize; j++) {
-            if ((*uids)[j] == (*(mClientUids.Get()))[i]) {
-                oldUid = FALSE;
-                break;
+    // Update sources that are no longer tracked.
+    if (goneWork != NULL) {
+        Int32 lastuid = -1;
+        Int32 v;
+        goneWork->GetSize(&v);
+        for (Int32 i=0; i< v; i++) {
+            Int32 uid;
+            goneWork->Get(i, &uid);
+            AutoPtr<IBinder> binder;
+            ECode ec = AppOpsManager::GetToken(mAppOpsService, (IBinder**)&binder);
+            if (FAILED(ec)) {
+                Logger::W(TAG, "RemoteException%08x", ec);
+                // return E_REMOTE_EXCEPTION;
+            }
+            String name;
+            goneWork->GetName(i, &name);
+            mAppOpsService->FinishOperation(binder, AppOpsManager::OP_GPS, uid, name);
+            if (uid != lastuid) {
+                lastuid = uid;
+                mBatteryStats->NoteStopGps(uid);
             }
         }
-        if (oldUid) {
-            //try {
-//                mBatteryStats->NoteStopGps(uid1);
-            //} catch (RemoteException e) {
-            //    Log.w(TAG, "RemoteException", e);
-            //}
+    }
+}
+
+ECode GpsLocationProvider::SendExtraCommand(
+    /* [in] */ const String& command,
+    /* [in] */ IBundle* extras,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Int64 identity = Binder::ClearCallingIdentity();
+    *result = FALSE;
+
+    if (String("delete_aiding_data").Equals(command)) {
+        *result = DeleteAidingData(extras);
+    }
+    else if (String("force_time_injection").Equals(command)) {
+        SendMessage(INJECT_NTP_TIME, 0, NULL);
+        *result = TRUE;
+    }
+    else if (String("force_xtra_injection").Equals(command)) {
+        if (mSupportsXtra) {
+            XtraDownloadRequest();
+            *result = TRUE;
         }
     }
+    else {
+        Logger::W(TAG, "sendExtraCommand: unknown command %s", command.string());
+    }
 
-    // save current uids
-    mClientUids = uids;
+    Binder::RestoreCallingIdentity(identity);
+    return NOERROR;
 }
 
 Boolean GpsLocationProvider::DeleteAidingData(
     /* [in] */ IBundle* extras)
 {
     Int32 flags;
-    Boolean bFlag = FALSE;
 
     if (extras == NULL) {
         flags = GPS_DELETE_ALL;
     } else {
         flags = 0;
-        if (extras->GetBoolean(String("ephemeris"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_EPHEMERIS;
-        }
-
-        if (extras->GetBoolean(String("almanac"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_ALMANAC;
-        }
-
-        if (extras->GetBoolean(String("position"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_POSITION;
-        }
-
-        if (extras->GetBoolean(String("time"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_TIME;
-        }
-
-        if (extras->GetBoolean(String("iono"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_IONO;
-        }
-
-        if (extras->GetBoolean(String("utc"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_UTC;
-        }
-
-        if (extras->GetBoolean(String("health"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_HEALTH;
-        }
-
-        if (extras->GetBoolean(String("svdir"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_SVDIR;
-        }
-
-        if (extras->GetBoolean(String("svsteer"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_SVSTEER;
-        }
-
-        if (extras->GetBoolean(String("sadata"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_SADATA;
-        }
-
-        if (extras->GetBoolean(String("rti"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_RTI;
-        }
-
-        if (extras->GetBoolean(String("celldb-info"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_CELLDB_INFO;
-        }
-
-        if (extras->GetBoolean(String("all"), &bFlag), bFlag) {
-            flags |= GPS_DELETE_ALL;
-        }
+        Boolean v;
+        if (extras->GetBoolean(String("ephemeris"), &v),v) flags |= GPS_DELETE_EPHEMERIS;
+        if (extras->GetBoolean(String("almanac"), &v),v) flags |= GPS_DELETE_ALMANAC;
+        if (extras->GetBoolean(String("position"), &v),v) flags |= GPS_DELETE_POSITION;
+        if (extras->GetBoolean(String("time"), &v),v) flags |= GPS_DELETE_TIME;
+        if (extras->GetBoolean(String("iono"), &v),v) flags |= GPS_DELETE_IONO;
+        if (extras->GetBoolean(String("utc"), &v),v) flags |= GPS_DELETE_UTC;
+        if (extras->GetBoolean(String("health"), &v),v) flags |= GPS_DELETE_HEALTH;
+        if (extras->GetBoolean(String("svdir"), &v),v) flags |= GPS_DELETE_SVDIR;
+        if (extras->GetBoolean(String("svsteer"), &v),v) flags |= GPS_DELETE_SVSTEER;
+        if (extras->GetBoolean(String("sadata"), &v),v) flags |= GPS_DELETE_SADATA;
+        if (extras->GetBoolean(String("rti"), &v),v) flags |= GPS_DELETE_RTI;
+        if (extras->GetBoolean(String("celldb-info"), &v),v) flags |= GPS_DELETE_CELLDB_INFO;
+        if (extras->GetBoolean(String("all"), &v),v) flags |= GPS_DELETE_ALL;
     }
 
     if (flags != 0) {
@@ -1103,46 +1723,70 @@ Boolean GpsLocationProvider::DeleteAidingData(
     return FALSE;
 }
 
-void GpsLocationProvider::StartNavigating()
+void GpsLocationProvider::StartNavigating(
+    /* [in] */ Boolean singleShot)
 {
     if (!mStarted) {
-//        if (DEBUG) Log.d(TAG, "startNavigating");
+        if (DEBUG) Logger::D(TAG, "startNavigating, singleShot is %s", singleShot ? "TRUE" : "FALSE");
         mTimeToFirstFix = 0;
         mLastFixTime = 0;
         mStarted = TRUE;
+        mSingleShot = singleShot;
         mPositionMode = GPS_POSITION_MODE_STANDALONE;
 
-//         if (Settings.Global.getInt(mContext.getContentResolver(),
-//                Settings.Global.ASSISTED_GPS_ENABLED, 1) != 0) {
-            if (HasCapability(GPS_CAPABILITY_MSB)) {
-                mPositionMode = GPS_POSITION_MODE_MS_BASED;
+        AutoPtr<IContentResolver> cr;
+        mContext->GetContentResolver((IContentResolver**)&cr);
+        AutoPtr<ISettingsGlobal> sg;
+        CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
+        Int32 i;
+        sg->GetInt32(cr, ISettingsGlobal::ASSISTED_GPS_ENABLED, 1, &i);
+        Boolean agpsEnabled = i != 0;
+        mPositionMode = GetSuplMode(mProperties, agpsEnabled, singleShot);
+
+        if (DEBUG) {
+            String mode;
+
+            switch(mPositionMode) {
+                case GPS_POSITION_MODE_STANDALONE:
+                    mode = "standalone";
+                    break;
+                case GPS_POSITION_MODE_MS_ASSISTED:
+                    mode = "MS_ASSISTED";
+                    break;
+                case GPS_POSITION_MODE_MS_BASED:
+                    mode = "MS_BASED";
+                    break;
+                default:
+                    mode = "unknown";
+                    break;
             }
-//        }
+            Logger::D(TAG, "setting position_mode to %s", mode.string());
+        }
 
         Int32 interval = (HasCapability(GPS_CAPABILITY_SCHEDULING) ? mFixInterval : 1000);
         if (!Native_set_position_mode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
-                interval, 0, 0)) {
+            interval, 0, 0)) {
             mStarted = FALSE;
-//            Log.e(TAG, "set_position_mode failed in startNavigating()");
+            Logger::E(TAG, "set_position_mode failed in startNavigating()");
             return;
         }
         if (!Native_start()) {
             mStarted = FALSE;
-//            Log.e(TAG, "native_start failed in startNavigating()");
+            Logger::E(TAG, "Native_start failed in startNavigating()");
             return;
         }
 
         // reset SV count to zero
         UpdateStatus(ILocationProvider::TEMPORARILY_UNAVAILABLE, 0);
-        AutoPtr<ISystem> system;
-        Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
-        system->GetCurrentTimeMillis(&mFixRequestTime);
+        AutoPtr<ISystem> sys;
+        CSystem::AcquireSingleton((ISystem**)&sys);
+        sys->GetCurrentTimeMillis(&mFixRequestTime);
         if (!HasCapability(GPS_CAPABILITY_SCHEDULING)) {
             // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
             // and our fix interval is not short
             if (mFixInterval >= NO_FIX_TIMEOUT) {
-//                mAlarmManager->Set(IAlarmManager::ELAPSED_REALTIME_WAKEUP,
-//                        SystemClock::GetElapsedRealtime() + NO_FIX_TIMEOUT, mTimeoutIntent);
+                mAlarmManager->Set(IAlarmManager::ELAPSED_REALTIME_WAKEUP,
+                        SystemClock::GetElapsedRealtime() + NO_FIX_TIMEOUT, mTimeoutIntent);
             }
         }
     }
@@ -1150,9 +1794,10 @@ void GpsLocationProvider::StartNavigating()
 
 void GpsLocationProvider::StopNavigating()
 {
-//    if (DEBUG) Log.d(TAG, "stopNavigating");
+    if (DEBUG) Logger::D(TAG, "stopNavigating");
     if (mStarted) {
         mStarted = FALSE;
+        mSingleShot = FALSE;
         Native_stop();
         mTimeToFirstFix = 0;
         mLastFixTime = 0;
@@ -1167,10 +1812,10 @@ void GpsLocationProvider::Hibernate()
 {
     // stop GPS until our next fix interval arrives
     StopNavigating();
-//    mAlarmManager->Cancel(mTimeoutIntent);
-//    mAlarmManager->Cancel(mWakeupIntent);
+    mAlarmManager->Cancel(mTimeoutIntent);
+    mAlarmManager->Cancel(mWakeupIntent);
     Int64 now = SystemClock::GetElapsedRealtime();
-//    mAlarmManager->Set(IAlarmManager::ELAPSED_REALTIME_WAKEUP, now + mFixInterval, mWakeupIntent);
+    mAlarmManager->Set(IAlarmManager::ELAPSED_REALTIME_WAKEUP, now + mFixInterval, mWakeupIntent);
 }
 
 Boolean GpsLocationProvider::HasCapability(
@@ -1179,9 +1824,6 @@ Boolean GpsLocationProvider::HasCapability(
     return ((mEngineCapabilities & capability) != 0);
 }
 
-/**
- * called from native code to update our position.
- */
 void GpsLocationProvider::ReportLocation(
     /* [in] */ Int32 flags,
     /* [in] */ Double latitude,
@@ -1192,12 +1834,9 @@ void GpsLocationProvider::ReportLocation(
     /* [in] */ Float accuracy,
     /* [in] */ Int64 timestamp)
 {
-//    if (VERBOSE) Log.v(TAG, "reportLocation lat: " + latitude + " long: " + longitude +
-//                " timestamp: " + timestamp);
+    if (VERBOSE) Logger::V(TAG, "reportLocation lat: %lf long: %lf timestamp: %ld", latitude,longitude,timestamp);
 
-    //synchronized(mLocation)
-    {
-        AutoLock lock(mLocationMutex);
+    synchronized(mLocation) {
         mLocationFlags = flags;
         if ((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
             mLocation->SetLatitude(latitude);
@@ -1209,318 +1848,248 @@ void GpsLocationProvider::ReportLocation(
         }
         if ((flags & LOCATION_HAS_ALTITUDE) == LOCATION_HAS_ALTITUDE) {
             mLocation->SetAltitude(altitude);
-        } else {
+        }
+        else {
             mLocation->RemoveAltitude();
         }
         if ((flags & LOCATION_HAS_SPEED) == LOCATION_HAS_SPEED) {
             mLocation->SetSpeed(speed);
-        } else {
+        }
+        else {
             mLocation->RemoveSpeed();
         }
         if ((flags & LOCATION_HAS_BEARING) == LOCATION_HAS_BEARING) {
             mLocation->SetBearing(bearing);
-        } else {
+        }
+        else {
             mLocation->RemoveBearing();
         }
         if ((flags & LOCATION_HAS_ACCURACY) == LOCATION_HAS_ACCURACY) {
             mLocation->SetAccuracy(accuracy);
-        } else {
+        }
+        else {
             mLocation->RemoveAccuracy();
         }
         mLocation->SetExtras(mLocationExtras);
 
-        //try {
-            mILocationManager->ReportLocation(mLocation, FALSE);
-        //} catch (RemoteException e) {
-        //    Log.e(TAG, "RemoteException calling reportLocation");
-        //}
+        ECode ec = mILocationManager->ReportLocation(mLocation, FALSE);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "RemoteException calling reportLocation");
+            // return E_REMOTE_EXCEPTION;
+        }
     }
-
-    AutoPtr<ISystem> system;
-    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
-    system->GetCurrentTimeMillis(&mLastFixTime);
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    sys->GetCurrentTimeMillis(&mLastFixTime);
     // report time to first fix
     if (mTimeToFirstFix == 0 && (flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
         mTimeToFirstFix = (Int32)(mLastFixTime - mFixRequestTime);
-//        if (DEBUG) Log.d(TAG, "TTFF: " + mTimeToFirstFix);
+        if (DEBUG) Logger::D(TAG, "TTFF: %d", mTimeToFirstFix);
 
         // notify status listeners
-        //synchronized(mListeners)
-        {
-            AutoLock lock(mListenersMutex);
-            Int32 size = mListeners.GetSize();
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<Listener> listener = mListeners[i];
-                //try {
-                    listener->mListener->OnFirstFix(mTimeToFirstFix);
-                //} catch (RemoteException e) {
-//                    Log.w(TAG, "RemoteException in stopNavigating");
-                //    mListeners->Remove(listener);
-                    // adjust for size of list changing
-                //    size--;
-                //}
-            }
-        }
+        mListenerHelper->OnFirstFix(mTimeToFirstFix);
+    }
+
+    if (mSingleShot) {
+        StopNavigating();
     }
 
     if (mStarted && mStatus != ILocationProvider::AVAILABLE) {
         // we want to time out if we do not receive a fix
         // within the time out and we are requesting infrequent fixes
         if (!HasCapability(GPS_CAPABILITY_SCHEDULING) && mFixInterval < NO_FIX_TIMEOUT) {
-//            mAlarmManager->Cancel(mTimeoutIntent);
+            mAlarmManager->Cancel(mTimeoutIntent);
         }
 
         // send an intent to notify that the GPS is receiving fixes.
-        //Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
         AutoPtr<IIntent> intent;
         CIntent::New(ILocationManager::GPS_FIX_CHANGE_ACTION, (IIntent**)&intent);
-        intent->PutBooleanExtra(ILocationManager::EXTRA_GPS_ENABLED, TRUE);
-
-        AutoPtr<IUserHandleHelper> userHelper;
-        AutoPtr<IUserHandle> ALL;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&userHelper);
-        userHelper->GetALL((IUserHandle**)&ALL);
-        mContext->SendBroadcastAsUser(intent, ALL);
+        intent->PutExtra(ILocationManager::EXTRA_GPS_ENABLED, TRUE);
+        mContext->SendBroadcastAsUser(intent, UserHandle::ALL);
         UpdateStatus(ILocationProvider::AVAILABLE, mSvCount);
     }
 
    if (!HasCapability(GPS_CAPABILITY_SCHEDULING) && mStarted &&
            mFixInterval > GPS_POLLING_THRESHOLD_INTERVAL) {
-//        if (DEBUG) Log.d(TAG, "got fix, hibernating");
+        if (DEBUG) Logger::D(TAG, "got fix, hibernating");
         Hibernate();
     }
 }
 
-/**
- * called from native code to update our status
- */
 void GpsLocationProvider::ReportStatus(
     /* [in] */ Int32 status)
 {
-//    if (DEBUG) Log.v(TAG, "reportStatus status: " + status);
+    if (DEBUG) Logger::V(TAG, "reportStatus status: %d", status);
 
-    //synchronized(mListeners)
-    {
-        AutoLock lock(mListenersMutex);
+    Boolean wasNavigating = mNavigating;
+    switch (status) {
+        case GPS_STATUS_SESSION_BEGIN:
+            mNavigating = TRUE;
+            mEngineOn = TRUE;
+            break;
+        case GPS_STATUS_SESSION_END:
+            mNavigating = FALSE;
+            break;
+        case GPS_STATUS_ENGINE_ON:
+            mEngineOn = TRUE;
+            break;
+        case GPS_STATUS_ENGINE_OFF:
+            mEngineOn = FALSE;
+            mNavigating = FALSE;
+            break;
+    }
 
-        Boolean wasNavigating = mNavigating;
+    if (wasNavigating != mNavigating) {
+        mListenerHelper->OnStatusChanged(mNavigating);
 
-        switch (status) {
-            case GPS_STATUS_SESSION_BEGIN:
-                mNavigating = TRUE;
-                mEngineOn = TRUE;
-                break;
-            case GPS_STATUS_SESSION_END:
-                mNavigating = FALSE;
-                break;
-            case GPS_STATUS_ENGINE_ON:
-                mEngineOn = TRUE;
-                break;
-            case GPS_STATUS_ENGINE_OFF:
-                mEngineOn = FALSE;
-                mNavigating = FALSE;
-                break;
-        }
-
-        if (wasNavigating != mNavigating) {
-            Int32 size = mListeners.GetSize();
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<Listener> listener = mListeners[i];
-                //try {
-                    if (mNavigating) {
-                        listener->mListener->OnGpsStarted();
-                    } else {
-                        listener->mListener->OnGpsStopped();
-                    }
-                //} catch (RemoteException e) {
-                //    Log.w(TAG, "RemoteException in reportStatus");
-                //    mListeners.remove(listener);
-                    // adjust for size of list changing
-                //    size--;
-                //}
-            }
-
-            // send an intent to notify that the GPS has been enabled or disabled.
-            //Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
-            AutoPtr<IIntent> intent;
-            CIntent::New(ILocationManager::GPS_ENABLED_CHANGE_ACTION, (IIntent**)&intent);
-            intent->PutBooleanExtra(ILocationManager::EXTRA_GPS_ENABLED, mNavigating);
-
-            AutoPtr<IUserHandleHelper> userHelper;
-            AutoPtr<IUserHandle> ALL;
-            CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&userHelper);
-            userHelper->GetALL((IUserHandle**)&ALL);
-            mContext->SendBroadcastAsUser(intent, ALL);
-        }
+        // send an intent to notify that the GPS has been enabled or disabled
+        AutoPtr<IIntent> intent;
+        CIntent::New(ILocationManager::GPS_ENABLED_CHANGE_ACTION, (IIntent**)&intent);
+        intent->PutExtra(ILocationManager::EXTRA_GPS_ENABLED, mNavigating);
+        mContext->SendBroadcastAsUser(intent, UserHandle::ALL);
     }
 }
 
-/**
- * called from native code to update SV info
- */
 void GpsLocationProvider::ReportSvStatus()
 {
     Int32 svCount = Native_read_sv_status(mSvs, mSnrs, mSvElevations, mSvAzimuths, mSvMasks);
+    mListenerHelper->OnSvStatusChanged(
+        svCount, mSvs, mSnrs, mSvElevations, mSvAzimuths, (*mSvMasks)[EPHEMERIS_MASK],
+        (*mSvMasks)[ALMANAC_MASK], (*mSvMasks)[USED_FOR_FIX_MASK]);
 
-    //synchronized(mListeners)
-    {
-        AutoLock lock(mListenersMutex);
-
-        Int32 size = mListeners.GetSize();
-        for (Int32 i = 0; i < size; i++) {
-            AutoPtr<Listener> listener = mListeners[i];
-            //try {
-                listener->mListener->OnSvStatusChanged(svCount, mSvs, mSnrs,
-                        mSvElevations, mSvAzimuths, (*(mSvMasks.Get()))[EPHEMERIS_MASK],
-                        (*(mSvMasks.Get()))[ALMANAC_MASK], (*(mSvMasks.Get()))[USED_FOR_FIX_MASK]);
-            //} catch (RemoteException e) {
-            //    Log.w(TAG, "RemoteException in reportSvInfo");
-            //    mListeners.remove(listener);
-                // adjust for size of list changing
-            //    size--;
-            //}
-        }
-    }
-/*
     if (VERBOSE) {
-        Log.v(TAG, "SV count: " + svCount +
-                " ephemerisMask: " + Integer.toHexString(mSvMasks[EPHEMERIS_MASK]) +
-                " almanacMask: " + Integer.toHexString(mSvMasks[ALMANAC_MASK]));
-        for (int i = 0; i < svCount; i++) {
-            Log.v(TAG, "sv: " + mSvs[i] +
-                    " snr: " + mSnrs[i]/10 +
-                    " elev: " + mSvElevations[i] +
-                    " azimuth: " + mSvAzimuths[i] +
-                    ((mSvMasks[EPHEMERIS_MASK] & (1 << (mSvs[i] - 1))) == 0 ? "  " : " E") +
-                    ((mSvMasks[ALMANAC_MASK] & (1 << (mSvs[i] - 1))) == 0 ? "  " : " A") +
-                    ((mSvMasks[USED_FOR_FIX_MASK] & (1 << (mSvs[i] - 1))) == 0 ? "" : "U"));
+        Logger::V(TAG, "SV count: %d ephemerisMask: %s almanacMask: ", svCount,
+            StringUtils::ToHexString((*mSvMasks)[EPHEMERIS_MASK]).string(),
+            StringUtils::ToHexString((*mSvMasks)[ALMANAC_MASK]).string());
+        for (Int32 i = 0; i < svCount; i++) {
+            Logger::V(TAG, "sv: %d snr: %f elev: %f azimuth: %f%s%s%s",
+                (*mSvs)[i],(*mSnrs)[i]/10, (*mSvElevations)[i], (*mSvAzimuths)[i],
+                (((*mSvMasks)[EPHEMERIS_MASK] & (1 << ((*mSvs)[i] - 1))) == 0 ? "  " : " E"),
+                (((*mSvMasks)[ALMANAC_MASK] & (1 << ((*mSvs)[i] - 1))) == 0 ? "  " : " A"),
+                (((*mSvMasks)[USED_FOR_FIX_MASK] & (1 << ((*mSvs)[i] - 1))) == 0 ? "" : "U"));
         }
     }
-*/
-    // return number of sets used in fix instead of total
-//    UpdateStatus(mStatus, Integer.bitCount(mSvMasks[USED_FOR_FIX_MASK]));
 
-    AutoPtr<ISystem> system;
-    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
-    Int64 now;
-    system->GetCurrentTimeMillis(&now);
-    if (mNavigating && mStatus == ILocationProvider::AVAILABLE && mLastFixTime > 0
-        && now - mLastFixTime > RECENT_FIX_TIMEOUT) {
+    // return number of sets used in fix instead of total
+    //TODO Integer.bitCount
+    // UpdateStatus(mStatus, Integer.bitCount(mSvMasks[USED_FOR_FIX_MASK]));
+
+    AutoPtr<ISystem> sys;
+    CSystem::AcquireSingleton((ISystem**)&sys);
+    Int64 tm;
+    sys->GetCurrentTimeMillis(&tm);
+    if (mNavigating && mStatus == ILocationProvider::AVAILABLE && mLastFixTime > 0 &&
+        tm - mLastFixTime > RECENT_FIX_TIMEOUT) {
         // send an intent to notify that the GPS is no longer receiving fixes.
-        //Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
         AutoPtr<IIntent> intent;
         CIntent::New(ILocationManager::GPS_FIX_CHANGE_ACTION, (IIntent**)&intent);
-        intent->PutBooleanExtra(ILocationManager::EXTRA_GPS_ENABLED, FALSE);
-
-        AutoPtr<IUserHandleHelper> userHelper;
-        AutoPtr<IUserHandle> ALL;
-        CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&userHelper);
-        userHelper->GetALL((IUserHandle**)&ALL);
-        mContext->SendBroadcastAsUser(intent, ALL);
+        intent->PutExtra(ILocationManager::EXTRA_GPS_ENABLED, FALSE);
+        mContext->SendBroadcastAsUser(intent, UserHandle::ALL);
         UpdateStatus(ILocationProvider::TEMPORARILY_UNAVAILABLE, mSvCount);
     }
 }
 
-/**
- * called from native code to update AGPS status
- */
 void GpsLocationProvider::ReportAGpsStatus(
     /* [in] */ Int32 type,
     /* [in] */ Int32 status,
-    /* [in] */ Int32 ipaddr)
+    /* [in] */ ArrayOf<Byte>* ipaddr)
 {
     switch (status) {
-        case GPS_REQUEST_AGPS_DATA_CONN:
-//            if (DEBUG) Log.d(TAG, "GPS_REQUEST_AGPS_DATA_CONN");
+        case GPS_REQUEST_AGPS_DATA_CONN: {
+            if (DEBUG) Logger::D(TAG, "GPS_REQUEST_AGPS_DATA_CONN");
+            Logger::V(TAG, "Received SUPL IP addr[]: %g", ipaddr);
             // Set mAGpsDataConnectionState before calling startUsingNetworkFeature
             //  to avoid a race condition with handleUpdateNetworkState()
             mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPENING;
-            Int32 result;
-//            mConnMgr->StartUsingNetworkFeature(
-//                    IConnectivityManager::TYPE_MOBILE, IPhone::FEATURE_ENABLE_SUPL, &result);
-            mAGpsDataConnectionIpAddr = ipaddr;
-            if (/*result == IPhoneConstants::APN_ALREADY_ACTIVE*/0) {
-//                if (DEBUG) Log.d(TAG, "PhoneConstants.APN_ALREADY_ACTIVE");
-                if (mAGpsApn != NULL) {
-//                    Log.d(TAG, "mAGpsDataConnectionIpAddr " + mAGpsDataConnectionIpAddr);
-                    if (mAGpsDataConnectionIpAddr != 0xffffffff) {
-                        Boolean route_result;
-//                        if (DEBUG) Log.d(TAG, "call requestRouteToHost");
-//                        mConnMgr->RequestRouteToHost(
-//                            IConnectivityManager::TYPE_MOBILE_SUPL,
-//                            mAGpsDataConnectionIpAddr, &route_result);
-//                        if (route_result == false) Log.d(TAG, "call requestRouteToHost failed");
-                    }
-                    Native_agps_data_conn_open(mAGpsApn);
+            Int32 result = 0;
+            //TODO IPhone
+            // mConnMgr->StartUsingNetworkFeature(
+                // IConnectivityManager::TYPE_MOBILE, IPhone::FEATURE_ENABLE_SUPL, &result);
+            if (ipaddr != NULL) {
+                AutoPtr<IInetAddressHelper> iah;
+                CInetAddressHelper::AcquireSingleton((IInetAddressHelper**)&iah);
+                ECode ec = iah->GetByAddress(ipaddr, (IInetAddress**)&mAGpsDataConnectionIpAddr);
+                if (FAILED(ec)) {
+                    Logger::E(TAG, "Bad IP Address: %g%08x", ipaddr, ec);
+                    mAGpsDataConnectionIpAddr = NULL;
+                    // return E_UNKNOWN_HOST_EXCEPTION;
+                }
+                String str;
+                IObject::Probe(mAGpsDataConnectionIpAddr)->ToString(&str);
+                Logger::V(TAG, "IP address converted to: %s", str.string());
+            }
+
+            if (result == IPhoneConstants::APN_ALREADY_ACTIVE) {
+                if (DEBUG) Logger::D(TAG, "PhoneConstants.APN_ALREADY_ACTIVE");
+                if (!mAGpsApn.IsNull()) {
+                    SetRouting();
+                    Native_agps_data_conn_open(mAGpsApn, mApnIpType);
                     mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
-                } else {
-//                    Log.e(TAG, "mAGpsApn not set when receiving PhoneConstants.APN_ALREADY_ACTIVE");
+                }
+                else {
+                    Logger::E(TAG, "mAGpsApn not set when receiving PhoneConstants.APN_ALREADY_ACTIVE");
                     mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
                     Native_agps_data_conn_failed();
                 }
-            }/* else if (result == IPhoneConstants::APN_REQUEST_STARTED) {
-//                if (DEBUG) Log.d(TAG, "PhoneConstants.APN_REQUEST_STARTED");
+            }
+            else if (result == IPhoneConstants::APN_REQUEST_STARTED) {
+                if (DEBUG) Logger::D(TAG, "PhoneConstants.APN_REQUEST_STARTED");
                 // Nothing to do here
-            }*/ else {
-//                if (DEBUG) Log.d(TAG, "startUsingNetworkFeature failed");
+            }
+            else {
+                if (DEBUG) Logger::D(TAG, "startUsingNetworkFeature failed, value is %d", result);
                 mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
                 Native_agps_data_conn_failed();
             }
             break;
-        case GPS_RELEASE_AGPS_DATA_CONN:
-//            if (DEBUG) Log.d(TAG, "GPS_RELEASE_AGPS_DATA_CONN");
+        }
+        case GPS_RELEASE_AGPS_DATA_CONN: {
+            if (DEBUG) Logger::D(TAG, "GPS_RELEASE_AGPS_DATA_CONN");
             if (mAGpsDataConnectionState != AGPS_DATA_CONNECTION_CLOSED) {
-//                mConnMgr->StopUsingNetworkFeature(
-//                        IConnectivityManager::TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
+                //TODO IPhone
+                // Int32 i;
+                // mConnMgr->StopUsingNetworkFeature(
+                //         IConnectivityManager::TYPE_MOBILE, IPhone::FEATURE_ENABLE_SUPL, &i);
                 Native_agps_data_conn_closed();
                 mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
+                mAGpsDataConnectionIpAddr = NULL;
             }
             break;
+        }
         case GPS_AGPS_DATA_CONNECTED:
-//            if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONNECTED");
+            if (DEBUG) Logger::D(TAG, "GPS_AGPS_DATA_CONNECTED");
             break;
         case GPS_AGPS_DATA_CONN_DONE:
-//            if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONN_DONE");
+            if (DEBUG) Logger::D(TAG, "GPS_AGPS_DATA_CONN_DONE");
             break;
         case GPS_AGPS_DATA_CONN_FAILED:
-//            if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONN_FAILED");
+            if (DEBUG) Logger::D(TAG, "GPS_AGPS_DATA_CONN_FAILED");
             break;
+        default:
+            Logger::D(TAG, "Received Unknown AGPS status: %d", status);
     }
 }
 
-/**
- * called from native code to report NMEA data received
- */
 void GpsLocationProvider::ReportNmea(
     /* [in] */ Int64 timestamp)
 {
-    //synchronized(mListeners)
-    {
-        AutoLock lock(mListenersMutex);
-        Int32 size = mListeners.GetSize();
-        if (size > 0) {
-            // don't bother creating the String if we have no listeners
-            Int32 length = Native_read_nmea(mNmeaBuffer, mNmeaBuffer->GetLength());
-            String nmea((char const*)(mNmeaBuffer->GetPayload()), length);// = new String(mNmeaBuffer, 0, length);
-
-            for (Int32 i = 0; i < size; i++) {
-                AutoPtr<Listener> listener = mListeners[i];
-                //try {
-                    listener->mListener->OnNmeaReceived(timestamp, nmea);
-                //} catch (RemoteException e) {
-                //    Log.w(TAG, "RemoteException in reportNmea");
-                //    mListeners.remove(listener);
-                    // adjust for size of list changing
-                //    size--;
-                //}
-            }
-        }
-    }
+    Int32 length = Native_read_nmea(mNmeaBuffer, mNmeaBuffer->GetLength());
+    String nmea((char const*)(mNmeaBuffer->GetPayload()), length);
+    mListenerHelper->OnNmeaReceived(timestamp, nmea);
 }
 
-/**
- * called from native code to inform us what the GPS engine capabilities are
- */
+void GpsLocationProvider::ReportMeasurementData(
+    /* [in] */ IGpsMeasurementsEvent* event)
+{
+    mGpsMeasurementsProvider->OnMeasurementsAvailable(event);
+}
+
+void GpsLocationProvider::ReportNavigationMessage(
+    /* [in] */ IGpsNavigationMessageEvent* event)
+{
+    mGpsNavigationMessageProvider->OnNavigationMessageAvailable(event);
+}
+
 void GpsLocationProvider::SetEngineCapabilities(
     /* [in] */ Int32 capabilities)
 {
@@ -1532,36 +2101,265 @@ void GpsLocationProvider::SetEngineCapabilities(
     }
 }
 
-/**
- * called from native code to request XTRA data
- */
 void GpsLocationProvider::XtraDownloadRequest()
 {
-//    if (DEBUG) Log.d(TAG, "xtraDownloadRequest");
-//    SendMessage(DOWNLOAD_XTRA_DATA, 0, null);
+    if (DEBUG) Logger::D(TAG, "xtraDownloadRequest");
+    SendMessage(DOWNLOAD_XTRA_DATA, 0, NULL);
 }
 
+AutoPtr<ILocation> GpsLocationProvider::BuildLocation(
+    /* [in] */ Int32 flags,
+    /* [in] */ Double latitude,
+    /* [in] */ Double longitude,
+    /* [in] */ Double altitude,
+    /* [in] */ Float speed,
+    /* [in] */ Float bearing,
+    /* [in] */ Float accuracy,
+    /* [in] */ Int64 timestamp)
+{
+    AutoPtr<ILocation> location;
+    CLocation::New(ILocationManager::GPS_PROVIDER, (ILocation**)&location);
+    if((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
+        location->SetLatitude(latitude);
+        location->SetLongitude(longitude);
+        location->SetTime(timestamp);
+        location->SetElapsedRealtimeNanos(SystemClock::GetElapsedRealtimeNanos());
+    }
+    if((flags & LOCATION_HAS_ALTITUDE) == LOCATION_HAS_ALTITUDE) {
+        location->SetAltitude(altitude);
+    }
+    if((flags & LOCATION_HAS_SPEED) == LOCATION_HAS_SPEED) {
+        location->SetSpeed(speed);
+    }
+    if((flags & LOCATION_HAS_BEARING) == LOCATION_HAS_BEARING) {
+        location->SetBearing(bearing);
+    }
+    if((flags & LOCATION_HAS_ACCURACY) == LOCATION_HAS_ACCURACY) {
+        location->SetAccuracy(accuracy);
+    }
+    return location;
+}
 
-/**
- * Called from native code to request set id info.
- * We should be careful about receiving null string from the TelephonyManager,
- * because sending null String to JNI function would cause a crash.
- */
+Int64 GpsLocationProvider::GetGeofenceStatus(
+    /* [in] */ Int32 status)
+{
+    switch(status) {
+        case GPS_GEOFENCE_OPERATION_SUCCESS:
+            return IGeofenceHardware::GEOFENCE_SUCCESS;
+        case GPS_GEOFENCE_ERROR_GENERIC:
+            return IGeofenceHardware::GEOFENCE_FAILURE;
+        case GPS_GEOFENCE_ERROR_ID_EXISTS:
+            return IGeofenceHardware::GEOFENCE_ERROR_ID_EXISTS;
+        case GPS_GEOFENCE_ERROR_INVALID_TRANSITION:
+            return IGeofenceHardware::GEOFENCE_ERROR_INVALID_TRANSITION;
+        case GPS_GEOFENCE_ERROR_TOO_MANY_GEOFENCES:
+            return IGeofenceHardware::GEOFENCE_ERROR_TOO_MANY_GEOFENCES;
+        case GPS_GEOFENCE_ERROR_ID_UNKNOWN:
+            return IGeofenceHardware::GEOFENCE_ERROR_ID_UNKNOWN;
+        default:
+            return -1;
+    }
+}
+
+void GpsLocationProvider::ReportGeofenceTransition(
+    /* [in] */ Int32 geofenceId,
+    /* [in] */ Int32 flags,
+    /* [in] */ Double latitude,
+    /* [in] */ Double longitude,
+    /* [in] */ Double altitude,
+    /* [in] */ Float speed,
+    /* [in] */ Float bearing,
+    /* [in] */ Float accuracy,
+    /* [in] */ Int64 timestamp,
+    /* [in] */ Int32 transition,
+    /* [in] */ Int64 transitionTimestamp)
+{
+    if (mGeofenceHardwareImpl == NULL) {
+        mGeofenceHardwareImpl = GeofenceHardwareImpl::GetInstance(mContext);
+    }
+    AutoPtr<ILocation> location = BuildLocation(
+            flags,
+            latitude,
+            longitude,
+            altitude,
+            speed,
+            bearing,
+            accuracy,
+            timestamp);
+//TODO export FusedBatchOptions
+    // mGeofenceHardwareImpl->ReportGeofenceTransition(
+    //         geofenceId,
+    //         location,
+    //         transition,
+    //         transitionTimestamp,
+    //         IGeofenceHardware::MONITORING_TYPE_GPS_HARDWARE,
+    //         FusedBatchOptions::SourceTechnologies::GNSS);
+}
+
+void GpsLocationProvider::ReportGeofenceStatus(
+    /* [in] */ Int32 status,
+    /* [in] */ Int32 flags,
+    /* [in] */ Double latitude,
+    /* [in] */ Double longitude,
+    /* [in] */ Double altitude,
+    /* [in] */ Float speed,
+    /* [in] */ Float bearing,
+    /* [in] */ Float accuracy,
+    /* [in] */ Int64 timestamp)
+{
+    if (mGeofenceHardwareImpl == NULL) {
+        mGeofenceHardwareImpl = GeofenceHardwareImpl::GetInstance(mContext);
+    }
+    AutoPtr<ILocation> location = BuildLocation(
+            flags,
+            latitude,
+            longitude,
+            altitude,
+            speed,
+            bearing,
+            accuracy,
+            timestamp);
+    Int32 monitorStatus = IGeofenceHardware::MONITOR_CURRENTLY_UNAVAILABLE;
+    if(status == GPS_GEOFENCE_AVAILABLE) {
+        monitorStatus = IGeofenceHardware::MONITOR_CURRENTLY_AVAILABLE;
+    }
+//TODO export FusedBatchOptions
+    // mGeofenceHardwareImpl->ReportGeofenceMonitorStatus(
+    //         IGeofenceHardware::MONITORING_TYPE_GPS_HARDWARE,
+    //         monitorStatus,
+    //         location,
+    //         FusedBatchOptions::SourceTechnologies::GNSS);
+}
+
+void GpsLocationProvider::ReportGeofenceAddStatus(
+    /* [in] */ Int32 geofenceId,
+    /* [in] */ Int32 status)
+{
+    if (mGeofenceHardwareImpl == NULL) {
+        mGeofenceHardwareImpl = GeofenceHardwareImpl::GetInstance(mContext);
+    }
+    mGeofenceHardwareImpl->ReportGeofenceAddStatus(geofenceId, GetGeofenceStatus(status));
+}
+
+void GpsLocationProvider::ReportGeofenceRemoveStatus(
+    /* [in] */ Int32 geofenceId,
+    /* [in] */ Int32 status)
+{
+    if (mGeofenceHardwareImpl == NULL) {
+        mGeofenceHardwareImpl = GeofenceHardwareImpl::GetInstance(mContext);
+    }
+    mGeofenceHardwareImpl->ReportGeofenceRemoveStatus(geofenceId, GetGeofenceStatus(status));
+}
+
+void GpsLocationProvider::ReportGeofencePauseStatus(
+    /* [in] */ Int32 geofenceId,
+    /* [in] */ Int32 status)
+{
+    if (mGeofenceHardwareImpl == NULL) {
+        mGeofenceHardwareImpl = GeofenceHardwareImpl::GetInstance(mContext);
+    }
+    mGeofenceHardwareImpl->ReportGeofencePauseStatus(geofenceId, GetGeofenceStatus(status));
+}
+
+void GpsLocationProvider::ReportGeofenceResumeStatus(
+    /* [in] */ Int32 geofenceId,
+    /* [in] */ Int32 status)
+{
+    if (mGeofenceHardwareImpl == NULL) {
+        mGeofenceHardwareImpl = GeofenceHardwareImpl::GetInstance(mContext);
+    }
+    mGeofenceHardwareImpl->ReportGeofenceResumeStatus(geofenceId, GetGeofenceStatus(status));
+}
+
+ECode GpsLocationProvider::GetNetInitiatedListener(
+    /* [out] */ IINetInitiatedListener** nil)
+{
+    VALIDATE_NOT_NULL(*nil)
+    *nil = mNetInitiatedListener;
+    REFCOUNT_ADD(*nil)
+    return NOERROR;
+}
+
+ECode GpsLocationProvider::ReportNiNotification(
+    /* [in] */ Int32 notificationId,
+    /* [in] */ Int32 niType,
+    /* [in] */ Int32 notifyFlags,
+    /* [in] */ Int32 timeout,
+    /* [in] */ Int32 defaultResponse,
+    /* [in] */ const String& requestorId,
+    /* [in] */ const String& text,
+    /* [in] */ Int32 requestorIdEncoding,
+    /* [in] */ Int32 textEncoding,
+    /* [in] */ const String& extras)
+{
+    Logger::I(TAG, "reportNiNotification: entered");
+    Logger::I(TAG, "notificationId: %d, niType: %d, notifyFlags: %d, timeout: %d, defaultResponse: %d",
+        notificationId, niType, notifyFlags, timeout, defaultResponse);
+
+    Logger::I(TAG, "requestorId: %s, text: %s, requestorIdEncoding: %d, textEncoding: %d",
+        requestorId.string(), text.string(), requestorIdEncoding, textEncoding);
+
+#if 0 //TODO GpsNetInitiatedHandler::GpsNiNotification
+    AutoPtr<IGpsNiNotification> notification = new GpsNiNotification();
+
+    notification.notificationId = notificationId;
+    notification.niType = niType;
+    notification.needNotify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_NOTIFY) != 0;
+    notification.needVerify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_VERIFY) != 0;
+    notification.privacyOverride = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_PRIVACY_OVERRIDE) != 0;
+    notification.timeout = timeout;
+    notification.defaultResponse = defaultResponse;
+    notification.requestorId = requestorId;
+    notification.text = text;
+    notification.requestorIdEncoding = requestorIdEncoding;
+    notification.textEncoding = textEncoding;
+#endif
+    // Process extras, assuming the format is
+    // one of more lines of "key = value"
+    AutoPtr<IBundle> bundle;
+    CBundle::New((IBundle**)&bundle);
+
+    //TODO
+    // if (extras.IsNull()) extras = "";
+    AutoPtr<IProperties> extraProp;
+    CProperties::New((IProperties**)&extraProp);
+
+    AutoPtr<IReader> reader;
+    CStringReader::New(extras, (IReader**)&reader);
+    ECode ec = extraProp->Load(reader);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "reportNiNotification cannot parse extras data: %s", extras.string());
+        return E_IO_EXCEPTION;
+    }
+#if 0 //TODO
+    for (Entry<Object, Object> ent : extraProp.entrySet())
+    {
+        bundle.putString((String) ent.getKey(), (String) ent.getValue());
+    }
+
+    notification.extras = bundle;
+
+    mNIHandler.handleNiNotification(notification);
+#endif
+    return NOERROR;
+}
 
 void GpsLocationProvider::RequestSetID(
     /* [in] */ Int32 flags)
 {
-//    AutoPtr<ITelephonyManager> phone;
-//    mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&phone);
-    Int32    type = AGPS_SETID_TYPE_NONE;
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
+    AutoPtr<ITelephonyManager> phone = ITelephonyManager::Probe(obj);
+    Int32 type = AGPS_SETID_TYPE_NONE;
     String data("");
 
     if ((flags & AGPS_RIL_REQUEST_SETID_IMSI) == AGPS_RIL_REQUEST_SETID_IMSI) {
         String data_temp;
-//        phone->GetSubscriberId(&data_temp);
-        if (data_temp.GetLength() == 0) {
+        phone->GetSubscriberId(&data_temp);
+        if (data_temp.IsNull()) {
             // This means the framework does not have the SIM card ready.
-        } else {
+        }
+        else {
             // This means the framework has the SIM card.
             data = data_temp;
             type = AGPS_SETID_TYPE_IMSI;
@@ -1569,10 +2367,11 @@ void GpsLocationProvider::RequestSetID(
     }
     else if ((flags & AGPS_RIL_REQUEST_SETID_MSISDN) == AGPS_RIL_REQUEST_SETID_MSISDN) {
         String data_temp;
-//        phone->GetLine1Number(&data_temp);
-        if (data_temp.GetLength() == 0) {
+        phone->GetLine1Number(&data_temp);
+        if (data_temp.IsNull()) {
             // This means the framework does not have the SIM card ready.
-        } else {
+        }
+        else {
             // This means the framework has the SIM card.
             data = data_temp;
             type = AGPS_SETID_TYPE_MSISDN;
@@ -1581,100 +2380,234 @@ void GpsLocationProvider::RequestSetID(
     Native_agps_set_id(type, data);
 }
 
-/**
- * Called from native code to request utc time info
- */
-
 void GpsLocationProvider::RequestUtcTime()
 {
-//    SendMessage(INJECT_NTP_TIME, 0, null);
+    SendMessage(INJECT_NTP_TIME, 0, NULL);
 }
 
-/**
- * Called from native code to request reference location info
- */
-
-void GpsLocationProvider::RequestRefLocation(
+void GpsLocationProvider::requestRefLocation(
     /* [in] */ Int32 flags)
 {
-/*
-    AutoPtr<ITelephonyManager> phone;
-    mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (ITelephonyManager**)&phone);
-    Int32 phoneType;
-    phone->GetPhoneType(&phoneType);
-    if (phoneType == TelephonyManager.PHONE_TYPE_GSM) {
-        GsmCellLocation gsm_cell = (GsmCellLocation) phone.getCellLocation();
-        if ((gsm_cell != null) && (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) &&
-                (phone.getNetworkOperator() != null) &&
-                    (phone.getNetworkOperator().length() > 3)) {
-            int type;
-            int mcc = Integer.parseInt(phone.getNetworkOperator().substring(0,3));
-            int mnc = Integer.parseInt(phone.getNetworkOperator().substring(3));
-            int networkType = phone.getNetworkType();
-            if (networkType == TelephonyManager.NETWORK_TYPE_UMTS
-                || networkType == TelephonyManager.NETWORK_TYPE_HSDPA
-                || networkType == TelephonyManager.NETWORK_TYPE_HSUPA
-                || networkType == TelephonyManager.NETWORK_TYPE_HSPA) {
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::TELEPHONY_SERVICE, (IInterface**)&obj);
+    AutoPtr<ITelephonyManager> phone = ITelephonyManager::Probe(obj);
+    Int32 t;
+    phone->GetPhoneType(&t);
+    const Int32 phoneType = t;
+    if (phoneType == ITelephonyManager::PHONE_TYPE_GSM) {
+        AutoPtr<ICellLocation> cell;
+        phone->GetCellLocation((ICellLocation**)&cell);
+        AutoPtr<IGsmCellLocation> gsm_cell = IGsmCellLocation::Probe(cell);
+        String s;
+        phone->GetNetworkOperator(&s);
+        if ((gsm_cell != NULL) && (!s.IsNull()) && (s.GetLength() > 3)) {
+            Int32 type;
+            Int32 mcc = StringUtils::ParseInt32(s.Substring(0,3));
+            Int32 mnc = StringUtils::ParseInt32(s.Substring(3));
+            Int32 networkType;
+            phone->GetNetworkType(&networkType);
+            if (networkType == ITelephonyManager::NETWORK_TYPE_UMTS
+                || networkType == ITelephonyManager::NETWORK_TYPE_HSDPA
+                || networkType == ITelephonyManager::NETWORK_TYPE_HSUPA
+                || networkType == ITelephonyManager::NETWORK_TYPE_HSPA
+                || networkType == ITelephonyManager::NETWORK_TYPE_HSPAP) {
                 type = AGPS_REF_LOCATION_TYPE_UMTS_CELLID;
-            } else {
+            }
+            else {
                 type = AGPS_REF_LOCATION_TYPE_GSM_CELLID;
             }
-            native_agps_set_ref_location_cellid(type, mcc, mnc,
-                    gsm_cell.getLac(), gsm_cell.getCid());
-        } else {
-            Log.e(TAG,"Error getting cell location info.");
+            Int32 lac, cid;
+            gsm_cell->GetLac(&lac);
+            gsm_cell->GetCid(&cid);
+            Native_agps_set_ref_location_cellid(type, mcc, mnc, lac, cid);
+        }
+        else {
+            Logger::E(TAG,"Error getting cell location info.");
         }
     }
-    else {
-        Log.e(TAG,"CDMA not supported.");
+    else if (phoneType == ITelephonyManager::PHONE_TYPE_CDMA) {
+        Logger::E(TAG, "CDMA not supported.");
     }
-*/
 }
 
 void GpsLocationProvider::SendMessage(
     /* [in] */ Int32 message,
     /* [in] */ Int32 arg,
     /* [in] */ IInterface* obj)
-{}
+{
+    // hold a wake lock until this message is delivered
+    // note that this assumes the message will not be removed from the queue before
+    // it is handled (otherwise the wake lock would be leaked).
+    mWakeLock->AcquireLock();
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(message, arg, 1, obj, (IMessage**)&msg);
+    msg->SendToTarget();
+}
 
 String GpsLocationProvider::GetSelectedApn()
 {
-    AutoPtr<IUri> uri;// = CUri::Parse("content://telephony/carriers/preferapn");
-    String apn("");
-
+    AutoPtr<IUriHelper> uh;
+    CUriHelper::AcquireSingleton((IUriHelper**)&uh);
+    AutoPtr<IUri> uri;
+    uh->Parse(String("content://telephony/carriers/preferapn"), (IUri**)&uri);
     AutoPtr<ICursor> cursor;
-    AutoPtr<IContentResolver> contentResolver;
-    mContext->GetContentResolver((IContentResolver**)&contentResolver);
-//    contentResolver->Query(uri, String("apn"),
-//            NULL, NULL, ICarriers::DEFAULT_SORT_ORDER, (ICursor**)&cursor);
+    // try {
+    AutoPtr<IContentResolver> cr;
+    mContext->GetContentResolver((IContentResolver**)&cr);
+    AutoPtr<ArrayOf<String> > proj = ArrayOf<String>::Alloc(1);
+    (*proj)[0] = "apn";
+    #if 0 //TODO Carriers.DEFAULT_SORT_ORDER
+    cursor = mContext.getContentResolver().query(
+            uri,
+            new String[] { "apn" },
+            null /* selection */,
+            null /* selectionArgs */,
+            Carriers.DEFAULT_SORT_ORDER);
+    if (cursor != null && cursor.moveToFirst()) {
+        return cursor.getString(0);
+    } else {
+        Log.e(TAG, "No APN found to select.");
+    }
+    // } catch (Exception e) {
+        // Log.e(TAG, "Error encountered on selecting the APN.", e);
+    // } finally {
+        if (cursor != null) {
+            cursor.close();
+        }
+    // }
 
-    if (NULL != cursor) {
-        //try {
-            Boolean bFlag = FALSE;
-            if (cursor->MoveToFirst(&bFlag), bFlag) {
-                cursor->GetString(0, &apn);
-            }
-        //} finally {
-        //    cursor.close();
-        //}
+    // return null;
+    #endif
+    return String(NULL);
+}
+
+Int32 GpsLocationProvider::GetApnIpType(
+    /* [in] */ const String& apn)
+{
+    if (apn.IsNull()) {
+        return APN_INVALID;
     }
 
-    return apn;
+    // look for cached data to use
+    if (apn.Equals(mAGpsApn) && mApnIpType != APN_INVALID) {
+        return mApnIpType;
+    }
+
+    StringBuilder sb("current = 1 and apn = '");
+    sb += apn;
+    sb += "' and carrier_enabled = 1";
+    String selection = sb.ToString();
+    AutoPtr<ICursor> cursor;
+    #if 0 //TODO Carriers.PROTOCOL Carriers.DEFAULT_SORT_ORDER
+    // try {
+    cursor = mContext.getContentResolver().query(
+            Carriers.CONTENT_URI,
+            new String[] { Carriers.PROTOCOL },
+            selection,
+            null,
+            Carriers.DEFAULT_SORT_ORDER);
+
+    if (null != cursor && cursor.moveToFirst()) {
+        return translateToApnIpType(cursor.getString(0), apn);
+    } else {
+        Log.e(TAG, "No entry found in query for APN: " + apn);
+    }
+    // } catch (Exception e) {
+    //     Log.e(TAG, "Error encountered on APN query for: " + apn, e);
+    // } finally {
+        if (cursor != null) {
+            cursor.close();
+        }
+    // }
+    #endif
+    return APN_INVALID;
 }
 
-//static { class_init_native(); }
-void GpsLocationProvider::Class_init_native()
+Int32 GpsLocationProvider::TranslateToApnIpType(
+    /* [in] */ const String& ipProtocol,
+    /* [in] */ const String& apn)
 {
+    if (String("IP").Equals(ipProtocol)) {
+        return APN_IPV4;
+    }
+    if (String("IPV6").Equals(ipProtocol)) {
+        return APN_IPV6;
+    }
+    if (String("IPV4V6").Equals(ipProtocol)) {
+        return APN_IPV4V6;
+    }
+
+    // we hit the default case so the ipProtocol is not recognized
+    StringBuilder sb("Unknown IP Protocol: ");
+    sb += ipProtocol;
+    sb += ", for APN: ";
+    sb += apn;
+    String message = sb.ToString();
+    Logger::E(TAG, message.string());
+    return APN_INVALID;
 }
+
+void GpsLocationProvider::SetRouting()
+{
+    if (mAGpsDataConnectionIpAddr == NULL) {
+        return;
+    }
+
+    Boolean result;
+    mConnMgr->RequestRouteToHostAddress(
+        IConnectivityManager::TYPE_MOBILE_SUPL, mAGpsDataConnectionIpAddr, &result);
+    String s;
+    IObject::Probe(mAGpsDataConnectionIpAddr)->ToString(&s);
+    if (!result) {
+        Logger::E(TAG, "Error requesting route to host: %s", s.string());
+    }
+    else if (DEBUG) {
+        Logger::D(TAG, "Successfully requested route to host: %s", s.string());
+    }
+}
+
+ECode GpsLocationProvider::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    StringBuilder s;
+    s += "  mFixInterval=";
+    s += mFixInterval;
+    s += "\n";
+    s += "  mDisableGps (battery saver mode)=";
+    s += mDisableGps;
+    s += "\n";
+    s += "  mEngineCapabilities=0x";
+    s += StringUtils::ToHexString(mEngineCapabilities);
+    s += " (";
+    if (HasCapability(GPS_CAPABILITY_SCHEDULING)) s += "SCHED ";
+    if (HasCapability(GPS_CAPABILITY_MSB)) s += "MSB ";
+    if (HasCapability(GPS_CAPABILITY_MSA)) s += "MSA ";
+    if (HasCapability(GPS_CAPABILITY_SINGLE_SHOT)) s += "SINGLE_SHOT ";
+    if (HasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) s += "ON_DEMAND_TIME ";
+    s += ")\n";
+
+    s += Native_get_internal_state();
+    AutoPtr<ICharSequence> cs;
+    CString::New(s.ToString(), (ICharSequence**)&cs);
+    IAppendable::Probe(pw)->Append(cs);
+    return NOERROR;
+}
+
+// Boolean GpsLocationProvider::Class_init_Native()
+// {
+//     return FALSE;
+// }
 
 Boolean GpsLocationProvider::Native_is_supported()
 {
-    return FALSE;//temp
+    return FALSE;
 }
 
 Boolean GpsLocationProvider::Native_init()
 {
-    return FALSE;//temp
+    return FALSE;
 }
 
 void GpsLocationProvider::Native_cleanup()
@@ -1688,26 +2621,23 @@ Boolean GpsLocationProvider::Native_set_position_mode(
     /* [in] */ Int32 preferred_accuracy,
     /* [in] */ Int32 preferred_time)
 {
-    return FALSE;//temp
+    return FALSE;
 }
 
 Boolean GpsLocationProvider::Native_start()
 {
-    return FALSE;//temp
+    return FALSE;
 }
 
 Boolean GpsLocationProvider::Native_stop()
 {
-    return FALSE;//temp
+    return FALSE;
 }
 
 void GpsLocationProvider::Native_delete_aiding_data(
     /* [in] */ Int32 flags)
-{
-}
+{}
 
-// returns number of SVs
-// mask[0] is ephemeris mask and mask[1] is almanac mask
 Int32 GpsLocationProvider::Native_read_sv_status(
     /* [in] */ ArrayOf<Int32>* svs,
     /* [in] */ ArrayOf<Float>* snrs,
@@ -1715,14 +2645,14 @@ Int32 GpsLocationProvider::Native_read_sv_status(
     /* [in] */ ArrayOf<Float>* azimuths,
     /* [in] */ ArrayOf<Int32>* masks)
 {
-    return -1;//temp
+    return 0;
 }
 
 Int32 GpsLocationProvider::Native_read_nmea(
     /* [in] */ ArrayOf<Byte>* buffer,
     /* [in] */ Int32 bufferSize)
 {
-    return -1;//temp
+    return 0;
 }
 
 void GpsLocationProvider::Native_inject_location(
@@ -1730,51 +2660,56 @@ void GpsLocationProvider::Native_inject_location(
     /* [in] */ Double longitude,
     /* [in] */ Float accuracy)
 {
+
 }
 
-// XTRA Support
 void GpsLocationProvider::Native_inject_time(
     /* [in] */ Int64 time,
     /* [in] */ Int64 timeReference,
-    /* [in] */ Int32 uncertaInt32y)
+    /* [in] */ Int32 uncertainty)
 {
 }
 
 Boolean GpsLocationProvider::Native_supports_xtra()
 {
-    return FALSE;//temp
+    return FALSE;
 }
 
 void GpsLocationProvider::Native_inject_xtra_data(
     /* [in] */ ArrayOf<Byte>* data,
     /* [in] */ Int32 length)
 {
+
 }
 
-// DEBUG Support
 String GpsLocationProvider::Native_get_internal_state()
 {
-    return String("");//temp
+    return String(NULL);
 }
 
 // AGPS Support
 void GpsLocationProvider::Native_agps_data_conn_open(
-    /* [in] */ const String& apn)
+    /* [in] */ const String& apn,
+    /* [in] */ Int32 apnIpType)
 {
+
 }
 
 void GpsLocationProvider::Native_agps_data_conn_closed()
 {
+
 }
 
 void GpsLocationProvider::Native_agps_data_conn_failed()
 {
+
 }
 
 void GpsLocationProvider::Native_agps_ni_message(
     /* [in] */ ArrayOf<Byte>* msg,
     /* [in] */ Int32 length)
 {
+
 }
 
 void GpsLocationProvider::Native_set_agps_server(
@@ -1782,16 +2717,16 @@ void GpsLocationProvider::Native_set_agps_server(
     /* [in] */ const String& hostname,
     /* [in] */ Int32 port)
 {
+
 }
 
-// Network-initiated (NI) Support
 void GpsLocationProvider::Native_send_ni_response(
     /* [in] */ Int32 notificationId,
     /* [in] */ Int32 userResponse)
 {
+
 }
 
-// AGPS ril suport
 void GpsLocationProvider::Native_agps_set_ref_location_cellid(
     /* [in] */ Int32 type,
     /* [in] */ Int32 mcc,
@@ -1799,12 +2734,14 @@ void GpsLocationProvider::Native_agps_set_ref_location_cellid(
     /* [in] */ Int32 lac,
     /* [in] */ Int32 cid)
 {
+
 }
 
 void GpsLocationProvider::Native_agps_set_id(
     /* [in] */ Int32 type,
     /* [in] */ const String& setid)
 {
+
 }
 
 void GpsLocationProvider::Native_update_network_state(
@@ -1814,6 +2751,79 @@ void GpsLocationProvider::Native_update_network_state(
     /* [in] */ Boolean available,
     /* [in] */ const String& extraInfo,
     /* [in] */ const String& defaultAPN)
+{
+
+}
+
+Boolean GpsLocationProvider::Native_is_geofence_supported()
+{
+    return FALSE;
+}
+
+Boolean GpsLocationProvider::Native_add_geofence(
+    /* [in] */ Int32 geofenceId,
+    /* [in] */ Double latitude,
+    /* [in] */ Double longitude,
+    /* [in] */ Double radius,
+    /* [in] */ Int32 lastTransition,
+    /* [in] */ Int32 monitorTransitions,
+    /* [in] */ Int32 notificationResponsivenes,
+    /* [in] */ Int32 unknownTimer)
+{
+    return FALSE;
+}
+
+Boolean GpsLocationProvider::Native_remove_geofence(
+    /* [in] */ Int32 geofenceId)
+{
+    return FALSE;
+}
+
+Boolean GpsLocationProvider::Native_resume_geofence(
+    /* [in] */ Int32 geofenceId,
+    /* [in] */ Int32 transitions)
+{
+    return FALSE;
+}
+
+Boolean GpsLocationProvider::Native_pause_geofence(
+    /* [in] */ Int32 geofenceId)
+{
+    return FALSE;
+}
+
+Boolean GpsLocationProvider::Native_is_measurement_supported()
+{
+    return FALSE;
+}
+
+Boolean GpsLocationProvider::Native_start_measurement_collection()
+{
+    return FALSE;
+}
+
+Boolean GpsLocationProvider::Native_stop_measurement_collection()
+{
+    return FALSE;
+}
+
+Boolean GpsLocationProvider::Native_is_navigation_message_supported()
+{
+    return FALSE;
+}
+
+Boolean GpsLocationProvider::Native_start_navigation_message_collection()
+{
+    return FALSE;
+}
+
+Boolean GpsLocationProvider::Native_stop_navigation_message_collection()
+{
+    return FALSE;
+}
+
+void GpsLocationProvider::Native_configuration_update(
+    /* [in] */ const String& configData)
 {
 }
 

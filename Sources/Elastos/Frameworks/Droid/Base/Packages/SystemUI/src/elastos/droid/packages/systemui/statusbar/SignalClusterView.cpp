@@ -1,216 +1,202 @@
-#include "elastos/droid/systemui/statusbar/SignalClusterView.h"
-#include "elastos/droid/systemui/SystemUIR.h"
-#include <elastos/utility/logging/Slogger.h>
 
+#include "elastos/droid/packages/systemui/statusbar/SignalClusterView.h"
+#include "../R.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Packages::SystemUI::StatusBar::Policy::EIID_INetworkControllerImplSignalCluster;
+using Elastos::Droid::Packages::SystemUI::StatusBar::Policy::EIID_ISecurityControllerCallback;
+using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Core::CString;
-using Elastos::Droid::SystemUI::SystemUIR;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 
-SignalClusterView::SignalClusterView()
-    : mWifiVisible(FALSE)
-    , mWifiStrengthId(0)
-    , mWifiActivityId(0)
-    , mMobileVisible(FALSE)
-    , mMobileStrengthId(0)
-    , mMobileActivityId(0)
-    , mMobileTypeId(0)
-    , mEthernetVisible(FALSE)
-    , mEthernetStateId(0)
-    , mEthernetActivityId(0)
-    , mIsAirplaneMode(FALSE)
-    , mAirplaneIconId(0)
+SignalClusterView::ChangedRunnable::ChangedRunnable(
+    /* [in] */ SignalClusterView* host)
+    : mHost(host)
 {}
 
-SignalClusterView::SignalClusterView(
-    /* [in] */ IContext* context)
-    : LinearLayout(context, NULL)
+ECode SignalClusterView::ChangedRunnable::Run()
+{
+    mHost->mSC->IsVpnEnabled(&mHost->mVpnVisible);
+    mHost->Apply();
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(SignalClusterView::TmpCallback, Object, ISecurityControllerCallback);
+SignalClusterView::TmpCallback::TmpCallback(
+    /* [in] */ SignalClusterView* host)
+    : mHost(host)
+{}
+
+ECode SignalClusterView::TmpCallback::OnStateChanged()
+{
+    return mHost->OnStateChanged();
+}
+
+const String SignalClusterView::TAG("SignalClusterView");
+Boolean SignalClusterView::DEBUG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+CAR_INTERFACE_IMPL_3(SignalClusterView, LinearLayout, ISignalClusterView, INetworkControllerImplSignalCluster, ISecurityControllerCallback);
+SignalClusterView::SignalClusterView()
+    : mVpnVisible(FALSE)
     , mWifiVisible(FALSE)
     , mWifiStrengthId(0)
-    , mWifiActivityId(0)
     , mMobileVisible(FALSE)
     , mMobileStrengthId(0)
-    , mMobileActivityId(0)
     , mMobileTypeId(0)
-    , mEthernetVisible(FALSE)
-    , mEthernetStateId(0)
-    , mEthernetActivityId(0)
     , mIsAirplaneMode(FALSE)
     , mAirplaneIconId(0)
+    , mRoaming(FALSE)
+    , mIsMobileTypeIconWide(FALSE)
+    , mWideTypeIconStartPadding(0)
 {}
 
-SignalClusterView::SignalClusterView(
+ECode SignalClusterView::constructor(
+    /* [in] */ IContext* context)
+{
+    return constructor(context, NULL);
+}
+
+ECode SignalClusterView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
-    : LinearLayout(context, attrs)
-    , mWifiVisible(FALSE)
-    , mWifiStrengthId(0)
-    , mWifiActivityId(0)
-    , mMobileVisible(FALSE)
-    , mMobileStrengthId(0)
-    , mMobileActivityId(0)
-    , mMobileTypeId(0)
-    , mEthernetVisible(FALSE)
-    , mEthernetStateId(0)
-    , mEthernetActivityId(0)
-    , mIsAirplaneMode(FALSE)
-    , mAirplaneIconId(0)
-{}
+{
+    return constructor(context, attrs, 0);
+}
 
-SignalClusterView::SignalClusterView(
+ECode SignalClusterView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
-    : LinearLayout(context, attrs, defStyle)
-    , mWifiVisible(FALSE)
-    , mWifiStrengthId(0)
-    , mWifiActivityId(0)
-    , mMobileVisible(FALSE)
-    , mMobileStrengthId(0)
-    , mMobileActivityId(0)
-    , mMobileTypeId(0)
-    , mEthernetVisible(FALSE)
-    , mEthernetStateId(0)
-    , mEthernetActivityId(0)
-    , mIsAirplaneMode(FALSE)
-    , mAirplaneIconId(0)
-{}
+{
+    return LinearLayout::constructor(context, attrs, defStyle);
+}
 
 ECode SignalClusterView::SetNetworkController(
-    /* [in] */ INetworkController* nc)
+    /* [in] */ INetworkControllerImpl* nc)
 {
+    if (DEBUG) Logger::D(TAG, "NetworkController=%p", nc);
     mNC = nc;
     return NOERROR;
 }
 
-//@Override
+ECode SignalClusterView::SetSecurityController(
+    /* [in] */ ISecurityController* sc)
+{
+    if (DEBUG) Logger::D(TAG, "SecurityController=%p", sc);
+    mSC = sc;
+    AutoPtr<TmpCallback> callback = new TmpCallback(this);
+    mSC->AddCallback(callback);
+    mSC->IsVpnEnabled(&mVpnVisible);
+    return NOERROR;
+}
+
+ECode SignalClusterView::OnFinishInflate()
+{
+    LinearLayout::OnFinishInflate();
+    AutoPtr<IContext> context;
+    GetContext((IContext**)&context);
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
+    res->GetDimensionPixelSize(R::dimen::wide_type_icon_start_padding, &mWideTypeIconStartPadding);
+    return NOERROR;
+}
+
 ECode SignalClusterView::OnAttachedToWindow()
 {
     LinearLayout::OnAttachedToWindow();
 
     AutoPtr<IView> tmp;
-
-    tmp = FindViewById(SystemUIR::id::wifi_combo);
-    assert(tmp != NULL);
-    mWifiGroup = IViewGroup::Probe(tmp.Get());
-    assert(mWifiGroup != NULL);
-
-    tmp = FindViewById(SystemUIR::id::wifi_signal);
-    mWifi = IImageView::Probe(tmp.Get());
-    assert(mWifi != NULL);
-
-    tmp = FindViewById(SystemUIR::id::wifi_inout);
-    mWifiActivity = IImageView::Probe(tmp.Get());
-    assert(mWifiActivity != NULL);
-
-    tmp = FindViewById(SystemUIR::id::mobile_combo);
-    mMobileGroup = IViewGroup::Probe(tmp.Get());
-    assert(mMobileGroup != NULL);
-
-    tmp = FindViewById(SystemUIR::id::mobile_signal);
-    mMobile = IImageView::Probe(tmp.Get());
-    assert(mMobile != NULL);
-
-    tmp = FindViewById(SystemUIR::id::mobile_inout);
-    mMobileActivity = IImageView::Probe(tmp.Get());
-    assert(mMobileActivity != NULL);
-
-    tmp = FindViewById(SystemUIR::id::mobile_type);
-    mMobileType = IImageView::Probe(tmp.Get());
-    assert(mMobileType != NULL);
-
-    tmp = FindViewById(SystemUIR::id::ethernet_combo);
-    mEthernetGroup = IViewGroup::Probe(tmp.Get());
-    assert(mEthernetGroup != NULL);
-
-    tmp = FindViewById(SystemUIR::id::ethernet_state);
-    mEthernet = IImageView::Probe(tmp.Get());
-    assert(mEthernet != NULL);
-
-    mSpacer = FindViewById(SystemUIR::id::spacer);
-    assert(mSpacer != NULL);
-
-    tmp = FindViewById(SystemUIR::id::airplane);
-    // mAirplane = IImageView::Probe(tmp.Get());
-    // assert(mAirplane != NULL);
+    FindViewById(R::id::vpn, (IView**)&tmp);
+    mVpn = IImageView::Probe(tmp);
+    tmp = NULL;
+    FindViewById(R::id::wifi_combo, (IView**)&tmp);
+    mWifiGroup = IViewGroup::Probe(tmp);
+    tmp = NULL;
+    FindViewById(R::id::wifi_signal, (IView**)&tmp);
+    mWifi = IImageView::Probe(tmp);
+    tmp = NULL;
+    FindViewById(R::id::mobile_combo, (IView**)&tmp);
+    mMobileGroup = IViewGroup::Probe(tmp);
+    tmp = NULL;
+    FindViewById(R::id::mobile_signal, (IView**)&tmp);
+    mMobile = IImageView::Probe(tmp);
+    tmp = NULL;
+    FindViewById(R::id::mobile_type, (IView**)&tmp);
+    mMobileType = IImageView::Probe(tmp);
+    tmp = NULL;
+    FindViewById(R::id::airplane, (IView**)&tmp);
+    mAirplane = IImageView::Probe(tmp);
+    tmp = NULL;
+    FindViewById(R::id::wifi_airplane_spacer, (IView**)&tmp);
+    mWifiAirplaneSpacer = IView::Probe(tmp);
+    tmp = NULL;
+    FindViewById(R::id::wifi_signal_spacer, (IView**)&tmp);
+    mWifiSignalSpacer = IView::Probe(tmp);
 
     Apply();
     return NOERROR;
 }
 
-//@Override
 ECode SignalClusterView::OnDetachedFromWindow()
 {
+    mVpn            = NULL;
     mWifiGroup      = NULL;
     mWifi           = NULL;
-    mWifiActivity   = NULL;
     mMobileGroup    = NULL;
     mMobile         = NULL;
-    mMobileActivity = NULL;
     mMobileType     = NULL;
-    mSpacer         = NULL;
     mAirplane       = NULL;
 
     return LinearLayout::OnDetachedFromWindow();
 }
 
-//@Override
+ECode SignalClusterView::OnStateChanged()
+{
+    AutoPtr<ChangedRunnable> r = new ChangedRunnable(this);
+    Boolean tmp = FALSE;
+    Post(r, &tmp);
+    return NOERROR;
+}
+
 ECode SignalClusterView::SetWifiIndicators(
     /* [in] */ Boolean visible,
     /* [in] */ Int32 strengthIcon,
-    /* [in] */ Int32 activityIcon,
     /* [in] */ const String& contentDescription)
 {
     mWifiVisible = visible;
     mWifiStrengthId = strengthIcon;
-    mWifiActivityId = activityIcon;
     mWifiDescription = contentDescription;
 
     Apply();
     return NOERROR;
 }
 
-//@Override
 ECode SignalClusterView::SetMobileDataIndicators(
     /* [in] */ Boolean visible,
     /* [in] */ Int32 strengthIcon,
-    /* [in] */ Int32 activityIcon,
     /* [in] */ Int32 typeIcon,
     /* [in] */ const String& contentDescription,
-    /* [in] */ const String& typeContentDescription)
+    /* [in] */ const String& typeContentDescription,
+    /* [in] */ Boolean roaming,
+    /* [in] */ Boolean isTypeIconWide)
 {
     mMobileVisible = visible;
     mMobileStrengthId = strengthIcon;
-    mMobileActivityId = activityIcon;
     mMobileTypeId = typeIcon;
     mMobileDescription = contentDescription;
     mMobileTypeDescription = typeContentDescription;
+    mRoaming = roaming;
+    mIsMobileTypeIconWide = isTypeIconWide;
 
     Apply();
     return NOERROR;
 }
 
-//@Override
-ECode SignalClusterView::SetEthernetIndicators(
-    /* [in] */ Boolean visible,
-    /* [in] */ Int32 strengthIcon,
-    /* [in] */ Int32 activityIcon,
-    /* [in] */ const String& contentDescription)
-{
-    mEthernetVisible = visible;
-    mEthernetStateId = strengthIcon;
-    mEthernetActivityId = activityIcon;
-    mEthernetDescription = contentDescription;
-
-    Apply();
-    return NOERROR;
-}
-
-//@Override
 ECode SignalClusterView::SetIsAirplaneMode(
     /* [in] */ Boolean is,
     /* [in] */ Int32 airplaneIcon)
@@ -222,106 +208,126 @@ ECode SignalClusterView::SetIsAirplaneMode(
     return NOERROR;
 }
 
-//@Override
-Boolean SignalClusterView::DispatchPopulateAccessibilityEvent(
-    /* [in] */ IAccessibilityEvent* event)
+ECode SignalClusterView::DispatchPopulateAccessibilityEvent(
+    /* [in] */ IAccessibilityEvent* event,
+    /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result);
     assert(event != NULL);
-    AutoPtr<IObjectContainer> container;
-    event->GetText((IObjectContainer**)&container);
+    AutoPtr<IList> container;
+    IAccessibilityRecord::Probe(event)->GetText((IList**)&container);
     // Standard group layout onPopulateAccessibilityEvent() implementations
     // ignore content description, so populate manually
-    if (mWifiVisible) {
+    if (mWifiVisible && mWifiGroup != NULL) {
         AutoPtr<ICharSequence> seq;
-        mWifiGroup->GetContentDescription((ICharSequence**)&seq);
+        IView::Probe(mWifiGroup)->GetContentDescription((ICharSequence**)&seq);
         if (seq != NULL) {
-            container->Add(seq->Probe(EIID_IInterface));
+            container->Add(seq);
         }
     }
 
-    if (mMobileVisible) {
+    if (mMobileVisible && mMobileGroup != NULL) {
         AutoPtr<ICharSequence> seq;
-        mMobileGroup->GetContentDescription((ICharSequence**)&seq);
+        IView::Probe(mMobileGroup)->GetContentDescription((ICharSequence**)&seq);
         if (seq != NULL) {
-            container->Add(seq->Probe(EIID_IInterface));
+            container->Add(seq);
         }
     }
 
-    return LinearLayout::DispatchPopulateAccessibilityEvent(event);
+    return LinearLayout::DispatchPopulateAccessibilityEvent(event, result);
 }
 
+ECode SignalClusterView::OnRtlPropertiesChanged(
+    /* [in] */ Int32 layoutDirection)
+{
+    LinearLayout::OnRtlPropertiesChanged(layoutDirection);
 
-// Run after each indicator change.
+    if (mWifi != NULL) {
+        mWifi->SetImageDrawable(NULL);
+    }
+
+    if (mMobile != NULL) {
+        mMobile->SetImageDrawable(NULL);
+    }
+
+    if (mMobileType != NULL) {
+        mMobileType->SetImageDrawable(NULL);
+    }
+
+    if(mAirplane != NULL) {
+        mAirplane->SetImageDrawable(NULL);
+    }
+
+    Apply();
+    return NOERROR;
+}
+
+ECode SignalClusterView::HasOverlappingRendering(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+    return NOERROR;
+}
+
 void SignalClusterView::Apply()
 {
     if (mWifiGroup == NULL) return;
-
+    IView::Probe(mVpn)->SetVisibility(mVpnVisible ? IView::VISIBLE : IView::GONE);
+    if (DEBUG) Logger::D(TAG, "vpn: %s", (mVpnVisible ? "VISIBLE" : "GONE"));
     if (mWifiVisible) {
-        mWifiGroup->SetVisibility(IView::VISIBLE);
         mWifi->SetImageResource(mWifiStrengthId);
-        mWifiActivity->SetImageResource(mWifiActivityId);
-
-        // AutoPtr<ICharSequence> seq;
-        // CString::New(mWifiDescription, (ICharSequence**)&seq);
-        // mWifiGroup->SetContentDescription(seq);
+        AutoPtr<ICharSequence> des;
+        CString::New(mWifiDescription, (ICharSequence**)&des);
+        IView::Probe(mWifiGroup)->SetContentDescription(des);
+        IView::Probe(mWifiGroup)->SetVisibility(IView::VISIBLE);
     }
     else {
-        mWifiGroup->SetVisibility(IView::GONE);
+        IView::Probe(mWifiGroup)->SetVisibility(IView::GONE);
     }
 
-    if (mEthernetVisible) {
-        AutoPtr<ICharSequence> seq;
-        CString::New(mEthernetDescription, (ICharSequence**)&seq);
-        mEthernetGroup->SetVisibility(IView::VISIBLE);
-        mEthernet->SetImageResource(mEthernetStateId);
-        mEthernetGroup->SetContentDescription(seq);
+    if (DEBUG) Logger::D(TAG, "wifi: %s sig=%d", (mWifiVisible ? "VISIBLE" : "GONE"), mWifiStrengthId);
+
+    if (mMobileVisible && !mIsAirplaneMode) {
+        mMobile->SetImageResource(mMobileStrengthId);
+        mMobileType->SetImageResource(mMobileTypeId);
+        AutoPtr<ICharSequence> des;
+        CString::New(mMobileTypeDescription + " " + mMobileDescription, (ICharSequence**)&des);
+        IView::Probe(mMobileGroup)->SetContentDescription(des);
+        IView::Probe(mMobileGroup)->SetVisibility(IView::VISIBLE);
     } else {
-        mEthernetGroup->SetVisibility(IView::GONE);
+        IView::Probe(mMobileGroup)->SetVisibility(IView::GONE);
     }
 
-    // if (DEBUG) Slog.d(TAG,
-    //         String.format("wifi: %s sig=%d act=%d",
-    //             (mWifiVisible ? "VISIBLE" : "GONE"),
-    //             mWifiStrengthId, mWifiActivityId));
-
-    // if (mMobileVisible && !mIsAirplaneMode) {
-    //     mMobileGroup->SetVisibility(IView::VISIBLE);
-    //     mMobile->SetImageResource(mMobileStrengthId);
-    //     mMobileActivity->SetImageResource(mMobileActivityId);
-    //     mMobileType->SetImageResource(mMobileTypeId);
-    //     StringBuilder sb(mMobileTypeDescription);
-    //     sb += " ";
-    //     sb += mMobileDescription;
-    //     AutoPtr<ICharSequence> seq = sb.ToCharSequence();
-    //     mMobileGroup->SetContentDescription(seq);
-    // }
-    // else {
-    //     mMobileGroup->SetVisibility(IView::GONE);
-    // }
-
-    // if (mIsAirplaneMode) {
-    //    // mAirplane->SetVisibility(IView::VISIBLE);
-    //    // mAirplane->SetImageResource(mAirplaneIconId);
-    // } else {
-    //     // mAirplane->SetVisibility(IView::GONE);
-    // }
-
-    if (mMobileVisible && (mWifiVisible || mEthernetVisible) && mIsAirplaneMode) {
-        mSpacer->SetVisibility(IView::INVISIBLE);
+    if (mIsAirplaneMode) {
+        mAirplane->SetImageResource(mAirplaneIconId);
+        IView::Probe(mAirplane)->SetVisibility(IView::VISIBLE);
     } else {
-        mSpacer->SetVisibility(IView::GONE);
+        IView::Probe(mAirplane)->SetVisibility(IView::GONE);
     }
 
-    // if (DEBUG) Slog.d(TAG,
-    //         String.format("mobile: %s sig=%d act=%d typ=%d",
-    //             (mMobileVisible ? "VISIBLE" : "GONE"),
-    //             mMobileStrengthId, mMobileActivityId, mMobileTypeId));
+    if (mIsAirplaneMode && mWifiVisible) {
+        mWifiAirplaneSpacer->SetVisibility(IView::VISIBLE);
+    } else {
+        mWifiAirplaneSpacer->SetVisibility(IView::GONE);
+    }
 
-    mMobileType->SetVisibility(
-            !(mWifiVisible || mEthernetVisible) ? IView::VISIBLE : IView::GONE);
+    if (mRoaming && mMobileVisible && mWifiVisible) {
+        mWifiSignalSpacer->SetVisibility(IView::VISIBLE);
+    } else {
+        mWifiSignalSpacer->SetVisibility(IView::GONE);
+    }
+
+    IView::Probe(mMobile)->SetPaddingRelative(mIsMobileTypeIconWide ? mWideTypeIconStartPadding : 0, 0, 0, 0);
+
+    if (DEBUG) Logger::D(TAG, "mobile: %s sig=%d typ=%d", (mMobileVisible ? "VISIBLE" : "GONE"),
+                mMobileStrengthId, mMobileTypeId);
+
+    IView::Probe(mMobileType)->SetVisibility((mRoaming || mMobileTypeId != 0) ? IView::VISIBLE : IView::GONE);
 }
 
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos

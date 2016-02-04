@@ -612,7 +612,7 @@ ECode CAppWidgetService::Dump(
         //IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         HashMap<Int32, AutoPtr<AppWidgetServiceImpl> >::Iterator iter = mAppWidgetServices.Begin();
         for(;iter != mAppWidgetServices.End(); ++iter) {
-            pw->PrintStringln(String("User: ") + StringUtils::Int32ToString(iter->mFirst));
+            pw->Println(String("User: ") + StringUtils::Int32ToString(iter->mFirst));
             AutoPtr<AppWidgetServiceImpl> service = iter->mSecond;
             service->Dump(fd, pw, args);
         }

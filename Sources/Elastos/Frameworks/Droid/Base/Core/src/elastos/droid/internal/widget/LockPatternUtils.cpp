@@ -45,8 +45,8 @@ using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::SystemProperties;
-using Elastos::Droid::Os::Storage::EIID_IMountService;
-using Elastos::Droid::Os::Storage::IMountService;
+using Elastos::Droid::Os::Storage::EIID_IIMountService;
+using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Os::Storage::IStorageManager;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::Binder;
@@ -92,7 +92,7 @@ ECode LockPatternUtils::LockAsyncTask::DoInBackground(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<IMountService> mountService = IMountService::Probe(mService);
+    AutoPtr<IIMountService> mountService = IIMountService::Probe(mService);
     Int32 value = 0;
     if (FAILED(mountService->ChangeEncryptionPassword(mType, mPassword, &value))) {
         Slogger::E(LockPatternUtils::TAG, "Error changing encryption password");
@@ -639,7 +639,7 @@ void LockPatternUtils::UpdateCryptoUserInfo()
         return;
     }
 
-    AutoPtr<IMountService> mountService = IMountService::Probe(service);
+    AutoPtr<IIMountService> mountService = IIMountService::Probe(service);
     Slogger::D(TAG, "Setting owner info");
     if (FAILED(mountService->SetField(IStorageManager::OWNER_INFO_KEY, ownerInfo))) {
         Slogger::E(TAG, "Error changing user info");
@@ -917,7 +917,7 @@ ECode LockPatternUtils::SaveLockPassword(
 
 Boolean LockPatternUtils::IsDeviceEncrypted()
 {
-    AutoPtr<IMountService> mountService = IMountService::Probe(
+    AutoPtr<IIMountService> mountService = IIMountService::Probe(
             ServiceManager::GetService(String("mount")));
 
     Int32 state = 0, type = 0;
@@ -930,7 +930,7 @@ Boolean LockPatternUtils::IsDeviceEncrypted()
         return TRUE;
     }
 
-    return state != IMountService::ENCRYPTION_STATE_NONE
+    return state != IIMountService::ENCRYPTION_STATE_NONE
             && type != IStorageManager::CRYPT_TYPE_DEFAULT;
 }
 
@@ -1267,7 +1267,7 @@ ECode LockPatternUtils::SetVisiblePatternEnabled(
         return NOERROR;
     }
 
-    AutoPtr<IMountService> mountService = IMountService::Probe(service);
+    AutoPtr<IIMountService> mountService = IIMountService::Probe(service);
     if (FAILED(mountService->SetField(IStorageManager::PATTERN_VISIBLE_KEY, enabled ? String("1") : String("0")))) {
         Slogger::E(TAG, "Error changing pattern visible state");
     }

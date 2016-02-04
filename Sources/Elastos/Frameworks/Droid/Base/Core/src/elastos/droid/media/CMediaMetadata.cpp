@@ -21,23 +21,7 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
-CAR_INTERFACE_IMPL_2(CMediaMetadata, Object, IMediaMetadata, IParcelable)
-
-CAR_OBJECT_IMPL(CMediaMetadata)
-
-String CMediaMetadata::TAG("MediaMetadata");
-const Int32 CMediaMetadata::METADATA_TYPE_INVALID = -1;
-const Int32 CMediaMetadata::METADATA_TYPE_LONG = 0;
-const Int32 CMediaMetadata::METADATA_TYPE_TEXT = 1;
-const Int32 CMediaMetadata::METADATA_TYPE_BITMAP = 2;
-const Int32 CMediaMetadata::METADATA_TYPE_RATING = 3;
-AutoPtr<IArrayMap> CMediaMetadata::METADATA_KEYS_TYPE;
-AutoPtr<ISparseArray> CMediaMetadata::EDITOR_KEY_MAPPING;
-AutoPtr<ArrayOf<String> > CMediaMetadata::PREFERRED_DESCRIPTION_ORDER;
-AutoPtr<ArrayOf<String> > CMediaMetadata::PREFERRED_BITMAP_ORDER;
-AutoPtr<ArrayOf<String> > CMediaMetadata::PREFERRED_URI_ORDER;
-
-Boolean CMediaMetadata::InitStatic()
+CMediaMetadata::StaticInitializer::StaticInitializer()
 {
     PREFERRED_DESCRIPTION_ORDER = ArrayOf<String>::Alloc(7);
     PREFERRED_DESCRIPTION_ORDER->Set(0, METADATA_KEY_TITLE);
@@ -244,11 +228,24 @@ Boolean CMediaMetadata::InitStatic()
     cs = NULL;
     CString::New(METADATA_KEY_YEAR, (ICharSequence**)&cs);
     EDITOR_KEY_MAPPING->Put(IMediaMetadataRetriever::METADATA_KEY_YEAR, cs);
-
-    return TRUE;
 }
 
-Boolean CMediaMetadata::mInit = InitStatic();
+CAR_INTERFACE_IMPL_2(CMediaMetadata, Object, IMediaMetadata, IParcelable)
+
+CAR_OBJECT_IMPL(CMediaMetadata)
+
+String CMediaMetadata::TAG("MediaMetadata");
+const Int32 CMediaMetadata::METADATA_TYPE_INVALID = -1;
+const Int32 CMediaMetadata::METADATA_TYPE_LONG = 0;
+const Int32 CMediaMetadata::METADATA_TYPE_TEXT = 1;
+const Int32 CMediaMetadata::METADATA_TYPE_BITMAP = 2;
+const Int32 CMediaMetadata::METADATA_TYPE_RATING = 3;
+INIT_PROI_4 AutoPtr<ArrayOf<String> > CMediaMetadata::PREFERRED_DESCRIPTION_ORDER;
+INIT_PROI_4 AutoPtr<ArrayOf<String> > CMediaMetadata::PREFERRED_BITMAP_ORDER;
+INIT_PROI_4 AutoPtr<ArrayOf<String> > CMediaMetadata::PREFERRED_URI_ORDER;
+INIT_PROI_4 AutoPtr<IArrayMap> CMediaMetadata::METADATA_KEYS_TYPE;
+INIT_PROI_4 AutoPtr<ISparseArray> CMediaMetadata::EDITOR_KEY_MAPPING;
+INIT_PROI_4 const CMediaMetadata::StaticInitializer CMediaMetadata::sInitializer;
 
 CMediaMetadata::CMediaMetadata()
 {

@@ -9,10 +9,16 @@ namespace Pm {
 
 CAR_INTERFACE_IMPL_2(KeySet, Object, IKeySet, IParcelable)
 
-KeySet::KeySet(
+ECode KeySet::constructor(
     /* [in] */ IBinder* token)
-    : mToken(token)
 {
+    mToken = token;
+    return NOERROR;
+}
+
+ECode KeySet::constructor()
+{
+    return NOERROR;
 }
 
 KeySet::~KeySet()

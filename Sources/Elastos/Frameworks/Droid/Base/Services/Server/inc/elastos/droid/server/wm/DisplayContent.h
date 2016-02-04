@@ -1,9 +1,9 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_DISPLAYCONTENT_H__
 #define __ELASTOS_DROID_SERVER_WM_DISPLAYCONTENT_H__
 
-#include "wm/MagnificationSpec.h"
-#include "wm/WindowState.h"
-#include "wm/StackTapPointerEventListener.h"
+#include "_Elastos.Droid.Server.h"
+#include "elastos/droid/server/wm/WindowState.h"
+#include "elastos/droid/server/wm/StackTapPointerEventListener.h"
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Utility::Etl::List;
@@ -18,6 +18,9 @@ namespace Droid {
 namespace Server {
 namespace Wm {
 
+class TaskStack;
+class Task;
+
 /**
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
  * particular Display.
@@ -28,6 +31,7 @@ namespace Wm {
 class DisplayContent : public Object
 {
 public:
+    typedef List<AutoPtr<WindowState> > WindowList;
     /**
      * @param display May not be null.
      */
@@ -116,12 +120,6 @@ public:
         /* [out] */ String* str);
 
 public:
-    // Specification for magnifying the display content.
-    AutoPtr<MagnificationSpec> mMagnificationSpec;
-
-    // Callback for observing content changes on a display.
-    AutoPtr<IRemoteCallbackList> mDisplayContentChangeListeners;
-
     // This protects the following display size properties, so that
     // getDisplaySize() doesn't need to acquire the global lock.  This is
     // needed because the window manager sometimes needs to use ActivityThread

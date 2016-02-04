@@ -555,7 +555,7 @@ ECode CInterfaceProxy::ProxyEntry_RPC(
     AutoPtr<DataBuffer> dataBuf, replyBuf;
     ECode ec, orgec;
 #ifndef _mips
-    UInt32 argNum;
+    UInt32 argNum __attribute__((__unused__));
 #endif
 
 

@@ -131,6 +131,10 @@ public:
 
     CARAPI_(AutoPtr<IUriPermission>) BuildPersistedPublicApiObject();
 
+    static CARAPI_(Int32) PersistedTimeCompare(
+        /* [in] */ UriPermission* lhs,
+        /* [in] */ UriPermission* rhs);
+
 private:
     CARAPI_(void) UpdateModeFlags();
 

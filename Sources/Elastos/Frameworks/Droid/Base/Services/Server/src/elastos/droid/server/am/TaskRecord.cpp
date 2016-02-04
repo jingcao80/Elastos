@@ -377,7 +377,6 @@ void TaskRecord::SetIntent(
     uhHelper->GetUserId(uid, &mUserId);
     Int32 flags;
     info->GetFlags(&flags);
-    assert(0);
     if ((flags & IActivityInfo::FLAG_AUTO_REMOVE_FROM_RECENTS) != 0) {
         // If the activity itself has requested auto-remove, then just always do it.
         mAutoRemoveRecents = TRUE;
@@ -490,8 +489,7 @@ Boolean TaskRecord::SetLastThumbnail(
             }
         }
         else {
-            assert(0);
-            // mService->mTaskPersister->SaveImage(thumbnail, mFilename);
+            mService->mTaskPersister->SaveImage(thumbnail, mFilename);
         }
         return TRUE;
     }
@@ -504,8 +502,7 @@ void TaskRecord::GetLastThumbnail(
     thumbs->SetMainThumbnail(mLastThumbnail);
     thumbs->SetThumbnailFileDescriptor(NULL);
     if (mLastThumbnail == NULL) {
-        assert(0);
-        // thumbs->SetMainThumbnail(mService->mTaskPersister->GetImageFromWriteQueue(mFilename));
+        thumbs->SetMainThumbnail(mService->mTaskPersister->GetImageFromWriteQueue(mFilename));
     }
     // Only load the thumbnail file if we don't have a thumbnail
     AutoPtr<IBitmap> mainThumbnail;
@@ -571,8 +568,7 @@ AutoPtr<ActivityRecord> TaskRecord::TopRunningActivityLocked(
     List<AutoPtr<ActivityRecord> >::ReverseIterator riter;
     for (riter = mActivities->RBegin(); riter != mActivities->REnd(); ++riter) {
         ActivityRecord* r = *riter;
-        assert(0);
-        if (!r->mFinishing && r != notTop /*&& mStack->OkToShowLocked(r)*/) {
+        if (!r->mFinishing && r != notTop && mStack->OkToShowLocked(r)) {
             return r;
         }
     }
@@ -673,8 +669,7 @@ void TaskRecord::AddActivityAtIndex(
     mActivities->Insert(it, r);
     UpdateEffectiveIntent();
     if (r->IsPersistable()) {
-        assert(0);
-        // mService->NotifyTaskPersisterLocked(this, FALSE);
+        mService->NotifyTaskPersisterLocked(this, FALSE);
     }
 }
 
@@ -694,8 +689,7 @@ Boolean TaskRecord::RemoveActivity(
         mNumFullscreen--;
     }
     if (r->IsPersistable()) {
-        assert(0);
-        // mService->NotifyTaskPersisterLocked(this, FALSE);
+        mService->NotifyTaskPersisterLocked(this, FALSE);
     }
     if (mActivities->IsEmpty()) {
         return !mReuseTask;
@@ -727,16 +721,15 @@ void TaskRecord::PerformClearTaskAtIndexLocked(
 
         List<AutoPtr<ActivityRecord> >::Iterator nextIter = iter;
         ++nextIter;
-        assert(0);
         if (mStack == NULL) {
             // Task was restored from persistent storage.
             r->TakeFromHistory();
             iter = mActivities->Erase(iter);
         }
-        // else if (mStack->FinishActivityLocked(r, IActivity::RESULT_CANCELED, NULL, String("clear"),
-        //         FALSE)) {
-        //     iter = nextIter;
-        // }
+        else if (mStack->FinishActivityLocked(r, IActivity::RESULT_CANCELED, NULL, String("clear"),
+                FALSE)) {
+            iter = nextIter;
+        }
         else
             ++iter;
     }
@@ -779,12 +772,11 @@ AutoPtr<ActivityRecord> TaskRecord::PerformClearTaskLocked(
                 }
                 List<AutoPtr<ActivityRecord> >::Iterator nextIter = iter;
                 ++nextIter;
-                assert(0);
-                // if (mStack->FinishActivityLocked(r, IActivity::RESULT_CANCELED,
-                //     NULL, String("clear"), FALSE)) {
-                //     iter = nextIter;
-                // }
-                // else
+                if (mStack->FinishActivityLocked(r, IActivity::RESULT_CANCELED,
+                    NULL, String("clear"), FALSE)) {
+                    iter = nextIter;
+                }
+                else
                     ++iter;
             }
 
@@ -794,9 +786,8 @@ AutoPtr<ActivityRecord> TaskRecord::PerformClearTaskLocked(
             if (ret->mLaunchMode == IActivityInfo::LAUNCH_MULTIPLE
                     && (launchFlags & IIntent::FLAG_ACTIVITY_SINGLE_TOP) == 0) {
                 if (!ret->mFinishing) {
-                    assert(0);
-                    // mStack->FinishActivityLocked(ret, IActivity::RESULT_CANCELED, NULL,
-                    //         String("clear"), FALSE);
+                    mStack->FinishActivityLocked(ret, IActivity::RESULT_CANCELED, NULL,
+                            String("clear"), FALSE);
                     return NULL;
                 }
             }
@@ -811,12 +802,11 @@ AutoPtr<ActivityRecord> TaskRecord::PerformClearTaskLocked(
 AutoPtr<IActivityManagerTaskThumbnail> TaskRecord::GetTaskThumbnailLocked()
 {
     if (mStack != NULL) {
-        assert(0);
-        // AutoPtr<ActivityRecord> resumedActivity = mStack->mResumedActivity;
-        // if (resumedActivity != NULL && resumedActivity->mTask.Get() == this) {
-        //     AutoPtr<IBitmap> thumbnail = mStack->ScreenshotActivities(resumedActivity);
-        //     SetLastThumbnail(thumbnail);
-        // }
+        AutoPtr<ActivityRecord> resumedActivity = mStack->mResumedActivity;
+        if (resumedActivity != NULL && resumedActivity->mTask.Get() == this) {
+            AutoPtr<IBitmap> thumbnail = mStack->ScreenshotActivities(resumedActivity);
+            SetLastThumbnail(thumbnail);
+        }
     }
     AutoPtr<IActivityManagerTaskThumbnail> taskThumbnail;
     CActivityManagerTaskThumbnail::New((IActivityManagerTaskThumbnail**)&taskThumbnail);
@@ -926,7 +916,6 @@ void TaskRecord::UpdateTaskDescription()
 Int32 TaskRecord::FindEffectiveRootIndex()
 {
     Int32 effectiveNdx = 0;
-    Int32 topActivityNdx = mActivities->GetSize() - 1;
     List<AutoPtr<ActivityRecord> >::ReverseIterator riter;
     for (riter = mActivities->RBegin(); riter != mActivities->REnd(); ++riter, ++effectiveNdx) {
         AutoPtr<ActivityRecord> r = *riter;

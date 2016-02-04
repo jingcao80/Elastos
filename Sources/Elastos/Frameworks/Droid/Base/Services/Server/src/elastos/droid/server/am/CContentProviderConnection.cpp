@@ -90,8 +90,7 @@ void CContentProviderConnection::ToClientString(
         return;
 
     if (mClient != NULL) {
-        assert(0);
-        // *sb += (mClient->ToShortString());
+        *sb += (mClient->ToShortString());
     }
     *sb += (" s");
     *sb += (mStableCount);

@@ -1,12 +1,20 @@
 
-#include "BluetoothServerSocket.h"
+#include "elastos/droid/bluetooth/BluetoothServerSocket.h"
+#include "elastos/core/AutoLock.h"
 
-using Elastos::IO::EIID_ICloseable;
 using Elastos::Droid::Os::IMessage;
+using Elastos::IO::EIID_ICloseable;
+using Elastos::Core::AutoLock;
 
 namespace Elastos {
 namespace Droid {
 namespace Bluetooth {
+
+CAR_INTERFACE_IMPL_2(BluetoothServerSocket, Object, IBluetoothServerSocket, ICloseable);
+
+BluetoothServerSocket::BluetoothServerSocket()
+{
+}
 
 BluetoothServerSocket::BluetoothServerSocket(
     /* [in] */ Int32 type,
@@ -29,8 +37,6 @@ BluetoothServerSocket::BluetoothServerSocket(
     mSocket = new BluetoothSocket(type, -1, auth, encrypt, NULL, -1, uuid);
     mChannel = mSocket->GetPort();
 }
-
-CAR_INTERFACE_IMPL_2(BluetoothServerSocket, IBluetoothServerSocket, ICloseable)
 
 ECode BluetoothServerSocket::Accept(
     /* [out] */ IBluetoothSocket** socket)

@@ -27,6 +27,13 @@ CarClass(CBigDecimal)
     , public INumber
     , public IComparable
 {
+private:
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
+    };
+
 public:
     CBigDecimal();
 
@@ -1195,25 +1202,7 @@ public:
     CARAPI GetHashCode(
         /* [out] */ Int32* hashCode);
 
-public:
-    /**
-     * The constant zero as a {@code BigDecimal}.
-     */
-    static AutoPtr<IBigDecimal> ZERO;
-
-    /**
-     * The constant one as a {@code BigDecimal}.
-     */
-    static AutoPtr<IBigDecimal> ONE;
-
-    /**
-     * The constant ten as a {@code BigDecimal}.
-     */
-    static AutoPtr<IBigDecimal> TEN;
-
 private:
-    static Boolean InitStatic();
-
     static Int32 BitLength(
         /* [in] */ Int32 smallValue);
 
@@ -1341,10 +1330,25 @@ private:
         /* [in] */ Int32 bitLengthOfType,
         /* [out] */ Int64* result);
 
+    static CARAPI_(AutoPtr< ArrayOf<Int64> >) INIT_LONG_FIVE_POW();
+
+public:
+    /**
+     * The constant zero as a {@code BigDecimal}.
+     */
+    static AutoPtr<IBigDecimal> ZERO;
+
+    /**
+     * The constant one as a {@code BigDecimal}.
+     */
+    static AutoPtr<IBigDecimal> ONE;
+
+    /**
+     * The constant ten as a {@code BigDecimal}.
+     */
+    static AutoPtr<IBigDecimal> TEN;
+
 private:
-
-    static Boolean mIsStaticInited;
-
     /** The double closest to {@code Log10(2)}. */
     static const Double Log10_2;
 
@@ -1355,37 +1359,35 @@ private:
      * An array with powers of five that fit in the type <code>long</code>
      * (<code>5^0,5^1,...,5^27</code>).
      */
-    static AutoPtr<ArrayOf<IBigInteger*> > FivePow;
+    static AutoPtr< ArrayOf<IBigInteger*> > FIVE_POW;
 
     /**
      * An array with powers of ten that fit in the type <code>long</code>
      * (<code>10^0,10^1,...,10^18</code>).
      */
-    static AutoPtr<ArrayOf<IBigInteger*> > TenPow;
+    static AutoPtr< ArrayOf<IBigInteger*> > TEN_POW;
 
-    static const Int32 LongFivePowLength = 28;
-    static const Int64 LongFivePow[LongFivePowLength];
-    static Int32 LongFivePowBitLength[LongFivePowLength];
+    static const AutoPtr< ArrayOf<Int64> > LONG_FIVE_POW;
+    static const AutoPtr< ArrayOf<Int32> > LONG_FIVE_POW_BIT_LENGTH;
 
-    // see Elastos::Core::Math::LongPowersOfTenLength;
-    static Int32 LongPowsersOfTenBitLength[19];
+    static const AutoPtr< ArrayOf<Int32> > LONG_POWERS_OF_TEN_BIT_LENGTH;
+
+    static const Int32 BI_SCALED_BY_ZERO_LENGTH = 11;
 
     /**
      * An array with the first <code>BigInteger</code> scaled by zero.
      * (<code>[0,0],[1,0],...,[10,0]</code>).
      */
-    static const Int32 BiScaledByZeroLength = 11;
-    static AutoPtr<ArrayOf<IBigDecimal*> > BiScaledByZero;
+    static AutoPtr< ArrayOf<IBigDecimal*> > BI_SCALED_BY_ZERO;
 
     /**
      * An array with the zero number scaled by the first positive scales.
      * (<code>0*10^0, 0*10^1, ..., 0*10^10</code>).
      */
-    static AutoPtr<ArrayOf<IBigDecimal*> > ZeroScaledBy;
+    static AutoPtr< ArrayOf<IBigDecimal*> > ZERO_SCALED_BY;
 
     /** An array filled with characters <code>'0'</code>. */
-    static const Int32 CharZerosLength = 100;
-    static AutoPtr<ArrayOf<Char32> > CharZeros;
+    static AutoPtr< ArrayOf<Char32> > CH_ZEROS;
 
     /**
      * The arbitrary precision integer (unscaled value) in the internal
@@ -1414,6 +1416,7 @@ private:
 
     /** Cache for the hash code. */
     Int32 mHashCode;
+    static StaticInitializer sInitializer;
 };
 
 } // namespace Math

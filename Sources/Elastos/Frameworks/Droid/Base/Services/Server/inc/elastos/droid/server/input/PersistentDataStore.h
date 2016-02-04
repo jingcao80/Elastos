@@ -1,49 +1,47 @@
+#ifndef __ELASTOS_DROID_Server_Input_PersistentDataStore_H__
+#define __ELASTOS_DROID_Server_Input_PersistentDataStore_H__
 
-#ifndef __ELASTOS_DROID_SERVER_INPUT_INPUT_PERSISTENTDATASTORE_H__
-#define __ELASTOS_DROID_SERVER_INPUT_INPUT_PERSISTENTDATASTORE_H__
-
-#include "elastos/droid/ext/frameworkext.h"
-#include <elastos/utility/etl/List.h>
-#include <elastos/utility/etl/HashSet.h>
+#include "_Elastos.Droid.Server.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Utility::Etl::List;
-using Elastos::Utility::Etl::HashSet;
+using Elastos::Droid::Hardware::Input::ITouchCalibration;
+using Elastos::Droid::Utility::IAtomicFile;
 using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::ISet;
 using Org::Xmlpull::V1::IXmlPullParser;
 using Org::Xmlpull::V1::IXmlSerializer;
-using Elastos::Droid::Utility::IAtomicFile;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Input {
 
-/**
- * Manages persistent state recorded by the input manager service as an XML file.
- * Caller must acquire lock on the data store before accessing it.
- *
- * File format:
- * <code>
- * &lt;input-mananger-state>
- *   &lt;input-devices>
- *     &lt;input-device descriptor="xxxxx" keyboard-layout="yyyyy" />
- *   &gt;input-devices>
- * &gt;/input-manager-state>
- * </code>
- */
-class PersistentDataStore : public ElRefBase
+class PersistentDataStore
+    : public Object
 {
 private:
-    class InputDeviceState : public ElRefBase
+    class InputDeviceState
+        : public Object
     {
     public:
+        InputDeviceState();
+
+        CARAPI_(AutoPtr<ITouchCalibration>) GetTouchCalibration(
+            /* [in] */ Int32 surfaceRotation);
+
+        CARAPI_(Boolean) SetTouchCalibration(
+            /* [in] */ Int32 surfaceRotation,
+            /* [in] */ ITouchCalibration* calibration);
+
         CARAPI_(String) GetCurrentKeyboardLayout();
 
         CARAPI_(Boolean) SetCurrentKeyboardLayout(
             /* [in] */ const String& keyboardLayout);
 
-        CARAPI_(AutoPtr<ArrayOf<String> >) GetKeyboardLayouts();
+        CARAPI_(AutoPtr< ArrayOf<String> >) GetKeyboardLayouts();
 
         CARAPI_(Boolean) AddKeyboardLayout(
             /* [in] */ const String& keyboardLayout);
@@ -51,32 +49,56 @@ private:
         CARAPI_(Boolean) RemoveKeyboardLayout(
             /* [in] */ const String& keyboardLayout);
 
+        CARAPI_(void) UpdateCurrentKeyboardLayoutIfRemoved(
+            /* [in] */ const String& removedKeyboardLayout,
+            /* [in] */ Int32 removedIndex);
+
         CARAPI_(Boolean) SwitchKeyboardLayout(
             /* [in] */ Int32 direction);
 
         CARAPI_(Boolean) RemoveUninstalledKeyboardLayouts(
-            /* [in] */ const HashSet<String>& availableKeyboardLayouts);
+            /* [in] */ ISet* availableKeyboardLayouts);
 
+        // throws IOException, XmlPullParserException
         CARAPI LoadFromXml(
             /* [in] */ IXmlPullParser* parser);
 
+        // throws IOException
         CARAPI SaveToXml(
             /* [in] */ IXmlSerializer* serializer);
 
     private:
-        CARAPI_(void) UpdateCurrentKeyboardLayoutIfRemoved(
-            /* [in] */ const String& removedKeyboardLayout,
-            /* [in] */ List<String>::Iterator removedIter);
+        static CARAPI SurfaceRotationToString(
+            /* [in] */ Int32 surfaceRotation,
+            /* [in] */ String* str);
+
+        static CARAPI StringToSurfaceRotation(
+            /* [in] */ const String& str,
+            /* [in] */ Int32* r);
+
+        static CARAPI_(AutoPtr<ArrayOf<String> >) INIT_CALIBRATION_NAME();
 
     private:
+        static const AutoPtr<ArrayOf<String> > CALIBRATION_NAME;
+
+        AutoPtr<ArrayOf<ITouchCalibration*> > mTouchCalibration;
         String mCurrentKeyboardLayout;
-        List<String> mKeyboardLayouts;
+        AutoPtr<IArrayList> mKeyboardLayouts;
     };
 
 public:
     PersistentDataStore();
 
     CARAPI_(void) SaveIfNeeded();
+
+    CARAPI_(AutoPtr<ITouchCalibration>) GetTouchCalibration(
+        /* [in] */ const String& inputDeviceDescriptor,
+        /* [in] */ Int32 surfaceRotation);
+
+    CARAPI_(Boolean) SetTouchCalibration(
+        /* [in] */ const String& inputDeviceDescriptor,
+        /* [in] */ Int32 surfaceRotation,
+        /* [in] */ ITouchCalibration* calibration);
 
     CARAPI_(String) GetCurrentKeyboardLayout(
         /* [in] */ const String& inputDeviceDescriptor);
@@ -85,7 +107,7 @@ public:
         /* [in] */ const String& inputDeviceDescriptor,
         /* [in] */ const String& keyboardLayoutDescriptor);
 
-    CARAPI_(AutoPtr<ArrayOf<String> >) GetKeyboardLayouts(
+    CARAPI_(AutoPtr< ArrayOf<String> >) GetKeyboardLayouts(
         /* [in] */ const String& inputDeviceDescriptor);
 
     CARAPI_(Boolean) AddKeyboardLayout(
@@ -101,7 +123,7 @@ public:
         /* [in] */ Int32 direction);
 
     CARAPI_(Boolean) RemoveUninstalledKeyboardLayouts(
-        /* [in] */ const HashSet<String>& availableKeyboardLayouts);
+        /* [in] */ ISet* availableKeyboardLayouts);
 
 private:
     CARAPI_(AutoPtr<InputDeviceState>) GetInputDeviceState(
@@ -118,21 +140,23 @@ private:
 
     CARAPI_(void) Save();
 
+    // throws IOException, XmlPullParserException
     CARAPI LoadFromXml(
         /* [in] */ IXmlPullParser* parser);
 
+    // throws IOException, XmlPullParserException
     CARAPI LoadInputDevicesFromXml(
         /* [in] */ IXmlPullParser* parser);
 
+    //  throws IOException
     CARAPI SaveToXml(
         /* [in] */ IXmlSerializer* serializer);
 
-protected:
-    static const char* TAG;
-
 private:
+    static const String TAG;
+
     // Input device state by descriptor.
-    HashMap<String, AutoPtr<InputDeviceState> > mInputDevices;
+    HashMap< String, AutoPtr<InputDeviceState> > mInputDevices;
     AutoPtr<IAtomicFile> mAtomicFile;
 
     // True if the data has been loaded.
@@ -142,9 +166,11 @@ private:
     Boolean mDirty;
 };
 
-} // namespace Input
-} // namespace Server
-} // namespace Droid
-} // namespace Elastos
+} // Input
+} // Server
+} // Droid
+} // Elastos
 
-#endif //__ELASTOS_DROID_SERVER_INPUT_INPUT_PERSISTENTDATASTORE_H__
+#endif // __ELASTOS_DROID_Server_Input_PersistentDataStore_H__
+
+

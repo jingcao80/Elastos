@@ -1,6 +1,8 @@
 
-#include "wm/ScreenRotationAnimation.h"
-#include "wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/ScreenRotationAnimation.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/DisplayContent.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -9,6 +11,7 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::View::ISurfaceControlHelper;
 using Elastos::Droid::View::CSurfaceControlHelper;
 using Elastos::Droid::View::CSurface;
+using Elastos::Droid::View::CSurfaceControl;
 using Elastos::Droid::View::Animation::CTransformation;
 using Elastos::Droid::View::Animation::CAnimationUtils;
 using Elastos::Droid::View::Animation::IAnimationUtils;
@@ -22,10 +25,10 @@ namespace Server {
 namespace Wm {
 
 const String ScreenRotationAnimation::TAG("ScreenRotationAnimation");
-const Boolean ScreenRotationAnimation::DEBUG_STATE = FALSE;
-const Boolean ScreenRotationAnimation::DEBUG_TRANSFORMS = FALSE;
-const Boolean ScreenRotationAnimation::TWO_PHASE_ANIMATION = FALSE;
-const Boolean ScreenRotationAnimation::USE_CUSTOM_BLACK_FRAME = FALSE;
+const Boolean ScreenRotationAnimation::DEBUG_STATE;
+const Boolean ScreenRotationAnimation::DEBUG_TRANSFORMS;
+const Boolean ScreenRotationAnimation::TWO_PHASE_ANIMATION;
+const Boolean ScreenRotationAnimation::USE_CUSTOM_BLACK_FRAME;
 const Int32 ScreenRotationAnimation::FREEZE_LAYER
         = CWindowManagerService::TYPE_LAYER_MULTIPLIER * 200;
 Int32 ScreenRotationAnimation::mHwrotation = 0;
@@ -38,10 +41,7 @@ ScreenRotationAnimation::ScreenRotationAnimation(
     /* [in] */ Boolean forceDefaultOrientation,
     /* [in] */ Boolean isSecure)
     : mContext(context)
-    , mDisplayContent(mDisplayContent)
-    , mOriginalRotation(originalRotation)
-    , mOriginalWidth(originalWidth)
-    , mOriginalHeight(originalHeight)
+    , mDisplayContent(displayContent)
     , mCurRotation(0)
     , mStarted(FALSE)
     , mAnimRunning(FALSE)
@@ -94,7 +94,8 @@ ScreenRotationAnimation::ScreenRotationAnimation(
 
     // Screenshot does NOT include rotation!
     AutoPtr<IDisplay> display = displayContent->GetDisplay();
-    Int32 originalRotation = display->GetRotation();
+    Int32 originalRotation;
+    display->GetRotation(&originalRotation);
     Int32 originalWidth;
     Int32 originalHeight;
     AutoPtr<IDisplayInfo> displayInfo = displayContent->GetDisplayInfo();
@@ -107,7 +108,7 @@ ScreenRotationAnimation::ScreenRotationAnimation(
     else {
         // Normal situation
         displayInfo->GetLogicalWidth(&originalWidth);
-        displayInfo->GetLOgicalHeight(&originalHeight);
+        displayInfo->GetLogicalHeight(&originalHeight);
     }
     if (originalRotation == ISurface::ROTATION_90
             || originalRotation == ISurface::ROTATION_270) {
@@ -118,6 +119,10 @@ ScreenRotationAnimation::ScreenRotationAnimation(
         mWidth = originalWidth;
         mHeight = originalHeight;
     }
+
+    mOriginalRotation = originalRotation;
+    mOriginalWidth = originalWidth;
+    mOriginalHeight = originalHeight;
 
     AutoPtr<ISurfaceControlHelper> helper;
     CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&helper);
@@ -198,7 +203,7 @@ void ScreenRotationAnimation::SetSnapshotTransformInTransaction(
 {
     if (mSurfaceControl != NULL) {
         matrix->GetValues(mTmpFloats);
-        Float x = (*mTmpFloats([IMatrix::MTRANS_X];
+        Float x = (*mTmpFloats)[IMatrix::MTRANS_X];
         Float y = (*mTmpFloats)[IMatrix::MTRANS_Y];
         if (mForceDefaultOrientation) {
             mDisplayContent->GetLogicalDisplayRect(mCurrentDisplayRect);
@@ -602,7 +607,7 @@ Boolean ScreenRotationAnimation::Dismiss(
 void ScreenRotationAnimation::Kill()
 {
     if (DEBUG_STATE) Slogger::V(TAG, "Kill!");
-    if (mSurface != NULL) {
+    if (mSurfaceControl != NULL) {
         if (CWindowManagerService::SHOW_TRANSACTIONS ||
                 CWindowManagerService::SHOW_SURFACE_ALLOC) {
             Slogger::I(CWindowManagerService::TAG, "  FREEZE %p: DESTROY", mSurfaceControl.Get());
@@ -1002,7 +1007,6 @@ AutoPtr<ITransformation> ScreenRotationAnimation::GetEnterTransformation()
 {
     return mEnterTransformation;
 }
-
 
 } // Wm
 } // Server

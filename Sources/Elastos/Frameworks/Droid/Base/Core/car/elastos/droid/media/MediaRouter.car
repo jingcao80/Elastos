@@ -4,6 +4,7 @@ module
     interface Elastos.Utility.IList;
     interface Elastos.Core.ICharSequence;
     interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Res.IResources;
     interface Elastos.Droid.Hardware.Display.IDisplayListener;
     interface Elastos.Droid.Hardware.Display.IWifiDisplay;
     interface Elastos.Droid.Hardware.Display.IWifiDisplayStatus;
@@ -221,6 +222,10 @@ module
             [in] IContext * context,
             [out] ICharSequence ** result);
 
+        GetName(
+            [in] IResources* res,
+            [out] ICharSequence** result);
+
         /**
          * Gets the user-visible description of the route.
          * <p>
@@ -239,6 +244,21 @@ module
          */
         GetStatus(
             [out] ICharSequence ** result);
+
+        /**
+         * Set this route's status by predetermined status code. If the caller
+         * should dispatch a route changed event this call will return true;
+         */
+        SetRealStatusCode(
+            [in] Int32 statusCode,
+            [out] Boolean* result);
+
+        /**
+         * Resolves the status code whenever the real status code or selection state
+         * changes.
+         */
+        ResolveStatusCode(
+            [out] Boolean* result);
 
         /**
          * @hide
@@ -290,7 +310,7 @@ module
          * @param tag Arbitrary, app-specific data for this route to hold for later use
          */
         SetTag(
-        [in] IInterface * tag);
+            [in] IInterface * tag);
 
         /**
          * @return The tag object previously set by the application
@@ -417,6 +437,10 @@ module
         /** @hide */
         Select();
 
+        SetStatusInt(
+            [in] ICharSequence* status);
+
+        RouteUpdated();
     }
 
     /**
@@ -438,6 +462,10 @@ module
         GetName(
             [in] IContext * context,
             [out] ICharSequence ** result);
+
+        GetName(
+            [in] IResources* res,
+            [out] ICharSequence** result);
 
         /**
          * Return the current list of routes in this category that have been added
@@ -660,6 +688,21 @@ module
             [in] IMediaRouterRouteInfo * info,
             [in] Int32 volume);
 
+    }
+
+    interface IMediaRouterVolumeCallbackInfo
+    {
+        SetVolumeCallback(
+            [in] IMediaRouterVolumeCallback* vcb);
+
+        GetVolumeCallback(
+            [out] IMediaRouterVolumeCallback** vcb);
+
+        SetRouteInfo(
+            [in] IMediaRouterRouteInfo* route);
+
+        GetRouteInfo(
+            [out] IMediaRouterRouteInfo** route);
     }
 
     /**

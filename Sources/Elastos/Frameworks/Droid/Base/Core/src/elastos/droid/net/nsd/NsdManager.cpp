@@ -81,20 +81,20 @@ ECode NsdManager::PutListener(
         return INVALID_LISTENER_KEY;
     }
 
-    Int32 key;
+    Int32 key = 0;
     synchronized(mMapLock) {
-    Int32 valueIndex;
-    mListenerMap->IndexOfValue(listener, &valueIndex);
-    if (valueIndex != -1) {
-        return BUSY_LISTENER_KEY;
-    }
-    do {
-        key = mListenerKey++;
-    } while (key == INVALID_LISTENER_KEY);
+        Int32 valueIndex;
+        mListenerMap->IndexOfValue(listener, &valueIndex);
+        if (valueIndex != -1) {
+            return BUSY_LISTENER_KEY;
+        }
+        do {
+            key = mListenerKey++;
+        } while (key == INVALID_LISTENER_KEY);
 
-    mListenerMap->Put(key, listener);
+        mListenerMap->Put(key, listener);
 
-    mServiceMap->Put(key, s);
+        mServiceMap->Put(key, s);
     }
     *result = key;
     return NOERROR;

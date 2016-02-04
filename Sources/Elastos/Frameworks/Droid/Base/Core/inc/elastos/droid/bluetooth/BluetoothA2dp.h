@@ -1,14 +1,17 @@
-
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHA2DP_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHA2DP_H__
 
-#include "Elastos.Droid.Core_server.h"
+//#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.Droid.Content.h"
+#include <elastos/core/Object.h>
 #include "elastos/droid/ext/frameworkdef.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -17,12 +20,13 @@ namespace Bluetooth {
 class CBluetoothA2dpStateChangeCallback;
 
 class BluetoothA2dp
-    : public ElRefBase
+    : public Object
     , public IBluetoothA2dp
+    , public IBluetoothProfile
 {
 private:
     class ServiceConnection
-        : public ElRefBase
+        : public Object
         , public IServiceConnection
     {
     public:
@@ -43,13 +47,18 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    BluetoothA2dp();
+
     BluetoothA2dp(
         /* [in] */ IContext* context,
         /* [in] */ IBluetoothProfileServiceListener* listener);
 
     ~BluetoothA2dp();
 
-    CAR_INTERFACE_DECL()
+    CARAPI DoBind(
+        /* [out] */ Boolean* result);
 
     CARAPI Close();
 
@@ -62,11 +71,11 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI GetConnectedDevices(
-        /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices);
+        /* [out] */ IList** devices);
 
     CARAPI GetDevicesMatchingConnectionStates(
         /* [in] */ ArrayOf<Int32>* states,
-        /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices);
+        /* [out] */ IList** devices);// IBluetoothDevice
 
     CARAPI GetConnectionState(
         /* [in] */ IBluetoothDevice* device,
@@ -80,6 +89,15 @@ public:
     CARAPI GetPriority(
         /* [in] */ IBluetoothDevice* device,
         /* [out] */ Int32* priority);
+
+    CARAPI IsAvrcpAbsoluteVolumeSupported(
+        /* [out] */ Boolean* isSupported);
+
+    CARAPI AdjustAvrcpAbsoluteVolume(
+        /* [in] */ Int32 direction);
+
+    CARAPI SetAvrcpAbsoluteVolume(
+        /* [in] */ Int32 volume);
 
     CARAPI IsA2dpPlaying(
         /* [in] */ IBluetoothDevice* device,

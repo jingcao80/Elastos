@@ -36,5 +36,7 @@ ELASTOS_LIBS += camera2/params/params.lib
 ELASTOS_LIBS += camera2/utils/utils.lib
 ELASTOS_LIBS += camera2/dispatch/dispatch.lib
 ELASTOS_LIBS += camera2/legacy/legacy.lib
+ELASTOS_LIBS += camera2/marshal/marshal.lib
+ELASTOS_LIBS += camera2/marshal/impl/marshalImpl.lib
 ELASTOS_LIBS += camera2/impl/impl.lib
 ELASTOS_LIBS += camera2/camera2.lib

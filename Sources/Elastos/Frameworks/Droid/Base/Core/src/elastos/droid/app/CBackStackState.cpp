@@ -151,7 +151,7 @@ ECode CBackStackState::Instantiate(
         if (FragmentManagerImpl::DEBUG) {
             Logger::V(FragmentManagerImpl::TAG,
                 "Instantiate %s op #%d base fragment #%d",
-                Object::ToString(bse).string(), num, (*mOps)[pos]);
+                TO_CSTR(bse), num, (*mOps)[pos]);
         }
         Int32 findex = (*mOps)[pos++];
         if (findex >= 0) {
@@ -172,7 +172,7 @@ ECode CBackStackState::Instantiate(
                 if (FragmentManagerImpl::DEBUG) {
                     Logger::V(FragmentManagerImpl::TAG,
                         "Instantiate %s set remove fragment #%d",
-                        Object::ToString(bse).string(), (*mOps)[pos]);
+                        TO_CSTR(bse), (*mOps)[pos]);
                 }
                 AutoPtr<IFragment> r = fmObj->mActive[(*mOps)[pos++]];
                 op->mRemoved->Add(TO_IINTERFACE(r));
@@ -818,7 +818,7 @@ void BackStackRecord::BumpBackStackNesting(
                 newNesting += amt;
                 r->SetBackStackNesting(newNesting);
                 if (FragmentManagerImpl::DEBUG) {
-                    Logger::V(TAG, "Bump nesting of %s to %d", Object::ToString(r).string(), newNesting);
+                    Logger::V(TAG, "Bump nesting of %s to %d", TO_CSTR(r), newNesting);
                 }
             }
         }

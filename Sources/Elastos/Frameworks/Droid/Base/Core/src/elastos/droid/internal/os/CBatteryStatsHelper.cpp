@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Hardware.h"
 #include "Elastos.Droid.Net.h"
 #include "elastos/droid/internal/os/CBatteryStatsHelper.h"
+#include "elastos/droid/internal/os/CPowerProfile.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/os/CParcel.h"
 #include "elastos/droid/os/CUserHandle.h"
@@ -10,6 +11,7 @@
 #include "elastos/droid/os/CMemoryFile.h"
 #include "elastos/droid/os/CParcelFileDescriptorAutoCloseInputStream.h"
 #include "elastos/droid/utility/CArrayMap.h"
+#include "elastos/droid/utility/CSparseArray.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -35,6 +37,7 @@ using Elastos::Droid::Os::CMemoryFile;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Telephony::ISignalStrength;
 using Elastos::Droid::Utility::CArrayMap;
+using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Core::AutoLock;
 using Elastos::Core::EIID_IComparator;
 using Elastos::IO::CFile;
@@ -304,8 +307,7 @@ ECode CBatteryStatsHelper::GetPowerProfile(
 ECode CBatteryStatsHelper::Create(
     /* [in] */ IBatteryStats* stats)
 {
-    assert(0 && "TODO:CPowerProfile is not implemented!");
-    // CPowerProfile::New(mContext, (IPowerProfile**)&mPowerProfile);
+    CPowerProfile::New(mContext, (IPowerProfile**)&mPowerProfile);
     mStats = stats;
     return NOERROR;
 }
@@ -319,8 +321,7 @@ ECode CBatteryStatsHelper::Create(
     }
     AutoPtr<IInterface> service = ServiceManager::GetService(IBatteryStats::SERVICE_NAME);
     mBatteryInfo = IIBatteryStats::Probe(service);
-    assert(0 && "TODO:CPowerProfile is not implemented!");
-    // CPowerProfile::New(mContext, (IPowerProfile**)&mPowerProfile);
+    CPowerProfile::New(mContext, (IPowerProfile**)&mPowerProfile);
     return NOERROR;
 }
 
@@ -365,8 +366,7 @@ ECode CBatteryStatsHelper::RefreshStats(
     /* [in] */ Int32 asUser)
 {
     AutoPtr<ISparseArray> users;
-    // CSparseArray::New(1, (ISparseArray**)&users);
-    assert(0 && "TODO:CSparseArray is not implemented!");
+    CSparseArray::New(1, (ISparseArray**)&users);
     AutoPtr<IUserHandle> user;
     CUserHandle::New(asUser, (IUserHandle**)&user);
     users->Put(asUser, TO_IINTERFACE(user));
@@ -383,8 +383,7 @@ ECode CBatteryStatsHelper::RefreshStats(
     Int32 n;
     asUsers->GetSize(&n);
     AutoPtr<ISparseArray> users;
-    // CSparseArray::New(n, (ISparseArray**)&users);
-    assert(0 && "TODO:CSparseArray is not implemented!");
+    CSparseArray::New(n, (ISparseArray**)&users);
     for (Int32 i = 0; i < n; ++i) {
         AutoPtr<IInterface> item;
         asUsers->Get(i, (IInterface**)&item);
@@ -849,6 +848,7 @@ void CBatteryStatsHelper::ProcessAppUsage(
                         userPower = power;
                     }
                     else {
+                        userPower = find->mSecond;
                         userPower += power;
                     }
                     mUserPower[userId] = userPower;

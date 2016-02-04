@@ -5,7 +5,8 @@
 #include "elastos/droid/app/ActivityManagerNative.h"
 //#include "elastos/droid/app/backup/CBackupManagerHelper.h"
 #include "elastos/droid/content/res/CResources.h"
-// #include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/provider/Settings.h"
+#include "Elastos.Droid.Provider.h"
 #include "elastos/droid/R.h"
 #include "elastos/core/CoreUtils.h"
 #include <elastos/utility/logging/Logger.h>
@@ -20,7 +21,8 @@ using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IAssetManager;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IConfiguration;
-// using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IListAdapter;
 using Elastos::Droid::Widget::ISpinnerAdapter;
@@ -283,8 +285,7 @@ ECode LocalePicker::ConstructAdapter(
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
     Int32 value;
-    assert(0);
-    // Settings::Global::GetInt32(cr, Settings::Global::DEVELOPMENT_SETTINGS_ENABLED, 0, &value);
+    Settings::Global::GetInt32(cr, ISettingsGlobal::DEVELOPMENT_SETTINGS_ENABLED, 0, &value);
     Boolean isInDeveloperMode = value != 0;
     AutoPtr<IList> localeInfos;
     GetAllAssetLocales(context, isInDeveloperMode, (IList**)&localeInfos);
@@ -389,6 +390,7 @@ ECode LocalePicker::UpdateLocale(
     am->UpdateConfiguration(config);
     // Trigger the dirty bit for the Settings Provider.
     AutoPtr<IBackupManagerHelper> backupMgrHelper;
+    assert(0);
 //    CBackupManagerHelper::AcquireSingleton((IBackupManagerHelper**)&backupMgrHelper);
     backupMgrHelper->DataChanged(String("com.android.providers.settings"));
 //     } catch (RemoteException e) {

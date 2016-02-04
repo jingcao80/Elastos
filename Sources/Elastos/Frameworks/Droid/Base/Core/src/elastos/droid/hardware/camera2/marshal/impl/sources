@@ -1,0 +1,31 @@
+
+TARGET_NAME= marshalImpl
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../../sources.inc
+
+INCLUDES += ../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../inc/
+
+SOURCES  = MarshalQueryableArray.cpp
+SOURCES += MarshalQueryableBlackLevelPattern.cpp
+SOURCES += MarshalQueryableBoolean.cpp
+SOURCES += MarshalQueryableColorSpaceTransform.cpp
+SOURCES += MarshalQueryableEnum.cpp
+SOURCES += MarshalQueryableHighSpeedVideoConfiguration.cpp
+SOURCES += MarshalQueryableMeteringRectangle.cpp
+SOURCES += MarshalQueryableNativeByteToInteger.cpp
+SOURCES += MarshalQueryablePair.cpp
+SOURCES += MarshalQueryableParcelable.cpp
+SOURCES += MarshalQueryablePrimitive.cpp
+SOURCES += MarshalQueryableRange.cpp
+SOURCES += MarshalQueryableRect.cpp
+SOURCES += MarshalQueryableReprocessFormatsMap.cpp
+SOURCES += MarshalQueryableRggbChannelVector.cpp
+SOURCES += MarshalQueryableSize.cpp
+SOURCES += MarshalQueryableSizeF.cpp
+SOURCES += MarshalQueryableStreamConfiguration.cpp
+SOURCES += MarshalQueryableStreamConfigurationDuration.cpp
+SOURCES += MarshalQueryableString.cpp
+
+SOURCES += marshalImpl.cpp

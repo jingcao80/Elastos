@@ -1,6 +1,9 @@
 
 #include "elastos/droid/server/pm/CUserStopUserCallback.h"
 
+using Elastos::Droid::App::EIID_IStopUserCallback;
+using Elastos::Droid::Os::EIID_IBinder;
+
 namespace Elastos {
 namespace Droid {
 namespace Server {
@@ -28,6 +31,13 @@ ECode CUserStopUserCallback::UserStopAborted(
     /* [in] */ Int32 userId)
 {
     return NOERROR;
+}
+
+ECode CUserStopUserCallback::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    return Object::ToString(str);
 }
 
 } // namespace Pm

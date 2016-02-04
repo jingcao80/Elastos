@@ -352,8 +352,7 @@ AutoPtr<IList> ThreadPoolExecutor::DrainQueue()
     AutoPtr<IArrayList> taskList;
     CArrayList::New((IArrayList**)&taskList);
     Int32 number;
-    assert(0);
-    // q->DrainTo(taskList, &number);
+    q->DrainTo(ICollection::Probe(taskList), &number);
     Boolean isEmpty;
     if ((ICollection::Probe(q))->IsEmpty(&isEmpty), !isEmpty) {
         AutoPtr< ArrayOf<IInterface*> > runnables;
@@ -426,9 +425,8 @@ NEXT:
                     if ((t->IsAlive(&bIsAli), bIsAli)) // precheck that t is startable
                         return FALSE;
                     //    throw new IllegalThreadStateException();
-//                    workers->Add(w);
-                    // TODO:
-                    Int32 s;// = workers->Size();
+                    mWorkers.Insert(w);
+                    Int32 s = mWorkers.GetSize();
                     if (s > mLargestPoolSize) {
                         mLargestPoolSize = s;
                     }

@@ -235,8 +235,8 @@ Int32 ArrayUtils::IndexOf(
     if (array == NULL)
         return -1;
     for (Int32 i = 0; i < array->GetLength(); i++) {
-        if ((*array)[i] == NULL) {
-            if (value == NULL)
+        if ((*array)[i] == 0) {
+            if (value == 0)
                 return i;
         }
         else {

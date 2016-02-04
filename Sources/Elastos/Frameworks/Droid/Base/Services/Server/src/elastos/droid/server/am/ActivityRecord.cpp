@@ -6,7 +6,7 @@
 #include "elastos/droid/server/am/ActivityStackSupervisor.h"
 #include "elastos/droid/server/am/ProcessRecord.h"
 #include "elastos/droid/server/am/TaskPersister.h"
-// #include "elastos/droid/server/AttributeCache.h"
+#include "elastos/droid/server/AttributeCache.h"
 #include "elastos/droid/R.h"
 #include <elastos/droid/internal/utility/XmlUtils.h>
 #include <elastos/droid/os/Build.h>
@@ -243,20 +243,19 @@ ActivityRecord::ActivityRecord(
             const_cast<Int32 *>(R::styleable::Window),
             ArraySize(R::styleable::Window));
 
-        assert(0);
-        // AutoPtr<AttributeCache::Entry> ent = AttributeCache::GetInstance()->Get(
-        //     mPackageName, mRealTheme, attrIds, mUserId);
-        // if (ent != NULL) {
-        //     Boolean isFloating, isTranslucent;
-        //     ent->mArray->GetBoolean(
-        //        R::styleable::Window_windowIsFloating, FALSE, &isFloating);
-        //     ent->mArray->GetBoolean(
-        //        R::styleable::Window_windowIsTranslucent, FALSE, &isTranslucent);
-        //     mFullscreen = !isFloating && !isTranslucent;
+        AutoPtr<Entry> ent = AttributeCache::GetInstance()->Get(
+            mPackageName, mRealTheme, attrIds, mUserId);
+        if (ent != NULL) {
+            Boolean isFloating, isTranslucent;
+            ent->mArray->GetBoolean(
+               R::styleable::Window_windowIsFloating, FALSE, &isFloating);
+            ent->mArray->GetBoolean(
+               R::styleable::Window_windowIsTranslucent, FALSE, &isTranslucent);
+            mFullscreen = !isFloating && !isTranslucent;
 
-        //     ent->mArray->GetBoolean(
-        //        R::styleable::Window_windowNoDisplay, FALSE, &mNoDisplay);
-        // }
+            ent->mArray->GetBoolean(
+               R::styleable::Window_windowNoDisplay, FALSE, &mNoDisplay);
+        }
 
         String action;
         Boolean hasHomeCategory;
@@ -575,14 +574,13 @@ void ActivityRecord::SetTask(
     /* [in] */ TaskRecord* taskToAffiliateWith)
 {
     if (mTask != NULL && mTask->RemoveActivity(this)) {
-        assert(0);
-        // if (mTask.Get() != newTask) {
-        //     mTask->mStack->RemoveTask(mTask);
-        // }
-        // else {
-        //     Slogger::D(TAG, "!!! REMOVE THIS LOG !!! setTask: nearly removed stack=%s" +
-        //         (newTask == NULL ? "NULL" : newTask->mStack->ToString().string()));
-        // }
+        if (mTask.Get() != newTask) {
+            mTask->mStack->RemoveTask(mTask);
+        }
+        else {
+            Slogger::D(TAG, "!!! REMOVE THIS LOG !!! setTask: nearly removed stack=%s",
+                (newTask == NULL ? "NULL" : newTask->mStack->ToString().string()));
+        }
     }
     mTask = newTask;
     SetTaskToAffiliateWith(taskToAffiliateWith);
@@ -663,11 +661,10 @@ Boolean ActivityRecord::IsPersistable()
 void ActivityRecord::MakeFinishing()
 {
     if (!mFinishing) {
-        assert(0);
-/*        if (this == mTask->mStack->GetVisibleBehindActivity()) {
+        if (this == mTask->mStack->GetVisibleBehindActivity()) {
             // A finishing activity should not remain as visible in the background
             mStackSupervisor->RequestVisibleBehindLocked(this, FALSE);
-        }*/
+        }
         mFinishing = TRUE;
         if (mStopped) {
             ClearOptionsLocked();
@@ -753,18 +750,16 @@ ECode ActivityRecord::DeliverNewIntentLocked(
     /* [in] */ IIntent* _intent)
 {
     // The activity now gets access to the data associated with this Intent.
-    assert(0);
-    // FAIL_RETURN(mService->GrantUriPermissionFromIntentLocked(callingUid, packageName,
-    //         _intent, GetUriPermissionsLocked(), userId));
+    FAIL_RETURN(mService->GrantUriPermissionFromIntentLocked(callingUid, mPackageName,
+            _intent, GetUriPermissionsLocked(), mUserId));
     // We want to immediately deliver the intent to the activity if
     // it is currently the top resumed activity...  however, if the
     // device is sleeping, then all activities are stopped, so in that
     // case we will deliver it if this is the current top activity on its
     // stack.
     Boolean unsent = TRUE;
-    assert(0);
     if ((mState == ActivityState_RESUMED || (mService->IsSleeping()
-            /*&& mTask->mStack->TopRunningActivityLocked(NULL).Get() == this*/))
+            && mTask->mStack->TopRunningActivityLocked(NULL).Get() == this))
             && mApp != NULL && mApp->mThread != NULL) {
         // try {
         AutoPtr<IList> ar;
@@ -852,7 +847,7 @@ void ActivityRecord::ApplyOptionsLocked()
             case IActivityOptions::ANIM_THUMBNAIL_SCALE_UP:
             case IActivityOptions::ANIM_THUMBNAIL_SCALE_DOWN:
             {
-                Boolean scaleUp = (animationType == IActivityOptions::ANIM_THUMBNAIL_SCALE_UP);
+                Boolean UNUSED(scaleUp) = (animationType == IActivityOptions::ANIM_THUMBNAIL_SCALE_UP);
                 AutoPtr<IBitmap> thumb;
                 mPendingOptions->GetThumbnail((IBitmap**)&thumb);
                 Int32 x, y;
@@ -966,8 +961,7 @@ void ActivityRecord::UpdateThumbnail(
         }
         Boolean thumbnailUpdated = mTask->SetLastThumbnail(newThumbnail);
         if (thumbnailUpdated && IsPersistable()) {
-            assert(0);
-            // mStackSupervisor->mService->NotifyTaskPersisterLocked(task, FALSE);
+            mStackSupervisor->mService->NotifyTaskPersisterLocked(mTask, FALSE);
         }
     }
     mTask->mLastDescription = description;
@@ -1055,8 +1049,7 @@ ECode ActivityRecord::ReportFullyDrawnLocked()
             // EventLog.writeEvent(EventLogTags.AM_ACTIVITY_FULLY_DRAWN_TIME,
             //         userId, System.identityHashCode(this), shortComponentName,
             //         thisTime, totalTime);
-            assert(0);
-            StringBuilder* sb;// = mService->mStringBuilder;
+            StringBuilder* sb = mService->mStringBuilder;
             sb->SetLength(0);
             sb->Append("Fully drawn ");
             sb->Append(mShortComponentName);
@@ -1090,8 +1083,7 @@ void ActivityRecord::ReportLaunchTimeLocked(
         // EventLog.writeEvent(EventLogTags.AM_ACTIVITY_LAUNCH_TIME,
         //         userId, System.identityHashCode(this), shortComponentName,
         //         thisTime, totalTime);
-        assert(0);
-        StringBuilder* sb;// = mService->mStringBuilder;
+        StringBuilder* sb = mService->mStringBuilder;
         sb->SetLength(0);
         sb->Append("Displayed ");
         sb->Append(mShortComponentName);
@@ -1104,8 +1096,7 @@ void ActivityRecord::ReportLaunchTimeLocked(
         }
         Logger::I(TAG, sb->ToString().string());
     }
-    assert(0);
-    // mStackSupervisor->ReportActivityLaunchedLocked(FALSE, this, thisTime, totalTime);
+    mStackSupervisor->ReportActivityLaunchedLocked(FALSE, this, thisTime, totalTime);
     if (totalTime > 0) {
         //service.mUsageStatsService.noteLaunchTime(realActivity, (Int32)totalTime);
     }
@@ -1120,8 +1111,7 @@ ECode ActivityRecord::WindowsDrawn()
     if (mDisplayStartTime != 0) {
         ReportLaunchTimeLocked(SystemClock::GetUptimeMillis());
     }
-    assert(0);
-    // mStackSupervisor->SendWaitingVisibleReportLocked(this);
+    mStackSupervisor->SendWaitingVisibleReportLocked(this);
     mStartTime = 0;
     FinishLaunchTickingLocked();
     if (mTask != NULL) {
@@ -1134,8 +1124,7 @@ ECode ActivityRecord::WindowsVisible()
 {
     AutoLock lock(mService);
 
-    assert(0);
-    // mStackSupervisor->ReportActivityVisibleLocked(this);
+    mStackSupervisor->ReportActivityVisibleLocked(this);
     if (CActivityManagerService::DEBUG_SWITCH) {
         Logger::V(TAG, "windowsVisible(): %s", ToString().string());
     }
@@ -1146,8 +1135,7 @@ ECode ActivityRecord::WindowsVisible()
             // Instead of doing the full stop routine here, let's just
             // hide any activities we now can, and let them stop when
             // the normal idle happens.
-            assert(0);
-            // mStackSupervisor->ProcessStoppingActivitiesLocked(FALSE);
+            mStackSupervisor->ProcessStoppingActivitiesLocked(FALSE);
         }
         else {
             // If this activity was already idle, then we now need to
@@ -1155,23 +1143,22 @@ ECode ActivityRecord::WindowsVisible()
             // that are waiting to do so.    This is because we won't
             // do that while they are still waiting for this one to
             // become visible.
-            assert(0);
-            // List< AutoPtr<ActivityRecord> >& activities = mStackSupervisor->mWaitingVisibleActivities;
-            // if (activities.GetSize() > 0) {
-            //     List< AutoPtr<ActivityRecord> >::Iterator it;
-            //     for (it = activities.Begin(); it != activities.End(); ++it) {
-            //         AutoPtr<ActivityRecord> r = *it;
-            //         r->mWaitingVisible = FALSE;
-            //         if(CActivityManagerService::DEBUG_SWITCH) {
-            //             Logger::V(TAG, "Was waiting for visible: %s", r->ToString().string());
-            //         }
-            //     }
-            //     activities.Clear();
-            //     mStackSupervisor->ScheduleIdleLocked();
-            // }
+            Int32 N;
+            mStackSupervisor->mWaitingVisibleActivities->GetSize(&N);
+            if (N > 0) {
+                for (Int32 i = 0; i < N; i++) {
+                    AutoPtr<IInterface> item;
+                    mStackSupervisor->mWaitingVisibleActivities->Get(i, (IInterface**)&item);
+                    AutoPtr<ActivityRecord> r = (ActivityRecord*)IActivityRecord::Probe(item);
+                    r->mWaitingVisible = FALSE;
+                    if (CActivityManagerService::DEBUG_SWITCH) Logger::V(
+                        CActivityManagerService::TAG, "Was waiting for visible: %s", r->ToString().string());
+                }
+                mStackSupervisor->mWaitingVisibleActivities->Clear();
+                mStackSupervisor->ScheduleIdleLocked();
+            }
         }
-        assert(0);
-        // mService->ScheduleAppGcsLocked();
+        mService->ScheduleAppGcsLocked();
     }
     return NOERROR;
 }
@@ -1194,13 +1181,12 @@ AutoPtr<ActivityRecord> ActivityRecord::GetWaitingHistoryRecordLocked()
     // for this activity.
     AutoPtr<ActivityRecord> r = this;
     if (r->mWaitingVisible) {
-        assert(0);
-        // AutoPtr<ActivityStack> stack = mStackSupervisor->GetFocusedStack();
-        // // Hmmm, who might we be waiting for?
-        // r = stack->mResumedActivity;
-        // if (r == NULL) {
-        //     r = stack->mPausingActivity;
-        // }
+        AutoPtr<ActivityStack> stack = mStackSupervisor->GetFocusedStack();
+        // Hmmm, who might we be waiting for?
+        r = stack->mResumedActivity;
+        if (r == NULL) {
+            r = stack->mPausingActivity;
+        }
         // Both of those NULL?  Fall back to 'this' again
         if (r == NULL) {
             r = this;
@@ -1223,8 +1209,7 @@ ECode ActivityRecord::KeyDispatchingTimedOut(
         r = GetWaitingHistoryRecordLocked();
         anrApp = r != NULL ? r->mApp : NULL;
     }
-    assert(0);
-    // *result = mService->InputDispatchingTimedOut(anrApp, r, this, FALSE, reason);
+    *result = mService->InputDispatchingTimedOut(anrApp, r, this, FALSE, reason);
     return NOERROR;
 }
 
@@ -1236,8 +1221,7 @@ ECode ActivityRecord::GetKeyDispatchingTimeout(
     AutoLock lock(mService);
 
     AutoPtr<ActivityRecord> r = GetWaitingHistoryRecordLocked();
-    assert(0);
-    // *timeout = CActivityManagerService::GetInputDispatchingTimeoutLocked(r);
+    *timeout = CActivityManagerService::GetInputDispatchingTimeoutLocked(r);
     return NOERROR;
 }
 
@@ -1262,12 +1246,11 @@ ECode ActivityRecord::SetSleeping(
             Slogger::W(TAG, "Exception thrown when sleeping: %s", str.string());
         }
         else {
-            assert(0);
-            // List< AutoPtr<ActivityRecord> >& goingToSleepActivities = mStackSupervisor->mGoingToSleepActivities;
-            // if (sleeping && Find(goingToSleepActivities.Begin(), goingToSleepActivities.End(), AutoPtr<ActivityRecord>(this))
-            //         == goingToSleepActivities.End()) {
-            //     goingToSleepActivities.PushBack(this);
-            // }
+            Boolean contains;
+            if (sleeping && !(mStackSupervisor->mGoingToSleepActivities->Contains(
+                this->Probe(EIID_IInterface), &contains), contains)) {
+                mStackSupervisor->mGoingToSleepActivities->Add(this->Probe(EIID_IInterface));
+            }
             mSleeping = sleeping;
         }
     }
@@ -1294,7 +1277,7 @@ Int32 ActivityRecord::GetTaskForActivityLocked(
         return -1;
     }
     TaskRecord* task = r->mTask;
-    Int32 activityNdx;
+    Int32 activityNdx = 0;
     List<AutoPtr<ActivityRecord> >::Iterator iter = task->mActivities->Begin();
     for (Int32 i = 0; iter != task->mActivities->End(); ++iter, ++i) {
         if (iter->Get() == r) {
@@ -1314,8 +1297,7 @@ AutoPtr<ActivityRecord> ActivityRecord::IsInStackLocked(
 {
     AutoPtr<ActivityRecord> r = ForToken(token);
     if (r != NULL) {
-        assert(0);
-        // return r->mTask->mStack->IsInStackLocked(token);
+        return r->mTask->mStack->IsInStackLocked(token);
     }
     return NULL;
 }
@@ -1337,9 +1319,8 @@ Boolean ActivityRecord::IsDestroyable()
         // This would be redundant.
         return FALSE;
     }
-    assert(0);
-    if (mTask == NULL || mTask->mStack == NULL /*|| this == mTask->mStack->mResumedActivity
-            || this == mTask->mStack->mPausingActivity*/ || !mHaveState || !mStopped) {
+    if (mTask == NULL || mTask->mStack == NULL || this == mTask->mStack->mResumedActivity
+            || this == mTask->mStack->mPausingActivity || !mHaveState || !mStopped) {
         // We're not ready for this kind of thing.
         return FALSE;
     }
@@ -1370,8 +1351,7 @@ void ActivityRecord::SetTaskDescription(
     if ((taskDescription->GetIconFilename(&name), name == NULL) &&
         (taskDescription->GetIcon((IBitmap**)&icon), icon) != NULL) {
         String iconFilename = CreateImageFilename(mCreateTime, mTask->mTaskId);
-        assert(0);
-        // mStackSupervisor->mService->mTaskPersister->SaveImage(icon, iconFilename);
+        mStackSupervisor->mService->mTaskPersister->SaveImage(icon, iconFilename);
         taskDescription->SetIconFilename(iconFilename);
     }
     mTaskDescription = taskDescription;
@@ -1408,8 +1388,7 @@ ECode ActivityRecord::SaveToXml(
 
     if (IsPersistable() && mPersistentState != NULL) {
         FAIL_RETURN(out->WriteStartTag(String(NULL), TAG_PERSISTABLEBUNDLE));
-        assert(0);
-        // FAIL_RETURN(mPersistentState->SaveToXml(out));
+        FAIL_RETURN(mPersistentState->SaveToXml(out));
         FAIL_RETURN(out->WriteEndTag(String(NULL), TAG_PERSISTABLEBUNDLE));
     }
     return NOERROR;
@@ -1511,9 +1490,8 @@ ECode ActivityRecord::RestoreFromXml(
     }
 
     CActivityManagerService* service = stackSupervisor->mService;
-    assert(0);
-    AutoPtr<IActivityInfo> aInfo/* = mStackSupervisor->ResolveActivity(
-        intent, resolvedType, 0, NULL, userId)*/;
+    AutoPtr<IActivityInfo> aInfo = stackSupervisor->ResolveActivity(
+        intent, resolvedType, 0, NULL, userId);
     if (aInfo == NULL) {
         String str;
         IObject::Probe(intent)->ToString(&str);
@@ -1522,8 +1500,7 @@ ECode ActivityRecord::RestoreFromXml(
         return E_XML_PULL_PARSER_EXCEPTION;
     }
     AutoPtr<IConfiguration> config;
-    assert(0);
-    // service->GetConfiguration((IConfiguration**)&config);
+    service->GetConfiguration((IConfiguration**)&config);
     AutoPtr<ActivityRecord> r = new ActivityRecord(service, /*caller*/NULL, launchedFromUid,
             launchedFromPackage, intent, resolvedType, aInfo, config,
             NULL, String(NULL), 0, componentSpecified, stackSupervisor, NULL, NULL);

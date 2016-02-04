@@ -40,7 +40,7 @@ ECode BarController::InnerRunnable1::Run()
 {
     //try {
     AutoPtr<IIStatusBarService> statusbar = mOwner->GetStatusBarService();
-    ECode ec;
+    ECode ec = NOERROR;
     if (statusbar != NULL) {
         ec = statusbar->SetWindowState(mOwner->mStatusBarManagerId, mState);
     }

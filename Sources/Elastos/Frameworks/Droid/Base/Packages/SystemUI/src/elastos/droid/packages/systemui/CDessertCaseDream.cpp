@@ -1,40 +1,35 @@
 
-#include "elastos/droid/systemui/CDessertCaseDream.h"
+#include "elastos/droid/packages/systemui/CDessertCaseDream.h"
+#include "elastos/droid/packages/systemui/CDessertCaseView.h"
 
 using Elastos::Droid::Service::Dreams::EIID_IDreamService;
 using Elastos::Droid::View::IView;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 
-//===============================================================
-// CDessertCaseDream::
-//===============================================================
-//CAR_INTERFACE_IMPL_2(CDessertCaseDream, Object, IDessertCaseDream, IDreamService)
-CAR_INTERFACE_IMPL(CDessertCaseDream, Object, IDessertCaseDream)
-
+CAR_OBJECT_IMPL(CDessertCaseDream);
+CAR_INTERFACE_IMPL(CDessertCaseDream, DreamService, IDessertCaseDream);
 ECode CDessertCaseDream::OnAttachedToWindow()
 {
-    assert(0 && "TODO");
-//    DreamService::OnAttachedToWindow();
+    DreamService::OnAttachedToWindow();
+    SetInteractive(FALSE);
 
-//    SetInteractive(FALSE);
+    CDessertCaseView::New(this, (IDessertCaseView**)&mView);
 
-//    mView = new DessertCaseView(this);
+    mContainer = new CDessertCaseView::RescalingContainer(this);
 
-//    mContainer = new DessertCaseView.RescalingContainer(this);
+    IDessertCaseViewRescalingContainer::Probe(mContainer)->SetView(mView);
 
-    mContainer->SetView(mView);
-
-//    SetContentView(IView::Probe(mContainer));
+    SetContentView(IView::Probe(mContainer));
     return NOERROR;
 }
 
 ECode CDessertCaseDream::OnDreamingStarted()
 {
-    assert(0 && "TODO");
-//    DreamService::OnDreamingStarted();
+    DreamService::OnDreamingStarted();
     AutoPtr<Runnable_1> r = new Runnable_1(this);
     Boolean res = FALSE;
     IView::Probe(mView)->PostDelayed(r, 1000, &res);
@@ -43,21 +38,18 @@ ECode CDessertCaseDream::OnDreamingStarted()
 
 ECode CDessertCaseDream::OnDreamingStopped()
 {
-    assert(0 && "TODO");
-//    DreamService::OnDreamingStopped();
+    DreamService::OnDreamingStopped();
     mView->Stop();
     return NOERROR;
 }
 
 //===============================================================
-// CDessertCaseDream::Runnable_1::
+// CDessertCaseDream::Runnable_1
 //===============================================================
-
 CDessertCaseDream::Runnable_1::Runnable_1(
     /* [in] */ CDessertCaseDream* owner)
-{
-    mOwner = owner;
-}
+    : mOwner(owner)
+{}
 
 ECode CDessertCaseDream::Runnable_1::Run()
 {
@@ -66,5 +58,6 @@ ECode CDessertCaseDream::Runnable_1::Run()
 }
 
 } // namespace SystemUI
+} // namespace Packages
 } // namepsace Droid
 } // namespace Elastos

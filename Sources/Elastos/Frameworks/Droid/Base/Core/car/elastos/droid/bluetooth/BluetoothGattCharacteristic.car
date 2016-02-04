@@ -1,0 +1,374 @@
+module
+{
+    using interface Elastos.Core.IFloat;
+    using interface Elastos.Core.IInteger32;
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IUUID;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+
+        [deprecated]
+        interface IBluetoothGattCharacteristic {
+
+            /**
+             * Characteristic proprty: Characteristic is broadcastable.
+             */
+            const Int32 PROPERTY_BROADCAST = 0x01;
+
+            /**
+             * Characteristic property: Characteristic is readable.
+             */
+            const Int32 PROPERTY_READ = 0x02;
+
+            /**
+             * Characteristic property: Characteristic can be written without response.
+             */
+            const Int32 PROPERTY_WRITE_NO_RESPONSE = 0x04;
+
+            /**
+             * Characteristic property: Characteristic can be written.
+             */
+            const Int32 PROPERTY_WRITE = 0x08;
+
+            /**
+             * Characteristic property: Characteristic supports notification
+             */
+            const Int32 PROPERTY_NOTIFY = 0x10;
+
+            /**
+             * Characteristic property: Characteristic supports indication
+             */
+            const Int32 PROPERTY_INDICATE = 0x20;
+
+            /**
+             * Characteristic property: Characteristic supports write with signature
+             */
+            const Int32 PROPERTY_SIGNED_WRITE = 0x40;
+
+            /**
+             * Characteristic property: Characteristic has extended properties
+             */
+            const Int32 PROPERTY_EXTENDED_PROPS = 0x80;
+
+            /**
+             * Characteristic read permission
+             */
+            const Int32 PERMISSION_READ = 0x01;
+
+            /**
+             * Characteristic permission: Allow encrypted read operations
+             */
+            const Int32 PERMISSION_READ_ENCRYPTED = 0x02;
+
+            /**
+             * Characteristic permission: Allow reading with man-in-the-middle protection
+             */
+            const Int32 PERMISSION_READ_ENCRYPTED_MITM = 0x04;
+
+            /**
+             * Characteristic write permission
+             */
+            const Int32 PERMISSION_WRITE = 0x10;
+
+            /**
+             * Characteristic permission: Allow encrypted writes
+             */
+            const Int32 PERMISSION_WRITE_ENCRYPTED = 0x20;
+
+            /**
+             * Characteristic permission: Allow encrypted writes with man-in-the-middle
+             * protection
+             */
+            const Int32 PERMISSION_WRITE_ENCRYPTED_MITM = 0x40;
+
+            /**
+             * Characteristic permission: Allow signed write operations
+             */
+            const Int32 PERMISSION_WRITE_SIGNED = 0x80;
+
+            /**
+             * Characteristic permission: Allow signed write operations with
+             * man-in-the-middle protection
+             */
+            const Int32 PERMISSION_WRITE_SIGNED_MITM = 0x100;
+
+            /**
+             * Write characteristic, requesting acknoledgement by the remote device
+             */
+            const Int32 WRITE_TYPE_DEFAULT = 0x02;
+
+            /**
+             * Wrtite characteristic without requiring a response by the remote device
+             */
+            const Int32 WRITE_TYPE_NO_RESPONSE = 0x01;
+
+            /**
+             * Write characteristic including authentication signature
+             */
+            const Int32 WRITE_TYPE_SIGNED = 0x04;
+
+            /**
+             * Characteristic value format type uint8
+             */
+            const Int32 FORMAT_UINT8 = 0x11;
+
+            /**
+             * Characteristic value format type uint16
+             */
+            const Int32 FORMAT_UINT16 = 0x12;
+
+            /**
+             * Characteristic value format type uint32
+             */
+            const Int32 FORMAT_UINT32 = 0x14;
+
+            /**
+             * Characteristic value format type sint8
+             */
+            const Int32 FORMAT_SINT8 = 0x21;
+
+            /**
+             * Characteristic value format type sint16
+             */
+            const Int32 FORMAT_SINT16 = 0x22;
+
+            /**
+             * Characteristic value format type sint32
+             */
+            const Int32 FORMAT_SINT32 = 0x24;
+
+            /**
+             * Characteristic value format type sfloat (16-bit float)
+             */
+            const Int32 FORMAT_SFLOAT = 0x32;
+
+            /**
+             * Characteristic value format type float (32-bit float)
+             */
+            const Int32 FORMAT_FLOAT = 0x34;
+
+            /**
+             * Adds a descriptor to this characteristic.
+             * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+             *
+             * @param descriptor Descriptor to be added to this characteristic.
+             * @return true, if the descriptor was added to the characteristic
+             */
+            AddDescriptor(
+                [in] IBluetoothGattDescriptor* descriptor,
+                [out] Boolean* result);
+
+            /**
+             * Returns the UUID of this characteristic
+             *
+             * @return UUID of this characteristic
+             */
+            GetUuid(
+                [out] IUUID** uuid);
+
+            /**
+             * Returns the instance ID for this characteristic.
+             *
+             * <p>If a remote device offers multiple characteristics with the same UUID,
+             * the instance ID is used to distuinguish between characteristics.
+             *
+             * @return Instance ID of this characteristic
+             */
+            GetInstanceId(
+                [out] Int32* instanceId);
+
+            /**
+             * Returns the properties of this characteristic.
+             *
+             * <p>The properties contain a bit mask of property flags indicating
+             * the features of this characteristic.
+             *
+             * @return Properties of this characteristic
+             */
+            GetProperties(
+                [out] Int32* properties);
+
+            /**
+             * Returns the permissions for this characteristic.
+             *
+             * @return Permissions of this characteristic
+             */
+            GetPermissions(
+                [out] Int32* permissions);
+
+            /**
+             * Gets the write type for this characteristic.
+             *
+             * @return Write type for this characteristic
+             */
+            GetWriteType(
+                [out] Int32* writeType);
+
+            /**
+             * Set the write type for this characteristic
+             *
+             * <p>Setting the write type of a characteristic determines how the
+             * {@link BluetoothGatt#writeCharacteristic} function write this
+             * characteristic.
+             *
+             * @param writeType The write type to for this characteristic. Can be one
+             *                  of:
+             *                  {@link #WRITE_TYPE_DEFAULT},
+             *                  {@link #WRITE_TYPE_NO_RESPONSE} or
+             *                  {@link #WRITE_TYPE_SIGNED}.
+             */
+            SetWriteType(
+                [in] Int32 writeType);
+
+            /**
+             * Set the desired key size.
+             * @hide
+             */
+            SetKeySize(
+                [in] Int32 keySize);
+
+            /**
+             * Returns a list of descriptors for this characteristic.
+             *
+             * @return Descriptors for this characteristic list of IBluetoothGattDescriptor
+             */
+            GetDescriptors(
+                [out] IList** descriptors);
+
+            /**
+             * Returns a descriptor with a given UUID out of the list of
+             * descriptors for this characteristic.
+             *
+             * @return GATT descriptor object or null if no descriptor with the
+             *         given UUID was found.
+             */
+            GetDescriptor(
+                [in] IUUID* uuid,
+                [out] IBluetoothGattDescriptor** descriptor);
+
+            /**
+             * Get the stored value for this characteristic.
+             *
+             * <p>This function returns the stored value for this characteristic as
+             * retrieved by calling {@link BluetoothGatt#readCharacteristic}. The cached
+             * value of the characteristic is updated as a result of a read characteristic
+             * operation or if a characteristic update notification has been received.
+             *
+             * @return Cached value of the characteristic
+             */
+            GetValue(
+                [out, callee] ArrayOf<Byte>* value);
+
+            /**
+             * Return the stored value of this characteristic.
+             *
+             * <p>The formatType parameter determines how the characteristic value
+             * is to be interpreted. For example, settting formatType to
+             * {@link #FORMAT_UINT16} specifies that the first two bytes of the
+             * characteristic value at the given offset are interpreted to generate the
+             * return value.
+             *
+             * @param formatType The format type used to interpret the characteristic
+             *                   value.
+             * @param offset Offset at which the integer value can be found.
+             * @return Cached value of the characteristic or null of offset exceeds
+             *         value size.
+             */
+            GetIntValue(
+                [in] Int32 formatType,
+                [in] Int32 offset,
+                [out] IInteger32** value);
+
+            /**
+             * Return the stored value of this characteristic.
+             * <p>See {@link #getValue} for details.
+             *
+             * @param formatType The format type used to interpret the characteristic
+             *                   value.
+             * @param offset Offset at which the float value can be found.
+             * @return Cached value of the characteristic at a given offset or null
+             *         if the requested offset exceeds the value size.
+             */
+            GetFloatValue(
+                [in] Int32 formatType,
+                [in] Int32 offset,
+                [out] IFloat** value);
+
+            /**
+             * Return the stored value of this characteristic.
+             * <p>See {@link #getValue} for details.
+             *
+             * @param offset Offset at which the string value can be found.
+             * @return Cached value of the characteristic
+             */
+            GetStringValue(
+                [in] Int32 offset,
+                [out] String* value);
+
+            /**
+             * Updates the locally stored value of this characteristic.
+             *
+             * <p>This function modifies the locally stored cached value of this
+             * characteristic. To send the value to the remote device, call
+             * {@link BluetoothGatt#writeCharacteristic} to send the value to the
+             * remote device.
+             *
+             * @param value New value for this characteristic
+             * @return true if the locally stored value has been set, false if the
+             *              requested value could not be stored locally.
+             */
+            SetValue(
+                [in] ArrayOf<Byte>* value,
+                [out] Boolean* result);
+
+            /**
+             * Set the locally stored value of this characteristic.
+             * <p>See {@link #setValue(byte[])} for details.
+             *
+             * @param value New value for this characteristic
+             * @param formatType Integer format type used to transform the value parameter
+             * @param offset Offset at which the value should be placed
+             * @return true if the locally stored value has been set
+             */
+            SetValue(
+                [in] Int32 value,
+                [in] Int32 formatType,
+                [in] Int32 offset,
+                [out] Boolean* result);
+
+            /**
+             * Set the locally stored value of this characteristic.
+             * <p>See {@link #setValue(byte[])} for details.
+             *
+             * @param mantissa Mantissa for this characteristic
+             * @param exponent  exponent value for this characteristic
+             * @param formatType Float format type used to transform the value parameter
+             * @param offset Offset at which the value should be placed
+             * @return true if the locally stored value has been set
+             */
+            SetValue(
+                [in] Int32 mantissa,
+                [in] Int32 exponent,
+                [in] Int32 formatType,
+                [in] Int32 offset,
+                [out] Boolean* result);
+
+            /**
+             * Set the locally stored value of this characteristic.
+             * <p>See {@link #setValue(byte[])} for details.
+             *
+             * @param value New value for this characteristic
+             * @return true if the locally stored value has been set
+             */
+            SetValue(
+                [in] String value,
+                [out] Boolean* result);
+
+        }
+
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

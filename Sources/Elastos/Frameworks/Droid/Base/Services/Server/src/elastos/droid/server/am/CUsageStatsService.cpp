@@ -1141,11 +1141,11 @@ void CUsageStatsService::CollectDumpInfoFromParcelFLOCK(
     in->ReadInt32(&vers);
     if (vers != VERSION) {
         sb.Append(" (old data version)");
-        pw->PrintStringln(sb.ToString());
+        pw->Println(sb.ToString());
         return;
     }
 
-    pw->PrintStringln(sb.ToString());
+    pw->Println(sb.ToString());
     Int32 N;
     in->ReadInt32(&N);
 

@@ -37,19 +37,9 @@ const AutoPtr<IUri> BrowserContract::AUTHORITY_URI = initAUTHORITY_URI();
 //============================================================================
 //              BrowserContract::ChromeSyncColumns
 //============================================================================
-static String initSERVER_UNIQUE()
-{
-    return IBrowserContractBaseSyncColumns::SYNC3;
-}
+const String BrowserContract::ChromeSyncColumns::SERVER_UNIQUE = IBrowserContractBaseSyncColumns::SYNC3;
 
-static String initCLIENT_UNIQUE()
-{
-    return IBrowserContractBaseSyncColumns::SYNC4;
-}
-
-const String BrowserContract::ChromeSyncColumns::SERVER_UNIQUE = initCLIENT_UNIQUE();
-
-const String BrowserContract::ChromeSyncColumns::CLIENT_UNIQUE = initCLIENT_UNIQUE();
+const String BrowserContract::ChromeSyncColumns::CLIENT_UNIQUE = IBrowserContractBaseSyncColumns::SYNC4;
 
 //============================================================================
 //              BrowserContract::Bookmarks
@@ -123,12 +113,7 @@ const AutoPtr<IUri> BrowserContract::Searches::CONTENT_URI = initSearchesCONTENT
 //============================================================================
 //              BrowserContract::SyncState
 //============================================================================
-static String initCONTENT_DIRECTORY()
-{
-    return ISyncStateContractConstants::CONTENT_DIRECTORY;
-}
-
-const String BrowserContract::SyncState::CONTENT_DIRECTORY = initCONTENT_DIRECTORY();
+const String BrowserContract::SyncState::CONTENT_DIRECTORY = ISyncStateContractConstants::CONTENT_DIRECTORY;
 
 static AutoPtr<IUri> initSyncStateCONTENT_URI()
 {
@@ -146,6 +131,7 @@ ECode BrowserContract::SyncState::Get(
 {
     VALIDATE_NOT_NULL(value);
     // return SyncStateContractHelpers::Get(provider, SyncState::CONTENT_URI.Get(), account, value);
+    return NOERROR;
 }
 
 ECode BrowserContract::SyncState::GetWithUri(
@@ -155,6 +141,7 @@ ECode BrowserContract::SyncState::GetWithUri(
 {
     VALIDATE_NOT_NULL(value);
     // return SyncStateContractHelpers::GetWithUri(provider, SyncState::CONTENT_URI, account, value);
+    return NOERROR;
 }
 
 ECode BrowserContract::SyncState::Set(
@@ -163,6 +150,7 @@ ECode BrowserContract::SyncState::Set(
     /* [in] */ ArrayOf<Byte>* data)
 {
     // return SyncStateContractHelpers::Set(provider, BrowserContract::SyncState::CONTENT_URI.Get(), account, data);
+    return NOERROR;
 }
 
 ECode BrowserContract::SyncState::NewSetOperation(
@@ -172,6 +160,7 @@ ECode BrowserContract::SyncState::NewSetOperation(
 {
     VALIDATE_NOT_NULL(operation);
     // return SyncStateContractHelpers::NewSetOperation(BrowserContract::SyncState::CONTENT_URI.Get(), account, data, operation);
+    return NOERROR;
 }
 
 //============================================================================

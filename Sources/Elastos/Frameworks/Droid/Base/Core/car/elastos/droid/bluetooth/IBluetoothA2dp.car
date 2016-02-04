@@ -3,51 +3,61 @@ module
 {
     interface Elastos.Droid.Bluetooth.IBluetoothDevice;
 
+    using interface Elastos.Utility.IList;
+
     namespace Elastos {
     namespace Droid {
     namespace Bluetooth {
 
-        /**
-         * APIs for Bluetooth A2DP service
-         *
-         * @hide
-         */
-        [deprecated]
-        interface IIBluetoothA2dp {
-            // Public API
-            Connect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+    /**
+     * APIs for Bluetooth A2DP service
+     *
+     * @hide
+     */
+    [deprecated]
+    interface IIBluetoothA2dp {
+        // Public API
+        Connect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            Disconnect(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* result);
+        Disconnect(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* result);
 
-            // Mike TODO: Wait for list car interface
-            GetConnectedDevices(
-                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+        GetConnectedDevices(
+            [out] IList** devices);
 
-            GetDevicesMatchingConnectionStates(
-                [in] ArrayOf<Int32>* states,
-                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+        GetDevicesMatchingConnectionStates(
+            [in] ArrayOf<Int32>* states,
+            [out] IList** devices);
 
-            GetConnectionState(
-                [in] IBluetoothDevice* device,
-                [out] Int32* state);
+        GetConnectionState(
+            [in] IBluetoothDevice* device,
+            [out] Int32* state);
 
-            SetPriority(
-                [in] IBluetoothDevice* device,
-                [in] Int32 priority,
-                [out] Boolean* result);
+        SetPriority(
+            [in] IBluetoothDevice* device,
+            [in] Int32 priority,
+            [out] Boolean* result);
 
-            GetPriority(
-                [in] IBluetoothDevice* device,
-                [out] Int32* priority);
+        GetPriority(
+            [in] IBluetoothDevice* device,
+            [out] Int32* priority);
 
-            IsA2dpPlaying(
-                [in] IBluetoothDevice* device,
-                [out] Boolean* isA2dpPlaying);
-        }
+        IsAvrcpAbsoluteVolumeSupported(
+            [out] Boolean* result);
+
+        [oneway] AdjustAvrcpAbsoluteVolume(
+            [in] Int32 direction);
+
+        [oneway] SetAvrcpAbsoluteVolume(
+            [in] Int32 volume);
+
+        IsA2dpPlaying(
+            [in] IBluetoothDevice* device,
+            [out] Boolean* isA2dpPlaying);
+    }
 
     } // Bluetooth
     } // Droid

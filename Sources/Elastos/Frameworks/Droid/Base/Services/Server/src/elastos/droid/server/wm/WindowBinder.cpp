@@ -1,5 +1,6 @@
 
-#include "wm/WindowBinder.h"
+#include <Elastos.Droid.Content.h>
+#include "elastos/droid/server/wm/WindowBinder.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <binder/Binder.h>
 #include <binder/IServiceManager.h>

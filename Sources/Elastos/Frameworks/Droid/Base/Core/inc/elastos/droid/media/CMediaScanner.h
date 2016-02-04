@@ -28,10 +28,12 @@ namespace Droid {
 namespace Media {
 
 CarClass(CMediaScanner)
+    , public Object
+    , public IMediaScanner
 {
 public:
     class WplHandler
-        : public ElRefBase
+        : public Object
         , public IStartElementListener
         , public IEndElementListener
     {
@@ -60,7 +62,7 @@ public:
     };
 
 private:
-    /*static*/ class FileEntry : public ElRefBase
+    /*static*/ class FileEntry : public Object
     {
     public:
         FileEntry(
@@ -79,7 +81,7 @@ private:
         Boolean mLastModifiedChanged;
     };
 
-    /*static*/ class PlaylistEntry : public ElRefBase
+    /*static*/ class PlaylistEntry : public Object
     {
     public:
         PlaylistEntry()
@@ -93,7 +95,7 @@ private:
     };
 
     class MyMediaScannerClient
-        : public ElRefBase
+        : public Object
         , public IMediaScannerClient
     {
     public:
@@ -209,11 +211,12 @@ private:
         CMediaScanner* mOwner;
     }; // end of anonymous MediaScannerClient instance
 
-    class MediaBulkDeleter : public ElRefBase
+    class MediaBulkDeleter : public Object
     {
     public:
         MediaBulkDeleter(
             /* [in] */ IIContentProvider* provider,
+            /* [in] */ const String& packageName,
             /* [in] */ IUri* baseUri);
 
         CARAPI Delete( // throws RemoteException
@@ -225,6 +228,7 @@ private:
         StringBuilder whereClause;
         List<String> mWhereArgs; // = new ArrayList<String>(100);
         AutoPtr<IIContentProvider> mProvider;
+        String mPackageName;
         AutoPtr<IUri> mBaseUri;
     };
 
@@ -232,6 +236,8 @@ public:
     CMediaScanner();
 
     ~CMediaScanner();
+
+    CAR_INTERFACE_DECL();
 
     CARAPI constructor(
         /* [in] */ IContext* c);
@@ -272,6 +278,10 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI StopScan();
+
+    static CARAPI ClearMediaPathCache(
+        /* [in] */ Boolean clearMediaPaths,
+        /* [in] */ Boolean clearNoMediaPaths);
 
 protected:
     CARAPI_(void) Finalize();
@@ -395,6 +405,7 @@ private:
     android::MediaScanner* mNativeContext;
 
     AutoPtr<IContext> mContext;
+    String mPackageName;
     AutoPtr<IIContentProvider> mMediaProvider;
 
     AutoPtr<IUri> mAudioUri;
@@ -403,6 +414,7 @@ private:
     AutoPtr<IUri> mThumbsUri;
     AutoPtr<IUri> mPlaylistsUri;
     AutoPtr<IUri> mFilesUri;
+    AutoPtr<IUri> mFilesUriNoNotify;
     Boolean mProcessPlaylists;
     Boolean mProcessGenres;
     Handle32 mMtpObjectHandle;
@@ -459,6 +471,8 @@ private:
     Object  mLock;
 
     Int32 mScanCount; // = 0;
+    static HashMap<String, String> mNoMediaPaths;
+    static HashMap<String, String> mMediaPaths;
 };
 
 } // namespace Media

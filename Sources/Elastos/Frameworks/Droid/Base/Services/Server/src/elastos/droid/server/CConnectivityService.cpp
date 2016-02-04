@@ -324,7 +324,7 @@ void CConnectivityService::LegacyTypeTracker::Add(
     }
     if (VDBG) {
         Slogger::D(TAG, "Adding agent %s for legacy network type %d",
-            Object::ToString(nai).string(), type);
+            TO_CSTR(nai), type);
     }
 
     AutoPtr<IArrayList> list = (*mTypeLists)[type];
@@ -333,7 +333,7 @@ void CConnectivityService::LegacyTypeTracker::Add(
     list->Contains(naiObj, &bval);
     if (bval) {
         Slogger::E(TAG, "Attempting to register duplicate agent for type %d: %s",
-            type, Object::ToString(nai).string());
+            type, TO_CSTR(nai));
         return;
     }
 
@@ -392,7 +392,7 @@ void CConnectivityService::LegacyTypeTracker::Remove(
 void CConnectivityService::LegacyTypeTracker::Remove(
     /* [in] */ INetworkAgentInfo* nai)
 {
-    if (VDBG) Slogger::D(TAG, "Removing agent %s", Object::ToString(nai).string());
+    if (VDBG) Slogger::D(TAG, "Removing agent %s", TO_CSTR(nai));
     for (Int32 type = 0; type < mTypeLists->GetLength(); type++) {
         Remove(type, nai);
     }
@@ -500,7 +500,7 @@ void CConnectivityService::NetworkRequestInfo::UnlinkDeathRecipient()
 ECode CConnectivityService::NetworkRequestInfo::ProxyDied()
 {
     Slogger::D("CConnectivityService", "ConnectivityService NetworkRequestInfo binderDied(%s, %)",
-        Object::ToString(mRequest).string(), Object::ToString(mBinder).string());
+        TO_CSTR(mRequest), TO_CSTR(mBinder));
     mHost->ReleaseNetworkRequest(mRequest);
     return NOERROR;
 }
@@ -515,7 +515,7 @@ ECode CConnectivityService::NetworkRequestInfo::ToString(
     sb += "/";
     sb += mPid;
     sb += " for ";
-    sb += Object::ToString(mRequest).string();
+    sb += TO_CSTR(mRequest);
     return NOERROR;
 }
 
@@ -984,7 +984,7 @@ ECode CConnectivityService::NetworkStateTrackerHandler::HandleMessage(
                 AutoPtr<ILinkProperties> lp = mHost->GetLinkPropertiesForTypeInternal(type);
                 if (DBG) {
                     Slogger::D("CConnectivityService", "EVENT_STATE_CHANGED: connected to provisioning network, lp=%s",
-                        Object::ToString(lp).string());
+                        TO_CSTR(lp));
                 }
 
                 // Clear any default routes setup by the radio so
@@ -1211,7 +1211,7 @@ ECode CConnectivityService::constructor(
         AutoPtr<INetworkConfig> n;
         CNetworkConfig::New(naString, (INetworkConfig**)&n);
         if (VDBG) Slogger::D(TAG, "naString=%s config=%s",
-            naString.string(), Object::ToString(n).string());
+            naString.string(), TO_CSTR(n));
 
         n->GetType(&nType);
         if (nType > IConnectivityManager::MAX_NETWORK_TYPE) {
@@ -1507,7 +1507,7 @@ AutoPtr<INetworkInfo> CConnectivityService::GetProvisioningNetworkInfo()
         }
     }
     if (DBG) Slogger::D(TAG, "GetProvisioningNetworkInfo: X provNi=%s",
-        Object::ToString(provNi).string());
+        TO_CSTR(provNi));
     return provNi;
 }
 
@@ -1524,7 +1524,7 @@ ECode CConnectivityService::GetProvisioningOrActiveNetworkInfo(
         GetNetworkInfo(mActiveDefaultNetwork, uid, (INetworkInfo**)&provNi);
     }
     if (DBG) Slogger::D(TAG, "getProvisioningOrActiveNetworkInfo: X provNi=%s",
-         Object::ToString(provNi).string());
+         TO_CSTR(provNi));
     *info = provNi;
     REFCOUNT_ADD(*info)
     return NOERROR;
@@ -1996,7 +1996,7 @@ Boolean CConnectivityService::AddLegacyRouteToHost(
         String iface;
         bestRoute->GetInterface(&iface);
         Slogger::D(TAG, "Adding %s for interface %s",
-            Object::ToString(bestRoute).string(), iface.string());
+            TO_CSTR(bestRoute), iface.string());
     }
 
     ECode ec = mNetd->AddLegacyRouteForNetId(netId, bestRoute, uid);
@@ -2162,7 +2162,7 @@ void CConnectivityService::HandleAsyncChannelDisconnected(
             if (currentNetwork != NULL && (currentNetwork->mNetwork->GetNetId(&netId), netId) == id) {
                 if (DBG) {
                     Slogger::D(TAG, "Checking for replacement network to handle request %s",
-                        Object::ToString(request).string());
+                        TO_CSTR(request));
                 }
                 mNetworkForRequestId->Remove(requestId);
                 SendUpdatedScoreToFactories(request, 0);
@@ -2316,11 +2316,11 @@ void CConnectivityService::HandleReleaseNetworkRequest(
     if (nri != NULL) {
         if (IProcess::SYSTEM_UID != callingUid && nri->mUid != callingUid) {
             if (DBG) Slogger::D(TAG, "Attempt to release unowned NetworkRequest %s",
-                Object::ToString(request).string());
+                TO_CSTR(request));
             return;
         }
         if (DBG) Slogger::D(TAG, "releasing NetworkRequest %s",
-            Object::ToString(request).string());
+            TO_CSTR(request));
 
         nri->UnlinkDeathRecipient();
         Int32 requestId, size;
@@ -2676,7 +2676,7 @@ ECode CConnectivityService::CaptivePortalCheckCompleted(
     FAIL_RETURN(EnforceConnectivityInternalPermission())
     if (DBG) {
         Slogger::D(TAG, "captivePortalCheckCompleted: ni=%s captive=%d",
-            Object::ToString(info).string(), isCaptivePortal);
+            TO_CSTR(info), isCaptivePortal);
     }
 //        mNetTrackers[info.GetType()].captivePortalCheckCompleted(isCaptivePortal);
     return NOERROR;
@@ -3004,7 +3004,7 @@ Boolean CConnectivityService::IsLiveNetworkAgent(
     if (officialNai != NULL && Object::Equals(officialNai, nai)) return TRUE;
     if (officialNai != NULL || VDBG) {
         Slogger::E(TAG, "%s - IsLiveNetworkAgent found mismatched netId: %s - %s",
-            msg.string(), Object::ToString(officialNai).string(), Object::ToString(nai).string());
+            msg.string(), TO_CSTR(officialNai), TO_CSTR(nai));
     }
     return FALSE;
 }
@@ -3353,7 +3353,7 @@ ECode CConnectivityService::SetGlobalProxy(
                 if (!bval) {
                     if (DBG)
                         Slogger::D(TAG, "Invalid proxy properties, ignoring: %s",
-                            Object::ToString(proxyProperties).string());
+                            TO_CSTR(proxyProperties));
                     return NOERROR;
                 }
 
@@ -3413,7 +3413,7 @@ void CConnectivityService::LoadGlobalProxy()
         proxyProperties->IsValid(&bval);
         if (!bval) {
             if (DBG) Slogger::D(TAG, "Invalid proxy properties, ignoring: %s",
-                Object::ToString(proxyProperties).string());
+                TO_CSTR(proxyProperties));
             return;
         }
 
@@ -3463,7 +3463,7 @@ void CConnectivityService::HandleApplyDefaultProxy(
         if (mDefaultProxy == proxy) return; // catches repeated nulls
         if (proxy != NULL && (proxy->IsValid(&bval), !bval)) {
             if (DBG) Slogger::D(TAG, "Invalid proxy properties, ignoring: %s",
-                Object::ToString(proxy).string());
+                TO_CSTR(proxy));
             return;
         }
 
@@ -3775,15 +3775,14 @@ void CConnectivityService::SetLockdownTracker(
     }
 
     //try {
-    Boolean bval;
     if (tracker != NULL) {
-        mNetd->SetFirewallEnabled(TRUE, &bval);
+        mNetd->SetFirewallEnabled(TRUE);
         mNetd->SetFirewallInterfaceRule(String("lo"), TRUE);
         mLockdownTracker = tracker;
         mLockdownTracker->Init();
     }
     else {
-        mNetd->SetFirewallEnabled(FALSE, &bval);
+        mNetd->SetFirewallEnabled(FALSE);
     }
     //} catch (RemoteException e) {
         // ignored; NMS lives inside system_server
@@ -4394,7 +4393,7 @@ ECode CConnectivityService::RequestNetwork(
     AutoPtr<INetworkRequest> networkRequest;
     CNetworkRequest::New(networkCapabilities, legacyType,
         NextNetworkRequestId(), (INetworkRequest**)&networkRequest);
-    if (DBG) Slogger::D(TAG, "RequestNetwork for %s", Object::ToString(networkRequest).string());
+    if (DBG) Slogger::D(TAG, "RequestNetwork for %s", TO_CSTR(networkRequest));
     AutoPtr<NetworkRequestInfo> nri = new NetworkRequestInfo(messenger, networkRequest, binder,
         NetworkRequestInfo::REQUEST, this);
 
@@ -4439,7 +4438,7 @@ ECode CConnectivityService::ListenForNetwork(
     AutoPtr<INetworkRequest> networkRequest;
     CNetworkRequest::New(networkCapabilities, IConnectivityManager::TYPE_NONE,
         NextNetworkRequestId(), (INetworkRequest**)&networkRequest);
-    if (DBG) Slogger::D(TAG, "ListenForNetwork for %s", Object::ToString(networkRequest).string());
+    if (DBG) Slogger::D(TAG, "ListenForNetwork for %s", TO_CSTR(networkRequest));
     AutoPtr<NetworkRequestInfo> nri = new NetworkRequestInfo(messenger, networkRequest, binder,
         NetworkRequestInfo::LISTEN, this);
 
@@ -4561,7 +4560,7 @@ ECode CConnectivityService::RegisterNetworkAgent(
     synchronized(syncObj) {
         nai->mNetworkMonitor->mSystemReady = mSystemReady;
     }
-    if (DBG) Slogger::D(TAG, "RegisterNetworkAgent %s", Object::ToString(nai).string());
+    if (DBG) Slogger::D(TAG, "RegisterNetworkAgent %s", TO_CSTR(nai));
 
     Boolean bval;
     AutoPtr<IMessage> msg;
@@ -4735,7 +4734,7 @@ Boolean CConnectivityService::UpdateRoutes(
                 route->HasGateway(&bval);
                 if (bval) continue;
                 if (DBG) Slogger::D(TAG, "Adding Route [%s] to network %d",
-                    Object::ToString(route).string(), netId);
+                    TO_CSTR(route), netId);
                 ec = mNetd->AddRoute(netId, route);
                 if (FAILED(ec)) {
                     Boolean print = VDBG;
@@ -4765,7 +4764,7 @@ Boolean CConnectivityService::UpdateRoutes(
             route->HasGateway(&bval);
 
             if (DBG) Slogger::D(TAG, "Removing Route [%s] to network %d",
-                Object::ToString(route).string(), netId);
+                TO_CSTR(route), netId);
 
             ec = mNetd->RemoveRoute(netId, route);
             if (FAILED(ec)) {
@@ -4802,7 +4801,7 @@ void CConnectivityService::UpdateDnses(
             }
         }
         if (DBG) Slogger::D(TAG, "Setting Dns servers for network %d to %s",
-            netId, Object::ToString(dnses).string());
+            netId, TO_CSTR(dnses));
 
         AutoPtr<ArrayOf<String> > strs;
         NetworkUtils::MakeStrings(ICollection::Probe(dnses), (ArrayOf<String>**)&strs);
@@ -4904,7 +4903,7 @@ void CConnectivityService::SendUpdatedScoreToFactories(
     /* [in] */ Int32 score)
 {
     if (VDBG) Slogger::D(TAG, "sending new Min Network Score(%d): %s",
-        score, Object::ToString(networkRequest).string());
+        score, TO_CSTR(networkRequest));
 
     AutoPtr<ICollection> values;
     mNetworkFactoryInfos->GetValues((ICollection**)&values);
@@ -4987,7 +4986,7 @@ void CConnectivityService::TeardownUnneededNetwork(
         // Ignore listening requests.
         if (!IsRequest(nr)) continue;
         Slogger::E(TAG, "Dead network still had at least %s",
-            Object::ToString(nr).string());
+            TO_CSTR(nr));
         break;
     }
     nai->mAsyncChannel->Disconnect();
@@ -5168,7 +5167,7 @@ void CConnectivityService::RematchNetworkAndRequests(
             nai->mNetworkRequests->ValueAt(i, (IInterface**)&obj);
             INetworkRequest* nr = INetworkRequest::Probe(obj);
             if (nr == NULL) {
-                Slogger::E(TAG, "Request %s not found in mNetworkRequests.", Object::ToString(nr).string());
+                Slogger::E(TAG, "Request %s not found in mNetworkRequests.", TO_CSTR(nr));
                 Slogger::E(TAG, "  it came from request list  of %s", nai->Name().string());
             }
             else {
@@ -5545,7 +5544,7 @@ void CConnectivityService::NotifyNetworkCallbacks(
         obj = NULL;
         mNetworkRequests->Get(nr.Get(), (IInterface**)&obj);
         AutoPtr<NetworkRequestInfo> nri = (NetworkRequestInfo*)IProxyDeathRecipient::Probe(obj);
-        if (VDBG) Slogger::D(TAG, " sending notification for %s", Object::ToString(nr).string());
+        if (VDBG) Slogger::D(TAG, " sending notification for %s", TO_CSTR(nr));
         CallCallbackForRequest(nri, networkAgent, notifyType);
     }
 }

@@ -33,6 +33,9 @@ public:
         /* [in] */ Int32 offset,
         /* [in] */ Boolean isReadOnly);
 
+    CARAPI GetPrimitiveArray(
+        /* [out] */ Handle64* arrayHandle);
+
     CARAPI Get(
         /* [out] */ Int64* value);
 

@@ -53,6 +53,7 @@ AutoPtr<IHandler> ThreadUtils::GetUiThreadHandler()
         return sUiThreadHandler;
     }
 #endif
+    return NULL;
 }
 
 /**
@@ -122,6 +123,7 @@ AutoPtr<IInterface> ThreadUtils::RunOnUiThreadBlocking(
         throw new RuntimeException("Interrupted waiting for callable", e);
     }
 #endif
+    return NULL;
 }
 
 /**
@@ -247,6 +249,7 @@ Boolean ThreadUtils::RunningOnUiThread()
 #if 0
     return getUiThreadHandler().getLooper() == Looper.myLooper();
 #endif
+    return FALSE;
 }
 
 AutoPtr<ILooper> ThreadUtils::GetUiThreadLooper()

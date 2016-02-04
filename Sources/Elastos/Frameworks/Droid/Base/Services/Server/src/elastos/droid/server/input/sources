@@ -2,19 +2,14 @@ TARGET_NAME= input
 TARGET_TYPE= lib
 
 INCLUDES += ../
-INCLUDES += $(MAKEDIR)/../../inc
-INCLUDES += $(MAKEDIR)/../../../../Core/inc
-INCLUDES += $(PREBUILD_INC)/skia/utils
-INCLUDES += $(PREBUILD_INC)/skia/core
-
-include $(MAKEDIR)/../../../../../sources.inc
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
 
 C_DEFINES += -DDROID_SERVER
+include $(MAKEDIR)/../../../../../../../../sources.inc
 
-SOURCES = NativeInputApplicationHandle.cpp
-SOURCES += InputApplicationHandle.cpp
-SOURCES += NativeInputWindowHandle.cpp
+SOURCES = InputApplicationHandle.cpp
 SOURCES += InputWindowHandle.cpp
-SOURCES += NativeInputManager.cpp
 SOURCES += PersistentDataStore.cpp
+SOURCES += CIInputFilterHost.cpp
 SOURCES += CInputManagerService.cpp

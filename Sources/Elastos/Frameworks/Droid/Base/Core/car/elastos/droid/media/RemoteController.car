@@ -249,6 +249,9 @@ module
         StopListeningToSessions();
     }
 
+    interface IPlaybackInfo {
+    }
+
     } // namespace media
     } // namepsace Droid
     } // namespace Elastos

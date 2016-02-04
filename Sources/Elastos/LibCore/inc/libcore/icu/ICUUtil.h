@@ -161,7 +161,7 @@ public:
     static CARAPI_(String) GetISO3Language(
         /* [in] */ const String& languageTag);
 
-    static CARAPI_(ILocale*) AddLikelySubtags(
+    static CARAPI_(AutoPtr<ILocale>) AddLikelySubtags(
         /* [in] */ ILocale* locale);
 
     static CARAPI_(String) AddLikelySubtags(

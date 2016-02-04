@@ -1,10 +1,11 @@
 
-#include "CETC1Util.h"
-#include <elastos/utility/logging/Slogger.h>
-#include "CETC1.h"
+#include "elastos/droid/opengl/CETC1Util.h"
+#include "elastos/droid/opengl/CETC1.h"
+#include "elastos/droid/opengl/CETC1Texture.h"
+#include "elastos/droid/opengl/CGLES10.h"
+
 #include <elastos/core/Math.h>
-#include "CETC1Texture.h"
-#include "CGLES10.h"
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::IO::IBuffer;
 using Elastos::IO::IByteBuffer;
@@ -17,6 +18,10 @@ using Elastos::IO::ByteOrder;
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
+
+CAR_INTERFACE_IMPL(CETC1Util, Singleton, IETC1Util)
+
+CAR_SINGLETON_IMPL(CETC1Util)
 
 ECode CETC1Util::LoadTexture(
     /* [in] */ Int32 target,
@@ -54,7 +59,7 @@ ECode CETC1Util::LoadTexture(
     texture->GetWidth(&width);
     Int32 height;
     texture->GetHeight(&height);
-    AutoPtr<IBuffer> data;
+    AutoPtr<IByteBuffer> data;
     texture->GetData((IByteBuffer**)&data);
     Boolean supported;
     IsETC1Supported(&supported);
@@ -62,9 +67,9 @@ ECode CETC1Util::LoadTexture(
     CGLES10::AcquireSingleton((IGLES10**)&gles10);
     if (supported) {
         Int32 imageSize;
-        data->GetRemaining(&imageSize);
+        IBuffer::Probe(data)->GetRemaining(&imageSize);
         gles10->GlCompressedTexImage2D(target, level, IETC1::_ETC1_RGB8_OES, width, height,
-                border, imageSize, data);
+                border, imageSize, IBuffer::Probe(data));
     } else {
         Boolean useShorts = fallbackType != IGLES10::_GL_UNSIGNED_BYTE;
         Int32 pixelSize = useShorts ? 2 : 3;
@@ -80,9 +85,9 @@ ECode CETC1Util::LoadTexture(
         decodedData->SetOrder(order);
         AutoPtr<IETC1> etc1;
         CETC1::AcquireSingleton((IETC1**)&etc1);
-        etc1->DecodeImage(data, decodedData, width, height, pixelSize, stride);
+        etc1->DecodeImage(IBuffer::Probe(data), IBuffer::Probe(decodedData), width, height, pixelSize, stride);
         gles10->GlTexImage2D(target, level, fallbackFormat, width, height, border,
-                fallbackFormat, fallbackType, decodedData);
+                fallbackFormat, fallbackType, IBuffer::Probe(decodedData));
     }
     return NOERROR;
 }
@@ -90,6 +95,8 @@ ECode CETC1Util::LoadTexture(
 ECode CETC1Util::IsETC1Supported(
     /* [out] */ Boolean* isSupported)
 {
+    VALIDATE_NOT_NULL(isSupported)
+
     AutoPtr<ArrayOf<Int32> > results = ArrayOf<Int32>::Alloc(20);
     AutoPtr<IGLES10> gles10;
     CGLES10::AcquireSingleton((IGLES10**)&gles10);
@@ -113,6 +120,8 @@ ECode CETC1Util::CreateTexture(
     /* [in] */ Elastos::IO::IInputStream* input,
     /* [out] */ IETC1Texture** texture)
 {
+    VALIDATE_NOT_NULL(texture)
+
     Int32 width = 0;
     Int32 height = 0;
     AutoPtr<IByteBufferHelper> helper;
@@ -124,7 +133,7 @@ ECode CETC1Util::CreateTexture(
     AutoPtr<ArrayOf<Byte> > ioBuffer = ArrayOf<Byte>::Alloc(4096);
     {
         Int32 readRst;
-        input->ReadBytes(ioBuffer, 0, IETC1::_ETC_PKM_HEADER_SIZE, &readRst);
+        input->Read(ioBuffer, 0, IETC1::_ETC_PKM_HEADER_SIZE, &readRst);
         if (readRst !=IETC1::_ETC_PKM_HEADER_SIZE) {
             SLOGGERE("CETC1Util", "Unable to read PKM file header.")
             return E_IO_EXCEPTION;
@@ -137,16 +146,16 @@ ECode CETC1Util::CreateTexture(
         orderHelper->GetNativeOrder(&order);
 
         headerBuffer->SetOrder(order);
-        headerBuffer->PutBytes(*ioBuffer, 0, IETC1::_ETC_PKM_HEADER_SIZE);
-        headerBuffer->SetPosition(0);
+        headerBuffer->Put(ioBuffer, 0, IETC1::_ETC_PKM_HEADER_SIZE);
+        IBuffer::Probe(headerBuffer)->SetPosition(0);
 
         Boolean isValid;
-        if (etc1->IsValid(headerBuffer, &isValid), !isValid) {
+        if (etc1->IsValid(IBuffer::Probe(headerBuffer), &isValid), !isValid) {
             SLOGGERE("CETC1Util", "Not a PKM file.")
             return E_IO_EXCEPTION;
         }
-        etc1->GetWidth(headerBuffer, &width);
-        etc1->GetHeight(headerBuffer, &height);
+        etc1->GetWidth(IBuffer::Probe(headerBuffer), &width);
+        etc1->GetHeight(IBuffer::Probe(headerBuffer), &height);
     }
     Int32 encodedSize;
     etc1->GetEncodedDataSize(width, height, &encodedSize);
@@ -158,14 +167,14 @@ ECode CETC1Util::CreateTexture(
     for (Int32 i = 0; i < encodedSize; ) {
         Int32 chunkSize = Elastos::Core::Math::Min(ioBuffer->GetLength(), encodedSize - i);
         Int32 readRst;
-        input->ReadBytes(ioBuffer, 0, chunkSize, &readRst);
+        input->Read(ioBuffer, 0, chunkSize, &readRst);
         if (readRst != chunkSize) {
             return E_IO_EXCEPTION;
         }
-        dataBuffer->PutBytes(*ioBuffer, 0, chunkSize);
+        dataBuffer->Put(ioBuffer, 0, chunkSize);
         i += chunkSize;
     }
-    dataBuffer->SetPosition(0);
+    IBuffer::Probe(dataBuffer)->SetPosition(0);
     CETC1Texture::New(width, height, dataBuffer, texture);
     return NOERROR;
 }
@@ -178,6 +187,8 @@ ECode CETC1Util::CompressTexture(
     /* [in] */ Int32 stride,
     /* [out] */ IETC1Texture** texture)
 {
+    VALIDATE_NOT_NULL(texture)
+
     AutoPtr<IETC1> etc1;
     CETC1::AcquireSingleton((IETC1**)&etc1);
     AutoPtr<IByteBufferHelper> helper;
@@ -191,7 +202,7 @@ ECode CETC1Util::CompressTexture(
     ByteOrder order;
     orderHelper->GetNativeOrder(&order);
     compressedImage->SetOrder(order);
-    etc1->EncodeImage(input, width, height, pixelSize, stride, compressedImage);
+    etc1->EncodeImage(input, width, height, pixelSize, stride, IBuffer::Probe(compressedImage));
     CETC1Texture::New(width, height, compressedImage, texture);
     return NOERROR;
 }
@@ -203,7 +214,7 @@ ECode CETC1Util::WriteTexture(
     AutoPtr<IByteBuffer> dataBuffer;
     texture->GetData((IByteBuffer**)&dataBuffer);
     Int32 originalPosition;
-    dataBuffer->GetPosition(&originalPosition);
+    IBuffer::Probe(dataBuffer)->GetPosition(&originalPosition);
     ECode ec = NOERROR;
     // try {
         Int32 width;
@@ -225,13 +236,13 @@ ECode CETC1Util::WriteTexture(
         orderHelper->GetNativeOrder(&order);
         header->SetOrder(order);
 
-        ec = etc1->FormatHeader(header, width, height);
+        ec = etc1->FormatHeader(IBuffer::Probe(header), width, height);
         if(FAILED(ec))
             goto finally;
-        ec = header->GetBytes(ioBuffer, 0, IETC1::_ETC_PKM_HEADER_SIZE);
+        ec = header->Get(ioBuffer, 0, IETC1::_ETC_PKM_HEADER_SIZE);
         if(FAILED(ec))
             goto finally;
-        ec = output->WriteBytes(*ioBuffer, 0, IETC1::_ETC_PKM_HEADER_SIZE);
+        ec = output->Write(ioBuffer, 0, IETC1::_ETC_PKM_HEADER_SIZE);
         if(FAILED(ec))
             goto finally;
         Int32 encodedSize;
@@ -240,16 +251,16 @@ ECode CETC1Util::WriteTexture(
             goto finally;
         for (Int32 i = 0; i < encodedSize; ) {
             Int32 chunkSize = Elastos::Core::Math::Min(ioBuffer->GetLength(), encodedSize - i);
-            ec = dataBuffer->GetBytes(ioBuffer, 0, chunkSize);
+            ec = dataBuffer->Get(ioBuffer, 0, chunkSize);
             if(FAILED(ec))
                 goto finally;
-            ec = output->WriteBytes(*ioBuffer, 0, chunkSize);
+            ec = output->Write(ioBuffer, 0, chunkSize);
             if(FAILED(ec))
                 goto finally;
             i += chunkSize;
         }
     finally:
-        dataBuffer->SetPosition(originalPosition);
+        IBuffer::Probe(dataBuffer)->SetPosition(originalPosition);
     // }
     return ec;
 }

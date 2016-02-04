@@ -419,7 +419,7 @@ Boolean DisplayPowerController::RequestPowerState(
 {
     if (DEBUG) {
         Slogger::D(TAG, "RequestPowerState: %s, waitForNegativeProximity=%d",
-            Object::ToString(request).string(), waitForNegativeProximity);
+            TO_CSTR(request), waitForNegativeProximity);
     }
 
     synchronized(mLock) {
@@ -1196,7 +1196,7 @@ AutoPtr<ISpline> DisplayPowerController::CreateAutoBrightnessSpline(
     AutoPtr<ISpline> spline;
     helper->CreateSpline(x, y, (ISpline**)&spline);
     if (DEBUG) {
-        Slogger::D(TAG, "Auto-brightness spline: %s", Object::ToString(spline).string());
+        Slogger::D(TAG, "Auto-brightness spline: %s", TO_CSTR(spline));
         Float iv;
         for (Float v = 1.0f; v < (*lux)[lux->GetLength() - 1] * 1.25f; v *= 1.25f) {
             spline->Interpolate(v, &iv);

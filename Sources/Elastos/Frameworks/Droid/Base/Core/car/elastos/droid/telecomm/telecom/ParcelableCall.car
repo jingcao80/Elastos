@@ -1,0 +1,87 @@
+
+module
+{
+
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecomm {
+    namespace Telecom {
+
+        /**
+         *  Information about a call that is used between InCallService and Telecom.
+         *  @hide
+         *
+         * @Involve
+         * interface IParcelable
+         */
+        interface IParcelableCall {
+            GetId(
+                [out] String* res);
+
+            GetState(
+                [out] Int32* res);
+
+            GetDisconnectCause(
+                [out] IDisconnectCause** res);
+
+            GetCannedSmsResponses(
+                [out] IList** res);
+
+            GetCapabilities(
+                [out] Int32* res);
+
+            GetProperties(
+                [out] Int32* res);
+
+            GetConnectTimeMillis(
+                [out] Int64* res);
+
+            GetHandle(
+                [out] IUri** res);
+
+            GetHandlePresentation(
+                [out] Int32* res);
+
+            GetCallerDisplayName(
+                [out] String* res);
+
+            GetCallerDisplayNamePresentation(
+                [out] Int32* res);
+
+            GetGatewayInfo(
+                [out] IGatewayInfo** res);
+
+            GetAccountHandle(
+                [out] IPhoneAccountHandle** res);
+
+            GetVideoCall(
+                [out] IInCallServiceVideoCall** res);
+
+            GetParentCallId(
+                [out] String* res);
+
+            GetChildCallIds(
+                [out] IList** res);
+
+            GetConferenceableCallIds(
+                [out] IList** res);
+
+            GetStatusHints(
+                [out] IStatusHints** res);
+
+            GetVideoState(
+                [out] Int32* res);
+
+            GetExtras(
+                [out] IBundle** res);
+        }
+
+    } // namespace Telecom
+    } // namespace Telecomm
+    } // namespace Droid
+    } // namespace Elastos
+}

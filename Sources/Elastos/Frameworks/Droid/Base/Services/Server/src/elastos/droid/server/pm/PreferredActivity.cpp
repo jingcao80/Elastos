@@ -1,7 +1,7 @@
 
 #include "elastos/droid/server/pm/PreferredActivity.h"
 #include "elastos/droid/server/pm/CPackageManagerService.h"
-#include "elastos/droid/util/XmlUtils.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -9,7 +9,7 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Utility::XmlUtils;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Utility::ILogHelper;
 
 namespace Elastos {
@@ -31,7 +31,42 @@ PreferredActivity::PreferredActivity(
     mPref = new PreferredComponent(this, match, set, activity, always);
 }
 
-CAR_INTERFACE_IMPL(PreferredActivity, IntentFilter, PreferredComponent::ICallbacks)
+UInt32 PreferredActivity::AddRef()
+{
+    return ElRefBase::AddRef();
+}
+
+UInt32 PreferredActivity::Release()
+{
+    return ElRefBase::Release();
+}
+
+PInterface PreferredActivity::Probe(
+    /* [in] */ REIID riid)
+{
+    if (riid == EIID_IInterface) {
+        return (IInterface*)(PreferredComponent::ICallbacks*)this;
+    }
+    else if (riid == EIID_IPreferredComponentCallbacks) {
+        return (PreferredComponent::ICallbacks*)this;
+    }
+    return IntentFilter::Probe(riid);
+}
+
+ECode PreferredActivity::GetInterfaceID(
+    /* [in] */ IInterface* object,
+    /* [out] */ InterfaceID* iid)
+{
+    VALIDATE_NOT_NULL(iid);
+
+    if (object == (IInterface*)(PreferredComponent::ICallbacks*)this) {
+        *iid = EIID_IPreferredComponentCallbacks;
+        return NOERROR;
+    }
+    return IntentFilter::GetInterfaceID(object, iid);
+}
+
+// CAR_INTERFACE_IMPL(PreferredActivity, IntentFilter, PreferredComponent::ICallbacks)
 
 PreferredActivity::PreferredActivity(
     /* [in] */ IXmlPullParser* parser)
@@ -89,10 +124,10 @@ ECode PreferredActivity::ToString(
     CSystem::AcquireSingleton((ISystem**)&sys);
     Int32 hashCode;
     sys->IdentityHashCode((IObject*)this, &hashCode);
-    String str;
-    mPref->mComponent->FlattenToShortString(&str);
+    String s;
+    mPref->mComponent->FlattenToShortString(&s);
     *str = String("PreferredActivity{0x") + StringUtils::ToHexString(hashCode)
-            + " " + str + "}";
+            + " " + s + "}";
     return NOERROR;
 }
 

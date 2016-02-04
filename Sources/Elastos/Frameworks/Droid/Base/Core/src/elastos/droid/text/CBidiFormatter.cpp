@@ -21,31 +21,31 @@ static String StringFromChar32(
 /**
  * Unicode "Left-To-Right Embedding" (LRE) character.
  */
-const Char32 CBidiFormatter::LRE = '\u202A';
+const Char32 CBidiFormatter::LRE = 0x202A;
 
 /**
  * Unicode "Right-To-Left Embedding" (RLE) character.
  */
-const Char32 CBidiFormatter::RLE = '\u202B';
+const Char32 CBidiFormatter::RLE = 0x202B;
 
 /**
  * Unicode "Pop Directional Formatting" (PDF) character.
  */
-const Char32 CBidiFormatter::PDF = '\u202C';
+const Char32 CBidiFormatter::PDF = 0x202C;
 
 /**
  *  Unicode "Left-To-Right Mark" (LRM) character.
  */
-const Char32 CBidiFormatter::LRM = '\u200E';
+const Char32 CBidiFormatter::LRM = 0x200E;
 
 /*
  * Unicode "Right-To-Left Mark" (RLM) character.
  */
-const Char32 CBidiFormatter::RLM = '\u200F';
+const Char32 CBidiFormatter::RLM = 0x200F;
 
 
-const String CBidiFormatter::LRM_STRING = StringFromChar32('\u200E');//Character.toString(LRM);
-const String CBidiFormatter::RLM_STRING = StringFromChar32('\u200F');//Character.toString(RLM);
+const String CBidiFormatter::LRM_STRING = StringFromChar32(0x200E);//Character.toString(LRM);
+const String CBidiFormatter::RLM_STRING = StringFromChar32(0x200F);//Character.toString(RLM);
 
 const String CBidiFormatter::EMPTY_STRING("");
 

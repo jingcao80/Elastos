@@ -1,12 +1,15 @@
 
 #include "elastos/droid/server/pm/CPackageInstallerService.h"
+#include "elastos/droid/server/pm/CPackageInstallerSession.h"
 #include "elastos/droid/server/IoThread.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/os/FileUtils.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/SELinux.h"
+#include "elastos/droid/os/Process.h"
 #include "elastos/droid/system/Os.h"
+#include "elastos/droid/Manifest.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/Xml.h"
 #include "Elastos.Droid.Internal.h"
@@ -16,13 +19,17 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Objects.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/etl/Set.h>
 
 using Elastos::Droid::App::IActivityManager;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::IPackageInstallerSessionParams;
 using Elastos::Droid::Content::Pm::CPackageInstallerSessionParams;
 using Elastos::Droid::Content::Pm::CParceledListSlice;
 using Elastos::Droid::Content::Pm::IPackageManagerHelper;
 using Elastos::Droid::Content::Pm::CPackageManagerHelper;
+using Elastos::Droid::Content::Pm::IPackageInstaller;
+using Elastos::Droid::Content::Pm::EIID_IIPackageInstaller;
 using Elastos::Droid::Graphics::IBitmapFactory;
 using Elastos::Droid::Graphics::CBitmapFactory;
 using Elastos::Droid::Graphics::IBitmapHelper;
@@ -32,6 +39,8 @@ using Elastos::Droid::Internal::Content::IPackageHelper;
 using Elastos::Droid::Internal::Content::CPackageHelper;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
+using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::CHandlerThread;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::Environment;
@@ -39,6 +48,10 @@ using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::SELinux;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::CRemoteCallbackList;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::Process;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Droid::Utility::Xml;
@@ -48,13 +61,22 @@ using Elastos::Core::StringUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::IBoolean;
+using Elastos::Core::CBoolean;
 using Elastos::Core::IFloat;
+using Elastos::Core::CFloat;
+using Elastos::Core::IThread;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
 using Elastos::IO::CFile;
 using Elastos::IO::ICloseable;
 using Elastos::IO::CFileOutputStream;
-using Elastos::Security::CSecureRandom;
+using Elastos::IO::EIID_IFilenameFilter;
+using Elastos::IO::IFileInputStream;
+// using Elastos::Security::CSecureRandom;
 using Elastos::Utility::Objects;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Etl::Set;
 using Libcore::IO::IIoUtils;
 using Libcore::IO::CIoUtils;
 
@@ -67,7 +89,7 @@ namespace Pm {
 //                  CPackageInstallerService::StageFilter
 //==============================================================================
 
-CAR_INTERFACE_DECL()
+CAR_INTERFACE_IMPL(CPackageInstallerService::StageFilter, Object, IFilenameFilter)
 
 ECode CPackageInstallerService::StageFilter::Accept(
     /* [in] */ IFile* dir,
@@ -86,8 +108,9 @@ ECode CPackageInstallerService::StageFilter::Accept(
 
 ECode CPackageInstallerService::WriteSessionsRunnable::Run()
 {
-    synchronized (mHost->mSessionsLock) {
-        mHost->writeSessionsLocked();
+    Object& lock = mHost->mSessionsLock;
+    synchronized (lock) {
+        mHost->WriteSessionsLocked();
     }
     return NOERROR;
 }
@@ -104,7 +127,7 @@ ECode CPackageInstallerService::PackageDeleteObserverAdapter::OnUserActionRequir
     CIntent::New((IIntent**)&fillIn);
     fillIn->PutExtra(IPackageInstaller::EXTRA_PACKAGE_NAME, mPackageName);
     fillIn->PutExtra(IPackageInstaller::EXTRA_STATUS, IPackageInstaller::STATUS_PENDING_USER_ACTION);
-    fillIn->PutExtra(IIntent::EXTRA_INTENT, intent);
+    fillIn->PutExtra(IIntent::EXTRA_INTENT, IParcelable::Probe(intent));
     // try {
     mTarget->SendIntent(mContext, 0, fillIn, NULL, NULL);
     // } catch (SendIntentException ignored) {
@@ -141,14 +164,14 @@ ECode CPackageInstallerService::PackageDeleteObserverAdapter::OnPackageDeleted(
 //                  CPackageInstallerService::PackageInstallObserverAdapter
 //==============================================================================
 
-ECode CPackageInstallerService::PackageDeleteObserverAdapter::OnUserActionRequired(
+ECode CPackageInstallerService::PackageInstallObserverAdapter::OnUserActionRequired(
     /* [in] */ IIntent* intent)
 {
     AutoPtr<IIntent> fillIn;
     CIntent::New((IIntent**)&fillIn);
     fillIn->PutExtra(IPackageInstaller::EXTRA_SESSION_ID, mSessionId);
     fillIn->PutExtra(IPackageInstaller::EXTRA_STATUS, IPackageInstaller::STATUS_PENDING_USER_ACTION);
-    fillIn->PutExtra(IIntent::EXTRA_INTENT, intent);
+    fillIn->PutExtra(IIntent::EXTRA_INTENT, IParcelable::Probe(intent));
     // try {
     mTarget->SendIntent(mContext, 0, fillIn, NULL, NULL);
     // } catch (SendIntentException ignored) {
@@ -156,7 +179,7 @@ ECode CPackageInstallerService::PackageDeleteObserverAdapter::OnUserActionRequir
     return NOERROR;
 }
 
-ECode CPackageInstallerService::PackageDeleteObserverAdapter::OnPackageInstalled(
+ECode CPackageInstallerService::PackageInstallObserverAdapter::OnPackageInstalled(
     /* [in] */ const String& basePackageName,
     /* [in] */ Int32 returnCode,
     /* [in] */ const String& msg,
@@ -193,11 +216,11 @@ ECode CPackageInstallerService::PackageDeleteObserverAdapter::OnPackageInstalled
 //                  CPackageInstallerService::Callbacks
 //==============================================================================
 
-cosnt Int32 CPackageInstallerService::Callbacks::MSG_SESSION_CREATED;
-cosnt Int32 CPackageInstallerService::Callbacks::MSG_SESSION_BADGING_CHANGED;
-cosnt Int32 CPackageInstallerService::Callbacks::MSG_SESSION_ACTIVE_CHANGED;
-cosnt Int32 CPackageInstallerService::Callbacks::MSG_SESSION_PROGRESS_CHANGED;
-cosnt Int32 CPackageInstallerService::Callbacks::MSG_SESSION_FINISHED;
+const Int32 CPackageInstallerService::Callbacks::MSG_SESSION_CREATED;
+const Int32 CPackageInstallerService::Callbacks::MSG_SESSION_BADGING_CHANGED;
+const Int32 CPackageInstallerService::Callbacks::MSG_SESSION_ACTIVE_CHANGED;
+const Int32 CPackageInstallerService::Callbacks::MSG_SESSION_PROGRESS_CHANGED;
+const Int32 CPackageInstallerService::Callbacks::MSG_SESSION_FINISHED;
 
 CPackageInstallerService::Callbacks::Callbacks(
     /* [in] */ ILooper* looper)
@@ -212,13 +235,15 @@ void CPackageInstallerService::Callbacks::Register(
 {
     AutoPtr<IUserHandle> userH;
     CUserHandle::New(userId, (IUserHandle**)&userH);
-    mCallbacks->Register(callback, userH);
+    Boolean result;
+    mCallbacks->Register(callback, userH, &result);
 }
 
 void CPackageInstallerService::Callbacks::Unregister(
     /* [in] */ IPackageInstallerCallback* callback)
 {
-    mCallback->Unregister(callback);
+    Boolean result;
+    mCallbacks->Unregister(callback, &result);
 }
 
 ECode CPackageInstallerService::Callbacks::HandleMessage(
@@ -306,7 +331,9 @@ void CPackageInstallerService::Callbacks::NotifySessionActiveChanged(
     /* [in] */ Boolean active)
 {
     AutoPtr<IMessage> msg;
-    ObtainMessage(MSG_SESSION_ACTIVE_CHANGED, sessionId, userId, active, (IMessage**)&msg);
+    AutoPtr<IBoolean> b;
+    CBoolean::New(active, (IBoolean**)&b);
+    ObtainMessage(MSG_SESSION_ACTIVE_CHANGED, sessionId, userId, b, (IMessage**)&msg);
     msg->SendToTarget();
 }
 
@@ -316,7 +343,9 @@ void CPackageInstallerService::Callbacks::NotifySessionProgressChanged(
     /* [in] */ Float progress)
 {
     AutoPtr<IMessage> msg;
-    ObtainMessage(MSG_SESSION_PROGRESS_CHANGED, sessionId, userId, progress, (IMessage**)&msg);
+    AutoPtr<IFloat> f;
+    CFloat::New(progress, (IFloat**)&f);
+    ObtainMessage(MSG_SESSION_PROGRESS_CHANGED, sessionId, userId, f, (IMessage**)&msg);
     msg->SendToTarget();
 }
 
@@ -326,20 +355,23 @@ void CPackageInstallerService::Callbacks::NotifySessionFinished(
     /* [in] */ Boolean success)
 {
     AutoPtr<IMessage> msg;
-    ObtainMessage(MSG_SESSION_FINISHED, sessionId, userId, success, (IMessage**)&msg);
+    AutoPtr<IBoolean> b;
+    CBoolean::New(success, (IBoolean**)&b);
+    ObtainMessage(MSG_SESSION_FINISHED, sessionId, userId, b, (IMessage**)&msg);
     msg->SendToTarget();
 }
 
 
 //==============================================================================
-//                  CPackageInstallerService::InternalCallback::SessionFinishedRunnable
+//                  InternalCallback::SessionFinishedRunnable
 //==============================================================================
 
-ECode CPackageInstallerService::InternalCallback::SessionFinishedRunnable::Run()
+ECode InternalCallback::SessionFinishedRunnable::Run()
 {
-    synchronized (mHost->mSessionsLock) {
+    Object& lock = mHost->mSessionsLock;
+    synchronized (lock) {
         mHost->mSessions.Erase(mSession->mSessionId);
-        mHost->mHistoricalSessions[mSession->mSessionId] = session;
+        mHost->mHistoricalSessions[mSession->mSessionId] = mSession;
 
         AutoPtr<IFile> appIconFile = mHost->BuildAppIconFile(mSession->mSessionId);
         Boolean exists;
@@ -349,35 +381,36 @@ ECode CPackageInstallerService::InternalCallback::SessionFinishedRunnable::Run()
 
         mHost->WriteSessionsLocked();
     }
+    return NOERROR;
 }
 
 
 //==============================================================================
-//                  CPackageInstallerService::InternalCallback
+//                  InternalCallback
 //==============================================================================
 
-void CPackageInstallerService::InternalCallback::OnSessionBadgingChanged(
+void InternalCallback::OnSessionBadgingChanged(
     /* [in] */ CPackageInstallerSession* session)
 {
     mHost->mCallbacks->NotifySessionBadgingChanged(session->mSessionId, session->mUserId);
     mHost->WriteSessionsAsync();
 }
 
-void CPackageInstallerService::InternalCallback::OnSessionActiveChanged(
+void InternalCallback::OnSessionActiveChanged(
     /* [in] */ CPackageInstallerSession* session,
     /* [in] */ Boolean active)
 {
     mHost->mCallbacks->NotifySessionActiveChanged(session->mSessionId, session->mUserId, active);
 }
 
-void CPackageInstallerService::InternalCallback::OnSessionProgressChanged(
+void InternalCallback::OnSessionProgressChanged(
     /* [in] */ CPackageInstallerSession* session,
     /* [in] */ Float progress)
 {
     mHost->mCallbacks->NotifySessionProgressChanged(session->mSessionId, session->mUserId, progress);
 }
 
-void CPackageInstallerService::InternalCallback::OnSessionFinished(
+void InternalCallback::OnSessionFinished(
     /* [in] */ CPackageInstallerSession* session,
     /* [in] */ Boolean success)
 {
@@ -385,10 +418,10 @@ void CPackageInstallerService::InternalCallback::OnSessionFinished(
 
     AutoPtr<IRunnable> runnable = new SessionFinishedRunnable(mHost, session);
     Boolean result;
-    mInstallHandler->Post(runnable, &result);
+    mHost->mInstallHandler->Post(runnable, &result);
 }
 
-void CPackageInstallerService::InternalCallback::OnSessionPrepared(
+void InternalCallback::OnSessionPrepared(
     /* [in] */ CPackageInstallerSession* session)
 {
     // We prepared the destination to write into; we want to persist
@@ -396,13 +429,14 @@ void CPackageInstallerService::InternalCallback::OnSessionPrepared(
     mHost->WriteSessionsAsync();
 }
 
-void CPackageInstallerService::InternalCallback::OnSessionSealedBlocking(
+void InternalCallback::OnSessionSealedBlocking(
     /* [in] */ CPackageInstallerSession* session)
 {
     // It's very important that we block until we've recorded the
     // session as being sealed, since we never want to allow mutation
     // after sealing.
-    synchronized (mHost->mSessionsLock) {
+    Object& lock = mHost->mSessionsLock;
+    synchronized (lock) {
         mHost->WriteSessionsLocked();
     }
 }
@@ -439,7 +473,7 @@ const Int64 CPackageInstallerService::MAX_AGE_MILLIS = 3 * IDateUtils::DAY_IN_MI
 const Int64 CPackageInstallerService::MAX_ACTIVE_SESSIONS;
 const Int64 CPackageInstallerService::MAX_HISTORICAL_SESSIONS;
 
-static AutoPtr<IFilenameFilter> InitStageFilter()
+AutoPtr<IFilenameFilter> CPackageInstallerService::InitStageFilter()
 {
     return (IFilenameFilter*)new StageFilter();
 }
@@ -448,7 +482,8 @@ AutoPtr<IFilenameFilter> CPackageInstallerService::sStageFilter = InitStageFilte
 CPackageInstallerService::CPackageInstallerService()
 {
     mInternalCallback = new InternalCallback(this);
-    CSecureRandom::New((IRandom**)&mRandom);
+    // TODO: SecureRandom has not been realized
+    // CSecureRandom::New((IRandom**)&mRandom);
 }
 
 CAR_INTERFACE_IMPL_2(CPackageInstallerService, Object, IIPackageInstaller, IBinder)
@@ -456,20 +491,20 @@ CAR_INTERFACE_IMPL_2(CPackageInstallerService, Object, IIPackageInstaller, IBind
 CAR_OBJECT_IMPL(CPackageInstallerService)
 
 ECode CPackageInstallerService::constructor(
-	/* [in] */ IContext* ctx
+	/* [in] */ IContext* context,
     /* [in] */ IIPackageManager* pm,
     /* [in] */ IFile* stagingDir)
 {
     mContext = context;
-    mPm = reinterpret_cast<CPackageManagerService*>(pm->Probe(EIID_CPackageManagerService));
+    mPm = (CPackageManagerService*)pm;
     AutoPtr<IInterface> service;
-    mContext->GetSystemservice(IContext::APP_OPS_SERVICE, (IInterface**)&service);
+    mContext->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&service);
     mAppOps = IAppOpsManager::Probe(service);
 
     mStagingDir = stagingDir;
 
     CHandlerThread::New(TAG, (IHandlerThread**)&mInstallThread);
-    mInstallThread->Start();
+    IThread::Probe(mInstallThread)->Start();
 
     AutoPtr<ILooper> looper;
     mInstallThread->GetLooper((ILooper**)&looper);
@@ -482,19 +517,20 @@ ECode CPackageInstallerService::constructor(
     CFile::New(dir, String("install_sessions.xml"), (IFile**)&file);
     CAtomicFile::New(file, (IAtomicFile**)&mSessionsFile);
     CFile::New(dir, String("install_sessions"), (IFile**)&mSessionsDir);
-    mSessionsDir->Mkdirs();
+    Boolean result;
+    mSessionsDir->Mkdirs(&result);
 
     synchronized (mSessionsLock) {
         ReadSessionsLocked();
         AutoPtr<ArrayOf<IFile*> > files;
-        mStagingDir->Listfiles((ArrayOf<IFile*>**)&files);
-        HashSet<AutoPtr<IFile> > unclaimedStages;
+        mStagingDir->ListFiles((ArrayOf<IFile*>**)&files);
+        Set<AutoPtr<IFile> > unclaimedStages;
         for (Int32 i = 0; i < files->GetLength(); ++i) {
             unclaimedStages.Insert((*files)[i]);
         }
         files = NULL;
-        mSessionsDir->Listfiles((ArrayOf<IFile*>**)&NULL);
-        HashSet<AutoPtr<IFile> > unclaimedIcons;
+        mSessionsDir->ListFiles((ArrayOf<IFile*>**)&files);
+        Set<AutoPtr<IFile> > unclaimedIcons;
         for (Int32 i = 0; i < files->GetLength(); ++i) {
             unclaimedIcons.Insert((*files)[i]);
         }
@@ -509,7 +545,7 @@ ECode CPackageInstallerService::constructor(
         }
 
         // Clean up orphaned staging directories
-        HashSet<AutoPtr<IFile> >::Iterator stageIt = unclaimedStages.Begin();
+        Set<AutoPtr<IFile> >::Iterator stageIt = unclaimedStages.Begin();
         for (; stageIt != unclaimedStages.End(); ++stageIt) {
             AutoPtr<IFile> stage = *stageIt;
             Slogger::W(TAG, "Deleting orphan stage %p", stage.Get());
@@ -521,7 +557,7 @@ ECode CPackageInstallerService::constructor(
         }
 
         // Clean up orphaned icons
-        HashSet<AutoPtr<IFile> >::Iterator iconIt = unclaimedIcons.Begin();
+        Set<AutoPtr<IFile> >::Iterator iconIt = unclaimedIcons.Begin();
         for (; iconIt != unclaimedStages.End(); ++iconIt) {
             AutoPtr<IFile> icon = *iconIt;
             Slogger::W(TAG, "Deleting orphan icon %p", icon.Get());
@@ -538,7 +574,7 @@ void CPackageInstallerService::OnSecureContainersAvailable()
         AutoPtr<IPackageHelper> helper;
         CPackageHelper::AcquireSingleton((IPackageHelper**)&helper);
         AutoPtr<ArrayOf<String> > list;
-        helper->GetSecurecontainerList((ArrayOf<String>**)&list);
+        helper->GetSecureContainerList((ArrayOf<String>**)&list);
         for (Int32 i = 0; i < list->GetLength(); ++i) {
             String cid = (*list)[i];
             if (IsStageName(cid)) {
@@ -555,15 +591,18 @@ void CPackageInstallerService::OnSecureContainersAvailable()
             if (unclaimed.Find(cid) != unclaimed.End()) {
                 unclaimed.Erase(cid);
                 // Claimed by active session, mount it
-                helper->MountSdDir(cid, CPackageManagerService::GetEncryptKey(), IProcess::SYSTEM_UID);
+                String dir;
+                helper->MountSdDir(cid, CPackageManagerService::GetEncryptKey(), IProcess::SYSTEM_UID, &dir);
             }
         }
 
         // Clean up orphaned staging containers
         HashSet<String>::Iterator cidIt = unclaimed.Begin();
         for (; cidIt != unclaimed.End(); ++cidIt) {
-            Slogger::W(TAG, "Deleting orphan container %s", (*cid).string());
-            helper->DestroySdDir(cid);
+            String cid = *cidIt;
+            Slogger::W(TAG, "Deleting orphan container %s", cid.string());
+            Boolean result;
+            helper->DestroySdDir(cid, &result);
         }
     }
 }
@@ -602,12 +641,14 @@ ECode CPackageInstallerService::AllocateInternalStageDirLegacy(
 
 String CPackageInstallerService::AllocateExternalStageCidLegacy()
 {
+    String value;
     synchronized (mSessionsLock) {
         Int32 sessionId;
         AllocateSessionIdLocked(&sessionId);
         mLegacySessions[sessionId] = TRUE;
-        return String("smdl") + StringUtils::ToString(sessionId) + ".tmp";
+        value = String("smdl") + StringUtils::ToString(sessionId) + ".tmp";
     }
+    return value;
 }
 
 void CPackageInstallerService::ReadSessionsLocked()
@@ -619,16 +660,17 @@ void CPackageInstallerService::ReadSessionsLocked()
     AutoPtr<IFileInputStream> fis;
     // try {
     mSessionsFile->OpenRead((IFileInputStream**)&fis);
-    AutoPtr<IXmlPullParser> in = Xml::NewPullParser();
-    in->SetInput(fis, String(NULL));
+    AutoPtr<IXmlPullParser> in;
+    Xml::NewPullParser((IXmlPullParser**)&in);
+    in->SetInput(IInputStream::Probe(fis), String(NULL));
 
     AutoPtr<IIoUtils> ioutils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioutils);
     AutoPtr<ICloseable> closeFis = ICloseable::Probe(fis);
 
     Int32 type;
-    while (in->GetNext(&type), type != END_DOCUMENT) {
-        if (type == START_TAG) {
+    while (in->Next(&type), type != IXmlPullParser::END_DOCUMENT) {
+        if (type == IXmlPullParser::START_TAG) {
             String tag;
             in->GetName(&tag);
             if (TAG_SESSION.Equals(tag)) {
@@ -641,7 +683,7 @@ void CPackageInstallerService::ReadSessionsLocked()
                 AutoPtr<ISystem> sys;
                 CSystem::AcquireSingleton((ISystem**)&sys);
                 Int64 millis;
-                sys->GetCurrentTimeMillis(&age);
+                sys->GetCurrentTimeMillis(&millis);
                 Int64 age = millis - session->mCreatedMillis;
 
                 Boolean valid, exists;
@@ -684,7 +726,7 @@ void CPackageInstallerService::ReadSessionsLocked()
 
 ECode CPackageInstallerService::ReadSessionLocked(
     /* [in] */ IXmlPullParser* in,
-    /* [out] */ CPackageInstallerSession* session)
+    /* [out] */ CPackageInstallerSession** session)
 {
     VALIDATE_NOT_NULL(session)
     *session = NULL;
@@ -737,7 +779,9 @@ ECode CPackageInstallerService::ReadSessionLocked(
     params->SetAppIcon(appIcon);
     String appLabel;
     FAIL_RETURN(XmlUtils::ReadStringAttribute(in, ATTR_APP_LABEL, &appLabel))
-    params->SetAppLabel(appLabel);
+    AutoPtr<ICharSequence> cs;
+    CString::New(appLabel, (ICharSequence**)&cs);
+    params->SetAppLabel(cs);
     AutoPtr<IUri> originatingUri;
     FAIL_RETURN(XmlUtils::ReadUriAttribute(in, ATTR_APP_LABEL, (IUri**)&originatingUri))
     params->SetOriginatingUri(originatingUri);
@@ -749,7 +793,7 @@ ECode CPackageInstallerService::ReadSessionLocked(
     params->SetAbiOverride(abiOverride);
 
     AutoPtr<IFile> appIconFile = BuildAppIconFile(sessionId);
-    Boolean exists
+    Boolean exists;
     if (appIconFile->Exists(&exists), exists) {
         String absolutePath;
         appIconFile->GetAbsolutePath(&absolutePath);
@@ -765,7 +809,7 @@ ECode CPackageInstallerService::ReadSessionLocked(
 
     AutoPtr<ILooper> looper;
     mInstallHandler->GetLooper((ILooper**)&looper);
-    return CPackageInstallerSession::NewbyFriend(mInternalCallback, mContext, mPm,
+    return CPackageInstallerSession::NewByFriend((Handle64)mInternalCallback.Get(), mContext, mPm,
             looper, sessionId, userId, installerPackageName, installerUid,
             params, createdMillis, stageDir, stageCid, prepared, sealed, session);
 }
@@ -776,28 +820,44 @@ void CPackageInstallerService::WriteSessionsLocked()
 
     AutoPtr<IFileOutputStream> fos;
     // try {
-    FAIL_GOTO(mSessionsFile->StartWrite((IFileOutputStream**)&fos), fail)
+    do {
+        if (FAILED(mSessionsFile->StartWrite((IFileOutputStream**)&fos))) {
+            break;
+        }
 
-    AutoPtr<IXmlSerializer> out;
-    CFastXmlSerializer::New((IXmlSerializer**)&out);
-    FAIL_GOTO(out->SetOutput(fos, String("utf-8")), fail)
-    FAIL_GOTO(out->StartDocument(String(NULL), TRUE), fail)
-    FAIL_GOTO(out->StartTag(String(NULL), TAG_SESSIONS), fail)
-    HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Begin();
-    for (; it != mSessions.End(); ++it) {
-        FAIL_GOTO(WriteSessionLocked(out, it->mSecond), fail)
-    }
-    FAIL_GOTO(out->WriteEndTag(String(NULL), TAG_SESSIONS), fail)
-    FAIL_GOTO(out->EndDocument(), fail)
+        AutoPtr<IXmlSerializer> out;
+        CFastXmlSerializer::New((IXmlSerializer**)&out);
+        if (FAILED(out->SetOutput(IOutputStream::Probe(fos), String("utf-8")))) {
+            break;
+        }
+        if (FAILED(out->StartDocument(String(NULL), TRUE))) {
+            break;
+        }
+        if (FAILED(out->WriteStartTag(String(NULL), TAG_SESSIONS))) {
+            break;
+        }
+        HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Begin();
+        for (; it != mSessions.End(); ++it) {
+            if (FAILED(WriteSessionLocked(out, it->mSecond))) {
+                break;
+            }
+        }
+        if (FAILED(out->WriteEndTag(String(NULL), TAG_SESSIONS))) {
+            break;
+        }
+        if (FAILED(out->EndDocument())) {
+            break;
+        }
 
-    mSessionsFile->FinishWrite(fos);
-    return;
+        mSessionsFile->FinishWrite(fos);
+        return;
+    } while (0);
+
     // } catch (IOException e) {
     //     if (fos != null) {
     //         mSessionsFile.failWrite(fos);
     //     }
     // }
-fail:
     if (fos != NULL) {
         mSessionsFile->FailWrite(fos);
     }
@@ -809,27 +869,24 @@ ECode CPackageInstallerService::WriteSessionLocked(
 {
     AutoPtr<IPackageInstallerSessionParams> params = session->mParams;
 
-    FAIL_RETURN(out->StartTag(String(NULL), TAG_SESSION))
+    FAIL_RETURN(out->WriteStartTag(String(NULL), TAG_SESSION))
 
     FAIL_RETURN(XmlUtils::WriteInt32Attribute(out, ATTR_SESSION_ID, session->mSessionId))
     FAIL_RETURN(XmlUtils::WriteInt32Attribute(out, ATTR_USER_ID, session->mUserId))
     FAIL_RETURN(XmlUtils::WriteStringAttribute(out, ATTR_INSTALLER_PACKAGE_NAME,
-            session->mInstallerPackageName);
+            session->mInstallerPackageName))
     FAIL_RETURN(XmlUtils::WriteInt32Attribute(out, ATTR_INSTALLER_UID, session->mInstallerUid))
     FAIL_RETURN(XmlUtils::WriteInt64Attribute(out, ATTR_CREATED_MILLIS, session->mCreatedMillis))
     if (session->mStageDir != NULL) {
         String absolutePath;
         session->mStageDir->GetAbsolutePath(&absolutePath);
-        FAIL_RETURN(XmlUtils::WriteStringAttribute(out, ATTR_SESSION_STAGE_DIR, absolutePath);
+        FAIL_RETURN(XmlUtils::WriteStringAttribute(out, ATTR_SESSION_STAGE_DIR, absolutePath))
     }
     if (!session->mStageCid.IsNull()) {
-        FAIL_RETURN(XmlUtils::WriteStringAttribute(out, ATTR_SESSION_STAGE_CID, session->mStageCid);
+        FAIL_RETURN(XmlUtils::WriteStringAttribute(out, ATTR_SESSION_STAGE_CID, session->mStageCid))
     }
-    Boolean isPrepared, isSealed;
-    session->IsPrepared(&isPrepared);
-    FAIL_RETURN(XmlUtils::WriteBooleanAttribute(out, ATTR_PREPARED, isPrepared))
-    session->IsSealed(&isSealed);
-    FAIL_RETURN(XmlUtils::WriteBooleanAttribute(out, ATTR_SEALED, isSealed))
+    FAIL_RETURN(XmlUtils::WriteBooleanAttribute(out, ATTR_PREPARED, session->IsPrepared()))
+    FAIL_RETURN(XmlUtils::WriteBooleanAttribute(out, ATTR_SEALED, session->IsSealed()))
 
     Int32 mode;
     params->GetMode(&mode);
@@ -841,9 +898,9 @@ ECode CPackageInstallerService::WriteSessionLocked(
     params->GetInstallLocation(&installLocation);
     FAIL_RETURN(XmlUtils::WriteInt32Attribute(out, ATTR_INSTALL_LOCATION, installLocation))
     Int64 sizeBytes;
-    params->GetSizeByte(&sizeBytes);
+    params->GetSizeBytes(&sizeBytes);
     FAIL_RETURN(XmlUtils::WriteInt64Attribute(out, ATTR_SIZE_BYTES, sizeBytes))
-    string appPackageName;
+    String appPackageName;
     params->GetAppPackageName(&appPackageName);
     FAIL_RETURN(XmlUtils::WriteStringAttribute(out, ATTR_APP_PACKAGE_NAME, appPackageName))
     String appLabel;
@@ -862,7 +919,7 @@ ECode CPackageInstallerService::WriteSessionLocked(
     // Persist app icon if changed since last written
     AutoPtr<IFile> appIconFile = BuildAppIconFile(session->mSessionId);
     AutoPtr<IBitmap> appIcon;
-    params->GetAppIcon(&appIcon);
+    params->GetAppIcon((IBitmap**)&appIcon);
     Boolean exists;
     if (appIcon == NULL && (appIconFile->Exists(&exists), exists)) {
         appIconFile->Delete();
@@ -948,7 +1005,7 @@ ECode CPackageInstallerService::CreateSessionInternal(
 
     Int32 installFlags;
     params->GetInstallFlags(&installFlags);
-    if ((callingUid == IProcess::SHELL_UID) || (callingUid == IProcess::ROOT_UID)) {
+    if ((callingUid == IProcess::SHELL_UID) || (callingUid == Process::ROOT_UID)) {
         installFlags |= IPackageManager::INSTALL_FROM_ADB;
         params->SetInstallFlags(installFlags);
 
@@ -964,9 +1021,9 @@ ECode CPackageInstallerService::CreateSessionInternal(
 
     // Defensively resize giant app icons
     AutoPtr<IBitmap> appIcon;
-    if (params->GetAppIcon(appIcon), appIcon != NULL) {
+    if (params->GetAppIcon((IBitmap**)&appIcon), appIcon != NULL) {
         AutoPtr<IInterface> service;
-        mContext->GetSystemservice(IContext::ACTIVITY_SERVICE, (IInterface**)&service);
+        mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&service);
         AutoPtr<IActivityManager> am = IActivityManager::Probe(service);
         Int32 iconSize;
         am->GetLauncherLargeIconSize(&iconSize);
@@ -993,7 +1050,7 @@ ECode CPackageInstallerService::CreateSessionInternal(
         Int32 installLocation;
         params->GetInstallLocation(&installLocation);
         Int64 sizeBytes;
-        params->GetSizeByte(&sizeBytes);
+        params->GetSizeBytes(&sizeBytes);
         params->GetInstallFlags(&installFlags);
         AutoPtr<IPackageHelper> pkgHelper;
         CPackageHelper::AcquireSingleton((IPackageHelper**)&pkgHelper);
@@ -1056,7 +1113,7 @@ ECode CPackageInstallerService::CreateSessionInternal(
 
         AutoPtr<ILooper> looper;
         mInstallThread->GetLooper((ILooper**)&looper);
-        CPackageInstallerSession::NewbyFriend(mInternalCallback, mContext, mPm,
+        CPackageInstallerSession::NewByFriend((Handle64)mInternalCallback.Get(), mContext, mPm,
                 looper, sessionId, userId, installerPackageName, callingUid,
                 params, createdMillis, stageDir, stageCid, FALSE, FALSE, (CPackageInstallerSession**)&session);
         mSessions[sessionId] = session;
@@ -1064,7 +1121,7 @@ ECode CPackageInstallerService::CreateSessionInternal(
 
     mCallbacks->NotifySessionCreated(session->mSessionId, session->mUserId);
     WriteSessionsAsync();
-    *resut = sessionId;
+    *result = sessionId;
     return NOERROR;
 }
 
@@ -1088,7 +1145,7 @@ ECode CPackageInstallerService::UpdateSessionAppIcon(
         // Defensively resize giant app icons
         if (appIcon != NULL) {
             AutoPtr<IInterface> service;
-            mContext->GetSystemservice(IContext::ACTIVITY_SERVICE, (IInterface**)&service);
+            mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&service);
             AutoPtr<IActivityManager> am = IActivityManager::Probe(service);
             Int32 iconSize;
             am->GetLauncherLargeIconSize(&iconSize);
@@ -1123,9 +1180,12 @@ ECode CPackageInstallerService::UpdateSessionAppLabel(
             Slogger::E(TAG, "Caller has no access to session %d", sessionId);
             return E_SECURITY_EXCEPTION;
         }
-        session->mParams->SetAppLabel(appLabel);
+        AutoPtr<ICharSequence> cs;
+        CString::New(appLabel, (ICharSequence**)&cs);
+        session->mParams->SetAppLabel(cs);
         mInternalCallback->OnSessionBadgingChanged(session);
     }
+    return NOERROR;
 }
 
 ECode CPackageInstallerService::AbandonSession(
@@ -1162,7 +1222,7 @@ ECode CPackageInstallerService::OpenSessionInternal(
     /* [in] */ Int32 sessionId,
     /* [out] */ IIPackageInstallerSession** s)
 {
-    VALIDATE_NOT_NULL(session)
+    VALIDATE_NOT_NULL(s)
     synchronized (mSessionsLock) {
         AutoPtr<CPackageInstallerSession> session;
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Find(sessionId);
@@ -1190,7 +1250,7 @@ ECode CPackageInstallerService::AllocateSessionIdLocked(
         mRandom->NextInt32(Elastos::Core::Math::INT32_MAX_VALUE - 1, &sessionId);
         sessionId  += 1;
         if (mSessions.Find(sessionId) == mSessions.End()
-                && mHistoricalSessions.Find(sessionId) == mHistoricalSessions.End() {
+                && mHistoricalSessions.Find(sessionId) == mHistoricalSessions.End()) {
             Boolean value = FALSE;
             HashMap<Int32, Boolean>::Iterator it = mLegacySessions.Find(sessionId);
             if (it != mLegacySessions.End()) {
@@ -1211,7 +1271,7 @@ AutoPtr<IFile> CPackageInstallerService::BuildInternalStageDir(
     /* [in] */ Int32 sessionId)
 {
     AutoPtr<IFile> f;
-    CFile::New(mStagingDir, "vmdl" + StringUtils::ToString(sessionId) + ".tmp", (IFile**)&f);
+    CFile::New(mStagingDir, String("vmdl") + StringUtils::ToString(sessionId) + ".tmp", (IFile**)&f);
     return f;
 }
 
@@ -1227,11 +1287,11 @@ ECode CPackageInstallerService::PrepareInternalStageDir(
     // try {
     String absolutePath;
     stageDir->GetAbsolutePath(&absolutePath);
-    if (FAILED(Os::Mkdir(absolutePath, 0755))) {
+    if (FAILED(Elastos::Droid::System::Os::Mkdir(absolutePath, 0755))) {
         Slogger::E(TAG, "Failed to prepare session dir: %p", stageDir);
         return E_IO_EXCEPTION;
     }
-    if (FAILED(Os::Chmod(absolutePath, 0755))) {
+    if (FAILED(Elastos::Droid::System::Os::Chmod(absolutePath, 0755))) {
         Slogger::E(TAG, "Failed to prepare session dir: %p", stageDir);
         return E_IO_EXCEPTION;
     }
@@ -1259,9 +1319,9 @@ ECode CPackageInstallerService::PrepareExternalStageCid(
 {
     AutoPtr<IPackageHelper> helper;
     CPackageHelper::AcquireSingleton((IPackageHelper**)&helper);
-    AutoPtr<IFile> f;
+    String dir;
     if (helper->CreateSdDir(sizeBytes, stageCid, CPackageManagerService::GetEncryptKey(),
-            IProcess::SYSTEM_UID, TRUE, (IFile**)&f), f == NULL) {
+            IProcess::SYSTEM_UID, TRUE, &dir), dir.IsNull()) {
         Slogger::E(TAG, "Failed to create session cid: %s", stageCid.string());
         return E_IO_EXCEPTION;
     }
@@ -1273,7 +1333,7 @@ ECode CPackageInstallerService::GetSessionInfo(
     /* [out] */ IPackageInstallerSessionInfo** info)
 {
     VALIDATE_NOT_NULL(info)
-    synchronized (mSessions) {
+    synchronized (mSessionsLock) {
         AutoPtr<CPackageInstallerSession> session;
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Find(sessionId);
         if (it != mSessions.End()) {
@@ -1297,7 +1357,7 @@ ECode CPackageInstallerService::GetAllSessions(
 
     AutoPtr<IList> result;
     CArrayList::New((IList**)&result);
-    synchronized (mSessionsLocks) {
+    synchronized (mSessionsLock) {
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Begin();
         for (; it != mSessions.End(); ++it) {
             AutoPtr<CPackageInstallerSession> session = it->mSecond;
@@ -1324,12 +1384,14 @@ ECode CPackageInstallerService::GetMySessions(
 
     AutoPtr<IList> result;
     CArrayList::New((IList**)&result);
-    synchronized (mSessionsLocks) {
+    synchronized (mSessionsLock) {
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Begin();
         for (; it != mSessions.End(); ++it) {
             AutoPtr<CPackageInstallerSession> session = it->mSecond;
-            if (Objects::Equals(session->mInstallerPackageName, installerPackageName)
-                    && session->mUserId == userId) {
+            AutoPtr<ICharSequence> cs1, cs2;
+            CString::New(session->mInstallerPackageName, (ICharSequence**)&cs1);
+            CString::New(installerPackageName, (ICharSequence**)&cs2);
+            if (Objects::Equals(cs1, cs2) && session->mUserId == userId) {
                 AutoPtr<IPackageInstallerSessionInfo> info = session->GenerateInfo();
                 result->Add(info);
             }
@@ -1352,8 +1414,8 @@ ECode CPackageInstallerService::Uninstall(
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::DELETE_PACKAGES, &perm))
-    AutoPtr<IIPackageInstallObserver2> binder;
-    adapter->GetBinder((IIPackageInstallObserver2**)&binder);
+    AutoPtr<IIPackageDeleteObserver2> binder;
+    adapter->GetBinder((IIPackageDeleteObserver2**)&binder);
     if (perm == IPackageManager::PERMISSION_GRANTED) {
         // Sweet, call straight through!
         mPm->DeletePackage(packageName, binder, userId, flags);
@@ -1368,7 +1430,8 @@ ECode CPackageInstallerService::Uninstall(
         AutoPtr<IUri> uri;
         helper->FromParts(String("package"), packageName, String(NULL), (IUri**)&uri);
         intent->SetData(uri);
-        intent->PutExtra(IPackageInstaller::EXTRA_CALLBACK, IBinder::Probe(binder));
+        assert(0);
+        // intent->PutExtra(IPackageInstaller::EXTRA_CALLBACK, IBinder::Probe(binder));
         adapter->OnUserActionRequired(intent);
     }
     return NOERROR;
@@ -1381,7 +1444,7 @@ ECode CPackageInstallerService::SetPermissionsResult(
     FAIL_RETURN(mContext->EnforceCallingOrSelfPermission(
             Elastos::Droid::Manifest::permission::INSTALL_PACKAGES, TAG))
 
-    synchronized (mSessionsLocks) {
+    synchronized (mSessionsLock) {
         AutoPtr<CPackageInstallerSession> session;
         HashMap<Int32, AutoPtr<CPackageInstallerSession> >::Iterator it = mSessions.Find(sessionId);
         if (it != mSessions.End()) {
@@ -1400,14 +1463,14 @@ ECode CPackageInstallerService::RegisterCallback(
 {
     FAIL_RETURN(mPm->EnforceCrossUserPermission(Binder::GetCallingUid(), userId,
             TRUE, FALSE, String("registerCallback")))
-    mCallbacks->Register(callback, userId);
+    mCallbacks->Register(cb, userId);
     return NOERROR;
 }
 
 ECode CPackageInstallerService::UnregisterCallback(
     /* [in] */ IPackageInstallerCallback* cb)
 {
-    mCallbacks->Unregister(callback);
+    mCallbacks->Unregister(cb);
     return NOERROR;
 }
 
@@ -1430,12 +1493,19 @@ Boolean CPackageInstallerService::IsCallingUidOwner(
     /* [in] */ CPackageInstallerSession* session)
 {
     Int32 callingUid = Binder::GetCallingUid();
-    if (callingUid == IProcess::ROOT_UID) {
+    if (callingUid == Process::ROOT_UID) {
         return TRUE;
     }
     else {
         return (session != NULL) && (callingUid == session->mInstallerUid);
     }
+}
+
+ECode CPackageInstallerService::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    return Object::ToString(str);
 }
 
 } // namespace Pm

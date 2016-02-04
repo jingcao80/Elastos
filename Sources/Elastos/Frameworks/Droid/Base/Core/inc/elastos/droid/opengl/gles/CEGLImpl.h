@@ -2,10 +2,16 @@
 #define __ELASTOS_DROID_OPENGL_GLES_CEGLIMPL_H__
 
 #include "_Elastos_Droid_Opengl_Gles_CEGLImpl.h"
+#include "elastos/droid/opengl/gles/CEGLDisplayImpl.h"
+#include "elastos/droid/opengl/gles/CEGLSurfaceImpl.h"
+#include "elastos/droid/opengl/gles/CEGLContextImpl.h"
+
+#include <elastos/core/Object.h>
 #include <gui/Surface.h>
-#include "gles/CEGLDisplayImpl.h"
-#include "gles/CEGLSurfaceImpl.h"
-#include "gles/CEGLContextImpl.h"
+
+using Elastos::Core::Object;
+using Elastosx::Microedition::Khronos::Egl::IEGL;
+using Elastosx::Microedition::Khronos::Egl::IEGL10;
 
 namespace Elastos {
 namespace Droid {
@@ -13,6 +19,9 @@ namespace Opengl {
 namespace Gles {
 
 CarClass(CEGLImpl)
+    , public Object
+    , public IEGL10
+    , public IEGL
 {
 typedef Elastosx::Microedition::Khronos::Egl::IEGLConfig XIEGLConfig;
 typedef Elastosx::Microedition::Khronos::Egl::IEGLContext XIEGLContext;
@@ -20,9 +29,13 @@ typedef Elastosx::Microedition::Khronos::Egl::IEGLDisplay XIEGLDisplay;
 typedef Elastosx::Microedition::Khronos::Egl::IEGLSurface XIEGLSurface;
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
-    CARAPI eglChooseConfig(
+    CARAPI EglChooseConfig(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ ArrayOf<Int32>* attrib_list,
         /* [in] */ ArrayOf<XIEGLConfig*>* configs,
@@ -30,105 +43,105 @@ public:
         /* [in] */ ArrayOf<Int32>* num_config,
         /* [out] */ Boolean* result);
 
-    CARAPI eglCopyBuffers(
+    CARAPI EglCopyBuffers(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLSurface* surface,
         /* [in] */ IInterface* native_pixmap,
         /* [out] */ Boolean* result);
 
-    CARAPI eglCreateContext(
+    CARAPI EglCreateContext(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLConfig* config,
         /* [in] */ XIEGLContext* share_context,
         /* [in] */ ArrayOf<Int32>* attrib_list,
         /* [out] */ XIEGLContext** context);
 
-    CARAPI eglCreatePbufferSurface(
+    CARAPI EglCreatePbufferSurface(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLConfig* config,
         /* [in] */ ArrayOf<Int32>* attrib_list,
         /* [out] */ XIEGLSurface** surface);
 
-    CARAPI eglCreatePixmapSurface(
+    CARAPI EglCreatePixmapSurface(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLConfig* config,
         /* [in] */ IInterface* native_pixmap,
         /* [in] */ ArrayOf<Int32>* attrib_list,
         /* [out] */ XIEGLSurface** surface);
 
-    CARAPI eglCreateWindowSurface(
+    CARAPI EglCreateWindowSurface(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLConfig* config,
         /* [in] */ IInterface* native_window,
         /* [in] */ ArrayOf<Int32>* attrib_list,
         /* [out] */ XIEGLSurface** surface);
 
-    CARAPI eglDestroyContext(
+    CARAPI EglDestroyContext(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLContext* context,
         /* [out] */ Boolean* result);
 
-    CARAPI eglDestroySurface(
+    CARAPI EglDestroySurface(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLSurface* surface,
         /* [out] */ Boolean* result);
 
-    CARAPI eglGetConfigAttrib(
+    CARAPI EglGetConfigAttrib(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLConfig* config,
         /* [in] */ Int32 attribute,
         /* [in] */ ArrayOf<Int32>* value,
         /* [out] */ Boolean* result);
 
-    CARAPI eglGetConfigs(
+    CARAPI EglGetConfigs(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ ArrayOf<XIEGLConfig*>* configs,
         /* [in] */ Int32 config_size,
         /* [in] */ ArrayOf<Int32>* num_config,
         /* [out] */ Boolean* result);
 
-    CARAPI eglGetCurrentContext(
+    CARAPI EglGetCurrentContext(
         /* [out] */ XIEGLContext** context);
 
-    CARAPI eglGetCurrentDisplay(
+    CARAPI EglGetCurrentDisplay(
         /* [out] */ XIEGLDisplay** display);
 
-    CARAPI eglGetCurrentSurface(
+    CARAPI EglGetCurrentSurface(
         /* [in] */ Int32 readdraw,
         /* [out] */ XIEGLSurface** surface);
 
-    CARAPI eglGetDisplay(
+    CARAPI EglGetDisplay(
         /* [in] */ IInterface* native_display,
         /* [out] */ XIEGLDisplay** display);
 
-    CARAPI eglGetError(
+    CARAPI EglGetError(
         /* [out] */ Int32* error);
 
-    CARAPI eglInitialize(
+    CARAPI EglInitialize(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ ArrayOf<Int32>* major_minor,
         /* [out] */ Boolean* result);
 
-    CARAPI eglMakeCurrent(
+    CARAPI EglMakeCurrent(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLSurface* draw,
         /* [in] */ XIEGLSurface* read,
         /* [in] */ XIEGLContext* context,
         /* [out] */ Boolean* result);
 
-    CARAPI eglQueryContext(
+    CARAPI EglQueryContext(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLContext* context,
         /* [in] */ Int32 attribute,
         /* [in] */ ArrayOf<Int32>* value,
         /* [out] */ Boolean* result);
 
-    CARAPI eglQueryString(
+    CARAPI EglQueryString(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ Int32 name,
         /* [out] */ String* str);
 
-    CARAPI eglQuerySurface(
+    CARAPI EglQuerySurface(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLSurface* surface,
         /* [in] */ Int32 attribute,
@@ -136,22 +149,22 @@ public:
         /* [out] */ Boolean* result);
 
     /** @hide **/
-    CARAPI eglReleaseThread(
+    CARAPI EglReleaseThread(
         /* [out] */ Boolean* result);
 
-    CARAPI eglSwapBuffers(
+    CARAPI EglSwapBuffers(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLSurface* surface,
         /* [out] */ Boolean* result);
 
-    CARAPI eglTerminate(
+    CARAPI EglTerminate(
         /* [in] */ XIEGLDisplay* display,
         /* [out] */ Boolean* result);
 
-    CARAPI eglWaitGL(
+    CARAPI EglWaitGL(
         /* [out] */ Boolean* result);
 
-    CARAPI eglWaitNative(
+    CARAPI EglWaitNative(
         /* [in] */ Int32 engine,
         /* [in] */ IInterface* bindTarget,
         /* [out] */ Boolean* result);
@@ -169,14 +182,14 @@ private:
         /* [in] */ XIEGLConfig* config,
         /* [in] */ IInterface* native_window,
         /* [in] */ ArrayOf<Int32>* attrib_list,
-        /* [out] */ Int32* rst);
+        /* [out] */ Int64* rst);
 
     CARAPI_(Int32) _eglCreateWindowSurfaceTexture(
         /* [in] */ XIEGLDisplay* display,
         /* [in] */ XIEGLConfig* config,
         /* [in] */ IInterface* native_window,
         /* [in] */ ArrayOf<Int32>* attrib_list,
-        /* [out] */ Int32* rst);
+        /* [out] */ Int64* rst);
 
 private:
     AutoPtr<CEGLContextImpl> mContext;

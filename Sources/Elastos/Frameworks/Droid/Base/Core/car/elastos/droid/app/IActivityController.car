@@ -11,7 +11,7 @@ module
      * while tests are running.  Not for normal application development.
      * {@hide}
      */
-    interface IActivityController {
+    interface IIActivityController {
         /**
          * The system is trying to start an activity.  Return true to allow
          * it to be started as normal, or false to cancel/reject this activity.

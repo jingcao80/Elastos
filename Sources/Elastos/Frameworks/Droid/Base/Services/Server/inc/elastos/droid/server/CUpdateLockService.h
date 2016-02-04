@@ -3,25 +3,30 @@
 
 #include "_Elastos_Droid_Server_CUpdateLockService.h"
 #include "elastos/droid/os/TokenWatcher.h"
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Content.h>
 
-using Elastos::IO::IFile;
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IPrintWriter;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Os::IIUpdateLock;
 using Elastos::Droid::Os::TokenWatcher;
+using Elastos::IO::IFile;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 CarClass(CUpdateLockService)
+    , public Object
+    , public IIUpdateLock
+    , public IBinder
 {
 public:
     class LockWatcher
-        : public ElRefBase
-        , public TokenWatcher
+        : public TokenWatcher
     {
     public:
         LockWatcher(
@@ -38,6 +43,10 @@ public:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IContext* context);
 

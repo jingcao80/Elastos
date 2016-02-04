@@ -206,6 +206,7 @@ Boolean WirelessChargerDetector::Update(
                 && batteryLevel < WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT
                 && !mAtRest;
     }
+    return FALSE;
 }
 
 void WirelessChargerDetector::StartDetectionLocked()

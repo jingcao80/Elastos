@@ -127,7 +127,7 @@ UsbDeviceManager::MyUEventObserver::MyUEventObserver(
 {}
 
 void UsbDeviceManager::MyUEventObserver::OnUEvent(
-    /* [in] */ UEvent* event)
+    /* [in] */ IUEvent* event)
 {
     if (UsbDeviceManager::DEBUG) {
         Slogger::V(UsbDeviceManager::TAG, "USB UEVENT: %s" , event->ToString().string());

@@ -9,10 +9,12 @@
 #include "elastos/droid/graphics/drawable/CShapeDrawable.h"
 #include "elastos/droid/graphics/drawable/CRippleDrawable.h"
 #include "elastos/droid/graphics/drawable/shapes/COvalShape.h"
+#include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/view/animation/CPathInterpolator.h"
-// #include "elastos/droid/widget/CImageView.h"
+#include "elastos/droid/widget/CImageView.h"
 #include "elastos/droid/widget/CFrameLayoutLayoutParams.h"
 #include "elastos/droid/widget/CFrameLayout.h"
+#include "Elastos.Droid.Provider.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
@@ -34,6 +36,8 @@ using Elastos::Droid::Graphics::Drawable::IGradientDrawable;
 using Elastos::Droid::Graphics::Drawable::IShapeDrawable;
 using Elastos::Droid::Graphics::Drawable::Shapes::COvalShape;
 using Elastos::Droid::Graphics::Drawable::Shapes::IShape;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
 using Elastos::Droid::View::EIID_IViewOnLongClickListener;
@@ -47,6 +51,9 @@ using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::View::Animation::CPathInterpolator;
 using Elastos::Droid::Widget::CFrameLayout;
 using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
+using Elastos::Droid::Widget::CImageView;
+using Elastos::Core::CSystem;
+using Elastos::Core::ISystem;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -206,17 +213,17 @@ ECode PlatLogoActivity::LocalListener::OnLongClick(
 
     AutoPtr<IContentResolver> cr;
     mHost->GetContentResolver((IContentResolver**)&cr);
-    assert(0);
-    // Int64 value;
-    // Settings::System::GetInt64(cr, Settings::System::EGG_MODE, 0, &value);
-    // if (value == 0) {
-    //     // For posterity: the moment this user unlocked the easter egg
-    //     AutoPtr<ISystem> system;
-    //     CSystem::AcquireSingleton((ISystem**)&system);
-    //     Int64 t;
-    //     system->GetCurrentTimeMillis(&t);
-    //     Settings::System::PutInt64(cr, ISettings::System::EGG_MODE, t);
-    // }
+    Int64 value;
+    Settings::System::GetInt64(cr, ISettingsSystem::EGG_MODE, 0, &value);
+    if (value == 0) {
+        // For posterity: the moment this user unlocked the easter egg
+        AutoPtr<ISystem> system;
+        CSystem::AcquireSingleton((ISystem**)&system);
+        Int64 t;
+        system->GetCurrentTimeMillis(&t);
+        Boolean res;
+        Settings::System::PutInt64(cr, ISettingsSystem::EGG_MODE, t, &res);
+    }
     AutoPtr<LocalRunnable> runnable = new LocalRunnable(mHost);
     Boolean res;
     IView::Probe(mIm)->Post(runnable, &res);
@@ -327,8 +334,7 @@ ECode PlatLogoActivity::OnAttachedToWindow()
     stick->SetAlpha(0.f);
 
     AutoPtr<IView> im;
-    assert(0);
-    // CImageView::New(this, (IImageView**)&im);
+    CImageView::New(this, (IImageView**)&im);
     AutoPtr<IImageView> imageview = IImageView::Probe(im);
     im->SetTranslationZ(20);
     im->SetScaleX(0);

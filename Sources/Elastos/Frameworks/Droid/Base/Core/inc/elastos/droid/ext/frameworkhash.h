@@ -67,6 +67,7 @@ DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Net::INetworkIdentity)
 #ifdef HASH_FOR_OS
 #include "Elastos.Droid.Os.h"
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Os::IBinder)
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Os::IMessenger)
 #endif
 
 //

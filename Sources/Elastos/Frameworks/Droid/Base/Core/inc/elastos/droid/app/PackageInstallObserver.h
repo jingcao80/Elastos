@@ -14,7 +14,7 @@ namespace Droid {
 namespace App {
 
 /** {@hide} */
-class PackageInstallObserver
+class ECO_PUBLIC PackageInstallObserver
     : public Object
     , public IPackageInstallObserver
 {

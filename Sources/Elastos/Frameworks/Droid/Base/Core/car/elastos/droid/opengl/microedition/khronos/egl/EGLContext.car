@@ -11,13 +11,6 @@ module
     interface IEGLContext {
         GetGL(
             [out] IGL** gl);
-
-        Equals(
-            [in] IInterface *object,
-            [out] Boolean *equals);
-
-        GetHashCode(
-            [out] Int32 *hashCode);
     }
 
     interface IEGLContextHelper {

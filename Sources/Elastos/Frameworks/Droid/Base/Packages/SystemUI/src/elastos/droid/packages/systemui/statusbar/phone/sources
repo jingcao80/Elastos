@@ -8,13 +8,11 @@ INCLUDES += $(MAKEDIR)/../../../../../../../inc/
 
 SOURCES += SystemUIDialog.cpp
 SOURCES += CSystemUIDialog.cpp
-#SOURCES += IconMerger.cpp
-#SOURCES += CIconMerger.cpp
+SOURCES += IconMerger.cpp
+SOURCES += CIconMerger.cpp
 #SOURCES += NavigationBarView.cpp
 #SOURCES += CNavigationBarView.cpp
 #SOURCES += Ticker.cpp
-#SOURCES += IconMerger.cpp
-#SOURCES += CIconMerger.cpp
 ##SOURCES += TickerView.cpp
 #SOURCES += CTickerView.cpp
 #SOURCES += PanelBar.cpp

@@ -163,7 +163,7 @@ ECode ActivityView::ActivityContainerCallback::SetVisible(
     if (ActivityView::DEBUG)
         Logger::V("ActivityView::ActivityContainerCallback",
             "setVisible(): container=%s visible=%d.",
-            Object::ToString(container).string(), visible);
+            TO_CSTR(container), visible);
     return NOERROR;
 }
 
@@ -561,7 +561,7 @@ ECode ActivityView::StartActivity(
     Boolean bval;
     IsAttachedToDisplay(&bval);
     if (DEBUG) Logger::V(TAG, "startActivity(): intent=%s %s attached",
-            Object::ToString(intent).string(), (bval ? "" : "not"));
+            TO_CSTR(intent), (bval ? "" : "not"));
     if (mSurface != NULL) {
         Int32 ival;
         mActivityContainer->StartActivity(intent, &ival);
@@ -584,7 +584,7 @@ ECode ActivityView::StartActivity(
     Boolean bval;
     IsAttachedToDisplay(&bval);
     if (DEBUG) Logger::V(TAG, "startActivityIntentSender(): intentSender=%s %s attached",
-        Object::ToString(intentSender).string(), (bval ? "" : "not"));
+        TO_CSTR(intentSender), (bval ? "" : "not"));
     AutoPtr<IIIntentSender> iIntentSender;
     intentSender->GetTarget((IIIntentSender**)&iIntentSender);
     if (mSurface != NULL) {
@@ -610,7 +610,7 @@ ECode ActivityView::StartActivity(
         Boolean bval;
         IsAttachedToDisplay(&bval);
         Logger::V(TAG, "startActivityPendingIntent(): PendingIntent=%s %s attached",
-            Object::ToString(pendingIntent).string(), bval ? "" : "not");
+            TO_CSTR(pendingIntent), bval ? "" : "not");
     }
     AutoPtr<IIIntentSender> iIntentSender;
     pendingIntent->GetTarget((IIIntentSender**)&iIntentSender);

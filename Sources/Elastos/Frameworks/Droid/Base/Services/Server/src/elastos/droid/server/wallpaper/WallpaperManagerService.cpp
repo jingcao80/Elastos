@@ -592,7 +592,7 @@ WallpaperManagerService::SystemRunningObserver::SystemRunningObserver(
 
 ECode WallpaperManagerService::SystemRunningObserver::OnUserSwitching(
     /* [in] */ Int32 newUserId,
-    /* [in] */ IRemoteCallback* reply)
+    /* [in] */ IIRemoteCallback* reply)
 {
     return mHost->SwitchUser(newUserId, IIRemoteCallback::Probe(reply));
 }

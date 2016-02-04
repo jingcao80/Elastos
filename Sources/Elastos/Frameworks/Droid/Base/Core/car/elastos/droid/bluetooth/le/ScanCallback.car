@@ -1,0 +1,72 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.LE.IScanResult;
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+    namespace LE {
+
+    /**
+     * Bluetooth LE scan callbacks. Scan results are reported using these callbacks.
+     *
+     * @see BluetoothLeScanner#startScan
+     */
+    interface IScanCallback {
+        /**
+         * Fails to start scan as BLE scan with the same settings is already started by the app.
+         */
+        const Int32 SCAN_FAILED_ALREADY_STARTED = 1;
+
+        /**
+         * Fails to start scan as app cannot be registered.
+         */
+        const Int32 SCAN_FAILED_APPLICATION_REGISTRATION_FAILED = 2;
+
+        /**
+         * Fails to start scan due an internal error
+         */
+        const Int32 SCAN_FAILED_INTERNAL_ERROR = 3;
+
+        /**
+         * Fails to start power optimized scan as this feature is not supported.
+         */
+        const Int32 SCAN_FAILED_FEATURE_UNSUPPORTED = 4;
+
+        /**
+         * Callback when a BLE advertisement has been found.
+         *
+         * @param callbackType Determines how this callback was triggered. Currently could only be
+         *            {@link ScanSettings#CALLBACK_TYPE_ALL_MATCHES}.
+         * @param result A Bluetooth LE scan result.
+         */
+        OnScanResult(
+            [in] Int32 callbackType,
+            [in] IScanResult* result);
+
+        /**
+         * Callback when batch results are delivered.
+         *
+         * @param results List of scan results that are previously scanned.
+         */
+        OnBatchScanResults(
+            [in] IList* results);
+
+        /**
+         * Callback when scan could not be started.
+         *
+         * @param errorCode Error code (one of SCAN_FAILED_*) for scan failure.
+         */
+        OnScanFailed(
+            [in] Int32 errorCode);
+    }
+
+
+    } // LE
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

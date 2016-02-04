@@ -1,22 +1,29 @@
 
-#include "CTextServicesManagerService.h"
+#include "elastos/droid/server/CTextServicesManagerService.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
-//#include "elastos/droid/app/CActivityManagerHelper.h"
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/Manifest.h"
 #include <elastos/utility/etl/Algorithm.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/AutoLock.h>
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Utility.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Utility::ILocale;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Manifest;
+using Elastos::Droid::Os::IProcess;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::App::AppGlobals;
+using Elastos::Droid::App::EIID_IUserSwitchObserver;
 using Elastos::Droid::App::ActivityManagerNative;
-//using Elastos::Droid::App::IIActivityManager;
-using Elastos::Droid::App::IActivityManagerHelper;
-using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::CIntent;
@@ -26,15 +33,22 @@ using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::Pm::IServiceInfo;
 using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::CSettingsSecure;
 using Elastos::Droid::View::InputMethod::IInputMethodManager;
 using Elastos::Droid::View::InputMethod::IInputMethodSubtype;
-// using Elastos::Droid::View::Textservice::CSpellCheckerInfo;
-using Elastos::Droid::View::Textservice::EIID_IISpellCheckerService;
+using Elastos::Droid::View::TextService::CSpellCheckerInfo;
+using Elastos::Droid::Internal::TextService::EIID_IISpellCheckerService;
+using Elastos::Droid::Internal::TextService::EIID_IITextServicesManager;
 using Elastos::Droid::Internal::Content::IPackageMonitor;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::IList;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::ILocale;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -45,21 +59,21 @@ const Boolean CTextServicesManagerService::DBG = FALSE;
 
 CTextServicesManagerService::CTSMSUserSwitchObserver::CTSMSUserSwitchObserver(
     /* [in] */ CTextServicesManagerService* owner)
-    : mOwner(owner)
+    : mHost(owner)
 {}
 
 CTextServicesManagerService::CTSMSUserSwitchObserver::~CTSMSUserSwitchObserver()
 {}
 
-CAR_INTERFACE_IMPL(CTextServicesManagerService::CTSMSUserSwitchObserver, IUserSwitchObserver);
+CAR_INTERFACE_IMPL(CTextServicesManagerService::CTSMSUserSwitchObserver, Object, IUserSwitchObserver);
 
 ECode CTextServicesManagerService::CTSMSUserSwitchObserver::OnUserSwitching(
     /* [in] */ Int32 newUserId,
-    /* [in] */ IRemoteCallback* reply)
+    /* [in] */ IIRemoteCallback* reply)
 {
     {
-        AutoLock lock(mOwner->mSpellCheckerMapLock);
-        mOwner->SwitchUserLocked(newUserId);
+        AutoLock lock(mHost->mSpellCheckerMapLock);
+        mHost->SwitchUserLocked(newUserId);
     }
 
     if (reply != NULL) {
@@ -81,7 +95,7 @@ ECode CTextServicesManagerService::CTSMSUserSwitchObserver::OnUserSwitchComplete
 
 CTextServicesManagerService::TextServicesMonitor::TextServicesMonitor(
     /* [in] */ CTextServicesManagerService* owner)
-    : mOwner(owner)
+    : mHost(owner)
 {}
 
 CTextServicesManagerService::TextServicesMonitor::~TextServicesMonitor()
@@ -94,11 +108,13 @@ ECode CTextServicesManagerService::TextServicesMonitor::OnSomePackagesChanged()
     }
     ECode ec = NOERROR;
     {
-        AutoLock lock(mOwner->mSpellCheckerMapLock);
+        AutoLock lock(mHost->mSpellCheckerMapLock);
         BuildSpellCheckerMapLocked(
-            mOwner->mContext, mOwner->mSpellCheckerList, mOwner->mSpellCheckerMap, mOwner->mSettings);
+            mHost->mContext, mHost->mSpellCheckerList, mHost->mSpellCheckerMap, mHost->mSettings);
         AutoPtr<ISpellCheckerInfo> sci;
-        mOwner->GetCurrentSpellChecker(String(NULL), (ISpellCheckerInfo**)&sci);
+        mHost->GetCurrentSpellChecker(String(NULL), (ISpellCheckerInfo**)&sci);
+        // If no spell checker is enabled, just return. The user should explicitly
+        // enable the spell checker.
         if (sci == NULL) return NOERROR;
         String packageName;
         sci->GetPackageName(&packageName);
@@ -111,11 +127,11 @@ ECode CTextServicesManagerService::TextServicesMonitor::OnSomePackagesChanged()
                 // Package modified
                 || isModified) {
             sci = NULL;
-            ec = mOwner->FindAvailSpellCheckerLocked(String(NULL), packageName, (ISpellCheckerInfo**)&sci);
+            ec = mHost->FindAvailSpellCheckerLocked(String(NULL), packageName, (ISpellCheckerInfo**)&sci);
             if (sci != NULL) {
                 String id;
                 sci->GetId(&id);
-                ec = mOwner->SetCurrentSpellCheckerLocked(id);
+                ec = mHost->SetCurrentSpellCheckerLocked(id);
             }
         }
     }
@@ -127,7 +143,7 @@ Boolean CTextServicesManagerService::TextServicesMonitor::IsChangingPackagesOfCu
     Boolean result;
     Int32 userId, currentUserId;
     GetChangingUserId(&userId);
-    mOwner->mSettings->GetCurrentUserId(&currentUserId);
+    mHost->mSettings->GetCurrentUserId(&currentUserId);
 
     result = userId == currentUserId;
     if (CTextServicesManagerService::DBG) {
@@ -145,13 +161,13 @@ CTextServicesManagerService::InternalServiceConnection::InternalServiceConnectio
     : mSciId(id)
     , mLocale(locale)
     , mBundle(bundle)
-    , mOwner(owner)
+    , mHost(owner)
 {}
 
 CTextServicesManagerService::InternalServiceConnection::~InternalServiceConnection()
 {}
 
-CAR_INTERFACE_IMPL(CTextServicesManagerService::InternalServiceConnection, IServiceConnection);
+CAR_INTERFACE_IMPL(CTextServicesManagerService::InternalServiceConnection, Object, IServiceConnection);
 
 ECode CTextServicesManagerService::InternalServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
@@ -159,7 +175,7 @@ ECode CTextServicesManagerService::InternalServiceConnection::OnServiceConnected
 {
     ECode ec = NOERROR;
     {
-        AutoLock lock(mOwner->mSpellCheckerMapLock);
+        AutoLock lock(mHost->mSpellCheckerMapLock);
         ec = OnServiceConnectedInnerLocked(name, service);
     }
     return ec;
@@ -176,9 +192,9 @@ ECode CTextServicesManagerService::InternalServiceConnection::OnServiceConnected
         Slogger::W(TAG, "onServiceConnected: %s", strCompName.string());
     }
     AutoPtr<IISpellCheckerService> spellChecker = IISpellCheckerService::Probe(service);
-    ManagedSpellCheckerBindGroupMapIt it = mOwner->mSpellCheckerBindGroups.Find(mSciId);
+    ManagedSpellCheckerBindGroupMapIt it = mHost->mSpellCheckerBindGroups.Find(mSciId);
 
-    if (it != mOwner->mSpellCheckerBindGroups.End() && this == it->mSecond->mInternalConnection) {
+    if (it != mHost->mSpellCheckerBindGroups.End() && this == it->mSecond->mInternalConnection) {
         it->mSecond->OnServiceConnected(spellChecker);
     }
     return NOERROR;
@@ -188,10 +204,10 @@ ECode CTextServicesManagerService::InternalServiceConnection::OnServiceDisconnec
     /* [in] */ IComponentName* name)
 {
     {
-        AutoLock lock(mOwner->mSpellCheckerMapLock);
-        ManagedSpellCheckerBindGroupMapIt it = mOwner->mSpellCheckerBindGroups.Find(mSciId);
-        if (it != mOwner->mSpellCheckerBindGroups.End() && this == it->mSecond->mInternalConnection) {
-            mOwner->mSpellCheckerBindGroups.Erase(mSciId);
+        AutoLock lock(mHost->mSpellCheckerMapLock);
+        ManagedSpellCheckerBindGroupMapIt it = mHost->mSpellCheckerBindGroups.Find(mSciId);
+        if (it != mHost->mSpellCheckerBindGroups.End() && this == it->mSecond->mInternalConnection) {
+            mHost->mSpellCheckerBindGroups.Erase(mSciId);
         }
     }
     return NOERROR;
@@ -203,9 +219,12 @@ String CTextServicesManagerService::InternalServiceConnection::GetSciId()
     return mSciId;
 }
 
-String CTextServicesManagerService::InternalServiceConnection::ToString()
+ECode CTextServicesManagerService::InternalServiceConnection::ToString(
+    /* [out] */ String* str)
 {
-    return String("InternalServiceConnection");
+    VALIDATE_NOT_NULL(str)
+    *str = "InternalServiceConnection";
+    return NOERROR;
 }
 
 CTextServicesManagerService::TextServicesSettings::TextServicesSettings(
@@ -214,7 +233,7 @@ CTextServicesManagerService::TextServicesSettings::TextServicesSettings(
     /* [in] */ CTextServicesManagerService* owner)
     : mResolver(resolver)
     , mCurrentUserId(userId)
-    , mOwner(owner)
+    , mHost(owner)
 {}
 
 CTextServicesManagerService::TextServicesSettings::~TextServicesSettings()
@@ -258,7 +277,7 @@ ECode CTextServicesManagerService::TextServicesSettings::PutSelectedSpellChecker
     AutoPtr<ISettingsSecure> settingsSecure;
     CSettingsSecure::AcquireSingleton((ISettingsSecure**)&settingsSecure);
     return settingsSecure->PutStringForUser(mResolver,
-            ISettingsSecure::SELECTED_SPELL_CHECKER_SUBTYPE, StringUtils::Int32ToString(hashCode, 10),
+            ISettingsSecure::SELECTED_SPELL_CHECKER_SUBTYPE, StringUtils::ToString(hashCode, 10),
             mCurrentUserId, &result);
 }
 
@@ -307,16 +326,16 @@ ECode CTextServicesManagerService::TextServicesSettings::IsSpellCheckerEnabled(
 
 CTextServicesManagerService::SpellCheckerBindGroup::SpellCheckerBindGroup(
     /* [in] */ InternalServiceConnection* connection,
-    /* [in] */ ITextServicesSessionListener* listener,
+    /* [in] */ IITextServicesSessionListener* listener,
     /* [in] */ const String& locale,
-    /* [in] */ ISpellCheckerSessionListener* scListener,
+    /* [in] */ IISpellCheckerSessionListener* scListener,
     /* [in] */ Int32 uid,
     /* [in] */ IBundle* bundle,
     /* [in] */ CTextServicesManagerService* owner)
     : mInternalConnection(connection)
     , mBound(TRUE)
     , mConnected(FALSE)
-    , mOwner(owner)
+    , mHost(owner)
 {
     AutoPtr<InternalDeathRecipient> recipient;
     AddListener(listener, locale, scListener, uid, bundle, (InternalDeathRecipient**)&recipient);
@@ -342,7 +361,7 @@ ECode CTextServicesManagerService::SpellCheckerBindGroup::OnServiceConnected(
                 listener->mScLocale, listener->mScListener, listener->mBundle, (IISpellCheckerSession**)&session);
 
         {
-            AutoLock lock(mOwner->mSpellCheckerMapLock);
+            AutoLock lock(mHost->mSpellCheckerMapLock);
             ManagedInternalDeathRecipientListIt it2 = Find(mListeners.Begin(), mListeners.End(), listener);
             if (it2 != mListeners.End()) {
                 assert(listener->mTsListener != NULL);
@@ -363,7 +382,7 @@ ECode CTextServicesManagerService::SpellCheckerBindGroup::OnServiceConnected(
     }
 
     {
-        AutoLock lock(mOwner->mSpellCheckerMapLock);
+        AutoLock lock(mHost->mSpellCheckerMapLock);
         mSpellChecker = spellChecker;
         mConnected = TRUE;
     }
@@ -371,9 +390,9 @@ ECode CTextServicesManagerService::SpellCheckerBindGroup::OnServiceConnected(
 }
 
 ECode CTextServicesManagerService::SpellCheckerBindGroup::AddListener(
-    /* [in] */ ITextServicesSessionListener* tsListener,
+    /* [in] */ IITextServicesSessionListener* tsListener,
     /* [in] */ const String& locale,
-    /* [in] */ ISpellCheckerSessionListener* scListener,
+    /* [in] */ IISpellCheckerSessionListener* scListener,
     /* [in] */ Int32 uid,
     /* [in] */ IBundle* bundle,
     /* [out] */ InternalDeathRecipient** recipient)
@@ -387,7 +406,7 @@ ECode CTextServicesManagerService::SpellCheckerBindGroup::AddListener(
     AutoPtr<InternalDeathRecipient> localRecipient;
 
     {
-        AutoLock lock(mOwner->mSpellCheckerMapLock);
+        AutoLock lock(mHost->mSpellCheckerMapLock);
         ManagedInternalDeathRecipientListIt it = mListeners.Begin();
         //try {
         for (; it != mListeners.End(); ++it) {
@@ -396,7 +415,7 @@ ECode CTextServicesManagerService::SpellCheckerBindGroup::AddListener(
                 return NOERROR;
             }
         }
-        localRecipient = new InternalDeathRecipient(this, tsListener, locale, scListener, uid, bundle, mOwner);
+        localRecipient = new InternalDeathRecipient(this, tsListener, locale, scListener, uid, bundle, mHost);
         AutoPtr<IProxy> proxy = (IProxy*)scListener->Probe(EIID_IProxy);
         if (proxy != NULL) proxy->LinkToDeath(localRecipient, 0);
         mListeners.PushBack(localRecipient);
@@ -411,13 +430,13 @@ ECode CTextServicesManagerService::SpellCheckerBindGroup::AddListener(
 }
 
 ECode CTextServicesManagerService::SpellCheckerBindGroup::RemoveListener(
-    /* [in] */ ISpellCheckerSessionListener* listener)
+    /* [in] */ IISpellCheckerSessionListener* listener)
 {
     /*if (CTextServicesManagerService::DBG) {
         Slogger::W(TAG, "remove listener: " + listener.hashCode());
     }*/
     {
-        AutoLock lock(mOwner->mSpellCheckerMapLock);
+        AutoLock lock(mHost->mSpellCheckerMapLock);
 
         List<AutoPtr<InternalDeathRecipient> > removeList;
         ManagedInternalDeathRecipientListIt it = mListeners.Begin();
@@ -456,7 +475,7 @@ ECode CTextServicesManagerService::SpellCheckerBindGroup::RemoveAll()
     Slogger::E(TAG, "Remove the spell checker bind unexpectedly.");
     ECode ec = NOERROR;
     {
-        AutoLock lock(mOwner->mSpellCheckerMapLock);
+        AutoLock lock(mHost->mSpellCheckerMapLock);
         List<AutoPtr<InternalDeathRecipient> >::Iterator it = mListeners.Begin();
         for (; it != mListeners.End(); ++it) {
             AutoPtr<InternalDeathRecipient> idr = (*it);
@@ -472,9 +491,12 @@ ECode CTextServicesManagerService::SpellCheckerBindGroup::RemoveAll()
     return ec;
 }
 
-String CTextServicesManagerService::SpellCheckerBindGroup::ToString()
+ECode CTextServicesManagerService::SpellCheckerBindGroup::ToString(
+    /* [out] */ String* str)
 {
-    return String("SpellCheckerBindGroup");
+    VALIDATE_NOT_NULL(str)
+    *str = "SpellCheckerBindGroup";
+    return NOERROR;
 }
 
 ECode CTextServicesManagerService::SpellCheckerBindGroup::CleanLocked()
@@ -488,26 +510,26 @@ ECode CTextServicesManagerService::SpellCheckerBindGroup::CleanLocked()
     if (mBound && mListeners.IsEmpty()) {
         mBound = FALSE;
         const String sciId = mInternalConnection->GetSciId();
-        ManagedSpellCheckerBindGroupMapIt it = mOwner->mSpellCheckerBindGroups.Find(sciId);
+        ManagedSpellCheckerBindGroupMapIt it = mHost->mSpellCheckerBindGroups.Find(sciId);
         if ((SpellCheckerBindGroup*)it->mSecond == this) {
             if (DBG) {
                 Slogger::D(TAG, "Remove bind group.");
             }
-            mOwner->mSpellCheckerBindGroups.Erase(sciId);
+            mHost->mSpellCheckerBindGroups.Erase(sciId);
         }
-        ec = mOwner->mContext->UnbindService(mInternalConnection);
+        ec = mHost->mContext->UnbindService(mInternalConnection);
     }
 
     return ec;
 }
 
-CAR_INTERFACE_IMPL(CTextServicesManagerService::InternalDeathRecipient, IProxyDeathRecipient)
+CAR_INTERFACE_IMPL(CTextServicesManagerService::InternalDeathRecipient, Object, IProxyDeathRecipient)
 
 CTextServicesManagerService::InternalDeathRecipient::InternalDeathRecipient(
     /* [in] */ SpellCheckerBindGroup* group,
-    /* [in] */ ITextServicesSessionListener* tsListener,
+    /* [in] */ IITextServicesSessionListener* tsListener,
     /* [in] */ const String& scLocale,
-    /* [in] */ ISpellCheckerSessionListener* scListener,
+    /* [in] */ IISpellCheckerSessionListener* scListener,
     /* [in] */ Int32 uid,
     /* [in] */ IBundle* bundle,
     /* [in] */ CTextServicesManagerService* owner)
@@ -517,14 +539,14 @@ CTextServicesManagerService::InternalDeathRecipient::InternalDeathRecipient(
     , mScListener(scListener)
     , mUid(uid)
     , mBundle(bundle)
-    , mOwner(owner)
+    , mHost(owner)
 {}
 
 CTextServicesManagerService::InternalDeathRecipient::~InternalDeathRecipient()
 {}
 
 Boolean CTextServicesManagerService::InternalDeathRecipient::HasSpellCheckerListener(
-    /* [in] */ ISpellCheckerSessionListener* listener)
+    /* [in] */ IISpellCheckerSessionListener* listener)
 {
     return (IBinder::Probe(listener) == IBinder::Probe(mScListener));
 }
@@ -535,6 +557,9 @@ ECode CTextServicesManagerService::InternalDeathRecipient::ProxyDied()
     return mGroup->RemoveListener(mScListener);
 }
 
+CAR_INTERFACE_IMPL_2(CTextServicesManagerService, Object, IITextServicesManager, IBinder)
+
+CAR_OBJECT_IMPL(CTextServicesManagerService)
 
 ECode CTextServicesManagerService::constructor(
     /* [in] */ IContext* context)
@@ -669,10 +694,9 @@ ECode CTextServicesManagerService::GetCurrentSpellCheckerSubtype(
 
         for (Int32 i = 0; i < subtypeCount; ++i) {
             AutoPtr<ISpellCheckerSubtype> scs;
-            Int32 hashCode2;
             sci->GetSubtypeAt(i, (ISpellCheckerSubtype**)&scs);
             assert(scs != NULL);
-            scs->GetHashCode(&hashCode2);
+            Int32 hashCode2 = Object::GetHashCode(scs);
             if (hashCode == 0) {
                 String scsLocale;
                 scs->GetLocale(&scsLocale);
@@ -712,8 +736,8 @@ ECode CTextServicesManagerService::GetCurrentSpellCheckerSubtype(
 ECode CTextServicesManagerService::GetSpellCheckerService(
     /* [in] */ const String& sciId,
     /* [in] */ const String& locale,
-    /* [in] */ ITextServicesSessionListener* tsListener,
-    /* [in] */ ISpellCheckerSessionListener* scListener,
+    /* [in] */ IITextServicesSessionListener* tsListener,
+    /* [in] */ IISpellCheckerSessionListener* scListener,
     /* [in] */ IBundle* bundle)
 {
     if (!CalledFromValidUser()) {
@@ -793,7 +817,7 @@ ECode CTextServicesManagerService::GetSpellCheckerService(
 }
 
 ECode CTextServicesManagerService::FinishSpellCheckerService(
-    /* [in] */ ISpellCheckerSessionListener* listener)
+    /* [in] */ IISpellCheckerSessionListener* listener)
 {
     if (!CalledFromValidUser()) {
         return NOERROR;
@@ -943,9 +967,9 @@ ECode CTextServicesManagerService::GetEnabledSpellCheckers(
     return NOERROR;
 }
 
-ECode CTextServicesManagerService::SystemReady()
+ECode CTextServicesManagerService::SystemRunning()
 {
-    Slogger::I(TAG, "CTextServicesManagerService::SystemReady");
+    Slogger::I(TAG, "CTextServicesManagerService::SystemRunning");
     if (!mSystemReady) {
         mSystemReady = TRUE;
     }
@@ -1014,21 +1038,23 @@ Boolean CTextServicesManagerService::CalledFromValidUser()
 }
 
 ECode CTextServicesManagerService::BindCurrentSpellCheckerService(
-            /* [in] */ IIntent* service,
-            /* [in] */ IServiceConnection* conn,
-            /* [in] */ Int32 flags,
-            /* [out] */ Boolean* result)
+    /* [in] */ IIntent* service,
+    /* [in] */ IServiceConnection* conn,
+    /* [in] */ Int32 flags,
+    /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
     Int32 currentUserId;
 
     if (service == NULL || conn == NULL) {
         Slogger::E(TAG, "--- bind failed: service or conn was set to NULL, please have a check");
-        *result = FALSE;
         return NOERROR;
     }
+    AutoPtr<IUserHandle> userHandle;
+    CUserHandle::New(currentUserId, (IUserHandle**)&userHandle);
     mSettings->GetCurrentUserId(&currentUserId);
-    return mContext->BindService(service, conn, flags, currentUserId, result);
+    return mContext->BindServiceAsUser(service, conn, flags, userHandle, result);
 }
 
 ECode CTextServicesManagerService::UnbindServiceLocked()
@@ -1085,8 +1111,8 @@ ECode CTextServicesManagerService::FindAvailSpellCheckerLocked(
 ECode CTextServicesManagerService::StartSpellCheckerServiceInnerLocked(
     /* [in] */ ISpellCheckerInfo* info,
     /* [in] */ const String& locale,
-    /* [in] */ ITextServicesSessionListener* tsListener,
-    /* [in] */ ISpellCheckerSessionListener* scListener,
+    /* [in] */ IITextServicesSessionListener* tsListener,
+    /* [in] */ IISpellCheckerSessionListener* scListener,
     /* [in] */ Int32 uid,
     /* [in] */ IBundle* bundle)
 {
@@ -1159,10 +1185,9 @@ ECode CTextServicesManagerService::SetCurrentSpellCheckerSubtypeLocked(
         sci->GetSubtypeCount(&subtypeCount);
         for (Int32 i = 0; i < subtypeCount; ++i) {
             AutoPtr<ISpellCheckerSubtype> subtype;
-            Int32 hashCode2;
             sci->GetSubtypeAt(i, (ISpellCheckerSubtype**)&subtype);
             assert(subtype != NULL);
-            subtype->GetHashCode(&hashCode2);
+            Int32 hashCode2 = Object::GetHashCode(subtype);
             if(hashCode2 == hashCode) {
                 tempHashCode = hashCode;
                 break;
@@ -1196,6 +1221,8 @@ ECode CTextServicesManagerService::IsSpellCheckerEnabledLocked(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+
     const Int64 ident = Binder::ClearCallingIdentity();
     //try {
     Boolean retval;
@@ -1210,39 +1237,38 @@ ECode CTextServicesManagerService::IsSpellCheckerEnabledLocked(
 }
 
 ECode CTextServicesManagerService::BuildSpellCheckerMapLocked(
-    IContext* context,
-    List<AutoPtr<ISpellCheckerInfo> >& list,
-    HashMap<String, AutoPtr<ISpellCheckerInfo> >& map,
-    TextServicesSettings* settings)
+    /* [in] */ IContext* context,
+    /* [in] */ List<AutoPtr<ISpellCheckerInfo> >& list,
+    /* [in] */ HashMap<String, AutoPtr<ISpellCheckerInfo> >& map,
+    /* [in] */ TextServicesSettings* settings)
 {
-    // TODO
-    return NOERROR;
-
     list.Clear();
     map.Clear();
     const AutoPtr<IPackageManager> pm;
     context->GetPackageManager((IPackageManager**)&pm);
     assert(pm != NULL);
-    AutoPtr<IObjectContainer> services;
+    AutoPtr<IList> services;
     AutoPtr<IIntent> intent;
     Int32 currentUserId;
     FAIL_RETURN(CIntent::New(String("android.service.textservice.SpellCheckerService"), (IIntent**)&intent));
     settings->GetCurrentUserId(&currentUserId);
-    FAIL_RETURN(pm->QueryIntentServicesAsUser(intent, IPackageManager::GET_META_DATA, currentUserId, (IObjectContainer**)&services));
+    FAIL_RETURN(pm->QueryIntentServicesAsUser(intent, IPackageManager::GET_META_DATA,
+        currentUserId, (IList**)&services));
     if (services != NULL) {
-        AutoPtr<IObjectEnumerator> enumerator;
-        services->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
+        AutoPtr<IIterator> it;
+        services->GetIterator((IIterator**)&it);
+        String packageName, name, permission;
         Boolean hasNext = FALSE;
-        while(enumerator->MoveNext(&hasNext), hasNext) {
-            AutoPtr<IResolveInfo> ri;
-            AutoPtr<IServiceInfo> si;
-            enumerator->Current((IInterface**)&ri);
+        while(it->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IResolveInfo> ri = IResolveInfo::Probe(obj);
             assert(ri != NULL);
+            AutoPtr<IServiceInfo> si;
             ri->GetServiceInfo((IServiceInfo**)&si);
-            String packageName, name, permission;
             assert(si != NULL);
-            si->GetPackageName(&packageName);
-            si->GetName(&name);
+            IPackageItemInfo::Probe(si)->GetPackageName(&packageName);
+            IPackageItemInfo::Probe(si)->GetName(&name);
             si->GetPermission(&permission);
             AutoPtr<IComponentName> compName;
             CComponentName::New(packageName, name, (IComponentName**)&compName);
@@ -1255,8 +1281,7 @@ ECode CTextServicesManagerService::BuildSpellCheckerMapLocked(
             if (DBG) Slogger::D(TAG, "Add: %s", strCompName.string());
             //try {
             AutoPtr<ISpellCheckerInfo> sci;
-            // CSpellCheckerInfo::New(context, ri, (ISpellCheckerInfo**)&sci);
-            assert(0);
+            CSpellCheckerInfo::New(context, ri, (ISpellCheckerInfo**)&sci);
             Int32 subtypeCount;
             sci->GetSubtypeCount(&subtypeCount);
             if (subtypeCount <= 0) {
@@ -1304,82 +1329,82 @@ ECode CTextServicesManagerService::GetStackTrace(
 }
 
 ECode CTextServicesManagerService::Dump(
-        /* [in] */ IFileDescriptor* fd,
-        /* [in] */ IPrintWriter* pw,
-        /* [in] */ ArrayOf<String>* args)
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
 {
     Int32 result;
     assert(pw != NULL);
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(Elastos::Droid::Manifest::permission::DUMP, &result));
     if (result != IPackageManager::PERMISSION_GRANTED) {
-        pw->PrintStringln(String("Permission Denial: can't dump TextServicesManagerService from from pid=")
-                + StringUtils::Int32ToString(Binder::GetCallingPid())
-                + String(", uid=") + StringUtils::Int32ToString(Binder::GetCallingUid()));
+        pw->Println(String("Permission Denial: can't dump TextServicesManagerService from from pid=")
+                + StringUtils::ToString(Binder::GetCallingPid())
+                + String(", uid=") + StringUtils::ToString(Binder::GetCallingUid()));
         return NOERROR;
     }
 
     {
         AutoLock lock(mSpellCheckerMapLock);
-        pw->PrintStringln(String("Current Text Services Manager state:"));
-        pw->PrintStringln(String("  Spell Checker Map:"));
+        pw->Println(String("Current Text Services Manager state:"));
+        pw->Println(String("  Spell Checker Map:"));
         ManagedISpellCheckerInfoMapIt it = mSpellCheckerMap.Begin();
         String str;
 
         for(; it != mSpellCheckerMap.End(); ++it) {
-            pw->PrintString(String("    ")); pw->PrintString(it->mFirst); pw->PrintStringln(String(":"));
+            pw->Print(String("    ")); pw->Print(it->mFirst); pw->Println(String(":"));
             AutoPtr<ISpellCheckerInfo> info = it->mSecond;
             assert(info != NULL);
             info->GetId(&str);
-            pw->PrintString(String("      ")); pw->PrintString(String("id=")); pw->PrintStringln(str);
-            pw->PrintString(String("      ")); pw->PrintString(String("comp="));
+            pw->Print(String("      ")); pw->Print(String("id=")); pw->Println(str);
+            pw->Print(String("      ")); pw->Print(String("comp="));
             AutoPtr<IComponentName> comp;
             info->GetComponent((IComponentName**)&comp);
             assert(comp != NULL);
             comp->ToShortString(&str);
-            pw->PrintStringln(str);
+            pw->Println(str);
             Int32 NS;
             info->GetSubtypeCount(&NS);
             for (Int32 i=0; i<NS; i++) {
                 AutoPtr<ISpellCheckerSubtype> st;
                 info->GetSubtypeAt(i, (ISpellCheckerSubtype**)&st);
                 assert(st != NULL);
-                pw->PrintString(String("      ")); pw->PrintString(String("Subtype #")); pw->PrintInt32(i); pw->PrintStringln(String(":"));
+                pw->Print(String("      ")); pw->Print(String("Subtype #")); pw->Print(i); pw->Println(String(":"));
                 st->GetLocale(&str);
-                pw->PrintString(String("        ")); pw->PrintString(String("locale=")); pw->PrintStringln(str);
+                pw->Print(String("        ")); pw->Print(String("locale=")); pw->Println(str);
                 st->GetExtraValue(&str);
-                pw->PrintString(String("        ")); pw->PrintString(String("extraValue="));
-                        pw->PrintStringln(str);
+                pw->Print(String("        ")); pw->Print(String("extraValue="));
+                        pw->Println(str);
             }
         }
 
-        pw->PrintStringln(String(""));
-        pw->PrintStringln(String("  Spell Checker Bind Groups:"));
+        pw->Println(String(""));
+        pw->Println(String("  Spell Checker Bind Groups:"));
         ManagedSpellCheckerBindGroupMapIt it2 = mSpellCheckerBindGroups.Begin();
         for(; it2 != mSpellCheckerBindGroups.End(); ++it2) {
             AutoPtr<SpellCheckerBindGroup> grp = it2->mSecond;
             assert(grp != NULL);
-            pw->PrintString(String("    ")); pw->PrintString(it2->mFirst); pw->PrintString(String(" "));
-                                pw->PrintString(grp->ToString()); pw->PrintStringln(String(":"));
-            pw->PrintString(String("      ")); pw->PrintString(String("mInternalConnection="));
-                    pw->PrintStringln(grp->mInternalConnection->ToString());
-            pw->PrintString(String("      ")); pw->PrintString(String("mSpellChecker="));
-                    /*pw->PrintStringln(grp->mSpellChecker);*/pw->PrintStringln(String("grp.mSpellChecker"));
-            pw->PrintString(String("      ")); pw->PrintString(String("mBound=")); pw->PrintBoolean(grp->mBound);
-                    pw->PrintString(String(" mConnected=")); pw->PrintBooleanln(grp->mConnected);
+            pw->Print(String("    ")); pw->Print(it2->mFirst); pw->Print(String(" "));
+            pw->Print(Object::ToString(grp)); pw->Println(String(":"));
+            pw->Print(String("      ")); pw->Print(String("mInternalConnection="));
+            pw->Println(Object::ToString(grp->mInternalConnection));
+            pw->Print(String("      ")); pw->Print(String("mSpellChecker="));
+                    /*pw->Println(grp->mSpellChecker);*/pw->Println(String("grp.mSpellChecker"));
+            pw->Print(String("      ")); pw->Print(String("mBound=")); pw->Print(grp->mBound);
+            pw->Print(String(" mConnected=")); pw->Println(grp->mConnected);
 
             List<AutoPtr<InternalDeathRecipient> >::Iterator it3 = grp->mListeners.Begin();
             for (Int32 i = 0; it3 != grp->mListeners.End(); i++, it3++) {
                 AutoPtr<InternalDeathRecipient> listener = (*it3).Get();
-                pw->PrintString(String("      ")); pw->PrintString(String("Listener #")); pw->PrintInt32(i); pw->PrintStringln(String(":"));
-                pw->PrintString(String("        ")); pw->PrintString(String("mTsListener="));
-                        /*pw->PrintStringln(listener.mTsListener);*/pw->PrintStringln(String(String("listener.mTsListener")));
-                pw->PrintString(String("        ")); pw->PrintString(String("mScListener="));
-                        /*pw->PrintStringln(listener.mScListener);*/pw->PrintStringln(String("listener.mScListener"));
-                pw->PrintString(String("        ")); pw->PrintString(String("mGroup="));
-                        pw->PrintStringln(listener->mGroup->ToString());
-                pw->PrintString(String("        ")); pw->PrintString(String("mScLocale="));
-                        pw->PrintString(listener->mScLocale);
-                        pw->PrintString(String(" mUid=")); pw->PrintInt32ln(listener->mUid);
+                pw->Print(String("      ")); pw->Print(String("Listener #")); pw->Print(i); pw->Println(String(":"));
+                pw->Print(String("        ")); pw->Print(String("mTsListener="));
+                        /*pw->Println(listener.mTsListener);*/pw->Println(String(String("listener.mTsListener")));
+                pw->Print(String("        ")); pw->Print(String("mScListener="));
+                        /*pw->Println(listener.mScListener);*/pw->Println(String("listener.mScListener"));
+                pw->Print(String("        ")); pw->Print(String("mGroup="));
+                        pw->Println(Object::ToString(listener->mGroup));
+                pw->Print(String("        ")); pw->Print(String("mScLocale="));
+                        pw->Print(listener->mScLocale);
+                        pw->Print(String(" mUid=")); pw->Println(listener->mUid);
             }
         }
     }

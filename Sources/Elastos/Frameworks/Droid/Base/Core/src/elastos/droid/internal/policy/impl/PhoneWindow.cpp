@@ -6659,8 +6659,6 @@ ECode PhoneWindow::GetDrawableState(
 
         Slogger::E(TAG, "GetDrawableState: The feature has not been requested: content: %p, featureId: %d, mFeatures: %08x, mInvalidatePanelMenuFeatures: %08x",
             &mFeatures, featureId, mFeatures, mInvalidatePanelMenuFeatures);
-        // throw new RuntimeException("The feature has not been requested");
-        assert(0);
         return E_RUNTIME_EXCEPTION;
     }
 
@@ -6725,8 +6723,6 @@ ECode PhoneWindow::GetPanelState(
         }
         Slogger::E(TAG, "GetPanelState: The feature has not been requested: content: %p, featureId: %d, mFeatures: %08x, mInvalidatePanelMenuFeatures: %08x",
             &mFeatures, featureId, mFeatures, mInvalidatePanelMenuFeatures);
-        //throw new RuntimeException("The feature has not been requested");
-        assert(0);
         return E_RUNTIME_EXCEPTION;
     }
 

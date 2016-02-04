@@ -1,21 +1,51 @@
 module
 {
+    using interface Elastos.Droid.Content.IContext;
+
     namespace Elastos {
     namespace Droid {
     namespace Server {
 
+    [deprecated]
     interface INativeDaemonConnectorCallbacks {
         OnDaemonConnected();
+
+        OnCheckHoldWakeLock(
+            [in] Int32 code,
+            [out] Boolean* result);
 
         OnEvent(
             [in] Int32 code,
             [in] String raw,
-            [in] ArrayOf<String> cooked,
+            [in] ArrayOf<String>* cooked,
             [out] Boolean* result);
+    }
+
+    /**
+     * @hide
+     */
+    /**
+     * @Involved
+     * interface Elastos.Droid.Os.IINetworkManagementService;
+     * interface IBinder;
+     */
+    interface INetworkManagementService {
+        /**
+         * Name representing {@link #setGlobalAlert(long)} limit when delivered to
+         * {@link INetworkManagementEventObserver#limitReached(String, String)}.
+         */
+        const String LIMIT_GLOBAL_ALERT = "globalAlert";
+
+        SystemReady();
+    }
+
+    interface INetworkManagementServiceHelper {
+        Create(
+            [in] IContext* context,
+            [out] INetworkManagementService** result);
     }
 
     } // namespace Server
     } // namespace Droid
     } // namespace Elastos
-
 }

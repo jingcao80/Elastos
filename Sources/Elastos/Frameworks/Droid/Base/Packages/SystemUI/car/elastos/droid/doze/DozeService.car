@@ -8,7 +8,14 @@ module
     namespace Doze {
 
     /**
-     * @Involve interface IDreamService
+     * @Involve
+     * extends interface Elastos.Droid.Service.Dreams.IDreamService;
+     * extends Elastos.Droid.App.IService
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface Elastos.Droid.Content.IComponentCallbacks
+     * interface Elastos.Droid.Content.IComponentCallbacks2
+     * interface Elastos.Droid.View.IWindowCallback
      */
     interface IDozeService {}
 

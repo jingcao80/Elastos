@@ -2092,7 +2092,7 @@ static ECode WaitMonitor(
     struct timespec ts;
     Boolean wasInterrupted = FALSE;
     Boolean timed;
-    Int32 ret;
+    Int32 UNUSED(ret);
     String savedFileName;
     UInt32 savedLineNumber;
 

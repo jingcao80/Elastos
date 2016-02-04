@@ -3,19 +3,19 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
+#include "elastos/droid/animation/ObjectAnimator.h"
 #include "elastos/droid/graphics/drawable/RippleBackground.h"
 #include "elastos/droid/graphics/drawable/RippleDrawable.h"
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/graphics/Color.h"
-#include "elastos/droid/animation/ObjectAnimator.h"
 #include "elastos/droid/utility/MathUtils.h"
-// #include "elastos/droid/view/animation/CLinearInterpolator.h"
+#include "elastos/droid/view/animation/CLinearInterpolator.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Animation::ObjectAnimator;
 using Elastos::Droid::Utility::MathUtils;
 using Elastos::Droid::View::IRenderNodeAnimator;
-// using Elastos::Droid::View::Animation::CLinearInterpolator;
+using Elastos::Droid::View::Animation::CLinearInterpolator;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 
@@ -65,8 +65,8 @@ ECode RippleBackground::OuterOpacityAnimatorListenerAdapter::OnAnimationCancel(
     return animation->RemoveListener(this);
 }
 
-Boolean RippleBackground::sInit = InitStatic();
-AutoPtr<ITimeInterpolator> RippleBackground::LINEAR_INTERPOLATOR;
+
+AutoPtr<ITimeInterpolator> RippleBackground::LINEAR_INTERPOLATOR = Init_LINEAR_INTERPOLATOR();
 const Float RippleBackground::GLOBAL_SPEED = 1.0f;
 const Float RippleBackground::WAVE_OPACITY_DECAY_VELOCITY = 3.0f / GLOBAL_SPEED;
 const Float RippleBackground::WAVE_OUTER_OPACITY_EXIT_VELOCITY_MAX = 4.5f * GLOBAL_SPEED;
@@ -75,13 +75,11 @@ const Float RippleBackground::WAVE_OUTER_OPACITY_ENTER_VELOCITY = 10.0f * GLOBAL
 const Float RippleBackground::WAVE_OUTER_SIZE_INFLUENCE_MAX = 200.f;
 const Float RippleBackground::WAVE_OUTER_SIZE_INFLUENCE_MIN = 40.f;
 
-Boolean RippleBackground::InitStatic()
+AutoPtr<ITimeInterpolator> RippleBackground::Init_LINEAR_INTERPOLATOR()
 {
-    assert(0 && "TODO");
-    // AutoPtr<CLinearInterpolator> li;
-    // CLinearInterpolator::New((CTimeInterpolator**)&li);
-    // LINEAR_INTERPOLATOR = (ITimeInterpolator*)li.Get();
-    return TRUE;
+    AutoPtr<ITimeInterpolator> li;
+    CLinearInterpolator::New((ITimeInterpolator**)&li);
+    return li;
 }
 
 RippleBackground::RippleBackground(
@@ -185,7 +183,7 @@ Boolean RippleBackground::Draw(
 Boolean RippleBackground::ShouldDraw()
 {
     Int32 outerAlpha = (Int32) (mColorAlpha * mOuterOpacity + 0.5f);
-    return mCanUseHardware && mHardwareAnimating || outerAlpha > 0 && mOuterRadius > 0;
+    return (mCanUseHardware && mHardwareAnimating) || (outerAlpha > 0 && mOuterRadius > 0);
 }
 
 Boolean RippleBackground::DrawHardware(

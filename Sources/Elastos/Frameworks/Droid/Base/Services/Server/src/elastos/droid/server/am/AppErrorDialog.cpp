@@ -1,8 +1,18 @@
 
+#include "elastos/droid/R.h"
 #include "elastos/droid/server/am/AppErrorDialog.h"
+#include "elastos/core/AutoLock.h"
 
-using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::IDialogInterface;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::R;
+using Elastos::Droid::View::IWindow;
+
+using Elastos::Core::AutoLock;
+using Elastos::Core::CString;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +25,7 @@ Int64 const AppErrorDialog::DISMISS_TIMEOUT = 1000 * 60 * 5;
 
 AppErrorDialog::MyHandler::MyHandler(
     /* [in] */ AppErrorDialog* host)
-    : HandlerBase(FALSE)
+    : Handler(FALSE)
     , mHost(host)
 {}
 
@@ -26,7 +36,7 @@ ECode AppErrorDialog::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     {
-        AutoLock lock(mHost->mService->mLock);
+        AutoLock lock(mHost->mService);
         if (mHost->mProc != NULL && mHost->mProc->mCrashDialog == mHost) {
             mHost->mProc->mCrashDialog = NULL;
         }
@@ -34,6 +44,9 @@ ECode AppErrorDialog::MyHandler::HandleMessage(
     Int32 type;
     msg->GetWhat(&type);
     mHost->mResult->SetResult(type);
+
+    // Make sure we don't have time timeout still hanging around.
+    RemoveMessages(FORCE_QUIT);
 
     // If this is a timeout we won't be automatically closed, so go
     // ahead and explicitly dismiss ourselves just in case.
@@ -61,7 +74,8 @@ AppErrorDialog::AppErrorDialog(
     AutoPtr<IPackageManager> pkgManager;
     context->GetPackageManager((IPackageManager**)&pkgManager);
     pkgManager->GetApplicationLabel(app->mInfo, (ICharSequence**)&name);
-    if ((app->mPkgList.GetSize() == 1) && name!= NULL) {
+    Int32 size;
+    if (((app->mPkgList->GetSize(&size), size) == 1) && name!= NULL) {
         AutoPtr<ArrayOf<IInterface*> > args = ArrayOf<IInterface*>::Alloc(2);
         args->Set(0, (IInterface*)name.Get());
         String pName;
@@ -106,9 +120,11 @@ AppErrorDialog::AppErrorDialog(
     AutoPtr<ICharSequence> title;
     res->GetText(R::string::aerr_title, (ICharSequence**)&title);
     SetTitle(title);
-    Dialog::GetWindow()->AddFlags(IWindowManagerLayoutParams::FLAG_SYSTEM_ERROR);
+    AutoPtr<IWindow> window;
+    Dialog::GetWindow((IWindow**)&window);
+    //window->AddFlags(IViewGroupLayoutParams::FLAG_SYSTEM_ERROR);
     AutoPtr<IWindowManagerLayoutParams> attrs;
-    Dialog::GetWindow()->GetAttributes((IWindowManagerLayoutParams**)&attrs);
+    window->GetAttributes((IWindowManagerLayoutParams**)&attrs);
     String processName;
     app->mInfo->GetProcessName(&processName);
     AutoPtr<ICharSequence> titlecs;
@@ -116,10 +132,12 @@ AppErrorDialog::AppErrorDialog(
     attrs->SetTitle(titlecs);
     Int32 flags;
     attrs->GetPrivateFlags(&flags);
-    attrs->SetPrivateFlags(flags | IWindowManagerLayoutParams::PRIVATE_FLAG_SHOW_FOR_ALL_USERS);
-    Dialog::GetWindow()->SetAttributes(attrs);
+    attrs->SetPrivateFlags(flags
+            | IWindowManagerLayoutParams::PRIVATE_FLAG_SYSTEM_ERROR
+            | IWindowManagerLayoutParams::PRIVATE_FLAG_SHOW_FOR_ALL_USERS);
+    window->SetAttributes(attrs);
     if (app->mPersistent) {
-        Dialog::GetWindow()->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_ERROR);
+        window->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_ERROR);
     }
 
     // After the timeout, pretend the user clicked the quit button

@@ -1,18 +1,26 @@
 #ifndef __ELASTOS_DROID_OPENGL_GLSURFACEVIEW_H__
 #define __ELASTOS_DROID_OPENGL_GLSURFACEVIEW_H__
 
+#include "Elastos.Droid.Opengl.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "elastos/droid/view/SurfaceView.h"
+
 #include <elastos/core/Object.h>
-#include "elastos/io/Writer.h"
+#include <elastos/core/Thread.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/io/Writer.h>
 
 using Elastos::IO::IWriter;
 using Elastos::IO::IFlushable;
 using Elastos::IO::ICloseable;
 using Elastos::IO::Writer;
+using Elastos::Core::Thread;
+using Elastos::Core::Object;
 using Elastos::Core::StringBuilder;
 using Elastos::Droid::View::SurfaceView;
 using Elastos::Droid::View::ISurfaceHolder;
+using Elastos::Droid::View::ISurfaceHolderCallback;
 using Elastosx::Microedition::Khronos::Egl::IEGL10;
 using Elastosx::Microedition::Khronos::Egl::IEGL11;
 using Elastosx::Microedition::Khronos::Opengles::IGL;
@@ -22,10 +30,10 @@ namespace Elastos {
 namespace Droid {
 namespace Opengl {
 
-extern "C" const InterfaceID EIID_GLSurfaceView;
-
 class GLSurfaceView
     : public SurfaceView
+    , public IGLSurfaceView
+    , public ISurfaceHolderCallback
 {
 typedef Elastosx::Microedition::Khronos::Egl::IEGLConfig XIEGLConfig;
 typedef Elastosx::Microedition::Khronos::Egl::IEGLContext XIEGLContext;
@@ -35,7 +43,7 @@ typedef Elastosx::Microedition::Khronos::Egl::IEGLSurface XIEGLSurface;
 private:
     class DefaultContextFactory
         : public IEGLContextFactory
-        , public ElRefBase
+        , public Object
     {
     public:
         CAR_INTERFACE_DECL()
@@ -60,7 +68,7 @@ private:
 
     class DefaultWindowSurfaceFactory
         : public IEGLWindowSurfaceFactory
-        , public ElRefBase
+        , public Object
     {
     public:
         CAR_INTERFACE_DECL()
@@ -80,7 +88,7 @@ private:
 
     class BaseConfigChooser
         : public IEGLConfigChooser
-        , public ElRefBase
+        , public Object
     {
     public:
         CAR_INTERFACE_DECL()
@@ -167,7 +175,7 @@ private:
 
     class GLThread;
     class EglHelper
-        : public ElRefBase
+        : public Object
     {
     public:
         EglHelper(
@@ -219,7 +227,7 @@ private:
 
     class GLThreadManager;
     class GLThread
-        : public ThreadBase
+        : public Thread
     {
     public:
         GLThread(
@@ -274,6 +282,7 @@ private:
         Boolean mWaitingForSurface;
         Boolean mHaveEglContext;
         Boolean mHaveEglSurface;
+        Boolean mFinishedCreatingEglSurface;
         Boolean mShouldReleaseEglContext;
         Int32 mWidth;
         Int32 mHeight;
@@ -287,7 +296,7 @@ private:
         friend class GLThreadManager;
     };
 
-    class GLThreadManager :public ElRefBase
+    class GLThreadManager :public Object
     {
     public:
         GLThreadManager();
@@ -324,54 +333,18 @@ private:
     };
 
     class LogWriter
-        : public IWriter
-        , public ICloseable
-        , public IFlushable
-        , public Writer
-        , public ElRefBase
+        : public Writer
     {
     public:
-        CAR_INTERFACE_DECL()
-
         CARAPI Write(
-            /* [in] */ Int32 oneChar32);
-
-        CARAPI WriteChars(
-            /* [in] */ const ArrayOf<Char32>& buffer);
-
-        CARAPI WriteChars(
-            /* [in] */ const ArrayOf<Char32>& buffer,
+            /* [in] */ ArrayOf<Char32>* buffer,
             /* [in] */ Int32 offset,
             /* [in] */ Int32 count);
-
-        CARAPI WriteString(
-            /* [in] */ const String& str);
-
-        CARAPI WriteString(
-            /* [in] */ const String& str,
-            /* [in] */ Int32 offset,
-            /* [in] */ Int32 count);
-
-        CARAPI CheckError(
-            /* [out] */ Boolean* hasError);
 
         CARAPI Close();
 
         CARAPI Flush();
 
-        CARAPI AppendChar(
-            /* [out] */ Char32 c);
-
-        CARAPI AppendCharSequence(
-            /* [out] */ ICharSequence* csq);
-
-        CARAPI AppendCharSequence(
-            /* [out] */ ICharSequence* csq,
-            /* [out] */ Int32 start,
-            /* [out] */ Int32 end);
-
-        CARAPI GetLock(
-            /* [out] */ IInterface** lockobj);
     private:
         CARAPI FlushBuilder();
 
@@ -379,20 +352,18 @@ private:
     };
 
 public:
-    GLSurfaceView(
+    CAR_INTERFACE_DECL()
+
+    GLSurfaceView();
+
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
-    GLSurfaceView(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ IAttributeSet* attrs);
 
     ~GLSurfaceView();
-
-    virtual CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid) = 0;
-
-    virtual CARAPI GetWeakReference(
-        /* [out] */ IWeakReference** weakReference) = 0;
 
     CARAPI SetGLWrapper(
         /* [in] */ IGLWrapper* glWrapper);
@@ -463,18 +434,9 @@ public:
         /* [in] */ IRunnable* r);
 
 protected:
-    GLSurfaceView();
-
     CARAPI OnAttachedToWindow();
 
     CARAPI OnDetachedFromWindow();
-
-    CARAPI Init(
-        /* [in] */ IContext* context);
-
-    CARAPI Init(
-        /* [in] */ IContext* context,
-        /* [in] */ IAttributeSet* attrs);
 
 private:
     CARAPI InitInternal();

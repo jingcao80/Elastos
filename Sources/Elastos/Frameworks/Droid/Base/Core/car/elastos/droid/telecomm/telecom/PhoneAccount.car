@@ -1,0 +1,180 @@
+
+module
+{
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Telecomm.Telecom.IPhoneAccount;
+    using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecomm {
+    namespace Telecom {
+
+        interface IPhoneAccountBuilder {
+            SetAddress(
+                [in] IUri* value,
+                [out] IPhoneAccountBuilder** res);
+
+            SetSubscriptionAddress(
+                [in] IUri* value,
+                [out] IPhoneAccountBuilder** res);
+
+            SetCapabilities(
+                [in] Int32 value,
+                [out] IPhoneAccountBuilder** res);
+
+            SetIconResId(
+                [in] Int32 value,
+                [out] IPhoneAccountBuilder** res);
+
+            SetShortDescription(
+                [in] ICharSequence* value,
+                [out] IPhoneAccountBuilder** res);
+
+            AddSupportedUriScheme(
+                [in] String uriScheme,
+                [out] IPhoneAccountBuilder** res);
+
+            SetSupportedUriSchemes(
+                [in] IList* uriSchemes,
+                [out] IPhoneAccountBuilder** res);
+
+            Build(
+                [out] IPhoneAccount** res);
+        }
+
+        /**
+         * Describes a distinct account, line of service or call placement method that the system
+         * can use to place phone calls.
+         *  @hide
+         *
+         * @Involve
+         * interface IParcelable
+         */
+        interface IPhoneAccount {
+            /**
+             * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
+             * other connections. The {@link ConnectionService} associated with this {@code
+             * PhoneAccount}
+             * will be allowed to manage phone calls including using its own proprietary phone-call
+             * implementation (like VoIP calling) to make calls instead of the telephony stack.
+             * <p>
+             * When a user opts to place a call using the SIM-based telephony stack, the
+             * {@link ConnectionService} associated with this {@code PhoneAccount} will be attempted
+             * first
+             * if the user has explicitly selected it to be used as the default connection manager.
+             * <p>
+             * See {@link #getCapabilities}
+             */
+            const Int32 CAPABILITY_CONNECTION_MANAGER = 0x1;
+
+            /**
+             * Flag indicating that this {@code PhoneAccount} can make phone calls in place of
+             * traditional SIM-based telephony calls. This account will be treated as a distinct method
+             * for placing calls alongside the traditional SIM-based telephony stack. This flag is
+             * distinct from {@link #CAPABILITY_CONNECTION_MANAGER} in that it is not allowed to manage
+             * calls from or use the built-in telephony stack to place its calls.
+             * <p>
+             * See {@link #getCapabilities}
+             * <p>
+             * {@hide}
+             */
+            const Int32 CAPABILITY_CALL_PROVIDER = 0x2;
+
+            /**
+             * Flag indicating that this {@code PhoneAccount} represents a built-in PSTN SIM
+             * subscription.
+             * <p>
+             * Only the Android framework can register a {@code PhoneAccount} having this capability.
+             * <p>
+             * See {@link #getCapabilities}
+             */
+            const Int32 CAPABILITY_SIM_SUBSCRIPTION = 0x4;
+
+            /**
+             * Flag indicating that this {@code PhoneAccount} is capable of placing video calls.
+             * <p>
+             * See {@link #getCapabilities}
+             * @hide
+             */
+            const Int32 CAPABILITY_VIDEO_CALLING = 0x8;
+
+            /**
+             * Flag indicating that this {@code PhoneAccount} is capable of placing emergency calls.
+             * By default all PSTN {@code PhoneAccount}s are capable of placing emergency calls.
+             * <p>
+             * See {@link #getCapabilities}
+             */
+            const Int32 CAPABILITY_PLACE_EMERGENCY_CALLS = 0x10;
+
+            /**
+             * URI scheme for telephone number URIs.
+             */
+            const String SCHEME_TEL = "tel";
+
+            /**
+             * URI scheme for voicemail URIs.
+             */
+            const String SCHEME_VOICEMAIL = "voicemail";
+
+            /**
+             * URI scheme for SIP URIs.
+             */
+            const String SCHEME_SIP = "sip";
+
+            ToBuilder(
+                [out] IPhoneAccountBuilder** res);
+
+            GetAccountHandle(
+                [out] IPhoneAccountHandle** res);
+
+            GetAddress(
+                [out] IUri** res);
+
+            GetSubscriptionAddress(
+                [out] IUri** res);
+
+            GetCapabilities(
+                [out] Int32* res);
+
+            HasCapabilities(
+                [in] Int32 capability,
+                [out] Boolean* res);
+
+            GetLabel(
+                [out] ICharSequence** res);
+
+            GetShortDescription(
+                [out] ICharSequence** res);
+
+            GetSupportedUriSchemes(
+                [out] IList** res);
+
+            SupportsUriScheme(
+                [in] String uriScheme,
+                [out] Boolean* res);
+
+            GetIconResId(
+                [out] Int32* res);
+
+            GetIcon(
+                [in] IContext* context,
+                [out] IDrawable** res);
+        }
+
+        interface IPhoneAccountHelper {
+            Builder(
+                [in] IPhoneAccountHandle* accountHandle,
+                [in] ICharSequence* label,
+                [out] IPhoneAccountBuilder** res);
+        }
+
+    } // namespace Telecom
+    } // namespace Telecomm
+    } // namespace Droid
+    } // namespace Elastos
+}

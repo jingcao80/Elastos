@@ -5262,6 +5262,7 @@ ECode TextView::SetInputExtras(
     mEditor->mInputContentType->mExtras = NULL;
     CBundle::New((IBundle**)&mEditor->mInputContentType->mExtras);
     return res->ParseBundleExtras(parser, mEditor->mInputContentType->mExtras);*/
+    return NOERROR;
 }
 
 ECode TextView::GetInputExtras(
@@ -8240,6 +8241,7 @@ CARAPI TextView::BringPointIntoView(
 
     Float lineLeft, lineRight;
     layout->GetLineLeft(line, &lineLeft);
+    layout->GetLineRight(line, &lineRight);
     Int32 left = (Int32) Elastos::Core::Math::Floor(lineLeft);
     Int32 right = (Int32) Elastos::Core::Math::Ceil(lineRight);
     Int32 ht, compoundPaddingLeft, compoundPaddingRight, extendedPaddingTop, extendedPaddingBottom;
@@ -8533,6 +8535,7 @@ Int32 TextView::ViewportToContentVerticalOffset()
 ECode TextView::Debug(
     /* [in] */ Int32 depth)
 {
+    // TODO:
     /*View::debug(depth);
 
     String output = debugIndent(depth);
@@ -8552,6 +8555,7 @@ ECode TextView::Debug(
     }
     Log::d(VIEW_LOG_TAG, output);
     return NOERROR;*/
+    return NOERROR;
 }
 
 ECode TextView::GetSelectionStart(
@@ -9679,6 +9683,7 @@ Boolean TextView::CanSelectText()
     mText->GetLength(&len);
     assert(0);
     //return len != 0 && mEditor != NULL && mEditor->HasSelectionController();
+    return FALSE;
 }
 
 Boolean TextView::TextCanBeSelected()
@@ -10323,6 +10328,7 @@ Boolean TextView::CanPaste()
         && mEditor != NULL && mEditor->mKeyListener != NULL
         && GetSelectionStart() >= 0 && GetSelectionEnd() >= 0
         && hasClip);*/
+    return FALSE;
 }
 
 Boolean TextView::SelectAllText()
@@ -10511,6 +10517,7 @@ Boolean TextView::IsInBatchEditMode()
         return ims->mBatchEditNesting > 0;
     }
     return mEditor->mInBatchEditControllers;*/
+    return FALSE;
 }
 
 ECode TextView::OnRtlPropertiesChanged(

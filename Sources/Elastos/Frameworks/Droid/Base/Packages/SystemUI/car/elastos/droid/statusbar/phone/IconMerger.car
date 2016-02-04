@@ -16,7 +16,6 @@ module
      */
     [local]
     interface IIconMerger {
-
         SetOverflowIndicator(
             [in] IView* v);
     }

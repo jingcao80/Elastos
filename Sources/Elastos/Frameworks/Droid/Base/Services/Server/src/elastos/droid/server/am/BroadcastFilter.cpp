@@ -1,6 +1,6 @@
 
 #include "elastos/droid/server/am/BroadcastFilter.h"
-// #include "elastos/droid/server/am/ReceiverList.h"
+#include "elastos/droid/server/am/ReceiverList.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -41,9 +41,9 @@ void BroadcastFilter::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ const String& prefix)
 {
-    assert(0);
+    // TODO
     // DumpInReceiverList(pw, new PrintWriterPrinter(pw), prefix);
-    // mReceiverList->DumpLocal(pw, prefix);
+    mReceiverList->DumpLocal(pw, prefix);
 }
 
 void BroadcastFilter::DumpBrief(
@@ -81,8 +81,7 @@ String BroadcastFilter::ToString()
     sb += ("userId=");
     sb += (mOwningUserId);
     sb += ' ';
-    assert(0);
-    // sb += mReceiverList->ToString();
+    sb += mReceiverList->ToString();
     sb += "}";
     return sb.ToString();
 }

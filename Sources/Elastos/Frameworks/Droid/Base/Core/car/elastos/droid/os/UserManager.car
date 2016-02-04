@@ -615,6 +615,16 @@ module
             [out] IList** users);
 
         /**
+         * Returns the parent of the profile which this method is called from
+         * or null if called from a user that is not a profile.
+         *
+         * @hide
+         */
+        GetProfileParent(
+            [in] Int32 userHandle,
+            [out] IUserInfo** result);
+
+        /**
          * Removes a user and all associated data.
          * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
          * @param userHandle the integer handle of the user, where 0 is the primary user.

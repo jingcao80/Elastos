@@ -152,17 +152,18 @@ AutoPtr<ClipboardService::PerUserClipboard> ClipboardService::GetClipboard()
 AutoPtr<ClipboardService::PerUserClipboard> ClipboardService::GetClipboard(
     /* [in] */ Int32 userId)
 {
+    AutoPtr<PerUserClipboard> puc;
     synchronized(mClipboards) {
         AutoPtr<IInterface> obj;
         mClipboards->Get(userId, (IInterface**)&obj);
-        AutoPtr<PerUserClipboard> puc = (PerUserClipboard*)IObject::Probe(obj);
+        puc = (PerUserClipboard*)IObject::Probe(obj);
 
         if (puc == NULL) {
             puc = new PerUserClipboard(userId);
-            mClipboards->Put(userId, TO_IINTERFACE(puc));
+            mClipboards->Put(userId, (IObject*)puc);
         }
-        return puc;
     }
+    return puc;
 }
 
 void ClipboardService::RemoveClipboard(
@@ -207,13 +208,15 @@ ECode ClipboardService::SetPrimaryClip(
                 // try {
                 AutoPtr<IBundle> bundle;
                 ECode ec = mUm->GetUserRestrictions(userId, (IBundle**)&bundle);
-                if (FAILED(ec)) {
+                if (SUCCEEDED(ec)) {
+                    Boolean res;
+                    bundle->GetBoolean(
+                            IUserManager::DISALLOW_CROSS_PROFILE_COPY_PASTE, &res);
+                    canCopy = !res;
+                }
+                else {
                     Slogger::E(TAG, "Remote Exception calling UserManager: " );
                 }
-                Boolean res;
-                bundle->GetBoolean(
-                        IUserManager::DISALLOW_CROSS_PROFILE_COPY_PASTE, &res);
-                canCopy = !res;
                 // } catch (RemoteException e) {
                 //     Slog.e(TAG, "Remote Exception calling UserManager: " + e);
                 // }
@@ -255,6 +258,7 @@ ECode ClipboardService::GetRelatedProfiles(
     ECode ec = mUm->GetProfiles(userId, TRUE, (IList**)&related);
     if (FAILED(ec)) {
         Slogger::E(TAG, "Remote Exception calling UserManager: ");
+        Binder::RestoreCallingIdentity(origId);
         return NOERROR;
     }
     // } catch (RemoteException e) {
@@ -347,7 +351,7 @@ ECode ClipboardService::GetPrimaryClipDescription(
         AutoPtr<PerUserClipboard> clipboard = GetClipboard();
         if (clipboard->mPrimaryClip != NULL) {
             AutoPtr<IClipDescription> des;
-            FAIL_RETURN(clipboard->mPrimaryClip->GetDescription((IClipDescription**)&des));
+            clipboard->mPrimaryClip->GetDescription((IClipDescription**)&des);
             *description = des;
             REFCOUNT_ADD(*description);
         }
@@ -418,7 +422,7 @@ ECode ClipboardService::HasClipboardText(
         AutoPtr<PerUserClipboard> clipboard = GetClipboard();
         if (clipboard->mPrimaryClip != NULL) {
             AutoPtr<IClipDataItem> item;
-            FAIL_RETURN(clipboard->mPrimaryClip->GetItemAt(0, (IClipDataItem**)&item));
+            clipboard->mPrimaryClip->GetItemAt(0, (IClipDataItem**)&item);
             AutoPtr<ICharSequence> text;
             item->GetText((ICharSequence**)&text);
             if (text != NULL) {

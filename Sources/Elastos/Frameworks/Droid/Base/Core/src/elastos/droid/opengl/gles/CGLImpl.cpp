@@ -1,11 +1,12 @@
-#include "CGLImpl.h"
+#include "elastos/droid/opengl/gles/CGLImpl.h"
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/os/UserHandle.h"
-#include <elastos/utility/logging/Slogger.h>
 #include "elastos/droid/os/Build.h"
+#include "Elastos.CoreLibrary.IO.h"
+
+#include <elastos/utility/logging/Slogger.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
-#include <cmdef.h>
 
 // Work around differences between the generated name and the actual name.
 
@@ -25,10 +26,15 @@
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::App::AppGlobals;
-using Elastos::IO::INIOAccessHelper;
-using Elastos::IO::CNIOAccessHelper;
+using Elastos::IO::INIOAccess;
+using Elastos::IO::CNIOAccess;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastosx::Microedition::Khronos::Opengles::EIID_IGL10;
+using Elastosx::Microedition::Khronos::Opengles::EIID_IGL10Ext;
+using Elastosx::Microedition::Khronos::Opengles::EIID_IGL11;
+using Elastosx::Microedition::Khronos::Opengles::EIID_IGL11Ext;
+using Elastosx::Microedition::Khronos::Opengles::EIID_IGL11ExtensionPack;
 
 extern "C" {
 extern char*  __progname;
@@ -140,13 +146,15 @@ Boolean CGLImpl::SupportsExtension(
     return rst;
 }
 
+CAR_INTERFACE_IMPL_5(CGLImpl, Object, IGL10, IGL10Ext, IGL11, IGL11Ext, IGL11ExtensionPack)
+CAR_OBJECT_IMPL(CGLImpl)
 
 ECode CGLImpl::constructor()
 {
     return NOERROR;
 }
 
-ECode CGLImpl::glActiveTexture(
+ECode CGLImpl::GlActiveTexture(
     /* [in] */ Int32 texture)
 {
     glActiveTexture(
@@ -155,7 +163,7 @@ ECode CGLImpl::glActiveTexture(
     return NOERROR;
 }
 
-ECode CGLImpl::glAlphaFunc(
+ECode CGLImpl::GlAlphaFunc(
     /* [in] */ Int32 func,
     /* [in] */ Float ref)
 {
@@ -166,7 +174,7 @@ ECode CGLImpl::glAlphaFunc(
     return NOERROR;
 }
 
-ECode CGLImpl::glAlphaFuncx(
+ECode CGLImpl::GlAlphaFuncx(
     /* [in] */ Int32 func,
     /* [in] */ Int32 ref)
 {
@@ -177,7 +185,7 @@ ECode CGLImpl::glAlphaFuncx(
     return NOERROR;
 }
 
-ECode CGLImpl::glBindTexture(
+ECode CGLImpl::GlBindTexture(
     /* [in] */ Int32 target,
     /* [in] */ Int32 texture)
 {
@@ -188,7 +196,7 @@ ECode CGLImpl::glBindTexture(
     return NOERROR;
 }
 
-ECode CGLImpl::glBlendFunc(
+ECode CGLImpl::GlBlendFunc(
     /* [in] */ Int32 sfactor,
     /* [in] */ Int32 dfactor)
 {
@@ -199,7 +207,7 @@ ECode CGLImpl::glBlendFunc(
     return NOERROR;
 }
 
-ECode CGLImpl::glClear(
+ECode CGLImpl::GlClear(
     /* [in] */ Int32 mask)
 {
     glClear(
@@ -208,7 +216,7 @@ ECode CGLImpl::glClear(
     return NOERROR;
 }
 
-ECode CGLImpl::glClearColor(
+ECode CGLImpl::GlClearColor(
     /* [in] */ Float red,
     /* [in] */ Float green,
     /* [in] */ Float blue,
@@ -223,7 +231,7 @@ ECode CGLImpl::glClearColor(
     return NOERROR;
 }
 
-ECode CGLImpl::glClearColorx(
+ECode CGLImpl::GlClearColorx(
     /* [in] */ Int32 red,
     /* [in] */ Int32 green,
     /* [in] */ Int32 blue,
@@ -238,7 +246,7 @@ ECode CGLImpl::glClearColorx(
     return NOERROR;
 }
 
-ECode CGLImpl::glClearDepthf(
+ECode CGLImpl::GlClearDepthf(
     /* [in] */ Float depth)
 {
     glClearDepthf(
@@ -247,7 +255,7 @@ ECode CGLImpl::glClearDepthf(
     return NOERROR;
 }
 
-ECode CGLImpl::glClearDepthx(
+ECode CGLImpl::GlClearDepthx(
     /* [in] */ Int32 depth)
 {
     glClearDepthx(
@@ -256,7 +264,7 @@ ECode CGLImpl::glClearDepthx(
     return NOERROR;
 }
 
-ECode CGLImpl::glClearStencil(
+ECode CGLImpl::GlClearStencil(
     /* [in] */ Int32 s)
 {
     glClearStencil(
@@ -265,7 +273,7 @@ ECode CGLImpl::glClearStencil(
     return NOERROR;
 }
 
-ECode CGLImpl::glClientActiveTexture(
+ECode CGLImpl::GlClientActiveTexture(
     /* [in] */ Int32 texture)
 {
     glClientActiveTexture(
@@ -274,7 +282,7 @@ ECode CGLImpl::glClientActiveTexture(
     return NOERROR;
 }
 
-ECode CGLImpl::glColor4f(
+ECode CGLImpl::GlColor4f(
     /* [in] */ Float red,
     /* [in] */ Float green,
     /* [in] */ Float blue,
@@ -289,7 +297,7 @@ ECode CGLImpl::glColor4f(
     return NOERROR;
 }
 
-ECode CGLImpl::glColor4x(
+ECode CGLImpl::GlColor4x(
     /* [in] */ Int32 red,
     /* [in] */ Int32 green,
     /* [in] */ Int32 blue,
@@ -304,7 +312,7 @@ ECode CGLImpl::glColor4x(
     return NOERROR;
 }
 
-ECode CGLImpl::glColorMask(
+ECode CGLImpl::GlColorMask(
     /* [in] */ Boolean red,
     /* [in] */ Boolean green,
     /* [in] */ Boolean blue,
@@ -319,7 +327,7 @@ ECode CGLImpl::glColorMask(
     return NOERROR;
 }
 
-ECode CGLImpl::glColorPointerBounds(
+ECode CGLImpl::GlColorPointerBounds(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -329,7 +337,7 @@ ECode CGLImpl::glColorPointerBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle32 tmp;
+        Handle64 tmp;
         GetDirectBufferPointer(pointer_buf, &tmp);
         pointer = (GLvoid *) tmp;
         if ( ! pointer ) {
@@ -346,7 +354,7 @@ ECode CGLImpl::glColorPointerBounds(
     return NOERROR;
 }
 
-ECode CGLImpl::glColorPointer(
+ECode CGLImpl::GlColorPointer(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -371,7 +379,7 @@ ECode CGLImpl::glColorPointer(
     return NOERROR;
 }
 
-ECode CGLImpl::glCompressedTexSubImage2D(
+ECode CGLImpl::GlCompressedTexSubImage2D(
     /* [in] */ Int32 target,
     /* [in] */ Int32 level,
     /* [in] */ Int32 xoffset,
@@ -382,11 +390,11 @@ ECode CGLImpl::glCompressedTexSubImage2D(
     /* [in] */ Int32 imageSize,
     /* [in] */ IBuffer* data_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
-    Handle32 tmp;
+    Handle64 tmp;
     GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp);
     data = (GLvoid *) tmp;
     if (data == NULL) {
@@ -407,7 +415,7 @@ ECode CGLImpl::glCompressedTexSubImage2D(
     return NOERROR;
 }
 
-ECode CGLImpl::glCopyTexSubImage2D(
+ECode CGLImpl::GlCopyTexSubImage2D(
     /* [in] */ Int32 target,
     /* [in] */ Int32 level,
     /* [in] */ Int32 xoffset,
@@ -430,7 +438,7 @@ ECode CGLImpl::glCopyTexSubImage2D(
     return NOERROR;
 }
 
-ECode CGLImpl::glCullFace(
+ECode CGLImpl::GlCullFace(
     /* [in] */ Int32 mode)
 {
     glCullFace(
@@ -439,7 +447,7 @@ ECode CGLImpl::glCullFace(
     return NOERROR;
 }
 
-ECode CGLImpl::glDeleteTextures(
+ECode CGLImpl::GlDeleteTextures(
     /* [in] */ Int32 n,
     /* [in] */ ArrayOf<Int32>* textures_ref,
     /* [in] */ Int32 offset)
@@ -468,16 +476,16 @@ ECode CGLImpl::glDeleteTextures(
     return NOERROR;
 }
 
-ECode CGLImpl::glDeleteTextures(
+ECode CGLImpl::GlDeleteTextures(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* textures_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *textures = (GLuint *) 0;
-    Handle32 tmp;
-    GetPointer(textures_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(textures_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     textures = (GLuint *)tmp;
     if (_remaining < n) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -493,7 +501,7 @@ ECode CGLImpl::glDeleteTextures(
     return NOERROR;
 }
 
-ECode CGLImpl::glDepthFunc(
+ECode CGLImpl::GlDepthFunc(
     /* [in] */ Int32 func)
 {
     glDepthFunc(
@@ -502,7 +510,7 @@ ECode CGLImpl::glDepthFunc(
     return NOERROR;
 }
 
-ECode CGLImpl::glDepthMask(
+ECode CGLImpl::GlDepthMask(
     /* [in] */ Boolean flag)
 {
     glDepthMask(
@@ -511,7 +519,7 @@ ECode CGLImpl::glDepthMask(
     return NOERROR;
 }
 
-ECode CGLImpl::glDepthRangef(
+ECode CGLImpl::GlDepthRangef(
     /* [in] */ Float zNear,
     /* [in] */ Float zFar)
 {
@@ -522,7 +530,7 @@ ECode CGLImpl::glDepthRangef(
     return NOERROR;
 }
 
-ECode CGLImpl::glDepthRangex(
+ECode CGLImpl::GlDepthRangex(
     /* [in] */ Int32 zNear,
     /* [in] */ Int32 zFar)
 {
@@ -533,7 +541,7 @@ ECode CGLImpl::glDepthRangex(
     return NOERROR;
 }
 
-ECode CGLImpl::glDisable(
+ECode CGLImpl::GlDisable(
     /* [in] */ Int32 cap)
 {
     glDisable(
@@ -542,7 +550,7 @@ ECode CGLImpl::glDisable(
     return NOERROR;
 }
 
-ECode CGLImpl::glDisableClientState(
+ECode CGLImpl::GlDisableClientState(
     /* [in] */ Int32 array)
 {
     glDisableClientState(
@@ -551,7 +559,7 @@ ECode CGLImpl::glDisableClientState(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawArrays(
+ECode CGLImpl::GlDrawArrays(
     /* [in] */ Int32 mode,
     /* [in] */ Int32 first,
     /* [in] */ Int32 count)
@@ -564,18 +572,18 @@ ECode CGLImpl::glDrawArrays(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawElements(
+ECode CGLImpl::GlDrawElements(
     /* [in] */ Int32 mode,
     /* [in] */ Int32 count,
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* indices_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *indices = (GLvoid *) 0;
 
-    Handle32 tmp;
+    Handle64 tmp;
     GetPointer(indices_buf, &_array, &_remaining, &_bufferOffset, &tmp);
     indices = (GLvoid *) tmp;
     if (_remaining < count) {
@@ -594,19 +602,19 @@ ECode CGLImpl::glDrawElements(
     return NOERROR;
 }
 
-ECode CGLImpl::glFinish()
+ECode CGLImpl::GlFinish()
 {
     glFinish();
     return NOERROR;
 }
 
-ECode CGLImpl::glFlush()
+ECode CGLImpl::GlFlush()
 {
     glFlush();
     return NOERROR;
 }
 
-ECode CGLImpl::glFogf(
+ECode CGLImpl::GlFogf(
     /* [in] */ Int32 pname,
     /* [in] */ Float param)
 {
@@ -617,7 +625,7 @@ ECode CGLImpl::glFogf(
     return NOERROR;
 }
 
-ECode CGLImpl::glFogfv(
+ECode CGLImpl::GlFogfv(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
     /* [in] */ Int32 offset)
@@ -655,7 +663,7 @@ ECode CGLImpl::glFogfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -671,17 +679,17 @@ ECode CGLImpl::glFogfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glFogfv(
+ECode CGLImpl::GlFogfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -705,7 +713,7 @@ ECode CGLImpl::glFogfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -723,7 +731,7 @@ ECode CGLImpl::glFogfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glFogx(
+ECode CGLImpl::GlFogx(
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
 {
@@ -734,7 +742,7 @@ ECode CGLImpl::glFogx(
     return NOERROR;
 }
 
-ECode CGLImpl::glFogxv(
+ECode CGLImpl::GlFogxv(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
     /* [in] */ Int32 offset)
@@ -772,7 +780,7 @@ ECode CGLImpl::glFogxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -788,17 +796,17 @@ ECode CGLImpl::glFogxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glFogxv(
+ECode CGLImpl::GlFogxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -822,7 +830,7 @@ ECode CGLImpl::glFogxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -839,7 +847,7 @@ ECode CGLImpl::glFogxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glFrontFace(
+ECode CGLImpl::GlFrontFace(
     /* [in] */ Int32 mode)
 {
     glFrontFace(
@@ -848,7 +856,7 @@ ECode CGLImpl::glFrontFace(
     return NOERROR;
 }
 
-ECode CGLImpl::glFrustumf(
+ECode CGLImpl::GlFrustumf(
     /* [in] */ Float left,
     /* [in] */ Float right,
     /* [in] */ Float bottom,
@@ -867,7 +875,7 @@ ECode CGLImpl::glFrustumf(
     return NOERROR;
 }
 
-ECode CGLImpl::glFrustumx(
+ECode CGLImpl::GlFrustumx(
     /* [in] */ Int32 left,
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom,
@@ -886,7 +894,7 @@ ECode CGLImpl::glFrustumx(
     return NOERROR;
 }
 
-ECode CGLImpl::glGenTextures(
+ECode CGLImpl::GlGenTextures(
     /* [in] */ Int32 n,
     /* [in] */ ArrayOf<Int32>* textures_ref,
     /* [in] */ Int32 offset)
@@ -915,17 +923,17 @@ ECode CGLImpl::glGenTextures(
     return NOERROR;
 }
 
-ECode CGLImpl::glGenTextures(
+ECode CGLImpl::GlGenTextures(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* textures_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *textures = (GLuint *) 0;
 
-    Handle32 tmp;
-    GetPointer(textures_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(textures_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     textures = (GLuint *)tmp;
     if (_remaining < n) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -941,25 +949,29 @@ ECode CGLImpl::glGenTextures(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetError(
+ECode CGLImpl::GlGetError(
     /* [out] */ Int32* error)
 {
+    VALIDATE_NOT_NULL(error)
+
     GLenum _returnValue;
     _returnValue = glGetError();
     *error = _returnValue;
     return NOERROR;
 }
 
-ECode CGLImpl::glGetString(
+ECode CGLImpl::GlGetString(
     /* [in] */ Int32 name,
     /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str)
+
     const char* chars = (const char*) glGetString((GLenum) name);
     *str = String(chars);
     return NOERROR;
 }
 
-ECode CGLImpl::glHint(
+ECode CGLImpl::GlHint(
     /* [in] */ Int32 target,
     /* [in] */ Int32 mode)
 {
@@ -970,7 +982,7 @@ ECode CGLImpl::glHint(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightModelf(
+ECode CGLImpl::GlLightModelf(
     /* [in] */ Int32 pname,
     /* [in] */ Float param)
 {
@@ -981,7 +993,7 @@ ECode CGLImpl::glLightModelf(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightModelfv(
+ECode CGLImpl::GlLightModelfv(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
     /* [in] */ Int32 offset)
@@ -1010,7 +1022,7 @@ ECode CGLImpl::glLightModelfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1026,17 +1038,17 @@ ECode CGLImpl::glLightModelfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightModelfv(
+ECode CGLImpl::GlLightModelfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -1051,7 +1063,7 @@ ECode CGLImpl::glLightModelfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1069,7 +1081,7 @@ ECode CGLImpl::glLightModelfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightModelx(
+ECode CGLImpl::GlLightModelx(
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
 {
@@ -1080,7 +1092,7 @@ ECode CGLImpl::glLightModelx(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightModelxv(
+ECode CGLImpl::GlLightModelxv(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
     /* [in] */ Int32 offset)
@@ -1109,7 +1121,7 @@ ECode CGLImpl::glLightModelxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1126,17 +1138,17 @@ ECode CGLImpl::glLightModelxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightModelxv(
+ECode CGLImpl::GlLightModelxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -1151,7 +1163,7 @@ ECode CGLImpl::glLightModelxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1168,7 +1180,7 @@ ECode CGLImpl::glLightModelxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightf(
+ECode CGLImpl::GlLightf(
     /* [in] */ Int32 light,
     /* [in] */ Int32 pname,
     /* [in] */ Float param)
@@ -1181,7 +1193,7 @@ ECode CGLImpl::glLightf(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightfv(
+ECode CGLImpl::GlLightfv(
     /* [in] */ Int32 light,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
@@ -1237,7 +1249,7 @@ ECode CGLImpl::glLightfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1255,18 +1267,18 @@ ECode CGLImpl::glLightfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightfv(
+ECode CGLImpl::GlLightfv(
     /* [in] */ Int32 light,
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -1307,7 +1319,7 @@ ECode CGLImpl::glLightfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1325,7 +1337,7 @@ ECode CGLImpl::glLightfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightx(
+ECode CGLImpl::GlLightx(
     /* [in] */ Int32 light,
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
@@ -1338,7 +1350,7 @@ ECode CGLImpl::glLightx(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightxv(
+ECode CGLImpl::GlLightxv(
     /* [in] */ Int32 light,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -1394,7 +1406,7 @@ ECode CGLImpl::glLightxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1412,18 +1424,18 @@ ECode CGLImpl::glLightxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glLightxv(
+ECode CGLImpl::GlLightxv(
     /* [in] */ Int32 light,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -1464,7 +1476,7 @@ ECode CGLImpl::glLightxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1482,7 +1494,7 @@ ECode CGLImpl::glLightxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glLineWidth(
+ECode CGLImpl::GlLineWidth(
     /* [in] */ Float width)
 {
     glLineWidth(
@@ -1491,7 +1503,7 @@ ECode CGLImpl::glLineWidth(
     return NOERROR;
 }
 
-ECode CGLImpl::glLineWidthx(
+ECode CGLImpl::GlLineWidthx(
     /* [in] */ Int32 width)
 {
     glLineWidthx(
@@ -1500,13 +1512,13 @@ ECode CGLImpl::glLineWidthx(
     return NOERROR;
 }
 
-ECode CGLImpl::glLoadIdentity()
+ECode CGLImpl::GlLoadIdentity()
 {
     glLoadIdentity();
     return NOERROR;
 }
 
-ECode CGLImpl::glLoadMatrixf(
+ECode CGLImpl::GlLoadMatrixf(
     /* [in] */ ArrayOf<Float>* m_ref,
     /* [in] */ Int32 offset)
 {
@@ -1528,16 +1540,16 @@ ECode CGLImpl::glLoadMatrixf(
     return NOERROR;
 }
 
-ECode CGLImpl::glLoadMatrixf(
+ECode CGLImpl::GlLoadMatrixf(
     /* [in] */ IFloatBuffer* m_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *m = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(m_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(m_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     m = (GLfloat *)tmp;
     if (m == NULL) {
         char * _mBase = reinterpret_cast<char *>(_array);
@@ -1549,7 +1561,7 @@ ECode CGLImpl::glLoadMatrixf(
     return NOERROR;
 }
 
-ECode CGLImpl::glLoadMatrixx(
+ECode CGLImpl::GlLoadMatrixx(
     /* [in] */ ArrayOf<Int32>* m_ref,
     /* [in] */ Int32 offset)
 {
@@ -1571,16 +1583,16 @@ ECode CGLImpl::glLoadMatrixx(
     return NOERROR;
 }
 
-ECode CGLImpl::glLoadMatrixx(
+ECode CGLImpl::GlLoadMatrixx(
     /* [in] */ IInt32Buffer* m_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *m = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(m_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(m_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     m = (GLfixed *)tmp;
     if (m == NULL) {
         char * _mBase = reinterpret_cast<char *>(_array);
@@ -1592,7 +1604,7 @@ ECode CGLImpl::glLoadMatrixx(
     return NOERROR;
 }
 
-ECode CGLImpl::glLogicOp(
+ECode CGLImpl::GlLogicOp(
     /* [in] */ Int32 opcode)
 {
     glLogicOp(
@@ -1601,7 +1613,7 @@ ECode CGLImpl::glLogicOp(
     return NOERROR;
 }
 
-ECode CGLImpl::glMaterialf(
+ECode CGLImpl::GlMaterialf(
     /* [in] */ Int32 face,
     /* [in] */ Int32 pname,
     /* [in] */ Float param)
@@ -1614,7 +1626,7 @@ ECode CGLImpl::glMaterialf(
     return NOERROR;
 }
 
-ECode CGLImpl::glMaterialfv(
+ECode CGLImpl::GlMaterialfv(
     /* [in] */ Int32 face,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
@@ -1656,7 +1668,7 @@ ECode CGLImpl::glMaterialfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1674,18 +1686,18 @@ ECode CGLImpl::glMaterialfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glMaterialfv(
+ECode CGLImpl::GlMaterialfv(
     /* [in] */ Int32 face,
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -1712,7 +1724,7 @@ ECode CGLImpl::glMaterialfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1730,7 +1742,7 @@ ECode CGLImpl::glMaterialfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glMaterialx(
+ECode CGLImpl::GlMaterialx(
     /* [in] */ Int32 face,
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
@@ -1743,7 +1755,7 @@ ECode CGLImpl::glMaterialx(
     return NOERROR;
 }
 
-ECode CGLImpl::glMaterialxv(
+ECode CGLImpl::GlMaterialxv(
     /* [in] */ Int32 face,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -1785,7 +1797,7 @@ ECode CGLImpl::glMaterialxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1802,18 +1814,18 @@ ECode CGLImpl::glMaterialxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glMaterialxv(
+ECode CGLImpl::GlMaterialxv(
     /* [in] */ Int32 face,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -1840,7 +1852,7 @@ ECode CGLImpl::glMaterialxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -1858,7 +1870,7 @@ ECode CGLImpl::glMaterialxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glMatrixMode(
+ECode CGLImpl::GlMatrixMode(
     /* [in] */ Int32 mode)
 {
     glMatrixMode(
@@ -1867,7 +1879,7 @@ ECode CGLImpl::glMatrixMode(
     return NOERROR;
 }
 
-ECode CGLImpl::glMultMatrixf(
+ECode CGLImpl::GlMultMatrixf(
     /* [in] */ ArrayOf<Float>* m_ref,
     /* [in] */ Int32 offset)
 {
@@ -1889,16 +1901,16 @@ ECode CGLImpl::glMultMatrixf(
     return NOERROR;
 }
 
-ECode CGLImpl::glMultMatrixf(
+ECode CGLImpl::GlMultMatrixf(
     /* [in] */ IFloatBuffer* m_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *m = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(m_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(m_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     m = (GLfloat *)tmp;
     if (m == NULL) {
         char * _mBase = reinterpret_cast<char *>(_array);
@@ -1910,7 +1922,7 @@ ECode CGLImpl::glMultMatrixf(
     return NOERROR;
 }
 
-ECode CGLImpl::glMultMatrixx(
+ECode CGLImpl::GlMultMatrixx(
     /* [in] */ ArrayOf<Int32>* m_ref,
     /* [in] */ Int32 offset)
 {
@@ -1933,16 +1945,16 @@ ECode CGLImpl::glMultMatrixx(
     return NOERROR;
 }
 
-ECode CGLImpl::glMultMatrixx(
+ECode CGLImpl::GlMultMatrixx(
     /* [in] */ IInt32Buffer* m_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *m = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(m_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(m_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     m = (GLfixed *)tmp;
     if (m == NULL) {
         char * _mBase = reinterpret_cast<char *>(_array);
@@ -1954,7 +1966,7 @@ ECode CGLImpl::glMultMatrixx(
     return NOERROR;
 }
 
-ECode CGLImpl::glMultiTexCoord4f(
+ECode CGLImpl::GlMultiTexCoord4f(
     /* [in] */ Int32 target,
     /* [in] */ Float s,
     /* [in] */ Float t,
@@ -1971,7 +1983,7 @@ ECode CGLImpl::glMultiTexCoord4f(
     return NOERROR;
 }
 
-ECode CGLImpl::glMultiTexCoord4x(
+ECode CGLImpl::GlMultiTexCoord4x(
     /* [in] */ Int32 target,
     /* [in] */ Int32 s,
     /* [in] */ Int32 t,
@@ -1988,7 +2000,7 @@ ECode CGLImpl::glMultiTexCoord4x(
     return NOERROR;
 }
 
-ECode CGLImpl::glNormal3f(
+ECode CGLImpl::GlNormal3f(
     /* [in] */ Float nx,
     /* [in] */ Float ny,
     /* [in] */ Float nz)
@@ -2001,7 +2013,7 @@ ECode CGLImpl::glNormal3f(
     return NOERROR;
 }
 
-ECode CGLImpl::glNormal3x(
+ECode CGLImpl::GlNormal3x(
     /* [in] */ Int32 nx,
     /* [in] */ Int32 ny,
     /* [in] */ Int32 nz)
@@ -2014,7 +2026,7 @@ ECode CGLImpl::glNormal3x(
     return NOERROR;
 }
 
-ECode CGLImpl::glNormalPointer(
+ECode CGLImpl::GlNormalPointer(
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
     /* [in] */ IBuffer* pointer)
@@ -2037,7 +2049,7 @@ ECode CGLImpl::glNormalPointer(
     return NOERROR;
 }
 
-ECode CGLImpl::glNormalPointerBounds(
+ECode CGLImpl::GlNormalPointerBounds(
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
     /* [in] */ IBuffer* pointer_buf,
@@ -2046,7 +2058,7 @@ ECode CGLImpl::glNormalPointerBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle32 tmp;
+        Handle64 tmp;
         GetDirectBufferPointer(pointer_buf, &tmp);
         pointer = (GLvoid *)tmp;
         if ( ! pointer ) {
@@ -2062,7 +2074,7 @@ ECode CGLImpl::glNormalPointerBounds(
     return NOERROR;
 }
 
-ECode CGLImpl::glOrthof(
+ECode CGLImpl::GlOrthof(
     /* [in] */ Float left,
     /* [in] */ Float right,
     /* [in] */ Float bottom,
@@ -2081,7 +2093,7 @@ ECode CGLImpl::glOrthof(
     return NOERROR;
 }
 
-ECode CGLImpl::glOrthox(
+ECode CGLImpl::GlOrthox(
     /* [in] */ Int32 left,
     /* [in] */ Int32 right,
     /* [in] */ Int32 bottom,
@@ -2100,7 +2112,7 @@ ECode CGLImpl::glOrthox(
     return NOERROR;
 }
 
-ECode CGLImpl::glPixelStorei(
+ECode CGLImpl::GlPixelStorei(
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
 {
@@ -2111,7 +2123,7 @@ ECode CGLImpl::glPixelStorei(
     return NOERROR;
 }
 
-ECode CGLImpl::glPointSize(
+ECode CGLImpl::GlPointSize(
     /* [in] */ Float size)
 {
     glPointSize(
@@ -2120,7 +2132,7 @@ ECode CGLImpl::glPointSize(
     return NOERROR;
 }
 
-ECode CGLImpl::glPointSizex(
+ECode CGLImpl::GlPointSizex(
     /* [in] */ Int32 size)
 {
     glPointSizex(
@@ -2129,7 +2141,7 @@ ECode CGLImpl::glPointSizex(
     return NOERROR;
 }
 
-ECode CGLImpl::glPolygonOffset(
+ECode CGLImpl::GlPolygonOffset(
     /* [in] */ Float factor,
     /* [in] */ Float units)
 {
@@ -2140,7 +2152,7 @@ ECode CGLImpl::glPolygonOffset(
     return NOERROR;
 }
 
-ECode CGLImpl::glPolygonOffsetx(
+ECode CGLImpl::GlPolygonOffsetx(
     /* [in] */ Int32 factor,
     /* [in] */ Int32 units)
 {
@@ -2151,19 +2163,19 @@ ECode CGLImpl::glPolygonOffsetx(
     return NOERROR;
 }
 
-ECode CGLImpl::glPopMatrix()
+ECode CGLImpl::GlPopMatrix()
 {
     glPopMatrix();
     return NOERROR;
 }
 
-ECode CGLImpl::glPushMatrix()
+ECode CGLImpl::GlPushMatrix()
 {
     glPushMatrix();
     return NOERROR;
 }
 
-ECode CGLImpl::glReadPixels(
+ECode CGLImpl::GlReadPixels(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
     /* [in] */ Int32 width,
@@ -2172,12 +2184,12 @@ ECode CGLImpl::glReadPixels(
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* pixels_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *pixels = (GLvoid *) 0;
 
-    Handle32 tmp;
+    Handle64 tmp;
     GetPointer(pixels_buf, &_array, &_remaining, &_bufferOffset, &tmp);
     pixels = (GLvoid *)tmp;
     if (pixels == NULL) {
@@ -2196,7 +2208,7 @@ ECode CGLImpl::glReadPixels(
     return NOERROR;
 }
 
-ECode CGLImpl::glRotatef(
+ECode CGLImpl::GlRotatef(
     /* [in] */ Float angle,
     /* [in] */ Float x,
     /* [in] */ Float y,
@@ -2211,7 +2223,7 @@ ECode CGLImpl::glRotatef(
     return NOERROR;
 }
 
-ECode CGLImpl::glRotatex(
+ECode CGLImpl::GlRotatex(
     /* [in] */ Int32 angle,
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
@@ -2226,7 +2238,7 @@ ECode CGLImpl::glRotatex(
     return NOERROR;
 }
 
-ECode CGLImpl::glSampleCoverage(
+ECode CGLImpl::GlSampleCoverage(
     /* [in] */ Float value,
     /* [in] */ Boolean invert)
 {
@@ -2237,7 +2249,7 @@ ECode CGLImpl::glSampleCoverage(
     return NOERROR;
 }
 
-ECode CGLImpl::glSampleCoveragex(
+ECode CGLImpl::GlSampleCoveragex(
     /* [in] */ Int32 value,
     /* [in] */ Boolean invert)
 {
@@ -2248,7 +2260,7 @@ ECode CGLImpl::glSampleCoveragex(
     return NOERROR;
 }
 
-ECode CGLImpl::glScalef(
+ECode CGLImpl::GlScalef(
     /* [in] */ Float x,
     /* [in] */ Float y,
     /* [in] */ Float z)
@@ -2261,7 +2273,7 @@ ECode CGLImpl::glScalef(
     return NOERROR;
 }
 
-ECode CGLImpl::glScalex(
+ECode CGLImpl::GlScalex(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
     /* [in] */ Int32 z)
@@ -2274,7 +2286,7 @@ ECode CGLImpl::glScalex(
     return NOERROR;
 }
 
-ECode CGLImpl::glScissor(
+ECode CGLImpl::GlScissor(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
     /* [in] */ Int32 width,
@@ -2289,7 +2301,7 @@ ECode CGLImpl::glScissor(
     return NOERROR;
 }
 
-ECode CGLImpl::glShadeModel(
+ECode CGLImpl::GlShadeModel(
     /* [in] */ Int32 mode)
 {
     glShadeModel(
@@ -2298,7 +2310,7 @@ ECode CGLImpl::glShadeModel(
     return NOERROR;
 }
 
-ECode CGLImpl::glStencilFunc(
+ECode CGLImpl::GlStencilFunc(
     /* [in] */ Int32 func,
     /* [in] */ Int32 ref,
     /* [in] */ Int32 mask)
@@ -2311,7 +2323,7 @@ ECode CGLImpl::glStencilFunc(
     return NOERROR;
 }
 
-ECode CGLImpl::glStencilMask(
+ECode CGLImpl::GlStencilMask(
     /* [in] */ Int32 mask)
 {
     glStencilMask(
@@ -2320,7 +2332,7 @@ ECode CGLImpl::glStencilMask(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexCoordPointerBounds(
+ECode CGLImpl::GlTexCoordPointerBounds(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -2330,7 +2342,7 @@ ECode CGLImpl::glTexCoordPointerBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle32 tmp;
+        Handle64 tmp;
         GetDirectBufferPointer(pointer_buf, &tmp);
         pointer = (GLvoid *)tmp;
         if ( ! pointer ) {
@@ -2347,7 +2359,7 @@ ECode CGLImpl::glTexCoordPointerBounds(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexCoordPointer(
+ECode CGLImpl::GlTexCoordPointer(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -2375,7 +2387,7 @@ ECode CGLImpl::glTexCoordPointer(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexImage2D(
+ECode CGLImpl::GlTexImage2D(
     /* [in] */ Int32 target,
     /* [in] */ Int32 level,
     /* [in] */ Int32 internalformat,
@@ -2386,13 +2398,13 @@ ECode CGLImpl::glTexImage2D(
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* pixels_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *pixels = (GLvoid *) 0;
 
     if (pixels_buf) {
-        Handle32 tmp;
+        Handle64 tmp;
         GetPointer(pixels_buf, &_array, &_remaining, &_bufferOffset, &tmp);
         pixels = (GLvoid *)tmp;
     }
@@ -2414,7 +2426,7 @@ ECode CGLImpl::glTexImage2D(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexParameterf(
+ECode CGLImpl::GlTexParameterf(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ Float param)
@@ -2427,7 +2439,7 @@ ECode CGLImpl::glTexParameterf(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexParameterx(
+ECode CGLImpl::GlTexParameterx(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
@@ -2440,7 +2452,7 @@ ECode CGLImpl::glTexParameterx(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexSubImage2D(
+ECode CGLImpl::GlTexSubImage2D(
     /* [in] */ Int32 target,
     /* [in] */ Int32 level,
     /* [in] */ Int32 xoffset,
@@ -2451,13 +2463,13 @@ ECode CGLImpl::glTexSubImage2D(
     /* [in] */ Int32 type,
     /* [in] */ IBuffer* pixels_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *pixels = (GLvoid *) 0;
 
     if (pixels_buf) {
-        Handle32 tmp;
+        Handle64 tmp;
         GetPointer(pixels_buf, &_array, &_remaining, &_bufferOffset, &tmp);
         pixels = (GLvoid *)tmp;
     }
@@ -2479,7 +2491,7 @@ ECode CGLImpl::glTexSubImage2D(
     return NOERROR;
 }
 
-ECode CGLImpl::glTranslatef(
+ECode CGLImpl::GlTranslatef(
     /* [in] */ Float x,
     /* [in] */ Float y,
     /* [in] */ Float z)
@@ -2492,7 +2504,7 @@ ECode CGLImpl::glTranslatef(
     return NOERROR;
 }
 
-ECode CGLImpl::glTranslatex(
+ECode CGLImpl::GlTranslatex(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
     /* [in] */ Int32 z)
@@ -2505,7 +2517,7 @@ ECode CGLImpl::glTranslatex(
     return NOERROR;
 }
 
-ECode CGLImpl::glVertexPointerBounds(
+ECode CGLImpl::GlVertexPointerBounds(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -2515,7 +2527,7 @@ ECode CGLImpl::glVertexPointerBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle32 tmp;
+        Handle64 tmp;
         FAIL_RETURN(GetDirectBufferPointer(pointer_buf, &tmp));
         pointer = (GLvoid *)tmp;
         if ( ! pointer ) {
@@ -2532,7 +2544,7 @@ ECode CGLImpl::glVertexPointerBounds(
     return NOERROR;
 }
 
-ECode CGLImpl::glVertexPointer(
+ECode CGLImpl::GlVertexPointer(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -2560,7 +2572,7 @@ ECode CGLImpl::glVertexPointer(
     return ec;
 }
 
-ECode CGLImpl::glViewport(
+ECode CGLImpl::GlViewport(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
     /* [in] */ Int32 width,
@@ -2575,13 +2587,15 @@ ECode CGLImpl::glViewport(
     return NOERROR;
 }
 
-ECode CGLImpl::glQueryMatrixxOES(
+ECode CGLImpl::GlQueryMatrixxOES(
     /* [in] */ ArrayOf<Int32>* mantissa_ref,
     /* [in] */ Int32 mantissaOffset,
     /* [in] */ ArrayOf<Int32>* exponent_ref,
     /* [in] */ Int32 exponentOffset,
     /* [out] */ Int32* matrixxOES)
 {
+    VALIDATE_NOT_NULL(matrixxOES)
+
     GLbitfield _returnValue = -1;
     GLfixed *mantissa_base = (GLfixed *) 0;
     Int32 _mantissaRemaining;
@@ -2625,14 +2639,16 @@ ECode CGLImpl::glQueryMatrixxOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glQueryMatrixxOES(
+ECode CGLImpl::GlQueryMatrixxOES(
     /* [in] */ IInt32Buffer* mantissa_buf,
     /* [in] */ IInt32Buffer* exponent_buf,
     /* [out] */ Int32* matrixxOES)
 {
-    Handle32 _mantissaArray = (Handle32) 0;
+    VALIDATE_NOT_NULL(matrixxOES)
+
+    Handle64 _mantissaArray = (Handle64) 0;
     Int32 _mantissaBufferOffset = (Int32) 0;
-    Handle32 _exponentArray = (Handle32) 0;
+    Handle64 _exponentArray = (Handle64) 0;
     Int32 _exponentBufferOffset = (Int32) 0;
     GLbitfield _returnValue = -1;
     Int32 _mantissaRemaining;
@@ -2640,14 +2656,14 @@ ECode CGLImpl::glQueryMatrixxOES(
     Int32 _exponentRemaining;
     GLint *exponent = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(mantissa_buf, &_mantissaArray, &_mantissaRemaining, &_mantissaBufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(mantissa_buf), &_mantissaArray, &_mantissaRemaining, &_mantissaBufferOffset, &tmp);
     mantissa = (GLfixed *)tmp;
     if (_mantissaRemaining < 16) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    GetPointer(exponent_buf, &_exponentArray, &_exponentRemaining, &_exponentBufferOffset, &tmp);
+    GetPointer(IBuffer::Probe(exponent_buf), &_exponentArray, &_exponentRemaining, &_exponentBufferOffset, &tmp);
     exponent = (GLint *)tmp;
     if (_exponentRemaining < 16) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2669,7 +2685,7 @@ ECode CGLImpl::glQueryMatrixxOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexParameterfv(
+ECode CGLImpl::GlTexParameterfv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
@@ -2701,18 +2717,18 @@ ECode CGLImpl::glTexParameterfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexParameterfv(
+ECode CGLImpl::GlTexParameterfv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (_remaining < 1) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2730,7 +2746,7 @@ ECode CGLImpl::glTexParameterfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glCurrentPaletteMatrixOES(
+ECode CGLImpl::GlCurrentPaletteMatrixOES(
     /* [in] */ Int32 matrixpaletteindex)
 {
     glCurrentPaletteMatrixOES(
@@ -2739,7 +2755,7 @@ ECode CGLImpl::glCurrentPaletteMatrixOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexfOES(
+ECode CGLImpl::GlDrawTexfOES(
     /* [in] */ Float x,
     /* [in] */ Float y,
     /* [in] */ Float z,
@@ -2756,7 +2772,7 @@ ECode CGLImpl::glDrawTexfOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexfvOES(
+ECode CGLImpl::GlDrawTexfvOES(
     /* [in] */ ArrayOf<Float>* coords_ref,
     /* [in] */ Int32 offset)
 {
@@ -2783,16 +2799,16 @@ ECode CGLImpl::glDrawTexfvOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexfvOES(
+ECode CGLImpl::GlDrawTexfvOES(
     /* [in] */ IFloatBuffer* coords_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *coords = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(coords_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     coords = (GLfloat *)tmp;
     if (_remaining < 5) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2808,7 +2824,7 @@ ECode CGLImpl::glDrawTexfvOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexiOES(
+ECode CGLImpl::GlDrawTexiOES(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
     /* [in] */ Int32 z,
@@ -2825,7 +2841,7 @@ ECode CGLImpl::glDrawTexiOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexivOES(
+ECode CGLImpl::GlDrawTexivOES(
     /* [in] */ ArrayOf<Int32>* coords_ref,
     /* [in] */ Int32 offset)
 {
@@ -2852,16 +2868,16 @@ ECode CGLImpl::glDrawTexivOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexivOES(
+ECode CGLImpl::GlDrawTexivOES(
     /* [in] */ IInt32Buffer* coords_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *coords = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(coords_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     coords = (GLint *)tmp;
     if (_remaining < 5) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2876,7 +2892,7 @@ ECode CGLImpl::glDrawTexivOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexsOES(
+ECode CGLImpl::GlDrawTexsOES(
     /* [in] */ Int16 x,
     /* [in] */ Int16 y,
     /* [in] */ Int16 z,
@@ -2893,7 +2909,7 @@ ECode CGLImpl::glDrawTexsOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexsvOES(
+ECode CGLImpl::GlDrawTexsvOES(
     /* [in] */ ArrayOf<Int16>* coords_ref,
     /* [in] */ Int32 offset)
 {
@@ -2920,16 +2936,16 @@ ECode CGLImpl::glDrawTexsvOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexsvOES(
+ECode CGLImpl::GlDrawTexsvOES(
     /* [in] */ IInt16Buffer* coords_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLshort *coords = (GLshort *) 0;
 
-    Handle32 tmp;
-    GetPointer(coords_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     coords = (GLshort *)tmp;
     if (_remaining < 5) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -2945,7 +2961,7 @@ ECode CGLImpl::glDrawTexsvOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexxOES(
+ECode CGLImpl::GlDrawTexxOES(
     /* [in] */ Int32 x,
     /* [in] */ Int32 y,
     /* [in] */ Int32 z,
@@ -2962,7 +2978,7 @@ ECode CGLImpl::glDrawTexxOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexxvOES(
+ECode CGLImpl::GlDrawTexxvOES(
     /* [in] */ ArrayOf<Int32>* coords_ref,
     /* [in] */ Int32 offset)
 {
@@ -2989,16 +3005,16 @@ ECode CGLImpl::glDrawTexxvOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawTexxvOES(
+ECode CGLImpl::GlDrawTexxvOES(
     /* [in] */ IInt32Buffer* coords_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *coords = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(coords_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(coords_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     coords = (GLfixed *)tmp;
     if (_remaining < 5) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -3013,7 +3029,7 @@ ECode CGLImpl::glDrawTexxvOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glEnable(
+ECode CGLImpl::GlEnable(
     /* [in] */ Int32 cap)
 {
     glEnable(
@@ -3022,7 +3038,7 @@ ECode CGLImpl::glEnable(
     return NOERROR;
 }
 
-ECode CGLImpl::glEnableClientState(
+ECode CGLImpl::GlEnableClientState(
     /* [in] */ Int32 array)
 {
     glEnableClientState(
@@ -3031,13 +3047,13 @@ ECode CGLImpl::glEnableClientState(
     return NOERROR;
 }
 
-ECode CGLImpl::glLoadPaletteFromModelViewMatrixOES()
+ECode CGLImpl::GlLoadPaletteFromModelViewMatrixOES()
 {
     glLoadPaletteFromModelViewMatrixOES();
     return NOERROR;
 }
 
-ECode CGLImpl::glMatrixIndexPointerOES(
+ECode CGLImpl::GlMatrixIndexPointerOES(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -3065,7 +3081,7 @@ ECode CGLImpl::glMatrixIndexPointerOES(
     return ec;
 }
 
-ECode CGLImpl::glMatrixIndexPointerOESBounds(
+ECode CGLImpl::GlMatrixIndexPointerOESBounds(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -3075,7 +3091,7 @@ ECode CGLImpl::glMatrixIndexPointerOESBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle32 tmp;
+        Handle64 tmp;
         FAIL_RETURN(GetDirectBufferPointer(pointer_buf, &tmp));
         pointer = (GLvoid *) tmp;
         if ( ! pointer ) {
@@ -3092,7 +3108,7 @@ ECode CGLImpl::glMatrixIndexPointerOESBounds(
     return NOERROR;
 }
 
-ECode CGLImpl::glMatrixIndexPointerOES(
+ECode CGLImpl::GlMatrixIndexPointerOES(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -3102,12 +3118,12 @@ ECode CGLImpl::glMatrixIndexPointerOES(
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
     return NOERROR;
 }
 
-ECode CGLImpl::glWeightPointerOES(
+ECode CGLImpl::GlWeightPointerOES(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -3124,7 +3140,7 @@ ECode CGLImpl::glWeightPointerOES(
     );
 }
 
-ECode CGLImpl::glWeightPointerOESBounds(
+ECode CGLImpl::GlWeightPointerOESBounds(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -3134,7 +3150,7 @@ ECode CGLImpl::glWeightPointerOESBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle32 tmp;
+        Handle64 tmp;
         FAIL_RETURN(GetDirectBufferPointer(pointer_buf, &tmp));
         pointer = (GLvoid *) tmp;
         if ( ! pointer ) {
@@ -3151,7 +3167,7 @@ ECode CGLImpl::glWeightPointerOESBounds(
     return NOERROR;
 }
 
-ECode CGLImpl::glWeightPointerOES(
+ECode CGLImpl::GlWeightPointerOES(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -3161,12 +3177,12 @@ ECode CGLImpl::glWeightPointerOES(
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
     return NOERROR;
 }
 
-ECode CGLImpl::glBindFramebufferOES(
+ECode CGLImpl::GlBindFramebufferOES(
     /* [in] */ Int32 target,
     /* [in] */ Int32 framebuffer)
 {
@@ -3180,7 +3196,7 @@ ECode CGLImpl::glBindFramebufferOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glBindRenderbufferOES(
+ECode CGLImpl::GlBindRenderbufferOES(
     /* [in] */ Int32 target,
     /* [in] */ Int32 renderbuffer)
 {
@@ -3194,7 +3210,7 @@ ECode CGLImpl::glBindRenderbufferOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glBlendEquation(
+ECode CGLImpl::GlBlendEquation(
     /* [in] */ Int32 mode)
 {
     if (! SupportsExtension(this, HAVE_OES_BLEND_SUBTRACTID)) {
@@ -3206,7 +3222,7 @@ ECode CGLImpl::glBlendEquation(
     return NOERROR;
 }
 
-ECode CGLImpl::glBlendEquationSeparate(
+ECode CGLImpl::GlBlendEquationSeparate(
     /* [in] */ Int32 modeRGB,
     /* [in] */ Int32 modeAlpha)
 {
@@ -3220,7 +3236,7 @@ ECode CGLImpl::glBlendEquationSeparate(
     return NOERROR;
 }
 
-ECode CGLImpl::glBlendFuncSeparate(
+ECode CGLImpl::GlBlendFuncSeparate(
     /* [in] */ Int32 srcRGB,
     /* [in] */ Int32 dstRGB,
     /* [in] */ Int32 srcAlpha,
@@ -3238,10 +3254,12 @@ ECode CGLImpl::glBlendFuncSeparate(
     return NOERROR;
 }
 
-ECode CGLImpl::glCheckFramebufferStatusOES(
+ECode CGLImpl::GlCheckFramebufferStatusOES(
     /* [in] */ Int32 target,
     /* [out] */ Int32* status)
 {
+    VALIDATE_NOT_NULL(status)
+
     if (! SupportsExtension(this, HAVE_OES_BLEND_EQUATION_SEPARATEID)) {
         *status = 0;
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
@@ -3254,7 +3272,7 @@ ECode CGLImpl::glCheckFramebufferStatusOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glCompressedTexImage2D(
+ECode CGLImpl::GlCompressedTexImage2D(
     /* [in] */ Int32 target,
     /* [in] */ Int32 level,
     /* [in] */ Int32 internalformat,
@@ -3264,11 +3282,11 @@ ECode CGLImpl::glCompressedTexImage2D(
     /* [in] */ Int32 imageSize,
     /* [in] */ IBuffer* data_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
-    Handle32 tmp;
+    Handle64 tmp;
     GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp);
     data = (GLvoid *) tmp;
     if (data == NULL) {
@@ -3289,7 +3307,7 @@ ECode CGLImpl::glCompressedTexImage2D(
     return NOERROR;
 }
 
-ECode CGLImpl::glCopyTexImage2D(
+ECode CGLImpl::GlCopyTexImage2D(
     /* [in] */ Int32 target,
     /* [in] */ Int32 level,
     /* [in] */ Int32 internalformat,
@@ -3312,7 +3330,7 @@ ECode CGLImpl::glCopyTexImage2D(
     return NOERROR;
 }
 
-ECode CGLImpl::glDeleteFramebuffersOES(
+ECode CGLImpl::GlDeleteFramebuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ ArrayOf<Int32>* framebuffers_ref,
     /* [in] */ Int32 offset)
@@ -3344,20 +3362,20 @@ ECode CGLImpl::glDeleteFramebuffersOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDeleteFramebuffersOES(
+ECode CGLImpl::GlDeleteFramebuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* framebuffers_buf)
 {
     if (! SupportsExtension(this, HAVE_OES_FRAMEBUFFER_OBJECTID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *framebuffers = (GLuint *) 0;
 
-    Handle32 tmp;
-    GetPointer(framebuffers_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(framebuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     framebuffers = (GLuint *)tmp;
     if (_remaining < n) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -3374,7 +3392,7 @@ ECode CGLImpl::glDeleteFramebuffersOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDeleteRenderbuffersOES(
+ECode CGLImpl::GlDeleteRenderbuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ ArrayOf<Int32>* renderbuffers_ref,
     /* [in] */ Int32 offset)
@@ -3407,20 +3425,20 @@ ECode CGLImpl::glDeleteRenderbuffersOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glDeleteRenderbuffersOES(
+ECode CGLImpl::GlDeleteRenderbuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* renderbuffers_buf)
 {
     if (! SupportsExtension(this, HAVE_OES_FRAMEBUFFER_OBJECTID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *renderbuffers = (GLuint *) 0;
 
-    Handle32 tmp;
-    GetPointer(renderbuffers_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(renderbuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     renderbuffers = (GLuint *)tmp;
     if (_remaining < n) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -3436,7 +3454,7 @@ ECode CGLImpl::glDeleteRenderbuffersOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glFramebufferRenderbufferOES(
+ECode CGLImpl::GlFramebufferRenderbufferOES(
     /* [in] */ Int32 target,
     /* [in] */ Int32 attachment,
     /* [in] */ Int32 renderbuffertarget,
@@ -3454,7 +3472,7 @@ ECode CGLImpl::glFramebufferRenderbufferOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glFramebufferTexture2DOES(
+ECode CGLImpl::GlFramebufferTexture2DOES(
     /* [in] */ Int32 target,
     /* [in] */ Int32 attachment,
     /* [in] */ Int32 textarget,
@@ -3474,7 +3492,7 @@ ECode CGLImpl::glFramebufferTexture2DOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glGenerateMipmapOES(
+ECode CGLImpl::GlGenerateMipmapOES(
     /* [in] */ Int32 target)
 {
     if (! SupportsExtension(this, HAVE_OES_FRAMEBUFFER_OBJECTID)) {
@@ -3486,7 +3504,7 @@ ECode CGLImpl::glGenerateMipmapOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glGenFramebuffersOES(
+ECode CGLImpl::GlGenFramebuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ ArrayOf<Int32>* framebuffers_ref,
     /* [in] */ Int32 offset)
@@ -3519,7 +3537,7 @@ ECode CGLImpl::glGenFramebuffersOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glGenFramebuffersOES(
+ECode CGLImpl::GlGenFramebuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* framebuffers_buf)
 {
@@ -3527,13 +3545,13 @@ ECode CGLImpl::glGenFramebuffersOES(
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
 
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *framebuffers = (GLuint *) 0;
 
-    Handle32 tmp;
-    GetPointer(framebuffers_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(framebuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     framebuffers = (GLuint *) tmp;
     if (_remaining < n) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -3549,7 +3567,7 @@ ECode CGLImpl::glGenFramebuffersOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glGenRenderbuffersOES(
+ECode CGLImpl::GlGenRenderbuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ ArrayOf<Int32>* renderbuffers_ref,
     /* [in] */ Int32 offset)
@@ -3583,7 +3601,7 @@ ECode CGLImpl::glGenRenderbuffersOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glGenRenderbuffersOES(
+ECode CGLImpl::GlGenRenderbuffersOES(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* renderbuffers_buf)
 {
@@ -3591,13 +3609,13 @@ ECode CGLImpl::glGenRenderbuffersOES(
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
 
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *renderbuffers = (GLuint *) 0;
 
-    Handle32 tmp;
-    GetPointer(renderbuffers_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(renderbuffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     renderbuffers = (GLuint *)tmp;
     if (_remaining < n) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -3614,7 +3632,7 @@ ECode CGLImpl::glGenRenderbuffersOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetFramebufferAttachmentParameterivOES(
+ECode CGLImpl::GlGetFramebufferAttachmentParameterivOES(
     /* [in] */ Int32 target,
     /* [in] */ Int32 attachment,
     /* [in] */ Int32 pname,
@@ -3646,7 +3664,7 @@ ECode CGLImpl::glGetFramebufferAttachmentParameterivOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetFramebufferAttachmentParameterivOES(
+ECode CGLImpl::GlGetFramebufferAttachmentParameterivOES(
     /* [in] */ Int32 target,
     /* [in] */ Int32 attachment,
     /* [in] */ Int32 pname,
@@ -3655,13 +3673,13 @@ ECode CGLImpl::glGetFramebufferAttachmentParameterivOES(
     if (! SupportsExtension(this, HAVE_OES_FRAMEBUFFER_OBJECTID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
         char * _paramsBase = reinterpret_cast<char *>(_array);
@@ -3676,7 +3694,7 @@ ECode CGLImpl::glGetFramebufferAttachmentParameterivOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetIntegerv(
+ECode CGLImpl::GlGetIntegerv(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
     /* [in] */ Int32 offset)
@@ -4020,7 +4038,7 @@ ECode CGLImpl::glGetIntegerv(
             _needed = getNumCompressedTextureFormats();
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -4037,17 +4055,17 @@ ECode CGLImpl::glGetIntegerv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetIntegerv(
+ECode CGLImpl::GlGetIntegerv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -4377,7 +4395,7 @@ ECode CGLImpl::glGetIntegerv(
             _needed = getNumCompressedTextureFormats();
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -4395,7 +4413,7 @@ ECode CGLImpl::glGetIntegerv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetRenderbufferParameterivOES(
+ECode CGLImpl::GlGetRenderbufferParameterivOES(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -4425,7 +4443,7 @@ ECode CGLImpl::glGetRenderbufferParameterivOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetRenderbufferParameterivOES(
+ECode CGLImpl::GlGetRenderbufferParameterivOES(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
@@ -4433,13 +4451,13 @@ ECode CGLImpl::glGetRenderbufferParameterivOES(
     if (! SupportsExtension(this, HAVE_OES_FRAMEBUFFER_OBJECTID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
         char * _paramsBase = reinterpret_cast<char *>(_array);
@@ -4453,7 +4471,7 @@ ECode CGLImpl::glGetRenderbufferParameterivOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexGenfv(
+ECode CGLImpl::GlGetTexGenfv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
@@ -4482,7 +4500,7 @@ ECode CGLImpl::glGetTexGenfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexGenfv(
+ECode CGLImpl::GlGetTexGenfv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
@@ -4490,13 +4508,13 @@ ECode CGLImpl::glGetTexGenfv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (params == NULL) {
         char * _paramsBase = reinterpret_cast<char *>(_array);
@@ -4510,7 +4528,7 @@ ECode CGLImpl::glGetTexGenfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexGeniv(
+ECode CGLImpl::GlGetTexGeniv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -4540,7 +4558,7 @@ ECode CGLImpl::glGetTexGeniv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexGeniv(
+ECode CGLImpl::GlGetTexGeniv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
@@ -4548,13 +4566,13 @@ ECode CGLImpl::glGetTexGeniv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
         char * _paramsBase = reinterpret_cast<char *>(_array);
@@ -4568,7 +4586,7 @@ ECode CGLImpl::glGetTexGeniv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexGenxv(
+ECode CGLImpl::GlGetTexGenxv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -4598,7 +4616,7 @@ ECode CGLImpl::glGetTexGenxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexGenxv(
+ECode CGLImpl::GlGetTexGenxv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
@@ -4606,13 +4624,13 @@ ECode CGLImpl::glGetTexGenxv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
         char * _paramsBase = reinterpret_cast<char *>(_array);
@@ -4626,10 +4644,12 @@ ECode CGLImpl::glGetTexGenxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glIsFramebufferOES(
+ECode CGLImpl::GlIsFramebufferOES(
     /* [in] */ Int32 framebuffer,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     if (! SupportsExtension(this, HAVE_OES_FRAMEBUFFER_OBJECTID)) {
         *result = FALSE;
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
@@ -4642,10 +4662,12 @@ ECode CGLImpl::glIsFramebufferOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glIsRenderbufferOES(
+ECode CGLImpl::GlIsRenderbufferOES(
     /* [in] */ Int32 renderbuffer,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     if (! SupportsExtension(this, HAVE_OES_FRAMEBUFFER_OBJECTID)) {
         *result = FALSE;
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
@@ -4658,7 +4680,7 @@ ECode CGLImpl::glIsRenderbufferOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glRenderbufferStorageOES(
+ECode CGLImpl::GlRenderbufferStorageOES(
     /* [in] */ Int32 target,
     /* [in] */ Int32 internalformat,
     /* [in] */ Int32 width,
@@ -4676,7 +4698,7 @@ ECode CGLImpl::glRenderbufferStorageOES(
     return NOERROR;
 }
 
-ECode CGLImpl::glStencilOp(
+ECode CGLImpl::GlStencilOp(
     /* [in] */ Int32 fail,
     /* [in] */ Int32 zfail,
     /* [in] */ Int32 zpass)
@@ -4689,7 +4711,7 @@ ECode CGLImpl::glStencilOp(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexEnvf(
+ECode CGLImpl::GlTexEnvf(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ Float param)
@@ -4702,7 +4724,7 @@ ECode CGLImpl::glTexEnvf(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexEnvfv(
+ECode CGLImpl::GlTexEnvfv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
@@ -4738,7 +4760,7 @@ ECode CGLImpl::glTexEnvfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -4756,18 +4778,18 @@ ECode CGLImpl::glTexEnvfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexEnvfv(
+ECode CGLImpl::GlTexEnvfv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -4788,7 +4810,7 @@ ECode CGLImpl::glTexEnvfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -4807,7 +4829,7 @@ ECode CGLImpl::glTexEnvfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexEnvx(
+ECode CGLImpl::GlTexEnvx(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
@@ -4820,7 +4842,7 @@ ECode CGLImpl::glTexEnvx(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexEnvxv(
+ECode CGLImpl::GlTexEnvxv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -4856,7 +4878,7 @@ ECode CGLImpl::glTexEnvxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -4873,18 +4895,18 @@ ECode CGLImpl::glTexEnvxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexEnvxv(
+ECode CGLImpl::GlTexEnvxv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -4905,7 +4927,7 @@ ECode CGLImpl::glTexEnvxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -4924,7 +4946,7 @@ ECode CGLImpl::glTexEnvxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexGenf(
+ECode CGLImpl::GlTexGenf(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ Float param)
@@ -4940,7 +4962,7 @@ ECode CGLImpl::glTexGenf(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexGenfv(
+ECode CGLImpl::GlTexGenfv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
@@ -4969,7 +4991,7 @@ ECode CGLImpl::glTexGenfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexGenfv(
+ECode CGLImpl::GlTexGenfv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
@@ -4977,13 +4999,13 @@ ECode CGLImpl::glTexGenfv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (params == NULL) {
         char * _paramsBase = reinterpret_cast<char *>(_array);
@@ -4997,7 +5019,7 @@ ECode CGLImpl::glTexGenfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexGeni(
+ECode CGLImpl::GlTexGeni(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
@@ -5013,7 +5035,7 @@ ECode CGLImpl::glTexGeni(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexGeniv(
+ECode CGLImpl::GlTexGeniv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -5042,7 +5064,7 @@ ECode CGLImpl::glTexGeniv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexGeniv(
+ECode CGLImpl::GlTexGeniv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
@@ -5050,13 +5072,13 @@ ECode CGLImpl::glTexGeniv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
         char * _paramsBase = reinterpret_cast<char *>(_array);
@@ -5070,7 +5092,7 @@ ECode CGLImpl::glTexGeniv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexGenx(
+ECode CGLImpl::GlTexGenx(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
@@ -5086,7 +5108,7 @@ ECode CGLImpl::glTexGenx(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexGenxv(
+ECode CGLImpl::GlTexGenxv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -5115,7 +5137,7 @@ ECode CGLImpl::glTexGenxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexGenxv(
+ECode CGLImpl::GlTexGenxv(
     /* [in] */ Int32 coord,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
@@ -5123,13 +5145,13 @@ ECode CGLImpl::glTexGenxv(
     if (! SupportsExtension(this, HAVE_OES_TEXTURE_CUBE_MAPID)) {
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (params == NULL) {
         char * _paramsBase = reinterpret_cast<char *>(_array);
@@ -5143,14 +5165,14 @@ ECode CGLImpl::glTexGenxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetPointerv(
+ECode CGLImpl::GlGetPointerv(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<IBuffer*>* params)
 {
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
-ECode CGLImpl::glBindBuffer(
+ECode CGLImpl::GlBindBuffer(
     /* [in] */ Int32 target,
     /* [in] */ Int32 buffer)
 {
@@ -5161,19 +5183,19 @@ ECode CGLImpl::glBindBuffer(
     return NOERROR;
 }
 
-ECode CGLImpl::glBufferData(
+ECode CGLImpl::GlBufferData(
     /* [in] */ Int32 target,
     /* [in] */ Int32 size,
     /* [in] */ IBuffer* data_buf,
     /* [in] */ Int32 usage)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
 
     if (data_buf) {
-        Handle32 tmp;
+        Handle64 tmp;
         GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp);
         data = (GLvoid *)tmp;
         if (_remaining < size) {
@@ -5194,18 +5216,18 @@ ECode CGLImpl::glBufferData(
     return NOERROR;
 }
 
-ECode CGLImpl::glBufferSubData(
+ECode CGLImpl::GlBufferSubData(
     /* [in] */ Int32 target,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 size,
     /* [in] */ IBuffer* data_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLvoid *data = (GLvoid *) 0;
 
-    Handle32 tmp;
+    Handle64 tmp;
     GetPointer(data_buf, &_array, &_remaining, &_bufferOffset, &tmp);
     data = (GLvoid *)tmp;
     if (_remaining < size) {
@@ -5224,7 +5246,7 @@ ECode CGLImpl::glBufferSubData(
     return NOERROR;
 }
 
-ECode CGLImpl::glClipPlanef(
+ECode CGLImpl::GlClipPlanef(
     /* [in] */ Int32 plane,
     /* [in] */ ArrayOf<Float>* equation_ref,
     /* [in] */ Int32 offset)
@@ -5253,17 +5275,17 @@ ECode CGLImpl::glClipPlanef(
     return NOERROR;
 }
 
-ECode CGLImpl::glClipPlanef(
+ECode CGLImpl::GlClipPlanef(
     /* [in] */ Int32 plane,
     /* [in] */ IFloatBuffer* equation_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *equation = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(equation_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(equation_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     equation = (GLfloat *)tmp;
     if (_remaining < 4) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -5279,7 +5301,7 @@ ECode CGLImpl::glClipPlanef(
     return NOERROR;
 }
 
-ECode CGLImpl::glClipPlanex(
+ECode CGLImpl::GlClipPlanex(
     /* [in] */ Int32 plane,
     /* [in] */ ArrayOf<Int32>* equation_ref,
     /* [in] */ Int32 offset)
@@ -5308,17 +5330,17 @@ ECode CGLImpl::glClipPlanex(
     return NOERROR;
 }
 
-ECode CGLImpl::glClipPlanex(
+ECode CGLImpl::GlClipPlanex(
     /* [in] */ Int32 plane,
     /* [in] */ IInt32Buffer* equation_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *equation = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(equation_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(equation_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     equation = (GLfixed *)tmp;
     if (_remaining < 4) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -5334,7 +5356,7 @@ ECode CGLImpl::glClipPlanex(
     return NOERROR;
 }
 
-ECode CGLImpl::glColor4ub(
+ECode CGLImpl::GlColor4ub(
     /* [in] */ Byte red,
     /* [in] */ Byte green,
     /* [in] */ Byte blue,
@@ -5349,7 +5371,7 @@ ECode CGLImpl::glColor4ub(
     return NOERROR;
 }
 
-ECode CGLImpl::glColorPointer(
+ECode CGLImpl::GlColorPointer(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -5359,12 +5381,12 @@ ECode CGLImpl::glColorPointer(
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
     return NOERROR;
 }
 
-ECode CGLImpl::glDeleteBuffers(
+ECode CGLImpl::GlDeleteBuffers(
     /* [in] */ Int32 n,
     /* [in] */ ArrayOf<Int32>* buffers_ref,
     /* [in] */ Int32 offset)
@@ -5393,17 +5415,17 @@ ECode CGLImpl::glDeleteBuffers(
     return NOERROR;
 }
 
-ECode CGLImpl::glDeleteBuffers(
+ECode CGLImpl::GlDeleteBuffers(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* buffers_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *buffers = (GLuint *) 0;
 
-    Handle32 tmp;
-    GetPointer(buffers_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(buffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     buffers = (GLuint *) tmp;
     if (_remaining < n) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -5419,7 +5441,7 @@ ECode CGLImpl::glDeleteBuffers(
     return NOERROR;
 }
 
-ECode CGLImpl::glDrawElements(
+ECode CGLImpl::GlDrawElements(
     /* [in] */ Int32 mode,
     /* [in] */ Int32 count,
     /* [in] */ Int32 type,
@@ -5429,12 +5451,12 @@ ECode CGLImpl::glDrawElements(
         (GLenum)mode,
         (GLsizei)count,
         (GLenum)type,
-        (const GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
     return NOERROR;
 }
 
-ECode CGLImpl::glGenBuffers(
+ECode CGLImpl::GlGenBuffers(
     /* [in] */ Int32 n,
     /* [in] */ ArrayOf<Int32>* buffers_ref,
     /* [in] */ Int32 offset)
@@ -5463,17 +5485,17 @@ ECode CGLImpl::glGenBuffers(
     return NOERROR;
 }
 
-ECode CGLImpl::glGenBuffers(
+ECode CGLImpl::GlGenBuffers(
     /* [in] */ Int32 n,
     /* [in] */ IInt32Buffer* buffers_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLuint *buffers = (GLuint *) 0;
 
-    Handle32 tmp;
-    GetPointer(buffers_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(buffers_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     buffers = (GLuint *)tmp;
     if (_remaining < n) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -5489,7 +5511,7 @@ ECode CGLImpl::glGenBuffers(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetBooleanv(
+ECode CGLImpl::GlGetBooleanv(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Boolean>* params_ref,
     /* [in] */ Int32 offset)
@@ -5514,17 +5536,17 @@ ECode CGLImpl::glGetBooleanv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetBooleanv(
+ECode CGLImpl::GlGetBooleanv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLboolean *params = (GLboolean *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLboolean *)tmp;
     if (params == NULL) {
         char * _paramsBase = reinterpret_cast<char *>(_array);
@@ -5537,7 +5559,7 @@ ECode CGLImpl::glGetBooleanv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetBufferParameteriv(
+ECode CGLImpl::GlGetBufferParameteriv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params,
@@ -5546,7 +5568,7 @@ ECode CGLImpl::glGetBufferParameteriv(
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
-ECode CGLImpl::glGetBufferParameteriv(
+ECode CGLImpl::GlGetBufferParameteriv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params)
@@ -5554,7 +5576,7 @@ ECode CGLImpl::glGetBufferParameteriv(
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
-ECode CGLImpl::glGetClipPlanef(
+ECode CGLImpl::GlGetClipPlanef(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* eqn_ref,
     /* [in] */ Int32 offset)
@@ -5578,17 +5600,17 @@ ECode CGLImpl::glGetClipPlanef(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetClipPlanef(
+ECode CGLImpl::GlGetClipPlanef(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* eqn_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *eqn = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(eqn_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(eqn_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     eqn = (GLfloat *)tmp;
     if (eqn == NULL) {
         char * _eqnBase = reinterpret_cast<char *>(_array);
@@ -5601,7 +5623,7 @@ ECode CGLImpl::glGetClipPlanef(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetClipPlanex(
+ECode CGLImpl::GlGetClipPlanex(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* eqn_ref,
     /* [in] */ Int32 offset)
@@ -5625,17 +5647,17 @@ ECode CGLImpl::glGetClipPlanex(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetClipPlanex(
+ECode CGLImpl::GlGetClipPlanex(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* eqn_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *eqn = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(eqn_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(eqn_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     eqn = (GLfixed *)tmp;
     if (eqn == NULL) {
         char * _eqnBase = reinterpret_cast<char *>(_array);;
@@ -5648,7 +5670,7 @@ ECode CGLImpl::glGetClipPlanex(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetFixedv(
+ECode CGLImpl::GlGetFixedv(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
     /* [in] */ Int32 offset)
@@ -5672,17 +5694,17 @@ ECode CGLImpl::glGetFixedv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetFixedv(
+ECode CGLImpl::GlGetFixedv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     if (params == NULL) {
         char * _paramsBase = reinterpret_cast<char *>(_array);
@@ -5695,7 +5717,7 @@ ECode CGLImpl::glGetFixedv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetFloatv(
+ECode CGLImpl::GlGetFloatv(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
     /* [in] */ Int32 offset)
@@ -5719,17 +5741,17 @@ ECode CGLImpl::glGetFloatv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetFloatv(
+ECode CGLImpl::GlGetFloatv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (params == NULL) {
         char * _paramsBase = reinterpret_cast<char *>(_array);
@@ -5742,7 +5764,7 @@ ECode CGLImpl::glGetFloatv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetLightfv(
+ECode CGLImpl::GlGetLightfv(
     /* [in] */ Int32 light,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
@@ -5798,7 +5820,7 @@ ECode CGLImpl::glGetLightfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5815,18 +5837,18 @@ ECode CGLImpl::glGetLightfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetLightfv(
+ECode CGLImpl::GlGetLightfv(
     /* [in] */ Int32 light,
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     Int32 _needed;
     switch (pname) {
 #if defined(GL_SPOT_EXPONENT)
@@ -5866,7 +5888,7 @@ ECode CGLImpl::glGetLightfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5885,7 +5907,7 @@ ECode CGLImpl::glGetLightfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetLightxv(
+ECode CGLImpl::GlGetLightxv(
     /* [in] */ Int32 light,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -5941,7 +5963,7 @@ ECode CGLImpl::glGetLightxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -5959,18 +5981,18 @@ ECode CGLImpl::glGetLightxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetLightxv(
+ECode CGLImpl::GlGetLightxv(
     /* [in] */ Int32 light,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -6011,7 +6033,7 @@ ECode CGLImpl::glGetLightxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6029,7 +6051,7 @@ ECode CGLImpl::glGetLightxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetMaterialfv(
+ECode CGLImpl::GlGetMaterialfv(
     /* [in] */ Int32 face,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
@@ -6071,7 +6093,7 @@ ECode CGLImpl::glGetMaterialfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6089,18 +6111,18 @@ ECode CGLImpl::glGetMaterialfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetMaterialfv(
+ECode CGLImpl::GlGetMaterialfv(
     /* [in] */ Int32 face,
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -6127,7 +6149,7 @@ ECode CGLImpl::glGetMaterialfv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6146,7 +6168,7 @@ ECode CGLImpl::glGetMaterialfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetMaterialxv(
+ECode CGLImpl::GlGetMaterialxv(
     /* [in] */ Int32 face,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -6188,7 +6210,7 @@ ECode CGLImpl::glGetMaterialxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6205,18 +6227,18 @@ ECode CGLImpl::glGetMaterialxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetMaterialxv(
+ECode CGLImpl::GlGetMaterialxv(
     /* [in] */ Int32 face,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -6243,7 +6265,7 @@ ECode CGLImpl::glGetMaterialxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6261,7 +6283,7 @@ ECode CGLImpl::glGetMaterialxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexEnviv(
+ECode CGLImpl::GlGetTexEnviv(
     /* [in] */ Int32 env,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -6297,7 +6319,7 @@ ECode CGLImpl::glGetTexEnviv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6315,18 +6337,18 @@ ECode CGLImpl::glGetTexEnviv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexEnviv(
+ECode CGLImpl::GlGetTexEnviv(
     /* [in] */ Int32 env,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -6347,7 +6369,7 @@ ECode CGLImpl::glGetTexEnviv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6365,7 +6387,7 @@ ECode CGLImpl::glGetTexEnviv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexEnvxv(
+ECode CGLImpl::GlGetTexEnvxv(
     /* [in] */ Int32 env,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -6401,7 +6423,7 @@ ECode CGLImpl::glGetTexEnvxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6419,18 +6441,18 @@ ECode CGLImpl::glGetTexEnvxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexEnvxv(
+ECode CGLImpl::GlGetTexEnvxv(
     /* [in] */ Int32 env,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -6451,7 +6473,7 @@ ECode CGLImpl::glGetTexEnvxv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6470,7 +6492,7 @@ ECode CGLImpl::glGetTexEnvxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexParameterfv(
+ECode CGLImpl::GlGetTexParameterfv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
@@ -6501,18 +6523,18 @@ ECode CGLImpl::glGetTexParameterfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexParameterfv(
+ECode CGLImpl::GlGetTexParameterfv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (_remaining < 1) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -6529,7 +6551,7 @@ ECode CGLImpl::glGetTexParameterfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexParameteriv(
+ECode CGLImpl::GlGetTexParameteriv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -6560,18 +6582,18 @@ ECode CGLImpl::glGetTexParameteriv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexParameteriv(
+ECode CGLImpl::GlGetTexParameteriv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (_remaining < 1) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -6588,7 +6610,7 @@ ECode CGLImpl::glGetTexParameteriv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexParameterxv(
+ECode CGLImpl::GlGetTexParameterxv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -6619,18 +6641,18 @@ ECode CGLImpl::glGetTexParameterxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glGetTexParameterxv(
+ECode CGLImpl::GlGetTexParameterxv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     if (_remaining < 1) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -6647,10 +6669,12 @@ ECode CGLImpl::glGetTexParameterxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glIsBuffer(
+ECode CGLImpl::GlIsBuffer(
     /* [in] */ Int32 buffer,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     GLboolean _returnValue;
     _returnValue = glIsBuffer(
         (GLuint)buffer
@@ -6659,10 +6683,12 @@ ECode CGLImpl::glIsBuffer(
     return NOERROR;
 }
 
-ECode CGLImpl::glIsEnabled(
+ECode CGLImpl::GlIsEnabled(
     /* [in] */ Int32 cap,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     GLboolean _returnValue;
     _returnValue = glIsEnabled(
         (GLenum)cap
@@ -6671,10 +6697,12 @@ ECode CGLImpl::glIsEnabled(
     return NOERROR;
 }
 
-ECode CGLImpl::glIsTexture(
+ECode CGLImpl::GlIsTexture(
     /* [in] */ Int32 texture,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     GLboolean _returnValue;
     _returnValue = glIsTexture(
         (GLuint)texture
@@ -6683,7 +6711,7 @@ ECode CGLImpl::glIsTexture(
     return NOERROR;
 }
 
-ECode CGLImpl::glNormalPointer(
+ECode CGLImpl::GlNormalPointer(
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
     /* [in] */ Int32 offset)
@@ -6691,12 +6719,12 @@ ECode CGLImpl::glNormalPointer(
     glNormalPointer(
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
     return NOERROR;
 }
 
-ECode CGLImpl::glPointParameterf(
+ECode CGLImpl::GlPointParameterf(
     /* [in] */ Int32 pname,
     /* [in] */ Float param)
 {
@@ -6707,7 +6735,7 @@ ECode CGLImpl::glPointParameterf(
     return NOERROR;
 }
 
-ECode CGLImpl::glPointParameterfv(
+ECode CGLImpl::GlPointParameterfv(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Float>* params_ref,
     /* [in] */ Int32 offset)
@@ -6736,17 +6764,17 @@ ECode CGLImpl::glPointParameterfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glPointParameterfv(
+ECode CGLImpl::GlPointParameterfv(
     /* [in] */ Int32 pname,
     /* [in] */ IFloatBuffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfloat *params = (GLfloat *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfloat *)tmp;
     if (_remaining < 1) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -6762,7 +6790,7 @@ ECode CGLImpl::glPointParameterfv(
     return NOERROR;
 }
 
-ECode CGLImpl::glPointParameterx(
+ECode CGLImpl::GlPointParameterx(
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
 {
@@ -6773,7 +6801,7 @@ ECode CGLImpl::glPointParameterx(
     return NOERROR;
 }
 
-ECode CGLImpl::glPointParameterxv(
+ECode CGLImpl::GlPointParameterxv(
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
     /* [in] */ Int32 offset)
@@ -6802,17 +6830,17 @@ ECode CGLImpl::glPointParameterxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glPointParameterxv(
+ECode CGLImpl::GlPointParameterxv(
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     if (_remaining < 1) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -6828,7 +6856,7 @@ ECode CGLImpl::glPointParameterxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glPointSizePointerOES(
+ECode CGLImpl::GlPointSizePointerOES(
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
     /* [in] */ IBuffer* pointer)
@@ -6849,7 +6877,7 @@ ECode CGLImpl::glPointSizePointerOES(
     return ec;
 }
 
-ECode CGLImpl::glPointSizePointerOESBounds(
+ECode CGLImpl::GlPointSizePointerOESBounds(
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
     /* [in] */ IBuffer* pointer_buf,
@@ -6858,7 +6886,7 @@ ECode CGLImpl::glPointSizePointerOESBounds(
     GLvoid *pointer = (GLvoid *) 0;
 
     if (pointer_buf) {
-        Handle32 tmp;
+        Handle64 tmp;
         FAIL_RETURN(GetDirectBufferPointer(pointer_buf, &tmp));
         pointer = (GLvoid *)tmp;
         if ( ! pointer ) {
@@ -6874,7 +6902,7 @@ ECode CGLImpl::glPointSizePointerOESBounds(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexCoordPointer(
+ECode CGLImpl::GlTexCoordPointer(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -6884,12 +6912,12 @@ ECode CGLImpl::glTexCoordPointer(
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
     return NOERROR;
 }
 
-ECode CGLImpl::glTexEnvi(
+ECode CGLImpl::GlTexEnvi(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
@@ -6902,7 +6930,7 @@ ECode CGLImpl::glTexEnvi(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexEnviv(
+ECode CGLImpl::GlTexEnviv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -6938,7 +6966,7 @@ ECode CGLImpl::glTexEnviv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -6955,18 +6983,18 @@ ECode CGLImpl::glTexEnviv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexEnviv(
+ECode CGLImpl::GlTexEnviv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     Int32 _needed;
     switch (pname) {
@@ -6987,7 +7015,7 @@ ECode CGLImpl::glTexEnviv(
             _needed = 4;
             break;
         default:
-            _needed = 0;
+            _needed = 1;
             break;
     }
     if (_remaining < _needed) {
@@ -7006,7 +7034,7 @@ ECode CGLImpl::glTexEnviv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexParameteri(
+ECode CGLImpl::GlTexParameteri(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ Int32 param)
@@ -7019,7 +7047,7 @@ ECode CGLImpl::glTexParameteri(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexParameteriv(
+ECode CGLImpl::GlTexParameteriv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -7050,18 +7078,18 @@ ECode CGLImpl::glTexParameteriv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexParameteriv(
+ECode CGLImpl::GlTexParameteriv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLint *params = (GLint *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLint *)tmp;
     if (_remaining < 1) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -7078,7 +7106,7 @@ ECode CGLImpl::glTexParameteriv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexParameterxv(
+ECode CGLImpl::GlTexParameterxv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ ArrayOf<Int32>* params_ref,
@@ -7109,18 +7137,18 @@ ECode CGLImpl::glTexParameterxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glTexParameterxv(
+ECode CGLImpl::GlTexParameterxv(
     /* [in] */ Int32 target,
     /* [in] */ Int32 pname,
     /* [in] */ IInt32Buffer* params_buf)
 {
-    Handle32 _array = (Handle32) 0;
+    Handle64 _array = (Handle64) 0;
     Int32 _bufferOffset = (Int32) 0;
     Int32 _remaining;
     GLfixed *params = (GLfixed *) 0;
 
-    Handle32 tmp;
-    GetPointer(params_buf, &_array, &_remaining, &_bufferOffset, &tmp);
+    Handle64 tmp;
+    GetPointer(IBuffer::Probe(params_buf), &_array, &_remaining, &_bufferOffset, &tmp);
     params = (GLfixed *)tmp;
     if (_remaining < 1) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -7137,7 +7165,7 @@ ECode CGLImpl::glTexParameterxv(
     return NOERROR;
 }
 
-ECode CGLImpl::glVertexPointer(
+ECode CGLImpl::GlVertexPointer(
     /* [in] */ Int32 size,
     /* [in] */ Int32 type,
     /* [in] */ Int32 stride,
@@ -7147,7 +7175,7 @@ ECode CGLImpl::glVertexPointer(
         (GLint)size,
         (GLenum)type,
         (GLsizei)stride,
-        (const GLvoid *)offset
+        reinterpret_cast<GLvoid *>(offset)
     );
     return NOERROR;
 }
@@ -7188,11 +7216,13 @@ Boolean CGLImpl::AllowIndirectBuffers()
 
 ECode CGLImpl::GetPointer(
     /* [in] */ IBuffer* buffer,
-    /* [in, out] */ Handle32* array,
+    /* [in, out] */ Handle64* array,
     /* [in, out] */ Int32* remaining,
     /* [in, out] */ Int32* offset,
-    /* [out] */ Handle32* rst)
+    /* [out] */ Handle64* rst)
 {
+    VALIDATE_NOT_NULL(rst)
+
     Int32 position;
     Int32 limit;
     Int32 elementSizeShift;
@@ -7202,13 +7232,13 @@ ECode CGLImpl::GetPointer(
     buffer->GetElementSizeShift(&elementSizeShift);
     *remaining = (limit - position) << elementSizeShift;
 
-    AutoPtr<INIOAccessHelper> helper;
-    CNIOAccessHelper::AcquireSingleton((INIOAccessHelper**)&helper);
+    AutoPtr<INIOAccess> helper;
+    CNIOAccess::AcquireSingleton((INIOAccess**)&helper);
 
     helper->GetBasePointer(buffer, &pointer);
     if (pointer != 0L) {
         *array = 0;
-        *rst = (Handle32)pointer;
+        *rst = (Handle64)pointer;
         return NOERROR;
     }
 
@@ -7226,27 +7256,29 @@ ECode CGLImpl::GetPointer(
 
 ECode CGLImpl::GetDirectBufferPointer(
     /* [in] */ IBuffer* buffer,
-    /* [out] */ Handle32* result)
+    /* [out] */ Handle64* result)
 {
-    Handle32 primitiveArray;
-    buffer->GetPrimitiveArray(&primitiveArray);
-    if (primitiveArray != 0) {
+    VALIDATE_NOT_NULL(result)
+
+    Handle64 buf;
+    buffer->GetEffectiveDirectAddress(&buf);
+    if (buf != 0) {
         Int32 position, elementSizeShift;
         buffer->GetPosition(&position);
         buffer->GetElementSizeShift(&elementSizeShift);
-        primitiveArray += position << elementSizeShift;
+        buf += position << elementSizeShift;
     } else {
         if(AllowIndirectBuffers()) {
-            Handle32 array = 0;
+            Handle64 array = 0;
             Int32 remaining;
             Int32 offset;
-            GetPointer(buffer, &array, &remaining, &offset, &primitiveArray);
-            primitiveArray += offset;
+            GetPointer(buffer, &array, &remaining, &offset, &buf);
+            buf += offset;
         } else {
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
-    *result = primitiveArray;
+    *result = buf;
     return NOERROR;
 }
 

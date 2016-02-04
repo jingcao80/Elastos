@@ -1071,8 +1071,8 @@ ECode WallpaperService::Engine::DoOffsetsChanged(
         return E_NULL_POINTER_EXCEPTION;
     }
 
-    Float xOffset, yOffset, xOffsetStep, yOffsetStep;
-    Boolean sync;
+    Float xOffset = 0, yOffset = 0, xOffsetStep = 0, yOffsetStep = 0;
+    Boolean sync = FALSE;
     synchronized(mLock) {
         xOffset = mPendingXOffset;
         yOffset = mPendingYOffset;

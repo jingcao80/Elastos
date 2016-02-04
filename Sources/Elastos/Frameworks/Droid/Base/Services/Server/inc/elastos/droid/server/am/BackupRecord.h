@@ -4,7 +4,7 @@
 
 #include "elastos/droid/server/am/ProcessRecord.h"
 
-using Elastos::Droid::Os::IBatteryStatsUidPkgServ;
+using Elastos::Droid::Internal::Os::IBatteryStatsImplUidPkgServ;
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +15,7 @@ class BackupRecord : public Object
 {
 public:
     BackupRecord(
-        /* [in] */ IBatteryStatsUidPkgServ* agentStats,
+        /* [in] */ IBatteryStatsImplUidPkgServ* agentStats,
         /* [in] */ IApplicationInfo* appInfo,
         /* [in] */ Int32 backupMode)
         : mStats(agentStats)
@@ -33,7 +33,7 @@ public:
     static const Int32 RESTORE = 2;
     static const Int32 RESTORE_FULL = 3;
 
-    AutoPtr<IBatteryStatsUidPkgServ> mStats;
+    AutoPtr<IBatteryStatsImplUidPkgServ> mStats;
     String mStringName;                     // cached toString() output
     AutoPtr<IApplicationInfo> mAppInfo;     // information about BackupAgent's app
     Int32 mBackupMode;                      // full backup / incremental / restore

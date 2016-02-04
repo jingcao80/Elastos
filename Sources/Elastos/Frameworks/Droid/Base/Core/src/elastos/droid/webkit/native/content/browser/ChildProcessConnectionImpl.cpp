@@ -374,6 +374,7 @@ Boolean ChildProcessConnectionImpl::IsInitialBindingBound()
     assert(0);
     // Object::Autolock lock(mLock);
     // return mInitialBinding.isBound();
+    return FALSE;
 }
 
 //@Override

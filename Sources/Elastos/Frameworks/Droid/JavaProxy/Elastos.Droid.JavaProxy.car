@@ -4,7 +4,7 @@ module
     importlib("Elastos.Droid.Core.eco");
 
     using interface Elastos.Droid.Accounts.IAccountManagerResponse;
-    using interface Elastos.Droid.App.IActivityController;
+    using interface Elastos.Droid.App.IIActivityController;
     using interface Elastos.Droid.App.IApplicationThread;
     using interface Elastos.Droid.App.IPendingIntent;
     using interface Elastos.Droid.App.IProcessObserver;
@@ -39,7 +39,7 @@ module
     using interface Elastos.Droid.Os.IICancellationSignal;
     using interface Elastos.Droid.Os.IIMessenger;
     using interface Elastos.Droid.Os.IRemoteCallback;
-    using interface Elastos.Droid.Os.Storage.IMountServiceListener;
+    using interface Elastos.Droid.Os.Storage.IIMountServiceListener;
     using interface Elastos.Droid.Os.Storage.IIMountShutdownObserver;
     using interface Elastos.Droid.Os.Storage.IObbActionListener;
     using interface Elastos.Droid.Hardware.Display.IDisplayManagerCallback;
@@ -248,7 +248,7 @@ module
             [in] Handle32 jVM,
             [in] Handle32 jInstance);
 
-        interface IMountServiceListener;
+        interface IIMountServiceListener;
     }
 
     class CIServiceConnectionNative {
@@ -500,7 +500,7 @@ module
             [in] Handle32 jVM,
             [in] Handle32 jInstance);
 
-        interface IActivityController;
+        interface IIActivityController;
         interface IBinder;
     }
 

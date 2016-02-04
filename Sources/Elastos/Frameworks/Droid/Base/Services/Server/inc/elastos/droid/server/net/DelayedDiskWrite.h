@@ -12,7 +12,6 @@ using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::Runnable;
 
-using Elastos::Core::Object;
 using Elastos::IO::IDataOutputStream;
 
 namespace Elastos {

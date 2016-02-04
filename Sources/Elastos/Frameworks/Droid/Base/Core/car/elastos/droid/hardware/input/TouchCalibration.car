@@ -15,11 +15,14 @@ module
      * interface IParcelable;
      */
     interface ITouchCalibration {
-
         GetAffineTransform(
             [out, callee] ArrayOf<Float>* result);
     }
 
+    interface ITouchCalibrationHelper {
+        GetIDENTITY(
+            [out] ITouchCalibration** tc);
+    }
 
     } // namespace Input
     } // namespace Hardware

@@ -591,7 +591,7 @@ void AutomaticBrightnessController::UpdateAmbientLux(
         mAmbientLuxValid = TRUE;
         if (DEBUG) {
             Slogger::D(TAG, "UpdateAmbientLux: Initializing: mAmbientLightRingBuffer=%s, mAmbientLux=%f",
-                Object::ToString(mAmbientLightRingBuffer).string(), mAmbientLux);
+                TO_CSTR(mAmbientLightRingBuffer), mAmbientLux);
         }
         UpdateAutoBrightness(TRUE);
     }
@@ -607,7 +607,7 @@ void AutomaticBrightnessController::UpdateAmbientLux(
             Slogger::D(TAG, "UpdateAmbientLux: %s : mBrighteningLuxThreshold=%f"
                 ", mAmbientLightRingBuffer=%s, mAmbientLux=%f"
                 , ((ambientLux > mAmbientLux) ? "Brightened" : "Darkened")
-                , mBrighteningLuxThreshold, Object::ToString(mAmbientLightRingBuffer).string()
+                , mBrighteningLuxThreshold, TO_CSTR(mAmbientLightRingBuffer)
                 , mAmbientLux);
         }
         UpdateAutoBrightness(TRUE);

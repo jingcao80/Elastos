@@ -1,0 +1,2 @@
+DIRS += inc
+DIRS += src/elastos/droid/defaultcontainerservice

@@ -5,7 +5,6 @@
 #include "elastos/droid/R.h"
 
 using Elastos::Droid::Widget::IAdapter;
-using Elastos::Droid::Widget::IListAdapter;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 
 namespace Elastos {
@@ -25,13 +24,8 @@ ECode ExpandedMenuView::OnItemClickListener::OnItemClick(
     return mOwner->OnItemClick(parent, v, position, id);
 }
 
-#if 0
 CAR_INTERFACE_IMPL_4(ExpandedMenuView, ListView, IExpandedMenuView, IMenuBuilderItemInvoker,
     IMenuView, IAdapterViewOnItemClickListener)
-#else
-CAR_INTERFACE_IMPL_4(ExpandedMenuView, ViewGroup, IExpandedMenuView, IMenuBuilderItemInvoker,
-    IMenuView, IAdapterViewOnItemClickListener)
-#endif
 
 ExpandedMenuView::ExpandedMenuView()
     : mAnimations(0)
@@ -41,8 +35,7 @@ ECode ExpandedMenuView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    assert(0);
-    // FAIL_RETURN(ListView::constructor(context, attrs))
+    FAIL_RETURN(ListView::constructor(context, attrs))
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
         const_cast<Int32 *>(R::styleable::MenuView),
@@ -54,9 +47,7 @@ ECode ExpandedMenuView::constructor(
     a->Recycle();
 
     AutoPtr<OnItemClickListener> listener = new OnItemClickListener(this);
-    assert(0);
-    // return SetOnItemClickListener(listener);
-    return NOERROR;
+    return SetOnItemClickListener(listener);
 }
 
 ECode ExpandedMenuView::Initialize(
@@ -68,8 +59,7 @@ ECode ExpandedMenuView::Initialize(
 
 ECode ExpandedMenuView::OnDetachedFromWindow()
 {
-    assert(0);
-    // FAIL_RETURN(ListView::OnDetachedFromWindow())
+    FAIL_RETURN(ListView::OnDetachedFromWindow())
 
     // Clear the cached bitmaps of children
     SetChildrenDrawingCacheEnabled(FALSE);
@@ -90,11 +80,10 @@ ECode ExpandedMenuView::OnItemClick(
     /* [in] */ Int32 position,
     /* [in] */ Int64 id)
 {
-    AutoPtr<IListAdapter> adapter;
-    assert(0);
-    // GetAdapter((IListAdapter**)&adapter);
+    AutoPtr<IAdapter> adapter;
+    GetAdapter((IAdapter**)&adapter);
     AutoPtr<IInterface> item;
-    IAdapter::Probe(adapter)->GetItem(position, (IInterface**)&item);
+    adapter->GetItem(position, (IInterface**)&item);
     Boolean res;
     return InvokeItem(IMenuItemImpl::Probe(item), &res);
 }

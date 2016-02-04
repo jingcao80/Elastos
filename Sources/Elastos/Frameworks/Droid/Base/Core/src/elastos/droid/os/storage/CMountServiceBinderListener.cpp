@@ -6,6 +6,10 @@ namespace Droid {
 namespace Os {
 namespace Storage {
 
+CAR_INTERFACE_IMPL(CMountServiceBinderListener, Object, IIMountServiceListener)
+
+CAR_OBJECT_IMPL(CMountServiceBinderListener)
+
 ECode CMountServiceBinderListener::constructor(
     /* [in] */ IStorageManager* host)
 {

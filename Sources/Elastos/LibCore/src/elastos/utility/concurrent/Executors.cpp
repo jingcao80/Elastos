@@ -236,39 +236,35 @@ ECode Executors::DelegatedExecutorService::Execute(
     return (IExecutor::Probe(mE))->Execute(command);
 }
 
-void Executors::DelegatedExecutorService::Shutdown()
+ECode Executors::DelegatedExecutorService::Shutdown()
 {
-    mE->Shutdown();
+    return mE->Shutdown();
 }
 
-AutoPtr<IList> Executors::DelegatedExecutorService::ShutdownNow()
+ECode Executors::DelegatedExecutorService::ShutdownNow(
+    /* [out] */ IList** tasks)
 {
-    AutoPtr<IList> res;
-    mE->ShutdownNow((IList**)&res);
-    return res;
+    return mE->ShutdownNow(tasks);
 }
 
-Boolean Executors::DelegatedExecutorService::IsShutdown()
+ECode Executors::DelegatedExecutorService::IsShutdown(
+    /* [out] */ Boolean* result)
 {
-    Boolean res = FALSE;
-    mE->IsShutdown(&res);
-    return res;
+    return mE->IsShutdown(result);
 }
 
-Boolean Executors::DelegatedExecutorService::IsTerminated()
+ECode Executors::DelegatedExecutorService::IsTerminated(
+    /* [out] */ Boolean* result)
 {
-    Boolean res = FALSE;
-    mE->IsTerminated(&res);
-    return res;
+    return mE->IsTerminated(result);
 }
 
-Boolean Executors::DelegatedExecutorService::AwaitTermination(
+ECode Executors::DelegatedExecutorService::AwaitTermination(
     /* [in] */ Int64 timeout,
-    /* [in] */ ITimeUnit* unit)
+    /* [in] */ ITimeUnit* unit,
+    /* [out] */ Boolean* result)
 {
-    Boolean res = FALSE;
-    mE->AwaitTermination(timeout, unit, &res);
-    return res;
+    return mE->AwaitTermination(timeout, unit, result);
 }
 
 ECode Executors::DelegatedExecutorService::Submit(

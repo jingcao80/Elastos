@@ -989,10 +989,13 @@ ECode File::CreateNewFile(
     ECode ec = os->Open(mPath,
         OsConstants::_O_RDWR | OsConstants::_O_CREAT | OsConstants::_O_EXCL
         , 0600, (IFileDescriptor**)&fd);
-    if (fd != NULL)
-        os->Close(fd);
 
-    if (FAILED(ec)) return E_IO_EXCEPTION;
+    if (fd != NULL) os->Close(fd);
+
+    if (FAILED(ec)) {
+        if (errno == EEXIST) return NOERROR;
+        return E_IO_EXCEPTION;
+    }
 
     *succeeded = TRUE;
     // } catch (ErrnoException errnoException) {
@@ -1042,6 +1045,7 @@ ECode File::CreateTempFile(
     }
     AutoPtr<IFile> result;
     Boolean succeeded;
+    ECode ec = NOERROR;
     AutoPtr<IRandom> random = GetTempFileRandom();
     do {
         Int32 randomInt32;
@@ -1051,10 +1055,13 @@ ECode File::CreateTempFile(
         sb += _suffix;
         result = NULL;
         CFile::New(tmpDirFile, sb.ToString(), (IFile**)&result);
-    } while (result->CreateNewFile(&succeeded), !succeeded);
-    *file = result;
-    REFCOUNT_ADD(*file);
-    return NOERROR;
+    } while (ec = result->CreateNewFile(&succeeded), SUCCEEDED(ec) && !succeeded);
+
+    if (succeeded) {
+        *file = result;
+        REFCOUNT_ADD(*file);
+    }
+    return ec;
 }
 
 ECode File::RenameTo(

@@ -3,14 +3,14 @@
 #define __ELASTOS_DROID_WIDGET_REMOTEVIEWS_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "Elastos.Droid.Widget.h"
-#include "Elastos.Droid.Utility.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.View.h"
-#include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.App.h"
-#include "elastos/droid/content/ContextWrapper.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.Widget.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/droid/content/ContextWrapper.h>
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Utility::Etl::List;
@@ -37,14 +37,13 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-
 /**
  * A class that describes a view hierarchy that can be displayed in
  * another process. The hierarchy is inflated from a layout resource
  * file, and this class provides some basic operations for modifying
  * the content of the inflated hierarchy.
  */
-class RemoteViews
+class ECO_PUBLIC RemoteViews
     : public Object
     , public IRemoteViews
     , public IParcelable
@@ -70,7 +69,7 @@ private:
      * Simple class used to keep track of memory usage in a RemoteViews.
      *
      */
-    class MemoryUsageCounter
+    class ECO_LOCAL MemoryUsageCounter
         : public Object
         , public IMemoryUsageCounter
     {
@@ -94,7 +93,7 @@ private:
         Int32 mMemoryUsage;
     };
 
-    class MutablePair
+    class ECO_LOCAL MutablePair
         : public Object
         , public IMutablePair
     {
@@ -134,7 +133,7 @@ private:
      *
      *  SUBCLASSES MUST BE IMMUTABLE SO CLONE WORKS!!!!!
      */
-    class Action
+    class ECO_LOCAL Action
         : public Object
         , public IRemoteViewsAction
         , public IParcelable
@@ -177,7 +176,7 @@ private:
         Int32 mViewId;
     };
 
-    class _SetEmptyView : public Action
+    class ECO_LOCAL _SetEmptyView : public Action
     {
     public:
         _SetEmptyView();
@@ -208,7 +207,7 @@ private:
         Int32 mEmptyViewId;
     };
 
-    class _SetOnClickFillInIntent : public Action
+    class ECO_LOCAL _SetOnClickFillInIntent : public Action
     {
     public:
         _SetOnClickFillInIntent(
@@ -241,7 +240,7 @@ private:
         RemoteViews* mHost;
     };
 
-    class _SetPendingIntentTemplate : public Action
+    class ECO_LOCAL _SetPendingIntentTemplate : public Action
     {
     public:
         _SetPendingIntentTemplate(
@@ -276,7 +275,7 @@ private:
         RemoteViews* mHost;
     };
 
-    class SetRemoteViewsAdapterList : public Action
+    class ECO_LOCAL SetRemoteViewsAdapterList : public Action
     {
     public:
         SetRemoteViewsAdapterList();
@@ -308,7 +307,7 @@ private:
         AutoPtr<IArrayList> mList;
     };
 
-    class SetRemoteViewsAdapterIntent : public Action
+    class ECO_LOCAL SetRemoteViewsAdapterIntent : public Action
     {
     public:
         SetRemoteViewsAdapterIntent();
@@ -338,7 +337,7 @@ private:
         AutoPtr<IIntent> mIntent;
     };
 
-    class _SetOnClickPendingIntent : public Action
+    class ECO_LOCAL _SetOnClickPendingIntent : public Action
     {
     public:
         _SetOnClickPendingIntent(
@@ -383,7 +382,7 @@ private:
      * <p>
      * You can omit specific calls by marking their values with null or -1.
      */
-    class _SetDrawableParameters : public Action
+    class ECO_LOCAL _SetDrawableParameters : public Action
     {
     public:
         _SetDrawableParameters();
@@ -421,7 +420,7 @@ private:
         Int32 mLevel;
     };
 
-    class ReflectionActionWithoutParams : public Action
+    class ECO_LOCAL ReflectionActionWithoutParams : public Action
     {
     public:
         ReflectionActionWithoutParams(
@@ -459,7 +458,7 @@ private:
         RemoteViews* mHost;
     };
 
-    class BitmapCache
+    class ECO_LOCAL BitmapCache
         : public Object
         , public IBitmapCache
     {
@@ -492,7 +491,7 @@ private:
         List<AutoPtr<IBitmap> > mBitmaps;
     };
 
-    class BitmapReflectionAction : public Action
+    class ECO_LOCAL BitmapReflectionAction : public Action
     {
     public:
         BitmapReflectionAction(
@@ -534,7 +533,7 @@ private:
     /**
      * Base class for the reflection actions.
      */
-    class ReflectionAction : public Action
+    class ECO_LOCAL ReflectionAction : public Action
     {
     public:
         ReflectionAction();
@@ -595,7 +594,7 @@ private:
      * given {@link RemoteViews}, or calling {@link ViewGroup#removeAllViews()}
      * when null. This allows users to build "nested" {@link RemoteViews}.
      */
-    class ViewGroupAction : public Action
+    class ECO_LOCAL ViewGroupAction : public Action
     {
     public:
         ViewGroupAction(
@@ -645,7 +644,7 @@ private:
      * Helper action to set compound drawables on a TextView. Supports relative
      * (s/t/e/b) or cardinal (l/t/r/b) arrangement.
      */
-    class TextViewDrawableAction : public Action
+    class ECO_LOCAL TextViewDrawableAction : public Action
     {
     public:
         TextViewDrawableAction();
@@ -686,7 +685,7 @@ private:
     /**
      * Helper action to set text size on a TextView in any supported units.
      */
-    class TextViewSizeAction : public Action
+    class ECO_LOCAL TextViewSizeAction : public Action
     {
     public:
         TextViewSizeAction();
@@ -721,7 +720,7 @@ private:
     /**
      * Helper action to set padding on a View.
      */
-    class ViewPaddingAction : public Action
+    class ECO_LOCAL ViewPaddingAction : public Action
     {
     public:
         ViewPaddingAction();
@@ -757,7 +756,7 @@ private:
         Int32 mBottom;
     };
 
-    class TextViewDrawableColorFilterAction
+    class ECO_LOCAL TextViewDrawableColorFilterAction
         : public Action
     {
     public:
@@ -798,7 +797,7 @@ private:
         static const Int32 TAG = 17;
     };
 
-    class FillInIntentClickListener
+    class ECO_LOCAL FillInIntentClickListener
         : public IViewOnClickListener
         , public Object
     {
@@ -817,7 +816,7 @@ private:
         AutoPtr<IRemoteViewsOnClickHandler> mHandler;
     };
 
-    class PendingIntentClickListener
+    class ECO_LOCAL PendingIntentClickListener
         : public IViewOnClickListener
         , public Object
     {
@@ -836,7 +835,7 @@ private:
         AutoPtr<IRemoteViewsOnClickHandler> mHandler;
     };
 
-    class IntentTemplateOnItemClickListener
+    class ECO_LOCAL IntentTemplateOnItemClickListener
         : public IAdapterViewOnItemClickListener
         , public Object
     {
@@ -858,7 +857,7 @@ private:
         AutoPtr<IRemoteViewsOnClickHandler> mHandler;
     };
 
-    class MyContextWrapper
+    class ECO_LOCAL MyContextWrapper
         : public ContextWrapper
     {
     public:
@@ -1649,15 +1648,15 @@ private:
         /* [in] */ const String& paramType,
         /* [out] */ IMethodInfo** info);
 
-    static CARAPI GetApplicationInfo(
+    ECO_LOCAL static CARAPI GetApplicationInfo(
         /* [in] */ const String& packageName,
         /* [in] */ Int32 userId,
         /* [out] */ IApplicationInfo** info);
 
-    static CARAPI_(AutoPtr<IRect>) GetSourceBounds(
+    ECO_LOCAL static CARAPI_(AutoPtr<IRect>) GetSourceBounds(
         /* [out] */ IView* v);
 
-    static CARAPI_(AutoPtr<IArgumentList>) WrapArg(
+    ECO_LOCAL static CARAPI_(AutoPtr<IArgumentList>) WrapArg(
         /* [in] */ IMethodInfo* value);
 
 public:
@@ -1666,17 +1665,17 @@ public:
     static pthread_key_t sInvokeArgsTls;
 
 private:
-    const static String TAG;
+    ECO_LOCAL const static String TAG;
     /**
      * Constants to whether or not this RemoteViews is composed of a landscape and portrait
      * RemoteViews.
      */
-    static Boolean sHaveInitTls;
-    static const Int32 MODE_NORMAL = 0;
-    static const Int32 MODE_HAS_LANDSCAPE_AND_PORTRAIT = 1;
-    static Object sMethodsLock;
-    static AutoPtr<IArrayMap> sMethods;
-    const static AutoPtr<IRemoteViewsOnClickHandler> DEFAULT_ON_CLICK_HANDLER;
+    ECO_LOCAL static Boolean sHaveInitTls;
+    ECO_LOCAL static const Int32 MODE_NORMAL = 0;
+    ECO_LOCAL static const Int32 MODE_HAS_LANDSCAPE_AND_PORTRAIT = 1;
+    ECO_LOCAL static Object sMethodsLock;
+    ECO_LOCAL static AutoPtr<IArrayMap> sMethods;
+    ECO_LOCAL const static AutoPtr<IRemoteViewsOnClickHandler> DEFAULT_ON_CLICK_HANDLER;
 
     AutoPtr<IApplicationInfo> mApplication;
 
@@ -1733,4 +1732,4 @@ private:
 } // namespace Droid
 } // namespace Elastos
 
-#endif
+#endif // __ELASTOS_DROID_WIDGET_REMOTEVIEWS_H__

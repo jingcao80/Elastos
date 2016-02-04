@@ -1,5 +1,5 @@
 
-#include "BluetoothHealthCallback.h"
+#include "elastos/droid/bluetooth/BluetoothHealthCallback.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Utility::Logging::Logger;
@@ -9,6 +9,12 @@ namespace Droid {
 namespace Bluetooth {
 
 const String BluetoothHealthCallback::TAG("BluetoothHealthCallback");
+
+CAR_INTERFACE_IMPL(BluetoothHealthCallback, Object, IBluetoothHealthCallback);
+
+BluetoothHealthCallback::BluetoothHealthCallback()
+{
+}
 
 ECode BluetoothHealthCallback::OnHealthAppConfigurationStatusChange(
     /* [in] */ IBluetoothHealthAppConfiguration* config,
@@ -34,4 +40,3 @@ ECode BluetoothHealthCallback::OnHealthChannelStateChange(
 }
 }
 }
-

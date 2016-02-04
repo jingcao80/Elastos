@@ -137,7 +137,7 @@ ECode HdmiRecordListener::TimerStatusData::GetExtraError(
 Int32 HdmiRecordListener::TimerStatusData::BcdByteToInt(
     /* [in] */ Byte value)
 {
-    return ((value >> 4) & 0xF) * 10 + value & 0xF;
+    return ((value >> 4) & 0xF) * 10 + (value & 0xF);
 }
 
 CAR_INTERFACE_IMPL(HdmiRecordListener, Object, IHdmiRecordListener)

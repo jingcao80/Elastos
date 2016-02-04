@@ -2,7 +2,8 @@
 #define __ELASTOS_DROID_PROVIDER_SETTINGS_H__
 
 #include <elastos/droid/ext/frameworkext.h>
-#include <elastos/utility/HashMap.h>
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContext;
@@ -16,9 +17,10 @@ using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Internal::Widget::IILockSettings;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Privacy::IPrivacySettingsManager;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::Object;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IHashSet;
-using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
@@ -28,7 +30,7 @@ class ECO_PUBLIC Settings
 {
 private:
     // Thread-safe.
-    class NameValueCache : public Object
+    class ECO_LOCAL NameValueCache : public Object
     {
     public:
         NameValueCache(
@@ -71,7 +73,7 @@ private:
         // for the fast path of retrieving settings.
         const String mCallGetCommand;
         const String mCallSetCommand;
-        static Object mLock;
+        static Object sLock;
     };
 
 public:
@@ -467,9 +469,9 @@ public:
             /* [in] */ Int32 userHandle);
 
     private:
-        static CARAPI_(Boolean) InitMOVEDTOSECURE();
+        ECO_LOCAL static CARAPI_(Boolean) InitMOVEDTOSECURE();
 
-        static CARAPI_(Boolean) InitMOVEDTOGLOBALANDSECURE();
+        ECO_LOCAL static CARAPI_(Boolean) InitMOVEDTOGLOBALANDSECURE();
 
     public:
         /**
@@ -509,10 +511,10 @@ public:
         static const AutoPtr< ArrayOf<String> > VOLUME_SETTINGS;
 
     private:
-        static const AutoPtr<NameValueCache> sNameValueCache;
-        static const AutoPtr<IHashSet> MOVED_TO_SECURE;
-        static const AutoPtr<IHashSet> MOVED_TO_GLOBAL;
-        static const AutoPtr<IHashSet> MOVED_TO_SECURE_THEN_GLOBAL;
+        ECO_LOCAL static const AutoPtr<NameValueCache> sNameValueCache;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_SECURE;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_GLOBAL;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_SECURE_THEN_GLOBAL;
     };
 
     class Secure : public NameValueTable
@@ -868,14 +870,14 @@ public:
             /* [out] */ Boolean* result);
 
     private:
-        static CARAPI_(Boolean) InitHashSet();
+        ECO_LOCAL static CARAPI_(Boolean) InitHashSet();
 
-        static Boolean SetLocationModeForUser(
+        ECO_LOCAL static Boolean SetLocationModeForUser(
             /* [in] */ IContentResolver* cr,
             /* [in] */ Int32 mode,
             /* [in] */ Int32 userId);
 
-        static Int32 GetLocationModeForUser(
+        ECO_LOCAL static Int32 GetLocationModeForUser(
             /* [in] */ IContentResolver* cr,
             /* [in] */ Int32 userId);
 
@@ -897,14 +899,14 @@ public:
 
     private:
         // Populated lazily, guarded by class object:
-        static const AutoPtr<NameValueCache> sNameValueCache;
+        ECO_LOCAL static const AutoPtr<NameValueCache> sNameValueCache;
         //assert(0 && "TODO");
-        static AutoPtr<IILockSettings> sLockSettings;
+        ECO_LOCAL static AutoPtr<IILockSettings> sLockSettings;
 
-        static Boolean sIsSystemProcess;
-        static const AutoPtr<IHashSet> MOVED_TO_LOCK_SETTINGS;
-        static const AutoPtr<IHashSet> MOVED_TO_GLOBAL;
-        static Object sSecureLock;
+        ECO_LOCAL static Boolean sIsSystemProcess;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_LOCK_SETTINGS;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_GLOBAL;
+        ECO_LOCAL static Object sSecureLock;
     };
 
     class Global : public NameValueTable
@@ -1197,8 +1199,8 @@ public:
 
     private:
         // Populated lazily, guarded by class object:
-        static const AutoPtr<NameValueCache> sNameValueCache;
-        static const AutoPtr<IHashSet> MOVED_TO_SECURE;
+        ECO_LOCAL static const AutoPtr<NameValueCache> sNameValueCache;
+        ECO_LOCAL static const AutoPtr<IHashSet> MOVED_TO_SECURE;
     };
 
     class Bookmarks
@@ -1277,10 +1279,10 @@ public:
             static AutoPtr<IUri> CONTENT_URI;
 
     private:
-        static const String TAG;
-        static const AutoPtr< ArrayOf<String> > sIntentProjection;
-        static const AutoPtr< ArrayOf<String> > sShortcutProjection;
-        static const String sShortcutSelection;
+        ECO_LOCAL static const String TAG;
+        ECO_LOCAL static const AutoPtr< ArrayOf<String> > sIntentProjection;
+        ECO_LOCAL static const AutoPtr< ArrayOf<String> > sShortcutProjection;
+        ECO_LOCAL static const String sShortcutSelection;
     };
 
 public:
@@ -1297,10 +1299,10 @@ public:
         /* [in] */ Int64 androidId);
 
 private:
-    static const String JID_RESOURCE_PREFIX;
-    static const String TAG;
-    static const Boolean LOCAL_LOGV;
-    static Object mLocationSettingsLock;
+    ECO_LOCAL static const String JID_RESOURCE_PREFIX;
+    ECO_LOCAL static const String TAG;
+    ECO_LOCAL static const Boolean LOCAL_LOGV;
+    ECO_LOCAL static Object sLocationSettingsLock;
 };
 
 } //namespace Provider

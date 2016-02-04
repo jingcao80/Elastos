@@ -1,0 +1,26 @@
+module
+{
+    using interface Elastos.Droid.Hardware.Location.IIFusedLocationHardware;
+    using interface Elastos.Droid.Location.IIFusedGeofenceHardware;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Location {
+
+    interface IFlpHardwareProvider {
+        const String LOCATION = "Location";
+        const String GEOFENCING = "Geofencing";
+
+        GetLocationHardware(
+            [out] IIFusedLocationHardware** lh);
+
+        GetGeofenceHardware(
+            [out] IIFusedGeofenceHardware** gh);
+    }
+
+    } // namespace Location
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

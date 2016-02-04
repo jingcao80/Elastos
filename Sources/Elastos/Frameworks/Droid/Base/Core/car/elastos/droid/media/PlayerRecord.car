@@ -26,6 +26,14 @@ module
             Destroy();
         }
 
+        interface IPlayerRecordRemotePlaybackState
+        {
+        }
+
+        interface IPlayerRecordRccPlaybackState {
+            Reset();
+        }
+
     } // namespace media
     } // namepsace Droid
     } // namespace Elastos

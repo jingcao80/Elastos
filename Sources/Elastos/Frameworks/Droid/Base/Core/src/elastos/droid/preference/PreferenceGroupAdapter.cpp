@@ -146,12 +146,11 @@ ECode PreferenceGroupAdapter::SyncRunnable::Run()
 static AutoPtr<IViewGroupLayoutParams> init()
 {
     AutoPtr<IViewGroupLayoutParams> vglp;
-    CViewGroupLayoutParams::NewByFriend(
+    CViewGroupLayoutParams::New(
         IViewGroupLayoutParams::MATCH_PARENT,
         IViewGroupLayoutParams::WRAP_CONTENT,
-        (CViewGroupLayoutParams**)&vglp);
-    AutoPtr<IViewGroupLayoutParams> lp = (IViewGroupLayoutParams*)(vglp.Get());
-    return lp;
+        (IViewGroupLayoutParams**)&vglp);
+    return vglp;
 }
 
 AutoPtr<IViewGroupLayoutParams> PreferenceGroupAdapter::sWrapperLayoutParams = init();

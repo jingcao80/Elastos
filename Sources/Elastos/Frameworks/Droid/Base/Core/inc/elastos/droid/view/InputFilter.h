@@ -7,7 +7,7 @@
 
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::Handler;
-using Elastos::Droid::View::IInputFilterHost;
+using Elastos::Droid::View::IIInputFilterHost;
 
 namespace Elastos {
 namespace Droid {
@@ -57,7 +57,7 @@ public:
      * @param host The input filter host environment.
      */
     CARAPI Install(
-        /* [in] */ IInputFilterHost* host);
+        /* [in] */ IIInputFilterHost* host);
 
     /**
      * Called when the input filter is uninstalled.
@@ -138,7 +138,7 @@ private:
     //                         "InputFilter#OutboundInputEventConsistencyVerifier") : null;
 
     AutoPtr<H> mH;
-    AutoPtr<IInputFilterHost> mInputFilterHost;
+    AutoPtr<IIInputFilterHost> mInputFilterHost;
 
 };
 

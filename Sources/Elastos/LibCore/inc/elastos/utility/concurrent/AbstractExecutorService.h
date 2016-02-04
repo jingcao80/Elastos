@@ -46,6 +46,8 @@ namespace Concurrent {
 class AbstractExecutorService
     : public Object
     , public IAbstractExecutorService
+    , public IExecutorService
+    , public IExecutor
 {
     friend class CExecutorCompletionService;
 

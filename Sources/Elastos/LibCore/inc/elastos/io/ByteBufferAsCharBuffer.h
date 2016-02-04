@@ -35,6 +35,9 @@ public:
     static CARAPI_(AutoPtr<ICharBuffer>) AsCharBuffer(
         /* [in] */ ByteBuffer* byteBuffer);
 
+    CARAPI GetPrimitiveArray(
+        /* [out] */ Handle64* arrayHandle);
+
     // @Override
     CARAPI AsReadOnlyBuffer(
         /* [out] */ ICharBuffer** buffer);

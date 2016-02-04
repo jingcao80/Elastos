@@ -3,18 +3,23 @@
 #define __ELASTOS_DROID_SERVER_NET_NETWORKSTATSRECORDER_H__
 
 #include "NetworkStatsCollection.h"
+#include "elastos/droid/server/net/NetworkStatsCollection.h"
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Utility::Etl::HashMap;
-using Elastos::IO::IPrintWriter;
+using Elastos::Droid::Internal::Utility::IFileRotator;
+using Elastos::Droid::Internal::Utility::IFileRotatorRewriter;
+using Elastos::Droid::Internal::Utility::IIndentingPrintWriter;
+using Elastos::Droid::Net::INetworkStats;
+using Elastos::Droid::Net::INetworkStatsEntry;
+using Elastos::Droid::Net::INetworkStatsNonMonotonicObserver;
+using Elastos::Droid::Net::INetworkTemplate;
+using Elastos::Droid::Os::IDropBoxManager;
 using Elastos::IO::IFile;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IOutputStream;
-using Elastos::Droid::Net::INetworkStats;
-using Elastos::Droid::Net::INetworkStatsEntry;
-using Elastos::Droid::Net::INetworkTemplate;
-using Elastos::Droid::Net::INonMonotonicObserver;
-using Elastos::Droid::Os::IDropBoxManager;
+using Elastos::IO::IPrintWriter;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::IMap;
 
 namespace Elastos {
 namespace Droid {
@@ -22,6 +27,7 @@ namespace Server {
 namespace Net {
 
 class NetworkStatsRecorder
+    : public Object
 {
 private:
     /**
@@ -30,8 +36,8 @@ private:
      * original {@link NetworkStatsCollection} when finished writing.
      */
     class CombiningRewriter
-        : public ElRefBase
-        , public FileRotator::Rewriter
+        : public Object
+        , public IFileRotatorRewriter
     {
     public:
         CombiningRewriter(
@@ -59,8 +65,8 @@ private:
      * the requested UID, only writing data back when modified.
      */
     class RemoveUidRewriter
-        : public ElRefBase
-        , public FileRotator::Rewriter
+        : public Object
+        , public IFileRotatorRewriter
     {
     public:
         RemoveUidRewriter(
@@ -87,8 +93,8 @@ private:
 
 public:
     NetworkStatsRecorder(
-        /* [in] */ FileRotator* rotator,
-        /* [in] */ INonMonotonicObserver* observer,
+        /* [in] */ IFileRotator* rotator,
+        /* [in] */ INetworkStatsNonMonotonicObserver* observer,
         /* [in] */ IDropBoxManager* dropBox,
         /* [in] */ const String& cookie,
         /* [in] */ Int64 bucketDuration,
@@ -110,7 +116,7 @@ public:
      * as reference is valid.
      */
     CARAPI GetOrLoadCompleteLocked(
-        /* [out] */ NetworkStatsCollection* result);
+        /* [out] */ NetworkStatsCollection** result);
 
     /**
      * Record any delta that occurred since last {@link NetworkStats} snapshot,
@@ -119,7 +125,7 @@ public:
      */
     CARAPI_(void) RecordSnapshotLocked(
         /* [in] */ INetworkStats* snapshot,
-        /* [in] */ HashMap<String, AutoPtr<NetworkIdentitySet> >& ifaceIdent,
+        /* [in] */ IMap* ifaceIdent,
         /* [in] */ Int64 currentTimeMillis);
 
     /**
@@ -143,10 +149,10 @@ public:
         /* [in] */ ArrayOf<Int32>* uids);
 
 
-    CARAPI_(void) ImportLegacyNetworkLocked(
+    CARAPI ImportLegacyNetworkLocked(
         /* [in] */ IFile* file);
 
-    CARAPI_(void) ImportLegacyUidLocked(
+    CARAPI ImportLegacyUidLocked(
         /* [in] */ IFile* file);
 
     CARAPI_(void) DumpLocked(
@@ -170,8 +176,8 @@ private:
     /** Dump before deleting in {@link #recoverFromWtf()}. */
     static const Boolean DUMP_BEFORE_DELETE = TRUE;
 
-    AutoPtr<FileRotator> mRotator;
-    AutoPtr<INonMonotonicObserver> mObserver;
+    AutoPtr<IFileRotator> mRotator;
+    AutoPtr<INetworkStatsNonMonotonicObserver> mObserver;
     AutoPtr<IDropBoxManager> mDropBox;
     String mCookie;
 

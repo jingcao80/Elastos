@@ -18,12 +18,12 @@ module
     /**
      * @hide
      */
+    /**
+     * @Involved
+     * no super interface
+     */
     [deprecated]
     interface IINetworkManagementService {
-        /**
-         ** GENERAL
-         **/
-
         /**
          * Register an observer to receive events
          */
@@ -40,7 +40,7 @@ module
          * Returns a list of currently known network interfaces
          */
         ListInterfaces(
-            [out, callee] ArrayOf<String>* interfaces);
+            [out, callee] ArrayOf<String>* result);
 
         /**
          * Retrieves the specified interface config
@@ -48,7 +48,7 @@ module
          */
         GetInterfaceConfig(
             [in] String iface,
-            [out] IInterfaceConfiguration** config);
+            [out] IInterfaceConfiguration** result);
 
         /**
          * Sets the configuration of the specified interface
@@ -80,7 +80,7 @@ module
          */
         SetInterfaceIpv6PrivacyExtensions(
             [in] String iface,
-            [in] Boolean enabled);
+            [in] Boolean bEnable);
 
         /**
          * Disable IPv6 on an interface
@@ -100,7 +100,7 @@ module
          */
         GetRoutes(
             [in] String iface,
-            [out, callee] ArrayOf<IRouteInfo*>* routes);
+            [out, callee] ArrayOf<IRouteInfo*>* result);
 
         /**
          * Add the specified route to the interface.
@@ -129,14 +129,10 @@ module
         Shutdown();
 
         /**
-         ** TETHERING RELATED
-         **/
-
-        /**
          * Returns true if IP forwarding is enabled
          */
         GetIpForwardingEnabled(
-            [out] Boolean* enabled);
+            [out] Boolean* result);
 
         /**
          * Enables/Disables IP Forwarding
@@ -160,18 +156,7 @@ module
          * Returns true if tethering services are started
          */
         IsTetheringStarted(
-            [out] Boolean* started);
-
-        /**
-         * Start bluetooth reverse tethering services
-         */
-        StartReverseTethering(
-            [in] String iface);
-
-        /**
-         * Stop currently running bluetooth reserse tethering services
-         */
-        StopReverseTethering();
+            [out] Boolean* result);
 
         /**
          * Tethers the specified interface
@@ -189,7 +174,7 @@ module
          * Returns a list of currently tethered interfaces
          */
         ListTetheredInterfaces(
-            [out, callee] ArrayOf<String>* interfaces);
+            [out, callee] ArrayOf<String>* result);
 
         /**
          * Sets the list of DNS forwarders (in order of priority)
@@ -199,10 +184,10 @@ module
             [in] ArrayOf<String>* dns);
 
         /**
-         * Returns the list of DNS fowarders (in order of priority)
+         * Returns the list of DNS forwarders (in order of priority)
          */
         GetDnsForwarders(
-            [out, callee] ArrayOf<String>* dns);
+            [out, callee] ArrayOf<String>* result);
 
         /**
          *  Enables Network Address Translation between two interfaces.
@@ -221,14 +206,10 @@ module
             [in] String externalInterface);
 
         /**
-         ** PPPD
-         **/
-
-        /**
          * Returns the list of currently known TTY devices on the system
          */
         ListTtys(
-            [out, callee] ArrayOf<String>* ttys);
+            [out, callee] ArrayOf<String>* result);
 
         /**
          * Attaches a PPP server daemon to the specified TTY with the specified
@@ -276,25 +257,21 @@ module
             [in] String iface);
 
         /**
-         ** DATA USAGE RELATED
-         **/
-
-        /**
          * Return global network statistics summarized at an interface level,
          * without any UID-level granularity.
          */
         GetNetworkStatsSummaryDev(
-            [out] INetworkStats** stats);
+            [out] INetworkStats** result);
 
         GetNetworkStatsSummaryXt(
-            [out] INetworkStats** stats);
+            [out] INetworkStats** result);
 
         /**
          * Return detailed network statistics with UID-level granularity,
          * including interface and tag details.
          */
         GetNetworkStatsDetail(
-            [out] INetworkStats** stats);
+            [out] INetworkStats** result);
 
         /**
          * Return detailed network statistics for the requested UID,
@@ -302,13 +279,13 @@ module
          */
         GetNetworkStatsUidDetail(
             [in] Int32 uid,
-            [out] INetworkStats** stats);
+            [out] INetworkStats** result);
 
         /**
          * Return summary of network statistics all tethering interfaces.
          */
         GetNetworkStatsTethering(
-            [out] INetworkStats** stats);
+            [out] INetworkStats** result);
 
         /**
          * Set quota for an interface.
@@ -353,7 +330,7 @@ module
          * Return status of bandwidth control module.
          */
         IsBandwidthControlEnabled(
-            [out] Boolean* enabled);
+            [out] Boolean* result);
 
         /**
          * Sets idletimer for an interface.
@@ -392,25 +369,11 @@ module
         FlushNetworkDnsCache(
             [in] Int32 netId);
 
-        /**
-         * Bind name servers to an interface in the DNS resolver.
-         */
-        SetDnsServersForInterface(
-            [in] String iface,
-            [in] ArrayOf<String>* servers);
-
-        /**
-         * Flush the DNS cache associated with the specified interface.
-         */
-        FlushInterfaceDnsCache(
-            [in] String iface);
-
         SetFirewallEnabled(
-            [in] Boolean enabled,
-            [out] Boolean* prev);
+            [in] Boolean enabled);
 
         IsFirewallEnabled(
-            [out] Boolean* enabled);
+            [out] Boolean* result);
 
         SetFirewallInterfaceRule(
             [in] String iface,
@@ -543,10 +506,11 @@ module
 
         AddInterfaceToLocalNetwork(
             [in] String iface,
-            [in] IList* routes); //List<RouteInfo>
+            [in] IList* routes);
 
         RemoveInterfaceFromLocalNetwork(
             [in] String iface);
+
     }
 
     } // namespace Os

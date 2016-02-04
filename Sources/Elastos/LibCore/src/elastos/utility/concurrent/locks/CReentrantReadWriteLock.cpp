@@ -23,8 +23,7 @@ CAR_OBJECT_IMPL(CReentrantReadWriteLock)
 
 ECode CReentrantReadWriteLock::constructor()
 {
-    this->constructor(FALSE);
-    return NOERROR;
+    return constructor(FALSE);
 }
 
 ECode CReentrantReadWriteLock::constructor(

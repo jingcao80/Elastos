@@ -23,6 +23,21 @@ ECode ByteBufferAsInt32Buffer::constructor(
     return NOERROR;
 }
 
+ECode ByteBufferAsInt32Buffer::GetPrimitiveArray(
+    /* [out] */ Handle64* arrayHandle)
+{
+    AutoPtr<ArrayOf<Int32> > arrayTmp;
+    GetArray((ArrayOf<Int32>**)&arrayTmp);
+    if (arrayTmp == NULL)
+    {
+        *arrayHandle = 0;
+        return NOERROR;
+    }
+    Int32* primitiveArray = arrayTmp->GetPayload();
+    *arrayHandle = reinterpret_cast<Handle64>(primitiveArray);
+    return NOERROR;
+}
+
 AutoPtr<IInt32Buffer> ByteBufferAsInt32Buffer::AsInt32Buffer(
     /* [in] */ ByteBuffer* mByteBuffer)
 {

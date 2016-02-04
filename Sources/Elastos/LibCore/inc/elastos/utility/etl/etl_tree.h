@@ -14,8 +14,8 @@ using Elastos::ElLightRefBase;
 _ETL_NAMESPACE_BEGIN
 
 typedef Boolean RBTreeColorType;
-extern const RBTreeColorType S_RBTreeRed; // FALSE
-extern const RBTreeColorType S_RBTreeBlack; // TRUE
+ECO_PUBLIC extern const RBTreeColorType S_RBTreeRed; // FALSE
+ECO_PUBLIC extern const RBTreeColorType S_RBTreeBlack; // TRUE
 
 struct RBTreeNodeBase
 {

@@ -41,8 +41,8 @@ ECode CMessageQueue::DebugMessage(
 }
 
 CMessageQueue::CMessageQueue()
-    : mQuitAllowed(FALSE)
-    , mPtr(0)
+    : mPtr(0)
+    , mQuitAllowed(FALSE)
     , mQuitting(FALSE)
     , mBlocked(FALSE)
     , mNextBarrierToken(0)
@@ -286,7 +286,7 @@ ECode CMessageQueue::EnqueueMessage(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Boolean needWake, isAsync;
+    Boolean isAsync;
     {
         AutoLock lock(mLock);
 
@@ -884,8 +884,7 @@ void CMessageQueue::NativeWake()
 Boolean CMessageQueue::NativeIsIdling()
 {
     NativeMessageQueue* nativeMessageQueue = (NativeMessageQueue*)mPtr;
-    assert(0 && "TODO waiting for lib");
-    //return nativeMessageQueue->getLooper()->isIdling();
+    return (Boolean)nativeMessageQueue->GetLooper()->isIdling();
 }
 
 ECode CMessageQueue::GetMPtr(

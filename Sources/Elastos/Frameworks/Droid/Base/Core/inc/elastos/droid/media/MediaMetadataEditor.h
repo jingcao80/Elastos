@@ -27,6 +27,7 @@ class MediaMetadataEditor
     : public Object
     , public IMediaMetadataEditor
 {
+    friend class RemoteController;
 public:
     MediaMetadataEditor();
 

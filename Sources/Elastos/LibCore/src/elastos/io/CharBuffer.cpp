@@ -12,12 +12,13 @@ using Elastos::Core::CArrayOf;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::EIID_IChar32;
+using Elastos::Core::EIID_ICharSequence;
 using Elastos::Utility::Arrays;
 
 namespace Elastos {
 namespace IO {
 
-CAR_INTERFACE_IMPL_2(CharBuffer, Object, IBuffer, ICharBuffer)
+CAR_INTERFACE_IMPL_4(CharBuffer, Buffer, IComparable, ICharBuffer, ICharSequence, IReadable)
 
 ECode CharBuffer::Allocate(
     /* [in] */ Int32 capacity,
@@ -156,11 +157,14 @@ ECode CharBuffer::GetCharAt(
 }
 
 ECode CharBuffer::CompareTo(
-    /* [in] */ ICharBuffer* otherBuffer,
+    /* [in] */ IInterface* otherBuffer,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
     VALIDATE_NOT_NULL(otherBuffer);
+
+    *result = -1;
+    if (ICharBuffer::Probe(otherBuffer) == NULL) return NOERROR;
 
     Int32 remaining = 0;
     Int32 otherRemaining = 0;
@@ -177,7 +181,7 @@ ECode CharBuffer::CompareTo(
     Char32 otherByte;
     while (compareRemaining > 0) {
         Get(thisPos, &thisByte);
-        otherBuffer->Get(otherPos, &otherByte);
+        ICharBuffer::Probe(otherBuffer)->Get(otherPos, &otherByte);
         if (thisByte != otherByte) {
             *result = thisByte < otherByte ? -1 : 1;
             return NOERROR;
@@ -331,7 +335,7 @@ ECode CharBuffer::ToString(
     return result.ToString(str);
 }
 
-ECode CharBuffer::Append(
+ECode CharBuffer::AppendChar(
     /* [in] */ Char32 c)
 {
     return Put(c);

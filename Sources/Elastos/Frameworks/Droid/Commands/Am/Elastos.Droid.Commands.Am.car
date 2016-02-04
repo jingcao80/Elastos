@@ -5,7 +5,7 @@ module
 
     merge("car/Am.car");
 
-    using interface Elastos.Droid.App.IActivityController;
+    using interface Elastos.Droid.App.IIActivityController;
     using interface Elastos.Droid.Content.IIntentReceiver;
     using interface Elastos.Droid.App.IInstrumentationWatcher;
 
@@ -26,7 +26,7 @@ module
                 [in] Handle32 am,
                 [in] String gdbPort);
 
-            interface IActivityController;
+            interface IIActivityController;
         }
 
         class CIntentReceiver {

@@ -205,12 +205,12 @@ ECode CCompatibilityInfo::Translator::GetTranslatedTouchableArea(
 
 static AutoPtr<ICompatibilityInfo> InitDefaultCompatibilityInfo()
 {
-    AutoPtr<CCompatibilityInfo> info;
-    // ASSERT_SUCCEEDED(CCompatibilityInfo::NewByFriend((CCompatibilityInfo**)&info));
-    return (ICompatibilityInfo*)info.Get();
+    AutoPtr<ICompatibilityInfo> info;
+    ASSERT_SUCCEEDED(CCompatibilityInfo::New((ICompatibilityInfo**)&info));
+    return info;
 }
 
-const AutoPtr<ICompatibilityInfo> CCompatibilityInfo::DEFAULT_COMPATIBILITY_INFO
+INIT_PROI_3 const AutoPtr<ICompatibilityInfo> CCompatibilityInfo::DEFAULT_COMPATIBILITY_INFO
         = InitDefaultCompatibilityInfo();
 
 const Int32 CCompatibilityInfo::SCALING_REQUIRED = 1;
@@ -725,7 +725,6 @@ ECode CCompatibilityInfo::constructor(
     mApplicationDensity = dens;
     mApplicationScale = scale;
     mApplicationInvertedScale = invertedScale;
-
     return NOERROR;
 }
 

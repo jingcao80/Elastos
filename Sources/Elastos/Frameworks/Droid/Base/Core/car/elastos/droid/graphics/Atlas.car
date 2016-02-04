@@ -15,7 +15,8 @@ module
         AtlasType_SliceMinArea = 0,
         AtlasType_SliceMaxArea = 1,
         AtlasType_SliceShortAxis = 2,
-        AtlasType_SliceLongAxis = 3
+        AtlasType_SliceLongAxis = 3,
+        AtlasType_COUNT = 4
     }
 
     interface IAtlasEntry {

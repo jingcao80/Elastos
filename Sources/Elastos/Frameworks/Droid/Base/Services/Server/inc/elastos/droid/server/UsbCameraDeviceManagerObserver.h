@@ -52,7 +52,7 @@ public:
         /* [in] */ IContext* context);
 
     CARAPI_(void) OnUEvent(
-        /* [in] */ UEventObserver::UEvent* event);
+        /* [in] */ IUEvent* event);
 
     CARAPI_(void) UpdateState(
         /* [in] */ const String& name,

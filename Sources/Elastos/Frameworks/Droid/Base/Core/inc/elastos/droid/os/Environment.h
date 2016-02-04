@@ -457,11 +457,11 @@ public:
 
 private:
 
-    static CARAPI ThrowIfUserRequired();
+    ECO_LOCAL static CARAPI ThrowIfUserRequired();
 
-    static Boolean IsStorageDisabled();
+    ECO_LOCAL static Boolean IsStorageDisabled();
 
-    static AutoPtr<IStorageVolume> GetStorageVolume(
+    ECO_LOCAL static AutoPtr<IStorageVolume> GetStorageVolume(
         /* [in] */ IFile* path);
 
 public:
@@ -651,46 +651,46 @@ public:
 private:
     friend class UserEnvironment;
 
-    static const String ENV_EXTERNAL_STORAGE; // = "EXTERNAL_STORAGE";
-    static const String ENV_EMULATED_STORAGE_SOURCE; // = "EMULATED_STORAGE_SOURCE";
-    static const String ENV_EMULATED_STORAGE_TARGET; // = "EMULATED_STORAGE_TARGET";
-    static const String ENV_MEDIA_STORAGE; // = "MEDIA_STORAGE";
-    static const String ENV_SECONDARY_STORAGE; // = "SECONDARY_STORAGE";
-    static const String ENV_ANDROID_ROOT; // = "ANDROID_ROOT";
-    static const String ENV_OEM_ROOT; // = "OEM_ROOT";
-    static const String ENV_VENDOR_ROOT; // = "VENDOR_ROOT";
+    ECO_LOCAL static const String ENV_EXTERNAL_STORAGE; // = "EXTERNAL_STORAGE";
+    ECO_LOCAL static const String ENV_EMULATED_STORAGE_SOURCE; // = "EMULATED_STORAGE_SOURCE";
+    ECO_LOCAL static const String ENV_EMULATED_STORAGE_TARGET; // = "EMULATED_STORAGE_TARGET";
+    ECO_LOCAL static const String ENV_MEDIA_STORAGE; // = "MEDIA_STORAGE";
+    ECO_LOCAL static const String ENV_SECONDARY_STORAGE; // = "SECONDARY_STORAGE";
+    ECO_LOCAL static const String ENV_ANDROID_ROOT; // = "ANDROID_ROOT";
+    ECO_LOCAL static const String ENV_OEM_ROOT; // = "OEM_ROOT";
+    ECO_LOCAL static const String ENV_VENDOR_ROOT; // = "VENDOR_ROOT";
 
-    static const String DIR_DATA; // = "data";
-    static const String DIR_MEDIA; // = "media";
-    static const String DIR_OBB; // = "obb";
-    static const String DIR_FILES; // = "files";
-    static const String DIR_CACHE; // = "cache";
+    ECO_LOCAL static const String DIR_DATA; // = "data";
+    ECO_LOCAL static const String DIR_MEDIA; // = "media";
+    ECO_LOCAL static const String DIR_OBB; // = "obb";
+    ECO_LOCAL static const String DIR_FILES; // = "files";
+    ECO_LOCAL static const String DIR_CACHE; // = "cache";
 
-    static const AutoPtr<IFile> DIR_ANDROID_ROOT; // = GetDirectory(ENV_ANDROID_ROOT, "/system");
-    static const AutoPtr<IFile> DIR_OEM_ROOT; // = GetDirectory(ENV_OEM_ROOT, "/oem");
-    static const AutoPtr<IFile> DIR_VENDOR_ROOT; // = GetDirectory(ENV_VENDOR_ROOT, "/vendor");
-    static const AutoPtr<IFile> DIR_MEDIA_STORAGE; // = GetDirectory(ENV_MEDIA_STORAGE, "/data/media");
+    ECO_LOCAL static const AutoPtr<IFile> DIR_ANDROID_ROOT; // = GetDirectory(ENV_ANDROID_ROOT, "/system");
+    ECO_LOCAL static const AutoPtr<IFile> DIR_OEM_ROOT; // = GetDirectory(ENV_OEM_ROOT, "/oem");
+    ECO_LOCAL static const AutoPtr<IFile> DIR_VENDOR_ROOT; // = GetDirectory(ENV_VENDOR_ROOT, "/vendor");
+    ECO_LOCAL static const AutoPtr<IFile> DIR_MEDIA_STORAGE; // = GetDirectory(ENV_MEDIA_STORAGE, "/data/media");
 
-    static const AutoPtr<IFile> DATA_DIRECTORY; //= GetDirectory("ANDROID_DATA", "/data");
+    ECO_LOCAL static const AutoPtr<IFile> DATA_DIRECTORY; //= GetDirectory("ANDROID_DATA", "/data");
 
     /**
      * @hide
      */
-    static const AutoPtr<IFile> SECURE_DATA_DIRECTORY;// = GetDirectory("ANDROID_SECURE_DATA", "/data/secure");
+    ECO_LOCAL static const AutoPtr<IFile> SECURE_DATA_DIRECTORY;// = GetDirectory("ANDROID_SECURE_DATA", "/data/secure");
 
-    static const AutoPtr<IFile> DOWNLOAD_CACHE_DIRECTORY;// = GetDirectory("DOWNLOAD_CACHE", "/cache");
+    ECO_LOCAL static const AutoPtr<IFile> DOWNLOAD_CACHE_DIRECTORY;// = GetDirectory("DOWNLOAD_CACHE", "/cache");
 
 
-    static const String CANONCIAL_EMULATED_STORAGE_TARGET;
+    ECO_LOCAL static const String CANONCIAL_EMULATED_STORAGE_TARGET;
         // = GetCanonicalPathOrNull(ENV_EMULATED_STORAGE_TARGET);
 
-    static const String SYSTEM_PROPERTY_EFS_ENABLED; // = "persist.security.efs.enabled";
+    ECO_LOCAL static const String SYSTEM_PROPERTY_EFS_ENABLED; // = "persist.security.efs.enabled";
 
-    static AutoPtr<IUserEnvironment> sCurrentUser;
-    static Boolean sUserRequired;
+    ECO_LOCAL static AutoPtr<IUserEnvironment> sCurrentUser;
+    ECO_LOCAL static Boolean sUserRequired;
 
 private:
-    Environment();
+    ECO_LOCAL Environment();
 };
 
 } // namespace Os

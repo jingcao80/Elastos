@@ -4,7 +4,7 @@
 #include "_Elastos_Droid_Server_CInputMethodManagerServiceUserSwitchObserver.h"
 #include "CInputMethodManagerService.h"
 
-using Elastos::Droid::Os::IRemoteCallback;
+using Elastos::Droid::Os::IIRemoteCallback;
 
 namespace Elastos {
 namespace Droid {
@@ -18,7 +18,7 @@ public:
 
     CARAPI OnUserSwitching(
         /* [in] */ Int32 newUserId,
-        /* [in] */ IRemoteCallback* reply);
+        /* [in] */ IIRemoteCallback* reply);
 
     CARAPI OnUserSwitchComplete(
         /* [in] */ Int32 newUserId);

@@ -119,7 +119,6 @@ module
      */
     [local]
     interface INotificationData {
-
         /**
          * Returns the sorted list of active notifications (depending on {@link Environment}
          *

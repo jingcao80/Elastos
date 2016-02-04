@@ -3,6 +3,7 @@
 #include "elastos/droid/media/CMediaCodecInfoCodecProfileLevel.h"
 #include "elastos/droid/media/CMediaCodecInfoEncoderCapabilities.h"
 #include "elastos/droid/media/CMediaCodecInfoVideoCapabilities.h"
+#include "elastos/droid/media/CMediaFormat.h"
 #include <elastos/utility/Arrays.h>
 
 using Elastos::Core::CString;
@@ -50,11 +51,9 @@ ECode CMediaCodecInfoCodecCapabilities::constructor(
     /* [in] */ IMap* capabilitiesMap)
 {
     AutoPtr<IMediaFormat> f1;
-//TODO: Need CMediaFormat
-    // CMediaFormat::New(defaultFormatMap, (IMediaFormat**)&f1);
+    CMediaFormat::New(defaultFormatMap, (IMediaFormat**)&f1);
     AutoPtr<IMediaFormat> f2;
-//TODO: Need CMediaFormat
-    // CMediaFormat::New(capabilitiesMap, (IMediaFormat**)&f2);
+    CMediaFormat::New(capabilitiesMap, (IMediaFormat**)&f2);
 
     return constructor(profLevs, colFmts, encoder, flags, f1, f2);
 }
@@ -298,8 +297,7 @@ ECode CMediaCodecInfoCodecCapabilities::CreateFromProfileLevel(
     pl->mProfile = profile;
     pl->mLevel = level;
     AutoPtr<IMediaFormat> defaultFormat;
-//TODO: Need CMediaFormat
-    // CMediaFormat::New((IMediaFormat**)&defaultFormat);
+    CMediaFormat::New((IMediaFormat**)&defaultFormat);
     defaultFormat->SetString(IMediaFormat::KEY_MIME, mime);
 
     AutoPtr<ArrayOf<IMediaCodecInfoCodecProfileLevel*> > profLevs =
@@ -307,8 +305,7 @@ ECode CMediaCodecInfoCodecCapabilities::CreateFromProfileLevel(
     profLevs->Set(1, pl);
     AutoPtr<ArrayOf<Int32> > colFmts = ArrayOf<Int32>::Alloc(0);
     AutoPtr<IMediaFormat> format;
-//TODO: Need CMediaFormat
-    // CMediaFormat::New((IMediaFormat**)&format);
+    CMediaFormat::New((IMediaFormat**)&format);
 
     AutoPtr<CMediaCodecInfoCodecCapabilities> ret;
     CMediaCodecInfoCodecCapabilities::NewByFriend(

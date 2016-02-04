@@ -9,7 +9,7 @@ using Elastos::Core::IRunnable;
 namespace Elastos {
 namespace Utility {
 
-class TimerTask
+class ECO_PUBLIC TimerTask
     : public Object
     , public ITimerTask
     , public IRunnable

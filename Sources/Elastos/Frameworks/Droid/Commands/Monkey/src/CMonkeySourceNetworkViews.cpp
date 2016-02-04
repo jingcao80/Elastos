@@ -644,11 +644,11 @@ String CMonkeySourceNetworkViews::GetPositionFromNode(IAccessibilityNodeInfo* no
     Int32 bottom = 0;
     nodePosition->Get(&left, &top, &right, &bottom);
     positions.AppendInt32(left);
-    positions.AppendCStr(" ");
+    positions.Append(" ");
     positions.AppendInt32(top);
-    positions.AppendCStr(" ");
+    positions.Append(" ");
     positions.AppendInt32(right - left);
-    positions.AppendCStr(" ");
+    positions.Append(" ");
     positions.AppendInt32(bottom - top);
     String ret;
     positions.ToString(&ret);

@@ -1,7 +1,16 @@
 
 #include "elastos/droid/server/am/AppNotRespondingDialog.h"
+#include "elastos/droid/server/am/CActivityManagerService.h"
+#include "elastos/droid/R.h"
+#include "elastos/core/AutoLock.h"
 
-using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::R;
+using Elastos::Core::AutoLock;
+using Elastos::Core::CString;
+using Elastos::Core::ISystem;
 
 namespace Elastos {
 namespace Droid {
@@ -35,12 +44,13 @@ AppNotRespondingDialog::AppNotRespondingDialog(
     AutoPtr<IPackageManager> pkgManager;
     context->GetPackageManager((IPackageManager**)&pkgManager);
     if (activity != NULL) {
-        activity->mInfo->LoadLabel(pkgManager, (ICharSequence**)&name1);
+        IPackageItemInfo::Probe(activity->mInfo)->LoadLabel(pkgManager, (ICharSequence**)&name1);
     }
 
     AutoPtr<ICharSequence> name2;
     pkgManager->GetApplicationLabel(app->mInfo, (ICharSequence**)&name2);
-    if ((app->mPkgList.GetSize() == 1) &&
+    Int32 size;
+    if (((app->mPkgList->GetSize(&size), size) == 1) &&
             name2 != NULL) {
         if (name1 != NULL) {
             resid = R::string::anr_activity_application;
@@ -100,22 +110,28 @@ AppNotRespondingDialog::AppNotRespondingDialog(
     AutoPtr<ICharSequence> title;
     res->GetText(R::string::anr_title, (ICharSequence**)&title);
     SetTitle(title);
+
+    AutoPtr<IWindow> window;
+    Dialog::GetWindow((IWindow**)&window);
     if (aboveSystem) {
-        Dialog::GetWindow()->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_ERROR);
+        window->SetType(IWindowManagerLayoutParams::TYPE_SYSTEM_ERROR);
     }
     String processName;
     app->mInfo->GetProcessName(&processName);
     AutoPtr<IWindowManagerLayoutParams> attrs;
-    Dialog::GetWindow()->GetAttributes((IWindowManagerLayoutParams**)&attrs);
+    window->GetAttributes((IWindowManagerLayoutParams**)&attrs);
     AutoPtr<ICharSequence> titlecs;
     CString::New(String("Application Not Responding: ") + processName, (ICharSequence**)&titlecs);
     attrs->SetTitle(titlecs);
-    attrs->SetPrivateFlags(IWindowManagerLayoutParams::PRIVATE_FLAG_SHOW_FOR_ALL_USERS);
-    Dialog::GetWindow()->SetAttributes(attrs);
+    attrs->SetPrivateFlags( IWindowManagerLayoutParams::PRIVATE_FLAG_SYSTEM_ERROR
+            | IWindowManagerLayoutParams::PRIVATE_FLAG_SHOW_FOR_ALL_USERS);
+    window->SetAttributes(attrs);
 }
 
-void AppNotRespondingDialog::OnStop()
-{}
+ECode AppNotRespondingDialog::OnStop()
+{
+    return NOERROR;
+}
 
 AppNotRespondingDialog::MyHandler::MyHandler(
     /* [in] */ AppNotRespondingDialog* host)
@@ -135,12 +151,12 @@ ECode AppNotRespondingDialog::MyHandler::HandleMessage(
         case FORCE_CLOSE:
             // Kill the application.
             // todo:KillAppAtUsersRequest must be public and the function is public in android
-            mHost->mService->KillAppAtUsersRequest(mHost->mProc, (IDialog*)mHost->Probe(EIID_IDialog));
+            mHost->mService->KillAppAtUsersRequest(mHost->mProc, IDialog::Probe(mHost));
             break;
         case WAIT_AND_REPORT:
         case WAIT:
             // Continue waiting for the application.
-            AutoLock lock(mHost->mService->mLock);
+            AutoLock lock(mHost->mService);
             AutoPtr<ProcessRecord> app = mHost->mProc;
 
             if (type == WAIT_AND_REPORT) {

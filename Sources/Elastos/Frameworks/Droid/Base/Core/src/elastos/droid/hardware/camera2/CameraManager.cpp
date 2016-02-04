@@ -544,7 +544,7 @@ ECode CameraManager::OpenCameraDeviceUserAsync(
 
         //try {
         Boolean result;
-        ECode ec = SupportsCamera2ApiLocked(cameraId, &result);
+        SupportsCamera2ApiLocked(cameraId, &result);
         if (result) {
             // Use cameraservice's cameradeviceclient implementation for HAL3.2+ devices
             AutoPtr<IICameraService> cameraService;

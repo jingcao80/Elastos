@@ -1,5 +1,10 @@
 
-#include "wm/TaskStack.h"
+#include <Elastos.Droid.Graphics.h>
+#include <Elastos.Droid.Utility.h>
+#include "elastos/droid/server/wm/TaskStack.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/DisplayContent.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
@@ -35,9 +40,9 @@ AutoPtr<DisplayContent> TaskStack::GetDisplayContent()
     return mDisplayContent;
 }
 
-AutoPtr< List<AutoPtr<Task> > > TaskStack::GetTasks()
+AutoPtr<List<AutoPtr<Task> > > TaskStack::GetTasks()
 {
-    return mTasks;
+    return &mTasks;
 }
 
 void TaskStack::ResizeWindows()
@@ -46,20 +51,20 @@ void TaskStack::ResizeWindows()
     mBounds->GetTop(&top);
     Boolean underStatusBar = top == 0;
 
-    List< AutoPtr<WindowState> > resizingWindows = mService->mResizingWindows;
+    List<AutoPtr<WindowState> > resizingWindows = mService->mResizingWindows;
     List<AutoPtr<Task> >::ReverseIterator rit = mTasks.RBegin();
     for (; rit != mTasks.REnd(); ++rit) {
         AppTokenList activities = (*rit)->mAppTokens;
         AppTokenList::ReverseIterator activityRit = activities.RBegin();
-        for (; activityRit = activities.REnd(); ++activityRit) {
-            WindowList windows = (*activityRit)->mAllAppWindows;
-            WindowList::ReverseIterator winRit = windows.RBegin();
+        for (; activityRit != activities.REnd(); ++activityRit) {
+            List<AutoPtr<WindowState> > windows = (*activityRit)->mAllAppWindows;
+            List<AutoPtr<WindowState> >::ReverseIterator winRit = windows.RBegin();
             for (; winRit != windows.REnd(); ++winRit) {
                 AutoPtr<WindowState> win = *winRit;
-                List< AutoPtr<WindowState> >::Iterator it = Find(resizingWindows.Begin(), resizingWindows.End(), win);
+                List<AutoPtr<WindowState> >::Iterator it = Find(resizingWindows.Begin(), resizingWindows.End(), win);
                 if (it == resizingWindows.End()) {
                     if (CWindowManagerService::DEBUG_RESIZE)
-                        Slogger::D(TAG, "setBounds: Resizing %p", win.Get());
+                        Slogger::D(CWindowManagerService::TAG, "setBounds: Resizing %p", win.Get());
                     resizingWindows.PushBack(win);
                 }
                 win->mUnderStatusBar = underStatusBar;
@@ -83,7 +88,7 @@ Boolean TaskStack::SetBounds(
     }
 
     mDimLayer->SetBounds(bounds);
-    mAnimationBackgroundSurfac->SetBounds(bounds);
+    mAnimationBackgroundSurface->SetBounds(bounds);
     mBounds->Set(bounds);
 
     return TRUE;
@@ -115,10 +120,10 @@ Boolean TaskStack::IsAnimating()
         AppTokenList activities = (*taskRit)->mAppTokens;
         AppTokenList::ReverseIterator activityRit = activities.RBegin();
         for (; activityRit != activities.REnd(); ++activityRit) {
-            WindowList windows = (*activityRit)->mAllAppWindows;
-            WindowList::ReverseIterator winRit = windows.RBegin();
+            List<AutoPtr<WindowState> > windows = (*activityRit)->mAllAppWindows;
+            List<AutoPtr<WindowState> >::ReverseIterator winRit = windows.RBegin();
             for (; winRit != windows.REnd(); ++winRit) {
-                AutoPtr<WindowStateAnimator> winAnimator = (*rit)->mWinAnimator;
+                AutoPtr<WindowStateAnimator> winAnimator = (*winRit)->mWinAnimator;
                 if (winAnimator->IsAnimating() || winAnimator->mWin->mExiting) {
                     return TRUE;
                 }
@@ -132,16 +137,16 @@ void TaskStack::AddTask(
     /* [in] */ Task* task,
     /* [in] */ Boolean toTop)
 {
-    Int32 stackNdx;
+    List<AutoPtr<Task> >::Iterator it;
     if (!toTop) {
-        stackNdx = 0;
+        it = mTasks.Begin();
     }
     else {
         List<AutoPtr<Task> >::ReverseIterator taskRit = mTasks.RBegin();
         if (!mService->IsCurrentProfileLocked(task->mUserId)) {
             // Place the task below all current user tasks.
             while (taskRit != mTasks.REnd()) {
-                if (!mService->IsCurrentProfileLocked((*rit)->mUserId)) {
+                if (!mService->IsCurrentProfileLocked((*taskRit)->mUserId)) {
                     break;
                 }
                 ++taskRit;
@@ -149,10 +154,11 @@ void TaskStack::AddTask(
             // Put it above first non-current user task.
             --taskRit;
         }
+        it = (--(taskRit.GetBase()));
     }
     if (CWindowManagerService::DEBUG_TASK_MOVEMENT)
         Slogger::D(CWindowManagerService::TAG, "addTask: task=%p toTop=%d pos=", task, toTop /*, stackNdx*/);
-    mTasks.Insert(--(stackNdx.GetBase()), task);
+    mTasks.Insert(it, task);
 
     task->mStack = this;
     mDisplayContent->MoveStack(this, TRUE);
@@ -171,7 +177,7 @@ void TaskStack::MoveTaskToTop(
 void TaskStack::MoveTaskToBottom(
     /* [in] */ Task* task)
 {
-    if (CWindowManagerService::DEBUG_TASK_MOVEMENT) Slogger::D(TAG, "moveTaskToBottom: task=%p", task);
+    if (CWindowManagerService::DEBUG_TASK_MOVEMENT) Slogger::D(CWindowManagerService::TAG, "moveTaskToBottom: task=%p", task);
     mTasks.Remove(task);
     AddTask(task, FALSE);
 }
@@ -179,7 +185,7 @@ void TaskStack::MoveTaskToBottom(
 void TaskStack::RemoveTask(
     /* [in] */ Task* task)
 {
-    if (CWindowManagerService::DEBUG_TASK_MOVEMENT) Slogger::D(TAG, "removeTask: task=%p", task);
+    if (CWindowManagerService::DEBUG_TASK_MOVEMENT) Slogger::D(CWindowManagerService::TAG, "removeTask: task=%p", task);
     mTasks.Remove(task);
     if (mDisplayContent != NULL) {
         if (mTasks.Begin() == mTasks.End()) {
@@ -214,9 +220,9 @@ void TaskStack::DetachDisplay()
         AppTokenList appWindowTokens = (*taskRit)->mAppTokens;
         AppTokenList::ReverseIterator tokenRit = appWindowTokens.RBegin();
         for (; tokenRit != appWindowTokens.REnd(); ++tokenRit) {
-            WindowList appWindows = (*tokenRit)->mAllAppWindows;
-            WindowList::ReverseIterator winRit = windows.RBegin();
-            for (; winRit != windows.REnd(); ++winRit) {
+            List<AutoPtr<WindowState> > appWindows = (*tokenRit)->mAllAppWindows;
+            List<AutoPtr<WindowState> >::ReverseIterator winRit = appWindows.RBegin();
+            for (; winRit != appWindows.REnd(); ++winRit) {
                 mService->RemoveWindowInnerLocked(NULL, *winRit);
                 doAnotherLayoutPass = TRUE;
             }
@@ -248,14 +254,16 @@ Int64 TaskStack::GetDimBehindFadeDuration(
     mService->mContext->GetResources((IResources**)&res);
     res->GetValue(R::fraction::config_dimBehindFadeDuration, tv, TRUE);
     Int32 type;
-    tv->GetType(&type)
+    tv->GetType(&type);
     if (type == ITypedValue::TYPE_FRACTION) {
         Float fraction;
         tv->GetFraction(duration, duration, &fraction);
         duration = (Int64)fraction;
     }
     else if (type >= ITypedValue::TYPE_FIRST_INT && type <= ITypedValue::TYPE_LAST_INT) {
-        tv->GetData(&duration);
+        Int32 data;
+        tv->GetData(&data);
+        duration = (Int64)data;
     }
     return duration;
 }
@@ -275,11 +283,13 @@ Boolean TaskStack::AnimateDimLayers()
     Float targetAlpha = mDimLayer->GetTargetAlpha();
     if (targetAlpha != dimAmount) {
         if (mDimWinAnimator == NULL) {
-            mDimLaye->Hide(DEFAULT_DIM_DURATION);
+            mDimLayer->Hide(DEFAULT_DIM_DURATION);
         }
         else {
-            Int64 duration = (mDimWinAnimator->mAnimating && mDimWinAnimator->mAnimation != NULL)
-                    ? mDimWinAnimator->mAnimation->ComputeDurationHint() : DEFAULT_DIM_DURATION;
+            Int64 duration = DEFAULT_DIM_DURATION;
+            if (mDimWinAnimator->mAnimating && mDimWinAnimator->mAnimation != NULL) {
+                mDimWinAnimator->mAnimation->ComputeDurationHint(&duration);
+            }
             if (targetAlpha > dimAmount) {
                 duration = GetDimBehindFadeDuration(duration);
             }
@@ -324,7 +334,7 @@ Boolean TaskStack::IsDimming()
 Boolean TaskStack::IsDimming(
     /* [in] */ WindowStateAnimator* winAnimator)
 {
-    return mDimWinAnimator == winAnimator && mDimLayer->IsDimming();
+    return mDimWinAnimator.Get() == winAnimator && mDimLayer->IsDimming();
 }
 
 void TaskStack::StartDimmingIfNeeded(
@@ -357,7 +367,7 @@ void TaskStack::SetAnimationBackground(
         mAnimationBackgroundAnimator = winAnimator;
         animLayer = mService->AdjustAnimationBackground(winAnimator);
         mAnimationBackgroundSurface->Show(animLayer - CWindowManagerService::LAYER_OFFSET_DIM,
-                ((color >> 24) & 0xff) / 255f, 0);
+                ((color >> 24) & 0xff) / 255, 0);
     }
 }
 

@@ -6,11 +6,11 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/HandlerBase.h"
 
-using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IAssetFileDescriptor;
-using Elastos::IO::IFileDescriptor;
 using Elastos::Droid::Os::HandlerBase;
+using Elastos::Droid::Os::IMessage;
+using Elastos::IO::IFileDescriptor;
 
 namespace Elastos {
 namespace Droid {
@@ -90,6 +90,279 @@ namespace Media {
  */
 CarClass(CSoundPool)
 {
+public:
+    /**
+     * Builder class for {@link SoundPool} objects.
+     */
+    class Builder
+        : public Object
+        , public ISoundPoolBuilder
+    {
+    public:
+        Builder(
+            /* [in] */ CSoundPool* host);
+
+        ~Builder();
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI SetMaxStreams(
+            /* [in] */ Int32 maxStreams,
+            /* [out] */ ISoundPoolBuilder** result);
+
+        CARAPI SetAudioAttributes(
+            /* [in] */ IAudioAttributes * attributes);
+
+        CARAPI Build(
+            /* [out] */ ISoundPool** result);
+
+    private:
+        Int32 mMaxStreams;
+        AutoPtr<AudioAttributes> mAudioAttributes;
+        CSoundPool* mHost;
+    };
+
+    class SoundPoolImpl
+        : public Object
+        , public ISoundPoolDelegate
+    {
+    public:
+        SoundPoolImpl(
+            /* [in] */ SoundPool* proxy,
+            /* [in] */ Int32 maxStreams,
+            /* [in] */ AudioAttributes* attr);
+
+        ~SoundPoolImpl();
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI Load(
+            /* [in] */ const String& path,
+            /* [in] */ Int32 priority,
+            /* [out] */ Int32* result);
+
+        CARAPI Load(
+            /* [in] */ IContext* context,
+            /* [in] */ Int32 resId,
+            /* [in] */ Int32 priority,
+            /* [out] */ Int32* result);
+
+        CARAPI Load(
+            /* [in] */ IAssetFileDescriptor* afd,
+            /* [in] */ Int32 priority,
+            /* [out] */ Int32* result);
+
+        CARAPI Load(
+            /* [in] */ IFileDescriptor* fd,
+            /* [in] */ Int64 offset,
+            /* [in] */ Int64 length,
+            /* [in] */ Int64 priority,
+            /* [out] */ Int32* result);
+
+        CARAPI UnLoad(
+            /* [in] */ Int32 soundID,
+            /* [out] */ Boolean* result);
+
+        CARAPI Play(
+            /* [in] */ Int32 soundID,
+            /* [in] */ Float leftVolume,
+            /* [in] */ Float rightVolume,
+            /* [in] */ Int32 priority,
+            /* [in] */ Int32 loop,
+            /* [in] */ Float rate,
+            /* [out] */ Int32* result);
+
+        CARAPI _Play(
+            /* [in] */ Int32 soundID,
+            /* [in] */ Float leftVolume,
+            /* [in] */ Float rightVolume,
+            /* [in] */ Int32 priority,
+            /* [in] */ Int32 loop,
+            /* [in] */ Float rate,
+            /* [out] */ Int32* result);
+
+        CARAPI Pause(
+            /* [in] */ Int32 streamID);
+
+        CARAPI Resume(
+            /* [in] */ Int32 streamID);
+
+        CARAPI AutoPause();
+
+        CARAPI AutoResume();
+
+        CARAPI Stop(
+            /* [in] */ Int32 streamID);
+
+        CARAPI SetVolume(
+            /* [in] */ Int32 streamID,
+            /* [in] */ Float leftVolume,
+            /* [in] */ Float rightVolume);
+
+        CARAPI SetVolume(
+            /* [in] */ Int32 streamID,
+            /* [in] */ Float volume);
+
+        CARAPI SetPriority(
+            /* [in] */ Int32 streamID,
+            /* [in] */ Int32 priority);
+
+        CARAPI SetLoop(
+            /* [in] */ Int32 streamID,
+            /* [in] */ Int32 loop);
+
+        CARAPI SetRate(
+            /* [in] */ Int32 streamID,
+            /* [in] */ Float rate);
+
+        CARAPI SetOnLoadCompleteListener(
+            /* [in] */ ISoundPoolOnLoadCompleteListener* listener);
+
+        CARAPI ReleaseSoundPoolImpl();
+
+    private:
+        CARAPI_(Int32) _Load(
+            /* [in] */ const String& uri,
+            /* [in] */ Int32 priority);
+
+        CARAPI_(Int32) _Load(
+            /* [in] */ IFileDescriptor* fd,
+            /* [in] */ Int64 offset,
+            /* [in] */ Int64 length,
+            /* [in] */ Int32 priority);
+
+        CARAPI_(Boolean) IsRestricted();
+
+        CARAPI_(void) _SetVolume(
+            /* [in] */ Int32 streamID,
+            /* [in] */ Float leftVolume,
+            /* [in] */ Float rightVolume);
+
+        // post event from native code to message handler
+        static CARAPI_(void) PostEventFromNative(
+            /* [in] */ IInterface* weakRef,
+            /* [in] */ Int32 msg,
+            /* [in] */ Int32 arg1,
+            /* [in] */ Int32 arg2,
+            /* [in] */ IInterface* obj);
+
+        CARAPI_(Int32) Native_setup(
+            /* [in] */ IInterface* weakRef,
+            /* [in] */ Int32 maxStreams,
+            /* [in] */ IInterface* attributes/*AudioAttributes*/);
+
+    protected:
+        CARAPI_(void) Finalize();
+
+    public:
+        static ECode sStaticLoadLibrary;
+
+    private:
+        static String TAG;
+        static Boolean DEBUG;
+        Int64 mNativeContext; // accessed by native methods
+
+        AutoPtr<EventHandler> mEventHandler;
+        AutoPtr<ISoundPoolOnLoadCompleteListener> mOnLoadCompleteListener;
+        SoundPool* mProxy;
+
+        Object mLock;
+        AutoPtr<AudioAttributes> mAttributes;
+        AutoPtr<IIAppOpsService> mAppOps;
+
+        // SoundPool messages
+        //
+        // must match SoundPool.h
+        static Int32 SAMPLE_LOADED;
+    };
+
+    class SoundPoolStub
+        : public Object
+        , public ISoundPoolDelegate
+    {
+    public:
+        SoundPoolStub();
+
+        ~SoundPoolStub();
+
+        CAR_INTERFACE_DECL()
+
+        CARAPI Load(
+            /* [in] */ const String& path,
+            /* [in] */ Int32 priority,
+            /* [out] */ Int32* result);
+
+        CARAPI Load(
+            /* [in] */ IContext* context,
+            /* [in] */ Int32 resId,
+            /* [in] */ Int32 priority,
+            /* [out] */ Int32* result);
+
+        CARAPI Load(
+            /* [in] */ IAssetFileDescriptor* afd,
+            /* [in] */ Int32 priority,
+            /* [out] */ Int32* result);
+
+        CARAPI Load(
+            /* [in] */ IFileDescriptor* fd,
+            /* [in] */ Int64 offset,
+            /* [in] */ Int64 length,
+            /* [in] */ Int32 priority,
+            /* [out] */ Int32* result);
+
+        CARAPI Unload(
+            /* [in] */ Int32 soundID,
+            /* [out] */ Boolean* result);
+
+        CARAPI Play(
+            /* [in] */ Int32 soundID,
+            /* [in] */ Float leftVolume,
+            /* [in] */ Float rightVolume,
+            /* [in] */ Int32 priority,
+            /* [in] */ Int32 loop,
+            /* [in] */ Float rate,
+            /* [out] */ Int32* result);
+
+        CARAPI Pause(
+            /* [in] */ Int32 streamID);
+
+        CARAPI Resume(
+            /* [in] */ Int32 streamID);
+
+        CARAPI AutoPause();
+
+        CARAPI AutoResume();
+
+        CARAPI Stop(
+            /* [in] */ Int32 streamID);
+
+        CARAPI SetVolume(
+            /* [in] */ Int32 streamID,
+            /* [in] */ Float leftVolume,
+            /* [in] */ Float rightVolume);
+
+        CARAPI SetVolume(
+            /* [in] */ Int32 streamID,
+            /* [in] */ Float volume);
+
+        CARAPI SetPriority(
+            /* [in] */ Int32 streamID,
+            /* [in] */ Int32 priority);
+
+        CARAPI SetLoop(
+            /* [in] */ Int32 streamID,
+            /* [in] */ Int32 loop);
+
+        CARAPI SetRate(
+            /* [in] */ Int32 streamID,
+            /* [in] */ Float rate);
+
+        CARAPI SetOnLoadCompleteListener(
+            /* [in] */ ISoundPoolOnLoadCompleteListener* listener);
+
+        CARAPI ReleaseSoundPoolStub();
+    };
+
 private:
     class EventHandler
         : public HandlerBase
@@ -123,6 +396,8 @@ public:
      * @param srcQuality the sample-rate converter quality. Currently has no
      *                   effect. Use 0 for the default.
      * @return a SoundPool object, or NULL if creation failed
+     * @deprecated use {@link SoundPool.Builder} instead to create and configure a
+     *     SoundPool instance
      */
     CARAPI constructor(
         /* [in] */ Int32 maxStreams,
@@ -392,6 +667,10 @@ protected:
     CARAPI_(void) Finalize();
 
 private:
+    CARAPI constructor(
+        /* [in] */ Int32 maxStreams,
+        /* [in] */ IAudioAttributes* attributes);
+
     CARAPI NativeLoad(
         /* [in] */ const String& uri,
         /* [in] */ Int32 priority,
@@ -415,11 +694,13 @@ public:
     static const Boolean DEBUG; // = FALSE;
 
 private:
+    AutoPtr<ISoundPoolDelegate> mImpl;
+
     Handle32 mNativeContext; // accessed by native methods
 
     AutoPtr<EventHandler> mEventHandler;
 
-    AutoPtr<IOnLoadCompleteListener> mOnLoadCompleteListener;
+    AutoPtr<ISoundPoolOnLoadCompleteListener> mOnLoadCompleteListener;
 
     Object mLock;
 

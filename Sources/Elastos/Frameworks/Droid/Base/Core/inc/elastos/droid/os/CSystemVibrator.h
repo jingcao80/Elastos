@@ -5,7 +5,7 @@
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/os/Vibrator.h"
 
-using Elastos::Droid::Os::IVibratorService;
+using Elastos::Droid::Os::IIVibratorService;
 using Elastos::Droid::Media::IAudioAttributes;
 
 namespace Elastos {
@@ -59,7 +59,7 @@ private:
 private:
     static const String TAG;
 
-    AutoPtr<IVibratorService> mService;
+    AutoPtr<IIVibratorService> mService;
     AutoPtr<IBinder> mToken;
 };
 

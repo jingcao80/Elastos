@@ -89,7 +89,11 @@ private:
 } // namespace Elastos
 
 #ifndef synchronized
-#define synchronized(obj)  for(Elastos::Core::AutoLock obj##_lock(obj); obj##_lock; obj##_lock.SetUnlock())
+#ifdef __GNUC__
+#define synchronized(obj)  for(Elastos::Core::AutoLock tmpLockObj##__COUNTER__(obj); tmpLockObj##__COUNTER__; tmpLockObj##__COUNTER__.SetUnlock())
+#else
+#define synchronized(obj)  for(Elastos::Core::AutoLock tmpLockObj##__LINE__(obj); tmpLockObj##__LINE__; tmpLockObj##__LINE__.SetUnlock())
+#endif
 #endif
 
 using Elastos::Core::AutoLock;

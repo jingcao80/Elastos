@@ -1,6 +1,7 @@
 
 module
 {
+    using interface Elastos.Utility.IList;
     interface Elastos.Droid.Bluetooth.IBluetoothDevice;
 
     namespace Elastos {
@@ -80,6 +81,40 @@ module
             const Int32 PBAP = 6;
 
             /**
+              * GATT
+              */
+            const Int32 GATT = 7;
+
+            /**
+             * GATT_SERVER
+             */
+            const Int32 GATT_SERVER = 8;
+
+            /**
+             * MAP Profile
+             * @hide
+             */
+            const Int32 MAP = 9;
+
+            /**
+             * A2DP Sink Profile
+             * @hide
+             */
+            const Int32 A2DP_SINK = 10;
+
+            /**
+             * AVRCP Controller Profile
+             * @hide
+             */
+            const Int32 AVRCP_CONTROLLER = 11;
+
+            /**
+             * Headset Client - HFP HF Role
+             * @hide
+             */
+            const Int32 HEADSET_CLIENT = 16;
+
+            /**
              * Default priority for devices that we try to auto-connect to and
              * and allow incoming connections for the profile
              * @hide
@@ -120,7 +155,7 @@ module
              */
             //Mike TODO:
             GetConnectedDevices(
-                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+                [out] IList** devices);
 
             /**
              * Get a list of devices that match any of the given connection
@@ -146,7 +181,7 @@ module
             //Mike TODO:  Wait for List car interface
             GetDevicesMatchingConnectionStates(
                 [in] ArrayOf<Int32>* states,
-                [out, callee] /*List<BluetoothDevice>*/ ArrayOf<IBluetoothDevice*>* devices);
+                [out] IList** devices);
 
             /**
              * Get the current connection state of the profile

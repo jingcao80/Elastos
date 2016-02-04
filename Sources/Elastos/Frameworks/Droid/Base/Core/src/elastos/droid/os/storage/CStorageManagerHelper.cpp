@@ -9,6 +9,9 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 namespace Storage {
+CAR_INTERFACE_IMPL(CStorageManagerHelper, Singleton, IStorageManagerHelper)
+
+CAR_SINGLETON_IMPL(CStorageManagerHelper)
 
 /** {@hide} */
 ECode CStorageManagerHelper::From(

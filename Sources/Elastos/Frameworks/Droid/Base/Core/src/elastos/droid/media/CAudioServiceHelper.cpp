@@ -6,11 +6,16 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
-CAudioServiceHelper::CAudioServiceHelper()
-{}
+CAR_INTERFACE_IMPL(CAudioServiceHelper, Singleton, IAudioServiceHelper)
 
-CAudioServiceHelper::~CAudioServiceHelper()
-{}
+CAR_SINGLETON_IMPL(CAudioServiceHelper)
+
+ECode CAudioServiceHelper::StreamToString(
+    /* [in] */ Int32 stream,
+    /* [out] */ String* result)
+{
+    return CAudioService::StreamToString(stream, result);
+}
 
 ECode CAudioServiceHelper::GetValueForVibrateSetting(
     /* [in] */ Int32 existingValue,

@@ -6,6 +6,7 @@
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CUserHandle.h"
+#include "elastos/core/StringBuilder.h"
 
 using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::Res::IResources;
@@ -15,6 +16,7 @@ using Elastos::Droid::Content::Pm::IComponentInfo;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {

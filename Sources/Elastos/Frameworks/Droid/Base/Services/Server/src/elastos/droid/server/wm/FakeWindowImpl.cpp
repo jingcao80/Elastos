@@ -1,7 +1,9 @@
 
-#include "wm/FakeWindowImpl.h"
+#include "elastos/droid/server/wm/FakeWindowImpl.h"
 #include "elastos/droid/os/Process.h"
 
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::View::EIID_IFakeWindow;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IInputChannelHelper;
 using Elastos::Droid::View::CInputChannelHelper;
@@ -27,8 +29,10 @@ FakeWindowImpl::FakeWindowImpl(
     AutoPtr<IInputChannelHelper> helper;
     ASSERT_SUCCEEDED(CInputChannelHelper::AcquireSingleton(
             (IInputChannelHelper**)&helper));
-    helper->OpenInputChannelPair(name,
-            (IInputChannel**)&mServerChannel, (IInputChannel**)&mClientChannel);
+    AutoPtr<ArrayOf<IInputChannel*> > channels;
+    helper->OpenInputChannelPair(name, (ArrayOf<IInputChannel*>**)&channels);
+    mServerChannel = (*channels)[0];
+    mClientChannel = (*channels)[1];
     mService->mInputManager->RegisterInputChannel(mServerChannel, NULL);
 
     inputEventReceiverFactory->CreateInputEventReceiver(
@@ -63,34 +67,7 @@ FakeWindowImpl::FakeWindowImpl(
     mTouchFullscreen = touchFullscreen;
 }
 
-PInterface FakeWindowImpl::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (IInterface*)(IFakeWindow*)this;
-    }
-    else if (riid == Elastos::Droid::View::EIID_IFakeWindow) {
-        return (IFakeWindow*)this;
-    }
-    return NULL;
-}
-
-UInt32 FakeWindowImpl::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 FakeWindowImpl::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode FakeWindowImpl::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    return E_NOT_IMPLEMENTED;
-}
+CAR_INTERFACE_IMPL(FakeWindowImpl, Object, IFakeWindow)
 
 void FakeWindowImpl::Layout(
     /* [in] */ Int32 dw,

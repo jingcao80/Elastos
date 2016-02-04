@@ -1,14 +1,17 @@
 
-#include "wm/KeyguardDisableHandler.h"
+#include <Elastos.Droid.App.h>
+#include "elastos/droid/server/wm/KeyguardDisableHandler.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
-#include "elastos/droid/os/SomeArgs.h"
+#include "elastos/droid/internal/os/SomeArgs.h"
 #include <elastos/utility/logging/Logger.h>
 
-
 using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::Os::SomeArgs;
+using Elastos::Droid::Internal::Os::SomeArgs;
+using Elastos::Droid::Internal::Os::ISomeArgs;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
+using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Os::IBinder;
 
 namespace Elastos {
 namespace Droid {
@@ -60,9 +63,9 @@ ECode KeyguardDisableHandler::KeyguardTokenWatcher::Released()
 }
 
 const String KeyguardDisableHandler::TAG("KeyguardDisableHandler");
-const Int32 KeyguardDisableHandler::ALLOW_DISABLE_YES = 1;
-const Int32 KeyguardDisableHandler::ALLOW_DISABLE_NO = 0;
-const Int32 KeyguardDisableHandler::ALLOW_DISABLE_UNKNOWN = -1;
+const Int32 KeyguardDisableHandler::ALLOW_DISABLE_YES;
+const Int32 KeyguardDisableHandler::ALLOW_DISABLE_NO;
+const Int32 KeyguardDisableHandler::ALLOW_DISABLE_UNKNOWN;
 
 const Int32 KeyguardDisableHandler::KEYGUARD_DISABLE;
 const Int32 KeyguardDisableHandler::KEYGUARD_REENABLE;
@@ -90,7 +93,7 @@ ECode KeyguardDisableHandler::HandleMessage(
         case KEYGUARD_DISABLE: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            SomeArgs* args = (SomeArgs*)obj.Get();
+            SomeArgs* args = (SomeArgs*)(ISomeArgs*)obj.Get();
 
             IBinder* token = IBinder::Probe(args->mArg1);
             ICharSequence* seq= ICharSequence::Probe(args->mArg2);
@@ -117,37 +120,6 @@ ECode KeyguardDisableHandler::HandleMessage(
 
     return NOERROR;
 }
-
-
-// PInterface KeyguardDisableHandler::KeyguardTokenWatcher::Probe(
-//     /* [in] */ REIID riid)
-// {
-//     if (riid == EIID_IInterface) {
-//         return (IInterface*)(ITokenWatcher*)this;
-//     }
-//     else if (riid == EIID_ITokenWatcher) {
-//         return (Elastos::Droid::Os::ITokenWatcher*)this;
-//     }
-//     return NULL;
-// }
-
-// UInt32 KeyguardDisableHandler::KeyguardTokenWatcher::AddRef()
-// {
-//     return ElRefBase::AddRef();
-// }
-
-// UInt32 KeyguardDisableHandler::KeyguardTokenWatcher::Release()
-// {
-//     return ElRefBase::Release();
-// }
-
-// ECode KeyguardDisableHandler::KeyguardTokenWatcher::GetInterfaceID(
-//     /* [in] */ IInterface *pObject,
-//     /* [out] */ InterfaceID *pIID)
-// {
-//     return E_NOT_IMPLEMENTED;
-// }
-
 
 } // Wm
 } // Server

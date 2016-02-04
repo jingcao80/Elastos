@@ -9,7 +9,7 @@
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CRectF.h"
 #include "elastos/droid/view/View.h"
-//#include "elastos/droid/View/GhostView.h"
+#include "elastos/droid/view/GhostView.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/CoreUtils.h>
@@ -25,7 +25,7 @@ using Elastos::Droid::Os::IResultReceiver;
 using Elastos::Droid::Transition::ITransitionSet;
 using Elastos::Droid::Transition::CTransitionSet;
 using Elastos::Droid::Transition::EIID_IEpicenterCallback;
-//using Elastos::Droid::View::GhostView;
+using Elastos::Droid::View::GhostView;
 using Elastos::Droid::View::View;
 using Elastos::Droid::View::IGhostView;
 using Elastos::Droid::View::IViewGroupOverlay;
@@ -139,17 +139,16 @@ ECode ActivityTransitionCoordinator::GhostViewListeners::OnPreDraw(
 {
     VALIDATE_NOT_NULL(result)
 
-    assert(0 && "TODO");
-    // AutoPtr<IGhostView> ghostView = GhostView::GetGhost(mView);
-    // if (ghostView == NULL) {
-    //     AutoPtr<IViewTreeObserver> vto;
-    //     mParent->GetViewTreeObserver((IViewTreeObserver**)&vto);
-    //     vto->RemoveOnPreDrawListener(THIS_PROBE(IOnPreDrawListener));
-    // }
-    // else {
-    //     GhostView::CalculateMatrix(mView, mDecor, mMatrix);
-    //     ghostView->SetMatrix(mMatrix);
-    // }
+    AutoPtr<IGhostView> ghostView = GhostView::GetGhost(mView);
+    if (ghostView == NULL) {
+        AutoPtr<IViewTreeObserver> vto;
+        mParent->GetViewTreeObserver((IViewTreeObserver**)&vto);
+        vto->RemoveOnPreDrawListener(THIS_PROBE(IOnPreDrawListener));
+    }
+    else {
+        GhostView::CalculateMatrix(mView, mDecor, mMatrix);
+        ghostView->SetMatrix(mMatrix);
+    }
     *result = TRUE;
     return NOERROR;
 }
@@ -1173,8 +1172,7 @@ ECode ActivityTransitionCoordinator::MoveSharedElementsFromOverlay()
             AutoPtr<IInterface> obj;
             mSharedElements->Get(i, (IInterface**)&obj);
             IView* sharedElement = IView::Probe(obj);
-            assert(0 && "TODO");
-            // GhostView::RemoveGhost(sharedElement);
+            GhostView::RemoveGhost(sharedElement);
         }
     }
     return NOERROR;
@@ -1189,11 +1187,10 @@ ECode ActivityTransitionCoordinator::SetGhostVisibility(
         AutoPtr<IInterface> obj;
         mSharedElements->Get(i, (IInterface**)&obj);
         IView* view = IView::Probe(obj);
-        assert(0 && "TODO");
-        // AutoPtr<GhostView> ghostView = GhostView::GetGhost(view);
-        // if (ghostView != NULL) {
-        //     ghostView->SetVisibility(visibility);
-        // }
+        AutoPtr<IGhostView> ghostView = GhostView::GetGhost(view);
+        if (ghostView != NULL) {
+            IView::Probe(ghostView)->SetVisibility(visibility);
+        }
     }
     return NOERROR;
 }

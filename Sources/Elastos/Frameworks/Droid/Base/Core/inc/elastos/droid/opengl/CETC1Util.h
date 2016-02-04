@@ -2,15 +2,25 @@
 #ifndef __ELASTOS_DROID_OPENGL_CETC1UTIL_H__
 #define __ELASTOS_DROID_OPENGL_CETC1UTIL_H__
 
+#include "Elastos.Droid.Opengl.h"
 #include "_Elastos_Droid_Opengl_CETC1Util.h"
+#include <elastos/core/Singleton.h>
+
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
 
 CarClass(CETC1Util)
+    , public Singleton
+    , public IETC1Util
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
+
     CARAPI LoadTexture(
         /* [in] */ Int32 target,
         /* [in] */ Int32 level,

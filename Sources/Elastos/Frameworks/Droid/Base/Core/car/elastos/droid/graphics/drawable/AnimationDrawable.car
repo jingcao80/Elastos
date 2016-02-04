@@ -14,11 +14,11 @@ module
      * which can be used as a View object's background.
      * <p>
      * The simplest way to create a frame-by-frame animation is to define the animation in an XML
-     * file, placed in the res/drawable/ folder, and set it as the background to a View object. Then, call somthing 
+     * file, placed in the res/drawable/ folder, and set it as the background to a View object. Then, call somthing
      * to run the animation.Somthing meams:
      *
      *@sa #start()
-     * 
+     *
      * <p>
      * An AnimationDrawable defined in XML consists of a single <code>&lt;animation-list></code> element,
      * and a series of nested <code>&lt;item></code> tags. Each item defines a frame of the animation.
@@ -65,8 +65,8 @@ module
      */
 
      /**
-     * A helper class that contains several Drawables and selects which one to use. 
-     * You can subclass it to create your own DrawableContainers or directly use one 
+     * A helper class that contains several Drawables and selects which one to use.
+     * You can subclass it to create your own DrawableContainers or directly use one
      * its child classes.
      *
      * @sa Drawable
@@ -75,6 +75,10 @@ module
     /**
      * @Involve
      * interface IDrawableContainer
+     * interface IDrawable
+     * interface IDrawableCallback
+     * interface IRunnable
+     * interface IAnimatable
      */
     interface IAnimationDrawable {
         /**

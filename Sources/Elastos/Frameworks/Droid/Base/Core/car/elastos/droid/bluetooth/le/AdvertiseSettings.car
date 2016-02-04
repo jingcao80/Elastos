@@ -1,0 +1,143 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+    namespace LE {
+
+    /**
+     * The {@link AdvertiseSettings} provide a way to adjust advertising preferences for each
+     * Bluetooth LE advertisement instance. Use {@link AdvertiseSettings.Builder} to create an
+     * instance of this class.
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IAdvertiseSettings {
+        /**
+         * Perform Bluetooth LE advertising in low power mode. This is the default and preferred
+         * advertising mode as it consumes the least power.
+         */
+        const Int32 ADVERTISE_MODE_LOW_POWER = 0;
+
+        /**
+         * Perform Bluetooth LE advertising in balanced power mode. This is balanced between advertising
+         * frequency and power consumption.
+         */
+        const Int32 ADVERTISE_MODE_BALANCED = 1;
+
+        /**
+         * Perform Bluetooth LE advertising in low latency, high power mode. This has the highest power
+         * consumption and should not be used for continuous background advertising.
+         */
+        const Int32 ADVERTISE_MODE_LOW_LATENCY = 2;
+
+        /**
+         * Advertise using the lowest transmission (TX) power level. Low transmission power can be used
+         * to restrict the visibility range of advertising packets.
+         */
+        const Int32 ADVERTISE_TX_POWER_ULTRA_LOW = 0;
+
+        /**
+         * Advertise using low TX power level.
+         */
+        const Int32 ADVERTISE_TX_POWER_LOW = 1;
+
+        /**
+         * Advertise using medium TX power level.
+         */
+        const Int32 ADVERTISE_TX_POWER_MEDIUM = 2;
+
+        /**
+         * Advertise using high TX power level. This corresponds to largest visibility range of the
+         * advertising packet.
+         */
+        const Int32 ADVERTISE_TX_POWER_HIGH = 3;
+
+        /**
+         * Returns the advertise mode.
+         */
+        GetMode(
+            [out] Int32* mode);
+
+        /**
+         * Returns the TX power level for advertising.
+         */
+        GetTxPowerLevel(
+            [out] Int32* level);
+
+        /**
+         * Returns whether the advertisement will indicate connectable.
+         */
+        IsConnectable(
+            [out] Boolean* result);
+
+        /**
+         * Returns the advertising time limit in milliseconds.
+         */
+        GetTimeout(
+            [out] Int32* timeout);
+    }
+
+    /**
+     * Builder class for {@link AdvertiseSettings}.
+     */
+    interface IAdvertiseSettingsBuilder {
+
+        /**
+         * Set advertise mode to control the advertising power and latency.
+         *
+         * @param advertiseMode Bluetooth LE Advertising mode, can only be one of
+         *            {@link AdvertiseSettings#ADVERTISE_MODE_LOW_POWER},
+         *            {@link AdvertiseSettings#ADVERTISE_MODE_BALANCED}, or
+         *            {@link AdvertiseSettings#ADVERTISE_MODE_LOW_LATENCY}.
+         * @throws IllegalArgumentException If the advertiseMode is invalid.
+         */
+        SetAdvertiseMode(
+            [in] Int32 advertiseMode);
+
+        /**
+         * Set advertise TX power level to control the transmission power level for the advertising.
+         *
+         * @param txPowerLevel Transmission power of Bluetooth LE Advertising, can only be one of
+         *            {@link AdvertiseSettings#ADVERTISE_TX_POWER_ULTRA_LOW},
+         *            {@link AdvertiseSettings#ADVERTISE_TX_POWER_LOW},
+         *            {@link AdvertiseSettings#ADVERTISE_TX_POWER_MEDIUM} or
+         *            {@link AdvertiseSettings#ADVERTISE_TX_POWER_HIGH}.
+         * @throws IllegalArgumentException If the {@code txPowerLevel} is invalid.
+         */
+        SetTxPowerLevel(
+            [in] Int32 txPowerLevel);
+
+        /**
+         * Set whether the advertisement type should be connectable or non-connectable.
+         *
+         * @param connectable Controls whether the advertisment type will be connectable (true)
+         *                    or non-connectable (false).
+         */
+        SetConnectable(
+            [in] Boolean connectable);
+
+        /**
+         * Limit advertising to a given amount of time.
+         * @param timeoutMillis Advertising time limit. May not exceed 180000 milliseconds.
+         *                       A value of 0 will disable the time limit.
+         * @throws IllegalArgumentException If the provided timeout is over 180000 ms.
+         */
+        SetTimeout(
+            [in] Int32 timeoutMillis);
+
+        /**
+         * Build the {@link AdvertiseSettings} object.
+         */
+        Build(
+            [out] IAdvertiseSettings** settings);
+    }
+
+    } // LE
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

@@ -844,7 +844,7 @@ ECode CPosix::Ftruncate(
     fd->GetDescriptor(&_fd);
     ECode ec;
     ErrorIfMinusOne("ftruncate", TEMP_FAILURE_RETRY(ftruncate64(_fd, length)), &ec);
-    return NOERROR;
+    return ec;
 }
 
 ECode CPosix::Gai_strerror(
@@ -1025,7 +1025,7 @@ ECode CPosix::GetsockoptInt32(
     ECode ec;
     ErrorIfMinusOne("getsockopt", TEMP_FAILURE_RETRY(getsockopt(_fd, level, option, &result, &size)), &ec);
     *sockopt = result;
-    return NOERROR;
+    return ec;
 }
 
 ECode CPosix::GetsockoptLinger(
@@ -1272,7 +1272,7 @@ ECode CPosix::Lseek(
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     ECode ec;
-    ErrorIfMinusOne("lseek", TEMP_FAILURE_RETRY(lseek64(_fd, offset, whence)), &ec);
+    *result = ErrorIfMinusOne("lseek", TEMP_FAILURE_RETRY(lseek64(_fd, offset, whence)), &ec);
     return ec;
 }
 
@@ -1399,7 +1399,7 @@ ECode CPosix::Open(
     }
     ECode ec;
     Int32 _fd = ErrorIfMinusOne("open", TEMP_FAILURE_RETRY(open(path, flags, mode)), &ec);
-    if(_fd != -1) {
+    if (_fd != -1) {
         CFileDescriptor::New(fd);
         (*fd)->SetDescriptor(_fd);
     } else {
@@ -1413,22 +1413,26 @@ ECode CPosix::Pipe(
 {
     Int32 fdsArr[2];
     ECode ec;
-    ErrorIfMinusOne("pipe", TEMP_FAILURE_RETRY(pipe(&fdsArr[0])), &ec);
-
-    AutoPtr<ArrayOf<IFileDescriptor*> > result = ArrayOf<IFileDescriptor*>::Alloc(2);
-    for (Int32 i = 0; i < 2; ++i) {
-        AutoPtr<IFileDescriptor> fd;
-        CFileDescriptor::New((IFileDescriptor**)&fd);
-        if (fd == NULL) {
-            *fds = NULL;
-            return NOERROR;
+    Int32 _fd = ErrorIfMinusOne("pipe", TEMP_FAILURE_RETRY(pipe(&fdsArr[0])), &ec);
+    if (_fd != -1) {
+        AutoPtr<ArrayOf<IFileDescriptor*> > result = ArrayOf<IFileDescriptor*>::Alloc(2);
+        for (Int32 i = 0; i < 2; ++i) {
+            AutoPtr<IFileDescriptor> fd;
+            CFileDescriptor::New((IFileDescriptor**)&fd);
+            if (fd == NULL) {
+                *fds = NULL;
+                return NOERROR;
+            }
+            fd->SetDescriptor(fdsArr[i]);
+            result->Set(i, fd);
         }
-        fd->SetDescriptor(fdsArr[i]);
-        result->Set(i, fd);
+        *fds = result;
+        REFCOUNT_ADD(*fds)
     }
-    *fds = result;
-    REFCOUNT_ADD(*fds)
-    return NOERROR;
+    else {
+        *fds = NULL;
+    }
+    return ec;
 }
 
     /* TODO: if we used the non-standard ppoll(2) behind the scenes, we could take a long timeout. */
@@ -2088,11 +2092,11 @@ ECode CPosix::Socket(
     ECode ec;
     Int32 _fd = ErrorIfMinusOne("socket", TEMP_FAILURE_RETRY(socket(socketDomain, type, protocol)), &ec);
     *fd = NULL;
-    if(_fd != -1) {
+    if (_fd != -1) {
         CFileDescriptor::New(fd);
         (*fd)->SetDescriptor(_fd);
     }
-    return NOERROR;
+    return ec;
 }
 
 ECode CPosix::Socketpair(

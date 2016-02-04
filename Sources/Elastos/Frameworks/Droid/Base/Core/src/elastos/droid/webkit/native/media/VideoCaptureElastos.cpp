@@ -62,9 +62,10 @@ VideoCaptureElastos::BuggyDeviceHack::IdAndSizes::IdAndSizes(
 
 AutoPtr<ArrayOf<VideoCaptureElastos::BuggyDeviceHack::IdAndSizes*> > VideoCaptureElastos::s_CAPTURESIZE_BUGGY_DEVICE_LIST_Init()
 {
-    AutoPtr<BuggyDeviceHack::IdAndSizes> idAndSizes = new BuggyDeviceHack::IdAndSizes(String("Nexus 7"), String("flo"), 640, 480);
+    // AutoPtr<BuggyDeviceHack::IdAndSizes> idAndSizes = new BuggyDeviceHack::IdAndSizes(String("Nexus 7"), String("flo"), 640, 480);
     AutoPtr<ArrayOf<BuggyDeviceHack::IdAndSizes*> > array = ArrayOf<BuggyDeviceHack::IdAndSizes*>::Alloc(1);
-    (*array)[0] = idAndSizes;
+    // TODO
+    // (*array)[0] = idAndSizes;
     return array;
 }
 

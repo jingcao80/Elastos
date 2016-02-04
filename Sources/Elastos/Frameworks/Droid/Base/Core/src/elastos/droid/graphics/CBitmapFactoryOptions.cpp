@@ -11,18 +11,19 @@ namespace Graphics {
 
 CAR_OBJECT_IMPL(CBitmapFactoryOptions);
 CAR_INTERFACE_IMPL(CBitmapFactoryOptions, Object, IBitmapFactoryOptions);
+
 CBitmapFactoryOptions::CBitmapFactoryOptions()
     : mInMutable(FALSE)
     , mInJustDecodeBounds(FALSE)
     , mInSampleSize(0)
     , mInPreferredConfig(BitmapConfig_ARGB_8888)
+    , mInPremultiplied(TRUE)
     , mInDither(FALSE)
     , mNewOptsFlag(FALSE)
     , mInDensity(0)
     , mInTargetDensity(0)
     , mInScreenDensity(0)
     , mInScaled(TRUE)
-    , mInPremultiplied(TRUE)
     , mInPurgeable(FALSE)
     , mInInputShareable(FALSE)
     , mInPreferQualityOverSpeed(FALSE)

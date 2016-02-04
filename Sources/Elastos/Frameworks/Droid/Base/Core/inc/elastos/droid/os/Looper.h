@@ -13,7 +13,7 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
-class Looper
+class ECO_PUBLIC Looper
     : public Object
     , public ILooper
 {
@@ -176,13 +176,13 @@ public:
         /* [out] */ String* string);
 
 private:
-    Looper(
+    ECO_LOCAL Looper(
         /* [in] */ Boolean quitAllowed);
 
-    static CARAPI Prepare(
+    ECO_LOCAL static CARAPI Prepare(
         /* [in] */ Boolean quitAllowed);
 
-    static CARAPI_(void) InitTLS();
+    ECO_LOCAL static CARAPI_(void) InitTLS();
 
 public:
     AutoPtr<IMessageQueue> mQueue;

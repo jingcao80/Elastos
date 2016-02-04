@@ -2,13 +2,17 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEADSET_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEADSET_H__
 
-#include "Elastos.Droid.Core_server.h"
+//#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -17,19 +21,20 @@ namespace Bluetooth {
 class CBluetoothHeadsetStateChangeCallback;
 
 class BluetoothHeadset
-    : public ElRefBase
+    : public Object
     , public IBluetoothHeadset
+    , public IBluetoothProfile
 {
 private:
     class ServiceConnection
-        : public ElRefBase
+        : public Object
         , public IServiceConnection
     {
     public:
+        CAR_INTERFACE_DECL()
+
         ServiceConnection(
             /* [in] */ BluetoothHeadset* host);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI OnServiceConnected(
             /* [in] */ IComponentName* name,
@@ -43,11 +48,13 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    BluetoothHeadset();
+
     BluetoothHeadset(
         /* [in] */ IContext* context,
         /* [in] */ IBluetoothProfileServiceListener* listener);
-
-    CAR_INTERFACE_DECL()
 
     CARAPI Close();
 
@@ -60,11 +67,11 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI GetConnectedDevices(
-        /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices);
+        /* [out] */ IList** devices);// IBluetoothDevice
 
     CARAPI GetDevicesMatchingConnectionStates(
         /* [in] */ ArrayOf<Int32>* states,
-        /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices);
+        /* [out] */ IList** devices);// IBluetoothDevice
 
     CARAPI GetConnectionState(
         /* [in] */ IBluetoothDevice* device,
@@ -151,6 +158,18 @@ public:
         /* [in] */ Boolean mpty,
         /* [in] */ const String& number,
         /* [in] */ Int32 type);
+
+    CARAPI SendVendorSpecificResultCode(
+        /* [in] */ IBluetoothDevice* device,
+        /* [in] */ const String& command,
+        /* [in] */ const String& arg,
+        /* [out] */ Boolean* result);
+
+    CARAPI EnableWBS(
+        /* [out] */ Boolean* result);
+
+    CARAPI DisableWBS(
+        /* [out] */ Boolean* result);
 
 private:
     CARAPI_(Boolean) IsEnabled();

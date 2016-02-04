@@ -98,9 +98,9 @@ SQLiteDatabase::SQLiteDatabase(
     /* [in] */ Int32 openFlags,
     /* [in] */ ISQLiteDatabaseCursorFactory* cursorFactory,
     /* [in] */ IDatabaseErrorHandler* errorHandler)
-    : mCursorFactory(cursorFactory)
+    : mKeyThreadSessionInitialized(FALSE)
+    , mCursorFactory(cursorFactory)
     , mHasAttachedDbsLocked(FALSE)
-    , mKeyThreadSessionInitialized(FALSE)
 {
     if (errorHandler != NULL) {
         mErrorHandler = errorHandler;
@@ -507,7 +507,7 @@ ECode SQLiteDatabase::DeleteDatabase(
 
 ECode SQLiteDatabase::ReopenReadWrite()
 {
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
@@ -582,7 +582,7 @@ ECode SQLiteDatabase::AddCustomFunction(
     // Create wrapper (also validates arguments).
     AutoPtr<SQLiteCustomFunction> wrapper = new SQLiteCustomFunction(name, numArgs, function);
 
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
@@ -702,6 +702,7 @@ ECode SQLiteDatabase::FindEditTable(
     //     Slogger::E(TAG, "Invalid tables");
     //     return E_ILLEGAL_STATE_EXCEPTION;
     // }
+    return NOERROR;
 }
 
 ECode SQLiteDatabase::CompileStatement(
@@ -1243,7 +1244,7 @@ ECode SQLiteDatabase::IsReadOnly(
 
 Boolean SQLiteDatabase::IsReadOnlyLocked()
 {
-    Boolean ret;
+    Boolean ret = FALSE;
     synchronized(mLock) {
         ret = (mConfigurationLocked->mOpenFlags & OPEN_READ_MASK) == OPEN_READONLY;
     }
@@ -1300,7 +1301,7 @@ ECode SQLiteDatabase::SetLocale(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
@@ -1327,7 +1328,7 @@ ECode SQLiteDatabase::SetMaxSqlCacheSize(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
@@ -1348,7 +1349,7 @@ ECode SQLiteDatabase::SetMaxSqlCacheSize(
 ECode SQLiteDatabase::SetForeignKeyConstraintsEnabled(
     /* [in] */ Boolean enable)
 {
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
@@ -1374,7 +1375,7 @@ ECode SQLiteDatabase::EnableWriteAheadLogging(
 {
     VALIDATE_NOT_NULL(result);
 
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfNotOpenLocked())
 
@@ -1424,7 +1425,7 @@ ECode SQLiteDatabase::EnableWriteAheadLogging(
 
 ECode SQLiteDatabase::DisableWriteAheadLogging()
 {
-    ECode ec;
+    ECode ec = NOERROR;
     synchronized(mLock) {
         FAIL_RETURN(ThrowIfNotOpenLocked())
 

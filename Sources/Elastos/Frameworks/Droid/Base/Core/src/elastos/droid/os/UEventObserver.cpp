@@ -1,17 +1,19 @@
 
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.Os.h"
 #include "elastos/droid/os/UEventObserver.h"
+#include <elastos/core/StringBuilder.h>
 #include <elastos/utility/etl/Vector.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 #include <hardware_legacy/uevent.h>
+#include "Elastos.Droid.Content.h"
 
-using Elastos::Utility::Etl::Vector;
+
+using Elastos::Core::StringBuilder;
 using Elastos::Core::EIID_IThread;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Etl::Vector;
 
 namespace Elastos {
 namespace Droid {
@@ -24,7 +26,10 @@ Object UEventObserver::sClsLock;
 
 //===============================================================
 //UEventObserver::UEvent
-//===============================================================
+//===============================================================.
+
+CAR_INTERFACE_IMPL(UEventObserver::UEvent, Object, IUEvent)
+
 UEventObserver::UEvent::UEvent(
     /* [in] */ const String& message)
 {
@@ -60,13 +65,44 @@ String UEventObserver::UEvent::Get(
     return it != mMap.End() ? it->mSecond : defaultValue;
 }
 
-String UEventObserver::UEvent::ToString()
+ECode UEventObserver::UEvent::Get(
+    /* [in] */ const String& key,
+    /* [out] */ String* str)
 {
-   // return mMap.toString();
-    assert(0);
-    return String(NULL);
+    VALIDATE_NOT_NULL(str)
+    *str = Get(key);
+    return NOERROR;
 }
 
+ECode UEventObserver::UEvent::Get(
+    /* [in] */ const String& key,
+    /* [in] */ const String& defaultValue,
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = Get(key, defaultValue);
+    return NOERROR;
+}
+
+ECode UEventObserver::UEvent::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+
+    StringBuilder sb("UEvent:{");
+
+    HashMap<String, String>::Iterator it;
+    for (it = mMap.Begin(); it != mMap.End(); it++) {
+        sb += "[";
+        sb += it->mFirst;
+        sb += ",";
+        sb += it->mSecond;
+        sb += "];";
+    }
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
+}
 
 //===============================================================
 //UEventObserver::UEventThread
@@ -116,7 +152,7 @@ void UEventObserver::UEventThread::SendEvent(
     }
 
     if (!mTempObserversToSignal.IsEmpty()) {
-        AutoPtr<UEvent> event = new UEvent(message);
+        AutoPtr<IUEvent> event = new UEvent(message);
         List< AutoPtr<UEventObserver> >::Iterator it;
         for (it = mTempObserversToSignal.Begin(); it != mTempObserversToSignal.End(); ++it) {
             AutoPtr<UEventObserver> observer = *it;
@@ -169,6 +205,8 @@ void UEventObserver::UEventThread::RemoveObserver(
 //===============================================================
 //UEventObserver
 //===============================================================
+CAR_INTERFACE_IMPL(UEventObserver, Object, IUEventObserver)
+
 UEventObserver::~UEventObserver()
 {
     StopObserving();
@@ -281,12 +319,13 @@ ECode UEventObserver::StartObserving(
     return NOERROR;
 }
 
-void UEventObserver::StopObserving()
+ECode UEventObserver::StopObserving()
 {
     AutoPtr<UEventThread> t = GetThread();
     if (t != NULL) {
         t->RemoveObserver(this);
     }
+    return NOERROR;
 }
 
 } // namespace Os

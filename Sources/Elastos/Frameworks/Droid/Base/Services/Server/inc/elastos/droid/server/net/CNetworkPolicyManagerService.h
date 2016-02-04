@@ -424,6 +424,8 @@ private:
     };
 
 public:
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL()
 
     CNetworkPolicyManagerService();
@@ -758,6 +760,10 @@ private:
         /* [in] */ ISparseInt32Array* value);
 
 public:
+    // @VisibleForTesting
+    static const String ACTION_NETWORK_STATS_POLL;
+    static const String ACTION_NETWORK_STATS_UPDATED;
+
     static const Int32 TYPE_WARNING;
     static const Int32 TYPE_LIMIT;
     static const Int32 TYPE_LIMIT_SNOOZED;

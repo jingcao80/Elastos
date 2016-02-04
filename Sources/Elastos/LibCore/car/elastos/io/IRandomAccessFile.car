@@ -17,6 +17,8 @@ module
     /**
      * @Involve
      * interface ICloseable;
+     * interface IDataInput;
+     * interface IDataOutput;
      */
     [deprecated]
     interface IRandomAccessFile {

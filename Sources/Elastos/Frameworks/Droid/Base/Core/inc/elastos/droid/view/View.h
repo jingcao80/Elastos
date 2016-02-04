@@ -5687,20 +5687,6 @@ private:
      */
     CARAPI_(Boolean)  NeedRtlPropertiesResolution();
 
-    /**
-     * Returns a DisplayList. If the incoming displayList is null, one will be created.
-     * Otherwise, the same display list will be returned (after having been rendered into
-     * along the way, depending on the invalidation state of the view).
-     *
-     * @param displayList The previous version of this displayList, could be null.
-     * @param isLayer Whether the requester of the display list is a layer. If so,
-     * the view will avoid creating a layer inside the resulting display list.
-     * @return A new or reused DisplayList object.
-     */
-    CARAPI_(AutoPtr<IDisplayList>) GetDisplayList(
-        /* [in] */ IDisplayList* displayList,
-        /* [in] */ Boolean isLayer);
-
     CARAPI_(void) ResetDisplayList();
 
     /**

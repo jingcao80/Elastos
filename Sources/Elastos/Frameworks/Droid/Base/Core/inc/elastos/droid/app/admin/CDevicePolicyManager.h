@@ -1164,7 +1164,8 @@ public:
 
     CARAPI GetTrustAgentFeaturesEnabled(
         /* [in] */ IComponentName* admin,
-        /* [in] */ IComponentName* agent);
+        /* [in] */ IComponentName* agent,
+        /* [out] */ IList** result);
 
     CARAPI SetCrossProfileCallerIdDisabled(
         /* [in] */ IComponentName* who,

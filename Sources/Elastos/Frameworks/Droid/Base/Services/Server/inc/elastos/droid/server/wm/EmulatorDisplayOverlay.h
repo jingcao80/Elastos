@@ -2,9 +2,11 @@
 #define __ELASTOS_DROID_SERVER_WM_EMULATORDISPLAYOVERLAY_H__
 
 #include "_Elastos.Droid.Server.h"
+#include <Elastos.Droid.Content.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::View::ISurfaceControl;

@@ -2,12 +2,12 @@
 #include "Elastos.Droid.App.h"
 #include "elastos/droid/internal/view/menu/MenuDialogHelper.h"
 #include "elastos/droid/internal/view/menu/CListMenuPresenter.h"
-// #include "elastos/droid/app/CAlertDialogBuilder.h"
+#include "elastos/droid/app/CAlertDialogBuilder.h"
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
 #include "elastos/droid/R.h"
 
 using Elastos::Droid::App::IAlertDialogBuilder;
-// using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::CAlertDialogBuilder;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnKeyListener;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnDismissListener;
@@ -91,8 +91,7 @@ ECode MenuDialogHelper::Show(
     AutoPtr<IContext> context;
     menu->GetContext((IContext**)&context);
     AutoPtr<IAlertDialogBuilder> builder;
-    assert(0);
-    // CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&builder);
+    CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&builder);
 
     AutoPtr<IContext> alctx;
     builder->GetContext((IContext**)&alctx);

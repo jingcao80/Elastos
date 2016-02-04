@@ -2516,10 +2516,9 @@ ECode WebView::GetAccessibilityNodeProvider(
         assert(0);
         // TODO
         // return super.getAccessibilityNodeProvider(provider);
-    }
-    else {
         return NOERROR;
     }
+    return NOERROR;
 }
 
 Boolean WebView::ShouldDelayChildPressedState()

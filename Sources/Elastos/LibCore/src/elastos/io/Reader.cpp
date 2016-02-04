@@ -15,15 +15,6 @@ Reader::Reader()
 {
 }
 
-Reader::Reader(
-    /* [in] */ ISynchronize* lock)
-    : mIsStrongLock(TRUE)
-{
-    assert(lock != NULL);
-    mLock = lock;
-    REFCOUNT_ADD(mLock);
-}
-
 Reader::~Reader()
 {
     if (mIsStrongLock) {

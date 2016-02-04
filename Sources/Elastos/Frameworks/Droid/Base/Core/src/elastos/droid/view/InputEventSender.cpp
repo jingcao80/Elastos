@@ -347,6 +347,7 @@ ECode InputEventSender::constructor(
             inputChannel, mMessageQueue);*/
 
     mCloseGuard->Open(String("dispose"));
+    return NOERROR;
 }
 
 ECode InputEventSender::Finalize()
@@ -382,6 +383,7 @@ ECode InputEventSender::Dispose(
     }
     mInputChannel = NULL;
     mMessageQueue = NULL;
+    return NOERROR;
 }
 
 /**
@@ -394,6 +396,7 @@ ECode InputEventSender::OnInputEventFinished(
     /* [in] */ Int32 seq,
     /* [in] */ Boolean handled)
 {
+    return NOERROR;
 }
 
 /**
@@ -423,7 +426,8 @@ ECode InputEventSender::SendInputEvent(
 
     if (IKeyEvent::Probe(event)) {
         return NativeSendKeyEvent(mSenderPtr, seq, IKeyEvent::Probe(event));
-    } else {
+    }
+    else {
         return NativeSendMotionEvent(mSenderPtr, seq, IMotionEvent::Probe(event));
     }
 }
@@ -442,6 +446,7 @@ ECode InputEventSender::NativeInit(
     /* [in] */ IMessageQueue* messageQueueObj,
     /* [out] */ Int64 res)
 {
+    // TODO:
     /*sp<InputChannel> inputChannel = GetInputChannel(inputChannelObj);
 
     if (inputChannel == NULL) {
@@ -484,6 +489,7 @@ ECode InputEventSender::NativeInit(
 void InputEventSender::NativeDispose(
     /* [in] */ Int64 senderPtr)
 {
+    // TODO:
     /*sp<NativeInputEventSender> sender =
             reinterpret_cast<NativeInputEventSender*>(senderPtr);
     sender->dispose();
@@ -495,12 +501,14 @@ Boolean InputEventSender::NativeSendKeyEvent(
     /* [in] */ Int32 seq,
     /* [in] */ IKeyEvent* eventObj)
 {
+    // TODO:
     /*sp<NativeInputEventSender> sender =
             reinterpret_cast<NativeInputEventSender*>(senderPtr);
     AutoPtr<IKeyEvent> event;
     GetKeyEvent(eventObj, (IKeyEvent**)&event);
     status_t status = sender->sendKeyEvent(seq, &event);
     return !status;*/
+    return FALSE;
 }
 
 Boolean InputEventSender::NativeSendMotionEvent(
@@ -508,27 +516,31 @@ Boolean InputEventSender::NativeSendMotionEvent(
     /* [in] */ Int32 seq,
     /* [in] */ IMotionEvent* eventObj)
 {
+    // TODO:
     /*sp<NativeInputEventSender> sender =
             reinterpret_cast<NativeInputEventSender*>(senderPtr);
     AutoPtr<IMotionEvent> event;
     GetMotionEvent(eventObj, (IMotionEvent**)&event);
     status_t status = sender->sendMotionEvent(seq, event);
     return !status;*/
+    return FALSE;
 }
 
 AutoPtr<IInputChannel> InputEventSender::GetInputChannel(
     /* [in] */ IInputChannel* inputChannelObj)
 {
-
+    // TODO:
     /*Handle64 longPtr = ((InputChannel*)inputChannelObj)->mNative;
     AutoPtr<NativeInputChannel> nativeInputChannel =
         reinterpret_cast<NativeInputChannel>(longPtr);
     return nativeInputChannel != NULL ? nativeInputChannel->getInputChannel() : NULL;*/
+    return NULL;
 }
 
 android::sp<android::MessageQueue>& InputEventSender::GetMessageQueue(
     /* [in] */ IMessageQueue* messageQueueObj)
 {
+    // TODO:
     /*Int64 ptr = ((CMessageQueue*)messageQueueObj)->mPtr;
     return reinterpret_cast<NativeMessageQueue*>(ptr);*/
 }
@@ -537,6 +549,7 @@ ECode InputEventSender::GetKeyEvent(
     /* [in] */ IKeyEvent* eventObj,
     /* [out] */ IKeyEvent** result)
 {
+    // TODO:
     /*VALIDATE_NOT_NULL(result)
     KeyEvent* temp = (KeyEvent*)eventObj;
     CKeyEvent::New(temp->mDownTime, temp->mEventTime, temp->mAction, temp->mKeyCode, temp->mRepeatCount,
@@ -547,9 +560,11 @@ ECode InputEventSender::GetKeyEvent(
 AutoPtr<IMotionEvent> InputEventSender::GetMotionEvent(
     /* [in] */ IMotionEvent* eventObj)
 {
+    // TODO:
     /*VALIDATE_NOT_NULL(result)
     MotionEvent* temp = (MotionEvent*)eventObj;
     return reinterpret_cast<IMotionEvent*>(temp->mNativePtr);*/
+    return NULL;
 }
 
 } // namespace View

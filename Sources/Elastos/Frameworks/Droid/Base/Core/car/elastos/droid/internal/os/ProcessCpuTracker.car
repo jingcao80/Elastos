@@ -1,6 +1,8 @@
 
 module
 {
+    interface Elastos.Droid.Internal.Os.IBatteryStatsImplUidProc;
+
     namespace Elastos {
     namespace Droid {
     namespace Internal {
@@ -14,62 +16,125 @@ module
         GetUid(
             [out] Int32* uid);
 
+        GetBatteryStats(
+            [out] IBatteryStatsImplUidProc** batteryStats);
+
+        SetBatteryStats(
+            [in] IBatteryStatsImplUidProc* batteryStats);
+
         GetInteresting(
             [out] Boolean* interesting);
+
+        SetInteresting(
+            [in] Boolean interesting);
 
         GetBaseName(
             [out] String* name);
 
+        SetBaseName(
+            [in] String baseName);
+
         GetName(
             [out] String* name);
+
+        SetName(
+            [in] String name);
 
         GetNameWidth(
             [out] Int32* width);
 
+        SetNameWidth(
+            [in] Int32 nameWidth);
+
         GetVsize(
             [out] Int64* vsize);
+
+        SetVsize(
+            [in] Int64 vsize);
 
         GetBaseUptime(
             [out] Int64* time);
 
+        SetBaseUptime(
+            [in] Int64 baseUptime);
+
         GetRelUptime(
             [out] Int64* time);
+
+        SetRelUptime(
+            [in] Int64 relUptime);
 
         GetBaseUtime(
             [out] Int64* time);
 
+        SetBaseUtime(
+            [in] Int64 baseUtime);
+
         GetBaseStime(
             [out] Int64* time);
+
+        SetBaseStime(
+            [in] Int64 baseStime);
 
         GetRelUtime(
             [out] Int32* time);
 
+        SetRelUtime(
+            [in] Int32 relUtime);
+
         GetRelStime(
             [out] Int32* time);
+
+        SetRelStime(
+            [in] Int32 relStime);
 
         GetBaseMinfaults(
             [out] Int64* faults);
 
+        SetBaseMinfaults(
+            [in] Int64 baseMinfaults);
+
         GetBaseMajfaults(
             [out] Int64* faults);
+
+        SetBaseMajfaults(
+            [in] Int64 baseMajfaults);
 
         GetRelMinfaults(
             [out] Int32* faults);
 
+        SetRelMinfaults(
+            [in] Int32 relMinfaults);
+
         GetRelMajfaults(
             [out] Int32* faults);
+
+        SetRelMajfaults(
+            [in] Int32 relMajfaults);
 
         GetActive(
             [out] Boolean* active);
 
+        SetActive(
+            [in] Boolean active);
+
         GetWorking(
             [out] Boolean* working);
+
+        SetWorking(
+            [in] Boolean working);
 
         GetAdded(
             [out] Boolean* added);
 
+        SetAdded(
+            [in] Boolean added);
+
         GetRemoved(
             [out] Boolean* removed);
+
+        SetRemoved(
+            [in] Boolean removed);
     }
 
     [local]

@@ -103,10 +103,10 @@ public:
         /* [in] */ Int64 size,
         /* [out] */ IMappedByteBuffer** buffer);
 
-    CARAPI GetPosition(
+    CARAPI Position(
         /* [out] */ Int64* position);
 
-    CARAPI SetPosition(
+    CARAPI Position(
         /* [in] */ Int64 offset);
 
     CARAPI Read(

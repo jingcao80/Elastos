@@ -171,6 +171,16 @@ public:
     CARAPI SetImportanceReasonImportance(
         /* [in] */ Int32 importance);
 
+    /**
+     * Current process state, as per PROCESS_STATE_* constants.
+     * @hide
+     */
+    CARAPI GetProcessState(
+        /* [out] */ Int32* processState);
+
+    CARAPI SetProcessState(
+        /* [in] */ Int32 processState);
+
 private:
     String mProcessName;
 

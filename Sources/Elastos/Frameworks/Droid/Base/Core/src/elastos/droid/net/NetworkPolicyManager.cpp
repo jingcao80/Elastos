@@ -337,9 +337,7 @@ ECode NetworkPolicyManager::IsUidValidForPolicy(
             CHashSet::New((IHashSet**)&packageSignature);
             AutoPtr<IPackageInfo> Uidspackageinfo;
             ECode ec = pm->GetPackageInfo((*uids)[i], IPackageManager::GET_SIGNATURES, (IPackageInfo**)&Uidspackageinfo);
-            if (FAILED(ec)) {
-                if (ec != E_NAME_NOT_FOUND_EXCEPTION) return ec;
-            }
+            if (FAILED(ec) && ec != (ECode)E_NAME_NOT_FOUND_EXCEPTION) return ec;
 
             AutoPtr< ArrayOf<ISignature*> > Uidssignatures;
             packageinfo->GetSignatures((ArrayOf<ISignature*>**)&Uidssignatures);

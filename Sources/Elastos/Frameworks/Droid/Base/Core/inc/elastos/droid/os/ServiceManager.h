@@ -7,7 +7,7 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
-class ServiceManager
+class ECO_PUBLIC ServiceManager
 {
 public:
     /**

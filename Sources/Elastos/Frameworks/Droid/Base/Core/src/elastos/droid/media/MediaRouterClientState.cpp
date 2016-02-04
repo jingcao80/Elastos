@@ -1,9 +1,11 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/media/MediaRouterClientState.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Utility::CArrayList;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos{
 namespace Droid {
@@ -100,26 +102,40 @@ ECode MediaRouterClientState::RouteInfo::WriteToParcel(
     dest->WriteInt32(mVolumeMax);
     dest->WriteInt32(mVolumeHandling);
     dest->WriteInt32(mPresentationDisplayId);
+    return NOERROR;
 }
 
 ECode MediaRouterClientState::RouteInfo::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = String("RouteInfo{ id=") + mId
-               + String(", name=") + mName
-               + String(", description=") + mDescription
-               + String(", supportedTypes=0x") + StringUtils::ToHexString(mSupportedTypes)
-               + String(", enabled=") + mEnabled
-               + String(", statusCode=") + mStatusCode
-               + String(", playbackType=") + mPlaybackType
-               + String(", playbackStream=") + mPlaybackStream
-               + String(", volume=") + mVolume
-               + String(", volumeMax=") + mVolumeMax
-               + String(", volumeHandling=") + mVolumeHandling
-               + String(", presentationDisplayId=") + mPresentationDisplayId
-               + String(" }");
-
+    StringBuilder sb;
+    sb += "RouteInfo{ id=";
+    sb += mId;
+    sb += ", name=";
+    sb += mName;
+    sb += ", description=";
+    sb += mDescription;
+    sb += ", supportedTypes=0x";
+    sb += StringUtils::ToHexString(mSupportedTypes);
+    sb += ", enabled=";
+    sb += mEnabled;
+    sb += ", statusCode=";
+    sb += mStatusCode;
+    sb += ", playbackType=";
+    sb += mPlaybackType;
+    sb += ", playbackStream=";
+    sb += mPlaybackStream;
+    sb += ", volume=";
+    sb += mVolume;
+    sb += ", volumeMax=";
+    sb += mVolumeMax;
+    sb += ", volumeHandling=";
+    sb += mVolumeHandling;
+    sb += ", presentationDisplayId=";
+    sb += mPresentationDisplayId;
+    sb += " }";
+    *result = sb.ToString();
     return NOERROR;
 }
 

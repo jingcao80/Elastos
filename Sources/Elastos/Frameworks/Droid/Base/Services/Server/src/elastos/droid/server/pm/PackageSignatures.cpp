@@ -1,12 +1,12 @@
 
-#include "pm/PackageSignatures.h"
-#include "pm/CPackageManagerService.h"
-#include "util/XmlUtils.h"
+#include "elastos/droid/server/pm/PackageSignatures.h"
+#include "elastos/droid/server/pm/CPackageManagerService.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Core::StringUtils;
 using Elastos::Droid::Server::Pm::CPackageManagerService;
-using Elastos::Droid::Utility::XmlUtils;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Content::Pm::CSignature;
 
 namespace Elastos {
@@ -41,28 +41,28 @@ void PackageSignatures::WriteXml(
     }
     serializer->WriteStartTag(String(NULL), tagName);
     serializer->WriteAttribute(String(NULL), String("count"),
-            StringUtils::Int32ToString(mSignatures->GetLength()));
+            StringUtils::ToString(mSignatures->GetLength()));
     for (Int32 i = 0; i < mSignatures->GetLength(); i++) {
         serializer->WriteStartTag(String(NULL), String("cert"));
         AutoPtr<ISignature> sig = (*mSignatures)[i];
 
         Int32 sigHash;
-        sig->GetHashCode(&sigHash);
+        IObject::Probe(sig)->GetHashCode(&sigHash);
         Int32 j;
         List< AutoPtr<ISignature> >::Iterator it;
         for (it = pastSignatures.Begin(), j = 0; it != pastSignatures.End(); ++it, ++j) {
             AutoPtr<ISignature> pastSig = *it;
             Int32 hash;
             Boolean isEqual;
-            if ((pastSig->GetHashCode(&hash), hash == sigHash) &&
-                    (pastSig->Equals(sig, &isEqual), isEqual)) {
-                serializer->WriteAttribute(String(NULL), String("index"), StringUtils::Int32ToString(j));
+            if ((IObject::Probe(pastSig)->GetHashCode(&hash), hash == sigHash) &&
+                    (IObject::Probe(pastSig)->Equals(sig, &isEqual), isEqual)) {
+                serializer->WriteAttribute(String(NULL), String("index"), StringUtils::ToString(j));
                 break;
             }
         }
         if (it == pastSignatures.End()) {
             pastSignatures.PushBack(sig);
-            serializer->WriteAttribute(String(NULL), String("index"), StringUtils::Int32ToString(pastSignatures.GetSize()));
+            serializer->WriteAttribute(String(NULL), String("index"), StringUtils::ToString((Int32)pastSignatures.GetSize()));
             String str;
             sig->ToCharsString(&str);
             serializer->WriteAttribute(String(NULL), String("key"), str);
@@ -112,7 +112,7 @@ void PackageSignatures::ReadXml(
                     String key;
                     parser->GetAttributeValue(String(NULL), String("key"), &key);
                     if (key.IsNull()) {
-                        if (idx >= 0 && idx < pastSignatures.GetSize()) {
+                        if (idx >= 0 && idx < (Int32)pastSignatures.GetSize()) {
                             AutoPtr<ISignature> sig = pastSignatures[idx];
                             if (sig != NULL) {
                                 mSignatures->Set(pos, sig);
@@ -137,7 +137,7 @@ void PackageSignatures::ReadXml(
                         }
                     }
                     else {
-                        while (pastSignatures.GetSize() <= idx) {
+                        while ((Int32)pastSignatures.GetSize() <= idx) {
                             pastSignatures.PushBack(NULL);
                         }
                         AutoPtr<ISignature> sig;
@@ -172,7 +172,7 @@ void PackageSignatures::ReadXml(
                 parser->GetPositionDescription(&des);
                 CPackageManagerService::ReportSettingsProblem(5/*TODO: Log.WARN*/,
                         String("Error in package manager settings: too ")
-                           + "many <cert> tags, expected " + count
+                           + "many <cert> tags, expected " + StringUtils::ToString(count)
                            + " at " + des);
             }
         }

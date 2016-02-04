@@ -1,11 +1,12 @@
 
-#include "elastos/droid/ext/frameworkdef.h"
-#include "CBluetoothDevice.h"
-#include "CBluetoothClass.h"
-#include "BluetoothSocket.h"
-#include "CBluetoothAdapter.h"
+#include "elastos/droid/bluetooth/CBluetoothDevice.h"
+#include "elastos/droid/bluetooth/CBluetoothClass.h"
+#include "elastos/droid/bluetooth/BluetoothSocket.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -16,6 +17,10 @@ const String CBluetoothDevice::TAG("BluetoothDevice");
 const Boolean CBluetoothDevice::DBG = FALSE;
 AutoPtr<IIBluetooth> CBluetoothDevice::sService;
 
+CAR_INTERFACE_IMPL_2(CBluetoothDevice, Object, IBluetoothDevice, IParcelable);
+
+CAR_OBJECT_IMPL(CBluetoothDevice);
+
 static AutoPtr<IIBluetoothManagerCallback> InitStateChangeCallback()
 {
     AutoPtr<IIBluetoothManagerCallback> callback;
@@ -24,7 +29,11 @@ static AutoPtr<IIBluetoothManagerCallback> InitStateChangeCallback()
 }
 AutoPtr<IIBluetoothManagerCallback> CBluetoothDevice::mStateChangeCallback = InitStateChangeCallback();
 
-Mutex CBluetoothDevice::sLock;
+Object CBluetoothDevice::sLock;
+
+CBluetoothDevice::CBluetoothDevice()
+{
+}
 
 AutoPtr<IIBluetooth> CBluetoothDevice::GetService()
 {
@@ -105,6 +114,13 @@ ECode CBluetoothDevice::GetName(
 //    } catch (RemoteException e) {Log.e(TAG, "", e);}
 }
 
+ECode CBluetoothDevice::GetType(
+    /* [out] */ Int32* type)
+{
+    //TODO
+    return NOERROR;
+}
+
 ECode CBluetoothDevice::GetAlias(
     /* [out] */ String* alias)
 {
@@ -159,6 +175,14 @@ ECode CBluetoothDevice::CreateBond(
 //    try {
     return sService->CreateBond(this, result);
 //    } catch (RemoteException e) {Log.e(TAG, "", e);}
+}
+
+ECode CBluetoothDevice::CreateBond(
+    /* [in] */ Int32 transport,
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
 }
 
 ECode CBluetoothDevice::CreateBondOutOfBand(
@@ -243,6 +267,13 @@ ECode CBluetoothDevice::GetBondState(
 //    }
 }
 
+ECode CBluetoothDevice::IsConnected(
+    /* [out] */ Boolean* connected)
+{
+    //TODO
+    return NOERROR;
+}
+
 ECode CBluetoothDevice::GetBluetoothClass(
     /* [out] */ IBluetoothClass** bluetoothClass)
 {
@@ -316,6 +347,13 @@ ECode CBluetoothDevice::FetchUuidsWithSdp(
 //    try {
     return sService->FetchRemoteUuids(this, result);
 //    } catch (RemoteException e) {Log.e(TAG, "", e);}
+}
+
+ECode CBluetoothDevice::FetchMasInstances(
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
 }
 
 ECode CBluetoothDevice::GetServiceChannel(
@@ -418,6 +456,36 @@ ECode CBluetoothDevice::IsBluetoothDock(
 
 }
 
+ECode CBluetoothDevice::GetPhonebookAccessPermission(
+    /* [out] */ Int32* result)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode CBluetoothDevice::SetPhonebookAccessPermission(
+    /* [in] */ Int32 value,
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode CBluetoothDevice::GetMessageAccessPermission(
+    /* [out] */ Int32* result)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode CBluetoothDevice::SetMessageAccessPermission(
+    /* [in] */ Int32 value,
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
+}
+
 ECode CBluetoothDevice::CreateRfcommSocket(
     /* [in] */ Int32 channel,
     /* [out] */ IBluetoothSocket** socket)
@@ -470,6 +538,27 @@ ECode CBluetoothDevice::CreateScoSocket(
     return NOERROR;
 }
 
+ECode CBluetoothDevice::ConnectGatt(
+    /* [in] */ IContext* context,
+    /* [in] */ Boolean autoConnect,
+    /* [in] */ IBluetoothGattCallback* cb,
+    /* [in] */ IBluetoothGatt** btGatt)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode CBluetoothDevice::ConnectGatt(
+    /* [in] */ IContext* context,
+    /* [in] */ Boolean autoConnect,
+    /* [in] */ IBluetoothGattCallback* cb,
+    /* [in] */ Int32 transport,
+    /* [out] */ IBluetoothGatt** btGatt)
+{
+    //TODO
+    return NOERROR;
+}
+
 AutoPtr< ArrayOf<Byte> > CBluetoothDevice::ConvertPinToBytes(
     /* [in] */ const String& pin)
 {
@@ -489,10 +578,10 @@ AutoPtr< ArrayOf<Byte> > CBluetoothDevice::ConvertPinToBytes(
     return pinBytes;
 }
 
-ECode CBluetoothDevice::constructor()
-{
-    return NOERROR;
-}
+//ECode CBluetoothDevice::constructor()
+//{
+//    return NOERROR;
+//}
 
 ECode CBluetoothDevice::constructor(
     /* [in] */ const String& address)

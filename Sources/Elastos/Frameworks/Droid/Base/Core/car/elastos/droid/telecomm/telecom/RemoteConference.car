@@ -1,0 +1,94 @@
+
+module
+{
+
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecomm {
+    namespace Telecom {
+
+        interface IRemoteConferenceCallback {
+            OnStateChanged(
+                [in] IRemoteConference* conference,
+                [in] Int32 oldState,
+                [in] Int32 newState);
+
+            OnDisconnected(
+                [in] IRemoteConference* conference,
+                [in] IDisconnectCause* disconnectCause);
+
+            OnConnectionAdded(
+                [in] IRemoteConference* conference,
+                [in] IRemoteConnection* connection);
+
+            OnConnectionRemoved(
+                [in] IRemoteConference* conference,
+                [in] IRemoteConnection* connection);
+
+            OnCapabilitiesChanged(
+                [in] IRemoteConference* conference,
+                [in] Int32 capabilities);
+
+            OnConferenceableConnectionsChanged(
+                [in] IRemoteConference* conference,
+                [in] IList* conferenceableConnections);
+
+            OnDestroyed(
+                [in] IRemoteConference* conference);
+        }
+
+        /**
+         * Represents a conference call which can contain any number of {@link Connection} objects.
+         * @hide
+         */
+        interface IRemoteConference {
+            GetConnections(
+                [out] IList** res);
+
+            GetState(
+                [out] Int32* res);
+
+            GetCallCapabilities(
+                [out] Int32* res);
+
+            Disconnect();
+
+            Separate(
+                [in] IRemoteConnection* connection);
+
+            Merge();
+
+            Swap();
+
+            Hold();
+
+            Unhold();
+
+            GetDisconnectCause(
+                [out] IDisconnectCause** res);
+
+            PlayDtmfTone(
+                [in] Char32 digit);
+
+            StopDtmfTone();
+
+            SetAudioState(
+                [in] IAudioState* state);
+
+            GetConferenceableConnections(
+                [out] IList** res);
+
+            RegisterCallback(
+                [out] IRemoteConferenceCallback** cb);
+
+            UnregisterCallback(
+                [out] IRemoteConferenceCallback** cb);
+        }
+
+    } // namespace Telecom
+    } // namespace Telecomm
+    } // namespace Droid
+    } // namespace Elastos
+}

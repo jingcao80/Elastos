@@ -5,57 +5,40 @@
 namespace Elastos {
 namespace Math {
 
-const Int32 Multiplication::TenPows[] = {
+Multiplication::StaticInitializer::StaticInitializer()
+{
+    Int32 i;
+    Int64 fivePow = 1LL;
+    for (i = 0; i <= 18; i++) {
+        AutoPtr<IBigInteger> bi;
+        CBigInteger::ValueOf(fivePow, (IBigInteger**)&bi);
+        sBigFivePows->Set(i, bi);
+        CBigInteger::ValueOf(fivePow << i, (IBigInteger**)&bi);
+        sBigTenPows->Set(i, bi);
+        fivePow *= 5;
+    }
+    for (; i < sBigTenPows->GetLength(); i++) {
+        AutoPtr<IBigInteger> fivePowTemp, tenPowTemp;
+        (*sBigFivePows)[i - 1]->Multiply((*sBigFivePows)[1], (IBigInteger**)&fivePowTemp);
+        sBigFivePows->Set(i, fivePowTemp);
+        (*sBigTenPows)[i - 1]->Multiply(CBigInteger::TEN, (IBigInteger**)&tenPowTemp);
+        sBigTenPows->Set(i, tenPowTemp);
+    }
+}
+
+const Int32 Multiplication::sTenPows[] = {
     1, 10, 100, 1000, 10000, 100000, 1000000,
     10000000, 100000000, 1000000000
 };
 
-const Int32 Multiplication::FivePows[] = {
+const Int32 Multiplication::sFivePows[] = {
     1, 5, 25, 125, 625, 3125, 15625, 78125, 390625,
     1953125, 9765625, 48828125, 244140625, 1220703125
 };
 
-AutoPtr<ArrayOf<IBigInteger*> > Multiplication::BigTenPows = NULL;
-AutoPtr<ArrayOf<IBigInteger*> > Multiplication::BigFivePows = NULL;
-Boolean Multiplication::mIsStaticInited = InitStatic();
-
-static AutoPtr<IBigInteger> CreateBigInteger(Int32 sign, Int64 value)
-{
-    AutoPtr<CBigInteger> obj;
-    CBigInteger::NewByFriend(sign, value, (CBigInteger**)&obj);
-    return (IBigInteger*)obj->Probe(EIID_IBigInteger);
-}
-
-Boolean Multiplication::InitStatic()
-{
-    if (!mIsStaticInited && BigTenPows == NULL) {
-        mIsStaticInited = TRUE;
-
-        BigTenPows = ArrayOf<IBigInteger*>::Alloc(32);
-        BigFivePows = ArrayOf<IBigInteger*>::Alloc(32);
-
-        Int32 i;
-        Int64 fivePow = 1L;
-        for (i = 0; i <= 18; i++) {
-            AutoPtr<IBigInteger> bi = CreateBigInteger(1, fivePow);
-            BigFivePows->Set(i, bi);
-            bi = CreateBigInteger(1, fivePow << i);
-            BigTenPows->Set(i, bi);
-            fivePow *= 5;
-        }
-
-        AutoPtr<IBigInteger> TEN = CreateBigInteger(1, 10LL);
-        for (; i < BigTenPows->GetLength(); i++) {
-            AutoPtr<IBigInteger> fivePowTemp, tenPowTemp;
-            (*BigFivePows)[i - 1]->Multiply((*BigFivePows)[1], (IBigInteger**)&fivePowTemp);
-            BigFivePows->Set(i, fivePowTemp);
-            (*BigTenPows)[i - 1]->Multiply(TEN, (IBigInteger**)&tenPowTemp);
-            BigTenPows->Set(i, tenPowTemp);
-        }
-    }
-
-    return mIsStaticInited;
-}
+INIT_PROI_3 AutoPtr<ArrayOf<IBigInteger*> > Multiplication::sBigTenPows = ArrayOf<IBigInteger*>::Alloc(32);
+INIT_PROI_3 AutoPtr<ArrayOf<IBigInteger*> > Multiplication::sBigFivePows = ArrayOf<IBigInteger*>::Alloc(32);
+INIT_PROI_3 Multiplication::StaticInitializer Multiplication::sInitializer;
 
 ECode Multiplication::MultiplyByPositiveInt(
     /* [in] */ IBigInteger* val,
@@ -79,8 +62,8 @@ ECode Multiplication::MultiplyByTenPow(
     VALIDATE_NOT_NULL(val);
     VALIDATE_NOT_NULL(result);
 
-    if (exp < TenPowsLength) {
-        return MultiplyByPositiveInt(val, TenPows[(Int32)exp], result);
+    if (exp < sTenPowsLength) {
+        return MultiplyByPositiveInt(val, sTenPows[(Int32)exp], result);
     }
     else {
         AutoPtr<IBigInteger> powerBi;
@@ -98,9 +81,9 @@ ECode Multiplication::PowerOf10(
     // PRE: exp >= 0
     Int32 intExp = (Int32)exp;
     // "SMALL POWERS"
-    if (exp < BigTenPows->GetLength()) {
+    if (exp < sBigTenPows->GetLength()) {
         // The largest power that fit in 'Int64' type
-        *result =  (*BigTenPows)[intExp];
+        *result =  (*sBigTenPows)[intExp];
         REFCOUNT_ADD(*result);
         return NOERROR;
     }
@@ -117,7 +100,7 @@ ECode Multiplication::PowerOf10(
     if (exp <= Math::INT32_MAX_VALUE) {
         // To calculate:    5^exp * 2^exp
         AutoPtr<IBigInteger> temp;
-        FAIL_RETURN((*BigFivePows)[1]->Pow(intExp, (IBigInteger**)&temp));
+        FAIL_RETURN((*sBigFivePows)[1]->Pow(intExp, (IBigInteger**)&temp));
         FAIL_RETURN(temp->ShiftLeft(intExp, (IBigInteger**)&res));
     } else {
         /*
@@ -128,7 +111,7 @@ ECode Multiplication::PowerOf10(
          */
         // To calculate:    5^exp
         AutoPtr<IBigInteger> powerOfFive = NULL;
-        FAIL_RETURN((*BigFivePows)[1]->Pow(Math::INT32_MAX_VALUE, (IBigInteger**)&powerOfFive));
+        FAIL_RETURN((*sBigFivePows)[1]->Pow(Math::INT32_MAX_VALUE, (IBigInteger**)&powerOfFive));
         res = powerOfFive;
         Int64 longExp = exp - Math::INT32_MAX_VALUE;
 
@@ -141,7 +124,7 @@ ECode Multiplication::PowerOf10(
         }
 
         AutoPtr<IBigInteger> temp1, temp2;
-        FAIL_RETURN((*BigFivePows)[1]->Pow(intExp, (IBigInteger**)&temp1));
+        FAIL_RETURN((*sBigFivePows)[1]->Pow(intExp, (IBigInteger**)&temp1));
         FAIL_RETURN(res->Multiply(temp1, (IBigInteger**)&temp2));
         res = temp2;
         temp1 = NULL, temp2 = NULL;
@@ -181,15 +164,15 @@ ECode Multiplication::MultiplyByFivePow(
     VALIDATE_NOT_NULL(result);
 
     // PRE: exp >= 0
-    if (exp < FivePowsLength) {
-        return MultiplyByPositiveInt(val, FivePows[exp], result);
+    if (exp < sFivePowsLength) {
+        return MultiplyByPositiveInt(val, sFivePows[exp], result);
     }
-    else if (exp < BigFivePows->GetLength()) {
-        return val->Multiply((*BigFivePows)[exp], result);
+    else if (exp < sBigFivePows->GetLength()) {
+        return val->Multiply((*sBigFivePows)[exp], result);
     }
     else {// Large powers of five
         AutoPtr<IBigInteger> powerBi = NULL;
-        FAIL_RETURN((*BigFivePows)[1]->Pow(exp, (IBigInteger**)&powerBi));
+        FAIL_RETURN((*sBigFivePows)[1]->Pow(exp, (IBigInteger**)&powerBi));
         return val->Multiply(powerBi, result);
     }
 }

@@ -125,8 +125,6 @@ public:
     CARAPI_(void) Cancel();
 
 private:
-    static CARAPI_(Boolean) InitStatic();
-
     CARAPI_(Boolean) DrawHardware(
         /* [in] */ IHardwareCanvas* c);
 
@@ -158,9 +156,9 @@ private:
 
     CARAPI_(void) InvalidateSelf();
 
+    static CARAPI_(AutoPtr<ITimeInterpolator>) Init_LINEAR_INTERPOLATOR();
 
 private:
-    static Boolean sInit;
     static AutoPtr<ITimeInterpolator> LINEAR_INTERPOLATOR;
 
     static const Float GLOBAL_SPEED;

@@ -1,10 +1,17 @@
 
 #include "elastos/droid/os/storage/CObbActionListener.h"
+#include <elastos/core/AutoLock.h>
+
+using Elastos::Core::AutoLock;
 
 namespace Elastos {
 namespace Droid {
 namespace Os {
 namespace Storage {
+
+CAR_INTERFACE_IMPL(CObbActionListener, Object, IIObbActionListener)
+
+CAR_OBJECT_IMPL(CObbActionListener)
 
 ECode CObbActionListener::constructor(
     /* [in] */ IStorageManager* host)

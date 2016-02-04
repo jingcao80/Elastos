@@ -87,6 +87,7 @@ SOURCES += CharArrayBuffer.cpp
 SOURCES += ByteBuffer.cpp
 SOURCES += NioUtils.cpp
 SOURCES += DirectByteBuffer.cpp
+SOURCES += CDirectByteBufferHelper.cpp
 SOURCES += FileChannelImpl.cpp
 SOURCES += MappedByteBuffer.cpp
 SOURCES += DoubleBuffer.cpp

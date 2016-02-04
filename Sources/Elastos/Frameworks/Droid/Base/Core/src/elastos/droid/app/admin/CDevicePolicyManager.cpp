@@ -1634,7 +1634,8 @@ ECode CDevicePolicyManager::SetTrustAgentFeaturesEnabled(
 
 ECode CDevicePolicyManager::GetTrustAgentFeaturesEnabled(
     /* [in] */ IComponentName* admin,
-    /* [in] */ IComponentName* agent)
+    /* [in] */ IComponentName* agent,
+    /* [out] */ IList** result)
 {
     assert(0);
     // TODO

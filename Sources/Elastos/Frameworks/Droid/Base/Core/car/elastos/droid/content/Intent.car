@@ -3347,6 +3347,9 @@ module
         GetClipData(
             [out] IClipData** clipData);
 
+        GetContentUserHint(
+            [out] Int32* hint);
+
         /**
          * Sets the ClassLoader that will be used when unmarshalling
          * any Parcelable values from the extras of this Intent.
@@ -3975,6 +3978,18 @@ module
             [in] IPackageManager* pm,
             [in] Int32 flags,
             [out] IActivityInfo** result);
+
+        /**
+         * Special function for use by the system to resolve service
+         * intents to system apps.  Throws an exception if there are
+         * multiple potential matches to the Intent.  Returns null if
+         * there are no matches.
+         * @hide
+         */
+        ResolveSystemService(
+            [in] IPackageManager* pm,
+            [in] Int32 flags,
+            [out] IComponentName** componentName);
 
         /**
          * Set the general action to be performed.
@@ -5198,6 +5213,9 @@ module
          */
         MigrateExtraStreamToClipData(
             [out] Boolean* result);
+
+        IsDocument(
+            [out] Boolean* result);
     }
 
     [local]
@@ -5389,6 +5407,7 @@ module
     /**
      * @Involve
      * interface IParcelable;
+     * interface ICloneable;
      */
     interface IIntentShortcutIconResource {
         /**

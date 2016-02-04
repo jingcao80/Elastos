@@ -1,48 +1,52 @@
 
-#include "input/InputApplicationHandle.h"
-#include <utils/threads.h>
-
-static android::Mutex gHandleMutex;
+#include "elastos/droid/server/input/InputApplicationHandle.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Input {
 
+CAR_INTERFACE_IMPL(InputApplicationHandle, Object, IInputApplicationHandle);
+
 InputApplicationHandle::InputApplicationHandle(
-    /* [in] */ void* appWindowToken)
-    : mAppWindowToken(appWindowToken)
-    , mNative(NULL)
+    /* [in] */ IObject* appWindowToken)
+    : mPtr(0)
+    , mAppWindowToken(appWindowToken)
+    , mDispatchingTimeoutNanos(0)
 {}
 
 InputApplicationHandle::~InputApplicationHandle()
 {
-    android::AutoMutex _l(gHandleMutex);
-
-    if (mNative != NULL) {
-        mNative->decStrong(this);
-    }
+    //try {
+    NativeDispose();
+    //} finally {
+    //    super.finalize();
+    //}
 }
 
-android::sp<android::InputApplicationHandle> InputApplicationHandle::GetHandle(
-    /* [in] */ InputApplicationHandle* inputApplicationHandleObj)
+void InputApplicationHandle::NativeDispose()
 {
-    if (inputApplicationHandleObj == NULL) {
-        return NULL;
-    }
+/*
+static void android_server_InputApplicationHandle_nativeDispose(JNIEnv* env, jobject obj) {
+    AutoMutex _l(gHandleMutex);
 
-    android::AutoMutex _l(gHandleMutex);
+    jlong ptr = env->GetLongField(obj, gInputApplicationHandleClassInfo.ptr);
+    if (ptr) {
+        env->SetLongField(obj, gInputApplicationHandleClassInfo.ptr, 0);
 
-    NativeInputApplicationHandle* handle = inputApplicationHandleObj->mNative;
-    if (handle == NULL) {
-        handle = new NativeInputApplicationHandle(inputApplicationHandleObj);
-        handle->incStrong(inputApplicationHandleObj);
-        inputApplicationHandleObj->mNative = handle;
+        NativeInputApplicationHandle* handle = reinterpret_cast<NativeInputApplicationHandle*>(ptr);
+        handle->decStrong((void*)android_server_InputApplicationHandle_getHandle);
     }
-    return handle;
+}
+    if (ptr != NULL) {
+        NativeInputApplicationHandle* handle = reinterpret_cast<NativeInputApplicationHandle*>(ptr);
+        handle->decStrong((void*)android_server_InputApplicationHandle_getHandle);
+        ptr = NULL;
+    }
+*/
 }
 
-} // namespace Input
-} // namespace Server
-} // namespace Droid
-} // namespace Elastos
+} // Input
+} // Server
+} // Droid
+} // Elastos

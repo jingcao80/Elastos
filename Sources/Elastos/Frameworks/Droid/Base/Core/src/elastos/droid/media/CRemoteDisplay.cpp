@@ -5,13 +5,15 @@
 #include <media/IMediaPlayerService.h>
 #include <media/IRemoteDisplayClient.h>
 #include <elastos/utility/logging/Logger.h>
+#include <gui/Surface.h>
+
 #include "elastos/droid/view/CSurface.h"
 
-using Elastos::Core::ICloseGuardHelper;
-using Elastos::Core::CCloseGuardHelper;
-using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::View::CSurface;
 using Elastos::Droid::Graphics::ISurfaceTexture;
+using Elastos::Droid::View::CSurface;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Core::CCloseGuardHelper;
+using Elastos::Core::ICloseGuardHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -37,7 +39,7 @@ CRemoteDisplay::NotifyDisplayConnectedRun::NotifyDisplayConnectedRun(
 
 ECode CRemoteDisplay::NotifyDisplayConnectedRun::Run()
 {
-    return mOwner->mListener->OnDisplayConnected(mSurface, mWidth, mHeight, mFlags);
+    return mOwner->mListener->OnDisplayConnected(mSurface, mWidth, mHeight, mFlags, mSession);
 }
 
 //------------------------------------------------
@@ -81,6 +83,10 @@ CRemoteDisplay::~CRemoteDisplay()
 {
     Finalize();
 }
+
+CAR_OBJECT_IMPL(CRemoteDisplay)
+
+CAR_INTERFACE_IMPL(CRemoteDisplay, Object, IRemoteDisplay)
 
 ECode CRemoteDisplay::constructor(
     /* [in] */ IRemoteDisplayListener* listener,
@@ -149,7 +155,7 @@ void CRemoteDisplay::Finalize() // throws Throwable
 
 class NativeRemoteDisplayClient
      : public android::BnRemoteDisplayClient
-     , public ElRefBase
+     , public Object
 {
 public:
     NativeRemoteDisplayClient(
@@ -163,19 +169,20 @@ protected:
 
 public:
     virtual void onDisplayConnected(
-        /* [in] */ const android::sp<android::ISurfaceTexture>& surfaceTexture,
+        /* [in] */ const android::sp<android::IGraphicBufferProducer>& bufferProducer,
         /* [in] */ uint32_t width,
         /* [in] */ uint32_t height,
-        /* [in] */ uint32_t flags)
+        /* [in] */ uint32_t flags,
+        /* [in] */ uint32_t session)
     {
-        if (surfaceTexture == NULL) {
+        if (bufferProducer == NULL) {
             return;
         }
 
-        android::sp<android::Surface> surface(new android::Surface(surfaceTexture));
+        android::sp<android::Surface> surface(new android::Surface(bufferProducer));
         if (surface == NULL) {
             Logger::E("NativeRemoteDisplayClient", "Could not create Surface from surface texture %p provided by media server.",
-                surfaceTexture.get());
+                bufferProducer.get());
             return;
         }
 
@@ -186,9 +193,7 @@ public:
             return;
         }
 
-        surfaceObj->SetSurface((Handle32)surface.get());
-
-        mRemoteDisplayObjGlobal->NotifyDisplayConnected(surfaceObj, width, height, flags);
+        mRemoteDisplayObjGlobal->NotifyDisplayConnected(surfaceObj, width, height, flags, session);
 
         CheckAndClearExceptionFromCallback("notifyDisplayConnected");
     }
@@ -219,7 +224,7 @@ private:
 };
 
 class NativeRemoteDisplay
-    : public ElRefBase
+    : public Object
 {
 public:
     NativeRemoteDisplay(
@@ -232,6 +237,16 @@ public:
     ~NativeRemoteDisplay()
     {
         mDisplay->dispose();
+    }
+
+    void pause()
+    {
+        mDisplay->pause();
+    }
+
+    void resume()
+    {
+        mDisplay->resume();
     }
 
 private:
@@ -268,7 +283,32 @@ void CRemoteDisplay::NativeDispose(
     delete wrapper;
 }
 
+void CRemoteDisplay::NativePause(
+    /* [in] */ Handle32 ptr)
+{
+    NativeRemoteDisplay* wrapper = reinterpret_cast<NativeRemoteDisplay*>(ptr);
+    wrapper->pause();
+}
+
+void CRemoteDisplay::NativeResume(
+    /* [in] */ Handle32 ptr)
+{
+    NativeRemoteDisplay* wrapper = reinterpret_cast<NativeRemoteDisplay*>(ptr);
+    wrapper->pause();
+}
+
 //------------------------------------------------
+ECode CRemoteDisplay::Pause()
+{
+    NativePause(mPtr);
+    return NOERROR;
+}
+
+ECode CRemoteDisplay::Resume()
+{
+    NativeResume(mPtr);
+    return NOERROR;
+}
 
 void CRemoteDisplay::Dispose(
     /* [in] */ Boolean finalized)
@@ -302,7 +342,8 @@ void CRemoteDisplay::NotifyDisplayConnected(
     /* [in] */ ISurface* surface,
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
-    /* [in] */ Int32 flags)
+    /* [in] */ Int32 flags,
+    /* [in] */ Int32 session)
 {
     Boolean tempState;
     AutoPtr<IRunnable> runnable = new NotifyDisplayConnectedRun(this, surface, width, height, flags);

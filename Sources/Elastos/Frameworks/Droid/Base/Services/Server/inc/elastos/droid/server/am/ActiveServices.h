@@ -18,14 +18,13 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::Handler;
 using Elastos::IO::IPrintWriter;
 using Elastos::IO::IFileDescriptor;
+using Elastos::Utility::IList;
 using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Am {
-
-extern "C" const InterfaceID EIID_ServiceRestarter;
 
 class CActivityManagerService;
 class ProcessRecord;
@@ -73,6 +72,9 @@ public:
         List<AutoPtr<CServiceRecord> > mStartingBackground;
 
         static const Int32 MSG_BG_START_TIMEOUT = 1;
+
+    private:
+        ActiveServices* mHost;
     };
 
     class ServiceLookupResult : public Object
@@ -231,7 +233,7 @@ public:
     CARAPI_(AutoPtr<IActivityManagerRunningServiceInfo>) MakeRunningServiceInfoLocked(
         /* [in] */ CServiceRecord* r);
 
-    CARAPI_(AutoPtr<List<AutoPtr<IActivityManagerRunningServiceInfo> > >) GetRunningServiceInfoLocked(
+    CARAPI_(AutoPtr<IList>) GetRunningServiceInfoLocked(
         /* [in] */ Int32 maxNum,
         /* [in] */ Int32 flags);
 
@@ -316,7 +318,9 @@ private:
         /* [in] */ Boolean allowCancel);
 
     CARAPI_(Boolean) UnscheduleServiceRestartLocked(
-        /* [in] */ CServiceRecord* r);
+        /* [in] */ CServiceRecord* r,
+        /* [in] */ Int32 callingUid,
+        /* [in] */ Boolean force);
 
     CARAPI_(void) ClearRestartingIfNeededLocked(
         /* [in] */ CServiceRecord* r);
@@ -428,7 +432,7 @@ public:
 
     // Maximum number of services that we allow to start in the background
     // at the same time.
-    const Int32 mMaxStartingBackground;
+    Int32 mMaxStartingBackground;
 
     HashMap<Int32, AutoPtr<ServiceMap> > mServiceMap;
 

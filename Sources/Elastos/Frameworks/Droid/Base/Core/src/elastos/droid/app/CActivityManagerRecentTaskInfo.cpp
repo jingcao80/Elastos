@@ -178,6 +178,67 @@ ECode CActivityManagerRecentTaskInfo::SetDescription(
     return NOERROR;
 }
 
+ECode CActivityManagerRecentTaskInfo::GetStackId(
+    /* [out] */ Int32* stackId)
+{
+    VALIDATE_NOT_NULL(stackId);
+    *stackId = mStackId;
+    return NOERROR;
+}
+
+ECode CActivityManagerRecentTaskInfo::SetStackId(
+    /* [in] */ Int32 stackId)
+{
+    mStackId = stackId;
+    return NOERROR;
+}
+
+ECode CActivityManagerRecentTaskInfo::GetUserId(
+    /* [out] */ Int32* userId)
+{
+    VALIDATE_NOT_NULL(userId);
+    *userId = mUserId;
+    return NOERROR;
+}
+
+ECode CActivityManagerRecentTaskInfo::SetUserId(
+    /* [in] */ Int32 userId)
+{
+    mUserId = userId;
+    return NOERROR;
+}
+
+ECode CActivityManagerRecentTaskInfo::GetFirstActiveTime(
+    /* [out] */ Int64* firstActiveTime)
+{
+    VALIDATE_NOT_NULL(firstActiveTime);
+    *firstActiveTime = mFirstActiveTime;
+    return NOERROR;
+}
+
+ECode CActivityManagerRecentTaskInfo::SetFirstActiveTime(
+    /* [in] */ Int64 firstActiveTime)
+{
+    mFirstActiveTime = firstActiveTime;
+    return NOERROR;
+}
+
+ECode CActivityManagerRecentTaskInfo::GetLastActiveTime(
+    /* [out] */ Int64* lastActiveTime)
+{
+    VALIDATE_NOT_NULL(lastActiveTime);
+    *lastActiveTime = mLastActiveTime;
+    return NOERROR;
+}
+
+ECode CActivityManagerRecentTaskInfo::SetLastActiveTime(
+    /* [in] */ Int64 lastActiveTime)
+{
+    mLastActiveTime = lastActiveTime;
+    return NOERROR;
+}
+
+
 ECode CActivityManagerRecentTaskInfo::SetTaskDescription(
     /* [in] */ IActivityManagerTaskDescription* description)
 {
@@ -206,6 +267,21 @@ ECode CActivityManagerRecentTaskInfo::SetAffiliatedTaskId(
     /* [in] */ Int32 id)
 {
     mAffiliatedTaskId = id;
+    return NOERROR;
+}
+
+ECode CActivityManagerRecentTaskInfo::GetAffiliatedTaskColor(
+    /* [out] */ Int32* color)
+{
+    VALIDATE_NOT_NULL(color)
+    *color = mAffiliatedTaskColor;
+    return NOERROR;
+}
+
+ECode CActivityManagerRecentTaskInfo::SetAffiliatedTaskColor(
+    /* [in] */ Int32 color)
+{
+    mAffiliatedTaskColor = color;
     return NOERROR;
 }
 

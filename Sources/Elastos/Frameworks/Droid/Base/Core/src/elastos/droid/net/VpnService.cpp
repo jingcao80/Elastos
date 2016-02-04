@@ -119,9 +119,7 @@ ECode VpnService::Prepare(
     context->GetPackageName(&packageName);
     Boolean prepareVpnOk;
     ECode ec = GetService()->PrepareVpn(packageName, String(NULL), &prepareVpnOk);
-    if (FAILED(ec)) {
-        if (ec != E_REMOTE_EXCEPTION) return ec;
-    }
+    if (FAILED(ec) && ec != (ECode)E_REMOTE_EXCEPTION) return ec;
     if (prepareVpnOk) {
         *result = NULL;
         return NOERROR;

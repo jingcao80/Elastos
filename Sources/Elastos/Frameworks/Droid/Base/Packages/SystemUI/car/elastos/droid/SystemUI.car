@@ -1,5 +1,9 @@
 module
 {
+    using interface Elastos.Droid.Content.Res.IConfiguration;
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+    using interface Elastos.Utility.IMap;
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Content.Res.IConfiguration;
 
@@ -8,18 +12,25 @@ module
     namespace Packages {
     namespace SystemUI {
 
-    [local]
+    [local, deprecated]
     interface ISystemUI {
         Start();
 
+        OnConfigurationChanged(
+            [in] IConfiguration* newConfig);
+
         SetContext(
-            [in] IContext* ctx);
+            [in] IContext* context);
 
         GetContext(
             [out] IContext** context);
 
-        OnConfigurationChanged(
-            [in] IConfiguration* newConfig);
+        OnBootCompleted();
+
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* pw,
+            [in] ArrayOf<String>* args);
     }
 
     } // namespace SystemUI

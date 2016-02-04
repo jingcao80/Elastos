@@ -30,7 +30,7 @@ namespace Components {
 //=====================================================================
 //               PersonalAutofillPopulator::ProfileQuery
 //=====================================================================
-AutoPtr<IUri> PersonalAutofillPopulator::ProfileQuery::mProfileDataUri = PersonalAutofillPopulator::ProfileQuery::MiddleInitProfiledataUri();
+AutoPtr<IUri> PersonalAutofillPopulator::ProfileQuery::mProfileDataUri;// = PersonalAutofillPopulator::ProfileQuery::MiddleInitProfiledataUri();
 
 AutoPtr<IUri> PersonalAutofillPopulator::ProfileQuery::MiddleInitProfiledataUri()
 {

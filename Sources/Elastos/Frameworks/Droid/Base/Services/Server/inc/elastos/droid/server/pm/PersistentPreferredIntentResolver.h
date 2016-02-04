@@ -1,6 +1,7 @@
 #ifndef __ELASTOS_DROID_SERVER_PM_PERSISTENTPREFERREDINTENTRESOLVER_H__
 #define __ELASTOS_DROID_SERVER_PM_PERSISTENTPREFERREDINTENTRESOLVER_H__
 
+#include <Elastos.Droid.Content.h>
 #include "elastos/droid/server/IntentResolver.h"
 #include "elastos/droid/server/pm/PersistentPreferredActivity.h"
 

@@ -2,12 +2,12 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/internal/app/CAlertControllerAlertParams.h"
 #include "elastos/droid/internal/app/CAlertController.h"
-// #include "elastos/droid/widget/CSimpleCursorAdapter.h"
+#include "elastos/droid/widget/CSimpleCursorAdapter.h"
 #include "elastos/droid/R.h"
 
 using Elastos::Droid::Content::IDialogInterface;
 using Elastos::Droid::View::EIID_ILayoutInflater;
-// using Elastos::Droid::Widget::CSimpleCursorAdapter;
+using Elastos::Droid::Widget::CSimpleCursorAdapter;
 using Elastos::Droid::Widget::IAbsListView;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::ICheckedTextView;
@@ -961,8 +961,7 @@ void CAlertControllerAlertParams::CreateListView(
             AutoPtr<ArrayOf<Int32> > iParams = ArrayOf<Int32>::Alloc(1);
             (*sParams)[0] = mLabelColumn;
             (*iParams)[0] = R::id::text1;
-            assert(0);
-            // CSimpleCursorAdapter::New(mContext, layout, mCursor, sParams, iParams, (ISimpleCursorAdapter**)&adapter);
+            CSimpleCursorAdapter::New(mContext, layout, mCursor, sParams, iParams, (ISimpleCursorAdapter**)&adapter);
         }
     }
 

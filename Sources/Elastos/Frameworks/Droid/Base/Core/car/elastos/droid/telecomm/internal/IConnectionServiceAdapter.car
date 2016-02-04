@@ -1,0 +1,108 @@
+
+module
+{
+    interface Elastos.Droid.Net.IUri;
+    interface Elastos.Droid.Telecomm.Telecom.IConnectionRequest;
+    interface Elastos.Droid.Telecomm.Telecom.IParcelableConnection;
+    interface Elastos.Droid.Telecomm.Telecom.IDisconnectCause;
+    interface Elastos.Droid.Telecomm.Telecom.IParcelableConference;
+    interface Elastos.Droid.Telecomm.Internal.IRemoteServiceCallback;
+    interface Elastos.Droid.Telecomm.Telecom.IStatusHints;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecomm {
+    namespace Internal {
+
+        /**
+         * Internal remote callback interface for connection services.
+         *
+         * @see android.telecom.ConnectionServiceAdapter
+         *
+         * {@hide}
+        */
+        interface IIConnectionServiceAdapter {
+            HandleCreateConnectionComplete(
+                [in] String callId,
+                [in] IConnectionRequest* request,
+                [in] IParcelableConnection* connection);
+
+            SetActive(
+                [in] String callId);
+
+            SetRinging(
+                [in] String callId);
+
+            SetDialing(
+                [in] String callId);
+
+            SetDisconnected(
+                [in] String callId,
+                [in] IDisconnectCause* disconnectCause);
+
+            SetOnHold(
+                [in] String callId);
+
+            SetRingbackRequested(
+                [in] String callId,
+                [in] Boolean ringing);
+
+            SetCallCapabilities(
+                [in] String callId,
+                [in] Int32 callCapabilities);
+
+            SetIsConferenced(
+                [in] String callId,
+                [in] String conferenceCallId);
+
+            AddConferenceCall(
+                [in] String callId,
+                [in] IParcelableConference* conference);
+
+            RemoveCall(
+                [in] String callId);
+
+            OnPostDialWait(
+                [in] String callId,
+                [in] String remaining);
+
+            QueryRemoteConnectionServices(
+                [in] IRemoteServiceCallback* cb);
+
+            SetVideoProvider(
+                [in] String callId,
+                [in] IIVideoProvider* videoProvider);
+
+            SetVideoState(
+                [in] String callId,
+                [in] Int32 videoState);
+
+            SetIsVoipAudioMode(
+                [in] String callId,
+                [in] Boolean isVoip);
+
+            SetStatusHints(
+                [in] String callId,
+                [in] IStatusHints* statusHints);
+
+            SetAddress(
+                [in] String callId,
+                [in] IUri* address,
+                [in] Int32 presentation);
+
+            SetCallerDisplayName(
+                [in] String callId,
+                [in] String callerDisplayName,
+                [in] Int32 presentation);
+
+            SetConferenceableConnections(
+                [in] String callId,
+                [in] IList* conferenceableCallIds);
+        }
+
+    } // namespace Internal
+    } // namespace Telecomm
+    } // namespace Droid
+    } // namespace Elastos
+}

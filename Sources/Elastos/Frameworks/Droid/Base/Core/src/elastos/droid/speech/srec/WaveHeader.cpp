@@ -130,7 +130,7 @@ ECode WaveHeader::Read(
 
     /* RIFF header */
     ReadId(in, String("RIFF"));
-    Int32 numBytes = ReadInt(in) - 36;
+    Int32 UNUSED(numBytes) = ReadInt(in) - 36;
     ReadId(in, String("WAVE"));
 
     /* fmt chunk */

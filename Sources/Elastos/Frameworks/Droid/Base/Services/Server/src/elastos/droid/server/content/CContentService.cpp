@@ -21,7 +21,7 @@ using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Text::TextUtils;
@@ -370,7 +370,7 @@ void CContentService::ObserverNode::CollectObserversLocked(
 //===================================================================================
 // CContentService
 //===================================================================================
-CAR_INTERFACE_IMPL(CContentService, Object, IIContentService)
+CAR_INTERFACE_IMPL_2(CContentService, Object, IIContentService, IBinder)
 
 CAR_OBJECT_IMPL(CContentService)
 

@@ -2,7 +2,11 @@
 #define __ELASTOS_DROID_OPENGL_GLES_CEGLCONTEXIMPL_H__
 
 #include "_Elastos_Droid_Opengl_Gles_CEGLContextImpl.h"
+#include "Elastos.Droid.Opengl.h"
 
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 using Elastosx::Microedition::Khronos::Egl::IEGL;
 using Elastosx::Microedition::Khronos::Opengles::IGL;
 
@@ -10,10 +14,16 @@ namespace Elastos {
 namespace Droid {
 namespace Opengl {
 namespace Gles {
-class CEGLImpl;
+
 CarClass(CEGLContextImpl)
+    , public Object
+    , public Elastosx::Microedition::Khronos::Egl::IEGLContext
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     static CARAPI_(AutoPtr<IEGL>) GetEGL();
 
     CARAPI GetGL(
@@ -27,12 +37,12 @@ public:
             /* [out] */ Int32 *hashCode);
 
     CARAPI constructor(
-        /* [in] */ Int32 ctx);
+        /* [in] */ Int64 ctx);
 
     CARAPI_(Int32) GetEGLContext();
 
 protected:
-    Int32 mEGLContext;
+    Int64 mEGLContext;
 
 private:
     static AutoPtr<IEGL> EGL_INSTANCE;

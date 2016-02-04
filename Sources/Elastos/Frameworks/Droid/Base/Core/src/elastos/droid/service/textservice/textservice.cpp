@@ -5,12 +5,12 @@
 namespace Elastos {
 namespace Droid {
 namespace Service {
-namespace Textservice {
+namespace TextService {
 
 CAR_OBJECT_IMPL(CInternalISpellCheckerSession)
 CAR_OBJECT_IMPL(CSpellCheckerServiceBinder)
 
-} // namespace Textservice
+} // namespace TextService
 } // namespace Service
 } // namespace Droid
 } // namespace Elastos

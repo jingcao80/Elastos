@@ -7,8 +7,6 @@ module
     namespace Emoji {
 
     singleton class CEmojiFactoryHelper {
-        constructor();
-
         interface IEmojiFactoryHelper;
     }
 

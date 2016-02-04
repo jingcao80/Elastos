@@ -1,11 +1,15 @@
 
-#include "CBluetoothAdapterHelper.h"
-#include "CBluetoothAdapter.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapterHelper.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/droid/ext/frameworkext.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Bluetooth {
+
+CAR_INTERFACE_IMPL(CBluetoothAdapterHelper, Singleton, IBluetoothAdapterHelper);
+
+CAR_SINGLETON_IMPL(CBluetoothAdapterHelper);
 
 ECode CBluetoothAdapterHelper::GetDefaultAdapter(
     /* [out] */ Elastos::Droid::Bluetooth::IBluetoothAdapter** adapter)

@@ -9,8 +9,9 @@ namespace Droid {
 namespace Server {
 namespace Pm {
 
-class PackageVerificationState
-    : public Object
+class InstallArgs;
+
+class PackageVerificationState : public Object
 {
 public:
     /**
@@ -23,9 +24,9 @@ public:
      */
     PackageVerificationState(
         /* [in] */ Int32 requiredVerifierUid,
-        /* [in] */ CPackageManagerService::InstallArgs* args);
+        /* [in] */ InstallArgs* args);
 
-    CARAPI_(AutoPtr<CPackageManagerService::InstallArgs>) GetInstallArgs();
+    CARAPI_(AutoPtr<InstallArgs>) GetInstallArgs();
 
     CARAPI_(void) AddSufficientVerifier(
         /* [in] */ Int32 uid);
@@ -43,7 +44,7 @@ public:
     CARAPI_(Boolean) TimeoutExtended();
 
 private:
-    AutoPtr<CPackageManagerService::InstallArgs> mArgs;
+    AutoPtr<InstallArgs> mArgs;
 
     HashMap<Int32, Boolean> mSufficientVerifierUids;
 

@@ -404,9 +404,9 @@ ECode Surface::CheckNotReleasedLocked()
 }
 
 Surface::Surface()
-    : mNativeObject(0)
+    : mGenerationId(0)
+    , mNativeObject(0)
     , mLockedObject(0)
-    , mGenerationId(0)
 {
     AutoPtr<ICloseGuardHelper> helper;
     CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);

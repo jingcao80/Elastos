@@ -261,9 +261,8 @@ ECode IntentFilter::Create(
     /* [out] */ IIntentFilter** filter)
 {
     VALIDATE_NOT_NULL(filter)
-    ECode ecode = CIntentFilter::New(action, dataType, filter);
-    if (E_MALFORMED_MIME_TYPE_EXCEPTION == ecode) return E_RUNTIME_EXCEPTION;
-    return ecode;
+    ECode ec = CIntentFilter::New(action, dataType, filter);
+    return ec == (ECode)E_MALFORMED_MIME_TYPE_EXCEPTION ? E_RUNTIME_EXCEPTION : ec;
 }
 
 ECode IntentFilter::SetPriority(
@@ -640,7 +639,6 @@ ECode IntentFilter::HasDataSchemeSpecificPart(
     }
     Boolean match;
     List< AutoPtr<IPatternMatcher> >::Iterator it = mDataSchemeSpecificParts->Begin();
-    Int32 numDataSchemeSpecificParts = mDataSchemeSpecificParts->GetSize();
     for (; it != mDataSchemeSpecificParts->End(); ++it) {
         IPatternMatcher* pe = *it;
         if (pe->Match(data, &match), match) {

@@ -1,310 +1,671 @@
-#include "elastos/droid/systemui/statusbar/NotificationData.h"
-#include "elastos/droid/systemui/SystemUIR.h"
 
-using Elastos::Core::IBoolean;
-using Elastos::Core::CBoolean;
+#include "elastos/droid/packages/systemui/statusbar/NotificationData.h"
+#include "../R.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.View.h"
+#include <elastos/core/StringUtils.h>
+
 using Elastos::Droid::App::INotification;
-using Elastos::Droid::SystemUI::SystemUIR;
+using Elastos::Droid::Os::IBundle;
+using Elastos::Droid::Service::Notification::CNotificationListenerServiceRanking;
+using Elastos::Droid::Utility::CArrayMap;
+using Elastos::Droid::Utility::CArraySet;
+using Elastos::Core::CString;
+using Elastos::Core::EIID_IComparator;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CCollections;
+using Elastos::Utility::ICollections;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IList;
+using Elastos::Utility::ISet;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 
-
 //=============================================================================
-//              NotificationDataEntry
+//              Entry
 //=============================================================================
-NotificationDataEntry::NotificationDataEntry()
+CAR_INTERFACE_IMPL(NotificationData::Entry, Object, INotificationDataEntry);
+NotificationData::Entry::Entry()
+    : mAutoRedacted(FALSE)
+    , mLegacy(FALSE)
+    , mTargetSdk(0)
+    , mInterruption(FALSE)
 {
 }
 
-NotificationDataEntry::NotificationDataEntry(
-    /* [in] */ IBinder* key,
+NotificationData::Entry::Entry(
     /* [in] */ IStatusBarNotification* n,
     /* [in] */ IStatusBarIconView* ic)
-    : mKey(key)
-    , mNotification(n)
+    : mNotification(n)
     , mIcon(ic)
 {
+    n->GetKey(&mKey);
 }
 
-void NotificationDataEntry::SetLargeView(
-    /* [in] */ IView* expandedLarge)
+ECode NotificationData::Entry::SetBigContentView(
+    /* [in] */ IView* bigContentView)
 {
-    mExpanded = expandedLarge;
-    NotificationData::WriteBooleanTag(mRow, SystemUIR::id::expandable_tag, expandedLarge != NULL);
+    mExpandedBig = bigContentView;
+    mRow->SetExpandable(bigContentView != NULL);
+    return NOERROR;
 }
 
-AutoPtr<IView> NotificationDataEntry::GetLargeView()
+ECode NotificationData::Entry::GetBigContentView(
+    /* [out] */ IView** view)
 {
-    return mExpanded;
+    VALIDATE_NOT_NULL(view);
+    *view = mExpandedBig;
+    REFCOUNT_ADD(*view);
+    return NOERROR;
 }
 
-/**
- * Return whether the entry can be expanded.
- */
-Boolean NotificationDataEntry::Expandable()
+ECode NotificationData::Entry::GetPublicContentView(
+    /* [out] */ IView** view)
 {
-    return NotificationData::GetIsExpandable(mRow);
+    VALIDATE_NOT_NULL(view);
+    *view = mExpandedPublic;
+    REFCOUNT_ADD(*view);
+    return NOERROR;
 }
 
-/**
- * Return whether the entry has been manually expanded by the user.
- */
-Boolean NotificationDataEntry::UserExpanded()
+ECode NotificationData::Entry::SetInterruption()
 {
-    return NotificationData::GetUserExpanded(mRow);
+    mInterruption = TRUE;
+    return NOERROR;
 }
 
-Boolean NotificationDataEntry::SetUserExpanded(
-    /* [in] */ Boolean userExpanded)
+ECode NotificationData::Entry::HasInterrupted(
+    /* [out] */ Boolean* has)
 {
-    return NotificationData::SetUserExpanded(mRow, userExpanded);
+    VALIDATE_NOT_NULL(has);
+    *has = mInterruption;
+    return NOERROR;
 }
 
-/**
- * Return whether the entry is being touched by the user.
- */
-Boolean NotificationDataEntry::UserLocked()
+ECode NotificationData::Entry::Reset()
 {
-    return NotificationData::GetUserLocked(mRow);
-}
-
-/**
- * Set the flag indicating that this is being touched by the user.
- */
-Boolean NotificationDataEntry::SetUserLocked(
-    /* [in] */ Boolean userLocked)
-{
-    return NotificationData::SetUserLocked(mRow, userLocked);
-}
-
-Int32 NotificationDataEntry::Compare(
-    /* [in] */ const NotificationDataEntry* lhs,
-    /* [in] */ const NotificationDataEntry* rhs)
-{
-    assert(lhs != NULL && rhs != NULL);
-    if (lhs == rhs) return 0;
-
-    // sort first by score, then by when
-    Int32 score, otherScore;
-    lhs->mNotification->GetScore(&score);
-    rhs->mNotification->GetScore(&otherScore);
-
-    Int32 d = score - otherScore;
-    if (d != 0) return d;
-
-    Int64 when, otherWhen;
-    AutoPtr<INotification> ln, rn;
-
-    lhs->mNotification->GetNotification((INotification**)&ln);
-    ln->GetWhen(&when);
-    rhs->mNotification->GetNotification((INotification**)&rn);
-    rn->GetWhen(&otherWhen);
-    return (Int32)(when - otherWhen);
-}
-
-//=============================================================================
-//              NotificationData
-//=============================================================================
-Int32 NotificationData::Size()
-{
-    return mEntries.GetSize();
-}
-
-AutoPtr<NotificationDataEntry> NotificationData::Get(
-    /* [in] */ Int32 i)
-{
-    return mEntries[i];
-}
-
-List<AutoPtr<NotificationDataEntry> >::Iterator NotificationData::FindIteratorByKey(
-    /* [in] */ IBinder* key)
-{
-    List<AutoPtr<NotificationDataEntry> >::Iterator it;
-    for (it = mEntries.Begin(); it != mEntries.End(); ++it) {
-        if ((*it)->mKey.Get() == key) {
-            return it;
-        }
+    // NOTE: Icon needs to be preserved for now.
+    // We should fix this at some point.
+    mExpanded = NULL;
+    mExpandedPublic = NULL;
+    mExpandedBig = NULL;
+    mAutoRedacted = FALSE;
+    mLegacy = FALSE;
+    if (mRow != NULL) {
+        IActivatableNotificationView::Probe(mRow)->Reset();
     }
-
-    return it;
+    return NOERROR;
 }
 
-AutoPtr<NotificationDataEntry> NotificationData::FindByKey(
-    /* [in] */ IBinder* key)
+ECode NotificationData::Entry::SetKey(
+    /* [in] */ const String& key)
 {
-    List<AutoPtr<NotificationDataEntry> >::Iterator it;
-    for (it = mEntries.Begin(); it != mEntries.End(); ++it) {
-        if ((*it)->mKey.Get() == key) {
-            return *it;
-        }
-    }
-
-    return NULL;
+    mKey = key;
+    return NOERROR;
 }
 
-Int32 NotificationData::Add(
-    /* [in] */ NotificationDataEntry* entry)
+ECode NotificationData::Entry::GetKey(
+    /* [out] */ String* key)
 {
-    Int32 i = 0;
-    List<AutoPtr<NotificationDataEntry> >::Iterator it;
-    for (it = mEntries.Begin(); it != mEntries.End(); ++it, ++i) {
-        if (NotificationDataEntry::Compare(*it, entry) > 0) {
-            break;
-        }
-    }
-
-    AutoPtr<NotificationDataEntry> ne = entry;
-    mEntries.Insert(it, ne);
-    return i;
+    VALIDATE_NOT_NULL(key);
+    *key = mKey;
+    return NOERROR;
 }
 
-Int32 NotificationData::Add(
-    /* [in] */ IBinder* key,
-    /* [in] */ IStatusBarNotification* notification,
-    /* [in] */ IView* row,
-    /* [in] */ IView* content,
-    /* [in] */ IView* expanded,
-    /* [in] */ IStatusBarIconView* icon)
+ECode NotificationData::Entry::SetNotification(
+    /* [in] */ IStatusBarNotification* sbn)
 {
-    AutoPtr<NotificationDataEntry> entry = new NotificationDataEntry();
-    entry->mKey = key;
-    entry->mNotification = notification;
-    entry->mRow = row;
-    entry->mContent = content;
-    entry->mExpanded = expanded;
-    entry->mIcon = icon;
-    entry->mLargeIcon = NULL; // TODO add support for large icons
-    return Add(entry);
+    mNotification = sbn;
+    return NOERROR;
 }
 
-AutoPtr<NotificationDataEntry> NotificationData::Remove(
-    /* [in] */ IBinder* key)
+ECode NotificationData::Entry::GetNotification(
+    /* [out] */ IStatusBarNotification** sbn)
 {
-    AutoPtr<NotificationDataEntry> e;
-    List<AutoPtr<NotificationDataEntry> >::Iterator it = FindIteratorByKey(key);
-    if (it != mEntries.End()) {
-        e = *it;
-        mEntries.Erase(it);
-    }
-    return e;
+    VALIDATE_NOT_NULL(sbn);
+    *sbn = mNotification;
+    REFCOUNT_ADD(*sbn);
+    return NOERROR;
 }
 
-/**
- * Return whether there are any visible items (i.e. items without an error).
- */
-Boolean NotificationData::HasVisibleItems()
+ECode NotificationData::Entry::SetIcon(
+    /* [in] */ IStatusBarIconView* view)
 {
-    List<AutoPtr<NotificationDataEntry> >::Iterator it;
-    for (it = mEntries.Begin(); it != mEntries.End(); ++it) {
-        if ((*it)->mExpanded != NULL) { // the view successfully inflated
-            return TRUE;
-        }
-    }
-
-    return FALSE;
+    mIcon = view;
+    return NOERROR;
 }
 
-/**
- * Return whether there are any clearable items (that aren't errors).
- */
-Boolean NotificationData::HasClearableItems()
+ECode NotificationData::Entry::GetIcon(
+    /* [out] */ IStatusBarIconView** view)
 {
-    Boolean isClearable;
-    List<AutoPtr<NotificationDataEntry> >::Iterator it;
-    for (it = mEntries.Begin(); it != mEntries.End(); ++it) {
-        if ((*it)->mExpanded != NULL) { // the view successfully inflated
-            (*it)->mNotification->IsClearable(&isClearable);
-            if (isClearable)
-                return TRUE;
-        }
-    }
-
-    return FALSE;
+    VALIDATE_NOT_NULL(view);
+    *view = mIcon;
+    REFCOUNT_ADD(*view);
+    return NOERROR;
 }
 
-Boolean NotificationData::ReadBooleanTag(
-    /* [in] */ IView* view,
-    /* [in] */ Int32 id)
+ECode NotificationData::Entry::SetRow(
+    /* [in] */ IExpandableNotificationRow* row)
 {
-    if (view != NULL) {
-        AutoPtr<IInterface> value;
-        view->GetTag(id, (IInterface**)&value);
-        if (IBoolean::Probe(value) != NULL) {
-            Boolean result;
-            IBoolean::Probe(value)->GetValue(&result);
-            return result;
-        }
-    }
-
-    return FALSE;
+    mRow = row;
+    return NOERROR;
 }
 
-Boolean NotificationData::WriteBooleanTag(
-    /* [in] */ IView* view,
-    /* [in] */ Int32 id,
+ECode NotificationData::Entry::GetRow(
+    /* [out] */ IExpandableNotificationRow** row)
+{
+    VALIDATE_NOT_NULL(row);
+    *row = mRow;
+    REFCOUNT_ADD(*row);
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::SetExpanded(
+    /* [in] */ IView* view)
+{
+    mExpanded = view;
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::GetExpanded(
+    /* [out] */ IView** view)
+{
+    VALIDATE_NOT_NULL(view);
+    *view = mExpanded;
+    REFCOUNT_ADD(*view);
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::SetExpandedPublic(
+    /* [in] */ IView* view)
+{
+    mExpandedPublic = view;
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::GetExpandedPublic(
+    /* [out] */ IView** view)
+{
+    VALIDATE_NOT_NULL(view);
+    *view = mExpandedPublic;
+    REFCOUNT_ADD(*view);
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::SetExpandedBig(
+    /* [in] */ IView* big)
+{
+    mExpandedBig = big;
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::GetExpandedBig(
+    /* [out] */ IView** big)
+{
+    VALIDATE_NOT_NULL(big);
+    *big = mExpandedBig;
+    REFCOUNT_ADD(*big);
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::SetAutoRedacted(
     /* [in] */ Boolean value)
 {
-    if (view != NULL) {
-        AutoPtr<IBoolean> bVal;
-        CBoolean::New(value, (IBoolean**)&bVal);
-        view->SetTag(id, bVal);
-        return value;
+    mAutoRedacted = value;
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::GetAutoRedacted(
+    /* [out] */ Boolean* value)
+{
+    VALIDATE_NOT_NULL(value);
+    *value = mAutoRedacted;
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::SetLegacy(
+    /* [in] */ Boolean value)
+{
+    mLegacy = value;
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::GetLegacy(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mLegacy;
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::SetTargetSdk(
+    /* [in] */ Int32 sdk)
+{
+    mTargetSdk = sdk;
+    return NOERROR;
+}
+
+ECode NotificationData::Entry::GetTargetSdk(
+    /* [out] */ Int32* sdk)
+{
+    VALIDATE_NOT_NULL(sdk);
+    *sdk = mTargetSdk;
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(NotificationData::Comparator, Object, IComparator);
+NotificationData::Comparator::Comparator(
+    /* [in] */ NotificationData* host)
+    : mHost(host)
+{
+    CNotificationListenerServiceRanking::New((INotificationListenerServiceRanking**)&mRankingA);
+    CNotificationListenerServiceRanking::New((INotificationListenerServiceRanking**)&mRankingB);
+}
+
+ECode NotificationData::Comparator::Compare(
+    /* [in] */ IInterface* _a,
+    /* [in] */ IInterface* _b,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    // Upsort current media notification.
+    String mediaNotification;
+    mHost->mEnvironment->GetCurrentMediaNotificationKey(&mediaNotification);
+    Entry* a = (Entry*)INotificationDataEntry::Probe(_a);
+    Entry* b = (Entry*)INotificationDataEntry::Probe(_b);
+    Boolean aMedia = a->mKey.Equals(mediaNotification);
+    Boolean bMedia = b->mKey.Equals(mediaNotification);
+    if (aMedia != bMedia) {
+        *result = aMedia ? -1 : 1;
+        return NOERROR;
     }
 
+    AutoPtr<IStatusBarNotification> na = a->mNotification;
+    AutoPtr<IStatusBarNotification> nb = b->mNotification;
+
+    // Upsort PRIORITY_MAX system notifications
+    AutoPtr<INotification> tmpA;
+    na->GetNotification((INotification**)&tmpA);
+    AutoPtr<INotification> tmpB;
+    nb->GetNotification((INotification**)&tmpB);
+    Int32 priorityA = 0, priorityB = 0;
+    tmpA->GetPriority(&priorityA);
+    tmpB->GetPriority(&priorityB);
+    Boolean aSystemMax = priorityA >= INotification::PRIORITY_MAX &&
+            IsSystemNotification(na);
+    Boolean bSystemMax = priorityB >= INotification::PRIORITY_MAX &&
+            IsSystemNotification(nb);
+    if (aSystemMax != bSystemMax) {
+        *result = aSystemMax ? -1 : 1;
+        return NOERROR;
+    }
+
+    // RankingMap as received from NoMan.
+    if (mHost->mRankingMap != NULL) {
+        Boolean ret = FALSE;
+        mHost->mRankingMap->GetRanking(a->mKey, mRankingA, &ret);
+        mHost->mRankingMap->GetRanking(b->mKey, mRankingB, &ret);
+        Int32 rankA = 0, rankB = 0;
+        mRankingA->GetRank(&rankA);
+        mRankingB->GetRank(&rankB);
+        *result = rankA - rankB;
+        return NOERROR;
+    }
+
+    Int32 sA = 0, sB = 0;
+    nb->GetScore(&sB);
+    na->GetScore(&sA);
+    Int32 d = sB - sA;
+    if (a->mInterruption != b->mInterruption) {
+        *result = a->mInterruption ? -1 : 1;
+        return NOERROR;
+    }
+    else if (d != 0) {
+        *result = d;
+        return NOERROR;
+    }
+    else {
+        Int64 whenA = 0, whenB = 0;
+        tmpA->GetWhen(&whenA);
+        tmpB->GetWhen(&whenB);
+        *result = (Int32) (whenB - whenA);
+        return NOERROR;
+    }
+    return NOERROR;
+}
+
+CAR_INTERFACE_IMPL(NotificationData, Object, INotificationData);
+NotificationData::NotificationData(
+    /* [in] */ INotificationEnvironment* environment)
+{
+    mEnvironment = environment;
+    mRankingComparator = new Comparator(this);
+
+    CArrayMap::New((IArrayMap**)&mEntries);
+    CArrayList::New((IArrayList**)&mSortedAndFiltered);
+    CArraySet::New((IArraySet**)&mGroupsWithSummaries);
+    CNotificationListenerServiceRanking::New((INotificationListenerServiceRanking**)&mTmpRanking);
+}
+
+ECode NotificationData::GetActiveNotifications(
+    /* [out] */ IArrayList** list)
+{
+    VALIDATE_NOT_NULL(list);
+    *list = mSortedAndFiltered;
+    REFCOUNT_ADD(*list);
+    return NOERROR;
+}
+
+ECode NotificationData::Get(
+    /* [in] */ const String& key,
+    /* [out] */ INotificationDataEntry** entry)
+{
+    VALIDATE_NOT_NULL(entry);
+    AutoPtr<IInterface> obj;
+    AutoPtr<ICharSequence> k;
+    CString::New(key, (ICharSequence**)&k);
+    mEntries->Get(k, (IInterface**)&obj);
+    *entry = INotificationDataEntry::Probe(obj);
+    REFCOUNT_ADD(*entry);
+    return NOERROR;
+}
+
+ECode NotificationData::Add(
+    /* [in] */ INotificationDataEntry* entry,
+    /* [in] */ INotificationListenerServiceRankingMap* ranking)
+{
+    String key;
+    ((Entry*)entry)->mNotification->GetKey(&key);
+    AutoPtr<ICharSequence> k;
+    CString::New(key, (ICharSequence**)&k);
+    mEntries->Put(k, entry);
+    UpdateRankingAndSort(ranking);
+    return NOERROR;
+}
+
+ECode NotificationData::Remove(
+    /* [in] */ const String& key,
+    /* [in] */ INotificationListenerServiceRankingMap* ranking,
+    /* [out] */ INotificationDataEntry** entry)
+{
+    VALIDATE_NOT_NULL(entry);
+    *entry = NULL;
+
+    AutoPtr<ICharSequence> k;
+    CString::New(key, (ICharSequence**)&k);
+    AutoPtr<IInterface> obj;
+    mEntries->Remove(k, (IInterface**)&obj);
+    AutoPtr<INotificationDataEntry> removed = INotificationDataEntry::Probe(obj);
+    if (removed == NULL) return NOERROR;
+    UpdateRankingAndSort(ranking);
+    *entry = removed;
+    REFCOUNT_ADD(*entry);
+    return NOERROR;
+}
+
+ECode NotificationData::UpdateRanking(
+    /* [in] */ INotificationListenerServiceRankingMap* ranking)
+{
+    UpdateRankingAndSort(ranking);
+    return NOERROR;
+}
+
+ECode NotificationData::IsAmbient(
+    /* [in] */ const String& key,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (mRankingMap != NULL) {
+        mRankingMap->GetRanking(key, mTmpRanking, result);
+        return mTmpRanking->IsAmbient(result);
+    }
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode NotificationData::GetVisibilityOverride(
+    /* [in] */ const String& key,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (mRankingMap != NULL) {
+        Boolean tmp = FALSE;
+        mRankingMap->GetRanking(key, mTmpRanking, &tmp);
+        return mTmpRanking->GetVisibilityOverride(result);
+    }
+    *result = INotificationListenerServiceRanking::VISIBILITY_NO_OVERRIDE;
+    return NOERROR;
+}
+
+void NotificationData::UpdateRankingAndSort(
+    /* [in] */ INotificationListenerServiceRankingMap* ranking)
+{
+    if (ranking != NULL) {
+        mRankingMap = ranking;
+    }
+    FilterAndSort();
+}
+
+ECode NotificationData::FilterAndSort()
+{
+    mSortedAndFiltered->Clear();
+    ISet::Probe(mGroupsWithSummaries)->Clear();
+
+    Int32 N = 0;
+    mEntries->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        mEntries->GetValueAt(i, (IInterface**)&obj);
+        AutoPtr<INotificationDataEntry> entry = INotificationDataEntry::Probe(obj);
+        AutoPtr<IStatusBarNotification> sbn;
+        entry->GetNotification((IStatusBarNotification**)&sbn);
+
+        if (ShouldFilterOut(sbn)) {
+            continue;
+        }
+
+        AutoPtr<INotification> n;
+        sbn->GetNotification((INotification**)&n);
+        Boolean state = FALSE;
+        if (n->IsGroupSummary(&state), state) {
+            String key;
+            sbn->GetGroupKey(&key);
+            AutoPtr<ICharSequence> k;
+            CString::New(key, (ICharSequence**)&k);
+            ISet::Probe(mGroupsWithSummaries)->Add(k);
+        }
+        mSortedAndFiltered->Add(entry);
+    }
+
+    // Second pass: Filter out group children with summary.
+    Boolean empty = FALSE;
+    if (ISet::Probe(mGroupsWithSummaries)->IsEmpty(&empty), !empty) {
+        Int32 M = 0;
+        mSortedAndFiltered->GetSize(&M);
+        for (Int32 i = M - 1; i >= 0; i--) {
+            AutoPtr<IInterface> obj;
+            mSortedAndFiltered->Get(i, (IInterface**)&obj);
+            AutoPtr<INotificationDataEntry> ent = INotificationDataEntry::Probe(obj);
+            AutoPtr<IStatusBarNotification> sbn;
+            ent->GetNotification((IStatusBarNotification**)&sbn);
+
+            AutoPtr<INotification> n;
+            sbn->GetNotification((INotification**)&n);
+            Boolean tmp = FALSE;
+            if (n->IsGroupChild(&tmp), tmp) {
+                String key;
+                sbn->GetGroupKey(&key);
+                AutoPtr<ICharSequence> k;
+                CString::New(key, (ICharSequence**)&k);
+
+                if (ISet::Probe(mGroupsWithSummaries)->Contains(k, &tmp), tmp) {
+                    mSortedAndFiltered->Remove(i);
+                }
+            }
+        }
+    }
+
+    AutoPtr<ICollections> collections;
+    CCollections::AcquireSingleton((ICollections**)&collections);
+    collections->Sort(IList::Probe(mSortedAndFiltered), mRankingComparator);
+    return NOERROR;
+}
+
+ECode NotificationData::IsGroupWithSummary(
+    /* [in] */ const String& groupKey,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    AutoPtr<ICharSequence> k;
+    CString::New(groupKey, (ICharSequence**)&k);
+    return ISet::Probe(mGroupsWithSummaries)->Contains(k, result);
+}
+
+Boolean NotificationData::ShouldFilterOut(
+    /* [in] */ IStatusBarNotification* sbn)
+{
+    Boolean tmp = FALSE;
+    if (!((mEnvironment->IsDeviceProvisioned(&tmp), tmp) ||
+            ShowNotificationEvenIfUnprovisioned(sbn))) {
+        return TRUE;
+    }
+
+    if (mEnvironment->IsNotificationForCurrentProfiles(sbn, &tmp), !tmp) {
+        return TRUE;
+    }
+
+    AutoPtr<INotification> n;
+    sbn->GetNotification((INotification**)&n);
+    Int32 visibility = 0, id = 0;
+    n->GetVisibility(&visibility);
+    sbn->GetUserId(&id);
+    if (visibility == INotification::VISIBILITY_SECRET &&
+            (mEnvironment->ShouldHideSensitiveContents(id, &tmp), tmp)) {
+        return TRUE;
+    }
     return FALSE;
 }
 
-/**
- * Return whether the entry can be expanded.
- */
-Boolean NotificationData::GetIsExpandable(
-    /* [in] */ IView* row)
+ECode NotificationData::HasActiveClearableNotifications(
+    /* [out] */ Boolean* result)
 {
-    return ReadBooleanTag(row, SystemUIR::id::expandable_tag);
+    VALIDATE_NOT_NULL(result);
+    AutoPtr<IIterator> it;
+    mSortedAndFiltered->GetIterator((IIterator**)&it);
+    Boolean hasNext = FALSE;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        Entry* e = (Entry*)INotificationDataEntry::Probe(obj);
+        if (e->mExpanded.Get() != NULL) { // the view successfully inflated
+            Boolean clearable = FALSE;
+            if (e->mNotification->IsClearable(&clearable), clearable) {
+                *result = TRUE;
+                return NOERROR;
+            }
+        }
+    }
+
+    *result = FALSE;
+    return NOERROR;
 }
 
-/**
- * Return whether the entry has been manually expanded by the user.
- */
-Boolean NotificationData::GetUserExpanded(
-    /* [in] */ IView* row)
+Boolean NotificationData::ShowNotificationEvenIfUnprovisioned(
+    /* [in] */ IStatusBarNotification* sbn)
 {
-    return ReadBooleanTag(row, SystemUIR::id::user_expanded_tag);
+    AutoPtr<INotification> n;
+    sbn->GetNotification((INotification**)&n);
+    AutoPtr<IBundle> data;
+    n->GetExtras((IBundle**)&data);
+    Boolean tmp = FALSE;
+    data->GetBoolean(INotification::EXTRA_ALLOW_DURING_SETUP, &tmp);
+    String name;
+    sbn->GetPackageName(&name);
+    return String("android").Equals(name) && tmp;
 }
 
-/**
- * Set whether the entry has been manually expanded by the user.
- */
-Boolean NotificationData::SetUserExpanded(
-    /* [in] */ IView* row,
-    /* [in] */ Boolean userExpanded)
+void NotificationData::Dump(
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ const String& indent)
 {
-    return WriteBooleanTag(row, SystemUIR::id::user_expanded_tag, userExpanded);
+    Int32 N = 0;
+    mSortedAndFiltered->GetSize(&N);
+    pw->Print(indent);
+    pw->Println(String("active notifications: ") + StringUtils::ToString(N));
+    Int32 active = 0;
+    for (active = 0; active < N; active++) {
+        AutoPtr<IInterface> obj;
+        mSortedAndFiltered->Get(active, (IInterface**)&obj);
+        AutoPtr<INotificationDataEntry> e = INotificationDataEntry::Probe(obj);
+        DumpEntry(pw, indent, active, (Entry*)e.Get());
+    }
+
+    Int32 M = 0;
+    mEntries->GetSize(&M);
+    pw->Print(indent);
+    pw->Println(String("inactive notifications: ") + StringUtils::ToString(M - active));
+    Int32 inactiveCount = 0;
+    for (Int32 i = 0; i < M; i++) {
+        AutoPtr<IInterface> obj;
+        mEntries->GetValueAt(i, (IInterface**)&obj);
+        AutoPtr<INotificationDataEntry> entry = INotificationDataEntry::Probe(obj);
+        Boolean tmp = FALSE;
+        if (mSortedAndFiltered->Contains(entry, &tmp), !tmp) {
+            DumpEntry(pw, indent, inactiveCount, (Entry*)entry.Get());
+            inactiveCount++;
+        }
+    }
 }
 
-/**
- * Return whether the entry is being touched by the user.
- */
-Boolean NotificationData::GetUserLocked(
-    /* [in] */ IView* row)
+void NotificationData::DumpEntry(
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ const String& indent,
+    /* [in] */ Int32 i,
+    /* [in] */ Entry* e)
 {
-    return ReadBooleanTag(row, SystemUIR::id::user_lock_tag);
+    pw->Print(indent);
+    pw->Println(String("  [") + StringUtils::ToString(i) + "] key=" + e->mKey + " icon="
+        + StringUtils::ToHexString((Int32)e->mIcon.Get()));
+    AutoPtr<IStatusBarNotification> n = e->mNotification;
+    pw->Print(indent);
+    String value;
+    n->GetPackageName(&value);
+    Int32 id = 0, s = 0;
+    n->GetId(&id);
+    n->GetScore(&s);
+    pw->Println(String("      pkg=") + value
+            + " id=" + StringUtils::ToString(id) + " score=" + StringUtils::ToString(s));
+    pw->Print(indent);
+    AutoPtr<INotification> tmpN;
+    n->GetNotification((INotification**)&tmpN);
+    pw->Println(String("      notification=") + StringUtils::ToHexString((Int32)tmpN.Get()));
+    pw->Print(indent);
+    AutoPtr<ICharSequence> tickerText;
+    tmpN->GetTickerText((ICharSequence**)&tickerText);
+    tickerText->ToString(&value);
+    pw->Println(String("      tickerText=\"") + value + "\"");
 }
 
-/**
- * Set whether the entry is being touched by the user.
- */
-Boolean NotificationData::SetUserLocked(
-    /* [in] */ IView* row,
-    /* [in] */ Boolean userLocked)
+Boolean NotificationData::IsSystemNotification(
+    /* [in] */ IStatusBarNotification* sbn)
 {
-    return WriteBooleanTag(row, SystemUIR::id::user_lock_tag, userLocked);
+    String sbnPackage;
+    sbn->GetPackageName(&sbnPackage);
+    return String("android").Equals(sbnPackage) || String("com.android.systemui").Equals(sbnPackage);
 }
 
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos

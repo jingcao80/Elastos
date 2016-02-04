@@ -95,6 +95,7 @@ private:
             info->AppendFormat("%p", this);
             return NOERROR;
         }
+
     private:
         ClipboardService* mHost;
     };

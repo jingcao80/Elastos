@@ -1,5 +1,7 @@
 
-#include "wm/CircularDisplayMask.h"
+#include <Elastos.Droid.Graphics.h>
+#include <Elastos.Droid.View.h>
+#include "elastos/droid/server/wm/CircularDisplayMask.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
@@ -13,6 +15,7 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::PorterDuffMode_SRC;
 using Elastos::Droid::View::CSurface;
+using Elastos::Droid::View::CSurfaceControl;
 
 namespace Elastos {
 namespace Droid {
@@ -21,7 +24,7 @@ namespace Wm {
 
 const String CircularDisplayMask::TAG("CircularDisplayMask");
 
-cosnt Int32 CircularDisplayMask::STROKE_WIDTH;
+const Int32 CircularDisplayMask::STROKE_WIDTH;
 
 CircularDisplayMask::CircularDisplayMask(
     /* [in] */ IDisplay* display,
@@ -46,28 +49,28 @@ CircularDisplayMask::CircularDisplayMask(
         Int32 id;
         display->GetDisplayId(&id);
         Slogger::W(TAG, "Screen dimensions of displayId = %dare not equal, circularMask will not be drawn.", id);
-        mDimensionsUnequal = try;
+        mDimensionsUnequal = TRUE;
     }
 
     AutoPtr<ISurfaceControl> ctrl;
-    try {
-        // if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-        //     ctrl = new WindowStateAnimator.SurfaceTrace(session, "CircularDisplayMask",
-        //             mScreenSize.x, mScreenSize.y, PixelFormat.TRANSLUCENT,
-        //             SurfaceControl.HIDDEN);
-        // } else {
-        CSurfaceControl::New(session, String("CircularDisplayMask"), x,
-                y, IPixelFormat::TRANSLUCENT, ISurfaceControl::HIDDEN, (ISurfaceControl**)&ctrl);
-        // }
-        Int32 stack;
-        display->GetLayerStack(&stack);
-        ctrl->SetLayerStack(stack);
-        ctrl->SetLayer(zOrder);
-        ctrl->SetPosition(0, 0);
-        ctrl->Show();
-        mSurface->CopyFrom(ctrl);
-    } catch (OutOfResourcesException e) {
-    }
+    // try {
+    // if (WindowManagerService.DEBUG_SURFACE_TRACE) {
+    //     ctrl = new WindowStateAnimator.SurfaceTrace(session, "CircularDisplayMask",
+    //             mScreenSize.x, mScreenSize.y, PixelFormat.TRANSLUCENT,
+    //             SurfaceControl.HIDDEN);
+    // } else {
+    CSurfaceControl::New(session, String("CircularDisplayMask"), x,
+            y, IPixelFormat::TRANSLUCENT, ISurfaceControl::HIDDEN, (ISurfaceControl**)&ctrl);
+    // }
+    Int32 stack;
+    display->GetLayerStack(&stack);
+    ctrl->SetLayerStack(stack);
+    ctrl->SetLayer(zOrder);
+    ctrl->SetPosition(0, 0);
+    ctrl->Show();
+    mSurface->CopyFrom(ctrl);
+    // } catch (OutOfResourcesException e) {
+    // }
     mSurfaceControl = ctrl;
     mDrawNeeded = TRUE;
     CPaint::New((IPaint**)&mPaint);

@@ -284,6 +284,7 @@ ECode Browser::UpdateVisitedHistory(
     // } finally {
     if (c != NULL)  return ICloseable::Probe(c)->Close();
     // }
+    return NOERROR;
 }
 
 ECode Browser::GetVisitedHistory(
@@ -293,6 +294,7 @@ ECode Browser::GetVisitedHistory(
     VALIDATE_NOT_NULL(urls);
     AutoPtr<ICursor> c;
     AutoPtr<ArrayOf<String> > str;
+    Int32 i = 0;
     // try {
     AutoPtr<ArrayOf<String> > projection = ArrayOf<String>::Alloc(1);
     (*projection)[0] = IBrowserContractCommonColumns::URL;
@@ -300,14 +302,13 @@ ECode Browser::GetVisitedHistory(
         IBrowserContractHistoryColumns::VISITS + " > 0", NULL, String(NULL), (ICursor**)&c);
     if (!SUCCEEDED(ec)) goto EXIT;
     if (c == NULL) {
-        urls = NULL;
+        *urls = NULL;
         return NOERROR;
     }
 
     Int32 count;
     c->GetCount(&count);
     str = ArrayOf<String>::Alloc(count);
-    Int32 i;
     Boolean bSucceeded;
     while ((c->MoveToNext(&bSucceeded), bSucceeded)) {
         String columnValue;
@@ -327,10 +328,11 @@ EXIT:
         if (ec == (ECode)E_ILLEGAL_STATE_EXCEPTION)
         {
             Slogger::E(LOGTAG, "getVisitedHistory%d", ec);
-            urls = NULL;
+            *urls = NULL;
             return NOERROR;
         }
     }
+    return NOERROR;
 }
 
 ECode Browser::TruncateHistory(
@@ -378,6 +380,7 @@ EXIT:
         Slogger::E(LOGTAG, "truncateHistory%d", ec);
         return NOERROR;
     }
+    return NOERROR;
 }
 
 ECode Browser::CanClearHistory(
@@ -532,6 +535,7 @@ ECode Browser::RequestAllIcons(
     /* [in] */ IWebIconDatabaseIconListener* listener)
 {
     // Do nothing: this is no longer used.
+    return NOERROR;
 }
 
 } // namespace Provider

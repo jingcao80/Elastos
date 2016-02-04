@@ -45,7 +45,7 @@ ECode Vector::Enumeration::GetNextElement(
 // Vector::
 //====================================================================
 
-CAR_INTERFACE_IMPL_3(Vector, AbstractList, IRandomAccess, ICloneable, ISerializable)
+CAR_INTERFACE_IMPL_4(Vector, AbstractList, IVector, IRandomAccess, ICloneable, ISerializable)
 
 const Int32 Vector::DEFAULT_SIZE = 10;
 
@@ -99,6 +99,12 @@ AutoPtr<ArrayOf<IInterface*> > Vector::NewElementArray(
 }
 
 ECode Vector::Add(
+    /* [in] */ IInterface* object)
+{
+    return AbstractList::Add(object);
+}
+
+ECode Vector::Add(
     /* [in] */ Int32 location,
     /* [in] */ IInterface* object)
 {
@@ -119,6 +125,19 @@ ECode Vector::Add(
         *modified = TRUE;
     }
     return NOERROR;
+}
+
+ECode Vector::AddAll(
+        /* [in] */ ICollection* collection)
+{
+    return AbstractList::AddAll(collection);
+}
+
+ECode Vector::AddAll(
+    /* [in] */ Int32 location,
+    /* [in] */ ICollection* collection)
+{
+    return AbstractList::AddAll(location, collection);
 }
 
 ECode Vector::AddAll(
@@ -533,6 +552,12 @@ ECode Vector::LastIndexOf(
 }
 
 ECode Vector::Remove(
+        /* [in] */ Int32 location)
+{
+    return AbstractList::Remove(location);;
+}
+
+ECode Vector::Remove(
     /* [in] */ Int32 location,
     /* [out] */ IInterface** object)
 {
@@ -567,6 +592,12 @@ ECode Vector::Remove(
     /* [out] */ Boolean* modified)
 {
     return RemoveElement(object, modified);
+}
+
+ECode Vector::RemoveAll(
+        /* [in] */ ICollection* collection)
+{
+    return AbstractList::RemoveAll(collection);
 }
 
 ECode Vector::RemoveAll(
@@ -665,6 +696,12 @@ ECode Vector::RemoveRange(
 }
 
 ECode Vector::RetainAll(
+        /* [in] */ ICollection* collection)
+{
+    return AbstractList::RetainAll(collection);
+}
+
+ECode Vector::RetainAll(
     /* [in] */ ICollection* collection,
     /* [out] */ Boolean* modified)
 {
@@ -673,6 +710,13 @@ ECode Vector::RetainAll(
         AbstractList::RetainAll(collection, modified);
     }
     return NOERROR;
+}
+
+ECode Vector::Set(
+        /* [in] */ Int32 location,
+        /* [in] */ IInterface* object)
+{
+    return AbstractList::Set(location, object);
 }
 
 ECode Vector::Set(
@@ -747,6 +791,25 @@ ECode Vector::GetSubList(
         REFCOUNT_ADD(*subList);
     }
     return NOERROR;
+}
+
+ECode Vector::GetIterator(
+        /* [out] */ IIterator** it)
+{
+    return AbstractList::GetIterator(it);
+}
+
+ECode Vector::GetListIterator(
+        /* [out] */ IListIterator** it)
+{
+    return AbstractList::GetListIterator(it);
+}
+
+ECode Vector::GetListIterator(
+        /* [in] */ Int32 location,
+        /* [out] */ IListIterator** it)
+{
+    return AbstractList::GetListIterator(location, it);
 }
 
 ECode Vector::ToArray(

@@ -6,18 +6,20 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Os.h"
+#include "elastos/droid/content/pm/PackageParser.h"
 #include "elastos/droid/internal/content/CPackageHelper.h"
 #include "elastos/droid/internal/content/CNativeLibraryHelper.h"
 #include "elastos/droid/internal/content/CNativeLibraryHelperHandle.h"
 #include "elastos/droid/os/FileUtils.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/storage/StorageResultCode.h"
-// #include "elastos/droid/os/storage/CStorageManagerHelper.h"
+#include "elastos/droid/os/storage/CStorageManagerHelper.h"
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/os/CUserEnvironment.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringUtils.h>
 
+using Elastos::Droid::Content::Pm::PackageParser;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IPackageInfo;
@@ -30,7 +32,7 @@ using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::Storage::StorageResultCode;
 using Elastos::Droid::Os::Storage::IStorageManager;
-// using Elastos::Droid::Os::Storage::CStorageManagerHelper;
+using Elastos::Droid::Os::Storage::CStorageManagerHelper;
 using Elastos::Droid::Os::Storage::IStorageManagerHelper;
 using Libcore::IO::IIoUtils;
 using Libcore::IO::CIoUtils;
@@ -64,13 +66,13 @@ CAR_INTERFACE_IMPL(CPackageHelper, Singleton, IPackageHelper)
 CAR_SINGLETON_IMPL(CPackageHelper)
 
 ECode CPackageHelper::GetMountService(
-    /* [out] */ IMountService** mountService)
+    /* [out] */ IIMountService** mountService)
 {
     VALIDATE_NOT_NULL(mountService)
 
     AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));
     if (obj != NULL) {
-        *mountService = IMountService::Probe(obj);
+        *mountService = IIMountService::Probe(obj);
         REFCOUNT_ADD(*mountService);
         return NOERROR;
     }
@@ -94,8 +96,8 @@ ECode CPackageHelper::CreateSdDir(
     // Round up to nearest MB, plus another MB for filesystem overhead
     const Int32 sizeMb = (Int32)((sizeBytes + ITrafficStats::MB_IN_BYTES) / ITrafficStats::MB_IN_BYTES) + 1;
     // try {
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "MountService running?");
         return NOERROR;
     }
@@ -138,8 +140,8 @@ ECode CPackageHelper::ResizeSdDir(
     *result = FALSE;
     // Round up to nearest MB, plus another MB for filesystem overhead
     const Int32 sizeMb = (Int32)((sizeBytes + ITrafficStats::MB_IN_BYTES) / ITrafficStats::MB_IN_BYTES) + 1;
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "MountService running?");
         return NOERROR;
     }
@@ -172,8 +174,8 @@ ECode CPackageHelper::MountSdDir(
     VALIDATE_NOT_NULL(dir)
     *dir = NULL;
     // try {
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "MountService running?");
         return NOERROR;
     }
@@ -204,8 +206,8 @@ ECode CPackageHelper::UnMountSdDir(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
     // try {
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "MountService running?");
         return NOERROR;
     }
@@ -233,8 +235,8 @@ ECode CPackageHelper::RenameSdDir(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
     // try {
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "Failed to rename %s to %s", oldId.string(), newId.string());
         return NOERROR;
     }
@@ -263,8 +265,8 @@ ECode CPackageHelper::GetSdDir(
     VALIDATE_NOT_NULL(dir)
     *dir = NULL;
     // try {
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "Failed to get container path for %s", cid.string());
         return NOERROR;
     }
@@ -287,8 +289,8 @@ ECode CPackageHelper::GetSdFilesystem(
     VALIDATE_NOT_NULL(fs)
     *fs = NULL;
     // try {
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "Failed to get container path for %s", cid.string());
         return NOERROR;
     }
@@ -311,8 +313,8 @@ ECode CPackageHelper::FinalizeSdDir(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
     // try {
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "Failed to finalize container %s", cid.string());
         return NOERROR;
     }
@@ -344,8 +346,8 @@ ECode CPackageHelper::DestroySdDir(
         Logger::I(TAG, "Forcibly destroying container %s", cid.string());
     }
 
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "Failed to destroy container %s", cid.string());
         return NOERROR;
     }
@@ -372,8 +374,8 @@ ECode CPackageHelper::GetSecureContainerList(
     VALIDATE_NOT_NULL(ids)
     *ids = NULL;
     // try {
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "Failed to get secure container list");
         return NOERROR;
     }
@@ -395,8 +397,8 @@ ECode CPackageHelper::IsContainerMounted(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
     // try {
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "Failed to find out if container %s mounted", cid.string());
         return NOERROR;
     }
@@ -533,8 +535,8 @@ ECode CPackageHelper::FixSdPermissions(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
     // try {
-    AutoPtr<IMountService> mountService;
-    if (FAILED(GetMountService((IMountService**)&mountService))) {
+    AutoPtr<IIMountService> mountService;
+    if (FAILED(GetMountService((IIMountService**)&mountService))) {
         Logger::E(TAG, "Failed to fixperms container %s", cid.string());
         return NOERROR;
     }
@@ -616,8 +618,7 @@ ECode CPackageHelper::ResolveInstallLocation(
 
     Boolean emulated = Environment::IsExternalStorageEmulated();
     AutoPtr<IStorageManagerHelper> smHelper;
-    assert(0 && "TODO: CStorageManagerHelper is not implemented!");
-    // CStorageManagerHelper::AcquireSingleton((IStorageManagerHelper**)&smHelper);
+    CStorageManagerHelper::AcquireSingleton((IStorageManagerHelper**)&smHelper);
     AutoPtr<IStorageManager> storage;
     smHelper->From(context, (IStorageManager**)&storage);
 
@@ -684,14 +685,14 @@ ECode CPackageHelper::ResolveInstallLocation(
 }
 
 ECode CPackageHelper::CalculateInstalledSize(
-    /* [in] */ IPackageLite* pkg,
+    /* [in] */ Handle64 pkg,
     /* [in] */ Boolean isForwardLocked,
     /* [in] */ const String& abiOverride,
     /* [out] */ Int64* size)
 {
     VALIDATE_NOT_NULL(size)
     AutoPtr<INativeLibraryHelperHandle> handle;
-    CNativeLibraryHelperHandle::Create(pkg, (INativeLibraryHelperHandle**)&handle);
+    CNativeLibraryHelperHandle::CreatePackage(pkg, (INativeLibraryHelperHandle**)&handle);
     ECode ec = CalculateInstalledSize(pkg, handle, isForwardLocked, abiOverride, size);
     AutoPtr<IIoUtils> ioUtils;
     ASSERT_SUCCEEDED(CIoUtils::AcquireSingleton((IIoUtils**)&ioUtils));
@@ -700,7 +701,7 @@ ECode CPackageHelper::CalculateInstalledSize(
 }
 
 ECode CPackageHelper::CalculateInstalledSize(
-    /* [in] */ IPackageLite* pkg,
+    /* [in] */ Handle64 pkg,
     /* [in] */ INativeLibraryHelperHandle* handle,
     /* [in] */ Boolean isForwardLocked,
     /* [in] */ const String& abiOverride,
@@ -710,8 +711,8 @@ ECode CPackageHelper::CalculateInstalledSize(
     *sizeBytes = 0;
 
     // Include raw APKs, and possibly unpacked resources
-    assert(0 && "TODO: PackageLite is not implemented");
-    AutoPtr<List<String> > codePaths;// = pkg->GetAllCodePaths();
+    AutoPtr<PackageParser::PackageLite> lite = (PackageParser::PackageLite*)pkg;
+    AutoPtr<List<String> > codePaths = lite->GetAllCodePaths();
     List<String>::Iterator iter = codePaths->Begin();
     for (; iter != codePaths->End(); ++iter) {
         AutoPtr<IFile> codeFile;

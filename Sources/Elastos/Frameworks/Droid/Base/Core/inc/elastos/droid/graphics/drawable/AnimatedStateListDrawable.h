@@ -3,11 +3,13 @@
 #define  __ELASTOS_DROID_GRAPHICS_DRAWABLE_ANIMATESTATELISTDRAWABLE_H__
 
 #include "Elastos.Droid.Animation.h"
+#include "Elastos.Droid.Utility.h"
 #include "elastos/droid/graphics/drawable/StateListDrawable.h"
 #include "elastos/droid/graphics/drawable/AnimationDrawable.h"
 
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Utility::ISparseInt32Array;
 
 namespace Elastos {
 namespace Droid {
@@ -47,7 +49,10 @@ private:
         : public Object
     {
     public:
+        virtual CARAPI_(AutoPtr<Transition>) Clone() = 0;
+
         virtual CARAPI_(void) Start() = 0;
+
         virtual CARAPI_(void) Stop() = 0;
 
         virtual CARAPI_(void) Reverse()
@@ -69,6 +74,13 @@ private:
             /* [in] */ IAnimatable* a)
         {
             mA = a;
+        }
+
+        // @Override
+        CARAPI_(AutoPtr<Transition>) Clone()
+        {
+            AutoPtr<Transition> obj = new AnimatableTransition(mA);
+            return obj;
         }
 
         // @Override
@@ -96,6 +108,13 @@ private:
             /* [in] */ Boolean reversed);
 
         // @Override
+        CARAPI_(AutoPtr<Transition>) Clone()
+        {
+            AutoPtr<Transition> obj = new AnimationDrawableTransition(mAnim);
+            return obj;
+        }
+
+        // @Override
         CARAPI_(Boolean) CanReverse();
 
         // @Override
@@ -108,6 +127,12 @@ private:
         CARAPI_(void) Stop();
 
     private:
+        AnimationDrawableTransition(
+            /* [in] */ IObjectAnimator* animator)
+            : mAnim(animator)
+        {}
+
+    private:
         AutoPtr<IObjectAnimator> mAnim;
     };
 
@@ -118,6 +143,13 @@ private:
         AnimatedVectorDrawableTransition(
             /* [in] */ IAnimatedVectorDrawable* avd,
             /* [in] */ Boolean reversed);
+
+        // @Override
+        CARAPI_(AutoPtr<Transition>) Clone()
+        {
+            AutoPtr<Transition> obj = new AnimatedVectorDrawableTransition(mAvd, mReversed);
+            return obj;
+        }
 
         // @Override
         CARAPI_(Boolean) CanReverse();
@@ -190,7 +222,7 @@ protected:
         static const Int32 REVERSE_MASK;
 
         // final LongSparseLongArray mTransitions;
-        // SparseInt32Array mStateIds;
+        AutoPtr<ISparseInt32Array> mStateIds;
     };
 
     /**

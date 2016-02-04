@@ -215,9 +215,9 @@ void LocalDisplayAdapter::LocalDisplayDevice::DumpLocked(
     /* [in] */ IPrintWriter* pw)
 {
 //    DisplayDevice::DumpLocked(pw);
-//    pw->PrintStringln(String("mBuiltInDisplayId=") + StringUtils::Int32ToString(mBuiltInDisplayId);
-//    pw->PrintStringln(String("mPhys=") + mPhys->ToString());
-//    pw->PrintStringln(String("mBlanked=") + StringUtils::BooleanToString(mBlanked);
+//    pw->Println(String("mBuiltInDisplayId=") + StringUtils::Int32ToString(mBuiltInDisplayId);
+//    pw->Println(String("mPhys=") + mPhys->ToString());
+//    pw->Println(String("mBlanked=") + StringUtils::BooleanToString(mBlanked);
     assert(0);
 }
 

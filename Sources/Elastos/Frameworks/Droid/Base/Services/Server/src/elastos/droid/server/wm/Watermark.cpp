@@ -1,6 +1,6 @@
 
-#include "wm/Watermark.h"
-#include "wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/Watermark.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
 #include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::StringBuilder;
@@ -13,6 +13,7 @@ using Elastos::Droid::Graphics::IPaintFontMetricsInt;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::ICanvas;
+using Elastos::Droid::View::CSurface;
 using Elastos::Droid::View::CSurfaceControl;
 
 namespace Elastos {
@@ -28,14 +29,13 @@ Watermark::Watermark(
     : mDisplay(display)
     , mTextWidth(0)
     , mTextHeight(0)
-    , mTextAscent(0)
-    , mTextDescent(0)
     , mDeltaX(0)
     , mDeltaY(0)
     , mLastDW(0)
     , mLastDH(0)
     , mDrawNeeded(FALSE)
 {
+    CSurface::New((ISurface**)&mSurface);
     // if (false) {
     //     Log.i(WindowManagerService.TAG, "*********************** WATERMARK");
     //     for (Int32 i=0; i<tokens.length; i++) {
@@ -82,7 +82,10 @@ Watermark::Watermark(
     AutoPtr<IPaintFontMetricsInt> fm;
     mTextPaint->GetFontMetricsInt((IPaintFontMetricsInt**)&fm);
     mTextPaint->MeasureText(mText, (Float*)&mTextWidth);
-    mTextHeight = mTextDescent - mTextAscent;
+    Int32 descent, ascent;
+    fm->GetDescent(&descent);
+    fm->GetAscent(&ascent);
+    mTextHeight = descent - ascent;
 
     mDeltaX = CWindowManagerService::GetPropertyInt(tokens, 2,
             ITypedValue::COMPLEX_UNIT_PX, mTextWidth * 2, dm);

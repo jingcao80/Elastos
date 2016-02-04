@@ -46,6 +46,15 @@ module
         Clear();
     }
 
+    interface IMagnificationSpecHelper {
+        Obtain(
+            [in] IMagnificationSpec* other,
+            [out] IMagnificationSpec** spec);
+
+        Obtain(
+            [out] IMagnificationSpec** spec);
+    }
+
     } // namespace View
     } // namepsace Droid
     } // namespace Elastos

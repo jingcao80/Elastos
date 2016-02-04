@@ -10,6 +10,7 @@
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Database::IContentObserver;
 
 namespace Elastos {
 namespace Droid {

@@ -8,7 +8,7 @@ module
 
     /** @hide */
     [deprecated]
-    interface IVibratorService {
+    interface IIVibratorService {
         HasVibrator(
             [out] Boolean* hasVibrator);
 

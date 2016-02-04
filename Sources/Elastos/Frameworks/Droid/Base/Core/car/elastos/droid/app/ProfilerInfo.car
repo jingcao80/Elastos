@@ -25,7 +25,7 @@ module
         GetProfileFd(
             [out] IParcelFileDescriptor** fd);
 
-        SetProfiledFd(
+        SetProfileFd(
             [in] IParcelFileDescriptor* fd);
 
         /* Indicates sample profiling when nonzero, interval in microseconds. */

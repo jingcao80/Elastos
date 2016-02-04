@@ -2,19 +2,16 @@
 #define __ELASTOS_DROID_SERVER_PM_PACKAGEVERIFICATIONRESPONSE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Pm {
 
-class PackageVerificationResponse
-    : public ElRefBase
-    , public IInterface
+class PackageVerificationResponse : public Object
 {
 public:
-    CAR_INTERFACE_DECL()
-
     PackageVerificationResponse(
         /* [in] */ Int32 code,
         /* [in] */ Int32 callerUid)

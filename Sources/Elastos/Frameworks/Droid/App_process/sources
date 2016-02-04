@@ -5,6 +5,7 @@ TARGET_TYPE = ecx
 IMPORTS = Elastos.Droid.Core.eco
 
 SOURCES = app_main.cpp
+SOURCES += Elastos.Droid.Core.cpp
 SOURCES += Elastos.CoreLibrary.cpp
 
 LIBRARIES += $(XDK_USER_LIB)/Elastos.Runtime.lib

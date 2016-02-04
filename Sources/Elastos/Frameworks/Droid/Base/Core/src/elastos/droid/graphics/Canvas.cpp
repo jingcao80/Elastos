@@ -215,10 +215,11 @@ ECode Canvas::SetBitmap(
     return NOERROR;
 }
 
-void Canvas::SetNativeBitmap(
+ECode Canvas::SetNativeBitmap(
     /* [in] */ Int64 bitmapHandle)
 {
     NativeSetBitmap(mNativeCanvasWrapper, bitmapHandle, FALSE);
+    return NOERROR;
 }
 
 /**

@@ -379,7 +379,7 @@ void ElRefBase::WeakRefType::IncWeak(const void* id)
 {
     WeakRefImpl* const impl = static_cast<WeakRefImpl*>(this);
     impl->AddWeakRef(id);
-    const Int32 c = atomic_inc(&impl->mWeak) - 1;
+    const Int32 c __attribute__((__unused__)) = atomic_inc(&impl->mWeak) - 1;
     ELA_ASSERT_WITH_BLOCK(c >= 0) {
         ALOGE(" > ElRefBase: incWeak called on %p after last weak ref", this);
     }

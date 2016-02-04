@@ -6,7 +6,7 @@
 #include "elastos/droid/server/am/BaseErrorDialog.h"
 #include "elastos/droid/server/am/ProcessRecord.h"
 #include "elastos/droid/server/am/CActivityManagerService.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include "elastos/droid/os/Handler.h"
 
 using Elastos::Core::ICharSequence;
 using Elastos::Droid::Content::IContext;
@@ -20,7 +20,7 @@ class AppWaitingForDebuggerDialog : public BaseErrorDialog
 {
 private:
     class MyHandler
-        : public HandlerBase
+        : public Handler
     {
     public:
         MyHandler(
@@ -41,7 +41,7 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ ProcessRecord* app);
 
-    void OnStop();
+    CARAPI OnStop();
 
 public:
     CActivityManagerService* mService;  // weak-ref

@@ -3,12 +3,17 @@
 #define __ELASTOS_DROID_SERVER_PM_CPACKAGEINSTALLERSESSION_H__
 
 #include "_Elastos_Droid_Server_Pm_CPackageInstallerSession.h"
-#include "elastos/droid/server/pm/CPackageInstallerService.h"
+#include "elastos/droid/server/pm/CPackageManagerService.h"
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 
+using Elastos::Droid::Content::IIntentSender;
 using Elastos::Droid::Content::Pm::IIPackageInstallerSession;
+using Elastos::Droid::Content::Pm::IPackageInstallerSessionParams;
+using Elastos::Droid::Content::Pm::IPackageInstallerSessionInfo;
+using Elastos::Droid::Content::Pm::IIPackageInstallObserver2;
 using Elastos::Droid::Os::IHandlerCallback;
 using Elastos::Droid::Os::IFileBridge;
+using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
 
 namespace Elastos {
@@ -17,6 +22,7 @@ namespace Server {
 namespace Pm {
 
 class CLocalObserver;
+class InternalCallback;
 
 CarClass(CPackageInstallerSession)
     , public Object
@@ -24,13 +30,13 @@ CarClass(CPackageInstallerSession)
     , public IBinder
 {
 private:
-    class HandlerCallBack
+    class MyHandlerCallBack
         : public Object
         , public IHandlerCallback
     {
     public:
-        HandlerCallBack(
-            /* [in] */ CPackageInstallerSession* host);
+        MyHandlerCallBack(
+            /* [in] */ CPackageInstallerSession* host)
             : mHost(host)
         {}
 
@@ -80,7 +86,7 @@ public:
         /* [in] */ Float progress);
 
     CARAPI GetNames(
-        /* [out, callee] */ ArrayOf<String>* names);
+        /* [out, callee] */ ArrayOf<String>** names);
 
     CARAPI OpenWrite(
         /* [in] */ const String& name,
@@ -104,6 +110,9 @@ public:
 
     CARAPI Abandon();
 
+    CARAPI ToString(
+        /* [out] */ String* str);
+
 private:
     CARAPI AssertPreparedAndNotSealed(
         /* [in] */ const String& cookie);
@@ -114,7 +123,7 @@ private:
      * until someone actively works with the session.
      */
     CARAPI ResolveStageDir(
-        /* [out] */ IFile* dir);
+        /* [out] */ IFile** dir);
 
     CARAPI_(void) ComputeProgressLocked(
         /* [in] */ Boolean forcePublish);
@@ -203,7 +212,7 @@ private:
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
 
-    AutoPtr<CPackageInstallerService::InternalCallback> mCallback;
+    AutoPtr<InternalCallback> mCallback;
     AutoPtr<IContext> mContext;
     AutoPtr<CPackageManagerService> mPm;
     AutoPtr<IHandler> mHandler;
@@ -266,7 +275,7 @@ private:
 
     AutoPtr<IHandlerCallback> mHandlerCallback;
 
-    Int32 mErrorCode;
+    static Int32 sErrorCode;
 
     friend class HandlerCallBack;
     friend class CLocalObserver;

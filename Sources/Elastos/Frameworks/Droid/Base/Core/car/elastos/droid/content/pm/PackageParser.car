@@ -1,0 +1,61 @@
+
+module
+{
+    interface Elastos.IO.IFile;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * Lightweight parsed details about a single package.
+     */
+    interface IPackageLite {
+        GetPackageName(
+            [out] String* name);
+
+        GetVersionCode(
+            [out] Int32* code);
+
+        GetInstallLocation(
+            [out] Int32* location);
+
+        GetVerifiers(
+            [out, callee] ArrayOf<IVerifierInfo*> * verifiers);
+
+        GetSplitNames(
+            [out, callee] ArrayOf<String> * splitNames);
+
+        GetCodePath(
+            [out] String* path);
+
+        GetBaseCodePath(
+            [out] String* path);
+
+        GetSplitCodePaths(
+            [out, callee] ArrayOf<String> * paths);
+
+        GetCoreApp(
+            [out] Boolean* app);
+
+        GetMultiArch(
+            [out] Boolean* arch);
+    }
+
+    interface IPackageParserHelper {
+        IsApkFile(
+            [in] IFile* file,
+            [out] Boolean* res);
+
+        ParsePackageLite(
+            [in] IFile* packageFile,
+            [in] Int32 flags,
+            [out] IPackageLite** res);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

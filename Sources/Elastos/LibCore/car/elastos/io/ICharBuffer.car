@@ -401,7 +401,7 @@ module
          * @return this buffer.
          * implements ICharSequence::AppendChar, same as Append(Char32 c)
          */
-        Append(
+        AppendChar(
             [in] Char32 c);
 
         Append(

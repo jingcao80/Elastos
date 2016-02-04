@@ -2,16 +2,22 @@
 #ifndef __ELASTOS_DROID_OPENGL_CETC1_H__
 #define __ELASTOS_DROID_OPENGL_CETC1_H__
 
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.Droid.Opengl.h"
 #include "_Elastos_Droid_Opengl_CETC1.h"
-#include <cmdef.h>
+
+#include <elastos/core/Singleton.h>
 
 using Elastos::IO::IBuffer;
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
 
 CarClass(CETC1)
+    , public Singleton
+    , public IETC1
 {
 private:
     class BufferHelper
@@ -58,6 +64,10 @@ private:
         Int32 mRemaining;
     };
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
+
     CARAPI EncodeBlock(
         /* [in] */ Elastos::IO::IBuffer* inBuf,
         /* [in] */ Int32 validPixelMask,

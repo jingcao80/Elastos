@@ -32,6 +32,7 @@ ECode WebVttTrack::constructor(
 {
     SubtitleTrack::constructor(format);
     mRenderingWidget = (WebVttRenderingWidget*)renderingWidget;
+    return NOERROR;
 }
 
 ECode WebVttTrack::GetRenderingWidget(

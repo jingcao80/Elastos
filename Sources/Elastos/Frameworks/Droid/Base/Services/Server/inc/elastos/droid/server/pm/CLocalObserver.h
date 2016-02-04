@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_SERVER_PM_CLOCALOBSERVER_H__
 
 #include "_Elastos_Droid_Server_Pm_CLocalObserver.h"
-#include "pm/CPackageInstallerSession.h"
+#include "elastos/droid/server/pm/CPackageInstallerSession.h"
 
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinder;
@@ -25,7 +25,7 @@ public:
 
     CAR_OBJECT_DECL()
 
-    constructor(
+    CARAPI constructor(
         /* [in] */ IIPackageInstallerSession* host);
 
     CARAPI OnUserActionRequired(
@@ -36,6 +36,9 @@ public:
         /* [in] */ Int32 returnCode,
         /* [in] */ const String& msg,
         /* [in] */ IBundle* extras);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     CPackageInstallerSession* mHost;

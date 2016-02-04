@@ -12,6 +12,7 @@ using Elastos::Core::StringUtils;
 using Elastos::IO::IInputStreamReader;
 using Elastos::IO::CInputStreamReader;
 using Elastos::IO::EIID_ICloseable;
+using Org::Xmlpull::V1::EIID_IXmlPullParser;
 
 namespace Org {
 namespace Kxml2 {
@@ -117,7 +118,7 @@ CKXmlParser::ContentSource::ContentSource(
     , mLimit(limit)
 {}
 
-CAR_INTERFACE_IMPL_2(CKXmlParser, Object, IKXmlParser, ICloseable)
+CAR_INTERFACE_IMPL_3(CKXmlParser, Object, IKXmlParser, IXmlPullParser, ICloseable)
 CAR_OBJECT_IMPL(CKXmlParser)
 
 CKXmlParser::CKXmlParser()
@@ -1987,7 +1988,7 @@ ECode CKXmlParser::SetInput(
     Int32 savedLimit = mLimit;
     AutoPtr<IInputStreamReader> reader;
     CInputStreamReader::New(is, charset, (IInputStreamReader**)&reader);
-    SetInput((IReader*)reader.Get());
+    SetInput(IReader::Probe(reader));
     mEncoding = charset;
     mLimit = savedLimit;
 

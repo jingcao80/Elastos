@@ -1,5 +1,6 @@
 
 #include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"
+#include <elastos/core/Math.h>
 #include <elastos/core/StringBuffer.h>
 
 using Elastos::Core::StringBuffer;
@@ -53,8 +54,7 @@ ECode HashCodeHelpers::GetHashCode(
     Int32 h = 1;
     for (Int32 i = 0; i < array->GetLength(); i++) {
         Float f = (*array)[i];
-        assert(0 && "TODO: need FloatToIntBits");
-        Int32 x;// = Float::FloatToIntBits(f);
+        Int32 x = Elastos::Core::Math::FloatToInt32Bits(f);
         h = ((h << 5) - h) ^ x; // (h * 31) XOR x
     }
 

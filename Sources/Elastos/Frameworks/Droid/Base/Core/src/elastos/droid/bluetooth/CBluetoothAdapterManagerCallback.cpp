@@ -1,12 +1,23 @@
 
-#include "CBluetoothAdapterManagerCallback.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapterManagerCallback.h"
+#include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Bluetooth {
+
+CAR_INTERFACE_IMPL_2(CBluetoothAdapterManagerCallback, Object, IIBluetoothManagerCallback, IBinder);
+
+CAR_OBJECT_IMPL(CBluetoothAdapterManagerCallback);
+
+CBluetoothAdapterManagerCallback::CBluetoothAdapterManagerCallback()
+{
+}
 
 ECode CBluetoothAdapterManagerCallback::OnBluetoothServiceUp(
     /* [in] */ IIBluetooth* bluetoothService)

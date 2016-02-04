@@ -14,7 +14,7 @@ ECode CInputMethodManagerServiceUserSwitchObserver::constructor(
 
 ECode CInputMethodManagerServiceUserSwitchObserver::OnUserSwitching(
     /* [in] */ Int32 newUserId,
-    /* [in] */ IRemoteCallback* reply)
+    /* [in] */ IIRemoteCallback* reply)
 {
     {
         AutoLock lock(mHost->mMethodMapLock);

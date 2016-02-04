@@ -1,19 +1,41 @@
 
-#include "NativeDaemonConnector.h"
+#include "elastos/droid/server/NativeDaemonConnector.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Handler.h"
-#include "Elastos.Droid.Server_server.h"
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringUtils.h>
+#include "elastos/droid/os/Build.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/Thread.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Net.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Net.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
 
+using Elastos::Droid::Os::IHandlerThread;
+using Elastos::Droid::Os::CHandlerThread;
+using Elastos::Droid::Os::EIID_IHandlerCallback;
+using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::Build;
+using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::IMessageHelper;
+using Elastos::Droid::Os::CMessageHelper;
+using Elastos::Droid::Net::ILocalSocket;
+using Elastos::Droid::Net::CLocalSocket;
+using Elastos::Droid::Net::CLocalSocketAddress;
+using Elastos::Droid::Net::LocalSocketAddressNamespace_RESERVED;
 using Elastos::Core::StringUtils;
+using Elastos::Core::StringBuilder;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IInteger64;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Core::Thread;
 using Elastos::Core::IThread;
+using Elastos::Core::EIID_IRunnable;
 using Elastos::IO::IInputStream;
 using Elastos::IO::ICloseable;
 using Elastos::Utility::Concurrent::IArrayBlockingQueue;
@@ -23,23 +45,12 @@ using Elastos::Utility::Concurrent::ITimeUnitHelper;
 using Elastos::Utility::Concurrent::CTimeUnitHelper;
 using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
 using Elastos::Utility::Logging::Slogger;
-using Elastos::Droid::Net::ILocalSocket;
-using Elastos::Droid::Net::CLocalSocket;
-using Elastos::Droid::Net::ILocalSocketAddress;
-using Elastos::Droid::Net::CLocalSocketAddress;
-using Elastos::Droid::Net::LocalSocketAddressNamespace_RESERVED;
-using Elastos::Droid::Os::IHandlerThread;
-using Elastos::Droid::Os::CHandlerThread;
-using Elastos::Droid::Os::EIID_IHandlerCallback;
-using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Os::CHandler;
-using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::Os::IMessageHelper;
-using Elastos::Droid::Os::CMessageHelper;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
+
+CAR_INTERFACE_IMPL(NativeDaemonConnector::SensitiveArg, Object, ISensitiveArg)
 
 //==============================================================================
 // NativeDaemonConnector::Command
@@ -69,10 +80,9 @@ NativeDaemonConnector::ResponseQueue::PendingCmd::PendingCmd(
     /* [in] */ Int32 c,
     /* [in] */ const String& r)
     : mCmdNum(c)
-    , mRequest(r)
+    , mLogCmd(r)
 {
-    //CArrayBlockingQueue::New(10, (IArrayBlockingQueue**)&mResponses);
-    //assert(mResponses != NULL);
+    CArrayBlockingQueue::New(10, (IBlockingQueue**)&mResponses);
 }
 
 //==============================================================================
@@ -110,7 +120,7 @@ void NativeDaemonConnector::ResponseQueue::Add(
                 AutoPtr<PendingCmd> pendingCmd = *mPendingCmds.Begin();
                 mPendingCmds.PopFront();
 //                Slog.e("NativeDaemonConnector.ResponseQueue",
-//                        "Removing request: " + pendingCmd.request + " (" +
+//                        "Removing request: " + pendingCmd.mLogCmd + " (" +
 //                        pendingCmd.cmdNum + ")");
             }
             found = new PendingCmd(cmdNum, String(NULL));
@@ -122,17 +132,15 @@ void NativeDaemonConnector::ResponseQueue::Add(
         if (found->mAvailableResponseCount == 0) mPendingCmds.Remove(found);
     }
 //    try {
-    // TODO: delete
-    AutoLock lock(found->mResponsesLock);
-    found->mResponses.Push(response);
-    //found->mResponses->Put(response->Probe(EIID_IInterface));
+    AutoLock lock(found->mResponses);
+    found->mResponses->Put(TO_IINTERFACE(response));
 //    } catch (InterruptedException e) { }
 }
 
 AutoPtr<NativeDaemonEvent> NativeDaemonConnector::ResponseQueue::Remove(
     /* [in] */ Int32 cmdNum,
     /* [in] */ Int32 timeoutMs,
-    /* [in] */ const String& origCmd)
+    /* [in] */ const String& logCmd)
 {
     AutoPtr<PendingCmd> found;
     {
@@ -147,7 +155,7 @@ AutoPtr<NativeDaemonEvent> NativeDaemonConnector::ResponseQueue::Remove(
             }
         }
         if (found == NULL) {
-            found = new PendingCmd(cmdNum, origCmd);
+            found = new PendingCmd(cmdNum, logCmd);
             mPendingCmds.PushBack(found);
         }
         found->mAvailableResponseCount--;
@@ -156,37 +164,21 @@ AutoPtr<NativeDaemonEvent> NativeDaemonConnector::ResponseQueue::Remove(
         if (found->mAvailableResponseCount == 0) mPendingCmds.Remove(found);
     }
 
-
     AutoPtr<NativeDaemonEvent> result;
-    // TODO:delete
-    AutoPtr<IThread> thread;
-    Thread::Attach((IThread**)&thread);
-    do {
-        {
-            AutoLock lock(found->mResponsesLock);
-            if (!found->mResponses.IsEmpty()) {
-                result = found->mResponses.GetFront();
-                found->mResponses.Pop();
-                break;
-            }
-        }
-        SystemClock::Sleep(1000);
-        timeoutMs -= 1000;
-    } while (timeoutMs > 0);
 
 //    try {
-    //AutoPtr<ITimeUnitHelper> helper;
-    //CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
-    //AutoPtr<ITimeUnit> MILLISECONDS;
-    //helper->GetMILLISECONDS((ITimeUnit**)&MILLISECONDS);
-    //AutoPtr<IInterface> obj;
-    //found->mResponses->Poll(timeoutMs, MILLISECONDS, (IInterface**)&obj);
-    // if (obj != NULL) {
-    //     result = reinterpret_cast<NativeDaemonEvent*>(obj->Probe(EIID_NativeDaemonEvent));
-    // }
+    AutoPtr<ITimeUnitHelper> helper;
+    CTimeUnitHelper::AcquireSingleton((ITimeUnitHelper**)&helper);
+    AutoPtr<ITimeUnit> MILLISECONDS;
+    helper->GetMILLISECONDS((ITimeUnit**)&MILLISECONDS);
+    AutoPtr<IInterface> obj;
+    ECode ec = found->mResponses->Poll(timeoutMs, MILLISECONDS, (IInterface**)&obj);
 //    } catch (InterruptedException e) {}
-    if (result == NULL) {
+    if (obj == NULL || ec == (ECode)E_INTERRUPTED_EXCEPTION) {
         Slogger::E("NativeDaemonConnector.ResponseQueue", "Timeout waiting for response");
+    }
+    else {
+        result = (NativeDaemonEvent*)IObject::Probe(obj);
     }
     return result;
 }
@@ -212,80 +204,58 @@ void NativeDaemonConnector::ResponseQueue::Dump(
 // NativeDaemonConnector
 //==============================================================================
 
+const Boolean NativeDaemonConnector::LOGD = FALSE;
+const Boolean NativeDaemonConnector::VDBG = FALSE;
 const Int32 NativeDaemonConnector::DEFAULT_TIMEOUT;
 const Int64 NativeDaemonConnector::WARN_EXECUTE_DELAY_MS;
 const Int32 NativeDaemonConnector::BUFFER_SIZE;
-const Boolean NativeDaemonConnector::LOGD = FALSE;
+
+CAR_INTERFACE_IMPL_2(NativeDaemonConnector, Object, IRunnable, IHandlerCallback)
 
 NativeDaemonConnector::NativeDaemonConnector(
     /* [in] */ INativeDaemonConnectorCallbacks* callbacks,
     /* [in] */ const String& socket,
     /* [in] */ Int32 responseQueueSize,
     /* [in] */ const String& logTag,
-    /* [in] */ Int32 maxLogSize)
+    /* [in] */ Int32 maxLogSize,
+    /* [in] */ IPowerManagerWakeLock* wl)
     : mSocket(socket)
     , mCallbacks(callbacks)
 {
     mResponseQueue = new ResponseQueue(responseQueueSize);
+    if (mWakeLock != NULL) {
+        mWakeLock->SetReferenceCounted(TRUE);
+    }
     CAtomicInteger32::New(0, (IAtomicInteger32**)&mSequenceNumber);
-    TAG = !logTag.IsNull() ? logTag : String("NativeDaemonConnector");
-//    mLocalLog = new LocalLog(maxLogSize);
+    TAG = logTag != NULL ? logTag : String("NativeDaemonConnector");
+    // mLocalLog = new LocalLog(maxLogSize);
 }
 
-PInterface NativeDaemonConnector::Probe(
-    /* [in] */ REIID riid)
+NativeDaemonConnector::NativeDaemonConnector(
+    /* [in] */ INativeDaemonConnectorCallbacks* callbacks,
+    /* [in] */ const String& socket,
+    /* [in] */ Int32 responseQueueSize,
+    /* [in] */ const String& logTag,
+    /* [in] */ Int32 maxLogSize,
+    /* [in] */ IPowerManagerWakeLock* wl,
+    /* [in] */ ILooper* looper)
+    : mSocket(socket)
+    , mCallbacks(callbacks)
 {
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IRunnable*)this;
+    mResponseQueue = new ResponseQueue(responseQueueSize);
+    mWakeLock = wl;
+    if (mWakeLock != NULL) {
+        mWakeLock->SetReferenceCounted(TRUE);
     }
-    else if (riid == Elastos::Core::EIID_IRunnable) {
-        return (IRunnable*)this;
-    }
-    else if (riid == Elastos::Droid::Os::EIID_IHandlerCallback) {
-        return (IHandlerCallback*)this;
-    }
-    else if (riid == EIID_IWeakReferenceSource) {
-        return (IWeakReferenceSource*)this;
-    }
-
-    return NULL;
-}
-
-UInt32 NativeDaemonConnector::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 NativeDaemonConnector::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode NativeDaemonConnector::GetInterfaceID(
-    /* [in] */ IInterface* pObject,
-    /* [in] */ InterfaceID* pIID)
-{
-    assert(0);
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode NativeDaemonConnector::GetWeakReference(
-    /* [out] */ IWeakReference** weakReference)
-{
-    VALIDATE_NOT_NULL(weakReference)
-    *weakReference = new WeakReferenceImpl(Probe(EIID_IInterface), CreateWeak(this));
-    REFCOUNT_ADD(*weakReference)
-    return NOERROR;
+    mLooper = looper;
+    CAtomicInteger32::New(0, (IAtomicInteger32**)&mSequenceNumber);
+    TAG = logTag != NULL ? logTag : String("NativeDaemonConnector");
+    // mLocalLog = new LocalLog(maxLogSize);
 }
 
 ECode NativeDaemonConnector::Run()
 {
-    AutoPtr<IHandlerThread> thread;
-    CHandlerThread::New(TAG + String(".CallbackHandler"), (IHandlerThread**)&thread);
-    thread->Start();
-    AutoPtr<ILooper> looper;
-    thread->GetLooper((ILooper**)&looper);
-    CHandler::New(looper, THIS_PROBE(IHandlerCallback), FALSE, (IHandler**)&mCallbackHandler);
+    CHandler::New(mLooper, THIS_PROBE(IHandlerCallback), FALSE, (IHandler**)&mCallbackHandler);
 
     while (TRUE) {
 //        try {
@@ -309,8 +279,8 @@ ECode NativeDaemonConnector::HandleMessage(
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
-    Int32 code;
-    msg->GetWhat(&code);
+    Int32 what;
+    msg->GetWhat(&what);
     AutoPtr<IInterface> obj;
     msg->GetObj((IInterface**)&obj);
     ICharSequence* seq = ICharSequence::Probe(obj);
@@ -320,7 +290,7 @@ ECode NativeDaemonConnector::HandleMessage(
 
 //    try {
     Boolean bval;
-    ECode ec = mCallbacks->OnEvent(code, event, *NativeDaemonEvent::UnescapeArgs(event), &bval);
+    ECode ec = mCallbacks->OnEvent(what, event, NativeDaemonEvent::UnescapeArgs(event), &bval);
     if (FAILED(ec)) {
         Slogger::E(TAG, "Error handling event [%s]", event.string());
     }
@@ -333,7 +303,27 @@ ECode NativeDaemonConnector::HandleMessage(
     if (result) {
         *result = bval;
     }
+
+    mCallbacks->OnCheckHoldWakeLock(what, &bval);
+    if (bval && mWakeLock != NULL) {
+        mWakeLock->ReleaseLock();
+    }
     return NOERROR;
+}
+
+AutoPtr<ILocalSocketAddress> NativeDaemonConnector::DetermineSocketAddress()
+{
+    AutoPtr<ILocalSocketAddress> lsa;
+    // If we're testing, set up a socket in a namespace that's accessible to test code.
+    // In order to ensure that unprivileged apps aren't able to impersonate native daemons on
+    // production devices, even if said native daemons ill-advisedly pick a socket name that
+    // starts with __test__, only allow this on debug builds.
+    if (mSocket.StartWith("__test__") && Build::IS_DEBUGGABLE) {
+        CLocalSocketAddress::New(mSocket, (ILocalSocketAddress**)&lsa);
+    } else {
+        CLocalSocketAddress::New(mSocket, LocalSocketAddressNamespace_RESERVED, (ILocalSocketAddress**)&lsa);
+    }
+    return lsa;
 }
 
 ECode NativeDaemonConnector::ListenToSocket()
@@ -342,13 +332,11 @@ ECode NativeDaemonConnector::ListenToSocket()
 
 //    try {
     FAIL_RETURN(CLocalSocket::New((ILocalSocket**)&socket));
-    AutoPtr<ILocalSocketAddress> socketAddress;
-    CLocalSocketAddress::New(mSocket, LocalSocketAddressNamespace_RESERVED,
-        (ILocalSocketAddress**)&socketAddress);
+    AutoPtr<ILocalSocketAddress> socketAddress = DetermineSocketAddress();
 
     ECode ec = socket->Connect(socketAddress);
     if (FAILED(ec)) {
-        socket->Close();
+        ICloseable::Probe(socket)->Close();
         return ec;
     }
 
@@ -367,11 +355,11 @@ ECode NativeDaemonConnector::ListenToSocket()
 
     AutoPtr<IMessageHelper> helper;
     CMessageHelper::AcquireSingleton((IMessageHelper**)&helper);
-    Boolean result;
+    Boolean bval;
 
     while (TRUE) {
         Int32 count;
-        ec = inputStream->ReadBytes(buffer, start, BUFFER_SIZE - start, &count);
+        ec = inputStream->Read(buffer, start, BUFFER_SIZE - start, &count);
         if (FAILED(ec)) {
             goto _EXIT_;
         }
@@ -391,6 +379,7 @@ ECode NativeDaemonConnector::ListenToSocket()
                 String rawEvent((char*)buffer->GetPayload() + start, i - start);
                 if (LOGD) Slogger::D(TAG, "RCV <- {%s}", rawEvent.string());
 
+                Boolean releaseWl = FALSE;
 //                try {
                 AutoPtr<NativeDaemonEvent> event;
                 ec = NativeDaemonEvent::ParseRawEvent(rawEvent, (NativeDaemonEvent**)&event);
@@ -399,11 +388,20 @@ ECode NativeDaemonConnector::ListenToSocket()
                 }
                 if (event->IsClassUnsolicited()) {
                     // TODO: migrate to sending NativeDaemonEvent instances
+                    Int32 code = event->GetCode();
+                    mCallbacks->OnCheckHoldWakeLock(code, &bval);
+                    if (bval && mWakeLock != NULL) {
+                        mWakeLock->AcquireLock();
+                        releaseWl = TRUE;
+                    }
                     AutoPtr<ICharSequence> seq;
                     CString::New(event->GetRawEvent(), (ICharSequence**)&seq);
                     AutoPtr<IMessage> msg;
-                    helper->Obtain(mCallbackHandler, event->GetCode(), seq, (IMessage**)&msg);
-                    mCallbackHandler->SendMessage(msg, &result);
+                    mCallbackHandler->ObtainMessage(code, seq.Get(), (IMessage**)&msg);
+                    mCallbackHandler->SendMessage(msg, &bval);
+                    if (bval) {
+                        releaseWl = FALSE;
+                    }
                 }
                 else {
                     mResponseQueue->Add(event->GetCmdNumber(), event);
@@ -411,7 +409,12 @@ ECode NativeDaemonConnector::ListenToSocket()
 //                } catch (IllegalArgumentException e) {
 //                    log("Problem parsing message: " + rawEvent + " - " + e);
 //                }
-
+                // finally
+                {
+                    if (releaseWl) {
+                        mWakeLock->AcquireLock();
+                    }
+                }
                 start = i + 1;
             }
         }
@@ -454,7 +457,7 @@ _EXIT_:
     }
     // try {
     if (socket != NULL) {
-        socket->Close();
+        ICloseable::Probe(socket)->Close();
         socket = NULL;
     }
     // } catch (IOException ex) {
@@ -487,70 +490,52 @@ _EXIT_:
     return ec;
 }
 
-/**
-* Make command for daemon, escaping arguments as needed.
-*/
 ECode NativeDaemonConnector::MakeCommand(
-    /* [in] */ StringBuilder& builder,
+    /* [in] */ StringBuilder& rawBuilder,
+    /* [in] */ StringBuilder& logBuilder,
+    /* [in] */ Int32 sequenceNumber,
     /* [in] */ const String& cmd,
     /* [in] */ ArrayOf<IInterface*>* args)
 {
-    // TODO: eventually enforce that cmd doesn't contain arguments
-    if (cmd.IndexOf(Char32('\0')) >= 0) {
-        Slogger::E(TAG, "MakeCommand: unexpected command: %s", cmd.string());
+    if (cmd.IndexOf((Char32)'\0') >= 0) {
+        Slogger::E(TAG, "Unexpected command: %s", cmd.string());
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (cmd.IndexOf((Char32)' ') >= 0) {
+        Slogger::E(TAG, "Arguments must be separate from command");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    builder.AppendString(cmd);
-    if (args != NULL) {
-        for (Int32 i = 0; i < args->GetLength(); i++) {
-            AutoPtr<IInterface> arg = (*args)[i];
-            String argString;// final String argString = String.valueOf(arg);
-            if (arg == NULL) {
-                argString = "NULL";
-            }
-            else if (ICharSequence::Probe(arg) != NULL) {
-                AutoPtr<ICharSequence> valueOfarg = ICharSequence::Probe(arg);
-                valueOfarg->ToString(&argString);
-            }
-            else if (IInteger32::Probe(arg) != NULL) {
-                AutoPtr<IInteger32> valueOfarg = IInteger32::Probe(arg);
-                Int32 num;
-                valueOfarg->GetValue(&num);
-                argString = StringUtils::ToString(num);
-            }
-            else if (IInteger64::Probe(arg) != NULL) {
-                AutoPtr<IInteger64> valueOfarg = IInteger64::Probe(arg);
-                Int64 num;
-                valueOfarg->GetValue(&num);
-                argString = StringUtils::ToString(num);
-            }
-            else {
-                Slogger::E(TAG, "MakeCommand: unexpected argument type!");
-                assert(0);
-            }
+    rawBuilder.Append(sequenceNumber);
+    rawBuilder.Append(" ");
+    rawBuilder.Append(cmd);
+    logBuilder.Append(sequenceNumber);
+    logBuilder.Append(" ");
+    logBuilder.Append(cmd);
+    for (Int32 i = 0; i < args->GetLength(); ++i) {
+        IInterface* arg = (*args)[i];
+        String argString = Object::ToString(arg);
+        if (argString.IndexOf((Char32)'\0') >= 0) {
+            Slogger::E(TAG, "Unexpected argument: %s", argString.string());
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
 
-            if (argString.IndexOf(Char32('\0')) >= 0) {
-                Slogger::E(TAG, "MakeCommand: unexpected argument %s!", argString.string());
-                return E_ILLEGAL_ARGUMENT_EXCEPTION;
-            }
+        rawBuilder.Append(" ");
+        logBuilder.Append(" ");
 
-            builder.AppendChar(' ');
-            AppendEscaped(builder, argString);
+        AppendEscaped(rawBuilder, argString);
+        if (ISensitiveArg::Probe(arg) != NULL) {
+            logBuilder.Append("[scrubbed]");
+        }
+        else {
+            AppendEscaped(logBuilder, argString);
         }
     }
+
+    rawBuilder.AppendChar('\0');
     return NOERROR;
 }
 
-/**
-* Issue the given command to the native daemon and return a single expected
-* response.
-*
-* @throws NativeDaemonConnectorException when problem communicating with
-*             native daemon, or if the response matches
-*             {@link NativeDaemonEvent#isClassClientError()} or
-*             {@link NativeDaemonEvent#isClassServerError()}.
-*/
 ECode NativeDaemonConnector::Execute(
     /* [in] */ Command* cmd,
     /* [out] */ NativeDaemonEvent** event)
@@ -568,15 +553,6 @@ ECode NativeDaemonConnector::Execute(
     return Execute(cmd->mCmd, argsArray, event);
 }
 
-/**
-* Issue the given command to the native daemon and return a single expected
-* response.
-*
-* @throws NativeDaemonConnectorException when problem communicating with
-*             native daemon, or if the response matches
-*             {@link NativeDaemonEvent#isClassClientError()} or
-*             {@link NativeDaemonEvent#isClassServerError()}.
-*/
 ECode NativeDaemonConnector::Execute(
     /* [in] */ const String& cmd,
     /* [in] */ const String& arg,
@@ -612,16 +588,6 @@ ECode NativeDaemonConnector::Execute(
     return NOERROR;
 }
 
-/**
-* Issue the given command to the native daemon and return any
-* {@link NativeDaemonEvent#isClassContinue()} responses, including the
-* final terminal response.
-*
-* @throws NativeDaemonConnectorException when problem communicating with
-*             native daemon, or if the response matches
-*             {@link NativeDaemonEvent#isClassClientError()} or
-*             {@link NativeDaemonEvent#isClassServerError()}.
-*/
 ECode NativeDaemonConnector::ExecuteForList(
     /* [in] */ Command* cmd,
     /* [out, callee] */ ArrayOf<NativeDaemonEvent*>** events)
@@ -639,16 +605,6 @@ ECode NativeDaemonConnector::ExecuteForList(
     return ExecuteForList(cmd->mCmd, argsArray, events);
 }
 
-/**
-* Issue the given command to the native daemon and return any
-* {@link NativeDaemonEvent#isClassContinue()} responses, including the
-* final terminal response.
-*
-* @throws NativeDaemonConnectorException when problem communicating with
-*             native daemon, or if the response matches
-*             {@link NativeDaemonEvent#isClassClientError()} or
-*             {@link NativeDaemonEvent#isClassServerError()}.
-*/
 ECode NativeDaemonConnector::ExecuteForList(
     /* [in] */ const String& cmd,
     /* [in] */ ArrayOf<IInterface*>* args,
@@ -657,17 +613,6 @@ ECode NativeDaemonConnector::ExecuteForList(
     return Execute(DEFAULT_TIMEOUT, cmd, args, events);
 }
 
-/**
-* Issue the given command to the native daemon and return any
-* {@linke NativeDaemonEvent@isClassContinue()} responses, including the
-* final terminal response.  Note that the timeout does not count time in
-* deep sleep.
-*
-* @throws NativeDaemonConnectorException when problem communicating with
-*             native daemon, or if the response matches
-*             {@link NativeDaemonEvent#isClassClientError()} or
-*             {@link NativeDaemonEvent#isClassServerError()}.
-*/
 ECode NativeDaemonConnector::Execute(
     /* [in] */ Int32 timeout,
     /* [in] */ const String& cmd,
@@ -677,21 +622,20 @@ ECode NativeDaemonConnector::Execute(
     VALIDATE_NOT_NULL(eventsArray);
     *eventsArray = NULL;
 
+    Int64 startTime = SystemClock::GetElapsedRealtime();
     List< AutoPtr<NativeDaemonEvent> > events;
 
+    StringBuilder rawBuilder;
+    StringBuilder logBuilder;
     Int32 sequenceNumber;
     mSequenceNumber->IncrementAndGet(&sequenceNumber);
-    StringBuilder cmdBuilder(StringUtils::Int32ToString(sequenceNumber));
-    cmdBuilder.AppendChar(' ');
-    const Int64 startTime = SystemClock::GetElapsedRealtime();
 
-    MakeCommand(cmdBuilder, cmd, args);
+    MakeCommand(rawBuilder, logBuilder, sequenceNumber, cmd, args);
 
-    String logCmd = cmdBuilder.ToString(); /* includes cmdNum, cmd, args */
+    String rawCmd = rawBuilder.ToString();
+    String logCmd = logBuilder.ToString();
+
     if (LOGD) Slogger::D(TAG, "Execute: SND -> [%s]", logCmd.string());
-
-    cmdBuilder.AppendChar('\0');
-    String sentCmd = cmdBuilder.ToString(); /* logCmd + \0 */
 
     {
         AutoLock lock(mDaemonLock);
@@ -703,7 +647,8 @@ ECode NativeDaemonConnector::Execute(
             return E_NATIVE_DAEMON_CONNECTOR_EXCEPTION;
         }
         else {
-            ECode ec = mOutputStream->WriteBytes(ArrayOf<Byte>((Byte*)(sentCmd.string()), sentCmd.GetByteLength() + 1));
+            AutoPtr<ArrayOf<Byte> > bytes = rawCmd.GetBytes();
+            ECode ec = mOutputStream->Write(bytes);
             if (FAILED(ec)) {
                 *eventsArray = ArrayOf<NativeDaemonEvent*>::Alloc(0);
                 REFCOUNT_ADD(*eventsArray);
@@ -715,14 +660,14 @@ ECode NativeDaemonConnector::Execute(
 
     AutoPtr<NativeDaemonEvent> event;
     do {
-        event = mResponseQueue->Remove(sequenceNumber, timeout, sentCmd);
+        event = mResponseQueue->Remove(sequenceNumber, timeout, logCmd);
         if (event == NULL) {
             *eventsArray = ArrayOf<NativeDaemonEvent*>::Alloc(0);
             REFCOUNT_ADD(*eventsArray);
             Slogger::E(TAG, "timed-out waiting for response to %s.", logCmd.string());
             return E_NATIVE_DAEMON_CONNECTOR_EXCEPTION;
         }
-//        log("RMV <- {" + event + "}");
+//      if (VDBG) log("RMV <- {" + event + "}");
         events.PushBack(event);
     } while (event->IsClassContinue());
 
@@ -759,76 +704,6 @@ ECode NativeDaemonConnector::Execute(
     return NOERROR;
 }
 
-/**
-* Issue a command to the native daemon and return the raw responses.
-*
-* @deprecated callers should move to {@link #execute(String, Object...)}
-*             which returns parsed {@link NativeDaemonEvent}.
-*/
-ECode NativeDaemonConnector::DoCommand(
-    /* [in] */ const String& cmd,
-    /* [out] */ List<String>& responses)
-{
-    AutoPtr< ArrayOf<NativeDaemonEvent*> > events;
-    FAIL_RETURN(ExecuteForList(cmd, NULL, (ArrayOf<NativeDaemonEvent*>**)&events));
-    for (Int32 i = 0; i < events->GetLength(); ++i) {
-        responses.PushBack((*events)[i]->GetRawEvent());
-    }
-    return NOERROR;
-}
-
-/**
-* Issues a list command and returns the cooked list of all
-* {@link NativeDaemonEvent#getMessage()} which match requested code.
-*/
-ECode NativeDaemonConnector::DoListCommand(
-    /* [in] */ const String& cmd,
-    /* [in] */ Int32 expectedCode,
-    /* [out, callee] */ ArrayOf<String>** responses)
-{
-    VALIDATE_NOT_NULL(responses);
-    *responses = NULL;
-
-    List<String> list;
-
-    AutoPtr< ArrayOf<NativeDaemonEvent*> > events;
-    FAIL_RETURN(ExecuteForList(cmd, NULL, (ArrayOf<NativeDaemonEvent*>**)&events));
-    for (Int32 i = 0; i < events->GetLength(); ++i) {
-        AutoPtr<NativeDaemonEvent> event = (*events)[i];
-        Int32 code = event->GetCode();
-        if (code == expectedCode) {
-            list.PushBack(event->GetMessage());
-        }
-        else {
-            Slogger::E(TAG, "unexpected list response %d instead of %d.", code, expectedCode);
-            return E_NATIVE_DAEMON_CONNECTOR_EXCEPTION;
-//            throw new NativeDaemonConnectorException(
-//                    "unexpected list response " + code + " instead of " + expectedCode);
-        }
-    }
-
-    AutoPtr<NativeDaemonEvent> finalEvent = (*events)[events->GetLength() - 1];
-    if (!finalEvent->IsClassOk()) {
-        Slogger::E(TAG, "unexpected final event.");
-//        throw new NativeDaemonConnectorException("unexpected final event: " + finalEvent);
-        return E_NATIVE_DAEMON_CONNECTOR_EXCEPTION;
-    }
-
-    *responses = ArrayOf<String>::Alloc(list.GetSize());
-    REFCOUNT_ADD(*responses);
-    List<String>::Iterator it;
-    Int32 i;
-    for (it = list.Begin(), i = 0; it != list.End(); ++it, ++i) {
-        (**responses)[i] = *it;
-    }
-    return NOERROR;
-}
-
-/**
-* Append the given argument to {@link StringBuilder}, escaping as needed,
-* and surrounding with quotes when it contains spaces.
-*/
-// @VisibleForTesting
 void NativeDaemonConnector::AppendEscaped(
     /* [in] */ StringBuilder& builder,
     /* [in] */ const String& arg)
@@ -843,10 +718,10 @@ void NativeDaemonConnector::AppendEscaped(
         const Char32 c = arg.GetChar(i);
 
         if (c == '"') {
-            builder.AppendCStr("\\\"");
+            builder.Append("\\\"");
         }
         else if (c == '\\') {
-            builder.AppendCStr("\\\\");
+            builder.Append("\\\\");
         }
         else {
             builder.AppendChar(c);

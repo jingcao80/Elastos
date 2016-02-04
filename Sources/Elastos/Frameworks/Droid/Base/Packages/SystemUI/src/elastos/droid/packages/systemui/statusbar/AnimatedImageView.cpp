@@ -1,59 +1,62 @@
-#include "elastos/droid/systemui/statusbar/AnimatedImageView.h"
+
+#include "elastos/droid/packages/systemui/statusbar/AnimatedImageView.h"
 
 using Elastos::Droid::Graphics::Drawable::IAnimatable;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 
+CAR_INTERFACE_IMPL(AnimatedImageView, ImageView, IAnimatedImageView);
 AnimatedImageView::AnimatedImageView()
     : mAttached(FALSE)
 {}
 
-AnimatedImageView::AnimatedImageView(
+ECode AnimatedImageView::constructor(
     /* [in] */ IContext* context)
-    : ImageView(context)
-    , mAttached(FALSE)
-{}
+{
+    return ImageView::constructor(context);
+}
 
-AnimatedImageView::AnimatedImageView(
+ECode AnimatedImageView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
-    : ImageView(context, attrs)
-    , mAttached(FALSE)
-{}
+{
+    return ImageView::constructor(context, attrs);
+}
 
 ECode AnimatedImageView::SetImageResource(
     /* [in] */ Int32 resId)
 {
-    ECode ec = ImageView::SetImageResource(resId);
+    ImageView::SetImageResource(resId);
     UpdateAnim();
-    return ec;
+    return NOERROR;
 }
 
 ECode AnimatedImageView::SetImageDrawable(
     /* [in] */ IDrawable* drawable)
 {
-    ECode ec = ImageView::SetImageDrawable(drawable);
+    ImageView::SetImageDrawable(drawable);
     UpdateAnim();
-    return ec;
+    return NOERROR;
 }
 
 void AnimatedImageView::UpdateAnim()
 {
-    AutoPtr<IDrawable> drawable = GetDrawable();
+    AutoPtr<IDrawable> drawable;
+    GetDrawable((IDrawable**)&drawable);
 
     if (mAttached && mAnim != NULL) {
-        AutoPtr<IAnimatable> anim = IAnimatable::Probe(mAnim);
-        if (anim) anim->Stop();
+        IAnimatable::Probe(mAnim)->Stop();
     }
 
     if (IAnimationDrawable::Probe(drawable)) {
         mAnim = IAnimationDrawable::Probe(drawable);
-        if (IsShown()) {
-            AutoPtr<IAnimatable> anim = IAnimatable::Probe(mAnim);
-            if (anim) anim->Start();
+        Boolean shown = FALSE;
+        if (IsShown(&shown), shown) {
+            IAnimatable::Probe(mAnim)->Start();
         }
     }
     else {
@@ -61,7 +64,6 @@ void AnimatedImageView::UpdateAnim()
     }
 }
 
-// @Override
 ECode AnimatedImageView::OnAttachedToWindow()
 {
     ImageView::OnAttachedToWindow();
@@ -69,37 +71,35 @@ ECode AnimatedImageView::OnAttachedToWindow()
     return NOERROR;
 }
 
-// @Override
 ECode AnimatedImageView::OnDetachedFromWindow()
 {
     ImageView::OnDetachedFromWindow();
     if (mAnim != NULL) {
-        AutoPtr<IAnimatable> anim = IAnimatable::Probe(mAnim);
-        if (anim) anim->Stop();
+        IAnimatable::Probe(mAnim)->Stop();
     }
     mAttached = FALSE;
     return NOERROR;
 }
 
-// @Override
-void AnimatedImageView::OnVisibilityChanged(
+ECode AnimatedImageView::OnVisibilityChanged(
     /* [in] */ IView* changedView,
     /* [in] */ Int32 vis)
 {
     ImageView::OnVisibilityChanged(changedView, vis);
     if (mAnim != NULL) {
-        AutoPtr<IAnimatable> anim = IAnimatable::Probe(mAnim);
-        if (anim) {
-            if (IsShown()) {
-                anim->Start();
-            } else {
-                anim->Stop();
-            }
+        Boolean shown = FALSE;
+        if (IsShown(&shown), shown) {
+            IAnimatable::Probe(mAnim)->Start();
+        }
+        else {
+            IAnimatable::Probe(mAnim)->Stop();
         }
     }
+    return NOERROR;
 }
 
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos

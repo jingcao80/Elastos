@@ -926,7 +926,7 @@ void MediaDrmBridge::CreateSession(
 
         HashMap<AutoPtr<IByteBuffer>, Int32>::Iterator hmIter =
             mSessionIds.Find(mMediaCryptoSession);
-        Boolean found = (hmIter != mSessionIds.End());
+        Boolean UNUSED(found) = (hmIter != mSessionIds.End());
         assert(mMediaCrypto != NULL);
         assert(found);
 
@@ -962,7 +962,7 @@ void MediaDrmBridge::CreateSession(
             //assert(!mSessionIds->ContainsKey(session));
             HashMap<AutoPtr<IByteBuffer>, Int32>::Iterator hmIter =
                 mSessionIds.Find(session);
-            Boolean found = (hmIter != mSessionIds.End());
+            Boolean UNUSED(found) = (hmIter != mSessionIds.End());
             assert(!found);
         }
 

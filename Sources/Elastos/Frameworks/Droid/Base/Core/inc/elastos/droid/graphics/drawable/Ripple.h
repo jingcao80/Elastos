@@ -182,8 +182,7 @@ private:
 
     CARAPI_(void) InvalidateSelf();
 
-    static CARAPI_(Boolean) InitStatic();
-
+    static CARAPI_(AutoPtr<ITimeInterpolator>) Init_LINEAR_INTERPOLATOR();
 
 private:
     static AutoPtr<ITimeInterpolator> LINEAR_INTERPOLATOR;
@@ -257,7 +256,6 @@ private:
     Boolean mCanceled;
 
     AutoPtr<AnimatorListenerAdapter> mAnimationListener;
-    static Boolean sInit;
 };
 
 } // namespace Drawable

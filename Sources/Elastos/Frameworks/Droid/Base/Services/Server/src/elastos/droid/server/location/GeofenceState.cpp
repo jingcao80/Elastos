@@ -1,72 +1,60 @@
 
-#include "location/GeofenceState.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "elastos/droid/server/location/GeofenceState.h"
 #include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Location::CLocation;
+using Elastos::Core::CDouble;
+using Elastos::Core::IComparable;
+using Elastos::Core::IDouble;
+using Elastos::Core::Math;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Location {
 
-const Int32 GeofenceState::FLAG_ENTER = 0x01;
-const Int32 GeofenceState::FLAG_EXIT = 0x02;
+const Int32 GeofenceState::FLAG_ENTER;
+const Int32 GeofenceState::FLAG_EXIT;
 
-const Int32 GeofenceState::STATE_UNKNOWN = 0;
-const Int32 GeofenceState::STATE_INSIDE = 1;
-const Int32 GeofenceState::STATE_OUTSIDE = 2;
+const Int32 GeofenceState::STATE_UNKNOWN;
+const Int32 GeofenceState::STATE_INSIDE;
+const Int32 GeofenceState::STATE_OUTSIDE;
 
 GeofenceState::GeofenceState(
     /* [in] */ IGeofence* fence,
     /* [in] */ Int64 expireAt,
+    /* [in] */ Int32 allowedResolutionLevel,
+    /* [in] */ Int32 uid,
     /* [in] */ const String& packageName,
     /* [in] */ IPendingIntent* intent)
 {
-    assert(fence != NULL);
-
     mState = STATE_UNKNOWN;
     mDistanceToCenter = Elastos::Core::Math::DOUBLE_MAX_VALUE;
-
     mFence = fence;
     mExpireAt = expireAt;
+    mAllowedResolutionLevel = allowedResolutionLevel;
+    mUid = uid;
     mPackageName = packageName;
     mIntent = intent;
-
-    //mLocation = new Location("");
     CLocation::New(String(""), (ILocation**)&mLocation);
     Double latitude;
-    Double longitude;
     fence->GetLatitude(&latitude);
-    fence->GetLongitude(&longitude);
     mLocation->SetLatitude(latitude);
-    mLocation->SetLongitude(longitude);
+    fence->GetLongitude(&latitude);
+    mLocation->SetLongitude(latitude);
 }
 
-UInt32 GeofenceState::AddRef()
+ECode GeofenceState::ProcessLocation(
+    /* [in] */ ILocation* location,
+    /* [out] */ Int32* v)
 {
-    return ElRefBase::AddRef();
-}
-
-UInt32 GeofenceState::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode GeofenceState::GetInterfaceID(
-    /* [in] */ IInterface *object,
-    /* [out] */ InterfaceID *IID)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-/**
- * Process a new location.
- * @return FLAG_ENTER or FLAG_EXIT if the fence was crossed, 0 otherwise
- */
-Int32 GeofenceState::ProcessLocation(
-    /* [in] */ ILocation* location)
-{
-    mLocation->DistanceTo(location, (Float*)&mDistanceToCenter);
+    VALIDATE_NOT_NULL(v)
+    Float f;
+    mLocation->DistanceTo(location, &f);
+    mDistanceToCenter = (Double)f;
 
     Int32 prevState = mState;
     //TODO: inside/outside detection could be made more rigorous
@@ -77,38 +65,45 @@ Int32 GeofenceState::ProcessLocation(
     if (inside) {
         mState = STATE_INSIDE;
         if (prevState != STATE_INSIDE) {
-            return FLAG_ENTER; // return enter if previously exited or unknown
+            *v = GeofenceState::FLAG_ENTER; // return enter if previously exited or unknown
+            return NOERROR;
         }
-    } else {
+    }
+    else {
         mState = STATE_OUTSIDE;
         if (prevState == STATE_INSIDE) {
-            return FLAG_EXIT; // return exit only if previously entered
+            *v = GeofenceState::FLAG_EXIT; // return exit only if previously entered
+            return NOERROR;
         }
     }
-    return 0;
+    *v = 0;
+    return NOERROR;
 }
 
-/**
- * Gets the distance from the current location to the fence's boundary.
- * @return The distance or {@link Double#MAX_VALUE} if unknown.
- */
-Double GeofenceState::GetDistanceToBoundary()
+ECode GeofenceState::GetDistanceToBoundary(
+    /* [out] */ Double* v)
 {
-    if (Elastos::Core::Math::Compare(mDistanceToCenter, Elastos::Core::Math::DOUBLE_MAX_VALUE) == 0) {
-        return Elastos::Core::Math::DOUBLE_MAX_VALUE;
-    } else {
+    VALIDATE_NOT_NULL(v)
+    AutoPtr<IDouble> v1, v2;
+    CDouble::New(mDistanceToCenter, (IDouble**)&v1);
+    CDouble::New(Elastos::Core::Math::DOUBLE_MAX_VALUE, (IDouble**)&v2);
+    Int32 result;
+    IComparable::Probe(v1)->CompareTo(v2.Get(), &result);
+    if (result == 0) {
+        *v = Elastos::Core::Math::DOUBLE_MAX_VALUE;
+    }
+    else {
         Float radius;
         mFence->GetRadius(&radius);
-        return Elastos::Core::Math::Abs(radius - mDistanceToCenter);
+        *v = Elastos::Core::Math::Abs(radius - mDistanceToCenter);
     }
+    return NOERROR;
 }
 
-//@Override
 ECode GeofenceState::ToString(
     /* [out] */ String* strOut)
 {
-/*    VALIDATE_NOT_NULL(strOut);
-
+    VALIDATE_NOT_NULL(strOut)
     String state;
     switch (mState) {
         case STATE_INSIDE:
@@ -120,9 +115,15 @@ ECode GeofenceState::ToString(
         default:
             state = "?";
     }
-    return String.format("%s d=%.0f %s", mFence.toString(), mDistanceToCenter, state);
-*/
-    return E_NOT_IMPLEMENTED;//temp
+    String fence;
+    IObject::Probe(mFence)->ToString(&fence);
+    StringBuilder sb(fence);
+    sb += " d=";
+    sb += mDistanceToCenter;
+    sb += " ";
+    sb += state;
+    *strOut = sb.ToString();
+    return NOERROR;
 }
 
 } // namespace Location

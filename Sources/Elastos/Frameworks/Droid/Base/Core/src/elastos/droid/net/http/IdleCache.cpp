@@ -11,10 +11,8 @@
 #include <elastos/core/Thread.h>
 
 using Elastos::Droid::Os::IProcess;
-using Elastos::Droid::Os::ISystemClock;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::Os::ISystemClock;
 
 using Elastos::Core::ISystem;
 using Elastos::Core::StringUtils;

@@ -10,6 +10,13 @@ namespace Media {
 
 class DecoderCapabilities
 {
+private:
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
+    };
+
 public:
     /**
      * Returns the list of video decoder types
@@ -39,10 +46,8 @@ private:
     static CARAPI_(Int32) Native_get_audio_decoder_type(
         /* [in] */ Int32 index);
 
-    static CARAPI_(Boolean) InitStatic();
-
 private:
-    static Boolean mInit;
+    static const StaticInitializer sInitializer;
 };
 
 } // namespace Media

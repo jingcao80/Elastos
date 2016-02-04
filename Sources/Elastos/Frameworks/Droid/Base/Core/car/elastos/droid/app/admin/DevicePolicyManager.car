@@ -1846,7 +1846,8 @@ module
          */
         GetTrustAgentFeaturesEnabled(
             [in] IComponentName* admin,
-            [in] IComponentName* agent);
+            [in] IComponentName* agent,
+            [out] IList** result);
 
         /**
          * Called by a profile owner of a managed profile to set whether caller-Id information from

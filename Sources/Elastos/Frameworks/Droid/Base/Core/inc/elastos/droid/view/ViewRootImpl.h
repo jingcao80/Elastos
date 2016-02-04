@@ -697,10 +697,10 @@ private:
             /* [in] */ IMotionEvent* event);
 
     private:
-        ViewRootImpl* mHost;
         AutoPtr<TrackballAxis> mX;
         AutoPtr<TrackballAxis> mY;
         Int64 mLastTime;
+        ViewRootImpl* mHost;
     };
 
     class SyntheticJoystickHandler
@@ -732,11 +732,11 @@ private:
         const static Int32 MSG_ENQUEUE_X_AXIS_KEY_REPEAT;
         const static Int32 MSG_ENQUEUE_Y_AXIS_KEY_REPEAT;
 
-        ViewRootImpl* mHost;
         Int32 mLastXDirection;
         Int32 mLastYDirection;
         Int32 mLastXKeyCode;
         Int32 mLastYKeyCode;
+        ViewRootImpl* mHost;
     };
 
     class SyntheticTouchNavigationHandler
@@ -832,7 +832,6 @@ private:
         static const Float FLING_TICK_DECAY;
 
         /* The input device that we are tracking. */
-        ViewRootImpl* mHost;
         Int32 mCurrentDeviceId;
         Int32 mCurrentSource;
         Boolean mCurrentDeviceSupported;
@@ -884,6 +883,7 @@ private:
         Float mFlingVelocity;
 
         AutoPtr<Runnable> mFlingRunnable;
+        ViewRootImpl* mHost;
     };
 
     class SyntheticKeyboardHandler
@@ -1044,8 +1044,8 @@ private:
         Int64 mLastEventTimeMillis;
 
     private:
-        ViewRootImpl* mHost;
         Int32 mChangeTypes;
+        ViewRootImpl* mHost;
     };
 
     class RenderProfileRunnable : public Runnable

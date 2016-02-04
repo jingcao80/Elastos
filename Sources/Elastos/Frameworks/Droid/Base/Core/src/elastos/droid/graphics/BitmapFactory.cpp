@@ -606,7 +606,7 @@ static AutoPtr<IBitmap> DoDecode(
     SkBitmap* outputBitmap = NULL;
     UInt32 existingBufferSize = 0;
     if (bmpObj != NULL) {
-        Handle32 bmp;
+        Handle64 bmp;
         bmpObj->GetNativeBitmap(&bmp);
         outputBitmap = (SkBitmap*) bmp;
         if (outputBitmap->isImmutable()) {

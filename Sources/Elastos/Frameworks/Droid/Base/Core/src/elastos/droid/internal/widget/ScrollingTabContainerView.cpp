@@ -418,9 +418,9 @@ ECode ScrollingTabContainerView::VisibilityAnimListener::OnAnimationRepeat(
 
 static AutoPtr<ITimeInterpolator> InitIpt()
 {
-    AutoPtr<CDecelerateInterpolator> ipt;
-    CDecelerateInterpolator::NewByFriend((CDecelerateInterpolator**)&ipt);
-    return (ITimeInterpolator*)ipt.Get();
+    AutoPtr<ITimeInterpolator> ipt;
+    CDecelerateInterpolator::New((ITimeInterpolator**)&ipt);
+    return ipt;
 }
 
 const String ScrollingTabContainerView::TAG("ScrollingTabContainerView");

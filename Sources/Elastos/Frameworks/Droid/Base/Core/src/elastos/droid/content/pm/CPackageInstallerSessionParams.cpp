@@ -75,10 +75,31 @@ ECode CPackageInstallerSessionParams::ReadFromParcel(
     return NOERROR;
 }
 
+ECode CPackageInstallerSessionParams::SetMode(
+    /* [in] */ Int32 mode)
+{
+    mMode = mode;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionParams::SetInstallFlags(
+    /* [in] */ Int32 flags)
+{
+    mInstallFlags = flags;
+    return NOERROR;
+}
+
 ECode CPackageInstallerSessionParams::SetInstallLocation(
     /* [in] */ Int32 installLocation)
 {
     mInstallLocation = installLocation;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionParams::SetSizeBytes(
+    /* [in] */ Int64 bytes)
+{
+    mSizeBytes = bytes;
     return NOERROR;
 }
 
@@ -110,6 +131,13 @@ ECode CPackageInstallerSessionParams::SetAppLabel(
     return NOERROR;
 }
 
+ECode CPackageInstallerSessionParams::SetAppIconLastModified(
+    /* [in] */ Int64 lastModified)
+{
+    mAppIconLastModified = lastModified;
+    return NOERROR;
+}
+
 ECode CPackageInstallerSessionParams::SetOriginatingUri(
     /* [in] */ IUri* originatingUri)
 {
@@ -137,6 +165,13 @@ ECode CPackageInstallerSessionParams::SetInstallFlagsExternal()
 {
     mInstallFlags |= IPackageManager::INSTALL_EXTERNAL;
     mInstallFlags &= ~IPackageManager::INSTALL_INTERNAL;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionParams::SetAbiOverride(
+    /* [in] */ const String& abiOverride)
+{
+    mAbiOverride = abiOverride;
     return NOERROR;
 }
 

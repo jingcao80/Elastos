@@ -442,7 +442,7 @@ void Html::WithinStyle(
                 text->GetCharAt(i + 1, &d);
                 if (d >= 0xDC00 && d <= 0xDFFF) {
                     i++;
-                    Int32 codepoint = 0x010000 | (Int32) c - 0xD800 << 10 | (Int32) d - 0xDC00;
+                    Int32 codepoint = 0x010000 | ((Int32)c - 0xD800) << 10 | ((Int32)d - 0xDC00);
                     out->Append("&#");
                     out->Append(codepoint);
                     out->Append(";");

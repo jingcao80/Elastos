@@ -74,8 +74,8 @@ public:
 
 private:
     static const String TAG;// = "OrientationEventListener";
-    static const Boolean DEBUG = FALSE;
-    static const Boolean localLOGV = FALSE;
+    static const Boolean DEBUG;// = FALSE;
+    static const Boolean localLOGV;// = FALSE;
     Int32 mOrientation;// = ORIENTATION_UNKNOWN;
     AutoPtr<ISensorManager> mSensorManager;
     Boolean mEnabled;// = false;

@@ -37,20 +37,20 @@ void ActivityManagerNative::BroadcastStickyIntent(
     /* [in] */ const String& permission,
     /* [in] */ Int32 userId)
 {
-    assert(0 && "TODO");
     Int32 res;
-    String nullStr;
-    // GetDefault()->BroadcastIntent(
-    //     NULL, intent, nullStr, NULL, IActivity::RESULT_OK, nullStr, NULL,
-    //     nullStr /*permission*/, 1/*CAppOpsManager::OP_NONE*/, FALSE, TRUE, userId, &res);
+    GetDefault()->BroadcastIntent(
+        NULL, intent, String(NULL), NULL, IActivity::RESULT_OK, String(NULL), NULL,
+        String(NULL) /*permission*/, IAppOpsManager::OP_NONE, FALSE, TRUE, userId, &res);
 }
 
 void ActivityManagerNative::NoteWakeupAlarm(
-    /* [in] */ IPendingIntent* ps)
+    /* [in] */ IPendingIntent* ps,
+    /* [in] */ Int32 sourceUid,
+    /* [in] */ const String& sourcePkg)
 {
     AutoPtr<IIIntentSender> target;
     ps->GetTarget((IIIntentSender**)&target);
-    GetDefault()->NoteWakeupAlarm(target);
+    GetDefault()->NoteWakeupAlarm(target, sourceUid, sourcePkg);
 }
 
 

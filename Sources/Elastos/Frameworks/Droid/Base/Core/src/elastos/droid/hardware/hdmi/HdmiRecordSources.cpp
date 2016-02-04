@@ -164,10 +164,10 @@ ECode HdmiRecordSources::ChannelIdentifier::ToByteArray(
     VALIDATE_NOT_NULL(result);
 
     // The first 6 bits for format, the 10 bits for major number.
-    (*data)[index] = (Byte) (((mChannelNumberFormat << 2) | (mMajorChannelNumber >> 8) & 0x3));
+    (*data)[index] = (Byte) ((mChannelNumberFormat << 2) | ((mMajorChannelNumber >> 8) & 0x3));
     (*data)[index + 1] = (Byte) (mMajorChannelNumber & 0xFF);
     // Minor number uses the next 16 bits.
-    Int32 tmp = HdmiRecordSources::Int16ToByteArray((Int16) mMinorChannelNumber, data, index + 2);
+    HdmiRecordSources::Int16ToByteArray((Int16) mMinorChannelNumber, data, index + 2);
     *result = 4;
     return NOERROR;
 }

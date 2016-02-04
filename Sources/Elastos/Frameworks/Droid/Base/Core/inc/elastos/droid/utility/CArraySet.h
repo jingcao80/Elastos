@@ -57,6 +57,30 @@ private:
         CArraySet* mHost;
     };
 
+    class ObjectsEntry : public Object
+    {
+    public:
+        ObjectsEntry(
+            /* [in] */ ArrayOf<IInterface*>* objects)
+            : mObjects(objects)
+        {}
+
+    public:
+        AutoPtr<ArrayOf<IInterface*> > mObjects;
+    };
+
+    class HashesEntry : public Object
+    {
+    public:
+        HashesEntry(
+            /* [in] */ ArrayOf<Int32>* hashes)
+            : mHashes(hashes)
+        {}
+
+    public:
+        AutoPtr<ArrayOf<Int32> > mHashes;
+    };
+
 public:
     CAR_INTERFACE_DECL()
 
@@ -204,31 +228,9 @@ private:
     // Interop with traditional Java containers.  Not as efficient as using
     // specialized collection APIs.
     // ------------------------------------------------------------------------
-    AutoPtr<MapCollections> GetCollection();
+    CARAPI_(AutoPtr<MapCollections>) GetCollection();
 
 private:
-    class ObjectsEntry : public Object {
-    public:
-        AutoPtr<ArrayOf<IInterface*> > mObjects;
-
-        ObjectsEntry(
-            /* [in] */ ArrayOf<IInterface*>* objects)
-            : mObjects(objects)
-        {
-        }
-    };
-
-    class HashesEntry : public Object {
-    public:
-        AutoPtr<ArrayOf<Int32> > mHashes;
-
-        HashesEntry(
-            /* [in] */ ArrayOf<Int32>* hashes)
-            : mHashes(hashes)
-        {
-        }
-    };
-
     static const Boolean DEBUG;// = false;
     static const String TAG;// = "ArraySet";
 
@@ -250,10 +252,10 @@ private:
      * list; the second entry is a pointer to the Int32[] hash code array for it.
      */
     static Object sLock;
-    static AutoPtr<ArrayOf<IInterface*> > mBaseCache;
-    static Int32 mBaseCacheSize;
-    static AutoPtr<ArrayOf<IInterface*> > mTwiceBaseCache;
-    static Int32 mTwiceBaseCacheSize;
+    static AutoPtr<ArrayOf<IInterface*> > sBaseCache;
+    static Int32 sBaseCacheSize;
+    static AutoPtr<ArrayOf<IInterface*> > sTwiceBaseCache;
+    static Int32 sTwiceBaseCacheSize;
 
     AutoPtr<ArrayOf<Int32> > mHashes;
     AutoPtr<ArrayOf<IInterface*> > mArray;

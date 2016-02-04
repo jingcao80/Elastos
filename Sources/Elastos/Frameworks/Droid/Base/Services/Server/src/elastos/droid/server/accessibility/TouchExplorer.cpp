@@ -283,18 +283,18 @@ AutoPtr<IMotionEvent> TouchExplorer::InjectedPointerTracker::GetLastInjectedHove
 String TouchExplorer::InjectedPointerTracker::ToString()
 {
     StringBuilder builder;
-    builder.AppendCStr("=========================");
-    builder.AppendCStr("\nDown pointers #");
-    // builder.AppendCStr(Integer.bitCount(mInjectedPointersDown));
-    builder.AppendCStr(" [ ");
+    builder.Append("=========================");
+    builder.Append("\nDown pointers #");
+    // builder.Append(Integer.bitCount(mInjectedPointersDown));
+    builder.Append(" [ ");
     for (Int32 i = 0; i < TouchExplorer::MAX_POINTER_COUNT; i++) {
         if ((mInjectedPointersDown & i) != 0) {
             builder.AppendInt32(i);
-            builder.AppendCStr(" ");
+            builder.Append(" ");
         }
     }
-    builder.AppendCStr("]");
-    builder.AppendCStr("\n=========================");
+    builder.Append("]");
+    builder.Append("\n=========================");
     return builder.ToString();
 }
 
@@ -634,31 +634,31 @@ Float TouchExplorer::ReceivedPointerTracker::ComputePointerDeltaMove(
 String TouchExplorer::ReceivedPointerTracker::ToString()
 {
     StringBuilder builder;
-    builder.AppendCStr("=========================");
-    builder.AppendCStr("\nDown pointers #");
-    // builder.AppendCStr(getReceivedPointerDownCount());
-    builder.AppendCStr(" [ ");
+    builder.Append("=========================");
+    builder.Append("\nDown pointers #");
+    // builder.Append(getReceivedPointerDownCount());
+    builder.Append(" [ ");
     for (Int32 i = 0; i < TouchExplorer::MAX_POINTER_COUNT; i++) {
         if (IsReceivedPointerDown(i)) {
             builder.AppendInt32(i);
-            builder.AppendCStr(" ");
+            builder.Append(" ");
         }
     }
-    builder.AppendCStr("]");
-    builder.AppendCStr("\nActive pointers #");
-    // builder.AppendCStr(getActivePointerCount());
-    builder.AppendCStr(" [ ");
+    builder.Append("]");
+    builder.Append("\nActive pointers #");
+    // builder.Append(getActivePointerCount());
+    builder.Append(" [ ");
     for (Int32 i = 0; i < TouchExplorer::MAX_POINTER_COUNT; i++) {
         if (IsActivePointer(i)) {
             builder.AppendInt32(i);
-            builder.AppendCStr(" ");
+            builder.Append(" ");
         }
     }
-    builder.AppendCStr("]");
-    builder.AppendCStr("\nPrimary active pointer id [ ");
+    builder.Append("]");
+    builder.Append("\nPrimary active pointer id [ ");
     builder.AppendInt32(GetPrimaryActivePointerId());
-    builder.AppendCStr(" ]");
-    builder.AppendCStr("\n=========================");
+    builder.Append(" ]");
+    builder.Append("\n=========================");
     return builder.ToString();
 }
 

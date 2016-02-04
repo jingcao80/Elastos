@@ -1,6 +1,5 @@
 
-#include "PreferredComponent.h"
-#include "util/XmlUtils.h"
+#include "elastos/droid/server/pm/PreferredComponent.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/utility/logging/Slogger.h>
 
@@ -9,7 +8,8 @@ using Elastos::Droid::Content::CComponentNameHelper;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::Pm::IActivityInfo;
-using Elastos::Droid::Utility::XmlUtils;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::StringUtils;
@@ -20,6 +20,10 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Pm {
+
+// {5169C3ED-4FBC-4306-A108-376EB189B823}
+extern "C" const InterfaceID EIID_IPreferredComponentCallbacks =
+        { 0x5169c3ed, 0x4fbc, 0x4306, { 0xa1, 0x8, 0x37, 0x6e, 0xb1, 0x89, 0xb8, 0x23 } };
 
 const String PreferredComponent::TAG_SET("set");
 const String PreferredComponent::ATTR_ALWAYS("always");
@@ -79,13 +83,13 @@ PreferredComponent::PreferredComponent(
         mParseError = String("Bad activity name ") + mShortComponent;
     }
     String matchStr;
-    parser->GetAttributeValue(String(NULL), ATTR_MATCH), &matchStr);
+    parser->GetAttributeValue(String(NULL), ATTR_MATCH, &matchStr);
     mMatch = matchStr != NULL ? StringUtils::ParseInt32(matchStr, 16) : 0;
     String setCountStr;
     parser->GetAttributeValue(String(NULL), ATTR_SET, &setCountStr);
     Int32 setCount = setCountStr != NULL ? StringUtils::ParseInt32(setCountStr) : 0;
     String alwaysStr;
-    parser->GetAttributeValue(String(NULL), ATTR_ALWAYS, alwaysStr);
+    parser->GetAttributeValue(String(NULL), ATTR_ALWAYS, &alwaysStr);
     mAlways = !alwaysStr.IsNull() ? StringUtils::ParseBoolean(alwaysStr) : TRUE;
 
     AutoPtr<ArrayOf<String> > myPackages = setCount > 0 ? ArrayOf<String>::Alloc(setCount) : NULL;
@@ -179,7 +183,7 @@ ECode PreferredComponent::WriteToXml(
     serializer->WriteAttribute(String(NULL), ATTR_NAME, mShortComponent);
     if (full) {
         if (mMatch != 0) {
-            serializer->WriteAttribute(String(NULL), ATTR_MATCH, StringUtils::Int32ToHexString(mMatch));
+            serializer->WriteAttribute(String(NULL), ATTR_MATCH, StringUtils::ToHexString(mMatch));
         }
         serializer->WriteAttribute(String(NULL), ATTR_ALWAYS, StringUtils::ToString(mAlways));
         serializer->WriteAttribute(String(NULL), ATTR_SET, StringUtils::ToString(NS));
@@ -217,8 +221,9 @@ Boolean PreferredComponent::SameSet(
         AutoPtr<IActivityInfo> ai;
         ri->GetActivityInfo((IActivityInfo**)&ai);
         String packageName, name;
-        ai->GetPackageName(&packageName);
-        ai->GetName(&name);
+        AutoPtr<IPackageItemInfo> pii = IPackageItemInfo::Probe(ai);
+        pii->GetPackageName(&packageName);
+        pii->GetName(&name);
         Boolean good = FALSE;
         for (Int32 j = 0; j < NS; j++) {
             if ((*mSetPackages)[j].Equals(packageName) && (*mSetClasses)[j].Equals(name)) {
@@ -268,21 +273,21 @@ void PreferredComponent::Dump(
     AutoPtr<ISystem> sys;
     CSystem::AcquireSingleton((ISystem**)&sys);
     Int32 hashCode;
-    sys->IdentityHashCode(&hashCode);
+    sys->IdentityHashCode(ident, &hashCode);
     out->Print(StringUtils::ToHexString(hashCode));
     out->PrintChar(' ');
-    out->println(mShortComponent);
-    out->Print(prefix)
-    out->Print(" match=0x");
+    out->Println(mShortComponent);
+    out->Print(prefix);
+    out->Print(String(" match=0x"));
     out->Print(StringUtils::ToHexString(mMatch));
-    out->Print(" mAlways=");
+    out->Print(String(" mAlways="));
     out->Println(mAlways);
     if (mSetComponents != NULL) {
-        out->PrintString(prefix);
-        out->PrintStringln("  Selected from:");
+        out->Print(prefix);
+        out->Println(String("  Selected from:"));
         for (Int32 i = 0; i < mSetComponents->GetLength(); i++) {
             out->Print(prefix);
-            out->Print("    ");
+            out->Print(String("    "));
             out->Println((*mSetComponents)[i]);
         }
     }

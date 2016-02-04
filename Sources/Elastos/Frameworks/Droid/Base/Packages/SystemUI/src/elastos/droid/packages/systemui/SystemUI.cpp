@@ -1,9 +1,14 @@
-#include "elastos/droid/systemui/SystemUI.h"
+
+#include "elastos/droid/packages/systemui/SystemUI.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.CoreLibrary.Utility.h"
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 
+CAR_INTERFACE_IMPL(SystemUI, Object, ISystemUI);
 SystemUI::SystemUI()
 {}
 
@@ -16,19 +21,67 @@ ECode SystemUI::OnConfigurationChanged(
     return NOERROR;
 }
 
+ECode SystemUI::Dump(
+    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ ArrayOf<String>* args)
+{
+    return NOERROR;
+}
+
+ECode SystemUI::OnBootCompleted()
+{
+    return NOERROR;
+}
+
+AutoPtr<IInterface> SystemUI::GetComponent(
+    /* [in] */ InterfaceID interfaceType)
+{
+    if (mComponents == NULL) {
+        return NULL;
+    }
+    return (*mComponents)[interfaceType];
+}
+
+ECode SystemUI::PutComponent(
+    /* [in] */ InterfaceID interfaceType,
+    /* [in] */ IInterface* component)
+{
+    if (mComponents != NULL) {
+        (*mComponents)[interfaceType] = component;
+    }
+    return NOERROR;
+}
+
 ECode SystemUI::SetContext(
     /* [in] */ IContext* context)
 {
-    assert(context != NULL && "Context can not be NULL.");
     mContext = context;
     return NOERROR;
 }
 
-AutoPtr<IContext> SystemUI::GetContext()
+ECode SystemUI::GetContext(
+    /* [out] */ IContext** context)
 {
-    return mContext;
+    VALIDATE_NOT_NULL(context);
+    *context = mContext;
+    REFCOUNT_ADD(*context);
+    return NOERROR;
 }
 
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
+ECode SystemUI::SetComponents(
+    /* [in] */ HashMap<InterfaceID, AutoPtr<IInterface> >* components)
+{
+    mComponents = components;
+    return NOERROR;
+}
+
+AutoPtr<HashMap<InterfaceID, AutoPtr<IInterface> > > SystemUI::GetComponents()
+{
+    return mComponents;
+}
+
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos

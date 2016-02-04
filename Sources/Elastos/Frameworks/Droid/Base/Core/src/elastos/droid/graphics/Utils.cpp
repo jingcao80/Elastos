@@ -8,7 +8,6 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-static const char* TAG = "AssetStreamAdaptor";
 AssetStreamAdaptor::AssetStreamAdaptor(android::Asset* asset, OwnAsset ownAsset,
                                        HasMemoryBase hasMemoryBase)
     : fAsset(asset)

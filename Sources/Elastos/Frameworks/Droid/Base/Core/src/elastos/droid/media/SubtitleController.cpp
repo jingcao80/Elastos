@@ -22,16 +22,6 @@ namespace Media {
 //===============================================================
 CAR_INTERFACE_IMPL(SubtitleController::MyHandlerCallback, Object, IHandlerCallback)
 
-SubtitleController::MyHandlerCallback::MyHandlerCallback()
-{}
-
-ECode SubtitleController::MyHandlerCallback::constructor(
-    /* [in] */ SubtitleController* host)
-{
-    mHost = host;
-    return NOERROR;
-}
-
 ECode SubtitleController::MyHandlerCallback::HandleMessage(
     /* [in] */ IMessage* msg,
     /* [out] */ Boolean* result)
@@ -85,16 +75,6 @@ ECode SubtitleController::MyHandlerCallback::HandleMessage(
 //===============================================================
 CAR_INTERFACE_IMPL(SubtitleController::MyCaptioningChangeListener, Object, ICaptioningManagerCaptioningChangeListener);
 
-SubtitleController::MyCaptioningChangeListener::MyCaptioningChangeListener()
-{}
-
-ECode SubtitleController::MyCaptioningChangeListener::constructor(
-    /* [in] */ SubtitleController* host)
-{
-    mHost = host;
-    return NOERROR;
-}
-
 ECode SubtitleController::MyCaptioningChangeListener::OnEnabledChanged(
     /* [in] */ Boolean enabled)
 {
@@ -107,23 +87,38 @@ ECode SubtitleController::MyCaptioningChangeListener::OnLocaleChanged(
     return mHost->SelectDefaultTrack();
 }
 
+ECode SubtitleController::MyCaptioningChangeListener::OnUserStyleChanged(
+    /* [in] */ ICaptioningManagerCaptionStyle* userStyle)
+{
+    return NOERROR;
+}
+
+ECode SubtitleController::MyCaptioningChangeListener::OnFontScaleChanged(
+    /* [in] */ Float fontScale)
+{
+    return NOERROR;
+}
+
 //===============================================================
             // SubtitleController
 //===============================================================
+const Int32 SubtitleController::WHAT_SHOW = 1;
+const Int32 SubtitleController::WHAT_HIDE = 2;
+const Int32 SubtitleController::WHAT_SELECT_TRACK = 3;
+const Int32 SubtitleController::WHAT_SELECT_DEFAULT_TRACK = 4;
+
 CAR_INTERFACE_IMPL(SubtitleController, Object, ISubtitleController);
 
 SubtitleController::SubtitleController()
     : mTrackIsExplicit(FALSE)
     , mVisibilityIsExplicit(FALSE)
-{}
+{
+    mCallback = new MyHandlerCallback(this);
+    mCaptioningChangeListener = new MyCaptioningChangeListener(this);
+}
 
 SubtitleController::~SubtitleController()
 {}
-
-const Int32 SubtitleController::WHAT_SHOW = 1;
-const Int32 SubtitleController::WHAT_HIDE = 2;
-const Int32 SubtitleController::WHAT_SELECT_TRACK = 3;
-const Int32 SubtitleController::WHAT_SELECT_DEFAULT_TRACK = 4;
 
 ECode SubtitleController::constructor(
     /* [in] */ IContext* context,
@@ -160,8 +155,8 @@ ECode SubtitleController::GetTracks(
         mTracks->ToArray((ArrayOf<IInterface *>**)&tracks);
         *result = tracks;
         REFCOUNT_ADD(*result);
-        return NOERROR;
     }
+    return NOERROR;
 }
 
 ECode SubtitleController::GetSelectedTrack(
@@ -206,7 +201,7 @@ void SubtitleController::DoSelectTrack(
     /* [in] */ ISubtitleTrack* track)
 {
     mTrackIsExplicit = TRUE;
-    if (mSelectedTrack == track) {
+    if (mSelectedTrack.Get() == track) {
         return;
     }
 
@@ -483,14 +478,14 @@ ECode SubtitleController::HasRendererFor(
         }
 
         *result = FALSE;
-        return NOERROR;
     }
+    return NOERROR;
 }
 
 ECode SubtitleController::SetAnchor(
     /* [in] */ ISubtitleControllerAnchor* anchor)
 {
-    if (mAnchor == anchor) {
+    if (mAnchor.Get() == anchor) {
         return NOERROR;
     }
 

@@ -33,7 +33,7 @@ ECode Matrix::constructor()
 ECode Matrix::constructor(
     /* [in] */ IMatrix* src)
 {
-    Int32 nSrc = src != NULL? ((Matrix*)(IMatrix*)src->Probe(EIID_Matrix))->mNativeInstance : NULL;
+    Int64 nSrc = src != NULL ? ((Matrix*)(IMatrix*)src->Probe(EIID_Matrix))->mNativeInstance : 0;
     mNativeInstance = NativeCreate(nSrc);
     return NOERROR;
 }

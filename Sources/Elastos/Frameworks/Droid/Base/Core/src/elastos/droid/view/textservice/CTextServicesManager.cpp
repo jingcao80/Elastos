@@ -17,8 +17,8 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::CServiceManager;
-using Elastos::Droid::View::Internal::TextService::IITextServicesSessionListener;
-using Elastos::Droid::View::Internal::TextService::IISpellCheckerSessionListener;
+using Elastos::Droid::Internal::TextService::IITextServicesSessionListener;
+using Elastos::Droid::Internal::TextService::IISpellCheckerSessionListener;
 
 using Elastos::Utility::Logging::Logger;
 

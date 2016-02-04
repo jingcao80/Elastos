@@ -30,9 +30,10 @@ namespace Media {
 AutoPtr< ArrayOf<VideoCaptureFactory::CamParams*> > VideoCaptureTango::s_CAM_PARAMS_Init()
 {
   AutoPtr< ArrayOf<VideoCaptureFactory::CamParams*> > array = ArrayOf<VideoCaptureFactory::CamParams*>::Alloc(3);
-  (*array)[0] = new VideoCaptureFactory::CamParams(VideoCaptureTango::DEPTH_CAMERA_ID, String("depth"), 320, 240);
-  (*array)[1] = new VideoCaptureFactory::CamParams(VideoCaptureTango::FISHEYE_CAMERA_ID, String("fisheye"), 640, 480);
-  (*array)[2] = new VideoCaptureFactory::CamParams(VideoCaptureTango::FOURMP_CAMERA_ID, String("4MP"), 1280, 720);
+  // TODO
+  // (*array)[0] = new VideoCaptureFactory::CamParams(VideoCaptureTango::DEPTH_CAMERA_ID, String("depth"), 320, 240);
+  // (*array)[1] = new VideoCaptureFactory::CamParams(VideoCaptureTango::FISHEYE_CAMERA_ID, String("fisheye"), 640, 480);
+  // (*array)[2] = new VideoCaptureFactory::CamParams(VideoCaptureTango::FOURMP_CAMERA_ID, String("4MP"), 1280, 720);
   return array;
 }
 

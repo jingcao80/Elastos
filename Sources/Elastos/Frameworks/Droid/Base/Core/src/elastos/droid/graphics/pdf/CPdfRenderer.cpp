@@ -503,7 +503,7 @@ void CPdfRenderer::NativeRenderPage(
     /* [in] */ Int64 matrixPtr,
     /* [in] */ Int32 renderMode)
 {
-    FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
+    FPDF_DOCUMENT UNUSED(document) = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
     SkBitmap* skBitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
     SkMatrix* skMatrix = reinterpret_cast<SkMatrix*>(matrixPtr);

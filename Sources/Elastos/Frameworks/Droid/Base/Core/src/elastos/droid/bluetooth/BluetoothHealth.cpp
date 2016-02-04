@@ -1,16 +1,18 @@
-
-#include "BluetoothHealth.h"
-#include "CBluetoothAdapter.h"
-#include "CBluetoothHealthAppConfiguration.h"
-#include "CBluetoothHealthStateChangeCallback.h"
-#include "CBluetoothHealthCallbackWrapper.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/bluetooth/BluetoothHealth.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/droid/bluetooth/CBluetoothHealthAppConfiguration.h"
+#include "elastos/droid/bluetooth/CBluetoothHealthStateChangeCallback.h"
+#include "elastos/droid/bluetooth/CBluetoothHealthCallbackWrapper.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::Content::EIID_IServiceConnection;
-using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::EIID_IServiceConnection;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -19,13 +21,12 @@ namespace Bluetooth {
 //====================================================
 // BluetoothHealth::ServiceConnection
 //====================================================
+CAR_INTERFACE_IMPL(BluetoothHealth::ServiceConnection, Object, IServiceConnection)
 
 BluetoothHealth::ServiceConnection::ServiceConnection(
     /* [in] */ BluetoothHealth* host)
     : mHost(host)
 {}
-
-CAR_INTERFACE_IMPL(BluetoothHealth::ServiceConnection, IServiceConnection)
 
 ECode BluetoothHealth::ServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
@@ -60,13 +61,19 @@ const String BluetoothHealth::TAG("BluetoothHealth");
 const Boolean BluetoothHealth::DBG = TRUE;
 const Boolean BluetoothHealth::VDBG = FALSE;
 
+CAR_INTERFACE_IMPL_2(BluetoothHealth, Object, IBluetoothHealth, IBluetoothProfile);
+
+BluetoothHealth::BluetoothHealth()
+{
+}
+
 BluetoothHealth::BluetoothHealth(
     /* [in] */ IContext* context,
     /* [in] */ IBluetoothProfileServiceListener* listener)
     : mContext(context)
     , mServiceListener(listener)
 {
-    CBluetoothHealthStateChangeCallback::New(this, (IIBluetoothStateChangeCallback**)&mBluetoothStateChangeCallback);
+    CBluetoothHealthStateChangeCallback::New(TO_IINTERFACE(this), (IIBluetoothStateChangeCallback**)&mBluetoothStateChangeCallback);
     mConnection = new ServiceConnection(this);
 
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
@@ -90,49 +97,6 @@ BluetoothHealth::BluetoothHealth(
     if (context->BindService(intent, mConnection, 0, &result), !result) {
         Logger::E(TAG, "Could not bind to Bluetooth Headset Service");
     }
-}
-
-PInterface BluetoothHealth::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IBluetoothHealth*)this;
-    }
-    else if (riid == EIID_IBluetoothHealth) {
-        return (IBluetoothHealth*)this;
-    }
-    else if (riid == EIID_IBluetoothProfile) {
-        return (IBluetoothProfile*)this;
-    }
-    return NULL;
-}
-
-UInt32 BluetoothHealth::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 BluetoothHealth::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode BluetoothHealth::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    VALIDATE_NOT_NULL(pIID)
-
-    if (pObject == (IInterface*)(IBluetoothHealth*)this) {
-        *pIID = EIID_IBluetoothHealth;
-        return NOERROR;
-    }
-    else if (pObject == (IInterface*)(IBluetoothProfile*)this) {
-        *pIID = EIID_IBluetoothProfile;
-        return NOERROR;
-    }
-
-    return E_INVALID_ARGUMENT;
 }
 
 ECode BluetoothHealth::RegisterSinkAppConfiguration(
@@ -310,7 +274,7 @@ ECode BluetoothHealth::GetConnectionState(
 }
 
 ECode BluetoothHealth::GetConnectedDevices(
-    /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices)
+    /* [out] */ IList** devices)
 {
     VALIDATE_NOT_NULL(devices)
     if (mService != NULL && IsEnabled()) {
@@ -322,14 +286,14 @@ ECode BluetoothHealth::GetConnectedDevices(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
+    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
     REFCOUNT_ADD(*devices)
     return NOERROR;
 }
 
 ECode BluetoothHealth::GetDevicesMatchingConnectionStates(
     /* [in] */ ArrayOf<Int32>* states,
-    /* [out, callee] */ ArrayOf<IBluetoothDevice *>** devices)
+    /* [out] */ IList** devices)
 {
     VALIDATE_NOT_NULL(devices)
     if (mService != NULL && IsEnabled()) {
@@ -341,7 +305,7 @@ ECode BluetoothHealth::GetDevicesMatchingConnectionStates(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
+    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
     REFCOUNT_ADD(*devices)
     return NOERROR;
 }
@@ -424,7 +388,6 @@ Boolean BluetoothHealth::CheckAppParam(
     return TRUE;
 }
 
-}
-}
-}
-
+} // Bluetooth
+} // Droid
+} // Elastos

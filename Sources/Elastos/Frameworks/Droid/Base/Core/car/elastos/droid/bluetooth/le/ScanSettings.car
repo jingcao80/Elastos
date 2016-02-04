@@ -1,0 +1,158 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+    namespace LE {
+
+    /**
+     * Bluetooth LE scan settings are passed to {@link BluetoothLeScanner#startScan} to define the
+     * parameters for the scan.
+     */
+    /**
+     * @Involve
+     * interface IParcelable;
+     */
+    interface IScanSettings {
+        /**
+         * Perform Bluetooth LE scan in low power mode. This is the default scan mode as it consumes the
+         * least power.
+         */
+        const Int32 SCAN_MODE_LOW_POWER = 0;
+
+        /**
+         * Perform Bluetooth LE scan in balanced power mode. Scan results are returned at a rate that
+         * provides a good trade-off between scan frequency and power consumption.
+         */
+        const Int32 SCAN_MODE_BALANCED = 1;
+
+        /**
+         * Scan using highest duty cycle. It's recommended to only use this mode when the application is
+         * running in the foreground.
+         */
+        const Int32 SCAN_MODE_LOW_LATENCY = 2;
+
+        /**
+         * Trigger a callback for every Bluetooth advertisement found that matches the filter criteria.
+         * If no filter is active, all advertisement packets are reported.
+         */
+        const Int32 CALLBACK_TYPE_ALL_MATCHES = 1;
+
+        /**
+         * A result callback is only triggered for the first advertisement packet received that matches
+         * the filter criteria.
+         *
+         * @hide
+         */
+        //@SystemApi
+        const Int32 CALLBACK_TYPE_FIRST_MATCH = 2;
+
+        /**
+         * Receive a callback when advertisements are no longer received from a device that has been
+         * previously reported by a first match callback.
+         *
+         * @hide
+         */
+        //@SystemApi
+        const Int32 CALLBACK_TYPE_MATCH_LOST = 4;
+
+        /**
+         * Request full scan results which contain the device, rssi, advertising data, scan response as
+         * well as the scan timestamp.
+         *
+         * @hide
+         */
+        //@SystemApi
+        const Int32 SCAN_RESULT_TYPE_FULL = 0;
+
+        /**
+         * Request abbreviated scan results which contain the device, rssi and scan timestamp.
+         * <p>
+         * <b>Note:</b> It is possible for an application to get more scan results than it asked for, if
+         * there are multiple apps using this type.
+         *
+         * @hide
+         */
+        //@SystemApi
+        const Int32 SCAN_RESULT_TYPE_ABBREVIATED = 1;
+
+
+        GetScanMode(
+            [out] Int32* result);
+
+        GetCallbackType(
+            [out] Int32* result);
+
+        GetScanResultType(
+            [out] Int32* result);
+
+        /**
+         * Returns report delay timestamp based on the device clock.
+         */
+        GetReportDelayMillis(
+            [out] Int64* result);
+    }
+
+
+    interface IScanSettingsBuilder {
+
+        /**
+         * Set scan mode for Bluetooth LE scan.
+         *
+         * @param scanMode The scan mode can be one of {@link ScanSettings#SCAN_MODE_LOW_POWER},
+         *            {@link ScanSettings#SCAN_MODE_BALANCED} or
+         *            {@link ScanSettings#SCAN_MODE_LOW_LATENCY}.
+         * @throws IllegalArgumentException If the {@code scanMode} is invalid.
+         */
+        SetScanMode(
+            [in] Int32 scanMode);
+
+        /**
+         * Set callback type for Bluetooth LE scan.
+         *
+         * @param callbackType The callback type flags for the scan.
+         * @throws IllegalArgumentException If the {@code callbackType} is invalid.
+         * @hide
+         */
+        //@SystemApi
+        SetCallbackType(
+            [in] Int32 callbackType);
+
+        /**
+         * Set scan result type for Bluetooth LE scan.
+         *
+         * @param scanResultType Type for scan result, could be either
+         *            {@link ScanSettings#SCAN_RESULT_TYPE_FULL} or
+         *            {@link ScanSettings#SCAN_RESULT_TYPE_ABBREVIATED}.
+         * @throws IllegalArgumentException If the {@code scanResultType} is invalid.
+         * @hide
+         */
+        //@SystemApi
+        SetScanResultType(
+            [in] Int32 scanResultType);
+
+        /**
+         * Set report delay timestamp for Bluetooth LE scan.
+         *
+         * @param reportDelayMillis Delay of report in milliseconds. Set to 0 to be notified of
+         *            results immediately. Values &gt; 0 causes the scan results to be queued up and
+         *            delivered after the requested delay or when the internal buffers fill up.
+         * @throws IllegalArgumentException If {@code reportDelayMillis} &lt; 0.
+         */
+        SetReportDelay(
+            [in] Int64 reportDelayMillis);
+
+        /**
+         * Build {@link ScanSettings}.
+         */
+        Build(
+            [out] IScanSettings** settings);
+    }
+
+
+    } // LE
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

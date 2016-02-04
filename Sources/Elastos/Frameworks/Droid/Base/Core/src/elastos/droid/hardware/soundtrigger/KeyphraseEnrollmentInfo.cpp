@@ -8,6 +8,7 @@
 #include "elastos/droid/utility/Xml.h"
 #include "elastos/droid/utility/CArraySet.h"
 #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
@@ -23,6 +24,7 @@ using Elastos::Droid::Hardware::Soundtrigger::KeyphraseMetadata;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Utility::CArraySet;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::R;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::IO::ICloseable;
@@ -202,9 +204,8 @@ ECode KeyphraseEnrollmentInfo::InitializeKeyphrasesFromTypedArray(
 {
     // Get the keyphrase ID.
     Int32 searchKeyphraseId;
-    assert(0 && "TODO:com.android.internal.R.styleable.VoiceEnrollmentApplication_searchKeyphraseId");
-    // FAIL_RETURN(array->GetInt32(
-    //         com.android.internal.R.styleable.VoiceEnrollmentApplication_searchKeyphraseId, -1, &searchKeyphraseId))
+    FAIL_RETURN(array->GetInt32(
+            R::styleable::VoiceEnrollmentApplication_searchKeyphraseId, -1, &searchKeyphraseId))
     if (searchKeyphraseId <= 0) {
         mParseError = String("No valid searchKeyphraseId specified in meta-data");
         Slogger::W(TAG, mParseError);
@@ -213,9 +214,8 @@ ECode KeyphraseEnrollmentInfo::InitializeKeyphrasesFromTypedArray(
 
     // Get the keyphrase text.
     String searchKeyphrase;
-    assert(0 && "TODO:com.android.internal.R.styleable.VoiceEnrollmentApplication_searchKeyphrase");
-    // FAIL_RETURN(array->GetString(
-    //         com.android.internal.R.styleable.VoiceEnrollmentApplication_searchKeyphrase, &searchKeyphrase))
+    FAIL_RETURN(array->GetString(
+            R::styleable::VoiceEnrollmentApplication_searchKeyphrase, &searchKeyphrase))
     if (searchKeyphrase.IsNull()) {
         mParseError = String("No valid searchKeyphrase specified in meta-data");
         Slogger::W(TAG, mParseError);
@@ -224,10 +224,8 @@ ECode KeyphraseEnrollmentInfo::InitializeKeyphrasesFromTypedArray(
 
     // Get the supported locales.
     String searchKeyphraseSupportedLocales;
-    assert(0 && "TODO:com.android.internal.R.styleable.VoiceEnrollmentApplication_searchKeyphraseSupportedLocales");
-    // FAIL_RETURN(array->GetString(
-    //         com.android.internal.R.styleable
-    //                 .VoiceEnrollmentApplication_searchKeyphraseSupportedLocales, &searchKeyphraseSupportedLocales))
+    FAIL_RETURN(array->GetString(
+            R::styleable::VoiceEnrollmentApplication_searchKeyphraseSupportedLocales, &searchKeyphraseSupportedLocales))
     if (searchKeyphraseSupportedLocales.IsNull()) {
         mParseError = String("No valid searchKeyphraseSupportedLocales specified in meta-data");
         Slogger::W(TAG, mParseError);
@@ -278,9 +276,8 @@ ECode KeyphraseEnrollmentInfo::InitializeKeyphrasesFromTypedArray(
 
     // Get the supported recognition modes.
     Int32 recognitionModes;
-    assert(0 && "TODO:com.android.internal.R.styleable.VoiceEnrollmentApplication_searchKeyphraseRecognitionFlags");
-    // FAIL_RETURN(array->GetInt32(com.android.internal.R.styleable
-    //         .VoiceEnrollmentApplication_searchKeyphraseRecognitionFlags, -1, &recognitionModes))
+    FAIL_RETURN(array->GetInt32(
+            R::styleable::VoiceEnrollmentApplication_searchKeyphraseRecognitionFlags, -1, &recognitionModes))
     if (recognitionModes < 0) {
         mParseError = String("No valid searchKeyphraseRecognitionFlags specified in meta-data");
         Slogger::W(TAG, mParseError);

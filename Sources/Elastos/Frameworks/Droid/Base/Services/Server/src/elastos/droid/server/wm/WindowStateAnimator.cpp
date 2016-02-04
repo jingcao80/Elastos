@@ -1,24 +1,28 @@
 
-#include "wm/WindowStateAnimator.h"
+#include "elastos/droid/server/wm/WindowStateAnimator.h"
+#include "elastos/droid/server/wm/DisplayContent.h"
+#include "elastos/droid/server/wm/ScreenRotationAnimation.h"
+#include "elastos/droid/server/wm/AccessibilityController.h"
 #include "elastos/droid/R.h"
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringUtils.h>
 #include "elastos/droid/os/Handler.h"
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::IPixelFormat;
+using Elastos::Droid::Graphics::CPixelFormat;
 using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::View::Animation::CTransformation;
 using Elastos::Droid::View::Animation::IAnimationUtils;
 using Elastos::Droid::View::Animation::CAnimationUtils;
+using Elastos::Droid::View::Animation::CTransformation;
 using Elastos::Droid::View::CSurface;
+using Elastos::Droid::View::CSurfaceControl;
 using Elastos::Droid::View::CSurfaceControlHelper;
 using Elastos::Droid::View::ISurfaceControlHelper;
-using Elastos::Droid::Graphics::CRect;
-using Elastos::Droid::Graphics::IPixelFormat;
-using Elastos::Droid::Graphics::CPixelFormat;
-using Elastos::Droid::View::Animation::CTransformation;
+using Elastos::Core::StringUtils;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -26,11 +30,11 @@ namespace Server {
 namespace Wm {
 
 const String WindowStateAnimator::TAG("WindowStateAnimator");
-const Int32 WindowStateAnimator::NO_SURFACE = 0;
-const Int32 WindowStateAnimator::DRAW_PENDING = 1;
-const Int32 WindowStateAnimator::COMMIT_DRAW_PENDING = 2;
-const Int32 WindowStateAnimator::READY_TO_SHOW = 3;
-const Int32 WindowStateAnimator::HAS_DRAWN = 4;
+const Int32 WindowStateAnimator::NO_SURFACE ;
+const Int32 WindowStateAnimator::DRAW_PENDING ;
+const Int32 WindowStateAnimator::COMMIT_DRAW_PENDING ;
+const Int32 WindowStateAnimator::READY_TO_SHOW ;
+const Int32 WindowStateAnimator::HAS_DRAWN ;
 const Int32 WindowStateAnimator::SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN;
 
 String WindowStateAnimator::DrawStateToString(
@@ -42,7 +46,7 @@ String WindowStateAnimator::DrawStateToString(
         case WindowStateAnimator::COMMIT_DRAW_PENDING: return String("COMMIT_DRAW_PENDING");
         case WindowStateAnimator::READY_TO_SHOW: return String("READY_TO_SHOW");
         case WindowStateAnimator::HAS_DRAWN: return String("HAS_DRAWN");
-        default: return StringUtils::Int32ToString(state);
+        default: return StringUtils::ToString(state);
     }
 }
 
@@ -97,7 +101,7 @@ WindowStateAnimator::WindowStateAnimator(
     mPolicy = win->mService->mPolicy;
     mContext = win->mService->mContext;
 
-    AutoPtr<DisplayContent> displayContent = win.getDisplayContent();
+    AutoPtr<DisplayContent> displayContent = win->GetDisplayContent();
     if (displayContent != NULL) {
         AutoPtr<IDisplayInfo> displayInfo = displayContent->GetDisplayInfo();
         displayInfo->GetAppWidth(&mAnimDw);
@@ -462,7 +466,7 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
 {
     AutoPtr<WindowState> w = mWin;
     if (mSurfaceControl == NULL) {
-        if (DEBUG_ANIM || DEBUG_ORIENTATION) {
+        if (CWindowManagerService::DEBUG_ANIM || CWindowManagerService::DEBUG_ORIENTATION) {
             Slogger::I(TAG, "createSurface %p: mDrawState=DRAW_PENDING", this);
         }
         mDrawState = DRAW_PENDING;
@@ -491,7 +495,7 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
         AutoPtr<IUserHandleHelper> helper;
         CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
         Int32 userId;
-        helper->GetUserId(mwin->mOwnerUid, &userId);
+        helper->GetUserId(mWin->mOwnerUid, &userId);
         if (mService->IsScreenCaptureDisabledLocked(userId)) {
             flags |= ISurfaceControl::SECURE;
         }
@@ -525,11 +529,13 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
         Float top = ft + w->mYOffset;
 
         // Adjust for surface insets.
+        AutoPtr<IRect> surfaceInsets;
+        attrs->GetSurfaceInsets((IRect**)&surfaceInsets);
         Int32 sil, sir, sit, sib;
-        attrs->mSurfaceInsets->GetLeft(&sil);
-        attrs->mSurfaceInsets->GetRight(&sir);
-        attrs->mSurfaceInsets->GetTop(&sit);
-        attrs->mSurfaceInsets->GetBottom(&sib);
+        surfaceInsets->GetLeft(&sil);
+        surfaceInsets->GetRight(&sir);
+        surfaceInsets->GetTop(&sit);
+        surfaceInsets->GetBottom(&sib);
         width += sil + sir;
         height += sit + sib;
         left -= sil;
@@ -575,10 +581,10 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
         attrs->GetFormat(&attrsformat);
         Boolean hasAlpha;
         if ((pf->FormatHasAlpha(attrsformat, &hasAlpha), !hasAlpha)
-                && (attrs->mSurfaceInsets->GetLeft(&sil), sil == 0)
-                && (attrs->mSurfaceInsets->GetTop(&sit), sit == 0)
-                && (attrs->mSurfaceInsets->GetRight(&sir), sir == 0)
-                && (attrs->mSurfaceInsets->GetBottom(&sib), sib == 0)) {
+                && (surfaceInsets->GetLeft(&sil), sil == 0)
+                && (surfaceInsets->GetTop(&sit), sit == 0)
+                && (surfaceInsets->GetRight(&sir), sir == 0)
+                && (surfaceInsets->GetBottom(&sib), sib == 0)) {
             flags |= ISurfaceControl::OPAQUE;
         }
 
@@ -599,10 +605,9 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
 
         w->mHasSurface = TRUE;
 
-        if (CWindowManagerService::SHOW_TRANSACTIONS || CWindowManagerServiceSHOW_SURFACE_ALLOC) {
+        if (CWindowManagerService::SHOW_TRANSACTIONS || CWindowManagerService::SHOW_SURFACE_ALLOC) {
             Slogger::I(TAG, "  CREATE SURFACE %p IN SESSION %p: pid=%d format=%d flags=0x%d / %p",
-                    , mSurfaceControl, mSession->mSurfaceSession
-                    , mSession->mPid, attrsformat, flags, this);
+                    mSurfaceControl.Get(), mSession->mSurfaceSession.Get() , mSession->mPid, attrsformat, flags, this);
         }
         // } catch (OutOfResourcesException e) {
         //     w.mHasSurface = false;
@@ -623,7 +628,7 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
         //             + ", animLayer=" + mAnimLayer);
         // }
 
-        // if (SHOW_LIGHT_TRANSACTIONS) {
+        // if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) {
         //     Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
         //     WindowManagerService.logSurface(w, "CREATE pos=("
         //             + w.mFrame.left + "," + w.mFrame.top + ") ("
@@ -659,7 +664,7 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
         mLastHidden = TRUE;
         // } finally {
         //     SurfaceControl.closeTransaction();
-        //     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+        //     if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
         //             "<<< CLOSE TRANSACTION createSurfaceLocked");
         // }
         sch->CloseTransaction();
@@ -669,8 +674,7 @@ AutoPtr<ISurfaceControl> WindowStateAnimator::CreateSurfaceLocked()
     return mSurfaceControl;
 }
 
-void WindowStateAnimator::DestroySurfaceLocked(
-    /* [in] */ Boolean fromAnimator)
+void WindowStateAnimator::DestroySurfaceLocked()
 {
     if (mWin->mAppToken != NULL && mWin == mWin->mAppToken->mStartingWindow) {
         mWin->mAppToken->mStartingDisplayed = FALSE;
@@ -709,7 +713,7 @@ void WindowStateAnimator::DestroySurfaceLocked(
                     if (FAILED(ec)) {
                         Slogger::W(TAG,
                                 "Exception thrown when destroying Window %p surface %p session : 0x%08x"
-                                , this, mSurface.Get(), mSession.Get(), ec);
+                                , this, mSurfaceControl.Get(), mSession.Get(), ec);
                         goto fail;
                     }
                 }
@@ -733,7 +737,7 @@ void WindowStateAnimator::DestroySurfaceLocked(
                 goto fail;
             }
         }
-        mAnimator->HideWallpapersLocked(mWin, fromAnimator);
+        mAnimator->HideWallpapersLocked(mWin);
         // } catch (RuntimeException e) {
         //     Slog.w(TAG, "Exception thrown when destroying Window " + this
         //         + " surface " + mSurface + " session " + mSession
@@ -790,8 +794,7 @@ void WindowStateAnimator::ComputeShownFrameLocked()
     // are currently targeting.
     AutoPtr<WindowState> wallpaperTarget = mService->mWallpaperTarget;
     if (mIsWallpaper && wallpaperTarget != NULL && mService->mAnimateWallpaperWithTarget) {
-        AutoPtr<WindowStateAnimator> wallpaperAnimator
-                = mAnimator->mWallpaperTarget->mWinAnimator;
+        AutoPtr<WindowStateAnimator> wallpaperAnimator = wallpaperTarget->mWinAnimator;
         Boolean result;
         if (wallpaperAnimator->mHasLocalTransformation
                 && wallpaperAnimator->mAnimation != NULL
@@ -800,7 +803,8 @@ void WindowStateAnimator::ComputeShownFrameLocked()
                 // if (WindowManagerService.DEBUG_WALLPAPER && attachedTransformation != null) {
                 //     Slog.v(TAG, "WP target attached xform: " + attachedTransformation);
         }
-        AutoPtr<AppWindowAnimator> wpAppAnimator = mAnimator->mWpAppAnimator;
+        AutoPtr<AppWindowAnimator> wpAppAnimator = wallpaperTarget->mAppToken == NULL ?
+                    NULL : wallpaperTarget->mAppToken->mAppAnimator;
         if (wpAppAnimator != NULL && wpAppAnimator->mHasTransformation
                 && wpAppAnimator->mAnimation != NULL
                 && (wpAppAnimator->mAnimation->GetDetachWallpaper(&result), !result)) {
@@ -880,12 +884,17 @@ void WindowStateAnimator::ComputeShownFrameLocked()
         }
         //TODO (multidisplay): Magnification is supported only for the default display.
         if (mService->mAccessibilityController != NULL && displayId == IDisplay::DEFAULT_DISPLAY) {
-            AutoPtr<MagnificationSpec> spec = mService->mAccessibilityController
-                    ->GetMagnificationSpecForWindowLocked(mWin);
-            if (spec != NULL && !spec->IsNop()) {
+            AutoPtr<IMagnificationSpec> spec =
+                    mService->mAccessibilityController->GetMagnificationSpecForWindowLocked(mWin);
+            Boolean isNop;
+            if (spec != NULL && (spec->IsNop(&isNop), !isNop)) {
                 Boolean result;
-                tmpMatrix->PostScale(spec->mScale, spec->mScale, &result);
-                tmpMatrix->PostTranslate(spec->mOffsetX, spec->mOffsetY, &result);
+                Float scale, offsetX, offsetY;
+                spec->GetScale(&scale);
+                spec->GetOffsetX(&offsetX);
+                spec->GetOffsetY(&offsetY);
+                tmpMatrix->PostScale(scale, scale, &result);
+                tmpMatrix->PostTranslate(offsetX, offsetY, &result);
             }
         }
 
@@ -946,14 +955,14 @@ void WindowStateAnimator::ComputeShownFrameLocked()
                         mClipRect->GetLeft(&crl);
                         mClipRect->GetRight(&crr);
                         mClipRect->SetLeft(crl / mWin->mHScale);
-                        mClipRect->SetRight(crr / mWin->mHScale;
+                        mClipRect->SetRight(crr / mWin->mHScale);
                     }
                     if (mWin->mVScale > 0) {
                         Int32 crt, crb;
                         mClipRect->GetTop(&crt);
                         mClipRect->GetBottom(&crb);
                         mClipRect->SetTop(crt / mWin->mVScale);
-                        mClipRect->SetBottom(crb / mWin->mVScale;
+                        mClipRect->SetBottom(crb / mWin->mVScale);
                     }
                     mHasClipRect = TRUE;
                 }
@@ -994,7 +1003,7 @@ void WindowStateAnimator::ComputeShownFrameLocked()
     Boolean applyUniverseTransformation = (mAnimator->mUniverseBackground != NULL
             && (mWin->mAttrs->GetType(&type), type != IWindowManagerLayoutParams::TYPE_UNIVERSE_BACKGROUND)
             && mWin->mBaseLayer < mAnimator->mAboveUniverseLayer);
-    AutoPtr<MagnificationSpec> spec;
+    AutoPtr<IMagnificationSpec> spec;
     //TODO (multidisplay): Magnification is supported only for the default display.
     if (mService->mAccessibilityController != NULL && displayId == IDisplay::DEFAULT_DISPLAY) {
         spec = mService->mAccessibilityController->GetMagnificationSpecForWindowLocked(mWin);
@@ -1017,10 +1026,15 @@ void WindowStateAnimator::ComputeShownFrameLocked()
             tmpMatrix->PostConcat(m, &result);
         }
 
-        if (spec != NULL && !spec->IsNop()) {
+        Boolean isNop;
+        if (spec != NULL && (spec->IsNop(&isNop), !isNop)) {
             Boolean result;
-            tmpMatrix->PostScale(spec->mScale, spec->mScale, &result);
-            tmpMatrix->PostTranslate(spec->mOffsetX, spec->mOffsetY, &result);
+            Float scale, offsetX, offsetY;
+            spec->GetScale(&scale);
+            spec->GetOffsetX(&offsetX);
+            spec->GetOffsetY(&offsetY);
+            tmpMatrix->PostScale(scale, scale, &result);
+            tmpMatrix->PostTranslate(offsetX, offsetY, &result);
         }
 
         tmpMatrix->GetValues(tmpFloats.Get());
@@ -1074,7 +1088,7 @@ void WindowStateAnimator::ApplyDecorRect(
     Int32 top = w->mYOffset + ft;
 
     // Initialize the decor rect to the entire frame.
-    w.mSystemDecorRect.set(0, 0, width, height);
+    w->mSystemDecorRect->Set(0, 0, width, height);
 
     // Intersect with the decor rect, offsetted by window position.
     Int32 dl, dt, dr, db;
@@ -1094,6 +1108,7 @@ void WindowStateAnimator::ApplyDecorRect(
     // much and hide part of the window that should be seen.
     if (w->mEnforceSizeCompat && w->mInvGlobalScale != 1.0f) {
         Float scale = w->mInvGlobalScale;
+        Int32 l, t, r, b;
         w->mSystemDecorRect->GetLeft(&l);
         w->mSystemDecorRect->GetTop(&t);
         w->mSystemDecorRect->GetRight(&r);
@@ -1185,19 +1200,21 @@ void WindowStateAnimator::UpdateSurfaceWindowCrop(
     AutoPtr<IWindowManagerLayoutParams> attrs = w->mAttrs;
     Int32 crl, sil;
     clipRect->GetLeft(&crl);
-    attrs->mSurfaceInsets->GetLeft(&sil);
+    AutoPtr<IRect> surfaceInsets;
+    attrs->GetSurfaceInsets((IRect**)&surfaceInsets);
+    surfaceInsets->GetLeft(&sil);
     clipRect->SetLeft(crl - sil);
     Int32 crt, sit;
     clipRect->GetTop(&crt);
-    attrs->mSurfaceInsets->GetTop(&sit);
+    surfaceInsets->GetTop(&sit);
     clipRect->SetTop(crt - sit);
     Int32 crr, sir;
     clipRect->GetRight(&crr);
-    attrs->mSurfaceInsets->GetRight(&sir);
+    surfaceInsets->GetRight(&sir);
     clipRect->SetRight(crr - sir);
     Int32 crb, sib;
     clipRect->GetBottom(&crb);
-    attrs->mSurfaceInsets->GetBottom(&sib);
+    surfaceInsets->GetBottom(&sib);
     clipRect->SetBottom(crb - sib);
 
     // If we have an animated clip rect, intersect it with the clip rect.
@@ -1207,10 +1224,11 @@ void WindowStateAnimator::UpdateSurfaceWindowCrop(
         // cases, we take into account the specified content insets as well.
         if ((w->mSystemUiVisibility & SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN)
                 == SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN
-                || (w->mAttrs->GetFlags(&flags), (flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0)) {
+                || (w->mAttrs->GetFlags(&flags), (flags & IWindowManagerLayoutParams::FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0)) {
             // Don't apply the workaround to apps explicitly requesting
             // fullscreen layout or when the bars are transparent.
-            clipRect->Intersect(mClipRect);
+            Boolean result;
+            clipRect->Intersect(mClipRect, &result);
         }
         else {
             clipRect->GetTop(&crt);
@@ -1218,15 +1236,16 @@ void WindowStateAnimator::UpdateSurfaceWindowCrop(
             w->mContentInsets->GetTop(&cit);
             Int32 offsetTop = Elastos::Core::Math::Max(crt, cit);
             clipRect->Offset(0, -offsetTop);
-            clipRect->Intersect(mClipRect);
+            Boolean result;
+            clipRect->Intersect(mClipRect, &result);
             clipRect->Offset(0, offsetTop);
         }
     }
 
     // The clip rect was generated assuming (0,0) as the window origin,
     // so we need to translate to match the actual surface coordinates.
-    attrs->mSurfaceInsets->GetLeft(&sil);
-    attrs->mSurfaceInsets->GetTop(&sit);
+    surfaceInsets->GetLeft(&sil);
+    surfaceInsets->GetTop(&sit);
     clipRect->Offset(sil, sit);
 
     Boolean equals;
@@ -1287,13 +1306,14 @@ void WindowStateAnimator::SetSurfaceBoundariesLocked(
     // Adjust for surface insets.
     AutoPtr<IWindowManagerLayoutParams> attrs;
     w->GetAttrs((IWindowManagerLayoutParams**)&attrs);
+    AutoPtr<IRect> surfaceInsets;
     Int32 sil, sir;
-    attrs->mSurfaceInsets->GetLeft(&sil);
-    attrs->mSurfaceInsets->GetRight(&sir);
+    surfaceInsets->GetLeft(&sil);
+    surfaceInsets->GetRight(&sir);
     width += sil + sir;
     Int32 sit, sib;
-    attrs->mSurfaceInsets->GetTop(&sit);
-    attrs->mSurfaceInsets->GetBottom(&sib);
+    surfaceInsets->GetTop(&sit);
+    surfaceInsets->GetBottom(&sib);
     height += sit + sib;
     left -= sil;
     top -= sit;
@@ -1307,7 +1327,7 @@ void WindowStateAnimator::SetSurfaceBoundariesLocked(
         // if (CWindowManagerService::SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
         //         "POS " + left + ", " + top, null);
         if (FAILED(mSurfaceControl->SetPosition(left, top))) {
-            Slogger::WTAG, "Error positioning surface of %p pos=(%d,%d)", w.Get(), left, top);
+            Slogger::W(TAG, "Error positioning surface of %p pos=(%d,%d)", w.Get(), left, top);
             if (!recoveringMemory) {
                 mService->ReclaimSomeSurfaceMemoryLocked(this, String("position"), TRUE);
             }
@@ -1338,7 +1358,7 @@ void WindowStateAnimator::SetSurfaceBoundariesLocked(
         }
         mAnimator->SetPendingLayoutChanges(w->GetDisplayId(),
                 IWindowManagerPolicy::FINISH_LAYOUT_REDO_WALLPAPER);
-        if ((w->mAttrs->GetFlags(&flags), (flags & IWindowManagerLayoutParams::FLAG_DIM_BEHIND) != 0) {
+        if (w->mAttrs->GetFlags(&flags), (flags & IWindowManagerLayoutParams::FLAG_DIM_BEHIND) != 0) {
             AutoPtr<TaskStack> stack = w->GetStack();
             if (stack != NULL) {
                 stack->StartDimmingIfNeeded(this);
@@ -1496,7 +1516,7 @@ void WindowStateAnimator::SetTransparentRegionHintLocked(
         Slogger::W(TAG, "setTransparentRegionHint: null mSurface after mHasSurface true");
         return;
     }
-    if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG,
+    if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG,
         ">>> OPEN TRANSACTION setTransparentRegion");
     AutoPtr<ISurfaceControlHelper> surfaceHelper;
     CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&surfaceHelper);
@@ -1504,26 +1524,30 @@ void WindowStateAnimator::SetTransparentRegionHintLocked(
     // try {
     // if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin,
     //         "transparentRegionHint=" + region, null);
-    mSurface->SetTransparentRegionHint(region);
+    mSurfaceControl->SetTransparentRegionHint(region);
     // } finally {
     surfaceHelper->CloseTransaction();
-    if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG,
+    if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG,
             "<<< CLOSE TRANSACTION setTransparentRegion");
     // }
 }
 
 void WindowStateAnimator::SetWallpaperOffset(
-    /* [in] */ IRect* shownFrame)
+    /* [in] */ IRectF* shownFrame)
 {
     AutoPtr<IWindowManagerLayoutParams> attrs;
     mWin->GetAttrs((IWindowManagerLayoutParams**)&attrs);
-    Int32 sfl, sil;
+    Float sfl;
     shownFrame->GetLeft(&sfl);
-    attrs->mSurfaceInsets->GetLeft(&sil);
+    AutoPtr<IRect> surfaceInsets;
+    attrs->GetSurfaceInsets((IRect**)&surfaceInsets);
+    Int32 sil;
+    surfaceInsets->GetLeft(&sil);
     Int32 left = sfl - sil;
-    Int32 sft, sit;
+    Float sft;
     shownFrame->GetTop(&sft);
-    attrs->mSurfaceInsets->GetTop(&sit);
+    Int32 sit;
+    surfaceInsets->GetTop(&sit);
     Int32 top = sft - sit;
     if (mSurfaceX != left || mSurfaceY != top) {
         mSurfaceX = left;
@@ -1535,7 +1559,7 @@ void WindowStateAnimator::SetWallpaperOffset(
             // transformation is being applied by the animation.
             return;
         }
-        if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
+        if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
         AutoPtr<ISurfaceControlHelper> surfaceHelper;
         CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&surfaceHelper);
         surfaceHelper->OpenTransaction();
@@ -1546,9 +1570,9 @@ void WindowStateAnimator::SetWallpaperOffset(
         mWin->mFrame->GetLeft(&winLeft);
         mWin->mFrame->GetTop(&winTop);
         if (FAILED(mSurfaceControl->SetPosition(winLeft + left, winTop + top))) {
-            Slogger::W(TAG, "Error positioning surface of %p size=(%d,%d)", mWin.Get(), left, top);
+            Slogger::W(TAG, "Error positioning surface of %p size=(%d,%d)", mWin, left, top);
             surfaceHelper->CloseTransaction();
-            if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
+            if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
             return;
         }
         UpdateSurfaceWindowCrop(FALSE);
@@ -1557,11 +1581,11 @@ void WindowStateAnimator::SetWallpaperOffset(
         //             + " pos=(" + left + "," + top + ")", e);
         // } finally {
         //     SurfaceControl.closeTransaction();
-        //     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+        //     if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
         //             "<<< CLOSE TRANSACTION setWallpaperOffset");
         // }
         surfaceHelper->CloseTransaction();
-        if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
+        if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
     }
 }
 
@@ -1571,7 +1595,7 @@ void WindowStateAnimator::SetOpaqueLocked(
     if (mSurfaceControl == NULL) {
         return;
     }
-    if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> OPEN TRANSACTION setOpaqueLocked");
+    if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, ">>> OPEN TRANSACTION setOpaqueLocked");
     AutoPtr<ISurfaceControlHelper> surfaceHelper;
     CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&surfaceHelper);
     surfaceHelper->OpenTransaction();
@@ -1581,10 +1605,10 @@ void WindowStateAnimator::SetOpaqueLocked(
     mSurfaceControl->SetOpaque(isOpaque);
     // } finally {
     //     SurfaceControl.closeTransaction();
-    //     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
+    //     if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
     // }
     surfaceHelper->CloseTransaction();
-    if (SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
+    if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
 }
 
 Boolean WindowStateAnimator::PerformShowLocked()
@@ -1698,7 +1722,7 @@ Boolean WindowStateAnimator::ShowSurfaceRobustlyLocked()
         ECode ec = mSurfaceControl->Show();
         if (FAILED(ec)) {
             Slogger::W(TAG, "Failure showing surface %p in %p 0x%08x",
-                    mSurface.Get(), mWin, ec);
+                    mSurfaceControl.Get(), mWin, ec);
             mService->ReclaimSomeSurfaceMemoryLocked(this, String("show"), TRUE);
             return FALSE;
         }

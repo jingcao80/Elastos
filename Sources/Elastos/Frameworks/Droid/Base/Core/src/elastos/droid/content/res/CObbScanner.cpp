@@ -16,9 +16,8 @@ namespace Droid {
 namespace Content {
 namespace Res {
 
-CAR_INTERFACE_IMPL(CObbScanner, Object, IObbScanner)
-
-CAR_OBJECT_IMPL(CObbScanner)
+CAR_INTERFACE_IMPL(CObbScanner, Singleton, IObbScanner)
+CAR_SINGLETON_IMPL(CObbScanner)
 
 ECode CObbScanner::GetObbInfo(
     /* [in] */ const String& filePath,

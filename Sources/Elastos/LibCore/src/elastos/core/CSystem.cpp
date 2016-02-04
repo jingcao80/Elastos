@@ -5,7 +5,7 @@
 #include "CHashMap.h"
 #include "CProperties.h"
 #include "ICUUtil.h"
-//#include "CSelectorProviderHelper.h"
+#include "CSelectorProviderHelper.h"
 #include "CFileDescriptor.h"
 #include "CFileInputStream.h"
 #include "CFileOutputStream.h"
@@ -36,7 +36,7 @@ using Elastos::IO::EIID_IOutputStream;
 using Elastos::IO::EIID_IPrintStream;
 using Elastos::IO::Channels::Spi::ISelectorProvider;
 using Elastos::IO::Channels::Spi::ISelectorProviderHelper;
-//using Elastos::IO::Channels::Spi::CSelectorProviderHelper;
+using Elastos::IO::Channels::Spi::CSelectorProviderHelper;
 using Libcore::ICU::ICUUtil;
 using Elastos::Droid::System::Os;
 using Elastos::Droid::System::IStructPasswd;
@@ -257,12 +257,11 @@ ECode CSystem::InheritedChannel(
 {
     VALIDATE_NOT_NULL(value);
 
-    // TODO upgrade
-    /*AutoPtr<CSelectorProviderHelper> helper;
+    AutoPtr<CSelectorProviderHelper> helper;
     CSelectorProviderHelper::AcquireSingletonByFriend((CSelectorProviderHelper**)&helper);
     AutoPtr<ISelectorProvider> provider;
     helper->GetProvider((ISelectorProvider**)&provider);
-    provider->InheritedChannel((IChannel**)&value);*/
+    provider->InheritedChannel((IChannel**)&value);
     return NOERROR;
 }
 

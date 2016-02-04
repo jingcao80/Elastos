@@ -86,11 +86,12 @@ CameraMetadataNative::Key::Key(
 
     mName = name;
     mType = type;
-    assert(0);
+    // assert(0);
+    // TODO
     //mTypeReference = TypeReference::CreateSpecializedTypeReference(type);
-    Int32 code;
-    IObject::Probe(mTypeReference)->GetHashCode(&code);
-    mHash = mName.GetHashCode() ^ code;
+    // Int32 code;
+    // IObject::Probe(mTypeReference)->GetHashCode(&code);
+    // mHash = mName.GetHashCode() ^ code;
 }
 
 CameraMetadataNative::Key::Key(
@@ -392,7 +393,7 @@ ECode CameraMetadataNative::SetCommand_AvailableFormats::SetValue(
     }
 
     CameraMetadataNative* metadataNative = (CameraMetadataNative*)metadata;
-    Boolean res = metadataNative->SetAvailableFormats(values);
+    metadataNative->SetAvailableFormats(values);
     return NOERROR;
 }
 
@@ -414,7 +415,7 @@ ECode CameraMetadataNative::SetCommand_FaceRectangles::SetValue(
     }
 
     CameraMetadataNative* metadataNative = (CameraMetadataNative*)metadata;
-    Boolean res = metadataNative->SetFaceRectangles(values);
+    metadataNative->SetFaceRectangles(values);
     return NOERROR;
 }
 
@@ -436,7 +437,7 @@ ECode CameraMetadataNative::SetCommand_Faces::SetValue(
     }
 
     CameraMetadataNative* metadataNative = (CameraMetadataNative*)metadata;
-    Boolean res = metadataNative->SetFaces(values);
+    metadataNative->SetFaces(values);
     return NOERROR;
 }
 
@@ -449,7 +450,7 @@ ECode CameraMetadataNative::SetCommand_TonemapCurve::SetValue(
 
     AutoPtr<ITonemapCurve> _value = ITonemapCurve::Probe(value);
     CameraMetadataNative* metadataNative = (CameraMetadataNative*)metadata;
-    Boolean res = metadataNative->SetTonemapCurve(_value);
+    metadataNative->SetTonemapCurve(_value);
     return NOERROR;
 }
 
@@ -461,7 +462,7 @@ ECode CameraMetadataNative::SetCommand_GpsLocation::SetValue(
 {
     AutoPtr<ILocation> _value = ILocation::Probe(value);
     CameraMetadataNative* metadataNative = (CameraMetadataNative*)metadata;
-    Boolean res = metadataNative->SetGpsLocation(_value);
+    metadataNative->SetGpsLocation(_value);
     return NOERROR;
 }
 
@@ -471,102 +472,103 @@ AutoPtr<IHashMap> CameraMetadataNative::sSetCommandMap;
 
 Boolean CameraMetadataNative::InitStaticBlock()
 {
-    CHashMap::New((IHashMap**)&sGetCommandMap);
+    // TODO:
+    // CHashMap::New((IHashMap**)&sGetCommandMap);
 
-    AutoPtr<ICameraMetadataNativeKey> availableFormatsKey;
-    CameraCharacteristics::SCALER_AVAILABLE_FORMATS->GetNativeKey((ICameraMetadataNativeKey**)&availableFormatsKey);
-    AutoPtr<GetCommand_AvailableFormats> availableFormats = new GetCommand_AvailableFormats();
-    sGetCommandMap->Put(TO_IINTERFACE(availableFormatsKey), TO_IINTERFACE(availableFormats));
+    // AutoPtr<ICameraMetadataNativeKey> availableFormatsKey;
+    // CameraCharacteristics::SCALER_AVAILABLE_FORMATS->GetNativeKey((ICameraMetadataNativeKey**)&availableFormatsKey);
+    // AutoPtr<GetCommand_AvailableFormats> availableFormats = new GetCommand_AvailableFormats();
+    // sGetCommandMap->Put(TO_IINTERFACE(availableFormatsKey), TO_IINTERFACE(availableFormats));
 
-    AutoPtr<ICameraMetadataNativeKey> facesKey;
-    CaptureResult::STATISTICS_FACES->GetNativeKey((ICameraMetadataNativeKey**)&facesKey);
-    AutoPtr<GetCommand_Faces> faces = new GetCommand_Faces();
-    sGetCommandMap->Put(TO_IINTERFACE(facesKey), TO_IINTERFACE(faces));
+    // AutoPtr<ICameraMetadataNativeKey> facesKey;
+    // CaptureResult::STATISTICS_FACES->GetNativeKey((ICameraMetadataNativeKey**)&facesKey);
+    // AutoPtr<GetCommand_Faces> faces = new GetCommand_Faces();
+    // sGetCommandMap->Put(TO_IINTERFACE(facesKey), TO_IINTERFACE(faces));
 
-    AutoPtr<ICameraMetadataNativeKey> faceRectanglesKey;
-    CaptureResult::STATISTICS_FACE_RECTANGLES->GetNativeKey((ICameraMetadataNativeKey**)&faceRectanglesKey);
-    AutoPtr<GetCommand_FaceRectangles> faceRectangles = new GetCommand_FaceRectangles();
-    sGetCommandMap->Put(TO_IINTERFACE(faceRectanglesKey), TO_IINTERFACE(faceRectangles));
+    // AutoPtr<ICameraMetadataNativeKey> faceRectanglesKey;
+    // CaptureResult::STATISTICS_FACE_RECTANGLES->GetNativeKey((ICameraMetadataNativeKey**)&faceRectanglesKey);
+    // AutoPtr<GetCommand_FaceRectangles> faceRectangles = new GetCommand_FaceRectangles();
+    // sGetCommandMap->Put(TO_IINTERFACE(faceRectanglesKey), TO_IINTERFACE(faceRectangles));
 
-    AutoPtr<ICameraMetadataNativeKey> streamConfigurationMapKey;
-    CameraCharacteristics::SCALER_STREAM_CONFIGURATION_MAP->GetNativeKey((ICameraMetadataNativeKey**)&streamConfigurationMapKey);
-    AutoPtr<GetCommand_StreamConfigurationMap> streamConfigurationMap = new GetCommand_StreamConfigurationMap();
-    sGetCommandMap->Put(TO_IINTERFACE(streamConfigurationMapKey), TO_IINTERFACE(streamConfigurationMap));
+    // AutoPtr<ICameraMetadataNativeKey> streamConfigurationMapKey;
+    // CameraCharacteristics::SCALER_STREAM_CONFIGURATION_MAP->GetNativeKey((ICameraMetadataNativeKey**)&streamConfigurationMapKey);
+    // AutoPtr<GetCommand_StreamConfigurationMap> streamConfigurationMap = new GetCommand_StreamConfigurationMap();
+    // sGetCommandMap->Put(TO_IINTERFACE(streamConfigurationMapKey), TO_IINTERFACE(streamConfigurationMap));
 
-    AutoPtr<ICameraMetadataNativeKey> maxRegionKey;
-    CameraCharacteristics::CONTROL_MAX_REGIONS_AE->GetNativeKey((ICameraMetadataNativeKey**)&maxRegionKey);
-    AutoPtr<GetCommand_MaxRegions> maxRegion = new GetCommand_MaxRegions();
-    sGetCommandMap->Put(TO_IINTERFACE(maxRegionKey), TO_IINTERFACE(maxRegion));
+    // AutoPtr<ICameraMetadataNativeKey> maxRegionKey;
+    // CameraCharacteristics::CONTROL_MAX_REGIONS_AE->GetNativeKey((ICameraMetadataNativeKey**)&maxRegionKey);
+    // AutoPtr<GetCommand_MaxRegions> maxRegion = new GetCommand_MaxRegions();
+    // sGetCommandMap->Put(TO_IINTERFACE(maxRegionKey), TO_IINTERFACE(maxRegion));
 
-    AutoPtr<ICameraMetadataNativeKey> maxRegionKey2;
-    CameraCharacteristics::CONTROL_MAX_REGIONS_AWB->GetNativeKey((ICameraMetadataNativeKey**)&maxRegionKey2);
-    AutoPtr<GetCommand_MaxRegions> maxRegion2 = new GetCommand_MaxRegions();
-    sGetCommandMap->Put(TO_IINTERFACE(maxRegionKey2), TO_IINTERFACE(maxRegion2));
+    // AutoPtr<ICameraMetadataNativeKey> maxRegionKey2;
+    // CameraCharacteristics::CONTROL_MAX_REGIONS_AWB->GetNativeKey((ICameraMetadataNativeKey**)&maxRegionKey2);
+    // AutoPtr<GetCommand_MaxRegions> maxRegion2 = new GetCommand_MaxRegions();
+    // sGetCommandMap->Put(TO_IINTERFACE(maxRegionKey2), TO_IINTERFACE(maxRegion2));
 
-    AutoPtr<ICameraMetadataNativeKey> maxRegionKey3;
-    CameraCharacteristics::CONTROL_MAX_REGIONS_AF->GetNativeKey((ICameraMetadataNativeKey**)&maxRegionKey3);
-    AutoPtr<GetCommand_MaxRegions> maxRegion3 = new GetCommand_MaxRegions();
-    sGetCommandMap->Put(TO_IINTERFACE(maxRegionKey3), TO_IINTERFACE(maxRegion3));
+    // AutoPtr<ICameraMetadataNativeKey> maxRegionKey3;
+    // CameraCharacteristics::CONTROL_MAX_REGIONS_AF->GetNativeKey((ICameraMetadataNativeKey**)&maxRegionKey3);
+    // AutoPtr<GetCommand_MaxRegions> maxRegion3 = new GetCommand_MaxRegions();
+    // sGetCommandMap->Put(TO_IINTERFACE(maxRegionKey3), TO_IINTERFACE(maxRegion3));
 
-    AutoPtr<ICameraMetadataNativeKey> maxNumOutputsKey;
-    CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_RAW->GetNativeKey((ICameraMetadataNativeKey**)&maxNumOutputsKey);
-    AutoPtr<GetCommand_MaxNumOutputs> maxNumOutputs = new GetCommand_MaxNumOutputs();
-    sGetCommandMap->Put(TO_IINTERFACE(maxNumOutputsKey), TO_IINTERFACE(maxNumOutputs));
+    // AutoPtr<ICameraMetadataNativeKey> maxNumOutputsKey;
+    // CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_RAW->GetNativeKey((ICameraMetadataNativeKey**)&maxNumOutputsKey);
+    // AutoPtr<GetCommand_MaxNumOutputs> maxNumOutputs = new GetCommand_MaxNumOutputs();
+    // sGetCommandMap->Put(TO_IINTERFACE(maxNumOutputsKey), TO_IINTERFACE(maxNumOutputs));
 
-    AutoPtr<ICameraMetadataNativeKey> maxNumOutputsKey2;
-    CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_PROC->GetNativeKey((ICameraMetadataNativeKey**)&maxNumOutputsKey2);
-    AutoPtr<GetCommand_MaxNumOutputs> maxNumOutputs2 = new GetCommand_MaxNumOutputs();
-    sGetCommandMap->Put(TO_IINTERFACE(maxNumOutputsKey2), TO_IINTERFACE(maxNumOutputs2));
+    // AutoPtr<ICameraMetadataNativeKey> maxNumOutputsKey2;
+    // CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_PROC->GetNativeKey((ICameraMetadataNativeKey**)&maxNumOutputsKey2);
+    // AutoPtr<GetCommand_MaxNumOutputs> maxNumOutputs2 = new GetCommand_MaxNumOutputs();
+    // sGetCommandMap->Put(TO_IINTERFACE(maxNumOutputsKey2), TO_IINTERFACE(maxNumOutputs2));
 
-    AutoPtr<ICameraMetadataNativeKey> maxNumOutputsKey3;
-    CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_PROC_STALLING->GetNativeKey((ICameraMetadataNativeKey**)&maxNumOutputsKey3);
-    AutoPtr<GetCommand_MaxNumOutputs> maxNumOutputs3 = new GetCommand_MaxNumOutputs();
-    sGetCommandMap->Put(TO_IINTERFACE(maxNumOutputsKey3), TO_IINTERFACE(maxNumOutputs3));
+    // AutoPtr<ICameraMetadataNativeKey> maxNumOutputsKey3;
+    // CameraCharacteristics::REQUEST_MAX_NUM_OUTPUT_PROC_STALLING->GetNativeKey((ICameraMetadataNativeKey**)&maxNumOutputsKey3);
+    // AutoPtr<GetCommand_MaxNumOutputs> maxNumOutputs3 = new GetCommand_MaxNumOutputs();
+    // sGetCommandMap->Put(TO_IINTERFACE(maxNumOutputsKey3), TO_IINTERFACE(maxNumOutputs3));
 
-    AutoPtr<ICameraMetadataNativeKey> tonemapCurveKey;
-    CaptureRequest::TONEMAP_CURVE->GetNativeKey((ICameraMetadataNativeKey**)&tonemapCurveKey);
-    AutoPtr<GetCommand_TonemapCurve> tonemapCurve = new GetCommand_TonemapCurve();
-    sGetCommandMap->Put(TO_IINTERFACE(tonemapCurveKey), TO_IINTERFACE(tonemapCurve));
+    // AutoPtr<ICameraMetadataNativeKey> tonemapCurveKey;
+    // CaptureRequest::TONEMAP_CURVE->GetNativeKey((ICameraMetadataNativeKey**)&tonemapCurveKey);
+    // AutoPtr<GetCommand_TonemapCurve> tonemapCurve = new GetCommand_TonemapCurve();
+    // sGetCommandMap->Put(TO_IINTERFACE(tonemapCurveKey), TO_IINTERFACE(tonemapCurve));
 
-    AutoPtr<ICameraMetadataNativeKey> gpsLocationKey;
-    CaptureResult::JPEG_GPS_LOCATION->GetNativeKey((ICameraMetadataNativeKey**)&gpsLocationKey);
-    AutoPtr<GetCommand_GpsLocation> gpsLocation = new GetCommand_GpsLocation();
-    sGetCommandMap->Put(TO_IINTERFACE(gpsLocationKey), TO_IINTERFACE(gpsLocation));
+    // AutoPtr<ICameraMetadataNativeKey> gpsLocationKey;
+    // CaptureResult::JPEG_GPS_LOCATION->GetNativeKey((ICameraMetadataNativeKey**)&gpsLocationKey);
+    // AutoPtr<GetCommand_GpsLocation> gpsLocation = new GetCommand_GpsLocation();
+    // sGetCommandMap->Put(TO_IINTERFACE(gpsLocationKey), TO_IINTERFACE(gpsLocation));
 
-    AutoPtr<ICameraMetadataNativeKey> lensShadingMapKey;
-    CaptureResult::STATISTICS_LENS_SHADING_CORRECTION_MAP->GetNativeKey((ICameraMetadataNativeKey**)&lensShadingMapKey);
-    AutoPtr<GetCommand_LensShadingMap> lensShadingMap = new GetCommand_LensShadingMap();
-    sGetCommandMap->Put(TO_IINTERFACE(lensShadingMapKey), TO_IINTERFACE(lensShadingMap));
+    // AutoPtr<ICameraMetadataNativeKey> lensShadingMapKey;
+    // CaptureResult::STATISTICS_LENS_SHADING_CORRECTION_MAP->GetNativeKey((ICameraMetadataNativeKey**)&lensShadingMapKey);
+    // AutoPtr<GetCommand_LensShadingMap> lensShadingMap = new GetCommand_LensShadingMap();
+    // sGetCommandMap->Put(TO_IINTERFACE(lensShadingMapKey), TO_IINTERFACE(lensShadingMap));
 
-    CHashMap::New((IHashMap**)&sSetCommandMap);
+    // CHashMap::New((IHashMap**)&sSetCommandMap);
 
-    AutoPtr<ICameraMetadataNativeKey> _availableFormatsKey;
-    CameraCharacteristics::SCALER_AVAILABLE_FORMATS->GetNativeKey((ICameraMetadataNativeKey**)&_availableFormatsKey);
-    AutoPtr<SetCommand_AvailableFormats> _availableFormats = new SetCommand_AvailableFormats();
-    sSetCommandMap->Put(TO_IINTERFACE(_availableFormatsKey), TO_IINTERFACE(_availableFormats));
+    // AutoPtr<ICameraMetadataNativeKey> _availableFormatsKey;
+    // CameraCharacteristics::SCALER_AVAILABLE_FORMATS->GetNativeKey((ICameraMetadataNativeKey**)&_availableFormatsKey);
+    // AutoPtr<SetCommand_AvailableFormats> _availableFormats = new SetCommand_AvailableFormats();
+    // sSetCommandMap->Put(TO_IINTERFACE(_availableFormatsKey), TO_IINTERFACE(_availableFormats));
 
-    AutoPtr<ICameraMetadataNativeKey> _faceRectanglesKey;
-    CaptureResult::STATISTICS_FACE_RECTANGLES->GetNativeKey((ICameraMetadataNativeKey**)&_faceRectanglesKey);
-    AutoPtr<SetCommand_FaceRectangles> _faceRectangles = new SetCommand_FaceRectangles();
-    sSetCommandMap->Put(TO_IINTERFACE(_faceRectanglesKey), TO_IINTERFACE(_faceRectangles));
+    // AutoPtr<ICameraMetadataNativeKey> _faceRectanglesKey;
+    // CaptureResult::STATISTICS_FACE_RECTANGLES->GetNativeKey((ICameraMetadataNativeKey**)&_faceRectanglesKey);
+    // AutoPtr<SetCommand_FaceRectangles> _faceRectangles = new SetCommand_FaceRectangles();
+    // sSetCommandMap->Put(TO_IINTERFACE(_faceRectanglesKey), TO_IINTERFACE(_faceRectangles));
 
-    AutoPtr<ICameraMetadataNativeKey> _facesKey;
-    CaptureResult::STATISTICS_FACES->GetNativeKey((ICameraMetadataNativeKey**)&_facesKey);
-    AutoPtr<SetCommand_Faces> _faces = new SetCommand_Faces();
-    sSetCommandMap->Put(TO_IINTERFACE(_facesKey), TO_IINTERFACE(_faces));
+    // AutoPtr<ICameraMetadataNativeKey> _facesKey;
+    // CaptureResult::STATISTICS_FACES->GetNativeKey((ICameraMetadataNativeKey**)&_facesKey);
+    // AutoPtr<SetCommand_Faces> _faces = new SetCommand_Faces();
+    // sSetCommandMap->Put(TO_IINTERFACE(_facesKey), TO_IINTERFACE(_faces));
 
-    AutoPtr<ICameraMetadataNativeKey> _tonemapCurveKey;
-    CaptureRequest::TONEMAP_CURVE->GetNativeKey((ICameraMetadataNativeKey**)&_tonemapCurveKey);
-    AutoPtr<SetCommand_TonemapCurve> _tonemapCurve = new SetCommand_TonemapCurve();
-    sSetCommandMap->Put(TO_IINTERFACE(_tonemapCurveKey), TO_IINTERFACE(_tonemapCurve));
+    // AutoPtr<ICameraMetadataNativeKey> _tonemapCurveKey;
+    // CaptureRequest::TONEMAP_CURVE->GetNativeKey((ICameraMetadataNativeKey**)&_tonemapCurveKey);
+    // AutoPtr<SetCommand_TonemapCurve> _tonemapCurve = new SetCommand_TonemapCurve();
+    // sSetCommandMap->Put(TO_IINTERFACE(_tonemapCurveKey), TO_IINTERFACE(_tonemapCurve));
 
-    AutoPtr<ICameraMetadataNativeKey> _gpsLocationKey;
-    CaptureResult::JPEG_GPS_LOCATION->GetNativeKey((ICameraMetadataNativeKey**)&_gpsLocationKey);
-    AutoPtr<SetCommand_GpsLocation> _gpsLocation= new SetCommand_GpsLocation();
-    sSetCommandMap->Put(TO_IINTERFACE(_gpsLocationKey), TO_IINTERFACE(_gpsLocation));
+    // AutoPtr<ICameraMetadataNativeKey> _gpsLocationKey;
+    // CaptureResult::JPEG_GPS_LOCATION->GetNativeKey((ICameraMetadataNativeKey**)&_gpsLocationKey);
+    // AutoPtr<SetCommand_GpsLocation> _gpsLocation= new SetCommand_GpsLocation();
+    // sSetCommandMap->Put(TO_IINTERFACE(_gpsLocationKey), TO_IINTERFACE(_gpsLocation));
 
-    NativeClassInit();
-    RegisterAllMarshalers();
+    // NativeClassInit();
+    // RegisterAllMarshalers();
 
     return TRUE;
 }
@@ -1991,8 +1993,8 @@ ECode CameraMetadataNative::NativeWriteToParcel(
             return NOERROR;
         }
 
-        android::Parcel* parcelNative;// = parcelForJavaObject(env, parcel);
-        assert(0);
+        android::Parcel* parcelNative;
+        parcel->GetElementPayload((Handle32*)&parcelNative);
         if (parcelNative == NULL) {
             //jniThrowNullPointerException(env, "parcel");
             Slogger::E(TAG, "parcel");
@@ -2021,8 +2023,8 @@ ECode CameraMetadataNative::NativeReadFromParcel(
             return NOERROR;
         }
 
-        android::Parcel* parcelNative;// = parcelForJavaObject(env, parcel);
-        assert(0);
+        android::Parcel* parcelNative;
+        source->GetElementPayload((Handle32*)&parcelNative);
         if (parcelNative == NULL) {
             //jniThrowNullPointerException(env, "parcel");
             Slogger::E(TAG, "parcel");
@@ -2086,7 +2088,7 @@ ECode CameraMetadataNative::NativeIsEmpty(
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
-    Boolean empty;
+    Boolean empty = FALSE;
     synchronized(this) {
         ALOGV("%s", __FUNCTION__);
 
@@ -2116,7 +2118,7 @@ ECode CameraMetadataNative::NativeGetEntryCount(
     VALIDATE_NOT_NULL(count);
     *count = 0;
 
-    Int32 res;
+    Int32 res = 0;
     synchronized(this) {
         ALOGV("%s", __FUNCTION__);
 
@@ -2266,7 +2268,7 @@ ECode CameraMetadataNative::NativeWriteValues(
             Slogger::E(TAG, "Tag (%d) did not have a type", tag);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-        size_t tagSize = Helpers::getTypeSize(tagType);
+        size_t UNUSED(tagSize) = Helpers::getTypeSize(tagType);
 
         android::status_t res;
 

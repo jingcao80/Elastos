@@ -350,20 +350,20 @@ ECode CLocationManagerService::Receiver::GetInterfaceID(
 String CLocationManagerService::Receiver::ToString()
 {
     StringBuilder s;
-    s.AppendCStr("Reciever[");
+    s.Append("Reciever[");
     // s.Append(Integer.toHexString(System.identityHashCode(this)));
     if (mListener != NULL) {
-        s.AppendCStr(" listener");
+        s.Append(" listener");
     }
     else {
-        s.AppendCStr(" intent");
+        s.Append(" intent");
     }
     HashMap<String, AutoPtr<UpdateRecord> >::Iterator it;
     for (it = mUpdateRecords.Begin(); it != mUpdateRecords.End(); ++it) {
-        s.AppendCStr(" ");
+        s.Append(" ");
         s.AppendString(it->mSecond->ToString());
     }
-    s.AppendCStr("]");
+    s.Append("]");
     String result;
     s.ToString(&result);
     return result;

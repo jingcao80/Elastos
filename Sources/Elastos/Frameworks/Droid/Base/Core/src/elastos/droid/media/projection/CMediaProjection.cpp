@@ -5,6 +5,7 @@
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/os/ServiceManager.h"
 
+using Elastos::Droid::Hardware::Display::IDisplayManager;
 using Elastos::Utility::IMap;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Utility::CArrayMap;
@@ -94,41 +95,45 @@ ECode CMediaProjection::UnregisterCallback(
     return IMap::Probe(mCallbacks)->Remove(cb, (IInterface**)&cr);
 }
 
-// TODO: Need IIVirtualDisplayCallback
-// ECode CMediaProjection::CreateVirtualDisplay(
-//     /* [in] */ const String& name,
-//     /* [in] */ Int32 width,
-//     /* [in] */ Int32 height,
-//     /* [in] */ Int32 dpi,
-//     /* [in] */ Boolean isSecure,
-//     /* [in] */ ISurface * surface,
-//     /* [in] */ IIVirtualDisplayCallback * cb,
-//     /* [in] */ IHandler * handler,
-//     /* [out] */ IVirtualDisplay ** result)
-// {
-//     DisplayManager dm = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
-//     int flags = isSecure ? DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE : 0;
-//     return dm.createVirtualDisplay(this, name, width, height, dpi, surface,
-//                 flags | DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR |
-//                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION, callback, handler);
-// }
+ECode CMediaProjection::CreateVirtualDisplay(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 width,
+    /* [in] */ Int32 height,
+    /* [in] */ Int32 dpi,
+    /* [in] */ Boolean isSecure,
+    /* [in] */ ISurface * surface,
+    /* [in] */ IVirtualDisplayCallback * cb,
+    /* [in] */ IHandler * handler,
+    /* [out] */ IVirtualDisplay ** result)
+{
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::DISPLAY_SERVICE, ((IInterface**)&service));
+    AutoPtr<IDisplayManager> dm = IDisplayManager::Probe(service);
 
-// TODO: Need IIVirtualDisplayCallback
-// ECode CMediaProjection::CreateVirtualDisplay(
-//     /* [in] */ const String& name,
-//     /* [in] */ Int32 width,
-//     /* [in] */ Int32 height,
-//     /* [in] */ Int32 dpi,
-//     /* [in] */ Int32 flags,
-//     /* [in] */ ISurface * surface,
-//     /* [in] */ IIVirtualDisplayCallback * cb,
-//     /* [in] */ IHandler * handler,
-//     /* [out] */ IVirtualDisplay ** result)
-// {
-//     DisplayManager dm = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
-//     return dm.createVirtualDisplay(
-//                 this, name, width, height, dpi, surface, flags, callback, handler);
-// }
+    Int32 flags = isSecure ? IDisplayManager::VIRTUAL_DISPLAY_FLAG_SECURE : 0;
+    return dm->CreateVirtualDisplay(this, name, width, height, dpi, surface,
+                flags | IDisplayManager::VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR |
+                IDisplayManager::VIRTUAL_DISPLAY_FLAG_PRESENTATION, cb, handler, result);
+}
+
+ECode CMediaProjection::CreateVirtualDisplay(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 width,
+    /* [in] */ Int32 height,
+    /* [in] */ Int32 dpi,
+    /* [in] */ Int32 flags,
+    /* [in] */ ISurface * surface,
+    /* [in] */ IVirtualDisplayCallback * cb,
+    /* [in] */ IHandler * handler,
+    /* [out] */ IVirtualDisplay ** result)
+{
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::DISPLAY_SERVICE, ((IInterface**)&service));
+    AutoPtr<IDisplayManager> dm = IDisplayManager::Probe(service);
+
+    return dm->CreateVirtualDisplay(
+                this, name, width, height, dpi, surface, flags, cb, handler, result);
+}
 
 ECode CMediaProjection::CreateAudioRecord(
     /* [in] */ Int32 sampleRateInHz,

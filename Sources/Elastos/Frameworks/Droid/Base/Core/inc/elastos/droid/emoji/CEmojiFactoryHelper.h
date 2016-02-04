@@ -23,8 +23,6 @@ public:
 
     virtual ~CEmojiFactoryHelper();
 
-    CARAPI constructor();
-
     /**
      * Constructs an instance of EmojiFactory corresponding to the name.
      *
@@ -33,7 +31,7 @@ public:
      * If factory_name is invalid, null is returned.
      */
     CARAPI NewInstance(
-        /* [in] */ const String& class_name,
+        /* [in] */ const String& className,
         /* [out] */ IEmojiFactory** EmojiFactory);
 
     /**

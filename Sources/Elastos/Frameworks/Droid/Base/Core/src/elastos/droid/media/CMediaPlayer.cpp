@@ -1,18 +1,16 @@
 #include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/media/CAudioAttributes.h"
 #include "elastos/droid/media/CAudioAttributesBuilder.h"
+#include "elastos/droid/media/AudioSystem.h"
 #include "elastos/droid/media/CMediaFormat.h"
 #include "elastos/droid/media/CMediaHTTPService.h"
 #include "elastos/droid/media/CMediaPlayer.h"
 #include "elastos/droid/media/CMediaPlayerTrackInfo.h"
-// TODO: Need CMetadata
-// #include "elastos/droid/media/CMetadata.h"
-// TODO: Need CSRTRenderer
-// #include "elastos/droid/media/CSRTRenderer.h"
-// TODO: Need CTimedText
-// #include "elastos/droid/media/CTimedText.h"
-// TODO: Need CTrackInfoVendor
-// #include "elastos/droid/media/CTrackInfoVendor.h"
+#include "elastos/droid/media/CMetadata.h"
+#include "elastos/droid/media/CSRTRenderer.h"
+#include "elastos/droid/media/CSubtitleController.h"
+#include "elastos/droid/media/CSubtitleData.h"
+#include "elastos/droid/media/CTimedText.h"
 // TODO: Need Media_Utils
 // #include "elastos/droid/media/Media_Utils.h"
 #include "elastos/droid/net/CUriHelper.h"
@@ -466,8 +464,8 @@ ECode CMediaPlayer::TimeProvider::GetCurrentTimeUs(
         }
 
         *result = GetEstimatedTime(nanoTime, monotonic);
-        return NOERROR;
     }
+    return NOERROR;
 }
 
 void CMediaPlayer::TimeProvider::ScheduleNotification(
@@ -819,8 +817,8 @@ ECode CMediaPlayer::EventHandler::HandleMessage(
                 if (IParcel::Probe(obj) != NULL) {
                     AutoPtr<ITimedText> text;
                     assert(0);
-                    // AutoPtr<IParcel> parcel = IParcel::Probe(obj);
-                    // CTimedText::New(parcel, (ITimedText**)&text);
+                    AutoPtr<IParcel> parcel = IParcel::Probe(obj);
+                    CTimedText::New(parcel, (ITimedText**)&text);
                     // parcel->Recycle();
                     mMediaPlayer->mOnTimedTextListener->OnTimedText(mMediaPlayer, text);
                 }
@@ -834,7 +832,8 @@ ECode CMediaPlayer::EventHandler::HandleMessage(
             if (IParcel::Probe(obj) != NULL) {
                 AutoPtr<ISubtitleData> data;
                 assert(0);
-                // AutoPtr<IParcel> parcel = IParcel::Probe(obj);
+                AutoPtr<IParcel> parcel = IParcel::Probe(obj);
+// TODO: Need CSubtitleData::constructor(IParcel)
                 // CSubtitleData::New(parcel, (ISubtitleData**)&data);
                 // parcel->Recycle();
                 mMediaPlayer->mOnSubtitleDataListener->OnSubtitleData(mMediaPlayer, data);
@@ -1216,8 +1215,7 @@ ECode CMediaPlayer::Create(
     /* [out] */ IMediaPlayer** player)
 {
     Int32 s;
-// TODO: Need CAudioSystem
-    // CAudioSystem::NewAudioSessionId(&s);
+    AudioSystem::NewAudioSessionId(&s);
     return Create(context, uri, holder, NULL, s > 0 ? s : 0, player);
 }
 
@@ -1272,8 +1270,7 @@ ECode CMediaPlayer::Create(
     /* [out] */ IMediaPlayer** player)
 {
     Int32 s;
-// TODO: Need CAudioSystem
-    // CAudioSystem::NewAudioSessionId(&s);
+    AudioSystem::NewAudioSessionId(&s);
     return Create(context, resid, NULL, s > 0 ? s : 0, player);
 }
 
@@ -1405,7 +1402,7 @@ _EXIT_:
         afd = NULL;
     }
 
-    if (ec != E_SECURITY_EXCEPTION && ec != E_IO_EXCEPTION) {
+    if (ec != (ECode)E_SECURITY_EXCEPTION && ec != (ECode)E_IO_EXCEPTION) {
         return ec;
     }
 
@@ -1906,8 +1903,7 @@ ECode CMediaPlayer::GetMetadata(
     CCallbackParcel::New((IParcel**)&reply);
 
     AutoPtr<IMetadata> data;
-// TODO: Need CMetadata
-    // FAIL_RETURN(CMetadata::New((IMetadata**)&data));
+    FAIL_RETURN(CMetadata::New((IMetadata**)&data));
     Boolean succeeded;
     FAIL_RETURN(NativeGetMetadata(update_only, apply_filter, reply, &succeeded));
     if (!succeeded) {
@@ -2095,7 +2091,7 @@ ECode CMediaPlayer::NativeSetAudioStreamType(
         mp->setAudioStreamType((audio_stream_type_t)streamtype), NOERROR, "SetAudioStreamType");
 }
 
-Boolean CMediaPlayer::NativeSetParameter(
+ECode CMediaPlayer::NativeSetParameter(
     /* [in] */ Int32 key,
     /* [in] */ IParcel* value)
 {
@@ -2105,16 +2101,10 @@ Boolean CMediaPlayer::NativeSetParameter(
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-// TODO: Need jni code
     android::Parcel *request;
-    // request = parcelForJavaObject(env, java_request);
-    android::status_t err = mp->setParameter(key, *request);
-    if (err == android::OK) {
-        return TRUE;
-    }
-    else {
-        return FALSE;
-    }
+    value->GetElementPayload((Handle32*)&request);
+    android::status_t UNUSED(err) = mp->setParameter(key, *request);
+    return NOERROR;
 }
 
 ECode CMediaPlayer::SetAudioAttributes(
@@ -2168,7 +2158,7 @@ ECode CMediaPlayer::SetVolume(
     if (IsRestricted()) {
         return NOERROR;
     }
-    NativeSetVolume(leftVolume, rightVolume);
+    return NativeSetVolume(leftVolume, rightVolume);
 }
 
 ECode CMediaPlayer::NativeSetVolume(
@@ -2234,7 +2224,7 @@ ECode CMediaPlayer::SetAuxEffectSendLevel(
     if (IsRestricted()) {
         return NOERROR;
     }
-    NativeSetAuxEffectSendLevel(level);
+    return NativeSetAuxEffectSendLevel(level);
 }
 
 ECode CMediaPlayer::NativeSetAuxEffectSendLevel(
@@ -2607,7 +2597,6 @@ ECode CMediaPlayer::AddTimedTextSource(
     CLibcore::AcquireSingleton((ILibcore**)&lc);
     AutoPtr<IOs> os;
     lc->GetOs((IOs**)&os);
-    Int64 size = 0;
     os->Dup(fd, (IFileDescriptor**)&fd2);
 
     // } catch (ErrnoException ex) {
@@ -2624,10 +2613,9 @@ ECode CMediaPlayer::AddTimedTextSource(
     AutoPtr<IContext> context = IContext::Probe(app);
     // A MediaPlayer created by a VideoView should already have its mSubtitleController set.
     if (mSubtitleController == NULL) {
-// TODO: Need CSubtitleController
-        // CSubtitleController::New(context, mTimeProvider,
-        //         THIS_PROBE(ISubtitleControllerListener),
-        //         (ISubtitleController**)&mSubtitleController);
+        CSubtitleController::New(context, mTimeProvider,
+                THIS_PROBE(ISubtitleControllerListener),
+                (ISubtitleController**)&mSubtitleController);
 
         AutoPtr<MyAnchor> anchor = new MyAnchor(this);
         mSubtitleController->SetAnchor(anchor);
@@ -2637,10 +2625,9 @@ ECode CMediaPlayer::AddTimedTextSource(
     mSubtitleController->HasRendererFor(fFormat, &b);
     if (!b) {
         // test and add not atomic
-        AutoPtr<ISRTRenderer> srtr;
-// TODO: Need CSRTRenderer
-        // CSRTRenderer::New(context, mEventHandler, (ISRTRenderer**)&srtr);
-        mSubtitleController->RegisterRenderer(ISubtitleControllerRenderer::Probe(srtr));
+        AutoPtr<ISubtitleControllerRenderer> srtr;
+        CSRTRenderer::New(context, mEventHandler, (ISubtitleControllerRenderer**)&srtr);
+        mSubtitleController->RegisterRenderer(srtr);
     }
     AutoPtr<ISubtitleTrack> track;
     mSubtitleController->AddTrack(fFormat, (ISubtitleTrack**)&track);

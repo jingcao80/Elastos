@@ -59,7 +59,7 @@ ECode TextTrackCue::Equals(
             mAutoLinePosition == cue->mAutoLinePosition &&
             (mAutoLinePosition || mLinePosition == cue->mLinePosition) &&
             mTextPosition == cue->mTextPosition &&
-                mSize == cue->mSize && mAlignment == cue->mAlignment;
+            mSize == cue->mSize && mAlignment == cue->mAlignment &&
             length == len;
     if (res == TRUE) {
         for (Int32 line = 0; line < length; line++) {

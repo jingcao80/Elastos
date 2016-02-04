@@ -73,11 +73,25 @@ ECode CPackageInstallerSessionInfo::ReadFromParcel(
     return NOERROR;
 }
 
+ECode CPackageInstallerSessionInfo::SetSessionId(
+    /* [in] */ Int32 id)
+{
+    mSessionId = id;
+    return NOERROR;
+}
+
 ECode CPackageInstallerSessionInfo::GetSessionId(
     /* [out] */ Int32* id)
 {
     VALIDATE_NOT_NULL(id)
     *id = mSessionId;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::SetInstallerPackageName(
+    /* [in] */ const String& packageName)
+{
+    mInstallerPackageName = packageName;
     return NOERROR;
 }
 
@@ -89,11 +103,55 @@ ECode CPackageInstallerSessionInfo::GetInstallerPackageName(
     return NOERROR;
 }
 
+ECode CPackageInstallerSessionInfo::GetResolvedBaseCodePath(
+    /* [out] */ String* path)
+{
+    VALIDATE_NOT_NULL(path)
+    *path = mResolvedBaseCodePath;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::SetResolvedBaseCodePath(
+    /* [in] */ const String& path)
+{
+    mResolvedBaseCodePath = path;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::SetSealed(
+    /* [in] */ Boolean sealed)
+{
+    mSealed = sealed;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::IsSealed(
+    /* [out] */ Boolean* isSealed)
+{
+    VALIDATE_NOT_NULL(isSealed)
+    *isSealed = mSealed;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::SetProgress(
+    /* [in] */ Float progress)
+{
+    mProgress = progress;
+    return NOERROR;
+}
+
 ECode CPackageInstallerSessionInfo::GetProgress(
     /* [out] */ Float* progress)
 {
     VALIDATE_NOT_NULL(progress)
     *progress = mProgress;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::SetActive(
+    /* [in] */ Boolean active)
+{
+    mActive = active;
     return NOERROR;
 }
 
@@ -113,11 +171,55 @@ ECode CPackageInstallerSessionInfo::IsOpen(
     return NOERROR;
 }
 
+ECode CPackageInstallerSessionInfo::SetMode(
+    /* [in] */ Int32 mode)
+{
+    mMode = mode;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::GetMode(
+    /* [out] */ Int32* mode)
+{
+    VALIDATE_NOT_NULL(mode)
+    *mode = mMode;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::SetSizeBytes(
+    /* [in] */ Int64 sizeBytes)
+{
+    mSizeBytes = sizeBytes;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::GetSizeBytes(
+    /* [out] */ Int64* sizeBytes)
+{
+    VALIDATE_NOT_NULL(sizeBytes)
+    *sizeBytes = mSizeBytes;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::SetAppPackageName(
+    /* [in] */ const String& name)
+{
+    mAppPackageName = name;
+    return NOERROR;
+}
+
 ECode CPackageInstallerSessionInfo::GetAppPackageName(
     /* [out] */ String* name)
 {
     VALIDATE_NOT_NULL(name)
     *name = mAppPackageName;
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::SetAppIcon(
+    /* [in] */ IBitmap* icon)
+{
+    mAppIcon = icon;
     return NOERROR;
 }
 
@@ -127,6 +229,13 @@ ECode CPackageInstallerSessionInfo::GetAppIcon(
     VALIDATE_NOT_NULL(icon)
     *icon = mAppIcon;
     REFCOUNT_ADD(*icon)
+    return NOERROR;
+}
+
+ECode CPackageInstallerSessionInfo::SetAppLabel(
+    /* [in] */ ICharSequence* label)
+{
+    mAppLabel = label;
     return NOERROR;
 }
 

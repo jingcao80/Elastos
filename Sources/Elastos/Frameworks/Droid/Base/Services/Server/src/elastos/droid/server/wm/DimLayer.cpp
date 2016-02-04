@@ -1,14 +1,17 @@
 
-#include "wm/DimLayer.h"
-#include "wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/DimLayer.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/DisplayContent.h"
 #include "elastos/droid/os/SystemClock.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::View::ISurfaceControlHelper;
 using Elastos::Droid::View::CSurfaceControlHelper;
+using Elastos::Droid::View::CSurfaceControl;
 using Elastos::Droid::View::IDisplayInfo;
 
 namespace Elastos {
@@ -39,7 +42,7 @@ DimLayer::DimLayer(
     Int32 displayId = mDisplayContent->GetDisplayId();
     if (DEBUG) Slogger::V(TAG, "Ctor: displayId=" + displayId);
     AutoPtr<ISurfaceControlHelper> helper;
-    CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&scHelper);
+    CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&helper);
     helper->OpenTransaction();
     // try {
     // if (WindowManagerService.DEBUG_SURFACE_TRACE) {
@@ -121,8 +124,7 @@ void DimLayer::AdjustSurface(
     /* [in] */ Int32 layer,
     /* [in] */ Boolean inTransaction)
 {
-    Int32 dw, dh;
-    Float xPos, yPos;
+    Int32 dw, dh, xPos, yPos;
     if (!mStack->IsFullscreen()) {
         mBounds->GetWidth(&dw);
         mBounds->GetHeight(&dh);
@@ -258,8 +260,8 @@ Boolean DimLayer::StepAnimation()
         Int64 curTime = SystemClock::GetUptimeMillis();
         Float alphaDelta = mTargetAlpha - mStartAlpha;
         Float alpha = mStartAlpha + alphaDelta * (curTime - mStartTime) / mDuration;
-        if (alphaDelta > 0 && alpha > mTargetAlpha ||
-                alphaDelta < 0 && alpha < mTargetAlpha) {
+        if ((alphaDelta > 0 && alpha > mTargetAlpha) ||
+                (alphaDelta < 0 && alpha < mTargetAlpha)) {
             // Don't exceed limits.
             alpha = mTargetAlpha;
         }
@@ -284,32 +286,32 @@ void DimLayer::PrintTo(
     /* [in] */ IPrintWriter* pw)
 {
     pw->Print(prefix);
-    pw->Pring(String("mDimSurface="));
+    pw->Print(String("mDimSurface="));
     pw->Print(mDimSurface);
-    pw->Pring(String(" mLayer="));
+    pw->Print(String(" mLayer="));
     pw->Print(mLayer);
-    pw->Pring(String(" mAlpha="));
+    pw->Print(String(" mAlpha="));
     pw->Println(mAlpha);
     pw->Print(prefix);
-    pw->Pring(String("mLastBounds=");
+    pw->Print(String("mLastBounds="));
     String str;
     mLastBounds->ToShortString(&str);
     pw->Print(str);
-    pw->Pring(String(" mBounds=");
+    pw->Print(String(" mBounds="));
     mBounds->ToShortString(&str);
     pw->Println(str);
     pw->Print(prefix);
-    pw->Pring(String("Last animation: "));
-    pw->Pring(String(" mDuration="));
+    pw->Print(String("Last animation: "));
+    pw->Print(String(" mDuration="));
     pw->Print(mDuration);
-    pw->Pring(String(" mStartTime="));
+    pw->Print(String(" mStartTime="));
     pw->Print(mStartTime);
-    pw->Pring(String(" curTime="));
+    pw->Print(String(" curTime="));
     pw->Println(SystemClock::GetUptimeMillis());
     pw->Print(prefix);
-    pw->Pring(String(" mStartAlpha="));
+    pw->Print(String(" mStartAlpha="));
     pw->Print(mStartAlpha);
-    pw->Pring(String(" mTargetAlpha="));
+    pw->Print(String(" mTargetAlpha="));
     pw->Println(mTargetAlpha);
 }
 

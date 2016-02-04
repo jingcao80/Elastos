@@ -2,14 +2,14 @@
 #include "elastos/droid/server/pm/CrossProfileIntentFilter.h"
 #include "elastos/droid/server/pm/CPackageManagerService.h"
 #include "elastos/droid/server/pm/Settings.h"
-#include "elastos/droid/util/XmlUtils.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Core::StringUtils;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Utility::XmlUtils;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Utility::ILogHelper;
 
 namespace Elastos {
@@ -17,7 +17,7 @@ namespace Droid {
 namespace Server {
 namespace Pm {
 
-const String CrossProfileIntentFilter::ATTR_TARGET_USER_I("targetUserId");
+const String CrossProfileIntentFilter::ATTR_TARGET_USER_ID("targetUserId");
 const String CrossProfileIntentFilter::ATTR_FLAGS("flags");
 const String CrossProfileIntentFilter::ATTR_OWNER_USER_ID("ownerUserId");
 const String CrossProfileIntentFilter::ATTR_OWNER_PACKAGE("wnerPackage");
@@ -43,17 +43,17 @@ CrossProfileIntentFilter::CrossProfileIntentFilter(
     , mOwnerUserId(0)
     , mFlags(0)
 {
-    mTargetUserId = GetIntFromXml(parser, ATTR_TARGET_USER_ID, IUserHandle::USER_NULL);
-    mOwnerUserId = GetIntFromXml(parser, ATTR_OWNER_USER_ID, IUserHandle::USER_NULL);
+    mTargetUserId = GetInt32FromXml(parser, ATTR_TARGET_USER_ID, IUserHandle::USER_NULL);
+    mOwnerUserId = GetInt32FromXml(parser, ATTR_OWNER_USER_ID, IUserHandle::USER_NULL);
     mOwnerPackage = GetStringFromXml(parser, ATTR_OWNER_PACKAGE, String(""));
-    mFlags = GetIntFromXml(parser, ATTR_FLAGS, 0);
+    mFlags = GetInt32FromXml(parser, ATTR_FLAGS, 0);
 
     Int32 outerDepth;
     parser->GetDepth(&outerDepth);
     String tagName;
     parser->GetName(&tagName);
     Int32 type, depth;
-    while ((parser->GetNext(&type), type != IXmlPullParser::END_DOCUMENT)
+    while ((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
             && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&depth), depth > outerDepth))) {
         parser->GetName(&tagName);
         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
@@ -126,10 +126,10 @@ String CrossProfileIntentFilter::GetStringFromXml(
     }
 }
 
-Int32 CrossProfileIntentFilter::GetIntFromXml(
+Int32 CrossProfileIntentFilter::GetInt32FromXml(
     /* [in] */ IXmlPullParser* parser,
     /* [in] */ const String& attribute,
-    /* [in] */ const String& defaultValue)
+    /* [in] */ Int32 defaultValue)
 {
     String stringValue = GetStringFromXml(parser, attribute, String(NULL));
     if (!stringValue.IsNull()) {
@@ -154,7 +154,7 @@ ECode CrossProfileIntentFilter::WriteToXml(
 ECode CrossProfileIntentFilter::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(str)
     AutoPtr<ISystem> system;
     CSystem::AcquireSingleton((ISystem**)&system);
     Int32 hashCode;

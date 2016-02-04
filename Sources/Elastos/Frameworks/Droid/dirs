@@ -4,7 +4,7 @@ DIRS = DCARServer
 DIRS += DCARServiceManager
 DIRS += DroidRuntime
 DIRS += Base/Core/
-#DIRS += Base/Packages/
+DIRS += Base/Packages/
 DIRS += Base/Services/Server/
 DIRS += App_process
 

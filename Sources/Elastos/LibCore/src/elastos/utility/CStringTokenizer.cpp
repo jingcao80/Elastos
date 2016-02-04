@@ -38,7 +38,7 @@ ECode CStringTokenizer::constructor(
     /* [in] */ const String& delimiters,
     /* [in] */ Boolean returnDelimiters)
 {
-    if (mString.IsNull()) {
+    if (string.IsNull()) {
         // throw new NullPointerException("string == null");
         return E_NULL_POINTER_EXCEPTION;
     }

@@ -16,6 +16,8 @@
 
 using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::App::IINotificationManager;
+using Elastos::Droid::App::CNotificationManagerHelper;
+using Elastos::Droid::App::INotificationManagerHelper;
 using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::CIntent;
@@ -202,13 +204,12 @@ ECode CServiceRecord::PostNotificationRunnable::Run()
                 "Error showing notification for service");
         // If it gave us a garbage notification, it doesn't
         // get to be foreground.
-        assert(0);
-        // mHost->mAms->SetServiceForeground(mHost->mName, mHost,
-        //         0, NULL, TRUE);
-        // StringBuilder errorsb("Bad notification for startForeground: ");
-        // errorsb += (Int32)ec;
-        // mHost->mAms->CrashApplication(mAppUid, mAppPid, mLocalPackageName,
-        //         errorsb.ToString());
+        mHost->mAms->SetServiceForeground(mHost->mName, mHost,
+                0, NULL, TRUE);
+        StringBuilder errorsb("Bad notification for startForeground: ");
+        errorsb += (Int32)ec;
+        mHost->mAms->CrashApplication(mAppUid, mAppPid, mLocalPackageName,
+                errorsb.ToString());
     }
     return NOERROR;
 }
@@ -219,8 +220,10 @@ ECode CServiceRecord::PostNotificationRunnable::Run()
 
 ECode CServiceRecord::CancelNotificationRunnable::Run()
 {
-    assert(0);
-    AutoPtr<IINotificationManager> inm;// = NotificationManager::GetService();
+    AutoPtr<INotificationManagerHelper> nmHelper;
+    CNotificationManagerHelper::AcquireSingleton((INotificationManagerHelper**)&nmHelper);
+    AutoPtr<IINotificationManager> inm;
+    nmHelper->GetService((IINotificationManager**)&inm);
     if (inm == NULL) {
         return NOERROR;
     }
@@ -296,7 +299,7 @@ CServiceRecord::~CServiceRecord()
 
 ECode CServiceRecord::constructor(
     /* [in] */ CActivityManagerService* ams,
-    /* [in] */ IBatteryStatsUidPkgServ* servStats,
+    /* [in] */ IBatteryStatsImplUidPkgServ* servStats,
     /* [in] */ IComponentName* name,
     /* [in] */ IIntentFilterComparison* intent,
     /* [in] */ IServiceInfo* sInfo,
@@ -546,9 +549,8 @@ AutoPtr<IServiceState> CServiceRecord::GetTracker()
         Int32 uid, versionCode;
         appInfo->GetUid(&uid);
         appInfo->GetVersionCode(&versionCode);
-        assert(0);
-        // mTracker = mAms->mProcessStats->GetServiceStateLocked(packageName,
-        //         uid, versionCode, processName, name);
+        mTracker = mAms->mProcessStats->GetServiceStateLocked(packageName,
+                uid, versionCode, processName, name);
         mTracker->ApplyNewOwner((IObject*)this);
     }
     return mTracker;
@@ -579,9 +581,8 @@ void CServiceRecord::MakeRestarting(
             Int32 uid, versionCode;
             appInfo->GetUid(&uid);
             appInfo->GetVersionCode(&versionCode);
-            assert(0);
-            // mRestartTracker = mAms->mProcessStats->GetServiceStateLocked(packageName,
-            //         uid, versionCode, processName, name);
+            mRestartTracker = mAms->mProcessStats->GetServiceStateLocked(packageName,
+                    uid, versionCode, processName, name);
         }
         if (mRestartTracker == NULL) {
             return;

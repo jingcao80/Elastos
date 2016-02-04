@@ -3,21 +3,25 @@
 #define __ELASTOS_DROID_SERVER_NET_NETWORKSTATSCOLLECTION_H__
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/net/NetworkIdentitySet.h"
-#include "util/FileRotator.h"
+#include "elastos/droid/server/net/NetworkIdentitySet.h"
+#include <Elastos.Droid.Internal.h>
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Utility::Etl::HashMap;
-using Elastos::IO::IDataInputStream;
-using Elastos::IO::IDataOutputStream;
-using Elastos::Droid::Net::INetworkTemplate;
-using Elastos::Droid::Net::INetworkStats;
-using Elastos::Droid::Net::INetworkStatsHistory;
-using Elastos::Droid::Net::INetworkIdentity;
-using Elastos::Droid::Net::INetworkStatsEntry;
-using Elastos::Droid::Net::INetworkStatsHistoryEntry;
-using Elastos::Droid::Internal::Utility::FileRotator;
+using Elastos::Droid::Internal::Utility::IFileRotatorReader;
 using Elastos::Droid::Internal::Utility::IIndentingPrintWriter;
+using Elastos::Droid::Net::INetworkIdentity;
+using Elastos::Droid::Net::INetworkStats;
+using Elastos::Droid::Net::INetworkStatsEntry;
+using Elastos::Droid::Net::INetworkStatsHistory;
+using Elastos::Droid::Net::INetworkStatsHistoryEntry;
+using Elastos::Droid::Net::INetworkTemplate;
+using Elastos::IO::IDataInput;
+using Elastos::IO::IDataInputStream;
+using Elastos::IO::IDataOutput;
+using Elastos::IO::IDataOutputStream;
+using Elastos::IO::IFile;
+using Elastos::IO::IInputStream;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -27,7 +31,8 @@ namespace Net {
 extern "C" const InterfaceID EIID_NetworkStatsCollection;
 
 class NetworkStatsCollection
-    : public FileRotator::Reader
+    : public Object
+    , public IFileRotatorReader
 {
 public:
     class Key
@@ -71,6 +76,8 @@ public:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     NetworkStatsCollection(
         /* [in] */ Int64 bucketDuration);
 

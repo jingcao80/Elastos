@@ -1,10 +1,12 @@
 
 #include "elastos/droid/media/CRemoteControlClient.h"
 #include <elastos/utility/logging/Logger.h>
+#include "elastos/droid/media/session/CPlaybackState.h"
+#include "elastos/droid/media/session/CPlaybackStateBuilder.h"
+#include "elastos/droid/media/CMediaMetadataBuilder.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/CLooperHelper.h"
 #include "elastos/droid/os/SystemClock.h"
-#include "elastos/droid/media/CAudioSystemHelper.h"
 #include "elastos/droid/os/CServiceManager.h"
 #include <elastos/core/Math.h>
 #include "elastos/droid/graphics/CBitmap.h"
@@ -12,9 +14,14 @@
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/graphics/CRectF.h"
 #include <elastos/core/StringUtils.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::ILooperHelper;
 using Elastos::Droid::Os::CLooperHelper;
@@ -24,6 +31,11 @@ using Elastos::Core::CInteger32;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::CServiceManager;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Media::Session::EIID_IMediaSessionCallback;
+using Elastos::Droid::Media::Session::CPlaybackState;
+using Elastos::Droid::Media::Session::CPlaybackStateBuilder;
+using Elastos::Droid::Media::Session::IPlaybackStateBuilder;
+using Elastos::Droid::Media::CMediaMetadataBuilder;
 using Elastos::Droid::Graphics::BitmapConfig;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::Graphics::BitmapConfig_NONE;
@@ -39,66 +51,28 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
-static AutoPtr< ArrayOf<Int32> > InitMETADATA_KEYS_TYPE_STRING()
-{
-    AutoPtr< ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(11);
-    array->Set(0, IMediaMetadataRetriever::METADATA_KEY_ALBUM);
-    array->Set(1, IMediaMetadataRetriever::METADATA_KEY_ALBUMARTIST);
-    array->Set(2, IMediaMetadataRetriever::METADATA_KEY_TITLE);
-    array->Set(3, IMediaMetadataRetriever::METADATA_KEY_ARTIST);
-    array->Set(4, IMediaMetadataRetriever::METADATA_KEY_AUTHOR);
-    array->Set(5, IMediaMetadataRetriever::METADATA_KEY_COMPILATION);
-    array->Set(6, IMediaMetadataRetriever::METADATA_KEY_COMPOSER);
-    array->Set(7, IMediaMetadataRetriever::METADATA_KEY_DATE);
-    array->Set(8, IMediaMetadataRetriever::METADATA_KEY_GENRE);
-    array->Set(9, IMediaMetadataRetriever::METADATA_KEY_TITLE);
-    array->Set(10, IMediaMetadataRetriever::METADATA_KEY_WRITER);
-    return array;
-}
-
-static AutoPtr< ArrayOf<Int32> > InitMETADATA_KEYS_TYPE_LONG()
-{
-    AutoPtr< ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(3);
-
-    array->Set(0, IMediaMetadataRetriever::METADATA_KEY_CD_TRACK_NUMBER);
-    array->Set(1, IMediaMetadataRetriever::METADATA_KEY_DISC_NUMBER);
-    array->Set(2, IMediaMetadataRetriever::METADATA_KEY_DURATION);
-    return array;
-
-}
-
-AutoPtr< ArrayOf<Int32> > CRemoteControlClient::METADATA_KEYS_TYPE_STRING = ArrayOf<Int32>::Alloc(11);
-AutoPtr< ArrayOf<Int32> > CRemoteControlClient::METADATA_KEYS_TYPE_LONG = ArrayOf<Int32>::Alloc(3);
-
 const String CRemoteControlClient::TAG("RemoteControlClient");
+const Boolean CRemoteControlClient::DEBUG = FALSE;
 
 const Int32 CRemoteControlClient::PLAYBACK_TYPE_MIN = IRemoteControlClient::PLAYBACK_TYPE_LOCAL;
 const Int32 CRemoteControlClient::PLAYBACK_TYPE_MAX = IRemoteControlClient::PLAYBACK_TYPE_REMOTE;
-AutoPtr<IIAudioService> CRemoteControlClient::sService;
-
-const Int32 CRemoteControlClient::MSG_REQUEST_PLAYBACK_STATE = 1;
-const Int32 CRemoteControlClient::MSG_REQUEST_METADATA = 2;
-const Int32 CRemoteControlClient::MSG_REQUEST_TRANSPORTCONTROL = 3;
-const Int32 CRemoteControlClient::MSG_REQUEST_ARTWORK = 4;
-const Int32 CRemoteControlClient::MSG_NEW_INTERNAL_CLIENT_GEN = 5;
-const Int32 CRemoteControlClient::MSG_NEW_CURRENT_CLIENT_GEN = 6;
-const Int32 CRemoteControlClient::MSG_PLUG_DISPLAY = 7;
-const Int32 CRemoteControlClient::MSG_UNPLUG_DISPLAY = 8;
-
+const Int64 CRemoteControlClient::POSITION_REFRESH_PERIOD_PLAYING_MS = 15000;
+const Int64 CRemoteControlClient::POSITION_REFRESH_PERIOD_MIN_MS = 2000;
+const Int32 CRemoteControlClient::MSG_POSITION_DRIFT_CHECK = 11;
+const Int64 CRemoteControlClient::POSITION_DRIFT_MAX_MS = 500;
 //----------------------------------------
 //    CRemoteControlClient::MetadataEditor
 //----------------------------------------
 
-CAR_INTERFACE_IMPL(CRemoteControlClient::MetadataEditor, IMetadataEditor);
+CAR_INTERFACE_IMPL_2(CRemoteControlClient::MetadataEditor, Object, IRemoteControlClientMetadataEditor, IMediaMetadataEditor);
 
 CRemoteControlClient::MetadataEditor::MetadataEditor(
     /* [in] */ CRemoteControlClient* owner)
-    : mApplied(FALSE)
-    , mOwner(owner)
+    : mOwner(owner)
 {}
 
-ECode CRemoteControlClient::MetadataEditor::Clone( // throws CloneNotSupportedException
-    /* [out] */ IMetadataEditor** result)
+ECode CRemoteControlClient::MetadataEditor::Clone(
+    /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
     assert(0);
@@ -107,57 +81,48 @@ ECode CRemoteControlClient::MetadataEditor::Clone( // throws CloneNotSupportedEx
 }
 
 /*synchronized*/
-ECode CRemoteControlClient::MetadataEditor::PutString( // throws IllegalArgumentException
+ECode CRemoteControlClient::MetadataEditor::PutString(
     /* [in] */ Int32 key,
     /* [in] */ const String& value,
-    /* [out] */ IMetadataEditor** result)
+    /* [out] */ IRemoteControlClientMetadataEditor** result)
 {
     VALIDATE_NOT_NULL(result);
+    MediaMetadataEditor::PutString(key, value);
 
-    AutoLock lock(mThisLock);
-
-    if (mApplied) {
-        Logger::E(TAG, "Can't edit a previously applied MetadataEditor");
-        *result = this;
-        REFCOUNT_ADD(*result);
-        return NOERROR;
+    if (mMetadataBuilder != NULL) {
+        // MediaMetadata supports all the same fields as MetadataEditor
+        String metadataKey;
+        CMediaMetadata::GetKeyFromMetadataEditorKey(key, &metadataKey);
+        // But just in case, don't add things we don't understand
+        if (!metadataKey.IsNull()) {
+            mMetadataBuilder->PutText(metadataKey, StringUtils::ParseCharSequence(value).Get());
+        }
     }
 
-    if (!ValidTypeForKey(key, METADATA_KEYS_TYPE_STRING)) {
-        Logger::E(TAG, "Invalid type 'String' for key %d", key);
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-
-    mEditorMetadata->PutString(StringUtils::Int32ToString(key), value);
-    mMetadataChanged = TRUE;
     *result = this;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
 /*synchronized*/
-ECode CRemoteControlClient::MetadataEditor::PutInt64( // throws IllegalArgumentException
+ECode CRemoteControlClient::MetadataEditor::PutInt64(
     /* [in] */ Int32 key,
     /* [in] */ Int64 value,
-    /* [out] */ IMetadataEditor** result)
+    /* [out] */ IRemoteControlClientMetadataEditor** result)
 {
     VALIDATE_NOT_NULL(result);
-
     AutoLock lock(mThisLock);
 
-    if (mApplied) {
-        Logger::E(TAG, "Can't edit a previously applied MetadataEditor");
-        *result = this;
-        REFCOUNT_ADD(*result);
-        return NOERROR;
+    MediaMetadataEditor::PutInt64(key, value);
+    if (mMetadataBuilder != NULL) {
+        // MediaMetadata supports all the same fields as MetadataEditor
+        String metadataKey;
+        CMediaMetadata::GetKeyFromMetadataEditorKey(key, &metadataKey);
+        // But just in case, don't add things we don't understand
+        if (!metadataKey.IsNull()) {
+            mMetadataBuilder->PutLong(metadataKey, value);
+        }
     }
-
-    if (!ValidTypeForKey(key, METADATA_KEYS_TYPE_LONG)) {
-        //throw(new IllegalArgumentException("Invalid type 'long' for key "+ key));
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-    mEditorMetadata->PutInt64(StringUtils::Int32ToString(key), value);
-    mMetadataChanged = TRUE;
     *result = this;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -167,30 +132,42 @@ ECode CRemoteControlClient::MetadataEditor::PutInt64( // throws IllegalArgumentE
 ECode CRemoteControlClient::MetadataEditor::PutBitmap( // throws IllegalArgumentException
     /* [in] */ Int32 key,
     /* [in] */ IBitmap* bitmap,
-    /* [out] */ IMetadataEditor** result)
+    /* [out] */ IRemoteControlClientMetadataEditor** result)
 {
     VALIDATE_NOT_NULL(result);
-
+    MediaMetadataEditor::PutBitmap(key, bitmap);
     AutoLock lock(mThisLock);
 
-    if (mApplied) {
-        Logger::E(TAG, "Can't edit a previously applied MetadataEditor");
-        *result = this;
-        REFCOUNT_ADD(*result);
-        return NOERROR;
+    if (mMetadataBuilder != NULL) {
+        // MediaMetadata supports all the same fields as MetadataEditor
+        String metadataKey;
+        CMediaMetadata::GetKeyFromMetadataEditorKey(key, &metadataKey);
+        // But just in case, don't add things we don't understand
+        if (!metadataKey.IsNull()) {
+            mMetadataBuilder->PutBitmap(metadataKey, bitmap);
+        }
     }
-    if (key != BITMAP_KEY_ARTWORK) {
-        Logger::E(TAG, "Invalid type 'Bitmap' for key %d", key);
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    *result = this;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MetadataEditor::PutObject(
+    /* [in] */ Int32 key,
+    /* [in] */ IInterface* object,
+    /* [out] */ IRemoteControlClientMetadataEditor** result)
+{
+    VALIDATE_NOT_NULL(result);
+    MediaMetadataEditor::PutObject(key, object);
+    if (mMetadataBuilder != NULL &&
+        (key == IMediaMetadataEditor::RATING_KEY_BY_USER ||
+        key == IMediaMetadataEditor::RATING_KEY_BY_OTHERS)) {
+        String metadataKey;
+        CMediaMetadata::GetKeyFromMetadataEditorKey(key, &metadataKey);
+        if (!metadataKey.IsNull()) {
+            mMetadataBuilder->PutRating(metadataKey, IRating::Probe(object));
+        }
     }
-    if ((mOwner->mArtworkExpectedWidth > 0) && (mOwner->mArtworkExpectedHeight > 0)) {
-        mEditorArtwork = mOwner->ScaleBitmapIfTooBig(bitmap,
-                mOwner->mArtworkExpectedWidth, mOwner->mArtworkExpectedHeight);
-    } else {
-        // no valid resize dimensions, store as is
-        mEditorArtwork = bitmap;
-    }
-    mArtworkChanged = TRUE;
     *result = this;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -200,14 +177,7 @@ ECode CRemoteControlClient::MetadataEditor::PutBitmap( // throws IllegalArgument
 ECode CRemoteControlClient::MetadataEditor::Clear()
 {
     AutoLock lock(mThisLock);
-
-    if (mApplied) {
-        Logger::E(TAG, "Can't clear a previously applied MetadataEditor");
-        return NOERROR;
-    }
-    mEditorMetadata->Clear();
-    mEditorArtwork = NULL;
-    return NOERROR;
+    return MediaMetadataEditor::Clear();
 }
 
 /*synchronized*/
@@ -216,29 +186,27 @@ ECode CRemoteControlClient::MetadataEditor::Apply()
     AutoLock lock(mThisLock);
 
     if (mApplied) {
-        Logger::E(TAG, "Can't apply a previously applied MetadataEditor");
+        Logger::E(CRemoteControlClient::TAG, "Can't apply a previously applied MetadataEditor");
         return NOERROR;
     }
-    {
-        AutoLock lock(mOwner->mCacheLock);
+    synchronized(mThisLock) {
+        // Still build the old metadata so when creating a new editor
+        // you get the expected values.
         // assign the edited data
         mOwner->mMetadata = NULL;
         CBundle::New(mEditorMetadata, (IBundle**)&mOwner->mMetadata);
-
-        if ((mOwner->mArtwork != NULL) && (!(mOwner->mArtwork == mEditorArtwork))) {
-            mOwner->mArtwork->Recycle();
+        // add the information about editable keys
+        mOwner->mMetadata->PutInt64(StringUtils::ToString(IMediaMetadataEditor::KEY_EDITABLE_MASK), mEditableKeys);
+        if ((mOwner->mOriginalArtwork != NULL) && (!Object::Equals(mOwner->mOriginalArtwork, mEditorArtwork))) {
+                mOwner->mOriginalArtwork->Recycle();
         }
-        mOwner->mArtwork = mEditorArtwork;
+        mOwner->mOriginalArtwork = mEditorArtwork;
         mEditorArtwork = NULL;
-        if (mMetadataChanged & mArtworkChanged) {
-            // send to remote control display if conditions are met
-            mOwner->SendMetadataWithArtwork_syncCacheLock();
-        } else if (mMetadataChanged) {
-            // send to remote control display if conditions are met
-            mOwner->SendMetadata_syncCacheLock();
-        } else if (mArtworkChanged) {
-            // send to remote control display if conditions are met
-            mOwner->SendArtwork_syncCacheLock();
+
+        // USE_SESSIONS
+        if (mOwner->mSession != NULL && mMetadataBuilder != NULL) {
+            mMetadataBuilder->Build((IMediaMetadata**)&(mOwner->mMediaMetadata));
+            mOwner->mSession->SetMetadata(mOwner->mMediaMetadata);
         }
         mApplied = TRUE;
     }
@@ -246,35 +214,35 @@ ECode CRemoteControlClient::MetadataEditor::Apply()
 }
 
 CRemoteControlClient::CRemoteControlClient()
-    : mPlaybackType(PLAYBACK_TYPE_LOCAL)
-    , mPlaybackVolumeMax(DEFAULT_PLAYBACK_VOLUME)
-    , mPlaybackVolume(DEFAULT_PLAYBACK_VOLUME)
-    , mPlaybackVolumeHandling(DEFAULT_PLAYBACK_VOLUME_HANDLING)
-    , mPlaybackStream(IAudioManager::STREAM_MUSIC)
-    , mPlaybackState(PLAYSTATE_NONE)
+    : mPlaybackState(PLAYSTATE_NONE)
     , mPlaybackStateChangeTimeMs(0)
-    , ARTWORK_DEFAULT_SIZE(256)
-    , ARTWORK_INVALID_SIZE(-1)
-    , mArtworkExpectedWidth(ARTWORK_DEFAULT_SIZE)
-    , mArtworkExpectedHeight(ARTWORK_DEFAULT_SIZE)
+    , mPlaybackPositionMs(PLAYBACK_POSITION_INVALID)
+    , mPlaybackSpeed(PLAYBACK_SPEED_1X)
     , mTransportControlFlags(FLAGS_KEY_MEDIA_NONE)
     , mCurrentClientGenId(-1)
     , mInternalClientGenId(-2)
-    , mRcseId(RCSE_ID_UNREGISTERED)
+    , mNeedsPositionSync(FALSE)
 {
-    CBundle::New((IBundle**)&mMetadata);
-    mIRCC = new MyRemoteControlClient(this);
 }
+
+CRemoteControlClient::~CRemoteControlClient()
+{}
+
+CAR_OBJECT_IMPL(CRemoteControlClient);
+
+CAR_INTERFACE_IMPL(CRemoteControlClient, Object, IRemoteControlClient);
 
 ECode CRemoteControlClient::constructor(
     /* [in] */ IPendingIntent* mediaButtonIntent)
 {
+    CBundle::New((IBundle**)&mMetadata);
+
     mRcMediaIntent = mediaButtonIntent;
 
     AutoPtr<ILooper> looper;
     AutoPtr<ILooperHelper> looperHelper;
     CLooperHelper::AcquireSingleton((ILooperHelper**)&looperHelper);
-    if ((looperHelper->MyLooper((ILooper**)&looper), looper) != NULL) {
+    if ((looperHelper->GetMyLooper((ILooper**)&looper), looper) != NULL) {
         mEventHandler = new EventHandler(this, looper, this);
     } else if ((looperHelper->GetMainLooper((ILooper**)&looper), looper) != NULL) {
         mEventHandler = new EventHandler(this, looper, this);
@@ -282,6 +250,9 @@ ECode CRemoteControlClient::constructor(
         mEventHandler = NULL;
         Logger::E(TAG, "RemoteControlClient() couldn't find main application thread");
     }
+
+    AutoPtr<MediaSessionCallback> ms = new MediaSessionCallback();
+    mTransportListener = IMediaSessionCallback::Probe(ms);
     return NOERROR;
 }
 
@@ -295,9 +266,34 @@ ECode CRemoteControlClient::constructor(
     return NOERROR;
 }
 
+ECode CRemoteControlClient::RegisterWithSession(
+    /* [in] */ IMediaSessionLegacyHelper * helper)
+{
+    helper->AddRccListener(mRcMediaIntent, mTransportListener);
+    helper->GetSession(mRcMediaIntent.Get(), (IMediaSession**)&mSession);
+    return SetTransportControlFlags(mTransportControlFlags);
+}
+
+ECode CRemoteControlClient::UnregisterWithSession(
+    /* [in] */ IMediaSessionLegacyHelper * helper)
+{
+    helper->RemoveRccListener(mRcMediaIntent);
+    mSession = NULL;
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::GetMediaSession(
+    /* [out] */ IMediaSession ** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mSession;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
 ECode CRemoteControlClient::EditMetadata(
     /* [in] */ Boolean startEmpty,
-    /* [out] */ IMetadataEditor** result)
+    /* [out] */ IRemoteControlClientMetadataEditor** result)
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
@@ -309,12 +305,24 @@ ECode CRemoteControlClient::EditMetadata(
         editor->mEditorArtwork = NULL;
         editor->mMetadataChanged = TRUE;
         editor->mArtworkChanged = TRUE;
+        editor->mEditableKeys = 0;
     }
     else {
         CBundle::New(mMetadata, (IBundle**)(&(editor->mEditorMetadata)));
-        editor->mEditorArtwork = mArtwork;
+        editor->mEditorArtwork = mOriginalArtwork;
         editor->mMetadataChanged = FALSE;
         editor->mArtworkChanged = FALSE;
+    }
+    // USE_SESSIONS
+    AutoPtr<IMediaMetadataBuilder> mmb;
+    if (startEmpty || mMediaMetadata == NULL) {
+        mmb = NULL;
+        CMediaMetadataBuilder::New((IMediaMetadataBuilder**)&mmb);
+        editor->mMetadataBuilder = mmb.Get();
+    } else {
+        mmb = NULL;
+        CMediaMetadataBuilder::New(mMediaMetadata, (IMediaMetadataBuilder**)&mmb);
+        editor->mMetadataBuilder = mmb.Get();
     }
 
     *result = editor;
@@ -325,154 +333,208 @@ ECode CRemoteControlClient::EditMetadata(
 ECode CRemoteControlClient::SetPlaybackState(
     /* [in] */ Int32 state)
 {
-    AutoLock lock(mCacheLock);
+    SetPlaybackStateInt(state, PLAYBACK_POSITION_ALWAYS_UNKNOWN, PLAYBACK_SPEED_1X,
+        FALSE /* legacy API, converting to method with position and speed */);
+    return NOERROR;
+}
 
-    if (mPlaybackState != state) {
-        // store locally
-        mPlaybackState = state;
-        // keep track of when the state change occurred
-        mPlaybackStateChangeTimeMs = SystemClock::GetElapsedRealtime();
+ECode CRemoteControlClient::SetPlaybackState(
+    /* [in] */ Int32 state,
+    /* [in] */ Int64 timeInMs,
+    /* [in] */ Float playbackSpeed)
+{
+    SetPlaybackStateInt(state, timeInMs, playbackSpeed, TRUE);
+    return NOERROR;
+}
 
-        // send to remote control display if conditions are met
-        SendPlaybackState_syncCacheLock();
-        // update AudioService
-        SendAudioServiceNewPlaybackInfo_syncCacheLock(PLAYBACKINFO_PLAYSTATE, state);
+void CRemoteControlClient::SetPlaybackStateInt(
+    /* [in] */ Int32 state,
+    /* [in] */ Int64 timeInMs,
+    /* [in] */ Float playbackSpeed,
+    /* [in] */ Boolean hasPosition)
+{
+    synchronized(mCacheLock) {
+        if ((mPlaybackState != state) || (mPlaybackPositionMs != timeInMs)
+                || (mPlaybackSpeed != playbackSpeed)) {
+            // store locally
+            mPlaybackState = state;
+            // distinguish between an application not knowing the current playback position
+            // at the moment and an application using the API where only the playback state
+            // is passed, not the playback position.
+            if (hasPosition) {
+                if (timeInMs < 0) {
+                    mPlaybackPositionMs = IRemoteControlClient::PLAYBACK_POSITION_INVALID;
+                } else {
+                    mPlaybackPositionMs = timeInMs;
+                }
+            } else {
+                mPlaybackPositionMs = IRemoteControlClient::PLAYBACK_POSITION_ALWAYS_UNKNOWN;
+            }
+            mPlaybackSpeed = playbackSpeed;
+            // keep track of when the state change occurred
+            mPlaybackStateChangeTimeMs = SystemClock::GetElapsedRealtime();
+
+            // USE_SESSIONS
+            if (mSession != NULL) {
+                Int32 pbState;
+                CPlaybackState::GetStateFromRccState(state, &pbState);
+                Int64 position = hasPosition ? mPlaybackPositionMs
+                        : IPlaybackState::PLAYBACK_POSITION_UNKNOWN;
+
+                AutoPtr<IPlaybackStateBuilder> bob;
+                CPlaybackStateBuilder::New(mSessionPlaybackState.Get(), (IPlaybackStateBuilder**)&bob);
+                bob->SetState(pbState, position, playbackSpeed, SystemClock::GetElapsedRealtime());
+                bob->SetErrorMessage(NULL);
+                bob->Build((IPlaybackState**)&mSessionPlaybackState);
+                bob->Build((IPlaybackState **)&mSessionPlaybackState);
+
+                mSession->SetPlaybackState(mSessionPlaybackState.Get());
+            }
+        }
+    }
+}
+
+Int64 CRemoteControlClient::GetCheckPeriodFromSpeed(
+    /*[in] */ Float speed)
+{
+    if (Elastos::Core::Math::Abs(speed) <= 1.0f) {
+        return POSITION_REFRESH_PERIOD_PLAYING_MS;
+    } else {
+        return Elastos::Core::Math::Max((Int64)(POSITION_REFRESH_PERIOD_PLAYING_MS / Elastos::Core::Math::Abs(speed)),
+                POSITION_REFRESH_PERIOD_MIN_MS);
+    }
+}
+
+void CRemoteControlClient::OnPositionDriftCheck()
+{
+    if (DEBUG) {
+     Slogger::D(TAG, "onPositionDriftCheck()");
+    }
+    synchronized(mCacheLock) {
+        if ((mEventHandler == NULL) || (mPositionProvider == NULL) || !mNeedsPositionSync) {
+            return;
+        }
+        if ((mPlaybackPositionMs < 0) || (mPlaybackSpeed == 0.0f)) {
+            if (DEBUG) {
+                Slogger::D(TAG, " no valid position or 0 speed, no check needed");
+            }
+            return;
+        }
+        Int64 estPos = mPlaybackPositionMs + (Int64)
+                ((SystemClock::GetElapsedRealtime() - mPlaybackStateChangeTimeMs) / mPlaybackSpeed);
+        Int64 actPos;
+        mPositionProvider->OnGetPlaybackPosition(&actPos);
+        if (actPos >= 0) {
+            if (Elastos::Core::Math::Abs(estPos - actPos) > POSITION_DRIFT_MAX_MS) {
+                // drift happened, report the new position
+                if (DEBUG) {
+                    Slogger::W(TAG, " drift detected: actual=%ld  est=%ld", actPos, estPos);
+                }
+                SetPlaybackState(mPlaybackState, actPos, mPlaybackSpeed);
+            } else {
+                if (DEBUG) { Slogger::D(TAG, " no drift: actual=%ld  est=%ld", actPos, estPos);
+                }
+                // no drift, schedule the next drift check
+                AutoPtr<IMessage> message;
+                mEventHandler->ObtainMessage(MSG_POSITION_DRIFT_CHECK, (IMessage**)&message);
+                Boolean flag = FALSE;
+                mEventHandler->SendMessageDelayed(message.Get(), GetCheckPeriodFromSpeed(mPlaybackSpeed), &flag);
+            }
+        } else {
+            // invalid position (negative value), can't check for drift
+            mEventHandler->RemoveMessages(MSG_POSITION_DRIFT_CHECK);
+        }
     }
 
-    return NOERROR;
 }
 
 ECode CRemoteControlClient::SetTransportControlFlags(
     /* [in] */ Int32 transportControlFlags)
 {
+    synchronized(mCacheLock) {
+        // store locally
+        mTransportControlFlags = transportControlFlags;
 
-    AutoLock lock(mCacheLock);
-    // store locally
-    mTransportControlFlags = transportControlFlags;
+        // USE_SESSIONS
+        if (mSession != NULL) {
+            AutoPtr<IPlaybackStateBuilder> bob;
+            CPlaybackStateBuilder::New(mSessionPlaybackState, (IPlaybackStateBuilder**)&bob);
+            Int64 vol;
+            CPlaybackState::GetActionsFromRccControlFlags(transportControlFlags, &vol);
+            bob->SetActions(vol);
+            bob->Build((IPlaybackState**)&mSessionPlaybackState);
+            return mSession->SetPlaybackState(mSessionPlaybackState);
+        }
 
-    // send to remote control display if conditions are met
-    SendTransportControlFlags_syncCacheLock();
+    }
 
     return NOERROR;
 }
 
-ECode CRemoteControlClient::SetPlaybackInformation(
-    /* [in] */ Int32 what,
-    /* [in] */ Int32 value)
+ECode CRemoteControlClient::SetMetadataUpdateListener(
+    /* [in] */ IRemoteControlClientOnMetadataUpdateListener * l)
 {
-    {
-        AutoLock lock(mCacheLock);
-        switch (what) {
-            case PLAYBACKINFO_PLAYBACK_TYPE:
-            {
-                if ((value >= PLAYBACK_TYPE_MIN) && (value <= PLAYBACK_TYPE_MAX)) {
-                    if (mPlaybackType != value) {
-                        mPlaybackType = value;
-                        SendAudioServiceNewPlaybackInfo_syncCacheLock(what, value);
-                    }
-                } else {
-                    Logger::W(TAG, "using invalid value for PLAYBACKINFO_PLAYBACK_TYPE");
-                }
-                break;
-            }
-            case PLAYBACKINFO_VOLUME:
-            {
-                if ((value > -1) && (value <= mPlaybackVolumeMax)) {
-                    if (mPlaybackVolume != value) {
-                        mPlaybackVolume = value;
-                        SendAudioServiceNewPlaybackInfo_syncCacheLock(what, value);
-                    }
-                } else {
-                    Logger::W(TAG, "using invalid value for PLAYBACKINFO_VOLUME");
-                }
-                break;
-            }
-            case PLAYBACKINFO_VOLUME_MAX:
-            {
-                if (value > 0) {
-                    if (mPlaybackVolumeMax != value) {
-                        mPlaybackVolumeMax = value;
-                        SendAudioServiceNewPlaybackInfo_syncCacheLock(what, value);
-                    }
-                } else {
-                    Logger::W(TAG, "using invalid value for PLAYBACKINFO_VOLUME_MAX");
-                }
-                break;
-            }
-            case PLAYBACKINFO_USES_STREAM:
-            {
-                AutoPtr<IAudioSystemHelper> audioSystemHelper;
-                CAudioSystemHelper::AcquireSingleton((IAudioSystemHelper**)&audioSystemHelper);
-                Int32 tempValue;
-                if ((value >= 0) && (value < (audioSystemHelper->GetNumStreamTypes(&tempValue), tempValue))) {
-                    mPlaybackStream = value;
-                } else {
-                    Logger::W(TAG, "using invalid value for PLAYBACKINFO_USES_STREAM");
-                }
-                break;
-            }
-            case PLAYBACKINFO_VOLUME_HANDLING:
-            {
-                if ((value >= PLAYBACK_VOLUME_FIXED) && (value <= PLAYBACK_VOLUME_VARIABLE)) {
-                    if (mPlaybackVolumeHandling != value) {
-                        mPlaybackVolumeHandling = value;
-                        SendAudioServiceNewPlaybackInfo_syncCacheLock(what, value);
-                    }
-                } else {
-                    Logger::W(TAG, "using invalid value for PLAYBACKINFO_VOLUME_HANDLING");
-                }
-                break;
-            }
-            default:
-            {
-                // not throwing an exception or returning an error if more keys are to be
-                // supported in the future
-                Logger::W(TAG, String("setPlaybackInformation() ignoring unknown key ") + StringUtils::Int32ToString(what));
-                break;
-            }
+    synchronized(mCacheLock) {
+        mMetadataUpdateListener = l;
+    }
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::SetPlaybackPositionUpdateListener(
+    /* [in] */ IRemoteControlClientOnPlaybackPositionUpdateListener * l)
+{
+    synchronized(mCacheLock) {
+        mPositionUpdateListener = l;
+    }
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::SetOnGetPlaybackPositionListener(
+    /* [in] */ IRemoteControlClientOnGetPlaybackPositionListener * l)
+{
+    synchronized(mCacheLock) {
+        mPositionProvider = l;
+        Boolean flag = FALSE;
+        if ((mPositionProvider != NULL) && (mEventHandler != NULL)
+                && (PlaybackPositionShouldMove(mPlaybackState, &flag), flag)) {
+            // playback position is already moving, but now we have a position provider,
+            // so schedule a drift check right now
+            AutoPtr<IMessage> message;
+            mEventHandler->ObtainMessage(MSG_POSITION_DRIFT_CHECK, (IMessage**)&message);
+            Boolean ret = FALSE;
+            return mEventHandler->SendMessageDelayed(
+                    message.Get(), 0 /*check now*/, &ret);
         }
     }
     return NOERROR;
 }
 
-ECode CRemoteControlClient::GetInt32PlaybackInformation(
-    /* [in] */ Int32 what,
-    /* [out] */ Int32* result)
+ECode CRemoteControlClient::PlaybackPositionShouldMove(
+    /* [in] */ Int32 playstate,
+    /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-
-    {
-        AutoLock lock(mCacheLock);
-
-        switch (what) {
-            case PLAYBACKINFO_PLAYBACK_TYPE:
-            {
-                *result = mPlaybackType;
-            }
-            case PLAYBACKINFO_VOLUME:
-            {
-                *result = mPlaybackVolume;
-            }
-            case PLAYBACKINFO_VOLUME_MAX:
-            {
-                *result = mPlaybackVolumeMax;
-            }
-            case PLAYBACKINFO_USES_STREAM:
-            {
-                *result = mPlaybackStream;
-            }
-            case PLAYBACKINFO_VOLUME_HANDLING:
-            {
-                *result = mPlaybackVolumeHandling;
-            }
-            default:
-            {
-                Logger::E(TAG, String("getIntPlaybackInformation() unknown key ") + StringUtils::Int32ToString(what));
-                *result = PLAYBACKINFO_INVALID_VALUE;
-            }
+    switch(playstate) {
+        case PLAYSTATE_STOPPED:
+        case PLAYSTATE_PAUSED:
+        case PLAYSTATE_BUFFERING:
+        case PLAYSTATE_ERROR:
+        case PLAYSTATE_SKIPPING_FORWARDS:
+        case PLAYSTATE_SKIPPING_BACKWARDS:
+        {
+            *result = FALSE;
+            return NOERROR;
         }
+        case PLAYSTATE_PLAYING:
+        case PLAYSTATE_FAST_FORWARDING:
+        case PLAYSTATE_REWINDING:
+        default:
+        {
+            *result = TRUE;
+            return NOERROR;
+        }
+
     }
-    return NOERROR;
 }
 
 ECode CRemoteControlClient::GetRcMediaIntent(
@@ -485,135 +547,6 @@ ECode CRemoteControlClient::GetRcMediaIntent(
     return NOERROR;
 }
 
-ECode CRemoteControlClient::GetIRemoteControlClient(
-    /* [out] */ IIRemoteControlClient** result)
-{
-    VALIDATE_NOT_NULL(result);
-
-    *result = mIRCC;
-    REFCOUNT_ADD(*result);
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::SetRcseId(
-    /* [in] */ Int32 id)
-{
-    mRcseId = id;
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::GetRcseId(
-    /* [out] */ Int32* result)
-{
-    VALIDATE_NOT_NULL(result);
-
-    *result = mRcseId;
-    return NOERROR;
-}
-
-//-----------------------------------------------
-//    CRemoteControlClient::MyRemoteControlClient
-//-----------------------------------------------
-
-CAR_INTERFACE_IMPL(CRemoteControlClient::MyRemoteControlClient, IIRemoteControlClient);
-
-CRemoteControlClient::MyRemoteControlClient::MyRemoteControlClient(
-    /* [in] */ CRemoteControlClient* owner)
-    : mOwner(owner)
-{}
-
-ECode CRemoteControlClient::MyRemoteControlClient::OnInformationRequested(
-    /* [in] */ Int32 clientGeneration,
-    /* [in] */ Int32 infoFlags,
-    /* [in] */ Int32 artWidth,
-    /* [in] */ Int32 artHeight)
-{
-    // only post messages, we can't block here
-    if (mOwner->mEventHandler != NULL) {
-        // signal new client
-        mOwner->mEventHandler->RemoveMessages(CRemoteControlClient::MSG_NEW_INTERNAL_CLIENT_GEN);
-
-        AutoPtr<IMessage> msg;
-        AutoPtr<IInteger32> iObj;
-        CInteger32::New(clientGeneration, (IInteger32**)&iObj);
-        mOwner->mEventHandler->ObtainMessage(
-            CRemoteControlClient::MSG_NEW_INTERNAL_CLIENT_GEN,
-            artWidth, artHeight, iObj, (IMessage**)&msg);
-        mOwner->mEventHandler->DispatchMessage(msg);
-
-        // send the information
-        mOwner->mEventHandler->RemoveMessages(CRemoteControlClient::MSG_REQUEST_PLAYBACK_STATE);
-        mOwner->mEventHandler->RemoveMessages(CRemoteControlClient::MSG_REQUEST_METADATA);
-        mOwner->mEventHandler->RemoveMessages(CRemoteControlClient::MSG_REQUEST_TRANSPORTCONTROL);
-        mOwner->mEventHandler->RemoveMessages(CRemoteControlClient::MSG_REQUEST_ARTWORK);
-
-        msg = NULL;
-        mOwner->mEventHandler->ObtainMessage(
-            CRemoteControlClient::MSG_REQUEST_PLAYBACK_STATE, (IMessage**)&msg);
-        mOwner->mEventHandler->DispatchMessage(msg);
-
-        msg = NULL;
-        mOwner->mEventHandler->ObtainMessage(
-            CRemoteControlClient::MSG_REQUEST_TRANSPORTCONTROL, (IMessage**)&msg);
-        mOwner->mEventHandler->DispatchMessage(msg);
-
-        msg = NULL;
-        mOwner->mEventHandler->ObtainMessage(
-            CRemoteControlClient::MSG_REQUEST_METADATA, (IMessage**)&msg);
-        mOwner->mEventHandler->DispatchMessage(msg);
-
-        msg = NULL;
-        mOwner->mEventHandler->ObtainMessage(
-            CRemoteControlClient::MSG_REQUEST_ARTWORK, (IMessage**)&msg);
-        mOwner->mEventHandler->DispatchMessage(msg);
-    }
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MyRemoteControlClient::SetCurrentClientGenerationId(
-    /* [in] */ Int32 clientGeneration)
-{
-    // only post messages, we can't block here
-    if (mOwner->mEventHandler != NULL) {
-        mOwner->mEventHandler->RemoveMessages(MSG_NEW_CURRENT_CLIENT_GEN);
-
-        AutoPtr<IMessage> msg;
-        AutoPtr<IInteger32> iObj;
-        CInteger32::New(clientGeneration, (IInteger32**)&iObj);
-        mOwner->mEventHandler->ObtainMessage(
-            CRemoteControlClient::MSG_NEW_CURRENT_CLIENT_GEN,
-            clientGeneration, 0/*ignored*/, (IMessage**)&msg);
-        mOwner->mEventHandler->DispatchMessage(msg);
-    }
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MyRemoteControlClient::PlugRemoteControlDisplay(
-    /* [in] */ IIRemoteControlDisplay* rcd)
-{
-    // only post messages, we can't block here
-    if (mOwner->mEventHandler != NULL) {
-        AutoPtr<IMessage> msg;
-        mOwner->mEventHandler->ObtainMessage(
-            CRemoteControlClient::MSG_PLUG_DISPLAY, rcd, (IMessage**)&msg);
-        mOwner->mEventHandler->DispatchMessage(msg);
-    }
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MyRemoteControlClient::UnplugRemoteControlDisplay(
-    /* [in] */ IIRemoteControlDisplay* rcd)
-{
-    // only post messages, we can't block here
-    if (mOwner->mEventHandler != NULL) {
-        AutoPtr<IMessage> msg;
-        mOwner->mEventHandler->ObtainMessage(
-            CRemoteControlClient::MSG_UNPLUG_DISPLAY, rcd, (IMessage**)&msg);
-        mOwner->mEventHandler->DispatchMessage(msg);
-    }
-    return NOERROR;
-}
-
 //--------------------------------------
 //    CRemoteControlClient::EventHandler
 //--------------------------------------
@@ -622,78 +555,20 @@ CRemoteControlClient::EventHandler::EventHandler(
     /* [in] */ IRemoteControlClient* rcc,
     /* [in] */ ILooper* looper,
     /* [in] */ CRemoteControlClient* owner)
-    : HandlerBase(looper)
-    , mOwner(owner)
+    : mOwner(owner)
 {
 }
 
 ECode CRemoteControlClient::EventHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    Int32 what, arg1, arg2;
+    Int32 what;
     msg->GetWhat(&what);
-    msg->GetArg1(&arg1);
-    msg->GetArg2(&arg2);
 
     switch(what) {
-        case MSG_REQUEST_PLAYBACK_STATE:
+        case MSG_POSITION_DRIFT_CHECK:
         {
-            {
-                AutoLock lock(mOwner->mCacheLock);
-                mOwner->SendPlaybackState_syncCacheLock();
-            }
-            break;
-        }
-        case MSG_REQUEST_METADATA:
-        {
-            {
-                AutoLock lock(mOwner->mCacheLock);
-                mOwner->SendMetadata_syncCacheLock();
-            }
-            break;
-        }
-        case MSG_REQUEST_TRANSPORTCONTROL:
-        {
-            {
-                AutoLock lock(mOwner->mCacheLock);
-                mOwner->SendTransportControlFlags_syncCacheLock();
-            }
-            break;
-        }
-        case MSG_REQUEST_ARTWORK:
-        {
-            {
-                AutoLock lock(mOwner->mCacheLock);
-                mOwner->SendArtwork_syncCacheLock();
-            }
-            break;
-        }
-        case MSG_NEW_INTERNAL_CLIENT_GEN:
-        {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            Int32 tempValue;
-            IInteger32::Probe(obj)->GetValue(&tempValue);
-            mOwner->OnNewInternalClientGen(tempValue, arg1, arg2);
-            break;
-        }
-        case MSG_NEW_CURRENT_CLIENT_GEN:
-        {
-            mOwner->OnNewCurrentClientGen(arg1);
-            break;
-        }
-        case MSG_PLUG_DISPLAY:
-        {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            mOwner->OnPlugDisplay(IIRemoteControlDisplay::Probe(obj));
-            break;
-        }
-        case MSG_UNPLUG_DISPLAY:
-        {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            mOwner->OnUnplugDisplay(IIRemoteControlDisplay::Probe(obj));
+            mOwner->OnPositionDriftCheck();
             break;
         }
         default:
@@ -706,241 +581,128 @@ ECode CRemoteControlClient::EventHandler::HandleMessage(
     return NOERROR;
 }
 
-void CRemoteControlClient::DetachFromDisplay_syncCacheLock()
+void CRemoteControlClient::OnSeekTo(
+    /* [in] */ Int32 generationId,
+    /* [in] */ Int64 timeMs)
 {
-    mRcDisplay = NULL;
-    mArtworkExpectedWidth = ARTWORK_INVALID_SIZE;
-    mArtworkExpectedHeight = ARTWORK_INVALID_SIZE;
-}
-
-void CRemoteControlClient::SendPlaybackState_syncCacheLock()
-{
-    if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != NULL)) {
-        ECode ec;
-//        try {
-            ec = mRcDisplay->SetPlaybackState(mInternalClientGenId, mPlaybackState,
-                    mPlaybackStateChangeTimeMs);
-//        } catch (RemoteException e) {
-            if (FAILED(ec)) {
-                Logger::E(TAG, "Error in setPlaybackState(), dead display "/*+e*/);
-                DetachFromDisplay_syncCacheLock();
-            }
-//        }
-    }
-}
-
-void CRemoteControlClient::SendMetadata_syncCacheLock()
-{
-    if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != NULL)) {
-        ECode ec;
-//        try {
-            ec = mRcDisplay->SetMetadata(mInternalClientGenId, mMetadata);
-//        } catch (RemoteException e) {
-            if (FAILED(ec)) {
-                Logger::E(TAG, "Error in sendPlaybackState(), dead display "/*+e*/);
-                DetachFromDisplay_syncCacheLock();
-            }
-//        }
-    }
-}
-
-void CRemoteControlClient::SendTransportControlFlags_syncCacheLock()
-{
-    if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != NULL)) {
-        ECode ec;
-//        try {
-            ec = mRcDisplay->SetTransportControlFlags(mInternalClientGenId,
-                    mTransportControlFlags);
-//        } catch (RemoteException e) {
-            if (FAILED(ec)) {
-                Logger::E(TAG, "Error in sendTransportControlFlags(), dead display "/*+e*/);
-                DetachFromDisplay_syncCacheLock();
-            }
-//        }
-    }
-}
-
-void CRemoteControlClient::SendArtwork_syncCacheLock()
-{
-    if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != NULL)) {
-        // even though we have already scaled in setArtwork(), when this client needs to
-        // send the bitmap, there might be newer and smaller expected dimensions, so we have
-        // to check again.
-        mArtwork = ScaleBitmapIfTooBig(mArtwork, mArtworkExpectedWidth, mArtworkExpectedHeight);
-        ECode ec;
-//        try {
-            ec = mRcDisplay->SetArtwork(mInternalClientGenId, mArtwork);
-//        } catch (RemoteException e) {
-            if (FAILED(ec)) {
-                Logger::E(TAG, "Error in sendArtwork(), dead display "/*+e*/);
-                DetachFromDisplay_syncCacheLock();
-            }
-//        }
-    }
-}
-
-void CRemoteControlClient::SendMetadataWithArtwork_syncCacheLock()
-{
-    if ((mCurrentClientGenId == mInternalClientGenId) && (mRcDisplay != NULL)) {
-        // even though we have already scaled in setArtwork(), when this client needs to
-        // send the bitmap, there might be newer and smaller expected dimensions, so we have
-        // to check again.
-        mArtwork = ScaleBitmapIfTooBig(mArtwork, mArtworkExpectedWidth, mArtworkExpectedHeight);
-        ECode ec;
-//        try {
-            ec = mRcDisplay->SetAllMetadata(mInternalClientGenId, mMetadata, mArtwork);
-//        } catch (RemoteException e) {
-            if (FAILED(ec)) {
-                Logger::E(TAG, "Error in setAllMetadata(), dead display "/*+e*/);
-                DetachFromDisplay_syncCacheLock();
-            }
-//        }
-    }
-}
-
-/*static*/
-AutoPtr<IIAudioService> CRemoteControlClient::GetService()
-{
-    if (sService != NULL) {
-        return sService;
-    }
-
-    AutoPtr<IServiceManager> serviceManager;
-    CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
-    AutoPtr<IInterface> obj;
-    serviceManager->GetService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
-    sService = IIAudioService::Probe(obj.Get());
-
-    return sService;
-}
-
-void CRemoteControlClient::SendAudioServiceNewPlaybackInfo_syncCacheLock(
-    /* [in] */ Int32 what,
-    /* [in] */ Int32 value)
-{
-    if (mRcseId == RCSE_ID_UNREGISTERED) {
-        return;
-    }
-    //Logger::D(TAG, String("sending to AudioService key=") + StringUtils::Int32ToString(what) + String(", value=") + StringUtils::Int32ToString(value));
-    AutoPtr<IIAudioService> service = GetService();
-    ECode ec;
-//    try {
-        ec = service->SetPlaybackInfoForRcc(mRcseId, what, value);
-//    } catch (RemoteException e) {
-        if (FAILED(ec)) {
-            Logger::E(TAG, "Dead object in sendAudioServiceNewPlaybackInfo_syncCacheLock"/*, e*/);
-        }
-//    }
-}
-
-void CRemoteControlClient::OnNewInternalClientGen(
-    /* [in] */ Int32 clientGeneration,
-    /* [in] */ Int32 artWidth,
-    /* [in] */ Int32 artHeight)
-{
-    {
-        AutoLock lock(mCacheLock);
-
-        // this remote control client is told it is the "focused" one:
-        // it implies that now (mCurrentClientGenId == mInternalClientGenId) is true
-        mInternalClientGenId = clientGeneration;
-        if (artWidth > 0) {
-            mArtworkExpectedWidth = artWidth;
-            mArtworkExpectedHeight = artHeight;
+    synchronized (mCacheLock) {
+        if ((mCurrentClientGenId == generationId) && (mPositionUpdateListener != NULL)) {
+            mPositionUpdateListener->OnPlaybackPositionUpdate(timeMs);
         }
     }
 }
 
-void CRemoteControlClient::OnNewCurrentClientGen(
-    /* [in] */ Int32 clientGeneration)
-{
-    {
-        AutoLock lock(mCacheLock);
-        mCurrentClientGenId = clientGeneration;
-    }
-}
-
-void CRemoteControlClient::OnPlugDisplay(
-    /* [in] */ IIRemoteControlDisplay* rcd)
-{
-    {
-        AutoLock lock(mCacheLock);
-        mRcDisplay = rcd;
-    }
-}
-
-void CRemoteControlClient::OnUnplugDisplay(
-    /* [in] */ IIRemoteControlDisplay* rcd)
-{
-    {
-        AutoLock lock(mCacheLock);
-
-        if ((mRcDisplay != NULL) && (rcd == mRcDisplay)) {
-            mRcDisplay = NULL;
-            mArtworkExpectedWidth = ARTWORK_DEFAULT_SIZE;
-            mArtworkExpectedHeight = ARTWORK_DEFAULT_SIZE;
-        }
-    }
-}
-
-AutoPtr<IBitmap> CRemoteControlClient::ScaleBitmapIfTooBig(
-    /* [in] */ IBitmap* bitmap,
-    /* [in] */ Int32 maxWidth,
-    /* [in] */ Int32 maxHeight)
-{
-    using Elastos::Core::Math;
-    if (bitmap != NULL) {
-        Int32 width;
-        bitmap->GetWidth(&width);
-        Int32 height;
-        bitmap->GetHeight(&height);
-        if (width > maxWidth || height > maxHeight) {
-            Float scale = Elastos::Core::Math::Min((Float) maxWidth / width, (Float) maxHeight / height);
-            Int32 newWidth = Elastos::Core::Math::Round(scale * width);
-            Int32 newHeight = Elastos::Core::Math::Round(scale * height);
-            BitmapConfig newConfig;
-            bitmap->GetConfig(&newConfig);
-            if (newConfig == BitmapConfig_NONE) {
-                newConfig = BitmapConfig_ARGB_8888;
-            }
-            AutoPtr<IBitmap> outBitmap;
-            CBitmap::CreateBitmap(newWidth, newHeight, newConfig, (IBitmap**)&outBitmap);
-
-            AutoPtr<ICanvas> canvas;
-            CCanvas::New(outBitmap,(ICanvas**)&canvas);
-
-            AutoPtr<IPaint> paint;
-            CPaint::New((IPaint**)&paint);
-            paint->SetAntiAlias(TRUE);
-            paint->SetFilterBitmap(TRUE);
-
-            AutoPtr<IRectF> rectF;
-            Int32 tempValue1, tempValue2;
-            outBitmap->GetWidth(&tempValue1);
-            outBitmap->GetHeight(&tempValue2);
-            CRectF::New(0, 0, tempValue1, tempValue2, (IRectF**)&rectF);
-            canvas->DrawBitmap(bitmap, NULL, rectF, paint);
-            bitmap = outBitmap;
-        }
-    }
-    return bitmap;
-}
-
-/*static*/
-Boolean CRemoteControlClient::ValidTypeForKey(
+void CRemoteControlClient::OnUpdateMetadata(
+    /* [in] */ Int32 generationId,
     /* [in] */ Int32 key,
-    /* [in] */ ArrayOf<Int32>* validKeys)
+    /* [in] */ IInterface* value)
 {
-//    try {
-        for (Int32 i = 0; i != validKeys->GetLength(); i++) {
-            if (key == (*validKeys)[i]) {
-                return TRUE;
+    synchronized (mCacheLock) {
+        if ((mCurrentClientGenId == generationId) && (mMetadataUpdateListener != NULL)) {
+                mMetadataUpdateListener->OnMetadataUpdate(key, value);
             }
         }
-        return FALSE;
-//    } catch (ArrayIndexOutOfBoundsException e) {
-//        return FALSE;
-//    }
+}
+
+//--------------------------------------
+//    CRemoteControlClient::MediaSessionCallback
+//--------------------------------------
+CRemoteControlClient::MediaSessionCallback::MediaSessionCallback()
+{}
+
+CRemoteControlClient::MediaSessionCallback::~MediaSessionCallback()
+{}
+
+CAR_INTERFACE_IMPL(CRemoteControlClient::MediaSessionCallback, Object, IMediaSessionCallback)
+
+ECode CRemoteControlClient::MediaSessionCallback::OnSeekTo(
+    /* [in] */ Int64 pos)
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnSetRating(
+    /* [in] */ IRating* rating)
+{
+    return NOERROR;
+}
+
+//override for compile
+ECode CRemoteControlClient::MediaSessionCallback::OnCommand(
+    /* [in] */ const String& command,
+    /* [in] */ IBundle * arg,
+    /* [in] */ IResultReceiver * cb)
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnMediaButtonEvent(
+    /* [in] */ IIntent * mediaButtonIntent,
+    /* [out] */ Boolean * result)
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnPlay()
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnPlayFromMediaId(
+    /* [in] */ const String& mediaId,
+    /* [in] */ IBundle * extras)
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnPlayFromSearch(
+    /* [in] */ const String& query,
+    /* [in] */ IBundle * extras)
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnSkipToQueueItem(
+    /* [in] */ Int64 id)
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnPause()
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnSkipToNext()
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnSkipToPrevious()
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnFastForward()
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnRewind()
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnStop()
+{
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::MediaSessionCallback::OnCustomAction(
+    /* [in] */ const String& action,
+    /* [in] */ IBundle * extras)
+{
+    return NOERROR;
 }
 
 } // namespace Media

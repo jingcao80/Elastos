@@ -12,6 +12,8 @@ class ByteArrayBuffer
     , public IByteArrayBuffer
 {
 public:
+    CAR_INTERFACE_DECL()
+
     ByteArrayBuffer();
 
     CARAPI constructor(
@@ -23,7 +25,8 @@ public:
         /* [in] */ Int32 arrayOffset,
         /* [in] */ Boolean isReadOnly);
 
-    CAR_INTERFACE_DECL()
+    CARAPI GetPrimitiveArray(
+        /* [out] */ Handle64* arrayHandle);
 
     CARAPI AsReadOnlyBuffer(
         /* [out] */ IByteBuffer** buffer);

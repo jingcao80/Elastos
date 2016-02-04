@@ -9,7 +9,7 @@
 using Elastos::Utility::Stack;
 using Elastos::IO::IFloatBuffer;
 using Elastos::Droid::Opengl::IMatrix;
-using Elastos::Droid::Opengl::CMatrixGL;
+using Elastos::Droid::Opengl::CMatrix;
 
 namespace Elastos {
 namespace Droid {

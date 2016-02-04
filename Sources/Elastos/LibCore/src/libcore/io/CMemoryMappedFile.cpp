@@ -68,6 +68,8 @@ ECode CMemoryMappedFile::LittleEndianIterator(
 ECode CMemoryMappedFile::Size(
     /* [out] */ Int64* size)
 {
+    VALIDATE_NOT_NULL(size)
+    *size = mSize;
     return NOERROR;
 }
 
@@ -102,7 +104,7 @@ ECode CMemoryMappedFile::MmapRO(
     Int64 address;
     FAIL_RETURN(os->Mmap(0L, size, OsConstants::_PROT_READ, OsConstants::_MAP_SHARED, fd, 0, &address))
     FAIL_RETURN(os->Close(fd))
-    FAIL_RETURN(New(address, size, (IMemoryMappedFile**)&rst))
+    FAIL_RETURN(New(address, size, (IMemoryMappedFile**)rst))
     return NOERROR;
 }
 

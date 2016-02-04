@@ -3,8 +3,11 @@
 #define __ELASTOS_DROID_MEDIA_CREMOTEDISPLAY_H__
 
 #include "_Elastos_Droid_Media_CRemoteDisplay.h"
+#include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Runnable.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Runnable;
@@ -16,6 +19,8 @@ namespace Droid {
 namespace Media {
 
 CarClass(CRemoteDisplay)
+    , public Object
+    , public IRemoteDisplay
 {
 public:
     class NotifyDisplayConnectedRun
@@ -36,7 +41,7 @@ public:
 
         AutoPtr<ISurface> mSurface;
 
-        Int32 mWidth, mHeight, mFlags;
+        Int32 mWidth, mHeight, mFlags, mSession;
     };
 
     class NotifyDisplayDisconnectedRun
@@ -68,9 +73,14 @@ public:
         Int32 mError;
     };
 
+public:
     CRemoteDisplay();
 
-    ~CRemoteDisplay();
+    virtual ~CRemoteDisplay();
+
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     CARAPI constructor(
         /* [in] */ IRemoteDisplayListener* listener,
@@ -80,6 +90,10 @@ public:
      * Disconnects the remote display and stops listening for new connections.
      */
     CARAPI Dispose();
+
+    CARAPI Pause();
+
+    CARAPI Resume();
 
     /**
      * Starts listening for displays to be connected on the specified interface.
@@ -99,7 +113,8 @@ public:
         /* [in] */ ISurface* surface,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height,
-        /* [in] */ Int32 flags);
+        /* [in] */ Int32 flags,
+        /* [in] */ Int32 session);
 
     // Called from native.
     CARAPI_(void) NotifyDisplayDisconnected();
@@ -117,6 +132,12 @@ private:
         /* [in] */ const String& iface);
 
     CARAPI_(void) NativeDispose(
+        /* [in] */ Handle32 ptr);
+
+    CARAPI_(void) NativePause(
+        /* [in] */ Handle32 ptr);
+
+    CARAPI_(void) NativeResume(
         /* [in] */ Handle32 ptr);
 
     CARAPI_(void) Dispose(

@@ -30,6 +30,30 @@ module
             [out] IRect** bounds);
     }
 
+    interface ICharPos {
+
+    }
+
+    interface IJustification {
+
+    }
+
+    interface IStyle {
+
+    }
+
+    interface IFont {
+
+    }
+
+    interface IKaraoke {
+
+    }
+
+    interface IHyperText {
+
+    }
+
     } // namespace Media
     } // namepsace Droid
     } // namespace Elastos

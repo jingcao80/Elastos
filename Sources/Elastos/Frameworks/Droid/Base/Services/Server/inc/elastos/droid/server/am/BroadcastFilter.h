@@ -76,4 +76,6 @@ struct Conversion<Elastos::Droid::Server::Am::BroadcastFilter*, IInterface*>
     enum { exists = TRUE, exists2Way = FALSE, sameType = FALSE };
 };
 
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Server::Am::BroadcastFilter)
+
 #endif //__ELASTOS_DROID_SERVER_AM_BROADCASTFILTER_H__

@@ -4,9 +4,9 @@
 
 #include "_Elastos_Droid_Packages_SystemUI_CDessertCaseView.h"
 #include "Elastos.Droid.Os.h"
-#include <elastos/droid/widget/FrameLayout.h>
+#include <elastos/droid/animation/AnimatorListenerAdapter.h>
 #include <elastos/droid/os/Runnable.h>
-#include "elastos/droid/animation/AnimatorListenerAdapter.h"
+#include <elastos/droid/widget/FrameLayout.h>
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimator;
@@ -23,7 +23,6 @@ using Elastos::Droid::View::IViewOnClickListener;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::FrameLayout;
 using Elastos::Droid::Widget::IImageView;
-
 using Elastos::Utility::ISet;
 using Elastos::Utility::IHashSet;
 

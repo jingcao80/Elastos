@@ -22,9 +22,9 @@ CAR_INTERFACE_IMPL_2(CWifiP2pConfig, Object, IWifiP2pConfig, IParcelable)
 CAR_OBJECT_IMPL(CWifiP2pConfig)
 
 CWifiP2pConfig::CWifiP2pConfig()
-    : mGroupOwnerIntent(-1)
+    : mDeviceAddress("")
+    , mGroupOwnerIntent(-1)
     , mNetId(IWifiP2pGroup::PERSISTENT_NET_ID)
-    , mDeviceAddress("")
 {
 }
 

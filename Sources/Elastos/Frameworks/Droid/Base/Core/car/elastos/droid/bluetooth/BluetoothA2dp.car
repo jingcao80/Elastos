@@ -61,6 +61,8 @@ module
              */
             const String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED";
 
+            const String ACTION_AVRCP_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp.profile.action.AVRCP_CONNECTION_STATE_CHANGED";
+
             /**
              * Intent used to broadcast the change in connection state of the A2DP
              * profile.
@@ -222,6 +224,33 @@ module
                 [out] Int32* priority);
 
             /**
+             * Checks if Avrcp device supports the absolute volume feature.
+             *
+             * @return true if device supports absolute volume
+             * @hide
+             */
+            IsAvrcpAbsoluteVolumeSupported(
+                [out] Boolean* isSupported);
+
+            /**
+             * Tells remote device to adjust volume. Only if absolute volume is supported.
+             *
+             * @param direction 1 to increase volume, or -1 to decrease volume
+             * @hide
+             */
+            AdjustAvrcpAbsoluteVolume(
+                [in] Int32 direction);
+
+            /**
+             * Tells remote device to set an absolute volume. Only if absolute volume is supported
+             *
+             * @param volume Absolute volume to be set on AVRCP side
+             * @hide
+             */
+            SetAvrcpAbsoluteVolume(
+                [in] Int32 volume);
+
+            /**
              * Check if A2DP profile is streaming music.
              *
              * <p>Requires android.Manifest.permission#BLUETOOTH permission.
@@ -242,6 +271,9 @@ module
             ShouldSendVolumeKeys(
                 [in] IBluetoothDevice* device,
                 [out] Boolean* should);
+
+            DoBind(
+                [out] Boolean* result);
 
             Close();
         }

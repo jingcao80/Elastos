@@ -1503,7 +1503,7 @@ AutoPtr<IDrawable> ApplicationPackageManager::GetCachedIcon(
                 String info;
                 name->ToString(&info);
                 Logger::V(TAG, "Get cached drawable state for %s : %s",
-                    info.string(), Object::ToString(state).string());
+                    info.string(), TO_CSTR(state));
             }
             // Note: It's okay here to not use the newDrawable(Resources) variant
             //       of the API. The ConstantState comes from a drawable that was
@@ -1540,7 +1540,7 @@ void ApplicationPackageManager::PutCachedIcon(
             String info;
             name->ToString(&info);
             Logger::V(TAG, "Added cached drawable state for %s : %s",
-                info.string(), Object::ToString(state).string());
+                info.string(), TO_CSTR(state));
         }
     }
 }

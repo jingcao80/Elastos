@@ -1,0 +1,86 @@
+
+module
+{
+    interface Elastos.Droid.Bluetooth.LE.IAdvertiseSettings;
+    interface Elastos.Droid.Bluetooth.LE.IAdvertiseData;
+    interface Elastos.Droid.Bluetooth.LE.IAdvertiseCallback;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Bluetooth {
+    namespace LE {
+
+    /**
+     * This class provides a way to perform Bluetooth LE advertise operations, such as starting and
+     * stopping advertising. An advertiser can broadcast up to 31 bytes of advertisement data
+     * represented by {@link AdvertiseData}.
+     * <p>
+     * To get an instance of {@link BluetoothLeAdvertiser}, call the
+     * {@link BluetoothAdapter#getBluetoothLeAdvertiser()} method.
+     * <p>
+     * <b>Note:</b> Most of the methods here require {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @see AdvertiseData
+     */
+    interface IBluetoothLeAdvertiser {
+
+        /**
+         * Start Bluetooth LE Advertising. On success, the {@code advertiseData} will be broadcasted.
+         * Returns immediately, the operation status is delivered through {@code callback}.
+         * <p>
+         * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+         *
+         * @param settings Settings for Bluetooth LE advertising.
+         * @param advertiseData Advertisement data to be broadcasted.
+         * @param callback Callback for advertising status.
+         */
+        StartAdvertising(
+            [in] IAdvertiseSettings* settings,
+            [in] IAdvertiseData* advertiseData,
+            [in] IAdvertiseCallback* cb);
+
+        /**
+         * Start Bluetooth LE Advertising. The {@code advertiseData} will be broadcasted if the
+         * operation succeeds. The {@code scanResponse} is returned when a scanning device sends an
+         * active scan request. This method returns immediately, the operation status is delivered
+         * through {@code callback}.
+         * <p>
+         * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+         *
+         * @param settings Settings for Bluetooth LE advertising.
+         * @param advertiseData Advertisement data to be advertised in advertisement packet.
+         * @param scanResponse Scan response associated with the advertisement data.
+         * @param callback Callback for advertising status.
+         */
+        StartAdvertising(
+            [in] IAdvertiseSettings* settings,
+            [in] IAdvertiseData* advertiseData,
+            [in] IAdvertiseData* scanResponse,
+            [in] IAdvertiseCallback* cb);
+
+        /**
+         * Stop Bluetooth LE advertising. The {@code callback} must be the same one use in
+         * {@link BluetoothLeAdvertiser#startAdvertising}.
+         * <p>
+         * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+         *
+         * @param callback {@link AdvertiseCallback} identifies the advertising instance to stop.
+         */
+        StopAdvertising(
+            [in] IAdvertiseCallback* cb);
+
+        /**
+         * Cleans up advertise clients. Should be called when bluetooth is down.
+         *
+         * @hide
+         */
+        Cleanup();
+    }
+
+
+    } // LE
+    } // Bluetooth
+    } // Droid
+    } // Elastos
+}

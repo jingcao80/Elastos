@@ -1029,7 +1029,7 @@ private:
     /**
      * setBitmap() variant for native callers with a raw bitmap handle.
      */
-    CARAPI_(void) SetNativeBitmap(
+    CARAPI SetNativeBitmap(
         /* [in] */ Int64 bitmapHandle);
 
     CARAPI Dispose();

@@ -5,9 +5,12 @@
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/text/CSimpleStringSplitter.h"
 #include "elastos/droid/text/TextUtils.h"
-// #include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/view/inputmethod/CInputMethodSubtype.h"
+#include "elastos/droid/view/textservice/CTextServicesManager.h"
+#include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/utility/CPair.h"
 #include "elastos/droid/R.h"
+#include "Elastos.Droid.Provider.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
@@ -21,10 +24,12 @@ using Elastos::Droid::Content::Pm::IServiceInfo;
 using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Provider::ISettingsSecure;
-// using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Text::CSimpleStringSplitter;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::View::TextService::CTextServicesManager;
 using Elastos::Droid::View::TextService::ISpellCheckerInfo;
+using Elastos::Droid::View::InputMethod::CInputMethodSubtype;
 using Elastos::Droid::Utility::CPair;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CString;
@@ -177,8 +182,7 @@ ECode InputMethodUtils::InputMethodSettings::GetEnabledInputMethodSubtypeListLoc
         context->GetResources((IResources**)&r);
         enabledSubtypes = IList::Probe(GetImplicitlyApplicableSubtypesLocked(r, imi));
     }
-    assert(0 && "TODO:CInputMethodSubtype is not implemented");
-    //CInputMethodSubtype::Sort(context, 0, imi, enabledSubtypes);
+    CInputMethodSubtype::Sort(context, 0, imi, enabledSubtypes);
     *list = enabledSubtypes;
     REFCOUNT_ADD(*list)
     return NOERROR;
@@ -424,9 +428,8 @@ void InputMethodUtils::InputMethodSettings::PutEnabledInputMethodsStr(
     /* [in] */ const String& str)
 {
     Boolean res;
-    assert(0 && "TODO:Settings is not implemented");
-    // Settings::Secure::PutStringForUser(
-    //         mResolver, ISettingsSecure::ENABLED_INPUT_METHODS, str, mCurrentUserId, &res);
+    Settings::Secure::PutStringForUser(
+            mResolver, ISettingsSecure::ENABLED_INPUT_METHODS, str, mCurrentUserId, &res);
     mEnabledInputMethodsStrCache = str;
     if (DEBUG) {
         Slogger::D(TAG, "putEnabledInputMethodStr: %s", str.string());
@@ -437,10 +440,9 @@ ECode InputMethodUtils::InputMethodSettings::GetEnabledInputMethodsStr(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    assert(0 && "TODO:Settings is not implemented");
-    // Settings::Secure::GetStringForUser(
-    //     mResolver, ISettingsSecure::ENABLED_INPUT_METHODS, mCurrentUserId,
-    //     &mEnabledInputMethodsStrCache);
+    Settings::Secure::GetStringForUser(
+        mResolver, ISettingsSecure::ENABLED_INPUT_METHODS, mCurrentUserId,
+        &mEnabledInputMethodsStrCache);
     if (DEBUG) {
         Slogger::D(TAG, "GetEnabledInputMethodsStr: %s, %d",
             mEnabledInputMethodsStrCache.string(), mCurrentUserId);
@@ -535,10 +537,9 @@ void InputMethodUtils::InputMethodSettings::PutSubtypeHistoryStr(
         Slogger::D(TAG, "putSubtypeHistoryStr: %s", str.string());
     }
     Boolean res;
-    assert(0 && "TODO:Settings is not implemented");
-    // Settings::Secure::PutStringForUser(
-    //     mResolver, ISettingsSecure::INPUT_METHODS_SUBTYPE_HISTORY,
-    //     str, mCurrentUserId, &res);
+    Settings::Secure::PutStringForUser(
+        mResolver, ISettingsSecure::INPUT_METHODS_SUBTYPE_HISTORY,
+        str, mCurrentUserId, &res);
 }
 
 ECode InputMethodUtils::InputMethodSettings::GetLastInputMethodAndSubtypeLocked(
@@ -723,9 +724,8 @@ AutoPtr<IList> InputMethodUtils::InputMethodSettings::LoadInputMethodAndSubtypeH
 String InputMethodUtils::InputMethodSettings::GetSubtypeHistoryStr()
 {
     String str;
-    assert(0 && "TODO:Settings is not implemented");
-    // Settings::Secure::GetStringForUser(
-    //         mResolver, ISettingsSecure::INPUT_METHODS_SUBTYPE_HISTORY, mCurrentUserId, &str);
+    Settings::Secure::GetStringForUser(
+            mResolver, ISettingsSecure::INPUT_METHODS_SUBTYPE_HISTORY, mCurrentUserId, &str);
     if (DEBUG) {
         Slogger::D(TAG, "GetSubtypeHistoryStr: %s", str.string());
     }
@@ -739,9 +739,8 @@ ECode InputMethodUtils::InputMethodSettings::PutSelectedInputMethod(
         Slogger::D(TAG, "putSelectedInputMethodStr: %s, %d", imeId.string(), mCurrentUserId);
     }
     Boolean res;
-    assert(0 && "TODO:Settings is not implemented");
-    // return Settings::Secure::PutStringForUser(
-    //     mResolver, ISettingsSecure::DEFAULT_INPUT_METHOD, imeId, mCurrentUserId, &res);
+    return Settings::Secure::PutStringForUser(
+        mResolver, ISettingsSecure::DEFAULT_INPUT_METHOD, imeId, mCurrentUserId, &res);
     return NOERROR;
 }
 
@@ -752,32 +751,26 @@ ECode InputMethodUtils::InputMethodSettings::PutSelectedSubtype(
         Slogger::D(TAG, "putSelectedInputMethodSubtypeStr: %d, %d", subtypeId, mCurrentUserId);
     }
     Boolean res;
-    assert(0 && "TODO:Settings is not implemented");
-    // return Settings::Secure::PutIntForUser(mResolver, ISettingsSecure::SELECTED_INPUT_METHOD_SUBTYPE,
-    //         subtypeId, mCurrentUserId, &res);
-    return NOERROR;
+    return Settings::Secure::PutInt32ForUser(mResolver, ISettingsSecure::SELECTED_INPUT_METHOD_SUBTYPE,
+            subtypeId, mCurrentUserId, &res);
 }
 
 ECode InputMethodUtils::InputMethodSettings::GetDisabledSystemInputMethods(
     /* [out] */ String* str)
 {
-    assert(0 && "TODO:Settings is not implemented");
-    // return Settings::Secure::GetStringForUser(
-    //     mResolver, ISettingsSecure::DISABLED_SYSTEM_INPUT_METHODS, mCurrentUserId, str);
-    return NOERROR;
+    return Settings::Secure::GetStringForUser(
+        mResolver, ISettingsSecure::DISABLED_SYSTEM_INPUT_METHODS, mCurrentUserId, str);
 }
 
 ECode InputMethodUtils::InputMethodSettings::GetSelectedInputMethod(
     /* [out] */ String* str)
 {
-    assert(0 && "TODO:Settings is not implemented");
-    // ECode ec = Settings::Secure::GetStringForUser(
-    //     mResolver, ISettingsSecure::DEFAULT_INPUT_METHOD, mCurrentUserId, str);
+    ECode ec = Settings::Secure::GetStringForUser(
+        mResolver, ISettingsSecure::DEFAULT_INPUT_METHOD, mCurrentUserId, str);
     if (DEBUG) {
         Slogger::D(TAG, "GetSelectedInputMethodStr: %s, %d", str->string(), mCurrentUserId);
     }
-    // return ec;
-    return NOERROR;
+    return ec;
 }
 
 ECode InputMethodUtils::InputMethodSettings::IsSubtypeSelected(
@@ -791,11 +784,10 @@ ECode InputMethodUtils::InputMethodSettings::IsSubtypeSelected(
 Int32 InputMethodUtils::InputMethodSettings::GetSelectedInputMethodSubtypeHashCode()
 {
     Int32 ret;
-    assert(0 && "TODO:Settings is not implemented");
-    // if (FAILED(Settings::Secure::GetInt32ForUser(
-    //     mResolver, ISettingsSecure::SELECTED_INPUT_METHOD_SUBTYPE, mCurrentUserId, &ret))) {
-    //     return NOT_A_SUBTYPE_ID;
-    // }
+    if (FAILED(Settings::Secure::GetInt32ForUser(
+        mResolver, ISettingsSecure::SELECTED_INPUT_METHOD_SUBTYPE, mCurrentUserId, &ret))) {
+        return NOT_A_SUBTYPE_ID;
+    }
     return ret;
 }
 
@@ -804,9 +796,8 @@ ECode InputMethodUtils::InputMethodSettings::IsShowImeWithHardKeyboardEnabled(
 {
     VALIDATE_NOT_NULL(result)
     Int32 ret;
-    assert(0 && "TODO:Settings is not implemented");
-    // FAIL_RETURN(Settings::Secure::GetInt32ForUser(mResolver,
-    //     ISettingsSecure::SHOW_IME_WITH_HARD_KEYBOARD, 0, mCurrentUserId, &ret))
+    FAIL_RETURN(Settings::Secure::GetInt32ForUser(mResolver,
+        ISettingsSecure::SHOW_IME_WITH_HARD_KEYBOARD, 0, mCurrentUserId, &ret))
     *result = ret == 1;
     return NOERROR;
 }
@@ -814,10 +805,9 @@ ECode InputMethodUtils::InputMethodSettings::IsShowImeWithHardKeyboardEnabled(
 ECode InputMethodUtils::InputMethodSettings::SetShowImeWithHardKeyboard(
     /* [in] */ Boolean show)
 {
-    assert(0 && "TODO:Settings is not implemented");
-    // return Settings::Secure::PutIntForUser(mResolver, ISettingsSecure::SHOW_IME_WITH_HARD_KEYBOARD,
-    //         show ? 1 : 0, mCurrentUserId);
-    return NOERROR;
+    Boolean res;
+    return Settings::Secure::PutInt32ForUser(mResolver, ISettingsSecure::SHOW_IME_WITH_HARD_KEYBOARD,
+            show ? 1 : 0, mCurrentUserId, &res);
 }
 
 ECode InputMethodUtils::InputMethodSettings::GetCurrentUserId(
@@ -1503,9 +1493,7 @@ AutoPtr<IList> InputMethodUtils::GetEnabledInputMethodSubtypeList(
         context->GetResources((IResources**)&r);
         enabledSubtypes = IList::Probe(GetImplicitlyApplicableSubtypesLocked(r, imi));
     }
-    assert(0 && "TODO:CIInputMethodSubtype is not implemented");
-    // return CInputMethodSubtype::Sort(context, 0, imi, enabledSubtypes);
-    return NULL;
+    return CInputMethodSubtype::Sort(context, 0, imi, enabledSubtypes);
 }
 
 String InputMethodUtils::GetLanguageFromLocaleString(
@@ -1617,9 +1605,8 @@ void InputMethodUtils::SetNonSelectedSystemImesDisabledUntilUsed(
     }
     // Only the current spell checker should be treated as an enabled one.
     AutoPtr<ISpellCheckerInfo> currentSpellChecker;
-    assert(0 && "TODO:CTextServicesManager is not implemented");
-    // CTextServicesManager::GetInstance()->GetCurrentSpellChecker(
-    //     (ISpellCheckerInfo**)&currentSpellChecker);
+    CTextServicesManager::GetInstance()->GetCurrentSpellChecker(
+        (ISpellCheckerInfo**)&currentSpellChecker);
     for (Int32 i = 0; i < systemImesDisabledUntilUsed->GetLength(); i++ ) {
         String packageName = (*systemImesDisabledUntilUsed)[i];
         if (DEBUG) {

@@ -1165,7 +1165,7 @@ module
      * @Invovle
      * interface IParcelable
      */
-    [local]
+    [local, parcelable]
     interface IActivityManagerRecentTaskInfo {
         GetId(
             [out] Int32* id);
@@ -1197,6 +1197,30 @@ module
         SetDescription(
             [in] ICharSequence* description);
 
+        GetStackId(
+            [out] Int32* stackId);
+
+        SetStackId(
+            [in] Int32 stackId);
+
+        GetUserId(
+            [out] Int32* userId);
+
+        SetUserId(
+            [in] Int32 userId);
+
+        GetFirstActiveTime(
+            [out] Int64* firstActiveTime);
+
+        SetFirstActiveTime(
+            [in] Int64 firstActiveTime);
+
+        GetLastActiveTime(
+            [out] Int64* lastActiveTime);
+
+        SetLastActiveTime(
+            [in] Int64 lastActiveTime);
+
         /**
          * The recent activity values for the highest activity in the stack to have set the values.
          * {@link Activity#setTaskDescription(android.app.ActivityManager.TaskDescription)}.
@@ -1215,6 +1239,12 @@ module
 
         SetAffiliatedTaskId(
             [in] Int32 id);
+
+        GetAffiliatedTaskColor(
+            [out] Int32* color);
+
+        SetAffiliatedTaskColor(
+            [in] Int32 color);
     }
 
     /**
@@ -1949,6 +1979,16 @@ module
 
         SetImportanceReasonImportance(
             [in] Int32 importance);
+
+        /**
+         * Current process state, as per PROCESS_STATE_* constants.
+         * @hide
+         */
+        GetProcessState(
+            [out] Int32* processState);
+
+        SetProcessState(
+            [in] Int32 processState);
     }
 
     } // namespace App

@@ -1,10 +1,15 @@
-
+#include "Elastos.Droid.Utility.h"
+#include "elastos/droid/server/am/CActivityManagerService.h"
 #include "elastos/droid/server/am/StrictModeViolationDialog.h"
-#include "elastos/droid/os/Handler.h"
 #include "elastos/droid/R.h"
+#include "elastos/core/AutoLock.h"
 
-using Elastos::Droid::R;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::R;
+using Elastos::Core::AutoLock;
+using Elastos::Core::CString;
 
 namespace Elastos {
 namespace Droid {
@@ -23,7 +28,7 @@ ECode StrictModeViolationDialog::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
     {
-        AutoLock lock(mOwner->mService->mLock);
+        AutoLock lock(mOwner->mService);
         if (mOwner->mProc != NULL && mOwner->mProc->mCrashDialog == mOwner) {
             mOwner->mProc->mCrashDialog = NULL;
         }
@@ -39,10 +44,10 @@ ECode StrictModeViolationDialog::MyHandler::HandleMessage(
 }
 
 
-String const StrictModeViolationDialog::TAG("StrictModeViolationDialog");
-Int32 const StrictModeViolationDialog::ACTION_OK = 0;
-Int32 const StrictModeViolationDialog::ACTION_OK_AND_REPORT = 1;
-Int64 const StrictModeViolationDialog::DISMISS_TIMEOUT = 1000 * 60 * 1;
+const String StrictModeViolationDialog::TAG("StrictModeViolationDialog");
+const Int32 StrictModeViolationDialog::ACTION_OK = 0;
+const Int32 StrictModeViolationDialog::ACTION_OK_AND_REPORT = 1;
+const Int64 StrictModeViolationDialog::DISMISS_TIMEOUT = 1000 * 60 * 1;
 
 StrictModeViolationDialog::StrictModeViolationDialog(
     /* [in] */ IContext* context,
@@ -64,7 +69,8 @@ StrictModeViolationDialog::StrictModeViolationDialog(
     context->GetPackageManager((IPackageManager**)&pkgManager);
     AutoPtr<ICharSequence> label;
     pkgManager->GetApplicationLabel(app->mInfo, (ICharSequence**)&label);
-    if ((app->mPkgList.GetSize() == 1) &&
+    Int32 size;
+    if (((app->mPkgList->GetSize(&size), size) == 1) &&
             (name = label) != NULL) {
         String processName;
         app->mInfo->GetProcessName(&processName);
@@ -109,7 +115,7 @@ StrictModeViolationDialog::StrictModeViolationDialog(
     SetTitle(title);
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);
-    window->AddFlags(IWindowManagerLayoutParams::FLAG_SYSTEM_ERROR);
+    window->AddFlags(IWindowManagerLayoutParams::PRIVATE_FLAG_SYSTEM_ERROR);
     String processName;
     app->mInfo->GetProcessName(&processName);
     AutoPtr<ICharSequence> cs;

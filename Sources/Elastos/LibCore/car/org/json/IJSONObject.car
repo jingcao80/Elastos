@@ -454,9 +454,6 @@ module
         ToString(
             [in] Int32 indentSpaces,
             [out] String* str);
-
-        WriteTo(
-            [in] IJSONStringer* stringer);
     }
 
     interface IJSONObjectHelper {
@@ -495,6 +492,9 @@ module
          */
         Wrap(
             [in] IInterface* o,
+            [out] IInterface** obj);
+
+        GetNULL(
             [out] IInterface** obj);
     }
 

@@ -30,6 +30,9 @@ public:
     CARAPI Wrap(
         /* [in] */ IInterface* o,
         /* [out] */ IInterface** obj);
+
+    CARAPI GetNULL(
+        /* [out] */ IInterface** obj);
 };
 
 } //namespace Json

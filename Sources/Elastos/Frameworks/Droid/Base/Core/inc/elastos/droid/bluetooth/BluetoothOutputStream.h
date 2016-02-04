@@ -2,12 +2,12 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHOUTPUTSTREAM_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHOUTPUTSTREAM_H__
 
-#include "Elastos.Droid.Core_server.h"
+//#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Bluetooth.h"
+#include <elastos/core/Object.h>
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/io/OutputStream.h>
 
-using Elastos::IO::IOutputStream;
-using Elastos::IO::IFlushable;
 using Elastos::IO::OutputStream;
 
 namespace Elastos {
@@ -17,16 +17,11 @@ namespace Bluetooth {
 class BluetoothSocket;
 
 class BluetoothOutputStream
-    : public ElRefBase
-    , public IOutputStream
-    , public IFlushable
-    , public OutputStream
+    : public OutputStream
 {
 public:
     BluetoothOutputStream(
         /* [in] */ BluetoothSocket* socket);
-
-    CAR_INTERFACE_DECL()
 
     CARAPI Close();
 
@@ -36,19 +31,19 @@ public:
         /* [in] */ Int32 oneByte);
 
     CARAPI WriteBytes(
-        /* [in] */ const ArrayOf<Byte>& buffer);
-
-    CARAPI WriteBytes(
         /* [in] */ const ArrayOf<Byte> & buffer,
         /* [in] */ Int32 offset,
         /* [in] */ Int32 count);
 
-    CARAPI CheckError(
-        /* [out] */ Boolean* hasError);
-
-    CARAPI GetLock(
-        /* [out] */ IInterface** lockobj);
-
+//    CARAPI WriteBytes(
+//        /* [in] */ const ArrayOf<Byte>& buffer);
+//
+//    CARAPI CheckError(
+//        /* [out] */ Boolean* hasError);
+//
+//    CARAPI GetLock(
+//        /* [out] */ IInterface** lockobj);
+//
 private:
     BluetoothSocket* mSocket;
 };

@@ -33,5 +33,14 @@ ECode CJSONObjectHelper::Wrap(
     return JSONObject::Wrap(o, obj);
 }
 
+ECode CJSONObjectHelper::GetNULL(
+    /* [out] */ IInterface** obj)
+{
+    VALIDATE_NOT_NULL(obj);
+    *obj = JSONObject::Object_NULL;
+    REFCOUNT_ADD(*obj);
+    return NOERROR;
+}
+
 } //namespace Json
 } //namespace Org

@@ -1,0 +1,56 @@
+
+module
+{
+
+    interface Elastos.Droid.View.ISurface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecomm {
+    namespace Telecom {
+
+        /**
+         * Implementation of a Video Call, which allows InCallUi to communicate commands to the
+         * underlying
+         * {@link Connection.VideoProvider}, and direct callbacks from the
+         * {@link Connection.VideoProvider} to the appropriate {@link VideoCall.Listener}.
+         * @hide
+         *
+         * @Involve
+         * interface IInCallServiceVideoCall
+         */
+        interface IVideoCallImpl {
+            SetVideoCallListener(
+                [in] IVideoCallListener* videoCallListener);
+
+            SetCamera(
+                [in] String cameraId);
+
+            SetPreviewSurface(
+                [in] ISurface* surface);
+
+            SetDisplaySurface(
+                [in] ISurface* surface);
+
+            SetDeviceOrientation(
+                [in] Int32 rotation);
+
+            SetZoom(
+                [in] Float value);
+
+            SendSessionModifyResponse(
+                [in] IVideoProfile* responseProfile);
+
+            RequestCameraCapabilities();
+
+            RequestCallDataUsage();
+
+            SetPauseImage(
+                [in] String uri);
+        }
+
+    } // namespace Telecom
+    } // namespace Telecomm
+    } // namespace Droid
+    } // namespace Elastos
+}

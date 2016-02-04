@@ -1543,7 +1543,7 @@ Boolean CWallpaperManagerService::RestoreNamedResourceLocked(
                 AutoPtr<ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(32768);
                 Int32 amt;
                 while ((res->ReadBytes(buffer, &amt), amt) > 0) {
-                    fos->WriteBytes(*buffer, 0, amt);
+                    fos->Write(buffer, 0, amt);
                 }
                 // mWallpaperObserver will notice the close and send the change broadcast
 
@@ -1586,32 +1586,32 @@ void CWallpaperManagerService::Dump(
         String str;
         str.AppendFormat("Permission Denial: can't dump wallpaper service from from pid=%d, uid=%d",
             Binder::GetCallingPid(), Binder::GetCallingUid());
-        pw->PrintStringln(str);
+        pw->Println(str);
         return;
     }
 
     {
         AutoLock lock(&mLock);
-        pw->PrintStringln(String("Current Wallpaper Service state:"));
+        pw->Println(String("Current Wallpaper Service state:"));
         HashMap<Int32, AutoPtr<WallpaperData> >::Iterator iter;
         for (iter = mWallpaperMap.Begin(); iter != mWallpaperMap.End(); ++iter) {
             AutoPtr<WallpaperData> wallpaper = iter->mSecond;
-            pw->PrintStringln(String(" User ") + StringUtils::Int32ToString(wallpaper->mUserId) + ":");
+            pw->Println(String(" User ") + StringUtils::Int32ToString(wallpaper->mUserId) + ":");
             pw->PrintString(String("  mWidth="));
             pw->PrintInt32(wallpaper->mWidth);
             pw->PrintString(String(" mHeight="));
             pw->PrintInt32ln(wallpaper->mHeight);
             pw->PrintString(String("  mName="));
-            pw->PrintStringln(wallpaper->mName);
+            pw->Println(wallpaper->mName);
             pw->PrintString(String("  mWallpaperComponent="));
             String str;
             wallpaper->mWallpaperComponent->ToString(&str);
-            pw->PrintStringln(str);
+            pw->Println(str);
             if (wallpaper->mConnection != NULL) {
                 AutoPtr<CWMSWallpaperConnection> conn = wallpaper->mConnection;
                 pw->PrintString(String("  Wallpaper connection "));
                 // pw->Print(conn);
-                pw->PrintStringln(String(":"));
+                pw->Println(String(":"));
                 if (conn->mInfo != NULL) {
                     pw->PrintString(String("    mInfo.component="));
                     AutoPtr<IComponentName> componentName;

@@ -9,8 +9,6 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-extern const InterfaceID EIID_ColorFilter;
-
 class ColorFilter
     : public Object
     , public IColorFilter

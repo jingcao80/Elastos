@@ -1,5 +1,5 @@
 
-#include "BluetoothUuid.h"
+#include "elastos/droid/bluetooth/BluetoothUuid.h"
 
 namespace Elastos {
 namespace Droid {
@@ -36,9 +36,22 @@ namespace Bluetooth {
 // const AutoPtr<IParcelUuid> BluetoothUuid::PBAP_PSE =
 //         ParcelUuid.fromString("0000112f-0000-1000-8000-00805F9B34FB");
 
+// const AutoPtr<IParcelUuid> BluetoothUuid::MAP=
+//         ParcelUuid.fromString("00001134-0000-1000-8000-00805F9B34FB");
+// const AutoPtr<IParcelUuid> BluetoothUuid::MNS=
+//         ParcelUuid.fromString("00001133-0000-1000-8000-00805F9B34FB");
+// const AutoPtr<IParcelUuid> BluetoothUuid::MAS=
+//         ParcelUuid.fromString("00001132-0000-1000-8000-00805F9B34FB");
+// const AutoPtr<IParcelUuid> BluetoothUuid::BASE_UUID=
+//         ParcelUuid.fromString("00000000-0000-1000-8000-00805F9B34FB");
+
 // const AutoPtr< ArrayOf<IParcelUuid*> > BluetoothUuid::RESERVED_UUIDS = {
 //     AudioSink, AudioSource, AdvAudioDist, HSP, Handsfree, AvrcpController, AvrcpTarget,
-//     ObexObjectPush, PANU, NAP};
+//     ObexObjectPush, PANU, NAP, MAP, MNS, MAS};
+
+const Int32 BluetoothUuid::UUID_BYTES_16_BIT;
+const Int32 BluetoothUuid::UUID_BYTES_32_BIT;
+const Int32 BluetoothUuid::UUID_BYTES_128_BIT;
 
 Boolean BluetoothUuid::IsAudioSource(
     /* [in] */ IParcelUuid* uuid)

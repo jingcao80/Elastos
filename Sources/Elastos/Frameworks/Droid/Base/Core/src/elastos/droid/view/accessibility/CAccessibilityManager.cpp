@@ -219,7 +219,7 @@ ECode CAccessibilityManager::SendAccessibilityEvent(
     /* [in] */ IAccessibilityEvent* event)
 {
     AutoPtr<IIAccessibilityManager> service;
-    Int32 userId;
+    Int32 userId = 0;
     synchronized(mLock) {
         service = GetServiceLocked();
         if (service == NULL) {
@@ -267,7 +267,7 @@ ECode CAccessibilityManager::SendAccessibilityEvent(
 ECode CAccessibilityManager::Interrupt()
 {
     AutoPtr<IIAccessibilityManager> service;
-    Int32 userId;
+    Int32 userId = 0;
     synchronized(mLock) {
         service = GetServiceLocked();
         if (service == NULL) {
@@ -329,7 +329,7 @@ ECode CAccessibilityManager::GetInstalledAccessibilityServiceList(
     VALIDATE_NOT_NULL(serviceList);
 
     AutoPtr<IIAccessibilityManager> service;
-    Int32 userId;
+    Int32 userId = 0;
     synchronized(mLock) {
         service = GetServiceLocked();
         if (service == NULL) {
@@ -374,7 +374,7 @@ ECode CAccessibilityManager::GetEnabledAccessibilityServiceList(
     VALIDATE_NOT_NULL(serviceList);
 
     AutoPtr<IIAccessibilityManager> service;
-    Int32 userId;
+    Int32 userId = 0;
     synchronized(mLock) {
         service = GetServiceLocked();
         if (service == NULL) {
@@ -507,7 +507,7 @@ ECode CAccessibilityManager::AddAccessibilityInteractionConnection(
     VALIDATE_NOT_NULL(add);
 
     AutoPtr<IIAccessibilityManager> service;
-    Int32 userId;
+    Int32 userId = 0;
     synchronized(mLock) {
         service = GetServiceLocked();
         if (service == NULL) {
@@ -582,7 +582,7 @@ void CAccessibilityManager::TryConnectToServiceLocked()
 
 void CAccessibilityManager::HandleNotifyAccessibilityStateChanged()
 {
-    Boolean isEnabled;
+    Boolean isEnabled = FALSE;
     synchronized(mLock) {
         isEnabled = mIsEnabled;
     }
@@ -597,7 +597,7 @@ void CAccessibilityManager::HandleNotifyAccessibilityStateChanged()
 
 void CAccessibilityManager::HandleNotifyTouchExplorationStateChanged()
 {
-    Boolean isTouchExplorationEnabled;
+    Boolean isTouchExplorationEnabled = FALSE;
     synchronized(mLock) {
         isTouchExplorationEnabled = mIsTouchExplorationEnabled;
     }
@@ -612,7 +612,7 @@ void CAccessibilityManager::HandleNotifyTouchExplorationStateChanged()
 
 void CAccessibilityManager::HandleNotifyHighTextContrastStateChanged()
 {
-    Boolean isHighTextContrastEnabled;
+    Boolean isHighTextContrastEnabled = FALSE;
     synchronized(mLock) {
         isHighTextContrastEnabled = mIsHighTextContrastEnabled;
     }

@@ -9,7 +9,9 @@
 using Elastos::Droid::Utility::IAtomicFile;
 using Org::Xmlpull::V1::IXmlPullParser;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Utility::IAtomicFile;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
@@ -51,7 +53,7 @@ public:
         /* [in] */ IRect* outRect);
 
     CARAPI_(void) SetOverscanLocked(
-        /* [in] */ const String* name,
+        /* [in] */ const String& name,
         /* [in] */ Int32 left,
         /* [in] */ Int32 top,
         /* [in] */ Int32 right,

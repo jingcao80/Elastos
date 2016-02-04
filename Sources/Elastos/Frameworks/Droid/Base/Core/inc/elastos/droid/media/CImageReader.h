@@ -89,13 +89,12 @@ private:
             CARAPI_(void) ClearBuffer();
 
         private:
-            SurfaceImage* mHost;
-
             Int32 mIndex;
             Int32 mPixelStride;
             Int32 mRowStride;
 
             AutoPtr<IByteBuffer> mBuffer;
+            SurfaceImage* mHost;
         };
 
     public:
@@ -144,8 +143,6 @@ private:
             /* [out] */ SurfacePlane** result);
 
     private:
-        CImageReader* mHost;
-
         /**
          * This field is used to keep track of native object and used by native code only.
          * Don't modify.
@@ -159,6 +156,7 @@ private:
 
         AutoPtr<ArrayOf<SurfacePlane*> > mPlanes;
         Boolean mIsImageValid;
+        CImageReader* mHost;
     };
 
 public:

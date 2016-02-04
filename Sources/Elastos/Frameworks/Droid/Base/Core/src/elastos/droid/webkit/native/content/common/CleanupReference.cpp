@@ -101,7 +101,8 @@ AutoPtr<IHandler> CleanupReference_LazyHolder_sHandler_Init()
     return handler;
 }
 
-AutoPtr<IHandler> CleanupReference::LazyHolder::sHandler = CleanupReference_LazyHolder_sHandler_Init();
+// TODO
+AutoPtr<IHandler> CleanupReference::LazyHolder::sHandler;// = CleanupReference_LazyHolder_sHandler_Init();
 
 //===============================================================
 //                 CleanupReference::InnerThread
@@ -156,7 +157,8 @@ Boolean CleanupReferenceStart()
     return TRUE;
 }
 
-static Boolean sStart = CleanupReferenceStart();
+// TODO
+static Boolean sStart;// = CleanupReferenceStart();
 
 const String CleanupReference::TAG("CleanupReference");
 const Boolean CleanupReference::DEBUG = FALSE;  // Always check in as false!
@@ -170,7 +172,8 @@ AutoPtr<IThread> CleanupReference_sReaperThread_Init()
     return thread;
 }
 
-AutoPtr<IThread> CleanupReference::sReaperThread = CleanupReference_sReaperThread_Init();
+// TODO
+AutoPtr<IThread> CleanupReference::sReaperThread;// = CleanupReference_sReaperThread_Init();
 
 // Add a new reference to sRefs. |msg.obj| is the CleanupReference to add.
 const Int32 CleanupReference::ADD_REF;
@@ -191,7 +194,8 @@ AutoPtr<ISet> sRefsInit()
     AutoPtr<ISet> set = ISet::Probe(hashSet);
     return set;
 }
-AutoPtr<ISet> CleanupReference::sRefs = sRefsInit();
+// TODO
+AutoPtr<ISet> CleanupReference::sRefs;// = sRefsInit();
 
 /**
  * @param obj the object whose loss of reachability should trigger the

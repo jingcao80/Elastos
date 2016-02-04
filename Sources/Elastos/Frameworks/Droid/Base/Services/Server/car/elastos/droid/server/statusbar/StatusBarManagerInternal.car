@@ -1,0 +1,28 @@
+module
+{
+    interface Elastos.Droid.Server.Notification.INotificationDelegate;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace StatusBar {
+
+    interface IStatusBarManagerInternal {
+        SetNotificationDelegate(
+            [in] INotificationDelegate* notificationDelegate);
+
+        BuzzBeepBlinked();
+
+        NotificationLightPulse(
+            [in] Int32 argb,
+            [in] Int32 onMillis,
+            [in] Int32 offMillis);
+
+        NotificationLightOff();
+    }
+
+    } // namespace StatusBar
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+}

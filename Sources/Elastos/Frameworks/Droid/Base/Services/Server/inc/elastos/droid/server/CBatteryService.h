@@ -2,32 +2,138 @@
 #define __ELASTOS_DROID_SERVER_CBATTERYSERVICE_H__
 
 #include "_Elastos_Droid_Server_CBatteryService.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/server/SystemService.h"
+#include "elastos/droid/server/lights/Light.h"
 #include "elastos/droid/os/UEventObserver.h"
 #include "elastos/droid/os/Runnable.h"
-#include "LightsService.h"
+#include "elastos/droid/os/Binder.h"
+#include "elastos/droid/database/ContentObserver.h"
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.Internal.h>
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::UEventObserver;
-using Elastos::Droid::Server::LightsService;
+using Elastos::Droid::Os::IBatteryProperties;
+using Elastos::Droid::Os::IIBatteryPropertiesListener;
+using Elastos::Droid::Os::IIBatteryPropertiesRegistrar;
+using Elastos::Droid::Os::IBatteryManagerInternal;
+using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Internal::App::IIBatteryStats;
+using Elastos::Droid::Server::Lights::Light;
+using Elastos::Droid::Server::Lights::ILightsManager;
+
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
+/**
+ * <p>BatteryService monitors the charging status, and charge level of the device
+ * battery.  When these values change this service broadcasts the new values
+ * to all {@link android.content.BroadcastReceiver IntentReceivers} that are
+ * watching the {@link android.content.Intent#ACTION_BATTERY_CHANGED
+ * BATTERY_CHANGED} action.</p>
+ * <p>The new values are stored in the Intent data and can be retrieved by
+ * calling {@link android.content.Intent#getExtra Intent.getExtra} with the
+ * following keys:</p>
+ * <p>&quot;scale&quot; - int, the maximum value for the charge level</p>
+ * <p>&quot;level&quot; - int, charge level, from 0 through &quot;scale&quot; inclusive</p>
+ * <p>&quot;status&quot; - String, the current charging status.<br />
+ * <p>&quot;health&quot; - String, the current battery health.<br />
+ * <p>&quot;present&quot; - boolean, true if the battery is present<br />
+ * <p>&quot;icon-small&quot; - int, suggested small icon to use for this state</p>
+ * <p>&quot;plugged&quot; - int, 0 if the device is not plugged in; 1 if plugged
+ * into an AC power adapter; 2 if plugged in via USB.</p>
+ * <p>&quot;voltage&quot; - int, current battery voltage in millivolts</p>
+ * <p>&quot;temperature&quot; - int, current battery temperature in tenths of
+ * a degree Centigrade</p>
+ * <p>&quot;technology&quot; - String, the type of battery installed, e.g. "Li-ion"</p>
+ *
+ * <p>
+ * The battery service may be called by the power manager while holding its locks so
+ * we take care to post all outcalls into the activity manager to a handler.
+ *
+ * FIXME: Ideally the power manager would perform all of its calls into the battery
+ * service asynchronously itself.
+ * </p>
+ */
 CarClass(CBatteryService)
+    , public SystemService
 {
+public:
+    class BinderService
+        : public Binder
+    {
+    public:
+        BinderService();
+
+        CARAPI constructor(
+            /* [in] */ ISystemService* batteryService);
+
+        // //@Override
+        CARAPI Dump(
+            /* [in] */ IFileDescriptor* fd,
+            /* [in] */ IPrintWriter* pw,
+            /* [in] */ ArrayOf<String>* args);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+    private:
+        CBatteryService* mHost;
+    };
+
+    class BatteryListener
+        : public Object
+        , public IIBatteryPropertiesListener
+        , public IBinder
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        BatteryListener();
+
+        CARAPI constructor(
+            /* [in] */ ISystemService* batteryService);
+
+        // //@Override
+        CARAPI BatteryPropertiesChanged(
+            /* [in] */ IBatteryProperties* props);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
+
+    private:
+        CBatteryService* mHost;
+    };
+
 private:
-    class Led : public ElRefBase
+    class BootPhaseContentObserver
+        : public ContentObserver
+    {
+    public:
+        BootPhaseContentObserver(
+            /* [in] */ CBatteryService* host);
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        CBatteryService* mHost;
+
+    };
+
+    class Led : public Object
     {
     public:
         Led(
             /* [in] */ IContext* context,
-            /* [in] */ LightsService* lights,
+            /* [in] */ ILightsManager* lights,
             /* [in] */ CBatteryService* host);
 
         /**
@@ -36,7 +142,7 @@ private:
         CARAPI UpdateLightsLocked();
 
     private:
-        AutoPtr<LightsService::Light> mBatteryLight;
+        AutoPtr<Light> mBatteryLight;
 
         Int32 mBatteryLowARGB;
         Int32 mBatteryMediumARGB;
@@ -44,21 +150,6 @@ private:
         Int32 mBatteryLedOn;
         Int32 mBatteryLedOff;
 
-        CBatteryService* mHost;
-    };
-
-    class PowerSupplyObserver
-        : public UEventObserver
-    {
-    public:
-        PowerSupplyObserver(
-            /* [in] */ CBatteryService* host) : mHost(host)
-        {}
-
-        CARAPI_(void) OnUEvent(
-            /* [in] */ UEventObserver::UEvent* event);
-
-    private:
         CBatteryService* mHost;
     };
 
@@ -70,8 +161,8 @@ private:
             /* [in] */ CBatteryService* host) : mHost(host)
         {}
 
-        CARAPI_(void) OnUEvent(
-            /* [in] */ UEventObserver::UEvent* event);
+        CARAPI OnUEvent(
+            /* [in] */ IUEvent* event);
 
     private:
         CBatteryService* mHost;
@@ -91,19 +182,6 @@ private:
         CBatteryService* mHost;
     };
 
-    class ShutdownIfInBootFastModeRunnable
-        : public Runnable
-    {
-    public:
-        ShutdownIfInBootFastModeRunnable(
-           /* [in] */  CBatteryService* host) : mHost(host)
-        {}
-
-        CARAPI Run();
-
-    private:
-        CBatteryService* mHost;
-    };
 
     class ShutdownIfOverTempRunnable
         : public Runnable
@@ -193,56 +271,74 @@ private:
         AutoPtr<IIntent> mIntent;
     };
 
+    class LocalService
+        : public Object
+        , public IBatteryManagerInternal
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        LocalService(
+            /* [in] */ CBatteryService* host);
+
+        //@Override
+        CARAPI IsPowered(
+            /* [in] */ Int32 plugTypeSet,
+            /* [out] */ Boolean* result);
+
+        //@Override
+        CARAPI GetPlugType(
+            /* [out] */ Int32* result);
+
+        //@Override
+        CARAPI GetBatteryLevel(
+            /* [out] */ Int32* result);
+
+        //@Override
+        CARAPI GetBatteryLevelLow(
+            /* [out] */ Boolean* result);
+
+        //@Override
+        CARAPI GetInvalidCharger(
+            /* [out] */ Int32* result);
+
+    private:
+        CBatteryService* mHost;
+    };
+
 public:
+    CAR_OBJECT_DECL()
+
     CBatteryService();
 
     CARAPI constructor(
-        /* [in] */ IContext* context,
-        /* [in] */ Handle32 lights);
+        /* [in] */ IContext* context);
 
-    CARAPI_(void) SystemReady();
+    CARAPI OnStart();
 
-    /**
-     * Returns true if the device is plugged into any of the specified plug types.
-     */
-    CARAPI_(Boolean) IsPowered(
-        /* [in] */ Int32 plugTypeSet);
-
-    /**
-     * Returns the current plug type.
-     */
-    CARAPI_(Int32) GetPlugType();
-
-    /**
-     * Returns battery level as a percentage.
-     */
-    CARAPI_(Int32) GetBatteryLevel();
-
-    /**
-     * Returns true if battery level is below the first warning threshold.
-     */
-    CARAPI_(Boolean) IsBatteryLow();
+    CARAPI OnBootPhase(
+        /* [in] */ Int32 phase);
 
     CARAPI ToString(
         /* [out] */ String* str);
 
 private:
-    CARAPI_(void) NativeUpdate();
-
-    CARAPI_(void) NativeShutdown();
+    CARAPI UpdateBatteryWarningLevelLocked();
 
     CARAPI_(Boolean) IsPoweredLocked(
         /* [in] */ Int32 plugTypeSet);
 
-    CARAPI_(void) ShutdownIfNoPowerLocked();
+    Boolean ShouldSendBatteryLowLocked();
 
-    CARAPI_(void) ShutdownIfInBootFastModeLocked();
+    CARAPI_(void) ShutdownIfNoPowerLocked();
 
     CARAPI_(void) ShutdownIfOverTempLocked();
 
-    CARAPI_(void) UpdateLocked();
+    CARAPI_(void) Update(
+        /* [in] */ IBatteryProperties* props);
 
-    CARAPI_(void) ProcessValuesLocked();
+    CARAPI_(void) ProcessValuesLocked(
+        /* [in] */ Boolean force);
 
     CARAPI_(void) SendIntentLocked();
 
@@ -253,6 +349,10 @@ private:
 
     CARAPI_(Int32) GetIconLocked(
         /* [in] */ Int32 level);
+
+    CARAPI DumpInternal(
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ ArrayOf<String>* args);
 
 private:
     static const String TAG;
@@ -267,13 +367,11 @@ private:
 
     static const Int32 DUMP_MAX_LENGTH = 24 * 1024;
     static const AutoPtr< ArrayOf<String> > DUMPSYS_ARGS;
-    static const String BATTERY_STATS_SERVICE_NAME;
 
     static const String DUMPSYS_DATA_PATH;
 
     // This should probably be exposed in the API, though it's not critical
     static const Int32 BATTERY_PLUGGED_NONE = 0;
-    static const Int32 BOOT_FAST_REAL_SHUT_DOWN_LEVEL = 5;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IIBatteryStats> mBatteryStats;
@@ -281,19 +379,9 @@ private:
 
     Object mLock;
 
-    /* Begin native fields: All of these fields are set by native code. */
-    Boolean mAcOnline;
-    Boolean mUsbOnline;
-    Boolean mWirelessOnline;
-    Int32 mBatteryStatus;
-    Int32 mBatteryHealth;
-    Boolean mBatteryPresent;
-    Int32 mBatteryLevel;
-    Int32 mBatteryVoltage;
-    Int32 mBatteryTemperature;
-    String mBatteryTechnology;
+    AutoPtr<IBatteryProperties> mBatteryProps;
+    AutoPtr<IBatteryProperties> mLastBatteryProps;
     Boolean mBatteryLevelCritical;
-    /* End native fields. */
 
     Int32 mLastBatteryStatus;
     Int32 mLastBatteryHealth;
@@ -313,6 +401,8 @@ private:
     Int32 mPlugType;
     Int32 mLastPlugType; // Extra state so we can detect first run
 
+    Boolean mBatteryLevelLow;
+
     Int64 mDischargeStartTime;
     Int32 mDischargeStartLevel;
 
@@ -322,7 +412,6 @@ private:
 
     Boolean mSentLowBatteryBroadcast;
 
-    AutoPtr<PowerSupplyObserver> mPowerSupplyObserver;
     AutoPtr<InvalidChargerObserver> mInvalidChargerObserver;
 };
 

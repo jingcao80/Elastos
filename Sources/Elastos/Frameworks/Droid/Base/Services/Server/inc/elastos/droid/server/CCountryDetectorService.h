@@ -3,24 +3,34 @@
 #define __ELASTOS_DROID_SERVER_CCOUNTRYDETECTORSERVICE_H__
 
 #include "_Elastos_Droid_Server_CCountryDetectorService.h"
+// #include "elastos/droid/server/location/ComprehensiveCountryDetector.h"
 #include "elastos/droid/ext/frameworkext.h"
+#define HASH_FOR_OS
+#include "elastos/droid/ext/frameworkhash.h"
 #include "elastos/droid/os/Runnable.h"
 #include <elastos/utility/etl/HashMap.h>
+#include <Elastos.Droid.Content.h>
 
-using Elastos::Utility::Etl::HashMap;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Location::IICountryDetector;
 using Elastos::Droid::Location::ICountryListener;
 using Elastos::Droid::Location::IICountryListener;
 using Elastos::Droid::Location::ICountry;
+//using Elastos::Droid::Server::Location::ComprehensiveCountryDetector;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
 CarClass(CCountryDetectorService)
+    , public Object
+    , public IICountryDetector
+    , public IBinder
+    , public IRunnable
 {
 public:
     class CountryDetectedRunnable
@@ -64,7 +74,7 @@ public:
      * from listener list when the remote process was died.
      */
     class Receiver
-        : public ElRefBase
+        : public Object
         , public IProxyDeathRecipient
     {
     public:
@@ -86,7 +96,7 @@ public:
     };
 
     class LocationBasedDetectorListener
-        : public ElRefBase
+        : public Object
         , public ICountryListener
     {
     public:
@@ -103,6 +113,10 @@ public:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IContext *context);
 
@@ -132,7 +146,7 @@ public:
     virtual CARAPI NotifyReceivers(
         /* [in] */ ICountry *country);
 
-    virtual CARAPI SystemReady();
+    virtual CARAPI SystemRunning();
 
     virtual CARAPI SetCountryListener(
         /* [in] */ ICountryListener *listener);
@@ -167,11 +181,10 @@ private:
     Object mReceiverslock;
 
     AutoPtr<IContext> mContext;
-    //AutoPtr<IComprehensiveCountryDetector> mCountryDetector;
+    // AutoPtr<ComprehensiveCountryDetector> mCountryDetector;
     Boolean mSystemReady;
     AutoPtr<IHandler> mHandler;
     AutoPtr<ICountryListener> mLocationBasedDetectorListener;
-
 };
 
 }

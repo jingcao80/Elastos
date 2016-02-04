@@ -10,7 +10,6 @@ module
 
     [local]
     interface IDragDownCallback {
-
         /**
          * @return true if the interaction is accepted, false if it should be cancelled
          */

@@ -2,8 +2,7 @@
 #include "elastos/droid/media/CAudioFormat.h"
 #include "elastos/droid/media/CAudioFormatBuilder.h"
 #include "elastos/droid/media/CAudioRecord.h"
-//TODO: Need CMediaRecorder.h
-// #include "elastos/droid/media/CMediaRecorder.h"
+#include "elastos/droid/media/CMediaRecorder.h"
 #include "elastos/droid/media/AudioSystem.h"
 #include "elastos/droid/os/CBinder.h"
 #include "elastos/droid/os/Looper.h"
@@ -18,8 +17,7 @@
 using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Media::CAudioFormat;
 using Elastos::Droid::Media::CAudioFormatBuilder;
-//TODO: Need CMediaRecorder.h
-// using Elastos::Droid::Media::CMediaRecorder;
+using Elastos::Droid::Media::CMediaRecorder;
 using Elastos::Droid::Os::CBinder;
 using Elastos::Droid::Os::EIID_IHandler;
 using Elastos::Droid::Os::Looper;
@@ -453,10 +451,9 @@ ECode CAudioRecord::AudioParamCheck(
     //--------------
     // audio source
     Int32 tempValue;
-    if ( (audioSource < IMediaRecorderAudioSource::DEFAULT) ||
-//TODO: Need CMediaRecorder.h
-         // (audioSource > (CMediaRecorder::GetAudioSourceMax(&tempValue), tempValue)) &&
-         (audioSource != IMediaRecorderAudioSource::HOTWORD) ) {
+    if ((audioSource < IMediaRecorderAudioSource::DEFAULT) ||
+         ((audioSource > (CMediaRecorder::GetAudioSourceMax(&tempValue), tempValue)) &&
+         (audioSource != IMediaRecorderAudioSource::HOTWORD))) {
         //throw (new IllegalArgumentException("Invalid audio source."));
         Logger::E(TAG, "Invalid audio source.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;

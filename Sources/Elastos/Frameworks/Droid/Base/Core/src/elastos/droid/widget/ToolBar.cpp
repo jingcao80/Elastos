@@ -1230,6 +1230,7 @@ AutoPtr<IParcelable> ToolBar::OnSaveInstanceState()
     state.isOverflowOpen = isOverflowMenuShowing();
 
     return state;*/
+    return NULL;
 }
 
 void ToolBar::OnRestoreInstanceState(
@@ -1851,6 +1852,7 @@ ECode ToolBar::AddSystemView(
     assert(0);
     //lp->SetViewType(LayoutParams::SYSTEM);
     AddView(v, IViewGroupLayoutParams::Probe(lp));
+    return NOERROR;
 }
 
 ECode ToolBar::PostShowOverflowMenu()
@@ -2249,6 +2251,7 @@ ECode ToolBar::UpdateChildVisibilityForExpandedActionView(
     if (viewTpye != LayoutParams::EXPANDED && IView::Probe(mMenuView) != child) {
         child->SetVisibility(mExpandedActionView != NULL ? IView::GONE : IView::VISIBLE);
     }
+    return NOERROR;
 }
 
 } // namespace Widget

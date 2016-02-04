@@ -1,6 +1,10 @@
 #include "elastos/droid/media/FocusRequester.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -30,8 +34,7 @@ ECode FocusRequester::constructor(
     /* [in] */ IIAudioFocusDispatcher* afl,
     /* [in] */ IBinder* source,
     /* [in] */ const String& id,
-//TODO: Need MediaFocusControl::AudioFocusDeathHandler
-    // /* [in] */ AudioFocusDeathHandler* hdlr,
+    /* [in] */ IProxyDeathRecipient* hdlr,
     /* [in] */ const String& pn,
     /* [in] */ Int32 uid)
 {
@@ -39,8 +42,7 @@ ECode FocusRequester::constructor(
     mFocusDispatcher = afl;
     mSourceRef = source;
     mClientId = id;
-//TODO: Need MediaFocusControl::AudioFocusDeathHandler
-    // mDeathHandler = hdlr;
+    mDeathHandler = hdlr;
     mPackageName = pn;
     mCallingUid = uid;
     mFocusGainRequest = focusRequest;
@@ -115,27 +117,35 @@ ECode FocusRequester::Dump(
 {
     String str;
     mSourceRef->ToString(&str);
-    return pw->Println(String("  source:") + str
-            + " -- pack: " + mPackageName
-            + " -- client: " + mClientId
-            + " -- gain: " + FocusGainToString()
-            + " -- loss: " + FocusLossToString()
-            + " -- uid: " + mCallingUid
-            + " -- stream: " + mStreamType);
+    StringBuilder sb;
+    sb += "  source:";
+    sb += str;
+    sb += " -- pack: ";
+    sb += mPackageName;
+    sb += " -- client: ";
+    sb += mClientId;
+    sb += " -- gain: ";
+    sb += FocusGainToString();
+    sb += " -- loss: ";
+    sb += FocusLossToString();
+    sb += " -- uid: ";
+    sb += mCallingUid;
+    sb += " -- stream: ";
+    sb += mStreamType;
+    return pw->Println(sb.ToString());
 }
 
 ECode FocusRequester::ReleaseResources()
 {
     // try {
-//TODO: Need MediaFocusControl::AudioFocusDeathHandler
-    // if (mSourceRef != NULL && mDeathHandler != NULL) {
-    //     AutoPtr<IProxy> proxy = IProxy::Probe(mSourceRef);
-    //     if (proxy != NULL) {
-    //         Boolean b;
-    //         proxy->UnlinkToDeath(IProxyDeathRecipient::Probe(mDeathHandler), 0, &b);
-    //     }
-    //     mDeathHandler = NULL;
-    // }
+    if (mSourceRef != NULL && mDeathHandler != NULL) {
+        AutoPtr<IProxy> proxy = (IProxy*)mSourceRef->Probe(EIID_IProxy);
+        if (proxy != NULL) {
+            Boolean b;
+            proxy->UnlinkToDeath(mDeathHandler, 0, &b);
+        }
+        mDeathHandler = NULL;
+    }
     return NOERROR;
     // } catch (java.util.NoSuchElementException e) {
     //     Log.e(TAG, "FocusRequester.release() hit ", e);
@@ -208,7 +218,7 @@ String FocusRequester::FocusChangeToString(
         case IAudioManager::AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
             return String("LOSS_TRANSIENT_CAN_DUCK");
         default:
-            return String("[invalid focus change") + focus + "]";
+            return String("[invalid focus change") + StringUtils::ToString(focus) + "]";
     }
 }
 
@@ -256,7 +266,7 @@ Int32 FocusRequester::FocusLossForGainRequest(
             }
         default:
             Logger::E(TAG, "focusLossForGainRequest() for invalid focus request %d", gainRequest);
-                    return IAudioManager::AUDIOFOCUS_NONE;
+            return IAudioManager::AUDIOFOCUS_NONE;
     }
 }
 

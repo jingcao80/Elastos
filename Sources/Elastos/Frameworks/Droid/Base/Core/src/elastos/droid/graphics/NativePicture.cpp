@@ -123,8 +123,7 @@ SkPicture* NativePicture::MakePartialCopy() const
     SkPictureRecorder reRecorder;
 
     SkCanvas* canvas = reRecorder.beginRecording(mWidth, mHeight, NULL, 0);
-    assert(0 && "TODO : this class is a friend class in the skia's class-SkPictureRecorder.");
-    // mRecorder->partialReplay(canvas);
+    mRecorder->partialReplay(canvas);
     return reRecorder.endRecording();
 }
 

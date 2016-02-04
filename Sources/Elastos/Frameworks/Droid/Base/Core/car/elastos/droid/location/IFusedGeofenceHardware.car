@@ -17,7 +17,7 @@ module
      *
      * @hide
      */
-    [local,deprecated]
+    [deprecated]
     interface IIFusedGeofenceHardware {
         /**
          * Flags if the interface functionality is supported by the platform.

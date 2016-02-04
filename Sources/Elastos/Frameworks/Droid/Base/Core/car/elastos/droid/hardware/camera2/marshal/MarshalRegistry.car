@@ -9,6 +9,9 @@ module
     namespace Camera2 {
     namespace Marshal {
 
+    interface IMarshalRegistryMarshalToken {
+    }
+
     /**
      * Registry of supported marshalers; add new query-able marshalers or lookup existing ones.</p>
      */

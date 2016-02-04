@@ -1,7 +1,9 @@
 
-#include "location/GeocoderProxy.h"
+#include "elastos/droid/server/location/GeocoderProxy.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Location::EIID_IIGeocodeProvider;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -13,73 +15,36 @@ const String GeocoderProxy::SERVICE_ACTION("com.android.location.service.Geocode
 
 AutoPtr<GeocoderProxy> GeocoderProxy::CreateAndBind(
     /* [in] */ IContext* context,
-    /* [in] */ List<String>* initialPackageNames,
-    /* [in] */ Int32 userId)
+    /* [in] */ Int32 overlaySwitchResId,
+    /* [in] */ Int32 defaultServicePackageNameResId,
+    /* [in] */ Int32 initialPackageNameResId,
+    /* [in] */ IHandler* handler)
 {
-    AutoPtr<GeocoderProxy> proxy = new GeocoderProxy(context, initialPackageNames, userId);
+    AutoPtr<GeocoderProxy> proxy = new GeocoderProxy(
+        context,
+        overlaySwitchResId,
+        defaultServicePackageNameResId,
+        initialPackageNameResId,
+        handler);
     if (proxy->Bind()) {
         return proxy;
-    } else {
+    }
+    else {
         return NULL;
     }
 }
 
 GeocoderProxy::GeocoderProxy(
     /* [in] */ IContext* context,
-    /* [in] */ List<String>* initialPackageNames,
-    /* [in] */ Int32 userId)
+    /* [in] */ Int32 overlaySwitchResId,
+    /* [in] */ Int32 defaultServicePackageNameResId,
+    /* [in] */ Int32 initialPackageNameResId,
+    /* [in] */ IHandler* handler)
 {
     mContext = context;
-    mServiceWatcher = new ServiceWatcher(mContext, TAG, SERVICE_ACTION, initialPackageNames, NULL, NULL, userId);
-}
 
-String GeocoderProxy::GetConnectedPackageName()
-{
-    return mServiceWatcher->GetBestPackageName();
-}
-
-String GeocoderProxy::GetFromLocation(
-    /* [in] */ Double latitude,
-    /* [in] */ Double longitude,
-    /* [in] */ Int32 maxResults,
-    /* [in] */ IGeocoderParams* params,
-    /* [in] */ IObjectContainer** addrs)
-{
-    AutoPtr<IIGeocodeProvider> provider = GetService();
-    if (provider != NULL) {
-        String temp;
-        provider->GetFromLocation(latitude, longitude, maxResults, params, addrs, &temp);
-        return temp;
-    }
-
-    return String("Service not Available");
-}
-
-String GeocoderProxy::GetFromLocationName(
-    /* [in] */ const String& locationName,
-    /* [in] */ Double lowerLeftLatitude,
-    /* [in] */ Double lowerLeftLongitude,
-    /* [in] */ Double upperRightLatitude,
-    /* [in] */ Double upperRightLongitude,
-    /* [in] */ Int32 maxResults,
-    /* [in] */ IGeocoderParams* params,
-    /* [out] */ IObjectContainer** addrs)
-{
-    assert(addrs != NULL);
-    *addrs = NULL;
-
-    AutoPtr<IIGeocodeProvider> provider = GetService();
-    if (provider != NULL) {
-
-        String temp;
-        provider->GetFromLocationName(locationName, lowerLeftLatitude,
-                lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                maxResults, params, addrs, &temp);
-        return temp;
-
-    }
-
-    return String("Service not Available");
+    mServiceWatcher = new ServiceWatcher(mContext, TAG, SERVICE_ACTION, overlaySwitchResId,
+        defaultServicePackageNameResId, initialPackageNameResId, NULL, handler);
 }
 
 Boolean GeocoderProxy::Bind()
@@ -89,9 +54,64 @@ Boolean GeocoderProxy::Bind()
 
 AutoPtr<IIGeocodeProvider> GeocoderProxy::GetService()
 {
-    AutoPtr<IBinder> binder = mServiceWatcher->GetBinder();
-    AutoPtr<IIGeocodeProvider> rst = (IIGeocodeProvider*)(binder->Probe(EIID_IIGeocodeProvider));
-    return rst;
+    return IIGeocodeProvider::Probe(mServiceWatcher->GetBinder());
+}
+
+ECode GeocoderProxy::GetConnectedPackageName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name)
+    *name = mServiceWatcher->GetBestPackageName();
+    return NOERROR;
+}
+
+ECode GeocoderProxy::GetFromLocation(
+    /* [in] */ Double latitude,
+    /* [in] */ Double longitude,
+    /* [in] */ Int32 maxResults,
+    /* [in] */ IGeocoderParams* params,
+    /* [out] */ IList** addrs,///*List<Address>*/
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(addrs)
+    VALIDATE_NOT_NULL(name)
+    AutoPtr<IIGeocodeProvider> provider = GetService();
+    if (provider != NULL) {
+        ECode ec = provider->GetFromLocation(latitude, longitude, maxResults, params, addrs, name);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "%08x", ec);
+            return E_REMOTE_EXCEPTION;
+        }
+    }
+    *name = "Service not Available";
+    return NOERROR;
+}
+
+ECode GeocoderProxy::GetFromLocationName(
+    /* [in] */ const String& locationName,
+    /* [in] */ Double lowerLeftLatitude,
+    /* [in] */ Double lowerLeftLongitude,
+    /* [in] */ Double upperRightLatitude,
+    /* [in] */ Double upperRightLongitude,
+    /* [in] */ Int32 maxResults,
+    /* [in] */ IGeocoderParams* params,
+    /* [out] */ IList** addrs,///*List<Address>*/
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(addrs)
+    VALIDATE_NOT_NULL(name)
+    AutoPtr<IIGeocodeProvider> provider = GetService();
+    if (provider != NULL) {
+        ECode ec = provider->GetFromLocationName(locationName, lowerLeftLatitude,
+            lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
+            maxResults, params, addrs, name);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "%08x", ec);
+            return E_REMOTE_EXCEPTION;
+        }
+    }
+    *name = "Service not Available";
+    return NOERROR;
 }
 
 } // namespace Location

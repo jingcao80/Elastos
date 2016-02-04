@@ -1,0 +1,14 @@
+
+TARGET_NAME= marshal
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+SOURCES  = MarshalHelpers.cpp
+SOURCES += CMarshalHelpers.cpp
+SOURCES += MarshalRegistry.cpp
+SOURCES += CMarshalRegistry.cpp
+SOURCES += Marshaler.cpp

@@ -488,7 +488,9 @@ int LubeContext::InterfaceConstMember(MemberType member, char *pszBuffer)
                 }
                 else {
                     assert(pDesc->mType == TYPE_STRING);
-                    sprintf(pszBuffer, "String(\"%s\")", pDesc->mV.mStrValue);
+                    pDesc->mV.mStrValue != NULL ?
+                            sprintf(pszBuffer, "String(\"%s\")", pDesc->mV.mStrValue) :
+                            sprintf(pszBuffer, "String(NULL)");
                 }
                 return LUBE_OK;
             }

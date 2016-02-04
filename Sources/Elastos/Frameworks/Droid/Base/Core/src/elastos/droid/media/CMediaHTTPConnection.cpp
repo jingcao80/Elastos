@@ -498,6 +498,7 @@ AutoPtr<IBinder> CMediaHTTPConnection::NativeGetIMemory()
     // sp<JMediaHTTPConnection> conn = getObject(env, thiz);
 
     // return javaObjectForIBinder(env, conn->getIMemory()->asBinder());
+    return NULL;
 }
 
 Int32 CMediaHTTPConnection::NativeReadAt(
@@ -524,6 +525,7 @@ Int32 CMediaHTTPConnection::NativeReadAt(
     // }
 
     // return n;
+    return 0;
 }
 
 } // namespace Media

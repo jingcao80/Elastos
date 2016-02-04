@@ -7,8 +7,13 @@
 #include "elastos/droid/os/FileUtils.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/Environment.h"
-#include "util/Xml.h"
+#include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/R.h"
+#include "elastos/droid/Manifest.h"
+#include "elastos/droid/utility/Xml.h"
+#include <Elastos.Droid.Graphics.h>
 #include <Elastos.CoreLibrary.Security.h>
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/etl/List.h>
@@ -21,31 +26,41 @@ using Elastos::Core::CBoolean;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
+using Elastos::Core::IArrayOf;
 using Elastos::IO::CFile;
 using Elastos::IO::IFileInputStream;
 using Elastos::IO::IFileOutputStream;
 using Elastos::IO::CFileOutputStream;
 using Elastos::IO::IBufferedOutputStream;
 using Elastos::IO::CBufferedOutputStream;
+using Elastos::IO::ICloseable;
 using Elastos::Security::ISecureRandom;
 using Elastos::Security::ISecureRandomHelper;
-using Elastos::Security::CSecureRandomHelper;
+using Elastos::Security::IMessageDigest;
+// using Elastos::Security::CSecureRandomHelper;
 using Elastos::Security::IMessageDigestHelper;
 using Elastos::Security::CMessageDigestHelper;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::IRandom;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Logging::Logger;
 using Org::Xmlpull::V1::IXmlSerializer;
 using Elastos::Droid::App::CActivityManagerHelper;
 using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::App::IActivity;
+using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::R;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::Pm::CUserInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
+using Elastos::Droid::Internal::Utility::IFastXmlSerializer;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::FileUtils;
@@ -57,11 +72,12 @@ using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::IUserManagerHelper;
 using Elastos::Droid::Os::CUserManagerHelper;
 using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::EIID_IIUserManager;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Text::Format::IDateUtils;
-using Elastos::Droid::Utility::CParcelableObjectContainer;
-using Elastos::Droid::Utility::CFastXmlSerializer;
 using Elastos::Droid::Utility::IAtomicFile;
-using Elastos::Droid::Utility::IFastXmlSerializer;
 using Elastos::Droid::Utility::CAtomicFile;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Graphics::IBitmapFactory;
@@ -78,8 +94,10 @@ namespace Pm {
 
 ECode CUserManagerService::FinishRemoveUserReceiver::FinishRemoveUserThread::Run()
 {
-    synchronized (mHost->mInstallLock) {
-        synchronized (mHost->mPackagesLock) {
+    AutoPtr<IObject> lock = mHost->mInstallLock;
+    synchronized (lock) {
+        AutoPtr<IObject> pkgLock = mHost->mPackagesLock;
+        synchronized (pkgLock) {
             mHost->RemoveUserStateLocked(mUserHandle);
         }
     }
@@ -99,7 +117,7 @@ ECode CUserManagerService::FinishRemoveUserReceiver::OnReceive(
         Slogger::I(CUserManagerService::TAG,
                 "USER_REMOVED broadcast sent, cleaning up user data %d", mUserHandle);
     }
-    AutoPtr<FinishThread> thread = new FinishThread(mHost, mUserHandle);
+    AutoPtr<FinishRemoveUserThread> thread = new FinishRemoveUserThread(mHost, mUserHandle);
     thread->Start();
     return NOERROR;
 }
@@ -111,7 +129,8 @@ ECode CUserManagerService::FinishRemoveUserReceiver::OnReceive(
 
 ECode CUserManagerService::RemoveUserStateRunnable::Run()
 {
-    synchronized (mHost->mPackagesLock) {
+    AutoPtr<IObject> lock = mHost->mPackagesLock;
+    synchronized (lock) {
         mHost->mRemovingUserIds.Erase(mUserHandle);
     }
     return NOERROR;
@@ -142,8 +161,9 @@ ECode CUserManagerService::UnhideAllInstalledAppsRunnable::Run()
         if ((appInfo->GetFlags(&flags), (flags & IApplicationInfo::FLAG_INSTALLED) != 0)
                 && (flags & IApplicationInfo::FLAG_HIDDEN) != 0) {
             String packageName;
-            appInfo->GetPackageName(&packageName);
-            mHost->mPm->SetApplicationHiddenSettingAsUser(packageName, FALSE, mUserHandle);
+            IPackageItemInfo::Probe(appInfo)->GetPackageName(&packageName);
+            Boolean result;
+            mHost->mPm->SetApplicationHiddenSettingAsUser(packageName, FALSE, mUserHandle, &result);
         }
     }
     // } finally {
@@ -185,6 +205,10 @@ const String CUserManagerService::TAG_VALUE("value");
 const String CUserManagerService::ATTR_KEY("key");
 const String CUserManagerService::ATTR_VALUE_TYPE("type");
 const String CUserManagerService::ATTR_MULTIPLE("m");
+const String CUserManagerService::ATTR_TYPE_STRING_ARRAY("sa");
+const String CUserManagerService::ATTR_TYPE_STRING("s");
+const String CUserManagerService::ATTR_TYPE_BOOLEAN("b");
+const String CUserManagerService::ATTR_TYPE_INTEGER("i");
 const String CUserManagerService::USER_INFO_DIR("system/users"); //"system" + File.separator + "users";
 const String CUserManagerService::USER_LIST_FILENAME("userlist.xml");
 const String CUserManagerService::USER_PHOTO_FILENAME("photo.png");
@@ -208,13 +232,12 @@ static AutoPtr<ArrayOf<Int32> > InitBackOffTimes()
 }
 const AutoPtr<ArrayOf<Int32> > CUserManagerService::BACKOFF_TIMES = InitBackOffTimes();
 AutoPtr<CUserManagerService> CUserManagerService::sInstance;
-Mutex CUserManagerService::sLock;
+Object CUserManagerService::sLock;
 
 CUserManagerService::CUserManagerService()
     : mPm(NULL)
     , mInstallLock(NULL)
     , mPackagesLock(NULL)
-    , mDeleteLock(FALSE)
     , mUsers(7)
     , mRemovingUserIds(7)
     , mNextSerialNumber(0)
@@ -223,7 +246,7 @@ CUserManagerService::CUserManagerService()
     CBundle::New((IBundle**)&mGuestRestrictions);
 }
 
-CAR_INTERFACE_IMPL2(CUserManagerService, Object, IIUserManager, IBinder)
+CAR_INTERFACE_IMPL_2(CUserManagerService, Object, IIUserManager, IBinder)
 
 CAR_OBJECT_IMPL(CUserManagerService)
 
@@ -231,8 +254,8 @@ ECode CUserManagerService::constructor(
     /* [in] */ IFile* dataDir,
     /* [in] */ IFile* baseUserPath)
 {
-    AutoPtr<IObject> installLock = new Object();
-    AutoPtr<IObject> packagesLock = new Object();
+    AutoPtr<IObject> installLock = (IObject*)new Object();
+    AutoPtr<IObject> packagesLock = (IObject*)new Object();
     return Init(NULL, NULL, installLock, packagesLock, dataDir, baseUserPath);
 }
 
@@ -257,7 +280,7 @@ ECode CUserManagerService::Init(
     /* [in] */ IFile* baseUserPath)
 {
     mContext = context;
-    mPm = reinterpret_cast<CPackageManagerService*>(pm->Probe(EIID_CPackageManagerService));
+    mPm = (CPackageManagerService*)pm;
     mInstallLock = installLock;
     mPackagesLock = packagesLock;
     CHandler::New((IHandler**)&mHandler);
@@ -287,7 +310,7 @@ ECode CUserManagerService::Init(
             for (it = mUsers.Begin(); it != mUsers.End(); ++it) {
                 AutoPtr<IUserInfo> ui = it->mSecond;
                 Boolean partial, guestToRemove;
-                if (((ui->GetPartial(&partial), partial) || (ui->GetGuestToRemove(&guestToRemove), guestToRemove)
+                if (((ui->GetPartial(&partial), partial) || (ui->GetGuestToRemove(&guestToRemove), guestToRemove))
                         && it != mUsers.Begin()) {
                     partials.PushBack(ui);
                 }
@@ -329,9 +352,10 @@ void CUserManagerService::SystemReady()
 
 AutoPtr<CUserManagerService> CUserManagerService::GetInstance()
 {
-    synchronized(this) {
+    synchronized (sLock){
         return sInstance;
     }
+    return NULL;
 }
 
 ECode CUserManagerService::GetUsers(
@@ -359,9 +383,9 @@ ECode CUserManagerService::GetUsers(
             }
         }
         *_users = users;
-        REFCOUNT_ADD(*users)
-        return NOERROR;
+        REFCOUNT_ADD(*_users)
     }
+    return NOERROR;
 }
 
 ECode CUserManagerService::GetProfiles(
@@ -448,11 +472,11 @@ Boolean CUserManagerService::IsProfileOf(
 {
     Int32 userId, profileId;
     user->GetId(&userId);
-    profile->GetId(&userId);
+    profile->GetId(&profileId);
     if (userId != profileId) {
         Int32 userProfileGroupId, profileGroupId;
         return (user->GetProfileGroupId(&userProfileGroupId), userProfileGroupId != IUserInfo::NO_PROFILE_GROUP_ID
-                && (profile->GetProfileGroupId(profileGroupId), userProfileGroupId == profileGroupId));
+                && (profile->GetProfileGroupId(&profileGroupId), userProfileGroupId == profileGroupId));
 
     }
     return TRUE;
@@ -463,7 +487,7 @@ ECode CUserManagerService::SetUserEnabled(
 {
     FAIL_RETURN(CheckManageUsersPermission(String("enable user")))
     synchronized (mPackagesLock) {
-        AutoPtr<IUserInfo> info = GetUserInfoLocked(userId);
+        AutoPtr<IUserInfo> info = GetUserInfoLocked(userHandle);
         Boolean isEnabled;
         if (info != NULL && (info->IsEnabled(&isEnabled), !isEnabled)) {
             Int32 flags;
@@ -488,8 +512,8 @@ ECode CUserManagerService::GetUserInfo(
         AutoPtr<IUserInfo> user = GetUserInfoLocked(userId);
         *userInfo = user;
         REFCOUNT_ADD(*userInfo)
-        return NOERROR;
     }
+    return NOERROR;
 }
 
 ECode CUserManagerService::IsRestricted(
@@ -526,8 +550,8 @@ Boolean CUserManagerService::Exists(
         for (Int32 i = 0; i < mUserIds->GetLength(); ++i) {
             if ((*mUserIds)[i] == userId) return TRUE;
         }
-        return FALSE;
     }
+    return FALSE;
 }
 
 ECode CUserManagerService::SetUserName(
@@ -625,7 +649,7 @@ ECode CUserManagerService::GetUserIcon(
         userInfo->GetProfileGroupId(&callingGroupId);
         Int32 profileGroupId;
         if (callingGroupId == IUserInfo::NO_PROFILE_GROUP_ID
-                || (info->GetProfileGroupId(&profileGroupId), callingGroupId != profileGroupId) {
+                || (info->GetProfileGroupId(&profileGroupId), callingGroupId != profileGroupId)) {
             FAIL_RETURN(CheckManageUsersPermission(String("get the icon of a user who is not related")))
         }
         String iconPath;
@@ -635,8 +659,9 @@ ECode CUserManagerService::GetUserIcon(
         }
         AutoPtr<IBitmapFactory> factory;
         CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
-        return factory->DecodeFile(iconPath, userIcon);
+        factory->DecodeFile(iconPath, userIcon);
     }
+    return NOERROR;
 }
 
 ECode CUserManagerService::MakeInitialized(
@@ -679,8 +704,9 @@ ECode CUserManagerService::GetDefaultGuestRestrictions(
     *result = NULL;
     FAIL_RETURN(CheckManageUsersPermission(String("getDefaultGuestRestrictions")))
     synchronized (mPackagesLock) {
-        return CBundle::New(mGuestRestrictions, result);
+        CBundle::New(mGuestRestrictions, result);
     }
+    return NOERROR;
 }
 
 ECode CUserManagerService::SetDefaultGuestRestrictions(
@@ -696,8 +722,8 @@ ECode CUserManagerService::SetDefaultGuestRestrictions(
 }
 
 ECode CUserManagerService::HasUserRestriction(
-    /* [in] */ String restrictionKey,
-    /* [in] */ Int32 userHandle,
+    /* [in] */ const String& restrictionKey,
+    /* [in] */ Int32 userId,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -724,25 +750,26 @@ ECode CUserManagerService::GetUserRestrictions(
 
     synchronized (mPackagesLock) {
         AutoPtr<IBundle> restrictions;
-        HashMap<Int32, AutoPtr<IBundle> >::Iterator it = mUserRestrictions.Find(userId);
+        HashMap<Int32, AutoPtr<IBundle> >::Iterator it = mUserRestrictions.Find(userHandle);
         if (it != mUserRestrictions.End()) {
             restrictions = it->mSecond;
         }
         if (restrictions != NULL) {
-            return CBundle::New(restrictions, bundle);
+            CBundle::New(restrictions, bundle);
         }
         else {
-            return CBundle::New(bundle);
+            CBundle::New(bundle);
         }
     }
+    return NOERROR;
 }
 
 ECode CUserManagerService::SetUserRestrictions(
     /* [in] */ IBundle* restrictions,
-    /* [in] */ Int32 userHandle)
+    /* [in] */ Int32 userId)
 {
     FAIL_RETURN(CheckManageUsersPermission(String("setUserRestrictions")))
-    if (restrictions == null) return;
+    if (restrictions == NULL) return NOERROR;
 
     synchronized (mPackagesLock) {
         AutoPtr<IBundle> bundle;
@@ -766,7 +793,7 @@ ECode CUserManagerService::SetUserRestrictions(
         Binder::RestoreCallingIdentity(token);
         AutoPtr<IUserInfo> info;
         HashMap<Int32, AutoPtr<IUserInfo> >::Iterator infoIt = mUsers.Find(userId);
-        if (infoIt != mUsers.End() {
+        if (infoIt != mUsers.End()) {
             info = infoIt->mSecond;
         }
         WriteUserLocked(info);
@@ -785,7 +812,7 @@ Boolean CUserManagerService::IsUserLimitReachedLocked()
         user->GetId(&id);
         Boolean isGuest, partial;
         if (!mRemovingUserIds[id]
-                && (user->IsGuest(&isGuest), !isGuest) && (user->GetPartial(&partial). !partial)) {
+                && (user->IsGuest(&isGuest), !isGuest) && (user->GetPartial(&partial), !partial)) {
             aliveUserCount++;
         }
     }
@@ -840,13 +867,14 @@ void CUserManagerService::WriteBitmapLocked(
     AutoPtr<IFileOutputStream> os;
     CFileOutputStream::New(file, (IFileOutputStream**)&os);
     Boolean result = FALSE;
-    if (bitmap->Compress(Elastos::Droid::Graphics::BitmapCompressFormat_PNG, 100, os, &result), result) {
+    if (bitmap->Compress(Elastos::Droid::Graphics::BitmapCompressFormat_PNG, 100,
+            IOutputStream::Probe(os), &result), result) {
         String aPath;
         file->GetAbsolutePath(&aPath);
         info->SetIconPath(aPath);
     }
     // try {
-    os->Close();
+    ICloseable::Probe(os)->Close();
     // } catch (IOException ioe) {
     //     // What the ... !
     // }
@@ -860,6 +888,7 @@ AutoPtr< ArrayOf<Int32> > CUserManagerService::GetUserIds()
     synchronized (mPackagesLock) {
         return mUserIds;
     }
+    return NULL;
 }
 
 AutoPtr< ArrayOf<Int32> > CUserManagerService::GetUserIdsLPr()
@@ -880,8 +909,9 @@ void CUserManagerService::ReadUserListLocked()
     CAtomicFile::New(mUserListFile, (IAtomicFile**)&userListFile);
 //     try {
     userListFile->OpenRead((IFileInputStream**)&fis);
-    AutoPtr<IXmlPullParser> parser = Xml::NewPullParser();
-    parser->SetInput(fis, String(NULL));
+    AutoPtr<IXmlPullParser> parser;
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    parser->SetInput(IInputStream::Probe(fis), String(NULL));
     Int32 type;
     while ((parser->Next(&type), type) != IXmlPullParser::START_TAG
             && type != IXmlPullParser::END_DOCUMENT) {
@@ -893,7 +923,7 @@ void CUserManagerService::ReadUserListLocked()
         FallbackToSingleUserLocked();
         if (fis != NULL) {
             // try {
-            fis->Close();
+            ICloseable::Probe(fis)->Close();
             // } catch (IOException e) {
             // }
         }
@@ -939,7 +969,7 @@ void CUserManagerService::ReadUserListLocked()
         }
     }
     UpdateUserIdsLocked();
-    UpgradeIfNecessary();
+    UpgradeIfNecessaryLock();
 //     } catch (IOException ioe) {
 //         fallbackToSingleUserLocked();
 //     } catch (XmlPullParserException pe) {
@@ -950,7 +980,7 @@ void CUserManagerService::ReadUserListLocked()
 //     } finally {
     if (fis != NULL) {
         // try {
-        fis->Close();
+        ICloseable::Probe(fis)->Close();
         // } catch (IOException e) {
         // }
     }
@@ -1053,15 +1083,13 @@ void CUserManagerService::WriteUserLocked(
 //     try {
     userFile->StartWrite((IFileOutputStream**)&fos);
     AutoPtr<IBufferedOutputStream> bos;
-    CBufferedOutputStream::New(fos, (IBufferedOutputStream**)&bos);
+    CBufferedOutputStream::New(IOutputStream::Probe(fos), (IBufferedOutputStream**)&bos);
 
     // XmlSerializer serializer = XmlUtils.serializerInstance();
     AutoPtr<IXmlSerializer> serializer;
-    CFastXmlSerializer::New((IFastXmlSerializer**)&serializer);
-    serializer->SetOutput(bos, String("utf-8"));
-    AutoPtr<IBoolean> bv;
-    CBoolean::New(TRUE, (IBoolean**)&bv);
-    serializer->StartDocument(String(NULL), bv);
+    CFastXmlSerializer::New((IXmlSerializer**)&serializer);
+    serializer->SetOutput(IOutputStream::Probe(bos), String("utf-8"));
+    serializer->StartDocument(String(NULL), TRUE);
     serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
 
     serializer->WriteStartTag(String(NULL), TAG_USER);
@@ -1082,7 +1110,7 @@ void CUserManagerService::WriteUserLocked(
             StringUtils::ToString(lastLoggedInTime));
 
     AutoPtr<RestrictionsPinState> pinState;
-    HashMap<Int32, AutoPtr<RestrictionsPinState> >::Iterator it = mRestrictionsPinStates.Finds(id);
+    HashMap<Int32, AutoPtr<RestrictionsPinState> >::Iterator it = mRestrictionsPinStates.Find(id);
     if (it != mRestrictionsPinStates.End()) {
         pinState = it->mSecond;
     }
@@ -1112,10 +1140,10 @@ void CUserManagerService::WriteUserLocked(
         serializer->WriteAttribute(String(NULL), ATTR_PARTIAL, String("true"));
     }
     Boolean guestToRemove;
-    if (userInfo->GetGuestToRemove(guestToRemove), guestToRemove) {
+    if (userInfo->GetGuestToRemove(&guestToRemove), guestToRemove) {
         serializer->WriteAttribute(String(NULL), ATTR_GUEST_TO_REMOVE, String("true"));
     }
-    Int32 profileGroupId
+    Int32 profileGroupId;
     if (userInfo->GetProfileGroupId(&profileGroupId), profileGroupId != IUserInfo::NO_PROFILE_GROUP_ID) {
         serializer->WriteAttribute(String(NULL), ATTR_PROFILE_GROUP_ID,
                 StringUtils::ToString(profileGroupId));
@@ -1152,15 +1180,13 @@ void CUserManagerService::WriteUserListLocked()
     // try {
     userListFile->StartWrite((IFileOutputStream**)&fos);
     AutoPtr<IBufferedOutputStream> bos;
-    CBufferedOutputStream::New(fos, (IBufferedOutputStream**)&bos);
+    CBufferedOutputStream::New(IOutputStream::Probe(fos), (IBufferedOutputStream**)&bos);
 
     // XmlSerializer serializer = XmlUtils.serializerInstance();
-    AutoPtr<IFastXmlSerializer> serializer;
-    CFastXmlSerializer::New((IFastXmlSerializer**)&serializer);
-    serializer->SetOutput(bos, String("utf-8"));
-    AutoPtr<IBoolean> bv;
-    CBoolean::New(TRUE, (IBoolean**)&bv);
-    serializer->StartDocument(String(NULL), bv);
+    AutoPtr<IXmlSerializer> serializer;
+    CFastXmlSerializer::New((IXmlSerializer**)&serializer);
+    serializer->SetOutput(IOutputStream::Probe(bos), String("utf-8"));
+    serializer->StartDocument(String(NULL), TRUE);
     serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
 
     serializer->WriteStartTag(String(NULL), TAG_USERS);
@@ -1254,8 +1280,9 @@ AutoPtr<IUserInfo> CUserManagerService::ReadUserLocked(
     AutoPtr<IAtomicFile> userFile;
     CAtomicFile::New(baseFile, (IAtomicFile**)&userFile);
     userFile->OpenRead((IFileInputStream**)&fis);
-    AutoPtr<IXmlPullParser> parser = Xml::NewPullParser();
-    parser->SetInput(fis, String(NULL));
+    AutoPtr<IXmlPullParser> parser;
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    parser->SetInput(IInputStream::Probe(fis), String(NULL));
     Int32 type;
     while ((parser->Next(&type), type) != IXmlPullParser::START_TAG
             && type != IXmlPullParser::END_DOCUMENT) {
@@ -1304,7 +1331,7 @@ AutoPtr<IUserInfo> CUserManagerService::ReadUserLocked(
         Int32 outerDepth;
         parser->GetDepth(&outerDepth);
         Int32 type, depth;
-        while ((parser->GetNext(&type), type != IXmlPullParser:END_DOCUMENT)
+        while ((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
                && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&depth), depth > outerDepth))) {
             if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
                 continue;
@@ -1312,7 +1339,7 @@ AutoPtr<IUserInfo> CUserManagerService::ReadUserLocked(
             String tag;
             parser->GetName(&tag);
             if (TAG_NAME.Equals(tag)) {
-                parser->GetNext(&type);
+                parser->Next(&type);
                 if (type == IXmlPullParser::TEXT) {
                     parser->GetText(&name);
                 }
@@ -1353,7 +1380,7 @@ AutoPtr<IUserInfo> CUserManagerService::ReadUserLocked(
 exit:
     if (fis != NULL) {
         // try {
-        fis->Close();
+        ICloseable::Probe(fis)->Close();
         // } catch (IOException e) {
         // }
     }
@@ -1400,7 +1427,7 @@ void CUserManagerService::ReadBoolean(
     /* [in] */ const String& restrictionKey)
 {
     String value;
-    parser->GetAttributeValue(String(NULL), restrictionKey);
+    parser->GetAttributeValue(String(NULL), restrictionKey, &value);
     if (!value.IsNull()) {
         restrictions->PutBoolean(restrictionKey, StringUtils::ParseBoolean(value));
     }
@@ -1415,7 +1442,7 @@ void CUserManagerService::WriteBoolean(
     if (restrictions->ContainsKey(restrictionKey, &contains), contains) {
         Boolean value;
         restrictions->GetBoolean(restrictionKey, &value);
-        xml->WriteAttribute(string(NULL), restrictionKey, StringUtils::ToString(value));
+        xml->WriteAttribute(String(NULL), restrictionKey, StringUtils::ToString(value));
     }
 }
 
@@ -1457,7 +1484,7 @@ Boolean CUserManagerService::IsPackageInstalled(
     mPm->GetApplicationInfo(pkg, IPackageManager::GET_UNINSTALLED_PACKAGES,
             userId, (IApplicationInfo**)&info);
     Int32 flags;
-    if (info == NULL || (info->GetFlags(&flags) (flags & IApplicationInfo::FLAG_INSTALLED) == 0)) {
+    if (info == NULL || (info->GetFlags(&flags), (flags & IApplicationInfo::FLAG_INSTALLED) == 0)) {
         return FALSE;
     }
     return TRUE;
@@ -1500,6 +1527,25 @@ void CUserManagerService::CleanAppRestrictionsForPackage(
     }
 }
 
+ECode CUserManagerService::CreateProfileForUser(
+    /* [in] */ const String& name,
+    /* [in] */ Int32 flags,
+    /* [in] */ Int32 userId,
+    /* [out] */ IUserInfo** userInfo)
+{
+    VALIDATE_NOT_NULL(userInfo)
+    *userInfo = NULL;
+
+    FAIL_RETURN(CheckManageUsersPermission(String("Only the system can create users")))
+    if (userId != IUserHandle::USER_OWNER) {
+        Slogger::W(LOG_TAG, "Only user owner can have profiles");
+        return NOERROR;
+    }
+    *userInfo = CreateUserInternal(name, flags, userId);
+    REFCOUNT_ADD(*userInfo)
+    return NOERROR;
+}
+
 ECode CUserManagerService::CreateUser(
     /* [in] */ const String& name,
     /* [in] */ Int32 flags,
@@ -1508,8 +1554,8 @@ ECode CUserManagerService::CreateUser(
     VALIDATE_NOT_NULL(uInfo)
     *uInfo = NULL;
     FAIL_RETURN(CheckManageUsersPermission(String("Only the system can create users")))
-    *info = CreateUserInternal(name, flags, IUserHandle::USER_NULL);
-    REFCOUNT_ADD(*info)
+    *uInfo = CreateUserInternal(name, flags, IUserHandle::USER_NULL);
+    REFCOUNT_ADD(*uInfo)
     return NOERROR;
 }
 
@@ -1521,7 +1567,7 @@ AutoPtr<IUserInfo> CUserManagerService::CreateUserInternal(
     AutoPtr<IBundle> b;
     GetUserRestrictions(UserHandle::GetCallingUserId(), (IBundle**)&b);
     Boolean value;
-    if (b->GetBoolean(IUserManager::DISALLOW_ADD_USER, FALSE. &value), value) {
+    if (b->GetBoolean(IUserManager::DISALLOW_ADD_USER, FALSE, &value), value) {
         Logger::W(LOG_TAG, "Cannot add user. DISALLOW_ADD_USER is enabled.");
         return NULL;
     }
@@ -1570,7 +1616,7 @@ AutoPtr<IUserInfo> CUserManagerService::CreateUserInternal(
             WriteUserListLocked();
             if (parent != NULL) {
                 Int32 profileGroupId;
-                parent->GetProfileGroupId(&profileGroupId)
+                parent->GetProfileGroupId(&profileGroupId);
                 if (profileGroupId == IUserInfo::NO_PROFILE_GROUP_ID) {
                     Int32 id;
                     parent->GetId(&id);
@@ -1608,9 +1654,9 @@ Int32 CUserManagerService::NumberOfUsersOfTypeLocked(
     /* [in] */ Boolean excludeDying)
 {
     Int32 count = 0;
-    HashMap<Int32, AutoPtr<IUserInfo> >::ReverseIterator rit = mUsers.RBegin();
-    for (; rit != mUsers.REnd(); ++rit) {
-        AutoPtr<IUserInfo> user = rit->mSecond;
+    HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it = mUsers.Begin();
+    for (; it != mUsers.End(); ++it) {
+        AutoPtr<IUserInfo> user = it->mSecond;
         Int32 id;
         if (!excludeDying || (user->GetId(&id), !mRemovingUserIds[id])) {
             Int32 userFlags;
@@ -1713,7 +1759,7 @@ ECode CUserManagerService::RemoveUser(
         if (it != mUsers.End()) {
             user = it->mSecond;
         }
-        if (userHandle == 0 || user == null || mRemovingUserIds[userHandle]) {
+        if (userHandle == 0 || user == NULL || mRemovingUserIds[userHandle]) {
             return NOERROR;
         }
         mRemovingUserIds[userHandle] = TRUE;
@@ -1739,7 +1785,7 @@ ECode CUserManagerService::RemoveUser(
 
     Int32 profileGroupId;
     Boolean isManagedProfile;
-    if (user->GetProfileGroupId(profileGroupId), profileGroupId != IUserInfo::NO_PROFILE_GROUP_ID
+    if (user->GetProfileGroupId(&profileGroupId), profileGroupId != IUserInfo::NO_PROFILE_GROUP_ID
             && (user->IsManagedProfile(&isManagedProfile), isManagedProfile)) {
         // Send broadcast to notify system that the user removed was a
         // managed user.
@@ -1753,7 +1799,7 @@ ECode CUserManagerService::RemoveUser(
     // try {
     AutoPtr<IStopUserCallback> callback;
     CUserStopUserCallback::New(this, (IStopUserCallback**)&callback);
-    if (FAILED(ActivityManagerNative::GetDefault().stopUser(userHandle, callback, &res))) {
+    if (FAILED(ActivityManagerNative::GetDefault()->StopUser(userHandle, callback, &res))) {
         *succeeded = FALSE;
         Binder::RestoreCallingIdentity(ident);
         return NOERROR;
@@ -1864,7 +1910,7 @@ ECode CUserManagerService::GetApplicationRestrictions(
 
 ECode CUserManagerService::GetApplicationRestrictionsForUser(
     /* [in] */ const String& packageName,
-    /* [in] */ Int32 userHandle,
+    /* [in] */ Int32 userId,
     /* [out] */ IBundle** bundle)
 {
     VALIDATE_NOT_NULL(bundle)
@@ -1884,7 +1930,7 @@ ECode CUserManagerService::GetApplicationRestrictionsForUser(
 ECode CUserManagerService::SetApplicationRestrictions(
     /* [in] */ const String& packageName,
     /* [in] */ IBundle* restrictions,
-    /* [in] */ Int32 userHandle)
+    /* [in] */ Int32 userId)
 {
     if (UserHandle::GetCallingUserId() != userId
             || !UserHandle::IsSameApp(Binder::GetCallingUid(), GetUidForPackage(packageName))) {
@@ -1922,9 +1968,9 @@ ECode CUserManagerService::SetRestrictionsChallenge(
     *result = FALSE;
 
     FAIL_RETURN(CheckManageUsersPermission(String("Only system can modify restrictions pin")))
-    Int32 userId = UserHandle:GetCallingUserId();
+    Int32 userId = UserHandle::GetCallingUserId();
     synchronized (mPackagesLock) {
-        AutoPtr<RestrictionsPinState> pinState
+        AutoPtr<RestrictionsPinState> pinState;
         HashMap<Int32, AutoPtr<RestrictionsPinState> >::Iterator it = mRestrictionsPinStates.Find(userId);
         if (it != mRestrictionsPinStates.End()) {
             pinState = it->mSecond;
@@ -1933,16 +1979,17 @@ ECode CUserManagerService::SetRestrictionsChallenge(
             pinState = new RestrictionsPinState();
         }
         if (newPin.IsNull()) {
-            pinState->msalt = 0;
+            pinState->mSalt = 0;
             pinState->mPinHash = NULL;
         }
         else {
             // try {
             AutoPtr<ISecureRandomHelper> helper;
-            CSecureRandomHelper::AcquireSingleton((ISecureRandomHelper**)&helper);
+            assert(0);
+            // CSecureRandomHelper::AcquireSingleton((ISecureRandomHelper**)&helper);
             AutoPtr<ISecureRandom> random;
             helper->GetInstance(String("SHA1PRNG"), (ISecureRandom**)&random);
-            if (FAILED(random->NextInt64(&pinState->mSalt))) {
+            if (FAILED(IRandom::Probe(random)->NextInt64(&pinState->mSalt))) {
                 pinState->mSalt = (Int64)(Elastos::Core::Math::Random() * Elastos::Core::Math::INT64_MAX_VALUE);
             }
             // } catch (NoSuchAlgorithmException e) {
@@ -2034,7 +2081,7 @@ Int32 CUserManagerService::GetRemainingTimeForPinAttempt(
     AutoPtr<ISystem> sys;
     CSystem::AcquireSingleton((ISystem**)&sys);
     sys->GetCurrentTimeMillis(&millis);
-    return (Int32)Elastos::Core::Math::Max(backoffTime + pinState->mLastAttemptTime - millis, 0);
+    return (Int32)Elastos::Core::Math::Max(backoffTime + pinState->mLastAttemptTime - millis, (Int64)0);
 }
 
 ECode CUserManagerService::HasRestrictionsChallenge(
@@ -2106,7 +2153,7 @@ String CUserManagerService::PasswordToHash(
         return String(NULL);
     }
     String algo(NULL);
-    String hashed = salt + password;
+    String hashed(salt + password);
     // try {
     AutoPtr<ArrayOf<Byte> > saltedPassword = (password + salt).GetBytes();
     AutoPtr<IMessageDigestHelper> helper;
@@ -2174,10 +2221,11 @@ AutoPtr<IBundle> CUserManagerService::ReadApplicationRestrictionsLocked(
     AutoPtr<IAtomicFile> restrictionsFile;
     CAtomicFile::New(file, (IAtomicFile**)&restrictionsFile);
     restrictionsFile->OpenRead((IFileInputStream**)&fis);
-    AutoPtr<IXmlPullParser> parser = Xml::NewPullParser();
+    AutoPtr<IXmlPullParser> parser;
+    Xml::NewPullParser((IXmlPullParser**)&parser);
     parser->SetInput(IInputStream::Probe(fis), String(NULL));
     Int32 type;
-    while ((parser->GetNext(&type), type != IXmlPullParser::START_TAG)
+    while ((parser->Next(&type), type != IXmlPullParser::START_TAG)
             && type != IXmlPullParser::END_DOCUMENT) {
         ;
     }
@@ -2189,10 +2237,10 @@ AutoPtr<IBundle> CUserManagerService::ReadApplicationRestrictionsLocked(
         return restrictions;
     }
 
-    while (parser->GetNext(&type), type != IXmlPullParser::END_DOCUMENT) {
+    while (parser->Next(&type), type != IXmlPullParser::END_DOCUMENT) {
         String name;
         if (type == IXmlPullParser::START_TAG &&
-                (parser->GetName(&name), name.Equals(TAG_ENTRY)) {
+                (parser->GetName(&name), name.Equals(TAG_ENTRY))) {
             String key;
             parser->GetAttributeValue(String(NULL), ATTR_KEY, &key);
             String valType;
@@ -2202,10 +2250,10 @@ AutoPtr<IBundle> CUserManagerService::ReadApplicationRestrictionsLocked(
             if (!multiple.IsNull()) {
                 values.Clear();
                 Int32 count = StringUtils::ParseInt32(multiple);
-                while (count > 0 && (parser->GetNext(&type), type != IXmlPullParser::END_DOCUMENT) {
+                while (count > 0 && (parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)) {
                     String n;
                     if (type == IXmlPullParser::START_TAG
-                            && (parser->GetName(&n), n.Equals(TAG_VALUE)) {
+                            && (parser->GetName(&n), n.Equals(TAG_VALUE))) {
                         String text;
                         parser->NextText(&text);
                         values.PushBack(text.Trim());
@@ -2227,7 +2275,7 @@ AutoPtr<IBundle> CUserManagerService::ReadApplicationRestrictionsLocked(
                     restrictions->PutBoolean(key, StringUtils::ParseBoolean(value));
                 }
                 else if (ATTR_TYPE_INTEGER.Equals(valType)) {
-                    restrictions->PutInt32(key, StringUtils::ParseInt(value));
+                    restrictions->PutInt32(key, StringUtils::ParseInt32(value));
                 }
                 else {
                     restrictions->PutString(key, value);
@@ -2268,16 +2316,16 @@ void CUserManagerService::WriteApplicationRestrictionsLocked(
     // try {
     restrictionsFile->StartWrite((IFileOutputStream**)&fos);
     AutoPtr<IBufferedOutputStream> bos;
-    CBufferedOutputStream::New(fos, (IBufferedOutputStream**)&bos);
+    CBufferedOutputStream::New(IOutputStream::Probe(fos), (IBufferedOutputStream**)&bos);
 
     // XmlSerializer serializer = XmlUtils.serializerInstance();
-    AutoPtr<IXmlSerializer> serializer;
+AutoPtr<IXmlSerializer> serializer;
     CFastXmlSerializer::New((IXmlSerializer**)&serializer);
-    serializer->SetOutput(bos, String("utf-8"));
+    serializer->SetOutput(IOutputStream::Probe(bos), String("utf-8"));
     serializer->StartDocument(String(NULL), TRUE);
     serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
 
-    serializer->StartTag(String(NULL), TAG_RESTRICTIONS);
+    serializer->WriteStartTag(String(NULL), TAG_RESTRICTIONS);
 
     AutoPtr<ISet> set;
     restrictions->GetKeySet((ISet**)&set);
@@ -2335,7 +2383,7 @@ void CUserManagerService::WriteApplicationRestrictionsLocked(
 
     serializer->WriteEndTag(String(NULL), TAG_RESTRICTIONS);
 
-    serializer->WriteEndDocument();
+    serializer->EndDocument();
     restrictionsFile->FinishWrite(fos);
     // } catch (Exception e) {
     //     restrictionsFile.failWrite(fos);
@@ -2353,8 +2401,9 @@ ECode CUserManagerService::GetUserSerialNumber(
             *serialNo = -1;
             return NOERROR;
         }
-        return GetUserInfoLocked(userHandle)->GetSerialNumber(serialNo);
+        GetUserInfoLocked(userHandle)->GetSerialNumber(serialNo);
     }
+    return NOERROR;
 }
 
 ECode CUserManagerService::GetUserHandle(
@@ -2430,16 +2479,16 @@ void CUserManagerService::UserForeground(
 
 Int32 CUserManagerService::GetNextAvailableIdLocked()
 {
+    Int32 i = MIN_USER_ID;
     synchronized (mPackagesLock) {
-        Int32 i = MIN_USER_ID;
         while (i < Elastos::Core::Math::INT32_MAX_VALUE) {
             if (mUsers.Find(i) == mUsers.End() && !mRemovingUserIds[i]) {
                 break;
             }
             i++;
         }
-        return i;
     }
+    return i;
 }
 
 String CUserManagerService::PackageToRestrictionsFileName(
@@ -2453,6 +2502,13 @@ String CUserManagerService::RestrictionsFileNameToPackage(
 {
     return fileName.Substring(RESTRICTIONS_FILE_PREFIX.GetLength(),
             (Int32)(fileName.GetLength() - XML_SUFFIX.GetLength()));
+}
+
+ECode CUserManagerService::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    return Object::ToString(str);
 }
 
 // @Override

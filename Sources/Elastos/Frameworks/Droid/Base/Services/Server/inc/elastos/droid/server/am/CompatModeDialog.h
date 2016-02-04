@@ -2,12 +2,10 @@
 #ifndef __ELASTOS_DROID_SERVER_AM_COMPATMODEDIALOG_H__
 #define __ELASTOS_DROID_SERVER_AM_COMPATMODEDIALOG_H__
 
+#include "Elastos.Droid.Widget.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/server/am/CActivityManagerService.h"
 #include "elastos/droid/app/Dialog.h"
-
-
-
 
 using Elastos::Droid::App::Dialog;
 using Elastos::Droid::App::IDialog;
@@ -26,12 +24,7 @@ namespace Server {
 namespace Am {
 
 class CompatModeDialog
-    : public Object
-    , public Dialog
-    , public IDialog
-    , public IWindowCallback
-    , public IKeyEventCallback
-    , public IViewOnCreateContextMenuListener
+    : public Dialog
 {
 private:
     class CompatEnabledListener
@@ -79,12 +72,6 @@ public:
         /* [in] */ CActivityManagerService* service,
         /* [in] */ IContext* context,
         /* [in] */ IApplicationInfo* appInfo);
-
-    CAR_INTERFACE_DECL()
-
-    IDIALOG_METHODS_DECL()
-
-    IWINDOWCALLBACK_METHODS_DECL()
 
     CARAPI OnKeyDown(
         /* [in] */ Int32 keyCode,

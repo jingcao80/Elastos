@@ -1,13 +1,17 @@
 
-#include "wm/AppTransition.h"
-#include "wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/AppTransition.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/R.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Slogger;
+using Elastos::Droid::Animation::EIID_ITimeInterpolator;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Graphics::EIID_IInterpolator;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::View::Animation::IAnimationUtils;
 using Elastos::Droid::View::Animation::CAnimationUtils;
@@ -39,11 +43,19 @@ ECode AppTransition::FadeInInterpolator::GetInterpolation(
     VALIDATE_NOT_NULL(output)
     // Linear response for first fraction, then complete after that.
     if (input < AppTransition::RECENTS_THUMBNAIL_FADEIN_FRACTION) {
-        *output = 0f;
+        *output = 0.0;
         return NOERROR;
     }
     *output = (input - AppTransition::RECENTS_THUMBNAIL_FADEIN_FRACTION) /
-            (1f - RECENTS_THUMBNAIL_FADEIN_FRACTION);
+            (1 - RECENTS_THUMBNAIL_FADEIN_FRACTION);
+    return NOERROR;
+}
+
+ECode AppTransition::FadeInInterpolator:: HasNativeInterpolator(
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
     return NOERROR;
 }
 
@@ -64,9 +76,18 @@ ECode AppTransition::FadeOutInterpolator::GetInterpolation(
         *output = input / AppTransition::RECENTS_THUMBNAIL_FADEOUT_FRACTION;
         return NOERROR;
     }
-    *output = 1f;
+    *output = 1;
     return NOERROR;
 }
+
+ECode AppTransition::FadeOutInterpolator:: HasNativeInterpolator(
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res)
+    *res = FALSE;
+    return NOERROR;
+}
+
 
 
 //==============================================================================
@@ -74,11 +95,11 @@ ECode AppTransition::FadeOutInterpolator::GetInterpolation(
 //==============================================================================
 
 const Int32 AppTransition::TRANSIT_UNSET;
-const Int32 AppTransition::TRANSIT_NON;
-const Int32 AppTransition::TRANSIT_ACTIVITY_OPE;
-const Int32 AppTransition::TRANSIT_ACTIVITY_CLOS;
-const Int32 AppTransition::TRANSIT_TASK_OPE;
-const Int32 AppTransition::TRANSIT_TASK_CLOS;
+const Int32 AppTransition::TRANSIT_NONE;
+const Int32 AppTransition::TRANSIT_ACTIVITY_OPEN;
+const Int32 AppTransition::TRANSIT_ACTIVITY_CLOSE;
+const Int32 AppTransition::TRANSIT_TASK_OPEN;
+const Int32 AppTransition::TRANSIT_TASK_CLOSE;
 const Int32 AppTransition::TRANSIT_TASK_TO_FRONT;
 const Int32 AppTransition::TRANSIT_TASK_TO_BACK;
 const Int32 AppTransition::TRANSIT_WALLPAPER_CLOSE;
@@ -133,14 +154,13 @@ AppTransition::AppTransition(
     CRect::New((IRect**)&mTmpFromClipRect);
     CRect::New((IRect**)&mTmpToClipRect);
 
-    AutoPtr<IResource> res;
-    context->GetResources((IResource**)&res);
+    AutoPtr<IResources> res;
+    context->GetResources((IResources**)&res);
     res->GetInteger(R::integer::config_shortAnimTime, &mConfigShortAnimTime);
     AutoPtr<IAnimationUtils> utils;
     CAnimationUtils::AcquireSingleton((IAnimationUtils**)&utils);
     utils->LoadInterpolator(context, R::interpolator::decelerate_cubic, (IInterpolator**)&mDecelerateInterpolator);
     utils->LoadInterpolator(context, R::interpolator::fast_out_slow_in, (IInterpolator**)&mThumbnailFastOutSlowInInterpolator);
-    CInterpolator::
     mThumbnailFadeInInterpolator = new FadeInInterpolator();
     mThumbnailFadeOutInterpolator = new FadeOutInterpolator();
 }
@@ -231,7 +251,7 @@ Int32 AppTransition::GetStartingY()
 
 void AppTransition::Prepare()
 {
-    if (!isRunning()) {
+    if (!IsRunning()) {
         mAppTransitionState = APP_STATE_IDLE;
     }
 }
@@ -256,7 +276,7 @@ void AppTransition::Freeze()
     SetReady();
 }
 
-AutoPtr<AttributeCache::Entry> AppTransition::GetCachedAnimations(
+AutoPtr<Entry> AppTransition::GetCachedAnimations(
     /* [in] */ IWindowManagerLayoutParams* lp)
 {
     if (DEBUG_ANIM) {
@@ -287,27 +307,30 @@ AutoPtr<AttributeCache::Entry> AppTransition::GetCachedAnimations(
             packageName = "android";
         }
         if (DEBUG_ANIM) Slogger::V(TAG, "Loading animations: picked package=%s", packageName.string());
-        return AttributeCache::GetInstance()->Get(packageName, resId,
-                R::styleable::WindowAnimation, mCurrentUserId);
+        AutoPtr<ArrayOf<Int32> > attrs = ArrayOf<Int32>::Alloc(const_cast<Int32 *>(R::styleable::WindowAnimation),
+                ArraySize(R::styleable::WindowAnimation));
+        return AttributeCache::GetInstance()->Get(packageName, resId, attrs, mCurrentUserId);
     }
     return NULL;
 }
 
-AutoPtr<AttributeCache::Entry> AppTransition::GetCachedAnimations(
-    /* [in] */ const String& packageName,
+AutoPtr<Entry> AppTransition::GetCachedAnimations(
+    /* [in] */ const String& _packageName,
     /* [in] */ Int32 resId)
 {
+    String packageName = _packageName;
     if (DEBUG_ANIM) {
         Slogger::V(TAG, "Loading animations: package=%s resId=0x%s"
                 , packageName.string(), StringUtils::ToString(resId).string());
     }
     if (!packageName.IsNull()) {
         if ((resId & 0xFF000000) == 0x01000000) {
-            packageName = "android";
+            packageName = String("android");
         }
         if (DEBUG_ANIM) Slogger::V(TAG, "Loading animations: picked package=%s", packageName.string());
-        return AttributeCache::GetInstance()->Get(packageName, resId,
-                R::styleable::WindowAnimation, mCurrentUserId);
+        AutoPtr<ArrayOf<Int32> > attrs = ArrayOf<Int32>::Alloc(const_cast<Int32 *>(R::styleable::WindowAnimation),
+                ArraySize(R::styleable::WindowAnimation));
+        return AttributeCache::GetInstance()->Get(packageName, resId, attrs, mCurrentUserId);
     }
     return NULL;
 }
@@ -319,7 +342,7 @@ AutoPtr<IAnimation> AppTransition::LoadAnimationAttr(
     Int32 anim = 0;
     AutoPtr<IContext> context = mContext;
     if (animAttr >= 0) {
-        AutoPtr<AttributeCache::Entry> ent = GetCachedAnimations(lp);
+        AutoPtr<Entry> ent = GetCachedAnimations(lp);
         if (ent != NULL) {
             context = ent->mContext;
             ent->mArray->GetResourceId(animAttr, 0, &anim);
@@ -341,7 +364,7 @@ AutoPtr<IAnimation> AppTransition::LoadAnimationRes(
 {
     AutoPtr<IContext> context = mContext;
     if (resId >= 0) {
-        AutoPtr<AttributeCache::Entry> ent = GetCachedAnimations(lp);
+        AutoPtr<Entry> ent = GetCachedAnimations(lp);
         if (ent != NULL) {
             context = ent->mContext;
         }
@@ -361,7 +384,7 @@ AutoPtr<IAnimation> AppTransition::LoadAnimationRes(
     Int32 anim = 0;
     AutoPtr<IContext> context = mContext;
     if (resId >= 0) {
-        AutoPtr<AttributeCache::Entry> ent = GetCachedAnimations(packageName, resId);
+        AutoPtr<Entry> ent = GetCachedAnimations(packageName, resId);
         if (ent != NULL) {
             context = ent->mContext;
             anim = resId;
@@ -415,8 +438,8 @@ AutoPtr<IAnimation> AppTransition::CreateScaleUpAnimationLocked(
         CAnimationSet::New(FALSE, (IAnimationSet**)&set);
         set->AddAnimation(scale);
         set->AddAnimation(alpha);
-        set->SetDetachWallpaper(TRUE);
         a = IAnimation::Probe(set);
+        a->SetDetachWallpaper(TRUE);
     }
     else  if (transit == TRANSIT_WALLPAPER_INTRA_OPEN ||
             transit == TRANSIT_WALLPAPER_INTRA_CLOSE) {
@@ -531,15 +554,14 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailAspectScaleAnimationLocked(
     Float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
 
     Float scaleW = deviceWidth / thumbWidth;
-    Float unscaledWidth = deviceWidth;
     Float unscaledHeight = thumbHeight * scaleW;
-    Float unscaledStartY = mNextAppTransitionStartY - (unscaledHeight - thumbHeight) / 2f;
+    Float unscaledStartY = mNextAppTransitionStartY - (unscaledHeight - thumbHeight) / 2;
     if (mNextAppTransitionScaleUp) {
         // Animation up from the thumbnail to the full screen
         AutoPtr<IScaleAnimation> sa;
-        CScaleAnimation::New(1f, scaleW, 1f, scaleW,
-                mNextAppTransitionStartX + (thumbWidth / 2f),
-                mNextAppTransitionStartY + (thumbHeight / 2f), (IScaleAnimation**)&sa);
+        CScaleAnimation::New(1, scaleW, 1, scaleW,
+                mNextAppTransitionStartX + (thumbWidth / 2),
+                mNextAppTransitionStartY + (thumbHeight / 2), (IScaleAnimation**)&sa);
         AutoPtr<IAnimation> scale = IAnimation::Probe(sa);
         scale->SetInterpolator(mThumbnailFastOutSlowInInterpolator);
         scale->SetDuration(THUMBNAIL_APP_TRANSITION_DURATION);
@@ -557,7 +579,7 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailAspectScaleAnimationLocked(
         translate->SetDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
         // This AnimationSet uses the Interpolators assigned above.
-        AutoPtr<IAnimationSet> set
+        AutoPtr<IAnimationSet> set;
         CAnimationSet::New(FALSE, (IAnimationSet**)&set);
         set->AddAnimation(scale);
         set->AddAnimation(alpha);
@@ -567,14 +589,14 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailAspectScaleAnimationLocked(
     else {
         // Animation down from the full screen to the thumbnail
         AutoPtr<IScaleAnimation> sa;
-        CScaleAnimation::New(scaleW, 1f, scaleW, 1f,
-                mNextAppTransitionStartX + (thumbWidth / 2f),
-                mNextAppTransitionStartY + (thumbHeight / 2f), (IScaleAnimation**)&sa);
+        CScaleAnimation::New(scaleW, 1, scaleW, 1,
+                mNextAppTransitionStartX + (thumbWidth / 2),
+                mNextAppTransitionStartY + (thumbHeight / 2), (IScaleAnimation**)&sa);
         AutoPtr<IAnimation> scale = IAnimation::Probe(sa);
         scale->SetInterpolator(mThumbnailFastOutSlowInInterpolator);
         scale->SetDuration(THUMBNAIL_APP_TRANSITION_DURATION);
         AutoPtr<IAlphaAnimation> aa;
-        CAlphaAnimation::New(0f, 1f, (IAlphaAnimation**)&aa);
+        CAlphaAnimation::New(0, 1, (IAlphaAnimation**)&aa);
         AutoPtr<IAnimation> alpha = IAnimation::Probe(aa);
         alpha->SetInterpolator(mThumbnailFadeOutInterpolator);
         alpha->SetDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
@@ -587,7 +609,7 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailAspectScaleAnimationLocked(
         translate->SetDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
         // This AnimationSet uses the Interpolators assigned above.
-        AutoPtr<IAnimationSet> set
+        AutoPtr<IAnimationSet> set;
         CAnimationSet::New(FALSE, (IAnimationSet**)&set);
         set->AddAnimation(scale);
         set->AddAnimation(alpha);
@@ -615,7 +637,7 @@ AutoPtr<IAnimation> AppTransition::CreateAspectScaledThumbnailEnterExitAnimation
     Float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
 
     // Used for the ENTER_SCALE_UP and EXIT_SCALE_DOWN transitions
-    Float scale = 1f;
+    Float scale = 1;
     Int32 scaledTopDecor = 0;
 
     switch (thumbTransitState) {
@@ -746,7 +768,7 @@ AutoPtr<IAnimation> AppTransition::CreateAspectScaledThumbnailEnterExitAnimation
                 }
                 Int32 clipRectLeft;
                 mTmpToClipRect->GetLeft(&clipRectLeft);
-                mTmpToClipRect->SetRight = (clipRectLeft + unscaledThumbWidth);
+                mTmpToClipRect->SetRight(clipRectLeft + unscaledThumbWidth);
             }
             mNextAppTransitionInsets->Set(contentInsets);
 
@@ -762,7 +784,7 @@ AutoPtr<IAnimation> AppTransition::CreateAspectScaledThumbnailEnterExitAnimation
             AutoPtr<IAnimation> translateAnim = IAnimation::Probe(ta);
 
             AutoPtr<IAnimationSet> set;
-            CAnimationSet(TRUE, (IAnimationSet**)&set);
+            CAnimationSet::New(TRUE, (IAnimationSet**)&set);
             set->AddAnimation(clipAnim);
             set->AddAnimation(scaleAnim);
             set->AddAnimation(translateAnim);
@@ -902,8 +924,8 @@ AutoPtr<IAnimation> AppTransition::CreateThumbnailEnterExitAnimationLocked(
             CAnimationSet::New(TRUE, (IAnimationSet**)&set);
             set->AddAnimation(scale);
             set->AddAnimation(alpha);
-            set->SetZAdjustment(IAnimation::ZORDER_TOP);
             a = IAnimation::Probe(set);
+            a->SetZAdjustment(IAnimation::ZORDER_TOP);
             break;
         }
         default: {
@@ -971,7 +993,7 @@ AutoPtr<IAnimation> AppTransition::LoadAnimation(
                 appWidth, appHeight, transit);
         if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
             String animName = mNextAppTransitionScaleUp ?
-                    "ANIM_THUMBNAIL_SCALE_UP" : "ANIM_THUMBNAIL_SCALE_DOWN";
+                    String("ANIM_THUMBNAIL_SCALE_UP") : String("ANIM_THUMBNAIL_SCALE_DOWN");
             Slogger::V(TAG, "applyAnimation: anim=%p nextAppTransition=%s transit=%d isEntrance=%d"
                     , a.Get(), animName.string(), transit, enter/*+ " Callers=" + Debug.getCallers(3)*/);
         }
@@ -985,7 +1007,7 @@ AutoPtr<IAnimation> AppTransition::LoadAnimation(
                 transit, containingFrame, contentInsets, isFullScreen);
         if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
             String animName = mNextAppTransitionScaleUp ?
-                    "ANIM_THUMBNAIL_ASPECT_SCALE_UP" : "ANIM_THUMBNAIL_ASPECT_SCALE_DOWN";
+                    String("ANIM_THUMBNAIL_ASPECT_SCALE_UP") : String("ANIM_THUMBNAIL_ASPECT_SCALE_DOWN");
             Slogger::V(TAG, "applyAnimation: anim=%p nextAppTransition=%s transit=%d isEntrance=%d"
                     , a.Get(), animName.string(), transit, enter/*+ " Callers=" + Debug.getCallers(3)*/);
         }
@@ -1061,8 +1083,9 @@ void AppTransition::PostAnimationCallback()
 {
     if (mNextAppTransitionCallback != NULL) {
         AutoPtr<IMessage> msg;
-        mH->ObtainMessage(H::DO_ANIMATION_CALLBACK, mNextAppTransitionCallback, (IMessage**)&msg);
-        mH->SendMessage(msg);
+        mH->ObtainMessage(CWindowManagerService::H::DO_ANIMATION_CALLBACK, mNextAppTransitionCallback, (IMessage**)&msg);
+        Boolean result;
+        mH->SendMessage(msg, &result);
         mNextAppTransitionCallback = NULL;
     }
 }

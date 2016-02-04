@@ -1,0 +1,30 @@
+
+module
+{
+    interface Elastos.Droid.Content.IComponentName;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Telecomm {
+    namespace Telecom {
+
+        /**
+         *  The unique identifier for a {@link PhoneAccount}.
+         *  @hide
+         *
+         * @Involve
+         * interface IParcelable
+         */
+        interface IPhoneAccountHandle {
+            GetComponentName(
+                [out] IComponentName** res);
+
+            GetId(
+                [out] String* res);
+        }
+
+    } // namespace Telecom
+    } // namespace Telecomm
+    } // namespace Droid
+    } // namespace Elastos
+}

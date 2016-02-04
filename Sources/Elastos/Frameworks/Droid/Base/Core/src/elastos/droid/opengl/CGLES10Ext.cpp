@@ -1,26 +1,31 @@
 
-#include "CGLES10Ext.h"
+#include "elastos/droid/opengl/CGLES10Ext.h"
 #include <GLES/gl.h>
 #include <GLES/glext.h>
-#include <cmdef.h>
 #include <elastos/utility/logging/Slogger.h>
 
 #define LOGD(msg) SLOGGERD("CGLES10Ext", msg)
 
-using Elastos::IO::CNIOAccessHelper;
-using Elastos::IO::INIOAccessHelper;
+using Elastos::IO::CNIOAccess;
+using Elastos::IO::INIOAccess;
 
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
 
-ECode CGLES10Ext::glQueryMatrixxOES(
+CAR_INTERFACE_IMPL(CGLES10Ext, Singleton, IGLES10Ext)
+
+CAR_SINGLETON_IMPL(CGLES10Ext)
+
+ECode CGLES10Ext::GlQueryMatrixxOES(
     /* [in] */ ArrayOf<Int32>* mantissa_ref,
     /* [in] */ Int32 mantissaOffset,
     /* [in] */ ArrayOf<Int32>* exponent_ref,
     /* [in] */ Int32 exponentOffset,
     /* [out] */ Int32* matrixx)
 {
+    VALIDATE_NOT_NULL(matrixx)
+
     *matrixx = -1;
     GLfixed *mantissa_base = (GLfixed *) 0;
     Int32 _mantissaRemaining;
@@ -69,31 +74,33 @@ ECode CGLES10Ext::glQueryMatrixxOES(
     return NOERROR;
 }
 
-ECode CGLES10Ext::glQueryMatrixxOES(
+ECode CGLES10Ext::GlQueryMatrixxOES(
     /* [in] */ Elastos::IO::IInt32Buffer* mantissa_buf,
     /* [in] */ Elastos::IO::IInt32Buffer* exponent_buf,
     /* [out] */ Int32* matrixx)
 {
-    Handle32 _mantissaArray = (Handle32) 0;
+    VALIDATE_NOT_NULL(matrixx)
+
+    Handle64 _mantissaArray = (Handle64) 0;
     Int32 _mantissaBufferOffset = (Int32) 0;
-    Handle32 _exponentArray = (Handle32) 0;
+    Handle64 _exponentArray = (Handle64) 0;
     Int32 _exponentBufferOffset = (Int32) 0;
     GLbitfield _returnValue = -1;
     *matrixx = -1;
     Int32 _mantissaRemaining;
     GLfixed *mantissa = (GLfixed *) 0;
-    Handle32 mantissaTmp;
+    Handle64 mantissaTmp;
     Int32 _exponentRemaining;
     GLint *exponent = (GLint *) 0;
-    Handle32 exponentTmp;
+    Handle64 exponentTmp;
 
-    FAIL_RETURN(GetPointer(mantissa_buf, &_mantissaArray, &_mantissaRemaining, &_mantissaBufferOffset, &mantissaTmp));
+    FAIL_RETURN(GetPointer(IBuffer::Probe(mantissa_buf), &_mantissaArray, &_mantissaRemaining, &_mantissaBufferOffset, &mantissaTmp));
     mantissa = (GLfixed *) mantissaTmp;
     if (_mantissaRemaining < 16) {
         LOGD("GlQueryMatrixxOESEx: remaining() < 16 < needed")
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    FAIL_RETURN(GetPointer(exponent_buf, &_exponentArray, &_exponentRemaining, &_exponentBufferOffset, &exponentTmp));
+    FAIL_RETURN(GetPointer(IBuffer::Probe(exponent_buf), &_exponentArray, &_exponentRemaining, &_exponentBufferOffset, &exponentTmp));
     exponent = (GLint *) exponentTmp;
     if (_exponentRemaining < 16) {
         LOGD("GlQueryMatrixxOESEx: remaining() < 16 < needed")
@@ -118,11 +125,13 @@ ECode CGLES10Ext::glQueryMatrixxOES(
 
 ECode CGLES10Ext::GetPointer(
     /* [in] */ IBuffer* buffer,
-    /* [in, out] */ Handle32* array,
+    /* [in, out] */ Handle64* array,
     /* [in, out] */ Int32* remaining,
     /* [in, out] */ Int32* offset,
-    /* [out] */ Handle32* rst)
+    /* [out] */ Handle64* rst)
 {
+    VALIDATE_NOT_NULL(rst)
+
     Int32 position;
     Int32 limit;
     Int32 elementSizeShift;
@@ -132,13 +141,13 @@ ECode CGLES10Ext::GetPointer(
     buffer->GetElementSizeShift(&elementSizeShift);
     *remaining = (limit - position) << elementSizeShift;
 
-    AutoPtr<INIOAccessHelper> helper;
-    CNIOAccessHelper::AcquireSingleton((INIOAccessHelper**)&helper);
+    AutoPtr<INIOAccess> helper;
+    CNIOAccess::AcquireSingleton((INIOAccess**)&helper);
 
     helper->GetBasePointer(buffer, &pointer);
     if (pointer != 0L) {
         *array = 0;
-        *rst = (Handle32)pointer;
+        *rst = (Handle64)pointer;
         return NOERROR;
     }
 
@@ -153,7 +162,6 @@ ECode CGLES10Ext::GetPointer(
     *rst = 0;
     return NOERROR;
 }
-
 
 } // namespace Opengl
 } // namespace Droid

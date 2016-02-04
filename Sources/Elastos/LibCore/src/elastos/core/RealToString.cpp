@@ -269,9 +269,9 @@ void RealToString::LongDigitGenerator(Int64 f, Int32 e,
     }
     Int32 k = (Int32) Math::Ceil((e + p - 1) * INV_LOG_OF_TEN_BASE_2 - 1e-10);
     if (k > 0) {
-        S = S * Math::LongPowersOfTen[k];
+        S = S * (*Math::LONG_POWERS_OF_TEN)[k];
     } else if (k < 0) {
-        Int64 scale = Math::LongPowersOfTen[-k];
+        Int64 scale = (*Math::LONG_POWERS_OF_TEN)[-k];
         R = R * scale;
         M = M == 1 ? scale : M * scale;
     }

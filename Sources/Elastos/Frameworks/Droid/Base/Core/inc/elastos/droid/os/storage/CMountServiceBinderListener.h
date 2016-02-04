@@ -4,6 +4,9 @@
 
 #include "_Elastos_Droid_Os_Storage_CMountServiceBinderListener.h"
 #include "elastos/droid/os/storage/CStorageManager.h"
+#include "Elastos.Droid.Os.h"
+
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
@@ -11,8 +14,14 @@ namespace Os {
 namespace Storage {
 
 CarClass(CMountServiceBinderListener)
+    , public Object
+    , public IIMountServiceListener
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor(
         /* [in] */ IStorageManager* host);
 

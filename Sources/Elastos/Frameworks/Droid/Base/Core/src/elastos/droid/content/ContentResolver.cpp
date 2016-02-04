@@ -9,7 +9,7 @@
 #include "elastos/droid/content/CContentResolverOpenResourceIdResult.h"
 #include "elastos/droid/content/CContentProviderClient.h"
 #include "elastos/droid/content/ContentProvider.h"
-//#include "elastos/droid/content/res/CAssetFileDescriptor.h"
+#include "elastos/droid/content/res/CAssetFileDescriptor.h"
 //#include "elastos/droid/accounts/CAccount.h"
 //#include "elastos/droid/app/ActivityManagerNative.h"
 //#include "elastos/droid/app/AppGlobals.h"
@@ -34,7 +34,7 @@ using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IParceledListSlice;
 using Elastos::Droid::Content::Res::IResources;
-//using Elastos::Droid::Content::Res::CAssetFileDescriptor;
+using Elastos::Droid::Content::Res::CAssetFileDescriptor;
 using Elastos::Droid::Database::IIContentObserver;
 using Elastos::Droid::Database::EIID_ICrossProcessCursorWrapper;
 using Elastos::Droid::Database::EIID_ICursorWrapper;
@@ -659,8 +659,7 @@ ECode ContentResolver::OpenAssetFileDescriptor(
         Int32 nMode;
         FAIL_RETURN(ParcelFileDescriptor::ParseMode(mode, &nMode));
         FAIL_RETURN(ParcelFileDescriptor::Open(file, nMode, (IParcelFileDescriptor**)&pfd));
-        assert(0 && "TODO");
-        // return CAssetFileDescriptor::New(pfd, 0, -1, fileDescriptor);
+        return CAssetFileDescriptor::New(pfd, 0, -1, fileDescriptor);
     }
     else {
         if (mode.Equals("r")) {

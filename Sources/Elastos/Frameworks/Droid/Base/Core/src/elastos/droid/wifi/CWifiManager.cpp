@@ -9,15 +9,17 @@
 #include "elastos/droid/os/CBinder.h"
 #include "elastos/droid/os/CWorkSource.h"
 #include "elastos/droid/os/CHandlerThread.h"
+#include "elastos/droid/utility/CSparseArray.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Internal::Utility::CAsyncChannel;
+using Elastos::Droid::Internal::Utility::IProtocol;
 using Elastos::Droid::Os::CBinder;
 using Elastos::Droid::Os::CWorkSource;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::CHandlerThread;
-using Elastos::Droid::Internal::Utility::CAsyncChannel;
-using Elastos::Droid::Internal::Utility::IProtocol;
+using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Core::AutoLock;
 using Elastos::Core::IThread;
 using Elastos::Utility::Concurrent::CCountDownLatch;
@@ -411,9 +413,7 @@ ECode CWifiManager::ServiceHandler::HandleMessage(
 static AutoPtr<ISparseArray> sListenerMap_Init()
 {
     AutoPtr<ISparseArray> array;
-    assert(0);
-    // TODO
-    // CSparseArray::New((ISparseArray**)&array);
+    CSparseArray::New((ISparseArray**)&array);
     return array;
 }
 

@@ -1,7 +1,8 @@
 
-#include "wm/DragState.h"
-#include "wm/InputMonitor.h"
-#include "wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/DragState.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/InputMonitor.h"
+#include "elastos/droid/server/wm/DisplayContent.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Handler.h"
 #include <elastos/utility/logging/Slogger.h>
@@ -16,6 +17,7 @@ using Elastos::Droid::View::ISurfaceControlHelper;
 using Elastos::Droid::View::IDragEventHelper;
 using Elastos::Droid::View::CDragEventHelper;
 using Elastos::Droid::View::CSurfaceControlHelper;
+using Elastos::Droid::View::ISurfaceHelper;
 using Elastos::Droid::Os::Process;
 
 namespace Elastos {
@@ -64,14 +66,15 @@ void DragState::Register(
     }
     else {
         AutoPtr<IInputChannelHelper> helper;
-        ASSERT_SUCCEEDED(CInputChannelHelper::AcquireSingleton(
-                (IInputChannelHelper**)&helper));
-        ASSERT_SUCCEEDED(helper->OpenInputChannelPair(String("drag"),
-                (IInputChannel**)&mServerChannel, (IInputChannel**)&mClientChannel));
+        CInputChannelHelper::AcquireSingleton((IInputChannelHelper**)&helper);
+        AutoPtr<ArrayOf<IInputChannel*> > inputChannels;
+        ASSERT_SUCCEEDED(helper->OpenInputChannelPair(String("drag"), (ArrayOf<IInputChannel*>**)&inputChannels))
+        mServerChannel = (*inputChannels)[0];
+        mClientChannel = (*inputChannels)[1];
         mService->mInputManager->RegisterInputChannel(mServerChannel, NULL);
         AutoPtr<ILooper> hLooper;
         mService->mH->GetLooper((ILooper**)&hLooper);
-        mInputEventReceiver = new CWindowManagerService::DragInputEventReceiver(
+        mInputEventReceiver = new DragInputEventReceiver(
                 mClientChannel, hLooper, mService);
 
         mDragApplicationHandle = new InputApplicationHandle(NULL);
@@ -175,9 +178,9 @@ void DragState::BroadcastDragStartedLw(
     mDisplay->GetDisplayId(&id);
     AutoPtr<DisplayContent> displayContent = mService->GetDisplayContentLocked(id);
     if (displayContent != NULL) {
-        List< AutoPtr<WindowState> >& windows = displayContent->GetWindowList();
-        List<AutoPtr<WindowState> >::Iterator it = windows.Begin();
-        for (; it != windows.End(); ++it) {
+        AutoPtr<List<AutoPtr<WindowState> > > windows = displayContent->GetWindowList();
+        List<AutoPtr<WindowState> >::Iterator it = windows->Begin();
+        for (; it != windows->End(); ++it) {
             SendDragStartedLw(*it, touchX, touchY, mDataDescription);
         }
     }
@@ -292,7 +295,7 @@ void DragState::NotifyMoveLw(
     if (CWindowManagerService::SHOW_LIGHT_TRANSACTIONS) Slogger::I(
             CWindowManagerService::TAG, ">>> OPEN TRANSACTION notifyMoveLw");
     AutoPtr<ISurfaceControlHelper> surfaceHelper;
-    CSurfaceControlHelper::AcquireSingleton((ISurfaceHelper**)&surfaceHelper);
+    CSurfaceControlHelper::AcquireSingleton((ISurfaceControlHelper**)&surfaceHelper);
     surfaceHelper->OpenTransaction();
     // try {
     mSurfaceControl->SetPosition(x - mThumbOffsetX, y - mThumbOffsetY);
@@ -423,9 +426,9 @@ AutoPtr<WindowState> DragState::GetTouchedWinAtPointLw(
         return NULL;
     }
 
-    List< AutoPtr<WindowState> >& windows = displayContent->GetWindowList();
-    List<AutoPtr<WindowState> >::ReverseIterator rit = windows.RBegin();
-    for (; rit != windows.REnd(); ++rit) {
+    AutoPtr<List<AutoPtr<WindowState> > > windows = displayContent->GetWindowList();
+    List<AutoPtr<WindowState> >::ReverseIterator rit = windows->RBegin();
+    for (; rit != windows->REnd(); ++rit) {
         AutoPtr<WindowState> child = *rit;
         Int32 flags;
         child->mAttrs->GetFlags(&flags);

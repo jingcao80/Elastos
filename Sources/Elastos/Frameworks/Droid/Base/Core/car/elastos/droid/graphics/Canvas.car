@@ -1523,6 +1523,9 @@ module
             [out] Int64* natvieCanvas);
 
         ReleaseResources();
+
+        SetNativeBitmap(
+            [in] Int64 bitmapHandle);
     }
 
     } // namespace Graphics

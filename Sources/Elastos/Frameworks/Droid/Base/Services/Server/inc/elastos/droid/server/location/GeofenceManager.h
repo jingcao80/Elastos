@@ -2,31 +2,33 @@
 #ifndef __ELASTOS_DROID_SERVER_LOCATION_GEOFENCEMANAGER_H__
 #define __ELASTOS_DROID_SERVER_LOCATION_GEOFENCEMANAGER_H__
 
-#include "location/LocationBlacklist.h"
-#include "location/GeofenceState.h"
-#include "elastos/droid/os/SystemClock.h"
-#include "elastos/droid/os/HandlerBase.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include <elastos/utility/etl/List.h>
+#include "_Elastos.Droid.Server.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Location.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/server/location/LocationBlacklist.h"
 
-using Elastos::Utility::Etl::List;
+using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IPendingIntentOnFinished;
-using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Location::IGeofence;
 using Elastos::Droid::Location::ILocation;
 using Elastos::Droid::Location::ILocationListener;
 using Elastos::Droid::Location::ILocationManager;
 using Elastos::Droid::Location::ILocationRequest;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::HandlerBase;
-using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::IO::IPrintWriter;
-using Elastos::Droid::Location::EIID_ILocationListener;
-using Elastos::Droid::App::EIID_IPendingIntentOnFinished;
-using Elastos::Droid::App::EIID_IPendingIntentOnFinished;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -34,18 +36,17 @@ namespace Server {
 namespace Location {
 
 class GeofenceManager
-    : public ElRefBase
+    : public Object
     , public ILocationListener
     , public IPendingIntentOnFinished
 {
 public:
-    class GeofenceHandler : public HandlerBase
+    class GeofenceHandler
+        : public Handler
     {
     public:
         GeofenceHandler(
-            /* [in] */ GeofenceManager* host)
-            : mHost(host)
-        {}
+            /* [in] */ GeofenceManager* host);
 
         HandleMessage(
             /* [in] */ IMessage* msg);
@@ -55,34 +56,25 @@ public:
     };
 
 public:
-
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
-
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface* object,
-        /* [out] */ InterfaceID* iid);
+    CAR_INTERFACE_DECL()
 
     GeofenceManager(
         /* [in] */ IContext* context,
         /* [in] */ LocationBlacklist* blacklist);
 
-    CARAPI_(void) AddFence(
+    CARAPI AddFence(
         /* [in] */ ILocationRequest* request,
         /* [in] */ IGeofence* geofence,
         /* [in] */ IPendingIntent* intent,
         /* [in] */ Int32 uid,
+        /* [in] */ Int32 allowedResolutionLevel,
         /* [in] */ const String& packageName);
 
-    CARAPI_(void) RemoveFence(
+    CARAPI RemoveFence(
         /* [in] */ IGeofence* fence,
         /* [in] */ IPendingIntent* intent);
 
-    CARAPI_(void) RemoveFence(
+    CARAPI RemoveFence(
         /* [in] */ const String& packageName);
 
     // Runs on the handler (which was passed into LocationManager.requestLocationUpdates())
@@ -112,13 +104,11 @@ public:
         /* [in] */ const String& resultData,
         /* [in] */ IBundle* resultExtras);
 
-    CARAPI_(void) Dump(
+    CARAPI Dump(
         /* [in] */ IPrintWriter* pw);
 
 private:
-
     CARAPI_(void) RemoveExpiredFencesLocked();
-
     CARAPI_(void) ScheduleUpdateFencesLocked();
 
     /**
@@ -145,51 +135,50 @@ private:
     CARAPI_(void) SendIntentExit(
         /* [in] */ IPendingIntent* pendingIntent);
 
-    CARAPI_(void) SendIntent(
+    CARAPI SendIntent(
         /* [in] */ IPendingIntent* pendingIntent,
         /* [in] */ IIntent* intent);
 
 private:
-    static const String TAG;// = "GeofenceManager";
-    static const Boolean D;// = ILocationManagerService::D;
+    static const String TAG;
+    static const Boolean D;
 
-    static const Int32 MSG_UPDATE_FENCES;// = 1;
+    static const Int32 MSG_UPDATE_FENCES;
 
     /**
      * Assume a maximum land speed, as a heuristic to throttle location updates.
      * (Air travel should result in an airplane mode toggle which will
      * force a new location update anyway).
      */
-    static const Int32 MAX_SPEED_M_S;// = 100;  // 360 km/hr (high speed train)
+    static const Int32 MAX_SPEED_M_S;  // 360 km/hr (high speed train)
 
     /**
      * Maximum age after which a location is no longer considered fresh enough to use.
      */
-    static const Int64 MAX_AGE_NANOS;// = 5 * 60 * 1000000000L; // five minutes
+    static const Int64 MAX_AGE_NANOS; // five minutes
 
     /**
      * Most frequent update interval allowed.
      */
-    static const Int64 MIN_INTERVAL_MS;// = 1 * 60 * 1000; // one minute
+    static const Int64 MIN_INTERVAL_MS; // one minute
 
     /**
      * Least frequent update interval allowed.
      */
-    static const Int64 MAX_INTERVAL_MS;// = 2 * 60 * 60 * 1000; // two hours
+    static const Int64 MAX_INTERVAL_MS; // two hours
 
     AutoPtr<IContext> mContext;
     AutoPtr<ILocationManager> mLocationManager;
+    AutoPtr<IAppOpsManager> mAppOps;
     AutoPtr<IPowerManagerWakeLock> mWakeLock;
     AutoPtr<GeofenceHandler> mHandler;
     AutoPtr<LocationBlacklist> mBlacklist;
-
-    Object mLock;
 
     // access to members below is synchronized on mLock
     /**
      * A list containing all registered geofences.
      */
-    List<AutoPtr<GeofenceState> > mFences;;
+     AutoPtr<IList> mFences;
 
     /**
      * This is set true when we have an active request for {@link Location} updates via

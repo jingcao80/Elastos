@@ -13,6 +13,7 @@
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/ParcelFileDescriptor.h"
+#include "elastos/droid/Manifest.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/StringBuilder.h>
@@ -204,8 +205,7 @@ Boolean ContentProvider::CheckUser(
 {
     Int32 cuid, perm;
     context->GetUserId(&cuid);
-    assert(0 && "TODO");
-    //context->CheckPermission(Elastos::Droid::Manifest::permission::INTERACT_ACROSS_USERS, pid, uid, &perm);
+    context->CheckPermission(Elastos::Droid::Manifest::permission::INTERACT_ACROSS_USERS, pid, uid, &perm);
     return UserHandle::GetUserId(uid) == cuid
             || mSingleUser
             || perm == IPackageManager::PERMISSION_GRANTED;
@@ -638,7 +638,7 @@ ECode ContentProvider::OpenFile(
     VALIDATE_NOT_NULL(fileDescriptor)
     *fileDescriptor = NULL;
 
-    Logger::E(TAG, "No files supported by provider at %s", Object::ToString(uri).string());
+    Logger::E(TAG, "No files supported by provider at %s", TO_CSTR(uri));
     return E_FILE_NOT_FOUND_EXCEPTION;
 }
 

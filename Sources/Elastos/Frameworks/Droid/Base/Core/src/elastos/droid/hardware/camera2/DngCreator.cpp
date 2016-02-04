@@ -332,7 +332,6 @@ status_t DngCreator::InputStripSource::writeToStream(
     /* [in] */ Output& stream,
     /* [in] */ uint32_t count)
 {
-    status_t err = android::OK;
     uint32_t fullSize = mWidth * mHeight * mBytesPerSample * mSamplesPerPixel;
     Int64 offset = mOffset;
 
@@ -538,7 +537,7 @@ static ECode validateDngHeader(
             TIFF_IFD_SUB1 : TIFF_IFD_0)->getData<uint32_t>());
 
     if (width < 0 || metadataWidth != static_cast<uint32_t>(width)) {
-        // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", \
+        // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
         //                 "Metadata width %d doesn't match image width %d", metadataWidth, width);
         *result = FALSE;
         Slogger::E("DngCreator::validateDngHeader", "java/lang/IllegalArgumentException :"
@@ -547,7 +546,7 @@ static ECode validateDngHeader(
     }
 
     if (height < 0 || metadataHeight != static_cast<uint32_t>(height)) {
-        // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", \
+        // jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
         //                 "Metadata height %d doesn't match image height %d", metadataHeight, height);
         *result = FALSE;
         Slogger::E("DngCreator::validateDngHeader", "java/lang/IllegalArgumentException :"
@@ -1396,7 +1395,7 @@ ECode DngCreator::NativeInit(
 
         const uint32_t samplesPerPixel = 1;
         const uint32_t bitsPerSample = BITS_PER_SAMPLE;
-        const uint32_t bitsPerByte = BITS_PER_SAMPLE / BYTES_PER_SAMPLE;
+        const uint32_t UNUSED(bitsPerByte) = BITS_PER_SAMPLE / BYTES_PER_SAMPLE;
         uint32_t imageWidth = 0;
         uint32_t imageHeight = 0;
 
@@ -1826,7 +1825,7 @@ ECode DngCreator::NativeInit(
                 }
 
                 BAIL_IF_INVALID(writer->addEntry(android::img_utils::TAG_CAMERACALIBRATION2, entry2.count,
-                        calibrationTransform1, TIFF_IFD_0), android::img_utils::TAG_CAMERACALIBRATION2, writer);
+                        calibrationTransform2, TIFF_IFD_0), android::img_utils::TAG_CAMERACALIBRATION2, writer);
             }
         }
 
@@ -2030,9 +2029,11 @@ ECode DngCreator::NativeInit(
 
         DngCreator_setNativeContext(nativeContext);
     }
+    return NOERROR;
 }
 
-void DngCreator::NativeDestroy(){
+void DngCreator::NativeDestroy()
+{
     synchronized(this) {
         ALOGV("%s:", __FUNCTION__);
         DngCreator_setNativeContext(NULL);
@@ -2404,6 +2405,7 @@ ECode DngCreator::NativeSetThumbnail(
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
     }
+    return NOERROR;
 }
 
 ECode DngCreator::NativeWriteImage(

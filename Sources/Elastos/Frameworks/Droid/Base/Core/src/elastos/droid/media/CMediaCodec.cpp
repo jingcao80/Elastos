@@ -1,8 +1,7 @@
 #include "elastos/droid/media/AudioSystem.h"
 #include "elastos/droid/media/CMediaCodec.h"
 #include "elastos/droid/media/CMediaCodecList.h"
-// TODO: Need CMediaFormat
-// #include "elastos/droid/media/CMediaFormat.h"
+#include "elastos/droid/media/CMediaFormat.h"
 #include "elastos/droid/os/Looper.h"
 #include <elastos/core/AutoLock.h>
 
@@ -108,8 +107,7 @@ void CMediaCodec::EventHandler::HandleCallback(
             msg->GetObj((IInterface**)&obj);
             AutoPtr<IMap> map = IMap::Probe(obj);
             AutoPtr<IMediaFormat> mf;
-// TODO: Need CMediaFormat
-            // CMediaFormat::New(map, (IMediaFormat**)&mf);
+            CMediaFormat::New(map, (IMediaFormat**)&mf);
             mCodec->mCallback->OnOutputFormatChanged(mCodec, mf);
             break;
         }
@@ -531,8 +529,7 @@ ECode CMediaCodec::GetOutputFormat(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IMap> map = NativeGetFormatNative(FALSE /* input */);
-// TODO: Need CMediaFormat
-    // return CMediaFormat::New(map, result);
+    return CMediaFormat::New(map, result);
     return NOERROR;
 }
 
@@ -541,8 +538,7 @@ ECode CMediaCodec::GetInputFormat(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IMap> map = NativeGetFormatNative(TRUE /* input */);
-// TODO: Need CMediaFormat
-    // return CMediaFormat::New(map, result);
+    return CMediaFormat::New(map, result);
     return NOERROR;
 }
 
@@ -552,8 +548,7 @@ ECode CMediaCodec::GetOutputFormat(
 {
     VALIDATE_NOT_NULL(result)
     AutoPtr<IMap> map = NativeGetOutputFormatNative(index);
-// TODO: Need CMediaFormat
-    // return CMediaFormat::New(map, result);
+    return CMediaFormat::New(map, result);
     return NOERROR;
 }
 
@@ -739,8 +734,8 @@ ECode CMediaCodec::SetCallback(
         // it may cause the callback to be delayed and set in a wrong state,
         // and MediaCodec is already doing it on looper.
         NativeSetCallback(cb);
-        return NOERROR;
     }
+    return NOERROR;
 }
 
 ECode CMediaCodec::GetCodecInfo(

@@ -96,6 +96,7 @@ ECode CMtpPropertyGroup::constructor(
     for (Int32 i = 0; i < count; i++) {
         mColumns->Set(i, (*columns)[i]);
     }
+    return NOERROR;
 }
 
 ECode CMtpPropertyGroup::GetPropertyList(
@@ -515,6 +516,7 @@ Int64 CMtpPropertyGroup::QueryInt64(
         if (c != NULL && (c->MoveToNext(&b),b)) {
             Int64 value;
             c->GetInt64(1, &value);
+            ICloseable::Probe(c)->Close();
             return value;
         }
     //} catch (Exception e) {
@@ -523,7 +525,7 @@ Int64 CMtpPropertyGroup::QueryInt64(
             ICloseable::Probe(c)->Close();
         }
     //}
-    return NULL;
+    return 0;
 }
 
 String CMtpPropertyGroup::NameFromPath(

@@ -788,11 +788,12 @@ ECode SurfaceTextureRenderer::CheckGlError(
     Int32 error;
     assert(0 && "need GLES20");
     //GLES20::GlGetError(&error);
-    while (error != IGLES20::_GL_NO_ERROR) {
+    if (error != IGLES20::_GL_NO_ERROR) {
         //throw new IllegalStateException(msg + ": GLES20 error: 0x" + Integer.toHexString(error));
         Slogger::E(TAG, "%s: GLES20 error: 0x%x", msg.string(), StringUtils::ToHexString(error).string());
         return E_ILLEGAL_STATE_EXCEPTION;
     }
+    return NOERROR;
 }
 
 void SurfaceTextureRenderer::DumpGlTiming()
@@ -944,7 +945,7 @@ ECode SurfaceTextureRenderer::ConfigureSurfaces(
         // If pixel conversions aren't handled by egl, use a pbuffer
         //try {
         Boolean result = LegacyCameraDevice::NeedsConversion(s);
-        ECode ec;
+        ECode ec = NOERROR;
         if (result) {
             // Always override to YV12 output for YUV surface formats.
             ec = LegacyCameraDevice::SetSurfaceFormat(s, IImageFormat::YV12);
@@ -956,7 +957,7 @@ ECode SurfaceTextureRenderer::ConfigureSurfaces(
             AutoPtr<EGLSurfaceHolder> holder = new EGLSurfaceHolder();
             holder->mSurface = s;
             mSurfaces->Add(TO_IINTERFACE(holder));
-            }
+        }
         //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
         if (FAILED(ec)) {
             Slogger::W(TAG, "Surface abandoned, skipping configuration... %d", ec);

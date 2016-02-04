@@ -1,9 +1,13 @@
 #ifndef __ELASTOS_DROID_SERVER_WM_KEYGURADDISABLEHANDLER_H__
 #define __ELASTOS_DROID_SERVER_WM_KEYGURADDISABLEHANDLER_H__
 
-#include "elastos/droid/os/HandlerBase.h"
+#include "_Elastos.Droid.Server.h"
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.View.h>
+#include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/TokenWatcher.h"
 
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::TokenWatcher;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::IWindowManagerPolicy;
@@ -13,7 +17,7 @@ namespace Droid {
 namespace Server {
 namespace Wm {
 
-class KeyguardDisableHandler : public HandlerBase
+class KeyguardDisableHandler : public Handler
 {
 public:
     class KeyguardTokenWatcher : public TokenWatcher
@@ -51,9 +55,9 @@ public:
 private:
     static const String TAG;
 
-    static const Int32 ALLOW_DISABLE_YES;
-    static const Int32 ALLOW_DISABLE_NO;
-    static const Int32 ALLOW_DISABLE_UNKNOWN; // check with DevicePolicyManager
+    static const Int32 ALLOW_DISABLE_YES = 1;
+    static const Int32 ALLOW_DISABLE_NO = 0;
+    static const Int32 ALLOW_DISABLE_UNKNOWN = -1; // check with DevicePolicyManager
     Int32 mAllowDisableKeyguard; // sync'd by mKeyguardTokenWatcher
 };
 

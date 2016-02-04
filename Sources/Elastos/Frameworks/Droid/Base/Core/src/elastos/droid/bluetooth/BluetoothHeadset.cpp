@@ -1,16 +1,18 @@
-
-#include "BluetoothHeadset.h"
-#include "CBluetoothHeadsetStateChangeCallback.h"
-#include "CBluetoothAdapter.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/bluetooth/BluetoothHeadset.h"
+#include "elastos/droid/bluetooth/CBluetoothHeadsetStateChangeCallback.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/R.h"
+#include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::R;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::R;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -19,13 +21,12 @@ namespace Bluetooth {
 //====================================================
 // BluetoothHeadset::ServiceConnection
 //====================================================
+CAR_INTERFACE_IMPL(BluetoothHeadset::ServiceConnection, Object, IServiceConnection)
 
 BluetoothHeadset::ServiceConnection::ServiceConnection(
     /* [in] */ BluetoothHeadset* host)
     : mHost(host)
 {}
-
-CAR_INTERFACE_IMPL(BluetoothHeadset::ServiceConnection, IServiceConnection)
 
 ECode BluetoothHeadset::ServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* name,
@@ -55,10 +56,15 @@ ECode BluetoothHeadset::ServiceConnection::OnServiceDisconnected(
 //====================================================
 // BluetoothHeadset
 //====================================================
-
 const String BluetoothHeadset::TAG("BluetoothHeadset");
 const Boolean BluetoothHeadset::DBG = TRUE;
 const Boolean BluetoothHeadset::VDBG = FALSE;
+
+CAR_INTERFACE_IMPL_2(BluetoothHeadset, Object, IBluetoothHeadset, IBluetoothProfile);
+
+BluetoothHeadset::BluetoothHeadset()
+{
+}
 
 BluetoothHeadset::BluetoothHeadset(
     /* [in] */ IContext* context,
@@ -66,7 +72,7 @@ BluetoothHeadset::BluetoothHeadset(
     : mContext(context)
     , mServiceListener(listener)
 {
-    CBluetoothHeadsetStateChangeCallback::New(this, (IIBluetoothStateChangeCallback**)&mBluetoothStateChangeCallback);
+    CBluetoothHeadsetStateChangeCallback::New(TO_IINTERFACE(this), (IIBluetoothStateChangeCallback**)&mBluetoothStateChangeCallback);
     mConnection = new ServiceConnection(this);
 
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
@@ -90,49 +96,6 @@ BluetoothHeadset::BluetoothHeadset(
     if (context->BindService(intent, mConnection, 0, &result), !result) {
         Logger::E(TAG, "Could not bind to Bluetooth Headset Service");
     }
-}
-
-PInterface BluetoothHeadset::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IBluetoothHeadset*)this;
-    }
-    else if (riid == EIID_IBluetoothHeadset) {
-        return (IBluetoothHeadset*)this;
-    }
-    else if (riid == EIID_IBluetoothProfile) {
-        return (IBluetoothProfile*)this;
-    }
-    return NULL;
-}
-
-UInt32 BluetoothHeadset::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 BluetoothHeadset::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode BluetoothHeadset::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    VALIDATE_NOT_NULL(pIID)
-
-    if (pObject == (IInterface*)(IBluetoothHeadset*)this) {
-        *pIID = EIID_IBluetoothHeadset;
-        return NOERROR;
-    }
-    else if (pObject == (IInterface*)(IBluetoothProfile*)this) {
-        *pIID = EIID_IBluetoothProfile;
-        return NOERROR;
-    }
-
-    return E_INVALID_ARGUMENT;
 }
 
 ECode BluetoothHeadset::Close()
@@ -216,7 +179,7 @@ ECode BluetoothHeadset::Disconnect(
 }
 
 ECode BluetoothHeadset::GetConnectedDevices(
-    /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices)
+    /* [out] */ IList** devices)
 {
     VALIDATE_NOT_NULL(devices)
     if (VDBG) Logger::D(TAG, "getConnectedDevices()");
@@ -229,14 +192,14 @@ ECode BluetoothHeadset::GetConnectedDevices(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
+    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
     REFCOUNT_ADD(*devices);
     return NOERROR;
 }
 
 ECode BluetoothHeadset::GetDevicesMatchingConnectionStates(
     /* [in] */ ArrayOf<Int32>* states,
-    /* [out, callee] */ ArrayOf<IBluetoothDevice*>** devices)
+    /* [out] */ IList** devices)
 {
     VALIDATE_NOT_NULL(devices)
     if (VDBG) Logger::D(TAG, "getDevicesMatchingStates()");
@@ -249,7 +212,7 @@ ECode BluetoothHeadset::GetDevicesMatchingConnectionStates(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
+    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
     REFCOUNT_ADD(*devices);
     return NOERROR;
 }
@@ -594,7 +557,7 @@ ECode BluetoothHeadset::RoamChanged(
 {
     if (mService != NULL && IsEnabled()) {
 //        try {
-        return mService->RoamChanged(roaming);
+        //TODO return mService->RoamChanged(roaming);// RoamChanged removed
 //        } catch (RemoteException e) {
 //            Log.e(TAG, e.toString());
 //        }
@@ -626,6 +589,30 @@ ECode BluetoothHeadset::ClccResponse(
         Logger::W(TAG, "Proxy not attached to service");
 //        if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
     }
+    return NOERROR;
+}
+
+ECode BluetoothHeadset::SendVendorSpecificResultCode(
+    /* [in] */ IBluetoothDevice* device,
+    /* [in] */ const String& command,
+    /* [in] */ const String& arg,
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode BluetoothHeadset::EnableWBS(
+    /* [out] */ Boolean* result)
+{
+    //TODO
+    return NOERROR;
+}
+
+ECode BluetoothHeadset::DisableWBS(
+    /* [out] */ Boolean* result)
+{
+    //TODO
     return NOERROR;
 }
 
@@ -662,6 +649,7 @@ Boolean BluetoothHeadset::IsValidDevice(
     String address;
     device->GetAddress(&address);
     if (CBluetoothAdapter::CheckBluetoothAddress(address)) return TRUE;
+    return FALSE;
 }
 
 } // Bluetooth

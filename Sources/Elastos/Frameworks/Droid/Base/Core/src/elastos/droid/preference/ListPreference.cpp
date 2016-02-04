@@ -289,7 +289,7 @@ ECode ListPreference::OnPrepareDialogBuilder(
      * click-on-an-item dismiss the dialog instead of the user having to
      * press 'Ok'.
      */
-    builder->SetPositiveButton(NULL, NULL);
+    builder->SetPositiveButton((ICharSequence*)NULL, NULL);
     return NOERROR;
 }
 

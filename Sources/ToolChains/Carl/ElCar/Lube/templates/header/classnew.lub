@@ -77,7 +77,7 @@ $                               ELSE
 $                               END IF ;; parameter is not last
 $                           END DO ;; all parameters
     {
-        IInterface* __pNewObj;
+        IInterface* __pNewObj = NULL;
         PRegime pRegime = NULL;
 
         if (!IS_RGM_NUMBER(__regime)){

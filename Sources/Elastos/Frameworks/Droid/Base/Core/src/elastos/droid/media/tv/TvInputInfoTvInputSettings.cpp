@@ -2,8 +2,7 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/media/tv/TvInputInfoTvInputSettings.h"
 #include "elastos/droid/net/CUriHelper.h"
-//TODO: Need Settings.h
-// #include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/provider/Settings.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 
@@ -11,8 +10,7 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Provider::ISettingsSecure;
-//TODO: Need Settings.h
-// using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringBuilder;
@@ -21,6 +19,8 @@ using Elastos::Utility::CHashMap;
 using Elastos::Utility::CHashSet;
 using Elastos::Utility::IHashMap;
 using Elastos::Utility::IHashSet;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IMapEntry;
 
 namespace Elastos {
 namespace Droid {
@@ -38,8 +38,7 @@ ECode TvInputInfoTvInputSettings::GetHiddenTvInputIds(
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
     String hiddenIdsString;
-//TODO: Need Settings.h
-    // Settings::Secure::GetStringForUser(cr, ISettingsSecure::TV_INPUT_HIDDEN_INPUTS, userId, &hiddenIdsString);
+    Settings::Secure::GetStringForUser(cr, ISettingsSecure::TV_INPUT_HIDDEN_INPUTS, userId, &hiddenIdsString);
 
     AutoPtr<IHashSet> set;
     CHashSet::New((IHashSet**)&set);
@@ -73,8 +72,7 @@ ECode TvInputInfoTvInputSettings::GetCustomLabels(
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
     String labelsString;
-//TODO: Need Settings.h
-    // Settings::Secure::GetStringForUser(cr, ISettingsSecure::TV_INPUT_CUSTOM_LABELS, userId, &labelsString);
+    Settings::Secure::GetStringForUser(cr, ISettingsSecure::TV_INPUT_CUSTOM_LABELS, userId, &labelsString);
 
     AutoPtr<IHashMap> map;
     CHashMap::New((IHashMap**)&map);
@@ -134,8 +132,7 @@ ECode TvInputInfoTvInputSettings::PutHiddenTvInputs(
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
     Boolean b;
-//TODO: Need Settings.h
-    // Settings::Secure::PutStringForUser(cr, ISettingsSecure::TV_INPUT_HIDDEN_INPUTS, s, userId, &b);
+    Settings::Secure::PutStringForUser(cr, ISettingsSecure::TV_INPUT_HIDDEN_INPUTS, s, userId, &b);
     return NOERROR;
 }
 
@@ -146,31 +143,47 @@ ECode TvInputInfoTvInputSettings::PutCustomLabels(
 {
     StringBuilder builder;
     Boolean firstItem = TRUE;
-//TODO:
-    // for (Map.Entry<String, String> entry: customLabels.entrySet()) {
-    //     EnsureValidField(entry.getKey());
-    //     EnsureValidField(entry.getValue());
-    //     if (firstItem) {
-    //         firstItem = FALSE;
-    //     } else {
-    //         builder.Append(TV_INPUT_SEPARATOR);
-    //     }
-    //     AutoPtr<IUriHelper> helper;
-    //     CUriHelper::AcquireSingleton((IUriHelper**)&helper);
-    //     String str;
-    //     helper->Encode(entry.getKey(), &str);
-    //     builder.Append(str);
-    //     builder.Append(CUSTOM_NAME_SEPARATOR);
-    //     helper->Encode(entry.getValue(), &str);
-    //     builder.Append(str);
-    // }
+
+    AutoPtr<ISet> entrySet;
+    customLabels->GetEntrySet((ISet**)&entrySet);
+    AutoPtr<IIterator> i;
+    entrySet->GetIterator((IIterator**)&i);
+    Boolean b;
+    while (i->HasNext(&b), b) {
+        AutoPtr<IInterface> obj;
+        i->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
+        obj = NULL;
+        String sKey, sValue;
+        entry->GetKey((IInterface**)&obj);
+        ICharSequence::Probe(obj)->ToString(&sKey);
+        obj = NULL;
+        entry->GetValue((IInterface**)&obj);
+        ICharSequence::Probe(obj)->ToString(&sValue);
+
+        EnsureValidField(sKey);
+        EnsureValidField(sValue);
+        if (firstItem) {
+            firstItem = FALSE;
+        }
+        else {
+            builder.Append(TV_INPUT_SEPARATOR);
+        }
+        AutoPtr<IUriHelper> helper;
+        CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        String str;
+        helper->Encode(sKey, &str);
+        builder.Append(str);
+        builder.Append(CUSTOM_NAME_SEPARATOR);
+        helper->Encode(sValue, &str);
+        builder.Append(str);
+    }
+
     String s;
     builder.ToString(&s);
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
-    Boolean b;
-//TODO: Need Settings.h
-    // Settings::Secure::PutStringForUser(cr, ISettingsSecure::TV_INPUT_CUSTOM_LABELS, s, userId, &b);
+    Settings::Secure::PutStringForUser(cr, ISettingsSecure::TV_INPUT_CUSTOM_LABELS, s, userId, &b);
     return NOERROR;
 }
 
@@ -212,6 +225,7 @@ ECode TvInputInfoTvInputSettings::EnsureValidField(
         // throw new IllegalArgumentException(value + " should not empty ");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
+    return NOERROR;
 }
 
 } // namespace Tv

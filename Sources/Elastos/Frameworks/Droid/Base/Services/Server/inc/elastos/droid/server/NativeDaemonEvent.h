@@ -3,23 +3,19 @@
 
 #include "_Elastos.Droid.Server.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
-extern "C" const InterfaceID EIID_NativeDaemonEvent;
-
 /**
  * Parsed event from native side of {@link NativeDaemonConnector}.
  */
 class NativeDaemonEvent
-    : public ElRefBase
-    , public IInterface
+    : public Object
 {
 public:
-    CAR_INTERFACE_DECL()
-
     CARAPI_(Int32) GetCmdNumber();
 
     CARAPI_(Int32) GetCode();
@@ -78,5 +74,7 @@ private:
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos
+
+DEFINE_CONVERSION_FOR(Elastos::Droid::Server::NativeDaemonEvent, IInterface)
 
 #endif //__ELASTOS_DROID_SERVER_NATIVEDAEMONEVENT_H__

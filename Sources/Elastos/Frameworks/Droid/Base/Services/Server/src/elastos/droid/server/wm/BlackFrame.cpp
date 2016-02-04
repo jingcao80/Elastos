@@ -1,6 +1,6 @@
 
-#include "wm/BlackFrame.h"
-#include "wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/BlackFrame.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
@@ -8,6 +8,7 @@ using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::View::CSurface;
+using Elastos::Droid::View::CSurfaceControl;
 
 namespace Elastos {
 namespace Droid {
@@ -175,7 +176,7 @@ void BlackFrame::SetAlpha(
 {
     for (Int32 i = 0; i < mBlackSurfaces->GetLength(); i++) {
         if ((*mBlackSurfaces)[i] != NULL) {
-            (*mBlackSurfaces)[i].setAlpha(alpha);
+            (*mBlackSurfaces)[i]->SetAlpha(alpha);
         }
     }
 }

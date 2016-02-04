@@ -208,9 +208,10 @@ private:
         /* [in] */ IObjectInputStream* stream);
 
 private:
-    ECO_LOCAL static const Int64 sSerialVersionUID = -5024744406713321676L;
+    ECO_LOCAL static const Int64 sSerialVersionUID = -5024744406713321676LL;
 
     /* transient */ AutoPtr<IMap> mBackingMap;
+    AutoPtr<IWeakReference> mWeakThis;
 };
 
 } // namespace Utility

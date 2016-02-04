@@ -98,7 +98,7 @@ ECode CRecolor::CreateAnimator(
     cEndValues->mValues->Get(pro_background, (IInterface**)&eB);
     AutoPtr<IDrawable> startBackground = IDrawable::Probe(sB);
     AutoPtr<IDrawable> endBackground = IDrawable::Probe(eB);
-    Boolean changed = FALSE;
+    Boolean UNUSED(changed) = FALSE;
     if ( (IColorDrawable::Probe(startBackground) != NULL) && (IColorDrawable::Probe(endBackground) != NULL) ) {
         AutoPtr<IColorDrawable> startColor = IColorDrawable::Probe(startBackground);
         AutoPtr<IColorDrawable> endColor = IColorDrawable::Probe(endBackground);

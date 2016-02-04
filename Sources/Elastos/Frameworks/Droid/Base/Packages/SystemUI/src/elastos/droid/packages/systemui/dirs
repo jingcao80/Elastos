@@ -1,5 +1,5 @@
 
-#DIRS += doze
+DIRS += doze
 #DIRS += media
 #DIRS += recent
 DIRS += statusbar

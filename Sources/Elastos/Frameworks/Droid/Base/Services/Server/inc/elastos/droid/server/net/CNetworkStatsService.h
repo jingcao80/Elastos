@@ -5,45 +5,55 @@
 #include "elastos/droid/ext/frameworkdef.h"
 #include "_Elastos_Droid_Server_Net_CNetworkStatsService.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include "elastos/droid/net/NetworkIdentitySet.h"
-#include "elastos/droid/net/NetworkStatsRecorder.h"
-#include "elastos/droid/net/NetworkStatsCollection.h"
+#include "elastos/droid/server/net/NetworkStatsCollection.h"
+#include "elastos/droid/server/net/NetworkStatsRecorder.h"
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.Droid.App.h>
+#include <Elastos.Droid.Telephony.h>
+#include <Elastos.Droid.Utility.h>
+#include <elastos/droid/server/net/BaseNetworkObserver.h>
+#include <elastos/utility/etl/HashMap.h>
 
-using Elastos::IO::IFileDescriptor;
-using Elastos::Droid::Utility::ITrustedTime;
-using Elastos::Droid::App::IIActivityManager;
+using Elastos::Droid::App::IAlarmManager;
 using Elastos::Droid::App::IIAlarmManager;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::BroadcastReceiver;
-using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Net::CNetworkStats;
+using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::IIConnectivityManager;
-using Elastos::Droid::Net::INetworkStatsSession;
+using Elastos::Droid::Net::IINetworkManagementEventObserver;
+using Elastos::Droid::Net::IINetworkStatsService;
+using Elastos::Droid::Net::IINetworkStatsSession;
+using Elastos::Droid::Net::INetworkIdentity;
 using Elastos::Droid::Net::INetworkStats;
 using Elastos::Droid::Net::INetworkStatsHistory;
-using Elastos::Droid::Net::INetworkStatsService;
+using Elastos::Droid::Net::INetworkStatsNonMonotonicObserver;
 using Elastos::Droid::Net::INetworkTemplate;
 using Elastos::Droid::Net::INetworkTemplateHelper;
-using Elastos::Droid::Net::INetworkManagementEventObserver;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IHandlerCallback;
 using Elastos::Droid::Os::IHandlerThread;
-using Elastos::Droid::Os::IIPowerManager;
-using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::IINetworkManagementService;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::IPowerManagerWakeLock;
+// using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Telephony::ITelephonyManager;
-
+using Elastos::Droid::Utility::IArrayMap;
+using Elastos::Droid::Utility::ITrustedTime;
+using Elastos::IO::IFile;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IPrintWriter;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Net {
-
-class CNetworkStatsSession;
-class CNetworkStatsServiceAlertObserber;
 
 CarClass(CNetworkStatsService)
     , public Object
@@ -70,9 +80,13 @@ public:
         CNetworkStatsService* mHost;
     };
 
-    class NetworkStatsSettingsConfig : public ElRefBase
+    class NetworkStatsSettingsConfig
+        : public Object
+        , public INetworkStatsSettingsConfig
     {
     public:
+        CAR_INTERFACE_DECL()
+
         NetworkStatsSettingsConfig(
             /* [in] */ Int64 bucketDuration,
             /* [in] */ Int64 rotateAgeMillis,
@@ -80,54 +94,26 @@ public:
             : mBucketDuration(bucketDuration)
             , mRotateAgeMillis(rotateAgeMillis)
             , mDeleteAgeMillis(deleteAgeMillis)
-        { }
+        {}
 
-    public:
+        CARAPI GetBucketDuration(
+            /* [out] */ Int64* result);
+
+        CARAPI GetRotateAgeMillis(
+            /* [out] */ Int64* result);
+
+        CARAPI GetDeleteAgeMillis(
+            /* [out] */ Int64* result);
+
+    private:
         Int64 mBucketDuration;
         Int64 mRotateAgeMillis;
         Int64 mDeleteAgeMillis;
     };
 
-    /**
-     * Settings that can be changed externally.
-     */
-    class NetworkStatsSettings : public ElRefBase
-    {
-    public:
-        virtual CARAPI_(Int64) GetPollInterval() = 0;
-
-        virtual CARAPI_(Int64) GetTimeCacheMaxAge() = 0;
-
-        virtual CARAPI_(Boolean) GetSampleEnabled() = 0;
-
-        virtual CARAPI_(Boolean) GetReportXtOverDev() = 0;
-
-        virtual CARAPI_(AutoPtr<NetworkStatsSettingsConfig>) GetDevConfig() = 0;
-
-        virtual CARAPI_(AutoPtr<NetworkStatsSettingsConfig>) GetXtConfig() = 0;
-
-        virtual CARAPI_(AutoPtr<NetworkStatsSettingsConfig>) GetUidConfig() = 0;
-
-        virtual CARAPI_(AutoPtr<NetworkStatsSettingsConfig>) GetUidTagConfig() = 0;
-
-        virtual CARAPI_(Int64) GetGlobalAlertBytes(
-            /* [in] */ Int64 def) = 0;
-
-        virtual CARAPI_(Int64) GetDevPersistBytes(
-            /* [in] */ Int64 def) = 0;
-
-        virtual CARAPI_(Int64) GetXtPersistBytes(
-            /* [in] */ Int64 def) = 0;
-
-        virtual CARAPI_(Int64) GetUidPersistBytes(
-            /* [in] */ Int64 def) = 0;
-
-        virtual CARAPI_(Int64) GetUidTagPersistBytes(
-            /* [in] */ Int64 def) = 0;
-    };
-
 private:
-    class ConnReceiver : public BroadcastReceiver
+    class ConnReceiver
+        : public BroadcastReceiver
     {
     public:
         ConnReceiver(
@@ -149,7 +135,8 @@ private:
         CNetworkStatsService* mOwner;
     };
 
-    class TetherReceiver : public BroadcastReceiver
+    class TetherReceiver
+        : public BroadcastReceiver
     {
     public:
         TetherReceiver(
@@ -171,7 +158,8 @@ private:
         CNetworkStatsService* mOwner;
     };
 
-    class PollReceiver : public BroadcastReceiver
+    class PollReceiver
+        : public BroadcastReceiver
     {
     public:
         PollReceiver(
@@ -193,7 +181,8 @@ private:
         CNetworkStatsService* mOwner;
     };
 
-    class RemovedReceiver : public BroadcastReceiver
+    class RemovedReceiver
+        : public BroadcastReceiver
     {
     public:
         RemovedReceiver(
@@ -215,7 +204,8 @@ private:
         CNetworkStatsService* mOwner;
     };
 
-    class UserReceiver : public BroadcastReceiver
+    class UserReceiver
+        : public BroadcastReceiver
     {
     public:
         UserReceiver(
@@ -237,7 +227,8 @@ private:
         CNetworkStatsService* mOwner;
     };
 
-    class ShutdownReceiver : public BroadcastReceiver
+    class ShutdownReceiver
+        : public BroadcastReceiver
     {
     public:
         ShutdownReceiver(
@@ -278,14 +269,14 @@ private:
     // };
 
     class DropBoxNonMonotonicObserver
-        : public ElRefBase
-        , public INonMonotonicObserver
+        : public Object
+        , public INetworkStatsNonMonotonicObserver
     {
     public:
+        CAR_INTERFACE_DECL()
+
         DropBoxNonMonotonicObserver(
             /* [in] */ CNetworkStatsService* owner);
-
-        CAR_INTERFACE_DECL()
 
         CARAPI FoundNonMonotonic(
             /* [in] */ INetworkStats* left,
@@ -302,42 +293,59 @@ private:
      * Default external settings that read from
      * {@link android.provider.Settings.Global}.
      */
-    class DefaultNetworkStatsSettings : public NetworkStatsSettings
+    class DefaultNetworkStatsSettings
+        : public Object
+        , public INetworkStatsSettings
     {
     public:
+        CAR_INTERFACE_DECL()
+
         DefaultNetworkStatsSettings(
             /* [in] */ IContext* context);
 
-        CARAPI_(Int64) GetPollInterval();
+        CARAPI GetPollInterval(
+            /* [out] */ Int64* result);
 
-        CARAPI_(Int64) GetTimeCacheMaxAge();
+        CARAPI GetTimeCacheMaxAge(
+            /* [out] */ Int64* result);
 
-        CARAPI_(Boolean) GetSampleEnabled();
+        CARAPI GetSampleEnabled(
+            /* [out] */ Boolean* result);
 
-        CARAPI_(Boolean) GetReportXtOverDev();
+        CARAPI GetReportXtOverDev(
+            /* [out] */ Boolean* result);
 
-        CARAPI_(AutoPtr<NetworkStatsSettingsConfig>) GetDevConfig();
+        CARAPI GetDevConfig(
+            /* [out] */ INetworkStatsSettingsConfig** result);
 
-        CARAPI_(AutoPtr<NetworkStatsSettingsConfig>) GetXtConfig();
+        CARAPI GetXtConfig(
+            /* [out] */ INetworkStatsSettingsConfig** result);
 
-        CARAPI_(AutoPtr<NetworkStatsSettingsConfig>) GetUidConfig();
+        CARAPI GetUidConfig(
+            /* [out] */ INetworkStatsSettingsConfig** result);
 
-        CARAPI_(AutoPtr<NetworkStatsSettingsConfig>) GetUidTagConfig();
+        CARAPI GetUidTagConfig(
+            /* [out] */ INetworkStatsSettingsConfig** result);
 
-        CARAPI_(Int64) GetGlobalAlertBytes(
-            /* [in] */ Int64 def);
+        CARAPI GetGlobalAlertBytes(
+            /* [in] */ Int64 def,
+            /* [out] */ Int64* result);
 
-        CARAPI_(Int64) GetDevPersistBytes(
-            /* [in] */ Int64 def);
+        CARAPI GetDevPersistBytes(
+            /* [in] */ Int64 def,
+            /* [out] */ Int64* result);
 
-        CARAPI_(Int64) GetXtPersistBytes(
-            /* [in] */ Int64 def);
+        CARAPI GetXtPersistBytes(
+            /* [in] */ Int64 def,
+            /* [out] */ Int64* result);
 
-        CARAPI_(Int64) GetUidPersistBytes(
-            /* [in] */ Int64 def);
+        CARAPI GetUidPersistBytes(
+            /* [in] */ Int64 def,
+            /* [out] */ Int64* result);
 
-        CARAPI_(Int64) GetUidTagPersistBytes(
-            /* [in] */ Int64 def);
+        CARAPI GetUidTagPersistBytes(
+            /* [in] */ Int64 def,
+            /* [out] */ Int64* result);
 
     private:
         CARAPI_(Int64) GetGlobalInt64(
@@ -364,20 +372,20 @@ private:
 
         // @Override
         CARAPI GetSummaryForNetwork(
-            /* [in] */ INetworkTemplate* template,
+            /* [in] */ INetworkTemplate* templ,
             /* [in] */ Int64 start,
             /* [in] */ Int64 end,
             /* [out] */ INetworkStats** result);
 
         // @Override
         CARAPI GetHistoryForNetwork(
-            /* [in] */ INetworkTemplate* template,
+            /* [in] */ INetworkTemplate* templ,
             /* [in] */ Int32 fields,
             /* [out] */ INetworkStatsHistory** result);
 
         // @Override
         CARAPI GetSummaryForAllUid(
-            /* [in] */ INetworkTemplate* template,
+            /* [in] */ INetworkTemplate* templ,
             /* [in] */ Int64 start,
             /* [in] */ Int64 end,
             /* [in] */ Boolean includeTags,
@@ -385,7 +393,7 @@ private:
 
         // @Override
         CARAPI GetHistoryForUid(
-            /* [in] */ INetworkTemplate* template,
+            /* [in] */ INetworkTemplate* templ,
             /* [in] */ Int32 uid,
             /* [in] */ Int32 set,
             /* [in] */ Int32 tag,
@@ -396,17 +404,35 @@ private:
         CARAPI Close();
 
     private:
-        CARAPI_(AutoPtr<INetworkStatsCollection>) GetUidComplete();
+        CARAPI_(AutoPtr<NetworkStatsCollection>) GetUidComplete();
 
-        CARAPI_(AutoPtr<INetworkStatsCollection>) GetUidTagComplete();
+        CARAPI_(AutoPtr<NetworkStatsCollection>) GetUidTagComplete();
 
     private:
         CNetworkStatsService* mHost;
-        AutoPtr<INetworkStatsCollection> mUidComplete;
-        AutoPtr<INetworkStatsCollection> mUidTagComplete;
+        AutoPtr<NetworkStatsCollection> mUidComplete;
+        AutoPtr<NetworkStatsCollection> mUidTagComplete;
+    };
+
+    class InnerSub_BaseNetworkObserver
+        : public BaseNetworkObserver
+    {
+    public:
+        InnerSub_BaseNetworkObserver(
+            /* [in] */ CNetworkStatsService* host);
+
+        // @Override
+        CARAPI LimitReached(
+            /* [in] */ const String& limitName,
+            /* [in] */ const String& iface);
+
+    private:
+        CNetworkStatsService* mHost;
     };
 
 public:
+    CAR_OBJECT_DECL()
+
     CAR_INTERFACE_DECL()
 
     CNetworkStatsService();
@@ -465,7 +491,7 @@ public:
         /* [in] */ IIAlarmManager* alarmManager,
         /* [in] */ ITrustedTime* time,
         /* [in] */ IFile* systemDir,
-        /* [in] */ Handle32 settings);
+        /* [in] */ INetworkStatsSettings* settings);
 
 protected:
     CARAPI_(void) Dump(
@@ -587,7 +613,7 @@ private:
 
     CARAPI_(void) HandleMsgRegisterGlobalAlert();
 
-    static CARAPI_(AutoPtr<INetworkIdentitySet>) FindOrCreateNetworkIdentitySet(
+    static CARAPI_(AutoPtr<NetworkIdentitySet>) FindOrCreateNetworkIdentitySet(
         /* [in] */ IArrayMap* map,
         /* [in] */ IInterface* key);
 
@@ -619,10 +645,10 @@ private:
 
     AutoPtr<IContext> mContext;
     AutoPtr<IINetworkManagementService> mNetworkManager;
-    AutoPtr<IIAlarmManager> mAlarmManager;
+    AutoPtr<IAlarmManager> mAlarmManager;
     AutoPtr<ITrustedTime> mTime;
     AutoPtr<ITelephonyManager> mTeleManager;
-    AutoPtr<NetworkStatsSettings> mSettings;
+    AutoPtr<INetworkStatsSettings> mSettings;
     AutoPtr<IFile> mSystemDir;
     AutoPtr<IFile> mBaseDir;
     AutoPtr<IPowerManagerWakeLock> mWakeLock;
@@ -636,7 +662,7 @@ private:
     /** Current default active iface. */
     String mActiveIface;
     /** Set of any ifaces associated with mobile networks since boot. */
-    AutoPtr< ArrayOf<String> > mMobileIfaces;
+    AutoPtr<ArrayOf<String> > mMobileIfaces;
 
     AutoPtr<DropBoxNonMonotonicObserver> mNonMonotonicObserver;
 
@@ -670,15 +696,13 @@ private:
     AutoPtr<BroadcastReceiver> mUserReceiver;
     AutoPtr<BroadcastReceiver> mShutdownReceiver;
 
-    AutoPtr<INetworkManagementEventObserver> mAlertObserver;
+    AutoPtr<IINetworkManagementEventObserver> mAlertObserver;
 
     Int32 mLastPhoneState;
     Int32 mLastPhoneNetworkType;
 
     //AutoPtr<PhoneListener> mPhoneListener;
 
-    friend class CNetworkStatsSession;
-    friend class CNetworkStatsServiceAlertObserber;
 };
 
 } // namespace Net

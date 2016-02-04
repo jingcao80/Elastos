@@ -1,21 +1,36 @@
 
-#include "elastos/droid/media/CRingtone.h"
+#include "elastos/droid/media/CAudioAttributes.h"
+#include "elastos/droid/media/CAudioAttributesBuilder.h"
+#include "elastos/droid/media/CAudioAttributesHelper.h"
 #include "elastos/droid/media/CMediaPlayer.h"
+#include "elastos/droid/media/CRingtone.h"
+#include "elastos/droid/media/CRingtoneManager.h"
 #include "elastos/droid/media/CRingtoneManagerHelper.h"
 #include "elastos/droid/os/CBinder.h"
 #include "elastos/droid/R.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Provider.h"
+#include "Elastos.Droid.Database.h"
+#include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <elastos/core/StringUtils.h>
 
-using namespace Elastos::Core;
 using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Os::CBinder;
 using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::Res::IAssetFileDescriptor;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::Provider::IMediaStore;
 using Elastos::Droid::Provider::IMediaStoreAudioMedia;
-// TODO using Elastos::Droid::Provider::IDrmStoreAudio;
-// using Elastos::Droid::Provider::IDrmStore;
+using Elastos::Droid::Provider::IMediaStoreAudioPlaylistsMembers;
+using Elastos::Droid::Provider::IMediaStoreMediaColumns;
 using Elastos::Droid::R;
+using Elastos::IO::ICloseable;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -27,29 +42,21 @@ const Boolean CRingtone::LOGD = TRUE;
 static AutoPtr<ArrayOf<String> > InitMEDIA_COLUMNS()
 {
     AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(3);
-    array->Set(0, IMediaStoreAudioMedia::ID);
-    array->Set(1, IMediaStoreAudioMedia::DATA);
-    array->Set(2, IMediaStoreAudioMedia::TITLE);
-    return array;
-}
-
-static AutoPtr<ArrayOf<String> > InitDRM_COLUMNS()
-{
-    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(3);
-    // TODO
-    // array->Set(0, IDrmStoreAudio::ID);
-    // array->Set(1, IDrmStoreAudio::DATA);
-    // array->Set(2, IDrmStoreAudio::TITLE);
+    array->Set(0, IMediaStoreAudioPlaylistsMembers::ID);
+    array->Set(1, IMediaStoreMediaColumns::DATA);
+    array->Set(2, IMediaStoreMediaColumns::TITLE);
     return array;
 }
 
 AutoPtr<ArrayOf<String> > CRingtone::MEDIA_COLUMNS = InitMEDIA_COLUMNS();
-AutoPtr<ArrayOf<String> > CRingtone::DRM_COLUMNS = InitDRM_COLUMNS();
 
+CAR_OBJECT_IMPL(CRingtone)
+
+CAR_INTERFACE_IMPL(CRingtone, Object, IRingtone)
 
 CRingtone::CRingtone()
     : mAllowRemote(FALSE)
-    , mStreamType(IAudioManager::STREAM_RING)
+    // , mStreamType(IAudioManager::STREAM_RING)
 {}
 
 CRingtone::~CRingtone()
@@ -71,25 +78,54 @@ ECode CRingtone::constructor(
         CBinder::New((IBinder**)&mRemoteToken);
     }
 
-    return NOERROR;
+    AutoPtr<IAudioAttributesBuilder> ab;
+    CAudioAttributesBuilder::New((IAudioAttributesBuilder**)&ab);
+    ab->SetUsage(IAudioAttributes::USAGE_NOTIFICATION_RINGTONE);
+    ab->SetContentType(IAudioAttributes::CONTENT_TYPE_SONIFICATION);
+
+    return ab->Build((IAudioAttributes**)&mAudioAttributes);
 }
 
 ECode CRingtone::SetStreamType(
     /* [in] */ Int32 streamType)
 {
-    mStreamType = streamType;
+    AutoPtr<IAudioAttributesBuilder> ab;
+    CAudioAttributesBuilder::New((IAudioAttributesBuilder**)&ab);
+    ab->SetInternalLegacyStreamType(streamType);
+    AutoPtr<IAudioAttributes> attributes;
+    ab->Build((IAudioAttributes**)&attributes);
 
-    // The stream type has to be set before the media player is prepared.
-    // Re-initialize it.
-    SetUri(mUri);
-
-    return NOERROR;
+    return SetAudioAttributes(attributes);
 }
 
 ECode CRingtone::GetStreamType(
     /* [out] */ Int32* type)
 {
-    *type = mStreamType;
+    VALIDATE_NOT_NULL(type);
+    AutoPtr<IAudioAttributesHelper> aa;
+    CAudioAttributesHelper::AcquireSingleton((IAudioAttributesHelper**)&aa);
+    return aa->ToLegacyStreamType(mAudioAttributes.Get(), type);
+}
+
+ECode CRingtone::SetAudioAttributes(
+    /* [in] */ IAudioAttributes* attributes)
+{
+    if (attributes == NULL) {
+        Slogger::E(TAG, "Invalid NULL AudioAttributes for Ringtone");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    mAudioAttributes = attributes;
+    // The audio attributes have to be set before the media player is prepared.
+    // Re-initialize it.
+    return SetUri(mUri);
+}
+
+ECode CRingtone::GetAudioAttributes(
+    /* [out] */ IAudioAttributes** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mAudioAttributes;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -136,58 +172,37 @@ String CRingtone::GetTitle(
                 helper->GetActualDefaultRingtoneUri(context, type, (IUri**)&actualUri);
                 String actualTitle = GetTitle(context, actualUri, FALSE);
 
-                AutoPtr<ICharSequence> seq;
-                CString::New(actualTitle, (ICharSequence**)&seq);
                 AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
-                array->Set(0, (IInterface*)seq.Get());
+                array->Set(0, StringUtils::ParseCharSequence(actualTitle).Get());
                 context->GetString(R::string::ringtone_default_with_actual, array, &title);
             }
         }
         else {
-            assert(0 && "TODO");
-            /*
-            if (IDrmStore::AUTHORITY.Equals(authority)) {
-                res->Query(uri, DRM_COLUMNS, nullStr, NULL, nullStr, (ICursor**)&cursor);
-            }
-            else
-            */
+            // try {
             if (IMediaStore::AUTHORITY.Equals(authority)) {
                 res->Query(uri, MEDIA_COLUMNS, nullStr, NULL, nullStr, (ICursor**)&cursor);
             }
+            // } catch (SecurityException e) {
+                // missing cursor is handled below
+            // }
 
             // try {
             Boolean result;
-            ECode ec = NOERROR;
-
             Int32 count = 0;
             if (cursor) {
                 cursor->GetCount(&count);
             }
 
             if (count == 1) {
-                ec = cursor->MoveToFirst(&result);
-                FAIL_GOTO(ec, _EXIT_)
-
-                ec = cursor->GetString(2, &title);
-                FAIL_GOTO(ec, _EXIT_)
-
-_EXIT_:
-                if (cursor != NULL) {
-                    cursor->Close();
-                    cursor = NULL;
-                }
-
-                if (SUCCEEDED(ec)) {
-                    return title;
-                }
-            }
-            else {
+                cursor->MoveToFirst(&result);
+                cursor->GetString(2, &title);
+            } else {
                 uri->GetLastPathSegment(&title);
+            }
 
-                if (cursor != NULL) {
-                    cursor->Close();
-                    cursor = NULL;
-                }
+            if (cursor != NULL) {
+                ICloseable::Probe(cursor)->Close();
+                cursor = NULL;
             }
         }
     }
@@ -220,7 +235,7 @@ ECode CRingtone::SetUri(
     ECode ec = mLocalPlayer->SetDataSource(mContext, mUri);
     FAIL_GOTO(ec, _EXIT_);
 
-    ec = mLocalPlayer->SetAudioStreamType(mStreamType);
+    ec = mLocalPlayer->SetAudioAttributes(mAudioAttributes);
     FAIL_GOTO(ec, _EXIT_);
 
     ec = mLocalPlayer->Prepare();
@@ -268,21 +283,28 @@ ECode CRingtone::Play()
         // do not play ringtones if stream volume is 0
         // (typically because ringer mode is silent).
         Int32 vol;
-        if (mAudioManager->GetStreamVolume(mStreamType, &vol) != 0) {
+        CAudioAttributes::ToLegacyStreamType(mAudioAttributes, &vol);
+        Int32 vol_;
+        mAudioManager->GetStreamVolume(vol != 0, &vol_);
+        if (vol_) {
             mLocalPlayer->Start();
         }
     }
-    else if (mAllowRemote) {
+    else if (mAllowRemote && mRemotePlayer != NULL) {
         AutoPtr<IUri> canonicalUri;
         mUri->GetCanonicalUri((IUri**)&canonicalUri);
         //try {
-        ECode ec = mRemotePlayer->Play(mRemoteToken, canonicalUri, mStreamType);
+        ECode ec = mRemotePlayer->Play(mRemoteToken, canonicalUri, mAudioAttributes);
         if (ec == (ECode)E_REMOTE_EXCEPTION) {
-            Logger::W(TAG, "Problem playing ringtone: E_REMOTE_EXCEPTION");
+            if (!PlayFallbackRingtone()) {
+                Logger::W(TAG, "Problem playing ringtone: E_REMOTE_EXCEPTION");
+            }
         }
     }
     else {
-        Logger::W(TAG, "Neither local nor remote playback available");
+        if (!PlayFallbackRingtone()) {
+            Logger::W(TAG, "Neither local nor remote playback available");
+        }
     }
 
     return NOERROR;
@@ -293,7 +315,7 @@ ECode CRingtone::Stop()
     if (mLocalPlayer != NULL) {
         DestroyLocalPlayer();
     }
-    else if (mAllowRemote) {
+    else if (mAllowRemote && (mRemotePlayer != NULL)) {
         //try {
         ECode ec = mRemotePlayer->Stop(mRemoteToken);
         if (ec == (ECode)E_REMOTE_EXCEPTION) {
@@ -325,7 +347,7 @@ ECode CRingtone::IsPlaying(
     if (mLocalPlayer != NULL) {
         return mLocalPlayer->IsPlaying(playing);
     }
-    else if (mAllowRemote) {
+    else if (mAllowRemote && (mRemotePlayer != NULL)) {
         //try {
         return mRemotePlayer->IsPlaying(mRemoteToken, playing);
         //} catch (RemoteException e) {
@@ -339,6 +361,59 @@ ECode CRingtone::IsPlaying(
     }
 
     return NOERROR;
+}
+
+Boolean CRingtone::PlayFallbackRingtone()
+{
+    Int32 vol;
+    CAudioAttributes::ToLegacyStreamType(mAudioAttributes, &vol);
+    Int32 r;
+    mAudioManager->GetStreamVolume(vol, &r);
+    if (r != 0) {
+        Int32 ringtoneType;
+        CRingtoneManager::GetDefaultType(mUri, &ringtoneType);
+        AutoPtr<IUri> uri;
+        CRingtoneManager::GetActualDefaultRingtoneUri(mContext, ringtoneType, (IUri**)&uri);
+        if (ringtoneType == -1 || uri != NULL) {
+            // Default ringtone, try fallback ringtone.
+            // try {
+            AutoPtr<IResources> res;
+            mContext->GetResources((IResources**)&res);
+            AutoPtr<IAssetFileDescriptor> afd;
+            res->OpenRawResourceFd(R::raw::fallbackring, (IAssetFileDescriptor**)&afd);
+            if (afd != NULL) {
+                CMediaPlayer::New((IMediaPlayer**)&mLocalPlayer);
+                Int64 declaredLength;
+                afd->GetDeclaredLength(&declaredLength);
+                AutoPtr<IFileDescriptor> fd;
+                afd->GetFileDescriptor((IFileDescriptor**)&fd);
+
+                if (declaredLength < 0) {
+                    mLocalPlayer->SetDataSource(fd);
+                } else {
+                    Int64 startOffset;
+                    afd->GetStartOffset(&startOffset);
+                    mLocalPlayer->SetDataSource(fd.Get(), startOffset, declaredLength);
+                }
+                mLocalPlayer->SetAudioAttributes(mAudioAttributes);
+                mLocalPlayer->Prepare();
+                mLocalPlayer->Start();
+                ICloseable::Probe(afd)->Close();
+                return TRUE;
+            } else {
+                Logger::E(TAG, "Could not load fallback ringtone");
+            }
+            // } catch (IOException ioe) {
+                DestroyLocalPlayer();
+                Logger::E(TAG, "Failed to open fallback ringtone");
+            // } catch (NotFoundException nfe) {
+                Logger::E(TAG, "Fallback ringtone does not exist");
+            // }
+        } else {
+            Logger::W(TAG, "not playing fallback for %p", mUri.Get());
+        }
+    }
+    return FALSE;
 }
 
 void CRingtone::SetTitle(

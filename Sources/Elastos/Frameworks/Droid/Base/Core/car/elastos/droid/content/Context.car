@@ -252,6 +252,16 @@ module
         const Int32 BIND_ADJUST_WITH_ACTIVITY = 0x0080;
 
         /**
+         * @hide Flag for {@link #bindService}: Treat the binding as hosting
+         * an activity, an unbinding as the activity going in the background.
+         * That is, when unbinding, the process when empty will go on the activity
+         * LRU list instead of the regular one, keeping it around more aggressively
+         * than it otherwise would be.  This is intended for use with IMEs to try
+         * to keep IME processes around for faster keyboard switching.
+         */
+        const Int32 BIND_TREAT_LIKE_ACTIVITY = 0x08000000;
+
+        /**
          * @hide An idea that is not yet implemented.
          * Flag for #bindService: If binding from an activity, consider
          * this service to be visible like the binding activity is.  That is,
@@ -264,7 +274,7 @@ module
          *
          * @sa #bindService
          */
-        const Int32 BIND_VISIBLE = 0x0100;
+        const Int32 BIND_VISIBLE = 0x10000000;
 
         /**
          * @hide

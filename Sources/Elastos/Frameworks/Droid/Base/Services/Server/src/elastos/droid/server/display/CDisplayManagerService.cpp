@@ -1568,14 +1568,14 @@ void CDisplayManagerService::AddLogicalDisplayLocked(
         & DisplayDeviceInfo::FLAG_DEFAULT_DISPLAY) != 0;
     if (isDefault && mLogicalDisplays.Find(IDisplay::DEFAULT_DISPLAY) != mLogicalDisplays.End()) {
         Slogger::W(TAG, "Ignoring attempt to add a second default display: %s"
-            , Object::ToString(deviceInfo).string());
+            , TO_CSTR(deviceInfo));
         isDefault = FALSE;
     }
 
     if (!isDefault && mSingleDisplayDemoMode) {
         Slogger::I(TAG, "Not creating a logical display for a secondary display "
             " because single display demo mode is enabled: %s",
-            Object::ToString(deviceInfo).string());
+            TO_CSTR(deviceInfo));
         return;
     }
 
@@ -1588,7 +1588,7 @@ void CDisplayManagerService::AddLogicalDisplayLocked(
         // This should never happen currently.
         Slogger::W(TAG, "Ignoring display device because the logical display "
             "created from it was not considered valid: %s",
-            Object::ToString(deviceInfo).string());
+            TO_CSTR(deviceInfo));
         return;
     }
 

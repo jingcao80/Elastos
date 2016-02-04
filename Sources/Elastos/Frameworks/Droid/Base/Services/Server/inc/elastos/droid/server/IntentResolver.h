@@ -1,21 +1,28 @@
 #ifndef __ELASTOS_DROID_SERVER_INTENTRESOLVER_H__
 #define __ELASTOS_DROID_SERVER_INTENTRESOLVER_H__
 
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.Net.h>
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Os.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/utility/etl/HashSet.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/Object.h>
 //#include "elastos/droid/net/Uri.h"
 
 using Elastos::Utility::Etl::HashSet;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::List;
+using Elastos::Utility::IIterator;
 using Elastos::IO::IPrintWriter;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::IIntentFilterAuthorityEntry;
+using Elastos::Droid::Os::IPatternMatcher;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -49,10 +56,14 @@ public:
     // public boolean dump(PrintWriter out, String title, String prefix, String packageName,
     //         boolean printFilter);
 
-//    /**
-//     * Returns an iterator allowing filters to be removed.
-//     */
-//    public Iterator<F> filterIterator();
+    /**
+     * Returns an iterator allowing filters to be removed.
+     */
+    virtual CARAPI_(AutoPtr<IIterator>) FilterIterator()
+    {
+        assert(0);
+        return NULL;
+    }
 
     /**
      * Returns a read-only set of the filters.
@@ -588,8 +599,8 @@ AutoPtr< List< AutoPtr<R> > > IntentResolver<F, R>::QueryIntent(
 //                ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
 
     // if (debug) Slog.v(
-    //         TAG, "Resolving type=" + resolvedType + " scheme=" + scheme
-    //         + " defaultOnly=" + defaultOnly + " userId=" + userId + " of " + intent);
+    //     TAG, "Resolving type=" + resolvedType + " scheme=" + scheme
+    //     + " defaultOnly=" + defaultOnly + " userId=" + userId + " of " + intent);
 
     AutoPtr< ArrayOf<F*> > firstTypeCut;
     AutoPtr< ArrayOf<F*> > secondTypeCut;

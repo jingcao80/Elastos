@@ -285,13 +285,13 @@ ECode CMediaDrm::OpenSession(
     /* [out, callee] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result)
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::CloseSession(
     /* [in] */ ArrayOf<Byte>* sessionId)
 {
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::GetKeyRequest(
@@ -303,7 +303,7 @@ ECode CMediaDrm::GetKeyRequest(
     /* [out] */ IMediaDrmKeyRequest** result)
 {
     VALIDATE_NOT_NULL(result)
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::ProvideKeyResponse(
@@ -312,7 +312,7 @@ ECode CMediaDrm::ProvideKeyResponse(
     /* [out, callee] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result)
-
+    return NOERROR;
 }
 
 
@@ -320,13 +320,13 @@ ECode CMediaDrm::RestoreKeys(
     /* [in] */ ArrayOf<Byte>* sessionId,
     /* [in] */ ArrayOf<Byte>* keySetId)
 {
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::RemoveKeys(
     /* [in] */ ArrayOf<Byte>* sessionId)
 {
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::QueryKeyStatus(
@@ -334,7 +334,7 @@ ECode CMediaDrm::QueryKeyStatus(
     /* [out] */ IHashMap** result)
 {
     VALIDATE_NOT_NULL(result)
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::GetProvisionRequest(
@@ -356,21 +356,21 @@ ECode CMediaDrm::ProvideProvisionResponse(
 // TODO: Need jni code
 ECode CMediaDrm::UnprovisionDevice()
 {
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::GetSecureStops(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result)
-
+    return NOERROR;
 }
 
 
 ECode CMediaDrm::ReleaseSecureStops(
     /* [in] */ ArrayOf<Byte>* ssRelease)
 {
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::GetPropertyString(
@@ -378,7 +378,7 @@ ECode CMediaDrm::GetPropertyString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::GetPropertyByteArray(
@@ -386,21 +386,21 @@ ECode CMediaDrm::GetPropertyByteArray(
     /* [out, callee] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result)
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::SetPropertyString(
     /* [in] */ const String& propertyName,
     /* [in] */ const String& value)
 {
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::SetPropertyByteArray(
     /* [in] */ const String& propertyName,
     /* [in] */ ArrayOf<Byte>* value)
 {
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::GetCryptoSession(
@@ -457,7 +457,7 @@ ECode CMediaDrm::SignRSA(
 
 ECode CMediaDrm::ReleaseResources()
 {
-
+    return NOERROR;
 }
 
 ECode CMediaDrm::IsCryptoSchemeSupported(
@@ -500,7 +500,7 @@ Boolean CMediaDrm::IsCryptoSchemeSupportedNative(
     /* [in] */ ArrayOf<Byte>* uuid,
     /* [in] */ const String& mimeType)
 {
-
+    return FALSE;
 }
 
 void CMediaDrm::PostEventFromNative(
@@ -526,13 +526,13 @@ AutoPtr<CMediaDrm::ProvisionRequest> CMediaDrm::GetProvisionRequestNative(
     /* [in] */ Int32 certType,
     /* [in] */ const String& certAuthority)
 {
-
+    return NULL;
 }
 
 AutoPtr<CMediaDrm::Certificate> CMediaDrm::ProvideProvisionResponseNative(
     /* [in] */ ArrayOf<Byte>* response)
 {
-
+    return NULL;
 }
 
 void CMediaDrm::SetCipherAlgorithmNative(
@@ -558,7 +558,7 @@ AutoPtr<ArrayOf<Byte> > CMediaDrm::EncryptNative(
     /* [in] */ ArrayOf<Byte>* input,
     /* [in] */ ArrayOf<Byte>* iv)
 {
-
+    return NULL;
 }
 
 AutoPtr<ArrayOf<Byte> > CMediaDrm::DecryptNative(
@@ -568,7 +568,7 @@ AutoPtr<ArrayOf<Byte> > CMediaDrm::DecryptNative(
     /* [in] */ ArrayOf<Byte>* input,
     /* [in] */ ArrayOf<Byte>* iv)
 {
-
+    return NULL;
 }
 
 AutoPtr<ArrayOf<Byte> > CMediaDrm::SignNative(
@@ -577,7 +577,7 @@ AutoPtr<ArrayOf<Byte> > CMediaDrm::SignNative(
     /* [in] */ ArrayOf<Byte>* keyId,
     /* [in] */ ArrayOf<Byte>* message)
 {
-
+    return NULL;
 }
 
 Boolean CMediaDrm::VerifyNative(
@@ -587,7 +587,7 @@ Boolean CMediaDrm::VerifyNative(
     /* [in] */ ArrayOf<Byte>* message,
     /* [in] */ ArrayOf<Byte>* signature)
 {
-
+    return FALSE;
 }
 
 AutoPtr<ArrayOf<Byte> > CMediaDrm::SignRSANative(
@@ -597,7 +597,7 @@ AutoPtr<ArrayOf<Byte> > CMediaDrm::SignRSANative(
     /* [in] */ ArrayOf<Byte>* wrappedKey,
     /* [in] */ ArrayOf<Byte>* message)
 {
-
+    return NULL;
 }
 
 void CMediaDrm::NativeInit()

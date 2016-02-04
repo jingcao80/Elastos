@@ -1,34 +1,43 @@
 
-#include "location/MockProvider.h"
+#include "elastos/droid/server/location/MockProvider.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Droid::Location::CLocation;
+using Elastos::Droid::Location::ILocationProvider;
+using Elastos::Droid::Os::CBundle;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Location {
 
-// {ac01c312-65e8-445a-a973-2ea720a308a8}
-extern "C" const InterfaceID EIID_ILocationProviderInterface =
-        { 0xac01c312, 0x65e8, 0x445a, { 0xa9, 0x73, 0x2e, 0xa7, 0x20, 0xa3, 0x08, 0xa8 } };
-
 const String MockProvider::TAG("MockProvider");
 
-CAR_INTERFACE_IMPL(MockProvider, ILocationProviderInterface)
+CAR_INTERFACE_IMPL(MockProvider, Object, ILocationProviderInterface)
 
 MockProvider::MockProvider(
     /* [in] */ const String& name,
     /* [in] */ IILocationManager* locationManager,
     /* [in] */ IProviderProperties* properties)
+    : mStatus(0)
+    , mStatusUpdateTime(0L)
+    , mHasLocation(FALSE)
+    , mHasStatus(FALSE)
+    , mEnabled(FALSE)
 {
-    //if (properties == null) throw new NullPointerException("properties is null");
-    assert(properties != NULL);
-
+    if (properties == NULL) {
+        Logger::E(TAG, "properties is null");
+    }
     mName = name;
     mLocationManager = locationManager;
     mProperties = properties;
     CLocation::New(name, (ILocation**)&mLocation);
+    CBundle::New((IBundle**)&mExtras);
 }
 
-//@Override
 ECode MockProvider::GetName(
     /* [out] */ String* name)
 {
@@ -37,7 +46,6 @@ ECode MockProvider::GetName(
     return NOERROR;
 }
 
-//@Override
 ECode MockProvider::GetProperties(
     /* [out] */ IProviderProperties** properties)
 {
@@ -48,21 +56,18 @@ ECode MockProvider::GetProperties(
     return NOERROR;
 }
 
-//@Override
 ECode MockProvider::Disable()
 {
     mEnabled = FALSE;
     return NOERROR;
 }
 
-//@Override
 ECode MockProvider::Enable()
 {
     mEnabled = TRUE;
     return NOERROR;
 }
 
-//@Override
 ECode MockProvider::IsEnabled(
     /* [out] */ Boolean* enable)
 {
@@ -71,14 +76,11 @@ ECode MockProvider::IsEnabled(
     return NOERROR;
 }
 
-//@Override
 ECode MockProvider::GetStatus(
     /* [in] */ IBundle* extras,
     /* [out] */ Int32* status)
 {
-    VALIDATE_NOT_NULL(extras);
     VALIDATE_NOT_NULL(status);
-
     if (mHasStatus) {
         extras->Clear();
         extras->PutAll(mExtras);
@@ -86,11 +88,9 @@ ECode MockProvider::GetStatus(
     } else {
         *status = ILocationProvider::AVAILABLE;
     }
-
     return NOERROR;
 }
 
-//@Override
 ECode MockProvider::GetStatusUpdateTime(
     /* [out] */ Int64* time)
 {
@@ -99,26 +99,28 @@ ECode MockProvider::GetStatusUpdateTime(
     return NOERROR;
 }
 
-void MockProvider::SetLocation(
+ECode MockProvider::SetLocation(
     /* [in] */ ILocation* l)
 {
     mLocation->Set(l);
     mHasLocation = TRUE;
     if (mEnabled) {
-        //try {
-            mLocationManager->ReportLocation(mLocation, FALSE);
-        //} catch (RemoteException e) {
-        //    Log.e(TAG, "RemoteException calling reportLocation");
-        //}
+        ECode ec = mLocationManager->ReportLocation(mLocation, FALSE);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "RemoteException calling reportLocation");
+            return E_REMOTE_EXCEPTION;
+        }
     }
+    return NOERROR;
 }
 
-void MockProvider::ClearLocation()
+ECode MockProvider::ClearLocation()
 {
     mHasLocation = FALSE;
+    return NOERROR;
 }
 
-void MockProvider::SetStatus(
+ECode MockProvider::SetStatus(
     /* [in] */ Int32 status,
     /* [in] */ IBundle* extras,
     /* [in] */ Int64 updateTime)
@@ -130,40 +132,39 @@ void MockProvider::SetStatus(
         mExtras->PutAll(extras);
     }
     mHasStatus = TRUE;
+    return NOERROR;
 }
 
-void MockProvider::ClearStatus()
+ECode MockProvider::ClearStatus()
 {
     mHasStatus = FALSE;
     mStatusUpdateTime = 0;
+    return NOERROR;
 }
 
-//@Override
 ECode MockProvider::Dump(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
-    Dump(pw, String(""));
+    return Dump(pw, String(""));
+}
+
+ECode MockProvider::Dump(
+    /* [in] */ IPrintWriter* pw,
+    /* [in] */ const String& prefix)
+{
+    pw->Println(prefix + mName);
+    pw->Println(prefix + "mHasLocation=" + (mHasLocation ? "TRUE" : "FALSE"));
+    pw->Println(prefix + "mLocation:");
+    // mLocation->Dump(new PrintWriterPrinter(pw), prefix + "  ");
+    pw->Println(prefix + "mHasStatus=" + (mHasStatus ? "TRUE" : "FALSE"));
+    // pw->Println(prefix + "mStatus=" + mStatus);
+    // pw->Println(prefix + "mStatusUpdateTime=" + mStatusUpdateTime);
+    // pw->Println(prefix + "mExtras=" + mExtras);
     return NOERROR;
 }
 
-void MockProvider::Dump(
-    /* [in] */ IPrintWriter* pw,
-    /* [in] */ const String& prefix)
-{/*
-    pw.println(prefix + mName);
-    pw.println(prefix + "mHasLocation=" + mHasLocation);
-    pw.println(prefix + "mLocation:");
-    mLocation.dump(new PrintWriterPrinter(pw), prefix + "  ");
-    pw.println(prefix + "mHasStatus=" + mHasStatus);
-    pw.println(prefix + "mStatus=" + mStatus);
-    pw.println(prefix + "mStatusUpdateTime=" + mStatusUpdateTime);
-    pw.println(prefix + "mExtras=" + mExtras);
-*/
-}
-
-//@Override
 ECode MockProvider::SetRequest(
     /* [in] */ IProviderRequest* request,
     /* [in] */ IWorkSource* source)
@@ -171,15 +172,6 @@ ECode MockProvider::SetRequest(
     return NOERROR;
 }
 
-//@Override
-ECode MockProvider::SwitchUser(
-    /* [in] */ Int32 userId)
-{
-    // nothing to do here
-    return NOERROR;
-}
-
-//@Override
 ECode MockProvider::SendExtraCommand(
     /* [in] */ const String& command,
     /* [in] */ IBundle* extras,

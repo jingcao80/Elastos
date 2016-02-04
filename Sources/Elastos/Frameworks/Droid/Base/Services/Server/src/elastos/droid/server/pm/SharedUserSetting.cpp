@@ -42,9 +42,10 @@ ECode SharedUserSetting::ToString(
     AutoPtr<ISystem> sys;
     CSystem::AcquireSingleton((ISystem**)&sys);
     Int32 hashCode;
-    sys->IdentityHashCode((IInterface*)this, &hashCode);
+    sys->IdentityHashCode((IInterface*)(IObject*)this, &hashCode);
     *str = String("SharedUserSetting{") + StringUtils::ToHexString(hashCode) + " "
-            + mName + "/" + mUserId + "}";
+            + mName + "/" + StringUtils::ToString(mUserId) + "}";
+    return NOERROR;
 }
 
 void SharedUserSetting::RemovePackage(
@@ -58,7 +59,7 @@ void SharedUserSetting::RemovePackage(
             Int32 aggregatedFlags = mUidFlags;
             it = mPackages.Begin();
             for (; it != mPackages.End(); ++it) {
-                aggregatedFlags |= ps->mPkgFlags;
+                aggregatedFlags |= (*it)->mPkgFlags;
             }
             SetFlags(aggregatedFlags);
         }

@@ -1,167 +1,269 @@
-#ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_NOTIFICATIONDATA_H__
-#define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_NOTIFICATIONDATA_H__
 
-#include "elastos/droid/ext/frameworkext.h"
-#include <elastos/utility/etl/List.h>
+#ifndef  __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_NOTIFICATIONDATA_H__
+#define  __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_NOTIFICATIONDATA_H__
 
-using Elastos::Utility::Etl::List;
+#include <elastos/droid/ext/frameworkext.h>
+#include "_SystemUI.h"
+#include "Elastos.Droid.Service.h"
+#include <elastos/core/Object.h>
+
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::Widget::IImageView;
-using Elastos::Droid::StatusBar::IStatusBarNotification;
-using Elastos::Droid::SystemUI::StatusBar::IStatusBarIconView;
+using Elastos::Droid::Service::Notification::INotificationListenerServiceRanking;
+using Elastos::Droid::Service::Notification::INotificationListenerServiceRankingMap;
+using Elastos::Droid::Service::Notification::IStatusBarNotification;
+using Elastos::Droid::Packages::SystemUI::StatusBar::IStatusBarIconView;
+using Elastos::Droid::Utility::IArrayMap;
+using Elastos::Droid::Utility::IArraySet;
+using Elastos::Core::IComparator;
+using Elastos::Core::Object;
+using Elastos::IO::IPrintWriter;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
+namespace Packages {
 namespace SystemUI {
 namespace StatusBar {
 
-class NotificationDataEntry : public ElRefBase
+class NotificationData
+    : public Object
+    , public INotificationData
 {
-public:
-    NotificationDataEntry();
-
-    NotificationDataEntry(
-        /* [in] */ IBinder* key,
-        /* [in] */ IStatusBarNotification* n,
-        /* [in] */ IStatusBarIconView* ic);
-
-    CARAPI_(void) SetLargeView(
-        /* [in] */ IView* expandedLarge);
-
-    CARAPI_(AutoPtr<IView>) GetLargeView();
-
-    /**
-     * Return whether the entry can be expanded.
-     */
-    CARAPI_(Boolean) Expandable();
-
-    /**
-     * Return whether the entry has been manually expanded by the user.
-     */
-    CARAPI_(Boolean) UserExpanded();
-
-    /**
-     * Set the flag indicating that this was manually expanded by the user.
-     */
-    CARAPI_(Boolean) SetUserExpanded(
-        /* [in] */ Boolean userExpanded);
-
-    /**
-     * Return whether the entry is being touched by the user.
-     */
-    CARAPI_(Boolean) UserLocked();
-
-    /**
-     * Set the flag indicating that this is being touched by the user.
-     */
-    CARAPI_(Boolean) SetUserLocked(
-        /* [in] */ Boolean userLocked);
-
-    static CARAPI_(Int32) Compare(
-        /* [in] */ const NotificationDataEntry* lhs,
-        /* [in] */ const NotificationDataEntry* rhs);
+private:
+    class Comparator;
 
 public:
-    AutoPtr<IBinder> mKey;
-    AutoPtr<IStatusBarNotification> mNotification;
-    AutoPtr<IStatusBarIconView> mIcon;
-    AutoPtr<IView> mRow; // the outer expanded view
-    AutoPtr<IView> mContent; // takes the click events and sends the PendingIntent
-    AutoPtr<IView> mExpanded; // the inflated RemoteViews
-    AutoPtr<IImageView> mLargeIcon;
-};
+    class Entry
+        : public Object
+        , public INotificationDataEntry
+    {
+    public:
+        CAR_INTERFACE_DECL();
 
+        Entry();
 
-class NotificationData : public ElRefBase
-{
-public:
-    CARAPI_(Int32) Size();
+        Entry(
+            /* [in] */ IStatusBarNotification* n,
+            /* [in] */ IStatusBarIconView* ic);
 
-    CARAPI_(AutoPtr<NotificationDataEntry>) Get(
-        /* [in] */ Int32 i);
+        CARAPI SetBigContentView(
+            /* [in] */ IView* expandedLarge);
 
-    CARAPI_(List<AutoPtr<NotificationDataEntry> >::Iterator) FindIteratorByKey(
-        /* [in] */ IBinder* key);
+        CARAPI GetBigContentView(
+            /* [out] */ IView** view);
 
-    CARAPI_(AutoPtr<NotificationDataEntry>) FindByKey(
-        /* [in] */ IBinder* key);
+        CARAPI GetPublicContentView(
+            /* [out] */ IView** view);
 
-    CARAPI_(Int32) Add(
-        /* [in] */ NotificationDataEntry* entry);
+        CARAPI SetInterruption();
 
-    CARAPI_(Int32) Add(
-        /* [in] */ IBinder* key,
-        /* [in] */ IStatusBarNotification* notification,
-        /* [in] */ IView* row,
-        /* [in] */ IView* content,
-        /* [in] */ IView* expanded,
-        /* [in] */ IStatusBarIconView* icon);
+        CARAPI HasInterrupted(
+            /* [out] */ Boolean* has);
 
-    CARAPI_(AutoPtr<NotificationDataEntry>) Remove(
-        /* [in] */ IBinder* key);
+        /**
+         * Resets the notification entry to be re-used.
+         */
+        CARAPI Reset();
 
-    /**
-     * Return whether there are any visible items (i.e. items without an error).
-     */
-    CARAPI_(Boolean) HasVisibleItems();
+        CARAPI SetKey(
+            /* [in] */ const String& key);
 
-    /**
-     * Return whether there are any clearable items (that aren't errors).
-     */
-    CARAPI_(Boolean) HasClearableItems();
+        CARAPI GetKey(
+            /* [out] */ String* key);
 
-    /**
-     * Return whether the entry can be expanded.
-     */
-    static CARAPI_(Boolean) GetIsExpandable(
-        /* [in] */ IView* row);
+        CARAPI SetNotification(
+            /* [in] */ IStatusBarNotification* sbn);
 
-    /**
-     * Return whether the entry has been manually expanded by the user.
-     */
-    static CARAPI_(Boolean) GetUserExpanded(
-        /* [in] */ IView* row);
+        CARAPI GetNotification(
+            /* [out] */ IStatusBarNotification** sbn);
 
-    /**
-     * Set whether the entry has been manually expanded by the user.
-     */
-    static CARAPI_(Boolean) SetUserExpanded(
-        /* [in] */ IView* row,
-        /* [in] */ Boolean userExpanded);
+        CARAPI SetIcon(
+            /* [in] */ IStatusBarIconView* view);
 
-    /**
-     * Return whether the entry is being touched by the user.
-     */
-    static CARAPI_(Boolean) GetUserLocked(
-        /* [in] */ IView* row);
+        CARAPI GetIcon(
+            /* [out] */ IStatusBarIconView** view);
 
-    /**
-     * Set whether the entry is being touched by the user.
-     */
-    static CARAPI_(Boolean) SetUserLocked(
-        /* [in] */ IView* row,
-        /* [in] */ Boolean userLocked);
+        CARAPI SetRow(
+            /* [in] */ IExpandableNotificationRow* row); // the outer expanded view
 
-protected:
-    static CARAPI_(Boolean) ReadBooleanTag(
-        /* [in] */ IView* view,
-        /* [in] */ Int32 id);
+        CARAPI GetRow(
+            /* [out] */ IExpandableNotificationRow** row);
 
-    static CARAPI_(Boolean) WriteBooleanTag(
-        /* [in] */ IView* view,
-        /* [in] */ Int32 id,
-        /* [in] */ Boolean value);
+        CARAPI SetExpanded(
+            /* [in] */ IView* view); // the inflated RemoteViews
+
+        CARAPI GetExpanded(
+            /* [out] */ IView** view);
+
+        CARAPI SetExpandedPublic(
+            /* [in] */ IView* view); // for insecure lockscreens
+
+        CARAPI GetExpandedPublic(
+            /* [out] */ IView** view);
+
+        CARAPI SetExpandedBig(
+            /* [in] */ IView* big);
+
+        CARAPI GetExpandedBig(
+            /* [out] */ IView** big);
+
+        CARAPI SetAutoRedacted(
+            /* [in] */ Boolean value); // whether the redacted notification was generated by us
+
+        CARAPI GetAutoRedacted(
+            /* [out] */ Boolean* value);
+
+        CARAPI SetLegacy(
+            /* [in] */ Boolean value); // whether the notification has a legacy, dark background
+
+        CARAPI GetLegacy(
+            /* [out] */ Boolean* result);
+
+        CARAPI SetTargetSdk(
+            /* [in] */ Int32 sdk);
+
+        CARAPI GetTargetSdk(
+            /* [out] */ Int32* sdk);
+
+    public:
+        String mKey;
+        AutoPtr<IStatusBarNotification> mNotification;
+        AutoPtr<IStatusBarIconView> mIcon;
+        AutoPtr<IExpandableNotificationRow> mRow; // the outer expanded view
+        AutoPtr<IView> mExpanded; // the inflated RemoteViews
+        AutoPtr<IView> mExpandedPublic; // for insecure lockscreens
+        AutoPtr<IView> mExpandedBig;
+        Boolean mAutoRedacted; // whether the redacted notification was generated by us
+        Boolean mLegacy; // whether the notification has a legacy, dark background
+        Int32 mTargetSdk;
+
+    private:
+        Boolean mInterruption;
+        friend class Comparator;
+    };
 
 private:
-    friend class NotificationDataEntry;
-    List<AutoPtr<NotificationDataEntry> > mEntries;
+    class Comparator
+        : public Object
+        , public IComparator
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        Comparator(
+            /* [in] */ NotificationData* host);
+
+        // @Override
+        CARAPI Compare(
+            /* [in] */ IInterface* a,
+            /* [in] */ IInterface* b,
+            /* [out] */ Int32* result);
+
+    private:
+        NotificationData* mHost;
+        AutoPtr<INotificationListenerServiceRanking> mRankingA;
+        AutoPtr<INotificationListenerServiceRanking> mRankingB;
+    };
+
+public:
+    CAR_INTERFACE_DECL();
+
+    NotificationData(
+        /* [in] */ INotificationEnvironment* environment);
+
+    /**
+     * Returns the sorted list of active notifications (depending on {@link Environment}
+     *
+     * <p>
+     * This call doesn't update the list of active notifications. Call {@link #filterAndSort()}
+     * when the environment changes.
+     * <p>
+     * Don't hold on to or modify the returned list.
+     */
+    CARAPI GetActiveNotifications(
+        /* [out] */ IArrayList** list);
+
+    CARAPI Get(
+        /* [in] */ const String& key,
+        /* [out] */ INotificationDataEntry** entry);
+
+    CARAPI Add(
+        /* [in] */ INotificationDataEntry* entry,
+        /* [in] */ INotificationListenerServiceRankingMap* ranking);
+
+    CARAPI Remove(
+        /* [in] */ const String& key,
+        /* [in] */ INotificationListenerServiceRankingMap* ranking,
+        /* [out] */ INotificationDataEntry** entry);
+
+    CARAPI UpdateRanking(
+        /* [in] */ INotificationListenerServiceRankingMap* ranking);
+
+    CARAPI IsAmbient(
+        /* [in] */ const String& key,
+        /* [out] */ Boolean* result);
+
+    CARAPI GetVisibilityOverride(
+        /* [in] */ const String& key,
+        /* [out] */ Int32* result);
+
+    // TODO: This should not be public. Instead the Environment should notify this class when
+    // anything changed, and this class should call back the UI so it updates itself.
+    CARAPI FilterAndSort();
+
+    CARAPI IsGroupWithSummary(
+        /* [in] */ const String& groupKey,
+        /* [out] */ Boolean* result);
+
+    CARAPI_(Boolean) ShouldFilterOut(
+        /* [in] */ IStatusBarNotification* sbn);
+
+    /**
+     * Return whether there are any clearable notifications (that aren't errors).
+     */
+    CARAPI HasActiveClearableNotifications(
+        /* [out] */ Boolean* result);
+
+    // Q: What kinds of notifications should show during setup?
+    // A: Almost none! Only things coming from the system (package is "android") that also
+    // have special "kind" tags marking them as relevant for setup (see below).
+    static CARAPI_(Boolean) ShowNotificationEvenIfUnprovisioned(
+        /* [in] */ IStatusBarNotification* sbn);
+
+    CARAPI_(void) Dump(
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ const String& indent);
+
+private:
+    CARAPI_(void) UpdateRankingAndSort(
+        /* [in] */ INotificationListenerServiceRankingMap* ranking);
+
+    CARAPI_(void) DumpEntry(
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ const String& indent,
+        /* [in] */ Int32 i,
+        /* [in] */ Entry* e);
+
+    static CARAPI_(Boolean) IsSystemNotification(
+        /* [in] */ IStatusBarNotification* sbn);
+
+private:
+    AutoPtr<INotificationEnvironment> mEnvironment;
+
+    AutoPtr<IArrayMap/*<String, Entry*/> mEntries;
+    AutoPtr<IArrayList/*<Entry*/> mSortedAndFiltered;
+    AutoPtr<IArraySet/*<String*/> mGroupsWithSummaries;
+    AutoPtr<IComparator/*<Entry*/> mRankingComparator;
+    AutoPtr<INotificationListenerServiceRankingMap> mRankingMap;
+    AutoPtr<INotificationListenerServiceRanking> mTmpRanking;
 };
 
+} // namespace StatusBar
+} // namespace SystemUI
+} // namespace Packages
+} // namespace Droid
+} // namespace Elastos
 
-}// namespace StatusBar
-}// namespace SystemUI
-}// namespace Droid
-}// namespace Elastos
-
-#endif //__ELASTOS_DROID_SYSTEMUI_STATUSBAR_NOTIFICATIONDATA_H__
+#endif // __ELASTOS_DROID_PACKAGES_SYSTEMUI_STATUSBAR_NOTIFICATIONDATA_H__

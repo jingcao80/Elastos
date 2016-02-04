@@ -1,15 +1,17 @@
 
 #include "elastos/droid/server/pm/PersistentPreferredActivity.h"
 #include "elastos/droid/server/pm/CPackageManagerService.h"
-#include "elastos/droid/util/XmlUtils.h"
+#include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Content::CComponentNameHelper;
 using Elastos::Droid::Content::IComponentNameHelper;
 using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Utility::XmlUtils;
+using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Utility::ILogHelper;
 using Elastos::Core::StringUtils;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 
 namespace Elastos {
 namespace Droid {
@@ -19,7 +21,7 @@ namespace Pm {
 const String PersistentPreferredActivity::ATTR_NAME("name");
 const String PersistentPreferredActivity::ATTR_FILTER("filter");
 const String PersistentPreferredActivity::TAG("PersistentPreferredActivity");
-static const Boolean DEBUG_FILTERS;
+const Boolean PersistentPreferredActivity::DEBUG_FILTERS;
 
 PersistentPreferredActivity::PersistentPreferredActivity(
     /* [in] */ IIntentFilter* filter,
@@ -36,10 +38,10 @@ PersistentPreferredActivity::PersistentPreferredActivity(
     parser->GetAttributeValue(String(NULL), ATTR_NAME, &shortComponent);
     AutoPtr<IComponentNameHelper> helper;
     CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&helper);
-    helper->UnflattenFromString(name, (IComponentName**)&mComponent);
+    helper->UnflattenFromString(shortComponent, (IComponentName**)&mComponent);
     if (mComponent == NULL) {
-        Srring desc;
-        parser->GetPositiondescription(&desc);
+        String desc;
+        parser->GetPositionDescription(&desc);
         CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                 String("Error in package manager settings: ") +
                         "Bad activity name " + shortComponent +
@@ -50,7 +52,7 @@ PersistentPreferredActivity::PersistentPreferredActivity(
     String tagName;
     parser->GetName(&tagName);
     Int32 type, depth;
-    while ((parser->GetNext(&type), type != IXmlPullParser::END_DOCUMENT)
+    while ((parser->Next(&type), type != IXmlPullParser::END_DOCUMENT)
             && (type != IXmlPullParser::END_TAG || (parser->GetDepth(&depth), depth > outerDepth))) {
         parser->GetName(&tagName);
         if (type == IXmlPullParser::END_TAG || type == IXmlPullParser::TEXT) {
@@ -61,8 +63,8 @@ PersistentPreferredActivity::PersistentPreferredActivity(
                 break;
             }
             else {
-                Srring desc;
-                parser->GetPositiondescription(&desc);
+                String desc;
+                parser->GetPositionDescription(&desc);
                 CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
                         String("Unknown element: ") + tagName + " at " + desc);
                 XmlUtils::SkipCurrentTag(parser);
@@ -73,10 +75,10 @@ PersistentPreferredActivity::PersistentPreferredActivity(
         ReadFromXml(parser);
     }
     else {
-        Srring desc;
-        parser->GetPositiondescription(&desc);
+        String desc;
+        parser->GetPositionDescription(&desc);
         CPackageManagerService::ReportSettingsProblem(ILogHelper::WARN,
-                String("Missing element filter at ") + descs);
+                String("Missing element filter at ") + desc);
         XmlUtils::SkipCurrentTag(parser);
     }
 }
@@ -96,15 +98,15 @@ ECode PersistentPreferredActivity::WriteToXml(
 ECode PersistentPreferredActivity::ToString(
     /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(result)
+    VALIDATE_NOT_NULL(str)
     AutoPtr<ISystem> system;
     CSystem::AcquireSingleton((ISystem**)&system);
     Int32 hashCode;
     system->IdentityHashCode((IObject*)this, &hashCode);
-    String str;
-    mComponent->FlattenToShortString(&str);
+    String s;
+    mComponent->FlattenToShortString(&s);
     *str = String("PersistentPreferredActivity{0x") + StringUtils::ToHexString(hashCode)
-            + " " + str + "}";
+            + " " + s + "}";
     return NOERROR;
 }
 

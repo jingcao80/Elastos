@@ -51,12 +51,8 @@ ECode CAtomicInteger32::LazySet(
 {
     volatile Int32* address = &mValue;
 
-    // TODO:
-    // ANDROID_MEMBAR_STORE();
-    // *address = newValue;
-    // return NOERROR;
-
-//    unsafe.putOrderedInt(this, valueOffset, newValue);
+    ANDROID_MEMBAR_STORE();
+    *address = newValue;
     return NOERROR;
 }
 

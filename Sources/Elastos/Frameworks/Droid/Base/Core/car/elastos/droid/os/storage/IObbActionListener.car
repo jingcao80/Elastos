@@ -12,7 +12,7 @@ module
      *
      * @hide - Applications should use StorageManager to interact with OBBs.
      */
-    interface IObbActionListener {
+    interface IIObbActionListener {
         /**
          * Return from an OBB action result.
          *

@@ -4,6 +4,7 @@ TARGET_TYPE= lib
 include $(MAKEDIR)/../../../../../../../sources.inc
 
 C_DEFINES += -DDROID_CORE
+C_DEFINES += -DTHROW_ON_BAD_ID
 
 INCLUDES += ../../
 INCLUDES += $(MAKEDIR)/../../../../../inc/

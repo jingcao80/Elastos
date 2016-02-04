@@ -26,7 +26,7 @@ using Elastos::Droid::Content::Res::ICompatibilityInfo;
 using Elastos::Droid::Internal::App::IProcessState;
 using Elastos::Droid::Internal::App::IProcessStateHolder;
 using Elastos::Droid::Internal::Os::IBatteryStatsImpl;
-using Elastos::Droid::Os::IBatteryStatsUidProc;
+using Elastos::Droid::Internal::Os::IBatteryStatsImplUidProc;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Utility::IArrayMap;
@@ -139,7 +139,7 @@ public:
                                 // 'persistent' is true (in which case we
                                 // are in the process of launching the app)
     AutoPtr<IProcessState> mBaseProcessTracker;
-    AutoPtr<IBatteryStatsUidProc> mCurProcBatteryStats;
+    AutoPtr<IBatteryStatsImplUidProc> mCurProcBatteryStats;
     Int32 mPid;
     Boolean mStarting;            // True if the process is being started
     Int64 mLastActivityTime;      // For managing the LRU list

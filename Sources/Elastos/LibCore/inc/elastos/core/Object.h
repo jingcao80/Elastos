@@ -216,9 +216,6 @@ public:
         /* [out] */ IWeakReference** weakReference);
 
 public:
-    NativeObject* mNativeObject;
-
-public:
     //================================================================
     // static methods
     //================================================================
@@ -274,6 +271,21 @@ public:
     static CARAPI_(Boolean) Equals(
         /* [in] */ const AutoPtr<T1>& lhs,
         /* [in] */ const AutoPtr<T2>& rhs);
+
+    static CARAPI_(String) GetClassName(
+        /* [in] */ IInterface* obj);
+
+    static CARAPI_(String) GetFullClassName(
+        /* [in] */ IInterface* obj);
+
+    static CARAPI_(String) GetNamespace(
+        /* [in] */ IInterface* obj);
+
+    static CARAPI_(String) GetModulePath(
+        /* [in] */ IInterface* obj);
+
+public:
+    NativeObject* mNativeObject;
 };
 
 //====================================================================

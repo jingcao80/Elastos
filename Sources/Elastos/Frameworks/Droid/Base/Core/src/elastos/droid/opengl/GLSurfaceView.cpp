@@ -1,10 +1,12 @@
-#include "GLSurfaceView.h"
+#include "elastos/droid/opengl/GLSurfaceView.h"
+#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/opengl/CGLDebugHelper.h"
+#include "elastos/droid/opengl/gles/CEGL10Helper.h"
+#include "elastos/droid/opengl/gles/CEGLContextImpl.h"
+#include "Elastos.Droid.Content.h"
+
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringUtils.h>
-#include "elastos/droid/os/SystemProperties.h"
-#include "gles/CEGL10Helper.h"
-#include "CGLDebugHelper.h"
-#include "gles/CEGLContextImpl.h"
 
 using Elastos::IO::EIID_IWriter;
 using Elastos::IO::EIID_ICloseable;
@@ -12,21 +14,24 @@ using Elastos::IO::EIID_IFlushable;
 using Elastos::Core::StringUtils;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Content::Pm::IConfigurationInfo;
-using Elastosx::Microedition::Khronos::egl::IEGLContextHelper;
-using Elastosx::Microedition::Khronos::egl::IEGL;
-using Elastos::Droid::View::ISurfaceHolderCallback;
+using Elastosx::Microedition::Khronos::Egl::IEGLContextHelper;
+using Elastosx::Microedition::Khronos::Egl::IEGL;
+using Elastos::Droid::View::Accessibility::EIID_IAccessibilityEventSource;
 using Elastos::Droid::View::EIID_ISurfaceHolderCallback;
-using Elastosx::Microedition::Khronos::egl::IEGL10Helper;
-using Elastos::Droid::Opengl::gles::CEGL10Helper;
-using Elastos::Droid::Opengl::gles::CEGLContextImpl;
+using Elastos::Droid::View::EIID_IKeyEventCallback;
+using Elastos::Droid::View::EIID_ISurfaceView;
+using Elastos::Droid::View::EIID_ISurfaceHolderCallback;
+using Elastos::Droid::View::EIID_IView;
+using Elastos::Droid::View::ISurfaceHolderCallback;
+using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
+
+using Elastosx::Microedition::Khronos::Egl::IEGL10Helper;
+using Elastos::Droid::Opengl::Gles::CEGL10Helper;
+using Elastos::Droid::Opengl::Gles::CEGLContextImpl;
 
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
-
-// 5d5a0ab3-f303-4049-9ab2-bf4d2b74991e
-extern "C" const InterfaceID EIID_GLSurfaceView =
-        { 0x5d5a0ab3, 0xf303, 0x4049, { 0x9a, 0xb2, 0xbf, 0x4d, 0x2b, 0x74, 0x99, 0x1e } };
 
 String GLSurfaceView::TAG("GLSurfaceView");
 Boolean GLSurfaceView::LOG_ATTACH_DETACH = FALSE;
@@ -42,9 +47,9 @@ String GLSurfaceView::GLThreadManager::kMSM7K_RENDERER_PREFIX("Q3Dimension MSM75
 String GLSurfaceView::GLThreadManager::TAG("GLThreadManager");
 AutoPtr<GLSurfaceView::GLThreadManager> GLSurfaceView::sGLThreadManager = new GLThreadManager();
 
-CAR_INTERFACE_IMPL(GLSurfaceView::DefaultContextFactory, IEGLContextFactory)
-CAR_INTERFACE_IMPL(GLSurfaceView::DefaultWindowSurfaceFactory, IEGLWindowSurfaceFactory)
-CAR_INTERFACE_IMPL(GLSurfaceView::BaseConfigChooser, IEGLConfigChooser)
+CAR_INTERFACE_IMPL(GLSurfaceView::DefaultContextFactory, Object, IEGLContextFactory)
+CAR_INTERFACE_IMPL(GLSurfaceView::DefaultWindowSurfaceFactory, Object, IEGLWindowSurfaceFactory)
+CAR_INTERFACE_IMPL(GLSurfaceView::BaseConfigChooser, Object, IEGLConfigChooser)
 
 GLSurfaceView::DefaultContextFactory::DefaultContextFactory(
     /* [in] */ GLSurfaceView* host)
@@ -59,6 +64,8 @@ ECode GLSurfaceView::DefaultContextFactory::CreateContext(
     /* [in] */ XIEGLConfig* eglConfig,
     /* [out] */ XIEGLContext** ctx)
 {
+    VALIDATE_NOT_NULL(ctx)
+
     AutoPtr<ArrayOf<Int32> > attrib_list = ArrayOf<Int32>::Alloc(3);
     (*attrib_list)[0] = EGL_CONTEXT_CLIENT_VERSION_EX;
     (*attrib_list)[1] = mHost->mEGLContextClientVersion;
@@ -98,6 +105,8 @@ ECode GLSurfaceView::DefaultWindowSurfaceFactory::CreateWindowSurface(
     /* [in] */ IInterface* nativeWindow,
     /* [out] */ XIEGLSurface** surface)
 {
+    VALIDATE_NOT_NULL(surface)
+
     ECode ec = egl->EglCreateWindowSurface(display, config, nativeWindow, NULL, surface);
     if (ec != NOERROR) {
         SLOGGERE("GLSurfaceView", "eglCreateWindowSurface error");
@@ -127,6 +136,8 @@ ECode GLSurfaceView::BaseConfigChooser::ChooseConfig(
     /* [in] */ XIEGLDisplay* display,
     /* [out] */ XIEGLConfig** config)
 {
+    VALIDATE_NOT_NULL(config)
+
     AutoPtr<ArrayOf<Int32> > num_config = ArrayOf<Int32>::Alloc(1);
     Boolean eglChooseConfig;
     egl->EglChooseConfig(display, mConfigSpec, NULL, 0, num_config, &eglChooseConfig);
@@ -159,7 +170,7 @@ ECode GLSurfaceView::BaseConfigChooser::ChooseConfig(
 AutoPtr<ArrayOf<Int32> > GLSurfaceView::BaseConfigChooser::FilterConfigSpec(
     /* [in] */ ArrayOf<Int32>* configSpec)
 {
-    if(mHost->mEGLContextClientVersion != 2) {
+    if(mHost->mEGLContextClientVersion != 2 && mHost->mEGLContextClientVersion != 3) {
         return configSpec;
     }
     /* We know none of the subclasses define EGL_RENDERABLE_TYPE.
@@ -169,7 +180,11 @@ AutoPtr<ArrayOf<Int32> > GLSurfaceView::BaseConfigChooser::FilterConfigSpec(
     AutoPtr<ArrayOf<Int32> > newConfigSpec = ArrayOf<Int32>::Alloc(len + 2);
     newConfigSpec->Copy(0, configSpec, 0, len - 1);
     (*newConfigSpec)[len - 1] = IEGL10::_EGL_RENDERABLE_TYPE;
-    (*newConfigSpec)[len] = 4;
+    if (mHost->mEGLContextClientVersion == 2) {
+        (*newConfigSpec)[len] = IEGL14::EGL_OPENGL_ES2_BIT;  /* EGL_OPENGL_ES2_BIT */
+    } else {
+        (*newConfigSpec)[len] = IEGLExt::EGL_OPENGL_ES3_BIT_KHR; /* EGL_OPENGL_ES3_BIT_KHR */
+    }
     (*newConfigSpec)[len + 1] = IEGL10::_EGL_NONE;
     return newConfigSpec;
 }
@@ -199,6 +214,8 @@ ECode GLSurfaceView::ComponentSizeChooser::ChooseConfig(
     /* [in] */ ArrayOf<XIEGLConfig*>* configs,
     /* [out] */ XIEGLConfig** rst)
 {
+    VALIDATE_NOT_NULL(rst)
+
     Int32 len = configs->GetLength();
     for (Int32 i = 0; i < len; i++) {
         AutoPtr<XIEGLConfig> config = (*configs)[i];
@@ -273,13 +290,13 @@ GLSurfaceView::SimpleEGLConfigChooser::SimpleEGLConfigChooser(
     /* [in] */ GLSurfaceView* host) : ComponentSizeChooser(8, 8, 8, 0, withDepthBuffer ? 16 : 0, 0, host)
 {}
 
-GLSurfaceView::eglHelper::eglHelper(
+GLSurfaceView::EglHelper::EglHelper(
     /* [in] */ IWeakReference* glSurfaceViewWeakRef)
 {
     mGLSurfaceViewWeakRef = glSurfaceViewWeakRef;
 }
 
-ECode GLSurfaceView::eglHelper::Start()
+ECode GLSurfaceView::EglHelper::Start()
 {
     if (LOG_EGL) {
         Int64 tid;
@@ -314,11 +331,11 @@ ECode GLSurfaceView::eglHelper::Start()
         return E_RUNTIME_EXCEPTION;
     }
 
-    AutoPtr<IInterface> obj;
+    AutoPtr<IGLSurfaceView> obj;
     GLSurfaceView* view;
-    mGLSurfaceViewWeakRef->Resolve(EIID_IInterface, (IInterface**)&obj);
+    mGLSurfaceViewWeakRef->Resolve(EIID_IGLSurfaceView, (IInterface**)&obj);
     if (obj) {
-        view = reinterpret_cast<GLSurfaceView*>(obj->Probe(EIID_GLSurfaceView));
+        view = (GLSurfaceView*)(obj.Get());
         view->mEGLConfigChooser->ChooseConfig(mEgl, mEglDisplay, (XIEGLConfig**)&mEglConfig);
 
         /*
@@ -348,9 +365,11 @@ ECode GLSurfaceView::eglHelper::Start()
     return NOERROR;
 }
 
-ECode GLSurfaceView::eglHelper::CreateSurface(
+ECode GLSurfaceView::EglHelper::CreateSurface(
     /* [out] */ Boolean* rst)
 {
+    VALIDATE_NOT_NULL(rst)
+
     *rst = FALSE;
     if (LOG_EGL) {
         Int64 tid;
@@ -383,13 +402,15 @@ ECode GLSurfaceView::eglHelper::CreateSurface(
      * Create an EGL surface we can render into.
      */
 
-    AutoPtr<IInterface> obj;
+    AutoPtr<IGLSurfaceView> obj;
     GLSurfaceView* view;
-    mGLSurfaceViewWeakRef->Resolve(EIID_IInterface, (IInterface**)&obj);
+    mGLSurfaceViewWeakRef->Resolve(EIID_IGLSurfaceView, (IInterface**)&obj);
     if (obj) {
-        view = reinterpret_cast<GLSurfaceView*>(obj->Probe(EIID_GLSurfaceView));
+        view = (GLSurfaceView*)(obj.Get());
+        AutoPtr<ISurfaceHolder> holder;
+        view->GetHolder((ISurfaceHolder**)&holder);
         view->mEGLWindowSurfaceFactory->CreateWindowSurface(mEgl,
-                mEglDisplay, mEglConfig, view->GetHolder(), (XIEGLSurface**)&mEglSurface);
+                mEglDisplay, mEglConfig, holder, (XIEGLSurface**)&mEglSurface);
     } else {
         mEglSurface = NULL;
         mEglContext = NULL;
@@ -431,16 +452,16 @@ ECode GLSurfaceView::eglHelper::CreateSurface(
     return NOERROR;
 }
 
-AutoPtr<IGL> GLSurfaceView::eglHelper::CreateGL()
+AutoPtr<IGL> GLSurfaceView::EglHelper::CreateGL()
 {
     AutoPtr<IGL> gl;
     mEglContext->GetGL((IGL**)&gl);
-    AutoPtr<IInterface> obj;
+    AutoPtr<IGLSurfaceView> obj;
     GLSurfaceView* view;
     AutoPtr<IGL> rstGl;
-    mGLSurfaceViewWeakRef->Resolve(EIID_IInterface, (IInterface**)&obj);
+    mGLSurfaceViewWeakRef->Resolve(EIID_IGLSurfaceView, (IInterface**)&obj);
     if (obj) {
-        view = reinterpret_cast<GLSurfaceView*>(obj->Probe(EIID_GLSurfaceView));
+        view = (GLSurfaceView*)(obj.Get());
         if (view->mGLWrapper != NULL) {
             view->mGLWrapper->Wrap(gl, (IGL**)&gl);
         }
@@ -462,7 +483,7 @@ AutoPtr<IGL> GLSurfaceView::eglHelper::CreateGL()
     return gl;
 }
 
-Int32 GLSurfaceView::eglHelper::Swap()
+Int32 GLSurfaceView::EglHelper::Swap()
 {
     Boolean r;
     mEgl->EglSwapBuffers(mEglDisplay, mEglSurface, &r);
@@ -474,7 +495,7 @@ Int32 GLSurfaceView::eglHelper::Swap()
     return IEGL10::_EGL_SUCCESS;
 }
 
-ECode GLSurfaceView::eglHelper::DestroySurface()
+ECode GLSurfaceView::EglHelper::DestroySurface()
 {
     if (LOG_EGL) {
         Int64 tid;
@@ -485,7 +506,7 @@ ECode GLSurfaceView::eglHelper::DestroySurface()
     return NOERROR;
 }
 
-ECode GLSurfaceView::eglHelper::Finish()
+ECode GLSurfaceView::EglHelper::Finish()
 {
     if (LOG_EGL) {
         Int64 tid;
@@ -493,11 +514,11 @@ ECode GLSurfaceView::eglHelper::Finish()
         SLOGGERW("EglHelper", "finish()  tid= %ld", tid)
     }
     if (mEglContext != NULL) {
-        AutoPtr<IInterface> obj;
+        AutoPtr<IGLSurfaceView> obj;
         GLSurfaceView* view;
-        mGLSurfaceViewWeakRef->Resolve(EIID_IInterface, (IInterface**)&obj);
+        mGLSurfaceViewWeakRef->Resolve(EIID_IGLSurfaceView, (IInterface**)&obj);
         if (obj) {
-            view = reinterpret_cast<GLSurfaceView*>(obj->Probe(EIID_GLSurfaceView));
+            view = (GLSurfaceView*)(obj.Get());
             view->mEGLContextFactory->DestroyContext(mEgl, mEglDisplay, mEglContext);
         }
         mEglContext = NULL;
@@ -510,7 +531,7 @@ ECode GLSurfaceView::eglHelper::Finish()
     return NOERROR;
 }
 
-ECode GLSurfaceView::eglHelper::DestroySurfaceImp()
+ECode GLSurfaceView::EglHelper::DestroySurfaceImp()
 {
     AutoPtr<IEGL10Helper> helper;
     CEGL10Helper::AcquireSingleton((IEGL10Helper**)&helper);
@@ -524,11 +545,11 @@ ECode GLSurfaceView::eglHelper::DestroySurfaceImp()
                 noSur,
                 noCtx,
                 &r);
-        AutoPtr<IInterface> obj;
+        AutoPtr<IGLSurfaceView> obj;
         GLSurfaceView* view;
-        mGLSurfaceViewWeakRef->Resolve(EIID_IInterface, (IInterface**)&obj);
+        mGLSurfaceViewWeakRef->Resolve(EIID_IGLSurfaceView, (IInterface**)&obj);
         if (obj) {
-            view = reinterpret_cast<GLSurfaceView*>(obj->Probe(EIID_GLSurfaceView));
+            view = (GLSurfaceView*)(obj.Get());
             view->mEGLWindowSurfaceFactory->DestroySurface(mEgl, mEglDisplay, mEglSurface);
         }
         mEglSurface = NULL;
@@ -536,7 +557,7 @@ ECode GLSurfaceView::eglHelper::DestroySurfaceImp()
     return NOERROR;
 }
 
-ECode GLSurfaceView::eglHelper::ThrowEglException(
+ECode GLSurfaceView::EglHelper::ThrowEglException(
     /* [in] */ const String& function,
     /* [in] */ Int32 error)
 {
@@ -549,7 +570,7 @@ ECode GLSurfaceView::eglHelper::ThrowEglException(
     return E_RUNTIME_EXCEPTION;
 }
 
-ECode GLSurfaceView::eglHelper::LogEglErrorAsWarning(
+ECode GLSurfaceView::EglHelper::LogEglErrorAsWarning(
     /* [in] */ const String& tag,
     /* [in] */ const String& function,
     /* [in] */ Int32 error)
@@ -558,14 +579,14 @@ ECode GLSurfaceView::eglHelper::LogEglErrorAsWarning(
     return NOERROR;
 }
 
-String GLSurfaceView::eglHelper::FormatEglError(
+String GLSurfaceView::EglHelper::FormatEglError(
     /* [in] */ const String& function,
     /* [in] */ Int32 error)
 {
     return function + "failed: " + GetErrorString(error);
 }
 
-String GLSurfaceView::eglHelper::GetErrorString(
+String GLSurfaceView::EglHelper::GetErrorString(
     /* [in] */ Int32 error)
 {
     switch (error) {
@@ -600,11 +621,11 @@ String GLSurfaceView::eglHelper::GetErrorString(
     case IEGL11::_EGL_CONTEXT_LOST:
         return String("EGL_CONTEXT_LOST");
     default:
-        return StringUtils::Int32ToString(error, 16);
+        return StringUtils::ToString(error, 16);
     }
 }
 
-ECode GLSurfaceView::eglHelper::ThrowEglException(
+ECode GLSurfaceView::EglHelper::ThrowEglException(
     /* [in] */ const String& function)
 {
     Int32 error;
@@ -639,7 +660,7 @@ ECode GLSurfaceView::GLThread::Run()
 {
     Int64 id;
     GetId(&id);
-    SetName(String("GLThread ") + StringUtils::Int64ToString(id));
+    SetName(String("GLThread ") + StringUtils::ToString(id));
     if (LOG_THREADS) {
         SLOGGERI("GLThread", "starting tid = %ld", id)
     }
@@ -696,19 +717,10 @@ ECode GLSurfaceView::GLThread::SurfaceCreated()
         SLOGGERI("GLThread", "surfaceCreated tid = %d", tid)
     }
     mHasSurface = TRUE;
-
-
-    if(mGameloftNeedCompat)
-    {
-        mMotionEventMayNeedAdjust = TRUE;
-    }
-    else
-    {
-        mMotionEventMayNeedAdjust =FALSE;
-    }
+    mFinishedCreatingEglSurface = FALSE;
 
     sLockMgr.NotifyAll();
-    while((mWaitingForSurface) && (!mExited)) {
+    while((mWaitingForSurface) && !mFinishedCreatingEglSurface && (!mExited)) {
         // try {
         if (sLockMgr.Wait() == (ECode)E_INTERRUPTED_EXCEPTION) {
             GetCurrentThread()->Interrupt();
@@ -726,9 +738,6 @@ ECode GLSurfaceView::GLThread::SurfaceDestroyed()
         SLOGGERI("GLThread", "surfaceDestroyed tid = %d", id)
     }
     mHasSurface = FALSE;
-
-    mMotionEventMayNeedAdjust =FALSE;
-
     sLockMgr.NotifyAll();
     while((!mWaitingForSurface) && (!mExited)) {
         // try {
@@ -943,12 +952,12 @@ ECode GLSurfaceView::GLThread::GuardedRun()
 
                     // When pausing, optionally release the EGL Context:
                     if (pausing && mHaveEglContext) {
-                        AutoPtr<IInterface> obj;
+                        AutoPtr<IGLSurfaceView> obj;
                         GLSurfaceView* view;
-                        mGLSurfaceViewWeakRef->Resolve(EIID_IInterface, (IInterface**)&obj);
+                        mGLSurfaceViewWeakRef->Resolve(EIID_IGLSurfaceView, (IInterface**)&obj);
                         Boolean preserveEglContextOnPause = FALSE;
                         if (obj) {
-                            view = reinterpret_cast<GLSurfaceView*>(obj->Probe(EIID_GLSurfaceView));
+                            view = (GLSurfaceView*)(obj.Get());
                             preserveEglContextOnPause = view->mPreserveEGLContextOnPause;
                         }
                         if (!preserveEglContextOnPause || sGLThreadManager->ShouldReleaseEGLContextWhenPausing()) {
@@ -1074,6 +1083,7 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                         StringBuilder sb("waiting tid = "); sb += tid;
                         sb += "mHaveEglContext = "; sb += mHaveEglContext;
                         sb += "mHaveEglSurface = "; sb += mHaveEglSurface;
+                        sb += " mFinishedCreatingEglSurface: "; sb += mFinishedCreatingEglSurface;
                         sb += "mPaused = "; sb += mPaused;
                         sb += "mHasSurface = "; sb += mHasSurface;
                         sb += "mSurfaceIsBad = "; sb += mSurfaceIsBad;
@@ -1107,9 +1117,16 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                 }
                 Boolean created;
                 mEglHelper->CreateSurface(&created);
-                if (!created) {
+                if (created) {
                     {
                         AutoLock lock(sLockMgr);
+                        mFinishedCreatingEglSurface = TRUE;
+                        sLockMgr.NotifyAll();
+                    }
+                } else {
+                    {
+                        AutoLock lock(sLockMgr);
+                        mFinishedCreatingEglSurface = TRUE;
                         mSurfaceIsBad = TRUE;
                         sLockMgr.NotifyAll();
                     }
@@ -1130,11 +1147,11 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                 if (LOG_RENDERER) {
                     SLOGGERW("GLThread", "onSurfaceCreated")
                 }
-                AutoPtr<IInterface> obj;
+                AutoPtr<IGLSurfaceView> obj;
                 GLSurfaceView* view;
-                mGLSurfaceViewWeakRef->Resolve(EIID_IInterface, (IInterface**)&obj);
+                mGLSurfaceViewWeakRef->Resolve(EIID_IGLSurfaceView, (IInterface**)&obj);
                 if (obj) {
-                    view = reinterpret_cast<GLSurfaceView*>(obj->Probe(EIID_GLSurfaceView));
+                    view = (GLSurfaceView*)(obj.Get());
                     view->mRenderer->OnSurfaceCreated(gl, mEglHelper->mEglConfig);
                 }
                 createEglContext = FALSE;
@@ -1144,11 +1161,11 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                 if (LOG_RENDERER) {
                     SLOGGERW("GLThread", "onSurfaceChanged(%d, %d)", w, h);
                 }
-                AutoPtr<IInterface> obj;
+                AutoPtr<IGLSurfaceView> obj;
                 GLSurfaceView* view;
-                mGLSurfaceViewWeakRef->Resolve(EIID_IInterface, (IInterface**)&obj);
+                mGLSurfaceViewWeakRef->Resolve(EIID_IGLSurfaceView, (IInterface**)&obj);
                 if (obj) {
-                    view = reinterpret_cast<GLSurfaceView*>(obj->Probe(EIID_GLSurfaceView));
+                    view = (GLSurfaceView*)(obj.Get());
                     view->mRenderer->OnSurfaceChanged(gl, w, h);
                 }
                 sizeChanged = FALSE;
@@ -1160,11 +1177,11 @@ ECode GLSurfaceView::GLThread::GuardedRun()
                 SLOGGERW("GLThread", "onDrawFrame tid = %ld", tid)
             }
             {
-                AutoPtr<IInterface> obj;
+                AutoPtr<IGLSurfaceView> obj;
                 GLSurfaceView* view;
-                mGLSurfaceViewWeakRef->Resolve(EIID_IInterface, (IInterface**)&obj);
+                mGLSurfaceViewWeakRef->Resolve(EIID_IGLSurfaceView, (IInterface**)&obj);
                 if (obj) {
-                    view = reinterpret_cast<GLSurfaceView*>(obj->Probe(EIID_GLSurfaceView));
+                    view = (GLSurfaceView*)(obj.Get());
                     view->mRenderer->OnDrawFrame(gl);
                 }
             }
@@ -1314,9 +1331,9 @@ ECode GLSurfaceView::GLThreadManager::CheckGLDriver(
 ECode GLSurfaceView::GLThreadManager::CheckGLESVersion()
 {
     if (! mGLESVersionCheckComplete) {
-        mGLESVersion = SystemProperties::GetInt32(
+        SystemProperties::GetInt32(
                 String("ro.opengles.version"),
-                IConfigurationInfo::GL_ES_VERSION_UNDEFINED);
+                IConfigurationInfo::GL_ES_VERSION_UNDEFINED, &mGLESVersion);
         if (mGLESVersion >= kGLES_20) {
             mMultipleGLESContextsAllowed = TRUE;
         }
@@ -1329,69 +1346,13 @@ ECode GLSurfaceView::GLThreadManager::CheckGLESVersion()
     return NOERROR;
 }
 
-
-PInterface GLSurfaceView::LogWriter::Probe(
-    /* [in] */ REIID riid)
-{
-    if ( riid == EIID_IInterface) {
-        return (IInterface*)(IWriter *)this;
-    } else if ( riid == EIID_IWriter ) {
-        return (IWriter *)this;
-    } else if ( riid == EIID_ICloseable) {
-        return (ICloseable *)this;
-    } else if ( riid == EIID_IFlushable) {
-        return (IFlushable *)this;
-    }
-
-    return NULL;
-}
-
-UInt32 GLSurfaceView::LogWriter::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 GLSurfaceView::LogWriter::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode GLSurfaceView::LogWriter::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    VALIDATE_NOT_NULL(iid);
-    if (object == (IInterface*)(IWriter *)this) {
-        *iid = EIID_IWriter ;
-    } else if (object == (IInterface*)(ICloseable *)this) {
-        *iid = EIID_ICloseable ;
-    } else if (object == (IInterface*)(IFlushable *)this) {
-        *iid = EIID_IFlushable ;
-    } else{
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-    return NOERROR;
-}
-
 ECode GLSurfaceView::LogWriter::Write(
-    /* [in] */ Int32 oneChar32)
-{
-    return Writer::Write(oneChar32);
-}
-
-ECode GLSurfaceView::LogWriter::WriteChars(
-    /* [in] */ const ArrayOf<Char32>& buffer)
-{
-    return Writer::WriteChars(buffer);
-}
-
-ECode GLSurfaceView::LogWriter::WriteChars(
-    /* [in] */ const ArrayOf<Char32>& buffer,
+    /* [in] */ ArrayOf<Char32>* buffer,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 count)
 {
     for(Int32 i = 0; i < count; i++) {
-        Char32 c = buffer[offset + i];
+        Char32 c = (*buffer)[offset + i];
         if (c == '\n') {
             FlushBuilder();
         }
@@ -1400,26 +1361,6 @@ ECode GLSurfaceView::LogWriter::WriteChars(
         }
     }
     return NOERROR;
-}
-
-ECode GLSurfaceView::LogWriter::WriteString(
-    /* [in] */ const String& str)
-{
-    return Writer::WriteString(str);
-}
-
-ECode GLSurfaceView::LogWriter::WriteString(
-    /* [in] */ const String& str,
-    /* [in] */ Int32 offset,
-    /* [in] */ Int32 count)
-{
-    return Writer::WriteString(str, offset, count);
-}
-
-ECode GLSurfaceView::LogWriter::CheckError(
-    /* [out] */ Boolean* hasError)
-{
-    return Writer::CheckError(hasError);
 }
 
 ECode GLSurfaceView::LogWriter::Close()
@@ -1432,36 +1373,6 @@ ECode GLSurfaceView::LogWriter::Flush()
     return FlushBuilder();
 }
 
-ECode GLSurfaceView::LogWriter::AppendChar(
-    /* [in] */ Char32 c)
-{
-    return Writer::AppendChar(c);
-}
-
-ECode GLSurfaceView::LogWriter::AppendCharSequence(
-    /* [in] */ ICharSequence* csq)
-{
-    return Writer::AppendCharSequence(csq);
-}
-
-ECode GLSurfaceView::LogWriter::AppendCharSequence(
-    /* [in] */ ICharSequence* csq,
-    /* [in] */ Int32 start,
-    /* [in] */ Int32 end)
-{
-    return Writer::AppendCharSequence(csq, start, end);
-}
-
-ECode GLSurfaceView::LogWriter::GetLock(
-    /* [out] */ IInterface** lockobj)
-{
-    VALIDATE_NOT_NULL(lockobj);
-    AutoPtr<IInterface> obj = Writer::GetLock();
-    *lockobj = obj;
-    REFCOUNT_ADD(*lockobj);
-    return NOERROR;
-}
-
 ECode GLSurfaceView::LogWriter::FlushBuilder()
 {
     if (mBuilder.GetLength() > 0) {
@@ -1471,6 +1382,7 @@ ECode GLSurfaceView::LogWriter::FlushBuilder()
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL_7(GLSurfaceView, SurfaceView, IGLSurfaceView, ISurfaceView, IView, IDrawableCallback, IKeyEventCallback, IAccessibilityEventSource, ISurfaceHolderCallback)
 GLSurfaceView::GLSurfaceView()
     : mDetached(FALSE)
     , mDebugFlags(0)
@@ -1479,42 +1391,19 @@ GLSurfaceView::GLSurfaceView()
 {
 }
 
-GLSurfaceView::GLSurfaceView(
-    /* [in] */ IContext* context)
-    : SurfaceView(context)
-    , mDetached(FALSE)
-    , mDebugFlags(0)
-    , mEGLContextClientVersion(0)
-    , mPreserveEGLContextOnPause(FALSE)
-{
-    InitInternal();
-}
-
-GLSurfaceView::GLSurfaceView(
-    /* [in] */ IContext* context,
-    /* [in] */ IAttributeSet* attrs)
-    : SurfaceView(context, attrs)
-    , mDetached(FALSE)
-    , mDebugFlags(0)
-    , mEGLContextClientVersion(0)
-    , mPreserveEGLContextOnPause(FALSE)
-{
-    InitInternal();
-}
-
-ECode GLSurfaceView::Init(
+ECode GLSurfaceView::constructor(
     /* [in] */ IContext* context)
 {
-    FAIL_RETURN(SurfaceView::Init(context));
+    FAIL_RETURN(SurfaceView::constructor(context));
     InitInternal();
     return NOERROR;
 }
 
-ECode GLSurfaceView::Init(
+ECode GLSurfaceView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    FAIL_RETURN(SurfaceView::Init(context));
+    FAIL_RETURN(SurfaceView::constructor(context));
     InitInternal();
     return NOERROR;
 }
@@ -1549,6 +1438,8 @@ ECode GLSurfaceView::SetDebugFlags(
 ECode GLSurfaceView::GetDebugFlags(
     /* [out] */ Int32* flags)
 {
+    VALIDATE_NOT_NULL(flags)
+
     *flags = mDebugFlags;
     return NOERROR;
 }
@@ -1563,6 +1454,8 @@ ECode GLSurfaceView::SetPreserveEGLContextOnPause(
 ECode GLSurfaceView::GetPreserveEGLContextOnPause(
     /* [out] */ Boolean* preserveEGLContextOnPause)
 {
+    VALIDATE_NOT_NULL(preserveEGLContextOnPause)
+
     *preserveEGLContextOnPause = mPreserveEGLContextOnPause;
     return NOERROR;
 }
@@ -1653,6 +1546,8 @@ ECode GLSurfaceView::SetRenderMode(
 ECode GLSurfaceView::GetRenderMode(
     /* [out] */ Int32* renderMode)
 {
+    VALIDATE_NOT_NULL(renderMode)
+
     *renderMode = mGLThread->GetRenderMode();
     return NOERROR;
 }
@@ -1740,8 +1635,9 @@ ECode GLSurfaceView::InitInternal()
 {
     // Install a SurfaceHolder.Callback so we get notified when the
     // underlying surface is created and destroyed
-    AutoPtr<ISurfaceHolder> holder = GetHolder();
-    holder->AddCallback(THIS_PROBE(ISurfaceHolderCallback));
+    AutoPtr<ISurfaceHolder> holder;
+    GetHolder((ISurfaceHolder**)&holder);
+    holder->AddCallback(this);
     // setFormat is done by SurfaceView in SDK 2.3 and newer. Uncomment
     // this statement if back-porting to 2.2 or older:
     // holder.setFormat(PixelFormat.RGB_565);

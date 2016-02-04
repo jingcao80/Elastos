@@ -5,7 +5,7 @@
 #include "_CTextServicesSessionListenerNative.h"
 #include <jni.h>
 
-using Elastos::Droid::View::Textservice::IISpellCheckerSession;
+using Elastos::Droid::View::TextService::IISpellCheckerSession;
 
 namespace Elastos {
 namespace Droid {
