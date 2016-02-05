@@ -2360,8 +2360,10 @@ DECLARE_SPECIAL_STACK_OF(OPENSSL_BLOCK, void)
 	SKM_ASN1_SET_OF_d2i(X509, (st), (pp), (length), (d2i_func), (free_func), (ex_tag), (ex_class)) 
 #define i2d_ASN1_SET_OF_X509(st, pp, i2d_func, ex_tag, ex_class, is_set) \
 	SKM_ASN1_SET_OF_i2d(X509, (st), (pp), (i2d_func), (ex_tag), (ex_class), (is_set))
+/*
 #define ASN1_seq_pack_X509(st, i2d_func, buf, len) \
 	SKM_ASN1_seq_pack(X509, (st), (i2d_func), (buf), (len))
+*/
 #define ASN1_seq_unpack_X509(buf, len, d2i_func, free_func) \
 	SKM_ASN1_seq_unpack(X509, (buf), (len), (d2i_func), (free_func))
 

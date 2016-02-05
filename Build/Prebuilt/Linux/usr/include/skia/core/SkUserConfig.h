@@ -193,7 +193,7 @@
 // Android defines:
 #ifndef SkUserConfig_Android_DEFINED
 #define SkUserConfig_Android_DEFINED
-#ifdef ANDROID
+#ifdef ELASTOS
     #include <utils/misc.h>
 #endif
 
@@ -222,8 +222,10 @@
 #define SK_DISABLE_PIXELREF_LOCKCOUNT_BALANCE_CHECK
 #define SkLONGLONG int64_t
 #define SK_DEFAULT_FONT_CACHE_LIMIT   (768 * 1024)
-#define SK_ATOMICS_PLATFORM_H "../../src/ports/SkAtomics_sync.h"
-#define SK_MUTEX_PLATFORM_H "../../src/ports/SkMutex_pthread.h"
+// #define SK_ATOMICS_PLATFORM_H "../../src/ports/SkAtomics_sync.h"
+#define SK_ATOMICS_PLATFORM_H "SkAtomics_sync.h"
+// #define SK_MUTEX_PLATFORM_H "../../src/ports/SkMutex_pthread.h"
+#define SK_MUTEX_PLATFORM_H "SkMutex_pthread.h"
 #define SK_SUPPORT_LEGACY_CLIPTOLAYERFLAG
 #define SK_ATTR_DEPRECATED SK_NOTHING_ARG1
 #define SK_SUPPORT_LEGACY_SHADER_LOCALMATRIX
@@ -231,7 +233,9 @@
 #define SK_IGNORE_ETC1_SUPPORT
 #define SK_SUPPORT_LEGACY_BITMAP_CONFIG
 #define SK_SUPPORT_LEGACY_SETCONFIG
+#ifndef SK_BUILD_FOR_ANDROID
 #define SK_BUILD_FOR_ANDROID
+#endif
 #define SK_FONTHOST_DOES_NOT_USE_FONTMGR
 #define SK_GAMMA_EXPONENT 1.4
 #define SK_GAMMA_CONTRAST 0.0

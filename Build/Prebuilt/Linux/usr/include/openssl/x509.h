@@ -607,10 +607,10 @@ extern "C" {
 #define X509_EXT_PACK_UNKNOWN	1
 #define X509_EXT_PACK_STRING	2
 
-#define		X509_get_version(x) ASN1_INTEGER_get((x)->cert_info->version)
+#define		X509_GET_VERSION(x) ASN1_INTEGER_get((x)->cert_info->version)
 /* #define	X509_get_serialNumber(x) ((x)->cert_info->serialNumber) */
-#define		X509_get_notBefore(x) ((x)->cert_info->validity->notBefore)
-#define		X509_get_notAfter(x) ((x)->cert_info->validity->notAfter)
+#define		X509_GET_NOTBEFORE(x) ((x)->cert_info->validity->notBefore)
+#define		X509_GET_NOTAFTER(x) ((x)->cert_info->validity->notAfter)
 #define		X509_extract_key(x)	X509_get_pubkey(x) /*****/
 #define		X509_REQ_get_version(x) ASN1_INTEGER_get((x)->req_info->version)
 #define		X509_REQ_get_subject_name(x) ((x)->req_info->subject)
@@ -618,11 +618,11 @@ extern "C" {
 #define		X509_name_cmp(a,b)	X509_NAME_cmp((a),(b))
 #define		X509_get_signature_type(x) EVP_PKEY_type(OBJ_obj2nid((x)->sig_alg->algorithm))
 
-#define		X509_CRL_get_version(x) ASN1_INTEGER_get((x)->crl->version)
-#define 	X509_CRL_get_lastUpdate(x) ((x)->crl->lastUpdate)
-#define 	X509_CRL_get_nextUpdate(x) ((x)->crl->nextUpdate)
+// #define		X509_CRL_get_version(x) ASN1_INTEGER_get((x)->crl->version)
+// #define 	X509_CRL_get_lastUpdate(x) ((x)->crl->lastUpdate)
+// #define 	X509_CRL_get_nextUpdate(x) ((x)->crl->nextUpdate)
 #define		X509_CRL_get_issuer(x) ((x)->crl->issuer)
-#define		X509_CRL_get_REVOKED(x) ((x)->crl->revoked)
+// #define		X509_CRL_get_REVOKED(x) ((x)->crl->revoked)
 
 void X509_CRL_set_default_method(const X509_CRL_METHOD *meth);
 X509_CRL_METHOD *X509_CRL_METHOD_new(

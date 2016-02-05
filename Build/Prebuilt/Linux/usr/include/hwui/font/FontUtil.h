@@ -44,7 +44,7 @@
     #define GET_GLYPH(text) nextGlyph((const uint16_t**) &text)
     #define IS_END_OF_STRING(glyph) false
 
-    static glyph_t nextGlyph(const uint16_t** srcPtr) {
+    static glyph_t __attribute__((__unused__)) nextGlyph(const uint16_t** srcPtr) {
         const uint16_t* src = *srcPtr;
         glyph_t g = *src++;
         *srcPtr = src;

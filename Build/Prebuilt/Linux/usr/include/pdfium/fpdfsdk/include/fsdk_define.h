@@ -105,7 +105,7 @@ class CPDF_CustomAccess : public IFX_FileRead, public CFX_Object
 {
 public:
 	CPDF_CustomAccess(FPDF_FILEACCESS* pFileAccess);
-	~CPDF_CustomAccess() {}
+	virtual ~CPDF_CustomAccess() {}
 
 	virtual CFX_ByteString GetFullPath() { return ""; }
 	virtual FX_FILESIZE	GetSize() { return m_FileAccess.m_FileLen; }

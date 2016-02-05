@@ -60,7 +60,7 @@ private:
     Mutex                   mMutex;
 
 public:
-                            MtpDevice(struct usb_device* device, int interface,
+                            MtpDevice(struct usb_device* device, int _interface,
                                     const struct usb_endpoint_descriptor *ep_in,
                                     const struct usb_endpoint_descriptor *ep_out,
                                     const struct usb_endpoint_descriptor *ep_intr);

@@ -619,10 +619,10 @@ struct ssl_session_st
 #define SSL_OP_TLS_ROLLBACK_BUG				0x00800000L
 
 #define SSL_OP_NO_SSLv2					0x01000000L
-#define SSL_OP_NO_SSLv3					0x02000000L
-#define SSL_OP_NO_TLSv1					0x04000000L
-#define SSL_OP_NO_TLSv1_2				0x08000000L
-#define SSL_OP_NO_TLSv1_1				0x10000000L
+// #define SSL_OP_NO_SSLv3					0x02000000L
+// #define SSL_OP_NO_TLSv1					0x04000000L
+// #define SSL_OP_NO_TLSv1_2				0x08000000L
+// #define SSL_OP_NO_TLSv1_1				0x10000000L
 
 /* These next two were never actually used for anything since SSLeay
  * zap so we have some more flags.
@@ -690,25 +690,28 @@ struct ssl_session_st
 	SSL_CTX_ctrl((ctx),SSL_CTRL_CLEAR_OPTIONS,(op),NULL)
 #define SSL_CTX_get_options(ctx) \
 	SSL_CTX_ctrl((ctx),SSL_CTRL_OPTIONS,0,NULL)
+/*
 #define SSL_set_options(ssl,op) \
 	SSL_ctrl((ssl),SSL_CTRL_OPTIONS,(op),NULL)
 #define SSL_clear_options(ssl,op) \
 	SSL_ctrl((ssl),SSL_CTRL_CLEAR_OPTIONS,(op),NULL)
 #define SSL_get_options(ssl) \
         SSL_ctrl((ssl),SSL_CTRL_OPTIONS,0,NULL)
-
+*/
 #define SSL_CTX_set_mode(ctx,op) \
 	SSL_CTX_ctrl((ctx),SSL_CTRL_MODE,(op),NULL)
 #define SSL_CTX_clear_mode(ctx,op) \
 	SSL_CTX_ctrl((ctx),SSL_CTRL_CLEAR_MODE,(op),NULL)
 #define SSL_CTX_get_mode(ctx) \
 	SSL_CTX_ctrl((ctx),SSL_CTRL_MODE,0,NULL)
+/*
 #define SSL_clear_mode(ssl,op) \
 	SSL_ctrl((ssl),SSL_CTRL_CLEAR_MODE,(op),NULL)
 #define SSL_set_mode(ssl,op) \
 	SSL_ctrl((ssl),SSL_CTRL_MODE,(op),NULL)
 #define SSL_get_mode(ssl) \
         SSL_ctrl((ssl),SSL_CTRL_MODE,0,NULL)
+*/
 #define SSL_set_mtu(ssl, mtu) \
         SSL_ctrl((ssl),SSL_CTRL_SET_MTU,(mtu),NULL)
 
@@ -1774,13 +1777,17 @@ DECLARE_PEM_rw(SSL_SESSION, SSL_SESSION)
 /* SSL_enable_tls_channel_id either configures a TLS server to accept TLS client
  * IDs from clients, or configure a client to send TLS client IDs to server.
  * Returns 1 on success. */
+/*
 #define SSL_enable_tls_channel_id(s) \
 	SSL_ctrl(s,SSL_CTRL_CHANNEL_ID,0,NULL)
+*/
 /* SSL_set1_tls_channel_id configures a TLS client to send a TLS Channel ID to
  * compatible servers. private_key must be a P-256 EVP_PKEY*. Returns 1 on
  * success. */
+/*
 #define SSL_set1_tls_channel_id(s, private_key) \
 	SSL_ctrl(s,SSL_CTRL_SET_CHANNEL_ID,0,(void*)private_key)
+*/
 #define SSL_CTX_set1_tls_channel_id(ctx, private_key) \
 	SSL_CTX_ctrl(ctx,SSL_CTRL_SET_CHANNEL_ID,0,(void*)private_key)
 /* SSL_get_tls_channel_id gets the client's TLS Channel ID from a server SSL*
@@ -1788,9 +1795,10 @@ DECLARE_PEM_rw(SSL_SESSION, SSL_SESSION)
  * Channel ID consists of the client's P-256 public key as an (x,y) pair where
  * each is a 32-byte, big-endian field element. Returns 0 if the client didn't
  * offer a Channel ID and the length of the complete Channel ID otherwise. */
+/*
 #define SSL_get_tls_channel_id(ctx, channel_id, channel_id_len) \
 	SSL_ctrl(ctx,SSL_CTRL_GET_CHANNEL_ID,channel_id_len,(void*)channel_id)
-
+*/
 #define SSL_CTX_add_extra_chain_cert(ctx,x509) \
 	SSL_CTX_ctrl(ctx,SSL_CTRL_EXTRA_CHAIN_CERT,0,(char *)x509)
 #define SSL_CTX_get_extra_chain_certs(ctx,px509) \

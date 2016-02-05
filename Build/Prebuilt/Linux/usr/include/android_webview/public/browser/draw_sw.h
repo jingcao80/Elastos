@@ -5,7 +5,12 @@
 #ifndef ANDROID_WEBVIEW_PUBLIC_BROWSER_DRAW_SW_H_
 #define ANDROID_WEBVIEW_PUBLIC_BROWSER_DRAW_SW_H_
 
-#include <jni.h>
+//#if defined(OS_ELASTOS)
+//#include "ElAndroid.h"
+#include "elastos.h"
+//#else
+//#include <jni.h>
+//#endif
 #include <stddef.h>
 
 #ifndef __cplusplus
@@ -28,14 +33,21 @@ struct AwPixelInfo {
 // from a Java canvas object, for optimized rendering path.
 // Returns the pixel info on success, which must be freed via a call to
 // AwReleasePixelsFunction, or NULL.
-typedef AwPixelInfo* (AwAccessPixelsFunction)(JNIEnv* env, jobject canvas);
+//#if defined(OS_ELASTOS)
+typedef AwPixelInfo* (AwAccessPixelsFunction)(IInterface* canvas);
+
+// Called to create an Android Picture object encapsulating a native SkPicture.
+typedef Elastos::AutoPtr<IInterface> (AwCreatePictureFunction)(SkPicture* picture);
+//#else
+//typedef AwPixelInfo* (AwAccessPixelsFunction)(JNIEnv* env, jobject canvas);
 
 // Must be called to balance every *successful* call to AwAccessPixelsFunction
 // (i.e. that returned true).
 typedef void (AwReleasePixelsFunction)(AwPixelInfo* pixels);
 
 // Called to create an Android Picture object encapsulating a native SkPicture.
-typedef jobject (AwCreatePictureFunction)(JNIEnv* env, SkPicture* picture);
+//typedef jobject (AwCreatePictureFunction)(JNIEnv* env, SkPicture* picture);
+//#endif
 
 // Method that returns the current Skia function.
 typedef void (SkiaVersionFunction)(int* major, int* minor, int* patch);

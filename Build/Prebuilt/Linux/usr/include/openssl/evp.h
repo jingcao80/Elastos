@@ -482,7 +482,7 @@ int EVP_MD_block_size(const EVP_MD *md);
 unsigned long EVP_MD_flags(const EVP_MD *md);
 
 const EVP_MD *EVP_MD_CTX_md(const EVP_MD_CTX *ctx);
-#define EVP_MD_CTX_size(e)		EVP_MD_size(EVP_MD_CTX_md(e))
+#define EVP_MD_CTX_size(e)		::EVP_MD_size(EVP_MD_CTX_md(e))
 #define EVP_MD_CTX_block_size(e)	EVP_MD_block_size(EVP_MD_CTX_md(e))
 #define EVP_MD_CTX_type(e)		EVP_MD_type(EVP_MD_CTX_md(e))
 
@@ -510,14 +510,14 @@ unsigned long EVP_CIPHER_CTX_flags(const EVP_CIPHER_CTX *ctx);
 #define EVP_DECODE_LENGTH(l)	((l+3)/4*3+80)
 
 #define EVP_SignInit_ex(a,b,c)		EVP_DigestInit_ex(a,b,c)
-#define EVP_SignInit(a,b)		EVP_DigestInit(a,b)
-#define EVP_SignUpdate(a,b,c)		EVP_DigestUpdate(a,b,c)
+// #define EVP_SignInit(a,b)		EVP_DigestInit(a,b)
+// #define EVP_SignUpdate(a,b,c)		EVP_DigestUpdate(a,b,c)
 #define	EVP_VerifyInit_ex(a,b,c)	EVP_DigestInit_ex(a,b,c)
-#define	EVP_VerifyInit(a,b)		EVP_DigestInit(a,b)
-#define	EVP_VerifyUpdate(a,b,c)		EVP_DigestUpdate(a,b,c)
+// #define	EVP_VerifyInit(a,b)		EVP_DigestInit(a,b)
+// #define	EVP_VerifyUpdate(a,b,c)		EVP_DigestUpdate(a,b,c)
 #define EVP_OpenUpdate(a,b,c,d,e)	EVP_DecryptUpdate(a,b,c,d,e)
 #define EVP_SealUpdate(a,b,c,d,e)	EVP_EncryptUpdate(a,b,c,d,e)	
-#define EVP_DigestSignUpdate(a,b,c)	EVP_DigestUpdate(a,b,c)
+// #define EVP_DigestSignUpdate(a,b,c)	EVP_DigestUpdate(a,b,c)
 #define EVP_DigestVerifyUpdate(a,b,c)	EVP_DigestUpdate(a,b,c)
 
 #ifdef CONST_STRICT

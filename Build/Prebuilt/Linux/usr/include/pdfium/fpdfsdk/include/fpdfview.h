@@ -1,7 +1,7 @@
 // Copyright 2014 PDFium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
- 
+
 // Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
 
 
@@ -16,13 +16,13 @@
 typedef void*	FPDF_MODULEMGR;
 
 // PDF types
-typedef void*	FPDF_DOCUMENT;		
-typedef void*	FPDF_PAGE;			
+typedef void*	FPDF_DOCUMENT;
+typedef void*	FPDF_PAGE;
 typedef void*	FPDF_PAGEOBJECT;	// Page object(text, path, etc)
 typedef void*	FPDF_PATH;
-typedef void*	FPDF_CLIPPATH;	
-typedef void*	FPDF_BITMAP;	
-typedef void*	FPDF_FONT;			
+typedef void*	FPDF_CLIPPATH;
+typedef void*	FPDF_BITMAP;
+typedef void*	FPDF_FONT;
 
 typedef void*	FPDF_TEXTPAGE;
 typedef void*	FPDF_SCHHANDLE;
@@ -37,7 +37,7 @@ typedef void*	FPDF_LINK;
 
 // Basic data types
 typedef int				FPDF_BOOL;
-typedef int				FPDF_ERROR;	
+typedef int				FPDF_ERROR;
 typedef unsigned long	FPDF_DWORD;
 
 typedef	float			FS_FLOAT;
@@ -102,8 +102,12 @@ typedef const FS_RECTF*	FS_LPCRECTF;
 #define DLLEXPORT __declspec( dllexport )
 #define STDCALL __stdcall
 #else
+#ifndef DLLEXPORT
 #define DLLEXPORT
+#endif
+#ifndef STDCALL
 #define STDCALL
+#endif
 #endif
 
 extern const char g_ExpireDate[];
@@ -115,7 +119,7 @@ extern "C" {
 #endif
 
 // Function: FPDF_InitLibrary
-//			Initialize the FPDFSDK library 
+//			Initialize the FPDFSDK library
 // Parameters:
 //			hInstance	-	For WIN32 system only: the instance of the executable or DLL module.
 // Return value:
@@ -133,7 +137,7 @@ DLLEXPORT void STDCALL FPDF_InitLibrary(void* hInstance);
 // Return value:
 //			None.
 // Comments:
-//			You can call this function to release all memory blocks allocated by the library. 
+//			You can call this function to release all memory blocks allocated by the library.
 //			After this function called, you should not call any PDF processing functions.
 DLLEXPORT void STDCALL FPDF_DestroyLibrary();
 
@@ -142,7 +146,7 @@ DLLEXPORT void STDCALL FPDF_DestroyLibrary();
 
 // Function: FPDF_SetSandBoxPolicy
 //			Set the policy for the sandbox environment.
-// Parameters:	
+// Parameters:
 //			policy		-	The specified policy for setting, for example:FPDF_POLICY_MACHINETIME_ACCESS.
 //			enable		-	True for enable, False for disable the policy.
 // Return value:
@@ -152,22 +156,22 @@ DLLEXPORT void	STDCALL FPDF_SetSandBoxPolicy(FPDF_DWORD policy, FPDF_BOOL enable
 /**
 * Open and load a PDF document.
 * @param[in] file_path	-	Path to the PDF file (including extension).
-* @param[in] password	-	A string used as the password for PDF file. 
+* @param[in] password	-	A string used as the password for PDF file.
 *							If no password needed, empty or NULL can be used.
 * @note		Loaded document can be closed by FPDF_CloseDocument.
 *			If this function fails, you can use FPDF_GetLastError() to retrieve
 *			the reason why it fails.
 * @retval	A handle to the loaded document. If failed, NULL is returned.
 */
-DLLEXPORT FPDF_DOCUMENT	STDCALL FPDF_LoadDocument(FPDF_STRING file_path, 
+DLLEXPORT FPDF_DOCUMENT	STDCALL FPDF_LoadDocument(FPDF_STRING file_path,
 	FPDF_BYTESTRING password);
 
 // Function: FPDF_LoadMemDocument
 //			Open and load a PDF document from memory.
-// Parameters: 
+// Parameters:
 //			data_buf	-	Pointer to a buffer containing the PDF document.
 //			size		-	Number of bytes in the PDF document.
-//			password	-	A string used as the password for PDF file. 
+//			password	-	A string used as the password for PDF file.
 //							If no password needed, empty or NULL can be used.
 // Return value:
 //			A handle to the loaded document. If failed, NULL is returned.
@@ -177,7 +181,7 @@ DLLEXPORT FPDF_DOCUMENT	STDCALL FPDF_LoadDocument(FPDF_STRING file_path,
 //			If this function fails, you can use FPDF_GetLastError() to retrieve
 //			the reason why it fails.
 //
-DLLEXPORT FPDF_DOCUMENT	STDCALL FPDF_LoadMemDocument(const void* data_buf, 
+DLLEXPORT FPDF_DOCUMENT	STDCALL FPDF_LoadMemDocument(const void* data_buf,
 											int size, FPDF_BYTESTRING password);
 
 // Structure for custom file access.
@@ -207,7 +211,7 @@ typedef struct {
 // Comments:
 //			The application should maintain the file resources being valid until the PDF document close.
 //			Loaded document can be closed by FPDF_CloseDocument.
-DLLEXPORT FPDF_DOCUMENT STDCALL FPDF_LoadCustomDocument(FPDF_FILEACCESS* pFileAccess, 
+DLLEXPORT FPDF_DOCUMENT STDCALL FPDF_LoadCustomDocument(FPDF_FILEACCESS* pFileAccess,
 														FPDF_BYTESTRING password);
 
 // Function: FPDF_GetFileVersion
@@ -231,7 +235,7 @@ DLLEXPORT FPDF_BOOL STDCALL FPDF_GetFileVersion(FPDF_DOCUMENT doc, int* fileVers
 
 // Function: FPDF_GetLastError
 //			Get last error code when an SDK function failed.
-// Parameters: 
+// Parameters:
 //			None.
 // Return value:
 //			A 32-bit integer indicating error codes (defined above).
@@ -243,7 +247,7 @@ DLLEXPORT unsigned long	STDCALL FPDF_GetLastError();
 
 // Function: FPDF_GetDocPermission
 //			Get file permission flags of the document.
-// Parameters: 
+// Parameters:
 //			document	-	Handle to document. Returned by FPDF_LoadDocument function.
 // Return value:
 //			A 32-bit integer indicating permission flags. Please refer to PDF Reference for
@@ -253,7 +257,7 @@ DLLEXPORT unsigned long	STDCALL FPDF_GetDocPermissions(FPDF_DOCUMENT document);
 
 // Function: FPDF_GetPageCount
 //			Get total number of pages in a document.
-// Parameters: 
+// Parameters:
 //			document	-	Handle to document. Returned by FPDF_LoadDocument function.
 // Return value:
 //			Total number of pages in the document.
@@ -262,7 +266,7 @@ DLLEXPORT int STDCALL FPDF_GetPageCount(FPDF_DOCUMENT document);
 
 // Function: FPDF_LoadPage
 //			Load a page inside a document.
-// Parameters: 
+// Parameters:
 //			document	-	Handle to document. Returned by FPDF_LoadDocument function.
 //			page_index	-	Index number of the page. 0 for the first page.
 // Return value:
@@ -311,19 +315,19 @@ DLLEXPORT int STDCALL FPDF_GetPageSizeByIndex(FPDF_DOCUMENT document, int page_i
 #define FPDF_LCD_TEXT		0x02		// Set if using text rendering optimized for LCD display.
 #define FPDF_NO_NATIVETEXT	0x04		// Don't use the native text output available on some platforms
 #define FPDF_GRAYSCALE		0x08		// Grayscale output.
-#define FPDF_DEBUG_INFO		0x80		// Set if you want to get some debug info. 
+#define FPDF_DEBUG_INFO		0x80		// Set if you want to get some debug info.
 										// Please discuss with Foxit first if you need to collect debug info.
 #define FPDF_NO_CATCH		0x100		// Set if you don't want to catch exception.
-#define FPDF_RENDER_LIMITEDIMAGECACHE	0x200	// Limit image cache size. 
+#define FPDF_RENDER_LIMITEDIMAGECACHE	0x200	// Limit image cache size.
 #define FPDF_RENDER_FORCEHALFTONE		0x400	// Always use halftone for image stretching.
 #define FPDF_PRINTING		0x800	// Render for printing.
-#define FPDF_REVERSE_BYTE_ORDER		0x10		//set whether render in a reverse Byte order, this flag only 
+#define FPDF_REVERSE_BYTE_ORDER		0x10		//set whether render in a reverse Byte order, this flag only
 												//enable when render to a bitmap.
 #ifdef _WIN32
 // Function: FPDF_RenderPage
 //			Render contents in a page to a device (screen, bitmap, or printer).
 //			This function is only supported on Windows system.
-// Parameters: 
+// Parameters:
 //			dc			-	Handle to device context.
 //			page		-	Handle to the page. Returned by FPDF_LoadPage function.
 //			start_x		-	Left pixel position of the display area in the device coordinate.
@@ -342,7 +346,7 @@ DLLEXPORT void STDCALL FPDF_RenderPage(HDC dc, FPDF_PAGE page, int start_x, int 
 
 // Function: FPDF_RenderPageBitmap
 //			Render contents in a page to a device independent bitmap
-// Parameters: 
+// Parameters:
 //			bitmap		-	Handle to the device independent bitmap (as the output buffer).
 //							Bitmap handle can be created by FPDFBitmap_Create function.
 //			page		-	Handle to the page. Returned by FPDF_LoadPage function.
@@ -356,12 +360,12 @@ DLLEXPORT void STDCALL FPDF_RenderPage(HDC dc, FPDF_PAGE page, int start_x, int 
 // Return value:
 //			None.
 //
-DLLEXPORT void STDCALL FPDF_RenderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int start_x, int start_y, 
+DLLEXPORT void STDCALL FPDF_RenderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int start_x, int start_y,
 						int size_x, int size_y, int rotate, int flags);
 
 // Function: FPDF_ClosePage
 //			Close a loaded PDF page.
-// Parameters: 
+// Parameters:
 //			page		-	Handle to the loaded page.
 // Return value:
 //			None.
@@ -370,7 +374,7 @@ DLLEXPORT void STDCALL FPDF_ClosePage(FPDF_PAGE page);
 
 // Function: FPDF_CloseDocument
 //			Close a loaded PDF document.
-// Parameters: 
+// Parameters:
 //			document	-	Handle to the loaded document.
 // Return value:
 //			None.
@@ -395,9 +399,9 @@ DLLEXPORT void STDCALL FPDF_CloseDocument(FPDF_DOCUMENT document);
 //			None.
 // Comments:
 //			The page coordinate system has its origin at left-bottom corner of the page, with X axis goes along
-//			the bottom side to the right, and Y axis goes along the left side upward. NOTE: this coordinate system 
-//			can be altered when you zoom, scroll, or rotate a page, however, a point on the page should always have 
-//			the same coordinate values in the page coordinate system. 
+//			the bottom side to the right, and Y axis goes along the left side upward. NOTE: this coordinate system
+//			can be altered when you zoom, scroll, or rotate a page, however, a point on the page should always have
+//			the same coordinate values in the page coordinate system.
 //
 //			The device coordinate system is device dependent. For screen device, its origin is at left-top
 //			corner of the window. However this origin can be altered by Windows coordinate transformation
@@ -441,14 +445,14 @@ DLLEXPORT void STDCALL FPDF_PageToDevice(FPDF_PAGE page, int start_x, int start_
 //			An FXDIB always use 4 byte per pixel. The first byte of a pixel is always double word aligned.
 //			Each pixel contains red (R), green (G), blue (B) and optionally alpha (A) values.
 //			The byte order is BGRx (the last byte unused if no alpha channel) or BGRA.
-//			
+//
 //			The pixels in a horizontal line (also called scan line) are stored side by side, with left most
 //			pixel stored first (with lower memory address). Each scan line uses width*4 bytes.
 //
 //			Scan lines are stored one after another, with top most scan line stored first. There is no gap
 //			between adjacent scan lines.
 //
-//			This function allocates enough memory for holding all pixels in the bitmap, but it doesn't 
+//			This function allocates enough memory for holding all pixels in the bitmap, but it doesn't
 //			initialize the buffer. Applications can use FPDFBitmap_FillRect to fill the bitmap using any color.
 DLLEXPORT FPDF_BITMAP STDCALL FPDFBitmap_Create(int width, int height, int alpha);
 
@@ -470,9 +474,9 @@ DLLEXPORT FPDF_BITMAP STDCALL FPDFBitmap_Create(int width, int height, int alpha
 // Return value:
 //			The created bitmap handle, or NULL if parameter error or out of memory.
 // Comments:
-//			Similar to FPDFBitmap_Create function, with more formats and external buffer supported. 
-//			Bitmap created by this function can be used in any place that a FPDF_BITMAP handle is 
-//			required. 
+//			Similar to FPDFBitmap_Create function, with more formats and external buffer supported.
+//			Bitmap created by this function can be used in any place that a FPDF_BITMAP handle is
+//			required.
 //
 //			If external scanline buffer is used, then the application should destroy the buffer
 //			by itself. FPDFBitmap_Destroy function will not destroy the buffer.
@@ -500,7 +504,7 @@ DLLEXPORT FPDF_BITMAP STDCALL FPDFBitmap_CreateEx(int width, int height, int for
 //			instead the background will be replaced by the source color and alpha.
 //			If alpha channel is not used, the "alpha" parameter is ignored.
 //
-DLLEXPORT void STDCALL FPDFBitmap_FillRect(FPDF_BITMAP bitmap, int left, int top, int width, int height, 
+DLLEXPORT void STDCALL FPDFBitmap_FillRect(FPDF_BITMAP bitmap, int left, int top, int width, int height,
 									int red, int green, int blue, int alpha);
 
 // Function: FPDFBitmap_GetBuffer
@@ -542,7 +546,7 @@ DLLEXPORT int STDCALL FPDFBitmap_GetHeight(FPDF_BITMAP bitmap);
 DLLEXPORT int STDCALL FPDFBitmap_GetStride(FPDF_BITMAP bitmap);
 
 // Function: FPDFBitmap_Destroy
-//			Destroy an FXDIB and release all related buffers. 
+//			Destroy an FXDIB and release all related buffers.
 // Parameters:
 //			bitmap		-	Handle to the bitmap. Returned by FPDFBitmap_Create function.
 // Return value:
@@ -554,7 +558,7 @@ DLLEXPORT void STDCALL FPDFBitmap_Destroy(FPDF_BITMAP bitmap);
 
 // Function: FPDF_VIEWERREF_GetPrintScaling
 //			Whether the PDF document prefers to be scaled or not.
-// Parameters: 
+// Parameters:
 //			document	-	Handle to the loaded document.
 // Return value:
 //			None.
@@ -563,7 +567,7 @@ DLLEXPORT FPDF_BOOL STDCALL FPDF_VIEWERREF_GetPrintScaling(FPDF_DOCUMENT documen
 
 // Function: FPDF_GetNamedDestByName
 //			get a special dest handle by the index.
-// Parameters: 
+// Parameters:
 //			document	-	Handle to the loaded document.
 //			name		-	The name of a special named dest.
 // Return value:

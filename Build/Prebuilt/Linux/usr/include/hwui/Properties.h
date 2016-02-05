@@ -244,7 +244,7 @@ enum DebugLevel {
 // Converts a number of kilo-bytes into bytes
 #define KB(s) s * 1024
 
-static DebugLevel readDebugLevel() {
+static DebugLevel __attribute__((__unused__)) readDebugLevel() {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_DEBUG, property, NULL) > 0) {
         return (DebugLevel) atoi(property);
