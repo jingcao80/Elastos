@@ -782,12 +782,13 @@ ECode CAssetManager::AddOverlayPath(
         return NOERROR;
     }
 
-    android::String8 idmapPath8(idmapPath.string());
-    int32_t cookie;
-    bool res = am->addOverlayPath(idmapPath8, &cookie);
-    if (res) {
-        *result = cookie;
-    }
+    // TODO:
+    // android::String8 idmapPath8(idmapPath.string());
+    // int32_t cookie;
+    // bool res = am->addOverlayPath(idmapPath8, &cookie);
+    // if (res) {
+    //     *result = cookie;
+    // }
     return NOERROR;
 }
 

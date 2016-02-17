@@ -420,42 +420,43 @@ MtpResponseCode MyMtpDatabase::setObjectPropertyValue(
     Int64 longValue = 0;
     String stringValue;
 
-    switch (type) {
-        case MTP_TYPE_INT8:
-            longValue = packet.getInt8();
-            break;
-        case MTP_TYPE_UINT8:
-            longValue = packet.getUInt8();
-            break;
-        case MTP_TYPE_INT16:
-            longValue = packet.getInt16();
-            break;
-        case MTP_TYPE_UINT16:
-            longValue = packet.getUInt16();
-            break;
-        case MTP_TYPE_INT32:
-            longValue = packet.getInt32();
-            break;
-        case MTP_TYPE_UINT32:
-            longValue = packet.getUInt32();
-            break;
-        case MTP_TYPE_INT64:
-            longValue = packet.getInt64();
-            break;
-        case MTP_TYPE_UINT64:
-            longValue = packet.getUInt64();
-            break;
-        case MTP_TYPE_STR:
-        {
-            MtpStringBuffer buffer;
-            packet.getString(buffer);
-            stringValue = String((const char *)buffer);
-            break;
-         }
-        default:
-            // ALOGE("unsupported type in setObjectPropertyValue\n");
-            return MTP_RESPONSE_INVALID_OBJECT_PROP_FORMAT;
-    }
+//    TODO:
+//    switch (type) {
+//        case MTP_TYPE_INT8:
+//            longValue = packet.getInt8();
+//            break;
+//        case MTP_TYPE_UINT8:
+//            longValue = packet.getUInt8();
+//            break;
+//        case MTP_TYPE_INT16:
+//            longValue = packet.getInt16();
+//            break;
+//        case MTP_TYPE_UINT16:
+//            longValue = packet.getUInt16();
+//            break;
+//        case MTP_TYPE_INT32:
+//            longValue = packet.getInt32();
+//            break;
+//        case MTP_TYPE_UINT32:
+//            longValue = packet.getUInt32();
+//            break;
+//        case MTP_TYPE_INT64:
+//            longValue = packet.getInt64();
+//            break;
+//        case MTP_TYPE_UINT64:
+//            longValue = packet.getUInt64();
+//            break;
+//        case MTP_TYPE_STR:
+//        {
+//            MtpStringBuffer buffer;
+//            packet.getString(buffer);
+//            stringValue = String((const char *)buffer);
+//            break;
+//         }
+//        default:
+//            // ALOGE("unsupported type in setObjectPropertyValue\n");
+//            return MTP_RESPONSE_INVALID_OBJECT_PROP_FORMAT;
+//    }
 
     Int32 result = mDatabase->SetObjectProperty((Int32)handle, (Int32)property, (Int64)longValue, stringValue);
 
@@ -544,42 +545,43 @@ MtpResponseCode MyMtpDatabase::setDevicePropertyValue(
     Int64 longValue = 0;
     String stringValue;
 
-    switch (type) {
-        case MTP_TYPE_INT8:
-            longValue = packet.getInt8();
-            break;
-        case MTP_TYPE_UINT8:
-            longValue = packet.getUInt8();
-            break;
-        case MTP_TYPE_INT16:
-            longValue = packet.getInt16();
-            break;
-        case MTP_TYPE_UINT16:
-            longValue = packet.getUInt16();
-            break;
-        case MTP_TYPE_INT32:
-            longValue = packet.getInt32();
-            break;
-        case MTP_TYPE_UINT32:
-            longValue = packet.getUInt32();
-            break;
-        case MTP_TYPE_INT64:
-            longValue = packet.getInt64();
-            break;
-        case MTP_TYPE_UINT64:
-            longValue = packet.getUInt64();
-            break;
-        case MTP_TYPE_STR:
-        {
-            MtpStringBuffer buffer;
-            packet.getString(buffer);
-            stringValue = String((const char *)buffer);
-            break;
-         }
-        default:
-            // ALOGE("unsupported type in setDevicePropertyValue\n");
-            return MTP_RESPONSE_INVALID_OBJECT_PROP_FORMAT;
-    }
+//    TODO:
+//    switch (type) {
+//        case MTP_TYPE_INT8:
+//            longValue = packet.getInt8();
+//            break;
+//        case MTP_TYPE_UINT8:
+//            longValue = packet.getUInt8();
+//            break;
+//        case MTP_TYPE_INT16:
+//            longValue = packet.getInt16();
+//            break;
+//        case MTP_TYPE_UINT16:
+//            longValue = packet.getUInt16();
+//            break;
+//        case MTP_TYPE_INT32:
+//            longValue = packet.getInt32();
+//            break;
+//        case MTP_TYPE_UINT32:
+//            longValue = packet.getUInt32();
+//            break;
+//        case MTP_TYPE_INT64:
+//            longValue = packet.getInt64();
+//            break;
+//        case MTP_TYPE_UINT64:
+//            longValue = packet.getUInt64();
+//            break;
+//        case MTP_TYPE_STR:
+//        {
+//            MtpStringBuffer buffer;
+//            packet.getString(buffer);
+//            stringValue = String((const char *)buffer);
+//            break;
+//         }
+//        default:
+//            // ALOGE("unsupported type in setDevicePropertyValue\n");
+//            return MTP_RESPONSE_INVALID_OBJECT_PROP_FORMAT;
+//    }
 
     Int32 result = mDatabase->SetDeviceProperty((Int32)property, longValue, stringValue);
 

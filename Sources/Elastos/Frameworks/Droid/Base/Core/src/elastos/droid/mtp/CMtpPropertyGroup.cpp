@@ -15,7 +15,6 @@
 
 #include <stdio.h>
 #include <time.h>
-#include <cutils/tztime.h>
 
 using Elastos::IO::ICloseable;
 using Elastos::Core::StringUtils;
