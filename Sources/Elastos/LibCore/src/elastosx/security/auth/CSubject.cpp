@@ -355,7 +355,7 @@ ECode CSubject::ToString(
         AutoPtr<IInterface> elem;
         it->GetNext((IInterface**)&elem);
         buf.Append(elem);
-        buf.Append('\n');
+        buf.AppendChar('\n');
     }
 
     it = NULL;
@@ -365,7 +365,7 @@ ECode CSubject::ToString(
         AutoPtr<IInterface> elem;
         it->GetNext((IInterface**)&elem);
         buf.Append(elem);
-        buf.Append('\n');
+        buf.AppendChar('\n');
     }
 
     Int32 offset;
@@ -378,7 +378,7 @@ ECode CSubject::ToString(
         AutoPtr<IInterface> elem;
         it->GetNext((IInterface**)&elem);
         buf.Append(elem);
-        buf.Append('\n');
+        buf.AppendChar('\n');
     }
     return buf.ToString(str);
 }

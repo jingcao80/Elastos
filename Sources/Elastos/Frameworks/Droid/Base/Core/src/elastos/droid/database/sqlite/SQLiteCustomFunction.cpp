@@ -12,7 +12,7 @@ namespace Sqlite {
 SQLiteCustomFunction::SQLiteCustomFunction(
     /* [in] */ const String& name,
     /* [in] */ Int32 numArgs,
-    /* [in] */ SQLiteDatabase::ICustomFunction* callBack)
+    /* [in] */ ICustomFunction* callBack)
     : mNumArgs(numArgs)
     , mCallback(callBack)
 {

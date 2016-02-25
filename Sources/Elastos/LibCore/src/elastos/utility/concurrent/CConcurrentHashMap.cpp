@@ -366,7 +366,7 @@ String CConcurrentHashMap::ToString()
     Int32 f = (t = mTable) == NULL ? 0 : t->GetLength();
     AutoPtr<Traverser> it = new Traverser(t, f, 0, f);
     StringBuilder sb;
-    sb.Append('{');
+    sb.AppendChar('{');
     AutoPtr<Node> p;
     if ((p = it->Advance()) != NULL) {
         for (;;) {
@@ -376,18 +376,18 @@ String CConcurrentHashMap::ToString()
                 sb.Append("(this Map)");
             else
                 sb.Append(k);
-            sb.Append('=');
+            sb.AppendChar('=');
             if (Object::Equals(v, THIS_PROBE(IInterface)))
                 sb.Append("(this Map)");
             else
                 sb.Append(v);
             if ((p = it->Advance()) == NULL)
                 break;
-            sb.Append(',');
-            sb.Append(' ');
+            sb.AppendChar(',');
+            sb.AppendChar(' ');
         }
     }
-    sb.Append('}');
+    sb.AppendChar('}');
     return sb.ToString();
 }
 
@@ -1568,7 +1568,7 @@ ECode CConcurrentHashMap::CollectionView::ToArray(
 String CConcurrentHashMap::CollectionView::ToString()
 {
     StringBuilder sb;
-    sb.Append('[');
+    sb.AppendChar('[');
     AutoPtr<IIterator> it;
     GetIterator((IIterator**)&it);
     Boolean b1 = FALSE;
@@ -1583,11 +1583,11 @@ String CConcurrentHashMap::CollectionView::ToString()
             Boolean b2 = FALSE;
             if (!(it->HasNext(&b2), b2))
                 break;
-            sb.Append(',');
-            sb.Append(' ');
+            sb.AppendChar(',');
+            sb.AppendChar(' ');
         }
     }
-    sb.Append(']');
+    sb.AppendChar(']');
     return sb.ToString();
 }
 

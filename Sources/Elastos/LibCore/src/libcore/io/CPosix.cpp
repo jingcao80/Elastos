@@ -940,6 +940,7 @@ ECode CPosix::Getpeername(
     VALIDATE_NOT_NULL(peername)
     AutoPtr<ISocketAddress> addr = DoGetSockName(fd, FALSE);
     *peername = addr;
+    if (NULL == *peername) return E_ERRNO_EXCEPTION;
     REFCOUNT_ADD(*peername)
     return NOERROR;
 }
@@ -992,6 +993,7 @@ ECode CPosix::Getsockname(
     VALIDATE_NOT_NULL(sockname)
     AutoPtr<ISocketAddress> addr = DoGetSockName(fd, TRUE);
     *sockname = addr;
+    if (NULL == *sockname) return E_ERRNO_EXCEPTION;
     REFCOUNT_ADD(*sockname)
     return NOERROR;
 }
@@ -1321,7 +1323,10 @@ ECode CPosix::Lstat(
     /* [out] */ IStructStat** stat)
 {
     VALIDATE_NOT_NULL(stat)
-    *stat = DoStat(path, TRUE);
+    AutoPtr<IStructStat> statObj = DoStat(path, TRUE);
+    *stat = statObj;
+    if (NULL == *stat) return E_ERRNO_EXCEPTION;
+    REFCOUNT_ADD(*stat)
     return NOERROR;
 }
 
@@ -2178,6 +2183,7 @@ ECode CPosix::Stat(
     VALIDATE_NOT_NULL(stat)
     AutoPtr<IStructStat> statObj = DoStat(path, FALSE);
     *stat = statObj;
+    if (NULL == *stat) return E_ERRNO_EXCEPTION;
     REFCOUNT_ADD(*stat)
     return NOERROR;
 }
@@ -2198,10 +2204,11 @@ ECode CPosix::StatVfs(
         // throwErrnoException(env, "statvfs");
         ALOGE("System-call statvfs error, errno = %d", errno);
         *vfsResult = NULL;
-        return NOERROR;
+        return E_ERRNO_EXCEPTION;
     }
     AutoPtr<IStructStatVfs> statObj = MakeStructStatVfs(sb);
     *vfsResult = statObj;
+    if (NULL == *vfsResult) return E_ERRNO_EXCEPTION;
     REFCOUNT_ADD(*vfsResult)
     return NOERROR;
 }

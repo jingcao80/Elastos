@@ -311,7 +311,7 @@ ECode AbstractCollection::ToString(
     Int32 size;
     GetSize(&size);
     StringBuilder buffer(size * 16);
-    buffer.Append('[');
+    buffer.AppendChar('[');
     AutoPtr<IIterator> it;
     GetIterator((IIterator**)&it);
     Boolean hasnext = FALSE;
@@ -328,7 +328,7 @@ ECode AbstractCollection::ToString(
             buffer += ", ";
         }
     }
-    buffer.Append(']');
+    buffer.AppendChar(']');
     *result = buffer.ToString();
     return NOERROR;
 }

@@ -424,7 +424,7 @@ String StringUtils::ToHexString(
         }
 
         hexString.Append(hexSignificand);
-        hexString.Append('p');
+        hexString.AppendChar('p');
         // remove exponent's 'bias' and convert to a string
         String str = ToString(exponent - 1023);
         hexString.Append(str);

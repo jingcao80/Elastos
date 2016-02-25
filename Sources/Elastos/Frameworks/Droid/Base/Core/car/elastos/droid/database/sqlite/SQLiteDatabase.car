@@ -35,6 +35,12 @@ module
             [out] ICursor** result);
     }
 
+    [deprecated]
+    interface ICustomFunction {
+        Callback(
+            [in] ArrayOf<String>* args);
+    }
+
 
     /**
      * Exposes methods to manage a SQLite database.

@@ -30,7 +30,7 @@ public:
     SQLiteCustomFunction(
         /* [in] */ const String& name,
         /* [in] */ Int32 numArgs,
-        /* [in] */ SQLiteDatabase::ICustomFunction* callBack);
+        /* [in] */ ICustomFunction* callBack);
 
     // Called from native.
     //@SuppressWarnings("unused")
@@ -40,7 +40,7 @@ public:
 public:
     String mName;
     Int32 mNumArgs;
-    AutoPtr<SQLiteDatabase::ICustomFunction> mCallback;
+    AutoPtr<ICustomFunction> mCallback;
 };
 
 } //Sqlite

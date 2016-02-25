@@ -417,7 +417,7 @@ ECode AbstractMap::ToString(
         else {
             buffer.Append("(this Map)");
         }
-        buffer.Append('=');
+        buffer.AppendChar('=');
         AutoPtr<IInterface> value;
         entry->GetValue((IInterface**)&value);
         if (value.Get() != this->Probe(EIID_IInterface)) {
@@ -430,7 +430,7 @@ ECode AbstractMap::ToString(
             buffer.Append(", ");
         }
     }
-    buffer.Append('}');
+    buffer.AppendChar('}');
     return buffer.ToString(str);
 }
 

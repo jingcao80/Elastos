@@ -1080,11 +1080,11 @@ String Locale::SerializeExtensions(
     // while (true) {
     //     Map.Entry<Character, String> entry = entryIterator.next();
     //     sb.Append(entry.getKey());
-    //     sb.Append('-');
+    //     sb.AppendChar('-');
     //     sb.Append(entry.getValue());
 
     //     if (entryIterator.hasNext()) {
-    //         sb.Append('-');
+    //         sb.AppendChar('-');
     //     } else {
     //         break;
     //     }
@@ -1266,7 +1266,7 @@ void Locale::AddUnicodeExtensionToExtensionsMap(
             sb.Append(value);
 
             if (attributesIterator->HasNext(&hasNext), hasNext) {
-                sb.Append('-');
+                sb.AppendChar('-');
             }
             else {
                 break;
@@ -1276,7 +1276,7 @@ void Locale::AddUnicodeExtensionToExtensionsMap(
 
     if (!b) {
         if (!a) {
-            sb.Append('-');
+            sb.AppendChar('-');
         }
 
         Boolean hasNext;
@@ -1296,12 +1296,12 @@ void Locale::AddUnicodeExtensionToExtensionsMap(
             String vs = Object::ToString(key);
             sb.Append(ks);
             if (!vs.IsEmpty()) {
-                sb.Append('-');
+                sb.AppendChar('-');
                 sb.Append(vs);
             }
 
             if (keywordsIterator->HasNext(&hasNext), hasNext) {
-                sb.Append('-');
+                sb.AppendChar('-');
             }
             else {
                 break;

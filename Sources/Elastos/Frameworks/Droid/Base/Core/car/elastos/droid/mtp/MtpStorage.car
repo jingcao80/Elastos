@@ -9,10 +9,6 @@ module
         GetStorageId(
             [out] Int32* result);
 
-        GetStorageId(
-            [in] Int32 index,
-            [out] Int32* result);
-
         GetPath(
             [out] String* result);
 
@@ -28,6 +24,13 @@ module
         GetMaxFileSize(
             [out] Int64* result);
     }
+
+    interface IMtpStorageHelper {
+        GetStorageId(
+            [in] Int32 index,
+            [out] Int32* result);
+    }
+
     } // namespace mtp
     } // namepsace Droid
     } // namespace Elastos

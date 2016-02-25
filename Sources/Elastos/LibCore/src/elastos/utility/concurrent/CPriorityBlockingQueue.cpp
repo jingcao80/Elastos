@@ -516,7 +516,7 @@ ECode CPriorityBlockingQueue::ToString(
         return NOERROR;
     }
     StringBuilder sb;
-    sb.Append('[');
+    sb.AppendChar('[');
     for (Int32 i = 0; i < n; ++i) {
         AutoPtr<IInterface> e = (*mQueue)[i];
         if (Object::Equals(e, THIS_PROBE(IInterface))) {
@@ -526,11 +526,11 @@ ECode CPriorityBlockingQueue::ToString(
             sb.Append(e);
         }
         if (i != n - 1) {
-            sb.Append(',');
-            sb.Append(' ');
+            sb.AppendChar(',');
+            sb.AppendChar(' ');
         }
     }
-    sb.Append(']');
+    sb.AppendChar(']');
     sb.ToString(res);
     ILock::Probe(lock)->UnLock();
     return NOERROR;

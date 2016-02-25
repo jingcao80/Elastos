@@ -184,7 +184,7 @@ ECode CAuthScope::ToString(
     StringBuilder buffer;
     if (!mScheme.IsNull()) {
         buffer.Append(mScheme.ToUpperCase(/*ILocale::ENGLISH*/));
-        buffer.Append(' ');
+        buffer.AppendChar(' ');
     }
     if (!mRealm.IsNull()) {
         buffer.AppendChar('\'');

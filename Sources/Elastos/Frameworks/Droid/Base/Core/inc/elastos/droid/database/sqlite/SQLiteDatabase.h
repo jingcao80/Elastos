@@ -51,19 +51,6 @@ class SQLiteDatabase
     : public SQLiteClosable
     , public ISQLiteDatabase
 {
-public:
-    /**
-     * A callback interface for a custom sqlite3 function.
-     * This can be used to create a function that can be called from
-     * sqlite3 database triggers.
-     * @hide
-     */
-    interface ICustomFunction : public IInterface
-    {
-        virtual CARAPI_(void) Callback(
-            /* [in] */ ArrayOf<String>* args) = 0;
-    };
-
 private:
     class MyFileFilter
         : public Object

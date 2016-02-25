@@ -2116,6 +2116,10 @@ module
         interface IMtpStorage;
     }
 
+    singleton class CMtpStorageHelper {
+        interface IMtpStorageHelper;
+    }
+
     class CMtpStorageInfo {
         interface IMtpStorageInfo;
     }
