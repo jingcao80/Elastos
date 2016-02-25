@@ -91,12 +91,12 @@ public:
     CARAPI GetBluetoothClass(
         /* [out] */ IBluetoothClass** bluetoothClass);
 
-    CARAPI GetTrustState(
-        /* [out] */ Boolean* state);
+    //CARAPI GetTrustState(
+    //    /* [out] */ Boolean* state);
 
-    CARAPI SetTrust(
-        /* [in] */ Boolean value,
-        /* [out] */ Boolean* result);
+    //CARAPI SetTrust(
+    //    /* [in] */ Boolean value,
+    //    /* [out] */ Boolean* result);
 
     CARAPI GetUuids(
         /* [out, callee] */ ArrayOf<IParcelUuid*>** uuids);

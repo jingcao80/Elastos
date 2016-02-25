@@ -233,7 +233,7 @@ ECode CInputMethodManager::constructor(
     mMainLooper = looper;
     mH = new MyHandler(looper, this);
     CControlledInputConnectionWrapper::New(looper, mDummyInputConnection,
-        this, (IInputContext**)&mIInputContext);
+        this, (IIInputContext**)&mIInputContext);
 
     return NOERROR;
 }
@@ -265,7 +265,7 @@ ECode CInputMethodManager::GetClient(
 }
 
 ECode CInputMethodManager::GetInputContext(
-    /* [out] */ IInputContext** context)
+    /* [out] */ IIInputContext** context)
 {
     VALIDATE_NOT_NULL(context);
     *context = mIInputContext;

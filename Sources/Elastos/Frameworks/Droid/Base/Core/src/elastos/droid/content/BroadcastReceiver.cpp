@@ -1,7 +1,11 @@
 
 #include "Elastos.Droid.App.h"
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
+#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-//#include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/app/QueuedWork.h"
+#include "elastos/droid/app/CActivityThread.h"
+#include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/os/CBundle.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringBuilder.h>
@@ -9,12 +13,35 @@
 
 using Elastos::Droid::Os::IBaseBundle;
 using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::App::QueuedWork;
+using Elastos::Droid::App::CActivityThread;
+using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Concurrent::IExecutor;
+using Elastos::Utility::Concurrent::IExecutorService;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Content {
+
+//==============================================================================
+// BroadcastReceiver::PendingResult::FinishRunnable
+//==============================================================================
+BroadcastReceiver::PendingResult::FinishRunnable::FinishRunnable(
+    /* [in] */ BroadcastReceiver::PendingResult* host)
+    : mPendingResult(host)
+{}
+
+ECode BroadcastReceiver::PendingResult::FinishRunnable::Run()
+{
+    if (CActivityThread::DEBUG_BROADCAST)
+        Slogger::I(CActivityThread::TAG, "Finishing broadcast after work to component %s",
+            TO_CSTR(mPendingResult->mToken));
+    AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
+    mPendingResult->SendFinished(mgr);
+    return NOERROR;
+}
 
 //==============================================================================
 // BroadcastReceiver::PendingResult
@@ -177,40 +204,40 @@ ECode BroadcastReceiver::PendingResult::ClearAbortBroadcast()
 
 ECode BroadcastReceiver::PendingResult::Finish()
 {
-    assert(0 && "TODO");
     if (mType == TYPE_COMPONENT) {
-        // AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
-        // if (QueuedWork.hasPendingWork()) {
-        //     // If this is a broadcast component, we need to make sure any
-        //     // queued work is complete before telling AM we are done, so
-        //     // we don't have our process killed before that.  We now know
-        //     // there is pending work; put another piece of work at the end
-        //     // of the list to finish the broadcast, so we don't block this
-        //     // thread (which may be the main thread) to have it finished.
-        //     //
-        //     // Note that we don't need to use QueuedWork.add() with the
-        //     // runnable, since we know the AM is waiting for us until the
-        //     // executor gets to it.
-        //     QueuedWork.singleThreadExecutor().execute( new Runnable() {
-        //         @Override public void run() {
-        //             if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
-        //                     "Finishing broadcast after work to component " + mToken);
-        //             sendFinished(mgr);
-        //         }
-        //     });
-        // } else {
-        // if (ActivityThread::DEBUG_BROADCAST) {
-        //     Slogger::I("BroadcastReceiver::PendingResult", "Finishing broadcast to component %p", mToken.Get());
-        // }
-        // SendFinished(mgr);
-        // }
+        Boolean bval;
+        QueuedWork::HasPendingWork(&bval);
+        if (bval) {
+            // If this is a broadcast component, we need to make sure any
+            // queued work is complete before telling AM we are done, so
+            // we don't have our process killed before that.  We now know
+            // there is pending work; put another piece of work at the end
+            // of the list to finish the broadcast, so we don't block this
+            // thread (which may be the main thread) to have it finished.
+            //
+            // Note that we don't need to use QueuedWork.add() with the
+            // runnable, since we know the AM is waiting for us until the
+            // executor gets to it.
+            AutoPtr<IExecutorService> exService;
+            QueuedWork::SingleThreadExecutor((IExecutorService**)&exService);
+            AutoPtr<IRunnable> runnable = new FinishRunnable(this);
+            IExecutor::Probe(exService)->Execute(runnable);
+        }
+        else {
+            if (CActivityThread::DEBUG_BROADCAST) {
+                Slogger::I("BroadcastReceiver::PendingResult", "Finishing broadcast to component %p", mToken.Get());
+            }
+            AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
+            SendFinished(mgr);
+        }
     }
     else if (mOrderedHint && mType != TYPE_UNREGISTERED) {
-        // if (ActivityThread::DEBUG_BROADCAST) {
-        //     Slogger::I("BroadcastReceiver::PendingResult", "Finishing broadcast to %p", mToken.Get());
-        // }
-        // AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
-        // SendFinished(mgr);
+        if (CActivityThread::DEBUG_BROADCAST) {
+            Slogger::I("BroadcastReceiver::PendingResult", "Finishing broadcast to %s",
+                TO_CSTR(mToken));
+        }
+        AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
+        SendFinished(mgr);
     }
     return NOERROR;
 }
@@ -334,8 +361,7 @@ ECode BroadcastReceiver::PeekService(
     VALIDATE_NOT_NULL(binder)
     *binder = NULL;
 
-    assert(0 && "TODO");
-    AutoPtr<IIActivityManager> am ;//= ActivityManagerNative::GetDefault();
+    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
     AutoPtr<IContentResolver> resolver;
     String type;
 

@@ -5,13 +5,13 @@
 #include "elastos/droid/app/CBackStackRecordTransitionState.h"
 #include "elastos/droid/app/CBackStackRecord.h"
 #include "elastos/droid/app/FragmentManagerImpl.h"
-// #include "elastos/droid/app/Fragment.h"
+#include "elastos/droid/app/Fragment.h"
 #include "elastos/droid/os/CParcel.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/transition/CTransitionManager.h"
 #include "elastos/droid/transition/CTransitionSet.h"
 #include "elastos/droid/utility/CArrayMap.h"
-// #include "elastos/droid/widget/CView.h"
+#include "elastos/droid/view/CView.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -23,7 +23,7 @@ using Elastos::Droid::Transition::CTransitionSet;
 using Elastos::Droid::Transition::EIID_IEpicenterCallback;
 using Elastos::Droid::App::IFragmentTransaction;
 using Elastos::Droid::Graphics::CRect;
-//using Elastos::Droid::Widget::CView;
+using Elastos::Droid::View::CView;
 using Elastos::Droid::View::IViewTreeObserver;
 using Elastos::Droid::View::EIID_IOnPreDrawListener;
 using Elastos::Droid::Utility::CArrayMap;
@@ -1160,8 +1160,7 @@ AutoPtr<IBackStackRecordTransitionState> BackStackRecord::BeginTransition(
     // any views by default. They'll only target the views we tell add. If we don't
     // add any, then no views will be targeted.
     AutoPtr<IView> view;
-    assert(0 && "TODO");
-    // CView::New(mManager->mActivity, (IView**)&view);
+    CView::New(IContext::Probe(mManager->mActivity), (IView**)&view);
     state->SetNonExistentView(view);
 
     Boolean hasNext;
@@ -1303,18 +1302,17 @@ AutoPtr<IArrayMap> BackStackRecord::RemapSharedElements(
         }
     }
 
-    assert(0 && "TODO");
-    // Fragment* of = (Fragment*)outFragment;
-    // if (isBack) {
-    //     of->mEnterTransitionCallback->OnMapSharedElements(
-    //         IList::Probe(mSharedElementTargetNames), IMap::Probe(namedViews));
-    //     SetBackNameOverrides(state, namedViews, FALSE);
-    // }
-    // else {
-    //     of->mExitTransitionCallback->OnMapSharedElements(
-    //         IList::Probe(mSharedElementTargetNames), IMap::Probe(namedViews));
-    //     SetNameOverrides(state, namedViews, FALSE);
-    // }
+    Fragment* of = (Fragment*)outFragment;
+    if (isBack) {
+        of->mEnterTransitionCallback->OnMapSharedElements(
+            IList::Probe(mSharedElementTargetNames), IMap::Probe(namedViews));
+        SetBackNameOverrides(state, namedViews, FALSE);
+    }
+    else {
+        of->mExitTransitionCallback->OnMapSharedElements(
+            IList::Probe(mSharedElementTargetNames), IMap::Probe(namedViews));
+        SetNameOverrides(state, namedViews, FALSE);
+    }
 
     return namedViews;
 }
@@ -1450,19 +1448,18 @@ void BackStackRecord::CallSharedElementEnd(
     IMap::Probe(namedViews)->GetKeySet((ISet**)&keyset);
     IMap::Probe(namedViews)->GetValues((ICollection**)&values);
 
-    AutoPtr<IArrayList> names, views;
+    AutoPtr<IList> names, views;
     CArrayList::New(ICollection::Probe(keyset), (IArrayList**)&names);
     CArrayList::New(values, (IArrayList**)&views);
 
-    assert(0 && "TODO");
-    // Fragment* fragment = NULL;
-    // if (isBack) {
-    //     fragment = (Fragment*)outFragment;
-    // }
-    // else {
-    //     inFragment = (Fragment*)outFragment;
-    // }
-    // fragment->mSharedElementCallback->OnSharedElementEnd(names, views, NULL);
+    Fragment* fragment = NULL;
+    if (isBack) {
+        fragment = (Fragment*)outFragment;
+    }
+    else {
+        inFragment = (Fragment*)outFragment;
+    }
+    fragment->mEnterTransitionCallback->OnSharedElementEnd(names, views, NULL);
 }
 
 void BackStackRecord::SetEpicenterIn(
@@ -1491,20 +1488,19 @@ AutoPtr<IArrayMap> /*<String, View>*/ BackStackRecord::MapSharedElementsIn(
     // Now map the shared elements in the incoming fragment
     AutoPtr<IArrayMap> namedViews = MapEnteringSharedElements(state, inFragment, isBack);
 
-    assert(0 && "TODO");
-    // Fragment* fragment = (Fragment*)inFragment;
-    // // remap shared elements and set the name mapping used
-    // // in the shared element transition->
-    // if (isBack) {
-    //     fragment->mExitTransitionCallback->OnMapSharedElements(
-    //         IList::Probe(mSharedElementTargetNames), IMap::Probe(namedViews));
-    //     SetBackNameOverrides(state, namedViews, TRUE);
-    // }
-    // else {
-    //     fragment->mEnterTransitionCallback->OnMapSharedElements(
-    //         IList::Probe(mSharedElementTargetNames), IMap::Probe(namedViews));
-    //     SetNameOverrides(state, namedViews, TRUE);
-    // }
+    Fragment* fragment = (Fragment*)inFragment;
+    // remap shared elements and set the name mapping used
+    // in the shared element transition->
+    if (isBack) {
+        fragment->mExitTransitionCallback->OnMapSharedElements(
+            IList::Probe(mSharedElementTargetNames), IMap::Probe(namedViews));
+        SetBackNameOverrides(state, namedViews, TRUE);
+    }
+    else {
+        fragment->mEnterTransitionCallback->OnMapSharedElements(
+            IList::Probe(mSharedElementTargetNames), IMap::Probe(namedViews));
+        SetNameOverrides(state, namedViews, TRUE);
+    }
     return namedViews;
 }
 
@@ -1638,19 +1634,18 @@ void BackStackRecord::ConfigureTransitions(Int32 containerId,
             IMap::Probe(namedViews)->GetKeySet((ISet**)&keyset);
             IMap::Probe(namedViews)->GetValues((ICollection**)&values);
 
-            AutoPtr<IArrayList> names, views;
+            AutoPtr<IList> names, views;
             CArrayList::New(ICollection::Probe(keyset), (IArrayList**)&names);
             CArrayList::New(values, (IArrayList**)&views);
 
-            assert(0 && "TODO");
-            // Fragment* fragment = NULL;
-            // if (isBack) {
-            //     fragment = outFragment;
-            // }
-            // else {
-            //     fragment = inFragment;
-            // }
-            // fragment->mEnterTransitionCallback->OnSharedElementStart(names, views, NULL);
+            Fragment* fragment = NULL;
+            if (isBack) {
+                fragment = (Fragment*)outFragment.Get();
+            }
+            else {
+                fragment = (Fragment*)inFragment.Get();
+            }
+            fragment->mEnterTransitionCallback->OnSharedElementStart(names, views, NULL);
         }
 
         Boolean empty;
@@ -1873,33 +1868,30 @@ void BackStackRecord::ExcludeHiddenFragments(
     /* [in] */ Int32 containerId,
     /* [in] */ ITransition* transition)
 {
-    assert(0 && "TODO");
-    // if (mManager->mAdded != NULL) {
-    //     Int32 size;
-    //     mManager->mAdded->GetSize(&size);
-    //     for (Int32 i = 0; i < size; i++) {
-    //         AutoPtr<IInterface> obj;
-    //         mManager->mAdded->Get(i, (IInterface**)&obj);
-    //         Fragment* fragment = (Fragment*)IFragment::Probe(obj);
-    //         if (fragment->mView != NULL && fragment->mContainer != NULL
-    //             && fragment->mContainerId == containerId) {
-    //             AutoPtr<IView> view;
-    //             fragment->GetView((IView**)&view);
-    //             IInterface* viewObj = TO_IINTERFACE(view);
-    //             if (fragment->mHidden) {
-    //                 Boolean contains;
-    //                 hiddenFragmentViews->Contains(viewObj, &contains);
-    //                 if (!contains) {
-    //                     transition->ExcludeTarget(view, TRUE);
-    //                     hiddenFragmentViews->Add(viewObj);
-    //                 }
-    //             } else {
-    //                 transition->ExcludeTarget(view, FALSE);
-    //                 hiddenFragmentViews->Remove(viewObj);
-    //             }
-    //         }
-    //     }
-    // }
+    {
+        Int32 size = mManager->mAdded.GetSize();
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IFragment> obj = mManager->mAdded[i];
+            Fragment* fragment = (Fragment*)obj.Get();
+            if (fragment->mView != NULL && fragment->mContainer != NULL
+                && fragment->mContainerId == containerId) {
+                AutoPtr<IView> view;
+                fragment->GetView((IView**)&view);
+                IInterface* viewObj = TO_IINTERFACE(view);
+                if (fragment->mHidden) {
+                    Boolean contains;
+                    hiddenFragmentViews->Contains(viewObj, &contains);
+                    if (!contains) {
+                        transition->ExcludeTarget(view, TRUE);
+                        hiddenFragmentViews->Add(viewObj);
+                    }
+                } else {
+                    transition->ExcludeTarget(view, FALSE);
+                    hiddenFragmentViews->Remove(viewObj);
+                }
+            }
+        }
+    }
 }
 
 //=========================================================================

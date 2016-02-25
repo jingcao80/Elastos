@@ -118,16 +118,16 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
@@ -161,16 +161,16 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
@@ -188,11 +188,11 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -529,7 +529,7 @@ module
             [in] Int32 defStyleAttr);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
@@ -896,11 +896,11 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr);
 
@@ -951,7 +951,7 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         interface IGlowPadView;

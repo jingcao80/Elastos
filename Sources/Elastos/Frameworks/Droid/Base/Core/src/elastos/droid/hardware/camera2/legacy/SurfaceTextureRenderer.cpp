@@ -507,7 +507,7 @@ void SurfaceTextureRenderer::ClearState()
 ECode SurfaceTextureRenderer::ConfigureEGLContext()
 {
     assert(0 && "need opengl:: EGL14");
-    // EGL14::EglGetDisplay(IEGL14::EGL_DEFAULT_DISPLAY, (IEGLDisplay**)&mEGLDisplay);
+    // EGL14::EglGetDisplay(IEGL14::_EGL_DEFAULT_DISPLAY, (IEGLDisplay**)&mEGLDisplay);
     // AutoPtr<IEGL14Helper> helper;
     // CEGL14Helper::AcquireSingleton((IEGL14Helper**)&helper);
     // AutoPtr<IEGLDisplay> display;

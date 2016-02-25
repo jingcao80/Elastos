@@ -49,6 +49,9 @@ public:
     CARAPI GetUri(
         /* [out] */ IUri** uri);
 
+    CARAPI SetUri(
+        /* [in] */ IUri* uri);
+
     /**
      * Turn this item into text, regardless of the type of data it
      * actually contains.

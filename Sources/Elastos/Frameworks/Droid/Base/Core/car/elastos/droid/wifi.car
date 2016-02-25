@@ -47,24 +47,8 @@ module
 
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Os.ILooper;
-    // enum Elastos.Droid.Net.Wifi.SupplicantState;
-    // enum Elastos.Droid.Net.Wifi.WpsResultStatus;
-    // interface Elastos.Droid.Net.Wifi.IWpsInfo;
-    // interface Elastos.Droid.Net.Wifi.IWpsResult;
-    // interface Elastos.Droid.Net.Wifi.IWifiSsidHelper;
-    // interface Elastos.Droid.Net.Wifi.ISupplicantStateHelper;
-    // interface Elastos.Droid.Net.Wifi.IWifiConfiguration;
-    // interface Elastos.Droid.Net.Wifi.IWifiConfigurationStatus;
-    // interface Elastos.Droid.Net.Wifi.IScanResult;
-    // interface Elastos.Droid.Net.Wifi.IRssiPacketCountInfo;
-    // interface Elastos.Droid.Net.Wifi.IWifiConfigurationKeyMgmt;
-    // interface Elastos.Droid.Net.Wifi.IWifiConfigurationGroupCipher;
-    // interface Elastos.Droid.Net.Wifi.IWifiConfigurationEnterpriseField;
-    // interface Elastos.Droid.Net.Wifi.IWifiConfigurationAuthAlgorithm;
-    // interface Elastos.Droid.Net.Wifi.IWifiConfigurationPairwiseCipher;
-    // interface Elastos.Droid.Net.Wifi.IIWifiManager;
-    // interface Elastos.Droid.Net.Wifi.IWifiManager;
     interface Elastos.Droid.Wifi.P2p.IWifiP2pDevice;
+    interface Elastos.Droid.Wifi.P2p.IIWifiP2pManager;
 
     namespace Elastos {
     namespace Droid {
@@ -81,7 +65,7 @@ module
 
         class CRttManager {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IIRttManager* service);
 
             interface IRttManager;
@@ -203,7 +187,7 @@ module
 
         class CWifiScanner {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IIWifiScanner* service);
 
             interface IWifiScanner;
@@ -510,7 +494,8 @@ module
         }
 
         class CWifiP2pManager {
-            constructor();
+            constructor(
+                [in] IIWifiP2pManager* service);
 
             interface IWifiP2pManager;
         }

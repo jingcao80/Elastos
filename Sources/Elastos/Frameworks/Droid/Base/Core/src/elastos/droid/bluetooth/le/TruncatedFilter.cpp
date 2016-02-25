@@ -15,12 +15,13 @@ TruncatedFilter::TruncatedFilter()
 {
 }
 
-TruncatedFilter::TruncatedFilter(
+ECode TruncatedFilter::constructor(
     /* [in] */ IScanFilter* filter,
     /* [in] */ IList* storageDescriptors)
 {
     mFilter = filter;
     mStorageDescriptors = storageDescriptors;
+    return NOERROR;
 }
 
 ECode TruncatedFilter::GetFilter(

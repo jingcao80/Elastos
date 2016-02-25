@@ -5,7 +5,7 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/server/am/ActivityStackSupervisor.h"
 #include "elastos/droid/server/am/CActivityManagerService.h"
-//TODO #include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
 
 using Elastos::Droid::App::IActivityOptions;
 using Elastos::Droid::Os::Handler;
@@ -20,7 +20,7 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IPersistableBundle;
-//TODO using Elastos::Droid::Server::Wm::CWindowManagerService;
+using Elastos::Droid::Server::Wm::CWindowManagerService;
 using Elastos::Droid::Service::Voice::IIVoiceInteractionSession;
 using Elastos::Droid::Utility::IArraySet;
 
@@ -642,7 +642,7 @@ public:
     static const Boolean SCREENSHOT_FORCE_565;
 
     AutoPtr<CActivityManagerService> mService;
-    //TODO AutoPtr<CWindowManagerService> mWindowManager;//TODO CWindowManagerService->IIWindowManager
+    AutoPtr<CWindowManagerService> mWindowManager;//TODO CWindowManagerService->IIWindowManager
     /**
       * Used for validating app tokens with window manager.
       */

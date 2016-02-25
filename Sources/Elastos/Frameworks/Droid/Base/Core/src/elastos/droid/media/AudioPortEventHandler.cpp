@@ -2,6 +2,8 @@
 #include "elastos/droid/os/Looper.h"
 #include <elastos/core/AutoLock.h>
 
+#include <media/AudioSystem.h>
+
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::Looper;
 using Elastos::Utility::CArrayList;
@@ -16,6 +18,63 @@ const Int32 AudioPortEventHandler::AUDIOPORT_EVENT_PORT_LIST_UPDATED = 1;
 const Int32 AudioPortEventHandler::AUDIOPORT_EVENT_PATCH_LIST_UPDATED = 2;
 const Int32 AudioPortEventHandler::AUDIOPORT_EVENT_SERVICE_DIED = 3;
 const Int32 AudioPortEventHandler::AUDIOPORT_EVENT_NEW_LISTENER = 4;
+
+//===================================================================================
+//              JNIAudioPortCallback
+//===================================================================================
+
+// ----------------------------------------------------------------------------
+// ref-counted object for callbacks
+class JNIAudioPortCallback: public android::AudioSystem::AudioPortCallback
+{
+public:
+    JNIAudioPortCallback(IInterface* weak_thiz);
+    ~JNIAudioPortCallback();
+
+    virtual void onAudioPortListUpdate();
+    virtual void onAudioPatchListUpdate();
+    virtual void onServiceDied();
+
+private:
+    void sendEvent(int event);
+
+    IInterface*     mObject;    // Weak ref to AudioPortEventHandlerDelegate Java object to call on
+};
+
+JNIAudioPortCallback::JNIAudioPortCallback(IInterface* weak_thiz)
+{
+    // We use a weak reference so the SoundTriggerModule object can be garbage collected.
+    // The reference is only used as a proxy for callbacks.
+    mObject  = weak_thiz;
+}
+
+JNIAudioPortCallback::~JNIAudioPortCallback()
+{
+}
+
+void JNIAudioPortCallback::sendEvent(int event)
+{
+    AudioPortEventHandler::PostEventFromNative(mObject, event, 0, 0, NULL);
+}
+
+void JNIAudioPortCallback::onAudioPortListUpdate()
+{
+    sendEvent(AudioPortEventHandler::AUDIOPORT_EVENT_PORT_LIST_UPDATED);
+}
+
+void JNIAudioPortCallback::onAudioPatchListUpdate()
+{
+    sendEvent(AudioPortEventHandler::AUDIOPORT_EVENT_PATCH_LIST_UPDATED);
+}
+
+void JNIAudioPortCallback::onServiceDied()
+{
+    sendEvent(AudioPortEventHandler::AUDIOPORT_EVENT_SERVICE_DIED);
+}
+
+//===================================================================================
+//              AudioPortEventHandler
+//===================================================================================
 
 ECode AudioPortEventHandler::EventHandler::HandleMessage(
     /* [in] */ IMessage* msg)
@@ -182,25 +241,23 @@ ECode AudioPortEventHandler::Handler(
 }
 
 ECode AudioPortEventHandler::NativeSetup(
-    /* [in] */ IInterface* module_this)
+    /* [in] */ IInterface* weak_this)
 {
-//TODO: Need JNI
     ALOGV("eventHandlerSetup");
 
-    // sp<JNIAudioPortCallback> callback = new JNIAudioPortCallback(env, thiz, weak_this);
+    android::sp<JNIAudioPortCallback> callback = new JNIAudioPortCallback(weak_this);
 
-    // AudioSystem::setAudioPortCallback(callback);
+    android::AudioSystem::setAudioPortCallback(callback);
     return NOERROR;
 }
 
 ECode AudioPortEventHandler::NativeFinalize()
 {
-//TODO: Need JNI
     ALOGV("eventHandlerFinalize");
 
-    // sp<JNIAudioPortCallback> callback;
+    android::sp<JNIAudioPortCallback> callback;
 
-    // AudioSystem::setAudioPortCallback(callback);
+    android::AudioSystem::setAudioPortCallback(callback);
     return NOERROR;
 }
 

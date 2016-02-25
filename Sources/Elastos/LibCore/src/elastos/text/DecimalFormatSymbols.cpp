@@ -32,8 +32,9 @@ ECode DecimalFormatSymbols::constructor()
 ECode DecimalFormatSymbols::constructor(
     /* [in] */ ILocale* locale)
 {
-    if (locale == NULL)
+    if (locale == NULL) {
         return E_NULL_POINTER_EXCEPTION;
+    }
 
     AutoPtr<ILocaleDataHelper> helper;
     CLocaleDataHelper::AcquireSingleton((ILocaleDataHelper**)&helper);
@@ -58,7 +59,7 @@ ECode DecimalFormatSymbols::constructor(
         mCurrency->GetCurrencyCode(&mIntlCurrencySymbol);
     }
     else {
-        mCurrency = Currency::GetInstance(String("XXX"));
+        FAIL_RETURN(Currency::GetInstance(String("XXX"), (ICurrency**)&mCurrency));
         localeData->GetCurrencySymbol(&mCurrencySymbol);
         localeData->GetInternationalCurrencySymbol(&mIntlCurrencySymbol);
     }
@@ -392,7 +393,8 @@ ECode DecimalFormatSymbols::SetInternationalCurrencySymbol(
         return NOERROR;
     }
 
-    mCurrency = Currency::GetInstance(value);
+    mCurrency = NULL;
+    FAIL_RETURN(Currency::GetInstance(value, (ICurrency**)&mCurrency));
     ECode ec = mCurrency->GetSymbol(mLocale, &mCurrencySymbol);
     if (FAILED(ec)) {
         mCurrency = NULL;

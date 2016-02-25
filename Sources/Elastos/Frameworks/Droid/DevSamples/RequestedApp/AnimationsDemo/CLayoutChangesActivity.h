@@ -1,6 +1,6 @@
 
-#ifndef  __CLAYOUTCHANGESACTIVITY_H__
-#define  __CLAYOUTCHANGESACTIVITY_H__
+#ifndef __CLAYOUTCHANGESACTIVITY_H__
+#define __CLAYOUTCHANGESACTIVITY_H__
 
 #include "_CLayoutChangesActivity.h"
 #include "elastos/droid/app/Activity.h"

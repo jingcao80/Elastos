@@ -1,13 +1,12 @@
 
 module
 {
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IBatteryController;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IKeyguardUserSwitcher;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IUserInfoController;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IBatteryController;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IKeyguardUserSwitcher;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IUserInfoController;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
     namespace Phone {
@@ -42,7 +41,6 @@ module
     } // namespace Phone
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

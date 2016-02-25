@@ -85,11 +85,11 @@ protected:
         ASSERT_SUCCEEDED(CBufferedReader::New((IFileReader*)freader, (IBufferedReader**)&in));
         String line;
         ec = in->ReadLine(&line);
-        if (FAILED(ec) && ec != E_IO_EXCEPTION) { goto go_on; }
+        if (FAILED(ec) && ec != (ECode)E_IO_EXCEPTION) { goto go_on; }
         while (line != NULL) {
             webappsJson += line;
             ec = in->ReadLine(&line);
-            if (FAILED(ec) && ec != E_IO_EXCEPTION) { goto go_on; }
+            if (FAILED(ec) && ec != (ECode)E_IO_EXCEPTION) { goto go_on; }
         }
 go_on:
         if (webappsJson.GetLength() == 0)
@@ -298,11 +298,11 @@ ECode CLauncherShortcuts::OnListItemClick(
     ASSERT_SUCCEEDED(CBufferedReader::New((IBufferedReader*)reader, (IBufferedReader**)&in));
     String line;
     ec = in->ReadLine(&line);
-    if (FAILED(ec) && ec != E_IO_EXCEPTION) { goto go_on; }
+    if (FAILED(ec) && ec != (ECode)E_IO_EXCEPTION) { goto go_on; }
     while (line != NULL) {
         manifestJson += line;
         ec = in->ReadLine(&line);
-        if (FAILED(ec) && ec != E_IO_EXCEPTION) { goto go_on; }
+        if (FAILED(ec) && ec != (ECode)E_IO_EXCEPTION) { goto go_on; }
     }
 
 go_on:

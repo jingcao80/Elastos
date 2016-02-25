@@ -5,7 +5,6 @@
 #include <elastos/droid/ext/frameworkext.h>
 #include "Elastos.Droid.App.h"
 #include <elastos/droid/content/ContextWrapper.h>
-// #include "elastos/droid/app/LoadedPkg.h"
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Os::IBundle;
@@ -142,7 +141,7 @@ private:
     CARAPI_(AutoPtr< ArrayOf<IActivityLifecycleCallbacks*> >) CollectActivityLifecycleCallbacks();
 
 public:
-    // AutoPtr<LoadedPkg> mLoadedPkg;
+    AutoPtr<ILoadedPkg> mLoadedPkg;
 
 private:
     static const String TAG;

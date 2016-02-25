@@ -7,11 +7,40 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/view/ThreadedRenderer.h"
+#include "elastos/droid/view/HardwareRenderer.h"
+#include "elastos/droid/view/CRenderNodeHelper.h"
+#include "elastos/droid/view/RenderNode.h"
+#include "elastos/droid/view/HardwareLayer.h"
+#include "elastos/droid/view/CChoreographerHelper.h"
+#include "elastos/droid/view/Surface.h"
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/os/Process.h"
+#include "elastos/droid/utility/TimeUtils.h"
+#include "elastos/droid/R.h"
+
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Slogger.h>
+
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <EGL/egl_cache.h>
+
+#include <utils/StrongPointer.h>
+#include <system/window.h>
+
+#include <Animator.h>
+#include <AnimationContext.h>
+#include <IContextFactory.h>
+#include <hwui/RenderNode.h>
+#include <renderthread/CanvasContext.h>
+#include <renderthread/RenderProxy.h>
+#include <renderthread/RenderTask.h>
+#include <renderthread/RenderThread.h>
+#include <elastos/utility/etl/Vector.h>
 
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Content::Res::IResources;
@@ -24,13 +53,23 @@ using Elastos::Droid::Graphics::Drawable::IDrawableConstantState;
 using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::Process;
 using Elastos::Droid::Utility::IInt64SparseArray;
+using Elastos::Droid::Utility::TimeUtils;
+using Elastos::Droid::R;
 
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::Core::IInteger64;
 using Elastos::Core::CInteger64;
+using Elastos::Core::StringUtils;
 using Elastos::IO::IFlushable;
 using Elastos::Utility::IHashSet;
 using Elastos::Utility::CHashSet;
+
+using namespace android;
+using namespace android::uirenderer;
+using namespace android::uirenderer::renderthread;
 
 namespace Elastos {
 namespace Droid {
@@ -46,7 +85,14 @@ const Int32 ThreadedRenderer::SYNC_OK = 0;
 
 const Int32 ThreadedRenderer::SYNC_INVALIDATE_REQUIRED = 1 << 0;
 
-const AutoPtr<ArrayOf<String> > ThreadedRenderer::VISUALIZERS = ArrayOf<String>::Alloc(1);
+static AutoPtr<ArrayOf<String> > InitArray()
+{
+    AutoPtr<ArrayOf<String> > result = ArrayOf<String>::Alloc(1);
+    (*result)[0] = HardwareRenderer::PROFILE_PROPERTY_VISUALIZE_BARS;
+    return result;
+}
+
+const AutoPtr<ArrayOf<String> > ThreadedRenderer::VISUALIZERS = InitArray();
 
 ThreadedRenderer::ThreadedRenderer()
     : mWidth(0)
@@ -65,54 +111,56 @@ ThreadedRenderer::ThreadedRenderer()
     , mInitialized(FALSE)
     , mProfilingEnabled(FALSE)
     , mRootNodeNeedsUpdate(FALSE)
-{
-//    (*VISUALIZERS)[0] = PROFILE_PROPERTY_VISUALIZE_BARS;
-}
+{}
 
 ECode ThreadedRenderer::constructor(
     /* [in] */ IContext* context,
     /* [in] */ Boolean translucent)
 {
-    assert(0 && "TODO");
     AutoPtr<ITypedArray> a;
-    // context->ObtainStyledAttributes(NULL, R.styleable.Lighting, 0, 0, (ITypedArray**)&a);
-    // a->GetDimension(R.styleable.Lighting_lightY, 0, &mLightY);
-    // a->GetDimension(R.styleable.Lighting_lightZ, 0, &mLightZ);
-    // a->GetDimension(R.styleable.Lighting_lightRadius, 0, &mLightRadius);
+    AutoPtr<ArrayOf<Int32> > lightings = ArrayOf<Int32>::Alloc(
+        const_cast<Int32 *>(R::styleable::Lighting),
+        ArraySize(R::styleable::Lighting));
+    context->ObtainStyledAttributes(NULL, lightings, 0, 0, (ITypedArray**)&a);
+    a->GetDimension(R::styleable::Lighting_lightY, 0, &mLightY);
+    a->GetDimension(R::styleable::Lighting_lightZ, 0, &mLightZ);
+    a->GetDimension(R::styleable::Lighting_lightRadius, 0, &mLightRadius);
     Float f1 = 0.f, f2 = 0.f;
-    // a->GetFloat(R.styleable.Lighting_ambientShadowAlpha, 0, &f1);
+    a->GetFloat(R::styleable::Lighting_ambientShadowAlpha, 0, &f1);
     mAmbientShadowAlpha = (Int32) (255 * f1 + 0.5f);
-    // a->GetFloat(R.styleable.Lighting_spotShadowAlpha, 0, &f2);
+    a->GetFloat(R::styleable::Lighting_spotShadowAlpha, 0, &f2);
     mSpotShadowAlpha = (Int32) (255 * f2 + 0.5f);
     a->Recycle();
 
     Int64 rootNodePtr = NativeCreateRootRenderNode();
     AutoPtr<IRenderNodeHelper> hlp;
-    // CRenderNodeHelper::AcquireSingleton((IRenderNodeHelper**)&hlp);
+    CRenderNodeHelper::AcquireSingleton((IRenderNodeHelper**)&hlp);
     hlp->Adopt(rootNodePtr, (IRenderNode**)&mRootNode);
     Boolean r;
     mRootNode->SetClipToBounds(FALSE, &r);
     mNativeProxy = NativeCreateProxy(translucent, rootNodePtr);
 
-//    AtlasInitializer::sInstance->Init(context, mNativeProxy);
+    AtlasInitializer::sInstance->Init(context, mNativeProxy);
 
     // Setup timing
     AutoPtr<IChoreographerHelper> cghlp;
-//    CChoreographerHelper::AcquireSingleton((IChoreographerHelper**)&cghlp);
+    CChoreographerHelper::AcquireSingleton((IChoreographerHelper**)&cghlp);
     cghlp->GetInstance((IChoreographer**)&mChoreographer);
     Int64 n = 0;
     mChoreographer->GetFrameIntervalNanos(&n);
     NativeSetFrameInterval(mNativeProxy, n);
 
-    LoadSystemProperties();
+    Boolean tmp;
+    LoadSystemProperties(&tmp);
     return NOERROR;
 }
 
-void ThreadedRenderer::Destroy()
+ECode ThreadedRenderer::Destroy()
 {
     mInitialized = FALSE;
     UpdateEnabledState(NULL);
     NativeDestroy(mNativeProxy);
+    return NOERROR;
 }
 
 void ThreadedRenderer::UpdateEnabledState(
@@ -120,22 +168,24 @@ void ThreadedRenderer::UpdateEnabledState(
 {
     Boolean vld = FALSE;
     if (surface == NULL || !(surface->IsValid(&vld), vld)) {
-//        SetEnabled(FALSE);
+       SetEnabled(FALSE);
     }
     else {
-//        SetEnabled(mInitialized);
+       SetEnabled(mInitialized);
     }
 }
 
 // throws OutOfResourcesException
-Boolean ThreadedRenderer::Initialize(
-    /* [in] */ ISurface* surface)
+ECode ThreadedRenderer::Initialize(
+    /* [in] */ ISurface* surface,
+    /* [out] */ Boolean* res)
 {
     mInitialized = TRUE;
     UpdateEnabledState(surface);
     Boolean status = NativeInitialize(mNativeProxy, surface);
     surface->AllocateBuffers();
-    return status;
+    *res = status;
+    return NOERROR;
 }
 
 // throws OutOfResourcesException
@@ -147,23 +197,25 @@ ECode ThreadedRenderer::UpdateSurface(
     return NOERROR;
 }
 
-void ThreadedRenderer::PauseSurface(
+ECode ThreadedRenderer::PauseSurface(
     /* [in] */ ISurface* surface)
 {
     NativePauseSurface(mNativeProxy, surface);
+    return NOERROR;
 }
 
-void ThreadedRenderer::DestroyHardwareResources(
+ECode ThreadedRenderer::DestroyHardwareResources(
         /* [in] */ IView* view)
 {
     DestroyResources(view);
     NativeDestroyHardwareResources(mNativeProxy);
+    return NOERROR;
 }
 
 void ThreadedRenderer::DestroyResources(
     /* [in] */ IView* view)
 {
-//    ((View*)view)->DestroyHardwareResources();
+    ((View*)view)->DestroyHardwareResources();
 
     if (IViewGroup::Probe(view) != NULL) {
         AutoPtr<IViewGroup> group = IViewGroup::Probe(view);
@@ -178,19 +230,21 @@ void ThreadedRenderer::DestroyResources(
     }
 }
 
-void ThreadedRenderer::Invalidate(
+ECode ThreadedRenderer::Invalidate(
     /* [in] */ ISurface* surface)
 {
     UpdateSurface(surface);
+    return NOERROR;
 }
 
-void ThreadedRenderer::DetachSurfaceTexture(
+ECode ThreadedRenderer::DetachSurfaceTexture(
     /* [in] */ Int64 hardwareLayer)
 {
     NativeDetachSurfaceTexture(mNativeProxy, hardwareLayer);
+    return NOERROR;
 }
 
-void ThreadedRenderer::Setup(
+ECode ThreadedRenderer::Setup(
     /* [in] */ Int32 width,
     /* [in] */ Int32 height,
     /* [in] */ IRect* surfaceInsets)
@@ -222,30 +276,37 @@ void ThreadedRenderer::Setup(
     NativeSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight,
             lightX, mLightY, mLightZ, mLightRadius,
             mAmbientShadowAlpha, mSpotShadowAlpha);
+    return NOERROR;
 }
 
-void ThreadedRenderer::SetOpaque(
+ECode ThreadedRenderer::SetOpaque(
     /* [in] */ Boolean opaque)
 {
     NativeSetOpaque(mNativeProxy, opaque && !mHasInsets);
+    return NOERROR;
 }
 
-Int32 ThreadedRenderer::GetWidth()
+ECode ThreadedRenderer::GetWidth(
+    /* [out] */ Int32* width)
 {
-    return mWidth;
+    *width = mWidth;
+    return NOERROR;
 }
 
-Int32 ThreadedRenderer::GetHeight()
+ECode ThreadedRenderer::GetHeight(
+    /* [out] */ Int32* height)
 {
-    return mHeight;
+    *height = mHeight;
+    return NOERROR;
 }
 
-void ThreadedRenderer::DumpGfxInfo(
+ECode ThreadedRenderer::DumpGfxInfo(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ IFileDescriptor* fd)
 {
     IFlushable::Probe(pw)->Flush();
     NativeDumpProfileInfo(mNativeProxy, fd);
+    return NOERROR;
 }
 
 Int32 ThreadedRenderer::Search(
@@ -261,14 +322,13 @@ Int32 ThreadedRenderer::Search(
 Boolean ThreadedRenderer::CheckIfProfilingRequested()
 {
     String profiling;
-//    SystemProperties::Get(HardwareRenderer::PROFILE_PROPERTY, &profiling);
+    SystemProperties::Get(HardwareRenderer::PROFILE_PROPERTY, &profiling);
     Int32 graphType = Search(VISUALIZERS, profiling);
-    assert(0 && "TODO");
-//    return (graphType >= 0) || Boolean::ParseBoolean(profiling);
-    return FALSE;
+    return (graphType >= 0) || StringUtils::ParseBoolean(profiling);
 }
 
-Boolean ThreadedRenderer::LoadSystemProperties()
+ECode ThreadedRenderer::LoadSystemProperties(
+    /* [out] */ Boolean* res)
 {
     Boolean changed = NativeLoadSystemProperties(mNativeProxy);
     Boolean wantProfiling = CheckIfProfilingRequested();
@@ -276,191 +336,227 @@ Boolean ThreadedRenderer::LoadSystemProperties()
         mProfilingEnabled = wantProfiling;
         changed = TRUE;
     }
-    return changed;
+    *res = changed;
+    return NOERROR;
 }
 
 void ThreadedRenderer::UpdateViewTreeDisplayList(
     /* [in] */ IView* view)
 {
-    // AutoPtr<View> cv = (View*)view;
-    // cv->mPrivateFlags |= View::PFLAG_DRAWN;
-    // cv->mRecreateDisplayList = (cv->mPrivateFlags & View::PFLAG_INVALIDATED)
-    //         == View::PFLAG_INVALIDATED;
-    // cv->mPrivateFlags &= ~View::PFLAG_INVALIDATED;
-    // view->GetDisplayList();
-    // cv->mRecreateDisplayList = FALSE;
+    View* cv = (View*)view;
+    cv->mPrivateFlags |= View::PFLAG_DRAWN;
+    cv->mRecreateDisplayList = (cv->mPrivateFlags & View::PFLAG_INVALIDATED)
+            == View::PFLAG_INVALIDATED;
+    cv->mPrivateFlags &= ~View::PFLAG_INVALIDATED;
+    AutoPtr<IRenderNode> nodes;
+    view->GetDisplayList((IRenderNode**)&nodes);
+    cv->mRecreateDisplayList = FALSE;
 }
 
-// void ThreadedRenderer::UpdateRootDisplayList(
-//     /* [in] */ IView* view,
-//     /* [in] */ IHardwareDrawCallbacks* callbacks)
-// {
-//     assert(0 && "TODO");
-// //    Trace::TraceBegin(Trace::TRACE_TAG_VIEW, "getDisplayList");
-//     UpdateViewTreeDisplayList(view);
+void ThreadedRenderer::UpdateRootDisplayList(
+    /* [in] */ IView* view,
+    /* [in] */ IHardwareDrawCallbacks* callbacks)
+{
+//    Trace::TraceBegin(Trace::TRACE_TAG_VIEW, "getDisplayList");
+    UpdateViewTreeDisplayList(view);
 
-//     Boolean bVld = FALSE;
-//     if (mRootNodeNeedsUpdate || !(mRootNode->IsValid(&bVld), bVld)) {
-//         AutoPtr<IHardwareCanvas> canvas;
-//         mRootNode->Start(mSurfaceWidth, mSurfaceHeight, (IHardwareCanvas**)&canvas);
-//         Int32 saveCount = 0;
-//         canvas->Save(&saveCount);
-//         canvas->Translate(mInsetLeft, mInsetTop);
-//         callbacks->OnHardwarePreDraw(canvas);
+    Boolean bVld = FALSE;
+    if (mRootNodeNeedsUpdate || !(mRootNode->IsValid(&bVld), bVld)) {
+        AutoPtr<IHardwareCanvas> canvas;
+        mRootNode->Start(mSurfaceWidth, mSurfaceHeight, (IHardwareCanvas**)&canvas);
+        Int32 saveCount = 0;
+        ICanvas* c = ICanvas::Probe(canvas);
+        c->Save(&saveCount);
+        c->Translate(mInsetLeft, mInsetTop);
+        callbacks->OnHardwarePreDraw(canvas);
 
-//         canvas->InsertReorderBarrier();
-//         AutoPtr<IRenderNode> dl;
-//         view->GetDisplayList((IRenderNode**)&dl);
-//         canvas->DrawRenderNode(dl);
-//         canvas->InsertInorderBarrier();
+        c->InsertReorderBarrier();
+        AutoPtr<IRenderNode> dl;
+        view->GetDisplayList((IRenderNode**)&dl);
+        canvas->DrawRenderNode(dl);
+        c->InsertInorderBarrier();
 
-//         callbacks->OnHardwarePostDraw(canvas);
-//         canvas->RestoreToCount(saveCount);
-//         mRootNodeNeedsUpdate = FALSE;
+        callbacks->OnHardwarePostDraw(canvas);
+        c->RestoreToCount(saveCount);
+        mRootNodeNeedsUpdate = FALSE;
 
-//         mRootNode->End(canvas);
-//     }
-// //    Trace::TraceEnd(Trace::TRACE_TAG_VIEW);
-// }
+        mRootNode->End(canvas);
+    }
+//    Trace::TraceEnd(Trace::TRACE_TAG_VIEW);
+}
 
-void ThreadedRenderer::InvalidateRoot()
+ECode ThreadedRenderer::InvalidateRoot()
 {
     mRootNodeNeedsUpdate = TRUE;
+    return NOERROR;
 }
 
-// ECode ThreadedRenderer::Draw(
-//     /* [in] */ IView* view,
-//     /* [in] */ IAttachInfo* attachInfo,
-//     /* [in] */ IHardwareDrawCallbacks* callbacks)
-// {
-//     attachInfo->mIgnoreDirtyState = TRUE;
-//     Int64 frameTimeNanos = 0;
-//     mChoreographer->GetFrameTimeNanos(&frameTimeNanos);
-//     attachInfo->mDrawingTime = frameTimeNanos / ITimeUtils::NANOS_PER_MS;
+ECode ThreadedRenderer::Draw(
+    /* [in] */ IView* view,
+    /* [in] */ View::AttachInfo* attachInfo,
+    /* [in] */ IHardwareDrawCallbacks* callbacks)
+{
+    attachInfo->mIgnoreDirtyState = TRUE;
+    Int64 frameTimeNanos = 0;
+    mChoreographer->GetFrameTimeNanos(&frameTimeNanos);
+    attachInfo->mDrawingTime = frameTimeNanos / TimeUtils::NANOS_PER_MS;
 
-//     Int64 recordDuration = 0;
-//     if (mProfilingEnabled) {
-//         recordDuration = System::NanoTime();
-//     }
+    Int64 recordDuration = 0;
+    AutoPtr<ISystem> system;
+    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
+    Int64 nanoTime;
 
-//     UpdateRootDisplayList(view, callbacks);
+    if (mProfilingEnabled) {
+        system->GetNanoTime(&nanoTime);
+        recordDuration = nanoTime;
+    }
 
-//     if (mProfilingEnabled) {
-//         recordDuration = System::NanoTime() - recordDuration;
-//     }
 
-//     attachInfo->mIgnoreDirtyState = FALSE;
+    UpdateRootDisplayList(view, callbacks);
 
-//     // register animating rendernodes which started animating prior to renderer
-//     // creation, which is typical for animators started prior to first draw
-//     if (attachInfo->mPendingAnimatingRenderNodes != NULL) {
-//         Int32 count = attachInfo->mPendingAnimatingRenderNodes->GetSize();
-//         for (Int32 i = 0; i < count; i++) {
-//             RegisterAnimatingRenderNode(
-//                     attachInfo->mPendingAnimatingRenderNodes->Get(i));
-//         }
-//         attachInfo->mPendingAnimatingRenderNodes->Clear();
-//         // We don't need this anymore as subsequent calls to
-//         // ViewRootImpl#attachRenderNodeAnimator will go directly to us.
-//         attachInfo->mPendingAnimatingRenderNodes = NULL;
-//     }
+    if (mProfilingEnabled) {
+        system->GetNanoTime(&nanoTime);
+        recordDuration = nanoTime - recordDuration;
+    }
 
-//     Int32 syncResult = NativeSyncAndDrawFrame(mNativeProxy, frameTimeNanos,
-//             recordDuration, view->GetResources()->GetDisplayMetrics()->mDensity);
-//     if ((syncResult & SYNC_INVALIDATE_REQUIRED) != 0) {
-//         attachInfo->mViewRootImpl->Invalidate();
-//     }
-//     return NOERROR;
-// }
+    attachInfo->mIgnoreDirtyState = FALSE;
 
-void ThreadedRenderer::InvokeFunctor(
+    // register animating rendernodes which started animating prior to renderer
+    // creation, which is typical for animators started prior to first draw
+    if (attachInfo->mPendingAnimatingRenderNodes != NULL) {
+        Int32 count;
+        attachInfo->mPendingAnimatingRenderNodes->GetSize(&count);
+        for (Int32 i = 0; i < count; i++) {
+            AutoPtr<IInterface> tmp;
+            attachInfo->mPendingAnimatingRenderNodes->Get(i, (IInterface**)&tmp);
+            AutoPtr<IRenderNode> node = IRenderNode::Probe(tmp);
+            RegisterAnimatingRenderNode(node);
+        }
+        attachInfo->mPendingAnimatingRenderNodes->Clear();
+        // We don't need this anymore as subsequent calls to
+        // ViewRootImpl#attachRenderNodeAnimator will go directly to us.
+        attachInfo->mPendingAnimatingRenderNodes = NULL;
+    }
+
+    AutoPtr<IResources> res;
+    view->GetResources((IResources**)&res);
+    AutoPtr<IDisplayMetrics> metrics;
+    res->GetDisplayMetrics((IDisplayMetrics**)&metrics);
+    Float density;
+    metrics->GetDensity(&density);
+    Int32 syncResult = NativeSyncAndDrawFrame(mNativeProxy, frameTimeNanos,
+            recordDuration, density);
+    if ((syncResult & SYNC_INVALIDATE_REQUIRED) != 0) {
+        attachInfo->mViewRootImpl->Invalidate();
+    }
+    return NOERROR;
+}
+
+ECode ThreadedRenderer::InvokeFunctor(
     /* [in] */ Int64 functor,
     /* [in] */ Boolean waitForCompletion)
 {
     NativeInvokeFunctor(functor, waitForCompletion);
+    return NOERROR;
 }
 
-AutoPtr<IHardwareLayer> ThreadedRenderer::CreateTextureLayer()
+ECode ThreadedRenderer::CreateTextureLayer(
+    /* [out] */ IHardwareLayer** layer)
 {
-    Int64 layer = NativeCreateTextureLayer(mNativeProxy);
-//    return HardwareLayer::AdoptTextureLayer(this, layer);
-    return NULL;
+    Int64 nLayer = NativeCreateTextureLayer(mNativeProxy);
+    *layer = HardwareLayer::AdoptTextureLayer(this, nLayer);;
+    return NOERROR;
 }
 
-void ThreadedRenderer::BuildLayer(
+ECode ThreadedRenderer::BuildLayer(
     /* [in] */ IRenderNode* node)
 {
-    assert(0 && "TODO");
-    Int64 dl = 0; // node->GetNativeDisplayList();
+    RenderNode* nodeImpl = (RenderNode*)node;
+    Int64 dl = 0;
+    nodeImpl->GetNativeDisplayList(&dl);
     NativeBuildLayer(mNativeProxy, dl);
+    return NOERROR;
 }
 
-Boolean ThreadedRenderer::CopyLayerInto(
+ECode ThreadedRenderer::CopyLayerInto(
     /* [in] */ IHardwareLayer* layer,
-    /* [in] */ IBitmap* bitmap)
+    /* [in] */ IBitmap* bitmap,
+    /* [out] */ Boolean* res)
 {
     Int64 dlu = 0;
     layer->GetDeferredLayerUpdater(&dlu);
     AutoPtr<CBitmap> cbmp = (CBitmap*)bitmap;
-    return NativeCopyLayerInto(mNativeProxy,
+    *res = NativeCopyLayerInto(mNativeProxy,
             dlu, cbmp->mNativeBitmap);
+    return NOERROR;
 }
 
-void ThreadedRenderer::PushLayerUpdate(
+ECode ThreadedRenderer::PushLayerUpdate(
     /* [in] */ IHardwareLayer* layer)
 {
     Int64 dlu = 0;
     layer->GetDeferredLayerUpdater(&dlu);
     NativePushLayerUpdate(mNativeProxy, dlu);
+    return NOERROR;
 }
 
-void ThreadedRenderer::OnLayerDestroyed(
+ECode ThreadedRenderer::OnLayerDestroyed(
     /* [in] */ IHardwareLayer* layer)
 {
     Int64 dlu = 0;
     layer->GetDeferredLayerUpdater(&dlu);
     NativeCancelLayerUpdate(mNativeProxy, dlu);
-}
-
-void ThreadedRenderer::SetName(
-    /* [in] */ const String& name)
-{
-}
-
-void ThreadedRenderer::Fence()
-{
-    NativeFence(mNativeProxy);
-}
-
-void ThreadedRenderer::StopDrawing()
-{
-    NativeStopDrawing(mNativeProxy);
-}
-
-void ThreadedRenderer::NotifyFramePending()
-{
-    NativeNotifyFramePending(mNativeProxy);
-}
-
-void ThreadedRenderer::RegisterAnimatingRenderNode(
-    /* [in] */ IRenderNode* animator)
-{
-//    NativeRegisterAnimatingRenderNode(mRootNode->mNativeRenderNode, animator->mNativeRenderNode);
-}
-
-// throws Throwable
-ECode ThreadedRenderer::Finalize()
-{
-    NativeDeleteProxy(mNativeProxy);
-    mNativeProxy = 0;
-//    HardwareRenderer::Finalize();
     return NOERROR;
 }
 
-void ThreadedRenderer::TrimMemory(
+ECode ThreadedRenderer::SetName(
+    /* [in] */ const String& name)
+{
+    return NOERROR;
+}
+
+ECode ThreadedRenderer::Fence()
+{
+    NativeFence(mNativeProxy);
+    return NOERROR;
+}
+
+ECode ThreadedRenderer::StopDrawing()
+{
+    NativeStopDrawing(mNativeProxy);
+    return NOERROR;
+}
+
+ECode ThreadedRenderer::NotifyFramePending()
+{
+    NativeNotifyFramePending(mNativeProxy);
+    return NOERROR;
+}
+
+ECode ThreadedRenderer::RegisterAnimatingRenderNode(
+    /* [in] */ IRenderNode* animator)
+{
+    Int64 nativeRenderNode1, nativeRenderNode2;
+    RenderNode* node = (RenderNode*)mRootNode.Get();
+    node->GetNativeDisplayList(&nativeRenderNode1);
+    RenderNode* nAnimator = (RenderNode*)animator;
+    nAnimator->GetNativeDisplayList(&nativeRenderNode2);
+    NativeRegisterAnimatingRenderNode(nativeRenderNode1, nativeRenderNode2);
+    return NOERROR;
+}
+
+// throws Throwable
+ThreadedRenderer::~ThreadedRenderer()
+{
+    NativeDeleteProxy(mNativeProxy);
+    mNativeProxy = 0;
+}
+
+ECode ThreadedRenderer::TrimMemory(
     /* [in] */ Int32 level)
 {
     NativeTrimMemory(level);
+    return NOERROR;
 }
 
 //========================================================================================
@@ -483,26 +579,36 @@ void ThreadedRenderer::AtlasInitializer::Init(
     AutoPtr<IBinder> binder = IBinder::Probe(p);
     if (binder == NULL) return;
 
-//     AutoPtr<IAssetAtlas> atlas = IAssetAtlas.Stub.asInterface(binder);
-// //     try {
-//         if (atlas->IsCompatible(android.os.Process.myPpid())) {
-//             AutoPtr<IGraphicBuffer> buffer = atlas->GetBuffer();
-//             if (buffer != NULL) {
-//                 AutoPtr<ArrayOf<Int64> > map = atlas->GetMap();
-//                 if (map != NULL) {
-//                     // TODO Remove after fixing b/15425820
-//                     ValidateMap(context, map);
-//                     NativeSetAtlas(renderProxy, buffer, map);
-//                     mInitialized = TRUE;
-//                 }
-//                 // If IAssetAtlas is not the same class as the IBinder
-//                 // we are using a remote service and we can safely
-//                 // destroy the graphic buffer
-//                 if (atlas->GetClass() != binder->GetClass()) {
-//                     buffer->Destroy();
-//                 }
-//             }
-//         }
+    AutoPtr<IIAssetAtlas> atlas = IIAssetAtlas::Probe(binder);
+//     try {
+    Int32 ppid = Process::MyPpid();
+    Boolean compatible;
+    if (atlas->IsCompatible(ppid, &compatible), compatible) {
+        AutoPtr<IGraphicBuffer> buffer;
+        atlas->GetBuffer((IGraphicBuffer**)&buffer);
+        if (buffer != NULL) {
+            AutoPtr<ArrayOf<Int64> > map;
+            atlas->GetMap((ArrayOf<Int64>**)&map);
+            if (map != NULL) {
+                // TODO Remove after fixing b/15425820
+                ValidateMap(context, map);
+                NativeSetAtlas(renderProxy, buffer, map);
+                mInitialized = TRUE;
+            }
+            // If IAssetAtlas is not the same class as the IBinder
+            // we are using a remote service and we can safely
+            // destroy the graphic buffer
+            ClassID clsid1, clsid2;
+            IObject* obj1 = IObject::Probe(atlas);
+            obj1->GetClassID(&clsid1);
+            IObject* obj2 = IObject::Probe(binder);
+            obj2->GetClassID(&clsid2);
+
+            if (*(EMuid *)&clsid1 != *(EMuid *)&clsid2) {
+                buffer->Destroy();
+            }
+        }
+    }
     // } catch (RemoteException e) {
     //     Log.w(LOG_TAG, "Could not acquire atlas", e);
     // }
@@ -553,74 +659,255 @@ void ThreadedRenderer::AtlasInitializer::ValidateMap(
 
 //------------Native Methord-----------
 
-void ThreadedRenderer::NativeSetupShadersDiskCache(
+
+class OnFinishedEvent {
+public:
+    OnFinishedEvent(BaseRenderNodeAnimator* animator, AnimationListener* listener)
+            : animator(animator), listener(listener) {}
+    sp<BaseRenderNodeAnimator> animator;
+    sp<AnimationListener> listener;
+};
+
+class InvokeAnimationListeners : public MessageHandler {
+public:
+    InvokeAnimationListeners(std::vector<OnFinishedEvent>& events) {
+        mOnFinishedEvents.swap(events);
+    }
+
+    static void callOnFinished(OnFinishedEvent& event) {
+        event.listener->onAnimationFinished(event.animator.get());
+    }
+
+    virtual void handleMessage(const Message& message) {
+        std::for_each(mOnFinishedEvents.begin(), mOnFinishedEvents.end(), callOnFinished);
+        mOnFinishedEvents.clear();
+    }
+
+private:
+    std::vector<OnFinishedEvent> mOnFinishedEvents;
+};
+
+class RenderingException : public MessageHandler {
+public:
+    RenderingException(const std::string& message)
+            : mMessage(message) {
+    }
+
+    virtual void handleMessage(const Message&) {
+        throwException(mMessage);
+    }
+
+    static void throwException(const std::string& message) {
+        SLOGGERE("ThreadedRenderer", message.c_str())
+    }
+
+private:
+    std::string mMessage;
+};
+
+class RootRenderNode : public android::uirenderer::RenderNode, ErrorHandler {
+public:
+    RootRenderNode() : RenderNode() {
+        mLooper = Looper::getForThread();
+        LOG_ALWAYS_FATAL_IF(!mLooper.get(),
+                "Must create RootRenderNode on a thread with a looper!");
+    }
+
+    virtual ~RootRenderNode() {}
+
+    virtual void onError(const std::string& message) {
+        mLooper->sendMessage(new RenderingException(message), 0);
+    }
+
+    virtual void prepareTree(TreeInfo& info) {
+        info.errorHandler = this;
+        RenderNode::prepareTree(info);
+        info.errorHandler = NULL;
+    }
+
+    void sendMessage(const sp<MessageHandler>& handler) {
+        mLooper->sendMessage(handler, 0);
+    }
+
+    void attachAnimatingNode(RenderNode* animatingNode) {
+        mPendingAnimatingRenderNodes.push_back(animatingNode);
+    }
+
+    void doAttachAnimatingNodes(AnimationContext* context) {
+        for (size_t i = 0; i < mPendingAnimatingRenderNodes.size(); i++) {
+            RenderNode* node = mPendingAnimatingRenderNodes[i].get();
+            context->addAnimatingRenderNode(*node);
+        }
+        mPendingAnimatingRenderNodes.clear();
+    }
+
+private:
+    sp<Looper> mLooper;
+    std::vector< sp<RenderNode> > mPendingAnimatingRenderNodes;
+};
+
+class AnimationContextBridge : public AnimationContext {
+public:
+    AnimationContextBridge(renderthread::TimeLord& clock, RootRenderNode* rootNode)
+            : AnimationContext(clock), mRootNode(rootNode) {
+    }
+
+    virtual ~AnimationContextBridge() {}
+
+    // Marks the start of a frame, which will update the frame time and move all
+    // next frame animations into the current frame
+    virtual void startFrame(TreeInfo::TraversalMode mode) {
+        if (mode == TreeInfo::MODE_FULL) {
+            mRootNode->doAttachAnimatingNodes(this);
+        }
+        AnimationContext::startFrame(mode);
+    }
+
+    // Runs any animations still left in mCurrentFrameAnimations
+    virtual void runRemainingAnimations(TreeInfo& info) {
+        AnimationContext::runRemainingAnimations(info);
+        postOnFinishedEvents();
+    }
+
+    virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) {
+        OnFinishedEvent event(animator, listener);
+        mOnFinishedEvents.push_back(event);
+    }
+
+    virtual void destroy() {
+        AnimationContext::destroy();
+        postOnFinishedEvents();
+    }
+
+private:
+    sp<RootRenderNode> mRootNode;
+    std::vector<OnFinishedEvent> mOnFinishedEvents;
+
+    void postOnFinishedEvents() {
+        if (mOnFinishedEvents.size()) {
+            sp<InvokeAnimationListeners> message
+                    = new InvokeAnimationListeners(mOnFinishedEvents);
+            mRootNode->sendMessage(message);
+        }
+    }
+};
+
+class ContextFactoryImpl : public IContextFactory {
+public:
+    ContextFactoryImpl(RootRenderNode* rootNode) : mRootNode(rootNode) {}
+
+    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) {
+        return new AnimationContextBridge(clock, mRootNode);
+    }
+
+private:
+    RootRenderNode* mRootNode;
+};
+
+
+ECode ThreadedRenderer::NativeSetupShadersDiskCache(
     /* [in] */ const String& cacheFile)
 {
     // Zhangyu JNI TODO
+    return NOERROR;
 }
 
 void ThreadedRenderer::NativeSetAtlas(
-    /* [in] */ Int64 nativeProxy,
-    /* [in] */ IGraphicBuffer* buffer,
-    /* [in] */ ArrayOf<Int64>* map)
+    /* [in] */ Int64 proxyPtr,
+    /* [in] */ IGraphicBuffer* graphicBuffer,
+    /* [in] */ ArrayOf<Int64>* atlasMapArray)
 {
-    // Zhangyu JNI TODO
+    Handle64 handler;
+    graphicBuffer->GetNativeObject(&handler);
+    sp<android::GraphicBuffer> buffer = reinterpret_cast<android::GraphicBuffer*>(handler);
+
+    Int32 len = atlasMapArray->GetLength();
+    if (len <= 0) {
+        ALOGW("Failed to initialize atlas, invalid map length: %d", len);
+        return;
+    }
+    int64_t* map = new int64_t[len];
+    for (Int32 i = 0; i < len; i++) {
+        map[i] = (*atlasMapArray)[i];
+    }
+
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->setTextureAtlas(buffer, map, len);
 }
 
 Int64 ThreadedRenderer::NativeCreateRootRenderNode()
 {
-    // Zhangyu JNI TODO
-    return 0;
+    RootRenderNode* node = new RootRenderNode();
+    node->incStrong(0);
+    node->setName("RootRenderNode");
+    return reinterpret_cast<Int64>(node);
 }
 
 Int64 ThreadedRenderer::NativeCreateProxy(
     /* [in] */ Boolean translucent,
-    /* [in] */ Int64 rootRenderNode)
+    /* [in] */ Int64 rootRenderNodePtr)
 {
-    // Zhangyu JNI TODO
-    return 0;
+    RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootRenderNodePtr);
+    ContextFactoryImpl factory(rootRenderNode);
+    return (Int64) new RenderProxy(translucent, rootRenderNode, &factory);
 }
 
 void ThreadedRenderer::NativeDeleteProxy(
     /* [in] */ Int64 nativeProxy)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    delete proxy;
 }
 
 void ThreadedRenderer::NativeSetFrameInterval(
     /* [in] */ Int64 nativeProxy,
     /* [in] */ Int64 frameIntervalNanos)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    proxy->setFrameInterval(frameIntervalNanos);
 }
 
 Boolean ThreadedRenderer::NativeLoadSystemProperties(
     /* [in] */ Int64 nativeProxy)
 {
-    // Zhangyu JNI TODO
-    return FALSE;
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    return proxy->loadSystemProperties();
 }
 
 Boolean ThreadedRenderer::NativeInitialize(
     /* [in] */ Int64 nativeProxy,
     /* [in] */ ISurface* window)
 {
-    // Zhangyu JNI TODO
-    return FALSE;
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    Surface* sur = (Surface*)window;
+    sp<ANativeWindow> nWindow = sur->GetSurface();
+    return proxy->initialize(nWindow);
 }
 
 void ThreadedRenderer::NativeUpdateSurface(
     /* [in] */ Int64 nativeProxy,
     /* [in] */ ISurface* window)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    sp<ANativeWindow> nWindow;
+    if (window) {
+        Surface* sur = (Surface*)window;
+        nWindow = sur->GetSurface();
+    }
+    proxy->updateSurface(nWindow);
 }
 
 void ThreadedRenderer::NativePauseSurface(
     /* [in] */ Int64 nativeProxy,
     /* [in] */ ISurface* window)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    sp<ANativeWindow> nWindow;
+    if (window) {
+        Surface* sur = (Surface*)window;
+        nWindow = sur->GetSurface();
+    }
+    proxy->pauseSurface(nWindow);
 }
 
 void ThreadedRenderer::NativeSetup(
@@ -634,14 +921,17 @@ void ThreadedRenderer::NativeSetup(
     /* [in] */ Int32 ambientShadowAlpha,
     /* [in] */ Int32 spotShadowAlpha)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    proxy->setup(width, height, (Vector3){lightX, lightY, lightZ}, lightRadius,
+            ambientShadowAlpha, spotShadowAlpha);
 }
 
 void ThreadedRenderer::NativeSetOpaque(
     /* [in] */ Int64 nativeProxy,
     /* [in] */ Boolean opaque)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    proxy->setOpaque(opaque);
 }
 
 Int32 ThreadedRenderer::NativeSyncAndDrawFrame(
@@ -650,109 +940,131 @@ Int32 ThreadedRenderer::NativeSyncAndDrawFrame(
     /* [in] */ Int64 recordDuration,
     /* [in] */ Float density)
 {
-    // Zhangyu JNI TODO
-    return 0;
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    return proxy->syncAndDrawFrame(frameTimeNanos, recordDuration, density);
 }
 
 void ThreadedRenderer::NativeDestroy(
     /* [in] */ Int64 nativeProxy)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    proxy->destroy();
 }
 
 void ThreadedRenderer::NativeRegisterAnimatingRenderNode(
-    /* [in] */ Int64 rootRenderNode,
-    /* [in] */ Int64 animatingNode)
+    /* [in] */ Int64 rootNodePtr,
+    /* [in] */ Int64 animatingNodePtr)
 {
-    // Zhangyu JNI TODO
+    RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootNodePtr);
+    android::uirenderer::RenderNode* animatingNode = reinterpret_cast<android::uirenderer::RenderNode*>(animatingNodePtr);
+    rootRenderNode->attachAnimatingNode(animatingNode);
 }
 
 void ThreadedRenderer::NativeInvokeFunctor(
-    /* [in] */ Int64 functor,
+    /* [in] */ Int64 functorPtr,
     /* [in] */ Boolean waitForCompletion)
 {
-    // Zhangyu JNI TODO
+    Functor* functor = reinterpret_cast<Functor*>(functorPtr);
+    RenderProxy::invokeFunctor(functor, waitForCompletion);
 }
 
 Int64 ThreadedRenderer::NativeCreateTextureLayer(
     /* [in] */ Int64 nativeProxy)
 {
-    // Zhangyu JNI TODO
-    return 0;
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    DeferredLayerUpdater* layer = proxy->createTextureLayer();
+    return reinterpret_cast<Int64>(layer);
 }
 
 void ThreadedRenderer::NativeBuildLayer(
     /* [in] */ Int64 nativeProxy,
-    /* [in] */ Int64 node)
+    /* [in] */ Int64 nodePtr)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    android::uirenderer::RenderNode* node = reinterpret_cast<android::uirenderer::RenderNode*>(nodePtr);
+    proxy->buildLayer(node);
 }
 
 Boolean ThreadedRenderer::NativeCopyLayerInto(
     /* [in] */ Int64 nativeProxy,
-    /* [in] */ Int64 layer,
-    /* [in] */ Int64 bitmap)
+    /* [in] */ Int64 layerPtr,
+    /* [in] */ Int64 bitmapPtr)
 {
-    // Zhangyu JNI TODO
-    return FALSE;
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(nativeProxy);
+    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
+    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
+    return proxy->copyLayerInto(layer, bitmap);
 }
 
 void ThreadedRenderer::NativePushLayerUpdate(
-    /* [in] */ Int64 nativeProxy,
-    /* [in] */ Int64 layer)
+    /* [in] */ Int64 proxyPtr,
+    /* [in] */ Int64 layerPtr)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
+    proxy->pushLayerUpdate(layer);
 }
 
 void ThreadedRenderer::NativeCancelLayerUpdate(
-    /* [in] */ Int64 nativeProxy,
-    /* [in] */ Int64 layer)
+    /* [in] */ Int64 proxyPtr,
+    /* [in] */ Int64 layerPtr)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
+    proxy->cancelLayerUpdate(layer);
 }
 
 void ThreadedRenderer::NativeDetachSurfaceTexture(
-    /* [in] */ Int64 nativeProxy,
-    /* [in] */ Int64 layer)
+    /* [in] */ Int64 proxyPtr,
+    /* [in] */ Int64 layerPtr)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
+    proxy->detachSurfaceTexture(layer);
 }
 
 void ThreadedRenderer::NativeDestroyHardwareResources(
-    /* [in] */ Int64 nativeProxy)
+    /* [in] */ Int64 proxyPtr)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->destroyHardwareResources();
 }
 
 void ThreadedRenderer::NativeTrimMemory(
     /* [in] */ Int32 level)
 {
-    // Zhangyu JNI TODO
+    RenderProxy::trimMemory(level);
 }
 
 void ThreadedRenderer::NativeFence(
-    /* [in] */ Int64 nativeProxy)
+    /* [in] */ Int64 proxyPtr)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->fence();
 }
 
 void ThreadedRenderer::NativeStopDrawing(
-    /* [in] */ Int64 nativeProxy)
+    /* [in] */ Int64 proxyPtr)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->stopDrawing();
 }
 
 void ThreadedRenderer::NativeNotifyFramePending(
-    /* [in] */ Int64 nativeProxy)
+    /* [in] */ Int64 proxyPtr)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->notifyFramePending();
 }
 
 void ThreadedRenderer::NativeDumpProfileInfo(
-    /* [in] */ Int64 nativeProxy,
-    /* [in] */ IFileDescriptor* fd)
+    /* [in] */ Int64 proxyPtr,
+    /* [in] */ IFileDescriptor* pFd)
 {
-    // Zhangyu JNI TODO
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    Int32 fd;
+    pFd->GetDescriptor(&fd);
+    proxy->dumpProfileInfo(fd);
 }
 
 } // namespace View

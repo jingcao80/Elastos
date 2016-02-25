@@ -6,6 +6,8 @@
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 
+using Elastos::Droid::Widget::EIID_IAbsoluteLayout;
+
 namespace Elastos {
 namespace Droid {
 namespace Widget {

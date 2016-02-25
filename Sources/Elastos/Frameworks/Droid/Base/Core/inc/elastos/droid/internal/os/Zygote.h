@@ -3,9 +3,10 @@
 #define __ELASTOS_DROID_INTERNAL_OS_ZYGOTE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::System::IZygoteHooks;
-using Elastos::Core::IStringBuilder;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -52,7 +53,7 @@ public:
         /* [in] */ Int32 gid,
         /* [in] */ ArrayOf<Int32>* gids,
         /* [in] */ Int32 debugFlags,
-        /* [in] */ ArrayOf<Int32*>* rlimits, //int[][] rlimits,
+        /* [in] */ ArrayOf< Int32Array >* rlimits, //int[][] rlimits,
         /* [in] */ Int32 mountExternal,
         /* [in] */ const String& seInfo,
         /* [in] */ const String& niceName,
@@ -65,7 +66,7 @@ public:
         /* [in] */ Int32 gid,
         /* [in] */ ArrayOf<Int32>* gids,
         /* [in] */ Int32 debugFlags,
-        /* [in] */ ArrayOf<Int32*>* rlimits, //int[][] rlimits,
+        /* [in] */ ArrayOf< Int32Array >* rlimits, //int[][] rlimits,
         /* [in] */ Int32 mountExternal,
         /* [in] */ const String& seInfo,
         /* [in] */ const String& niceName,
@@ -101,7 +102,7 @@ public:
         /* [in] */ Int32 gid,
         /* [in] */ ArrayOf<Int32>* gids,
         /* [in] */ Int32 debugFlags,
-        /* [in] */ ArrayOf<Int32*>* rlimits, //int[][] rlimits,
+        /* [in] */ ArrayOf< Int32Array >* rlimits, //int[][] rlimits,
         /* [in] */ Int64 permittedCapabilities,
         /* [in] */ Int64 effectiveCapabilities);
 
@@ -110,7 +111,7 @@ public:
         /* [in] */ Int32 gid,
         /* [in] */ ArrayOf<Int32>* gids,
         /* [in] */ Int32 debugFlags,
-        /* [in] */ ArrayOf<Int32*>* rlimits, //int[][] rlimits,
+        /* [in] */ ArrayOf< Int32Array >* rlimits, //int[][] rlimits,
         /* [in] */ Int64 permittedCapabilities,
         /* [in] */ Int64 effectiveCapabilities);
 
@@ -134,8 +135,8 @@ public:
      * @see #execShell(String)
      */
     static CARAPI_(void) AppendQuotedShellArgs(
-        /* [in] */ IStringBuilder* command,
-        /* [in] */ const ArrayOf<String>& args);
+        /* [in] */ StringBuilder* command,
+        /* [in] */ ArrayOf<String>* args);
 
 
     static CARAPI_(void) CallPostForkChildHooks(

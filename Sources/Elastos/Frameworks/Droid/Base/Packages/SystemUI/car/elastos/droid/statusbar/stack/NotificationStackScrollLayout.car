@@ -7,18 +7,17 @@ module
     interface Elastos.Droid.View.IViewGroup;
     interface Elastos.Droid.View.IMotionEvent;
 
-    interface Elastos.Droid.Packages.SystemUI.ISwipeHelperLongPressListener;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.IActivatableNotificationView;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.IDismissView;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.IEmptyShadeView;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.IExpandableView;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.IExpandableViewOnHeightChangedListener;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.ISpeedBumpView;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPhoneStatusBar;
+    interface Elastos.Droid.SystemUI.ISwipeHelperLongPressListener;
+    interface Elastos.Droid.SystemUI.StatusBar.IActivatableNotificationView;
+    interface Elastos.Droid.SystemUI.StatusBar.IDismissView;
+    interface Elastos.Droid.SystemUI.StatusBar.IEmptyShadeView;
+    interface Elastos.Droid.SystemUI.StatusBar.IExpandableView;
+    interface Elastos.Droid.SystemUI.StatusBar.IExpandableViewOnHeightChangedListener;
+    interface Elastos.Droid.SystemUI.StatusBar.ISpeedBumpView;
+    interface Elastos.Droid.SystemUI.StatusBar.Phone.IPhoneStatusBar;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
     namespace Stack {
@@ -400,7 +399,6 @@ module
     } // namespace Stack
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

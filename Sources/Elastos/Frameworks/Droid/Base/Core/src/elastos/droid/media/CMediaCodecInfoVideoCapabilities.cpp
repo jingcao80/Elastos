@@ -2,6 +2,7 @@
 #include "elastos/droid/media/CMediaCodecInfoCodecCapabilities.h"
 #include "elastos/droid/media/CMediaCodecInfoCodecProfileLevel.h"
 #include "elastos/droid/media/CMediaCodecInfoVideoCapabilities.h"
+#include "elastos/droid/media/Utils.h"
 #include "elastos/droid/utility/CSize.h"
 #include "elastos/droid/utility/CRational.h"
 #include <elastos/core/Math.h>
@@ -50,7 +51,7 @@ ECode CMediaCodecInfoVideoCapabilities::constructor()
 ECode CMediaCodecInfoVideoCapabilities::GetBitrateRange(
     /* [out] */ IRange** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = mBitrateRange;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -59,7 +60,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetBitrateRange(
 ECode CMediaCodecInfoVideoCapabilities::GetSupportedWidths(
     /* [out] */ IRange** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = mWidthRange;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -68,7 +69,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedWidths(
 ECode CMediaCodecInfoVideoCapabilities::GetSupportedHeights(
     /* [out] */ IRange** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = mHeightRange;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -77,7 +78,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedHeights(
 ECode CMediaCodecInfoVideoCapabilities::GetWidthAlignment(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = mWidthAlignment;
     return NOERROR;
 }
@@ -85,7 +86,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetWidthAlignment(
 ECode CMediaCodecInfoVideoCapabilities::GetHeightAlignment(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = mHeightAlignment;
     return NOERROR;
 }
@@ -93,7 +94,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetHeightAlignment(
 ECode CMediaCodecInfoVideoCapabilities::GetSmallerDimensionUpperLimit(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = mSmallerDimensionUpperLimit;
     return NOERROR;
 }
@@ -101,7 +102,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetSmallerDimensionUpperLimit(
 ECode CMediaCodecInfoVideoCapabilities::GetSupportedFrameRates(
     /* [out] */ IRange** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = mFrameRateRange;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -111,7 +112,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedWidthsFor(
     /* [in] */ Int32 height,
     /* [out] */ IRange** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = NULL;
     // try {
     AutoPtr<IRange> range = mWidthRange;
@@ -124,8 +125,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedWidthsFor(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Int32 heightInBlocks;
-// TODO: Need Utils
-    // heightInBlocks = Utils::DivUp(height, mBlockHeight);
+    heightInBlocks = Utils::DivUp(height, mBlockHeight);
 
     // constrain by block count and by block aspect ratio
     AutoPtr<IInterface> bcUpper;
@@ -192,7 +192,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedHeightsFor(
     /* [in] */ Int32 width,
     /* [out] */ IRange** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = NULL;
     // try {
     AutoPtr<IRange> range = mHeightRange;
@@ -205,8 +205,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedHeightsFor(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Int32 widthInBlocks;
-// TODO: Need Utils
-    // widthInBlocks = Utils::DivUp(width, mBlockWidth);
+    widthInBlocks = Utils::DivUp(width, mBlockWidth);
 
     // constrain by block count and by block aspect ratio
     AutoPtr<IInterface> bcUpper;
@@ -275,7 +274,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedFrameRatesFor(
     /* [in] */ Int32 height,
     /* [out] */ IRange** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = NULL;
     AutoPtr<IRange> range = mHeightRange;
     AutoPtr<IInteger32> i1;
@@ -287,8 +286,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetSupportedFrameRatesFor(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     Int32 blockCount;
-// TODO: Need Utils
-    // blockCount = Utils::DivUp(width, mBlockWidth) * Utils::DivUp(height, mBlockHeight);
+    blockCount = Utils::DivUp(width, mBlockWidth) * Utils::DivUp(height, mBlockHeight);
 
     AutoPtr<IInterface> bpsUpper;
     mBlocksPerSecondRange->GetUpper((IInterface**)&bpsUpper);
@@ -313,7 +311,7 @@ ECode CMediaCodecInfoVideoCapabilities::AreSizeAndRateSupported(
     /* [in] */ Double frameRate,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IInteger32> i1;
     CInteger32::New(width, (IInteger32**)&i1);
     AutoPtr<IInteger32> i2;
@@ -329,7 +327,7 @@ ECode CMediaCodecInfoVideoCapabilities::IsSizeSupported(
     /* [in] */ Int32 height,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IInteger32> i1;
     CInteger32::New(width, (IInteger32**)&i1);
     AutoPtr<IInteger32> i2;
@@ -342,7 +340,7 @@ ECode CMediaCodecInfoVideoCapabilities::SupportsFormat(
     /* [in] */ IMediaFormat* format,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IMap> map;
     format->GetMap((IMap**)&map);
     AutoPtr<ICharSequence> cs;
@@ -384,14 +382,14 @@ ECode CMediaCodecInfoVideoCapabilities::Init(
 ECode CMediaCodecInfoVideoCapabilities::GetBlockSize(
     /* [out] */ ISize** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     return CSize::New(mBlockWidth, mBlockHeight, result);
 }
 
 ECode CMediaCodecInfoVideoCapabilities::GetBlockCountRange(
     /* [out] */ IRange** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = mBlockCountRange;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -400,7 +398,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetBlockCountRange(
 ECode CMediaCodecInfoVideoCapabilities::GetBlocksPerSecondRange(
     /* [out] */ IRange** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = mBlocksPerSecondRange;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -410,7 +408,7 @@ ECode CMediaCodecInfoVideoCapabilities::GetAspectRatioRange(
     /* [in] */ Boolean blocks,
     /* [out] */ IRange** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = blocks ? mBlockAspectRatioRange : mAspectRatioRange;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -421,7 +419,7 @@ ECode CMediaCodecInfoVideoCapabilities::Create(
     /* [in] */ IMediaCodecInfoCodecCapabilities* parent,
     /* [out] */ IMediaCodecInfoVideoCapabilities** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IMediaCodecInfoVideoCapabilities> caps;
     CMediaCodecInfoVideoCapabilities::New((IMediaCodecInfoVideoCapabilities**)&caps);
     caps->Init(info, parent);

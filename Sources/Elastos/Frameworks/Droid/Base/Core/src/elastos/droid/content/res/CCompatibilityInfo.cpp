@@ -3,22 +3,20 @@
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/content/res/CCompatibilityInfo.h"
-//#include "elastos/droid/content/pm/CApplicationInfo.h"
-//#include "elastos/droid/graphics/CPoint.h"
-//#include "elastos/droid/graphics/CPointF.h"
-//#include "elastos/droid/graphics/CRect.h"
-//#include "elastos/droid/graphics/CRegion.h"
+#include "elastos/droid/content/pm/CApplicationInfo.h"
+#include "elastos/droid/graphics/CPoint.h"
+#include "elastos/droid/graphics/CPointF.h"
+#include "elastos/droid/graphics/CRect.h"
+#include "elastos/droid/graphics/CRegion.h"
 #include "elastos/droid/utility/CDisplayMetrics.h"
-//#include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
 
-//using Elastos::Droid::Content::Pm::CApplicationInfo;
+using Elastos::Droid::Content::Pm::CApplicationInfo;
 using Elastos::Droid::View::IDisplay;
-//using Elastos::Droid::Hardware::Display::DisplayManagerGlobal;
 using Elastos::Droid::Graphics::IPoint;
-//using Elastos::Droid::Graphics::CPoint;
-//using Elastos::Droid::Graphics::CPointF;
-//using Elastos::Droid::Graphics::CRect;
-//using Elastos::Droid::Graphics::CRegion;
+using Elastos::Droid::Graphics::CPoint;
+using Elastos::Droid::Graphics::CPointF;
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CRegion;
 using Elastos::Droid::Utility::CDisplayMetrics;
 
 
@@ -116,12 +114,11 @@ ECode CCompatibilityInfo::Translator::TranslateRectInScreenToAppWindow(
 ECode CCompatibilityInfo::Translator::TranslatePointInScreenToAppWindow(
     /* [in] */ IPointF* point)
 {
-    assert(0 && "TODO");
     Float scale = mApplicationInvertedScale;
     if (scale != 1.0f) {
-        // AutoPtr<CPointF> cls = (CPointF*)point;
-        // cls->mX = cls->mX * scale;
-        // cls->mY = cls->mY * scale;
+        AutoPtr<CPointF> cls = (CPointF*)point;
+        cls->mX = cls->mX * scale;
+        cls->mY = cls->mY * scale;
     }
 
     return NOERROR;
@@ -138,9 +135,10 @@ ECode CCompatibilityInfo::Translator::GetTranslatedContentInsets(
     /* [out] */ IRect** rect)
 {
     VALIDATE_NOT_NULL(rect);
+    *rect = NULL;
 
     if (mContentInsetsBuffer == NULL) {
-        // FAIL_RETURN(CRect::New((IRect**)&mContentInsetsBuffer));
+        FAIL_RETURN(CRect::New((IRect**)&mContentInsetsBuffer));
     }
 
     mContentInsetsBuffer->Set(contentInsets);
@@ -156,9 +154,10 @@ ECode CCompatibilityInfo::Translator::GetTranslatedVisibleInsets(
     /* [out] */ IRect** rect)
 {
     VALIDATE_NOT_NULL(rect);
+    *rect = NULL;
 
     if (mVisibleInsetsBuffer == NULL) {
-        // FAIL_RETURN(CRect::New((IRect**)&mVisibleInsetsBuffer));
+        FAIL_RETURN(CRect::New((IRect**)&mVisibleInsetsBuffer));
     }
 
     mVisibleInsetsBuffer->Set(visibleInsets);
@@ -192,7 +191,7 @@ ECode CCompatibilityInfo::Translator::GetTranslatedTouchableArea(
     VALIDATE_NOT_NULL(region);
 
     if (mTouchableAreaBuffer == NULL) {
-        // FAIL_RETURN(CRegion::New((IRegion**)&mTouchableAreaBuffer));
+        FAIL_RETURN(CRegion::New((IRegion**)&mTouchableAreaBuffer));
     }
     Boolean result;
     mTouchableAreaBuffer->Set(touchableArea, &result);
@@ -422,22 +421,6 @@ Float CCompatibilityInfo::ComputeCompatibleScaling(
         outDm->SetWidthPixels(newWidth);
         outDm->SetHeightPixels(newHeight);
     }
-
-    // //tellen add 2012/12/07 for apk compatibility
-    // AutoPtr<IDisplay> display;
-    // DisplayManagerGlobal::GetInstance()->GetRealDisplay(
-    //     IDisplay::DEFAULT_DISPLAY, (IDisplay**)&display);
-    // AutoPtr<IPoint> p;
-    // ASSERT_SUCCEEDED(CPoint::New((IPoint**)&p));
-    // display->GetRealSize(p);
-    // //1024x768 resolution screen need reduce scale ratio in order to support special apks
-    // // begin from this
-    // Int32 x, y;
-    // p->GetX(&x);
-    // p->GetY(&y);
-    // if( ((1024 == x) && (768 == y)) || ((1024 == y) && (768 == x)) ){
-    //     return 2.0f;
-    // }
 
     return scale;
 }

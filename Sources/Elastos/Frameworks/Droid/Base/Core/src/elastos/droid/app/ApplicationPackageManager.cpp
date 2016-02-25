@@ -2,7 +2,7 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Net.h"
 #include "elastos/droid/app/ApplicationPackageManager.h"
-// #include "elastos/droid/app/CContextImpl.h"
+#include "elastos/droid/app/CContextImpl.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CUserHandle.h"
@@ -53,6 +53,7 @@ using Elastos::Droid::Graphics::Drawable::EIID_IDrawableConstantState;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_ICharSequence;
 using Elastos::Utility::IList;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Logging::Logger;
@@ -1374,9 +1375,8 @@ ECode ApplicationPackageManager::GetResourcesForApplication(
     IPackageItemInfo::Probe(app)->GetPackageName(&pkgName);
     if (pkgName.Equals("system")) {
         AutoPtr<IContextImpl> sysContent;
-        assert(0 && "TODO");
-        // CContextImpl* ci = (CContextImpl*)IContextImpl::Probe(mContext);
-        // ci->mMainThread->GetSystemContext((IContextImpl**)&sysContent);
+        CContextImpl* ci = (CContextImpl*)IContextImpl::Probe(mContext);
+        ci->mMainThread->GetSystemContext((IContextImpl**)&sysContent);
         return IContext::Probe(sysContent)->GetResources(res);
     }
 
@@ -1394,13 +1394,12 @@ ECode ApplicationPackageManager::GetResourcesForApplication(
     app->GetSharedLibraryFiles((ArrayOf<String>**)&sharedLibraryFiles);
 
     AutoPtr<IResources> r;
-    assert(0 && "TODO");
-    // CContextImpl* ci = (CContextImpl*)IContextImpl::Probe(mContext);
-    // ci->mMainThread->GetTopLevelResources(
-    //         sameUid ? sourceDir : publicSourceDir,
-    //         sameUid ? splitSourceDirs : splitPublicSourceDirs,
-    //         resourceDirs, sharedLibraryFiles, IDisplay::DEFAULT_DISPLAY,
-    //         NULL, ci->mPackageInfo, (IResources**)&r);
+    CContextImpl* ci = (CContextImpl*)IContextImpl::Probe(mContext);
+    ci->mMainThread->GetTopLevelResources(
+            sameUid ? sourceDir : publicSourceDir,
+            sameUid ? splitSourceDirs : splitPublicSourceDirs,
+            resourceDirs, sharedLibraryFiles, IDisplay::DEFAULT_DISPLAY,
+            NULL, ci->mPackageInfo, (IResources**)&r);
     if (r != NULL) {
         *res = r;
         REFCOUNT_ADD(*res)
@@ -1436,9 +1435,8 @@ ECode ApplicationPackageManager::GetResourcesForApplicationAsUser(
 
     if (appPackageName.Equals("system")) {
         AutoPtr<IContextImpl> ctx;
-        assert(0 && "TODO");
-        // CContextImpl* ci = (CContextImpl*)IContextImpl::Probe(mContext);
-        // ci->mMainThread->GetSystemContext((IContextImpl**)&ctx);
+        CContextImpl* ci = (CContextImpl*)IContextImpl::Probe(mContext);
+        ci->mMainThread->GetSystemContext((IContextImpl**)&ctx);
         return IContext::Probe(ctx)->GetResources(res);
     }
 
@@ -1966,8 +1964,7 @@ ECode ApplicationPackageManager::GetPreferredPackages(
     VALIDATE_NOT_NULL(packages);
     ECode ec = mPM->GetPreferredPackages(flags, packages);
     if (FAILED(ec)) {
-        assert(0 && "TODO");
-        // CParcelableObjectContainer::New(packages);
+        CArrayList::New(packages);
     }
 
     return NOERROR;

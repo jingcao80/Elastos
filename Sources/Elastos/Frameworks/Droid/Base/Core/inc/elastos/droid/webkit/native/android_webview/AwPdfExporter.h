@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWPDFEXPORTER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include <Elastos.Droid.Webkit.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::ICancellationSignal;
@@ -9,7 +10,7 @@ using Elastos::Droid::Os::IParcelFileDescriptor;
 //TODO using Elastos::Droid::Print::IPrintAttributes;
 // import android.print.PrintAttributes;
 using Elastos::Droid::View::IViewGroup;
-//TODO using Elastos::Droid::Webkit::IValueCallback;
+using Elastos::Droid::Webkit::IValueCallback;
 using Elastos::Core::Object;
 
 // import org.chromium.base.CalledByNative;
@@ -38,7 +39,7 @@ public:
     virtual CARAPI ExportToPdf(
         /* [in] */ IParcelFileDescriptor* fd,
         /* [in] */ /*TODO IPrintAttributes*/IInterface* attributes,
-        /* [in] */ /*TODO IValueCallback*/IInterface* resultCallback,
+        /* [in] */ IValueCallback* resultCallback,
         /* [in] */ ICancellationSignal* cancellationSignal);
 
 private:
@@ -118,8 +119,7 @@ private:
     Int64 mNativeAwPdfExporter;
     // TODO(sgurun) result callback should return an int/object indicating errors.
     // potential errors: invalid print parameters, already pending, IO error
-    //TODO AutoPtr<IValueCallback> mResultCallback;
-    AutoPtr<IInterface> mResultCallback;//TODO removed if above line is ok
+    AutoPtr<IValueCallback> mResultCallback;
     //TODO AutoPtr<IPrintAttributes> mAttributes;
     AutoPtr<IInterface> mAttributes;//TODO removed if above line is ok
     AutoPtr<IParcelFileDescriptor> mFd;

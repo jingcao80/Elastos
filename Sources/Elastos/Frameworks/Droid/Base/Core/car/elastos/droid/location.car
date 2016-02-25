@@ -242,7 +242,7 @@ module
         [local]
         class CGpsMeasurementListenerTransport {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IILocationManager* locationManager);
 
             interface ILocalListenerHelper;
@@ -270,7 +270,7 @@ module
         [local]
         class CGpsNavigationMessageListenerTransport {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IILocationManager* locationManager);
 
             interface ILocalListenerHelper;

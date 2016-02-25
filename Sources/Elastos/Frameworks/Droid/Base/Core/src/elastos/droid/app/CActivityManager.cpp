@@ -4,7 +4,7 @@
 #include "elastos/droid/app/CActivityManager.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/app/CActivityManagerAppTask.h"
-// #include "elastos/droid/app/CActivityManagerTaskDescription.h"
+#include "elastos/droid/app/CActivityManagerTaskDescription.h"
 #include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CUserHandleHelper.h"
@@ -397,8 +397,7 @@ ECode CActivityManager::AddAppTask(
         thumbnail = bm;
     }
     if (description == NULL) {
-        assert(0 && "TODO");
-        // CActivityManagerTaskDescription::New((IActivityManagerTaskDescription**)&description);
+        CActivityManagerTaskDescription::New((IActivityManagerTaskDescription**)&description);
     }
 
     AutoPtr<IBinder> token;

@@ -2,10 +2,12 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Os.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/content/pm/PackageItemInfo.h"
-//#include "elastos/droid/content/pm/PackageManager.h"
+#include "elastos/droid/content/pm/PackageManager.h"
 
 using Elastos::Core::CString;
+using Elastos::Droid::Text::TextUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -86,9 +88,7 @@ ECode PackageItemInfo::LoadIcon(
     /* [in] */ IPackageManager* pm,
     /* [out] */ IDrawable** icon)
 {
-    assert(0 && "TODO");
-    return NOERROR;
-    // return ((PackageManager*)pm)->LoadItemIcon(THIS_PROBE(IPackageItemInfo), GetApplicationInfo(), icon);
+    return ((PackageManager*)pm)->LoadItemIcon(THIS_PROBE(IPackageItemInfo), GetApplicationInfo(), icon);
 }
 
 ECode PackageItemInfo::LoadBanner(
@@ -199,8 +199,7 @@ ECode PackageItemInfo::WriteToParcel(
     dest->WriteString(mName);
     dest->WriteString(mPackageName);
     dest->WriteInt32(mLabelRes);
-    assert(0 && "TODO");
-    // TextUtils.writeToParcel(nonLocalizedLabel, dest, parcelableFlags);
+    TextUtils::WriteToParcel(mNonLocalizedLabel, dest);
     dest->WriteInt32(mIcon);
     dest->WriteInt32(mLogo);
     dest->WriteInterfacePtr(mMetaData);
@@ -217,9 +216,7 @@ ECode PackageItemInfo::ReadFromParcel(
     src->ReadString(&mName);
     src->ReadString(&mPackageName);
     src->ReadInt32(&mLabelRes);
-    assert(0 && "TODO");
-    // nonLocalizedLabel
-    //         = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+    TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(src, (ICharSequence**)&mNonLocalizedLabel);
     src->ReadInt32(&mIcon);
     src->ReadInt32(&mLogo);
     AutoPtr<IInterface> obj;

@@ -1197,11 +1197,11 @@ public:
         /* [in] */ IIVolumeController* controller,
         /* [in] */ Boolean visible);
 
-protected:
     static CARAPI GetMaxStreamVolume(
         /* [in] */ Int32 streamType,
         /* [out] */ Int32* result);
 
+protected:
     CARAPI Dump(
         /* [in] */ IFileDescriptor* fd,
         /* [in] */ IPrintWriter* pw,

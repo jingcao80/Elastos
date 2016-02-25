@@ -1,4 +1,5 @@
 #include "elastos/droid/app/CActivityThread.h"
+#include "elastos/droid/media/_AudioErrors.h"
 #include "elastos/droid/media/CAudioAttributes.h"
 #include "elastos/droid/media/CAudioAttributesBuilder.h"
 #include "elastos/droid/media/CAudioFormat.h"
@@ -6,7 +7,6 @@
 #include "elastos/droid/media/CAudioTrack.h"
 #include "elastos/droid/media/CAudioTimestamp.h"
 #include "elastos/droid/media/AudioSystem.h"
-//#include "elastos/droid/media/ElAudioSystem.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/ServiceManager.h"
@@ -18,6 +18,8 @@
 #include <elastos/utility/logging/Logger.h>
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
+//TODO: Need audio_utils/primitives.h
+// #include <media/audio_utils/primitives.h>
 #include <system/audio.h>
 
 using Elastos::Droid::App::CActivityThread;
@@ -270,7 +272,9 @@ ECode CAudioTrack::constructor(
 
     Int32 session[] = { sessionId };
     // native initialization
-    Int32 initResult = NativeSetup(THIS_PROBE(IAudioTrack), mAttributes, mSampleRate, mChannels,
+    AutoPtr<IWeakReference> weakHost;
+    GetWeakReference((IWeakReference**)&weakHost);
+    Int32 initResult = NativeSetup(weakHost, mAttributes, mSampleRate, mChannels,
             mAudioFormat, mNativeBufferSizeInBytes, mDataLoadMode, session);
     if (initResult != IAudioTrack::SUCCESS) {
         Logger::E(TAG, "Error code %d  when initializing AudioTrack.", initResult);
@@ -436,11 +440,11 @@ ECode CAudioTrack::ReleaseResources()
 {
     // even though native_release() stops the native AudioTrack, we need to stop
     // AudioTrack subclasses too.
-//    try {
+    // try {
     Stop();
-//    } catch(IllegalStateException ise) {
-//        // don't raise an exception, we're releasing the resources.
-//    }
+    // } catch(IllegalStateException ise) {
+    //     // don't raise an exception, we're releasing the resources.
+    // }
 
     NativeRelease();
     mState = STATE_UNINITIALIZED;
@@ -613,12 +617,6 @@ ECode CAudioTrack::GetMinBufferSize(
         }
      }
 
-    // if ((audioFormat != IAudioFormat::ENCODING_PCM_16BIT)
-    //         && (audioFormat != IAudioFormat::ENCODING_PCM_8BIT)) {
-    //     Logger::E(TAG, "getMinBufferSize(): Invalid audio format.");
-    //     *size = IAudioTrack::ERROR_BAD_VALUE;
-    //     return NOERROR;
-    // }
     Boolean b;
     if (CAudioFormat::IsValidEncoding(audioFormat, &b), !b) {
         Logger::E(TAG, "getMinBufferSize(): Invalid audio format.");
@@ -1115,7 +1113,7 @@ ECode CAudioTrack::ReloadStaticData(
         *result = IAudioTrack::ERROR_INVALID_OPERATION;
         return NOERROR;
     }
-    *result = NativeReloadStatic();
+    *result = NativeReload();
     return NOERROR;
 }
 
@@ -1164,10 +1162,14 @@ ECode CAudioTrack::PostEventFromNative(
     /* [in] */ IInterface* obj)
 {
     //logd("Event posted from the native side: event="+ what + " args="+ arg1+" "+arg2);
-    IAudioTrack* iat = IAudioTrack::Probe(ref);
-    if (iat == NULL) return NOERROR;
+    AutoPtr<IWeakReference> wr = IWeakReference::Probe(ref);
+    AutoPtr<IAudioTrack> iat;
+    wr->Resolve(EIID_IAudioTrack, (IInterface**)&iat);
+    if (iat == NULL) {
+        return NOERROR;
+    }
 
-    AutoPtr<CAudioTrack> track = (CAudioTrack*)iat;
+    AutoPtr<CAudioTrack> track = (CAudioTrack*)iat.Get();
 
     AutoPtr<NativeEventHandlerDelegate> delegate = track->mEventHandlerDelegate;
     if (delegate != NULL) {
@@ -1182,41 +1184,23 @@ ECode CAudioTrack::PostEventFromNative(
     return NOERROR;
 }
 
-#define DEFAULT_OUTPUT_SAMPLE_RATE 44100;
+// ----------------------------------------------------------------------------
+#define JNI_TRUE    1
 
-// //Native method
-// #define SUCCESS                         0
-// #define ERROR                           -1
-// #define ERROR_BAD_VALUE                 -2
-// #define ERROR_INVALID_OPERATION         -3
-// #define ERROR_SETUP_AUDIOSYSTEM         -16
-// #define ERROR_SETUP_INVALIDCHANNELMASK -17
-// #define ERROR_SETUP_INVALIDFORMAT       -18
-// #define ERROR_SETUP_INVALIDSTREAMTYPE   -19
-// #define ERROR_SETUP_NATIVEINITFAILED    -20
+#define DEFAULT_OUTPUT_SAMPLE_RATE   44100
 
-// struct fields_t
-// {
-//     // these fields provide access from C++ to the...
-//     Int32       PCM16;                 //...  format constants
-//     Int32       PCM8;                  //...  format constants
-//     Int32       STREAM_VOICE_CALL;     //...  stream type constants
-//     Int32       STREAM_SYSTEM;         //...  stream type constants
-//     Int32       STREAM_RING;           //...  stream type constants
-//     Int32       STREAM_MUSIC;          //...  stream type constants
-//     Int32       STREAM_ALARM;          //...  stream type constants
-//     Int32       STREAM_NOTIFICATION;   //...  stream type constants
-//     Int32       STREAM_BLUETOOTH_SCO;  //...  stream type constants
-//     Int32       STREAM_DTMF;           //...  stream type constants
-//     Int32       MODE_STREAM;           //...  memory mode
-//     Int32       MODE_STATIC;           //...  memory mode
-// };
+#define AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM         -16
+#define AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK  -17
+#define AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT       -18
+#define AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE   -19
+#define AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED    -20
 
-// static fields_t AudioTrackFields;
+// static Mutex sLock;
+// static SortedVector <audiotrack_callback_cookie *> sAudioTrackCallBackCookies;
 
 struct audiotrack_callback_cookie
 {
-    IAudioTrack* mAudioTrackRef;
+    AutoPtr<IWeakReference> mAudioTrackRef;
 };
 
 class AudioTrackJniStorage
@@ -1249,23 +1233,8 @@ public:
     android::sp<android::MemoryHeapBase> mMemHeap;
     android::sp<android::MemoryBase> mMemBase;
     struct audiotrack_callback_cookie mCallbackData;
-    Int32 mStreamType;
+    audio_stream_type_t mStreamType;
 };
-
-static Int32 AndroidMediaTranslateErrorCode(
-    /* [in] */ Int32 code)
-{
-    switch(code) {
-    case android::NO_ERROR:
-    return IAudioTrack::SUCCESS;
-    case android::BAD_VALUE:
-        return IAudioTrack::ERROR_BAD_VALUE;
-    case android::INVALID_OPERATION:
-        return IAudioTrack::ERROR_INVALID_OPERATION;
-    default:
-        return IAudioTrack::ERROR;
-    }
-}
 
 static void audioCallback(int event, void* user, void *info)
 {
@@ -1291,202 +1260,295 @@ static void audioCallback(int event, void* user, void *info)
     }
 }
 
-//TODO: Need JNI
+static inline audio_format_t audioFormatToNative(int audioFormat)
+{
+    switch (audioFormat) {
+    case IAudioFormat::ENCODING_PCM_16BIT:
+        return AUDIO_FORMAT_PCM_16_BIT;
+    case IAudioFormat::ENCODING_PCM_8BIT:
+        return AUDIO_FORMAT_PCM_8_BIT;
+    case IAudioFormat::ENCODING_PCM_FLOAT:
+        return AUDIO_FORMAT_PCM_FLOAT;
+    case IAudioFormat::ENCODING_AC3:
+        return AUDIO_FORMAT_AC3;
+    case IAudioFormat::ENCODING_E_AC3:
+        return AUDIO_FORMAT_E_AC3;
+    case IAudioFormat::ENCODING_DEFAULT:
+        return AUDIO_FORMAT_DEFAULT;
+    default:
+        return AUDIO_FORMAT_INVALID;
+    }
+}
+
+template<bool readOnly>
+class ScopedBytes {
+public:
+    ScopedBytes(IInterface* object)
+    : mObject(object), mByteArray(NULL), mPtr(NULL)
+    {
+        if (mObject == NULL) {
+            // jniThrowNullPointerException(mEnv, NULL);
+            return;
+        }
+        else if (IByteBuffer::Probe(mObject)) {
+            IByteBuffer::Probe(mObject)->GetArray((ArrayOf<Byte>**)&mByteArray);
+            mPtr = mByteArray->GetPayload();
+        }
+        else {
+            Handle64 addr;
+            IBuffer::Probe(mObject)->GetEffectiveDirectAddress(&addr);
+            mPtr = (Byte*)addr;
+        }
+    }
+
+    ~ScopedBytes() {
+    }
+
+private:
+    AutoPtr<IInterface> mObject;
+    AutoPtr<ArrayOf<Byte> > mByteArray;
+
+protected:
+    Byte* mPtr;
+
+private:
+    // Disallow copy and assignment.
+    ScopedBytes(const ScopedBytes&);
+    void operator=(const ScopedBytes&);
+};
+
+class ScopedBytesRO : public ScopedBytes<true> {
+public:
+    ScopedBytesRO(IInterface* object) : ScopedBytes<true>(object) {}
+    Byte* get() const {
+        return mPtr;
+    }
+};
 
 Int32 CAudioTrack::NativeSetup(
-    /* [in] */ IInterface* audiotrack_this,
-    /* [in] */ IInterface* attributes,
-    /* [in] */ Int32 sampleRate,
+    /* [in] */ IWeakReference* weak_this,
+    /* [in] */ IAudioAttributes* attributes,
+    /* [in] */ Int32 sampleRateInHertz,
     /* [in] */ Int32 channelMask,
     /* [in] */ Int32 audioFormat,
     /* [in] */ Int32 buffSizeInBytes,
-    /* [in] */ Int32 mode,
-    /* [in] */ Int32* nSession)
+    /* [in] */ Int32 memoryMode,
+    /* [in] */ Int32* jSession)
 {
-//     //LOGV("sampleRate=%d, audioFormat(from Java)=%d, channels=%x, buffSize=%d",sampleRateInHertz, audioFormat, channels, buffSizeInBytes);
-//     int afSampleRate;
-//     int afFrameCount;
+    ALOGV("sampleRate=%d, audioFormat(from Java)=%d, channel mask=%x, buffSize=%d",
+        sampleRateInHertz, audioFormat, channelMask, buffSizeInBytes);
 
-//     if (android::AudioSystem::getOutputFrameCount(&afFrameCount, (audio_stream_type_t)streamType) != android::NO_ERROR) {
-//         //LOGE("Error creating AudioTrack: Could not get AudioSystem frame count.");
-//         return ERROR_NATIVESETUP_AUDIOSYSTEM;
-//     }
-//     if (android::AudioSystem::getOutputSamplingRate(&afSampleRate, (audio_stream_type_t)streamType) != android::NO_ERROR) {
-//         //LOGE("Error creating AudioTrack: Could not get AudioSystem sampling rate.");
-//         return ERROR_NATIVESETUP_AUDIOSYSTEM;
-//     }
+    if (attributes == 0) {
+        ALOGE("Error creating AudioTrack: invalid audio attributes");
+        return IAudioSystem::ERROR;
+    }
 
-//     // Java channel masks don't map directly to the native definition, but it's a simple shift
-//     // to skip the two deprecated channel configurations "default" and "mono".
-//     uint32_t nativeChannelMask = ((uint32_t)channels) >> 2;
+    // Java channel masks don't map directly to the native definition, but it's a simple shift
+    // to skip the two deprecated channel configurations "default" and "mono".
+    audio_channel_mask_t nativeChannelMask = ((uint32_t)channelMask) >> 2;
 
-//     if (!audio_is_output_channel(nativeChannelMask)) {
-//         // ALOGE("Error creating AudioTrack: invalid channel mask.");
-//         return ERROR_NATIVESETUP_INVALIDCHANNELMASK;
-//     }
+    if (!audio_is_output_channel(nativeChannelMask)) {
+        ALOGE("Error creating AudioTrack: invalid channel mask %#x.", channelMask);
+        return AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK;
+    }
 
-//     Int32 nbChannels = popcount(nativeChannelMask);
+    uint32_t channelCount = audio_channel_count_from_out_mask(nativeChannelMask);
 
-//     // check the stream type
-//     audio_stream_type_t atStreamType;
-//     switch (streamType) {
-//     case AUDIO_STREAM_VOICE_CALL:
-//     case AUDIO_STREAM_SYSTEM:
-//     case AUDIO_STREAM_RING:
-//     case AUDIO_STREAM_MUSIC:
-//     case AUDIO_STREAM_ALARM:
-//     case AUDIO_STREAM_NOTIFICATION:
-//     case AUDIO_STREAM_BLUETOOTH_SCO:
-//     case AUDIO_STREAM_DTMF:
-//         atStreamType = (audio_stream_type_t)streamType;
-//         break;
-//     default:
-//         // ALOGE("Error creating AudioTrack: unknown stream type.");
-//         return ERROR_NATIVESETUP_INVALIDSTREAMTYPE;
-//     }
+    // check the format.
+    // This function was called from Java, so we compare the format against the Java constants
+    audio_format_t format = audioFormatToNative(audioFormat);
+    if (format == AUDIO_FORMAT_INVALID) {
+        ALOGE("Error creating AudioTrack: unsupported audio format %d.", audioFormat);
+        return AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT;
+    }
 
-//     // check the format.
-//     // This function was called from Java, so we compare the format against the Java constants
-//     if ((audioFormat != IAudioFormat::ENCODING_PCM_16BIT) && (audioFormat != IAudioFormat::ENCODING_PCM_8BIT)) {
-//         //LOGE("Error creating AudioTrack: unsupported audio format.");
-//         return ERROR_NATIVESETUP_INVALIDFORMAT;
-//     }
+    // for the moment 8bitPCM in MODE_STATIC is not supported natively in the AudioTrack C++ class
+    // so we declare everything as 16bitPCM, the 8->16bit conversion for MODE_STATIC will be handled
+    // in android_media_AudioTrack_native_write_byte()
+    if ((format == AUDIO_FORMAT_PCM_8_BIT)
+        && (memoryMode == MODE_STATIC)) {
+        ALOGV("android_media_AudioTrack_setup(): requesting MODE_STATIC for 8bit \
+            buff size of %dbytes, switching to 16bit, buff size of %dbytes",
+            buffSizeInBytes, 2*buffSizeInBytes);
+        format = AUDIO_FORMAT_PCM_16_BIT;
+        // we will need twice the memory to store the data
+        buffSizeInBytes *= 2;
+    }
 
-//     // for the moment 8bitPCM in MODE_STATIC is not supported natively in the AudioTrack C++ class
-//     // so we declare everything as 16bitPCM, the 8->16bit conversion for MODE_STATIC will be handled
-//     // in android_media_AudioTrack_native_write()
-//     if ((audioFormat == IAudioFormat::ENCODING_PCM_8BIT)
-//         && (memoryMode == MODE_STATIC)) {
-//         //LOGV("android_media_AudioTrack_native_setup(): requesting MODE_STATIC for 8bit \ buff size of %dbytes, switching to 16bit, buff size of %dbytes",buffSizeInBytes, 2*buffSizeInBytes);
-//         audioFormat = IAudioFormat::ENCODING_PCM_16BIT;
-//         // we will need twice the memory to store the data
-//         buffSizeInBytes *= 2;
-//     }
+    // compute the frame count
+    size_t frameCount;
+    if (audio_is_linear_pcm(format)) {
+        const size_t bytesPerSample = audio_bytes_per_sample(format);
+        frameCount = buffSizeInBytes / (channelCount * bytesPerSample);
+    }
+    else {
+        frameCount = buffSizeInBytes;
+    }
 
-//     // compute the frame count
-//     Int32 bytesPerSample = audioFormat == IAudioFormat::ENCODING_PCM_16BIT ? 2 : 1;
-//     audio_format_t format = audioFormat == IAudioFormat::ENCODING_PCM_16BIT ?
-//             AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT;
-//     Int32 frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
+    // jclass clazz = env->GetObjectClass(thiz);
+    // if (clazz == NULL) {
+    //     ALOGE("Can't find %s when setting up callback.", kClassPathName);
+    //     return (jint) AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED;
+    // }
 
-//     AudioTrackJniStorage* lpJniStorage = new AudioTrackJniStorage();
+    if (jSession == NULL) {
+        ALOGE("Error creating AudioTrack: invalid session ID pointer");
+        return IAudioSystem::ERROR;
+    }
 
-//     // initialize the callback information:
-//     // this data will be passed with every AudioTrack callback
-//     // we use a weak reference so the AudioTrack object can be garbage collected.
-//     lpJniStorage->mCallbackData.mAudioTrackRef = this;
+    Int32 sessionId = jSession[0];
 
-//     lpJniStorage->mStreamType = atStreamType;
+    // create the native AudioTrack object
+    android::sp<android::AudioTrack> lpTrack = new android::AudioTrack();
 
-//     if (nSession == NULL) {
-//     //    LOGE("Error creating AudioTrack: invalid session ID pointer");
-//         delete lpJniStorage;
-//         return IAudioTrack::ERROR;
-//     }
+    audio_attributes_t *paa = NULL;
+    // read the AudioAttributes values
+    paa = (audio_attributes_t *) calloc(1, sizeof(audio_attributes_t));
 
-//     Int32 sessionId = nSession[0];
+    AutoPtr<CAudioAttributes> attr = (CAudioAttributes*)attributes;
+    const char* tags = attr->mFormattedTags.string();
+    // copying array size -1, char array for tags was calloc'd, no need to NULL-terminate it
+    strncpy(paa->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
+    paa->usage = (audio_usage_t) attr->mUsage;
+    paa->content_type = (audio_content_type_t) attr->mContentType;
+    paa->flags = attr->mFlags;
 
-//     // create the native AudioTrack object
-//     android::AudioTrack* lpTrack = new android::AudioTrack();
-//     if (lpTrack == NULL) {
-//     //    LOGE("Error creating uninitialized AudioTrack");
-//         goto native_track_failure;
-//     }
+    ALOGV("AudioTrack_setup for usage=%d content=%d flags=0x%#x tags=%s",
+            paa->usage, paa->content_type, paa->flags, paa->tags);
 
-//     // initialize the native AudioTrack object
-//     if (memoryMode == MODE_STREAM) {
+    // initialize the callback information:
+    // this data will be passed with every AudioTrack callback
+    AudioTrackJniStorage* lpJniStorage = new AudioTrackJniStorage();
+    // we use a weak reference so the AudioTrack object can be garbage collected.
+    lpJniStorage->mCallbackData.mAudioTrackRef = weak_this;
 
-//         lpTrack->set(
-//             atStreamType,// stream type
-//             sampleRateInHertz,
-//             format,// word length, PCM
-//             nativeChannelMask,
-//             frameCount,
-//             AUDIO_OUTPUT_FLAG_NONE,// flags
-//             audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user)
-//             0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
-//             0,// shared mem
-//             true,// thread can call Java
-//             sessionId);// audio session ID
-//     }
-//     else if (memoryMode == MODE_STATIC) {
-//         // AudioTrack is using shared memory
+    // initialize the native AudioTrack object
+    android::status_t status = android::NO_ERROR;
+    switch (memoryMode) {
+    case MODE_STREAM:
 
-//         if (!lpJniStorage->AllocSharedMem(buffSizeInBytes)) {
-//         //    LOGE("Error creating AudioTrack in static mode: error creating mem heap base");
-//             goto native_init_failure;
-//         }
+        status = lpTrack->set(
+                AUDIO_STREAM_DEFAULT,// stream type, but more info conveyed in paa (last argument)
+                sampleRateInHertz,
+                format,// word length, PCM
+                nativeChannelMask,
+                frameCount,
+                AUDIO_OUTPUT_FLAG_NONE,
+                audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user)
+                0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
+                0,// shared mem
+                true,// thread can call Java
+                sessionId,// audio session ID
+                android::AudioTrack::TRANSFER_SYNC,
+                NULL,                         // default offloadInfo
+                -1, -1,                       // default uid, pid values
+                paa);
+        break;
 
-//         lpTrack->set(
-//             atStreamType,// stream type
-//             sampleRateInHertz,
-//             format,// word length, PCM
-//             nativeChannelMask,
-//             frameCount,
-//             AUDIO_OUTPUT_FLAG_NONE,// flags
-//             audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user));
-//             0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
-//             lpJniStorage->mMemBase,// shared mem
-//             true,// thread can call Java
-//             sessionId);// audio session ID
-//     }
+    case MODE_STATIC:
+        // AudioTrack is using shared memory
 
-//     if (lpTrack->initCheck() != android::NO_ERROR) {
-//         //LOGE("Error initializing AudioTrack");
-//         goto native_init_failure;
-//     }
+        if (!lpJniStorage->AllocSharedMem(buffSizeInBytes)) {
+            ALOGE("Error creating AudioTrack in static mode: error creating mem heap base");
+            goto native_init_failure;
+        }
 
-//     // read the audio session ID back from AudioTrack in case we create a new session
-//     nSession[0] = lpTrack->getSessionId();
+        status = lpTrack->set(
+                AUDIO_STREAM_DEFAULT,// stream type, but more info conveyed in paa (last argument)
+                sampleRateInHertz,
+                format,// word length, PCM
+                nativeChannelMask,
+                frameCount,
+                AUDIO_OUTPUT_FLAG_NONE,
+                audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user));
+                0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
+                lpJniStorage->mMemBase,// shared mem
+                true,// thread can call Java
+                sessionId,// audio session ID
+                android::AudioTrack::TRANSFER_SHARED,
+                NULL,                         // default offloadInfo
+                -1, -1,                       // default uid, pid values
+                paa);
+        break;
 
-//     // save our newly created C++ AudioTrack in the "nativeTrackInJavaObj" field
-//     // of the Java object (in mNativeTrackInJavaObj)
-//     mNativeTrack = (Int32)lpTrack;
+    default:
+        ALOGE("Unknown mode %d", memoryMode);
+        goto native_init_failure;
+    }
 
-//     // save the JNI resources so we can free them later
-//     //LOGV("storing lpJniStorage: %x\n", (int)lpJniStorage);
-//     mNativeData = (Int32)lpJniStorage;
+    if (status != android::NO_ERROR) {
+        ALOGE("Error %d initializing AudioTrack", status);
+        goto native_init_failure;
+    }
 
-//     return IAudioTrack::SUCCESS;
+    // read the audio session ID back from AudioTrack in case we create a new session
+    jSession[0] = lpTrack->getSessionId();
 
-//     // failures:
-// native_init_failure:
-//     delete lpTrack;
-//     mNativeTrack = 0;
+    // {   // scope for the lock
+    //     Mutex::Autolock l(sLock);
+    //     sAudioTrackCallBackCookies.add(&lpJniStorage->mCallbackData);
+    // }
+    // save our newly created C++ AudioTrack in the "nativeTrackInJavaObj" field
+    // of the Java object (in mNativeTrackInJavaObj)
+    mNativeTrack = (Int64) lpTrack.get();
 
-// native_track_failure:
-//     delete lpJniStorage;
-//     mNativeData = 0;
-//     return ERROR_NATIVESETUP_NATIVEINITFAILED;
-    return 0;
+    // save the JNI resources so we can free them later
+    //ALOGV("storing lpJniStorage: %x\n", (long)lpJniStorage);
+    mNativeData = (Int64)lpJniStorage;
+
+    // since we had audio attributes, the stream type was derived from them during the
+    // creation of the native AudioTrack: push the same value to the Java object
+    mStreamType = (Int32)lpTrack->streamType();
+
+    // audio attributes were copied in AudioTrack creation
+    free(paa);
+    paa = NULL;
+
+    return IAudioSystem::SUCCESS;
+
+    // failures:
+native_init_failure:
+    if (paa != NULL) {
+        free(paa);
+    }
+    delete lpJniStorage;
+
+    mNativeData = 0;
+
+    return AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED;
 }
 
 void CAudioTrack::NativeFinalize()
 {
-    // //LOGV("android_media_AudioTrack_native_finalize jobject: %x\n", (int)thiz);
-
-    // // delete the AudioTrack object
-    // android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    // if (lpTrack) {
-    //     //LOGV("deleting lpTrack: %x\n", (int)lpTrack);
-    //     lpTrack->stop();
-    //     delete lpTrack;
-    // }
-
-    // // delete the JNI data
-    // AudioTrackJniStorage* pJniStorage = (AudioTrackJniStorage *)mNativeData;
-    // if (pJniStorage) {
-    //     //LOGV("deleting pJniStorage: %x\n", (int)pJniStorage);
-    //     delete pJniStorage;
-    // }
+    //ALOGV("android_media_AudioTrack_finalize jobject: %x\n", (int)thiz);
+    NativeRelease();
 }
 
 void CAudioTrack::NativeRelease()
 {
-    // do everything a call to finalize would
-    NativeFinalize();
-    // + reset the native resources in the Java object so any attempt to access
+    android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
+    if (lpTrack == NULL) {
+        return;
+    }
+
+    //ALOGV("deleting lpTrack: %x\n", (int)lpTrack);
+    lpTrack->stop();
+//TODO:
+    // delete lpTrack;
+
+    // delete the JNI data
+    AudioTrackJniStorage* pJniStorage = (AudioTrackJniStorage *)mNativeData;
+    // reset the native resources in the Java object so any attempt to access
     // them after a call to release fails.
+
+    if (pJniStorage) {
+        // Mutex::Autolock l(sLock);
+        // audiotrack_callback_cookie *lpCookie = &pJniStorage->mCallbackData;
+        //ALOGV("deleting pJniStorage: %x\n", (int)pJniStorage);
+        // sAudioTrackCallBackCookies.remove(lpCookie);
+        delete pJniStorage;
+    }
+
     mNativeTrack = 0;
     mNativeData = 0;
 }
@@ -1528,40 +1590,52 @@ static Int32 WriteToTrack(
     /* [in] */ Int32 audioFormat,
     /* [in] */ Byte* data,
     /* [in] */ Int32 offsetInBytes,
-    /* [in] */ Int32 sizeInBytes)
+    /* [in] */ Int32 sizeInBytes,
+    /* [in] */ Boolean blocking = true)
 {
     // give the data to the native AudioTrack object (the data starts at the offset)
     ssize_t written = 0;
     // regular write() or copy the data to the AudioTrack's shared memory?
     if (pTrack->sharedBuffer() == 0) {
-        written = pTrack->write(data + offsetInBytes, sizeInBytes);
+        written = pTrack->write(data + offsetInBytes, sizeInBytes, blocking);
+        // for compatibility with earlier behavior of write(), return 0 in this case
+        if (written == (ssize_t) android::WOULD_BLOCK) {
+            written = 0;
+        }
     }
     else {
-        if (audioFormat == IAudioFormat::ENCODING_PCM_16BIT) {
-            // writing to shared memory, check for capacity
-            if ((size_t)sizeInBytes > pTrack->sharedBuffer()->size()) {
-                sizeInBytes = pTrack->sharedBuffer()->size();
+        const audio_format_t format = audioFormatToNative(audioFormat);
+        switch (format) {
+
+            default:
+            case AUDIO_FORMAT_PCM_FLOAT:
+            case AUDIO_FORMAT_PCM_16_BIT: {
+                // writing to shared memory, check for capacity
+                if ((size_t)sizeInBytes > pTrack->sharedBuffer()->size()) {
+                    sizeInBytes = pTrack->sharedBuffer()->size();
+                }
+                memcpy(pTrack->sharedBuffer()->pointer(), data + offsetInBytes, sizeInBytes);
+                written = sizeInBytes;
+                break;
             }
-            memcpy(pTrack->sharedBuffer()->pointer(), data + offsetInBytes, sizeInBytes);
-            written = sizeInBytes;
-        }
-        else if (audioFormat == IAudioFormat::ENCODING_PCM_8BIT) {
-            // data contains 8bit data we need to expand to 16bit before copying
-            // to the shared memory
-            // writing to shared memory, check for capacity,
-            // note that input data will occupy 2X the input space due to 8 to 16bit conversion
-            if (((size_t)sizeInBytes) * 2 > pTrack->sharedBuffer()->size()) {
-                sizeInBytes = pTrack->sharedBuffer()->size() / 2;
+            case IAudioFormat::ENCODING_PCM_8BIT: {
+                // data contains 8bit data we need to expand to 16bit before copying
+                // to the shared memory
+                // writing to shared memory, check for capacity,
+                // note that input data will occupy 2X the input space due to 8 to 16bit conversion
+                if (((size_t)sizeInBytes) * 2 > pTrack->sharedBuffer()->size()) {
+                    sizeInBytes = pTrack->sharedBuffer()->size() / 2;
+                }
+                Int32 count = sizeInBytes;
+                int16_t *dst = (int16_t *)pTrack->sharedBuffer()->pointer();
+                const uint8_t *src = (const uint8_t *)(data + offsetInBytes);
+//TODO: Need audio_utils/primitives.h
+                // memcpy_to_i16_from_u8(dst, src, count);
+                // even though we wrote 2*sizeInBytes, we only report sizeInBytes as written to hide
+                // the 8bit mixer restriction from the user of this function
+                written = sizeInBytes;
+                break;
             }
-            Int32 count = sizeInBytes;
-            int16_t *dst = (int16_t *)pTrack->sharedBuffer()->pointer();
-            const int8_t *src = (const int8_t *)(data + offsetInBytes);
-            while(count--) {
-                *dst++ = (int16_t)(*src++^0x80) << 8;
-            }
-            // even though we wrote 2*sizeInBytes, we only report sizeInBytes as written to hide
-            // the 8bit mixer restriction from the user of this function
-            written = sizeInBytes;
         }
     }
     return written;
@@ -1594,7 +1668,8 @@ Int32 CAudioTrack::NativeWriteByte(
         return 0;
     }
 
-    Int32 written = WriteToTrack(lpTrack, javaAudioFormat, cAudioData, offsetInBytes, sizeInBytes);
+    Int32 written = WriteToTrack(lpTrack, javaAudioFormat,
+            cAudioData, offsetInBytes, sizeInBytes, isBlocking == JNI_TRUE /*blocking*/);
 
     //LOGV("write wrote %d (tried %d) bytes in the native AudioTrack with offset %d",
     //     (int)written, (int)(sizeInBytes), (int)offsetInBytes);
@@ -1602,15 +1677,48 @@ Int32 CAudioTrack::NativeWriteByte(
 }
 
 Int32 CAudioTrack::NativeWriteInt16(
-    /* [in] */ ArrayOf<Int16>* javaAudioData,
+    /* [in] */ ArrayOf<Int16>* audioData,
     /* [in] */ Int32 offsetInShorts,
     /* [in] */ Int32 sizeInShorts,
     /* [in] */ Int32 javaAudioFormat)
 {
-    // return (NativeWriteByte((ArrayOf<Byte>*)javaAudioData,
-    //         offsetInShorts * 2, sizeInShorts * 2, javaAudioFormat)
-    //         / 2);
-    return 0;
+    //ALOGV("android_media_AudioTrack_write_short(offset=%d, sizeInShorts=%d) called",
+    //    offsetInShorts, sizeInShorts);
+    android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
+    if (lpTrack == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //     "Unable to retrieve AudioTrack pointer for write()");
+        return 0;
+    }
+
+    // get the pointer for the audio data from the java array
+    // NOTE: We may use GetPrimitiveArrayCritical() when the JNI implementation changes in such
+    // a way that it becomes much more efficient. When doing so, we will have to prevent the
+    // AudioSystem callback to be called while in critical section (in case of media server
+    // process crash for instance)
+    Int16* cAudioData = NULL;
+    if (audioData) {
+        cAudioData = audioData->GetPayload();
+        if (cAudioData == NULL) {
+            ALOGE("Error retrieving source of audio data to play, can't play");
+            return 0; // out of memory or no data to load
+        }
+    }
+    else {
+        ALOGE("NULL java array of audio data to play, can't play");
+        return 0;
+    }
+    Int32 written = WriteToTrack(lpTrack, javaAudioFormat, (Byte *)cAudioData,
+                                offsetInShorts * sizeof(short), sizeInShorts * sizeof(short),
+            true /*blocking write, legacy behavior*/);
+
+    if (written > 0) {
+        written /= sizeof(short);
+    }
+    //ALOGV("write wrote %d (tried %d) shorts in the native AudioTrack with offset %d",
+    //     (int)written, (int)(sizeInShorts), (int)offsetInShorts);
+
+    return written;
 }
 
 Int32 CAudioTrack::NativeWriteFloat(
@@ -1618,33 +1726,72 @@ Int32 CAudioTrack::NativeWriteFloat(
     /* [in] */ Int32 offsetInFloats,
     /* [in] */ Int32 sizeInFloats,
     /* [in] */ Int32 format,
-    /* [in] */ Boolean isBlocking)
+    /* [in] */ Boolean isWriteBlocking)
 {
-    return 0;
+    android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
+    if (lpTrack == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //     "Unable to retrieve AudioTrack pointer for write()");
+        return 0;
+    }
+
+    Float* cAudioData = NULL;
+    if (audioData) {
+        cAudioData = audioData->GetPayload();
+        if (cAudioData == NULL) {
+            ALOGE("Error retrieving source of audio data to play, can't play");
+            return 0; // out of memory or no data to load
+        }
+    }
+    else {
+        ALOGE("NULL java array of audio data to play, can't play");
+        return 0;
+    }
+    Int32 written = WriteToTrack(lpTrack, format, (Byte *)cAudioData,
+                                offsetInFloats * sizeof(float), sizeInFloats * sizeof(float),
+                                isWriteBlocking == JNI_TRUE /* blocking */);
+
+    if (written > 0) {
+        written /= sizeof(float);
+    }
+
+    return written;
 }
 
 Int32 CAudioTrack::NativeWriteNativeBytes(
-    /* [in] */ IInterface* audioData,
-    /* [in] */ Int32 positionInBytes,
+    /* [in] */ IByteBuffer* audioData,
+    /* [in] */ Int32 byteOffset,
     /* [in] */ Int32 sizeInBytes,
     /* [in] */ Int32 format,
-    /* [in] */ Boolean blocking)
+    /* [in] */ Boolean isWriteBlocking)
 {
-    return 0;
-}
-
-Int32 CAudioTrack::NativeReloadStatic()
-{
+    //ALOGV("android_media_AudioTrack_write_native_bytes(offset=%d, sizeInBytes=%d) called",
+    //    offsetInBytes, sizeInBytes);
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //         "Unable to retrieve AudioTrack pointer for write()");
+        return 0;
+    }
 
-    return AndroidMediaTranslateErrorCode(lpTrack->reload());
+    ScopedBytesRO bytes(audioData);
+    if (bytes.get() == NULL) {
+        // ALOGE("Error retrieving source of audio data to play, can't play");
+        return IAudioSystem::BAD_VALUE;
+    }
+
+    Int32 written = WriteToTrack(lpTrack, format, bytes.get(), byteOffset,
+            sizeInBytes, isWriteBlocking == JNI_TRUE /* blocking */);
+
+    return written;
 }
 
 Int32 CAudioTrack::NativeGetNativeFrameCount()
 {
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
 
     return lpTrack->frameCount();
 }
@@ -1654,7 +1801,9 @@ void CAudioTrack::NativeSetVolume(
     /* [in] */ Float right)
 {
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return;
+    }
 
     lpTrack->setVolume(left, right);
 }
@@ -1663,15 +1812,19 @@ Int32 CAudioTrack::NativeSetPlaybackRate(
     /* [in] */ Int32 sampleRateInHz)
 {
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
 
-    return AndroidMediaTranslateErrorCode(lpTrack->setSampleRate(sampleRateInHz));
+    return NativeToElastosStatus(lpTrack->setSampleRate(sampleRateInHz));
 }
 
 Int32 CAudioTrack::NativeGetPlaybackRate()
 {
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
 
     return (Int32)lpTrack->getSampleRate();
 }
@@ -1680,9 +1833,11 @@ Int32 CAudioTrack::NativeSetMarkerPos(
     /* [in] */ Int32 markerPos)
 {
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
 
-    return AndroidMediaTranslateErrorCode(lpTrack->setMarkerPosition(markerPos));
+    return NativeToElastosStatus(lpTrack->setMarkerPosition(markerPos));
 }
 
 Int32 CAudioTrack::NativeGetMarkerPos()
@@ -1690,7 +1845,9 @@ Int32 CAudioTrack::NativeGetMarkerPos()
     uint32_t position = 0;
 
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
 
     lpTrack->getMarkerPosition(&position);
     return (Int32)position;
@@ -1700,9 +1857,11 @@ Int32 CAudioTrack::NativeSetPosUpdatePeriod(
     /* [in] */ Int32 periodInFrames)
 {
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
 
-    return AndroidMediaTranslateErrorCode(lpTrack->setPositionUpdatePeriod(periodInFrames));
+    return NativeToElastosStatus(lpTrack->setPositionUpdatePeriod(periodInFrames));
 }
 
 Int32 CAudioTrack::NativeGetPosUpdatePeriod()
@@ -1710,7 +1869,9 @@ Int32 CAudioTrack::NativeGetPosUpdatePeriod()
     uint32_t period = 0;
 
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
 
     lpTrack->getPositionUpdatePeriod(&period);
     return (Int32)period;
@@ -1720,9 +1881,11 @@ Int32 CAudioTrack::NativeSetPosition(
     /* [in] */ Int32 position)
 {
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
 
-    return AndroidMediaTranslateErrorCode(lpTrack->setPosition(position));
+    return NativeToElastosStatus(lpTrack->setPosition(position));
 }
 
 Int32 CAudioTrack::NativeGetPosition()
@@ -1730,7 +1893,9 @@ Int32 CAudioTrack::NativeGetPosition()
     uint32_t position = 0;
 
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
 
     lpTrack->getPosition(&position);
     return (Int32)position;
@@ -1738,13 +1903,38 @@ Int32 CAudioTrack::NativeGetPosition()
 
 Int32 CAudioTrack::NativeGetLatency()
 {
-    return 0;
+    android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
+
+    if (lpTrack == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //     "Unable to retrieve AudioTrack pointer for latency()");
+        return IAudioSystem::ERROR;
+    }
+    return (Int32)lpTrack->latency();
 }
 
 Int32 CAudioTrack::NativeGetTimestamp(
-    /* [in] */ ArrayOf<Int64>* longArray)
+    /* [in] */ ArrayOf<Int64>* jTimestamp)
 {
-    return 0;
+    android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
+
+    if (lpTrack == NULL) {
+        // ALOGE("Unable to retrieve AudioTrack pointer for getTimestamp()");
+        return IAudioSystem::ERROR;
+    }
+    android::AudioTimestamp timestamp;
+    android::status_t status = lpTrack->getTimestamp(timestamp);
+
+    if (status == android::OK) {
+        Int64* nTimestamp = jTimestamp->GetPayload();
+        if (nTimestamp == NULL) {
+            ALOGE("Unable to get array for getTimestamp()");
+            return IAudioSystem::ERROR;
+        }
+        nTimestamp[0] = (Int64) timestamp.mPosition;
+        nTimestamp[1] = (Int64) ((timestamp.mTime.tv_sec * 1000000000LL) + timestamp.mTime.tv_nsec);
+    }
+    return NativeToElastosStatus(status);
 }
 
 Int32 CAudioTrack::NativeSetLoop(
@@ -1753,83 +1943,107 @@ Int32 CAudioTrack::NativeSetLoop(
     /* [in] */ Int32 loopCount)
 {
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
 
-    return AndroidMediaTranslateErrorCode(lpTrack->setLoop(loopStart, loopEnd, loopCount));
+    return NativeToElastosStatus(lpTrack->setLoop(loopStart, loopEnd, loopCount));
+}
+
+Int32 CAudioTrack::NativeReload()
+{
+    android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
+
+    return NativeToElastosStatus(lpTrack->reload());
 }
 
 Int32 CAudioTrack::NativeGetOutputSampleRate(
    /* [in] */ Int32 javaStreamType)
 {
-    // Int32 afSamplingRate;
-    // // convert the stream type from Java to native value
-    // // FIXME: code duplication with android_media_AudioTrack_native_setup()
-    // audio_stream_type_t nativeStreamType;
-    // switch (javaStreamType) {
-    // case AUDIO_STREAM_VOICE_CALL:
-    // case AUDIO_STREAM_SYSTEM:
-    // case AUDIO_STREAM_RING:
-    // case AUDIO_STREAM_MUSIC:
-    // case AUDIO_STREAM_ALARM:
-    // case AUDIO_STREAM_NOTIFICATION:
-    // case AUDIO_STREAM_BLUETOOTH_SCO:
-    // case AUDIO_STREAM_DTMF:
-    //     nativeStreamType = (audio_stream_type_t) javaStreamType;
-    //     break;
-    // default:
-    //     nativeStreamType = AUDIO_STREAM_DEFAULT;
-    //     break;
-    // }
+    uint32_t afSamplingRate;
+    // convert the stream type from Java to native value
+    // FIXME: code duplication with android_media_AudioTrack_native_setup()
+    audio_stream_type_t nativeStreamType;
+    switch (javaStreamType) {
+    case AUDIO_STREAM_VOICE_CALL:
+    case AUDIO_STREAM_SYSTEM:
+    case AUDIO_STREAM_RING:
+    case AUDIO_STREAM_MUSIC:
+    case AUDIO_STREAM_ALARM:
+    case AUDIO_STREAM_NOTIFICATION:
+    case AUDIO_STREAM_BLUETOOTH_SCO:
+    case AUDIO_STREAM_DTMF:
+        nativeStreamType = (audio_stream_type_t) javaStreamType;
+        break;
+    default:
+        nativeStreamType = AUDIO_STREAM_DEFAULT;
+        break;
+    }
 
-    // if (android::AudioSystem::getOutputSamplingRate(&afSamplingRate, nativeStreamType) != android::NO_ERROR) {
-    //     // LOGE("AudioSystem::getOutputSamplingRate() for stream type %d failed in AudioTrack JNI",
-    //     //     nativeStreamType);
-    //     return DEFAULT_OUTPUT_SAMPLE_RATE;
-    // }
-    // else {
-    //     return afSamplingRate;
-    // }
-    return 0;
+    android::status_t status = android::AudioSystem::getOutputSamplingRate(&afSamplingRate, nativeStreamType);
+    if (status != android::NO_ERROR) {
+        ALOGE("Error %d in AudioSystem::getOutputSamplingRate() for stream type %d "
+              "in AudioTrack JNI", status, nativeStreamType);
+        return DEFAULT_OUTPUT_SAMPLE_RATE;
+    }
+    else {
+        return afSamplingRate;
+    }
 }
 
 // returns the minimum required size for the successful creation of a streaming AudioTrack
 // returns -1 if there was an error querying the hardware.
 Int32 CAudioTrack::NativeGetMinBuffSize(
     /* [in] */ Int32 sampleRateInHertz,
-    /* [in] */ Int32 nbChannels,
+    /* [in] */ Int32 channelCount,
     /* [in] */ Int32 audioFormat)
 {
-    // Int32 frameCount = 0;
-    // if (android::AudioTrack::getMinFrameCount(&frameCount, AUDIO_STREAM_DEFAULT,
-    //         sampleRateInHertz) != android::NO_ERROR) {
-    //     return -1;
-    // }
-    // return frameCount * nbChannels * (audioFormat == IAudioFormat::ENCODING_PCM_16BIT ? 2 : 1);
-    return 0;
-}
-
-Int32 CAudioTrack::NativeAttachAuxEffect(
-    /* [in] */ Int32 effectId)
-{
-    android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
-
-    return AndroidMediaTranslateErrorCode(lpTrack->attachAuxEffect(effectId));
+    size_t frameCount;
+    const android::status_t status = android::AudioTrack::getMinFrameCount(
+            &frameCount, AUDIO_STREAM_DEFAULT, sampleRateInHertz);
+    if (status != android::NO_ERROR) {
+        ALOGE("AudioTrack::getMinFrameCount() for sample rate %d failed with status %d",
+                sampleRateInHertz, status);
+        return -1;
+    }
+    const audio_format_t format = audioFormatToNative(audioFormat);
+    if (audio_is_linear_pcm(format)) {
+        const size_t bytesPerSample = audio_bytes_per_sample(format);
+        return frameCount * channelCount * bytesPerSample;
+    }
+    else {
+        return frameCount;
+    }
 }
 
 Int32 CAudioTrack::NativeSetAuxEffectSendLevel(
     /* [in] */ Float level)
 {
     android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
-    assert(lpTrack != NULL);
+    if (lpTrack == NULL) {
+        return -1;
+    }
 
     android::status_t status = lpTrack->setAuxEffectSendLevel(level);
     if (status != android::NO_ERROR) {
-        //TODO:
-        // ALOGE("AudioTrack::setAuxEffectSendLevel() for level %g failed with status %d",
-        //         level, status);
+        ALOGE("AudioTrack::setAuxEffectSendLevel() for level %g failed with status %d",
+                level, status);
     }
     return (Int32) status;
+}
+
+Int32 CAudioTrack::NativeAttachAuxEffect(
+    /* [in] */ Int32 effectId)
+{
+    android::AudioTrack* lpTrack = (android::AudioTrack *)mNativeTrack;
+    if (lpTrack == NULL) {
+        return IAudioSystem::ERROR;
+    }
+
+    return NativeToElastosStatus(lpTrack->attachAuxEffect(effectId));
 }
 
 } // namespace Media

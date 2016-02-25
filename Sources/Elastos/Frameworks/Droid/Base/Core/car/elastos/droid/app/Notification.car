@@ -1489,6 +1489,47 @@ module
          */
         BuildStyled(
             [in] INotification* wip);
+
+        /**
+         * Changes the padding of the first line such that the big and small content view have the
+         * same top padding.
+         *
+         * @hide
+         */
+        ApplyTopPadding(
+            [in] IRemoteViews* contentView);
+
+        /**
+         * @hide
+         */
+        RestoreFromExtras(
+            [in] IBundle* extras);
+
+
+        // The following methods are split out so we can re-create notification partially.
+        /**
+         * @hide
+         */
+        PopulateTickerView(
+            [in] INotification* wip);
+
+        /**
+         * @hide
+         */
+        PopulateContentView(
+            [in] INotification* wip);
+
+        /**
+         * @hide
+         */
+        PopulateBigContentView(
+            [in] INotification* wip);
+
+        /**
+         * @hide
+         */
+        PopulateHeadsUpContentView(
+            [in] INotification* wip);
     }
 
     /**

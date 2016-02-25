@@ -44,16 +44,18 @@ ECode CBluetoothA2dpStateChangeCallback::OnBluetoothStateChange(
         // try {
         if (mHost->mService == NULL) {
             if (BluetoothA2dp::VDBG) Logger::D(BluetoothA2dp::TAG, "Binding service...");
-            AutoPtr<IIntent> intent;
-            CIntent::New(String("IBluetoothHeadset")/*IBluetoothHeadset.class.getName()*/, (IIntent**)&intent);
-            Boolean result;
-            ECode ec = mHost->mContext->BindService(intent, mHost->mConnection, 0, &result);
-            if (FAILED(ec)) {
-                Logger::E(BluetoothA2dp::TAG, "0x%08x", ec);
-            }
-            else if (!result) {
-                Logger::E(BluetoothA2dp::TAG, "Could not bind to Bluetooth Headset Service");
-            }
+            //AutoPtr<IIntent> intent;
+            //CIntent::New(String("IBluetoothHeadset")/*IBluetoothHeadset.class.getName()*/, (IIntent**)&intent);
+            //Boolean result;
+            //ECode ec = mHost->mContext->BindService(intent, mHost->mConnection, 0, &result);
+            //if (FAILED(ec)) {
+            //    Logger::E(BluetoothA2dp::TAG, "0x%08x", ec);
+            //}
+            //else if (!result) {
+            //    Logger::E(BluetoothA2dp::TAG, "Could not bind to Bluetooth Headset Service");
+            //}
+            Boolean bindResult;
+            mHost->DoBind(&bindResult);
         }
         // } catch (Exception re) {
         //     Log.e(TAG,"",re);

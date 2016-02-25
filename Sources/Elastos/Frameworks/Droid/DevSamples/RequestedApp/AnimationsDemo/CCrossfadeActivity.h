@@ -1,6 +1,6 @@
 
-#ifndef  __CCROSSFADEACTIVITY_H__
-#define  __CCROSSFADEACTIVITY_H__
+#ifndef __CCROSSFADEACTIVITY_H__
+#define __CCROSSFADEACTIVITY_H__
 
 #include "_CCrossfadeActivity.h"
 #include "elastos/droid/app/Activity.h"

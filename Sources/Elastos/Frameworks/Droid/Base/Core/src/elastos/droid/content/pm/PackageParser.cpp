@@ -26,6 +26,7 @@
 #include "elastos/droid/os/CPatternMatcher.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/app/CActivityManager.h"
 #include "elastos/droid/utility/CArraySet.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/utility/CDisplayMetrics.h"
@@ -46,6 +47,7 @@ using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CPatternMatcher;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::App::CActivityManager;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Droid::Utility::CArraySet;
@@ -842,8 +844,7 @@ const AutoPtr<IComparator> PackageParser::sSplitNameComparator = new PackagePars
 PackageParser::PackageParser()
     : mOnlyCoreApps(FALSE)
 {
-    assert(0 && "TODO");
-    // CDisplayMetrics::New((IDisplayMetrics**)&mMetrics);
+    CDisplayMetrics::New((IDisplayMetrics**)&mMetrics);
     mMetrics->SetToDefaults();
 }
 
@@ -2458,15 +2459,17 @@ ECode PackageParser::ParseBaseApk(
         else if (tagName.Equals("overlay")) {
             pkg->mTrustedOverlay = trustedOverlay;
 
-            assert(0 && "TODO");
             sa = NULL;
-            // res->ObtainAttributes(attrs,
-            //     R::styleable::AndroidManifestResourceOverlay, (ITypedArray**)&sa);
-            // sa->GetString(
-            //     R::styleable::AndroidManifestResourceOverlay_targetPackage, &pkg->mOverlayTarget);
-            // sa->GetInt32(
-            //     R::styleable::AndroidManifestResourceOverlay_priority, -1, &pkg->mOverlayPriority);
-            // sa->Recycle();
+            size = ArraySize(R::styleable::AndroidManifestResourceOverlay);
+            layout = ArrayOf<Int32>::Alloc(size);
+            layout->Copy(R::styleable::AndroidManifestResourceOverlay, size);
+            ASSERT_SUCCEEDED(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
+
+            sa->GetString(
+                R::styleable::AndroidManifestResourceOverlay_targetPackage, &pkg->mOverlayTarget);
+            sa->GetInt32(
+                R::styleable::AndroidManifestResourceOverlay_priority, -1, &pkg->mOverlayPriority);
+            sa->Recycle();
 
             if (pkg->mOverlayTarget == NULL) {
                 (*outError)[0] = String("<overlay> does not specify a target package");
@@ -3123,8 +3126,7 @@ ECode PackageParser::ParseUsesPermission(
 
     Int32 maxSdkVersion = 0;
     AutoPtr<ITypedValue> val;
-    assert(0 && "TODO");
-    // sa->PeekValue(R::styleable::AndroidManifestUsesPermission_maxSdkVersion, (ITypedValue**)&val);
+    sa->PeekValue(R::styleable::AndroidManifestUsesPermission_maxSdkVersion, (ITypedValue**)&val);
     if (val != NULL) {
         Int32 type;
         val->GetType(&type);
@@ -3351,15 +3353,14 @@ ECode PackageParser::ParseKeySets(
                 return NOERROR;
             }
 
-            assert(0 && "TODO");
-            // Int32 size = ArraySize(R::styleable::AndroidManifestKeySet);
-            // AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            // layout->Copy(R::styleable::AndroidManifestKeySet, size);
+            Int32 size = ArraySize(R::styleable::AndroidManifestKeySet);
+            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
+            layout->Copy(R::styleable::AndroidManifestKeySet, size);
 
             AutoPtr<ITypedArray> sa;
-            // res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
+            res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
             String keysetName;
-            // sa->GetNonResourceString(R::styleable::AndroidManifestKeySet_name, &keysetName);
+            sa->GetNonResourceString(R::styleable::AndroidManifestKeySet_name, &keysetName);
             AutoPtr<IArraySet> as;
             CArraySet::New((IArraySet**)&as);
             AutoPtr<ICharSequence> csq = CoreUtils::Convert(keysetName);
@@ -3375,16 +3376,15 @@ ECode PackageParser::ParseKeySets(
                 return NOERROR;
             }
 
-            assert(0 && "TODO");
-            // Int32 size = ArraySize(R::styleable::AndroidManifestPublicKey);
-            // AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            // layout->Copy(R::styleable::AndroidManifestPublicKey, size);
+            Int32 size = ArraySize(R::styleable::AndroidManifestPublicKey);
+            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
+            layout->Copy(R::styleable::AndroidManifestPublicKey, size);
             AutoPtr<ITypedArray> sa;
-            // res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
+            res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
             String publicKeyName, encodedKey;
-            // sa->GetNonResourceString(R::styleable::AndroidManifestPublicKey_name, &publicKeyName);
-            // sa->GetNonResourceString(R::styleable::AndroidManifestPublicKey_value, &encodedKey);
+            sa->GetNonResourceString(R::styleable::AndroidManifestPublicKey_name, &publicKeyName);
+            sa->GetNonResourceString(R::styleable::AndroidManifestPublicKey_value, &encodedKey);
             AutoPtr<ICharSequence> keyNameCsq = CoreUtils::Convert(publicKeyName);
             IInterface* keyNameObj = TO_IINTERFACE(keyNameCsq);
             AutoPtr<ICharSequence> curCsq = CoreUtils::Convert(currentKeySet);
@@ -3436,15 +3436,14 @@ ECode PackageParser::ParseKeySets(
             XmlUtils::SkipCurrentTag(parser);
         }
         else if (tagName.Equals("upgrade-key-set")) {
-            assert(0 && "TODO");
-            // Int32 size = ArraySize(R::styleable::AndroidManifestUpgradeKeySet);
-            // AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-            // layout->Copy(R::styleable::AndroidManifestUpgradeKeySet, size);
+            Int32 size = ArraySize(R::styleable::AndroidManifestUpgradeKeySet);
+            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
+            layout->Copy(R::styleable::AndroidManifestUpgradeKeySet, size);
             AutoPtr<ITypedArray> sa;
-            // res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
+            res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
             String name;
-            // sa->GetNonResourceString(R::styleable::AndroidManifestUpgradeKeySet_name, &name);
+            sa->GetNonResourceString(R::styleable::AndroidManifestUpgradeKeySet_name, &name);
             AutoPtr<ICharSequence> csq = CoreUtils::Convert(name);
             upgradeSet->Add(TO_IINTERFACE(csq));
             sa->Recycle();
@@ -3561,13 +3560,12 @@ ECode PackageParser::ParsePermissionGroup(
 
     AutoPtr<PermissionGroup> perm = new PermissionGroup(owner);
 
-    assert(0 && "TODO");
-    // Int32 size = ArraySize(R::styleable::AndroidManifestPermissionGroup);
-    // AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    // layout->Copy(R::styleable::AndroidManifestPermissionGroup, size);
+    Int32 size = ArraySize(R::styleable::AndroidManifestPermissionGroup);
+    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
+    layout->Copy(R::styleable::AndroidManifestPermissionGroup, size);
 
     AutoPtr<ITypedArray> sa;
-    // res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
+    res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
     if (!ParsePackageItemInfo(owner, IPackageItemInfo::Probe(perm->mInfo), outError,
             String("<permission-group>"), sa,
@@ -3575,7 +3573,7 @@ ECode PackageParser::ParsePermissionGroup(
             R::styleable::AndroidManifestPermissionGroup_label,
             R::styleable::AndroidManifestPermissionGroup_icon,
             R::styleable::AndroidManifestPermissionGroup_logo,
-            0)// R::styleable::AndroidManifestPermissionGroup_banner)
+            R::styleable::AndroidManifestPermissionGroup_banner)
     ) {
         sa->Recycle();
         sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
@@ -3636,14 +3634,13 @@ ECode PackageParser::ParsePermission(
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
-    assert(0 && "TODO");
     if (!ParsePackageItemInfo(owner, IPackageItemInfo::Probe(perm->mInfo), outError,
             String("<permission>"), sa,
             R::styleable::AndroidManifestPermission_name,
             R::styleable::AndroidManifestPermission_label,
             R::styleable::AndroidManifestPermission_icon,
             R::styleable::AndroidManifestPermission_logo,
-            0)// R::styleable::AndroidManifestPermission_banner)
+            R::styleable::AndroidManifestPermission_banner)
     ) {
         sa->Recycle();
         sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
@@ -3733,14 +3730,13 @@ ECode PackageParser::ParsePermissionTree(
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
-    assert(0 && "TODO");
     if (!ParsePackageItemInfo(owner, IPackageItemInfo::Probe(perm->mInfo), outError,
             String("<permission-tree>"), sa,
             R::styleable::AndroidManifestPermissionTree_name,
             R::styleable::AndroidManifestPermissionTree_label,
             R::styleable::AndroidManifestPermissionTree_icon,
             R::styleable::AndroidManifestPermissionTree_logo,
-            0)// R::styleable::AndroidManifestPermissionTree_banner)
+            R::styleable::AndroidManifestPermissionTree_banner)
     ) {
         sa->Recycle();
         sParseError = IPackageManager::INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
@@ -3794,15 +3790,14 @@ AutoPtr<PackageParser::Instrumentation> PackageParser::ParseInstrumentation(
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
-    assert(0 && "TODO");
     if (mParseInstrumentationArgs == NULL) {
-        // mParseInstrumentationArgs = new ParsePackageItemArgs(owner, outError,
-        //         R::styleable::AndroidManifestInstrumentation_name,
-        //         R::styleable::AndroidManifestInstrumentation_label,
-        //         R::styleable::AndroidManifestInstrumentation_icon,
-        //         R::styleable::AndroidManifestInstrumentation_logo,
-        //         R::styleable::AndroidManifestInstrumentation_banner);
-        // mParseInstrumentationArgs->mTag = String("<instrumentation>");
+        mParseInstrumentationArgs = new ParsePackageItemArgs(owner, outError,
+                R::styleable::AndroidManifestInstrumentation_name,
+                R::styleable::AndroidManifestInstrumentation_label,
+                R::styleable::AndroidManifestInstrumentation_icon,
+                R::styleable::AndroidManifestInstrumentation_logo,
+                R::styleable::AndroidManifestInstrumentation_banner);
+        mParseInstrumentationArgs->mTag = "<instrumentation>";
     }
 
     mParseInstrumentationArgs->mSa = sa;
@@ -3941,10 +3936,9 @@ Boolean PackageParser::ParseBaseApplication(
                 ai->SetFlags(aiFlags);
             }
 
-            assert(0 && "TODO");
-            // sa->GetBoolean(
-            //     R::styleable::AndroidManifestApplication_fullBackupOnly,
-            //     FALSE, &value);
+            sa->GetBoolean(
+                R::styleable::AndroidManifestApplication_fullBackupOnly,
+                FALSE, &value);
             if (value) {
                 ai->GetFlags(&aiFlags);
                 aiFlags |= IApplicationInfo::FLAG_FULL_BACKUP_ONLY;
@@ -3969,9 +3963,9 @@ Boolean PackageParser::ParseBaseApplication(
     sa->GetResourceId(
         R::styleable::AndroidManifestApplication_logo, 0, &ivalue);
     pii->SetLogo(ivalue);
-    assert(0 && "TODO");
-    // sa->GetResourceId(
-    //     R::styleable::AndroidManifestApplication_banner, 0, &ivalue);
+
+    sa->GetResourceId(
+        R::styleable::AndroidManifestApplication_banner, 0, &ivalue);
     pii->SetBanner(ivalue);
     sa->GetResourceId(
         R::styleable::AndroidManifestApplication_theme, 0, &ivalue);
@@ -4368,13 +4362,12 @@ ECode PackageParser::ParseSplitApplication(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    // Int32 size = ArraySize(R::styleable::AndroidManifestApplication);
-    // AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
-    // layout->Copy(R::styleable::AndroidManifestApplication, size);
+    Int32 size = ArraySize(R::styleable::AndroidManifestApplication);
+    AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
+    layout->Copy(R::styleable::AndroidManifestApplication, size);
 
     AutoPtr<ITypedArray> sa;
-    // FAIL_RETURN(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
-
+    FAIL_RETURN(res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa));
 
     Boolean bval;
     sa->GetBoolean(R::styleable::AndroidManifestApplication_hasCode, TRUE, &bval);
@@ -4460,13 +4453,12 @@ ECode PackageParser::ParseSplitApplication(
 
         }
         else if (tagName.Equals("uses-library")) {
-            assert(0 && "TODO");
             sa = NULL;
-            // size = ArraySize(R::styleable::AndroidManifestUsesLibrary);
-            // layout = ArrayOf<Int32>::Alloc(size);
-            // layout->Copy(R::styleable::AndroidManifestUsesLibrary, size);
+            size = ArraySize(R::styleable::AndroidManifestUsesLibrary);
+            layout = ArrayOf<Int32>::Alloc(size);
+            layout->Copy(R::styleable::AndroidManifestUsesLibrary, size);
 
-            // res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
+            res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
             // Note: don't allow this value to be a reference to a resource
             // that may change
@@ -4622,13 +4614,12 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
     if (mParseActivityArgs == NULL) {
-        assert(0 && "TODO");
         mParseActivityArgs = new ParseComponentArgs(owner, outError,
             R::styleable::AndroidManifestActivity_name,
             R::styleable::AndroidManifestActivity_label,
             R::styleable::AndroidManifestActivity_icon,
             R::styleable::AndroidManifestActivity_logo,
-            0/*R::styleable::AndroidManifestActivity_banner*/,
+            R::styleable::AndroidManifestActivity_banner,
             mSeparateProcesses,
             R::styleable::AndroidManifestActivity_process,
             R::styleable::AndroidManifestActivity_description,
@@ -4826,18 +4817,17 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
             a->mInfo->SetFlags(ivalue);
         }
 
-        assert(0 && "TODO");
         sa->GetInt32(
             R::styleable::AndroidManifestActivity_launchMode,
             IActivityInfo::LAUNCH_MULTIPLE, &ivalue);
         a->mInfo->SetLaunchMode(ivalue);
-        // sa->GetInt32(
-        //         R::styleable::AndroidManifestActivity_documentLaunchMode,
-        //         IActivityInfo::DOCUMENT_LAUNCH_NONE, &ivalue);
+        sa->GetInt32(
+                R::styleable::AndroidManifestActivity_documentLaunchMode,
+                IActivityInfo::DOCUMENT_LAUNCH_NONE, &ivalue);
         a->mInfo->SetDocumentLaunchMode(ivalue);
-        // sa->GetInt32(
-        //         R::styleable::AndroidManifestActivity_maxRecents,
-        //         CActivityManager::GetDefaultAppRecentsLimitStatic(), &ivalue);
+        sa->GetInt32(
+                R::styleable::AndroidManifestActivity_maxRecents,
+                CActivityManager::GetDefaultAppRecentsLimitStatic(), &ivalue);
         a->mInfo->SetMaxRecents(ivalue);
         sa->GetInt32(
             R::styleable::AndroidManifestActivity_screenOrientation,
@@ -4852,42 +4842,42 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
             0, &ivalue);
         a->mInfo->SetSoftInputMode(ivalue);
 
-        // sa->GetInteger(
-        //         R::styleable::AndroidManifestActivity_persistableMode,
-        //         IActivityInfo::PERSIST_ROOT_ONLY, &ivalue);
-        // a->mInfo->SetPersistableMode(ivalue);
+        sa->GetInteger(
+                R::styleable::AndroidManifestActivity_persistableMode,
+                IActivityInfo::PERSIST_ROOT_ONLY, &ivalue);
+        a->mInfo->SetPersistableMode(ivalue);
 
-        // if (sa->GetBoolean(
-        //         R::styleable::AndroidManifestActivity_allowEmbedded,
-        //         FALSE, &bvalue), bvalue) {
-                // a->mInfo->GetFlags(&ivalue);
-                // ivalue |= IActivityInfo::FLAG_ALLOW_EMBEDDED;
-                // a->mInfo->SetFlags(ivalue);
-        // }
+        if (sa->GetBoolean(
+                R::styleable::AndroidManifestActivity_allowEmbedded,
+                FALSE, &bvalue), bvalue) {
+                a->mInfo->GetFlags(&ivalue);
+                ivalue |= IActivityInfo::FLAG_ALLOW_EMBEDDED;
+                a->mInfo->SetFlags(ivalue);
+        }
 
-        // if (sa->GetBoolean(
-        //         R::styleable::AndroidManifestActivity_autoRemoveFromRecents,
-        //         FALSE, &bvalue), bvalue) {
-        //     a->mInfo->GetFlags(&ivalue);
-        //     ivalue |= IActivityInfo::FLAG_AUTO_REMOVE_FROM_RECENTS;
-        //     a->mInfo->SetFlags(ivalue);
-        // }
+        if (sa->GetBoolean(
+                R::styleable::AndroidManifestActivity_autoRemoveFromRecents,
+                FALSE, &bvalue), bvalue) {
+            a->mInfo->GetFlags(&ivalue);
+            ivalue |= IActivityInfo::FLAG_AUTO_REMOVE_FROM_RECENTS;
+            a->mInfo->SetFlags(ivalue);
+        }
 
-        // if (sa->GetBoolean(
-        //         R::styleable::AndroidManifestActivity_relinquishTaskIdentity,
-        //         FALSE, &bvalue), bvalue) {
-        //     a->mInfo->GetFlags(&ivalue);
-        //     ivalue |= IActivityInfo::FLAG_RELINQUISH_TASK_IDENTITY;
-        //     a->mInfo->SetFlags(ivalue);
-        // }
+        if (sa->GetBoolean(
+                R::styleable::AndroidManifestActivity_relinquishTaskIdentity,
+                FALSE, &bvalue), bvalue) {
+            a->mInfo->GetFlags(&ivalue);
+            ivalue |= IActivityInfo::FLAG_RELINQUISH_TASK_IDENTITY;
+            a->mInfo->SetFlags(ivalue);
+        }
 
-        // if (sa->GetBoolean(
-        //         R::styleable::AndroidManifestActivity_resumeWhilePausing,
-        //         FALSE, &bvalue), bvalue) {
-        //     a->mInfo->GetFlags(&ivalue);
-        //     ivalue |= IActivityInfo::FLAG_RESUME_WHILE_PAUSING;
-        //     a->mInfo->SetFlags(ivalue);
-        // }
+        if (sa->GetBoolean(
+                R::styleable::AndroidManifestActivity_resumeWhilePausing,
+                FALSE, &bvalue), bvalue) {
+            a->mInfo->GetFlags(&ivalue);
+            ivalue |= IActivityInfo::FLAG_RESUME_WHILE_PAUSING;
+            a->mInfo->SetFlags(ivalue);
+        }
     }
     else {
         a->mInfo->SetLaunchMode(IActivityInfo::LAUNCH_MULTIPLE);
@@ -5059,14 +5049,13 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivityAlias(
         return NULL;
     }
 
-    assert(0 && "TODO");
     if (mParseActivityAliasArgs == NULL) {
         mParseActivityAliasArgs = new ParseComponentArgs(owner, outError,
                 R::styleable::AndroidManifestActivityAlias_name,
                 R::styleable::AndroidManifestActivityAlias_label,
                 R::styleable::AndroidManifestActivityAlias_icon,
                 R::styleable::AndroidManifestActivityAlias_logo,
-                0,/*R::styleable::AndroidManifestActivityAlias_banner*/
+                R::styleable::AndroidManifestActivityAlias_banner,
                 mSeparateProcesses,
                 0,
                 R::styleable::AndroidManifestActivityAlias_description,
@@ -5245,15 +5234,13 @@ AutoPtr<PackageParser::Provider> PackageParser::ParseProvider(
     AutoPtr<ITypedArray> sa;
     res->ObtainAttributes(attrs, layout, (ITypedArray**)&sa);
 
-    assert(0 && "TODO");
-
     if (mParseProviderArgs == NULL) {
         mParseProviderArgs = new ParseComponentArgs(owner, outError,
             R::styleable::AndroidManifestProvider_name,
             R::styleable::AndroidManifestProvider_label,
             R::styleable::AndroidManifestProvider_icon,
             R::styleable::AndroidManifestProvider_logo,
-            0,/*R::styleable::AndroidManifestProvider_banner*/
+            R::styleable::AndroidManifestProvider_banner,
             mSeparateProcesses,
             R::styleable::AndroidManifestProvider_process,
             R::styleable::AndroidManifestProvider_description,
@@ -6101,10 +6088,9 @@ Boolean PackageParser::ParseIntent(
         R::styleable::AndroidManifestIntentFilter_logo, 0,
         &outInfo->mLogo);
 
-    assert(0 && "TODO");
-    // sa->GetResourceId(
-    //     R::styleable::AndroidManifestIntentFilter_banner, 0,
-    //     &outInfo->mBanner);
+    sa->GetResourceId(
+        R::styleable::AndroidManifestIntentFilter_banner, 0,
+        &outInfo->mBanner);
 
     sa->Recycle();
 
@@ -6174,22 +6160,20 @@ Boolean PackageParser::ParseIntent(
                 outInfo->AddDataScheme(str);
             }
 
-            assert(0 && "TODO");
-
-            // sa->GetNonConfigurationString(
-            //         R::styleable::AndroidManifestData_ssp, 0, &str);
+            sa->GetNonConfigurationString(
+                    R::styleable::AndroidManifestData_ssp, 0, &str);
             if (!str.IsNull()) {
                 outInfo->AddDataSchemeSpecificPart(str, IPatternMatcher::PATTERN_LITERAL);
             }
 
-            // sa->GetNonConfigurationString(
-            //         R::styleable::AndroidManifestData_sspPrefix, 0, &str);
+            sa->GetNonConfigurationString(
+                    R::styleable::AndroidManifestData_sspPrefix, 0, &str);
             if (!str.IsNull()) {
                 outInfo->AddDataSchemeSpecificPart(str, IPatternMatcher::PATTERN_PREFIX);
             }
 
-            // sa->GetNonConfigurationString(
-            //         R::styleable::AndroidManifestData_sspPattern, 0&str);
+            sa->GetNonConfigurationString(
+                    R::styleable::AndroidManifestData_sspPattern, 0, &str);
             if (!str.IsNull()) {
                 if (!allowGlobs) {
                     (*outError)[0] = String("sspPattern not allowed here; ssp must be literal");

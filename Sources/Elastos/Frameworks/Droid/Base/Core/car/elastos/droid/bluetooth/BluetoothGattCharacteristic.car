@@ -149,6 +149,9 @@ module
              */
             const Int32 FORMAT_FLOAT = 0x34;
 
+            GetKeySize(
+                [out] Int32* result);
+
             /**
              * Adds a descriptor to this characteristic.
              * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
@@ -159,6 +162,17 @@ module
             AddDescriptor(
                 [in] IBluetoothGattDescriptor* descriptor,
                 [out] Boolean* result);
+
+            GetDescriptor(
+                [in] IUUID* uuid,
+                [in] Int32 instanceId,
+                [out] IBluetoothGattDescriptor** result);
+
+            GetService(
+                [out] IBluetoothGattService** result);
+
+            SetService(
+                [in] IBluetoothGattService* service);
 
             /**
              * Returns the UUID of this characteristic

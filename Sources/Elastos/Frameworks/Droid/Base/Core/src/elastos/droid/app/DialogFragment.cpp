@@ -2,6 +2,7 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/app/DialogFragment.h"
+#include "elastos/droid/app/CDialog.h"
 
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IViewParent;
@@ -279,8 +280,7 @@ ECode DialogFragment::OnCreateDialog(
     GetActivity((IActivity**)&activity);
     Int32 theme;
     GetTheme(&theme);
-    assert(0 && "TODO");
-//    CDialog::New((IContext*)activity.Get(), theme, dialog);
+    CDialog::New((IContext*)activity.Get(), theme, dialog);
     return NOERROR;
 }
 

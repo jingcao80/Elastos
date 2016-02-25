@@ -7,11 +7,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 
-// import android.bluetooth.IBluetoothUuid;
-// import android.util.ArrayMap;
-// import android.util.Log;
-// import java.util.ArrayList;
-// import java.util.Arrays;
 using Elastos::Droid::Os::IParcelUuid;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Utility::IList;

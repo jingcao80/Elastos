@@ -1,0 +1,12 @@
+TARGET_NAME = recents
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES += Constants.cpp
+SOURCES += RecentsConfiguration.cpp
+
+ELASTOS_LIBS += model/model.lib
+ELASTOS_LIBS += views/views.lib

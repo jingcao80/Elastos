@@ -16,6 +16,10 @@ BluetoothHealthCallback::BluetoothHealthCallback()
 {
 }
 
+BluetoothHealthCallback::~BluetoothHealthCallback()
+{
+}
+
 ECode BluetoothHealthCallback::OnHealthAppConfigurationStatusChange(
     /* [in] */ IBluetoothHealthAppConfiguration* config,
     /* [in] */ Int32 status)

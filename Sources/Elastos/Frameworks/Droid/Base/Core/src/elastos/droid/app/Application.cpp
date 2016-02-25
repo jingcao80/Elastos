@@ -1,6 +1,7 @@
 
 #include "elastos/droid/app/Application.h"
-// #include "elastos/droid/app/CContextImpl.h"
+#include "elastos/droid/app/CContextImpl.h"
+#include <elastos/droid/app/LoadedPkg.h>
 #include <elastos/core/AutoLock.h>
 
 using Elastos::Droid::Content::EIID_IComponentCallbacks;
@@ -140,8 +141,8 @@ ECode Application::Attach(
     /* [in] */ IContext* ctx)
 {
     FAIL_RETURN(AttachBaseContext(ctx))
-    assert(0 && "TODO");
-    // mLoadedPkg = CContextImpl::GetImpl(ctx)->mPackageInfo;
+    AutoPtr<CContextImpl> ctxImpl = CContextImpl::GetImpl(ctx);
+    mLoadedPkg = (ILoadedPkg*)(ctxImpl->mPackageInfo.Get());
     return NOERROR;
 }
 

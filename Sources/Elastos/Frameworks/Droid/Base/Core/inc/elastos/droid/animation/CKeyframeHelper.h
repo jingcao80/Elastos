@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_ANIMATION_CKEYFRAMEHELPER_H__
-#define  __ELASTOS_DROID_ANIMATION_CKEYFRAMEHELPER_H__
+#ifndef __ELASTOS_DROID_ANIMATION_CKEYFRAMEHELPER_H__
+#define __ELASTOS_DROID_ANIMATION_CKEYFRAMEHELPER_H__
 
 #include "_Elastos_Droid_Animation_CKeyframeHelper.h"
 #include "elastos/droid/animation/Keyframe.h"

@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_SERVER_CBACKUPMANAGERSERVICE_H__
-#define  __ELASTOS_DROID_SERVER_CBACKUPMANAGERSERVICE_H__
+#define __ELASTOS_DROID_SERVER_CBACKUPMANAGERSERVICE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_Server_CBackupManagerService.h"

@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_VIEW_INPUTMETHOD_CCONTROLLEDINPUTCONNECTIONWRAPPER_H__
-#define  __ELASTOS_DROID_VIEW_INPUTMETHOD_CCONTROLLEDINPUTCONNECTIONWRAPPER_H__
+#define __ELASTOS_DROID_VIEW_INPUTMETHOD_CCONTROLLEDINPUTCONNECTIONWRAPPER_H__
 
 #include "_Elastos_Droid_View_InputMethod_CControlledInputConnectionWrapper.h"
 //#include "elastos/droid/view/IInputConnectionWrapper.h"
@@ -10,8 +10,8 @@
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Internal::View::IInputContext;
-using Elastos::Droid::Internal::View::IInputContextCallback;
+using Elastos::Droid::Internal::View::IIInputContext;
+using Elastos::Droid::Internal::View::IIInputContextCallback;
 
 using Elastos::Core::ICharSequence;
 
@@ -22,7 +22,7 @@ namespace InputMethod {
 
 CarClass(CControlledInputConnectionWrapper)
     , public Object
-    , public IInputContext
+    , public IIInputContext
     , public IBinder
 //    , public IInputConnectionWrapper  // internal
 {
@@ -42,29 +42,29 @@ public:
         /* [in] */ Int32 length,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI GetTextBeforeCursor(
         /* [in] */ Int32 length,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI GetSelectedText(
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI GetCursorCapsMode(
         /* [in] */ Int32 reqModes,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI GetExtractedText(
         /* [in] */ IExtractedTextRequest* request,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI CommitText(
         /* [in] */ ICharSequence* text,
@@ -123,7 +123,7 @@ public:
     CARAPI RequestUpdateCursorAnchorInfo(
         /* [in] */ Int32 cursorUpdateMode,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* cb);
+        /* [in] */ IIInputContextCallback* cb);
 
     CARAPI_(Boolean) IsActive();
 

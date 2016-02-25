@@ -32,7 +32,7 @@ module
          * @return the list of scorers, or the empty list if there are no valid scorers.
          */
         GetAllValidScorers(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] ICollection** result);
 
         /**
@@ -43,7 +43,7 @@ module
          *     it was disabled or uninstalled).
          */
         GetActiveScorer(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] INetworkScorerAppData** result);
 
         /**
@@ -57,19 +57,19 @@ module
          * @return true if the scorer was changed, or false if the package is not a valid scorer.
          */
         SetActiveScorer(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String packageName,
             [out] Boolean* result);
 
         /** Determine whether the application with the given UID is the enabled scorer. */
         IsCallerActiveScorer(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 callingUid,
             [out] Boolean* result);
 
         /** Returns the {@link NetworkScorerAppData} for the given app, or null if it's not a scorer. */
         GetScorer(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String packageName,
             [out] INetworkScorerAppData** result);
     }

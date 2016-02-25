@@ -1049,7 +1049,7 @@ ECode MessageFormat::GetMaxOffset(
 ECode MessageFormat::GetArgumentNumbers(
     /* [out, callee] */ ArrayOf<Int32>** argumentNumbers)
 {
-    VALIDATE_NOT_NULL(*argumentNumbers)
+    VALIDATE_NOT_NULL(argumentNumbers)
     *argumentNumbers = mArgumentNumbers;
     REFCOUNT_ADD(*argumentNumbers);
     return NOERROR;
@@ -1058,7 +1058,7 @@ ECode MessageFormat::GetArgumentNumbers(
 ECode MessageFormat::GetStrings(
     /* [out, callee] */ ArrayOf<String>** strings)
 {
-    VALIDATE_NOT_NULL(*strings)
+    VALIDATE_NOT_NULL(strings)
     *strings = mStrings;
     REFCOUNT_ADD(*strings);
     return NOERROR;

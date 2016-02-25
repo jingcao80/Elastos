@@ -310,7 +310,7 @@ module
          * @param intent The received intent as per {@link #onReceive}.
          */
         OnProfileProvisioningComplete(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIntent* intent);
 
         /**
@@ -322,7 +322,7 @@ module
          * @param pkg If entering, the authorized package using lock task mode, otherwise null.
          */
         OnLockTaskModeEntering(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIntent* intent,
             [in] String pkg);
 
@@ -334,7 +334,7 @@ module
          * @param intent The received intent as per {@link #onReceive}.
          */
         OnLockTaskModeExiting(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIntent* intent);
     }
 

@@ -1,0 +1,12 @@
+TARGET_NAME= Elastos.DroidRuntime
+TARGET_TYPE= lib
+
+C_DEFINES += -DHAVE_ENDIAN_H
+
+EXPORT_HEADERS = elastos/droid/DroidRuntime.h
+
+EXPORT_LIBRARY = 1
+
+VPATH := $(MAKEDIR)/elastos/droid
+
+SOURCES = DroidRuntime.cpp

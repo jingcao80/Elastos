@@ -13,7 +13,7 @@ module
      * {@hide}
      */
     [oneway]
-    interface IInputContextCallback {
+    interface IIInputContextCallback {
         SetTextBeforeCursor(
             [in] ICharSequence* textBeforeCursor,
             [in] Int32 seq);

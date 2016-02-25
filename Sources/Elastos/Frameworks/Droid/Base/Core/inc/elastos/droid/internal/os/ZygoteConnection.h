@@ -120,7 +120,7 @@ public:
         String mSeInfo;
 
         /** from all --rlimit=r,c,m */
-        AutoPtr<List<AutoPtr<ArrayOf<Int32> > > > mRlimits;
+        AutoPtr<List< Int32Array > > mRlimits;
 
         /** from --invoke-with */
         String mInvokeWith;

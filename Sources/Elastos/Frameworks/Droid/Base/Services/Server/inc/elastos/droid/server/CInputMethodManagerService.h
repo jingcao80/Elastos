@@ -1,51 +1,46 @@
 
 #ifndef __ELASTOS_DROID_SERVER_CINPUTMETHODMANAGERSERVICE_H__
-#define  __ELASTOS_DROID_SERVER_CINPUTMETHODMANAGERSERVICE_H__
+#define __ELASTOS_DROID_SERVER_CINPUTMETHODMANAGERSERVICE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_Server_CInputMethodManagerService.h"
-#include "wm/CWindowManagerService.h"
-#include "CStatusBarManagerService.h"
-#include "elastos/droid/os/HandlerCaller.h"
+#define HASH_FOR_OS
+#define HASH_FOR_TEXT_STYLE
+#include "elastos/droid/ext/frameworkhash.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 // #include "elastos/droid/content/ContentResolver.h"
-#include "elastos/droid/content/PackageMonitor.h"
 
-#include "elastos/droid/text/TextUtils.h"
-#include "elastos/droid/widget/ArrayAdapter.h"
+#include <elastos/droid/widget/ArrayAdapter.h>
+#include <elastos/droid/database/ContentObserver.h>
+#include "elastos/droid/internal/content/PackageMonitor.h"
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/core/StringBuilder.h>
-#include <database/ContentObserver.h>
 
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Core::StringBuilder;
-using Elastos::Utility::Etl::List;
-using Elastos::Core::IComparable;
-using Elastos::Utility::IObjectStringMap;
-using Elastos::Droid::App::IUserSwitchObserver;
+using Elastos::Droid::Os::IHandlerCallback;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::IRemoteCallback;
+using Elastos::Droid::Os::IResultReceiver;
+using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::App::IKeyguardManager;
+using Elastos::Droid::App::INotification;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::IIUserSwitchObserver;
+using Elastos::Droid::App::INotificationManager;
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::App::IAlertDialog;
+using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContentResolver;
-using Elastos::Droid::Internal::Content::PackageMonitor;
 using Elastos::Droid::Content::Pm::IIPackageManager;
+using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::ContentObserver;
-using Elastos::Droid::Internal::View::IInputBindResult;
-using Elastos::Droid::Internal::View::IInputMethodClient;
-using Elastos::Droid::Internal::View::IInputContext;
-using Elastos::Droid::Internal::View::IIInputMethod;
-using Elastos::Droid::Internal::View::IIInputMethodSession;
-using Elastos::Droid::Os::HandlerCaller;
-using Elastos::Droid::Os::IHandlerCallerCallback;
-using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Os::IRemoteCallback;
-using Elastos::Droid::Os::IResultReceiver;
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::Style::ISuggestionSpan;
 using Elastos::Droid::View::IInputMethodCallback;
+using Elastos::Droid::View::IInputChannel;
 using Elastos::Droid::View::IIWindowManager;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::ILayoutInflater;
@@ -56,48 +51,73 @@ using Elastos::Droid::View::InputMethod::IInputMethodSession;
 using Elastos::Droid::View::InputMethod::IEditorInfo;
 using Elastos::Droid::Widget::IArrayAdapter;
 using Elastos::Droid::Widget::ArrayAdapter;
-using Elastos::Droid::StatusBar::IIStatusBarService;
-using Elastos::Droid::Server::Wm::CWindowManagerService;
+using Elastos::Droid::Internal::StatusBar::IIStatusBarService;
+using Elastos::Droid::Internal::Content::PackageMonitor;
+using Elastos::Droid::Internal::Content::IPackageMonitor;
+using Elastos::Droid::Internal::InputMethod::IInputMethodSubtypeSwitchingController;
+using Elastos::Droid::Internal::InputMethod::IImeSubtypeListItem;
+using Elastos::Droid::Internal::InputMethod::IInputMethodUtils;
+using Elastos::Droid::Internal::InputMethod::IInputMethodSettings;
+using Elastos::Droid::Internal::Os::IHandlerCaller;
+using Elastos::Droid::Internal::Os::IHandlerCallerCallback;
+using Elastos::Droid::Internal::Os::ISomeArgs;
+using Elastos::Droid::Internal::Utility::IFastXmlSerializer;
+using Elastos::Droid::Internal::View::IIInputContext;
+using Elastos::Droid::Internal::View::IIInputMethod;
+using Elastos::Droid::Internal::View::IIInputSessionCallback;
+using Elastos::Droid::Internal::View::IInputMethodClient;
+using Elastos::Droid::Internal::View::IIInputMethodManager;
+using Elastos::Droid::Internal::View::IIInputMethodSession;
+using Elastos::Droid::Internal::View::IInputBindResult;
+using Elastos::Droid::Utility::IAtomicFile;
+using Elastos::Droid::Utility::IPair;
+using Elastos::Droid::Server::Wm::IOnHardKeyboardStatusChangeListener;
 
+using Elastos::Core::IComparable;
+using Elastos::Core::StringBuilder;
+using Elastos::Utility::IList;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
+namespace Wm {
+    class CWindowManagerService;
+}}}}
 
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace StatusBar {
+    class CStatusBarManagerService;
+}}}}
 
-typedef List< AutoPtr<IInputMethodInfo> > InputMethodInfoList;
-typedef typename InputMethodInfoList::Iterator InputMethodInfoListIterator;
-typedef typename InputMethodInfoList::ReverseIterator InputMethodInfoListReverseIterator;
+using Elastos::Droid::Server::Wm::CWindowManagerService;
+using Elastos::Droid::Server::StatusBar::CStatusBarManagerService;
 
-typedef List< AutoPtr<IInputMethodSubtype> > InputMethodSubtypeList;
-typedef typename InputMethodSubtypeList::Iterator InputMethodSubtypeListIterator;
-
-typedef HashMap<AutoPtr<IInputMethodInfo>, AutoPtr< InputMethodSubtypeList > > InputMethodInfoSubtypeMap;
-
-typedef Pair<AutoPtr<IInputMethodInfo>, AutoPtr<List<String> > > InputMethodInfoStingListPair;
-typedef List< AutoPtr<InputMethodInfoStingListPair> > InputMethodInfoStingListPairList;
-typedef typename InputMethodInfoStingListPairList::Iterator InputMethodInfoStingListPairIterator;
-
-typedef Pair<String, String> StringStringPair;
-typedef List< AutoPtr<StringStringPair> > StringStringPairList;
-typedef typename StringStringPairList::Iterator StringStringPairListIterator;
-
-typedef Pair<String, AutoPtr<List<String> > > StringStringListPair;
-typedef List< AutoPtr<StringStringListPair> > StringStringListPairList;
-typedef typename StringStringListPairList::Iterator StringStringListPairListIterator;
+namespace Elastos {
+namespace Droid {
+namespace Server {
 
 /**
  * This class provides a system service that manages input methods.
  */
 
 CarClass(CInputMethodManagerService)
+    , public Object
+    , public IIInputMethodManager
+    , public IBinder
+    , public IServiceConnection
+    , public IHandlerCallback
 {
     friend class CInputMethodManagerServiceMethodCallback;
     friend class CInputMethodManagerServiceUserSwitchObserver;
 
 private:
     class MyHandlerCallerCallback
-        : public ElRefBase
+        : public Object
         , public IHandlerCallerCallback
     {
     public:
@@ -114,7 +134,7 @@ private:
     };
 
     class VisibleServiceConnection
-        : public ElRefBase
+        : public Object
         , public IServiceConnection
     {
     public:
@@ -131,41 +151,40 @@ private:
     class ClientState;
 
     class SessionState
-        : public ElRefBase
-        , public IInterface
+        : public Object
     {
     public:
-        CAR_INTERFACE_DECL()
-
         SessionState(
             /* [in] */ ClientState* client,
             /* [in] */ IIInputMethod* method,
-            /* [in] */ IIInputMethodSession* session);
+            /* [in] */ IIInputMethodSession* session,
+            /* [in] */ IInputChannel* channel);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     public:
         ClientState* mClient;
         AutoPtr<IIInputMethod> mMethod;
         AutoPtr<IIInputMethodSession> mSession;
+        AutoPtr<IInputChannel> mChannel;
     };
 
     class ClientState
-        : public ElRefBase
-        , public IInterface
+        : public Object
     {
     public:
-        CAR_INTERFACE_DECL()
-
         ClientState(
             /* [in] */ IInputMethodClient* client,
-            /* [in] */ IInputContext* inputContext,
+            /* [in] */ IIInputContext* inputContext,
             /* [in] */ Int32 uid,
             /* [in] */ Int32 pid);
 
-        ~ClientState();
-
+        CARAPI ToString(
+            /* [out] */ String* str);
     public:
         AutoPtr<IInputMethodClient> mClient;
-        AutoPtr<IInputContext> mInputContext;
+        AutoPtr<IIInputContext> mInputContext;
         const Int32 mUid;
         const Int32 mPid;
         AutoPtr<IInputBinding> mBinding;
@@ -174,24 +193,30 @@ private:
         AutoPtr<SessionState> mCurSession;
     };
 
-    class SettingsObserver : public ContentObserver
+    class SettingsObserver
+        : public ContentObserver
     {
     public:
-        SettingsObserver(
+        SettingsObserver();
+
+        CARAPI constructor(
             /* [in] */ IHandler* handler,
             /* [in] */ CInputMethodManagerService* host);
 
         CARAPI OnChange(
-            /* [in] */ Boolean selfChange);
+            /* [in] */ Boolean selfChange,
+            /* [in] */ IUri* uri);
 
     private:
+        String mLastEnabled;
         CInputMethodManagerService* mHost;
     };
 
-    class ImmsBroadcastReceiver : public BroadcastReceiver
+    class ImmsBroadcastReceiver
+        : public BroadcastReceiver
     {
     public:
-        ImmsBroadcastReceiver(
+        CARAPI constructor(
             /* [in] */ CInputMethodManagerService* host);
 
         //@Override
@@ -217,7 +242,7 @@ private:
     class MyPackageMonitor: public PackageMonitor
     {
     public:
-        MyPackageMonitor(
+        CARAPI constructor(
             /* [in] */ CInputMethodManagerService* host);
 
         //@Override
@@ -243,19 +268,17 @@ private:
         , public IOnHardKeyboardStatusChangeListener
     {
     public:
+        CAR_INTERFACE_DECL()
+
         HardKeyboardListener(
             /* [in] */ CInputMethodManagerService* host);
 
-        CAR_INTERFACE_DECL()
-
         //@Override
         CARAPI OnHardKeyboardStatusChange(
-            /* [in] */ Boolean available,
-            /* [in] */ Boolean enabled);
+            /* [in] */ Boolean available);
 
         CARAPI HandleHardKeyboardStatusChange(
-            /* [in] */ Boolean available,
-            /* [in] */ Boolean enabled);
+            /* [in] */ Boolean available);
 
     private:
         CInputMethodManagerService* mHost;
@@ -264,7 +287,7 @@ private:
     class CheckReceiver : public BroadcastReceiver
     {
     public:
-        CheckReceiver(
+        CARAPI constructor(
             /* [in] */ CInputMethodManagerService* host);
 
     protected:
@@ -285,261 +308,42 @@ private:
         CInputMethodManagerService* mHost;
     };
 
-    class ImeSubtypeListItem
-        : public ElRefBase
-        , public IComparable
-    {
-    public:
-        ImeSubtypeListItem(
-            /* [in] */ ICharSequence* imeName,
-            /* [in] */ ICharSequence* subtypeName,
-            /* [in] */ IInputMethodInfo* imi,
-            /* [in] */ Int32 subtypeId,
-            /* [in] */ const String& subtypeLocale,
-            /* [in] */ const String& systemLocale);
-
-        CARAPI_(UInt32) AddRef();
-
-        CARAPI_(UInt32) Release();
-
-        CARAPI_(PInterface) Probe(
-            /* [in] */ REIID riid);
-
-        CARAPI GetInterfaceID(
-            /* [in] */ IInterface *pObject,
-            /* [out] */ InterfaceID *pIID);
-
-        //@Override
-        CARAPI CompareTo(
-            /* [in] */ IInterface* _other,
-            /* [out] */ Int32* result);
-
-    public:
-        AutoPtr<ICharSequence> mImeName;
-        AutoPtr<ICharSequence> mSubtypeName;
-        AutoPtr<IInputMethodInfo> mImi;
-        Int32 mSubtypeId;
-
-    private:
-        Boolean mIsSystemLocale;
-        Boolean mIsSystemLanguage;
-    };
-
     class ImeSubtypeListAdapter
-        : public ElRefBase
-        , public ArrayAdapter
-        , public IArrayAdapter
+        : public ArrayAdapter
     {
     public:
-        ImeSubtypeListAdapter(
-            /* [in] */ IContext* context,
-            /* [in] */ Int32 textViewResourceId,
-            /* [in] */ List< AutoPtr<ImeSubtypeListItem> >* itemsList,
-            /* [in] */ Int32 checkedItem);
+        ImeSubtypeListAdapter();
 
         ~ImeSubtypeListAdapter();
 
-        CARAPI_(UInt32) AddRef();
-
-        CARAPI_(UInt32) Release();
-
-        CARAPI_(PInterface) Probe(
-            /* [in] */ REIID riid);
-
-        CARAPI GetInterfaceID(
-            /* [in] */ IInterface *pObject,
-            /* [out] */ InterfaceID *pIID);
+        CARAPI constructor(
+            /* [in] */ IContext* context,
+            /* [in] */ Int32 textViewResourceId,
+            /* [in] */ IList* itemsList,
+            /* [in] */ Int32 checkedItem);
 
         //@Override
-        CARAPI_(AutoPtr<IView>) GetView(
+        CARAPI GetView(
             /* [in] */ Int32 position,
             /* [in] */ IView* convertView,
-            /* [in] */ IViewGroup* parent);
+            /* [in] */ IViewGroup* parent,
+            /* [out] */ IView** view);
 
+    public:
+        Int32 mCheckedItem;
     private:
         AutoPtr<ILayoutInflater> mInflater;
         Int32 mTextViewResourceId;
-        AutoPtr< List< AutoPtr<ImeSubtypeListItem> > > mItemsList;
-        Int32 mCheckedItem;
-    };
-
-    class InputMethodAndSubtypeListManager : public ElRefBase
-    {
-    public:
-        InputMethodAndSubtypeListManager(
-            /* [in] */ IContext* context,
-            /* [in] */ CInputMethodManagerService* imms);
-
-        CARAPI_(AutoPtr<ImeSubtypeListItem>) GetNextInputMethod(
-            /* [in] */ Boolean onlyCurrentIme,
-            /* [in] */ IInputMethodInfo* imi,
-            /* [in] */ IInputMethodSubtype* subtype);
-
-        CARAPI_(AutoPtr< List< AutoPtr<ImeSubtypeListItem> > >) GetSortedInputMethodAndSubtypeList();
-
-        CARAPI_(AutoPtr< List< AutoPtr<ImeSubtypeListItem> > >) GetSortedInputMethodAndSubtypeList(
-            /* [in] */ Boolean showSubtypes,
-            /* [in] */ Boolean inputShown,
-            /* [in] */ Boolean isScreenLocked);
-
-    private:
-        AutoPtr<IContext> mContext;
-        // Used to load label
-        AutoPtr<IPackageManager> mPm;
-        CInputMethodManagerService* mImms;
-        String mSystemLocaleStr;
-
-        // TreeMap<InputMethodInfo, List<InputMethodSubtype>> mSortedImmis =
-        //         new TreeMap<InputMethodInfo, List<InputMethodSubtype>>(
-        //                 new Comparator<InputMethodInfo>() {
-        //                     @Override
-        //                     public int compare(InputMethodInfo imi1, InputMethodInfo imi2) {
-        //                         if (imi2 == NULL) return 0;
-        //                         if (imi1 == NULL) return 1;
-        //                         if (mPm == NULL) {
-        //                             return imi1.getId().compareTo(imi2.getId());
-        //                         }
-        //                         CharSequence imiId1 = imi1.loadLabel(mPm) + "/" + imi1.getId();
-        //                         CharSequence imiId2 = imi2.loadLabel(mPm) + "/" + imi2.getId();
-        //                         return imiId1.toString().compareTo(imiId2.toString());
-        //                     }
-        //                 });
-    };
-
-    /**
-     * Utility class for putting and getting settings for InputMethod
-     * TODO: Move all putters and getters of settings to this class.
-     */
-    class InputMethodSettings : public ElRefBase
-    {
-    public:
-        InputMethodSettings(
-            /* [in] */ IResources* res,
-            /* [in] */ IContentResolver* resolver,
-            /* [in] */ HashMap<String, AutoPtr<IInputMethodInfo> >* methodMap,
-            /* [in] */ InputMethodInfoList* methodList,
-            /* [in] */ Int32 userId,
-            /* [in] */ CInputMethodManagerService* host);
-
-        ~InputMethodSettings();
-
-        CARAPI_(void) SetCurrentUserId(
-            /* [in] */ Int32 userId);
-
-        CARAPI_(AutoPtr< InputMethodInfoList >) GetEnabledInputMethodListLocked();
-
-        AutoPtr< InputMethodInfoStingListPairList > GetEnabledInputMethodAndSubtypeHashCodeListLocked();
-
-        CARAPI_(AutoPtr< InputMethodSubtypeList >) GetEnabledInputMethodSubtypeListLocked(
-            /* [in] */ IInputMethodInfo* imi);
-
-        // AutoPtr<HashMap< AutoPtr<IInputMethodInfo>, InputMethodSubtypeList* > >
-        // GetExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked();
-
-        // At the initial boot, the settings for input methods are not set,
-        // so we need to enable IME in that case.
-        CARAPI_(void) EnableAllIMEsIfThereIsNoEnabledIME();
-
-        CARAPI_(void) AppendAndPutEnabledInputMethodLocked(
-            /* [in] */ const String& id,
-            /* [in] */ Boolean reloadInputMethodStr);
-
-        /**
-         * Build and put a string of EnabledInputMethods with removing specified Id.
-         * @return the specified id was removed or not.
-         */
-        CARAPI_(Boolean) BuildAndPutEnabledInputMethodsStrRemovingIdLocked(
-            /* [in] */ StringBuilder& builder,
-            /* [in] */ StringStringListPairList * imsList,
-            /* [in] */ const String& id);
-
-        CARAPI_(void) AddSubtypeToHistory(
-            /* [in] */ const String& imeId,
-            /* [in] */ const String& subtypeId);
-
-        AutoPtr<StringStringPair> GetLastInputMethodAndSubtypeLocked();
-
-        CARAPI_(String) GetLastSubtypeForInputMethodLocked(
-            /* [in] */ const String& imeId);
-
-        CARAPI_(String) GetDisabledSystemInputMethods();
-
-        CARAPI_(void) PutSelectedSubtype(
-            /* [in] */ Int32 subtypeId);
-
-        CARAPI_(void) PutSelectedInputMethod(
-            /* [in] */ const String& imeId);
-
-        CARAPI_(String) GetSelectedInputMethod();
-
-        CARAPI_(Int32) GetSelectedInputMethodSubtypeHashCode();
-
-        CARAPI_(Int32) GetCurrentUserId();
-
-    private:
-        static CARAPI_(void) BuildEnabledInputMethodsSettingString(
-            /* [in] */ StringBuilder& builder,
-            /* [in] */ StringStringListPair* pair);
-
-        AutoPtr< StringStringListPairList > GetEnabledInputMethodsAndSubtypeListLocked();
-
-        CARAPI_(AutoPtr< InputMethodInfoList >) CreateEnabledInputMethodListLocked(
-            /* [in] */ StringStringListPairList * imsList);
-
-        AutoPtr< InputMethodInfoStingListPairList > CreateEnabledInputMethodAndSubtypeHashCodeListLocked(
-            /* [in] */ StringStringListPairList * imsList);
-
-        CARAPI_(void) PutEnabledInputMethodsStr(
-            /* [in] */ const String& str);
-
-        CARAPI_(String) GetEnabledInputMethodsStr();
-
-        CARAPI_(void) SaveSubtypeHistory(
-            /* [in] */ StringStringPairList* savedImes,
-            /* [in] */ const String& newImeId,
-            /* [in] */ const String& newSubtypeId);
-
-        CARAPI_(void) PutSubtypeHistoryStr(
-            /* [in] */ const String& str);
-
-        AutoPtr<StringStringPair> GetLastSubtypeForInputMethodLockedInternal(
-            /* [in] */ const String& imeId);
-
-        CARAPI_(String) GetEnabledSubtypeHashCodeForInputMethodAndSubtypeLocked(
-            /* [in] */ StringStringListPairList * enabledImes,
-            /* [in] */ const String& imeId,
-            /* [in] */ const String& subtypeHashCode);
-
-        CARAPI_(String) GetSubtypeHistoryStr();
-
-        AutoPtr< StringStringPairList > LoadInputMethodAndSubtypeHistoryLocked();
-
-    private:
-        // The string for enabled input method is saved as follows:
-        // example: ("ime0;subtype0;subtype1;subtype2:ime1:ime2;subtype0")
-        static const Char32 INPUT_METHOD_SEPARATER;
-        static const Char32 INPUT_METHOD_SUBTYPE_SEPARATER;
-        AutoPtr<TextUtils::SimpleStringSplitter> mInputMethodSplitter;
-
-        AutoPtr<TextUtils::SimpleStringSplitter> mSubtypeSplitter;
-
-        AutoPtr<IResources> mRes;
-        AutoPtr<IContentResolver> mResolver;
-        AutoPtr< HashMap<String, AutoPtr<IInputMethodInfo> > > mMethodMap;
-        AutoPtr< InputMethodInfoList > mMethodList;
-
-        String mEnabledInputMethodsStrCache;
-        Int32 mCurrentUserId;
-
-        CInputMethodManagerService*  mHost;
+        AutoPtr<IList> mItemsList; //List<ImeSubtypeListItem>
     };
 
     // TODO: Cache the state for each user and reset when the cached user is removed.
-    class InputMethodFileManager : public ElRefBase
+    class InputMethodFileManager
+        : public Object
     {
     public:
         InputMethodFileManager(
-            /* [in] */ HashMap<String, AutoPtr<IInputMethodInfo> >* methodMap,
+            /* [in] */ IHashMap* methodMap,
             /* [in] */ Int32 userId,
             /* [in] */ CInputMethodManagerService*  host);
 
@@ -547,19 +351,19 @@ private:
             /* [in] */ IInputMethodInfo* imi,
             /* [in] */ ArrayOf<IInputMethodSubtype*>* additionalSubtypes);
 
-        CARAPI_(AutoPtr<IObjectStringMap>) GetAllAdditionalInputMethodSubtypes();
+        CARAPI_(AutoPtr<IHashMap>) GetAllAdditionalInputMethodSubtypes();
 
     private:
         CARAPI_(void) DeleteAllInputMethodSubtypes(
             /* [in] */ const String& imiId);
 
         static CARAPI_(void) WriteAdditionalInputMethodSubtypes(
-            /* [in] */ HashMap<String, AutoPtr< InputMethodSubtypeList > >* allSubtypes,
+            /* [in] */ IHashMap* allSubtypes,
             /* [in] */ IAtomicFile* subtypesFile,
-            /* [in] */ HashMap<String, AutoPtr<IInputMethodInfo> >* methodMap);
+            /* [in] */ IHashMap* methodMap);
 
-        static CARAPI_(void) ReadAdditionalInputMethodSubtypes(
-            /* [in] */ HashMap<String, AutoPtr< InputMethodSubtypeList > >* allSubtypes,
+        static CARAPI ReadAdditionalInputMethodSubtypes(
+            /* [in] */ IHashMap* allSubtypes,
             /* [in] */ IAtomicFile* subtypesFile);
 
     private:
@@ -578,44 +382,42 @@ private:
         static const String ATTR_IS_AUXILIARY;
 
         AutoPtr<IAtomicFile> mAdditionalInputMethodSubtypeFile;
-        AutoPtr< HashMap<String, AutoPtr<IInputMethodInfo> > > mMethodMap;
-        Object mMethodMapLock;
-        HashMap<String, AutoPtr< InputMethodSubtypeList > > mAdditionalSubtypesMap;
+        AutoPtr<IHashMap> mMethodMap;//HashMap<String, InputMethodInfo>
+        AutoPtr<IHashMap> mAdditionalSubtypesMap; //HashMap<String, InputMethodSubtypeList>
         CInputMethodManagerService* mHost;
         friend class MyPackageMonitor;
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CInputMethodManagerService();
 
     ~CInputMethodManagerService();
 
     CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ Handle32 windowManagerService);
+        /* [in] */ IIWindowManager* windowManagerService);
 
-    CARAPI_(void) SystemReady(
-        /* [in] */ CStatusBarManagerService* statusBar);
+    CARAPI SystemRunning(
+        /* [in] */ IIStatusBarService* statusBar);
 
     CARAPI GetInputMethodList(
-        /* [out] */ IObjectContainer** infos);
+        /* [out] */ IList** infos);
 
     CARAPI GetEnabledInputMethodList(
-        /* [out] */ IObjectContainer** list);
-
-    CARAPI GetEnabledInputMethodSubtypeListLocked(
-        /* [in] */ IInputMethodInfo* imi,
-        /* [in] */ Boolean allowsImplicitlySelectedSubtypes,
-        /* [out] */ IObjectContainer** subtypes);
+        /* [out] */ IList** list);
 
     CARAPI GetEnabledInputMethodSubtypeList(
-        /* [in] */ IInputMethodInfo* imi,
+        /* [in] */ const String& imiId,
         /* [in] */ Boolean allowsImplicitlySelectedSubtypes,
-        /* [out] */ IObjectContainer** infos);
+        /* [out] */ IList** infos);
 
     CARAPI AddClient(
         /* [in] */ IInputMethodClient* client,
-        /* [in] */ IInputContext* inputContext,
+        /* [in] */ IIInputContext* inputContext,
         /* [in] */ Int32 uid,
         /* [in] */ Int32 pid);
 
@@ -634,14 +436,14 @@ public:
 
     /* packaged */ CARAPI StartInputLocked(
         /* [in] */ IInputMethodClient* client,
-        /* [in] */ IInputContext* inputContext,
+        /* [in] */ IIInputContext* inputContext,
         /* [in] */ IEditorInfo* attribute,
         /* [in] */ Int32 controlFlags,
         /* [out] */ IInputBindResult** result);
 
     /* packaged */ CARAPI StartInputUncheckedLocked(
         /* [in] */ ClientState* cs,
-        /* [in] */ IInputContext* inputContext,
+        /* [in] */ IIInputContext* inputContext,
         /* [in] */ IEditorInfo* attribute,
         /* [in] */ Int32 controlFlags,
         /* [out] */ IInputBindResult** result);
@@ -651,7 +453,7 @@ public:
 
     CARAPI StartInput(
         /* [in] */ IInputMethodClient* client,
-        /* [in] */ IInputContext* inputContext,
+        /* [in] */ IIInputContext* inputContext,
         /* [in] */ IEditorInfo* attribute,
         /* [in] */ Int32 controlFlags,
         /* [out] */ IInputBindResult** res);
@@ -663,15 +465,22 @@ public:
         /* [in] */ IComponentName* name,
         /* [in] */ IBinder* service);
 
-    /* packaged */ CARAPI_(void) OnSessionCreated(
+    CARAPI OnSessionCreated(
         /* [in] */ IIInputMethod* method,
-        /* [in] */ IIInputMethodSession* session);
+        /* [in] */ IIInputMethodSession* session,
+        /* [in] */ IInputChannel* channel);
 
-    /* packaged */ CARAPI_(void) UnbindCurrentMethodLocked(
+    CARAPI UnbindCurrentMethodLocked(
         /* [in] */ Boolean reportToClient,
         /* [in] */ Boolean savePosition);
 
-    /* packaged */ CARAPI_(void) ClearCurMethodLocked();
+    CARAPI RequestClientSessionLocked(
+        /* [in] */ ClientState* cs);
+
+    CARAPI ClearClientSessionLocked(
+        /* [in] */ ClientState* cs);
+
+    CARAPI ClearCurMethodLocked();
 
     CARAPI OnServiceDisconnected(
         /* [in] */ IComponentName* name);
@@ -700,7 +509,13 @@ public:
         /* [in] */ Int32 index,
         /* [out] */ Boolean* picked);
 
-    /* packaged */ CARAPI_(void) UpdateFromSettingsLocked();
+    /* packaged */ CARAPI_(void) UpdateFromSettingsLocked(
+        /* [in] */ Boolean enabledMayChange);
+
+    /* packaged */ CARAPI_(void) UpdateInputMethodsFromSettingsLocked(
+        /* [in] */ Boolean enabledMayChang);
+
+    CARAPI UpdateKeyboardFromSettingsLocked();
 
     /* packaged */ CARAPI SetInputMethodLocked(
         /* [in] */ const String& id,
@@ -733,7 +548,7 @@ public:
         /* [in] */ Int32 softInputMode,
         /* [in] */ Int32 windowFlags,
         /* [in] */ IEditorInfo* attribute,
-        /* [in] */ IInputContext* inputContext,
+        /* [in] */ IIInputContext* inputContext,
         /* [out] */ IInputBindResult** result);
 
     CARAPI ShowInputMethodPickerFromClient(
@@ -761,12 +576,22 @@ public:
         /* [in] */ Boolean onlyCurrentIme,
         /* [out] */ Boolean* result);
 
+    CARAPI ShouldOfferSwitchingToNextInputMethod(
+        /* [in] */ IBinder* token,
+        /* [out] */ Boolean* result);
+
     CARAPI GetLastInputMethodSubtype(
         /* [out] */ IInputMethodSubtype** subtype);
 
     CARAPI SetAdditionalInputMethodSubtypes(
         /* [in] */ const String& imiId,
         /* [in] */ ArrayOf<IInputMethodSubtype*>* subtypes);
+
+    CARAPI GetInputMethodWindowVisibleHeight(
+        /* [out] */ Int32* result);
+
+    CARAPI NotifyUserAction(
+        /* [in] */ Int32 sequenceNumber);
 
     CARAPI HideMySoftInput(
         /* [in] */ IBinder* token,
@@ -780,8 +605,9 @@ public:
         /* [in] */ SessionState* session);
 
     /* packaged */ CARAPI_(void) BuildInputMethodListLocked(
-        /* [in] */ InputMethodInfoList* list,
-        /* [in] */ HashMap<String, AutoPtr<IInputMethodInfo> >* map);
+        /* [in] */ IArrayList* list,
+        /* [in] */ IHashMap* map,
+        /* [in] */ Boolean resetDefaultEnabledIme);
 
     /* packaged */ CARAPI_(void) HideInputMethodMenu();
 
@@ -804,37 +630,28 @@ public:
 
     // TODO: We should change the return type from List to List<Parcelable>
     CARAPI GetShortcutInputMethodsAndSubtypes(
-        /* [out] */ IObjectContainer** ret);
-
-    CARAPI GetInputContext(
-        /* [out] */ IInputContext** ctx);
+        /* [out] */ IList** ret);
 
     CARAPI SetCurrentInputMethodSubtype(
         /* [in] */ IInputMethodSubtype* subtype,
         /* [out] */ Boolean* result);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
 private:
     CARAPI_(void) ResetDefaultImeLocked(
         /* [in] */ IContext* context);
 
     CARAPI_(void) ResetAllInternalStateLocked(
-        /* [in] */ Boolean updateOnlyWhenLocaleChanged);
+        /* [in] */ Boolean updateOnlyWhenLocaleChanged,
+        /* [in] */Boolean resetDefaultEnabledIme);
 
-    CARAPI_(void) CheckCurrentLocaleChangedLocked();
+    CARAPI_(void) ResetStateIfCurrentLocaleChangedLocked();
 
     CARAPI_(void) SwitchUserLocked(
         /* [in] */ Int32 newUserId);
 
-    CARAPI_(Boolean) IsValidSystemDefaultIme(
-        /* [in] */ IInputMethodInfo* imi,
-        /* [in] */ IContext* context);
-
-    static CARAPI_(Boolean) IsSystemImeThatHasEnglishSubtype(
-        /* [in] */ IInputMethodInfo* imi);
-
-    static CARAPI_(Boolean) ContainsSubtypeOf(
-        /* [in] */ IInputMethodInfo* imi,
-        /* [in] */ const String& language);
+    CARAPI_(void) UpdateCurrentProfileIds();
 
     CARAPI_(void) SetImeWindowVisibilityStatusHiddenLocked();
 
@@ -848,38 +665,39 @@ private:
     // 2) the calling process' user id is identical to the current user id IMMS thinks.
     CARAPI_(Boolean) CalledFromValidUser();
 
+    /**
+     * Returns true iff the caller is identified to be the current input method with the token.
+     * @param token The window token given to the input method when it was started.
+     * @return true if and only if non-null valid token is specified.
+     */
+    CARAPI_(Boolean) CalledWithValidToken(
+        /* [in] */ IBinder* token);
+
     CARAPI_(Boolean) BindCurrentInputMethodService(
         /* [in] */ IIntent* service,
         /* [in] */ IServiceConnection* conn,
         /* [in] */ Int32 flags);
 
-    AutoPtr< InputMethodInfoSubtypeMap > GetExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked();
-
     CARAPI_(Int32) GetImeShowFlags();
 
     CARAPI_(Int32) GetAppShowFlags();
 
-    CARAPI_(void) FinishSession(
+    CARAPI_(void) FinishSessionLocked(
         /* [in] */ SessionState* sessionState);
 
     CARAPI_(Boolean) NeedsToShowImeSwitchOngoingNotification();
+
+    CARAPI_(Boolean) IsKeyguardLocked();
 
     CARAPI SetInputMethodWithSubtypeId(
         /* [in] */ IBinder* token,
         /* [in] */ const String& id,
         /* [in] */ Int32 subtypeId);
 
-    static CARAPI_(Boolean) IsSystemIme(
-        /* [in] */ IInputMethodInfo* inputMethod);
-
-    static CARAPI_(AutoPtr< InputMethodSubtypeList >) GetSubtypes(
-        /* [in] */ IInputMethodInfo* imi);
-
-    static CARAPI_(AutoPtr< InputMethodSubtypeList >) GetOverridingImplicitlyEnabledSubtypes(
-        /* [in] */ IInputMethodInfo* imi,
-        /* [in] */ const String& mode);
-
-    CARAPI_(AutoPtr<IInputMethodInfo>) GetMostApplicableDefaultIMELocked();
+    CARAPI SetInputMethodWithSubtypeIdLocked(
+        /* [in] */ IBinder* token,
+        /* [in] */ const String& id,
+        /* [in] */ Int32 subtypeId);
 
     CARAPI_(Boolean) ChooseNewDefaultIMELocked();
 
@@ -897,11 +715,6 @@ private:
     CARAPI_(void) ShowInputMethodMenuInternal(
         /* [in] */ Boolean showSubtypes);
 
-    CARAPI_(Boolean) CanAddToLastInputMethod(
-        /* [in] */ IInputMethodSubtype* subtype);
-
-    CARAPI_(void) SaveCurrentInputMethodAndSubtypeToHistory();
-
     CARAPI_(void) SetSelectedInputMethodAndSubtypeLocked(
         /* [in] */ IInputMethodInfo* imi,
         /* [in] */ Int32 subtypeId,
@@ -910,41 +723,10 @@ private:
     CARAPI_(void) ResetSelectedInputMethodAndSubtypeLocked(
         /* [in] */ const String& newDefaultIme);
 
-    CARAPI_(Int32) GetSelectedInputMethodSubtypeId(
-        /* [in] */ const String& id);
-
-    static CARAPI_(Boolean) IsValidSubtypeId(
-        /* [in] */ IInputMethodInfo* imi,
-        /* [in] */ Int32 subtypeHashCode);
-
-    static CARAPI_(Int32) GetSubtypeIdFromHashCode(
-        /* [in] */ IInputMethodInfo* imi,
-        /* [in] */ Int32 subtypeHashCode);
-
-    static CARAPI_(AutoPtr< InputMethodSubtypeList >) GetImplicitlyApplicableSubtypesLocked(
-        /* [in] */ IResources* res,
-        /* [in] */ IInputMethodInfo* imi);
-
-    /**
-     * If there are no selected subtypes, tries finding the most applicable one according to the
-     * given locale.
-     * @param subtypes this function will search the most applicable subtype in subtypes
-     * @param mode subtypes will be filtered by mode
-     * @param locale subtypes will be filtered by locale
-     * @param canIgnoreLocaleAsLastResort if this function can't find the most applicable subtype,
-     * it will return the first subtype matched with mode
-     * @return the most applicable subtypeId
-     */
-    static CARAPI_(AutoPtr<IInputMethodSubtype>) FindLastResortApplicableSubtypeLocked(
-        /* [in] */ IResources* res,
-        /* [in] */ InputMethodSubtypeList * subtypes,
-        /* [in] */ const String& mode,
-        /* [in] */ const String& locale,
-        /* [in] */ Boolean canIgnoreLocaleAsLastResort);
-
     // If there are no selected shortcuts, tries finding the most applicable ones.
-    // private Pair<InputMethodInfo, InputMethodSubtype>
-    //         findLastResortApplicableShortcutInputMethodAndSubtypeLocked(String mode)
+    AutoPtr<IPair> /* Pair<InputMethodInfo, InputMethodSubtype> */
+    FindLastResortApplicableShortcutInputMethodAndSubtypeLocked(
+        /* [in] */ const String& mode);
 
     CARAPI_(AutoPtr<IInputMethodSubtype>) GetCurrentInputMethodSubtypeLocked();
 
@@ -956,7 +738,8 @@ private:
         /* [in] */ IMessage* msg,
         /* [out] */ Boolean* result);
 
-    static CARAPI_(AutoPtr<ILocale>) GetEnglishLocale();
+    AutoPtr<IInputMethodInfo> GetMethodInfoFromMethodMap(
+        /* [in] */ const String& inputMethodId);
 
 public:
     static const Boolean DEBUG;
@@ -980,28 +763,32 @@ public:
     static const Int32 MSG_UNBIND_METHOD = 3000;
     static const Int32 MSG_BIND_METHOD = 3010;
     static const Int32 MSG_SET_ACTIVE = 3020;
+    static const Int32 MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER = 3040;
 
     static const Int32 MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
-    static const Int64 TIME_TO_RECONNECT = 10 * 1000;
+    static const Int64 TIME_TO_RECONNECT = 3 * 1000;
 
     static const Int32 SECURE_SUGGESTION_SPANS_MAX_SIZE = 20;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IResources> mRes;
     AutoPtr<IHandler> mHandler;
-    AutoPtr<InputMethodSettings> mSettings;
+    AutoPtr<IInputMethodSettings> mSettings;
     AutoPtr<SettingsObserver> mSettingsObserver;
     AutoPtr<IIWindowManager> mIWindowManager;
-    AutoPtr<HandlerCaller> mCaller;
+    AutoPtr<IHandlerCaller> mCaller;
+    Boolean mHasFeature;
 
     AutoPtr<IInputBindResult> mNoBinding;
 
     // All known input methods.  mMethodMap also serves as the global
     // lock for this class.
-    AutoPtr< InputMethodInfoList > mMethodList;
-    AutoPtr< HashMap<String, AutoPtr<IInputMethodInfo> > > mMethodMap;
+    AutoPtr< IArrayList > mMethodList; // ArrayList<InputMethodInfo>
+    AutoPtr< IHashMap > mMethodMap; //HashMap<String, IInputMethodInfo>
     Object mMethodMapLock;
+
+    AutoPtr<IInputMethodSubtypeSwitchingController> mSwitchingController;
 
     // Used to bring IME service up to visible adjustment while it is being shown.
     AutoPtr<VisibleServiceConnection> mVisibleConnection;
@@ -1038,7 +825,7 @@ public:
     /**
      * The input context last provided by the current client.
      */
-    AutoPtr<IInputContext> mCurInputContext;
+    AutoPtr<IIInputContext> mCurInputContext;
 
     /**
      * The attributes last provided by the current client.
@@ -1116,32 +903,29 @@ public:
      */
     Boolean mScreenOn;
 
+    Int32 mCurUserActionNotificationSequenceNumber;
+
     Int32 mBackDisposition;
     Int32 mImeWindowVis;
 
 private:
-    static const Int32 NOT_A_SUBTYPE_ID = -1;
-    static String NOT_A_SUBTYPE_ID_STR;
-    static String SUBTYPE_MODE_KEYBOARD;
-    static String SUBTYPE_MODE_VOICE;
+    static const Int32 NOT_A_SUBTYPE_ID;
     static String TAG_TRY_SUPPRESSING_IME_SWITCHER;
-    static String TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE;
-    static String TAG_ASCII_CAPABLE;
-    static AutoPtr<ILocale> ENGLISH_LOCALE;
 
     AutoPtr<InputMethodFileManager> mFileManager;
-    AutoPtr<InputMethodAndSubtypeListManager> mImListManager;
     AutoPtr<HardKeyboardListener> mHardKeyboardListener;
     CWindowManagerService* mWindowManagerService;
+    AutoPtr<IAppOpsManager> mAppOpsManager;
 
     // private final LruCache<SuggestionSpan, InputMethodInfo> mSecureSuggestionSpans =
     //         new LruCache<SuggestionSpan, InputMethodInfo>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
+    //TODO
     HashMap<AutoPtr<ISuggestionSpan>, AutoPtr<IInputMethodInfo> > mSecureSuggestionSpans;
 
     // Ongoing notification
     AutoPtr<INotificationManager> mNotificationManager;
     AutoPtr<IKeyguardManager> mKeyguardManager;
-    AutoPtr<CStatusBarManagerService> mStatusBar;
+    CStatusBarManagerService* mStatusBar;
     AutoPtr<INotification> mImeSwitcherNotification;
     AutoPtr<IPendingIntent> mImeSwitchPendingIntent;
     Boolean mShowOngoingImeSwitcherForPhones;
@@ -1154,7 +938,11 @@ private:
     AutoPtr<IInputMethodSubtype> mCurrentSubtype;
 
     // This list contains the pairs of InputMethodInfo and InputMethodSubtype.
-    InputMethodInfoSubtypeMap mShortcutInputMethodsAndSubtypes;
+    //HashMap<InputMethodInfo, ArrayList<InputMethodSubtype>>
+    AutoPtr<IHashMap> mShortcutInputMethodsAndSubtypes;
+
+    // Was the keyguard locked when this client became current?
+    Boolean mCurClientInKeyguard;
 
     AutoPtr<IAlertDialogBuilder> mDialogBuilder;
     AutoPtr<IAlertDialog> mSwitchingDialog;
@@ -1162,6 +950,7 @@ private:
     AutoPtr< ArrayOf<IInputMethodInfo*> > mIms;
     AutoPtr< ArrayOf<Int32> > mSubtypeIds;
     AutoPtr<ILocale> mLastSystemLocale;
+    Boolean mShowImeWithHardKeyboard;
     AutoPtr<MyPackageMonitor> mMyPackageMonitor;
     AutoPtr<IIPackageManager> mIPackageManager;
     Boolean mInputBoundToKeyguard;

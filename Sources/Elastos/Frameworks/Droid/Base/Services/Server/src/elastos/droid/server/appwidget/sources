@@ -1,0 +1,13 @@
+TARGET_NAME= appwidget
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
+
+C_DEFINES += -DDROID_SERVER
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+SOURCES = AppWidgetService.cpp
+SOURCES += AppWidgetServiceImpl.cpp
+SOURCES += CAppWidgetServiceImpl.cpp

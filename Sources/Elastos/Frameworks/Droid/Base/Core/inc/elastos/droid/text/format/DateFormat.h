@@ -19,7 +19,7 @@ namespace Droid {
 namespace Text {
 namespace Format {
 
-class DateFormat
+class ECO_PUBLIC DateFormat
 {
 public:
     /**
@@ -173,48 +173,48 @@ public:
         /* [in] */ ICalendar* inDate);
 
 private:
-    static CARAPI_(String) GetDateFormatStringForSetting(
+    ECO_LOCAL static CARAPI_(String) GetDateFormatStringForSetting(
         /* [in] */ IContext* context,
         /* [in] */ const String& value);
 
-    static CARAPI_(String) GetDateFormatString(
+    ECO_LOCAL static CARAPI_(String) GetDateFormatString(
         /* [in] */ IContext* context);
 
-    static CARAPI_(Int32) SkipQuotedText(
+    ECO_LOCAL static CARAPI_(Int32) SkipQuotedText(
         /* [in] */ ICharSequence* s,
         /* [in] */ Int32 i,
         /* [in] */ Int32 len);
 
-    static CARAPI_(String) GetDayOfWeekString(
+    ECO_LOCAL static CARAPI_(String) GetDayOfWeekString(
         /* [in] */ ILocaleData* ld,
         /* [in] */ Int32 day,
         /* [in] */ Int32 count,
         /* [in] */ Int32 kind);
 
-    static CARAPI_(String) GetMonthString(
+    ECO_LOCAL static CARAPI_(String) GetMonthString(
         /* [in] */ ILocaleData* ld,
         /* [in] */ Int32 month,
         /* [in] */ Int32 count,
         /* [in] */ Int32 kind);
 
-    static CARAPI_(String) GetTimeZoneString(
+    ECO_LOCAL static CARAPI_(String) GetTimeZoneString(
         /* [in] */ ICalendar* inDate,
         /* [in] */ Int32 count);
 
-    static CARAPI_(String) FormatZoneOffset(
+    ECO_LOCAL static CARAPI_(String) FormatZoneOffset(
         /* [in] */ Int32 offset,
         /* [in] */ Int32 count);
 
-    static CARAPI_(String) GetYearString(
+    ECO_LOCAL static CARAPI_(String) GetYearString(
         /* [in] */ Int32 year,
         /* [in] */ Int32 count);
 
-    static CARAPI_(Int32) AppendQuotedText(
+    ECO_LOCAL static CARAPI_(Int32) AppendQuotedText(
         /* [in] */ ISpannableStringBuilder* s,
         /* [in] */ Int32 i,
         /* [in] */ Int32 len);
 
-    static CARAPI_(String) ZeroPad(
+    ECO_LOCAL static CARAPI_(String) ZeroPad(
         /* [in] */ Int32 inValue,
         /* [in] */ Int32 inMinDigits);
 
@@ -222,9 +222,9 @@ private:
     DateFormat();
 
 private:
-    static Object sLocaleLock;
-    static AutoPtr<ILocale> sIs24HourLocale;
-    static Boolean sIs24Hour;
+    ECO_LOCAL static Object sLocaleLock;
+    ECO_LOCAL static AutoPtr<ILocale> sIs24HourLocale;
+    ECO_LOCAL static Boolean sIs24Hour;
 };
 
 } // namespace Format

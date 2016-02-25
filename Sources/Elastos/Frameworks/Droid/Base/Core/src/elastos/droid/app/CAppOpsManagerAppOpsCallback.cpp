@@ -1,5 +1,5 @@
 #include "elastos/droid/app/CAppOpsManagerAppOpsCallback.h"
-// #include "elastos/droid/app/AppOpsManager.h"
+#include "elastos/droid/app/AppOpsManager.h"
 
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Internal::App::EIID_IIAppOpsCallback;
@@ -28,10 +28,10 @@ ECode CAppOpsManagerAppOpsCallback::OpChanged(
         internal->OnOpChanged(op, packageName);
     }
 
-    assert(0 && "TODO");
-    // if (!AppOpsManager::sOpToString[op].IsNull()) {
-    //     mCallback->OnOpChanged(AppOpsManager::sOpToString[op], packageName);
-    // }
+    const String str = AppOpsManager::sOpToString[op];
+    if (!str.IsNull()) {
+        mCallback->OnOpChanged(str, packageName);
+    }
     return NOERROR;
 }
 

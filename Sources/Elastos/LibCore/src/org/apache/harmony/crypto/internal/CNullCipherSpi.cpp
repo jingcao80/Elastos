@@ -126,7 +126,8 @@ ECode CNullCipherSpi::EngineUpdateEx2(
     /* [out] */ IByteBuffer * output,
     /* [out] */ Int32* number)
 {
-    VALIDATE_NOT_NULL(*number)
+    VALIDATE_NOT_NULL(number)
+    *number = 0;
     if (NULL == input) {
         return E_NULL_POINTER_EXCEPTION;
     } else if (NULL == output) {
@@ -147,6 +148,9 @@ ECode CNullCipherSpi::EngineDoFinal(
     /* [in] */ Int32 inputLen,
     /* [out, callee] */ ArrayOf<Byte>** bytes)
 {
+    VALIDATE_NOT_NULL(bytes)
+    *bytes = NULL;
+
     if (NULL == input) {
         return NOERROR;
     }
@@ -177,6 +181,8 @@ ECode CNullCipherSpi::EngineWrap(
     /* [in] */ Elastos::Security::IKey* keyToWrap,
     /* [out, callee] */ ArrayOf<Byte>** wrappedKey)
 {
+    VALIDATE_NOT_NULL(wrappedKey)
+    *wrappedKey = NULL;
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -186,6 +192,8 @@ ECode CNullCipherSpi::EngineUnwrap(
     /* [in] */ Int32 wrappedKeyType,
     /* [out] */ IKey** key)
 {
+    VALIDATE_NOT_NULL(key)
+    *key = NULL;
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -193,6 +201,8 @@ ECode CNullCipherSpi::EngineGetKeySize(
     /* [in] */ Elastos::Security::IKey * pKey,
     /* [out] */ Int32 * pSize)
 {
+    VALIDATE_NOT_NULL(pSize)
+    *pSize = 0;
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 

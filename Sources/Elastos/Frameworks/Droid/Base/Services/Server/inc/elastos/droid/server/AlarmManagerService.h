@@ -250,7 +250,9 @@ private:
         AutoPtr<FilterStats> mFilterStats;
         Int32 mAlarmType;
 
-        InFlight(
+        InFlight();
+
+        CARAPI constructor(
             /* [in] */ AlarmManagerService* service,
             /* [in] */ IPendingIntent* pendingIntent,
             /* [in] */ IWorkSource* workSource,

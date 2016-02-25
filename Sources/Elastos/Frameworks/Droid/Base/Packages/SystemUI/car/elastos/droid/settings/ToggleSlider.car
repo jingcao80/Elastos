@@ -1,11 +1,10 @@
 
 module
 {
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IBrightnessMirrorController;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IBrightnessMirrorController;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Settings {
 
@@ -54,7 +53,6 @@ module
 
     } // namespace Settings
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

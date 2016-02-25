@@ -27,7 +27,7 @@ public:
     /**
       * Creates BluetoothHeadsetClientCall instance.
       */
-    BluetoothHeadsetClientCall(
+    CARAPI constructor(
         /* [in] */ Int32 id,
         /* [in] */ Int32 state,
         /* [in] */ const String& number,
@@ -112,8 +112,8 @@ public:
 
     // @Override
     CARAPI WriteToParcel(
-        /* [in] */ IParcel* out,
-        /* [in] */ Int32 flags);
+        /* [in] */ IParcel* out);
+    //    /* [in] */ Int32 flags);
 
     // @Override
     CARAPI ReadFromParcel(

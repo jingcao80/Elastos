@@ -8,21 +8,10 @@
 #include "elastos/droid/bluetooth/BluetoothGattCallbackWrapper.h"
 #include "elastos/droid/os/Runnable.h"
 
-// import android.bluetooth.IBluetoothAdapter;
-// import android.bluetooth.IBluetoothGatt;
 using Elastos::Droid::Bluetooth::BluetoothGattCallbackWrapper;
-// import android.bluetooth.IBluetoothUuid;
-// import android.bluetooth.IIBluetoothGatt;
-// import android.bluetooth.IIBluetoothManager;
 using Elastos::Droid::Os::IHandler;
-// import android.os.Looper;
 using Elastos::Droid::Os::Runnable;
-// import android.os.ParcelUuid;
-// import android.os.RemoteException;
-// import android.util.Log;
-// import java.util.HashMap;
 using Elastos::Utility::IMap;
-// import java.util.UUID;
 
 using Elastos::Droid::Bluetooth::IIBluetoothGatt;
 using Elastos::Droid::Bluetooth::IIBluetoothManager;
@@ -149,7 +138,7 @@ public:
       * @param bluetoothManager BluetoothManager that conducts overall Bluetooth Management
       * @hide
       */
-    BluetoothLeAdvertiser(
+    CARAPI constructor(
         /* [in] */ IIBluetoothManager* bluetoothManager);
 
     /**

@@ -1,7 +1,6 @@
 #ifndef __ELASTOS_DROID_VIEW_DISPLAYADJUSTMENTS_H__
 #define __ELASTOS_DROID_VIEW_DISPLAYADJUSTMENTS_H__
 
-
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 
@@ -51,6 +50,10 @@ public:
         /* [in] */ IInterface* object,
         /* [out] */ Boolean* equals);
 
+private:
+    CARAPI Init(
+        /* [in] */ ICompatibilityInfo* compatInfo,
+        /* [in] */ IBinder* token);
 public:
     static CARAPI GetDEFAULT_DISPLAY_ADJUSTMENTS(
         /* [out] */ IDisplayAdjustments** da);

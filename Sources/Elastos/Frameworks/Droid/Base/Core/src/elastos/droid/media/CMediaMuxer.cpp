@@ -1,4 +1,10 @@
 #include "elastos/droid/media/CMediaMuxer.h"
+#include "elastos/droid/media/Media_Utils.h"
+
+#include <media/stagefright/foundation/ABuffer.h>
+#include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/foundation/AMessage.h>
+#include <media/stagefright/MediaMuxer.h>
 
 using Elastos::Core::CCloseGuardHelper;
 using Elastos::Core::ICharSequence;
@@ -211,7 +217,7 @@ ECode CMediaMuxer::AddTrack(
             entry->GetValue((IInterface**)&iValue);
             values->Set(i, iValue);
         }
-        trackIndex = NativeAddTrack(mNativeObject, keys, values);
+        NativeAddTrack(mNativeObject, keys, values, &trackIndex);
     }
     else {
         // throw new IllegalArgumentException("format must not be empty.");
@@ -298,200 +304,207 @@ ECode CMediaMuxer::ReleaseResources()
     return NOERROR;
 }
 
-// TODO: Need jni code
 Int64 CMediaMuxer::NativeSetup(
-    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IFileDescriptor* fileDes,
     /* [in] */ Int32 format)
 {
-    // int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    // ALOGV("native_setup: fd %d", fd);
+    Int32 fd;
+    fileDes->GetDescriptor(&fd);
+    ALOGV("native_setup: fd %d", fd);
 
-    // MediaMuxer::OutputFormat fileFormat =
-    //     static_cast<MediaMuxer::OutputFormat>(format);
-    // sp<MediaMuxer> muxer = new MediaMuxer(fd, fileFormat);
-    // muxer->incStrong(clazz);
-    // return reinterpret_cast<jlong>(muxer.get());
-    return 0;
+    android::MediaMuxer::OutputFormat fileFormat =
+        static_cast<android::MediaMuxer::OutputFormat>(format);
+    android::sp<android::MediaMuxer> muxer = new android::MediaMuxer(fd, fileFormat);
+    return reinterpret_cast<Int64>(muxer.get());
 }
 
 void CMediaMuxer::NativeRelease(
     /* [in] */ Int64 nativeObject)
 {
-    // sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
-    // if (muxer != NULL) {
-    //     muxer->decStrong(clazz);
-    // }
 }
 
-void CMediaMuxer::NativeStart(
+ECode CMediaMuxer::NativeStart(
     /* [in] */ Int64 nativeObject)
 {
-    // sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
-    // if (muxer == NULL) {
-    //     jniThrowException(env, "java/lang/IllegalStateException",
-    //                       "Muxer was not set up correctly");
-    //     return;
-    // }
-    // status_t err = muxer->start();
+    android::sp<android::MediaMuxer> muxer(
+            reinterpret_cast<android::MediaMuxer *>(nativeObject));
+    if (muxer == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "Muxer was not set up correctly");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    android::status_t err = muxer->start();
 
-    // if (err != OK) {
-    //     jniThrowException(env, "java/lang/IllegalStateException",
-    //                       "Failed to start the muxer");
-    //     return;
-    // }
+    if (err != android::OK) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "Failed to start the muxer");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    return NOERROR;
 }
 
-void CMediaMuxer::NativeStop(
+ECode CMediaMuxer::NativeStop(
     /* [in] */ Int64 nativeObject)
 {
-    // sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
-    // if (muxer == NULL) {
-    //     jniThrowException(env, "java/lang/IllegalStateException",
-    //                       "Muxer was not set up correctly");
-    //     return;
-    // }
+    android::sp<android::MediaMuxer> muxer(
+            reinterpret_cast<android::MediaMuxer *>(nativeObject));
+    if (muxer == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "Muxer was not set up correctly");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    // status_t err = muxer->stop();
+    android::status_t err = muxer->stop();
 
-    // if (err != OK) {
-    //     jniThrowException(env, "java/lang/IllegalStateException",
-    //                       "Failed to stop the muxer");
-    //     return;
-    // }
+    if (err != android::OK) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "Failed to start the muxer");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    return NOERROR;
 }
 
-Int32 CMediaMuxer::NativeAddTrack(
+ECode CMediaMuxer::NativeAddTrack(
     /* [in] */ Int64 nativeObject,
     /* [in] */ ArrayOf<String>* keys,
-    /* [in] */ ArrayOf<IInterface*>* values)
+    /* [in] */ ArrayOf<IInterface*>* values,
+    /* [out] */ Int32* result)
 {
-    // sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
-    // if (muxer == NULL) {
-    //     jniThrowException(env, "java/lang/IllegalStateException",
-    //                       "Muxer was not set up correctly");
-    //     return -1;
-    // }
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
 
-    // sp<AMessage> trackformat;
-    // status_t err = ConvertKeyValueArraysToMessage(env, keys, values,
-    //                                               &trackformat);
-    // if (err != OK) {
-    //     jniThrowException(env, "java/lang/IllegalArgumentException",
-    //                       "ConvertKeyValueArraysToMessage got an error");
-    //     return err;
-    // }
+    android::sp<android::MediaMuxer> muxer(
+            reinterpret_cast<android::MediaMuxer *>(nativeObject));
+    if (muxer == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "Muxer was not set up correctly");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    // // Return negative value when errors happen in addTrack.
-    // jint trackIndex = muxer->addTrack(trackformat);
+    android::sp<android::AMessage> trackformat;
+    android::status_t err = Media_Utils::ConvertKeyValueArraysToMessage(keys, values, &trackformat);
+    if (err != android::OK) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "ConvertKeyValueArraysToMessage got an error");
+        *result = err;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
-    // if (trackIndex < 0) {
-    //     jniThrowException(env, "java/lang/IllegalStateException",
-    //                       "Failed to add the track to the muxer");
-    //     return -1;
-    // }
-    // return trackIndex;
-    return 0;
+    // Return negative value when errors happen in addTrack.
+    Int32 trackIndex = muxer->addTrack(trackformat);
+
+    if (trackIndex < 0) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "Failed to add the track to the muxer");
+        *result = -1;
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    *result = trackIndex;
+    return NOERROR;
 }
 
-void CMediaMuxer::NativeSetOrientationHint(
+ECode CMediaMuxer::NativeSetOrientationHint(
     /* [in] */ Int64 nativeObject,
     /* [in] */ Int32 degrees)
 {
-    // sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
-    // if (muxer == NULL) {
-    //     jniThrowException(env, "java/lang/IllegalStateException",
-    //                       "Muxer was not set up correctly");
-    //     return;
-    // }
-    // status_t err = muxer->setOrientationHint(degrees);
+    android::sp<android::MediaMuxer> muxer(
+            reinterpret_cast<android::MediaMuxer *>(nativeObject));
+    if (muxer == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "Muxer was not set up correctly");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    android::status_t err = muxer->setOrientationHint(degrees);
 
-    // if (err != OK) {
-    //     jniThrowException(env, "java/lang/IllegalStateException",
-    //                       "Failed to set orientation hint");
-    //     return;
-    // }
+    if (err != android::OK) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "Failed to set orientation hint");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    return NOERROR;
 }
 
-void CMediaMuxer::NativeSetLocation(
+ECode CMediaMuxer::NativeSetLocation(
     /* [in] */ Int64 nativeObject,
     /* [in] */ Int32 latitude,
     /* [in] */ Int32 longitude)
 {
-    // MediaMuxer* muxer = reinterpret_cast<MediaMuxer *>(nativeObject);
+    android::sp<android::MediaMuxer> muxer(
+            reinterpret_cast<android::MediaMuxer *>(nativeObject));
 
-    // status_t res = muxer->setLocation(latitude, longitude);
-    // if (res != OK) {
-    //     jniThrowException(env, "java/lang/IllegalStateException",
-    //                       "Failed to set location");
-    //     return;
-    // }
+    android::status_t res = muxer->setLocation(latitude, longitude);
+    if (res != android::OK) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "Failed to set location");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    return NOERROR;
 }
 
-void CMediaMuxer::NativeWriteSampleData(
+ECode CMediaMuxer::NativeWriteSampleData(
     /* [in] */ Int64 nativeObject,
     /* [in] */ Int32 trackIndex,
     /* [in] */ IByteBuffer* byteBuf,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 size,
-    /* [in] */ Int64 presentationTimeUs,
+    /* [in] */ Int64 timeUs,
     /* [in] */ Int32 flags)
 {
-    // sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
-    // if (muxer == NULL) {
-    //     jniThrowException(env, "java/lang/IllegalStateException",
-    //                       "Muxer was not set up correctly");
-    //     return;
-    // }
+    android::sp<android::MediaMuxer> muxer(
+            reinterpret_cast<android::MediaMuxer *>(nativeObject));
+    if (muxer == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "Muxer was not set up correctly");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    // // Try to convert the incoming byteBuffer into ABuffer
-    // void *dst = env->GetDirectBufferAddress(byteBuf);
+    // Try to convert the incoming byteBuffer into ABuffer
+    Handle64 addr;
+    IBuffer::Probe(byteBuf)->GetEffectiveDirectAddress(&addr);
+    void *dst = (void*)addr;
 
-    // jlong dstSize;
-    // jbyteArray byteArray = NULL;
+    Int64 dstSize;
+    AutoPtr<ArrayOf<Byte> > byteArray;
 
-    // if (dst == NULL) {
+    if (dst == NULL) {
 
-    //     byteArray =
-    //         (jbyteArray)env->CallObjectMethod(byteBuf, gFields.arrayID);
+        byteBuf->GetArray((ArrayOf<Byte>**)&byteArray);
 
-    //     if (byteArray == NULL) {
-    //         jniThrowException(env, "java/lang/IllegalArgumentException",
-    //                           "byteArray is null");
-    //         return;
-    //     }
+        if (byteArray == NULL) {
+            // jniThrowException(env, "java/lang/IllegalArgumentException",
+            //                   "byteArray is null");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
 
-    //     jboolean isCopy;
-    //     dst = env->GetByteArrayElements(byteArray, &isCopy);
+        dst = byteArray->GetPayload();
 
-    //     dstSize = env->GetArrayLength(byteArray);
-    // } else {
-    //     dstSize = env->GetDirectBufferCapacity(byteBuf);
-    // }
+        dstSize = byteArray->GetLength();
+    }
+    else {
+        Int32 size;
+        IBuffer::Probe(byteBuf)->GetCapacity(&size);
+        dstSize = size;
+    }
 
-    // if (dstSize < (offset + size)) {
-    //     ALOGE("writeSampleData saw wrong dstSize %lld, size  %d, offset %d",
-    //           dstSize, size, offset);
-    //     if (byteArray != NULL) {
-    //         env->ReleaseByteArrayElements(byteArray, (jbyte *)dst, 0);
-    //     }
-    //     jniThrowException(env, "java/lang/IllegalArgumentException",
-    //                       "sample has a wrong size");
-    //     return;
-    // }
+    if (dstSize < (offset + size)) {
+        ALOGE("writeSampleData saw wrong dstSize %lld, size  %d, offset %d",
+              dstSize, size, offset);
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "sample has a wrong size");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
-    // sp<ABuffer> buffer = new ABuffer((char *)dst + offset, size);
+    android::sp<android::ABuffer> buffer;
+    buffer = new android::ABuffer((char *)dst + offset, size);
 
-    // status_t err = muxer->writeSampleData(buffer, trackIndex, timeUs, flags);
+    android::status_t err = muxer->writeSampleData(buffer, trackIndex, timeUs, flags);
 
-    // if (byteArray != NULL) {
-    //     env->ReleaseByteArrayElements(byteArray, (jbyte *)dst, 0);
-    // }
-
-    // if (err != OK) {
-    //     jniThrowException(env, "java/lang/IllegalStateException",
-    //                       "writeSampleData returned an error");
-    // }
-    // return;
+    if (err != android::OK) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "writeSampleData returned an error");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    return NOERROR;
 }
 
 } // namespace Media

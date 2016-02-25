@@ -58,6 +58,9 @@ public:
 
     ~BluetoothPan();
 
+    CARAPI DoBind(
+        /* [out] */ Boolean* bind);
+
     CARAPI Close();
 
     CARAPI Connect(

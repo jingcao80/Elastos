@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_DROID_MEDIA_AUDIOSYSTEM_H__
 #define __ELASTOS_DROID_MEDIA_AUDIOSYSTEM_H__
 
+#include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 

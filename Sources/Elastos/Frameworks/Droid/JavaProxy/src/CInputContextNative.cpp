@@ -34,8 +34,8 @@ ECode CInputContextNative::ReportFullscreenMode(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "reportFullscreenMode", "(Z)V");
     Util::CheckErrorAndLog(env, TAG, String("GetMethodID: onDisplayEvent"), __LINE__);
@@ -56,8 +56,8 @@ ECode CInputContextNative::FinishComposingText()
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "finishComposingText", "()V");
     Util::CheckErrorAndLog(env, TAG, String("GetMethodID: onDisplayEvent"), __LINE__);
@@ -87,8 +87,8 @@ ECode CInputContextNative::CommitText(
         jtext = Util::ToJavaString(env, stext);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "commitText", "(Ljava/lang/CharSequence;I)V");
     Util::CheckErrorAndLog(env, TAG, String("GetMethodID: commitText"), __LINE__);
@@ -109,7 +109,7 @@ ECode CInputContextNative::CommitText(
 ECode CInputContextNative::GetCursorCapsMode(
     /* [in] */ Int32 reqModes,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* icCallback)
+    /* [in] */ IIInputContextCallback* icCallback)
 {
     // LOGGERD(TAG, String("+ CInputContextNative::GetCursorCapsMode()"));
 
@@ -131,10 +131,10 @@ ECode CInputContextNative::GetCursorCapsMode(
         env->DeleteLocalRef(c);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "getCursorCapsMode", "(IILcom/android/internal/view/IInputContextCallback;)V");
+    jmethodID m = env->GetMethodID(c, "getCursorCapsMode", "(IILcom/android/internal/view/IIInputContextCallback;)V");
     Util::CheckErrorAndLog(env, TAG, String("GetMethodID: GetCursorCapsMode"), __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)reqModes, (jint)seq, jicCallback);
@@ -162,8 +162,8 @@ ECode CInputContextNative::SendKeyEvent(
         jevent = Util::ToJavaKeyEvent(env, event);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "sendKeyEvent", "(Landroid/view/KeyEvent;)V");
     Util::CheckErrorAndLog(env, TAG, String("GetMethodID: SendKeyEvent"), __LINE__);
@@ -184,7 +184,7 @@ ECode CInputContextNative::GetTextBeforeCursor(
     /* [in] */ Int32 length,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* icCallback)
+    /* [in] */ IIInputContextCallback* icCallback)
 {
     // LOGGERD(TAG, String("+ CInputContextNative::GetTextBeforeCursor()"));
 
@@ -206,10 +206,10 @@ ECode CInputContextNative::GetTextBeforeCursor(
         env->DeleteLocalRef(c);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "getTextBeforeCursor", "(IIILcom/android/internal/view/IInputContextCallback;)V");
+    jmethodID m = env->GetMethodID(c, "getTextBeforeCursor", "(IIILcom/android/internal/view/IIInputContextCallback;)V");
     Util::CheckErrorAndLog(env, TAG, String("GetMethodID: getTextBeforeCursor"), __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)length, (jint)flags, (jint)seq, jicCallback);
@@ -232,8 +232,8 @@ ECode CInputContextNative::ClearMetaKeyStates(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "clearMetaKeyStates", "(I)V");
     Util::CheckErrorAndLog(env, TAG, String("GetMethodID: clearMetaKeyStates"), __LINE__);
@@ -255,8 +255,8 @@ ECode CInputContextNative::PerformEditorAction(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "performEditorAction", "(I)V");
     Util::CheckErrorAndLog(env, TAG, String("GetMethodID: performEditorAction"), __LINE__);
@@ -277,8 +277,8 @@ ECode CInputContextNative::BeginBatchEdit()
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "beginBatchEdit", "()V");
     Util::CheckErrorAndLog(env, TAG, String("GetMethodID: beginBatchEdit"), __LINE__);
@@ -299,8 +299,8 @@ ECode CInputContextNative::EndBatchEdit()
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "endBatchEdit", "()V");
     Util::CheckErrorAndLog(env, TAG, String("GetMethodID: endBatchEdit"), __LINE__);
@@ -330,8 +330,8 @@ ECode CInputContextNative::SetComposingText(
         jtext = Util::ToJavaString(env, stext);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "setComposingText", "(Ljava/lang/CharSequence;I)V");
     Util::CheckErrorAndLog(env, TAG, String("GetMethodID: setComposingText"), __LINE__);
@@ -353,7 +353,7 @@ ECode CInputContextNative::GetExtractedText(
     /* [in] */ IExtractedTextRequest* request,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* icCallback)
+    /* [in] */ IIInputContextCallback* icCallback)
 {
     // LOGGERD(TAG, String("+ CInputContextNative::GetExtractedText()"));
 
@@ -380,10 +380,10 @@ ECode CInputContextNative::GetExtractedText(
         env->DeleteLocalRef(c);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "GetExtractedText FindClass: IInputContext %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "GetExtractedText FindClass: IIInputContext %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "getExtractedText", "(Landroid/view/inputmethod/ExtractedTextRequest;IILcom/android/internal/view/IInputContextCallback;)V");
+    jmethodID m = env->GetMethodID(c, "getExtractedText", "(Landroid/view/inputmethod/ExtractedTextRequest;IILcom/android/internal/view/IIInputContextCallback;)V");
     Util::CheckErrorAndLog(env, TAG, "GetExtractedText GetMethodID: getExtractedText %d", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jrequest, (jint)flags, (jint)seq, jicCallback);
@@ -433,7 +433,7 @@ ECode CInputContextNative::GetTextAfterCursor(
     /* [in] */ Int32 length,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* icCallback)
+    /* [in] */ IIInputContextCallback* icCallback)
 {
     // LOGGERD(TAG, String("+ CInputContextNative::GetTextAfterCursor()"));
 
@@ -455,10 +455,10 @@ ECode CInputContextNative::GetTextAfterCursor(
         env->DeleteLocalRef(c);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "getTextAfterCursor", "(IIILcom/android/internal/view/IInputContextCallback;)V");
+    jmethodID m = env->GetMethodID(c, "getTextAfterCursor", "(IIILcom/android/internal/view/IIInputContextCallback;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: getTextAfterCursor %d", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)length, (jint)flags, (jint)seq, jicCallback);
@@ -483,8 +483,8 @@ ECode CInputContextNative::DeleteSurroundingText(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "deleteSurroundingText", "(II)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: deleteSurroundingText %d", __LINE__);
@@ -511,8 +511,8 @@ ECode CInputContextNative::CommitCompletion(
         jcompletion = Util::ToJavaCompletionInfo(env, completion);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "commitCompletion", "(Landroid/view/inputmethod/CompletionInfo;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: commitCompletion %d", __LINE__);
@@ -542,8 +542,8 @@ ECode CInputContextNative::CommitCorrection(
         jcorrection = Util::ToJavaCorrectionInfo(env, correction);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "commitCorrection", "(Landroid/view/inputmethod/CorrectionInfo;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: commitCorrection %d", __LINE__);
@@ -570,8 +570,8 @@ ECode CInputContextNative::SetSelection(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "setSelection", "(II)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: setSelection %d", __LINE__);
@@ -593,8 +593,8 @@ ECode CInputContextNative::PerformContextMenuAction(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "performEditorAction", "(I)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: performEditorAction %d", __LINE__);
@@ -624,8 +624,8 @@ ECode CInputContextNative::PerformPrivateCommand(
         jdata = Util::ToJavaBundle(env, data);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IInputContext %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "Fail FindClass: IIInputContext %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "performPrivateCommand", "(I)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: performPrivateCommand %d", __LINE__);
@@ -652,8 +652,8 @@ ECode CInputContextNative::SetComposingRegion(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "FindClass: IInputContext %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IIInputContext %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "setComposingRegion", "(II)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: setComposingRegion %d", __LINE__);
@@ -670,7 +670,7 @@ ECode CInputContextNative::SetComposingRegion(
 ECode CInputContextNative::GetSelectedText(
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* icCallback)
+    /* [in] */ IIInputContextCallback* icCallback)
 {
     // LOGGERD(TAG, String("+ CInputContextNative::GetSelectedText()"));
 
@@ -692,10 +692,10 @@ ECode CInputContextNative::GetSelectedText(
         env->DeleteLocalRef(c);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContext");
-    Util::CheckErrorAndLog(env, TAG, "FindClass: IInputContext %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContext");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IIInputContext %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "getSelectedText", "(IILcom/android/internal/view/IInputContextCallback;)V");
+    jmethodID m = env->GetMethodID(c, "getSelectedText", "(IILcom/android/internal/view/IIInputContextCallback;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: getSelectedText %d", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, (jint)flags, (jint)seq, jicCallback);

@@ -51,6 +51,8 @@ ECode TextureView::OnFrameAvailableListener::OnFrameAvailable(
 //========================================================================================
 //const String TextureView::LOG_TAG("TextureView");
 
+CAR_INTERFACE_IMPL(TextureView, View, ITextureView)
+
 TextureView::TextureView()
     : mHadSurface(FALSE)
     , mOpaque(TRUE)
@@ -60,13 +62,6 @@ TextureView::TextureView()
     , mSaveCount(0)
     , mNativeWindow(0)
 {
-    CMatrix::New((IMatrix**)&mMatrix);
-
-//    mLock = ArrayOf<IInterface*>::Alloc(1);
-
-//    mNativeWindowLock = ArrayOf<IInterface*>::Alloc(1);
-
-    mUpdateListener = new OnFrameAvailableListener(this);
 }
 
 ECode TextureView::constructor(
@@ -109,7 +104,14 @@ ECode TextureView::constructor(
 
 void TextureView::Init()
 {
+    CMatrix::New((IMatrix**)&mMatrix);
     CPaint::New((IPaint**)&mLayerPaint);
+
+//    mLock = ArrayOf<IInterface*>::Alloc(1);
+
+//    mNativeWindowLock = ArrayOf<IInterface*>::Alloc(1);
+
+    mUpdateListener = new OnFrameAvailableListener(this);
 }
 
 Boolean TextureView::IsOpaque()

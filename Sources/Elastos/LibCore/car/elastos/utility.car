@@ -5,8 +5,6 @@ module
     // Elastos.Utility
     //======================================================
     merge("utility/Exceptions.car");
-    //merge("utility/IObjectEnumerator.car");
-    //merge("utility/IObjectContainer.car");
     merge("utility/IRandom.car");
     merge("utility/IBitSet.car");
     merge("utility/IDate.car");
@@ -752,10 +750,6 @@ module
 
     singleton class CUUIDHelper {
         interface IUUIDHelper;
-    }
-
-    singleton class CTimeZoneGetterHelper {
-       interface ITimeZoneGetterHelper;
     }
 
     singleton class CTimeZoneHelper {

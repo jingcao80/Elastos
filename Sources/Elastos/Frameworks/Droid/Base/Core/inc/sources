@@ -23,16 +23,20 @@ EXPORT_HEADERS += elastos/droid/app/job/JobService.h
 //EXPORT_HEADERS += elastos/droid/app/backup/BackupAgentHelper.h
 //EXPORT_HEADERS += elastos/droid/appwidget/AppWidgetProvider.h
 
+EXPORT_HEADERS += elastos/droid/bluetooth/BluetoothUuid.h
 
 EXPORT_HEADERS += elastos/droid/content/BroadcastReceiver.h
+EXPORT_HEADERS += elastos/droid/content/Intent.h
 EXPORT_HEADERS += elastos/droid/content/IntentFilter.h
 EXPORT_HEADERS += elastos/droid/content/ContextWrapper.h
 EXPORT_HEADERS += elastos/droid/content/Context.h
 EXPORT_HEADERS += elastos/droid/content/pm/PackageParser.h
 EXPORT_HEADERS += elastos/droid/content/pm/PackageUserState.h
-//EXPORT_HEADERS += elastos/droid/content/ContentProvider.h
+EXPORT_HEADERS += elastos/droid/content/ContentProvider.h
 EXPORT_HEADERS += elastos/droid/database/sqlite/SQLiteOpenHelper.h
 EXPORT_HEADERS += elastos/droid/database/ContentObserver.h
+
+EXPORT_HEADERS += elastos/droid/graphics/drawable/Drawable.h
 
 EXPORT_HEADERS += elastos/droid/ext/frameworkdef.h
 EXPORT_HEADERS += elastos/droid/ext/frameworkext.h
@@ -53,8 +57,12 @@ EXPORT_HEADERS += elastos/droid/internal/content/PackageMonitor.h
 EXPORT_HEADERS += elastos/droid/internal/view/BaseIWindow.h
 EXPORT_HEADERS += elastos/droid/internal/view/BaseSurfaceHolder.h
 EXPORT_HEADERS += elastos/droid/internal/os/ProcessCpuTracker.h
+EXPORT_HEADERS += elastos/droid/internal/os/SomeArgs.h
 
 //EXPORT_HEADERS += elastos/droid/Manifest.h
+
+EXPORT_HEADERS += elastos/droid/media/MediaRouterSimpleCallback.h
+EXPORT_HEADERS += elastos/droid/media/VolumeProvider.h
 
 EXPORT_HEADERS += elastos/droid/net/ReturnOutValue.h
 EXPORT_HEADERS += elastos/droid/net/NetworkUtils.h
@@ -69,7 +77,6 @@ EXPORT_HEADERS += elastos/droid/os/HandlerThread.h
 //EXPORT_HEADERS += elastos/droid/os/HandlerRunnable.h
 EXPORT_HEADERS += elastos/droid/os/Looper.h
 EXPORT_HEADERS += elastos/droid/os/Runnable.h
-//EXPORT_HEADERS += elastos/droid/os/SomeArgs.h
 EXPORT_HEADERS += elastos/droid/os/Process.h
 EXPORT_HEADERS += elastos/droid/os/Binder.h
 EXPORT_HEADERS += elastos/droid/os/UserHandle.h
@@ -101,6 +108,7 @@ EXPORT_HEADERS += elastos/droid/text/TextUtils.h
 //EXPORT_HEADERS += elastos/droid/text/AndroidBidi.h
 //EXPORT_HEADERS += elastos/droid/text/TextDirectionHeuristics.h
 //EXPORT_HEADERS += elastos/droid/text/method/MetaKeyKeyListener.h
+EXPORT_HEADERS += elastos/droid/text/format/DateFormat.h
 EXPORT_HEADERS += elastos/droid/text/format/Formatter.h
 
 EXPORT_HEADERS += elastos/droid/utility/Xml.h
@@ -109,10 +117,11 @@ EXPORT_HEADERS += elastos/droid/utility/TimeUtils.h
 //EXPORT_HEADERS += elastos/droid/utility/Config.h
 //EXPORT_HEADERS += elastos/droid/utility/ArrayUtils.h
 EXPORT_HEADERS += elastos/droid/utility/FloatMath.h
-//EXPORT_HEADERS += elastos/droid/utility/LruCache.h
+EXPORT_HEADERS += elastos/droid/utility/LruCache.h
 EXPORT_HEADERS += elastos/droid/utility/Int32Property.h
 EXPORT_HEADERS += elastos/droid/utility/FloatProperty.h
 EXPORT_HEADERS += elastos/droid/utility/Pools.h
+EXPORT_HEADERS += elastos/droid/utility/SparseArray.h
 
 EXPORT_HEADERS += elastos/droid/view/AbsSavedState.h
 EXPORT_HEADERS += elastos/droid/view/View.h
@@ -120,7 +129,6 @@ EXPORT_HEADERS += elastos/droid/view/ViewGroup.h
 EXPORT_HEADERS += elastos/droid/view/ContextThemeWrapper.h
 EXPORT_HEADERS += elastos/droid/view/GestureDetector.h
 EXPORT_HEADERS += elastos/droid/view/ScaleGestureDetector.h
-EXPORT_HEADERS += elastos/droid/view/ViewOutlineProvider.h
 EXPORT_HEADERS += elastos/droid/view/ViewOutlineProvider.h
 //EXPORT_HEADERS += elastos/droid/view/InputFilter.h
 //EXPORT_HEADERS += elastos/droid/view/BaseSurfaceHolder.h
@@ -130,6 +138,7 @@ EXPORT_HEADERS += elastos/droid/view/LayoutInflater.h
 //EXPORT_HEADERS += elastos/droid/view/SoundEffectConstants.h
 EXPORT_HEADERS += elastos/droid/view/WindowIdFocusObserver.h
 EXPORT_HEADERS += elastos/droid/view/animation/Animation.h
+EXPORT_HEADERS += elastos/droid/view/animation/AnimationUtils.h
 
 //EXPORT_HEADERS += elastos/droid/webkit/WebViewClient.h
 //EXPORT_HEADERS += elastos/droid/webkit/WebChromeClient.h
@@ -143,3 +152,4 @@ EXPORT_HEADERS += elastos/droid/widget/FrameLayout.h
 EXPORT_HEADERS += elastos/droid/widget/ImageView.h
 EXPORT_HEADERS += elastos/droid/widget/ImageButton.h
 EXPORT_HEADERS += elastos/droid/widget/RemoteViews.h
+EXPORT_HEADERS += elastos/droid/widget/TextView.h

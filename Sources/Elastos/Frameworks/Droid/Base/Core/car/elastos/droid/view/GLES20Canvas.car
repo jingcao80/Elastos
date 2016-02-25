@@ -27,7 +27,6 @@ module
      * interface IGLES20Canvas;
      */
     interface IGLES20RecordingCanvas {
-
     }
 
     } // namespace View

@@ -1,5 +1,5 @@
-#ifndef __ELASTOS_DROID_MEDIA_TV_TvContract_H__
-#define __ELASTOS_DROID_MEDIA_TV_TvContract_H__
+#ifndef __ELASTOS_DROID_MEDIA_TV_TVCONTRACT_H__
+#define __ELASTOS_DROID_MEDIA_TV_TVCONTRACT_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
@@ -43,18 +43,18 @@ public:
      * @param name The {@link ComponentName} of the TV input service to build ID for.
      * @return the ID for the given TV input service.
      */
-    CARAPI BuildInputId(
-        /* [in] */ IComponentName * name,
-        /* [out] */ String * result);
+    static CARAPI BuildInputId(
+        /* [in] */ IComponentName* name,
+        /* [out] */ String* result);
 
     /**
      * Builds a URI that points to a specific channel.
      *
      * @param channelId The ID of the channel to point to.
      */
-    CARAPI BuildChannelUri(
+    static CARAPI BuildChannelUri(
         /* [in] */ Int64 channelId,
-        /* [out] */ IUri ** result);
+        /* [out] */ IUri** result);
 
     /**
      * Build a special channel URI intended to be used with pass-through inputs. (e.g. HDMI)
@@ -62,27 +62,27 @@ public:
      * @param inputId The ID of the pass-through input to build a channels URI for.
      * @see TvInputInfo#isPassthroughInput()
      */
-    CARAPI BuildChannelUriForPassthroughInput(
+    static CARAPI BuildChannelUriForPassthroughInput(
         /* [in] */ const String& inputId,
-        /* [out] */ IUri ** result);
+        /* [out] */ IUri** result);
 
     /**
      * Builds a URI that points to a channel logo. See {@link Channels.Logo}.
      *
      * @param channelId The ID of the channel whose logo is pointed to.
      */
-    CARAPI BuildChannelLogoUri(
+    static CARAPI BuildChannelLogoUri(
         /* [in] */ Int64 channelId,
-        /* [out] */ IUri ** result);
+        /* [out] */ IUri** result);
 
     /**
      * Builds a URI that points to a channel logo. See {@link Channels.Logo}.
      *
      * @param channelUri The URI of the channel whose logo is pointed to.
      */
-    CARAPI BuildChannelLogoUri(
-        /* [in] */ IUri * channelUri,
-        /* [out] */ IUri ** result);
+    static CARAPI BuildChannelLogoUri(
+        /* [in] */ IUri* channelUri,
+        /* [out] */ IUri** result);
 
     /**
      * Builds a URI that points to all channels from a given TV input.
@@ -90,9 +90,9 @@ public:
      * @param inputId The ID of the TV input to build a channels URI for. If {@code null}, builds a
      *            URI for all the TV inputs.
      */
-    CARAPI BuildChannelsUriForInput(
+    static CARAPI BuildChannelsUriForInput(
         /* [in] */ const String& inputId,
-        /* [out] */ IUri ** result);
+        /* [out] */ IUri** result);
 
     /**
      * Builds a URI that points to all or browsable-only channels from a given TV input.
@@ -105,10 +105,10 @@ public:
      * @hide
      */
     // @SystemApi
-    CARAPI BuildChannelsUriForInput(
+    static CARAPI BuildChannelsUriForInput(
         /* [in] */ const String& inputId,
         /* [in] */ Boolean browsableOnly,
-        /* [out] */ IUri ** result);
+        /* [out] */ IUri** result);
 
     /**
      * Builds a URI that points to all or browsable-only channels which have programs with the given
@@ -123,38 +123,38 @@ public:
      * @hide
      */
     // @SystemApi
-    CARAPI BuildChannelsUriForInput(
+    static CARAPI BuildChannelsUriForInput(
         /* [in] */ const String& inputId,
         /* [in] */ const String& genre,
         /* [in] */ Boolean browsableOnly,
-        /* [out] */ IUri ** result);
+        /* [out] */ IUri** result);
 
     /**
      * Builds a URI that points to a specific program.
      *
      * @param programId The ID of the program to point to.
      */
-    CARAPI BuildProgramUri(
+    static CARAPI BuildProgramUri(
         /* [in] */ Int64 programId,
-        /* [out] */ IUri ** result);
+        /* [out] */ IUri** result);
 
     /**
      * Builds a URI that points to all programs on a given channel.
      *
      * @param channelId The ID of the channel to return programs for.
      */
-    CARAPI BuildProgramsUriForChannel(
+    static CARAPI BuildProgramsUriForChannel(
         /* [in] */ Int64 channelId,
-        /* [out] */ IUri ** result);
+        /* [out] */ IUri** result);
 
     /**
      * Builds a URI that points to all programs on a given channel.
      *
      * @param channelUri The URI of the channel to return programs for.
      */
-    CARAPI BuildProgramsUriForChannel(
-        /* [in] */ IUri * channelUri,
-        /* [out] */ IUri ** result);
+    static CARAPI BuildProgramsUriForChannel(
+        /* [in] */ IUri* channelUri,
+        /* [out] */ IUri** result);
 
     /**
      * Builds a URI that points to programs on a specific channel whose schedules overlap with the
@@ -166,11 +166,11 @@ public:
      * @param endTime The end time used to filter programs. The returned programs should have
      *            {@link Programs#COLUMN_START_TIME_UTC_MILLIS} that is less than this time.
      */
-    CARAPI BuildProgramsUriForChannel(
+    static CARAPI BuildProgramsUriForChannel(
         /* [in] */ Int64 channelId,
         /* [in] */ Int64 startTime,
         /* [in] */ Int64 endTime,
-        /* [out] */ IUri ** result);
+        /* [out] */ IUri** result);
 
     /**
      * Builds a URI that points to programs on a specific channel whose schedules overlap with the
@@ -182,11 +182,11 @@ public:
      * @param endTime The end time used to filter programs. The returned programs should have
      *            {@link Programs#COLUMN_START_TIME_UTC_MILLIS} that is less than this time.
      */
-    CARAPI BuildProgramsUriForChannel(
-        /* [in] */ IUri * channelUri,
+    static CARAPI BuildProgramsUriForChannel(
+        /* [in] */ IUri* channelUri,
         /* [in] */ Int64 startTime,
         /* [in] */ Int64 endTime,
-        /* [out] */ IUri ** result);
+        /* [out] */ IUri** result);
 
     /**
      * Builds a URI that points to a specific program the user watched.
@@ -194,49 +194,49 @@ public:
      * @param watchedProgramId The ID of the watched program to point to.
      * @hide
      */
-    CARAPI BuildWatchedProgramUri(
+    static CARAPI BuildWatchedProgramUri(
         /* [in] */ Int64 watchedProgramId,
-        /* [out] */ IUri ** result);
+        /* [out] */ IUri** result);
 
     /**
      * Returns true, if {@code uri} is a channel URI.
      * @hide
      */
-    CARAPI IsChannelUri(
-        /* [in] */ IUri * uri,
-        /* [out] */ Boolean * result);
+    static CARAPI IsChannelUri(
+        /* [in] */ IUri* uri,
+        /* [out] */ Boolean* result);
 
     /**
      * Returns true, if {@code uri} is a channel URI for a tuner input.
      * @hide
      */
-    CARAPI IsChannelUriForTunerInput(
-        /* [in] */ IUri * uri,
-        /* [out] */ Boolean * result);
+    static CARAPI IsChannelUriForTunerInput(
+        /* [in] */ IUri* uri,
+        /* [out] */ Boolean* result);
 
     /**
      * Returns true, if {@code uri} is a channel URI for a passthrough input.
      * @hide
      */
     // @SystemApi
-    CARAPI IsChannelUriForPassthroughInput(
-        /* [in] */ IUri * uri,
-        /* [out] */ Boolean * result);
+    static CARAPI IsChannelUriForPassthroughInput(
+        /* [in] */ IUri* uri,
+        /* [out] */ Boolean* result);
 
     /**
      * Returns true, if {@code uri} is a program URI.
      * @hide
      */
-    CARAPI IsProgramUri(
-        /* [in] */ IUri * uri,
-        /* [out] */ Boolean * result);
+    static CARAPI IsProgramUri(
+        /* [in] */ IUri* uri,
+        /* [out] */ Boolean* result);
 
 private:
     static CARAPI_(Boolean) IsTvUri(
-        /* [in] */ IUri * uri);
+        /* [in] */ IUri* uri);
 
     static CARAPI_(Boolean) IsTwoSegmentUriStartingWith(
-        /* [in] */ IUri * uri,
+        /* [in] */ IUri* uri,
         /* [in] */ const String& pathSegment);
 
     TvContract();
@@ -252,4 +252,4 @@ private:
 } // namepsace Droid
 } // namespace Elastos
 
-#endif //__ELASTOS_DROID_MEDIA_TV_TvContract_H__
+#endif //__ELASTOS_DROID_MEDIA_TV_TVCONTRACT_H__

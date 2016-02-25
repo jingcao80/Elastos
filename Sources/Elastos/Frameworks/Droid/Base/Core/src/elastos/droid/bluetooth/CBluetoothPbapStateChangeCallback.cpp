@@ -44,16 +44,18 @@ ECode CBluetoothPbapStateChangeCallback::OnBluetoothStateChange(
         // try {
         if (mHost->mService == NULL) {
             if (BluetoothPbap::VDBG) Logger::D(BluetoothPbap::TAG, "Binding service...");
-            AutoPtr<IIntent> intent;
-            CIntent::New(String("IBluetoothPbap")/*IBluetoothPbap.class.getName()*/, (IIntent**)&intent);
-            Boolean result;
-            ECode ec = mHost->mContext->BindService(intent, mHost->mConnection, 0, &result);
-            if (FAILED(ec)) {
-                Logger::E(BluetoothPbap::TAG, "0x%08x", ec);
-            }
-            else if (!result) {
-                Logger::E(BluetoothPbap::TAG, "Could not bind to Bluetooth PBAP Service");
-            }
+            //AutoPtr<IIntent> intent;
+            //CIntent::New(String("IBluetoothPbap")/*IBluetoothPbap.class.getName()*/, (IIntent**)&intent);
+            //Boolean result;
+            //ECode ec = mHost->mContext->BindService(intent, mHost->mConnection, 0, &result);
+            //if (FAILED(ec)) {
+            //    Logger::E(BluetoothPbap::TAG, "0x%08x", ec);
+            //}
+            //else if (!result) {
+            //    Logger::E(BluetoothPbap::TAG, "Could not bind to Bluetooth PBAP Service");
+            //}
+            Boolean bind;
+            mHost->DoBind(&bind);
         }
         // } catch (Exception re) {
         //     Log.e(TAG,"",re);

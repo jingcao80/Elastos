@@ -1,6 +1,6 @@
 
-#ifndef  __CTIMESERVICE_H__
-#define  __CTIMESERVICE_H__
+#ifndef __CTIMESERVICE_H__
+#define __CTIMESERVICE_H__
 
 #include "_CTimeService.h"
 #include "elastos/droid/app/Service.h"

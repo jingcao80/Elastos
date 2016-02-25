@@ -5,12 +5,11 @@
 #include "elastos/droid/webkit/native/media/AudioRecordInput.h"
 #include "elastos/droid/webkit/native/media/api/AudioRecordInput_dec.h"
 
-//TODO #include "elastos/droid/media/CAudioRecord.h"
-//TODO #include "elastos/droid/media/CAudioRecordHelper.h"
-//TODO #include "elastos/droid/media/audiofx/CAcousticEchoCancelerHelper.h"
+#include "elastos/droid/media/CAudioRecord.h"
+//TODO: #include "elastos/droid/media/CAudioRecordHelper.h"
+#include "elastos/droid/media/audiofx/CAcousticEchoCancelerHelper.h"
 #include "elastos/droid/os/Process.h"
 
-//TODO #include <elastos/io/CByteBufferHelper.h>
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -20,13 +19,13 @@ using Elastos::Droid::Media::Audiofx::IAudioEffect;
 using Elastos::Droid::Media::Audiofx::IAudioEffectDescriptor;
 using Elastos::Droid::Media::IAudioRecordHelper;
 using Elastos::Droid::Media::Audiofx::IAcousticEchoCancelerHelper;
-//TODO using Elastos::Droid::Media::Audiofx::CAcousticEchoCancelerHelper;
-//TODO using Elastos::Droid::Media::CAudioRecord;
-//TODO using Elastos::Droid::Media::CAudioRecordHelper;
+using Elastos::Droid::Media::Audiofx::CAcousticEchoCancelerHelper;
+using Elastos::Droid::Media::CAudioRecord;
+//TODO: using Elastos::Droid::Media::CAudioRecordHelper;
 
 using Elastos::IO::IBuffer;
 using Elastos::IO::IByteBufferHelper;
-//TODO using Elastos::IO::CByteBufferHelper;
+using Elastos::IO::CByteBufferHelper;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Process;
 using Elastos::Core::IThread;
@@ -143,7 +142,7 @@ AudioRecordInput::AudioRecordInput(
     // http://developer.android.com/training/articles/perf-jni.html
     //ByteBuffer::AllocateDirect(bytesPerBuffer, (IByteBuffer**)&mBuffer);
     AutoPtr<IByteBufferHelper> bbh;
-    //TODO CByteBufferHelper::AcquierSingleton((**IByteBufferHelper)&bbh);
+    CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&bbh);
     bbh->AllocateDirect(bytesPerBuffer, (IByteBuffer**)&mBuffer);
 
     // Rather than passing the ByteBuffer with every OnData call (requiring
@@ -207,7 +206,7 @@ Boolean AudioRecordInput::Open()
     // Android documentation notes "this size doesn't guarantee a smooth
     // recording under load".
     AutoPtr<IAudioRecordHelper> arHelper;
-    //TODO CAudioRecordHelper::AcquireSingleton((IAudioRecordHelper**)&arHelper);
+    //TODO: CAudioRecordHelper::AcquireSingleton((IAudioRecordHelper**)&arHelper);
     Int32 minBufferSize;
     arHelper->GetMinBufferSize(mSampleRate, channelConfig, audioFormat, &minBufferSize);
     if (minBufferSize < 0) {
@@ -224,12 +223,12 @@ Boolean AudioRecordInput::Open()
     // try {
         // TODO(ajm): Allow other AudioSource types to be requested?
     ECode ecode = NOERROR;
-    //TODO ecode = CAudioRecord::New(IAudioSource::VOICE_COMMUNICATION,
-    //                                   mSampleRate,
-    //                                   channelConfig,
-    //                                   audioFormat,
-   //                                    audioRecordBufferSizeInBytes,
-   //                                    (IAudioRecord**)&mAudioRecord);
+    ecode = CAudioRecord::New(IMediaRecorderAudioSource::VOICE_COMMUNICATION,
+        mSampleRate,
+        channelConfig,
+        audioFormat,
+        audioRecordBufferSizeInBytes,
+        (IAudioRecord**)&mAudioRecord);
     // } catch (IllegalArgumentException e) {
     //     Log.e(TAG, "AudioRecord failed", e);
     //     return false;
@@ -240,7 +239,7 @@ Boolean AudioRecordInput::Open()
     }
 
     AutoPtr<IAcousticEchoCancelerHelper> aecHelper;
-    //TODO CAcousticEchoCancelerHelper::AcquireSingleton((IAcousticEchoCancelerHelper**)&aecHelper);
+    CAcousticEchoCancelerHelper::AcquireSingleton((IAcousticEchoCancelerHelper**)&aecHelper);
     Boolean isAvailable = FALSE;
     aecHelper->IsAvailable(&isAvailable);
     if (isAvailable) {

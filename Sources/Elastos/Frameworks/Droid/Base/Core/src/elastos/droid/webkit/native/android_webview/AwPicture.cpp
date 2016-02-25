@@ -41,7 +41,7 @@ AwPicture::AwPicture(
     : mNativeAwPicture(nativeAwPicture)
 {
     AutoPtr<IRunnable> runnable = new DestroyRunnable(nativeAwPicture);
-    //TODO mCleanupReference = new CleanupReference(this, runnable);
+    mCleanupReference = new CleanupReference(this, runnable);
 }
 
 //@Override

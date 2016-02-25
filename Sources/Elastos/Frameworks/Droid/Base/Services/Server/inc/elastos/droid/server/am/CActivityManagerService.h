@@ -5,7 +5,6 @@
 #include "_Elastos_Droid_Server_Am_CActivityManagerService.h"
 #include "elastos/droid/server/ProcessMap.h"
 #include "elastos/droid/server/IntentResolver.h"
-// #include "elastos/droid/server/wm/CWindowManagerService.h"
 #include "elastos/droid/server/am/ActiveServices.h"
 #include "elastos/droid/server/am/CProcessStatsService.h"
 #include "elastos/droid/server/am/ContentProviderRecord.h"
@@ -60,7 +59,7 @@ using Elastos::Droid::App::IIProcessObserver;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IProfilerInfo;
 using Elastos::Droid::App::IStopUserCallback;
-using Elastos::Droid::App::IUserSwitchObserver;
+using Elastos::Droid::App::IIUserSwitchObserver;
 using Elastos::Droid::App::Usage::IUsageStatsManagerInternal;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
@@ -109,7 +108,6 @@ using Elastos::Droid::Os::IUpdateLock;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Server::ProcessMap;
 using Elastos::Droid::Server::IntentResolver;
-// using Elastos::Droid::Server::Wm::CWindowManagerService;
 using Elastos::Droid::Server::Pm::CUserManagerService;
 using Elastos::Droid::View::IWindowManager;
 using Elastos::Core::ICharSequence;
@@ -1145,12 +1143,12 @@ public:
     CARAPI_(void) SetUsageStatsManager(
         /* [in] */ IUsageStatsManagerInternal* usageStatsManager);
 
-    CARAPI_(void) StartObservingNativeCrashes();
+    CARAPI StartObservingNativeCrashes();
 
     CARAPI_(AutoPtr<IIAppOpsService>) GetAppOpsService();
 
     CARAPI_(void) SetSystemServiceManager(
-        /* [in] */ SystemServiceManager* mgr);
+        /* [in] */ ISystemServiceManager* mgr);
 
     CARAPI_(void) InitPowerManagement();
 
@@ -1450,14 +1448,14 @@ public:
     CARAPI CreateActivityContainer(
         /* [in] */ IBinder* parentActivityToken,
         /* [in] */ IActivityContainerCallback* callback,
-        /* [out] */ IActivityContainer** container);
+        /* [out] */ IIActivityContainer** container);
 
     CARAPI DeleteActivityContainer(
-        /* [in] */ IActivityContainer* container);
+        /* [in] */ IIActivityContainer* container);
 
     CARAPI GetEnclosingActivityContainer(
         /* [in] */ IBinder* activityToken,
-        /* [out] */ IActivityContainer** container);
+        /* [out] */ IIActivityContainer** container);
 
     CARAPI MoveTaskToStack(
         /* [in] */ Int32 taskId,
@@ -2126,10 +2124,10 @@ public:
         /* [out] */ String* launchedFromPackage);
 
     CARAPI RegisterUserSwitchObserver(
-        /* [in] */ IUserSwitchObserver* observer);
+        /* [in] */ IIUserSwitchObserver* observer);
 
     CARAPI UnregisterUserSwitchObserver(
-        /* [in] */ IUserSwitchObserver* observer);
+        /* [in] */ IIUserSwitchObserver* observer);
 
     CARAPI RequestBugReport();
 
@@ -2776,7 +2774,7 @@ public:
         /* [in] */ Int32 startFlags,
         /* [in] */ IBundle* options,
         /* [in] */ Int32 userId,
-        /* [in] */ IActivityContainer* container,
+        /* [in] */ IIActivityContainer* container,
         /* [in] */ TaskRecord* inTask,
         /* [out] */ Int32* result);
 
@@ -3742,7 +3740,7 @@ public:
     static const Int32 LAST_PREBOOT_DELIVERED_FILE_VERSION = 10000;
 
     /** All system services */
-    AutoPtr<SystemServiceManager> mSystemServiceManager;
+    AutoPtr<ISystemServiceManager> mSystemServiceManager;
 
     /** Run all ActivityStacks through this */
     AutoPtr<ActivityStackSupervisor> mStackSupervisor;
@@ -3944,7 +3942,7 @@ public:
     /**
      * Registered observers of the user switching mechanics.
      */
-    //AutoPtr< RemoteCallbackList<IUserSwitchObserver> > mUserSwitchObservers;
+    //AutoPtr< RemoteCallbackList<IIUserSwitchObserver> > mUserSwitchObservers;
     AutoPtr<IRemoteCallbackList> mUserSwitchObservers;
 
     /**

@@ -153,7 +153,7 @@ module
             [out] IPendingIntent** intent);
 
         GetVpnLabel(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String packageName,
             [out] ICharSequence** label);
     }

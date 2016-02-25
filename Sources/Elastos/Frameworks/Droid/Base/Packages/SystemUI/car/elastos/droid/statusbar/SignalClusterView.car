@@ -2,12 +2,11 @@ module
 {
     using interface Elastos.Core.IRunnable;
 
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.INetworkControllerImpl;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.ISecurityController;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.INetworkControllerImpl;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.ISecurityController;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
 
@@ -95,7 +94,6 @@ module
 
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

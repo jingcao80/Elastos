@@ -33,7 +33,7 @@ private:
             /* [in] */ Int32 type,
             /* [in] */ Int32 userId,
             /* [in] */ IComponentName* agent,
-            /* [in] */ String message,
+            /* [in] */ const String& message,
             /* [in] */ Int64 duration,
             /* [in] */ Boolean userInitiated,
             /* [in] */ Boolean managingTrust);
@@ -64,7 +64,7 @@ public:
     CARAPI LogGrantTrust(
         /* [in] */ Int32 userId,
         /* [in] */ IComponentName* agent,
-        /* [in] */ String message,
+        /* [in] */ const String& message,
         /* [in] */ Int64 duration,
         /* [in] */ Boolean userInitiated);
 
@@ -97,7 +97,7 @@ public:
         /* [in] */ IPrintWriter* writer,
         /* [in] */ Int32 limit,
         /* [in] */ Int32 userId,
-        /* [in] */ String linePrefix,
+        /* [in] */ const String& linePrefix,
         /* [in] */ Boolean duplicateSimpleNames);
 
     static CARAPI FormatDuration(

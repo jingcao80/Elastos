@@ -27,7 +27,7 @@ namespace Server {
         } \
     } while(0);
 
-const String SystemServiceManager::TAG("SystemServiceManager");
+const String SystemServiceManager::TAG("elSystemServiceManager");
 const String SystemServiceManager::sConstructorSignature("Ctx");
 
 CAR_INTERFACE_IMPL(SystemServiceManager, Object, ISystemServiceManager)

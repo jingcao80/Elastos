@@ -658,6 +658,9 @@ module
         SetOnItemSelectedListener(
             [in] IAdapterViewOnItemSelectedListener* listener);
 
+        SetView(
+            [in] Int32 layoutResId);
+
         /**
          * Set a custom view to be the contents of the Dialog. If the supplied view is an instance
          * of a ListView the light background will be used.

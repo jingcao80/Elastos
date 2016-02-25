@@ -8,10 +8,6 @@
 #include <elastos/core/Object.h>
 #include "elastos/droid/ext/frameworkext.h"
 
-// import android.util.Log;
-// import java.util.ArrayList;
-// import java.util.List;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IParcelUuid;
@@ -38,7 +34,7 @@ class BluetoothGattServer
     , public IBluetoothGattServer
     , public IBluetoothProfile
 {
-private:
+public:
     class BluetoothGattServerCallbackStub
         : public Object
         , public IIBluetoothGattServerCallback
@@ -49,7 +45,7 @@ private:
 
         BluetoothGattServerCallbackStub();
 
-        BluetoothGattServerCallbackStub(
+        CARAPI constructor(
             /* [in] */ IBluetoothGattServer* owner);
 
         /**
@@ -195,7 +191,7 @@ public:
     /*package*/
     BluetoothGattServer(
         /* [in] */ IContext* context,
-        /* [in] */ IBluetoothGatt* iGatt,
+        /* [in] */ IIBluetoothGatt* iGatt,
         /* [in] */ Int32 transport);
 
     /**
@@ -439,7 +435,7 @@ private:
     static const Boolean VDBG;
     AutoPtr<IContext> mContext;
     AutoPtr<IBluetoothAdapter> mAdapter;
-    AutoPtr<IBluetoothGatt> mService;
+    AutoPtr<IIBluetoothGatt> mService;
     AutoPtr<IBluetoothGattServerCallback> mCallback;
     AutoPtr<Object> mServerIfLock;
     Int32 mServerIf;
@@ -449,7 +445,7 @@ private:
     /**
       * Bluetooth GATT interface callbacks
       */
-    AutoPtr<IBluetoothGattServerCallback> mBluetoothGattServerCallback;
+    AutoPtr<IIBluetoothGattServerCallback> mBluetoothGattServerCallback;
 };
 
 } // namespace Bluetooth

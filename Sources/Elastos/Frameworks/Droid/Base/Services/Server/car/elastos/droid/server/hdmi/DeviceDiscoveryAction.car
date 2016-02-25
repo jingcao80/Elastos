@@ -1,0 +1,32 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Hdmi {
+
+    /**
+     * Interface used to report result of device discovery.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IDeviceDiscoveryActionDeviceDiscoveryCallback {
+        /**
+         * Called when device discovery is done.
+         *
+         * @param deviceInfos a list of all non-local devices. It can be empty list.
+         */
+        OnDeviceDiscoveryDone(
+            [in] IList* deviceInfos);
+    }
+
+    } // namespace Hdmi
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

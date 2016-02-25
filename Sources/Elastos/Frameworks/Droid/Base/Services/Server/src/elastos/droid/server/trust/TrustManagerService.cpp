@@ -1,15 +1,18 @@
 
+#include "elastos/droid/server/trust/TrustManagerService.h"
 #include "elastos/droid/server/trust/TrustAgentWrapper.h"
 #include "elastos/droid/server/trust/TrustArchive.h"
-#include "elastos/droid/server/trust/TrustManagerService.h"
+#include <Elastos.CoreLibrary.External.h>
+#include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.h>
 #include <Elastos.Droid.Graphics.h>
 #include <Elastos.Droid.Utility.h>
-#include <cutils/log.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/R.h>
+#include <elastos/droid/app/ActivityManagerNative.h>
+#include <elastos/droid/net/ReturnOutValue.h>
 #include <elastos/droid/os/Binder.h>
 #include <elastos/droid/os/Handler.h>
 #include <elastos/droid/os/SystemClock.h>
@@ -17,70 +20,66 @@
 #include <elastos/droid/utility/Xml.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
-#include <elastos/droid/net/ReturnOutValue.h>
-#include <Elastos.CoreLibrary.IO.h>
-#include <elastos/droid/app/ActivityManagerNative.h>
-#include <Elastos.CoreLibrary.External.h>
-// #include <elastos/droid/provider/Settings.h>
+#include <Elastos.Droid.Provider.h>
 
-using Elastos::Droid::Os::EIID_IBinder;
-using Elastos::Droid::Content::CComponentNameHelper;
-using Elastos::Droid::Content::IComponentNameHelper;
-using Elastos::Droid::Content::Res::ITypedArray;
-using Elastos::Droid::Content::Pm::IComponentInfo;
-using Elastos::Droid::Content::Res::IXmlResourceParser;
-using Elastos::Droid::Content::Pm::IServiceInfo;
-using Elastos::Droid::Content::Pm::IPackageItemInfo;
-using Elastos::Droid::Internal::Widget::CLockPatternUtils;
-using Elastos::Utility::ISet;
-using Elastos::Droid::App::ActivityManagerNative;
-// using Elastos::Droid::Provider::Settings;
 using Elastos::Core::CInteger32;
+using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IRunnable;
-using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::ISystem;
 using Elastos::Core::StringUtils;
+using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
 using Elastos::Droid::App::IService;
+using Elastos::Droid::App::Trust::EIID_IITrustManager;
 using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Content::CComponentNameHelper;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::IComponentNameHelper;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Content::Pm::IComponentInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::Pm::IServiceInfo;
 using Elastos::Droid::Content::Pm::IUserInfo;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Content::Res::IXmlResourceParser;
+using Elastos::Droid::Internal::Widget::CLockPatternUtils;
 using Elastos::Droid::Manifest;
 using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::R;
 using Elastos::Droid::Service::Trust::ITrustAgentService;
 using Elastos::Droid::Utility::CArraySet;
 using Elastos::Droid::Utility::CSparseBooleanArray;
 using Elastos::Droid::Utility::IArraySet;
+using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Utility::ISparseBooleanArray;
 using Elastos::Droid::Utility::Xml;
-using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
+using Elastos::Utility::ISet;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 using Elastosx::Net::Ssl::ITrustManager;
 using Org::Xmlpull::V1::IXmlPullParser;
-using Elastos::Droid::App::Trust::EIID_IITrustManager;
 
 namespace Elastos {
 namespace Droid {
@@ -100,6 +99,8 @@ ECode TrustManagerService::AgentInfo::Equals(
     /* [in] */ IInterface* other,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     if (IAgentInfo::Probe(other) == NULL) {
         *result = FALSE;
         return NOERROR;
@@ -114,6 +115,8 @@ ECode TrustManagerService::AgentInfo::Equals(
 ECode TrustManagerService::AgentInfo::GetHashCode(
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     Int32 rev;
     IObject::Probe(mComponent)->GetHashCode(&rev);
     *result = rev * 31 + mUserId;
@@ -381,6 +384,8 @@ String TrustManagerService::InnerSub_ITrustManager::DumpBool(
 ECode TrustManagerService::InnerSub_ITrustManager::ToString(
     /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return IObject::ToString(result);
 }
 
@@ -433,18 +438,20 @@ ECode TrustManagerService::InnerSub_PackageMonitor::OnSomePackagesChanged()
 }
 
 ECode TrustManagerService::InnerSub_PackageMonitor::OnPackageChanged(
-    /* [in] */ String packageName,
+    /* [in] */ const String& packageName,
     /* [in] */ Int32 uid,
     /* [in] */ ArrayOf<String>* components,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     // We're interested in all changes, even if just some components get enabled / disabled.
     *result = TRUE;
     return NOERROR;
 }
 
 ECode TrustManagerService::InnerSub_PackageMonitor::OnPackageDisappeared(
-    /* [in] */ String packageName,
+    /* [in] */ const String& packageName,
     /* [in] */ Int32 reason)
 {
     return mHost->RemoveAgentsOfPackage(packageName);
@@ -643,7 +650,7 @@ ECode TrustManagerService::UpdateDevicePolicyFeatures()
 }
 
 ECode TrustManagerService::RemoveAgentsOfPackage(
-    /* [in] */ String packageName)
+    /* [in] */ const String& packageName)
 {
     Boolean trustMayHaveChanged = FALSE;
     for (Int32 i = Ptr(ISet::Probe(mActiveAgents))->Func(ISet::GetSize) - 1; i >= 0; i--) {
@@ -699,6 +706,8 @@ ECode TrustManagerService::GetSettingsComponentName(
     /* [in] */ IResolveInfo* resolveInfo,
     /* [out] */ IComponentName** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     AutoPtr<IServiceInfo> serviceInfo;
     resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
     if (resolveInfo == NULL || serviceInfo == NULL
@@ -811,12 +820,12 @@ ECode TrustManagerService::MaybeEnableFactoryTrustAgents(
     /* [in] */ ILockPatternUtils* utils,
     /* [in] */ Int32 userId)
 {
-    // TODO: Waiting for Settings
-    assert(0);
-    // if (0 != Settings::Secure::GetIntForUser(Ptr(mContext)->Func(mContext->GetContentResolver,
-    //         Settings::Secure::TRUST_AGENTS_INITIALIZED, 0, userId)) {
-    //     return NOERROR;
-    // }
+    Int32 value;
+    Settings::Secure::GetInt32ForUser(Ptr(mContext)->Func(mContext->GetContentResolver),
+            ISettingsSecure::TRUST_AGENTS_INITIALIZED, 0, userId, &value);
+    if (0 != value) {
+        return NOERROR;
+    }
     AutoPtr<IPackageManager> pm;
     mContext->GetPackageManager((IPackageManager**)&pm);
     AutoPtr<IList> resolveInfos = ResolveAllowedTrustAgents(pm, userId);
@@ -841,10 +850,9 @@ ECode TrustManagerService::MaybeEnableFactoryTrustAgents(
         discoveredAgents->AddAll(IArraySet::Probe(previouslyEnabledAgents));
     }
     utils->SetEnabledTrustAgents(ICollection::Probe(discoveredAgents), userId);
-    // TODO: Waiting for Settings
-    assert(0);
-    // Settings::Secure::PutIntForUser(Ptr(mContext)->Func(mContext->GetContentResolver),
-    //         Settings::Secure::TRUST_AGENTS_INITIALIZED, 1, userId);
+    Boolean bNoUse;
+    Settings::Secure::PutInt32ForUser(Ptr(mContext)->Func(mContext->GetContentResolver),
+            ISettingsSecure::TRUST_AGENTS_INITIALIZED, 1, userId, &bNoUse);
     return NOERROR;
 }
 

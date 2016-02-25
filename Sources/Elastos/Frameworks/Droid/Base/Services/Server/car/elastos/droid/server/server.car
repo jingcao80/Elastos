@@ -31,6 +31,15 @@ module
     merge("display/OverlayDisplayWindow.car");
     merge("display/RampAnimator.car");
 
+    merge("hdmi/DeviceDiscoveryAction.car");
+    merge("hdmi/HdmiCecController.car");
+    merge("hdmi/HdmiCecFeatureAction.car");
+    merge("hdmi/HdmiCecLocalDevice.car");
+    merge("hdmi/HdmiCecMessage.car");
+    merge("hdmi/HdmiCecMessageValidator.car");
+    merge("hdmi/HdmiCecStandbyModeHandler.car");
+    merge("hdmi/HdmiControlService.car");
+
     merge("input/InputManagerService.car");
     merge("input/InputApplicationHandle.car");
     merge("input/InputWindowHandle.car");
@@ -62,6 +71,9 @@ module
 
     merge("trust/TrustManagerService.car");
 
+    merge("tv/TvInputHal.car");
+    merge("tv/TvInputHardwareManager.car");
+
     merge("twilight/TwilightState.car");
     merge("twilight/TwilightManager.car");
     merge("twilight/TwilightListener.car");
@@ -86,13 +98,14 @@ module
     interface Elastos.Droid.Server.Wallpaper.IWallpaperData;
     interface Elastos.Droid.Server.Wallpaper.IWallpaperManagerService;
 
-    using interface Elastos.Droid.App.IActivityContainer;
+    using interface Elastos.Droid.App.IIActivityContainer;
     using interface Elastos.Droid.App.IIActivityManager;
     using interface Elastos.Droid.App.IIAlarmManager;
     using interface Elastos.Droid.App.IIAppTask;
     using interface Elastos.Droid.App.IINotificationManager;
     using interface Elastos.Droid.App.IIWallpaperManager;
     using interface Elastos.Droid.App.IIUiModeManager;
+    using interface Elastos.Droid.App.IIUserSwitchObserver;
     using interface Elastos.Droid.App.IStopUserCallback;
     using interface Elastos.Droid.App.IWallpaperInfo;
     using interface Elastos.Droid.App.Job.IJobService;
@@ -120,15 +133,21 @@ module
     using interface Elastos.Droid.Hardware.IISerialManager;
     using interface Elastos.Droid.Hardware.IIConsumerIrService;
     using interface Elastos.Droid.Hardware.Display.IIDisplayManager;
+    using interface Elastos.Droid.Hardware.Hdmi.IIHdmiControlService;
     using interface Elastos.Droid.Hardware.Input.IIInputManager;
     using interface Elastos.Droid.Hardware.Location.IIFusedLocationHardware;
     using interface Elastos.Droid.Internal.App.IIProcessStats;
     using interface Elastos.Droid.Internal.App.IIBatteryStats;
+    using interface Elastos.Droid.Internal.App.IIAppOpsService;
     using interface Elastos.Droid.Internal.Os.IBatteryCallback;
     using interface Elastos.Droid.Internal.Os.IIParcelFileDescriptorFactory;
     using interface Elastos.Droid.Internal.Os.IIDropBoxManagerService;
     using interface Elastos.Droid.Internal.View.IInputMethodClient;
-    using interface Elastos.Droid.Internal.View.IInputContext;
+    using interface Elastos.Droid.Internal.View.IIInputContext;
+    using interface Elastos.Droid.Internal.View.IIInputMethod;
+    using interface Elastos.Droid.Internal.View.IIInputSessionCallback;
+    using interface Elastos.Droid.Internal.View.IIInputMethodManager;
+    using interface Elastos.Droid.Internal.AppWidget.IIAppWidgetService;
     using interface Elastos.Droid.Internal.Widget.IILockSettings;
     using interface Elastos.Droid.Internal.StatusBar.IIStatusBarService;
     using interface Elastos.Droid.Internal.TextService.IITextServicesManager;
@@ -138,8 +157,6 @@ module
     using interface Elastos.Droid.Location.IIGpsGeofenceHardware;
     using interface Elastos.Droid.Location.IIGpsStatusProvider;
     using interface Elastos.Droid.Location.IINetInitiatedListener;
-    using interface Elastos.Droid.Bluetooth.IIBluetoothManager;
-    using interface Elastos.Droid.Bluetooth.IIBluetoothCallback;
     using interface Elastos.Droid.Media.Projection.IIMediaProjectionCallback;
     using interface Elastos.Droid.Net.IIConnectivityManager;
     using interface Elastos.Droid.Net.IINetworkManagementEventObserver;
@@ -151,6 +168,7 @@ module
     using interface Elastos.Droid.Os.IBinder;
     using interface Elastos.Droid.Os.IBundle;
     using interface Elastos.Droid.Os.IHandler;
+    using interface Elastos.Droid.Os.IHandlerCallback;
     using interface Elastos.Droid.Os.ILooper;
     using interface Elastos.Droid.Os.ILowPowerModeListener;
     using interface Elastos.Droid.Os.IIVibratorService;
@@ -165,6 +183,7 @@ module
     using interface Elastos.Droid.Os.ILooper;
     using interface Elastos.Droid.Os.IIBatteryPropertiesListener;
     using interface Elastos.Droid.Os.Storage.IIMountShutdownObserver;
+    using interface Elastos.Droid.Server.IWidgetBackupProvider;
     using interface Elastos.Droid.Service.Dreams.IIDreamManager;
     using interface Elastos.Droid.Service.Notification.IIStatusBarNotificationHolder;
     using interface Elastos.Droid.Service.Notification.IStatusBarNotification;
@@ -173,6 +192,7 @@ module
     using interface Elastos.Droid.Utility.ITrustedTime;
     using interface Elastos.Droid.View.IApplicationToken;
     using interface Elastos.Droid.View.IIInputFilterHost;
+    using interface Elastos.Droid.View.IInputChannel;
     using interface Elastos.Droid.View.IIWindowManager;
     using interface Elastos.Droid.View.IWindowManagerPolicyWindowManagerFuncs;
     using interface Elastos.Droid.View.IIWindowSessionCallback;
@@ -191,9 +211,47 @@ module
     namespace Droid {
     namespace Server {
 
+    class CAppOpsService {
+        constructor(
+            [in] IFile* storagePath,
+            [in] IHandler* handler);
+
+        interface IIAppOpsService;
+        interface IBinder;
+    }
+
+    class CInputMethodManagerServiceMethodCallback {
+        constructor(
+            [in] IIInputMethodManager* imms,
+            [in] IIInputMethod* method,
+            [in] IInputChannel* channel);
+
+        interface IIInputSessionCallback;
+        interface IBinder;
+    }
+
+    class CInputMethodManagerServiceUserSwitchObserver {
+        constructor(
+            [in] IIInputMethodManager* imms);
+
+        interface IIUserSwitchObserver;
+        interface IBinder;
+    }
+
+    class CInputMethodManagerService {
+        constructor(
+            [in] IContext* ctx,
+            [in] IIWindowManager* windowManagerService);
+
+        interface IIInputMethodManager;
+        interface IBinder;
+        interface IServiceConnection;
+        interface IHandlerCallback;
+    }
+
     class CNetworkManagementService {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String socket);
 
         interface IINetworkManagementService;
@@ -440,19 +498,6 @@ module
         interface IBinder;
     }
 
-//     class CBootReceiver {
-//         interface IBroadcastReceiver;
-//     }
-
-//     class CMasterClearReceiver {
-//         interface IBroadcastReceiver;
-//     }
-
-//     [local]
-//     class CBrickReceiver {
-//         interface IBroadcastReceiver;
-//     }
-
 //     [local]
 //     class CEthernetService {
 //         constructor(
@@ -461,31 +506,12 @@ module
 //         interface IIEthernetManager;
 //     }
 
-//     // [local]
-//     // class CPppoeService {
-//     //     constructor(
-//     //         [in] IContext* ctx,
-//     //         [in] IPppoeStateTracker* tracker);
-// //
-//     //     interface IIPppoeManager;
-//     // }
-
 //     [local]
 //     class CDeviceStorageMonitorService {
 //         constructor(
 //             [in] IContext* ctx);
 //
 //         interface IDeviceStorageMonitorService;
-//         interface IBinder;
-//     }
-
-//     [local]
-//     class CDisplayManagerServiceAw {
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IIPowerManager* pm);
-
-//         interface IIDisplayManagerAw;
 //         interface IBinder;
 //     }
 
@@ -502,6 +528,7 @@ module
 //         interface IBackupAgentHelper;
 //     }
 
+//     backup
 //     [local]
 //     class CActiveRestoreSession {
 //         constructor(
@@ -513,35 +540,11 @@ module
 //         interface IBinder;
 //     }
 
-//     [local]
-//     class CNsdService {
-//         constructor(
-//             [in] IContext* ctx);
-
-//         interface IINsdManager;
-//         interface IBinder;
-//     }
-
-//     [local]
-//     class CThrottleService {
-//         constructor(
-//             [in] IContext* ctx);
-
-//         constructor(
-//             [in] IContext* ctx,
-//             [in] IINetworkManagementService* nmService,
-//             [in] ITrustedTime* time,
-//             [in] String iface);
-
-//         interface IIThrottleManager;
-//         interface IBinder;
-//     }
-
 //     class CWMSUserSwitchObserver {
 //         constructor(
 //             [in] Handle32 owner);
 
-//         interface IUserSwitchObserver;
+//         interface IIUserSwitchObserver;
 //         interface IBinder;
 //     }
 
@@ -565,77 +568,6 @@ module
 //     }
 
 //     } //Location
-
-//     namespace Net {
-//         class CProcessObserver {
-//             constructor(
-//                 [in] Handle32 owner);
-
-//             interface IProcessObserver;
-//         }
-
-//         [local]
-//         class CNetworkPolicyManagerService {
-//             constructor(
-//                 [in] IContext* ctx,
-//                 [in] IIActivityManager* activityManager,
-//                 [in] IIPowerManager* powerManager,
-//                 [in] INetworkStatsService* networkStats,
-//                 [in] IINetworkManagementService* networkManagement);
-
-//             constructor(
-//                 [in] IContext* ctx,
-//                 [in] IIActivityManager* activityManager,
-//                 [in] IIPowerManager* powerManager,
-//                 [in] INetworkStatsService* networkStats,
-//                 [in] IINetworkManagementService* networkManagement,
-//                 [in] ITrustedTime* time,
-//                 [in] IFile* systemDir,
-//                 [in] Boolean suppressDefaultPolicy);
-
-//             interface IINetworkPolicyManager;
-//         }
-
-//         [local]
-//         class CNetworkStatsService {
-//             constructor(
-//                 [in] IContext* ctx,
-//                 [in] IINetworkManagementService* networkManager,
-//                 [in] IIAlarmManager* alarmManager);
-
-//             constructor(
-//                 [in] IContext* ctx,
-//                 [in] IINetworkManagementService* networkManager,
-//                 [in] IIAlarmManager* alarmManager,
-//                 [in] ITrustedTime* time,
-//                 [in] IFile* systemDir,
-//                 [in] Handle32 settings);
-
-//             interface INetworkStatsService;
-//         }
-
-//         class CNetworkStatsSession {
-//             constructor(
-//                 [in] Handle32 host);
-
-//             interface INetworkStatsSession;
-//         }
-
-//         class CNetworkPolicyManagerServiceAlertObserber {
-//             constructor(
-//                 [in] Handle32 owner);
-
-//             interface IINetworkManagementEventObserver;
-//         }
-
-//         class CNetworkStatsServiceAlertObserber {
-//             constructor(
-//                 [in] Handle32 owner);
-
-//             interface IINetworkManagementEventObserver;
-//         }
-
-//     } // namespace Net
 
 // //    namespace Updates {
 // //
@@ -708,7 +640,7 @@ module
             [in] Handle64 service,
             [in] IIWindowSessionCallback* cb,
             [in] IInputMethodClient* client,
-            [in] IInputContext* inputContext);
+            [in] IIInputContext* inputContext);
 
         interface IWindowSession;
         interface IProxyDeathRecipient;
@@ -748,15 +680,6 @@ module
 //             [in] IContext* ctx);
 
 //             interface IIPrivacySettingsManager;
-//     }
-
-//     [local]
-//     class CAppWidgetService {
-//         constructor(
-//             [in] IContext* ctx);
-
-//         interface IIAppWidgetService;
-//         interface IBinder;
 //     }
 
 //     namespace Accessibility {
@@ -1269,7 +1192,7 @@ module
         [local]
         class CNat464Xlat {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IINetworkManagementService* nmService,
                 [in] IIConnectivityManager* connService,
                 [in] IHandler* handler);
@@ -1420,7 +1343,7 @@ module
             [in] Int32 stackId,
             [in] IInterface* owner);
         interface IBinder;
-        interface IActivityContainer;
+        interface IIActivityContainer;
     }
 
     [local]
@@ -1525,14 +1448,14 @@ module
     [local]
     class CNetworkPolicyManagerService {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIActivityManager* activityManager,
             [in] IIPowerManager* powerManager,
             [in] IINetworkStatsService* networkStats,
             [in] IINetworkManagementService* networkManagement);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIActivityManager* activityManager,
             [in] IIPowerManager* powerManager,
             [in] IINetworkStatsService* networkStats,
@@ -1548,12 +1471,12 @@ module
     [local]
     class CNetworkStatsService {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IINetworkManagementService* networkManager,
             [in] IIAlarmManager* alarmManager);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IINetworkManagementService* networkManager,
             [in] IIAlarmManager* alarmManager,
             [in] ITrustedTime* time,
@@ -1612,7 +1535,7 @@ module
     class CFusedLocationHardwareSecure {
         constructor(
             [in] IIFusedLocationHardware* locationHardware,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String permissionId);
 
         interface IIFusedLocationHardware;
@@ -1731,4 +1654,59 @@ module
     } // namepsace Droid
     } // namespace Elastos
 
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace AppWidget {
+
+    [local]
+    class CAppWidgetServiceImpl {
+         constructor(
+             [in] IContext* context);
+
+         interface IIAppWidgetService;
+         interface IWidgetBackupProvider;
+         interface IBinder;
+    }
+
+    } // namespace AppWidget
+    } // namespace Server
+    } // namepsace Droid
+    } // namespace Elastos
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Hdmi {
+
+//    class CHdmiCecLocalDevice {
+//        constructor(
+//            [in] IHdmiControlService* service,
+//            [in] Int32 deviceType);
+
+//        interface IHdmiCecLocalDevice;
+//    }
+
+//    [deprecated]
+//    class CHdmiCecMessage {
+//        constructor(
+//            [in] Int32 source,
+//            [in] Int32 destination,
+//            [in] Int32 opcode,
+//            [in] ArrayOf<Byte>* params);
+
+//        interface IHdmiCecMessage;
+//    }
+
+    class CHdmiControlServiceBinderService {
+        constructor();
+
+        interface IBinder;
+        interface IIHdmiControlService;
+    }
+
+    } // namespace Elastos
+    } // namespace Droid
+    } // namespace Server
+    } // namespace Hdmi
 }

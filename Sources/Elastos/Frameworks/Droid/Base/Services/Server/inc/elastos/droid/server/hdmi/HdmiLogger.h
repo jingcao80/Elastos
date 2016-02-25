@@ -1,27 +1,20 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.server.hdmi;
+#ifndef __ELASTOS_DROID_SERVER_HDMI_HDMILOGGER_H__
+#define __ELASTOS_DROID_SERVER_HDMI_HDMILOGGER_H__
 
-using Elastos::Droid::annotation.Nullable;
-using Elastos::Droid::Os::ISystemClock;
+#include "_Elastos.Droid.Server.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/core/Object.h>
+
+// using Elastos::Droid::Os::ISystemClock;
 using Elastos::Droid::Utility::IPair;
-using Elastos::Droid::Utility::ISlog;
-
 using Elastos::Utility::IHashMap;
+using Elastos::Core::IThreadLocal;
+
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Hdmi {
 
 /**
  * A logger that prevents spammy log. For the same log message, it logs once every 20seconds.
@@ -36,103 +29,85 @@ using Elastos::Utility::IHashMap;
  *   <li>[P]: Device polling result
  * </ul>
  */
-final class HdmiLogger {
-    private static const String TAG = "HDMI";
+class HdmiLogger
+    : public Object
+{
+public:
+    static CARAPI Warning(
+        /* [in] */ const String& logMessage,
+        /* [in] */ ArrayOf<IObject>* objs);
+
+    static CARAPI Error(
+        /* [in] */ const String& logMessage,
+        /* [in] */ ArrayOf<IObject>* objs);
+
+    static CARAPI Debug(
+        /* [in] */ const String& logMessage,
+        /* [in] */ ArrayOf<IObject>* objs);
+
+private:
+    HdmiLogger();
+
+    CARAPI WarningInternal(
+        /* [in] */ const String& logMessage);
+
+    CARAPI ErrorInternal(
+        /* [in] */ const String& logMessage);
+
+    CARAPI DebugInternal(
+        /* [in] */ const String& logMessage);
+
+    static CARAPI ToLogString(
+        /* [in] */ const String& logMessage,
+        /* [in] */ ArrayOf<IObject*>* objs,
+        /* [out] */ String* result);
+
+    static CARAPI GetLogger(
+        /* [out] */ HdmiLogger** result);
+
+    static CARAPI UpdateLog(
+        /* [in] */ IHashMap* cache,
+        /* [in] */ const String& logMessage,
+        /* [out] */ String* result);
+
+    static CARAPI BuildMessage(
+        /* [in] */ const String& message,
+        /* [in] */ IPair* timing,
+        /* [out] */ String* result);
+
+    static CARAPI IncreaseLogCount(
+        /* [in] */ IHashMap* cache,
+        /* [in] */ const String& message);
+
+    static CARAPI ShouldLogNow(
+        /* [in] */ IPair* timing,
+        /* [in] */ Int64 curTime,
+        /* [out] */ Boolean* result);
+
+    static CARAPI_(AutoPtr<IThreadLocal>) InitLogger();
+
+private:
+    static const String TAG;
+
     // Logging duration for same error message.
-    private static const Int64 ERROR_LOG_DURATTION_MILLIS = 20 * 1000;  // 20s
+    static const Int64 ERROR_LOG_DURATTION_MILLIS;
 
-    private static const Boolean DEBUG = FALSE;
+    // 20s
+    static const Boolean DEBUG;
 
-    private static const ThreadLocal<HdmiLogger> sLogger = new ThreadLocal<>();
+    static const AutoPtr<IThreadLocal> sLogger;
 
     // Key (String): log message.
     // Value (Pair(Long, Integer)): a pair of last log time millis and the number of logMessage.
     // Cache for warning.
-    private final HashMap<String, Pair<Long, Integer>> mWarningTimingCache = new HashMap<>();
+    AutoPtr<IHashMap> mWarningTimingCache;
     // Cache for error.
-    private final HashMap<String, Pair<Long, Integer>> mErrorTimingCache = new HashMap<>();
+    AutoPtr<IHashMap> mErrorTimingCache;
+};
 
-    private HdmiLogger() {
-    }
+} // namespace Hdmi
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
 
-    static const void Warning(String logMessage, Object... objs) {
-        GetLogger()->WarningInternal(ToLogString(logMessage, objs));
-    }
-
-    private void WarningInternal(String logMessage) {
-        String log = UpdateLog(mWarningTimingCache, logMessage);
-        if (!log->IsEmpty()) {
-            Slogger::W(TAG, log);
-        }
-    }
-
-    static const void Error(String logMessage, Object... objs) {
-        GetLogger()->ErrorInternal(ToLogString(logMessage, objs));
-    }
-
-    private void ErrorInternal(String logMessage) {
-        String log = UpdateLog(mErrorTimingCache, logMessage);
-        if (!log->IsEmpty()) {
-            Slogger::E(TAG, log);
-        }
-    }
-
-    static const void Debug(String logMessage, Object... objs) {
-        GetLogger()->DebugInternal(ToLogString(logMessage, objs));
-    }
-
-    private void DebugInternal(String logMessage) {
-        if (!DEBUG) {
-            return;
-        }
-        Slogger::D(TAG, logMessage);
-    }
-
-    private static const String ToLogString(String logMessage, Object[] objs) {
-        if (objs.length > 0) {
-            return String->Format(logMessage, objs);
-        } else {
-            return logMessage;
-        }
-    }
-
-    private static HdmiLogger GetLogger() {
-        HdmiLogger logger = sLogger->Get();
-        if (logger == NULL) {
-            logger = new HdmiLogger();
-            sLogger->Set(logger);
-        }
-        return logger;
-    }
-
-    private static String UpdateLog(HashMap<String, Pair<Long, Integer>> cache, String logMessage) {
-        Int64 curTime = SystemClock->UptimeMillis();
-        Pair<Long, Integer> timing = cache->Get(logMessage);
-        if (ShouldLogNow(timing, curTime)) {
-            String log = BuildMessage(logMessage, timing);
-            cache->Put(logMessage, new Pair<>(curTime, 1));
-            return log;
-        } else {
-            IncreaseLogCount(cache, logMessage);
-        }
-        return "";
-    }
-
-    private static String BuildMessage(String message, @Nullable Pair<Long, Integer> timing) {
-        return new StringBuilder()
-                .Append("[").Append(timing == NULL ? 1 : timing.second).Append("]:")
-                .Append(message).ToString();
-    }
-
-    private static void IncreaseLogCount(HashMap<String, Pair<Long, Integer>> cache,
-            String message) {
-        Pair<Long, Integer> timing = cache->Get(message);
-        if (timing != NULL) {
-            cache->Put(message, new Pair<>(timing.first, timing.second + 1));
-        }
-    }
-
-    private static Boolean ShouldLogNow(@Nullable Pair<Long, Integer> timing, Int64 curTime) {
-        return timing == NULL || curTime - timing.first > ERROR_LOG_DURATTION_MILLIS;
-    }
-}
+#endif // __ELASTOS_DROID_SERVER_HDMI_HDMILOGGER_H__

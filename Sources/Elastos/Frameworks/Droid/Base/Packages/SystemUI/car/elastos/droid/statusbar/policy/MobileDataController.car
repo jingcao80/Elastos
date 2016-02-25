@@ -1,10 +1,9 @@
 module
 {
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.INetworkControllerDataUsageInfo;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.INetworkControllerDataUsageInfo;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
     namespace Policy {
@@ -34,7 +33,6 @@ module
     } // namespace Policy
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

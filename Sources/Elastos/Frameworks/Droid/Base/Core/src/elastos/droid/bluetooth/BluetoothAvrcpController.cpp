@@ -1,8 +1,21 @@
-
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/bluetooth/BluetoothAvrcpController.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/os/Process.h"
+#include "elastos/core/AutoLock.h"
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::Process;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::IList;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -17,40 +30,42 @@ BluetoothAvrcpController::BluetoothStateChangeCallbackStub::BluetoothStateChange
 {
 }
 
-BluetoothAvrcpController::BluetoothStateChangeCallbackStub::BluetoothStateChangeCallbackStub(
+ECode BluetoothAvrcpController::BluetoothStateChangeCallbackStub::constructor (
     /* [in] */ IBluetoothAvrcpController* owner)
 {
     mOwner = (BluetoothAvrcpController*)owner;
+    return NOERROR;
 }
 
 ECode BluetoothAvrcpController::BluetoothStateChangeCallbackStub::OnBluetoothStateChange(
     /* [in] */ Boolean up)
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
-    // if (!up) {
-    //     if (VDBG) Log.d(TAG,"Unbinding service...");
-    //     synchronized (mConnection) {
-    //         try {
-    //             mService = null;
-    //             mContext.unbindService(mConnection);
-    //         } catch (Exception re) {
-    //             Log.e(TAG,"",re);
-    //         }
-    //     }
-    // } else {
-    //     synchronized (mConnection) {
-    //         try {
-    //             if (mService == null) {
-    //                 if (VDBG) Log.d(TAG,"Binding service...");
-    //                 doBind();
-    //             }
-    //         } catch (Exception re) {
-    //             Log.e(TAG,"",re);
-    //         }
-    //     }
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "onBluetoothStateChange: up=%d", up);
+    if (!up) {
+        if (VDBG) Logger::D(TAG,"Unbinding service...");
+        {
+            AutoLock lock(mOwner->mConnection);
+            //try {
+            mOwner->mService = NULL;
+            mOwner->mContext->UnbindService(mOwner->mConnection);
+            //} catch (Exception re) {
+            //    Log.e(TAG,"",re);
+            //}
+        }
+    } else {
+        {
+            AutoLock lock(mOwner->mConnection);
+            //try {
+            if (mOwner->mService == NULL) {
+                if (VDBG) Logger::D(TAG,"Binding service...");
+                Boolean bind;
+                mOwner->DoBind(&bind);
+            }
+            //} catch (Exception re) {
+            //    Log.e(TAG,"",re);
+            //}
+        }
+    }
     return NOERROR;
 }
 
@@ -66,7 +81,6 @@ BluetoothAvrcpController::InnerServiceConnection::InnerServiceConnection()
 BluetoothAvrcpController::InnerServiceConnection::InnerServiceConnection(
     /* [in] */ BluetoothAvrcpController* owner)
 {
-    // ==================before translated======================
     mOwner = owner;
 }
 
@@ -74,31 +88,24 @@ ECode BluetoothAvrcpController::InnerServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* className,
     /* [in] */ IBinder* service)
 {
-    VALIDATE_NOT_NULL(className);
-    VALIDATE_NOT_NULL(service);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Proxy object connected");
-    // mService = IBluetoothAvrcpController.Stub.asInterface(service);
-    //
-    // if (mServiceListener != null) {
-    //     mServiceListener.onServiceConnected(BluetoothProfile.AVRCP_CONTROLLER,
-    //             BluetoothAvrcpController.this);
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "Proxy object connected");
+    mOwner->mService = IIBluetoothAvrcpController::Probe(service);
+
+    if (mOwner->mServiceListener != NULL) {
+        mOwner->mServiceListener->OnServiceConnected(IBluetoothProfile::AVRCP_CONTROLLER,
+                mOwner);
+    }
     return NOERROR;
 }
 
 ECode BluetoothAvrcpController::InnerServiceConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* className)
 {
-    VALIDATE_NOT_NULL(className);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Proxy object disconnected");
-    // mService = null;
-    // if (mServiceListener != null) {
-    //     mServiceListener.onServiceDisconnected(BluetoothProfile.AVRCP_CONTROLLER);
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "Proxy object disconnected");
+    mOwner->mService = NULL;
+    if (mOwner->mServiceListener != NULL) {
+        mOwner->mServiceListener->OnServiceDisconnected(IBluetoothProfile::AVRCP_CONTROLLER);
+    }
     return NOERROR;
 }
 
@@ -106,8 +113,8 @@ ECode BluetoothAvrcpController::InnerServiceConnection::OnServiceDisconnected(
 //                       BluetoothAvrcpController
 //=====================================================================
 const String BluetoothAvrcpController::TAG("BluetoothAvrcpController");
-const Boolean BluetoothAvrcpController::DBG = true;
-const Boolean BluetoothAvrcpController::VDBG = false;
+const Boolean BluetoothAvrcpController::DBG = TRUE;
+const Boolean BluetoothAvrcpController::VDBG = FALSE;
 
 CAR_INTERFACE_IMPL_2(BluetoothAvrcpController, Object, IBluetoothAvrcpController, IBluetoothProfile);
 
@@ -115,76 +122,87 @@ BluetoothAvrcpController::BluetoothAvrcpController()
 {
 }
 
+BluetoothAvrcpController::~BluetoothAvrcpController()
+{
+    Close();
+}
+
 BluetoothAvrcpController::BluetoothAvrcpController(
     /* [in] */ IContext* context,
     /* [in] */ IBluetoothProfileServiceListener* l)
 {
-    // ==================before translated======================
-    // mContext = context;
-    // mServiceListener = l;
-    // mAdapter = BluetoothAdapter.getDefaultAdapter();
-    // IBluetoothManager mgr = mAdapter.getBluetoothManager();
-    // if (mgr != null) {
-    //     try {
-    //         mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG,"",e);
-    //     }
-    // }
-    //
-    // doBind();
+    mContext = context;
+    mServiceListener = l;
+    mAdapter = CBluetoothAdapter::GetDefaultAdapter();
+    //IBluetoothManager mgr = mAdapter.getBluetoothManager();
+    AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
+    if (mgr != NULL) {
+        //try {
+        mgr->RegisterStateChangeCallback(mBluetoothStateChangeCallback);
+        //} catch (RemoteException e) {
+        //    Log.e(TAG,"",e);
+        //}
+    }
+
+    Boolean bind;
+    DoBind(&bind);
 }
 
 ECode BluetoothAvrcpController::DoBind(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // Intent intent = new Intent(IBluetoothAvrcpController.class.getName());
-    // ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
-    // intent.setComponent(comp);
-    // if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
-    //         android.os.Process.myUserHandle())) {
-    //     Log.e(TAG, "Could not bind to Bluetooth AVRCP Controller Service with " + intent);
-    //     return false;
-    // }
-    // return true;
-    assert(0);
+    AutoPtr<IIntent> intent;
+    CIntent::New(String("IBluetoothAvrcpController")/*IBluetoothAvrcpController.class.getName()*/, (IIntent**)&intent);
+    AutoPtr<IComponentName> comp;
+    AutoPtr<IPackageManager> pm;
+    mContext->GetPackageManager((IPackageManager**)&pm);
+    intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
+    intent->SetComponent(comp);
+    AutoPtr<IUserHandle> userHandle;
+    Process::MyUserHandle((IUserHandle**)&userHandle);
+    Boolean succeeded = FALSE;
+
+    if (comp == NULL || !(mContext->BindServiceAsUser(intent, mConnection, 0,
+            userHandle, &succeeded), succeeded)) {
+        Logger::E(TAG, "Could not bind to Bluetooth AVRCP Controller Service with ");// + intent;
+        *result = FALSE;
+        return NOERROR;
+    }
+    *result = TRUE;
     return NOERROR;
 }
 
 ECode BluetoothAvrcpController::Close()
 {
-    // ==================before translated======================
-    // mServiceListener = null;
-    // IBluetoothManager mgr = mAdapter.getBluetoothManager();
-    // if (mgr != null) {
-    //     try {
-    //         mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
-    //     } catch (Exception e) {
-    //         Log.e(TAG,"",e);
-    //     }
-    // }
-    //
-    // synchronized (mConnection) {
-    //     if (mService != null) {
-    //         try {
-    //             mService = null;
-    //             mContext.unbindService(mConnection);
-    //         } catch (Exception re) {
-    //             Log.e(TAG,"",re);
-    //         }
-    //     }
-    // }
-    assert(0);
+    mServiceListener = NULL;
+    //IBluetoothManager mgr = mAdapter->GetBluetoothManager();
+    AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
+    if (mgr != NULL) {
+        //try {
+        mgr->UnregisterStateChangeCallback(mBluetoothStateChangeCallback);
+        //} catch (Exception e) {
+        //    Log.e(TAG,"",e);
+        //}
+    }
+
+    {
+        AutoLock lock(mConnection);
+        if (mService != NULL) {
+            //try {
+            mService = NULL;
+            mContext->UnbindService(mConnection);
+            //} catch (Exception re) {
+            //    Log.e(TAG,"",re);
+            //}
+        }
+    }
     return NOERROR;
 }
 
 ECode BluetoothAvrcpController::Finalize()
 {
-    // ==================before translated======================
-    // close();
-    assert(0);
+    Close();
     return NOERROR;
 }
 
@@ -192,19 +210,20 @@ ECode BluetoothAvrcpController::GetConnectedDevices(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (VDBG) log("getConnectedDevices()");
-    // if (mService != null && isEnabled()) {
-    //     try {
-    //         return mService.getConnectedDevices();
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-    //         return new ArrayList<BluetoothDevice>();
-    //     }
-    // }
-    // if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    // return new ArrayList<BluetoothDevice>();
-    assert(0);
+    if (VDBG) Logger::D(TAG, "getConnectedDevices()");
+    if (mService != NULL && IsEnabled()) {
+        //try {
+            return mService->GetConnectedDevices(result);
+        //} catch (RemoteException e) {
+        //    Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+        //    return new ArrayList<BluetoothDevice>();
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
+    AutoPtr<IList> list;
+    CArrayList::New((IList**)&list);
+    *result = list;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -212,21 +231,21 @@ ECode BluetoothAvrcpController::GetDevicesMatchingConnectionStates(
     /* [in] */ ArrayOf<Int32>* states,
     /* [out] */ IList** result)
 {
-    VALIDATE_NOT_NULL(states);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (VDBG) log("getDevicesMatchingStates()");
-    // if (mService != null && isEnabled()) {
-    //     try {
-    //         return mService.getDevicesMatchingConnectionStates(states);
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-    //         return new ArrayList<BluetoothDevice>();
-    //     }
-    // }
-    // if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    // return new ArrayList<BluetoothDevice>();
-    assert(0);
+    if (VDBG) Logger::D(TAG, "getDevicesMatchingStates()");
+    if (mService != NULL && IsEnabled()) {
+        //try {
+        return mService->GetDevicesMatchingConnectionStates(states, result);
+        //} catch (RemoteException e) {
+        //    Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+        //    return new ArrayList<BluetoothDevice>();
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
+    AutoPtr<IList> list;
+    CArrayList::New((IList**)&list);
+    *result = list;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -234,22 +253,19 @@ ECode BluetoothAvrcpController::GetConnectionState(
     /* [in] */ IBluetoothDevice* device,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(device);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (VDBG) log("getState(" + device + ")");
-    // if (mService != null && isEnabled()
-    //     && isValidDevice(device)) {
-    //     try {
-    //         return mService.getConnectionState(device);
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-    //         return BluetoothProfile.STATE_DISCONNECTED;
-    //     }
-    // }
-    // if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    // return BluetoothProfile.STATE_DISCONNECTED;
-    assert(0);
+    if (VDBG) Logger::D(TAG, "getState( device )");
+    if (mService != NULL && IsEnabled()
+        && IsValidDevice(device)) {
+        //try {
+        return mService->GetConnectionState(device, result);
+        //} catch (RemoteException e) {
+        //    Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+        //    return BluetoothProfile.STATE_DISCONNECTED;
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
+    *result = IBluetoothProfile::STATE_DISCONNECTED;
     return NOERROR;
 }
 
@@ -258,50 +274,42 @@ ECode BluetoothAvrcpController::SendPassThroughCmd(
     /* [in] */ Int32 keyCode,
     /* [in] */ Int32 keyState)
 {
-    VALIDATE_NOT_NULL(device);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "sendPassThroughCmd");
-    // if (mService != null && isEnabled()) {
-    //     try {
-    //         mService.sendPassThroughCmd(device, keyCode, keyState);
-    //         return;
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG, "Error talking to BT service in sendPassThroughCmd()", e);
-    //         return;
-    //     }
-    // }
-    // if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    assert(0);
+    if (DBG) Logger::D(TAG, "sendPassThroughCmd");
+    if (mService != NULL && IsEnabled()) {
+        //try {
+        mService->SendPassThroughCmd(device, keyCode, keyState);
+        return NOERROR;
+        //} catch (RemoteException e) {
+        //    Log.e(TAG, "Error talking to BT service in sendPassThroughCmd()", e);
+        //    return;
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
     return NOERROR;
 }
 
 Boolean BluetoothAvrcpController::IsEnabled()
 {
-    // ==================before translated======================
-    // if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
-    // return false;
-    assert(0);
+    Int32 state;
+    if ((mAdapter->GetState(&state), state) == IBluetoothAdapter::STATE_ON) return TRUE;
     return FALSE;
 }
 
 Boolean BluetoothAvrcpController::IsValidDevice(
     /* [in] */ IBluetoothDevice* device)
 {
-    // ==================before translated======================
-    // if (device == null) return false;
-    //
-    // if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
-    // return false;
-    assert(0);
+    if (device == NULL) return FALSE;
+
+    String address;
+    device->GetAddress(&address);
+    if (CBluetoothAdapter::CheckBluetoothAddress(address)) return TRUE;
     return FALSE;
 }
 
 void BluetoothAvrcpController::Log(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Log.d(TAG, msg);
-    assert(0);
+    Logger::D(TAG, msg);
 }
 
 } // namespace Bluetooth

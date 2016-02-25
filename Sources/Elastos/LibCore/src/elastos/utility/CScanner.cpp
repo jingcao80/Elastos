@@ -63,15 +63,16 @@ namespace Elastos {
 namespace Utility {
 
 static AutoPtr<IPattern> InitPattern(
-    /* [in] */ const String str)
+    /* [in] */ const String str,
+    /* [in] */ Int32 flag = 0)
 {
     AutoPtr<IPattern> p;
-    Pattern::Compile(str, (IPattern**)&p);
+    Pattern::Compile(str, flag, (IPattern**)&p);
     return p;
 }
 
 const AutoPtr<IPattern> CScanner::DEFAULT_DELIMITER = InitPattern(String("\\p{javaWhitespace}+"));
-const AutoPtr<IPattern> CScanner::BOOLEAN_PATTERN = InitPattern(String("TRUE|FALSE"));
+const AutoPtr<IPattern> CScanner::BOOLEAN_PATTERN = InitPattern(String("true|false"), Pattern::CASE_INSENSITIVE);
 const AutoPtr<IPattern> CScanner::LINE_TERMINATOR = InitPattern(String("\n|\r\n|\r|\u0085|\u2028|\u2029"));
 const AutoPtr<IPattern> CScanner::MULTI_LINE_TERMINATOR = InitPattern(String("(\n|\r\n|\r|\u0085|\u2028|\u2029)+"));
 const AutoPtr<IPattern> CScanner::LINE_PATTERN = InitPattern(String(".*(\n|\r\n|\r|\u0085|\u2028|\u2029)|.+(\n|\r\n|\r|\u0085|\u2028|\u2029)?"));
@@ -360,7 +361,7 @@ ECode CScanner::FindInLine(
     /* [out] */ String* str)
 {
     AutoPtr<IPattern> outpat;
-    Pattern::Compile(pattern, (IPattern**)&outpat);
+    FAIL_RETURN(Pattern::Compile(pattern, (IPattern**)&outpat));
     return FindInLine(outpat, str);
 }
 
@@ -435,7 +436,7 @@ ECode CScanner::FindWithinHorizon(
     /* [out] */ String* str)
 {
     AutoPtr<IPattern> outpat;
-    Pattern::Compile(pattern, (IPattern**)&outpat);
+    FAIL_RETURN(Pattern::Compile(pattern, (IPattern**)&outpat));
     return FindWithinHorizon(outpat, horizon, str);
 }
 
@@ -478,7 +479,7 @@ ECode CScanner::HasNext(
     *value = FALSE;
 
     AutoPtr<IPattern> outpat;
-    Pattern::Compile(pattern, (IPattern**)&outpat);
+    FAIL_RETURN(Pattern::Compile(pattern, (IPattern**)&outpat));
     return HasNext(outpat, value);
 }
 
@@ -693,38 +694,10 @@ ECode CScanner::HasNextLine(
 
     PrepareForScan();
     String result;
-    FindWithinHorizon(LINE_PATTERN, 0, &result);
+    FAIL_RETURN(FindWithinHorizon(LINE_PATTERN, 0, &result));
     RecoverPreviousStatus();
     *value = !result.IsNull();
     return NOERROR;
-
-    // FAIL_RETURN(CheckOpen());
-    // mMatcher->UsePattern(LINE_PATTERN);
-    // mMatcher->Region(mFindStartIndex, mBufferLength);
-
-    // Boolean hasNextLine = FALSE;
-    // while (TRUE) {
-    //     if (mMatcher->Find(&hasNextLine), hasNextLine) {
-    //         Int32 intend = 0;
-    //         if (mInputExhausted || ((IMatchResult::Probe(mMatcher))->End(&intend), intend) != mBufferLength) {
-    //             mMatchSuccessful = TRUE;
-    //             hasNextLine = TRUE;
-    //             break;
-    //         }
-    //     }
-    //     else {
-    //         if (mInputExhausted) {
-    //             mMatchSuccessful = FALSE;
-    //             break;
-    //         }
-    //     }
-    //     if (!mInputExhausted) {
-    //         ReadMore();
-    //         ResetMatcher();
-    //     }
-    // }
-    // *value = hasNextLine;
-    // return NOERROR;
 }
 
 ECode CScanner::HasNextInt64(
@@ -881,7 +854,7 @@ ECode CScanner::Next(
     /* [out] */ String* str)
 {
     AutoPtr<IPattern> outpat;
-    Pattern::Compile(pattern, (IPattern**)&outpat);
+    FAIL_RETURN(Pattern::Compile(pattern, (IPattern**)&outpat));
     return Next(outpat, str);
 }
 
@@ -902,7 +875,7 @@ ECode CScanner::NextBigDecimal(
     }
     AutoPtr<IPattern> floatPattern = GetFloatPattern();
     String floatString;
-    Next(floatPattern, &floatString);
+    FAIL_RETURN(Next(floatPattern, &floatString));
     floatString = RemoveLocaleInfoFromFloat(floatString);
     AutoPtr<IBigDecimal> bigDecimalValue;
     // try {
@@ -944,7 +917,7 @@ ECode CScanner::NextBigInteger(
     }
     AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
     String intString;
-    Next(integerPattern, &intString);
+    FAIL_RETURN(Next(integerPattern, &intString));
     intString = RemoveLocaleInfo(intString, INT);
     AutoPtr<IBigInteger> bigIntegerValue;
     // try {
@@ -969,7 +942,7 @@ ECode CScanner::NextBoolean(
     *value = FALSE;
 
     String outstr;
-    Next(BOOLEAN_PATTERN, &outstr);
+    FAIL_RETURN(Next(BOOLEAN_PATTERN, &outstr));
     *value = outstr.EqualsIgnoreCase("true");
     return NOERROR;
 }
@@ -996,7 +969,7 @@ ECode CScanner::NextByte(
     }
     AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
     String intString;
-    Next(integerPattern, &intString);
+    FAIL_RETURN(Next(integerPattern, &intString));
     intString = RemoveLocaleInfo(intString, INT);
     // try {
     Int32 byteValue = 0;
@@ -1028,7 +1001,7 @@ ECode CScanner::NextDouble(
     }
     AutoPtr<IPattern> floatPattern = GetFloatPattern();
     String floatString;
-    Next(floatPattern, &floatString);
+    FAIL_RETURN(Next(floatPattern, &floatString));
     floatString = RemoveLocaleInfoFromFloat(floatString);
     Double doubleValue = 0;
     // try {
@@ -1060,7 +1033,7 @@ ECode CScanner::NextFloat(
     }
     AutoPtr<IPattern> floatPattern = GetFloatPattern();
     String floatString;
-    Next(floatPattern, &floatString);
+    FAIL_RETURN(Next(floatPattern, &floatString));
     floatString = RemoveLocaleInfoFromFloat(floatString);
     Float floatValue = 0;
     // try {
@@ -1099,7 +1072,7 @@ ECode CScanner::NextInt32(
     }
     AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
     String intString;
-    Next(integerPattern, &intString);
+    FAIL_RETURN(Next(integerPattern, &intString));
     intString = RemoveLocaleInfo(intString, INT);
     Int32 intValue = 0;
     // try {
@@ -1187,7 +1160,7 @@ ECode CScanner::NextInt64(
     }
     AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
     String intString;
-    Next(integerPattern, &intString);
+    FAIL_RETURN(Next(integerPattern, &intString));
     intString = RemoveLocaleInfo(intString, INT);
     Int64 longValue = 0;
     // try {
@@ -1225,7 +1198,7 @@ ECode CScanner::NextInt16(
     }
     AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
     String intString;
-    Next(integerPattern, &intString);
+    FAIL_RETURN(Next(integerPattern, &intString));
     intString = RemoveLocaleInfo(intString, INT);
     Int16 shortValue = 0;
     // try {
@@ -1296,7 +1269,7 @@ ECode CScanner::Skip(
     /* [out] */ IScanner** outscan)
 {
     AutoPtr<IPattern> outpat;
-    Pattern::Compile(pattern, (IPattern**)&outpat);
+    FAIL_RETURN(Pattern::Compile(pattern, (IPattern**)&outpat));
     return Skip(outpat, outscan);
 }
 
@@ -1305,13 +1278,14 @@ ECode CScanner::ToString(
 {
     VALIDATE_NOT_NULL(str)
 
-    assert(0 && "TODO");
-    // return getClass().getName() +
-    //         "[mDelimiter=" + mDelimiter +
-    //         ",mFindStartIndex=" + mFindStartIndex +
-    //         ",mMatchSuccessful=" + mMatchSuccessful +
-    //         ",mClosed=" + mClosed +
-    //         "]";
+    String name("CScanner");
+    String strPattern;
+    IObject::Probe(mDelimiter)->ToString(&strPattern);
+    *str = name + "[mDelimiter=" + strPattern +
+             ",mFindStartIndex=" + StringUtils::ToString(mFindStartIndex, 10) +
+             ",mMatchSuccessful=" + StringUtils::BooleanToString(mMatchSuccessful) +
+             ",mClosed=" + StringUtils::BooleanToString(mClosed) +
+             "]";
     return NOERROR;
 }
 
@@ -1332,7 +1306,7 @@ ECode CScanner::UseDelimiter(
     /* [out] */ IScanner** outscan)
 {
     AutoPtr<IPattern> outpat;
-    Pattern::Compile(pattern, (IPattern**)&outpat);
+    FAIL_RETURN(Pattern::Compile(pattern, (IPattern**)&outpat));
     return UseDelimiter(outpat, outscan);
 }
 

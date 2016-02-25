@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLE_H__
-#define  __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLE_H__
+#ifndef __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLE_H__
+#define __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/graphics/CanvasProperty.h"

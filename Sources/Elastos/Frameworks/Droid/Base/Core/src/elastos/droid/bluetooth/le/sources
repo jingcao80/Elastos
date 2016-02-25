@@ -21,3 +21,14 @@ SOURCES += ScanRecord.cpp
 SOURCES += ScanResult.cpp
 SOURCES += ScanSettings.cpp
 SOURCES += TruncatedFilter.cpp
+
+SOURCES += CAdvertiseData.cpp
+SOURCES += CAdvertiseSettings.cpp
+SOURCES += CBluetoothLeAdvertiser.cpp
+SOURCES += CBluetoothLeScanner.cpp
+SOURCES += CResultStorageDescriptor.cpp
+SOURCES += CScanFilter.cpp
+SOURCES += CScanRecordHelper.cpp
+SOURCES += CScanResult.cpp
+SOURCES += CScanSettings.cpp
+SOURCES += CTruncatedFilter.cpp

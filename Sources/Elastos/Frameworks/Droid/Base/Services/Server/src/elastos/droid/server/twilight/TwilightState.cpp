@@ -99,7 +99,7 @@ ECode TwilightState::Equals(
     /* [in] */ IInterface* other,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
     ITwilightState* obj = ITwilightState::Probe(other);

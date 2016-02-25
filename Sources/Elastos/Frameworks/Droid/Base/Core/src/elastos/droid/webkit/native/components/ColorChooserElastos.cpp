@@ -33,7 +33,7 @@ ECode ColorChooserElastos::InnerOnColorChangedListener::OnColorChanged(
 
     assert(NULL != mOwner);
     assert(NULL != mOwner->mDialog);
-    //mOwner->mDialog->Dismiss();
+    mOwner->mDialog->Dismiss();
     mOwner->NativeOnColorChosen(mOwner->mNativeColorChooserElastos, color);
     return NOERROR;
 }
@@ -46,7 +46,7 @@ ECode ColorChooserElastos::CloseColorChooser()
     // ==================before translated======================
     // mDialog.dismiss();
 
-    //mDialog->Dismiss();
+    mDialog->Dismiss();
     return NOERROR;
 }
 
@@ -97,7 +97,7 @@ ECode ColorChooserElastos::OpenColorChooser()
     // mDialog.show();
 
     assert(0);
-    //mDialog->Show();
+    mDialog->Show();
     return NOERROR;
 }
 

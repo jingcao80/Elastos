@@ -16,12 +16,19 @@
 #include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
-#include <skia/core/SkUnPreMultiply.h>
-#include <skia/core/SkImageEncoder.h>
-#include <skia/core/SkDither.h>
+
+// #include "Paint.h"
+// #include "GraphicsJNI.h"
+
 #include <skia/core/SkBitmap.h>
+#include <skia/core/SkPixelRef.h>
+#include <skia/core/SkImageEncoder.h>
 #include <skia/core/SkImageInfo.h>
+#include <skia/core/SkColorPriv.h>
+#include <skia/core/SkDither.h>
+#include <skia/core/SkUnPreMultiply.h>
 #include <skia/core/SkStream.h>
+#include <binder/Parcel.h>
 
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Core::AutoLock;
@@ -38,8 +45,10 @@ Int32 CBitmap::sDefaultDensity = -1;
 Int32 CBitmap::WORKING_COMPRESS_STORAGE = 4096;
 Object CBitmap::sClassLock;
 
-CAR_OBJECT_IMPL(CBitmap);
-CAR_INTERFACE_IMPL_2(CBitmap, Object, IBitmap, IParcelable);
+CAR_OBJECT_IMPL(CBitmap)
+
+CAR_INTERFACE_IMPL_2(CBitmap, Object, IBitmap, IParcelable)
+
 CBitmap::CBitmap()
     : mNativeBitmap(0)
     , mDensity(GetDefaultDensity())
@@ -1871,10 +1880,11 @@ void CBitmap::NativeCopyPixelsToBuffer(
     const void* src = bitmap->getPixels();
 
     if (NULL != src) {
-        assert(0 && "TODO");
-        // AutoBufferPointer abp(dst, TRUE);
-        // // the java side has already checked that buffer is large enough
-        // memcpy(abp.Pointer(), src, bitmap->getSize());
+        Handle64 p;
+        dst->GetPrimitiveArray(&p);
+        void* bf = (void*)p;
+        // the java side has already checked that buffer is large enough
+        memcpy(bf, src, bitmap->getSize());
     }
 }
 
@@ -1889,10 +1899,11 @@ void CBitmap::NativeCopyPixelsFromBuffer(
     void* dst = bitmap->getPixels();
 
     if (NULL != dst) {
-        assert(0 && "TODO");
-        // AutoBufferPointer abp(src, FALSE);
-        // // the java side has already checked that buffer is large enough
-        // memcpy(dst, abp.Pointer(), bitmap->getSize());
+        Handle64 p;
+        src->GetPrimitiveArray(&p);
+        void* bf = (void*)p;
+        // the java side has already checked that buffer is large enough
+        memcpy(dst, bf, bitmap->getSize());
         bitmap->notifyPixelsChanged();
     }
 }
@@ -1904,139 +1915,166 @@ Int32 CBitmap::NativeGenerationId(
     return static_cast<Int32>(bitmap->getGenerationID());
 }
 
+// Assert that bitmap's SkAlphaType is consistent with isPremultiplied.
+static void assert_premultiplied(
+    /* [in] */ const SkBitmap& bitmap,
+    /* [in] */ Boolean isPremultiplied)
+{
+    // kOpaque_SkAlphaType and kIgnore_SkAlphaType mean that isPremultiplied is
+    // irrelevant. This just tests to ensure that the SkAlphaType is not
+    // opposite of isPremultiplied.
+    if (isPremultiplied) {
+        SkASSERT(bitmap.alphaType() != GraphicsNative::kUnpremul_SkAlphaType);
+    } else {
+        SkASSERT(bitmap.alphaType() != GraphicsNative::kPremul_SkAlphaType);
+    }
+}
+
 ECode CBitmap::NativeCreateFromParcel(
-    /* [in] */ IParcel* p,
+    /* [in] */ IParcel* parcel,
     /* [in] */ CBitmap* thisObj)
 {
-    Int32 value = 0;
-    p->ReadInt32(&value);
-    const Boolean isMutable = value != 0;
-    p->ReadInt32(&value);
-    const SkColorType colorType = (SkColorType)value;
-    p->ReadInt32(&value);
-    const SkAlphaType alphaType = (SkAlphaType)value;
-    Int32 width = 0;
-    p->ReadInt32(&width);
-    Int32 height = 0;
-    p->ReadInt32(&height);
-    Int32 rowBytes = 0;
-    p->ReadInt32(&rowBytes);
-    Int32 density = 0;
-    p->ReadInt32(&density);
+    if (parcel == NULL) {
+        Logger::E(TAG, "-------- unparcel parcel is NULL\n");
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    android::Parcel* p;
+    parcel->GetElementPayload((Handle32*)&p);
+
+    const bool        isMutable = p->readInt32() != 0;
+    const SkColorType colorType = (SkColorType)p->readInt32();
+    const SkAlphaType alphaType = (SkAlphaType)p->readInt32();
+    const int         width = p->readInt32();
+    const int         height = p->readInt32();
+    const int         rowBytes = p->readInt32();
+    const int         density = p->readInt32();
 
     if (kN32_SkColorType != colorType &&
             kRGB_565_SkColorType != colorType &&
             kARGB_4444_SkColorType != colorType &&
             kIndex_8_SkColorType != colorType &&
             kAlpha_8_SkColorType != colorType) {
-        Logger::E(TAG, "Bitmap_createFromParcel unknown config: %d\n", colorType);
-        // return NULL;
-        return NOERROR;
+        Logger::E(TAG, "Bitmap_createFromParcel unknown colortype: %d\n", colorType);
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    SkBitmap* bmp = new SkBitmap;
+    SkBitmap* bitmap = new SkBitmap;
 
-    bmp->setInfo(SkImageInfo::Make(width, height, colorType, alphaType), rowBytes);
+    bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType), rowBytes);
 
     SkColorTable* ctable = NULL;
     if (colorType == kIndex_8_SkColorType) {
-        Int32 count;
-        p->ReadInt32(&count);
+        int count = p->readInt32();
         if (count > 0) {
-            AutoPtr< ArrayOf<Int32> > array;
-            p->ReadArrayOf((Handle32*)&array);
-            assert(count == array->GetLength());
-            const SkPMColor* src = (const SkPMColor*)array->GetPayload();
+            size_t size = count * sizeof(SkPMColor);
+            const SkPMColor* src = (const SkPMColor*)p->readInplace(size);
             ctable = new SkColorTable(src, count);
         }
     }
 
+
     AutoPtr< ArrayOf<Byte> > buffer;
-    FAIL_RETURN(GraphicsNative::AllocateDroidPixelRef(bmp, ctable, (ArrayOf<Byte>**)&buffer));
-    if (buffer == NULL) {
+    FAIL_RETURN(GraphicsNative::AllocateDroidPixelRef(bitmap, ctable, (ArrayOf<Byte>**)&buffer));
+    if (NULL == buffer) {
         SkSafeUnref(ctable);
-        delete bmp;
+        delete bitmap;
         return E_RUNTIME_EXCEPTION;
     }
 
     SkSafeUnref(ctable);
 
-    size_t size = bmp->getSize();
+    size_t size = bitmap->getSize();
 
-    assert(0 && "TODO");
-    // android::Parcel::ReadableBlob blob;
-    // android::status_t status = p->readBlob(size, &blob);
-    // if (status) {
-    //     doThrowRE(env, "Could not read bitmap from parcel blob.");
-    //     delete bitmap;
-    //     return NULL;
-    // }
+    android::Parcel::ReadableBlob blob;
+    android::status_t status = p->readBlob(size, &blob);
+    if (status) {
+        Logger::E(TAG, "Could not read bitmap from parcel blob.");
+        delete bitmap;
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    AutoPtr< ArrayOf<Byte> > array;
-    p->ReadArrayOf((Handle32*)&array);
-    assert(size == (size_t)array->GetLength());
+    bitmap->lockPixels();
+    memcpy(bitmap->getPixels(), blob.data(), size);
+    bitmap->unlockPixels();
 
-    bmp->lockPixels();
-    memcpy(bmp->getPixels(), (void*)array->GetPayload(), size);
-    bmp->unlockPixels();
+    blob.release();
 
-    // blob.release();
+    // GraphicsNative::CreateBitmap
+    //
+    Int32 bitmapCreateFlags = GetPremulBitmapCreateFlags(isMutable);
 
-    /*return*/ GraphicsNative::CreateBitmap(bmp, buffer, GetPremulBitmapCreateFlags(isMutable),
-            NULL, NULL, density);
-    return NOERROR;
+    SkASSERT(bitmap);
+    SkASSERT(bitmap->pixelRef());
+    bool bMutable = bitmapCreateFlags & GraphicsNative::kBitmapCreateFlag_Mutable;
+    bool bPremultiplied = bitmapCreateFlags & GraphicsNative::kBitmapCreateFlag_Premultiplied;
+
+    // The caller needs to have already set the alpha type properly, so the
+    // native SkBitmap stays in sync with the Java Bitmap.
+    assert_premultiplied(*bitmap, bPremultiplied);
+
+    return thisObj->constructor(reinterpret_cast<Int64>(bitmap), buffer,
+            bitmap->width(), bitmap->height(), density, bMutable, bPremultiplied,
+            NULL, NULL);
 }
 
 Boolean CBitmap::NativeWriteToParcel(
     /* [in] */ Int64 nativeBitmap,
     /* [in] */ Boolean isMutable,
     /* [in] */ Int32 density,
-    /* [in] */ IParcel* p)
+    /* [in] */ IParcel* parcel)
 {
+    if (parcel == NULL) {
+        Logger::E(TAG, "-------- unparcel parcel is NULL\n");
+        return FALSE;
+    }
+
     assert(nativeBitmap);
     const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(nativeBitmap);
 
-    p->WriteInt32(isMutable);
-    p->WriteInt32(bitmap->colorType());
-    p->WriteInt32(bitmap->alphaType());
-    p->WriteInt32(bitmap->width());
-    p->WriteInt32(bitmap->height());
-    p->WriteInt32(bitmap->rowBytes());
-    p->WriteInt32(density);
+    android::Parcel* p;
+    parcel->GetElementPayload((Handle32*)&p);
+
+    p->writeInt32(isMutable);
+    p->writeInt32(bitmap->colorType());
+    p->writeInt32(bitmap->alphaType());
+    p->writeInt32(bitmap->width());
+    p->writeInt32(bitmap->height());
+    p->writeInt32(bitmap->rowBytes());
+    p->writeInt32(density);
 
     if (bitmap->colorType() == kIndex_8_SkColorType) {
         SkColorTable* ctable = bitmap->getColorTable();
         if (ctable != NULL) {
-            Int32 count = (Int32)ctable->count();
-            p->WriteInt32(count);
-            ArrayOf<Int32> array((Int32*)ctable->lockColors(), count);
-            p->WriteArrayOf((Handle32)&array);
+            int count = ctable->count();
+            p->writeInt32(count);
+            memcpy(p->writeInplace(count * sizeof(SkPMColor)),
+                   ctable->lockColors(), count * sizeof(SkPMColor));
             ctable->unlockColors();
-        }
-        else {
-            p->WriteInt32(0); // indicate no ctable
+        } else {
+            p->writeInt32(0);   // indicate no ctable
         }
     }
 
     size_t size = bitmap->getSize();
 
-    assert(0 && "TODO");
-    // android::Parcel::WritableBlob blob;
-    // android::status_t status = p->writeBlob(size, &blob);
-    // if (status) {
-    //     doThrowRE(env, "Could not write bitmap to parcel blob.");
-    //     return FALSE;
-    // }
+    android::Parcel::WritableBlob blob;
+    android::status_t status = p->writeBlob(size, &blob);
+    if (status) {
+        Logger::E(TAG, "Could not write bitmap to parcel blob.");
+        return FALSE;
+    }
+
     bitmap->lockPixels();
-    AutoPtr< ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(size);
     const void* pSrc =  bitmap->getPixels();
     if (pSrc == NULL) {
-        memset(array->GetPayload(), 0, size);
+        memset(blob.data(), 0, size);
     } else {
-        memcpy(array->GetPayload(), pSrc, size);
+        memcpy(blob.data(), pSrc, size);
     }
     bitmap->unlockPixels();
-    p->WriteArrayOf((Handle32)array.Get());
+
+    blob.release();
     return TRUE;
 }
 

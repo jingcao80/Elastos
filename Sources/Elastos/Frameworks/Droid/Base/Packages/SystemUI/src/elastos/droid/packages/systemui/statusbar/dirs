@@ -1,4 +1,0 @@
-
-#DIRS += policy
-DIRS += phone
-#DIRS += tablet

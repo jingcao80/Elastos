@@ -22,7 +22,7 @@ ScanResult::ScanResult()
 {
 }
 
-ScanResult::ScanResult(
+ECode ScanResult::constructor(
     /* [in] */ IBluetoothDevice* device,
     /* [in] */ IScanRecord* scanRecord,
     /* [in] */ Int32 rssi,
@@ -32,6 +32,14 @@ ScanResult::ScanResult(
     mScanRecord = scanRecord;
     mRssi = rssi;
     mTimestampNanos = timestampNanos;
+    return NOERROR;
+}
+
+ECode ScanResult::constructor(
+    /* [in] */ IParcel* in)
+{
+    ReadFromParcel(in);
+    return NOERROR;
 }
 
 ECode ScanResult::WriteToParcel(
@@ -129,12 +137,6 @@ ECode ScanResult::ToString(
             + StringUtils::ToString(mTimestampNanos)
             + String("}");
     return NOERROR;
-}
-
-ScanResult::ScanResult(
-    /* [in] */ IParcel* in)
-{
-    ReadFromParcel(in);
 }
 
 ECode ScanResult::ReadFromParcel(

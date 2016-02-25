@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_ANIMATION_ANIMATOR_H__
-#define  __ELASTOS_DROID_ANIMATION_ANIMATOR_H__
+#ifndef __ELASTOS_DROID_ANIMATION_ANIMATOR_H__
+#define __ELASTOS_DROID_ANIMATION_ANIMATOR_H__
 
 #include "Elastos.Droid.Animation.h"
 #include "elastos/droid/ext/frameworkext.h"

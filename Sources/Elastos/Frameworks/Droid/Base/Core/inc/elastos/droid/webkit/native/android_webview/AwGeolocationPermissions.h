@@ -1,12 +1,13 @@
 #ifndef __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWGEOLOCATIONPERMISSIONS_H__
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWGEOLOCATIONPERMISSIONS_H__
 
+#include <Elastos.Droid.Webkit.h>
 #include <Elastos.CoreLibrary.Core.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/core/Object.h"
 
 using Elastos::Droid::Content::ISharedPreferences;
-//TODO using Elastos::Droid::Webkit::IValueCallback;
+using Elastos::Droid::Webkit::IValueCallback;
 
 using Elastos::Core::IRunnable;
 using Elastos::Utility::ISet;
@@ -34,14 +35,14 @@ private:
         CAR_INTERFACE_DECL();
         GetAllowedRunnable(
             /* [in] */ AwGeolocationPermissions* owner,
-            /* [in] */ /*TODO IValueCallback*/IInterface* callback,
+            /* [in] */ IValueCallback* callback,
             /* [in] */ Boolean finalAllowed);
 
         CARAPI Run();
 
     private:
         AwGeolocationPermissions* mOwner;
-        /*TODO IValueCallback*/IInterface* mCallback;
+        AutoPtr<IValueCallback> mCallback;
         Boolean mFinalAllowed;
     };
 
@@ -53,13 +54,13 @@ private:
         CAR_INTERFACE_DECL();
         GetOriginsRunnable(
             /* [in] */ AwGeolocationPermissions* owner,
-            /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+            /* [in] */ IValueCallback* callback);
 
         CARAPI Run();
 
     private:
         AwGeolocationPermissions* mOwner;
-        /*TODO IValueCallback*/IInterface* mCallback;
+        AutoPtr<IValueCallback> mCallback;
         AutoPtr<ISet> mOrigins;
     };
 
@@ -107,13 +108,13 @@ public:
      */
     CARAPI_(void) GetAllowed(
         /* [in] */ const String& origin,
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback* callback);
 
     /**
      * Async method to get the domains currently allowed or denied.
      */
     CARAPI_(void) GetOrigins(
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback* callback);
 
 private:
     /**

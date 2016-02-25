@@ -1,5 +1,5 @@
-#ifndef  __ELASTOS_DROID_INTERNAL_WIDGET_CLOCKPATTERNVIEWCELL_H__
-#define  __ELASTOS_DROID_INTERNAL_WIDGET_CLOCKPATTERNVIEWCELL_H__
+#ifndef __ELASTOS_DROID_INTERNAL_WIDGET_CLOCKPATTERNVIEWCELL_H__
+#define __ELASTOS_DROID_INTERNAL_WIDGET_CLOCKPATTERNVIEWCELL_H__
 
 #include "_Elastos_Droid_Internal_Widget_CLockPatternViewCell.h"
 #include "elastos/droid/internal/widget/LockPatternView.h"

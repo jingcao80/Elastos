@@ -19,11 +19,8 @@ module
     merge("view/menu/MenuPopupHelper.car");
     merge("view/menu/SubMenuBuilder.car");
     merge("view/ActionBarPolicy.car");
-    // merge("view/BaseIWindow.car");
-    // merge("view/IInputContext.car");
     merge("view/IInputContextCallback.car");
     merge("view/IInputMethod.car");
-    // merge("view/IInputMethodClient.car");
     merge("view/IInputMethodManager.car");
     merge("view/IInputMethodSession.car");
     merge("view/IInputSessionCallback.car");
@@ -403,7 +400,7 @@ module
             [in] ILooper* mainLooper,
             [in] IInputConnection* conn);
 
-        interface IInputContext;
+        interface IIInputContext;
         interface IBinder;
     }
 
@@ -423,7 +420,7 @@ module
 
     class CInputConnectionWrapper {
         constructor(
-            [in] IInputContext* inputContext);
+            [in] IIInputContext* inputContext);
 
         interface IInputConnection;
     }
@@ -431,7 +428,7 @@ module
     class CInputContextCallback {
         constructor();
 
-        interface IInputContextCallback;
+        interface IIInputContextCallback;
         interface IBinder;
     }
 

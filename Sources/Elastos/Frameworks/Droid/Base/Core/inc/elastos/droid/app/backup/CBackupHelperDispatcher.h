@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_APP_BACKUP_CBACKUPHELPERDISPATCHER_H__
-#define  __ELASTOS_DROID_APP_BACKUP_CBACKUPHELPERDISPATCHER_H__
+#define __ELASTOS_DROID_APP_BACKUP_CBACKUPHELPERDISPATCHER_H__
 
 #include "_Elastos_Droid_App_Backup_CBackupHelperDispatcher.h"
 #include <elastos/core/Object.h>

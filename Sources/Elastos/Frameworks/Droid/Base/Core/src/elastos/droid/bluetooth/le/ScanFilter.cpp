@@ -1,5 +1,4 @@
 #include "Elastos.CoreLibrary.Utility.h"
-#include "Elastos.Droid.Os.h"
 #include "elastos/droid/bluetooth/le/ScanFilter.h"
 #include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/core/CoreUtils.h"
@@ -190,6 +189,13 @@ ScanFilter::ScanFilter()
 {
 }
 
+ECode ScanFilter::constructor(
+    /* [in] */ IParcel* source)
+{
+    ReadFromParcel(source);
+    return NOERROR;
+}
+
 ECode ScanFilter::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
@@ -262,22 +268,25 @@ ECode ScanFilter::ReadFromParcel(
     }
     if ((in->ReadInt32(&flag), flag) == 1) {
         //ParcelUuid uuid = in.readParcelable(ParcelUuid.class.getClassLoader());
-        mServiceUuid = NULL;
-        in->ReadInterfacePtr((Handle32*)((IParcelUuid**)&mServiceUuid));
+        AutoPtr<IInterface> obj;
+        in->ReadInterfacePtr((Handle32*)((IInterface**)&obj));
+        mServiceUuid = IParcelUuid::Probe(obj);
         //builder.setServiceUuid(uuid);
         flag = 0;
         if ((in->ReadInt32(&flag), flag) == 1) {
             //ParcelUuid uuidMask = in.readParcelable(ParcelUuid.class.getClassLoader());
             //builder.setServiceUuid(uuid, uuidMask);
-            mServiceUuidMask = NULL;
-            in->ReadInterfacePtr((Handle32*)((IParcelUuid**)&mServiceUuidMask));
+            AutoPtr<IInterface> obj;
+            in->ReadInterfacePtr((Handle32*)((IInterface**)&obj));
+            mServiceUuidMask = IParcelUuid::Probe(obj);
         }
     }
     flag = 0;
     if ((in->ReadInt32(&flag), flag) == 1) {
         //ParcelUuid servcieDataUuid = in.readParcelable(ParcelUuid.class.getClassLoader());
-        mServiceDataUuid = NULL;
-        in->ReadInterfacePtr((Handle32*)((IParcelUuid**)&mServiceDataUuid));
+        AutoPtr<IInterface> obj;
+        in->ReadInterfacePtr((Handle32*)((IInterface**)&obj));
+        mServiceDataUuid = IParcelUuid::Probe(obj);
         flag = 0;
         if ((in->ReadInt32(&flag), flag) == 1) {
             Int32 serviceDataLength;

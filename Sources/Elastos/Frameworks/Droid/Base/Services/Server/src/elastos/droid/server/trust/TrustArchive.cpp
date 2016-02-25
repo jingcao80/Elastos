@@ -40,7 +40,7 @@ TrustArchive::Event::Event(
     /* [in] */ Int32 type,
     /* [in] */ Int32 userId,
     /* [in] */ IComponentName* agent,
-    /* [in] */ String message,
+    /* [in] */ const String& message,
     /* [in] */ Int64 duration,
     /* [in] */ Boolean userInitiated,
     /* [in] */ Boolean managingTrust)
@@ -74,7 +74,7 @@ TrustArchive::TrustArchive()
 ECode TrustArchive::LogGrantTrust(
     /* [in] */ Int32 userId,
     /* [in] */ IComponentName* agent,
-    /* [in] */ String message,
+    /* [in] */ const String& message,
     /* [in] */ Int64 duration,
     /* [in] */ Boolean userInitiated)
 {
@@ -140,7 +140,7 @@ ECode TrustArchive::Dump(
     /* [in] */ IPrintWriter* writer,
     /* [in] */ Int32 limit,
     /* [in] */ Int32 userId,
-    /* [in] */ String linePrefix,
+    /* [in] */ const String& linePrefix,
     /* [in] */ Boolean duplicateSimpleNames)
 {
     Int32 count = 0;
@@ -208,6 +208,8 @@ ECode TrustArchive::FormatDuration(
     /* [in] */ Int64 duration,
     /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     StringBuilder sb;
     TimeUtils::FormatDuration(duration, sb);
     return sb.ToString(result);
@@ -227,6 +229,8 @@ ECode TrustArchive::GetSimpleName(
     /* [in] */ IComponentName* cn,
     /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     String name;
     cn->GetClassName(&name);
     Int32 idx = name.LastIndexOf('.');

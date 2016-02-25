@@ -26,6 +26,7 @@ using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Droid::Utility::Pools;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::IHashMap;
+using Libcore::ICU::INativePluralRules;
 
 namespace Elastos {
 namespace Droid {
@@ -1278,7 +1279,7 @@ public:
         /* [out] */ IXmlResourceParser** resourceParser);
 
 private:
-    // CARAPI_(AutoPtr<NativePluralRules>) GetPluralRule();
+    CARAPI_(AutoPtr<INativePluralRules>) GetPluralRule();
 
     static CARAPI_(Int32) AttrForQuantityCode(
         /* [in] */ Int32 quantityCode);
@@ -1382,7 +1383,7 @@ private:
     AutoPtr<CDisplayMetrics> mMetrics;
 
     AutoPtr<CConfiguration> mConfiguration;
-    // AutoPtr<NativePluralRules> mPluralRule;
+    AutoPtr<INativePluralRules> mPluralRule;
 
     AutoPtr<ICompatibilityInfo> mCompatibilityInfo;
 

@@ -36,23 +36,22 @@
 #include "elastos/droid/os/CPowerManager.h"
 // #include "elastos/droid/os/CDropBoxManager.h"
 #include "elastos/droid/os/CUserManager.h"
-// #include "elastos/droid/os/storage/CStorageManager.h"
+#include "elastos/droid/os/storage/CStorageManager.h"
 #include "elastos/droid/content/ContentProvider.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/content/CClipboardManager.h"
 #include "elastos/droid/content/res/CCompatibilityInfo.h"
 #include "elastos/droid/content/res/CResources.h"
-// #include "elastos/droid/impl/CPolicyManager.h"
+#include "elastos/droid/internal/policy/CPolicyManager.h"
 #include "elastos/droid/net/CConnectivityManager.h"
-// #include "elastos/droid/net/wifi/CWifiManager.h"
-// #include "elastos/droid/net/wifi/p2p/CWifiP2pManager.h"
+#include "elastos/droid/wifi/CWifiManager.h"
+#include "elastos/droid/wifi/p2p/CWifiP2pManager.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManager.h"
 #include "elastos/droid/view/inputmethod/CInputMethodManager.h"
 #include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/view/WindowManagerImpl.h"
 #include "elastos/droid/view/DisplayAdjustments.h"
-// #include "elastos/droid/view/CDisplayManagerAw.h"
-// #include "elastos/droid/media/CAudioManager.h"
+#include "elastos/droid/media/CAudioManager.h"
 #include "elastos/droid/database/sqlite/SQLiteDatabase.h"
 // #include "elastos/droid/accounts/CAccountManager.h"
 // #include "elastos/droid/privacy/CPrivacySettingsManager.h"
@@ -101,7 +100,7 @@ using Elastos::Droid::Os::IIUserManager;
 using Elastos::Droid::Os::CPowerManager;
 // using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Os::Storage::IStorageManager;
-// using Elastos::Droid::Os::Storage::CStorageManager;
+using Elastos::Droid::Os::Storage::CStorageManager;
 using Elastos::Droid::View::DisplayAdjustments;
 using Elastos::Droid::View::WindowManagerImpl;
 using Elastos::Droid::View::IContextThemeWrapper;
@@ -122,20 +121,20 @@ using Elastos::Droid::Net::IIConnectivityManager;
 using Elastos::Droid::Net::IConnectivityManager;
 using Elastos::Droid::Net::CConnectivityManager;
 using Elastos::Droid::Wifi::IWifiManager;
-// using Elastos::Droid::Wifi::CWifiManager;
+using Elastos::Droid::Wifi::CWifiManager;
 using Elastos::Droid::Wifi::IIWifiManager;
 using Elastos::Droid::Wifi::EIID_IIWifiManager;
 using Elastos::Droid::Wifi::P2p::IWifiP2pManager;
-// using Elastos::Droid::Wifi::P2p::CWifiP2pManager;
+using Elastos::Droid::Wifi::P2p::CWifiP2pManager;
 using Elastos::Droid::Wifi::P2p::IIWifiP2pManager;
 using Elastos::Droid::Wifi::P2p::EIID_IIWifiP2pManager;
 using Elastos::Droid::Net::EIID_IIEthernetManager;
 using Elastos::Droid::Internal::Policy::IPolicyManager;
-// using Elastos::Droid::Internal::Policy::CPolicyManager;
+using Elastos::Droid::Internal::Policy::CPolicyManager;
 // using Elastos::Droid::Internal::Os::IDropBoxManagerService;
 // using Elastos::Droid::Internal::Os::EIID_IDropBoxManagerService;
 using Elastos::Droid::Media::IAudioManager;
-// using Elastos::Droid::Media::CAudioManager;
+using Elastos::Droid::Media::CAudioManager;
 // using Elastos::Droid::Accounts::CAccountManager;
 using Elastos::Droid::Accounts::IIAccountManager;
 using Elastos::Droid::Accounts::IAccountManager;
@@ -170,7 +169,7 @@ ECode CContextImpl::ApplicationContentResolver::constructor(
     /* [in] */ CActivityThread* mainThread,
     /* [in] */ IUserHandle* user)
 {
-    assert(mainThread != NULL && mUser != NULL);
+    assert(mainThread != NULL && user != NULL);
     ContentResolver::constructor(context);
     mMainThread = mainThread;
     mUser = user;
@@ -262,7 +261,6 @@ CContextImpl::CContextImpl()
     , mThemeResource(0)
 {
     mDisplayAdjustments = new DisplayAdjustments();
-    // CDisplayAdjustments::New((IDisplayAdjustments**)&mDisplayAdjustments);
 }
 
 CContextImpl::~CContextImpl()
@@ -2272,8 +2270,7 @@ ECode CContextImpl::GetSystemService(
     else if (IContext::LAYOUT_INFLATER_SERVICE.Equals(name)) {
         AutoLock lock(mCacheLock);
         AutoPtr<IPolicyManager> pm;
-        assert(0 && "TODO");
-        // FAIL_RETURN(CPolicyManager::AcquireSingleton((IPolicyManager**)&pm));
+        FAIL_RETURN(CPolicyManager::AcquireSingleton((IPolicyManager**)&pm));
         AutoPtr<IContext> ctx = GetOuterContext();
         AutoPtr<ILayoutInflater> inflater;
         FAIL_RETURN(pm->MakeNewLayoutInflater(ctx, (ILayoutInflater**)&inflater));
@@ -2373,11 +2370,10 @@ ECode CContextImpl::GetSystemService(
         AutoLock lock(mCacheLock);
 
         AutoPtr<IInterface> b = ServiceManager::GetService(IContext::WIFI_SERVICE);
-        AutoPtr<IIWifiManager> service = (IIWifiManager*)b->Probe(EIID_IIWifiManager);
+        AutoPtr<IIWifiManager> service = IIWifiManager::Probe(b);
         AutoPtr<IContext> ctx = GetOuterContext();
         AutoPtr<IWifiManager> wifiManager;
-        assert(0 && "TODO");
-        // CWifiManager::New(ctx, service, (IWifiManager**)&wifiManager);
+        CWifiManager::New(ctx, service, (IWifiManager**)&wifiManager);
         *object = wifiManager.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;
@@ -2387,13 +2383,11 @@ ECode CContextImpl::GetSystemService(
 
         AutoPtr<IInterface> b = ServiceManager::GetService(IContext::WIFI_P2P_SERVICE);
         assert(b != NULL);
-        AutoPtr<IIWifiP2pManager> service = (IIWifiP2pManager*)b->Probe(EIID_IIWifiP2pManager);
+        AutoPtr<IIWifiP2pManager> service = IIWifiP2pManager::Probe(b);
         assert(service != NULL);
         AutoPtr<IContext> ctx = GetOuterContext();
         AutoPtr<IWifiP2pManager> wifiP2pManager;
-        assert(0 && "TODO");
-        // CWifiP2pManager::New((IWifiP2pManager**)&wifiP2pManager);
-        // wifiP2pManager->SetService(service);
+        CWifiP2pManager::New(service, (IWifiP2pManager**)&wifiP2pManager);
         *object = wifiP2pManager.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;
@@ -2540,8 +2534,7 @@ ECode CContextImpl::GetSystemService(
         AutoPtr<IContentResolver> cr;
         GetContentResolver((IContentResolver**)&cr);
         AutoPtr<IStorageManager> sManager;
-        assert(0 && "TODO");
-        // CStorageManager::New(cr, looper, (IStorageManager**)&sManager);
+        CStorageManager::New(cr, looper, (IStorageManager**)&sManager);
         assert(sManager != NULL);
         *object = sManager.Get();
         mServiceCache[name] = *object;
@@ -2599,7 +2592,7 @@ ECode CContextImpl::GetSystemService(
         AutoLock lock(mCacheLock);
 
         AutoPtr<IAudioManager> aManager;
-        // CAudioManager::New(this, (IAudioManager**)&aManager);
+        CAudioManager::New(this, (IAudioManager**)&aManager);
         *object = aManager.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;
@@ -3360,9 +3353,12 @@ ECode CContextImpl::CreateDisplayContext(
 
 Int32 CContextImpl::GetDisplayId()
 {
-    Int32 displayId;
-    mDisplay->GetDisplayId(&displayId);
-    return mDisplay != NULL ? displayId : IDisplay::DEFAULT_DISPLAY;
+    Int32 displayId = IDisplay::DEFAULT_DISPLAY;
+    if (mDisplay != NULL) {
+        mDisplay->GetDisplayId(&displayId);
+    }
+
+    return displayId;
 }
 
 ECode CContextImpl::IsRestricted(
@@ -3387,6 +3383,7 @@ ECode CContextImpl::GetDisplayAdjustments(
 AutoPtr<CContextImpl> CContextImpl::CreateSystemContext(
     /* [in] */ IActivityThread* mainThread)
 {
+    assert(mainThread != NULL);
     AutoPtr<LoadedPkg> packageInfo = new LoadedPkg();
     packageInfo->constructor(mainThread);
 
@@ -3398,7 +3395,9 @@ AutoPtr<CContextImpl> CContextImpl::CreateSystemContext(
     ci->mResourcesManager->GetConfiguration((IConfiguration**)&config);
     AutoPtr<IDisplayMetrics> dm;
     ci->mResourcesManager->GetDisplayMetricsLocked(IDisplay::DEFAULT_DISPLAY, (IDisplayMetrics**)&dm);
+    Logger::I(TAG, " === CreateSystemContext 1 ===");
     ci->mResources->UpdateConfiguration(config, dm);
+    Logger::I(TAG, " === CreateSystemContext 2 ===");
     return ci;
 }
 
@@ -3414,10 +3413,10 @@ ECode CContextImpl::CreateAppContext(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<CContextImpl> c;
-    CContextImpl::NewByFriend(NULL, mainThread,
-        packageInfo, NULL, NULL, FALSE, NULL, NULL, (CContextImpl**)&c);
-    *result = (IContextImpl*)c.Get();
+    AutoPtr<IContextImpl> c;
+    CContextImpl::New(NULL, mainThread,
+        packageInfo, NULL, NULL, FALSE, NULL, NULL, (IContextImpl**)&c);
+    *result = c;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -3435,10 +3434,10 @@ ECode CContextImpl::CreateActivityContext(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    AutoPtr<CContextImpl> c;
-    CContextImpl::NewByFriend(NULL, mainThread,
-        packageInfo, activityToken, NULL, FALSE, NULL, NULL, (CContextImpl**)&c);
-    *result = (IContextImpl*)c.Get();
+    AutoPtr<IContextImpl> c;
+    CContextImpl::New(NULL, mainThread,
+        packageInfo, activityToken, NULL, FALSE, NULL, NULL, (IContextImpl**)&c);
+    *result = c;
     REFCOUNT_ADD(*result)
     return NOERROR;
 }
@@ -3453,6 +3452,8 @@ ECode CContextImpl::constructor(
     /* [in] */ IDisplay* display,
     /* [in] */ IConfiguration* overrideConfiguration)
 {
+    assert(mainThread != NULL);
+
     GetWeakReference((IWeakReference**)&mOuterContext);
 
     mMainThread = (CActivityThread*)mainThread;

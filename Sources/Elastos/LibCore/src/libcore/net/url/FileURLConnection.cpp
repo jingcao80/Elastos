@@ -346,7 +346,7 @@ ECode FileURLConnection::GetInputStream(
 ECode FileURLConnection::GetPermission(
     /* [out] */ IPermission** permission)
 {
-    VALIDATE_NOT_NULL(*permission);
+    VALIDATE_NOT_NULL(permission);
     if (mPermission == NULL) {
         String path = mFilename;
         if (CFile::sSeparatorChar != '/') {

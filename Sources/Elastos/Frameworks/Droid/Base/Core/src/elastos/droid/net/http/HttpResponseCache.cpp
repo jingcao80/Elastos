@@ -140,7 +140,7 @@ ECode HttpResponseCache::Flush()
     // ECode ec = mDelegate->Flush();
     //     // } catch (IOException ignored) {
     // if (FAILED(ec)) {
-    //     if (ec != E_IO_EXCEPTION) return ec;
+    //     if (ec != (ECode)E_IO_EXCEPTION) return ec;
     // }
     //     // }
     return NOERROR;

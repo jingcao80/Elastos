@@ -3,12 +3,12 @@
 
 #include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/ext/frameworkext.h"
-//TODO #include "elastos/droid/webkit/native/content/common/CleanupReference.h"
+#include "elastos/droid/webkit/native/content/common/CleanupReference.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IPicture;
-//TODO using Elastos::Droid::Webkit::Content::Common::CleanupReference;
+using Elastos::Droid::Webkit::Content::Common::CleanupReference;
 using Elastos::Core::IRunnable;
 using Elastos::IO::IOutputStream;
 
@@ -102,7 +102,7 @@ private:
 
 private:
     Int64 mNativeAwPicture;
-    AutoPtr</*TODO CleanupReference*/IInterface> mCleanupReference;
+    AutoPtr<CleanupReference> mCleanupReference;
 };
 
 } // namespace AndroidWebview

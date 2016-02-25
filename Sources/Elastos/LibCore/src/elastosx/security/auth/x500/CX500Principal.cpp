@@ -27,7 +27,7 @@ const Int64 mSerialVersionUID = -500463348111345721L;
 ECode CX500Principal::GetEncoded(
     /* [out, callee] */ ArrayOf<Byte>** encodedName)
 {
-    VALIDATE_NOT_NULL(*encodedName)
+    VALIDATE_NOT_NULL(encodedName)
     *encodedName = NULL;
 
     AutoPtr<ArrayOf<Byte> > src;

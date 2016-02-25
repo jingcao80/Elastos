@@ -4,6 +4,7 @@
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
+
 CAR_INTERFACE_IMPL(EGLDisplayWrapper, EGLObjectHandle, IEGLDisplay)
 
 ECode EGLDisplayWrapper::Equals(

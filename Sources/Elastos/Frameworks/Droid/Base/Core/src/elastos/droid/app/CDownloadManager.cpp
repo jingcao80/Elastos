@@ -7,8 +7,8 @@
 #include "elastos/droid/content/CContentUris.h"
 #include "elastos/droid/content/CContentValues.h"
 #include "elastos/droid/net/Uri.h"
-//#include "elastos/droid/provider/CDownloadsImpl.h"
-//#include "elastos/droid/provider/CSettingsGlobal.h"
+#include "elastos/droid/provider/CDownloadsImpl.h"
+#include "elastos/droid/provider/CSettingsGlobal.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringUtils.h>
@@ -21,10 +21,10 @@ using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Database::EIID_ICursor;
 using Elastos::Droid::Database::EIID_ICursorWrapper;
 using Elastos::Droid::Net::Uri;
-// using Elastos::Droid::Provider::CDownloadsImpl;
+using Elastos::Droid::Provider::CDownloadsImpl;
 using Elastos::Droid::Provider::IBaseColumns;
 using Elastos::Droid::Provider::IDownloadsImpl;
-// using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::CSettingsGlobal;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::CInteger32;
@@ -273,8 +273,7 @@ Int32 CDownloadManager::CursorTranslator::TranslateStatus(
         default:
         {
             AutoPtr<IDownloadsImpl> impl;
-            assert(0 && "TODO");
-            // CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&impl);
+            CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&impl);
             Boolean res;
             impl->IsStatusError(status, &res);
             assert(res != FALSE);
@@ -297,8 +296,7 @@ ECode CDownloadManager::constructor(
     mResolver = resolver;
     mPackageName = packageName;
     AutoPtr<IDownloadsImpl> impl;
-    assert(0 && "TODO");
-    // CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&impl);
+    CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&impl);
     impl->GetCONTENT_URI((IUri**)&mBaseUri);
     return NOERROR;
 }
@@ -306,9 +304,8 @@ ECode CDownloadManager::constructor(
 ECode CDownloadManager::SetAccessAllDownloads(
     /* [in] */ Boolean accessAllDownloads)
 {
-    assert(0 && "TODO");
     AutoPtr<IDownloadsImpl> dImpl;
-    // CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&dImpl);
+    CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&dImpl);
     if (accessAllDownloads) {
         dImpl->GetALL_DOWNLOADS_CONTENT_URI((IUri**)&mBaseUri);
     } else {
@@ -326,8 +323,7 @@ ECode CDownloadManager::Enqueue(
 
     AutoPtr<IContentValues> values = ((CDownloadManagerRequest*)request)->ToContentValues(mPackageName);
     AutoPtr<IDownloadsImpl> dImpl;
-    assert(0 && "TODO");
-    // CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&dImpl);
+    CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&dImpl);
     AutoPtr<IUri> uri;
     dImpl->GetCONTENT_URI((IUri**)&uri);
     AutoPtr<IUri> downloadUri;
@@ -448,7 +444,7 @@ ECode CDownloadManager::GetUriForDownloadedFile(
                 AutoPtr<IContentUris> cUris;
                 CContentUris::AcquireSingleton((IContentUris**)&cUris);
                 AutoPtr<IDownloadsImpl> impl;
-                // CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&impl);
+                CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&impl);
                 AutoPtr<IUri> contentUri;
                 impl->GetCONTENT_URI((IUri**)&contentUri);
                 cUris->WithAppendedId(contentUri, id, uri);
@@ -590,8 +586,7 @@ ECode CDownloadManager::GetMaxBytesOverMobile(
     AutoPtr<IContentResolver> resolver;
     context->GetContentResolver((IContentResolver**)&resolver);
     AutoPtr<ISettingsGlobal> global;
-    assert(0 && "TODO");
-    // CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&global);
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&global);
     return global->GetInt64(resolver,
             ISettingsGlobal::DOWNLOAD_MAX_BYTES_OVER_MOBILE, size);
 //     } catch (SettingNotFoundException exc) {
@@ -610,8 +605,7 @@ ECode CDownloadManager::GetRecommendedMaxBytesOverMobile(
     AutoPtr<IContentResolver> resolver;
     context->GetContentResolver((IContentResolver**)&resolver);
     AutoPtr<ISettingsGlobal> global;
-    assert(0 && "TODO");
-    // CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&global);
+    CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&global);
     return global->GetInt64(resolver,
             ISettingsGlobal::DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE, size);
     // } catch (SettingNotFoundException exc) {
@@ -713,7 +707,7 @@ ECode CDownloadManager::AddCompletedDownload(
             completion : hidden);
     values->Put(IDownloadsImpl::COLUMN_ALLOW_WRITE, allowWrite ? 1 : 0);
     AutoPtr<IDownloadsImpl> impl;
-    // CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&impl);
+    CDownloadsImpl::AcquireSingleton((IDownloadsImpl**)&impl);
     AutoPtr<IUri> contentUri;
     impl->GetCONTENT_URI((IUri**)&contentUri);
     AutoPtr<IUri> downloadUri;

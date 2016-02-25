@@ -1,4 +1,4 @@
-#ifndef  __ELASTOS_DROID_MEDIA_CTEXTTRACKCUE_H__
+#ifndef __ELASTOS_DROID_MEDIA_CTEXTTRACKCUE_H__
 #define __ELASTOS_DROID_MEDIA_CTEXTTRACKCUE_H__
 
 #include "_Elastos_Droid_Media_CTextTrackCue.h"

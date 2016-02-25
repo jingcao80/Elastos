@@ -1,11 +1,27 @@
+/*
+ * Usages:
+ * compile:
+ *      cd Quintet
+ *      emake
+ *      pd @
+ *      elcopy testQuintet
+ *
+ * run:
+        adb root
+ *      adb shell
+ *      cd /data/data/com.elastos.runtime/elastos
+ *      ./testQuintet
+ */
 
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/etl/HashMap.h>
+#include <Elastos.CoreLibrary.Net.h>
 
 using namespace Elastos;
 using namespace Elastos::Core;
 using namespace Elastos::Math;
+using namespace Elastos::Net;
 using Elastos::Utility::Etl::HashMap;
 
 class Base
@@ -898,6 +914,65 @@ void testSelfCopy()
     printf("\n");
 }
 
+void testMemoryLeak()
+{
+    {
+        printf(" ======= test IInetAddress ===========\n");
+
+        AutoPtr<IInetAddressHelper> iaHelper;
+        CInetAddressHelper::AcquireSingleton((IInetAddressHelper**)&iaHelper);
+
+        {
+            AutoPtr<IInetAddress> ia1, ia2;
+            iaHelper->GetByName(String("127.0.0.1"), (IInetAddress**)&ia1);
+            iaHelper->GetByName(String("www.163.com"), (IInetAddress**)&ia2);
+
+            AutoPtr<ArrayOf<IInetAddress*> > result = ArrayOf<IInetAddress*>::Alloc(2);
+            result->Set(0, ia1);
+            result->Set(1, ia2);
+
+            printf(" ia1 : %p, %p\n", ia1.Get(), TO_IINTERFACE(ia1));
+            printf(" ia2 : %p, %p\n", ia2.Get(), TO_IINTERFACE(ia2));
+
+            ia1 = NULL;
+            ia2 = NULL;
+
+            printf(" ======= before release ===========\n");
+        }
+        printf(" ======= affter release ===========\n");
+    }
+
+    {
+        printf(" ======= test IBigInteger ===========\n");
+        {
+            AutoPtr<IBigInteger> i1, i2, i3, i4;
+            CBigInteger::New(1, 1, (IBigInteger**)&i1);
+            CBigInteger::New(1, 2, (IBigInteger**)&i2);
+            CBigInteger::New(-1, 3, (IBigInteger**)&i3);
+            CBigInteger::New(-1, 4, (IBigInteger**)&i4);
+
+            AutoPtr< ArrayOf<IBigInteger*> > v1 = ArrayOf<IBigInteger*>::Alloc(4);
+            v1->Set(0, i1);
+            v1->Set(1, i2);
+            v1->Set(2, i3);
+            v1->Set(3, i4);
+
+            printf(" i1 : %p, %p\n", i1.Get(), TO_IINTERFACE(i1));
+            printf(" i2 : %p, %p\n", i2.Get(), TO_IINTERFACE(i2));
+            printf(" i3 : %p, %p\n", i3.Get(), TO_IINTERFACE(i3));
+            printf(" i4 : %p, %p\n", i4.Get(), TO_IINTERFACE(i4));
+            i1 = NULL;
+            i2 = NULL;
+            i3 = NULL;
+            i4 = NULL;
+
+            printf(" ======= before release ===========\n");
+        }
+        printf(" ======= affter release ===========\n");
+
+    }
+}
+
 void testQuintet()
 {
     // doTestArrayOfFreeRelease();
@@ -912,7 +987,8 @@ void testQuintet()
     // testArray2();
 
     // testArrayOfString();
-    testSelfCopy();
+    //testSelfCopy();
+    // testMemoryLeak();
 }
 
 int main(int argc, char *argv[])

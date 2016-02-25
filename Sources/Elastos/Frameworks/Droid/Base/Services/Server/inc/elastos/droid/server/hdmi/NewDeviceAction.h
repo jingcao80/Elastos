@@ -1,25 +1,17 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.android.server.hdmi;
 
-using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
-using Elastos::Droid::Utility::ISlog;
+#ifndef __ELASTOS_DROID_SERVER_HDMI_NEWDEVICEACTION_H__
+#define __ELASTOS_DROID_SERVER_HDMI_NEWDEVICEACTION_H__
 
-using Elastos::Droid::Server::Ihdmi.HdmiCecLocalDevice.ActiveSource;
-using Elastos::IO::IUnsupportedEncodingException;
+#include "_Elastos.Droid.Server.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/core/Object.h>
+#include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDevice.h"
+
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Hdmi {
 
 /**
  * Feature action that discovers the information of a newly found logical device.
@@ -33,23 +25,11 @@ using Elastos::IO::IUnsupportedEncodingException;
  *
  * <p>Package-private, accessed by {@link HdmiControlService} only.
  */
-final class NewDeviceAction extends HdmiCecFeatureAction {
-
-    private static const String TAG = "NewDeviceAction";
-
-    // State in which the action sent <Give OSD Name> and is waiting for <Set OSD Name>
-    // that contains the name of the device for display on screen.
-    static const Int32 STATE_WAITING_FOR_SET_OSD_NAME = 1;
-
-    // State in which the action sent <Give Device Vendor ID> and is waiting for
-    // <Device Vendor ID> that contains the vendor ID of the device.
-    static const Int32 STATE_WAITING_FOR_DEVICE_VENDOR_ID = 2;
-
-    private final Int32 mDeviceLogicalAddress;
-    private final Int32 mDevicePhysicalAddress;
-
-    private Int32 mVendorId;
-    private String mDisplayName;
+class NewDeviceAction
+    : public HdmiCecFeatureAction
+{
+public:
+    NewDeviceAction();
 
     /**
      * Constructor.
@@ -58,130 +38,59 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
      * @param deviceLogicalAddress logical address of the device in interest
      * @param devicePhysicalAddress physical address of the device in interest
      */
-    NewDeviceAction(HdmiCecLocalDevice source, Int32 deviceLogicalAddress,
-            Int32 devicePhysicalAddress) {
-        Super(source);
-        mDeviceLogicalAddress = deviceLogicalAddress;
-        mDevicePhysicalAddress = devicePhysicalAddress;
-        mVendorId = Constants.UNKNOWN_VENDOR_ID;
-    }
+    CARAPI constructor(
+        /* [in] */ IHdmiCecLocalDevice* source,
+        /* [in] */ Int32 deviceLogicalAddress,
+        /* [in] */ Int32 devicePhysicalAddress);
 
-    //@Override
-    public Boolean Start() {
-        mState = STATE_WAITING_FOR_SET_OSD_NAME;
-        if (MayProcessCommandIfCached(mDeviceLogicalAddress, Constants.MESSAGE_SET_OSD_NAME)) {
-            return TRUE;
-        }
+    // @Override
+    CARAPI Start(
+        /* [out] */ Boolean* result);
 
-        SendCommand(HdmiCecMessageBuilder->BuildGiveOsdNameCommand(GetSourceAddress(),
-                mDeviceLogicalAddress));
-        AddTimer(mState, HdmiConfig.TIMEOUT_MS);
-        return TRUE;
-    }
+    // @Override
+    CARAPI ProcessCommand(
+        /* [in] */ IHdmiCecMessage* cmd,
+        /* [out] */ Boolean* result);
 
-    //@Override
-    public Boolean ProcessCommand(HdmiCecMessage cmd) {
-        // For the logical device in interest, we want two more pieces of information -
-        // osd name and vendor id. They are requested in sequence. In case we don't
-        // get the expected responses (either by timeout or by receiving <feature abort> command),
-        // set them to a default osd name and unknown vendor id respectively.
-        Int32 opcode = cmd->GetOpcode();
-        Int32 src = cmd->GetSource();
-        Byte[] params = cmd->GetParams();
+    // @Override
+    CARAPI HandleTimerEvent(
+        /* [in] */ Int32 state);
 
-        if (mDeviceLogicalAddress != src) {
-            return FALSE;
-        }
+    CARAPI IsActionOf(
+        /* [in] */ HdmiCecLocalDevice::ActiveSource* activeSource,
+        /* [out] */ Boolean* result);
 
-        if (mState == STATE_WAITING_FOR_SET_OSD_NAME) {
-            if (opcode == Constants.MESSAGE_SET_OSD_NAME) {
-                try {
-                    mDisplayName = new String(params, "US-ASCII");
-                } catch (UnsupportedEncodingException e) {
-                    Slogger::E(TAG, "Failed to get OSD name: " + e->GetMessage());
-                }
-                RequestVendorId();
-                return TRUE;
-            } else if (opcode == Constants.MESSAGE_FEATURE_ABORT) {
-                Int32 requestOpcode = params[0] & 0xFF;
-                if (requestOpcode == Constants.MESSAGE_GIVE_OSD_NAME) {
-                    RequestVendorId();
-                    return TRUE;
-                }
-            }
-        } else if (mState == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
-            if (opcode == Constants.MESSAGE_DEVICE_VENDOR_ID) {
-                mVendorId = HdmiUtils->ThreeBytesToInt(params);
-                AddDeviceInfo();
-                Finish();
-                return TRUE;
-            } else if (opcode == Constants.MESSAGE_FEATURE_ABORT) {
-                Int32 requestOpcode = params[0] & 0xFF;
-                if (requestOpcode == Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID) {
-                    AddDeviceInfo();
-                    Finish();
-                    return TRUE;
-                }
-            }
-        }
-        return FALSE;
-    }
+    // that contains the name of the device for display on screen.
+    static const Int32 STATE_WAITING_FOR_SET_OSD_NAME;
 
-    private Boolean MayProcessCommandIfCached(Int32 destAddress, Int32 opcode) {
-        HdmiCecMessage message = GetCecMessageCache()->GetMessage(destAddress, opcode);
-        if (message != NULL) {
-            return ProcessCommand(message);
-        }
-        return FALSE;
-    }
+    // <Device Vendor ID> that contains the vendor ID of the device.
+    static const Int32 STATE_WAITING_FOR_DEVICE_VENDOR_ID;
 
-    private void RequestVendorId() {
-        // At first, transit to waiting status for <Device Vendor Id>.
-        mState = STATE_WAITING_FOR_DEVICE_VENDOR_ID;
-        // If the message is already in cache, process it.
-        if (MayProcessCommandIfCached(mDeviceLogicalAddress,
-                Constants.MESSAGE_DEVICE_VENDOR_ID)) {
-            return;
-        }
-        SendCommand(HdmiCecMessageBuilder->BuildGiveDeviceVendorIdCommand(GetSourceAddress(),
-                mDeviceLogicalAddress));
-        AddTimer(mState, HdmiConfig.TIMEOUT_MS);
-    }
+private:
+    CARAPI MayProcessCommandIfCached(
+        /* [in] */ Int32 destAddress,
+        /* [in] */ Int32 opcode,
+        /* [out] */ Boolean* result);
 
-    private void AddDeviceInfo() {
-        if (mDisplayName == NULL) {
-            mDisplayName = HdmiUtils->GetDefaultDeviceName(mDeviceLogicalAddress);
-        }
-        HdmiDeviceInfo deviceInfo = new HdmiDeviceInfo(
-                mDeviceLogicalAddress, mDevicePhysicalAddress,
-                Tv()->GetPortId(mDevicePhysicalAddress),
-                HdmiUtils->GetTypeFromAddress(mDeviceLogicalAddress),
-                mVendorId, mDisplayName);
-        Tv()->AddCecDevice(deviceInfo);
+    CARAPI RequestVendorId();
 
-        if (HdmiUtils->GetTypeFromAddress(mDeviceLogicalAddress)
-                == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
-            Tv()->OnNewAvrAdded(deviceInfo);
-        }
-    }
+    CARAPI AddDeviceInfo();
 
-    //@Override
-    CARAPI HandleTimerEvent(Int32 state) {
-        if (mState == STATE_NONE || mState != state) {
-            return;
-        }
-        if (state == STATE_WAITING_FOR_SET_OSD_NAME) {
-            // Osd name request timed out. Try vendor id
-            RequestVendorId();
-        } else if (state == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
-            // vendor id timed out. Go ahead creating the device info what we've got so far.
-            AddDeviceInfo();
-            Finish();
-        }
-    }
+private:
+    static const String TAG;
 
-    Boolean IsActionOf(ActiveSource activeSource) {
-        return (mDeviceLogicalAddress == activeSource.logicalAddress)
-                && (mDevicePhysicalAddress == activeSource.physicalAddress);
-    }
-}
+    Int32 mDeviceLogicalAddress;
+
+    Int32 mDevicePhysicalAddress;
+
+    Int32 mVendorId;
+
+    String mDisplayName;
+};
+
+} // namespace Hdmi
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
+
+#endif // __ELASTOS_DROID_SERVER_HDMI_NEWDEVICEACTION_H__

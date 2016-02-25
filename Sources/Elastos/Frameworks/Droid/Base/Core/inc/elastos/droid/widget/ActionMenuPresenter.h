@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_WIDGET_ACTIONMENUPRESENTER_H__
-#define  __ELASTOS_DROID_WIDGET_ACTIONMENUPRESENTER_H__
+#define __ELASTOS_DROID_WIDGET_ACTIONMENUPRESENTER_H__
 
 #include "elastos/droid/widget/ImageButton.h"
 #include "elastos/droid/widget/ListPopupWindow.h"

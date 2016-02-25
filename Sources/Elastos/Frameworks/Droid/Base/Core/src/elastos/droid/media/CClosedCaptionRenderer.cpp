@@ -1,3 +1,5 @@
+
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/Typeface.h"
 #include "elastos/droid/media/CClosedCaptionRenderer.h"
 #include "elastos/droid/text/CSpannableStringBuilder.h"
@@ -8,6 +10,7 @@
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::PaintJoin;
 using Elastos::Droid::Graphics::PaintStyle;
 using Elastos::Droid::Graphics::Typeface;

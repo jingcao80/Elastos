@@ -3,6 +3,11 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+#include <binder/MemoryDealer.h>
+#include <media/stagefright/foundation/ABase.h>
+#include <media/stagefright/foundation/ADebug.h>
+#include <utils/RefBase.h>
+
 using Elastos::Droid::Net::NetworkUtils;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Core::CString;
@@ -24,9 +29,69 @@ using Elastos::Utility::IMapEntry;
 using Elastos::Utility::ISet;
 using Elastos::Utility::Logging::Logger;
 
+using android::sp;
+
 namespace Elastos {
 namespace Droid {
 namespace Media {
+
+//==============================================================================
+//  JMediaHTTPConnection
+//==============================================================================
+
+struct JMediaHTTPConnection : public android::RefBase {
+    enum {
+        kBufferSize = 32768,
+    };
+
+    JMediaHTTPConnection(CMediaHTTPConnection* obj);
+
+    sp<android::IMemory> getIMemory();
+
+    AutoPtr<ArrayOf<Byte> > getByteArrayObj();
+
+protected:
+    virtual ~JMediaHTTPConnection();
+
+private:
+    CMediaHTTPConnection* mObject;
+    AutoPtr<ArrayOf<Byte> > mByteArrayObj;
+
+    sp<android::MemoryDealer> mDealer;
+    sp<android::IMemory> mMemory;
+
+    DISALLOW_EVIL_CONSTRUCTORS(JMediaHTTPConnection);
+};
+
+JMediaHTTPConnection::JMediaHTTPConnection(CMediaHTTPConnection* obj)
+    : mObject(obj),
+      mByteArrayObj(NULL)
+{
+    mDealer = new android::MemoryDealer(kBufferSize, "MediaHTTPConnection");
+    mMemory = mDealer->allocate(kBufferSize);
+
+    mByteArrayObj = ArrayOf<Byte>::Alloc(JMediaHTTPConnection::kBufferSize);
+}
+
+JMediaHTTPConnection::~JMediaHTTPConnection()
+{
+    mByteArrayObj = NULL;
+    mObject = NULL;
+}
+
+sp<android::IMemory> JMediaHTTPConnection::getIMemory()
+{
+    return mMemory;
+}
+
+AutoPtr<ArrayOf<Byte> > JMediaHTTPConnection::getByteArrayObj()
+{
+    return mByteArrayObj;
+}
+
+//==============================================================================
+//  CMediaHTTPConnection
+//==============================================================================
 
 const String CMediaHTTPConnection::TAG("MediaHTTPConnection");
 Boolean CMediaHTTPConnection::VERBOSE = FALSE;
@@ -485,18 +550,21 @@ void CMediaHTTPConnection::NativeInit()
 
 void CMediaHTTPConnection::NativeSetup()
 {
-    return;
+    sp<JMediaHTTPConnection> conn = new JMediaHTTPConnection(this);
+
+    mNativeContext = (Int64)conn.get();
 }
 
 void CMediaHTTPConnection::NativeFinalize()
 {
-    return;
+    mNativeContext = 0;
 }
 
 AutoPtr<IBinder> CMediaHTTPConnection::NativeGetIMemory()
 {
-    // sp<JMediaHTTPConnection> conn = getObject(env, thiz);
+    sp<JMediaHTTPConnection> conn = (JMediaHTTPConnection*)mNativeContext;
 
+//TODO: javaObjectForIBinder
     // return javaObjectForIBinder(env, conn->getIMemory()->asBinder());
     return NULL;
 }
@@ -505,27 +573,23 @@ Int32 CMediaHTTPConnection::NativeReadAt(
     /* [in] */ Int64 offset,
     /* [in] */ Int32 size)
 {
-    // sp<JMediaHTTPConnection> conn = getObject(env, thiz);
+    sp<JMediaHTTPConnection> conn = (JMediaHTTPConnection*)mNativeContext;
 
-    // if (size > JMediaHTTPConnection::kBufferSize) {
-    //     size = JMediaHTTPConnection::kBufferSize;
-    // }
+    if (size > JMediaHTTPConnection::kBufferSize) {
+        size = JMediaHTTPConnection::kBufferSize;
+    }
 
-    // jbyteArray byteArrayObj = conn->getByteArrayObj();
+    AutoPtr<ArrayOf<Byte> > byteArrayObj = conn->getByteArrayObj();
 
-    // jint n = env->CallIntMethod(
-    //         thiz, gFields.readAtMethodID, offset, byteArrayObj, size);
+    Int32 n = ReadAt(offset, byteArrayObj, size);
 
-    // if (n > 0) {
-    //     env->GetByteArrayRegion(
-    //             byteArrayObj,
-    //             0,
-    //             n,
-    //             (jbyte *)conn->getIMemory()->pointer());
-    // }
+    if (n > 0) {
+//TODO: GetByteArrayRegion
+        // env->GetByteArrayRegion(
+        //         byteArrayObj, 0, n, (jbyte *)conn->getIMemory()->pointer());
+    }
 
-    // return n;
-    return 0;
+    return n;
 }
 
 } // namespace Media

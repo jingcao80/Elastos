@@ -408,6 +408,7 @@ ECode CPosix::Accept(
     /* [in] */ IInetSocketAddress* peerAddress,
     /* [out] */ IFileDescriptor** retFd)
 {
+    VALIDATE_NOT_NULL(retFd)
     *retFd = NULL;
     sockaddr_storage ss;
     socklen_t sl = sizeof(ss);
@@ -430,6 +431,7 @@ ECode CPosix::Access(
     /* [in] */ Int32 mode,
     /* [out] */ Boolean* succeed)
 {
+    VALIDATE_NOT_NULL(succeed)
     *succeed = FALSE;
     if (path == NULL) {
         return NOERROR;
@@ -449,6 +451,7 @@ ECode CPosix::Elastos_getaddrinfo(
     /* [in] */ Int32 netId,
     /* [out, callee] */ ArrayOf<IInetAddress*>** info)
 {
+    VALIDATE_NOT_NULL(info)
     *info = NULL;
     if (node == NULL) {
         return NOERROR;
@@ -595,11 +598,13 @@ ECode CPosix::Dup(
     /* [in] */ IFileDescriptor* oldFd,
     /* [out] */ IFileDescriptor** retFd)
 {
+    VALIDATE_NOT_NULL(retFd)
+    *retFd = NULL;
+
     Int32 _oldFd;
     oldFd->GetDescriptor(&_oldFd);
     ECode ec;
     Int32 newFd = ErrorIfMinusOne("dup", TEMP_FAILURE_RETRY(dup(_oldFd)), &ec);
-    *retFd = NULL;
     if (newFd != -1) {
         CFileDescriptor::New(retFd);
         (*retFd)->SetDescriptor(newFd);
@@ -612,11 +617,13 @@ ECode CPosix::Dup2(
     /* [in] */ Int32 newFd,
     /* [out] */ IFileDescriptor** retFd)
 {
+    VALIDATE_NOT_NULL(retFd)
+    *retFd = NULL;
+
     Int32 _oldFd;
     oldFd->GetDescriptor(&_oldFd);
     ECode ec;
     Int32 fd = ErrorIfMinusOne("dup2", TEMP_FAILURE_RETRY(dup2(_oldFd, newFd)), &ec);
-    *retFd = NULL;
     if (fd != -1) {
         CFileDescriptor::New(retFd);
         (*retFd)->SetDescriptor(fd);
@@ -627,6 +634,8 @@ ECode CPosix::Dup2(
 ECode CPosix::Environ(
     /* [out, callee] */ ArrayOf<String>** env)
 {
+    VALIDATE_NOT_NULL(env)
+    *env = NULL;
 
     Int32 size = 0;
     while(*environ) size++;
@@ -721,6 +730,7 @@ ECode CPosix::FcntlVoid(
     /* [in] */ Int32 cmd,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     ECode ec;
@@ -734,6 +744,7 @@ ECode CPosix::FcntlInt64(
     /* [in] */ Int64 arg,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     ECode ec;
@@ -747,6 +758,7 @@ ECode CPosix::FcntlFlock(
     /* [in] */ IStructFlock* flock,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     struct flock64 lock;
     memset(&lock, 0, sizeof(lock));
     Int16 typeTmp, whenceTmp;
@@ -790,6 +802,7 @@ ECode CPosix::Fstat(
     /* [in] */ IFileDescriptor* fd,
     /* [out] */ IStructStat** statout)
 {
+    VALIDATE_NOT_NULL(statout)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     struct stat sb;
@@ -810,6 +823,7 @@ ECode CPosix::Fstatvfs(
     /* [in] */ IFileDescriptor* fd,
     /* [out] */ IStructStatVfs** statFs)
 {
+    VALIDATE_NOT_NULL(statFs)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     struct statvfs sb;
@@ -851,6 +865,7 @@ ECode CPosix::Gai_strerror(
     /* [in] */ Int32 error,
     /* [out] */ String* strerror)
 {
+    VALIDATE_NOT_NULL(strerror)
     *strerror = gai_strerror(error);
     return NOERROR;
 }
@@ -858,6 +873,7 @@ ECode CPosix::Gai_strerror(
 ECode CPosix::Getegid(
     /* [out] */ Int32* egid)
 {
+    VALIDATE_NOT_NULL(egid)
     *egid = getegid();
     return NOERROR;
 }
@@ -865,6 +881,7 @@ ECode CPosix::Getegid(
 ECode CPosix::Geteuid(
     /* [out] */ Int32* euid)
 {
+    VALIDATE_NOT_NULL(euid)
     *euid = geteuid();
     return NOERROR;
 }
@@ -872,6 +889,7 @@ ECode CPosix::Geteuid(
 ECode CPosix::Getgid(
     /* [out] */ Int32* gid)
 {
+    VALIDATE_NOT_NULL(gid)
     *gid = getgid();
     return NOERROR;
 }
@@ -880,6 +898,7 @@ ECode CPosix::Getenv(
     /* [in] */ const String& name,
     /* [out] */ String* env)
 {
+    VALIDATE_NOT_NULL(env)
     if (name == NULL) {
         *env = NULL;
         return NOERROR;
@@ -894,6 +913,7 @@ ECode CPosix::Getnameinfo(
     /* [in] */ Int32 flags,
     /* [out] */ String* nameinfo)
 {
+    VALIDATE_NOT_NULL(nameinfo)
     sockaddr_storage ss;
     socklen_t sa_len;
     if (!InetAddressToSockaddrVerbatim(address, 0, ss, sa_len)) {
@@ -917,6 +937,7 @@ ECode CPosix::Getpeername(
     /* [in] */ IFileDescriptor* fd,
     /* [out] */ ISocketAddress** peername)
 {
+    VALIDATE_NOT_NULL(peername)
     AutoPtr<ISocketAddress> addr = DoGetSockName(fd, FALSE);
     *peername = addr;
     REFCOUNT_ADD(*peername)
@@ -926,6 +947,7 @@ ECode CPosix::Getpeername(
 ECode CPosix::Getpid(
     /* [out] */ Int32* pid)
 {
+    VALIDATE_NOT_NULL(pid)
     *pid = getpid();
     return NOERROR;
 }
@@ -933,6 +955,7 @@ ECode CPosix::Getpid(
 ECode CPosix::Getppid(
     /* [out] */ Int32* ppid)
 {
+    VALIDATE_NOT_NULL(ppid)
     *ppid = getppid();
     return NOERROR;
 }
@@ -941,6 +964,7 @@ ECode CPosix::Getpwnam(
     /* [in] */ const String& name,
     /* [out] */ IStructPasswd** pwnam)
 {
+    VALIDATE_NOT_NULL(pwnam)
     if (name == NULL) {
         *pwnam = NULL;
     }
@@ -954,6 +978,7 @@ ECode CPosix::Getpwuid(
     /* [in] */ Int32 uid,
     /* [out] */ IStructPasswd** pwuid)
 {
+    VALIDATE_NOT_NULL(pwuid)
     AutoPtr<IStructPasswd> passwd = Passwd().getpwuid(uid);
     *pwuid = passwd;
     REFCOUNT_ADD(*pwuid)
@@ -964,6 +989,7 @@ ECode CPosix::Getsockname(
     /* [in] */ IFileDescriptor* fd,
     /* [out] */ ISocketAddress** sockname)
 {
+    VALIDATE_NOT_NULL(sockname)
     AutoPtr<ISocketAddress> addr = DoGetSockName(fd, TRUE);
     *sockname = addr;
     REFCOUNT_ADD(*sockname)
@@ -976,6 +1002,7 @@ ECode CPosix::GetsockoptByte(
     /* [in] */ Int32 option,
     /* [out] */ Int32* sockopt)
 {
+    VALIDATE_NOT_NULL(sockopt)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     u_char result = 0;
@@ -992,6 +1019,7 @@ ECode CPosix::GetsockoptInAddr(
     /* [in] */ Int32 option,
     /* [out] */ IInetAddress** addr)
 {
+    VALIDATE_NOT_NULL(addr)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     sockaddr_storage ss;
@@ -1018,6 +1046,7 @@ ECode CPosix::GetsockoptInt32(
     /* [in] */ Int32 option,
     /* [out] */ Int32* sockopt)
 {
+    VALIDATE_NOT_NULL(sockopt)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     Int32 result = 0;
@@ -1034,6 +1063,7 @@ ECode CPosix::GetsockoptLinger(
     /* [in] */ Int32 option,
     /* [out] */ IStructLinger** linger)
 {
+    VALIDATE_NOT_NULL(linger)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     struct linger l;
@@ -1058,6 +1088,7 @@ ECode CPosix::GetsockoptTimeval(
     /* [in] */ Int32 option,
     /* [out] */ IStructTimeval** timeval)
 {
+    VALIDATE_NOT_NULL(timeval)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     struct timeval tv;
@@ -1082,6 +1113,7 @@ ECode CPosix::GetsockoptUcred(
     /* [in] */ Int32 option,
     /* [out] */ IStructUcred** ucred)
 {
+    VALIDATE_NOT_NULL(ucred)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     struct ucred u;
@@ -1103,6 +1135,7 @@ ECode CPosix::GetsockoptUcred(
 ECode CPosix::Gettid(
     /* [out] */ Int32* tid)
 {
+    VALIDATE_NOT_NULL(tid)
 #if defined(__APPLE__)
     uint64_t owner;
     int rc = pthread_threadid_np(NULL, &owner);  // Requires Mac OS 10.6
@@ -1124,6 +1157,7 @@ ECode CPosix::Gettid(
 ECode CPosix::Getuid(
     /* [out] */ Int32* uid)
 {
+    VALIDATE_NOT_NULL(uid)
     *uid =getuid();
     return NOERROR;
 }
@@ -1132,6 +1166,7 @@ ECode CPosix::If_indextoname(
     /* [in] */ Int32 index,
     /* [out] */ String* name)
 {
+    VALIDATE_NOT_NULL(name)
     char buf[IF_NAMESIZE];
     char* _name = if_indextoname(index, buf);
     // if_indextoname(3) returns NULL on failure, which will come out of NewStringUTF unscathed.
@@ -1145,6 +1180,7 @@ ECode CPosix::Inet_pton(
     /* [in] */ const String& name,
     /* [out] */ IInetAddress** addr)
 {
+    VALIDATE_NOT_NULL(addr)
     if (name == NULL) {
         *addr = NULL;
         return NOERROR;
@@ -1170,6 +1206,7 @@ ECode CPosix::IoctlInetAddress(
     /* [in] */ const String& interfaceName,
     /* [out] */ IInetAddress** addr)
 {
+    VALIDATE_NOT_NULL(addr)
     struct ifreq req;
     if (!FillIfreq(interfaceName, req)) {
         *addr = NULL;
@@ -1195,6 +1232,7 @@ ECode CPosix::IoctlInt(
     /* [in, out] */ Int32* arg,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     // This is complicated because ioctls may return their result by updating their argument
     // or via their return value, so we need to support both.
     Int32 _fd;
@@ -1209,6 +1247,7 @@ ECode CPosix::Isatty(
     /* [in] */ IFileDescriptor* fd,
     /* [out] */ Boolean* isatty)
 {
+    VALIDATE_NOT_NULL(isatty)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     *isatty = TEMP_FAILURE_RETRY(::isatty(_fd)) == 1;
@@ -1269,6 +1308,7 @@ ECode CPosix::Lseek(
     /* [in] */ Int32 whence,
     /* [out] */ Int64* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     ECode ec;
@@ -1280,6 +1320,7 @@ ECode CPosix::Lstat(
     /* [in] */ const String& path,
     /* [out] */ IStructStat** stat)
 {
+    VALIDATE_NOT_NULL(stat)
     *stat = DoStat(path, TRUE);
     return NOERROR;
 }
@@ -1342,6 +1383,7 @@ ECode CPosix::Mmap(
     /* [in] */ Int64 offset,
     /* [out] */ Int64* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     void* suggestedPtr = reinterpret_cast<void*>(static_cast<uintptr_t>(address));
@@ -1393,6 +1435,7 @@ ECode CPosix::Open(
     /* [in] */ Int32 mode,
     /* [out] */ IFileDescriptor** fd)
 {
+    VALIDATE_NOT_NULL(fd)
     if (path == NULL) {
         *fd = NULL;
         return NOERROR;
@@ -1411,6 +1454,7 @@ ECode CPosix::Open(
 ECode CPosix::Pipe(
     /* [out, callee] */ ArrayOf<IFileDescriptor*>** fds)
 {
+    VALIDATE_NOT_NULL(fds)
     Int32 fdsArr[2];
     ECode ec;
     Int32 _fd = ErrorIfMinusOne("pipe", TEMP_FAILURE_RETRY(pipe(&fdsArr[0])), &ec);
@@ -1441,6 +1485,7 @@ ECode CPosix::Poll(
     /* [in] */ Int32 timeoutMs,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     // static jfieldID fdFid = env->GetFieldID(JniConstants::structPollfdClass, "fd", "Ljava/io/FileDescriptor;");
     // static jfieldID eventsFid = env->GetFieldID(JniConstants::structPollfdClass, "events", "S");
     // static jfieldID reventsFid = env->GetFieldID(JniConstants::structPollfdClass, "revents", "S");
@@ -1528,6 +1573,7 @@ ECode CPosix::Prctl(
     /* [in] */ Int64 arg5,
     /* [out] */ Int32* prctlOut)
 {
+    VALIDATE_NOT_NULL(prctlOut)
 #ifdef __APPLE__
     ALOGE("prctl doesn't exist on a Mac");
     *prctlOut = 0;
@@ -1559,6 +1605,7 @@ ECode CPosix::Pread(
     /* [in] */ Int64 offset,
     /* [out] */ Int32* num)
 {
+    VALIDATE_NOT_NULL(num)
     // TODO::
     Int32 position, remaining;
     AutoPtr<IBuffer> buf = IBuffer::Probe(buffer);
@@ -1588,6 +1635,7 @@ ECode CPosix::Pwrite(
     /* [in] */ Int64 offset,
     /* [out] */ Int32* num)
 {
+    VALIDATE_NOT_NULL(num)
     // TODO::
     Int32 position, remaining;
     AutoPtr<IBuffer> buf = IBuffer::Probe(buffer);
@@ -1615,6 +1663,7 @@ ECode CPosix::Read(
     /* [in] */ IByteBuffer* buffer,
     /* [out] */ Int32* num)
 {
+    VALIDATE_NOT_NULL(num)
     // TODO::
     Int32 position, remaining;
     AutoPtr<IBuffer> buf = IBuffer::Probe(buffer);
@@ -1631,6 +1680,7 @@ ECode CPosix::Readlink(
     /* [in] */ const String& path,
     /* [out] */ String* link)
 {
+    VALIDATE_NOT_NULL(link)
     if (path == NULL) {
         *link = NULL;
         return NOERROR;
@@ -1654,6 +1704,7 @@ ECode CPosix::Readv(
     /* [in] */ ArrayOf<Int32>* byteCounts,
     /* [out] */ Int32* num)
 {
+    VALIDATE_NOT_NULL(num)
     if (offsets == NULL || byteCounts == NULL || buffers == NULL) {
         *num = -1;
         return NOERROR;
@@ -1712,6 +1763,7 @@ ECode CPosix::Recvfrom(
     /* [in] */ IInetSocketAddress* srcAddress,
     /* [out] */ Int32* num)
 {
+    VALIDATE_NOT_NULL(num)
     // TODO::
     Int32 position, remaining;
     AutoPtr<IBuffer> buf = IBuffer::Probe(buffer);
@@ -1768,6 +1820,7 @@ ECode CPosix::Sendto(
     /* [in] */ Int32 port,
     /* [out] */ Int32* num)
 {
+    VALIDATE_NOT_NULL(num)
     // TODO::
     Int32 position, remaining;
     AutoPtr<IBuffer> buf = IBuffer::Probe(buffer);
@@ -1787,6 +1840,7 @@ ECode CPosix::Sendfile(
     /* [in] */ Int64 byteCount,
     /* [out] */ Int64* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 _outFd, _inFd;
     outFd->GetDescriptor(&_outFd);
     inFd->GetDescriptor(&_inFd);
@@ -2089,6 +2143,7 @@ ECode CPosix::Socket(
     /* [in] */ Int32 protocol,
     /* [out] */ IFileDescriptor** fd)
 {
+    VALIDATE_NOT_NULL(fd)
     ECode ec;
     Int32 _fd = ErrorIfMinusOne("socket", TEMP_FAILURE_RETRY(socket(socketDomain, type, protocol)), &ec);
     *fd = NULL;
@@ -2120,6 +2175,7 @@ ECode CPosix::Stat(
     /* [in] */ const String& path,
     /* [out] */ IStructStat** stat)
 {
+    VALIDATE_NOT_NULL(stat)
     AutoPtr<IStructStat> statObj = DoStat(path, FALSE);
     *stat = statObj;
     REFCOUNT_ADD(*stat)
@@ -2131,6 +2187,7 @@ ECode CPosix::StatVfs(
     /* [in] */ const String& path,
     /* [out] */ IStructStatVfs** vfsResult)
 {
+    VALIDATE_NOT_NULL(vfsResult)
     if (path == NULL) {
         *vfsResult = NULL;
         return NOERROR;
@@ -2153,6 +2210,7 @@ ECode CPosix::Strerror(
     /* [in] */ Int32 errnum,
     /* [out] */ String* strerr)
 {
+    VALIDATE_NOT_NULL(strerr)
     const char* message = strerror(errnum);
     *strerr = message;
     return NOERROR;
@@ -2162,6 +2220,7 @@ ECode CPosix::Strsignal(
     /* [in] */ Int32 signal,
     /* [out] */ String* strSignal)
 {
+    VALIDATE_NOT_NULL(strSignal)
     *strSignal = strsignal(signal);
     return NOERROR;
 }
@@ -2183,6 +2242,7 @@ ECode CPosix::Sysconf(
     /* [in] */ Int32 name,
     /* [out] */ Int64* result)
 {
+    VALIDATE_NOT_NULL(result)
     // Since -1 is a valid result from sysconf(3), detecting failure is a little more awkward.
     errno = 0;
     *result = sysconf(name);
@@ -2220,6 +2280,7 @@ ECode CPosix::Umask(
     /* [in] */ Int32 mask,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if ((mask & 0777) != mask) {
         ALOGE("Invalid umask: %d", mask);
         // throw new IllegalArgumentException("Invalid umask: " + mask);
@@ -2231,6 +2292,7 @@ ECode CPosix::Umask(
 ECode CPosix::Uname(
     /* [out] */ IStructUtsname** unameOut)
 {
+    VALIDATE_NOT_NULL(unameOut)
     struct utsname buf;
     if (TEMP_FAILURE_RETRY(uname(&buf)) == -1) {
         *unameOut = NULL; // Can't happen.
@@ -2258,10 +2320,11 @@ ECode CPosix::Waitpid(
     /* [in] */ Int32 options,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     Int32 status;
     ECode ec;
     Int32 rc = ErrorIfMinusOne("waitpid", TEMP_FAILURE_RETRY(waitpid(pid, &status, options)), &ec);
-    if (rc != -1 && statusArg == NULL) {
+    if (rc != -1 && statusArg != NULL) {
         *statusArg = status;
     }
     *result = rc;
@@ -2283,6 +2346,7 @@ ECode CPosix::Write(
     /* [in] */ IByteBuffer* buffer,
     /* [out] */ Int32* num)
 {
+    VALIDATE_NOT_NULL(num)
     // TODO::
     Int32 position, remaining;
     AutoPtr<IBuffer> buf = IBuffer::Probe(buffer);
@@ -2302,6 +2366,7 @@ ECode CPosix::Writev(
     /* [in] */ ArrayOf<Int32>* byteCounts,
     /* [out] */ Int32* num)
 {
+    VALIDATE_NOT_NULL(num)
     if (offsets == NULL || byteCounts == NULL || buffers == NULL) {
         *num = -1;
         return NOERROR;
@@ -2349,6 +2414,7 @@ ECode CPosix::PreadBytes(
     /* [in] */ Int64 offset,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (buffer == NULL) {
         *result = -1;
         return NOERROR;
@@ -2368,6 +2434,7 @@ ECode CPosix::PreadBytes(
     /* [in] */ Int64 offset,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (byteArray == NULL) {
         *result = -1;
         return NOERROR;
@@ -2385,6 +2452,7 @@ ECode CPosix::PwriteBytes(
     /* [in] */ Int64 offset,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (buffer == NULL) {
         *result = -1;
         return NOERROR;
@@ -2402,6 +2470,7 @@ ECode CPosix::PwriteBytes(
     /* [in] */ Int64 offset,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (byteArray == NULL) {
         *result = -1;
         return NOERROR;
@@ -2418,6 +2487,7 @@ ECode CPosix::ReadBytes(
     /* [in] */ Int32 bufferCount,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (buffer == NULL) {
         *result = -1;
         return NOERROR;
@@ -2434,6 +2504,7 @@ ECode CPosix::ReadBytes(
     /* [in] */ Int32 byteCount,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (byteArray == NULL) {
         *result = -1;
         return NOERROR;
@@ -2452,6 +2523,7 @@ ECode CPosix::RecvfromBytes(
     /* [in] */ IInetSocketAddress* srcAddress,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (buffer == NULL) {
         *result = -1;
         return NOERROR;
@@ -2470,6 +2542,7 @@ ECode CPosix::RecvfromBytes(
     /* [in] */ IInetSocketAddress* srcAddress,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (byteArray == NULL) {
         *result = -1;
         return NOERROR;
@@ -2496,6 +2569,7 @@ ECode CPosix::SendtoBytes(
     /* [in] */ Int32 port,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (buffer == NULL) {
         *result = -1;
         return NOERROR;
@@ -2515,6 +2589,7 @@ ECode CPosix::SendtoBytes(
     /* [in] */ Int32 port,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (byteArray == NULL) {
         *result = -1;
         return NOERROR;
@@ -2535,6 +2610,7 @@ ECode CPosix::UmaskImpl(
     /* [in] */ Int32 mask,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     *result = umask(mask);
     return NOERROR;
 }
@@ -2546,6 +2622,7 @@ ECode CPosix::WriteBytes(
     /* [in] */ Int32 bufferCount,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (buffer == NULL) {
         *result = -1;
         return NOERROR;
@@ -2562,6 +2639,7 @@ ECode CPosix::WriteBytes(
     /* [in] */ Int32 byteCount,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     if (byteArray == NULL) {
         *result = -1;
         return NOERROR;

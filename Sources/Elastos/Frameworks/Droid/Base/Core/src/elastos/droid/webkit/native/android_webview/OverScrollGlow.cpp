@@ -3,10 +3,10 @@
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/webkit/native/android_webview/OverScrollGlow.h"
-//TODO #include "elastos/droid/widget/CEdgeEffect.h"
+#include "elastos/droid/widget/CEdgeEffect.h"
 #include <elastos/core/Math.h>
 
-//TODO using Elastos::Droid::Widget::CEdgeEffect;
+using Elastos::Droid::Widget::CEdgeEffect;
 
 namespace Elastos {
 namespace Droid {
@@ -21,10 +21,10 @@ OverScrollGlow::OverScrollGlow(
     , mOverScrollDeltaY(0)
     , mShouldPull(FALSE)
 {
-    //TODO CEdgeEffect::New(context, (IEdgeEffect**)&mEdgeGlowTop);
-    //TODO CEdgeEffect::New(context, (IEdgeEffect**)&mEdgeGlowBottom);
-    //TODO CEdgeEffect::New(context, (IEdgeEffect**)&mEdgeGlowLeft);
-    //TODO CEdgeEffect::New(context, (IEdgeEffect**)&mEdgeGlowRight);
+    CEdgeEffect::New(context, (IEdgeEffect**)&mEdgeGlowTop);
+    CEdgeEffect::New(context, (IEdgeEffect**)&mEdgeGlowBottom);
+    CEdgeEffect::New(context, (IEdgeEffect**)&mEdgeGlowLeft);
+    CEdgeEffect::New(context, (IEdgeEffect**)&mEdgeGlowRight);
 }
 
 void OverScrollGlow::SetShouldPull(

@@ -501,6 +501,18 @@ module
             [out] Boolean* result);
 
         /**
+         * @hide
+         * Returns whether the given user has been disallowed from performing certain actions
+         * or setting certain settings.
+         * @param restrictionKey the string key representing the restriction
+         * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
+         */
+        HasUserRestriction(
+            [in] String restrictionKey,
+            [in] IUserHandle* userHandle,
+            [out] Boolean* result);
+
+        /**
          * Return the serial number for a user.  This is a device-unique
          * number assigned to that user; if the user is deleted and then a new
          * user created, the new users will not be given the same serial number.
@@ -549,7 +561,7 @@ module
          * @hide
          */
         CreateGuest(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String name,
             [out] IUserInfo** userInfo);
 

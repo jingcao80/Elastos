@@ -39,6 +39,8 @@ public:
 
     virtual ~PackageMonitor();
 
+    CARAPI constructor();
+
     CARAPI Register(
         /* [in] */ IContext* context,
         /* [in] */ ILooper* thread,

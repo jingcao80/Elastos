@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEBACKGROUND_H__
-#define  __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEBACKGROUND_H__
+#ifndef __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEBACKGROUND_H__
+#define __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEBACKGROUND_H__
 
 #include "elastos/droid/graphics/CanvasProperty.h"
 #include "elastos/droid/graphics/drawable/Ripple.h"

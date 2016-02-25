@@ -1463,14 +1463,19 @@ ECode AlarmManagerService::Alarm::Dump(
 //=======================================================================================
 // AlarmManagerService::InFlight
 //=======================================================================================
+AlarmManagerService::InFlight::InFlight()
+    : mAlarmType(0)
+{}
 
-AlarmManagerService::InFlight::InFlight(
+ECode AlarmManagerService::InFlight::constructor(
     /* [in] */ AlarmManagerService* service,
     /* [in] */ IPendingIntent* pendingIntent,
     /* [in] */ IWorkSource* workSource,
     /* [in] */ Int32 alarmType,
     /* [in] */ const String& tag)
 {
+    Intent::constructor();
+
     mPendingIntent = pendingIntent;
     mWorkSource = workSource;
     mTag = tag;
@@ -1485,6 +1490,7 @@ AlarmManagerService::InFlight::InFlight(
     }
     mFilterStats = fs;
     mAlarmType = alarmType;
+    return NOERROR;
 }
 
 //=======================================================================================
@@ -2874,7 +2880,8 @@ void AlarmManagerService::DeliverAlarmsLocked(
             mWakeLock->AcquireLock();
         }
 
-        inflight = new InFlight(this,
+        inflight = new InFlight();
+        inflight->constructor(this,
                 alarm->mOperation, alarm->mWorkSource, alarm->mType, alarm->mTag);
         mInFlight->Add(TO_IINTERFACE(inflight));
         mBroadcastRefCount++;

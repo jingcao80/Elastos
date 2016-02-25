@@ -23,16 +23,15 @@ CAR_INTERFACE_IMPL(ExternalVideoSurfaceContainer, Object, ISurfaceHolderCallback
 
 ExternalVideoSurfaceContainer::NoPunchingSurfaceView::NoPunchingSurfaceView(
     /* [in] */ IContext* context)
-    //TODO :SurfaceView(context)
 {
+    SurfaceView::constructor(context);
 }
 // SurfaceView.dispatchDraw implementation punches a hole in the view hierarchy.
 // Disable this by making this a no-op.
 //@Override
-ECode ExternalVideoSurfaceContainer::NoPunchingSurfaceView::DispatchDraw(
+void ExternalVideoSurfaceContainer::NoPunchingSurfaceView::DispatchDraw(
     /* [in] */ ICanvas* canvas)
 {
-    return NOERROR;
 }
 
 //===============================================================

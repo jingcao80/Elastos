@@ -3,10 +3,11 @@
 #define __ELASTOS_DROID_CONTENT_BROADCASTRECEIVER_H__
 
 #include "Elastos.Droid.Content.h"
-#include <elastos/core/Object.h>
+#include <elastos/droid/os/Runnable.h>
 
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
@@ -42,6 +43,18 @@ public:
         : public Object
         , public IPendingResult
     {
+    private:
+        class FinishRunnable
+            : public Runnable
+        {
+        public:
+            FinishRunnable(
+                /* [in] */ PendingResult* host);
+
+            CARAPI Run();
+        private:
+            AutoPtr<PendingResult> mPendingResult;
+        };
     public:
         CAR_INTERFACE_DECL()
 

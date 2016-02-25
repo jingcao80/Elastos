@@ -7,10 +7,6 @@
 #include <elastos/core/Object.h>
 #include "elastos/droid/ext/frameworkext.h"
 
-// import android.content.IIntent;
-// import android.util.Log;
-// import java.util.ArrayList;
-
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IServiceConnection;
@@ -36,7 +32,7 @@ class BluetoothHeadsetClient
     , public IBluetoothHeadsetClient
     , public IBluetoothProfile
 {
-private:
+public:
     class BluetoothStateChangeCallbackStub
         : public Object
         , public IIBluetoothStateChangeCallback
@@ -47,7 +43,7 @@ private:
 
         BluetoothStateChangeCallbackStub();
 
-        BluetoothStateChangeCallbackStub(
+        CARAPI constructor(
             /* [in] */ IBluetoothHeadsetClient* owner);
 
         // @Override
@@ -64,6 +60,7 @@ private:
         BluetoothHeadsetClient* mOwner;
     };
 
+private:
     class InnerServiceConnection
         : public Object
         , public IServiceConnection
@@ -509,7 +506,7 @@ private:
     static const Boolean VDBG;
     AutoPtr<IContext> mContext;
     AutoPtr<IBluetoothProfileServiceListener> mServiceListener;
-    AutoPtr<IBluetoothHeadsetClient> mService;
+    AutoPtr<IIBluetoothHeadsetClient> mService;
     AutoPtr<IBluetoothAdapter> mAdapter;
     AutoPtr<IIBluetoothStateChangeCallback> mBluetoothStateChangeCallback;
     AutoPtr<IServiceConnection> mConnection;

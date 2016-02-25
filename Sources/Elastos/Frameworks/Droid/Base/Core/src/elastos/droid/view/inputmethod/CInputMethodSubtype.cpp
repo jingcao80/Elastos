@@ -52,6 +52,11 @@ CInputMethodSubtype::InputMethodSubtypeBuilder::InputMethodSubtypeBuilder()
 {
 }
 
+ECode CInputMethodSubtype::InputMethodSubtypeBuilder::constructor()
+{
+    return NOERROR;
+}
+
 ECode CInputMethodSubtype::InputMethodSubtypeBuilder::SetIsAuxiliary(
     /* [in] */ Boolean isAuxiliary)
 {

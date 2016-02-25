@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_VIEW_INPUTMETHOD_BASEINPUTCONNECTION_H__
-#define  __ELASTOS_DROID_VIEW_INPUTMETHOD_BASEINPUTCONNECTION_H__
+#define __ELASTOS_DROID_VIEW_INPUTMETHOD_BASEINPUTCONNECTION_H__
 
 #include "Elastos.Droid.Text.h"
 #include "elastos/droid/ext/frameworkext.h"
@@ -10,7 +10,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Internal::View::IIInputMethodManager;
 using Elastos::Droid::Internal::View::IInputMethodClient;
-using Elastos::Droid::Internal::View::IInputContext;
+using Elastos::Droid::Internal::View::IIInputContext;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::ILooper;

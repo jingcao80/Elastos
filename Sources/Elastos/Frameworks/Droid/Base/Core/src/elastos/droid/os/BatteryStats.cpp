@@ -18,12 +18,13 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
+
 const Int32 BatteryStats::BatteryStatsUid::BatteryStatsSensor::GPS;
 const Int32 BatteryStats::BatteryStatsUid::BatteryStatsProc::ExcessivePower::TYPE_WAKE;
 const Int32 BatteryStats::BatteryStatsUid::BatteryStatsProc::ExcessivePower::TYPE_CPU;
 
 
-AutoPtr< ArrayOf<String> > InitUserActivityTypes()
+static AutoPtr< ArrayOf<String> > InitUserActivityTypes()
 {
     AutoPtr< ArrayOf<String> > types = ArrayOf<String>::Alloc(3);
     (*types)[0] = String("other");
@@ -34,6 +35,15 @@ AutoPtr< ArrayOf<String> > InitUserActivityTypes()
 const AutoPtr<ArrayOf<String> > BatteryStats::BatteryStatsUid::USER_ACTIVITY_TYPES = InitUserActivityTypes();
 const Int32 BatteryStats::BatteryStatsUid::NUM_USER_ACTIVITY_TYPES;
 
+static AutoPtr<ArrayOf<String> > InitPROCESS_STATE_NAMES()
+{
+    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(3);
+    (*names)[0] = String("Foreground");
+    (*names)[1] = String("Active");
+    (*names)[2] = String("Running");
+    return types;
+}
+const AutoPtr<ArrayOf<String> > BatteryStats::BatteryStatsUid::PROCESS_STATE_NAMES = InitPROCESS_STATE_NAMES();
 
 const String BatteryStats::HistoryItem::TAG("HistoryItem");
 const Boolean BatteryStats::HistoryItem::DEBUG;
@@ -75,15 +85,24 @@ const Int32 BatteryStats::HistoryItem::DELTA_BATTERY_LEVEL_FLAG;
 const Int32 BatteryStats::HistoryItem::DELTA_STATE_FLAG;
 const Int32 BatteryStats::HistoryItem::DELTA_STATE_MASK;
 
+CAR_INTERFACE_IMPL(BatteryStats::HistoryItem, Object, IParcelable)
+
 BatteryStats::HistoryItem::HistoryItem(
     /* [in] */ Int64 time,
     /* [in] */ IParcel* src)
     : mTime(time)
 {
+    mNumReadInts = 2;
     ReadFromParcel(src);
 }
 
-CAR_INTERFACE_IMPL(BatteryStats::HistoryItem, IParcelable)
+ECode BatteryStats::HistoryItem::IsDeltaData(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = cmd == CMD_UPDATE;
+    return NOERROR;
+}
 
 ECode BatteryStats::HistoryItem::WriteToParcel(
     /* [in] */ IParcel* dest)
@@ -93,18 +112,36 @@ ECode BatteryStats::HistoryItem::WriteToParcel(
             | ((((Int32)mBatteryLevel) << 8) & 0xff00)
             | ((((Int32)mBatteryStatus) << 16) & 0xf0000)
             | ((((Int32)mBatteryHealth) << 20) & 0xf00000)
-            | ((((Int32)mBatteryPlugType) << 24) & 0xf000000);
+            | ((((Int32)mBatteryPlugType) << 24) & 0xf000000)
+            | (mWakelockTag != NULL ? 0x10000000 : 0)
+            | (mWakeReasonTag != NULL ? 0x20000000 : 0)
+            | (mEventCode != EVENT_NONE ? 0x40000000 : 0);
     dest->WriteInt32(bat);
     bat = (((Int32)mBatteryTemperature) & 0xffff)
             | ((((Int32)mBatteryVoltage) << 16) & 0xffff0000);
     dest->WriteInt32(bat);
     dest->WriteInt32(mStates);
+    dest.writeInt(states2);
+    if (wakelockTag != null) {
+        wakelockTag.writeToParcel(dest, flags);
+    }
+    if (wakeReasonTag != null) {
+        wakeReasonTag.writeToParcel(dest, flags);
+    }
+    if (eventCode != EVENT_NONE) {
+        dest.writeInt(eventCode);
+        eventTag.writeToParcel(dest, flags);
+    }
+    if (cmd == CMD_CURRENT_TIME || cmd == CMD_RESET) {
+        dest.writeLong(currentTime);
+    }
     return NOERROR;
 }
 
 ECode BatteryStats::HistoryItem::ReadFromParcel(
     /* [in] */ IParcel* src)
 {
+    int start = src.dataPosition();
     Int32 bat;
     src->ReadInt32(&bat);
     mCmd = (Byte)(bat & 0xff);
@@ -112,11 +149,39 @@ ECode BatteryStats::HistoryItem::ReadFromParcel(
     mBatteryStatus = (Byte)((bat >> 16) & 0xf);
     mBatteryHealth = (Byte)((bat >> 20) & 0xf);
     mBatteryPlugType = (Byte)((bat >> 24) & 0xf);
-    src->ReadInt32(&bat);
-    mBatteryTemperature = (Char32)(bat & 0xffff);
-    mBatteryVoltage = (Char32)((bat >> 16) & 0xffff);
-    src->ReadInt32(&mStates);
 
+    Int32 bat2;
+    src->ReadInt32(&bat2);
+    batteryTemperature = (Int16)(bat2&0xffff);
+    batteryVoltage = (Char32)((bat2>>16)&0xffff);
+    states = src.readInt();
+    states2 = src.readInt();
+    if ((bat&0x10000000) != 0) {
+        wakelockTag = localWakelockTag;
+        wakelockTag.readFromParcel(src);
+    } else {
+        wakelockTag = null;
+    }
+    if ((bat&0x20000000) != 0) {
+        wakeReasonTag = localWakeReasonTag;
+        wakeReasonTag.readFromParcel(src);
+    } else {
+        wakeReasonTag = null;
+    }
+    if ((bat&0x40000000) != 0) {
+        eventCode = src.readInt();
+        eventTag = localEventTag;
+        eventTag.readFromParcel(src);
+    } else {
+        eventCode = EVENT_NONE;
+        eventTag = null;
+    }
+    if (cmd == CMD_CURRENT_TIME || cmd == CMD_RESET) {
+        currentTime = src.readLong();
+    } else {
+        currentTime = 0;
+    }
+    numReadInts += (src.dataPosition()-start)/4;
     return NOERROR;
 }
 
@@ -315,6 +380,11 @@ void BatteryStats::HistoryItem::Clear()
     mBatteryTemperature = 0;
     mBatteryVoltage = 0;
     mStates = 0;
+    states2 = 0;
+    wakelockTag = null;
+    wakeReasonTag = null;
+    eventCode = EVENT_NONE;
+    eventTag = null;
 }
 
 void BatteryStats::HistoryItem::SetTo(
@@ -329,6 +399,7 @@ void BatteryStats::HistoryItem::SetTo(
     mBatteryTemperature = o->mBatteryTemperature;
     mBatteryVoltage = o->mBatteryVoltage;
     mStates = o->mStates;
+    SetToCommon(o);
 }
 
 void BatteryStats::HistoryItem::SetTo(
@@ -345,20 +416,141 @@ void BatteryStats::HistoryItem::SetTo(
     mBatteryTemperature = o->mBatteryTemperature;
     mBatteryVoltage = o->mBatteryVoltage;
     mStates = o->mStates;
+    SetToCommon(o);
 }
 
-Boolean BatteryStats::HistoryItem::Same(
+private void SetToCommon(HistoryItem o) {
+    batteryLevel = o.batteryLevel;
+    batteryStatus = o.batteryStatus;
+    batteryHealth = o.batteryHealth;
+    batteryPlugType = o.batteryPlugType;
+    batteryTemperature = o.batteryTemperature;
+    batteryVoltage = o.batteryVoltage;
+    states = o.states;
+    states2 = o.states2;
+    if (o.wakelockTag != null) {
+        wakelockTag = localWakelockTag;
+        wakelockTag.setTo(o.wakelockTag);
+    } else {
+        wakelockTag = null;
+    }
+    if (o.wakeReasonTag != null) {
+        wakeReasonTag = localWakeReasonTag;
+        wakeReasonTag.setTo(o.wakeReasonTag);
+    } else {
+        wakeReasonTag = null;
+    }
+    eventCode = o.eventCode;
+    if (o.eventTag != null) {
+        eventTag = localEventTag;
+        eventTag.setTo(o.eventTag);
+    } else {
+        eventTag = null;
+    }
+    currentTime = o.currentTime;
+}
+
+public boolean sameNonEvent(HistoryItem o) {
+    return batteryLevel == o.batteryLevel
+            && batteryStatus == o.batteryStatus
+            && batteryHealth == o.batteryHealth
+            && batteryPlugType == o.batteryPlugType
+            && batteryTemperature == o.batteryTemperature
+            && batteryVoltage == o.batteryVoltage
+            && states == o.states
+            && states2 == o.states2
+            && currentTime == o.currentTime;
+}
+
+public boolean same(
     /* [in] */ HistoryItem* o)
 {
-    return mBatteryLevel == o->mBatteryLevel
-            && mBatteryStatus == o->mBatteryStatus
-            && mBatteryHealth == o->mBatteryHealth
-            && mBatteryPlugType == o->mBatteryPlugType
-            && mBatteryTemperature == o->mBatteryTemperature
-            && mBatteryVoltage == o->mBatteryVoltage
-            && mStates == o->mStates;
+    if (!sameNonEvent(o) || eventCode != o.eventCode) {
+        return false;
+    }
+    if (wakelockTag != o.wakelockTag) {
+        if (wakelockTag == null || o.wakelockTag == null) {
+            return false;
+        }
+        if (!wakelockTag.equals(o.wakelockTag)) {
+            return false;
+        }
+    }
+    if (wakeReasonTag != o.wakeReasonTag) {
+        if (wakeReasonTag == null || o.wakeReasonTag == null) {
+            return false;
+        }
+        if (!wakeReasonTag.equals(o.wakeReasonTag)) {
+            return false;
+        }
+    }
+    if (eventTag != o.eventTag) {
+        if (eventTag == null || o.eventTag == null) {
+            return false;
+        }
+        if (!eventTag.equals(o.eventTag)) {
+            return false;
+        }
+    }
+    return true;
 }
 
+public final static class HistoryEventTracker {
+    private final HashMap<String, SparseIntArray>[] mActiveEvents
+            = (HashMap<String, SparseIntArray>[]) new HashMap[HistoryItem.EVENT_COUNT];
+
+    public boolean updateState(int code, String name, int uid, int poolIdx) {
+        if ((code&HistoryItem.EVENT_FLAG_START) != 0) {
+            int idx = code&HistoryItem.EVENT_TYPE_MASK;
+            HashMap<String, SparseIntArray> active = mActiveEvents[idx];
+            if (active == null) {
+                active = new HashMap<String, SparseIntArray>();
+                mActiveEvents[idx] = active;
+            }
+            SparseIntArray uids = active.get(name);
+            if (uids == null) {
+                uids = new SparseIntArray();
+                active.put(name, uids);
+            }
+            if (uids.indexOfKey(uid) >= 0) {
+                // Already set, nothing to do!
+                return false;
+            }
+            uids.put(uid, poolIdx);
+        } else if ((code&HistoryItem.EVENT_FLAG_FINISH) != 0) {
+            int idx = code&HistoryItem.EVENT_TYPE_MASK;
+            HashMap<String, SparseIntArray> active = mActiveEvents[idx];
+            if (active == null) {
+                // not currently active, nothing to do.
+                return false;
+            }
+            SparseIntArray uids = active.get(name);
+            if (uids == null) {
+                // not currently active, nothing to do.
+                return false;
+            }
+            idx = uids.indexOfKey(uid);
+            if (idx < 0) {
+                // not currently active, nothing to do.
+                return false;
+            }
+            uids.removeAt(idx);
+            if (uids.size() <= 0) {
+                active.remove(name);
+            }
+        }
+        return true;
+    }
+
+    public void removeEvents(int code) {
+        int idx = code&HistoryItem.EVENT_TYPE_MASK;
+        mActiveEvents[idx] = null;
+    }
+
+    public HashMap<String, SparseIntArray> getStateForEvent(int code) {
+        return mActiveEvents[code];
+    }
+};
 
 void BatteryStats::HistoryPrinter::PrintNextItem(
     /* [in] */ IPrintWriter* pw,
@@ -496,11 +688,10 @@ const Int32 BatteryStats::STATS_SINCE_UNPLUGGED;
 
 AutoPtr< ArrayOf<String> > InitStatNames()
 {
-    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(4);
-    (*names)[0] = String("t");
-    (*names)[1] = String("l");
-    (*names)[2] = String("c");
-    (*names)[3] = String("u");
+    AutoPtr< ArrayOf<String> > names = ArrayOf<String>::Alloc(3);
+    (*names)[0] = String("l");
+    (*names)[1] = String("c");
+    (*names)[2] = String("u");
     return names;
 }
 const AutoPtr< ArrayOf<String> > BatteryStats::STAT_NAMES = InitStatNames();
@@ -508,12 +699,19 @@ const Int32 BatteryStats::BATTERY_STATS_CHECKIN_VERSION;
 const Int64 BatteryStats::BYTES_PER_KB;
 const Int64 BatteryStats::BYTES_PER_MB;
 const Int64 BatteryStats::BYTES_PER_GB;
+const String BatteryStats::VERSION_DATA("vers");
 const String BatteryStats::UID_DATA("uid");
 const String BatteryStats::APK_DATA("apk");
 const String BatteryStats::PROCESS_DATA("pr");
 const String BatteryStats::SENSOR_DATA("sr");
+const String BatteryStats::VIBRATOR_DATA("vib");
+const String BatteryStats::FOREGROUND_DATA("fg");
+const String BatteryStats::STATE_TIME_DATA("st");
 const String BatteryStats::WAKELOCK_DATA("wl");
+const String BatteryStats::SYNC_DATA("sy");
+const String BatteryStats::JOB_DATA("jb");
 const String BatteryStats::KERNEL_WAKELOCK_DATA("kwl");
+const String BatteryStats::WAKEUP_REASON_DATA("wr");
 const String BatteryStats::NETWORK_DATA("nt");
 const String BatteryStats::USER_ACTIVITY_DATA("ua");
 const String BatteryStats::BATTERY_DATA("bt");
@@ -521,12 +719,29 @@ const String BatteryStats::BATTERY_DISCHARGE_DATA("dc");
 const String BatteryStats::BATTERY_LEVEL_DATA("lv");
 const String BatteryStats::WIFI_DATA("wfl");
 const String BatteryStats::MISC_DATA("m");
+const String BatteryStats::GLOBAL_NETWORK_DATA("gn";
+const String BatteryStats::HISTORY_STRING_POOL("hsp";
+const String BatteryStats::HISTORY_DATA("h");
 const String BatteryStats::SCREEN_BRIGHTNESS_DATA("br");
 const String BatteryStats::SIGNAL_STRENGTH_TIME_DATA("sgt");
 const String BatteryStats::SIGNAL_SCANNING_TIME_DATA("sst");
 const String BatteryStats::SIGNAL_STRENGTH_COUNT_DATA("sgc");
 const String BatteryStats::DATA_CONNECTION_TIME_DATA("dct");
 const String BatteryStats::DATA_CONNECTION_COUNT_DATA("dcc");
+const String BatteryStats::WIFI_STATE_TIME_DATA("wst");
+const String BatteryStats::WIFI_STATE_COUNT_DATA("wsc");
+const String BatteryStats::WIFI_SUPPL_STATE_TIME_DATA("wsst");
+const String BatteryStats::WIFI_SUPPL_STATE_COUNT_DATA("wssc");
+const String BatteryStats::WIFI_SIGNAL_STRENGTH_TIME_DATA("wsgt");
+const String BatteryStats::WIFI_SIGNAL_STRENGTH_COUNT_DATA("wsgc");
+const String BatteryStats::BLUETOOTH_STATE_TIME_DATA("bst");
+const String BatteryStats::BLUETOOTH_STATE_COUNT_DATA("bsc");
+const String BatteryStats::POWER_USE_SUMMARY_DATA("pws");
+const String BatteryStats::POWER_USE_ITEM_DATA("pwi");
+const String BatteryStats::DISCHARGE_STEP_DATA("dsd");
+const String BatteryStats::CHARGE_STEP_DATA("csd");
+const String BatteryStats::DISCHARGE_TIME_REMAIN_DATA("dtr");
+const String BatteryStats::CHARGE_TIME_REMAIN_DATA("ctr");
 const Int32 BatteryStats::SCREEN_BRIGHTNESS_DARK;
 const Int32 BatteryStats::SCREEN_BRIGHTNESS_DIM;
 const Int32 BatteryStats::SCREEN_BRIGHTNESS_MEDIUM;

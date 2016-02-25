@@ -146,6 +146,13 @@ public:
         /* [in] */ IAudioAttributes* aa,
         /* [out] */ Int32* result);
 
+public:
+    Int32 mUsage;
+    Int32 mContentType;
+    Int32 mSource;
+    Int32 mFlags;
+    String mFormattedTags;
+
 private:
     static String TAG;
 
@@ -157,12 +164,7 @@ private:
      */
     static Int32 ALL_PARCEL_FLAGS;
 
-    Int32 mUsage;
-    Int32 mContentType;
-    Int32 mSource;
-    Int32 mFlags;
     AutoPtr<IHashSet> mTags;
-    String mFormattedTags;
 };
 
 } // namespace Media

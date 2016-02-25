@@ -27,7 +27,7 @@ module
          * @return Whether the device supports rotation.
          */
         IsRotationSupported(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
 
         /**
@@ -39,28 +39,28 @@ module
          * otherwise Configuration.ORIENTATION_UNDEFINED if any orientation is lockable.
          */
         GetRotationLockOrientation(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Int32* result);
 
         /**
          * Returns true if the rotation-lock toggle should be shown in system UI.
          */
         IsRotationLockToggleVisible(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
 
         /**
          * Returns true if rotation lock is enabled.
          */
         IsRotationLocked(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
 
         /**
          * Enables or disables rotation lock from the system UI toggle.
          */
         SetRotationLock(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Boolean enabled);
 
         /**
@@ -69,14 +69,14 @@ module
          * If rotation is locked for accessibility, the system UI toggle is hidden to avoid confusion.
          */
         SetRotationLockForAccessibility(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Boolean enabled);
 
         /**
          * Registers a listener for rotation policy changes affecting the caller's user
          */
         RegisterRotationPolicyListener(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IRotationPolicyListener* listener);
 
         /**
@@ -84,7 +84,7 @@ module
          * or USER_ALL for all users.
          */
         RegisterRotationPolicyListener(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IRotationPolicyListener* listener,
             [in] Int32 userHandle);
 
@@ -92,7 +92,7 @@ module
          * Unregisters a listener for rotation policy changes.
          */
         UnregisterRotationPolicyListener(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IRotationPolicyListener* listener);
     }
 

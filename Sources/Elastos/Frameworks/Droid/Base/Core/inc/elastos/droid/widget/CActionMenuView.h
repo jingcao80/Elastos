@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_WIDGET_CACTIONMENUVIEW_H__
-#define  __ELASTOS_DROID_WIDGET_CACTIONMENUVIEW_H__
+#define __ELASTOS_DROID_WIDGET_CACTIONMENUVIEW_H__
 
 #include "_Elastos_Droid_Widget_CActionMenuView.h"
 #include "elastos/droid/widget/ActionMenuView.h"

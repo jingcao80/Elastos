@@ -5,13 +5,17 @@
 #include "elastos/droid/bluetooth/CBluetoothHealthStateChangeCallback.h"
 #include "elastos/droid/bluetooth/CBluetoothHealthCallbackWrapper.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/os/Process.h"
 #include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::Process;
 using Elastos::Core::AutoLock;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -77,26 +81,56 @@ BluetoothHealth::BluetoothHealth(
     mConnection = new ServiceConnection(this);
 
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
-    if(mAdapter == NULL) {
-        AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
-        if (mgr != NULL) {
+    //if(mAdapter == NULL) {
+    AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
+    if (mgr != NULL) {
     //        try {
-            ECode ec = mgr->RegisterStateChangeCallback(mBluetoothStateChangeCallback);
-            if (FAILED(ec)) {
-                Logger::E(TAG, "0x%08x", ec);
-            }
+        ECode ec = mgr->RegisterStateChangeCallback(mBluetoothStateChangeCallback);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "0x%08x", ec);
+        }
     //        } catch (RemoteException e) {
     //            Log.e(TAG,"",e);
     //        }
-        }
     }
+    //}
 
+    //AutoPtr<IIntent> intent;
+    //CIntent::New(String("IBluetoothHealth")/*IBluetoothHealth.class.getName()*/, (IIntent**)&intent);
+    //Boolean result;
+    //if (context->BindService(intent, mConnection, 0, &result), !result) {
+    //    Logger::E(TAG, "Could not bind to Bluetooth Headset Service");
+    //}
+    Boolean bind;
+    DoBind(&bind);
+}
+
+ECode BluetoothHealth::DoBind(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    //Intent intent = new Intent(IBluetoothHealth.class.getName());
+    //ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+    //intent.setComponent(comp);
     AutoPtr<IIntent> intent;
     CIntent::New(String("IBluetoothHealth")/*IBluetoothHealth.class.getName()*/, (IIntent**)&intent);
-    Boolean result;
-    if (context->BindService(intent, mConnection, 0, &result), !result) {
-        Logger::E(TAG, "Could not bind to Bluetooth Headset Service");
+    AutoPtr<IComponentName> comp;
+    AutoPtr<IPackageManager> pm;
+    mContext->GetPackageManager((IPackageManager**)&pm);
+    intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
+    intent->SetComponent(comp);
+    AutoPtr<IUserHandle> userHandle;
+    Process::MyUserHandle((IUserHandle**)&userHandle);
+
+    Boolean succeeded = FALSE;
+    if (comp == NULL || !(mContext->BindServiceAsUser(intent, mConnection, 0,
+                userHandle, &succeeded), succeeded)) {
+        Logger::E(TAG, "Could not bind to Bluetooth Health Service with ");// + intent);
+        *result = FALSE;
+        return NOERROR;
     }
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode BluetoothHealth::RegisterSinkAppConfiguration(
@@ -286,8 +320,7 @@ ECode BluetoothHealth::GetConnectedDevices(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
-    REFCOUNT_ADD(*devices)
+    CArrayList::New(devices);
     return NOERROR;
 }
 
@@ -305,8 +338,7 @@ ECode BluetoothHealth::GetDevicesMatchingConnectionStates(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
-    REFCOUNT_ADD(*devices)
+    CArrayList::New(devices);
     return NOERROR;
 }
 
@@ -314,18 +346,18 @@ ECode BluetoothHealth::Close()
 {
     if (VDBG) Logger::D(TAG, "close()");
     AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
-    if (mAdapter != NULL) {
-        if (mgr != NULL) {
-            // try {
-            ECode ec = mgr->UnregisterStateChangeCallback(mBluetoothStateChangeCallback);
-            if (FAILED(ec)) {
-                Logger::E(TAG, "0x%08x", ec);
-            }
-            // } catch (Exception e) {
-            //     Log.e(TAG,"",e);
-            // }
+    //if (mAdapter != NULL) {
+    if (mgr != NULL) {
+        // try {
+        ECode ec = mgr->UnregisterStateChangeCallback(mBluetoothStateChangeCallback);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "0x%08x", ec);
         }
+        // } catch (Exception e) {
+        //     Log.e(TAG,"",e);
+        // }
     }
+    //}
 
     AutoLock lock(mConnectionLock);
     if (mService != NULL) {

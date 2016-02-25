@@ -4,11 +4,10 @@ module
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.View.IViewGroup;
 
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IUserSwitcherController;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IUserSwitcherController;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Qs {
     namespace Tiles {
@@ -41,7 +40,7 @@ module
     [local]
     interface IUserDetailViewHelper {
         Inflate(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IViewGroup* parent,
             [in] Boolean attach,
             [out] IUserDetailView** ret);
@@ -50,7 +49,6 @@ module
     } // namespace Tiles
     } // namespace Qs
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_NET_WIFI_WIFISTATEMACHINE_H__
-#define  __ELASTOS_DROID_NET_WIFI_WIFISTATEMACHINE_H__
+#define __ELASTOS_DROID_NET_WIFI_WIFISTATEMACHINE_H__
 
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/net/DhcpInfoInternal.h"

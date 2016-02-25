@@ -4147,7 +4147,7 @@ AutoPtr<IIPackageManager> CPackageManagerService::Main(
 {
     AutoPtr<IIPackageManager> m;
     CPackageManagerService::New(context, (Handle32)installer,
-            factoryTest, onlyCore, (IIPackageManager**)&m);
+        factoryTest, onlyCore, (IIPackageManager**)&m);
     ServiceManager::AddService(String("package"), m);
     return m;
 }

@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_ANIMATION_PATHKEYFRAMES_H__
-#define  __ELASTOS_DROID_ANIMATION_PATHKEYFRAMES_H__
+#ifndef __ELASTOS_DROID_ANIMATION_PATHKEYFRAMES_H__
+#define __ELASTOS_DROID_ANIMATION_PATHKEYFRAMES_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Animation.h"

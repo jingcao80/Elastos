@@ -1,133 +1,74 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.server.hdmi;
+#ifndef __ELASTOS_DROID_SERVER_HDMI_ONETOUCHRECORDACTION_H__
+#define __ELASTOS_DROID_SERVER_HDMI_ONETOUCHRECORDACTION_H__
 
-import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION;
-import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_ANALOGUE_SERVICE;
-import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_CURRENTLY_SELECTED_SOURCE;
-import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_DIGITAL_SERVICE;
-import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_EXTERNAL_INPUT;
+#include "_Elastos.Droid.Server.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/core/Object.h>
+#include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
 
-using Elastos::Droid::Utility::ISlog;
-
-using Elastos::Droid::Server::Ihdmi.HdmiControlService.SendMessageCallback;
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Hdmi {
 
 /**
  * Feature action that performs one touch record.
  */
-public class OneTouchRecordAction extends HdmiCecFeatureAction {
-    private static const String TAG = "OneTouchRecordAction";
+class OneTouchRecordAction
+    : public HdmiCecFeatureAction
+{
+public:
+    OneTouchRecordAction();
+
+    CARAPI constructor(
+        /* [in] */ IHdmiCecLocalDevice* source,
+        /* [in] */ Int32 recorderAddress,
+        /* [in] */ ArrayOf<Byte>* recordSource);
+
+    // @Override
+    CARAPI Start(
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI ProcessCommand(
+        /* [in] */ IHdmiCecMessage* cmd,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI HandleTimerEvent(
+        /* [in] */ Int32 state);
+
+    CARAPI GetRecorderAddress(
+        /* [out] */ Int32* result);
+
+private:
+    CARAPI SendRecordOn();
+
+    CARAPI HandleRecordStatus(
+        /* [in] */ IHdmiCecMessage* cmd,
+        /* [out] */ Boolean* result);
+
+private:
+    static const String TAG;
 
     // Timer out for waiting <Record Status> 120s
-    private static const Int32 RECORD_STATUS_TIMEOUT_MS = 120000;
+    static const Int32 RECORD_STATUS_TIMEOUT_MS;
 
     // State that waits for <Record Status> once sending <Record On>
-    private static const Int32 STATE_WAITING_FOR_RECORD_STATUS = 1;
+    static const Int32 STATE_WAITING_FOR_RECORD_STATUS;
+
     // State that describes recording in progress.
-    private static const Int32 STATE_RECORDING_IN_PROGRESS = 2;
+    static const Int32 STATE_RECORDING_IN_PROGRESS;
 
-    private final Int32 mRecorderAddress;
-    private final Byte[] mRecordSource;
+    Int32 mRecorderAddress;
 
-    OneTouchRecordAction(HdmiCecLocalDevice source, Int32 recorderAddress, Byte[] recordSource) {
-        Super(source);
-        mRecorderAddress = recorderAddress;
-        mRecordSource = recordSource;
-    }
+    AutoPtr<ArrayOf<Byte> > mRecordSource;
+};
 
-    //@Override
-    Boolean Start() {
-        SendRecordOn();
-        return TRUE;
-    }
+} // namespace Hdmi
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
 
-    private void SendRecordOn() {
-        SendCommand(HdmiCecMessageBuilder->BuildRecordOn(GetSourceAddress(), mRecorderAddress,
-                mRecordSource),
-                new SendMessageCallback() {
-                //@Override
-                    CARAPI OnSendCompleted(Int32 error) {
-                        // if failed to send <Record On>, display error message and finish action.
-                        if (error != Constants.SEND_RESULT_SUCCESS) {
-                            Tv()->AnnounceOneTouchRecordResult(
-                                    ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION);
-                            Finish();
-                            return;
-                        }
-
-                        mState = STATE_WAITING_FOR_RECORD_STATUS;
-                        AddTimer(mState, RECORD_STATUS_TIMEOUT_MS);
-                    }
-                });
-    }
-
-    //@Override
-    Boolean ProcessCommand(HdmiCecMessage cmd) {
-        if (mState != STATE_WAITING_FOR_RECORD_STATUS) {
-            return FALSE;
-        }
-
-        switch (cmd->GetOpcode()) {
-            case Constants.MESSAGE_RECORD_STATUS:
-                return HandleRecordStatus(cmd);
-
-        }
-        return FALSE;
-    }
-
-    private Boolean HandleRecordStatus(HdmiCecMessage cmd) {
-        // Only handle message coming from original recorder.
-        if (cmd->GetSource() != mRecorderAddress) {
-            return FALSE;
-        }
-
-        Int32 recordStatus = cmd->GetParams()[0];
-        Tv()->AnnounceOneTouchRecordResult(recordStatus);
-        Slogger::I(TAG, "Got record status:" + recordStatus + " from " + cmd->GetSource());
-
-        // If recording started successfully, change state and keep this action until <Record Off>
-        // received. Otherwise, finish action.
-        switch (recordStatus) {
-            case ONE_TOUCH_RECORD_RECORDING_CURRENTLY_SELECTED_SOURCE:
-            case ONE_TOUCH_RECORD_RECORDING_DIGITAL_SERVICE:
-            case ONE_TOUCH_RECORD_RECORDING_ANALOGUE_SERVICE:
-            case ONE_TOUCH_RECORD_RECORDING_EXTERNAL_INPUT:
-                mState = STATE_RECORDING_IN_PROGRESS;
-                mActionTimer->ClearTimerMessage();
-                break;
-            default:
-                Finish();
-                break;
-        }
-        return TRUE;
-    }
-
-    //@Override
-    void HandleTimerEvent(Int32 state) {
-        if (mState != state) {
-            Slogger::W(TAG, "Timeout in invalid state:[Expected:" + mState + ", Actual:" + state + "]");
-            return;
-        }
-
-        Tv()->AnnounceOneTouchRecordResult(ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION);
-        Finish();
-    }
-
-    Int32 GetRecorderAddress() {
-        return mRecorderAddress;
-    }
-}
+#endif // __ELASTOS_DROID_SERVER_HDMI_ONETOUCHRECORDACTION_H__

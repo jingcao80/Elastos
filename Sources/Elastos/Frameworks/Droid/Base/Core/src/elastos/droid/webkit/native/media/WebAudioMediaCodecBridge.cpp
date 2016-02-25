@@ -7,17 +7,15 @@
 
 #include "elastos/droid/os/CParcelFileDescriptorHelper.h"
 //TODO #include "elastos/droid/media/CMediaExtractor.h"
-//TODO #include "elastos/droid/media/CMediaCodecBufferInfo.h"
+#include "elastos/droid/media/CMediaCodecBufferInfo.h"
 //TODO #include "elastos/droid/media/CMediaCodecHelper.h"
 
-//TODO #include <elastos/io/CByteBufferHelper.h>
-//TODO #include <elastos/io/CFileHelper.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Media::IMediaCodec;
 using Elastos::Droid::Media::IMediaCodecBufferInfo;
-//TODO using Elastos::Droid::Media::CMediaCodecBufferInfo;
+using Elastos::Droid::Media::CMediaCodecBufferInfo;
 using Elastos::Droid::Media::IMediaFormat;
 using Elastos::Droid::Media::IMediaExtractor;
 //TODO using Elastos::Droid::Media::CMediaExtractor;
@@ -30,11 +28,11 @@ using Elastos::Droid::Os::CParcelFileDescriptorHelper;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IFileHelper;
-//TODO using Elastos::IO::CFileHelper;
+using Elastos::IO::CFileHelper;
 using Elastos::IO::IBuffer;
 using Elastos::IO::IByteBuffer;
 using Elastos::IO::IByteBufferHelper;
-//TODO using Elastos::IO::CByteBufferHelper;
+using Elastos::IO::CByteBufferHelper;
 using Elastos::Utility::Logging::Logger;
 
 
@@ -57,7 +55,7 @@ String WebAudioMediaCodecBridge::CreateTempFile(
     ctx->GetCacheDir((IFile**)&outputDirectory);
     AutoPtr<IFile> outputFile;
     AutoPtr<IFileHelper> fileHelper;
-    //TODO CFileHelper::AcquireSingleton((IFileHelper**)&fileHelper);
+    CFileHelper::AcquireSingleton((IFileHelper**)&fileHelper);
     fileHelper->CreateTempFile(String("webaudio"), String(".dat"), outputDirectory,
         (IFile**)&outputFile);
 
@@ -215,7 +213,7 @@ Boolean WebAudioMediaCodecBridge::DecodeAudioFile(
 
         // Output side
         AutoPtr<IMediaCodecBufferInfo> info;
-        //TODO CMediaCodecBufferInfo::New((IMediaCodecBufferInfo**)&info);
+        CMediaCodecBufferInfo::New((IMediaCodecBufferInfo**)&info);
         Int32 outputBufIndex;
         codec->DequeueOutputBuffer(info, TIMEOUT_MICROSECONDS, &outputBufIndex);
 

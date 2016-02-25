@@ -276,6 +276,14 @@ String EntropyMixer::GetSystemDir()
     return Object::ToString(systemDir);
 }
 
+ECode EntropyMixer::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = "EntropyMixer";
+    return NOERROR;
+}
+
 } // namespace Server
 } // namespace Droid
 } // namespace Elastos

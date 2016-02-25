@@ -150,7 +150,7 @@ module
          * java.util.List)}. A null value will produce a null snapshot value for those two methods.
          */
         OnCreateSnapshotView(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IParcelable* snapshot,
             [out] IView** view);
     }

@@ -280,7 +280,7 @@ ECode CURL::SetURLStreamHandlerFactory(
 
     if (sStreamHandlerFactory != NULL) {
 //        throw new Error("Factory already set");
-        assert(0);
+        return E_FAIL;
     }
 //    SecurityManager sm = System.getSecurityManager();
 //    if (sm != null) {

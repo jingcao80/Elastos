@@ -6,12 +6,11 @@
 ;
 Elastos.Runtime.eco
 Elastos.CoreLibrary.eco
-Elastos.Droid.System.eco
 Elastos.Droid.Core.eco
-;Elastos.Droid.Server.eco
+Elastos.Droid.Server.eco
 ;Elastos.Droid.JavaProxy.eco
-;ServiceManager
-;ElApp_process
+elservicemanager
+ElApp_process
 ;Elastos.Droid.Commands.Monkey.eco
 ;Elastos.Droid.Commands.Am.eco
 ;Eunit.eco

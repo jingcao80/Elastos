@@ -8,12 +8,13 @@
 #include "elastos/droid/os/CHandlerThread.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/content/CIntentFilter.h"
-//TODO #include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/provider/CSettingsSystem.h"
 //TODO #include "elastos/droid/media/CAudioRecordHelper.h"
-//TODO #include "elastos/droid/media/CAudioTrackHelper.h"
-//TODO #include "elastos/droid/media/CAudioTrackHelper.h"
-//TODO #include "elastos/droid/media/audiofx/CAcousticEchoCanceler.h"
-//TODO #include "elastos/droid/bluetooth/CBluetoothAdapterHelper.h"
+#include "elastos/droid/media/CAudioTrackHelper.h"
+#include "elastos/droid/media/audiofx/CAcousticEchoCanceler.h"
+#include "elastos/droid/media/audiofx/CAcousticEchoCancelerHelper.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapterHelper.h"
 //#include <elastos/core/Thread.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/IntegralToString.h>
@@ -22,11 +23,13 @@
 //#include <elastos/utility/etl/etl_list.h>
 //#include "stdlib.h"
 
-//TODO using Elastos::Droid::Bluetooth::IBluetoothAdapter;
-//TODO using Elastos::Droid::Bluetooth::IBluetoothManager;
-//TODO using Elastos::Droid::Bluetooth::IBluetoothAdapterHelper;
-//TODO using Elastos::Droid::Bluetooth::CBluetoothAdapterHelper;
-//TODO using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Bluetooth::IBluetoothAdapter;
+using Elastos::Droid::Bluetooth::IBluetoothManager;
+using Elastos::Droid::Bluetooth::IBluetoothAdapterHelper;
+using Elastos::Droid::Bluetooth::CBluetoothAdapterHelper;
+using Elastos::Droid::Provider::CSettingsSystem;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::Pm::IPackageManager;
@@ -37,10 +40,11 @@ using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Media::IAudioRecordHelper;
 //using Elastos::Droid::Media::IAudioTrack;
 using Elastos::Droid::Media::IAudioTrackHelper;
-//TODO using Elastos::Droid::Media::CAudioTrackHelper;
+using Elastos::Droid::Media::CAudioTrackHelper;
+//using Elastos::Droid::Media::CAudioRecordHelper;
 //using Elastos::Droid::Media::Audiofx::IAcousticEchoCanceler;
 using Elastos::Droid::Media::Audiofx::IAcousticEchoCancelerHelper;
-//TODO using Elastos::Droid::Media::Audiofx::CAcousticEchoCancelerHelper;
+using Elastos::Droid::Media::Audiofx::CAcousticEchoCancelerHelper;
 using Elastos::Droid::Bluetooth::IBluetoothProfile;
 using Elastos::Droid::Bluetooth::IBluetoothHeadset;
 using Elastos::Droid::Os::Build;
@@ -236,8 +240,8 @@ ECode AudioManagerElastos::BluetoothHeadsetBroadcastReceiver::OnReceive(
     // disconnected. This broadcast is *not* sticky.
     Int32 profileState;
     intent->GetInt32Extra(
-        String("android.bluetooth.profile.extra.STATE"),//TODO IBluetoothProfile::EXTRA_STATE,//IBluetoothHeadset
-        0,//IBluetoothProfile::STATE_DISCONNECTED,//IBluetoothHeadset::STATE_DISCONNECTED,
+        IBluetoothProfile::EXTRA_STATE,
+        IBluetoothProfile::STATE_DISCONNECTED,
         &profileState);
 
     if (DEBUG) {
@@ -249,7 +253,7 @@ ECode AudioManagerElastos::BluetoothHeadsetBroadcastReceiver::OnReceive(
     }
 
     switch (profileState) {
-        case 0://IBluetoothProfile::STATE_DISCONNECTED:
+        case IBluetoothProfile::STATE_DISCONNECTED:
             // We do not have to explicitly call stopBluetoothSco()
             // since BT SCO will be disconnected automatically when
             // the BT headset is disabled.
@@ -259,16 +263,16 @@ ECode AudioManagerElastos::BluetoothHeadsetBroadcastReceiver::OnReceive(
                 (*(mOwner->mAudioDevices))[DEVICE_BLUETOOTH_HEADSET] = FALSE;
             }
             break;
-        case 2: {//IBluetoothProfile::STATE_CONNECTED: {
+        case IBluetoothProfile::STATE_CONNECTED: {
                 AutoLock lock(&(mOwner->mLock));
                 // Add the BT device to the list of devices.
                 (*(mOwner->mAudioDevices))[DEVICE_BLUETOOTH_HEADSET] = TRUE;
             }
             break;
-        case 1://IBluetoothProfile::STATE_CONNECTING:
+        case IBluetoothProfile::STATE_CONNECTING:
             // Bluetooth service is switching from off to on.
             break;
-        case 3://IBluetoothProfile::STATE_DISCONNECTING:
+        case IBluetoothProfile::STATE_DISCONNECTING:
             // Bluetooth service is switching from on to off.
             break;
         default:
@@ -364,7 +368,7 @@ ECode AudioManagerElastos::InnerContentObserver::OnChange(
     if (mode != IAudioManager::MODE_IN_COMMUNICATION) {
         // throw new IllegalStateException(
         //         "Only enable SettingsObserver in COMM mode");
-        assert(0);
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
 
     // Get stream volume for the voice stream and deliver callback if
@@ -385,33 +389,23 @@ ECode AudioManagerElastos::InnerContentObserver::OnChange(
 //                    AudioManagerElastos
 //===============================================================
 
-template<typename T>
-static AutoPtr< ArrayOf<T> > ArrayOf_Init(T array[])
-{
-    Int32 size = sizeof(T)/sizeof(T[0]);
-    AutoPtr< ArrayOf<T> > retArray = ArrayOf<T>::Alloc(size);
-    for (Int32 i = 0; i < size; ++i) {
-        (*retArray)[i] = array[i];
-    }
-
-    return retArray;
-}
-
 const String AudioManagerElastos::TAG("AudioManagerElastos");
 const Boolean AudioManagerElastos::DEBUG = FALSE;
 
-static String models[] = {
-    String("GT-I9300"),  // Galaxy S3
-    String("GT-I9500"),  // Galaxy S4
-    String("GT-N7105"),  // Galaxy Note 2
-    String("Nexus 4"),   // Nexus 4
-    String("Nexus 5"),   // Nexus 5
-    String("Nexus 7"),   // Nexus 7
-    String("SM-N9005"),  // Galaxy Note 3
-    String("SM-T310"),   // Galaxy Tab 3 8.0 (WiFi)
-};
-//TODO
-const AutoPtr< ArrayOf<String> > AudioManagerElastos::SUPPORTED_AEC_MODELS;// = ArrayOf_Init(models);
+static AutoPtr< ArrayOf<String> > InitSUPPORTED_AEC_MODELS()
+{
+    AutoPtr< ArrayOf<String> > array = ArrayOf<String>::Alloc(8);
+    array->Set(0, String("GT-I9300"));  // Galaxy S3
+    array->Set(1, String("GT-I9500"));  // Galaxy S4
+    array->Set(2, String("GT-N7105"));  // Galaxy Note 2
+    array->Set(3, String("Nexus 4"));   // Nexus 4
+    array->Set(4, String("Nexus 5"));   // Nexus 5
+    array->Set(5, String("Nexus 7"));   // Nexus 7
+    array->Set(6, String("SM-N9005"));  // Galaxy Note 3
+    array->Set(7, String("SM-T310"));   // Galaxy Tab 3 8.0 (WiFi)
+    return array;
+}
+const AutoPtr< ArrayOf<String> > AudioManagerElastos::SUPPORTED_AEC_MODELS = InitSUPPORTED_AEC_MODELS();
 
 // Supported audio device types.
 const Int32 AudioManagerElastos::DEVICE_DEFAULT;
@@ -427,26 +421,30 @@ const Int32 AudioManagerElastos::DEVICE_COUNT;
 // TODO(henrika): add support for proper detection of device names and
 // localize the name strings by using resource strings.
 // See http://crbug.com/333208 for details.
-static String names[] = {
-    String("Speakerphone"),
-    String("Wired headset"),      // With or without microphone.
-    String("Headset earpiece"),   // Only available on mobile phones.
-    String("Bluetooth headset"),  // Requires BLUETOOTH permission.
-};
+static AutoPtr< ArrayOf<String> > InitDEVICE_NAMES()
+{
+    AutoPtr< ArrayOf<String> > array = ArrayOf<String>::Alloc(4);
+    array->Set(0, String("Speakerphone"));
+    array->Set(1, String("Wired headset"));      // With or without microphone.
+    array->Set(2, String("Headset earpiece"));   // Only available on mobile phones.
+    array->Set(3, String("Bluetooth headset"));  // Requires BLUETOOTH permission.
+    return array;
+}
+const AutoPtr< ArrayOf<String> > AudioManagerElastos::DEVICE_NAMES = InitDEVICE_NAMES();
 
-//TODO
-const AutoPtr< ArrayOf<String> > AudioManagerElastos::DEVICE_NAMES;// = ArrayOf_Init(names);
-
-Int32 AudioManagerElastos::devices[4] = {
-    AudioManagerElastos::DEVICE_SPEAKERPHONE,
-    AudioManagerElastos::DEVICE_WIRED_HEADSET,
-    AudioManagerElastos::DEVICE_EARPIECE,
-    AudioManagerElastos::DEVICE_BLUETOOTH_HEADSET,
-};
+static AutoPtr< ArrayOf<Int32> > InitVALID_DEVICES()
+{
+    AutoPtr< ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(4);
+    array->Set(0, 0 /* AudioManagerElastos::DEVICE_SPEAKERPHONE */);
+    array->Set(1, 1 /* AudioManagerElastos::DEVICE_WIRED_HEADSET */);
+    array->Set(2, 2 /* AudioManagerElastos::DEVICE_EARPIECE */);
+    array->Set(3, 3 /* AudioManagerElastos::DEVICE_BLUETOOTH_HEADSET */);
+    return array;
+}
 
 // List of valid device types.
 //TODO
-const AutoPtr< ArrayOf<Int32> > AudioManagerElastos::VALID_DEVICES;// = ArrayOf_Init(devices);
+const AutoPtr< ArrayOf<Int32> > AudioManagerElastos::VALID_DEVICES = InitVALID_DEVICES();
 
 // Bluetooth audio SCO states. Example of valid state sequence:
 // SCO_INVALID -> SCO_TURNING_ON -> SCO_ON -> SCO_TURNING_OFF -> SCO_OFF.
@@ -463,16 +461,6 @@ const Int32 AudioManagerElastos::DEFAULT_SAMPLING_RATE;
 // fails.
 const Int32 AudioManagerElastos::DEFAULT_FRAME_PER_BUFFER;
 
-AutoPtr< ArrayOf<Boolean> > AudioManagerElastos::mAudioDevices_Init()
-{
-    AutoPtr< ArrayOf<Boolean> > array = ArrayOf<Boolean>::Alloc(DEVICE_COUNT);
-    for (Int32 i = 0; i < DEVICE_COUNT; ++i) {
-        (*array)[i] = FALSE;
-    }
-
-    return array;
-}
-
 AudioManagerElastos::AudioManagerElastos(
     /* [in] */ IContext* context,
     /* [in] */ Int64 nativeAudioManagerElastos)
@@ -487,10 +475,12 @@ AudioManagerElastos::AudioManagerElastos(
     , mSavedIsSpeakerphoneOn(FALSE)
     , mSavedIsMicrophoneMute(FALSE)
     , mRequestedAudioDevice(DEVICE_INVALID)
-    , mAudioDevices(mAudioDevices_Init())
     , mCurrentVolume(0)
 {
-    mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&mAudioManager);
+    mAudioDevices = ArrayOf<Boolean>::Alloc(DEVICE_COUNT);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
+    mAudioManager = IAudioManager::Probe(obj);
     mContext->GetContentResolver((IContentResolver**)&mContentResolver);
 }
 
@@ -544,14 +534,14 @@ void AudioManagerElastos::Init()
     // Check if process has MODIFY_AUDIO_SETTINGS and RECORD_AUDIO
     // permissions. Both are required for full functionality.
     assert(0 && "TODO");
-    // mHasModifyAudioSettingsPermission = HasPermission(
-    //         Manifest::permission::MODIFY_AUDIO_SETTINGS);
+    mHasModifyAudioSettingsPermission = HasPermission(
+            Elastos::Droid::Manifest::permission::MODIFY_AUDIO_SETTINGS);
     if (DEBUG && !mHasModifyAudioSettingsPermission) {
         Logd(String("MODIFY_AUDIO_SETTINGS permission is missing"));
     }
     assert(0 && "TODO");
-    // mHasRecordAudioPermission = HasPermission(
-    //         Manifest::permission::RECORD_AUDIO);
+    mHasRecordAudioPermission = HasPermission(
+            Elastos::Droid::Manifest::permission::RECORD_AUDIO);
     if (DEBUG && !mHasRecordAudioPermission) {
         Logd(String("RECORD_AUDIO permission is missing"));
     }
@@ -756,19 +746,26 @@ AutoPtr< ArrayOf<IInterface*> > AudioManagerElastos::GetAudioInputDeviceNames()
         AutoLock lock(&mLock);
         devices = mAudioDevices->Clone();
     }
-    //TODO List<String> list;// = new ArrayList<String>();
+    List<String> list;
     AutoPtr< ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(GetNumOfAudioDevices(devices));
     Int32 i = 0;
     for (Int32 id = 0; id < DEVICE_COUNT; ++id) {
         if ((*devices)[id]) {
             AutoPtr<AudioDeviceName> dn = new AudioDeviceName(id, (*DEVICE_NAMES)[id]);
             array->Set(i, TO_IINTERFACE(dn));
-            //TODO list.Pushback(DEVICE_NAMES[id]);
+            list.PushBack((*DEVICE_NAMES)[id]);
             i++;
         }
     }
 
-    if (DEBUG) Logger::D(TAG, "getAudioInputDeviceNames: %s", "xxx");//TODO print the value in the list
+    String audioInputDeviceNames;
+    for (Int32 i=0; i<(Int32)list.GetSize(); ++i) {
+        audioInputDeviceNames = audioInputDeviceNames + list[i];
+        if (i != (Int32)list.GetSize()) {
+            audioInputDeviceNames = audioInputDeviceNames + String(" ");
+        }
+    }
+    if (DEBUG) Logger::D(TAG, "getAudioInputDeviceNames: %s", audioInputDeviceNames.string());
 
     return array;
 }
@@ -848,7 +845,7 @@ Int32 AudioManagerElastos::GetMinOutputFrameSize(
 
 
     AutoPtr<IAudioTrackHelper> helper;
-    //TODO CAudioTrackHelper::AcquireSingleton((IAudioTrackHelper**)&helper);
+    CAudioTrackHelper::AcquireSingleton((IAudioTrackHelper**)&helper);
     Int32 result;
     helper->GetMinBufferSize(sampleRate, channelConfig, IAudioFormat::ENCODING_PCM_16BIT, &result);
     return result/2/channels;
@@ -892,7 +889,7 @@ Boolean AudioManagerElastos::ShouldUseAcousticEchoCanceler()
     }
 
     AutoPtr<IAcousticEchoCancelerHelper> helper;
-    //TODO CAcousticEchoCancelerHelper::AcquireSingleton((IAcousticEchoCancelerHelper**)&helper);
+    CAcousticEchoCancelerHelper::AcquireSingleton((IAcousticEchoCancelerHelper**)&helper);
     Boolean isAvailable = FALSE;
     helper->IsAvailable(&isAvailable);
     if (DEBUG && isAvailable) {
@@ -923,9 +920,8 @@ void AudioManagerElastos::CheckIfCalledOnValidThread()
 void AudioManagerElastos::RegisterBluetoothIntentsIfNeeded()
 {
     // Check if this process has the BLUETOOTH permission or not.
-    assert(0 && "TODO");
-    // mHasBluetoothPermission = HasPermission(
-    //         Manifest::permission::BLUETOOTH);
+    mHasBluetoothPermission = HasPermission(
+            Elastos::Droid::Manifest::permission::BLUETOOTH);
 
     // Add a Bluetooth headset to the list of available devices if a BT
     // headset is detected and if we have the BLUETOOTH permission.
@@ -934,7 +930,7 @@ void AudioManagerElastos::RegisterBluetoothIntentsIfNeeded()
     // is not sticky and will only be received if a BT headset is connected
     // after this method has been called.
     if (!mHasBluetoothPermission) {
-//        Log.w(TAG, "Requires BLUETOOTH permission");
+        Logger::W(TAG, "Requires BLUETOOTH permission");
         return;
     }
     (*mAudioDevices)[DEVICE_BLUETOOTH_HEADSET] = HasBluetoothHeadset();
@@ -1045,14 +1041,13 @@ Boolean AudioManagerElastos::HasBluetoothHeadset()
     // getDefaultAdapter() method; when running on JELLY_BEAN_MR2 (4.3) and
     // higher, retrieve it through getSystemService(String) with
     // BLUETOOTH_SERVICE.
-    /* TODO
     AutoPtr<IBluetoothAdapter> btAdapter;
     if (RunningOnJellyBeanMR2OrHigher()) {
         // Use BluetoothManager to get the BluetoothAdapter for
         // Android 4.3 and above.
         AutoPtr<IBluetoothManager> btManager;
         mContext->GetSystemService(IContext::BLUETOOTH_SERVICE, (IInterface**)&btManager);
-        btManager->GetAdapter((IBluetoothManager**)&btAdapter);
+        btManager->GetAdapter((IBluetoothAdapter**)&btAdapter);
     }
     else {
         // Use static method for Android 4.2 and below to get the
@@ -1066,19 +1061,17 @@ Boolean AudioManagerElastos::HasBluetoothHeadset()
         // Bluetooth not supported on this platform.
         return FALSE;
     }
-    */
 
-    Int32 profileConnectionState = 0;//IBluetoothProfile::STATE_DISCONNECTED
+    Int32 profileConnectionState = IBluetoothProfile::STATE_DISCONNECTED;
     Boolean isEnabled = FALSE;
-    //TODO btAdapter->GetProfileConnectionState(1/*TODO IBluetoothProfile::HEADSET*/, &profileConnectionState);
+    btAdapter->GetProfileConnectionState(IBluetoothProfile::HEADSET, &profileConnectionState);
 
     // Ensure that Bluetooth is enabled and that a device which supports the
     // headset and handsfree profile is connected.
     // TODO(henrika): it is possible that btAdapter.isEnabled() is
     // redundant. It might be sufficient to only check the profile state.
-    //TODO btAdapter->IsEnabled(&isEnabled);
-    return isEnabled && profileConnectionState ==
-        2/*TODO IBluetoothProfile::STATE_CONNECTED*/;
+    btAdapter->IsEnabled(&isEnabled);
+    return isEnabled && profileConnectionState == IBluetoothProfile::STATE_CONNECTED;
 }
 
 /**
@@ -1119,7 +1112,7 @@ void AudioManagerElastos::RegisterForBluetoothHeadsetIntentBroadcast()
     AutoPtr<IIntentFilter> filter;
     AutoPtr<IIntent> intent;
     CIntentFilter::New(
-        String("android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED"),//TODO IBluetoothHeadset::ACTION_CONNECTION_STATE_CHANGED,
+        IBluetoothHeadset::ACTION_CONNECTION_STATE_CHANGED,
         (IIntentFilter**)&filter);
 
     /** Receiver which handles changes in BT headset availability. */
@@ -1386,9 +1379,11 @@ void AudioManagerElastos::StartObservingVolumeChanges()
     mSettingsObserver = new InnerContentObserver(this);
 
     AutoPtr<IUri> uri;
-    //Uri::Parse(String("content://") + ISettings::AUTHORITY + String("/system"), (IUri**)&uri);
+    AutoPtr<ISettingsSystem> settingsSystem;
+    CSettingsSystem::AcquireSingleton((ISettingsSystem**)&settingsSystem);
+    settingsSystem->GetCONTENT_URI((IUri**)&uri);
     mContentResolver->RegisterContentObserver(
-        uri/*TODO Settings::System::CONTENT_URI*/, TRUE, mSettingsObserver);
+        uri, TRUE, mSettingsObserver);
 }
 
 /** Quit observer thread and stop listening for volume changes. */

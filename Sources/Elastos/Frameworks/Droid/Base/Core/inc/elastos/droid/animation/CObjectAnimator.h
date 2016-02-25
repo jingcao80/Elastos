@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_ANIMATION_COBJECTANIMATOR_H__
-#define  __ELASTOS_DROID_ANIMATION_COBJECTANIMATOR_H__
+#ifndef __ELASTOS_DROID_ANIMATION_COBJECTANIMATOR_H__
+#define __ELASTOS_DROID_ANIMATION_COBJECTANIMATOR_H__
 
 #include "_Elastos_Droid_Animation_CObjectAnimator.h"
 #include "elastos/droid/animation/ObjectAnimator.h"

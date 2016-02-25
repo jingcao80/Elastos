@@ -46,7 +46,7 @@ module
          * </p>
          */
         OnCreateChooserDialog(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IBundle* savedInstanceState,
             [out] IMediaRouteChooserDialog** dialog);
     }

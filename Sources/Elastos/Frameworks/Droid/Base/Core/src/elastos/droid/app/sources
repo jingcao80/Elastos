@@ -46,6 +46,7 @@ SOURCES += AliasActivity.cpp
 SOURCES += AppGlobals.cpp
 SOURCES += AppImportanceMonitor.cpp
 SOURCES += AppOpsManager.cpp
+SOURCES += CAppOpsManagerHelper.cpp
 SOURCES += CAppOpsManagerAppOpsCallback.cpp
 SOURCES += Application.cpp
 SOURCES += CApplicationThread.cpp

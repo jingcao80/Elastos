@@ -6,7 +6,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::App::IActivityContainer;
+using Elastos::Droid::App::IIActivityContainer;
 using Elastos::Droid::Content::IIIntentSender;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentReceiver;
@@ -130,7 +130,7 @@ public:
         /* [in] */ Int32 flagsMask,
         /* [in] */ Int32 flagsValues,
         /* [in] */ IBundle* options,
-        /* [in] */ IActivityContainer* container);
+        /* [in] */ IIActivityContainer* container);
 
 public:
     CActivityManagerService* mOwner;

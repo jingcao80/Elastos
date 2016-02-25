@@ -126,7 +126,7 @@ module
          */
         NewInstance(
             [in] String userAgent,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IElastosHttpClient** result);
 
         /**

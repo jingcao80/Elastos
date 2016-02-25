@@ -2,12 +2,11 @@ module
 {
     interface Elastos.Droid.View.IViewGroup;
 
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.INotificationDataEntry;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPhoneStatusBar;
+    interface Elastos.Droid.SystemUI.StatusBar.INotificationDataEntry;
+    interface Elastos.Droid.SystemUI.StatusBar.Phone.IPhoneStatusBar;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
     namespace Policy {
@@ -69,7 +68,6 @@ module
     } // namespace Policy
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

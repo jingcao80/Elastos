@@ -16,7 +16,7 @@ ECode CSubjectDomainCombiner::Combine(
     /* [in] */ ArrayOf<IProtectionDomain*> *assigned,
     /* [out, callee] */ ArrayOf<IProtectionDomain*> **result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = NULL;
     VALIDATE_NOT_NULL(current)
     VALIDATE_NOT_NULL(assigned)
@@ -27,7 +27,7 @@ ECode CSubjectDomainCombiner::Combine(
 ECode CSubjectDomainCombiner::GetSubject(
     /* [out] */ ISubject **subject)
 {
-    VALIDATE_NOT_NULL(*subject)
+    VALIDATE_NOT_NULL(subject)
     *subject = NULL;
 
     return NOERROR;

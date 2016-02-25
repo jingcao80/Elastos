@@ -76,7 +76,7 @@ module
          * @hide Used by Browser and Settings
          */
         InflateCertificateView(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IView** result);
     }
 

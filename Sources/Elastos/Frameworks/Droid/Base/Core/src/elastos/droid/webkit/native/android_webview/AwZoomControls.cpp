@@ -1,12 +1,12 @@
 #include "elastos/droid/webkit/native/android_webview/AwZoomControls.h"
 #include "elastos/droid/webkit/native/android_webview/AwContents.h"
-//TODO #include "elastos/droid/widget/CZoomButtonsController.h"
+#include "elastos/droid/widget/CZoomButtonsController.h"
 
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::Widget::IFrameLayout;
 using Elastos::Droid::Widget::IZoomButtonsController;
-//TODO using Elastos::Droid::Widget::CZoomButtonsController;
+using Elastos::Droid::Widget::CZoomButtonsController;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::Widget::IFrameLayoutLayoutParams;
 using Elastos::Droid::Widget::EIID_IFrameLayoutLayoutParams;
@@ -128,7 +128,7 @@ AutoPtr<IZoomButtonsController> AwZoomControls::GetZoomController()
         AutoPtr<IViewGroup> viewGroup;
         viewGroup = mAwContents->GetContentViewCore()->GetContainerView();
         containerView = IView::Probe(viewGroup);
-        //TODO CZoomButtonsController::New( containerView,(IZoomButtonsController**)&mZoomButtonsController);
+        CZoomButtonsController::New( containerView,(IZoomButtonsController**)&mZoomButtonsController);
         AutoPtr<ZoomListener> listener = new ZoomListener(this);
         mZoomButtonsController->SetOnZoomListener(listener);
         // ZoomButtonsController positions the buttons at the bottom, but in

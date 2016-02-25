@@ -1,12 +1,11 @@
 
 module
 {
-    interface Elastos.Droid.Packages.SystemUI.Qs.IQSPanel;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IKeyguardUserSwitcher;
+    interface Elastos.Droid.SystemUI.Qs.IQSPanel;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IKeyguardUserSwitcher;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
     namespace Phone {
@@ -33,7 +32,6 @@ module
     } // namespace Phone
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

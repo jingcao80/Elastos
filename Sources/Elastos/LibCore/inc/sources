@@ -88,6 +88,7 @@ EXPORT_HEADERS += elastos/utility/Observable.h
 EXPORT_HEADERS += elastos/utility/Properties.h
 EXPORT_HEADERS += elastos/utility/TimSort.h
 EXPORT_HEADERS += elastos/utility/TimerTask.h
+EXPORT_HEADERS += elastos/utility/TimeZoneGetter.h
 EXPORT_HEADERS += elastos/utility/regex/Pattern.h
 
 EXPORT_HEADERS += elastos/net/ProxySelector.h

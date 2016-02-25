@@ -4,8 +4,8 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/text/utility/Linkify.h"
 #include "elastos/droid/text/CSpannableString.h"
-//#include "elastos/droid/text/method/CLinkMovementMethod.h"
-//#include "elastos/droid/text/style/CURLSpan.h"
+#include "elastos/droid/text/method/LinkMovementMethod.h"
+#include "elastos/droid/text/style/CURLSpan.h"
 //#include "elastos/droid/webkit/CWebView.h"
 #include "elastos/droid/utility/Patterns.h"
 #include <elastos/core/Character.h>
@@ -16,10 +16,10 @@ using Elastos::Droid::Text::CSpannableString;
 using Elastos::Droid::Text::Method::IMovementMethod;
 using Elastos::Droid::Text::Method::ILinkMovementMethod;
 using Elastos::Droid::Text::Method::EIID_ILinkMovementMethod;
-// using Elastos::Droid::Text::Method::CLinkMovementMethod;
+using Elastos::Droid::Text::Method::LinkMovementMethod;
 using Elastos::Droid::Text::Style::IURLSpan;
 using Elastos::Droid::Text::Style::EIID_IURLSpan;
-//using Elastos::Droid::Text::Style::CURLSpan;
+using Elastos::Droid::Text::Style::CURLSpan;
 
 // import com.android.i18n.phonenumbers.PhoneNumberMatch;
 // import com.android.i18n.phonenumbers.PhoneNumberUtil;
@@ -250,7 +250,8 @@ ECode Linkify::AddLinkMovementMethod(
         t->GetLinksClickable(&bLinksClickable);
         if (bLinksClickable) {
             assert(0 && "TODO");
-            // m = CLinkMovementMethod::GetInstance();
+            m = NULL;
+            LinkMovementMethod::GetInstance((IMovementMethod**)&m);
             t->SetMovementMethod(m);
         }
     }
@@ -344,9 +345,8 @@ void Linkify::ApplyLink(
     /* [in] */ Int32 end,
     /* [in] */ ISpannable* text)
 {
-    assert(0 && "TODO");
     AutoPtr<IURLSpan> span;
-    // CURLSpan::New(url, (IURLSpan**)&span);
+    CURLSpan::New(url, (IURLSpan**)&span);
 
     text->SetSpan(span, start, end, ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
 }

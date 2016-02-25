@@ -13,7 +13,7 @@ module
     [deprecated]
     interface IEGL14 {
 
-        const Int32 EGL_DEFAULT_DISPLAY                = 0;
+        const Int32 _EGL_DEFAULT_DISPLAY                = 0;
 
         const Int32 EGL_FALSE                          = 0;
         const Int32 EGL_TRUE                           = 1;

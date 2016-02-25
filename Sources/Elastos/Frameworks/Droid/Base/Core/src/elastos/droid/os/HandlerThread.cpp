@@ -50,7 +50,7 @@ void HandlerThread::OnLooperPrepared()
 
 ECode HandlerThread::Run()
 {
-    //TODO mTid = Process::MyTid();
+    mTid = Process::MyTid();
     Looper::Prepare();
     {
         Lock();
@@ -60,7 +60,7 @@ ECode HandlerThread::Run()
 
         Unlock();
     }
-    //TODO Process::SetThreadPriority(mPriority);
+    Process::SetThreadPriority(mPriority);
     OnLooperPrepared();
     Looper::Loop();
     mTid = -1;

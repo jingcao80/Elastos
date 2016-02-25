@@ -13,21 +13,9 @@ using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Runnable;
 
 using Elastos::Droid::Bluetooth::IBluetoothAdapter;
-// import android.bluetooth.IBluetoothGatt;
 using Elastos::Droid::Bluetooth::IIBluetoothGatt;
-// import android.bluetooth.IBluetoothManager;
-// import android.os.Handler;
-// import android.os.Looper;
-// import android.os.ParcelUuid;
-// import android.os.RemoteException;
-// import android.util.Log;
-// import java.util.ArrayList;
-// import java.util.HashMap;
-// import java.util.List;
 using Elastos::Utility::IList;
 using Elastos::Utility::IMap;
-// import java.util.Map;
-// import java.util.UUID;
 
 namespace Elastos {
 namespace Droid {
@@ -193,7 +181,7 @@ public:
       * @param bluetoothManager BluetoothManager that conducts overall Bluetooth Management.
       * @hide
       */
-    BluetoothLeScanner(
+    CARAPI constructor(
         /* [in] */ IIBluetoothManager* bluetoothManager);
 
     /**

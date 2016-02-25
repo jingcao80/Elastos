@@ -21,6 +21,8 @@ module
     namespace System {
 
     class CStructAddrinfo {
+        constructor();
+
         interface IStructAddrinfo;
     }
 
@@ -52,6 +54,8 @@ module
     }
 
     class CStructPollfd {
+        constructor();
+
         interface IStructPollfd;
     }
 
@@ -92,6 +96,8 @@ module
     }
 
     class CStructFlock {
+        constructor();
+
         interface IStructFlock;
     }
 
@@ -133,6 +139,8 @@ module
     }
 
     class CZygoteHooks {
+        constructor();
+
         interface IZygoteHooks;
     }
 

@@ -1,48 +1,39 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.server.hdmi;
+#ifndef __ELASTOS_DROID_SERVER_HDMI_HDMICECMESSAGE_H__
+#define __ELASTOS_DROID_SERVER_HDMI_HDMICECMESSAGE_H__
 
-import libcore.util.EmptyArray;
+#include "_Elastos.Droid.Server.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/core/Object.h>
 
-using Elastos::Utility::IArrays;
+
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Hdmi {
 
 /**
  * A class to encapsulate HDMI-CEC message used for the devices connected via
  * HDMI cable to communicate with one another. A message is defined by its
  * source and destination address, command (or opcode), and optional parameters.
  */
-public class HdmiCecMessage {
-    public static const Byte[] EMPTY_PARAM = EmptyArray.BYTE;
+class HdmiCecMessage
+    : public Object
+    , public IHdmiCecMessage
+{
+public:
+    CAR_INTERFACE_DECL()
 
-    private final Int32 mSource;
-    private final Int32 mDestination;
-
-    private final Int32 mOpcode;
-    private final Byte[] mParams;
+    HdmiCecMessage();
 
     /**
      * Constructor.
      */
-    public HdmiCecMessage(Int32 source, Int32 destination, Int32 opcode, Byte[] params) {
-        mSource = source;
-        mDestination = destination;
-        mOpcode = opcode & 0xFF;
-        mParams = Arrays->CopyOf(params, params.length);
-    }
+    CARAPI constructor(
+        /* [in] */ Int32 source,
+        /* [in] */ Int32 destination,
+        /* [in] */ Int32 opcode,
+        /* [in] */ ArrayOf<Byte>* params);
 
     /**
      * Return the source address field of the message. It is the logical address
@@ -50,9 +41,8 @@ public class HdmiCecMessage {
      *
      * @return source address
      */
-    public Int32 GetSource() {
-        return mSource;
-    }
+    CARAPI GetSource(
+        /* [out] */ Int32* result);
 
     /**
      * Return the destination address field of the message. It is the logical address
@@ -60,9 +50,8 @@ public class HdmiCecMessage {
      *
      * @return destination address
      */
-    public Int32 GetDestination() {
-        return mDestination;
-    }
+    CARAPI GetDestination(
+        /* [out] */ Int32* result);
 
     /**
      * Return the opcode field of the message. It is the type of the message that
@@ -70,9 +59,8 @@ public class HdmiCecMessage {
      *
      * @return opcode
      */
-    public Int32 GetOpcode() {
-        return mOpcode;
-    }
+    CARAPI GetOpcode(
+        /* [out] */ Int32* result);
 
     /**
      * Return the parameter field of the message. The contents of parameter varies
@@ -81,173 +69,31 @@ public class HdmiCecMessage {
      *
      * @return parameter
      */
-    public Byte[] GetParams() {
-        return mParams;
-    }
+    CARAPI GetParams(
+        /* [out, callee] */ ArrayOf<Byte>* result);
 
-    //@Override
+    // @Override
     CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        StringBuffer s = new StringBuffer();
-        s->Append(String->Format("<%s> src: %d, dst: %d",
-                OpcodeToString(mOpcode), mSource, mDestination));
-        if (mParams.length > 0) {
-            s->Append(", params:");
-            for (Byte data : mParams) {
-                s->Append(String->Format(" %02X", data));
-            }
-        }
-        return s->ToString();
-    }
+        /* [out] */ String* result);
 
-    private static String OpcodeToString(Int32 opcode) {
-        switch (opcode) {
-            case Constants.MESSAGE_FEATURE_ABORT:
-                return "Feature Abort";
-            case Constants.MESSAGE_IMAGE_VIEW_ON:
-                return "Image View On";
-            case Constants.MESSAGE_TUNER_STEP_INCREMENT:
-                return "Tuner Step Increment";
-            case Constants.MESSAGE_TUNER_STEP_DECREMENT:
-                return "Tuner Step Decrement";
-            case Constants.MESSAGE_TUNER_DEVICE_STATUS:
-                return "Tuner Device Staus";
-            case Constants.MESSAGE_GIVE_TUNER_DEVICE_STATUS:
-                return "Give Tuner Device Status";
-            case Constants.MESSAGE_RECORD_ON:
-                return "Record On";
-            case Constants.MESSAGE_RECORD_STATUS:
-                return "Record Status";
-            case Constants.MESSAGE_RECORD_OFF:
-                return "Record Off";
-            case Constants.MESSAGE_TEXT_VIEW_ON:
-                return "Text View On";
-            case Constants.MESSAGE_RECORD_TV_SCREEN:
-                return "Record Tv Screen";
-            case Constants.MESSAGE_GIVE_DECK_STATUS:
-                return "Give Deck Status";
-            case Constants.MESSAGE_DECK_STATUS:
-                return "Deck Status";
-            case Constants.MESSAGE_SET_MENU_LANGUAGE:
-                return "Set Menu Language";
-            case Constants.MESSAGE_CLEAR_ANALOG_TIMER:
-                return "Clear Analog Timer";
-            case Constants.MESSAGE_SET_ANALOG_TIMER:
-                return "Set Analog Timer";
-            case Constants.MESSAGE_TIMER_STATUS:
-                return "Timer Status";
-            case Constants.MESSAGE_STANDBY:
-                return "Standby";
-            case Constants.MESSAGE_PLAY:
-                return "Play";
-            case Constants.MESSAGE_DECK_CONTROL:
-                return "Deck Control";
-            case Constants.MESSAGE_TIMER_CLEARED_STATUS:
-                return "Timer Cleared Status";
-            case Constants.MESSAGE_USER_CONTROL_PRESSED:
-                return "User Control Pressed";
-            case Constants.MESSAGE_USER_CONTROL_RELEASED:
-                return "User Control Release";
-            case Constants.MESSAGE_GIVE_OSD_NAME:
-                return "Give Osd Name";
-            case Constants.MESSAGE_SET_OSD_NAME:
-                return "Set Osd Name";
-            case Constants.MESSAGE_SET_OSD_STRING:
-                return "Set Osd String";
-            case Constants.MESSAGE_SET_TIMER_PROGRAM_TITLE:
-                return "Set Timer Program Title";
-            case Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST:
-                return "System Audio Mode Request";
-            case Constants.MESSAGE_GIVE_AUDIO_STATUS:
-                return "Give Audio Status";
-            case Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE:
-                return "Set System Audio Mode";
-            case Constants.MESSAGE_REPORT_AUDIO_STATUS:
-                return "Report Audio Status";
-            case Constants.MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS:
-                return "Give System Audio Mode Status";
-            case Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS:
-                return "System Audio Mode Status";
-            case Constants.MESSAGE_ROUTING_CHANGE:
-                return "Routing Change";
-            case Constants.MESSAGE_ROUTING_INFORMATION:
-                return "Routing Information";
-            case Constants.MESSAGE_ACTIVE_SOURCE:
-                return "Active Source";
-            case Constants.MESSAGE_GIVE_PHYSICAL_ADDRESS:
-                return "Give Physical Address";
-            case Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS:
-                return "Report Physical Address";
-            case Constants.MESSAGE_REQUEST_ACTIVE_SOURCE:
-                return "Request Active Source";
-            case Constants.MESSAGE_SET_STREAM_PATH:
-                return "Set Stream Path";
-            case Constants.MESSAGE_DEVICE_VENDOR_ID:
-                return "Device Vendor Id";
-            case Constants.MESSAGE_VENDOR_COMMAND:
-                return "Vendor Commandn";
-            case Constants.MESSAGE_VENDOR_REMOTE_BUTTON_DOWN:
-                return "Vendor Remote Button Down";
-            case Constants.MESSAGE_VENDOR_REMOTE_BUTTON_UP:
-                return "Vendor Remote Button Up";
-            case Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID:
-                return "Give Device Vendor Id";
-            case Constants.MESSAGE_MENU_REQUEST:
-                return "Menu REquest";
-            case Constants.MESSAGE_MENU_STATUS:
-                return "Menu Status";
-            case Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS:
-                return "Give Device Power Status";
-            case Constants.MESSAGE_REPORT_POWER_STATUS:
-                return "Report Power Status";
-            case Constants.MESSAGE_GET_MENU_LANGUAGE:
-                return "Get Menu Language";
-            case Constants.MESSAGE_SELECT_ANALOG_SERVICE:
-                return "Select Analog Service";
-            case Constants.MESSAGE_SELECT_DIGITAL_SERVICE:
-                return "Select Digital Service";
-            case Constants.MESSAGE_SET_DIGITAL_TIMER:
-                return "Set Digital Timer";
-            case Constants.MESSAGE_CLEAR_DIGITAL_TIMER:
-                return "Clear Digital Timer";
-            case Constants.MESSAGE_SET_AUDIO_RATE:
-                return "Set Audio Rate";
-            case Constants.MESSAGE_INACTIVE_SOURCE:
-                return "InActive Source";
-            case Constants.MESSAGE_CEC_VERSION:
-                return "Cec Version";
-            case Constants.MESSAGE_GET_CEC_VERSION:
-                return "Get Cec Version";
-            case Constants.MESSAGE_VENDOR_COMMAND_WITH_ID:
-                return "Vendor Command With Id";
-            case Constants.MESSAGE_CLEAR_EXTERNAL_TIMER:
-                return "Clear External Timer";
-            case Constants.MESSAGE_SET_EXTERNAL_TIMER:
-                return "Set External Timer";
-            case Constants.MESSAGE_REPORT_SHORT_AUDIO_DESCRIPTOR:
-                return "Repot Short Audio Descriptor";
-            case Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR:
-                return "Request Short Audio Descriptor";
-            case Constants.MESSAGE_INITIATE_ARC:
-                return "Initiate ARC";
-            case Constants.MESSAGE_REPORT_ARC_INITIATED:
-                return "Report ARC Initiated";
-            case Constants.MESSAGE_REPORT_ARC_TERMINATED:
-                return "Report ARC Terminated";
-            case Constants.MESSAGE_REQUEST_ARC_INITIATION:
-                return "Request ARC Initiation";
-            case Constants.MESSAGE_REQUEST_ARC_TERMINATION:
-                return "Request ARC Termination";
-            case Constants.MESSAGE_TERMINATE_ARC:
-                return "Terminate ARC";
-            case Constants.MESSAGE_CDC_MESSAGE:
-                return "Cdc Message";
-            case Constants.MESSAGE_ABORT:
-                return "Abort";
-            default:
-                return String->Format("Opcode: %02X", opcode);
-        }
-    }
-}
+private:
+    static CARAPI OpcodeToString(
+        /* [in] */ Int32 opcode,
+        /* [out] */ String* result);
 
+private:
+    Int32 mSource;
+
+    Int32 mDestination;
+
+    Int32 mOpcode;
+
+    AutoPtr<ArrayOf<Byte> > mParams;
+};
+
+} // namespace Hdmi
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
+
+#endif // __ELASTOS_DROID_SERVER_HDMI_HDMICECMESSAGE_H__

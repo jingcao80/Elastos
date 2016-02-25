@@ -113,7 +113,7 @@ module
          * install size, pick the actual location to install the app.
          */
         ResolveInstallLocation(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String packageName,
             [in] Int32 installLocation,
             [in] Int64 sizeBytes,

@@ -19,7 +19,7 @@
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/graphics/CCanvas.h"
-// #include "elastos/droid/widget/CRemoteViews.h"
+#include "elastos/droid/widget/CRemoteViews.h"
 #include "elastos/droid/utility/MathUtils.h"
 #include "elastos/droid/internal/utility/NotificationColorUtil.h"
 #include <elastos/core/CoreUtils.h>
@@ -40,7 +40,7 @@ using Elastos::Droid::Graphics::CCanvas;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::Graphics::PorterDuffMode_MULTIPLY;
 using Elastos::Droid::Graphics::PorterDuffMode_SRC_ATOP;
-// using Elastos::Droid::Widget::CRemoteViews;
+using Elastos::Droid::Widget::CRemoteViews;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::MathUtils;
 using Elastos::Droid::Internal::Utility::NotificationColorUtil;
@@ -140,21 +140,20 @@ ECode CNotificationBuilder::constructor(
     String templateClass;
     extras->GetString(INotification::EXTRA_TEMPLATE, &templateClass);
     if (!TextUtils::IsEmpty(templateClass)) {
-        assert(0 && "TODO");
-        // Class<? extends Style> styleClass = getNotificationStyleClass(templateClass);
-        // if (styleClass == NULL) {
-        //     Log.d(TAG, "Unknown style class: " + styleClass);
-        //     return;
-        // }
+        AutoPtr<IClassInfo> classInfo = GetNotificationStyleClass(templateClass);
+        if (classInfo == NULL) {
+            Logger::D(TAG, "Unknown style class: %s", templateClass.string());
+            return NOERROR;
+        }
 
-        // try {
-        //     Constructor<? extends Style> constructor = styleClass->GetConstructor();
-        //     style = constructor.newInstance();
-        //     style.restoreFromExtras(extras);
-        // } catch (Throwable t) {
-        //     Log.e(TAG, "Could not create Style", t);
-        //     return;
-        // }
+        AutoPtr<IInterface> obj;
+        ECode ec = classInfo->CreateObject((IInterface**)&obj);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Could not create Style %s", templateClass.string());
+            return ec;
+        }
+        style = INotificationStyle::Probe(obj);
+        style->RestoreFromExtras(extras);
     }
     if (style != NULL) {
         SetStyle(style);
@@ -776,8 +775,7 @@ AutoPtr<IRemoteViews> CNotificationBuilder::ApplyStandardTemplate(
     AutoPtr<IRemoteViews> contentView;
     AutoPtr<IApplicationInfo> ai;
     mContext->GetApplicationInfo((IApplicationInfo**)&ai);
-    assert(0 && "TODO");
-    // CRemoteViews::New(ai, resId, (IRemoteViews**)&contentView);
+    CRemoteViews::New(ai, resId, (IRemoteViews**)&contentView);
 
     Boolean showLine3 = FALSE;
     Boolean showLine2 = FALSE;
@@ -1013,10 +1011,9 @@ AutoPtr<IRemoteViews> CNotificationBuilder::GenerateActionButton(
     String name;
     mContext->GetPackageName(&name);
 
-    assert(0 && "TODO");
-    // CRemoteViews::New(name,
-    //     tombstone ? GetActionTombstoneLayoutResource() : GetActionLayoutResource(),
-    //     (IRemoteViews**)&button);
+    CRemoteViews::New(name,
+        tombstone ? GetActionTombstoneLayoutResource() : GetActionLayoutResource(),
+        (IRemoteViews**)&button);
 
     Int32 icon;
     action->GetIcon(&icon);
@@ -1221,8 +1218,8 @@ ECode CNotificationBuilder::BuildUnstyled(
         actions = ArrayOf<INotificationAction*>::Alloc(mActions.GetSize());
         //mActions.ToArray(n->mActions);
         List<AutoPtr<INotificationAction> >::Iterator it = mActions.Begin();
-        for(Int32 i = 0; i < mActions.GetSize(); i++, it++) {
-            actions->Set(i, *it);
+        for(Int32 i = 0; it != mActions.End(); it++) {
+            actions->Set(i++, *it);
         }
         n->SetActions(actions);
     }
@@ -1447,7 +1444,7 @@ ECode CNotificationBuilder::Rebuild(
 AutoPtr<IClassInfo> CNotificationBuilder::GetNotificationStyleClass(
     /* [in] */ const String& templateClass)
 {
-
+    assert(0 && "TODO");
 //     Class<? extends Style>[] classes = new Class[]{
 //             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class};
 //     for (Class<? extends Style> innerClass : classes) {

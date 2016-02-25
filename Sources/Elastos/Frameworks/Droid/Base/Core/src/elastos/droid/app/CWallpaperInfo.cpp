@@ -2,11 +2,11 @@
 #include "elastos/droid/ext/frameworkdef.h"
 #include <Elastos.CoreLibrary.External.h>
 #include "Elastos.Droid.Utility.h"
+#include "Elastos.Droid.Service.h"
 #include "elastos/droid/app/CWallpaperInfo.h"
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/pm/CResolveInfo.h"
 #include "elastos/droid/utility/Xml.h"
-// #include "elastos/droid/service/wallpaper/WallpaperService.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Slogger.h>
 
@@ -22,7 +22,7 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Utility::IAttributeSet;
-// using Elastos::Droid::Service::Wallpaper::WallpaperService;
+using Elastos::Droid::Service::Wallpaper::IWallpaperService;
 
 namespace Elastos {
 namespace Droid {
@@ -306,16 +306,16 @@ ECode CWallpaperInfo::constructor(
     Int32 descriptionRes = -1;
 
     AutoPtr<IXmlResourceParser> parser;
+    IPackageItemInfo* pi = IPackageItemInfo::Probe(si);
     // try {
-    assert(0 && "TODO");
-    // ECode ec = si->LoadXmlMetaData(pm, WallpaperService::SERVICE_META_DATA,
-    //         (IXmlResourceParser**)&parser);
-    // if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION || parser == NULL) {
-    //     String packageName;
-    //     si->GetPackageName(&packageName);
-    //     Slogger::E(TAG, "Unable to create context for: %s", (const char*)packageName);
-    //     return E_XML_PULL_PARSER_EXCEPTION;
-    // }
+    ECode ec = pi->LoadXmlMetaData(pm, IWallpaperService::SERVICE_META_DATA,
+            (IXmlResourceParser**)&parser);
+    if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION || parser == NULL) {
+        String packageName;
+        pi->GetPackageName(&packageName);
+        Slogger::E(TAG, "Unable to create context for: %s", (const char*)packageName);
+        return E_XML_PULL_PARSER_EXCEPTION;
+    }
 
     AutoPtr<IApplicationInfo> appInfo;
     IComponentInfo::Probe(si)->GetApplicationInfo((IApplicationInfo**)&appInfo);

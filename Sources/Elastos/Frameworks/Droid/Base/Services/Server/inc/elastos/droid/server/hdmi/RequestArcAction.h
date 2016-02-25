@@ -1,35 +1,25 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.server.hdmi;
+#ifndef __ELASTOS_DROID_SERVER_HDMI_REQUESTARCACTION_H__
+#define __ELASTOS_DROID_SERVER_HDMI_REQUESTARCACTION_H__
 
-using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
-using Elastos::Droid::Utility::ISlog;
+#include "_Elastos.Droid.Server.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/core/Object.h>
+#include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
+
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Hdmi {
 
 /**
  * Base feature action class for &lt;Request ARC Initiation&gt;/&lt;Request ARC Termination&gt;.
  */
-abstract class RequestArcAction extends HdmiCecFeatureAction {
-    private static const String TAG = "RequestArcAction";
-
-    // State in which waits for ARC response.
-    protected static const Int32 STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE = 1;
-
-    // Logical address of AV Receiver.
-    protected final Int32 mAvrAddress;
+class RequestArcAction
+    : public HdmiCecFeatureAction
+{
+public:
+    RequestArcAction();
 
     /**
      * @Constructor
@@ -39,52 +29,35 @@ abstract class RequestArcAction extends HdmiCecFeatureAction {
      * @throw IllegalArugmentException if device type of sourceAddress and avrAddress
      *                      is invalid
      */
-    RequestArcAction(HdmiCecLocalDevice source, Int32 avrAddress) {
-        Super(source);
-        HdmiUtils->VerifyAddressType(GetSourceAddress(), HdmiDeviceInfo.DEVICE_TV);
-        HdmiUtils->VerifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mAvrAddress = avrAddress;
-    }
+    CARAPI constructor(
+        /* [in] */ IHdmiCecLocalDevice* source,
+        /* [in] */ Int32 avrAddress);
 
-    //@Override
-    Boolean ProcessCommand(HdmiCecMessage cmd) {
-        if (mState != STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE
-                || !HdmiUtils->CheckCommandSource(cmd, mAvrAddress, TAG)) {
-            return FALSE;
-        }
-        Int32 opcode = cmd->GetOpcode();
-        switch (opcode) {
-            // Handles only <Feature Abort> here and, both <Initiate ARC> and <Terminate ARC>
-            // are handled in HdmiControlService itself because both can be
-            // received without <Request ARC Initiation> or <Request ARC Termination>.
-            case Constants.MESSAGE_FEATURE_ABORT:
-                Int32 originalOpcode = cmd->GetParams()[0] & 0xFF;
-                if (originalOpcode == Constants.MESSAGE_REQUEST_ARC_INITIATION
-                        || originalOpcode == Constants.MESSAGE_REQUEST_ARC_TERMINATION) {
-                    DisableArcTransmission();
-                    Finish();
-                    return TRUE;
-                } else {
-                    return FALSE;
-                }
-        }
-        return FALSE;
-    }
+    // @Override
+    CARAPI ProcessCommand(
+        /* [in] */ IHdmiCecMessage* cmd,
+        /* [out] */ Boolean* result);
 
-    protected final void DisableArcTransmission() {
-        // Start Set ARC Transmission State action.
-        SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(LocalDevice(),
-                mAvrAddress, FALSE);
-        AddAndStartAction(action);
-    }
+    CARAPI DisableArcTransmission();
 
-    //@Override
-    final void HandleTimerEvent(Int32 state) {
-        if (mState != state || state != STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE) {
-            return;
-        }
-        HdmiLogger->Debug("[T]RequestArcAction.");
-        DisableArcTransmission();
-        Finish();
-    }
-}
+    // @Override
+    CARAPI HandleTimerEvent(
+        /* [in] */ Int32 state);
+
+public:
+    // State in which waits for ARC response.
+    static const Int32 STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE;
+
+    // Logical address of AV Receiver.
+    Int32 mAvrAddress;
+
+private:
+    static const String TAG;
+};
+
+} // namespace Hdmi
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
+
+#endif // __ELASTOS_DROID_SERVER_HDMI_REQUESTARCACTION_H__

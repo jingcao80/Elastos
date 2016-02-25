@@ -12,7 +12,7 @@ using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::InputMethod::ICompletionInfo;
 using Elastos::Droid::View::InputMethod::ICorrectionInfo;
 using Elastos::Droid::View::InputMethod::IExtractedTextRequest;
-using Elastos::Droid::Internal::View::IInputContextCallback;
+using Elastos::Droid::Internal::View::IIInputContextCallback;
 
 namespace Elastos {
 namespace Droid {
@@ -34,24 +34,24 @@ public:
         /* [in] */ Int32 length,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* icCallback);
+        /* [in] */ IIInputContextCallback* icCallback);
 
     CARAPI GetTextAfterCursor(
         /* [in] */ Int32 length,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* icCallback);
+        /* [in] */ IIInputContextCallback* icCallback);
 
     CARAPI GetCursorCapsMode(
         /* [in] */ Int32 reqModes,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* icCallback);
+        /* [in] */ IIInputContextCallback* icCallback);
 
     CARAPI GetExtractedText(
         /* [in] */ IExtractedTextRequest* request,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* icCallback);
+        /* [in] */ IIInputContextCallback* icCallback);
 
     CARAPI DeleteSurroundingText(
         /* [in] */ Int32 leftLength,
@@ -107,7 +107,7 @@ public:
     CARAPI GetSelectedText(
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* icCallback);
+        /* [in] */ IIInputContextCallback* icCallback);
 
 private:
     static const String TAG;

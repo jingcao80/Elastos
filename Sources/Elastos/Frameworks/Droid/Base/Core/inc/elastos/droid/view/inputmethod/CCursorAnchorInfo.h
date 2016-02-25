@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_VIEW_INPUTMETHOD_CCURSORANCHORINFO_H__
-#define  __ELASTOS_DROID_VIEW_INPUTMETHOD_CCURSORANCHORINFO_H__
+#define __ELASTOS_DROID_VIEW_INPUTMETHOD_CCURSORANCHORINFO_H__
 
 #include "Elastos.Droid.Graphics.h"
 #include "_Elastos_Droid_View_InputMethod_CCursorAnchorInfo.h"

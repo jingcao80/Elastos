@@ -153,7 +153,7 @@ module
          * @hide
          */
         GetTimeFormatString(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] String* format);
 
         /**

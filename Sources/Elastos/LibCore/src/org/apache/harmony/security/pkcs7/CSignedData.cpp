@@ -285,7 +285,7 @@ CSignedData::CSignedData(
 ECode CSignedData::GetCertificates(
     /* [out] */ IList** certificate)
 {
-    VALIDATE_NOT_NULL(*certificate)
+    VALIDATE_NOT_NULL(certificate)
     *certificate = mCertificates;
     REFCOUNT_ADD(*certificate)
     return NOERROR;
@@ -294,7 +294,7 @@ ECode CSignedData::GetCertificates(
 ECode CSignedData::GetCRLs(
     /* [out] */ IList** crls)
 {
-    VALIDATE_NOT_NULL(*crls)
+    VALIDATE_NOT_NULL(crls)
     *crls = mCrls;
     REFCOUNT_ADD(*crls)
     return NOERROR;
@@ -303,7 +303,7 @@ ECode CSignedData::GetCRLs(
 ECode CSignedData::GetSignerInfos(
     /* [out] */ IList** signerInfo)
 {
-    VALIDATE_NOT_NULL(*signerInfo)
+    VALIDATE_NOT_NULL(signerInfo)
     *signerInfo = mSignerInfos;
     REFCOUNT_ADD(*signerInfo)
     return NOERROR;

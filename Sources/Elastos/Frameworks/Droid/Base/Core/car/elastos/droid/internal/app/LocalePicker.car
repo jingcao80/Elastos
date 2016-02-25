@@ -46,7 +46,7 @@ module
     [local]
     interface ILocalePickerHelper {
         GetAllAssetLocales(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Boolean isInDeveloperMode,
             [out] IList** result);
 
@@ -55,11 +55,11 @@ module
          * {@link LocaleInfo#label}.
          */
         ConstructAdapter(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IArrayAdapter** result);
 
         ConstructAdapter(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 layoutId,
             [in] Int32 fieldId,
             [out] IArrayAdapter** result);

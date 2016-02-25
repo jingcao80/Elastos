@@ -1,6 +1,8 @@
 #ifndef __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWCONTENTSCLIENT_H__
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWCONTENTSCLIENT_H__
+
 #include "elastos/droid/ext/frameworkext.h"
+#include <Elastos.Droid.Webkit.h>
 #include "elastos/droid/webkit/native/android_webview/permission/AwPermissionRequest.h"
 #include "elastos/droid/webkit/native/content/browser/ContentViewCore.h"
 #include "elastos/droid/webkit/native/content/browser/WebContentsObserverElastos.h"
@@ -18,10 +20,10 @@ using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IView;
-//TODO using Elastos::Droid::Webkit::IConsoleMessage;
-//TODO using Elastos::Droid::Webkit::IGeolocationPermissionsCallback;
-//TODO using Elastos::Droid::Webkit::IValueCallback;
-//TODO using Elastos::Droid::Webkit::IWebChromeClientCustomViewCallback;
+using Elastos::Droid::Webkit::IConsoleMessage;
+using Elastos::Droid::Webkit::IGeolocationPermissionsCallback;
+using Elastos::Droid::Webkit::IValueCallback;
+using Elastos::Droid::Webkit::IWebChromeClientCustomViewCallback;
 
 using Elastos::Utility::Etl::Map;
 using Elastos::Droid::Webkit::AndroidWebview::Permission::AwPermissionRequest;
@@ -153,7 +155,7 @@ public:
         /* [in] */ Int32 color);
 
     virtual CARAPI GetVisitedHistory(
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback) = 0;
+        /* [in] */ IValueCallback* callback) = 0;
 
     virtual CARAPI DoUpdateVisitedHistory(
         /* [in] */ const String& url,
@@ -178,7 +180,7 @@ public:
         /* [in] */ IKeyEvent* event) = 0;
 
     virtual CARAPI_(Boolean) OnConsoleMessage(
-        /* [in] */ /*TODO IConsoleMessage*/IInterface* consoleMessage) = 0;
+        /* [in] */ IConsoleMessage* consoleMessage) = 0;
 
     virtual CARAPI OnReceivedHttpAuthRequest(
         /* [in] */ AwHttpAuthHandler* handler,
@@ -186,7 +188,7 @@ public:
         /* [in] */ const String& realm) = 0;
 
     virtual CARAPI OnReceivedSslError(
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback,
+        /* [in] */ IValueCallback* callback,
         /* [in] */ ISslError* error) = 0;
 
     // TODO(sgurun): Make abstract once this has rolled in downstream.
@@ -215,12 +217,12 @@ public:
 
     // TODO(joth): Make abstract once this has rolled in downstream.
     virtual CARAPI ShowFileChooser(
-        /* [in] */ /*TODO IValueCallback*/IInterface* uploadFilePathsCallback,
+        /* [in] */ IValueCallback* uploadFilePathsCallback,
         /* [in] */ FileChooserParams* fileChooserParams);
 
     virtual CARAPI OnGeolocationPermissionsShowPrompt(
         /* [in] */ const String& origin,
-        /* [in] */ /*TODO IGeolocationPermissionsCallback*/IInterface* callback) = 0;
+        /* [in] */ IGeolocationPermissionsCallback* callback) = 0;
 
     virtual CARAPI OnGeolocationPermissionsHidePrompt() = 0;
 
@@ -262,13 +264,13 @@ public:
     virtual CARAPI OnShowCustomView(
         /* [in] */ IView* view,
         /* [in] */ Int32 requestedOrientation,
-        /* [in] */ /*TODO IWebChromeClientCustomViewCallback*/IInterface* callback);
+        /* [in] */ IWebChromeClientCustomViewCallback* callback);
 
     // TODO (michaelbai): This method should be abstract, having empty body here
     // makes the merge to the Android easy.
     virtual CARAPI OnShowCustomView(
         /* [in] */ IView* view,
-        /* [in] */ /*TODO IWebChromeClientCustomViewCallback*/IInterface* callback);
+        /* [in] */ IWebChromeClientCustomViewCallback* callback);
 
     virtual CARAPI OnHideCustomView() = 0;
 

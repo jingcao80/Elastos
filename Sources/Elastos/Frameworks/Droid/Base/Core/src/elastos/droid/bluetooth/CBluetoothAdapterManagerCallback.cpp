@@ -1,4 +1,5 @@
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/bluetooth/CBluetoothAdapterManagerCallback.h"
 #include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
@@ -45,6 +46,9 @@ ECode CBluetoothAdapterManagerCallback::OnBluetoothServiceDown()
     if (CBluetoothAdapter::VDBG) Logger::D(CBluetoothAdapter::TAG, "onBluetoothServiceDown: %p", mHost->mService.Get());
     AutoLock lock(mHost->mManagerCallbackLock);
     mHost->mService = NULL;
+    mHost->mLeScanClients->Clear();
+    if (CBluetoothAdapter::sBluetoothLeAdvertiser != NULL) CBluetoothAdapter::sBluetoothLeAdvertiser->Cleanup();
+    if (CBluetoothAdapter::sBluetoothLeScanner != NULL) CBluetoothAdapter::sBluetoothLeScanner->Cleanup();
     List<AutoPtr<IIBluetoothManagerCallback> >::Iterator it = mHost->mProxyServiceStateCallbacks.Begin();
     for (; it != mHost->mProxyServiceStateCallbacks.End(); ++it) {
         AutoPtr<IIBluetoothManagerCallback> cb = *it;

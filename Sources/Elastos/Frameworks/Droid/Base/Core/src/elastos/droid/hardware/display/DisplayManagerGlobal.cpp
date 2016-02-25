@@ -30,8 +30,8 @@ const Int32 DisplayManagerGlobal::VirtualDisplayCallbackDelegate::MSG_DISPLAY_PA
 const Int32 DisplayManagerGlobal::VirtualDisplayCallbackDelegate::MSG_DISPLAY_RESUMED = 1;
 const Int32 DisplayManagerGlobal::VirtualDisplayCallbackDelegate::MSG_DISPLAY_STOPPED = 2;
 
-const String DisplayManagerGlobal::TAG("DisplayManagerGlobal");
-const Boolean DisplayManagerGlobal::DEBUG;
+const String TAG("DisplayManagerGlobal");
+const Boolean DEBUG = FALSE;
 const Boolean DisplayManagerGlobal::USE_CACHE;
 
 AutoPtr<IDisplayManagerGlobal> DisplayManagerGlobal::sInstance;
@@ -390,6 +390,9 @@ void DisplayManagerGlobal::HandleDisplayEvent(
     /* [in] */ Int32 displayId,
     /* [in] */ Int32 event)
 {
+    if (DEBUG) {
+        Logger::D(TAG, "onDisplayEvent: displayId=%d, event=%d", displayId, event);
+    }
     synchronized(mLock) {
         if (USE_CACHE) {
             mDisplayInfoCache.Erase(displayId);

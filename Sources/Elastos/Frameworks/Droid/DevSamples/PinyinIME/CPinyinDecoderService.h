@@ -1,6 +1,6 @@
 
-#ifndef  __CPINYINDECODERSERVICE_H__
-#define  __CPINYINDECODERSERVICE_H__
+#ifndef __CPINYINDECODERSERVICE_H__
+#define __CPINYINDECODERSERVICE_H__
 
 #include "_CPinyinDecoderService.h"
 #include "elastos/droid/app/Service.h"

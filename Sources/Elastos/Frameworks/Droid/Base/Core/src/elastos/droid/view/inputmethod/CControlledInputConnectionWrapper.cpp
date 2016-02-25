@@ -8,7 +8,7 @@
 #include "elastos/droid/view/inputmethod/CControlledInputConnectionWrapper.h"
 #include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::Internal::View::EIID_IInputContext;
+using Elastos::Droid::Internal::View::EIID_IIInputContext;
 using Elastos::Droid::Os::EIID_IBinder;
 
 using Elastos::Utility::Logging::Logger;
@@ -21,7 +21,7 @@ namespace InputMethod {
 //========================================================================================
 //              CControlledInputConnectionWrapper::
 //========================================================================================
-CAR_INTERFACE_IMPL_2(CControlledInputConnectionWrapper, Object, IInputContext, IBinder)
+CAR_INTERFACE_IMPL_2(CControlledInputConnectionWrapper, Object, IIInputContext, IBinder)
 
 CAR_OBJECT_IMPL(CControlledInputConnectionWrapper)
 
@@ -46,7 +46,7 @@ ECode CControlledInputConnectionWrapper::GetTextAfterCursor(
     /* [in] */ Int32 length,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     assert(0 && "TODO");
 //    return IInputConnectionWrapper::GetTextAfterCursor(length, flags, seq, callback);
@@ -57,7 +57,7 @@ ECode CControlledInputConnectionWrapper::GetTextBeforeCursor(
     /* [in] */ Int32 length,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     assert(0 && "TODO");
 //    return IInputConnectionWrapper::GetTextBeforeCursor(length, flags, seq, callback);
@@ -67,7 +67,7 @@ ECode CControlledInputConnectionWrapper::GetTextBeforeCursor(
 ECode CControlledInputConnectionWrapper::GetSelectedText(
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     assert(0 && "TODO");
 //    return IInputConnectionWrapper::GetSelectedText(flags, seq, callback);
@@ -77,7 +77,7 @@ ECode CControlledInputConnectionWrapper::GetSelectedText(
 ECode CControlledInputConnectionWrapper::GetCursorCapsMode(
     /* [in] */ Int32 reqModes,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     assert(0 && "TODO");
 //    return IInputConnectionWrapper::GetCursorCapsMode(reqModes, seq, callback);
@@ -88,7 +88,7 @@ ECode CControlledInputConnectionWrapper::GetExtractedText(
     /* [in] */ IExtractedTextRequest* request,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     assert(0 && "TODO");
 //    return IInputConnectionWrapper::GetExtractedText(request, flags, seq, callback);
@@ -237,7 +237,7 @@ ECode CControlledInputConnectionWrapper::GetDescription(
 ECode CControlledInputConnectionWrapper::RequestUpdateCursorAnchorInfo(
     /* [in] */ Int32 cursorUpdateMode,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* cb)
+    /* [in] */ IIInputContextCallback* cb)
 {
     assert(0 && "TODO");
     return E_NOT_IMPLEMENTED;

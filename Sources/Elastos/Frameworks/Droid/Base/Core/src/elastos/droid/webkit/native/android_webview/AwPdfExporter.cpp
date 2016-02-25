@@ -3,9 +3,10 @@
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/webkit/native/android_webview/AwPdfExporter.h"
 #include "elastos/droid/webkit/native/android_webview/api/AwPdfExporter_dec.h"
-
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Core::CoreUtils;
 using Elastos::Utility::Logging::Logger;
 //TODO using Elastos::Droid::Print::IMargins;
 //TODO using Elastos::Droid::Print::IMediaSize;
@@ -34,7 +35,7 @@ void AwPdfExporter::SetContainerView(
 ECode AwPdfExporter::ExportToPdf(
     /* [in] */ IParcelFileDescriptor* fd,
     /* [in] */ /*TODO IPrintAttributes*/IInterface* attributes,
-    /* [in] */ /*TODO IValueCallback*/IInterface* resultCallback,
+    /* [in] */ IValueCallback* resultCallback,
     /* [in] */ ICancellationSignal* cancellationSignal)
 {
     if (fd == NULL) {
@@ -80,7 +81,8 @@ ECode AwPdfExporter::ExportToPdf(
     }
 
     if (mNativeAwPdfExporter == 0) {
-        //TODO resultCallback->OnReceiveValue(FALSE);
+        AutoPtr<IBoolean> boolTmp = CoreUtils::Convert(FALSE);
+        resultCallback->OnReceiveValue(TO_IINTERFACE(boolTmp));
         return NOERROR;
     }
 
@@ -101,7 +103,8 @@ void AwPdfExporter::SetNativeAwPdfExporter(
     // Handle the cornercase that Webview.Destroy is called before the native side
     // has a chance to complete the pdf exporting.
     if (nativePdfExporter == 0 && mResultCallback != NULL) {
-        //TODO mResultCallback->OnReceiveValue(FALSE);
+        AutoPtr<IBoolean> boolTmp = CoreUtils::Convert(FALSE);
+        mResultCallback->OnReceiveValue(TO_IINTERFACE(boolTmp));
         mResultCallback = NULL;
     }
 }
@@ -128,7 +131,8 @@ Int32 AwPdfExporter::GetPrintDpi(
 void AwPdfExporter::DidExportPdf(
     /* [in] */ Boolean success)
 {
-    //TODO mResultCallback->OnReceiveValue(success);
+    AutoPtr<IBoolean> boolTmp = CoreUtils::Convert(success);
+    mResultCallback->OnReceiveValue(TO_IINTERFACE(boolTmp));
     mResultCallback = NULL;
     mAttributes = NULL;
     // The caller should close the file.

@@ -3,12 +3,15 @@
 #include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/droid/bluetooth/CBluetoothPbapStateChangeCallback.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/os/Process.h"
 #include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::Process;
 using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Logger;
 
@@ -84,7 +87,7 @@ BluetoothPbap::BluetoothPbap(
     mConnection = new ServiceConnection(this);
 
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
-    if (mAdapter != NULL) {
+    //if (mAdapter != NULL) {
         AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
         if (mgr != NULL) {
             // try {
@@ -96,14 +99,16 @@ BluetoothPbap::BluetoothPbap(
             //     Log.e(TAG,"",e);
             // }
         }
-    }
+    //}
 
-    AutoPtr<IIntent> intent;
-    CIntent::New(String("IBluetoothPbap")/*IBluetoothPbap.class.getName()*/, (IIntent**)&intent);
-    Boolean result;
-    if (context->BindService(intent, mConnection, 0, &result), !result) {
-        Logger::E(TAG, "Could not bind to Bluetooth Pbap Service");
-    }
+    //AutoPtr<IIntent> intent;
+    //CIntent::New(String("IBluetoothPbap")/*IBluetoothPbap.class.getName()*/, (IIntent**)&intent);
+    //Boolean result;
+    //if (context->BindService(intent, mConnection, 0, &result), !result) {
+    //    Logger::E(TAG, "Could not bind to Bluetooth Pbap Service");
+    //}
+    Boolean bind;
+    DoBind(&bind);
 }
 
 BluetoothPbap::~BluetoothPbap()
@@ -115,10 +120,38 @@ BluetoothPbap::~BluetoothPbap()
     // }
 }
 
+ECode BluetoothPbap::DoBind(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    //Intent intent = new Intent(IBluetoothPbap.class.getName());
+    AutoPtr<IIntent> intent;
+    CIntent::New(String("IBluetoothPbap")/*IBluetoothPbap.class.getName()*/, (IIntent**)&intent);
+    //ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+    //intent.setComponent(comp);
+    AutoPtr<IComponentName> comp;
+    AutoPtr<IPackageManager> pm;
+    mContext->GetPackageManager((IPackageManager**)&pm);
+    intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
+    intent->SetComponent(comp);
+    AutoPtr<IUserHandle> userHandle;
+    Process::MyUserHandle((IUserHandle**)&userHandle);
+
+    Boolean succeeded = FALSE;
+    if (comp == NULL || !(mContext->BindServiceAsUser(intent, mConnection, 0,
+                userHandle, &succeeded), succeeded)) {
+        Logger::E(TAG, "Could not bind to Bluetooth Pbap Service with ");// + intent);
+        *result = FALSE;
+        return NOERROR;
+    }
+    *result = TRUE;
+    return NOERROR;
+}
+
 ECode BluetoothPbap::Close()
 {
     AutoLock lock(mLock);
-    if (mAdapter != NULL) {
+    //if (mAdapter != NULL) {
         AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
         if (mgr != NULL) {
             // try {
@@ -130,7 +163,7 @@ ECode BluetoothPbap::Close()
             //     Log.e(TAG,"",e);
             // }
         }
-    }
+    //}
 
     {
         AutoLock lock(mConnectionLock);
@@ -141,7 +174,7 @@ ECode BluetoothPbap::Close()
             if (FAILED(ec)) {
                 Logger::E(TAG, "0x%08x", ec);
             }
-            mConnection = NULL;
+            //mConnection = NULL;
             // } catch (Exception re) {
             //     Log.e(TAG,"",re);
             // }

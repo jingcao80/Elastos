@@ -5,7 +5,6 @@ module
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Doze {
 
@@ -51,7 +50,6 @@ module
 
     } //namespace Doze
     } //namespace SystemUI
-    } //namespace Packages
     } //namespace Droid
     } //namespace Elastos
 }

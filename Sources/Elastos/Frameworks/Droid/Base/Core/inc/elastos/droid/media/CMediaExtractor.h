@@ -2,34 +2,29 @@
 #ifndef __ELASTOS_DROID_MEDIA_CMEDIAEXTRACTOR_H__
 #define __ELASTOS_DROID_MEDIA_CMEDIAEXTRACTOR_H__
 
+#include <Elastos.CoreLibrary.IO.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
 #include "_Elastos_Droid_Media_CMediaExtractor.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
-#include <media/stagefright/DataSource.h>
-#include <media/stagefright/MediaExtractor.h>
-#include <media/stagefright/MediaSource.h>
-#include <media/stagefright/MetaData.h>
-#include <media/stagefright/NuMediaExtractor.h>
-#include <utils/Compat.h>  // off64_t
-#include <utils/KeyedVector.h>
-#include <utils/String8.h>
 
-//test
-#include <binder/MemoryHeapBase.h>
+#include <media/stagefright/DataSource.h>
+#include <media/stagefright/NuMediaExtractor.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBinder;
 using Elastos::IO::IByteBuffer;
 using Elastos::IO::IFileDescriptor;
 using Elastos::Droid::Media::IDataSource;
 using Elastos::Droid::Media::IMediaCodecCryptoInfo;
-//using android::NuMediaExtractor;
+using Elastos::Utility::IMap;
 
 namespace Elastos {
 namespace Droid {
 namespace Media {
-
-struct android::NuMediaExtractor;
 
 class JavaDataSourceBridge : public android::DataSource {
 public:
@@ -278,14 +273,6 @@ public:
     CARAPI HasCacheReachedEndOfStream(
         /* [out] */ Boolean* result);
 
-    static android::sp<android::NuMediaExtractor> SetMediaExtractor(
-        const android::sp<android::NuMediaExtractor>& newME);
-
-    static android::sp<android::NuMediaExtractor> GetMediaExtractor();
-
-protected:
-    CARAPI Finalize();
-
 private:
     CARAPI NativeSetDataSource(
         /* [in] */ IBinder* httpServiceBinder,
@@ -293,29 +280,37 @@ private:
         /* [in] */ ArrayOf<String>* keys,
         /* [in] */ ArrayOf<String>* values);
 
-    CARAPI NativeSetDataSource(
-        /* [in] */ const String& path,
-        /* [in] */ android::KeyedVector<android::String8,android::String8>* headers);
+    // CARAPI NativeSetDataSource(
+    //     /* [in] */ const android::sp<android::IMediaHTTPService> &httpService,
+    //     /* [in] */ const String& path,
+    //     /* [in] */ android::KeyedVector<android::String8,android::String8>* headers);
 
-    CARAPI NativeSetDataSource(
-        /* [in] */ Int32 fd,
-        /* [in] */ Int64 offset,
-        /* [in] */ Int64 size);
+    // CARAPI NativeSetDataSource(
+    //     /* [in] */ Int32 fd,
+    //     /* [in] */ Int64 offset,
+    //     /* [in] */ Int64 size);
 
-    CARAPI_(AutoPtr<IMap>) GetFileFormatNative();
+    CARAPI GetFileFormatNative(
+        /* [out] */ IMap** result);
 
-    CARAPI_(AutoPtr<IMap>) GetTrackFormatNative(
-        /* [in] */ Int32 index);
-
-    static CARAPI NativeInit();
+    CARAPI GetTrackFormatNative(
+        /* [in] */ Int32 index,
+        /* [out] */ IMap** result);
 
     CARAPI NativeSetup();
 
     CARAPI NativeFinalize();
 
+    static android::sp<android::NuMediaExtractor> SetMediaExtractor(
+        const android::sp<android::NuMediaExtractor>& newME);
+
+    static android::sp<android::NuMediaExtractor> GetMediaExtractor();
+
 private:
     static android::sp<android::NuMediaExtractor> mImpl;
     static const String TAG;
+    static const Boolean INIT;
+    Int64 mNativeContext;
 };
 
 } // namespace Media

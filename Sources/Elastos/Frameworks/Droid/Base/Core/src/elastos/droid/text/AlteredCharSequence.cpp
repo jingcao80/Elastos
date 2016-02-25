@@ -1,5 +1,6 @@
 #include "elastos/droid/text/AlteredCharSequence.h"
 #include "elastos/droid/text/CAlteredCharSequence.h"
+#include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/Math.h>
 
@@ -175,8 +176,7 @@ ECode AlteredCharSequence::GetChars(
     /* [in] */ ArrayOf<Char32>* dest,
     /* [in] */ Int32 off)
 {
-    assert(0 && "TODO");
-    // TextUtils::GetChars(mSource, start, end, dest, off);
+    TextUtils::GetChars(mSource, start, end, dest, off);
 
     Int32 start1, end1;
     start1 = Elastos::Core::Math::Max(mStart, start);

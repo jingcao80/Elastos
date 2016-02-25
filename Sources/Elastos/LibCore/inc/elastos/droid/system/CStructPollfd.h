@@ -25,6 +25,8 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor();
+
     /** The file descriptor to poll. */
     CARAPI GetFd(
         /* [out] */ IFileDescriptor** fd);

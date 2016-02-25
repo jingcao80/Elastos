@@ -706,7 +706,7 @@ module
 
     class CSearchManager {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IHandler* handler);
 
         interface ISearchManager;
@@ -1000,6 +1000,36 @@ module
         interface IBinder;
     }
 
+    class CAppOpsManagerOpEntry {
+        constructor();
+
+        constructor(
+            [in] Int32 op,
+            [in] Int32 mode,
+            [in] Int32 time,
+            [in] Int32 rejectTime,
+            [in] Int32 duration);
+
+        interface IAppOpsManagerOpEntry;
+        interface IParcelable;
+    }
+
+    class CAppOpsManagerPackageOps {
+        constructor();
+
+        constructor(
+            [in] String packageName,
+            [in] Int32 uid,
+            [in] IList* entries);
+
+        interface IAppOpsManagerPackageOps;
+        interface IParcelable;
+    }
+
+    singleton class CAppOpsManagerHelper {
+        interface IAppOpsManagerHelper;
+    }
+
     class CAppImportanceMonitorProcessObserver {
         constructor(
             [in] IAppImportanceMonitor* monitor);
@@ -1184,7 +1214,7 @@ module
 
     class CNotificationManager {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IHandler* handler);
 
         interface INotificationManager;
@@ -1501,7 +1531,7 @@ module
             [in] Int32 dayOfMonth);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 theme,
             [in] IDatePickerDialogOnDateSetListener* cb,
             [in] Int32 year,

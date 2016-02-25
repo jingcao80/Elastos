@@ -24,6 +24,10 @@ public:
 
     CAR_INTERFACE_DECL()
 
+    CARAPI constructor(
+        /* [in] */ const String& pattern,
+        /* [in] */ Int32 flags);
+
     /**
      * Returns a {@link Matcher} for this pattern applied to the given {@code input}.
      * The {@code Matcher} can be used to match the {@code Pattern} against the
@@ -154,10 +158,6 @@ public:
         /* [in] */ const String& string);
 
 private:
-    Pattern(
-        /* [in] */ const String& pattern,
-        /* [in] */ Int32 flags);
-
     CARAPI Compile();
 
     static CARAPI CompileImpl(

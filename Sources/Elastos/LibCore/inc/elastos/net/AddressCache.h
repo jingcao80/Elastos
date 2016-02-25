@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_NET_ADDRESSCACHE_H__
 #define __ELASTOS_NET_ADDRESSCACHE_H__
 
+#include "_Elastos.CoreLibrary.Net.h"
 #include "elastos/core/Object.h"
 
 using Libcore::Utility::IBasicLruCache;

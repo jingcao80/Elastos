@@ -614,7 +614,7 @@ ECode CArrayDeque::Contains(
     Int32 i = mHead;
     AutoPtr<IInterface> x;
     while ( (x = (*mElements)[i]) != NULL) {
-        if (o == x) {
+        if (Object::Equals(o, x)) {
             *value = TRUE;
             return NOERROR;
         }

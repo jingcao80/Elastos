@@ -35,7 +35,7 @@ ECode CPrivateCredentialPermission::Implies(
 ECode CPrivateCredentialPermission::GetPrincipals(
     /* [out, callee] */ ArrayOf<IArrayOf*> **principals)
 {
-    VALIDATE_NOT_NULL(*principals)
+    VALIDATE_NOT_NULL(principals)
     *principals = NULL;
 
     return NOERROR;

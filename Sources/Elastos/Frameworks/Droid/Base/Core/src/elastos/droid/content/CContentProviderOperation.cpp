@@ -8,23 +8,17 @@
 #include "elastos/droid/content/CContentProviderResult.h"
 #include "elastos/droid/content/ContentProvider.h"
 #include "elastos/droid/content/CContentProviderOperationBuilder.h"
-// #include "elastos/droid/content/CContentUris.h"
-// #include "elastos/droid/content/CContentValues.h"
-//#include "elastos/droid/net/Uri.h"
-// #include "elastos/droid/net/CStringUri.h"
-// #include "elastos/droid/net/COpaqueUri.h"
-// #include "elastos/droid/net/CHierarchicalUri.h"
-// #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/content/CContentUris.h"
+#include "elastos/droid/content/CContentValues.h"
+#include "elastos/droid/net/Uri.h"
+#include "elastos/droid/text/TextUtils.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/CoreUtils.h>
 
 using Elastos::Droid::Database::ICursor;
-//using Elastos::Droid::Net::Uri;
-// using Elastos::Droid::Net::CStringUri;
-// using Elastos::Droid::Net::COpaqueUri;
-// using Elastos::Droid::Net::CHierarchicalUri;
-//using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Net::Uri;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::CString;
@@ -137,7 +131,7 @@ ECode CContentProviderOperation::ReadFromParcel(
 
     if (source->ReadInt32(&value), value != 0) {
         AutoPtr<IContentValues> values;
-        // CContentValues::New((IContentValues**)&values);
+        CContentValues::New((IContentValues**)&values);
         IParcelable::Probe(values)->ReadFromParcel(source);
         mValues = values;
     }
@@ -156,7 +150,7 @@ ECode CContentProviderOperation::ReadFromParcel(
 
     if (source->ReadInt32(&value), value != 0) {
         AutoPtr<IContentValues> values;
-        // CContentValues::New((IContentValues**)&values);
+        CContentValues::New((IContentValues**)&values);
         IParcelable::Probe(values)->ReadFromParcel(source);
         mValuesBackReferences = values;
     }
@@ -360,6 +354,7 @@ ECode CContentProviderOperation::Apply(
     *providerResult = NULL;
     VALIDATE_NOT_NULL(provider)
 
+    ECode ec = NOERROR;
     AutoPtr<IContentValues> values;
     FAIL_RETURN(ResolveValueBackReferences(backRefs, numBackRefs, (IContentValues**)&values))
     AutoPtr<ArrayOf<String> > selectionArgs;
@@ -430,18 +425,18 @@ ECode CContentProviderOperation::Apply(
                     AutoPtr<ICharSequence> charSeq = CoreUtils::Convert(cursorValue);
                     AutoPtr<ICharSequence> charSeq2 = CoreUtils::Convert(expectedValue);
 
-                    assert(0 && "TODO");
-                //     if (!TextUtils::Equals(charSeq, charSeq2)) {
-                //         // Throw exception when expected values don't match
-                //         String str;
-                //         ecode = ToString(&str);
-                //         FAIL_WithGoto(ecode)
-                //         Logger::E(TAG, str);
-                //         //throw new OperationApplicationException("Found value " + cursorValue
-                //         //        + " when expected " + expectedValue + " for column "
-                //         //        + projection[i]);
-                //         return E_OPERATION_APPLICATION_EXCEPTION;
-                //     }
+                    if (!TextUtils::Equals(charSeq, charSeq2)) {
+                        // Throw exception when expected values don't match
+                        String str;
+                        ToString(&str);
+                        Logger::E(TAG, str);
+
+                        ecode = E_OPERATION_APPLICATION_EXCEPTION;
+                        FAIL_GOTO(ecode, _EXIT_)
+                        //throw new OperationApplicationException("Found value " + cursorValue
+                        //        + " when expected " + expectedValue + " for column "
+                        //        + projection[i]);
+                    }
                 }
             }
         }
@@ -466,7 +461,7 @@ _EXIT_:
     }
 
     FAIL_RETURN(CContentProviderResult::New(numRows, providerResult))
-    return NOERROR;
+    return ec;
 }
 
 ECode CContentProviderOperation::ResolveValueBackReferences(
@@ -484,12 +479,11 @@ ECode CContentProviderOperation::ResolveValueBackReferences(
         return NOERROR;
     }
 
-    assert(0 && "TODO");
-    // if (NULL == mValues) {
-    //     FAIL_RETURN(CContentValues::New(contentValues))
-    // } else {
-    //     FAIL_RETURN(CContentValues::New(mValues, contentValues))
-    // }
+    if (NULL == mValues) {
+        FAIL_RETURN(CContentValues::New(contentValues))
+    } else {
+        FAIL_RETURN(CContentValues::New(mValues, contentValues))
+    }
 
     AutoPtr<ISet> valueSet;
     FAIL_RETURN(mValues->GetValueSet((ISet**)&valueSet))
@@ -695,8 +689,7 @@ ECode CContentProviderOperation::BackRefToValue(
 
     if (NULL != uri) {
         AutoPtr<IContentUris> contentUris;
-        assert(0 && "TODO");
-        // FAIL_RETURN(CContentUris::AcquireSingleton((IContentUris**)&contentUris))
+        FAIL_RETURN(CContentUris::AcquireSingleton((IContentUris**)&contentUris))
         FAIL_RETURN(contentUris->ParseId(uri, &tmpBackRefValue))
     }
     else {

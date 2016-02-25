@@ -63,7 +63,7 @@ ECode CNTUserPrincipal::Equals(
     /* [in] */ IInterface* obj,
     /* [out] */ Boolean* equals)
 {
-    VALIDATE_NOT_NULL(*equals)
+    VALIDATE_NOT_NULL(equals)
     if (obj == NULL) {
         *equals = FALSE;
         return NOERROR;

@@ -20,10 +20,6 @@ CarClass(CMediaRouterSimpleCallback)
 {
 public:
     CAR_OBJECT_DECL()
-
-    CMediaRouterSimpleCallback();
-
-    virtual ~CMediaRouterSimpleCallback();
 };
 
 } // namespace Media

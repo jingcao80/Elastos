@@ -3,11 +3,17 @@
 #include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/droid/bluetooth/CBluetoothPanStateChangeCallback.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/os/Process.h"
+#include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::Process;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -84,7 +90,7 @@ BluetoothPan::BluetoothPan(
     mConnection = new ServiceConnection(this);
 
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
-    if(mAdapter != NULL){
+    //if(mAdapter != NULL){
         AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
         if (mgr != NULL) {
 //            try {
@@ -98,14 +104,44 @@ BluetoothPan::BluetoothPan(
         }
 
         Logger::D(TAG, "BluetoothPan() call bindService");
-        AutoPtr<IIntent> intent;
-        CIntent::New(String("IBluetoothPan")/*IBluetoothPan.class.getName()*/, (IIntent**)&intent);
-        Boolean result;
-        if (context->BindService(intent, mConnection, 0, &result), !result) {
-            Logger::E(TAG, "Could not bind to Bluetooth HID Service");
-        }
+        //AutoPtr<IIntent> intent;
+        //CIntent::New(String("IBluetoothPan")/*IBluetoothPan.class.getName()*/, (IIntent**)&intent);
+        //Boolean result;
+        //if (context->BindService(intent, mConnection, 0, &result), !result) {
+        //    Logger::E(TAG, "Could not bind to Bluetooth HID Service");
+        //}
+        Boolean bind;
+        DoBind(&bind);
         Logger::D(TAG, "BluetoothPan(), bindService called");
+    //}
+}
+
+ECode BluetoothPan::DoBind(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    //Intent intent = new Intent(IBluetoothPan.class.getName());
+    AutoPtr<IIntent> intent;
+    CIntent::New(String("IBluetoothPan")/*IBluetoothPan.class.getName()*/, (IIntent**)&intent);
+    //ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+    //intent.setComponent(comp);
+    AutoPtr<IComponentName> comp;
+    AutoPtr<IPackageManager> pm;
+    mContext->GetPackageManager((IPackageManager**)&pm);
+    intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
+    intent->SetComponent(comp);
+    AutoPtr<IUserHandle> userHandle;
+    Process::MyUserHandle((IUserHandle**)&userHandle);
+
+    Boolean succeeded = FALSE;
+    if (comp == NULL || !(mContext->BindServiceAsUser(intent, mConnection, 0,
+                userHandle, &succeeded), userHandle)) {
+        Logger::E(TAG, "Could not bind to Bluetooth Pan Service with ");// + intent);
+        *result = FALSE;
+        return NOERROR;
     }
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode BluetoothPan::Close()
@@ -114,21 +150,28 @@ ECode BluetoothPan::Close()
         Logger::D(TAG, "close()");
     }
 
-    if (mConnection != NULL) {
-        mContext->UnbindService(mConnection);
-        mConnection = NULL;
+    AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
+    if (mgr != NULL) {
+        //try {
+        mgr->UnregisterStateChangeCallback(mStateChangeCallback);
+        //} catch (RemoteException re) {
+        //    Log.w(TAG,"Unable to unregister BluetoothStateChangeCallback",re);
+        //}
+    }
+
+    {
+        AutoLock lock(mConnection);
+        if (mPanService != NULL) {
+            //try {
+            mPanService = NULL;
+            mContext->UnbindService(mConnection);
+            //} catch (Exception re) {
+            //    Log.e(TAG,"",re);
+            //}
+        }
     }
     mServiceListener = NULL;
-    if (mAdapter != NULL) {
-        // try {
-        ECode ec = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager()->UnregisterStateChangeCallback(mStateChangeCallback);
-        if (FAILED(ec)) {
-            Logger::W(TAG, "Unable to register BluetoothStateChangeCallback 0x%08x", ec);
-        }
-        // } catch (RemoteException re) {
-        //     Log.w(TAG,"Unable to register BluetoothStateChangeCallback",re);
-        // }
-    }
+
     return NOERROR;
 }
 
@@ -206,7 +249,9 @@ ECode BluetoothPan::GetConnectedDevices(
         // }
     }
     if (mPanService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
+    AutoPtr<IList> l;
+    CArrayList::New((IList**)&l);
+    *devices = l;
     REFCOUNT_ADD(*devices)
     return NOERROR;
 }
@@ -228,7 +273,9 @@ ECode BluetoothPan::GetDevicesMatchingConnectionStates(
         // }
     }
     if (mPanService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
+    AutoPtr<IList> l;
+    CArrayList::New((IList**)&l);
+    *devices = l;
     REFCOUNT_ADD(*devices)
     return NOERROR;
 }

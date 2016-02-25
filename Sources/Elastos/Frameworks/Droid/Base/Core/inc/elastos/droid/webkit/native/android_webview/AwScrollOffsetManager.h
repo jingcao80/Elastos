@@ -1,12 +1,14 @@
 #ifndef __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWSCROLLOFFSETMANAGER_H__
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWSCROLLOFFSETMANAGER_H__
 
+#include <Elastos.Droid.Widget.h>
 #include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/webkit/native/android_webview/OverScrollGlow.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Graphics::IRect;
-//TODO using Elastos::Droid::Widget::IOverScroller;
-//TODO using Elastos::Droid::Widget::IOverScrollGlow;
+using Elastos::Droid::Widget::IOverScroller;
+using Elastos::Droid::Webkit::AndroidWebview::OverScrollGlow;
 
 // import com.google.common.annotations.VisibleForTesting;
 
@@ -67,7 +69,7 @@ public:
 public:
     AwScrollOffsetManager(
         /* [in] */ Delegate* delegate,
-        /* [in] */ /*TODO IOverScroller*/IInterface* overScroller);
+        /* [in] */ IOverScroller* overScroller);
 
     //----- Scroll range and extent calculation methods -------------------------------------------
 
@@ -150,7 +152,7 @@ public:
 
     // Called immediately before the draw to update the scroll offset.
     CARAPI_(void) ComputeScrollAndAbsorbGlow(
-        /* [in] */ /*TODO IOverScrollGlow*/IInterface* overScrollGlow);
+        /* [in] */ OverScrollGlow* overScrollGlow);
 
     /**
      * See {@link android.webkit.WebView#pageUp(boolean)}
@@ -232,7 +234,7 @@ private:
     Int32 mDeferredNativeScrollX;
     Int32 mDeferredNativeScrollY;
 
-    AutoPtr</*IOverScroller*/IInterface> mScroller;
+    AutoPtr<IOverScroller> mScroller;
 };
 
 } // namespace AndroidWebview

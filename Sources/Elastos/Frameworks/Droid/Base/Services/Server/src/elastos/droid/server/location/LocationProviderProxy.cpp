@@ -171,7 +171,7 @@ ECode LocationProviderProxy::Enable()
         Logger::W(TAG, "%08x", ec);
         return E_REMOTE_EXCEPTION;
     }
-    // if (ec == E_EXCEPRION) {
+    // if (ec == (ECode)E_EXCEPRION) {
     //     // never let remote service crash system server
     //     Logger::E(TAG, "Exception from %s", mServiceWatcher->GetBestPackageName().string());
     //     return ec;
@@ -193,7 +193,7 @@ ECode LocationProviderProxy::Disable()
         Logger::W(TAG, "%08x", ec);
         return E_REMOTE_EXCEPTION;
     }
-    // if (ec == E_EXCEPRION) {
+    // if (ec == (ECode)E_EXCEPRION) {
     //     // never let remote service crash system server
     //     Logger::E(TAG, "Exception from %s", mServiceWatcher->GetBestPackageName().string());
     //     return ec;
@@ -227,7 +227,7 @@ ECode LocationProviderProxy::SetRequest(
         Logger::W(TAG, "%08x", ec);
         return E_REMOTE_EXCEPTION;
     }
-    // if (ec == E_EXCEPRION) {
+    // if (ec == (ECode)E_EXCEPRION) {
     //     // never let remote service crash system server
     //     Logger::E(TAG, "Exception from %s", mServiceWatcher->GetBestPackageName().string());
     //     return ec;
@@ -302,7 +302,7 @@ ECode LocationProviderProxy::GetStatus(
         Logger::W(TAG, "%08x", ec);
         return E_REMOTE_EXCEPTION;
     }
-    // if (ec == E_EXCEPRION) {
+    // if (ec == (ECode)E_EXCEPRION) {
     //     // never let remote service crash system server
     //     Logger::E(TAG, "Exception from %s", mServiceWatcher->GetBestPackageName().string());
     //     return ec;
@@ -325,7 +325,7 @@ ECode LocationProviderProxy::GetStatusUpdateTime(
         Logger::W(TAG, "%08x", ec);
         return E_REMOTE_EXCEPTION;
     }
-    // if (ec == E_EXCEPRION) {
+    // if (ec == (ECode)E_EXCEPRION) {
     //     // never let remote service crash system server
     //     Logger::E(TAG, "Exception from %s", mServiceWatcher->GetBestPackageName().string());
     //     return ec;
@@ -349,7 +349,7 @@ ECode LocationProviderProxy::SendExtraCommand(
         Logger::W(TAG, "%08x", ec);
         return E_REMOTE_EXCEPTION;
     }
-    // if (ec == E_EXCEPRION) {
+    // if (ec == (ECode)E_EXCEPRION) {
     //     // never let remote service crash system server
     //     Logger::E(TAG, "Exception from %s", mServiceWatcher->GetBestPackageName().string());
     //     return ec;

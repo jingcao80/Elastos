@@ -2,7 +2,6 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEADSET_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEADSET_H__
 
-//#include "Elastos.Droid.Core_server.h"
 #include "Elastos.Droid.Bluetooth.h"
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkdef.h"
@@ -55,6 +54,9 @@ public:
     BluetoothHeadset(
         /* [in] */ IContext* context,
         /* [in] */ IBluetoothProfileServiceListener* listener);
+
+    CARAPI DoBind(
+        /* [out] */ Boolean* bind);
 
     CARAPI Close();
 
@@ -147,8 +149,8 @@ public:
         /* [in] */ const String& number,
         /* [in] */ Int32 type);
 
-    CARAPI RoamChanged(
-        /* [in] */ Boolean roaming);
+    //CARAPI RoamChanged(
+    //    /* [in] */ Boolean roaming);
 
     CARAPI ClccResponse(
         /* [in] */ Int32 index,

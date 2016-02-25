@@ -48,7 +48,7 @@ module
          * @return True if the bitmap is grayscale; FALSE if it is color or too large to examine.
          */
         IsGrayscaleIcon(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 drawableResId,
             [out] Boolean* result);
 
@@ -67,7 +67,7 @@ module
     [local]
     interface INotificationColorUtilHelper {
         GetInstance(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] INotificationColorUtil** instance);
     }
 

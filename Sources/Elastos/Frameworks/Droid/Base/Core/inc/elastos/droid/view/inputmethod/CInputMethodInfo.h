@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_VIEW_INPUTMETHOD_CINPUTMETHODINFO_H__
-#define  __ELASTOS_DROID_VIEW_INPUTMETHOD_CINPUTMETHODINFO_H__
+#define __ELASTOS_DROID_VIEW_INPUTMETHOD_CINPUTMETHODINFO_H__
 
 #include "elastos/droid/ext/frameworkdef.h"
 #include "_Elastos_Droid_View_InputMethod_CInputMethodInfo.h"

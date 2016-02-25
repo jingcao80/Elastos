@@ -407,7 +407,7 @@ module
 
         interface ITelecomManagerHelper {
             From(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [out] ITelecomManager** res);
 
         }

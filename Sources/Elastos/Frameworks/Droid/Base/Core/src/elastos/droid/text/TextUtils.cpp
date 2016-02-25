@@ -3,34 +3,36 @@
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/text/CAndroidCharacter.h"
 #include "elastos/droid/text/MeasuredText.h"
-//#include "elastos/droid/text/TextDirectionHeuristics.h"
-//#include "elastos/droid/text/CSpannedString.h"
-//#include "elastos/droid/text/CSpannableString.h"
-//#include "elastos/droid/text/CSpannableStringBuilder.h"
-//#include "elastos/droid/text/CAnnotation.h"
-//#include "elastos/droid/text/style/CAlignmentSpanStandard.h"
-//#include "elastos/droid/text/style/CForegroundColorSpan.h"
-//#include "elastos/droid/text/style/CRelativeSizeSpan.h"
-//#include "elastos/droid/text/style/CScaleXSpan.h"
-//#include "elastos/droid/text/style/CStrikethroughSpan.h"
-//#include "elastos/droid/text/style/CUnderlineSpan.h"
-//#include "elastos/droid/text/style/CStyleSpan.h"
-//#include "elastos/droid/text/style/CBulletSpan.h"
-//#include "elastos/droid/text/style/CQuoteSpan.h"
-//#include "elastos/droid/text/style/CLeadingMarginSpanStandard.h"
-//#include "elastos/droid/text/style/CURLSpan.h"
-//#include "elastos/droid/text/style/CBackgroundColorSpan.h"
-//#include "elastos/droid/text/style/CTypefaceSpan.h"
-//#include "elastos/droid/text/style/CSuperscriptSpan.h"
-//#include "elastos/droid/text/style/CSubscriptSpan.h"
-//#include "elastos/droid/text/style/CAbsoluteSizeSpan.h"
-//#include "elastos/droid/text/style/CTextAppearanceSpan.h"
-//#include "elastos/droid/text/style/CSuggestionSpan.h"
-//#include "elastos/droid/text/style/CSpellCheckSpan.h"
-//#include "elastos/droid/text/style/CSuggestionRangeSpan.h"
-//#include "elastos/droid/text/style/CEasyEditSpan.h"
-//#include "elastos/droid/text/style/CLocaleSpan.h"
+#include "elastos/droid/text/TextDirectionHeuristics.h"
+#include "elastos/droid/text/CSpannedString.h"
+#include "elastos/droid/text/CSpannableString.h"
+#include "elastos/droid/text/CSpannableStringBuilder.h"
+#include "elastos/droid/text/CAnnotation.h"
+#include "elastos/droid/text/style/CAlignmentSpanStandard.h"
+#include "elastos/droid/text/style/CForegroundColorSpan.h"
+#include "elastos/droid/text/style/CRelativeSizeSpan.h"
+#include "elastos/droid/text/style/CScaleXSpan.h"
+#include "elastos/droid/text/style/CStrikethroughSpan.h"
+#include "elastos/droid/text/style/CUnderlineSpan.h"
+#include "elastos/droid/text/style/CStyleSpan.h"
+#include "elastos/droid/text/style/CBulletSpan.h"
+#include "elastos/droid/text/style/CQuoteSpan.h"
+#include "elastos/droid/text/style/CLeadingMarginSpanStandard.h"
+#include "elastos/droid/text/style/CURLSpan.h"
+#include "elastos/droid/text/style/CBackgroundColorSpan.h"
+#include "elastos/droid/text/style/CTypefaceSpan.h"
+#include "elastos/droid/text/style/CSuperscriptSpan.h"
+#include "elastos/droid/text/style/CSubscriptSpan.h"
+#include "elastos/droid/text/style/CAbsoluteSizeSpan.h"
+#include "elastos/droid/text/style/CTextAppearanceSpan.h"
+#include "elastos/droid/text/style/CSuggestionSpan.h"
+#include "elastos/droid/text/style/CSpellCheckSpan.h"
+#include "elastos/droid/text/style/CSuggestionRangeSpan.h"
+#include "elastos/droid/text/style/CEasyEditSpan.h"
+#include "elastos/droid/text/style/CLocaleSpan.h"
+#include "elastos/droid/text/style/CTtsSpan.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/content/res/CResourcesHelper.h"
@@ -142,9 +144,9 @@ ECode TextUtils::Reverser::GetCharAt(
 
     Char32 orig;
     mSource->GetCharAt(mEnd - 1 - off, &orig);
-    assert(0 && "TODO");
-    // *ch = AndroidCharacter::GetMirror(orig);
-    return NOERROR;
+    AutoPtr<IAndroidCharacter> ac;
+    CAndroidCharacter::AcquireSingleton((IAndroidCharacter**)&ac);
+    return ac->GetMirror(orig, ch);
 }
 
 ECode TextUtils::Reverser::GetChars(
@@ -154,8 +156,10 @@ ECode TextUtils::Reverser::GetChars(
     /* [in] */ Int32 destoff)
 {
     TextUtils::GetChars(mSource, start + mStart, end + mStart, dest, destoff);
-    assert(0 && "TODO");
-    // AndroidCharacter::Mirror(dest, 0, end - start);
+    AutoPtr<IAndroidCharacter> ac;
+    CAndroidCharacter::AcquireSingleton((IAndroidCharacter**)&ac);
+    Boolean bval;
+    ac->Mirror(dest, 0, end - start, &bval);
 
     Int32 len = end - start;
     Int32 n = (end - start) / 2;
@@ -784,142 +788,212 @@ ECode TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(
     }
 
     AutoPtr<ISpannableString> sp;
-    assert(0 && "TODO");
-    // CSpannableString::New(cs, (ISpannableString**)&sp);
+    CSpannableString::New(cs, (ISpannableString**)&sp);
 
-    // while (TRUE) {
-    //     FAIL_RETURN(p->ReadInt32(&kind));
+    while (TRUE) {
+        FAIL_RETURN(p->ReadInt32(&kind));
 
-    //     if (kind == 0)
-    //         break;
+        if (kind == 0)
+            break;
 
-    //     AutoPtr<IInterface> object;
-    //     switch (kind) {
-    //     case ITextUtils::ALIGNMENT_SPAN:
-    //         CAlignmentSpanStandard::New(p, (IAlignmentSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        switch (kind) {
+        case ITextUtils::ALIGNMENT_SPAN: {
+            AutoPtr<IAlignmentSpan> object;
+            CAlignmentSpanStandard::New((IAlignmentSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::FOREGROUND_COLOR_SPAN:
-    //         CForegroundColorSpan::New(p, (IForegroundColorSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::FOREGROUND_COLOR_SPAN: {
+            AutoPtr<IForegroundColorSpan> object;
+            CForegroundColorSpan::New((IForegroundColorSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::RELATIVE_SIZE_SPAN:
-    //         CRelativeSizeSpan::New(p, (IRelativeSizeSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::RELATIVE_SIZE_SPAN: {
+            AutoPtr<IRelativeSizeSpan> object;
+            CRelativeSizeSpan::New((IRelativeSizeSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::SCALE_X_SPAN:
-    //         CScaleXSpan::New(p, (IScaleXSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::SCALE_X_SPAN: {
+            AutoPtr<IScaleXSpan> object;
+            CScaleXSpan::New((IScaleXSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::STRIKETHROUGH_SPAN:
-    //         CStrikethroughSpan::New(p, (IStrikethroughSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::STRIKETHROUGH_SPAN: {
+            AutoPtr<IStrikethroughSpan> object;
+            CStrikethroughSpan::New((IStrikethroughSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::UNDERLINE_SPAN:
-    //         CUnderlineSpan::New(p, (IUnderlineSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::UNDERLINE_SPAN: {
+            AutoPtr<IUnderlineSpan> object;
+            CUnderlineSpan::New((IUnderlineSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::STYLE_SPAN:
-    //         CStyleSpan::New(p, (IStyleSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::STYLE_SPAN: {
+            AutoPtr<IStyleSpan> object;
+            CStyleSpan::New((IStyleSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::BULLET_SPAN:
-    //         CBulletSpan::New(p, (IBulletSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::BULLET_SPAN: {
+            AutoPtr<IBulletSpan> object;
+            CBulletSpan::New((IBulletSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::QUOTE_SPAN:
-    //         CQuoteSpan::New(p, (IQuoteSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::QUOTE_SPAN: {
+            AutoPtr<IQuoteSpan> object;
+            CQuoteSpan::New((IQuoteSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::LEADING_MARGIN_SPAN:
-    //         CLeadingMarginSpanStandard::New(p, (ILeadingMarginSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //     break;
+        case ITextUtils::LEADING_MARGIN_SPAN: {
+            AutoPtr<ILeadingMarginSpan> object;
+            CLeadingMarginSpanStandard::New((ILeadingMarginSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::URL_SPAN:
-    //         CURLSpan::New(p, (IURLSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::URL_SPAN: {
+            AutoPtr<IURLSpan> object;
+            CURLSpan::New((IURLSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::BACKGROUND_COLOR_SPAN:
-    //         CBackgroundColorSpan::New(p, (IBackgroundColorSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::BACKGROUND_COLOR_SPAN: {
+            AutoPtr<IBackgroundColorSpan> object;
+            CBackgroundColorSpan::New((IBackgroundColorSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::TYPEFACE_SPAN:
-    //         CTypefaceSpan::New(p, (ITypefaceSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::TYPEFACE_SPAN: {
+            AutoPtr<ITypefaceSpan> object;
+            CTypefaceSpan::New((ITypefaceSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::SUPERSCRIPT_SPAN:
-    //         CSuperscriptSpan::New(p, (ISuperscriptSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::SUPERSCRIPT_SPAN: {
+            AutoPtr<ISuperscriptSpan> object;
+            CSuperscriptSpan::New((ISuperscriptSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::SUBSCRIPT_SPAN:
-    //         CSubscriptSpan::New(p, (ISubscriptSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::SUBSCRIPT_SPAN: {
+            AutoPtr<ISubscriptSpan> object;
+            CSubscriptSpan::New((ISubscriptSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::ABSOLUTE_SIZE_SPAN:
-    //         CAbsoluteSizeSpan::New(p, (IAbsoluteSizeSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::ABSOLUTE_SIZE_SPAN: {
+            AutoPtr<IAbsoluteSizeSpan> object;
+            CAbsoluteSizeSpan::New((IAbsoluteSizeSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::TEXT_APPEARANCE_SPAN:
-    //         CTextAppearanceSpan::New(p, (ITextAppearanceSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::TEXT_APPEARANCE_SPAN: {
+            AutoPtr<ITextAppearanceSpan> object;
+            CTextAppearanceSpan::New((ITextAppearanceSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::ANNOTATION:
-    //         CAnnotation::New(p, (IAnnotation**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::ANNOTATION: {
+            AutoPtr<IAnnotation> object;
+            CAnnotation::New((IAnnotation**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::SUGGESTION_SPAN:
-    //         CSuggestionSpan::New(p, (ISuggestionSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::SUGGESTION_SPAN: {
+            AutoPtr<ISuggestionSpan> object;
+            CSuggestionSpan::New((ISuggestionSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::SPELL_CHECK_SPAN:
-    //         CSpellCheckSpan::New(p, (ISpellCheckSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::SPELL_CHECK_SPAN: {
+            AutoPtr<ISpellCheckSpan> object;
+            CSpellCheckSpan::New((ISpellCheckSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::SUGGESTION_RANGE_SPAN:
-    //         CSuggestionRangeSpan::New(p, (ISuggestionRangeSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::SUGGESTION_RANGE_SPAN: {
+            AutoPtr<ISuggestionRangeSpan> object;
+            CSuggestionRangeSpan::New((ISuggestionRangeSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::EASY_EDIT_SPAN:
-    //         CEasyEditSpan::New(p, (IEasyEditSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::EASY_EDIT_SPAN: {
+            AutoPtr<IEasyEditSpan> object;
+            CEasyEditSpan::New((IEasyEditSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::LOCALE_SPAN:
-    //         CLocaleSpan::New(p, (ILocaleSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::LOCALE_SPAN: {
+            AutoPtr<ILocaleSpan> object;
+            CLocaleSpan::New((ILocaleSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     case ITextUtils::TTS_SPAN:
-    //         CTtsSpan::New(p, (ITtsSpan**)&object);
-    //         FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), object));
-    //         break;
+        case ITextUtils::TTS_SPAN: {
+            AutoPtr<ITtsSpan> object;
+            CTtsSpan::New((ITtsSpan**)&object);
+            IParcelable::Probe(object)->ReadFromParcel(p);
+            FAIL_RETURN(ReadSpan(p, ISpannable::Probe(sp), (IInterface*)object.Get()));
+            break;
+        }
 
-    //     default:
-    //         // throw new RuntimeException("bogus span encoding " + kind);
-    //         return E_RUNTIME_EXCEPTION;
-    //     }
-    // }
+        default:
+            // throw new RuntimeException("bogus span encoding " + kind);
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
 
     *csq = ICharSequence::Probe(sp);
     REFCOUNT_ADD(*csq);
@@ -947,8 +1021,7 @@ AutoPtr<ICharSequence> TextUtils::Replace(
     /* [in] */ ArrayOf<ICharSequence*>* destinations)
 {
     AutoPtr<ISpannableStringBuilder> tb;
-    assert(0 && "TODO");
-    // CSpannableStringBuilder::New(temp, (ISpannableStringBuilder**)&tb);
+    CSpannableStringBuilder::New(temp, (ISpannableStringBuilder**)&tb);
     ICharSequence* csq = ICharSequence::Probe(tb);
     ISpannable* spannable = ISpannable::Probe(tb);
     ISpanned* spanned = ISpanned::Probe(tb);
@@ -987,8 +1060,7 @@ AutoPtr<ICharSequence> TextUtils::ExpandTemplate(
     }
 
     AutoPtr<ISpannableStringBuilder> ssb;
-    assert(0 && "TODO");
-    // CSpannableStringBuilder::New(temp, (ISpannableStringBuilder**)&ssb);
+    CSpannableStringBuilder::New(temp, (ISpannableStringBuilder**)&ssb);
     ICharSequence* csq = ICharSequence::Probe(ssb);
     IEditable* enditable = IEditable::Probe(ssb);
 
@@ -1211,13 +1283,12 @@ AutoPtr<ICharSequence> TextUtils::Ellipsize(
     }
 
     AutoPtr<ICharSequence> rst;
-    assert(0 && "TODO");
-    // rst = Ellipsize(text, paint, avail, where, preserveLength, callback,
-    //     TextDirectionHeuristics::FIRSTSTRONG_LTR, ellipsis);
-    // if(rst == NULL) {
-    //     String sNull("");
-    //     CString::New(sNull, (ICharSequence**)&rst);
-    // }
+    rst = Ellipsize(text, paint, avail, where, preserveLength, callback,
+        TextDirectionHeuristics::FIRSTSTRONG_LTR, ellipsis);
+    if(rst == NULL) {
+        String sNull("");
+        CString::New(sNull, (ICharSequence**)&rst);
+    }
     return rst;
 }
 
@@ -1339,10 +1410,8 @@ AutoPtr<ICharSequence> TextUtils::CommaEllipsize(
     /* [in] */ const String& oneMore,
     /* [in] */ const String& more)
 {
-    assert(0 && "TODO");
-    // return CommaEllipsize(text, p, avail, oneMore, more,
-    //         TextDirectionHeuristics::FIRSTSTRONG_LTR);
-    return NULL;
+    return CommaEllipsize(text, p, avail, oneMore, more,
+            TextDirectionHeuristics::FIRSTSTRONG_LTR);
 }
 
 AutoPtr<ICharSequence> TextUtils::CommaEllipsize(
@@ -1595,8 +1664,7 @@ AutoPtr<ICharSequence> TextUtils::Concat(
     }
     AutoPtr<ISpannableString> ss;
     AutoPtr<ICharSequence> s = sb.ToCharSequence();
-    assert(0 && "TODO");
-    // CSpannableString::New(s, (ISpannableString**)&ss);
+    CSpannableString::New(s, (ISpannableString**)&ss);
     Int32 off = 0;
     Int32 iLen;
     for (Int32 i = 0; i < len; ++i) {
@@ -1608,8 +1676,7 @@ AutoPtr<ICharSequence> TextUtils::Concat(
         off += iLen;
     }
     AutoPtr<ISpannedString> span;
-    assert(0 && "TODO");
-    // CSpannedString::New(ss,(ISpannedString**)&span);
+    CSpannedString::New(ICharSequence::Probe(ss),(ISpannedString**)&span);
     result = ICharSequence::Probe(span.Get());
     return result;
 }

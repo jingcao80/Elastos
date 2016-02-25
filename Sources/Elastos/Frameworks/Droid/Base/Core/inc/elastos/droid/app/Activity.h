@@ -2,12 +2,12 @@
 #ifndef __ELASTOS_DROID_APP_ACTIVITY_H__
 #define __ELASTOS_DROID_APP_ACTIVITY_H__
 
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Database.h"
-#include "Elastos.Droid.View.h"
 #include "elastos/droid/view/ContextThemeWrapper.h"
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.View.h"
 
 using Elastos::Droid::Os::IPersistableBundle;
 using Elastos::Droid::Os::IBinder;

@@ -8,7 +8,7 @@
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/accessibilityservice/CAccessibilityServiceInfo.h"
 #include "elastos/droid/hardware/input/CInputManager.h"
-// #include "elastos/droid/view/CWindowAnimationFrameStats.h"
+#include "elastos/droid/view/CWindowAnimationFrameStats.h"
 #include "elastos/droid/view/SurfaceControl.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
@@ -25,7 +25,7 @@ using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::View::SurfaceControl;
-// using Elastos::Droid::View::CWindowAnimationFrameStats;
+using Elastos::Droid::View::CWindowAnimationFrameStats;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
 
 using Libcore::IO::IIoUtils;
@@ -266,8 +266,7 @@ ECode UiAutomationConnection::GetWindowAnimationFrameStats(
     Int64 identity = Binder::ClearCallingIdentity();
     // try {
     AutoPtr<IWindowAnimationFrameStats> stats;
-    assert(0 && "TODO");
-    // CWindowAnimationFrameStats::New((IWindowAnimationFrameStats**)&stats);
+    CWindowAnimationFrameStats::New((IWindowAnimationFrameStats**)&stats);
     Boolean bval;
     SurfaceControl::GetAnimationFrameStats(stats, &bval);
     *result = stats;

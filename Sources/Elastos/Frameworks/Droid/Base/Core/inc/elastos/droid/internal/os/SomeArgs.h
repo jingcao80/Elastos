@@ -11,7 +11,7 @@ namespace Droid {
 namespace Internal {
 namespace Os {
 
-class SomeArgs
+class ECO_PUBLIC SomeArgs
     : public Object
     , public ISomeArgs
 {
@@ -39,9 +39,9 @@ public:
     CARAPI Recycle();
 
 private:
-    CARAPI_(void) Clear();
+    ECO_LOCAL CARAPI_(void) Clear();
 
-    SomeArgs();
+    ECO_LOCAL SomeArgs();
 
 public:
     static const Int32 WAIT_NONE = 0;

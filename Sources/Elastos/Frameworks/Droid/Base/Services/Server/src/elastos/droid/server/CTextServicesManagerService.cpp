@@ -21,7 +21,7 @@ using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::App::AppGlobals;
-using Elastos::Droid::App::EIID_IUserSwitchObserver;
+using Elastos::Droid::App::EIID_IIUserSwitchObserver;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Content::IComponentName;
@@ -65,7 +65,7 @@ CTextServicesManagerService::CTSMSUserSwitchObserver::CTSMSUserSwitchObserver(
 CTextServicesManagerService::CTSMSUserSwitchObserver::~CTSMSUserSwitchObserver()
 {}
 
-CAR_INTERFACE_IMPL(CTextServicesManagerService::CTSMSUserSwitchObserver, Object, IUserSwitchObserver);
+CAR_INTERFACE_IMPL(CTextServicesManagerService::CTSMSUserSwitchObserver, Object, IIUserSwitchObserver);
 
 ECode CTextServicesManagerService::CTSMSUserSwitchObserver::OnUserSwitching(
     /* [in] */ Int32 newUserId,
@@ -569,7 +569,7 @@ ECode CTextServicesManagerService::constructor(
     Int32 userId = IUserHandle::USER_OWNER;
     //try {
     AutoPtr<CTSMSUserSwitchObserver> userSwithchObserver = new CTSMSUserSwitchObserver(this);
-    ActivityManagerNative::GetDefault()->RegisterUserSwitchObserver((IUserSwitchObserver*)userSwithchObserver);
+    ActivityManagerNative::GetDefault()->RegisterUserSwitchObserver((IIUserSwitchObserver*)userSwithchObserver);
 
     AutoPtr<IUserInfo> userInfo;
     ActivityManagerNative::GetDefault()->GetCurrentUser((IUserInfo**)&userInfo);

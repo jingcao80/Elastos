@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_VIEW_INPUTMETHOD_CCORRECTIONINFO_H__
-#define  __ELASTOS_DROID_VIEW_INPUTMETHOD_CCORRECTIONINFO_H__
+#define __ELASTOS_DROID_VIEW_INPUTMETHOD_CCORRECTIONINFO_H__
 
 #include "_Elastos_Droid_View_InputMethod_CCorrectionInfo.h"
 #include <elastos/core/Object.h>

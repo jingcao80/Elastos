@@ -2,6 +2,12 @@
 #ifndef __ELASTOS_DROID_MEDIA_CMEDIAMETADATARETRIEVER_H__
 #define __ELASTOS_DROID_MEDIA_CMEDIAMETADATARETRIEVER_H__
 
+#include <Elastos.CoreLibrary.Core.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Os.h"
 #include "_Elastos_Droid_Media_CMediaMetadataRetriever.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
@@ -10,6 +16,7 @@
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::IBinder;
 using Elastos::IO::IFileDescriptor;
 using Elastos::Utility::IMap;
 

@@ -169,10 +169,11 @@ public:
         /* [in] */ IParcelable* snapshot,
         /* [out] */ IView** view);
 
+public:
+    static const AutoPtr<ISharedElementCallback> NULL_CALLBACK;// = new SharedElementCallback()
+
 private:
     AutoPtr<IMatrix> mTempMatrix;
-
-    static const AutoPtr<ISharedElementCallback> NULL_CALLBACK;// = new SharedElementCallback()
 };
 
 } // namespace App

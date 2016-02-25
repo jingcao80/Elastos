@@ -81,7 +81,6 @@ SOURCES += TimeZone.cpp
 SOURCES += Timer.cpp
 SOURCES += TimerTask.cpp
 SOURCES += TimeZoneGetter.cpp
-SOURCES += CTimeZoneGetterHelper.cpp
 SOURCES += CTimeZoneHelper.cpp
 SOURCES += CTreeMap.cpp
 SOURCES += CTreeSet.cpp

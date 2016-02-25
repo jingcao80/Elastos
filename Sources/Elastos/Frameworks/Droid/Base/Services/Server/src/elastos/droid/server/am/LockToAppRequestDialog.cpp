@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/R.h"
 
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
@@ -28,6 +29,7 @@ using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::Widget::ICheckable;
 using Elastos::Droid::Widget::ITextView;
 
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::Logging::Slogger;
@@ -87,23 +89,18 @@ ECode LockToAppRequestDialog::ShowLockTaskPrompt(
 
     AutoPtr<IAlertDialogBuilder> builder;
     CAlertDialogBuilder::New(mContext, (IAlertDialogBuilder**)&builder);
-    AutoPtr<ICharSequence> titleCS;
-    CString::New(title, (ICharSequence**)&titleCS);
+    AutoPtr<ICharSequence> titleCS = CoreUtils::Convert(title);
+    AutoPtr<ICharSequence> descriptionCS = CoreUtils::Convert(description);
+    AutoPtr<ICharSequence> positiveButtonCS = CoreUtils::Convert(positiveButton);
+    AutoPtr<ICharSequence> negativeButtionCS = CoreUtils::Convert(negativeButtion);
     builder->SetTitle(titleCS);
-    AutoPtr<ICharSequence> descriptionCS;
-    CString::New(description, (ICharSequence**)&descriptionCS);
     builder->SetMessage(descriptionCS);
-    AutoPtr<ICharSequence> positiveButtonCS;
-    CString::New(positiveButton, (ICharSequence**)&positiveButtonCS);
     builder->SetPositiveButton(positiveButtonCS, this);
-    AutoPtr<ICharSequence> negativeButtionCS;
-    CString::New(negativeButtion, (ICharSequence**)&negativeButtionCS);
     builder->SetNegativeButton(negativeButtionCS, this);
 
-
     if (unlockStringId != 0) {
-        // builder do not have this interface SetView(Int32)
-        //TODO builder->SetView(R::layout::lock_to_app_checkbox);
+        assert(0 && "TODO");
+        // builder->SetView(R::layout::lock_to_app_checkbox);
     }
     builder->Create((IAlertDialog**)&mDialog);
 

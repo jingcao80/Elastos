@@ -1,6 +1,6 @@
 
-#ifndef  __CINPUTMODESWITCHER_H__
-#define  __CINPUTMODESWITCHER_H__
+#ifndef __CINPUTMODESWITCHER_H__
+#define __CINPUTMODESWITCHER_H__
 
 #include "elastos/droid/ext/frameworkdef.h"
 #include "_CInputModeSwitcher.h"

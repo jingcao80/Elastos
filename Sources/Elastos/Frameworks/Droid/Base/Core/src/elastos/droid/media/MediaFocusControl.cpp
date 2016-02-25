@@ -1,6 +1,7 @@
 #include "elastos/droid/app/CActivityManager.h"
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/media/CAudioService.h"
 #include "elastos/droid/media/CFocusRequester.h"
 #include "elastos/droid/media/MediaFocusControl.h"
 #include "elastos/droid/os/Binder.h"
@@ -400,10 +401,10 @@ ECode MediaFocusControl::constructor(
 
     pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
             String("handleMediaEvent"), (IPowerManagerWakeLock**)&mMediaEventWakeLock);
-// TODO: Need CAudioService
-    // mMainRemote = new CAudioService::RemotePlaybackState(-1,
-    //         AudioService::GetMaxStreamVolume(IAudioManager::STREAM_MUSIC),
-    //         AudioService::GetMaxStreamVolume(IAudioManager::STREAM_MUSIC));
+    Int32 val;
+    CAudioService::GetMaxStreamVolume(IAudioManager::STREAM_MUSIC, &val);
+// TODO: Need PlayerRecord
+    // mMainRemote = new PlayerRecord::RemotePlaybackState(-1, val, val);
 
     // Register for phone state monitoring
 

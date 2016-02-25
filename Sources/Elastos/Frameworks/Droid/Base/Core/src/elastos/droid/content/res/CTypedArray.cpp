@@ -4,11 +4,11 @@
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include <stdlib.h>
 
 using Elastos::Droid::Internal::Utility::XmlUtils;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -24,11 +24,12 @@ AutoPtr<ITypedArray> CTypedArray::Obtain(
     /* [in] */ Int32 len)
 {
     CResources* r = (CResources*)res;
+    assert(r != NULL && r->mTypedArrayPool != NULL);
     AutoPtr<ITypedArray> attrs = r->mTypedArrayPool->AcquireItem();
     if (attrs != NULL) {
         CTypedArray* cta = (CTypedArray*)attrs.Get();
         cta->mLength = len;
-        cta->mRecycled = false;
+        cta->mRecycled = FALSE;
 
         Int32 fullLen = len * CAssetManager::STYLE_NUM_ENTRIES;
         if (cta->mData->GetLength() >= fullLen) {
@@ -40,10 +41,11 @@ AutoPtr<ITypedArray> CTypedArray::Obtain(
         return attrs;
     }
 
-    AutoPtr<CTypedArray> ta;
     AutoPtr<ArrayOf<Int32> > a1 = ArrayOf<Int32>::Alloc(len*CAssetManager::STYLE_NUM_ENTRIES);
-    AutoPtr<ArrayOf<Int32> > a2 = ArrayOf<Int32>::Alloc(1+len);
-    CTypedArray::NewByFriend(res, a1, a2, len, (CTypedArray**)&ta);
+    AutoPtr<ArrayOf<Int32> > a2 = ArrayOf<Int32>::Alloc(1 + len);
+    AutoPtr<CTypedArray> ta;
+    ASSERT_SUCCEEDED(CTypedArray::NewByFriend(res, a1, a2, len, (CTypedArray**)&ta));
+    //Logger::I("CTypedArray", "CTypedArray::Obtain %s", TO_CSTR(ta));
     return (ITypedArray*)ta.Get();
 }
 
@@ -51,11 +53,27 @@ CTypedArray::CTypedArray()
     : mLength(0)
     , mRecycled(FALSE)
 {
-    ASSERT_SUCCEEDED(CTypedValue::NewByFriend((CTypedValue**)&mValue));
 }
 
 CTypedArray::~CTypedArray()
 {}
+
+ECode CTypedArray::constructor(
+    /* [in] */ IResources* resources,
+    /* [in] */ ArrayOf<Int32>* data,
+    /* [in] */ ArrayOf<Int32>* indices,
+    /* [in] */ Int32 len)
+{
+    ASSERT_SUCCEEDED(CTypedValue::NewByFriend((CTypedValue**)&mValue));
+
+    mResources = (CResources*)resources;
+    mMetrics = mResources->mMetrics;
+    mAssets = mResources->mAssets;
+    mData = data;
+    mIndices = indices;
+    mLength = len;
+    return NOERROR;
+}
 
 ECode CTypedArray::GetLength(
     /* [out] */ Int32* len)
@@ -134,10 +152,10 @@ ECode CTypedArray::GetText(
 
     AutoPtr<CTypedValue> v = mValue;
     if (GetValueAt(index, v)) {
-        Slogger::W(CResources::TAG, "Converting to string: %p", v.Get());
+        Logger::W(CResources::TAG, "Converting to string: %p", v.Get());
         return v->CoerceToString(csq);
     }
-    Slogger::W(CResources::TAG, "getString of bad type: %d", type);
+    Logger::W(CResources::TAG, "getString of bad type: %d", type);
     return NOERROR;
 }
 
@@ -166,7 +184,7 @@ ECode CTypedArray::GetString(
 
     AutoPtr<CTypedValue> v = mValue;
     if (GetValueAt(index, v)) {
-        Slogger::W(CResources::TAG, "Converting to string: %p", v.Get());
+        Logger::W(CResources::TAG, "Converting to string: %p", v.Get());
         AutoPtr<ICharSequence> csq;
         if (FAILED(v->CoerceToString((ICharSequence**)&csq))) {
             *str = String(NULL);
@@ -174,7 +192,7 @@ ECode CTypedArray::GetString(
         }
         return csq->ToString(str);
     }
-    Slogger::W(CResources::TAG, "getString of bad type: %d", type);
+    Logger::W(CResources::TAG, "getString of bad type: %d", type);
     *str = String(NULL);
     return NOERROR;
 }
@@ -238,7 +256,7 @@ ECode CTypedArray::GetNonConfigurationString(
         }
         return csq->ToString(str);
     }
-    Slogger::W(CResources::TAG, "getString of bad type: 0x%08x", type);
+    Logger::W(CResources::TAG, "getString of bad type: 0x%08x", type);
     return NOERROR;
 }
 
@@ -266,16 +284,15 @@ ECode CTypedArray::GetBoolean(
         return NOERROR;
     }
 
-    assert(0 && "TODO");
     AutoPtr<CTypedValue> v = mValue;
     if (GetValueAt(index, v)) {
-        Slogger::W(CResources::TAG, "Converting to boolean: %p", v.Get());
+        Logger::W(CResources::TAG, "Converting to boolean: %p", v.Get());
         AutoPtr<ICharSequence> csq;
         v->CoerceToString((ICharSequence**)&csq);
         *value = XmlUtils::ConvertValueToBoolean(csq, defValue);
         return NOERROR;
     }
-    Slogger::W(CResources::TAG, "getBoolean of bad type: 0x%08x", type);
+    Logger::W(CResources::TAG, "getBoolean of bad type: 0x%08x", type);
     *value = defValue;
     return NOERROR;
 }
@@ -306,13 +323,13 @@ ECode CTypedArray::GetInt32(
 
     AutoPtr<CTypedValue> v = mValue;
     if (GetValueAt(index, v)) {
-        Slogger::W(CResources::TAG, "Converting to Int32: %p", v.Get());
+        Logger::W(CResources::TAG, "Converting to Int32: %p", v.Get());
         AutoPtr<ICharSequence> csq;
         v->CoerceToString((ICharSequence**)&csq);
         *value = XmlUtils::ConvertValueToInt32(csq, defValue);
         return NOERROR;
     }
-    Slogger::W(CResources::TAG, "getInt of bad type: 0x%08x", type);
+    Logger::W(CResources::TAG, "getInt of bad type: 0x%08x", type);
     *value = defValue;
     return NOERROR;
 }
@@ -347,7 +364,7 @@ ECode CTypedArray::GetFloat(
 
     AutoPtr<CTypedValue> v = mValue;
     if (GetValueAt(index, v)) {
-        Slogger::W(CResources::TAG, "Converting to float: %p", v.Get());
+        Logger::W(CResources::TAG, "Converting to float: %p", v.Get());
         AutoPtr<ICharSequence> csq;
         if (SUCCEEDED(v->CoerceToString((ICharSequence**)&csq))) {
             String str;
@@ -356,7 +373,7 @@ ECode CTypedArray::GetFloat(
             return NOERROR;
         }
     }
-    Slogger::W(CResources::TAG, "getFloat of bad type: 0x%08x", type);
+    Logger::W(CResources::TAG, "getFloat of bad type: 0x%08x", type);
     *value = defValue;
     return NOERROR;
 }
@@ -401,7 +418,7 @@ ECode CTypedArray::GetColor(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Slogger::E(CResources::TAG, "Can't convert to color: type=0x%08x", type);
+    Logger::E(CResources::TAG, "Can't convert to color: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -459,7 +476,7 @@ ECode CTypedArray::GetInteger(
         return NOERROR;
     }
 
-    Slogger::E(CResources::TAG, "Can't convert to integer: type=0x%08x", type);
+    Logger::E(CResources::TAG, "Can't convert to integer: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -492,7 +509,7 @@ ECode CTypedArray::GetDimension(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Slogger::E(CResources::TAG, "Can't convert to dimension: type=0x%08x", type);
+    Logger::E(CResources::TAG, "Can't convert to dimension: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -525,7 +542,7 @@ ECode CTypedArray::GetDimensionPixelOffset(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Slogger::E(CResources::TAG, "Can't convert to dimension: type=0x%08x", type);
+    Logger::E(CResources::TAG, "Can't convert to dimension: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -558,7 +575,7 @@ ECode CTypedArray::GetDimensionPixelSize(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Slogger::E(CResources::TAG, "Can't convert to dimension: type=0x%08x", type);
+    Logger::E(CResources::TAG, "Can't convert to dimension: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -593,7 +610,7 @@ ECode CTypedArray::GetLayoutDimension(
 
     String des;
     GetPositionDescription(&des);
-    Slogger::E(CResources::TAG, ")%s: You must supply a %s attribute.", (const char*)des, (const char*)name);
+    Logger::E(CResources::TAG, ")%s: You must supply a %s attribute.", (const char*)des, (const char*)name);
     return E_RUNTIME_EXCEPTION;
 }
 
@@ -657,7 +674,7 @@ ECode CTypedArray::GetFraction(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Slogger::E(CResources::TAG, "Can't convert to fraction: type=0x%08x", type);
+    Logger::E(CResources::TAG, "Can't convert to fraction: type=0x%08x", type);
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
@@ -960,20 +977,6 @@ AutoPtr<ICharSequence> CTypedArray::LoadStringValueAt(
     return cam->GetPooledStringForCookie(cookie, (*data)[index + CAssetManager::STYLE_DATA]);
 }
 
-ECode CTypedArray::constructor(
-    /* [in] */ IResources* resources,
-    /* [in] */ ArrayOf<Int32>* data,
-    /* [in] */ ArrayOf<Int32>* indices,
-    /* [in] */ Int32 len)
-{
-    mResources = (CResources*)resources;
-    mMetrics = mResources->mMetrics;
-    mAssets = mResources->mAssets;
-    mData = data;
-    mIndices = indices;
-    mLength = len;
-    return NOERROR;
-}
 
 } // namespace Res
 } // namespace Content

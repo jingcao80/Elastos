@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_NET_WIFI_WIFISTATETRACKER_H__
-#define  __ELASTOS_DROID_NET_WIFI_WIFISTATETRACKER_H__
+#define __ELASTOS_DROID_NET_WIFI_WIFISTATETRACKER_H__
 
 #include "elastos/droid/net/NetworkStateTracker.h"
 #include "elastos/droid/ext/frameworkdef.h"

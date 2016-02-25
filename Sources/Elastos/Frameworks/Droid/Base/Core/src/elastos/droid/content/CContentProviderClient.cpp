@@ -1,7 +1,7 @@
 
 #include "elastos/droid/content/CContentProviderClient.h"
 #include "elastos/droid/content/CContentProviderHelper.h"
-//#include "elastos/droid/content/ContentResolver.h"
+#include "elastos/droid/content/ContentResolver.h"
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/Looper.h"
 #include <elastos/core/AutoLock.h>
@@ -44,10 +44,9 @@ ECode CContentProviderClient::NotRespondingRunnable::Run()
 
     CContentProviderClient* cpc = (CContentProviderClient*)obj.Get();
     Logger::W("CContentProviderClient", "Detected provider not responding: %s",
-        Object::ToString(cpc->mContentProvider).string());
-    assert(0 && "TODO");
-    // ContentResolver* cp = (ContentResolver*)cpc->mContentResolver;
-    // cp->AppNotRespondingViaProvider(cpc->mContentProvider);
+        TO_CSTR(cpc->mContentProvider));
+    ContentResolver* cp = (ContentResolver*)cpc->mContentResolver.Get();
+    cp->AppNotRespondingViaProvider(cpc->mContentProvider);
     return NOERROR;
 }
 

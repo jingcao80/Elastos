@@ -2,7 +2,6 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEALTH_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEALTH_H__
 
-//#include "Elastos.Droid.Core_server.h"
 #include "Elastos.Droid.Bluetooth.h"
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/ext/frameworkdef.h"
@@ -57,6 +56,8 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IBluetoothProfileServiceListener* listener);
 
+    CARAPI DoBind(
+        /* [out] */ Boolean* bind);
 
     CARAPI RegisterSinkAppConfiguration(
         /* [in] */ const String& name,

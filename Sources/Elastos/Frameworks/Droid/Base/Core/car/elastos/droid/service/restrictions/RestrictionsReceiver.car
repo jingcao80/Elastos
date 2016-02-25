@@ -48,7 +48,7 @@ module
          * @see RestrictionsManager#REQUEST_KEY_ID
          */
         OnRequestPermission(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String packageName,
             [in] String requestType,
             [in] String requestId,

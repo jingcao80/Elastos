@@ -1,32 +1,33 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.android.server.hdmi;
 
+#ifndef __ELASTOS_DROID_SERVER_HDMI_HDMICECFEATUREACTION_H__
+#define __ELASTOS_DROID_SERVER_HDMI_HDMICECFEATUREACTION_H__
+
+#include "_Elastos.Droid.Server.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/core/Object.h>
+#include <elastos/droid/os/Handler.h>
+
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Droid::Utility::ISlog;
 
-using Elastos::Droid::internal.annotations.VisibleForTesting;
-using Elastos::Droid::Server::Ihdmi.HdmiControlService.DevicePollingCallback;
+using Elastos::Droid::Server::Hdmi::IHdmiControlServiceDevicePollingCallback;
 
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Hdmi {
+
+class HdmiCecMessageCache;
+class HdmiCecLocalDevicePlayback;
+class HdmiCecLocalDeviceTv;
+class HdmiControlService;
 /**
  * Encapsulates a sequence of CEC command exchange for a certain feature.
  * <p>
@@ -41,54 +42,61 @@ using Elastos::Utility::IList;
  * consumes it if the command is what the action expects, or yields it to other action. Declared as
  * package private, accessed by {@link HdmiControlService} only.
  */
-abstract class HdmiCecFeatureAction {
-    private static const String TAG = "HdmiCecFeatureAction";
+class HdmiCecFeatureAction
+    : public Object
+{
+private:
+    class ActionTimerHandler
+        : public Handler
+        , public IHdmiCecFeatureActionActionTimer
+    {
+    public:
+        CARAPI constructor(
+            /* [in] */ ILooper* looper);
 
-    // Timer handler message used for timeout event
-    protected static const Int32 MSG_TIMEOUT = 100;
+        // @Override
+        CARAPI SendTimerMessage(
+            /* [in] */ Int32 state,
+            /* [in] */ Int64 delayMillis);
 
-    // Default state used in common by all the feature actions.
-    protected static const Int32 STATE_NONE = 0;
+        // @Override
+        CARAPI ClearTimerMessage();
 
-    // Internal state indicating the progress of action.
-    protected Int32 mState = STATE_NONE;
+        // @Override
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+    };
 
-    private final HdmiControlService mService;
-    private final HdmiCecLocalDevice mSource;
+public:
+    HdmiCecFeatureAction();
 
-    // Timer that manages timeout events.
-    protected ActionTimer mActionTimer;
+    CARAPI constructor(
+        /* [in] */ IHdmiCecLocalDevice* source);
 
-    private ArrayList<Pair<HdmiCecFeatureAction, Runnable>> mOnFinishedCallbacks;
-
-    HdmiCecFeatureAction(HdmiCecLocalDevice source) {
-        mSource = source;
-        mService = mSource->GetService();
-        mActionTimer = CreateActionTimer(mService->GetServiceLooper());
-    }
-
-    @VisibleForTesting
-    void SetActionTimer(ActionTimer actionTimer) {
-        mActionTimer = actionTimer;
-    }
+    // @VisibleForTesting
+    CARAPI SetActionTimer(
+        /* [in] */ IHdmiCecFeatureActionActionTimer* actionTimer);
 
     /**
      * Called after the action is created. Initialization or first step to take
      * for the action can be done in this method. Shall update {@code mState} to
      * indicate that the action has started.
      *
-     * @return TRUE if the operation is successful; otherwise FALSE.
+     * @return true if the operation is successful; otherwise false.
      */
-    abstract Boolean Start();
+    CARAPI Start(
+        /* [out] */ Boolean* result);
 
     /**
      * Process the command. Called whenever a new command arrives.
      *
      * @param cmd command to process
-     * @return TRUE if the command was consumed in the process; Otherwise FALSE, which
+     * @return true if the command was consumed in the process; Otherwise false, which
      *          indicates that the command shall be handled by other actions.
      */
-    abstract Boolean ProcessCommand(HdmiCecMessage cmd);
+    CARAPI ProcessCommand(
+        /* [in] */ IHdmiCecMessage* cmd,
+        /* [out] */ Boolean* result);
 
     /**
      * Called when the action should handle the timer event it created before.
@@ -99,94 +107,33 @@ abstract class HdmiCecFeatureAction {
      *
      * @param state the state associated with the time when the timer was created
      */
-    abstract void HandleTimerEvent(Int32 state);
+    virtual CARAPI HandleTimerEvent(
+        /* [in] */ Int32 state) = 0;
 
-    /**
-     * Timer handler interface used for FeatureAction classes.
-     */
-    interface ActionTimer {
-        /**
-         * Send a timer message.
-         *
-         * Also carries the state of the action when the timer is created. Later this state is
-         * compared to the one the action is in when it receives the timer to let the action tell
-         * the right timer to handle.
-         *
-         * @param state state of the action is in
-         * @param delayMillis amount of delay for the timer
-         */
-        void SendTimerMessage(Int32 state, Int64 delayMillis);
-
-        /**
-         * Removes any pending timer message.
-         */
-        void ClearTimerMessage();
-    }
-
-    private class ActionTimerHandler extends Handler implements ActionTimer {
-
-        public ActionTimerHandler(Looper looper) {
-            Super(looper);
-        }
-
-        //@Override
-        CARAPI SendTimerMessage(Int32 state, Int64 delayMillis) {
-            // The third Argument(0) is not used.
-            SendMessageDelayed(ObtainMessage(MSG_TIMEOUT, state, 0), delayMillis);
-        }
-
-        //@Override
-        CARAPI ClearTimerMessage() {
-            RemoveMessages(MSG_TIMEOUT);
-        }
-
-        //@Override
-        CARAPI HandleMessage(Message msg) {
-            switch (msg.what) {
-            case MSG_TIMEOUT:
-                HandleTimerEvent(msg.arg1);
-                break;
-            default:
-                Slogger::W(TAG, "Unsupported message:" + msg.what);
-                break;
-            }
-        }
-    }
-
-    private ActionTimer CreateActionTimer(Looper looper) {
-        return new ActionTimerHandler(looper);
-    }
-
-    // Add a new timer. The timer event will come to mActionTimer->HandleMessage() in
     // delayMillis.
-    protected void AddTimer(Int32 state, Int32 delayMillis) {
-        mActionTimer->SendTimerMessage(state, delayMillis);
-    }
+    CARAPI AddTimer(
+        /* [in] */ Int32 state,
+        /* [in] */ Int32 delayMillis);
 
-    Boolean Started() {
-        return mState != STATE_NONE;
-    }
+    CARAPI Started(
+        /* [out] */ Boolean* result);
 
-    protected final void SendCommand(HdmiCecMessage cmd) {
-        mService->SendCecCommand(cmd);
-    }
+    CARAPI SendCommand(
+        /* [in] */ IHdmiCecMessage* cmd);
 
-    protected final void SendCommand(HdmiCecMessage cmd,
-            HdmiControlService.SendMessageCallback callback) {
-        mService->SendCecCommand(cmd, callback);
-    }
+    CARAPI SendCommand(
+        /* [in] */ IHdmiCecMessage* cmd,
+        /* [in] */ IHdmiControlServiceSendMessageCallback* callback);
 
-    protected final void AddAndStartAction(HdmiCecFeatureAction action) {
-        mSource->AddAndStartAction(action);
-    }
+    CARAPI AddAndStartAction(
+        /* [in] */ HdmiCecFeatureAction* action);
 
-    protected final <T extends HdmiCecFeatureAction> List<T> GetActions(final Class<T> clazz) {
-        return mSource->GetActions(clazz);
-    }
+    CARAPI GetActions(
+        /* [in] */ ClassID clazz,
+        /* [out] */ IList** result);
 
-    protected final HdmiCecMessageCache GetCecMessageCache() {
-        return mSource->GetCecMessageCache();
-    }
+    CARAPI GetCecMessageCache(
+        /* [out] */ HdmiCecMessageCache** result);
 
     /**
      * Remove the action from the action queue. This is called after the action finishes
@@ -194,85 +141,94 @@ abstract class HdmiCecFeatureAction {
      *
      * @param action
      */
-    protected final void RemoveAction(HdmiCecFeatureAction action) {
-        mSource->RemoveAction(action);
-    }
+    CARAPI RemoveAction(
+        /* [in] */ HdmiCecFeatureAction* action);
 
-    protected final <T extends HdmiCecFeatureAction> void RemoveAction(final Class<T> clazz) {
-        mSource->RemoveActionExcept(clazz, NULL);
-    }
+    CARAPI RemoveAction(
+        /* [in] */ ClassID clazz,
+        /* [out] */ HdmiCecFeatureAction** result);
 
-    protected final <T extends HdmiCecFeatureAction> void RemoveActionExcept(final Class<T> clazz,
-            final HdmiCecFeatureAction exception) {
-        mSource->RemoveActionExcept(clazz, exception);
-    }
+    CARAPI RemoveActionExcept(
+        /* [in] */ ClassID clazz,
+        /* [in] */ HdmiCecFeatureAction* exception,
+        /* [out] */ HdmiCecFeatureAction** result);
 
-    protected final void PollDevices(DevicePollingCallback callback, Int32 pickStrategy,
-            Int32 retryCount) {
-        mService->PollDevices(callback, GetSourceAddress(), pickStrategy, retryCount);
-    }
+    CARAPI PollDevices(
+        /* [in] */ IHdmiControlServiceDevicePollingCallback* callback,
+        /* [in] */ Int32 pickStrategy,
+        /* [in] */ Int32 retryCount);
 
     /**
      * Clean up action's state.
      *
      * <p>Declared as package-private. Only {@link HdmiControlService} can access it.
      */
-    void Clear() {
-        mState = STATE_NONE;
-        // Clear all timers.
-        mActionTimer->ClearTimerMessage();
-    }
+    CARAPI Clear();
 
     /**
      * Finish up the action. Reset the state, and remove itself from the action queue.
      */
-    protected void Finish() {
-        Finish(TRUE);
-    }
+    CARAPI Finish();
 
-    void Finish(Boolean removeSelf) {
-        Clear();
-        if (removeSelf) {
-            RemoveAction(this);
-        }
-        if (mOnFinishedCallbacks != NULL) {
-            for (Pair<HdmiCecFeatureAction, Runnable> actionCallbackPair: mOnFinishedCallbacks) {
-                if (actionCallbackPair.first.mState != STATE_NONE) {
-                    actionCallbackPair.second->Run();
-                }
-            }
-            mOnFinishedCallbacks = NULL;
-        }
-    }
+    CARAPI Finish(
+        /* [in] */ Boolean removeSelf);
 
-    protected final HdmiCecLocalDevice LocalDevice() {
-        return mSource;
-    }
+    CARAPI LocalDevice(
+        /* [out] */ IHdmiCecLocalDevice** result);
 
-    protected final HdmiCecLocalDevicePlayback Playback() {
-        return (HdmiCecLocalDevicePlayback) mSource;
-    }
+    CARAPI Playback(
+        /* [out] */ HdmiCecLocalDevicePlayback** result);
 
-    protected final HdmiCecLocalDeviceTv Tv() {
-        return (HdmiCecLocalDeviceTv) mSource;
-    }
+    CARAPI Tv(
+        /* [out] */ HdmiCecLocalDeviceTv** result);
 
-    protected final Int32 GetSourceAddress() {
-        return mSource->GetDeviceInfo()->GetLogicalAddress();
-    }
+    CARAPI GetSourceAddress(
+        /* [out] */ Int32* result);
 
-    protected final Int32 GetSourcePath() {
-        return mSource->GetDeviceInfo()->GetPhysicalAddress();
-    }
+    CARAPI GetSourcePath(
+        /* [out] */ Int32* result);
 
-    protected final void SendUserControlPressedAndReleased(Int32 targetAddress, Int32 uiCommand) {
-        mSource->SendUserControlPressedAndReleased(targetAddress, uiCommand);
-    }
+    CARAPI SendUserControlPressedAndReleased(
+        /* [in] */ Int32 targetAddress,
+        /* [in] */ Int32 uiCommand);
 
-    protected final void AddOnFinishedCallback(HdmiCecFeatureAction action, Runnable runnable) {
-        if (mOnFinishedCallbacks == NULL) {
-            mOnFinishedCallbacks = new ArrayList<>();
-        }
-        mOnFinishedCallbacks->Add(Pair->Create(action, runnable));
-    }
-}
+    CARAPI AddOnFinishedCallback(
+        /* [in] */ HdmiCecFeatureAction* action,
+        /* [in] */ IRunnable* runnable);
+
+private:
+    CARAPI CreateActionTimer(
+        /* [in] */ ILooper* looper,
+        /* [out] */ IHdmiCecFeatureActionActionTimer** result);
+
+public:
+    // Timer handler message used for timeout event
+    static const Int32 MSG_TIMEOUT;
+
+    // Default state used in common by all the feature actions.
+    static const Int32 STATE_NONE;
+
+    // Internal state indicating the progress of action.
+    Int32 mState;
+
+    // Timer that manages timeout events.
+    AutoPtr<IHdmiCecFeatureActionActionTimer> mActionTimer;
+
+private:
+    static const String TAG;
+
+#if 0
+    AutoPtr<HdmiControlService> mService;
+#endif
+
+    AutoPtr<IHdmiCecLocalDevice> mSource;
+
+    AutoPtr<IArrayList> mOnFinishedCallbacks;
+};
+
+} // namespace Hdmi
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
+
+#endif // __ELASTOS_DROID_SERVER_HDMI_HDMICECFEATUREACTION_H__

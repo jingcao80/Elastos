@@ -1,8 +1,21 @@
-
+#include "Elastos.CoreLibrary.Utility.h"
 #include "elastos/droid/bluetooth/BluetoothMap.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/os/Process.h"
+#include <elastos/utility/logging/Logger.h>
+#include "elastos/core/AutoLock.h"
 
-using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
+using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::Process;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -17,40 +30,42 @@ BluetoothMap::BluetoothStateChangeCallbackStub::BluetoothStateChangeCallbackStub
 {
 }
 
-BluetoothMap::BluetoothStateChangeCallbackStub::BluetoothStateChangeCallbackStub(
+ECode BluetoothMap::BluetoothStateChangeCallbackStub::constructor(
     /* [in] */ IBluetoothMap* owner)
 {
     mOwner = (BluetoothMap*)owner;
+    return NOERROR;
 }
 
 ECode BluetoothMap::BluetoothStateChangeCallbackStub::OnBluetoothStateChange(
     /* [in] */ Boolean up)
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
-    // if (!up) {
-    //     if (VDBG) Log.d(TAG,"Unbinding service...");
-    //     synchronized (mConnection) {
-    //         try {
-    //             mService = null;
-    //             mContext.unbindService(mConnection);
-    //         } catch (Exception re) {
-    //             Log.e(TAG,"",re);
-    //         }
-    //     }
-    // } else {
-    //     synchronized (mConnection) {
-    //         try {
-    //             if (mService == null) {
-    //                 if (VDBG) Log.d(TAG,"Binding service...");
-    //                 doBind();
-    //             }
-    //         } catch (Exception re) {
-    //             Log.e(TAG,"",re);
-    //         }
-    //     }
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "onBluetoothStateChange: up=%d", up);
+    if (!up) {
+        if (VDBG) Logger::D(TAG,"Unbinding service...");
+        {
+            AutoLock lock(mOwner->mConnection);
+            //try {
+            mOwner->mService = NULL;
+            mOwner->mContext->UnbindService(mOwner->mConnection);
+            //} catch (Exception re) {
+            //    Logger::E(TAG,"",re);
+            //}
+        }
+    } else {
+        {
+            AutoLock lock(mOwner->mConnection);
+            //try {
+            if (mOwner->mService == NULL) {
+                if (VDBG) Logger::D(TAG,"Binding service...");
+                Boolean bind;
+                mOwner->DoBind(&bind);
+            }
+            //} catch (Exception re) {
+            //    Logger::E(TAG,"",re);
+            //}
+        }
+    }
     return NOERROR;
 }
 
@@ -63,37 +78,28 @@ BluetoothMap::InnerServiceConnection::InnerServiceConnection(
     /* [in] */ BluetoothMap* owner)
     : mOwner(owner)
 {
-    // ==================before translated======================
-    // mOwner = owner;
 }
 
 ECode BluetoothMap::InnerServiceConnection::OnServiceConnected(
     /* [in] */ IComponentName* className,
     /* [in] */ IBinder* service)
 {
-    VALIDATE_NOT_NULL(className);
-    VALIDATE_NOT_NULL(service);
-    // ==================before translated======================
-    // if (DBG) log("Proxy object connected");
-    // mService = IBluetoothMap.Stub.asInterface(service);
-    // if (mServiceListener != null) {
-    //     mServiceListener.onServiceConnected(BluetoothProfile.MAP, BluetoothMap.this);
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "Proxy object connected");
+    mOwner->mService = IIBluetoothMap::Probe(service);
+    if (mOwner->mServiceListener != NULL) {
+        mOwner->mServiceListener->OnServiceConnected(IBluetoothProfile::MAP, mOwner);
+    }
     return NOERROR;
 }
 
 ECode BluetoothMap::InnerServiceConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* className)
 {
-    VALIDATE_NOT_NULL(className);
-    // ==================before translated======================
-    // if (DBG) log("Proxy object disconnected");
-    // mService = null;
-    // if (mServiceListener != null) {
-    //     mServiceListener.onServiceDisconnected(BluetoothProfile.MAP);
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "Proxy object disconnected");
+    mOwner->mService = NULL;
+    if (mOwner->mServiceListener != NULL) {
+        mOwner->mServiceListener->OnServiceDisconnected(IBluetoothProfile::MAP);
+    }
     return NOERROR;
 }
 
@@ -101,8 +107,8 @@ ECode BluetoothMap::InnerServiceConnection::OnServiceDisconnected(
 //                             BluetoothMap
 //=====================================================================
 const String BluetoothMap::TAG("BluetoothMap");
-const Boolean BluetoothMap::DBG = true;
-const Boolean BluetoothMap::VDBG = false;
+const Boolean BluetoothMap::DBG = TRUE;
+const Boolean BluetoothMap::VDBG = FALSE;
 
 CAR_INTERFACE_IMPL_2(BluetoothMap, Object, IBluetoothMap, IBluetoothProfile);
 
@@ -110,84 +116,96 @@ BluetoothMap::BluetoothMap(
     /* [in] */ IContext* context,
     /* [in] */ IBluetoothProfileServiceListener* l)
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "Create BluetoothMap proxy object");
-    // mContext = context;
-    // mServiceListener = l;
-    // mAdapter = BluetoothAdapter.getDefaultAdapter();
-    // IBluetoothManager mgr = mAdapter.getBluetoothManager();
-    // if (mgr != null) {
-    //     try {
-    //         mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG,"",e);
-    //     }
-    // }
-    // doBind();
+    if (DBG) Logger::D(TAG, "Create BluetoothMap proxy object");
+    mContext = context;
+    mServiceListener = l;
+    mAdapter = CBluetoothAdapter::GetDefaultAdapter();
+    AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
+    if (mgr != NULL) {
+        //try {
+        mgr->RegisterStateChangeCallback(mBluetoothStateChangeCallback);
+        //} catch (RemoteException e) {
+        //    Logger::E(TAG,"",e);
+        //}
+    }
+    Boolean bind;
+    DoBind(&bind);
+}
+
+BluetoothMap::~BluetoothMap()
+{
+    Finalize();
 }
 
 ECode BluetoothMap::DoBind(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // Intent intent = new Intent(IBluetoothMap.class.getName());
-    // ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
-    // intent.setComponent(comp);
-    // if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
-    //         android.os.Process.myUserHandle())) {
-    //     Log.e(TAG, "Could not bind to Bluetooth MAP Service with " + intent);
-    //     return false;
-    // }
-    // return true;
-    assert(0);
+    *result = FALSE;
+    AutoPtr<IIntent> intent;
+    CIntent::New(String("IBluetoothMap")/*IBluetoothMap.class.getName()*/, (IIntent**)&intent);
+    AutoPtr<IComponentName> comp;
+    AutoPtr<IPackageManager> pm;
+    mContext->GetPackageManager((IPackageManager**)&pm);
+    intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
+    intent->SetComponent(comp);
+    AutoPtr<IUserHandle> userHandle;
+    Process::MyUserHandle((IUserHandle**)&userHandle);
+
+    //Intent intent = new Intent(IBluetoothMap.class.getName());
+    //ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+    //intent.setComponent(comp);
+    Boolean succeeded = FALSE;
+    if (comp == NULL || !(mContext->BindServiceAsUser(intent, mConnection, 0,
+            userHandle, &succeeded), succeeded)) {
+        Logger::E(TAG, "Could not bind to Bluetooth MAP Service with ");// + intent);
+        *result = FALSE;
+        return NOERROR;
+    }
+    *result = TRUE;
     return NOERROR;
 }
 
 // synchronized
 ECode BluetoothMap::Close()
 {
-    // ==================before translated======================
-    // IBluetoothManager mgr = mAdapter.getBluetoothManager();
-    // if (mgr != null) {
-    //     try {
-    //         mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
-    //     } catch (Exception e) {
-    //         Log.e(TAG,"",e);
-    //     }
-    // }
-    //
-    // synchronized (mConnection) {
-    //     if (mService != null) {
-    //         try {
-    //             mService = null;
-    //             mContext.unbindService(mConnection);
-    //         } catch (Exception re) {
-    //             Log.e(TAG,"",re);
-    //         }
-    //     }
-    // }
-    // mServiceListener = null;
-    assert(0);
+    AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
+    if (mgr != NULL) {
+        //try {
+        mgr->UnregisterStateChangeCallback(mBluetoothStateChangeCallback);
+        //} catch (Exception e) {
+        //    Logger::E(TAG,"",e);
+        //}
+    }
+
+    {
+        AutoLock lock(mConnection);
+        if (mService != NULL) {
+            //try {
+            mService = NULL;
+            mContext->UnbindService(mConnection);
+            //} catch (Exception re) {
+            //    Logger::E(TAG,"",re);
+            //}
+        }
+    }
+    mServiceListener = NULL;
     return NOERROR;
 }
 
 ECode BluetoothMap::GetState(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (VDBG) log("getState()");
-    // if (mService != null) {
-    //     try {
-    //         return mService.getState();
-    //     } catch (RemoteException e) {Log.e(TAG, e.toString());}
-    // } else {
-    //     Log.w(TAG, "Proxy not attached to service");
-    //     if (DBG) log(Log.getStackTraceString(new Throwable()));
-    // }
-    // return BluetoothMap.STATE_ERROR;
-    assert(0);
+    if (VDBG) Logger::D(TAG, "getState()");
+    if (mService != NULL) {
+        //try {
+        return mService->GetState(result);
+        //} catch (RemoteException e) {Logger::E(TAG, e.toString());}
+    } else {
+        Logger::W(TAG, "Proxy not attached to service");
+        //if (DBG) log(Log.getStackTraceString(new Throwable()));
+    }
+    *result = IBluetoothMap::STATE_ERROR;
     return NOERROR;
 }
 
@@ -195,18 +213,16 @@ ECode BluetoothMap::GetClient(
     /* [out] */ IBluetoothDevice** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (VDBG) log("getClient()");
-    // if (mService != null) {
-    //     try {
-    //         return mService.getClient();
-    //     } catch (RemoteException e) {Log.e(TAG, e.toString());}
-    // } else {
-    //     Log.w(TAG, "Proxy not attached to service");
-    //     if (DBG) log(Log.getStackTraceString(new Throwable()));
-    // }
-    // return null;
-    assert(0);
+    if (VDBG) Logger::D(TAG, "getClient()");
+    if (mService != NULL) {
+        //try {
+        return mService->GetClient(result);
+        //} catch (RemoteException e) {Logger::E(TAG, e.toString());}
+    } else {
+        Logger::W(TAG, "Proxy not attached to service");
+        //if (DBG) log(Log.getStackTraceString(new Throwable()));
+    }
+    *result = NULL;
     return NOERROR;
 }
 
@@ -214,20 +230,17 @@ ECode BluetoothMap::IsConnected(
     /* [in] */ IBluetoothDevice* device,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(device);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (VDBG) log("isConnected(" + device + ")");
-    // if (mService != null) {
-    //     try {
-    //         return mService.isConnected(device);
-    //     } catch (RemoteException e) {Log.e(TAG, e.toString());}
-    // } else {
-    //     Log.w(TAG, "Proxy not attached to service");
-    //     if (DBG) log(Log.getStackTraceString(new Throwable()));
-    // }
-    // return false;
-    assert(0);
+    if (VDBG) Logger::D(TAG, "isConnected(");// + device + ")");
+    if (mService != NULL) {
+        //try {
+        return mService->IsConnected(device, result);
+        //} catch (RemoteException e) {Logger::E(TAG, e.toString());}
+    } else {
+        Logger::W(TAG, "Proxy not attached to service");
+        //if (DBG) log(Log.getStackTraceString(new Throwable()));
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -235,12 +248,9 @@ ECode BluetoothMap::Connect(
     /* [in] */ IBluetoothDevice* device,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(device);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) log("connect(" + device + ")" + "not supported for MAPS");
-    // return false;
-    assert(0);
+    if (DBG) Logger::D(TAG, "connect(");// + device + ")" + "not supported for MAPS");
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -248,40 +258,37 @@ ECode BluetoothMap::Disconnect(
     /* [in] */ IBluetoothDevice* device,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(device);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) log("disconnect(" + device + ")");
-    // if (mService != null && isEnabled() &&
-    //     isValidDevice(device)) {
-    //     try {
-    //         return mService.disconnect(device);
-    //     } catch (RemoteException e) {
-    //       Log.e(TAG, Log.getStackTraceString(new Throwable()));
-    //       return false;
-    //     }
-    // }
-    // if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    // return false;
-    assert(0);
+    if (DBG) Logger::D(TAG, "disconnect(");// + device + ")");
+    if (mService != NULL && IsEnabled() &&
+        IsValidDevice(device)) {
+        //try {
+        return mService->Disconnect(device, result);
+        //} catch (RemoteException e) {
+        //  Logger::E(TAG, Log.getStackTraceString(new Throwable()));
+        //  return FALSE;
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
+    *result = FALSE;
     return NOERROR;
 }
 
 Boolean BluetoothMap::DoesClassMatchSink(
     /* [in] */ IBluetoothClass* btClass)
 {
-    // ==================before translated======================
     // // TODO optimize the rule
-    // switch (btClass.getDeviceClass()) {
-    // case BluetoothClass.Device.COMPUTER_DESKTOP:
-    // case BluetoothClass.Device.COMPUTER_LAPTOP:
-    // case BluetoothClass.Device.COMPUTER_SERVER:
-    // case BluetoothClass.Device.COMPUTER_UNCATEGORIZED:
-    //     return true;
-    // default:
-    //     return false;
-    // }
-    assert(0);
+    Int32 deviceClass;
+    btClass->GetDeviceClass(&deviceClass);
+    switch (deviceClass) {
+    case IBluetoothClassDevice::COMPUTER_DESKTOP:
+    case IBluetoothClassDevice::COMPUTER_LAPTOP:
+    case IBluetoothClassDevice::COMPUTER_SERVER:
+    case IBluetoothClassDevice::COMPUTER_UNCATEGORIZED:
+        return TRUE;
+    default:
+        return FALSE;
+    }
     return FALSE;
 }
 
@@ -289,19 +296,21 @@ ECode BluetoothMap::GetConnectedDevices(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) log("getConnectedDevices()");
-    // if (mService != null && isEnabled()) {
-    //     try {
-    //         return mService.getConnectedDevices();
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG, Log.getStackTraceString(new Throwable()));
-    //         return new ArrayList<BluetoothDevice>();
-    //     }
-    // }
-    // if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    // return new ArrayList<BluetoothDevice>();
-    assert(0);
+    if (DBG) Logger::D(TAG, "getConnectedDevices()");
+    if (mService != NULL && IsEnabled()) {
+        //try {
+        return mService->GetConnectedDevices(result);
+        //} catch (RemoteException e) {
+        //    Logger::E(TAG, Log.getStackTraceString(new Throwable()));
+        //    return new ArrayList<BluetoothDevice>();
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
+
+    AutoPtr<IList> l;
+    CArrayList::New((IList**)&l);
+    *result = l;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -309,21 +318,22 @@ ECode BluetoothMap::GetDevicesMatchingConnectionStates(
     /* [in] */ ArrayOf<Int32>* states,
     /* [out] */ IList** result)
 {
-    VALIDATE_NOT_NULL(states);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) log("getDevicesMatchingStates()");
-    // if (mService != null && isEnabled()) {
-    //     try {
-    //         return mService.getDevicesMatchingConnectionStates(states);
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG, Log.getStackTraceString(new Throwable()));
-    //         return new ArrayList<BluetoothDevice>();
-    //     }
-    // }
-    // if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    // return new ArrayList<BluetoothDevice>();
-    assert(0);
+    if (DBG) Logger::D(TAG, "getDevicesMatchingStates()");
+    if (mService != NULL && IsEnabled()) {
+        //try {
+        return mService->GetDevicesMatchingConnectionStates(states, result);
+        //} catch (RemoteException e) {
+        //    Logger::E(TAG, Log.getStackTraceString(new Throwable()));
+        //    return new ArrayList<BluetoothDevice>();
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
+
+    AutoPtr<IList> l;
+    CArrayList::New((IList**)&l);
+    *result = l;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -331,22 +341,19 @@ ECode BluetoothMap::GetConnectionState(
     /* [in] */ IBluetoothDevice* device,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(device);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) log("getConnectionState(" + device + ")");
-    // if (mService != null && isEnabled() &&
-    //     isValidDevice(device)) {
-    //     try {
-    //         return mService.getConnectionState(device);
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG, Log.getStackTraceString(new Throwable()));
-    //         return BluetoothProfile.STATE_DISCONNECTED;
-    //     }
-    // }
-    // if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    // return BluetoothProfile.STATE_DISCONNECTED;
-    assert(0);
+    if (DBG) Logger::D(TAG, "getConnectionState(");// + device + ")");
+    if (mService != NULL && IsEnabled() &&
+        IsValidDevice(device)) {
+        //try {
+        return mService->GetConnectionState(device, result);
+        //} catch (RemoteException e) {
+        //    Logger::E(TAG, Log.getStackTraceString(new Throwable()));
+        //    return BluetoothProfile.STATE_DISCONNECTED;
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
+    *result = IBluetoothProfile::STATE_DISCONNECTED;
     return NOERROR;
 }
 
@@ -355,26 +362,25 @@ ECode BluetoothMap::SetPriority(
     /* [in] */ Int32 priority,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(device);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) log("setPriority(" + device + ", " + priority + ")");
-    // if (mService != null && isEnabled() &&
-    //     isValidDevice(device)) {
-    //     if (priority != BluetoothProfile.PRIORITY_OFF &&
-    //         priority != BluetoothProfile.PRIORITY_ON) {
-    //       return false;
-    //     }
-    //     try {
-    //         return mService.setPriority(device, priority);
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG, Log.getStackTraceString(new Throwable()));
-    //         return false;
-    //     }
-    // }
-    // if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    // return false;
-    assert(0);
+    if (DBG) Logger::D(TAG, "setPriority(");// + device + ", " + priority + ")");
+    if (mService != NULL && IsEnabled() &&
+        IsValidDevice(device)) {
+        if (priority != IBluetoothProfile::PRIORITY_OFF &&
+            priority != IBluetoothProfile::PRIORITY_ON) {
+          *result = FALSE;
+          return NOERROR;
+        }
+        //try {
+        return mService->SetPriority(device, priority, result);
+        //} catch (RemoteException e) {
+        //    Logger::E(TAG, Log.getStackTraceString(new Throwable()));
+        //    return FALSE;
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
+
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -382,64 +388,54 @@ ECode BluetoothMap::GetPriority(
     /* [in] */ IBluetoothDevice* device,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(device);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (VDBG) log("getPriority(" + device + ")");
-    // if (mService != null && isEnabled() &&
-    //     isValidDevice(device)) {
-    //     try {
-    //         return mService.getPriority(device);
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG, Log.getStackTraceString(new Throwable()));
-    //         return PRIORITY_OFF;
-    //     }
-    // }
-    // if (mService == null) Log.w(TAG, "Proxy not attached to service");
-    // return PRIORITY_OFF;
-    assert(0);
+    if (VDBG) Logger::D(TAG, "getPriority(");// + device + ")");
+    if (mService != NULL && IsEnabled() &&
+        IsValidDevice(device)) {
+        //try {
+        return mService->GetPriority(device, result);
+        //} catch (RemoteException e) {
+        //    Logger::E(TAG, Log.getStackTraceString(new Throwable()));
+        //    return PRIORITY_OFF;
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
+    *result = PRIORITY_OFF;
     return NOERROR;
 }
 
 void BluetoothMap::Finalize()
 {
-    // ==================before translated======================
-    // try {
-    //     close();
-    // } finally {
-    //     super.finalize();
-    // }
-    assert(0);
+    //try {
+    Close();
+    //} finally {
+    //    super.finalize();
+    //}
 }
 
 void BluetoothMap::Log(
     /* [in] */ const String& msg)
 {
-    // ==================before translated======================
-    // Log.d(TAG, msg);
-    assert(0);
+    Logger::D(TAG, msg.string());
 }
 
 Boolean BluetoothMap::IsEnabled()
 {
-    // ==================before translated======================
-    // BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-    // if (adapter != null && adapter.getState() == BluetoothAdapter.STATE_ON) return true;
-    // log("Bluetooth is Not enabled");
-    // return false;
-    assert(0);
+    AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
+    Int32 state;
+    if (adapter != NULL && adapter->GetState(&state) == IBluetoothAdapter::STATE_ON) return TRUE;
+    Logger::D(TAG, "Bluetooth is Not enabled");
     return FALSE;
 }
 
 Boolean BluetoothMap::IsValidDevice(
     /* [in] */ IBluetoothDevice* device)
 {
-    // ==================before translated======================
-    // if (device == null) return false;
-    //
-    // if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
-    // return false;
-    assert(0);
+    if (device == NULL) return FALSE;
+
+    String address;
+    device->GetAddress(&address);
+    if (CBluetoothAdapter::CheckBluetoothAddress(address)) return TRUE;
     return FALSE;
 }
 

@@ -20,42 +20,21 @@ namespace View {
 
 class HardwareRenderer
     : public Object
+    , public IHardwareRenderer
 {
 public:
-    /**
-     * Interface used to receive callbacks whenever a view is drawn by
-     * a hardware renderer instance.
-     */
-    interface HardwareDrawCallbacks
-        : public IInterface
-    {
-    public:
-        /**
-         * Invoked before a view is drawn by a hardware renderer.
-         *
-         * @param canvas The Canvas used to render the view.
-         */
-        virtual CARAPI OnHardwarePreDraw(
-            /* [in] */ IHardwareCanvas* canvas) = 0;
+    CAR_INTERFACE_DECL()
 
-        /**
-         * Invoked after a view is drawn by a hardware renderer.
-         *
-         * @param canvas The Canvas used to render the view.
-         */
-        virtual CARAPI OnHardwarePostDraw(
-            /* [in] */ IHardwareCanvas* canvas) = 0;
-    };
-
-public:
     HardwareRenderer();
+
+    virtual ~HardwareRenderer();
 
     /**
      * Invoke this method to disable hardware rendering in the current process.
      *
      * @hide
      */
-    static CARAPI_(void) Disable(
+    static CARAPI Disable(
         /* [in] */ Boolean system);
 
     /**
@@ -64,7 +43,7 @@ public:
      * uses WebView! This should be only used by system_process or similar
      * that do not go into the background.
      */
-    static CARAPI_(void) EnableForegroundTrimming();
+    static CARAPI EnableForegroundTrimming();
 
     /**
      * Indicates whether hardware acceleration is available under any form for
@@ -73,7 +52,8 @@ public:
      * @return True if the view hierarchy can potentially be hardware accelerated,
      *         false otherwise
      */
-    static CARAPI_(Boolean) IsAvailable();
+    static CARAPI IsAvailable(
+        /* [out] */ Boolean* res);
 
     /**
      * Sets the directory to use as a persistent storage for hardware rendering
@@ -83,7 +63,7 @@ public:
      *
      * @hide
      */
-    static CARAPI_(void) SetupDiskCache(
+    static CARAPI SetupDiskCache(
         /* [in] */ IFile* cacheDir);
 
     /**
@@ -98,18 +78,6 @@ public:
         /* [in] */ Boolean translucent);
 
     /**
-     * Draws the specified view.
-     *
-     * @param view The view to draw.
-     * @param attachInfo AttachInfo tied to the specified view.
-     * @param callbacks Callbacks invoked when drawing happens.
-     */
-    virtual void Draw(
-        /* [in] */ IView* view,
-        /* [in] */ View::AttachInfo* attachInfo,
-        /* [in] */ IHardwareDrawCallbacks* callbacks) = 0;
-
-    /**
      * Invoke this method when the system is running out of memory. This
      * method will attempt to recover as much memory as possible, based on
      * the specified hint.
@@ -117,135 +85,8 @@ public:
      * @param level Hint about the amount of memory that should be trimmed,
      *              see {@link android.content.ComponentCallbacks}
      */
-    static CARAPI_(void) TrimMemory(
+    static CARAPI TrimMemory(
         /* [in] */ Int32 level);
-
-protected:
-    /**
-     * Destroys the hardware rendering context.
-     */
-    virtual CARAPI_(void) Destroy() = 0;
-
-    /**
-     * Initializes the hardware renderer for the specified surface.
-     *
-     * @param surface The surface to hardware accelerate
-     *
-     * @return True if the initialization was successful, false otherwise.
-     */
-    virtual CARAPI Initialize(
-        /* [in] */ ISurface* surface,
-        /* [out] */ Boolean* result) = 0;
-
-    /**
-     * Updates the hardware renderer for the specified surface.
-     *
-     * @param surface The surface to hardware accelerate
-     */
-    virtual CARAPI UpdateSurface(
-        /* [in] */ ISurface* surface) = 0;
-
-    /**
-     * Stops any rendering into the surface. Use this if it is unclear whether
-     * or not the surface used by the HardwareRenderer will be changing. It
-     * Suspends any rendering into the surface, but will not do any destruction
-     */
-    virtual CARAPI_(void) PauseSurface(
-        /* [in] */ ISurface* surface) = 0;
-
-    /**
-     * Destroys all hardware rendering resources associated with the specified
-     * view hierarchy.
-     *
-     * @param view The root of the view hierarchy
-     */
-    virtual CARAPI_(void) DestroyHardwareResources(
-        /* [in] */ IView* view) = 0;
-
-    /**
-     * This method should be invoked whenever the current hardware renderer
-     * context should be reset.
-     *
-     * @param surface The surface to hardware accelerate
-     */
-    virtual CARAPI_(void) Invalidate(
-        /* [in] */ ISurface* surface) = 0;
-
-    /**
-     * Detaches the layer's surface texture from the GL context and releases
-     * the texture id
-     */
-    virtual CARAPI_(void) DetachSurfaceTexture(
-        /* [in] */ Int64 hardwareLayer) = 0;
-
-    /**
-     * Gets the current width of the surface. This is the width that the surface
-     * was last set to in a call to {@link #setup(int, int, Rect)}.
-     *
-     * @return the current width of the surface
-     */
-    virtual CARAPI_(Int32) GetWidth() = 0;
-
-    /**
-     * Gets the current height of the surface. This is the height that the surface
-     * was last set to in a call to {@link #setup(int, int, Rect)}.
-     *
-     * @return the current width of the surface
-     */
-    virtual CARAPI_(Int32) GetHeight() = 0;
-
-    /**
-     * Outputs extra debugging information in the specified file descriptor.
-     */
-    virtual CARAPI_(void) DumpGfxInfo(
-        /* [in] */ IPrintWriter* pw,
-        /* [in] */ IFileDescriptor* fd) = 0;
-
-    /**
-     * Loads system properties used by the renderer. This method is invoked
-     * whenever system properties are modified. Implementations can use this
-     * to trigger live updates of the renderer based on properties.
-     *
-     * @return True if a property has changed.
-     */
-    virtual CARAPI_(Boolean) LoadSystemProperties() = 0;
-
-    /**
-     * Indicates that the specified hardware layer needs to be updated
-     * as soon as possible.
-     *
-     * @param layer The hardware layer that needs an update
-     */
-    virtual CARAPI_(void) PushLayerUpdate(
-        /* [in] */ IHardwareLayer* layer) = 0;
-
-    /**
-     * Tells the HardwareRenderer that the layer is destroyed. The renderer
-     * should remove the layer from any update queues.
-     */
-    virtual CARAPI_(void) OnLayerDestroyed(
-        /* [in] */ IHardwareLayer* layer) = 0;
-
-    /**
-     *  Indicates that the content drawn by HardwareDrawCallbacks needs to
-     *  be updated, which will be done by the next call to draw()
-     */
-    virtual CARAPI_(void) InvalidateRoot() = 0;
-
-    /**
-     * Creates a new hardware layer. A hardware layer built by calling this
-     * method will be treated as a texture layer, instead of as a render target.
-     *
-     * @return A hardware layer
-     */
-    virtual CARAPI_(AutoPtr<IHardwareLayer>) CreateTextureLayer() = 0;
-
-    virtual CARAPI_(void) BuildLayer(
-        /* [in] */ IRenderNode* node) = 0;
-
-    virtual CARAPI_(Boolean) CopyLayerInto(
-        /* [in] */ IHardwareLayer* layer,
-        /* [in] */ IBitmap* bitmap) = 0;
 
     /**
      * Initializes the hardware renderer for the specified surface and setup the
@@ -270,44 +111,19 @@ protected:
         /* [out] */ Boolean* result);
 
     /**
-     * Sets up the renderer for drawing.
-     *
-     * @param width The width of the drawing surface.
-     * @param height The height of the drawing surface.
-     * @param surfaceInsets The drawing surface insets to apply
-     */
-    virtual CARAPI_(void) Setup(
-        /* [in] */ Int32 width,
-        /* [in] */ Int32 height,
-        /* [in] */ IRect* surfaceInsets) = 0;
-
-    /**
-     * Optional, sets the name of the renderer. Useful for debugging purposes.
-     *
-     * @param name The name of this renderer, can be null
-     */
-    virtual CARAPI_(void) SetName(
-        /* [in] */ const String& name) = 0;
-
-    /**
-     * Change the HardwareRenderer's opacity
-     */
-    virtual CARAPI_(void) SetOpaque(
-        /* [in] */ Boolean opaque) = 0;
-
-    /**
      * Indicates whether hardware acceleration is currently enabled.
      *
      * @return True if hardware acceleration is in use, false otherwise.
      */
-    CARAPI_(Boolean) IsEnabled();
+    CARAPI IsEnabled(
+        /* [out] */ Boolean* enabled);
 
     /**
      * Indicates whether hardware acceleration is currently enabled.
      *
      * @param enabled True if the hardware renderer is in use, false otherwise.
      */
-    CARAPI_(void) SetEnabled(
+    CARAPI SetEnabled(
         /* [in] */ Boolean enabled);
 
     /**
@@ -316,7 +132,8 @@ protected:
      *
      * @return True if requested, false otherwise.
      */
-    CARAPI_(Boolean) IsRequested();
+    CARAPI IsRequested(
+        /* [out] */ Boolean* requested);
 
     /**
      * Indicates whether hardware acceleration is currently requested but not
@@ -324,29 +141,21 @@ protected:
      *
      * @return True to request hardware acceleration, false otherwise.
      */
-    CARAPI_(void) SetRequested(
+    CARAPI SetRequested(
         /* [in] */ Boolean requested);
 
-    /**
-     * Blocks until all previously queued work has completed.
-     */
-    virtual CARAPI_(void) Fence() = 0;
 
     /**
-     * Prevents any further drawing until draw() is called. This is a signal
-     * that the contents of the RenderNode tree are no longer safe to play back.
-     * In practice this usually means that there are Functor pointers in the
-     * display list that are no longer valid.
+     * Draws the specified view.
+     *
+     * @param view The view to draw.
+     * @param attachInfo AttachInfo tied to the specified view.
+     * @param callbacks Callbacks invoked when drawing happens.
      */
-    virtual CARAPI_(void) StopDrawing() = 0;
-
-    /**
-     * Called by {@link ViewRootImpl} when a new performTraverals is scheduled.
-     */
-    virtual CARAPI_(void) NotifyFramePending() = 0;
-
-    virtual CARAPI_(void) RegisterAnimatingRenderNode(
-        /* [in] */ IRenderNode* animator) = 0;
+    virtual CARAPI Draw(
+        /* [in] */ IView* view,
+        /* [in] */ View::AttachInfo* attachInfo,
+        /* [in] */ IHardwareDrawCallbacks* callbacks) = 0;
 
 public:
     /**

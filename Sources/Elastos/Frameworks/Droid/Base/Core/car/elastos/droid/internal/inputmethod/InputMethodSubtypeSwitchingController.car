@@ -89,7 +89,7 @@ module
     interface IInputMethodSubtypeSwitchingControllerHelper {
         CreateInstanceLocked(
             [in] IInputMethodSettings* settings,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IInputMethodSubtypeSwitchingController** instance);
     }
 

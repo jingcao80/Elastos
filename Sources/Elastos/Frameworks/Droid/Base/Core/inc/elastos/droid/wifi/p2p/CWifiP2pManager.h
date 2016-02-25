@@ -23,12 +23,7 @@ public:
 
     CAR_OBJECT_DECL()
 
-    CARAPI constructor();
-
-    CARAPI GetService(
-        /* [out] */ IIWifiP2pManager** service);
-
-    CARAPI SetService(
+    CARAPI constructor(
         /* [in] */ IIWifiP2pManager* service);
 
     /**

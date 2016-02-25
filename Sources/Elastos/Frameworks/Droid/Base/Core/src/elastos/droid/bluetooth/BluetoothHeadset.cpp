@@ -3,6 +3,7 @@
 #include "elastos/droid/bluetooth/CBluetoothHeadsetStateChangeCallback.h"
 #include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/os/Process.h"
 #include "elastos/droid/R.h"
 #include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
@@ -10,8 +11,11 @@
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::Process;
 using Elastos::Droid::R;
 using Elastos::Core::AutoLock;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -76,45 +80,75 @@ BluetoothHeadset::BluetoothHeadset(
     mConnection = new ServiceConnection(this);
 
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
-    if (mAdapter != NULL) {
-        AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
-        if (mgr != NULL) {
-            // try {
-            ECode ec = mgr->RegisterStateChangeCallback(mBluetoothStateChangeCallback);
-            if (FAILED(ec)) {
-                Logger::E(TAG, "0x%08x", ec);
-            }
-            // } catch (RemoteException e) {
-            //     Log.e(TAG,"",e);
-            // }
+    //if (mAdapter != NULL) {
+    AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
+    if (mgr != NULL) {
+        // try {
+        ECode ec = mgr->RegisterStateChangeCallback(mBluetoothStateChangeCallback);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "0x%08x", ec);
         }
+        // } catch (RemoteException e) {
+        //     Log.e(TAG,"",e);
+        // }
     }
+    //}
 
+    //AutoPtr<IIntent> intent;
+    //CIntent::New(String("IBluetoothHeadset")/*IBluetoothHeadset.class.getName()*/, (IIntent**)&intent);
+    //Boolean result;
+    //if (context->BindService(intent, mConnection, 0, &result), !result) {
+    //    Logger::E(TAG, "Could not bind to Bluetooth Headset Service");
+    //}
+    Boolean bind;
+    DoBind(&bind);
+}
+
+ECode BluetoothHeadset::DoBind(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    //Intent intent = new Intent(IBluetoothHeadset.class.getName());
     AutoPtr<IIntent> intent;
     CIntent::New(String("IBluetoothHeadset")/*IBluetoothHeadset.class.getName()*/, (IIntent**)&intent);
-    Boolean result;
-    if (context->BindService(intent, mConnection, 0, &result), !result) {
-        Logger::E(TAG, "Could not bind to Bluetooth Headset Service");
+    //ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+    //intent.setComponent(comp);
+    AutoPtr<IComponentName> comp;
+    AutoPtr<IPackageManager> pm;
+    mContext->GetPackageManager((IPackageManager**)&pm);
+    intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
+    intent->SetComponent(comp);
+    AutoPtr<IUserHandle> userHandle;
+    Process::MyUserHandle((IUserHandle**)&userHandle);
+    Boolean succeeded = FALSE;
+    if (comp == NULL || !(mContext->BindServiceAsUser(intent, mConnection, 0,
+               userHandle, &succeeded), succeeded)) {
+        Logger::E(TAG, "Could not bind to Bluetooth Headset Service with ");// + intent);
+        *result = FALSE;
+        return NOERROR;
     }
+    *result = TRUE;
+    return NOERROR;
 }
+
 
 ECode BluetoothHeadset::Close()
 {
     if (VDBG) Logger::D(TAG, "close()");
 
     AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
-    if (mAdapter != NULL) {
-        if (mgr != NULL) {
+    //if (mAdapter != NULL) {
+    if (mgr != NULL) {
     //        try {
-            ECode ec = mgr->UnregisterStateChangeCallback(mBluetoothStateChangeCallback);
-            if (FAILED(ec)) {
-                Logger::E(TAG, "0x%08x", ec);
-            }
+        ECode ec = mgr->UnregisterStateChangeCallback(mBluetoothStateChangeCallback);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "0x%08x", ec);
+        }
     //        } catch (Exception e) {
     //            Log.e(TAG,"",e);
     //        }
-        }
     }
+    //}
 
     AutoLock lock(mConnectionLock);
     if (mService != NULL) {
@@ -192,8 +226,7 @@ ECode BluetoothHeadset::GetConnectedDevices(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
-    REFCOUNT_ADD(*devices);
+    CArrayList::New(devices);
     return NOERROR;
 }
 
@@ -212,8 +245,7 @@ ECode BluetoothHeadset::GetDevicesMatchingConnectionStates(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
-    REFCOUNT_ADD(*devices);
+    CArrayList::New(devices);
     return NOERROR;
 }
 
@@ -552,22 +584,22 @@ ECode BluetoothHeadset::PhoneStateChanged(
     return NOERROR;
 }
 
-ECode BluetoothHeadset::RoamChanged(
-    /* [in] */ Boolean roaming)
-{
-    if (mService != NULL && IsEnabled()) {
-//        try {
-        //TODO return mService->RoamChanged(roaming);// RoamChanged removed
-//        } catch (RemoteException e) {
-//            Log.e(TAG, e.toString());
-//        }
-    }
-    else {
-        Logger::W(TAG, "Proxy not attached to service");
-//        if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-    }
-    return NOERROR;
-}
+//ECode BluetoothHeadset::RoamChanged(
+//    /* [in] */ Boolean roaming)
+//{
+//    if (mService != NULL && IsEnabled()) {
+////        try {
+//        //TODO return mService->RoamChanged(roaming);// RoamChanged removed
+////        } catch (RemoteException e) {
+////            Log.e(TAG, e.toString());
+////        }
+//    }
+//    else {
+//        Logger::W(TAG, "Proxy not attached to service");
+////        if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+//    }
+//    return NOERROR;
+//}
 
 ECode BluetoothHeadset::ClccResponse(
     /* [in] */ Int32 index,
@@ -598,45 +630,86 @@ ECode BluetoothHeadset::SendVendorSpecificResultCode(
     /* [in] */ const String& arg,
     /* [out] */ Boolean* result)
 {
-    //TODO
+    VALIDATE_NOT_NULL(result);
+    if (DBG) {
+        Logger::D(TAG, "sendVendorSpecificResultCode()");
+    }
+    if (command == NULL) {
+        //throw new IllegalArgumentException("command is null");
+        Logger::E(TAG, "command is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (mService != NULL && IsEnabled() &&
+            IsValidDevice(device)) {
+        //try {
+        return mService->SendVendorSpecificResultCode(device, command, arg, result);
+        //} catch (RemoteException e) {
+        //    Log.e(TAG, Log.getStackTraceString(new Throwable()));
+        //}
+    }
+    if (mService == NULL) {
+        Logger::W(TAG, "Proxy not attached to service");
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
 ECode BluetoothHeadset::EnableWBS(
     /* [out] */ Boolean* result)
 {
-    //TODO
+    VALIDATE_NOT_NULL(result);
+    if (mService != NULL && IsEnabled()) {
+        //try {
+        return mService->EnableWBS(result);
+        //} catch (RemoteException e) {
+        //    Log.e(TAG, e.toString());
+        //}
+    } else {
+        Logger::W(TAG, "Proxy not attached to service");
+        //if (DBG) Logger::D(TAG, Log.getStackTraceString(new Throwable()));
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
 ECode BluetoothHeadset::DisableWBS(
     /* [out] */ Boolean* result)
 {
-    //TODO
+    if (mService != NULL && IsEnabled()) {
+        //try {
+        return mService->DisableWBS(result);
+        //} catch (RemoteException e) {
+        //    Log.e(TAG, e.toString());
+        //}
+    } else {
+        Logger::W(TAG, "Proxy not attached to service");
+        //if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
 Boolean BluetoothHeadset::IsEnabled()
 {
-    if(mAdapter != NULL) {
-        Int32 state = IBluetoothAdapter::STATE_OFF;
+    //if(mAdapter != NULL) {
+    Int32 state = IBluetoothAdapter::STATE_OFF;
 
-        mAdapter->GetState(&state);
+    mAdapter->GetState(&state);
 
-        if (state == IBluetoothAdapter::STATE_ON) {
-           return TRUE;
-        }
+    if (state == IBluetoothAdapter::STATE_ON) {
+        return TRUE;
     }
+    //}
 
     return FALSE;
 }
 
 Boolean BluetoothHeadset::IsDisabled()
 {
-    if (mAdapter != NULL) {
-        Int32 state;
+    //if (mAdapter != NULL) {
+    Int32 state;
         if (mAdapter->GetState(&state), state == IBluetoothAdapter::STATE_OFF) return TRUE;
-    }
+    //}
 
    return FALSE;
 }

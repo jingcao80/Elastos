@@ -28,7 +28,7 @@ const String DhcpResults::TAG("DhcpResults");
 ECode DhcpResults::GetServerAddress(
     /* [out] */ IInetAddress** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = mServerAddress;
     REFCOUNT_ADD(*result)
     return NOERROR;
@@ -222,7 +222,7 @@ ECode DhcpResults::SetGateway(
     /* [in] */ const String& addrString,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
     ECode ec = NetworkUtils::NumericToInetAddress(addrString, (IInetAddress**)&mGateway);

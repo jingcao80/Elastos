@@ -1,0 +1,25 @@
+
+TARGET_NAME= phone
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../../sources.inc
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+SOURCES += SystemUIDialog.cpp
+SOURCES += CSystemUIDialog.cpp
+SOURCES += IconMerger.cpp
+SOURCES += CIconMerger.cpp
+#SOURCES += NavigationBarView.cpp
+#SOURCES += CNavigationBarView.cpp
+#SOURCES += Ticker.cpp
+##SOURCES += TickerView.cpp
+#SOURCES += CTickerView.cpp
+#SOURCES += PanelBar.cpp
+#SOURCES += CPanelBar.cpp
+#SOURCES += PanelView.cpp
+#SOURCES += CPanelView.cpp
+#SOURCES += PanelHolder.cpp
+#SOURCES += CPanelHolder.cpp
+#SOURCES += FastColorDrawable.cpp
+#SOURCES += CFastColorDrawable.cpp

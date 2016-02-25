@@ -15,6 +15,10 @@ AdvertiseCallback::AdvertiseCallback()
 {
 }
 
+AdvertiseCallback::~AdvertiseCallback()
+{
+}
+
 ECode AdvertiseCallback::OnStartSuccess(
     /* [in] */ IAdvertiseSettings* settingsInEffect)
 {

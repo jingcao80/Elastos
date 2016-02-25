@@ -20,7 +20,7 @@ public:
 
     BluetoothMasInstance();
 
-    BluetoothMasInstance(
+    CARAPI constructor(
         /* [in] */ Int32 id,
         /* [in] */ const String& name,
         /* [in] */ Int32 channel,
@@ -40,8 +40,8 @@ public:
         /* [out] */ String* info);
 
     CARAPI WriteToParcel(
-        /* [in] */ IParcel* out,
-        /* [in] */ Int32 flags);
+        /* [in] */ IParcel* out);
+    //    /* [in] */ Int32 flags);
 
     // @Override
     CARAPI ReadFromParcel(

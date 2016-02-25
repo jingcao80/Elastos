@@ -18,6 +18,8 @@ public:
 
     CAR_OBJECT_DECL()
 
+    CARAPI constructor();
+
     /** The operation type, one of F_RDLCK, F_WRLCK, or F_UNLCK. */
     CARAPI GetType(
         /* [out] */ Int16* type);

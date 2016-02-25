@@ -374,8 +374,8 @@ private:
     CARAPI_(Boolean) IsRestricted();
 
     CARAPI_(Int32) NativeSetup(
-        /* [in] */ IInterface* audiotrack_this,
-        /* [in] */ IInterface* attributes,
+        /* [in] */ IWeakReference* audiotrack_this,
+        /* [in] */ IAudioAttributes* attributes,
         /* [in] */ Int32 sampleRate,
         /* [in] */ Int32 channelMask,
         /* [in] */ Int32 audioFormat,
@@ -416,13 +416,11 @@ private:
         /* [in] */ Boolean isBlocking);
 
     CARAPI_(Int32) NativeWriteNativeBytes(
-        /* [in] */ IInterface* audioData,
+        /* [in] */ IByteBuffer* audioData,
         /* [in] */ Int32 positionInBytes,
         /* [in] */ Int32 sizeInBytes,
         /* [in] */ Int32 format,
         /* [in] */ Boolean blocking);
-
-    CARAPI_(Int32) NativeReloadStatic();
 
     CARAPI_(Int32) NativeGetNativeFrameCount();
 
@@ -456,11 +454,13 @@ private:
         /* [in] */ Int32 end,
         /* [in] */ Int32 loopCount);
 
-    CARAPI_(Int32) NativeAttachAuxEffect(
-        /* [in] */ Int32 effectId);
+    CARAPI_(Int32) NativeReload();
 
     CARAPI_(Int32) NativeSetAuxEffectSendLevel(
         /* [in] */ Float level);
+
+    CARAPI_(Int32) NativeAttachAuxEffect(
+        /* [in] */ Int32 effectId);
 
 private:
     /** Minimum value for a channel volume */
@@ -573,15 +573,20 @@ private:
      */
     AutoPtr<IIAppOpsService> mAppOps;
 
+    //--------------------------------
+    // Used exclusively by native code
+    //--------------------
     /**
      * Accessed by native methods: provides access to C++ AudioTrack object.
      */
-    Int32 mNativeTrack;
+    // @SuppressWarnings("unused")
+    Int64 mNativeTrack;
     /**
      * Accessed by native methods: provides access to the JNI data (i.e. resources used by
      * the native AudioTrack object, but not stored in it).
      */
-    Int32 mNativeData;
+    // @SuppressWarnings("unused")
+    Int64 mNativeData;
 };
 
 } // namespace Media

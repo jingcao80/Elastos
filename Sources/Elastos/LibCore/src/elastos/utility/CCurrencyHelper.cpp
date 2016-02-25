@@ -13,12 +13,7 @@ ECode CCurrencyHelper::GetInstance(
     /* [in] */ const String& currencyCode,
     /* [out] */ ICurrency** outcur)
 {
-    VALIDATE_NOT_NULL(outcur)
-
-    AutoPtr<ICurrency> cur = Currency::GetInstance(currencyCode);
-    *outcur = cur;
-    REFCOUNT_ADD(*outcur)
-    return NOERROR;
+    return Currency::GetInstance(currencyCode, outcur);
 }
 
 ECode CCurrencyHelper::GetInstance(

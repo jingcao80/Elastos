@@ -1269,7 +1269,7 @@ ECode Collections::_SingletonMap::MySet::GetSize(
 ECode Collections::_SingletonMap::MySet::GetIterator(
     /* [out] */ IIterator** it)
 {
-    VALIDATE_NOT_NULL(*it)
+    VALIDATE_NOT_NULL(it)
     *it = new Iterator(this);
     REFCOUNT_ADD(*it)
     return NOERROR;
@@ -1669,7 +1669,7 @@ ECode Collections::_SynchronizedCollection::GetSize(
 ECode Collections::_SynchronizedCollection::ToArray(
     /* [out, callee] */ ArrayOf<IInterface*>** array)
 {
-    VALIDATE_NOT_NULL(*array);
+    VALIDATE_NOT_NULL(array);
     synchronized (mLock) {
         mC->ToArray(array);
     }
@@ -1751,7 +1751,7 @@ ECode Collections::SynchronizedRandomAccessList::GetSubList(
     /* [in] */ Int32 end,
     /* [out] */ IList** subList)
 {
-    VALIDATE_NOT_NULL(*subList);
+    VALIDATE_NOT_NULL(subList);
     synchronized (mLock) {
         AutoPtr<IList> sub;
         mList->GetSubList(start, end, (IList**)&sub);
@@ -1840,7 +1840,7 @@ ECode Collections::_SynchronizedList::Get(
     /* [in] */ Int32 location,
     /* [out] */ IInterface** object)
 {
-    VALIDATE_NOT_NULL(*object);
+    VALIDATE_NOT_NULL(object);
     synchronized (mLock) {
         mList->Get(location, object);
     }
@@ -2187,7 +2187,7 @@ ECode Collections::_SynchronizedMap::ContainsValue(
 ECode Collections::_SynchronizedMap::GetEntrySet(
     /* [out, callee] */ ISet** entries)
 {
-    VALIDATE_NOT_NULL(*entries);
+    VALIDATE_NOT_NULL(entries);
     synchronized (mLock) {
         AutoPtr<ISet> entry;
         mM->GetEntrySet((ISet**)&entry);
@@ -6065,14 +6065,12 @@ Collections::CheckedListIterator::CheckedListIterator(
 ECode Collections::CheckedListIterator::HasNext(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
     return (IIterator::Probe(mI))->HasNext(result);
 }
 
 ECode Collections::CheckedListIterator::GetNext(
     /* [out] */ IInterface** object)
 {
-    VALIDATE_NOT_NULL(object);
     return (IIterator::Probe(mI))->GetNext(object);
 }
 
@@ -6084,28 +6082,24 @@ ECode Collections::CheckedListIterator::Remove()
 ECode Collections::CheckedListIterator::HasPrevious(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
     return mI->HasPrevious(result);
 }
 
 ECode Collections::CheckedListIterator::GetPrevious(
     /* [out] */ IInterface** object)
 {
-    VALIDATE_NOT_NULL(*object);
     return mI->GetPrevious(object);
 }
 
 ECode Collections::CheckedListIterator::GetNextIndex(
     /* [out] */ Int32* index)
 {
-    VALIDATE_NOT_NULL(index);
     return mI->GetNextIndex(index);
 }
 
 ECode Collections::CheckedListIterator::GetPreviousIndex(
     /* [out] */ Int32* index)
 {
-    VALIDATE_NOT_NULL(index);
     return mI->GetPreviousIndex(index);
 }
 
@@ -6161,7 +6155,6 @@ ECode Collections::_CheckedList::Get(
     /* [in] */ Int32 location,
     /* [out] */ IInterface** object)
 {
-    VALIDATE_NOT_NULL(object);
     return mL->Get(location, object);
 }
 
@@ -6170,7 +6163,6 @@ ECode Collections::_CheckedList::Set(
     /* [in] */ IInterface* object,
     /* [out] */ IInterface** prevObject)
 {
-    VALIDATE_NOT_NULL(prevObject);
     FAIL_RETURN(Collections::CheckType(object, mType));
     return mL->Set(location, object, prevObject);
 }
@@ -6202,7 +6194,6 @@ ECode Collections::_CheckedList::Remove(
     /* [in] */ Int32 location,
     /* [out] */ IInterface** object)
 {
-    VALIDATE_NOT_NULL(object);
     return mL->Remove(location, object);
 }
 
@@ -6217,7 +6208,6 @@ ECode Collections::_CheckedList::IndexOf(
     /* [in] */ IInterface* object,
     /* [out] */ Int32* index)
 {
-    VALIDATE_NOT_NULL(index);
     return mL->IndexOf(object, index);
 }
 
@@ -6225,7 +6215,6 @@ ECode Collections::_CheckedList::LastIndexOf(
     /* [in] */ IInterface* object,
     /* [out] */ Int32* index)
 {
-    VALIDATE_NOT_NULL(index);
     return mL->LastIndexOf(object, index);
 }
 
@@ -6272,14 +6261,12 @@ ECode Collections::_CheckedList::Equals(
     /* [in] */ IInterface* object,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
     return (ICollection::Probe(mL))->Equals(object, result);
 }
 
 ECode Collections::_CheckedList::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
-    VALIDATE_NOT_NULL(hashCode);
     return (ICollection::Probe(mL))->GetHashCode(hashCode);
 }
 

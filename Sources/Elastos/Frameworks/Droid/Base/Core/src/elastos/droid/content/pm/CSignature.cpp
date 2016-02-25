@@ -3,11 +3,11 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Security.h>
 #include "elastos/droid/content/pm/CSignature.h"
-//#include "elastos/droid/internal/utility/ArrayUtils.h"
+#include "elastos/droid/internal/utility/ArrayUtils.h"
 #include <elastos/utility/Arrays.h>
 #include <elastos/core/Math.h>
 
-//using Elastos::Droid::Internal::Utility::ArrayUtils;
+using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Elastos::Core::Math;
 using Elastos::Utility::Arrays;
 using Elastos::IO::IInputStream;
@@ -263,10 +263,8 @@ Boolean CSignature::AreExactMatch(
     /* [in] */ ArrayOf<ISignature*>* a,
     /* [in] */ ArrayOf<ISignature*>* b)
 {
-    assert(0 && "TODO");
-    return FALSE;
-    // return (a->GetLength() == b->GetLength()) && ArrayUtils::ContainsAll(a, b)
-    //         && ArrayUtils::ContainsAll(b, a);
+    return (a->GetLength() == b->GetLength()) && ArrayUtils::ContainsAll(a, b)
+            && ArrayUtils::ContainsAll(b, a);
 }
 
 Boolean CSignature::AreEffectiveMatch(

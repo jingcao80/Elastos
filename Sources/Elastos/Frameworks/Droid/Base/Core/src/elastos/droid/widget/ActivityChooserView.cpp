@@ -146,7 +146,7 @@ ActivityChooserView::InnerForwardingListener::InnerForwardingListener(
 ECode ActivityChooserView::InnerForwardingListener::GetPopup(
     /* [out] */ IListPopupWindow** result)
 {
-    VALIDATE_NOT_NULL(*result);
+    VALIDATE_NOT_NULL(result);
     // ==================before translated======================
     // return getListPopupWindow();
 

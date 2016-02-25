@@ -23,7 +23,7 @@ namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
-class Drawable
+class ECO_PUBLIC Drawable
     : public Object
     , public IDrawable
 {

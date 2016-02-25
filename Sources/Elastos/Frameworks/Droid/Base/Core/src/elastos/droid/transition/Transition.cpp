@@ -982,7 +982,7 @@ ECode Transition::GetTargetViewNames(
 ECode Transition::GetTargetTypes(
     /* [out] */ IList** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
     *result = IList::Probe(mTargetTypes);
     REFCOUNT_ADD(*result)
     return NOERROR;

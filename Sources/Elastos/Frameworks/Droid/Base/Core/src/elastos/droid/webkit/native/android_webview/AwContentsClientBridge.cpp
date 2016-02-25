@@ -7,11 +7,11 @@
 #include "elastos/droid/webkit/native/android_webview/JsResultHandler.h"
 #include "elastos/droid/webkit/native/android_webview/SslUtil.h"
 #include "elastos/droid/webkit/native/base/ThreadUtils.h"
-//TODO #include <elastosx/security/auth/x500/CX500Principal.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Net::Http::ISslCertificate;
 using Elastos::Droid::Net::Http::ISslError;
+using Elastos::Droid::Webkit::EIID_IValueCallback;
 using Elastos::Security::Cert::ICertificate;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Core::IBoolean;
@@ -200,7 +200,7 @@ void AwContentsClientBridge::ClientCertificateRequestCallback::ProvideResponse(
 //=========================================================================
 //               AwContentsClientBridge::InnerValueCallback
 //=========================================================================
-//TODO CAR_INTERFACE_IMPL(AwContentsClientBridge::InnerValueCallback, Object, IValueCallback);
+CAR_INTERFACE_IMPL(AwContentsClientBridge::InnerValueCallback, Object, IValueCallback);
 
 AwContentsClientBridge::InnerValueCallback::InnerValueCallback(
     /* [in] */ AwContentsClientBridge* owner,
@@ -298,7 +298,7 @@ Boolean AwContentsClientBridge::AllowCertificateError(
         return FALSE;
     }
     AutoPtr<ISslError> sslError = SslUtil::SslErrorFromNetErrorCode(certError, cert, url);
-    AutoPtr</*TODO IValueCallback*/IInterface> callback;//TODO  = new InnerValueCallback(this, id);
+    AutoPtr<IValueCallback> callback = new InnerValueCallback(this, id);
     mClient->OnReceivedSslError(callback, sslError);
     return TRUE;
 }
@@ -338,7 +338,9 @@ void AwContentsClientBridge::SelectClientCertificate(
         principals = ArrayOf<IPrincipal*>::Alloc(encodedPrincipals->GetLength());
         for (Int32 n = 0; n < encodedPrincipals->GetLength(); ++n) {
             //try {
-                //(*principals)[n] = new CX500Principal(encodedPrincipals[n]);
+            AutoPtr<IPrincipal> principalTmp;
+            CX500Principal::New((*encodedPrincipals)[n], (IPrincipal**)&principalTmp);
+            principals->Set(n, principalTmp);
             AutoPtr<IX500Principal> ixp;
             String name((char*)((*encodedPrincipals)[n]->GetPayload()));
             CX500Principal::New(name, (IX500Principal**)&ixp);

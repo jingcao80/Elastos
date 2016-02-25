@@ -101,7 +101,7 @@ void AwQuotaManagerBridge::DeleteOrigin(
  * aggregate.
  */
 void AwQuotaManagerBridge::GetOrigins(
-    /* [in] */ /*TODO IValueCallback*/IInterface* callback)
+    /* [in] */ IValueCallback * callback)
 {
     Int32 callbackId = GetNextId();
     assert(mPendingGetOriginCallbacks[callbackId] == NULL);
@@ -114,7 +114,8 @@ void AwQuotaManagerBridge::GetOrigins(
  * origin.
  */
 void AwQuotaManagerBridge::GetQuotaForOrigin(
-    /* [in] */ const String& origin, /*TODO IValueCallback*/IInterface* callback)
+    /* [in] */ const String& origin,
+    /* [in] */ IValueCallback* callback)
 {
     Int32 callbackId = GetNextId();
     assert(mPendingGetQuotaForOriginCallbacks[callbackId] == NULL);
@@ -128,7 +129,7 @@ void AwQuotaManagerBridge::GetQuotaForOrigin(
  */
 void AwQuotaManagerBridge::GetUsageForOrigin(
     /* [in] */ const String& origin,
-    /* [in] */ /*TODO IValueCallback*/IInterface* callback)
+    /* [in] */ IValueCallback * callback)
 {
     Int32 callbackId = GetNextId();
     assert(mPendingGetUsageForOriginCallbacks[callbackId] == NULL);
@@ -144,7 +145,8 @@ void AwQuotaManagerBridge::OnGetOriginsCallback(
     /* [in] */ ArrayOf<Int64>* quotas)
 {
     assert(mPendingGetOriginCallbacks[callbackId] != NULL);
-    //TODO mPendingGetOriginCallbacks[callbackId]->OnReceiveValue(new Origins(origin, usages, quotas));
+    AutoPtr<Origins> originsTmp = new Origins(origin, usages, quotas);
+    mPendingGetOriginCallbacks[callbackId]->OnReceiveValue(TO_IINTERFACE(originsTmp));
     mPendingGetOriginCallbacks.Erase(callbackId);
 }
 
@@ -159,14 +161,14 @@ void AwQuotaManagerBridge::OnGetUsageAndQuotaForOriginCallback(
         assert(mPendingGetQuotaForOriginCallbacks[callbackId] != NULL);
         AutoPtr<IInteger64> iQuota;
         CInteger64::New(quota, (IInteger64**)&iQuota);
-        //TODO mPendingGetQuotaForOriginCallbacks[callbackId]->OnReceiveValue(iQuota);
+        mPendingGetQuotaForOriginCallbacks[callbackId]->OnReceiveValue(TO_IINTERFACE(iQuota));
         mPendingGetQuotaForOriginCallbacks.Erase(callbackId);
     }
     else {
         assert(mPendingGetUsageForOriginCallbacks[callbackId] != NULL);
         AutoPtr<IInteger64> iUsage;
         CInteger64::New(usage, (IInteger64**)&iUsage);
-        //TODO mPendingGetUsageForOriginCallbacks[callbackId]->OnReceiveValue(iUsage);
+        mPendingGetUsageForOriginCallbacks[callbackId]->OnReceiveValue(TO_IINTERFACE(iUsage));
         mPendingGetUsageForOriginCallbacks.Erase(callbackId);
     }
 }

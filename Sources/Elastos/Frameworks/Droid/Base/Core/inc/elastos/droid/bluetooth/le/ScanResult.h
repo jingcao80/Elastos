@@ -33,11 +33,14 @@ public:
       * @param rssi Received signal strength.
       * @param timestampNanos Device timestamp when the scan result was observed.
       */
-    ScanResult(
+    CARAPI constructor(
         /* [in] */ IBluetoothDevice* device,
         /* [in] */ IScanRecord* scanRecord,
         /* [in] */ Int32 rssi,
         /* [in] */ Int64 timestampNanos);
+
+    CARAPI constructor(
+        /* [in] */ IParcel* in);
 
     // @Override
     CARAPI WriteToParcel(
@@ -83,10 +86,6 @@ public:
     // @Override
     CARAPI ToString(
         /* [out] */ String* info);
-
-private:
-    ScanResult(
-        /* [in] */ IParcel* in);
 
 private:
     // Remote bluetooth device.

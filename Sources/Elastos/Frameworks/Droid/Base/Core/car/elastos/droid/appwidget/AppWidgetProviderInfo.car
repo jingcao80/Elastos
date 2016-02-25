@@ -80,7 +80,7 @@ module
          * @return The provider icon.
          */
         LoadIcon(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 density,
             [out] IDrawable** result);
 
@@ -101,7 +101,7 @@ module
          * @return The widget preview image or null if preview image is not available.
          */
         LoadPreviewImage(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 density,
             [out] IDrawable** result);
 

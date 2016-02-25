@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_HARDWARE_CLISTUTILS_H__
-#define  __ELASTOS_DROID_HARDWARE_CLISTUTILS_H__
+#ifndef __ELASTOS_DROID_HARDWARE_CLISTUTILS_H__
+#define __ELASTOS_DROID_HARDWARE_CLISTUTILS_H__
 
 #include "_Elastos_Droid_Hardware_Camera2_Utils_CListUtils.h"
 #include "elastos/droid/hardware/camera2/utils/ListUtils.h"

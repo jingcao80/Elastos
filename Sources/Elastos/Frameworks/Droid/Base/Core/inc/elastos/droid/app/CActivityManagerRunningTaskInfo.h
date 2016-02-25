@@ -52,6 +52,12 @@ public:
     CARAPI SetId(
         /* [in] */ Int32 id);
 
+    CARAPI GetLastActiveTime(
+        /* [out] */ Int32* lastTime);
+
+    CARAPI SetLastActiveTime(
+        /* [in] */ Int32 lastTime);
+
     /**
      * The component launched as the first activity in the task.  This can
      * be considered the "application" of this task.

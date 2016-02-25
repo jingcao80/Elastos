@@ -126,7 +126,7 @@ private:
     {
     public:
         ActivityContainerWrapper(
-            /* [in] */ IActivityContainer* container);
+            /* [in] */ IIActivityContainer* container);
 
         virtual ~ActivityContainerWrapper();
 
@@ -167,7 +167,7 @@ private:
         CARAPI ToString(
             /* [out] */ String* str);
     private:
-        AutoPtr<IActivityContainer> mActivityContainer;
+        AutoPtr<IIActivityContainer> mActivityContainer;
         AutoPtr<ICloseGuard> mGuard;// = CloseGuard.get();
         Boolean mOpened; // Protected by mGuard.
     };

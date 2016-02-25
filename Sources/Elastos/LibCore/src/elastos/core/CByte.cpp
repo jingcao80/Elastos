@@ -127,7 +127,7 @@ ECode CByte::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    //*result = IntegralToString::ToString(mValue);
+    *result = IntegralToString::ToString(mValue);
 
     return NOERROR;
 }

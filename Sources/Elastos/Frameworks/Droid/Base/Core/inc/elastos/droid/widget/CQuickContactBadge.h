@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_WIDGET_CQUICKCONTACTBADGE_H__
-#define  __ELASTOS_DROID_WIDGET_CQUICKCONTACTBADGE_H__
+#ifndef __ELASTOS_DROID_WIDGET_CQUICKCONTACTBADGE_H__
+#define __ELASTOS_DROID_WIDGET_CQUICKCONTACTBADGE_H__
 
 #include "_Elastos_Droid_Widget_CQuickContactBadge.h"
 #include "elastos/droid/widget/QuickContactBadge.h"

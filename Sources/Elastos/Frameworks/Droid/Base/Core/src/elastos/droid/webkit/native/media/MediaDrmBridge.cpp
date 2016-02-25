@@ -7,27 +7,20 @@
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/CHandler.h"
-//TODO #include "elastos/droid/media/CMediaCrypto.h"
-//TODO #include "elastos/droid/meida/CMediaDrmHelper.h"
-//TODO #include "elastos/droid/meida/CMediaDrm.h"
-//TODO #include "elastos/droid/media/CMediaCryptoHelper.h"
-
-//TODO #include <elastos/io/CByteBufferHelper.h>
-//TODO #include <elastos/utility/CArrayDeque.h>
-//TODO #include <elastos/utility/CHashMap.h>
-//TODO #include <elastos/utility/CUUID.h>
+//TODO: #include "elastos/droid/media/CMediaCrypto.h"
+//TODO: #include "elastos/droid/meida/CMediaDrmHelper.h"
+#include "elastos/droid/media/CMediaDrm.h"
+//TODO: #include "elastos/droid/media/CMediaCryptoHelper.h"
 #include <elastos/utility/logging/Logger.h>
+//TODO: #include <org/apache/http/utility/EntityUtils.h>
+//TODO: #include <org/apache/http/impl/client/DefaultHttpClient.h>
 
-//TODO #include <org/apache/http/util/EntityUtils.h>
-//TODO #include <org/apache/http/impl/client/DefaultHttpClient.h>
-//TODO #include <org/apache/http/client/methods/CHttpPost.h>
-
-//TODO using Elastos::Droid::Media::CMediaDrm;
+using Elastos::Droid::Media::CMediaDrm;
 using Elastos::Droid::Media::IMediaDrmHelper;
-//TODO using Elastos::Droid::Media::CMediaDrmHelper;
-//TODO using Elastos::Droid::Media::CMediaCrypto;
+//TODO: using Elastos::Droid::Media::CMediaDrmHelper;
+//TODO: using Elastos::Droid::Media::CMediaCrypto;
 using Elastos::Droid::Media::IMediaCryptoHelper;
-//TODO using Elastos::Droid::Media::CMediaCryptoHelper;
+//TODO: using Elastos::Droid::Media::CMediaCryptoHelper;
 using Elastos::Droid::Media::IMediaDrmKeyRequest;
 using Elastos::Droid::Media::IMediaDrmProvisionRequest;
 
@@ -46,9 +39,9 @@ using Elastos::Utility::IArrayDeque;
 using Elastos::Utility::IDeque;
 using Elastos::Utility::CArrayDeque;
 using Elastos::Utility::IHashMap;
-//TODO using Elastos::Utility::CHashMap;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::IUUID;
-//TODO using Elastos::Utility::CUUID;
+using Elastos::Utility::CUUID;
 using Elastos::Utility::Logging::Logger;
 
 using Org::Apache::Http::IHttpResponse;
@@ -59,8 +52,9 @@ using Org::Apache::Http::IStatusLine;
 using Org::Apache::Http::Client::IHttpClient;
 using Org::Apache::Http::Client::Methods::IHttpPost;
 using Org::Apache::Http::IHttpMessage;
-//TODO using Org::Apache::Http::Impl::Client::DefaultHttpClient;
-//TODO using Org::Apache::Http::Utility::EntityUtils;
+//TODO: using Org::Apache::Http::Impl::Client::DefaultHttpClient;
+//TODO: using Org::Apache::Http::Utility::EntityUtils;
+using Org::Apache::Http::Client::Methods::CHttpPost;
 using Org::Apache::Http::IHttpEntity;
 
 namespace Elastos {
@@ -241,7 +235,7 @@ AutoPtr<ArrayOf<Byte> > MediaDrmBridge::PostRequestTask::PostRequest(
     /* [in] */ const String& url,
     /* [in] */ ArrayOf<Byte>* drmRequest)
 {
-    AutoPtr<IHttpClient> httpClient;//TODO  = new DefaultHttpClient();
+    AutoPtr<IHttpClient> httpClient;//TODO:  = new DefaultHttpClient();
     String str(url);
     str += "&signedRequest=";
     //is this OK??
@@ -249,7 +243,7 @@ AutoPtr<ArrayOf<Byte> > MediaDrmBridge::PostRequestTask::PostRequest(
     //drmRequest->ToString(&drmRequestStr);
     str += drmRequestStr;
     AutoPtr<IHttpPost> httpPost;
-    //TODO CHttpPost::New(str, (IHttpPost**)&httpPost);
+    CHttpPost::New(str, (IHttpPost**)&httpPost);
 
     String requestLineStr;
     AutoPtr<IHttpRequest> httpRequest = IHttpRequest::Probe(httpPost);
@@ -279,7 +273,7 @@ AutoPtr<ArrayOf<Byte> > MediaDrmBridge::PostRequestTask::PostRequest(
         if (responseCode == 200) {
             AutoPtr<IHttpEntity> httpEntity;
             response->GetEntity((IHttpEntity**)&httpEntity);
-            //TODO EntityUtils::ToByteArray(httpEntity, (ArrayOf<Byte>**)&responseBody);
+            //TODO: EntityUtils::ToByteArray(httpEntity, (ArrayOf<Byte>**)&responseBody);
         }
         else {
             Logger::E(MDB_PTAG, "Server returned HTTP error code,%d ", responseCode);
@@ -442,7 +436,7 @@ MediaDrmBridge::MediaDrmBridge(
     /* [in] */ Boolean singleSessionMode)
 {
     mSchemeUUID = schemeUUID;
-    //TODO CMediaDrm::New(schemeUUID, (IMediaDrm**)&mMediaDrm);
+    CMediaDrm::New(schemeUUID, (IMediaDrm**)&mMediaDrm);
     mNativeMediaDrmBridge = nativeMediaDrmBridge;
     CHandler::New((IHandler**)&mHandler);
     mSingleSessionMode = singleSessionMode;
@@ -485,7 +479,7 @@ AutoPtr<IUUID> MediaDrmBridge::GetUUIDFromBytes(
     }
 
     AutoPtr<IUUID> uuid;
-    //TODO CUUID::New(mostSigBits, leastSigBits, (IUUID**)&uuid);
+    CUUID::New(mostSigBits, leastSigBits, (IUUID**)&uuid);
 
     return uuid;
 }
@@ -536,7 +530,7 @@ Boolean MediaDrmBridge::CreateMediaCrypto()
     // Create MediaCrypto object.
     // try {
         AutoPtr<IMediaCryptoHelper> helper;
-        //TODO CMediaCryptoHelper::AcquireSingleton((IMediaCryptoHelper**)&helper);
+        //TODO: CMediaCryptoHelper::AcquireSingleton((IMediaCryptoHelper**)&helper);
         Boolean isCryptoSchemeSupported;
         helper->IsCryptoSchemeSupported(mSchemeUUID, &isCryptoSchemeSupported);
         if (isCryptoSchemeSupported) {
@@ -545,7 +539,7 @@ Boolean MediaDrmBridge::CreateMediaCrypto()
             mMediaCryptoSession->GetArray((ArrayOf<Byte>**)&mediaCryptoSession);
 
             //mMediaCrypto = new MediaCrypto(mSchemeUUID, mediaCryptoSession);
-            //TODO CMediaCrypto::New(mSchemeUUID, mediaCryptoSession, (IMediaCrypto**)mMediaCrypto);
+            //TODO: CMediaCrypto::New(mSchemeUUID, mediaCryptoSession, (IMediaCrypto**)mMediaCrypto);
             assert(mMediaCrypto != NULL);
             Logger::D(TAG, "MediaCrypto successfully created!");
             //mSessionIds.put(mMediaCryptoSession, INVALID_SESSION_ID);
@@ -630,7 +624,7 @@ Boolean MediaDrmBridge::IsCryptoSchemeSupported(
     AutoPtr<IUUID> cryptoScheme = GetUUIDFromBytes(schemeUUID);
 
     AutoPtr<IMediaCryptoHelper> helper;
-    //TODO CMediaCryptoHelper::AcquireSingleton((IMediaCryptoHelper**)&helper);
+    //TODO: CMediaCryptoHelper::AcquireSingleton((IMediaCryptoHelper**)&helper);
     Boolean result;
 
     if (containerMimeType.IsEmpty()) {
@@ -639,7 +633,7 @@ Boolean MediaDrmBridge::IsCryptoSchemeSupported(
     }
 
     AutoPtr<IMediaDrmHelper> mdHelper;
-    //TODO CMediaDrmHelper::AcquireSingleton((IMediaDrmHelper**)&mdHelper);
+    //TODO: CMediaDrmHelper::AcquireSingleton((IMediaDrmHelper**)&mdHelper);
     mdHelper->IsCryptoSchemeSupported(cryptoScheme, containerMimeType, &result);
     return result;
 }
@@ -658,7 +652,7 @@ AutoPtr<IInterface> MediaDrmBridge::Create(
 {
     AutoPtr<IUUID> cryptoScheme = GetUUIDFromBytes(schemeUUID);
     AutoPtr<IMediaDrmHelper> mdHelper;
-    //TODO CMediaDrmHelper::AcquireSingleton((IMediaDrmHelper**)&mdHelper);
+    //TODO: CMediaDrmHelper::AcquireSingleton((IMediaDrmHelper**)&mdHelper);
     Boolean isSupported;
     mdHelper->IsCryptoSchemeSupported(cryptoScheme, &isSupported);
     if (cryptoScheme == NULL || !isSupported) {
@@ -819,7 +813,7 @@ ECode MediaDrmBridge::GetKeyRequest(
 
     //HashMap<String, String> optionalParameters = new HashMap<String, String>();
     AutoPtr<IHashMap> optionalParameters;
-    //TODO CHashMap::New((IHashMap**)&optionalParameters);
+    CHashMap::New((IHashMap**)&optionalParameters);
     AutoPtr<IMediaDrmKeyRequest> request;
     AutoPtr<ArrayOf<Byte> > sessionArray;
     session->GetArray((ArrayOf<Byte>**)&sessionArray);

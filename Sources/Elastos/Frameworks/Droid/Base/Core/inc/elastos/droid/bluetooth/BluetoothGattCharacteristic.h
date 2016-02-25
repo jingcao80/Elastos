@@ -6,7 +6,6 @@
 #include <elastos/core/Object.h>
 #include "elastos/droid/ext/frameworkext.h"
 
-// import java.util.ArrayList;
 using Elastos::Core::IFloat;
 using Elastos::Core::IInteger32;
 using Elastos::Utility::IList;
@@ -364,7 +363,7 @@ private:
       * signed value.
       */
     CARAPI_(Int32) UnsignedToSigned(
-        /* [in] */ Int32 unsigned,
+        /* [in] */ Int32 unsignedInt,
         /* [in] */ Int32 size);
 
     /**

@@ -339,7 +339,7 @@ module {
          */
         AddCall(
             [in] ICallerInfo* ci,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String number,
             [in] Int32 presentation,
             [in] Int32 callType,
@@ -376,7 +376,7 @@ module {
          */
         AddCall(
             [in] ICallerInfo* ci,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String number,
             [in] Int32 presentation,
             [in] Int32 callType,
@@ -395,7 +395,7 @@ module {
          * string if none exist yet.
          */
         GetLastOutgoingCall(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] String* call);
 
         /**

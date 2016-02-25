@@ -115,6 +115,8 @@ private:
     // from com.squareup.okhttp.internal.http
     static Int32 HTTP_TEMP_REDIRECT;
     static Int32 MAX_REDIRECTS;
+
+    Int64 mNativeContext;
 };
 
 } // namespace Media

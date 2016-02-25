@@ -8,6 +8,7 @@ using Elastos::Net::EIID_IInet6Address;
 namespace Elastos {
 namespace Droid {
 namespace System {
+
 CAR_OBJECT_IMPL(CStructAddrinfo)
 
 CAR_INTERFACE_IMPL(CStructAddrinfo, Object, IStructAddrinfo)

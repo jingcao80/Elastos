@@ -9,27 +9,25 @@
 #include "elastos/droid/content/CContentResolverOpenResourceIdResult.h"
 #include "elastos/droid/content/CContentProviderClient.h"
 #include "elastos/droid/content/ContentProvider.h"
+#include "elastos/droid/content/CSyncRequestBuilder.h"
 #include "elastos/droid/content/res/CAssetFileDescriptor.h"
 //#include "elastos/droid/accounts/CAccount.h"
-//#include "elastos/droid/app/ActivityManagerNative.h"
-//#include "elastos/droid/app/AppGlobals.h"
+#include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/app/AppGlobals.h"
+#include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/SystemClock.h"
-//#include "elastos/droid/privacy/surrogate/PrivacyContentResolver.h"
-//#include "elastos/droid/text/TextUtils.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
 
-// BEGIN privacy-added
-//#include "elastos/droid/privacy/surrogate/PrivacyContentResolver.h"
-// END privacy-added
 
 //using Elastos::Droid::Accounts::CAccount;
-//using Elastos::Droid::App::ActivityManagerNative;
-//using Elastos::Droid::App::AppGlobals;
+using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::App::AppGlobals;
+using Elastos::Droid::App::CActivityThread;
 using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IParceledListSlice;
@@ -45,8 +43,6 @@ using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::IBinderHelper;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::IBaseBundle;
-//using Elastos::Droid::Privacy::Surrogate::PrivacyContentResolver;
-//using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::StringUtils;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IInteger64;
@@ -194,12 +190,11 @@ ECode ContentResolver::constructor(
 {
     CRandom::New((IRandom**)&mRandom);
 
-    assert(0 && "TODO");
     if (context != NULL) {
         mContext = context;
     }
     else {
-        // mContext = ActivityThread::CurrentApplication();
+        mContext = IContext::Probe(CActivityThread::GetCurrentApplication());
     }
 
     mContext->GetOpPackageName(&mPackageName);
@@ -278,8 +273,7 @@ ECode ContentResolver::GetType(
     AutoPtr<IUri> newUri;
     ContentProvider::GetUriWithoutUserId(uri, (IUri**)&newUri);
     Int32 userId = ResolveUserId(uri);
-    assert(0 && "TODO");
-    AutoPtr<IIActivityManager> am;// = ActivityManagerNative::GetDefault();
+    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
     return am->GetProviderMimeType(newUri, userId, type);
 //    } catch (RemoteException e) {
 //        // Arbitrary and not worth documenting, as Activity
@@ -404,8 +398,7 @@ ECode ContentResolver::Query(
         ec = AcquireProvider(uri, (IIContentProvider**)&stableProvider);
         FAIL_GOTO(ec, __EXIT__)
     }
-    assert(0 && "TODO");
-    //wrapper = new CursorWrapperInner(qCursor, stableProvider, this);
+    wrapper = new CursorWrapperInner(qCursor, stableProvider, this);
     stableProvider = NULL;
     qCursor = NULL;
     goto __EXIT__;
@@ -757,8 +750,7 @@ __EXIT__:
 
             FAIL_RETURN(ec)
 //            }
-            assert(0 && "TODO");
-            // return CAssetFileDescriptor::New(pfd, startOffset, length, fileDescriptor);
+            return CAssetFileDescriptor::New(pfd, startOffset, length, fileDescriptor);
 
 __RETURN__:
             if (NULL != stableProvider) {
@@ -868,12 +860,12 @@ ECode ContentResolver::OpenTypedAssetFileDescriptor(
 //    } finally {
 
 __EXIT__:
-    assert(0 && "TODO");
+
     if (FAILED(ec)) {
         ec = E_FILE_NOT_FOUND_EXCEPTION;
     }
     else {
-        // ec = CAssetFileDescriptor::New(pfd, startOffset, length, fileDescriptor);
+        ec = CAssetFileDescriptor::New(pfd, startOffset, length, fileDescriptor);
     }
 
     if (NULL != stableProvider) {
@@ -1397,9 +1389,7 @@ ECode ContentResolver::TakePersistableUriPermission(
     /* [in] */ IUri* uri,
     /* [in] */ Int32 modeFlags)
 {
-    AutoPtr<IIActivityManager> am;
-    assert(0 && "TODO");
-    // am = ActivityManagerNative::GetDefault();
+    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
     // try {
     AutoPtr<IUri> newUri;
     ContentProvider::GetUriWithoutUserId(uri, (IUri**)&newUri);
@@ -1412,9 +1402,7 @@ ECode ContentResolver::ReleasePersistableUriPermission(
     /* [in] */ IUri* uri,
     /* [in] */ Int32 modeFlags)
 {
-    AutoPtr<IIActivityManager> am;
-    assert(0 && "TODO");
-    // am = ActivityManagerNative::GetDefault();
+    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
     // try {
     AutoPtr<IUri> newUri;
     ContentProvider::GetUriWithoutUserId(uri, (IUri**)&newUri);
@@ -1427,9 +1415,7 @@ ECode ContentResolver::ReleasePersistableUriPermission(
 ECode ContentResolver::GetPersistedUriPermissions(
     /* [out] */ IList** perms)
 {
-    AutoPtr<IIActivityManager> am;
-    assert(0 && "TODO");
-    // am = ActivityManagerNative::GetDefault();
+    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
     // try {
     AutoPtr<IParceledListSlice> pls;
     FAIL_RETURN(am->GetPersistedUriPermissions(mPackageName, TRUE, (IParceledListSlice**)&pls))
@@ -1445,9 +1431,7 @@ ECode ContentResolver::GetOutgoingPersistedUriPermissions(
     VALIDATE_NOT_NULL(perms)
     *perms = NULL;
 
-    AutoPtr<IIActivityManager> am;
-    assert(0 && "TODO");
-    // am = ActivityManagerNative::GetDefault();
+    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
     // try {
     AutoPtr<IParceledListSlice> pls;
     FAIL_RETURN(am->GetPersistedUriPermissions(mPackageName, FALSE, (IParceledListSlice**)&pls))
@@ -1498,9 +1482,8 @@ ECode ContentResolver::RequestSyncAsUser(
 {
     VALIDATE_NOT_NULL(extras)
 
-    assert(0 && "TODO");
     AutoPtr<ISyncRequestBuilder> builder;
-    // CSyncRequestBuilder::New((ISyncRequestBuilder**)&builder);
+    CSyncRequestBuilder::New((ISyncRequestBuilder**)&builder);
     builder->SetSyncAdapter(account, authority);
     builder->SetExtras(extras);
     builder->SyncOnce();

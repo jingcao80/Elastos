@@ -3,12 +3,14 @@
 #define __ELASTOS_DROID_MEDIA_CSOUNDPOOL_H__
 
 #include "_Elastos_Droid_Media_CSoundPool.h"
+#include "Elastos.Droid.Media.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/HandlerBase.h"
+#include <elastos/droid/os/Handler.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IAssetFileDescriptor;
-using Elastos::Droid::Os::HandlerBase;
+using Elastos::Droid::Internal::App::IIAppOpsService;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::IO::IFileDescriptor;
 
@@ -89,6 +91,8 @@ namespace Media {
  * resumes.</p>
  */
 CarClass(CSoundPool)
+    , public Object
+    , public ISoundPool
 {
 public:
     /**
@@ -98,6 +102,7 @@ public:
         : public Object
         , public ISoundPoolBuilder
     {
+        friend class CSoundPool;
     public:
         Builder(
             /* [in] */ CSoundPool* host);
@@ -118,7 +123,7 @@ public:
 
     private:
         Int32 mMaxStreams;
-        AutoPtr<AudioAttributes> mAudioAttributes;
+        AutoPtr<IAudioAttributes> mAudioAttributes;
         CSoundPool* mHost;
     };
 
@@ -126,11 +131,34 @@ public:
         : public Object
         , public ISoundPoolDelegate
     {
+        friend class CSoundPool;
+    private:
+        class EventHandler
+            : public Handler
+        {
+            friend class CSoundPool;
+            friend class SoundPoolImpl;
+        public:
+            EventHandler(
+                /* [in] */ CSoundPool* soundPool,
+                /* [in] */ SoundPoolImpl* host,
+                /* [in] */ ILooper* looper);
+
+            CAR_INTERFACE_DECL();
+
+            CARAPI HandleMessage(
+                /* [in] */ IMessage* msg);
+
+        private:
+            CSoundPool* mSoundPool;
+            SoundPoolImpl*  mHost;
+        };
+
     public:
         SoundPoolImpl(
-            /* [in] */ SoundPool* proxy,
+            /* [in] */ CSoundPool* proxy,
             /* [in] */ Int32 maxStreams,
-            /* [in] */ AudioAttributes* attr);
+            /* [in] */ IAudioAttributes* attr);
 
         ~SoundPoolImpl();
 
@@ -156,10 +184,10 @@ public:
             /* [in] */ IFileDescriptor* fd,
             /* [in] */ Int64 offset,
             /* [in] */ Int64 length,
-            /* [in] */ Int64 priority,
+            /* [in] */ Int32 priority,
             /* [out] */ Int32* result);
 
-        CARAPI UnLoad(
+        CARAPI Unload(
             /* [in] */ Int32 soundID,
             /* [out] */ Boolean* result);
 
@@ -220,6 +248,8 @@ public:
 
         CARAPI ReleaseSoundPoolImpl();
 
+        CARAPI ReleaseSoundPoolDelegate();
+
     private:
         CARAPI_(Int32) _Load(
             /* [in] */ const String& uri,
@@ -264,10 +294,10 @@ public:
 
         AutoPtr<EventHandler> mEventHandler;
         AutoPtr<ISoundPoolOnLoadCompleteListener> mOnLoadCompleteListener;
-        SoundPool* mProxy;
+        CSoundPool* mProxy;
 
         Object mLock;
-        AutoPtr<AudioAttributes> mAttributes;
+        AutoPtr<IAudioAttributes> mAttributes;
         AutoPtr<IIAppOpsService> mAppOps;
 
         // SoundPool messages
@@ -361,28 +391,19 @@ public:
             /* [in] */ ISoundPoolOnLoadCompleteListener* listener);
 
         CARAPI ReleaseSoundPoolStub();
-    };
 
-private:
-    class EventHandler
-        : public HandlerBase
-    {
-    public:
-        EventHandler(
-            /* [in] */ CSoundPool* soundPool,
-            /* [in] */ ILooper* looper);
-
-        CARAPI HandleMessage(
-            /* [in] */ IMessage* msg);
-
-    private:
-        CSoundPool* mSoundPool;
+        //for compile
+        CARAPI ReleaseSoundPoolDelegate();
     };
 
 public:
     CSoundPool();
 
     ~CSoundPool();
+
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
 
     /**
      * Constructor. Constructs a SoundPool object with the following
@@ -403,6 +424,10 @@ public:
         /* [in] */ Int32 maxStreams,
         /* [in] */ Int32 streamType,
         /* [in] */ Int32 srcQuality);
+
+    CARAPI constructor(
+        /* [in] */ Int32 maxStreams,
+        /* [in] */ IAudioAttributes* attributes);
 
     /**
      * Load the sound from the specified path.
@@ -595,6 +620,10 @@ public:
         /* [in] */ Float leftVolume,
         /* [in] */ Float rightVolume);
 
+    CARAPI SetVolume(
+       /* [in] */ Int32 streamID,
+       /* [in] */ Float volume);
+
     /**
      * Change stream priority.
      *
@@ -644,7 +673,7 @@ public:
      * Sets the callback hook for the OnLoadCompleteListener.
      */
     CARAPI SetOnLoadCompleteListener(
-        /* [in] */ IOnLoadCompleteListener* listener);
+        /* [in] */ ISoundPoolOnLoadCompleteListener* listener);
 
     /**
      * Release the SoundPool resources.
@@ -655,22 +684,10 @@ public:
      */
     CARAPI ReleaseResources();
 
-    // post event from native code to message handler
-    static CARAPI PostEventFromNative(
-        /* [in] */ IWeakReference* weakRef,
-        /* [in] */ Int32 msg,
-        /* [in] */ Int32 arg1,
-        /* [in] */ Int32 arg2,
-        /* [in] */ IInterface* obj);
-
 protected:
     CARAPI_(void) Finalize();
 
 private:
-    CARAPI constructor(
-        /* [in] */ Int32 maxStreams,
-        /* [in] */ IAudioAttributes* attributes);
-
     CARAPI NativeLoad(
         /* [in] */ const String& uri,
         /* [in] */ Int32 priority,
@@ -683,12 +700,6 @@ private:
         /* [in] */ Int32 priority,
         /* [in] */ Int32* id);
 
-    CARAPI_(Int32) NativeSetup(
-        /* [in] */ IWeakReference* weakRef,
-        /* [in] */ Int32 maxStreams,
-        /* [in] */ Int32 streamType,
-        /* [in] */ Int32 srcQuality);
-
 public:
     static const String TAG; // = "SoundPool";
     static const Boolean DEBUG; // = FALSE;
@@ -697,10 +708,6 @@ private:
     AutoPtr<ISoundPoolDelegate> mImpl;
 
     Handle32 mNativeContext; // accessed by native methods
-
-    AutoPtr<EventHandler> mEventHandler;
-
-    AutoPtr<ISoundPoolOnLoadCompleteListener> mOnLoadCompleteListener;
 
     Object mLock;
 

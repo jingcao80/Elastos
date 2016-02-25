@@ -174,7 +174,7 @@ ECode AwContentsClient::OnReceivedClientCertRequest(
 
 // TODO(joth): Make abstract once this has rolled in downstream.
 ECode AwContentsClient::ShowFileChooser(
-    /* [in] */ /*TODO IValueCallback*/IInterface* uploadFilePathsCallback,
+    /* [in] */ IValueCallback* uploadFilePathsCallback,
     /* [in] */ FileChooserParams* fileChooserParams)
 {
     return NOERROR;
@@ -200,7 +200,7 @@ ECode AwContentsClient::OnPermissionRequestCanceled(
 ECode AwContentsClient::OnShowCustomView(
     /* [in] */ IView* view,
     /* [in] */ Int32 requestedOrientation,
-    /* [in] */ /*TODO IWebChromeClientCustomViewCallback*/IInterface* callback)
+    /* [in] */ IWebChromeClientCustomViewCallback* callback)
 {
     return NOERROR;
 }
@@ -209,7 +209,7 @@ ECode AwContentsClient::OnShowCustomView(
 // makes the merge to the Android easy.
 ECode AwContentsClient::OnShowCustomView(
     /* [in] */ IView* view,
-    /* [in] */ /*TODO IWebChromeClientCustomViewCallback*/IInterface* callback)
+    /* [in] */ IWebChromeClientCustomViewCallback* callback)
 {
     return OnShowCustomView(view, IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED, callback);
 }

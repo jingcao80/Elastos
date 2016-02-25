@@ -1484,7 +1484,7 @@ module
 
         /** {@hide} */
         From(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IConnectivityManager** result);
 
         /** {@hide */

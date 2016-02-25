@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_GRAPHICS_DRAWABLE_CVECTORDRAWABLE_H__
-#define  __ELASTOS_DROID_GRAPHICS_DRAWABLE_CVECTORDRAWABLE_H__
+#ifndef __ELASTOS_DROID_GRAPHICS_DRAWABLE_CVECTORDRAWABLE_H__
+#define __ELASTOS_DROID_GRAPHICS_DRAWABLE_CVECTORDRAWABLE_H__
 
 #include "_Elastos_Droid_Graphics_Drawable_CVectorDrawable.h"
 #include "elastos/droid/graphics/drawable/VectorDrawable.h"

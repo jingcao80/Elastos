@@ -1,6 +1,6 @@
 
-#ifndef  __ENGLISHINPUTPROCESSOR_H__
-#define  __ENGLISHINPUTPROCESSOR_H__
+#ifndef __ENGLISHINPUTPROCESSOR_H__
+#define __ENGLISHINPUTPROCESSOR_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 

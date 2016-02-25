@@ -4,28 +4,28 @@
 #include "elastos/droid/webkit/native/base/ContentUriUtils.h"
 #include "elastos/droid/webkit/native/base/ThreadUtils.h"
 #include "elastos/droid/webkit/native/content/browser/ContentVideoView.h"
-//TODO #include "elastos/droid/net/CUriHelper.h"
-//TODO #include "elastos/droid/webkit/CConsoleMessage.h"
-//TODO #include <elastos/utility/CArrayList.h>
+#include "elastos/droid/net/CUriHelper.h"
+#include "elastos/droid/webkit/CConsoleMessage.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Webkit::Base::ContentUriUtils;
 using Elastos::Droid::Webkit::Base::ThreadUtils;
 using Elastos::Droid::Webkit::Content::Browser::ContentVideoView;
 using Elastos::Droid::Webkit::Content::Browser::ContentViewCore;
+using Elastos::Droid::Webkit::EIID_IValueCallback;
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
-//TODO using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Provider::IMediaStore;
 using Elastos::Droid::Provider::IMediaStoreMediaColumns;
-//TODO using Elastos::Droid::Webkit::IConsoleMessage;
-//TODO using Elastos::Droid::Webkit::CConsoleMessage;
+using Elastos::Droid::Webkit::IConsoleMessage;
+using Elastos::Droid::Webkit::CConsoleMessage;
 using Elastos::Droid::Os::EIID_IHandler;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IArrayList;
-//TODO using Elastos::Utility::CArrayList;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
 
@@ -65,7 +65,7 @@ ECode AwWebContentsDelegateAdapter::GetDisplayNameTask::DoInBackground(
     *result = NULL;
 
     AutoPtr<IArrayList> displayNamesList;
-    //TODO CArrayList::New((IArrayList**)&displayNamesList);
+    CArrayList::New((IArrayList**)&displayNamesList);
     //AutoPtr<ArrayOf<String> > displayNames = ArrayOf<String>::Alloc(mFilePaths->GetLength());
     for (Int32 i = 0; i < mFilePaths->GetLength(); ++i) {
         //(*displayNames)[i] = ResolveFileName(mFilePaths[i]);
@@ -114,7 +114,7 @@ String AwWebContentsDelegateAdapter::GetDisplayNameTask::ResolveFileName(
     }
 
     AutoPtr<IUriHelper> helper;
-    //TODO CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     AutoPtr<IUri> uri;
     helper->Parse(filePath, (IUri**)&helper);
     return ContentUriUtils::GetDisplayName(
@@ -161,7 +161,7 @@ ECode AwWebContentsDelegateAdapter::InnerHandler::HandleMessage(
 //===============================================================
 //       AwWebContentsDelegateAdapter::InnerValueCallback
 //===============================================================
-//TODO CAR_INTERFACE_IMPL(AwWebContentsDelegateAdapter::InnerValueCallback, Object, IValueCallback);
+CAR_INTERFACE_IMPL(AwWebContentsDelegateAdapter::InnerValueCallback, Object, IValueCallback);
 
 AwWebContentsDelegateAdapter::InnerValueCallback::InnerValueCallback(
     /* [in] */ AwWebContentsDelegateAdapter* owner,
@@ -316,27 +316,27 @@ Boolean AwWebContentsDelegateAdapter::AddMessageToConsole(
     /* [in] */ Int32 lineNumber,
     /* [in] */ const String& sourceId)
 {
-    //TODO Elastos::Droid::Webkit::MessageLevel messageLevel = Elastos::Droid::Webkit::DEBUG;
+    Elastos::Droid::Webkit::MessageLevel messageLevel = Elastos::Droid::Webkit::DEBUG;
     switch(level) {
         case LOG_LEVEL_TIP:
-            //TODO messageLevel = Elastos::Droid::Webkit::TIP;
+            messageLevel = Elastos::Droid::Webkit::TIP;
             break;
         case LOG_LEVEL_LOG:
-            //TODO messageLevel = Elastos::Droid::Webkit::LOG;
+            messageLevel = Elastos::Droid::Webkit::LOG;
             break;
         case LOG_LEVEL_WARNING:
-            //TODO messageLevel = Elastos::Droid::Webkit::WARNING;
+            messageLevel = Elastos::Droid::Webkit::WARNING;
             break;
         case LOG_LEVEL_ERROR:
-            //TODO messageLevel = Elastos::Droid::Webkit::ERROR;
+            messageLevel = Elastos::Droid::Webkit::ERROR;
             break;
         default:
             Logger::W(TAG, "Unknown message level, defaulting to DEBUG");
             break;
     }
 
-    AutoPtr</*TODO IConsoleMessage*/IInterface> cm;
-    //TODO CConsoleMessage::New(message, sourceId, lineNumber, messageLevel, (IConsoleMessage**)&cm);
+    AutoPtr<IConsoleMessage> cm;
+    CConsoleMessage::New(message, sourceId, lineNumber, messageLevel, (IConsoleMessage**)&cm);
     return mContentsClient->OnConsoleMessage(cm);
 }
 
@@ -409,7 +409,7 @@ void AwWebContentsDelegateAdapter::RunFileChooser(
     params->defaultFilename = defaultFilename;
     params->capture = capture;
 
-    AutoPtr</*TODO IValueCallback*/IInterface> callback ;//TODO = new InnerValueCallback(this, processId, renderId, modeFlags, FALSE);
+    AutoPtr<IValueCallback> callback = new InnerValueCallback(this, processId, renderId, modeFlags, FALSE);
     mContentsClient->ShowFileChooser(callback, params);
 }
 

@@ -7,10 +7,6 @@
 #include <elastos/core/Object.h>
 #include "elastos/droid/ext/frameworkext.h"
 
-// import java.util.ArrayList;
-// import android.content.IIntent;
-// import android.util.Log;
-
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IServiceConnection;
@@ -31,7 +27,7 @@ class BluetoothMap
     , public IBluetoothMap
     , public IBluetoothProfile
 {
-private:
+public:
     class BluetoothStateChangeCallbackStub
         : public Object
         , public IIBluetoothStateChangeCallback
@@ -42,7 +38,7 @@ private:
 
         BluetoothStateChangeCallbackStub();
 
-        BluetoothStateChangeCallbackStub(
+        CARAPI constructor(
             /* [in] */ IBluetoothMap* owner);
 
         CARAPI OnBluetoothStateChange(
@@ -58,6 +54,7 @@ private:
         BluetoothMap* mOwner;
     };
 
+private:
     class InnerServiceConnection
         : public Object
         , public IServiceConnection
@@ -83,6 +80,8 @@ public:
     CAR_INTERFACE_DECL();
 
     BluetoothMap();
+
+    ~BluetoothMap();
 
     /**
       * Create a BluetoothMap proxy object.
@@ -231,7 +230,7 @@ private:
     static const String TAG;
     static const Boolean DBG;
     static const Boolean VDBG;
-    AutoPtr<IBluetoothMap> mService;
+    AutoPtr<IIBluetoothMap> mService;
     AutoPtr<IContext> mContext;
     AutoPtr<IBluetoothProfileServiceListener> mServiceListener;
     AutoPtr<IBluetoothAdapter> mAdapter;

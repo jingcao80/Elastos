@@ -32,9 +32,12 @@
 #include "elastos/droid/webkit/native/content/browser/input/SelectionHandleController.h"
 #include "elastos/droid/webkit/native/content_public/browser/GestureStateListener.h"
 #include "elastos/droid/webkit/native/ui/base/ViewElastosDelegate.h"
+#include "elastos/droid/webkit/native/ui/base/ViewElastos.h"
+#include "elastos/droid/webkit/native/ui/base/WindowElastos.h"
 
 using Elastos::Utility::IHashSet;
 using Elastos::Utility::IMap;
+using Elastos::Utility::IHashSet;
 using Elastos::Utility::ISet;
 
 // import android.annotation.SuppressLint;
@@ -86,6 +89,8 @@ using Elastos::Droid::Widget::IFrameLayout;
 
 using Elastos::Droid::Webkit::Base::ObserverList;
 using Elastos::Droid::Webkit::Ui::Base::ViewElastosDelegate;
+using Elastos::Droid::Webkit::Ui::Base::ViewElastos;
+using Elastos::Droid::Webkit::Ui::Base::WindowElastos;
 using Elastos::Droid::Webkit::Content::Browser::Accessibility::AccessibilityInjector;
 using Elastos::Droid::Webkit::Content::Browser::Accessibility::BrowserAccessibilityManager;
 using Elastos::Droid::Webkit::Content::Browser::Input::AdapterInputConnection;
@@ -721,11 +726,11 @@ public:
     // to set the private browsing mode at a later point for the WebView implementation.
     // Note that the caller remains the owner of the nativeWebContents and is responsible for
     // deleting it after destroying the ContentViewCore.
-//    CARAPI_(void) Initialize(
-//        /* [in] */ IViewGroup* containerView,
-//        /* [in] */ InternalAccessDelegate* internalDispatcher,
-//        /* [in] */ Int64 nativeWebContents,
-//        /* [in] */ WindowAndroid* windowAndroid);
+    CARAPI_(void) Initialize(
+        /* [in] */ IViewGroup* containerView,
+        /* [in] */ InternalAccessDelegate* internalDispatcher,
+        /* [in] */ Int64 nativeWebContents,
+        /* [in] */ WindowElastos* windowElastos);
 
     /**
      * Sets a new container view for this {@link ContentViewCore}.
@@ -1526,11 +1531,10 @@ public:
      *                           exposed.
      *
      */
-    // TODO
-    // CARAPI_(void) AddPossiblyUnsafeJavascriptInterface(
-    //     /* [in] */ IInterface* object,
-    //     /* [in] */ const String& name,
-    //     /* [in] */ IAnnotation* requiredAnnotation);
+    CARAPI_(void) AddPossiblyUnsafeJavascriptInterface(
+        /* [in] */ IInterface* object,
+        /* [in] */ const String& name,
+        /* [in] */ IInterface* requiredAnnotation);
 
     /**
      * Removes a previously added JavaScript interface with the given name.
@@ -2549,7 +2553,7 @@ private:
     // on the interface object. Note we use HashSet rather than Set as the native side
     // expects HashSet (no bindings for interfaces).
 //    const HashSet<Object> mRetainedJavaScriptObjects = new HashSet<Object>();
-    AutoPtr<ISet> mRetainedJavaScriptObjects;
+    AutoPtr<IHashSet> mRetainedJavaScriptObjects;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IViewGroup> mContainerView;
@@ -2658,7 +2662,7 @@ private:
     // onNativeFlingStopped() is called asynchronously.
     Int32 mPotentiallyActiveFlingCount;
 
-//    AutoPtr<ViewAndroid> mViewAndroid;
+    AutoPtr<ViewElastos> mViewElastos;
 
     AutoPtr<SmartClipDataListener> mSmartClipDataListener;
 

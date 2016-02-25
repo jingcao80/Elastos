@@ -1,4 +1,5 @@
 #include "elastos/droid/media/CMediaCodecMediaImage.h"
+#include "elastos/droid/media/Utils.h"
 #include <elastos/utility/Arrays.h>
 
 using Elastos::Droid::Graphics::IImageFormat;
@@ -152,8 +153,7 @@ ECode CMediaCodecMediaImage::constructor(
 
             IBuffer::Probe(buffer)->GetPosition(&pos);
             Int32 d;
-// TODO: Need Utils
-            // d = Utils::DivUp(bitDepth, 8);
+            d = Utils::DivUp(bitDepth, 8);
             IBuffer::Probe(buffer)->SetLimit(pos + d + (mHeight / vert - 1) * rowInc +
                     (mWidth / horiz - 1) * colInc);
 

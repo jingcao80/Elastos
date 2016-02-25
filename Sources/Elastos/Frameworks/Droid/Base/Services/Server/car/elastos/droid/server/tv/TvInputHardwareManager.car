@@ -1,0 +1,41 @@
+module
+{
+    using interface Elastos.Droid.Hardware.Hdmi.IHdmiDeviceInfo;
+    using interface Elastos.Droid.Media.Tv.ITvInputHardwareInfo;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Tv {
+
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface ITvInputHardwareManagerListener {
+        OnStateChanged(
+            [in] String inputId,
+            [in] Int32 state);
+
+        OnHardwareDeviceAdded(
+            [in] ITvInputHardwareInfo* info);
+
+        OnHardwareDeviceRemoved(
+            [in] ITvInputHardwareInfo* info);
+
+        OnHdmiDeviceAdded(
+            [in] IHdmiDeviceInfo* device);
+
+        OnHdmiDeviceRemoved(
+            [in] IHdmiDeviceInfo* device);
+
+        OnHdmiDeviceUpdated(
+            [in] String inputId,
+            [in] IHdmiDeviceInfo* device);
+    }
+
+    } // namespace Tv
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

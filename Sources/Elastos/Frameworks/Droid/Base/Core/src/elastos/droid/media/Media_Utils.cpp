@@ -1,20 +1,24 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/media/Media_Utils.h"
-#include <media/stagefright/MediaErrors.h>
 #include <elastos/utility/logging/Slogger.h>
 
+#include <media/stagefright/MediaErrors.h>
+
+using Elastos::IO::CByteBufferHelper;
+using Elastos::IO::IBuffer;
 using Elastos::IO::IByteBuffer;
 using Elastos::IO::IByteBufferHelper;
-using Elastos::IO::CByteBufferHelper;
-using Elastos::Core::IInteger32;
-using Elastos::Core::IInteger64;
-using Elastos::Core::IFloat;
+using Elastos::Core::CFloat;
 using Elastos::Core::CInteger32;
 using Elastos::Core::CInteger64;
-using Elastos::Core::CFloat;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::IFloat;
+using Elastos::Core::IInteger32;
+using Elastos::Core::IInteger64;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::IHashMap;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -22,43 +26,6 @@ namespace Droid {
 namespace Media {
 
 const String Media_Utils::TAG("Media_Utils");
-
-ECode Media_Utils::ThrowExceptionAsNecessary(
-    /* [in] */ android::status_t err,
-    /* [out] */ Int32* result)
-{
-    VALIDATE_NOT_NULL(result)
-    *result = 0;
-    if (err >= android::ERROR_DRM_WV_VENDOR_MIN
-        && err <= android::ERROR_DRM_WV_VENDOR_MAX) {
-        // We'll throw our custom MediaCodec.CryptoException
-        Slogger::E(TAG, "MediaCodec.CryptoException!");
-        return E_CRYPTO_EXCEPTION;
-    }
-
-    switch (err) {
-        case android::OK:
-            return NOERROR;
-
-        case -EAGAIN:
-            *result = DEQUEUE_INFO_TRY_AGAIN_LATER;
-            return NOERROR; // DEQUEUE_INFO_TRY_AGAIN_LATER;
-
-        case android::INFO_FORMAT_CHANGED:
-            *result = DEQUEUE_INFO_OUTPUT_FORMAT_CHANGED;
-            return NOERROR; //DEQUEUE_INFO_OUTPUT_FORMAT_CHANGED;
-
-        case android::INFO_OUTPUT_BUFFERS_CHANGED:
-            *result = DEQUEUE_INFO_OUTPUT_BUFFERS_CHANGED;
-            return NOERROR; //DEQUEUE_INFO_OUTPUT_BUFFERS_CHANGED;
-
-        default:
-            Slogger::E(TAG, "Media IllegalStateException!");
-            return E_ILLEGAL_STATE_EXCEPTION;
-    }
-
-    return NOERROR;
-}
 
 ECode Media_Utils::ConvertKeyValueArraysToKeyedVector(
     /* [in] */ ArrayOf<String>* keys,
@@ -100,15 +67,15 @@ ECode Media_Utils::ConvertKeyValueArraysToKeyedVector(
     return NOERROR;
 }
 
-ECode Media_Utils::ConvertMessageToMap(
+android::status_t Media_Utils::ConvertMessageToMap(
    /* [in] */ android::sp<android::AMessage>& msg,
-   /* [out] */ IObjectStringMap** mymap)
+   /* [out] */ IMap** mymap)
 {
     VALIDATE_NOT_NULL(mymap);
     *mymap = NULL;
 
-    AutoPtr<IObjectStringMap> returnMap;
-    CObjectStringMap::New( (IObjectStringMap**)&returnMap);
+    AutoPtr<IHashMap> returnMap;
+    CHashMap::New( (IHashMap**)&returnMap);
 
     for (Int32 i = 0; i < msg->countEntries(); i++) {
         android::AMessage::Type valueType;
@@ -157,8 +124,7 @@ ECode Media_Utils::ConvertMessageToMap(
                 AutoPtr<IByteBufferHelper> helper;
                 CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
                 AutoPtr<IByteBuffer> buffer;
-                helper->Allocate(size, (IByteBuffer**)&buffer);
-                buffer->PutBytes(bytes);
+                helper->Wrap(&bytes, (IByteBuffer**)&buffer);
                 valueObj = buffer->Probe(EIID_IInterface);
                 break;
             }
@@ -170,26 +136,34 @@ ECode Media_Utils::ConvertMessageToMap(
 
                 String strLeft;
                 strLeft.AppendFormat("%s-left", key);
+                AutoPtr<ICharSequence> csLeft;
+                CString::New(strLeft, (ICharSequence**)&csLeft);
                 CInteger32::New(left, (IInteger32**)&tmpInt);
-                returnMap->Put(strLeft ,tmpInt->Probe(EIID_IInterface));
+                returnMap->Put(csLeft ,tmpInt->Probe(EIID_IInterface));
 
                 String strTop;
                 strLeft.AppendFormat("%s-top", key);
+                AutoPtr<ICharSequence> csTop;
+                CString::New(strTop, (ICharSequence**)&csTop);
                 tmpInt = NULL;
                 CInteger32::New(top, (IInteger32**)&tmpInt);
-                returnMap->Put(strTop ,tmpInt->Probe(EIID_IInterface));
+                returnMap->Put(csTop ,tmpInt->Probe(EIID_IInterface));
 
                 String strRight;
                 strLeft.AppendFormat("%s-right", key);
+                AutoPtr<ICharSequence> csRight;
+                CString::New(strRight, (ICharSequence**)&csRight);
                 tmpInt = NULL;
                 CInteger32::New(right, (IInteger32**)&tmpInt);
-                returnMap->Put(strRight ,tmpInt->Probe(EIID_IInterface));
+                returnMap->Put(csRight ,tmpInt->Probe(EIID_IInterface));
 
                 String strBottom;
                 strLeft.AppendFormat("%s-bottom", key);
+                AutoPtr<ICharSequence> csBottom;
+                CString::New(strBottom, (ICharSequence**)&csBottom);
                 tmpInt = NULL;
                 CInteger32::New(bottom, (IInteger32**)&tmpInt);
-                returnMap->Put(strBottom ,tmpInt->Probe(EIID_IInterface));
+                returnMap->Put(csBottom ,tmpInt->Probe(EIID_IInterface));
                 break;
             }
 
@@ -199,16 +173,18 @@ ECode Media_Utils::ConvertMessageToMap(
 
         if (valueObj != NULL)  {
             String keyObj(key);
-            returnMap->Put(keyObj ,valueObj);
+            AutoPtr<ICharSequence> csKey;
+            CString::New(keyObj, (ICharSequence**)&csKey);
+            returnMap->Put(csKey ,valueObj);
         }
     }//end for
 
-    *mymap = returnMap;
+    *mymap = IMap::Probe(returnMap);
     REFCOUNT_ADD(*mymap);
-    return NOERROR;
+    return android::OK;
 }
 
-ECode Media_Utils::ConvertKeyValueArraysToMessage(
+android::status_t Media_Utils::ConvertKeyValueArraysToMessage(
     /* [in] */ ArrayOf<String>* keys,
     /* [in] */ ArrayOf<IInterface*>* values,
     /* [in] */ android::sp<android::AMessage> * out)
@@ -220,7 +196,7 @@ ECode Media_Utils::ConvertKeyValueArraysToMessage(
     if (keys != NULL){
         if (values == NULL){
             //show error log
-            return E_INVALID_ARGUMENT;
+            return -EINVAL;
         }
 
         numEntries = keys->GetLength();
@@ -228,8 +204,8 @@ ECode Media_Utils::ConvertKeyValueArraysToMessage(
             return E_INVALID_ARGUMENT;
         }
     }
-    else if (values!=NULL){
-        return E_INVALID_ARGUMENT;
+    else if (values != NULL){
+        return -EINVAL;
     }
 
     android::sp<android::AMessage> msg = new android::AMessage;
@@ -257,8 +233,8 @@ ECode Media_Utils::ConvertKeyValueArraysToMessage(
             IByteBuffer* b = IByteBuffer::Probe(valueObj);
             Int32 position;
             Int32 limit;
-            b->GetPosition(&position);
-            b->GetLimit(&limit);
+            IBuffer::Probe(b)->GetPosition(&position);
+            IBuffer::Probe(b)->GetLimit(&limit);
             AutoPtr<ArrayOf<Byte> > array;
             b->GetArray((ArrayOf<Byte>**)&array);
 
@@ -271,10 +247,8 @@ ECode Media_Utils::ConvertKeyValueArraysToMessage(
     }//for loop
 
     *out = msg;
-    return NOERROR;
+    return android::OK;
 }
-
-
 
 } // namespace Media
 } // namepsace Droid

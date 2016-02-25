@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_WIDGET_TOGGLEBUTTON_H__
-#define  __ELASTOS_DROID_WIDGET_TOGGLEBUTTON_H__
+#ifndef __ELASTOS_DROID_WIDGET_TOGGLEBUTTON_H__
+#define __ELASTOS_DROID_WIDGET_TOGGLEBUTTON_H__
 
 #include "elastos/droid/widget/CompoundButton.h"
 

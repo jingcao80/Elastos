@@ -58,6 +58,7 @@ DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Location::ILocationListener)
 //
 #ifdef HASH_FOR_NET
 #include "Elastos.Droid.Net.h"
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Net::IUri)
 DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Net::INetworkIdentity)
 #endif
 

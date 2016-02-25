@@ -170,7 +170,7 @@ module
          * @see #setChoiceValues(String[])
          */
         SetChoiceValues(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 stringArrayResId);
 
         /**
@@ -198,7 +198,7 @@ module
          * @param stringArrayResId the resource id of a string array containing the possible entries.
          */
         SetChoiceEntries(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 stringArrayResId);
 
         /**

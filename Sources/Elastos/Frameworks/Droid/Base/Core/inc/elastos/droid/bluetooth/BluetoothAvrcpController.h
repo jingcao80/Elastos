@@ -9,11 +9,8 @@
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
-// import android.content.IIntent;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Os::IBinder;
-// import android.util.Log;
-// import java.util.ArrayList;
 using Elastos::Utility::IList;
 
 
@@ -36,7 +33,7 @@ class BluetoothAvrcpController
     , public IBluetoothAvrcpController
     , public IBluetoothProfile
 {
-private:
+public:
     class BluetoothStateChangeCallbackStub
         : public Object
         , public IIBluetoothStateChangeCallback
@@ -47,7 +44,7 @@ private:
 
         BluetoothStateChangeCallbackStub();
 
-        BluetoothStateChangeCallbackStub(
+        CARAPI constructor(
             /* [in] */ IBluetoothAvrcpController* owner);
 
         CARAPI OnBluetoothStateChange(
@@ -63,6 +60,7 @@ private:
         BluetoothAvrcpController* mOwner;
     };
 
+private:
     class InnerServiceConnection
         : public Object
         , public IServiceConnection
@@ -90,6 +88,8 @@ public:
     CAR_INTERFACE_DECL();
 
     BluetoothAvrcpController();
+
+    ~BluetoothAvrcpController();
 
     /**
       * Create a BluetoothAvrcpController proxy object for interacting with the local
@@ -149,7 +149,7 @@ private:
     static const Boolean VDBG;
     AutoPtr<IContext> mContext;
     AutoPtr<IBluetoothProfileServiceListener> mServiceListener;
-    AutoPtr<IBluetoothAvrcpController> mService;
+    AutoPtr<IIBluetoothAvrcpController> mService;
     AutoPtr<IBluetoothAdapter> mAdapter;
     AutoPtr<IIBluetoothStateChangeCallback> mBluetoothStateChangeCallback;
     AutoPtr<IServiceConnection> mConnection;

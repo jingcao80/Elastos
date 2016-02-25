@@ -1,7 +1,17 @@
 
 #include "elastos/droid/bluetooth/BluetoothGattServer.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/droid/os/CParcelUuid.h"
+#include "elastos/core/AutoLock.h"
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Os::CParcelUuid;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Core::AutoLock;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IUUIDHelper;
+using Elastos::Utility::CUUIDHelper;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -17,29 +27,28 @@ BluetoothGattServer::BluetoothGattServerCallbackStub::BluetoothGattServerCallbac
 {
 }
 
-BluetoothGattServer::BluetoothGattServerCallbackStub::BluetoothGattServerCallbackStub(
+ECode BluetoothGattServer::BluetoothGattServerCallbackStub::constructor(
     /* [in] */ IBluetoothGattServer* owner)
 {
     mOwner = (BluetoothGattServer*)owner;
+    return NOERROR;
 }
 
 ECode BluetoothGattServer::BluetoothGattServerCallbackStub::OnServerRegistered(
     /* [in] */ Int32 status,
     /* [in] */ Int32 serverIf)
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "onServerRegistered() - status=" + status
-    //     + " serverIf=" + serverIf);
-    // synchronized(mServerIfLock) {
-    //     if (mCallback != null) {
-    //         mServerIf = serverIf;
-    //         mServerIfLock.notify();
-    //     } else {
-    //         // registration timeout
-    //         Log.e(TAG, "onServerRegistered: mCallback is null");
-    //     }
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "onServerRegistered() - status=%d, serverIf=%d", status, serverIf);
+    {
+        AutoLock lock(mOwner->mServerIfLock);
+        if (mOwner->mCallback != NULL) {
+            mOwner->mServerIf = serverIf;
+            mOwner->mServerIfLock->Notify();
+        } else {
+            // registration timeout
+            Logger::E(TAG, "onServerRegistered: mCallback is NULL");
+        }
+    }
     return NOERROR;
 }
 
@@ -49,10 +58,8 @@ ECode BluetoothGattServer::BluetoothGattServerCallbackStub::OnScanResult(
     /* [in] */ ArrayOf<Byte>* advData)
 {
     VALIDATE_NOT_NULL(advData);
-    // ==================before translated======================
-    // if (VDBG) Log.d(TAG, "onScanResult() - Device=" + address + " RSSI=" +rssi);
+    if (VDBG) Logger::D(TAG, "onScanResult() - Device=%s, RSSI=%d", address.string(), rssi);
     // // no op
-    assert(0);
     return NOERROR;
 }
 
@@ -62,17 +69,17 @@ ECode BluetoothGattServer::BluetoothGattServerCallbackStub::OnServerConnectionSt
     /* [in] */ Boolean connected,
     /* [in] */ const String& address)
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "onServerConnectionState() - status=" + status
-    //     + " serverIf=" + serverIf + " device=" + address);
-    // try {
-    //     mCallback.onConnectionStateChange(mAdapter.getRemoteDevice(address), status,
-    //                                       connected ? BluetoothProfile.STATE_CONNECTED :
-    //                                       BluetoothProfile.STATE_DISCONNECTED);
-    // } catch (Exception ex) {
-    //     Log.w(TAG, "Unhandled exception in callback", ex);
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "onServerConnectionState() - status=%d, serverIf=%d, device=%s",
+            status, serverIf, address.string());
+    //try {
+        AutoPtr<IBluetoothDevice> device;
+        mOwner->mAdapter->GetRemoteDevice(address, (IBluetoothDevice**)&device);
+        mOwner->mCallback->OnConnectionStateChange(device, status,
+                                          connected ? IBluetoothProfile::STATE_CONNECTED :
+                                          IBluetoothProfile::STATE_DISCONNECTED);
+    //} catch (Exception ex) {
+    //    Log.w(TAG, "Unhandled exception in callback", ex);
+    //}
     return NOERROR;
 }
 
@@ -83,20 +90,19 @@ ECode BluetoothGattServer::BluetoothGattServerCallbackStub::OnServiceAdded(
     /* [in] */ IParcelUuid* srvcId)
 {
     VALIDATE_NOT_NULL(srvcId);
-    // ==================before translated======================
-    // UUID srvcUuid = srvcId.getUuid();
-    // if (DBG) Log.d(TAG, "onServiceAdded() - service=" + srvcUuid
-    //     + "status=" + status);
-    //
-    // BluetoothGattService service = getService(srvcUuid, srvcInstId, srvcType);
-    // if (service == null) return;
-    //
-    // try {
-    //     mCallback.onServiceAdded((int)status, service);
-    // } catch (Exception ex) {
-    //     Log.w(TAG, "Unhandled exception in callback", ex);
-    // }
-    assert(0);
+    AutoPtr<IUUID> srvcUuid;
+    srvcId->GetUuid((IUUID**)&srvcUuid);
+    if (DBG) Logger::D(TAG, "onServiceAdded() - service=");// + srvcUuid + "status=" + status);
+
+    AutoPtr<IBluetoothGattService> service;
+    mOwner->GetService(srvcUuid, srvcInstId, srvcType, (IBluetoothGattService**)&service);
+    if (service == NULL) return NOERROR;
+
+    //try {
+    mOwner->mCallback->OnServiceAdded(status, service);
+    //} catch (Exception ex) {
+    //    Log.w(TAG, "Unhandled exception in callback", ex);
+    //}
     return NOERROR;
 }
 
@@ -111,27 +117,28 @@ ECode BluetoothGattServer::BluetoothGattServerCallbackStub::OnCharacteristicRead
     /* [in] */ Int32 charInstId,
     /* [in] */ IParcelUuid* charId)
 {
-    VALIDATE_NOT_NULL(srvcId);
-    VALIDATE_NOT_NULL(charId);
-    // ==================before translated======================
-    // UUID srvcUuid = srvcId.getUuid();
-    // UUID charUuid = charId.getUuid();
-    // if (VDBG) Log.d(TAG, "onCharacteristicReadRequest() - "
-    //     + "service=" + srvcUuid + ", characteristic=" + charUuid);
-    //
-    // BluetoothDevice device = mAdapter.getRemoteDevice(address);
-    // BluetoothGattService service = getService(srvcUuid, srvcInstId, srvcType);
-    // if (service == null) return;
-    //
-    // BluetoothGattCharacteristic characteristic = service.getCharacteristic(charUuid);
-    // if (characteristic == null) return;
-    //
-    // try {
-    //     mCallback.onCharacteristicReadRequest(device, transId, offset, characteristic);
-    // } catch (Exception ex) {
-    //     Log.w(TAG, "Unhandled exception in callback", ex);
-    // }
-    assert(0);
+    AutoPtr<IUUID> srvcUuid;
+    srvcId->GetUuid((IUUID**)&srvcUuid);
+    AutoPtr<IUUID> charUuid;
+    charId->GetUuid((IUUID**)&charUuid);
+    if (VDBG) Logger::D(TAG, "onCharacteristicReadRequest() - ");
+        //+ "service=" + srvcUuid + ", characteristic=" + charUuid);
+
+    AutoPtr<IBluetoothDevice> device;
+    mOwner->mAdapter->GetRemoteDevice(address, (IBluetoothDevice**)&device);
+    AutoPtr<IBluetoothGattService> service;
+    mOwner->GetService(srvcUuid, srvcInstId, srvcType, (IBluetoothGattService**)&service);
+    if (service == NULL) return NOERROR;
+
+    AutoPtr<IBluetoothGattCharacteristic> characteristic;
+    service->GetCharacteristic(charUuid, (IBluetoothGattCharacteristic**)&characteristic);
+    if (characteristic == NULL) return NOERROR;
+
+    //try {
+    mOwner->mCallback->OnCharacteristicReadRequest(device, transId, offset, characteristic);
+    //} catch (Exception ex) {
+    //    Log.w(TAG, "Unhandled exception in callback", ex);
+    //}
     return NOERROR;
 }
 
@@ -147,33 +154,35 @@ ECode BluetoothGattServer::BluetoothGattServerCallbackStub::OnDescriptorReadRequ
     /* [in] */ IParcelUuid* charId,
     /* [in] */ IParcelUuid* descrId)
 {
-    VALIDATE_NOT_NULL(srvcId);
-    VALIDATE_NOT_NULL(charId);
-    VALIDATE_NOT_NULL(descrId);
-    // ==================before translated======================
-    // UUID srvcUuid = srvcId.getUuid();
-    // UUID charUuid = charId.getUuid();
-    // UUID descrUuid = descrId.getUuid();
-    // if (VDBG) Log.d(TAG, "onCharacteristicReadRequest() - "
-    //     + "service=" + srvcUuid + ", characteristic=" + charUuid
-    //     + "descriptor=" + descrUuid);
-    //
-    // BluetoothDevice device = mAdapter.getRemoteDevice(address);
-    // BluetoothGattService service = getService(srvcUuid, srvcInstId, srvcType);
-    // if (service == null) return;
-    //
-    // BluetoothGattCharacteristic characteristic = service.getCharacteristic(charUuid);
-    // if (characteristic == null) return;
-    //
-    // BluetoothGattDescriptor descriptor = characteristic.getDescriptor(descrUuid);
-    // if (descriptor == null) return;
-    //
-    // try {
-    //     mCallback.onDescriptorReadRequest(device, transId, offset, descriptor);
-    // } catch (Exception ex) {
-    //     Log.w(TAG, "Unhandled exception in callback", ex);
-    // }
-    assert(0);
+    AutoPtr<IUUID> srvcUuid;
+    srvcId->GetUuid((IUUID**)&srvcUuid);
+    AutoPtr<IUUID> charUuid;
+    charId->GetUuid((IUUID**)&charUuid);
+    AutoPtr<IUUID> descrUuid;
+    descrId->GetUuid((IUUID**)&descrUuid);
+    if (VDBG) Logger::D(TAG, "onCharacteristicReadRequest() - ");
+        //+ "service=" + srvcUuid + ", characteristic=" + charUuid
+        //+ "descriptor=" + descrUuid);
+
+    AutoPtr<IBluetoothDevice> device;
+    mOwner->mAdapter->GetRemoteDevice(address, (IBluetoothDevice**)&device);
+    AutoPtr<IBluetoothGattService> service;
+    mOwner->GetService(srvcUuid, srvcInstId, srvcType, (IBluetoothGattService**)&service);
+    if (service == NULL) return NOERROR;
+
+    AutoPtr<IBluetoothGattCharacteristic> characteristic;
+    service->GetCharacteristic(charUuid, (IBluetoothGattCharacteristic**)&characteristic);
+    if (characteristic == NULL) return NOERROR;
+
+    AutoPtr<IBluetoothGattDescriptor> descriptor;
+    characteristic->GetDescriptor(descrUuid, (IBluetoothGattDescriptor**)&descriptor);
+    if (descriptor == NULL) return NOERROR;
+
+    //try {
+    mOwner->mCallback->OnDescriptorReadRequest(device, transId, offset, descriptor);
+    //} catch (Exception ex) {
+    //    Log.w(TAG, "Unhandled exception in callback", ex);
+    //}
     return NOERROR;
 }
 
@@ -191,29 +200,29 @@ ECode BluetoothGattServer::BluetoothGattServerCallbackStub::OnCharacteristicWrit
     /* [in] */ IParcelUuid* charId,
     /* [in] */ ArrayOf<Byte>* value)
 {
-    VALIDATE_NOT_NULL(srvcId);
-    VALIDATE_NOT_NULL(charId);
-    VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // UUID srvcUuid = srvcId.getUuid();
-    // UUID charUuid = charId.getUuid();
-    // if (VDBG) Log.d(TAG, "onCharacteristicWriteRequest() - "
-    //     + "service=" + srvcUuid + ", characteristic=" + charUuid);
-    //
-    // BluetoothDevice device = mAdapter.getRemoteDevice(address);
-    // BluetoothGattService service = getService(srvcUuid, srvcInstId, srvcType);
-    // if (service == null) return;
-    //
-    // BluetoothGattCharacteristic characteristic = service.getCharacteristic(charUuid);
-    // if (characteristic == null) return;
-    //
-    // try {
-    //     mCallback.onCharacteristicWriteRequest(device, transId, characteristic,
-    //                                            isPrep, needRsp, offset, value);
-    // } catch (Exception ex) {
-    //     Log.w(TAG, "Unhandled exception in callback", ex);
-    // }
-    assert(0);
+    AutoPtr<IUUID> srvcUuid;
+    srvcId->GetUuid((IUUID**)&srvcUuid);
+    AutoPtr<IUUID> charUuid;
+    charId->GetUuid((IUUID**)&charUuid);
+    if (VDBG) Logger::D(TAG, "onCharacteristicWriteRequest() - ");
+        //+ "service=" + srvcUuid + ", characteristic=" + charUuid);
+
+    AutoPtr<IBluetoothDevice> device;
+    mOwner->mAdapter->GetRemoteDevice(address, (IBluetoothDevice**)&device);
+    AutoPtr<IBluetoothGattService> service;
+    mOwner->GetService(srvcUuid, srvcInstId, srvcType, (IBluetoothGattService**)&service);
+    if (service == NULL) return NOERROR;
+
+    AutoPtr<IBluetoothGattCharacteristic> characteristic;
+    service->GetCharacteristic(charUuid, (IBluetoothGattCharacteristic**)&characteristic);
+    if (characteristic == NULL) return NOERROR;
+
+    //try {
+    mOwner->mCallback->OnCharacteristicWriteRequest(device, transId, characteristic,
+                                               isPrep, needRsp, offset, value);
+    //} catch (Exception ex) {
+    //    Log.w(TAG, "Unhandled exception in callback", ex);
+    //}
     return NOERROR;
 }
 
@@ -232,36 +241,37 @@ ECode BluetoothGattServer::BluetoothGattServerCallbackStub::OnDescriptorWriteReq
     /* [in] */ IParcelUuid* descrId,
     /* [in] */ ArrayOf<Byte>* value)
 {
-    VALIDATE_NOT_NULL(srvcId);
-    VALIDATE_NOT_NULL(charId);
-    VALIDATE_NOT_NULL(descrId);
-    VALIDATE_NOT_NULL(value);
-    // ==================before translated======================
-    // UUID srvcUuid = srvcId.getUuid();
-    // UUID charUuid = charId.getUuid();
-    // UUID descrUuid = descrId.getUuid();
-    // if (VDBG) Log.d(TAG, "onDescriptorWriteRequest() - "
-    //     + "service=" + srvcUuid + ", characteristic=" + charUuid
-    //     + "descriptor=" + descrUuid);
-    //
-    // BluetoothDevice device = mAdapter.getRemoteDevice(address);
-    //
-    // BluetoothGattService service = getService(srvcUuid, srvcInstId, srvcType);
-    // if (service == null) return;
-    //
-    // BluetoothGattCharacteristic characteristic = service.getCharacteristic(charUuid);
-    // if (characteristic == null) return;
-    //
-    // BluetoothGattDescriptor descriptor = characteristic.getDescriptor(descrUuid);
-    // if (descriptor == null) return;
-    //
-    // try {
-    //     mCallback.onDescriptorWriteRequest(device, transId, descriptor,
-    //                                        isPrep, needRsp, offset, value);
-    // } catch (Exception ex) {
-    //     Log.w(TAG, "Unhandled exception in callback", ex);
-    // }
-    assert(0);
+    AutoPtr<IUUID> srvcUuid;
+    srvcId->GetUuid((IUUID**)&srvcUuid);
+    AutoPtr<IUUID> charUuid;
+    charId->GetUuid((IUUID**)&charUuid);
+    AutoPtr<IUUID> descrUuid;
+    descrId->GetUuid((IUUID**)&descrUuid);
+    if (VDBG) Logger::D(TAG, "onDescriptorWriteRequest() - ");
+        //+ "service=" + srvcUuid + ", characteristic=" + charUuid
+        //+ "descriptor=" + descrUuid);
+
+    AutoPtr<IBluetoothDevice> device;
+    mOwner->mAdapter->GetRemoteDevice(address, (IBluetoothDevice**)&device);
+
+    AutoPtr<IBluetoothGattService> service;
+    mOwner->GetService(srvcUuid, srvcInstId, srvcType, (IBluetoothGattService**)&service);
+    if (service == NULL) return NOERROR;
+
+    AutoPtr<IBluetoothGattCharacteristic> characteristic;
+    service->GetCharacteristic(charUuid, (IBluetoothGattCharacteristic**)&characteristic);
+    if (characteristic == NULL) return NOERROR;
+
+    AutoPtr<IBluetoothGattDescriptor> descriptor;
+    characteristic->GetDescriptor(descrUuid, (IBluetoothGattDescriptor**)&descriptor);
+    if (descriptor == NULL) return NOERROR;
+
+    //try {
+    mOwner->mCallback->OnDescriptorWriteRequest(device, transId, descriptor,
+                                           isPrep, needRsp, offset, value);
+    //} catch (Exception ex) {
+    //    Log.w(TAG, "Unhandled exception in callback", ex);
+    //}
     return NOERROR;
 }
 
@@ -270,20 +280,19 @@ ECode BluetoothGattServer::BluetoothGattServerCallbackStub::OnExecuteWrite(
     /* [in] */ Int32 transId,
     /* [in] */ Boolean execWrite)
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "onExecuteWrite() - "
-    //     + "device=" + address + ", transId=" + transId
-    //     + "execWrite=" + execWrite);
-    //
-    // BluetoothDevice device = mAdapter.getRemoteDevice(address);
-    // if (device == null) return;
-    //
-    // try {
-    //     mCallback.onExecuteWrite(device, transId, execWrite);
-    // } catch (Exception ex) {
-    //     Log.w(TAG, "Unhandled exception in callback", ex);
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "onExecuteWrite() - ");
+        //+ "device=" + address + ", transId=" + transId
+        //+ "execWrite=" + execWrite);
+
+    AutoPtr<IBluetoothDevice> device;
+    mOwner->mAdapter->GetRemoteDevice(address, (IBluetoothDevice**)&device);
+    if (device == NULL) return NOERROR;
+
+    //try {
+    mOwner->mCallback->OnExecuteWrite(device, transId, execWrite);
+    //} catch (Exception ex) {
+    //    Log.w(TAG, "Unhandled exception in callback", ex);
+    //}
     return NOERROR;
 }
 
@@ -291,19 +300,18 @@ ECode BluetoothGattServer::BluetoothGattServerCallbackStub::OnNotificationSent(
     /* [in] */ const String& address,
     /* [in] */ Int32 status)
 {
-    // ==================before translated======================
-    // if (VDBG) Log.d(TAG, "onNotificationSent() - "
-    //     + "device=" + address + ", status=" + status);
-    //
-    // BluetoothDevice device = mAdapter.getRemoteDevice(address);
-    // if (device == null) return;
-    //
-    // try {
-    //     mCallback.onNotificationSent(device, status);
-    // } catch (Exception ex) {
-    //     Log.w(TAG, "Unhandled exception: " + ex);
-    // }
-    assert(0);
+    if (VDBG) Logger::D(TAG, "onNotificationSent() - ");
+        //+ "device=" + address + ", status=" + status);
+
+    AutoPtr<IBluetoothDevice> device;
+    mOwner->mAdapter->GetRemoteDevice(address, (IBluetoothDevice**)&device);
+    if (device == NULL) return NOERROR;
+
+    //try {
+    mOwner->mCallback->OnNotificationSent(device, status);
+    //} catch (Exception ex) {
+    //    Log.w(TAG, "Unhandled exception: " + ex);
+    //}
     return NOERROR;
 }
 
@@ -311,8 +319,8 @@ ECode BluetoothGattServer::BluetoothGattServerCallbackStub::OnNotificationSent(
 //                         BluetoothGattServer
 //=====================================================================
 const String BluetoothGattServer::TAG("BluetoothGattServer");
-const Boolean BluetoothGattServer::DBG = true;
-const Boolean BluetoothGattServer::VDBG = false;
+const Boolean BluetoothGattServer::DBG = TRUE;
+const Boolean BluetoothGattServer::VDBG = FALSE;
 const Int32 BluetoothGattServer::CALLBACK_REG_TIMEOUT;
 
 CAR_INTERFACE_IMPL_2(BluetoothGattServer, Object, IBluetoothGattServer, IBluetoothProfile);
@@ -323,25 +331,24 @@ BluetoothGattServer::BluetoothGattServer()
 
 BluetoothGattServer::BluetoothGattServer(
     /* [in] */ IContext* context,
-    /* [in] */ IBluetoothGatt* iGatt,
+    /* [in] */ IIBluetoothGatt* iGatt,
     /* [in] */ Int32 transport)
 {
-    // ==================before translated======================
-    // mContext = context;
-    // mService = iGatt;
-    // mAdapter = BluetoothAdapter.getDefaultAdapter();
-    // mCallback = null;
-    // mServerIf = 0;
-    // mTransport = transport;
-    // mServices = new ArrayList<BluetoothGattService>();
+    mContext = context;
+    mService = iGatt;
+    //mAdapter = BluetoothAdapter.getDefaultAdapter();
+    mAdapter = CBluetoothAdapter::GetDefaultAdapter();
+    mCallback = NULL;
+    mServerIf = 0;
+    mTransport = transport;
+    //mServices = new ArrayList<BluetoothGattService>();
+    CArrayList::New((IList**)&mServices);
 }
 
 ECode BluetoothGattServer::Close()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "close()");
-    // unregisterCallback();
-    assert(0);
+    if (DBG) Logger::D(TAG, "close()");
+    UnregisterCallback();
     return NOERROR;
 }
 
@@ -349,47 +356,60 @@ ECode BluetoothGattServer::RegisterCallback(
     /* [in] */ IBluetoothGattServerCallback* callback,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(callback);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "registerCallback()");
-    // if (mService == null) {
-    //     Log.e(TAG, "GATT service not available");
-    //     return false;
-    // }
-    // UUID uuid = UUID.randomUUID();
-    // if (DBG) Log.d(TAG, "registerCallback() - UUID=" + uuid);
-    //
-    // synchronized(mServerIfLock) {
-    //     if (mCallback != null) {
-    //         Log.e(TAG, "App can register callback only once");
-    //         return false;
-    //     }
-    //
-    //     mCallback = callback;
-    //     try {
-    //         mService.registerServer(new ParcelUuid(uuid), mBluetoothGattServerCallback);
-    //     } catch (RemoteException e) {
-    //         Log.e(TAG,"",e);
-    //         mCallback = null;
-    //         return false;
-    //     }
-    //
-    //     try {
-    //         mServerIfLock.wait(CALLBACK_REG_TIMEOUT);
-    //     } catch (InterruptedException e) {
-    //         Log.e(TAG, "" + e);
-    //         mCallback = null;
-    //     }
-    //
-    //     if (mServerIf == 0) {
-    //         mCallback = null;
-    //         return false;
-    //     } else {
-    //         return true;
-    //     }
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "registerCallback()");
+    if (mService == NULL) {
+        Logger::E(TAG, "GATT service not available");
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    AutoPtr<IUUIDHelper> uuidHelper;
+    CUUIDHelper::AcquireSingleton((IUUIDHelper**)&uuidHelper);
+    AutoPtr<IUUID> uuid;
+    uuidHelper->RandomUUID((IUUID**)&uuid);
+    if (DBG) Logger::D(TAG, "registerCallback() - UUID=");// + uuid);
+
+    {
+        AutoLock lock(mServerIfLock);
+        if (mCallback != NULL) {
+            Logger::E(TAG, "App can register callback only once");
+            *result = FALSE;
+            return NOERROR;
+        }
+
+        mCallback = callback;
+        //try {
+        AutoPtr<IParcelUuid> parcelUuid;
+        CParcelUuid::New(uuid, (IParcelUuid**)&parcelUuid);
+        ECode ec = mService->RegisterServer(parcelUuid, mBluetoothGattServerCallback);
+        //} catch (RemoteException e) {
+        if (FAILED(ec)) {
+            //Logger::E(TAG,"",e);
+            mCallback = NULL;
+            *result = FALSE;
+            return NOERROR;
+        }
+        //}
+
+        //try {
+        ec = mServerIfLock->Wait(CALLBACK_REG_TIMEOUT);
+        //} catch (InterruptedException e) {
+        //    Logger::E(TAG, "" + e);
+        if (FAILED(ec)) {
+            mCallback = NULL;
+        }
+        //}
+
+        if (mServerIf == 0) {
+            mCallback = NULL;
+            *result = FALSE;
+            return NOERROR;
+        } else {
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 
@@ -399,18 +419,29 @@ ECode BluetoothGattServer::GetService(
     /* [in] */ Int32 type,
     /* [out] */ IBluetoothGattService** result)
 {
-    VALIDATE_NOT_NULL(uuid);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // for(BluetoothGattService svc : mServices) {
-    //     if (svc.getType() == type &&
-    //         svc.getInstanceId() == instanceId &&
-    //         svc.getUuid().equals(uuid)) {
-    //         return svc;
-    //     }
-    // }
-    // return null;
-    assert(0);
+    Int32 size;
+    mServices->GetSize(&size);
+    for(Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mServices->Get(i, (IInterface**)&obj);
+        IBluetoothGattService* svc = IBluetoothGattService::Probe(obj);
+        Int32 sType;
+        Int32 sInstanceId;
+        AutoPtr<IUUID> sUuid;
+        svc->GetType(&sType);
+        svc->GetInstanceId(&sInstanceId);
+        svc->GetUuid((IUUID**)&sUuid);
+        Boolean eq = FALSE;
+        if (sType == type &&
+            sInstanceId == instanceId &&
+            (sUuid->Equals(uuid, &eq), eq)) {
+            *result = svc;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
+        }
+    }
+    *result = NULL;
     return NOERROR;
 }
 
@@ -419,39 +450,40 @@ ECode BluetoothGattServer::Connect(
     /* [in] */ Boolean autoConnect,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(device);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "connect() - device: " + device.getAddress() + ", auto: " + autoConnect);
-    // if (mService == null || mServerIf == 0) return false;
-    //
-    // try {
-    //     mService.serverConnect(mServerIf, device.getAddress(),
-    //                        autoConnect ? false : true,mTransport); // autoConnect is inverse of "isDirect"
-    // } catch (RemoteException e) {
-    //     Log.e(TAG,"",e);
-    //     return false;
-    // }
-    //
-    // return true;
-    assert(0);
+    *result = FALSE;
+    if (DBG) Logger::D(TAG, "connect() - device: ");// + device.getAddress() + ", auto: " + autoConnect);
+    if (mService == NULL || mServerIf == 0) return NOERROR;
+
+    String address;
+    device->GetAddress(&address);
+    //try {
+    ECode ec = mService->ServerConnect(mServerIf, address,
+                           autoConnect ? FALSE : TRUE, mTransport); // autoConnect is inverse of "isDirect"
+    //} catch (RemoteException e) {
+    //    Logger::E(TAG,"",e);
+    if (FAILED(ec)) {
+        return NOERROR;
+    }
+    //}
+
+    *result = TRUE;
     return NOERROR;
 }
 
 ECode BluetoothGattServer::CancelConnection(
     /* [in] */ IBluetoothDevice* device)
 {
-    VALIDATE_NOT_NULL(device);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "cancelConnection() - device: " + device.getAddress());
-    // if (mService == null || mServerIf == 0) return;
-    //
-    // try {
-    //     mService.serverDisconnect(mServerIf, device.getAddress());
-    // } catch (RemoteException e) {
-    //     Log.e(TAG,"",e);
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "cancelConnection() - device: ");// + device.getAddress());
+    if (mService == NULL || mServerIf == 0) return NOERROR;
+
+    String address;
+    device->GetAddress(&address);
+    //try {
+    mService->ServerDisconnect(mServerIf, address);
+    //} catch (RemoteException e) {
+    //    Logger::E(TAG,"",e);
+    //}
     return NOERROR;
 }
 
@@ -463,22 +495,23 @@ ECode BluetoothGattServer::SendResponse(
     /* [in] */ ArrayOf<Byte>* value,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(device);
-    VALIDATE_NOT_NULL(value);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (VDBG) Log.d(TAG, "sendResponse() - device: " + device.getAddress());
-    // if (mService == null || mServerIf == 0) return false;
-    //
-    // try {
-    //     mService.sendResponse(mServerIf, device.getAddress(), requestId,
-    //                           status, offset, value);
-    // } catch (RemoteException e) {
-    //     Log.e(TAG,"",e);
-    //     return false;
-    // }
-    // return true;
-    assert(0);
+    *result = FALSE;
+    if (VDBG) Logger::D(TAG, "sendResponse() - device: ");// + device.getAddress());
+    if (mService == NULL || mServerIf == 0) return NOERROR;
+
+    String address;
+    device->GetAddress(&address);
+    //try {
+    ECode ec = mService->SendResponse(mServerIf, address, requestId,
+                              status, offset, value);
+    //} catch (RemoteException e) {
+    //    Logger::E(TAG,"",e);
+    if (FAILED(ec)) {
+        return FALSE;
+    }
+    //}
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -488,34 +521,54 @@ ECode BluetoothGattServer::NotifyCharacteristicChanged(
     /* [in] */ Boolean confirm,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(device);
-    VALIDATE_NOT_NULL(characteristic);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (VDBG) Log.d(TAG, "notifyCharacteristicChanged() - device: " + device.getAddress());
-    // if (mService == null || mServerIf == 0) return false;
-    //
-    // BluetoothGattService service = characteristic.getService();
-    // if (service == null) return false;
-    //
-    // if (characteristic.getValue() == null) {
-    //     throw new IllegalArgumentException("Chracteristic value is empty. Use "
-    //             + "BluetoothGattCharacteristic#setvalue to update");
-    // }
-    //
-    // try {
-    //     mService.sendNotification(mServerIf, device.getAddress(),
-    //             service.getType(), service.getInstanceId(),
-    //             new ParcelUuid(service.getUuid()), characteristic.getInstanceId(),
-    //             new ParcelUuid(characteristic.getUuid()), confirm,
-    //             characteristic.getValue());
-    // } catch (RemoteException e) {
-    //     Log.e(TAG,"",e);
-    //     return false;
-    // }
-    //
-    // return true;
-    assert(0);
+    *result = FALSE;
+    if (VDBG) Logger::D(TAG, "notifyCharacteristicChanged() - device: ");// + device.getAddress());
+    if (mService == NULL || mServerIf == 0) return NOERROR;
+
+    AutoPtr<IBluetoothGattService> service;
+    characteristic->GetService((IBluetoothGattService**)&service);
+    if (service == NULL) return NOERROR;
+
+    AutoPtr<ArrayOf<Byte> > value;
+    characteristic->GetValue((ArrayOf<Byte>**)&value);
+    if (value == NULL) {
+        //throw new IllegalArgumentException("Chracteristic value is empty. Use "
+        //        + "BluetoothGattCharacteristic#setvalue to update");
+        Logger::E(TAG, "Chracteristic value is empty. Use BluetoothGattCharacteristic#setvalue to update");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    //try {
+    String address;
+    device->GetAddress(&address);
+    Int32 type;
+    service->GetType(&type);
+    Int32 instanceId;
+    service->GetInstanceId(&instanceId);
+    AutoPtr<IUUID> uuid;
+    service->GetUuid((IUUID**)&uuid);
+    AutoPtr<IParcelUuid> parcelUuid;
+    CParcelUuid::New(uuid, (IParcelUuid**)&parcelUuid);
+    Int32 cInstanceId;
+    characteristic->GetInstanceId(&cInstanceId);
+    AutoPtr<IUUID> cuuid;
+    characteristic->GetUuid((IUUID**)&cuuid);
+    AutoPtr<IParcelUuid> pcUuid;
+    CParcelUuid::New(cuuid, (IParcelUuid**)&pcUuid);
+    ECode ec = mService->SendNotification(mServerIf, address,
+                type, instanceId,
+                parcelUuid, cInstanceId,
+                pcUuid, confirm,
+                value);
+    //} catch (RemoteException e) {
+    //    Logger::E(TAG,"",e);
+    if (FAILED(ec)) {
+        return FALSE;
+    }
+    //}
+
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -523,52 +576,103 @@ ECode BluetoothGattServer::AddService(
     /* [in] */ IBluetoothGattService* service,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(service);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "addService() - service: " + service.getUuid());
-    // if (mService == null || mServerIf == 0) return false;
-    //
-    // mServices.add(service);
-    //
-    // try {
-    //     mService.beginServiceDeclaration(mServerIf, service.getType(),
-    //         service.getInstanceId(), service.getHandles(),
-    //         new ParcelUuid(service.getUuid()), service.isAdvertisePreferred());
-    //
-    //     List<BluetoothGattService> includedServices = service.getIncludedServices();
-    //     for (BluetoothGattService includedService : includedServices) {
-    //         mService.addIncludedService(mServerIf,
-    //             includedService.getType(),
-    //             includedService.getInstanceId(),
-    //             new ParcelUuid(includedService.getUuid()));
-    //     }
-    //
-    //     List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
-    //     for (BluetoothGattCharacteristic characteristic : characteristics) {
-    //         int permission = ((characteristic.getKeySize() - 7) << 12)
-    //                             + characteristic.getPermissions();
-    //         mService.addCharacteristic(mServerIf,
-    //             new ParcelUuid(characteristic.getUuid()),
-    //             characteristic.getProperties(), permission);
-    //
-    //         List<BluetoothGattDescriptor> descriptors = characteristic.getDescriptors();
-    //         for (BluetoothGattDescriptor descriptor: descriptors) {
-    //             permission = ((characteristic.getKeySize() - 7) << 12)
-    //                                 + descriptor.getPermissions();
-    //             mService.addDescriptor(mServerIf,
-    //                 new ParcelUuid(descriptor.getUuid()), permission);
-    //         }
-    //     }
-    //
-    //     mService.endServiceDeclaration(mServerIf);
-    // } catch (RemoteException e) {
-    //     Log.e(TAG,"",e);
-    //     return false;
-    // }
-    //
-    // return true;
-    assert(0);
+    *result = FALSE;
+    if (DBG) Logger::D(TAG, "addService() - service: ");// + service.getUuid());
+    if (mService == NULL || mServerIf == 0) return NOERROR;
+
+    mServices->Add(TO_IINTERFACE(service));
+
+    Int32 type;
+    service->GetType(&type);
+    Int32 instanceId;
+    service->GetInstanceId(&instanceId);
+    AutoPtr<IUUID> uuid;
+    service->GetUuid((IUUID**)&uuid);
+    AutoPtr<IParcelUuid> parcelUuid;
+    CParcelUuid::New(uuid, (IParcelUuid**)&parcelUuid);
+    Boolean preferred;
+    service->IsAdvertisePreferred(&preferred);
+    Int32 handles = 0;
+    service->GetHandles(&handles);
+    //try {
+        mService->BeginServiceDeclaration(mServerIf, type,
+            instanceId, handles,
+            parcelUuid, preferred);
+
+        //List<BluetoothGattService> includedServices = service.getIncludedServices();
+        AutoPtr<IList> includedServices;
+        service->GetIncludedServices((IList**)&includedServices);
+        Int32 size;
+        includedServices->GetSize(&size);
+        for(Int32 i = 0; i < size; ++i) {
+            AutoPtr<IInterface> obj;
+            includedServices->Get(i, (IInterface**)&obj);
+            IBluetoothGattService* includedService = IBluetoothGattService::Probe(obj);
+            Int32 iType, iInstanceId;
+            includedService->GetType(&iType);
+            includedService->GetInstanceId(&iInstanceId);
+            AutoPtr<IUUID> uuid;
+            includedService->GetUuid((IUUID**)&uuid);
+            AutoPtr<IParcelUuid> parcelUuid;
+            CParcelUuid::New(uuid, (IParcelUuid**)&parcelUuid);
+            mService->AddIncludedService(mServerIf,
+                iType, iInstanceId,
+                parcelUuid);
+        }
+
+        //List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
+        AutoPtr<IList> characteristics;
+        service->GetCharacteristics((IList**)&characteristics);
+        Int32 csize;
+        characteristics->GetSize(&csize);
+        for(Int32 i = 0; i < csize; ++i) {
+            AutoPtr<IInterface> obj;
+            characteristics->Get(i, (IInterface**)&obj);
+            IBluetoothGattCharacteristic* characteristic = IBluetoothGattCharacteristic::Probe(obj);
+            Int32 keySize = 0, permissions = 0;
+            characteristic->GetKeySize(&keySize);
+            characteristic->GetPermissions(&permissions);
+            Int32 permission = ((keySize - 7) << 12)
+                                + permissions;
+            AutoPtr<IUUID> uuid;
+            characteristic->GetUuid((IUUID**)&uuid);
+            AutoPtr<IParcelUuid> parcelUuid;
+            CParcelUuid::New(uuid, (IParcelUuid**)&parcelUuid);
+
+            Int32 properties;
+            characteristic->GetProperties(&properties);
+            mService->AddCharacteristic(mServerIf,
+                parcelUuid,
+                properties, permission);
+
+            //List<BluetoothGattDescriptor> descriptors = characteristic.getDescriptors();
+            AutoPtr<IList> descriptors;
+            characteristic->GetDescriptors((IList**)&descriptors);
+            Int32 size;
+            descriptors->GetSize(&size);
+            for(Int32 i = 0; i < size; ++i) {
+                AutoPtr<IInterface> obj;
+                IBluetoothGattDescriptor* descriptor = IBluetoothGattDescriptor::Probe(obj);
+                Int32 dPermissions;
+                descriptor->GetPermissions(&dPermissions);
+                permission = ((keySize - 7) << 12)
+                                    + dPermissions;
+                AutoPtr<IUUID> uuid;
+                descriptor->GetUuid((IUUID**)&uuid);
+                AutoPtr<IParcelUuid> parcelUuid;
+                CParcelUuid::New(uuid, (IParcelUuid**)&parcelUuid);
+                mService->AddDescriptor(mServerIf, parcelUuid, permission);
+            }
+        }
+
+        mService->EndServiceDeclaration(mServerIf);
+    //} catch (RemoteException e) {
+    //    Logger::E(TAG,"",e);
+    //    return FALSE;
+    //}
+
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -576,43 +680,48 @@ ECode BluetoothGattServer::RemoveService(
     /* [in] */ IBluetoothGattService* service,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(service);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "removeService() - service: " + service.getUuid());
-    // if (mService == null || mServerIf == 0) return false;
-    //
-    // BluetoothGattService intService = getService(service.getUuid(),
-    //                         service.getInstanceId(), service.getType());
-    // if (intService == null) return false;
-    //
-    // try {
-    //     mService.removeService(mServerIf, service.getType(),
-    //         service.getInstanceId(), new ParcelUuid(service.getUuid()));
-    //     mServices.remove(intService);
-    // } catch (RemoteException e) {
-    //     Log.e(TAG,"",e);
-    //     return false;
-    // }
-    //
-    // return true;
-    assert(0);
+    *result = FALSE;
+    if (DBG) Logger::D(TAG, "removeService() - service: ");// + service.getUuid());
+    if (mService == NULL || mServerIf == 0) return NOERROR;
+
+    AutoPtr<IBluetoothGattService> intService;
+    AutoPtr<IUUID> uuid;
+    service->GetUuid((IUUID**)&uuid);
+    Int32 instanceId, type;
+    service->GetInstanceId(&instanceId);
+    service->GetType(&type);
+    GetService(uuid, instanceId, type, (IBluetoothGattService**)&intService);
+    if (intService == NULL) return NOERROR;
+
+    AutoPtr<IParcelUuid> parcelUuid;
+    CParcelUuid::New(uuid, (IParcelUuid**)&parcelUuid);
+    //try {
+    ECode ec = mService->RemoveService(mServerIf, type,
+            instanceId, parcelUuid);
+    mServices->Remove(intService);
+    //} catch (RemoteException e) {
+    //    Logger::E(TAG,"",e);
+    if (FAILED(ec)) {
+        return FALSE;
+    }
+    //}
+
+    *result = TRUE;
     return NOERROR;
 }
 
 ECode BluetoothGattServer::ClearServices()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "clearServices()");
-    // if (mService == null || mServerIf == 0) return;
-    //
-    // try {
-    //     mService.clearServices(mServerIf);
-    //     mServices.clear();
-    // } catch (RemoteException e) {
-    //     Log.e(TAG,"",e);
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "clearServices()");
+    if (mService == NULL || mServerIf == 0) return NOERROR;
+
+    //try {
+    mService->ClearServices(mServerIf);
+    mServices->Clear();
+    //} catch (RemoteException e) {
+    //    Logger::E(TAG,"",e);
+    //}
     return NOERROR;
 }
 
@@ -620,9 +729,8 @@ ECode BluetoothGattServer::GetServices(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mServices;
-    assert(0);
+    *result = mServices;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -630,17 +738,24 @@ ECode BluetoothGattServer::GetService(
     /* [in] */ IUUID* uuid,
     /* [out] */ IBluetoothGattService** result)
 {
-    VALIDATE_NOT_NULL(uuid);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // for (BluetoothGattService service : mServices) {
-    //     if (service.getUuid().equals(uuid)) {
-    //         return service;
-    //     }
-    // }
-    //
-    // return null;
-    assert(0);
+    Int32 size;
+    mServices->GetSize(&size);
+    for(Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mServices->Get(i, (IInterface**)&obj);
+        IBluetoothGattService* service = IBluetoothGattService::Probe(obj);
+        AutoPtr<IUUID> sUuid;
+        service->GetUuid((IUUID**)&sUuid);
+        Boolean eq = FALSE;
+        if (sUuid->Equals(uuid, &eq), eq) {
+            *result = service;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
+        }
+     }
+
+    *result = NULL;
     return NOERROR;
 }
 
@@ -648,47 +763,39 @@ ECode BluetoothGattServer::GetConnectionState(
     /* [in] */ IBluetoothDevice* device,
     /* [out] */ Int32* state)
 {
-    // ==================before translated======================
     // throw new UnsupportedOperationException("Use BluetoothManager#getConnectionState instead.");
-    assert(0);
-    return NOERROR;
+    return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
 ECode BluetoothGattServer::GetConnectedDevices(
     /* [out] */ IList** devices)
 {
-    // ==================before translated======================
     // throw new UnsupportedOperationException
     //     ("Use BluetoothManager#getConnectedDevices instead.");
-    assert(0);
-    return NOERROR;
+    return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
 ECode BluetoothGattServer::GetDevicesMatchingConnectionStates(
     /* [in] */ ArrayOf<Int32>* states,
     /* [out] */ IList** devices)
 {
-    // ==================before translated======================
     // throw new UnsupportedOperationException
     //     ("Use BluetoothManager#getDevicesMatchingConnectionStates instead.");
-    assert(0);
-    return NOERROR;
+    return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
 void BluetoothGattServer::UnregisterCallback()
 {
-    // ==================before translated======================
-    // if (DBG) Log.d(TAG, "unregisterCallback() - mServerIf=" + mServerIf);
-    // if (mService == null || mServerIf == 0) return;
-    //
-    // try {
-    //     mCallback = null;
-    //     mService.unregisterServer(mServerIf);
-    //     mServerIf = 0;
-    // } catch (RemoteException e) {
-    //     Log.e(TAG,"",e);
-    // }
-    assert(0);
+    if (DBG) Logger::D(TAG, "unregisterCallback() - mServerIf=");// + mServerIf);
+    if (mService == NULL || mServerIf == 0) return;
+
+    //try {
+        mCallback = NULL;
+        mService->UnregisterServer(mServerIf);
+        mServerIf = 0;
+    //} catch (RemoteException e) {
+    //    Logger::E(TAG,"",e);
+    //}
 }
 
 } // namespace Bluetooth

@@ -3,17 +3,17 @@
 #include "elastos/droid/webkit/native/content/browser/ContentVideoView.h"
 #include "elastos/droid/webkit/native/content/common/ContentSwitches.h"
 #include "elastos/droid/webkit/native/android_webview/AwContents.h"
-//TODO #include "elastos/droid/widget/CFrameLayout.h"
+#include "elastos/droid/widget/CFrameLayout.h"
 #include "elastos/droid/webkit/URLUtil.h"
 
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::EIID_IViewOnAttachStateChangeListener;
-//TODO using Elastos::Droid::Webkit::EIID_IWebChromeClientCustomViewCallback;
+using Elastos::Droid::Webkit::EIID_IWebChromeClientCustomViewCallback;
 using Elastos::Droid::Webkit::URLUtil;
 using Elastos::Droid::Webkit::Base::CommandLine;
 using Elastos::Droid::Webkit::Content::Browser::ContentVideoView;
 using Elastos::Droid::Webkit::Content::Common::ContentSwitches;
-//TODO using Elastos::Droid::Widget::CFrameLayout;
+using Elastos::Droid::Widget::CFrameLayout;
 
 namespace Elastos {
 namespace Droid {
@@ -23,7 +23,7 @@ namespace AndroidWebview {
 //=======================================================================================================
 //         AwContentViewClient::AwContentVideoViewClient::InnerWebChromeClientCustomViewCallback
 //=======================================================================================================
-//TODO CAR_INTERFACE_IMPL(AwContentViewClient::AwContentVideoViewClient::InnerWebChromeClientCustomViewCallback, Object, IWebChromeClientCustomViewCallback);
+CAR_INTERFACE_IMPL(AwContentViewClient::AwContentVideoViewClient::InnerWebChromeClientCustomViewCallback, Object, IWebChromeClientCustomViewCallback);
 
 AwContentViewClient::AwContentVideoViewClient::InnerWebChromeClientCustomViewCallback::InnerWebChromeClientCustomViewCallback(
     /* [in] */ AwContentVideoViewClient* owner)
@@ -90,7 +90,7 @@ AwContentViewClient::AwContentVideoViewClient::AwContentVideoViewClient(
 Boolean AwContentViewClient::AwContentVideoViewClient::OnShowCustomView(
     /* [in] */ IView* view)
 {
-    AutoPtr</*TODO IWebChromeClientCustomViewCallback*/IInterface> cb ;//TODO = new InnerWebChromeClientCustomViewCallback(this);
+    AutoPtr<IWebChromeClientCustomViewCallback> cb = new InnerWebChromeClientCustomViewCallback(this);
     // TODO(igsolla): remove the legacy path (kept as a fallback if things go awry).
     if (!AreHtmlControlsEnabled()) {
         OnShowCustomViewLegacy(view, cb);
@@ -103,17 +103,17 @@ Boolean AwContentViewClient::AwContentVideoViewClient::OnShowCustomView(
 
 void AwContentViewClient::AwContentVideoViewClient::OnShowCustomViewLegacy(
     /* [in] */ IView* view,
-    /* [in] */ /*TODO IWebChromeClientCustomViewCallback*/IInterface* cb)
+    /* [in] */ IWebChromeClientCustomViewCallback* cb)
 {
     mOwner->mAwContentsClient->OnShowCustomView(view, cb);
 }
 
 void AwContentViewClient::AwContentVideoViewClient::OnShowCustomView(
     /* [in] */ IView* view,
-    /* [in] */ /*TODO IWebChromeClientCustomViewCallback*/IInterface* cb)
+    /* [in] */ IWebChromeClientCustomViewCallback* cb)
 {
     AutoPtr<IFrameLayout> frameLayout;
-    //TODO CFrameLayout::New(mContext, (IFrameLayout**)&frameLayout);
+    CFrameLayout::New(mOwner->mContext, (IFrameLayout**)&frameLayout);
     AutoPtr<IViewGroup> viewGroup = IViewGroup::Probe(frameLayout);
     viewGroup->AddView(view);
     AutoPtr<IViewOnAttachStateChangeListener> listener = new InnerViewOnAttachStateChangeListener(this, frameLayout);

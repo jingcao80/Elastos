@@ -33,7 +33,7 @@ module
     interface Elastos.Droid.App.INotification;
     interface Elastos.Droid.App.IInstrumentationWatcher;
     interface Elastos.Droid.App.IStopUserCallback;
-    interface Elastos.Droid.App.IUserSwitchObserver;
+    interface Elastos.Droid.App.IIUserSwitchObserver;
     interface Elastos.Droid.App.IIServiceConnection;
     interface Elastos.Droid.App.IActivityManagerWaitResult;
     interface Elastos.Droid.App.IActivityManagerStackInfo;
@@ -942,10 +942,10 @@ module
             [out] String* result);
 
         RegisterUserSwitchObserver(
-            [in] IUserSwitchObserver* observer);
+            [in] IIUserSwitchObserver* observer);
 
         UnregisterUserSwitchObserver(
-            [in] IUserSwitchObserver* observer);
+            [in] IIUserSwitchObserver* observer);
 
         RequestBugReport();
 
@@ -988,14 +988,14 @@ module
         CreateActivityContainer(
             [in] IBinder* parentActivityToken,
             [in] IActivityContainerCallback* cb,
-            [out] IActivityContainer** container);
+            [out] IIActivityContainer** container);
 
         DeleteActivityContainer(
-            [in] IActivityContainer* container);
+            [in] IIActivityContainer* container);
 
         GetEnclosingActivityContainer(
             [in] IBinder* activityToken,
-            [out] IActivityContainer** container);
+            [out] IIActivityContainer** container);
 
         GetHomeActivityToken(
             [out] IBinder** result);

@@ -223,7 +223,7 @@ ECode CInputMethodServiceNative::SetSessionEnabled(
 }
 
 ECode CInputMethodServiceNative::StartInput(
-    /* [in] */ IInputContext* inputContext,
+    /* [in] */ IIInputContext* inputContext,
     /* [in] */ IEditorInfo* attribute)
 {
     // LOGGERD(TAG, String("+ CInputMethodServiceNative::StartInput()"));
@@ -254,7 +254,7 @@ ECode CInputMethodServiceNative::StartInput(
     jclass c = env->FindClass("com/android/internal/view/IInputMethod");
     Util::CheckErrorAndLog(env, TAG, "FindClass: IInputMethod %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "startInput", "(Lcom/android/internal/view/IInputContext;Landroid/view/inputmethod/EditorInfo;)V");
+    jmethodID m = env->GetMethodID(c, "startInput", "(Lcom/android/internal/view/IIInputContext;Landroid/view/inputmethod/EditorInfo;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: startInput %d", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jinputContext, jattribute);
@@ -302,7 +302,7 @@ ECode CInputMethodServiceNative::ShowSoftInput(
 }
 
 ECode CInputMethodServiceNative::RestartInput(
-    /* [in] */ IInputContext* inputContext,
+    /* [in] */ IIInputContext* inputContext,
     /* [in] */ IEditorInfo* attribute)
 {
     // LOGGERD(TAG, String("+ CInputMethodServiceNative::RestartInput()"));
@@ -333,7 +333,7 @@ ECode CInputMethodServiceNative::RestartInput(
     jclass c = env->FindClass("com/android/internal/view/IInputMethod");
     Util::CheckErrorAndLog(env, TAG, "FindClass: IInputMethod %d", __LINE__);
 
-    jmethodID m = env->GetMethodID(c, "restartInput", "(Lcom/android/internal/view/IInputContext;Landroid/view/inputmethod/EditorInfo;)V");
+    jmethodID m = env->GetMethodID(c, "restartInput", "(Lcom/android/internal/view/IIInputContext;Landroid/view/inputmethod/EditorInfo;)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: restartInput %d", __LINE__);
 
     env->CallVoidMethod(mJInstance, m, jinputContext, jattribute);

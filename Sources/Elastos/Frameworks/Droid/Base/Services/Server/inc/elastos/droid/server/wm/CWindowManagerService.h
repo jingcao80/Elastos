@@ -58,7 +58,7 @@ using Elastos::Droid::Hardware::Display::IDisplayManager;
 using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Internal::View::IInputMethodClient;
 using Elastos::Droid::Internal::View::IIInputMethodManager;
-using Elastos::Droid::Internal::View::IInputContext;
+using Elastos::Droid::Internal::View::IIInputContext;
 using Elastos::Droid::Os::IPowerManagerWakeLock;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IIRemoteCallback;
@@ -694,7 +694,7 @@ public:
 
     CARAPI_(void) ValidateAppTokens(
         /* [in] */ Int32 stackId,
-        /* [in] */ List< AutoPtr<TaskGroup> >& tasks);
+        /* [in] */ IArrayList* tasks);
 
     CARAPI_(void) ValidateStackOrder(
         /* [in] */ ArrayOf<IInteger32*>* remoteStackIds);
@@ -1345,14 +1345,14 @@ public:
 
     CARAPI_(Boolean) DetectSafeMode();
 
-    CARAPI_(void) DisplayReady();
+    CARAPI DisplayReady();
 
     CARAPI SystemReady();
 
     CARAPI OpenSession(
         /* [in] */ IIWindowSessionCallback* callback,
         /* [in] */ IInputMethodClient* client,
-        /* [in] */ IInputContext* inputContext,
+        /* [in] */ IIInputContext* inputContext,
         /* [out] */ IWindowSession** session);
 
     CARAPI InputMethodClientHasFocus(

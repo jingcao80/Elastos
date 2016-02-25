@@ -2,15 +2,15 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "CDriverManager.h"
 #include "CSystem.h"
-#include "Pattern.h"
+#include "StringUtils.h"
 #include "CProperties.h"
 #include "AutoLock.h"
 #include "Collections.h"
 #include "CArrayList.h"
 
 using Elastos::Core::ISystem;
+using Elastos::Core::StringUtils;
 using Elastos::IO::IFlushable;
-using Elastos::Utility::Regex::Pattern;
 using Elastos::Utility::IProperties;
 using Elastos::Utility::CProperties;
 using Elastos::Utility::Collections;
@@ -53,9 +53,8 @@ Boolean CDriverManager::LoadInitialDrivers()
      * Get the names of the drivers as an array of Strings from the system
      * property by splitting the property at the separator character ':'
      */
-    AutoPtr<Pattern> pat = new Pattern();
     AutoPtr<ArrayOf<String> > theDriverNames;
-    pat->Split(String(":"), (ArrayOf<String> **)&theDriverNames);
+    StringUtils::Split(theDriverList, String(":"), (ArrayOf<String> **)&theDriverNames);
 
     if (theDriverNames) {
         for (Int32 i = 0; i < theDriverNames->GetLength(); ++i) {
@@ -144,6 +143,9 @@ ECode CDriverManager::GetConnection(
     /* [in] */ const String& password,
     /* [out] */ IConnection ** conn)
 {
+    VALIDATE_NOT_NULL(conn)
+    *conn = NULL;
+
     AutoPtr<IProperties> theProperties;
     CProperties::New((IProperties **)&theProperties);
 
@@ -161,6 +163,9 @@ ECode CDriverManager::GetDriver(
     /* [in] */ const String& url,
     /* [out] */ IDriver ** driver)
 {
+    VALIDATE_NOT_NULL(driver)
+    *driver = NULL;
+
     AutoPtr<IClassLoader> callerClassLoader  ;//= VMStack.getCallingClassLoader();
     assert(0 && "TODO");
     synchronized(mTheDriversLock) {

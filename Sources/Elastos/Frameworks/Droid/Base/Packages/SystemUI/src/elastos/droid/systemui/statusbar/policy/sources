@@ -1,0 +1,40 @@
+
+TARGET_NAME= policy
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../../sources.inc
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+SOURCES += CClock.cpp
+SOURCES += CDeadZone.cpp
+#SOURCES += KeyButtonView.cpp
+#SOURCES += CKeyButtonView.cpp
+SOURCES += Prefs.cpp
+#SOURCES += CompatModeButton.cpp
+#SOURCES += CCompatModeButton.cpp
+#SOURCES += ToggleSlider.cpp
+#SOURCES += CToggleSlider.cpp
+#SOURCES += EventHole.cpp
+#SOURCES += CEventHole.cpp
+SOURCES += CDateView.cpp
+#SOURCES += IntruderAlertView.cpp
+#SOURCES += CIntruderAlertView.cpp
+#SOURCES += NetworkController.cpp
+#SOURCES += NotificationRowLayout.cpp
+#SOURCES += CNotificationRowLayout.cpp
+SOURCES += AccessibilityContentDescriptions.cpp
+#SOURCES += TelephonyIcons.cpp
+#SOURCES += WifiIcons.cpp
+#SOURCES += WimaxIcons.cpp
+#SOURCES += FixedSizeDrawable.cpp
+#SOURCES += CFixedSizeDrawable.cpp
+#SOURCES += AutoRotateController.cpp
+SOURCES += AccessibilityController.cpp
+SOURCES += BatteryController.cpp
+SOURCES += PairedDevice.cpp
+SOURCES += BluetoothUtil.cpp
+SOURCES += BluetoothControllerImpl.cpp
+SOURCES += BrightnessMirrorController.cpp
+SOURCES += CastDevice.cpp
+SOURCES += CastControllerImpl.cpp

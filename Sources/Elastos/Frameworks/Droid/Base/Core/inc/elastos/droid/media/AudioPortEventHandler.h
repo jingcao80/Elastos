@@ -57,12 +57,6 @@ public:
     CARAPI Handler(
         /* [out] */ IHandler** result);
 
-private:
-    CARAPI NativeSetup(
-        /* [in] */ IInterface* module_this);
-
-    CARAPI NativeFinalize();
-
     static CARAPI PostEventFromNative(
         /* [in] */ IInterface* module_ref,
         /* [in] */ Int32 what,
@@ -71,16 +65,23 @@ private:
         /* [in] */ IInterface* obj);
 
 private:
+    CARAPI NativeSetup(
+        /* [in] */ IInterface* module_this);
+
+    CARAPI NativeFinalize();
+
+public:
+    const static Int32 AUDIOPORT_EVENT_PORT_LIST_UPDATED;
+    const static Int32 AUDIOPORT_EVENT_PATCH_LIST_UPDATED;
+    const static Int32 AUDIOPORT_EVENT_SERVICE_DIED;
+    const static Int32 AUDIOPORT_EVENT_NEW_LISTENER;
+
+private:
     AutoPtr<IHandler> mHandler;
     AutoPtr<IArrayList> mListeners;
     AutoPtr<IAudioManager> mAudioManager;
 
     const static String TAG;
-
-    const static Int32 AUDIOPORT_EVENT_PORT_LIST_UPDATED;
-    const static Int32 AUDIOPORT_EVENT_PATCH_LIST_UPDATED;
-    const static Int32 AUDIOPORT_EVENT_SERVICE_DIED;
-    const static Int32 AUDIOPORT_EVENT_NEW_LISTENER;
 };
 
 } // namespace Media

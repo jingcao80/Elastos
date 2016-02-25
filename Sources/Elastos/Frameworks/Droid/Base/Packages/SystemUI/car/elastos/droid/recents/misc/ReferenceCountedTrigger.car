@@ -7,7 +7,6 @@ module
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Recents {
     namespace Misc {
@@ -48,7 +47,6 @@ module
     } // namespace Misc
     } // namespace Recents
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

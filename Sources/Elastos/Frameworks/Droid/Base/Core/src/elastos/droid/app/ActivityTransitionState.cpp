@@ -3,7 +3,7 @@
 #include "elastos/droid/app/ActivityTransitionState.h"
 #include "elastos/droid/app/CActivityOptions.h"
 #include "elastos/droid/app/EnterTransitionCoordinator.h"
-// #include "elastos/droid/app/ExitTransitionCoordinator.h"
+#include "elastos/droid/app/ExitTransitionCoordinator.h"
 #include "elastos/droid/app/Activity.h"
 
 using Elastos::Droid::Os::IResultReceiver;
@@ -268,17 +268,16 @@ ECode ActivityTransitionState::StartExitBackTransition(
                 }
             }
 
-            assert(0 && "TODO");
-            // AutoPtr<ExitTransitionCoordinator> etc = new ExitTransitionCoordinator();
-            // etc->constructor(activity, mEnteringNames, NULL, NULL, TRUE);
+            AutoPtr<ExitTransitionCoordinator> etc = new ExitTransitionCoordinator();
+            etc->constructor(activity, mEnteringNames, NULL, NULL, TRUE);
 
-            // if (enterViewsTransition != NULL && decor != NULL) {
-            //     enterViewsTransition->Resume(IView::Probe(decor));
-            // }
+            if (enterViewsTransition != NULL && decor != NULL) {
+                enterViewsTransition->Resume(IView::Probe(decor));
+            }
 
-            // Activity* act = (Activity*)activity;
-            // etc->StartExit(act->mResultCode, act->mResultData);
-            // mReturnExitCoordinator = (IExitTransitionCoordinator*)etc.Get();
+            Activity* act = (Activity*)activity;
+            etc->StartExit(act->mResultCode, act->mResultData);
+            mReturnExitCoordinator = (IExitTransitionCoordinator*)etc.Get();
         }
 
         *result = TRUE;

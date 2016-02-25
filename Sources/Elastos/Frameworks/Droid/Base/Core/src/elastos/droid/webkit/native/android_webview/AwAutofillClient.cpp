@@ -115,7 +115,6 @@ void AwAutofillClient::AddToAutofillSuggestionArray(
 {
     AutoPtr<AutofillSuggestion> autofillSuggestion = new AutofillSuggestion(name, label, uniqueId);
     AutoPtr<IInterface> suggestionInterface = TO_IINTERFACE(autofillSuggestion);
-    //(*array)[index] = new AutofillSuggestion(name, label, uniqueId);
     array->Set(index, suggestionInterface.Get());
 }
 

@@ -1457,7 +1457,7 @@ ECode CNativeDecimalFormat::Equals(
 ECode CNativeDecimalFormat::Clone(
     /* [out] */ IInterface** rev)
 {
-    VALIDATE_NOT_NULL(*rev);
+    VALIDATE_NOT_NULL(rev);
 
     AutoPtr<CNativeDecimalFormat> clone = new CNativeDecimalFormat;
     clone->mAddress = CloneImpl(mAddress);

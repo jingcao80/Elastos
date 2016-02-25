@@ -3,15 +3,15 @@
 #include <Elastos.CoreLibrary.Text.h>
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/app/CActivityThread.h"
-// #include "elastos/droid/app/CApplicationThread.h"
-//#include "elastos/droid/app/CContextImpl.h"
+#include "elastos/droid/app/CApplicationThread.h"
+#include "elastos/droid/app/CContextImpl.h"
 #include "elastos/droid/app/CInstrumentation.h"
 #include "elastos/droid/app/CActivityManager.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/app/CContentProviderHolder.h"
 #include "elastos/droid/app/ApplicationPackageManager.h"
 #include "elastos/droid/app/QueuedWork.h"
-// #include "elastos/droid/app/CResourcesManager.h"
+#include "elastos/droid/app/CResourcesManager.h"
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/pm/CInstrumentationInfo.h"
 #include "elastos/droid/content/pm/CApplicationInfo.h"
@@ -21,7 +21,7 @@
 #include "elastos/droid/graphics/CCanvas.h"
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/view/View.h"
-//#include "elastos/droid/view/HardwareRenderer.h"
+#include "elastos/droid/view/HardwareRenderer.h"
 #include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/ServiceManager.h"
@@ -31,13 +31,11 @@
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/AsyncTask.h"
-#include "elastos/droid/os/CSystemProperties.h"
+#include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/os/CPersistableBundle.h"
 #include "elastos/droid/os/CMessage.h"
-
-// #include "elastos/droid/view/ViewRootImpl.h"
-// #include "elastos/droid/view/CWindowManagerGlobal.h"
-// #include "elastos/droid/utility/CParcelableObjectContainer.h"
+#include "elastos/droid/view/ViewRootImpl.h"
+#include "elastos/droid/view/CWindowManagerGlobal.h"
 #include "elastos/droid/database/sqlite/CSQLiteDatabaseHelper.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Thread.h>
@@ -51,16 +49,16 @@ using Elastos::Droid::R;
 using Elastos::Droid::App::Backup::EIID_IBackupAgent;
 using Elastos::Droid::App::CInstrumentation;
 using Elastos::Droid::App::LoadedPkg;
-// using Elastos::Droid::App::CContextImpl;
+using Elastos::Droid::App::CContextImpl;
 using Elastos::Droid::App::CContentProviderHolder;
 using Elastos::Droid::App::QueuedWork;
-// using Elastos::Droid::View::ViewRootImpl;
+using Elastos::Droid::View::ViewRootImpl;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IWindowManager;
-// using Elastos::Droid::View::CWindowManagerGlobal;
+using Elastos::Droid::View::CWindowManagerGlobal;
 using Elastos::Droid::View::IWindowManagerGlobal;
-//using Elastos::Droid::View::HardwareRenderer;
+using Elastos::Droid::View::HardwareRenderer;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::Graphics::Canvas;
@@ -94,8 +92,7 @@ using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::ISystemProperties;
-using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::IBaseBundle;
 using Elastos::Droid::Os::EIID_IIdleHandler;
@@ -977,10 +974,8 @@ ECode CActivityThread::H::HandleMessage(
         case CLEAN_UP_CONTEXT: {
             AutoPtr<ContextCleanupInfo> cci = (ContextCleanupInfo*)IObject::Probe(obj);
             assert(cci != NULL);
-
-            assert(0 && "TODO");
-            // ec = ((CContextImpl*)(IContext*)cci->mContext)->PerformFinalCleanup(
-            //     cci->mWho, cci->mWhat);
+            ec = ((CContextImpl*)cci->mContext.Get())->PerformFinalCleanup(
+                cci->mWho, cci->mWhat);
             break;
         }
         case GC_WHEN_IDLE:
@@ -1170,13 +1165,11 @@ CActivityThread::CActivityThread()
     , mSomeActivitiesChanged(FALSE)
     , mGcIdlerScheduled(FALSE)
 {
-    assert(0 && "TODO");
-    // ASSERT_SUCCEEDED(CApplicationThread::New((IApplicationThread**)&mAppThread));
-    // ((CApplicationThread*)mAppThread.Get())->mAThread = this;
+    ASSERT_SUCCEEDED(CApplicationThread::New((IApplicationThread**)&mAppThread));
+    ((CApplicationThread*)mAppThread.Get())->mAThread = this;
     mLooper = Looper::GetMyLooper();
 
-    assert(0 && "TODO");
-    // mResourcesManager = CResourcesManager::GetInstance();
+    mResourcesManager = CResourcesManager::GetInstance();
     mH = new H(this);
 }
 
@@ -1632,8 +1625,7 @@ ECode CActivityThread::GetSystemContext(
 
     synchronized(this) {
         if (mSystemContext == NULL) {
-            assert(0 && "TODO");
-            // mSystemContext = CContextImpl::CreateSystemContext(this);
+            mSystemContext = CContextImpl::CreateSystemContext(this);
         }
     }
 
@@ -1644,24 +1636,22 @@ ECode CActivityThread::GetSystemContext(
 
 ECode CActivityThread::InstallSystemApplicationInfo(
     /* [in] */ IApplicationInfo* info,
-    /* [in] */ IClassLoader* cl)
+    /* [in] */ IClassLoader* classLoader)
 {
     Slogger::D(TAG, " > TODO: CActivityThread::InstallSystemApplicationInfo");
 
-    synchronized(this)
-    {
-        assert(0 && "TODO");
-        // AutoPtr<IContextImpl> ctx;
-        // GetSystemContext((IContextImpl**)&ctx);
-        // CContextImpl* cctx = (CContextImpl*)ctx.Get();
-        // cctx->InstallSystemApplicationInfo(info, classLoader);
+    synchronized(this) {
+        AutoPtr<IContextImpl> ctx;
+        GetSystemContext((IContextImpl**)&ctx);
+        CContextImpl* cctx = (CContextImpl*)ctx.Get();
+        cctx->InstallSystemApplicationInfo(info, classLoader);
 
         // The code package for "android" in the system server needs
         // to be the system context's package.
-        // AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(cctx->mPackageInfo);
-        // AutoPtr<IWeakReference> wr;
-        // wrs->GetWeakReference((IWeakReference**)&wr);
-        // mPackages[String("android")] = wr;
+        AutoPtr<IWeakReferenceSource> wrs = (IWeakReferenceSource*)cctx->mPackageInfo->Probe(EIID_IWeakReferenceSource);
+        AutoPtr<IWeakReference> wr;
+        wrs->GetWeakReference((IWeakReference**)&wr);
+        mPackages[String("android")] = wr;
 
         // give ourselves a default profiler
         mProfiler = new Profiler();
@@ -2295,17 +2285,15 @@ ECode CActivityThread::PerformLaunchActivity(
         String debugOnKey("debug.on");
         String defaultValue("0");
         String debugOnValue;
-        AutoPtr<ISystemProperties> properties;
-        CSystemProperties::AcquireSingleton((ISystemProperties**)&properties);
-        properties->Get(debugOnKey, String("0"), &debugOnValue);
+        SystemProperties::Get(debugOnKey, String("0"), &debugOnValue);
         if (debugOnValue.Equals("1")) {
             Slogger::D(TAG, "Waiting for attaching...");
             String debugAttachedKey("debug.attached");
             String debugAttachedValue;
-            properties->Get(debugAttachedKey, defaultValue, &debugAttachedValue);
+            SystemProperties::Get(debugAttachedKey, defaultValue, &debugAttachedValue);
             while (debugAttachedValue.Equals("0")) {
                 Thread::Sleep(500);
-                properties->Get(debugAttachedKey, defaultValue, &debugAttachedValue);
+                SystemProperties::Get(debugAttachedKey, defaultValue, &debugAttachedValue);
             }
         }
 
@@ -2404,52 +2392,50 @@ AutoPtr<IContext> CActivityThread::CreateBaseContextForActivity(
     /* [in] */ ActivityClientRecord* r,
     /* [in] */ IActivity* activity)
 {
-    assert(0 && "TODO");
-    AutoPtr<IContext> baseContext;
-    // AutoPtr<CContextImpl> appContext;
-    // CContextImpl::NewByFriend((CContextImpl**)&appContext);
-    // appContext->Init(lp, r->mToken, this);
-    // appContext->SetOuterContext(activity);
+    AutoPtr<IContextImpl> appCtx;
+    CContextImpl::CreateActivityContext(this, r->mPackageInfo, r->mToken, (IContextImpl**)&appCtx);
+    CContextImpl* appContext = (CContextImpl*)appCtx.Get();
+    appContext->SetOuterContext(IContext::Probe(activity));
+    AutoPtr<IContext> baseContext = IContext::Probe(appCtx);
 
-    // AutoPtr<CContextImpl> appContext = ContextImpl::CreateActivityContext(
-    //     THIS_PROBE(IActivityThread), lp, r->mToken);
-    // appContext->SetOuterContext(activity);
-    // baseContext = IContext::Probe(appContext);
-
-    // AutoPtr<DisplayManagerGlobal> dm = DisplayManagerGlobal::GetInstance();
-    // // try {
-    // AutoPtr<IIActivityContainer> container;
-    // ActivityManagerNative::GetDefault()->GetEnclosingActivityContainer(
-    //     r->mToken, (IIActivityContainer**)&container);
-    // Int32 displayId = IDisplay::DEFAULT_DISPLAY;
-    // if (container != NULL) {
-    //     container->GetDisplayId(&displayId);
-    // }
-    // if (displayId > IDisplay::DEFAULT_DISPLAY) {
-    //     AutoPtr<IDisplay> display;
-    //     dm->GetRealDisplay(displayId, r->mToken, (IDisplay**)&display);
-    //     baseContext = NULL;
-    //     appContext->CcreateDisplayContext(display, (IContext**)&baseContext);
-    // }
+    AutoPtr<IDisplayManagerGlobal> dm = DisplayManagerGlobal::GetInstance();
+    // try {
+    AutoPtr<IIActivityContainer> container;
+    ActivityManagerNative::GetDefault()->GetEnclosingActivityContainer(
+        r->mToken, (IIActivityContainer**)&container);
+    Int32 displayId = IDisplay::DEFAULT_DISPLAY;
+    if (container != NULL) {
+        container->GetDisplayId(&displayId);
+    }
+    if (displayId > IDisplay::DEFAULT_DISPLAY) {
+        AutoPtr<IDisplay> display;
+        dm->GetRealDisplay(displayId, r->mToken, (IDisplay**)&display);
+        baseContext = NULL;
+        appContext->CreateDisplayContext(display, (IContext**)&baseContext);
+    }
     // } catch (RemoteException e) {
     // }
 
     // For debugging purposes, if the activity's package name contains the value of
     // the "debug.use-second-display" system property as a substring, then show
     // its content on a secondary display if there is one.
-    // String pkgName = SystemProperties.get("debug.second-display.pkg");
-    // if (pkgName != NULL && !pkgName.IsEmpty()
-    //         && r->mPackageInfo->mPackageName->Contains(pkgName)) {
-    //     for (int displayId : dm.getDisplayIds()) {
-    //         if (displayId != IDisplay::DEFAULT_DISPLAY) {
-    //             AutoPtr<IDisplay> display;
-    //             dm->GetRealDisplay(displayId, r->mToken, (IDisplay**)&display);
-    //             baseContext = NULL;
-    //             appContext->CreateDisplayContext(display, (IContext**)&baseContext);
-    //             break;
-    //         }
-    //     }
-    // }
+    String pkgName;
+    SystemProperties::Get(String("debug.second-display.pkg"), &pkgName);
+    LoadedPkg* loadedPkg = (LoadedPkg*)r->mPackageInfo.Get();
+    if (!pkgName.IsNullOrEmpty() && loadedPkg->mPackageName.Contains(pkgName)) {
+        AutoPtr< ArrayOf<Int32> > ids;
+        dm->GetDisplayIds((ArrayOf<Int32>**)&ids);
+        for (Int32 i = 0; i < ids->GetLength(); ++i) {
+            Int32 displayId = (*ids)[i];
+            if (displayId != IDisplay::DEFAULT_DISPLAY) {
+                AutoPtr<IDisplay> display;
+                dm->GetRealDisplay(displayId, r->mToken, (IDisplay**)&display);
+                baseContext = NULL;
+                appContext->CreateDisplayContext(display, (IContext**)&baseContext);
+                break;
+            }
+        }
+    }
 
     return baseContext;
 }
@@ -2556,7 +2542,7 @@ ECode CActivityThread::DeliverNewIntents(
     /* [in] */ ActivityClientRecord* r,
     /* [in] */ IList* intents)
 {
-    assert(0 && "TODO");
+
     AutoPtr<Activity> activity = (Activity*)r->mActivity.Get();
     Int32 size;
     intents->GetSize(&size);
@@ -2564,11 +2550,11 @@ ECode CActivityThread::DeliverNewIntents(
         AutoPtr<IInterface> obj;
         intents->Get(i, (IInterface**)&obj);
         IIntent* intent = IIntent::Probe(obj);
+        assert(0 && "TODO");
         // AutoPtr<IClassLoader> classLoader;
         // if (activity) activity->GetClassLoader((IClassLoader**)&classLoader);
         // intent->SetExtrasClassLoader(classLoader);
         intent->PrepareToEnterProcess();
-
 
         if (activity) activity->mFragments->NoteStateNotSaved();
         mInstrumentation->CallActivityOnNewIntent(r->mActivity, intent);
@@ -2857,8 +2843,7 @@ ECode CActivityThread::HandleReceiver(
 
     receiver->SetPendingResult((IPendingResult*)data);
     AutoPtr<IContext> ic;
-    assert(0 && "TODO");
-    // ((CContextImpl*)context.Get())->GetReceiverRestrictedContext((IContext**)&ic);
+    ((CContextImpl*)context.Get())->GetReceiverRestrictedContext((IContext**)&ic);
     ec = receiver->OnReceive(ic, data->mIntent);
     if (FAILED(ec)) {
         String comp;
@@ -3012,12 +2997,11 @@ ECode CActivityThread::HandleCreateBackupAgent(
         }
 
         // set up the agent's context
-        assert(0 && "TODO");
-        // AutoPtr<CContextImpl> context;
-        // CContextImpl::NewByFriend((CContextImpl**)&context);
-        // context->Init(packageInfo, NULL, this);
-        // context->SetOuterContext(agent);
-        // agent->Attach(context);
+        AutoPtr<IContextImpl> cimpl;
+        CContextImpl::CreateAppContext(this, lp, (IContextImpl**)&cimpl);
+        CContextImpl* context = (CContextImpl*)cimpl.Get();
+        context->SetOuterContext(IContext::Probe(agent));
+        agent->Attach(IContext::Probe(cimpl));
 
         agent->OnCreate();
         agent->OnBind((IBinder**)&binder);
@@ -3145,16 +3129,16 @@ ECode CActivityThread::HandleCreateService(
         Slogger::V(TAG, "Creating service %s, path %s", className.string(), path.string());
     }
 
-    assert(0 && "TODO");
-    // AutoPtr<CContextImpl> appContext = ContextImpl::CreateAppContext(THIS_PROBE(IActivityThread), packageInfo);
-    // appContext->SetOuterContext(IContext::Probe(service));
+    AutoPtr<IContextImpl> cimpl;
+    CContextImpl::CreateAppContext(this, packageInfo, (IContextImpl**)&cimpl);
+    CContextImpl* appContext = (CContextImpl*)cimpl.Get();
+    appContext->SetOuterContext(IContext::Probe(service));
 
     AutoPtr<IApplication> app;
     packageInfo->MakeApplication(FALSE, mInstrumentation, (IApplication**)&app);
 
     AutoPtr<IIActivityManager> activityManager = ActivityManagerNative::GetDefault();
-    // service->Attach(IContext::Probe(appContext), this, className, data->mToken, app,
-    //         activityManager);
+    service->Attach(IContext::Probe(appContext), this, className, data->mToken, app, activityManager);
     service->OnCreate();
     mServices[data->mToken] = service;
 //    try {
@@ -3378,8 +3362,7 @@ ECode CActivityThread::HandleStopService(
         if (con != NULL) {
             String who;
             s->GetClassName(&who);
-            assert(0 && "TODO");
-           // ((CContextImpl*)(IContext*)context)->ScheduleFinalCleanup(who, String("Service"));
+            ((CContextImpl*)context.Get())->ScheduleFinalCleanup(who, String("Service"));
         }
         QueuedWork::WaitToFinish();
 
@@ -3468,7 +3451,7 @@ void CActivityThread::CleanUpPendingRemoveWindows(
             AutoPtr<IComponentName> cn;
             r->mActivity->GetComponentName((IComponentName**)&cn);
             cn->ToShortString(&activityName);
-            // CWindowManagerGlobal::GetInstance()->CloseAll(wtoken, activityName, String("Activity"));
+            CWindowManagerGlobal::GetInstance()->CloseAll(wtoken, activityName, String("Activity"));
         }
     }
     r->mPendingRemoveWindow = NULL;
@@ -4134,9 +4117,8 @@ ECode CActivityThread::HandleUpdatePackageCompatibilityInfo(
         pkg->SetCompatibilityInfo(data->mInfo);
     }
     HandleConfigurationChanged(mConfiguration, data->mInfo);
-    assert(0 && "TODO");
-    // AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
-    // wmg->ReportNewConfiguration(mConfiguration);
+    AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
+    wmg->ReportNewConfiguration(mConfiguration);
     return NOERROR;
 }
 
@@ -4423,9 +4405,8 @@ ECode CActivityThread::HandleDestroyActivity(
             }
 
             if (wtoken != NULL && r->mPendingRemoveWindow == NULL) {
-                assert(0 && "TODO");
-                // AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
-                // wmg->CloseAll(wtoken, activityName, String("Activity"));
+                AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
+                wmg->CloseAll(wtoken, activityName, String("Activity"));
             }
             r->mActivity->SetDecorView(NULL);
         }
@@ -4437,9 +4418,8 @@ ECode CActivityThread::HandleDestroyActivity(
             // by the app will leak.  Well we try to warning them a lot
             // about leaking windows, because that is a bug, so if they are
             // using this recreate facility then they get to live with leaks.
-            assert(0 && "TODO");
-            // AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
-            // wmg->CloseAll(token, activityName, String("Activity"));
+            AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
+            wmg->CloseAll(token, activityName, String("Activity"));
         }
 
         // Mocked out contexts won't be participating in the normal
@@ -4450,8 +4430,7 @@ ECode CActivityThread::HandleDestroyActivity(
         IContextWrapper::Probe(r->mActivity)->GetBaseContext((IContext**)&c);
         IContextImpl* ci = IContextImpl::Probe(c);
         if (ci) {
-            assert(0 && "TODO");
-            // ((CContextImpl*)ci)->ScheduleFinalCleanup(activityName, String("Activity"));
+            ((CContextImpl*)ci)->ScheduleFinalCleanup(activityName, String("Activity"));
         }
     }
 
@@ -5072,9 +5051,9 @@ ECode CActivityThread::HandleTrimMemory(
             (*it)->OnTrimMemory(level);
         }
     }
-    assert(0 && "TODO");
-    // AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
-    // wmg->TrimMemory(level);
+
+    AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
+    wmg->TrimMemory(level);
     return NOERROR;
 }
 
@@ -5094,7 +5073,7 @@ void CActivityThread::SetupGraphicsSupport(
         // If there are several packages in this application we won't
         // initialize the graphics disk caches
         if (packages != NULL && packages->GetLength() == 1) {
-//             HardwareRenderer.setupDiskCache(cacheDir);
+            HardwareRenderer::SetupDiskCache(cacheDir);
 //             RenderScript.setupDiskCache(cacheDir);
         }
 //     } catch (RemoteException e) {
@@ -5207,25 +5186,26 @@ ECode CActivityThread::HandleBindApplication(
     }
     UpdateDefaultDensity();
 
-    assert(0 && "TODO");
-    // AutoPtr<CContextImpl> appContext = ContextImpl::CreateAppContext(this, data.info);
-    // if (!Process::IsIsolated()) {
-    //     AutoPtr<IFile> cacheDir;
-    //     appContext->GetCacheDir((IFile**)&cacheDir);
-    //     if (cacheDir != NULL) {
-    //         // Provide a usable directory for temporary files
-    //         AutoPtr<ISystem> system;
-    //         Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
-    //         String path, oldValue;
-    //         cacheDir->GetAbsolutePath(&path);
-    //         system->SetProperty(String("java.io.tmpdir"), path, &oldValue);
+    AutoPtr<IContextImpl> cimpl;
+    CContextImpl::CreateAppContext(this, data->mInfo, (IContextImpl**)&cimpl);
+    CContextImpl* appContext = (CContextImpl*)cimpl.Get();
+    if (!Process::IsIsolated()) {
+        AutoPtr<IFile> cacheDir;
+        appContext->GetCacheDir((IFile**)&cacheDir);
+        if (cacheDir != NULL) {
+            // Provide a usable directory for temporary files
+            AutoPtr<ISystem> system;
+            Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
+            String path, oldValue;
+            cacheDir->GetAbsolutePath(&path);
+            system->SetProperty(String("java.io.tmpdir"), path, &oldValue);
 
-    //         SetupGraphicsSupport(data->mInfo, cacheDir);
-    //     }
-    //     else {
-    //         Slogger::E(TAG, "Unable to setupGraphicsSupport due to missing cache directory");
-    //     }
-    // }
+            SetupGraphicsSupport(loadedPkg, cacheDir);
+        }
+        else {
+            Slogger::E(TAG, "Unable to setupGraphicsSupport due to missing cache directory");
+        }
+    }
 
     String timeStr;
     mCoreSettings->GetString(ISettingsSystem::TIME_12_24, &timeStr);
@@ -5349,8 +5329,7 @@ ECode CActivityThread::HandleBindApplication(
         GetPackageInfo(instrApp, data->mCompatInfo, NULL/*appContext.getClassLoader()*/,
             FALSE, TRUE, FALSE, (ILoadedPkg**)&pi);
         AutoPtr<IContextImpl> instrContext;
-        assert(0 && "TODO");
-        //instrContext = CContextImpl::CreateAppContext(this, pi);
+        CContextImpl::CreateAppContext(this, pi, (IContextImpl**)&instrContext);
 
 //        try {
         String className;
@@ -5390,9 +5369,8 @@ ECode CActivityThread::HandleBindApplication(
         ci->GetName(&name);
         AutoPtr<IComponentName> component;
         CComponentName::New(cName, name, (IComponentName**)&component);
-        assert(0 && "TODO");
-        // mInstrumentation->Init(this, instrContext, appContext, component,
-        //     data->mInstrumentationWatcher, data->mInstrumentationUiAutomationConnection);
+        mInstrumentation->Init(this, IContext::Probe(instrContext), IContext::Probe(appContext),
+            component, data->mInstrumentationWatcher, data->mInstrumentationUiAutomationConnection);
 
         Boolean isHandle;
         ci->GetHandleProfiling(&isHandle);
@@ -6295,7 +6273,7 @@ AutoPtr<IContentProviderHolder> CActivityThread::InstallProvider(
 ECode CActivityThread::Attach(
     /* [in] */ Boolean sys)
 {
-    sCurrentActivityThread = THIS_PROBE(IActivityThread);
+    sCurrentActivityThread = this;
     mSystemThread = sys;
     if (!sys) {
 //         ViewRootImpl.addFirstDrawHandler(new Runnable() {
@@ -6322,14 +6300,18 @@ ECode CActivityThread::Attach(
         mInstrumentation = NULL;
         CInstrumentation::New((IInstrumentation**)&mInstrumentation);
 
-        assert(0 && "TODO");
-        // AutoPtr<CContextImpl> ctx;
-        // GetSystemContext((IContextImpl**)&ctx);
-        // AutoPtr<CContextImpl> context = ContextImpl::CreateAppContext(
-        //     THIS_PROBE(IActivityThread), ctx->mPackageInfo);
+        AutoPtr<IContextImpl> ctx;
+        GetSystemContext((IContextImpl**)&ctx);
+        CContextImpl* systemContext = (CContextImpl*)ctx.Get();
+        AutoPtr<IContextImpl> appContext;
+        CContextImpl::CreateAppContext(
+            this, systemContext->mPackageInfo, (IContextImpl**)&appContext);
 
-        // mInitialApplication = context->mPackageInfo->MakeApplication(TRUE, NULL);
-        // mInitialApplication->OnCreate();
+        CContextImpl* context = (CContextImpl*)appContext.Get();
+        mInitialApplication = NULL;
+        context->mPackageInfo->MakeApplication(
+            TRUE, NULL, (IApplication**)&mInitialApplication);
+        mInitialApplication->OnCreate();
 
         // } catch (Exception e) {
         //     throw new RuntimeException(
@@ -6342,9 +6324,8 @@ ECode CActivityThread::Attach(
 
     AutoPtr<IWeakReference> wr;
     GetWeakReference((IWeakReference**)&wr);
-    AutoPtr<IComponentCallbacks2> callbacks = new ConfigurationChangedCallbacks(wr);
-    assert(0 && "TODO");
-    // ViewRootImpl::AddConfigCallback(callbacks);
+    AutoPtr<IComponentCallbacks> callbacks = new ConfigurationChangedCallbacks(wr);
+    ViewRootImpl::AddConfigCallback(callbacks);
     return NOERROR;
 }
 

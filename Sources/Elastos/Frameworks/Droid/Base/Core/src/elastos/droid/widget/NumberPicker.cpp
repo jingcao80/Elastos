@@ -4,6 +4,7 @@
 #include "elastos/droid/widget/NumberPicker.h"
 #include "elastos/droid/content/res/CCompatibilityInfo.h"
 #include "elastos/droid/graphics/CPaint.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/CSparseArray.h"
 #include "elastos/droid/utility/CTypedValue.h"
@@ -22,6 +23,7 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::ICompatibilityInfo;
 using Elastos::Droid::Content::Res::CCompatibilityInfo;
 using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::IInputType;

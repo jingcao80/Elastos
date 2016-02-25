@@ -20,7 +20,7 @@ module
     interface Elastos.Droid.View.InputMethod.IInputMethodSubtype;
     interface Elastos.Droid.View.InputMethod.IInputMethodInfo;
     interface Elastos.Droid.Internal.View.IInputMethodClient;
-    interface Elastos.Droid.Internal.View.IInputContext;
+    interface Elastos.Droid.Internal.View.IIInputContext;
 
     namespace Elastos {
     namespace Droid {
@@ -282,7 +282,7 @@ module
 
         /** @hide */
         GetInputContext(
-            [out] IInputContext** context);
+            [out] IIInputContext** context);
 
         GetInputMethodList(
             [out] IList** infos);

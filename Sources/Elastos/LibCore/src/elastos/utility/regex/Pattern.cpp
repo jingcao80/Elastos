@@ -27,6 +27,23 @@ Pattern::~Pattern()
     }
 }
 
+ECode Pattern::constructor(
+    /* [in] */ const String& pattern,
+    /* [in] */ Int32 flags)
+{
+    if ((flags & CANON_EQ) != 0) {
+        return E_UNSUPPORTED_OPERATION_EXCEPTION;
+    }
+    Int32 supportedFlags = CASE_INSENSITIVE | COMMENTS | DOTALL
+        | LITERAL | MULTILINE | UNICODE_CASE | UNIX_LINES;
+    if ((flags & ~supportedFlags) != 0) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    mPattern = pattern;
+    mFlags = flags;
+    return Compile();
+}
+
 ECode Pattern::Matcher(
     /* [in] */ const String& inputString,
     /* [out] */ IMatcher** matcher)
@@ -105,7 +122,9 @@ ECode Pattern::Compile(
     /* [out] */ IPattern** obj)
 {
     VALIDATE_NOT_NULL(obj);
-    *obj = (IPattern*)new Pattern(regularExpression, flags);
+    AutoPtr<Pattern> pattern = new Pattern();
+    FAIL_RETURN(pattern->constructor(regularExpression, flags));
+    *obj = IPattern::Probe(pattern);
     REFCOUNT_ADD(*obj);
     return NOERROR;
 }
@@ -117,31 +136,10 @@ ECode Pattern::Compile(
     return Compile(pattern, 0, obj);
 }
 
-Pattern::Pattern(
-    /* [in] */ const String& pattern,
-    /* [in] */ Int32 flags)
-    : mNativePattern(NULL)
-    , mPattern(pattern)
-    , mFlags(flags)
-{
-    assert((flags & CANON_EQ) == 0);
-    // if ((flags & CANON_EQ) != 0) {
-    //     throw new UnsupportedOperationException("CANON_EQ flag not supported");
-    // }
-    Int32 supportedFlags = CASE_INSENSITIVE | COMMENTS | DOTALL
-        | LITERAL | MULTILINE | UNICODE_CASE | UNIX_LINES;
-    if ((flags & ~supportedFlags) != 0) {
-        //throw new IllegalArgumentException("Unsupported flags: " + (flags & ~supportedFlags));
-        assert(0 && "Unsupported flags");
-    }
-    ASSERT_SUCCEEDED(Compile());
-}
-
 ECode Pattern::Compile()
 {
     if (mPattern.IsNull()) {
         return E_NULL_POINTER_EXCEPTION;
-//        throw new NullPointerException("pattern == null");
     }
 
     String icuPattern = mPattern;
@@ -161,11 +159,13 @@ Boolean Pattern::Matches(
     /* [in] */ const String& regularExpression,
     /* [in] */ ICharSequence* input)
 {
-    AutoPtr<IPattern> pattern = (IPattern*)new Pattern(regularExpression, 0);
+    AutoPtr<Pattern> pattern = new Pattern();
+    ECode ec = pattern->constructor(regularExpression, 0);
+    if (FAILED(ec)) return FALSE;
+
     AutoPtr<CMatcher> matcher;
-    ECode ec = CMatcher::NewByFriend(pattern, input, (CMatcher**)&matcher);
-    if (FAILED(ec))
-        return FALSE;
+    ec = CMatcher::NewByFriend(IPattern::Probe(pattern), input, (CMatcher**)&matcher);
+    if (FAILED(ec)) return FALSE;
 
     Boolean result;
     matcher->Matches(&result);
@@ -178,8 +178,7 @@ Boolean Pattern::Matches(
 {
     AutoPtr<ICharSequence> input;
     ECode ec = CString::New(inputString, (ICharSequence**)&input);
-    if (FAILED(ec))
-        return FALSE;
+    if (FAILED(ec)) return FALSE;
 
     return Matches(regularExpression, input);
 }

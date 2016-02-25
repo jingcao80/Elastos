@@ -43,7 +43,7 @@ module
             [out] IList** list);
 
         GetEnabledInputMethodSubtypeListLocked(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IInputMethodInfo* imi,
             [in] Boolean allowsImplicitlySelectedSubtypes,
             [out] IList** list);
@@ -116,7 +116,7 @@ module
             [in] IInputMethodSubtype* currentSubtype);
 
         GetExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IHashMap** hashmap);
     }
 
@@ -156,15 +156,15 @@ module
 
         GetFallbackLocaleForDefaultIme(
             [in] IArrayList* imis,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] ILocale** locale);
 
         GetSystemLocaleFromContext(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] ILocale** locale);
 
         GetDefaultEnabledImes(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Boolean isSystemReady,
             [in] IArrayList* imis,
             [out] IArrayList** arrayList);
@@ -185,7 +185,7 @@ module
         IsValidSystemDefaultIme(
             [in] Boolean isSystemReady,
             [in] IInputMethodInfo* imi,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
 
         ContainsSubtypeOf(
@@ -263,7 +263,7 @@ module
             [in] IList* enabledImis);
 
         GetImeAndSubtypeDisplayName(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IInputMethodInfo* imi,
             [in] IInputMethodSubtype* subtype,
             [out] ICharSequence** displayName);

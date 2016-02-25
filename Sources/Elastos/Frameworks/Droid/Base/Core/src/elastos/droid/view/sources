@@ -158,6 +158,7 @@ SOURCES += OrientationListener.cpp
 SOURCES += CViewAnimationUtilsHelper.cpp
 SOURCES += InputEventSender.cpp
 SOURCES += AccessibilityIterators.cpp
+SOURCES += HardwareLayer.cpp
 
 ELASTOS_LIBS += inputmethod/inputmethod.lib
 ELASTOS_LIBS += accessibility/accessibility.lib

@@ -9,7 +9,7 @@ module
     interface Elastos.Droid.Os.IResultReceiver;
     interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.Internal.View.IInputBindResult;
-    interface Elastos.Droid.Internal.View.IInputContext;
+    interface Elastos.Droid.Internal.View.IIInputContext;
     interface Elastos.Droid.Internal.View.IInputMethodClient;
 
     namespace Elastos {
@@ -30,7 +30,7 @@ module
             [out] IList** infos);
 
         GetEnabledInputMethodSubtypeList(
-            [in] IInputMethodInfo* imi,
+            [in] String imiId,
             [in] Boolean allowsImplicitlySelectedSubtypes,
             [out] IList** infos);
 
@@ -42,13 +42,9 @@ module
         GetShortcutInputMethodsAndSubtypes(
             [out] IList** subtypes);
 
-        /* get the current inputcontext,used by tvremoteserver */
-        GetInputContext(
-            [out] IInputContext** ctx);
-
         AddClient(
             [in] IInputMethodClient* client,
-            [in] IInputContext* inputContext,
+            [in] IIInputContext* inputContext,
             [in] Int32 uid,
             [in] Int32 pid);
 
@@ -57,7 +53,7 @@ module
 
         StartInput(
             [in] IInputMethodClient* client,
-            [in] IInputContext* inputContext,
+            [in] IIInputContext* inputContext,
             [in] IEditorInfo* attribute,
             [in] Int32 controlFlags,
             [out] IInputBindResult** result);
@@ -86,7 +82,7 @@ module
             [in] Int32 softInputMode,
             [in] Int32 windowFlags,
             [in] IEditorInfo* attribute,
-            [in] IInputContext* inputContext,
+            [in] IIInputContext* inputContext,
             [out] IInputBindResult** result);
 
         ShowInputMethodPickerFromClient(

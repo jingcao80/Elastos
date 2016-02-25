@@ -6,6 +6,7 @@
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/view/CSurface.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
 #include <camera/Camera.h>
@@ -21,6 +22,7 @@ using Elastos::Droid::Os::ILooperHelper;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::View::CSurface;
 using Elastos::IO::CFile;
 using Elastos::IO::CRandomAccessFile;
 using Elastos::IO::ICloseable;
@@ -107,10 +109,13 @@ static android::sp<android::MediaRecorder> setMediaRecorder(
 
 static android::sp<android::Surface> get_surface(ISurface* clazz)
 {
-    //ALOGV("get_surface");
-// TODO: Need jni code
-    // return android_view_Surface_getSurface(env, clazz);
-    return NOERROR;
+    ALOGV("get_surface");
+
+    AutoPtr<CSurface> surface = (CSurface*)clazz;
+    android::sp<android::Surface> sur;
+    sur = reinterpret_cast<android::Surface *>(
+            surface->mNativeObject);
+    return sur;
 }
 
 static android::sp<android::Camera> get_native_camera(
@@ -259,8 +264,24 @@ ECode CMediaRecorder::GetSurface(
     }
 
     // Wrap the IGBP in a Java-language Surface.
-// TODO: Need jni code
-    // return android_view_Surface_createFromIGraphicBufferProducer(env, bufferProducer);
+    android::sp<android::Surface> surface(new android::Surface(bufferProducer, TRUE));
+    if (surface == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
+
+    AutoPtr<ISurface> surfaceObj;
+    CSurface::New((Int64)surface.get(), (ISurface**)&surfaceObj);
+    if (surfaceObj == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
+    *result = surfaceObj;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+
+
+
     return NOERROR;
 }
 

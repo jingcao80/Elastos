@@ -34,7 +34,7 @@ public:
       * @param filter Scan filter of the truncated filter.
       * @param storageDescriptors Describes how the scan should be stored.
       */
-    TruncatedFilter(
+    constructor(
         /* [in] */ IScanFilter* filter,
         /* [in] */ IList* storageDescriptors);// ResultStorageDescriptor
 

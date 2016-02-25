@@ -97,13 +97,15 @@ ECode ContentProviderNative::ContentProviderProxy::Query(
     /* [in] */ IICancellationSignal* cancellationSignal,
     /* [out] */ ICursor** cursor)
 {
-    assert(0 && "TODO");
     VALIDATE_NOT_NULL(cursor);
     AutoPtr<IBulkCursorToCursorAdaptor> adaptor;
-//***    FAIL_RETURN(CBulkCursorToCursorAdaptor::New((IBulkCursorToCursorAdaptor**)&adaptor));
-    AutoPtr<IParcel> data; // Parcel.obtain();
+    FAIL_RETURN(CBulkCursorToCursorAdaptor::New((IBulkCursorToCursorAdaptor**)&adaptor));
+    AutoPtr<IParcel> data, reply; // Parcel.obtain();
     AutoPtr<IParcel> reply; // Parcel.obtain();
+    CParcel::New((IParcel**)&data);
+    CParcel::New((IParcel**)&reply);
 //    try {
+    assert(0 && "TODO");
 //        data.writeInterfaceToken(IContentProvider.descriptor);
     AutoPtr<IParcelable> parcelable = (IParcelable*) uri->Probe(EIID_IParcelable);
     FAIL_RETURN(parcelable->WriteToParcel(reply));

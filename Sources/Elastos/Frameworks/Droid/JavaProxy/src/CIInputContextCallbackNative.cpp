@@ -42,8 +42,8 @@ ECode CIInputContextCallbackNative::SetTextBeforeCursor(
         jtextBeforeCursor = Util::ToJavaString(env, str);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContextCallback");
-    Util::CheckErrorAndLog(env, TAG, "FindClass: IInputContextCallback %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContextCallback");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IIInputContextCallback %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "setTextBeforeCursor", "(Ljava/lang/CharSequence;I)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: setTextBeforeCursor %d", __LINE__);
@@ -77,8 +77,8 @@ ECode CIInputContextCallbackNative::SetTextAfterCursor(
         jtextAfterCursor = Util::ToJavaString(env, str);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContextCallback");
-    Util::CheckErrorAndLog(env, TAG, "FindClass: IInputContextCallback %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContextCallback");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IIInputContextCallback %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "setTextAfterCursor", "(Ljava/lang/CharSequence;I)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: setTextAfterCursor %d", __LINE__);
@@ -105,8 +105,8 @@ ECode CIInputContextCallbackNative::SetCursorCapsMode(
     JNIEnv* env;
     mJVM->AttachCurrentThread(&env, NULL);
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContextCallback");
-    Util::CheckErrorAndLog(env, TAG, "FindClass: IInputContextCallback %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContextCallback");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IIInputContextCallback %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "setCursorCapsMode", "(II)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: setCursorCapsMode %d", __LINE__);
@@ -134,8 +134,8 @@ ECode CIInputContextCallbackNative::SetExtractedText(
         jextractedText = Util::ToJavaExtractedText(env, extractedText);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContextCallback");
-    Util::CheckErrorAndLog(env, TAG, "FindClass: IInputContextCallback %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContextCallback");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IIInputContextCallback %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "setExtractedText", "(Landroid/view/inputmethod/ExtractedText;I)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: setExtractedText %d", __LINE__);
@@ -166,8 +166,8 @@ ECode CIInputContextCallbackNative::SetSelectedText(
         jselectedText = Util::ToJavaString(env, str);
     }
 
-    jclass c = env->FindClass("com/android/internal/view/IInputContextCallback");
-    Util::CheckErrorAndLog(env, TAG, "FindClass: IInputContextCallback %d", __LINE__);
+    jclass c = env->FindClass("com/android/internal/view/IIInputContextCallback");
+    Util::CheckErrorAndLog(env, TAG, "FindClass: IIInputContextCallback %d", __LINE__);
 
     jmethodID m = env->GetMethodID(c, "setSelectedText", "(Ljava/lang/CharSequence;I)V");
     Util::CheckErrorAndLog(env, TAG, "GetMethodID: setSelectedText %d", __LINE__);

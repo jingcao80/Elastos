@@ -29,7 +29,7 @@ module
 
     interface IEnableAccessibilityControllerHelper {
         CanEnableAccessibilityViaGesture(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
     }
 

@@ -26,7 +26,7 @@ public:
 
     BluetoothAudioConfig();
 
-    BluetoothAudioConfig(
+    CARAPI constructor(
         /* [in] */ Int32 sampleRate,
         /* [in] */ Int32 channelConfig,
         /* [in] */ Int32 audioFormat);
@@ -45,8 +45,8 @@ public:
         /* [out] */ String* info);
 
     CARAPI WriteToParcel(
-        /* [in] */ IParcel* out,
-        /* [in] */ Int32 flags);
+        /* [in] */ IParcel* out);
+    //    /* [in] */ Int32 flags);
 
     // @Override
     CARAPI ReadFromParcel(

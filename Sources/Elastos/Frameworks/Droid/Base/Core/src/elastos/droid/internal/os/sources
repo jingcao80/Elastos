@@ -25,6 +25,7 @@ SOURCES += CRuntimeInit.cpp
 SOURCES += CSomeArgsHelper.cpp
 SOURCES += CTransferPipe.cpp
 SOURCES += CZygoteInit.cpp
+SOURCES += WrapperInit.cpp
 SOURCES += InstallerConnection.cpp
 SOURCES += LoggingPrintStream.cpp
 SOURCES += ProcessCpuTracker.cpp

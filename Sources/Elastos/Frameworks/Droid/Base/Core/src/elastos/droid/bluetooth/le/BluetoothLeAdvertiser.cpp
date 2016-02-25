@@ -228,13 +228,14 @@ BluetoothLeAdvertiser::BluetoothLeAdvertiser()
 {
 }
 
-BluetoothLeAdvertiser::BluetoothLeAdvertiser(
+ECode BluetoothLeAdvertiser::constructor(
     /* [in] */ IIBluetoothManager* bluetoothManager)
 {
     mBluetoothManager = bluetoothManager;
     mBluetoothAdapter = CBluetoothAdapter::GetDefaultAdapter();
     AutoPtr<ILooper> mainLooper = Looper::GetMainLooper();
     CHandler::New(mainLooper, (IHandler**)&mHandler);
+    return NOERROR;
 }
 
 ECode BluetoothLeAdvertiser::StartAdvertising(

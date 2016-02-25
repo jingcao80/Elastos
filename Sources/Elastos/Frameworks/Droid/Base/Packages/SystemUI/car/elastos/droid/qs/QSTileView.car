@@ -5,7 +5,6 @@ module
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Qs {
 
@@ -41,7 +40,6 @@ module
 
     } // namespace Qs
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

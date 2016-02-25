@@ -4,6 +4,7 @@
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/graphics/Color.h"
 #include "elastos/droid/graphics/CPaint.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/widget/CFrameLayoutLayoutParams.h"
 #include "elastos/droid/widget/CTextView.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -21,6 +22,7 @@ using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::Color;
 using Elastos::Droid::Graphics::CBitmap;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;

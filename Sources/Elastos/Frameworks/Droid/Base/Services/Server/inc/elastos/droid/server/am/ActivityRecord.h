@@ -58,7 +58,7 @@ public:
         /* [in] */ Int32 reqCode,
         /* [in] */ Boolean componentSpecified,
         /* [in] */ ActivityStackSupervisor* supervisor,
-        /* [in] */ IActivityContainer* container,
+        /* [in] */ IIActivityContainer* container,
         /* [in] */ IBundle* options);
 
     ~ActivityRecord();
@@ -332,13 +332,13 @@ public:
     Boolean mForceNewConfig; // force re-create with new config next time
     Int32 mLaunchCount;        // count of launches since last state
     Int64 mLastLaunchTime;    // time of last lauch of this activity
-    List<AutoPtr<IActivityContainer> > mChildContainers;
+    List<AutoPtr<IIActivityContainer> > mChildContainers;
 
     String mStringName;      // for caching of toString().
 
     ActivityStackSupervisor* mStackSupervisor;
     Boolean mStartingWindowShown;
-    AutoPtr<IActivityContainer> mInitialActivityContainer;
+    AutoPtr<IIActivityContainer> mInitialActivityContainer;
 
     AutoPtr<IActivityManagerTaskDescription> mTaskDescription; // the recents information for this activity
     Boolean mLaunchTaskBehind; // this activity is actively being launched with

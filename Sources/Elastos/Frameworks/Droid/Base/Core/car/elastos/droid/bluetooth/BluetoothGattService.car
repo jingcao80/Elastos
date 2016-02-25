@@ -46,6 +46,11 @@ module
                 [in] IBluetoothGattCharacteristic* characteristic,
                 [out] Boolean* result);
 
+            GetCharacteristic(
+                [in] IUUID* uuid,
+                [in] Int32 instanceId,
+                [out] IBluetoothGattCharacteristic** result);
+
             /**
              * Force the instance ID.
              * This is needed for conformance testing only.
@@ -54,6 +59,9 @@ module
             SetInstanceId(
                 [in] Int32 instanceId);
 
+            GetHandles(
+                [out] Int32* result);
+
             /**
              * Force the number of handles to reserve for this service.
              * This is needed for conformance testing only.
@@ -61,6 +69,12 @@ module
              */
             SetHandles(
                 [in] Int32 handles);
+
+            AddIncludedService(
+                [in] IBluetoothGattService* includedService);
+
+            GetDevice(
+                [out] IBluetoothDevice** result);
 
             /**
              * Returns the UUID of this service

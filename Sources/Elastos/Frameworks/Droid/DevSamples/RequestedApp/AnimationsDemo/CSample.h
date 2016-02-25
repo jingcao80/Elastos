@@ -1,6 +1,6 @@
 
-#ifndef  __CSAMPLE_H__
-#define  __CSAMPLE_H__
+#ifndef __CSAMPLE_H__
+#define __CSAMPLE_H__
 
 #include "_CSample.h"
 #include "CMainActivity.h"

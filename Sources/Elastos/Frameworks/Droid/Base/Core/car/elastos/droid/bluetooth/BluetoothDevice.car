@@ -44,6 +44,10 @@ module
          * {@see BluetoothAdapter}
          * {@see BluetoothSocket}
          */
+        /**
+         * @Involve
+         * interface IParcelable
+         */
         [deprecated]
         interface IBluetoothDevice {
             /**
@@ -1010,7 +1014,7 @@ module
              * @throws IllegalArgumentException if callback is null
              */
             ConnectGatt(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] Boolean autoConnect,
                 [in] IBluetoothGattCallback* cb,
                 [out] IBluetoothGatt** btGatt);
@@ -1032,11 +1036,15 @@ module
              * @hide
              */
             ConnectGatt(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] Boolean autoConnect,
                 [in] IBluetoothGattCallback* cb,
                 [in] Int32 transport,
                 [out] IBluetoothGatt** btGatt);
+
+            Equals(
+                [in] IInterface* obj,
+                [out] Boolean* result);
         }
 
     } // Bluetooth

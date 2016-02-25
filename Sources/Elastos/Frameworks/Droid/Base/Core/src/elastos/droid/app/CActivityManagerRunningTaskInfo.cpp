@@ -106,6 +106,21 @@ ECode CActivityManagerRunningTaskInfo::SetId(
     return NOERROR;
 }
 
+ECode CActivityManagerRunningTaskInfo::GetLastActiveTime(
+    /* [out] */ Int32* lastActiveTime)
+{
+    VALIDATE_NOT_NULL(lastActiveTime);
+    *lastActiveTime = mLastActiveTime;
+    return NOERROR;
+}
+
+ECode CActivityManagerRunningTaskInfo::SetLastActiveTime(
+    /* [in] */ Int32 lastActiveTime)
+{
+    mLastActiveTime = lastActiveTime;
+    return NOERROR;
+}
+
 /**
  * The component launched as the first activity in the task.  This can
  * be considered the "application" of this task.

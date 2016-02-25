@@ -9,11 +9,8 @@
 
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
-// import android.content.IIntent;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Os::IBinder;
-// import android.util.Log;
-// import java.util.ArrayList;
 using Elastos::Utility::IList;
 
 namespace Elastos {
@@ -35,7 +32,7 @@ class BluetoothA2dpSink
     , public IBluetoothA2dpSink
     , public IBluetoothProfile
 {
-private:
+public:
     class BluetoothStateChangeCallbackStub
         : public Object
         , public IIBluetoothStateChangeCallback
@@ -46,8 +43,8 @@ private:
 
         BluetoothStateChangeCallbackStub();
 
-        BluetoothStateChangeCallbackStub(
-            /* [in] */ IBluetoothA2dpSink* owner);
+        CARAPI constructor(
+            /* [in] */ IInterface* owner);
 
         CARAPI OnBluetoothStateChange(
             /* [in] */ Boolean up);
@@ -89,6 +86,8 @@ public:
     CAR_INTERFACE_DECL();
 
     BluetoothA2dpSink();
+
+    ~BluetoothA2dpSink();
 
     /**
       * Create a BluetoothA2dp proxy object for interacting with the local
@@ -223,7 +222,7 @@ private:
     static const Boolean VDBG;
     AutoPtr<IContext> mContext;
     AutoPtr<IBluetoothProfileServiceListener> mServiceListener;
-    AutoPtr<IBluetoothA2dpSink> mService;
+    AutoPtr<IIBluetoothA2dpSink> mService;
     AutoPtr<IBluetoothAdapter> mAdapter;
     AutoPtr<IIBluetoothStateChangeCallback> mBluetoothStateChangeCallback;
     AutoPtr<IServiceConnection> mConnection;

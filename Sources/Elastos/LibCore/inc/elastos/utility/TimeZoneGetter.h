@@ -2,40 +2,47 @@
 #define __ELASTOS_UTILITY_TIMEZONEGETTER_H__
 
 #include "Elastos.CoreLibrary.Utility.h"
-#include "Object.h"
+#include "elastos/core/Object.h"
+
+using Elastos::Utility::ITimeZoneGetter;
 
 namespace Elastos {
 namespace Utility {
 
-class TimeZoneGetter
+class ECO_PUBLIC TimeZoneGetter
+    : public Object
+    , public ITimeZoneGetter
 {
-private:
-    class DefaultTimeZoneGetter
-        : public Object
-        , public ITimeZoneGetter
-    {
-    public:
-        CAR_INTERFACE_DECL();
-
-        CARAPI GetId(
-            /* [out] */ String* string);
-
-    private:
-        String mId;
-    };
-
 public:
+    TimeZoneGetter();
+
+    virtual ~TimeZoneGetter();
+
+    CAR_INTERFACE_DECL();
+
     static CARAPI_(AutoPtr<ITimeZoneGetter>) GetInstance();
 
     static CARAPI SetInstance(
         /* [in] */ ITimeZoneGetter* getter);
 
+    virtual CARAPI GetId(
+        /* [out] */ String* string) = 0;
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 private:
-    TimeZoneGetter();
-    TimeZoneGetter(const TimeZoneGetter&);
+    ECO_LOCAL static AutoPtr<ITimeZoneGetter> sInstance;
+};
+
+class DefaultTimeZoneGetter
+    : public TimeZoneGetter
+{
+public:
+    virtual CARAPI GetId(
+        /* [out] */ String* string);
 
 private:
-    static AutoPtr<ITimeZoneGetter> sInstance;
+    String mId;
 };
 
 }// namespace Utility

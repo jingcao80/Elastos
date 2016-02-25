@@ -645,6 +645,24 @@ module
         IsDeviceEncryptionEnabled(
             [out] Boolean* isDeviceEncryptionEnabled);
 
+        /**
+         * Deserialize a pattern.
+         * @param string The pattern serialized with {@link #patternToString}
+         * @return The pattern.
+         */
+        StringToPattern(
+            [in] String string,
+            [out] IList** list);
+
+        /**
+         * Serialize a pattern.
+         * @param pattern The pattern.
+         * @return The pattern in string form.
+         */
+        PatternToString(
+            [in] IList* pattern,
+            [out] String* str);
+
         /*
          * Generate an SHA-1 hash for the pattern. Not the most secure, but it is
          * at least a second level of protection. First level is that the file
@@ -655,6 +673,9 @@ module
         PatternToHash(
             [in] IList* pattern,
             [out, callee] ArrayOf<Byte>* arr);
+
+        IsSafeModeEnabled(
+            [out] Boolean* result);
 
     }
 

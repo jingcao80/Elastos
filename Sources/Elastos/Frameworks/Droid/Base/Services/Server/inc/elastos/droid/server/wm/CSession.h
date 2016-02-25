@@ -20,7 +20,7 @@ using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::IRegion;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinder;
-using Elastos::Droid::Internal::View::IInputContext;
+using Elastos::Droid::Internal::View::IIInputContext;
 using Elastos::Droid::Internal::View::IInputMethodClient;
 
 namespace Elastos {
@@ -44,7 +44,7 @@ public:
         /* [in] */ Handle64 wmService,
         /* [in] */ IIWindowSessionCallback* callback,
         /* [in] */ IInputMethodClient* client,
-        /* [in] */ IInputContext* inputContext);
+        /* [in] */ IIInputContext* inputContext);
 
     CARAPI Add(
         /* [in] */ IIWindow* window,
@@ -331,7 +331,7 @@ public:
     AutoPtr<CWindowManagerService> mService;
     AutoPtr<IIWindowSessionCallback> mCallback;
     AutoPtr<IInputMethodClient> mClient;
-    AutoPtr<IInputContext> mInputContext;
+    AutoPtr<IIInputContext> mInputContext;
     Int32 mUid;
     Int32 mPid;
     String mStringName;

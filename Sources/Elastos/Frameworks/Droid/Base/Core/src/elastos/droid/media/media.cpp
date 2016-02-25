@@ -22,6 +22,11 @@
 #include "elastos/droid/media/CWebVttRenderingWidget.h"
 #include "elastos/droid/media/CWebVttTrack.h"
 #include "elastos/droid/media/CTtmlRenderer.h"
+#include "elastos/droid/media/CMediaRouterRouteInfo.h"
+#include "elastos/droid/media/CMediaRouterRouteGroup.h"
+#include "elastos/droid/media/CRouteCategory.h"
+#include "elastos/droid/media/CMediaRouterSimpleCallback.h"
+#include "elastos/droid/media/CMediaRouterUserRouteInfo.h"
 
 namespace Elastos {
 namespace Droid {
@@ -51,6 +56,11 @@ CAR_OBJECT_IMPL(CMediaRouterClientStateRouteInfo)
 CAR_OBJECT_IMPL(CRemoteDisplayState)
 CAR_OBJECT_IMPL(CRemoteDisplayInfo)
 CAR_OBJECT_IMPL(CTtmlRenderer)
+CAR_OBJECT_IMPL(CMediaRouterRouteInfo)
+CAR_OBJECT_IMPL(CMediaRouterUserRouteInfo)
+CAR_OBJECT_IMPL(CMediaRouterRouteGroup)
+CAR_OBJECT_IMPL(CRouteCategory)
+CAR_OBJECT_IMPL(CMediaRouterSimpleCallback)
 
 } // namespace Media
 } // namepsace Droid

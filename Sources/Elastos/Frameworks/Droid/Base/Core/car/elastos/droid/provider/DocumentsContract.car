@@ -254,7 +254,7 @@ module
          * @see #buildDocumentUriUsingTree(Uri, String)
          */
         IsDocumentUri(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IUri* uri,
             [out] Boolean* result);
 

@@ -1,6 +1,6 @@
 
-#ifndef  __CTIMEWIDGETPROVIDER_H__
-#define  __CTIMEWIDGETPROVIDER_H__
+#ifndef __CTIMEWIDGETPROVIDER_H__
+#define __CTIMEWIDGETPROVIDER_H__
 
 #include "_CTimeWidgetProvider.h"
 #include "appwidget/AppWidgetProvider.h"

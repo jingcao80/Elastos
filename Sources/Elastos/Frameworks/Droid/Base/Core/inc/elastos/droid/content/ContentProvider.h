@@ -68,7 +68,7 @@ namespace Content {
  * <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
  * developer guide.</p>
  */
-class ContentProvider
+class ECO_PUBLIC ContentProvider
     : public Object
     , public IContentProvider
     , public IComponentCallbacks
@@ -1212,7 +1212,7 @@ public:
 private:
     friend class CContentProviderTransport;
 
-    static const String TAG;
+    ECO_LOCAL static const String TAG;
 
     /*
      * Note: if you add methods to ContentProvider, you must add similar methods to

@@ -488,7 +488,7 @@ private:
      * Tries to open socket to Zygote process if not already open. If
      * already open, does nothing.  May block and retry.
      */
-    ECO_LOCAL static CARAPI OpenZygoteSocketIfNeeded(
+    ECO_LOCAL static CARAPI OpenElastosZygoteSocketIfNeeded(
         /* [in] */ const String& abi,
         /* [out] */ ZygoteState** state);
 
@@ -503,7 +503,7 @@ private:
      *
      * @throws ZygoteStartFailedEx if process start failed for any reason
      */
-    ECO_LOCAL static CARAPI ZygoteSendArgsAndGetResult(
+    ECO_LOCAL static CARAPI ElastosZygoteSendArgsAndGetResult(
         /* [in] */ ZygoteState* state,
         /* [in] */ List<String>* args,
         /* [out] */ IProcessStartResult** result);
@@ -565,12 +565,14 @@ public:
     /**
      * @hide for internal use only.
      */
-    static const String ZYGOTE_SOCKET;// = "zygote";
+    static const String ZYGOTE_SOCKET_ELASTOS;// = "elzygote";
+    static const String ZYGOTE_SOCKET_JAVA;// = "zygote";
 
     /**
      * @hide for internal use only.
      */
-    static const String SECONDARY_ZYGOTE_SOCKET;// = "zygote_secondary";
+    static const String SECONDARY_ZYGOTE_SOCKET_ELASTOS;// = "zygote_secondary";
+    static const String SECONDARY_ZYGOTE_SOCKET_JAVA;// = "zygote_secondary";
 
     /**
      * Defines the root UID.

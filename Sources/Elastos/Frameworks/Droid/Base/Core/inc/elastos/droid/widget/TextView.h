@@ -1,19 +1,16 @@
 #ifndef __ELASTOS_DROID_WIDGET_TEXTVIEW_H__
 #define __ELASTOS_DROID_WIDGET_TEXTVIEW_H__
 
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Text.h"
 #include "Elastos.Droid.Widget.h"
 #include <Elastos.CoreLibrary.Utility.h>
-#include "Elastos.Droid.Content.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/graphics/CRect.h"
-#include "elastos/droid/graphics/CRectF.h"
-#include "elastos/droid/os/Runnable.h"
-#include "elastos/droid/view/View.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/os/Runnable.h>
+#include <elastos/droid/view/View.h>
 
 using Elastos::Droid::Content::IUndoManager;
-using Elastos::Droid::Graphics::CRect;
-using Elastos::Droid::Graphics::CRectF;
 using Elastos::Droid::Graphics::ITypeface;
 using Elastos::Droid::Graphics::IPath;
 using Elastos::Droid::Text::ITextPaint;
@@ -441,7 +438,7 @@ private:
 
 class UserDictionaryListener;
 
-class TextView
+class ECO_PUBLIC TextView
     : public Elastos::Droid::View::View
     , public ITextView
     , public IOnPreDrawListener
@@ -3126,7 +3123,7 @@ private:
     static const Int32 EMS = 1;
     static const Int32 PIXELS = 2;
 
-    static const AutoPtr<CRectF> TEMP_RECTF;// = new RectF();
+    static const AutoPtr<IRectF> TEMP_RECTF;// = new RectF();
     static Object sTempRectLock;
 
     // XXX should be much larger

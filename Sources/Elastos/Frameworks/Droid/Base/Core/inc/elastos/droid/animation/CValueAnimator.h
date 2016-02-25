@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_ANIMATION_CVALUEANIMATOR_H__
-#define  __ELASTOS_DROID_ANIMATION_CVALUEANIMATOR_H__
+#ifndef __ELASTOS_DROID_ANIMATION_CVALUEANIMATOR_H__
+#define __ELASTOS_DROID_ANIMATION_CVALUEANIMATOR_H__
 
 #include "_Elastos_Droid_Animation_CValueAnimator.h"
 #include "elastos/droid/animation/ValueAnimator.h"

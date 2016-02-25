@@ -1,0 +1,37 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Hdmi {
+
+    /**
+     * Class that models a logical CEC device hosted in this system. Handles initialization,
+     * CEC commands that call for actions customized per device type.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IHdmiCecLocalDevice {
+    }
+
+    /**
+     * A callback interface to get notified when all pending action is cleared.
+     * It can be called when timeout happened.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IHdmiCecLocalDevicePendingActionClearedCallback {
+        OnCleared(
+            [in] IHdmiCecLocalDevice* device);
+    }
+
+    } // namespace Hdmi
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -12,349 +12,349 @@ module
     namespace Droid {
     namespace View {
 
-        [local, deprecated]
-        interface IHardwareRenderer {
-            /**
-             * System property used to enable or disable hardware rendering profiling.
-             * The default value of this property is assumed to be false.
-             *
-             * When profiling is enabled, the adb shell dumpsys gfxinfo command will
-             * output extra information about the time taken to execute by the last
-             * frames.
-             *
-             * Possible values:
-             * "true", to enable profiling
-             * "visual_bars", to enable profiling and visualize the results on screen
-             * "false", to disable profiling
-             *
-             * @see #PROFILE_PROPERTY_VISUALIZE_BARS
-             *
-             * @hide
-             */
-            const String PROFILE_PROPERTY = "debug.hwui.profile";
+    [local, deprecated]
+    interface IHardwareRenderer {
+        /**
+         * System property used to enable or disable hardware rendering profiling.
+         * The default value of this property is assumed to be false.
+         *
+         * When profiling is enabled, the adb shell dumpsys gfxinfo command will
+         * output extra information about the time taken to execute by the last
+         * frames.
+         *
+         * Possible values:
+         * "true", to enable profiling
+         * "visual_bars", to enable profiling and visualize the results on screen
+         * "false", to disable profiling
+         *
+         * @see #PROFILE_PROPERTY_VISUALIZE_BARS
+         *
+         * @hide
+         */
+        const String PROFILE_PROPERTY = "debug.hwui.profile";
 
-            /**
-             * Value for {@link #PROFILE_PROPERTY}. When the property is set to this
-             * value, profiling data will be visualized on screen as a bar chart.
-             *
-             * @hide
-             */
-            const String PROFILE_PROPERTY_VISUALIZE_BARS = "visual_bars";
+        /**
+         * Value for {@link #PROFILE_PROPERTY}. When the property is set to this
+         * value, profiling data will be visualized on screen as a bar chart.
+         *
+         * @hide
+         */
+        const String PROFILE_PROPERTY_VISUALIZE_BARS = "visual_bars";
 
-            /**
-             * Turn on to draw dirty regions every other frame.
-             *
-             * Possible values:
-             * "true", to enable dirty regions debugging
-             * "false", to disable dirty regions debugging
-             *
-             * @hide
-             */
-            const String DEBUG_DIRTY_REGIONS_PROPERTY = "debug.hwui.show_dirty_regions";
+        /**
+         * Turn on to draw dirty regions every other frame.
+         *
+         * Possible values:
+         * "true", to enable dirty regions debugging
+         * "false", to disable dirty regions debugging
+         *
+         * @hide
+         */
+        const String DEBUG_DIRTY_REGIONS_PROPERTY = "debug.hwui.show_dirty_regions";
 
-            /**
-             * Turn on to flash hardware layers when they update.
-             *
-             * Possible values:
-             * "true", to enable hardware layers updates debugging
-             * "false", to disable hardware layers updates debugging
-             *
-             * @hide
-             */
-            const String DEBUG_SHOW_LAYERS_UPDATES_PROPERTY = "debug.hwui.show_layers_updates";
+        /**
+         * Turn on to flash hardware layers when they update.
+         *
+         * Possible values:
+         * "true", to enable hardware layers updates debugging
+         * "false", to disable hardware layers updates debugging
+         *
+         * @hide
+         */
+        const String DEBUG_SHOW_LAYERS_UPDATES_PROPERTY = "debug.hwui.show_layers_updates";
 
-            /**
-             * Controls overdraw debugging.
-             *
-             * Possible values:
-             * "false", to disable overdraw debugging
-             * "show", to show overdraw areas on screen
-             * "count", to display an overdraw counter
-             *
-             * @hide
-             */
-            const String DEBUG_OVERDRAW_PROPERTY = "debug.hwui.overdraw";
+        /**
+         * Controls overdraw debugging.
+         *
+         * Possible values:
+         * "false", to disable overdraw debugging
+         * "show", to show overdraw areas on screen
+         * "count", to display an overdraw counter
+         *
+         * @hide
+         */
+        const String DEBUG_OVERDRAW_PROPERTY = "debug.hwui.overdraw";
 
-            /**
-             * Value for {@link #DEBUG_OVERDRAW_PROPERTY}. When the property is set to this
-             * value, overdraw will be shown on screen by coloring pixels.
-             *
-             * @hide
-             */
-            const String OVERDRAW_PROPERTY_SHOW = "show";
+        /**
+         * Value for {@link #DEBUG_OVERDRAW_PROPERTY}. When the property is set to this
+         * value, overdraw will be shown on screen by coloring pixels.
+         *
+         * @hide
+         */
+        const String OVERDRAW_PROPERTY_SHOW = "show";
 
-            /**
-             * Turn on to debug non-rectangular clip operations.
-             *
-             * Possible values:
-             * "hide", to disable this debug mode
-             * "highlight", highlight drawing commands tested against a non-rectangular clip
-             * "stencil", renders the clip region on screen when set
-             *
-             * @hide
-             */
-            const String DEBUG_SHOW_NON_RECTANGULAR_CLIP_PROPERTY = "debug.hwui.show_non_rect_clip";
+        /**
+         * Turn on to debug non-rectangular clip operations.
+         *
+         * Possible values:
+         * "hide", to disable this debug mode
+         * "highlight", highlight drawing commands tested against a non-rectangular clip
+         * "stencil", renders the clip region on screen when set
+         *
+         * @hide
+         */
+        const String DEBUG_SHOW_NON_RECTANGULAR_CLIP_PROPERTY = "debug.hwui.show_non_rect_clip";
 
-            /**
-             * Destroys the hardware rendering context.
-             */
-            Destroy();
+        /**
+         * Destroys the hardware rendering context.
+         */
+        Destroy();
 
-            /**
-             * Initializes the hardware renderer for the specified surface.
-             *
-             * @param surface The surface to hardware accelerate
-             *
-             * @return True if the initialization was successful, false otherwise.
-             */
-            Initialize(
-                [in] ISurface* surface,
-                [out] Boolean* res);
+        /**
+         * Initializes the hardware renderer for the specified surface.
+         *
+         * @param surface The surface to hardware accelerate
+         *
+         * @return True if the initialization was successful, false otherwise.
+         */
+        Initialize(
+            [in] ISurface* surface,
+            [out] Boolean* res);
 
-            /**
-             * Updates the hardware renderer for the specified surface.
-             *
-             * @param surface The surface to hardware accelerate
-             */
-            UpdateSurface(
-                [in] ISurface* surface);
+        /**
+         * Updates the hardware renderer for the specified surface.
+         *
+         * @param surface The surface to hardware accelerate
+         */
+        UpdateSurface(
+            [in] ISurface* surface);
 
-            /**
-             * Stops any rendering into the surface. Use this if it is unclear whether
-             * or not the surface used by the HardwareRenderer will be changing. It
-             * Suspends any rendering into the surface, but will not do any destruction
-             */
-            PauseSurface(
-                [in] ISurface* surface);
+        /**
+         * Stops any rendering into the surface. Use this if it is unclear whether
+         * or not the surface used by the HardwareRenderer will be changing. It
+         * Suspends any rendering into the surface, but will not do any destruction
+         */
+        PauseSurface(
+            [in] ISurface* surface);
 
-            /**
-             * Destroys all hardware rendering resources associated with the specified
-             * view hierarchy.
-             *
-             * @param view The root of the view hierarchy
-             */
-            DestroyHardwareResources(
-                [in] IView* view);
+        /**
+         * Destroys all hardware rendering resources associated with the specified
+         * view hierarchy.
+         *
+         * @param view The root of the view hierarchy
+         */
+        DestroyHardwareResources(
+            [in] IView* view);
 
-            /**
-             * This method should be invoked whenever the current hardware renderer
-             * context should be reset.
-             *
-             * @param surface The surface to hardware accelerate
-             */
-            Invalidate(
-                [in] ISurface* surface);
+        /**
+         * This method should be invoked whenever the current hardware renderer
+         * context should be reset.
+         *
+         * @param surface The surface to hardware accelerate
+         */
+        Invalidate(
+            [in] ISurface* surface);
 
-            /**
-             * Detaches the layer's surface texture from the GL context and releases
-             * the texture id
-             */
-            DetachSurfaceTexture(
-                [in] Int64 hardwareLayer);
+        /**
+         * Detaches the layer's surface texture from the GL context and releases
+         * the texture id
+         */
+        DetachSurfaceTexture(
+            [in] Int64 hardwareLayer);
 
-            /**
-             * Gets the current width of the surface. This is the width that the surface
-             * was last set to in a call to {@link #setup(int, int, Rect)}.
-             *
-             * @return the current width of the surface
-             */
-            GetWidth(
-                [out] Int32* width);
+        /**
+         * Gets the current width of the surface. This is the width that the surface
+         * was last set to in a call to {@link #setup(int, int, Rect)}.
+         *
+         * @return the current width of the surface
+         */
+        GetWidth(
+            [out] Int32* width);
 
-            /**
-             * Gets the current height of the surface. This is the height that the surface
-             * was last set to in a call to {@link #setup(int, int, Rect)}.
-             *
-             * @return the current width of the surface
-             */
-            GetHeight(
-                [out] Int32* heigth);
+        /**
+         * Gets the current height of the surface. This is the height that the surface
+         * was last set to in a call to {@link #setup(int, int, Rect)}.
+         *
+         * @return the current width of the surface
+         */
+        GetHeight(
+            [out] Int32* heigth);
 
-            /**
-             * Outputs extra debugging information in the specified file descriptor.
-             */
-            DumpGfxInfo(
-                [in] IPrintWriter* pw,
-                [in] IFileDescriptor* fd);
+        /**
+         * Outputs extra debugging information in the specified file descriptor.
+         */
+        DumpGfxInfo(
+            [in] IPrintWriter* pw,
+            [in] IFileDescriptor* fd);
 
-            /**
-             * Loads system properties used by the renderer. This method is invoked
-             * whenever system properties are modified. Implementations can use this
-             * to trigger live updates of the renderer based on properties.
-             *
-             * @return True if a property has changed.
-             */
-            LoadSystemProperties(
-                [out] Boolean* res);
+        /**
+         * Loads system properties used by the renderer. This method is invoked
+         * whenever system properties are modified. Implementations can use this
+         * to trigger live updates of the renderer based on properties.
+         *
+         * @return True if a property has changed.
+         */
+        LoadSystemProperties(
+            [out] Boolean* res);
 
-            /**
-             * Indicates that the specified hardware layer needs to be updated
-             * as soon as possible.
-             *
-             * @param layer The hardware layer that needs an update
-             */
-            PushLayerUpdate(
-                [in] IHardwareLayer* layer);
+        /**
+         * Indicates that the specified hardware layer needs to be updated
+         * as soon as possible.
+         *
+         * @param layer The hardware layer that needs an update
+         */
+        PushLayerUpdate(
+            [in] IHardwareLayer* layer);
 
-            /**
-             * Tells the HardwareRenderer that the layer is destroyed. The renderer
-             * should remove the layer from any update queues.
-             */
-            OnLayerDestroyed(
-                [in] IHardwareLayer* layer);
+        /**
+         * Tells the HardwareRenderer that the layer is destroyed. The renderer
+         * should remove the layer from any update queues.
+         */
+        OnLayerDestroyed(
+            [in] IHardwareLayer* layer);
 
-            /**
-             *  Indicates that the content drawn by HardwareDrawCallbacks needs to
-             *  be updated, which will be done by the next call to draw()
-             */
-            InvalidateRoot();
+        /**
+         *  Indicates that the content drawn by HardwareDrawCallbacks needs to
+         *  be updated, which will be done by the next call to draw()
+         */
+        InvalidateRoot();
 
-            /**
-             * Creates a new hardware layer. A hardware layer built by calling this
-             * method will be treated as a texture layer, instead of as a render target.
-             *
-             * @return A hardware layer
-             */
-            CreateTextureLayer(
-                [out] IHardwareLayer** res);
+        /**
+         * Creates a new hardware layer. A hardware layer built by calling this
+         * method will be treated as a texture layer, instead of as a render target.
+         *
+         * @return A hardware layer
+         */
+        CreateTextureLayer(
+            [out] IHardwareLayer** res);
 
-            BuildLayer(
-                [in] IRenderNode* node);
+        BuildLayer(
+            [in] IRenderNode* node);
 
-            CopyLayerInto(
-                [in] IHardwareLayer* layer,
-                [in] IBitmap* bitmap,
-                [out] Boolean* res);
+        CopyLayerInto(
+            [in] IHardwareLayer* layer,
+            [in] IBitmap* bitmap,
+            [out] Boolean* res);
 
-            InitializeIfNeeded(
-                [in] Int32 width,
-                [in] Int32 height,
-                [in] ISurface* surface,
-                [in] IRect* surfaceInsets,
-                [out] Boolean* res);
+        InitializeIfNeeded(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] ISurface* surface,
+            [in] IRect* surfaceInsets,
+            [out] Boolean* res);
 
-            /**
-             * Sets up the renderer for drawing.
-             *
-             * @param width The width of the drawing surface.
-             * @param height The height of the drawing surface.
-             * @param surfaceInsets The drawing surface insets to apply
-             */
-            Setup(
-                [in] Int32 width,
-                [in] Int32 height,
-                [in] IRect* surfaceInsets);
+        /**
+         * Sets up the renderer for drawing.
+         *
+         * @param width The width of the drawing surface.
+         * @param height The height of the drawing surface.
+         * @param surfaceInsets The drawing surface insets to apply
+         */
+        Setup(
+            [in] Int32 width,
+            [in] Int32 height,
+            [in] IRect* surfaceInsets);
 
-            /**
-             * Optional, sets the name of the renderer. Useful for debugging purposes.
-             *
-             * @param name The name of this renderer, can be null
-             */
-            SetName(
-                [in] String name);
+        /**
+         * Optional, sets the name of the renderer. Useful for debugging purposes.
+         *
+         * @param name The name of this renderer, can be null
+         */
+        SetName(
+            [in] String name);
 
-            /**
-             * Change the HardwareRenderer's opacity
-             */
-            SetOpaque(
-                [in] Boolean opaque);
+        /**
+         * Change the HardwareRenderer's opacity
+         */
+        SetOpaque(
+            [in] Boolean opaque);
 
-            /**
-             * Indicates whether hardware acceleration is currently enabled.
-             *
-             * @return True if hardware acceleration is in use, false otherwise.
-             */
-            IsEnabled(
-                [out] Boolean* res);
+        /**
+         * Indicates whether hardware acceleration is currently enabled.
+         *
+         * @return True if hardware acceleration is in use, false otherwise.
+         */
+        IsEnabled(
+            [out] Boolean* res);
 
-            /**
-             * Indicates whether hardware acceleration is currently enabled.
-             *
-             * @param enabled True if the hardware renderer is in use, false otherwise.
-             */
-            SetEnabled(
-                [in] Boolean enabled);
+        /**
+         * Indicates whether hardware acceleration is currently enabled.
+         *
+         * @param enabled True if the hardware renderer is in use, false otherwise.
+         */
+        SetEnabled(
+            [in] Boolean enabled);
 
-            /**
-             * Indicates whether hardware acceleration is currently request but not
-             * necessarily enabled yet.
-             *
-             * @return True if requested, false otherwise.
-             */
-            IsRequested(
-                [out] Boolean* res);
+        /**
+         * Indicates whether hardware acceleration is currently request but not
+         * necessarily enabled yet.
+         *
+         * @return True if requested, false otherwise.
+         */
+        IsRequested(
+            [out] Boolean* res);
 
-            /**
-             * Indicates whether hardware acceleration is currently requested but not
-             * necessarily enabled yet.
-             *
-             * @return True to request hardware acceleration, false otherwise.
-             */
-            SetRequested(
-                [in] Boolean requested);
+        /**
+         * Indicates whether hardware acceleration is currently requested but not
+         * necessarily enabled yet.
+         *
+         * @return True to request hardware acceleration, false otherwise.
+         */
+        SetRequested(
+            [in] Boolean requested);
 
-            /**
-             * Blocks until all previously queued work has completed.
-             */
-            Fence();
+        /**
+         * Blocks until all previously queued work has completed.
+         */
+        Fence();
 
-            /**
-             * Prevents any further drawing until draw() is called. This is a signal
-             * that the contents of the RenderNode tree are no longer safe to play back.
-             * In practice this usually means that there are Functor pointers in the
-             * display list that are no longer valid.
-             */
-            StopDrawing();
+        /**
+         * Prevents any further drawing until draw() is called. This is a signal
+         * that the contents of the RenderNode tree are no longer safe to play back.
+         * In practice this usually means that there are Functor pointers in the
+         * display list that are no longer valid.
+         */
+        StopDrawing();
 
-            /**
-             * Called by {@link ViewRootImpl} when a new performTraverals is scheduled.
-             */
-            NotifyFramePending();
+        /**
+         * Called by {@link ViewRootImpl} when a new performTraverals is scheduled.
+         */
+        NotifyFramePending();
 
-            RegisterAnimatingRenderNode(
-                [in] IRenderNode* animator);
-        }
+        RegisterAnimatingRenderNode(
+            [in] IRenderNode* animator);
+    }
 
-        [local]
-        interface IHardwareRendererHelper{
-            Disable(
-                [in] Boolean system);
+    [local]
+    interface IHardwareRendererHelper{
+        Disable(
+            [in] Boolean system);
 
-            EnableForegroundTrimming();
+        EnableForegroundTrimming();
 
-            IsAvailable(
-                [out] Boolean* res);
+        IsAvailable(
+            [out] Boolean* res);
 
-            SetupDiskCache(
-                [in] IFile* cacheDir);
+        SetupDiskCache(
+            [in] IFile* cacheDir);
 
-            Create(
-                [in] IContext* context,
-                [in] Boolean translucent,
-                [out] IHardwareRenderer** res);
+        Create(
+            [in] IContext* ctx,
+            [in] Boolean translucent,
+            [out] IHardwareRenderer** res);
 
-            TrimMemory(
-                [in] Int32 level);
-        }
+        TrimMemory(
+            [in] Int32 level);
+    }
 
-        interface IHardwareDrawCallbacks {
-            /**
-             * Invoked before a view is drawn by a hardware renderer.
-             *
-             * @param canvas The Canvas used to render the view.
-             */
-            OnHardwarePreDraw(
-                [in] IHardwareCanvas* canvas);
+    interface IHardwareDrawCallbacks {
+        /**
+         * Invoked before a view is drawn by a hardware renderer.
+         *
+         * @param canvas The Canvas used to render the view.
+         */
+        OnHardwarePreDraw(
+            [in] IHardwareCanvas* canvas);
 
-            /**
-             * Invoked after a view is drawn by a hardware renderer.
-             *
-             * @param canvas The Canvas used to render the view.
-             */
-            OnHardwarePostDraw(
-                [in] IHardwareCanvas* canvas);
+        /**
+         * Invoked after a view is drawn by a hardware renderer.
+         *
+         * @param canvas The Canvas used to render the view.
+         */
+        OnHardwarePostDraw(
+            [in] IHardwareCanvas* canvas);
 
-        }
+    }
 
     } // namespace View
     } // namepsace Droid

@@ -10,7 +10,7 @@
 #include "elastos/droid/server/am/ActivityRecord.h"
 #include "elastos/droid/server/am/ActivityStack.h"
 #include "elastos/droid/server/am/ActivityState.h"
-//TODO #include "elastos/droid/server/wm/AppTransition.h"
+#include "elastos/droid/server/wm/AppTransition.h"
 #include "elastos/droid/server/wm/TaskGroup.h"
 #include "elastos/droid/server/Watchdog.h"
 
@@ -27,7 +27,7 @@ using Elastos::Droid::App::CActivityOptions;
 using Elastos::Droid::App::CActivityOptionsHelper;
 using Elastos::Droid::App::CResultInfo;
 using Elastos::Droid::App::IActivity;
-using Elastos::Droid::App::IActivityContainer;
+using Elastos::Droid::App::IIActivityContainer;
 using Elastos::Droid::App::IIActivityController;
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IActivityManagerHelper;
@@ -56,7 +56,7 @@ using Elastos::Droid::Os::IUserHandleHelper;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Server::Am::IActivityRecord;
 using Elastos::Droid::Server::Watchdog;
-//TODO using Elastos::Droid::Server::Wm::AppTransition;
+using Elastos::Droid::Server::Wm::AppTransition;
 using Elastos::Droid::Server::Wm::TaskGroup;
 using Elastos::Droid::View::IDisplay;
 
@@ -201,7 +201,6 @@ static Boolean Init_SCREENSHOT_FORCE_565()
     return res;
 }
 
-
 const Int32 ActivityStack::LAUNCH_TICK;
 const Int32 ActivityStack::PAUSE_TIMEOUT;
 const Int32 ActivityStack::STOP_TIMEOUT;
@@ -237,7 +236,7 @@ ActivityStack::ActivityStack(
     AutoPtr<ILooper> looper;
     mService->mHandler->GetLooper((ILooper**)&looper);
     mHandler = new ActivityStackHandler(looper, this);
-    //TODO mWindowManager = mService->mWindowManager;
+    mWindowManager = mService->mWindowManager;
     mStackId = activityContainer->mStackId;
     mCurrentUser = mService->mCurrentUserId;//TODO friend this class in ActivityManagerService
 
@@ -473,9 +472,11 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
     appInfo->GetUid(&uid);
     Int32 userId;
     helper->GetUserId(uid, &userId);
-    Boolean isDoc = FALSE;
-    assert(isDoc);//TODO remove
-    Boolean isDocument = FALSE;//TODO  = intent != NULL & (((CIntent*)intent.Get())->IsDocument(&isDoc), isDoc);// IsDocument not in IIntent
+
+    Boolean isDocument = FALSE;
+    if (intent != NULL) {
+        intent->IsDocument(&isDocument);
+    }
     // If documentData is non-NULL then it must match the existing task data.
     AutoPtr<IUri> documentData;
     if (isDocument) {
@@ -508,14 +509,19 @@ AutoPtr<ActivityRecord> ActivityStack::FindTaskLocked(
 
         AutoPtr<IIntent> taskIntent = task->mIntent;
         AutoPtr<IIntent> affinityIntent = task->mAffinityIntent;
-        Boolean taskIsDocument;
+        Boolean taskIsDocument = FALSE, affinityIsDocument = FALSE;
         AutoPtr<IUri> taskDocumentData;
-        Boolean tiIsDoc = FALSE;
-        assert(tiIsDoc);//TODO remove
-        if (taskIntent != NULL && FALSE/*TODO (((CIntent*)taskIntent.Get())->IsDocument(&tiIsDoc), tiIsDoc)*/) {
+        if (taskIntent != NULL) {
+            taskIntent->IsDocument(&taskIsDocument);
+        }
+        if (affinityIntent != NULL) {
+            affinityIntent->IsDocument(&affinityIsDocument);
+        }
+        if (taskIntent != NULL && taskIsDocument) {
             taskIsDocument = TRUE;
             taskIntent->GetData((IUri**)&taskDocumentData);
-        } else if (affinityIntent != NULL && FALSE/*TODO (((CIntent*)affinityIntent.Get())->IsDocument(&tiIsDoc), tiIsDoc)*/) {
+        } else if (affinityIntent != NULL && affinityIsDocument
+            ) {
             taskIsDocument = TRUE;
             affinityIntent->GetData((IUri**)&taskDocumentData);
         } else {
@@ -579,7 +585,6 @@ AutoPtr<ActivityRecord> ActivityStack::FindActivityLocked(
     if (!sTargetActivity.IsNull()) {
         String sPackagename;
         IPackageItemInfo::Probe(info)->GetPackageName(&sPackagename);
-        //cls = new ComponentName(info.packageName, info.targetActivity);
         CComponentName::New(sPackagename, sTargetActivity, (IComponentName**)&cls);
     }
     AutoPtr<IUserHandleHelper> helper;
@@ -1403,7 +1408,7 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             mStackSupervisor->AllResumedActivitiesComplete()) {
         // Make sure we have executed any pending transitions, since there
         // should be nothing left to do at this point.
-        //TODO mWindowManager->ExecuteAppTransition();
+        mWindowManager->ExecuteAppTransition();
         mNoAnimActivities->Clear();
         aoHelper->Abort(options);
         if (ActivityStackSupervisor::DEBUG_STATES)
@@ -1450,7 +1455,7 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             && mStackSupervisor->AllPausedActivitiesComplete()) {
         // Make sure we have executed any pending transitions, since there
         // should be nothing left to do at this point.
-        //TODO mWindowManager->ExecuteAppTransition();
+        mWindowManager->ExecuteAppTransition();
         mNoAnimActivities->Clear();
         aoHelper->Abort(options);
         if (ActivityStackSupervisor::DEBUG_STATES) Slogger::D(CActivityManagerService::TAG, "resumeTopActivityLocked: Going to sleep and all paused");
@@ -1612,32 +1617,32 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             Boolean bTemp = FALSE;
             if (mNoAnimActivities->Contains(TO_IINTERFACE(prev), &bTemp), bTemp) {
                 anim = FALSE;
-                //TODO mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, FALSE);
+                mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, FALSE);
             } else {
-                //TODO mWindowManager->PrepareAppTransition(prev->mTask == next->mTask
-                //        ? 7/*TODO AppTransition::TRANSIT_ACTIVITY_CLOSE*/
-                //        : 9/*TODO AppTransition::TRANSIT_TASK_CLOSE*/, FALSE);
+                mWindowManager->PrepareAppTransition(prev->mTask == next->mTask
+                       ? AppTransition::TRANSIT_ACTIVITY_CLOSE
+                       :  AppTransition::TRANSIT_TASK_CLOSE, FALSE);
             }
-            //TODO mWindowManager->SetAppWillBeHidden(IBinder::Probe(prev->mAppToken));
-            //TODO mWindowManager->SetAppVisibility(IBinder::Probe(prev->mAppToken), FALSE);
+            mWindowManager->SetAppWillBeHidden(IBinder::Probe(prev->mAppToken));
+            mWindowManager->SetAppVisibility(IBinder::Probe(prev->mAppToken), FALSE);
         } else {
             if (CActivityManagerService::DEBUG_TRANSITION)
                 Slogger::V(CActivityManagerService::TAG, "Prepare open transition: prev=%s", prev->ToString().string());
             Boolean bTemp;
             if (mNoAnimActivities->Contains(TO_IINTERFACE(next), &bTemp), bTemp) {
                 anim = FALSE;
-                //TODO mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, FALSE);
+                mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, FALSE);
             } else {
-                //TODO mWindowManager->PrepareAppTransition(prev->mTask == next->mTask
-                //        ? 6/*TODO AppTransition::TRANSIT_ACTIVITY_OPEN */
-                //        : next->mLaunchTaskBehind
-                //        ? 16/*TODO AppTransition::TRANSIT_TASK_OPEN_BEHIND*/
-                //        : 8/*TODO AppTransition::TRANSIT_TASK_OPEN*/, FALSE);
+                mWindowManager->PrepareAppTransition(prev->mTask == next->mTask
+                       ? AppTransition::TRANSIT_ACTIVITY_OPEN
+                       : next->mLaunchTaskBehind
+                       ? AppTransition::TRANSIT_TASK_OPEN_BEHIND
+                       : AppTransition::TRANSIT_TASK_OPEN, FALSE);
             }
         }
         if (FALSE) {
-            //TODO mWindowManager->SetAppWillBeHidden(IBinder::Probe(prev->mAppToken));
-            //TODO mWindowManager->SetAppVisibility(IBinder::Probe(prev->mAppToken), FALSE);
+            mWindowManager->SetAppWillBeHidden(IBinder::Probe(prev->mAppToken));
+            mWindowManager->SetAppVisibility(IBinder::Probe(prev->mAppToken), FALSE);
         }
     } else {
         if (CActivityManagerService::DEBUG_TRANSITION)
@@ -1645,9 +1650,9 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
         Boolean bTemp;
         if (mNoAnimActivities->Contains(TO_IINTERFACE(next), &bTemp), bTemp) {
             anim = FALSE;
-            //TODO mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, FALSE);
+            mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_NONE, FALSE);
         } else {
-            //TODO mWindowManager->PrepareAppTransition(6/*TODO AppTransition::TRANSIT_ACTIVITY_OPEN*/, FALSE);
+            mWindowManager->PrepareAppTransition(AppTransition::TRANSIT_ACTIVITY_OPEN, FALSE);
         }
     }
 
@@ -1669,7 +1674,7 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             Slogger::V(CActivityManagerService::TAG, "Resume running: %s", next->ToString().string());
 
         // This activity is now becoming visible.
-        //TODO mWindowManager->SetAppVisibility(IBinder::Probe(next->mAppToken), TRUE);
+        mWindowManager->SetAppVisibility(IBinder::Probe(next->mAppToken), TRUE);
 
         // schedule launch ticks to collect information about slow apps.
         next->StartLaunchTickingLocked();
@@ -1694,10 +1699,10 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
         Boolean notUpdated = TRUE;
         if (mStackSupervisor->IsFrontStack(this)) {
             AutoPtr<IConfiguration> config;
-            //TODO mWindowManager->UpdateOrientationFromAppTokens(
-            //        mService->mConfiguration,
-            //        next->MayFreezeScreenLocked(next->mApp) ? IBinder::Probe(next->mAppToken) : NULL,
-            //        (IConfiguration**)&config);
+            mWindowManager->UpdateOrientationFromAppTokens(
+                   mService->mConfiguration,
+                   next->MayFreezeScreenLocked(next->mApp) ? IBinder::Probe(next->mAppToken) : NULL,
+                   (IConfiguration**)&config);
             if (config != NULL) {
                 next->mFrozenBeforeDestroy = TRUE;
             }
@@ -1828,13 +1833,13 @@ Boolean ActivityStack::ResumeTopActivityInnerLocked(
             if (SHOW_APP_STARTING_PREVIEW) {
                 AutoPtr<IApplicationInfo> appInfo;
                 IComponentInfo::Probe(next->mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
-                //TODO mWindowManager->SetAppStartingWindow(
-                //        IBinder::Probe(next->mAppToken), next->mPackageName, next->mTheme,
-                //        mService->CompatibilityInfoForPackageLocked(
-                //            appInfo),
-                //        next->mNonLocalizedLabel,
-                //        next->mLabelRes, next->mIcon, next->mLogo, next->mWindowFlags,
-                //        NULL, TRUE);
+                mWindowManager->SetAppStartingWindow(
+                       IBinder::Probe(next->mAppToken), next->mPackageName, next->mTheme,
+                       mService->CompatibilityInfoForPackageLocked(
+                           appInfo),
+                       next->mNonLocalizedLabel,
+                       next->mLabelRes, next->mIcon, next->mLogo, next->mWindowFlags,
+                       NULL, TRUE);
             }
             if (CActivityManagerService::DEBUG_SWITCH)
                 Slogger::V(CActivityManagerService::TAG, "Restarting: %s", next->ToString().string());
@@ -1863,7 +1868,7 @@ void ActivityStack::StartActivityLocked(
         // Insert or replace.
         // Might not even be in.
         InsertTaskAtTop(rTask);
-        //TODO mWindowManager->MoveTaskToTop(taskId);
+        mWindowManager->MoveTaskToTop(taskId);
     }
     AutoPtr<TaskRecord> task = NULL;
     if (!newTask) {
@@ -1898,21 +1903,16 @@ void ActivityStack::StartActivityLocked(
                         }
                     }
                     AutoPtr<IActivityInfo> info = r->mInfo;
-                    //r.info.screenOrientation
-                    Int32 screenOrientation;
+                    Int32 screenOrientation, flags, configChanges;
                     info->GetScreenOrientation(&screenOrientation);
-                    //r.info.flags
-                    Int32 flags;
                     info->GetFlags(&flags);
-                    //r.info.configChanges
-                    Int32 configChanges;
                     info->GetConfigChanges(&configChanges);
                     assert(activityNdx);//TODO remove
-                    //TODO mWindowManager->AddAppToken(activityNdx, IBinder::Probe(r->mAppToken),
-                    //        r->mTask->mTaskId, mStackId, screenOrientation, r->mFullscreen,
-                    //        (flags & IActivityInfo::FLAG_SHOW_ON_LOCK_SCREEN) != 0,
-                    //        r->mUserId, configChanges, task->mVoiceSession != NULL,
-                    //        r->mLaunchTaskBehind);
+                    mWindowManager->AddAppToken(activityNdx, r->mAppToken,
+                           r->mTask->mTaskId, mStackId, screenOrientation, r->mFullscreen,
+                           (flags & IActivityInfo::FLAG_SHOW_ON_LOCK_SCREEN) != 0,
+                           r->mUserId, configChanges, task->mVoiceSession != NULL,
+                           r->mLaunchTaskBehind);
                     if (CActivityManagerService::VALIDATE_TOKENS) {
                         ValidateAppTokensLocked();
                     }
@@ -1975,14 +1975,14 @@ void ActivityStack::StartActivityLocked(
                 "Prepare open transition: starting %s", r->ToString().string());
         Int32 intentFlags;
         if (((r->mIntent->GetFlags(&intentFlags), intentFlags)&IIntent::FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-            //TODO mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, keepCurTransition);
+            mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, keepCurTransition);
             mNoAnimActivities->Add(TO_IINTERFACE(r));
         } else {
-            //TODO mWindowManager->PrepareAppTransition(newTask
-            //        ? r->mLaunchTaskBehind
-            //        ? 16/*TODO AppTransition::TRANSIT_TASK_OPEN_BEHIND */
-            //        : 8/*TODO AppTransition::TRANSIT_TASK_OPEN*/
-            //        : 6/*TODO AppTransition::TRANSIT_ACTIVITY_OPEN*/, keepCurTransition);
+            mWindowManager->PrepareAppTransition(newTask
+                   ? r->mLaunchTaskBehind
+                   ? 16/*TODO AppTransition::TRANSIT_TASK_OPEN_BEHIND */
+                   : 8/*TODO AppTransition::TRANSIT_TASK_OPEN*/
+                   : 6/*TODO AppTransition::TRANSIT_ACTIVITY_OPEN*/, keepCurTransition);
             mNoAnimActivities->Remove(TO_IINTERFACE(r));
         }
 
@@ -2005,10 +2005,10 @@ void ActivityStack::StartActivityLocked(
         Int32 configChanges;
         info->GetConfigChanges(&configChanges);
         assert(activityNdx);//TODO remove
-        //TODO mWindowManager->AddAppToken(activityNdx,
-        //        IBinder::Probe(r->mAppToken), r->mTask->mTaskId, mStackId, screenOrientation, r->mFullscreen,
-        //        (flags & IActivityInfo::FLAG_SHOW_ON_LOCK_SCREEN) != 0, r->mUserId,
-        //        configChanges, task->mVoiceSession != NULL, r->mLaunchTaskBehind);
+        mWindowManager->AddAppToken(activityNdx,
+               r->mAppToken, r->mTask->mTaskId, mStackId, screenOrientation, r->mFullscreen,
+               (flags & IActivityInfo::FLAG_SHOW_ON_LOCK_SCREEN) != 0, r->mUserId,
+               configChanges, task->mVoiceSession != NULL, r->mLaunchTaskBehind);
         Boolean doShow = TRUE;
         if (newTask) {
             // Even though this activity is starting fresh, we still need
@@ -2034,7 +2034,7 @@ void ActivityStack::StartActivityLocked(
         if (r->mLaunchTaskBehind) {
             // Don't do a starting window for mLaunchTaskBehind. More importantly make sure we
             // tell WindowManager that r is visible even though it is at the back of the stack.
-            //TODO mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), TRUE);
+            mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), TRUE);
             EnsureActivitiesVisibleLocked(NULL, 0);
         } else if (SHOW_APP_STARTING_PREVIEW && doShow) {
             // Figure out if we are transitioning from another activity that is
@@ -2056,12 +2056,12 @@ void ActivityStack::StartActivityLocked(
             AutoPtr<IApplicationInfo> appInfo;
             IComponentInfo::Probe(r->mInfo)->GetApplicationInfo((IApplicationInfo**)&appInfo);
             assert(showStartingIcon);//TODO remove
-            //TODO mWindowManager->SetAppStartingWindow(
-            //        IBinder::Probe(r->mAppToken), r->mPackageName, r->mTheme,
-            //        mService->CompatibilityInfoForPackageLocked(appInfo),
-            //        r->mNonLocalizedLabel,
-            //        r->mLabelRes, r->mIcon, r->mLogo, r->mWindowFlags,
-            //        prev != NULL ? IBinder::Probe(prev->mAppToken) : NULL, showStartingIcon);
+            mWindowManager->SetAppStartingWindow(
+                   IBinder::Probe(r->mAppToken), r->mPackageName, r->mTheme,
+                   mService->CompatibilityInfoForPackageLocked(appInfo),
+                   r->mNonLocalizedLabel,
+                   r->mLabelRes, r->mIcon, r->mLogo, r->mWindowFlags,
+                   prev != NULL ? IBinder::Probe(prev->mAppToken) : NULL, showStartingIcon);
             r->mStartingWindowShown = TRUE;
         }
     } else {
@@ -2086,10 +2086,10 @@ void ActivityStack::StartActivityLocked(
         Int32 configChanges;
         info->GetConfigChanges(&configChanges);
         assert(activityNdx);//TODO remove
-        //TODO mWindowManager->AddAppToken(activityNdx, IBinder::Probe(r->mAppToken),
-        //        r->mTask->mTaskId, mStackId, screenOrientation, r->mFullscreen,
-        //        (flags & IActivityInfo::FLAG_SHOW_ON_LOCK_SCREEN) != 0, r->mUserId,
-        //        configChanges, task->mVoiceSession != NULL, r->mLaunchTaskBehind);
+        mWindowManager->AddAppToken(activityNdx, r->mAppToken,
+               r->mTask->mTaskId, mStackId, screenOrientation, r->mFullscreen,
+               (flags & IActivityInfo::FLAG_SHOW_ON_LOCK_SCREEN) != 0, r->mUserId,
+               configChanges, task->mVoiceSession != NULL, r->mLaunchTaskBehind);
         AutoPtr<IActivityOptionsHelper> aoHelper;
         CActivityOptionsHelper::AcquireSingleton((IActivityOptionsHelper**)&aoHelper);
         aoHelper->Abort(options);
@@ -2120,17 +2120,17 @@ void ActivityStack::ValidateAppTokensLocked()
         if (activities->IsEmpty()) {
             continue;
         }
-        assert(0);
-        // AutoPtr<TaskGroup> group = new TaskGroup();
-        // group->mTaskId = task->mTaskId;
-        // mValidateAppTokens->Add(TO_IINTERFACE(group));
-        // Int32 numActivities = activities->GetSize();
-        // for (Int32 activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
-        //     AutoPtr<ActivityRecord> r = (*activities)[activityNdx];//->get(activityNdx);
-        //     group->mTokens.PushBack(r->mAppToken);
-        // }
+
+        AutoPtr<TaskGroup> group = new TaskGroup();
+        group->mTaskId = task->mTaskId;
+        mValidateAppTokens->Add(TO_IINTERFACE(group));
+        Int32 numActivities = activities->GetSize();
+        for (Int32 activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
+            AutoPtr<ActivityRecord> r = (*activities)[activityNdx];//->get(activityNdx);
+            group->mTokens.PushBack(r->mAppToken);
+        }
     }
-    //TODO mWindowManager->ValidateAppTokens(mStackId, mValidateAppTokens);
+    mWindowManager->ValidateAppTokens(mStackId, mValidateAppTokens);
 }
 
 AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
@@ -2221,7 +2221,7 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
 
             Int32 targetTaskId = targetTask->mTaskId;
             assert(targetTaskId);//TODO remove
-            //TODO mWindowManager->SetAppGroupId(IBinder::Probe(target->mAppToken), targetTaskId);
+            mWindowManager->SetAppGroupId(IBinder::Probe(target->mAppToken), targetTaskId);
 
             Boolean noOptions = canMoveOptions;
             Int32 start = replyChainEnd < 0 ? i : replyChainEnd;
@@ -2246,10 +2246,10 @@ AutoPtr<IActivityOptions> ActivityStack::ResetTargetTaskIfNeededLocked(
                 p->SetTask(targetTask, NULL);
                 targetTask->AddActivityAtBottom(p);
 
-                //TODO mWindowManager->SetAppGroupId(IBinder::Probe(p->mAppToken), targetTaskId);
+                mWindowManager->SetAppGroupId(IBinder::Probe(p->mAppToken), targetTaskId);
             }
 
-            //TODO mWindowManager->MoveTaskToBottom(targetTaskId);
+            mWindowManager->MoveTaskToBottom(targetTaskId);
             if (CActivityManagerService::VALIDATE_TOKENS) {
                 ValidateAppTokensLocked();
             }
@@ -2439,7 +2439,7 @@ void ActivityStack::StopActivityLocked(
             //if (CActivityManagerService::DEBUG_VISBILITY)
             //  Slog.v(CActivityManagerService::TAG, "Stopping visible=" + r.visible + " for " + r);
             if (!r->mVisible) {
-                //TODO mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), FALSE);
+                mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), FALSE);
             }
             r->mApp->mThread->ScheduleStopActivity(IBinder::Probe(r->mAppToken), r->mVisible, r->mConfigChangeFlags);
             if (mService->IsSleepingOrShuttingDown()) {
@@ -2727,12 +2727,12 @@ Boolean ActivityStack::FinishActivityLocked(
         //if (CActivityManagerService::DEBUG_VISBILITY || CActivityManagerService::DEBUG_TRANSITION)
         //  Slog.v(CActivityManagerService::TAG,
         //        "Prepare close transition: finishing " + r);
-        //TODO mWindowManager->PrepareAppTransition(endTask
-        //        ? 9/*TODO AppTransition::TRANSIT_TASK_CLOSE*/
-        //        : 7/*TODO AppTransition::TRANSIT_ACTIVITY_CLOSE*/, FALSE);
+        mWindowManager->PrepareAppTransition(endTask
+               ? 9/*TODO AppTransition::TRANSIT_TASK_CLOSE*/
+               : 7/*TODO AppTransition::TRANSIT_ACTIVITY_CLOSE*/, FALSE);
 
         // Tell window manager to prepare for this one to be removed.
-        //TODO mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), FALSE);
+        mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), FALSE);
 
         if (mPausingActivity == NULL) {
             if (CActivityManagerService::DEBUG_PAUSE)
@@ -3100,7 +3100,7 @@ void ActivityStack::CleanUpActivityServicesLocked(
         //}
         while (iter != r->mConnections->End()) {
             AutoPtr<ConnectionRecord> cr = *iter;
-            //TODO mService->mServices->RemoveConnectionLocked(cr, NULL, r);
+            mService->mServices->RemoveConnectionLocked(cr, NULL, r);
             ++iter;
         }
         r->mConnections = NULL;
@@ -3269,7 +3269,7 @@ Boolean ActivityStack::DestroyActivityLocked(
             if (r->mApp->mActivities.IsEmpty()) {
                 // Update any services we are bound to that might care about whether
                 // their client may have activities.
-                //TODO mService->mServices->UpdateServiceConnectionActivitiesLocked(r->mApp);
+                mService->mServices->UpdateServiceConnectionActivitiesLocked(r->mApp);
                 // No longer have activities, so update LRU list and oom adj.
                 mService->UpdateLruProcessLocked(r->mApp, FALSE, NULL);
                 mService->UpdateOomAdjLocked();
@@ -3536,7 +3536,7 @@ void ActivityStack::UpdateTransitLocked(
             aoHelper->Abort(options);
         }
     }
-    //TODO mWindowManager->PrepareAppTransition(transit, FALSE);
+    mWindowManager->PrepareAppTransition(transit, FALSE);
 }
 
 void ActivityStack::UpdateTaskMovement(
@@ -3574,7 +3574,7 @@ void ActivityStack::MoveHomeStackTaskToTop(
             mTaskHistory->Remove(taskNdx);
             mTaskHistory->Add(top, TO_IINTERFACE(task));
             UpdateTaskMovement(task, TRUE);
-            //TODO mWindowManager->MoveTaskToTop(task->mTaskId);
+            mWindowManager->MoveTaskToTop(task->mTaskId);
             return;
         }
     }
@@ -3618,7 +3618,7 @@ void ActivityStack::MoveTaskToFrontLocked(
     Int32 flags;
     if (reason != NULL &&
             ((reason->mIntent->GetFlags(&flags), flags)&IIntent::FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-        //TODO mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, FALSE);
+        mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, FALSE);
         AutoPtr<ActivityRecord> r = TopRunningActivityLocked(NULL);
         if (r != NULL) {
             mNoAnimActivities->Add(TO_IINTERFACE(r));
@@ -3631,7 +3631,7 @@ void ActivityStack::MoveTaskToFrontLocked(
         UpdateTransitLocked(10/*TODO AppTransition::TRANSIT_TASK_TO_FRONT*/, options);
     }
 
-    //TODO mWindowManager->MoveTaskToTop(tr->mTaskId);
+    mWindowManager->MoveTaskToTop(tr->mTaskId);
 
     mStackSupervisor->ResumeTopActivitiesLocked();
     //TODO EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, tr.taskId);
@@ -3707,15 +3707,15 @@ Boolean ActivityStack::MoveTaskToBackLocked(
     Int32 flags;
     if (reason != NULL &&
             ((reason->mIntent->GetFlags(&flags), flags) & IIntent::FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-        //TODO mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, FALSE);
+        mWindowManager->PrepareAppTransition(0/*TODO AppTransition::TRANSIT_NONE*/, FALSE);
         AutoPtr<ActivityRecord> r = TopRunningActivityLocked(NULL);
         if (r != NULL) {
             mNoAnimActivities->Add(TO_IINTERFACE(r));
         }
     } else {
-        //TODO mWindowManager->PrepareAppTransition(11/*TODO AppTransition::TRANSIT_TASK_TO_BACK*/, FALSE);
+        mWindowManager->PrepareAppTransition(11/*TODO AppTransition::TRANSIT_TASK_TO_BACK*/, FALSE);
     }
-    //TODO mWindowManager->MoveTaskToBottom(taskId);
+    mWindowManager->MoveTaskToBottom(taskId);
 
     if (CActivityManagerService::VALIDATE_TOKENS) {
         ValidateAppTokensLocked();
@@ -4045,17 +4045,14 @@ void ActivityStack::GetTasksLocked(
 
         AutoPtr<IActivityManagerRunningTaskInfo> ci;
         CActivityManagerRunningTaskInfo::New((IActivityManagerRunningTaskInfo**)&ci);
-        //ci.id = task.taskId;
         ci->SetId(task->mTaskId);
         AutoPtr<IComponentName> bActivity;
         r->mIntent->GetComponent((IComponentName**)&bActivity);
-        //ci.baseActivity = r.intent.getComponent();
         ci->SetBaseActivity(bActivity);
         AutoPtr<IComponentName> tActivity;
         top->mIntent->GetComponent((IComponentName**)&tActivity);
-        //ci.topActivity = top.intent.getComponent();
         ci->SetTopActivity(tActivity);
-        //TODO ci->SetLastActiveTime(task->mLastActiveTime);
+        ci->SetLastActiveTime(task->mLastActiveTime);
 
         if (top->mTask != NULL) {
             ci->SetDescription(top->mTask->mLastDescription);
@@ -4269,7 +4266,7 @@ void ActivityStack::RemoveTask(
     /* [in] */ TaskRecord* task)
 {
     mStackSupervisor->EndLockTaskModeIfTaskEnding(task);
-    //TODO mWindowManager->RemoveTask(task->mTaskId);
+    mWindowManager->RemoveTask(task->mTaskId);
     AutoPtr<ActivityRecord> r = mResumedActivity;
     if (r != NULL && r->mTask.Get() == task) {
         mResumedActivity = NULL;
@@ -4598,11 +4595,11 @@ void ActivityStack::SetVisibile(
     /* [in] */ Boolean visible)
 {
     r->mVisible = visible;
-    //TODO mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), visible);
+    mWindowManager->SetAppVisibility(IBinder::Probe(r->mAppToken), visible);
     //final ArrayList<ActivityContainer> containers = r.mChildContainers;
-    List<AutoPtr<IActivityContainer> > containers = r->mChildContainers;
+    List<AutoPtr<IIActivityContainer> > containers = r->mChildContainers;
     for (Int32 containerNdx = containers.GetSize() - 1; containerNdx >= 0; --containerNdx) {
-        AutoPtr<IActivityContainer> icontainer = containers[containerNdx];
+        AutoPtr<IIActivityContainer> icontainer = containers[containerNdx];
         ActivityStackSupervisor::ActivityContainer* container = (ActivityStackSupervisor::ActivityContainer*)(icontainer.Get());
         container->SetVisible(visible);
     }
@@ -4780,10 +4777,10 @@ Int32 ActivityStack::ResetAffinityTaskIfNeededLocked(
                     //        new RuntimeException("here").fillInStackTrace());
                     //if (CActivityManagerService::DEBUG_TASKS) Slog.v(CActivityManagerService::TAG, "Pulling activity " + p + " from " + srcPos
                     //        + " in to resetting task " + task);
-                    //TODO mWindowManager->SetAppGroupId(IBinder::Probe(p->mAppToken), taskId);
+                    mWindowManager->SetAppGroupId(IBinder::Probe(p->mAppToken), taskId);
                 }
                 assert(taskId);//TODO remove
-                //TODO mWindowManager->MoveTaskToTop(taskId);
+                mWindowManager->MoveTaskToTop(taskId);
                 if (CActivityManagerService::VALIDATE_TOKENS) {
                     ValidateAppTokensLocked();
                 }
@@ -4877,7 +4874,7 @@ void ActivityStack::RemoveActivityFromHistoryLocked(
     r->mState = ActivityState_DESTROYED;
     //if (ActivityStackSupervisor::DEBUG_APP) Slog.v(CActivityManagerService::TAG, "Clearing app during remove for activity " + r);
     r->mApp = NULL;
-    //TODO mWindowManager->RemoveAppToken(IBinder::Probe(r->mAppToken));
+    mWindowManager->RemoveAppToken(IBinder::Probe(r->mAppToken));
     if (CActivityManagerService::VALIDATE_TOKENS) {
         ValidateAppTokensLocked();
     }

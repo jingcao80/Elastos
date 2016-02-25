@@ -1,10 +1,12 @@
 #ifndef __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWQUOTAMANAGERBRIDGE_H__
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWQUOTAMANAGERBRIDGE_H__
+
 #include "elastos/droid/ext/frameworkext.h"
+#include <Elastos.Droid.Webkit.h>
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/core/Object.h>
 
-//TODO using Elastos::Droid::Webkit::IValueCallback;
+using Elastos::Droid::Webkit::IValueCallback;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::Utility::Etl::HashMap;
 
@@ -77,7 +79,7 @@ public:
      * aggregate.
      */
     CARAPI_(void) GetOrigins(
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback* callback);
 
     /**
      * Implements WebStorage.getQuotaForOrigin. Get the quota of APIs 2-5 in aggregate for given
@@ -85,7 +87,7 @@ public:
      */
     CARAPI_(void) GetQuotaForOrigin(
         /* [in] */ const String& origin,
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback* callback);
 
     /**
      * Implements WebStorage.getUsageForOrigin. Get the usage of APIs 2-5 in aggregate for given
@@ -93,7 +95,7 @@ public:
      */
     CARAPI_(void) GetUsageForOrigin(
         /* [in] */ const String& origin,
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback * callback);
 
 private:
     AwQuotaManagerBridge(
@@ -168,11 +170,11 @@ private:
     // callback and is passed to the native side to identify callback.
     Int32 mNextId;
     //AutoPtr<ISparseArray> mPendingGetOriginCallbacks;TODO map replace this
-    HashMap<Int32, AutoPtr</*TODO IValueCallback*/IInterface> > mPendingGetOriginCallbacks;
+    HashMap<Int32, AutoPtr<IValueCallback> > mPendingGetOriginCallbacks;
     //AutoPtr<ISparseArray> mPendingGetQuotaForOriginCallbacks;TODO
-    HashMap<Int32, AutoPtr</*TODO IValueCallback*/IInterface> > mPendingGetQuotaForOriginCallbacks;
+    HashMap<Int32, AutoPtr<IValueCallback> > mPendingGetQuotaForOriginCallbacks;
     //AutoPtr<ISparseArray> mPendingGetUsageForOriginCallbacks;TODO
-    HashMap<Int32, AutoPtr</*TODO IValueCallback*/IInterface> > mPendingGetUsageForOriginCallbacks;
+    HashMap<Int32, AutoPtr<IValueCallback> > mPendingGetUsageForOriginCallbacks;
 };
 
 } // namespace AndroidWebview

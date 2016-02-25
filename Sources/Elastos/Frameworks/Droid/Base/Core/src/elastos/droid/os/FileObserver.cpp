@@ -164,17 +164,19 @@ void FileObserver::ObserverThread::NativeStopWatching(
 //========================================================
 // FileObserver
 //========================================================
+AutoPtr<FileObserver::ObserverThread> FileObserver::sObserverThread;
+Object FileObserver::sLockObj;
+
 CAR_INTERFACE_IMPL(FileObserver, Object, IFileObserver)
 
-Boolean FileObserver::InitObserverThread()
+void FileObserver::InitObserverThread()
 {
-    sObserverThread = new ObserverThread();
-    sObserverThread->Start();
-    return TRUE;
+    AutoLock lock(sLockObj);
+    if (sObserverThread == NULL) {
+        sObserverThread = new ObserverThread();
+        sObserverThread->Start();
+    }
 }
-
-AutoPtr<FileObserver::ObserverThread> FileObserver::sObserverThread;
-const Boolean FileObserver::sObserverThreadInited = FileObserver::InitObserverThread();
 
 FileObserver::FileObserver()
     : mDescriptor(0)
@@ -213,6 +215,7 @@ ECode FileObserver::constructor(
 ECode FileObserver::StartWatching()
 {
     if (mDescriptor < 0) {
+        InitObserverThread();
         mDescriptor = sObserverThread->StartWatching(mPath, mMask, this);
     }
     return NOERROR;
@@ -221,6 +224,7 @@ ECode FileObserver::StartWatching()
 ECode FileObserver::StopWatching()
 {
     if (mDescriptor >= 0) {
+        InitObserverThread();
         sObserverThread->StopWatching(mDescriptor);
         mDescriptor = -1;
     }

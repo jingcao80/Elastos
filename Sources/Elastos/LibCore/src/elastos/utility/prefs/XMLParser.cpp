@@ -550,7 +550,7 @@ ECode XMLParser::ReadXmlPreferences(
     /* [in] */ IFile* xmlFile,
     /* [out] */ IProperties** per)
 {
-    VALIDATE_NOT_NULL(*per);
+    VALIDATE_NOT_NULL(per);
     AutoPtr<IProperties> result;
     CProperties::New((IProperties**)&result);
     Boolean flag = FALSE;

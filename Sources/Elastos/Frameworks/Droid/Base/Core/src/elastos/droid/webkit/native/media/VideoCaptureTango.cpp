@@ -4,16 +4,11 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/webkit/native/media/VideoCaptureTango.h"
-
-//#include <elastos/utility/CArrayList.h>
-//#include <elastos/io/nio/CByteBufferHelper.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IImageFormat;
 using Elastos::Droid::Hardware::IHardwareCamera;
-
-//using Elastos::Utility::CArrayList;
 using Elastos::Utility::Concurrent::Locks::ILock;
 using Elastos::Utility::Concurrent::Locks::EIID_ILock;
 using Elastos::Utility::Logging::Logger;
@@ -29,12 +24,14 @@ namespace Media {
 
 AutoPtr< ArrayOf<VideoCaptureFactory::CamParams*> > VideoCaptureTango::s_CAM_PARAMS_Init()
 {
-  AutoPtr< ArrayOf<VideoCaptureFactory::CamParams*> > array = ArrayOf<VideoCaptureFactory::CamParams*>::Alloc(3);
-  // TODO
-  // (*array)[0] = new VideoCaptureFactory::CamParams(VideoCaptureTango::DEPTH_CAMERA_ID, String("depth"), 320, 240);
-  // (*array)[1] = new VideoCaptureFactory::CamParams(VideoCaptureTango::FISHEYE_CAMERA_ID, String("fisheye"), 640, 480);
-  // (*array)[2] = new VideoCaptureFactory::CamParams(VideoCaptureTango::FOURMP_CAMERA_ID, String("4MP"), 1280, 720);
-  return array;
+    AutoPtr< ArrayOf<VideoCaptureFactory::CamParams*> > array = ArrayOf<VideoCaptureFactory::CamParams*>::Alloc(3);
+    AutoPtr<VideoCaptureFactory::CamParams> item0 = new VideoCaptureFactory::CamParams(VideoCaptureTango::DEPTH_CAMERA_ID, String("depth"), 320, 240);
+    AutoPtr<VideoCaptureFactory::CamParams> item1 = new VideoCaptureFactory::CamParams(VideoCaptureTango::FISHEYE_CAMERA_ID, String("fisheye"), 640, 480);
+    AutoPtr<VideoCaptureFactory::CamParams> item2 = new VideoCaptureFactory::CamParams(VideoCaptureTango::FOURMP_CAMERA_ID, String("4MP"), 1280, 720);
+    array->Set(0, item0);
+    array->Set(1, item1);
+    array->Set(2, item2);
+    return array;
 }
 
 // The indexes must coincide with the s_CAM_PARAMS used below.

@@ -2,11 +2,11 @@
 #include "elastos/droid/app/CAlertDialogBuilder.h"
 #include "elastos/droid/app/CAlertDialog.h"
 #include "elastos/droid/internal/app/CAlertControllerAlertParams.h"
-// #include "elastos/droid/view/CContextThemeWrapper.h"
+#include "elastos/droid/view/CContextThemeWrapper.h"
 
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::View::IContextThemeWrapper;
-// using Elastos::Droid::View::CContextThemeWrapper;
+using Elastos::Droid::View::CContextThemeWrapper;
 using Elastos::Droid::Internal::App::CAlertControllerAlertParams;
 
 namespace Elastos {
@@ -33,9 +33,8 @@ ECode CAlertDialogBuilder::constructor(
     /* [in] */ Int32 theme)
 {
     AutoPtr<IContextThemeWrapper> wrapper;
-    assert(0 && "TODO");
-    // CContextThemeWrapper::New(context, AlertDialog::ResolveDialogTheme(context, theme),
-    //     (IContextThemeWrapper**)&wrapper);
+    CContextThemeWrapper::New(context, AlertDialog::ResolveDialogTheme(context, theme),
+        (IContextThemeWrapper**)&wrapper);
     CAlertControllerAlertParams::New(IContext::Probe(wrapper), (IAlertControllerAlertParams**)&mP);
     assert(mP != NULL);
     mTheme = theme;

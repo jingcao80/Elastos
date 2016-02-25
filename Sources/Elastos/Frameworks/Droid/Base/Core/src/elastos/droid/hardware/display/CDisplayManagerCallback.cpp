@@ -25,10 +25,6 @@ ECode CDisplayManagerCallback::OnDisplayEvent(
     /* [in] */ Int32 displayId,
     /* [in] */ Int32 event)
 {
-    if (mOwner->DEBUG) {
-        Logger::D(mOwner->TAG, "onDisplayEvent: displayId=%d, event=%d",
-            displayId, event);
-    }
     mOwner->HandleDisplayEvent(displayId, event);
 
     return NOERROR;

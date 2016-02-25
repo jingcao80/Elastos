@@ -3,6 +3,7 @@
 
 #include "Elastos.Droid.App.h"
 #include "elastos/droid/view/View.h"
+//#include "elastos/droid/media/CMediaRouter.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContextWrapper;
@@ -11,6 +12,7 @@ using Elastos::Droid::Graphics::ICanvas;
 using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Media::IMediaRouter;
+//using Elastos::Droid::Media::CMediaRouter;
 using Elastos::Droid::Media::IMediaRouterRouteGroup;
 using Elastos::Droid::Media::IMediaRouterRouteInfo;
 using Elastos::Droid::Media::IMediaRouterCallback;
@@ -43,10 +45,12 @@ class MediaRouteButton
 {
 private:
      class MyMediaRouterCallback
-        : public Object //extends MediaRouter::SimpleCallback
+        : public Object // CMediaRouter::SimpleCallback
     {
     public:
-        MyMediaRouterCallback(
+        MyMediaRouterCallback();
+
+        CARAPI constructor(
             /* [in] */ IMediaRouteButton* provider);
 
         //@Override

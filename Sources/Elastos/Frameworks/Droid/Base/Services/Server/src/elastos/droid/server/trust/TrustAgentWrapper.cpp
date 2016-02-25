@@ -402,6 +402,8 @@ ECode TrustAgentWrapper::SetCallback(
 ECode TrustAgentWrapper::UpdateDevicePolicyFeatures(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     Boolean trustDisabled = FALSE;
     if (DEBUG) Slogger::V(TAG, "updateDevicePolicyFeatures(%s)", Object::ToString(mName).string());
     // try {
@@ -474,6 +476,8 @@ ECode TrustAgentWrapper::UpdateDevicePolicyFeatures(
 ECode TrustAgentWrapper::IsTrusted(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     *result = mTrusted && mManagingTrust && !mTrustDisabledByDpm;
     return NOERROR;
 }
@@ -481,6 +485,8 @@ ECode TrustAgentWrapper::IsTrusted(
 ECode TrustAgentWrapper::IsManagingTrust(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     *result = mManagingTrust && !mTrustDisabledByDpm;
     return NOERROR;
 }
@@ -488,6 +494,8 @@ ECode TrustAgentWrapper::IsManagingTrust(
 ECode TrustAgentWrapper::GetMessage(
     /* [out] */ ICharSequence** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     FUNC_RETURN(mMessage);
 }
 
@@ -511,6 +519,8 @@ ECode TrustAgentWrapper::Unbind()
 ECode TrustAgentWrapper::IsConnected(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     *result = mTrustAgentService != NULL;
     return NOERROR;
 }
@@ -518,6 +528,8 @@ ECode TrustAgentWrapper::IsConnected(
 ECode TrustAgentWrapper::IsBound(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     *result = mBound;
     return NOERROR;
 }
@@ -525,6 +537,8 @@ ECode TrustAgentWrapper::IsBound(
 ECode TrustAgentWrapper::GetScheduledRestartUptimeMillis(
     /* [out] */ Int64* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     *result = mScheduledRestartUptimeMillis;
     return NOERROR;
 }

@@ -13,10 +13,10 @@
 #include "elastos/droid/os/CParcel.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/text/TextUtils.h"
-// #include "elastos/droid/media/CAudioAttributes.h"
-// #include "elastos/droid/media/CAudioAttributesBuilder.h"
+#include "elastos/droid/media/CAudioAttributes.h"
+#include "elastos/droid/media/CAudioAttributesBuilder.h"
 #include "elastos/droid/graphics/CBitmap.h"
-// #include "elastos/droid/widget/CRemoteViews.h"
+#include "elastos/droid/widget/CRemoteViews.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
@@ -28,11 +28,11 @@ using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::CParcel;
 using Elastos::Droid::Text::TextUtils;
-// using Elastos::Droid::Media::CAudioAttributes;
-// using Elastos::Droid::Media::CAudioAttributesBuilder;
+using Elastos::Droid::Media::CAudioAttributes;
+using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Media::IAudioAttributesBuilder;
 using Elastos::Droid::Graphics::CBitmap;
-// using Elastos::Droid::Widget::CRemoteViews;
+using Elastos::Droid::Widget::CRemoteViews;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
 using Elastos::Core::CoreUtils;
@@ -56,16 +56,14 @@ CNotification::BuilderRemoteViews::BuilderRemoteViews()
 
 ECode CNotification::BuilderRemoteViews::constructor()
 {
-    return NOERROR;
+    return RemoteViews::constructor();
 }
 
 ECode CNotification::BuilderRemoteViews::constructor(
     /* [in] */ IApplicationInfo* appInfo,
     /* [in] */ Int32 layoutId)
 {
-    assert(0 && "TODO");
-    // return RemoteViews::constructor(appInfo, layoutId);
-    return NOERROR;
+    return RemoteViews::constructor(appInfo, layoutId);
 }
 
 // @Override
@@ -87,8 +85,7 @@ ECode CNotification::BuilderRemoteViews::Clone(
 
     AutoPtr<IParcel> parcel;
     CParcel::New((IParcel**)&parcel);
-    assert(0 && "TODO");
-    // WriteToParcel(p);
+    WriteToParcel(parcel);
     parcel->SetDataPosition(0);
 
     AutoPtr<IBuilderRemoteViews> brv;
@@ -106,12 +103,12 @@ ECode CNotification::BuilderRemoteViews::Clone(
 static AutoPtr<IAudioAttributes> InitAUDIO_ATTRIBUTES_DEFAULT()
 {
     AutoPtr<IAudioAttributes> attrs;
-    // AutoPtr<IAudioAttributesBuilder> builder;
-    // CAudioAttributesBuilder::NewByFriend((CAudioAttributesBuilder**)&builder);
+    AutoPtr<IAudioAttributesBuilder> builder;
+    CAudioAttributesBuilder::NewByFriend((CAudioAttributesBuilder**)&builder);
 
-    // builder->SetContentType(IAudioAttributes::CONTENT_TYPE_SONIFICATION);
-    // builder->SetUsage(IAudioAttributes::USAGE_NOTIFICATION)
-    // builder->Build((IAudioAttributes**)&attrs);
+    builder->SetContentType(IAudioAttributes::CONTENT_TYPE_SONIFICATION);
+    builder->SetUsage(IAudioAttributes::USAGE_NOTIFICATION);
+    builder->Build((IAudioAttributes**)&attrs);
 
     return attrs;
 }
@@ -753,8 +750,7 @@ ECode CNotification::ReadFromParcel(
     mTickerView = NULL;
     parcel->ReadInt32(&value);
     if (value != 0) {
-        assert(0 && "TODO");
-        // CRemoteViews::New((IRemoteViews**)&mTickerView);
+        CRemoteViews::New((IRemoteViews**)&mTickerView);
         parcelable = IParcelable::Probe(mTickerView);
         parcelable->ReadFromParcel(parcel);
     }
@@ -762,8 +758,7 @@ ECode CNotification::ReadFromParcel(
     mContentView = NULL;
     parcel->ReadInt32(&value);
     if (value != 0) {
-        assert(0 && "TODO");
-        // CRemoteViews::New((IRemoteViews**)&mContentView);
+        CRemoteViews::New((IRemoteViews**)&mContentView);
         parcelable = IParcelable::Probe(mContentView);
         parcelable->ReadFromParcel(parcel);
     }
@@ -790,8 +785,7 @@ ECode CNotification::ReadFromParcel(
     parcel->ReadInt32(&mAudioStreamType);
     parcel->ReadInt32(&value);
     if (value != 0) {
-        assert(0 && "TODO");
-        // CAudioAttributes::New((IAudioAttributes**)&mAudioAttributes);
+        CAudioAttributes::New((IAudioAttributes**)&mAudioAttributes);
         IParcelable::Probe(mAudioAttributes)->ReadFromParcel(parcel);
     }
 
@@ -837,15 +831,13 @@ ECode CNotification::ReadFromParcel(
 
     parcel->ReadInt32(&value);
     if (value != 0) {
-        assert(0 && "TODO");
-        // CRemoteViews::New((IRemoteViews**)&mBigContentView);
+        CRemoteViews::New((IRemoteViews**)&mBigContentView);
         IParcelable::Probe(mBigContentView)->ReadFromParcel(parcel);
     }
 
     parcel->ReadInt32(&value);
     if (value != 0) {
-        assert(0 && "TODO");
-        // CRemoteViews::New((IRemoteViews**)&mHeadsUpContentView);
+        CRemoteViews::New((IRemoteViews**)&mHeadsUpContentView);
         IParcelable::Probe(mHeadsUpContentView)->ReadFromParcel(parcel);
     }
 
@@ -1139,8 +1131,7 @@ ECode CNotification::CloneInto(
     that->mAudioStreamType = this->mAudioStreamType;
     if (this->mAudioAttributes != NULL) {
         AutoPtr<IAudioAttributesBuilder> builder;
-        assert(0 && "TODO");
-        // CAudioAttributesBuilder::New(this->mAudioAttributes, (IAudioAttributesBuilder**)&builder);
+        CAudioAttributesBuilder::New(this->mAudioAttributes, (IAudioAttributesBuilder**)&builder);
         that->mAudioAttributes = NULL;
         builder->Build((IAudioAttributes**)&that->mAudioAttributes);
     }

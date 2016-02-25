@@ -9,6 +9,8 @@
 #include "elastos/droid/app/CAliasActivity.h"
 #include "elastos/droid/app/CApplication.h"
 #include "elastos/droid/app/CAppImportanceMonitorProcessObserver.h"
+#include "elastos/droid/app/CAppOpsManagerPackageOps.h"
+#include "elastos/droid/app/CAppOpsManagerOpEntry.h"
 #include "elastos/droid/app/CBackStackRecord.h"
 #include "elastos/droid/app/CDatePickerDialog.h"
 #include "elastos/droid/app/CDialog.h"
@@ -62,6 +64,8 @@ CAR_OBJECT_IMPL(CAlertDialog)
 CAR_OBJECT_IMPL(CAliasActivity)
 CAR_OBJECT_IMPL(CApplication)
 CAR_OBJECT_IMPL(CAppImportanceMonitorProcessObserver)
+CAR_OBJECT_IMPL(CAppOpsManagerPackageOps)
+CAR_OBJECT_IMPL(CAppOpsManagerOpEntry)
 CAR_OBJECT_IMPL(CBackStackRecord)
 CAR_OBJECT_IMPL(CDatePickerDialog)
 CAR_OBJECT_IMPL(CDialog)

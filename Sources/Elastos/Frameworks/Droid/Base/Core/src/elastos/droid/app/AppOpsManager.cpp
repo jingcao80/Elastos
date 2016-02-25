@@ -138,6 +138,9 @@ AppOpsManager::OpEntry::OpEntry()
 {
 }
 
+AppOpsManager::OpEntry::~OpEntry()
+{}
+
 ECode AppOpsManager::OpEntry::constructor()
 {
     return NOERROR;
@@ -482,7 +485,7 @@ String AppOpsManager::sOpPerms[48] =  {
         String(NULL), // no permission for activating vpn
 };
 
-static String sOpRestrictions[48] = {
+String AppOpsManager::sOpRestrictions[48] = {
         IUserManager::DISALLOW_SHARE_LOCATION, //COARSE_LOCATION
         IUserManager::DISALLOW_SHARE_LOCATION, //FINE_LOCATION
         IUserManager::DISALLOW_SHARE_LOCATION, //GPS

@@ -15,7 +15,7 @@ using Elastos::Utility::Arrays;
 // ECode CTest::MockMap::EntrySet(
 //     /* [out, callee] */ ISet** entries)
 // {
-//     VALIDATE_NOT_NULL(*entries)
+//     VALIDATE_NOT_NULL(entries)
 //     *entries = NULL;
 //     REFCOUNT_ADD(*entries)
 //     return NOERROR;

@@ -14,6 +14,10 @@ ScanCallback::ScanCallback()
 {
 }
 
+ScanCallback::~ScanCallback()
+{
+}
+
 ECode ScanCallback::OnScanResult(
     /* [in] */ Int32 callbackType,
     /* [in] */ IScanResult* result)

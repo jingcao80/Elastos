@@ -8,6 +8,7 @@
 #include "elastos/droid/os/CParcelFileDescriptor.h"
 #include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Net::CLocalSocket;
 using Elastos::Droid::Os::CParcelFileDescriptor;
@@ -19,8 +20,10 @@ using Elastos::IO::CByteBufferHelper;
 using Elastos::IO::ByteOrder;
 using Elastos::IO::IByteOrderHelper;
 using Elastos::IO::CByteOrderHelper;
+using Elastos::IO::IFlushable;
 using Elastos::Core::AutoLock;
 using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -34,8 +37,8 @@ const Int32 BluetoothSocket::_EADDRINUSE;
 const Int32 BluetoothSocket::SEC_FLAG_ENCRYPT;
 const Int32 BluetoothSocket::SEC_FLAG_AUTH;
 const String BluetoothSocket::TAG("BluetoothSocket");
-const Boolean BluetoothSocket::DBG;
-const Boolean BluetoothSocket::VDBG;
+const Boolean BluetoothSocket::DBG = Logger::IsLoggable(TAG, Logger::___DEBUG);
+const Boolean BluetoothSocket::VDBG = Logger::IsLoggable(TAG, Logger::VERBOSE);
 Int32 BluetoothSocket::PROXY_CONNECTION_TIMEOUT = 5000;
 Int32 BluetoothSocket::SOCK_SIGNAL_SIZE = 16;
 
@@ -80,9 +83,7 @@ BluetoothSocket::BluetoothSocket(
     if (device == NULL) {
         // Server socket
         AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
-        if(adapter != NULL){
-            adapter->GetAddress(&mAddress);
-        }
+        adapter->GetAddress(&mAddress);
     }
     else {
         // Remote socket
@@ -117,9 +118,10 @@ ECode BluetoothSocket::AcceptSocket(
     as->mSocketState = CONNECTED;
     AutoPtr< ArrayOf<IFileDescriptor*> > fds;
     mSocket->GetAncillaryFileDescriptors((ArrayOf<IFileDescriptor*>**)&fds);
-    if (VDBG) Slogger::D(TAG, "socket fd passed by stack  fds: %p", fds.Get());
+    if (DBG) Slogger::D(TAG, "socket fd passed by stack  fds: %p", fds.Get());
     if(fds == NULL || fds->GetLength() != 1) {
         Slogger::E(TAG, "fd passed from stack failed");
+        as->Close();
         return E_IO_EXCEPTION;
         // throw new IOException("bt socket acept failed");
     }
@@ -129,9 +131,7 @@ ECode BluetoothSocket::AcceptSocket(
     as->mAddress = remoteAddr;
 
     AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
-    if (adapter != NULL) {
-        adapter->GetRemoteDevice(remoteAddr, (IBluetoothDevice**)&as->mDevice);
-    }
+    adapter->GetRemoteDevice(remoteAddr, (IBluetoothDevice**)&as->mDevice);
 
     *socket = as;
     REFCOUNT_ADD(*socket)
@@ -225,16 +225,14 @@ ECode BluetoothSocket::Connect()
     }
 
     AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
-    if (adapter != NULL) {
-        AutoPtr<IIBluetooth> bluetoothProxy = ((CBluetoothAdapter*)adapter.Get())->GetBluetoothService(NULL);
-        if (bluetoothProxy == NULL) {
-            // throw new IOException("Bluetooth is off");
-            Slogger::E(TAG, "Bluetooth is off");
-            return E_IO_EXCEPTION;
-        }
-        FAIL_RETURN(bluetoothProxy->ConnectSocket(mDevice, mType, mUuid, mPort,
-                GetSecurityFlags(), (IParcelFileDescriptor**)&mPfd))
+    AutoPtr<IIBluetooth> bluetoothProxy = ((CBluetoothAdapter*)adapter.Get())->GetBluetoothService(NULL);
+    if (bluetoothProxy == NULL) {
+        // throw new IOException("Bluetooth is off");
+        Slogger::E(TAG, "Bluetooth is off");
+        return E_IO_EXCEPTION;
     }
+    FAIL_RETURN(bluetoothProxy->ConnectSocket(mDevice, mType, mUuid, mPort,
+            GetSecurityFlags(), (IParcelFileDescriptor**)&mPfd))
 
     {
         AutoLock lock(mLock);
@@ -275,6 +273,7 @@ ECode BluetoothSocket::Connect()
     mSocketState = CONNECTED;
     // } catch (RemoteException e) {
     //     Log.e(TAG, Log.getStackTraceString(new Throwable()));
+    //     throw new IOException("unable to send RPC: " + e.getMessage());
     // }
     return NOERROR;
 }
@@ -284,43 +283,39 @@ Int32 BluetoothSocket::BindListen()
     if (mSocketState == CLOSED) return _EBADFD;
 
     AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
-    if (adapter != NULL) {
-        AutoPtr<IIBluetooth> bluetoothProxy = ((CBluetoothAdapter*)adapter.Get())->GetBluetoothService(NULL);
-        if (bluetoothProxy == NULL) {
-            Slogger::E(TAG, "bindListen fail, reason: bluetooth is off");
-            return -1;
-        }
-        // try {
-        if (FAILED(bluetoothProxy->CreateSocketChannel(mType, mServiceName,
-                mUuid, mPort, GetSecurityFlags(), (IParcelFileDescriptor**)&mPfd))) {
-            Slogger::E(TAG, "create socket channel failed");
-            return -1;
-        }
-        // } catch (RemoteException e) {
-        //     Log.e(TAG, Log.getStackTraceString(new Throwable()));
-        //     return -1;
-        // }
+    AutoPtr<IIBluetooth> bluetoothProxy = ((CBluetoothAdapter*)adapter.Get())->GetBluetoothService(NULL);
+    if (bluetoothProxy == NULL) {
+        Slogger::E(TAG, "bindListen fail, reason: bluetooth is off");
+        return -1;
     }
-
-
+    // try {
+    if (FAILED(bluetoothProxy->CreateSocketChannel(mType, mServiceName,
+            mUuid, mPort, GetSecurityFlags(), (IParcelFileDescriptor**)&mPfd))) {
+        Slogger::E(TAG, "create socket channel failed");
+        return -1;
+    }
+    // } catch (RemoteException e) {
+    //     Log.e(TAG, Log.getStackTraceString(new Throwable()));
+    //     return -1;
+    // }
 
     // read out port number
     // try {
     {
         AutoLock lock(mLock);
-        if (VDBG) Slogger::D(TAG, "bindListen(), SocketState: %d, mPfd: %p", mSocketState, mPfd.Get());
+        if (DBG) Slogger::D(TAG, "bindListen(), SocketState: %d, mPfd: %p", mSocketState, mPfd.Get());
         if(mSocketState != INIT) return _EBADFD;
         if(mPfd == NULL) return -1;
         AutoPtr<IFileDescriptor> fd;
         mPfd->GetFileDescriptor((IFileDescriptor**)&fd);
-        if (VDBG) Slogger::D(TAG, "bindListen(), new LocalSocket ");
+        if (DBG) Slogger::D(TAG, "bindListen(), new LocalSocket ");
         CLocalSocket::New(fd, (ILocalSocket**)&mSocket);
-        if (VDBG) Slogger::D(TAG, "bindListen(), new LocalSocket.getInputStream() ");
+        if (DBG) Slogger::D(TAG, "bindListen(), new LocalSocket.getInputStream() ");
         mSocket->GetInputStream((IInputStream**)&mSocketIS);
         mSocket->GetOutputStream((IOutputStream**)&mSocketOS);
     }
 
-    if (VDBG) Slogger::D(TAG, "bindListen(), readInt mSocketIS: %p", mSocketIS.Get());
+    if (DBG) Slogger::D(TAG, "bindListen(), readInt mSocketIS: %p", mSocketIS.Get());
     Int32 channel;
     ReadInt32(mSocketIS, &channel);
     {
@@ -328,11 +323,19 @@ Int32 BluetoothSocket::BindListen()
         if(mSocketState == INIT)
             mSocketState = LISTENING;
     }
-    if (VDBG) Slogger::D(TAG, "channel: %d", channel);
+    if (DBG) Slogger::D(TAG, "channel: %d", channel);
     if (mPort == -1) {
         mPort = channel;
     } // else ASSERT(mPort == channel)
     // } catch (IOException e) {
+    //     if (mPfd != null) {
+    //            try {
+    //                mPfd.close();
+    //            } catch (IOException e1) {
+    //                Log.e(TAG, "bindListen, close mPfd: " + e1);
+    //            }
+    //            mPfd = null;
+    //        }
     //     Log.e(TAG, "bindListen, fail to get port number, exception: " + e);
     //     return -1;
     // }
@@ -380,12 +383,29 @@ ECode BluetoothSocket::Available(
     return mSocketIS->Available(result);
 }
 
+ECode BluetoothSocket::Flush()
+{
+    if (mSocketOS == NULL) {
+        //throw new IOException("flush is called on null OutputStream");
+        Logger::E(TAG, "flush is called on null OutputStream");
+        return E_IO_EXCEPTION;
+    }
+    if (VDBG) Logger::D(TAG, "flush: ");// + mSocketOS);
+    IFlushable::Probe(mSocketOS)->Flush();
+    return NOERROR;
+}
+
 ECode BluetoothSocket::Read(
     /* [in] */ ArrayOf<Byte>* b,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 length,
     /* [out] */ Int32* count)
 {
+    if (mSocketIS == NULL) {
+        //throw new IOException("read is called on null InputStream");
+        Logger::E(TAG, "read is called on null InputStream");
+        return E_IO_EXCEPTION;
+    }
     VALIDATE_NOT_NULL(count)
     *count = 0;
 
@@ -408,6 +428,11 @@ ECode BluetoothSocket::Write(
     /* [in] */ Int32 length,
     /* [out] */ Int32* count)
 {
+    if (mSocketOS == NULL) {
+        //throw new IOException("write is called on null OutputStream");
+        Logger::E(TAG, "write is called on null OutputStream");
+        return E_IO_EXCEPTION;
+    }
     VALIDATE_NOT_NULL(count)
     *count = 0;
     if (VDBG) Slogger::D(TAG, "write: %p length: %d", mSocketOS.Get(), length);
@@ -420,7 +445,7 @@ ECode BluetoothSocket::Write(
 
 ECode BluetoothSocket::Close()
 {
-    if (VDBG) Slogger::D(TAG, "close() in, this: %p, channel: %d, state: %d", this, mPort, mSocketState);
+    if (DBG) Slogger::D(TAG, "close() in, this: %p, channel: %d, state: %d", this, mPort, mSocketState);
     if(mSocketState == CLOSED) {
         return NOERROR;
     }
@@ -428,10 +453,10 @@ ECode BluetoothSocket::Close()
         AutoLock lock(mLock);
         if(mSocketState == CLOSED) return NOERROR;
         mSocketState = CLOSED;
-        if (VDBG) Slogger::D(TAG, "close() this: %p, channel: %d, mSocketIS: %p, mSocketOS: %p, mSocket: %p", this
+        if (DBG) Slogger::D(TAG, "close() this: %p, channel: %d, mSocketIS: %p, mSocketOS: %p, mSocket: %p", this
                 , mPort, mSocketIS.Get(), mSocketOS.Get(), mSocket.Get());
         if(mSocket != NULL) {
-            if (VDBG) Slogger::D(TAG, "Closing mSocket: %p", mSocket.Get());
+            if (DBG) Slogger::D(TAG, "Closing mSocket: %p", mSocket.Get());
             mSocket->ShutdownInput();
             mSocket->ShutdownOutput();
             ICloseable::Probe(mSocket)->Close();
@@ -440,6 +465,8 @@ ECode BluetoothSocket::Close()
         if(mPfd != NULL) {
             Slogger::E(TAG, "function DetachFd() has not been realized!!!!!!!!!!");
             // ((CParcelFileDescriptor*)mPfd.Get())->DetachFd();
+            mPfd->Close();
+            mPfd = NULL;
         }
     }
     return NOERROR;
@@ -457,7 +484,7 @@ String BluetoothSocket::ConvertAddr(
     /* [in] */ ArrayOf<byte>* addr)
 {
     String str;
-    str.AppendFormat("%02X:%02X:%02X:%02X:%02X:%02X",
+    str.AppendFormat(/*TODO Local.US, */"%02X:%02X:%02X:%02X:%02X:%02X",
             (*addr)[0] , (*addr)[1], (*addr)[2], (*addr)[3] , (*addr)[4], (*addr)[5]);
     return str;
 }

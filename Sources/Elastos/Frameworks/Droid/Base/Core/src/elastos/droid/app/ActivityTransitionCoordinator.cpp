@@ -1100,8 +1100,7 @@ ECode ActivityTransitionCoordinator::MoveSharedElementsToOverlay()
             AutoPtr<IInterface> obj;
             mSharedElements->Get(i, (IInterface**)&obj);
             IView* view = IView::Probe(obj);
-            assert(0 && "TODO");
-            // GhostView::AddGhost(view, decor);
+            GhostView::AddGhost(view, decor);
             AutoPtr<IViewParent> vp;
             view->GetParent((IViewParent**)&vp);
             IView* parent = IView::Probe(vp);

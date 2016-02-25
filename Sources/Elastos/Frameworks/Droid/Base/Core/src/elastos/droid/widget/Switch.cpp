@@ -1,5 +1,6 @@
 
 #include "elastos/droid/animation/ObjectAnimator.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/Typeface.h"
 #include "elastos/droid/graphics/Insets.h"
 #include "elastos/droid/text/CStaticLayout.h"
@@ -19,6 +20,7 @@
 using Elastos::Droid::Animation::IAnimator;
 using Elastos::Droid::Animation::ObjectAnimator;
 using Elastos::Droid::Content::Res::ICompatibilityInfo;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::Typeface;
 using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::Graphics::Insets;

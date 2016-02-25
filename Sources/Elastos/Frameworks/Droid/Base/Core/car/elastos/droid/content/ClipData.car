@@ -525,6 +525,9 @@ module
         GetUri(
             [out] IUri** uri);
 
+        SetUri(
+            [in] IUri* uri);
+
         /**
          * Turn this item into text, regardless of the type of data it
          * actually contains.

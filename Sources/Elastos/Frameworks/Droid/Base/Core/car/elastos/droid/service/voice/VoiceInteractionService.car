@@ -95,7 +95,7 @@ module
          * VoiceInteractionService.
          */
         IsActiveService(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IComponentName* service,
             [out] Boolean* isActiveService);
     }

@@ -142,7 +142,7 @@ private:
             /* [in] */ Int32 readerFormat,
             /* [out] */ SurfacePlane** result);
 
-    private:
+    public:
         /**
          * This field is used to keep track of native object and used by native code only.
          * Don't modify.
@@ -395,6 +395,15 @@ public:
      */
     CARAPI Close();
 
+    /**
+     * Called from Native code when an Event happens.
+     *
+     * This may be called from an arbitrary Binder thread, so access to the ImageReader must be
+     * synchronized appropriately.
+     */
+    static CARAPI_(void) PostEventFromNative(
+        /* [in] */ IInterface* selfRef);
+
 private:
     /**
      * Attempts to acquire the next image from the underlying native implementation.
@@ -433,17 +442,8 @@ private:
     CARAPI GetNumPlanesFromFormat(
         /* [out] */ Int32* result);
 
-    /**
-     * Called from Native code when an Event happens.
-     *
-     * This may be called from an arbitrary Binder thread, so access to the ImageReader must be
-     * synchronized appropriately.
-     */
-    static CARAPI_(void) PostEventFromNative(
-        /* [in] */ IInterface* selfRef);
-
     CARAPI NativeInit(
-        /* [in] */ IInterface* weakSelf,
+        /* [in] */ IImageReader* weakSelf,
         /* [in] */ Int32 w,
         /* [in] */ Int32 h,
         /* [in] */ Int32 fmt,

@@ -1,0 +1,53 @@
+TARGET_NAME= hdmi
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = hdmi.cpp
+SOURCES += ActiveSourceHandler.cpp
+SOURCES += Constants.cpp
+SOURCES += DeviceDiscoveryAction.cpp
+SOURCES += DevicePowerStatusAction.cpp
+SOURCES += DeviceSelectAction.cpp
+SOURCES += HdmiCecController.cpp
+SOURCES += HdmiCecFeatureAction.cpp
+SOURCES += HdmiCecKeycode.cpp
+SOURCES += HdmiCecLocalDevice.cpp
+SOURCES += HdmiCecLocalDevicePlayback.cpp
+SOURCES += HdmiCecLocalDeviceTv.cpp
+SOURCES += HdmiCecMessage.cpp
+SOURCES += HdmiCecMessageBuilder.cpp
+SOURCES += HdmiCecMessageCache.cpp
+SOURCES += HdmiCecMessageValidator.cpp
+SOURCES += HdmiCecStandbyModeHandler.cpp
+SOURCES += HdmiConfig.cpp
+SOURCES += HdmiControlService.cpp
+SOURCES += HdmiLogger.cpp
+SOURCES += HdmiMhlControllerStub.cpp
+SOURCES += HdmiMhlLocalDeviceStub.cpp
+SOURCES += HdmiUtils.cpp
+SOURCES += HotplugDetectionAction.cpp
+SOURCES += NewDeviceAction.cpp
+SOURCES += OneTouchPlayAction.cpp
+SOURCES += OneTouchRecordAction.cpp
+SOURCES += PowerStatusMonitorAction.cpp
+SOURCES += RequestArcAction.cpp
+SOURCES += RequestArcInitiationAction.cpp
+SOURCES += RequestArcTerminationAction.cpp
+SOURCES += RoutingControlAction.cpp
+SOURCES += SendKeyAction.cpp
+SOURCES += SetArcTransmissionStateAction.cpp
+SOURCES += SystemAudioAction.cpp
+SOURCES += SystemAudioActionFromAvr.cpp
+SOURCES += SystemAudioActionFromTv.cpp
+SOURCES += SystemAudioAutoInitiationAction.cpp
+SOURCES += SystemAudioStatusAction.cpp
+SOURCES += TimerRecordingAction.cpp
+SOURCES += UnmodifiableSparseArray.cpp
+SOURCES += UnmodifiableSparseInt32Array.cpp
+SOURCES += VolumeControlAction.cpp

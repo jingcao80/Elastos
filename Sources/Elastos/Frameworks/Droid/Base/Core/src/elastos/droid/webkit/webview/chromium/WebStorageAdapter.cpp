@@ -109,8 +109,7 @@ ECode WebStorageAdapter::GetOrigins(
 
     assert(0);
     AutoPtr<InnerValueCallback> valueCallback = new InnerValueCallback(this, callback);
-    IInterface* interfaceTmp = TO_IINTERFACE(valueCallback);
-    mQuotaManagerBridge->GetOrigins(interfaceTmp);
+    mQuotaManagerBridge->GetOrigins(valueCallback);
     return NOERROR;
 }
 

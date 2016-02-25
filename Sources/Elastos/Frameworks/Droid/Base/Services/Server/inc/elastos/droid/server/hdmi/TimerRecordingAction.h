@@ -1,172 +1,80 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.server.hdmi;
+#ifndef __ELASTOS_DROID_SERVER_HDMI_TIMERRECORDINGACTION_H__
+#define __ELASTOS_DROID_SERVER_HDMI_TIMERRECORDINGACTION_H__
 
-import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION;
-import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE;
-import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_ANALOGUE;
-import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_DIGITAL;
-import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL;
+#include "_Elastos.Droid.Server.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/core/Object.h>
+#include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
 
-using Elastos::Droid::Utility::ISlog;
-
-using Elastos::Droid::Server::Ihdmi.HdmiControlService.SendMessageCallback;
-
-using Elastos::Utility::IArrays;
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Hdmi {
 
 /**
  * Feature action that performs timer recording.
  */
-public class TimerRecordingAction extends HdmiCecFeatureAction {
-    private static const String TAG = "TimerRecordingAction";
+class TimerRecordingAction
+    : public HdmiCecFeatureAction
+{
+public:
+    TimerRecordingAction();
+
+    CARAPI constructor(
+        /* [in] */ IHdmiCecLocalDevice* source,
+        /* [in] */ Int32 recorderAddress,
+        /* [in] */ Int32 sourceType,
+        /* [in] */ ArrayOf<Byte>* recordSource);
+
+    // @Override
+    CARAPI Start(
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI ProcessCommand(
+        /* [in] */ IHdmiCecMessage* cmd,
+        /* [out] */ Boolean* result);
+
+    // @Override
+    CARAPI HandleTimerEvent(
+        /* [in] */ Int32 state);
+
+private:
+    CARAPI SendTimerMessage();
+
+    CARAPI HandleTimerStatus(
+        /* [in] */ IHdmiCecMessage* cmd,
+        /* [out] */ Boolean* result);
+
+    CARAPI HandleFeatureAbort(
+        /* [in] */ IHdmiCecMessage* cmd,
+        /* [out] */ Boolean* result);
+
+    // Convert byte array to int.
+    static CARAPI BytesToInt(
+        /* [in] */ ArrayOf<Byte>* data,
+        /* [out] */ Int32* result);
+
+private:
+    static const String TAG;
 
     // Timer out for waiting <Timer Status> 120s.
-    private static const Int32 TIMER_STATUS_TIMEOUT_MS = 120000;
+    static const Int32 TIMER_STATUS_TIMEOUT_MS;
 
     // State that waits for <Timer Status> once sending <Set XXX Timer>
-    private static const Int32 STATE_WAITING_FOR_TIMER_STATUS = 1;
+    static const Int32 STATE_WAITING_FOR_TIMER_STATUS;
 
-    private final Int32 mRecorderAddress;
-    private final Int32 mSourceType;
-    private final Byte[] mRecordSource;
+    Int32 mRecorderAddress;
 
-    TimerRecordingAction(HdmiCecLocalDevice source, Int32 recorderAddress, Int32 sourceType,
-            Byte[] recordSource) {
-        Super(source);
-        mRecorderAddress = recorderAddress;
-        mSourceType = sourceType;
-        mRecordSource = recordSource;
-    }
+    Int32 mSourceType;
 
-    //@Override
-    Boolean Start() {
-        SendTimerMessage();
-        return TRUE;
-    }
+    AutoPtr<ArrayOf<Byte> > mRecordSource;
+};
 
-    private void SendTimerMessage() {
-        HdmiCecMessage message = NULL;
-        switch (mSourceType) {
-            case TIMER_RECORDING_TYPE_DIGITAL:
-                message = HdmiCecMessageBuilder->BuildSetDigitalTimer(GetSourceAddress(),
-                        mRecorderAddress, mRecordSource);
-                break;
-            case TIMER_RECORDING_TYPE_ANALOGUE:
-                message = HdmiCecMessageBuilder->BuildSetAnalogueTimer(GetSourceAddress(),
-                        mRecorderAddress, mRecordSource);
-                break;
-            case TIMER_RECORDING_TYPE_EXTERNAL:
-                message = HdmiCecMessageBuilder->BuildSetExternalTimer(GetSourceAddress(),
-                        mRecorderAddress, mRecordSource);
-                break;
-            default:
-                Tv()->AnnounceTimerRecordingResult(
-                        TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE);
-                Finish();
-                return;
-        }
-        SendCommand(message, new SendMessageCallback() {
-            //@Override
-            CARAPI OnSendCompleted(Int32 error) {
-                if (error != Constants.SEND_RESULT_SUCCESS) {
-                    Tv()->AnnounceTimerRecordingResult(
-                            TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
-                    Finish();
-                    return;
-                }
-                mState = STATE_WAITING_FOR_TIMER_STATUS;
-                AddTimer(mState, TIMER_STATUS_TIMEOUT_MS);
-            }
-        });
-    }
+} // namespace Hdmi
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
 
-    //@Override
-    Boolean ProcessCommand(HdmiCecMessage cmd) {
-        if (mState != STATE_WAITING_FOR_TIMER_STATUS) {
-            return FALSE;
-        }
-
-        if (cmd->GetSource() != mRecorderAddress) {
-            return FALSE;
-        }
-
-        switch (cmd->GetOpcode()) {
-            case Constants.MESSAGE_TIMER_STATUS:
-                return HandleTimerStatus(cmd);
-            case Constants.MESSAGE_FEATURE_ABORT:
-                return HandleFeatureAbort(cmd);
-        }
-        return FALSE;
-    }
-
-    private Boolean HandleTimerStatus(HdmiCecMessage cmd) {
-        Byte[] timerStatusData = cmd->GetParams();
-        // [Timer Status Data] should be one or three bytes.
-        if (timerStatusData.length == 1 || timerStatusData.length == 3) {
-            Tv()->AnnounceTimerRecordingResult(BytesToInt(timerStatusData));
-            Slogger::I(TAG, "Received [Timer Status Data]:" + Arrays->ToString(timerStatusData));
-        } else {
-            Slogger::W(TAG, "Invalid [Timer Status Data]:" + Arrays->ToString(timerStatusData));
-        }
-
-        // Unlike one touch record, finish timer record when <Timer Status> is received.
-        Finish();
-        return TRUE;
-    }
-
-    private Boolean HandleFeatureAbort(HdmiCecMessage cmd) {
-        Byte[] params = cmd->GetParams();
-        Int32 messageType = params[0] & 0xFF;
-        switch (messageType) {
-            case Constants.MESSAGE_SET_DIGITAL_TIMER: // fall through
-            case Constants.MESSAGE_SET_ANALOG_TIMER: // fall through
-            case Constants.MESSAGE_SET_EXTERNAL_TIMER: // fall through
-                break;
-            default:
-                return FALSE;
-        }
-        Int32 reason = params[1] & 0xFF;
-        Slogger::I(TAG, "[Feature Abort] for " + messageType + " reason:" + reason);
-        Tv()->AnnounceTimerRecordingResult(TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
-        Finish();
-        return TRUE;
-    }
-
-    // Convert Byte array to Int32.
-    private static Int32 BytesToInt(Byte[] data) {
-        if (data.length > 4) {
-            throw new IllegalArgumentException("Invalid data size:" + Arrays->ToString(data));
-        }
-        Int32 result = 0;
-        for (Int32 i = 0; i < data.length; ++i) {
-            Int32 shift = (3 - i) * 8;
-            result |= ((data[i] & 0xFF) << shift);
-        }
-        return result;
-    }
-
-    //@Override
-    void HandleTimerEvent(Int32 state) {
-        if (mState != state) {
-            Slogger::W(TAG, "Timeout in invalid state:[Expected:" + mState + ", Actual:" + state + "]");
-            return;
-        }
-
-        Tv()->AnnounceTimerRecordingResult(TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
-        Finish();
-    }
-}
+#endif // __ELASTOS_DROID_SERVER_HDMI_TIMERRECORDINGACTION_H__

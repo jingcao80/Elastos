@@ -579,7 +579,7 @@ AutoPtr<IIDisplayManagerAw> CDisplayManagerAw::GetService()
     CServiceManager::AcquireSingleton((IServiceManager**)&sm);
     AutoPtr<IInterface> sTemp;
     sm->GetService(String("display_aw"), (IInterface**)&sTemp);
-    return (IIDisplayManagerAw*)(sTemp->Probe(EIID_IIDisplayManagerAw));
+    return IIDisplayManagerAw::Probe(sTemp);
 }
 
 }// namespace Elastos

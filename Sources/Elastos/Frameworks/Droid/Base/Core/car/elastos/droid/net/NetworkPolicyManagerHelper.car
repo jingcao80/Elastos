@@ -13,7 +13,7 @@ module
     interface INetworkPolicyManagerHelper {
 
         From(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] INetworkPolicyManager** result);
 
         /**
@@ -51,7 +51,7 @@ module
          */
         //     @Deprecated
         IsUidValidForPolicy(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 uid,
             [out] Boolean* result);
 

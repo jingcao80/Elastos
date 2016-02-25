@@ -2,7 +2,7 @@
 #include "elastos/droid/graphics/CTypeface.h"
 
 using Elastos::Droid::Graphics::ITypeface;
-// using Elastos::Droid::Graphics::CTypeface;
+using Elastos::Droid::Graphics::CTypeface;
 using Elastos::Droid::Text::EIID_IParcelableSpan;
 
 namespace Elastos {
@@ -89,12 +89,11 @@ ECode StyleSpan::Apply(
     Int32 want = oldStyle | style;
 
     AutoPtr<ITypeface> tf;
-    assert(0 && "TODO");
-    // if (old == NULL) {
-    //     CTypeface::DefaultFromStyle(want, (ITypeface**)&tf);
-    // } else {
-    //     CTypeface::Create(old, want, (ITypeface**)&tf);
-    // }
+    if (old == NULL) {
+        CTypeface::DefaultFromStyle(want, (ITypeface**)&tf);
+    } else {
+        CTypeface::Create(old, want, (ITypeface**)&tf);
+    }
 
     Int32 s;
     tf->GetStyle(&s);

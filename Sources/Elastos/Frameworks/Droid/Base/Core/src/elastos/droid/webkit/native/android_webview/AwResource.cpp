@@ -5,15 +5,16 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/webkit/native/android_webview/AwResource.h"
 #include "elastos/droid/webkit/native/android_webview/api/AwResource_dec.h"
-//TODO #include <elastos/utility/CScanner.h>
-//TODO #include <elastos/io/CInputStreamReader.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::IO::ICloseable;
 using Elastos::IO::IInputStreamReader;
 using Elastos::IO::CInputStreamReader;
 using Elastos::IO::IInputStream;
+using Elastos::IO::IReadable;
+using Elastos::IO::IReader;
 using Elastos::Utility::IScanner;
-//TODO using Elastos::Utility::CScanner;
+using Elastos::Utility::CScanner;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
@@ -143,7 +144,7 @@ String AwResource::GetRawFileResourceContent(
         // \A tells the scanner to use the beginning of the input
         // as the delimiter, hence causes it to read the entire text.
         AutoPtr<IScanner> scanner;
-        //TODO CScanner::New(isr, (IScanner**)&scanner);
+        CScanner::New(IReadable::Probe(isr), (IScanner**)&scanner);
         AutoPtr<IScanner> _scanner;
         scanner->UseDelimiter(String("\\A"), (IScanner**)&_scanner);
         _scanner->Next(&result);
@@ -152,17 +153,17 @@ String AwResource::GetRawFileResourceContent(
     // } catch (NoSuchElementException e) {
     //     return "";
     // } finally {
-    //     try {
-    //         if (isr != null) {
-    //             isr.close();
-    //         }
-    //     } catch (IOException e) {
-    //         // Nothing to do if close() fails.
-    //     }
+        // try {
+            if (isr != NULL) {
+                ICloseable::Probe(isr)->Close();
+            }
+        //} catch (IOException e) {
+            // Nothing to do if close() fails.
+        //}
     // }
     if (isr)
     {
-        //TODO isr->Close();//should have the Close method
+        ICloseable::Probe(isr)->Close();
     }
     return result;
 }

@@ -50,8 +50,10 @@ public:
     CARAPI Sinks(
         /* [out, callee] */ ArrayOf<IAudioPortConfig*>** result);
 
-private:
+public:
     AutoPtr<IAudioHandle> mHandle;
+
+private:
     AutoPtr<ArrayOf<IAudioPortConfig*> > mSources;
     AutoPtr<ArrayOf<IAudioPortConfig*> > mSinks;
 };

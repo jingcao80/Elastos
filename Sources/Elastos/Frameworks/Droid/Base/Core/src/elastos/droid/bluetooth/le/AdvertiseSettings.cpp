@@ -1,5 +1,6 @@
 
 #include "elastos/droid/bluetooth/le/AdvertiseSettings.h"
+#include "elastos/droid/bluetooth/le/CAdvertiseSettings.h"
 #include "elastos/core/StringUtils.h"
 #include <elastos/utility/logging/Slogger.h>
 
@@ -76,8 +77,7 @@ ECode AdvertiseSettings::Builder::Build(
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
-    // return new AdvertiseSettings(mMode, mTxPowerLevel, mConnectable, mTimeoutMillis);
-    //TODO CAdvertiseSettings::New(mMode, mTxPowerLevel, mConnectable, mTimeoutMillis, result);
+    CAdvertiseSettings::New(mMode, mTxPowerLevel, mConnectable, mTimeoutMillis, result);
     return NOERROR;
 }
 

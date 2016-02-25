@@ -328,16 +328,16 @@ ECode Inet6Address::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = String("");
 
     String addr;
-    FAIL_RETURN(InetAddress::ToString(&addr));
+    InetAddress::ToString(&addr);
     StringBuilder sb(addr);
-    sb.Append("%");
-    if (mIfname.IsNull()){
+    if (!mIfname.IsNull()){
+        sb.Append("%");
         sb.Append(mIfname);
     }
-    else {
+    else if (0 != mScopeId){
+        sb.Append("%");
         sb.Append(mScopeId);
     }
 
@@ -348,7 +348,7 @@ ECode Inet6Address::ToString(
 ECode Inet6Address::GetANY(
     /* [out] */ IInetAddress** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
 
     *result = ANY;
     REFCOUNT_ADD(*result)
@@ -358,7 +358,7 @@ ECode Inet6Address::GetANY(
 ECode Inet6Address::GetLOOPBACK(
     /* [out] */ IInetAddress** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
 
     *result = LOOPBACK;
     REFCOUNT_ADD(*result)

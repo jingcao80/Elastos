@@ -4,7 +4,7 @@
 #include "elastos/droid/webkit/native/media/VideoCaptureElastos.h"
 #include "elastos/droid/webkit/native/media/VideoCaptureTango.h"
 
-//TODO #include "elastos/droid/hardware/CHardwareCamera.h"
+#include "elastos/droid/hardware/CHardwareCamera.h"
 #include "elastos/droid/hardware/CHardwareCameraHelper.h"
 #include "elastos/droid/os/Build.h"
 #include <elastos/core/StringUtils.h>
@@ -14,10 +14,9 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Hardware::IHardwareCamera;
 using Elastos::Droid::Hardware::IHardwareCameraHelper;
-//TODO using Elastos::Droid::Hardware::CHardwareCamera;
+using Elastos::Droid::Hardware::CHardwareCamera;
 using Elastos::Droid::Hardware::CHardwareCameraHelper;
 
-//TODO using Elastos::EIID_IInterface;
 using Elastos::Core::StringUtils;
 using Elastos::Droid::Os::Build;
 using Elastos::Utility::Logging::Logger;
@@ -199,7 +198,7 @@ AutoPtr<IHardwareCameraInfo> VideoCaptureFactory::ChromiumCameraInfo::GetCameraI
     /* [in] */ Int32 id)
 {
     AutoPtr<IHardwareCameraInfo> cameraInfo;
-    //TODO CHardwareCamera::CCameraInfo::New((IHardwareCameraInfo**)&cameraInfo);
+    //TODO: CHardwareCamera::CCameraInfo::New((IHardwareCameraInfo**)&cameraInfo);
     // try {
         AutoPtr<IHardwareCameraHelper> helper;
         CHardwareCameraHelper::AcquireSingleton((IHardwareCameraHelper**)&helper);

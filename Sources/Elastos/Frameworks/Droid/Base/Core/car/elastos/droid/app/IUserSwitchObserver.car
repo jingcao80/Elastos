@@ -8,7 +8,7 @@ module
 
     /** {@hide} */
     [oneway]
-    interface IUserSwitchObserver {
+    interface IIUserSwitchObserver {
         OnUserSwitching(
             [in] Int32 newUserId,
             [in] IIRemoteCallback* reply);

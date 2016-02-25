@@ -1,6 +1,6 @@
 
-#ifndef  __CZOOMACTIVITY_H__
-#define  __CZOOMACTIVITY_H__
+#ifndef __CZOOMACTIVITY_H__
+#define __CZOOMACTIVITY_H__
 
 #include "_CZoomActivity.h"
 #include "elastos/droid/app/Activity.h"

@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_INPUTMETHODSERVICE_ELASTOS_DROID_INPUTMEHTODSERVICE_CIINPUTMETHODWRAPPER_H__
-#define  __ELASTOS_DROID_INPUTMETHODSERVICE_ELASTOS_DROID_INPUTMEHTODSERVICE_CIINPUTMETHODWRAPPER_H__
+#define __ELASTOS_DROID_INPUTMETHODSERVICE_ELASTOS_DROID_INPUTMEHTODSERVICE_CIINPUTMETHODWRAPPER_H__
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
@@ -10,7 +10,7 @@
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
-using Elastos::Droid::Internal::View::IInputContext;
+using Elastos::Droid::Internal::View::IIInputContext;
 using Elastos::Droid::Internal::Os::IHandlerCaller;
 using Elastos::Droid::Internal::Os::IHandlerCallerCallback;
 using Elastos::Droid::Os::IResultReceiver;
@@ -24,7 +24,7 @@ using Elastos::Droid::View::IInputChannel;
 using Elastos::Droid::View::InputMethod::IInputMethodSession;
 using Elastos::Droid::Internal::View::IIInputMethodSession;
 using Elastos::Droid::Internal::View::IIInputMethod;
-using Elastos::Droid::Internal::View::IInputSessionCallback;
+using Elastos::Droid::Internal::View::IIInputSessionCallback;
 using Elastos::Droid::View::InputMethod::IInputBinding;
 using Elastos::Droid::View::InputMethod::IEditorInfo;
 using Elastos::Droid::View::InputMethod::ICompletionInfo;
@@ -64,7 +64,7 @@ private:
         InputMethodSessionCallbackWrapper(
             /* [in] */ IContext* context,
             /* [in] */ IInputChannel* channel,
-            /* [in] */ IInputSessionCallback* cb);
+            /* [in] */ IIInputSessionCallback* cb);
 
         CARAPI SessionCreated(
             /* [in] */ IInputMethodSession* session);
@@ -72,7 +72,7 @@ private:
     private:
         AutoPtr<IContext> mContext;
         AutoPtr<IInputChannel> mChannel;
-        AutoPtr<IInputSessionCallback> mCb;
+        AutoPtr<IIInputSessionCallback> mCb;
     };
 
 public:
@@ -98,16 +98,16 @@ public:
     CARAPI UnbindInput();
 
     CARAPI StartInput(
-        /* [in] */ IInputContext* inputContext,
+        /* [in] */ IIInputContext* inputContext,
         /* [in] */ IEditorInfo* attribute);
 
     CARAPI RestartInput(
-        /* [in] */ IInputContext* inputContext,
+        /* [in] */ IIInputContext* inputContext,
         /* [in] */ IEditorInfo* attribute);
 
     CARAPI CreateSession(
         /* [in] */ IInputChannel* channel,
-        /* [in] */ IInputSessionCallback* callback);
+        /* [in] */ IIInputSessionCallback* callback);
 
     CARAPI SetSessionEnabled(
         /* [in] */ IIInputMethodSession* session,

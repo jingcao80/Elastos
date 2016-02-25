@@ -1,6 +1,8 @@
 #ifndef __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWWEBCONTENTSDELEGATEADAPTER_H__
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWWEBCONTENTSDELEGATEADAPTER_H__
+
 #include "elastos/droid/ext/frameworkext.h"
+#include <Elastos.Droid.Webkit.h>
 #include "elastos/droid/webkit/native/content/browser/ContentViewCore.h"
 #include "elastos/droid/webkit/native/android_webview/AwWebContentsDelegate.h"
 #include "elastos/droid/webkit/native/android_webview/AwContentsClient.h"
@@ -15,8 +17,7 @@ using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IView;
-//TODO using Elastos::Droid::Webkit::IValueCallback;
-
+using Elastos::Droid::Webkit::IValueCallback;
 using Elastos::Droid::Webkit::Content::Browser::ContentViewCore;
 
 namespace Elastos {
@@ -87,10 +88,11 @@ public:
 
     class InnerValueCallback
         : public Object
-        //TODO , public IValueCallback
+        , public IValueCallback
     {
     public:
-        //TODO CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL();
+
         InnerValueCallback(
             /* [in] */ AwWebContentsDelegateAdapter* owner,
             /* [in] */ Int32 processId,

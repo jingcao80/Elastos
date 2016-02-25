@@ -1384,12 +1384,12 @@ module
     [local]
     interface IFragmentHelper {
         Instantiate(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String fname,
             [out] IFragment** fragment);
 
         Instantiate(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String fname,
             [in] IBundle* args,
             [out] IFragment** fragment);

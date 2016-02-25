@@ -1,5 +1,5 @@
-#ifndef  __ELASTOS_DROID_WIDGET_HEADERVIEWLISTADAPTER_H__
-#define  __ELASTOS_DROID_WIDGET_HEADERVIEWLISTADAPTER_H__
+#ifndef __ELASTOS_DROID_WIDGET_HEADERVIEWLISTADAPTER_H__
+#define __ELASTOS_DROID_WIDGET_HEADERVIEWLISTADAPTER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/ListView.h"

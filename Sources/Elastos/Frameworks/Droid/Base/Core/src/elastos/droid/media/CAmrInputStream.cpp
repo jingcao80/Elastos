@@ -1,6 +1,6 @@
 #include "elastos/droid/media/CAmrInputStream.h"
 
-// #include "gsmamr_enc.h"
+#include <media/stagefright/codecs/amrnb/gsmamr_enc.h>
 
 namespace Elastos {
 namespace Droid {
@@ -160,13 +160,12 @@ ECode CAmrInputStream::GsmAmrEncoderInitialize(
     /* [in] */ Int64 gae)
 {
     GsmAmrEncoderState *state = (GsmAmrEncoderState *)gae;
-//TODO:
-    // int32_t nResult = AMREncodeInit(&state->mEncState, &state->mSidState, false);
-    // if (nResult != 0) {
-    //     // throwException(env, "java/lang/IllegalArgumentException",
-    //     //     "GsmAmrEncoder initialization failed %d", nResult);
-    //     return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    // }
+    int32_t nResult = AMREncodeInit(&state->mEncState, &state->mSidState, false);
+    if (nResult != 0) {
+        // throwException(env, "java/lang/IllegalArgumentException",
+        //     "GsmAmrEncoder initialization failed %d", nResult);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     return NOERROR;
 }
 
@@ -179,20 +178,18 @@ ECode CAmrInputStream::GsmAmrEncoderEncode(
     /* [out] */ Int32* number)
 {
     VALIDATE_NOT_NULL(number);
-assert(0);
     Byte inBuf[BYTES_PER_FRAME];
     Byte outBuf[MAX_OUTPUT_BUFFER_SIZE];
 
     memcpy(inBuf, pcm->GetPayload() + pcmOffset, sizeof(inBuf));
     GsmAmrEncoderState *state = (GsmAmrEncoderState *)gae;
     int32_t length;
-//TODO:
-    // length = AMREncode(state->mEncState, state->mSidState,
-    //                             (Mode)MR122,
-    //                             (int16_t *)inBuf,
-    //                             (unsigned char *)outBuf,
-    //                             (Frame_Type_3GPP*)&state->mLastModeUsed,
-    //                             AMR_TX_WMF);
+    length = AMREncode(state->mEncState, state->mSidState,
+                                (Mode)MR122,
+                                (int16_t *)inBuf,
+                                (unsigned char *)outBuf,
+                                (Frame_Type_3GPP*)&state->mLastModeUsed,
+                                AMR_TX_WMF);
     if (length < 0) {
         // throwException(env, "java/io/IOException",
         //         "Failed to encode a frame with error code: %d", length);
@@ -221,8 +218,7 @@ void CAmrInputStream::GsmAmrEncoderCleanup(
 {
     GsmAmrEncoderState *state = (GsmAmrEncoderState *)gae;
     if (state) {
-//TODO:
-        // AMREncodeExit(&state->mEncState, &state->mSidState);
+        AMREncodeExit(&state->mEncState, &state->mSidState);
         state->mEncState = NULL;
         state->mSidState = NULL;
     }

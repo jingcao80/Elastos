@@ -43,14 +43,14 @@ ECode CameraBinderDecorator::CameraBinderDecoratorListener::OnCatchException(
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
-    if ((UInt32)t == E_DEAD_OBJECT_EXCEPTION) {
+    if (t == (ECode)E_DEAD_OBJECT_EXCEPTION) {
         // throw new CameraRuntimeException(CAMERA_DISCONNECTED,
         //         "Process hosting the camera service has died unexpectedly",
         //         t);
         Slogger::E("CameraBinderDecorator", "CAMERA_DISCONNECTED , Process hosting the camera service has died unexpectedly");
         return E_CAMERA_RUNTIME_EXCEPTION;
     }
-    else if ((UInt32)t == E_REMOTE_EXCEPTION) {
+    else if (t == (ECode)E_REMOTE_EXCEPTION) {
         // throw new UnsupportedOperationException("An unknown RemoteException was thrown" +
         //         " which should never happen.", t);
         Slogger::E("CameraBinderDecorator", "An unknown RemoteException was thrown which should never happen. %d", t);

@@ -287,7 +287,7 @@ Int32 CPendingIntentRecord::SendInner(
     /* [in] */ Int32 flagsMask,
     /* [in] */ Int32 flagsValues,
     /* [in] */ IBundle* options,
-    /* [in] */ IActivityContainer* container)
+    /* [in] */ IIActivityContainer* container)
 {
     String resolvedType(aResolvedType);
     AutoLock lock(mOwner);

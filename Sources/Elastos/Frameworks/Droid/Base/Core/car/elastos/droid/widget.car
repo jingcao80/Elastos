@@ -709,7 +709,7 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         interface ILinearLayout;
@@ -1682,7 +1682,7 @@ module
             [in] Int32 defStyleAttr);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
@@ -1738,7 +1738,7 @@ module
             [in] Int32 defStyleAttr);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
@@ -2043,7 +2043,7 @@ module
             [in] Int32 defStyleAttr);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
@@ -2156,7 +2156,7 @@ module
            [in] IContext* ctx,
            [in] Int32 resource,
            [in] Int32 textViewResourceId,
-           [in] ArrayOf<IInterface*>* objects);
+           [in] ArrayOf<IInterface*>* array);
 
         constructor(
             [in] IContext* ctx,
@@ -2164,10 +2164,10 @@ module
             [in] IList* objects);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 resource,
             [in] Int32 textViewResourceId,
-            [in] IList* objects);
+            [in] IList* list);
 
         interface IArrayAdapter;
         interface IBaseAdapter;
@@ -2451,7 +2451,7 @@ module
             [in] Int32 defStyleAttr);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
@@ -2659,22 +2659,22 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IInterpolator* interpolator);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IInterpolator* interpolator,
             [in] Boolean flywheel);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IInterpolator* interpolator,
             [in] Float bounceCoefficientX,
             [in] Float bounceCoefficientY);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IInterpolator* interpolator,
             [in] Float bounceCoefficientX,
             [in] Float bounceCoefficientY,
@@ -2772,7 +2772,7 @@ module
     [local]
     class CRemoteViewsListAdapter {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IArrayList* remoteViews,
             [in] Int32 viewTypeCount);
 
@@ -3130,16 +3130,16 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle,
             [in] Int32 defStyleRes);
@@ -3153,16 +3153,16 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
@@ -3176,11 +3176,11 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyle);
 
@@ -3193,16 +3193,16 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
@@ -3213,7 +3213,7 @@ module
     [local]
     class CDayPickerView {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IDatePickerController* attrs);
 
         interface IDayPickerView;
@@ -3233,7 +3233,7 @@ module
     class CTimePickerSpinnerDelegate {
         constructor(
             [in] ITimePicker* delegator,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);

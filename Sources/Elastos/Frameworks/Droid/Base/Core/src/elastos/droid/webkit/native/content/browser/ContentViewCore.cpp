@@ -2,6 +2,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Utility.h"
 #include "elastos/droid/webkit/native/content/browser/ContentViewCore.h"
 #include "elastos/droid/webkit/native/content/api/ContentViewCore_dec.h"
 #include "elastos/droid/webkit/native/content/browser/DeviceUtils.h"
@@ -25,6 +26,7 @@
 //TODO #include "elastos/droid/widget/CView.h"
 //TODO #include "elastos/droid/view/CMotionEventHelper.h"
 //TODO #include "elastos/droid/utility/CArrayList.h"
+#include "elastos/droid/utility/CPairHelper.h"
 
 #include <elastos/core/Math.h>
 #include <elastos/core/StringUtils.h>
@@ -48,6 +50,9 @@ using Elastos::Droid::Text::ISpannable;
 using Elastos::Droid::Text::EIID_ISpannable;
 //TODO using Elastos::Droid::Widget::CView;
 using Elastos::Droid::Utility::IDisplayMetrics;
+using Elastos::Droid::Utility::CPairHelper;
+using Elastos::Droid::Utility::IPair;
+using Elastos::Droid::Utility::IPairHelper;
 
 using Elastos::Droid::Webkit::Content::Common::ContentSwitches;
 using Elastos::Droid::Webkit::Content::Browser::Input::GamepadList;
@@ -69,7 +74,7 @@ using Elastos::Droid::View::InputMethod::EIID_IInputConnection;
 //TODO using Elastos::Droid::View::CMotionEventHelper;
 using Elastos::Droid::View::IMotionEventHelper;
 using Elastos::Core::StringUtils;
-//using Elastos::Core::CStringWrapper;
+using Elastos::Core::CString;
 using Elastos::Utility::IList;
 using Elastos::Utility::Logging::Logger;
 
@@ -1043,40 +1048,22 @@ AutoPtr<ImeAdapter> ContentViewCore::CreateImeAdapter(
     return imeAdapter;
 }
 
-/**
- *
- * @param containerView The view that will act as a container for all views created by this.
- * @param internalDispatcher Handles dispatching all hidden or super methods to the
- *                           containerView.
- * @param nativeWebContents A pointer to the native web contents.
- * @param windowAndroid An instance of the WindowAndroid.
- */
-// Perform important post-construction set up of the ContentViewCore.
-// We do not require the containing view in the constructor to allow embedders to create a
-// ContentViewCore without having fully created its containing view. The containing view
-// is a vital component of the ContentViewCore, so embedders must exercise caution in what
-// they do with the ContentViewCore before calling initialize().
-// We supply the nativeWebContents pointer here rather than in the constructor to allow us
-// to set the private browsing mode at a later point for the WebView implementation.
-// Note that the caller remains the owner of the nativeWebContents and is responsible for
-// deleting it after destroying the ContentViewCore.
-#if 0
 void ContentViewCore::Initialize(
     /* [in] */ IViewGroup* containerView,
     /* [in] */ InternalAccessDelegate* internalDispatcher,
     /* [in] */ Int64 nativeWebContents,
-    /* [in] */ WindowAndroid* windowAndroid)
+    /* [in] */ WindowElastos* windowElastos)
 {
     SetContainerView(containerView);
 
     mPositionListener = new InnerListener(this);
 
-    Int64 windowNativePointer = windowAndroid != NULL ? windowAndroid->GetNativePointer() : 0;
+    Int64 windowNativePointer = windowElastos != NULL ? windowElastos->GetNativePointer() : 0;
 
     Int64 viewAndroidNativePointer = 0;
     if (windowNativePointer != 0) {
-        mViewAndroid = new ViewAndroid(windowAndroid, GetViewAndroidDelegate());
-        viewAndroidNativePointer = mViewAndroid->GetNativePointer();
+        mViewElastos = new ViewElastos(windowElastos, GetViewAndroidDelegate());
+        viewAndroidNativePointer = mViewElastos->GetNativePointer();
     }
 
     mZoomControlsDelegate = new InnerZoomControlsDelegate(this);
@@ -1096,7 +1083,6 @@ void ContentViewCore::Initialize(
 
     mWebContentsObserver = new InnerWebContentsObserverAndroid(this);
 }
-#endif
 
 /**
  * Sets a new container view for this {@link ContentViewCore}.
@@ -1197,13 +1183,13 @@ void ContentViewCore::Destroy()
     mWebContents = NULL;
     assert(0);
     // TODO
-    // if (mViewAndroid != NULL) {
-    //     mViewAndroid->Destroy();
+    // if (mViewElastos != NULL) {
+    //     mViewElastos->Destroy();
     // }
     mNativeContentViewCore = 0;
     mContentSettings = NULL;
     mJavaScriptInterfaces->Clear();
-    mRetainedJavaScriptObjects->Clear();
+    ISet::Probe(mRetainedJavaScriptObjects)->Clear();
     UnregisterAccessibilityContentObserver();
     mGestureStateListeners.Clear();
     ScreenOrientationListener::GetInstance()->RemoveObserver(this);
@@ -3645,17 +3631,23 @@ void ContentViewCore::AddJavascriptInterface(
  *                           exposed.
  *
  */
-// TODO
-// void ContentViewCore::AddPossiblyUnsafeJavascriptInterface(
-//     /* [in] */ IInterface* object,
-//     /* [in] */ const String& name,
-//     /* [in] */ Annotation* requiredAnnotation)
-// {
-//     if (mNativeContentViewCore != 0 && object != null) {
-//         mJavaScriptInterfaces.put(name, new Pair<Object, Class>(object, requiredAnnotation));
-//         NativeAddJavascriptInterface(mNativeContentViewCore, object, name, requiredAnnotation);
-//     }
-// }
+void ContentViewCore::AddPossiblyUnsafeJavascriptInterface(
+    /* [in] */ IInterface* object,
+    /* [in] */ const String& name,
+    /* [in] */ IInterface* requiredAnnotation)
+{
+    if (mNativeContentViewCore != 0 && object != NULL) {
+        AutoPtr<ICharSequence> charSequenceTmp;
+        CString::New(name, (ICharSequence**)&charSequenceTmp);
+
+        AutoPtr<IPairHelper> helper;
+        CPairHelper::AcquireSingleton((IPairHelper**)&helper);
+        AutoPtr<IPair> pair;
+        helper->Create(object, requiredAnnotation, (IPair**)&pair);
+        mJavaScriptInterfaces->Put(TO_IINTERFACE(charSequenceTmp), TO_IINTERFACE(pair));
+        NativeAddJavascriptInterface(mNativeContentViewCore, object, name, requiredAnnotation);
+    }
+}
 
 /**
  * Removes a previously added JavaScript interface with the given name.

@@ -121,6 +121,7 @@ module
     const E_MEDIA_CRYPTO_EXCEPTION                      =  0xEC040000;
     const E_MEDIA_DRM_EXCEPTION                         =  0xEC050000;
     const E_MEDIA_DRM_STATE_EXCEPTION                   =  0xEC060000;
+    const E_UNSUPPORTED_SCHEME_EXCEPTION                =  0xEC070000;
 
     //==========================================================================
     // Elastos Droid internal exception codes (Family: 0x6D - ED)

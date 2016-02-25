@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_GRAPHICS_DRAWABLE_VECTORDRAWABLE_H__
-#define  __ELASTOS_DROID_GRAPHICS_DRAWABLE_VECTORDRAWABLE_H__
+#ifndef __ELASTOS_DROID_GRAPHICS_DRAWABLE_VECTORDRAWABLE_H__
+#define __ELASTOS_DROID_GRAPHICS_DRAWABLE_VECTORDRAWABLE_H__
 
 #include "elastos/droid/graphics/drawable/Drawable.h"
 #include "elastos/droid/utility/PathParser.h"

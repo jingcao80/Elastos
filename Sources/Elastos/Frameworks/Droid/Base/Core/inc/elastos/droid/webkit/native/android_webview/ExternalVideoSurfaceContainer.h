@@ -3,7 +3,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/webkit/native/content/browser/ContentViewCore.h"
 #include "elastos/droid/webkit/native/content/browser/RenderCoordinates.h"
-//TODO #include "elastos/droid/view/SurfaceView.h"
+#include "elastos/droid/view/SurfaceView.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::ICanvas;
@@ -11,7 +11,7 @@ using Elastos::Droid::View::ISurface;
 using Elastos::Droid::View::ISurfaceHolder;
 using Elastos::Droid::View::ISurfaceHolderCallback;
 using Elastos::Droid::View::ISurfaceView;
-//TODO using Elastos::Droid::View::SurfaceView;
+using Elastos::Droid::View::SurfaceView;
 using Elastos::Droid::View::IViewGroup;
 
 // import com.google.common.annotations.VisibleForTesting;
@@ -58,7 +58,7 @@ private:
     // in SurfaceView can clear out some web elements like media control or subtitle.
     // So we need to disable its hole-punching logic.
     class NoPunchingSurfaceView
-    //TODO : public SurfaceView
+        : public SurfaceView
     {
     public:
         NoPunchingSurfaceView(
@@ -68,7 +68,7 @@ private:
         // SurfaceView.dispatchDraw implementation punches a hole in the view hierarchy.
         // Disable this by making this a no-op.
         //@Override
-        CARAPI DispatchDraw(
+        CARAPI_(void) DispatchDraw(
             /* [in] */ ICanvas* canvas);
     };
 

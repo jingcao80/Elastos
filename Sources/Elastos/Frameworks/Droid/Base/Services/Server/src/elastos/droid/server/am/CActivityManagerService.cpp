@@ -33,8 +33,8 @@
 #include "elastos/droid/server/AttributeCache.h"
 #include "elastos/droid/server/LocalServices.h"
 #include "elastos/droid/server/Watchdog.h"
-//#include "elastos/droid/server/wm/AppTransition.h"
-//#include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/AppTransition.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
 #include "Elastos.Droid.AppWidget.h"
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Provider.h"
@@ -170,6 +170,7 @@ using Elastos::Droid::Os::FactoryTest;
 using Elastos::Droid::Os::CMessageHelper;
 using Elastos::Droid::Os::IMessageHelper;
 using Elastos::Droid::Os::IPermissionController;
+using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::IPatternMatcher;
 using Elastos::Droid::Os::CRemoteCallbackList;
@@ -193,7 +194,6 @@ using Elastos::Droid::Os::ILooperHelper;
 using Elastos::Droid::Os::CLooperHelper;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Os::CEnvironment;
-using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::IProcessStartResult;
 using Elastos::Droid::Os::Storage::IIMountService;
@@ -217,6 +217,7 @@ using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::ILayoutInflaterHelper;
+using Elastos::Droid::Server::Wm::AppTransition;
 using Elastos::Droid::R;
 using Elastos::Droid::Manifest;
 
@@ -1533,6 +1534,14 @@ ECode CActivityManagerService::PreBootCompletedIntentReceiver::ToString(
 //==============================================================================
 // CActivityManagerService::OnFinishCallback
 //==============================================================================
+CActivityManagerService::OnFinishCallback::OnFinishCallback(
+    /* [in] */ CActivityManagerService* host,
+    /* [in] */ List<AutoPtr<IComponentName> >* doneReceivers,
+    /* [in] */ IRunnable* goingCallback)
+    : mHost(host)
+    , mDoneReceivers(doneReceivers)
+    , mGoingCallback(goingCallback)
+{}
 
 ECode CActivityManagerService::OnFinishCallback::Run()
 {
@@ -2890,8 +2899,7 @@ void CActivityManagerService::SetWindowManager(
     /* [in] */ CWindowManagerService* wm)
 {
     mWindowManager = wm;
-    assert(0);
-    // mStackSupervisor->SetWindowManager(wm);
+    mStackSupervisor->SetWindowManager(TO_IINTERFACE(wm));
 }
 
 void CActivityManagerService::SetUsageStatsManager(
@@ -2900,10 +2908,10 @@ void CActivityManagerService::SetUsageStatsManager(
     mUsageStatsService = usageStatsManager;
 }
 
-void CActivityManagerService::StartObservingNativeCrashes()
+ECode CActivityManagerService::StartObservingNativeCrashes()
 {
     AutoPtr<NativeCrashListener> ncl = new NativeCrashListener(this);
-    ncl->Start();
+    return ncl->Start();
 }
 
 AutoPtr<IIAppOpsService> CActivityManagerService::GetAppOpsService()
@@ -2996,7 +3004,7 @@ AutoPtr<IIAppOpsService> CActivityManagerService::GetAppOpsService()
 // }
 
 void CActivityManagerService::SetSystemServiceManager(
-    /* [in] */ SystemServiceManager* mgr)
+    /* [in] */ ISystemServiceManager* mgr)
 {
     mSystemServiceManager = mgr;
 }
@@ -3224,8 +3232,7 @@ ECode CActivityManagerService::SetFocusedActivityLocked(
         }
         mStackSupervisor->SetFocusedStack(r);
         if (r != NULL) {
-            assert(0);
-            // mWindowManager->SetFocusedApp(IBinder::Probe(r->mAppToken), TRUE);
+            mWindowManager->SetFocusedApp(IBinder::Probe(r->mAppToken), TRUE);
         }
         ApplyUpdateLockStateLocked(r);
     }
@@ -3687,12 +3694,10 @@ ECode CActivityManagerService::EnsurePackageDexOpt(
 Boolean CActivityManagerService::IsNextTransitionForward()
 {
     Int32 UNUSED(transit);
-    assert(0);
-    return FALSE;
-    // mWindowManager->GetPendingAppTransition(&transit);
-    // return transit == AppTransition::TRANSIT_ACTIVITY_OPEN
-    //         || transit == AppTransition::TRANSIT_TASK_OPEN
-    //         || transit == AppTransition::TRANSIT_TASK_TO_FRONT;
+    mWindowManager->GetPendingAppTransition(&transit);
+    return transit == AppTransition::TRANSIT_ACTIVITY_OPEN
+            || transit == AppTransition::TRANSIT_TASK_OPEN
+            || transit == AppTransition::TRANSIT_TASK_TO_FRONT;
 }
 
 Int32 CActivityManagerService::StartIsolatedProcess(
@@ -5067,7 +5072,7 @@ ECode CActivityManagerService::StartActivityInPackage(
     /* [in] */ Int32 startFlags,
     /* [in] */ IBundle* options,
     /* [in] */ Int32 userId,
-    /* [in] */ IActivityContainer* container,
+    /* [in] */ IIActivityContainer* container,
     /* [in] */ TaskRecord* inTask,
     /* [out] */ Int32* result)
 {
@@ -5743,13 +5748,11 @@ ECode CActivityManagerService::SetRequestedOrientation(
         return NOERROR;;
     }
     const Int64 origId = BinderClearCallingIdentity();
-    assert(0);
-    // mWindowManager->SetAppOrientation(r->mAppToken, requestedOrientation);
+    mWindowManager->SetAppOrientation(r->mAppToken, requestedOrientation);
     AutoPtr<IConfiguration> config;
-    assert(0);
-    // mWindowManager->UpdateOrientationFromAppTokens(
-    //     mConfiguration, r->MayFreezeScreenLocked(r->mApp)
-    //         ? IBinder::Probe(r->mAppToken) : NULL, (IConfiguration**)&config);
+    mWindowManager->UpdateOrientationFromAppTokens(
+        mConfiguration, r->MayFreezeScreenLocked(r->mApp)
+            ? IBinder::Probe(r->mAppToken) : NULL, (IConfiguration**)&config);
     if (config != NULL) {
         r->mFrozenBeforeDestroy = TRUE;
         if (!UpdateConfigurationLocked(config, r, FALSE, FALSE)) {
@@ -5771,9 +5774,7 @@ ECode CActivityManagerService::GetRequestedOrientation(
         *requestedOrientation = IActivityInfo::SCREEN_ORIENTATION_UNSPECIFIED;
         return NOERROR;
     }
-    assert(0);
-    return NOERROR;
-    // return mWindowManager->GetAppOrientation(r->mAppToken, requestedOrientation);
+    return mWindowManager->GetAppOrientation(r->mAppToken, requestedOrientation);
 }
 
 ECode CActivityManagerService::FinishActivity(
@@ -6067,9 +6068,8 @@ ECode CActivityManagerService::OverridePendingTransition(
 
     if (self->mState == ActivityState_RESUMED
             || self->mState == ActivityState_PAUSING) {
-        assert(0);
-        // mWindowManager->OverridePendingAppTransition(packageName,
-        //         enterAnim, exitAnim, NULL);
+        mWindowManager->OverridePendingAppTransition(packageName,
+                enterAnim, exitAnim, NULL);
     }
 
     BinderRestoreCallingIdentity(origId);
@@ -7151,8 +7151,7 @@ ECode CActivityManagerService::CloseSystemDialogsLocked(
     if (reason != NULL) {
         intent->PutExtra(String("reason"), reason);
     }
-    assert(0);
-    // mWindowManager->CloseSystemDialogs(reason);
+    mWindowManager->CloseSystemDialogs(reason);
 
     mStackSupervisor->CloseSystemDialogsLocked();
 
@@ -8063,8 +8062,7 @@ ECode CActivityManagerService::EnableScreenAfterBoot()
 {
 //    EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_ENABLE_SCREEN,
 //            SystemClock.uptimeMillis());
-    assert(0);
-    // mWindowManager->EnableScreenAfterBoot();
+    mWindowManager->EnableScreenAfterBoot();
     AutoLock lock(this);
     UpdateEventDispatchingLocked();
 
@@ -8076,8 +8074,7 @@ ECode CActivityManagerService::ShowBootMessage(
     /* [in] */ Boolean always)
 {
     FAIL_RETURN(EnforceNotIsolatedCaller(String("showBootMessage")));
-    assert(0);
-    // mWindowManager->ShowBootMessage(msg, always);
+    mWindowManager->ShowBootMessage(msg, always);
     return NOERROR;
 }
 
@@ -8089,8 +8086,7 @@ ECode CActivityManagerService::KeyguardWaitingForActivityDrawn()
         {
             AutoLock lock(this);
             if (DEBUG_LOCKSCREEN) LogLockScreen(String(""));
-                assert(0);
-                // mWindowManager->KeyguardWaitingForActivityDrawn();
+                mWindowManager->KeyguardWaitingForActivityDrawn();
             if (mLockScreenShown) {
                 mLockScreenShown = FALSE;
                 ComeOutOfSleepIfNeededLocked();
@@ -11139,7 +11135,7 @@ ECode CActivityManagerService::GetHomeActivityToken(
 ECode CActivityManagerService::CreateActivityContainer(
     /* [in] */ IBinder* parentActivityToken,
     /* [in] */ IActivityContainerCallback* callback,
-    /* [out] */ IActivityContainer** container)
+    /* [out] */ IIActivityContainer** container)
 {
     VALIDATE_NOT_NULL(container);
     *container = NULL;
@@ -11158,7 +11154,7 @@ ECode CActivityManagerService::CreateActivityContainer(
             Slogger::E(TAG, "callback must not be NULL");
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
-        AutoPtr<IActivityContainer> temp = mStackSupervisor->CreateActivityContainer(r, callback);
+        AutoPtr<IIActivityContainer> temp = mStackSupervisor->CreateActivityContainer(r, callback);
         *container = temp;
         REFCOUNT_ADD(*container);
     }
@@ -11166,7 +11162,7 @@ ECode CActivityManagerService::CreateActivityContainer(
 }
 
 ECode CActivityManagerService::DeleteActivityContainer(
-    /* [in] */ IActivityContainer* container)
+    /* [in] */ IIActivityContainer* container)
 {
     FAIL_RETURN(EnforceCallingPermission(Manifest::permission::MANAGE_ACTIVITY_STACKS,
             String("deleteActivityContainer()")));
@@ -11178,7 +11174,7 @@ ECode CActivityManagerService::DeleteActivityContainer(
 
 ECode CActivityManagerService::GetEnclosingActivityContainer(
     /* [in] */ IBinder* activityToken,
-    /* [out] */ IActivityContainer** container)
+    /* [out] */ IIActivityContainer** container)
 {
     VALIDATE_NOT_NULL(container);
     synchronized (this) {
@@ -11225,8 +11221,7 @@ ECode CActivityManagerService::ResizeStack(
             String("resizeStackBox()")));
     Int64 ident = BinderClearCallingIdentity();
     // try {
-        assert(0);
-        // mWindowManager->ResizeStack(stackBoxId, bounds);
+        mWindowManager->ResizeStack(stackBoxId, bounds);
     // } finally {
         BinderRestoreCallingIdentity(ident);
     // }
@@ -13045,8 +13040,7 @@ ECode CActivityManagerService::StartRunningVoiceLocked()
 
 ECode CActivityManagerService::UpdateEventDispatchingLocked()
 {
-    assert(0);
-    // mWindowManager->SetEventDispatching(mBooted && !mShuttingDown);
+    mWindowManager->SetEventDispatching(mBooted && !mShuttingDown);
     return NOERROR;
 }
 
@@ -13592,8 +13586,7 @@ ECode CActivityManagerService::ConvertFromTranslucent(
             r->mTask->mStack->ReleaseBackgroundResources();
             mStackSupervisor->EnsureActivitiesVisibleLocked(NULL, 0);
         }
-        assert(0);
-        // mWindowManager->SetAppFullscreen(token, TRUE);
+        mWindowManager->SetAppFullscreen(token, TRUE);
         *result = translucentChanged;
     }
     BinderRestoreCallingIdentity(origId);
@@ -13629,8 +13622,7 @@ ECode CActivityManagerService::ConvertToTranslucent(
             r->mTask->mStack->ConvertToTranslucent(r);
         }
         mStackSupervisor->EnsureActivitiesVisibleLocked(NULL, 0);
-        assert(0);
-        // mWindowManager->SetAppFullscreen(token, FALSE);
+        mWindowManager->SetAppFullscreen(token, FALSE);
         *result = translucentChanged;
     }
     BinderRestoreCallingIdentity(origId);
@@ -14398,7 +14390,7 @@ ECode CActivityManagerService::SystemReady(
                 return NOERROR;
             }
             AutoPtr<List<AutoPtr<IComponentName> > > doneReceivers = new List<AutoPtr<IComponentName> >();
-            AutoPtr<IRunnable> runnable = new OnFinishCallback(this, doneReceivers, goingCallback);
+            AutoPtr<IRunnable> runnable = new OnFinishCallback(this, doneReceivers.Get(), goingCallback);
             mWaitingUpdate = DeliverPreBootCompleted(runnable, doneReceivers, IUserHandle::USER_OWNER);
 
             if (mWaitingUpdate) {
@@ -20706,8 +20698,7 @@ ECode CActivityManagerService::UpdateConfiguration(
         AutoLock lock(this);
         if (values == NULL && mWindowManager != NULL) {
             // sentinel: fetch the current configuration from the window manager
-            assert(0);
-            // values = mWindowManager->ComputeNewConfiguration();
+            values = mWindowManager->ComputeNewConfiguration();
         }
 
         if (mWindowManager != NULL) {
@@ -20861,8 +20852,7 @@ Boolean CActivityManagerService::UpdateConfigurationLocked(
     }
 
     if (values != NULL && mWindowManager != NULL) {
-        assert(0);
-        // mWindowManager->SetNewConfiguration(mConfiguration);
+        mWindowManager->SetNewConfiguration(mConfiguration);
     }
 
     return kept;
@@ -23227,9 +23217,8 @@ ECode CActivityManagerService::StartUser(
             }
 
             if (foreground) {
-                assert(0);
-                // mWindowManager->StartFreezingScreen(R::anim::screen_user_exit,
-                //         R::anim::screen_user_enter);
+                mWindowManager->StartFreezingScreen(R::anim::screen_user_exit,
+                        R::anim::screen_user_enter);
             }
 
             Boolean needStart = FALSE;
@@ -23251,18 +23240,15 @@ ECode CActivityManagerService::StartUser(
                 mCurrentUserId = userId;
                 mTargetUserId = IUserHandle::USER_NULL; // reset, mCurrentUserId has caught up
                 UpdateCurrentProfileIdsLocked();
-                assert(0);
-                // mWindowManager->SetCurrentUser(userId);
+                mWindowManager->SetCurrentUser(userId, mCurrentProfileIds);
 
                 // Once the internal notion of the active user has switched, we lock the device
                 // with the option to show the user switcher on the keyguard.
-                assert(0);
-                // mWindowManager->LockNow(NULL);
+                mWindowManager->LockNow(NULL);
             }
             else {
                 UpdateCurrentProfileIdsLocked();
-                assert(0);
-                // mWindowManager->SetCurrentProfileIds(mCurrentProfileIds);
+                mWindowManager->SetCurrentProfileIds(mCurrentProfileIds);
                 mUserLru.Remove(mCurrentUserId);
                 mUserLru.PushBack(mCurrentUserId);
             }
@@ -23470,7 +23456,7 @@ ECode CActivityManagerService::DispatchUserSwitch(
             // try {
             AutoPtr<IInterface> item;
             mUserSwitchObservers->GetBroadcastItem(i, (IInterface**)&item);
-            AutoPtr<IUserSwitchObserver> observer = IUserSwitchObserver::Probe(item);
+            AutoPtr<IIUserSwitchObserver> observer = IIUserSwitchObserver::Probe(item);
             observer->OnUserSwitching(newUserId, callback);
             // } catch (RemoteException e) {
             // }
@@ -23570,8 +23556,7 @@ ECode CActivityManagerService::CompleteSwitchAndInitalize(
             uss->mSwitching = FALSE;
         }
         if (!uss->mSwitching && !uss->mInitializing) {
-            assert(0);
-            // mWindowManager->StopFreezingScreen();
+            mWindowManager->StopFreezingScreen();
             unfrozen = TRUE;
         }
     }
@@ -23583,7 +23568,7 @@ ECode CActivityManagerService::CompleteSwitchAndInitalize(
             // try {
             AutoPtr<IInterface> item;
             mUserSwitchObservers->GetBroadcastItem(i, (IInterface**)&item);
-            AutoPtr<IUserSwitchObserver> observer = IUserSwitchObserver::Probe(item);
+            AutoPtr<IIUserSwitchObserver> observer = IIUserSwitchObserver::Probe(item);
             observer->OnUserSwitchComplete(newUserId);
             // } catch (RemoteException e) {
             // }
@@ -23987,7 +23972,7 @@ ECode CActivityManagerService::UpdateStartedUserArrayLocked()
 }
 
 ECode CActivityManagerService::RegisterUserSwitchObserver(
-    /* [in] */ IUserSwitchObserver* observer)
+    /* [in] */ IIUserSwitchObserver* observer)
 {
    if (CheckCallingPermission(Manifest::permission::INTERACT_ACROSS_USERS_FULL)
            != IPackageManager::PERMISSION_GRANTED) {
@@ -24007,7 +23992,7 @@ ECode CActivityManagerService::RegisterUserSwitchObserver(
 }
 
 ECode CActivityManagerService::UnregisterUserSwitchObserver(
-    /* [in] */ IUserSwitchObserver* observer)
+    /* [in] */ IIUserSwitchObserver* observer)
 {
     Boolean result;
     return mUserSwitchObservers->Unregister(observer, &result);

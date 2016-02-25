@@ -8,30 +8,29 @@
 #include "elastos/droid/webkit/native/media/VideoCapture.h"
 #include "elastos/droid/webkit/native/media/api/VideoCapture_dec.h"
 #include "elastos/droid/webkit/native/media/ImageFormat.h"
-//TODO #include "elastos/droid/hardware/CHardwareCamera.h"
+#include "elastos/droid/hardware/CHardwareCamera.h"
 #include "elastos/droid/hardware/CHardwareCameraHelper.h"
-//TODO#include "elastos/droid/opengl/CGLES20.h"
-//TODO#include "elastos/droid/graphics/CSurfaceTexture.h"
+#include "elastos/droid/opengl/CGLES20.h"
+#include "elastos/droid/graphics/CSurfaceTexture.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
-//TODO #include <elastos/utility/concurrent/locks/CReentrantLock.h>
 
 using Elastos::Droid::Graphics::IImageFormat;
 using Elastos::Droid::Hardware::ICameraSize;
-//TODO using Elastos::Droid::Hardware::CHardwareCamera;
+using Elastos::Droid::Hardware::CHardwareCamera;
 using Elastos::Droid::Hardware::EIID_IPreviewCallback;
 using Elastos::Droid::Hardware::IHardwareCameraHelper;
 using Elastos::Droid::Hardware::CHardwareCameraHelper;
 using Elastos::Droid::Opengl::IGLES20;
-//TODO using Elastos::Droid::Opengl::CGLES20;
-//TODO using Elastos::Droid::Graphics::CSurfaceTexture;
+using Elastos::Droid::Opengl::CGLES20;
+using Elastos::Droid::Graphics::CSurfaceTexture;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::Opengl::IGLES20;
 using Elastos::Droid::View::ISurface;
 using Elastos::Droid::View::IWindowManager;
 
 using Elastos::Core::Math;
-//TODO using Elastos::Utility::Concurrent::Locks::CReentrantLock;
+using Elastos::Utility::Concurrent::Locks::CReentrantLock;
 using Elastos::Utility::Concurrent::Locks::ILock;
 using Elastos::Utility::Concurrent::Locks::EIID_ILock;
 using Elastos::Utility::IList;
@@ -103,7 +102,7 @@ VideoCapture::VideoCapture(
     , mDeviceOrientation(0)
 {
 
-    //TODO CReentrantLock::New((IReentrantLock**)&mPreviewBufferLock);
+    CReentrantLock::New((IReentrantLock**)&mPreviewBufferLock);
 }
 
 //@CalledByNative
@@ -114,11 +113,9 @@ Boolean VideoCapture::Allocate(
 {
     Logger::D(TAG, "allocate: requested ( %d x %d)@%dfps",  width, height, frameRate);
     // try {
-    /*TODO
     AutoPtr<IHardwareCameraHelper> helper;
     CHardwareCameraHelper::AcquireSingleton((IHardwareCameraHelper**)&helper);
-    helper->Open(mId, (ICamera**)&mCamera);
-    */
+    helper->Open(mId, (IHardwareCamera**)&mCamera);
     // } catch (RuntimeException ex) {
     //     Log.e(TAG, "allocate: Camera.open: " + ex);
     //     return false;
@@ -188,8 +185,8 @@ Boolean VideoCapture::Allocate(
     for (Int32 i = 0; i < length; ++i) {
         size = (*listCameraSize)[i];
         Int32 _width = 0, _height = 0;
-        //TODO size->GetWidth(&_width);
-        //TODO size->GetHeight(&_height);
+        size->GetWidth(&_width);
+        size->GetHeight(&_height);
         Int32 diff = Elastos::Core::Math::Abs(_width - width) +
                    Elastos::Core::Math::Abs(_height - height);
         Logger::D(TAG, "allocate: supported (%d, %d), diff=%d",  _width, _height, diff);
@@ -236,7 +233,7 @@ Boolean VideoCapture::Allocate(
 
     // Generate one texture pointer and bind it as an external texture.
     AutoPtr<IGLES20> gles20;
-    //TODO CGLES20::AcquireSingleton((IGLES20**)&gles20);
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
     gles20->GlGenTextures(1, mGlTextures, 0);
     gles20->GlBindTexture(GL_TEXTURE_EXTERNAL_OES, (*mGlTextures)[0]);
     // No mip-mapping with camera source.
@@ -250,7 +247,7 @@ Boolean VideoCapture::Allocate(
     gles20->GlTexParameteri(GL_TEXTURE_EXTERNAL_OES,
             IGLES20::_GL_TEXTURE_WRAP_T, IGLES20::_GL_CLAMP_TO_EDGE);
 
-    //TODO CSurfaceTexture::New((*mGlTextures[0]), (ISurfaceTexture**)&mSurfaceTexture);
+    CSurfaceTexture::New((*mGlTextures)[0], (ISurfaceTexture**)&mSurfaceTexture);
     mSurfaceTexture->SetOnFrameAvailableListener(NULL);
     // try {
         mCamera->SetPreviewTexture(mSurfaceTexture);
@@ -331,7 +328,7 @@ void VideoCapture::Deallocate()
         mCamera->SetPreviewTexture(NULL);
         if (mGlTextures != NULL) {
             AutoPtr<IGLES20> gles20;
-            //TODO CGLES20::AcquireSingleton((IGLES20**)&gles20);
+            CGLES20::AcquireSingleton((IGLES20**)&gles20);
             gles20->GlDeleteTextures(1, mGlTextures, 0);
         }
         mCaptureFormat = NULL;
@@ -437,13 +434,11 @@ AutoPtr<IHardwareCameraInfo> VideoCapture::GetCameraInfo(
     /* [in] */ Int32 id)
 {
     AutoPtr<IHardwareCameraInfo> cameraInfo;
-    //TODO CHardwareCamera::CameraInfo::New((IHardwareCameraInfo**)&cameraInfo);
+    //TODO: CHardwareCamera::CameraInfo::New((IHardwareCameraInfo**)&cameraInfo);
     // try {
-    /*TODO
         AutoPtr<IHardwareCameraHelper> helper;
         CHardwareCameraHelper::AcquireSingleton((IHardwareCameraHelper**)&helper);
         helper->GetCameraInfo(id, cameraInfo);
-        */
     // } catch (RuntimeException ex) {
     //     Log.e(TAG, "getCameraInfo: Camera.getCameraInfo: " + ex);
     //     return null;

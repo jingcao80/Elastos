@@ -747,7 +747,7 @@ module
     class CSearchRecentSuggestions
     {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String authority,
             [in] Int32 mode);
 

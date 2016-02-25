@@ -4,22 +4,23 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.Droid.Text.h"
 #include "elastos/droid/content/CClipDataItem.h"
-// #include "elastos/droid/text/CSpannableStringBuilder.h"
-// #include "elastos/droid/text/Html.h"
-// #include "elastos/droid/text/style/CURLSpan.h"
+#include "elastos/droid/text/CSpannableStringBuilder.h"
+#include "elastos/droid/text/Html.h"
+#include "elastos/droid/text/style/CURLSpan.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringBuilder.h>
-
 
 using Elastos::Droid::Text::ISpanned;
 using Elastos::Droid::Text::ISpannableStringBuilder;
-// using Elastos::Droid::Text::CSpannableStringBuilder;
+using Elastos::Droid::Text::CSpannableStringBuilder;
 using Elastos::Droid::Text::IEditable;
-// using Elastos::Droid::Text::Html;
+using Elastos::Droid::Text::Html;
 using Elastos::Droid::Text::ISpannable;
 using Elastos::Droid::Text::Style::IURLSpan;
-// using Elastos::Droid::Text::Style::CURLSpan;
+using Elastos::Droid::Text::Style::CURLSpan;
 using Elastos::Droid::Content::Res::IAssetFileDescriptor;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::IAppendable;
@@ -70,6 +71,13 @@ ECode CClipDataItem::GetUri(
     VALIDATE_NOT_NULL(uri)
     *uri = mUri;
     REFCOUNT_ADD(*uri);
+    return NOERROR;
+}
+
+ECode CClipDataItem::SetUri(
+    /* [in] */ IUri* uri)
+{
+    mUri = uri;
     return NOERROR;
 }
 
@@ -295,8 +303,7 @@ ECode CClipDataItem::CoerceToHtmlOrStyledText(
                 if (styled) {
                     // We loaded HTML formatted text and the caller
                     // want styled text, convert it.
-                    assert(0 && "TODO");
-                    // newText = Html::FromHtml(text);
+                    newText = ICharSequence::Probe(Html::FromHtml(text));
 
                     if (newText != NULL) {
                         *cs = newText;
@@ -329,11 +336,9 @@ ECode CClipDataItem::CoerceToHtmlOrStyledText(
                     FAIL_RETURN(ICloseable::Probe(stream)->Close());
                 }
 
-                AutoPtr<ICharSequence> tmp;
-                CString::New(text, (ICharSequence**)&tmp);
-                assert(0 && "TODO");
-                // String value = Html::EscapeHtml(tmp);
-                // return CString::New(value, cs);
+                AutoPtr<ICharSequence> tmp = CoreUtils::Convert(text);
+                String value = Html::EscapeHtml(tmp);
+                return CString::New(value, cs);
             }
 
             // } catch (FileNotFoundException e) {
@@ -523,17 +528,15 @@ ECode CClipDataItem::UriToHtml(
     /* [out] */ String* htmlText)
 {
     VALIDATE_NOT_NULL(htmlText)
-    AutoPtr<ICharSequence> uriSeq;
-    CString::New(uri, (ICharSequence**)&uriSeq);
+    AutoPtr<ICharSequence> uriSeq = CoreUtils::Convert(uri);
     StringBuilder builder(256);
-    assert(0 && "TODO");
-    // builder += "<a href=\"";
-    // builder += Html::EscapeHtml(uriSeq);
-    // builder += uri;
-    // builder += "\">";
-    // builder += Html::EscapeHtml(uriSeq);
-    // builder += uri;
-    // builder += "</a>";
+    builder += "<a href=\"";
+    builder += Html::EscapeHtml(uriSeq);
+    builder += uri;
+    builder += "\">";
+    builder += Html::EscapeHtml(uriSeq);
+    builder += uri;
+    builder += "</a>";
     return builder.ToString(htmlText);
 }
 
@@ -543,15 +546,13 @@ ECode CClipDataItem::UriToStyledText(
 {
     VALIDATE_NOT_NULL(cs)
     AutoPtr<ISpannableStringBuilder> builder;
-    assert(0 && "TODO");
-    // FAIL_RETURN(CSpannableStringBuilder::New((ISpannableStringBuilder**)&builder));
+    FAIL_RETURN(CSpannableStringBuilder::New((ISpannableStringBuilder**)&builder));
     AutoPtr<ICharSequence> tmpUri;
     FAIL_RETURN(CString::New(uri, (ICharSequence**)&tmpUri));
     FAIL_RETURN(IAppendable::Probe(builder)->Append(tmpUri));
 
     AutoPtr<IURLSpan> span;
-    assert(0 && "TODO");
-    // CURLSpan::New(uri, (IURLSpan**)&span);
+    CURLSpan::New(uri, (IURLSpan**)&span);
     Int32 len = 0;
     ICharSequence::Probe(builder)->GetLength(&len);
     ISpannable::Probe(builder)->SetSpan(span, 0, len, ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);

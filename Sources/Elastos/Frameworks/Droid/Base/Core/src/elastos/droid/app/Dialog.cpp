@@ -7,10 +7,11 @@
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/CMessageHelper.h"
 #include "elastos/droid/R.h"
-// #include "elastos/droid/impl/CPolicyManager.h"
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
-// #include "elastos/droid/view/CContextThemeWrapper.h"
+#include "elastos/droid/view/CContextThemeWrapper.h"
 #include "elastos/droid/utility/CTypedValue.h"
+#include "elastos/droid/internal/app/CWindowDecorActionBar.h"
+#include "elastos/droid/internal/policy//CPolicyManager.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
@@ -27,14 +28,16 @@ using Elastos::Droid::Content::EIID_IDialogInterface;
 using Elastos::Droid::Content::Res::IResourcesTheme;
 using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Internal::App::IWindowDecorActionBar;
+using Elastos::Droid::Internal::App::CWindowDecorActionBar;
 using Elastos::Droid::Internal::Policy::IPolicyManager;
-// using Elastos::Droid::Internal::Policy::CPolicyManager;
+using Elastos::Droid::Internal::Policy::CPolicyManager;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IDispatcherState;
 using Elastos::Droid::View::IContextThemeWrapper;
-// using Elastos::Droid::View::CContextThemeWrapper;
+using Elastos::Droid::View::CContextThemeWrapper;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::CWindowManagerLayoutParams;
 using Elastos::Droid::View::EIID_IWindowCallback;
@@ -170,7 +173,7 @@ ECode Dialog::constructor(
             theme = GetResourceId(context, R::attr::dialogTheme);
         }
         mContext = NULL;
-        // CContextThemeWrapper::New(context, theme, (IContextThemeWrapper**)&mContext);
+        CContextThemeWrapper::New(context, theme, (IContextThemeWrapper**)&mContext);
     }
     else {
         mContext = context;
@@ -181,7 +184,7 @@ ECode Dialog::constructor(
     mWindowManager = IWindowManager::Probe(obj);
 
     AutoPtr<IPolicyManager> pm;
-    // CPolicyManager::AcquireSingleton((IPolicyManager**)&pm);
+    CPolicyManager::AcquireSingleton((IPolicyManager**)&pm);
     pm->MakeNewWindow(mContext, (IWindow**)&mWindow);
 
     mWindow->SetCallback(THIS_PROBE(IWindowCallback));
@@ -323,8 +326,7 @@ ECode Dialog::Show()
         IPackageItemInfo::Probe(info)->GetLogo(&logo);
         mWindow->SetDefaultIcon(icon);
         mWindow->SetDefaultLogo(logo);
-        assert(0 && "TODO");
-        // mActionBar = new WindowDecorActionBar(this);
+        CWindowDecorActionBar::New(this, (IActionBar**)&mActionBar);
     }
 
     AutoPtr<IWindowManagerLayoutParams> l;

@@ -9,7 +9,7 @@
 #include "elastos/droid/os/CSystemProperties.h"
 #include "elastos/droid/net/CLocalSocket.h"
 #include "elastos/droid/net/CLocalSocketAddress.h"
-//#include <elastos/droid/DroidRuntime.h>
+#include <elastos/droid/DroidRuntime.h>
 
 #include <elastos/droid/system/Os.h>
 #include <elastos/core/AutoLock.h>
@@ -52,7 +52,7 @@ using Elastos::IO::IInputStream;
 using Elastos::IO::IOutputStream;
 using Elastos::Utility::Etl::Vector;
 using Elastos::Utility::Logging::Logger;
-//using Ellastos::Droid::DroidRuntime;
+using Elastos::Droid::DroidRuntime;
 using Elastos::Droid::Net::CLocalSocket;
 using Elastos::Droid::Net::ILocalSocketAddress;
 using Elastos::Droid::Net::CLocalSocketAddress;
@@ -63,8 +63,10 @@ namespace Droid {
 namespace Os {
 
 const String Process::TAG("Process");
-const String Process::ZYGOTE_SOCKET("zygote");
-const String Process::SECONDARY_ZYGOTE_SOCKET("zygote_secondary");
+const String Process::ZYGOTE_SOCKET_ELASTOS("elzygote");
+const String Process::SECONDARY_ZYGOTE_SOCKET_ELASTOS("elzygote_secondary");
+const String Process::ZYGOTE_SOCKET_JAVA("zygote");
+const String Process::SECONDARY_ZYGOTE_SOCKET_JAVA("zygote_secondary");
 
 const Int32 Process::ROOT_UID = 0;
 
@@ -112,8 +114,7 @@ ECode Process::ZygoteState::Connect(
     AutoPtr<IDataInputStream> zygoteInputStream = NULL;
     AutoPtr<IBufferedWriter> zygoteWriter = NULL;
     AutoPtr<ILocalSocket> zygoteSocket;
-    assert(0 && "TODO");
-    //CLocalSocket::New((ILocalSocket**)&zygoteSocket);
+    CLocalSocket::New((ILocalSocket**)&zygoteSocket);
 
     AutoPtr<IInputStream> inputStream;
     AutoPtr<IOutputStream> outputStream;
@@ -242,7 +243,7 @@ ECode Process::GetAbiList(
     return NOERROR;
 }
 
-ECode Process::ZygoteSendArgsAndGetResult(
+ECode Process::ElastosZygoteSendArgsAndGetResult(
     /* [in] */ Process::ZygoteState* zygoteState,
     /* [in] */ List<String>* args,
     /* [out] */ IProcessStartResult** _result)
@@ -498,8 +499,8 @@ ECode Process::StartViaZygote(
         }
         else {
             AutoPtr<ZygoteState> zygoteState;
-            FAIL_RETURN(OpenZygoteSocketIfNeeded(abi, (ZygoteState**)&zygoteState))
-            return ZygoteSendArgsAndGetResult(zygoteState, argsForZygote, result);
+            FAIL_RETURN(OpenElastosZygoteSocketIfNeeded(abi, (ZygoteState**)&zygoteState))
+            return ElastosZygoteSendArgsAndGetResult(zygoteState, argsForZygote, result);
         }
     }
 }
@@ -938,8 +939,7 @@ ECode Process::SetArgV0(
 
     if (!procName.IsEmpty()) {
         set_process_name(procName);
-        assert(0);
-        //DroidRuntime::GetRuntime()->setArgv0(procName);
+        DroidRuntime::GetRuntime()->SetArgv0(procName);
     }
     return NOERROR;
 }
@@ -1248,6 +1248,9 @@ static ECode ParseProcLineArray(
     /* [out] */ ArrayOf<Float>* outFloats,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
     const Int32 NF = format.GetLength();
     const Int32 NS = outStrings ? outStrings->GetLength() : 0;
     const Int32 NL = outInt64s ? outInt64s->GetLength() : 0;
@@ -1338,8 +1341,9 @@ ECode Process::ReadProcFile(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+
     if (file.IsNull()) {
-        *result = FALSE;
         return E_NULL_POINTER_EXCEPTION;
     }
 
@@ -1508,14 +1512,23 @@ Int32 Process::KillProcessGroup(
     return killProcessGroup(uid, pid, SIGKILL);
 }
 
-ECode Process::OpenZygoteSocketIfNeeded(
+ECode Process::RemoveAllProcessGroups()
+{
+    removeAllProcessGroups();
+    return NOERROR;
+}
+
+ECode Process::OpenElastosZygoteSocketIfNeeded(
     /* [in] */ const String& abi,
     /* [out] */ Process::ZygoteState** state)
 {
+    VALIDATE_NOT_NULL(state)
+    *state = NULL;
+
     if (mPrimaryZygoteState == NULL || mPrimaryZygoteState->IsClosed()) {
         // try {
         mPrimaryZygoteState = NULL;
-        ECode ec = ZygoteState::Connect(ZYGOTE_SOCKET, (ZygoteState**)&mPrimaryZygoteState);
+        ECode ec = ZygoteState::Connect(ZYGOTE_SOCKET_ELASTOS, (ZygoteState**)&mPrimaryZygoteState);
         // } catch (IOException ioe) {
         if (ec == (ECode)E_IO_EXCEPTION) {
             // throw new ZygoteStartFailedEx("Error connecting to primary zygote", ioe);
@@ -1534,7 +1547,7 @@ ECode Process::OpenZygoteSocketIfNeeded(
     if (mSecondaryZygoteState == NULL || mSecondaryZygoteState->IsClosed()) {
         // try {
         mSecondaryZygoteState = NULL;
-        ECode ec = ZygoteState::Connect(SECONDARY_ZYGOTE_SOCKET, (ZygoteState**)&mSecondaryZygoteState);
+        ECode ec = ZygoteState::Connect(SECONDARY_ZYGOTE_SOCKET_ELASTOS, (ZygoteState**)&mSecondaryZygoteState);
         if (ec == (ECode)E_IO_EXCEPTION) {
         // } catch (IOException ioe) {
         //     throw new ZygoteStartFailedEx("Error connecting to secondary zygote", ioe);
@@ -1558,43 +1571,45 @@ ECode Process::OpenJavaZygoteSocketIfNeeded(
     /* [in] */ const String& abi,
     /* [out] */ Process::ZygoteState** state)
 {
-    assert(0 && "TODO");
-    // if (mPrimaryZygoteState == NULL || mPrimaryZygoteState->IsClosed()) {
-    //     // try {
-    //     mPrimaryZygoteState = NULL;
-    //     ECode ec = ZygoteState::Connect(ZYGOTE_SOCKET_JAVA, (ZygoteState**)&mPrimaryZygoteState);
-    //     // } catch (IOException ioe) {
-    //     if (ec == (ECode)E_IO_EXCEPTION) {
-    //         // throw new ZygoteStartFailedEx("Error connecting to primary zygote", ioe);
-    //         Logger::E(TAG, "Error connecting to primary zygote");
-    //         return E_ZYGOTE_START_FAILED_EXCEPTION;
-    //     }
-    // }
+    VALIDATE_NOT_NULL(state)
+    *state = NULL;
 
-    // if (mPrimaryZygoteState->Matches(abi)) {
-    //     *state = mPrimaryZygoteState;
-    //     REFCOUNT_ADD(*state)
-    //     return NOERROR;
-    // }
+    if (mPrimaryZygoteState == NULL || mPrimaryZygoteState->IsClosed()) {
+        // try {
+        mPrimaryZygoteState = NULL;
+        ECode ec = ZygoteState::Connect(ZYGOTE_SOCKET_JAVA, (ZygoteState**)&mPrimaryZygoteState);
+        // } catch (IOException ioe) {
+        if (ec == (ECode)E_IO_EXCEPTION) {
+            // throw new ZygoteStartFailedEx("Error connecting to primary zygote", ioe);
+            Logger::E(TAG, "Error connecting to primary zygote");
+            return E_ZYGOTE_START_FAILED_EXCEPTION;
+        }
+    }
 
-    // // The primary zygote didn't match. Try the secondary.
-    // if (mSecondaryZygoteState == NULL || mSecondaryZygoteState->IsClosed()) {
-    //     // try {
-    //     mSecondaryZygoteState = NULL;
-    //     ECode ec = ZygoteState::Connect(SECONDARY_ZYGOTE_SOCKET, (ZygoteState**)&mSecondaryZygoteState);
-    //     if (ec == (ECode)E_IO_EXCEPTION) {
-    //     // } catch (IOException ioe) {
-    //     //     throw new ZygoteStartFailedEx("Error connecting to secondary zygote", ioe);
-    //         Logger::E(TAG, "Error connecting to secondary zygote");
-    //         return E_ZYGOTE_START_FAILED_EXCEPTION;
-    //     }
-    // }
+    if (mPrimaryZygoteState->Matches(abi)) {
+        *state = mPrimaryZygoteState;
+        REFCOUNT_ADD(*state)
+        return NOERROR;
+    }
 
-    // if (mSecondaryZygoteState->Matches(abi)) {
-    //     *state = mSecondaryZygoteState;
-    //     REFCOUNT_ADD(*state)
-    //     return NOERROR;
-    // }
+    // The primary zygote didn't match. Try the secondary.
+    if (mSecondaryZygoteState == NULL || mSecondaryZygoteState->IsClosed()) {
+        // try {
+        mSecondaryZygoteState = NULL;
+        ECode ec = ZygoteState::Connect(SECONDARY_ZYGOTE_SOCKET_JAVA, (ZygoteState**)&mSecondaryZygoteState);
+        if (ec == (ECode)E_IO_EXCEPTION) {
+        // } catch (IOException ioe) {
+        //     throw new ZygoteStartFailedEx("Error connecting to secondary zygote", ioe);
+            Logger::E(TAG, "Error connecting to secondary zygote");
+            return E_ZYGOTE_START_FAILED_EXCEPTION;
+        }
+    }
+
+    if (mSecondaryZygoteState->Matches(abi)) {
+        *state = mSecondaryZygoteState;
+        REFCOUNT_ADD(*state)
+        return NOERROR;
+    }
 
     // throw new ZygoteStartFailedEx("Unsupported zygote ABI: " + abi);
     Logger::E(TAG, "Unsupported zygote ABI: %s", abi.string());

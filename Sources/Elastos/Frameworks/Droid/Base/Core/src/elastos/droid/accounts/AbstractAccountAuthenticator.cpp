@@ -32,21 +32,21 @@ ECode AbstractAccountAuthenticator::HandleException(
     /* [in] */ const String& data,
     /* [in] */ UInt32 e)
 {
-    if (e == E_NETWORK_ERROR_EXCEPTION) {
+    if (e == (ECode)E_NETWORK_ERROR_EXCEPTION) {
         // if (Log.isLoggable(TAG, Log.VERBOSE)) {
         //     Log.v(TAG, method + "(" + data + ")", e);
         // }
         response->OnError(IAccountManager::ERROR_CODE_NETWORK_ERROR,
                 String(NULL)/*e.getMessage()*/);
     }
-    else if (e == E_UNSUPPORTED_OPERATION_EXCEPTION) {
+    else if (e == (ECode)E_UNSUPPORTED_OPERATION_EXCEPTION) {
         // if (Log.isLoggable(TAG, Log.VERBOSE)) {
         //     Log.v(TAG, method + "(" + data + ")", e);
         // }
         response->OnError(IAccountManager::ERROR_CODE_UNSUPPORTED_OPERATION,
                 method + String(" not supported"));
     }
-    else if (e == E_ILLEGAL_ARGUMENT_EXCEPTION) {
+    else if (e == (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION) {
         // if (Log.isLoggable(TAG, Log.VERBOSE)) {
         //     Log.v(TAG, method + "(" + data + ")", e);
         // }

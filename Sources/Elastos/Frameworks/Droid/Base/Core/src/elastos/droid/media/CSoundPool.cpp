@@ -1,28 +1,51 @@
 
 #include "elastos/droid/media/CSoundPool.h"
+#include "elastos/droid/media/CAudioAttributesBuilder.h"
+#include "elastos/droid/app/CActivityThread.h"
+#include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/os/CParcelFileDescriptor.h"
 #include "elastos/droid/os/CParcelFileDescriptorHelper.h"
 #include "elastos/droid/os/CLooperHelper.h"
-#include "elastos/droid/os/SystemProperties.h"
+#include <elastos/droid/os/ServiceManager.h>
+#include <elastos/droid/os/Looper.h>
+#include <elastos/droid/os/Process.h>
 #include "Elastos.CoreLibrary.h"
 #include "Elastos.CoreLibrary.IO.h"
-#include <media/SoundPool.h>
-#include <elastos/core/StringUtils.h>
+#include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Internal.h"
 #include <elastos/utility/logging/Logger.h>
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/AutoLock.h>
+#include <elastos/core/StringUtils.h>
+#include <media/SoundPool.h>
 
-using Elastos::Droid::Os::EIID_IHandler;
-using Elastos::Droid::Os::IParcelFileDescriptorHelper;
-using Elastos::Droid::Os::CParcelFileDescriptorHelper;
-using Elastos::Droid::Os::IParcelFileDescriptor;
-using Elastos::Droid::Os::ILooperHelper;
-using Elastos::Droid::Os::CLooperHelper;
-using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::App::CActivityThread;
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::Res::IAssetFileDescriptor;
 using Elastos::Droid::Content::Res::IResources;
-using Elastos::Core::StringUtils;
+using Elastos::Droid::Internal::App::IIAppOpsService;
+using Elastos::Droid::Os::CLooperHelper;
+using Elastos::Droid::Os::CParcelFileDescriptor;
+using Elastos::Droid::Os::CParcelFileDescriptorHelper;
+using Elastos::Droid::Os::EIID_IHandler;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Os::ILooperHelper;
+using Elastos::Droid::Os::IParcelFileDescriptor;
+using Elastos::Droid::Os::IParcelFileDescriptorHelper;
+using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::SystemProperties;
+using Elastos::IO::CFile;
+using Elastos::IO::IFile;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::Logging::Slogger;
+using Elastos::Core::AutoLock;
 using Elastos::Core::CSystem;
 using Elastos::Core::ISystem;
-using Elastos::IO::IFile;
-using Elastos::IO::CFile;
-using Elastos::Utility::Logging::Logger;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -43,7 +66,7 @@ CSoundPool::Builder::Builder(
 CSoundPool::Builder::~Builder()
 {}
 
-CAR_INTERFACE_IMPL(Builder, Object, ISoundPoolBuilder)
+CAR_INTERFACE_IMPL(CSoundPool::Builder, Object, ISoundPoolBuilder)
 
 ECode CSoundPool::Builder::SetMaxStreams(
     /* [in] */ Int32 maxStreams,
@@ -64,10 +87,11 @@ ECode CSoundPool::Builder::SetAudioAttributes(
     /* [in] */ IAudioAttributes* attributes)
 {
     if (attributes == NULL) {
-        Slogger::E("CSoundPool::Builder", "Invalid null AudioAttributes");
+        Slogger::E(TAG, "Invalid null AudioAttributes");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    mAudioAttributes =(AudioAttributes*)attributes;
+    mAudioAttributes = attributes;
+    return NOERROR;
 }
 
 ECode CSoundPool::Builder::Build(
@@ -81,10 +105,11 @@ ECode CSoundPool::Builder::Build(
         aab->SetUsage(IAudioAttributes::USAGE_MEDIA);
         AutoPtr<IAudioAttributes> attr;
         aab->Build((IAudioAttributes**)&attr);
-        mAudioAttributes = (AudioAttributes*)attr;
+        mAudioAttributes = attr.Get();
     }
-    mHost->constructor(mMaxStreams, mAudioAttributes);
-    *result = mHost;
+    AutoPtr<ISoundPool> sp;
+    CSoundPool::New(mMaxStreams, mAudioAttributes.Get(), (ISoundPool**)&sp);
+    *result = sp.Get();
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -103,30 +128,32 @@ ECode static initLoadLibrary()
 ECode CSoundPool::SoundPoolImpl::sStaticLoadLibrary = initLoadLibrary();
 
 String CSoundPool::SoundPoolImpl::TAG(String("SoundPool"));
+
 Boolean CSoundPool::SoundPoolImpl::DEBUG = FALSE;
+
 Int32 CSoundPool::SoundPoolImpl::SAMPLE_LOADED = 1;
 
 CSoundPool::SoundPoolImpl::SoundPoolImpl(
-    /* [in] */ SoundPool* proxy,
+    /* [in] */ CSoundPool* proxy,
     /* [in] */ Int32 maxStreams,
-    /* [in] */ AudioAttributes* attr)
+    /* [in] */ IAudioAttributes* attr)
 {
     // do native setup
-    if (Native_setup(IWeakReference::Probe(this), maxStreams, IAudioAttributes::Probe(attr)) != 0) {
+    if (Native_setup(ISoundPoolDelegate::Probe(this), maxStreams, IAudioAttributes::Probe(attr)) != 0) {
         Slogger::E(TAG, "Native setup failed");
-        return E_RUNTIME_EXCEPTION;
+    } else {
+        mProxy = proxy;
+        mAttributes = attr;
+        AutoPtr<IInterface> inter = ServiceManager::GetService(IContext::APP_OPS_SERVICE);
+        AutoPtr<IBinder> b = IBinder::Probe(inter);
+        mAppOps = IIAppOpsService::Probe(b);
     }
-    mProxy = proxy;
-    mAttributes = attr;
-    AutoPtr<IInterface> inter = ServiceManager::GetService(IContext::APP_OPS_SERVICE);
-    AutoPtr<IBinder> b = IBinder::Probe(inter);
-    mAppOps = IIAppOpsService::Probe(b);
 }
 
 CSoundPool::SoundPoolImpl::~SoundPoolImpl()
 {}
 
-CAR_INTERFACE_IMPL()
+CAR_INTERFACE_IMPL(CSoundPool::SoundPoolImpl, Object, ISoundPoolDelegate)
 
 ECode CSoundPool::SoundPoolImpl::Load(
     /* [in] */ const String& path,
@@ -210,7 +237,7 @@ ECode CSoundPool::SoundPoolImpl::Load(
         afd->GetFileDescriptor((IFileDescriptor**)&fd);
         Int64 startOffset;
         afd->GetStartOffset(&startOffset);
-        *result = _load(fd.Get(), startOffset, len, priority);
+        *result = _Load(fd.Get(), startOffset, len, priority);
         return NOERROR;
     } else {
         *result = 0;
@@ -222,7 +249,7 @@ ECode CSoundPool::SoundPoolImpl::Load(
     /* [in] */ IFileDescriptor* fd,
     /* [in] */ Int64 offset,
     /* [in] */ Int64 length,
-    /* [in] */ Int64 priority,
+    /* [in] */ Int32 priority,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
@@ -230,7 +257,7 @@ ECode CSoundPool::SoundPoolImpl::Load(
     return NOERROR;
 }
 
-ECode CSoundPool::SoundPoolImpl::UnLoad(
+ECode CSoundPool::SoundPoolImpl::Unload(
     /* [in] */ Int32 soundID,
     /* [out] */ Boolean* result)
 {
@@ -259,7 +286,7 @@ ECode CSoundPool::SoundPoolImpl::Play(
     if (IsRestricted()) {
         leftVolume = rightVolume = 0;
     }
-    return _Play(soundID, leftVolume, rightVolume, priority, loop, rate);
+    return _Play(soundID, leftVolume, rightVolume, priority, loop, rate, result);
 }
 
 ECode CSoundPool::SoundPoolImpl::_Play(
@@ -332,6 +359,7 @@ ECode CSoundPool::SoundPoolImpl::Stop(
         return NOERROR;
     }
     ap->stop(streamID);
+    return NOERROR;
 }
 
 ECode CSoundPool::SoundPoolImpl::SetVolume(
@@ -392,18 +420,17 @@ ECode CSoundPool::SoundPoolImpl::SetRate(
 ECode CSoundPool::SoundPoolImpl::SetOnLoadCompleteListener(
     /* [in] */ ISoundPoolOnLoadCompleteListener* listener)
 {
-    synchronized(mLock) {
+    synchronized(mLock){
         if (listener != NULL) {
             // setup message handler
-            AutoPtr<ILooper> looper;
-            Looper::GetMyLooper((ILooper**)&looper);
+            AutoPtr<ILooper> looper = Looper::GetMyLooper();
             if (looper != NULL) {
-                mEventHandler = new EventHandler(mProxy, looper);
+                mEventHandler = new EventHandler(mProxy, this, looper.Get());
             } else {
                 looper = NULL;
                 looper = Looper::GetMainLooper();
                 if (looper != NULL) {
-                    mEventHandler = new EventHandler(mProxy, looper);
+                    mEventHandler = new EventHandler(mProxy, this, looper.Get());
                 } else {
                     mEventHandler = NULL;
                 }
@@ -462,9 +489,8 @@ Boolean CSoundPool::SoundPoolImpl::IsRestricted()
     // try {
         Int32 usage;
         mAttributes->GetUsage(&usage);
-        Int32 myUid;
-        Process::MyUid(&myUid);
-        String currentPackName = CActivityThread::GetCurrentPackageName()
+        Int32 myUid = Process::MyUid();
+        String currentPackName = CActivityThread::GetCurrentPackageName();
         Int32 mode;
         mAppOps->CheckAudioOperation(IAppOpsManager::OP_PLAY_AUDIO,
                 usage, myUid, currentPackName, &mode);
@@ -500,11 +526,12 @@ void CSoundPool::SoundPoolImpl::PostEventFromNative(
         return;
 
     if (soundPoolImpl->mEventHandler != NULL) {
-        AutoPtr<EventHandler> eh = soundPoolImpl->mEventHandler;
+        AutoPtr<EventHandler> eh;
+        // eh = soundPoolImpl->mEventHandler;
         AutoPtr<IMessage> m;
         IHandler::Probe(eh)->ObtainMessage(msg, arg1, arg2, obj, (IMessage**)&m);
         Boolean flag = FALSE;
-        soundPoolImpl->mEventHandler->SendMessage(m.Get(), &flag);
+        ((IHandler*)(eh.Get()))->SendMessage(m.Get(), &flag);
     }
 }
 
@@ -513,25 +540,88 @@ Int32 CSoundPool::SoundPoolImpl::Native_setup(
     /* [in] */ Int32 maxStreams,
     /* [in] */ IInterface* attributes)
 {
-    audio_attributes_t
-    AutoPtr<AudioAttributes> aab = (AudioAttributes*)IAudioAttributes::Probe(attributes);
-    AutoPtr<ISet> iset;
-    aab->GetTags((ISet**)&iset);
-    AutoPtr<IHashSet> tags = IHashSet::Probe(iset);
+    audio_attributes_t *paa = NULL;
+    AutoPtr<IAudioAttributes> aab = IAudioAttributes::Probe(attributes);
+    //todo
+    // const char* tags;
+    // strncpy(paa->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
     Int32 usage;
     aab->GetUsage(&usage);
-    Int32 contentType;
-    aab->GetContentType(&contentType);
+    paa->usage = (audio_usage_t)usage;
+    Int32 ct;
+    aab->GetContentType(&ct);
+    // paa->content_type = ct;
     Int32 flags;
     aab->GetFlags(&flags);
-    audio_attributes_t* paa = NULL;
-    assert(0 && "TODO");
+    paa->flags = flags;
+
+    ALOGV("android_media_SoundPool_SoundPoolImpl_native_setup");
+    android::SoundPool *ap = new android::SoundPool(maxStreams, paa);
+    if (ap == NULL) {
+        return -1;
+    }
+    // ap->setCallback(android_media_callback, globalWeakRef);
 }
 
 void CSoundPool::SoundPoolImpl::Finalize()
 {
     ReleaseSoundPoolImpl();
 }
+
+ECode CSoundPool::SoundPoolImpl::ReleaseSoundPoolDelegate()
+{
+    return ReleaseSoundPoolImpl();
+}
+
+//----------------------------
+//    CSoundPool::SoundPoolImpl::EventHandler
+//----------------------------
+
+CSoundPool::SoundPoolImpl::EventHandler::EventHandler(
+    /* [in] */ CSoundPool* soundPool,
+    /* [in] */ SoundPoolImpl* host,
+    /* [in] */ ILooper* looper)
+    : mSoundPool(soundPool)
+    , mHost(host)
+{
+}
+
+CAR_INTERFACE_IMPL(CSoundPool::SoundPoolImpl::EventHandler, Object, IHandler)
+
+ECode CSoundPool::SoundPoolImpl::EventHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    Int32 what, arg1, arg2;
+    msg->GetWhat(&what);
+    msg->GetArg1(&arg1);
+    msg->GetArg2(&arg2);
+
+    switch(what) {
+        case -1:
+        {
+            if (CSoundPool::DEBUG) {
+                Logger::D(TAG, "Sample %d loaded", arg1);
+            }
+
+            {
+                AutoLock lock(mSoundPool->mLock);
+                if (mHost->mOnLoadCompleteListener != NULL) {
+                    mHost->mOnLoadCompleteListener->OnLoadComplete(
+                        (ISoundPool*)mSoundPool->Probe(EIID_ISoundPool), arg1, arg2);
+                }
+            }
+            break;
+        }
+
+        default:
+        {
+            Logger::E(TAG, "Unknown message type %d", what);
+            break;
+        }
+    }
+    return NOERROR;
+}
+
 
 //----------------------------
 //    CSoundPool::SoundPoolStub
@@ -684,49 +774,9 @@ ECode CSoundPool::SoundPoolStub::ReleaseSoundPoolStub()
 {
     return NOERROR;
 }
-//----------------------------
-//    CSoundPool::EventHandler
-//----------------------------
 
-CSoundPool::EventHandler::EventHandler(
-    /* [in] */ CSoundPool* soundPool,
-    /* [in] */ ILooper* looper)
-    : HandlerBase(looper)
-    , mSoundPool(soundPool)
+ECode CSoundPool::SoundPoolStub::ReleaseSoundPoolDelegate()
 {
-}
-
-ECode CSoundPool::EventHandler::HandleMessage(
-    /* [in] */ IMessage* msg)
-{
-    Int32 what, arg1, arg2;
-    msg->GetWhat(&what);
-    msg->GetArg1(&arg1);
-    msg->GetArg2(&arg2);
-
-    switch(what) {
-        case SAMPLE_LOADED:
-        {
-            if (CSoundPool::DEBUG) {
-                Logger::D(TAG, "Sample %d loaded", arg1);
-            }
-
-            {
-                AutoLock lock(mSoundPool->mLock);
-                if (mSoundPool->mOnLoadCompleteListener != NULL) {
-                    mSoundPool->mOnLoadCompleteListener->OnLoadComplete(
-                        (ISoundPool*)mSoundPool->Probe(EIID_ISoundPool), arg1, arg2);
-                }
-            }
-            break;
-        }
-
-        default:
-        {
-            Logger::E(TAG, "Unknown message type %d", what);
-            break;
-        }
-    }
     return NOERROR;
 }
 
@@ -740,6 +790,10 @@ CSoundPool::~CSoundPool()
 {
     Finalize();
 }
+
+CAR_OBJECT_IMPL(CSoundPool)
+
+CAR_INTERFACE_IMPL(CSoundPool, Object, ISoundPool)
 
 ECode CSoundPool::constructor(
     /* [in] */ Int32 maxStreams,
@@ -764,6 +818,7 @@ ECode CSoundPool::constructor(
     } else {
         mImpl = new SoundPoolImpl(this, maxStreams, attributes);
     }
+    return NOERROR;
 }
 
 ECode CSoundPool::Load(
@@ -813,7 +868,7 @@ ECode CSoundPool::Unload(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    return mImpl->Unload(soundID);
+    return mImpl->Unload(soundID, result);
 }
 
 ECode CSoundPool::Play(
@@ -839,7 +894,7 @@ ECode CSoundPool::Pause(
 ECode CSoundPool::Resume(
     /* [in] */ Int32 streamID)
 {
-    mImpl->Resume(streamID);
+    return mImpl->Resume(streamID);
 }
 
 ECode CSoundPool::AutoPause()
@@ -867,8 +922,8 @@ ECode CSoundPool::SetVolume(
 }
 
 ECode CSoundPool::SetVolume(
-    /* [in] */ Int32 streamID,
-    /* [in] */ Float volume)
+   /* [in] */ Int32 streamID,
+   /* [in] */ Float volume)
 {
     return SetVolume(streamID, volume, volume);
 }
@@ -897,7 +952,7 @@ ECode CSoundPool::SetRate(
 //-----------------------------------------
 
 ECode CSoundPool::SetOnLoadCompleteListener(
-    /* [in] */ IOnLoadCompleteListener* listener)
+    /* [in] */ ISoundPoolOnLoadCompleteListener* listener)
 {
     return mImpl->SetOnLoadCompleteListener(listener);
 }
@@ -905,7 +960,7 @@ ECode CSoundPool::SetOnLoadCompleteListener(
 /*native method*/
 ECode CSoundPool::ReleaseResources()
 {
-    return mImpl->ReleaseResources();
+    return mImpl->ReleaseSoundPoolDelegate();
 }
 
 void CSoundPool::Finalize()
@@ -956,65 +1011,6 @@ ECode CSoundPool::NativeLoad(
     *id = ap->load(tempValue, offset, length, priority);
     return NOERROR;
 }
-
-/*static*/
-ECode CSoundPool::PostEventFromNative(
-    /* [in] */ IWeakReference* weakRef,
-    /* [in] */ Int32 msg,
-    /* [in] */ Int32 arg1,
-    /* [in] */ Int32 arg2,
-    /* [in] */ IInterface* obj)
-{
-    AutoPtr<ISoundPool> pool;
-    weakRef->Resolve(EIID_ISoundPool, (IInterface**)&pool);
-    if (pool == NULL) {
-        return NOERROR;
-    }
-
-    CSoundPool* soundPool = (CSoundPool*)pool.Get();
-    if (soundPool->mEventHandler != NULL) {
-        AutoPtr<IMessage> message;
-        soundPool->mEventHandler->ObtainMessage(msg, arg1, arg2, obj, (IMessage**)&message);
-        Boolean bval;
-        soundPool->mEventHandler->SendMessage(message, &bval);
-    }
-
-    return NOERROR;
-}
-
-//-------------------------------------
-static void android_media_callback(
-    android::SoundPoolEvent event,
-    android::SoundPool* soundPool,
-    void* user)
-{
-    if (CSoundPool::DEBUG) {
-        Logger::D("SoundPool::media_callback", "callback: (%d, %d, %d, %p, %p)",
-            event.mMsg, event.mArg1, event.mArg2, soundPool, user);
-    }
-
-    CSoundPool::PostEventFromNative((IWeakReference*)user, event.mMsg, event.mArg1, event.mArg2, NULL);
-}
-
-/*native method*/
-Int32 CSoundPool::NativeSetup(
-    /* [in] */ IWeakReference* weakRef,
-    /* [in] */ Int32 maxStreams,
-    /* [in] */ Int32 streamType,
-    /* [in] */ Int32 srcQuality)
-{
-    android::SoundPool *ap = new android::SoundPool(maxStreams, (audio_stream_type_t) streamType, srcQuality);
-    if (ap == NULL) {
-        return -1;
-    }
-
-    mNativeContext = (Handle32)ap;
-    weakRef->AddRef();
-    ap->setCallback(android_media_callback, (void*)weakRef);
-    return 0;
-}
-
-//-------------------------------------
 
 } // namespace Media
 } // namepsace Droid

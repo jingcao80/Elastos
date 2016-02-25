@@ -28,12 +28,14 @@ ECode CBluetoothPanStateChangeCallback::OnBluetoothStateChange(
     //Handle enable request to bind again.
     if (on) {
         Logger::D(BluetoothPan::TAG, "onBluetoothStateChange(on) call bindService");
-        AutoPtr<IIntent> intent;
-        CIntent::New(String("IBluetoothPan"), (IIntent**)&intent);
-        Boolean result;
-        if (mHost->mContext->BindService(intent, mHost->mConnection, 0, &result), !result) {
-            Logger::E(BluetoothPan::TAG, "Could not bind to Bluetooth HID Service");
-        }
+        //AutoPtr<IIntent> intent;
+        //CIntent::New(String("IBluetoothPan"), (IIntent**)&intent);
+        //Boolean result;
+        //if (mHost->mContext->BindService(intent, mHost->mConnection, 0, &result), !result) {
+        //    Logger::E(BluetoothPan::TAG, "Could not bind to Bluetooth HID Service");
+        //}
+        Boolean bind;
+        mHost->DoBind(&bind);
         Logger::D(BluetoothPan::TAG, "BluetoothPan(), bindService called");
     }
     else {

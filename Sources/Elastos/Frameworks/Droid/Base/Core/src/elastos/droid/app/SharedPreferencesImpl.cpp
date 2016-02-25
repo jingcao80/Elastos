@@ -4,7 +4,7 @@
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "elastos/droid/app/SharedPreferencesImpl.h"
 #include "elastos/droid/app/CActivityThread.h"
-// #include "elastos/droid/app/CContextImpl.h"
+#include "elastos/droid/app/CContextImpl.h"
 #include "elastos/droid/app/QueuedWork.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include "elastos/droid/os/FileUtils.h"
@@ -941,8 +941,7 @@ void SharedPreferencesImpl::WriteToFile(
     FileUtils::Sync(str);
     FAIL_GOTO(ICloseable::Probe(str)->Close(), failed);
     FAIL_GOTO(mFile->GetPath(&path), failed);
-    assert(0 && "TODO");
-    // CContextImpl::SetFilePermissionsFromMode(path, mMode, 0);
+    CContextImpl::SetFilePermissionsFromMode(path, mMode, 0);
 
     FAIL_GOTO(Elastos::Droid::System::Os::Stat(path, (IStructStat**)&stat), failed);
     {

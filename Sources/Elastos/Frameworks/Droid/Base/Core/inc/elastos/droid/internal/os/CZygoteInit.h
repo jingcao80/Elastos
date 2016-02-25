@@ -231,6 +231,9 @@ private:
     static CARAPI_(Int32) PreloadDrawables(
         /* [in] */ ITypedArray* ar);
 
+    static CARAPI PosixCapabilitiesAsBits(
+        /* [in] */ ArrayOf<Int32>* capabilities,
+        /* [out] */ Int64* result);
 
 public:
     /**
@@ -240,6 +243,8 @@ public:
     static const Int32 GC_LOOP_COUNT = 10;
 
 private:
+    friend class WrapperInit;
+
     static const String TAG;
 
     static const String PROPERTY_DISABLE_OPENGL_PRELOADING;

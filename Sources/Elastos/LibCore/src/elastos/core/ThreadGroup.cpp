@@ -63,8 +63,20 @@ ECode ThreadGroup::UncaughtException(
     /* [in] */ IThread* thread,
     /* [in] */ ECode ec)
 {
-    assert(0 && "TODO");
-    return E_NOT_IMPLEMENTED;
+    if (mParent != NULL) {
+        IThreadUncaughtExceptionHandler::Probe(mParent)->UncaughtException(thread, ec);
+    }
+    else if (Thread::GetDefaultUncaughtExceptionHandler() != NULL) {
+        // TODO The spec is unclear regarding this. What do we do?
+        Thread::GetDefaultUncaughtExceptionHandler()->UncaughtException(thread, ec);
+    }
+    // TODO
+    // else if (!(e instanceof ThreadDeath)) {
+    //     // No parent group, has to be 'system' Thread Group
+    //     e.printStackTrace(System.err);
+    // }
+
+    return NOERROR;
 }
 
 ECode ThreadGroup::ActiveCount(

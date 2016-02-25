@@ -24,7 +24,7 @@ module
             [out] IDialogFragment** dialogFragment);
 
         CreateDialog(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 routeTypes,
             [in] IViewOnClickListener* extendedSettingsClickListener,
             [out] IDialog** dialog);

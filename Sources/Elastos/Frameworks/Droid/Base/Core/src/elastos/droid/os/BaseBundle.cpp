@@ -156,8 +156,12 @@ ECode BaseBundle::constructor(
     return NOERROR;
 }
 
-String BaseBundle::GetPairValue()
+ECode BaseBundle::GetPairValue(
+    /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str)
+    *str = String(NULL);
+
     Unparcel();
     Int32 size;
     mMap->GetSize(&size);
@@ -165,19 +169,18 @@ String BaseBundle::GetPairValue()
         Logger::W(TAG, "getPairValue() used on Bundle with multiple pairs.");
     }
     if (size == 0) {
-        return String(NULL);
+        return NOERROR;
     }
     AutoPtr<IInterface> obj;
     mMap->GetValueAt(0, (IInterface**)&obj);
 
     if (ICharSequence::Probe(obj) == NULL) {
         TypeWarning(String("getPairValue()"), String("String"));
-        return String(NULL);
+        return NOERROR;
     }
 
-    String str;
-    ICharSequence::Probe(obj)->ToString(&str);
-    return str;
+    ICharSequence::Probe(obj)->ToString(str);
+    return NOERROR;
 }
 
 ECode BaseBundle::SetClassLoader(

@@ -10,6 +10,7 @@
 #include "elastos/droid/os/SELinux.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/SystemProperties.h"
 #include <Elastos.CoreLibrary.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/droid/system/Os.h>
@@ -18,6 +19,7 @@
 using Elastos::Droid::Os::SELinux;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Os::SystemProperties;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IReader;
 using Elastos::IO::IOutputStream;
@@ -44,7 +46,7 @@ namespace Droid {
 namespace Internal {
 namespace Os {
 
-const String ZygoteConnection::TAG("Zygote");
+const String ZygoteConnection::TAG("ZygoteConnection");
 const Int32 ZygoteConnection::CONNECTION_TIMEOUT_MILLIS;
 const Int32 ZygoteConnection::MAX_ZYGOTE_ARGC;
 AutoPtr<ILocalSocket> ZygoteConnection::sPeerWaitSocket;
@@ -169,7 +171,7 @@ ECode ZygoteConnection::Arguments::ParseArgs(
             }
 
             if (mRlimits == NULL) {
-                mRlimits = new List<AutoPtr<ArrayOf<Int32> > >();
+                mRlimits = new List< Int32Array >();
             }
 
             mRlimits->PushBack(rlimitTuple);
@@ -267,12 +269,15 @@ ZygoteConnection::ZygoteConnection(
     socket->GetInputStream((IInputStream**)&in);
     AutoPtr<IInputStreamReader> reader;
     CInputStreamReader::New(in, (IInputStreamReader**)&reader);
-    // CBufferedReader::New(IReader::Probe(reader), 256, (IBufferedReader**)&mSocketReader);
+    CBufferedReader::New(IReader::Probe(reader), 256, (IBufferedReader**)&mSocketReader);
 
     mSocket->SetSoTimeout(CONNECTION_TIMEOUT_MILLIS);
 
     // try {
-    mSocket->GetPeerCredentials((ICredentials**)&mPeer);
+    ECode ec = mSocket->GetPeerCredentials((ICredentials**)&mPeer);
+    if (ec == (ECode)E_IO_EXCEPTION) {
+        Logger::E(TAG, "Cannot read peer credentials");
+    }
     // } catch (IOException ex) {
     //     Log.e(TAG, "Cannot read peer credentials", ex);
     //     throw ex;
@@ -378,12 +383,18 @@ Boolean ZygoteConnection::RunOnce(
 
         CheckTime(startTime, String("zygoteConnection.runOnce: apply security policies"));
 
-        AutoPtr<ArrayOf<Int32*> > rlimits;
+        AutoPtr<ArrayOf< Int32Array > > rlimits;
+       if (parsedArgs->mRlimits != NULL) {
+            Int32 size = parsedArgs->mRlimits->GetSize();
+            rlimits = ArrayOf< Int32Array >::Alloc(size);
+            List< Int32Array >::Iterator it;
+            Int32 i = 0;
+            for (it = parsedArgs->mRlimits->Begin(); it != parsedArgs->mRlimits->End(); ++it) {
+                Int32Array array = *it;
+                rlimits->Set(i++, array);
+            }
+       }
 
-    //        if (parsedArgs->mRlimits != NULL) {
-    //            rlimits = parsedArgs->mRlimits.toArray(intArray2d);
-    //        }
-    //
         if (parsedArgs->mRuntimeInit && parsedArgs->mInvokeWith != NULL) {
             AutoPtr<ArrayOf<IFileDescriptor*> > pipeFds;
             ec = Elastos::Droid::System::Os::Pipe((ArrayOf<IFileDescriptor*>**)&pipeFds);
@@ -614,9 +625,11 @@ ECode ZygoteConnection::ApplyUidSecurityPolicy(
 void ZygoteConnection::ApplyDebuggerSystemProperty(
     /* [in] */ Arguments* args)
 {
-//    if ("1".equals(SystemProperties.get("ro.debuggable"))) {
-//        args.mDebugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
-//    }
+    String value;
+    SystemProperties::Get(String("ro.debuggable"), &value);
+   if (value.Equals("1")) {
+       args->mDebugFlags |= IZygote::DEBUG_ENABLE_DEBUGGER;
+   }
 }
 
 ECode ZygoteConnection::ApplyRlimitSecurityPolicy(
@@ -706,18 +719,19 @@ ECode ZygoteConnection::ApplyseInfoSecurityPolicy(
 void ZygoteConnection::ApplyInvokeWithSystemProperty(
     /* [in] */ Arguments* args)
 {
-//    if (args.invokeWith == null && args.niceName != null) {
-//        if (args.niceName != null) {
-//            String property = "wrap." + args.niceName;
-//            if (property.length() > 31) {
-//                property = property.substring(0, 31);
-//            }
-//            args.invokeWith = SystemProperties.get(property);
-//            if (args.invokeWith != null && args.invokeWith.length() == 0) {
-//                args.invokeWith = null;
-//            }
-//        }
-//    }
+    if (args->mInvokeWith == NULL && args->mNiceName != NULL) {
+        if (args->mNiceName != NULL) {
+            String property("wrap.");
+            property += args->mNiceName;
+            if (property.GetLength() > 31) {
+                property = property.Substring(0, 31);
+            }
+            SystemProperties::Get(property, &args->mInvokeWith);
+            if (args->mInvokeWith != NULL && args->mInvokeWith.GetLength() == 0) {
+                args->mInvokeWith = NULL;
+            }
+        }
+    }
 }
 
 ECode ZygoteConnection::HandleChildProc(

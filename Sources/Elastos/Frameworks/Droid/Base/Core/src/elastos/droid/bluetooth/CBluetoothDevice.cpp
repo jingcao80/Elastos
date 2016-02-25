@@ -3,6 +3,7 @@
 #include "elastos/droid/bluetooth/CBluetoothClass.h"
 #include "elastos/droid/bluetooth/BluetoothSocket.h"
 #include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/droid/bluetooth/BluetoothGatt.h"
 #include "elastos/core/AutoLock.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -41,9 +42,7 @@ AutoPtr<IIBluetooth> CBluetoothDevice::GetService()
 
     if (sService == NULL) {
         AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
-        if(adapter != NULL){
-            sService = ((CBluetoothAdapter*)adapter.Get())->GetBluetoothService(mStateChangeCallback);
-        }
+        sService = ((CBluetoothAdapter*)adapter.Get())->GetBluetoothService(mStateChangeCallback);
     }
 
     return sService;
@@ -117,7 +116,17 @@ ECode CBluetoothDevice::GetName(
 ECode CBluetoothDevice::GetType(
     /* [out] */ Int32* type)
 {
-    //TODO
+    if (sService == NULL) {
+        Logger::E(TAG, "BT not enabled. Cannot get Remote Device type");
+        *type = DEVICE_TYPE_UNKNOWN;
+        return NOERROR;
+    }
+    //try {
+    ECode ec = sService->GetRemoteType(this, type);
+    //} catch (RemoteException e) {Log.e(TAG, "", e);}
+    if (FAILED(ec)) {
+        *type = DEVICE_TYPE_UNKNOWN;
+    }
     return NOERROR;
 }
 
@@ -173,7 +182,7 @@ ECode CBluetoothDevice::CreateBond(
         return NOERROR;
     }
 //    try {
-    return sService->CreateBond(this, result);
+    return sService->CreateBond(this, TRANSPORT_AUTO, result);
 //    } catch (RemoteException e) {Log.e(TAG, "", e);}
 }
 
@@ -181,7 +190,21 @@ ECode CBluetoothDevice::CreateBond(
     /* [in] */ Int32 transport,
     /* [out] */ Boolean* result)
 {
-    //TODO
+    if (sService == NULL) {
+        Logger::E(TAG, "BT not enabled. Cannot create bond to Remote Device");
+        *result = FALSE;
+    }
+
+    if (TRANSPORT_AUTO > transport || transport > TRANSPORT_LE)
+    {
+        //throw new IllegalArgumentException(transport + " is not a valid Bluetooth transport");
+        Logger::E(TAG, "%d  is not a valid Bluetooth transport", transport);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    //try {
+    return sService->CreateBond(this, transport, result);
+    //} catch (RemoteException e) {Log.e(TAG, "", e);}
+    //return false;
     return NOERROR;
 }
 
@@ -270,7 +293,17 @@ ECode CBluetoothDevice::GetBondState(
 ECode CBluetoothDevice::IsConnected(
     /* [out] */ Boolean* connected)
 {
-    //TODO
+    if (sService == NULL) {
+        // BT is not enabled, we cannot be connected.
+        *connected = FALSE;
+        return NOERROR;
+    }
+    //try {
+    return sService->IsConnected(this, connected);
+    //} catch (RemoteException e) {
+    //    Log.e(TAG, "", e);
+    //    return false;
+    //}
     return NOERROR;
 }
 
@@ -295,36 +328,36 @@ ECode CBluetoothDevice::GetBluetoothClass(
 //    } catch (RemoteException e) {Log.e(TAG, "", e);}
 }
 
-ECode CBluetoothDevice::GetTrustState(
-    /* [out] */ Boolean* state)
-{
-    //TODO(BT)
-    /*
-    try {
-        return sService.getTrustState(this);
-    } catch (RemoteException e) {
-        Log.e(TAG, "", e);
-    }*/
-    VALIDATE_NOT_NULL(state)
-    *state = FALSE;
-    return NOERROR;
-}
-
-ECode CBluetoothDevice::SetTrust(
-    /* [in] */ Boolean value,
-    /* [out] */ Boolean* result)
-{
-    //TODO(BT)
-    /*
-    try {
-        return sService.setTrust(this, value);
-    } catch (RemoteException e) {
-        Log.e(TAG, "", e);
-    }*/
-    VALIDATE_NOT_NULL(result)
-    *result = FALSE;
-    return NOERROR;
-}
+//ECode CBluetoothDevice::GetTrustState(
+//    /* [out] */ Boolean* state)
+//{
+//    //TODO(BT)
+//    /*
+//    try {
+//        return sService.getTrustState(this);
+//    } catch (RemoteException e) {
+//        Log.e(TAG, "", e);
+//    }*/
+//    VALIDATE_NOT_NULL(state)
+//    *state = FALSE;
+//    return NOERROR;
+//}
+//
+//ECode CBluetoothDevice::SetTrust(
+//    /* [in] */ Boolean value,
+//    /* [out] */ Boolean* result)
+//{
+//    //TODO(BT)
+//    /*
+//    try {
+//        return sService.setTrust(this, value);
+//    } catch (RemoteException e) {
+//        Log.e(TAG, "", e);
+//    }*/
+//    VALIDATE_NOT_NULL(result)
+//    *result = FALSE;
+//    return NOERROR;
+//}
 
 ECode CBluetoothDevice::GetUuids(
     /* [out, callee] */ ArrayOf<IParcelUuid *>** uuids)
@@ -344,6 +377,12 @@ ECode CBluetoothDevice::FetchUuidsWithSdp(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    AutoPtr<IIBluetooth> service = sService;
+    if (service == NULL) {
+        Logger::E(TAG, "BT not enabled. Cannot fetchUuidsWithSdp");
+        *result = FALSE;
+        return NOERROR;
+    }
 //    try {
     return sService->FetchRemoteUuids(this, result);
 //    } catch (RemoteException e) {Log.e(TAG, "", e);}
@@ -352,8 +391,16 @@ ECode CBluetoothDevice::FetchUuidsWithSdp(
 ECode CBluetoothDevice::FetchMasInstances(
     /* [out] */ Boolean* result)
 {
-    //TODO
-    return NOERROR;
+    if (sService == NULL) {
+        Logger::E(TAG, "BT not enabled. Cannot query remote device for MAS instances");
+        *result = FALSE;
+        return NOERROR;
+    }
+    //try {
+    return sService->FetchRemoteMasInstances(this, result);
+    //} catch (RemoteException e) {Log.e(TAG, "", e);}
+    //return false;
+    //return NOERROR;
 }
 
 ECode CBluetoothDevice::GetServiceChannel(
@@ -459,31 +506,67 @@ ECode CBluetoothDevice::IsBluetoothDock(
 ECode CBluetoothDevice::GetPhonebookAccessPermission(
     /* [out] */ Int32* result)
 {
-    //TODO
-    return NOERROR;
+    if (sService == NULL) {
+        *result = ACCESS_UNKNOWN;
+        return NOERROR;
+    }
+    //try {
+    return sService->GetPhonebookAccessPermission(this, result);
+    //} catch (RemoteException e) {
+    //    Log.e(TAG, "", e);
+    //}
+    //return ACCESS_UNKNOWN;
+    //return NOERROR;
 }
 
 ECode CBluetoothDevice::SetPhonebookAccessPermission(
     /* [in] */ Int32 value,
     /* [out] */ Boolean* result)
 {
-    //TODO
+    if (sService == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    //try {
+    return sService->SetPhonebookAccessPermission(this, value, result);
+    //} catch (RemoteException e) {
+    //    Log.e(TAG, "", e);
+    //}
+    //return false;
     return NOERROR;
 }
 
 ECode CBluetoothDevice::GetMessageAccessPermission(
     /* [out] */ Int32* result)
 {
-    //TODO
-    return NOERROR;
+    if (sService == NULL) {
+        *result = ACCESS_UNKNOWN;
+        return NOERROR;
+    }
+    //try {
+    return sService->GetMessageAccessPermission(this, result);
+    //} catch (RemoteException e) {
+    //    Log.e(TAG, "", e);
+    //}
+    //return ACCESS_UNKNOWN;
+    //return NOERROR;
 }
 
 ECode CBluetoothDevice::SetMessageAccessPermission(
     /* [in] */ Int32 value,
     /* [out] */ Boolean* result)
 {
-    //TODO
-    return NOERROR;
+    if (sService == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    //try {
+    return sService->SetMessageAccessPermission(this, value, result);
+    //} catch (RemoteException e) {
+    //    Log.e(TAG, "", e);
+    //}
+    //return false;
+    //return NOERROR;
 }
 
 ECode CBluetoothDevice::CreateRfcommSocket(
@@ -544,8 +627,7 @@ ECode CBluetoothDevice::ConnectGatt(
     /* [in] */ IBluetoothGattCallback* cb,
     /* [in] */ IBluetoothGatt** btGatt)
 {
-    //TODO
-    return NOERROR;
+    return (ConnectGatt(context, autoConnect, cb, TRANSPORT_AUTO, btGatt));
 }
 
 ECode CBluetoothDevice::ConnectGatt(
@@ -555,7 +637,25 @@ ECode CBluetoothDevice::ConnectGatt(
     /* [in] */ Int32 transport,
     /* [out] */ IBluetoothGatt** btGatt)
 {
-    //TODO
+    VALIDATE_NOT_NULL(btGatt);
+    *btGatt = NULL;
+    // TODO(Bluetooth) check whether platform support BLE
+    //     Do the check here or in GattServer?
+    AutoPtr<IBluetoothAdapter> adapter = CBluetoothAdapter::GetDefaultAdapter();
+    AutoPtr<IIBluetoothManager> managerService = ((CBluetoothAdapter*)adapter.Get())->GetBluetoothManager();
+    //try {
+        AutoPtr<IIBluetoothGatt> iGatt;
+        managerService->GetBluetoothGatt((IIBluetoothGatt**)&iGatt);
+        if (iGatt == NULL) {
+            // BLE is not supported
+            return NOERROR;
+        }
+        AutoPtr<BluetoothGatt> gatt = new BluetoothGatt(context, iGatt, this, transport);
+        Boolean connect;
+        gatt->Connect(autoConnect, cb, &connect);
+        *btGatt = gatt;
+    //} catch (RemoteException e) {Log.e(TAG, "", e);}
+    //return null;
     return NOERROR;
 }
 
@@ -601,4 +701,3 @@ ECode CBluetoothDevice::constructor(
 } // Bluetooth
 } // Droid
 } // Elastos
-

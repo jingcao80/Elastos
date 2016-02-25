@@ -6,10 +6,10 @@
 #include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Widget.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/AutoLock.h>
-//#include "elastos/droid/os/CHandler.h"
-//#include "elastos/droid/app/CPendingIntent.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;

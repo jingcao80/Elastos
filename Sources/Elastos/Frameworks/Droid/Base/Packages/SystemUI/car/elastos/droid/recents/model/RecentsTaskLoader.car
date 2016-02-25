@@ -8,14 +8,13 @@ module
     interface Elastos.Droid.Graphics.Drawable.IDrawable;
     interface Elastos.Droid.App.IActivityManagerTaskDescription;
 
-    interface Elastos.Droid.Packages.SystemUI.Recent.ITaskDescription;
-    interface Elastos.Droid.Packages.SystemUI.Recents.IRecentsConfiguration;
-    interface Elastos.Droid.Packages.SystemUI.Recents.Misc.ISystemServicesProxy;
-    interface Elastos.Droid.Packages.SystemUI.Recents.Model.ITaskKey;
+    interface Elastos.Droid.SystemUI.Recent.ITaskDescription;
+    interface Elastos.Droid.SystemUI.Recents.IRecentsConfiguration;
+    interface Elastos.Droid.SystemUI.Recents.Misc.ISystemServicesProxy;
+    interface Elastos.Droid.SystemUI.Recents.Model.ITaskKey;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Recents {
     namespace Model {
@@ -59,7 +58,7 @@ module
 
         /** Reload the set of recent tasks */
         Reload(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 preloadCount,
             [in] Boolean isTopTaskHome,
             [out] ISpaceNode** result);
@@ -94,7 +93,7 @@ module
 
         /** Registers any broadcast receivers. */
         RegisterReceivers(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IPackageCallbacks* cb);
 
         /** Unregisters any broadcast receivers. */
@@ -113,7 +112,7 @@ module
 
         /** Initializes the recents task loader */
         Initialize(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IRecentsTaskLoader** result);
 
         /** Returns the current recents task loader */
@@ -124,7 +123,6 @@ module
     } // namespace Model
     } // namespace Recents
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

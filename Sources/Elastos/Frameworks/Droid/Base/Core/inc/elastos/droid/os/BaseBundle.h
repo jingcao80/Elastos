@@ -97,7 +97,8 @@ public:
      *
      * @hide
      */
-    CARAPI_(String) GetPairValue();
+    CARAPI GetPairValue(
+        /* [out] */ String* str);
 
     /**
      * Changes the ClassLoader this Bundle uses when instantiating objects.

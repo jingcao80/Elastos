@@ -7,14 +7,14 @@
 #include "elastos/droid/content/res/CColorStateList.h"
 #include "elastos/droid/content/res/XmlBlock.h"
 #include "elastos/droid/content/pm/CActivityInfo.h"
-//#include "elastos/droid/graphics/Movie.h"
+#include "elastos/droid/graphics/Movie.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
-//#include "elastos/droid/graphics/drawable/CColorDrawable.h"
-//#include "elastos/droid/graphics/drawable/Drawable.h"
+#include "elastos/droid/graphics/drawable/CColorDrawable.h"
+#include "elastos/droid/graphics/drawable/Drawable.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/utility/CInt64SparseArray.h"
 #include "elastos/droid/R.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -25,11 +25,11 @@ using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::CActivityInfo;
 using Elastos::Droid::Internal::Utility::XmlUtils;
 using Elastos::Droid::Os::Build;
-//using Elastos::Droid::Graphics::Movie;
-//using Elastos::Droid::Graphics::Drawable::CColorDrawable;
+using Elastos::Droid::Graphics::Movie;
+using Elastos::Droid::Graphics::Drawable::CColorDrawable;
 using Elastos::Droid::Graphics::Drawable::IColorDrawable;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableConstantState;
-//using Elastos::Droid::Graphics::Drawable::Drawable;
+using Elastos::Droid::Graphics::Drawable::Drawable;
 using Elastos::Droid::Utility::CInt64SparseArray;
 
 using Libcore::ICU::INativePluralRulesHelper;
@@ -41,7 +41,7 @@ using Elastos::Core::StringBuilder;
 using Elastos::Utility::IFormatter;
 using Elastos::Utility::CFormatter;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ILocale;
@@ -399,6 +399,8 @@ CResources::CResources()
     ASSERT_SUCCEEDED(CTypedValue::NewByFriend((CTypedValue**)&mTmpValue));
     ASSERT_SUCCEEDED(CConfiguration::NewByFriend((CConfiguration**)&mTmpConfig));
 
+    mTypedArrayPool = new Pools::SynchronizedPool<ITypedArray>(5);
+
     mCachedXmlBlockIds = ArrayOf<Int32>::Alloc(4);
     mCachedXmlBlocks = ArrayOf<XmlBlock*>::Alloc(4);
 
@@ -518,7 +520,7 @@ ECode CResources::GetText(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "String resource ID #0x%08x", id);
+    Logger::E(TAG, "String resource ID #0x%08x", id);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -530,10 +532,7 @@ ECode CResources::GetQuantityText(
     VALIDATE_NOT_NULL(csq);
     *csq = NULL;
 
-    AutoPtr<INativePluralRulesHelper> helper;
-    CNativePluralRulesHelper::AcquireSingleton((INativePluralRulesHelper **)&helper);
-    AutoPtr<INativePluralRules> rules;
-    helper->ForLocale(mConfiguration->mLocale , (INativePluralRules **)&rules);
+    AutoPtr<INativePluralRules> rules = GetPluralRule();
     Int32 value;
     rules->QuantityForInt(quantity, &value);
     AutoPtr<ICharSequence> temp = mAssets->GetResourceBagText(id, AttrForQuantityCode(value));
@@ -550,19 +549,24 @@ ECode CResources::GetQuantityText(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Plural resource ID #0x%08x quantity=%d item=%s", id, quantity,
+    Logger::E(TAG, "Plural resource ID #0x%08x quantity=%d item=%s", id, quantity,
              StringForQuantityCode(value).string());
     return E_NOT_FOUND_EXCEPTION;
 }
 
-// AutoPtr<NativePluralRules> CResources::GetPluralRule()
-// {
-//     AutoLock lock(this);
-//     if (mPluralRule == NULL) {
-//         mPluralRule = NativePluralRules::ForLocale(mConfiguration->mLocale);
-//     }
-//     return mPluralRule;
-// }
+AutoPtr<INativePluralRules> CResources::GetPluralRule()
+{
+    AutoLock lock(this);
+
+    if (mPluralRule == NULL) {
+        AutoPtr<INativePluralRulesHelper> helper;
+        CNativePluralRulesHelper::AcquireSingleton((INativePluralRulesHelper**)&helper);
+        AutoPtr<ILocale> locale;
+        mConfiguration->GetLocale((ILocale**)&locale);
+        helper->ForLocale(locale, (INativePluralRules**)&mPluralRule);
+    }
+    return mPluralRule;
+}
 
 Int32 CResources::AttrForQuantityCode(
     /* [in] */ Int32 quantityCode)
@@ -628,7 +632,7 @@ ECode CResources::GetString(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "String resource ID #0x%08x", id);
+    Logger::E(TAG, "String resource ID #0x%08x", id);
     *str = NULL;
     return E_NOT_FOUND_EXCEPTION;
 }
@@ -728,7 +732,7 @@ ECode CResources::GetTextArray(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Text array resource ID #0x%08x", id);
+    Logger::E(TAG, "Text array resource ID #0x%08x", id);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -746,7 +750,7 @@ ECode CResources::GetStringArray(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "String array resource ID #0x%08x", id);
+    Logger::E(TAG, "String array resource ID #0x%08x", id);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -765,7 +769,7 @@ ECode CResources::GetInt32Array(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Int array resource ID #0x%08x", id);
+    Logger::E(TAG, "Int array resource ID #0x%08x", id);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -778,11 +782,12 @@ ECode CResources::ObtainTypedArray(
 
     Int32 len = mAssets->GetArraySize(id);
     if (len < 0) {
-        Slogger::E(TAG, "Array resource ID #0x%08x", id);
+        Logger::E(TAG, "Array resource ID #0x%08x", id);
         return E_NOT_FOUND_EXCEPTION;
     }
 
     AutoPtr<ITypedArray> ta = CTypedArray::Obtain(THIS_PROBE(IResources), len);
+    assert(ta != NULL);
     CTypedArray* temp = (CTypedArray*)ta.Get();
     FAIL_RETURN(mAssets->RetrieveArray(id, temp->mData, &temp->mLength))
     (*temp->mIndices)[0] = 0;
@@ -813,7 +818,7 @@ ECode CResources::GetDimension(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
+    Logger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
     *dim = 0.0f;
     return E_NOT_FOUND_EXCEPTION;
 }
@@ -840,7 +845,7 @@ ECode CResources::GetDimensionPixelOffset(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
+    Logger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
     *offset = 0;
     return E_NOT_FOUND_EXCEPTION;
 }
@@ -867,7 +872,7 @@ ECode CResources::GetDimensionPixelSize(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
+    Logger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
     *size = 0;
     return E_NOT_FOUND_EXCEPTION;
 }
@@ -894,7 +899,7 @@ ECode CResources::GetFraction(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
+    Logger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
     *fraction = 0.0f;
     return E_NOT_FOUND_EXCEPTION;
 }
@@ -1018,8 +1023,8 @@ ECode CResources::GetMovie(
 
     AutoPtr<IInputStream> is;
     OpenRawResource(id, (IInputStream**)&is);
-    assert(0 && "TODO");
-    ECode ec = NOERROR;// Movie::DecodeStream(is, movie);
+
+    ECode ec = Movie::DecodeStream(is, movie);
     is->Close(); // don't care, since the return value is valid
 
     return ec;
@@ -1049,7 +1054,7 @@ ECode CResources::GetColor(
             return NOERROR;
         }
         else if (mTmpValue->mType != ITypedValue::TYPE_STRING) {
-            Slogger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
+            Logger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
             *color = 0;
             mTmpValue = NULL;
             return E_NOT_FOUND_EXCEPTION;
@@ -1120,7 +1125,7 @@ ECode CResources::GetBoolean(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
+    Logger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
     *b = FALSE;
     return E_NOT_FOUND_EXCEPTION;
 }
@@ -1146,7 +1151,7 @@ ECode CResources::GetInteger(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
+    Logger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
     *i = 0;
     return E_NOT_FOUND_EXCEPTION;
 }
@@ -1171,7 +1176,7 @@ ECode CResources::GetFloat(
         return mTmpValue->GetFloat(f);
     }
 
-    Slogger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
+    Logger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -1301,7 +1306,7 @@ ECode CResources::GetValue(
     if (mAssets->GetResourceValue(id, 0, outValue, resolveRefs)) {
         return NOERROR;
     }
-    Slogger::E(TAG, "Resource ID #0x%08x", id);
+    Logger::E(TAG, "Resource ID #0x%08x", id);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -1314,7 +1319,7 @@ ECode CResources::GetValueForDensity(
     if (mAssets->GetResourceValue(id, density, outValue, resolveRefs)) {
         return NOERROR;
     }
-    Slogger::E(TAG, "Resource ID #0x%08x", id);
+    Logger::E(TAG, "Resource ID #0x%08x", id);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -1330,7 +1335,7 @@ ECode CResources::GetValue(
     if (id != 0) {
         return GetValue(id, outValue, resolveRefs);
     }
-    Slogger::E(TAG, "String resource name %s", (const char*)name);
+    Logger::E(TAG, "String resource name %s", (const char*)name);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -1384,6 +1389,7 @@ ECode CResources::UpdateConfiguration(
     /* [in] */ IDisplayMetrics* metrics,
     /* [in] */ ICompatibilityInfo* compat)
 {
+    Logger::I(TAG, " >>>> UpdateConfiguration");
     {
         AutoLock lock(mAccessLock);
 
@@ -1467,6 +1473,7 @@ ECode CResources::UpdateConfiguration(
                         == IConfiguration::HARDKEYBOARDHIDDEN_YES) {
             keyboardHidden = IConfiguration::KEYBOARDHIDDEN_SOFT;
         }
+
         mAssets->SetConfiguration(mConfiguration->mMcc, mConfiguration->mMnc,
                 locale, mConfiguration->mOrientation,
                 mConfiguration->mTouchscreen, mConfiguration->mDensityDpi,
@@ -1478,7 +1485,7 @@ ECode CResources::UpdateConfiguration(
                 Build::VERSION::RESOURCES_SDK_INT);
 
         if (DEBUG_CONFIG) {
-            Slogger::I(TAG, "**** Updating config of %p: config is %p compat is %p",
+            Logger::I(TAG, "**** Updating config of %p: config is %p compat is %p",
                     this, mConfiguration.Get(), mCompatibilityInfo.Get());
         }
 
@@ -1489,13 +1496,18 @@ ECode CResources::UpdateConfiguration(
     }
 
     {
-        // AutoLock lock(this);
-        // if (mPluralRule != NULL) {
-        //     assert(config);
-        //     mPluralRule = NativePluralRules::ForLocale((CConfiguration*)config->mLocale);
-        // }
+        AutoLock lock(this);
+        if (mPluralRule != NULL) {
+            AutoPtr<INativePluralRulesHelper> helper;
+            CNativePluralRulesHelper::AcquireSingleton((INativePluralRulesHelper**)&helper);
+            AutoPtr<ILocale> locale;
+            assert(config != NULL);
+            config->GetLocale((ILocale**)&locale);
+            helper->ForLocale(locale, (INativePluralRules**)&mPluralRule);
+        }
     }
 
+    Logger::I(TAG, " <<<< UpdateConfiguration");
     return NOERROR;
 }
 
@@ -1514,7 +1526,7 @@ void CResources::ClearDrawableCacheLocked(
     /* [in] */ Int32 configChanges)
 {
     if (DEBUG_CONFIG) {
-        Slogger::D(TAG, "Cleaning up drawables config changes: 0x%08x", configChanges);
+        Logger::D(TAG, "Cleaning up drawables config changes: 0x%08x", configChanges);
     }
 
     Int32 N;
@@ -1533,14 +1545,14 @@ void CResources::ClearDrawableCacheLocked(
                     if (DEBUG_CONFIG) {
                         Int64 key;
                         cache->KeyAt(i, &key);
-                        Slogger::D(TAG, "FLUSHING #0x%08x /%p with changes: 0x%08x", key, cs.Get(), con);
+                        Logger::D(TAG, "FLUSHING #0x%08x /%p with changes: 0x%08x", key, cs.Get(), con);
                     }
                     cache->SetValueAt(i, NULL);
                 }
                 else if (DEBUG_CONFIG) {
                     Int64 key;
                     cache->KeyAt(i, &key);
-                    Slogger::D(TAG, "(Keeping #0x%08x /%p with changes: 0x%08x", key, cs.Get(), con);
+                    Logger::D(TAG, "(Keeping #0x%08x /%p with changes: 0x%08x", key, cs.Get(), con);
                 }
             }
         }
@@ -1590,7 +1602,7 @@ ECode CResources::GetDisplayMetrics(
 {
     VALIDATE_NOT_NULL(metrics);
 
-    if (DEBUG_CONFIG) Slogger::V(TAG, "Returning DisplayMetrics: %d x %d %f",
+    if (DEBUG_CONFIG) Logger::V(TAG, "Returning DisplayMetrics: %d x %d %f",
             mMetrics->mWidthPixels, mMetrics->mHeightPixels, mMetrics->mDensity);
     *metrics = (IDisplayMetrics*)mMetrics.Get();
     REFCOUNT_ADD(*metrics);
@@ -1667,7 +1679,7 @@ ECode CResources::GetResourceName(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Unable to find resource ID #0x%08x", resid);
+    Logger::E(TAG, "Unable to find resource ID #0x%08x", resid);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -1682,7 +1694,7 @@ ECode CResources::GetResourcePackageName(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Unable to find resource ID #0x%08x", resid);
+    Logger::E(TAG, "Unable to find resource ID #0x%08x", resid);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -1697,7 +1709,7 @@ ECode CResources::GetResourceTypeName(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Unable to find resource ID #0x%08x", resid);
+    Logger::E(TAG, "Unable to find resource ID #0x%08x", resid);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -1712,7 +1724,7 @@ ECode CResources::GetResourceEntryName(
         return NOERROR;
     }
 
-    Slogger::E(TAG, "Unable to find resource ID #0x%08x", resid);
+    Logger::E(TAG, "Unable to find resource ID #0x%08x", resid);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -1770,7 +1782,7 @@ ECode CResources::ParseBundleExtra(
         sa->Recycle();
         String s;
         attrs->GetPositionDescription(&s);
-        Slogger::E(TAG, "<%s> requires an android:name attribute at %s",
+        Logger::E(TAG, "<%s> requires an android:name attribute at %s",
                 (const char*)tagName, (const char*)s);
         // throw new XmlPullParserException("<" + tagName
         //         + "> requires an android:name attribute at "
@@ -1819,7 +1831,7 @@ ECode CResources::ParseBundleExtra(
 //                + attrs.getPositionDescription());
         String s;
         attrs->GetPositionDescription(&s);
-        Slogger::E(TAG, "<%s> requires an android:name attribute at %s",
+        Logger::E(TAG, "<%s> requires an android:name attribute at %s",
                 (const char*)tagName, (const char*)s);
         return E_XML_PULL_PARSER_EXCEPTION;
     }
@@ -1862,7 +1874,7 @@ ECode CResources::StartPreloading()
     AutoLock lock(this);
 
     if (sPreloaded) {
-        Slogger::E(TAG, "Resources already preloaded");
+        Logger::E(TAG, "Resources already preloaded");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     sPreloaded = TRUE;
@@ -1910,7 +1922,7 @@ Boolean CResources::VerifyPreloadConfig(
         }
         // This should never happen in production, so we should log a
         // warning even if we're not debugging.
-        Slogger::W(TAG, "Preloaded %s resource #0x%08x (%s) that varies with configuration!!",
+        Logger::W(TAG, "Preloaded %s resource #0x%08x (%s) that varies with configuration!!",
             name.string(), resourceId, resName.string());
         return FALSE;
     }
@@ -1922,7 +1934,7 @@ Boolean CResources::VerifyPreloadConfig(
             resName = "?";
         }
 
-        Slogger::W(TAG, "Preloaded %s resource #0x%08x (%s) that varies with configuration!!",
+        Logger::W(TAG, "Preloaded %s resource #0x%08x (%s) that varies with configuration!!",
             name.string(), resourceId, resName.string());
     }
     return TRUE;
@@ -1944,7 +1956,7 @@ ECode CResources::LoadDrawable(
         if (((unsigned Int32)id >> 24) == 0x1) {
             String name;
             GetResourceName(id, &name);
-            Slogger::D(TAG, "PreloadDrawable %s", name.string());
+            Logger::D(TAG, "PreloadDrawable %s", name.string());
         }
     }
 
@@ -1996,13 +2008,12 @@ ECode CResources::LoadDrawable(
         wr->Resolve(EIID_IDrawableConstantState, (IInterface**)&cs);
     }
 
-    assert(0 && "TODO");
     AutoPtr<IDrawable> dr;
     if (cs != NULL) {
         cs->NewDrawable(THIS_PROBE(IResources), theme, (IDrawable**)&dr);
     }
     else if (isColorDrawable) {
-        // CColorDrawable::New(value->mData, (IDrawable**)&dr);
+        CColorDrawable::New(value->mData, (IDrawable**)&dr);
     }
     else {
         LoadDrawableForCookie(typedValue, id, theme, (IDrawable**)&dr);
@@ -2231,7 +2242,7 @@ ECode CResources::LoadColorStateList(
             String name;
             GetResourceName(id, &name);
             if (!name.IsNull())
-                Slogger::D(NULL, "PreloadColorStateList %s", (const char*)name);
+                Logger::D(NULL, "PreloadColorStateList %s", (const char*)name);
         }
     }
 
@@ -2295,7 +2306,7 @@ ECode CResources::LoadColorStateList(
     }
 
     if (typedValue->mString == NULL) {
-        Slogger::E(TAG, "Resource is not a ColorStateList (color or path): %p", value);
+        Logger::E(TAG, "Resource is not a ColorStateList (color or path): %p", value);
         return E_NOT_FOUND_EXCEPTION;
         // throw new NotFoundException(
         //         "Resource is not a ColorStateList (color or path): " + value);
@@ -2310,7 +2321,7 @@ ECode CResources::LoadColorStateList(
         ECode ec = LoadXmlResourceParser(file, id, typedValue->mAssetCookie,
                 String("colorstatelist"), (IXmlResourceParser**)&rp);
         if (FAILED(ec)) {
-            Slogger::E(TAG, "File %s from color state list resource ID #0x%08x",
+            Logger::E(TAG, "File %s from color state list resource ID #0x%08x",
                 file.string(), id);
             return E_NOT_FOUND_EXCEPTION;
         }
@@ -2320,7 +2331,7 @@ ECode CResources::LoadColorStateList(
         rp->Close();
 
         if (FAILED(ec)) {
-            Slogger::E(TAG, "File %s from color state list resource ID #0x%08x",
+            Logger::E(TAG, "File %s from color state list resource ID #0x%08x",
                 file.string(), id);
             return E_NOT_FOUND_EXCEPTION;
         }
@@ -2333,7 +2344,7 @@ ECode CResources::LoadColorStateList(
         // }
     }
     else {
-        Slogger::E(TAG, "File %s from color state list resource ID #0x%08x: .xml extension required",
+        Logger::E(TAG, "File %s from color state list resource ID #0x%08x: .xml extension required",
             file.string(), id);
         return E_NOT_FOUND_EXCEPTION;
     }
@@ -2415,7 +2426,7 @@ ECode CResources::LoadXmlResourceParser(
 //    throw new NotFoundException(
 //            "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
 //            + Integer.toHexString(value.type) + " is not valid");
-    Slogger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
+    Logger::E(TAG, "Resource ID #0x%08x type #0x%08x is not valid", id, mTmpValue->mType);
     return E_NOT_FOUND_EXCEPTION;
 }
 
@@ -2458,7 +2469,7 @@ ECode CResources::LoadXmlResourceParser(
         // the next slot in the cache.
         AutoPtr<XmlBlock> block;
         if (FAILED(mAssets->OpenXmlBlockAsset(assetCookie, file, (XmlBlock**)&block))) {
-            Slogger::E(TAG, "File %s from xml type %s resource ID #0x%08x",
+            Logger::E(TAG, "File %s from xml type %s resource ID #0x%08x",
                 file.string(), type.string(), id);
             return E_NOT_FOUND_EXCEPTION;
         }
@@ -2493,7 +2504,7 @@ ECode CResources::LoadXmlResourceParser(
     // throw new NotFoundException(
     //     "File " + file + " from xml type " + type + " resource ID #0x"
     //     + Integer.toHexString(id));
-    Slogger::E(TAG, "File %s from xml type %s resource ID #0x%08x",
+    Logger::E(TAG, "File %s from xml type %s resource ID #0x%08x",
         file.string(), type.string(), id);
     return E_NOT_FOUND_EXCEPTION;
 }

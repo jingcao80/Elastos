@@ -368,7 +368,7 @@ ECode CSearchRecentSuggestionsProvider::SetupSuggestions(
 
     // derived values
     assert(0 && "TODO");
-//***    FAIL_RETURN(CStringUri::New(String("content://") + mAuthority + String("/suggestions"), (IUri**)&mSuggestionsUri))
+    // FAIL_RETURN(CStringUri::New(String("content://") + mAuthority + String("/suggestions"), (IUri**)&mSuggestionsUri))
     FAIL_RETURN(CUriMatcher::New(IUriMatcher::NO_MATCH, (IUriMatcher**)&mUriMatcher))
     FAIL_RETURN(mUriMatcher->AddURI(mAuthority, ISearchManager::SUGGEST_URI_PATH_QUERY, URI_MATCH_SUGGEST))
 

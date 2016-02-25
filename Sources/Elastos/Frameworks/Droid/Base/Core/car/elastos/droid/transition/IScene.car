@@ -128,7 +128,7 @@ module
         GetSceneForLayout(
             [in] IViewGroup* sceneRoot,
             [in] Int32 layoutId,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IScene** result);
 
         /**

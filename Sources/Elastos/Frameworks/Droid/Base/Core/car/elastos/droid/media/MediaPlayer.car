@@ -1004,7 +1004,7 @@ module
          * @throws IllegalStateException if it is called in an invalid state
          */
         SetDataSource(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IUri* uri);
 
         /**
@@ -1020,7 +1020,7 @@ module
          * @throws IllegalStateException if it is called in an invalid state
          */
         SetDataSource(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IUri* uri,
             [in] IMap* headers);
 
@@ -1144,7 +1144,7 @@ module
          * @see android.os.PowerManager
          */
         SetWakeMode(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 mode);
 
         /**
@@ -1497,7 +1497,7 @@ module
          * @throws IllegalStateException if called in an invalid state.
          */
         AddTimedTextSource(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IUri* uri,
             [in] String mimeType);
 
@@ -1748,7 +1748,7 @@ module
          * @return a MediaPlayer object, or null if creation failed
          */
         Create(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IUri* uri,
             [out] IMediaPlayer** result);
 
@@ -1769,7 +1769,7 @@ module
          * @return a MediaPlayer object, or null if creation failed
          */
         Create(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IUri* uri,
             [in] ISurfaceHolder* holder,
             [out] IMediaPlayer** result);
@@ -1786,7 +1786,7 @@ module
          * @return a MediaPlayer object, or null if creation failed
          */
         Create(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IUri* uri,
             [in] ISurfaceHolder* holder,
             [in] IAudioAttributes* audioAttributes,
@@ -1810,7 +1810,7 @@ module
          * @return a MediaPlayer object, or null if creation failed
          */
         Create(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 resid,
             [out] IMediaPlayer** result);
 
@@ -1826,7 +1826,7 @@ module
          * @return a MediaPlayer object, or null if creation failed
          */
         Create(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 resid,
             [in] IAudioAttributes* audioAttributes,
             [in] Int32 audioSessionId,

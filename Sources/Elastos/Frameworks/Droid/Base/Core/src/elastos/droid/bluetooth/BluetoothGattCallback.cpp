@@ -19,8 +19,6 @@ ECode BluetoothGattCallback::OnConnectionStateChange(
     /* [in] */ Int32 status,
     /* [in] */ Int32 newState)
 {
-    VALIDATE_NOT_NULL(gatt);
-    assert(0);
     return NOERROR;
 }
 
@@ -28,8 +26,6 @@ ECode BluetoothGattCallback::OnServicesDiscovered(
     /* [in] */ IBluetoothGatt* gatt,
     /* [in] */ Int32 status)
 {
-    VALIDATE_NOT_NULL(gatt);
-    assert(0);
     return NOERROR;
 }
 
@@ -38,9 +34,6 @@ ECode BluetoothGattCallback::OnCharacteristicRead(
     /* [in] */ IBluetoothGattCharacteristic* characteristic,
     /* [in] */ Int32 status)
 {
-    VALIDATE_NOT_NULL(gatt);
-    VALIDATE_NOT_NULL(characteristic);
-    assert(0);
     return NOERROR;
 }
 
@@ -49,9 +42,6 @@ ECode BluetoothGattCallback::OnCharacteristicWrite(
     /* [in] */ IBluetoothGattCharacteristic* characteristic,
     /* [in] */ Int32 status)
 {
-    VALIDATE_NOT_NULL(gatt);
-    VALIDATE_NOT_NULL(characteristic);
-    assert(0);
     return NOERROR;
 }
 
@@ -59,9 +49,6 @@ ECode BluetoothGattCallback::OnCharacteristicChanged(
     /* [in] */ IBluetoothGatt* gatt,
     /* [in] */ IBluetoothGattCharacteristic* characteristic)
 {
-    VALIDATE_NOT_NULL(gatt);
-    VALIDATE_NOT_NULL(characteristic);
-    assert(0);
     return NOERROR;
 }
 
@@ -70,9 +57,6 @@ ECode BluetoothGattCallback::OnDescriptorRead(
     /* [in] */ IBluetoothGattDescriptor* descriptor,
     /* [in] */ Int32 status)
 {
-    VALIDATE_NOT_NULL(gatt);
-    VALIDATE_NOT_NULL(descriptor);
-    assert(0);
     return NOERROR;
 }
 
@@ -81,9 +65,6 @@ ECode BluetoothGattCallback::OnDescriptorWrite(
     /* [in] */ IBluetoothGattDescriptor* descriptor,
     /* [in] */ Int32 status)
 {
-    VALIDATE_NOT_NULL(gatt);
-    VALIDATE_NOT_NULL(descriptor);
-    assert(0);
     return NOERROR;
 }
 
@@ -91,8 +72,6 @@ ECode BluetoothGattCallback::OnReliableWriteCompleted(
     /* [in] */ IBluetoothGatt* gatt,
     /* [in] */ Int32 status)
 {
-    VALIDATE_NOT_NULL(gatt);
-    assert(0);
     return NOERROR;
 }
 
@@ -101,8 +80,6 @@ ECode BluetoothGattCallback::OnReadRemoteRssi(
     /* [in] */ Int32 rssi,
     /* [in] */ Int32 status)
 {
-    VALIDATE_NOT_NULL(gatt);
-    assert(0);
     return NOERROR;
 }
 
@@ -111,8 +88,6 @@ ECode BluetoothGattCallback::OnMtuChanged(
     /* [in] */ Int32 mtu,
     /* [in] */ Int32 status)
 {
-    VALIDATE_NOT_NULL(gatt);
-    assert(0);
     return NOERROR;
 }
 

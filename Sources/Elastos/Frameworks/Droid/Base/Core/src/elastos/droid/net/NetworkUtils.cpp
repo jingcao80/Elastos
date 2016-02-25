@@ -364,7 +364,7 @@ ECode NetworkUtils::ParseIpAndMask(
         ec = inetaddresshelper->ParseNumericAddress((*pieces)[0], (IInetAddress**)&address);
     }
     if (FAILED(ec)) {
-        if (ec != E_ILLEGAL_ARGUMENT_EXCEPTION && ec != E_NUMBER_FORMAT_EXCEPTION)
+        if (ec != (ECode)E_ILLEGAL_ARGUMENT_EXCEPTION && ec != (ECode)E_NUMBER_FORMAT_EXCEPTION)
             return ec;
     }
     // } catch (NullPointerException e) {            // Null string.

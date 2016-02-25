@@ -12,7 +12,7 @@ namespace Elastos {
 namespace Droid {
 namespace Utility {
 
-class SparseArray
+class ECO_PUBLIC SparseArray
     : public Object
     , public ISparseArray
     , public ICloneable
@@ -188,7 +188,7 @@ public:
         /* [out] */ String* str);
 
 private:
-    CARAPI_(void) Gc();
+    ECO_LOCAL CARAPI_(void) Gc();
 
 private:
     static const AutoPtr<Object> DELETED;

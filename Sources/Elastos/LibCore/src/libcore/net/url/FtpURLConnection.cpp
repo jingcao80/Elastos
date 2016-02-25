@@ -178,7 +178,7 @@ ECode FtpURLConnection::GetOutputStream(
 ECode FtpURLConnection::GetPermission(
     /* [out] */ IPermission** permission)
 {
-    VALIDATE_NOT_NULL(*permission);
+    VALIDATE_NOT_NULL(permission);
     Int32 port = 0;
     mUrl->GetPort(&port);
     if (port <= 0) {

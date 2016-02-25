@@ -434,7 +434,7 @@ public:
     CARAPI RemoveStatusChangeListener(
         /* [in] */ IISyncStatusObserver* observer);
 
-    static CARAPI Main(
+    static AutoPtr<IIContentService> Main(
         /* [in] */ IContext* context,
         /* [in] */ Boolean factoryTest);
 

@@ -386,9 +386,9 @@ ECode ICUUtil::GetBestDateTimePattern(
             CString::New(pattern, (ICharSequence**)&pattern_cs);
             AutoPtr<IInterface> old;
             CACHED_PATTERNS->Put(key_cs, pattern_cs, (IInterface**)&old);
-        } else {
-            pattern_cs->ToString(rst);
         }
+
+        pattern_cs->ToString(rst);
     }
 
     return NOERROR;

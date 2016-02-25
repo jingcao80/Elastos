@@ -7,27 +7,31 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/Singleton.h>
 #include <elastos/droid/os/Runnable.h>
-// #include "elastos/droid/server/am/CActivityManagerService.h"
+#include "elastos/droid/server/am/CActivityManagerService.h"
 #include "elastos/droid/server/display/CDisplayManagerService.h"
-// #include "elastos/droid/server/pm/Installer.h"
-// #include "elastos/droid/server/pm/CPackageManagerService.h"
-// #include "elastos/droid/server/power/CPowerManagerService.h"
+#include "elastos/droid/server/input/CInputManagerService.h"
+#include "elastos/droid/server/pm/Installer.h"
+#include "elastos/droid/server/pm/CPackageManagerService.h"
+#include "elastos/droid/server/power/PowerManagerService.h"
 
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Pm::IPackageManager;
-// using Elastos::Droid::Server::Am::CActivityManagerService;
+using Elastos::Droid::Server::Am::CActivityManagerService;
 using Elastos::Droid::Server::Display::CDisplayManagerService;
-// using Elastos::Droid::Server::Pm::Installer;
-// using Elastos::Droid::Server::Pm::CPackageManagerService;
-// using Elastos::Droid::Server::Power::CPowerManagerService;
+using Elastos::Droid::Server::Input::CInputManagerService;
+using Elastos::Droid::Server::Pm::Installer;
+using Elastos::Droid::Server::Pm::CPackageManagerService;
+using Elastos::Droid::Server::Power::PowerManagerService;
 using Elastos::Utility::ITimer;
 
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
+
+class CInputMethodManagerService;
 
 class SystemServer
     : public Object
@@ -44,7 +48,7 @@ private:
         // AutoPtr<CConnectivityService> mConnectivityF;
         // AutoPtr<CNetworkScoreService> mNetworkScoreF;
         // AutoPtr<CWallpaperManagerService> mWallpaperF;
-        // AutoPtr<CInputMethodManagerService> mImmF;
+        AutoPtr<CInputMethodManagerService> mImmF;
         // AutoPtr<CLocationManagerService> mLocationF;
         // AutoPtr<CCountryDetectorService> mCountryDetectorF;
         // AutoPtr<CNetworkTimeUpdateService> mNetworkTimeUpdaterF;
@@ -52,7 +56,7 @@ private:
         // AutoPtr<CTextServicesManagerService> mTextServiceManagerServiceF;
         // AutoPtr<CStatusBarManagerService> mStatusBarF;
         // AutoPtr<CAssetAtlasService> mAtlasF;
-        // AutoPtr<CInputManagerService> mInputManagerF;
+        AutoPtr<CInputManagerService> mInputManagerF;
         // AutoPtr<CTelephonyRegistry> mTelephonyRegistryF;
         // AutoPtr<CMediaRouterService> mMediaRouterF;
         // AutoPtr<CAudioService> mAudioServiceF;
@@ -152,11 +156,11 @@ private:
     AutoPtr<ISystemServiceManager> mSystemServiceManager;
 
     // TODO: remove all of these references by improving dependency resolution and boot phases
-    // AutoPtr<Installer> mInstaller;
-    // AutoPtr<CPowerManagerService> mPowerManagerService;
-    // AutoPtr<CActivityManagerService> mActivityManagerService;
+    AutoPtr<Installer> mInstaller;
+    AutoPtr<PowerManagerService> mPowerManagerService;
+    AutoPtr<CActivityManagerService> mActivityManagerService;
     AutoPtr<CDisplayManagerService> mDisplayManagerService;
-    // AutoPtr<CPackageManagerService> mPackageManagerService;
+    AutoPtr<CPackageManagerService> mPackageManagerService;
     AutoPtr<IPackageManager> mPackageManager;
     AutoPtr<IContentResolver> mContentResolver;
 

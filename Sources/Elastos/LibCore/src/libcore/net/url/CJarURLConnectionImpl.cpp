@@ -67,7 +67,7 @@ ECode CJarURLConnectionImpl::Connect() /*throws IOException*/
 ECode CJarURLConnectionImpl::GetJarFile(
     /* [out] */ IJarFile** file) /*throws IOException*/
 {
-    VALIDATE_NOT_NULL(*file);
+    VALIDATE_NOT_NULL(file);
     *file = NULL;
     FAIL_RETURN(Connect());
     *file = mJarFile;
@@ -110,7 +110,7 @@ ECode CJarURLConnectionImpl::FindJarFile() /*throws IOException*/
 ECode CJarURLConnectionImpl::OpenJarFile(
     /* [out] */ IJarFile** jarFile) /*throws IOException*/
 {
-    VALIDATE_NOT_NULL(*jarFile);
+    VALIDATE_NOT_NULL(jarFile);
     *jarFile = NULL;
     String value;
     if ((mJarFileURL->GetProtocol(&value), value).Equals("file")) {
@@ -171,7 +171,7 @@ Fail:
 ECode CJarURLConnectionImpl::GetJarEntry(
     /* [out] */ IJarEntry** entry) /*throws IOException*/
 {
-    VALIDATE_NOT_NULL(*entry);
+    VALIDATE_NOT_NULL(entry);
     FAIL_RETURN(Connect());
     *entry = mJarEntry;
     REFCOUNT_ADD(*entry);
@@ -197,7 +197,7 @@ ECode CJarURLConnectionImpl::FindJarEntry() /*throws IOException*/
 ECode CJarURLConnectionImpl::GetInputStream(
     /* [out] */ IInputStream** stream)/* throws IOException*/
 {
-    VALIDATE_NOT_NULL(*stream);
+    VALIDATE_NOT_NULL(stream);
     if (mClosed) {
         // throw new IllegalStateException("JarURLConnection InputStream has been closed");
         return E_ILLEGAL_STATE_EXCEPTION;
@@ -284,7 +284,7 @@ ECode CJarURLConnectionImpl::GetContentLength(
 ECode CJarURLConnectionImpl::GetContent(
     /* [out] */ IInterface** content) /*throws IOException*/
 {
-    VALIDATE_NOT_NULL(*content);
+    VALIDATE_NOT_NULL(content);
     *content = NULL;
     FAIL_RETURN(Connect());
     // if there is no Jar Entry, return a JarFile

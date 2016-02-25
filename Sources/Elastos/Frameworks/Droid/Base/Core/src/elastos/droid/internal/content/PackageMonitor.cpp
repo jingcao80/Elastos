@@ -59,6 +59,8 @@ AutoPtr<IIntentFilter> PackageMonitor::sPackageFilt = InitPackageFilt();
 AutoPtr<IIntentFilter> PackageMonitor::sNonDataFilt = InitNonDataFilt();
 AutoPtr<IIntentFilter> PackageMonitor::sExternalFilt = InitExternalFilt();
 
+CAR_INTERFACE_IMPL(PackageMonitor, BroadcastReceiver, IPackageMonitor)
+
 PackageMonitor::PackageMonitor()
     : mChangeType(0)
     , mChangeUserId(IUserHandle::USER_NULL)
@@ -71,7 +73,10 @@ PackageMonitor::~PackageMonitor()
 {
 }
 
-CAR_INTERFACE_IMPL(PackageMonitor, BroadcastReceiver, IPackageMonitor)
+ECode PackageMonitor::constructor()
+{
+    return BroadcastReceiver::constructor();
+}
 
 ECode PackageMonitor::Register(
     /* [in] */ IContext* context,

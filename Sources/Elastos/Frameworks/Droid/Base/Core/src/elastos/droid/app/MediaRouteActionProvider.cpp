@@ -15,11 +15,18 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-MediaRouteActionProvider::MediaRouterCallback::MediaRouterCallback(
+MediaRouteActionProvider::MediaRouterCallback::MediaRouterCallback()
+{}
+
+ECode MediaRouteActionProvider::MediaRouterCallback::constructor(
     /* [in] */ IMediaRouteActionProvider* provider)
 {
+    assert(0 && "TODO");
+    // CMediaRouter::SimpleCallback::constructor();
+
     AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(provider);
     wrs->GetWeakReference((IWeakReference**)&mProviderWeak);
+    return NOERROR;
 }
 
 ECode MediaRouteActionProvider::MediaRouterCallback::OnRouteAdded(
@@ -83,8 +90,9 @@ ECode MediaRouteActionProvider::constructor(
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::MEDIA_ROUTER_SERVICE, (IInterface**)&obj);
     mRouter = IMediaRouter::Probe(obj);
-    assert(0 && "TODO");
-    // mCallback = new MediaRouterCallback(this);
+    AutoPtr<MediaRouterCallback> cb = new MediaRouterCallback();
+    cb->constructor(this);
+    mCallback = (IMediaRouterCallback*)cb.Get();
 
     // Start with live audio by default.
     // TODO Update this when new route types are added; segment by API level

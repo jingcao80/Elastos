@@ -2,11 +2,12 @@
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWCOOKIEMANAGER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include <Elastos.Droid.Webkit.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::ILooper;
-//TODO using Elastos::Droid::Webkit::IValueCallback;
+using Elastos::Droid::Webkit::IValueCallback;
 
 using Elastos::Core::IRunnable;
 // import org.chromium.base.CalledByNative;
@@ -58,18 +59,18 @@ public:
 
     public:
         CookieCallback(
-            /* [in] */ /*TODO IValueCallback*/IInterface* callback,
+            /* [in] */ IValueCallback* callback,
             /* [in] */ IHandler* handler);
 
         static ECode Convert(
-            /* [in] */ /*TODO IValueCallback*/IInterface* callback,
+            /* [in] */ IValueCallback* callback,
             /* [out] */ CookieCallback** cookieCallback);
 
         CARAPI_(void) OnReceiveValue(
             /* [in] */ IInterface* t);
 
     private:
-        AutoPtr</*TODO IValueCallback*/IInterface> mCallback;
+        AutoPtr<IValueCallback> mCallback;
         AutoPtr<IHandler> mHandler;
     };
 
@@ -124,7 +125,7 @@ public:
     CARAPI SetCookie(
         /* [in] */ const String& url,
         /* [in] */ const String& value,
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback* callback);
 
     /**
      * Get cookie(s) for a given url so that it can be set to "cookie:" in http
@@ -141,7 +142,7 @@ public:
      * @param callback A callback called after the cookies (if any) are removed.
      */
     CARAPI RemoveSessionCookies(
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback* callback);
 
     /**
      * Remove all cookies.
@@ -149,7 +150,7 @@ public:
      * @param callback A callback called after the cookies (if any) are removed.
      */
     CARAPI RemoveAllCookies(
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback* callback);
 
     /**
      *  Return true if there are stored cookies.

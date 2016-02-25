@@ -80,7 +80,8 @@ ECode ScanSettings::Builder::Build(
     /* [out] */ IScanSettings** result)
 {
     VALIDATE_NOT_NULL(result);
-    AutoPtr<IScanSettings> ss = new ScanSettings(mScanMode, mCallbackType, mScanResultType,
+    AutoPtr<ScanSettings> ss = new ScanSettings();
+    ss->constructor(mScanMode, mCallbackType, mScanResultType,
             mReportDelayMillis);
     *result = ss;
     REFCOUNT_ADD(*result);
@@ -102,6 +103,7 @@ Boolean ScanSettings::Builder::IsValidCallbackType(
 //                             ScanSettings
 //=====================================================================
 CAR_INTERFACE_IMPL_2(ScanSettings, Object, IScanSettings, IParcelable);
+
 ScanSettings::ScanSettings()
 {
 }
@@ -159,7 +161,7 @@ CARAPI ScanSettings::ReadFromParcel(
     return NOERROR;
 }
 
-ScanSettings::ScanSettings(
+ECode ScanSettings::constructor(
     /* [in] */ Int32 scanMode,
     /* [in] */ Int32 callbackType,
     /* [in] */ Int32 scanResultType,
@@ -169,15 +171,17 @@ ScanSettings::ScanSettings(
     mCallbackType = callbackType;
     mScanResultType = scanResultType;
     mReportDelayMillis = reportDelayMillis;
+    return NOERROR;
 }
 
-ScanSettings::ScanSettings(
+ECode ScanSettings::constructor(
     /* [in] */ IParcel* in)
 {
     in->ReadInt32(&mScanMode);
     in->ReadInt32(&mCallbackType);
     in->ReadInt32(&mScanResultType);
     in->ReadInt64(&mReportDelayMillis);
+    return NOERROR;
 }
 
 } // namespace LE

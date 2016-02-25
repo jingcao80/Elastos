@@ -1,20 +1,42 @@
 #include "elastos/droid/media/CMediaExtractor.h"
 #include "elastos/droid/media/CMediaFormat.h"
+#include "elastos/droid/media/CMediaHTTPService.h"
+#include "elastos/droid/media/Media_Utils.h"
+#include "elastos/droid/net/Uri.h"
+#include "elastos/droid/os/NativeBinder.h"
 #include <elastos/utility/logging/Logger.h>
-#include <media/Media_Utils.h>
+
+#include <media/IMediaHTTPService.h>
+#include <media/hardware/CryptoAPI.h>
 #include <media/stagefright/foundation/ABuffer.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
-#include <media/stagefright/MediaSource.h>
+#include <media/stagefright/MediaErrors.h>
+#include <media/stagefright/MetaData.h>
+#include <utils/KeyedVector.h>
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IAssetFileDescriptor;
+using Elastos::Droid::Os::IBinderForDroidObject;
+using Elastos::Droid::Net::Uri;
+using Elastos::Core::CArrayOf;
+using Elastos::Core::CByte;
 using Elastos::Core::CString;
+using Elastos::Core::EIID_IByte;
+using Elastos::Core::IArrayOf;
+using Elastos::Core::IByte;
 using Elastos::Core::ICharSequence;
 using Elastos::IO::ByteOrder;
 using Elastos::IO::CByteOrderHelper;
 using Elastos::IO::IByteOrderHelper;
 using Elastos::IO::IBuffer;
+using Elastos::IO::ICloseable;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::CUUID;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::ISet;
 using Elastos::Utility::IUUID;
 using Elastos::Utility::Logging::Logger;
 
@@ -38,7 +60,7 @@ JavaDataSourceBridge::JavaDataSourceBridge(
 JavaDataSourceBridge::~JavaDataSourceBridge()
 {
     if (mDataSource != NULL) {
-        mDataSource->Close();
+        ICloseable::Probe(mDataSource)->Close();
         mDataSource = NULL;
     }
 }
@@ -78,7 +100,7 @@ android::status_t JavaDataSourceBridge::getSize(
 //==========================================================================
 const String CMediaExtractor::TAG("CMediaExtractor");
 
-Boolean NativeInit()
+static Boolean NativeInit()
 {
     android::DataSource::RegisterDefaultSniffers();
     return TRUE;
@@ -101,6 +123,16 @@ android::sp<android::NuMediaExtractor> CMediaExtractor::GetMediaExtractor()
     return mImpl;
 }
 
+CMediaExtractor::CMediaExtractor()
+    : mNativeContext(0)
+{
+}
+
+CMediaExtractor::~CMediaExtractor()
+{
+    NativeFinalize();
+}
+
 ECode CMediaExtractor::constructor()
 {
     return NativeSetup();
@@ -109,7 +141,13 @@ ECode CMediaExtractor::constructor()
 ECode CMediaExtractor::SetDataSource(
     /* [in] */ IDataSource* source)
 {
+    if (mImpl == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
     if (source == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -177,7 +215,7 @@ _EXIT_:
         return ec;
     }
 
-    uri->ToString(&tempString);
+    ((Uri*)uri)->ToString(&tempString);
     return SetDataSource(tempString, headers);
 }
 
@@ -189,80 +227,124 @@ ECode CMediaExtractor::SetDataSource(
     AutoPtr<ArrayOf<String> > values;
 
     if (headers != NULL) {
-        headers->GetKeys( (ArrayOf<String>**)&keys);
-        if (keys != NULL) {
-            Int32 keylen = keys->GetLength();
-            values = ArrayOf<String>::Alloc(keylen);
+        Int32 size;
+        headers->GetSize(&size);
+        keys = ArrayOf<String>::Alloc(size);
+        values = ArrayOf<String>::Alloc(size);
 
-            ICharSequence* seq;
+        AutoPtr<ISet> set;
+        headers->GetEntrySet((ISet**)&set);
+        AutoPtr<IIterator> it;
+        set->GetIterator((IIterator**)&it);
+        Int32 i = 0;
+        Boolean b;
+        while (it->HasNext(&b), b) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
+            obj = NULL;
+            entry->GetKey((IInterface**)&obj);
             String str;
-            for (Int32 i = 0; i < keylen; i++) {
-                AutoPtr<IInterface> tmpObj;
-                headers->Get((*keys)[i], (IInterface**)&tmpObj);
-                seq = ICharSequence::Probe(tmpObj.Get());
-                if (seq) {
-                    seq->ToString(&str);
-                    values->Set(i, str);
-                }
-            }
+            ICharSequence::Probe(obj)->ToString(&str);
+            keys->Set(i, str);
+            obj = NULL;
+            entry->GetValue((IInterface**)&obj);
+            ICharSequence::Probe(obj)->ToString(&str);
+            values->Set(i, str);
+            ++i;
         }
     }
 
     AutoPtr<IBinder> binder;
-    MediaHTTPService.createHttpServiceBinderIfNecessary(
+    CMediaHTTPService::CreateHttpServiceBinderIfNecessary(
             path, (IBinder**)&binder);
     return NativeSetDataSource(
         binder, path, keys, values);
 }
 
+// ECode CMediaExtractor::NativeSetDataSource(
+//     /* [in] */ const android::sp<android::IMediaHTTPService> &httpService,
+//     /* [in] */ const String& path,
+//     /* [in] */ android::KeyedVector<android::String8,android::String8>* headers)
+// {
+//     if (path.IsNull()) {
+//         return E_ILLEGAL_ARGUMENT_EXCEPTION;
+//     }
+
+//     android::status_t err = mImpl->setDataSource(httpService, path.string(), headers);
+//     if (err != android::OK) {
+//         Logger::E(TAG, "Failed to instantiate extractor.");
+//         return E_IO_EXCEPTION;
+//     }
+//     return NOERROR;
+// }
+
+// ECode  CMediaExtractor::NativeSetDataSource(
+//     /* [in] */ Int32 fd,
+//     /* [in] */ Int64 offset,
+//     /* [in] */ Int64 size)
+// {
+//     android::status_t err = mImpl->setDataSource(fd, offset, size);
+//     if (err != android::OK) {
+//         Logger::E(TAG, "Failed to instantiate extractor.");
+//         return E_IO_EXCEPTION;
+//     }
+//     return NOERROR;
+// }
+
 ECode CMediaExtractor::NativeSetDataSource(
-    /* [in] */ const String& path,
-    /* [in] */ android::KeyedVector<android::String8,android::String8>* headers)
-{
-    if (path.IsNull()) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
-
-    android::status_t err = mImpl->setDataSource(path.string(), headers);
-    if (err != android::OK) {
-        Logger::E(TAG, "Failed to instantiate extractor.");
-        return E_IO_EXCEPTION;
-    }
-    return NOERROR;
-}
-
-ECode  CMediaExtractor::NativeSetDataSource(
-    /* [in] */ Int32 fd,
-    /* [in] */ Int64 offset,
-    /* [in] */ Int64 size)
-{
-    android::status_t err = mImpl->setDataSource(fd, offset, size);
-    if (err != android::OK) {
-        Logger::E(TAG, "Failed to instantiate extractor.");
-        return E_IO_EXCEPTION;
-    }
-    return NOERROR;
-}
-
-ECode  CMediaExtractor::NativeSetDataSource(
     /* [in] */ IBinder* httpServiceBinder,
-    /* [in] */ const String& path,
+    /* [in] */ const String& pathStr,
     /* [in] */ ArrayOf<String>* keys,
     /* [in] */ ArrayOf<String>* values)
 {
-    android::KeyedVector<android::String8, android::String8> headers;
-    FAIL_RETURN(Media_Utils::ConvertKeyValueArraysToKeyedVector(keys, values, &headers));
+    if (mImpl == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    return NativeSetDataSource(path, &headers);
+    if (pathStr.IsNull()) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    android::KeyedVector<android::String8, android::String8> headers;
+    if (!Media_Utils::ConvertKeyValueArraysToKeyedVector(
+                keys, values, &headers)) {
+        return NOERROR;
+    }
+
+    const char *path = pathStr.string();
+
+    if (path == NULL) {
+        return NOERROR;
+    }
+
+    android::sp<android::IMediaHTTPService> httpService;
+    if (httpServiceBinder != NULL) {
+        android::sp<android::IBinder> binder = IBinderForDroidObject(httpServiceBinder);
+        httpService = android::interface_cast<android::IMediaHTTPService>(binder);
+    }
+
+    android::status_t err = mImpl->setDataSource(httpService, path, &headers);
+
+    if (err != android::OK) {
+        // jniThrowException(
+        //         env,
+        //         "java/io/IOException",
+        //         "Failed to instantiate extractor.");
+        return E_IO_EXCEPTION;
+    }
+    return NOERROR;
 }
 
 ECode CMediaExtractor::SetDataSource(
     /* [in] */ const String& path)
 {
     AutoPtr<IBinder> binder;
-    MediaHTTPService::CreateHttpServiceBinderIfNecessary(
+    CMediaHTTPService::CreateHttpServiceBinderIfNecessary(
                 path, (IBinder**)&binder);
-    return nativeSetDataSource(binder, path, NULL, NULL);
+    return NativeSetDataSource(binder, path, NULL, NULL);
 }
 
 ECode CMediaExtractor::SetDataSource(
@@ -271,21 +353,34 @@ ECode CMediaExtractor::SetDataSource(
     return SetDataSource(fd, 0, 0x7ffffffffffffffL);
 }
 
-//native code
 ECode CMediaExtractor::SetDataSource(
-    /* [in] */ IFileDescriptor* fd,
+    /* [in] */ IFileDescriptor* fileDesc,
     /* [in] */ Int64 offset,
     /* [in] */ Int64 length)
 {
-    VALIDATE_NOT_NULL(fd);
-    Int32 tempfd;
-    fd->GetDescriptor(&tempfd);
-    return NativeSetDataSource(tempfd, offset, length);
-}
+    if (mImpl == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-ECode  CMediaExtractor::Finalize()
-{
-    return NativeFinalize();
+    if (fileDesc == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Int32 fd;
+    fileDesc->GetDescriptor(&fd);
+
+    android::status_t err = mImpl->setDataSource(fd, offset, length);
+
+    if (err != android::OK) {
+        // jniThrowException(
+        //         env,
+        //         "java/io/IOException",
+        //         "Failed to instantiate extractor.");
+        return E_IO_EXCEPTION;
+    }
+    return NOERROR;
 }
 
 ECode CMediaExtractor::ReleaseResources()
@@ -302,15 +397,16 @@ ECode CMediaExtractor::GetTrackCount(
     return NOERROR;
 }
 
-ECode CMediaExtractor::GetTrackCount(
+ECode CMediaExtractor::GetPsshInfo(
     /* [out] */ IMap** result)
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IHashMap> psshMap;
-    AutoPtr<IMap> formatMap = GetFileFormatNative();
+    AutoPtr<IMap> formatMap;
+    GetFileFormatNative((IMap**)&formatMap);
 
     AutoPtr<ICharSequence> cs;
-    CString::New("pssh", (ICharSequence**)&cs);
+    CString::New(String("pssh"), (ICharSequence**)&cs);
     Boolean b;
     if (formatMap != NULL && (formatMap->ContainsKey(cs, &b), b)) {
         AutoPtr<IInterface> obj;
@@ -323,13 +419,13 @@ ECode CMediaExtractor::GetTrackCount(
         orderHelper->GetNativeOrder(&nativeOrder);
 
         rawpssh->SetOrder(nativeOrder);
-        rawpssh->Rewind();
+        IBuffer::Probe(rawpssh)->Rewind();
         formatMap->Remove(cs);
 
         // parse the flat pssh bytebuffer into something more manageable
         CHashMap::New((IHashMap**)&psshMap);
         Int32 remaining;
-        rawpssh->GetRemaining(&remaining);
+        IBuffer::Probe(rawpssh)->GetRemaining(&remaining);
         while (remaining > 0) {
             rawpssh->SetOrder(Elastos::IO::ByteOrder_BIG_ENDIAN);
             Int64 msb;
@@ -343,10 +439,20 @@ ECode CMediaExtractor::GetTrackCount(
             rawpssh->GetInt32(&datalen);
             AutoPtr<ArrayOf<Byte> > psshdata = ArrayOf<Byte>::Alloc(datalen);
             rawpssh->GetArray((ArrayOf<Byte>**)&psshdata);
-            psshMap->Put(uuid, psshdata);
+
+            AutoPtr<IArrayOf> array;
+            CArrayOf::New(EIID_IByte, psshdata->GetLength(), (IArrayOf**)&array);
+            for (Int32 i = 0; i < psshdata->GetLength(); ++i) {
+                AutoPtr<IByte> byte;
+                CByte::New((*psshdata)[i], (IByte**)&byte);
+                array->Set(i, byte);
+            }
+            psshMap->Put(uuid, array);
         }
     }
-    return psshMap;
+    *result = IMap::Probe(psshMap);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode CMediaExtractor::GetTrackFormat(
@@ -357,34 +463,72 @@ ECode CMediaExtractor::GetTrackFormat(
     *result = NULL;
 
     AutoPtr<IMap> tiMap;
-    tiMap = GetTrackFormatNative(index);
+    GetTrackFormatNative(index, (IMap**)&tiMap);
 
     return CMediaFormat::New(tiMap, result);
 }
 
-AutoPtr<IMap> CMediaExtractor::GetFileFormatNative()
+ECode CMediaExtractor::GetFileFormatNative(
+    /* [out] */ IMap** result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    if (mImpl == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
     android::sp<android::AMessage> msg;
-    mImpl->getFileFormat(&msg);
+    android::status_t err = mImpl->getFileFormat(&msg);
+    if (err != android::OK) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    //convert message to map
     AutoPtr<IMap> format;
-    Media_Utils::ConvertMessageToMap(msg, (IMap**)&format);
+    err = Media_Utils::ConvertMessageToMap(msg, (IMap**)&format);
 
-    return msgMap;
+    if (err != android::OK) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    *result = format;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
-AutoPtr<IMap> CMediaExtractor::GetTrackFormatNative(
-    /* [in] */ Int32 index)
+ECode CMediaExtractor::GetTrackFormatNative(
+    /* [in] */ Int32 index,
+    /* [out] */ IMap** result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    if (mImpl == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
     android::sp<android::AMessage> msg;
-    mImpl->getTrackFormat((ssize_t)index, &msg);
+    android::status_t err = mImpl->getTrackFormat((ssize_t)index, &msg);
+    if (err != android::OK) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    //convert message to map
-    AutoPtr<IMap> msgMap;
-    Media_Utils::ConvertMessageToMap(msg, (IMap**)&msgMap);
+    AutoPtr<IMap> format;
+    err = Media_Utils::ConvertMessageToMap(msg, (IMap**)&format);
 
-    return msgMap;
+    if (err != android::OK) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    *result = format;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode CMediaExtractor::SelectTrack(

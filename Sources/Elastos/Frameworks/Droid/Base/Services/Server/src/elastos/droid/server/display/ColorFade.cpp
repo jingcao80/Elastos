@@ -617,7 +617,7 @@ Boolean ColorFade::CreateEglContext()
     Boolean bval;
 
     if (mEglDisplay == NULL) {
-        egl14->EglGetDisplay(IEGL14::EGL_DEFAULT_DISPLAY, (IEGLDisplay**)&mEglDisplay);
+        egl14->EglGetDisplay(IEGL14::_EGL_DEFAULT_DISPLAY, (IEGLDisplay**)&mEglDisplay);
         if (mEglDisplay == NULL /* CEGL14::EGL_NO_DISPLAY */) {
             LogEglError(String("eglGetDisplay"));
             return FALSE;

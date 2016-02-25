@@ -73,7 +73,7 @@ module
          * @param target is the Hander to which to return the events.
          */
         StartMonitoring(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IHandler* target);
 
         /**

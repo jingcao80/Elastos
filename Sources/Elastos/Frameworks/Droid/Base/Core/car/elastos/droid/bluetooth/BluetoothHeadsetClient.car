@@ -343,6 +343,8 @@ module
             const Int32 CALL_ACCEPT_HOLD = 1;
             const Int32 CALL_ACCEPT_TERMINATE = 2;
 
+            Close();
+
             /**
              * Connects to remote device.
              *

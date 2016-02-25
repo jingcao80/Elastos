@@ -6,33 +6,31 @@
 #include "elastos/droid/webkit/native/media/VideoCaptureElastos.h"
 #include "elastos/droid/webkit/native/media/ImageFormat.h"
 
-//TODO #include "elastos/droid/graphics/CImageFormat.h"
+#include "elastos/droid/graphics/CImageFormat.h"
 #include "elastos/droid/hardware/CHardwareCameraHelper.h"
-//TODO #include "elastos/droid/hardware/CHardwareCamera.h"
+#include "elastos/droid/hardware/CHardwareCamera.h"
 #include "elastos/droid/os/Build.h"
 
-//TODO #include <elastos/utility/CArrayList.h>
-//TODO #include <elastos/core/CInteger32.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Graphics::IImageFormat;
-//TODO using Elastos::Droid::Graphics::CImageFormat;
+using Elastos::Droid::Graphics::CImageFormat;
 using Elastos::Droid::Hardware::ICameraSize;
 using Elastos::Droid::Hardware::IHardwareCameraHelper;
 using Elastos::Droid::Hardware::CHardwareCameraHelper;
-//TODO using Elastos::Droid::Hardware::CHardwareCamera;
+using Elastos::Droid::Hardware::CHardwareCamera;
 
 using Elastos::Utility::Concurrent::Locks::ILock;
 using Elastos::Utility::Concurrent::Locks::EIID_ILock;
 using Elastos::Utility::IListIterator;
 using Elastos::Utility::IList;
 using Elastos::Utility::IArrayList;
-//TODO using Elastos::Utility::CArrayList;
+using Elastos::Utility::CArrayList;
 using Elastos::Droid::Os::Build;
 using Elastos::Core::IInteger32;
 //using Elastos::Core::IObjectContainer;
 //using Elastos::Core::IObjectEnumerator;
-//TODO using Elastos::Core::CInteger32;
+using Elastos::Core::CInteger32;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -62,10 +60,9 @@ VideoCaptureElastos::BuggyDeviceHack::IdAndSizes::IdAndSizes(
 
 AutoPtr<ArrayOf<VideoCaptureElastos::BuggyDeviceHack::IdAndSizes*> > VideoCaptureElastos::s_CAPTURESIZE_BUGGY_DEVICE_LIST_Init()
 {
-    // AutoPtr<BuggyDeviceHack::IdAndSizes> idAndSizes = new BuggyDeviceHack::IdAndSizes(String("Nexus 7"), String("flo"), 640, 480);
+    AutoPtr<BuggyDeviceHack::IdAndSizes> idAndSizes = new BuggyDeviceHack::IdAndSizes(String("Nexus 7"), String("flo"), 640, 480);
     AutoPtr<ArrayOf<BuggyDeviceHack::IdAndSizes*> > array = ArrayOf<BuggyDeviceHack::IdAndSizes*>::Alloc(1);
-    // TODO
-    // (*array)[0] = idAndSizes;
+    array->Set(0, idAndSizes);
     return array;
 }
 
@@ -161,7 +158,7 @@ AutoPtr<ArrayOf<VideoCapture::CaptureFormat*> > VideoCaptureElastos::GetDeviceSu
         //pixelFormats = new ArrayList<Integer>();
         pixelFormats = ArrayOf<IInteger32*>::Alloc(1);
         AutoPtr<IInteger32> obj;
-        //TODO CInteger32::New(IImageFormat::UNKNOWN, (IInteger32**)&obj);
+        CInteger32::New(IImageFormat::UNKNOWN, (IInteger32**)&obj);
         pixelFormats->Set(0, obj.Get());
 
     }
@@ -186,7 +183,7 @@ AutoPtr<ArrayOf<VideoCapture::CaptureFormat*> > VideoCaptureElastos::GetDeviceSu
         if (listFpsRange == NULL) {
             //listFpsRange = new ArrayList<int[]>();
             AutoPtr<IArrayList> arrayList;
-            //TODO CArrayList::New((IArrayList**)&arrayList);
+            CArrayList::New((IArrayList**)&arrayList);
             listFpsRange = IList::Probe(arrayList);
         }
         Int32 count;
@@ -196,14 +193,14 @@ AutoPtr<ArrayOf<VideoCapture::CaptureFormat*> > VideoCaptureElastos::GetDeviceSu
             //TODO should check the implementation of GetSupportedPreviewFpsRange
             // now not implemented
             AutoPtr<IArrayList> _range;
-            //TODO CArrayList::New((IArrayList**)&_range);
+            CArrayList::New((IArrayList**)&_range);
 
             AutoPtr<IInteger32> obj;
-            //TODO CInteger32::New(0, (IInteger32**)&obj);
+            CInteger32::New(0, (IInteger32**)&obj);
             _range->Add(obj.Get());
 
             obj = NULL;
-            //TODO CInteger32::New(0, (IInteger32**)&obj);
+            CInteger32::New(0, (IInteger32**)&obj);
             _range->Add(obj.Get());
 
             listFpsRange->Add(_range);
@@ -225,7 +222,7 @@ AutoPtr<ArrayOf<VideoCapture::CaptureFormat*> > VideoCaptureElastos::GetDeviceSu
             if ((supportedSizes == NULL)||(supportedSizes->GetLength() == 0)) {
                 //supportedSizes = new ArrayList<Camera.Size>();
                 supportedSizes = ArrayOf<ICameraSize*>::Alloc(1);
-                AutoPtr<ICameraSize> cameraSize ;//TODO = new CHardwareCamera::Size(0,0);
+                AutoPtr<ICameraSize> cameraSize = new CHardwareCamera::Size(0,0);
                 supportedSizes->Set(0, cameraSize.Get());
             }
             //if (supportedSizes.size() == 0) {
@@ -239,9 +236,9 @@ AutoPtr<ArrayOf<VideoCapture::CaptureFormat*> > VideoCaptureElastos::GetDeviceSu
                 AutoPtr<ICameraSize> size = (*supportedSizes)[i];
                 //TODO if ICameraSize and the interface to get width/heigth
                 //below cast should be removed
-                //TODO AutoPtr<CHardwareCamera::Size> v_size = (CHardwareCamera::Size*)size.Get();
-                Int32 width = 0;//TODO = v_size->width;
-                Int32 height  = 0;//TOD = v_size->height;
+                AutoPtr<CHardwareCamera::Size> v_size = (CHardwareCamera::Size*)size.Get();
+                Int32 width = v_size->mWidth;
+                Int32 height = v_size->mHeight;
                 //formatList.add(new CaptureFormat
                 formatList->Set(i, new VideoCapture::CaptureFormat(width,
                                                  height,
@@ -276,7 +273,7 @@ void VideoCaptureElastos::SetCaptureParameters(
 void VideoCaptureElastos::AllocateBuffers()
 {
     AutoPtr<IImageFormat> format;
-    //TODO CImageFormat::AcquireSingleton((IImageFormat**)&format);
+    CImageFormat::AcquireSingleton((IImageFormat**)&format);
     Int32 bits;
     format->GetBitsPerPixel(mCaptureFormat->mPixelFormat, &bits);
     mExpectedFrameSize = mCaptureFormat->mWidth * mCaptureFormat->mHeight * bits / 8;

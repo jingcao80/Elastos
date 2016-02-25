@@ -2256,16 +2256,16 @@ _Exit_:
     ECode closeCode = NOERROR;
     if (rawDataIn != NULL)
         closeCode = rawDataIn->Close();
-    if(closeCode == E_IO_EXCEPTION) {
+    if(closeCode == (ECode)E_IO_EXCEPTION) {
         Slogger::W(TAG, "Close of restore data pipe threw");
     }
     if (rawInStream != NULL)
         closeCode = rawInStream->Close();
-    if(closeCode == E_IO_EXCEPTION) {
+    if(closeCode == (ECode)E_IO_EXCEPTION) {
         Slogger::W(TAG, "Close of restore data pipe threw");
     }
     closeCode = mInputFile->Close();
-    if(closeCode == E_IO_EXCEPTION) {
+    if(closeCode == (ECode)E_IO_EXCEPTION) {
         Slogger::W(TAG, "Close of restore data pipe threw");
     }
     // } catch (IOException e) {
@@ -2684,7 +2684,7 @@ _Exit2_:
                         if (pipeOkay) {
                             //try {
                             ECode ee = pipe->Write(buffer, 0, nRead);
-                            if (ee == E_IO_EXCEPTION) {
+                            if (ee == (ECode)E_IO_EXCEPTION) {
                                 Slogger::E(TAG, "Failed to write to restore pipe 0x%08x", ee);
                                 pipeOkay = FALSE;
                             }
@@ -3713,7 +3713,7 @@ void CBackupManagerService::PerformRestoreTask::BeginRestore()
             // !!! TODO: get an actual count from the transport after
             // its startRestore() runs?
             ECode code = mObserver->RestoreStarting(mRestorePackages->GetSize());
-            if (code == E_REMOTE_EXCEPTION) {
+            if (code == (ECode)E_REMOTE_EXCEPTION) {
                 Slogger::D(TAG, "Restore observer died at restoreStarting");
                 mObserver = NULL;
             }
@@ -6018,7 +6018,7 @@ _Exit1_:
         if (in != NULL) in->Close();
         //} catch (IOException e) {}
         //}
-        if (ecode == E_EOF_EXCEPTION) {
+        if (ecode == (ECode)E_EOF_EXCEPTION) {
             // Once we've rewritten the backup history log, atomically replace the
             // old one with the new one then reopen the file for continuing use.
             Boolean bSucceeded;
@@ -6030,7 +6030,7 @@ _Exit1_:
                 Slogger::E(TAG, "Error renaming %s to %s", str.string(), str1.string());
             }
         }
-        else if (ecode == E_IO_EXCEPTION) {
+        else if (ecode == (ECode)E_IO_EXCEPTION) {
             Slogger::E(TAG, "Error in processed file");
         }
         else if (FAILED(ecode)) {

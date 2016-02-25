@@ -2,12 +2,12 @@
 #include "elastos/droid/webkit/native/android_webview/api/AwPermissionRequest_dec.h"
 #include "elastos/droid/webkit/native/base/ThreadUtils.h"
 
-//TODO #include "elastos/droid/net/CUriHelper.h"
+#include "elastos/droid/net/CUriHelper.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
-//TODO using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Webkit::Base::ThreadUtils;
 
 using Elastos::Utility::Logging::Logger;
@@ -49,7 +49,7 @@ AutoPtr<IInterface> AwPermissionRequest::Create(
     if (nativeAwPermissionRequest == 0) return NULL;
 
     AutoPtr<IUriHelper> helper;
-    //TODO CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     AutoPtr<IUri> origin;
     helper->Parse(url, (IUri**)&origin);
     AutoPtr<AwPermissionRequest> request = new AwPermissionRequest(nativeAwPermissionRequest, origin, resources);

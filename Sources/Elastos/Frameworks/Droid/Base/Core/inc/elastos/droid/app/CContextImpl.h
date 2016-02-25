@@ -11,49 +11,10 @@
 #include "elastos/droid/content/ContextWrapper.h"
 #include <elastos/utility/etl/HashMap.h>
 
-// using Elastos::Core::IClassLoader;
-// using Elastos::Core::ICharSequence;
-// using Elastos::IO::IFile;
-// using Elastos::IO::IFileInputStream;
-// using Elastos::IO::IFileOutputStream;
-// using Elastos::IO::IFileDescriptor;
-// using Elastos::IO::IInputStream;
-// using Elastos::Droid::Os::ILooper;
-// using Elastos::Droid::Os::IHandler;
-// using Elastos::Droid::Os::IBundle;
-// using Elastos::Droid::Os::IBinder;
-// using Elastos::Droid::Os::IUserHandle;
-// using Elastos::Droid::Net::IUri;
-// using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::Content::IIContentProvider;
 using Elastos::Droid::Content::ContentResolver;
 using Elastos::Droid::Content::ContextWrapper;
-// using Elastos::Droid::Content::IIntent;
-// using Elastos::Droid::Content::IIntentSender;
 using Elastos::Droid::Content::IIntentFilter;
-// using Elastos::Droid::Content::IContext;
-// using Elastos::Droid::Content::IContentResolver;
-// using Elastos::Droid::Content::IComponentName;
-// using Elastos::Droid::Content::IComponentCallbacks;
-// using Elastos::Droid::Content::ISharedPreferences;
-// using Elastos::Droid::Content::IBroadcastReceiver;
-// using Elastos::Droid::Content::IServiceConnection;
-// using Elastos::Droid::Content::Res::ITypedArray;
-// using Elastos::Droid::Content::Res::IConfiguration;
-// using Elastos::Droid::Content::Res::IResources;
-// using Elastos::Droid::Content::Res::IResourcesTheme;
-// using Elastos::Droid::Content::Res::IAssetManager;
-// using Elastos::Droid::Content::Pm::IPackageManager;
-// using Elastos::Droid::Content::Pm::IApplicationInfo;
-// using Elastos::Droid::Content::Pm::IActivityInfo;
-// using Elastos::Droid::View::IDisplay;
-// using Elastos::Droid::View::ICompatibilityInfoHolder;
-// using Elastos::Droid::Graphics::IBitmap;
-// using Elastos::Droid::Graphics::Drawable::IDrawable;
-// using Elastos::Droid::Database::ICursor;
-// using Elastos::Droid::Database::IDatabaseErrorHandler;
-// using Elastos::Droid::Database::Sqlite::ISQLiteDatabase;
-// using Elastos::Droid::Database::Sqlite::ISQLiteDatabaseCursorFactory;
 using Elastos::Droid::Utility::IArrayMap;
 
 namespace Elastos {

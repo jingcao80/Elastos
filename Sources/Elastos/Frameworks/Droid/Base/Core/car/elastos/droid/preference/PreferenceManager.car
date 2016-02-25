@@ -144,13 +144,13 @@ module
              * @hide
              */
         InflateFromResource(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 resId,
             [in] IPreferenceScreen* rootPreferences,
             [out] IPreferenceScreen** result);
 
         CreatePreferenceScreen(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IPreferenceScreen** result);
 
         /**
@@ -401,7 +401,7 @@ module
              *         listen to values of the preferences.
              */
         GetDefaultSharedPreferences(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] ISharedPreferences** result);
 
         /**
@@ -426,7 +426,7 @@ module
              *            parameter set to true.
              */
         SetDefaultValues(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 resId,
             [in] Boolean readAgain);
 
@@ -459,7 +459,7 @@ module
              * @see #setSharedPreferencesMode(int)
              */
         SetDefaultValues(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String sharedPreferencesName,
             [in] Int32 sharedPreferencesMode,
             [in] Int32 resId,

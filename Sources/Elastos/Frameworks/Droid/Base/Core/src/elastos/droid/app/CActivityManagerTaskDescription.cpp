@@ -3,23 +3,26 @@
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/graphics/CColor.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
+#include <Elastos.CoreLibrary.External.h>
 
 using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::CColor;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace App {
 
-const String ATTR_TASKDESCRIPTION_PREFIX("task_description_");
+const String CActivityManagerTaskDescription::ATTR_TASKDESCRIPTION_PREFIX("task_description_");
 
-const String ATTR_TASKDESCRIPTIONLABEL("task_description_label");
-const String ATTR_TASKDESCRIPTIONCOLOR("task_description_color");
-const String ATTR_TASKDESCRIPTIONICONFILENAM("task_description_icon_filename");
+const String CActivityManagerTaskDescription::ATTR_TASKDESCRIPTIONLABEL("task_description_label");
+const String CActivityManagerTaskDescription::ATTR_TASKDESCRIPTIONCOLOR("task_description_color");
+const String CActivityManagerTaskDescription::ATTR_TASKDESCRIPTIONICONFILENAME("task_description_icon_filename");
 
 CAR_INTERFACE_IMPL_2(CActivityManagerTaskDescription, Object, IActivityManagerTaskDescription, IParcelable)
 
@@ -196,18 +199,18 @@ ECode CActivityManagerTaskDescription::GetPrimaryColor(
 
 /** @hide */
 ECode CActivityManagerTaskDescription::SaveToXml(
-    /* [in] */ IXmlSerializer* xs)
+    /* [in] */ IXmlSerializer* out)
 {
-    assert(0 && "TODO");
-    // if (mLabel != NULL) {
-    //     out.attribute(NULL, ATTR_TASKDESCRIPTIONLABEL, mLabel);
-    // }
-    // if (mColorPrimary != 0) {
-    //     out.attribute(NULL, ATTR_TASKDESCRIPTIONCOLOR, Integer.toHexString(mColorPrimary));
-    // }
-    // if (!mIconFilename.IsNull()) {
-    //     out.attribute(NULL, ATTR_TASKDESCRIPTIONICONFILENAME, mIconFilename);
-    // }
+    String nullStr;
+    if (!mLabel.IsNull()) {
+        out->WriteAttribute(nullStr, ATTR_TASKDESCRIPTIONLABEL, mLabel);
+    }
+    if (mColorPrimary != 0) {
+        out->WriteAttribute(nullStr, ATTR_TASKDESCRIPTIONCOLOR, StringUtils::ToHexString(mColorPrimary));
+    }
+    if (!mIconFilename.IsNull()) {
+        out->WriteAttribute(nullStr, ATTR_TASKDESCRIPTIONICONFILENAME, mIconFilename);
+    }
     return NOERROR;
 }
 
@@ -215,14 +218,15 @@ ECode CActivityManagerTaskDescription::RestoreFromXml(
     /* [in] */ const String& attrName,
     /* [in] */ const String& attrValue)
 {
-    assert(0 && "TODO");
-    // if (ATTR_TASKDESCRIPTIONLABEL.equals(attrName)) {
-    //     setLabel(attrValue);
-    // } else if (ATTR_TASKDESCRIPTIONCOLOR.equals(attrName)) {
-    //     setPrimaryColor((int) Long.parseLong(attrValue, 16));
-    // } else if (ATTR_TASKDESCRIPTIONICONFILENAME.equals(attrName)) {
-    //     setIconFilename(attrValue);
-    // }
+    if (ATTR_TASKDESCRIPTIONLABEL.Equals(attrName)) {
+        SetLabel(attrValue);
+    }
+    else if (ATTR_TASKDESCRIPTIONCOLOR.Equals(attrName)) {
+        SetPrimaryColor(StringUtils::ParseInt64(attrValue, 16));
+    }
+    else if (ATTR_TASKDESCRIPTIONICONFILENAME.Equals(attrName)) {
+        SetIconFilename(attrValue);
+    }
     return NOERROR;
 }
 

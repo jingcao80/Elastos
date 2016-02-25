@@ -7,6 +7,7 @@
 #include "elastos/droid/app/CNotificationMediaStyle.h"
 #include "elastos/droid/app/CNotificationBuilder.h"
 #include "elastos/droid/app/CNotification.h"
+#include "elastos/droid/widget/CRemoteViews.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
@@ -14,6 +15,7 @@
 using Elastos::Droid::R;
 using Elastos::Droid::Graphics::PorterDuffMode_SRC_ATOP;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::Widget::CRemoteViews;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -144,8 +146,7 @@ AutoPtr<IRemoteViews> CNotificationMediaStyle::GenerateMediaActionButton(
     builder->mContext->GetPackageName(&pkgName);
 
     AutoPtr<IRemoteViews> button;
-    assert(0 && "TODO");
-    // CRemoteViews::New(pkgName, R::layout::notification_material_media_action, (IRemoteViews**)&button);
+    CRemoteViews::New(pkgName, R::layout::notification_material_media_action, (IRemoteViews**)&button);
     button->SetImageViewResource(R::id::action0, icon);
     button->SetDrawableParameters(R::id::action0, FALSE, -1,
         0xFFFFFFFF, PorterDuffMode_SRC_ATOP, -1);

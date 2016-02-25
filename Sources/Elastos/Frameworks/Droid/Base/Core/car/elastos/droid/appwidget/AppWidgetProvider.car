@@ -146,7 +146,7 @@ module
          * @param newWidgetIds
          */
         OnRestored(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ArrayOf<Int32>* oldWidgetIds,
             [in] ArrayOf<Int32>* newWidgetIds);
     }

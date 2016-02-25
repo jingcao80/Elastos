@@ -21,7 +21,7 @@
 using Elastos::Droid::App::IWallpaperInfo;
 using Elastos::Droid::App::IIWallpaperManager;
 using Elastos::Droid::App::IIWallpaperManagerCallback;
-using Elastos::Droid::App::IUserSwitchObserver;
+using Elastos::Droid::App::IIUserSwitchObserver;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
@@ -277,7 +277,7 @@ public:
 
     class SystemRunningObserver
         : public Object
-        , public IUserSwitchObserver
+        , public IIUserSwitchObserver
         , public IBinder
     {
     public:

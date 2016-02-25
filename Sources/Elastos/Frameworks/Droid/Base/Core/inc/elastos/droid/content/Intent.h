@@ -29,7 +29,7 @@ namespace Elastos {
 namespace Droid {
 namespace Content {
 
-class Intent
+class ECO_PUBLIC Intent
     : public Object
     , public IIntent
     , public IParcelable
@@ -716,27 +716,27 @@ public:
     CARAPI IsDocument(
         /* [out] */ Boolean* result);
 private:
-    static CARAPI_(AutoPtr<IClipDataItem>) MakeClipItem(
+    ECO_LOCAL static CARAPI_(AutoPtr<IClipDataItem>) MakeClipItem(
         /* [in] */ ArrayOf<IUri*>* streams,
         /* [in] */ ArrayOf<ICharSequence*>* texts,
         /* [in] */ ArrayOf<String>* htmlTexts,
         /* [in] */ Int32 which);
 
-    CARAPI_(AutoPtr<IClassInfo>) TransformClassInfo(
+    ECO_LOCAL CARAPI_(AutoPtr<IClassInfo>) TransformClassInfo(
         /* [in] */ const ClassID& objId);
 
 private:
-    static const String ATTR_ACTION;// = "action";
-    static const String TAG_CATEGORIES;// = "categories";
-    static const String ATTR_CATEGORY;// = "category";
-    static const String TAG_EXTRA;// = "extra";
-    static const String ATTR_TYPE;// = "type";
-    static const String ATTR_COMPONENT;// = "component";
-    static const String ATTR_DATA;// = "data";
-    static const String ATTR_FLAGS;// = "flags";
+    ECO_LOCAL static const String ATTR_ACTION;// = "action";
+    ECO_LOCAL static const String TAG_CATEGORIES;// = "categories";
+    ECO_LOCAL static const String ATTR_CATEGORY;// = "category";
+    ECO_LOCAL static const String TAG_EXTRA;// = "extra";
+    ECO_LOCAL static const String ATTR_TYPE;// = "type";
+    ECO_LOCAL static const String ATTR_COMPONENT;// = "component";
+    ECO_LOCAL static const String ATTR_DATA;// = "data";
+    ECO_LOCAL static const String ATTR_FLAGS;// = "flags";
 
 private:
-    static const String TAG;
+    ECO_LOCAL static const String TAG;
 
     String mAction;
     AutoPtr<IUri> mData;

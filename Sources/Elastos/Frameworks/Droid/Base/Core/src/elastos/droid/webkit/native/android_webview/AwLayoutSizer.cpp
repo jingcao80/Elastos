@@ -1,10 +1,10 @@
 
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/webkit/native/android_webview/AwLayoutSizer.h"
-//TODO #include "elastos/droid/view/View.h"
+#include "elastos/droid/view/View.h"
 
 using Elastos::Droid::View::IView;
-//TODO using Elastos::Droid::View::View;
+using Elastos::Droid::View::View;
 
 namespace Elastos {
 namespace Droid {
@@ -127,10 +127,10 @@ void AwLayoutSizer::OnMeasure(
     /* [in] */ Int32 widthMeasureSpec,
     /* [in] */ Int32 heightMeasureSpec)
 {
-    Int32 heightMode = 0;//TODO View::MeasureSpec::GetMode(heightMeasureSpec);
-    Int32 heightSize = 0;//TODO View::MeasureSpec::GetSize(heightMeasureSpec);
-    Int32 widthMode = 0;//TODO View::MeasureSpec::GetMode(widthMeasureSpec);
-    Int32 widthSize = 0;//TODO View::MeasureSpec::GetSize(widthMeasureSpec);
+    Int32 heightMode = Elastos::Droid::View::View::MeasureSpec::GetMode(heightMeasureSpec);
+    Int32 heightSize = Elastos::Droid::View::View::MeasureSpec::GetSize(heightMeasureSpec);
+    Int32 widthMode = Elastos::Droid::View::View::MeasureSpec::GetMode(widthMeasureSpec);
+    Int32 widthSize = Elastos::Droid::View::View::MeasureSpec::GetSize(widthMeasureSpec);
 
     Int32 contentHeightPix = (Int32) (mContentHeightCss * mPageScaleFactor * mDIPScale);
     Int32 contentWidthPix = (Int32) (mContentWidthCss * mPageScaleFactor * mDIPScale);
@@ -139,10 +139,10 @@ void AwLayoutSizer::OnMeasure(
     Int32 measuredWidth = contentWidthPix;
 
     // Always use the given size unless unspecified. This matches WebViewClassic behavior.
-    mWidthMeasurementIsFixed = (widthMode != (0 << 30)/*TODO View::MeasureSpec::UNSPECIFIED*/);
-    mHeightMeasurementIsFixed = (heightMode == (1 << 30)/*TODO View::MeasureSpec::EXACTLY*/);
+    mWidthMeasurementIsFixed = (widthMode != (Elastos::Droid::View::View::MeasureSpec::UNSPECIFIED));
+    mHeightMeasurementIsFixed = (heightMode == (Elastos::Droid::View::View::MeasureSpec::EXACTLY));
     mHeightMeasurementLimited =
-        (heightMode == (2 << 30)/*TODO View::MeasureSpec::AT_MOST*/) && (contentHeightPix > heightSize);
+        (heightMode == (Elastos::Droid::View::View::MeasureSpec::AT_MOST) && (contentHeightPix > heightSize));
     mHeightMeasurementLimit = heightSize;
 
     if (mHeightMeasurementIsFixed || mHeightMeasurementLimited) {

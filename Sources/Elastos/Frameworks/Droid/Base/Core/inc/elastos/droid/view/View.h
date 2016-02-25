@@ -101,6 +101,7 @@ class ECO_PUBLIC View
 {
     friend class RenderNode;
     friend class RenderNodeAnimator;
+    friend class ThreadedRenderer;
     friend class ViewRootImpl;
     friend class LayoutInflater;
     friend class ViewGroup;

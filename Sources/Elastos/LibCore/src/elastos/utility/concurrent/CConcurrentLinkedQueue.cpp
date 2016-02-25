@@ -159,7 +159,9 @@ ECode CConcurrentLinkedQueue::Offer(
 ECode CConcurrentLinkedQueue::Poll(
     /* [out] */ IInterface** e)
 {
-    VALIDATE_NOT_NULL(*e);
+    VALIDATE_NOT_NULL(e);
+    *e = NULL;
+
     RESTARTFROMHEAD:
     for (;;) {
         for (AutoPtr<Node> h = mHead, p = h, q;;) {
@@ -176,7 +178,6 @@ ECode CConcurrentLinkedQueue::Poll(
             }
             else if ((q = p->mNext) == NULL) {
                 UpdateHead(h, p);
-                *e = NULL;
                 return NOERROR;
             }
             else if (p == q)
@@ -191,7 +192,9 @@ ECode CConcurrentLinkedQueue::Poll(
 ECode CConcurrentLinkedQueue::Peek(
     /* [out] */ IInterface** e)
 {
-    VALIDATE_NOT_NULL(*e);
+    VALIDATE_NOT_NULL(e);
+    *e = NULL;
+
     RESTARTFROMHEAD:
     for (;;) {
         for (AutoPtr<Node> h = mHead, p = h, q;;) {
@@ -366,7 +369,7 @@ ECode CConcurrentLinkedQueue::AddAll(
 ECode CConcurrentLinkedQueue::ToArray(
     /* [out, callee] */ ArrayOf<IInterface*>** array)
 {
-    VALIDATE_NOT_NULL(*array);
+    VALIDATE_NOT_NULL(array);
     // Use ArrayList to deal with resizing.
     AutoPtr<IArrayList> al;
     CArrayList::New((IArrayList**)&al);
@@ -384,7 +387,7 @@ ECode CConcurrentLinkedQueue::ToArray(
     /* [in] */ ArrayOf<IInterface*>* inArray,
     /* [out, callee] */ ArrayOf<IInterface*>** outArray)
 {
-    VALIDATE_NOT_NULL(*outArray);
+    VALIDATE_NOT_NULL(outArray);
     // try to use sent-in array
     Int32 k = 0;
     AutoPtr<Node> p;
@@ -419,7 +422,7 @@ ECode CConcurrentLinkedQueue::ToArray(
 ECode CConcurrentLinkedQueue::GetIterator(
     /* [out] */ IIterator** iterator)
 {
-    VALIDATE_NOT_NULL(*iterator);
+    VALIDATE_NOT_NULL(iterator);
     AutoPtr<Itr> p = new Itr(this);
     *iterator = (IIterator*)p->Probe(EIID_IIterator);
     REFCOUNT_ADD(*iterator);

@@ -1368,7 +1368,7 @@ ECode CContentService::EnforceCrossUserPermission(
     return NOERROR;
 }
 
-ECode CContentService::Main(
+AutoPtr<IIContentService> CContentService::Main(
     /* [in] */ IContext* context,
     /* [in] */ Boolean factoryTest)
 {
@@ -1376,7 +1376,8 @@ ECode CContentService::Main(
     CContentService::New(context, factoryTest, (IIContentService**)&service);
     AutoPtr<IServiceManager> mgr;
     CServiceManager::AcquireSingleton((IServiceManager**)&mgr);
-    return mgr->AddService(IContentResolver::CONTENT_SERVICE_NAME, service.Get());
+    mgr->AddService(IContentResolver::CONTENT_SERVICE_NAME, service.Get());
+    return service;
 }
 
 ECode CContentService::constructor(

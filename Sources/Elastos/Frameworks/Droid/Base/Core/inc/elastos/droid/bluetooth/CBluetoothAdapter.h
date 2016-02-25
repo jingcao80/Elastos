@@ -7,12 +7,16 @@
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/core/Object.h>
 #include "elastos/droid/bluetooth/CBluetoothAdapterManagerCallback.h"
+#include "elastos/droid/bluetooth/le/ScanCallback.h"
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::Bluetooth::LE::IBluetoothLeAdvertiser;
 using Elastos::Droid::Bluetooth::LE::IBluetoothLeScanner;
+using Elastos::Droid::Bluetooth::LE::IScanResult;
+using Elastos::Droid::Bluetooth::LE::ScanCallback;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Utility::Etl::List;
+using Elastos::Utility::IMap;
 using Elastos::Utility::IUUID;
 
 namespace Elastos {
@@ -62,6 +66,27 @@ CarClass(CBluetoothAdapter)
 //        virtual CARAPI_(void) OnBluetoothStateChange(
 //            /* [in] */ Boolean on) = 0;
 //    };
+public:
+    class BluetoothAdapterScanCallback
+        : public ScanCallback
+    {
+    public:
+        ~BluetoothAdapterScanCallback(){};
+
+        BluetoothAdapterScanCallback(
+            /* [in] */ CBluetoothAdapter* owner,
+            /* [in] */ ArrayOf<IUUID*>* serviceUuids,
+            /* [in] */ IBluetoothAdapterLeScanCallback* callback);
+
+        CARAPI OnScanResult(
+            /* [in] */ Int32 callbackType,
+            /* [in] */ IScanResult* result);
+
+    private:
+        CBluetoothAdapter* mOwner;
+        AutoPtr<ArrayOf<IUUID*> > mServiceUuids;
+        AutoPtr<IBluetoothAdapterLeScanCallback> mCallback;
+    };
 
 public:
     CAR_INTERFACE_DECL();
@@ -71,14 +96,6 @@ public:
     CBluetoothAdapter();
 
     ~CBluetoothAdapter();
-
-    /**
-    * Helper to check if this device has FEATURE_BLUETOOTH, but without using
-    * a context.
-    * Equivalent to
-    * context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)
-    */
-    static CARAPI_(Boolean) HasBluetoothFeature();
 
     static CARAPI_(AutoPtr<IBluetoothAdapter>) GetDefaultAdapter();
 
@@ -269,6 +286,7 @@ private:
     const static Boolean DBG;
     const static Boolean VDBG;
     const static Int32 ADDRESS_LENGTH = 17;
+    const static Int32 CONTROLLER_ENERGY_UPDATE_TIMEOUT_MILLIS = 30;
 
     /**
      * Lazily initialized singleton. Guaranteed final after first object
@@ -276,10 +294,16 @@ private:
      */
     static AutoPtr<IBluetoothAdapter> sAdapter;
 
+    static AutoPtr<IBluetoothLeScanner> sBluetoothLeScanner;
+    static AutoPtr<IBluetoothLeAdvertiser> sBluetoothLeAdvertiser;
+
     AutoPtr<IIBluetoothManager> mManagerService;
     AutoPtr<IIBluetooth> mService;
 
-    AutoPtr<IHandler> mServiceRecordHandler;
+    Object mLock;
+    AutoPtr<IMap> mLeScanClients;//<LeScanCallback, ScanCallback>
+
+    //AutoPtr<IHandler> mServiceRecordHandler;
     AutoPtr<IIBluetoothManagerCallback> mManagerCallback;
     Object mManagerCallbackLock;
     List<AutoPtr<IIBluetoothManagerCallback> > mProxyServiceStateCallbacks;

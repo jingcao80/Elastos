@@ -43,7 +43,7 @@ module
          * {@link #createSpeechRecognizer} static factory method
          */
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IComponentName* serviceComponent);
 
         interface ISpeechRecognizer;
@@ -90,7 +90,7 @@ module
          *            TextToSpeech engine has initialized.
          */
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ITextToSpeechOnInitListener* listener);
 
         /**
@@ -105,7 +105,7 @@ module
          * @param engine Package name of the TTS engine to use.
          */
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ITextToSpeechOnInitListener* listener,
             [in] String engine);
 
@@ -116,7 +116,7 @@ module
          * @hide
          */
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ITextToSpeechOnInitListener* listener,
             [in] String engine,
             [in] String packageName,

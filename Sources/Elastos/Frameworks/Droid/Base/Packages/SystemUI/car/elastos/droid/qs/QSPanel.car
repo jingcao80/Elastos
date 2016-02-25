@@ -3,13 +3,12 @@ module
 {
     using interface Elastos.Utility.ICollection;
 
-    interface Elastos.Droid.Packages.SystemUI.Qs.IQSTileDetailAdapter;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPhoneQSTileHost;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IBrightnessMirrorController;
+    interface Elastos.Droid.SystemUI.Qs.IQSTileDetailAdapter;
+    interface Elastos.Droid.SystemUI.StatusBar.Phone.IPhoneQSTileHost;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IBrightnessMirrorController;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Qs {
 
@@ -72,7 +71,6 @@ module
 
     } // namespace Qs
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

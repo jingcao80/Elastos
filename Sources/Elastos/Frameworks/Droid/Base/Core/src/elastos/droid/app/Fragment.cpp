@@ -4,7 +4,8 @@
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/app/Fragment.h"
 #include "elastos/droid/app/FragmentManagerImpl.h"
-// #include "elastos/droid/app/Activity.h"
+#include "elastos/droid/app/Activity.h"
+#include "elastos/droid/app/SharedElementCallback.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/transition/TransitionInflater.h"
 #include "elastos/droid/transition/CTransitionSet.h"
@@ -169,8 +170,7 @@ ECode FragmentState::Instantiate(
         mInstance->SetSavedFragmentState(mSavedFragmentState);
     }
 
-    assert(0 && "TODO");
-    // AutoPtr<Activity> act = (Activity*)activity;
+    AutoPtr<Activity> act = (Activity*)activity;
     mInstance->SetIndex(mIndex, parent);
     mInstance->SetFromLayout(mFromLayout);
     mInstance->SetRestored(TRUE);
@@ -878,8 +878,8 @@ ECode Fragment::RestoreViewState(
     mCalled = FALSE;
     OnViewStateRestored(savedInstanceState);
     if (!mCalled) {
-//         throw new SuperNotCalledException("Fragment " + this
-//                 + " did not call through to super.onViewStateRestored()");
+        Slogger::E("Fragment", "Fragment did not call through to super::OnViewStateRestored()");
+        return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     return NOERROR;
 }
@@ -971,7 +971,7 @@ ECode Fragment::SetArguments(
     /* [in] */ IBundle* args)
 {
     if (mIndex >= 0) {
-//         throw new IllegalStateException("Fragment already active");
+        Slogger::E("Fragment", "Fragment already active");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     mArguments = args;
@@ -992,7 +992,7 @@ ECode Fragment::SetInitialSavedState(
     /* [in] */ IFragmentSavedState* state)
 {
     if (mIndex >= 0) {
-//         throw new IllegalStateException("Fragment already active");
+        Slogger::E("Fragment", "Fragment already active");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     AutoPtr<IBundle> fState;
@@ -1285,13 +1285,12 @@ ECode Fragment::GetLoaderManager(
         REFCOUNT_ADD(*manager);
     }
     if (mActivity == NULL) {
-//         throw new IllegalStateException("Fragment " + this + " not attached to Activity");
+        Slogger::E("Fragment", "Fragment  not attached to Activity");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     mCheckedForLoaderManager = TRUE;
-    assert(0 && "TODO");
-    // AutoPtr<Activity> act = (Activity*)mActivity.Get();;
-    // mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, TRUE);
+    AutoPtr<Activity> act = (Activity*)mActivity.Get();;
+    mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, TRUE);
     *manager = ILoaderManager::Probe(mLoaderManager);
     REFCOUNT_ADD(*manager);
     return NOERROR;
@@ -1314,7 +1313,7 @@ ECode Fragment::StartActivity(
     VALIDATE_NOT_NULL(options);
 
     if (mActivity == NULL) {
-//         throw new IllegalStateException("Fragment " + this + " not attached to Activity");
+        Slogger::E("Fragment", "Fragment  not attached to Activity");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (options != NULL) {
@@ -1340,7 +1339,7 @@ ECode Fragment::StartActivityForResult(
     /* [in] */ IBundle* options)
 {
     if (mActivity == NULL) {
-//         throw new IllegalStateException("Fragment " + this + " not attached to Activity");
+        Slogger::E("Fragment", "Fragment  not attached to Activity");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (options != NULL) {
@@ -1515,13 +1514,11 @@ ECode Fragment::OnStart()
         mLoadersStarted = TRUE;
         if (!mCheckedForLoaderManager) {
             mCheckedForLoaderManager = TRUE;
-            assert(0 && "TODO");
-            // AutoPtr<Activity> act = (Activity*)mActivity.Get();;
-            // mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, FALSE);
+            AutoPtr<Activity> act = (Activity*)mActivity.Get();;
+            mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, FALSE);
         }
         if (mLoaderManager != NULL) {
-            assert(0 && "TODO");
-            // ((LoaderManagerImpl*)mLoaderManager.Get())->DoStart();
+            assert(0 && "TODO"); //((LoaderManagerImpl*)mLoaderManager.Get())->DoStart();
         }
     }
     return NOERROR;
@@ -1584,12 +1581,11 @@ ECode Fragment::OnDestroy()
     //        + " mLoaderManager=" + mLoaderManager);
     if (!mCheckedForLoaderManager) {
         mCheckedForLoaderManager = TRUE;
-        assert(0 && "TODO");
-        // AutoPtr<Activity> act = (Activity*)mActivity.Get();;
-        // mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, FALSE);
+        AutoPtr<Activity> act = (Activity*)mActivity.Get();;
+        mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, FALSE);
     }
     if (mLoaderManager != NULL) {
-        // ((LoaderManagerImpl*)mLoaderManager.Get())->DoDestroy();
+        assert(0 && "TODO"); //((LoaderManagerImpl*)mLoaderManager.Get())->DoStart();
     }
     return NOERROR;
 }
@@ -1698,9 +1694,8 @@ ECode Fragment::SetEnterSharedElementCallback(
     /* [in] */ ISharedElementCallback* callback)
 {
     mEnterTransitionCallback = callback;
-    assert(0 && "TODO");
     if (mEnterTransitionCallback == NULL) {
-        // mEnterTransitionCallback = SharedElementCallback::NULL_CALLBACK;
+        mEnterTransitionCallback = SharedElementCallback::NULL_CALLBACK;
     }
     return NOERROR;
 }
@@ -1715,9 +1710,8 @@ ECode Fragment::SetExitSharedElementCallback(
     /* [in] */ ISharedElementCallback* callback)
 {
     mExitTransitionCallback = callback;
-    assert(0 && "TODO");
     if (mExitTransitionCallback == NULL) {
-        // mExitTransitionCallback = SharedElementCallback.NULL_CALLBACK;
+        mExitTransitionCallback = SharedElementCallback::NULL_CALLBACK;
     }
 
     return NOERROR;
@@ -2000,13 +1994,12 @@ ECode Fragment::PerformCreate(
     mCalled = FALSE;
     OnCreate(savedInstanceState);
     if (!mCalled) {
-//         throw new SuperNotCalledException("Fragment " + this
-//                 + " did not call through to super.onCreate()");
+        Slogger::E("Fragment", "Fragment  did not call through to super::OnCreate()");
+        return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     if (savedInstanceState != NULL) {
         AutoPtr<IParcelable> p;
-        assert(0 && "TODO");
-        // savedInstanceState->GetParcelable(Activity::FRAGMENTS_TAG, (IParcelable**)&p);
+        savedInstanceState->GetParcelable(Activity::FRAGMENTS_TAG, (IParcelable**)&p);
         if (p != NULL) {
             if (mChildFragmentManager == NULL) {
                 InstantiateChildFragmentManager();
@@ -2044,8 +2037,8 @@ ECode Fragment::PerformActivityCreated(
     mCalled = FALSE;
     OnActivityCreated(savedInstanceState);
     if (!mCalled) {
-//         throw new SuperNotCalledException("Fragment " + this
-//                 + " did not call through to super.onActivityCreated()");
+        Slogger::E("Fragment", "Fragment  did not call through to super::OnActivityCreated()");
+        return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     if (mChildFragmentManager != NULL) {
         mChildFragmentManager->DispatchActivityCreated();
@@ -2063,15 +2056,15 @@ ECode Fragment::PerformStart()
     mCalled = FALSE;
     OnStart();
     if (!mCalled) {
-//         throw new SuperNotCalledException("Fragment " + this
-//                 + " did not call through to super.onStart()");
+        Slogger::E("Fragment", "Fragment  did not call through to super::OnStart()");
+        return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     if (mChildFragmentManager != NULL) {
         mChildFragmentManager->DispatchStart();
     }
     if (mLoaderManager != NULL) {
         assert(0 && "TODO");
-        // ((LoaderManagerImpl*)mLoaderManager.Get())->DoReportStart();
+        //((LoaderManagerImpl*)mLoaderManager.Get())->DoReportStart();
     }
     return NOERROR;
 }
@@ -2086,8 +2079,8 @@ ECode Fragment::PerformResume()
     mCalled = FALSE;
     OnResume();
     if (!mCalled) {
-//         throw new SuperNotCalledException("Fragment " + this
-//                 + " did not call through to super.onResume()");
+        Slogger::E("Fragment", "Fragment  did not call through to super::OnResume()");
+        return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     if (mChildFragmentManager != NULL) {
         mChildFragmentManager->DispatchResume();
@@ -2243,8 +2236,7 @@ ECode Fragment::PerformSaveInstanceState(
         AutoPtr<IParcelable> p;
         mChildFragmentManager->SaveAllState((IParcelable**)&p);
         if (p != NULL) {
-            assert(0 && "TODO");
-            // outState->PutParcelable(Activity::FRAGMENTS_TAG, p);
+            outState->PutParcelable(Activity::FRAGMENTS_TAG, p);
         }
     }
     return NOERROR;
@@ -2258,8 +2250,8 @@ ECode Fragment::PerformPause()
     mCalled = FALSE;
     OnPause();
     if (!mCalled) {
-//         throw new SuperNotCalledException("Fragment " + this
-//                 + " did not call through to super.onPause()");
+        Slogger::E("Fragment", "Fragment did not call through to super::OnPause()");
+        return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     return NOERROR;
 }
@@ -2272,25 +2264,26 @@ ECode Fragment::PerformStop()
     mCalled = FALSE;
     OnStop();
     if (!mCalled) {
-//         throw new SuperNotCalledException("Fragment " + this
-//                 + " did not call through to super.onStop()");
+        Slogger::E("Fragment", "Fragment did not call through to super::OnStop()");
+        return E_SUPER_NOT_CALLED_EXCEPTION;
     }
 
     if (mLoadersStarted) {
         mLoadersStarted = FALSE;
-        assert(0 && "TODO");
-        // AutoPtr<Activity> act = (Activity*)mActivity.Get();;
-        // if (!mCheckedForLoaderManager) {
-        //     mCheckedForLoaderManager = TRUE;
-        //     mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, FALSE);
-        // }
-        // if (mLoaderManager != NULL) {
-        //     if (mActivity == NULL || !act->mChangingConfigurations) {
-        //         ILoaderManager::Probe(mLoaderManager)->DoStop();
-        //     } else {
-        //         ILoaderManager::Probe(mLoaderManager)->DoRetain();
-        //     }
-        // }
+        AutoPtr<Activity> act = (Activity*)mActivity.Get();;
+        if (!mCheckedForLoaderManager) {
+            mCheckedForLoaderManager = TRUE;
+            mLoaderManager = act->GetLoaderManager(mWho, mLoadersStarted, FALSE);
+        }
+        if (mLoaderManager != NULL) {
+            assert(0 && "TODO");
+            // if (mActivity == NULL || !act->mChangingConfigurations) {
+            //     ILoaderManager::Probe(mLoaderManager)->DoStop();
+            // }
+            // else {
+            //     ILoaderManager::Probe(mLoaderManager)->DoRetain();
+            // }
+        }
     }
     return NOERROR;
 }
@@ -2303,8 +2296,8 @@ ECode Fragment::PerformDestroyView()
     mCalled = FALSE;
     OnDestroyView();
     if (!mCalled) {
-//         throw new SuperNotCalledException("Fragment " + this
-//                 + " did not call through to super.onDestroyView()");
+        Slogger::E("Fragment", "Fragment did not call through to super::OnDestroyView()");
+        return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     if (mLoaderManager != NULL) {
         assert(0 && "TODO");
@@ -2321,8 +2314,8 @@ ECode Fragment::PerformDestroy()
     mCalled = FALSE;
     OnDestroy();
     if (!mCalled) {
-//         throw new SuperNotCalledException("Fragment " + this
-//                 + " did not call through to super.onDestroy()");
+        Slogger::E("Fragment", "Fragment did not call through to super::OnDestroy()");
+        return E_SUPER_NOT_CALLED_EXCEPTION;
     }
     return NOERROR;
 }

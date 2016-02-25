@@ -168,27 +168,28 @@ private:
     static CARAPI_(void) NativeRelease(
         /* [in] */ Int64 nativeObject);
 
-    static CARAPI_(void) NativeStart(
+    static CARAPI NativeStart(
         /* [in] */ Int64 nativeObject);
 
-    static CARAPI_(void) NativeStop(
+    static CARAPI NativeStop(
         /* [in] */ Int64 nativeObject);
 
-    static CARAPI_(Int32) NativeAddTrack(
+    static CARAPI NativeAddTrack(
         /* [in] */ Int64 nativeObject,
         /* [in] */ ArrayOf<String>* keys,
-        /* [in] */ ArrayOf<IInterface*>* values);
+        /* [in] */ ArrayOf<IInterface*>* values,
+        /* [out] */ Int32* result);
 
-    static CARAPI_(void) NativeSetOrientationHint(
+    static CARAPI NativeSetOrientationHint(
         /* [in] */ Int64 nativeObject,
         /* [in] */ Int32 degrees);
 
-    static CARAPI_(void) NativeSetLocation(
+    static CARAPI NativeSetLocation(
         /* [in] */ Int64 nativeObject,
         /* [in] */ Int32 latitude,
         /* [in] */ Int32 longitude);
 
-    static CARAPI_(void) NativeWriteSampleData(
+    static CARAPI NativeWriteSampleData(
         /* [in] */ Int64 nativeObject,
         /* [in] */ Int32 trackIndex,
         /* [in] */ IByteBuffer* byteBuf,

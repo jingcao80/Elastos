@@ -11,7 +11,7 @@
 
 using Elastos::Droid::App::Admin::IDevicePolicyManager;
 using Elastos::Droid::App::Admin::IIDevicePolicyManager;
-using Elastos::Droid::App::IActivityContainer;
+using Elastos::Droid::App::IIActivityContainer;
 using Elastos::Droid::App::IActivityContainerCallback;
 using Elastos::Droid::App::IActivityManagerStackInfo;
 using Elastos::Droid::App::IActivityManagerWaitResult;
@@ -150,7 +150,7 @@ public:
     class ActivityContainer
         : public Object
         , public IBinder
-        , public IActivityContainer
+        , public IIActivityContainer
     {
     public:
         CAR_INTERFACE_DECL();
@@ -459,7 +459,7 @@ public:
         /* [in] */ IConfiguration* config,
         /* [in] */ IBundle* options,
         /* [in] */ Int32 userId,
-        /* [in] */ IActivityContainer* iContainer,
+        /* [in] */ IIActivityContainer* iContainer,
         /* [in] */ TaskRecord* inTask,
         /* [out] */ Int32* result);
 
@@ -597,7 +597,7 @@ public:
         /* [in] */ ActivityRecord* parentActivity);
 
     virtual CARAPI DeleteActivityContainer(
-        /* [in] */ IActivityContainer* container);
+        /* [in] */ IIActivityContainer* container);
 
     virtual CARAPI_(Int32) GetNextStackId();
 

@@ -3,6 +3,7 @@
 #include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/droid/bluetooth/CBluetoothInputDeviceStateChangeCallback.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/os/Process.h"
 #include "elastos/core/AutoLock.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
@@ -10,8 +11,11 @@
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::Process;
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -95,26 +99,56 @@ BluetoothInputDevice::BluetoothInputDevice(
     mConnection = new ServiceConnection(this);
 
     mAdapter = CBluetoothAdapter::GetDefaultAdapter();
-    if(mAdapter != NULL){
-        AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
-        if (mgr != NULL) {
+    //if(mAdapter != NULL){
+    AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
+    if (mgr != NULL) {
 //            try {
-            ECode ec = mgr->RegisterStateChangeCallback(mBluetoothStateChangeCallback);
-            if (FAILED(ec)) {
-                Logger::E(TAG, "0x%08x", ec);
-            }
+        ECode ec = mgr->RegisterStateChangeCallback(mBluetoothStateChangeCallback);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "0x%08x", ec);
+        }
 //            } catch (RemoteException e) {
 //                Log.e(TAG,"",e);
 //            }
-        }
     }
+    //}
 
+    //AutoPtr<IIntent> intent;
+    //CIntent::New(String("IBluetoothInputDevice")/*IBluetoothInputDevice.class.getName()*/, (IIntent**)&intent);
+    //Boolean result;
+    //if (context->BindService(intent, mConnection, 0, &result), !result) {
+    //    Logger::E(TAG, "Could not bind to Bluetooth HID Service");
+    //}
+    Boolean bind;
+    DoBind(&bind);
+}
+
+ECode BluetoothInputDevice::DoBind(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    //Intent intent = new Intent(IBluetoothInputDevice.class.getName());
     AutoPtr<IIntent> intent;
     CIntent::New(String("IBluetoothInputDevice")/*IBluetoothInputDevice.class.getName()*/, (IIntent**)&intent);
-    Boolean result;
-    if (context->BindService(intent, mConnection, 0, &result), !result) {
-        Logger::E(TAG, "Could not bind to Bluetooth HID Service");
+    //ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+    //intent.setComponent(comp);
+    AutoPtr<IComponentName> comp;
+    AutoPtr<IPackageManager> pm;
+    mContext->GetPackageManager((IPackageManager**)&pm);
+    intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
+    intent->SetComponent(comp);
+    AutoPtr<IUserHandle> userHandle;
+    Process::MyUserHandle((IUserHandle**)&userHandle);
+
+    Boolean succeeded = FALSE;
+    if (comp == NULL || !(mContext->BindServiceAsUser(intent, mConnection, 0,
+                userHandle, &succeeded), succeeded)) {
+        Logger::E(TAG, "Could not bind to Bluetooth HID Service with ");// + intent);
+        *result = FALSE;
+        return NOERROR;
     }
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode BluetoothInputDevice::Close()
@@ -123,19 +157,19 @@ ECode BluetoothInputDevice::Close()
         Logger::D(TAG, "close()");
     }
 
-    if(mAdapter != NULL){
-        AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
-        if (mgr != NULL) {
+    //if(mAdapter != NULL){
+    AutoPtr<IIBluetoothManager> mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
+    if (mgr != NULL) {
     //        try {
-            ECode ec = mgr->UnregisterStateChangeCallback(mBluetoothStateChangeCallback);
-            if (FAILED(ec)) {
-                Logger::E(TAG, "0x%08x", ec);
-            }
+        ECode ec = mgr->UnregisterStateChangeCallback(mBluetoothStateChangeCallback);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "0x%08x", ec);
+        }
     //        } catch (Exception e) {
     //            Log.e(TAG,"",e);
     //        }
-        }
     }
+    //}
 
     AutoLock lock(mConnectionLock);
     if (mService != NULL) {
@@ -211,7 +245,6 @@ ECode BluetoothInputDevice::GetConnectedDevices(
 {
     VALIDATE_NOT_NULL(devices)
     *devices = NULL;
-    AutoPtr< ArrayOf<IBluetoothDevice*> > _devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
 
     if (VDBG) Logger::E(TAG, "getConnectedDevices()");
     if (mService != NULL && IsEnabled()) {
@@ -223,7 +256,9 @@ ECode BluetoothInputDevice::GetConnectedDevices(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    //TODO *devices = _devices;
+    AutoPtr<IList> l;
+    CArrayList::New((IList**)&l);
+    *devices = l;
     REFCOUNT_ADD(*devices)
     return NOERROR;
 }
@@ -232,9 +267,8 @@ ECode BluetoothInputDevice::GetDevicesMatchingConnectionStates(
     /* [in] */ ArrayOf<Int32>* states,
     /* [out] */ IList** devices)
 {
-    VALIDATE_NOT_NULL(*devices)
+    VALIDATE_NOT_NULL(devices)
     *devices = NULL;
-    AutoPtr< ArrayOf<IBluetoothDevice*> > _devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
 
     if (VDBG) Logger::D(TAG, "getDevicesMatchingStates()");
     if (mService != NULL && IsEnabled()) {
@@ -246,7 +280,9 @@ ECode BluetoothInputDevice::GetDevicesMatchingConnectionStates(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    //TODO *devices = _devices;
+    AutoPtr<IList> l;
+    CArrayList::New((IList**)&l);
+    *devices = l;
     REFCOUNT_ADD(*devices)
     return NOERROR;
 }
@@ -365,12 +401,12 @@ ECode BluetoothInputDevice::VirtualUnplug(
 
 Boolean BluetoothInputDevice::IsEnabled()
 {
-    if (mAdapter != NULL){
+    //if (mAdapter != NULL){
         Int32 state;
         if (mAdapter->GetState(&state), state == IBluetoothAdapter::STATE_ON) {
             return TRUE;
         }
-    }
+    //}
 
     return FALSE;
 }
@@ -480,7 +516,7 @@ ECode BluetoothInputDevice::SetReport(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    if (DBG) {
+    if (VDBG) {
         String str;
         IObject::Probe(device)->ToString(&str);
         Logger::D(TAG, "setReport(%s), reportType=%d report=%s", str.string(), reportType, report.string());

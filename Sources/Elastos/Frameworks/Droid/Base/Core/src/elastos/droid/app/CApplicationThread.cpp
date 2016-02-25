@@ -1,6 +1,7 @@
 
 #include <Elastos.CoreLibrary.Net.h>
 #include <Elastos.CoreLibrary.Text.h>
+#include <Elastos.CoreLibrary.Libcore.h>
 #include "Elastos.Droid.Internal.h"
 #include "elastos/droid/app/CApplicationThread.h"
 #include "elastos/droid/app/CActivityThread.h"
@@ -39,9 +40,9 @@ using Elastos::Text::IDateFormatHelper;
 using Elastos::Text::CDateFormatHelper;
 using Elastos::Net::IInetAddressHelper;
 using Elastos::Net::CInetAddressHelper;
-// using Libcore::Net::Event::INetworkEventDispatcher
-// using Libcore::Net::Event::INetworkEventDispatcherHelper;
-// using Libcore::Net::Event::CNetworkEventDispatcherHelper;
+using Libcore::Net::Event::INetworkEventDispatcher;
+using Libcore::Net::Event::INetworkEventDispatcherHelper;
+using Libcore::Net::Event::CNetworkEventDispatcherHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -445,11 +446,11 @@ ECode CApplicationThread::ClearDnsCache()
 
     // Allow libcore to perform the necessary actions as it sees fit upon a network
     // configuration change.
-    assert(0 && "TODO");
-    // AutoPtr<INetworkEventDispatcherHelper> helper;
-    // CNetworkEventDispatcherHelper::AcquireSingleton((INetworkEventDispatcherHelper**)&helper);
-    // return helper->OnNetworkConfigurationChanged();
-    return NOERROR;
+    AutoPtr<INetworkEventDispatcherHelper> nedHelper;
+    CNetworkEventDispatcherHelper::AcquireSingleton((INetworkEventDispatcherHelper**)&nedHelper);
+    AutoPtr<INetworkEventDispatcher> ned;
+    nedHelper->GetInstance((INetworkEventDispatcher**)&ned);
+    return ned->OnNetworkConfigurationChanged();
 }
 
 ECode CApplicationThread::SetHttpProxy(

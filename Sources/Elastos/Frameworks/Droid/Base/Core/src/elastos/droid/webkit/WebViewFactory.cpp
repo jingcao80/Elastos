@@ -13,10 +13,12 @@
 #include <android/dlext.h>
 
 #include "elastos/droid/os/Build.h"
+#include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/webkit/WebViewFactory.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::Build;
+using Elastos::Droid::Os::SystemProperties;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -27,11 +29,8 @@ static void* gReservedAddress = NULL;
 static size_t gReservedSize = 0;
 
 const String WebViewFactory::CHROMIUM_WEBVIEW_FACTORY("com.android.webview.chromium.WebViewChromiumFactoryProvider");
-
 const String WebViewFactory::NULL_WEBVIEW_FACTORY("com.android.webview.nullwebview.NullWebViewFactoryProvider");
-
 const String WebViewFactory::CHROMIUM_WEBVIEW_NATIVE_RELRO_32("/data/misc/shared_relro/libwebviewchromium32.relro");
-
 const String WebViewFactory::CHROMIUM_WEBVIEW_NATIVE_RELRO_64("/data/misc/shared_relro/libwebviewchromium64.relro");
 
 const Int64 WebViewFactory::CHROMIUM_WEBVIEW_DEFAULT_VMSIZE_BYTES;
@@ -40,6 +39,30 @@ const String WebViewFactory::LOGTAG("WebViewFactory");
 
 const Boolean WebViewFactory::DEBUG = FALSE;
 
+//============================================================================================
+// native codes
+//============================================================================================
+static Boolean nativeReserveAddressSpace(
+    /* [in] */ Int64 size)
+{
+    size_t vsize = static_cast<size_t>(size);
+
+    void* addr = mmap(NULL, vsize, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (addr == MAP_FAILED) {
+        ALOGE("Failed to reserve %zd bytes of address space for future load of "
+              "libwebviewchromium.so: %s",
+              vsize, strerror(errno));
+        return FALSE;
+    }
+    gReservedAddress = addr;
+    gReservedSize = vsize;
+    ALOGV("Reserved %zd bytes at %p", vsize, addr);
+    return TRUE;
+}
+
+//============================================================================================
+// WebViewFactory
+//============================================================================================
 // Cache the factory both for efficiency, and ensure any one process gets all webviews from the
 // same provider.
 AutoPtr<IWebViewFactoryProvider> WebViewFactory::sProviderInstance;
@@ -151,28 +174,26 @@ AutoPtr<IWebViewFactoryProvider> WebViewFactory::GetProvider()
  */
 ECode WebViewFactory::PrepareWebViewInZygote()
 {
-    assert(0);
     // TODO
     // try {
     //     System.loadLibrary("webviewchromium_loader");
-    //     long addressSpaceToReserve =
-    //             SystemProperties.getLong(CHROMIUM_WEBVIEW_VMSIZE_SIZE_PROPERTY,
-    //             CHROMIUM_WEBVIEW_DEFAULT_VMSIZE_BYTES);
-    //     sAddressSpaceReserved = nativeReserveAddressSpace(addressSpaceToReserve);
+    Int64 addressSpaceToReserve;
+    SystemProperties::GetInt64(IWebViewFactory::CHROMIUM_WEBVIEW_VMSIZE_SIZE_PROPERTY,
+        CHROMIUM_WEBVIEW_DEFAULT_VMSIZE_BYTES, &addressSpaceToReserve);
+    sAddressSpaceReserved = nativeReserveAddressSpace(addressSpaceToReserve);
 
-    //     if (sAddressSpaceReserved) {
-    //         if (DEBUG) {
-    //             Log.v(LOGTAG, "address space reserved: " + addressSpaceToReserve + " bytes");
-    //         }
-    //     } else {
-    //         Log.e(LOGTAG, "reserving " + addressSpaceToReserve +
-    //                 " bytes of address space failed");
-    //     }
+    if (sAddressSpaceReserved) {
+        if (DEBUG) {
+            Logger::V(LOGTAG, "address space reserved: %lld bytes", addressSpaceToReserve);
+        }
+    } else {
+        Logger::E(LOGTAG, "reserving %lld bytes of address space failed", addressSpaceToReserve);
+    }
     // } catch (Throwable t) {
     //     // Log and discard errors at this stage as we must not crash the zygote.
     //     Log.e(LOGTAG, "error preparing native loader", t);
     // }
-    return E_NOT_IMPLEMENTED;
+    return NOERROR;
 }
 
 /**

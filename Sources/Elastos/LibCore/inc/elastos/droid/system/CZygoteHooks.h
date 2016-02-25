@@ -25,6 +25,8 @@ public:
 
     CZygoteHooks();
 
+    CARAPI constructor();
+
     CARAPI PreFork();
 
     CARAPI PostForkChild(

@@ -2,12 +2,11 @@
 module
 {
     interface Elastos.Droid.View.IMotionEvent;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPanelView;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPanelHolder;
+    interface Elastos.Droid.SystemUI.StatusBar.Phone.IPanelView;
+    interface Elastos.Droid.SystemUI.StatusBar.Phone.IPanelHolder;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
     namespace Phone {
@@ -81,7 +80,6 @@ module
     } // namespace Phone
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

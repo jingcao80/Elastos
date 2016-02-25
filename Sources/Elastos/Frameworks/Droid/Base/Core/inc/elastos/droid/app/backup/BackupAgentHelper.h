@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_APP_BACKUP_BACKUPAGENTHELPER_H__
-#define  __ELASTOS_DROID_APP_BACKUP_BACKUPAGENTHELPER_H__
+#define __ELASTOS_DROID_APP_BACKUP_BACKUPAGENTHELPER_H__
 
 #include "elastos/droid/app/backup/BackupAgent.h"
 

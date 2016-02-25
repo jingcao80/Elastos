@@ -1,12 +1,11 @@
 module
 {
     using interface Elastos.Droid.View.IView;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.IExpandableView;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IScrollAdapter;
+    interface Elastos.Droid.SystemUI.StatusBar.IExpandableView;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IScrollAdapter;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
 
     [local]
@@ -90,7 +89,6 @@ module
     }
 
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

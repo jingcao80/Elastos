@@ -12,7 +12,7 @@ module
     [local]
     interface IDhcpStateMachineHelper {
         MakeDhcpStateMachine(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IStateMachine* controller,
             [in] String intf,
             [out] IDhcpStateMachine** result);

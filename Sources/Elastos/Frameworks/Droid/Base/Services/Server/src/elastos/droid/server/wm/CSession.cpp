@@ -48,7 +48,7 @@ ECode CSession::constructor(
     /* [in] */ Handle64 wmService,
     /* [in] */ IIWindowSessionCallback* callback,
     /* [in] */ IInputMethodClient* client,
-    /* [in] */ IInputContext* inputContext)
+    /* [in] */ IIInputContext* inputContext)
 {
     mService = (CWindowManagerService*)wmService;
     mCallback = callback;

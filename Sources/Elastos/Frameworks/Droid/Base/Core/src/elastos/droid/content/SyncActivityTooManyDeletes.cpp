@@ -125,8 +125,7 @@ ECode SyncActivityTooManyDeletes::OnItemClick(
     else if (position == 1) {
         FAIL_RETURN(StartSyncUndoDeletes())
     }
-    assert(0 && "TODO");
-    //FAIL_RETURN(Finish())
+    FAIL_RETURN(Finish())
     return NOERROR;
 }
 

@@ -30,7 +30,7 @@ module
          * {@link android.webkit.WebSettings#getDefaultUserAgent(Context) }
          */
         GetDefaultUserAgent(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] String* ua);
 
         /**
@@ -134,7 +134,7 @@ module
          * @return the singleton WebViewDatabase instance
          */
         GetWebViewDatabase(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IWebViewDatabase** database);
     }
 

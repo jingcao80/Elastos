@@ -1,9 +1,25 @@
 
 #include "Elastos.Droid.Media.h"
+#include "elastos/droid/media/_AudioErrors.h"
+#include "elastos/droid/media/_AudioFormat.h"
 #include "elastos/droid/media/AudioSystem.h"
+#include "elastos/droid/media/CAudioDevicePort.h"
+#include "elastos/droid/media/CAudioDevicePortConfig.h"
+#include "elastos/droid/media/CAudioGain.h"
+#include "elastos/droid/media/CAudioGainConfig.h"
+#include "elastos/droid/media/CAudioHandle.h"
+#include "elastos/droid/media/CAudioMixPort.h"
+#include "elastos/droid/media/CAudioMixPortConfig.h"
+#include "elastos/droid/media/CAudioPatch.h"
+#include "elastos/droid/media/CAudioPort.h"
+#include "elastos/droid/media/CAudioPortConfig.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
+
 #include <media/AudioSystem.h>
+#include <system/audio.h>
+#include <system/audio_policy.h>
+#include <utils/Errors.h>
 #include <utils/String8.h>
 
 using Elastos::Utility::Logging::Logger;
@@ -22,6 +38,27 @@ const Int32 AudioSystem::NUM_FORCE_USE = 6;
 Object AudioSystem::sLock;
 AudioSystem::StaticInitializer AudioSystem::sInitializer;
 
+enum AudioError {
+    kAudioStatusOk = 0,
+    kAudioStatusError = 1,
+    kAudioStatusMediaServerDied = 100
+};
+
+#define MAX_PORT_GENERATION_SYNC_ATTEMPTS 5
+
+static int check_AudioSystem_Command(android::status_t status)
+{
+    switch (status) {
+    case android::DEAD_OBJECT:
+        return kAudioStatusMediaServerDied;
+    case android::NO_ERROR:
+        return kAudioStatusOk;
+    default:
+        break;
+    }
+    return kAudioStatusError;
+}
+
 static void elastos_media_AudioSystem_error_callback(android::status_t err)
 {
     Int32 error = IAudioSystem::AUDIO_STATUS_ERROR;
@@ -37,12 +74,456 @@ static void elastos_media_AudioSystem_error_callback(android::status_t err)
             break;
     }
 
-    AudioSystem::ErrorCallbackFromNative(error);
+    int val = check_AudioSystem_Command(err);
+    AudioSystem::ErrorCallbackFromNative(val);
 }
 
 AudioSystem::StaticInitializer::StaticInitializer()
 {
     android::AudioSystem::setErrorCallback(elastos_media_AudioSystem_error_callback);
+}
+
+static bool useInChannelMask(audio_port_type_t type, audio_port_role_t role)
+{
+    return ((type == AUDIO_PORT_TYPE_DEVICE) && (role == AUDIO_PORT_ROLE_SOURCE)) ||
+                ((type == AUDIO_PORT_TYPE_MIX) && (role == AUDIO_PORT_ROLE_SINK));
+}
+
+static void convertAudioGainConfigToNative(
+   struct audio_gain_config *nAudioGainConfig,
+   IAudioGainConfig* audioGainConfig,
+   bool useInMask)
+{
+    audioGainConfig->Index(&nAudioGainConfig->index);
+    Int32 value;
+    audioGainConfig->Mode(&value);
+    nAudioGainConfig->mode = value;
+    ALOGV("convertAudioGainConfigToNative got gain index %d", nAudioGainConfig->index);
+    Int32 mask;
+    audioGainConfig->ChannelMask(&mask);
+
+    audio_channel_mask_t nMask;
+    if (useInMask) {
+        nMask = InChannelMaskToNative(mask);
+        ALOGV("convertAudioGainConfigToNative IN mask java %x native %x", mask, nMask);
+    }
+    else {
+        nMask = OutChannelMaskToNative(mask);
+        ALOGV("convertAudioGainConfigToNative OUT mask java %x native %x", mask, nMask);
+    }
+    nAudioGainConfig->channel_mask = nMask;
+    audioGainConfig->RampDurationMs(&value);
+    nAudioGainConfig->ramp_duration_ms = value;
+    AutoPtr<ArrayOf<Int32> > values;
+    audioGainConfig->Values((ArrayOf<Int32>**)&values);
+
+    int *nValues = values->GetPayload();
+    size_t size = values->GetLength();
+    memcpy(nAudioGainConfig->values, nValues, size * sizeof(int));
+}
+
+static Int32 convertAudioPortConfigToNative(
+    struct audio_port_config *nAudioPortConfig,
+    IAudioPortConfig* audioPortConfig)
+{
+    AutoPtr<IAudioPort> audioPort;
+    audioPortConfig->Port((IAudioPort**)&audioPort);
+    AutoPtr<IAudioHandle> handle;
+    audioPort->Handle((IAudioHandle**)&handle);
+    ((CAudioHandle*)handle.Get())->Id(&nAudioPortConfig->id);
+    Int32 role;
+    audioPort->Role(&role);
+    nAudioPortConfig->role = (audio_port_role_t)role;
+
+    if (IAudioDevicePort::Probe(audioPort) != NULL) {
+        nAudioPortConfig->type = AUDIO_PORT_TYPE_DEVICE;
+    }
+    else if (IAudioMixPort::Probe(audioPort) != NULL) {
+        nAudioPortConfig->type = AUDIO_PORT_TYPE_MIX;
+    }
+    else {
+        return IAudioSystem::ERROR;
+    }
+
+    ALOGV("convertAudioPortConfigToNative handle %d role %d type %d",
+          nAudioPortConfig->id, nAudioPortConfig->role, nAudioPortConfig->type);
+
+    Int32 value;
+    audioPortConfig->SamplingRate(&value);
+    nAudioPortConfig->sample_rate = value;
+
+    bool useInMask = useInChannelMask(nAudioPortConfig->type, nAudioPortConfig->role);
+    audio_channel_mask_t nMask;
+    Int32 mask;
+    audioPortConfig->ChannelMask(&mask);
+
+    if (useInMask) {
+        nMask = InChannelMaskToNative(mask);
+        ALOGV("convertAudioPortConfigToNative IN mask java %x native %x", mask, nMask);
+    }
+    else {
+        nMask = OutChannelMaskToNative(mask);
+        ALOGV("convertAudioPortConfigToNative OUT mask java %x native %x", mask, nMask);
+    }
+    nAudioPortConfig->channel_mask = nMask;
+
+    Int32 format;
+    audioPortConfig->Format(&format);
+    audio_format_t nFormat = AudioFormatToNative(format);
+    ALOGV("convertAudioPortConfigToNative format %d native %d", format, nFormat);
+    nAudioPortConfig->format = nFormat;
+    AutoPtr<IAudioGainConfig> gain;
+    audioPortConfig->Gain((IAudioGainConfig**)&gain);
+    if (gain != NULL) {
+        convertAudioGainConfigToNative(&nAudioPortConfig->gain, gain, useInMask);
+    }
+    else {
+        ALOGV("convertAudioPortConfigToNative no gain");
+        nAudioPortConfig->gain.index = -1;
+    }
+
+    nAudioPortConfig->config_mask = ((CAudioPortConfig*)audioPortConfig)->mConfigMask;
+
+    return IAudioSystem::SUCCESS;
+}
+
+static Int32 convertAudioPortConfigFromNative(
+    IAudioPort* _jAudioPort,
+    struct audio_port_config *nAudioPortConfig,
+    IAudioPortConfig **result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    Int32 jStatus = IAudioSystem::SUCCESS;
+    AutoPtr<IAudioGainConfig> jAudioGainConfig;
+    AutoPtr<IAudioGain> jAudioGain;
+    AutoPtr<ArrayOf<Int32> > jGainValues;
+    bool audioportCreated = false;
+
+    ALOGV("convertAudioPortConfigFromNative jAudioPort %p", _jAudioPort);
+
+    AutoPtr<IAudioPort> jAudioPort = _jAudioPort;
+    if (jAudioPort == NULL) {
+        AutoPtr<IAudioHandle> jHandle;
+        CAudioHandle::New(nAudioPortConfig->id, (IAudioHandle**)&jHandle);
+
+        ALOGV("convertAudioPortConfigFromNative handle %d is a %s", nAudioPortConfig->id,
+              nAudioPortConfig->type == AUDIO_PORT_TYPE_DEVICE ? "device" : "mix");
+
+        if (jHandle == NULL) {
+            return IAudioSystem::ERROR;
+        }
+        // create dummy port and port config objects with just the correct handle
+        // and configuration data. The actual AudioPortConfig objects will be
+        // constructed by java code with correct class type (device, mix etc...)
+        // and reference to AudioPort instance in this client
+        CAudioPort::New(jHandle, 0, NULL, NULL, NULL, NULL, (IAudioPort**)&jAudioPort);
+
+        if (jAudioPort == NULL) {
+            return IAudioSystem::ERROR;
+        }
+        ALOGV("convertAudioPortConfigFromNative jAudioPort created for handle %d",
+              nAudioPortConfig->id);
+
+        audioportCreated = true;
+    }
+
+    bool useInMask = useInChannelMask(nAudioPortConfig->type, nAudioPortConfig->role);
+
+    audio_channel_mask_t nMask;
+    Int32 jMask;
+
+    int gainIndex = nAudioPortConfig->gain.index;
+    if (gainIndex >= 0) {
+        ALOGV("convertAudioPortConfigFromNative gain found with index %d mode %x",
+              gainIndex, nAudioPortConfig->gain.mode);
+        if (audioportCreated) {
+            ALOGV("convertAudioPortConfigFromNative creating gain");
+            CAudioGain::New(gainIndex, 0, 0, 0, 0, 0, 0, 0, 0, (IAudioGain**)&jAudioGain);
+
+            if (jAudioGain == NULL) {
+                ALOGV("convertAudioPortConfigFromNative creating gain FAILED");
+                jStatus = IAudioSystem::ERROR;
+                return jStatus;
+            }
+        }
+        else {
+            ALOGV("convertAudioPortConfigFromNative reading gain from port");
+            AutoPtr<ArrayOf<IAudioGain*> > jGains;
+            jAudioPort->Gains((ArrayOf<IAudioGain*>**)&jGains);
+
+            if (jGains == NULL) {
+                ALOGV("convertAudioPortConfigFromNative could not get gains from port");
+                jStatus = IAudioSystem::ERROR;
+                return jStatus;
+            }
+            jAudioGain = (*jGains)[gainIndex];
+            if (jAudioGain == NULL) {
+                ALOGV("convertAudioPortConfigFromNative could not get gain at index %d", gainIndex);
+                jStatus = IAudioSystem::ERROR;
+                return jStatus;
+            }
+        }
+        int numValues;
+        if (useInMask) {
+            numValues = audio_channel_count_from_in_mask(nAudioPortConfig->gain.channel_mask);
+        }
+        else {
+            numValues = audio_channel_count_from_out_mask(nAudioPortConfig->gain.channel_mask);
+        }
+        jGainValues = ArrayOf<Int32>::Alloc(numValues);
+
+        if (jGainValues == NULL) {
+            ALOGV("convertAudioPortConfigFromNative could not create gain values %d", numValues);
+            jStatus = IAudioSystem::ERROR;
+            return jStatus;
+        }
+
+        for (Int32 i = 0; i < numValues; ++i) {
+            jGainValues->Set(i, nAudioPortConfig->gain.values[i]);
+        }
+
+        nMask = nAudioPortConfig->gain.channel_mask;
+        if (useInMask) {
+            jMask = InChannelMaskFromNative(nMask);
+            ALOGV("convertAudioPortConfigFromNative IN mask java %x native %x", jMask, nMask);
+        }
+        else {
+            jMask = OutChannelMaskFromNative(nMask);
+            ALOGV("convertAudioPortConfigFromNative OUT mask java %x native %x", jMask, nMask);
+        }
+
+        CAudioGainConfig::New(gainIndex,
+                jAudioGain,
+                nAudioPortConfig->gain.mode,
+                jMask,
+                jGainValues,
+                nAudioPortConfig->gain.ramp_duration_ms,
+                (IAudioGainConfig**)&jAudioGainConfig);
+
+        if (jAudioGainConfig == NULL) {
+            ALOGV("convertAudioPortConfigFromNative could not create gain config");
+            jStatus = IAudioSystem::ERROR;
+            return jStatus;
+        }
+    }
+
+    Int32 clazz;
+    if (audioportCreated) {
+        clazz = 0; //gAudioPortConfigClass;
+        ALOGV("convertAudioPortConfigFromNative building a generic port config");
+    }
+    else {
+        if (IAudioDevicePort::Probe(jAudioPort) != NULL) {
+            clazz = 1; //gAudioDevicePortConfigClass;
+            ALOGV("convertAudioPortConfigFromNative building a device config");
+        }
+        else if (IAudioMixPort::Probe(jAudioPort) != NULL) {
+            clazz = 2; //gAudioMixPortConfigClass;
+            ALOGV("convertAudioPortConfigFromNative building a mix config");
+        }
+        else {
+            jStatus = IAudioSystem::ERROR;
+            return jStatus;
+        }
+    }
+    nMask = nAudioPortConfig->channel_mask;
+    if (useInMask) {
+        jMask = InChannelMaskFromNative(nMask);
+        ALOGV("convertAudioPortConfigFromNative IN mask java %x native %x", jMask, nMask);
+    }
+    else {
+        jMask = OutChannelMaskFromNative(nMask);
+        ALOGV("convertAudioPortConfigFromNative OUT mask java %x native %x", jMask, nMask);
+    }
+
+    switch (clazz) {
+        case 0 : {
+            AutoPtr<IAudioPortConfig> ap;
+            CAudioPortConfig::New(jAudioPort,
+                    nAudioPortConfig->sample_rate,
+                    jMask,
+                    AudioFormatFromNative(nAudioPortConfig->format),
+                    jAudioGainConfig,
+                    (IAudioPortConfig**)&ap);
+            *result = ap;
+            REFCOUNT_ADD(*result)
+            break;
+        }
+        case 1: {
+            AutoPtr<IAudioDevicePortConfig> adp;
+            CAudioDevicePortConfig::New(IAudioDevicePort::Probe(jAudioPort),
+                    nAudioPortConfig->sample_rate,
+                    jMask,
+                    AudioFormatFromNative(nAudioPortConfig->format),
+                    jAudioGainConfig,
+                    (IAudioDevicePortConfig**)&adp);
+            *result = IAudioPortConfig::Probe(adp);
+            REFCOUNT_ADD(*result)
+            break;
+        }
+
+        case 2: {
+            AutoPtr<IAudioMixPortConfig> amp;
+            CAudioMixPortConfig::New(IAudioMixPort::Probe(jAudioPort),
+                    nAudioPortConfig->sample_rate,
+                    jMask,
+                    AudioFormatFromNative(nAudioPortConfig->format),
+                    jAudioGainConfig,
+                    (IAudioMixPortConfig**)&amp);
+            *result = IAudioPortConfig::Probe(amp);
+            REFCOUNT_ADD(*result)
+            break;
+        }
+    }
+
+    if (*result == NULL) {
+        ALOGV("convertAudioPortConfigFromNative could not create new port config");
+        jStatus = IAudioSystem::ERROR;
+    }
+    else {
+        ALOGV("convertAudioPortConfigFromNative OK");
+    }
+
+    return jStatus;
+}
+
+static Int32 convertAudioPortFromNative(
+    struct audio_port *nAudioPort,
+    IAudioPort **result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    Int32 jStatus = IAudioSystem::SUCCESS;
+    AutoPtr<ArrayOf<Int32> > jSamplingRates;
+    AutoPtr<ArrayOf<Int32> > jChannelMasks;
+    AutoPtr<ArrayOf<Int32> > jFormats;
+    AutoPtr<ArrayOf<IAudioGain*> > jGains;
+    AutoPtr<IAudioHandle> jHandle;
+    bool useInMask;
+
+    ALOGV("convertAudioPortFromNative id %d role %d type %d",
+                                  nAudioPort->id, nAudioPort->role, nAudioPort->type);
+
+    jSamplingRates = ArrayOf<Int32>::Alloc(nAudioPort->num_sample_rates);
+    if (jSamplingRates == NULL) {
+        jStatus = IAudioSystem::ERROR;
+        return jStatus;
+    }
+    if (nAudioPort->num_sample_rates) {
+        for (Int32 i = 0; i < nAudioPort->num_sample_rates; i++) {
+            jSamplingRates->Set(i, nAudioPort->sample_rates[i]);
+        }
+    }
+
+    jChannelMasks = ArrayOf<Int32>::Alloc(nAudioPort->num_channel_masks);
+    if (jChannelMasks == NULL) {
+        jStatus = IAudioSystem::ERROR;
+        return jStatus;
+    }
+    useInMask = useInChannelMask(nAudioPort->type, nAudioPort->role);
+
+    Int32 jMask;
+    for (size_t j = 0; j < nAudioPort->num_channel_masks; j++) {
+        if (useInMask) {
+            jMask = InChannelMaskFromNative(nAudioPort->channel_masks[j]);
+        }
+        else {
+            jMask = OutChannelMaskFromNative(nAudioPort->channel_masks[j]);
+        }
+        jChannelMasks->Set(j, jMask);
+    }
+
+    jFormats = ArrayOf<Int32>::Alloc(nAudioPort->num_formats);
+    if (jFormats == NULL) {
+        jStatus = IAudioSystem::ERROR;
+        return jStatus;
+    }
+    for (size_t j = 0; j < nAudioPort->num_formats; j++) {
+        Int32 jFormat = AudioFormatFromNative(nAudioPort->formats[j]);
+        jFormats->Set(j, jFormat);
+    }
+
+    jGains = ArrayOf<IAudioGain*>::Alloc(nAudioPort->num_gains);
+    if (jGains == NULL) {
+        jStatus = IAudioSystem::ERROR;
+        return jStatus;
+    }
+    for (size_t j = 0; j < nAudioPort->num_gains; j++) {
+        audio_channel_mask_t nMask = nAudioPort->gains[j].channel_mask;
+        if (useInMask) {
+            jMask = InChannelMaskFromNative(nMask);
+            ALOGV("convertAudioPortConfigFromNative IN mask java %x native %x", jMask, nMask);
+        }
+        else {
+            jMask = OutChannelMaskFromNative(nMask);
+            ALOGV("convertAudioPortConfigFromNative OUT mask java %x native %x", jMask, nMask);
+        }
+
+        AutoPtr<IAudioGain> jGain;
+        CAudioGain::New(j,
+            nAudioPort->gains[j].mode,
+            jMask,
+            nAudioPort->gains[j].min_value,
+            nAudioPort->gains[j].max_value,
+            nAudioPort->gains[j].default_value,
+            nAudioPort->gains[j].step_value,
+            nAudioPort->gains[j].min_ramp_ms,
+            nAudioPort->gains[j].max_ramp_ms,
+            (IAudioGain**)&jGain);
+
+        if (jGain == NULL) {
+            jStatus = IAudioSystem::ERROR;
+            return jStatus;
+        }
+        jGains->Set(j, jGain);
+    }
+
+    CAudioHandle::New(nAudioPort->id, (IAudioHandle**)&jHandle);
+    if (jHandle == NULL) {
+        jStatus = IAudioSystem::ERROR;
+        return jStatus;
+    }
+
+    AutoPtr<IAudioPort> ap;
+    if (nAudioPort->type == AUDIO_PORT_TYPE_DEVICE) {
+        ALOGV("convertAudioPortFromNative is a device %08x", nAudioPort->ext.device.type);
+        AutoPtr<IAudioDevicePort> adp;
+        CAudioDevicePort::New(jHandle, jSamplingRates, jChannelMasks, jFormats, jGains,
+                nAudioPort->ext.device.type, String(nAudioPort->ext.device.address), (IAudioDevicePort**)&adp);
+        ap = IAudioPort::Probe(adp);
+    }
+    else if (nAudioPort->type == AUDIO_PORT_TYPE_MIX) {
+        ALOGV("convertAudioPortFromNative is a mix");
+        AutoPtr<IAudioMixPort> amp;
+        CAudioMixPort::New(jHandle, nAudioPort->role, jSamplingRates, jChannelMasks,
+                jFormats, jGains, (IAudioMixPort**)&amp);
+    ap = IAudioPort::Probe(amp);
+    }
+    else {
+        ALOGE("convertAudioPortFromNative unknown nAudioPort type %d", nAudioPort->type);
+        jStatus = IAudioSystem::ERROR;
+        return jStatus;
+    }
+    if (ap == NULL) {
+        jStatus = IAudioSystem::ERROR;
+        return jStatus;
+    }
+
+    AutoPtr<IAudioPortConfig> jAudioPortConfig;
+    jStatus = convertAudioPortConfigFromNative(ap,
+            &nAudioPort->active_config,
+            (IAudioPortConfig**)&jAudioPortConfig);
+    if (jStatus != IAudioSystem::SUCCESS) {
+        return jStatus;
+    }
+
+    ap->SetActiveConfig(jAudioPortConfig);
+    *result = ap;
+    REFCOUNT_ADD(*result)
+    return jStatus;
 }
 
 ECode AudioSystem::GetNumStreamTypes(
@@ -452,209 +933,211 @@ ECode AudioSystem::CheckAudioFlinger(
     return NOERROR;
 }
 
-//TODO: Need JNI
 ECode AudioSystem::ListAudioPorts(
     /* [in] */ IArrayList* ports,
-    /* [in] */ ArrayOf<Int32>* generation,
+    /* [in] */ ArrayOf<Int32>* generationArray,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-//     ALOGV("listAudioPorts");
+    ALOGV("listAudioPorts");
 
-//     if (jPorts == NULL) {
-//         ALOGE("listAudioPorts NULL AudioPort ArrayList");
-//         return (jint)AUDIO_JAVA_BAD_VALUE;
-//     }
-//     if (!env->IsInstanceOf(jPorts, gArrayListClass)) {
-//         ALOGE("listAudioPorts not an arraylist");
-//         return (jint)AUDIO_JAVA_BAD_VALUE;
-//     }
+    if (ports == NULL) {
+        ALOGE("listAudioPorts NULL AudioPort ArrayList");
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
+    if (IArrayList::Probe(ports) != NULL) {
+        ALOGE("listAudioPorts not an arraylist");
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
 
-//     if (jGeneration == NULL || env->GetArrayLength(jGeneration) != 1) {
-//         return (jint)AUDIO_JAVA_BAD_VALUE;
-//     }
+    if (generationArray == NULL || generationArray->GetLength() != 1) {
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
 
-//     status_t status;
-//     unsigned int generation1;
-//     unsigned int generation;
-//     unsigned int numPorts;
-//     jint *nGeneration;
-//     struct audio_port *nPorts = NULL;
-//     int attempts = MAX_PORT_GENERATION_SYNC_ATTEMPTS;
+    android::status_t status;
+    unsigned int generation1;
+    unsigned int generation;
+    unsigned int numPorts;
+    Int32 *nGeneration;
+    struct audio_port *nPorts = NULL;
+    int attempts = MAX_PORT_GENERATION_SYNC_ATTEMPTS;
 
-//     // get the port count and all the ports until they both return the same generation
-//     do {
-//         if (attempts-- < 0) {
-//             status = TIMED_OUT;
-//             break;
-//         }
+    // get the port count and all the ports until they both return the same generation
+    do {
+        if (attempts-- < 0) {
+            status = android::TIMED_OUT;
+            break;
+        }
 
-//         numPorts = 0;
-//         status = AudioSystem::listAudioPorts(AUDIO_PORT_ROLE_NONE,
-//                                              AUDIO_PORT_TYPE_NONE,
-//                                                       &numPorts,
-//                                                       NULL,
-//                                                       &generation1);
-//         if (status != NO_ERROR || numPorts == 0) {
-//             ALOGE_IF(status != NO_ERROR, "AudioSystem::listAudioPorts error %d", status);
-//             break;
-//         }
-//         nPorts = (struct audio_port *)realloc(nPorts, numPorts * sizeof(struct audio_port));
+        numPorts = 0;
+        status = android::AudioSystem::listAudioPorts(AUDIO_PORT_ROLE_NONE,
+                                             AUDIO_PORT_TYPE_NONE,
+                                                      &numPorts,
+                                                      NULL,
+                                                      &generation1);
+        if (status != android::NO_ERROR || numPorts == 0) {
+            ALOGE_IF(status != android::NO_ERROR, "AudioSystem::listAudioPorts error %d", status);
+            break;
+        }
+        nPorts = (struct audio_port *)realloc(nPorts, numPorts * sizeof(struct audio_port));
 
-//         status = AudioSystem::listAudioPorts(AUDIO_PORT_ROLE_NONE,
-//                                              AUDIO_PORT_TYPE_NONE,
-//                                                       &numPorts,
-//                                                       nPorts,
-//                                                       &generation);
-//         ALOGV("listAudioPorts AudioSystem::listAudioPorts numPorts %d generation %d generation1 %d",
-//               numPorts, generation, generation1);
-//     } while (generation1 != generation && status == NO_ERROR);
+        status = android::AudioSystem::listAudioPorts(AUDIO_PORT_ROLE_NONE,
+                                             AUDIO_PORT_TYPE_NONE,
+                                                      &numPorts,
+                                                      nPorts,
+                                                      &generation);
+        ALOGV("listAudioPorts AudioSystem::listAudioPorts numPorts %d generation %d generation1 %d",
+              numPorts, generation, generation1);
+    } while (generation1 != generation && status == android::NO_ERROR);
 
-//     jint jStatus = nativeToJavaStatus(status);
-//     if (jStatus != AUDIO_JAVA_SUCCESS) {
-//         goto exit;
-//     }
+    Int32 jStatus = NativeToElastosStatus(status);
+    if (jStatus != IAudioSystem::SUCCESS) {
+        goto exit;
+    }
 
-//     nGeneration = env->GetIntArrayElements(jGeneration, NULL);
-//     if (nGeneration == NULL) {
-//         jStatus = (jint)AUDIO_JAVA_ERROR;
-//         goto exit;
-//     }
-//     nGeneration[0] = generation1;
-//     env->ReleaseIntArrayElements(jGeneration, nGeneration, 0);
+    nGeneration = generationArray->GetPayload();
+    if (nGeneration == NULL) {
+        jStatus = IAudioSystem::ERROR;
+        goto exit;
+    }
+    nGeneration[0] = generation1;
 
-//     for (size_t i = 0; i < numPorts; i++) {
-//         jobject jAudioPort;
-//         jStatus = convertAudioPortFromNative(env, &jAudioPort, &nPorts[i]);
-//         if (jStatus != AUDIO_JAVA_SUCCESS) {
-//             goto exit;
-//         }
-//         env->CallBooleanMethod(jPorts, gArrayListMethods.add, jAudioPort);
-//     }
+    for (size_t i = 0; i < numPorts; i++) {
+        AutoPtr<IAudioPort> audioPort;
+        jStatus = convertAudioPortFromNative(&nPorts[i], (IAudioPort**)&audioPort);
+        if (jStatus != IAudioSystem::SUCCESS) {
+            goto exit;
+        }
+        ports->Add(audioPort);
+    }
 
-// exit:
-//     free(nPorts);
-//     return jStatus;
+exit:
+    free(nPorts);
+    *result = jStatus;
     return NOERROR;
 }
 
 ECode AudioSystem::CreateAudioPatch(
-    /* [in] */ ArrayOf<IAudioPatch*>* patch,
+    /* [in] */ ArrayOf<IAudioPatch*>* patches,
     /* [in] */ ArrayOf<IAudioPortConfig*>* sources,
     /* [in] */ ArrayOf<IAudioPortConfig*>* sinks,
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-//     status_t status;
-//     jint jStatus;
+    *result = 0;
 
-//     ALOGV("createAudioPatch");
-//     if (jPatches == NULL || jSources == NULL || jSinks == NULL) {
-//         return (jint)AUDIO_JAVA_BAD_VALUE;
-//     }
+    android::status_t status;
+    Int32 jStatus;
 
-//     if (env->GetArrayLength(jPatches) != 1) {
-//         return (jint)AUDIO_JAVA_BAD_VALUE;
-//     }
-//     jint numSources = env->GetArrayLength(jSources);
-//     if (numSources == 0 || numSources > AUDIO_PATCH_PORTS_MAX) {
-//         return (jint)AUDIO_JAVA_BAD_VALUE;
-//     }
+    ALOGV("createAudioPatch");
+    if (patches == NULL || sources == NULL || sinks == NULL) {
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
 
-//     jint numSinks = env->GetArrayLength(jSinks);
-//     if (numSinks == 0 || numSinks > AUDIO_PATCH_PORTS_MAX) {
-//         return (jint)AUDIO_JAVA_BAD_VALUE;
-//     }
+    if (patches->GetLength() != 1) {
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
+    Int32 numSources = sources->GetLength();
+    if (numSources == 0 || numSources > AUDIO_PATCH_PORTS_MAX) {
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
 
-//     audio_patch_handle_t handle = (audio_patch_handle_t)0;
-//     jobject jPatch = env->GetObjectArrayElement(jPatches, 0);
-//     jobject jPatchHandle = NULL;
-//     if (jPatch != NULL) {
-//         if (!env->IsInstanceOf(jPatch, gAudioPatchClass)) {
-//             return (jint)AUDIO_JAVA_BAD_VALUE;
-//         }
-//         jPatchHandle = env->GetObjectField(jPatch, gAudioPatchFields.mHandle);
-//         handle = (audio_patch_handle_t)env->GetIntField(jPatchHandle, gAudioHandleFields.mId);
-//     }
+    Int32 numSinks = sinks->GetLength();
+    if (numSinks == 0 || numSinks > AUDIO_PATCH_PORTS_MAX) {
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
 
-//     struct audio_patch nPatch;
+    audio_patch_handle_t handle = (audio_patch_handle_t)0;
+    AutoPtr<IAudioPatch> jPatch = (*patches)[0];
+    AutoPtr<IAudioHandle> jPatchHandle;
+    if (jPatch != NULL) {
+        if (IAudioPatch::Probe(jPatch) == NULL) {
+            *result = IAudioSystem::BAD_VALUE;
+            return NOERROR;
+        }
+        jPatchHandle = ((CAudioPatch*)jPatch.Get())->mHandle;
+        Int32 id;
+        ((CAudioHandle*)jPatchHandle.Get())->Id(&id);
+        handle = (audio_patch_handle_t)id;
+    }
 
-//     nPatch.id = handle;
-//     nPatch.num_sources = 0;
-//     nPatch.num_sinks = 0;
-//     jobject jSource = NULL;
-//     jobject jSink = NULL;
+    struct audio_patch nPatch;
 
-//     for (jint i = 0; i < numSources; i++) {
-//         jSource = env->GetObjectArrayElement(jSources, i);
-//         if (!env->IsInstanceOf(jSource, gAudioPortConfigClass)) {
-//             jStatus = (jint)AUDIO_JAVA_BAD_VALUE;
-//             goto exit;
-//         }
-//         jStatus = convertAudioPortConfigToNative(env, &nPatch.sources[i], jSource);
-//         env->DeleteLocalRef(jSource);
-//         jSource = NULL;
-//         if (jStatus != AUDIO_JAVA_SUCCESS) {
-//             goto exit;
-//         }
-//         nPatch.num_sources++;
-//     }
+    nPatch.id = handle;
+    nPatch.num_sources = 0;
+    nPatch.num_sinks = 0;
+    AutoPtr<IAudioPortConfig> jSource;
+    AutoPtr<IAudioPortConfig> jSink;
 
-//     for (jint i = 0; i < numSinks; i++) {
-//         jSink = env->GetObjectArrayElement(jSinks, i);
-//         if (!env->IsInstanceOf(jSink, gAudioPortConfigClass)) {
-//             jStatus = (jint)AUDIO_JAVA_BAD_VALUE;
-//             goto exit;
-//         }
-//         jStatus = convertAudioPortConfigToNative(env, &nPatch.sinks[i], jSink);
-//         env->DeleteLocalRef(jSink);
-//         jSink = NULL;
-//         if (jStatus != AUDIO_JAVA_SUCCESS) {
-//             goto exit;
-//         }
-//         nPatch.num_sinks++;
-//     }
+    for (Int32 i = 0; i < numSources; i++) {
+        jSource = (*sources)[i];
+        if (IAudioPortConfig::Probe(jSource) == NULL) {
+            jStatus = IAudioSystem::BAD_VALUE;
+            *result = jStatus;
+            return NOERROR;
+        }
+        jStatus = convertAudioPortConfigToNative(&nPatch.sources[i], jSource);
+        if (jStatus != IAudioSystem::SUCCESS) {
+            *result = jStatus;
+            return NOERROR;
+        }
+        nPatch.num_sources++;
+    }
 
-//     ALOGV("AudioSystem::createAudioPatch");
-//     status = AudioSystem::createAudioPatch(&nPatch, &handle);
-//     ALOGV("AudioSystem::createAudioPatch() returned %d hande %d", status, handle);
+    for (Int32 i = 0; i < numSinks; i++) {
+        jSink = (*sinks)[i];
+        if (IAudioPortConfig::Probe(jSink) == NULL) {
+            jStatus = IAudioSystem::BAD_VALUE;
+            *result = jStatus;
+            return NOERROR;
+        }
+        jStatus = convertAudioPortConfigToNative(&nPatch.sinks[i], jSink);
+        if (jStatus != IAudioSystem::SUCCESS) {
+            *result = jStatus;
+            return NOERROR;
+        }
+        nPatch.num_sinks++;
+    }
 
-//     jStatus = nativeToJavaStatus(status);
-//     if (jStatus != AUDIO_JAVA_SUCCESS) {
-//         goto exit;
-//     }
+    ALOGV("AudioSystem::createAudioPatch");
+    status = android::AudioSystem::createAudioPatch(&nPatch, &handle);
+    ALOGV("AudioSystem::createAudioPatch() returned %d hande %d", status, handle);
 
-//     if (jPatchHandle == NULL) {
-//         jPatchHandle = env->NewObject(gAudioHandleClass, gAudioHandleCstor,
-//                                            handle);
-//         if (jPatchHandle == NULL) {
-//             jStatus = (jint)AUDIO_JAVA_ERROR;
-//             goto exit;
-//         }
-//         jPatch = env->NewObject(gAudioPatchClass, gAudioPatchCstor, jPatchHandle, jSources, jSinks);
-//         if (jPatch == NULL) {
-//             jStatus = (jint)AUDIO_JAVA_ERROR;
-//             goto exit;
-//         }
-//         env->SetObjectArrayElement(jPatches, 0, jPatch);
-//     } else {
-//         env->SetIntField(jPatchHandle, gAudioHandleFields.mId, handle);
-//     }
+    jStatus = NativeToElastosStatus(status);
+    if (jStatus != IAudioSystem::SUCCESS) {
+        *result = jStatus;
+        return NOERROR;
+    }
 
-// exit:
-//     if (jPatchHandle != NULL) {
-//         env->DeleteLocalRef(jPatchHandle);
-//     }
-//     if (jPatch != NULL) {
-//         env->DeleteLocalRef(jPatch);
-//     }
-//     if (jSource != NULL) {
-//         env->DeleteLocalRef(jSource);
-//     }
-//     if (jSink != NULL) {
-//         env->DeleteLocalRef(jSink);
-//     }
-//     return jStatus;
+    if (jPatchHandle == NULL) {
+        CAudioHandle::New(handle, (IAudioHandle**)&jPatchHandle);
+
+        if (jPatchHandle == NULL) {
+            jStatus = IAudioSystem::ERROR;
+            *result = jStatus;
+            return NOERROR;
+        }
+
+        CAudioPatch::New(jPatchHandle, sources, sinks, (IAudioPatch**)&jPatch);
+        if (jPatch == NULL) {
+            jStatus = IAudioSystem::ERROR;
+            *result = jStatus;
+            return NOERROR;
+        }
+        patches->Set(0, jPatch);
+    }
+    else {
+        ((CAudioHandle*)jPatchHandle.Get())->mId = handle;
+    }
+
+    *result = jStatus;
     return NOERROR;
 }
 
@@ -663,195 +1146,167 @@ ECode AudioSystem::ReleaseAudioPatch(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    // ALOGV("releaseAudioPatch");
-    // if (jPatch == NULL) {
-    //     return (jint)AUDIO_JAVA_BAD_VALUE;
-    // }
+    ALOGV("releaseAudioPatch");
+    if (patch == NULL) {
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
 
-    // audio_patch_handle_t handle = (audio_patch_handle_t)0;
-    // jobject jPatchHandle = NULL;
-    // if (!env->IsInstanceOf(jPatch, gAudioPatchClass)) {
-    //     return (jint)AUDIO_JAVA_BAD_VALUE;
-    // }
-    // jPatchHandle = env->GetObjectField(jPatch, gAudioPatchFields.mHandle);
-    // handle = (audio_patch_handle_t)env->GetIntField(jPatchHandle, gAudioHandleFields.mId);
-    // env->DeleteLocalRef(jPatchHandle);
+    audio_patch_handle_t handle = (audio_patch_handle_t)0;
+    AutoPtr<IAudioHandle> patchHandle = ((CAudioPatch*)patch)->mHandle;
+    Int32 id;
+    ((CAudioHandle*)patchHandle.Get())->Id(&id);
+    handle = (audio_patch_handle_t)id;
 
-    // ALOGV("AudioSystem::releaseAudioPatch");
-    // status_t status = AudioSystem::releaseAudioPatch(handle);
-    // ALOGV("AudioSystem::releaseAudioPatch() returned %d", status);
-    // jint jStatus = nativeToJavaStatus(status);
-    // return status;
+    ALOGV("AudioSystem::releaseAudioPatch");
+    android::status_t status = android::AudioSystem::releaseAudioPatch(handle);
+    ALOGV("AudioSystem::releaseAudioPatch() returned %d", status);
+    Int32 jStatus = NativeToElastosStatus(status);
+    *result = jStatus;
     return NOERROR;
 }
 
 ECode AudioSystem::ListAudioPatches(
     /* [in] */ IArrayList* patches,
-    /* [in] */ ArrayOf<Int32>* generation,
+    /* [in] */ ArrayOf<Int32>* jGeneration,
     /* [out] */ Int32* result)
 {
-//     VALIDATE_NOT_NULL(result)
-//     ALOGV("listAudioPatches");
-//     if (jPatches == NULL) {
-//         ALOGE("listAudioPatches NULL AudioPatch ArrayList");
-//         return (jint)AUDIO_JAVA_BAD_VALUE;
-//     }
-//     if (!env->IsInstanceOf(jPatches, gArrayListClass)) {
-//         ALOGE("listAudioPatches not an arraylist");
-//         return (jint)AUDIO_JAVA_BAD_VALUE;
-//     }
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
 
-//     if (jGeneration == NULL || env->GetArrayLength(jGeneration) != 1) {
-//         return (jint)AUDIO_JAVA_BAD_VALUE;
-//     }
+    ALOGV("listAudioPatches");
+    if (patches == NULL) {
+        ALOGE("listAudioPatches NULL AudioPatch ArrayList");
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
+    if (IArrayList::Probe(patches) == NULL) {
+        ALOGE("listAudioPatches not an arraylist");
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
 
-//     status_t status;
-//     unsigned int generation1;
-//     unsigned int generation;
-//     unsigned int numPatches;
-//     jint *nGeneration;
-//     struct audio_patch *nPatches = NULL;
-//     jobjectArray jSources = NULL;
-//     jobject jSource = NULL;
-//     jobjectArray jSinks = NULL;
-//     jobject jSink = NULL;
-//     jobject jPatch = NULL;
-//     int attempts = MAX_PORT_GENERATION_SYNC_ATTEMPTS;
+    if (jGeneration == NULL || jGeneration->GetLength() != 1) {
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
 
-//     // get the patch count and all the patches until they both return the same generation
-//     do {
-//         if (attempts-- < 0) {
-//             status = TIMED_OUT;
-//             break;
-//         }
+    android::status_t status;
+    unsigned int generation1;
+    unsigned int generation;
+    unsigned int numPatches;
+    Int32 *nGeneration;
+    struct audio_patch *nPatches = NULL;
+    AutoPtr<ArrayOf<IAudioPortConfig*> > jSources;
+    AutoPtr<IAudioPortConfig> jSource;
+    AutoPtr<ArrayOf<IAudioPortConfig*> > jSinks;
+    AutoPtr<IAudioPortConfig> jSink;
+    AutoPtr<IAudioPatch> jPatch;
+    int attempts = MAX_PORT_GENERATION_SYNC_ATTEMPTS;
 
-//         numPatches = 0;
-//         status = AudioSystem::listAudioPatches(&numPatches,
-//                                                NULL,
-//                                                &generation1);
-//         if (status != NO_ERROR || numPatches == 0) {
-//             ALOGE_IF(status != NO_ERROR, "listAudioPatches AudioSystem::listAudioPatches error %d",
-//                                       status);
-//             break;
-//         }
-//         nPatches = (struct audio_patch *)realloc(nPatches, numPatches * sizeof(struct audio_patch));
+    // get the patch count and all the patches until they both return the same generation
+    do {
+        if (attempts-- < 0) {
+            status = android::TIMED_OUT;
+            break;
+        }
 
-//         status = AudioSystem::listAudioPatches(&numPatches,
-//                                                nPatches,
-//                                                &generation);
-//         ALOGV("listAudioPatches AudioSystem::listAudioPatches numPatches %d generation %d generation1 %d",
-//               numPatches, generation, generation1);
+        numPatches = 0;
+        status = android::AudioSystem::listAudioPatches(&numPatches,
+                                               NULL,
+                                               &generation1);
+        if (status != android::NO_ERROR || numPatches == 0) {
+            ALOGE_IF(status != android::NO_ERROR, "listAudioPatches AudioSystem::listAudioPatches error %d",
+                                      status);
+            break;
+        }
+        nPatches = (struct audio_patch *)realloc(nPatches, numPatches * sizeof(struct audio_patch));
 
-//     } while (generation1 != generation && status == NO_ERROR);
+        status = android::AudioSystem::listAudioPatches(&numPatches,
+                                               nPatches,
+                                               &generation);
+        ALOGV("listAudioPatches AudioSystem::listAudioPatches numPatches %d generation %d generation1 %d",
+              numPatches, generation, generation1);
 
-//     jint jStatus = nativeToJavaStatus(status);
-//     if (jStatus != AUDIO_JAVA_SUCCESS) {
-//         goto exit;
-//     }
+    } while (generation1 != generation && status == android::NO_ERROR);
 
-//     nGeneration = env->GetIntArrayElements(jGeneration, NULL);
-//     if (nGeneration == NULL) {
-//         jStatus = AUDIO_JAVA_ERROR;
-//         goto exit;
-//     }
-//     nGeneration[0] = generation1;
-//     env->ReleaseIntArrayElements(jGeneration, nGeneration, 0);
+    Int32 jStatus = NativeToElastosStatus(status);
+    if (jStatus != IAudioSystem::SUCCESS) {
+        goto exit;
+    }
 
-//     for (size_t i = 0; i < numPatches; i++) {
-//         jobject patchHandle = env->NewObject(gAudioHandleClass, gAudioHandleCstor,
-//                                                  nPatches[i].id);
-//         if (patchHandle == NULL) {
-//             jStatus = AUDIO_JAVA_ERROR;
-//             goto exit;
-//         }
-//         ALOGV("listAudioPatches patch %d num_sources %d num_sinks %d",
-//               i, nPatches[i].num_sources, nPatches[i].num_sinks);
+    nGeneration = jGeneration->GetPayload();
+    if (nGeneration == NULL) {
+        jStatus = IAudioSystem::ERROR;
+        goto exit;
+    }
+    nGeneration[0] = generation1;
 
-//         env->SetIntField(patchHandle, gAudioHandleFields.mId, nPatches[i].id);
+    for (size_t i = 0; i < numPatches; i++) {
+        AutoPtr<IAudioHandle> patchHandle;
+        CAudioHandle::New(nPatches[i].id, (IAudioHandle**)&patchHandle);
+        if (patchHandle == NULL) {
+            jStatus = IAudioSystem::ERROR;
+            goto exit;
+        }
+        ALOGV("listAudioPatches patch %d num_sources %d num_sinks %d",
+              i, nPatches[i].num_sources, nPatches[i].num_sinks);
 
-//         // load sources
-//         jSources = env->NewObjectArray(nPatches[i].num_sources,
-//                                        gAudioPortConfigClass, NULL);
-//         if (jSources == NULL) {
-//             jStatus = AUDIO_JAVA_ERROR;
-//             goto exit;
-//         }
+        ((CAudioHandle*)patchHandle.Get())->mId = nPatches[i].id;
 
-//         for (size_t j = 0; j < nPatches[i].num_sources; j++) {
-//             jStatus = convertAudioPortConfigFromNative(env,
-//                                                       NULL,
-//                                                       &jSource,
-//                                                       &nPatches[i].sources[j]);
-//             if (jStatus != AUDIO_JAVA_SUCCESS) {
-//                 goto exit;
-//             }
-//             env->SetObjectArrayElement(jSources, j, jSource);
-//             env->DeleteLocalRef(jSource);
-//             jSource = NULL;
-//             ALOGV("listAudioPatches patch %d source %d is a %s handle %d",
-//                   i, j,
-//                   nPatches[i].sources[j].type == AUDIO_PORT_TYPE_DEVICE ? "device" : "mix",
-//                   nPatches[i].sources[j].id);
-//         }
-//         // load sinks
-//         jSinks = env->NewObjectArray(nPatches[i].num_sinks,
-//                                      gAudioPortConfigClass, NULL);
-//         if (jSinks == NULL) {
-//             jStatus = AUDIO_JAVA_ERROR;
-//             goto exit;
-//         }
+        // load sources
+        jSources = ArrayOf<IAudioPortConfig*>::Alloc(nPatches[i].num_sources);
+        if (jSources == NULL) {
+            jStatus = IAudioSystem::ERROR;
+            goto exit;
+        }
 
-//         for (size_t j = 0; j < nPatches[i].num_sinks; j++) {
-//             jStatus = convertAudioPortConfigFromNative(env,
-//                                                       NULL,
-//                                                       &jSink,
-//                                                       &nPatches[i].sinks[j]);
+        for (size_t j = 0; j < nPatches[i].num_sources; j++) {
+            jStatus = convertAudioPortConfigFromNative(NULL,
+                                                      &nPatches[i].sources[j],
+                                                      (IAudioPortConfig**)&jSource);
+            if (jStatus != IAudioSystem::SUCCESS) {
+                goto exit;
+            }
+            jSources->Set(i, jSource);
+            ALOGV("listAudioPatches patch %d source %d is a %s handle %d",
+                  i, j,
+                  nPatches[i].sources[j].type == AUDIO_PORT_TYPE_DEVICE ? "device" : "mix",
+                  nPatches[i].sources[j].id);
+        }
+        // load sinks
+        jSinks = ArrayOf<IAudioPortConfig*>::Alloc(nPatches[i].num_sinks);
+        if (jSinks == NULL) {
+            jStatus = IAudioSystem::ERROR;
+            goto exit;
+        }
 
-//             if (jStatus != AUDIO_JAVA_SUCCESS) {
-//                 goto exit;
-//             }
-//             env->SetObjectArrayElement(jSinks, j, jSink);
-//             env->DeleteLocalRef(jSink);
-//             jSink = NULL;
-//             ALOGV("listAudioPatches patch %d sink %d is a %s handle %d",
-//                   i, j,
-//                   nPatches[i].sinks[j].type == AUDIO_PORT_TYPE_DEVICE ? "device" : "mix",
-//                   nPatches[i].sinks[j].id);
-//         }
+        for (size_t j = 0; j < nPatches[i].num_sinks; j++) {
+            jStatus = convertAudioPortConfigFromNative(NULL,
+                                                      &nPatches[i].sinks[j],
+                                                      (IAudioPortConfig**)&jSink);
 
-//         jPatch = env->NewObject(gAudioPatchClass, gAudioPatchCstor,
-//                                        patchHandle, jSources, jSinks);
-//         env->DeleteLocalRef(jSources);
-//         jSources = NULL;
-//         env->DeleteLocalRef(jSinks);
-//         jSinks = NULL;
-//         if (jPatch == NULL) {
-//             jStatus = AUDIO_JAVA_ERROR;
-//             goto exit;
-//         }
-//         env->CallBooleanMethod(jPatches, gArrayListMethods.add, jPatch);
-//         env->DeleteLocalRef(jPatch);
-//         jPatch = NULL;
-//     }
+            if (jStatus != IAudioSystem::SUCCESS) {
+                goto exit;
+            }
+            jSinks->Set(j, jSink);
+            ALOGV("listAudioPatches patch %d sink %d is a %s handle %d",
+                  i, j,
+                  nPatches[i].sinks[j].type == AUDIO_PORT_TYPE_DEVICE ? "device" : "mix",
+                  nPatches[i].sinks[j].id);
+        }
 
-// exit:
-//     if (jSources != NULL) {
-//         env->DeleteLocalRef(jSources);
-//     }
-//     if (jSource != NULL) {
-//         env->DeleteLocalRef(jSource);
-//     }
-//     if (jSinks != NULL) {
-//         env->DeleteLocalRef(jSinks);
-//     }
-//     if (jSink != NULL) {
-//         env->DeleteLocalRef(jSink);
-//     }
-//     if (jPatch != NULL) {
-//         env->DeleteLocalRef(jPatch);
-//     }
-//     free(nPatches);
-//     return jStatus;
+        CAudioPatch::New(patchHandle, jSources, jSinks, (IAudioPatch**)&jPatch);
+        if (jPatch == NULL) {
+            jStatus = IAudioSystem::ERROR;
+            goto exit;
+        }
+        patches->Add(jPatch);
+    }
+
+exit:
+    free(nPatches);
+    *result = jStatus;
     return NOERROR;
 }
 
@@ -860,22 +1315,21 @@ ECode AudioSystem::SetAudioPortConfig(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-    // ALOGV("setAudioPortConfig");
-    // if (jAudioPortConfig == NULL) {
-    //     return AUDIO_JAVA_BAD_VALUE;
-    // }
-    // if (!env->IsInstanceOf(jAudioPortConfig, gAudioPortConfigClass)) {
-    //     return AUDIO_JAVA_BAD_VALUE;
-    // }
-    // struct audio_port_config nAudioPortConfig;
-    // jint jStatus = convertAudioPortConfigToNative(env, &nAudioPortConfig, jAudioPortConfig);
-    // if (jStatus != AUDIO_JAVA_SUCCESS) {
-    //     return jStatus;
-    // }
-    // status_t status = AudioSystem::setAudioPortConfig(&nAudioPortConfig);
-    // ALOGV("AudioSystem::setAudioPortConfig() returned %d", status);
-    // jStatus = nativeToJavaStatus(status);
-    // return jStatus;
+    ALOGV("setAudioPortConfig");
+    if (config == NULL) {
+        *result = IAudioSystem::BAD_VALUE;
+        return NOERROR;
+    }
+    struct audio_port_config nAudioPortConfig;
+    Int32 jStatus = convertAudioPortConfigToNative(&nAudioPortConfig, config);
+    if (jStatus != IAudioSystem::SUCCESS) {
+        *result = jStatus;
+        return NOERROR;
+    }
+    android::status_t status = android::AudioSystem::setAudioPortConfig(&nAudioPortConfig);
+    ALOGV("AudioSystem::setAudioPortConfig() returned %d", status);
+    jStatus = NativeToElastosStatus(status);
+    *result = jStatus;
     return NOERROR;
 }
 

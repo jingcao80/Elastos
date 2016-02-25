@@ -3,9 +3,11 @@
 #define __ELASTOS_DROID_WIDGET_ABSOLUTELAYOUT_H__
 
 #include "elastos/droid/view/ViewGroup.h"
+#include <Elastos.Droid.Widget.h>
 
 using Elastos::Droid::View::ViewGroup;
 using Elastos::Droid::View::IViewGroupLayoutParams;
+using Elastos::Droid::Widget::IAbsoluteLayout;
 
 namespace Elastos {
 namespace Droid {

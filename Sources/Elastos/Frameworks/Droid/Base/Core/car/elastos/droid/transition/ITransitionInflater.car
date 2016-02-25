@@ -53,7 +53,7 @@ module
          * Obtains the TransitionInflater from the given context.
          */
         From(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] ITransitionInflater** result);
     }
 

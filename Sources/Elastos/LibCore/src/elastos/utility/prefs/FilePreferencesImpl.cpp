@@ -72,7 +72,7 @@ void FilePreferencesImpl::InitPrefs()
 ECode FilePreferencesImpl::ChildrenNamesSpi(
     /* [out, callee] */ ArrayOf<String>** list)
 {
-    VALIDATE_NOT_NULL(*list);
+    VALIDATE_NOT_NULL(list);
     AutoPtr<FilenameFilter> filter = new FilenameFilter(this);
     AutoPtr<ArrayOf<String> > names;
     mDir->List((IFilenameFilter*)filter->Probe(EIID_IFilenameFilter), (ArrayOf<String>**)&names);

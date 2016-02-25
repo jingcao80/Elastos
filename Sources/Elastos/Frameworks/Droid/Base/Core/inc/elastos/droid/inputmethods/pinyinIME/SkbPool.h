@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_INPUTMETHODS_PINYINIME_SKBPOOL_H__
-#define  __ELASTOS_DROID_INPUTMETHODS_PINYINIME_SKBPOOL_H__
+#ifndef __ELASTOS_DROID_INPUTMETHODS_PINYINIME_SKBPOOL_H__
+#define __ELASTOS_DROID_INPUTMETHODS_PINYINIME_SKBPOOL_H__
 
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/utility/etl/List.h>

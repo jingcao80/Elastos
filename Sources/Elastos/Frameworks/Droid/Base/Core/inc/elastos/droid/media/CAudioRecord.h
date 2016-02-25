@@ -404,24 +404,25 @@ private:
     //---------------------------------------------------------
     static CARAPI_(void) recorderCallback(Int32 event, void* user, void *info);
 
-    CARAPI_(Int32) Native_setup(
-        /* [in] */ IInterface* audiorecord_this,
-        /* [in] */ IInterface* attributes,
+    CARAPI_(Int32) NativeSetup(
+        /* [in] */ IWeakReference* audiorecord_this,
+        /* [in] */ IAudioAttributes* attributes,
         /* [in] */ Int32 sampleRate,
         /* [in] */ Int32 channelMask,
         /* [in] */ Int32 audioFormat,
         /* [in] */ Int32 buffSizeInBytes,
         /* [in] */ ArrayOf<Int32>* sessionId);
 
-    CARAPI_(void) Native_finalize();
+    CARAPI_(void) NativeFinalize();
 
-    CARAPI_(void) Native_release();
+    CARAPI_(void) NativeRelease();
 
-    CARAPI_(Int32) Native_start(
+    CARAPI NativeStart(
         /* [in] */ Int32 syncEvent,
-        /* [in] */ Int32 sessionId);
+        /* [in] */ Int32 sessionId,
+        /* [out] */ Int32* result);
 
-    CARAPI_(void) Native_stop();
+    CARAPI NativeStop();
 
     CARAPI_(Int32) Native_read_in_byte_array(
         /* [in] */ ArrayOf<Byte>* audioData,
@@ -437,15 +438,19 @@ private:
         /* [in] */ IInterface* buffer,
         /* [in] */ Int32 sizeInBytes);
 
-    CARAPI_(Int32) Native_set_marker_pos(
-        /* [in] */ Int32 marker);
+    CARAPI Native_set_marker_pos(
+        /* [in] */ Int32 marker,
+        /* [out] */ Int32* result);
 
-    CARAPI_(Int32) Native_get_marker_pos();
+    CARAPI Native_get_marker_pos(
+        /* [out] */ Int32* result);
 
-    CARAPI_(Int32) Native_set_pos_update_period(
-        /* [in] */ Int32 updatePeriod);
+    CARAPI Native_set_pos_update_period(
+        /* [in] */ Int32 updatePeriod,
+        /* [out] */ Int32* result);
 
-    CARAPI_(Int32) Native_get_pos_update_period();
+    CARAPI Native_get_pos_update_period(
+        /* [out] */ Int32* result);
 
     static CARAPI_(Int32) Native_get_min_buff_size(
         /* [in] */ Int32 sampleRateInHz,

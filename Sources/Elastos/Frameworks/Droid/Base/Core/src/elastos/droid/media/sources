@@ -6,6 +6,7 @@ include $(MAKEDIR)/../../../../../../sources.inc
 
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../inc/
+INCLUDES += $(PREBUILD_INC)/media/openmax
 
 C_DEFINES += -DDROID_CORE
 
@@ -73,12 +74,12 @@ SOURCES += CMediaCodecBufferInfo.cpp
 SOURCES += CMediaCodecCryptoInfo.cpp
 SOURCES += CMediaCodecMediaImage.cpp
 SOURCES += CMediaCodec.cpp
-#SOURCES += CMediaCrypto.cpp
-#SOURCES += CMediaCryptoHelper.cpp
+SOURCES += CMediaCrypto.cpp
+SOURCES += CMediaCryptoHelper.cpp
 SOURCES += CMediaDescription.cpp
 SOURCES += CMediaDescriptionBuilder.cpp
 SOURCES += CMediaDrm.cpp
-#SOURCES += CMediaExtractor.cpp
+SOURCES += CMediaExtractor.cpp
 SOURCES += CMediaFileType.cpp
 SOURCES += MediaFile.cpp
 SOURCES += CMediaFile.cpp
@@ -92,17 +93,20 @@ SOURCES += CMediaMetadata.cpp
 SOURCES += CMediaMetadataHelper.cpp
 SOURCES += CMediaMetadataBuilder.cpp
 SOURCES += MediaMetadataEditor.cpp
-#SOURCES += CMediaMetadataRetriever.cpp
+SOURCES += CMediaMetadataRetriever.cpp
 SOURCES += CMediaMuxer.cpp
 SOURCES += CMediaRecorder.cpp
 SOURCES += CMediaRecorderHelper.cpp
 SOURCES += CMediaPlayerTrackInfo.cpp
 SOURCES += CMediaPlayer.cpp
 
-SOURCES += CMediaRouterSimpleCallback.cpp
+SOURCES += CMediaRouter.cpp
+SOURCES += MediaRouterRouteInfo.cpp
+SOURCES += MediaRouterUserRouteInfo.cpp
+SOURCES += MediaRouterRouteGroup.cpp
+SOURCES += MediaRouterSimpleCallback.cpp
 SOURCES += CTextTrackCueSpan.cpp
 SOURCES += CWebVttRenderer.cpp
-SOURCES += MediaRouterSimpleCallback.cpp
 SOURCES += SubtitleTrack.cpp
 SOURCES += SubtitleController.cpp
 SOURCES += SubtitleData.cpp
@@ -145,7 +149,10 @@ SOURCES += Utils.cpp
 SOURCES += PlayerRecord.cpp
 SOURCES += TtmlRenderer.cpp
 SOURCES += RemoteController.cpp
-
+SOURCES += CSoundPool.cpp
+SOURCES += CMediaScanner.cpp
+SOURCES += CMediaRouterHelper.cpp
+SOURCES += Media_Utils.cpp
 SOURCES += media.cpp
 
 ELASTOS_LIBS += audiofx/audiofx.lib

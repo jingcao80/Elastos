@@ -3,9 +3,36 @@
 #include "elastos/droid/os/Looper.h"
 #include <elastos/utility/logging/Logger.h>
 
+#include <binder/IServiceManager.h>
+#include <binder/Parcel.h>
+#include <media/IDrm.h>
+#include <media/IDrmClient.h>
+#include <media/IMediaPlayerService.h>
+#include <media/stagefright/foundation/ABase.h>
+#include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/MediaErrors.h>
+#include <utils/Errors.h>
+#include <utils/RefBase.h>
+
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::Looper;
+using Elastos::Core::CString;
+using Elastos::Core::ICharSequence;
+using Elastos::IO::IByteBuffer;
+using Elastos::IO::IByteBufferHelper;
+using Elastos::IO::CByteBufferHelper;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashMap;
+using Elastos::Utility::IArrayList;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::ISet;
 using Elastos::Utility::Logging::Logger;
+
+using android::sp;
+using android::status_t;
+using android::String8;
+using android::Vector;
 
 namespace Elastos {
 namespace Droid {
@@ -14,6 +41,342 @@ namespace Media {
 const String CMediaDrm::TAG("MediaDrm");
 const Int32 CMediaDrm::DRM_EVENT = 200;
 const String CMediaDrm::PERMISSION = Elastos::Droid::Manifest::permission::ACCESS_DRM_CERTIFICATES;
+
+//==============================================================================
+//  JNIDrmListener
+//==============================================================================
+
+class DrmListener: virtual public android::RefBase
+{
+public:
+    virtual void notify(android::DrmPlugin::EventType eventType, int extra,
+                        const android::Parcel *obj) = 0;
+};
+
+class JNIDrmListener: public DrmListener
+{
+public:
+    JNIDrmListener(IWeakReference* obj);
+    ~JNIDrmListener();
+    virtual void notify(android::DrmPlugin::EventType eventType,
+            int extra, const android::Parcel *obj = NULL);
+private:
+    JNIDrmListener();
+    AutoPtr<IWeakReference>    mObject;    // Weak ref to MediaDrm Java object to call on
+};
+
+JNIDrmListener::JNIDrmListener(IWeakReference* obj)
+    : mObject(obj)
+{
+    // We use a weak reference so the MediaDrm object can be garbage collected.
+    // The reference is only used as a proxy for callbacks.
+}
+
+JNIDrmListener::~JNIDrmListener()
+{
+}
+
+void JNIDrmListener::notify(android::DrmPlugin::EventType eventType, int extra,
+                            const android::Parcel *obj)
+{
+    Int32 jeventType;
+
+    // translate DrmPlugin event types into their java equivalents
+    switch(eventType) {
+        case android::DrmPlugin::kDrmPluginEventProvisionRequired:
+            jeventType = IMediaDrm::EVENT_PROVISION_REQUIRED;
+            break;
+        case android::DrmPlugin::kDrmPluginEventKeyNeeded:
+            jeventType = IMediaDrm::EVENT_KEY_REQUIRED;
+            break;
+        case android::DrmPlugin::kDrmPluginEventKeyExpired:
+            jeventType = IMediaDrm::EVENT_KEY_EXPIRED;
+            break;
+        case android::DrmPlugin::kDrmPluginEventVendorDefined:
+            jeventType = IMediaDrm::EVENT_VENDOR_DEFINED;
+            break;
+        default:
+            ALOGE("Invalid event DrmPlugin::EventType %d, ignored", (int)eventType);
+            return;
+    }
+
+    if (obj && obj->dataSize() > 0) {
+// TODO: JNI Parcel
+        // jobject jParcel = createJavaParcelObject(env);
+        // if (jParcel != NULL) {
+        //     Parcel* nativeParcel = parcelForJavaObject(env, jParcel);
+        //     nativeParcel->setData(obj->data(), obj->dataSize());
+        //     env->CallStaticVoidMethod(mClass, gFields.post_event, mObject,
+        //             jeventType, extra, jParcel);
+        //     env->DeleteLocalRef(jParcel);
+        // }
+    }
+}
+
+//==============================================================================
+//  JDrm
+//==============================================================================
+
+struct JDrm : public android::BnDrmClient {
+    static bool IsCryptoSchemeSupported(const uint8_t uuid[16], const String8 &mimeType);
+
+    JDrm(CMediaDrm* obj, const uint8_t uuid[16]);
+
+    status_t initCheck() const;
+    sp<android::IDrm> getDrm() { return mDrm; }
+
+    void notify(android::DrmPlugin::EventType, int extra, const android::Parcel *obj);
+    status_t setListener(const sp<DrmListener>& listener);
+
+    void disconnect();
+
+protected:
+    virtual ~JDrm();
+
+private:
+    CMediaDrm* mObject;
+    sp<android::IDrm> mDrm;
+
+    sp<DrmListener> mListener;
+    android::Mutex mNotifyLock;
+    android::Mutex mLock;
+
+    static sp<android::IDrm> MakeDrm();
+    static sp<android::IDrm> MakeDrm(const uint8_t uuid[16]);
+
+    DISALLOW_EVIL_CONSTRUCTORS(JDrm);
+};
+
+JDrm::JDrm(
+    CMediaDrm* obj, const uint8_t uuid[16])
+    : mObject(obj)
+{
+    mDrm = MakeDrm(uuid);
+    if (mDrm != NULL) {
+        mDrm->setListener(this);
+    }
+}
+
+JDrm::~JDrm()
+{
+    mObject = NULL;
+}
+
+// static
+sp<android::IDrm> JDrm::MakeDrm()
+{
+    sp<android::IServiceManager> sm = android::defaultServiceManager();
+
+    sp<android::IBinder> binder =
+        sm->getService(android::String16("media.player"));
+
+    sp<android::IMediaPlayerService> service =
+        android::interface_cast<android::IMediaPlayerService>(binder);
+
+    if (service == NULL) {
+        return NULL;
+    }
+
+    sp<android::IDrm> drm = service->makeDrm();
+
+    if (drm == NULL || (drm->initCheck() != android::OK &&
+            drm->initCheck() != android::NO_INIT))
+    {
+        return NULL;
+    }
+
+    return drm;
+}
+
+// static
+sp<android::IDrm> JDrm::MakeDrm(const uint8_t uuid[16])
+{
+    sp<android::IDrm> drm = MakeDrm();
+
+    if (drm == NULL) {
+        return NULL;
+    }
+
+    status_t err = drm->createPlugin(uuid);
+
+    if (err != android::OK) {
+        return NULL;
+    }
+
+    return drm;
+}
+
+status_t JDrm::setListener(const sp<DrmListener>& listener) {
+    android::Mutex::Autolock lock(mLock);
+    mListener = listener;
+    return android::OK;
+}
+
+void JDrm::notify(
+    android::DrmPlugin::EventType eventType,
+    int extra,
+    const android::Parcel *obj)
+{
+    sp<DrmListener> listener;
+    mLock.lock();
+    listener = mListener;
+    mLock.unlock();
+
+    if (listener != NULL) {
+        android::Mutex::Autolock lock(mNotifyLock);
+        listener->notify(eventType, extra, obj);
+    }
+}
+
+void JDrm::disconnect() {
+    if (mDrm != NULL) {
+        mDrm->destroyPlugin();
+        mDrm.clear();
+    }
+}
+
+// static
+bool JDrm::IsCryptoSchemeSupported(
+    const uint8_t uuid[16], const String8 &mimeType)
+{
+    sp<android::IDrm> drm = MakeDrm();
+
+    if (drm == NULL) {
+        return false;
+    }
+
+    return drm->isCryptoSchemeSupported(uuid, mimeType);
+}
+
+status_t JDrm::initCheck() const {
+    return mDrm == NULL ? android::NO_INIT : android::OK;
+}
+
+//==============================================================================
+//  JNI conversion utilities
+//==============================================================================
+
+static Vector<uint8_t> JByteArrayToVector(ArrayOf<Byte>* byteArray) {
+    Vector<uint8_t> vector;
+    size_t length = byteArray->GetLength();
+    vector.insertAt((size_t)0, length);
+//TODO: GetByteArrayRegion
+    // env->GetByteArrayRegion(byteArray, 0, length, (Byte *)vector.editArray());
+    return vector;
+}
+
+static AutoPtr<ArrayOf<Byte> > VectorToJByteArray(Vector<uint8_t> const &vector) {
+    size_t length = vector.size();
+    AutoPtr<ArrayOf<Byte> > result = ArrayOf<Byte>::Alloc(length);
+    if (result != NULL) {
+//TODO: SetByteArrayRegion
+        // env->SetByteArrayRegion(result, 0, length, (Byte *)vector.array());
+    }
+    return result;
+}
+
+static String8 JStringToString8(const String& jstr) {
+    String8 result;
+
+    const char *s = jstr.string();
+    if (s) {
+        result = s;
+    }
+    return result;
+}
+
+static android::KeyedVector<String8, String8> HashMapToKeyedVector(
+    IHashMap* hashMap)
+{
+    android::KeyedVector<String8, String8> keyedVector;
+
+    AutoPtr<ISet> entrySet;
+    hashMap->GetEntrySet((ISet**)&entrySet);
+    if (entrySet) {
+        AutoPtr<IIterator> iterator;
+        entrySet->GetIterator((IIterator**)&iterator);
+        if (iterator) {
+            Boolean hasNext;
+            iterator->HasNext(&hasNext);
+            while (hasNext) {
+                AutoPtr<IInterface> obj;
+                iterator->GetNext((IInterface**)&obj);
+                if (obj) {
+                    AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
+                    obj = NULL;
+                    entry->GetKey((IInterface**)&obj);
+                    String keyStr;
+                    ICharSequence::Probe(obj)->ToString(&keyStr);
+
+                    entry->GetValue((IInterface**)&obj);
+                    String valueStr;
+                    ICharSequence::Probe(obj)->ToString(&valueStr);
+
+                    String8 key = JStringToString8(keyStr);
+                    String8 value = JStringToString8(valueStr);
+                    keyedVector.add(key, value);
+
+                    iterator->HasNext(&hasNext);
+                }
+            }
+        }
+    }
+    return keyedVector;
+}
+
+static AutoPtr<IHashMap> KeyedVectorToHashMap (
+    android::KeyedVector<String8, String8> const &map)
+{
+    AutoPtr<IHashMap> hashMap;
+    CHashMap::New((IHashMap**)&hashMap);
+    for (size_t i = 0; i < map.size(); ++i) {
+        String jkey = String(map.keyAt(i).string());
+        String jvalue = String(map.valueAt(i).string());
+        AutoPtr<ICharSequence> csKey;
+        CString::New(jkey, (ICharSequence**)&csKey);
+        AutoPtr<ICharSequence> csValue;
+        CString::New(jvalue, (ICharSequence**)&csValue);
+        hashMap->Put(csKey, csValue);
+    }
+    return hashMap;
+}
+
+static AutoPtr<IList> ListOfVectorsToArrayListOfByteArray(
+    android::List<Vector<uint8_t> > list)
+{
+    AutoPtr<IArrayList> arrayList;
+    CArrayList::New((IArrayList**)&arrayList);
+
+    android::List<Vector<uint8_t> >::iterator iter = list.begin();
+    while (iter != list.end()) {
+        AutoPtr<ArrayOf<Byte> > byteArray = VectorToJByteArray(*iter);
+
+        AutoPtr<IByteBufferHelper> helper;
+        CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&helper);
+        AutoPtr<IByteBuffer> byteBuffer;
+        helper->Wrap(byteArray, (IByteBuffer**)&byteBuffer);
+
+        arrayList->Add(byteBuffer);
+        iter++;
+    }
+
+    return IList::Probe(arrayList);
+}
+
+static bool CheckSession(
+    const sp<android::IDrm> &drm, const ArrayOf<Byte>* jsessionId)
+{
+    if (drm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException", "MediaDrm obj is null");
+        return false;
+    }
+
+    if (jsessionId == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", "sessionId is null");
+        return false;
+    }
+    return true;
+}
 
 //==============================================================================
 //  CMediaDrm::KeyRequest
@@ -269,7 +632,9 @@ ECode CMediaDrm::constructor(
     /* Native setup requires a weak reference to our object.
      * It's easier to create it here than in C++.
      */
-    NativeSetup(THIS_PROBE(IMediaDrm), GetByteArrayFromUUID(uuid));
+    AutoPtr<IWeakReference> weakHost;
+    GetWeakReference((IWeakReference**)&weakHost);
+    NativeSetup(weakHost, GetByteArrayFromUUID(uuid));
     return NOERROR;
 }
 
@@ -280,60 +645,238 @@ ECode CMediaDrm::SetOnEventListener(
     return NOERROR;
 }
 
-// TODO: Need jni code
 ECode CMediaDrm::OpenSession(
     /* [out, callee] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (drm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "MediaDrm obj is null");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    Vector<uint8_t> sessionId;
+    status_t err = drm->openSession(sessionId);
+
+    // if (throwExceptionAsNecessary(env, err, "Failed to open session")) {
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    *result = VectorToJByteArray(sessionId);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode CMediaDrm::CloseSession(
-    /* [in] */ ArrayOf<Byte>* sessionId)
+    /* [in] */ ArrayOf<Byte>* jsessionId)
 {
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (!CheckSession(drm, jsessionId)) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+
+    status_t err = drm->closeSession(sessionId);
+
+    // throwExceptionAsNecessary(env, err, "Failed to close session");
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
 ECode CMediaDrm::GetKeyRequest(
-    /* [in] */ ArrayOf<Byte>* scope,
-    /* [in] */ ArrayOf<Byte>* init,
-    /* [in] */ const String& mimeType,
-    /* [in] */ Int32 keyType,
-    /* [in] */ IHashMap* optionalParameters,
+    /* [in] */ ArrayOf<Byte>* jsessionId,
+    /* [in] */ ArrayOf<Byte>* jinitData,
+    /* [in] */ const String& jmimeType,
+    /* [in] */ Int32 jkeyType,
+    /* [in] */ IHashMap* joptParams,
     /* [out] */ IMediaDrmKeyRequest** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (!CheckSession(drm, jsessionId)) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+
+    Vector<uint8_t> initData;
+    if (jinitData != NULL) {
+        initData = JByteArrayToVector(jinitData);
+    }
+
+    String8 mimeType;
+    if (jmimeType != NULL) {
+        mimeType = JStringToString8(jmimeType);
+    }
+
+    android::DrmPlugin::KeyType keyType;
+    if (jkeyType == IMediaDrm::KEY_TYPE_STREAMING) {
+        keyType = android::DrmPlugin::kKeyType_Streaming;
+    }
+    else if (jkeyType == IMediaDrm::KEY_TYPE_OFFLINE) {
+        keyType = android::DrmPlugin::kKeyType_Offline;
+    }
+    else if (jkeyType == IMediaDrm::KEY_TYPE_RELEASE) {
+        keyType = android::DrmPlugin::kKeyType_Release;
+    }
+    else {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "invalid keyType");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    android::KeyedVector<String8, String8> optParams;
+    if (joptParams != NULL) {
+        optParams = HashMapToKeyedVector(joptParams);
+    }
+
+    Vector<uint8_t> request;
+    String8 defaultUrl;
+
+    status_t err = drm->getKeyRequest(sessionId, initData, mimeType,
+                                          keyType, optParams, request, defaultUrl);
+
+    // if (throwExceptionAsNecessary(env, err, "Failed to get key request")) {
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    // Fill out return obj
+    AutoPtr<KeyRequest> keyObj = new KeyRequest();
+
+    AutoPtr<ArrayOf<Byte> > jrequest = VectorToJByteArray(request);
+    keyObj->mData = jrequest;
+
+    String jdefaultUrl = String(defaultUrl.string());
+    keyObj->mDefaultUrl = jdefaultUrl;
+
+    *result = keyObj;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 ECode CMediaDrm::ProvideKeyResponse(
-    /* [in] */ ArrayOf<Byte>* scope,
-    /* [in] */ ArrayOf<Byte>* response,
+    /* [in] */ ArrayOf<Byte>* jsessionId,
+    /* [in] */ ArrayOf<Byte>* jresponse,
     /* [out, callee] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (!CheckSession(drm, jsessionId)) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+
+    if (jresponse == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "key response is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    Vector<uint8_t> response(JByteArrayToVector(jresponse));
+    Vector<uint8_t> keySetId;
+
+    status_t err = drm->provideKeyResponse(sessionId, response, keySetId);
+
+    // if (throwExceptionAsNecessary(env, err, "Failed to handle key response")) {
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    *result = VectorToJByteArray(keySetId);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 
 ECode CMediaDrm::RestoreKeys(
-    /* [in] */ ArrayOf<Byte>* sessionId,
-    /* [in] */ ArrayOf<Byte>* keySetId)
+    /* [in] */ ArrayOf<Byte>* jsessionId,
+    /* [in] */ ArrayOf<Byte>* jkeysetId)
 {
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (!CheckSession(drm, jsessionId)) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if (jkeysetId == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+    Vector<uint8_t> keySetId(JByteArrayToVector(jkeysetId));
+
+    status_t err = drm->restoreKeys(sessionId, keySetId);
+
+    // throwExceptionAsNecessary(env, err, "Failed to restore keys");
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
 ECode CMediaDrm::RemoveKeys(
-    /* [in] */ ArrayOf<Byte>* sessionId)
+    /* [in] */ ArrayOf<Byte>* jkeysetId)
 {
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (jkeysetId == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "keySetId is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Vector<uint8_t> keySetId(JByteArrayToVector(jkeysetId));
+
+    status_t err = drm->removeKeys(keySetId);
+
+    // throwExceptionAsNecessary(env, err, "Failed to remove keys");
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
 ECode CMediaDrm::QueryKeyStatus(
-    /* [in] */ ArrayOf<Byte>* sessionId,
+    /* [in] */ ArrayOf<Byte>* jsessionId,
     /* [out] */ IHashMap** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (!CheckSession(drm, jsessionId)) {
+        return NOERROR;
+    }
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+
+    android::KeyedVector<String8, String8> infoMap;
+
+    status_t err = drm->queryKeyStatus(sessionId, infoMap);
+
+    // if (throwExceptionAsNecessary(env, err, "Failed to query key status")) {
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    *result = KeyedVectorToHashMap(infoMap);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -353,9 +896,22 @@ ECode CMediaDrm::ProvideProvisionResponse(
     return NOERROR;
 }
 
-// TODO: Need jni code
 ECode CMediaDrm::UnprovisionDevice()
 {
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (drm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "MediaDrm obj is null");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    status_t err = drm->unprovisionDevice();
+
+    // throwExceptionAsNecessary(env, err, "Failed to handle provision response");
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
@@ -363,43 +919,192 @@ ECode CMediaDrm::GetSecureStops(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (drm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "MediaDrm obj is null");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    android::List<Vector<uint8_t> > secureStops;
+
+    status_t err = drm->getSecureStops(secureStops);
+
+    // if (throwExceptionAsNecessary(env, err, "Failed to get secure stops")) {
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    *result = ListOfVectorsToArrayListOfByteArray(secureStops);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
 
 ECode CMediaDrm::ReleaseSecureStops(
-    /* [in] */ ArrayOf<Byte>* ssRelease)
+    /* [in] */ ArrayOf<Byte>* jssRelease)
 {
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (drm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "MediaDrm obj is null");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    Vector<uint8_t> ssRelease(JByteArrayToVector(jssRelease));
+
+    status_t err = drm->releaseSecureStops(ssRelease);
+
+    // throwExceptionAsNecessary(env, err, "Failed to release secure stops");
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
 ECode CMediaDrm::GetPropertyString(
-    /* [in] */ const String& propertyName,
+    /* [in] */ const String& jname,
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (drm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "MediaDrm obj is null");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    if (jname == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "property name String is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    String8 name = JStringToString8(jname);
+    String8 value;
+
+    status_t err = drm->getPropertyString(name, value);
+
+    // if (throwExceptionAsNecessary(env, err, "Failed to get property")) {
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    *result = String(value.string());
     return NOERROR;
 }
 
 ECode CMediaDrm::GetPropertyByteArray(
-    /* [in] */ const String& propertyName,
+    /* [in] */ const String& jname,
     /* [out, callee] */ ArrayOf<Byte>** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (drm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "MediaDrm obj is null");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    if (jname == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "property name String is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    String8 name = JStringToString8(jname);
+    Vector<uint8_t> value;
+
+    status_t err = drm->getPropertyByteArray(name, value);
+
+    // if (throwExceptionAsNecessary(env, err, "Failed to get property")) {
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    *result = VectorToJByteArray(value);
     return NOERROR;
 }
 
 ECode CMediaDrm::SetPropertyString(
-    /* [in] */ const String& propertyName,
-    /* [in] */ const String& value)
+    /* [in] */ const String& jname,
+    /* [in] */ const String& jvalue)
 {
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (drm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "MediaDrm obj is null");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    if (jname == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "property name String is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if (jvalue == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "property value String is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    String8 name = JStringToString8(jname);
+    String8 value = JStringToString8(jvalue);
+
+    status_t err = drm->setPropertyString(name, value);
+
+    // throwExceptionAsNecessary(env, err, "Failed to set property");
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
 ECode CMediaDrm::SetPropertyByteArray(
-    /* [in] */ const String& propertyName,
-    /* [in] */ ArrayOf<Byte>* value)
+    /* [in] */ const String& jname,
+    /* [in] */ ArrayOf<Byte>* jvalue)
 {
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (drm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "MediaDrm obj is null");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    if (jname == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "property name String is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    if (jvalue == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "property value byte array is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    String8 name = JStringToString8(jname);
+    Vector<uint8_t> value = JByteArrayToVector(jvalue);
+
+    status_t err = drm->setPropertyByteArray(name, value);
+
+    // throwExceptionAsNecessary(env, err, "Failed to set property");
+    if (err != android::OK) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
@@ -457,7 +1162,12 @@ ECode CMediaDrm::SignRSA(
 
 ECode CMediaDrm::ReleaseResources()
 {
-    return NOERROR;
+    sp<JDrm> drm = (JDrm *)mNativeContext;
+    if (drm != NULL) {
+        drm->setListener(NULL);
+        drm->disconnect();
+    }
+    mNativeContext = 0;
 }
 
 ECode CMediaDrm::IsCryptoSchemeSupported(
@@ -465,8 +1175,7 @@ ECode CMediaDrm::IsCryptoSchemeSupported(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = IsCryptoSchemeSupportedNative(GetByteArrayFromUUID(uuid), String(NULL));
-    return NOERROR;
+    return IsCryptoSchemeSupportedNative(GetByteArrayFromUUID(uuid), String(NULL), result);
 }
 
 ECode CMediaDrm::IsCryptoSchemeSupported(
@@ -475,8 +1184,7 @@ ECode CMediaDrm::IsCryptoSchemeSupported(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
-    *result = IsCryptoSchemeSupportedNative(GetByteArrayFromUUID(uuid), mimeType);
-    return NOERROR;
+    return IsCryptoSchemeSupportedNative(GetByteArrayFromUUID(uuid), mimeType, result);
 }
 
 AutoPtr<ArrayOf<Byte> > CMediaDrm::GetByteArrayFromUUID(
@@ -496,23 +1204,52 @@ AutoPtr<ArrayOf<Byte> > CMediaDrm::GetByteArrayFromUUID(
     return uuidBytes;
 }
 
-Boolean CMediaDrm::IsCryptoSchemeSupportedNative(
-    /* [in] */ ArrayOf<Byte>* uuid,
-    /* [in] */ const String& mimeType)
+ECode CMediaDrm::IsCryptoSchemeSupportedNative(
+    /* [in] */ ArrayOf<Byte>* uuidObj,
+    /* [in] */ const String& jmimeType,
+    /* [out] */ Boolean* result)
 {
-    return FALSE;
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
+    if (uuidObj == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Vector<uint8_t> uuid = JByteArrayToVector(uuidObj);
+
+    if (uuid.size() != 16) {
+        // jniThrowException(
+        //         env,
+        //         "java/lang/IllegalArgumentException",
+        //         "invalid UUID size, expected 16 bytes");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    String8 mimeType;
+    if (jmimeType != NULL) {
+        mimeType = JStringToString8(jmimeType);
+    }
+
+    *result = JDrm::IsCryptoSchemeSupported(uuid.array(), mimeType);
+    return NOERROR;
 }
 
 void CMediaDrm::PostEventFromNative(
-    /* [in] */ IInterface* mediadrm_ref,
+    /* [in] */ IInterface* ref,
     /* [in] */ Int32 eventType,
     /* [in] */ Int32 extra,
     /* [in] */ IInterface* obj)
 {
-    AutoPtr<CMediaDrm> md = (CMediaDrm*)IMediaDrm::Probe(mediadrm_ref);
-    if (md == NULL) {
+    AutoPtr<IWeakReference> wr = IWeakReference::Probe(ref);
+    AutoPtr<IMediaDrm> imd;
+    wr->Resolve(EIID_IMediaDrm, (IInterface**)&imd);
+    if (imd == NULL) {
         return;
     }
+
+    AutoPtr<CMediaDrm> md = (CMediaDrm*)imd.Get();
     if (md->mEventHandler != NULL) {
         AutoPtr<IMessage> m;
         md->mEventHandler->ObtainMessage(DRM_EVENT, eventType, extra, obj, (IMessage**)&m);
@@ -521,100 +1258,356 @@ void CMediaDrm::PostEventFromNative(
     }
 }
 
-// TODO: Need jni code
 AutoPtr<CMediaDrm::ProvisionRequest> CMediaDrm::GetProvisionRequestNative(
-    /* [in] */ Int32 certType,
-    /* [in] */ const String& certAuthority)
+    /* [in] */ Int32 jcertType,
+    /* [in] */ const String& jcertAuthority)
 {
-    return NULL;
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (drm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "MediaDrm obj is null");
+        return NULL;
+    }
+
+    Vector<uint8_t> request;
+    String8 defaultUrl;
+
+    String8 certType;
+    if (jcertType == IMediaDrm::CERTIFICATE_TYPE_X509) {
+        certType = "X.509";
+    }
+    else if (jcertType == IMediaDrm::CERTIFICATE_TYPE_NONE) {
+        certType = "none";
+    }
+    else {
+        certType = "invalid";
+    }
+
+    String8 certAuthority = JStringToString8(jcertAuthority);
+    status_t err = drm->getProvisionRequest(certType, certAuthority, request, defaultUrl);
+
+    // if (throwExceptionAsNecessary(env, err, "Failed to get provision request")) {
+    if (err != android::OK) {
+        return NULL;
+    }
+
+    // Fill out return obj
+    AutoPtr<ProvisionRequest> provisionObj = new ProvisionRequest();
+
+    AutoPtr<ArrayOf<Byte> > jrequest = VectorToJByteArray(request);
+    provisionObj->mData = jrequest;
+
+    String jdefaultUrl = String(defaultUrl.string());
+    provisionObj->mDefaultUrl = jdefaultUrl;
+
+    return provisionObj;
 }
 
 AutoPtr<CMediaDrm::Certificate> CMediaDrm::ProvideProvisionResponseNative(
-    /* [in] */ ArrayOf<Byte>* response)
+    /* [in] */ ArrayOf<Byte>* jresponse)
 {
-    return NULL;
+    sp<android::IDrm> drm = ((JDrm *)mNativeContext)->getDrm();
+
+    if (drm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException",
+        //                   "MediaDrm obj is null");
+        return NULL;
+    }
+
+    if (jresponse == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "provision response is null");
+        return NULL;
+    }
+
+    Vector<uint8_t> response(JByteArrayToVector(jresponse));
+    Vector<uint8_t> certificate, wrappedKey;
+
+    status_t err = drm->provideProvisionResponse(response, certificate, wrappedKey);
+
+    // Fill out return obj
+    AutoPtr<Certificate> certificateObj;
+
+    if (certificate.size() && wrappedKey.size()) {
+        certificateObj = new Certificate();
+
+        AutoPtr<ArrayOf<Byte> > jcertificate = VectorToJByteArray(certificate);
+        certificateObj->mCertificateData = jcertificate;
+
+        AutoPtr<ArrayOf<Byte> > jwrappedKey = VectorToJByteArray(wrappedKey);
+        certificateObj->mWrappedKey = jwrappedKey;
+    }
+
+    // throwExceptionAsNecessary(env, err, "Failed to handle provision response");
+    if (err != android::OK) {
+        return NULL;
+    }
+    return certificateObj;
 }
 
 void CMediaDrm::SetCipherAlgorithmNative(
-    /* [in] */ IMediaDrm* drm,
-    /* [in] */ ArrayOf<Byte>* sessionId,
-    /* [in] */ const String& algorithm)
+    /* [in] */ IMediaDrm* jdrm,
+    /* [in] */ ArrayOf<Byte>* jsessionId,
+    /* [in] */ const String& jalgorithm)
 {
+    sp<android::IDrm> drm = ((JDrm *)((CMediaDrm*)jdrm)->mNativeContext)->getDrm();
 
+    if (!CheckSession(drm, jsessionId)) {
+        return;
+    }
+
+    if (jalgorithm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "algorithm String is null");
+        return;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+    String8 algorithm = JStringToString8(jalgorithm);
+
+    status_t err = drm->setCipherAlgorithm(sessionId, algorithm);
+
+    // throwExceptionAsNecessary(env, err, "Failed to set cipher algorithm");
 }
 
 void CMediaDrm::SetMacAlgorithmNative(
-    /* [in] */ IMediaDrm* drm,
-    /* [in] */ ArrayOf<Byte>* sessionId,
-    /* [in] */ const String& algorithm)
+    /* [in] */ IMediaDrm* jdrm,
+    /* [in] */ ArrayOf<Byte>* jsessionId,
+    /* [in] */ const String& jalgorithm)
 {
+    sp<android::IDrm> drm = ((JDrm *)((CMediaDrm*)jdrm)->mNativeContext)->getDrm();
 
+    if (!CheckSession(drm, jsessionId)) {
+        return;
+    }
+
+    if (jalgorithm == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "algorithm String is null");
+        return;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+    String8 algorithm = JStringToString8(jalgorithm);
+
+    status_t err = drm->setMacAlgorithm(sessionId, algorithm);
+
+    // throwExceptionAsNecessary(env, err, "Failed to set mac algorithm");
 }
 
 AutoPtr<ArrayOf<Byte> > CMediaDrm::EncryptNative(
-    /* [in] */ IMediaDrm* drm,
-    /* [in] */ ArrayOf<Byte>* sessionId,
-    /* [in] */ ArrayOf<Byte>* keyId,
-    /* [in] */ ArrayOf<Byte>* input,
-    /* [in] */ ArrayOf<Byte>* iv)
+    /* [in] */ IMediaDrm* jdrm,
+    /* [in] */ ArrayOf<Byte>* jsessionId,
+    /* [in] */ ArrayOf<Byte>* jkeyId,
+    /* [in] */ ArrayOf<Byte>* jinput,
+    /* [in] */ ArrayOf<Byte>* jiv)
 {
-    return NULL;
+    sp<android::IDrm> drm = ((JDrm *)((CMediaDrm*)jdrm)->mNativeContext)->getDrm();
+
+    if (!CheckSession(drm, jsessionId)) {
+        return NULL;
+    }
+
+    if (jkeyId == NULL || jinput == NULL || jiv == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "required argument is null");
+        return NULL;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+    Vector<uint8_t> keyId(JByteArrayToVector(jkeyId));
+    Vector<uint8_t> input(JByteArrayToVector(jinput));
+    Vector<uint8_t> iv(JByteArrayToVector(jiv));
+    Vector<uint8_t> output;
+
+    status_t err = drm->encrypt(sessionId, keyId, input, iv, output);
+
+    // if (throwExceptionAsNecessary(env, err, "Failed to encrypt")) {
+    if (err != android::OK) {
+        return NULL;
+    }
+
+    return VectorToJByteArray(output);
 }
 
 AutoPtr<ArrayOf<Byte> > CMediaDrm::DecryptNative(
-    /* [in] */ IMediaDrm* drm,
-    /* [in] */ ArrayOf<Byte>* sessionId,
-    /* [in] */ ArrayOf<Byte>* keyId,
-    /* [in] */ ArrayOf<Byte>* input,
-    /* [in] */ ArrayOf<Byte>* iv)
+    /* [in] */ IMediaDrm* jdrm,
+    /* [in] */ ArrayOf<Byte>* jsessionId,
+    /* [in] */ ArrayOf<Byte>* jkeyId,
+    /* [in] */ ArrayOf<Byte>* jinput,
+    /* [in] */ ArrayOf<Byte>* jiv)
 {
-    return NULL;
+    sp<android::IDrm> drm = ((JDrm *)((CMediaDrm*)jdrm)->mNativeContext)->getDrm();
+
+    if (!CheckSession(drm, jsessionId)) {
+        return NULL;
+    }
+
+    if (jkeyId == NULL || jinput == NULL || jiv == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "required argument is null");
+        return NULL;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+    Vector<uint8_t> keyId(JByteArrayToVector(jkeyId));
+    Vector<uint8_t> input(JByteArrayToVector(jinput));
+    Vector<uint8_t> iv(JByteArrayToVector(jiv));
+    Vector<uint8_t> output;
+
+    status_t err = drm->decrypt(sessionId, keyId, input, iv, output);
+    // if (throwExceptionAsNecessary(env, err, "Failed to decrypt")) {
+    if (err != android::OK) {
+        return NULL;
+    }
+
+    return VectorToJByteArray(output);
 }
 
 AutoPtr<ArrayOf<Byte> > CMediaDrm::SignNative(
-    /* [in] */ IMediaDrm* drm,
-    /* [in] */ ArrayOf<Byte>* sessionId,
-    /* [in] */ ArrayOf<Byte>* keyId,
-    /* [in] */ ArrayOf<Byte>* message)
+    /* [in] */ IMediaDrm* jdrm,
+    /* [in] */ ArrayOf<Byte>* jsessionId,
+    /* [in] */ ArrayOf<Byte>* jkeyId,
+    /* [in] */ ArrayOf<Byte>* jmessage)
 {
-    return NULL;
+    sp<android::IDrm> drm = ((JDrm *)((CMediaDrm*)jdrm)->mNativeContext)->getDrm();
+
+    if (!CheckSession(drm, jsessionId)) {
+        return NULL;
+    }
+
+    if (jkeyId == NULL || jmessage == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "required argument is null");
+        return NULL;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+    Vector<uint8_t> keyId(JByteArrayToVector(jkeyId));
+    Vector<uint8_t> message(JByteArrayToVector(jmessage));
+    Vector<uint8_t> signature;
+
+    status_t err = drm->sign(sessionId, keyId, message, signature);
+
+    // if (throwExceptionAsNecessary(env, err, "Failed to sign")) {
+    if (err != android::OK) {
+        return NULL;
+    }
+
+    return VectorToJByteArray(signature);
 }
 
 Boolean CMediaDrm::VerifyNative(
-    /* [in] */ IMediaDrm* drm,
-    /* [in] */ ArrayOf<Byte>* sessionId,
-    /* [in] */ ArrayOf<Byte>* keyId,
-    /* [in] */ ArrayOf<Byte>* message,
-    /* [in] */ ArrayOf<Byte>* signature)
+    /* [in] */ IMediaDrm* jdrm,
+    /* [in] */ ArrayOf<Byte>* jsessionId,
+    /* [in] */ ArrayOf<Byte>* jkeyId,
+    /* [in] */ ArrayOf<Byte>* jmessage,
+    /* [in] */ ArrayOf<Byte>* jsignature)
 {
-    return FALSE;
+    sp<android::IDrm> drm = ((JDrm *)((CMediaDrm*)jdrm)->mNativeContext)->getDrm();
+
+    if (!CheckSession(drm, jsessionId)) {
+        return false;
+    }
+
+    if (jkeyId == NULL || jmessage == NULL || jsignature == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "required argument is null");
+        return false;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+    Vector<uint8_t> keyId(JByteArrayToVector(jkeyId));
+    Vector<uint8_t> message(JByteArrayToVector(jmessage));
+    Vector<uint8_t> signature(JByteArrayToVector(jsignature));
+    bool match;
+
+    status_t err = drm->verify(sessionId, keyId, message, signature, match);
+
+    // throwExceptionAsNecessary(env, err, "Failed to verify");
+    if (err != android::OK) {
+        return FALSE;
+    }
+    return match;
 }
 
 AutoPtr<ArrayOf<Byte> > CMediaDrm::SignRSANative(
-    /* [in] */ IMediaDrm* drm,
-    /* [in] */ ArrayOf<Byte>* sessionId,
-    /* [in] */ const String& algorithm,
-    /* [in] */ ArrayOf<Byte>* wrappedKey,
-    /* [in] */ ArrayOf<Byte>* message)
+    /* [in] */ IMediaDrm* jdrm,
+    /* [in] */ ArrayOf<Byte>* jsessionId,
+    /* [in] */ const String& jalgorithm,
+    /* [in] */ ArrayOf<Byte>* jwrappedKey,
+    /* [in] */ ArrayOf<Byte>* jmessage)
 {
-    return NULL;
+    sp<android::IDrm> drm = ((JDrm *)((CMediaDrm*)jdrm)->mNativeContext)->getDrm();
+
+    if (!CheckSession(drm, jsessionId)) {
+        return NULL;
+    }
+
+    if (jalgorithm == NULL || jwrappedKey == NULL || jmessage == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "required argument is null");
+        return NULL;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(jsessionId));
+    String8 algorithm = JStringToString8(jalgorithm);
+    Vector<uint8_t> wrappedKey(JByteArrayToVector(jwrappedKey));
+    Vector<uint8_t> message(JByteArrayToVector(jmessage));
+    Vector<uint8_t> signature;
+
+    status_t err = drm->signRSA(sessionId, algorithm, message, wrappedKey, signature);
+
+    // if (throwExceptionAsNecessary(env, err, "Failed to sign")) {
+    if (err != android::OK) {
+        return NULL;
+    }
+
+    return VectorToJByteArray(signature);
 }
 
 void CMediaDrm::NativeInit()
 {
-
 }
 
-void CMediaDrm::NativeSetup(
-    /* [in] */ IInterface* mediadrm_this,
-    /* [in] */ ArrayOf<Byte>* uuid)
+ECode CMediaDrm::NativeSetup(
+    /* [in] */ IWeakReference* mediadrm_this,
+    /* [in] */ ArrayOf<Byte>* uuidObj)
 {
+    if (uuidObj == NULL) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException", "uuid is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
+    Vector<uint8_t> uuid = JByteArrayToVector(uuidObj);
+
+    if (uuid.size() != 16) {
+        // jniThrowException(env, "java/lang/IllegalArgumentException",
+        //                   "invalid UUID size, expected 16 bytes");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    sp<JDrm> drm = new JDrm(this, uuid.array());
+
+    status_t err = drm->initCheck();
+
+    if (err != android::OK) {
+        // jniThrowException(
+        //         env,
+        //         "android/media/UnsupportedSchemeException",
+        //         "Failed to instantiate drm object.");
+        return E_UNSUPPORTED_SCHEME_EXCEPTION;
+    }
+
+    sp<JNIDrmListener> listener = new JNIDrmListener(mediadrm_this);
+    drm->setListener(listener);
+    mNativeContext = (Int64)drm.get();
 }
 
 void CMediaDrm::NativeFinalize()
 {
-
+    ReleaseResources();
 }
 
 } // namespace Media

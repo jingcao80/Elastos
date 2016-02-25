@@ -116,7 +116,7 @@ module
              * @return BluetoothGattServer instance
              */
             OpenGattServer(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IBluetoothGattServerCallback* cb,
                 [out] IBluetoothGattServer** server);
 
@@ -135,7 +135,7 @@ module
              * @hide
              */
             OpenGattServer(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] IBluetoothGattServerCallback* cb,
                 [in] Int32 transport,
                 [out] IBluetoothGattServer** server);

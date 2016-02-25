@@ -1,7 +1,7 @@
 
 
 #ifndef __ELASTOS_DROID_PREFERENCE_SEEKBARPREFERENCESAVEDSATAE_H__
-#define  __ELASTOS_DROID_PREFERENCE_SEEKBARPREFERENCESAVEDSATAE_H__
+#define __ELASTOS_DROID_PREFERENCE_SEEKBARPREFERENCESAVEDSATAE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/preference/PreferenceBaseSavedState.h"

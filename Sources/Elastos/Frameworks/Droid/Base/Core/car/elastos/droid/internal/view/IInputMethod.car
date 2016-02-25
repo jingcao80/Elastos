@@ -7,9 +7,9 @@ module
     interface Elastos.Droid.View.InputMethod.IInputBinding;
     interface Elastos.Droid.View.InputMethod.IEditorInfo;
     interface Elastos.Droid.View.InputMethod.IInputMethodSubtype;
-    interface Elastos.Droid.Internal.View.IInputContext;
+    interface Elastos.Droid.Internal.View.IIInputContext;
     interface Elastos.Droid.Internal.View.IIInputMethodSession;
-    interface Elastos.Droid.Internal.View.IInputSessionCallback;
+    interface Elastos.Droid.Internal.View.IIInputSessionCallback;
 
     namespace Elastos {
     namespace Droid {
@@ -32,16 +32,16 @@ module
         UnbindInput();
 
         StartInput(
-            [in] IInputContext* inputContext,
+            [in] IIInputContext* inputContext,
             [in] IEditorInfo* attribute);
 
         RestartInput(
-            [in] IInputContext* inputContext,
+            [in] IIInputContext* inputContext,
             [in] IEditorInfo* attribute);
 
         CreateSession(
             [in] IInputChannel* channel,
-            [in] IInputSessionCallback* inputMethodCalllback);
+            [in] IIInputSessionCallback* inputMethodCalllback);
 
         SetSessionEnabled(
             [in] IIInputMethodSession* session,

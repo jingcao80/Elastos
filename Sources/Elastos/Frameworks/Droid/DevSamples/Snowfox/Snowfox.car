@@ -7,7 +7,7 @@ module
     merge("GeckoSmsManager.car");
     merge("GeckoNetworkManager.car");
     //merge("LauncherShortcuts.car");
-    
+
     using interface Elastos.Droid.App.IActivity;
     using interface Elastos.Droid.Content.IBroadcastReceiver;
     using interface Elastos.Droid.Content.IContext;
@@ -24,7 +24,7 @@ module
         [local]
         class CAlertNotification {
             constructor(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [in] Int32 aNotificationId,
                 [in] Int32 aIcon,
                 [in] String aTitle,

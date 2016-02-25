@@ -223,7 +223,7 @@ module
          * @see #onRevoke
          */
         Prepare(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IIntent** result);
     }
 

@@ -103,7 +103,7 @@ module
     [local]
     class CSoftInputWindow {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String name,
             [in] Int32 theme,
             [in] ISoftInputWindowCallback* c,

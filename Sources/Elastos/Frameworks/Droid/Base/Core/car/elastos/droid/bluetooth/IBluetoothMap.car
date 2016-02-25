@@ -20,6 +20,9 @@ module
         GetState(
             [out] Int32* state);
 
+        GetClient(
+            [out] IBluetoothDevice** device);
+
         Connect(
             [in] IBluetoothDevice* device,
             [out] Boolean* result);

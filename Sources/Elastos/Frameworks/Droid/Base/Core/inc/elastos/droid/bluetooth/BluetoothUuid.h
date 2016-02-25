@@ -1,8 +1,6 @@
-
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHUUID_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHUUID_H__
 
-//#include "Elastos.Droid.Core_server.h"
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkdef.h"
 
@@ -12,7 +10,7 @@ namespace Elastos {
 namespace Droid {
 namespace Bluetooth {
 
-class BluetoothUuid
+class ECO_PUBLIC BluetoothUuid
 {
 public:
     static CARAPI_(Boolean) IsAudioSource(
@@ -42,6 +40,15 @@ public:
     static CARAPI_(Boolean) IsBnep(
         /* [in] */ IParcelUuid* uuid);
 
+    static CARAPI_(Boolean) IsMap(
+        /* [in] */ IParcelUuid* uuid);
+
+    static CARAPI_(Boolean) IsMns(
+        /* [in] */ IParcelUuid* uuid);
+
+    static CARAPI_(Boolean) IsMas(
+        /* [in] */ IParcelUuid* uuid);
+
     static CARAPI_(Boolean) IsUuidPresent(
         /* [in] */ ArrayOf<IParcelUuid*>* uuidArray,
         /* [in] */ IParcelUuid* uuid);
@@ -57,20 +64,15 @@ public:
     static CARAPI_(Int32) GetServiceIdentifierFromParcelUuid(
         /* [in] */ IParcelUuid* parcelUuid);
 
-    static CARAPI_(Boolean) Is16BitUuid(IParcelUuid* parcelUuid){
-        //TODO
-        return FALSE;
-    };
+    static CARAPI_(Boolean) Is16BitUuid(
+        /* [in] */ IParcelUuid* parcelUuid);
 
-    static CARAPI_(Boolean) Is32BitUuid(IParcelUuid* parcelUuid) {
-        //TODO
-        return FALSE;
-    };
+    static CARAPI_(Boolean) Is32BitUuid(
+        /* [in] */ IParcelUuid* parcelUuid);
 
-    static CARAPI_(AutoPtr<IParcelUuid>) ParseUuidFrom(ArrayOf<Byte>* uuidBytes) {
-        //TODO
-        return NULL;
-    };
+    static CARAPI_(AutoPtr<IParcelUuid>) ParseUuidFrom(
+        /* [in] */ ArrayOf<Byte>* uuidBytes);
+
 public:
     /* See Bluetooth Assigned Numbers document - SDP section, to get the values of UUIDs
      * for the various services.
@@ -89,6 +91,7 @@ public:
     static const AutoPtr<IParcelUuid> AvrcpTarget;
     static const AutoPtr<IParcelUuid> ObexObjectPush;
     static const AutoPtr<IParcelUuid> Hid;
+    static const AutoPtr<IParcelUuid> Hogp;
     static const AutoPtr<IParcelUuid> PANU;
     static const AutoPtr<IParcelUuid> NAP;
     static const AutoPtr<IParcelUuid> BNEP;
@@ -104,8 +107,6 @@ public:
     static const Int32 UUID_BYTES_32_BIT = 4;
     /** Length of bytes for 128 bit UUID */
     static const Int32 UUID_BYTES_128_BIT = 16;
-
-
 
     static const AutoPtr< ArrayOf<IParcelUuid*> > RESERVED_UUIDS;
 };

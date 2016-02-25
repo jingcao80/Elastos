@@ -1,3 +1,5 @@
+
+#include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/internal/widget/CLockPatternUtilsHelper.h"
 #include "elastos/droid/internal/widget/LockPatternUtils.h"
 
@@ -35,6 +37,26 @@ ECode CLockPatternUtilsHelper::IsDeviceEncryptionEnabled(
     return NOERROR;
 }
 
+ECode CLockPatternUtilsHelper::StringToPattern(
+    /* [in] */ const String& string,
+    /* [out] */ IList** list)
+{
+    VALIDATE_NOT_NULL(list);
+    AutoPtr<IList> pattern = LockPatternUtils::StringToPattern(string);
+    *list = pattern;
+    REFCOUNT_ADD(*list);
+    return NOERROR;
+}
+
+ECode CLockPatternUtilsHelper::PatternToString(
+    /* [in] */ IList* pattern,
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str);
+    *str = LockPatternUtils::PatternToString(pattern);
+    return NOERROR;
+}
+
 ECode CLockPatternUtilsHelper::PatternToHash(
     /* [in] */ IList* pattern,
     /* [out, callee] */ ArrayOf<Byte>** arr)
@@ -43,6 +65,14 @@ ECode CLockPatternUtilsHelper::PatternToHash(
     AutoPtr < ArrayOf<Byte> > bytes = LockPatternUtils::PatternToHash(pattern);
     *arr = bytes;
     REFCOUNT_ADD(*arr)
+    return NOERROR;
+}
+
+ECode CLockPatternUtilsHelper::IsSafeModeEnabled(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = LockPatternUtils::IsSafeModeEnabled();
     return NOERROR;
 }
 

@@ -1,28 +1,35 @@
 
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Content.h"
+#include "Elastos.Droid.Provider.h"
+#include "elastos/droid/R.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/os/CUserManager.h"
 #include "elastos/droid/os/CUserHandle.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/CBundle.h"
-//#include "elastos/droid/app/ActivityManagerNative.h"
-//#include "elastos/droid/content/res/CResourcesHelper.h"
-//#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/app/CActivityManager.h"
+#include "elastos/droid/app/ActivityManagerNative.h"
+#include "elastos/droid/content/res/CResourcesHelper.h"
+#include "elastos/droid/provider/Settings.h"
 
-//using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::R;
+using Elastos::Droid::App::ActivityManagerNative;
+using Elastos::Droid::App::CActivityManager;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::Res::IResourcesHelper;
-//using Elastos::Droid::Provider::Settings;
-//using Elastos::Droid::Content:Res::CResourcesHelper;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettingsGlobal;
+using Elastos::Droid::Provider::ISettingsSecure;
+using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
-
 
 namespace Elastos {
 namespace Droid {
@@ -61,14 +68,13 @@ Boolean CUserManager::SupportsMultipleUsers()
         return FALSE;
     }
 
-    assert(0);
-    // AutoPtr<IResourcesHelper> helper;
-    // CResourcesHelper::AcquireSingleton((IResourcesHelper**)&helper);
-    // AutoPtr<IResources> system;
-    // helper->GetSystem((IResources**)&system);
+    AutoPtr<IResourcesHelper> helper;
+    CResourcesHelper::AcquireSingleton((IResourcesHelper**)&helper);
+    AutoPtr<IResources> system;
+    helper->GetSystem((IResources**)&system);
     Boolean bval, result;
-    // system->GetBoolean(R::bool_::config_enableMultiUserUI, &bval);
-    // SystemProperties::GetBoolean(String("fw.show_multiuserui"), bval, &result);
+    system->GetBoolean(R::bool_::config_enableMultiUserUI, &bval);
+    SystemProperties::GetBoolean(String("fw.show_multiuserui"), bval, &result);
     return result;
 }
 
@@ -161,10 +167,9 @@ ECode CUserManager::IsUserRunning(
     // try {
     Int32 id;
     user->GetIdentifier(&id);
-    assert(0 && "TODO");
-    // ECode ec = ActivityManagerNative::GetDefault()->IsUserRunning(
-    //         id, FALSE, result);
-    // if (FAILED(ec)) *result = FALSE;
+    ECode ec = ActivityManagerNative::GetDefault()->IsUserRunning(
+            id, FALSE, result);
+    if (FAILED(ec)) *result = FALSE;
     return NOERROR;
     // } catch (RemoteException e) {
     //     return false;
@@ -179,10 +184,9 @@ ECode CUserManager::IsUserRunningOrStopping(
     // try {
     Int32 id;
     user->GetIdentifier(&id);
-    assert(0 && "TODO");
-    // ECode ec = ActivityManagerNative::GetDefault()->IsUserRunning(
-    //         id, TRUE, result);
-    // if (FAILED(ec)) *result = FALSE;
+    ECode ec = ActivityManagerNative::GetDefault()->IsUserRunning(
+            id, TRUE, result);
+    if (FAILED(ec)) *result = FALSE;
     return NOERROR;
     // } catch (RemoteException e) {
     //     return false;
@@ -357,9 +361,8 @@ ECode CUserManager::CreateGuest(
         AutoPtr<IContentResolver> resolver;
         context->GetContentResolver((IContentResolver**)&resolver);
         Boolean bval;
-        assert(0 && "TODO");
-        // Settings::Secure::PutStringForUser(resolver,
-        //     ISettingsSecure::SKIP_FIRST_USE_HINTS, String("1"), id, &bval);
+        Settings::Secure::PutStringForUser(resolver,
+            ISettingsSecure::SKIP_FIRST_USE_HINTS, String("1"), id, &bval);
         // try {
             AutoPtr<IBundle> guestRestrictions;
             mService->GetDefaultGuestRestrictions((IBundle**)&guestRestrictions);
@@ -671,21 +674,20 @@ ECode CUserManager::GetUserIcon(
  */
 Int32 CUserManager::GetMaxSupportedUsers()
 {
-    assert(0 && "TODO");
-    // // Don't allow multiple users on certain builds
-    // if (Build::ID.StartWith(String("JVP"))) return 1;
-    // // Svelte devices don't get multi-user.
-    // if (CActivityManager::IsLowRamDeviceStatic()) return 1;
+    // Don't allow multiple users on certain builds
+    if (Build::ID.StartWith(String("JVP"))) return 1;
+    // Svelte devices don't get multi-user.
+    if (CActivityManager::IsLowRamDeviceStatic()) return 1;
 
-    // AutoPtr<IResourcesHelper> helper;
-    // CResourcesHelper::AcquireSingleton((IResourcesHelper**)&helper);
-    // AutoPtr<IResources> system;
-    // // helper->GetSystem((IResources**)&system);
-    // Int32 ival;
-    // system->GetInteger(R::integer::config_multiuserMaximumUsers, &ival);
-    // Int32 result;
-    // return SystemProperties::GetInt32(String("fw.max_users"), ival, &result);
-    return 1;
+    AutoPtr<IResourcesHelper> helper;
+    CResourcesHelper::AcquireSingleton((IResourcesHelper**)&helper);
+    AutoPtr<IResources> system;
+    helper->GetSystem((IResources**)&system);
+    Int32 ival;
+    system->GetInteger(R::integer::config_multiuserMaximumUsers, &ival);
+    Int32 result;
+    SystemProperties::GetInt32(String("fw.max_users"), ival, &result);
+    return result;
 }
 
 ECode CUserManager::IsUserSwitcherEnabled(
@@ -719,8 +721,7 @@ ECode CUserManager::IsUserSwitcherEnabled(
     mContext->GetContentResolver((IContentResolver**)&resolver);
 
     Int32 ival;
-    assert(0 && "TODO");
-    // Settings::Global::GetInt32(resolver, ISettingsGlobal::GUEST_USER_ENABLED, 0, &ival);
+    Settings::Global::GetInt32(resolver, ISettingsGlobal::GUEST_USER_ENABLED, 0, &ival);
     Boolean guestEnabled = ival == 1;
     *result = switchableUserCount > 1 || guestEnabled;
     return NOERROR;

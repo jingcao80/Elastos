@@ -48,7 +48,7 @@ CAR_INTERFACE_IMPL(CIInputMethodWrapper::InputMethodSessionCallbackWrapper, Obje
 CIInputMethodWrapper::InputMethodSessionCallbackWrapper::InputMethodSessionCallbackWrapper(
     /* [in] */ IContext* context,
     /* [in] */ IInputChannel* channel,
-    /* [in] */ IInputSessionCallback* cb)
+    /* [in] */ IIInputSessionCallback* cb)
     : mContext(context)
     , mChannel(channel)
     , mCb(cb)
@@ -164,7 +164,7 @@ ECode CIInputMethodWrapper::ExecuteMessage(
             return NOERROR;
         case DO_START_INPUT: {
             SomeArgs* args = (SomeArgs*)IObject::Probe(obj);
-            IInputContext* inputContext = IInputContext::Probe(args->mArg1);
+            IIInputContext* inputContext = IIInputContext::Probe(args->mArg1);
             AutoPtr<IInputConnection> ic;
             if (inputContext != NULL)
                 CInputConnectionWrapper::New(inputContext, (IInputConnection**)&ic);
@@ -176,7 +176,7 @@ ECode CIInputMethodWrapper::ExecuteMessage(
         }
         case DO_RESTART_INPUT: {
             SomeArgs* args = (SomeArgs*)IObject::Probe(obj);
-            IInputContext* inputContext = IInputContext::Probe(args->mArg1);
+            IIInputContext* inputContext = IIInputContext::Probe(args->mArg1);
             AutoPtr<IInputConnection> ic;
             if (inputContext != NULL)
                 CInputConnectionWrapper::New(inputContext, (IInputConnection**)&ic);
@@ -189,7 +189,7 @@ ECode CIInputMethodWrapper::ExecuteMessage(
         case DO_CREATE_SESSION: {
             SomeArgs* args = (SomeArgs*)IObject::Probe(obj);
             AutoPtr<IInputMethodSessionCallback> cb = new InputMethodSessionCallbackWrapper(
-                    mContext, IInputChannel::Probe(args->mArg1), IInputSessionCallback::Probe(args->mArg2));
+                    mContext, IInputChannel::Probe(args->mArg1), IIInputSessionCallback::Probe(args->mArg2));
             inputMethod->CreateSession(cb);
             args->Recycle();
             return NOERROR;
@@ -229,7 +229,7 @@ ECode CIInputMethodWrapper::BindInput(
     AutoPtr<IBinder> binder;
     FAIL_RETURN(binding->GetConnectionToken((IBinder**)&binder));
     AutoPtr<IInputConnection> ic;
-    CInputConnectionWrapper::New(IInputContext::Probe(binder), (IInputConnection**)&ic);
+    CInputConnectionWrapper::New(IIInputContext::Probe(binder), (IInputConnection**)&ic);
     AutoPtr<IInputBinding> nu;
     FAIL_RETURN(CInputBinding::New(ic, binding, (IInputBinding**)&nu));
 
@@ -246,7 +246,7 @@ ECode CIInputMethodWrapper::UnbindInput()
 }
 
 ECode CIInputMethodWrapper::StartInput(
-    /* [in] */ IInputContext* inputContext,
+    /* [in] */ IIInputContext* inputContext,
     /* [in] */ IEditorInfo* attribute)
 {
     AutoPtr<IMessage> msg;
@@ -255,7 +255,7 @@ ECode CIInputMethodWrapper::StartInput(
 }
 
 ECode CIInputMethodWrapper::RestartInput(
-    /* [in] */ IInputContext* inputContext,
+    /* [in] */ IIInputContext* inputContext,
     /* [in] */ IEditorInfo* attribute)
 {
     AutoPtr<IMessage> msg;
@@ -265,7 +265,7 @@ ECode CIInputMethodWrapper::RestartInput(
 
 ECode CIInputMethodWrapper::CreateSession(
     /* [in] */ IInputChannel* channel,
-    /* [in] */ IInputSessionCallback* callback)
+    /* [in] */ IIInputSessionCallback* callback)
 {
     AutoPtr<IMessage> msg;
     mCaller->ObtainMessageOO(DO_CREATE_SESSION, channel, callback, (IMessage**)&msg);

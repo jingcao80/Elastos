@@ -22,7 +22,7 @@ namespace View {
 
 class IInputConnectionWrapper
     : public Object
-    , public IInputContext
+    , public IIInputContext
     , public IBinder
 {
 private:
@@ -32,13 +32,13 @@ private:
         SomeArgs(
             /* [in] */ IInterface* arg1 = NULL,
             /* [in] */ IInterface* arg2 = NULL,
-            /* [in] */ IInputContextCallback* clback = NULL,
+            /* [in] */ IIInputContextCallback* clback = NULL,
             /* [in] */ Int32 seq = 0);
 
     public:
         AutoPtr<IInterface> mArg1;
         AutoPtr<IInterface> mArg2;
-        AutoPtr<IInputContextCallback> mCallback;
+        AutoPtr<IIInputContextCallback> mCallback;
         Int32 mSeq;
     };
 
@@ -72,29 +72,29 @@ public:
         /* [in] */ Int32 length,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI GetTextBeforeCursor(
         /* [in] */ Int32 length,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI GetSelectedText(
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI GetCursorCapsMode(
         /* [in] */ Int32 reqModes,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI GetExtractedText(
         /* [in] */ IExtractedTextRequest* request,
         /* [in] */ Int32 flags,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI CommitText(
         /* [in] */ ICharSequence* text,
@@ -150,7 +150,7 @@ public:
     CARAPI RequestUpdateCursorAnchorInfo(
         /* [in] */ Int32 cursorUpdateMode,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI ToString(
         /* [out] */ String* info);
@@ -178,27 +178,27 @@ private:
         /* [in] */ Int32 what,
         /* [in] */ Int32 arg1,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI_(AutoPtr<IMessage>) ObtainMessageSC(
         /* [in] */ Int32 what,
         /* [in] */ Int32 arg1,
         /* [in] */ Int32 arg2,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI_(AutoPtr<IMessage>) ObtainMessageSC(
         /* [in] */ Int32 what,
         /* [in] */ IInterface* arg1,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI_(AutoPtr<IMessage>) ObtainMessageSC(
         /* [in] */ Int32 what,
         /* [in] */ Int32 arg1,
         /* [in] */ IInterface* arg2,
         /* [in] */ Int32 seq,
-        /* [in] */ IInputContextCallback* callback);
+        /* [in] */ IIInputContextCallback* callback);
 
     CARAPI_(AutoPtr<IMessage>) ObtainMessage(
         /* [in] */ Int32 what,

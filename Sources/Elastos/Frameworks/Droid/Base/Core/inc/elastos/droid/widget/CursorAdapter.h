@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_WIDGET_CURSORADAPTER_H__
-#define  __ELASTOS_DROID_WIDGET_CURSORADAPTER_H__
+#ifndef __ELASTOS_DROID_WIDGET_CURSORADAPTER_H__
+#define __ELASTOS_DROID_WIDGET_CURSORADAPTER_H__
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.View.h"

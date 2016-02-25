@@ -38,7 +38,7 @@ module
          * </p>
          */
         OnCreateControllerDialog(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IBundle* savedInstanceState,
             [out] IMediaRouteControllerDialog** result);
     }

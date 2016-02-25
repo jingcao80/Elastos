@@ -463,6 +463,10 @@ module
 
             constructor();
 
+            constructor(
+                [in] IContentProviderOperation* cpo,
+                [in] Boolean removeUserIdFromUri);
+
             interface IContentProviderOperation;
             interface IParcelable;
         }
@@ -487,6 +491,10 @@ module
                 [in] Int32 count);
 
             constructor();
+
+            constructor(
+                [in] IContentProviderResult* cpr,
+                [in] Int32 userId);
 
             interface IContentProviderResult;
             interface IParcelable;
@@ -1096,7 +1104,7 @@ module
              [in] IContext* context);
 
          constructor(
-             [in] IContext* context,
+             [in] IContext* ctx,
              [in] IResolveInfo* info,
              [in] IUserHandle* user,
              [in] Int64 firstInstallTime);
@@ -1107,7 +1115,7 @@ module
     [local]
     class CLauncherApps {
          constructor(
-             [in] IContext* context,
+             [in] IContext* ctx,
              [in] IILauncherApps* service);
 
         interface ILauncherApps;
@@ -1217,7 +1225,7 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IPackageManager* pm,
             [in] IIPackageInstaller* installer,
             [in] String installerPackageName,

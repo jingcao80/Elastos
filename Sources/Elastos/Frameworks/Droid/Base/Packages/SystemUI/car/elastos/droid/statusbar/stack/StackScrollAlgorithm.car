@@ -3,11 +3,10 @@ module
 {
     interface Elastos.Droid.View.IViewGroup;
 
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.IExpandableView;
+    interface Elastos.Droid.SystemUI.StatusBar.IExpandableView;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
     namespace Stack {
@@ -67,7 +66,6 @@ module
     } // namespace Stack
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

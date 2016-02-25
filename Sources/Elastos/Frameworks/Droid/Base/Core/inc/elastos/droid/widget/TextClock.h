@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_WIDGET_TEXTCLOCK_H__
-#define  __ELASTOS_DROID_WIDGET_TEXTCLOCK_H__
+#ifndef __ELASTOS_DROID_WIDGET_TEXTCLOCK_H__
+#define __ELASTOS_DROID_WIDGET_TEXTCLOCK_H__
 
 #include "elastos/droid/widget/TextView.h"
 #include "elastos/droid/content/BroadcastReceiver.h"

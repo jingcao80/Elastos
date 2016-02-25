@@ -309,10 +309,14 @@ ECode GraphicBuffer::IsDestroyed(
 }
 
 ECode GraphicBuffer::GetNativeObject(
-    /* [out] */ Int64* handle)
+    /* [out] */ Handle64* handle)
 {
     VALIDATE_NOT_NULL(handle)
-    *handle = mNativeObject;
+
+    GraphicBufferWrapper* wrapper =
+        reinterpret_cast<GraphicBufferWrapper*>(mNativeObject);
+    *handle = reinterpret_cast<Handle64>(wrapper->buffer.get());
+
     return NOERROR;
 }
 

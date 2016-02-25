@@ -39,7 +39,7 @@ using Elastos::Droid::App::AppGlobals;
 using Elastos::Droid::App::CActivityManagerStackInfo;
 using Elastos::Droid::App::CActivityOptionsHelper;
 using Elastos::Droid::App::CProfilerInfo;
-using Elastos::Droid::App::EIID_IActivityContainer;
+using Elastos::Droid::App::EIID_IIActivityContainer;
 using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IActivityManager;
 using Elastos::Droid::App::IActivityManagerRunningTaskInfo;
@@ -240,7 +240,7 @@ ECode ActivityStackSupervisor::ActivityStackSupervisorHandler::HandleMessage(
         case CONTAINER_CALLBACK_VISIBILITY: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            AutoPtr<ActivityContainer> container = (ActivityContainer*)(IActivityContainer::Probe(obj));
+            AutoPtr<ActivityContainer> container = (ActivityContainer*)(IIActivityContainer::Probe(obj));
             AutoPtr<IActivityContainerCallback> callback = container->mCallback;
             if (callback != NULL) {
                 //try {
@@ -339,7 +339,7 @@ ECode ActivityStackSupervisor::ActivityStackSupervisorHandler::HandleMessage(
         case CONTAINER_CALLBACK_TASK_LIST_EMPTY: {
             AutoPtr<IInterface> obj;
             msg->GetObj((IInterface**)&obj);
-            ActivityContainer* container = (ActivityContainer*)(IActivityContainer::Probe(obj));
+            ActivityContainer* container = (ActivityContainer*)(IIActivityContainer::Probe(obj));
             AutoPtr<IActivityContainerCallback> callback = container->mCallback;
             if (callback != NULL) {
                 //try {
@@ -355,7 +355,7 @@ ECode ActivityStackSupervisor::ActivityStackSupervisorHandler::HandleMessage(
                 //final ActivityContainer container = (ActivityContainer) msg.obj;
                 AutoPtr<IInterface> obj;
                 msg->GetObj((IInterface**)&obj);
-                ActivityContainer* container = (ActivityContainer*)(IActivityContainer::Probe(obj));
+                ActivityContainer* container = (ActivityContainer*)(IIActivityContainer::Probe(obj));
                 container->mStack->FinishAllActivitiesLocked(TRUE);
                 container->OnTaskListEmptyLocked();
             }
@@ -378,7 +378,7 @@ ECode ActivityStackSupervisor::ActivityStackSupervisorHandler::HandleMessage(
 //=====================================================================
 //              ActivityStackSupervisor::ActivityContainer
 //=====================================================================
-CAR_INTERFACE_IMPL_2(ActivityStackSupervisor::ActivityContainer, Object, IBinder, IActivityContainer)
+CAR_INTERFACE_IMPL_2(ActivityStackSupervisor::ActivityContainer, Object, IBinder, IIActivityContainer)
 
 const Int32 ActivityStackSupervisor::ActivityContainer::FORCE_NEW_TASK_FLAGS =
             IIntent::FLAG_ACTIVITY_NEW_TASK | IIntent::FLAG_ACTIVITY_MULTIPLE_TASK | IIntent::FLAG_ACTIVITY_NO_ANIMATION;
@@ -1867,7 +1867,7 @@ ECode ActivityStackSupervisor::StartActivityMayWait(
     /* [in] */ IConfiguration* config,
     /* [in] */ IBundle* options,
     /* [in] */ Int32 userId,
-    /* [in] */ IActivityContainer* iContainer,
+    /* [in] */ IIActivityContainer* iContainer,
     /* [in] */ TaskRecord* inTask,
     /* [out] */ Int32* result)
 {
@@ -4191,9 +4191,9 @@ AutoPtr<ActivityStackSupervisor::ActivityContainer> ActivityStackSupervisor::Cre
 ECode ActivityStackSupervisor::RemoveChildActivityContainers(
     /* [in] */ ActivityRecord* parentActivity)
 {
-    //List<AutoPtr<IActivityContainer> > childStacks = parentActivity->mChildContainers;
+    //List<AutoPtr<IIActivityContainer> > childStacks = parentActivity->mChildContainers;
     for (Int32 containerNdx = parentActivity->mChildContainers.GetSize() - 1; containerNdx >= 0; --containerNdx) {
-        AutoPtr<IActivityContainer> ac = (parentActivity->mChildContainers)[containerNdx];
+        AutoPtr<IIActivityContainer> ac = (parentActivity->mChildContainers)[containerNdx];
         parentActivity->mChildContainers.Remove(containerNdx);
         //if (DEBUG_CONTAINERS) Slog.d(CActivityManagerService::TAG, "removeChildActivityContainers: removing " +
         //        container);
@@ -4204,7 +4204,7 @@ ECode ActivityStackSupervisor::RemoveChildActivityContainers(
 }
 
 ECode ActivityStackSupervisor::DeleteActivityContainer(
-    /* [in] */ IActivityContainer* container)
+    /* [in] */ IIActivityContainer* container)
 {
     AutoPtr<ActivityContainer> activityContainer = (ActivityContainer*)container;
     if (activityContainer != NULL) {

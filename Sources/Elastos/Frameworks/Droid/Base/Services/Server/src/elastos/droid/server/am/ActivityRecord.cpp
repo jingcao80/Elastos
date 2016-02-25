@@ -92,7 +92,7 @@ ActivityRecord::ActivityRecord(
     /* [in] */ Int32 reqCode,
     /* [in] */ Boolean componentSpecified,
     /* [in] */ ActivityStackSupervisor* supervisor,
-    /* [in] */ IActivityContainer* container,
+    /* [in] */ IIActivityContainer* container,
     /* [in] */ IBundle* options)
     : mService(service)
     , mInfo(aInfo)

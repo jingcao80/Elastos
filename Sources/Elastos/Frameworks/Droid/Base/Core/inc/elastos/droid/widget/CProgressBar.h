@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_WIDGET_CPROGRESSBAR_H__
-#define  __ELASTOS_DROID_WIDGET_CPROGRESSBAR_H__
+#ifndef __ELASTOS_DROID_WIDGET_CPROGRESSBAR_H__
+#define __ELASTOS_DROID_WIDGET_CPROGRESSBAR_H__
 
 #include "_Elastos_Droid_Widget_CProgressBar.h"
 #include "elastos/droid/widget/ProgressBar.h"

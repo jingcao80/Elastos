@@ -2,6 +2,11 @@
 #include "CZygoteHooks.h"
 #include "CFile.h"
 #include <elastos/core/Thread.h>
+#include <elastos/core/NativeThread.h>
+#include <elastos/utility/logging/Logger.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <errno.h>
 
 #if defined(HAVE_PRCTL)
 #include <sys/prctl.h>
@@ -10,13 +15,163 @@
 #include <sys/resource.h>
 
 using Elastos::Core::Thread;
+using Elastos::Core::NativeThread;
 using Elastos::IO::IFile;
 using Elastos::IO::CFile;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace System {
 
+//======================================================================
+// native codes : art/runtime/signal_catcher.cc
+//======================================================================
+static const String TAG("CZygote");
+static pthread_t sSignalCatcherHandle;
+
+static void* SignalCatcherThreadStart(void* arg);
+
+/*
+ * Crank up the signal catcher thread.
+ *
+ * Returns immediately.
+ */
+static Boolean SignalCatcherStartup()
+{
+    Logger::W(TAG, " == TODO SignalCatcherStartup");
+    // // Create a raw pthread; its start routine will attach to the runtime.
+    // CHECK_PTHREAD_CALL(pthread_create, (&pthread_, NULL, &Run, this), "signal catcher thread");
+    // if (!Elastos::Core::NativeCreateInternalThread(&sSignalCatcherHandle,
+    //     "signal catcher thread", SignalCatcherThreadStart, NULL)) {
+    //     return FALSE;
+    // }
+
+    return TRUE;
+}
+
+/*
+ * Respond to a SIGQUIT by dumping the thread stacks.  Optionally dump
+ * a few other things while we're at it.
+ *
+ * Thread stacks can either go to the log or to a file designated for holding
+ * ANR traces.  If we're writing to a file, we want to do it in one shot,
+ * so we can use a single O_APPEND write instead of contending for exclusive
+ * access with flock().  There may be an advantage in resuming the VM
+ * before doing the file write, so we don't stall the VM if disk I/O is
+ * bottlenecked.
+ *
+ * If JIT tuning is compiled in, dump compiler stats as well.
+ */
+static void HandleSigQuit()
+{
+    //TOOD: not implemented
+}
+
+/*
+ * Respond to a SIGUSR1 by forcing a GC.
+ */
+static void HandleSigUsr1()
+{
+    //TODO: not implemented
+}
+
+/*
+ * Sleep in sigwait() until a signal arrives.
+ */
+static void* SignalCatcherThreadStart(void* arg)
+{
+    NativeThread* self = Elastos::Core::NativeThreadSelf();
+    sigset_t mask;
+    Int32 cc;
+
+//    UNUSED_PARAMETER(arg);
+
+    Logger::V(TAG, "Signal catcher thread started (threadid=%d)", self->mThreadId);
+
+    /* set up mask with signals we want to handle */
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGQUIT);
+    sigaddset(&mask, SIGUSR1);
+
+    while (TRUE) {
+        int signal_number;
+
+        Elastos::Core::NativeChangeStatus(self, Elastos::Core::NTHREAD_VMWAIT);
+
+        /*
+         * Signals for sigwait() must be blocked but not ignored.  We
+         * block signals like SIGQUIT for all threads, so the condition
+         * is met.  When the signal hits, we wake up, without any signal
+         * handlers being invoked.
+         *
+         * When running under GDB we occasionally return from sigwait()
+         * with EINTR (e.g. when other threads exit).
+         */
+loop:
+        cc = sigwait(&mask, &signal_number);
+        if (cc != 0) {
+            if (cc == EINTR) {
+                Logger::V(TAG, "sigwait: EINTR");
+                goto loop;
+            }
+            assert(!"bad result from sigwait");
+        }
+
+        /* set our status to RUNNING, self-suspending if GC in progress */
+        Elastos::Core::NativeChangeStatus(self, Elastos::Core::NTHREAD_RUNNING);
+
+        switch (signal_number) {
+        case SIGQUIT:
+            HandleSigQuit();
+            break;
+        case SIGUSR1:
+            HandleSigUsr1();
+            break;
+        default:
+            Logger::E(TAG, "unexpected signal %d", signal_number);
+            break;
+        }
+    }
+
+    return NULL;
+}
+
+static void Abort()
+{
+    int result = 0;
+
+    /*
+     * If we call abort(), all threads in the process receives a SIBABRT.
+     * debuggerd dumps the stack trace of the main thread, whether or not
+     * that was the thread that failed.
+     *
+     * By stuffing a value into a bogus address, we cause a segmentation
+     * fault in the current thread, and get a useful log from debuggerd.
+     * We can also trivially tell the difference between a VM crash and
+     * a deliberate abort by looking at the fault address.
+     */
+    *((char*)0xdeadd00d) = result;
+    abort();
+
+    /* notreached */
+}
+
+/*
+ * Do non-zygote-mode initialization.  This is done during VM init for
+ * standard startup, or after a "zygote fork" when creating a new process.
+ */
+static Boolean InitAfterZygote()
+{
+    if (!SignalCatcherStartup()) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+//======================================================================
+// CZygoteHooks
+//======================================================================
 CAR_OBJECT_IMPL(CZygoteHooks)
 
 CAR_INTERFACE_IMPL(CZygoteHooks, Object, IZygoteHooks)
@@ -24,6 +179,11 @@ CAR_INTERFACE_IMPL(CZygoteHooks, Object, IZygoteHooks)
 CZygoteHooks::CZygoteHooks()
     : mToken(0)
 {
+}
+
+ECode CZygoteHooks::constructor()
+{
+  return NOERROR;
 }
 
 ECode CZygoteHooks::PreFork()
@@ -63,7 +223,7 @@ Int64 CZygoteHooks::NativePreFork()
     // // Grab thread before fork potentially makes Thread::pthread_key_self_ unusable.
     // Thread* self = Thread::Current();
     // return reinterpret_cast<jlong>(self);
-    assert(0 && "CZygoteHooks::NativePreFork is not implemented!");
+    // assert(0 && "CZygoteHooks::NativePreFork is not implemented!");
     return 0;
 }
 
@@ -77,6 +237,12 @@ void CZygoteHooks::NativePostForkChild(
     // thread->InitAfterFork();
     // EnableDebugFeatures(debug_flags);
 
+    if (!InitAfterZygote()) {
+        Logger::E(TAG, "error in post-zygote initialization");
+        Abort();
+    }
+
+
     // if (instruction_set != nullptr) {
     //     InstructionSet isa = GetInstructionSetFromString(instructionSet.string());
     //     Runtime::NativeBridgeAction action = Runtime::NativeBridgeAction::kUnload;
@@ -88,7 +254,7 @@ void CZygoteHooks::NativePostForkChild(
     //     Runtime::Current()->DidForkFromZygote(env, Runtime::NativeBridgeAction::kUnload, nullptr);
     // }
 
-    assert(0 && "CZygoteHooks::NativePostForkChild is not implemented!");
+    // assert(0 && "CZygoteHooks::NativePostForkChild is not implemented!");
 }
 
 void CZygoteHooks::WaitUntilAllThreadsStopped()
@@ -97,6 +263,11 @@ void CZygoteHooks::WaitUntilAllThreadsStopped()
     CFile::New(String("/proc/self/task"), (IFile**)&tasks);
     AutoPtr< ArrayOf<String> > files;
     tasks->List((ArrayOf<String>**)&files);
+    // if (files != NULL) {
+    //     for (Int32 i = 0; i < files->GetLength(); ++i) {
+    //         Logger::I("CZygoteHooks", " wait task %s to stop.", (*files)[i].string());
+    //     }
+    // }
     while (files != NULL && files->GetLength() > 1) {
         // try {
         // Experimentally, booting and playing about with a stingray, I never saw us

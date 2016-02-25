@@ -25,11 +25,11 @@ ECode CameraServiceBinderDecorator::CameraServiceBinderDecoratorListener::OnCatc
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
 
-    if ((UInt32)t == E_DEAD_OBJECT_EXCEPTION) {
+    if (t == (ECode)E_DEAD_OBJECT_EXCEPTION) {
         // Can sometimes happen (camera service died)
         // Pass on silently
     }
-    else if ((UInt32)t == E_REMOTE_EXCEPTION) {
+    else if (t == (ECode)E_REMOTE_EXCEPTION) {
         // Some other kind of remote exception - this is not normal, so let's at least
         // note it before moving on
         //Log.e(TAG, "Unexpected RemoteException from camera service call.", t);

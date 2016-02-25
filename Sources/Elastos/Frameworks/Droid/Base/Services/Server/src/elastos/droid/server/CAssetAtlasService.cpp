@@ -984,7 +984,7 @@ public:
 static android::sp<android::GraphicBuffer> graphicBufferForJavaObject(IGraphicBuffer* obj)
 {
     if (obj) {
-        Int64 nativeObject;
+        Handle64 nativeObject;
         obj->GetNativeObject(&nativeObject);
         GraphicBufferWrapper* wrapper = (GraphicBufferWrapper*) nativeObject;
         if (wrapper != NULL) {

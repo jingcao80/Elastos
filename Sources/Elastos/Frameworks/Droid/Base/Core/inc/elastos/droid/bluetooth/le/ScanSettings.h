@@ -125,14 +125,13 @@ public:
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 
-private:
-    ScanSettings(
+    CARAPI constructor(
         /* [in] */ Int32 scanMode,
         /* [in] */ Int32 callbackType,
         /* [in] */ Int32 scanResultType,
         /* [in] */ Int64 reportDelayMillis);
 
-    ScanSettings(
+    CARAPI constructor(
         /* [in] */ IParcel* in);
 
 private:

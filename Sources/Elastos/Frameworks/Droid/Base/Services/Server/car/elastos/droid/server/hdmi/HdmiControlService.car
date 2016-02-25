@@ -1,0 +1,66 @@
+
+module
+{
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Hdmi {
+
+    /**
+     * Provides a service for sending and processing HDMI control messages,
+     * HDMI-CEC and MHL control command, and providing the information on both standard.
+     */
+    /**
+     * @Involved
+     * interface Elastos.Droid.Server.ISystemService;
+     */
+    interface IHdmiControlService {
+    }
+
+    /**
+     * Interface to report send result.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IHdmiControlServiceSendMessageCallback {
+        /**
+         * Called when {@link HdmiControlService#sendCecCommand} is completed.
+         *
+         * @param error result of send request.
+         * <ul>
+         * <li>{@link Constants#SEND_RESULT_SUCCESS}
+         * <li>{@link Constants#SEND_RESULT_NAK}
+         * <li>{@link Constants#SEND_RESULT_FAILURE}
+         * </ul>
+         */
+        OnSendCompleted(
+            [in] Int32 error);
+    }
+
+    /**
+     * Interface to get a list of available logical devices.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IHdmiControlServiceDevicePollingCallback {
+        /**
+         * Called when device polling is finished.
+         *
+         * @param ackedAddress a list of logical addresses of available devices
+         */
+        OnPollingFinished(
+            [in] IList* ackedAddress);
+    }
+
+    } // namespace Hdmi
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}
+

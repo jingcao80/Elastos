@@ -51,7 +51,7 @@ CAR_INTERFACE_IMPL(Inet4Address, InetAddress, IInet4Address)
 ECode Inet4Address::GetANY(
     /* [out] */ IInetAddress** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
 
     *result = ANY;
     REFCOUNT_ADD(*result)
@@ -61,7 +61,7 @@ ECode Inet4Address::GetANY(
 ECode Inet4Address::GetALL(
     /* [out] */ IInetAddress** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
 
     *result = ALL;
     REFCOUNT_ADD(*result)
@@ -71,7 +71,7 @@ ECode Inet4Address::GetALL(
 ECode Inet4Address::GetLOOPBACK(
     /* [out] */ IInetAddress** result)
 {
-    VALIDATE_NOT_NULL(*result)
+    VALIDATE_NOT_NULL(result)
 
     *result = LOOPBACK;
     REFCOUNT_ADD(*result)

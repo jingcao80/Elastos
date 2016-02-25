@@ -10,21 +10,17 @@
 #include "elastos/droid/os/CParcelFileDescriptorHelper.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/CBase64InputStream.h"
-//TODO #include "elastos/droid/net/CUriHelper.h"
-//TODO #include "elastos/droid/media/CMediaPlayer.h"
+#include "elastos/droid/net/CUriHelper.h"
+#include "elastos/droid/media/CMediaPlayer.h"
 #include "elastos/droid/os/Build.h"
 
-//TODO #include <elastos/io/CFileHelper.h>
-//TODO #include <elastos/io/CFileOutputStream.h>
-//TODO #include <elastos/io/CByteArrayInputStream.h>
-//TODO #include <elastos/utility/CHashMap.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::ISurface;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriHelper;
-//TODO using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Droid::Os::IParcelFileDescriptorHelper;
@@ -34,7 +30,7 @@ using Elastos::Droid::Utility::IBase64InputStream;
 using Elastos::Droid::Utility::CBase64InputStream;
 using Elastos::Droid::Utility::IBase64;
 using Elastos::Droid::Media::IMediaPlayer;
-//TODO using Elastos::Droid::Media::CMediaPlayer;
+using Elastos::Droid::Media::CMediaPlayer;
 
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
@@ -43,15 +39,15 @@ using Elastos::Core::CBoolean;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IFileHelper;
-//TODO using Elastos::IO::CFileHelper;
+using Elastos::IO::CFileHelper;
 using Elastos::IO::IFileOutputStream;
-//TODO using Elastos::IO::CFileOutputStream;
+using Elastos::IO::CFileOutputStream;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IOutputStream;
 using Elastos::IO::IByteArrayInputStream;
-//TODO using Elastos::IO::CByteArrayInputStream;
+using Elastos::IO::CByteArrayInputStream;
 using Elastos::Utility::IMap;
-//TODO using Elastos::Utility::CHashMap;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -84,12 +80,12 @@ ECode MediaPlayerBridge::LoadDataUriTask::DoInBackground(
     AutoPtr<IFileOutputStream> fos;
     // try {
     AutoPtr<IFileHelper> fileHelper;
-    //TODO CFileHelper::AcquireSingleton((IFileHelper**)&fileHelper);
+    CFileHelper::AcquireSingleton((IFileHelper**)&fileHelper);
     fileHelper->CreateTempFile(String("decoded"), String("mediadata"), (IFile**)&mTempFile);
-    //TODO CFileOutputStream::New(mTempFile, (IFileOutputStream**)&fos);
+    CFileOutputStream::New(mTempFile, (IFileOutputStream**)&fos);
     AutoPtr<ArrayOf<Byte> > data = mData.GetBytes();
     AutoPtr<IInputStream> stream;
-    //TODO CByteArrayInputStream::New(data, (IInputStream**)&stream);
+    CByteArrayInputStream::New(data, (IInputStream**)&stream);
     AutoPtr<IBase64InputStream> decoder;
     CBase64InputStream::New(stream, IBase64::DEFAULT, (IBase64InputStream**)&decoder);
     AutoPtr<ArrayOf<Byte> > buffer = ArrayOf<Byte>::Alloc(1024);
@@ -133,7 +129,7 @@ ECode MediaPlayerBridge::LoadDataUriTask::OnPostExecute(
 
     // try {
         AutoPtr<IUriHelper> helper;
-        //TODO CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+        CUriHelper::AcquireSingleton((IUriHelper**)&helper);
         AutoPtr<IUri> uri;
         helper->FromFile(mTempFile, (IUri**)&uri);
         mOwner->GetLocalPlayer()->SetDataSource(mContext, uri);
@@ -270,7 +266,7 @@ AutoPtr<IMediaPlayer> MediaPlayerBridge::GetLocalPlayer()
 {
     if (mPlayer == NULL) {
         //mPlayer = new MediaPlayer();
-        //TODO CMediaPlayer::New((IMediaPlayer**)&mPlayer);
+        CMediaPlayer::New((IMediaPlayer**)&mPlayer);
     }
     return mPlayer;
 }
@@ -383,11 +379,11 @@ Boolean MediaPlayerBridge::SetDataSource(
     //Uri uri = Uri.parse(url);
     AutoPtr<IUri> uri;
     AutoPtr<IUriHelper> helper;
-    //TODO CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     helper->Parse(url, (IUri**)&uri);
     //HashMap<String, String> headersMap = new HashMap<String, String>();
     AutoPtr<IMap> headersMap;
-    //TODO CHashMap::New((IMap**)&headersMap);
+    CHashMap::New((IMap**)&headersMap);
 
     if (hideUrlLog)
     {

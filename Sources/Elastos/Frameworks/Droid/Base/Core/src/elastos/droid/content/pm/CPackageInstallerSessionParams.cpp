@@ -1,10 +1,10 @@
 
 #include "Elastos.Droid.Graphics.h"
 #include "elastos/droid/content/pm/CPackageInstallerSessionParams.h"
-//#include "elastos/droid/graphics/CBitmap.h"
+#include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/net/Uri.h"
 
-//using Elastos::Droid::Graphics::CBitmap;
+using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::Net::Uri;
 
 namespace Elastos {
@@ -65,8 +65,7 @@ ECode CPackageInstallerSessionParams::ReadFromParcel(
     source->ReadInt32(&mInstallLocation);
     source->ReadInt64(&mSizeBytes);
     source->ReadString(&mAppPackageName);
-    assert(0 && "TODO");
-    // CBitmap::New((IBitmap**)&mAppIcon);
+    CBitmap::New((IBitmap**)&mAppIcon);
     IParcelable::Probe(mAppIcon)->ReadFromParcel(source);
     source->ReadString(&mAppLabel);
     IParcelable::Probe(mOriginatingUri)->ReadFromParcel(source);

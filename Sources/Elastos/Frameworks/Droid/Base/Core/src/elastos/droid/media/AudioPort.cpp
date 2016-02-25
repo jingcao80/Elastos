@@ -102,6 +102,13 @@ ECode AudioPort::ActiveConfig(
     return NOERROR;
 }
 
+ECode AudioPort::SetActiveConfig(
+    /* [in] */ IAudioPortConfig* config)
+{
+    mActiveConfig = config;
+    return NOERROR;
+}
+
 ECode AudioPort::Handle(
     /* [out]*/ IAudioHandle** result)
 {

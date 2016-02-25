@@ -1,40 +1,44 @@
 
-#include "CInputMethodManagerServiceMethodCallback.h"
+#include "elastos/droid/server/CInputMethodManagerServiceMethodCallback.h"
+#include "elastos/droid/server/CInputMethodManagerService.h"
+#include <elastos/droid/os/Binder.h>
+
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Internal::View::EIID_IIInputMethodManager;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
+CAR_INTERFACE_IMPL_2(CInputMethodManagerServiceMethodCallback, Object, IIInputMethodManager, IBinder)
+
+CAR_OBJECT_IMPL(CInputMethodManagerServiceMethodCallback)
+
 ECode CInputMethodManagerServiceMethodCallback::constructor(
+    /* [in] */ IIInputMethodManager* imms,
     /* [in] */ IIInputMethod* method,
-    /* [in] */ Handle32 host)
+    /* [in] */ IInputChannel* channel)
 {
     mMethod = method;
-    mHost = (CInputMethodManagerService*)host;
-    return NOERROR;
-}
-
-ECode CInputMethodManagerServiceMethodCallback::FinishedEvent(
-    /* [in] */ Int32 seq,
-    /* [in] */ Boolean handled)
-{
+    mChannel = channel;
+    mParentIMMS = (CInputMethodManagerService*)imms;
     return NOERROR;
 }
 
 ECode CInputMethodManagerServiceMethodCallback::SessionCreated(
     /* [in] */ IIInputMethodSession* session)
 {
-    assert(mHost != NULL);
-    mHost->OnSessionCreated(mMethod, session);
+    Int64 ident = Binder::ClearCallingIdentity();
+    mParentIMMS->OnSessionCreated(mMethod, session, mChannel);
+    Binder::RestoreCallingIdentity(ident);
     return NOERROR;
 }
 
-ECode CInputMethodManagerServiceMethodCallback::GetDescription(
-    /* [out] */ String* description)
+ECode CInputMethodManagerServiceMethodCallback::ToString(
+    /* [out] */ String* str)
 {
-    VALIDATE_NOT_NULL(description)
-    *description = String("CInputMethodManagerServiceMethodCallback");
-    return NOERROR;
+    return Object::ToString(str);
 }
 
 }// namespace Server

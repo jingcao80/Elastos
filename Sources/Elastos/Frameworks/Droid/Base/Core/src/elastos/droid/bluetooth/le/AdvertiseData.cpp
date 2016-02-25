@@ -2,6 +2,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/bluetooth/le/AdvertiseData.h"
+#include "elastos/droid/bluetooth/le/CAdvertiseData.h"
 #include "elastos/droid/bluetooth/le/BluetoothLeUtils.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/utility/CSparseArray.h"
@@ -105,11 +106,7 @@ ECode AdvertiseData::Builder::Build(
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
-    AutoPtr<IAdvertiseData> advertiseData;
-    //return new AdvertiseData(mServiceUuids, mManufacturerSpecificData, mServiceData, mIncludeTxPowerLevel, mIncludeDeviceName);
-    //TODO CAdvertiseData::New(mServiceUuids, mManufacturerSpecificData, mServiceData, mIncludeTxPowerLevel, mIncludeDeviceName);
-    *result = advertiseData;
-    REFCOUNT_ADD(*result);
+    CAdvertiseData::New(mServiceUuids, mManufacturerSpecificData, mServiceData, mIncludeTxPowerLevel, mIncludeDeviceName, result);
     return NOERROR;
 }
 
@@ -310,9 +307,8 @@ ECode AdvertiseData::ReadFromParcel(
 {
     AutoPtr<Builder> builder = new Builder();
     //List<ParcelUuid> uuids = in.readArrayList(ParcelUuid.class.getClassLoader());
-    Handle32 itpp;
-    in->ReadInterfacePtr(&itpp);
-    AutoPtr<IInterface> listInterface((IInterface*)itpp);
+    AutoPtr<IInterface> listInterface;
+    in->ReadInterfacePtr((Handle32*)(IInterface**)&listInterface);
     AutoPtr<IList> uuids = IList::Probe(listInterface.Get());
     Int32 listSize;
     uuids->GetSize(&listSize);
@@ -335,7 +331,7 @@ ECode AdvertiseData::ReadFromParcel(
             Int32 manufacturerDataLength;
             in->ReadInt32(&manufacturerDataLength);
             //byte[] manufacturerData = new byte[manufacturerDataLength];
-            AutoPtr<ArrayOf<Byte> > manufacturerData;//TODO = ArrayOf<Byte>::Alloc(manufacturerDataLength);
+            AutoPtr<ArrayOf<Byte> > manufacturerData = ArrayOf<Byte>::Alloc(manufacturerDataLength);
             in->ReadArrayOf((Handle32*)(&manufacturerData));
             builder->AddManufacturerData(manufacturerId, manufacturerData);
         }
@@ -344,16 +340,16 @@ ECode AdvertiseData::ReadFromParcel(
     in->ReadInt32(&serviceDataSize);
     for (Int32 i = 0; i < serviceDataSize; ++i) {
         //ParcelUuid serviceDataUuid = in.readParcelable( ParcelUuid.class.getClassLoader());
-        Handle32 itfp;
-        in->ReadInterfacePtr(&itfp);
-        AutoPtr<IParcelUuid> serviceDataUuid = IParcelUuid::Probe((IInterface*)itfp);
+        AutoPtr<IInterface> itfp;
+        in->ReadInterfacePtr((Handle32*)(IInterface**)&itfp);
+        AutoPtr<IParcelUuid> serviceDataUuid = IParcelUuid::Probe(itfp);
         Int32 flag;
         in->ReadInt32(&flag);
         if (flag == 1) {
             Int32 serviceDataLength;
             in->ReadInt32(&serviceDataLength);
             //byte[] serviceData = new byte[serviceDataLength];
-            AutoPtr<ArrayOf<Byte> > serviceData;//TODO ArrayOf<Byte>::Alloc(serviceDataLength);
+            AutoPtr<ArrayOf<Byte> > serviceData = ArrayOf<Byte>::Alloc(serviceDataLength);
             //in->ReadByteArray((Handle32*)&serviceData);
             in->ReadArrayOf((Handle32*)&serviceData);
             builder->AddServiceData(serviceDataUuid, serviceData);
@@ -371,6 +367,12 @@ ECode AdvertiseData::ReadFromParcel(
     this->mServiceData = builder->mServiceData;
     this->mIncludeTxPowerLevel = builder->mIncludeTxPowerLevel;
     this->mIncludeDeviceName = builder->mIncludeDeviceName;
+    return NOERROR;
+}
+ECode AdvertiseData::constructor(
+    /* [in] */ IParcel* source)
+{
+    ReadFromParcel(source);
     return NOERROR;
 }
 

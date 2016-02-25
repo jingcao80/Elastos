@@ -714,10 +714,9 @@ ECode CTime::Format3339(
         Int32 minutes = (offset % 3600) / 60;
         Int32 hours = offset / 3600;
 
-        assert(0 && "TODO");
-        //Java:    return String.format(Locale.US, "%s%s%02d:%02d", base, sign, hours, minutes);
-        // String ret;
-        // ret = String.format(Locale.US, "%s%s%02d:%02d", base, sign, hours, minutes);
+        String str;
+        str.AppendFormat("%s%s%02d:%02d", base.string(), sign.string(), hours, minutes);
+        *ret = str;
         return NOERROR;
     }
 }

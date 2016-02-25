@@ -113,11 +113,11 @@ module
             [in] ICharSequence* title);
 
         SetTitleTextAppearance(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 resId);
 
         SetSubtitleTextAppearance(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 resId);
 
         SetTitleTextColor(

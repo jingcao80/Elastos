@@ -13,7 +13,7 @@
 #include "elastos/droid/webkit/native/content/browser/PageTransitionTypes.h"
 #include "elastos/droid/webkit/native/content/browser/SmartClipProvider.h"
 #include "elastos/droid/webkit/native/content_public/browser/GestureStateListener.h"
-//TODO #include "elastos/droid/webkit/native/content/common/CleanupReference.h"
+#include "elastos/droid/webkit/native/content/common/CleanupReference.h"
 #include "elastos/droid/webkit/native/android_webview/AwViewMethods.h"
 #include "elastos/droid/webkit/native/android_webview/AwContentsIoThreadClient.h"
 #include "elastos/droid/webkit/native/android_webview/AwWebResourceResponse.h"
@@ -34,6 +34,7 @@
 #include "elastos/droid/webkit/native/android_webview/AwContentViewClient.h"
 #include "elastos/droid/webkit/native/android_webview/AwWebContentsDelegateAdapter.h"
 #include "elastos/droid/os/AsyncTask.h"
+#include <Elastos.Droid.Webkit.h>
 
 // import android.annotation.SuppressLint;
 
@@ -62,8 +63,8 @@ using Elastos::Droid::View::Accessibility::IAccessibilityNodeInfo;
 using Elastos::Droid::View::Accessibility::IAccessibilityNodeProvider;
 using Elastos::Droid::View::InputMethod::IEditorInfo;
 using Elastos::Droid::View::InputMethod::IInputConnection;
-//TODO using Elastos::Droid::Webkit::IValueCallback;
-//TODO using Elastos::Droid::Webkit::IGeolocationPermissionsCallback;
+using Elastos::Droid::Webkit::IValueCallback;
+using Elastos::Droid::Webkit::IGeolocationPermissionsCallback;
 using Elastos::Droid::Widget::IOverScroller;
 
 using Elastos::Droid::Webkit::Content::Browser::ContentViewStatics;
@@ -81,7 +82,7 @@ using Elastos::Droid::Webkit::Content::Browser::ContentViewCore;
 using Elastos::Droid::Webkit::Content::Browser::LoadUrlParams;
 using Elastos::Droid::Webkit::Content::Browser::NavigationHistory;
 using Elastos::Droid::Webkit::Content::Browser::SmartClipProvider;
-//TODO using Elastos::Droid::Webkit::Content::Common::CleanupReference;
+using Elastos::Droid::Webkit::Content::Common::CleanupReference;
 using Elastos::Droid::Webkit::Content_Public::Browser::GestureStateListener;
 
 using Elastos::Core::IRunnable;
@@ -497,10 +498,9 @@ public:
 
     class AwGeolocationCallback
         : public Object
-        //TODO , public IGeolocationPermissionsCallback
+        , public IGeolocationPermissionsCallback
     {
     public:
-        //TODO CAR_INTERFACE_DECL();
         class InnerRunnable
             : public Object
             , public IRunnable
@@ -523,6 +523,8 @@ public:
         };
 
     public:
+        CAR_INTERFACE_DECL()
+
         AwGeolocationCallback(
             /* [in] */ AwContents* owner);
 
@@ -673,7 +675,7 @@ public:
 
     class InnerValueCallback
         : public Object
-        /*TODO , public IValueCallback*/
+        , public IValueCallback
     {
     private:
         class InnerRunnable
@@ -694,6 +696,8 @@ public:
         };
 
     public:
+        CAR_INTERFACE_DECL()
+
         InnerValueCallback(
             /* [in] */ AwContents* owner);
 
@@ -710,14 +714,14 @@ public:
     public:
         InnerJavaScriptCallback(
             /* [in] */ AwContents* owner,
-            /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+            /* [in] */ IValueCallback* callback);
 
         CARAPI_(void) HandleJavaScriptResult(
             /* [in] */ const String& jsonResult);
 
     private:
         AwContents* mOwner;
-        /*TODO IValueCallback*/IInterface* mCallback;
+        IValueCallback* mCallback;
     };
 
     class SaveWebArchiveInternalTask
@@ -727,7 +731,7 @@ public:
             SaveWebArchiveInternalTask(
                     /* [in] */ AwContents* owner,
                     /* [in] */ const String& basename,
-                    /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+                    /* [in] */ IValueCallback* callback);
 
         protected:
             //@Override
@@ -742,7 +746,7 @@ public:
         private:
             AwContents* mOwner;
             const String mBasename;
-            AutoPtr</*TODO IValueCallback*/IInterface> mCallback;
+            AutoPtr<IValueCallback> mCallback;
     };
 
     class SaveWebArchiveInternalRunnable
@@ -753,13 +757,13 @@ public:
         CAR_INTERFACE_DECL();
         SaveWebArchiveInternalRunnable(
             /* [in] */ AwContents* owner,
-            /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+            /* [in] */ IValueCallback* callback);
 
         CARAPI Run();
 
     private:
         AwContents* mOwner;
-        /*TODO IValueCallback*/IInterface* mCallback;
+        IValueCallback* mCallback;
     };
 
     class InnerSmartClipDataListener
@@ -1159,7 +1163,7 @@ public:
     virtual CARAPI_(void) SaveWebArchive(
         /* [in] */ const String& basename,
         /* [in] */ Boolean autoname,
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback* callback);
 
     virtual CARAPI_(String) GetOriginalUrl();
 
@@ -1304,7 +1308,7 @@ public:
      */
     virtual CARAPI_(void) EvaluateJavaScript(
         /* [in] */ const String& script,
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback* callback);
 
     /**
      * @see ContentViewCore.evaluateJavaScriptEvenIfNotYetNavigated(String)
@@ -1648,7 +1652,7 @@ private:
 
     CARAPI_(void) SaveWebArchiveInternal(
         /* [in] */ const String& path,
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback* callback);
 
     /**
      * Try to generate a pathname for saving an MHTML archive. This roughly follows WebView's
@@ -1704,7 +1708,7 @@ private:
     CARAPI_(void) NativeGenerateMHTML(
         /* [in] */ Int64 nativeAwContents,
         /* [in] */ const String& path,
-        /* [in] */ /*TODO IValueCallback*/IInterface* callback);
+        /* [in] */ IValueCallback* callback);
 
     CARAPI_(void) NativeAddVisitedLinks(
         /* [in] */ Int64 nativeAwContents,
@@ -2061,7 +2065,7 @@ private:
 
     // Reference to the active mNativeAwContents pointer while it is active use
     // (ie before it is destroyed).
-    AutoPtr</*TODO CleanupReference*/IInterface> mCleanupReference;
+    AutoPtr<CleanupReference> mCleanupReference;
 };
 
 } // namespace AndroidWebview

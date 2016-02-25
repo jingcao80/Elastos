@@ -1,7 +1,7 @@
 
 
 #ifndef __ELASTOS_DROID_PREFERENCE_CSEEKBARPREFERENCESAVEDSATAE_H__
-#define  __ELASTOS_DROID_PREFERENCE_CSEEKBARPREFERENCESAVEDSATAE_H__
+#define __ELASTOS_DROID_PREFERENCE_CSEEKBARPREFERENCESAVEDSATAE_H__
 
 #include "_Elastos_Droid_Preference_CSeekBarPreferenceSavedState.h"
 #include "elastos/droid/preference/SeekBarPreferenceSavedState.h"

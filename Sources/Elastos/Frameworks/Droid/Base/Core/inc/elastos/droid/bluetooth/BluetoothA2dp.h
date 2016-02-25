@@ -1,7 +1,6 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHA2DP_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHA2DP_H__
 
-//#include "Elastos.Droid.Core_server.h"
 #include "Elastos.Droid.Bluetooth.h"
 #include "Elastos.Droid.Content.h"
 #include <elastos/core/Object.h>

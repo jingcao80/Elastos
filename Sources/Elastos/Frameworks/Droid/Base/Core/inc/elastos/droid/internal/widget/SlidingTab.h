@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_INTERNAL_WIDGET_SLIDINGTAB_H__
-#define  __ELASTOS_DROID_INTERNAL_WIDGET_SLIDINGTAB_H__
+#ifndef __ELASTOS_DROID_INTERNAL_WIDGET_SLIDINGTAB_H__
+#define __ELASTOS_DROID_INTERNAL_WIDGET_SLIDINGTAB_H__
 
 #include "elastos/droid/view/ViewGroup.h"
 #include "Elastos.Droid.Os.h"

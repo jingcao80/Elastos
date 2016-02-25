@@ -112,16 +112,16 @@ module
     [local]
     interface IBatteryStatsHelperHelper {
         CheckWifiOnly(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] Boolean* result);
 
         StatsFromFile(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String fname,
             [out] IBatteryStats** stats);
 
         DropFile(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String fname);
 
         MakemAh(

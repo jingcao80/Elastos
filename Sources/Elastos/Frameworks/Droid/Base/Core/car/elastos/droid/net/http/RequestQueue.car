@@ -138,7 +138,7 @@ module
             [out] IHttpHost** result);
 
         GetConnection(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IHttpHost* host,
             [out] IConnection** result);
 

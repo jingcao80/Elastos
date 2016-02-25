@@ -3,11 +3,11 @@
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/app/MediaRouteButton.h"
-// #include "elastos/droid/internal/app/MediaRouteDialogPresenter.h"
+#include "elastos/droid/internal/app/MediaRouteDialogPresenter.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/R.h"
 #include "elastos/droid/view/SoundEffectConstants.h"
-// #include "elastos/droid/widget/Toast.h"
+#include "elastos/droid/widget/Toast.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/Math.h>
 #include <elastos/utility/logging/Logger.h>
@@ -19,9 +19,9 @@ using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::SoundEffectConstants;
 using Elastos::Droid::View::IHapticFeedbackConstants;
-// using Elastos::Droid::Widget::Toast;
+using Elastos::Droid::Widget::Toast;
 using Elastos::Droid::Widget::IToast;
-// using Elastos::Droid::Internal::App::MediaRouteDialogPresenter;
+using Elastos::Droid::Internal::App::MediaRouteDialogPresenter;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -32,11 +32,18 @@ namespace App {
 //  MediaRouteButton::MyMediaRouterCallback
 //=========================================================================
 
-MediaRouteButton::MyMediaRouterCallback::MyMediaRouterCallback(
+MediaRouteButton::MyMediaRouterCallback::MyMediaRouterCallback()
+{}
+
+ECode MediaRouteButton::MyMediaRouterCallback::constructor(
     /* [in] */ IMediaRouteButton* provider)
 {
+    assert(0 && "TODO");
+    // CMediaRouter::SimpleCallback::constructor();
+
     AutoPtr<IWeakReferenceSource> wrs = IWeakReferenceSource::Probe(provider);
     wrs->GetWeakReference((IWeakReference**)&mProviderWeak);
+    return NOERROR;
 }
 
 ECode MediaRouteButton::MyMediaRouterCallback::OnRouteAdded(
@@ -168,8 +175,9 @@ ECode MediaRouteButton::constructor(
     AutoPtr<IInterface> obj;
     context->GetSystemService(IContext::MEDIA_ROUTER_SERVICE, (IInterface**)&obj);
     mRouter = IMediaRouter::Probe(obj);
-    assert(0 && "TODO");
-    // mCallback = new MyMediaRouterCallback(this);
+    AutoPtr<MyMediaRouterCallback> cb = new MyMediaRouterCallback();
+    cb->constructor(this);
+    mCallback = (IMediaRouterCallback*)cb.Get();
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
         const_cast<Int32 *>(R::styleable::MediaRouteButton),
@@ -245,10 +253,8 @@ Boolean MediaRouteButton::ShowDialogInternal()
 
     AutoPtr<IActivity> activity;
     GetActivity((IActivity**)&activity);
-    AutoPtr<IDialogFragment> f;
-    assert(0 && "TODO");
-    // MediaRouteDialogPresenter::ShowDialogFragment(activity,
-    //     mRouteTypes, mExtendedSettingsClickListener, (IDialogFragment**)&f);
+    AutoPtr<IDialogFragment> f = MediaRouteDialogPresenter::ShowDialogFragment(activity,
+        mRouteTypes, mExtendedSettingsClickListener);
     return f != NULL;
 }
 
@@ -340,8 +346,7 @@ ECode MediaRouteButton::PerformLongClick(
     dm->GetWidthPixels(&screenWidth);
 
     AutoPtr<IToast> cheatSheet;
-    assert(0 && "TODO");
-    // Toast::MakeText(context, contentDesc, IToast::LENGTH_SHORT, (IToast**)&cheatSheet);
+    Toast::MakeText(context, contentDesc, IToast::LENGTH_SHORT, (IToast**)&cheatSheet);
     displayFrame->GetHeight(&height);
     if (midy < height) {
         // Show along the top; follow action buttons

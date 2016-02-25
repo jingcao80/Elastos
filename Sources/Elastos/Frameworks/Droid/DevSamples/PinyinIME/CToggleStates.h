@@ -1,6 +1,6 @@
 
-#ifndef  __CTOGGLESTATES_H__
-#define  __CTOGGLESTATES_H__
+#ifndef __CTOGGLESTATES_H__
+#define __CTOGGLESTATES_H__
 
 #include "_CToggleStates.h"
 

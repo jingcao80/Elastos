@@ -1,0 +1,35 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Hdmi {
+
+    /**
+     * Interface to report allocated logical address.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IHdmiCecControllerAllocateAddressCallback {
+        /**
+         * Called when a new logical address is allocated.
+         *
+         * @param deviceType requested device type to allocate logical address
+         * @param logicalAddress allocated logical address. If it is
+         *                       {@link Constants#ADDR_UNREGISTERED}, it means that
+         *                       it failed to allocate logical address for the given device type
+         */
+        OnAllocated(
+            [in] Int32 deviceType,
+            [in] Int32 logicalAddress);
+    }
+
+    } // namespace Hdmi
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}
+

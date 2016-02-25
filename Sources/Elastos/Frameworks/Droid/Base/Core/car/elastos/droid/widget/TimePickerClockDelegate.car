@@ -12,7 +12,7 @@ module
 
     interface ITimePickerClockDelegateHelper {
     	GetAmPmStrings(
-    		[in] IContext* context,
+    		[in] IContext* ctx,
     		[out, callee] ArrayOf<String>* result);
     }
 

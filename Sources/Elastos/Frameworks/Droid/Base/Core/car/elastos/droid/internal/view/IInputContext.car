@@ -7,7 +7,7 @@ module
     interface Elastos.Droid.View.InputMethod.IExtractedTextRequest;
     interface Elastos.Droid.View.InputMethod.ICompletionInfo;
     interface Elastos.Droid.View.InputMethod.ICorrectionInfo;
-    interface Elastos.Droid.Internal.View.IInputContextCallback;
+    interface Elastos.Droid.Internal.View.IIInputContextCallback;
 
     namespace Elastos {
     namespace Droid {
@@ -20,29 +20,29 @@ module
      * {@hide}
      */
     [oneway]
-    interface IInputContext {
+    interface IIInputContext {
         GetTextBeforeCursor(
             [in] Int32 length,
             [in] Int32 flags,
             [in] Int32 seq,
-            [in] IInputContextCallback* cb);
+            [in] IIInputContextCallback* cb);
 
         GetTextAfterCursor(
             [in] Int32 length,
             [in] Int32 flags,
             [in] Int32 seq,
-            [in] IInputContextCallback* cb);
+            [in] IIInputContextCallback* cb);
 
         GetCursorCapsMode(
             [in] Int32 reqModes,
             [in] Int32 seq,
-            [in] IInputContextCallback* cb);
+            [in] IIInputContextCallback* cb);
 
         GetExtractedText(
             [in] IExtractedTextRequest* request,
             [in] Int32 flags,
             [in] Int32 seq,
-            [in] IInputContextCallback* cb);
+            [in] IIInputContextCallback* cb);
 
         DeleteSurroundingText(
             [in] Int32 leftLength,
@@ -98,12 +98,12 @@ module
         GetSelectedText(
             [in] Int32 flags,
             [in] Int32 seq,
-            [in] IInputContextCallback* cb);
+            [in] IIInputContextCallback* cb);
 
         RequestUpdateCursorAnchorInfo(
             [in] Int32 cursorUpdateMode,
             [in] Int32 seq,
-            [in] IInputContextCallback* cb);
+            [in] IIInputContextCallback* cb);
     }
 
     }//namespace View

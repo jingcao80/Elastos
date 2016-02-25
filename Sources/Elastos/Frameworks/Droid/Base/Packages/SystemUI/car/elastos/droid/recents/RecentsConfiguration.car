@@ -3,11 +3,10 @@ module
 {
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Graphics.IRect;
-    interface Elastos.Droid.Packages.SystemUI.Recents.Misc.ISystemServicesProxy;
+    interface Elastos.Droid.SystemUI.Recents.Misc.ISystemServicesProxy;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Recents {
 
@@ -25,12 +24,12 @@ module
 
         /** Updates the search bar app widget */
         UpdateSearchBarAppWidgetId(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 appWidgetId);
 
         /** Updates the states that need to be re-read whenever we re-initialize. */
         UpdateOnReinitialize(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ISystemServicesProxy* ssp);
 
         /** Called when the configuration has changed, and we want to reset any configuration specific
@@ -87,7 +86,7 @@ module
 
         /** Updates the configuration to the current context */
         Reinitialize(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ISystemServicesProxy* ssp);
 
         /** Returns the current recents configuration */
@@ -97,7 +96,6 @@ module
 
     } // namespace Recents
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

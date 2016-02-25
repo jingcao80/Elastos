@@ -7,7 +7,6 @@ module
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Recents {
     namespace Views {
@@ -36,69 +35,11 @@ module
      */
     [local]
     interface IRecentsView {
-
-        /** Sets the callbacks */
-        SetCallbacks(
-            [in] IRecentsViewCallbacks* cb);
-
-        /** Sets the debug overlay */
-        SetDebugOverlay(
-            [in] IDebugOverlayView* overlay);
-
-        /** Set/get the bsp root node */
-        SetTaskStacks(
-            [in] IArrayList* stacks);
-
-        /** Removes all the task stack views from this recents view. */
-        RemoveAllTaskStacks();
-
-        /** Launches the focused task from the first stack if possible */
-        LaunchFocusedTask(
-            [out] Boolean* result);
-
-        /** Launches the task that Recents was launched from, if possible */
-        LaunchPreviousTask(
-            [out] Boolean* result);
-
-        /** Requests all task stacks to start their enter-recents animation */
-        StartEnterRecentsAnimation(
-            [in] ITaskViewEnterContext* ctx);
-
-        /** Requests all task stacks to start their exit-recents animation */
-        StartExitToHomeAnimation(
-            [in] ITaskViewExitContext* ctx);
-
-        /** Adds the search bar */
-        SetSearchBar(
-            [in] IView* searchBar);
-
-        /** Returns whether there is currently a search bar */
-        HasSearchBar(
-            [out] Boolean* result);
-
-        /** Sets the visibility of the search bar */
-        SetSearchBarVisibility(
-            [in] Int32 visibility);
-
-        /** Notifies each task view of the user interaction. */
-        OnUserInteraction();
-
-        /** Focuses the next task in the first stack view */
-        FocusNextTask(
-            [in] Boolean forward);
-
-        /** Dismisses the focused task. */
-        DismissFocusedTask();
-
-        /** Unfilters any filtered stacks */
-        UnfilterFilteredStacks(
-            [out] Boolean* result);
     }
 
     } // namespace Views
     } // namespace Recents
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

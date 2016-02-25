@@ -2,6 +2,9 @@
 #ifndef __ELASTOS_DROID_MEDIA_MEDIA_UTIL_H__
 #define __ELASTOS_DROID_MEDIA_MEDIA_UTIL_H__
 
+#include <Elastos.CoreLibrary.Core.h>
+#include <Elastos.CoreLibrary.IO.h>
+#include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
@@ -10,6 +13,7 @@
 #include <utils/KeyedVector.h>
 
 using Elastos::IO::IByteBuffer;
+using Elastos::Utility::IMap;
 
 namespace Elastos {
 namespace Droid {
@@ -26,23 +30,20 @@ class Media_Utils
 {
 public:
 
-   static CARAPI ConvertMessageToMap(
+   static android::status_t ConvertMessageToMap(
         /* [in] */ android::sp<android::AMessage>& msg,
-        /* [out] */ IObjectStringMap** mymap);
+        /* [out] */ IMap** mymap);
 
    static CARAPI ConvertKeyValueArraysToKeyedVector(
         /* [in] */ ArrayOf<String>* keys,
         /* [in] */ ArrayOf<String>* values,
         /* [out] */ android::KeyedVector<android::String8,android::String8>* mykeyedVector);
 
-    static CARAPI ConvertKeyValueArraysToMessage(
+    static android::status_t ConvertKeyValueArraysToMessage(
         /* [in] */ ArrayOf<String>* keys,
         /* [in] */ ArrayOf<IInterface*>* values,
-        /* [out] */ android::sp<android::AMessage> * out);
+        /* [out] */ android::sp<android::AMessage>* out);
 
-    static CARAPI ThrowExceptionAsNecessary(
-        /* [in] */ android::status_t err,
-        /* [out] */ Int32* result);
 private:
     static const String TAG;
 };

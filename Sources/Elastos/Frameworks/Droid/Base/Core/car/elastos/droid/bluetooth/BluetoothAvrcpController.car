@@ -41,6 +41,8 @@ module
             const String ACTION_CONNECTION_STATE_CHANGED =
                     "android.bluetooth.acrcp-controller.profile.action.CONNECTION_STATE_CHANGED";
 
+            Close();
+
             Finalize();
 
             SendPassThroughCmd(

@@ -4,7 +4,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.App.h"
-#include <elastos/core/Object.h>
+#include "elastos/droid/widget/RemoteViews.h"
 #include "_Elastos_Droid_App_CNotification.h"
 
 using Elastos::Droid::Os::IUserHandle;
@@ -15,6 +15,7 @@ using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::View::IView;
+using Elastos::Droid::Widget::RemoteViews;
 using Elastos::Droid::Widget::IRemoteViews;
 using Elastos::Droid::Media::IAudioAttributes;
 using Elastos::Core::Object;
@@ -32,7 +33,7 @@ CarClass(CNotification)
 {
 public:
     class BuilderRemoteViews
-        : public Object // assert(0 && "TDOO") RemoteViews
+        : public RemoteViews
         , public IBuilderRemoteViews
     {
     public:

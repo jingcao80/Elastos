@@ -11,14 +11,15 @@
 #include "elastos/droid/media/CSubtitleController.h"
 #include "elastos/droid/media/CSubtitleData.h"
 #include "elastos/droid/media/CTimedText.h"
-// TODO: Need Media_Utils
-// #include "elastos/droid/media/Media_Utils.h"
+#include "elastos/droid/media/Media_Utils.h"
 #include "elastos/droid/net/CUriHelper.h"
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/os/CHandlerThread.h"
 #include "elastos/droid/os/Looper.h"
+#include "elastos/droid/os/NativeBinder.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/view/Surface.h"
 #include <elastos/droid/system/OsConstants.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/Math.h>
@@ -40,12 +41,14 @@ using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::CHandlerThread;
+using Elastos::Droid::Os::IBinderForDroidObject;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::System::OsConstants;
+using Elastos::Droid::View::Surface;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::IThread;
@@ -206,19 +209,6 @@ static ECode process_media_player_call(CMediaPlayer* thiz, android::status_t opS
     }
 
     return NOERROR;
-}
-
-static android::sp<android::Surface> android_view_Surface_getSurface(ISurface* surfaceObj)
-{
-    android::sp<android::Surface> sur;
-// TODO: Need jni code
-    // jobject lock = env->GetObjectField(surfaceObj, gSurfaceClassInfo.mLock);
-    // if (env->MonitorEnter(lock) == JNI_OK) {
-    //     sur = reinterpret_cast<android::Surface *>(env->GetLongField(surfaceObj, gSurfaceClassInfo.mNativeObject));
-    //     env->MonitorExit(lock);
-    // }
-    // env->DeleteLocalRef(lock);
-    return sur;
 }
 
 //===================================================================
@@ -1091,7 +1081,9 @@ ECode CMediaPlayer::SetVideoSurface(
 
     android::sp<android::IGraphicBufferProducer> new_st;
     if (insurface) {
-        android::sp<android::Surface> surface(android_view_Surface_getSurface(insurface));
+        Surface* surImpl = (Surface*)insurface;
+        android::sp<android::Surface> surface = reinterpret_cast<android::Surface*>(surImpl->mNativeObject);
+
         if (surface != NULL) {
             new_st = surface->getIGraphicBufferProducer();
             if (new_st == NULL) {
@@ -1525,15 +1517,13 @@ ECode CMediaPlayer::NativeSetDataSource(
     // headers is a Map<String, String>.
     // We build a similar KeyedVector out of it.
     android::KeyedVector<android::String8, android::String8> headersVector;
-// TODO: Need Media_Utils
-    // FAIL_RETURN(Media_Utils::ConvertKeyValueArraysToKeyedVector(
-    //     keys, values, &headersVector));
+    FAIL_RETURN(Media_Utils::ConvertKeyValueArraysToKeyedVector(
+        keys, values, &headersVector));
 
     android::sp<android::IMediaHTTPService> httpService;
     if (httpServiceBinderObj != NULL) {
-// TODO: Need jni code
-        // android::sp<IBinder> binder = ibinderForJavaObject(env, httpServiceBinderObj);
-        // httpService = interface_cast<android::IMediaHTTPService>(binder);
+        android::sp<android::IBinder> binder = IBinderForDroidObject(httpServiceBinderObj);
+        httpService = android::interface_cast<android::IMediaHTTPService>(binder);
     }
 
     android::status_t opStatus = mp->setDataSource(

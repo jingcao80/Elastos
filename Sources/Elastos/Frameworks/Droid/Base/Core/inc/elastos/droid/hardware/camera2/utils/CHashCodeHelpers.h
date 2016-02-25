@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_HARDWARE_CHASHCODEHELPER_H__
-#define  __ELASTOS_DROID_HARDWARE_CHASHCODEHELPER_H__
+#ifndef __ELASTOS_DROID_HARDWARE_CHASHCODEHELPER_H__
+#define __ELASTOS_DROID_HARDWARE_CHASHCODEHELPER_H__
 
 #include "_Elastos_Droid_Hardware_Camera2_Utils_CHashCodeHelpers.h"
 #include "elastos/droid/hardware/camera2/utils/HashCodeHelpers.h"

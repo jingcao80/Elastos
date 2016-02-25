@@ -6,14 +6,13 @@ module
     using interface Elastos.Droid.Keyguard.IViewMediatorCallback;
     using interface Elastos.Droid.Os.IBundle;
     using interface Elastos.Droid.View.IViewGroup;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IPhoneStatusBar;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IScrimController;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IStatusBarWindowManager;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IStatusBarKeyguardViewManager;
+    interface Elastos.Droid.SystemUI.StatusBar.Phone.IPhoneStatusBar;
+    interface Elastos.Droid.SystemUI.StatusBar.Phone.IScrimController;
+    interface Elastos.Droid.SystemUI.StatusBar.Phone.IStatusBarWindowManager;
+    interface Elastos.Droid.SystemUI.StatusBar.Phone.IStatusBarKeyguardViewManager;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Keyguard {
 
@@ -197,7 +196,6 @@ module
 
     } // namespace Keyguard
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

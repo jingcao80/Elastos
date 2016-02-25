@@ -56,6 +56,9 @@ public:
 
     ~BluetoothPbap();
 
+    CARAPI DoBind(
+        /* [out] */ Boolean* bind);
+
     CARAPI Close();
 
     CARAPI GetState(

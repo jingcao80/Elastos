@@ -44,12 +44,14 @@ ECode CBluetoothInputDeviceStateChangeCallback::OnBluetoothStateChange(
         // try {
         if (mHost->mService == NULL) {
             if (BluetoothInputDevice::VDBG) Logger::D(BluetoothInputDevice::TAG, "Binding service...");
-            AutoPtr<IIntent> intent;
-            CIntent::New(String("IBluetoothInputDevice")/*IBluetoothInputDevice.class.getName()*/, (IIntent**)&intent);
-            Boolean result;
-            if (mHost->mContext->BindService(intent, mHost->mConnection, 0, &result), !result) {
-                Logger::E(BluetoothInputDevice::TAG, "Could not bind to Bluetooth HID Service");
-            }
+            //AutoPtr<IIntent> intent;
+            //CIntent::New(String("IBluetoothInputDevice")/*IBluetoothInputDevice.class.getName()*/, (IIntent**)&intent);
+            //Boolean result;
+            //if (mHost->mContext->BindService(intent, mHost->mConnection, 0, &result), !result) {
+            //    Logger::E(BluetoothInputDevice::TAG, "Could not bind to Bluetooth HID Service");
+            //}
+            Boolean bind;
+            mHost->DoBind(&bind);
         }
         // } catch (Exception re) {
         //     Logger::E(BluetoothInputDevice::TAG,"",re);

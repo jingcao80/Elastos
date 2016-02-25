@@ -5,6 +5,7 @@
 #include <Elastos.CoreLibrary.Core.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
+#include "Elastos.Droid.View.h"
 #include "_Elastos_Droid_Media_CMediaCodec.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
@@ -685,6 +686,12 @@ public:
         /* [in] */ const String& name,
         /* [out] */ IMediaCodec** result);
 
+    CARAPI_(void) PostEventFromNative(
+        /* [in] */ Int32 what,
+        /* [in] */ Int32 arg1,
+        /* [in] */ Int32 arg2,
+        /* [in] */ IInterface* obj);
+
 private:
     CARAPI_(void) NativeReset();
 
@@ -693,7 +700,7 @@ private:
     CARAPI_(void) NativeSetCallback(
         /* [in] */ IMediaCodecCallback* cb);
 
-    CARAPI_(void) NativeConfigure(
+    CARAPI NativeConfigure(
         /* [in] */ ArrayOf<String>* keys,
         /* [in] */ ArrayOf<IInterface*>* values,
         /* [in] */ ISurface* surface,
@@ -770,12 +777,6 @@ private:
     CARAPI_(void) CacheBuffers(
         /* [in] */ Boolean input);
 
-    CARAPI_(void) PostEventFromNative(
-        /* [in] */ Int32 what,
-        /* [in] */ Int32 arg1,
-        /* [in] */ Int32 arg2,
-        /* [in] */ IInterface* obj);
-
     CARAPI_(void) NativeSetParameters(
         /* [in] */ ArrayOf<String>* keys,
         /* [in] */ ArrayOf<IInterface*>* values);
@@ -793,23 +794,24 @@ private:
 
     static CARAPI_(void) NativeInit();
 
-    CARAPI_(void) NativeSetup(
+    CARAPI NativeSetup(
         /* [in] */ const String& name,
         /* [in] */ Boolean nameIsType,
         /* [in] */ Boolean encoder);
 
     CARAPI_(void) NativeFinalize();
 
-private:
-    AutoPtr<EventHandler> mEventHandler;
-    AutoPtr<IMediaCodecCallback> mCallback;
-
+public:
     static const Int32 EVENT_CALLBACK;
     static const Int32 EVENT_SET_CALLBACK;
     static const Int32 CB_INPUT_AVAILABLE;
     static const Int32 CB_OUTPUT_AVAILABLE;
     static const Int32 CB_ERROR;
     static const Int32 CB_OUTPUT_FORMAT_CHANGE;
+
+private:
+    AutoPtr<EventHandler> mEventHandler;
+    AutoPtr<IMediaCodecCallback> mCallback;
 
     AutoPtr<ArrayOf<IByteBuffer*> > mCachedInputBuffers;
     AutoPtr<ArrayOf<IByteBuffer*> > mCachedOutputBuffers;

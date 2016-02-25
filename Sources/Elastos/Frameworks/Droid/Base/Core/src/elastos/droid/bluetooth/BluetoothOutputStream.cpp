@@ -47,8 +47,8 @@ ECode BluetoothOutputStream::WriteBytes(
 
 ECode BluetoothOutputStream::Flush()
 {
-    //TODO return mSocket->Flush();
-    return NOERROR;
+    return IFlushable::Probe(mSocket)->Flush();
+    //return NOERROR;
 }
 
 //ECode BluetoothOutputStream::WriteBytes(

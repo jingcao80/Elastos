@@ -4,7 +4,7 @@ module
     using interface Elastos.Core.ICharSequence;
 
     interface Elastos.Droid.Internal.View.IInputMethodClient;
-    interface Elastos.Droid.Internal.View.IInputContext;
+    interface Elastos.Droid.Internal.View.IIInputContext;
     interface Elastos.Droid.View.IWindowSession;
     interface Elastos.Droid.View.IApplicationToken;
     interface Elastos.Droid.View.IOnKeyguardExitResult;
@@ -45,7 +45,7 @@ module
         OpenSession(
             [in] IIWindowSessionCallback* cb,
             [in] IInputMethodClient* client,
-            [in] IInputContext* inputContext,
+            [in] IIInputContext* inputContext,
             [out] IWindowSession** session);
 
         InputMethodClientHasFocus(

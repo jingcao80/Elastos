@@ -1,30 +1,23 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.server.hdmi;
+#ifndef __ELASTOS_DROID_SERVER_HDMI_DEVICEDISCOVERYACTION_H__
+#define __ELASTOS_DROID_SERVER_HDMI_DEVICEDISCOVERYACTION_H__
+
+#include "_Elastos.Droid.Server.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Utility::ISlog;
 
-using Elastos::Droid::internal.util.Preconditions;
-using Elastos::Droid::Server::Ihdmi.HdmiControlService.DevicePollingCallback;
+using Elastos::Droid::Internal::Utility::IPreconditions;
 
-using Elastos::IO::IUnsupportedEncodingException;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
+
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Hdmi {
 
 /**
  * Feature action that handles device discovery sequences.
@@ -39,342 +32,140 @@ using Elastos::Utility::IList;
  *   <li>Gather "Vendor id" of all acknowledge devices
  * </ol>
  */
-final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
-    private static const String TAG = "DeviceDiscoveryAction";
-
-    // State in which the action is waiting for device polling.
-    private static const Int32 STATE_WAITING_FOR_DEVICE_POLLING = 1;
-    // State in which the action is waiting for gathering physical address of non-local devices.
-    private static const Int32 STATE_WAITING_FOR_PHYSICAL_ADDRESS = 2;
-    // State in which the action is waiting for gathering osd name of non-local devices.
-    private static const Int32 STATE_WAITING_FOR_OSD_NAME = 3;
-    // State in which the action is waiting for gathering vendor id of non-local devices.
-    private static const Int32 STATE_WAITING_FOR_VENDOR_ID = 4;
-
-    /**
-     * Interface used to report result of device discovery.
-     */
-    interface DeviceDiscoveryCallback {
-        /**
-         * Called when device discovery is done.
-         *
-         * @param deviceInfos a list of all non-local devices. It can be empty list.
-         */
-        void OnDeviceDiscoveryDone(List<HdmiDeviceInfo> deviceInfos);
-    }
-
+class DeviceDiscoveryAction
+#if 0
+    : public HdmiCecFeatureAction
+#else
+    : public Object
+#endif
+{
+private:
     // An internal container used to keep track of device information during
     // this action.
-    private static const class DeviceInfo {
-        private final Int32 mLogicalAddress;
+    class DeviceInfo
+        : public Object
+    {
+    private:
+        DeviceInfo(
+            /* [in] */ Int32 logicalAddress);
 
-        private Int32 mPhysicalAddress = Constants.INVALID_PHYSICAL_ADDRESS;
-        private Int32 mPortId = Constants.INVALID_PORT_ID;
-        private Int32 mVendorId = Constants.UNKNOWN_VENDOR_ID;
-        private String mDisplayName = "";
-        private Int32 mDeviceType = HdmiDeviceInfo.DEVICE_INACTIVE;
+        CARAPI ToHdmiDeviceInfo(
+            /* [out] */ IHdmiDeviceInfo** result);
 
-        private DeviceInfo(Int32 logicalAddress) {
-            mLogicalAddress = logicalAddress;
-        }
+    private:
+        const Int32 mLogicalAddress;
 
-        private HdmiDeviceInfo ToHdmiDeviceInfo() {
-            return new HdmiDeviceInfo(mLogicalAddress, mPhysicalAddress, mPortId, mDeviceType,
-                    mVendorId, mDisplayName);
-        }
-    }
+        Int32 mPhysicalAddress;
 
-    private final ArrayList<DeviceInfo> mDevices = new ArrayList<>();
-    private final DeviceDiscoveryCallback mCallback;
-    private Int32 mProcessedDeviceCount = 0;
+        Int32 mPortId;
+
+        Int32 mVendorId;
+
+        String mDisplayName;
+
+        Int32 mDeviceType;
+    };
+
+public:
+    DeviceDiscoveryAction();
 
     /**
      * Constructor.
      *
      * @param source an instance of {@link HdmiCecLocalDevice}.
      */
-    DeviceDiscoveryAction(HdmiCecLocalDevice source, DeviceDiscoveryCallback callback) {
-        Super(source);
-        mCallback = Preconditions->CheckNotNull(callback);
-    }
+    CARAPI constructor(
+        /* [in] */ IHdmiCecLocalDevice* source,
+        /* [in] */ IDeviceDiscoveryActionDeviceDiscoveryCallback* callback);
 
-    //@Override
-    Boolean Start() {
-        mDevices->Clear();
-        mState = STATE_WAITING_FOR_DEVICE_POLLING;
+    // @Override
+    CARAPI Start(
+        /* [out] */ Boolean* result);
 
-        PollDevices(new DevicePollingCallback() {
-            //@Override
-            CARAPI OnPollingFinished(List<Integer> ackedAddress) {
-                if (ackedAddress->IsEmpty()) {
-                    Slogger::V(TAG, "No device is detected.");
-                    WrapUpAndFinish();
-                    return;
-                }
+    // @Override
+    CARAPI ProcessCommand(
+        /* [in] */ IHdmiCecMessage* cmd,
+        /* [out] */ Boolean* result);
 
-                Slogger::V(TAG, "Device detected: " + ackedAddress);
-                AllocateDevices(ackedAddress);
-                StartPhysicalAddressStage();
-            }
-        }, Constants.POLL_ITERATION_REVERSE_ORDER
-            | Constants.POLL_STRATEGY_REMOTES_DEVICES, HdmiConfig.DEVICE_POLLING_RETRY);
-        return TRUE;
-    }
+    // @Override
+    CARAPI HandleTimerEvent(
+        /* [in] */ Int32 state);
 
-    private void AllocateDevices(List<Integer> addresses) {
-        for (Integer i : addresses) {
-            DeviceInfo info = new DeviceInfo(i);
-            mDevices->Add(info);
-        }
-    }
+private:
+    CARAPI AllocateDevices(
+        /* [in] */ IList* addresses);
 
-    private void StartPhysicalAddressStage() {
-        Slogger::V(TAG, "Start [Physical Address Stage]:" + mDevices->Size());
-        mProcessedDeviceCount = 0;
-        mState = STATE_WAITING_FOR_PHYSICAL_ADDRESS;
+    CARAPI StartPhysicalAddressStage();
 
-        CheckAndProceedStage();
-    }
+    CARAPI VerifyValidLogicalAddress(
+        /* [in] */ Int32 address,
+        /* [out] */ Boolean* result);
 
-    private Boolean VerifyValidLogicalAddress(Int32 address) {
-        return address >= Constants.ADDR_TV && address < Constants.ADDR_UNREGISTERED;
-    }
+    CARAPI QueryPhysicalAddress(
+        /* [in] */ Int32 address);
 
-    private void QueryPhysicalAddress(Int32 address) {
-        if (!VerifyValidLogicalAddress(address)) {
-            CheckAndProceedStage();
-            return;
-        }
+    CARAPI StartOsdNameStage();
 
-        mActionTimer->ClearTimerMessage();
+    CARAPI QueryOsdName(
+        /* [in] */ Int32 address);
 
-        // Check cache first and send request if not exist.
-        if (MayProcessMessageIfCached(address, Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS)) {
-            return;
-        }
-        SendCommand(HdmiCecMessageBuilder->BuildGivePhysicalAddress(GetSourceAddress(), address));
-        AddTimer(mState, HdmiConfig.TIMEOUT_MS);
-    }
+    CARAPI StartVendorIdStage();
 
-    private void StartOsdNameStage() {
-        Slogger::V(TAG, "Start [Osd Name Stage]:" + mDevices->Size());
-        mProcessedDeviceCount = 0;
-        mState = STATE_WAITING_FOR_OSD_NAME;
+    CARAPI QueryVendorId(
+        /* [in] */ Int32 address);
 
-        CheckAndProceedStage();
-    }
+    CARAPI MayProcessMessageIfCached(
+        /* [in] */ Int32 address,
+        /* [in] */ Int32 opcode,
+        /* [out] */ Boolean* result);
 
-    private void QueryOsdName(Int32 address) {
-        if (!VerifyValidLogicalAddress(address)) {
-            CheckAndProceedStage();
-            return;
-        }
+    CARAPI HandleReportPhysicalAddress(
+        /* [in] */ IHdmiCecMessage* cmd);
 
-        mActionTimer->ClearTimerMessage();
+    CARAPI GetPortId(
+        /* [in] */ Int32 physicalAddress,
+        /* [out] */ Int32* result);
 
-        if (MayProcessMessageIfCached(address, Constants.MESSAGE_SET_OSD_NAME)) {
-            return;
-        }
-        SendCommand(HdmiCecMessageBuilder->BuildGiveOsdNameCommand(GetSourceAddress(), address));
-        AddTimer(mState, HdmiConfig.TIMEOUT_MS);
-    }
+    CARAPI HandleSetOsdName(
+        /* [in] */ IHdmiCecMessage* cmd);
 
-    private void StartVendorIdStage() {
-        Slogger::V(TAG, "Start [Vendor Id Stage]:" + mDevices->Size());
+    CARAPI HandleVendorId(
+        /* [in] */ IHdmiCecMessage* cmd);
 
-        mProcessedDeviceCount = 0;
-        mState = STATE_WAITING_FOR_VENDOR_ID;
+    CARAPI IncreaseProcessedDeviceCount();
 
-        CheckAndProceedStage();
-    }
+    CARAPI RemoveDevice(
+        /* [in] */ Int32 index);
 
-    private void QueryVendorId(Int32 address) {
-        if (!VerifyValidLogicalAddress(address)) {
-            CheckAndProceedStage();
-            return;
-        }
+    CARAPI WrapUpAndFinish();
 
-        mActionTimer->ClearTimerMessage();
+    CARAPI CheckAndProceedStage();
 
-        if (MayProcessMessageIfCached(address, Constants.MESSAGE_DEVICE_VENDOR_ID)) {
-            return;
-        }
-        SendCommand(
-                HdmiCecMessageBuilder->BuildGiveDeviceVendorIdCommand(GetSourceAddress(), address));
-        AddTimer(mState, HdmiConfig.TIMEOUT_MS);
-    }
+private:
+    static const String TAG;
 
-    private Boolean MayProcessMessageIfCached(Int32 address, Int32 opcode) {
-        HdmiCecMessage message = GetCecMessageCache()->GetMessage(address, opcode);
-        if (message != NULL) {
-            ProcessCommand(message);
-            return TRUE;
-        }
-        return FALSE;
-    }
+    // State in which the action is waiting for device polling.
+    static const Int32 STATE_WAITING_FOR_DEVICE_POLLING;
 
-    //@Override
-    Boolean ProcessCommand(HdmiCecMessage cmd) {
-        switch (mState) {
-            case STATE_WAITING_FOR_PHYSICAL_ADDRESS:
-                if (cmd->GetOpcode() == Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS) {
-                    HandleReportPhysicalAddress(cmd);
-                    return TRUE;
-                }
-                return FALSE;
-            case STATE_WAITING_FOR_OSD_NAME:
-                if (cmd->GetOpcode() == Constants.MESSAGE_SET_OSD_NAME) {
-                    HandleSetOsdName(cmd);
-                    return TRUE;
-                }
-                return FALSE;
-            case STATE_WAITING_FOR_VENDOR_ID:
-                if (cmd->GetOpcode() == Constants.MESSAGE_DEVICE_VENDOR_ID) {
-                    HandleVendorId(cmd);
-                    return TRUE;
-                }
-                return FALSE;
-            case STATE_WAITING_FOR_DEVICE_POLLING:
-                // Fall through.
-            default:
-                return FALSE;
-        }
-    }
+    // State in which the action is waiting for gathering physical address of non-local devices.
+    static const Int32 STATE_WAITING_FOR_PHYSICAL_ADDRESS;
 
-    private void HandleReportPhysicalAddress(HdmiCecMessage cmd) {
-        Preconditions->CheckState(mProcessedDeviceCount < mDevices->Size());
+    // State in which the action is waiting for gathering osd name of non-local devices.
+    static const Int32 STATE_WAITING_FOR_OSD_NAME;
 
-        DeviceInfo current = mDevices->Get(mProcessedDeviceCount);
-        if (current.mLogicalAddress != cmd->GetSource()) {
-            Slogger::W(TAG, "Unmatched address[expected:" + current.mLogicalAddress + ", actual:" +
-                    cmd->GetSource());
-            return;
-        }
+    // State in which the action is waiting for gathering vendor id of non-local devices.
+    static const Int32 STATE_WAITING_FOR_VENDOR_ID;
 
-        Byte params[] = cmd->GetParams();
-        current.mPhysicalAddress = HdmiUtils->TwoBytesToInt(params);
-        current.mPortId = GetPortId(current.mPhysicalAddress);
-        current.mDeviceType = params[2] & 0xFF;
+    AutoPtr<IArrayList> mDevices;
 
-        Tv()->UpdateCecSwitchInfo(current.mLogicalAddress, current.mDeviceType,
-                    current.mPhysicalAddress);
+    AutoPtr<IDeviceDiscoveryActionDeviceDiscoveryCallback> mCallback;
 
-        IncreaseProcessedDeviceCount();
-        CheckAndProceedStage();
-    }
+    Int32 mProcessedDeviceCount;
+};
 
-    private Int32 GetPortId(Int32 physicalAddress) {
-        return Tv()->GetPortId(physicalAddress);
-    }
+} // namespace Hdmi
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
 
-    private void HandleSetOsdName(HdmiCecMessage cmd) {
-        Preconditions->CheckState(mProcessedDeviceCount < mDevices->Size());
-
-        DeviceInfo current = mDevices->Get(mProcessedDeviceCount);
-        if (current.mLogicalAddress != cmd->GetSource()) {
-            Slogger::W(TAG, "Unmatched address[expected:" + current.mLogicalAddress + ", actual:" +
-                    cmd->GetSource());
-            return;
-        }
-
-        String displayName = NULL;
-        try {
-            displayName = new String(cmd->GetParams(), "US-ASCII");
-        } catch (UnsupportedEncodingException e) {
-            Slogger::W(TAG, "Failed to decode display name: " + cmd->ToString());
-            // If failed to get display name, use the default name of device.
-            displayName = HdmiUtils->GetDefaultDeviceName(current.mLogicalAddress);
-        }
-        current.mDisplayName = displayName;
-        IncreaseProcessedDeviceCount();
-        CheckAndProceedStage();
-    }
-
-    private void HandleVendorId(HdmiCecMessage cmd) {
-        Preconditions->CheckState(mProcessedDeviceCount < mDevices->Size());
-
-        DeviceInfo current = mDevices->Get(mProcessedDeviceCount);
-        if (current.mLogicalAddress != cmd->GetSource()) {
-            Slogger::W(TAG, "Unmatched address[expected:" + current.mLogicalAddress + ", actual:" +
-                    cmd->GetSource());
-            return;
-        }
-
-        Byte[] params = cmd->GetParams();
-        Int32 vendorId = HdmiUtils->ThreeBytesToInt(params);
-        current.mVendorId = vendorId;
-        IncreaseProcessedDeviceCount();
-        CheckAndProceedStage();
-    }
-
-    private void IncreaseProcessedDeviceCount() {
-        mProcessedDeviceCount++;
-    }
-
-    private void RemoveDevice(Int32 index) {
-        mDevices->Remove(index);
-    }
-
-    private void WrapUpAndFinish() {
-        Slogger::V(TAG, "---------Wrap up Device Discovery:[" + mDevices->Size() + "]---------");
-        ArrayList<HdmiDeviceInfo> result = new ArrayList<>();
-        for (DeviceInfo info : mDevices) {
-            HdmiDeviceInfo cecDeviceInfo = info->ToHdmiDeviceInfo();
-            Slogger::V(TAG, " DeviceInfo: " + cecDeviceInfo);
-            result->Add(cecDeviceInfo);
-        }
-        Slogger::V(TAG, "--------------------------------------------");
-        mCallback->OnDeviceDiscoveryDone(result);
-        Finish();
-    }
-
-    private void CheckAndProceedStage() {
-        if (mDevices->IsEmpty()) {
-            WrapUpAndFinish();
-            return;
-        }
-
-        // If finished current stage, move on to next stage.
-        if (mProcessedDeviceCount == mDevices->Size()) {
-            mProcessedDeviceCount = 0;
-            switch (mState) {
-                case STATE_WAITING_FOR_PHYSICAL_ADDRESS:
-                    StartOsdNameStage();
-                    return;
-                case STATE_WAITING_FOR_OSD_NAME:
-                    StartVendorIdStage();
-                    return;
-                case STATE_WAITING_FOR_VENDOR_ID:
-                    WrapUpAndFinish();
-                    return;
-                default:
-                    return;
-            }
-        } else {
-            Int32 address = mDevices->Get(mProcessedDeviceCount).mLogicalAddress;
-            switch (mState) {
-                case STATE_WAITING_FOR_PHYSICAL_ADDRESS:
-                    QueryPhysicalAddress(address);
-                    return;
-                case STATE_WAITING_FOR_OSD_NAME:
-                    QueryOsdName(address);
-                    return;
-                case STATE_WAITING_FOR_VENDOR_ID:
-                    QueryVendorId(address);
-                default:
-                    return;
-            }
-        }
-    }
-
-    //@Override
-    void HandleTimerEvent(Int32 state) {
-        if (mState == STATE_NONE || mState != state) {
-            return;
-        }
-
-        Slogger::V(TAG, "Timeout[State=" + mState + ", Processed=" + mProcessedDeviceCount);
-        RemoveDevice(mProcessedDeviceCount);
-        CheckAndProceedStage();
-    }
-}
+#endif // __ELASTOS_DROID_SERVER_HDMI_DEVICEDISCOVERYACTION_H__

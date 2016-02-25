@@ -496,6 +496,9 @@ ECode CBitSet::Intersects(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    if (bs == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
 
     AutoPtr< ArrayOf<Int64> > bsBits = ((CBitSet*)bs)->mBits;
     Int32 length = Elastos::Core::Math::Min(mInt64Count, ((CBitSet*)bs)->mInt64Count);
@@ -515,6 +518,10 @@ ECode CBitSet::Intersects(
 ECode CBitSet::And(
     /* [in] */ IBitSet* bs)
 {
+    if (bs == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     CBitSet* bsObj = (CBitSet*)bs;
     Int32 minSize = Elastos::Core::Math::Min(mInt64Count, bsObj->mInt64Count);
     for (Int32 i = 0; i < minSize; ++i) {
@@ -533,6 +540,10 @@ ECode CBitSet::And(
 ECode CBitSet::AndNot(
     /* [in] */ IBitSet* bs)
 {
+    if (bs == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     CBitSet* bsObj = (CBitSet*)bs;
     Int32 minSize = Elastos::Core::Math::Min(mInt64Count, bsObj->mInt64Count);
     for (Int32 i = 0; i < minSize; ++i) {
@@ -548,6 +559,10 @@ ECode CBitSet::AndNot(
 ECode CBitSet::Or(
     /* [in] */ IBitSet* bs)
 {
+    if (bs == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     CBitSet* bsObj = (CBitSet*)bs;
     Int32 minSize = Elastos::Core::Math::Min(mInt64Count, bsObj->mInt64Count);
     Int32 maxSize = Elastos::Core::Math::Max(mInt64Count, bsObj->mInt64Count);
@@ -568,6 +583,10 @@ ECode CBitSet::Or(
 ECode CBitSet::Xor(
     /* [in] */ IBitSet* bs)
 {
+    if (bs == NULL) {
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
     CBitSet* bsObj = (CBitSet*)bs;
     Int32 minSize = Elastos::Core::Math::Min(mInt64Count, bsObj->mInt64Count);
     Int32 maxSize = Elastos::Core::Math::Max(mInt64Count, bsObj->mInt64Count);

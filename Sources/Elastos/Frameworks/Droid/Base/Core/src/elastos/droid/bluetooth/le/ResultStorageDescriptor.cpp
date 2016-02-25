@@ -18,7 +18,7 @@ ResultStorageDescriptor::ResultStorageDescriptor()
     mLength = 0;
 }
 
-ResultStorageDescriptor::ResultStorageDescriptor(
+ECode ResultStorageDescriptor::constructor(
     /* [in] */ Int32 type,
     /* [in] */ Int32 offset,
     /* [in] */ Int32 length)
@@ -26,6 +26,7 @@ ResultStorageDescriptor::ResultStorageDescriptor(
     mType = type;
     mOffset = offset;
     mLength = length;
+    return NOERROR;
 }
 
 ECode ResultStorageDescriptor::GetType(
@@ -53,8 +54,7 @@ ECode ResultStorageDescriptor::GetLength(
 }
 
 ECode ResultStorageDescriptor::WriteToParcel(
-    /* [in] */ IParcel* dest,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* dest)
 {
     dest->WriteInt32(mType);
     dest->WriteInt32(mOffset);
@@ -62,10 +62,11 @@ ECode ResultStorageDescriptor::WriteToParcel(
     return NOERROR;
 }
 
-ResultStorageDescriptor::ResultStorageDescriptor(
+ECode ResultStorageDescriptor::constructor(
     /* [in] */ IParcel* in)
 {
     ReadFromParcel(in);
+    return NOERROR;
 }
 
 ECode ResultStorageDescriptor::ReadFromParcel(

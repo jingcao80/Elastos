@@ -1,10 +1,10 @@
 
 #include "elastos/droid/content/CClipDescription.h"
 #include "elastos/droid/content/CClipDescriptionHelper.h"
-// #include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/text/TextUtils.h"
 #include <elastos/utility/etl/List.h>
 
-//using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Etl::List;
 
@@ -183,8 +183,7 @@ ECode CClipDescription::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     mLabel = NULL;
-    assert(0 && "TODO");
-    // FAIL_RETURN(TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(source, (ICharSequence**)&mLabel));
+    FAIL_RETURN(TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(source, (ICharSequence**)&mLabel));
     FAIL_RETURN(CreateStringArray(source, (ArrayOf<String>**)&mMimeTypes));
     return NOERROR;
 }
@@ -192,8 +191,7 @@ ECode CClipDescription::ReadFromParcel(
 ECode CClipDescription::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
-    assert(0 && "TODO");
-    // TextUtils::WriteToParcel(mLabel, dest);
+    TextUtils::WriteToParcel(mLabel, dest);
     FAIL_RETURN(WriteStringArray(dest, mMimeTypes));
     return NOERROR;
 }

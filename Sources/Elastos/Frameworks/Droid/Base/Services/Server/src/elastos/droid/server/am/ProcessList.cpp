@@ -1,7 +1,7 @@
 
 #include "elastos/droid/server/am/ProcessList.h"
 #include "elastos/droid/server/am/CActivityManagerService.h"
-// #include "elastos/droid/server/wm/CWindowManagerService.h"
+#include "elastos/droid/server/wm/CWindowManagerService.h"
 #include "elastos/droid/R.h"
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
@@ -187,8 +187,7 @@ ECode ProcessList::ApplyDisplaySize(
     if (!mHaveDisplaySize) {
         AutoPtr<IPoint> p, outP;
         CPoint::New((IPoint**)&p);
-        assert(0);
-        // wm->GetBaseDisplaySize(IDisplay::DEFAULT_DISPLAY, p, (IPoint**)&outP);
+        wm->GetBaseDisplaySize(IDisplay::DEFAULT_DISPLAY, p, (IPoint**)&outP);
         Int32 x, y;
         p->GetX(&x);
         p->GetY(&y);

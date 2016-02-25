@@ -49,7 +49,7 @@ ECode X509Certificate::GetInstance(
     /* [in] */ IInputStream* inStream,
     /* [out] */  IX509Certificate** rev)
 {
-    VALIDATE_NOT_NULL(*rev)
+    VALIDATE_NOT_NULL(rev)
     *rev = NULL;
 
     if (NULL == inStream) {
@@ -98,7 +98,7 @@ ERROR_PROCESS_1:
         ECode GetEncoded(
             /* [out, callee] */ ArrayOf<Byte>** encode)
         {
-            VALIDATE_NOT_NULL(*encode)
+            VALIDATE_NOT_NULL(encode)
             *encode = NULL;
 
             return Elastos::Security::Cert::ICertificate::Probe(mCert)->GetEncoded(encode);
@@ -133,7 +133,7 @@ ERROR_PROCESS_1:
         ECode GetPublicKey(
             /* [out] */ IPublicKey** key)
         {
-            VALIDATE_NOT_NULL(*key)
+            VALIDATE_NOT_NULL(key)
             *key = NULL;
 
             return Elastos::Security::Cert::ICertificate::Probe(mCert)->GetPublicKey(key);
@@ -169,7 +169,7 @@ ERROR_PROCESS_1:
         ECode GetSerialNumber(
             /* [out] */ IBigInteger** number)
         {
-            VALIDATE_NOT_NULL(*number)
+            VALIDATE_NOT_NULL(number)
             *number = NULL;
 
             return mCert->GetSerialNumber(number);
@@ -178,7 +178,7 @@ ERROR_PROCESS_1:
         ECode GetIssuerDN(
             /* [out] */ IPrincipal** dn)
         {
-            VALIDATE_NOT_NULL(*dn)
+            VALIDATE_NOT_NULL(dn)
             *dn = NULL;
 
             return mCert->GetIssuerDN(dn);
@@ -187,7 +187,7 @@ ERROR_PROCESS_1:
         ECode GetSubjectDN(
             /* [out] */ IPrincipal** dn)
         {
-            VALIDATE_NOT_NULL(*dn)
+            VALIDATE_NOT_NULL(dn)
             *dn = NULL;
 
             return mCert->GetSubjectDN(dn);
@@ -196,7 +196,7 @@ ERROR_PROCESS_1:
         ECode GetNotBefore(
             /* [out] */ IDate** dt)
         {
-            VALIDATE_NOT_NULL(*dt)
+            VALIDATE_NOT_NULL(dt)
             *dt = NULL;
 
             return mCert->GetNotBefore(dt);
@@ -205,7 +205,7 @@ ERROR_PROCESS_1:
         ECode GetNotAfter(
             /* [out] */ IDate** dt)
         {
-            VALIDATE_NOT_NULL(*dt)
+            VALIDATE_NOT_NULL(dt)
             *dt = NULL;
 
             return mCert->GetNotAfter(dt);
@@ -232,7 +232,7 @@ ERROR_PROCESS_1:
         ECode GetSigAlgParams(
             /* [out, callee] */ ArrayOf<Byte>** params)
         {
-            VALIDATE_NOT_NULL(*params)
+            VALIDATE_NOT_NULL(params)
             *params = NULL;
 
             return mCert->GetSigAlgParams(params);

@@ -49,34 +49,42 @@ Boolean HardwareRenderer::sSystemRendererDisabled = FALSE;
 
 Boolean HardwareRenderer::sTrimForeground = FALSE;
 
+CAR_INTERFACE_IMPL(HardwareRenderer, Object, IHardwareRenderer)
+
 HardwareRenderer::HardwareRenderer()
     : mEnabled(FALSE)
     , mRequested(TRUE)
 {
 }
 
-void HardwareRenderer::Disable(
+HardwareRenderer::~HardwareRenderer()
+{}
+
+ECode HardwareRenderer::Disable(
     /* [in] */ Boolean system)
 {
     sRendererDisabled = TRUE;
     if (system) {
         sSystemRendererDisabled = TRUE;
     }
+    return NOERROR;
 }
 
-void HardwareRenderer::EnableForegroundTrimming()
+ECode HardwareRenderer::EnableForegroundTrimming()
 {
     sTrimForeground = TRUE;
+    return NOERROR;
 }
 
-Boolean HardwareRenderer::IsAvailable()
+ECode HardwareRenderer::IsAvailable(
+    /* [out] */ Boolean* res)
 {
-    assert (0 && "TODO");
 //    return GLES20Canvas::IsAvailable();
-    return FALSE;
+    *res = FALSE;
+    return NOERROR;
 }
 
-void HardwareRenderer::SetupDiskCache(
+ECode HardwareRenderer::SetupDiskCache(
     /* [in] */ IFile* cacheDir)
 {
     AutoPtr<IFile> f;
@@ -84,6 +92,7 @@ void HardwareRenderer::SetupDiskCache(
     String path;
     f->GetAbsolutePath(&path);
     ThreadedRenderer::NativeSetupShadersDiskCache(path);
+    return NOERROR;
 }
 
 ECode HardwareRenderer::InitializeIfNeeded(
@@ -93,9 +102,10 @@ ECode HardwareRenderer::InitializeIfNeeded(
     /* [in] */ IRect* surfaceInsets,
     /* [out] */ Boolean* result)
 {
-    if (IsRequested()) {
+    if (mRequested) {
         // We lost the gl context, so recreate it.
-        if (!IsEnabled()) {
+        Boolean enabled;
+        if (IsEnabled(&enabled), !enabled) {
             Boolean bInit = FALSE;
             if ((Initialize(surface, &bInit), bInit)) {
                 Setup(width, height, surfaceInsets);
@@ -120,32 +130,39 @@ AutoPtr<HardwareRenderer> HardwareRenderer::Create(
     return renderer;
 }
 
-void HardwareRenderer::TrimMemory(
+ECode HardwareRenderer::TrimMemory(
     /* [in] */ Int32 level)
 {
     ThreadedRenderer::TrimMemory(level);
+    return NOERROR;
 }
 
-Boolean HardwareRenderer::IsEnabled()
+ECode HardwareRenderer::IsEnabled(
+    /* [out] */ Boolean* enabled)
 {
-    return mEnabled;
+    *enabled = mEnabled;
+    return NOERROR;
 }
 
-void HardwareRenderer::SetEnabled(
+ECode HardwareRenderer::SetEnabled(
     /* [in] */ Boolean enabled)
 {
     mEnabled = enabled;
+    return NOERROR;
 }
 
-Boolean HardwareRenderer::IsRequested()
+ECode HardwareRenderer::IsRequested(
+    /* [out] */ Boolean* requested)
 {
-    return mRequested;
+    *requested = mRequested;
+    return NOERROR;
 }
 
-void HardwareRenderer::SetRequested(
+ECode HardwareRenderer::SetRequested(
     /* [in] */ Boolean requested)
 {
     mRequested = requested;
+    return NOERROR;
 }
 
 } // namespace View

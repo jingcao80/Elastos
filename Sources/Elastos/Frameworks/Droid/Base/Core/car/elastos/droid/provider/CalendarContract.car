@@ -1836,7 +1836,7 @@ module {
          */
         RescheduleMissedAlarms(
             [in] IContentResolver* cr,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAlarmManager* manager);
 
         /**
@@ -1854,7 +1854,7 @@ module {
          * @hide
          */
         ScheduleAlarm(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAlarmManager* manager,
             [in] Int64 alarmTime);
 

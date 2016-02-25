@@ -1,6 +1,9 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/pm/PermissionInfo.h"
+#include "elastos/droid/text/TextUtils.h"
+
+using Elastos::Droid::Text::TextUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -123,8 +126,7 @@ ECode PermissionInfo::ReadFromParcel(
     source->ReadString(&mGroup);
     source->ReadInt32(&mFlags);
     source->ReadInt32(&mDescriptionRes);
-    assert(0 && "TODO");
-    // mNonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+    TextUtils::CHAR_SEQUENCE_CREATOR::CreateFromParcel(source, (ICharSequence**)&mNonLocalizedDescription);
     return NOERROR;
 }
 
@@ -136,8 +138,7 @@ ECode PermissionInfo::WriteToParcel(
     dest->WriteString(mGroup);
     dest->WriteInt32(mFlags);
     dest->WriteInt32(mDescriptionRes);
-    assert(0 && "TODO");
-    // TextUtils.writeToParcel(mNonLocalizedDescription, dest, parcelableFlags);
+    TextUtils::WriteToParcel(mNonLocalizedDescription, dest);
     return NOERROR;
 }
 

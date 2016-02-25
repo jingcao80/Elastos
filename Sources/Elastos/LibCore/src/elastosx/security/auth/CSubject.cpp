@@ -74,7 +74,7 @@ ECode CSubject::DoAs(
     /* [in] */ IPrivilegedAction *action,
     /* [out] */ IInterface **obj)
 {
-    VALIDATE_NOT_NULL(*obj)
+    VALIDATE_NOT_NULL(obj)
     *obj = NULL;
     VALIDATE_NOT_NULL(subject)
     VALIDATE_NOT_NULL(action)
@@ -96,7 +96,7 @@ ECode CSubject::DoAsPrivileged(
     /* [in] */ IAccessControlContext* context,
     /* [out] */ IInterface** obj)
 {
-    VALIDATE_NOT_NULL(*obj)
+    VALIDATE_NOT_NULL(obj)
     *obj = NULL;
     VALIDATE_NOT_NULL(subject)
     VALIDATE_NOT_NULL(action)
@@ -119,7 +119,7 @@ ECode CSubject::DoAs(
     /* [in] */ IPrivilegedExceptionAction* action,
     /* [out] */ IInterface** obj)
 {
-    VALIDATE_NOT_NULL(*obj)
+    VALIDATE_NOT_NULL(obj)
     *obj = NULL;
     VALIDATE_NOT_NULL(subject)
     VALIDATE_NOT_NULL(action)
@@ -141,7 +141,7 @@ ECode CSubject::DoAsPrivileged(
     /* [in] */ IAccessControlContext* context,
     /* [out] */ IInterface** obj)
 {
-    VALIDATE_NOT_NULL(*obj)
+    VALIDATE_NOT_NULL(obj)
     *obj = NULL;
     VALIDATE_NOT_NULL(subject)
     VALIDATE_NOT_NULL(action)
@@ -163,7 +163,7 @@ ECode CSubject::GetSubject(
     /* [in] */ IAccessControlContext* context,
     /* [out] */ ISubject** subject)
 {
-    VALIDATE_NOT_NULL(*subject)
+    VALIDATE_NOT_NULL(subject)
     *subject = NULL;
 
     if (NULL == context) {
@@ -183,7 +183,7 @@ ECode CSubject::GetSubject(
         ECode Run(
             /* [out] */ IInterface** result)
         {
-            VALIDATE_NOT_NULL(*result)
+            VALIDATE_NOT_NULL(result)
             *result = NULL;
 
             return mContext->GetDomainCombiner((IDomainCombiner**)result);
@@ -251,7 +251,7 @@ ECode CSubject::Equals(
 ECode CSubject::GetPrincipals(
     /* [out] */ ISet **principals)
 {
-    VALIDATE_NOT_NULL(*principals)
+    VALIDATE_NOT_NULL(principals)
 
     *principals = mPrincipals;
     REFCOUNT_ADD(*principals)
@@ -262,7 +262,7 @@ ECode CSubject::GetPrincipals(
     /* [in] */ IInterface *c,
     /* [out] */ ISet **principals)
 {
-    VALIDATE_NOT_NULL(*principals)
+    VALIDATE_NOT_NULL(principals)
     *principals = NULL;
     VALIDATE_NOT_NULL(c)
 
@@ -274,7 +274,7 @@ ECode CSubject::GetPrincipals(
 ECode CSubject::GetPrivateCredentials(
     /* [out] */ ISet **credentials)
 {
-    VALIDATE_NOT_NULL(*credentials)
+    VALIDATE_NOT_NULL(credentials)
     *credentials = mPrivateCredentials;
     REFCOUNT_ADD(*credentials)
     return NOERROR;
@@ -284,7 +284,7 @@ ECode CSubject::GetPrivateCredentials(
     /* [in] */ const ClassID& id,
     /* [out] */ ISet **credentials)
 {
-    VALIDATE_NOT_NULL(*credentials)
+    VALIDATE_NOT_NULL(credentials)
     *credentials = NULL;
 
     return mPrivateCredentials->Get(id, credentials);
@@ -293,7 +293,7 @@ ECode CSubject::GetPrivateCredentials(
 ECode CSubject::GetPublicCredentials(
     /* [out] */ ISet **credentials)
 {
-    VALIDATE_NOT_NULL(*credentials)
+    VALIDATE_NOT_NULL(credentials)
 
     *credentials = mPublicCredentials;
     REFCOUNT_ADD(*credentials)
@@ -304,7 +304,7 @@ ECode CSubject::GetPublicCredentials(
     /* [in] */ const ClassID& id,
     /* [out] */ ISet **credentials)
 {
-    VALIDATE_NOT_NULL(*credentials)
+    VALIDATE_NOT_NULL(credentials)
     *credentials = NULL;
 
     return mPublicCredentials->Get(id, credentials);
@@ -427,7 +427,7 @@ ECode CSubject::DoAs_PrivilegedAction(
     /* [in] */ IAccessControlContext * const context,
     /* [out] */ IInterface **ret)
 {
-    VALIDATE_NOT_NULL(*ret)
+    VALIDATE_NOT_NULL(ret)
     *ret = NULL;
     VALIDATE_NOT_NULL(subject)
     VALIDATE_NOT_NULL(context)
@@ -460,7 +460,7 @@ ECode CSubject::DoAs_PrivilegedAction(
         ECode Run(
             /* [out] */ IInterface** result)
         {
-            VALIDATE_NOT_NULL(*result)
+            VALIDATE_NOT_NULL(result)
             *result = NULL;
 
 #if 0 // TODO: Waiting for CAccessControlContext
@@ -498,7 +498,7 @@ ECode CSubject::DoAs_PrivilegedExceptionAction(
     /* [in] */ IAccessControlContext * const context,
     /* [out] */ IInterface **ret)
 {
-    VALIDATE_NOT_NULL(*ret)
+    VALIDATE_NOT_NULL(ret)
     *ret = NULL;
     VALIDATE_NOT_NULL(context)
     VALIDATE_NOT_NULL(action)
@@ -530,7 +530,7 @@ ECode CSubject::DoAs_PrivilegedExceptionAction(
         ECode Run(
             /* [out] */ IInterface** result)
         {
-            VALIDATE_NOT_NULL(*result)
+            VALIDATE_NOT_NULL(result)
             *result = NULL;
 
 #if 0 // TODO: Waiting for CAccessControlContext
@@ -597,7 +597,7 @@ ECode CSubject::SecureSet::Add(
 ECode CSubject::SecureSet::GetIterator(
     /* [out] */ IIterator **it)
 {
-    VALIDATE_NOT_NULL(*it)
+    VALIDATE_NOT_NULL(it)
     *it = NULL;
 
     if (mPermission == _PRIVATE_CREDENTIALS) {
@@ -630,7 +630,7 @@ ECode CSubject::SecureSet::GetIterator(
         ECode GetNext(
             /* [out] */ IInterface **next)
         {
-            VALIDATE_NOT_NULL(*next)
+            VALIDATE_NOT_NULL(next)
             *next = NULL;
 
             return mIterator->GetNext(next);
@@ -708,7 +708,7 @@ ECode CSubject::SecureSet::Get(
     /* [in] */ const ClassID& id,
     /* [out] */ ISet **obj)
 {
-    VALIDATE_NOT_NULL(*obj)
+    VALIDATE_NOT_NULL(obj)
     *obj = NULL;
 
     class InnerSet : public AbstractSet {
@@ -747,7 +747,7 @@ ECode CSubject::SecureSet::Get(
         ECode GetIterator(
             /* [out] */ IIterator** it)
         {
-            VALIDATE_NOT_NULL(*it)
+            VALIDATE_NOT_NULL(it)
             *it = NULL;
 
             return mElements->GetIterator(it);
@@ -831,7 +831,7 @@ ECode CSubject::SecureSet::SecureIterator::HasNext(
 ECode CSubject::SecureSet::SecureIterator::GetNext(
     /* [out] */ IInterface **next)
 {
-    VALIDATE_NOT_NULL(*next)
+    VALIDATE_NOT_NULL(next)
     *next = NULL;
 
     return mIterator->GetNext(next);

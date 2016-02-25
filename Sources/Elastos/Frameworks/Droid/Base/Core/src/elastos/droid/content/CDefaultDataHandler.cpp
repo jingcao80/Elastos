@@ -134,6 +134,7 @@ ECode CDefaultDataHandler::StartElement(
         String uriString;
         AutoPtr<IUri> u;
         FAIL_RETURN(atts->GetValue(URI_STR, &uriString))
+        assert(0 && "TODO");
 //***        FAIL_RETURN(StringUri::New(uriString, (IUri**)&u))
 
         if (NULL == u) {
@@ -243,14 +244,14 @@ ECode CDefaultDataHandler::Insert(
 ECode CDefaultDataHandler::ParseRow(
     /* [in] */ IAttributes* atts)
 {
-    assert(0 && "TODO");
     String uriStr;
     AutoPtr<IUri> uri;
     FAIL_RETURN(atts->GetValue(URI_STR, &uriStr))
 
     if (!uriStr.IsNull()) {
         // case 1
-//***        FAIL_RETURN(StringUri::New(uriStr, (IUri**)&uri))
+        assert(0 && "TODO");
+        // FAIL_RETURN(StringUri::New(uriStr, (IUri**)&uri))
         if (NULL == uri) {
             //throw new SAXException("attribute " + atts.getValue(URI_STR) + " parsing failure");
             return E_SAX_EXCEPTION;
@@ -268,6 +269,7 @@ ECode CDefaultDataHandler::ParseRow(
             FAIL_RETURN(builder->Build((IUri**)&uri))
         }
         else {
+            assert(0 && "TODO");
             // uri = mUris.At(mUris.GetSize()-1);
         }
     }

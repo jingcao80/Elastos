@@ -4,9 +4,11 @@
 
 #include "_Elastos_Droid_Media_CMediaScanner.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Sax.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/etl/List.h>
-#include "elastos/droid/media/mediascanner.h"
+#include <elastos/utility/etl/HashMap.h>
+#include <media/mediascanner.h>
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Database::ICursor;
@@ -20,6 +22,7 @@ using Elastos::Droid::Sax::IEndElementListener;
 using Org::Xml::Sax::IContentHandler;
 using Org::Xml::Sax::IAttributes;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Etl::List;
 using Elastos::IO::IFileDescriptor;
 
@@ -239,6 +242,8 @@ public:
 
     CAR_INTERFACE_DECL();
 
+    CAR_OBJECT_DECL();
+
     CARAPI constructor(
         /* [in] */ IContext* c);
 
@@ -383,10 +388,10 @@ private:
     static AutoPtr< ArrayOf<String> > FILES_PRESCAN_PROJECTION;
     static AutoPtr< ArrayOf<String> > ID_PROJECTION;
 
-    static const Int32 FILES_PRESCAN_ID_COLUMN_INDEX = 0;
-    static const Int32 FILES_PRESCAN_PATH_COLUMN_INDEX = 1;
-    static const Int32 FILES_PRESCAN_FORMAT_COLUMN_INDEX = 2;
-    static const Int32 FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX = 3;
+    static const Int32 FILES_PRESCAN_ID_COLUMN_INDEX;
+    static const Int32 FILES_PRESCAN_PATH_COLUMN_INDEX;
+    static const Int32 FILES_PRESCAN_FORMAT_COLUMN_INDEX;
+    static const Int32 FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX;
 
     static AutoPtr< ArrayOf<String> > PLAYLIST_MEMBERS_PROJECTION;
 
@@ -468,7 +473,7 @@ private:
 
     Boolean mStopScan; // = FALSE; //jni will read it to check if need stop scan
 
-    Object  mLock;
+    static Object  mLock;
 
     Int32 mScanCount; // = 0;
     static HashMap<String, String> mNoMediaPaths;

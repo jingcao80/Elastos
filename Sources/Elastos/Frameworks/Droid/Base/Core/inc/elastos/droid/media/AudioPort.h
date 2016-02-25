@@ -105,6 +105,9 @@ public:
     CARAPI ActiveConfig(
         /* [out] */ IAudioPortConfig** result);
 
+    CARAPI SetActiveConfig(
+        /* [in] */ IAudioPortConfig* config);
+
     CARAPI Handle(
         /* [out]*/ IAudioHandle** result);
 

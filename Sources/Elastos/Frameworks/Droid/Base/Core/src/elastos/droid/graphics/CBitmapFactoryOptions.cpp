@@ -198,7 +198,7 @@ ECode CBitmapFactoryOptions::SetInScaled(
 ECode CBitmapFactoryOptions::GetInPremultiplied(
     /* [out] */ Boolean* premultiplied)
 {
-    VALIDATE_NOT_NULL(*premultiplied);
+    VALIDATE_NOT_NULL(premultiplied);
     *premultiplied = mInPremultiplied;
     return NOERROR;
 }

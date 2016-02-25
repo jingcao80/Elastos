@@ -1,9 +1,5 @@
-I/DEBUG   ( 1218):     #00  pc 00062180  /system/lib/Elastos.Runtime.eco
-I/DEBUG   ( 1218):     #01  pc 0005bc78  /system/lib/Elastos.Runtime.eco
-I/DEBUG   ( 1218):     #02  pc 00058db0  /system/lib/Elastos.Runtime.eco
-I/DEBUG   ( 1218):     #03  pc 0005a8fc  /system/lib/Elastos.Runtime.eco
-I/DEBUG   ( 1218):     #04  pc 000659fc  /system/lib/Elastos.Runtime.eco
-I/DEBUG   ( 1218):     #05  pc 0005df5c  /system/lib/Elastos.Runtime.eco
-I/DEBUG   ( 1218):     #06  pc 0005e320  /system/lib/Elastos.Runtime.eco
-I/DEBUG   ( 1218):     #07  pc 0005dac0  /system/lib/Elastos.Runtime.eco
-I/DEBUG   ( 1218):     #08  pc 0005d948  /system/lib/Elastos.Runtime.eco
+I/DEBUG   (  146):     #00 pc 016e1694  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  146):     #01 pc 016e12d4  /system/lib/Elastos.Droid.Core.eco
+I/DEBUG   (  146):     #02 pc 0003d630  /system/lib/Elastos.Runtime.eco
+
+

@@ -1,2 +1,2 @@
 
-DIRS += src/elastos/droid/packages/systemui
+DIRS += src/elastos/droid/systemui

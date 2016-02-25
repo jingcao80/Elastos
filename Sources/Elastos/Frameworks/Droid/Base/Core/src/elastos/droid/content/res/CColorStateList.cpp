@@ -5,7 +5,7 @@
 #include "elastos/droid/graphics/Color.h"
 #include "elastos/droid/utility/StateSet.h"
 #include "elastos/droid/utility/MathUtils.h"
-//#include "elastos/droid/internal/utility/ArrayUtils.h"
+#include "elastos/droid/internal/utility/GrowingArrayUtils.h"
 #include "elastos/droid/utility/Xml.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/AutoLock.h>
@@ -15,7 +15,7 @@ using Elastos::Droid::Graphics::Color;
 using Elastos::Droid::Utility::StateSet;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Utility::MathUtils;
-//using Elastos::Droid::Internal::Utility::ArrayUtils;
+using Elastos::Droid::Internal::Utility::GrowingArrayUtils;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -253,8 +253,7 @@ ECode CColorStateList::Inflate(
         }
 
         if (listSize + 1 >= listAllocated) {
-            assert(0 && "TODO");
-            // listAllocated = ArrayUtils::IdealInt32ArraySize(listSize + 1);
+            listAllocated = GrowingArrayUtils::GrowSize(listSize + 1);
 
             AutoPtr< ArrayOf<Int32> > ncolor = ArrayOf<Int32>::Alloc(listAllocated);
             ncolor->Copy(colorList, 0, listSize);

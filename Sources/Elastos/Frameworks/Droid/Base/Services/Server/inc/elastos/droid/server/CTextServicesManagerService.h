@@ -13,7 +13,7 @@
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.View.h>
 
-using Elastos::Droid::App::IUserSwitchObserver;
+using Elastos::Droid::App::IIUserSwitchObserver;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IComponentName;
@@ -54,7 +54,7 @@ private:
 
     class CTSMSUserSwitchObserver
         : public Object
-        , public IUserSwitchObserver
+        , public IIUserSwitchObserver
     {
     public:
         CAR_INTERFACE_DECL();

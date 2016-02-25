@@ -219,6 +219,7 @@ ECode Collator::Strength_ICU_Java(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = value;
     switch (value) {
         case IRuleBasedCollatorICU::VALUE_PRIMARY:
             *result = ICollator::PRIMARY;
@@ -233,7 +234,6 @@ ECode Collator::Strength_ICU_Java(
             *result = ICollator::IDENTICAL;
             break;
     }
-    *result = -1;
     return NOERROR;
 }
 

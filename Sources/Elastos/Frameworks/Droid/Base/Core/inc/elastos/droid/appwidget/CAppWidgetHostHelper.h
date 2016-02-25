@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_APPWIDGET_CAPPWIDGETHOSTHELPER_H__
-#define  __ELASTOS_DROID_APPWIDGET_CAPPWIDGETHOSTHELPER_H__
+#define __ELASTOS_DROID_APPWIDGET_CAPPWIDGETHOSTHELPER_H__
 
 #include "_Elastos_Droid_AppWidget_CAppWidgetHostHelper.h"
 #include "elastos/droid/ext/frameworkdef.h"

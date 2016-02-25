@@ -11,8 +11,8 @@
 #include "CLibcore.h"
 #include "Arrays.h"
 #include "Collections.h"
-//#include "CCountDownLatch.h"
-//#include "CAtomicBoolean.h"
+#include "CCountDownLatch.h"
+#include "CAtomicBoolean.h"
 #include <netdb.h>
 #include <errno.h>
 #include <unistd.h>
@@ -35,12 +35,8 @@ using Elastos::Utility::IIterable;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::IEnumeration;
 using Elastos::Utility::Collections;
-//using Elastos::Utility::Concurrent::CCountDownLatch;
-//using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
-
-// using Elastos::Utility::CCollections;
-// using Elastos::Utility::Concurrent::CCountDownLatch;
-// using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
+using Elastos::Utility::Concurrent::CCountDownLatch;
+using Elastos::Utility::Concurrent::Atomic::CAtomicBoolean;
 
 namespace Elastos {
 namespace Net {
@@ -187,7 +183,7 @@ ECode InetAddress::GetHostName(
     if(mHostname.IsNull()) {
         AutoPtr<IInetAddress> addr;
         if(SUCCEEDED(GetHostByAddrImpl(this, (IInetAddress**)&addr))) {
-            InetAddress* inetAddress = (InetAddress*)THIS_PROBE(IInetAddress);
+            InetAddress* inetAddress = (InetAddress*)(addr.Get());
             mHostname = inetAddress->mHostname;
         }
         else{
@@ -448,10 +444,9 @@ ECode InetAddress::IsReachable(
         return NOERROR;
     }
     AutoPtr<ICountDownLatch> latch;
-    assert(0);
-    // CCountDownLatch::New(count, (ICountDownLatch**)&latch);
+    CCountDownLatch::New(count, (ICountDownLatch**)&latch);
     AutoPtr<IAtomicBoolean> _isReachable;
-    //CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&_isReachable);
+    CAtomicBoolean::New(FALSE, (IAtomicBoolean**)&_isReachable);
     sourceAddresses->GetIterator((IIterator**)&em);
     Boolean hasNext = FALSE;
     // TODO: find all inetAddress instance to check is the isReachabel should be TRUE;
@@ -544,6 +539,7 @@ ECode InetAddress::GetByAddress(
     /* [out] */ IInetAddress** address)
 {
     VALIDATE_NOT_NULL(address);
+    *address = NULL;
 
     if(ipaddress == NULL) {
         return E_UNKNOWN_HOST_EXCEPTION;
@@ -575,10 +571,8 @@ ECode InetAddress::GetByAddress(
             return NOERROR;
         }
     }
-    else{
-        return E_UNKNOWN_HOST_EXCEPTION;
-    }
-    return NOERROR;
+
+    return E_UNKNOWN_HOST_EXCEPTION;
 }
 
 Int32 InetAddress::BytesToInt32(
@@ -597,6 +591,7 @@ ECode InetAddress::LookupHostByName(
     /* [out, callee] */ ArrayOf<IInetAddress*>** addresses)
 {
     VALIDATE_NOT_NULL(addresses);
+    *addresses = NULL;
 
     AutoPtr<IBlockGuardPolicy> policy;
     BlockGuard::GetThreadPolicy((IBlockGuardPolicy**)&policy);
@@ -646,7 +641,10 @@ ECode InetAddress::LookupHostByName(
     return NOERROR;
 
 _EXIT_:
-    ADDRESS_CACHE->PutUnknownHost(host, netId, String("Unable to resolve") + host);
+    if (E_GAI_EXCEPTION == ec) {
+        ADDRESS_CACHE->PutUnknownHost(host, netId, String("Unable to resolve") + host);
+        ec = E_UNKNOWN_HOST_EXCEPTION;
+    }
     return ec;
 }
 
@@ -697,11 +695,13 @@ ECode InetAddress::IPv4MappedToIPv4(
 {
     VALIDATE_NOT_NULL(ipv4Address);
 
-    *ipv4Address = ArrayOf<Byte>::Alloc(4);
-    REFCOUNT_ADD(*ipv4Address);
-    for(Int32 i=0; i < 4; i++) {
-        (**ipv4Address)[i] = (*mappedAddress)[12 + i];
+    AutoPtr< ArrayOf<Byte> > array = ArrayOf<Byte>::Alloc(4);
+    for(Int32 i = 0; i < 4; i++) {
+        (*array)[i] = (*mappedAddress)[12 + i];
     }
+
+    *ipv4Address = array;
+    REFCOUNT_ADD(*ipv4Address)
     return NOERROR;
 }
 
@@ -732,10 +732,8 @@ ECode InetAddress::MakeInetAddress(
         REFCOUNT_ADD(*address);
         return NOERROR;
     }
-    else{
-        return E_UNKNOWN_HOST_EXCEPTION;
-    }
-    return NOERROR;
+
+    return E_UNKNOWN_HOST_EXCEPTION;
 }
 
 AutoPtr<IInetAddress> InetAddress::DisallowDeprecatedFormats(

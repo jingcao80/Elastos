@@ -105,11 +105,11 @@ public:
     CARAPI StopWatching();
 
 private:
-    ECO_LOCAL static CARAPI_(Boolean) InitObserverThread();
+    ECO_LOCAL static CARAPI_(void) InitObserverThread();
 
 private:
     ECO_LOCAL static AutoPtr<ObserverThread> sObserverThread;
-    ECO_LOCAL static const Boolean sObserverThreadInited;
+    ECO_LOCAL static Object sLockObj;
 
     // instance
     String mPath;

@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_ANIMATION_TIMEANIMATOR_H__
-#define  __ELASTOS_DROID_ANIMATION_TIMEANIMATOR_H__
+#ifndef __ELASTOS_DROID_ANIMATION_TIMEANIMATOR_H__
+#define __ELASTOS_DROID_ANIMATION_TIMEANIMATOR_H__
 
 #include "elastos/droid/animation/ValueAnimator.h"
 

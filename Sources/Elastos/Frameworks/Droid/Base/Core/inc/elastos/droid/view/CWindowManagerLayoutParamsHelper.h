@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_VIEW_CWINDOWMANAGERLAYOUTPARAMSHELPER_H__
-#define  __ELASTOS_DROID_VIEW_CWINDOWMANAGERLAYOUTPARAMSHELPER_H__
+#define __ELASTOS_DROID_VIEW_CWINDOWMANAGERLAYOUTPARAMSHELPER_H__
 
 #include "_Elastos_Droid_View_CWindowManagerLayoutParamsHelper.h"
 #include <elastos/core/Singleton.h>

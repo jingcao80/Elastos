@@ -13,6 +13,51 @@ module
      * interface IColorFilter
      */
     interface ILightingColorFilter {
+        /**
+         * Returns the RGB color used to multiply the source color when the
+         * color filter is applied.
+         *
+         * @see #setColorMultiply(int)
+         *
+         * @hide
+         */
+        GetColorMultiply(
+            [out] Int32* colorMultiply);
+
+        /**
+         * Specifies the RGB color used to multiply the source color when the
+         * color filter is applied.
+         * The alpha channel of this color is ignored.
+         *
+         * @see #getColorMultiply()
+         *
+         * @hide
+         */
+        SetColorMultiply(
+            [in] Int32 mul);
+
+        /**
+         * Returns the RGB color that will be added to the source color
+         * when the color filter is applied.
+         *
+         * @see #setColorAdd(int)
+         *
+         * @hide
+         */
+        GetColorAdd(
+            [out] Int32* color);
+
+        /**
+         * Specifies the RGB that will be added to the source color when
+         * the color filter is applied.
+         * The alpha channel of this color is ignored.
+         *
+         * @see #getColorAdd()
+         *
+         * @hide
+         */
+        SetColorAdd(
+            [in] Int32 add);
     }
 
     } // namespace Graphics

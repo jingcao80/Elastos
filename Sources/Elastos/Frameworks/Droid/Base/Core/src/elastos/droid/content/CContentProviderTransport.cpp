@@ -2,12 +2,15 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Net.h"
+
+#include "elastos/droid/content/CContentProviderOperation.h"
+#include "elastos/droid/content/CContentProviderResult.h"
 #include "elastos/droid/content/CContentProviderTransport.h"
 #include "elastos/droid/content/ContentProvider.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CCancellationSignalHelper.h"
-//#include "elastos/droid/app/AppOpsManager.h"
+#include "elastos/droid/app/AppOpsManager.h"
 
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Os::Binder;
@@ -17,7 +20,8 @@ using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Os::ICancellationSignal;
 using Elastos::Droid::Os::ICancellationSignalHelper;
 using Elastos::Droid::Os::CCancellationSignalHelper;
-//using Elastos::Droid::App::AppOpsManager;
+using Elastos::Droid::App::AppOpsManager;
+using Elastos::Droid::App::IAppOpsManager;
 
 namespace Elastos {
 namespace Droid {
@@ -28,10 +32,9 @@ CAR_INTERFACE_IMPL_3(CContentProviderTransport, Object, IContentProviderTranspor
 CAR_OBJECT_IMPL(CContentProviderTransport)
 
 CContentProviderTransport::CContentProviderTransport()
-    : mReadOp(-1/*AppOpsManager::OP_NONE*/)
-    , mWriteOp(-1/*AppOpsManager::OP_NONE*/)
+    : mReadOp(IAppOpsManager::OP_NONE)
+    , mWriteOp(IAppOpsManager::OP_NONE)
 {
-    assert(0 && "TODO");
 }
 
 ECode CContentProviderTransport::constructor(
@@ -267,7 +270,7 @@ ECode CContentProviderTransport::ApplyBatch(
                 // Adding the userId to the uri.
                 AutoPtr<IContentProviderResult> newResult;
                 assert(0 && "TODO");
-                // CContentProviderResult::New((*temp)[i], (*userId)[i],
+                // CContentProviderResult::New((*temp)[i], (*userIds)[i],
                 //     (IContentProviderResult**)&newResult);
                 temp->Set(i, newResult);
             }
@@ -613,8 +616,8 @@ ECode CContentProviderTransport::EnforceReadPermission(
     /* [in] */ IUri* uri,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(*result)
-    Int32 op = -1;/* AppOpsManager::OP_NONE */;
+    VALIDATE_NOT_NULL(result)
+    Int32 op = IAppOpsManager::OP_NONE;
     *result = op;
 
     AutoPtr<IContentProvider> contentProvider;
@@ -638,8 +641,8 @@ ECode CContentProviderTransport::EnforceWritePermission(
     /* [in] */ IUri* uri,
         /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(*result)
-    Int32 op = -1;/* AppOpsManager::OP_NONE */;
+    VALIDATE_NOT_NULL(result)
+    Int32 op = IAppOpsManager::OP_NONE;
     *result = op;
 
     AutoPtr<IContentProvider> contentProvider;

@@ -247,8 +247,6 @@ public:
     static const Int32 EVENT_DISPLAY_REMOVED = 3;
 
 private:
-    static const String TAG;
-    static const Boolean DEBUG = FALSE;
 
     // True if display info and display ids should be cached.
     //

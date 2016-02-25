@@ -1,6 +1,6 @@
 
-#ifndef  __CPINYINIME_H__
-#define  __CPINYINIME_H__
+#ifndef __CPINYINIME_H__
+#define __CPINYINIME_H__
 
 #include <ext/frameworkdef.h>
 #include "_CPinyinIME.h"

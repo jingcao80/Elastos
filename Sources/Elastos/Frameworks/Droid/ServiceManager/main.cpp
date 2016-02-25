@@ -12,9 +12,13 @@ int main(int argv, char**argc)
     android::sp<android::IServiceManager> sm = android::defaultServiceManager();
     int res = sm->addService(android::String16(ELASTOS_SERVICEMGR_NAME), new ServiceManager());
     if (res != 0) {
-        ALOGE("<%s, %d> add service 'media.servicemanager' failed, res=%d\n",
-            __FILE__, __LINE__, res);
+        ALOGE("<%s, %d> add service '%s' failed, res=%d\n",
+            __FILE__, __LINE__, ELASTOS_SERVICEMGR_NAME, res);
         return -1;
+    }
+    else {
+        ALOGE("<%s, %d> add service '%s' succeeded.\n",
+            __FILE__, __LINE__, ELASTOS_SERVICEMGR_NAME);
     }
 
     android::IPCThreadState::self()->joinThreadPool();

@@ -18,12 +18,11 @@ module
     using interface Elastos.Droid.View.IViewPropertyAnimator;
     using interface Elastos.Droid.Widget.ILinearLayout;
 
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.IGestureRecorder;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IStatusBarWindowView;
+    interface Elastos.Droid.SystemUI.StatusBar.IGestureRecorder;
+    interface Elastos.Droid.SystemUI.StatusBar.Phone.IStatusBarWindowView;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
     namespace Phone {
@@ -383,7 +382,6 @@ module
     } // namespace Phone
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

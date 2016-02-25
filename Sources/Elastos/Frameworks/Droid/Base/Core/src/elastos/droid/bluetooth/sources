@@ -56,6 +56,21 @@ SOURCES += CBluetoothDeviceManagerCallback.cpp
 SOURCES += CBluetoothDevice.cpp
 SOURCES += CBluetoothHealthAppConfiguration.cpp
 
+SOURCES += CBluetoothA2dpSinkStateChangeCallback.cpp
+SOURCES += CBluetoothActivityEnergyInfo.cpp
+SOURCES += CBluetoothAudioConfig.cpp
+SOURCES += CBluetoothAvrcpControllerStateChangeCallback.cpp
+SOURCES += CBluetoothGattCallback.cpp
+SOURCES += CBluetoothGattCallbackWrapper.cpp
+SOURCES += CBluetoothGattDescriptor.cpp
+SOURCES += CBluetoothGattServerCallback.cpp
+SOURCES += CBluetoothGattService.cpp
+SOURCES += CBluetoothHeadsetClientCall.cpp
+SOURCES += CBluetoothHeadsetClientStateChangeCallback.cpp
+SOURCES += CBluetoothManager.cpp
+SOURCES += CBluetoothMapStateChangeCallback.cpp
+SOURCES += CBluetoothMasInstance.cpp
+
 ELASTOS_LIBS += le/le.lib
 
 #SOURCES += BluetoothTetheringDataTracker.cpp

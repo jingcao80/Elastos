@@ -2,6 +2,8 @@
 #ifndef __ELASTOS_DROID_MEDIA_CMEDIADRM_H__
 #define __ELASTOS_DROID_MEDIA_CMEDIADRM_H__
 
+#include <Elastos.CoreLibrary.Core.h>
+#include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include "_Elastos_Droid_Media_CMediaDrm.h"
 #include "elastos/droid/ext/frameworkext.h"
@@ -117,7 +119,7 @@ public:
         CARAPI GetDefaultUrl(
             /* [out] */ String* result);
 
-    private:
+    public:
         AutoPtr<ArrayOf<Byte> > mData;
         String mDefaultUrl;
     };
@@ -153,7 +155,7 @@ public:
         CARAPI GetDefaultUrl(
             /* [out] */ String* result);
 
-    private:
+    public:
         AutoPtr<ArrayOf<Byte> > mData;
         String mDefaultUrl;
     };
@@ -325,7 +327,7 @@ public:
         CARAPI GetContent(
             /* [out, callee] */ ArrayOf<Byte>** result);
 
-    private:
+    public:
         AutoPtr<ArrayOf<Byte> > mWrappedKey;
         AutoPtr<ArrayOf<Byte> > mCertificateData;
     };
@@ -702,9 +704,10 @@ private:
     static CARAPI_(AutoPtr<ArrayOf<Byte> >) GetByteArrayFromUUID(
         /* [in] */ IUUID* uuid);
 
-    static CARAPI_(Boolean) IsCryptoSchemeSupportedNative(
+    static CARAPI IsCryptoSchemeSupportedNative(
         /* [in] */ ArrayOf<Byte>* uuid,
-        /* [in] */ const String& mimeType);
+        /* [in] */ const String& mimeType,
+        /* [out] */ Boolean* result);
 
     /*
      * This method is called from native code when an event occurs.  This method
@@ -772,8 +775,8 @@ private:
 
     static CARAPI_(void) NativeInit();
 
-    CARAPI_(void) NativeSetup(
-        /* [in] */ IInterface* mediadrm_this,
+    CARAPI NativeSetup(
+        /* [in] */ IWeakReference* mediadrm_this,
         /* [in] */ ArrayOf<Byte>* uuid);
 
     CARAPI_(void) NativeFinalize();

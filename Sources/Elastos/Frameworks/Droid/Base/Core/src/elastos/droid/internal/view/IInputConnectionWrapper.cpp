@@ -48,7 +48,7 @@ const Int32 IInputConnectionWrapper::DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
 IInputConnectionWrapper::SomeArgs::SomeArgs(
     /* [in] */ IInterface* arg1,
     /* [in] */ IInterface* arg2,
-    /* [in] */ IInputContextCallback* clback,
+    /* [in] */ IIInputContextCallback* clback,
     /* [in] */ Int32 seq)
     : mArg1(arg1)
     , mArg2(arg2)
@@ -78,8 +78,8 @@ IInputConnectionWrapper::MyHandler::MyHandler(
 ECode IInputConnectionWrapper::MyHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    AutoPtr<IInputContext> obj;
-    mWeakHost->Resolve(EIID_IInputContext, (IInterface**)&obj);
+    AutoPtr<IIInputContext> obj;
+    mWeakHost->Resolve(EIID_IIInputContext, (IInterface**)&obj);
     if (obj != NULL) {
         IInputConnectionWrapper* host = (IInputConnectionWrapper*)obj.Get();
         return host->ExecuteMessage(msg);
@@ -91,7 +91,7 @@ ECode IInputConnectionWrapper::MyHandler::HandleMessage(
 // IInputConnectionWrapper
 //===================================================================
 
-CAR_INTERFACE_IMPL_2(IInputConnectionWrapper, Object, IInputContext, IBinder)
+CAR_INTERFACE_IMPL_2(IInputConnectionWrapper, Object, IIInputContext, IBinder)
 
 IInputConnectionWrapper::IInputConnectionWrapper()
 {
@@ -116,7 +116,7 @@ ECode IInputConnectionWrapper::GetTextAfterCursor(
     /* [in] */ Int32 length,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     return DispatchMessage(ObtainMessageSC(DO_GET_TEXT_AFTER_CURSOR, length, flags, seq, callback));
 }
@@ -125,7 +125,7 @@ ECode IInputConnectionWrapper::GetTextBeforeCursor(
     /* [in] */ Int32 length,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     return DispatchMessage(ObtainMessageSC(DO_GET_TEXT_BEFORE_CURSOR, length, flags, seq, callback));
 }
@@ -133,7 +133,7 @@ ECode IInputConnectionWrapper::GetTextBeforeCursor(
 ECode IInputConnectionWrapper::GetSelectedText(
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     return DispatchMessage(ObtainMessageSC(DO_GET_SELECTED_TEXT, flags, seq, callback));
 }
@@ -141,7 +141,7 @@ ECode IInputConnectionWrapper::GetSelectedText(
 ECode IInputConnectionWrapper::GetCursorCapsMode(
     /* [in] */ Int32 reqModes,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     return DispatchMessage(ObtainMessageSC(DO_GET_CURSOR_CAPS_MODE, reqModes, seq, callback));
 }
@@ -150,7 +150,7 @@ ECode IInputConnectionWrapper::GetExtractedText(
     /* [in] */ IExtractedTextRequest* request,
     /* [in] */ Int32 flags,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     return DispatchMessage(ObtainMessageSC(DO_GET_EXTRACTED_TEXT, flags,
             request, seq, callback));
@@ -259,7 +259,7 @@ ECode IInputConnectionWrapper::PerformPrivateCommand(
 ECode IInputConnectionWrapper::RequestUpdateCursorAnchorInfo(
     /* [in] */ Int32 cursorUpdateMode,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     return DispatchMessage(ObtainMessageSC(DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO,
         cursorUpdateMode, seq, callback));
@@ -619,7 +619,7 @@ AutoPtr<IMessage> IInputConnectionWrapper::ObtainMessageSC(
     /* [in] */ Int32 what,
     /* [in] */ Int32 arg1,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     AutoPtr<SomeArgs> args = new SomeArgs(NULL, NULL, callback, seq);
 
@@ -633,7 +633,7 @@ AutoPtr<IMessage> IInputConnectionWrapper::ObtainMessageSC(
     /* [in] */ Int32 arg1,
     /* [in] */ Int32 arg2,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     AutoPtr<SomeArgs> args = new SomeArgs(NULL, NULL, callback, seq);
     AutoPtr<IMessage> msg;
@@ -645,7 +645,7 @@ AutoPtr<IMessage> IInputConnectionWrapper::ObtainMessageSC(
     /* [in] */ Int32 what,
     /* [in] */ IInterface* arg1,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     AutoPtr<SomeArgs> args = new SomeArgs(arg1, NULL, callback, seq);
     AutoPtr<IMessage> msg;
@@ -658,7 +658,7 @@ AutoPtr<IMessage> IInputConnectionWrapper::ObtainMessageSC(
     /* [in] */ Int32 arg1,
     /* [in] */ IInterface* arg2,
     /* [in] */ Int32 seq,
-    /* [in] */ IInputContextCallback* callback)
+    /* [in] */ IIInputContextCallback* callback)
 {
     AutoPtr<SomeArgs> args = new SomeArgs(arg2, NULL, callback, seq);
     AutoPtr<IMessage> msg;

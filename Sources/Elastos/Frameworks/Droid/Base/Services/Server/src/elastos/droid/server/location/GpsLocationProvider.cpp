@@ -2274,7 +2274,7 @@ void GpsLocationProvider::ReportGeofenceResumeStatus(
 ECode GpsLocationProvider::GetNetInitiatedListener(
     /* [out] */ IINetInitiatedListener** nil)
 {
-    VALIDATE_NOT_NULL(*nil)
+    VALIDATE_NOT_NULL(nil)
     *nil = mNetInitiatedListener;
     REFCOUNT_ADD(*nil)
     return NOERROR;

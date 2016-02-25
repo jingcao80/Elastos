@@ -1,4 +1,4 @@
-TARGET_NAME= ServiceManager
+TARGET_NAME= elservicemanager
 TARGET_TYPE= exe
 
 SOURCES += ServiceManager.cpp

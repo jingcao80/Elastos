@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_NET_WIFI_CWIFIMANAGER_H__
-#define  __ELASTOS_DROID_NET_WIFI_CWIFIMANAGER_H__
+#define __ELASTOS_DROID_NET_WIFI_CWIFIMANAGER_H__
 
 #include "_Elastos_Droid_Wifi_CWifiManager.h"
 #include "elastos/droid/os/Handler.h"

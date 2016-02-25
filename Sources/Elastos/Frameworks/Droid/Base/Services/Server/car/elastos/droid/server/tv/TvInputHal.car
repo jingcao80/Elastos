@@ -1,0 +1,38 @@
+
+module
+{
+    using interface Elastos.Droid.Media.Tv.ITvInputHardwareInfo;
+    using interface Elastos.Droid.Media.Tv.ITvStreamConfig;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Tv {
+
+    /**
+     * @Involved
+     * no super interface
+     */
+    [deprecated]
+    interface ITvInputHalCallback {
+        OnDeviceAvailable(
+            [in] ITvInputHardwareInfo* info,
+            [in] ArrayOf<ITvStreamConfig*>* configs);
+
+        OnDeviceUnavailable(
+            [in] Int32 deviceId);
+
+        OnStreamConfigurationChanged(
+            [in] Int32 deviceId,
+            [in] ArrayOf<ITvStreamConfig*>* configs);
+
+        OnFirstFrameCaptured(
+            [in] Int32 deviceId,
+            [in] Int32 streamId);
+    }
+
+    } // namespace Tv
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

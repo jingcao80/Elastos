@@ -40,7 +40,7 @@ module
      * State for keeping track of Int64 counting information.
      */
     [local]
-    interface IBatteryStatsLongCounter {
+    interface IBatteryStatsInt64Counter {
         /**
          * Returns the count associated with this Counter for the
          * selected type of statistics.
@@ -1550,7 +1550,7 @@ module
          * Temporary for settings.
          */
         DumpCheckinLocked(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IPrintWriter* pw,
             [in] Int32 which,
             [in] Int32 reqUid);
@@ -1561,7 +1561,7 @@ module
          * NOTE: all times are expressed in 'ms'.
          */
         DumpCheckinLocked(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IPrintWriter* pw,
             [in] Int32 which,
             [in] Int32 reqUid,
@@ -1571,14 +1571,14 @@ module
          * Temporary for settings.
          */
         DumpLocked(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IPrintWriter* pw,
             [in] String prefix,
             [in] Int32 which,
             [in] Int32 reqUid);
 
         DumpLocked(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IPrintWriter* pw,
             [in] String prefix,
             [in] Int32 which,
@@ -1593,14 +1593,14 @@ module
          * @param pw a Printer to receive the dump output.
          */
         DumpLocked(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IPrintWriter* pw,
             [in] Int32 flags,
             [in] Int32 reqUid,
             [in] Int64 histStart);
 
         DumpCheckinLocked(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IPrintWriter* pw,
             [in] IList* apps,
             [in] Int32 flags,

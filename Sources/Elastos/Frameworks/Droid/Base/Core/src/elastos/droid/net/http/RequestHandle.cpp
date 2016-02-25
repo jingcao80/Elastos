@@ -523,8 +523,8 @@ String RequestHandle::ComputeCnonce()
     CRandom::New((IRandom**)&rand);
     Int32 nextInt;
     rand->NextInt32(&nextInt);
-    nextInt = (nextInt == 0x80000000/*IInteger::MIN_VALUE*/) ?
-            0x7FFFFFFF/*IInteger::MAX_VALUE*/ : Elastos::Core::Math::Abs(nextInt);
+    nextInt = (nextInt == Elastos::Core::Math::INT32_MIN_VALUE) ?
+            Elastos::Core::Math::INT32_MAX_VALUE : Elastos::Core::Math::Abs(nextInt);
     return StringUtils::ToString(nextInt, 16);
 }
 

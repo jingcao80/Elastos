@@ -325,8 +325,8 @@ function eldrop ()
                         else
                             if [ "${TARGET:0-4:4}" == ".eco" ]; then
                                 elcopy $XDK_TARGETS/$TARGET /system/lib
-                            elif [ "$TARGET" == "ServiceManager" ]; then
-                                elcopy $XDK_TARGETS/ServiceManager /system/bin
+                            elif [ "$TARGET" == "elservicemanager" ]; then
+                                elcopy $XDK_TARGETS/elservicemanager /system/bin
                             elif [ "$TARGET" == "ElApp_process" ]; then
                                 elcopy $XDK_TARGETS/ElApp_process /system/bin
                             else

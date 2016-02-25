@@ -74,7 +74,7 @@ module
          * fails, or if the reboot itself fails.
          */
         InstallPackage(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IFile* packageFile);
 
         /**

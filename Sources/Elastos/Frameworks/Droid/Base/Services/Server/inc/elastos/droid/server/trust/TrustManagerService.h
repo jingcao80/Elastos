@@ -3,17 +3,18 @@
 #define __ELASTOS_DROID_SERVER_TRUST_TRUSTMANAGERSERVICE_H__
 
 #include "_Elastos.Droid.Server.h"
-#include <elastos/droid/ext/frameworkext.h>
 #include "elastos/droid/server/SystemService.h"
+#include <Elastos.Droid.App.h>
 #include <elastos/droid/content/BroadcastReceiver.h>
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/internal/content/PackageMonitor.h>
 #include <elastos/droid/os/Binder.h>
 #include <elastos/droid/os/Handler.h>
-#include <Elastos.Droid.App.h>
-#include <elastos/droid/internal/content/PackageMonitor.h>
+#include <elastos/droid/provider/Settings.h>
 
-// using Elastos::Droid::Provider::Settings;
-using Elastos::Droid::Server::SystemService;
 using Elastos::Core::ICharSequence;
+using Elastos::Droid::App::Trust::IITrustListener;
+using Elastos::Droid::App::Trust::IITrustManager;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
@@ -21,12 +22,18 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IResolveInfo;
 using Elastos::Droid::Content::Pm::IUserInfo;
+using Elastos::Droid::Graphics::Drawable::IDrawable;
+using Elastos::Droid::Internal::Content::IPackageMonitor;
+using Elastos::Droid::Internal::Content::PackageMonitor;
+using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Server::SystemService;
 using Elastos::Droid::Utility::IArraySet;
 using Elastos::Droid::Utility::ISparseBooleanArray;
 using Elastos::IO::IFile;
@@ -35,12 +42,6 @@ using Elastos::IO::IPrintWriter;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 using Elastosx::Net::Ssl::ITrustManager;
-using Elastos::Droid::Graphics::Drawable::IDrawable;
-using Elastos::Droid::App::Trust::IITrustManager;
-using Elastos::Droid::App::Trust::IITrustListener;
-using Elastos::Droid::Internal::Content::PackageMonitor;
-using Elastos::Droid::Internal::Content::IPackageMonitor;
-using Elastos::Droid::Internal::Widget::ILockPatternUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -231,14 +232,14 @@ private:
 
         // @Override
         CARAPI OnPackageChanged(
-            /* [in] */ String packageName,
+            /* [in] */ const String& packageName,
             /* [in] */ Int32 uid,
             /* [in] */ ArrayOf<String>* components,
             /* [out] */ Boolean* result);
 
         // @Override
         CARAPI OnPackageDisappeared(
-            /* [in] */ String packageName,
+            /* [in] */ const String& packageName,
             /* [in] */ Int32 reason);
 
     private:
@@ -275,7 +276,7 @@ private:
     CARAPI UpdateTrustAll();
 
     CARAPI RemoveAgentsOfPackage(
-        /* [in] */ String packageName);
+        /* [in] */ const String& packageName);
 
     CARAPI GetSettingsComponentName(
         /* [in] */ IPackageManager* pm,

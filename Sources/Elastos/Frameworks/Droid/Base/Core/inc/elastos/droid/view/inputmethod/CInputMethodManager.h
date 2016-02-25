@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_VIEW_INPUTMETHOD_CINPUTMETHODMANAGER_H__
-#define  __ELASTOS_DROID_VIEW_INPUTMETHOD_CINPUTMETHODMANAGER_H__
+#define __ELASTOS_DROID_VIEW_INPUTMETHOD_CINPUTMETHODMANAGER_H__
 
 #include "elastos/droid/ext/frameworkdef.h"
 #include "Elastos.Droid.Graphics.h"
@@ -22,7 +22,7 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IResultReceiver;
 using Elastos::Droid::Text::Style::ISuggestionSpan;
 using Elastos::Droid::Internal::View::IInputBindResult;
-using Elastos::Droid::Internal::View::IInputContext;
+using Elastos::Droid::Internal::View::IIInputContext;
 using Elastos::Droid::Internal::View::IInputMethodClient;
 using Elastos::Droid::Internal::View::IIInputMethodManager;
 using Elastos::Droid::Internal::View::IIInputMethodSession;
@@ -146,7 +146,7 @@ public:
 
     /** @hide */
     CARAPI GetInputContext(
-        /* [out] */ IInputContext** context);
+        /* [out] */ IIInputContext** context);
 
     CARAPI GetInputMethodList(
         /* [out] */ IList** infos);
@@ -771,7 +771,7 @@ public:
     Object mHLock;
 
     // Our generic input connection if the current target does not have its own.
-    AutoPtr<IInputContext> mIInputContext;
+    AutoPtr<IIInputContext> mIInputContext;
 
     /**
      * True if this input method client is active, initially false.

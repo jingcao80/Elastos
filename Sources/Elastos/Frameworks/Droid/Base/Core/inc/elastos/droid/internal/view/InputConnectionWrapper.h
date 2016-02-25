@@ -30,7 +30,7 @@ class InputConnectionWrapper
 public:
     class InputContextCallback
         : public Object
-        , public IInputContextCallback
+        , public IIInputContextCallback
         , public IBinder
     {
         friend class InputConnectionWrapper;
@@ -112,7 +112,7 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI constructor(
-        /* [in] */ IInputContext* inputContext);
+        /* [in] */ IIInputContext* inputContext);
 
     CARAPI GetTextAfterCursor(
         /* [in] */ Int32 n,
@@ -210,7 +210,7 @@ public:
 
 private:
     static const Int32 MAX_WAIT_TIME_MILLIS;
-    AutoPtr<IInputContext> mIInputContext;
+    AutoPtr<IIInputContext> mIInputContext;
 };
 
 } // namespace View

@@ -6,11 +6,10 @@ module
     using interface Elastos.Droid.View.IMotionEvent;
     using interface Elastos.Droid.View.IView;
 
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.INotificationDataEntry;
+    interface Elastos.Droid.SystemUI.StatusBar.INotificationDataEntry;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
 
@@ -141,7 +140,6 @@ module
 
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

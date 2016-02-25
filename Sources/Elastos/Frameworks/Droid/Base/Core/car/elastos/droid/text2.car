@@ -58,7 +58,7 @@ module
     [deprecated, local]
     class CCharacterPickerDialog {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IView* view,
             [in] IEditable* text,
             [in] String options,

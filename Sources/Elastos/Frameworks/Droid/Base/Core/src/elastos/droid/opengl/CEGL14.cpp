@@ -24,6 +24,7 @@ using Elastos::Droid::View::ISurfaceHolder;
 using Elastos::Droid::Graphics::ISurfaceTexture;
 using Elastos::Droid::Graphics::CSurfaceTexture;
 
+
 namespace Elastos {
 namespace Droid {
 namespace Opengl {
@@ -67,14 +68,14 @@ ECode CEGL14::EglGetError(
 
 ECode CEGL14::EglGetDisplay(
     /* [in] */ Int32 display_id,
-    /* [out] */ Elastos::Droid::Opengl::IEGLDisplay** display)
+    /* [out] */ IEGLDisplay** display)
 {
     VALIDATE_NOT_NULL(display)
+    *display = NULL;
 
-    if ((EGLNativeDisplayType)display_id != EGL_DEFAULT_DISPLAY) {
+    if ((EGLNativeDisplayType)display_id != IEGL14::_EGL_DEFAULT_DISPLAY) {
         // jniThrowException(_env, "java/lang/UnsupportedOperationException", "eglGetDisplay");
         SLOGGERD("CEGL14", "eglGetDisplay E_UNSUPPORTED_OPERATION_EXCEPTION")
-        *display = NULL;
         return E_UNSUPPORTED_OPERATION_EXCEPTION;
     }
     return EglGetDisplayInner(display_id, display);
@@ -82,7 +83,7 @@ ECode CEGL14::EglGetDisplay(
 
 ECode CEGL14::EglGetDisplayInner(
     /* [in] */ Int64 display_id,
-    /* [out] */ Elastos::Droid::Opengl::IEGLDisplay** display)
+    /* [out] */ IEGLDisplay** display)
 {
     VALIDATE_NOT_NULL(display)
 
@@ -90,21 +91,22 @@ ECode CEGL14::EglGetDisplayInner(
     _returnValue = eglGetDisplay(
         reinterpret_cast<EGLNativeDisplayType>(display_id)
     );
-    *display = IEGLDisplay::Probe(ToEGLHandle(EIID_IEGLDisplay, _returnValue));
+
+    AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLDisplay, _returnValue);
+    *display = IEGLDisplay::Probe(obj);
+    REFCOUNT_ADD(*display)
     return NOERROR;
 }
 
 ECode CEGL14::EglGetDisplay(
     /* [in] */ Int64 display_id,
-    /* [out] */ Elastos::Droid::Opengl::IEGLDisplay** display)
+    /* [out] */ IEGLDisplay** display)
 {
-    VALIDATE_NOT_NULL(display)
-
     return EglGetDisplayInner(display_id, display);
 }
 
 ECode CEGL14::EglInitialize(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
+    /* [in] */ IEGLDisplay* dpy,
     /* [in] */ ArrayOf<Int32>* major_ref,
     /* [in] */ Int32 majorOffset,
     /* [in] */ ArrayOf<Int32>* minor_ref,
@@ -164,7 +166,7 @@ ECode CEGL14::EglInitialize(
 }
 
 ECode CEGL14::EglTerminate(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
+    /* [in] */ IEGLDisplay* dpy,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -180,7 +182,7 @@ ECode CEGL14::EglTerminate(
 }
 
 ECode CEGL14::EglQueryString(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
+    /* [in] */ IEGLDisplay* dpy,
     /* [in] */ Int32 name,
     /* [out] */ String* str)
 {
@@ -195,8 +197,8 @@ ECode CEGL14::EglQueryString(
 }
 
 ECode CEGL14::EglGetConfigs(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ ArrayOf<Elastos::Droid::Opengl::IEGLConfig *>* configs_ref,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ ArrayOf<IEGLConfig *>* configs_ref,
     /* [in] */ Int32 configsOffset,
     /* [in] */ Int32 config_size,
     /* [in] */ ArrayOf<Int32>* num_config_ref,
@@ -249,10 +251,10 @@ ECode CEGL14::EglGetConfigs(
 }
 
 ECode CEGL14::EglChooseConfig(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
+    /* [in] */ IEGLDisplay* dpy,
     /* [in] */ ArrayOf<Int32>* attrib_list_ref,
     /* [in] */ Int32 attrib_listOffset,
-    /* [in] */ ArrayOf<Elastos::Droid::Opengl::IEGLConfig *>* configs_ref,
+    /* [in] */ ArrayOf<IEGLConfig *>* configs_ref,
     /* [in] */ Int32 configsOffset,
     /* [in] */ Int32 config_size,
     /* [in] */ ArrayOf<Int32>* num_config_ref,
@@ -339,8 +341,8 @@ ECode CEGL14::EglChooseConfig(
 }
 
 ECode CEGL14::EglGetConfigAttrib(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLConfig* config,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLConfig* config,
     /* [in] */ Int32 attribute,
     /* [in] */ ArrayOf<Int32>* value_ref,
     /* [in] */ Int32 offset,
@@ -383,12 +385,12 @@ ECode CEGL14::EglGetConfigAttrib(
 }
 
 ECode CEGL14::EglCreateWindowSurface(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLConfig* config,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLConfig* config,
     /* [in] */ IInterface* win,
     /* [in] */ ArrayOf<Int32>* attrib_list_ref,
     /* [in] */ Int32 offset,
-    /* [out] */ Elastos::Droid::Opengl::IEGLSurface** surface)
+    /* [out] */ IEGLSurface** surface)
 {
     VALIDATE_NOT_NULL(surface)
 
@@ -418,14 +420,15 @@ ECode CEGL14::EglCreateWindowSurface(
 }
 
 ECode CEGL14::_EglCreateWindowSurface(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLConfig* config,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLConfig* config,
     /* [in] */ IInterface* win,
     /* [in] */ ArrayOf<Int32>* attrib_list_ref,
     /* [in] */ Int32 offset,
-    /* [out] */ Elastos::Droid::Opengl::IEGLSurface** surface)
+    /* [out] */ IEGLSurface** surface)
 {
     VALIDATE_NOT_NULL(surface)
+    *surface = NULL;
 
     EGLSurface _returnValue = (EGLSurface) 0;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
@@ -477,18 +480,21 @@ not_valid_surface:
         (EGLint *)attrib_list
     );
 
-    *surface = IEGLSurface::Probe(ToEGLHandle(EIID_IEGLSurface, _returnValue));
+    AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLSurface, _returnValue);
+    *surface = IEGLSurface::Probe(obj);
+    REFCOUNT_ADD(*surface)
     return NOERROR;
 }
 
 ECode CEGL14::EglCreatePbufferSurface(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLConfig* config,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLConfig* config,
     /* [in] */ ArrayOf<Int32>* attrib_list_ref,
     /* [in] */ Int32 offset,
-    /* [out] */ Elastos::Droid::Opengl::IEGLSurface** surface)
+    /* [out] */ IEGLSurface** surface)
 {
     VALIDATE_NOT_NULL(surface)
+    *surface = NULL;
 
     EGLSurface _returnValue = (EGLSurface) 0;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
@@ -527,28 +533,33 @@ ECode CEGL14::EglCreatePbufferSurface(
         (EGLint *)attrib_list
     );
 
-    *surface = IEGLSurface::Probe(ToEGLHandle(EIID_IEGLSurface, _returnValue));
+    AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLSurface, _returnValue);
+    *surface = IEGLSurface::Probe(obj);
+    REFCOUNT_ADD(*surface)
     return NOERROR;
 }
 
 ECode CEGL14::EglCreatePixmapSurface(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLConfig* config,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLConfig* config,
     /* [in] */ Int32 pixmap,
     /* [in] */ ArrayOf<Int32>* attrib_list,
     /* [in] */ Int32 offset,
-    /* [out] */ Elastos::Droid::Opengl::IEGLSurface** surface)
+    /* [out] */ IEGLSurface** surface)
 {
     VALIDATE_NOT_NULL(surface)
+    *surface = NULL;
 
-    *surface = IEGLSurface::Probe(ToEGLHandle(EIID_IEGLSurface, (EGLSurface) 0));
     LOGD("EglCreatePixmapSurface: Unsupported Operation")
+    AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLSurface, (EGLSurface) 0);
+    *surface = IEGLSurface::Probe(obj);
+    REFCOUNT_ADD(*surface)
     return E_UNSUPPORTED_OPERATION_EXCEPTION;
 }
 
 ECode CEGL14::EglDestroySurface(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLSurface* surface,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLSurface* surface,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -566,8 +577,8 @@ ECode CEGL14::EglDestroySurface(
 }
 
 ECode CEGL14::EglQuerySurface(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLSurface* surface,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLSurface* surface,
     /* [in] */ Int32 attribute,
     /* [in] */ ArrayOf<Int32>* value_ref,
     /* [in] */ Int32 offset,
@@ -583,16 +594,16 @@ ECode CEGL14::EglQuerySurface(
     EGLint *value = (EGLint *) 0;
 
     if (!value_ref) {
-        LOGD("EglQuerySurface: value == null")
+        SLOGGERD("CEGL14", "EglQuerySurface: value == null")
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     if (offset < 0) {
-        LOGD("EglQuerySurface: offset < 0")
+        SLOGGERD("CEGL14", "EglQuerySurface: offset < 0")
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     _remaining = value_ref->GetLength() - offset;
     if (_remaining < 1) {
-        LOGD("EglQuerySurface: length - offset < 1 < needed")
+        SLOGGERD("CEGL14", "EglQuerySurface: length - offset < 1 < needed")
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     value_base = (EGLint *) value_ref->GetPayload();
@@ -656,13 +667,13 @@ ECode CEGL14::EglReleaseThread(
 }
 
 ECode CEGL14::EglCreatePbufferFromClientBuffer(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
+    /* [in] */ IEGLDisplay* dpy,
     /* [in] */ Int32 buftype,
     /* [in] */ Int32 buffer,
-    /* [in] */ Elastos::Droid::Opengl::IEGLConfig* config,
+    /* [in] */ IEGLConfig* config,
     /* [in] */ ArrayOf<Int32>* attrib_list_ref,
     /* [in] */ Int32 offset,
-    /* [out] */ Elastos::Droid::Opengl::IEGLSurface** surface)
+    /* [out] */ IEGLSurface** surface)
 {
     VALIDATE_NOT_NULL(surface)
 
@@ -676,13 +687,13 @@ ECode CEGL14::EglCreatePbufferFromClientBuffer(
 }
 
 ECode CEGL14::EglCreatePbufferFromClientBuffer(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
+    /* [in] */ IEGLDisplay* dpy,
     /* [in] */ Int32 buftype,
     /* [in] */ Int64 buffer,
-    /* [in] */ Elastos::Droid::Opengl::IEGLConfig* config,
+    /* [in] */ IEGLConfig* config,
     /* [in] */ ArrayOf<Int32>* attrib_list_ref,
     /* [in] */ Int32 offset,
-    /* [out] */ Elastos::Droid::Opengl::IEGLSurface** surface)
+    /* [out] */ IEGLSurface** surface)
 {
     VALIDATE_NOT_NULL(surface)
 
@@ -690,15 +701,16 @@ ECode CEGL14::EglCreatePbufferFromClientBuffer(
 }
 
 ECode CEGL14::EglCreatePbufferFromClientBufferInner(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
+    /* [in] */ IEGLDisplay* dpy,
     /* [in] */ Int32 buftype,
     /* [in] */ Int64 buffer,
-    /* [in] */ Elastos::Droid::Opengl::IEGLConfig* config,
+    /* [in] */ IEGLConfig* config,
     /* [in] */ ArrayOf<Int32>* attrib_list_ref,
     /* [in] */ Int32 offset,
-    /* [out] */ Elastos::Droid::Opengl::IEGLSurface** surface)
+    /* [out] */ IEGLSurface** surface)
 {
     VALIDATE_NOT_NULL(surface)
+    *surface = NULL;
 
     EGLSurface _returnValue = (EGLSurface) 0;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
@@ -738,13 +750,16 @@ ECode CEGL14::EglCreatePbufferFromClientBufferInner(
         (EGLConfig)config_native,
         (EGLint *)attrib_list
     );
-    *surface = IEGLSurface::Probe(ToEGLHandle(EIID_IEGLSurface, _returnValue));
+
+    AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLSurface, _returnValue);
+    *surface = IEGLSurface::Probe(obj);
+    REFCOUNT_ADD(*surface)
     return NOERROR;
 }
 
 ECode CEGL14::EglSurfaceAttrib(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLSurface* surface,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLSurface* surface,
     /* [in] */ Int32 attribute,
     /* [in] */ Int32 value,
     /* [out] */ Boolean* result)
@@ -766,8 +781,8 @@ ECode CEGL14::EglSurfaceAttrib(
 }
 
 ECode CEGL14::EglBindTexImage(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLSurface* surface,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLSurface* surface,
     /* [in] */ Int32 buffer,
     /* [out] */ Boolean* result)
 {
@@ -787,8 +802,8 @@ ECode CEGL14::EglBindTexImage(
 }
 
 ECode CEGL14::EglReleaseTexImage(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLSurface* surface,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLSurface* surface,
     /* [in] */ Int32 buffer,
     /* [out] */ Boolean* result)
 {
@@ -808,7 +823,7 @@ ECode CEGL14::EglReleaseTexImage(
 }
 
 ECode CEGL14::EglSwapInterval(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
+    /* [in] */ IEGLDisplay* dpy,
     /* [in] */ Int32 interval,
     /* [out] */ Boolean* result)
 {
@@ -826,14 +841,15 @@ ECode CEGL14::EglSwapInterval(
 }
 
 ECode CEGL14::EglCreateContext(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLConfig* config,
-    /* [in] */ Elastos::Droid::Opengl::IEGLContext* share_context,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLConfig* config,
+    /* [in] */ IEGLContext* share_context,
     /* [in] */ ArrayOf<Int32>* attrib_list_ref,
     /* [in] */ Int32 offset,
-    /* [out] */ Elastos::Droid::Opengl::IEGLContext** context)
+    /* [out] */ IEGLContext** context)
 {
     VALIDATE_NOT_NULL(context)
+    *context = NULL;
 
     EGLContext _returnValue = (EGLContext) 0;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
@@ -873,13 +889,16 @@ ECode CEGL14::EglCreateContext(
         (EGLContext)share_context_native,
         (EGLint *)attrib_list
     );
-    *context = IEGLContext::Probe(ToEGLHandle(EIID_IEGLContext, _returnValue));
+
+    AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLContext, _returnValue);
+    *context = IEGLContext::Probe(obj);
+    REFCOUNT_ADD(*context)
     return NOERROR;
 }
 
 ECode CEGL14::EglDestroyContext(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLContext* ctx,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLContext* ctx,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -897,10 +916,10 @@ ECode CEGL14::EglDestroyContext(
 }
 
 ECode CEGL14::EglMakeCurrent(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLSurface* draw,
-    /* [in] */ Elastos::Droid::Opengl::IEGLSurface* read,
-    /* [in] */ Elastos::Droid::Opengl::IEGLContext* ctx,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLSurface* draw,
+    /* [in] */ IEGLSurface* read,
+    /* [in] */ IEGLContext* ctx,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -922,19 +941,22 @@ ECode CEGL14::EglMakeCurrent(
 }
 
 ECode CEGL14::EglGetCurrentContext(
-    /* [out] */ Elastos::Droid::Opengl::IEGLContext** context)
+    /* [out] */ IEGLContext** context)
 {
     VALIDATE_NOT_NULL(context)
 
     EGLContext _returnValue = (EGLContext) 0;
     _returnValue = eglGetCurrentContext();
-    *context = IEGLContext::Probe(ToEGLHandle(EIID_IEGLContext, _returnValue));
+
+    AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLContext, _returnValue);
+    *context = IEGLContext::Probe(obj);
+    REFCOUNT_ADD(*context)
     return NOERROR;
 }
 
 ECode CEGL14::EglGetCurrentSurface(
     /* [in] */ Int32 readdraw,
-    /* [out] */ Elastos::Droid::Opengl::IEGLSurface** surface)
+    /* [out] */ IEGLSurface** surface)
 {
     VALIDATE_NOT_NULL(surface)
 
@@ -942,24 +964,30 @@ ECode CEGL14::EglGetCurrentSurface(
     _returnValue = eglGetCurrentSurface(
         (EGLint)readdraw
     );
-    *surface = IEGLSurface::Probe(ToEGLHandle(EIID_IEGLSurface, _returnValue));
+
+    AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLSurface, _returnValue);
+    *surface = IEGLSurface::Probe(obj);
+    REFCOUNT_ADD(*surface)
     return NOERROR;
 }
 
 ECode CEGL14::EglGetCurrentDisplay(
-    /* [out] */ Elastos::Droid::Opengl::IEGLDisplay** display)
+    /* [out] */ IEGLDisplay** display)
 {
     VALIDATE_NOT_NULL(display)
 
     EGLDisplay _returnValue = (EGLDisplay) 0;
     _returnValue = eglGetCurrentDisplay();
-    *display = IEGLDisplay::Probe(ToEGLHandle(EIID_IEGLDisplay, _returnValue));
+
+    AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLDisplay, _returnValue);
+    *display = IEGLDisplay::Probe(obj);
+    REFCOUNT_ADD(*display)
     return NOERROR;
 }
 
 ECode CEGL14::EglQueryContext(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLContext* ctx,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLContext* ctx,
     /* [in] */ Int32 attribute,
     /* [in] */ ArrayOf<Int32>* value_ref,
     /* [in] */ Int32 offset,
@@ -1026,8 +1054,8 @@ ECode CEGL14::EglWaitNative(
 }
 
 ECode CEGL14::EglSwapBuffers(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLSurface* surface,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLSurface* surface,
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
@@ -1045,8 +1073,8 @@ ECode CEGL14::EglSwapBuffers(
 }
 
 ECode CEGL14::EglCopyBuffers(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLSurface* surface,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLSurface* surface,
     /* [in] */ Int32 target,
     /* [out] */ Boolean* result)
 {
@@ -1110,14 +1138,15 @@ android::sp<ANativeWindow> CEGL14::SurfaceGetNativeWindow(
 }
 
 ECode CEGL14::_EglCreateWindowSurfaceTexture(
-    /* [in] */ Elastos::Droid::Opengl::IEGLDisplay* dpy,
-    /* [in] */ Elastos::Droid::Opengl::IEGLConfig* config,
+    /* [in] */ IEGLDisplay* dpy,
+    /* [in] */ IEGLConfig* config,
     /* [in] */ IInterface* win,
     /* [in] */ ArrayOf<Int32>* attrib_list_ref,
     /* [in] */ Int32 offset,
-    /* [out] */ Elastos::Droid::Opengl::IEGLSurface** surface)
+    /* [out] */ IEGLSurface** surface)
 {
     VALIDATE_NOT_NULL(surface)
+    *surface = NULL;
 
     EGLSurface _returnValue = (EGLSurface) 0;
     EGLDisplay dpy_native = (EGLDisplay) FromEGLHandle(IEGLObjectHandle::Probe(dpy));
@@ -1176,7 +1205,9 @@ not_valid_surface:
         (EGLint *)attrib_list
     );
 
-    *surface = IEGLSurface::Probe(ToEGLHandle(EIID_IEGLSurface, _returnValue));
+    AutoPtr<IInterface> obj = ToEGLHandle(EIID_IEGLSurface, _returnValue);
+    *surface = IEGLSurface::Probe(obj);
+    REFCOUNT_ADD(*surface)
     return NOERROR;
 }
 

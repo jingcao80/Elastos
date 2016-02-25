@@ -119,7 +119,7 @@ ECode JDBCStatement::Execute(
 ECode JDBCStatement::ExecuteBatch(
     /* [out, callee] */ ArrayOf<Int32> ** value)
 {
-    VALIDATE_NOT_NULL(*value);
+    VALIDATE_NOT_NULL(value);
     *value = NULL;
 
     AutoPtr<ArrayOf<Int32> > ret;
@@ -329,7 +329,7 @@ ECode JDBCStatement::ExecuteUpdate(
 ECode JDBCStatement::GetConnection(
     /* [out] */ IConnection ** value)
 {
-    VALIDATE_NOT_NULL(*value);
+    VALIDATE_NOT_NULL(value);
     *value = IConnection::Probe(conn);
     REFCOUNT_ADD(*value);
     return NOERROR;
@@ -354,7 +354,7 @@ ECode JDBCStatement::GetFetchSize(
 ECode JDBCStatement::GetGeneratedKeys(
     /* [out] */ IResultSet** value)
 {
-    VALIDATE_NOT_NULL(*value);
+    VALIDATE_NOT_NULL(value);
     *value = NULL;
     return E_SQL_FEATURE_NOT_SUPPORTED_EXCEPTION;
 }
@@ -391,7 +391,7 @@ ECode JDBCStatement::GetMoreResults(
     /* [in] */ Int32 current,
     /* [out] */ Boolean* value)
 {
-    VALIDATE_NOT_NULL(*value);
+    VALIDATE_NOT_NULL(value);
     *value = FALSE;
     return E_SQL_FEATURE_NOT_SUPPORTED_EXCEPTION;
 }
@@ -407,7 +407,7 @@ ECode JDBCStatement::GetQueryTimeout(
 ECode JDBCStatement::GetResultSet(
     /* [out] */ IResultSet** value)
 {
-    VALIDATE_NOT_NULL(*value);
+    VALIDATE_NOT_NULL(value);
     *value = IResultSet::Probe(rs);
     REFCOUNT_ADD(*value);
     return NOERROR;
@@ -424,7 +424,7 @@ ECode JDBCStatement::GetResultSetConcurrency(
 ECode JDBCStatement::GetResultSetHoldability(
     /* [out] */ Int32* value)
 {
-    VALIDATE_NOT_NULL(*value);
+    VALIDATE_NOT_NULL(value);
     *value = Elastos::Sql::IResultSet::HOLD_CURSORS_OVER_COMMIT;
     return NOERROR;
 }
@@ -448,7 +448,7 @@ ECode JDBCStatement::GetUpdateCount(
 ECode JDBCStatement::GetWarnings(
     /* [out] */ ISQLWarning** value)
 {
-    VALIDATE_NOT_NULL(*value);
+    VALIDATE_NOT_NULL(value);
     *value = NULL;
     return NOERROR;
 }

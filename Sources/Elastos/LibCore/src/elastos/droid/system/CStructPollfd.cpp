@@ -10,6 +10,11 @@ CAR_OBJECT_IMPL(CStructPollfd)
 
 CAR_INTERFACE_IMPL(CStructPollfd, Object, IStructPollfd)
 
+ECode CStructPollfd::constructor()
+{
+    return NOERROR;
+}
+
 ECode CStructPollfd::GetFd(
     /* [out] */ IFileDescriptor** fd)
 {

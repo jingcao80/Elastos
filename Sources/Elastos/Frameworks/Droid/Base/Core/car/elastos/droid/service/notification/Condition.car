@@ -85,7 +85,7 @@ module
             [out] String* str);
 
         NewId(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IUriBuilder** id);
 
         IsValidId(

@@ -1,6 +1,6 @@
 
-#ifndef  __LISTACTIVITY_H__
-#define  __LISTACTIVITY_H__
+#ifndef __LISTACTIVITY_H__
+#define __LISTACTIVITY_H__
 
 #include "elastos/droid/app/Activity.h"
 

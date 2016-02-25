@@ -56,7 +56,7 @@ module
          * @hide
          */
         FormatShortElapsedTime(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int64 millis,
             [out] String* ret);
     }

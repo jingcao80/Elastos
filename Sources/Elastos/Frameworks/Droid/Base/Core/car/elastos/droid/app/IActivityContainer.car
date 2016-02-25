@@ -10,7 +10,7 @@ module
     namespace App {
 
     /** @hide */
-    interface IActivityContainer {
+    interface IIActivityContainer {
         AttachToDisplay(
             [in] Int32 displayId);
 

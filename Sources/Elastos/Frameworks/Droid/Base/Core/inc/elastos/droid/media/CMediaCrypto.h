@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_DROID_MEDIA_CMEDIACRYPTO_H__
 #define __ELASTOS_DROID_MEDIA_CMEDIACRYPTO_H__
 
+#include <Elastos.CoreLibrary.Utility.h>
 #include "_Elastos_Droid_Media_CMediaCrypto.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <binder/IServiceManager.h>
@@ -27,7 +28,7 @@ struct JCrypto : public android::RefBase {
 
     Boolean requiresSecureDecoderComponent(const char *mime) const;
 
-    static android::sp<android::ICrypto> GetCrypto();
+    static android::sp<android::ICrypto> GetCrypto(IMediaCrypto* obj);
 
 protected:
     virtual ~JCrypto();
@@ -109,10 +110,12 @@ private:
     android::sp<JCrypto> SetCrypto(
        const android::sp<JCrypto> &crypto);
 
+public:
+    Int64 mNativeContext;
+
 private:
     static Boolean mInitStatic;
     static const String TAG;
-
 };
 
 } // namespace Media

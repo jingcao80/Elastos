@@ -132,7 +132,7 @@ module
          * {@hide}
          */
         GetPreferredHttpHost(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String url,
             [out] IHttpHost** result);
 

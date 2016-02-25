@@ -1,8 +1,8 @@
 
-//#include "elastos/droid/animation/CRevealAnimator.h"
+#include "elastos/droid/animation/RevealAnimator.h"
 #include "elastos/droid/view/CViewAnimationUtilsHelper.h"
 
-//using Elastos::Droid::Animation::CRevealAnimator;
+using Elastos::Droid::Animation::RevealAnimator;
 
 namespace Elastos {
 namespace Droid {
@@ -20,11 +20,10 @@ ECode CViewAnimationUtilsHelper::CreateCircularReveal(
     /* [in] */ Float endRadius,
     /* [out] */ IAnimator** result)
 {
-    assert(0);
-    VALIDATE_NOT_NULL(result);
+    VALIDATE_NOT_NULL(result)
     *result = NULL;
-    VALIDATE_NOT_NULL(view);
-    // has no carclass: CRevealAnimator::New(view, centerX, centerY, startRadius, endRadius, result);
+    VALIDATE_NOT_NULL(view)
+    *result = new RevealAnimator(view, centerX, centerY, startRadius, endRadius);
     return NOERROR;
 }
 

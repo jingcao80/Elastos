@@ -39,7 +39,7 @@ module
     [local]
     interface IActionBarPolicyHelper {
         Get(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IActionBarPolicy** policy);
     }
 

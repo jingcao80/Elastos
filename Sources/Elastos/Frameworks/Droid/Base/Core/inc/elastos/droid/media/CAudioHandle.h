@@ -42,7 +42,7 @@ public:
     CARAPI ToString(
         /* [out] */ String* result);
 
-private:
+public:
     Int32 mId;
 };
 

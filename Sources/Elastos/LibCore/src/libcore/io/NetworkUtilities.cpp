@@ -191,7 +191,7 @@ static Boolean InetAddressToSockaddr(
     return TRUE;
 }
 
-Boolean InetAddressToSockaddr(
+Boolean InetAddressToSockaddrVerbatim(
     /* [in] */ IInetAddress* inetAddress,
     /* [in] */ Int32 port,
     /* [in] */ sockaddr_storage& ss,
@@ -200,7 +200,7 @@ Boolean InetAddressToSockaddr(
     return InetAddressToSockaddr(inetAddress, port, ss, sa_len, FALSE);
 }
 
-Boolean InetAddressToSockaddrVerbatim(
+Boolean InetAddressToSockaddr(
     /* [in] */ IInetAddress* inetAddress,
     /* [in] */ Int32 port,
     /* [in] */ sockaddr_storage& ss,

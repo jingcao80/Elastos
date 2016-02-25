@@ -1,3 +1,5 @@
+#include "elastos/droid/media/_AudioErrors.h"
+#include "elastos/droid/media/CAudioAttributes.h"
 #include "elastos/droid/media/CAudioAttributesBuilder.h"
 #include "elastos/droid/media/CAudioFormat.h"
 #include "elastos/droid/media/CAudioFormatBuilder.h"
@@ -12,7 +14,9 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
+
 #include <media/AudioRecord.h>
+#include <system/audio.h>
 
 using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Media::CAudioFormat;
@@ -43,6 +47,29 @@ namespace Media {
 #define AUDIORECORD_ERROR_SETUP_INVALIDFORMAT       -18
 #define AUDIORECORD_ERROR_SETUP_INVALIDSOURCE       -19
 #define AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED    -20
+
+static inline audio_format_t audioFormatToNative(int audioFormat)
+{
+    switch (audioFormat) {
+    case IAudioFormat::ENCODING_PCM_16BIT:
+        return AUDIO_FORMAT_PCM_16_BIT;
+    case IAudioFormat::ENCODING_PCM_8BIT:
+        return AUDIO_FORMAT_PCM_8_BIT;
+    case IAudioFormat::ENCODING_PCM_FLOAT:
+        return AUDIO_FORMAT_PCM_FLOAT;
+    case IAudioFormat::ENCODING_AC3:
+        return AUDIO_FORMAT_AC3;
+    case IAudioFormat::ENCODING_E_AC3:
+        return AUDIO_FORMAT_E_AC3;
+    case IAudioFormat::ENCODING_DEFAULT:
+        return AUDIO_FORMAT_DEFAULT;
+    default:
+        return AUDIO_FORMAT_INVALID;
+    }
+}
+
+// static Mutex sLock;
+// static SortedVector <audiorecord_callback_cookie *> sAudioRecordCallBackCookies;
 
 const String CAudioRecord::TAG("CAudioRecord");
 
@@ -233,7 +260,10 @@ ECode CAudioRecord::constructor(
 
     //TODO: update native initialization when information about hardware init failure
     //      due to capture device already open is available.
-    Int32 initResult = Native_setup(THIS_PROBE(IAudioRecord), mAudioAttributes, mSampleRate,
+    AutoPtr<IWeakReference> weakHost;
+    GetWeakReference((IWeakReference**)&weakHost);
+
+    Int32 initResult = NativeSetup(weakHost, mAudioAttributes, mSampleRate,
         mChannelMask, mAudioFormat, mNativeBufferSizeInBytes, session);
 
     if (initResult != SUCCESS) {
@@ -261,7 +291,9 @@ ECode CAudioRecord::StartRecording() // throws IllegalStateException
 
     // start recording
     synchronized(mRecordingStateLock) {
-        if (Native_start(IMediaSyncEvent::SYNC_EVENT_NONE, 0) == SUCCESS) {
+        Int32 result;
+        NativeStart(IMediaSyncEvent::SYNC_EVENT_NONE, 0, &result);
+        if (result == SUCCESS) {
             HandleFullVolumeRec(TRUE);
             mRecordingState = RECORDSTATE_RECORDING;
         }
@@ -286,7 +318,9 @@ ECode CAudioRecord::StartRecording( // throws IllegalStateException
     syncEvent->GetAudioSessionId(&tempValue2);
 
     synchronized(mRecordingStateLock) {
-        if (Native_start(tempValue1, tempValue2) == SUCCESS) {
+        Int32 result;
+        NativeStart(tempValue1, tempValue2, &result);
+        if (result == SUCCESS) {
             HandleFullVolumeRec(TRUE);
             mRecordingState = RECORDSTATE_RECORDING;
         }
@@ -305,7 +339,7 @@ ECode CAudioRecord::Stop() // throws IllegalStateException
     synchronized(mRecordingStateLock) {
         HandleFullVolumeRec(FALSE);
 
-        Native_stop();
+        NativeStop();
         mRecordingState = RECORDSTATE_STOPPED;
     }
     return NOERROR;
@@ -426,8 +460,7 @@ ECode CAudioRecord::SetNotificationMarkerPosition(
         *result = IAudioRecord::ERROR_INVALID_OPERATION;
         return NOERROR;
     }
-    *result = Native_set_marker_pos(markerInFrames);
-    return NOERROR;
+    return Native_set_marker_pos(markerInFrames, result);
 }
 
 ECode CAudioRecord::SetPositionNotificationPeriod(
@@ -439,8 +472,7 @@ ECode CAudioRecord::SetPositionNotificationPeriod(
         *result = IAudioRecord::ERROR_INVALID_OPERATION;
         return NOERROR;
     }
-    *result = Native_set_pos_update_period(periodInFrames);
-    return NOERROR;
+    return Native_set_pos_update_period(periodInFrames, result);
 }
 
 ECode CAudioRecord::AudioParamCheck(
@@ -511,12 +543,12 @@ ECode CAudioRecord::AudioBuffSizeCheck(
 
 ECode CAudioRecord::ReleaseResources()
 {
-//    try {
+    // try {
     Stop();
-//    } catch(IllegalStateException ise) {
-        // don't raise an exception, we're releasing the resources.
-//    }
-    Native_release();
+    // } catch(IllegalStateException ise) {
+    //     don't raise an exception, we're releasing the resources.
+    // }
+    NativeRelease();
     mState = STATE_UNINITIALIZED;
     return NOERROR;
 }
@@ -583,16 +615,14 @@ ECode CAudioRecord::GetNotificationMarkerPosition(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = Native_get_marker_pos();
-    return NOERROR;
+    return Native_get_marker_pos(result);
 }
 
 ECode CAudioRecord::GetPositionNotificationPeriod(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = Native_get_pos_update_period();
-    return NOERROR;
+    return Native_get_pos_update_period(result);
 }
 
 ECode CAudioRecord::GetMinBufferSize(
@@ -714,7 +744,6 @@ ECode CAudioRecord::GetChannelMaskFromLegacyConfig(
     return NOERROR;
 }
 
-//TODO: Need JNI
 //---------------------------------------------------------
 // Java methods called from the native side
 //--------------------
@@ -733,7 +762,9 @@ void CAudioRecord::PostEventFromNative(
     sb += arg2;
     Logd(sb.ToString());
 
-    AutoPtr<IAudioRecord> recorder = IAudioRecord::Probe(audiorecord_ref);
+    AutoPtr<IWeakReference> wr = IWeakReference::Probe(audiorecord_ref);
+    AutoPtr<IAudioRecord> recorder;
+    wr->Resolve(EIID_IAudioRecord, (IInterface**)&recorder);
     if (recorder == NULL) {
         return;
     }
@@ -792,172 +823,184 @@ void CAudioRecord::recorderCallback(Int32 event, void* user, void *info)
     }
 }
 
-Int32 CAudioRecord::Native_setup(
-    /* [in] */ IInterface* audiorecord_this,
-    /* [in] */ IInterface* attributes,
-    /* [in] */ Int32 sampleRate,
+Int32 CAudioRecord::NativeSetup(
+    /* [in] */ IWeakReference* audiorecord_this,
+    /* [in] */ IAudioAttributes* attributes,
+    /* [in] */ Int32 sampleRateInHertz,
     /* [in] */ Int32 channelMask,
     /* [in] */ Int32 audioFormat,
     /* [in] */ Int32 buffSizeInBytes,
     /* [in] */ ArrayOf<Int32>* session)
 {
-   //  //LOGV(">> Entering android_media_AudioRecord_setup");
-   //  //LOGV("sampleRate=%d, audioFormat=%d, channels=%x, buffSizeInBytes=%d",
-   //  //     sampleRateInHertz, audioFormat, channels,     buffSizeInBytes);
+    //ALOGV(">> Entering android_media_AudioRecord_setup");
+    //ALOGV("sampleRate=%d, audioFormat=%d, channel mask=%x, buffSizeInBytes=%d",
+    //     sampleRateInHertz, audioFormat, channelMask, buffSizeInBytes);
 
-   //  if (!audio_is_input_channel(channels)) {
-   //      Logger::E(TAG, "Error creating AudioRecord: channel count is not 1 or 2.");
-   //      return AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK;
-   //  }
-   //  uint32_t nbChannels = popcount(channels);
-
-   //  // compare the format against the Java constants
-   //  if ((audioFormat != IAudioFormat::ENCODING_PCM_16BIT)
-   //      && (audioFormat != IAudioFormat::ENCODING_PCM_8BIT)) {
-   //      Logger::E(TAG, "Error creating AudioRecord: unsupported audio format.");
-   //      return AUDIORECORD_ERROR_SETUP_INVALIDFORMAT;
-   //  }
-
-   // Int32 bytesPerSample = audioFormat == IAudioFormat::ENCODING_PCM_16BIT ? 2 : 1;
-   // audio_format_t format = audioFormat == IAudioFormat::ENCODING_PCM_16BIT ?
-   //         AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT;
-
-   //  if (buffSizeInBytes == 0) {
-   //      Logger::E(TAG, "Error creating AudioRecord: frameCount is 0.");
-   //      return AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT;
-   //  }
-   //  Int32 frameSize = nbChannels * bytesPerSample;
-   //  size_t frameCount = buffSizeInBytes / frameSize;
-
-   //  if (recordSource >= AUDIO_SOURCE_CNT) {
-   //      Logger::E(TAG, "Error creating AudioRecord: unknown source.");
-   //      return AUDIORECORD_ERROR_SETUP_INVALIDSOURCE;
-   //  }
-
-   //  if (session == NULL) {
-   //      ALOGE("Error creating AudioRecord: invalid session ID pointer");
-   //      return AUDIORECORD_ERROR;
-   //  }
-
-   //  Int32 sessionId = (*session)[0];
-
-   //  audiorecord_callback_cookie *lpCallbackData = NULL;
-   //  android::AudioRecord* lpRecorder = NULL;
-
-   //  // create an uninitialized AudioRecord object
-   //  lpRecorder = new android::AudioRecord();
-   //      if(lpRecorder == NULL) {
-   //      Logger::E(TAG, "Error creating AudioRecord instance.");
-   //      return AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED;
-   //  }
-
-   //  // create the callback information:
-   //  // this data will be passed with every AudioRecord callback
-   //  lpCallbackData = new audiorecord_callback_cookie;
-   //  // we use a weak reference so the AudioRecord object can be garbage collected.
-   //  // lpCallbackData->audioRecord_ref = env->NewGlobalRef(weak_this);
-   //  GetWeakReference((IWeakReference**)&lpCallbackData->mAudioRecordRef);
-   //  lpCallbackData->mBusy = FALSE;
-   //  lpRecorder->set((audio_source_t)recordSource,
-   //     sampleRate,
-   //     format,        // word length, PCM
-   //     channels,
-   //     frameCount,
-   //     recorderCallback,// callback_t
-   //     lpCallbackData,// void* user
-   //     0,             // notificationFrames,
-   //     TRUE,         // threadCanCallJava)
-   //     sessionId);
-
-   //  if(lpRecorder->initCheck() != android::NO_ERROR) {
-   //      Logger::E(TAG, "Error creating AudioRecord instance: initialization check failed.");
-   //      goto native_init_failure;
-   //  }
-
-   //  // read the audio session ID back from AudioRecord in case a new session was created during set()
-   //  (*session)[0] = lpRecorder->getSessionId();
-
-   //  // {   // scope for the lock
-   //  //     AutoLock l(sLock);
-   //  //     sAudioRecordCallBackCookies.add(lpCallbackData);
-   //  // }
-
-   //  // save our newly created C++ AudioRecord in the "nativeRecorderInJavaObj" field
-   //  // of the Java object
-   //  mNativeRecorderInJavaObj = (Int32)lpRecorder;
-
-   //  // save our newly created callback information in the "nativeCallbackCookie" field
-   //  // of the Java object (in mNativeCallbackCookie) so we can free the memory in finalize()
-   //  mNativeCallbackCookie = (Int32)lpCallbackData;
-
-    return AUDIORECORD_SUCCESS;
-
-//     // failure:
-// native_init_failure:
-//     delete lpCallbackData;
-//     delete lpRecorder;
-
-//     mNativeRecorderInJavaObj = 0;
-//     mNativeCallbackCookie = 0;
-
-//     return AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED;
-}
-
-void CAudioRecord::Native_finalize()
-{
-    Native_release();
-}
-
-void CAudioRecord::Native_release()
-{
-    // // serialize access. Ugly, but functional.
-    // AutoLock lock(&_m_syncLock);
-
-    // android::AudioRecord* lpRecorder = (android::AudioRecord *)mNativeRecorderInJavaObj;
-    // audiorecord_callback_cookie* lpCookie = (audiorecord_callback_cookie *)mNativeCallbackCookie;
-
-    // // reset the native resources in the Java object so any attempt to access
-    // // them after a call to release fails.
-    // mNativeRecorderInJavaObj = 0;
-    // mNativeCallbackCookie = 0;
-
-    // // delete the AudioRecord object
-    // if (lpRecorder) {
-    //     // LOGV("About to delete lpRecorder: %x\n", (int)lpRecorder);
-    //     lpRecorder->stop();
-    //     delete lpRecorder;
-    // }
-
-    // // delete the callback information
-    // if (lpCookie) {
-    //     // LOGV("deleting lpCookie: %x\n", (int)lpCookie);
-    //     delete lpCookie;
-    // }
-}
-
-Int32 CAudioRecord::Native_start(
-    /* [in] */ Int32 syncEvent,
-    /* [in] */ Int32 sessionId)
-{
-    android::AudioRecord *lpRecorder = (android::AudioRecord *)mNativeRecorderInJavaObj;
-    if (lpRecorder == NULL) {
-        //jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return AUDIORECORD_ERROR;
+    if (attributes == 0) {
+        ALOGE("Error creating AudioRecord: invalid audio attributes");
+        return IAudioSystem::ERROR;
     }
 
-    return translateRecorderErrorCode(lpRecorder->start());
+    if (!audio_is_input_channel(channelMask)) {
+        ALOGE("Error creating AudioRecord: channel mask %#x is not valid.", channelMask);
+        return AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK;
+    }
+    uint32_t channelCount = audio_channel_count_from_in_mask(channelMask);
+
+    // compare the format against the Java constants
+    audio_format_t format = audioFormatToNative(audioFormat);
+    if (format == AUDIO_FORMAT_INVALID) {
+        ALOGE("Error creating AudioRecord: unsupported audio format %d.", audioFormat);
+        return AUDIORECORD_ERROR_SETUP_INVALIDFORMAT;
+    }
+
+    size_t bytesPerSample = audio_bytes_per_sample(format);
+
+    if (buffSizeInBytes == 0) {
+         ALOGE("Error creating AudioRecord: frameCount is 0.");
+        return AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT;
+    }
+    size_t frameSize = channelCount * bytesPerSample;
+    size_t frameCount = buffSizeInBytes / frameSize;
+
+    if (session == NULL) {
+        ALOGE("Error creating AudioRecord: invalid session ID pointer");
+        return IAudioSystem::ERROR;
+    }
+
+    Int32 sessionId = (*session)[0];
+
+    // create an uninitialized AudioRecord object
+    android::sp<android::AudioRecord> lpRecorder = new android::AudioRecord();
+
+    AutoPtr<CAudioAttributes> attr = (CAudioAttributes*)attributes;
+    audio_attributes_t *paa = NULL;
+    // read the AudioAttributes values
+    paa = (audio_attributes_t *) calloc(1, sizeof(audio_attributes_t));
+    const char* tags = attr->mFormattedTags.string();
+    // copying array size -1, char array for tags was calloc'd, no need to NULL-terminate it
+    strncpy(paa->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
+
+    paa->source = (audio_source_t) attr->mSource;
+    paa->flags = (audio_flags_mask_t)attr->mFlags;
+    ALOGV("AudioRecord_setup for source=%d tags=%s flags=%08x", paa->source, paa->tags, paa->flags);
+
+    audio_input_flags_t flags = AUDIO_INPUT_FLAG_NONE;
+    if (paa->flags & AUDIO_FLAG_HW_HOTWORD) {
+        flags = AUDIO_INPUT_FLAG_HW_HOTWORD;
+    }
+    // create the callback information:
+    // this data will be passed with every AudioRecord callback
+    audiorecord_callback_cookie *lpCallbackData = new audiorecord_callback_cookie;
+    // we use a weak reference so the AudioRecord object can be garbage collected.
+    lpCallbackData->mAudioRecordRef = audiorecord_this;
+    lpCallbackData->mBusy = false;
+
+    const android::status_t status = lpRecorder->set(paa->source,
+        sampleRateInHertz,
+        format,        // word length, PCM
+        channelMask,
+        frameCount,
+        recorderCallback,// callback_t
+        lpCallbackData,// void* user
+        0,             // notificationFrames,
+        true,          // threadCanCallJava
+        sessionId,
+        android::AudioRecord::TRANSFER_DEFAULT,
+        flags);
+
+    if (status != android::NO_ERROR) {
+        ALOGE("Error creating AudioRecord instance: initialization check failed with status %d.",
+                status);
+        goto native_init_failure;
+    }
+
+    // read the audio session ID back from AudioRecord in case a new session was created during set()
+    (*session)[0] = lpRecorder->getSessionId();
+
+    // {   // scope for the lock
+    //     Mutex::Autolock l(sLock);
+    //     sAudioRecordCallBackCookies.add(lpCallbackData);
+    // }
+    // save our newly created C++ AudioRecord in the "nativeRecorderInJavaObj" field
+    // of the Java object
+    mNativeRecorderInJavaObj = (Int64)lpRecorder.get();
+
+    // save our newly created callback information in the "nativeCallbackCookie" field
+    // of the Java object (in mNativeCallbackCookie) so we can free the memory in finalize()
+    mNativeCallbackCookie = (Int64)lpCallbackData;
+
+    return IAudioSystem::SUCCESS;
+
+    // failure:
+native_init_failure:
+    delete lpCallbackData;
+    mNativeCallbackCookie = 0;
+
+    return AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED;
 }
 
-void CAudioRecord::Native_stop()
+void CAudioRecord::NativeFinalize()
 {
+    NativeRelease();
+}
+
+void CAudioRecord::NativeRelease()
+{
+    // serialize access. Ugly, but functional.
+    android::AudioRecord* lpRecorder = (android::AudioRecord *)mNativeRecorderInJavaObj;
+
+    audiorecord_callback_cookie* lpCookie = (audiorecord_callback_cookie *)mNativeCallbackCookie;
+
+    // reset the native resources in the Java object so any attempt to access
+    // them after a call to release fails.
+    mNativeRecorderInJavaObj = 0;
+    mNativeCallbackCookie = 0;
+
+    // delete the AudioRecord object
+    if (lpRecorder) {
+        ALOGV("About to delete lpRecorder: %p\n", lpRecorder);
+        lpRecorder->stop();
+//TODO:
+        // delete lpRecorder;
+    }
+
+    // delete the callback information
+    if (lpCookie) {
+        ALOGV("deleting lpCookie: %p\n", lpCookie);
+        delete lpCookie;
+    }
+}
+
+ECode CAudioRecord::NativeStart(
+    /* [in] */ Int32 syncEvent,
+    /* [in] */ Int32 sessionId,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result)
     android::AudioRecord *lpRecorder = (android::AudioRecord *)mNativeRecorderInJavaObj;
     if (lpRecorder == NULL) {
         //jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return;
+        *result = IAudioSystem::ERROR;
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    *result = NativeToElastosStatus(
+            lpRecorder->start((android::AudioSystem::sync_event_t)syncEvent, sessionId));
+    return NOERROR;
+}
+
+ECode CAudioRecord::NativeStop()
+{
+    android::AudioRecord *lpRecorder = (android::AudioRecord *)mNativeRecorderInJavaObj;
+    if (lpRecorder == NULL) {
+        // jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return E_ILLEGAL_STATE_EXCEPTION;;
     }
 
     lpRecorder->stop();
     //LOGV("Called lpRecorder->stop()");
+    return NOERROR;
 }
 
 Int32 CAudioRecord::Native_read_in_byte_array(
@@ -994,6 +1037,10 @@ Int32 CAudioRecord::Native_read_in_byte_array(
                             sizeInBytes > (Int32)recorderBuffSize ?
                             (Int32)recorderBuffSize : sizeInBytes );
 
+    if (readSize < 0) {
+        readSize = IAudioSystem::INVALID_OPERATION;
+    }
+
     return (Int32)readSize;
 }
 
@@ -1002,8 +1049,45 @@ Int32 CAudioRecord::Native_read_in_short_array(
     /* [in] */ Int32 offsetInShorts,
     /* [in] */ Int32 sizeInShorts)
 {
-    return (Native_read_in_byte_array((ArrayOf<Byte>*)audioData,
-            offsetInShorts * 2, sizeInShorts * 2) / 2);
+    Int16* recordBuff = NULL;
+    // get the audio recorder from which we'll read new audio samples
+    android::AudioRecord *lpRecorder = (android::AudioRecord *)mNativeRecorderInJavaObj;
+    if (lpRecorder == NULL) {
+        ALOGE("Unable to retrieve AudioRecord object, can't record");
+        return 0;
+    }
+
+    if (!audioData) {
+        ALOGE("Invalid Java array to store recorded audio, can't record");
+        return 0;
+    }
+
+    // get the pointer to where we'll record the audio
+    // NOTE: We may use GetPrimitiveArrayCritical() when the JNI implementation changes in such
+    // a way that it becomes much more efficient. When doing so, we will have to prevent the
+    // AudioSystem callback to be called while in critical section (in case of media server
+    // process crash for instance)
+    recordBuff = audioData->GetPayload();
+
+    if (recordBuff == NULL) {
+        ALOGE("Error retrieving destination for recorded audio data, can't record");
+        return 0;
+    }
+
+    // read the new audio data from the native AudioRecord object
+    const size_t recorderBuffSize = lpRecorder->frameCount()*lpRecorder->frameSize();
+    const size_t sizeInBytes = sizeInShorts * sizeof(short);
+    ssize_t readSize = lpRecorder->read(recordBuff + offsetInShorts * sizeof(short),
+                                        sizeInBytes > recorderBuffSize ?
+                                            recorderBuffSize : sizeInBytes);
+
+    if (readSize < 0) {
+        readSize = IAudioSystem::INVALID_OPERATION;
+    }
+    else {
+        readSize /= sizeof(short);
+    }
+    return (Int32)readSize;
 }
 
 Int32 CAudioRecord::Native_read_in_direct_buffer(
@@ -1036,66 +1120,89 @@ Int32 CAudioRecord::Native_read_in_direct_buffer(
     }
 
     // read new data from the recorder
-    return lpRecorder->read(nativeFromJavaBuf,
+    ssize_t readSize = lpRecorder->read(nativeFromJavaBuf,
                                    capacity < sizeInBytes ? capacity : sizeInBytes);
+
+    if (readSize < 0) {
+        readSize = IAudioSystem::INVALID_OPERATION;
+    }
+    return (Int32)readSize;
 }
 
-Int32 CAudioRecord::Native_set_marker_pos(
-    /* [in] */ Int32 marker)
+ECode CAudioRecord::Native_set_marker_pos(
+    /* [in] */ Int32 marker,
+    /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     android::AudioRecord *lpRecorder = (android::AudioRecord *)mNativeRecorderInJavaObj;
 
-    if (lpRecorder) {
-        return translateRecorderErrorCode(lpRecorder->setMarkerPosition(marker));
-    } else {
+    if (lpRecorder == NULL) {
         // jniThrowException(env, "java/lang/IllegalStateException",
         //     "Unable to retrieve AudioRecord pointer for setMarkerPosition()");
-        return AUDIORECORD_ERROR;
+        *result = IAudioSystem::ERROR;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
+
+    *result = NativeToElastosStatus(
+            lpRecorder->setMarkerPosition(marker));
+    return NOERROR;
 }
 
-Int32 CAudioRecord::Native_get_marker_pos()
+ECode CAudioRecord::Native_get_marker_pos(
+    /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     android::AudioRecord *lpRecorder = (android::AudioRecord *)mNativeRecorderInJavaObj;
     uint32_t markerPos = 0;
 
-    if (lpRecorder) {
-        lpRecorder->getMarkerPosition(&markerPos);
-        return (Int32)markerPos;
-    } else {
+    if (lpRecorder == NULL) {
         // jniThrowException(env, "java/lang/IllegalStateException",
         //     "Unable to retrieve AudioRecord pointer for getMarkerPosition()");
-        return AUDIORECORD_ERROR;
+        *result = IAudioSystem::ERROR;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
+
+    lpRecorder->getMarkerPosition(&markerPos);
+    *result = (Int32)markerPos;
+    return NOERROR;
 }
 
-Int32 CAudioRecord::Native_set_pos_update_period(
-    /* [in] */ Int32 updatePeriod)
+ECode CAudioRecord::Native_set_pos_update_period(
+    /* [in] */ Int32 updatePeriod,
+    /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     android::AudioRecord *lpRecorder = (android::AudioRecord *)mNativeRecorderInJavaObj;
 
-    if (lpRecorder) {
-        return translateRecorderErrorCode(lpRecorder->setPositionUpdatePeriod(updatePeriod));
-    } else {
+    if (lpRecorder == NULL) {
         // jniThrowException(env, "java/lang/IllegalStateException",
         //     "Unable to retrieve AudioRecord pointer for setPositionUpdatePeriod()");
-        return AUDIORECORD_ERROR;
+        *result = IAudioSystem::ERROR;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
+
+    *result = NativeToElastosStatus(
+            lpRecorder->setPositionUpdatePeriod(updatePeriod));
+    return NOERROR;
 }
 
-Int32 CAudioRecord::Native_get_pos_update_period()
+ECode CAudioRecord::Native_get_pos_update_period(
+    /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
     android::AudioRecord *lpRecorder = (android::AudioRecord *)mNativeRecorderInJavaObj;
     uint32_t period = 0;
 
-    if (lpRecorder) {
-        lpRecorder->getPositionUpdatePeriod(&period);
-        return (Int32)period;
-    } else {
+    if (lpRecorder == NULL) {
         // jniThrowException(env, "java/lang/IllegalStateException",
         //     "Unable to retrieve AudioRecord pointer for getPositionUpdatePeriod()");
-        return AUDIORECORD_ERROR;
+        *result = IAudioSystem::ERROR;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
+
+    lpRecorder->getPositionUpdatePeriod(&period);
+    *result = (Int32)period;
+    return NOERROR;
 }
 
 /*static*/
@@ -1104,23 +1211,23 @@ Int32 CAudioRecord::Native_get_min_buff_size(
     /* [in] */ Int32 channelCount,
     /* [in] */ Int32 audioFormat)
 {
-    // // LOGV(">> android_media_AudioRecord_get_min_buff_size(%d, %d, %d)", sampleRateInHertz, nbChannels, audioFormat);
+    ALOGV(">> android_media_AudioRecord_get_min_buff_size(%d, %d, %d)", sampleRateInHz, channelCount, audioFormat);
 
-    // Int32 frameCount = 0;
-    // android::status_t result = android::AudioRecord::getMinFrameCount(&frameCount,
-    //         sampleRateInHz,
-    //         (audioFormat == IAudioFormat::ENCODING_PCM_16BIT ?
-    //         AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT),
-    //         channelCount);
+    size_t frameCount = 0;
+    audio_format_t format = audioFormatToNative(audioFormat);
+    audio_channel_mask_t val = audio_channel_in_mask_from_count(channelCount);
+    android::status_t result = android::AudioRecord::getMinFrameCount(&frameCount,
+            sampleRateInHz,
+            format,
+            val);
 
-    // if (result == android::BAD_VALUE) {
-    //     return 0;
-    // }
-    // if (result != android::NO_ERROR) {
-    //     return -1;
-    // }
-    // return frameCount * channelCount * (audioFormat == IAudioFormat::ENCODING_PCM_16BIT ? 2 : 1);
-    return 0;
+    if (result == android::BAD_VALUE) {
+        return 0;
+    }
+    if (result != android::NO_ERROR) {
+        return -1;
+    }
+    return frameCount * channelCount * audio_bytes_per_sample(format);
 }
 
 //-------------------------------------------------

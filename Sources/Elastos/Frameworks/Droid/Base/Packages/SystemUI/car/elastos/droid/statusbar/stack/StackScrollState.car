@@ -4,11 +4,10 @@ module
     interface Elastos.Droid.View.IView;
     interface Elastos.Droid.View.IViewGroup;
 
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.ISpeedBumpView;
+    interface Elastos.Droid.SystemUI.StatusBar.ISpeedBumpView;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
     namespace Stack {
@@ -61,7 +60,6 @@ module
     } // namespace Stack
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

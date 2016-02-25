@@ -135,14 +135,14 @@ int LaunchApp(void *handle, char *appName)
 
     Int32 pid = fork();
     if(pid == 0){
-        char * argv[] = { (char*)"ServiceManager", NULL };
-        if(execv("/system/bin/ServiceManager", argv) < 0){
-            Slogger::E(TAG, "Execute ServiceManager.ecx fail!\n");
+        char * argv[] = { (char*)"elserviceManager", NULL };
+        if(execv("/system/bin/elserviceManager", argv) < 0){
+            Slogger::E(TAG, "Execute elserviceManager.ecx fail!\n");
         }
         return 0;
     }
     else if(pid == -1) {
-        Slogger::E(TAG, "Create ServiceManager process fail!\n");
+        Slogger::E(TAG, "Create elserviceManager process fail!\n");
         return -1;
     }
 

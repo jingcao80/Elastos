@@ -54,7 +54,7 @@ AutoPtr<IZygoteHooks> InitZygoteHooks()
 }
 
 const AutoPtr<IZygoteHooks> Zygote::VM_HOOKS = InitZygoteHooks();
-static const String TAG("Zygote");
+static const String TAG("CZygote");
 static const Boolean DEBUG = FALSE;
 
 Int32 Zygote::ForkAndSpecialize(
@@ -62,7 +62,7 @@ Int32 Zygote::ForkAndSpecialize(
     /* [in] */ Int32 gid,
     /* [in] */ ArrayOf<Int32>* gids,
     /* [in] */ Int32 debugFlags,
-    /* [in] */ ArrayOf<Int32*>* rlimits, //int[][] rlimits,
+    /* [in] */ ArrayOf< Int32Array >* rlimits, //int[][] rlimits,
     /* [in] */ Int32 mountExternal,
     /* [in] */ const String& seInfo,
     /* [in] */ const String& niceName,
@@ -102,7 +102,7 @@ Int32 Zygote::ForkSystemServer(
     /* [in] */ Int32 gid,
     /* [in] */ ArrayOf<Int32>* gids,
     /* [in] */ Int32 debugFlags,
-    /* [in] */ ArrayOf<Int32*>* rlimits, //int[][] rlimits,
+    /* [in] */ ArrayOf< Int32Array >* rlimits, //int[][] rlimits,
     /* [in] */ Int64 permittedCapabilities,
     /* [in] */ Int64 effectiveCapabilities)
 {
@@ -137,16 +137,17 @@ ECode Zygote::ExecShell(
 }
 
 void Zygote::AppendQuotedShellArgs(
-    /* [in] */ IStringBuilder* command,
-    /* [in] */ const ArrayOf<String>& args)
+    /* [in] */ StringBuilder* command,
+    /* [in] */ ArrayOf<String>* args)
 {
-    for (Int32 i = 0; i < args.GetLength(); i++) {
-        String arg = args[i];
-        command->Append(String(" '"));
-        String rarg;
-        StringUtils::ReplaceAll(rarg, "'", "'\\''", &rarg);
-        command->Append(rarg);
-        command->Append(String("'"));
+    if (args) {
+        for (Int32 i = 0; i < args->GetLength(); i++) {
+            command->Append(" '");
+            String rarg;
+            StringUtils::ReplaceAll((*args)[i], "'", "'\\''", &rarg);
+            command->Append(rarg);
+            command->Append("'");
+        }
     }
 }
 
@@ -263,7 +264,7 @@ static void SetGids(
 // contains a tuple of length 3: (resource, rlim_cur, rlim_max). NULL is
 // treated as an empty array.
 static void SetRLimits(
-    /* [in] */ ArrayOf<Int32*>* rlimits)
+    /* [in] */ ArrayOf< Int32Array >* rlimits)
 {
     if (rlimits == NULL) {
         return;
@@ -273,12 +274,13 @@ static void SetRLimits(
     memset(&rlim, 0, sizeof(rlim));
 
     for (int i = 0; i < rlimits->GetLength(); ++i) {
-        rlim.rlim_cur = (*rlimits)[i][1];
-        rlim.rlim_max = (*rlimits)[i][2];
+        Int32Array array = (*rlimits)[i];
+        rlim.rlim_cur = (*array)[1];
+        rlim.rlim_max = (*array)[2];
 
-        int rc = setrlimit((*rlimits)[i][0], &rlim);
+        int rc = setrlimit((*array)[0], &rlim);
         if (rc == -1) {
-            Logger::E(TAG, "setrlimit(%d, {%d, %d}) failed", (*rlimits)[i][0], rlim.rlim_cur, rlim.rlim_max);
+            Logger::E(TAG, "setrlimit(%d, {%d, %d}) failed", (*array)[0], rlim.rlim_cur, rlim.rlim_max);
         }
     }
 }
@@ -521,7 +523,7 @@ static pid_t ForkAndSpecializeCommon(
     /* [in] */ gid_t gid,
     /* [in] */ ArrayOf<Int32>* gids,
     /* [in] */ Int32 debugFlags,
-    /* [in] */ ArrayOf<Int32*>* rlimits, //int[][] rlimits,
+    /* [in] */ ArrayOf< Int32Array >* rlimits, //int[][] rlimits,
     /* [in] */ Int64 permittedCapabilities,
     /* [in] */ Int64 effectiveCapabilities,
     /* [in] */ Int32 mountExternal,
@@ -669,7 +671,7 @@ Int32 Zygote::NativeForkAndSpecialize(
     /* [in] */ Int32 gid,
     /* [in] */ ArrayOf<Int32>* gids,
     /* [in] */ Int32 debugFlags,
-    /* [in] */ ArrayOf<Int32*>* rlimits, //int[][] rlimits,
+    /* [in] */ ArrayOf< Int32Array >* rlimits, //int[][] rlimits,
     /* [in] */ Int32 mountExternal,
     /* [in] */ const String& seInfo,
     /* [in] */ const String& niceName,
@@ -692,7 +694,7 @@ Int32 Zygote::NativeForkSystemServer(
     /* [in] */ Int32 gid,
     /* [in] */ ArrayOf<Int32>* gids,
     /* [in] */ Int32 debugFlags,
-    /* [in] */ ArrayOf<Int32*>* rlimits, //int[][] rlimits,
+    /* [in] */ ArrayOf< Int32Array >* rlimits, //int[][] rlimits,
     /* [in] */ Int64 permittedCapabilities,
     /* [in] */ Int64 effectiveCapabilities)
 {
@@ -709,6 +711,7 @@ Int32 Zygote::NativeForkSystemServer(
         int status;
         if (waitpid(pid, &status, WNOHANG) == pid) {
             Logger::E(TAG, "System server process %d has died. Restarting Zygote!", pid);
+            // RuntimeAbort(env);
         }
     }
     return pid;

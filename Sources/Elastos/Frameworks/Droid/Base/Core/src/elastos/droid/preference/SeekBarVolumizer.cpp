@@ -383,7 +383,7 @@ ECode SeekBarVolumizer::StopSample()
 ECode SeekBarVolumizer::GetSeekBar(
     /* [out] */ ISeekBar** seekBar)
 {
-    VALIDATE_NOT_NULL(*seekBar)
+    VALIDATE_NOT_NULL(seekBar)
     *seekBar = mSeekBar;
     REFCOUNT_ADD(*seekBar);
     return NOERROR;

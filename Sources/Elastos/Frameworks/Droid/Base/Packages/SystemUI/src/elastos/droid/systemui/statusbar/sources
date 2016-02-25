@@ -1,0 +1,47 @@
+TARGET_NAME = statusbar
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES += CAlphaImageView.cpp
+SOURCES += CAlphaOptimizedView.cpp
+SOURCES += CAlphaOptimizedFrameLayout.cpp
+SOURCES += AnimatedImageView.cpp
+SOURCES += CAnimatedImageView.cpp
+SOURCES += BaseStatusBar.cpp
+SOURCES += CCommandQueue.cpp
+SOURCES += DelegateViewHelper.cpp
+SOURCES += NotificationData.cpp
+SOURCES += StatusBarIconView.cpp
+SOURCES += CStatusBarIconView.cpp
+SOURCES += SignalClusterView.cpp
+SOURCES += CSignalClusterView.cpp
+SOURCES += CBackDropView.cpp
+SOURCES += ExpandableView.cpp
+SOURCES += ExpandableOutlineView.cpp
+SOURCES += CNotificationBackgroundView.cpp
+SOURCES += ActivatableNotificationView.cpp
+SOURCES += CNotificationContentView.cpp
+SOURCES += StackScrollerDecorView.cpp
+SOURCES += CDismissView.cpp
+SOURCES += CDismissViewImageButton.cpp
+SOURCES += DragDownHelper.cpp
+SOURCES += CEmptyShadeView.cpp
+SOURCES += CExpandableNotificationRow.cpp
+SOURCES += FlingAnimationUtils.cpp
+SOURCES += GestureRecorder.cpp
+SOURCES += KeyguardIndicationController.cpp
+SOURCES += CKeyguardAffordanceView.cpp
+SOURCES += CNotificationOverflowContainer.cpp
+SOURCES += CScrimView.cpp
+SOURCES += CNotificationGuts.cpp
+SOURCES += CNotificationOverflowIconsView.cpp
+SOURCES += CSpeedBumpView.cpp
+SOURCES += ServiceMonitor.cpp
+SOURCES += CSystemBars.cpp
+
+ELASTOS_LIBS += policy/policy.lib
+ELASTOS_LIBS += phone/phone.lib
+#ELASTOS_LIBS += tablet/tablet.lib

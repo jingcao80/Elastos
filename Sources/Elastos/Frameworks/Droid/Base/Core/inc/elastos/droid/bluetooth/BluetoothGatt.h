@@ -6,9 +6,6 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/bluetooth/BluetoothGattCallbackWrapper.h"
 
-// import android.util.Log;
-// import java.util.ArrayList;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::IParcelUuid;
 using Elastos::Utility::IList;
@@ -34,13 +31,15 @@ class BluetoothGatt
     , public IBluetoothGatt
     , public IBluetoothProfile
 {
-private:
+public:
     class InnerBluetoothGattCallbackWrapper
         : public BluetoothGattCallbackWrapper
     {
     public:
-        InnerBluetoothGattCallbackWrapper(
-            /* [in] */ BluetoothGatt* owner);
+        InnerBluetoothGattCallbackWrapper();
+
+        CARAPI constructor(
+            /* [in] */ IBluetoothGatt* owner);
 
         /**
           * Application interface registered - app is ready to go
@@ -239,7 +238,7 @@ public:
 
     BluetoothGatt(
         /* [in] */ IContext* context,
-        /* [in] */ IBluetoothGatt* iGatt,
+        /* [in] */ IIBluetoothGatt* iGatt,
         /* [in] */ IBluetoothDevice* device,
         /* [in] */ Int32 transport);
 
@@ -288,7 +287,7 @@ public:
       */
     /*package*/
     CARAPI Connect(
-        /* [in] */ Boolean* autoConnect,
+        /* [in] */ Boolean autoConnect,
         /* [in] */ IBluetoothGattCallback* callback,
         /* [out] */ Boolean* result);
 
@@ -618,12 +617,31 @@ private:
       */
     CARAPI_(void) UnregisterApp();
 
+public:
+    /**
+       * No authentication required.
+       * @hide
+       */
+    /*package*/ static const Int32 AUTHENTICATION_NONE = 0;
+
+    /**
+      * Authentication requested; no man-in-the-middle protection required.
+      * @hide
+      */
+    /*package*/ static const Int32 AUTHENTICATION_NO_MITM = 1;
+
+    /**
+      * Authentication with man-in-the-middle protection requested.
+      * @hide
+    */
+    /*package*/ static const Int32 AUTHENTICATION_MITM = 2;
+
 private:
     static const String TAG;
     static const Boolean DBG;
     static const Boolean VDBG;
     AutoPtr<IContext> mContext;
-    AutoPtr<IBluetoothGatt> mService;
+    AutoPtr<IIBluetoothGatt> mService;
     AutoPtr<IBluetoothGattCallback> mCallback;
     Int32 mClientIf;
     Boolean mAuthRetry;
@@ -631,6 +649,7 @@ private:
     Boolean mAutoConnect;
     Int32 mConnState;
     AutoPtr<Object> mStateLock;
+    AutoPtr<Object> mDeviceBusyLock;
     Boolean mDeviceBusy;
     Int32 mTransport;
     static const Int32 CONN_STATE_IDLE = 0;
@@ -642,7 +661,7 @@ private:
     /**
       * Bluetooth GATT callbacks. Overrides the default BluetoothGattCallback implementation.
       */
-    AutoPtr<IBluetoothGattCallback> mBluetoothGattCallback;
+    AutoPtr<IIBluetoothGattCallback> mBluetoothGattCallback;
 };
 
 } // namespace Bluetooth

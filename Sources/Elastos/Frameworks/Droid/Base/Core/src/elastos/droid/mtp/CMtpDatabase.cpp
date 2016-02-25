@@ -420,7 +420,7 @@ MtpResponseCode MyMtpDatabase::setObjectPropertyValue(
     Int64 longValue = 0;
     String stringValue;
 
-//    TODO:
+    // TODO:
 //    switch (type) {
 //        case MTP_TYPE_INT8:
 //            longValue = packet.getInt8();
@@ -545,7 +545,7 @@ MtpResponseCode MyMtpDatabase::setDevicePropertyValue(
     Int64 longValue = 0;
     String stringValue;
 
-//    TODO:
+    // TODO:
 //    switch (type) {
 //        case MTP_TYPE_INT8:
 //            longValue = packet.getInt8();

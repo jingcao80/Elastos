@@ -4,15 +4,16 @@
 #include "Elastos.Droid.Database.h"
 #include "Elastos.Droid.Net.h"
 #include "elastos/droid/content/ContentProvider.h"
-//#include "elastos/droid/content/CContentProviderTransport.h"
-//#include "elastos/droid/content/CClipDescriptionHelper.h"
-//#include "elastos/droid/content/CContentResolverHelper.h"
-//#include "elastos/droid/content/res/CAssetFileDescriptor.h"
+#include "elastos/droid/content/CContentProviderTransport.h"
+#include "elastos/droid/content/CClipDescriptionHelper.h"
+#include "elastos/droid/content/CContentResolverHelper.h"
+#include "elastos/droid/content/res/CAssetFileDescriptor.h"
 #include "elastos/droid/os/CParcelFileDescriptorHelper.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/ParcelFileDescriptor.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/Manifest.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringUtils.h>
@@ -20,7 +21,7 @@
 
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Pm::IComponentInfo;
-//using Elastos::Droid::Content::Res::CAssetFileDescriptor;
+using Elastos::Droid::Content::Res::CAssetFileDescriptor;
 using Elastos::Droid::Os::IParcelFileDescriptorHelper;
 using Elastos::Droid::Os::CParcelFileDescriptorHelper;
 using Elastos::Droid::Os::Process;
@@ -31,6 +32,7 @@ using Elastos::Droid::Os::ParcelFileDescriptor;
 using Elastos::Droid::Os::IPatternMatcher;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::IUriBuilder;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ICharSequence;
@@ -150,10 +152,7 @@ ContentProvider::~ContentProvider()
 
 ECode ContentProvider::constructor()
 {
-    assert(0 && "TODO");
-    return NOERROR;
-    // ASSERT_SUCCEEDED(CContentProviderTransport::New(
-    //         (Handle32)this, (IContentProviderTransport**)&mTransport));
+    return CContentProviderTransport::New(this, (IContentProviderTransport**)&mTransport);
 }
 
 ECode ContentProvider::constructor(
@@ -166,10 +165,7 @@ ECode ContentProvider::constructor(
     mReadPermission = readPermission;
     mWritePermission = writePermission;
     mPathPermissions = pathPermissions;
-    assert(0 && "TODO");
-    // return CContentProviderTransport::New(
-    //         (Handle32)this, (IContentProviderTransport**)&mTransport);
-    return NOERROR;
+    return CContentProviderTransport::New(this, (IContentProviderTransport**)&mTransport);
 }
 
 ECode ContentProvider::ToString(
@@ -414,9 +410,8 @@ ECode ContentProvider::GetCallingPackage(
 
     String pkg = GetTlsCallingPackage();
     if (!pkg.IsNull()) {
-        assert(0 && "TODO");
-        // CContentProviderTransport* cpt = (CContentProviderTransport*)mTransport.Get();
-        // FAIL_RETURN(cpt->mAppOpsManager->CheckPackage(Binder::GetCallingUid(), pkg));
+        CContentProviderTransport* cpt = (CContentProviderTransport*)IContentProviderTransport::Probe(mTransport);
+        FAIL_RETURN(cpt->mAppOpsManager->CheckPackage(Binder::GetCallingUid(), pkg));
     }
     *callingPackage = pkg;
     return NOERROR;
@@ -506,10 +501,9 @@ ECode ContentProvider::SetAppOps(
     /* [in] */ Int32 writeOp)
 {
     if (!mNoPerms) {
-        assert(0 && "TODO");
-        // CContentProviderTransport* cpt = (CContentProviderTransport*)mTransport.Get();
-        // cpt->mReadOp = readOp;
-        // cpt->mWriteOp = writeOp;
+        CContentProviderTransport* cpt = (CContentProviderTransport*)IContentProviderTransport::Probe(mTransport);
+        cpt->mReadOp = readOp;
+        cpt->mWriteOp = writeOp;
     }
 
     return NOERROR;
@@ -519,9 +513,8 @@ ECode ContentProvider::GetAppOpsManager(
     /* [out] */ IAppOpsManager** mgr)
 {
     VALIDATE_NOT_NULL(mgr)
-    assert(0 && "TODO");
-    // CContentProviderTransport* cpt = (CContentProviderTransport*)mTransport.Get();
-    // *mgr = cpt->mAppOpsManager;
+    CContentProviderTransport* cpt = (CContentProviderTransport*)IContentProviderTransport::Probe(mTransport);
+    *mgr = cpt->mAppOpsManager;
     REFCOUNT_ADD(*mgr)
     return NOERROR;
 }
@@ -661,9 +654,8 @@ ECode ContentProvider::OpenAssetFile(
 
     AutoPtr<IParcelFileDescriptor> fd;
     FAIL_RETURN(OpenFile(uri, mode, (IParcelFileDescriptor**)&fd));
-    assert(0 && "TODO");
     if (NULL != fd) {
-        // return CAssetFileDescriptor::New(fd, 0, -1, fileDescriptor);
+        return CAssetFileDescriptor::New(fd, 0, -1, fileDescriptor);
     }
     return NOERROR;
 }
@@ -761,8 +753,7 @@ ECode ContentProvider::OpenTypedAssetFile(
     GetType(uri, &baseType);
     if (!baseType.IsNull()) {
         AutoPtr<IClipDescriptionHelper> descriptionHelper;
-        assert(0 && "TODO");
-        // CClipDescriptionHelper::AcquireSingleton((IClipDescriptionHelper**)&descriptionHelper);
+        CClipDescriptionHelper::AcquireSingleton((IClipDescriptionHelper**)&descriptionHelper);
         Boolean result = FALSE;
         descriptionHelper->CompareMimeTypes(baseType, mimeTypeFilter, &result);
         // Use old untyped open call if this provider has a type for this
@@ -869,9 +860,8 @@ ECode ContentProvider::AttachInfo(
         if (context != NULL) {
             AutoPtr<IInterface> obj;
             context->GetSystemService(IContext::APP_OPS_SERVICE, (IInterface**)&obj);
-            assert(0 && "TODO");
-            // CContentProviderTransport* cpt = (CContentProviderTransport*)mTransport.Get();
-            // cpt->mAppOpsManager = IAppOpsManager::Probe(obj);
+            CContentProviderTransport* cpt = (CContentProviderTransport*)IContentProviderTransport::Probe(mTransport);
+            cpt->mAppOpsManager = IAppOpsManager::Probe(obj);
         }
 
         mMyUid = Process::MyUid();
@@ -1044,9 +1034,7 @@ Boolean ContentProvider::UriHasUserId(
     if (uri == NULL) return FALSE;
     String userInfo;
     uri->GetUserInfo(&userInfo);
-    assert(0 && "TODO");
-    // return !TextUtils::IsEmpty(userInfo);
-    return TRUE;
+    return !TextUtils::IsEmpty(userInfo);
 }
 
 AutoPtr<IUri> ContentProvider::MaybeAddUserId(

@@ -1,5 +1,3 @@
-
-#include "elastos/core/Object.h"
 #include "libcore/net/event/NetworkEventDispatcher.h"
 #include "libcore/net/event/CNetworkEventDispatcherHelper.h"
 

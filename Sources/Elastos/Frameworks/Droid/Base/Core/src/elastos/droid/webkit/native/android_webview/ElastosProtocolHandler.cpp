@@ -6,7 +6,7 @@
 #include "Elastos.Droid.Net.h"
 #include "elastos/droid/webkit/native/android_webview/ElastosProtocolHandler.h"
 #include "elastos/droid/webkit/native/android_webview/api/ElastosProtocolHandler_dec.h"
-//TODO #include "elastos/droid/net/CUriHelper.h"
+#include "elastos/droid/net/CUriHelper.h"
 #include "elastos/droid/utility/CTypedValue.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -15,12 +15,12 @@ using Elastos::Droid::Content::Res::IAssetManager;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Net::IUriHelper;
-//TODO using Elastos::Droid::Net::CUriHelper;
+using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Net::IURLConnection;
 using Elastos::Net::IURLConnectionHelper;
-//TODO using Elastos::Net::CURLConnectionHelper;
+//TODO: using Elastos::Net::CURLConnectionHelper;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IList;
@@ -260,7 +260,7 @@ String ElastosProtocolHandler::GetMimeType(
         else if (scheme.Equals(FILE_SCHEME) &&
                    path.StartWith(NativeGetAndroidAssetPath())) {
             AutoPtr<IURLConnectionHelper> helper;
-            //TODO CURLConnectionHelper::AcquireSingleton((IURLConnectionHelper**)&helper);
+            //TODO: CURLConnectionHelper::AcquireSingleton((IURLConnectionHelper**)&helper);
             String mimeType;
             helper->GuessContentTypeFromName(path, &mimeType);
             if (!mimeType.IsNull()) {
@@ -274,7 +274,7 @@ String ElastosProtocolHandler::GetMimeType(
     // Fall back to sniffing the type from the stream.
     //try {
         AutoPtr<IURLConnectionHelper> helper;
-        //TODO CURLConnectionHelper::AcquireSingleton((IURLConnectionHelper**)&helper);
+        //TODO: CURLConnectionHelper::AcquireSingleton((IURLConnectionHelper**)&helper);
 
         String type;
         helper->GuessContentTypeFromStream(stream, &type);
@@ -296,7 +296,7 @@ AutoPtr<IUri> ElastosProtocolHandler::VerifyUrl(
     }
 
     AutoPtr<IUriHelper> helper;
-    //TODO CUriHelper::AcquireSingleton((IUriHelper**)&helper);
+    CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     AutoPtr<IUri> uri;
     helper->Parse(url, (IUri**)&uri);
     if (uri == NULL) {

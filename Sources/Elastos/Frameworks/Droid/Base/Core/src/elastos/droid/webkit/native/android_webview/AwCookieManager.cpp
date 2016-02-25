@@ -33,8 +33,7 @@ AwCookieManager::CookieCallback::InnerRunnable::InnerRunnable(
 
 ECode AwCookieManager::CookieCallback::InnerRunnable::Run()
 {
-    //TODO return mOwner->mCallback->OnReceiveValue(mT);
-    return NOERROR;//TODO remove this
+    return mOwner->mCallback->OnReceiveValue(mT);
 }
 
 //===============================================================
@@ -42,7 +41,7 @@ ECode AwCookieManager::CookieCallback::InnerRunnable::Run()
 //===============================================================
 
 AwCookieManager::CookieCallback::CookieCallback(
-    /* [in] */ /*TODO IValueCallback*/IInterface* callback,
+    /* [in] */ IValueCallback* callback,
     /* [in] */ IHandler* handler)
     : mCallback(callback)
     , mHandler(handler)
@@ -50,7 +49,7 @@ AwCookieManager::CookieCallback::CookieCallback(
 }
 
 ECode AwCookieManager::CookieCallback::Convert(
-    /* [in] */ /*TODO IValueCallback*/IInterface* callback,
+    /* [in] */ IValueCallback* callback,
     /* [out] */ CookieCallback** cookieCallback)
 {
     VALIDATE_NOT_NULL(cookieCallback);
@@ -168,7 +167,7 @@ void AwCookieManager::RemoveAllCookies()
 ECode AwCookieManager::SetCookie(
     /* [in] */ const String& url,
     /* [in] */ const String& value,
-    /* [in] */ /*TODO IValueCallback*/IInterface* callback)
+    /* [in] */ IValueCallback* callback)
 {
     //try {
     AutoPtr<CookieCallback> cookieCallback;
@@ -215,7 +214,7 @@ String AwCookieManager::GetCookie(
  * @param callback A callback called after the cookies (if any) are removed.
  */
 ECode AwCookieManager::RemoveSessionCookies(
-    /* [in] */ /*TODO IValueCallback*/IInterface* callback)
+    /* [in] */ IValueCallback* callback)
 {
     //try {
     AutoPtr<CookieCallback> cookieCallback;
@@ -239,7 +238,7 @@ ECode AwCookieManager::RemoveSessionCookies(
  * @param callback A callback called after the cookies (if any) are removed.
  */
 ECode AwCookieManager::RemoveAllCookies(
-    /* [in] */ /*TODO IValueCallback*/IInterface* callback)
+    /* [in] */ IValueCallback* callback)
 {
     //try {
     AutoPtr<CookieCallback> cookieCallback;

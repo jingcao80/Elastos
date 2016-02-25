@@ -7,11 +7,9 @@
 #include "elastos/droid/webkit/native/media/UsbMidiDeviceElastos.h"
 
 #include "elastos/droid/content/CIntentFilter.h"
-//TODO #include "elastos/droid/app/CPendingIntentHelper.h"
+#include "elastos/droid/app/CPendingIntentHelper.h"
 #include "elastos/droid/content/CIntent.h"
 
-//TODO #include <elastos/utility/CHashSet.h>
-//TODO #include <elastos/utility/CArrayList.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::IBroadcastReceiver;
@@ -20,15 +18,15 @@ using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::App::IPendingIntentHelper;
-//TODO using Elastos::Droid::App::CPendingIntentHelper;
+using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::Hardware::Usb::IUsbConstants;
 using Elastos::Droid::Hardware::Usb::IUsbDevice;
 using Elastos::Droid::Hardware::Usb::IUsbInterface;
 using Elastos::Droid::Hardware::Usb::IUsbManager;
 
 using Elastos::Utility::IMap;
-//TODO using Elastos::Utility::CHashSet;
-//TODO using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::Logging::Logger;
@@ -78,7 +76,7 @@ UsbMidiDeviceFactoryElastos::UsbMidiDeviceFactoryElastos(
     /* [in] */ Int64 nativePointer)
     : mNativePointer(nativePointer)
 {
-    //TODO CArrayList::New((IList**)&mDevices);
+    CArrayList::New((IList**)&mDevices);
 }
 
 /**
@@ -112,7 +110,7 @@ Boolean UsbMidiDeviceFactoryElastos::EnumerateDevices(
     AutoPtr<IMap> devices;
     mUsbManager->GetDeviceList((IMap**)&devices);
     AutoPtr<IPendingIntentHelper> piHelper;
-    //TODO CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&piHelper);
+    CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&piHelper);
     //PendingIntent pendingIntent = PendingIntent.getBroadcast(
     //        context, 0, new Intent(ACTION_USB_PERMISSION), 0);
     AutoPtr<IPendingIntent> pendingIntent;
@@ -120,7 +118,7 @@ Boolean UsbMidiDeviceFactoryElastos::EnumerateDevices(
     CIntent::New(ACTION_USB_PERMISSION, (IIntent**)&intent);
     piHelper->GetBroadcast(context, 0, intent, 0, (IPendingIntent**)&pendingIntent);
     //mRequestedDevices = new HashSet<UsbDevice>();
-    //TODO CHashSet::New((ISet**)&mRequestedDevices);
+    CHashSet::New((ISet**)&mRequestedDevices);
     //for (UsbDevice device : devices.values())
     AutoPtr<ICollection> devicesValues;
     devices->GetValues((ICollection**)&devicesValues);

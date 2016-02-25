@@ -1,5 +1,9 @@
 
 #include "elastos/droid/bluetooth/BluetoothActivityEnergyInfo.h"
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::ISystem;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -14,58 +18,59 @@ BluetoothActivityEnergyInfo::BluetoothActivityEnergyInfo()
 {
 }
 
-BluetoothActivityEnergyInfo::BluetoothActivityEnergyInfo(
+ECode BluetoothActivityEnergyInfo::constructor(
     /* [in] */ Int32 stackState,
     /* [in] */ Int32 txTime,
     /* [in] */ Int32 rxTime,
     /* [in] */ Int32 idleTime,
     /* [in] */ Int32 energyUsed)
 {
-    // ==================before translated======================
-    // mBluetoothStackState = stackState;
-    // mControllerTxTimeMs = txTime;
-    // mControllerRxTimeMs = rxTime;
-    // mControllerIdleTimeMs = idleTime;
-    // mControllerEnergyUsed = energyUsed;
-    // timestamp = System.currentTimeMillis();
+    mBluetoothStackState = stackState;
+    mControllerTxTimeMs = txTime;
+    mControllerRxTimeMs = rxTime;
+    mControllerIdleTimeMs = idleTime;
+    mControllerEnergyUsed = energyUsed;
+
+    AutoPtr<ISystem> system;
+    Elastos::Core::CSystem::AcquireSingleton((ISystem**)&system);
+    system->GetCurrentTimeMillis(&timestamp);
+    return NOERROR;
 }
 
 ECode BluetoothActivityEnergyInfo::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return "BluetoothActivityEnergyInfo{"
-    //     + " timestamp=" + timestamp
-    //     + " mBluetoothStackState=" + mBluetoothStackState
-    //     + " mControllerTxTimeMs=" + mControllerTxTimeMs
-    //     + " mControllerRxTimeMs=" + mControllerRxTimeMs
-    //     + " mControllerIdleTimeMs=" + mControllerIdleTimeMs
-    //     + " mControllerEnergyUsed=" + mControllerEnergyUsed
-    //     + " }";
-    assert(0);
+    *result = String("BluetoothActivityEnergyInfo{")
+        + String(" timestamp=") + StringUtils::ToString(timestamp)
+        + String(" mBluetoothStackState=") + StringUtils::ToString(mBluetoothStackState)
+        + String(" mControllerTxTimeMs=") + StringUtils::ToString(mControllerTxTimeMs)
+        + String(" mControllerRxTimeMs=") + StringUtils::ToString(mControllerRxTimeMs)
+        + String(" mControllerIdleTimeMs=") + StringUtils::ToString(mControllerIdleTimeMs)
+        + String(" mControllerEnergyUsed=") + StringUtils::ToString(mControllerEnergyUsed)
+        + String(" }");
     return NOERROR;
 }
 
 ECode BluetoothActivityEnergyInfo::WriteToParcel(
-    /* [in] */ IParcel* out,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* out)
 {
-    VALIDATE_NOT_NULL(out);
-    // ==================before translated======================
-    // out.writeInt(mBluetoothStackState);
-    // out.writeInt(mControllerTxTimeMs);
-    // out.writeInt(mControllerRxTimeMs);
-    // out.writeInt(mControllerIdleTimeMs);
-    // out.writeInt(mControllerEnergyUsed);
-    assert(0);
+    out->WriteInt32(mBluetoothStackState);
+    out->WriteInt32(mControllerTxTimeMs);
+    out->WriteInt32(mControllerRxTimeMs);
+    out->WriteInt32(mControllerIdleTimeMs);
+    out->WriteInt32(mControllerEnergyUsed);
     return NOERROR;
 }
 
 ECode BluetoothActivityEnergyInfo::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    assert(0);
+    source->ReadInt32(&mBluetoothStackState);
+    source->ReadInt32(&mControllerTxTimeMs);
+    source->ReadInt32(&mControllerRxTimeMs);
+    source->ReadInt32(&mControllerIdleTimeMs);
+    source->ReadInt32(&mControllerEnergyUsed);
     return NOERROR;
 }
 
@@ -73,9 +78,7 @@ ECode BluetoothActivityEnergyInfo::GetBluetoothStackState(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mBluetoothStackState;
-    assert(0);
+    *result = mBluetoothStackState;
     return NOERROR;
 }
 
@@ -83,9 +86,7 @@ ECode BluetoothActivityEnergyInfo::GetControllerTxTimeMillis(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mControllerTxTimeMs;
-    assert(0);
+    *result = mControllerTxTimeMs;
     return NOERROR;
 }
 
@@ -93,9 +94,7 @@ ECode BluetoothActivityEnergyInfo::GetControllerRxTimeMillis(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mControllerRxTimeMs;
-    assert(0);
+    *result = mControllerRxTimeMs;
     return NOERROR;
 }
 
@@ -103,9 +102,7 @@ ECode BluetoothActivityEnergyInfo::GetControllerIdleTimeMillis(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mControllerIdleTimeMs;
-    assert(0);
+    *result = mControllerIdleTimeMs;
     return NOERROR;
 }
 
@@ -113,9 +110,7 @@ ECode BluetoothActivityEnergyInfo::GetControllerEnergyUsed(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mControllerEnergyUsed;
-    assert(0);
+    *result = mControllerEnergyUsed;
     return NOERROR;
 }
 
@@ -123,9 +118,7 @@ ECode BluetoothActivityEnergyInfo::GetTimeStamp(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return timestamp;
-    assert(0);
+    *result = timestamp;
     return NOERROR;
 }
 
@@ -133,11 +126,12 @@ ECode BluetoothActivityEnergyInfo::IsValid(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return ((getControllerTxTimeMillis() !=0) ||
-    //         (getControllerRxTimeMillis() !=0) ||
-    //         (getControllerIdleTimeMillis() !=0));
-    assert(0);
+    Int32 txTimeMillis;
+    Int32 rxTimeMillis;
+    Int32 idleTimeMillis;
+    *result = (((GetControllerTxTimeMillis(&txTimeMillis), txTimeMillis) !=0) ||
+            ((GetControllerRxTimeMillis(&rxTimeMillis), rxTimeMillis) !=0) ||
+            ((GetControllerIdleTimeMillis(&idleTimeMillis), idleTimeMillis) !=0));
     return NOERROR;
 }
 

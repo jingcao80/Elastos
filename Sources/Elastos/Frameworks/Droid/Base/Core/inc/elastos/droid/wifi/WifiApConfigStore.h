@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_NET_WIFI_WIFIAPCONFIGSTORE_H__
-#define  __ELASTOS_DROID_NET_WIFI_WIFIAPCONFIGSTORE_H__
+#define __ELASTOS_DROID_NET_WIFI_WIFIAPCONFIGSTORE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/utility/AsyncChannel.h"

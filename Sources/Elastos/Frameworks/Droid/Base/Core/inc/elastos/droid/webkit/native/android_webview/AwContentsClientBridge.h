@@ -1,11 +1,13 @@
 #ifndef __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWCONTENTSCLIENTBRIDGE_H__
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWCONTENTSCLIENTBRIDGE_H__
+
 #include "elastos/droid/ext/frameworkext.h"
+#include <Elastos.Droid.Webkit.h>
 #include "elastos/droid/webkit/native/net/ElastosPrivateKey.h"
 #include "elastos/droid/webkit/native/net/DefaultElastosKeyStore.h"
 #include "elastos/droid/webkit/native/android_webview/ClientCertLookupTable.h"
 
-//TODO using Elastos::Droid::Webkit::IValueCallback;
+using Elastos::Droid::Webkit::IValueCallback;
 using Elastos::Droid::Webkit::Net::ElastosPrivateKey;
 using Elastos::Droid::Webkit::Net::DefaultElastosKeyStore;
 using Elastos::Core::IRunnable;
@@ -136,10 +138,11 @@ public:
 private:
     class InnerValueCallback
         : public Object
-        //TODO , public IValueCallback
+        , public IValueCallback
     {
     public:
-        //TODO CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL();
+
     private:
         class InnerRunnable
             : public Object

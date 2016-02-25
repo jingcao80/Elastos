@@ -3,8 +3,9 @@
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/bluetooth/BluetoothA2dp.h"
 #include "elastos/droid/bluetooth/CBluetoothA2dpStateChangeCallback.h"
-//#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
+#include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/droid/bluetooth/BluetoothUuid.h"
+#include "elastos/droid/os/Process.h"
 #include "elastos/core/AutoLock.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/logging/Logger.h>
@@ -13,8 +14,11 @@ using Elastos::Droid::Content::EIID_IServiceConnection;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Os::IParcelUuid;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::Process;
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -79,28 +83,30 @@ BluetoothA2dp::BluetoothA2dp(
     CBluetoothA2dpStateChangeCallback::New(TO_IINTERFACE(this), (IIBluetoothStateChangeCallback**)&mBluetoothStateChangeCallback);
     mConnection = new ServiceConnection(this);
 
-    //TODO mAdapter = CBluetoothAdapter::GetDefaultAdapter();
-    if (mAdapter != NULL) {
-        AutoPtr<IIBluetoothManager> mgr;
-        //TODO mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
-        if (mgr != NULL) {
-            // try {
-            ECode ec = mgr->RegisterStateChangeCallback(mBluetoothStateChangeCallback);
-            if (FAILED(ec)) {
-                Logger::E(TAG, "0x%08x", ec);
-            }
-            // } catch (RemoteException e) {
-            //     Log.e(TAG,"",e);
-            // }
+    mAdapter = CBluetoothAdapter::GetDefaultAdapter();
+    //if (mAdapter != NULL) {
+    AutoPtr<IIBluetoothManager> mgr;
+    mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
+    if (mgr != NULL) {
+        // try {
+        ECode ec = mgr->RegisterStateChangeCallback(mBluetoothStateChangeCallback);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "0x%08x", ec);
         }
+        // } catch (RemoteException e) {
+        //     Log.e(TAG,"",e);
+        // }
     }
+    //}
 
-    AutoPtr<IIntent> intent;
-    CIntent::New(String("IBluetoothA2dp")/*IBluetoothA2dp.class.getName()*/, (IIntent**)&intent);
-    Boolean result;
-    if (context->BindService(intent, mConnection, 0, &result), !result) {
-        Logger::E(TAG, "Could not bind to Bluetooth A2DP Service");
-    }
+    //AutoPtr<IIntent> intent;
+    //CIntent::New(String("IBluetoothA2dp")/*IBluetoothA2dp.class.getName()*/, (IIntent**)&intent);
+    //Boolean result;
+    //if (context->BindService(intent, mConnection, 0, &result), !result) {
+    //    Logger::E(TAG, "Could not bind to Bluetooth A2DP Service");
+    //}
+    Boolean bindResult;
+    DoBind(&bindResult);
 }
 
 BluetoothA2dp::~BluetoothA2dp()
@@ -111,26 +117,43 @@ BluetoothA2dp::~BluetoothA2dp()
 ECode BluetoothA2dp::DoBind(
     /* [out] */ Boolean* result)
 {
-    //TODO
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+    AutoPtr<IIntent> intent;
+    CIntent::New(String("IBluetoothA2dp")/*IBluetoothA2dp.class.getName()*/, (IIntent**)&intent);
+    AutoPtr<IComponentName> comp;
+    AutoPtr<IPackageManager> pm;
+    mContext->GetPackageManager((IPackageManager**)&pm);
+    intent->ResolveSystemService(pm, 0, (IComponentName**)&comp);
+    intent->SetComponent(comp);
+    AutoPtr<IUserHandle> userHandle;
+    Process::MyUserHandle((IUserHandle**)&userHandle);
+    Boolean succeeded = FALSE;
+    if (comp == NULL || !(mContext->BindServiceAsUser(intent, mConnection, 0,
+                userHandle, &succeeded), succeeded)) {
+        Logger::E(TAG, "Could not bind to Bluetooth A2DP Service with xxx");// + intent);
+        *result = FALSE;
+        return NOERROR;
+    }
+    *result = TRUE;
     return NOERROR;
 }
+
 ECode BluetoothA2dp::Close()
 {
     mServiceListener = NULL;
 
-    if (mAdapter != NULL) {
-        AutoPtr<IIBluetoothManager> mgr;
-        //TODO mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
-        if (mgr != NULL) {
-            // try {
-            ECode ec = mgr->UnregisterStateChangeCallback(mBluetoothStateChangeCallback);
-            if (FAILED(ec)) {
-                Logger::E(TAG, "0x%08x", ec);
-            }
-            // } catch (Exception e) {
-            //     Log.e(TAG,"",e);
-            // }
+    AutoPtr<IIBluetoothManager> mgr;
+    mgr = ((CBluetoothAdapter*)mAdapter.Get())->GetBluetoothManager();
+    if (mgr != NULL) {
+        // try {
+        ECode ec = mgr->UnregisterStateChangeCallback(mBluetoothStateChangeCallback);
+        if (FAILED(ec)) {
+            Logger::E(TAG, "0x%08x", ec);
         }
+        // } catch (Exception e) {
+        //     Log.e(TAG,"",e);
+        // }
     }
 
     AutoLock lock(mConnectionLock);
@@ -208,8 +231,7 @@ ECode BluetoothA2dp::GetConnectedDevices(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
-    REFCOUNT_ADD(*devices);
+    CArrayList::New(devices);
     return NOERROR;
 }
 
@@ -228,8 +250,7 @@ ECode BluetoothA2dp::GetDevicesMatchingConnectionStates(
         // }
     }
     if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
-    //TODO *devices = ArrayOf<IBluetoothDevice*>::Alloc(0);
-    REFCOUNT_ADD(*devices);
+    CArrayList::New(devices);
     return NOERROR;
 }
 
@@ -312,21 +333,60 @@ ECode BluetoothA2dp::GetPriority(
 ECode BluetoothA2dp::IsAvrcpAbsoluteVolumeSupported(
     /* [out] */ Boolean* isSupported)
 {
-    //TODO
+    VALIDATE_NOT_NULL(isSupported);
+    if (DBG) Logger::D(TAG, "isAvrcpAbsoluteVolumeSupported");
+    if (mService != NULL && IsEnabled()) {
+        //try {
+        ECode ec = mService->IsAvrcpAbsoluteVolumeSupported(isSupported);
+        //} catch (RemoteException e) {
+        if(FAILED(ec)) {
+            Logger::E(TAG, "Error talking to BT service in isAvrcpAbsoluteVolumeSupported()");//, e;
+            *isSupported = FALSE;
+        } else {
+            return NOERROR;
+        }
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
+    *isSupported = FALSE;
     return NOERROR;
 }
 
 ECode BluetoothA2dp::AdjustAvrcpAbsoluteVolume(
     /* [in] */ Int32 direction)
 {
-    //TODO
+    if (DBG) Logger::D(TAG, "adjustAvrcpAbsoluteVolume");
+    if (mService != NULL && IsEnabled()) {
+        //try {
+        ECode ec = mService->AdjustAvrcpAbsoluteVolume(direction);
+        //} catch (RemoteException e) {
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Error talking to BT service in adjustAvrcpAbsoluteVolume()");//, e;
+            return NOERROR;
+        } else {
+            return NOERROR;
+        }
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
     return NOERROR;
 }
 
 ECode BluetoothA2dp::SetAvrcpAbsoluteVolume(
     /* [in] */ Int32 volume)
 {
-    //TODO
+    if (DBG) Logger::D(TAG, "setAvrcpAbsoluteVolume");
+    if (mService != NULL && IsEnabled()) {
+        //try {
+        ECode ec = mService->SetAvrcpAbsoluteVolume(volume);
+        //} catch (RemoteException e) {
+        if (FAILED(ec)) {
+            Logger::E(TAG, "Error talking to BT service in setAvrcpAbsoluteVolume()");//, e;
+            return NOERROR;
+        }
+        //}
+    }
+    if (mService == NULL) Logger::W(TAG, "Proxy not attached to service");
     return NOERROR;
 }
 
@@ -401,11 +461,9 @@ String BluetoothA2dp::StateToString(
 
 Boolean BluetoothA2dp::IsEnabled()
 {
-    if(mAdapter != NULL) {
-        Int32 state;
-        if (mAdapter->GetState(&state), state == IBluetoothAdapter::STATE_ON) {
-           return TRUE;
-        }
+    Int32 state;
+    if (mAdapter->GetState(&state), state == IBluetoothAdapter::STATE_ON) {
+       return TRUE;
     }
     return FALSE;
 }
@@ -416,7 +474,7 @@ Boolean BluetoothA2dp::IsValidDevice(
     if (device == NULL) return FALSE;
     String address;
     device->GetAddress(&address);
-    //TODO if (CBluetoothAdapter::CheckBluetoothAddress(address)) return TRUE;
+    if (CBluetoothAdapter::CheckBluetoothAddress(address)) return TRUE;
     return FALSE;
 }
 

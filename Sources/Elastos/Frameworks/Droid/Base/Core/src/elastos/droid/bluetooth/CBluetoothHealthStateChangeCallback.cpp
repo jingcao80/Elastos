@@ -43,16 +43,18 @@ ECode CBluetoothHealthStateChangeCallback::OnBluetoothStateChange(
         // try {
         if (mHost->mService == NULL) {
             if (BluetoothHealth::VDBG) Logger::D(BluetoothHealth::TAG, "Binding service...");
-            AutoPtr<IIntent> intent;
-            CIntent::New(String("IBluetoothHealth")/*IBluetoothHealth.class.getName()*/, (IIntent**)&intent);
-            Boolean result;
-            ECode ec = mHost->mContext->BindService(intent, mHost->mConnection, 0, &result);
-            if (FAILED(ec)) {
-                Logger::E(BluetoothHealth::TAG, "0x%08x", ec);
-            }
-            else if (!result) {
-                Logger::E(BluetoothHealth::TAG, "Could not bind to Bluetooth Headset Service");
-            }
+            //AutoPtr<IIntent> intent;
+            //CIntent::New(String("IBluetoothHealth")/*IBluetoothHealth.class.getName()*/, (IIntent**)&intent);
+            //Boolean result;
+            //ECode ec = mHost->mContext->BindService(intent, mHost->mConnection, 0, &result);
+            //if (FAILED(ec)) {
+            //    Logger::E(BluetoothHealth::TAG, "0x%08x", ec);
+            //}
+            //else if (!result) {
+            //    Logger::E(BluetoothHealth::TAG, "Could not bind to Bluetooth Headset Service");
+            //}
+            Boolean bind;
+            mHost->DoBind(&bind);
         }
         // } catch (Exception re) {
         //     Log.e(TAG,"",re);

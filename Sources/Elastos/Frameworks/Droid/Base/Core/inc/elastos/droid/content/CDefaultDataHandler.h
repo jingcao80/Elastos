@@ -5,6 +5,7 @@
 #include "Elastos.Droid.Net.h"
 #define HASH_FOR_NET
 #include "elastos/droid/ext/frameworkhash.h"
+#include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_Content_CDefaultDataHandler.h"
 #include <elastos/core/Object.h>
 #include <elastos/utility/etl/Stack.h>
@@ -145,7 +146,7 @@ private:
     static const String ARG;
 
 private:
-    Stack< AutoPtr<IUri> > mUris;
+    Stack< AutoPtr<IUri> > mUris; // assert(0 && "TODO"); using AutoPtr<IStack>
     AutoPtr<IContentValues> mValues;
     AutoPtr<IContentResolver> mContentResolver;
 };

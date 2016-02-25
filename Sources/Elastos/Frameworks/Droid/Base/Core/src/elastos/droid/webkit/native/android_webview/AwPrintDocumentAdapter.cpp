@@ -3,6 +3,7 @@
 //TODO using Elastos::Droid::Print::IPrintDocumentInfo;
 //TODO using Elastos::Droid::Print::IPrintDocumentInfoBuilder;
 //TODO using Elastos::Droid::Print::CPrintDocumentInfoBuilder;
+using Elastos::Droid::Webkit::EIID_IValueCallback;
 using Elastos::Core::IBoolean;
 using Elastos::Core::CBoolean;
 
@@ -14,7 +15,7 @@ namespace AndroidWebview {
 //===============================================================
 //          AwPrintDocumentAdapter::InnerValueCallback
 //===============================================================
-//TODO CAR_INTERFACE_IMPL(AwPrintDocumentAdapter::InnerValueCallback, Object, IValueCallback);
+CAR_INTERFACE_IMPL(AwPrintDocumentAdapter::InnerValueCallback, Object, IValueCallback);
 
 AwPrintDocumentAdapter::InnerValueCallback::InnerValueCallback(
     /* [in] */ AwPrintDocumentAdapter* owner,
@@ -103,7 +104,7 @@ void AwPrintDocumentAdapter::OnWrite(
     /* [in] */ ICancellationSignal* cancellationSignal,
     /* [in] */ /*TODO IWriteResultCallback*/IInterface* callback)
 {
-    AutoPtr</*TODO IValueCallback*/IInterface> valueCallback;//TODO = new InnerValueCallback(this, callback);
+    AutoPtr<IValueCallback> valueCallback = new InnerValueCallback(this, callback);
     mPdfExporter->ExportToPdf(destination, mAttributes, valueCallback, cancellationSignal);
 }
 

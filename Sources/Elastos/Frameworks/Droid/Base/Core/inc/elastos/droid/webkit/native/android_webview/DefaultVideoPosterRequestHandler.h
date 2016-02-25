@@ -1,5 +1,7 @@
 #ifndef __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_DEFAULTVIDEOPOSTERREQUESTHANDLER_H__
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_DEFAULTVIDEOPOSTERREQUESTHANDLER_H__
+
+#include <Elastos.CoreLibrary.IO.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/webkit/native/android_webview/AwContentsClient.h"
 #include "elastos/droid/webkit/native/android_webview/AwWebResourceResponse.h"
@@ -10,7 +12,7 @@ using Elastos::Droid::Os::AsyncTask;
 
 using Elastos::IO::IInputStream;
 using Elastos::IO::IOutputStream;
-//TODO using Elastos::IO::IPipedOutputStream;
+//TODO , interface in IO.h has no namespace prefix; using Elastos::IO::IPipedOutputStream;
 class IPipedOutputStream;//TODO remove when above line is ok
 
 // import java.io.IOException;

@@ -35,7 +35,7 @@ public:
       * @param uuid The UUID for this descriptor
       * @param permissions Permissions for this descriptor
       */
-    BluetoothGattDescriptor(
+    CARAPI constructor(
         /* [in] */ IUUID* uuid,
         /* [in] */ Int32 permissions);
 

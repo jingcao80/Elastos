@@ -2,11 +2,10 @@ module
 {
     using interface Elastos.Droid.Content.IComponentName;
     using interface Elastos.Droid.Widget.IImageView;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.IBaseStatusBar;
+    interface Elastos.Droid.SystemUI.StatusBar.IBaseStatusBar;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
 
     /**
@@ -19,7 +18,7 @@ module
      * interface Elastos.Droid.View.IKeyEventCallback
      * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
      * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
-     * interface Elastos.Droid.Packages.SystemUI.StatusBar.IStatusBarPanel
+     * interface Elastos.Droid.SystemUI.StatusBar.IStatusBarPanel
      */
     interface ISearchPanelView {
         ReplaceDrawable(
@@ -48,7 +47,6 @@ module
     }
 
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

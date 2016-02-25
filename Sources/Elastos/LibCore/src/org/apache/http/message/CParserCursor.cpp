@@ -43,7 +43,7 @@ ECode CParserCursor::GetUpperBound(
 ECode CParserCursor::GetPos(
     /* [out] */ Int32* pos)
 {
-    VALIDATE_NOT_NULL(*pos)
+    VALIDATE_NOT_NULL(pos)
     *pos = mPos;
     return NOERROR;
 }

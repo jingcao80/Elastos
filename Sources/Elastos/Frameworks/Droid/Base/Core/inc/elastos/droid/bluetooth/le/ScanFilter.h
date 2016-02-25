@@ -2,14 +2,11 @@
 #define __ELASTOS_DROID_BLUETOOTH_LE_SCANFILTER_H__
 
 #include "Elastos.Droid.Bluetooth.h"
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 
-// import android.bluetooth.IBluetoothAdapter;
-// import android.bluetooth.IBluetoothDevice;
 using Elastos::Droid::Os::IParcelUuid;
-// import java.util.Arrays;
-// import java.util.Objects;
 using Elastos::Utility::IList;
 using Elastos::Utility::IUUID;
 
@@ -160,6 +157,9 @@ public:
     CAR_INTERFACE_DECL();
 
     ScanFilter();
+
+    CARAPI constructor(
+        /* [in] */ IParcel* source);
 
     // @Override
     CARAPI WriteToParcel(

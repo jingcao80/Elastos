@@ -1,0 +1,41 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Hdmi {
+
+    /**
+     * Timer handler interface used for FeatureAction classes.
+     */
+    /**
+     * @Involved
+     * no super interface
+     */
+    interface IHdmiCecFeatureActionActionTimer {
+        /**
+         * Send a timer message.
+         *
+         * Also carries the state of the action when the timer is created. Later this state is
+         * compared to the one the action is in when it receives the timer to let the action tell
+         * the right timer to handle.
+         *
+         * @param state state of the action is in
+         * @param delayMillis amount of delay for the timer
+         */
+        SendTimerMessage(
+            [in] Int32 state,
+            [in] Int64 delayMillis);
+
+        /**
+         * Removes any pending timer message.
+         */
+        ClearTimerMessage();
+    }
+
+    } // namespace Hdmi
+    } // namespace Server
+    } // namespace Droid
+    } // namespace Elastos
+}

@@ -1,25 +1,32 @@
 
 #include "elastos/droid/graphics/CBitmap.h"
-#include "elastos/droid/graphics/CBitmapFactory.h"
+#include "elastos/droid/media/CMediaHTTPService.h"
 #include "elastos/droid/media/CMediaMetadataRetriever.h"
 #include "elastos/droid/media/Media_Utils.h"
+#include "elastos/droid/net/Uri.h"
+#include "elastos/droid/os/NativeBinder.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
 #include <assert.h>
+#include <media/IMediaHTTPService.h>
 #include <private/media/VideoFrame.h>
 #include <skia/core/SkBitmap.h>
 #include <utils/Log.h>
+#include <utils/String8.h>
 #include <utils/threads.h>
 
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IAssetFileDescriptor;
 using Elastos::Droid::Graphics::BitmapConfig;
 using Elastos::Droid::Graphics::CBitmap;
-using Elastos::Droid::Graphics::CBitmapFactory;
-using Elastos::Droid::Graphics::IBitmapFactory;
-using namespace Elastos::Core;
+using Elastos::Droid::Net::Uri;
+using Elastos::Droid::Os::IBinderForDroidObject;
+using Elastos::IO::ICloseable;
 using Elastos::IO::CFileInputStream;
 using Elastos::IO::IFileInputStream;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::IMapEntry;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -140,32 +147,23 @@ ECode CMediaMetadataRetriever::SetDataSource(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     AutoPtr<IFileInputStream> is;
-    //try {
-        AutoPtr<IFileDescriptor> fd;
-        ECode ec = CFileInputStream::New(path, (IFileInputStream**)&is);
-        FAIL_GOTO(ec, _EXIT_);
+    // try {
+    CFileInputStream::New(path, (IFileInputStream**)&is);
+    AutoPtr<IFileDescriptor> fd;
+    is->GetFD((IFileDescriptor**)&fd);
+    SetDataSource(fd, 0, 0x7ffffffffffffffL);
+    // } catch (FileNotFoundException fileEx) {
+    //     throw new IllegalArgumentException();
+    // } catch (IOException ioEx) {
+    //     throw new IllegalArgumentException();
+    // }
 
-        ec = is->GetFD((IFileDescriptor**)&fd);
-        FAIL_GOTO(ec, _EXIT_);
-
-        ec = SetDataSource(fd, 0, 0x7ffffffffffffffL);
-        FAIL_GOTO(ec, _EXIT_);
-
-_EXIT_:
-        if (is != NULL) {
-            is->Close();
-            is = NULL;
-        }
-
-        if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        }
-        else if (ec == (ECode)E_IO_EXCEPTION) {
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        }
-
-        return NOERROR;
+    // try {
+    if (is != NULL) {
+        ICloseable::Probe(is)->Close();
     }
+    // } catch (Exception e) {}
+    return NOERROR;
 }
 
 ECode CMediaMetadataRetriever::SetDataSource(
@@ -175,24 +173,31 @@ ECode CMediaMetadataRetriever::SetDataSource(
     AutoPtr<ArrayOf<String> > keys;
     AutoPtr<ArrayOf<String> > values;
 
-    if (headers != NULL) {
-        headers->GetKeys( (ArrayOf<String>**)&keys);
-        if (keys != NULL) {
-            Int32 keylen = keys->GetLength();
-            values = ArrayOf<String>::Alloc(keylen);
+    Int32 size;
+    headers->GetSize(&size);
+    keys = ArrayOf<String>::Alloc(size);
+    values = ArrayOf<String>::Alloc(size);
 
-            ICharSequence* seq;
-            String str;
-            for (Int32 i = 0; i < keylen; i++) {
-                AutoPtr<IInterface> tmpObj;
-                headers->Get((*keys)[i], (IInterface**)&tmpObj);
-                seq = ICharSequence::Probe(tmpObj.Get());
-                if (seq) {
-                    seq->ToString(&str);
-                    values->Set(i, str);
-                }
-            }
-        }
+    AutoPtr<ISet> set;
+    headers->GetEntrySet((ISet**)&set);
+    AutoPtr<IIterator> it;
+    set->GetIterator((IIterator**)&it);
+    Int32 i = 0;
+    Boolean b;
+    while (it->HasNext(&b), b) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
+        obj = NULL;
+        entry->GetKey((IInterface**)&obj);
+        String str;
+        ICharSequence::Probe(obj)->ToString(&str);
+        keys->Set(i, str);
+        obj = NULL;
+        entry->GetValue((IInterface**)&obj);
+        ICharSequence::Probe(obj)->ToString(&str);
+        values->Set(i, str);
+        ++i;
     }
 
     AutoPtr<IBinder> binder;
@@ -237,12 +242,11 @@ ECode CMediaMetadataRetriever::NativeSetDataSource(
     android::KeyedVector<android::String8, android::String8> headersVector;
     FAIL_RETURN(Media_Utils::ConvertKeyValueArraysToKeyedVector(keys, values, &headersVector));
 
-    sp<IMediaHTTPService> httpService;
-// TODO: Need jni code
-    // if (httpServiceBinderObj != NULL) {
-    //     sp<IBinder> binder = ibinderForJavaObject(env, httpServiceBinderObj);
-    //     httpService = interface_cast<IMediaHTTPService>(binder);
-    // }
+    android::sp<android::IMediaHTTPService> httpService;
+    if (httpServiceBinder != NULL) {
+        android::sp<android::IBinder> binder = IBinderForDroidObject(httpServiceBinder);
+        httpService = android::interface_cast<android::IMediaHTTPService>(binder);
+    }
 
     android::status_t status = retriever->setDataSource(
         httpService, pathStr.string(), headersVector.size() > 0 ? &headersVector : NULL);
@@ -371,7 +375,7 @@ _EXIT_:
         return NOERROR;
     }
 
-    uri->ToString(&u);
+    ((Uri*)uri)->ToString(&u);
     return SetDataSource(u);
 }
 
@@ -459,12 +463,10 @@ ECode CMediaMetadataRetriever::NativeGetFrameAtTime(
         height = videoFrame->mHeight;
     }
 
-    AutoPtr<IBitmapFactory> bitmapFactory;
-    CBitmapFactory::AcquireSingleton((IBitmapFactory**)&bitmapFactory);
     AutoPtr<IBitmap> jBitmap;
-    bitmapFactory->CreateBitmapEx3(width, height, config, (IBitmap**)&jBitmap);
+    CBitmap::CreateBitmap(width, height, config, (IBitmap**)&jBitmap);
 
-    Handle32 nativeBitmap;
+    Handle64 nativeBitmap;
     jBitmap->GetNativeBitmap(&nativeBitmap);
 
     SkBitmap *bitmap = (SkBitmap *)nativeBitmap;
@@ -488,16 +490,16 @@ ECode CMediaMetadataRetriever::NativeGetFrameAtTime(
                 width, height, displayWidth, displayHeight);
 
         AutoPtr<IBitmap> scaledBitmap;
-        bitmapFactory->CreateScaledBitmap(
+        CBitmap::CreateScaledBitmap(
                 jBitmap, displayWidth, displayHeight, TRUE, (IBitmap**)&scaledBitmap);
 
         *result = scaledBitmap;
-        INTERFACE_ADDREF(*result);
+        REFCOUNT_ADD(*result);
         return NOERROR;
     }
 
     *result = jBitmap;
-    INTERFACE_ADDREF(*result);
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -556,11 +558,12 @@ ECode CMediaMetadataRetriever::GetEmbeddedPicture(
 
 ECode CMediaMetadataRetriever::ReleaseResources()
 {
-    AutoLock lock(sLock);
-    android::MediaMetadataRetriever* retriever = GetRetriever();
-    assert(retriever != NULL);
-    delete retriever;
-    SetRetriever(NULL);
+    synchronized(sLock) {
+        android::MediaMetadataRetriever* retriever = GetRetriever();
+        assert(retriever != NULL);
+        delete retriever;
+        SetRetriever(NULL);
+    }
     return NOERROR;
 }
 

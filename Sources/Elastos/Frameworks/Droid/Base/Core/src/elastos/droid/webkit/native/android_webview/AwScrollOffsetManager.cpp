@@ -14,7 +14,7 @@ const Int32 AwScrollOffsetManager::MAX_SCROLL_ANIMATION_DURATION_MILLISEC;
 
 AwScrollOffsetManager::AwScrollOffsetManager(
     /* [in] */ Delegate* delegate,
-    /* [in] */ /*TODO IOverScroller*/IInterface* overScroller)
+    /* [in] */ IOverScroller* overScroller)
     : mDelegate(delegate)
     , mNativeScrollX(0)
     , mNativeScrollY(0)
@@ -134,7 +134,8 @@ void AwScrollOffsetManager::ScrollContainerViewTo(
 
 Boolean AwScrollOffsetManager::IsFlingActive()
 {
-    Boolean flinging = FALSE;//TODO = mScroller->ComputeScrollOffset();
+    Boolean flinging = FALSE;
+    mScroller->ComputeScrollOffset(&flinging);
     mWasFlinging |= flinging;
     return flinging;
 }
@@ -146,9 +147,9 @@ void AwScrollOffsetManager::OverScrollBy(
 {
     // TODO(mkosiba): Once http://crbug.com/260663 and http://crbug.com/261239 are fixed it
     // should be possible to uncomment the following asserts:
-    // if (deltaX < 0) assert mDelegate.getContainerViewScrollX() == 0;
-    // if (deltaX > 0) assert mDelegate.getContainerViewScrollX() ==
-    //          computeMaximumHorizontalScrollOffset();
+    if (deltaX < 0) assert (mDelegate->GetContainerViewScrollX() == 0);
+    if (deltaX > 0) assert (mDelegate->GetContainerViewScrollX() ==
+             ComputeMaximumHorizontalScrollOffset());
     ScrollBy(deltaX, deltaY);
 }
 
@@ -247,7 +248,7 @@ void AwScrollOffsetManager::OnFlingCancelGesture()
 {
     // TODO(mkosiba): Support speeding up a fling by flinging again.
     // http://crbug.com/265841
-    //TODO mScroller->ForceFinished(TRUE);
+    mScroller->ForceFinished(TRUE);
 }
 
 // Called when a fling gesture is not handled by the renderer.
@@ -266,23 +267,21 @@ void AwScrollOffsetManager::FlingScroll(
     /* [in] */ Int32 velocityX,
     /* [in] */ Int32 velocityY)
 {
-    /*TODO
     Int32 scrollX = mDelegate->GetContainerViewScrollX();
     Int32 scrollY = mDelegate->GetContainerViewScrollY();
     Int32 scrollRangeX = ComputeMaximumHorizontalScrollOffset();
     Int32 scrollRangeY = ComputeMaximumVerticalScrollOffset();
-    */
 
-    //TODO mScroller->Fling (scrollX, scrollY, velocityX, velocityY, 0, scrollRangeX, 0, scrollRangeY);
+    mScroller->Fling (scrollX, scrollY, velocityX, velocityY, 0, scrollRangeX, 0, scrollRangeY);
     mDelegate->Invalidate();
 }
 
 // Called immediately before the draw to update the scroll offset.
 void AwScrollOffsetManager::ComputeScrollAndAbsorbGlow(
-    /* [in] */ /*TODO IOverScrollGlow*/IInterface* overScrollGlow)
+    /* [in] */ OverScrollGlow* overScrollGlow)
 {
     Boolean bOffset = FALSE;
-    //TODO mScroller->ComputeScrollOffset(&bOffset);
+    mScroller->ComputeScrollOffset(&bOffset);
     if (!bOffset && !mWasFlinging) {
         return;
     }
@@ -290,18 +289,18 @@ void AwScrollOffsetManager::ComputeScrollAndAbsorbGlow(
 
     Int32 oldX = mDelegate->GetContainerViewScrollX();
     Int32 oldY = mDelegate->GetContainerViewScrollY();
-    Int32 x = 0;//TODO = mScroller->GetCurrX();
-    Int32 y = 0;//TODO = mScroller->GetCurrY();
+    Int32 x = 0;
+    mScroller->GetCurrX(&x);
+    Int32 y = 0;
+    mScroller->GetCurrY(&y);
 
-    /*TODO
     Int32 scrollRangeX = ComputeMaximumHorizontalScrollOffset();
     Int32 scrollRangeY = ComputeMaximumVerticalScrollOffset();
-    */
 
     if (overScrollGlow != NULL) {
-        //TODO Int32 velocity;
-        //TODO mScroller->GetCurrVelocity(&velocity);
-        //TODO overScrollGlow->AbsorbGlow(x, y, oldX, oldY, scrollRangeX, scrollRangeY, velocity);
+        Float velocity;
+        mScroller->GetCurrVelocity(&velocity);
+        overScrollGlow->AbsorbGlow(x, y, oldX, oldY, scrollRangeX, scrollRangeY, velocity);
     }
 
     // The mScroller is configured not to go outside of the scrollable range, so this call
@@ -336,7 +335,7 @@ Boolean AwScrollOffsetManager::AnimateScrollTo(
     if (dx == 0 && dy == 0)
         return FALSE;
 
-    //TODO mScroller->StartScroll(scrollX, scrollY, dx, dy, ComputeDurationInMilliSec(dx, dy));
+    mScroller->StartScroll(scrollX, scrollY, dx, dy, ComputeDurationInMilliSec(dx, dy));
     mDelegate->Invalidate();
 
     return TRUE;

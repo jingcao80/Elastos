@@ -13,7 +13,7 @@ module
     using interface Elastos.Droid.App.IIServiceConnection;
     using interface Elastos.Droid.App.IInstrumentationWatcher;
     using interface Elastos.Droid.App.IITransientNotification;
-    using interface Elastos.Droid.App.IUserSwitchObserver;
+    using interface Elastos.Droid.App.IIUserSwitchObserver;
     using interface Elastos.Droid.App.IIWallpaperManagerCallback;
     using interface Elastos.Droid.App.Backup.IIFullBackupRestoreObserver;
     using interface Elastos.Droid.App.Backup.IIRestoreObserver;
@@ -45,8 +45,8 @@ module
     using interface Elastos.Droid.Hardware.Display.IDisplayManagerCallback;
     using interface Elastos.Droid.Hardware.Input.IInputDevicesChangedListener;
     using interface Elastos.Droid.Internal.View.IInputMethodClient;
-    using interface Elastos.Droid.Internal.View.IInputContext;
-    using interface Elastos.Droid.Internal.View.IInputContextCallback;
+    using interface Elastos.Droid.Internal.View.IIInputContext;
+    using interface Elastos.Droid.Internal.View.IIInputContextCallback;
     using interface Elastos.Droid.Internal.View.IIInputMethod;
     using interface Elastos.Droid.Internal.View.IIInputMethodSession;
     using interface Elastos.Droid.Location.IICountryListener;
@@ -129,7 +129,7 @@ module
             [in] Handle32 jVM,
             [in] Handle32 jInstance);
 
-        interface IInputContext;
+        interface IIInputContext;
         interface IBinder;
     }
 
@@ -319,7 +319,7 @@ module
            [in] Handle32 jVM,
            [in] Handle32 jInstance);
 
-        interface IInputContextCallback;
+        interface IIInputContextCallback;
     }
 
     class CRemoteViewsAdapterConnectionNative{
@@ -527,7 +527,7 @@ module
             [in] Handle32 jVM,
             [in] Handle32 jInstance);
 
-        interface IUserSwitchObserver;
+        interface IIUserSwitchObserver;
         interface IBinder;
     }
 

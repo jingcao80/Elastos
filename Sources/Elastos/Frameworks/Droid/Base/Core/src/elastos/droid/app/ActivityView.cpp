@@ -4,7 +4,7 @@
 #include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/app/CActivityViewActivityContainerCallback.h"
 #include "elastos/droid/view/Surface.h"
-// #include "elastos/droid/view/CTextureView.h"
+#include "elastos/droid/view/CTextureView.h"
 #include "elastos/droid/utility/CDisplayMetrics.h"
 #include <elastos/utility/logging/Logger.h>
 
@@ -15,7 +15,7 @@ using Elastos::Droid::View::Surface;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IInputDevice;
 using Elastos::Droid::View::ITextureView;
-// using Elastos::Droid::View::CTextureView;
+using Elastos::Droid::View::CTextureView;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::IWindowManager;
 using Elastos::Droid::View::ISurfaceTextureListener;
@@ -199,7 +199,7 @@ ECode ActivityView::ActivityContainerCallback::ToString(
 //=========================================================================
 
 ActivityView::ActivityContainerWrapper::ActivityContainerWrapper(
-    /* [in] */ IActivityContainer* container)
+    /* [in] */ IIActivityContainer* container)
     : mOpened(TRUE)
 {
     mActivityContainer = container;
@@ -418,11 +418,10 @@ ECode ActivityView::constructor(
     AutoPtr<IBinder> token;
     mActivity->GetActivityToken((IBinder**)&token);
     AutoPtr<IActivityContainerCallback> cb;
-    assert(0 && "TODO");
     CActivityViewActivityContainerCallback::New(IActivityView::Probe(this), (IActivityContainerCallback**)&cb);
-    AutoPtr<IActivityContainer> ac;
+    AutoPtr<IIActivityContainer> ac;
     ECode ec = ActivityManagerNative::GetDefault()->CreateActivityContainer(
-        token, cb, (IActivityContainer**)&ac);
+        token, cb, (IIActivityContainer**)&ac);
 
     // } catch (RemoteException e)
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
@@ -432,8 +431,7 @@ ECode ActivityView::constructor(
 
     mActivityContainer = new ActivityContainerWrapper(ac);
 
-    assert(0 && "TODO");
-    // CTextureView::New(context, (ITextureView**)&mTextureView);
+    CTextureView::New(context, (ITextureView**)&mTextureView);
     AutoPtr<ISurfaceTextureListener> listener = new ActivityViewSurfaceTextureListener(this);
     mTextureView->SetSurfaceTextureListener(listener);
     AddView(IView::Probe(mTextureView));

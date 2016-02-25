@@ -1,165 +1,145 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.server.hdmi;
+#ifndef __ELASTOS_DROID_SERVER_HDMI_HDMICECSTANDBYMODEHANDLER_H__
+#define __ELASTOS_DROID_SERVER_HDMI_HDMICECSTANDBYMODEHANDLER_H__
+
+#include "_Elastos.Droid.Server.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Utility::ISparseArray;
 
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Hdmi {
+
+class HdmiCecLocalDeviceTv;
 /**
  * This class handles the incoming messages when HdmiCecService is in the standby mode.
  */
-public class HdmiCecStandbyModeHandler {
+class HdmiCecStandbyModeHandler
+    : public Object
+{
+private:
+    class Bystander
+        : public Object
+        , public IHdmiCecStandbyModeHandlerCecMessageHandler
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
-    private interface CecMessageHandler {
-        Boolean Handle(HdmiCecMessage message);
-    }
+        // @Override
+        CARAPI Handle(
+            /* [in] */ IHdmiCecMessage* message,
+            /* [out] */ Boolean* result);
+    };
 
-    private static const class Bystander implements CecMessageHandler {
-        //@Override
-        public Boolean Handle(HdmiCecMessage message) {
-            return TRUE;
-        }
-    }
+    class Bypasser
+        : public Object
+        , public IHdmiCecStandbyModeHandlerCecMessageHandler
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
-    private static const class Bypasser implements CecMessageHandler {
-        //@Override
-        public Boolean Handle(HdmiCecMessage message) {
-            return FALSE;
-        }
-    }
+        // @Override
+        CARAPI Handle(
+            /* [in] */ IHdmiCecMessage* message,
+            /* [out] */ Boolean* result);
+    };
 
-    private final class Aborter implements CecMessageHandler {
-        private final Int32 mReason;
-        public Aborter(Int32 reason) {
-            mReason = reason;
-        }
-        //@Override
-        public Boolean Handle(HdmiCecMessage message) {
-            mService->MaySendFeatureAbortCommand(message, mReason);
-            return TRUE;
-        }
-    }
+    class Aborter
+        : public Object
+        , public IHdmiCecStandbyModeHandlerCecMessageHandler
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
-    private final class AutoOnHandler implements CecMessageHandler {
-        //@Override
-        public Boolean Handle(HdmiCecMessage message) {
-            if (!mTv->GetAutoWakeup()) {
-                mAborterRefused->Handle(message);
-                return TRUE;
-            }
-            return FALSE;
-        }
-    }
+        Aborter(
+            /* [in] */ Int32 reason);
 
-    private final class UserControlProcessedHandler implements CecMessageHandler {
-        //@Override
-        public Boolean Handle(HdmiCecMessage message) {
-            // The power status here is always standby.
-            if (HdmiCecLocalDevice->IsPowerOnOrToggleCommand(message)) {
-                return FALSE;
-            } else if (HdmiCecLocalDevice->IsPowerOffOrToggleCommand(message)) {
-                return TRUE;
-            }
-            return mAborterIncorrectMode->Handle(message);
-        }
-    }
+        // @Override
+        CARAPI Handle(
+            /* [in] */ IHdmiCecMessage* message,
+            /* [out] */ Boolean* result);
 
-    private final HdmiControlService mService;
-    private final HdmiCecLocalDeviceTv mTv;
+    private:
+        const Int32 mReason;
+    };
 
-    private final SparseArray<CecMessageHandler> mCecMessageHandlers = new SparseArray<>();
-    private final CecMessageHandler mDefaultHandler = new Aborter(
-            Constants.ABORT_UNRECOGNIZED_OPCODE);
-    private final CecMessageHandler mAborterIncorrectMode = new Aborter(
-            Constants.ABORT_NOT_IN_CORRECT_MODE);
-    private final CecMessageHandler mAborterRefused = new Aborter(Constants.ABORT_REFUSED);
-    private final CecMessageHandler mAutoOnHandler = new AutoOnHandler();
-    private final CecMessageHandler mBypasser = new Bypasser();
-    private final CecMessageHandler mBystander = new Bystander();
-    private final UserControlProcessedHandler
-            mUserControlProcessedHandler = new UserControlProcessedHandler();
+    class AutoOnHandler
+        : public Object
+        , public IHdmiCecStandbyModeHandlerCecMessageHandler
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
-    public HdmiCecStandbyModeHandler(HdmiControlService service, HdmiCecLocalDeviceTv tv) {
-        mService = service;
-        mTv = tv;
+        // @Override
+        CARAPI Handle(
+            /* [in] */ IHdmiCecMessage* message,
+            /* [out] */ Boolean* result);
+    };
 
-        AddHandler(Constants.MESSAGE_IMAGE_VIEW_ON, mAutoOnHandler);
-        AddHandler(Constants.MESSAGE_TEXT_VIEW_ON, mAutoOnHandler);
+    class UserControlProcessedHandler
+        : public Object
+        , public IHdmiCecStandbyModeHandlerCecMessageHandler
+    {
+    public:
+        CAR_INTERFACE_DECL()
 
-        AddHandler(Constants.MESSAGE_ACTIVE_SOURCE, mBystander);
-        AddHandler(Constants.MESSAGE_REQUEST_ACTIVE_SOURCE, mBystander);
-        AddHandler(Constants.MESSAGE_ROUTING_CHANGE, mBystander);
-        AddHandler(Constants.MESSAGE_ROUTING_INFORMATION, mBystander);
-        AddHandler(Constants.MESSAGE_SET_STREAM_PATH, mBystander);
-        AddHandler(Constants.MESSAGE_STANDBY, mBystander);
-        AddHandler(Constants.MESSAGE_SET_MENU_LANGUAGE, mBystander);
-        AddHandler(Constants.MESSAGE_DEVICE_VENDOR_ID, mBystander);
-        AddHandler(Constants.MESSAGE_USER_CONTROL_RELEASED, mBystander);
-        AddHandler(Constants.MESSAGE_REPORT_POWER_STATUS, mBystander);
-        AddHandler(Constants.MESSAGE_FEATURE_ABORT, mBystander);
-        AddHandler(Constants.MESSAGE_INACTIVE_SOURCE, mBystander);
-        AddHandler(Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS, mBystander);
-        AddHandler(Constants.MESSAGE_REPORT_AUDIO_STATUS, mBystander);
+        // @Override
+        CARAPI Handle(
+            /* [in] */ IHdmiCecMessage* message,
+            /* [out] */ Boolean* result);
+    };
 
-        // If TV supports the following messages during power-on, ignore them and do nothing,
-        // else reply with <Feature Abort>["Unrecognized Opcode"]
-        // <Deck Status>, <Tuner Device Status>, <Tuner Cleared Status>, <Timer Status>
-        AddHandler(Constants.MESSAGE_RECORD_STATUS, mBystander);
+public:
+    HdmiCecStandbyModeHandler();
 
-        // If TV supports the following messages during power-on, reply with <Feature Abort>["Not
-        // in correct mode to respond"], else reply with <Feature Abort>["Unrecognized Opcode"]
-        // <Give Tuner Device Status>, <Select Digital Service>, <Tuner Step Decrement>,
-        // <Tuner Stem Increment>, <Menu Status>.
-        AddHandler(Constants.MESSAGE_RECORD_TV_SCREEN, mAborterIncorrectMode);
-        AddHandler(Constants.MESSAGE_INITIATE_ARC, mAborterIncorrectMode);
-        AddHandler(Constants.MESSAGE_TERMINATE_ARC, mAborterIncorrectMode);
-
-        AddHandler(Constants.MESSAGE_GIVE_PHYSICAL_ADDRESS, mBypasser);
-        AddHandler(Constants.MESSAGE_GET_MENU_LANGUAGE, mBypasser);
-        AddHandler(Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS, mBypasser);
-        AddHandler(Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID, mBypasser);
-        AddHandler(Constants.MESSAGE_GIVE_OSD_NAME, mBypasser);
-        AddHandler(Constants.MESSAGE_SET_OSD_NAME, mBypasser);
-
-        AddHandler(Constants.MESSAGE_USER_CONTROL_PRESSED, mUserControlProcessedHandler);
-
-        AddHandler(Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS, mBypasser);
-        AddHandler(Constants.MESSAGE_ABORT, mBypasser);
-        AddHandler(Constants.MESSAGE_GET_CEC_VERSION, mBypasser);
-
-        AddHandler(Constants.MESSAGE_VENDOR_COMMAND_WITH_ID, mAborterIncorrectMode);
-        AddHandler(Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE, mAborterIncorrectMode);
-    }
-
-    private void AddHandler(Int32 opcode, CecMessageHandler handler) {
-        mCecMessageHandlers->Put(opcode, handler);
-    }
+    CARAPI constructor(
+        /* [in] */ IHdmiControlService* service,
+        /* [in] */ HdmiCecLocalDeviceTv* tv);
 
     /**
      * Handles the CEC message in the standby mode.
      *
      * @param message {@link HdmiCecMessage} to be processed
-     * @return TRUE if the message is handled in the handler, FALSE means that the message is need
+     * @return true if the message is handled in the handler, false means that the message is need
      *         to be dispatched to the local device.
      */
-    Boolean HandleCommand(HdmiCecMessage message) {
-        CecMessageHandler handler = mCecMessageHandlers->Get(message->GetOpcode());
-        if (handler != NULL) {
-            return handler->Handle(message);
-        }
-        return mDefaultHandler->Handle(message);
-    }
-}
+    CARAPI HandleCommand(
+        /* [in] */ IHdmiCecMessage* message,
+        /* [out] */ Boolean* result);
+
+private:
+    CARAPI AddHandler(
+        /* [in] */ Int32 opcode,
+        /* [in] */ IHdmiCecStandbyModeHandlerCecMessageHandler* handler);
+
+private:
+    AutoPtr<IHdmiControlService> mService;
+
+    AutoPtr<HdmiCecLocalDeviceTv> mTv;
+
+    AutoPtr<ISparseArray> mCecMessageHandlers;
+
+    AutoPtr<IHdmiCecStandbyModeHandlerCecMessageHandler> mDefaultHandler;
+
+    AutoPtr<IHdmiCecStandbyModeHandlerCecMessageHandler> mAborterIncorrectMode;
+
+    AutoPtr<IHdmiCecStandbyModeHandlerCecMessageHandler> mAborterRefused;
+
+    AutoPtr<IHdmiCecStandbyModeHandlerCecMessageHandler> mAutoOnHandler;
+
+    AutoPtr<IHdmiCecStandbyModeHandlerCecMessageHandler> mBypasser;
+
+    AutoPtr<IHdmiCecStandbyModeHandlerCecMessageHandler> mBystander;
+
+    AutoPtr<UserControlProcessedHandler> mUserControlProcessedHandler;
+};
+
+} // namespace Hdmi
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
+
+#endif // __ELASTOS_DROID_SERVER_HDMI_HDMICECSTANDBYMODEHANDLER_H__

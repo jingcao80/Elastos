@@ -12,6 +12,7 @@
 
 using Elastos::Droid::Content::Res::ICompatibilityInfoHelper;
 using Elastos::Droid::Content::Res::CCompatibilityInfoHelper;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -37,31 +38,42 @@ DisplayAdjustments::DisplayAdjustments(
     AutoPtr<IBinder> token;
     daj->GetCompatibilityInfo((ICompatibilityInfo**)&info);
     daj->GetActivityToken((IBinder**)&token);
-    new(this)DisplayAdjustments(info, token);
+    Init(info, token);
 }
 
 DisplayAdjustments::DisplayAdjustments(
     /* [in] */ ICompatibilityInfo* compatInfo,
     /* [in] */ IBinder* token)
 {
+    Init(compatInfo, token);
+}
+
+ECode DisplayAdjustments::Init(
+    /* [in] */ ICompatibilityInfo* compatInfo,
+    /* [in] */ IBinder* token)
+{
     SetCompatibilityInfo(compatInfo);
     mActivityToken = token;
+    return NOERROR;
 }
 
 ECode DisplayAdjustments::SetCompatibilityInfo(
     /* [in] */ ICompatibilityInfo* compatInfo)
 {
     if (this == DEFAULT_DISPLAY_ADJUSTMENTS) {
-        SLOGGERE("DisplayAdjustments", "SetCompatibilityInfo: Cannot modify DEFAULT_DISPLAY_ADJUSTMENTS")
+        Slogger::E("DisplayAdjustments", "SetCompatibilityInfo: Cannot modify DEFAULT_DISPLAY_ADJUSTMENTS");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
-    Boolean isScalingRequired, supportsScreen;
-    compatInfo->IsScalingRequired(&isScalingRequired);
-    compatInfo->SupportsScreen(&supportsScreen);
-    if (compatInfo != NULL && (isScalingRequired
-            || !supportsScreen)) {
+    Boolean isScalingRequired = FALSE, supportsScreen = FALSE;
+    if (compatInfo != NULL) {
+        compatInfo->IsScalingRequired(&isScalingRequired);
+        compatInfo->SupportsScreen(&supportsScreen);
+    }
+
+    if (compatInfo != NULL && (isScalingRequired || !supportsScreen)) {
         mCompatInfo = compatInfo;
-    } else {
+    }
+    else {
         AutoPtr<ICompatibilityInfoHelper> helper;
         CCompatibilityInfoHelper::AcquireSingleton((ICompatibilityInfoHelper**)&helper);
         AutoPtr<ICompatibilityInfo> defInfo;
@@ -84,7 +96,7 @@ ECode DisplayAdjustments::SetActivityToken(
     /* [in] */ IBinder* token)
 {
     if (this == DEFAULT_DISPLAY_ADJUSTMENTS) {
-        SLOGGERE("DisplayAdjustments", "SetCompatibilityInfo: Cannot modify DEFAULT_DISPLAY_ADJUSTMENTS")
+        Slogger::E("DisplayAdjustments", "SetCompatibilityInfo: Cannot modify DEFAULT_DISPLAY_ADJUSTMENTS");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     mActivityToken = token;
@@ -103,13 +115,12 @@ ECode DisplayAdjustments::GetActivityToken(
 ECode DisplayAdjustments::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
+    VALIDATE_NOT_NULL(hashCode)
     Int32 hash = 17;
-    Int32 infoHash;
-    IObject::Probe(mCompatInfo)->GetHashCode(&infoHash);
+    Int32 infoHash = Object::GetHashCode(mCompatInfo);
     hash = hash * 31 + infoHash;
     if (DEVELOPMENT_RESOURCES_DEPEND_ON_ACTIVITY_TOKEN) {
-        Int32 tokenHash;
-        IObject::Probe(mActivityToken)->GetHashCode(&tokenHash);
+        Int32 tokenHash = Object::GetHashCode(mActivityToken);
         hash = hash * 31 + (mActivityToken == NULL ? 0 : tokenHash);
     }
     return hash;
@@ -119,15 +130,15 @@ ECode DisplayAdjustments::Equals(
     /* [in] */ IInterface* object,
     /* [out] */ Boolean* equals)
 {
+    VALIDATE_NOT_NULL(equals)
+    *equals = FALSE;
     if (IDisplayAdjustments::Probe(object) == NULL) {
-        return FALSE;
+        return NOERROR;
     }
     AutoPtr<IDisplayAdjustments> dajTmp = IDisplayAdjustments::Probe(object);
     AutoPtr<DisplayAdjustments> daj = (DisplayAdjustments*)dajTmp.Get();
-    Boolean infoEquals, tokenEquals;
-    IObject::Probe(mCompatInfo)->Equals(daj->mCompatInfo, &infoEquals);
-    IObject::Probe(mActivityToken)->Equals(daj->mActivityToken, &tokenEquals);
-    return infoEquals && tokenEquals;
+    return Object::Equals(mCompatInfo, daj->mCompatInfo)
+        && Object::Equals(mActivityToken, daj->mActivityToken);
 }
 
 ECode DisplayAdjustments::GetDEFAULT_DISPLAY_ADJUSTMENTS(

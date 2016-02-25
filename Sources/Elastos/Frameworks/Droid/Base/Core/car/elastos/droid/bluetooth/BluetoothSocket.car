@@ -80,6 +80,9 @@ module
          * {@see java.io.OutputStream}
          *
          * @implements Elastos.Droid.Bluetooth.Elastos.IO.ICloseable
+         * @involve interface IOutputStream
+         * @involve interface ICloseable
+         * @involve interface IFlushable
          */
         [deprecated]
         interface IBluetoothSocket {

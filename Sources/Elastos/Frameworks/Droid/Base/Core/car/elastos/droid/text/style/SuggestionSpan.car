@@ -107,7 +107,7 @@ module
          * @hide
          */
         NotifySelection(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String original,
             [in] Int32 index);
     }

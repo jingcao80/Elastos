@@ -5,9 +5,6 @@
 #include <elastos/core/Object.h>
 #include "elastos/droid/ext/frameworkext.h"
 
-// import android.util.Log;
-// import java.util.ArrayList;
-
 using Elastos::Droid::Content::IContext;
 using Elastos::Utility::IList;
 
@@ -47,7 +44,7 @@ public:
     /**
       * @hide
       */
-    BluetoothManager(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     /**

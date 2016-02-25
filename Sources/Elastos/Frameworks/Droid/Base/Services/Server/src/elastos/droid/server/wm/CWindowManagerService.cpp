@@ -3928,42 +3928,52 @@ Boolean CWindowManagerService::ApplyAnimationLocked(
 
 void CWindowManagerService::ValidateAppTokens(
     /* [in] */ Int32 stackId,
-    /* [in] */ List< AutoPtr<TaskGroup> >& tasks)
+    /* [in] */ IArrayList* tasks) //List<TaskGroup>
 {
     synchronized (mWindowMapLock) {
-        List<AutoPtr<TaskGroup> >::ReverseIterator taskGroupRit = tasks.RBegin();
-        if (tasks.Begin() != tasks.End()) {
+        Int32 size;
+        tasks->GetSize(&size);
+        Int32 t = size - 1;
+        if (t < 0) {
             Slogger::W(TAG, "validateAppTokens: empty task list");
             return;
         }
 
-        AutoPtr<TaskGroup> task = *(tasks.Begin());
+        AutoPtr<IInterface> obj;
+        tasks->Get(0, (IInterface**)&obj);
+        AutoPtr<TaskGroup> task = (TaskGroup*)IObject::Probe(obj);
         Int32 taskId = task->mTaskId;
-        AutoPtr<IInterface> value;
-        mTaskIdToTask->Get(taskId, (IInterface**)&value);
-        AutoPtr<Task> targetTask = (Task*)(IObject*)value.Get();
+        obj = NULL;
+        mTaskIdToTask->Get(taskId, (IInterface**)&obj);
+        AutoPtr<Task> targetTask = (Task*)IObject::Probe(obj);
+
         AutoPtr<DisplayContent> displayContent = targetTask->GetDisplayContent();
         if (displayContent == NULL) {
             Slogger::W(TAG, "validateAppTokens: no Display for taskId=%d", taskId);
             return;
         }
 
-        AutoPtr<IInterface> taskStack;
-        mStackIdToStack->Get(stackId, (IInterface**)&taskStack);
-        AutoPtr<TaskStack> stack = (TaskStack*)(IObject*)taskStack.Get();
-        AutoPtr<List<AutoPtr<Task> > > localTasks = stack->GetTasks();
+        obj = NULL;
+        mStackIdToStack->Get(stackId, (IInterface**)&obj);
+        AutoPtr<TaskStack> taskStack = (TaskStack*)IObject::Probe(obj);
+        AutoPtr< List<AutoPtr<Task> > > localTasks = taskStack->GetTasks();
+
         List<AutoPtr<Task> >::ReverseIterator taskRit = localTasks->RBegin();
-        for (; taskRit != localTasks->REnd() && taskGroupRit != tasks.REnd(); ++taskRit, ++taskGroupRit) {
+        for (; taskRit != localTasks->REnd() && t >= 0; ++taskRit, --t) {
             AppTokenList localTokens = (*taskRit)->mAppTokens;
-            task = *taskGroupRit;
+
+            obj = NULL;
+            tasks->Get(t, (IInterface**)&obj);
+            task = (TaskGroup*)IObject::Probe(obj);
+
             List<AutoPtr<IApplicationToken> > tokens = task->mTokens;
 
             AutoPtr<DisplayContent> lastDisplayContent = displayContent;
-            value = NULL;
-            mTaskIdToTask->Get(taskId, (IInterface**)&value);
-            targetTask = (Task*)(IObject*)value.Get();
+            obj = NULL;
+            mTaskIdToTask->Get(taskId, (IInterface**)&obj);
+            targetTask = (Task*)IObject::Probe(obj);
             displayContent = targetTask->GetDisplayContent();
-            if (displayContent != lastDisplayContent) {
+            if (displayContent.Get() != lastDisplayContent.Get()) {
                 Slogger::W(TAG, "validateAppTokens: displayContent changed in TaskGroup list!");
                 return;
             }
@@ -3988,10 +3998,10 @@ void CWindowManagerService::ValidateAppTokens(
             }
         }
 
-        if (taskRit != localTasks->REnd() || taskGroupRit != tasks.REnd()) {
-            // Slogger::W(TAG, "validateAppTokens: Mismatch! ActivityManager=" + tasks);
-            // Slogger::W(TAG, "validateAppTokens: Mismatch! WindowManager=" + localTasks);
-            // Slogger::W(TAG, "validateAppTokens: Mismatch! Callers=" + Debug.getCallers(4));
+        if (taskRit != localTasks->REnd() || t >= 0) {
+            Slogger::W(TAG, "validateAppTokens: Mismatch! ActivityManager=%s", TO_CSTR(tasks));
+            Slogger::W(TAG, "validateAppTokens: Mismatch! WindowManager=");// + localTasks);
+            Slogger::W(TAG, "validateAppTokens: Mismatch! Callers=");// + Debug.getCallers(4));
         }
     }
 }
@@ -6734,16 +6744,7 @@ Boolean CWindowManagerService::CheckWaitingForWindowsLocked()
     if (!mSystemBooted && !haveBootMsg) {
         return TRUE;
     }
-    // ActionsCode(authro:wh, comment: fix BUG00235996,force finish animation wait for keyguard)
-    // TODO: ActionsConfig!!!
-    // if(ActionsConfig.ACTIONS_FEATURE_FINISH_ANIMATION_AFTER_KEYGUARD_ON == 1) {
-        mPolicy->IsKeyguardDrawnLw(&haveKeyguard);
-        if(!haveKeyguard){
-            mH->RemoveMessages(H::ENABLE_SCREEN);
-            Boolean result;
-            mH->SendEmptyMessageDelayed(H::ENABLE_SCREEN, 1*1000, &result);
-        }
-    // }
+
     // If we are turning on the screen after the boot is completed
     // normally, don't do so until we have the application and
     // wallpaper.
@@ -8825,7 +8826,7 @@ Boolean CWindowManagerService::DetectSafeMode()
     return mSafeMode;
 }
 
-void CWindowManagerService::DisplayReady()
+ECode CWindowManagerService::DisplayReady()
 {
     //ActionsCode(author:wh, BUGFIXED:BUG00238382 init all displays which surfaceflinger decteced before system ready)
     //displayReady(Display.DEFAULT_DISPLAY);
@@ -8860,6 +8861,7 @@ void CWindowManagerService::DisplayReady()
     mActivityManager->UpdateConfiguration(NULL);
     // } catch (RemoteException e) {
     // }
+    return NOERROR;
 }
 
 void CWindowManagerService::DisplayReady(
@@ -9607,7 +9609,7 @@ ECode CWindowManagerService::HandleWaitingForDrawnTimeout()
 ECode CWindowManagerService::OpenSession(
     /* [in] */ IIWindowSessionCallback* callback,
     /* [in] */ IInputMethodClient* client,
-    /* [in] */ IInputContext* inputContext,
+    /* [in] */ IIInputContext* inputContext,
     /* [out] */ IWindowSession** session)
 {
     VALIDATE_NOT_NULL(session)
@@ -10239,11 +10241,8 @@ void CWindowManagerService::RebuildAppWindowListLocked(
                 CFastPrintWriter::New(IWriter::Probe(sw), FALSE, 1024, (IFastPrintWriter**)&fpw);
                 // ws.dump(pw, "", true);
                 IFlushable::Probe(fpw)->Flush();
-                Slogger::W(TAG, "This window was lost: %p", ws.Get());
-                // TODO:
-                // String swStr;
-                // sw->ToString(&swStr);
-                // Slogger::W(TAG, swStr);
+                Slogger::W(TAG, "This window was lost: %s", TO_CSTR(ws));
+                Slogger::W(TAG, TO_CSTR(sw));
                 ws->mWinAnimator->DestroySurfaceLocked();
             }
         }
@@ -13080,7 +13079,7 @@ void CWindowManagerService::HandleDisplayChangedLocked(
 ECode CWindowManagerService::GetWindowManagerLock(
     /* [out] */ IInterface** lock)
 {
-    VALIDATE_NOT_NULL(*lock)
+    VALIDATE_NOT_NULL(lock)
     *lock = (IObject*)&mWindowMapLock;
     REFCOUNT_ADD(*lock)
     return NOERROR;
@@ -13089,7 +13088,6 @@ ECode CWindowManagerService::GetWindowManagerLock(
 ECode CWindowManagerService::ToString(
     /* [ou] */ String* str)
 {
-    VALIDATE_NOT_NULL(str)
     return Object::ToString(str);
 }
 

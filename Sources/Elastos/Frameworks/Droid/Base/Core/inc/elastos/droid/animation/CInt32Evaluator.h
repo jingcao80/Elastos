@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_ANIMATION_CINT32EVALUATOR_H__
-#define  __ELASTOS_DROID_ANIMATION_CINT32EVALUATOR_H__
+#ifndef __ELASTOS_DROID_ANIMATION_CINT32EVALUATOR_H__
+#define __ELASTOS_DROID_ANIMATION_CINT32EVALUATOR_H__
 
 #include "_Elastos_Droid_Animation_CInt32Evaluator.h"
 #include <elastos/core/Object.h>

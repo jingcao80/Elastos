@@ -1,9 +1,17 @@
 
 #include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/ServiceManager.h"
 #include <elastos/core/Thread.h>
+#include <elastos/utility/logging/Slogger.h>
 #include <utils/SystemClock.h>
+#include <Elastos.Droid.App.h>
+#include <Elastos.Droid.Content.h>
 
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::App::IIAlarmManager;
 using Elastos::Core::Thread;
+using Elastos::Utility::Logging::Slogger;
+
 
 namespace Elastos {
 namespace Droid {
@@ -38,25 +46,22 @@ void SystemClock::Sleep(
 
 Boolean SystemClock::SetCurrentTimeMillis(Int64 millis)
 {
-    assert(0);
-    // TODO
-    // IBinder b = ServiceManager.getService(Context.ALARM_SERVICE);
-    // IAlarmManager mgr = IAlarmManager.Stub.asInterface(b);
-    // if (mgr == null) {
-    //     return false;
-    // }
+    AutoPtr<IInterface> service = ServiceManager::GetService(IContext::ALARM_SERVICE);
+    AutoPtr<IIAlarmManager> mgr = IIAlarmManager::Probe(service);
+    if (mgr == NULL) {
+        return FALSE;
+    }
 
-    // try {
-    //     return mgr.setTime(millis);
-    // } catch (RemoteException e) {
-    //     Slog.e(TAG, "Unable to set RTC", e);
-    // } catch (SecurityException e) {
-    //     Slog.e(TAG, "Unable to set RTC", e);
-    // }
-    // return false;
-    return FALSE;
+    Boolean bval = FALSE;
+    ECode ec = mgr->SetTime(millis, &bval);
+    if (ec == (ECode)E_REMOTE_EXCEPTION) {
+        Slogger::E("SystemClock", "Unable to set RTC, E_REMOTE_EXCEPTION");
+    }
+    else if (ec == (ECode)E_SECURITY_EXCEPTION) {
+        Slogger::E("SystemClock", "Unable to set RTC, E_SECURITY_EXCEPTION");
+    }
+    return bval;
 }
-
 
 Int64 SystemClock::GetUptimeMillis()
 {

@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_APPWIDGET_CAPPWIDGETHOST_H__
-#define  __ELASTOS_DROID_APPWIDGET_CAPPWIDGETHOST_H__
+#define __ELASTOS_DROID_APPWIDGET_CAPPWIDGETHOST_H__
 
 #include "_Elastos_Droid_AppWidget_CAppWidgetHost.h"
 #include "elastos/droid/appwidget/AppWidgetHost.h"

@@ -1,6 +1,8 @@
 
 #include "elastos/droid/bluetooth/BluetoothAudioConfig.h"
+#include <elastos/core/StringUtils.h>
 
+using Elastos::Core::StringUtils;
 using Elastos::Droid::Os::EIID_IBinder;
 
 namespace Elastos {
@@ -16,15 +18,15 @@ BluetoothAudioConfig::BluetoothAudioConfig()
 {
 }
 
-BluetoothAudioConfig::BluetoothAudioConfig(
+ECode BluetoothAudioConfig::constructor(
     /* [in] */ Int32 sampleRate,
     /* [in] */ Int32 channelConfig,
     /* [in] */ Int32 audioFormat)
 {
-    // ==================before translated======================
-    // mSampleRate = sampleRate;
-    // mChannelConfig = channelConfig;
-    // mAudioFormat = audioFormat;
+    mSampleRate = sampleRate;
+    mChannelConfig = channelConfig;
+    mAudioFormat = audioFormat;
+    return NOERROR;
 }
 
 ECode BluetoothAudioConfig::Equals(
@@ -32,15 +34,15 @@ ECode BluetoothAudioConfig::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (o instanceof BluetoothAudioConfig) {
-    //     BluetoothAudioConfig bac = (BluetoothAudioConfig)o;
-    //     return (bac.mSampleRate == mSampleRate &&
-    //             bac.mChannelConfig == mChannelConfig &&
-    //             bac.mAudioFormat == mAudioFormat);
-    // }
-    // return false;
-    assert(0);
+    IBluetoothAudioConfig* ibac = IBluetoothAudioConfig::Probe(other);
+    if (ibac != NULL) {
+        BluetoothAudioConfig* bac = (BluetoothAudioConfig*)ibac;
+        *result = (bac->mSampleRate == mSampleRate &&
+                bac->mChannelConfig == mChannelConfig &&
+                bac->mAudioFormat == mAudioFormat);
+        return NOERROR;
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -48,9 +50,7 @@ ECode BluetoothAudioConfig::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     VALIDATE_NOT_NULL(hashCode);
-    // ==================before translated======================
-    // return mSampleRate | (mChannelConfig << 24) | (mAudioFormat << 28);
-    assert(0);
+    *hashCode = mSampleRate | (mChannelConfig << 24) | (mAudioFormat << 28);
     return NOERROR;
 }
 
@@ -58,29 +58,28 @@ ECode BluetoothAudioConfig::ToString(
     /* [out] */ String* info)
 {
     VALIDATE_NOT_NULL(info);
-    // ==================before translated======================
-    // return "{mSampleRate:" + mSampleRate + ",mChannelConfig:" + mChannelConfig
-    //         + ",mAudioFormat:" + mAudioFormat + "}";
-    assert(0);
+    *info = String("{mSampleRate:") + StringUtils::ToString(mSampleRate)
+            + String(",mChannelConfig:") + StringUtils::ToString(mChannelConfig)
+            + String(",mAudioFormat:") + StringUtils::ToString(mAudioFormat)
+            + String("}");
     return NOERROR;
 }
 
 ECode BluetoothAudioConfig::WriteToParcel(
-    /* [in] */ IParcel* out,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* out)
 {
-    VALIDATE_NOT_NULL(out);
-    // ==================before translated======================
-    // out.writeInt(mSampleRate);
-    // out.writeInt(mChannelConfig);
-    // out.writeInt(mAudioFormat);
-    assert(0);
+    out->WriteInt32(mSampleRate);
+    out->WriteInt32(mChannelConfig);
+    out->WriteInt32(mAudioFormat);
     return NOERROR;
 }
 
 CARAPI BluetoothAudioConfig::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
+    source->ReadInt32(&mSampleRate);
+    source->ReadInt32(&mChannelConfig);
+    source->ReadInt32(&mAudioFormat);
     return NOERROR;
 }
 
@@ -88,9 +87,7 @@ ECode BluetoothAudioConfig::GetSampleRate(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mSampleRate;
-    assert(0);
+    *result = mSampleRate;
     return NOERROR;
 }
 
@@ -98,9 +95,7 @@ ECode BluetoothAudioConfig::GetChannelConfig(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mChannelConfig;
-    assert(0);
+    *result = mChannelConfig;
     return NOERROR;
 }
 
@@ -108,9 +103,7 @@ ECode BluetoothAudioConfig::GetAudioFormat(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAudioFormat;
-    assert(0);
+    *result = mAudioFormat;
     return NOERROR;
 }
 

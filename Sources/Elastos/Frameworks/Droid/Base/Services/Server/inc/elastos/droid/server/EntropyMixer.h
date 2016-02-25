@@ -96,6 +96,8 @@ public:
         /* [in] */ const String& randomDevice,
         /* [in] */ const String& hwRandomDevice);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
 private:
     CARAPI Init(
         /* [in] */ IContext* context,

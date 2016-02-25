@@ -1,12 +1,11 @@
 
 module
 {
-    interface Elastos.Droid.Packages.SystemUI.Qs.IQSTileHost;
-    interface Elastos.Droid.Packages.SystemUI.Qs.IQSTile;
+    interface Elastos.Droid.SystemUI.Qs.IQSTileHost;
+    interface Elastos.Droid.SystemUI.Qs.IQSTile;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Qs {
     namespace Tiles {
@@ -31,7 +30,6 @@ module
     } // namespace Tiles
     } // namespace Qs
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

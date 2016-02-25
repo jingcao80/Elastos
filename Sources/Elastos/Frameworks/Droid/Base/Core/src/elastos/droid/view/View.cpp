@@ -14009,8 +14009,9 @@ ECode View::OnCreateDrawableState(
     if (HasWindowFocus(&hasWindowFocus), hasWindowFocus) viewStateIndex |= VIEW_STATE_WINDOW_FOCUSED;
     if ((privateFlags & PFLAG_ACTIVATED) != 0) viewStateIndex |= VIEW_STATE_ACTIVATED;
 
+    Boolean available;
     if (mAttachInfo != NULL && mAttachInfo->mHardwareAccelerationRequested &&
-            HardwareRenderer::IsAvailable()) {
+            (HardwareRenderer::IsAvailable(&available), &available)) {
         // This is set if HW acceleration is requested, even if the current
         // process doesn't allow it.  This is just to allow app preview
         // windows to better match their app.

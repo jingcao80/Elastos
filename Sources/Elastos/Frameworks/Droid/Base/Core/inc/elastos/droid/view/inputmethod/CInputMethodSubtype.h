@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_VIEW_INPUTMETHOD_CINPUTMETHODSUBTYPE_H__
-#define  __ELASTOS_DROID_VIEW_INPUTMETHOD_CINPUTMETHODSUBTYPE_H__
+#define __ELASTOS_DROID_VIEW_INPUTMETHOD_CINPUTMETHODSUBTYPE_H__
 
 #include "elastos/droid/ext/frameworkdef.h"
 #include "_Elastos_Droid_View_InputMethod_CInputMethodSubtype.h"
@@ -53,6 +53,8 @@ public:
         CAR_INTERFACE_DECL()
 
         InputMethodSubtypeBuilder();
+
+        CARAPI constructor();
 
         /**
          * @param isAuxiliary should true when this subtype is auxiliary, false otherwise.

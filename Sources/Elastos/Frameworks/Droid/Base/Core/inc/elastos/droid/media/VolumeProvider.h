@@ -9,7 +9,7 @@ namespace Elastos {
 namespace Droid {
 namespace Media {
 
-class VolumeProvider
+class ECO_PUBLIC VolumeProvider
     : public Object
     , public IVolumeProvider
 {

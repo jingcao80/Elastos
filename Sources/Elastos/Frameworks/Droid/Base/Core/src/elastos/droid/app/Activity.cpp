@@ -1,13 +1,10 @@
-
-#include <Elastos.CoreLibrary.IO.h>
-#include "Elastos.Droid.Internal.h"
 #include "elastos/droid/app/Activity.h"
 #include "elastos/droid/app/Fragment.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
-//#include "elastos/droid/app/CSearchManager.h"
-// #include "elastos/droid/app/CInstrumentationHelper.h"
-// #include "elastos/droid/app/SharedElementCallback.h"
-// #include "elastos/droid/app/CVoiceInteractor.h"
+#include "elastos/droid/app/CSearchManager.h"
+#include "elastos/droid/app/CInstrumentationHelper.h"
+#include "elastos/droid/app/SharedElementCallback.h"
+#include "elastos/droid/app/CVoiceInteractor.h"
 #include "elastos/droid/app/FragmentManagerImpl.h"
 #include "elastos/droid/app/CApplication.h"
 #include "elastos/droid/app/CPendingIntent.h"
@@ -21,8 +18,8 @@
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/graphics/CBitmap.h"
-// #include "elastos/droid/view/CWindowManagerGlobal.h"
-// #include "elastos/droid/view/CMenuInflater.h"
+#include "elastos/droid/view/CWindowManagerGlobal.h"
+#include "elastos/droid/view/CMenuInflater.h"
 #include "elastos/droid/text/Selection.h"
 #include "elastos/droid/text/CSpannableStringBuilder.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -32,9 +29,11 @@
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/content/res/CConfiguration.h"
-// #include "elastos/droid/impl/CPolicyManager.h"
 #include "elastos/droid/net/CUriHelper.h"
 #include "elastos/droid/utility/CArrayMap.h"
+#include "elastos/droid/internal/app/CWindowDecorActionBar.h"
+#include "elastos/droid/internal/app/CToolbarActionBar.h"
+#include "elastos/droid/internal/policy/CPolicyManager.h"
 #include "elastos/droid/R.h"
 
 #include <elastos/core/StringBuffer.h>
@@ -45,6 +44,9 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
+
+#include "Elastos.Droid.Internal.h"
+#include <Elastos.CoreLibrary.IO.h>
 
 using Elastos::Droid::R;
 using Elastos::Droid::Net::IUriHelper;
@@ -85,8 +87,8 @@ using Elastos::Droid::Text::Method::ITextKeyListener;
 using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::View::IViewGroup;
 using Elastos::Droid::View::EIID_IViewGroup;
-// using Elastos::Droid::View::CWindowManagerGlobal;
-// using Elastos::Droid::View::CMenuInflater;
+using Elastos::Droid::View::CWindowManagerGlobal;
+using Elastos::Droid::View::CMenuInflater;
 using Elastos::Droid::View::IViewParent;
 using Elastos::Droid::View::IDispatcherState;
 using Elastos::Droid::View::IViewManager;
@@ -102,9 +104,11 @@ using Elastos::Droid::View::EIID_ILayoutInflaterFactory2;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::Utility::CArrayMap;
 using Elastos::Droid::Internal::Policy::IPolicyManager;
-// using Elastos::Droid::Internal::Policy::CPolicyManager;
+using Elastos::Droid::Internal::Policy::CPolicyManager;
 using Elastos::Droid::Internal::App::IWindowDecorActionBar;
+using Elastos::Droid::Internal::App::CWindowDecorActionBar;
 using Elastos::Droid::Internal::App::IToolbarActionBar;
+using Elastos::Droid::Internal::App::CToolbarActionBar;
 
 using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
@@ -411,9 +415,8 @@ ECode Activity::OnCreate(
     FAIL_RETURN(app->DispatchActivityCreated(THIS_PROBE(IActivity), savedInstanceState));
 
     if (mVoiceInteractor != NULL) {
-        assert(0 && "TODO");
-        // VoiceInteractor* vi = (VoiceInteractor*)mVoiceInteractor.Get();
-        // vi->AttachActivity(THIS_PROBE(IActivity));
+        VoiceInteractor* vi = (VoiceInteractor*)mVoiceInteractor.Get();
+        vi->AttachActivity(THIS_PROBE(IActivity));
     }
 
     mCalled = TRUE;
@@ -1142,8 +1145,7 @@ ECode Activity::SetActionBar(
     AutoPtr<ICharSequence> title;
     GetTitle((ICharSequence**)&title);
     AutoPtr<IToolbarActionBar> tbab;
-    assert(0 && "TODO");
-    // CToolbarActionBar::New(toolbar, title, THIS_PROBE(IActivity), (IToolbarActionBar**)&tbab);
+    CToolbarActionBar::New(toolbar, title, THIS_PROBE(IWindowCallback), (IToolbarActionBar**)&tbab);
     mActionBar = IActionBar::Probe(tbab);
     AutoPtr<IWindowCallback> cb;
     tbab->GetWrappedWindowCallback((IWindowCallback**)&cb);
@@ -1166,31 +1168,30 @@ ECode Activity::GetActionBar(
 
 ECode Activity::InitWindowDecorActionBar()
 {
-     AutoPtr<IWindow> window = GetWindow();
+    AutoPtr<IWindow> window = GetWindow();
 
-     // Initializing the window decor can change window feature flags.
-     // Make sure that we have the correct set before performing the test below.
-     AutoPtr<IView> d;
-     FAIL_RETURN(window->GetDecorView((IView**)&d));
+    // Initializing the window decor can change window feature flags.
+    // Make sure that we have the correct set before performing the test below.
+    AutoPtr<IView> d;
+    FAIL_RETURN(window->GetDecorView((IView**)&d));
 
-     Boolean isChild;
-     IsChild(&isChild);
-     if (isChild) {
-         return NOERROR;
-     }
+    Boolean isChild;
+    IsChild(&isChild);
+    if (isChild) {
+        return NOERROR;
+    }
 
-     Boolean hasFeature;
-     FAIL_RETURN(window->HasFeature(IWindow::FEATURE_ACTION_BAR, &hasFeature));
-     if (!hasFeature) {
-         return NOERROR;
-     }
+    Boolean hasFeature;
+    FAIL_RETURN(window->HasFeature(IWindow::FEATURE_ACTION_BAR, &hasFeature));
+    if (!hasFeature) {
+        return NOERROR;
+    }
 
-     if (mActionBar != NULL) {
-         return NOERROR;
-     }
+    if (mActionBar != NULL) {
+        return NOERROR;
+    }
 
-     assert(0 && "TODO");
-    // FAIL_RETURN(CWindowDecorActionBar::New(THIS_PROBE(IActivity), (IActionBarImpl**)&mActionBar));
+    FAIL_RETURN(CWindowDecorActionBar::New(THIS_PROBE(IActivity), (IActionBar**)&mActionBar));
     FAIL_RETURN(mActionBar->SetDefaultDisplayHomeAsUpEnabled(mEnableDefaultActionBarUp))
 
     IComponentInfo* ci = IComponentInfo::Probe(mActivityInfo);
@@ -2317,28 +2318,28 @@ ECode Activity::GetMenuInflater (
     VALIDATE_NOT_NULL(menuInflater);
 
     // mMenuInflater and Activity have circular reference, modified by xihao
-    assert(0 && "TODO");
-    // InitWindowDecorActionBar();
-    // if (mActionBar != NULL) {
-    //     AutoPtr<IContext> context;
-    //     mActionBar->GetThemedContext((IContext**)&context);
-    //     return CMenuInflater::New(context, THIS_PROBE(IActivity), menuInflater);
-    // }
-    // else {
-    //     return CMenuInflater::New(THIS_PROBE(IActivity), menuInflater);
-    // }
+    //
+    InitWindowDecorActionBar();
+    if (mActionBar != NULL) {
+        AutoPtr<IContext> context;
+        mActionBar->GetThemedContext((IContext**)&context);
+        return CMenuInflater::New(context, TO_IINTERFACE(this), menuInflater);
+    }
+    else {
+        return CMenuInflater::New(THIS_PROBE(IContext), menuInflater);
+    }
 
-    // Make sure that action views can get an appropriate theme.
+    // //Make sure that action views can get an appropriate theme.
     // if (mMenuInflater == NULL) {
     //     InitWindowDecorActionBar();
     //     if (mActionBar != NULL) {
     //         AutoPtr<IContext> context;
     //         mActionBar->GetThemedContext((IContext**)&context);
-    //         FAIL_RETURN(CMenuInflater::New(context, THIS_PROBE(IActivity),
+    //         FAIL_RETURN(CMenuInflater::New(context, TO_IINTERFACE(this),
     //                (IMenuInflater**)&mMenuInflater));
     //     }
     //     else {
-    //         FAIL_RETURN(CMenuInflater::New(THIS_PROBE(IActivity),
+    //         FAIL_RETURN(CMenuInflater::New(THIS_PROBE(IContext),
     //                (IMenuInflater**)&mMenuInflater));
     //     }
     // }
@@ -2581,8 +2582,7 @@ ECode Activity::StartIntentSenderForResultInner(
     FAIL_RETURN(ec);
 
     AutoPtr<IInstrumentationHelper> helper;
-    assert(0 && "TODO");
-    // CInstrumentationHelper::AcquireSingleton((IInstrumentationHelper**)&helper);
+    CInstrumentationHelper::AcquireSingleton((IInstrumentationHelper**)&helper);
     FAIL_RETURN(helper->CheckStartActivityResult(result, NULL));
 
     if (requestCode >= 0) {
@@ -2645,8 +2645,7 @@ ECode Activity::StartActivityIfNeeded(
 //        }
 
         AutoPtr<IInstrumentationHelper> helper;
-        assert(0 && "TODO");
-        // CInstrumentationHelper::AcquireSingleton((IInstrumentationHelper**)&helper);
+        CInstrumentationHelper::AcquireSingleton((IInstrumentationHelper**)&helper);
         FAIL_RETURN(helper->CheckStartActivityResult(result, intent));
 
         if (requestCode >= 0) {
@@ -3289,9 +3288,8 @@ ECode Activity::GetPreferences(
 ECode Activity::EnsureSearchManager()
 {
     if (mSearchManager == NULL) {
-        // TODO
-//        return CSearchManager::New(THIS_PROBE(IActivity), NULL,
-//                (ISearchManager**)&mSearchManager);
+       return CSearchManager::New(THIS_PROBE(IContext), NULL,
+               (ISearchManager**)&mSearchManager);
     }
 
     return NOERROR;
@@ -3613,9 +3611,8 @@ ECode Activity::ConvertFromTranslucent()
     mTranslucentCallback = NULL;
     Boolean bval;
     if (defaultAM->ConvertFromTranslucent(mToken, &bval), bval) {
-        assert(0 && "TODO");
-        // AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
-        // return wmg->ChangeCanvasOpacity(mToken, TRUE);
+        AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
+        return wmg->ChangeCanvasOpacity(mToken, TRUE);
     }
 
     return NOERROR;
@@ -3641,9 +3638,8 @@ ECode Activity::ConvertToTranslucent(
         drawComplete = FALSE;
     }
     else {
-        assert(0 && "TODO");
-        // AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
-        // wmg->ChangeCanvasOpacity(mToken, FALSE);
+        AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
+        wmg->ChangeCanvasOpacity(mToken, FALSE);
         drawComplete = TRUE;
     }
 
@@ -3664,9 +3660,8 @@ ECode Activity::OnTranslucentConversionComplete(
         mTranslucentCallback = NULL;
     }
     if (mChangeCanvasToTranslucent) {
-        assert(0 && "TODO");
-        // AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
-        // wmg->ChangeCanvasOpacity(mToken, FALSE);
+        AutoPtr<IWindowManagerGlobal> wmg = CWindowManagerGlobal::GetInstance();
+        wmg->ChangeCanvasOpacity(mToken, FALSE);
     }
     return NOERROR;
 }
@@ -3967,8 +3962,7 @@ ECode Activity::SetEnterSharedElementCallback(
 {
     AutoPtr<ISharedElementCallback> cb = callback;
     if (cb == NULL) {
-        assert(0 && "TODO");
-        // cb = SharedElementCallback::NULL_CALLBACK;
+        cb = SharedElementCallback::NULL_CALLBACK;
     }
     mEnterTransitionListener = cb;
     return NOERROR;
@@ -3979,7 +3973,7 @@ ECode Activity::SetExitSharedElementCallback(
 {
     AutoPtr<ISharedElementCallback> cb = callback;
     if (cb == NULL) {
-        // cb = SharedElementCallback::NULL_CALLBACK;
+        cb = SharedElementCallback::NULL_CALLBACK;
     }
     mExitTransitionListener = cb;
     return NOERROR;
@@ -4023,8 +4017,7 @@ ECode Activity::Attach(
     FAIL_RETURN(mFragments->AttachActivity(THIS_PROBE(IActivity), mContainer, NULL));
 
     AutoPtr<IPolicyManager> pm;
-    assert(0 && "TODO");
-    // CPolicyManager::AcquireSingleton((IPolicyManager**)&pm);
+    CPolicyManager::AcquireSingleton((IPolicyManager**)&pm);
     mWindow = NULL;
     FAIL_RETURN(pm->MakeNewWindow(THIS_PROBE(IContext), (IWindow**)&mWindow));
     FAIL_RETURN(mWindow->SetCallback(THIS_PROBE(IWindowCallback)));
@@ -4067,9 +4060,8 @@ ECode Activity::Attach(
         }
         else {
             AutoPtr<ILooper> looper = Looper::GetMyLooper();
-            assert(0 && "TODO");
-            // CVoiceInteractor::New(voiceInteractor, THIS_PROBE(IContext), THIS_PROBE(IActivity),
-            //     looper, (IVoiceInteractor**)&mVoiceInteractor);
+            CVoiceInteractor::New(voiceInteractor, THIS_PROBE(IContext), THIS_PROBE(IActivity),
+                looper, (IVoiceInteractor**)&mVoiceInteractor);
         }
     }
 
@@ -4189,10 +4181,7 @@ ECode Activity::PerformRestart()
         mStopped = FALSE;
 
         if (mToken != NULL && mParent == NULL) {
-            AutoPtr<IWindowManagerGlobal> wmg;
-            assert(0 && "TODO");
-            // CWindowManagerGlobal::AcquireSingleton((IWindowManagerGlobal**)&wmg);
-            // FAIL_RETURN(wmg->SetStoppedState(mToken, FALSE));
+            FAIL_RETURN(CWindowManagerGlobal::GetInstance()->SetStoppedState(mToken, FALSE));
         }
 
         {
@@ -4337,10 +4326,7 @@ ECode Activity::PerformStop()
             mWindow->CloseAllPanels();
         }
         if (mToken != NULL && mParent == NULL) {
-            AutoPtr<IWindowManagerGlobal> wmg;
-            assert(0 && "TODO");
-            // CWindowManagerGlobal::AcquireSingleton((IWindowManagerGlobal**)&wmg);
-            // FAIL_RETURN(wmg->SetStoppedState(mToken, TRUE));
+            FAIL_RETURN(CWindowManagerGlobal::GetInstance()->SetStoppedState(mToken, TRUE));
         }
 
         FAIL_RETURN(mFragments->DispatchStop());
@@ -4384,18 +4370,17 @@ ECode Activity::PerformDestroy()
     mDestroyed = true;
     mWindow->Destroy();
 
-    assert(0 && "TODO");
-    // FragmentManagerImpl* fmi = (FragmentManagerImpl*)mFragments.Get();
-    // FAIL_RETURN(fmi->DispatchDestroy());
+    FragmentManagerImpl* fmi = (FragmentManagerImpl*)mFragments.Get();
+    FAIL_RETURN(fmi->DispatchDestroy());
     OnDestroy();
     if (mLoaderManager != NULL) {
+        assert(0 && "TODO");
         //LoaderManagerImpl* lmi = (LoaderManagerImpl*)mLoaderManager.Get();
         //lmi->DoDestroy();
     }
     if (mVoiceInteractor != NULL) {
-        assert(0 && "TODO");
-        // VoiceInteractor* vi = (VoiceInteractor*)mVoiceInteractor.Get();
-        // vi->DetachActivity();
+        VoiceInteractor* vi = (VoiceInteractor*)mVoiceInteractor.Get();
+        vi->DetachActivity();
     }
     return NOERROR;
 }

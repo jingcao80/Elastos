@@ -1,12 +1,14 @@
 #ifndef __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWPRINTDOCUMENTADAPTER_H__
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWPRINTDOCUMENTADAPTER_H__
+
 #include "elastos/droid/ext/frameworkext.h"
+#include <Elastos.Droid.Webkit.h>
 #include "elastos/droid/webkit/native/android_webview/AwPdfExporter.h"
 
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ICancellationSignal;
 using Elastos::Droid::Os::IParcelFileDescriptor;
-//TODO using Elastos::Droid::Webkit::IValueCallback;
+using Elastos::Droid::Webkit::IValueCallback;
 //TODO using Elastos::Droid::Print::IPageRange;
 //TODO using Elastos::Droid::Print::IPrintAttributes;
 //TODO using Elastos::Droid::Print::IPrintDocumentAdapter;
@@ -30,10 +32,10 @@ class AwPrintDocumentAdapter
 public:
     class InnerValueCallback
         : public Object
-        //TODO , public IValueCallback
+        , public IValueCallback
     {
     public:
-        //TODO CAR_INTERFACE_DECL();
+        CAR_INTERFACE_DECL();
         InnerValueCallback(
             /* [in] */ AwPrintDocumentAdapter* owner,
             /* [in] */ /*TODO IWriteResultCallback*/IInterface* callback);

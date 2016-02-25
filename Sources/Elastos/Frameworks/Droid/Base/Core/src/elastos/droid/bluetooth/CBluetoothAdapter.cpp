@@ -1,21 +1,46 @@
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Os.h"
+#include "elastos/droid/bluetooth/le/CScanSettings.h"
+#include "elastos/droid/bluetooth/le/ScanFilter.h"
+#include "elastos/droid/bluetooth/le/BluetoothLeAdvertiser.h"
+#include "elastos/droid/bluetooth/le/BluetoothLeScanner.h"
 #include "elastos/droid/bluetooth/CBluetoothAdapter.h"
 #include "elastos/droid/bluetooth/CBluetoothDevice.h"
 #include "elastos/droid/bluetooth/BluetoothServerSocket.h"
 #include "elastos/droid/bluetooth/BluetoothHeadset.h"
 #include "elastos/droid/bluetooth/BluetoothA2dp.h"
-#include "elastos/droid/bluetooth/BluetoothInputDevice.h"
-#include "elastos/droid/bluetooth/BluetoothPan.h"
+#include "elastos/droid/bluetooth/BluetoothA2dpSink.h"
+#include "elastos/droid/bluetooth/BluetoothAvrcpController.h"
+#include "elastos/droid/bluetooth/BluetoothHeadsetClient.h"
 #include "elastos/droid/bluetooth/BluetoothHealth.h"
+#include "elastos/droid/bluetooth/BluetoothInputDevice.h"
+#include "elastos/droid/bluetooth/BluetoothMap.h"
+#include "elastos/droid/bluetooth/BluetoothPan.h"
 #include "elastos/droid/bluetooth/BluetoothSocket.h"
 #include "elastos/droid/app/CActivityThread.h"
+#include "elastos/droid/os/CParcelUuid.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::CActivityThread;
+using Elastos::Droid::Bluetooth::LE::CScanSettings;
+using Elastos::Droid::Bluetooth::LE::IBluetoothLeAdvertiser;
+using Elastos::Droid::Bluetooth::LE::BluetoothLeAdvertiser;
+using Elastos::Droid::Bluetooth::LE::IBluetoothLeScanner;
+using Elastos::Droid::Bluetooth::LE::BluetoothLeScanner;
+using Elastos::Droid::Bluetooth::LE::IScanCallback;
+using Elastos::Droid::Bluetooth::LE::IScanFilter;
+using Elastos::Droid::Bluetooth::LE::IScanRecord;
+using Elastos::Droid::Bluetooth::LE::IScanResult;
+using Elastos::Droid::Bluetooth::LE::IScanSettings;
+using Elastos::Droid::Bluetooth::LE::ScanFilter;
 using Elastos::Droid::Content::Pm::IIPackageManager;
+using Elastos::Droid::Os::CParcelUuid;
 using Elastos::Droid::Os::ServiceManager;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -27,7 +52,66 @@ const Boolean CBluetoothAdapter::DBG = TRUE;
 const Boolean CBluetoothAdapter::VDBG = FALSE;
 const Int32 CBluetoothAdapter::ADDRESS_LENGTH;
 AutoPtr<IBluetoothAdapter> CBluetoothAdapter::sAdapter;
+AutoPtr<IBluetoothLeScanner> CBluetoothAdapter::sBluetoothLeScanner;
+AutoPtr<IBluetoothLeAdvertiser> CBluetoothAdapter::sBluetoothLeAdvertiser;
 Object CBluetoothAdapter::sLock;
+
+CBluetoothAdapter::BluetoothAdapterScanCallback::BluetoothAdapterScanCallback(
+    /* [in] */ CBluetoothAdapter* owner,
+    /* [in] */ ArrayOf<IUUID*>* serviceUuids,
+    /* [in] */ IBluetoothAdapterLeScanCallback* callback)
+    : mOwner(owner)
+    , mServiceUuids(serviceUuids)
+    , mCallback(callback)
+{
+}
+
+ECode CBluetoothAdapter::BluetoothAdapterScanCallback::OnScanResult(
+    /* [in] */ Int32 callbackType,
+    /* [in] */ IScanResult* result)
+{
+    if (callbackType != IScanSettings::CALLBACK_TYPE_ALL_MATCHES) {
+        // Should not happen.
+        Logger::E(TAG, "LE Scan has already started");
+        return NOERROR;
+    }
+    AutoPtr<IScanRecord> scanRecord;
+    result->GetScanRecord((IScanRecord**)&scanRecord);
+    if (scanRecord == NULL) {
+        return NOERROR;
+    }
+    if (mServiceUuids != NULL) {
+        //List<ParcelUuid> uuids = new ArrayList<ParcelUuid>();
+        AutoPtr<IList> uuids;
+        CArrayList::New((IList**)&uuids);
+        //for (UUID uuid : serviceUuids) {
+        //    uuids.add(new ParcelUuid(uuid));
+        //}
+        for (Int32 i = 0; i < mServiceUuids->GetLength(); ++i) {
+            AutoPtr<IUUID> uuid = (*mServiceUuids)[i];
+            AutoPtr<IParcelUuid> puuid;
+            CParcelUuid::New(uuid, (IParcelUuid**)&puuid);
+            uuids->Add(TO_IINTERFACE(puuid));
+        }
+
+        //List<ParcelUuid> scanServiceUuids = scanRecord.getServiceUuids();
+        AutoPtr<IList> scanServiceUuids;
+        scanRecord->GetServiceUuids((IList**)&scanServiceUuids);
+        Boolean contains;
+        if (scanServiceUuids == NULL || !(scanServiceUuids->ContainsAll(Elastos::Utility::ICollection::Probe(uuids), &contains), contains)) {
+            if (DBG) Logger::D(TAG, "uuids does not match");
+            return NOERROR;
+        }
+    }
+    AutoPtr<IBluetoothDevice> device;
+    result->GetDevice((IBluetoothDevice**)&device);
+    Int32 rssi;
+    result->GetRssi(&rssi);
+    AutoPtr<ArrayOf<Byte> > bytes;
+    scanRecord->GetBytes((ArrayOf<Byte>**)&bytes);
+    mCallback->OnLeScan(device, rssi, bytes);
+    return NOERROR;
+}
 
 CAR_INTERFACE_IMPL(CBluetoothAdapter, Object, IBluetoothAdapter);
 
@@ -49,34 +133,10 @@ CBluetoothAdapter::~CBluetoothAdapter()
     // }
 }
 
-Boolean CBluetoothAdapter::HasBluetoothFeature()
-{
-    AutoPtr<IIPackageManager> pm = CActivityThread::GetPackageManager();
-    if (pm == NULL) {
-        Logger::E(TAG, "Cannot get package manager, assuming no Bluetooth feature");
-        return FALSE;
-    }
-    // try {
-    Boolean result;
-    if (FAILED(pm->HasSystemFeature(IPackageManager::FEATURE_BLUETOOTH, &result))) {
-        Logger::E(TAG, "Package manager query failed, assuming no Bluetooth feature");
-        return FALSE;
-    }
-    return result;
-    // } catch (RemoteException e) {
-    //     Log.e(TAG, "Package manager query failed, assuming no Bluetooth feature", e);
-    //     return false;
-    // }
-}
-
 AutoPtr<IBluetoothAdapter> CBluetoothAdapter::GetDefaultAdapter()
 {
     AutoLock lock(sLock);
     if (sAdapter == NULL) {
-        if(!HasBluetoothFeature())  {
-            Logger::I(TAG, "this device does not have Bluetooth support");
-            return NULL;
-        }
 
         AutoPtr<IInterface> b = ServiceManager::GetService(BLUETOOTH_MANAGER_SERVICE);
         if (b != NULL) {
@@ -112,21 +172,55 @@ ECode CBluetoothAdapter::GetRemoteDevice(
     }
 
     String add;
-    add.AppendFormat("%02X:%02X:%02X:%02X:%02X:%02X", (*address)[0], (*address)[1], (*address)[2], (*address)[3], (*address)[4], (*address)[5]);
+    add.AppendFormat(/*Local.US, */"%02X:%02X:%02X:%02X:%02X:%02X", (*address)[0], (*address)[1], (*address)[2], (*address)[3], (*address)[4], (*address)[5]);
     return CBluetoothDevice::New(add, device);
 }
 
 ECode CBluetoothAdapter::GetBluetoothLeAdvertiser(
     /* [out] */ IBluetoothLeAdvertiser** btAdvertiser)
 {
-    //TODO
+    VALIDATE_NOT_NULL(btAdvertiser);
+    Int32 state;
+    if ((GetState(&state), state) != STATE_ON) {
+        *btAdvertiser = NULL;
+        return NOERROR;
+    }
+    Boolean support = FALSE;
+    if (!(IsMultipleAdvertisementSupported(&support), support)) {
+        *btAdvertiser = NULL;
+        return NOERROR;
+    }
+    {
+        AutoLock lock(mLock);
+        if (sBluetoothLeAdvertiser == NULL) {
+            AutoPtr<BluetoothLeAdvertiser> bla = new BluetoothLeAdvertiser();//TODO check if use Cxx + constructor
+            bla->constructor(mManagerService);
+            sBluetoothLeAdvertiser = bla;
+        }
+    }
+    *btAdvertiser = sBluetoothLeAdvertiser;
     return NOERROR;
 }
 
 ECode CBluetoothAdapter::GetBluetoothLeScanner(
     /* [out] */ IBluetoothLeScanner** btLeScanner)
 {
-    //TODO
+    VALIDATE_NOT_NULL(btLeScanner);
+    Int32 state;
+    if ((GetState(&state), state) != STATE_ON) {
+        *btLeScanner = NULL;
+        return NOERROR;
+    }
+    {
+        AutoLock lock(mLock);
+        if (sBluetoothLeScanner == NULL) {
+            //TODO check if use Cxx + constructor
+            AutoPtr<BluetoothLeScanner> bls = new BluetoothLeScanner();
+            bls->constructor(mManagerService);
+            sBluetoothLeScanner = bls;
+        }
+    }
+    *btLeScanner = sBluetoothLeScanner;
     return NOERROR;
 }
 
@@ -231,7 +325,14 @@ ECode CBluetoothAdapter::ConfigHciSnoopLog(
     /* [in] */ Boolean enabled,
     /* [out] */ Boolean* result)
 {
-    //TODO
+    VALIDATE_NOT_NULL(result);
+    //try {
+    {
+        AutoLock lock(mManagerCallback);
+        if (mService != NULL) return mService->ConfigHciSnoopLog(enabled, result);
+    }
+    //} catch (RemoteException e) {Log.e(TAG, "", e);}
+    *result = FALSE;
     return NOERROR;
 }
 
@@ -390,21 +491,45 @@ ECode CBluetoothAdapter::IsDiscovering(
 ECode CBluetoothAdapter::IsMultipleAdvertisementSupported(
     /* [out] */ Boolean* result)
 {
-    //TODO
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+    Int32 state;
+    if ((GetState(&state), state) != STATE_ON) return NOERROR;
+    //try {
+    return mService->IsMultiAdvertisementSupported(result);
+    //} catch (RemoteException e) {
+    //    Log.e(TAG, "failed to get isMultipleAdvertisementSupported, error: ", e);
+    //}
     return NOERROR;
 }
 
 ECode CBluetoothAdapter::IsOffloadedFilteringSupported(
     /* [out] */ Boolean* result)
 {
-    //TODO
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+    Int32 state;
+    if ((GetState(&state), state) != STATE_ON) return NOERROR;
+    //try {
+    return mService->IsOffloadedFilteringSupported(result);
+    //} catch (RemoteException e) {
+    //    Log.e(TAG, "failed to get isOffloadedFilteringSupported, error: ", e);
+    //}
     return NOERROR;
 }
 
 ECode CBluetoothAdapter::IsOffloadedScanBatchingSupported(
     /* [out] */ Boolean* result)
 {
-    //TODO
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+    Int32 state;
+    if ((GetState(&state), state) != STATE_ON) return NOERROR;
+    //try {
+    return mService->IsOffloadedScanBatchingSupported(result);
+    //} catch (RemoteException e) {
+    //    Log.e(TAG, "failed to get isOffloadedScanBatchingSupported, error: ", e);
+    //}
     return NOERROR;
 }
 
@@ -412,7 +537,36 @@ ECode CBluetoothAdapter::GetControllerActivityEnergyInfo(
     /* [in] */ Int32 updateType,
     /* [out] */ IBluetoothActivityEnergyInfo** btActivityEnergyInfo)
 {
-    //TODO
+    VALIDATE_NOT_NULL(btActivityEnergyInfo);
+    *btActivityEnergyInfo = NULL;
+    Int32 state;
+    if ((GetState(&state), state) != STATE_ON) return NOERROR;
+    //try {
+        AutoPtr<IBluetoothActivityEnergyInfo> record;
+        Boolean supported = FALSE;
+        if (!(mService->IsActivityAndEnergyReportingSupported(&supported), supported)) {
+            return NOERROR;
+        }
+        {
+            AutoLock lock(this);
+            if (updateType == ACTIVITY_ENERGY_INFO_REFRESHED) {
+                mService->GetActivityEnergyInfoFromController();
+                Wait(CONTROLLER_ENERGY_UPDATE_TIMEOUT_MILLIS);
+            }
+            mService->ReportActivityInfo((IBluetoothActivityEnergyInfo**)&record);
+            Boolean isValid;
+            if (record->IsValid(&isValid)) {
+                *btActivityEnergyInfo = record;
+                return NOERROR;
+            } else {
+                return NOERROR;
+            }
+        }
+    //} catch (InterruptedException e) {
+    //    Log.e(TAG, "getControllerActivityEnergyInfoCallback wait interrupted: " + e);
+    //} catch (RemoteException e) {
+    //    Log.e(TAG, "getControllerActivityEnergyInfoCallback: " + e);
+    //}
     return NOERROR;
 }
 
@@ -658,6 +812,16 @@ ECode CBluetoothAdapter::GetProfileProxy(
         *result = TRUE;
         return NOERROR;
     }
+    else if (profile == IBluetoothProfile::A2DP_SINK) {
+        AutoPtr<IBluetoothA2dpSink> a2dpSink = new BluetoothA2dpSink(context, listener);
+        *result = TRUE;
+        return NOERROR;
+    }
+    else if (profile == IBluetoothProfile::AVRCP_CONTROLLER) {
+        AutoPtr<IBluetoothAvrcpController> avrcp = new BluetoothAvrcpController(context, listener);
+        *result = TRUE;
+        return NOERROR;
+    }
     else if (profile == IBluetoothProfile::INPUT_DEVICE) {
         AutoPtr<BluetoothInputDevice> obj = new BluetoothInputDevice(context, listener);
         *result = TRUE;
@@ -670,6 +834,16 @@ ECode CBluetoothAdapter::GetProfileProxy(
     }
     else if (profile == IBluetoothProfile::HEALTH) {
         AutoPtr<BluetoothHealth> obj = new BluetoothHealth(context, listener);
+        *result = TRUE;
+        return NOERROR;
+    }
+    else if (profile == IBluetoothProfile::MAP) {
+        AutoPtr<IBluetoothMap> map = new BluetoothMap(context, listener);
+        *result = TRUE;
+        return NOERROR;
+    }
+    else if (profile == IBluetoothProfile::HEADSET_CLIENT) {
+        AutoPtr<IBluetoothHeadsetClient> headsetClient = new BluetoothHeadsetClient(context, listener);
         *result = TRUE;
         return NOERROR;
     }
@@ -693,6 +867,12 @@ ECode CBluetoothAdapter::CloseProfileProxy(
         case IBluetoothProfile::A2DP:
             ((IBluetoothA2dp*)proxy)->Close();
             break;
+        case IBluetoothProfile::A2DP_SINK:
+            ((IBluetoothA2dpSink*)proxy)->Close();
+            break;
+        case IBluetoothProfile::AVRCP_CONTROLLER:
+            ((IBluetoothAvrcpController*)proxy)->Close();
+            break;
         case IBluetoothProfile::INPUT_DEVICE:
             ((BluetoothInputDevice*)proxy)->Close();
             break;
@@ -701,6 +881,18 @@ ECode CBluetoothAdapter::CloseProfileProxy(
             break;
         case IBluetoothProfile::HEALTH:
             ((IBluetoothHealth*)proxy)->Close();
+            break;
+        case IBluetoothProfile::GATT:
+            ((IBluetoothGatt*)proxy)->Close();
+            break;
+        case IBluetoothProfile::GATT_SERVER:
+            ((IBluetoothGattServer*)proxy)->Close();
+            break;
+        case IBluetoothProfile::MAP:
+            ((IBluetoothMap*)proxy)->Close();
+            break;
+        case IBluetoothProfile::HEADSET_CLIENT:
+            ((IBluetoothHeadsetClient*)proxy)->Close();
             break;
     }
 
@@ -748,8 +940,7 @@ ECode CBluetoothAdapter::StartLeScan(
     /* [in] */ IBluetoothAdapterLeScanCallback* cb,
     /* [out] */ Boolean* result)
 {
-    //TODO
-    return NOERROR;
+    return StartLeScan(NULL, cb, result);
 }
 
 ECode CBluetoothAdapter::StartLeScan(
@@ -757,14 +948,99 @@ ECode CBluetoothAdapter::StartLeScan(
     /* [in] */ IBluetoothAdapterLeScanCallback* cb,
     /* [out] */ Boolean* result)
 {
-    //TODO
+    VALIDATE_NOT_NULL(result);
+    if (DBG) Logger::D(TAG, "startLeScan(): ");// + serviceUuids;
+    if (cb == NULL) {
+        if (DBG) Logger::E(TAG, "startLeScan: null callback");
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    AutoPtr<IBluetoothLeScanner> scanner;
+    GetBluetoothLeScanner((IBluetoothLeScanner**)&scanner);
+    if (scanner == NULL) {
+        if (DBG) Logger::E(TAG, "startLeScan: cannot get BluetoothLeScanner");
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    {
+        AutoLock lock(mLeScanClients);
+        Boolean contains = FALSE;
+        if (mLeScanClients->ContainsKey(TO_IINTERFACE(cb), &contains), contains) {
+            if (DBG) Logger::E(TAG, "LE Scan has already started");
+            *result = FALSE;
+            return NOERROR;
+        }
+
+        //try {
+            AutoPtr<IIBluetoothGatt> iGatt;
+            mManagerService->GetBluetoothGatt((IIBluetoothGatt**)&iGatt);
+            if (iGatt == NULL) {
+                // BLE is not supported
+                *result = FALSE;
+                return NOERROR;
+            }
+
+            AutoPtr<IScanCallback> scanCallback = new BluetoothAdapterScanCallback(this, serviceUuids, cb);
+
+            //ScanSettings settings = new ScanSettings.Builder()
+            //    .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+            //    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
+            AutoPtr<IScanSettings> settings;
+            CScanSettings::New(IScanSettings::SCAN_MODE_LOW_LATENCY, IScanSettings::CALLBACK_TYPE_ALL_MATCHES,
+                    IScanSettings::SCAN_RESULT_TYPE_FULL, 0, (IScanSettings**)&settings);
+
+            //List<ScanFilter> filters = new ArrayList<ScanFilter>();
+            AutoPtr<IList> filters;
+            CArrayList::New((IList**)&filters);
+            if (serviceUuids != NULL && serviceUuids->GetLength() > 0) {
+                // Note scan filter does not support matching an UUID array so we put one
+                // UUID to hardware and match the whole array in callback.
+                //ScanFilter filter = new ScanFilter.Builder().setServiceUuid(
+                //        new ParcelUuid(serviceUuids[0])).build();
+                AutoPtr<IParcelUuid> puuid;
+                CParcelUuid::New((*serviceUuids)[0], (IParcelUuid**)&puuid);
+                AutoPtr<ScanFilter::Builder> builder = new ScanFilter::Builder();
+                builder->SetServiceUuid(puuid);
+                AutoPtr<IScanFilter> filter;
+                builder->Build((IScanFilter**)&filter);
+                filters->Add(TO_IINTERFACE(filter));
+            }
+            scanner->StartScan(filters, settings, scanCallback);
+
+            mLeScanClients->Put(TO_IINTERFACE(cb), TO_IINTERFACE(scanCallback));
+            *result = TRUE;
+            return NOERROR;
+
+        //} catch (RemoteException e) {
+        //    Log.e(TAG,"",e);
+        //}
+    }
+    *result = FALSE;
     return NOERROR;
 }
 
 ECode CBluetoothAdapter::StopLeScan(
     /* [in] */ IBluetoothAdapterLeScanCallback* cb)
 {
-    //TODO
+    if (DBG) Logger::D(TAG, "stopLeScan()");
+    AutoPtr<IBluetoothLeScanner> scanner;
+    GetBluetoothLeScanner((IBluetoothLeScanner**)&scanner);
+    if (scanner == NULL) {
+        return NOERROR;
+    }
+    {
+        AutoLock lock(mLeScanClients);
+        AutoPtr<IInterface> value;
+        mLeScanClients->Remove(TO_IINTERFACE(cb), (IInterface**)&value);
+        AutoPtr<IScanCallback> scanCallback = IScanCallback::Probe(value);
+        if (scanCallback == NULL) {
+            if (DBG) Logger::D(TAG, "scan not started yet");
+            return NOERROR;
+        }
+        scanner->StopScan(scanCallback);
+    }
     return NOERROR;
 }
 
@@ -839,7 +1115,8 @@ ECode CBluetoothAdapter::constructor(
 //        Log.e(TAG, "", e);
 //    }
     mManagerService = managerService;
-    mServiceRecordHandler = NULL;
+    //mServiceRecordHandler = NULL;
+    CHashMap::New((IMap**)&mLeScanClients);
     return NOERROR;
 }
 

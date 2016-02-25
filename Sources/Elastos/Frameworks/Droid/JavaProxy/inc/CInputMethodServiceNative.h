@@ -6,7 +6,7 @@
 #include <jni.h>
 
 using Elastos::Droid::Internal::View::IIInputMethodSession;
-using Elastos::Droid::Internal::View::IInputContext;
+using Elastos::Droid::Internal::View::IIInputContext;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IResultReceiver;
 using Elastos::Droid::View::IInputMethodCallback;
@@ -22,7 +22,7 @@ CarClass(CInputMethodServiceNative)
 {
 public:
     ~CInputMethodServiceNative();
-    
+
     CARAPI constructor(
         /* [in] */ Handle32 jVM,
         /* [in] */ Handle32 jInstance);
@@ -36,11 +36,11 @@ public:
     CARAPI UnbindInput();
 
     CARAPI StartInput(
-        /* [in] */ IInputContext* inputContext,
+        /* [in] */ IIInputContext* inputContext,
         /* [in] */ IEditorInfo* attribute);
 
     CARAPI RestartInput(
-        /* [in] */ IInputContext* inputContext,
+        /* [in] */ IIInputContext* inputContext,
         /* [in] */ IEditorInfo* attribute);
 
     CARAPI CreateSession(

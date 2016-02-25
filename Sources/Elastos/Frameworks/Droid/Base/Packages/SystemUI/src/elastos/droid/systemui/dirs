@@ -1,0 +1,16 @@
+
+DIRS += doze
+#DIRS += media
+#DIRS += recent
+DIRS += recents
+DIRS += statusbar
+#DIRS += egg
+#DIRS += keyguard
+#DIRS += net
+#DIRS += power
+#DIRS += qs
+#DIRS += recents
+#DIRS += screenshot
+#DIRS += settings
+#DIRS += usb
+#DIRS += volume

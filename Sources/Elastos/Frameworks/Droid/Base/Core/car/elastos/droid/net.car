@@ -217,7 +217,7 @@ module
 
     class CEthernetManager {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIEthernetManager* service);
 
         interface IEthernetManager;
@@ -412,7 +412,7 @@ module
     class CNetworkFactory {
         constructor(
             [in] ILooper* looper,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String logTag,
             [in] INetworkCapabilities* filter);
 
@@ -1016,7 +1016,7 @@ module
 
     class CHttpsConnection {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IHttpHost* host,
             [in] IHttpHost* proxy,
             [in] IRequestFeeder* requestFeeder);
@@ -1071,7 +1071,7 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] Int32 connectionCount);
 
         interface IRequestFeeder;
@@ -1169,7 +1169,7 @@ module
 
     class CNsdManager {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IINsdManager* service);
 
         interface INsdManager;

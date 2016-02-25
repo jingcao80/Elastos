@@ -7,9 +7,6 @@
 
 #include "elastos/droid/webkit/native/base/ThreadUtils.h"
 #include <elastos/core/StringUtils.h>
-//TODO #include <elastos/io/CPipedInputStream.h>
-//TODO #include <elastos/io/CPipedOutputStream.h>
-//TODO #include <elastos/utility/CRandom.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Webkit::Base::ThreadUtils;
@@ -20,10 +17,10 @@ using Elastos::Core::EIID_IRunnable;
 using Elastos::IO::IPipedInputStream;
 using Elastos::IO::IFlushable;
 using Elastos::IO::IOutputStream;
-//TODO using Elastos::IO::CPipedInputStream;
-//TODO using Elastos::IO::CPipedOutputStream;
+using Elastos::IO::CPipedInputStream;
+using Elastos::IO::CPipedOutputStream;
 using Elastos::Utility::IRandom;
-//TODO using Elastos::Utility::CRandom;
+using Elastos::Utility::CRandom;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -48,9 +45,8 @@ DefaultVideoPosterRequestHandler::UIRunnable::UIRunnable(
 
 ECode DefaultVideoPosterRequestHandler::UIRunnable::Run()
 {
-    AutoPtr<IBitmap> defaultVideoPoster; //TODO = mContentClient->GetDefaultVideoPoster();
-    AutoPtr<IOutputStream> outputStream;
-    //TODO outputStream = IOutputStream::Probe(mOutputStream);
+    AutoPtr<IBitmap> defaultVideoPoster = mContentClient->GetDefaultVideoPoster();
+    AutoPtr<IOutputStream> outputStream = IOutputStream::Probe(mOutputStream);
     if (defaultVideoPoster == NULL) {
         CloseOutputStream(outputStream);
         return NOERROR;
@@ -80,8 +76,7 @@ DefaultVideoPosterRequestHandler::AsyncTaskRunnable::AsyncTaskRunnable(
 ECode DefaultVideoPosterRequestHandler::AsyncTaskRunnable::Run()
 {
     // try {
-    AutoPtr<IOutputStream> outputStream;
-    //TODO outputStream = IOutputStream::Probe(mOutputStream);
+    AutoPtr<IOutputStream> outputStream = IOutputStream::Probe(mOutputStream);
     Boolean result;
     ECode ecode = mDefaultVideoPoster->Compress(BitmapCompressFormat_PNG, 100, outputStream, &result);
     if (FAILED(ecode))
@@ -125,9 +120,9 @@ AutoPtr<IInputStream> DefaultVideoPosterRequestHandler::GetInputStream(
     /* [in] */ AwContentsClient* contentClient, DefaultVideoPosterRequestHandler* pThis)
 {
     AutoPtr<IPipedInputStream> inputStream;
-    //TODO CPipedInputStream::New((IPipedInputStream**)&inputStream);
+    CPipedInputStream::New((IPipedInputStream**)&inputStream);
     AutoPtr<IPipedOutputStream> outputStream;
-    //TODO CPipedOutputStream::New(inputStream, (IPipedOutputStream**)&outputStream);
+    CPipedOutputStream::New(inputStream, (IPipedOutputStream**)&outputStream);
 
     // Send the request to UI thread to callback to the client, and if it provides a
     // valid bitmap bounce on to the worker thread pool to compress it into the piped
@@ -181,7 +176,7 @@ String DefaultVideoPosterRequestHandler::GetDefaultVideoPosterURL()
 String DefaultVideoPosterRequestHandler::GenerateDefaulVideoPosterURL()
 {
     AutoPtr<IRandom> randomGenerator;
-    //TODO CRandom::New((IRandom**)&randomGenerator);
+    CRandom::New((IRandom**)&randomGenerator);
     //String path = String.valueOf(randomGenerator.nextLong());
     Int64 randomNumber;
     randomGenerator->NextInt64(&randomNumber);

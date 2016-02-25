@@ -1,44 +1,81 @@
 
 #include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.Content.h"
+#include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/content/res/StringBlock.h"
-//#include "elastos/droid/graphics/CPaint.h"
-//#include "elastos/droid/graphics/CRect.h"
+#include "elastos/droid/graphics/CPaint.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/Color.h"
-// #include "elastos/droid/text/CStyleSpan.h"
-// #include "elastos/droid/text/CSpannableString.h"
-// #include "elastos/droid/text/CUnderlineSpan.h"
-// #include "elastos/droid/text/CTypefaceSpan.h"
-// #include "elastos/droid/text/CRelativeSizeSpan.h"
-// #include "elastos/droid/text/CSubscriptSpan.h"
-// #include "elastos/droid/text/CSuperscriptSpan.h"
-// #include "elastos/droid/text/CStrikethroughSpan.h"
-// #include "elastos/droid/text/CBulletSpan.h"
-// #include "elastos/droid/text/CAbsoluteSizeSpan.h"
-// #include "elastos/droid/text/CForegroundColorSpan.h"
-// #include "elastos/droid/text/CBackgroundColorSpan.h"
-// #include "elastos/droid/text/CURLSpan.h"
-// #include "elastos/droid/text/CAnnotation.h"
-// #include "utils/XmlUtils.h"
-// #include <string.h>
+#include "elastos/droid/text/TextUtils.h"
+#include "elastos/droid/text/CSpannableString.h"
+#include "elastos/droid/text/CAnnotation.h"
+#include "elastos/droid/text/style/CUnderlineSpan.h"
+#include "elastos/droid/text/style/CTypefaceSpan.h"
+#include "elastos/droid/text/style/CRelativeSizeSpan.h"
+#include "elastos/droid/text/style/CSubscriptSpan.h"
+#include "elastos/droid/text/style/CSuperscriptSpan.h"
+#include "elastos/droid/text/style/CStrikethroughSpan.h"
+#include "elastos/droid/text/style/CBulletSpan.h"
+#include "elastos/droid/text/style/CAbsoluteSizeSpan.h"
+#include "elastos/droid/text/style/CForegroundColorSpan.h"
+#include "elastos/droid/text/style/CBackgroundColorSpan.h"
+#include "elastos/droid/text/style/CURLSpan.h"
+#include "elastos/droid/text/style/CStyleSpan.h"
+#include "elastos/droid/text/style/CTextAppearanceSpan.h"
 #include <elastos/core/Math.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <androidfw/ResourceTypes.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Core::CString;
-using Elastos::Utility::Logging::Slogger;
-//using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Content::Res::CResources;
+using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::IPaint;
-//using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::Color;
 using Elastos::Droid::Graphics::IRect;
-// using Elastos::Droid::Text::TextUtilsTruncateAt;
-// using Elastos::Droid::Text::CAnnotation;
-// using Elastos::Droid::Text::IAnnotation;
-// using Elastos::Droid::Text::ISpanned;
+using Elastos::Droid::Graphics::ITypeface;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Text::TextUtilsTruncateAt;
+using Elastos::Droid::Text::TextUtilsTruncateAt_MARQUEE;
+using Elastos::Droid::Text::CAnnotation;
+using Elastos::Droid::Text::IAnnotation;
+using Elastos::Droid::Text::ISpanned;
+using Elastos::Droid::Text::CSpannableString;
+using Elastos::Droid::Text::Style::CUnderlineSpan;
+using Elastos::Droid::Text::Style::CTypefaceSpan;
+using Elastos::Droid::Text::Style::CRelativeSizeSpan;
+using Elastos::Droid::Text::Style::CSubscriptSpan;
+using Elastos::Droid::Text::Style::CSuperscriptSpan;
+using Elastos::Droid::Text::Style::CStrikethroughSpan;
+using Elastos::Droid::Text::Style::CBulletSpan;
+using Elastos::Droid::Text::Style::CAbsoluteSizeSpan;
+using Elastos::Droid::Text::Style::CForegroundColorSpan;
+using Elastos::Droid::Text::Style::CBackgroundColorSpan;
+using Elastos::Droid::Text::Style::CURLSpan;
+using Elastos::Droid::Text::Style::CStyleSpan;
+using Elastos::Droid::Text::Style::CTextAppearanceSpan;
+using Elastos::Droid::Text::Style::IUnderlineSpan;
+using Elastos::Droid::Text::Style::ITypefaceSpan;
+using Elastos::Droid::Text::Style::IRelativeSizeSpan;
+using Elastos::Droid::Text::Style::ISubscriptSpan;
+using Elastos::Droid::Text::Style::ISuperscriptSpan;
+using Elastos::Droid::Text::Style::IStrikethroughSpan;
+using Elastos::Droid::Text::Style::IBulletSpan;
+using Elastos::Droid::Text::Style::IAbsoluteSizeSpan;
+using Elastos::Droid::Text::Style::IForegroundColorSpan;
+using Elastos::Droid::Text::Style::IBackgroundColorSpan;
+using Elastos::Droid::Text::Style::IURLSpan;
+using Elastos::Droid::Text::Style::IStyleSpan;
+using Elastos::Droid::Text::Style::ITextAppearanceSpan;
 using Elastos::Droid::Text::Style::EIID_ILineHeightSpanWithDensity;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CString;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -103,15 +140,15 @@ ECode StringBlock::Height::ChooseHeight(
              * that unless we absolutely have to.
              */
             AutoPtr<IPaint> p;
-            // CPaint::New((IPaint**)&p);
+            CPaint::New((IPaint**)&p);
             p->SetTextSize(100);
             AutoPtr<IRect> r;
-            // CRect::New((IRect**)&r);
+            CRect::New((IRect**)&r);
             p->GetTextBounds(String("ABCDEFG"), 0, 7, r);
 
             Float paintAscent;
             p->Ascent(&paintAscent);
-            // sProportion = ((CRect*)r.Get())->mTop / paintAscent;
+            sProportion = ((CRect*)r.Get())->mTop / paintAscent;
         }
 
         fm->GetTop(&top);
@@ -313,16 +350,14 @@ AutoPtr<ICharSequence> StringBlock::ApplyStyles(
     /* [in] */ ArrayOf<Int32>* style,
     /* [in] */ StyleIDs* ids)
 {
+    AutoPtr<ICharSequence> cs;
+    CString::New(str, (ICharSequence**)&cs);
     if (style->GetLength() == 0) {
-        assert(!str.IsNull());
-        AutoPtr<ICharSequence> cs;
-        CString::New(str, (ICharSequence**)&cs);
         return cs;
     }
 
-    assert(0 && "TODO");
     AutoPtr<ISpannable> buffer;
-    // CSpannableString(str, (ISpannable**)&buffer);
+    CSpannableString::New(cs, (ISpannable**)&buffer);
     Int32 i=0;
     while (i < style->GetLength()) {
         Int32 type = (*style)[i];
@@ -332,79 +367,69 @@ AutoPtr<ICharSequence> StringBlock::ApplyStyles(
         }
 
         if (type == ids->boldId) {
-            assert(0);
-            // AutoPtr<IStyleSpan> span;
-            // CStyleSpan::New((ITypeface::BOLD), (IStyleSpan**)&span);
-            // buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
-            //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+            AutoPtr<IStyleSpan> span;
+            CStyleSpan::New((ITypeface::BOLD), (IStyleSpan**)&span);
+            buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
+                    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (type == ids->italicId) {
-            assert(0);
-            // AutoPtr<IStyleSpan> span;
-            // CStyleSpan::New((ITypeface::ITALIC), (IStyleSpan**)&span);
-            // buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
-            //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+            AutoPtr<IStyleSpan> span;
+            CStyleSpan::New((ITypeface::ITALIC), (IStyleSpan**)&span);
+            buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
+                    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (type == ids->underlineId) {
-            assert(0);
-            // AutoPtr<IUnderlineSpan> span;
-            // CUnderlineSpan::New((IUnderlineSpan**)&span);
-            // buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
-            //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+            AutoPtr<IUnderlineSpan> span;
+            CUnderlineSpan::New((IUnderlineSpan**)&span);
+            buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
+                    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (type == ids->ttId) {
-            assert(0);
-            // AutoPtr<ITypefaceSpan> span;
-            // CTypefaceSpan::New(String("monospace"), (ITypefaceSpan**)&span);
-            // buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
-            //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+            AutoPtr<ITypefaceSpan> span;
+            CTypefaceSpan::New(String("monospace"), (ITypefaceSpan**)&span);
+            buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
+                    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (type == ids->bigId) {
-            assert(0);
-            // AutoPtr<IRelativeSizeSpan> span
-            // CRelativeSizeSpan::New(1.25, (IRelativeSizeSpan**)&span);
-            // buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
-            //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+            AutoPtr<IRelativeSizeSpan> span;
+            CRelativeSizeSpan::New(1.25, (IRelativeSizeSpan**)&span);
+            buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
+                    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (type == ids->smallId) {
-            assert(0);
-            // AutoPtr<IRelativeSizeSpan> span;
-            // CRelativeSizeSpan::New(0.8, (IRelativeSizeSpan**)&span);
-            // buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
-            //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+            AutoPtr<IRelativeSizeSpan> span;
+            CRelativeSizeSpan::New(0.8, (IRelativeSizeSpan**)&span);
+            buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
+                    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (type == ids->subId) {
-            assert(0);
-            // AutoPtr<ISubscriptSpan> span;
-            // CSubscriptSpan::New((ISubscriptSpan**)&span);
-            // buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
-            //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+            AutoPtr<ISubscriptSpan> span;
+            CSubscriptSpan::New((ISubscriptSpan**)&span);
+            buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
+                    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (type == ids->supId) {
-            assert(0);
-            // AutoPtr<ISuperscriptSpan> span;
-            // CSuperscriptSpan::New((ISuperscriptSpan**)&span);
-            // buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
-            //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+            AutoPtr<ISuperscriptSpan> span;
+            CSuperscriptSpan::New((ISuperscriptSpan**)&span);
+            buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
+                    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (type == ids->strikeId) {
-            assert(0);
-            // AutoPtr<IStrikethroughSpan> span;
-            // CStrikethroughSpan::New((IStrikethroughSpan**)&span);
-            // buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
-            //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+            AutoPtr<IStrikethroughSpan> span;
+            CStrikethroughSpan::New((IStrikethroughSpan**)&span);
+            buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
+                    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         else if (type == ids->listItemId) {
-            assert(0);
-            // AutoPtr<IBulletSpan> span;
-            // CBulletSpan::New(10, (IStrikethroughSpan**)&span);
-            // AddParagraphSpan(buffer, span, (*style)[i + 1], (*style)[i + 2] + 1);
+            AutoPtr<IBulletSpan> span;
+            CBulletSpan::New(10, (IBulletSpan**)&span);
+            AddParagraphSpan(buffer, span, (*style)[i + 1], (*style)[i + 2] + 1);
         }
         else if (type == ids->marqueeId) {
-            assert(0);
-            // buffer->SetSpan(TextUtilsTruncateAt_MARQUEE,
-            //         (*style)[i + 1], (*style)[i + 2] + 1,
-            //         ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
+            AutoPtr<IInteger32> iobj = CoreUtils::Convert((Int32)TextUtilsTruncateAt_MARQUEE);
+            buffer->SetSpan(iobj.Get(),
+                    (*style)[i + 1], (*style)[i + 2] + 1,
+                    ISpanned::SPAN_INCLUSIVE_INCLUSIVE);
         }
         else {
             String tag = NativeGetString(mNative, type);
@@ -419,58 +444,52 @@ AutoPtr<ICharSequence> StringBlock::ApplyStyles(
 
                 sub = Subtag(tag, String(";size="));
                 if (!sub.IsNull()) {
-                    assert(0);
-                    // Int32 size = StringUtils::ParseInt32(sub);
-                    // AutoPtr<IAbsoluteSizeSpan> span;
-                    // CAbsoluteSizeSpan::New(size, TRUE, (IAbsoluteSizeSpan**)&span);
-                    // buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
-                    //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+                    Int32 size = StringUtils::ParseInt32(sub);
+                    AutoPtr<IAbsoluteSizeSpan> span;
+                    CAbsoluteSizeSpan::New(size, TRUE, (IAbsoluteSizeSpan**)&span);
+                    buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
+                            ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
 
                 sub = Subtag(tag, String(";fgcolor="));
                 if (!sub.IsNull()) {
-                    assert(0);
-                    // AutoPtr<ICharacterStyle> color = GetColor(sub, TRUE);
-                    // buffer->SetSpan(color,
-                    //    (*style)[i + 1], (*style)[i + 2] + 1,
-                    //    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+                    AutoPtr<ICharacterStyle> color = GetColor(sub, TRUE);
+                    buffer->SetSpan(color,
+                       (*style)[i + 1], (*style)[i + 2] + 1,
+                       ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
 
                 sub = Subtag(tag, String(";color="));
                 if (!sub.IsNull()) {
-                    assert(0);
-                    // AutoPtr<ICharacterStyle> color = GetColor(sub, TRUE);
-                    // buffer->SetSpan(color,
-                    //    (*style)[i + 1], (*style)[i + 2] + 1,
-                    //    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+                    AutoPtr<ICharacterStyle> color = GetColor(sub, TRUE);
+                    buffer->SetSpan(color,
+                       (*style)[i + 1], (*style)[i + 2] + 1,
+                       ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
 
                 sub = Subtag(tag, String(";bgcolor="));
                 if (!sub.IsNull()) {
-                    assert(0);
-                    // AutoPtr<ICharacterStyle> color = GetColor(sub, FALSE);
-                    // buffer->SetSpan(color,
-                    //    (*style)[i + 1], (*style)[i + 2] + 1,
-                    //    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+                    AutoPtr<ICharacterStyle> color = GetColor(sub, FALSE);
+                    buffer->SetSpan(color,
+                       (*style)[i + 1], (*style)[i + 2] + 1,
+                       ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
                 sub = Subtag(tag, String(";face="));
                 if (!sub.IsNull()) {
-                    assert(0);
-                    // AutoPtr<ITypefaceSpan> span;
-                    // CTypefaceSpan::New(sub, (ITypefaceSpan**)&span);
-                    // buffer->SetSpan(span,
-                    //    (*style)[i + 1], (*style)[i + 2] + 1,
-                    //    ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+                    AutoPtr<ITypefaceSpan> span;
+                    CTypefaceSpan::New(sub, (ITypefaceSpan**)&span);
+                    buffer->SetSpan(span,
+                       (*style)[i + 1], (*style)[i + 2] + 1,
+                       ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
             else if (tag.StartWith("a;")) {
                 String sub = Subtag(tag, String(";href="));
                 if (!sub.IsNull()) {
-                    assert(0);
-                    // AutoPtr<IURLSpan> span;
-                    // CURLSpan::New(color, (IURLSpan**)&span);
-                    // buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
-                    //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+                    AutoPtr<IURLSpan> span;
+                    CURLSpan::New(sub, (IURLSpan**)&span);
+                    buffer->SetSpan(span, (*style)[i + 1], (*style)[i + 2] + 1,
+                            ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
             else if (tag.StartWith("annotation;")) {
@@ -491,11 +510,10 @@ AutoPtr<ICharSequence> StringBlock::ApplyStyles(
                     String key = tag.Substring(t + 1, eq);
                     String value = tag.Substring(eq + 1, next);
 
-                    assert(0);
-                    // AutoPtr<IAnnotation> annotation;
-                    // CAnnotation::New(key, value, (IAnnotation**)&annotation);
-                    // buffer->SetSpan(annotation, (*style)[i + 1], (*style)[i + 2] + 1,
-                    //         ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
+                    AutoPtr<IAnnotation> annotation;
+                    CAnnotation::New(key, value, (IAnnotation**)&annotation);
+                    buffer->SetSpan(annotation, (*style)[i + 1], (*style)[i + 2] + 1,
+                            ISpanned::SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
         }
@@ -503,10 +521,9 @@ AutoPtr<ICharSequence> StringBlock::ApplyStyles(
         i += 3;
     }
 
-    // Auto<ISpannable> result;
-    // CSpannableString(buffer, (ISpannable**)&result);
-    assert(0);
-    return NULL;
+    AutoPtr<ICharSequence> result;
+    CSpannableString::New(ICharSequence::Probe(buffer), (ICharSequence**)&result);
+    return result;
 }
 
 AutoPtr<ICharacterStyle> StringBlock::GetColor(
@@ -515,39 +532,38 @@ AutoPtr<ICharacterStyle> StringBlock::GetColor(
 {
     Int32 c = 0xff000000;
 
-    assert(0 && "TODO");
-    // if (!TextUtils::IsEmpty(color)) {
-    //     if (color.StartWith("@")) {
-    //         AutoPtr<IResources> res = CResources::GetSystem();
-    //         String name = color.Substring(1);
-    //         Int32 colorRes;
-    //         res->GetIdentifier(name, String("color"), String("android"), &colorRes);
-    //         if (colorRes != 0) {
-    //             AutoPtr<IColorStateList> colors;
-    //             res->GetColorStateList(colorRes, (IColorStateList**)&colors);
-    //             if (foreground) {
-    //                 AutoPtr<ICharacterStyle> style;
-    //                 CTextAppearanceSpan::New(String(NULL), 0, 0, colors, NULL, (ICharacterStyle**)&style);
-    //                 return style;
-    //             }
-    //             else {
-    //                 colors->GetDefaultColor(&c);
-    //             }
-    //         }
-    //     }
-    //     else {
-    //         //c = Color::GetHtmlColor(color);
-    //     }
-    // }
+    if (!TextUtils::IsEmpty(color)) {
+        if (color.StartWith("@")) {
+            AutoPtr<IResources> res = CResources::GetSystem();
+            String name = color.Substring(1);
+            Int32 colorRes;
+            res->GetIdentifier(name, String("color"), String("android"), &colorRes);
+            if (colorRes != 0) {
+                AutoPtr<IColorStateList> colors;
+                res->GetColorStateList(colorRes, (IColorStateList**)&colors);
+                if (foreground) {
+                    AutoPtr<ICharacterStyle> style;
+                    CTextAppearanceSpan::New(String(NULL), 0, 0, colors, NULL, (ICharacterStyle**)&style);
+                    return style;
+                }
+                else {
+                    colors->GetDefaultColor(&c);
+                }
+            }
+        }
+        else {
+            c = Color::GetHtmlColor(color);
+        }
+    }
 
     AutoPtr<ICharacterStyle> style;
-    // if (foreground) {
-    //     CForegroundColorSpan::New(c, (ICharacterStyle**)&style);
-    //     return NOERROR;
-    // }
-    // else {
-    //     CBackgroundColorSpan::New(c, (ICharacterStyle**)&style);
-    // }
+    if (foreground) {
+        CForegroundColorSpan::New(c, (ICharacterStyle**)&style);
+        return NOERROR;
+    }
+    else {
+        CBackgroundColorSpan::New(c, (ICharacterStyle**)&style);
+    }
     return style;
 }
 
@@ -557,31 +573,31 @@ void StringBlock::AddParagraphSpan(
     /* [in] */ Int32 start,
     /* [in] */ Int32 end)
 {
-    // Int32 len;
-    // buffer->GetLength(&len);
-    // Char32 c;
-    // buffer->GetCharAt(start - 1, &c);
-    // if (start != 0 && start != len && c != '\n') {
-    //     for (start--; start > 0; start--) {
-    //         buffer->GetCharAt(start - 1, &c);
-    //         if (c == '\n') {
-    //             break;
-    //         }
-    //     }
-    // }
+    ICharSequence* csq = ICharSequence::Probe(buffer);
+    Int32 len;
+    csq->GetLength(&len);
+    Char32 c;
+    csq->GetCharAt(start - 1, &c);
+    if (start != 0 && start != len && c != '\n') {
+        for (start--; start > 0; start--) {
+            csq->GetCharAt(start - 1, &c);
+            if (c == '\n') {
+                break;
+            }
+        }
+    }
 
-    // buffer->GetCharAt(end - 1, &c);
-    // if (end != 0 && end != len && c != '\n') {
-    //     for (end++; end < len; end++) {
-    //         buffer->GetCharAt(end - 1, &c);
-    //         if (c == '\n') {
-    //             break;
-    //         }
-    //     }
-    // }
+    csq->GetCharAt(end - 1, &c);
+    if (end != 0 && end != len && c != '\n') {
+        for (end++; end < len; end++) {
+            csq->GetCharAt(end - 1, &c);
+            if (c == '\n') {
+                break;
+            }
+        }
+    }
 
-    // buffer->SetSpan(what, start, end, ISpanned::SPAN_PARAGRAPH);
-    assert(0);
+    buffer->SetSpan(what, start, end, ISpanned::SPAN_PARAGRAPH);
 }
 
 String StringBlock::Subtag(

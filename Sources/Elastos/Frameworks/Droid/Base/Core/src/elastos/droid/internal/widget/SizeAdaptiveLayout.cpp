@@ -194,7 +194,7 @@ ECode SizeAdaptiveLayout::LayoutParams::SetMaxHeight(
 ECode SizeAdaptiveLayout::LayoutParams::GetMaxHeight(
     /* [out] */ Int32* mh)
 {
-    VALIDATE_NOT_NULL(*mh);
+    VALIDATE_NOT_NULL(mh);
     *mh = mMaxHeight;
     return NOERROR;
 }

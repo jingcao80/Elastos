@@ -42,16 +42,19 @@ Currency::constructor(
     return NOERROR;
 }
 
-AutoPtr<ICurrency> Currency::GetInstance(
-    /* [in] */ const String& currencyCode)
+ECode Currency::GetInstance(
+    /* [in] */ const String& currencyCode,
+    /* [out] */ ICurrency** instance)
 {
+    VALIDATE_NOT_NULL(instance)
+    *instance = NULL;
     AutoLock lock(sCodesLock);
 
     AutoPtr<ICurrency> currency;
     HashMap<String, AutoPtr<ICurrency> >::Iterator it = sCodesToCurrencies.Find(currencyCode);
     if (it == sCodesToCurrencies.End()) {
         AutoPtr<Currency> c = new Currency();
-        c->constructor(currencyCode);
+        FAIL_RETURN(c->constructor(currencyCode));
         currency = (ICurrency*)c.Get();
         sCodesToCurrencies[currencyCode] = currency;
     }
@@ -59,7 +62,9 @@ AutoPtr<ICurrency> Currency::GetInstance(
         currency = it->mSecond;
     }
 
-    return currency;
+    *instance = currency;
+    REFCOUNT_ADD(*instance);
+    return NOERROR;
 }
 
 ECode Currency::GetInstance(
@@ -99,7 +104,8 @@ ECode Currency::GetInstance(
         return NOERROR;
     }
 
-    AutoPtr<ICurrency> result = GetInstance(currencyCode);
+    AutoPtr<ICurrency> result;
+    FAIL_RETURN(GetInstance(currencyCode, (ICurrency**)&result));
     sLocalesToCurrencies[locale] = result;
     *instance = result;
     REFCOUNT_ADD(*instance)
@@ -117,7 +123,8 @@ ECode Currency::GetAvailableCurrencies(
     FAIL_RETURN(ICUUtil::GetAvailableCurrencyCodes((ArrayOf<String>**)&currencyCodes));
     Int32 length = currencyCodes->GetLength();
     for (Int32 i = 0; i < length; i++) {
-        AutoPtr<ICurrency> currency = GetInstance((*currencyCodes)[i]);
+        AutoPtr<ICurrency> currency;
+        FAIL_RETURN(GetInstance((*currencyCodes)[i], (ICurrency**)&currency));
         ICollection::Probe(*currencies)->Add((IInterface*)currency);
     }
     return NOERROR;
@@ -209,7 +216,9 @@ ECode Currency::ToString(
 
 AutoPtr<IInterface> Currency::ReadResolve()
 {
-    return GetInstance(mCurrencyCode);
+    AutoPtr<ICurrency> currency;
+    ECode ec = GetInstance(mCurrencyCode, (ICurrency**)&currency);
+    return SUCCEEDED(ec) ? currency.Get() : NULL;
 }
 
 } // namespace Utility

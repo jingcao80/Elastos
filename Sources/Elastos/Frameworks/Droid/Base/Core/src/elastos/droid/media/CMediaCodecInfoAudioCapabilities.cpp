@@ -1,6 +1,7 @@
 #include "elastos/droid/media/CMediaCodecInfo.h"
 #include "elastos/droid/media/CMediaCodecInfoAudioCapabilities.h"
 #include "elastos/droid/media/CMediaCodecInfoCodecCapabilities.h"
+#include "elastos/droid/media/Utils.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
@@ -201,8 +202,7 @@ Boolean CMediaCodecInfoAudioCapabilities::Supports(
     }
     if (sampleRate != NULL) {
         Int32 ix;
-//TODO: Need Utils
-        // ix = Utils::BinarySearchDistinctRanges(mSampleRateRanges, sampleRate);
+        ix = Utils::BinarySearchDistinctRanges(mSampleRateRanges, sampleRate);
         if (ix < 0) {
             return FALSE;
         }
@@ -251,9 +251,8 @@ void CMediaCodecInfoAudioCapabilities::CreateDiscreteSampleRates()
 void CMediaCodecInfoAudioCapabilities::LimitSampleRates(
     /* [in] */ ArrayOf<IRange*>* rateRanges)
 {
-//TODO: Need Utils
-    // Utils::SortDistinctRanges(rateRanges);
-    // mSampleRateRanges = Utils::IntersectSortedDistinctRanges(mSampleRateRanges, rateRanges);
+    Utils::SortDistinctRanges(rateRanges);
+    mSampleRateRanges = Utils::IntersectSortedDistinctRanges(mSampleRateRanges, rateRanges);
 
     // check if all values are discrete
     for (Int32 i = 0; i < mSampleRateRanges->GetLength(); i++) {

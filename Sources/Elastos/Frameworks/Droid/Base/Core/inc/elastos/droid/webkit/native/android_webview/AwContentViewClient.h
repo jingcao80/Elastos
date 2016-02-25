@@ -10,7 +10,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewOnAttachStateChangeListener;
-//TODO using Elastos::Droid::Webkit::IWebChromeClientCustomViewCallback;
+using Elastos::Droid::Webkit::IWebChromeClientCustomViewCallback;
 using Elastos::Droid::Widget::IFrameLayout;
 
 using Elastos::Droid::Webkit::Content::Browser::ContentVideoViewClient;
@@ -33,7 +33,7 @@ public:
     public:
         class InnerWebChromeClientCustomViewCallback
             : public Object
-            //TODO , public IWebChromeClientCustomViewCallback
+            , public IWebChromeClientCustomViewCallback
         {
         public:
             CAR_INTERFACE_DECL();
@@ -86,11 +86,11 @@ public:
     private:
         CARAPI_(void) OnShowCustomViewLegacy(
             /* [in] */ IView* view,
-            /* [in] */ /*TODO IWebChromeClientCustomViewCallback*/IInterface* cb);
+            /* [in] */ IWebChromeClientCustomViewCallback* cb);
 
         CARAPI_(void) OnShowCustomView(
             /* [in] */ IView* view,
-            /* [in] */ /*TODO IWebChromeClientCustomViewCallback*/IInterface* cb);
+            /* [in] */ IWebChromeClientCustomViewCallback* cb);
 
     private:
         AwContentViewClient* mOwner;

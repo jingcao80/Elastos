@@ -1,30 +1,27 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.server.hdmi;
+#ifndef __ELASTOS_DROID_SERVER_HDMI_SYSTEMAUDIOACTIONFROMAVR_H__
+#define __ELASTOS_DROID_SERVER_HDMI_SYSTEMAUDIOACTIONFROMAVR_H__
 
-using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
-using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
+#include "_Elastos.Droid.Server.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/core/Object.h>
+#include "elastos/droid/server/hdmi/SystemAudioAction.h"
+
 using Elastos::Droid::Hardware::Hdmi::IIHdmiControlCallback;
+
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Hdmi {
 
 /**
  * Feature action that handles System Audio initiated by AVR devices.
  */
 // Seq #33
-final class SystemAudioActionFromAvr extends SystemAudioAction {
+class SystemAudioActionFromAvr
+    : public SystemAudioAction
+{
+public:
     /**
      * Constructor
      *
@@ -34,41 +31,23 @@ final class SystemAudioActionFromAvr extends SystemAudioAction {
      * @param callback callback interface to be notified when it's done
      * @throw IllegalArugmentException if device type of tvAddress and avrAddress is invalid
      */
-    SystemAudioActionFromAvr(HdmiCecLocalDevice source, Int32 avrAddress,
-            Boolean targetStatus, IHdmiControlCallback callback) {
-        Super(source, avrAddress, targetStatus, callback);
-        HdmiUtils->VerifyAddressType(GetSourceAddress(), HdmiDeviceInfo.DEVICE_TV);
-    }
+    CARAPI constructor(
+        /* [in] */ IHdmiCecLocalDevice* source,
+        /* [in] */ Int32 avrAddress,
+        /* [in] */ Boolean targetStatus,
+        /* [in] */ IIHdmiControlCallback* callback);
 
-    //@Override
-    Boolean Start() {
-        RemoveSystemAudioActionInProgress();
-        HandleSystemAudioActionFromAvr();
-        return TRUE;
-    }
+    // @Override
+    CARAPI Start(
+        /* [out] */ Boolean* result);
 
-    private void HandleSystemAudioActionFromAvr() {
-        if (mTargetAudioStatus == Tv()->IsSystemAudioActivated()) {
-            FinishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-            return;
-        }
-        if (Tv()->IsProhibitMode()) {
-            SendCommand(HdmiCecMessageBuilder->BuildFeatureAbortCommand(
-                    GetSourceAddress(), mAvrLogicalAddress,
-                    Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE, Constants.ABORT_REFUSED));
-            mTargetAudioStatus = FALSE;
-            SendSystemAudioModeRequest();
-            return;
-        }
+private:
+    CARAPI HandleSystemAudioActionFromAvr();
+};
 
-        RemoveAction(SystemAudioAutoInitiationAction.class);
+} // namespace Hdmi
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
 
-        if (mTargetAudioStatus) {
-            SetSystemAudioMode(TRUE);
-            StartAudioStatusAction();
-        } else {
-            SetSystemAudioMode(FALSE);
-            FinishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-        }
-    }
-}
+#endif // __ELASTOS_DROID_SERVER_HDMI_SYSTEMAUDIOACTIONFROMAVR_H__

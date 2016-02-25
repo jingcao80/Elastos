@@ -735,20 +735,20 @@ module
         interface IMediaCodec;
     }
 
-//    [deprecated]
-//    class CMediaCrypto {
-//        constructor();
-//
-//        constructor(
-//            [in] IUUID* uuid,
-//            [in] ArrayOf<Byte>* initData);
-//
-//        interface IMediaCrypto;
-//    }
-//
-//    singleton class CMediaCryptoHelper {
-//        interface IMediaCryptoHelper;
-//    }
+    [deprecated]
+    class CMediaCrypto {
+        constructor();
+
+        constructor(
+            [in] IUUID* uuid,
+            [in] ArrayOf<Byte>* initData);
+
+        interface IMediaCrypto;
+    }
+
+    singleton class CMediaCryptoHelper {
+        interface IMediaCryptoHelper;
+    }
 
     class CMediaDescription {
         constructor();
@@ -781,11 +781,11 @@ module
         interface IMediaDrm;
     }
 
-//    class CMediaExtractor {
-//        constructor();
-//
-//        interface IMediaExtractor;
-//    }
+    class CMediaExtractor {
+        constructor();
+
+        interface IMediaExtractor;
+    }
 
     singleton class CMediaFile {
         interface IMediaFile;
@@ -872,11 +872,11 @@ module
         interface IMediaMetadataHelper;
     }
 
-//    class CMediaMetadataRetriever {
-//        constructor();
-//
-//        interface IMediaMetadataRetriever;
-//    }
+    class CMediaMetadataRetriever {
+        constructor();
+
+        interface IMediaMetadataRetriever;
+    }
 
     class CMediaMuxer {
         constructor();
@@ -927,7 +927,7 @@ module
     class CSubtitleController {
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IMediaTimeProvider* timeProvider,
             [in] ISubtitleControllerListener* listener);
 
@@ -1017,16 +1017,16 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
@@ -1085,7 +1085,7 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IHandler* eventHandler);
 
         interface ISubtitleControllerRenderer;
@@ -1278,6 +1278,79 @@ module
 
         interface ISubtitleControllerRenderer;
         interface ITtmlRenderer;
+    }
+
+    class CMediaRouter {
+        constructor(
+            [in] IContext* context);
+
+        interface IMediaRouter;
+    }
+
+    [local]
+    class CMediaRouterRouteInfo {
+        constructor(
+            [in] IMediaRouterRouteCategory* category,
+            [in] IMediaRouter* host);
+
+        interface IMediaRouterRouteInfo;
+    }
+
+    class CMediaRouterRouteGroup {
+        constructor(
+            [in] IMediaRouterRouteCategory* category);
+
+        interface IMediaRouterRouteGroup;
+        interface IMediaRouterRouteInfo;
+    }
+
+    [local]
+    class CRouteCategory {
+        constructor(
+            [in] ICharSequence* name,
+            [in] Int32 types,
+            [in] Boolean groupable,
+            [in] IMediaRouter* host);
+
+        constructor(
+            [in] Int32 nameResId,
+            [in] Int32 types,
+            [in] Boolean groupable,
+            [in] IMediaRouter* host);
+
+        interface IMediaRouterRouteCategory;
+    }
+
+    class CMediaRouterUserRouteInfo {
+        constructor(
+            [in] IMediaRouterRouteCategory* category);
+
+        interface IMediaRouterUserRouteInfo;
+        interface IMediaRouterRouteInfo;
+    }
+
+    class CSoundPool {
+        constructor(
+            [in] Int32 maxStreams,
+            [in] Int32 streamType,
+            [in] Int32 srcQuality);
+
+        constructor(
+            [in] Int32 maxStreams,
+            [in] IAudioAttributes* attributes);
+
+        interface ISoundPool;
+    }
+
+    class CMediaScanner {
+        constructor(
+            [in] IContext* c);
+
+        interface IMediaScanner;
+    }
+
+    singleton class CMediaRouterHelper {
+        interface IMediaRouterHelper;
     }
 
     } // namespace media
@@ -1568,7 +1641,7 @@ module
 
     class CMediaBrowser {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IComponentName* serviceComponent,
             [in] IMediaBrowserConnectionCallback* cb,
             [in] IBundle* rootHints);
@@ -1592,7 +1665,7 @@ module
 
     class CMediaProjection {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIMediaProjection* impl);
 
         interface IMediaProjection;
@@ -1644,11 +1717,11 @@ module
 
     class CMediaController {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IISessionController* sessionBinder);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IMediaSessionToken* token);
 
         interface IMediaController;
@@ -1687,11 +1760,11 @@ module
 
     class CMediaSession {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String tag);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String tag,
             [in] Int32 userId);
 
@@ -1792,7 +1865,7 @@ module
     [local]
     class CITvInputSessionWrapper {
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] ITvInputServiceSession* sessionImpl,
             [in] IInputChannel* channel);
 
@@ -1827,6 +1900,26 @@ module
 
     singleton class CTvContentRatingSystemInfoHelper {
         interface ITvContentRatingSystemInfoHelper;
+    }
+
+    singleton class CTvContract {
+        interface ITvContract;
+    }
+
+    singleton class CTvContractChannels {
+        interface ITvContractChannels;
+    }
+
+    singleton class CTvContractPrograms {
+        interface ITvContractPrograms;
+    }
+
+    singleton class CTvContractProgramsGenres {
+        interface ITvContractProgramsGenres;
+    }
+
+    singleton class CTvContractWatchedPrograms {
+        interface ITvContractWatchedPrograms;
     }
 
     class CTvInputHardwareInfo {
@@ -1930,11 +2023,11 @@ module
             [in] IContext* context);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs,
             [in] Int32 defStyleAttr);
 

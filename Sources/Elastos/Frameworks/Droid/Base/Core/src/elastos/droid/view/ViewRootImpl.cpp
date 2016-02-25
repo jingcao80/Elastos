@@ -1768,7 +1768,8 @@ void ViewRootImpl::EnableHardwareAcceleration(
             (flags & IWindowManagerLayoutParams::FLAG_HARDWARE_ACCELERATED) != 0;
 
     if (hardwareAccelerated) {
-        if (!HardwareRenderer::IsAvailable()) {
+        Boolean available;
+        if (HardwareRenderer::IsAvailable(&available), !available) {
             return;
         }
 
@@ -1798,8 +1799,7 @@ void ViewRootImpl::EnableHardwareAcceleration(
             }
 
             Boolean translucent = WINLAY_PROBE(attrs)->mFormat != IPixelFormat::OPAQUE;
-            assert(0 && "TODO");
-            //mAttachInfo->mHardwareRenderer = HardwareRenderer::Create(sContext, translucent);
+            mAttachInfo->mHardwareRenderer = HardwareRenderer::Create(sContext, translucent);
             if (mAttachInfo->mHardwareRenderer != NULL) {
                 AutoPtr<ICharSequence> temp;
                 attrs->GetTitle((ICharSequence**)&temp);

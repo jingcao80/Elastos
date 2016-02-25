@@ -1,9 +1,9 @@
 
 #include "Elastos.Droid.App.h"
 #include "elastos/droid/text/style/EasyEditSpan.h"
-// #include "elastos/droid/app/CPendingIntent.h"
+#include "elastos/droid/app/CPendingIntent.h"
 
-// using Elastos::Droid::App::CPendingIntent;
+using Elastos::Droid::App::CPendingIntent;
 
 namespace Elastos {
 namespace Droid {
@@ -36,8 +36,7 @@ ECode EasyEditSpan::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
     mPendingIntent = NULL;
-    assert(0 && "TODO");
-    // CPendingIntent::New((IPendingIntent**)&mPendingIntent);
+    CPendingIntent::New((IPendingIntent**)&mPendingIntent);
     IParcelable::Probe(mPendingIntent)->ReadFromParcel(source);
     Byte b;
     source->ReadByte(&b);

@@ -64,93 +64,99 @@ private:
 public:
     ThreadedRenderer();
 
+    virtual ~ThreadedRenderer();
+
     CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ Boolean translucent);
 
-    CARAPI_(void) Destroy();
+    CARAPI Destroy();
 
-    CARAPI_(Boolean) Initialize(
-        /* [in] */ ISurface* surface);
+    CARAPI Initialize(
+        /* [in] */ ISurface* surface,
+        /* [out] */ Boolean* res);
 
     CARAPI UpdateSurface(
         /* [in] */ ISurface* surface);
 
-    CARAPI_(void) PauseSurface(
+    CARAPI PauseSurface(
         /* [in] */ ISurface* surface);
 
-    CARAPI_(void) DestroyHardwareResources(
+    CARAPI DestroyHardwareResources(
         /* [in] */ IView* view);
 
-    CARAPI_(void) Invalidate(
+    CARAPI Invalidate(
         /* [in] */ ISurface* surface);
 
-    CARAPI_(void) DetachSurfaceTexture(
+    CARAPI DetachSurfaceTexture(
         /* [in] */ Int64 hardwareLayer);
 
-    CARAPI_(void) Setup(
+    CARAPI Setup(
         /* [in] */ Int32 width,
         /* [in] */ Int32 height,
         /* [in] */ IRect* surfaceInsets);
 
-    CARAPI_(void) SetOpaque(
+    CARAPI SetOpaque(
         /* [in] */ Boolean opaque);
 
-    CARAPI_(Int32) GetWidth();
+    CARAPI GetWidth(
+        /* [out] */ Int32* width);
 
-    CARAPI_(Int32) GetHeight();
+    CARAPI GetHeight(
+        /* [out] */ Int32* height);
 
-    CARAPI_(void) DumpGfxInfo(
+    CARAPI DumpGfxInfo(
         /* [in] */ IPrintWriter* pw,
         /* [in] */ IFileDescriptor* fd);
 
-    CARAPI_(Boolean) LoadSystemProperties();
+    CARAPI LoadSystemProperties(
+        /* [out] */ Boolean* res);
 
-    CARAPI_(void) InvalidateRoot();
+    CARAPI InvalidateRoot();
 
-    // CARAPI Draw(
-    //     /* [in] */ IView* view,
-    //     /* [in] */ IAttachInfo* attachInfo,
-    //     /* [in] */ IHardwareDrawCallbacks* callbacks);
+    CARAPI Draw(
+        /* [in] */ IView* view,
+        /* [in] */ View::AttachInfo* attachInfo,
+        /* [in] */ IHardwareDrawCallbacks* callbacks);
 
-    static CARAPI_(void) InvokeFunctor(
+    static CARAPI InvokeFunctor(
         /* [in] */ Int64 functor,
         /* [in] */ Boolean waitForCompletion);
 
-    CARAPI_(AutoPtr<IHardwareLayer>) CreateTextureLayer();
+    CARAPI CreateTextureLayer(
+        /* [out] */ IHardwareLayer** layer);
 
-    CARAPI_(void) BuildLayer(
+    CARAPI BuildLayer(
         /* [in] */ IRenderNode* node);
 
-    CARAPI_(Boolean) CopyLayerInto(
+    CARAPI CopyLayerInto(
         /* [in] */ IHardwareLayer* layer,
-        /* [in] */ IBitmap* bitmap);
+        /* [in] */ IBitmap* bitmap,
+        /* [out] */ Boolean* res);
 
-    CARAPI_(void) PushLayerUpdate(
+    CARAPI PushLayerUpdate(
         /* [in] */ IHardwareLayer* layer);
 
-    CARAPI_(void) OnLayerDestroyed(
+    CARAPI OnLayerDestroyed(
         /* [in] */ IHardwareLayer* layer);
 
-    CARAPI_(void) SetName(
+    CARAPI SetName(
         /* [in] */ const String& name);
 
-    CARAPI_(void) Fence();
+    CARAPI Fence();
 
-    CARAPI_(void) StopDrawing();
+    CARAPI StopDrawing();
 
-    CARAPI_(void) NotifyFramePending();
+    CARAPI NotifyFramePending();
 
-    CARAPI_(void) RegisterAnimatingRenderNode(
+    CARAPI RegisterAnimatingRenderNode(
         /* [in] */ IRenderNode* animator);
 
-    static CARAPI_(void) TrimMemory(
+    static CARAPI TrimMemory(
         /* [in] */ Int32 level);
 
-    static CARAPI_(void) NativeSetupShadersDiskCache(
+    static CARAPI NativeSetupShadersDiskCache(
         /* [in] */ const String& cacheFile);
-
-    CARAPI Finalize();
 
 private:
     CARAPI_(void) UpdateEnabledState(
@@ -168,9 +174,9 @@ private:
     CARAPI_(void) UpdateViewTreeDisplayList(
         /* [in] */ IView* view);
 
-    // CARAPI_(void) UpdateRootDisplayList(
-    //     /* [in] */ IView* view,
-    //     /* [in] */ IHardwareDrawCallbacks* callbacks);
+    CARAPI_(void) UpdateRootDisplayList(
+        /* [in] */ IView* view,
+        /* [in] */ IHardwareDrawCallbacks* callbacks);
 
     static CARAPI_(void) NativeSetAtlas(
         /* [in] */ Int64 nativeProxy,

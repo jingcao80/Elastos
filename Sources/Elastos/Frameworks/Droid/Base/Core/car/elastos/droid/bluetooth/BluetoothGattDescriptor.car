@@ -78,6 +78,10 @@ module
             GetCharacteristic(
                 [out] IBluetoothGattCharacteristic** characteristic);
 
+            SetCharacteristic(
+                [in] IBluetoothGattCharacteristic* characteristic);
+
+
             /**
              * Returns the UUID of this descriptor.
              *

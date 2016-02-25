@@ -181,6 +181,9 @@ public:
         /* [in] */ IParcel* source);
 
     CARAPI constructor(
+        /* [in] */ IParcel* source);
+
+    CARAPI constructor(
         /* [in] */ IList* serviceUuids,// IParcelUuid
         /* [in] */ ISparseArray* manufacturerData,// ArrayOf<Byte>
         /* [in] */ IMap* serviceData,// IParcelUuid, ArrayOf<Byte>

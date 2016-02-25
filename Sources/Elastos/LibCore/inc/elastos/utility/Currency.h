@@ -50,8 +50,9 @@ public:
     CARAPI ToString(
         /* [out] */ String* str);
 
-    static CARAPI_(AutoPtr<ICurrency>) GetInstance(
-        /* [in] */ const String& currencyCode);
+    static CARAPI GetInstance(
+        /* [in] */ const String& currencyCode,
+        /* [out] */ ICurrency** instance);
 
     static CARAPI GetInstance(
         /* [in] */ ILocale* locale,

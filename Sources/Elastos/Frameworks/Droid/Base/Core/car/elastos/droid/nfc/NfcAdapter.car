@@ -193,11 +193,11 @@ module
     [local]
     interface INfcAdapterHelper {
         GetNfcAdapter(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] INfcAdapter** adapter);
 
         GetDefaultAdapter(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] INfcAdapter** adapter);
 
         GetDefaultAdapter(

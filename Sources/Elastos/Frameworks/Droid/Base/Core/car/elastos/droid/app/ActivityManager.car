@@ -194,7 +194,7 @@ module
          * @see Activity#startActivity(android.content.Intent, android.os.Bundle)
          */
         StartActivity(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IIntent* intent,
             [in] IBundle* options);
 
@@ -1268,6 +1268,12 @@ module
 
         SetId(
             [in] Int32 id);
+
+        GetLastActiveTime(
+            [out] Int32* lastTime);
+
+        SetLastActiveTime(
+            [in] Int32 lastTime);
 
         /**
          * The component launched as the first activity in the task.  This can

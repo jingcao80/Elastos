@@ -43,6 +43,8 @@ CarClass(CBigInteger)
 public:
     CBigInteger();
 
+    ~CBigInteger();
+
     CAR_OBJECT_DECL()
 
     CAR_INTERFACE_DECL()

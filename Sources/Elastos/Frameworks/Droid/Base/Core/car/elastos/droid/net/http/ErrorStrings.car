@@ -15,7 +15,7 @@ module
          */
         GetString(
             [in] Int32 errorCode,
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] String* result);
 
         /**

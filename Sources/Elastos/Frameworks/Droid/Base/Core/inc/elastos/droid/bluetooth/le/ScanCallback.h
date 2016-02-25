@@ -26,7 +26,8 @@ public:
 
     ScanCallback();
 
-    ~ScanCallback() = 0;
+    virtual ~ScanCallback() = 0;
+
     /**
       * Callback when a BLE advertisement has been found.
       *

@@ -3,11 +3,10 @@ module
 {
     interface Elastos.Droid.Content.IContext;
 
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Phone.IVelocityTrackerInterface;
+    interface Elastos.Droid.SystemUI.StatusBar.Phone.IVelocityTrackerInterface;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
     namespace Phone {
@@ -28,7 +27,6 @@ module
     } // namespace Phone
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

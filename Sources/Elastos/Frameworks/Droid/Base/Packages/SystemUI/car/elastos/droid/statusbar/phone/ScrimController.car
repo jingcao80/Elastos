@@ -3,12 +3,11 @@ module
 {
     using interface Elastos.Core.IRunnable;
 
-    interface Elastos.Droid.Packages.SystemUI.Doze.IDozeHostPulseCallback;
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.IBackDropView;
+    interface Elastos.Droid.SystemUI.Doze.IDozeHostPulseCallback;
+    interface Elastos.Droid.SystemUI.StatusBar.IBackDropView;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace StatusBar {
     namespace Phone {
@@ -57,7 +56,6 @@ module
     } // namespace Phone
     } // namespace StatusBar
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

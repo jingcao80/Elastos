@@ -5,7 +5,7 @@
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::ILayoutInflaterHelper;
-//TODO using Elastos::Droid::View::CLayoutInflaterHelper;
+// using Elastos::Droid::View::CLayoutInflaterHelper;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IWindow;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
@@ -71,7 +71,8 @@ UserSwitchingDialog::UserSwitchingDialog(
     // Custom view due to alignment and font size requirements
     AutoPtr<IView> view;
     AutoPtr<ILayoutInflaterHelper> lifHelper;
-    //TODO CLayoutInflaterHelper::AcquireSingleton((ILayoutInflaterHelper**)&lifHelper);
+    assert(0 && "TODO");
+    // CLayoutInflaterHelper::AcquireSingleton((ILayoutInflaterHelper**)&lifHelper);
     AutoPtr<ILayoutInflater> inflater;
     lifHelper->From(context, (ILayoutInflater**)&inflater);
     inflater->Inflate(R::layout::user_switching_dialog, NULL, (IView**)&view);

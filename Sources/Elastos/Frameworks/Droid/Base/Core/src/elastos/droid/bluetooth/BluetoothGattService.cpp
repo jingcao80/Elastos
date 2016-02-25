@@ -1,5 +1,8 @@
 
 #include "elastos/droid/bluetooth/BluetoothGattService.h"
+#include "elastos/droid/bluetooth/BluetoothGattCharacteristic.h"
+
+using Elastos::Utility::CArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -14,17 +17,19 @@ BluetoothGattService::BluetoothGattService()
 {
 }
 
-BluetoothGattService::BluetoothGattService(
+ECode BluetoothGattService::constructor(
     /* [in] */ IUUID* uuid,
     /* [in] */ Int32 serviceType)
 {
-    // ==================before translated======================
-    // mDevice = null;
-    // mUuid = uuid;
-    // mInstanceId = 0;
-    // mServiceType = serviceType;
-    // mCharacteristics = new ArrayList<BluetoothGattCharacteristic>();
-    // mIncludedServices = new ArrayList<BluetoothGattService>();
+    mDevice = NULL;
+    mUuid = uuid;
+    mInstanceId = 0;
+    mServiceType = serviceType;
+    //mCharacteristics = new ArrayList<BluetoothGattCharacteristic>();
+    //mIncludedServices = new ArrayList<BluetoothGattService>();
+    CArrayList::New((IList**)&mCharacteristics);
+    CArrayList::New((IList**)&mIncludedServices);
+    return NOERROR;
 }
 
 BluetoothGattService::BluetoothGattService(
@@ -33,22 +38,22 @@ BluetoothGattService::BluetoothGattService(
     /* [in] */ Int32 instanceId,
     /* [in] */ Int32 serviceType)
 {
-    // ==================before translated======================
-    // mDevice = device;
-    // mUuid = uuid;
-    // mInstanceId = instanceId;
-    // mServiceType = serviceType;
-    // mCharacteristics = new ArrayList<BluetoothGattCharacteristic>();
-    // mIncludedServices = new ArrayList<BluetoothGattService>();
+    mDevice = device;
+    mUuid = uuid;
+    mInstanceId = instanceId;
+    mServiceType = serviceType;
+    //mCharacteristics = new ArrayList<BluetoothGattCharacteristic>();
+    //mIncludedServices = new ArrayList<BluetoothGattService>();
+    CArrayList::New((IList**)&mCharacteristics);
+    CArrayList::New((IList**)&mIncludedServices);
 }
 
 ECode BluetoothGattService::GetDevice(
     /* [out] */ IBluetoothDevice** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mDevice;
-    assert(0);
+    *result = mDevice;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -56,12 +61,9 @@ ECode BluetoothGattService::AddService(
     /* [in] */ IBluetoothGattService* service,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(service);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // mIncludedServices.add(service);
-    // return true;
-    assert(0);
+    mIncludedServices->Add(TO_IINTERFACE(service));
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -69,13 +71,10 @@ ECode BluetoothGattService::AddCharacteristic(
     /* [in] */ IBluetoothGattCharacteristic* characteristic,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(characteristic);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // mCharacteristics.add(characteristic);
-    // characteristic.setService(this);
-    // return true;
-    assert(0);
+    mCharacteristics->Add(TO_IINTERFACE(characteristic));
+    ((BluetoothGattCharacteristic*)characteristic)->SetService(this);
+    *result = TRUE;
     return NOERROR;
 }
 
@@ -84,25 +83,34 @@ ECode BluetoothGattService::GetCharacteristic(
     /* [in] */ Int32 instanceId,
     /* [out] */ IBluetoothGattCharacteristic** result)
 {
-    VALIDATE_NOT_NULL(uuid);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // for(BluetoothGattCharacteristic characteristic : mCharacteristics) {
-    //     if (uuid.equals(characteristic.getUuid())
-    //      && characteristic.getInstanceId() == instanceId)
-    //         return characteristic;
-    // }
-    // return null;
-    assert(0);
+    *result = NULL;
+    Int32 size;
+    mCharacteristics->GetSize(&size);
+    for(Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mCharacteristics->Get(i, (IInterface**)&obj);
+        IBluetoothGattCharacteristic* characteristic = IBluetoothGattCharacteristic::Probe(obj);
+
+        AutoPtr<IUUID> cuuid;
+        characteristic->GetUuid((IUUID**)&cuuid);
+        Int32 cInstanceId;
+        characteristic->GetInstanceId(&cInstanceId);
+        Boolean eq = FALSE;
+        if ((uuid->Equals(TO_IINTERFACE(cuuid), &eq), eq)
+         && cInstanceId == instanceId) {
+            *result = characteristic;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 
 ECode BluetoothGattService::SetInstanceId(
     /* [in] */ Int32 instanceId)
 {
-    // ==================before translated======================
-    // mInstanceId = instanceId;
-    assert(0);
+    mInstanceId = instanceId;
     return NOERROR;
 }
 
@@ -110,28 +118,21 @@ ECode BluetoothGattService::GetHandles(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mHandles;
-    assert(0);
+    *result = mHandles;
     return NOERROR;
 }
 
 ECode BluetoothGattService::SetHandles(
     /* [in] */ Int32 handles)
 {
-    // ==================before translated======================
-    // mHandles = handles;
-    assert(0);
+    mHandles = handles;
     return NOERROR;
 }
 
 ECode BluetoothGattService::AddIncludedService(
     /* [in] */ IBluetoothGattService* includedService)
 {
-    VALIDATE_NOT_NULL(includedService);
-    // ==================before translated======================
-    // mIncludedServices.add(includedService);
-    assert(0);
+    mIncludedServices->Add(TO_IINTERFACE(includedService));
     return NOERROR;
 }
 
@@ -139,9 +140,8 @@ ECode BluetoothGattService::GetUuid(
     /* [out] */ IUUID** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mUuid;
-    assert(0);
+    *result = mUuid;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -149,9 +149,7 @@ ECode BluetoothGattService::GetInstanceId(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mInstanceId;
-    assert(0);
+    *result = mInstanceId;
     return NOERROR;
 }
 
@@ -159,9 +157,7 @@ ECode BluetoothGattService::GetType(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mServiceType;
-    assert(0);
+    *result = mServiceType;
     return NOERROR;
 }
 
@@ -169,9 +165,8 @@ ECode BluetoothGattService::GetIncludedServices(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mIncludedServices;
-    assert(0);
+    *result = mIncludedServices;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -179,9 +174,8 @@ ECode BluetoothGattService::GetCharacteristics(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mCharacteristics;
-    assert(0);
+    *result = mCharacteristics;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -189,15 +183,24 @@ ECode BluetoothGattService::GetCharacteristic(
     /* [in] */ IUUID* uuid,
     /* [out] */ IBluetoothGattCharacteristic** result)
 {
-    VALIDATE_NOT_NULL(uuid);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // for(BluetoothGattCharacteristic characteristic : mCharacteristics) {
-    //     if (uuid.equals(characteristic.getUuid()))
-    //         return characteristic;
-    // }
-    // return null;
-    assert(0);
+    *result = NULL;
+    Int32 size;
+    mCharacteristics->GetSize(&size);
+    for(Int32 i = 0; i < size; ++i) {
+        AutoPtr<IInterface> obj;
+        mCharacteristics->Get(i, (IInterface**)&obj);
+        IBluetoothGattCharacteristic* characteristic = IBluetoothGattCharacteristic::Probe(obj);
+
+        AutoPtr<IUUID> cuuid;
+        characteristic->GetUuid((IUUID**)&cuuid);
+        Boolean eq = FALSE;
+        if (uuid->Equals(TO_IINTERFACE(cuuid), &eq), eq) {
+            *result = characteristic;
+            REFCOUNT_ADD(*result);
+            return NOERROR;
+        }
+    }
     return NOERROR;
 }
 
@@ -205,18 +208,14 @@ ECode BluetoothGattService::IsAdvertisePreferred(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAdvertisePreferred;
-    assert(0);
+    *result = mAdvertisePreferred;
     return NOERROR;
 }
 
 ECode BluetoothGattService::SetAdvertisePreferred(
     /* [in] */ Boolean advertisePreferred)
 {
-    // ==================before translated======================
-    // this.mAdvertisePreferred = advertisePreferred;
-    assert(0);
+    mAdvertisePreferred = advertisePreferred;
     return NOERROR;
 }
 

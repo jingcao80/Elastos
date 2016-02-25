@@ -344,13 +344,12 @@ Watchdog::Watchdog()
 }
 
 ECode Watchdog::Init(
-    /* [in] */ IContext* context
-    /* [in] */ /*CActivityManagerService* activity*/)
+    /* [in] */ IContext* context,
+    /* [in] */ CActivityManagerService* activity)
 {
     context->GetContentResolver((IContentResolver**)&mResolver);
 
-    assert(0 && "TODO");
-    // mActivity = activity;
+    mActivity = activity;
 
     AutoPtr<IBroadcastReceiver> receiver = new RebootRequestReceiver(this);
     AutoPtr<IIntentFilter> filter;

@@ -41,7 +41,7 @@ module
 
     interface INetworkManagementServiceHelper {
         Create(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] INetworkManagementService** result);
     }
 

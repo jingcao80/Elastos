@@ -8,47 +8,44 @@
 
 //TODO #include "elastos/droid/media/CMediaCodecListHelper.h"
 //TODO #include "elastos/droid/media/CMediaCodecHelper.h"
-//TODO #include "elastos/droid/media/CMediaCodecBufferInfo.h"
-//TODO #include "elastos/droid/media/CMediaFormatHelper.h"
-//TODO #include "elastos/droid/media/CAudioTrackHelper.h"
-//TODO #include "elastos/droid/media/CAudioTrack.h"
-//TODO #include "elastos/droid/media/CMediaCodecCryptoInfo.h"
+#include "elastos/droid/media/CMediaCodecBufferInfo.h"
+#include "elastos/droid/media/CMediaFormatHelper.h"
+#include "elastos/droid/media/CAudioTrackHelper.h"
+#include "elastos/droid/media/CAudioTrack.h"
+#include "elastos/droid/media/CMediaCodecCryptoInfo.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/CBundle.h"
 
-//TODO #include <elastos/io/CByteBufferHelper.h>
 #include <elastos/core/Math.h>
-//TODO #include <elastos/utility/CHashMap.h>
-//TODO #include <elastos/utility/CArrayList.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Media::IAudioFormat;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Media::IAudioTrack;
-//TODO using Elastos::Droid::Media::CAudioTrack;
+using Elastos::Droid::Media::CAudioTrack;
 using Elastos::Droid::Media::IAudioTrackHelper;
-//TODO using Elastos::Droid::Media::CAudioTrackHelper;
+using Elastos::Droid::Media::CAudioTrackHelper;
 using Elastos::Droid::Media::IMediaCodec;
 using Elastos::Droid::Media::IMediaCodecHelper;
 //TODO using Elastos::Droid::Media::CMediaCodecHelper;
 using Elastos::Droid::Media::IMediaCodecInfo;
 using Elastos::Droid::Media::IMediaCodecCryptoInfo;
-//TODO using Elastos::Droid::Media::CMediaCodecCryptoInfo;
+using Elastos::Droid::Media::CMediaCodecCryptoInfo;
 using Elastos::Droid::Media::IMediaCodecList;
 using Elastos::Droid::Media::IMediaCodecListHelper;
 using Elastos::Droid::Media::IMediaCodecBufferInfo;
-//TODO using Elastos::Droid::Media::CMediaCodecBufferInfo;
+using Elastos::Droid::Media::CMediaCodecBufferInfo;
 //TODO using Elastos::Droid::Media::CMediaCodecListHelper;
-//TODO using Elastos::Droid::Media::IMediaCrypto;
+using Elastos::Droid::Media::IMediaCrypto;
 using Elastos::Droid::Media::IMediaFormatHelper;
-//TODO using Elastos::Droid::Media::CMediaFormatHelper;
+using Elastos::Droid::Media::CMediaFormatHelper;
 using Elastos::Droid::Media::IMediaFormat;
 //TODO using Elastos::Droid::Media::ICodecCapabilities;
 using Elastos::Droid::View::ISurface;
 
 using Elastos::IO::IBuffer;
 using Elastos::IO::IByteBufferHelper;
-//TODO using Elastos::IO::CByteBufferHelper;
+using Elastos::IO::CByteBufferHelper;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
 using Elastos::Droid::Os::Build;
@@ -56,9 +53,9 @@ using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Utility::IMap;
 using Elastos::Utility::IHashMap;
-//TODO using Elastos::Utility::CHashMap;
+using Elastos::Utility::CHashMap;
 using Elastos::Utility::IArrayList;
-//TODO using Elastos::Utility::CArrayList;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::ICollection;
 
 using Elastos::Utility::Logging::Logger;
@@ -370,9 +367,9 @@ AutoPtr<ArrayOf<IInterface*> > MediaCodecBridge::GetCodecsInfo()
     //Map<String, CodecInfo> encoderInfoMap = new HashMap<String, CodecInfo>();
     //Map<String, CodecInfo> decoderInfoMap = new HashMap<String, CodecInfo>();
     AutoPtr<IMap> encoderInfoMap;
-    //TODO CHashMap::New((IMap**)&encoderInfoMap);
+    CHashMap::New((IMap**)&encoderInfoMap);
     AutoPtr<IMap> decoderInfoMap;
-    //TODO CHashMap::New((IMap**)&decoderInfoMap);
+    CHashMap::New((IMap**)&decoderInfoMap);
     AutoPtr<IMediaCodecListHelper> mclHelper;
     //TODO CMediaCodecListHelper::AcquireSingleton((IMediaCodecListHelper**)&mclHelper);
 
@@ -411,7 +408,7 @@ AutoPtr<ArrayOf<IInterface*> > MediaCodecBridge::GetCodecsInfo()
     decoderInfoMap->GetSize(&decoderInfoMapSize);
     encoderInfoMap->GetSize(&encoderInfoMapSize);
     AutoPtr<IArrayList> codecInfos;
-    //TODO CArrayList::New(decoderInfoMapSize + encoderInfoMapSize, (IArrayList**)&codecInfos);
+    CArrayList::New(decoderInfoMapSize + encoderInfoMapSize, (IArrayList**)&codecInfos);
     AutoPtr<ICollection> encoderValues, decoderValues;
     //codecInfos.addAll(encoderInfoMap.values());
     //codecInfos.addAll(decoderInfoMap.values());
@@ -752,11 +749,11 @@ Int32 MediaCodecBridge::QueueSecureInputBuffer(
     ResetLastPresentationTimeIfNeeded(presentationTimeUs);
     // try {
         AutoPtr<IMediaCodecCryptoInfo> cryptoInfo;
-        //TODO CMediaCodecCryptoInfo::New((IMediaCodecCryptoInfo**)&cryptoInfo);
+        CMediaCodecCryptoInfo::New((IMediaCodecCryptoInfo**)&cryptoInfo);
         cryptoInfo->Set(numSubSamples, numBytesOfClearData, numBytesOfEncryptedData,
                 keyId, iv, IMediaCodec::CRYPTO_MODE_AES_CTR);
         UInt32 ecode = mMediaCodec->QueueSecureInputBuffer(index, offset, cryptoInfo, presentationTimeUs, 0);
-        if(ecode == E_CRYPTO_EXCEPTION)
+        if(ecode == (ECode)E_CRYPTO_EXCEPTION)
         {
             Logger::E(TAG, "MediaCodec.CryptoException with error code ,ecode:0x%x", ecode);
             return MEDIA_CODEC_ERROR;
@@ -803,7 +800,7 @@ AutoPtr<MediaCodecBridge::DequeueOutputResult> MediaCodecBridge::DequeueOutputBu
     /* [in] */ Int64 timeoutUs)
 {
     AutoPtr<IMediaCodecBufferInfo> info;
-    //TODO CMediaCodecBufferInfo::New((IMediaCodecBufferInfo**)&info);
+    CMediaCodecBufferInfo::New((IMediaCodecBufferInfo**)&info);
     Int32 status = MEDIA_CODEC_ERROR;
     Int32 index = -1;
     // try {
@@ -888,7 +885,7 @@ AutoPtr<IInterface> MediaCodecBridge::CreateAudioFormat(
     /* [in] */ Int32 channelCount)
 {
     AutoPtr<IMediaFormatHelper> helper;
-    //TODO CMediaFormatHelper::AcquireSingleton((IMediaFormatHelper**)&helper);
+    CMediaFormatHelper::AcquireSingleton((IMediaFormatHelper**)&helper);
     AutoPtr<IMediaFormat> format;
     helper->CreateAudioFormat(mime, sampleRate, channelCount, (IMediaFormat**)&format);
     return format;
@@ -901,7 +898,7 @@ AutoPtr<IInterface> MediaCodecBridge::CreateVideoDecoderFormat(
     /* [in] */ Int32 height)
 {
     AutoPtr<IMediaFormatHelper> helper;
-    //TODO CMediaFormatHelper::AcquireSingleton((IMediaFormatHelper**)&helper);
+    CMediaFormatHelper::AcquireSingleton((IMediaFormatHelper**)&helper);
     AutoPtr<IMediaFormat> format;
     helper->CreateVideoFormat(mime, width, height, (IMediaFormat**)&format);
     return format;
@@ -918,7 +915,7 @@ AutoPtr<IInterface> MediaCodecBridge::CreateVideoEncoderFormat(
     /* [in] */ Int32 colorFormat)
 {
     AutoPtr<IMediaFormatHelper> helper;
-    //TODO CMediaFormatHelper::AcquireSingleton((IMediaFormatHelper**)&helper);
+    CMediaFormatHelper::AcquireSingleton((IMediaFormatHelper**)&helper);
     AutoPtr<IMediaFormat> format;
     helper->CreateVideoFormat(mime, width, height, (IMediaFormat**)&format);
     format->SetInt32(IMediaFormat::KEY_BIT_RATE, bitRate);
@@ -986,7 +983,7 @@ void MediaCodecBridge::SetCodecSpecificData(
     if (!name.IsNullOrEmpty()) {
         AutoPtr<IByteBuffer> buf;
         AutoPtr<IByteBufferHelper> bHelper;
-        //TODO CByteBufferHelper::New((IByteBufferHelper**)bHelper);
+        CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&bHelper);
         bHelper->Wrap(bytes, (IByteBuffer**)&buf);
         format->SetByteBuffer(name, buf);
     }
@@ -1017,13 +1014,13 @@ Boolean MediaCodecBridge::ConfigureAudio(
             // Using 16bit PCM for output. Keep this value in sync with
             // kBytesPerAudioOutputSample in media_codec_bridge.cc.
             AutoPtr<IAudioTrackHelper> atHelper;
-            //TODO CAudioTrackHelper::New((IAudioTrackHelper**)atHelper);
+            CAudioTrackHelper::AcquireSingleton((IAudioTrackHelper**)&atHelper);
             Int32 minBufferSize;
             atHelper->GetMinBufferSize(sampleRate, channelConfig,
                     IAudioFormat::ENCODING_PCM_16BIT, &minBufferSize);
-            //TODO CAudioTrack::New(IAudioManager::STREAM_MUSIC, sampleRate, channelConfig,
-            //TODO         IAudioFormat::ENCODING_PCM_16BIT, minBufferSize, IAudioTrack::MODE_STREAM,
-            //TODO         (IAudioTrack**)&mAudioTrack);
+            CAudioTrack::New(IAudioManager::STREAM_MUSIC, sampleRate, channelConfig,
+                    IAudioFormat::ENCODING_PCM_16BIT, minBufferSize, IAudioTrack::MODE_STREAM,
+                    (IAudioTrack**)&mAudioTrack);
             Int32 state;
             mAudioTrack->GetState(&state);
             if (state == IAudioTrack::STATE_UNINITIALIZED) {

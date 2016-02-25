@@ -8,6 +8,11 @@ CAR_INTERFACE_IMPL(CStructFlock, Object, IStructFlock)
 
 CAR_OBJECT_IMPL(CStructFlock)
 
+ECode CStructFlock::constructor()
+{
+    return NOERROR;
+}
+
 /** The operation type, one of F_RDLCK, F_WRLCK, or F_UNLCK. */
 ECode CStructFlock::GetType(
     /* [out] */ Int16* type)

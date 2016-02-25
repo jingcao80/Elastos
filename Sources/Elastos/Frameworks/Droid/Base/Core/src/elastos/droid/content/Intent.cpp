@@ -14,7 +14,7 @@
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
-//#include "elastos/droid/graphics/CRect.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Slogger.h>
@@ -32,7 +32,7 @@ using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IServiceInfo;
 using Elastos::Droid::Content::Pm::IComponentInfo;
 using Elastos::Droid::Content::Res::ITypedArray;
-//using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::UserHandle;
@@ -126,11 +126,10 @@ ECode Intent::constructor(
         CBundle::New(extras, (IBundle**)&mExtras);
     }
 
-    assert(0 && "TODO");
     AutoPtr<IRect> sourceBounds;
     intent->GetSourceBounds((IRect**)&sourceBounds);
     if (sourceBounds != NULL) {
-        // CRect::New(sourceBounds, (IRect**)&mSourceBounds);
+        CRect::New(sourceBounds, (IRect**)&mSourceBounds);
     }
     AutoPtr<IIntent> selector;
     intent->GetSelector((IIntent**)&selector);
@@ -364,11 +363,10 @@ ECode Intent::ParseUri(
             *_intent = cintent;
             REFCOUNT_ADD(*_intent);
             // try {
-            assert(0 && "TODO");
             AutoPtr<IUri> data;
-            // if (FAILED(Uri::Parse(uri, (IUri**)&data))) {
-            //     return E_URI_SYNTAX_EXCEPTION;
-            // }
+            if (FAILED(Uri::Parse(uri, (IUri**)&data))) {
+                return E_URI_SYNTAX_EXCEPTION;
+            }
             (*_intent)->SetData(data);
             // } catch (IllegalArgumentException e) {
             //     throw new URISyntaxException(uri, e.getMessage());
@@ -381,8 +379,7 @@ ECode Intent::ParseUri(
     i = uri.LastIndexOf("#");
     if (i == -1) {
         AutoPtr<IUri> data;
-            assert(0 && "TODO");
-        // FAIL_RETURN(Uri::Parse(uri, (IUri**)&data));
+        FAIL_RETURN(Uri::Parse(uri, (IUri**)&data));
         AutoPtr<CIntent> cintent;
         FAIL_RETURN(CIntent::NewByFriend(IIntent::ACTION_VIEW, data, (CIntent**)&cintent));
         *_intent = cintent;
@@ -413,8 +410,7 @@ ECode Intent::ParseUri(
         Int32 semi = uri.IndexOf(';', i);
         String value = String("");
         if (eq < semi) {
-            assert(0 && "TODO");
-            // FAIL_RETURN(Uri::Decode(uri.Substring(eq + 1, semi), &value));
+            FAIL_RETURN(Uri::Decode(uri.Substring(eq + 1, semi), &value));
         }
 
         // action
@@ -463,8 +459,7 @@ ECode Intent::ParseUri(
         // extra
         else {
             String key;
-            assert(0 && "TODO");
-            // FAIL_RETURN(Uri::Decode(uri.Substring(i + 2, eq), &key));
+            FAIL_RETURN(Uri::Decode(uri.Substring(i + 2, eq), &key));
             // create Bundle if it doesn't already exist
             if (intent->mExtras == NULL) {
                 CBundle::New((IBundle**)&intent->mExtras);
@@ -527,10 +522,9 @@ ECode Intent::ParseUri(
         if (!data.IsEmpty()) {
             // try {
             intent->mData = NULL;
-            assert(0 && "TODO");
-            // if (FAILED(Uri::Parse(data, (IUri**)&intent->mData))) {
-            //     return E_URI_SYNTAX_EXCEPTION;
-            // }
+            if (FAILED(Uri::Parse(data, (IUri**)&intent->mData))) {
+                return E_URI_SYNTAX_EXCEPTION;
+            }
             // } catch (IllegalArgumentException e) {
             //     throw new URISyntaxException(uri, e.getMessage());
             // }
@@ -662,11 +656,9 @@ ECode Intent::GetIntentOld(
                 // try {
                 switch (type) {
                     case 'S':
-                        // CUriHelper::AcquireSingleton((IUriHelper**)&helper);
-                        assert(0 && "TODO");
-                        // if (FAILED(Uri::Decode(value, &decodeS))) {
-                        //     return E_URI_SYNTAX_EXCEPTION;
-                        // }
+                        if (FAILED(Uri::Decode(value, &decodeS))) {
+                            return E_URI_SYNTAX_EXCEPTION;
+                        }
                         intent->mExtras->PutString(key, decodeS);
                         break;
                     case 'B':
@@ -676,10 +668,9 @@ ECode Intent::GetIntentOld(
                         intent->mExtras->PutByte(key, (Byte)StringUtils::ParseInt32(value));
                         break;
                     case 'c':
-                    assert(0 && "TODO");
-                        // if (FAILED(Uri::Decode(value, &decodeS))) {
-                        //     return E_URI_SYNTAX_EXCEPTION;
-                        // }
+                        if (FAILED(Uri::Decode(value, &decodeS))) {
+                            return E_URI_SYNTAX_EXCEPTION;
+                        }
                         intent->mExtras->PutChar(key, decodeS.GetChar(0));
                         break;
                     case 'd':
@@ -2028,11 +2019,10 @@ ECode Intent::SetClass(
 ECode Intent::SetSourceBounds(
     /* [in] */ IRect* r)
 {
-    assert(0 && "TODO");
-    // mSourceBounds = NULL;
-    // if (r != NULL) {
-    //     return CRect::New(r, (IRect**)&mSourceBounds);
-    // }
+    mSourceBounds = NULL;
+    if (r != NULL) {
+        return CRect::New(r, (IRect**)&mSourceBounds);
+    }
     return NOERROR;
 }
 
@@ -2113,8 +2103,7 @@ ECode Intent::FillIn(
     if (otherIntent->mSourceBounds != NULL
             && (mSourceBounds == NULL || (flags & IIntent::FILL_IN_SOURCE_BOUNDS) != 0)) {
         mSourceBounds = NULL;
-    assert(0 && "TODO");
-        // CRect::New(otherIntent->mSourceBounds, (IRect**)&mSourceBounds);
+        CRect::New(otherIntent->mSourceBounds, (IRect**)&mSourceBounds);
         changes |= IIntent::FILL_IN_SOURCE_BOUNDS;
     }
 
@@ -2171,7 +2160,8 @@ ECode Intent::FilterEquals(
         if (categories == NULL) {
             return NOERROR;
         }
-        if (mCategories->GetSize() != categories->GetLength()) {
+        Int32 size = mCategories->GetSize();
+        if (size != categories->GetLength()) {
             return NOERROR;
         }
         for (Int32 i = 0; i < categories->GetLength(); ++i) {
@@ -2748,8 +2738,7 @@ ECode Intent::ParseIntent(
     sa->GetString(R::styleable::Intent_mimeType, &mimeType);
     AutoPtr<IUri> uri;
     if (!data.IsNull()) {
-        assert(0 && "TODO");
-        // Uri::Parse(data, (IUri**)&uri);
+        Uri::Parse(data, (IUri**)&uri);
     }
     intent->SetDataAndType(uri, mimeType);
 

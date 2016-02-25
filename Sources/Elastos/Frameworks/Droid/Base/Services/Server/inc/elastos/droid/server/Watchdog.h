@@ -6,7 +6,7 @@
 #include <elastos/droid/os/Runnable.h>
 #include <elastos/droid/os/SystemClock.h>
 #include <elastos/droid/content/BroadcastReceiver.h>
-// #include <elastos/droid/server/am/CActivityManagerService.h>
+#include <elastos/droid/server/am/CActivityManagerService.h>
 #include <elastos/core/Thread.h>
 #include <elastos/utility/etl/List.h>
 #include <Elastos.Droid.Os.h>
@@ -29,7 +29,7 @@ using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::IIntentFilter;
-// using Elastos::Droid::Server::Am::CActivityManagerService;
+using Elastos::Droid::Server::Am::CActivityManagerService;
 using Elastos::Core::Thread;
 using Elastos::IO::IFile;
 using Elastos::IO::IFileWriter;
@@ -154,13 +154,12 @@ public:
         /* [in] */ IHandler* thread,
         /* [in] */ Int64 timeoutMillis);
 
+    CARAPI Init(
+        /* [in] */ IContext* context,
+        /* [in] */ CActivityManagerService* activity);
 private:
 
     Watchdog();
-
-    CARAPI Init(
-        /* [in] */ IContext* context
-        /* [in] */ /*CActivityManagerService* activity*/);
 
     /**
      * Perform a full reboot of the system.
@@ -209,7 +208,7 @@ public:
     List<AutoPtr<HandlerChecker> > mHandlerCheckers;
     AutoPtr<HandlerChecker> mMonitorChecker;
     AutoPtr<IContentResolver> mResolver;
-    // CActivityManagerService* mActivity;
+    CActivityManagerService* mActivity;
 
     Int32 mPhonePid;
     AutoPtr<IIActivityController> mController;

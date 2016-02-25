@@ -26,7 +26,7 @@ namespace Animation {
  * Defines common utilities for working with animations.
  *
  */
-class AnimationUtils
+class ECO_PUBLIC AnimationUtils
 {
 public:
     /**

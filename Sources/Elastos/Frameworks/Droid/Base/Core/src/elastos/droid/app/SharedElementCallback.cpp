@@ -4,7 +4,7 @@
 #include "elastos/droid/app/SharedElementCallback.h"
 #include "elastos/droid/graphics/CMatrix.h"
 #include "elastos/droid/graphics/drawable/CBitmapDrawable.h"
-// #include "elastos/droid/view/CView.h"
+#include "elastos/droid/view/CView.h"
 #include "elastos/droid/transition/CTransitionUtils.h"
 
 using Elastos::Droid::Content::Res::IResources;
@@ -14,7 +14,7 @@ using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
 using Elastos::Droid::Graphics::Drawable::CBitmapDrawable;
-// using Elastos::Droid::View::CView;
+using Elastos::Droid::View::CView;
 using Elastos::Droid::Transition::ITransitionUtils;
 using Elastos::Droid::Transition::CTransitionUtils;
 
@@ -96,8 +96,7 @@ ECode SharedElementCallback::OnCreateSnapshotView(
     AutoPtr<IView> view;
     IBitmap* bitmap = IBitmap::Probe(snapshot);
     if (bitmap != NULL) {
-        assert(0 && "TODO");
-        // CView::New(context, (IView**)&view);
+        CView::New(context, (IView**)&view);
         AutoPtr<IResources> resources;
         context->GetResources((IResources**)&resources);
         AutoPtr<IDrawable> bd;

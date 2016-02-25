@@ -99,7 +99,6 @@ module
     // merge("view/RootViewSurfaceTaker.car");
     merge("view/IInputMethodCallback.car");
     // merge("view/WindowManagerPolicyThread.car");
-    // merge("view/IInputContextCallback.car");
     // merge("view/DisplayManagerAw.car");
     // merge("view/IDisplayManagerAw.car");
     // merge("view/DispList.car");
@@ -187,8 +186,8 @@ module
     interface Elastos.Droid.Graphics.Drawable.IDrawableCallback;
     // interface Elastos.Droid.Internal.View.IInputBindResult;
     interface Elastos.Droid.Internal.View.IIInputMethodManager;
-    interface Elastos.Droid.Internal.View.IInputContext;
-    // interface Elastos.Droid.Internal.View.IInputContextCallback;
+    interface Elastos.Droid.Internal.View.IIInputContext;
+    // interface Elastos.Droid.Internal.View.IIInputContextCallback;
     interface Elastos.Droid.Internal.View.IInputMethodClient;
     // interface Elastos.Droid.Internal.View.IIInputMethodSession;
     interface Elastos.Droid.Internal.View.IBaseIWindow;
@@ -242,20 +241,6 @@ module
     interface Elastos.Droid.Utility.IAttributeSet;
     interface Elastos.Droid.Text.IInputType;
 
-    // namespace Elastos {
-    // namespace Droid {
-    // namespace Internal {
-    // namespace View {
-
-    // class CInputContextCallback {
-    //     interface IInputContextCallback;
-    // }
-
-    // } // namespace View
-    // } // namespace Internal
-    // } // namespace Droid
-    // } // namespace Elastos
-
     namespace Elastos {
     namespace Droid {
     namespace View {
@@ -279,6 +264,32 @@ module
             [in] Int32 defStyleAttr,
             [in] Int32 defStyleRes);
 
+        interface IView;
+        interface IDrawableCallback;
+        interface IKeyEventCallback;
+        interface IAccessibilityEventSource;
+    }
+
+    class CTextureView {
+        constructor(
+            [in] IContext* ctx);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr);
+
+        constructor(
+            [in] IContext* ctx,
+            [in] IAttributeSet* attrs,
+            [in] Int32 defStyleAttr,
+            [in] Int32 defStyleRes);
+
+        interface ITextureView;
         interface IView;
         interface IDrawableCallback;
         interface IKeyEventCallback;
@@ -1579,7 +1590,7 @@ module
             [in] Float controlY2);
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IAttributeSet* attrs);
 
         constructor(
@@ -2003,7 +2014,7 @@ module
             [in] IInputConnection* conn,
             [in] IInputMethodManager* inputMethodManager);
 
-        interface IInputContext;
+        interface IIInputContext;
         interface IBinder;
     }
 
@@ -2124,6 +2135,12 @@ module
         interface IParcelable;
     }
 
+    class CInputMethodSubtypeBuilder {
+        constructor();
+
+        interface IInputMethodSubtypeBuilder;
+    }
+
     class CInputMethodSubtypeArray {
         constructor();
 
@@ -2168,7 +2185,7 @@ module
         constructor();
 
         constructor(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IResolveInfo* service);
 
         interface ISpellCheckerInfo;

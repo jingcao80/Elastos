@@ -25,7 +25,7 @@ using Elastos::Droid::App::CPendingIntentHelper;
 using Elastos::Droid::App::CWallpaperInfo;
 using Elastos::Droid::App::CWallpaperManager;
 using Elastos::Droid::App::EIID_IIWallpaperManager;
-using Elastos::Droid::App::EIID_IUserSwitchObserver;
+using Elastos::Droid::App::EIID_IIUserSwitchObserver;
 using Elastos::Droid::App::IPendingIntentHelper;
 using Elastos::Droid::App::Backup::IBackupManager;
 using Elastos::Droid::App::Backup::IWallpaperBackupHelper;
@@ -582,7 +582,7 @@ ECode WallpaperManagerService::SystemRunningBR::OnReceive(
 // WallpaperManagerService::SystemRunningObserver
 //==========================================
 
-CAR_INTERFACE_IMPL_2(WallpaperManagerService::SystemRunningObserver, Object, IUserSwitchObserver, IBinder)
+CAR_INTERFACE_IMPL_2(WallpaperManagerService::SystemRunningObserver, Object, IIUserSwitchObserver, IBinder)
 
 WallpaperManagerService::SystemRunningObserver::SystemRunningObserver(
     /* [in] */ WallpaperManagerService* host)
@@ -702,7 +702,7 @@ ECode WallpaperManagerService::SystemRunning()
 
     AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
     AutoPtr<SystemRunningObserver> observer = new SystemRunningObserver(this);
-    ECode ec = am->RegisterUserSwitchObserver((IUserSwitchObserver*)observer);
+    ECode ec = am->RegisterUserSwitchObserver((IIUserSwitchObserver*)observer);
     if (FAILED(ec)) {
         return E_REMOTE_EXCEPTION;
     }

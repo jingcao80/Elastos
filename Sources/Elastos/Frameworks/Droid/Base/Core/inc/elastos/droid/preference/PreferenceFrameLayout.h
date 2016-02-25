@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_PREFERENCE_PREFERENCEFRAMELAYOUT_H__
-#define  __ELASTOS_DROID_PREFERENCE_PREFERENCEFRAMELAYOUT_H__
+#define __ELASTOS_DROID_PREFERENCE_PREFERENCEFRAMELAYOUT_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/FrameLayout.h"

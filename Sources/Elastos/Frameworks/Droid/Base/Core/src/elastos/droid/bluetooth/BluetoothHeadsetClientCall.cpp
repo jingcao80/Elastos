@@ -1,5 +1,8 @@
 
 #include "elastos/droid/bluetooth/BluetoothHeadsetClientCall.h"
+#include "elastos/core/StringBuilder.h"
+
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -14,45 +17,39 @@ BluetoothHeadsetClientCall::BluetoothHeadsetClientCall()
 {
 }
 
-BluetoothHeadsetClientCall::BluetoothHeadsetClientCall(
+ECode BluetoothHeadsetClientCall::constructor(
     /* [in] */ Int32 id,
     /* [in] */ Int32 state,
     /* [in] */ const String& number,
     /* [in] */ Boolean multiParty,
     /* [in] */ Boolean outgoing)
 {
-    // ==================before translated======================
-    // mId = id;
-    // mState = state;
-    // mNumber = number != null ? number : "";
-    // mMultiParty = multiParty;
-    // mOutgoing = outgoing;
+    mId = id;
+    mState = state;
+    mNumber = number;// != null ? number : "";
+    mMultiParty = multiParty;
+    mOutgoing = outgoing;
+    return NOERROR;
 }
 
 ECode BluetoothHeadsetClientCall::SetState(
     /* [in] */ Int32 state)
 {
-    // ==================before translated======================
-    // mState = state;
-    assert(0);
+    mState = state;
     return NOERROR;
 }
 
 ECode BluetoothHeadsetClientCall::SetNumber(
     /* [in] */ const String& number)
 {
-    // ==================before translated======================
-    // mNumber = number;
-    assert(0);
+    mNumber = number;
     return NOERROR;
 }
 
 ECode BluetoothHeadsetClientCall::SetMultiParty(
     /* [in] */ Boolean multiParty)
 {
-    // ==================before translated======================
-    // mMultiParty = multiParty;
-    assert(0);
+    mMultiParty = multiParty;
     return NOERROR;
 }
 
@@ -60,9 +57,7 @@ ECode BluetoothHeadsetClientCall::GetId(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mId;
-    assert(0);
+    *result = mId;
     return NOERROR;
 }
 
@@ -70,9 +65,7 @@ ECode BluetoothHeadsetClientCall::GetState(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mState;
-    assert(0);
+    *result = mState;
     return NOERROR;
 }
 
@@ -80,9 +73,7 @@ ECode BluetoothHeadsetClientCall::GetNumber(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mNumber;
-    assert(0);
+    *result = mNumber;
     return NOERROR;
 }
 
@@ -90,9 +81,7 @@ ECode BluetoothHeadsetClientCall::IsMultiParty(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mMultiParty;
-    assert(0);
+    *result = mMultiParty;
     return NOERROR;
 }
 
@@ -100,9 +89,7 @@ ECode BluetoothHeadsetClientCall::IsOutgoing(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mOutgoing;
-    assert(0);
+    *result = mOutgoing;
     return NOERROR;
 }
 
@@ -110,52 +97,54 @@ ECode BluetoothHeadsetClientCall::ToString(
     /* [out] */ String* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // StringBuilder builder = new StringBuilder("BluetoothHeadsetClientCall{mId: ");
-    // builder.append(mId);
-    // builder.append(", mState: ");
-    // switch (mState) {
-    //     case CALL_STATE_ACTIVE: builder.append("ACTIVE"); break;
-    //     case CALL_STATE_HELD: builder.append("HELD"); break;
-    //     case CALL_STATE_DIALING: builder.append("DIALING"); break;
-    //     case CALL_STATE_ALERTING: builder.append("ALERTING"); break;
-    //     case CALL_STATE_INCOMING: builder.append("INCOMING"); break;
-    //     case CALL_STATE_WAITING: builder.append("WAITING"); break;
-    //     case CALL_STATE_HELD_BY_RESPONSE_AND_HOLD: builder.append("HELD_BY_RESPONSE_AND_HOLD"); break;
-    //     case CALL_STATE_TERMINATED: builder.append("TERMINATED"); break;
-    //     default: builder.append(mState); break;
-    // }
-    // builder.append(", mNumber: ");
-    // builder.append(mNumber);
-    // builder.append(", mMultiParty: ");
-    // builder.append(mMultiParty);
-    // builder.append(", mOutgoing: ");
-    // builder.append(mOutgoing);
-    // builder.append("}");
-    // return builder.toString();
-    assert(0);
+    AutoPtr<StringBuilder> builder = new StringBuilder("BluetoothHeadsetClientCall{mId: ");
+    builder->Append(mId);
+    builder->Append(", mState: ");
+    switch (mState) {
+        case CALL_STATE_ACTIVE: builder->Append("ACTIVE"); break;
+        case CALL_STATE_HELD: builder->Append("HELD"); break;
+        case CALL_STATE_DIALING: builder->Append("DIALING"); break;
+        case CALL_STATE_ALERTING: builder->Append("ALERTING"); break;
+        case CALL_STATE_INCOMING: builder->Append("INCOMING"); break;
+        case CALL_STATE_WAITING: builder->Append("WAITING"); break;
+        case CALL_STATE_HELD_BY_RESPONSE_AND_HOLD: builder->Append("HELD_BY_RESPONSE_AND_HOLD"); break;
+        case CALL_STATE_TERMINATED: builder->Append("TERMINATED"); break;
+        default: builder->Append(mState); break;
+    }
+    builder->Append(", mNumber: ");
+    builder->Append(mNumber);
+    builder->Append(", mMultiParty: ");
+    builder->Append(mMultiParty);
+    builder->Append(", mOutgoing: ");
+    builder->Append(mOutgoing);
+    builder->Append("}");
+    *result = builder->ToString();
     return NOERROR;
 }
 
 ECode BluetoothHeadsetClientCall::WriteToParcel(
-    /* [in] */ IParcel* out,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* out)
 {
-    VALIDATE_NOT_NULL(out);
-    // ==================before translated======================
-    // out.writeInt(mId);
-    // out.writeInt(mState);
-    // out.writeString(mNumber);
-    // out.writeInt(mMultiParty ? 1 : 0);
-    // out.writeInt(mOutgoing ? 1 : 0);
-    assert(0);
+    out->WriteInt32(mId);
+    out->WriteInt32(mState);
+    out->WriteString(mNumber);
+    out->WriteInt32(mMultiParty ? 1 : 0);
+    out->WriteInt32(mOutgoing ? 1 : 0);
     return NOERROR;
 }
 
 ECode BluetoothHeadsetClientCall::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    assert(0);
+    source->ReadInt32(&mId);
+    source->ReadInt32(&mState);
+    source->ReadString(&mNumber);
+    Int32 mp;
+    source->ReadInt32(&mp);
+    mMultiParty = mp == 1;
+    Int32 og;
+    source->ReadInt32(&og);
+    mOutgoing = og == 1;
     return NOERROR;
 }
 

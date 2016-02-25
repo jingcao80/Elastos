@@ -27,7 +27,7 @@ AutoPtr<InputConnectionWrapper::InputContextCallback> InputConnectionWrapper::In
 Int32 InputConnectionWrapper::InputContextCallback::sSequenceNumber = 1;
 Object InputConnectionWrapper::InputContextCallback::sLock;
 
-CAR_INTERFACE_IMPL_2(InputConnectionWrapper::InputContextCallback, Object, IInputContextCallback, IBinder)
+CAR_INTERFACE_IMPL_2(InputConnectionWrapper::InputContextCallback, Object, IIInputContextCallback, IBinder)
 
 InputConnectionWrapper::InputContextCallback::InputContextCallback()
     : mSeq(0)
@@ -204,7 +204,7 @@ void InputConnectionWrapper::InputContextCallback::WaitForResultLocked()
     while (!mHaveValue) {
         Int64 remainingTime = endTime - SystemClock::GetUptimeMillis();
         if (remainingTime <= 0) {
-            Logger::W(TAG, "Timed out waiting on IInputContextCallback");
+            Logger::W(TAG, "Timed out waiting on IIInputContextCallback");
             return;
         }
         // try {
@@ -225,7 +225,7 @@ const Int32 InputConnectionWrapper::MAX_WAIT_TIME_MILLIS = 2000;
 CAR_INTERFACE_IMPL(InputConnectionWrapper, Object, IInputConnection)
 
 ECode InputConnectionWrapper::constructor(
-    /* [in] */ IInputContext* inputContext)
+    /* [in] */ IIInputContext* inputContext)
 {
     assert(mIInputContext != NULL);
     mIInputContext = inputContext;

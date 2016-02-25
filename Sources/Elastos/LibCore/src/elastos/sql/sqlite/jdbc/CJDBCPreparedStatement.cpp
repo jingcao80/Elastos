@@ -234,14 +234,14 @@ ECode CJDBCPreparedStatement::ExecuteUpdate(
 ECode CJDBCPreparedStatement::GetMetaData(
     /* [out] */ IResultSetMetaData ** resultsetmeta)
 {
-    VALIDATE_NOT_NULL(*resultsetmeta);
+    VALIDATE_NOT_NULL(resultsetmeta);
     return IResultSet::Probe(rs)->GetMetaData(resultsetmeta);
 }
 
 ECode CJDBCPreparedStatement::GetParameterMetaData(
     /* [out] */ IParameterMetaData ** parametermeta)
 {
-    VALIDATE_NOT_NULL(*parametermeta);
+    VALIDATE_NOT_NULL(parametermeta);
     *parametermeta = NULL;
     return E_SQL_EXCEPTION;
 }

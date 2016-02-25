@@ -227,7 +227,7 @@ module
      * @throws KeyChainException if the alias was valid but there was some problem accessing it.
      */
         GetPrivateKey(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String alias);
 
     /**
@@ -239,7 +239,7 @@ module
      * @throws KeyChainException if the alias was valid but there was some problem accessing it.
      */
         GetCertificateChain(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String alias,
             [out, callee] ArrayOf<IX509Certificate*>* chain);
 
@@ -274,14 +274,14 @@ module
      * Caller should call unbindService on the result when finished.
      */
         Bind(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [out] IKeyChainConnection** connection);
 
     /**
      * @hide
      */
         BindAsUser(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IUserHandle* user,
             [out] IKeyChainConnection** connection);
     }

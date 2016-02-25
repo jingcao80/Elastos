@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_APP_BACKUP_CBACKUPDATAOUTPUT_H__
-#define  __ELASTOS_DROID_APP_BACKUP_CBACKUPDATAOUTPUT_H__
+#define __ELASTOS_DROID_APP_BACKUP_CBACKUPDATAOUTPUT_H__
 
 #include "_Elastos_Droid_App_Backup_CBackupDataOutput.h"
 #include <elastos/core/Object.h>

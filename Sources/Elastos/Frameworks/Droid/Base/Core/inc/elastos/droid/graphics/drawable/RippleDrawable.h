@@ -1,6 +1,6 @@
 
-#ifndef  __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEDRAWABLE_H__
-#define  __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEDRAWABLE_H__
+#ifndef __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEDRAWABLE_H__
+#define __ELASTOS_DROID_GRAPHICS_DRAWABLE_RIPPLEDRAWABLE_H__
 
 #include "elastos/droid/graphics/drawable/LayerDrawable.h"
 #include "elastos/droid/graphics/drawable/RippleBackground.h"

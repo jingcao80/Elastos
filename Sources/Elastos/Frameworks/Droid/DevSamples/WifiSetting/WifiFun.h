@@ -1,6 +1,6 @@
 
-#ifndef  __WIFIFUN_H__
-#define  __WIFIFUN_H__
+#ifndef __WIFIFUN_H__
+#define __WIFIFUN_H__
 
 #include "WifiNative.h"
 #include <utils/Log.h>

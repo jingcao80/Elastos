@@ -140,7 +140,8 @@ public:
         /* [out] */ Boolean* isDestroyed);
 
     CARAPI GetNativeObject(
-        /* [out] */ Int64* handle);
+        /* [out] */ Handle64* handle);
+
 public:
     static CARAPI Create(
         /* [in] */ Int32 width,

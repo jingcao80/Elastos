@@ -1502,7 +1502,7 @@ public:
 
             CARAPI Remove();
         public:
-            AutoPtr<Iterator> mIterator;
+            AutoPtr<IIterator> mIterator;
         };
     public:
         _UnmodifiableCollection(
@@ -1926,7 +1926,7 @@ public:
 
                 CARAPI Remove();
             public:
-                AutoPtr<Iterator> mIterator;
+                AutoPtr<IIterator> mIterator;
             };
 
         public:

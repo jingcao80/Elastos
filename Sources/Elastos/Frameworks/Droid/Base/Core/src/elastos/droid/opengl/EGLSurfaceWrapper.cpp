@@ -1,6 +1,10 @@
 
 #include "elastos/droid/opengl/EGLSurfaceWrapper.h"
 
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Utility::Logging::Slogger;
+
 namespace Elastos {
 namespace Droid {
 namespace Opengl {

@@ -54,7 +54,7 @@ ECode BaseNetworkStateTracker::constructor(
 ECode BaseNetworkStateTracker::GetTargetHandler(
     /* [out] */ IHandler** handler)
 {
-    VALIDATE_NOT_NULL(*handler)
+    VALIDATE_NOT_NULL(handler)
 
     *handler = mTarget;
     REFCOUNT_ADD(*handler)

@@ -111,7 +111,7 @@ module {
          *  {@link #LOCALE_TYPE_ALL} or {@link #LOCALE_TYPE_CURRENT}.
          */
         AddWord(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String word,
             [in] Int32 frequency,
             [in] Int32 localeType);
@@ -128,7 +128,7 @@ module {
          *  for all locales.
          */
         AddWord(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] String word,
             [in] Int32 frequency,
             [in] String shortcut,

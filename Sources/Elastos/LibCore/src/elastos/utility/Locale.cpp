@@ -741,8 +741,7 @@ String Locale::MakeLanguageTag()
 
         obj = NULL;
         extension->GetKey((IInterface**)&obj);
-        csq = ICharSequence::Probe(obj);
-        csq->ToString(&str);
+        str = Object::ToString(obj);
         if (!str.Equals("x")) {
             sb.AppendChar('-');
             sb.Append(str);
@@ -750,11 +749,9 @@ String Locale::MakeLanguageTag()
 
             obj = NULL;
             extension->GetValue((IInterface**)&obj);
-            csq = ICharSequence::Probe(obj);
-            csq->ToString(&str);
+            str = Object::ToString(obj);
             sb.Append(str);
         }
-
         obj = NULL;
     }
 
@@ -765,7 +762,7 @@ String Locale::MakeLanguageTag()
     mExtensions->Get(csq, (IInterface**)&obj);
     String privateUse;
     if (obj != NULL) {
-        ICharSequence::Probe(obj)->ToString(&privateUse);
+        privateUse = Object::ToString(obj);
     }
     if (!privateUse.IsNull()) {
         sb.Append("-x-");

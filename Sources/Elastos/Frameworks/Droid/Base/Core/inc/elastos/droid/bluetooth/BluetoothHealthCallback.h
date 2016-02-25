@@ -2,7 +2,6 @@
 #ifndef __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEALTHCALLBACK_H__
 #define __ELASTOS_DROID_BLUETOOTH_BLUETOOTHHEALTHCALLBACK_H__
 
-//#include "Elastos.Droid.Core_server.h"
 #include "Elastos.Droid.Bluetooth.h"
 #include <elastos/core/Object.h>
 #include "elastos/droid/ext/frameworkdef.h"

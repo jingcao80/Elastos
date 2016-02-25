@@ -114,7 +114,7 @@ ECode AnimatorInflater::LoadAnimator(
     /* [in] */ Int32 id,
     /* [out] */ IAnimator** animator) /*throws NotFoundException*/
 {
-    VALIDATE_NOT_NULL(*animator);
+    VALIDATE_NOT_NULL(animator);
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
     AutoPtr<IResourcesTheme> rt;
@@ -128,7 +128,7 @@ ECode AnimatorInflater::LoadAnimator(
     /* [in] */ Int32 id,
     /* [out] */ IAnimator** animator) /*throws NotFoundException*/
 {
-    VALIDATE_NOT_NULL(*animator);
+    VALIDATE_NOT_NULL(animator);
     return LoadAnimator(resources, theme, id, 1, animator);
 }
 
@@ -139,7 +139,7 @@ ECode AnimatorInflater::LoadAnimator(
     /* [in] */ Float pathErrorScale,
     /* [out] */ IAnimator** animator) /*throws NotFoundException*/
 {
-    VALIDATE_NOT_NULL(*animator);
+    VALIDATE_NOT_NULL(animator);
     AutoPtr<IXmlResourceParser> parser;
     ECode ec = NOERROR;
     // try {
@@ -180,7 +180,7 @@ ECode AnimatorInflater::LoadStateListAnimator(
     /* [in] */ Int32 id,
     /* [out] */ IStateListAnimator** animator) /*throws NotFoundException*/
 {
-    VALIDATE_NOT_NULL(*animator);
+    VALIDATE_NOT_NULL(animator);
     AutoPtr<IXmlResourceParser> parser;
     ECode ec = NOERROR;
     // try {

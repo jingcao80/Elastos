@@ -39,7 +39,6 @@ DIRS += webkit
 DIRS += widget
 DIRS += wifi
 
-#DIRS += impl
 #DIRS += opengl
 #DIRS += speech
 #DIRS += privacy

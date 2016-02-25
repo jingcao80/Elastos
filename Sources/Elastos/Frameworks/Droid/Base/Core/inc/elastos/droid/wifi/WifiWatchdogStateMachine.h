@@ -1,6 +1,6 @@
 
 #ifndef __ELASTOS_DROID_NET_WIFI_WIFIWATCHDOGSTATEMACHINE_H__
-#define  __ELASTOS_DROID_NET_WIFI_WIFIWATCHDOGSTATEMACHINE_H__
+#define __ELASTOS_DROID_NET_WIFI_WIFIWATCHDOGSTATEMACHINE_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/utility/AsyncChannel.h"

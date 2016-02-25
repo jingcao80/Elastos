@@ -5,6 +5,7 @@
 #include "elastos/droid/os/CUserHandle.h"
 #include "elastos/droid/os/CUserHandleHelper.h"
 #include <elastos/core/StringBuilder.h>
+#include <Elastos.Droid.App.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::EIID_IRunnable;
@@ -157,27 +158,21 @@ ECode CIntentSender::GetTargetPackage(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    // return ActivityManagerNative::GetDefault()->GetPackageForIntentSender(mTarget, str);
-    assert(0 && "TODO");
-    return NOERROR;
+    return ActivityManagerNative::GetDefault()->GetPackageForIntentSender(mTarget, str);
 }
 
 ECode CIntentSender::GetCreatorPackage(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    // return ActivityManagerNative::GetDefault()->GetPackageForIntentSender(mTarget, str);
-    assert(0 && "TODO");
-    return NOERROR;
+    return ActivityManagerNative::GetDefault()->GetPackageForIntentSender(mTarget, str);
 }
 
 ECode CIntentSender::GetCreatorUid(
     /* [out] */ Int32* uid)
 {
     VALIDATE_NOT_NULL(uid)
-    // return ActivityManagerNative::GetDefault()->GetUidForIntentSender(mTarget, uid);
-    assert(0 && "TODO");
-    return NOERROR;
+    return ActivityManagerNative::GetDefault()->GetUidForIntentSender(mTarget, uid);
 }
 
 ECode CIntentSender::GetCreatorUserHandle(
@@ -185,7 +180,7 @@ ECode CIntentSender::GetCreatorUserHandle(
 {
     VALIDATE_NOT_NULL(userHandle)
     Int32 uid = 0;
-    // FAIL_RETURN(ActivityManagerNative::GetDefault()->GetUidForIntentSender(mTarget, &uid));
+    FAIL_RETURN(ActivityManagerNative::GetDefault()->GetUidForIntentSender(mTarget, &uid));
     AutoPtr<IUserHandle> handle;
 
     if (uid > 0) {

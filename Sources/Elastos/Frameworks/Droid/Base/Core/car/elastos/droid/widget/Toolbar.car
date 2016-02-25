@@ -345,7 +345,7 @@ module
      * from the specified TextAppearance resource.
      */
     SetTitleTextAppearance(
-        [in] IContext* context,
+        [in] IContext* ctx,
         [in] Int32 resId);
 
     /**
@@ -353,7 +353,7 @@ module
      * from the specified TextAppearance resource.
      */
     SetSubtitleTextAppearance(
-        [in] IContext* context,
+        [in] IContext* ctx,
         [in] Int32 resId);
 
     /**

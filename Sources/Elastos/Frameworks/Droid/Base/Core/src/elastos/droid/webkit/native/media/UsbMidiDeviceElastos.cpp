@@ -3,11 +3,11 @@
 #include "elastos/droid/webkit/native/media/UsbMidiDeviceElastos.h"
 #include "elastos/droid/webkit/native/media/api/UsbMidiDeviceElastos_dec.h"
 
-//TODO #include "elastos/io/CByteBufferHelper.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/CHandler.h"
 #include "elastos/droid/hardware/usb/CUsbRequest.h"
+#include "elastos/droid/utility/CSparseArray.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Hardware::Usb::IUsbConstants;
@@ -22,7 +22,7 @@ using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Utility::ISparseArray;
-//TODO using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Droid::Utility::CSparseArray;
 
 using Elastos::IO::IBuffer;
 using Elastos::IO::IByteBuffer;
@@ -135,10 +135,8 @@ UsbMidiDeviceElastos::UsbMidiDeviceElastos(
     , mHasInputThread(FALSE)
     , mNativePointer(0)
 {
-    //mConnection = manager->OpenDevice(device);
     manager->OpenDevice(device, (IUsbDeviceConnection**)&mConnection);
-    //mEndpointMap = new SparseArray<UsbEndpoint>();
-    //TODO CSparseArray::New((ISparseArray**)&mEndpointMap);
+    CSparseArray::New((ISparseArray**)&mEndpointMap);
     //mRequestMap = new HashMap<UsbEndpoint, UsbRequest>();
     CHandler::New((IHandler**)&mHandler);
 

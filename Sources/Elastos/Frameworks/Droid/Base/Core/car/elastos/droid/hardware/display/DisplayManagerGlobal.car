@@ -109,7 +109,7 @@ module
             [out] IWifiDisplayStatus** status);
 
         CreateVirtualDisplay(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IMediaProjection* projection,
             [in] String name,
             [in] Int32 width,

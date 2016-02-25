@@ -296,7 +296,7 @@ BluetoothLeScanner::BluetoothLeScanner()
 {
 }
 
-BluetoothLeScanner::BluetoothLeScanner(
+ECode BluetoothLeScanner::constructor(
     /* [in] */ IIBluetoothManager* bluetoothManager)
 {
     mBluetoothManager = bluetoothManager;
@@ -305,6 +305,7 @@ BluetoothLeScanner::BluetoothLeScanner(
     CHandler::New(mainLooper, (IHandler**)&mHandler);
     //mLeScanClients = new HashMap<ScanCallback, BleScanCallbackWrapper>();
     CHashMap::New((IMap**)&mLeScanClients);
+    return NOERROR;
 }
 
 ECode BluetoothLeScanner::StartScan(

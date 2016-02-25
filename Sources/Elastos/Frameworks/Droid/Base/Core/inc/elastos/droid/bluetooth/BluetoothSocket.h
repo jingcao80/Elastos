@@ -7,7 +7,6 @@
 #include "Elastos.Droid.Net.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/Object.h>
-//#include "Elastos.Droid.Core_server.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/bluetooth/BluetoothInputStream.h"
 #include "elastos/droid/bluetooth/BluetoothOutputStream.h"
@@ -79,6 +78,8 @@ public:
     CARAPI Available(
         /* [out] */ Int32* result);
 
+    CARAPI Flush();
+
     CARAPI Read(
         /* [in] */ ArrayOf<Byte>* b,
         /* [in] */ Int32 offset,
@@ -145,8 +146,8 @@ public:
 
 private:
     const static String TAG;
-    const static Boolean DBG = TRUE;
-    const static Boolean VDBG = FALSE;
+    const static Boolean DBG;// = TRUE;
+    const static Boolean VDBG;// = FALSE;
     static Int32 PROXY_CONNECTION_TIMEOUT;
     static Int32 SOCK_SIGNAL_SIZE;
 

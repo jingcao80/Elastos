@@ -2,13 +2,11 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/widget/SimpleAdapter.h"
 #include "elastos/droid/net/Uri.h"
-#include "elastos/droid/os/ElDataInterface.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::Uri;
-using Elastos::Droid::Os::ElDataInterface;
 using Elastos::Core::StringUtils;
 using Elastos::Core::IBoolean;
 using Elastos::Core::IInteger32;

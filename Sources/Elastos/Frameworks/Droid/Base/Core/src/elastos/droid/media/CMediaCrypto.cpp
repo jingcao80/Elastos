@@ -1,5 +1,4 @@
 #include "elastos/droid/media/CMediaCrypto.h"
-#include "elastos/droid/media/Media_Utils.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <media/stagefright/MediaCodecList.h>
@@ -25,9 +24,9 @@ struct fields_t {
 
 static fields_t gFields;
 
-static android::sp<JCrypto> getCrypto()
+static android::sp<JCrypto> getCrypto(IMediaCrypto* obj)
 {
-    return (JCrypto *)gFields.context;
+    return (JCrypto *)((CMediaCrypto*)obj)->mNativeContext;
 }
 
 //===========================================================
@@ -116,9 +115,9 @@ android::status_t JCrypto::initCheck() const
 
 // static
 
-android::sp<android::ICrypto> JCrypto::GetCrypto()
+android::sp<android::ICrypto> JCrypto::GetCrypto(IMediaCrypto* obj)
 {
-    android::sp<JCrypto> jcrypto = getCrypto();
+    android::sp<JCrypto> jcrypto = getCrypto(obj);
     if (jcrypto == NULL) {
         return NULL;
     }
@@ -228,7 +227,7 @@ ECode CMediaCrypto::RequiresSecureDecoderComponent(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    android::sp<JCrypto> crypto = getCrypto();
+    android::sp<JCrypto> crypto = getCrypto(THIS_PROBE(IMediaCrypto));
     if (crypto == NULL) {
         Slogger::E(TAG, "crypto is NULL.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;

@@ -2,38 +2,50 @@
 #ifndef __ELASTOS_DROID_SERVER_CINPUTMETHODMANAGERSERVICEMETHODCALLBACK_H__
 #define __ELASTOS_DROID_SERVER_CINPUTMETHODMANAGERSERVICEMETHODCALLBACK_H__
 
-#include <_CInputMethodManagerServiceMethodCallback.h>
-#include <CInputMethodManagerService.h>
+#include <_Elastos_Droid_Server_CInputMethodManagerServiceMethodCallback.h>
+#include <elastos/core/Object.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.View.h>
+#include <Elastos.Droid.Internal.h>
 
-using Elastos::AutoPtr;
+using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::View::IInputChannel;
 using Elastos::Droid::Internal::View::IIInputMethod;
 using Elastos::Droid::Internal::View::IIInputMethodSession;
-
+using Elastos::Droid::Internal::View::IIInputSessionCallback;
+using Elastos::Droid::Internal::View::IIInputMethodManager;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 
+class CInputMethodManagerService;
+
 CarClass(CInputMethodManagerServiceMethodCallback)
+    , public Object
+    , public IIInputSessionCallback
+    , public IBinder
 {
 public:
-    CARAPI constructor(
-        /* [in] */ IIInputMethod* method,
-        /* [in] */ Handle32 host);
+    CAR_INTERFACE_DECL()
 
-    CARAPI FinishedEvent(
-        /* [in] */ Int32 seq,
-        /* [in] */ Boolean handled);
+    CAR_OBJECT_DECL()
+
+    CARAPI constructor(
+        /* [in] */ IIInputMethodManager* imms,
+        /* [in] */ IIInputMethod* method,
+        /* [in] */ IInputChannel* channel);
 
     CARAPI SessionCreated(
         /* [in] */ IIInputMethodSession* session);
 
-    CARAPI GetDescription(
+    CARAPI ToString(
             /* [out] */ String* description);
 
 private:
+    CInputMethodManagerService* mParentIMMS;
     AutoPtr<IIInputMethod> mMethod;
-    CInputMethodManagerService* mHost;
+    AutoPtr<IInputChannel> mChannel;
 };
 
 }// namespace Server

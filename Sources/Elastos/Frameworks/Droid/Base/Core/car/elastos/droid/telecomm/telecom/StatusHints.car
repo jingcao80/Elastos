@@ -30,7 +30,7 @@ module
                 [out] Int32* res);
 
             GetIcon(
-                [in] IContext* context,
+                [in] IContext* ctx,
                 [out] IDrawable** res);
 
             GetExtras(

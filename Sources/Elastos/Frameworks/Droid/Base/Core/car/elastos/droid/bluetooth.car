@@ -69,7 +69,14 @@ module
     merge("bluetooth/IBluetoothPbap.car");
     merge("bluetooth/IBluetoothStateChangeCallback.car");
 
+    interface Elastos.Droid.Bluetooth.IBluetoothDevice;
+    interface Elastos.Droid.Bluetooth.IIBluetoothManager;
     interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Utility.ISparseArray;
+    interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IMap;
+    using interface Elastos.Utility.IUUID;
 
     namespace Elastos {
     namespace Droid {
@@ -216,6 +223,233 @@ module
 
              interface IIBluetoothStateChangeCallback;
              interface IBinder;
+         }
+
+         class CBluetoothA2dpSinkStateChangeCallback {
+             constructor(
+                 [in] IInterface* host);
+
+             interface IIBluetoothStateChangeCallback;
+             interface IBinder;
+         }
+
+         class CBluetoothActivityEnergyInfo {
+             constructor(
+                [in] Int32 stackState,
+                [in] Int32 txTime,
+                [in] Int32 rxTime,
+                [in] Int32 idleTime,
+                [in] Int32 energyUsed);
+
+             interface IBluetoothActivityEnergyInfo;
+             interface IParcelable;
+         }
+
+         class CBluetoothAudioConfig {
+             constructor(
+                [in] Int32 sampleRate,
+                [in] Int32 channelConfig,
+                [in] Int32 audioFormat);
+
+             interface IBluetoothAudioConfig;
+             interface IParcelable;
+         }
+
+         class CBluetoothAvrcpControllerStateChangeCallback {
+             constructor(
+                 [in] IBluetoothAvrcpController* host);
+
+             interface IIBluetoothStateChangeCallback;
+             interface IBinder;
+         }
+
+        class CBluetoothGattCallbackWrapper {
+
+            interface IIBluetoothGattCallback;
+            interface IBinder;
+        }
+
+        class  CBluetoothGattDescriptor {
+            constructor(
+                [in] IUUID* uuid,
+                [in] Int32 permissions);
+            interface IBluetoothGattDescriptor;
+        }
+
+        class CBluetoothGattCallback {
+            constructor(
+                [in] IBluetoothGatt* host);
+
+            interface IIBluetoothGattCallback;
+            interface IBinder;
+        }
+
+        class CBluetoothGattServerCallback {
+             constructor(
+                 [in] IBluetoothGattServer* host);
+
+             interface IIBluetoothGattServerCallback;
+             interface IBinder;
+        }
+
+        class CBluetoothGattService {
+            constructor(
+                [in] IUUID* uuid,
+                [in] Int32 serviceType);
+
+            interface IBluetoothGattService;
+        }
+
+         class CBluetoothHeadsetClientCall {
+             constructor(
+                [in] Int32 id,
+                [in] Int32 state,
+                [in] String number,
+                [in] Boolean multiParty,
+                [in] Boolean outgoing);
+
+             interface IBluetoothHeadsetClientCall;
+             interface IParcelable;
+         }
+
+         class CBluetoothHeadsetClientStateChangeCallback {
+             constructor(
+                 [in] IBluetoothHeadsetClient* host);
+
+             interface IIBluetoothStateChangeCallback;
+             interface IBinder;
+         }
+
+         class CBluetoothManager {
+             constructor(
+                [in] IContext* ctx);
+
+             interface IBluetoothManager;
+         }
+
+         class CBluetoothMasInstance {
+             constructor(
+                [in] Int32 id,
+                [in] String name,
+                [in] Int32 channel,
+                [in] Int32 msgTypes);
+
+             interface IBluetoothMasInstance;
+             interface IParcelable;
+         }
+
+         class CBluetoothMapStateChangeCallback {
+             constructor(
+                 [in] IBluetoothMap* host);
+
+             interface IIBluetoothStateChangeCallback;
+             interface IBinder;
+         }
+
+         namespace LE {
+             class CAdvertiseData {
+                 constructor(
+                     [in] IParcel* parcel);
+
+                 constructor(
+                     [in] IList* serviceUuids,
+                     [in] ISparseArray* manufacturerData,
+                     [in] IMap* serviceData,
+                     [in] Boolean includeTxPowerLevel,
+                     [in] Boolean includeDeviceName);
+
+                 interface IAdvertiseData;
+                 interface IParcelable;
+             }
+
+             class CAdvertiseSettings {
+                constructor(
+                    [in] IParcel* parcel);
+
+                constructor(
+                    [in] Int32 advertiseMode,
+                    [in] Int32 advertiseTxPowerLevel,
+                    [in] Boolean advertiseConnectable,
+                    [in] Int32 advertiseTimeout);
+
+                interface IAdvertiseSettings;
+                interface IParcelable;
+             }
+
+             class CBluetoothLeAdvertiser {
+                constructor(
+                    [in] IIBluetoothManager* bluetoothManager);
+
+                interface IBluetoothLeAdvertiser;
+             }
+
+             class CBluetoothLeScanner {
+                constructor(
+                    [in] IIBluetoothManager* bluetoothManager);
+
+                interface IBluetoothLeScanner;
+             }
+
+             class CResultStorageDescriptor {
+                constructor(
+                    [in] IParcel* source);
+
+                constructor(
+                    [in] Int32 type,
+                    [in] Int32 offset,
+                    [in] Int32 length);
+
+                interface IResultStorageDescriptor;
+                interface IParcelable;
+             }
+
+             class CScanFilter {
+                constructor(
+                    [in] IParcel* source);
+
+                interface IScanFilter;
+                interface IParcelable;
+             }
+
+             singleton class CScanRecordHelper {
+                interface IScanRecordHelper;
+             }
+
+             class CScanResult {
+                constructor(
+                    [in] IParcel* source);
+
+                constructor(
+                    [in] IBluetoothDevice* device,
+                    [in] IScanRecord* scanRecord,
+                    [in] Int32 rssi,
+                    [in] Int64 timestampNanos);
+
+                interface IScanResult;
+                interface IParcelable;
+             }
+
+             class CScanSettings {
+                constructor(
+                    [in] IParcel* source);
+
+                constructor(
+                    [in] Int32 scanMode,
+                    [in] Int32 callbackType,
+                    [in] Int32 scanResultType,
+                    [in] Int64 reportDelayMillis);
+
+                interface IScanSettings;
+                interface IParcelable;
+             }
+
+             class CTruncatedFilter {
+                constructor(
+                    [in] IScanFilter* filter,
+                    [in] IList* storageDescriptors);
+
+                interface ITruncatedFilter;
+             }
          }
 
     } // Bluetooth

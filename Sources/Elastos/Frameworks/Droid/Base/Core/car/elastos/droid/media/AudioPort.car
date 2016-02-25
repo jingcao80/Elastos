@@ -112,6 +112,9 @@ module
          */
         ActiveConfig(
             [out] IAudioPortConfig** result);
+
+        SetActiveConfig(
+            [in] IAudioPortConfig* config);
     }
 
     } // namespace media

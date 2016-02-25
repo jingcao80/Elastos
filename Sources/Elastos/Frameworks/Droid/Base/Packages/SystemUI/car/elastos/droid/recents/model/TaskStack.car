@@ -4,11 +4,8 @@ module
     using interface Elastos.Utility.IList;
     using interface Elastos.Utility.IArrayList;
 
-    interface Elastos.Droid.Packages.SystemUI.Recents.IRecentsConfiguration;
-
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
     namespace Recents {
     namespace Model {
@@ -32,77 +29,6 @@ module
      * The task stack contains a list of multiple tasks.
      */
     interface ITaskStack {
-
-        /** Sets the callbacks for this task stack */
-        SetCallbacks(
-            [in] ITaskStackCallbacks* cb);
-
-        /** Adds a new task */
-        AddTask(
-            [in] ITask* t);
-
-        /** Removes a task */
-        RemoveTask(
-            [in] ITask* t);
-
-        /** Sets a few tasks in one go */
-        SetTasks(
-            [in] IList* tasks);
-
-        /** Gets the front task */
-        GetFrontMostTask(
-            [out] ITask** result);
-
-        /** Gets the tasks */
-        GetTasks(
-            [out] IArrayList** result);
-
-        /** Gets the number of tasks */
-        GetTaskCount(
-            [out] Int32* result);
-
-        /** Returns the index of this task in this current task stack */
-        IndexOfTask(
-            [in] ITask* t,
-            [out] Int32* result);
-
-        /** Finds the task with the specified task id. */
-        FindTaskWithId(
-            [in] Int32 taskId,
-            [out] ITask** result);
-
-        /******** Filtering ********/
-
-        /** Filters the stack into tasks similar to the one specified */
-        FilterTasks(
-            [in] ITask* t);
-
-        /** Unfilters the current stack */
-        UnfilterTasks();
-
-        /** Returns whether tasks are currently filtered */
-        HasFilteredTasks(
-            [out] Boolean* result);
-
-        /******** Grouping ********/
-
-        /** Adds a group to the set */
-        AddGroup(
-            [in] ITaskGrouping* group);
-
-        RemoveGroup(
-            [in] ITaskGrouping* group);
-
-        /** Returns the group with the specified affiliation. */
-        GetGroupWithAffiliation(
-            [in] Int32 affiliation,
-            [out] ITaskGrouping** result);
-
-        /**
-         * Temporary: This method will simulate affiliation groups by
-         */
-        CreateAffiliatedGroupings(
-            [in] IRecentsConfiguration* config);
     }
 
     /** Task stack callbacks */
@@ -134,7 +60,6 @@ module
     } // namespace Model
     } // namespace Recents
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

@@ -1,6 +1,6 @@
 
-#ifndef  __CIPINYINDECODERSERVICE_H__
-#define  __CIPINYINDECODERSERVICE_H__
+#ifndef __CIPINYINDECODERSERVICE_H__
+#define __CIPINYINDECODERSERVICE_H__
 
 #include "_CIPinyinDecoderService.h"
 #include "CPinyinDecoderService.h"

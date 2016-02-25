@@ -478,7 +478,7 @@ private:
     // fails.
     static const Int32 DEFAULT_FRAME_PER_BUFFER = 256;
 
-    const AutoPtr<IAudioManager> mAudioManager;
+    AutoPtr<IAudioManager> mAudioManager;
     const AutoPtr<IContext> mContext;
     const Int64 mNativeAudioManagerElastos;
 
@@ -517,7 +517,6 @@ private:
     /*TODO const*/ Object mLock;
 
     // Contains a list of currently available audio devices.
-    static AutoPtr< ArrayOf<Boolean> > mAudioDevices_Init();
     AutoPtr< ArrayOf<Boolean> > mAudioDevices;
 
     /*TODO const*/ AutoPtr<IContentResolver> mContentResolver;

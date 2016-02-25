@@ -1,5 +1,7 @@
 #ifndef __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWSETTINGS_H__
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_AWSETTINGS_H__
+
+#include <Elastos.Droid.Webkit.h>
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
 
@@ -8,8 +10,8 @@ using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
-//TODO using Elastos::Droid::Webkit::IWebSettings;
-//TODO using Elastos::Droid::Webkit::PluginState;
+using Elastos::Droid::Webkit::IWebSettings;
+using Elastos::Droid::Webkit::PluginState;
 using Elastos::Core::IRunnable;
 
 // import com.google.common.annotations.VisibleForTesting;
@@ -143,7 +145,7 @@ public:
     {
     public:
         // Lazy Holder pattern
-        static const String sInstance;
+        static String sInstance;
     };
 
     class ZoomSupportChangeListener
@@ -160,6 +162,8 @@ public:
     class EventHandler
         : public Object
     {
+        friend class AwSettings;
+
     public:
         class InnerHandler
             : public Handler
@@ -559,7 +563,7 @@ public:
      * See {@link android.webkit.WebSettings#setPluginState}.
      */
     CARAPI_(void) SetPluginState(
-        /* [in] */ /*TODO PluginState*/Int32 state);
+        /* [in] */ PluginState state);
 
     /**
      * See {@link android.webkit.WebSettings#getPluginsEnabled}.
@@ -569,7 +573,7 @@ public:
     /**
      * See {@link android.webkit.WebSettings#getPluginState}.
      */
-    CARAPI_(/*TODO PluginState*/Int32) GetPluginState();
+    CARAPI_(PluginState) GetPluginState();
 
     /**
      * See {@link android.webkit.WebSettings#setJavaScriptCanOpenWindowsAutomatically}.
@@ -1129,7 +1133,7 @@ private:
     Boolean mAllowFileAccessFromFileURLs;
     Boolean mJavaScriptCanOpenWindowsAutomatically;
     Boolean mSupportMultipleWindows;
-    /*TODO PluginState*/Int32 mPluginState;
+    PluginState mPluginState;
     Boolean mAppCacheEnabled;
     Boolean mDomStorageEnabled;
     Boolean mDatabaseEnabled;

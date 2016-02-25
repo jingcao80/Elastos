@@ -1,6 +1,6 @@
 
-#ifndef  __KEYMAPDREAM_H__
-#define  __KEYMAPDREAM_H__
+#ifndef __KEYMAPDREAM_H__
+#define __KEYMAPDREAM_H__
 
 #include "elastos/droid/ext/frameworkext.h"
 

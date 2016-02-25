@@ -6,12 +6,14 @@
 #include "elastos/droid/os/CUserEnvironment.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/os/UserHandle.h"
-//#include "elastos/droid/os/FileUtils.h"
+#include "elastos/droid/os/FileUtils.h"
+#include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::IO::CFile;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -159,8 +161,7 @@ ECode Environment::UserEnvironment::constructor(
 
     List<AutoPtr<IFile> > externalForVold, externalForApp;
 
-    Boolean isEmpty = FALSE;
-    //TODO Boolean isEmpty = TextUtils::IsEmpty(rawEmulatedTarget)
+    Boolean isEmpty = TextUtils::IsEmpty(rawEmulatedTarget);
     if (!isEmpty) {
         // Device has emulated storage; external storage paths should have
         // userId burned into them.
@@ -180,7 +181,7 @@ ECode Environment::UserEnvironment::constructor(
     }
     else {
         // Device has physical external storage; use plain paths.
-        //TODO isEmpty = TextUtils::IsEmpty(rawExternalStorage)
+        isEmpty = TextUtils::IsEmpty(rawExternalStorage);
         if (isEmpty) {
             Logger::W("Environment", "EXTERNAL_STORAGE undefined; falling back to default");
             rawExternalStorage = String("/storage/sdcard0");
@@ -625,19 +626,17 @@ String Environment::GetExternalStorageState(
 {
     AutoPtr<IStorageVolume> volume = GetStorageVolume(path);
     if (volume != NULL) {
-        assert(0 && "TODO");
-
-        // AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));
-        // IIMountService* mountService = IIMountService::Probe(mountService);
-        // // try {
-        // String result, path;
-        // volume->GetPath(&path);
-        // ECode ec = mountService->GetVolumeState(path, &result);
-        // if (!FAILED(ec)) {
-        //     return result;
-        // }
-        // } catch (RemoteException e) {
-        // }
+        AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));
+        IIMountService* mountService = IIMountService::Probe(mountService);
+        // try {
+        if (mountService != NULL) {
+            String result, path;
+            volume->GetPath(&path);
+            ECode ec = mountService->GetVolumeState(path, &result);
+            if (!FAILED(ec)) {
+                return result;
+            }
+        }
     }
 
     return MEDIA_UNKNOWN;
@@ -810,22 +809,18 @@ AutoPtr<IStorageVolume> Environment::GetStorageVolume(
         return NULL;
     }
 
-    assert(0 && "TODO");
-    // try {
-    // AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));
-    // IIMountService* mountService = IIMountService::Probe(mountService);
-    // AutoPtr<ArrayOf<IStorageVolume*> > volumes;
-    // mountService->GetVolumeList((ArrayOf<IStorageVolume*>**)&volumes);
-    // for (Int32 i = 0; i < volumes; ++i) {
-    //     AutoPtr<IStorageVolume> volume = (*volumes)[i];
-    //     AutoPtr<IFile> file;
-    //     volume->GetPathFile((IFile**)&file);
-    //     if (FileUtils::Contains(file, path)) {
-    //         return volume;
-    //     }
-    // }
-    // } catch (RemoteException e) {
-    // }
+    AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));
+    IIMountService* mountService = IIMountService::Probe(mountService);
+    AutoPtr<ArrayOf<IStorageVolume*> > volumes;
+    mountService->GetVolumeList((ArrayOf<IStorageVolume*>**)&volumes);
+    for (Int32 i = 0; i < volumes->GetLength(); ++i) {
+        AutoPtr<IStorageVolume> volume = (*volumes)[i];
+        AutoPtr<IFile> file;
+        volume->GetPathFile((IFile**)&file);
+        if (FileUtils::Contains(file, path)) {
+            return volume;
+        }
+    }
 
     return NULL;
 }

@@ -1,10 +1,9 @@
 module
 {
-    interface Elastos.Droid.Packages.SystemUI.StatusBar.Policy.IBatteryController;
+    interface Elastos.Droid.SystemUI.StatusBar.Policy.IBatteryController;
 
     namespace Elastos {
     namespace Droid {
-    namespace Packages {
     namespace SystemUI {
 
     /**
@@ -19,7 +18,6 @@ module
     }
 
     } // namespace SystemUI
-    } // namespace Packages
     } // namespace Droid
     } // namespace Elastos
 }

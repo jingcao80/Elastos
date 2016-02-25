@@ -1,7 +1,7 @@
 #ifndef __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_FULLSCREENVIEW_H__
 #define __ELASTOS_DROID_WEBKIT_ANDROIDWEBVIEW_FULLSCREENVIEW_H__
 #include "elastos/droid/ext/frameworkext.h"
-//TODO #include "elastos/droid/widget/AbsoluteLayout.h"
+#include "elastos/droid/widget/AbsoluteLayout.h"
 #include "elastos/droid/webkit/native/android_webview/AwContents.h"
 #include "elastos/droid/webkit/native/android_webview/AwViewMethods.h"
 
@@ -15,7 +15,7 @@ using Elastos::Droid::View::IView;
 using Elastos::Droid::View::InputMethod::IInputConnection;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::View::InputMethod::IEditorInfo;
-//TODO using Elastos::Droid::Widget::AbsoluteLayout;
+using Elastos::Droid::Widget::AbsoluteLayout;
 
 namespace Elastos {
 namespace Droid {
@@ -27,8 +27,7 @@ namespace AndroidWebview {
  * html controls and subtitles, over the {@link ContentVideoView}.
  */
 class FullScreenView
-    :public Object//TODO remove this
-//TODO : public AbsoluteLayout
+    : public AbsoluteLayout
 {
 private:
     // AwContents.InternalAccessDelegate implementation --------------------------------------
@@ -130,12 +129,13 @@ public:
         /* [in] */ Int32 heightMeasureSpec);
 
     //@Override
-    CARAPI_(Boolean) RequestFocus(
+    CARAPI RequestFocus(
         /* [in] */ Int32 direction,
-        /* [in] */ IRect* previouslyFocusedRect);
+        /* [in] */ IRect* previouslyFocusedRect,
+        /* [out] */ Boolean* result);
 
     //@Override
-    CARAPI_(void) SetLayerType(
+    CARAPI SetLayerType(
         /* [in] */ Int32 layerType,
         /* [in] */ IPaint* paint);
 
@@ -143,9 +143,10 @@ public:
     CARAPI_(AutoPtr<IInputConnection>) OnCreateInputConnection(IEditorInfo* outAttrs);
 
     //@Override
-    CARAPI_(Boolean) OnKeyUp(
+    CARAPI OnKeyUp(
         /* [in] */ Int32 keyCode,
-        /* [in] */ IKeyEvent* event);
+        /* [in] */ IKeyEvent* event,
+        /* [out] */ Boolean* result);
 
     //@Override
     CARAPI_(Boolean) DispatchKeyEvent(
@@ -168,10 +169,10 @@ public:
         /* [in] */ IConfiguration* newConfig);
 
     //@Override
-    CARAPI_(void) OnDetachedFromWindow();
+    CARAPI OnDetachedFromWindow();
 
     //@Override
-    CARAPI_(void) OnWindowFocusChanged(
+    CARAPI OnWindowFocusChanged(
         /* [in] */ Boolean hasWindowFocus);
 
     //@Override
@@ -193,10 +194,10 @@ public:
 
 protected:
     //@Override
-    CARAPI_(void) OnAttachedToWindow();
+    CARAPI OnAttachedToWindow();
 
     //@Override
-    CARAPI_(void) OnVisibilityChanged(
+    CARAPI OnVisibilityChanged(
         /* [in] */ IView* changedView,
         /* [in] */ Int32 visibility);
 

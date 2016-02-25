@@ -33,7 +33,7 @@ public:
       * @param offset Offset from start of the advertise packet payload.
       * @param length Byte length of the data
       */
-    ResultStorageDescriptor(
+    CARAPI constructor(
         /* [in] */ Int32 type,
         /* [in] */ Int32 offset,
         /* [in] */ Int32 length);
@@ -49,14 +49,13 @@ public:
 
     // @Override
     CARAPI WriteToParcel(
-        /* [in] */ IParcel* dest,
-        /* [in] */ Int32 flags);
+        /* [in] */ IParcel* dest);
+    //    /* [in] */ Int32 flags);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* in);
 
-private:
-    ResultStorageDescriptor(
+    CARAPI constructor(
         /* [in] */ IParcel* in);
 
 private:

@@ -7,6 +7,11 @@
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.App.h"
 #include "elastos/droid/R.h"
+#include "elastos/droid/graphics/Color.h"
+#include "elastos/droid/graphics/CMatrix.h"
+#include "elastos/droid/graphics/CPath.h"
+#include "elastos/droid/graphics/CPaint.h"
+#include "elastos/droid/graphics/CRectF.h"
 #include "elastos/droid/internal/utility/GrowingArrayUtils.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/CMessenger.h"
@@ -20,10 +25,6 @@
 #include "elastos/droid/text/style/CSuggestionRangeSpan.h"
 #include "elastos/droid/text/method/CMetaKeyKeyListenerHelper.h"
 #include "elastos/droid/text/method/CWordIterator.h"
-#include "elastos/droid/graphics/Color.h"
-#include "elastos/droid/graphics/CMatrix.h"
-#include "elastos/droid/graphics/CPath.h"
-#include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
@@ -85,11 +86,12 @@ using Elastos::Droid::Text::Method::IPasswordTransformationMethod;
 using Elastos::Droid::Text::Method::IMetaKeyKeyListener;
 using Elastos::Droid::Text::Method::IMetaKeyKeyListenerHelper;
 using Elastos::Droid::Text::Method::CMetaKeyKeyListenerHelper;
-using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::Color;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::CPath;
 using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CRectF;
+using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
 using Elastos::Droid::Internal::View::Menu::IMenuBuilder;
 using Elastos::Droid::Utility::IDisplayMetrics;

@@ -2,9 +2,8 @@
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Net.h"
 #include "elastos/droid/content/CContentProviderOperationBuilder.h"
-//#include "elastos/droid/content/CIntegerMapWrapper.h"
 #include "elastos/droid/content/CContentProviderOperation.h"
-//#include "elastos/droid/content/CContentValues.h"
+#include "elastos/droid/content/CContentValues.h"
 #include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -105,8 +104,7 @@ ECode CContentProviderOperationBuilder::WithValueBackReference(
     }
 
     if (NULL == mValuesBackReferences) {
-        assert(0 && "TODO");
-        // FAIL_RETURN(CContentValues::New((IContentValues**)&mValuesBackReferences));
+        FAIL_RETURN(CContentValues::New((IContentValues**)&mValuesBackReferences));
     }
 
     return mValuesBackReferences->Put(key, previousResult);
@@ -136,8 +134,7 @@ ECode CContentProviderOperationBuilder::WithSelectionBackReference(
 ECode CContentProviderOperationBuilder::CreateContentValueIfNull()
 {
     if (NULL == mValues) {
-        assert(0 && "TODO");
-        // FAIL_RETURN(CContentValues::New((IContentValues**)&mValues));
+        FAIL_RETURN(CContentValues::New((IContentValues**)&mValues));
     }
     return NOERROR;
 }

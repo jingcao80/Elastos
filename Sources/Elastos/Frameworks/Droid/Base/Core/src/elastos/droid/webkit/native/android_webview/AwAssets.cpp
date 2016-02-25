@@ -58,9 +58,9 @@ AutoPtr<ArrayOf<Int64> > AwAssets::OpenAsset(
     //    return new long[] {-1, -1, -1};
     //} finally {
     //    try {
-    //        if (afd != null) {
-    //            afd.close();
-    //        }
+            if (afd != NULL) {
+                afd->Close();
+            }
     //    } catch (IOException e2) {
     //        Log.e(LOGTAG, "Unable to close AssetFileDescriptor", e2);
     //    }

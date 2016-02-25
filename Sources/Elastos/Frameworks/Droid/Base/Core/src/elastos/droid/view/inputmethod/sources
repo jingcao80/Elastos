@@ -29,6 +29,7 @@ SOURCES += CInputBinding.cpp
 SOURCES += CInputConnectionWrapper.cpp
 SOURCES += CInputMethodInfo.cpp
 SOURCES += CInputMethodSubtype.cpp
+SOURCES += CInputMethodSubtypeBuilder.cpp
 SOURCES += CInputMethodSubtypeHelper.cpp
 SOURCES += CInputMethodSubtypeArray.cpp
 SOURCES += CSparseRectFArray.cpp

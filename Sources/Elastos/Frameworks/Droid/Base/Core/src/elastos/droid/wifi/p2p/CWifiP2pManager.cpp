@@ -33,21 +33,7 @@ CAR_INTERFACE_IMPL(CWifiP2pManager, Object, IWifiP2pManager);
 
 CAR_OBJECT_IMPL(CWifiP2pManager);
 
-ECode CWifiP2pManager::constructor()
-{
-    return NOERROR;
-}
-
-ECode CWifiP2pManager::GetService(
-    /* [out] */ IIWifiP2pManager** service)
-{
-    VALIDATE_NOT_NULL(service);
-    *service = mService;
-    REFCOUNT_ADD(*service);
-    return NOERROR;
-}
-
-ECode CWifiP2pManager::SetService(
+ECode CWifiP2pManager::constructor(
     /* [in] */ IIWifiP2pManager* service)
 {
     mService = service;

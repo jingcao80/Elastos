@@ -31,7 +31,7 @@ CAR_INTERFACE_IMPL(AwGeolocationPermissions::GetAllowedRunnable, Object, IRunnab
 
 AwGeolocationPermissions::GetAllowedRunnable::GetAllowedRunnable(
     /* [in] */ AwGeolocationPermissions* owner,
-    /* [in] */ /*TODO IValueCallback*/IInterface* callback,
+    /* [in] */ IValueCallback* callback,
     /* [in] */ Boolean finalAllowed)
     : mOwner(owner)
     , mCallback(callback)
@@ -43,8 +43,7 @@ ECode AwGeolocationPermissions::GetAllowedRunnable::Run()
 {
     AutoPtr<IBoolean> boolVal;
     CBoolean::New(mFinalAllowed, (IBoolean**)&boolVal);
-    //TODO return mCallback->OnReceiveValue(boolVal);
-    return NOERROR;//TODO remove this
+    return mCallback->OnReceiveValue(TO_IINTERFACE(boolVal));
 }
 
 //===============================================================
@@ -54,7 +53,7 @@ CAR_INTERFACE_IMPL(AwGeolocationPermissions::GetOriginsRunnable, Object, IRunnab
 
 AwGeolocationPermissions::GetOriginsRunnable::GetOriginsRunnable(
     /* [in] */ AwGeolocationPermissions* owner,
-    /* [in] */ /*TODO IValueCallback*/IInterface* callback)
+    /* [in] */ IValueCallback* callback)
     : mOwner(owner)
     , mCallback(callback)
     , mOrigins(NULL)
@@ -86,8 +85,7 @@ ECode AwGeolocationPermissions::GetOriginsRunnable::Run()
             mOrigins->Add(csi);
         }
     }
-    //TODO return mCallback->OnReceiveValue(mOrigins);
-    return NOERROR;//remove this
+    return mCallback->OnReceiveValue(TO_IINTERFACE(mOrigins));
 }
 
 //===============================================================
@@ -207,7 +205,7 @@ Boolean AwGeolocationPermissions::HasOrigin(
  */
 void AwGeolocationPermissions::GetAllowed(
     /* [in] */ const String& origin,
-    /* [in] */ /*TODO IValueCallback*/IInterface* callback)
+    /* [in] */ IValueCallback* callback)
 {
     Boolean finalAllowed = IsOriginAllowed(origin);
     AutoPtr<IRunnable> runnable = new GetAllowedRunnable(this, callback, finalAllowed);
@@ -218,7 +216,7 @@ void AwGeolocationPermissions::GetAllowed(
  * Async method to get the domains currently allowed or denied.
  */
 void AwGeolocationPermissions::GetOrigins(
-    /* [in] */ /*TODO IValueCallback*/IInterface* callback)
+    /* [in] */ IValueCallback* callback)
 {
     AutoPtr<IRunnable> runnable = new GetOriginsRunnable(this, callback);
     ThreadUtils::PostOnUiThread(runnable);

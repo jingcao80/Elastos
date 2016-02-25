@@ -526,7 +526,7 @@ module
          */
         //@SystemApi
         RegisterAsSystemService(
-            [in] IContext* context,
+            [in] IContext* ctx,
             [in] IComponentName* componentName,
             [in] Int32 currentUser);
 

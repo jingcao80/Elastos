@@ -41,7 +41,7 @@ ECode CAccessibilityInteractionConnection::FindAccessibilityNodeInfoByAccessibil
     } else {
         // We cannot make the call and notify the caller so it does not wait.
         // try {
-            callback->SetFindAccessibilityNodeInfosResult(NULL, interactionId);
+        return callback->SetFindAccessibilityNodeInfosResult(NULL, interactionId);
         // } catch (RemoteException re) {
             /* best effort - ignore */
         // }
@@ -74,7 +74,7 @@ ECode CAccessibilityInteractionConnection::FindAccessibilityNodeInfosByViewId(
     } else {
         // We cannot make the call and notify the caller so it does not wait.
         // try {
-            callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
+        return callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
         // } catch (RemoteException re) {
             /* best effort - ignore */
         // }
@@ -107,7 +107,7 @@ ECode CAccessibilityInteractionConnection::FindAccessibilityNodeInfosByText(
     } else {
         // We cannot make the call and notify the caller so it does not wait.
         // try {
-            callback->SetFindAccessibilityNodeInfosResult(NULL, interactionId);
+        return callback->SetFindAccessibilityNodeInfosResult(NULL, interactionId);
         // } catch (RemoteException re) {
             /* best effort - ignore */
         // }
@@ -139,7 +139,7 @@ ECode CAccessibilityInteractionConnection::FindFocus(
     } else {
         // We cannot make the call and notify the caller so it does not wait.
         // try {
-            callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
+        return callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
         // } catch (RemoteException re) {
             /* best effort - ignore */
         // }
@@ -171,7 +171,7 @@ ECode CAccessibilityInteractionConnection::FocusSearch(
     } else {
         // We cannot make the call and notify the caller so it does not wait.
         // try {
-            callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
+        return callback->SetFindAccessibilityNodeInfoResult(NULL, interactionId);
         // } catch (RemoteException re) {
             /* best effort - ignore */
         // }
@@ -202,7 +202,7 @@ ECode CAccessibilityInteractionConnection::PerformAccessibilityAction(
     } else {
         // We cannot make the call and notify the caller so it does not wait.
         // try {
-            callback->SetPerformAccessibilityActionResult(FALSE, interactionId);
+        return callback->SetPerformAccessibilityActionResult(FALSE, interactionId);
         // } catch (RemoteException re) {
             /* best effort - ignore */
         // }
@@ -233,7 +233,7 @@ ECode CAccessibilityInteractionConnection::ComputeClickPointInScreen(
     } else {
         // We cannot make the call and notify the caller so it does not wait.
         // try {
-            callback->SetComputeClickPointInScreenActionResult(FALSE, interactionId);
+        return callback->SetComputeClickPointInScreenActionResult(FALSE, interactionId);
         // } catch (RemoteException re) {
             /* best effort - ignore */
         // }

@@ -1,3 +1,108 @@
+
+#ifndef __ELASTOS_DROID_SERVER_HDMI_SYSTEMAUDIOACTION_H__
+#define __ELASTOS_DROID_SERVER_HDMI_SYSTEMAUDIOACTION_H__
+
+#include "_Elastos.Droid.Server.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/core/Object.h>
+#include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
+
+using Elastos::Droid::Hardware::Hdmi::IIHdmiControlCallback;
+
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Hdmi {
+
+/**
+ * Base feature action class for SystemAudioActionFromTv and SystemAudioActionFromAvr.
+ */
+class SystemAudioAction
+    : public HdmiCecFeatureAction
+{
+public:
+    SystemAudioAction();
+
+    /**
+     * Constructor
+     *
+     * @param source {@link HdmiCecLocalDevice} instance
+     * @param avrAddress logical address of AVR device
+     * @param targetStatus Whether to enable the system audio mode or not
+     * @param callback callback interface to be notified when it's done
+     * @throw IllegalArugmentException if device type of sourceAddress and avrAddress is invalid
+     */
+    CARAPI constructor(
+        /* [in] */ IHdmiCecLocalDevice* source,
+        /* [in] */ Int32 avrAddress,
+        /* [in] */ Boolean targetStatus,
+        /* [in] */ IIHdmiControlCallback* callback);
+
+    // Seq #27
+    CARAPI SendSystemAudioModeRequest();
+
+    CARAPI SetSystemAudioMode(
+        /* [in] */ Boolean mode);
+
+    // @Override
+    CARAPI ProcessCommand(
+        /* [in] */ IHdmiCecMessage* cmd,
+        /* [out] */ Boolean* result);
+
+    CARAPI StartAudioStatusAction();
+
+    CARAPI RemoveSystemAudioActionInProgress();
+
+    // @Override
+    CARAPI HandleTimerEvent(
+        /* [in] */ Int32 state);
+
+    // TODO: if IHdmiControlCallback is general to other FeatureAction,
+    //       move it into FeatureAction.
+    CARAPI FinishWithCallback(
+        /* [in] */ Int32 returnCode);
+
+private:
+    CARAPI SendSystemAudioModeRequestInternal();
+
+    CARAPI HandleSendSystemAudioModeRequestTimeout();
+
+public:
+    // Logical address of AV Receiver.
+    Int32 mAvrLogicalAddress;
+
+    // The target audio status of the action, whether to enable the system audio mode or not.
+    Boolean mTargetAudioStatus;
+
+private:
+    static const String TAG;
+
+    // Transient state to differentiate with STATE_NONE where the on-finished callback
+    // will not be called.
+    static const Int32 STATE_CHECK_ROUTING_IN_PRGRESS;
+
+    // State in which waits for <SetSystemAudioMode>.
+    static const Int32 STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE;
+
+    static const Int32 MAX_SEND_RETRY_COUNT;
+
+    static const Int32 ON_TIMEOUT_MS;
+
+    static const Int32 OFF_TIMEOUT_MS;
+
+    AutoPtr<IIHdmiControlCallback> mCallback;
+
+    Int32 mSendRetryCount;
+};
+
+} // namespace Hdmi
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
+
+#endif // __ELASTOS_DROID_SERVER_HDMI_SYSTEMAUDIOACTION_H__
+
+#if 0
 /*
  * Copyright (C) 2014 The Android Open Source Project
  *
@@ -17,22 +122,12 @@
 package com.android.server.hdmi;
 
 using Elastos::Droid::annotation.Nullable;
-using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
-using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
-using Elastos::Droid::Hardware::Hdmi::IIHdmiControlCallback;
-using Elastos::Droid::Os::IRemoteException;
-using Elastos::Droid::Utility::ISlog;
-
-using Elastos::Utility::IList;
-
 /**
  * Base feature action class for SystemAudioActionFromTv and SystemAudioActionFromAvr.
  */
 abstract class SystemAudioAction extends HdmiCecFeatureAction {
     private static const String TAG = "SystemAudioAction";
 
-    // Transient state to differentiate with STATE_NONE where the on-finished callback
-    // will not be called.
     private static const Int32 STATE_CHECK_ROUTING_IN_PRGRESS = 1;
 
     // State in which waits for <SetSystemAudioMode>.
@@ -49,7 +144,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
     // The target audio status of the action, whether to enable the system audio mode or not.
     protected Boolean mTargetAudioStatus;
 
-    @Nullable private final IHdmiControlCallback mCallback;
+    @Nullable private final
 
     private Int32 mSendRetryCount = 0;
 
@@ -64,131 +159,36 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
      */
     SystemAudioAction(HdmiCecLocalDevice source, Int32 avrAddress, Boolean targetStatus,
             IHdmiControlCallback callback) {
-        Super(source);
-        HdmiUtils->VerifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
-        mAvrLogicalAddress = avrAddress;
-        mTargetAudioStatus = targetStatus;
-        mCallback = callback;
     }
 
     // Seq #27
     protected void SendSystemAudioModeRequest() {
-        List<RoutingControlAction> routingActions = GetActions(RoutingControlAction.class);
-        if (!routingActions->IsEmpty()) {
-            mState = STATE_CHECK_ROUTING_IN_PRGRESS;
-            // Should have only one Routing Control Action
-            RoutingControlAction routingAction = routingActions->Get(0);
-            routingAction->AddOnFinishedCallback(this, new Runnable() {
-                //@Override
-                CARAPI Run() {
-                    SendSystemAudioModeRequestInternal();
-                }
-            });
-            return;
-        }
-        SendSystemAudioModeRequestInternal();
     }
 
     private void SendSystemAudioModeRequestInternal() {
-        Int32 avrPhysicalAddress = Tv()->GetAvrDeviceInfo().GetPhysicalAddress();
-        HdmiCecMessage command = HdmiCecMessageBuilder->BuildSystemAudioModeRequest(
-                GetSourceAddress(),
-                mAvrLogicalAddress, avrPhysicalAddress, mTargetAudioStatus);
-        SendCommand(command, new HdmiControlService->SendMessageCallback() {
-            //@Override
-            CARAPI OnSendCompleted(Int32 error) {
-                if (error != Constants.SEND_RESULT_SUCCESS) {
-                    HdmiLogger->Debug("Failed to send <System Audio Mode Request>:" + error);
-                    SetSystemAudioMode(FALSE);
-                    FinishWithCallback(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
-                }
-            }
-        });
-        mState = STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE;
-        AddTimer(mState, mTargetAudioStatus ? ON_TIMEOUT_MS : OFF_TIMEOUT_MS);
     }
 
     private void HandleSendSystemAudioModeRequestTimeout() {
-        if (!mTargetAudioStatus  // Don't retry for Off case.
-                || mSendRetryCount++ >= MAX_SEND_RETRY_COUNT) {
-            HdmiLogger->Debug("[T]:wait for <Set System Audio Mode>.");
-            SetSystemAudioMode(FALSE);
-            FinishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
-            return;
-        }
-        SendSystemAudioModeRequest();
     }
 
     protected void SetSystemAudioMode(Boolean mode) {
-        Tv()->SetSystemAudioMode(mode, TRUE);
     }
 
     //@Override
     final Boolean ProcessCommand(HdmiCecMessage cmd) {
-        switch (mState) {
-            case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
-                if (cmd->GetOpcode() == Constants.MESSAGE_FEATURE_ABORT
-                        && (cmd->GetParams()[0] & 0xFF)
-                                == Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST) {
-                    HdmiLogger->Debug("Failed to start system audio mode request.");
-                    SetSystemAudioMode(FALSE);
-                    FinishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
-                    return TRUE;
-                }
-                if (cmd->GetOpcode() != Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE
-                        || !HdmiUtils->CheckCommandSource(cmd, mAvrLogicalAddress, TAG)) {
-                    return FALSE;
-                }
-                Boolean receivedStatus = HdmiUtils->ParseCommandParamSystemAudioStatus(cmd);
-                if (receivedStatus == mTargetAudioStatus) {
-                    SetSystemAudioMode(receivedStatus);
-                    StartAudioStatusAction();
-                    return TRUE;
-                } else {
-                    HdmiLogger->Debug("Unexpected system audio mode request:" + receivedStatus);
-                    // Unexpected response, consider the request is newly initiated by AVR.
-                    // To return 'FALSE' will initiate new SystemAudioActionFromAvr by the control
-                    // service.
-                    FinishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
-                    return FALSE;
-                }
-            default:
-                return FALSE;
-        }
     }
 
     protected void StartAudioStatusAction() {
-        AddAndStartAction(new SystemAudioStatusAction(Tv(), mAvrLogicalAddress, mCallback));
-        Finish();
     }
 
     protected void RemoveSystemAudioActionInProgress() {
-        RemoveActionExcept(SystemAudioActionFromTv.class, this);
-        RemoveActionExcept(SystemAudioActionFromAvr.class, this);
     }
 
     //@Override
     final void HandleTimerEvent(Int32 state) {
-        if (mState != state) {
-            return;
-        }
-        switch (mState) {
-            case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
-                HandleSendSystemAudioModeRequestTimeout();
-                return;
-        }
     }
 
-    // TODO: if IHdmiControlCallback is general to other FeatureAction,
-    //       move it into FeatureAction.
     protected void FinishWithCallback(Int32 returnCode) {
-        if (mCallback != NULL) {
-            try {
-                mCallback->OnComplete(returnCode);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Failed to invoke callback.", e);
-            }
-        }
-        Finish();
     }
 }
+#endif

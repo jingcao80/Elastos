@@ -13,7 +13,7 @@ module
      * {@hide}
      */
     [oneway]
-    interface IInputSessionCallback {
+    interface IIInputSessionCallback {
         SessionCreated(
             [in] IIInputMethodSession* session);
     }

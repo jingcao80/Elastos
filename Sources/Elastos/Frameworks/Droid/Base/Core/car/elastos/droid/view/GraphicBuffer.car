@@ -140,7 +140,7 @@ module
             [out] Boolean* isDestroyed);
 
         GetNativeObject(
-            [out] Int64* handle);
+            [out] Handle64* handle);
     }
 
     interface IGraphicBufferHelper {
