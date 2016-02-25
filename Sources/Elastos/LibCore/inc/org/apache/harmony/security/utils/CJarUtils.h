@@ -4,7 +4,6 @@
 
 #include "_Org_Apache_Harmony_Security_Utils_CJarUtils.h"
 #include "core/Singleton.h"
-#include "WrappedX509Certificate.h"
 
 using Elastos::Core::Singleton;
 using Elastos::IO::IInputStream;
@@ -22,27 +21,6 @@ CarClass(CJarUtils)
     , public Singleton
     , public IJarUtils
 {
-private:
-    /**
-     * For legacy reasons we need to return exactly the original encoded
-     * certificate bytes, instead of letting the underlying implementation have
-     * a shot at re-encoding the data.
-     */
-    class VerbatimX509Certificate : public WrappedX509Certificate
-    {
-    public:
-        VerbatimX509Certificate(
-            /* [in] */ IX509Certificate* wrapped,
-            /* [in] */ ArrayOf<Byte>* encodedVerbatim);
-
-        // @Override
-        CARAPI GetEncoded(
-            /* [out, callee] */ ArrayOf<Byte>** encoded);
-
-    private:
-        AutoPtr< ArrayOf<Byte> > mEncodedVerbatim;
-    };
-
 public:
     CAR_INTERFACE_DECL()
 

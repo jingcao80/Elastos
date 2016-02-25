@@ -20,4 +20,3 @@ INCLUDES += $(MAKEDIR)/../../../../../../inc/org/apache/harmony/security/utils
 SOURCES += CJarUtils.cpp
 #SOURCES += CObjectIdentifierInUtils.cpp
 #SOURCES += CObjectIdentifierInUtilsHelper.cpp
-SOURCES += WrappedX509Certificate.cpp

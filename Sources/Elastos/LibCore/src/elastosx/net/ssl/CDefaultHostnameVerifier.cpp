@@ -228,7 +228,7 @@ ECode CDefaultHostnameVerifier::VerifyHostName(
         return NOERROR;
     }
 
-    if (_cn.StartWith("*.") && hostName.RegionMatches(0, _cn, 2, _cn.GetLength() - 2)) {
+    if (_cn.StartWith("*.") && hostName.Equals(cn.Substring(2))) {
         *result = TRUE; // "*.foo.com" matches "foo.com"
         return NOERROR;
     }

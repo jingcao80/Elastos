@@ -13,6 +13,7 @@
 #include "pkcs7/CContentInfoHelper.h"
 
 using Elastos::Core::IByte;
+using Elastos::Math::IBigInteger;
 using Elastos::IO::CByteArrayInputStream;
 using Elastos::Security::IMessageDigest;
 using Elastos::Security::ISignature;
@@ -20,12 +21,14 @@ using Elastos::Security::MessageDigest;
 using Elastos::Security::Signature;
 using Elastos::Security::Cert::ICertificateFactory;
 using Elastos::Security::Cert::CertificateFactory;
+using Elastos::Security::Cert::IX509Extension;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IList;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Logger;
+using Elastosx::Security::Auth::X500::IX500Principal;
 using Org::Apache::Harmony::Security::Asn1::IASN1OctetString;
 using Org::Apache::Harmony::Security::Asn1::CASN1OctetString;
 using Org::Apache::Harmony::Security::Asn1::IASN1Sequence;
@@ -45,26 +48,6 @@ namespace Apache {
 namespace Harmony {
 namespace Security {
 namespace Utils {
-
-//------------------------------------------------------------
-//  CJarUtils::VerbatimX509Certificate
-//------------------------------------------------------------
-CJarUtils::VerbatimX509Certificate::VerbatimX509Certificate(
-    /* [in] */ IX509Certificate* wrapped,
-    /* [in] */ ArrayOf<Byte>* encodedVerbatim)
-{
-    WrappedX509Certificate::constructor(wrapped);
-    mEncodedVerbatim = encodedVerbatim;
-}
-
-ECode CJarUtils::VerbatimX509Certificate::GetEncoded(
-    /* [out, callee] */ ArrayOf<Byte>** encoded)
-{
-    VALIDATE_NOT_NULL(encoded);
-    *encoded = mEncodedVerbatim;
-    return NOERROR;
-}
-
 
 //------------------------------------------------------------
 //  CJarUtils
@@ -124,9 +107,7 @@ ECode CJarUtils::VerifySignature(
         CByteArrayInputStream::New(encoded, (IInputStream**)&is);
         AutoPtr<ICertificate> cert;
         cf->GenerateCertificate(is, (ICertificate**)&cert);
-        AutoPtr< VerbatimX509Certificate > vx509Cert = new VerbatimX509Certificate(
-                IX509Certificate::Probe(cert), encoded);
-        certs->Set(i++, vx509Cert);
+        certs->Set(i++, IX509Certificate::Probe(cert));
     }
 
     AutoPtr<IList> sigInfos;
