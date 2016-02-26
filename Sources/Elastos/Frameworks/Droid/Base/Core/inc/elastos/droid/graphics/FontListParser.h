@@ -3,11 +3,15 @@
 #define __ELASTOS_DROID_GRAPHICS_FONTLISTPARSER_H__
 
 #include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.CoreLibrary.IO.h"
+#include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/core/Object.h>
-#include <elastos/utility/etl/List.h>
 
+using Elastos::Core::Object;
+using Elastos::IO::IFile;
 using Elastos::IO::IInputStream;
-using Elastos::Utility::Etl::List;
+using Elastos::Utility::IList;
+using Elastos::Utility::CArrayList;
 using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
@@ -20,7 +24,6 @@ namespace Graphics {
  * @hide
  */
 class FontListParser
-    : public Object
 {
 public:
     class Family;
@@ -31,10 +34,13 @@ public:
     public:
         Config()
         {
+            CArrayList::New((IList**)&mFamilies);
+            CArrayList::New((IList**)&mAliases);
         }
+
     public:
-        List<AutoPtr<Family> > mFamilies;
-        List<AutoPtr<Alias> > mAliases;
+        AutoPtr<IList> mFamilies;
+        AutoPtr<IList> mAliases;
     };
 
     class Font
@@ -48,8 +54,7 @@ public:
             : mFontName(fontName)
             , mWeight(weight)
             , mIsItalic(isItalic)
-        {
-        }
+        {}
 
     public:
         String mFontName;
@@ -77,7 +82,7 @@ public:
     public:
         Family(
             /* [in] */ const String& name,
-            /* [in] */ List<AutoPtr<Font> >* fonts,
+            /* [in] */ IList* fonts,
             /* [in] */ const String& lang,
             /* [in] */ const String& variant)
             : mName(name)
@@ -89,7 +94,7 @@ public:
 
     public:
         String mName;
-        AutoPtr<List<AutoPtr<Font> > > mFonts;
+        AutoPtr<IList> mFonts;
         String mLang;
         String mVariant;
     };
@@ -97,24 +102,34 @@ public:
 public:
     /* Parse fallback list (no names) */
     static CARAPI Parse(
+        /* [in] */ IFile* configFilename,
+        /* [in] */ IFile* fontDir,
+        /* [out] */ Config** config);
+
+    static CARAPI ParseLegacyFormat(
         /* [in] */ IInputStream* in,
-        /* [out] */ Config** config) /*throws XmlPullParserException, IOException*/;
+        /* [in] */ const String& dirName,
+        /* [out] */ Config** config);
 
 private:
+    static CARAPI IsLegacyFormat(
+        /* [in] */ IFile* configFilename,
+        /* [out] */ Boolean* result);
+
     static CARAPI ReadFamilies(
         /* [in] */ IXmlPullParser* parser,
-        /* [out] */ Config** result) /*throws XmlPullParserException, IOException*/;
+        /* [out] */ Config** result);
 
     static CARAPI ReadFamily(
         /* [in] */ IXmlPullParser* parser,
-        /* [out] */ Family** result) /*throws XmlPullParserException, IOException*/;
+        /* [out] */ Family** result);
 
     static CARAPI ReadAlias(
         /* [in] */ IXmlPullParser* parser,
-        /* [out] */ Alias** result) /*throws XmlPullParserException, IOException*/;
+        /* [out] */ Alias** result);
 
     static CARAPI Skip(
-        /* [in] */ IXmlPullParser* parser) /*throws XmlPullParserException, IOException*/;
+        /* [in] */ IXmlPullParser* parser);
 };
 
 } // namespace Graphics

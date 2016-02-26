@@ -428,10 +428,13 @@ AutoPtr<IFontFamily> Typeface::MakeFamilyFromParsed(
     /* [in] */ FontListParser::Family* family)
 {
     AutoPtr<FontFamily> fontFamily = new FontFamily(family->mLang, family->mVariant);
-    List<AutoPtr<FontListParser::Font> >::Iterator ator = family->mFonts->Begin();
-    Boolean result = FALSE;
-    for (; ator != family->mFonts->End(); ++ator) {
-        AutoPtr<FontListParser::Font> font = *ator;
+    Int32 N;
+    family->mFonts->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        family->mFonts->Get(i, (IInterface**)&obj);
+        FontListParser::Font* font = (FontListParser::Font*)IObject::Probe(obj);
+        Boolean result = FALSE;
         fontFamily->AddFontWeightStyle(font->mFontName, font->mWeight, font->mIsItalic, &result);
     }
     return fontFamily;
@@ -445,13 +448,11 @@ void Typeface::Init()
     CFile::New(systemFontConfigLocation, FONTS_CONFIG, (IFile**)&configFilename);
     // try {
     ECode ec = NOERROR;
-    Int32 i = 0;
-    List<AutoPtr<IFontFamily> > familyList;
+    Int32 N = 0, i = 0;
+    AutoPtr<IList> familyList;
+    CArrayList::New((IList**)&familyList);
     AutoPtr<ITypeface> tmp;
-    List<AutoPtr<IFontFamily> >::Iterator iter;
     HashMap<String, AutoPtr<ITypeface> >::Iterator sfIter;
-    List<AutoPtr<FontListParser::Alias> >::Iterator aIter;
-    List<AutoPtr<FontListParser::Family> >::Iterator ator;
     AutoPtr<FontListParser::Config> fontConfig;
     AutoPtr<IFileInputStream> fontsIn;
     ec = CFileInputStream::New(configFilename, (IFileInputStream**)&fontsIn);
@@ -461,34 +462,40 @@ void Typeface::Init()
 
     // Note that the default typeface is always present in the fallback list;
     // this is an enhancement from pre-Minikin behavior.
-    ator = fontConfig->mFamilies.Begin();
-    for (; ator != fontConfig->mFamilies.End(); ++ator, i++) {
-        AutoPtr<FontListParser::Family> f = *ator;
-        if (i == 0 || f->mName == NULL) {
-            familyList.PushBack(MakeFamilyFromParsed(f));
+    fontConfig->mFamilies->GetSize(&N);
+    for (i = 0; i < N; ++i) {
+        AutoPtr<IInterface> obj;
+        fontConfig->mFamilies->Get(i, (IInterface**)&obj);
+        FontListParser::Family* f = (FontListParser::Family*)IObject::Probe(obj);
+        if (i == 0 || f->mName.IsNull()) {
+            familyList->Add(MakeFamilyFromParsed(f));
         }
     }
-    sFallbackFonts = ArrayOf<IFontFamily*>::Alloc(familyList.GetSize());
-    iter = familyList.Begin();
-    for (i = 0; iter != familyList.End(); ++iter, i++) {
-        sFallbackFonts->Set(i, *iter);
+    familyList->GetSize(&N);
+    sFallbackFonts = ArrayOf<IFontFamily*>::Alloc(N);
+    for (i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        familyList->Get(i, (IInterface**)&obj);
+        sFallbackFonts->Set(i, IFontFamily::Probe(obj));
     }
 
     ec = Typeface::CreateFromFamilies(sFallbackFonts, (ITypeface**)&tmp);
     FAIL_GOTO(ec, Error);
     SetDefault(tmp);
 
-    ator = fontConfig->mFamilies.Begin();
-    i = 0;
-    for (; ator != fontConfig->mFamilies.End(); ++ator, i++) {
+    fontConfig->mFamilies->GetSize(&N);
+    for (i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        fontConfig->mFamilies->Get(i, (IInterface**)&obj);
+        FontListParser::Family* f = (FontListParser::Family*)IObject::Probe(obj);
         AutoPtr<ITypeface> typeface;
-        AutoPtr<FontListParser::Family> f = *ator;
-        if (f->mName != NULL) {
+        if (!f->mName.IsNull()) {
             if (i == 0) {
                 // The first entry is the default typeface; no sense in
                 // duplicating the corresponding FontFamily.
                 typeface = sDefaultTypeface;
-            } else {
+            }
+            else {
                 AutoPtr<IFontFamily> fontFamily = MakeFamilyFromParsed(f);
                 AutoPtr<ArrayOf<IFontFamily*> > families = ArrayOf<IFontFamily*>::Alloc(1);
                 families->Set(0, fontFamily);
@@ -497,10 +504,11 @@ void Typeface::Init()
             sSystemFontMap[f->mName] = typeface;
         }
     }
-
-    aIter = fontConfig->mAliases.Begin();
-    for (; aIter != fontConfig->mAliases.End(); ++aIter) {
-        AutoPtr<FontListParser::Alias> alias = *aIter;
+    fontConfig->mAliases->GetSize(&N);
+    for (i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        fontConfig->mAliases->Get(i, (IInterface**)&obj);
+        FontListParser::Alias* alias = (FontListParser::Alias*)IObject::Probe(obj);
         sfIter = sSystemFontMap.Find(alias->mToName);
         AutoPtr<ITypeface> base;
         if (sfIter != sSystemFontMap.End()) {

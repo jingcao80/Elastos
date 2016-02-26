@@ -51,6 +51,12 @@ public:
     static CARAPI_(AutoPtr<ICharSequence>) Convert(
         /* [in] */ const String & value);
 
+    static CARAPI_(String) Unbox(
+        /* [in] */ ICharSequence* value);
+
+    static CARAPI_(String) Unbox(
+        /* [in] */ IString* value);
+
     static CARAPI_(AutoPtr<ICharSequence>) Convert(
         /* [in] */ const char* str);
 

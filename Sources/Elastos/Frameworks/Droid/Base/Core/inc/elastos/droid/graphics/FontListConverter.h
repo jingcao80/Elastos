@@ -1,0 +1,110 @@
+
+#ifndef __ELASTOS_DROID_GRAPHICS_FONTLISTCONVERTER_H__
+#define __ELASTOS_DROID_GRAPHICS_FONTLISTCONVERTER_H__
+
+#include "elastos/droid/ext/frameworkdef.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/graphics/FontListParser.h"
+#include "elastos/droid/graphics/LegacyFontListParser.h"
+#include <elastos/core/Object.h>
+#include <elastos/utility/etl/HashMap.h>
+
+using Elastos::Core::Object;
+using Elastos::Utility::Etl::HashMap;
+
+DEFINE_OBJECT_HASH_FUNC_FOR(Elastos::Droid::Graphics::LegacyFontListParser::Family)
+
+namespace Elastos {
+namespace Droid {
+namespace Graphics {
+
+/**
+ * Converts a list of Family to FontListParser.Config
+ * {@hide}
+ */
+class FontListConverter
+    : public Object
+{
+private:
+    class StaticInitializer
+    {
+    public:
+        StaticInitializer();
+    };
+
+public:
+    FontListConverter(
+        /* [in] */ IList* families,
+        /* [in] */ const String& fontDir);
+
+    FontListConverter(
+        /* [in] */ LegacyFontListParser::Family* family,
+        /* [in] */ const String& fontDir);
+
+    CARAPI_(AutoPtr<FontListParser::Config>) Convert();
+
+protected:
+    /**
+     *  A "normal" style is just standard font,
+     *  eg Roboto is normal. Roboto-Thin is styled.
+     */
+    CARAPI_(Boolean) IsNormalStyle(
+        /* [in] */ LegacyFontListParser::Family* family);
+
+    CARAPI_(AutoPtr<IList>) ConvertFamilies();
+
+    CARAPI_(AutoPtr<FontListParser::Family>) ConvertFamily(
+        /* [in] */ LegacyFontListParser::Family* legacyFamily);
+
+    CARAPI_(AutoPtr<IList>) ConvertFonts(
+        /* [in] */ IList* fileset);
+
+    CARAPI_(AutoPtr<IList>) CreateAliases();
+
+private:
+    CARAPI_(void) FindFamilyVariants();
+
+    CARAPI_(AutoPtr<IList>) FindVariants(
+        /* [in] */ LegacyFontListParser::Family* normalFamily,
+        /* [in] */ IList* legacyFamilies);
+
+    CARAPI_(AutoPtr<IList>) GetAliasesForRelatedFamilies();
+
+    CARAPI_(AutoPtr<IList>) AdaptNamesetAliases(
+        /* [in] */ IList* nameset,
+        /* [in] */ const String& toName);
+
+    CARAPI_(AutoPtr<IList>) AdaptNamesetAliases(
+        /* [in] */ IList* nameset);
+
+public:
+    // Arbitrarily chosen list based on L's fonts.xml.
+    // There could be more out there, but we can't use a generic pattern of "fontName-styleName"
+    // as "sans-serif" would be translated as a font called "sans" with the style "serif".
+    static AutoPtr< ArrayOf<String> > STYLES;
+
+protected:
+    // These array values were determined by the order
+    // of fonts in a fileset. The order is:
+    // "Normal, Bold, Italic, BoldItalic"
+    // Additionally the weight values in L's fonts.xml
+    // are used to determine a generic weight value for each type
+    // e.g The 2nd entry in a fileset is the bold font.
+    static AutoPtr< ArrayOf<Int32> > WEIGHTS;
+    static AutoPtr< ArrayOf<Boolean> > ITALICS;
+    static Int32 DEFAULT_WEIGHT;
+
+private:
+    // Maps a "normal" family to a list of similar families differing by style
+    // Example: "sans-serif" -> { sans-serif-thin, sans-serif-light, sans-serif-medium }
+    HashMap< AutoPtr<LegacyFontListParser::Family>, AutoPtr<IList> > mFamilyVariants;
+    AutoPtr<IList> mFamilies;
+    String mFontDir;
+    static const StaticInitializer sInitializer;
+};
+
+} // namespace Graphics
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_GRAPHICS_FONTLISTCONVERTER_H__

@@ -123,7 +123,9 @@ SOURCES += MinikinSkia.cpp
 SOURCES += MinikinUtils.cpp
 SOURCES += SkiaCanvas.cpp
 SOURCES += FontFamily.cpp
+SOURCES += FontListConverter.cpp
 SOURCES += FontListParser.cpp
+SOURCES += LegacyFontListParser.cpp
 SOURCES += COutline.cpp
 
 ELASTOS_LIBS += drawable/drawable.lib

@@ -85,6 +85,21 @@ AutoPtr<ICharSequence> CoreUtils::Convert(
     return (ICharSequence*)obj.Get();
 }
 
+String CoreUtils::Unbox(
+    /* [in] */ ICharSequence* value)
+{
+    if (value == NULL) return String(NULL);
+    String str;
+    value->ToString(&str);
+    return str;
+}
+
+String CoreUtils::Unbox(
+    /* [in] */ IString* value)
+{
+    return Unbox(ICharSequence::Probe(value));
+}
+
 AutoPtr<ICharSequence> CoreUtils::Convert(
     /* [in] */ const char* str)
 {

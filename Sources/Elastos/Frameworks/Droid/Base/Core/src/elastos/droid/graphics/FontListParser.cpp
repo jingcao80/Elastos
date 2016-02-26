@@ -9,27 +9,76 @@
 
 using Elastos::Droid::Utility::Xml;
 using Elastos::Core::StringUtils;
+using Elastos::IO::IFileInputStream;
 
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
 ECode FontListParser::Parse(
-    /* [in] */ IInputStream* in,
-    /* [out] */ Config** config) /*throws XmlPullParserException, IOException*/
+    /* [in] */ IFile* configFilename,
+    /* [in] */ IFile* fontDir,
+    /* [out] */ Config** config)
 {
+    *config = NULL;
+    AutoPtr<IFileInputStream> in;
+    CFileInputStream::New(configFilename, (IFileInputStream**)&in);
+    Boolean result;
+    FAIL_RETURN(IsLegacyFormat(configFilename, &result));
+    if (result) {
+        String path;
+        fontDir->GetAbsolutePath(&path);
+        return ParseLegacyFormat(in, path, config);
+    }
+    else {
+        String path;
+        fontDir->GetAbsolutePath(&path);
+        return ParseNormalFormat(in, path, config);
+    }
+}
+
+ECode FontListParser::IsLegacyFormat(
+    /* [in] */ IFile* configFilename,
+    /* [out] */ Boolean* result)
+{
+    AutoPtr<IFileInputStream> in;
+    CFileInputStream::New(configFilename, (IFileInputStream**)&in);
+    Boolean isLegacy = FALSE;
+    // try {
     AutoPtr<IXmlPullParser> parser;
-    Int32 nextTag = 0;
-    ECode ec = Xml::NewPullParser((IXmlPullParser**)&parser);
-    FAIL_GOTO(ec, error);
-    ec = parser->SetInput(in, String(NULL));
-    FAIL_GOTO(ec, error);
-    ec = parser->NextTag(&nextTag);
-    FAIL_GOTO(ec, error);
-    ec = ReadFamilies(parser, config);
-error:
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    parser->SetInput(in, String(NULL));
+    Int32 tag;
+    ECode ec = parser->NextTag(&tag);
+    FAIL_GOTO(ec, EXIT);
+    parser->Require(IXmlPullParser::START_TAG, String(NULL), String("familyset"));
+    String version;
+    ec = parser->GetAttributeValue(String(NULL), String("version"));
+    FAIL_GOTO(ec, EXIT);
+    isLegacy = version.IsNull();
+    // } finally {
+EXIT:
     in->Close();
+    // }
+    *result = isLegacy;
     return ec;
+}
+
+ECode FontListParser::ParseLegacyFormat(
+    /* [in] */ IInputStream* in,
+    /* [in] */ const String& dirName,
+    /* [out] */ Config** config)
+{
+    VALIDATE_NOT_NULL(config);
+    // try {
+    AutoPtr<IList> legacyFamilies;
+
+    List<LegacyFontListParser.Family> legacyFamilies = LegacyFontListParser.parse(in);
+    FontListConverter converter = new FontListConverter(legacyFamilies, dirName);
+    return converter.convert();
+    // } finally {
+    //     in.close();
+    // }
 }
 
 ECode FontListParser::ReadFamilies(
@@ -49,12 +98,12 @@ ECode FontListParser::ReadFamilies(
         if (name.Equals(String("family"))) {
             AutoPtr<Family> f;
             FAIL_RETURN(ReadFamily(parser, (Family**)&f));
-            config->mFamilies.PushBack(f);
+            config->mFamilies->Add((IObject*)f);
         }
         else if (name.Equals(String("alias"))) {
             AutoPtr<Alias> a;
             FAIL_RETURN(ReadAlias(parser, (Alias**)&a));
-            config->mAliases.PushBack(a);
+            config->mAliases->Add((IObject*)a);
         }
         else {
             FAIL_RETURN(Skip(parser));
@@ -77,7 +126,8 @@ ECode FontListParser::ReadFamily(
     FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("lang"), &lang));
     String variant;
     FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("variant"), &variant));
-    AutoPtr<List<AutoPtr<Font> > > fonts = new List<AutoPtr<Font> >();
+    AutoPtr<IList> fonts;
+    CArrayList::New((IList**)&fonts);
     Int32 next = 0;
     while ((parser->Next(&next), next) != IXmlPullParser::END_TAG) {
         Int32 type = 0;
@@ -95,8 +145,10 @@ ECode FontListParser::ReadFamily(
             String filename;
             FAIL_RETURN(parser->NextText(&filename));
             String fullFilename = String("/system/fonts/") + filename;
-            fonts->PushBack(new Font(fullFilename, weight, isItalic));
-        } else {
+            AutoPtr<Font> font = new Font(fullFilename, weight, isItalic);
+            fonts->Add((IObject*)font);
+        }
+        else {
             FAIL_RETURN(Skip(parser));
         }
     }
