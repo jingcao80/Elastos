@@ -13,6 +13,7 @@ using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::Pm::IIPackageDataObserver;
 using Elastos::Droid::Content::Pm::IConfigurationInfo;
+using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IDebugMemoryInfo;
@@ -384,6 +385,12 @@ public:
         /* [out] */ IList** records);
 
     /**
+     * @hide
+     */
+    CARAPI GetConfiguration(
+        /* [out] */ IConfiguration** config);
+
+    /**
      * Returns a list of application processes that are running on the device.
      *
      * <p><b>Note: this method is only intended for debugging or building
@@ -517,26 +524,6 @@ public:
     //     /* [out] */ IMap** counts);
 
     /**
-     * @hide
-     */
-    CARAPI StartLockTaskMode(
-        /* [in] */ Int32 taskId);
-
-    /**
-     * @hide
-     */
-    CARAPI StopLockTaskMode();
-
-    /**
-     * Return whether currently in lock task mode.  When in this mode
-     * no new tasks can be created or switched to.
-     *
-     * @see Activity#startLockTask()
-     */
-    CARAPI IsInLockTaskMode(
-        /* [out] */ Boolean* mode);
-
-    /**
      * @param userid the user's id. Zero indicates the default user
      * @hide
      */
@@ -557,6 +544,35 @@ public:
         /* [in] */ Int32 userid,
         /* [out] */ Boolean* isRunning);
 
+    /**
+     * @hide
+     */
+    CARAPI StartLockTaskMode(
+        /* [in] */ Int32 taskId);
+
+    /**
+     * @hide
+     */
+    CARAPI StopLockTaskMode();
+
+    /**
+     * Return whether currently in lock task mode.  When in this mode
+     * no new tasks can be created or switched to.
+     *
+     * @see Activity#startLockTask()
+     */
+    CARAPI IsInLockTaskMode(
+        /* [out] */ Boolean* mode);
+
+    /**
+     * @throws SecurityException Throws SecurityException if the caller does
+     * not hold the {@link android.Manifest.permission#CHANGE_CONFIGURATION} permission.
+     *
+     * @hide
+     */
+    CARAPI UpdateConfiguration(
+        /* [in] */ IConfiguration* values);
+
 public:
     /** @hide */
     static CARAPI_(Int32) GetMemoryClass();
@@ -571,6 +587,8 @@ public:
      * @hide
      */
     static CARAPI_(Boolean) IsHighEndGfx();
+
+    static CARAPI_(Boolean) IsForcedHighEndGfx();
 
     /**
      * Return the maximum number of recents entries that we will maintain and show.

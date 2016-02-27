@@ -7,17 +7,6 @@
 #include <elastos/utility/etl/HashSet.h>
 #include <elastos/utility/etl/List.h>
 
-
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Utility::Etl::HashSet;
-using Elastos::Utility::Etl::List;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::IClassLoader;
-using Elastos::IO::IFile;
-using Elastos::IO::IFileInputStream;
-using Elastos::IO::IFileOutputStream;
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IInputStream;
 using Elastos::Droid::App::Backup::IBackupDataOutput;
 using Elastos::Droid::App::Backup::IBackupDataInput;
 using Elastos::Droid::App::Backup::IFullBackupDataOutput;
@@ -53,6 +42,17 @@ using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Droid::Utility::IAttributeSet;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::ICompatibilityInfoHolder;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::IClassLoader;
+using Elastos::IO::IFile;
+using Elastos::IO::IFileInputStream;
+using Elastos::IO::IFileOutputStream;
+using Elastos::IO::IFileDescriptor;
+using Elastos::IO::IInputStream;
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Utility::Etl::HashSet;
+using Elastos::Utility::Etl::List;
+using Elastos::Utility::Regex::IPattern;
 
 namespace Elastos {
 namespace Droid {
@@ -811,6 +811,7 @@ public:
 
     CARAPI IsRestricted(
         /* [out] */ Boolean* isRestricted);
+
 protected:
     /**
      * Scan the dir tree (if it actually exists) and process each entry we find.  If the
@@ -824,12 +825,52 @@ protected:
         /* [in] */ const String& packageName,
         /* [in] */ const String& domain,
         /* [in] */ const String& rootPath,
-        /* [in] */ HashSet<String>* excludes,
+        /* [in] */ HashSet<String>* excludeFullPathDir,
         /* [in] */ IFullBackupDataOutput* output);
+
+    /**
+     * Scan the dir tree (if it actually exists) and process each entry we find.  If the
+     * 'excludes' parameter is non-null, it is consulted each time a new file system entity
+     * is visited to see whether that entity (and its subtree, if appropriate) should be
+     * omitted from the backup process.
+     *
+     * @hide
+     */
+    CARAPI_(void) FullBackupFileTree(
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& domain,
+        /* [in] */ const String& rootPath,
+        /* [in] */ HashSet<String>* excludeFullPathDir,
+        /* [in] */ IPattern* excludeFiles,
+        /* [in] */ IFullBackupDataOutput* output);
+
+private:
+    /**
+     * Backup files specified by domainTokens parameter. It should be one (or more) of
+     * rootDir, filesDir, databaseDir, cacheDir, sharedPrefsDir, externalFilesDir
+     * excludeFiles is a regex of the files to be excluded when doing the backup.
+     *
+     * @param domainTokens
+     * @param excludeFilesRegex
+     * @param data
+     * @hide
+     */
+    CARAPI_(void) OnBackupFiles(
+        /* [in] */ ArrayOf<String>* domainTokens,
+        /* [in] */ const String& excludeFilesRegex,
+        /* [in] */ IFullBackupDataOutput* data);
 
 private:
     static const String TAG;
     static const Boolean DEBUG;
+
+    /**
+     * To lookup an application's database and shared preferences directories (usually
+     * /data/data/com.application.name), this generic name is used to invoke the
+     * getSharedPrefsFile(String) and getDatabasePath(String) APIs.
+     */
+    static const String GENERIC_FILE_NAME;
+
     AutoPtr<IBinder> mBinder;
     AutoPtr<IContext> mBase;
 };

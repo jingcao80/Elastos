@@ -11,6 +11,8 @@
 //#include "elastos/droid/app/backup/CBackupDataOutput.h"
 //#include "elastos/droid/app/backup/CBackupDataInput.h"
 
+using Elastos::Droid::Content::EIID_IContext;
+using Elastos::Droid::Content::EIID_IContextWrapper;
 using Libcore::IO::IOsConstants;
 using Libcore::IO::COsConstants;
 using Libcore::IO::ILibcore;
@@ -24,8 +26,7 @@ using Elastos::Core::StringBuilder;
 using Elastos::Utility::CLinkedList;
 using Elastos::Utility::ILinkedList;
 using Elastos::Utility::Logging::Logger;
-using Elastos::Droid::Content::EIID_IContext;
-using Elastos::Droid::Content::EIID_IContextWrapper;
+using Elastos::Utility::Regex::IMatcher;
 
 namespace Elastos {
 namespace Droid {
@@ -38,6 +39,8 @@ extern "C" const InterfaceID EIID_BackupAgent =
 
 const String BackupAgent::TAG("BackupAgent");
 const Boolean BackupAgent::DEBUG = FALSE;
+
+const String BackupAgent::GENERIC_FILE_NAME("foo");
 
 BackupAgent::BackupAgent()
 {
@@ -78,7 +81,7 @@ ECode BackupAgent::OnFullBackup(
     file->GetCanonicalPath(&filesDir);
 
     file = NULL;
-    GetDatabasePath(String("foo"), (IFile**)&file);
+    GetDatabasePath(GENERIC_FILE_NAME, (IFile**)&file);
     AutoPtr<IFile> parent;
     file->GetParentFile((IFile**)&parent);
     String databaseDir;
@@ -86,7 +89,7 @@ ECode BackupAgent::OnFullBackup(
 
     file = NULL;
     parent = NULL;
-    GetSharedPrefsFile(String("foo"), (IFile**)&file);
+    GetSharedPrefsFile(GENERIC_FILE_NAME, (IFile**)&file);
     file->GetParentFile((IFile**)&parent);
     String sharedPrefsDir;
     parent->GetCanonicalPath(&sharedPrefsDir);
@@ -156,7 +159,7 @@ ECode BackupAgent::FullBackupFile(
      pFile->GetCanonicalPath(&filesDir);
 
      pFile = NULL;
-     GetDatabasePath(String("foo"), (IFile**)&pFile);
+     GetDatabasePath(GENERIC_FILE_NAME, (IFile**)&pFile);
      AutoPtr<IFile> parent;
      pFile->GetParentFile((IFile**)&parent);
      String dbDir;
@@ -164,7 +167,7 @@ ECode BackupAgent::FullBackupFile(
 
      pFile = NULL;
      parent = NULL;
-     GetSharedPrefsFile(String("foo"), (IFile**)&pFile);
+     GetSharedPrefsFile(GENERIC_FILE_NAME, (IFile**)&pFile);
      pFile->GetParentFile((IFile**)&parent);
      String spDir;
      parent->GetCanonicalPath(&spDir);
@@ -232,8 +235,19 @@ void BackupAgent::FullBackupFileTree(
     /* [in] */ const String& packageName,
     /* [in] */ const String& domain,
     /* [in] */ const String& rootPath,
-    /* [in] */ HashSet<String>* excludes,
+    /* [in] */ HashSet<String>* excludeFullPathDir,
     /* [in] */ IFullBackupDataOutput* output)
+{
+    FullBackupFileTree(packageName, domain, rootPath, excludeFullPathDir, NULL, output);
+}
+
+void BackupAgent::FullBackupFileTree(
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& domain,
+        /* [in] */ const String& rootPath,
+        /* [in] */ HashSet<String>* excludeFullPathDir,
+        /* [in] */ IPattern* excludeFiles,
+        /* [in] */ IFullBackupDataOutput* output);
 {
     AutoPtr<IFile> rootFile;
     CFile::New(rootPath, (IFile**)&rootFile);
@@ -254,8 +268,20 @@ void BackupAgent::FullBackupFileTree(
             file->GetCanonicalPath(&filePath);
 
             //prune this subtree?
-            if (excludes != NULL && excludes->Find(filePath) != excludes->End()) {
+            if (excludeFullPathDir != NULL && excludeFullPathDir->Find(filePath) != excludeFullPathDir->End()) {
+                if (DEBUG) Logger::I(TAG, "Excluding directory path: %s", filePath.string());
                 continue;
+            }
+
+            // Does this match the regex ?
+            if (excludeFiles != NULL) {
+                AutoPtr<IMatcher> matcher;
+                excludeFiles->Matcher(filePath, (IMatcher**)&matcher);
+                Boolean found;
+                if (matcher->Find(&found), found) {
+                    if (DEBUG) Logger::I(TAG, "Excluding file: %s", filePath.string());
+                    continue;
+                }
             }
 
             // If it's a directory, enqueue its contents for scanning.
@@ -294,7 +320,9 @@ void BackupAgent::FullBackupFileTree(
             //     if (DEBUG) Log.w(TAG, "Error canonicalizing path of " + file);
             //     continue;
             // } catch (ErrnoException e) {
-            //     if (DEBUG) Log.w(TAG, "Error scanning file " + file + " : " + e);
+            //     if (DEBUG) {
+            //            Log.w(TAG, "Error scanning file " + file + ", skipping this file backup");
+            //        }
             //     continue;
             // }
 
@@ -305,6 +333,111 @@ void BackupAgent::FullBackupFileTree(
             CFullBackup::AcquireSingleton((IFullBackup**)&fullBackup);
             Int32 tempResult;
             fullBackup->BackupToTar(packageName, domain, String(NULL), rootPath, filePath, backupData, &tempResult);
+        }
+    }
+}
+
+void BackupAgent::OnBackupFiles(
+    /* [in] */ ArrayOf<String>* domainTokens,
+    /* [in] */ const String& excludeFilesRegex,
+    /* [in] */ IFullBackupDataOutput* data)
+{
+    String rootDir, filesDir, databaseDir, sharedPrefsDir, cacheDir, libDir, efLocationDir;
+    AutoPtr<IApplicationInfo> appInfo;
+    GetApplicationInfo((IApplicationInfo**)&appInfo);
+
+    String dataDir;
+    appInfo->GetDataDir(&dataDir);
+    AutoPtr<IFile> f;
+    CFile::New(dataDir, (IFile**)&f);
+    f->GetCanonicalPath(&rootDir);
+    f = NULL;
+    GetFilesDir((IFile**)&f);
+    f->GetCanonicalPath(&filesDir);
+    f = NULL;
+    GetDatabasePath(GENERIC_FILE_NAME, (IFile**)&f);
+    AutoPtr<IFile> pf;
+    f->GetParentFile((IFile**)&pf);
+    pf->GetCanonicalPath(&databaseDir);
+    f = NULL;
+    pf = NULL;
+    GetSharedPrefsFile(GENERIC_FILE_NAME, (IFile**)&f);
+    f->GetParentFile((IFile**)&pf);
+    pf->GetCanonicalPath(&sharedPrefsDir);
+    f = NULL;
+    GetCacheDir((IFile**)&f);
+    f->GetCanonicalPath(&cacheDir);
+    String nativeLibraryDir;
+    appInfo->GetNativeLibraryDir(&nativeLibraryDir);
+    if (!nativeLibraryDir.IsNull()) {
+        f = NULL;
+        CFile::New(nativeLibraryDir, (IFile**)&f);
+        f->GetCanonicalPath(&libDir);
+    }
+    f = NULL;
+    GetExternalFilesDir(String(NULL), (IFile**)&f);
+    f->GetCanonicalPath(&efLocationDir);
+
+    // Filters, the scan queue, and the set of resulting entities
+    AutoPtr< HashSet<String> > filterSet = new HashSet<String>();
+    String packageName;
+    GetPackageName(&packageName);
+    // Okay, start with the app's root tree, but exclude all of the canonical subdirs
+    if (!libDir.IsNull()) {
+        filterSet->Insert(libDir);
+    }
+    filterSet->Insert(cacheDir);
+    filterSet->Insert(databaseDir);
+    filterSet->Insert(sharedPrefsDir);
+    filterSet->Insert(filesDir);
+
+    AutoPtr<IPattern> excludeFiles;
+    if (!excludeFilesRegex.IsNull()) {
+        AutoPtr<IPatternHelper> helper;
+        CPatternHelper::AcquireSingleton((IPatternHelper**)&helper);
+        helper->Compile(excludeFilesRegex, IPattern::CASE_INSENSITIVE, (IPattern**)&excludeFiles);
+    }
+
+    for (Int32 i = 0; i < domainTokens->GetLength(); i++) {
+        String dToken = (*domainTokens)[i];
+        if (IFullBackup::ROOT_TREE_TOKEN.Equals(dToken)) {
+            FullBackupFileTree(packageName, IFullBackup::ROOT_TREE_TOKEN, rootDir, filterSet,
+                    excludeFiles, data);
+        }
+
+        if (IFullBackup::DATA_TREE_TOKEN.Equals(dToken)) {
+            filterSet->Insert(rootDir);
+            filterSet->Erase(filesDir);
+            FullBackupFileTree(packageName, IFullBackup::DATA_TREE_TOKEN, filesDir, filterSet,
+                    excludeFiles, data);
+        }
+
+        if (IFullBackup::DATABASE_TREE_TOKEN.Equals(dToken)) {
+            filterSet->Insert(filesDir);
+            filterSet->Erase(databaseDir);
+            FullBackupFileTree(packageName, IFullBackup::DATABASE_TREE_TOKEN, databaseDir,
+                    filterSet, excludeFiles, data);
+        }
+
+        if (IFullBackup::SHAREDPREFS_TREE_TOKEN.Equals(dToken)) {
+            filterSet->Insert(databaseDir);
+            filterSet->Erase(sharedPrefsDir);
+            FullBackupFileTree(packageName, IFullBackup::SHAREDPREFS_TREE_TOKEN, sharedPrefsDir,
+                    filterSet, excludeFiles, data);
+        }
+
+        if (IFullBackup::MANAGED_EXTERNAL_TREE_TOKEN.Equals(dToken)) {
+            // getExternalFilesDir() location associated with this app.  Technically there should
+            // not be any files here if the app does not properly have permission to access
+            // external storage, but edge cases happen. fullBackupFileTree() catches
+            // IOExceptions and similar, and treats them as non-fatal, so we rely on that; and
+            // we know a priori that processes running as the system UID are not permitted to
+            // access external storage, so we check for that as well to avoid nastygrams in
+            // the log.
+            if (Process::MyUid() != IProcess::SYSTEM_UID) {
+                FullBackupFileTree(packageName, IFullBackup::MANAGED_EXTERNAL_TREE_TOKEN,
+                        efLocationDir, NULL, excludeFiles, data);
+            }
         }
     }
 }
@@ -345,7 +478,7 @@ ECode BackupAgent::OnRestoreFile(
     }
     else if (domain.Equals(IFullBackup::DATABASE_TREE_TOKEN)) {
         AutoPtr<IFile> file;
-        GetDatabasePath(String("foo"), (IFile**)&file);
+        GetDatabasePath(GENERIC_FILE_NAME, (IFile**)&file);
         AutoPtr<IFile> parentFile;
         file->GetParentFile((IFile**)&parentFile);
         parentFile->GetCanonicalPath(&basePath);
@@ -361,7 +494,7 @@ ECode BackupAgent::OnRestoreFile(
     }
     else if (domain.Equals(IFullBackup::SHAREDPREFS_TREE_TOKEN)) {
         AutoPtr<IFile> file;
-        GetSharedPrefsFile(String("foo"), (IFile**)&file);
+        GetSharedPrefsFile(GENERIC_FILE_NAME, (IFile**)&file);
         AutoPtr<IFile> parentFile;
         file->GetParentFile((IFile**)&parentFile);
         parentFile->GetCanonicalPath(&basePath);

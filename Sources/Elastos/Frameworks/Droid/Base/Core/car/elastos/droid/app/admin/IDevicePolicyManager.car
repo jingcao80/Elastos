@@ -557,6 +557,10 @@ module
 
         GetAutoTimeRequired(
             [out] Boolean* result);
+
+        RequireSecureKeyguard(
+            [in] Int32 userHandle,
+            [out] Boolean* isRequired);
     }
 
     } // namespace Admin

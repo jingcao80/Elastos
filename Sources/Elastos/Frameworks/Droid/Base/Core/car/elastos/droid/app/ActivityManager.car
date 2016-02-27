@@ -16,6 +16,7 @@ module
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Content.Pm.IConfigurationInfo;
     interface Elastos.Droid.Content.Pm.IIPackageDataObserver;
+    interface Elastos.Droid.Content.Res.IConfiguration;
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Os.IDebugMemoryInfo;
     interface Elastos.Droid.Os.IParcelFileDescriptor;
@@ -906,6 +907,12 @@ module
             [out] IList** records);
 
         /**
+         * @hide
+         */
+        GetConfiguration(
+            [out] IConfiguration** config);
+
+        /**
          * Returns a list of application processes that are running on the device.
          *
          * <p><b>Note: this method is only intended for debugging or building
@@ -1045,8 +1052,17 @@ module
          *
          * @see Activity#startLockTask()
          */
-         IsInLockTaskMode(
+        IsInLockTaskMode(
             [out] Boolean* result);
+
+        /**
+         * @throws SecurityException Throws SecurityException if the caller does
+         * not hold the {@link android.Manifest.permission#CHANGE_CONFIGURATION} permission.
+         *
+         * @hide
+         */
+        UpdateConfiguration(
+            [in] IConfiguration* values);
     }
 
     interface IActivityManagerHelper {
@@ -1069,6 +1085,12 @@ module
          * @hide
          */
         IsHighEndGfx(
+            [out] Boolean* result);
+
+        /**
+         * @hide
+         */
+        IsForcedHighEndGfx(
             [out] Boolean* result);
 
         /**

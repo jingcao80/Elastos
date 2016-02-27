@@ -2380,6 +2380,18 @@ module
         GetCrossProfileWidgetProviders(
             [in] IComponentName* admin,
             [out] IList** result);
+
+        /**
+         * CM: check if secure keyguard is required
+         * @hide
+         */
+        RequireSecureKeyguard(
+            [out] Boolean* isRequired);
+
+        /** @hide */
+        RequireSecureKeyguard(
+            [in] Int32 userHandle,
+            [out] Boolean* isRequired);
     }
 
     [local]

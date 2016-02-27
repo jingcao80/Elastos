@@ -1956,6 +1956,34 @@ ECode CDevicePolicyManager::GetCrossProfileWidgetProviders(
     return E_NOT_IMPLEMENTED;
 }
 
+ECode CDevicePolicyManager::RequireSecureKeyguard(
+    /* [out] */ Boolean* isRequired)
+{
+    VALIDATE_NOT_NULL(isRequired);
+    return RequireSecureKeyguard(UserHandle::GetMyUserId(), isRequired);
+}
+
+ECode CDevicePolicyManager::RequireSecureKeyguard(
+    /* [in] */ Int32 userHandle,
+    /* [out] */ Boolean* isRequired)
+{
+    VALIDATE_NOT_NULL(isRequired);
+    *isRequired = TRUE;
+
+    ECode ec = NOERROR;
+    if (mService != NULL) {
+        // try {
+        ec = mService->RequireSecureKeyguard(userHandle, isRequired);
+        if (FAILED(ec)) {
+            Logger::W(TAG, "Failed to get secure keyguard requirement");
+        }
+        // } catch (RemoteException e) {
+        //     Log.w(TAG, "Failed to get secure keyguard requirement");
+        // }
+    }
+    return ec;
+}
+
 } // namespace Admin
 } // namespace App
 } // namespace Droid

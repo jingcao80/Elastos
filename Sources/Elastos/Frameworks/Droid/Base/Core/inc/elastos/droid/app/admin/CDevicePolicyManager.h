@@ -1316,6 +1316,13 @@ public:
         /* [in] */ IComponentName* admin,
         /* [out] */ IList** result);
 
+    CARAPI RequireSecureKeyguard(
+        /* [out] */ Boolean* isRequired);
+
+    CARAPI RequireSecureKeyguard(
+        /* [in] */ Int32 userHandle,
+        /* [out] */ Boolean* isRequired);
+
 private:
     /**
      * Returns the alias of a given CA certificate in the certificate store, or null if it

@@ -36,6 +36,14 @@ ECode CActivityManagerHelper::IsHighEndGfx(
     return NOERROR;
 }
 
+ECode CActivityManagerHelper::IsForcedHighEndGfx(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = CActivityManager::IsForcedHighEndGfx();
+    return NOERROR;
+}
+
 ECode CActivityManagerHelper::IsLowRamDeviceStatic(
     /* [out] */ Boolean* result)
 {

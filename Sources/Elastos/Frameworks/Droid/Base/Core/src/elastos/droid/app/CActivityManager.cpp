@@ -598,6 +598,19 @@ ECode CActivityManager::GetRunningExternalApplications(
     // }
 }
 
+ECode CActivityManager::GetConfiguration(
+    /* [out] */ IConfiguration** config)
+{
+    VALIDATE_NOT_NULL(config);
+    // try {
+    ECode ec = ActivityManagerNative::GetDefault()->GetConfiguration(config);
+    if (FAILED(ec)) *config = NULL;
+    return ec;
+    // } catch (RemoteException e) {
+    //     return null;
+    // }
+}
+
 ECode CActivityManager::GetRunningAppProcesses(
     /* [out] */ IList** records)
 {
@@ -796,6 +809,34 @@ Int32 CActivityManager::GetLauncherLargeIconSizeInner(
     }
 }*/
 
+ECode CActivityManager::SwitchUser(
+    /* [in] */ Int32 userid,
+    /* [out] */ Boolean* switched)
+{
+    VALIDATE_NOT_NULL(switched);
+    *switched = FALSE;
+    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
+    if (am) {
+        am->SwitchUser(userid, switched);
+    }
+
+    return NOERROR;
+}
+
+ECode CActivityManager::IsUserRunning(
+    /* [in] */ Int32 userid,
+    /* [out] */ Boolean* isRunning)
+{
+    VALIDATE_NOT_NULL(isRunning);
+    *isRunning = FALSE;
+    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
+    if (am) {
+        am->IsUserRunning(userid, FALSE, isRunning);
+    }
+
+    return NOERROR;
+}
+
 ECode CActivityManager::StartLockTaskMode(
     /* [in] */ Int32 taskId)
 {
@@ -824,32 +865,13 @@ ECode CActivityManager::IsInLockTaskMode(
     // }
 }
 
-ECode CActivityManager::SwitchUser(
-    /* [in] */ Int32 userid,
-    /* [out] */ Boolean* switched)
+ECode CActivityManager::UpdateConfiguration(
+    /* [in] */ IConfiguration* values)
 {
-    VALIDATE_NOT_NULL(switched);
-    *switched = FALSE;
-    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
-    if (am) {
-        am->SwitchUser(userid, switched);
-    }
-
-    return NOERROR;
-}
-
-ECode CActivityManager::IsUserRunning(
-    /* [in] */ Int32 userid,
-    /* [out] */ Boolean* isRunning)
-{
-    VALIDATE_NOT_NULL(isRunning);
-    *isRunning = FALSE;
-    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
-    if (am) {
-        am->IsUserRunning(userid, FALSE, isRunning);
-    }
-
-    return NOERROR;
+    // try {
+    return ActivityManagerNative::GetDefault()->UpdateConfiguration(values);
+    // } catch (RemoteException e) {
+    // }
 }
 
 Int32 CActivityManager::GetMemoryClass()
@@ -879,6 +901,13 @@ Boolean CActivityManager::IsHighEndGfx()
     Boolean bval;
     resources->GetBoolean(R::bool_::config_avoidGfxAccel, &bval);
     return !IsLowRamDeviceStatic() && bval;
+}
+
+Boolean CActivityManager::IsForcedHighEndGfx()
+{
+    Boolean value;
+    SystemProperties::GetBoolean(String("persist.sys.force_highendgfx"), FALSE, &value);
+    return value;
 }
 
 Int32 CActivityManager::GetMaxRecentTasksStatic()

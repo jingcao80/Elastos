@@ -309,7 +309,6 @@ module
          */
         const Int32 FLAG_MULTIARCH  = 0x80000000; // 1<<31;
 
-
         Dump(
             [in] IPrinter* pw,
             [in] String prefix);

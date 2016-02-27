@@ -41,6 +41,12 @@ public:
         /* [out] */ Boolean* result);
 
     /**
+     * @hide
+     */
+    CARAPI IsForcedHighEndGfx(
+        /* [out] */ Boolean* result);
+
+    /**
      * Return the maximum number of recents entries that we will maintain and show.
      * @hide
      */
