@@ -12,8 +12,6 @@
 #include <androidfw/AssetManager.h>
 
 using Elastos::IO::CFile;
-using Elastos::IO::CFileInputStream;
-using Elastos::IO::IFileInputStream;
 using Elastos::IO::IInputStream;
 using Elastos::Utility::Logging::Logger;
 
@@ -27,11 +25,27 @@ Typeface::StaticInitializer::StaticInitializer()
 {
     Init();
     // Set up defaults and typefaces exposed in public API
-    Typeface::Create(String(NULL), 0, (ITypeface**)&Typeface::DEFAULT);
-    Typeface::Create(String(NULL), ITypeface::BOLD, (ITypeface**)&Typeface::DEFAULT_BOLD);
-    Typeface::Create(String("sans-serif"), 0, (ITypeface**)&Typeface::SANS_SERIF);
-    Typeface::Create(String("serif"), 0, (ITypeface**)&Typeface::SERIF);
-    Typeface::Create(String("monospace"), 0, (ITypeface**)&Typeface::MONOSPACE);
+    Typeface::Create(String(NULL), 0, (ITypeface**)&Typeface::DEFAULT_INTERNAL);
+    Typeface::Create(String(NULL), ITypeface::BOLD, (ITypeface**)&Typeface::DEFAULT_BOLD_INTERNAL);
+    Typeface::Create(String("sans-serif"), 0, (ITypeface**)&Typeface::SANS_SERIF_INTERNAL);
+    Typeface::Create(String("serif"), 0, (ITypeface**)&Typeface::SERIF_INTERNAL);
+    Typeface::Create(String("monospace"), 0, (ITypeface**)&Typeface::MONOSPACE_INTERNAL);
+
+    AutoPtr<Typeface> tf = new Typeface();
+    tf->constructor(((Typeface*)DEFAULT_INTERNAL.Get())->mNativeInstance);
+    DEFAULT = tf;
+    tf = new Typeface();
+    tf->constructor(((Typeface*)DEFAULT_BOLD_INTERNAL.Get())->mNativeInstance);
+    DEFAULT_BOLD = tf;
+    tf = new Typeface();
+    tf->constructor(((Typeface*)SANS_SERIF_INTERNAL.Get())->mNativeInstance);
+    SANS_SERIF = tf;
+    tf = new Typeface();
+    tf->constructor(((Typeface*)SERIF_INTERNAL.Get())->mNativeInstance);
+    SERIF = tf;
+    tf = new Typeface();
+    tf->constructor(((Typeface*)MONOSPACE_INTERNAL.Get())->mNativeInstance);
+    MONOSPACE = tf;
 
     AutoPtr<ITypeface> italic, boldItalic;
     Typeface::Create(String(NULL), ITypeface::ITALIC, (ITypeface**)&italic);
@@ -47,6 +61,7 @@ Typeface::StaticInitializer::StaticInitializer()
 
 const String Typeface::TAG("Typeface");
 const String Typeface::FONTS_CONFIG("fonts.xml");
+const String Typeface::SANS_SERIF_FAMILY_NAME("sans-serif");
 AutoPtr<ITypeface> Typeface::DEFAULT;
 AutoPtr<ITypeface> Typeface::DEFAULT_BOLD;
 AutoPtr<ITypeface> Typeface::SANS_SERIF;
@@ -57,6 +72,11 @@ HashMap<Int32, AutoPtr<Typeface::TypefaceMap> > Typeface::sTypefaceCache(3);
 AutoPtr<ITypeface> Typeface::sDefaultTypeface;
 HashMap<String, AutoPtr<ITypeface> > Typeface::sSystemFontMap;
 AutoPtr<ArrayOf<IFontFamily*> > Typeface::sFallbackFonts;
+AutoPtr<ITypeface> Typeface::DEFAULT_INTERNAL;
+AutoPtr<ITypeface> Typeface::DEFAULT_BOLD_INTERNAL;
+AutoPtr<ITypeface> Typeface::SANS_SERIF_INTERNAL;
+AutoPtr<ITypeface> Typeface::SERIF_INTERNAL;
+AutoPtr<ITypeface> Typeface::MONOSPACE_INTERNAL;
 const Typeface::StaticInitializer Typeface::sInitializer;
 
 CAR_INTERFACE_IMPL(Typeface, Object, ITypeface);
@@ -440,25 +460,131 @@ AutoPtr<IFontFamily> Typeface::MakeFamilyFromParsed(
     return fontFamily;
 }
 
+void Typeface::AddFallbackFontsForFamilyName(
+    /* [in] */ FontListParser::Config* src,
+    /* [in] */ FontListParser::Config* dst,
+    /* [in] */ const String& familyName)
+{
+    Int32 N;
+    src->mFamilies->GetSize(&N);
+    for (Int32 i = 0; i < N; i++) {
+        AutoPtr<IInterface> obj;
+        src->mFamilies->Get(i, (IInterface**)&obj);
+        FontListParser::Family* srcFamily = (FontListParser::Family*)IObject::Probe(obj);
+        if (familyName.Equals(srcFamily->mName)) {
+            // set the name to null so that it will be added as a fallback
+            srcFamily->mName = NULL;
+            dst->mFamilies->Add((IObject*)srcFamily);
+            return;
+        }
+    }
+}
+
+void Typeface::AddMissingFontFamilies(
+    /* [in] */ FontListParser::Config* src,
+    /* [in] */ FontListParser::Config* dst)
+{
+    Int32 N;
+    dst->mFamilies->GetSize(&N);
+    // add missing families
+    Int32 NN;
+    src->mFamilies->GetSize(&NN);
+    for (Int32 j = 0; j < NN; j++) {
+        AutoPtr<IInterface> obj;
+        src->mFamilies->Get(j, (IInterface**)&obj);
+        FontListParser::Family* srcFamily = (FontListParser::Family*)IObject::Probe(obj);
+        Boolean addFamily = TRUE;
+        for (Int32 i = 0; i < N && addFamily; i++) {
+            AutoPtr<IInterface> dstObj;
+            dst->mFamilies->Get(i, (IInterface**)&dstObj);
+            FontListParser::Family* dstFamily = (FontListParser::Family*)IObject::Probe(dstObj);
+            String dstFamilyName = dstFamily->mName;
+            if (!dstFamilyName.IsNull() && dstFamilyName.Equals(srcFamily->mName)) {
+                addFamily = FALSE;
+                break;
+            }
+        }
+        if (addFamily) {
+            dst->mFamilies->Add((IObject*)srcFamily);
+        }
+    }
+}
+
+void Typeface::AddMissingFontAliases(
+    /* [in] */ FontListParser::Config* src,
+    /* [in] */ FontListParser::Config* dst)
+{
+    Int32 N;
+    dst->mAliases->GetSize(&N);
+    // add missing aliases
+    Int32 NN;
+    src->mAliases->GetSize(&NN);
+    for (Int32 j = 0; j < NN; j++) {
+        AutoPtr<IInterface> obj;
+        src->mAliases->Get(j, (IInterface**)&obj);
+        FontListParser::Alias* srcAlias = (FontListParser::Alias*)IObject::Probe(obj);
+        Boolean addAlias = TRUE;
+        for (Int32 i = 0; i < N && addAlias; i++) {
+            AutoPtr<IInterface> dstObj;
+            dst->mAliases->Get(i, (IInterface**)&dstObj);
+            FontListParser::Alias* dstAlias = (FontListParser::Alias*)IObject::Probe(dstObj);
+            String dstAliasName = dstAlias->mName;
+            if (!dstAliasName.IsNull() && dstAliasName.Equals(srcAlias->mName)) {
+                addAlias = FALSE;
+                break;
+            }
+        }
+        if (addAlias) {
+            dst->mAliases->Add((IObject*)srcAlias);
+        }
+    }
+}
+
 void Typeface::Init()
 {
     // Load font config and initialize Minikin state
     AutoPtr<IFile> systemFontConfigLocation = GetSystemFontConfigLocation();
-    AutoPtr<IFile> configFilename;
-    CFile::New(systemFontConfigLocation, FONTS_CONFIG, (IFile**)&configFilename);
+    AutoPtr<IFile> themeFontConfigLocation = GetThemeFontConfigLocation();
+
+    AutoPtr<IFile> systemConfigFile;
+    CFile::New(systemFontConfigLocation, FONTS_CONFIG, (IFile**)&systemConfigFile);
+    AutoPtr<IFile> themeConfigFile;
+    CFile::New(themeFontConfigLocation, FONTS_CONFIG, (IFile**)&themeConfigFile);
+    AutoPtr<IFile> configFile;
+    AutoPtr<IFile> fontDir;
+
+    Boolean isExisted;
+    if (themeConfigFile->Exists(&isExisted), isExisted) {
+        configFile = themeConfigFile;
+        fontDir = GetThemeFontDirLocation();
+    }
+    else {
+        configFile = systemConfigFile;
+        fontDir = GetSystemFontDirLocation();
+    }
+
     // try {
     ECode ec = NOERROR;
     Int32 N = 0, i = 0;
     AutoPtr<IList> familyList;
-    CArrayList::New((IList**)&familyList);
     AutoPtr<ITypeface> tmp;
-    HashMap<String, AutoPtr<ITypeface> >::Iterator sfIter;
     AutoPtr<FontListParser::Config> fontConfig;
-    AutoPtr<IFileInputStream> fontsIn;
-    ec = CFileInputStream::New(configFilename, (IFileInputStream**)&fontsIn);
+    AutoPtr<FontListParser::Config> systemFontConfig;
+    ec = FontListParser::Parse(configFile, fontDir, (FontListParser::Config**)&fontConfig);
     FAIL_GOTO(ec, Error);
-    ec = FontListParser::Parse(IInputStream::Probe(fontsIn), (FontListParser::Config**)&fontConfig);
-    FAIL_GOTO(ec, Error);
+
+    // If the fonts are coming from a theme, we will need to make sure that we include
+    // any font families from the system fonts that the theme did not include.
+    // NOTE: All the system font families without names ALWAYS get added.
+    if (configFile == themeConfigFile) {
+        ec = FontListParser::Parse(systemConfigFile, GetSystemFontDirLocation(), (FontListParser::Config**)&systemFontConfig);
+        FAIL_GOTO(ec, Error);
+        AddMissingFontFamilies(systemFontConfig, fontConfig);
+        AddMissingFontAliases(systemFontConfig, fontConfig);
+        AddFallbackFontsForFamilyName(systemFontConfig, fontConfig, SANS_SERIF_FAMILY_NAME);
+    }
+
+    CArrayList::New((IList**)&familyList);
 
     // Note that the default typeface is always present in the fallback list;
     // this is an enhancement from pre-Minikin behavior.
@@ -471,6 +597,7 @@ void Typeface::Init()
             familyList->Add(MakeFamilyFromParsed(f));
         }
     }
+
     familyList->GetSize(&N);
     sFallbackFonts = ArrayOf<IFontFamily*>::Alloc(N);
     for (i = 0; i < N; i++) {
@@ -509,7 +636,7 @@ void Typeface::Init()
         AutoPtr<IInterface> obj;
         fontConfig->mAliases->Get(i, (IInterface**)&obj);
         FontListParser::Alias* alias = (FontListParser::Alias*)IObject::Probe(obj);
-        sfIter = sSystemFontMap.Find(alias->mToName);
+        HashMap<String, AutoPtr<ITypeface> >::Iterator sfIter = sSystemFontMap.Find(alias->mToName);
         AutoPtr<ITypeface> base;
         if (sfIter != sSystemFontMap.End()) {
             base = sfIter->mSecond;
@@ -525,26 +652,77 @@ void Typeface::Init()
 
 Error:
     String filename;
-    configFilename->GetName(&filename);
+    configFile->GetName(&filename);
     if ((ECode)E_RUNTIME_EXCEPTION == ec) {
-        Logger::W(TAG, String("Didn't create default family (most likely, non-Minikin build)"));
+        Logger::W(TAG, "Didn't create default family (most likely, non-Minikin build)");
         // TODO: normal in non-Minikin case, remove or make error when Minikin-only
     }
     else if ((ECode)E_FILE_NOT_FOUND_EXCEPTION == ec) {
-        Logger::E(TAG, String("Error opening: %s"), filename.string());
+        Logger::E(TAG, "Error opening: %s", filename.string());
     }
     else if ((ECode)E_IO_EXCEPTION == ec) {
-        Logger::E(TAG, String("Error reading: %s"), filename.string());
+        Logger::E(TAG, "Error reading: %s", filename.string());
     }
     else if ((ECode)E_XML_PULL_PARSER_EXCEPTION == ec) {
-        Logger::E(TAG, String("XML parse exception for: %s"), filename.string());
+        Logger::E(TAG, "XML parse exception for: %s", filename.string());
     }
+}
+
+void Typeface::RecreateDefaults()
+{
+    sTypefaceCache.Clear();
+    sSystemFontMap.Clear();
+    Init();
+
+    DEFAULT_INTERNAL = NULL;
+    DEFAULT_BOLD_INTERNAL = NULL;
+    SANS_SERIF_INTERNAL = NULL;
+    SERIF_INTERNAL = NULL;
+    MONOSPACE_INTERNAL = NULL;
+    Typeface::Create(String(NULL), 0, (ITypeface**)&DEFAULT_INTERNAL);
+    Typeface::Create(String(NULL), ITypeface::BOLD, (ITypeface**)&Typeface::DEFAULT_BOLD_INTERNAL);
+    Typeface::Create(String("sans-serif"), 0, (ITypeface**)&Typeface::SANS_SERIF_INTERNAL);
+    Typeface::Create(String("serif"), 0, (ITypeface**)&Typeface::SERIF_INTERNAL);
+    Typeface::Create(String("monospace"), 0, (ITypeface**)&Typeface::MONOSPACE_INTERNAL);
+
+    ((Typeface*)DEFAULT.Get())->mNativeInstance = ((Typeface*)DEFAULT_INTERNAL.Get())->mNativeInstance;
+    ((Typeface*)DEFAULT_BOLD.Get())->mNativeInstance = ((Typeface*)DEFAULT_BOLD_INTERNAL.Get())->mNativeInstance;
+    ((Typeface*)SANS_SERIF.Get())->mNativeInstance = ((Typeface*)SANS_SERIF_INTERNAL.Get())->mNativeInstance;
+    ((Typeface*)SERIF.Get())->mNativeInstance = ((Typeface*)SERIF_INTERNAL.Get())->mNativeInstance;
+    ((Typeface*)MONOSPACE.Get())->mNativeInstance = ((Typeface*)MONOSPACE_INTERNAL.Get())->mNativeInstance;
+
+    AutoPtr<ITypeface> italic, boldItalic;
+    Typeface::Create(String(NULL), ITypeface::ITALIC, (ITypeface**)&italic);
+    Typeface::Create(String(NULL), ITypeface::BOLD_ITALIC, (ITypeface**)&boldItalic);
+    sDefaults->Set(2, italic);
+    sDefaults->Set(3, boldItalic);
 }
 
 AutoPtr<IFile> Typeface::GetSystemFontConfigLocation()
 {
     AutoPtr<IFile> file;
     CFile::New(String("/system/etc/"), (IFile**)&file);
+    return file;
+}
+
+AutoPtr<IFile> Typeface::GetSystemFontDirLocation()
+{
+    AutoPtr<IFile> file;
+    CFile::New(String("/system/fonts/"), (IFile**)&file);
+    return file;
+}
+
+AutoPtr<IFile> Typeface::GetThemeFontConfigLocation()
+{
+    AutoPtr<IFile> file;
+    CFile::New(String("/data/system/theme/fonts/"), (IFile**)&file);
+    return file;
+}
+
+AutoPtr<IFile> Typeface::GetThemeFontDirLocation()
+{
+    AutoPtr<IFile> file;
+    CFile::New(String("/data/system/theme/fonts/"), (IFile**)&file);
     return file;
 }
 

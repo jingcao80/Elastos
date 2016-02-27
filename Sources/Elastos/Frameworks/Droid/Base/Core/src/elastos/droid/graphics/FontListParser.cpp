@@ -3,13 +3,18 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
+#include "elastos/droid/graphics/FontListConverter.h"
 #include "elastos/droid/graphics/FontListParser.h"
+#include "elastos/droid/graphics/LegacyFontListParser.h"
 #include "elastos/droid/utility/Xml.h"
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Utility::Xml;
 using Elastos::Core::StringUtils;
 using Elastos::IO::IFileInputStream;
+using Elastos::IO::CFileInputStream;
+using Elastos::IO::IFileHelper;
+using Elastos::IO::CFileHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -28,12 +33,12 @@ ECode FontListParser::Parse(
     if (result) {
         String path;
         fontDir->GetAbsolutePath(&path);
-        return ParseLegacyFormat(in, path, config);
+        return ParseLegacyFormat(IInputStream::Probe(in), path, config);
     }
     else {
         String path;
         fontDir->GetAbsolutePath(&path);
-        return ParseNormalFormat(in, path, config);
+        return ParseNormalFormat(IInputStream::Probe(in), path, config);
     }
 }
 
@@ -47,18 +52,18 @@ ECode FontListParser::IsLegacyFormat(
     // try {
     AutoPtr<IXmlPullParser> parser;
     Xml::NewPullParser((IXmlPullParser**)&parser);
-    parser->SetInput(in, String(NULL));
+    parser->SetInput(IInputStream::Probe(in), String(NULL));
+    String version;
     Int32 tag;
     ECode ec = parser->NextTag(&tag);
     FAIL_GOTO(ec, EXIT);
     parser->Require(IXmlPullParser::START_TAG, String(NULL), String("familyset"));
-    String version;
-    ec = parser->GetAttributeValue(String(NULL), String("version"));
+    ec = parser->GetAttributeValue(String(NULL), String("version"), &version);
     FAIL_GOTO(ec, EXIT);
     isLegacy = version.IsNull();
     // } finally {
 EXIT:
-    in->Close();
+    IInputStream::Probe(in)->Close();
     // }
     *result = isLegacy;
     return ec;
@@ -70,12 +75,45 @@ ECode FontListParser::ParseLegacyFormat(
     /* [out] */ Config** config)
 {
     VALIDATE_NOT_NULL(config);
+    *config = NULL;
     // try {
     AutoPtr<IList> legacyFamilies;
+    ECode ec = LegacyFontListParser::Parse(in, (IList**)&legacyFamilies);
+    if (FAILED(ec)) {
+        in->Close();
+        return ec;
+    }
+    AutoPtr<FontListConverter> converter = new FontListConverter(legacyFamilies, dirName);
+    AutoPtr<Config> cfg = converter->Convert();
+    *config = cfg;
+    REFCOUNT_ADD(*config);
+    in->Close();
+    return NOERROR;
+    // } finally {
+    //     in.close();
+    // }
+}
 
-    List<LegacyFontListParser.Family> legacyFamilies = LegacyFontListParser.parse(in);
-    FontListConverter converter = new FontListConverter(legacyFamilies, dirName);
-    return converter.convert();
+ECode FontListParser::ParseNormalFormat(
+    /* [in] */ IInputStream* in,
+    /* [in] */ const String& dirName,
+    /* [out] */ Config** config)
+{
+    VALIDATE_NOT_NULL(config);
+    *config = NULL;
+    // try {
+    AutoPtr<IXmlPullParser> parser;
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    parser->SetInput(in, String(NULL));
+    Int32 tag;
+    ECode ec = parser->NextTag(&tag);
+    if (FAILED(ec)) {
+        in->Close();
+        return ec;
+    }
+    ec = ReadFamilies(parser, dirName, config);
+    in->Close();
+    return ec;
     // } finally {
     //     in.close();
     // }
@@ -83,7 +121,8 @@ ECode FontListParser::ParseLegacyFormat(
 
 ECode FontListParser::ReadFamilies(
     /* [in] */ IXmlPullParser* parser,
-    /* [out] */ Config** result) /*throws XmlPullParserException, IOException*/
+    /* [in] */ const String& dirPath,
+    /* [out] */ Config** result)
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
@@ -97,7 +136,7 @@ ECode FontListParser::ReadFamilies(
         parser->GetName(&name);
         if (name.Equals(String("family"))) {
             AutoPtr<Family> f;
-            FAIL_RETURN(ReadFamily(parser, (Family**)&f));
+            FAIL_RETURN(ReadFamily(parser, dirPath, (Family**)&f));
             config->mFamilies->Add((IObject*)f);
         }
         else if (name.Equals(String("alias"))) {
@@ -116,7 +155,8 @@ ECode FontListParser::ReadFamilies(
 
 ECode FontListParser::ReadFamily(
     /* [in] */ IXmlPullParser* parser,
-    /* [out] */ Family** result) /*throws XmlPullParserException, IOException*/
+    /* [in] */ const String& dirPath,
+    /* [out] */ Family** result)
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;
@@ -128,6 +168,11 @@ ECode FontListParser::ReadFamily(
     FAIL_RETURN(parser->GetAttributeValue(String(NULL), String("variant"), &variant));
     AutoPtr<IList> fonts;
     CArrayList::New((IList**)&fonts);
+    AutoPtr<IFileHelper> helper;
+    CFileHelper::AcquireSingleton((IFileHelper**)&helper);
+    Char32 separatorChar;
+    helper->GetSeparatorChar(&separatorChar);
+    String prefix = dirPath + separatorChar;
     Int32 next = 0;
     while ((parser->Next(&next), next) != IXmlPullParser::END_TAG) {
         Int32 type = 0;
@@ -144,7 +189,7 @@ ECode FontListParser::ReadFamily(
             Boolean isItalic = String("italic").Equals(value);
             String filename;
             FAIL_RETURN(parser->NextText(&filename));
-            String fullFilename = String("/system/fonts/") + filename;
+            String fullFilename = prefix + filename;
             AutoPtr<Font> font = new Font(fullFilename, weight, isItalic);
             fonts->Add((IObject*)font);
         }

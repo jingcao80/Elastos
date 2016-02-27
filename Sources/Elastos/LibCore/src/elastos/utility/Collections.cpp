@@ -3589,7 +3589,7 @@ ECode Collections::_UnmodifiableMap::UnmodifiableEntrySet::Iterator::GetNext(
     /* [out] */ IMapEntry** object)
 {
     AutoPtr<IMapEntry> o;
-    mIterator->GetNext((IMapEntry**)&o);
+    mIterator->GetNext((IInterface**)&o);
     AutoPtr<IMapEntry> res = new UnmodifiableMapEntry(o);
     *object = res;
     REFCOUNT_ADD(*object)

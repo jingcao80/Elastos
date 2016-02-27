@@ -111,6 +111,11 @@ public:
         /* [in] */ const String& dirName,
         /* [out] */ Config** config);
 
+    static CARAPI ParseNormalFormat(
+        /* [in] */ IInputStream* in,
+        /* [in] */ const String& dirName,
+        /* [out] */ Config** config);
+
 private:
     static CARAPI IsLegacyFormat(
         /* [in] */ IFile* configFilename,
@@ -118,10 +123,12 @@ private:
 
     static CARAPI ReadFamilies(
         /* [in] */ IXmlPullParser* parser,
+        /* [in] */ const String& dirPath,
         /* [out] */ Config** result);
 
     static CARAPI ReadFamily(
         /* [in] */ IXmlPullParser* parser,
+        /* [in] */ const String& dirPath,
         /* [out] */ Family** result);
 
     static CARAPI ReadAlias(

@@ -155,6 +155,13 @@ public:
         /* [in]*/ ArrayOf<IFontFamily*>* families,
         /* [out]*/ ITypeface** typeface);
 
+    /**
+     * Clears caches in java and skia.
+     * Skia will then reparse font config
+     * @hide
+     */
+    static CARAPI_(void) RecreateDefaults();
+
 protected:
     Typeface();
 
@@ -187,6 +194,35 @@ private:
     static CARAPI_(AutoPtr<IFontFamily>) MakeFamilyFromParsed(
         /* [in] */ FontListParser::Family* family);
 
+    /**
+     * Adds the family from src with the name familyName as a fallback font in dst
+     * @param src Source font config
+     * @param dst Destination font config
+     * @param familyName Name of family to add as a fallback
+     */
+    static CARAPI_(void) AddFallbackFontsForFamilyName(
+        /* [in] */ FontListParser::Config* src,
+        /* [in] */ FontListParser::Config* dst,
+        /* [in] */ const String& familyName);
+
+    /**
+     * Adds any font families in src that do not exist in dst
+     * @param src Source font config
+     * @param dst Destination font config
+     */
+    static CARAPI_(void) AddMissingFontFamilies(
+        /* [in] */ FontListParser::Config* src,
+        /* [in] */ FontListParser::Config* dst);
+
+    /**
+     * Adds any aliases in src that do not exist in dst
+     * @param src Source font config
+     * @param dst Destination font config
+     */
+    static CARAPI_(void) AddMissingFontAliases(
+        /* [in] */ FontListParser::Config* src,
+        /* [in] */ FontListParser::Config* dst);
+
     /*
      * (non-Javadoc)
      *
@@ -195,6 +231,12 @@ private:
     static CARAPI_(void) Init();
 
     static CARAPI_(AutoPtr<IFile>) GetSystemFontConfigLocation();
+
+    static CARAPI_(AutoPtr<IFile>) GetSystemFontDirLocation();
+
+    static CARAPI_(AutoPtr<IFile>) GetThemeFontConfigLocation();
+
+    static CARAPI_(AutoPtr<IFile>) GetThemeFontDirLocation();
 
 public:
     static const String TAG;
@@ -225,11 +267,20 @@ public:
 
     static const String FONTS_CONFIG;
 
+    static const String SANS_SERIF_FAMILY_NAME;
+
     /* package */
     Int64 mNativeInstance;
 
 private:
     Int32 mStyle;
+
+    // Typefaces that we can garbage collect when changing fonts, and so we don't break public APIs
+    static AutoPtr<ITypeface> DEFAULT_INTERNAL;
+    static AutoPtr<ITypeface> DEFAULT_BOLD_INTERNAL;
+    static AutoPtr<ITypeface> SANS_SERIF_INTERNAL;
+    static AutoPtr<ITypeface> SERIF_INTERNAL;
+    static AutoPtr<ITypeface> MONOSPACE_INTERNAL;
 
     static const StaticInitializer sInitializer;
 };
