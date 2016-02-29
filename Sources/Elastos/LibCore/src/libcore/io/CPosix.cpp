@@ -638,7 +638,7 @@ ECode CPosix::Environ(
     *env = NULL;
 
     Int32 size = 0;
-    while(*environ) size++;
+    while (environ[size]) size++;
     AutoPtr<ArrayOf<String> > envTmp = ArrayOf<String>::Alloc(size);
     for (Int32 i = 0; i < size; i++) {
         String str = String(environ[i]);
