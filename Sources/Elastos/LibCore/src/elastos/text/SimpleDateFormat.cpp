@@ -1433,30 +1433,38 @@ ECode SimpleDateFormat::Equals(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
     if (this->Probe(EIID_ISimpleDateFormat) == ISimpleDateFormat::Probe(object)) {
         *result = TRUE;
         return NOERROR;
     }
     if (object->Probe(EIID_ISimpleDateFormat) == NULL) {
-        *result = FALSE;
         return NOERROR;
     }
 
     AutoPtr<ISimpleDateFormat> simple = ISimpleDateFormat::Probe(object);
     Boolean res1 = FALSE, res2 = FALSE, res3 = FALSE;
     DateFormat::Equals(object, &res1);
+    if (!res1) {
+        return NOERROR;
+    }
 
     String p;
     simple->ToPattern(&p);
     res2 = mPattern.Equals(p);
+    if (!res2) {
+        return NOERROR;
+    }
 
     AutoPtr<IDateFormatSymbols> dfs;
     simple->GetDateFormatSymbols((IDateFormatSymbols**)&dfs);
-
     IObject::Probe(mFormatData)->Equals(dfs, &res3);
-    *result = res1 && res2 && res3;
+    if (!res3) {
+        return NOERROR;
+    }
 
+    *result = TRUE;
     return NOERROR;
 }
 

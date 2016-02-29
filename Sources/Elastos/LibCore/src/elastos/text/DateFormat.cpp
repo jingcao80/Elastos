@@ -35,9 +35,9 @@ namespace Text {
 
 static AutoPtr<IDateFormatField> InitField(const String& name, Int32 value)
 {
-    AutoPtr<CDateFormatField> cf;
-    CDateFormatField::NewByFriend(name, value, (CDateFormatField**)&cf);
-    return (IDateFormatField*)cf.Get();
+    AutoPtr<IDateFormatField> cf;
+    CDateFormatField::New(name, value, (IDateFormatField**)&cf);
+    return cf;
 }
 
 const AutoPtr<IDateFormatField> DateFormat::Field::ERA
@@ -110,6 +110,8 @@ ECode DateFormat::Field::OfCalendarField(
     /* [out] */ IDateFormatField** field)
 {
     VALIDATE_NOT_NULL(field);
+    *field = NULL;
+
     if (calendarField < 0 || calendarField >= ICalendar::FIELD_COUNT) {
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
@@ -168,7 +170,7 @@ ECode DateFormat::Equals(
     AutoPtr<ITimeZone> ltz, rtz;
     mCalendar->GetTimeZone((ITimeZone**)&ltz);
     other->mCalendar->GetTimeZone((ITimeZone**)&rtz);
-    value = Object::Equals(ltz, other->mNumberFormat);
+    value = Object::Equals(ltz, rtz);
     if (!value) return NOERROR;
 
     Int32 li, ri;
@@ -185,7 +187,8 @@ ECode DateFormat::Equals(
     Boolean lb, rb;
     mCalendar->IsLenient(&lb);
     other->mCalendar->IsLenient(&rb);
-    return lb == rb;
+    *result = (lb == rb);
+    return NOERROR;
 }
 
 ECode DateFormat::Format(

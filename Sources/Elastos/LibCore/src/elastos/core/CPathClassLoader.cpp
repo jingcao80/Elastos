@@ -12,6 +12,7 @@ ECode CPathClassLoader::constructor(
     /* [in] */ const String& path)
 {
     if (path.IsNullOrEmpty()) {
+        ALOGE("CPathClassLoader::constructor: module path is null or empty");
         return E_INVALID_ARGUMENT;
     }
 
@@ -27,30 +28,28 @@ ECode CPathClassLoader::LoadClass(
     *klass = NULL;
 
     if (className.IsNullOrEmpty()) {
+        ALOGE("CPathClassLoader::LoadClass: className is null or empty");
         return E_INVALID_ARGUMENT;
     }
 
-    String sname("C");
-    sname += className.Substring(className.LastIndexOf('.') + 1);
-    // ALOGD("CPathClassLoader::LoadClass: %s, className: %s mPath : %s\n",
-    //     sname.string(), className.string(), mPath.string());
-    ECode ec = NOERROR;
+    ALOGI("CPathClassLoader::LoadClass: GetClassInfo %s in %s",
+        className.string(), mPath.string());
+
     AutoPtr<IModuleInfo> moduleInfo;
-    if (sname.Equals("CFragmentOne")) {
-        ec = CReflector::AcquireModuleInfo(String("FragmentDemo.eco"), (IModuleInfo**)&moduleInfo);
-        if (FAILED(ec)) {
-            return E_CLASS_NOT_FOUND_EXCEPTION;
-        }
-    }
-    else {
-        ec = CReflector::AcquireModuleInfo(mPath, (IModuleInfo**)&moduleInfo);
-        if (FAILED(ec)) {
-            return E_CLASS_NOT_FOUND_EXCEPTION;
-        }
+    ECode ec = CReflector::AcquireModuleInfo(mPath, (IModuleInfo**)&moduleInfo);
+    if (FAILED(ec)) {
+        ALOGE("CPathClassLoader::LoadClass %s, failed to AcquireModuleInfo %s",
+            className.string(), mPath.string());
+        return E_CLASS_NOT_FOUND_EXCEPTION;
     }
 
-    ec = moduleInfo->GetClassInfo(sname, klass);
-    return FAILED(ec) ? E_CLASS_NOT_FOUND_EXCEPTION : NOERROR;
+    ec = moduleInfo->GetClassInfo(className, klass);
+    if (FAILED(ec)) {
+        ALOGE("CPathClassLoader::LoadClass: failed to GetClassInfo %s in %s",
+            className.string(), mPath.string());
+        return E_CLASS_NOT_FOUND_EXCEPTION;
+    }
+    return NOERROR;
 }
 
 } // namespace Core

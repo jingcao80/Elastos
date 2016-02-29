@@ -217,7 +217,8 @@ ECode DecimalFormat::Equals(
     GetDecimalFormatSymbols((IDecimalFormatSymbols**)&dfs1);
     other->GetDecimalFormatSymbols((IDecimalFormatSymbols**)&dfs2);
 
-    return Object::Equals(dfs1, dfs2);
+    *result = Object::Equals(dfs1, dfs2);
+    return NOERROR;
 }
 
 ECode DecimalFormat::FormatToCharacterIterator(

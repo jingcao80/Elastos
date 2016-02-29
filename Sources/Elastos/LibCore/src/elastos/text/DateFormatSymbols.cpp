@@ -211,15 +211,12 @@ Boolean DateFormatSymbols::TimeZoneStringsEqual(
     DateFormatSymbols* r = (DateFormatSymbols*)rhs;
     // Quick check that may keep us from having to load the zone strings.
     // Note that different locales may have the same strings, so the opposite check isn't valid.
-    AutoPtr<ArrayOf<IArrayOf*> > lzs, rzs;
-    lhs->GetZoneStrings((ArrayOf<IArrayOf*>**)&lzs);
-    rhs->GetZoneStrings((ArrayOf<IArrayOf*>**)&rzs);
-
-    if (lzs == NULL && rzs == NULL && Object::Equals(l->mLocale, r->mLocale)) {
+    if (l->mZoneStrings == NULL && r->mZoneStrings == NULL && Object::Equals(l->mLocale, r->mLocale)) {
         return TRUE;
     }
 
     // Make sure zone strings are loaded, then check.
+    AutoPtr<ArrayOf<IArrayOf*> > lzs, rzs;
     lzs = l->InternalZoneStrings();
     rzs = r->InternalZoneStrings();
     return Arrays::DeepEquals(lzs, rzs);

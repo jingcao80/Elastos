@@ -153,7 +153,7 @@ ECode DecimalFormatSymbols::Equals(
         return NOERROR;
     }
 
-    return Object::Equals(mCurrency, df->mCurrency) &&
+    *res = Object::Equals(mCurrency, df->mCurrency) &&
             mCurrencySymbol.Equals(df->mCurrencySymbol) &&
             mDecimalSeparator == df->mDecimalSeparator &&
             mDigit == df->mDigit &&
@@ -168,6 +168,7 @@ ECode DecimalFormatSymbols::Equals(
             mPerMill == df->mPerMill &&
             mPercent == df->mPercent &&
             mZeroDigit == df->mZeroDigit;
+    return NOERROR;
 }
 
 ECode DecimalFormatSymbols::ToString(
