@@ -1475,9 +1475,9 @@ void NativeDetachCurrentThread()
      * Thread.join() is implemented as an Object.wait() on the VMThread
      * object.  Signal anyone who is waiting.
      */
-    // dvmLockObject(self, vmThread);
-    // dvmObjectNotifyAll(self, vmThread);
-    // dvmUnlockObject(self, vmThread);
+    thread->Lock();
+    thread->NotifyAll();
+    thread->Unlock();
 
     // dvmReleaseTrackedAlloc(vmThread, self);
     // vmThread = NULL;

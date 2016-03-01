@@ -346,11 +346,12 @@ ECode Thread::GetState(
     //         return VMThread.STATE_MAP[state];
     //     }
     // }
-
-    Int32 ts = NativeGetState();
-    if (ts != -1) {
-        *state = STATE_MAP[ts];
-        return NOERROR;
+    if (mNativeThread) {
+        Int32 ts = NativeGetState();
+        if (ts != -1) {
+            *state = STATE_MAP[ts];
+            return NOERROR;
+        }
     }
 
     *state = mHasBeenStarted ? ThreadState_TERMINATED : ThreadState_NEW;
@@ -415,12 +416,10 @@ ECode Thread::Interrupt()
     if (mInterruptAction != NULL) {
         mInterruptAction->Run();
     }
-    // VMThread vmt = this.vmThread;
-    // if (vmt != null) {
-    //     vmt.interrupt();
-    // }
-    NativeInterrupt();
 
+    if (mNativeThread != NULL) {
+        NativeInterrupt();
+    }
     return NOERROR;
 }
 
@@ -448,8 +447,7 @@ ECode Thread::IsAlive(
     /* [out] */ Boolean* isAlive)
 {
     VALIDATE_NOT_NULL(isAlive);
-    *isAlive = TRUE;
-//    return (vmThread != null);
+    *isAlive = (mNativeThread != NULL);
     return NOERROR;
 }
 
@@ -465,11 +463,10 @@ ECode Thread::IsInterrupted(
     /* [out] */ Boolean* isInterrupted)
 {
     VALIDATE_NOT_NULL(isInterrupted);
-    // VMThread vmt = this.vmThread;
-    // if (vmt != null) {
-    //     return vmt.isInterrupted();
-    // }
-    *isInterrupted = NativeIsInterrupted();
+    *isInterrupted = FALSE;
+    if (mNativeThread != NULL) {
+        *isInterrupted = NativeIsInterrupted();
+    }
     return NOERROR;
 }
 
@@ -479,10 +476,12 @@ Boolean Thread::NativeIsInterrupted()
 
     NativeLockThreadList(NULL);
     NativeThread* thread = NativeGetThreadFromThreadObject(reinterpret_cast<Int32>(this));
-    if (thread != NULL)
+    if (thread != NULL) {
         interrupted = thread->mInterrupted;
-    else
+    }
+    else {
         interrupted = FALSE;
+    }
     NativeUnlockThreadList();
 
     return interrupted;
@@ -490,18 +489,15 @@ Boolean Thread::NativeIsInterrupted()
 
 ECode Thread::Join()
 {
-    // VMThread t = vmThread;
-    // if (t == null) {
-    //     return;
-    // }
+    if (mNativeThread == NULL) {
+        return NOERROR;
+    }
 
     AutoLock lock(this);
     Boolean isAlive;
-    IsAlive(&isAlive);
-    while (isAlive) {
+    while (IsAlive(&isAlive), isAlive) {
         Wait(0, 0);
     }
-
     return NOERROR;
 }
 
@@ -527,10 +523,9 @@ ECode Thread::Join(
         return Join();
     }
 
-    // VMThread t = vmThread;
-    // if (t == null) {
-    //     return;
-    // }
+    if (mNativeThread == NULL) {
+        return NOERROR;
+    }
 
     AutoLock lock(this);
     Boolean isAlive;
@@ -550,7 +545,7 @@ ECode Thread::Join(
     Int64 start, nanosElapsed, nanosRemaining;
     system->GetNanoTime(&start);
     while (TRUE) {
-        //t.wait(millis, nanos);//todo: must call
+        Wait(millis, nanos);
         IsAlive(&isAlive);
         if (!isAlive) {
             break;
@@ -632,13 +627,10 @@ ECode Thread::SetName(
     FAIL_RETURN(CheckAccess());
 
     mName = threadName;
-    //VMThread vmt = this.vmThread;
-    //if (vmt != null) {
-    //    /* notify the VM that the thread name has changed */
-    //    vmt.nameChanged(threadName);
-    //}
-    NativeNameChanged(threadName);
-
+    if (mNativeThread != NULL) {
+        /* notify the VM that the thread name has changed */
+        NativeNameChanged(threadName);
+    }
     return NOERROR;
 }
 
@@ -680,12 +672,9 @@ ECode Thread::SetPriority(
 
     mPriority = priority;
 
-    // VMThread vmt = this.vmThread;
-    // if (vmt != null) {
-    //     vmt.setPriority(priority);
-    // }
-    NativeSetPriority(priority);
-
+    if (mNativeThread != NULL) {
+        NativeSetPriority(priority);
+    }
     return NOERROR;
 }
 
@@ -753,12 +742,9 @@ ECode Thread::Stop()
     //     throw new NullPointerException();
     // }
 
-    // VMThread vmt = this.vmThread;
-    // if (vmt != null) {
-    //     vmt.stop(throwable);
-    // }
-    NativeStop();
-
+    if (mNativeThread != NULL) {
+        NativeStop();
+    }
     return NOERROR;
 }
 
@@ -775,12 +761,9 @@ ECode Thread::Suspend()
 {
     FAIL_RETURN(CheckAccess());
 
-    // VMThread vmt = this.vmThread;
-    // if (vmt != null) {
-    //     vmt.suspend();
-    // }
-    NativeSuspend();
-
+    if (mNativeThread != NULL) {
+        NativeSuspend();
+    }
     return NOERROR;
 }
 
@@ -797,7 +780,6 @@ void Thread::Yield()
 ECode Thread::Unpark()
 {
     NativeThread* nt = mNativeThread;
-
     if (nt == NULL) {
         /*
          * vmThread is null before the thread is start()ed. In
@@ -841,7 +823,6 @@ ECode Thread::ParkFor(
     /* [in] */ Int64 nanos)
 {
     NativeThread* nt = mNativeThread;
-
     if (nt == NULL) {
         // Running threads should always have an associated vmThread.
         // throw new AssertionError();
@@ -902,7 +883,6 @@ ECode Thread::ParkUntil(
     /* [in] */ Int64 time)
 {
     NativeThread* nt = mNativeThread;
-
     if (nt == NULL) {
         // Running threads should always have an associated vmThread.
         // throw new AssertionError();
