@@ -33,6 +33,35 @@ ECode StringToIntegral::Decode(
 
 ECode StringToIntegral::Parse(
     /* [in] */ const String& string,
+    /* [out] */ Byte* result)
+{
+    return Parse(string, 10, result);
+}
+
+ECode StringToIntegral::Parse(
+    /* [in] */ const String& string,
+    /* [in] */ Int32 radix,
+    /* [out] */ Byte* result)
+{
+    if (result == NULL) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Int32 intValue;
+    ECode ec = Parse(string, radix, &intValue);
+    Byte shortValue = (Byte) intValue;
+    if (shortValue == intValue) {
+        *result = shortValue;
+        return ec;
+    }
+
+    *result = 0;
+    ALOGE("StringToIntegral::Parse() Value out of range for short: \"%s\"", string.string());
+    return E_NUMBER_FORMAT_EXCEPTION;
+}
+
+ECode StringToIntegral::Parse(
+    /* [in] */ const String& string,
     /* [out] */ Int16* result)
 {
     return Parse(string, 10, result);

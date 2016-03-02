@@ -979,7 +979,7 @@ ECode CScanner::NextByte(
     FAIL_RETURN(Next(integerPattern, &intString));
     intString = RemoveLocaleInfo(intString, INT);
     // try {
-    Int32 byteValue = 0;
+    Byte byteValue = 0;
     ECode ec = StringUtils::Parse(intString, radix, &byteValue);
     // } catch (NumberFormatException e) {
     if (ec == (ECode)E_NUMBER_FORMAT_EXCEPTION) {

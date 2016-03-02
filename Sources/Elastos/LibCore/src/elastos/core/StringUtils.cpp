@@ -31,6 +31,23 @@ using Elastos::Utility::Regex::IMatcher;
 namespace Elastos {
 namespace Core {
 
+Byte StringUtils::ParseByte(
+    /* [in] */ const String& input,
+    /* [in] */ Int32 radix,
+    /* [in] */ Byte defValue)
+{
+    Byte value;
+    ECode ec = StringToIntegral::Parse(input, radix, &value);
+    if (FAILED(ec)) {
+#ifdef DEBUG
+        prInt32f("Warnning: StringUtils::ParseByte NumberFormatException, input [%s]\n", input.string());
+#endif
+        return defValue;
+    }
+
+    return value;
+}
+
 Int16 StringUtils::ParseInt16(
     /* [in] */ const String& input,
     /* [in] */ Int32 radix,
@@ -130,6 +147,13 @@ AutoPtr<ICharSequence> StringUtils::ParseCharSequence(
 
 ECode StringUtils::Parse(
     /* [in] */ const String& input,
+    /* [out] */ Byte* result)
+{
+    return StringToIntegral::Parse(input, 10, result);
+}
+
+ECode StringUtils::Parse(
+    /* [in] */ const String& input,
     /* [out] */ Int16* result)
 {
     return StringToIntegral::Parse(input, 10, result);
@@ -147,6 +171,14 @@ ECode StringUtils::Parse(
     /* [out] */ Int64* result)
 {
     return StringToIntegral::Parse(input, 10, result);
+}
+
+ECode StringUtils::Parse(
+    /* [in] */ const String& input,
+    /* [in] */ Int32 radix,
+    /* [out] */ Byte* result)
+{
+    return StringToIntegral::Parse(input, radix, result);
 }
 
 ECode StringUtils::Parse(
