@@ -522,7 +522,8 @@ ECode CScanner::HasNextBigInteger(
 {
     VALIDATE_NOT_NULL(value)
 
-    AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
+    AutoPtr<IPattern> integerPattern;
+    FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     Boolean isBigIntegerValue = FALSE;
     if (HasNext(integerPattern, &isBigIntegerValue), isBigIntegerValue) {
         String intString;
@@ -562,7 +563,8 @@ ECode CScanner::HasNextByte(
     /* [in] */ Int32 radix,
     /* [out] */ Boolean* value)
 {
-    AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
+    AutoPtr<IPattern> integerPattern;
+    FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     Boolean isByteValue = FALSE;
     if (HasNext(integerPattern, &isByteValue), isByteValue) {
         String intString;
@@ -661,7 +663,8 @@ ECode CScanner::HasNextInt32(
     VALIDATE_NOT_NULL(value)
     *value = FALSE;
 
-    AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
+    AutoPtr<IPattern> integerPattern;
+    FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     Boolean isIntValue = FALSE;
     if (HasNext(integerPattern, &isIntValue), isIntValue) {
         String intString;
@@ -713,7 +716,8 @@ ECode CScanner::HasNextInt64(
     VALIDATE_NOT_NULL(value)
     *value = FALSE;
 
-    AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
+    AutoPtr<IPattern> integerPattern;
+    FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     Boolean isLongValue = FALSE;
     if (HasNext(integerPattern, &isLongValue), isLongValue) {
         String intString;
@@ -751,7 +755,8 @@ ECode CScanner::HasNextInt16(
     VALIDATE_NOT_NULL(value)
     *value = FALSE;
 
-    AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
+    AutoPtr<IPattern> integerPattern;
+    FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     Boolean isShortValue = FALSE;
     if (HasNext(integerPattern, &isShortValue), isShortValue) {
         String intString;
@@ -915,7 +920,8 @@ ECode CScanner::NextBigInteger(
         REFCOUNT_ADD(*outbig);
         return NOERROR;
     }
-    AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
+    AutoPtr<IPattern> integerPattern;
+    FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     String intString;
     FAIL_RETURN(Next(integerPattern, &intString));
     intString = RemoveLocaleInfo(intString, INT);
@@ -967,7 +973,8 @@ ECode CScanner::NextByte(
         mFindStartIndex = mCachedNextIndex;
         return IByte::Probe(obj)->GetValue(value);
     }
-    AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
+    AutoPtr<IPattern> integerPattern;
+    FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     String intString;
     FAIL_RETURN(Next(integerPattern, &intString));
     intString = RemoveLocaleInfo(intString, INT);
@@ -1070,7 +1077,8 @@ ECode CScanner::NextInt32(
         mFindStartIndex = mCachedNextIndex;
         return IInteger32::Probe(obj)->GetValue(value);
     }
-    AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
+    AutoPtr<IPattern> integerPattern;
+    FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     String intString;
     FAIL_RETURN(Next(integerPattern, &intString));
     intString = RemoveLocaleInfo(intString, INT);
@@ -1158,7 +1166,8 @@ ECode CScanner::NextInt64(
         mFindStartIndex = mCachedNextIndex;
         return IInteger64::Probe(obj)->GetValue(value);
     }
-    AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
+    AutoPtr<IPattern> integerPattern;
+    FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     String intString;
     FAIL_RETURN(Next(integerPattern, &intString));
     intString = RemoveLocaleInfo(intString, INT);
@@ -1196,7 +1205,8 @@ ECode CScanner::NextInt16(
         mFindStartIndex = mCachedNextIndex;
         return IInteger16::Probe(obj)->GetValue(value);
     }
-    AutoPtr<IPattern> integerPattern = GetIntegerPattern(radix);
+    AutoPtr<IPattern> integerPattern;
+    FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     String intString;
     FAIL_RETURN(Next(integerPattern, &intString));
     intString = RemoveLocaleInfo(intString, INT);
@@ -1435,10 +1445,13 @@ ECode CScanner::RecoverPreviousStatus()
     return NOERROR;
 }
 
-AutoPtr<IPattern> CScanner::GetIntegerPattern(
-    /* [in] */ Int32 radix)
+ECode CScanner::GetIntegerPattern(
+    /* [in] */ Int32 radix,
+    /* [out] */ IPattern** outpat)
 {
-    CheckRadix(radix);
+    VALIDATE_NOT_NULL(outpat)
+    *outpat = NULL;
+    FAIL_RETURN(CheckRadix(radix));
 
     if (mDecimalFormat == NULL) {
         AutoPtr<INumberFormat> nf;
@@ -1447,7 +1460,9 @@ AutoPtr<IPattern> CScanner::GetIntegerPattern(
     }
 
     if (mCachedIntegerPatternRadix == radix) {
-        return mCachedIntegerPattern;
+        *outpat = mCachedIntegerPattern;
+        REFCOUNT_ADD(*outpat);
+        return NOERROR;
     }
 
     String digits = String("0123456789abcdefghijklmnopqrstuvwxyz");
@@ -1473,7 +1488,9 @@ AutoPtr<IPattern> CScanner::GetIntegerPattern(
     mCachedIntegerPatternRadix = radix;
     mCachedIntegerPattern = NULL;
     Pattern::Compile(regex.ToString(), (IPattern**)&mCachedIntegerPattern);
-    return mCachedIntegerPattern;
+    *outpat = mCachedIntegerPattern;
+    REFCOUNT_ADD(*outpat);
+    return NOERROR;
 }
 
 AutoPtr<IPattern> CScanner::GetFloatPattern()
