@@ -980,7 +980,7 @@ static U_ICU_NAMESPACE::DecimalFormatSymbols* makeDecimalFormatSymbols(
     return result;
 }
 
-extern ECode maybeThrowIcuException(UErrorCode errorCode);
+extern ECode maybeThrowIcuException(const char* provider, UErrorCode errorCode);
 
 ECode CNativeDecimalFormat::ApplyPatternImpl(
     /* [in] */ Int64 addr,
@@ -992,15 +992,18 @@ ECode CNativeDecimalFormat::ApplyPatternImpl(
     }
     U_ICU_NAMESPACE::DecimalFormat* fmt = toDecimalFormat(addr);
     UErrorCode status = U_ZERO_ERROR;
+    const char* function;
     if (localized) {
+        function = "DecimalFormat::applyLocalizedPattern";
         fmt->applyLocalizedPattern(
             UnicodeString::fromUTF8(pattern.string()), status);
     }
     else {
+        function = "DecimalFormat::applyPattern";
         fmt->applyPattern(
             UnicodeString::fromUTF8(pattern.string()), status);
     }
-    return maybeThrowIcuException(status);
+    return maybeThrowIcuException(function, status);
 }
 
 Int64 CNativeDecimalFormat::CloneImpl(
@@ -1061,16 +1064,16 @@ static ECode format(
     T value,
     ArrayOf<Char32>** rev)
 {
+    VALIDATE_NOT_NULL(rev)
+    *rev = NULL;
+
     UErrorCode status = U_ZERO_ERROR;
     UnicodeString s;
     DecimalFormat* fmt = toDecimalFormat(addr);
     U_ICU_NAMESPACE::FieldPositionIterator nativeFieldPositionIterator;
     U_ICU_NAMESPACE::FieldPositionIterator* fpi = javaFieldPositionIterator ? &nativeFieldPositionIterator : NULL;
     fmt->format(value, s, fpi, status);
-    if (!U_SUCCESS(status)) {
-        *rev = NULL;
-        return maybeThrowIcuException(status);
-    }
+    FAIL_RETURN(maybeThrowIcuException("format", status))
     *rev = formatResult(s, fpi, javaFieldPositionIterator);
     return NOERROR;
 }
@@ -1136,6 +1139,7 @@ ECode CNativeDecimalFormat::GetTextAttribute(
     /* [in] */ Int32 symbol,
     /* [out] */ String* _attr)
 {
+    VALIDATE_NOT_NULL(_attr)
     UErrorCode status = U_ZERO_ERROR;
     UNumberFormat* fmt = toUNumberFormat(addr);
     UNumberFormatTextAttribute attr = static_cast<UNumberFormatTextAttribute>(symbol);
@@ -1156,7 +1160,7 @@ ECode CNativeDecimalFormat::GetTextAttribute(
     UnicodeString(chars, charCount).toUTF8(sink);
     *_attr = str;
     delete[] chars;
-    return maybeThrowIcuException(status);
+    return maybeThrowIcuException("unum_getTextAttribute", status);
 }
 
 ECode CNativeDecimalFormat::Open(
@@ -1194,7 +1198,7 @@ ECode CNativeDecimalFormat::Open(
     if (fmt == NULL) {
         delete symbols;
     }
-    FAIL_RETURN(maybeThrowIcuException(status))
+    FAIL_RETURN(maybeThrowIcuException("DecimalFormat::DecimalFormat", status))
     *result = reinterpret_cast<uintptr_t>(fmt);
     return NOERROR;
 }
@@ -1314,7 +1318,7 @@ ECode CNativeDecimalFormat::SetSymbol(
     UErrorCode status = U_ZERO_ERROR;
     UNumberFormatSymbol symbol = static_cast<UNumberFormatSymbol>(_symbol);
     unum_setSymbol(toUNumberFormat(addr), symbol, s.getBuffer(), s.length(), &status);
-    return maybeThrowIcuException(status);
+    return maybeThrowIcuException("unum_setSymbol", status);
 }
 
 void CNativeDecimalFormat::SetAttribute(
@@ -1349,7 +1353,7 @@ ECode CNativeDecimalFormat::SetTextAttribute(
     UErrorCode status = U_ZERO_ERROR;
     UNumberFormatTextAttribute attr = static_cast<UNumberFormatTextAttribute>(symbol);
     unum_setTextAttribute(toUNumberFormat(addr), attr, s.getBuffer(), s.length(), &status);
-    return maybeThrowIcuException(status);
+    return maybeThrowIcuException("unum_setTextAttribute", status);
 }
 
 String CNativeDecimalFormat::ToPatternImpl(

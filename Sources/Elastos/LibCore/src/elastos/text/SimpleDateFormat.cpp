@@ -19,6 +19,7 @@
 #include "CSimpleDateFormat.h"
 #include "TimeZone.h"
 #include "Math.h"
+#include "Logger.h"
 
 using Elastos::Utility::CGregorianCalendar;
 using Elastos::Utility::IGregorianCalendar;
@@ -32,6 +33,7 @@ using Elastos::Utility::CTimeZoneHelper;
 using Elastos::Utility::ILocaleHelper;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::TimeZone;
+using Elastos::Utility::Logging::Logger;
 using Elastos::Core::EIID_INumber;
 using Elastos::Core::IInteger64;
 using Elastos::Core::CInteger64;
@@ -59,6 +61,7 @@ using Libcore::ICU::ITimeZoneNames;
 namespace Elastos {
 namespace Text {
 
+static const String TAG("SimpleDateFormat");
 const String SimpleDateFormat::PATTERN_CHARS("GyMdkHmsSEDFwWahKzZLc");
 const Int32 SimpleDateFormat::RFC_822_TIMEZONE_FIELD = 18;
 const Int32 SimpleDateFormat::STAND_ALONE_MONTH_FIELD = 19;
@@ -68,24 +71,25 @@ CAR_INTERFACE_IMPL(SimpleDateFormat, DateFormat, ISimpleDateFormat)
 
 ECode SimpleDateFormat::constructor()
 {
-    AutoPtr<ILocaleHelper> pILocaleHelper;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&pILocaleHelper);
-    AutoPtr<ILocale> pILocale;
-    pILocaleHelper->GetDefault((ILocale**)&pILocale);
-    this->constructor((ILocale*)pILocale);
+    AutoPtr<ILocaleHelper> localeHelper;
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&localeHelper);
+    AutoPtr<ILocale> locale;
+    localeHelper->GetDefault((ILocale**)&locale);
+    this->constructor(locale);
     DefaultPattern(&mPattern);
-    CDateFormatSymbols::New((ILocale*)pILocale, (IDateFormatSymbols**)&mFormatData);
+    CDateFormatSymbols::New(locale, (IDateFormatSymbols**)&mFormatData);
     return NOERROR;
 }
 
 ECode SimpleDateFormat::constructor(
     /* [in] */ const String& pattern)
 {
-    AutoPtr<ILocaleHelper> pILocaleHelper;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&pILocaleHelper);
-    AutoPtr<ILocale> pILocale;
-    pILocaleHelper->GetDefault((ILocale**)&pILocale);
-    return constructor(pattern, (ILocale*)pILocale);
+    AutoPtr<ILocaleHelper> localeHelper;
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&localeHelper);
+    AutoPtr<ILocale> locale;
+    localeHelper->GetDefault((ILocale**)&locale);
+    Logger::I(TAG, " constructor with pattern: %s, default locale: %s", pattern.string(), TO_CSTR(locale));
+    return constructor(pattern, locale);
 }
 
 ECode SimpleDateFormat::ValidatePatternCharacter(
@@ -102,7 +106,8 @@ ECode SimpleDateFormat::ValidatePattern(
     /* [in] */ const String& tem)
 {
     Boolean quote = FALSE;
-    Int32 next, last = -1, count = 0;
+    Char32 next, last = -1;
+    Int32 count = 0;
 
     AutoPtr<ArrayOf<Char32> > charArray = tem.GetChars();
     const Int32 patternLength = charArray->GetLength();
@@ -110,7 +115,7 @@ ECode SimpleDateFormat::ValidatePattern(
         next = (*charArray)[i];
         if (next == '\'') {
             if (count > 0) {
-                ValidatePatternCharacter((Char32) last);
+                FAIL_RETURN(ValidatePatternCharacter(last))
                 count = 0;
             }
             if (last == next) {
@@ -127,21 +132,21 @@ ECode SimpleDateFormat::ValidatePattern(
                 count++;
             } else {
                 if (count > 0) {
-                    ValidatePatternCharacter((Char32) last);
+                    FAIL_RETURN(ValidatePatternCharacter(last))
                 }
                 last = next;
                 count = 1;
             }
         } else {
             if (count > 0) {
-                ValidatePatternCharacter((Char32) last);
+                FAIL_RETURN(ValidatePatternCharacter(last))
                 count = 0;
             }
             last = -1;
         }
     }
     if (count > 0) {
-        ValidatePatternCharacter((Char32) last);
+        FAIL_RETURN(ValidatePatternCharacter(last))
     }
 
     if (quote) {
@@ -154,12 +159,12 @@ ECode SimpleDateFormat::constructor(
     /* [in] */ const String& tem,
     /* [in] */ IDateFormatSymbols* value)
 {
-    AutoPtr<ILocaleHelper> pILocaleHelper;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&pILocaleHelper);
-    AutoPtr<ILocale> pILocale;
-    pILocaleHelper->GetDefault((ILocale**)&pILocale);
-    constructor((ILocale*)pILocale);
-    ValidatePattern(tem);
+    AutoPtr<ILocaleHelper> localeHelper;
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&localeHelper);
+    AutoPtr<ILocale> locale;
+    localeHelper->GetDefault((ILocale**)&locale);
+    FAIL_RETURN(constructor(locale))
+    FAIL_RETURN(ValidatePattern(tem))
     mPattern = tem;
     AutoPtr<IInterface> obj;
     ICloneable::Probe(value)->Clone((IInterface **)&obj);
@@ -172,7 +177,7 @@ ECode SimpleDateFormat::constructor(
     /* [in] */ ILocale* locale)
 {
     FAIL_RETURN(constructor(locale));
-    ValidatePattern(tem);
+    FAIL_RETURN(ValidatePattern(tem))
     mPattern = tem;
     CDateFormatSymbols::New(locale, (IDateFormatSymbols**)&mFormatData);
     return NOERROR;
@@ -207,7 +212,7 @@ ECode SimpleDateFormat::ApplyLocalizedPattern(
 ECode SimpleDateFormat::ApplyPattern(
     /* [in] */ const String& tem)
 {
-    ValidatePattern(tem);
+    FAIL_RETURN(ValidatePattern(tem))
     mPattern = tem;
     return NOERROR;
 }
@@ -306,7 +311,8 @@ ECode SimpleDateFormat::FormatImpl(
     VALIDATE_NOT_NULL(buffer);
 
     Boolean quote = FALSE;
-    Int32 next = 0, last = -1, count = 0;
+    Int32 next = 0, last = -1;
+    Int32 count = 0;
     mCalendar->SetTime(date);
     if (field != NULL) {
         field->SetBeginIndex(0);
@@ -319,7 +325,7 @@ ECode SimpleDateFormat::FormatImpl(
         next = (*charArray)[i];
         if (next == '\'') {
             if (count > 0) {
-                Append(buffer, field, fields, (Char32) last, count);
+                Append(buffer, field, fields, last, count);
                 count = 0;
             }
             if (last == next) {
@@ -336,14 +342,14 @@ ECode SimpleDateFormat::FormatImpl(
                 count++;
             } else {
                 if (count > 0) {
-                    Append(buffer, field, fields, (Char32) last, count);
+                    Append(buffer, field, fields, last, count);
                 }
                 last = next;
                 count = 1;
             }
         } else {
             if (count > 0) {
-                Append(buffer, field, fields, (Char32) last, count);
+                Append(buffer, field, fields, last, count);
                 count = 0;
             }
             last = -1;
@@ -351,7 +357,7 @@ ECode SimpleDateFormat::FormatImpl(
         }
     }
     if (count > 0) {
-        Append(buffer, field, fields, (Char32) last, count);
+        Append(buffer, field, fields, last, count);
     }
 
     return NOERROR;
@@ -992,7 +998,8 @@ ECode SimpleDateFormat::Parse(
     VALIDATE_NOT_NULL(date)
     // Harmony delegates to ICU's SimpleDateFormat, we implement it directly
     Boolean quote = FALSE;
-    Int32 next, last = -1, count = 0, offset;
+    Char32 next, last = -1;
+    Int32 count = 0, offset;
     position->GetIndex(&offset);
     AutoPtr<ArrayOf<Char32> > strCharArray = string.GetChars();
     Int32 length = strCharArray->GetLength();
@@ -1007,7 +1014,7 @@ ECode SimpleDateFormat::Parse(
         if (next == '\'') {
             if (count > 0) {
                 Int32 v;
-                Parse(string, offset, (Char32) last, count, &v);
+                Parse(string, offset, last, count, &v);
                 if ((offset = v) < 0) {
                     return Error(position, -offset - 1, zone, date);
                 }
@@ -1032,7 +1039,7 @@ ECode SimpleDateFormat::Parse(
             } else {
                 if (count > 0) {
                     Int32 v;
-                    Parse(string, offset, (Char32) last, -count, &v);
+                    Parse(string, offset, last, -count, &v);
                     if ((offset = v) < 0) {
                         return Error(position, -offset - 1, zone, date);
                     }
@@ -1043,7 +1050,7 @@ ECode SimpleDateFormat::Parse(
         } else {
             if (count > 0) {
                 Int32 v;
-                Parse(string, offset, (Char32) last, count, &v);
+                Parse(string, offset, last, count, &v);
                 if ((offset = v) < 0) {
                     return Error(position, -offset - 1, zone, date);
                 }
@@ -1058,7 +1065,7 @@ ECode SimpleDateFormat::Parse(
     }
     if (count > 0) {
         Int32 v;
-        Parse(string, offset, (Char32) last, count, &v);
+        Parse(string, offset, last, count, &v);
         if ((offset = v) < 0) {
             return Error(position, -offset - 1, (ITimeZone*)zone, date);
         }

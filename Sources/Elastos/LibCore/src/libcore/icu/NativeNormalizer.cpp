@@ -46,7 +46,7 @@ Int32 NativeNormalizer::ToUNormalizationMode(
     return -1;
 }
 
-extern ECode maybeThrowIcuException(UErrorCode errorCode);
+extern ECode maybeThrowIcuException(const char*, UErrorCode errorCode);
 
 ECode NativeNormalizer::NormalizeImpl(
     /* [in] */ const String& src,
@@ -57,7 +57,7 @@ ECode NativeNormalizer::NormalizeImpl(
     UErrorCode status = U_ZERO_ERROR;
     UnicodeString dst;
     Normalizer::normalize(UnicodeString::fromUTF8(src.string()), mode, 0, dst, status);
-    FAIL_RETURN(maybeThrowIcuException(status));
+    FAIL_RETURN(maybeThrowIcuException("Normalizer::normalize", status));
     if (dst.isBogus()) {
         *result = NULL;
     }
@@ -78,7 +78,7 @@ ECode NativeNormalizer::IsNormalizedImpl(
     UNormalizationMode mode = static_cast<UNormalizationMode>(form);
     UErrorCode status = U_ZERO_ERROR;
     UBool result = Normalizer::isNormalized(UnicodeString::fromUTF8(src.string()), mode, status);
-    FAIL_RETURN(maybeThrowIcuException(status));
+    FAIL_RETURN(maybeThrowIcuException("Normalizer::isNormalized", status));
     *isNormalized = result;
     return NOERROR;
 }

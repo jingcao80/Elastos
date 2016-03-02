@@ -5,16 +5,20 @@
 #include "CLocaleData.h"
 #include "CLinkedHashSet.h"
 #include "AutoLock.h"
+#include "Logger.h"
 
 using Elastos::IO::EIID_ISerializable;
 using Elastos::Utility::CLocale;
+using Elastos::Utility::Logging::Logger;
 using Libcore::ICU::ICUUtil;
 using Libcore::ICU::LocaleData;
 using Libcore::ICU::ILocaleData;
 using Libcore::ICU::CLocaleData;
 
-namespace Elastos{
-namespace Utility{
+namespace Elastos {
+namespace Utility {
+
+static const String TAG("Currency");
 
 HashMap<String, AutoPtr<ICurrency> > Currency::sCodesToCurrencies;
 HashMap<AutoPtr<ILocale>, AutoPtr<ICurrency> > Currency::sLocalesToCurrencies;
@@ -35,8 +39,7 @@ Currency::constructor(
     CLocale::US->ToString(&usstr);
     String symbol = ICUUtil::GetCurrencySymbol(usstr, mCurrencyCode);
     if (symbol.IsNull()) {
-        // throw new IllegalArgumentException("Unsupported ISO 4217 currency code: " + currencyCode);
-        ALOGD("Unsupported ISO 4217 currency code:  %s\n", mCurrencyCode.string());
+        Logger::E("Currency", "Unsupported ISO 4217 currency code: \"%s\"", mCurrencyCode.string());
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     return NOERROR;

@@ -5,12 +5,16 @@
 #include "ICUUtil.h"
 #include "StringUtils.h"
 #include "AutoLock.h"
+#include "Logger.h"
 
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CLocale;
+using Elastos::Utility::Logging::Logger;
 
 namespace Libcore {
 namespace ICU {
+
+static const String TAG("LocaleData");
 
 LocaleData::StaticInitializer::StaticInitializer()
 {
@@ -90,10 +94,12 @@ AutoPtr<ILocaleData> LocaleData::Get(
     return newLocaleData;
 }
 
-String LocaleData::ToString()
+ECode LocaleData::ToString(
+    /* [out] */ String* str)
 {
-    return String("LocaleData");
-    // return Objects.toString(this);
+    VALIDATE_NOT_NULL(str)
+    *str = "LocaleData";
+    return NOERROR;
 }
 
 ECode LocaleData::GetDateFormat(
@@ -467,11 +473,14 @@ ECode LocaleData::GetPercentPattern(
 AutoPtr<ILocaleData> LocaleData::InitLocaleData(
     /* [in] */ ILocale* locale)
 {
+
     AutoPtr<CLocaleData> localeObj;
     CLocaleData::NewByFriend((CLocaleData**)&localeObj);
     LocaleData* localeData = (LocaleData*)localeObj.Get();
     String localeLanguageTag;
     locale->ToLanguageTag(&localeLanguageTag);
+
+    Logger::I(TAG, " InitLocaleData for %s, localeLanguageTag: %s", TO_CSTR(locale), localeLanguageTag.string());
 
     if (!ICUUtil::InitLocaleDataNative(localeLanguageTag, localeData)) {
         return NULL;
@@ -501,6 +510,10 @@ AutoPtr<ILocaleData> LocaleData::InitLocaleData(
         StringUtils::ReplaceAll(localeData->mNumberPattern, String("\\.[#,]*"), String("") ,
             &localeData->mIntegerPattern);
     }
+
+    Logger::I(TAG, " numberPattern %s, mIntegerPattern %s",
+        localeData->mNumberPattern.string(), localeData->mIntegerPattern.string());
+
     StringUtils::ReplaceAll(localeData->mShortDateFormat, String("\\byy\\b"), String("y"),
         &localeData->mShortDateFormat4);
     return (ILocaleData*)localeObj.Get();

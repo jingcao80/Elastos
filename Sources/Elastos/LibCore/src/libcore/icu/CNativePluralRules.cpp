@@ -48,7 +48,7 @@ static PluralRules* toPluralRules(
     return reinterpret_cast<PluralRules*>(static_cast<uintptr_t>(address));
 }
 
-extern ECode maybeThrowIcuException(UErrorCode errorCode);
+extern ECode maybeThrowIcuException(const char* provider, UErrorCode errorCode);
 
 void CNativePluralRules::FinalizeImpl(
     /* [in] */ Int64 address)
@@ -72,7 +72,7 @@ Int64 CNativePluralRules::ForLocaleImpl(
     Locale locale = Locale::createFromName(localeName.string());
     UErrorCode status = U_ZERO_ERROR;
     PluralRules* result = PluralRules::forLocale(locale, status);
-    ASSERT_SUCCEEDED(maybeThrowIcuException(status));
+    ASSERT_SUCCEEDED(maybeThrowIcuException("PluralRules::forLocale", status));
     return reinterpret_cast<uintptr_t>(result);
 }
 

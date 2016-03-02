@@ -43,24 +43,28 @@
 #include <unicode/ucurr.h>
 
 using Libcore::Utility::CBasicLruCache;
+using Elastos::Core::StringUtils;
+using Elastos::Core::IString;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
 using Elastos::Utility::Collections;
 using Elastos::Utility::ISet;
 using Elastos::Utility::CHashMap;
 using Elastos::Utility::CHashSet;
-using Elastos::Core::StringUtils;
-using Elastos::Utility::EIID_ICollection;
-using Elastos::Core::IString;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
 using Elastos::Utility::CLocale;
+using Elastos::Utility::Logging::Logger;
+using Elastos::Utility::EIID_ICollection;
 
 namespace Libcore {
 namespace ICU {
+
+static const String TAG("ICUUtil");
 
 extern String UnicodeStringToString(const UnicodeString& us);
 
 static String getCurrencyName(const String& languageTag, const String& currencyCode, UCurrNameStyle nameStyle)
 {
+    Logger::I(TAG, "getCurrencyName for languageTag %s, countryCode %s", languageTag.string(), languageTag.string());
     if (languageTag.IsNull()) {
         return String(NULL);
     }
@@ -87,7 +91,12 @@ static String getCurrencyName(const String& languageTag, const String& currencyC
             charCount = icuCurrencyCode.length();
         }
     }
-    return (0 == charCount) ? String(NULL) : UnicodeStringToString(chars);
+    String result;
+    if (charCount != 0) {
+        result = UnicodeStringToString(UnicodeString(chars));
+    }
+    Logger::I(TAG, "getCurrencyName %s", result.string());
+    return result;
 }
 
 // TODO: put this in a header file and use it everywhere!
@@ -349,7 +358,7 @@ ECode ICUUtil::LocaleFromIcuLocaleId(
         ParseLangScriptRegionAndVariants(localeId.Substring(0, extensionsIndex), pOutputArray);
     }
 
-    CLocale::New((*pOutputArray)[IDX_LANGUAGE],
+    return CLocale::New((*pOutputArray)[IDX_LANGUAGE],
         (*pOutputArray)[IDX_REGION],
         (*pOutputArray)[IDX_VARIANT],
         (*pOutputArray)[IDX_SCRIPT],
@@ -358,7 +367,6 @@ ECode ICUUtil::LocaleFromIcuLocaleId(
         pExtensionsMap,
         TRUE,
         locale);
-    return NOERROR;
 }
 
 ECode ICUUtil::LocalesFromStrings(
@@ -410,6 +418,7 @@ ECode ICUUtil::GetAvailableLocales(
     /* [out, callee] */ ArrayOf<ILocale*>** locales)
 {
     VALIDATE_NOT_NULL(locales);
+    *locales = NULL;
 
     if (sAvailableLocalesCache == NULL) {
         AutoPtr<ArrayOf<String> > _locales;
@@ -427,7 +436,7 @@ ECode ICUUtil::GetAvailableBreakIteratorLocales(
     /* [out, callee] */ ArrayOf<ILocale*>** locales)
 {
     VALIDATE_NOT_NULL(locales);
-
+    *locales = NULL;
     AutoPtr<ArrayOf<String> > _locales;
     FAIL_RETURN(GetAvailableBreakIteratorLocalesNative((ArrayOf<String>**)&_locales));
     return LocalesFromStrings(*_locales, locales);
@@ -437,7 +446,7 @@ ECode ICUUtil::GetAvailableCalendarLocales(
     /* [out, callee] */ ArrayOf<ILocale*>** locales)
 {
     VALIDATE_NOT_NULL(locales);
-
+    *locales = NULL;
     AutoPtr<ArrayOf<String> > _locales;
     FAIL_RETURN(GetAvailableCalendarLocalesNative((ArrayOf<String>**)&_locales));
     return LocalesFromStrings(*_locales, locales);
@@ -447,6 +456,7 @@ ECode ICUUtil::GetAvailableCollatorLocales(
     /* [out, callee] */ ArrayOf<ILocale*>** locales)
 {
     VALIDATE_NOT_NULL(locales);
+    *locales = NULL;
 
     AutoPtr<ArrayOf<String> > _locales;
     FAIL_RETURN(GetAvailableCollatorLocalesNative((ArrayOf<String>**)&_locales));
@@ -457,6 +467,7 @@ ECode ICUUtil::GetAvailableDateFormatLocales(
     /* [out, callee] */ ArrayOf<ILocale*>** locales)
 {
     VALIDATE_NOT_NULL(locales);
+    *locales = NULL;
 
     AutoPtr<ArrayOf<String> > _locales;
     FAIL_RETURN(GetAvailableDateFormatLocalesNative((ArrayOf<String>**)&_locales));
@@ -466,14 +477,12 @@ ECode ICUUtil::GetAvailableDateFormatLocales(
 ECode ICUUtil::GetAvailableDateFormatSymbolsLocales(
     /* [out, callee] */ ArrayOf<ILocale*>** locales)
 {
-    VALIDATE_NOT_NULL(locales);
     return GetAvailableDateFormatLocales(locales);
 }
 
 ECode ICUUtil::GetAvailableDecimalFormatSymbolsLocales(
     /* [out, callee] */ ArrayOf<ILocale*>** locales)
 {
-    VALIDATE_NOT_NULL(locales);
     return GetAvailableNumberFormatLocales(locales);
 }
 
@@ -481,6 +490,7 @@ ECode ICUUtil::GetAvailableNumberFormatLocales(
     /* [out, callee] */ ArrayOf<ILocale*>** locales)
 {
     VALIDATE_NOT_NULL(locales);
+    *locales = NULL;
 
     AutoPtr<ArrayOf<String> > _locales;
     FAIL_RETURN(GetAvailableNumberFormatLocalesNative((ArrayOf<String>**)&_locales));
@@ -534,9 +544,9 @@ String ICUUtil::ToLowerCase(
     if (s.IsNull()) {
         return String(NULL);
     }
-    NATIVE(Locale) icuLocale;
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(languageTag);
+    icuLocale = ::Locale::createFromName(languageTag);
     if (icuLocale.isBogus()) {
         return String(NULL);
     }
@@ -553,9 +563,9 @@ String ICUUtil::ToUpperCase(
     if (s.IsNull()) {
         return String(NULL);
     }
-    NATIVE(Locale) icuLocale;
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(languageTag);
+    icuLocale = ::Locale::createFromName(languageTag);
     if (icuLocale.isBogus()) {
         return String(NULL);
     }
@@ -628,21 +638,25 @@ ECode ICUUtil::GetAvailableNumberFormatLocalesNative(
 *         creation of the exception to be thrown fails
  * @exception thrown if errorCode represents an error
 */
-ECode maybeThrowIcuException(UErrorCode errorCode)
+ECode maybeThrowIcuException(const char* errInfo, UErrorCode errorCode)
 {
-    if (errorCode <= U_ZERO_ERROR || errorCode >= U_ERROR_LIMIT) {
+    if (U_SUCCESS(errorCode)) {
         return NOERROR;
     }
 
     switch (errorCode) {
         case U_ILLEGAL_ARGUMENT_ERROR:
+            Logger::E(TAG, "icu error: %s E_ILLEGAL_ARGUMENT_EXCEPTION", errInfo);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         case U_INDEX_OUTOFBOUNDS_ERROR:
         case U_BUFFER_OVERFLOW_ERROR:
+            Logger::E(TAG, "icu error: %s E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION", errInfo);
             return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
         case U_UNSUPPORTED_ERROR:
+            Logger::E(TAG, "icu error: %s E_UNSUPPORTED_OPERATION_EXCEPTION", errInfo);
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
         default:
+            Logger::E(TAG, "icu error: %s E_RUNTIME_EXCEPTION", errInfo);
             return E_RUNTIME_EXCEPTION;
     }
 }
@@ -677,35 +691,33 @@ ECode fromStringEnumeration(
     /* [in] */ StringEnumeration* se,
     /* [out] */ ArrayOf<String>** codes)
 {
-    if(!U_SUCCESS(status)) {
-        *codes = NULL;
-        return maybeThrowIcuException(status);
-    }
+    VALIDATE_NOT_NULL(codes)
+    *codes = NULL;
+
+    FAIL_RETURN(maybeThrowIcuException(provider, status))
 
     Int32 count = se->count(status);
-    if (!U_SUCCESS(status)) {
-        *codes = NULL;
-        return maybeThrowIcuException(status);
-    }
+    FAIL_RETURN(maybeThrowIcuException("StringEnumeration::count", status))
 
     AutoPtr<ArrayOf<String> > result = ArrayOf<String>::Alloc(count);
     for (Int32 i = 0; i < count; ++i) {
         const UnicodeString* string = se->snext(status);
-        if (!U_SUCCESS(status)) {
-            *codes = NULL;
-            return maybeThrowIcuException(status);
-        }
+        FAIL_RETURN(maybeThrowIcuException("StringEnumeration::snext", status))
         (*result)[i] = UnicodeStringToString(*string);
     }
+
     *codes = result;
+    REFCOUNT_ADD(*codes)
     return NOERROR;
 }
 
 ECode ICUUtil::GetAvailableCurrencyCodes(
     /* [out, callee] */ ArrayOf<String>** codes)
 {
-    UErrorCode status = U_ZERO_ERROR;
+    VALIDATE_NOT_NULL(codes)
+    *codes = NULL;
 
+    UErrorCode status = U_ZERO_ERROR;
     UStringEnumeration e(ucurr_openISOCurrencies(UCURR_COMMON|UCURR_NON_DEPRECATED, &status));
     return fromStringEnumeration(status, "ucurr_openISOCurrencies", &e, codes);
 }
@@ -714,15 +726,16 @@ ECode ICUUtil::GetAvailableCurrencyCodes(
 String ICUUtil::GetCurrencyCode(
     /* [in] */ const String& locale)
 {
+    String nullStr;
     UErrorCode status = U_ZERO_ERROR;
     ScopedResourceBundle supplData(ures_openDirect(U_ICUDATA_CURR, "supplementalData", &status));
     if (U_FAILURE(status)) {
-        return String(NULL);
+        return nullStr;
     }
 
     ScopedResourceBundle currencyMap(ures_getByKey(supplData.get(), "CurrencyMap", NULL, &status));
     if (U_FAILURE(status)) {
-        return String(NULL);
+        return nullStr;
     }
 
     ScopedResourceBundle currency(ures_getByKey(currencyMap.get(), locale.string(), NULL, &status));
@@ -732,7 +745,7 @@ String ICUUtil::GetCurrencyCode(
 
     ScopedResourceBundle currencyElem(ures_getByIndex(currency.get(), 0, NULL, &status));
     if (U_FAILURE(status)) {
-        return String("None");
+        return String("XXX");
     }
 
     // check if there is a 'to' date. If there is, the currency isn't used anymore.
@@ -747,19 +760,18 @@ String ICUUtil::GetCurrencyCode(
     ScopedResourceBundle currencyId(ures_getByKey(currencyElem.get(), "id", NULL, &status));
     if (U_FAILURE(status)) {
         // No id defined for this country
-        return String("None");
+        return String("XXX");
     }
 
-    char buffer[256];
     Int32 length;
-    ures_getUTF8String(currencyId.get(), buffer, &length, TRUE, &status);
+    const UChar* chars = ures_getString(currencyId.get(), &length, &status);
     if (U_FAILURE(status) || length == 0) {
-        return String("None");
+        Logger::E(TAG, "failed to GetCurrencyCode for %s: failed %d, length: %d",
+            locale.string(), U_FAILURE(status), length);
+        return String("XXX");
     }
-    else {
-        buffer[length] = '\0';
-        return String(buffer);
-    }
+
+    return UnicodeStringToString(UnicodeString(chars));
 }
 
 String ICUUtil::GetCurrencyDisplayName(
@@ -791,15 +803,15 @@ String ICUUtil::GetDisplayCountryNative(
     /* [in] */ const String& targetLanguageTag,
     /* [in] */ const String& languageTag)
 {
-    NATIVE(Locale) icuLocale;
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(languageTag);
+    icuLocale = ::Locale::createFromName(languageTag);
     if (icuLocale.isBogus()) {
         return String(NULL);
     }
-    NATIVE(Locale) icuTargetLocale;
+    ::Locale icuTargetLocale;
     icuTargetLocale.setToBogus();
-    icuTargetLocale = NATIVE(Locale)::createFromName(targetLanguageTag);
+    icuTargetLocale = ::Locale::createFromName(targetLanguageTag);
     if (icuTargetLocale.isBogus()) {
         return String(NULL);
     }
@@ -812,15 +824,15 @@ String ICUUtil::GetDisplayLanguageNative(
     /* [in] */ const String& targetLanguageTag,
     /* [in] */ const String& languageTag)
 {
-    NATIVE(Locale) icuLocale;
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(languageTag);
+    icuLocale = ::Locale::createFromName(languageTag);
     if (icuLocale.isBogus()) {
         return String(NULL);
     }
-    NATIVE(Locale) icuTargetLocale;
+    ::Locale icuTargetLocale;
     icuTargetLocale.setToBogus();
-    icuTargetLocale = NATIVE(Locale)::createFromName(targetLanguageTag);
+    icuTargetLocale = ::Locale::createFromName(targetLanguageTag);
     if (icuTargetLocale.isBogus()) {
         return String(NULL);
     }
@@ -845,15 +857,15 @@ String ICUUtil::GetDisplayVariantNative(
     /* [in] */ const String& targetLanguageTag,
     /* [in] */ const String& languageTag)
 {
-    NATIVE(Locale) icuLocale;
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(languageTag);
+    icuLocale = ::Locale::createFromName(languageTag);
     if (icuLocale.isBogus()) {
         return String(NULL);
     }
-    NATIVE(Locale) icuTargetLocale;
+    ::Locale icuTargetLocale;
     icuTargetLocale.setToBogus();
-    icuTargetLocale = NATIVE(Locale)::createFromName(targetLanguageTag);
+    icuTargetLocale = ::Locale::createFromName(targetLanguageTag);
     if (icuTargetLocale.isBogus()) {
         return String(NULL);
     }
@@ -865,9 +877,9 @@ String ICUUtil::GetDisplayVariantNative(
 String ICUUtil::GetISO3Country(
     /* [in] */ const String& languageTag)
 {
-    NATIVE(Locale) icuLocale;
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(languageTag);
+    icuLocale = ::Locale::createFromName(languageTag);
     if (icuLocale.isBogus()) {
         return String(NULL);
     }
@@ -877,9 +889,9 @@ String ICUUtil::GetISO3Country(
 String ICUUtil::GetISO3Language(
     /* [in] */ const String& languageTag)
 {
-    NATIVE(Locale) icuLocale;
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(languageTag);
+    icuLocale = ::Locale::createFromName(languageTag);
     if (icuLocale.isBogus()) {
         return String(NULL);
     }
@@ -914,15 +926,15 @@ String ICUUtil::GetDisplayScriptNative(
     const String& targetLanguageTag,
     const String& languageTag)
 {
-    NATIVE(Locale) icuLocale;
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(languageTag);
+    icuLocale = ::Locale::createFromName(languageTag);
     if (icuLocale.isBogus()) {
         return String(NULL);
     }
-    NATIVE(Locale) icuTargetLocale;
+    ::Locale icuTargetLocale;
     icuTargetLocale.setToBogus();
-    icuTargetLocale = NATIVE(Locale)::createFromName(targetLanguageTag);
+    icuTargetLocale = ::Locale::createFromName(targetLanguageTag);
     if (icuTargetLocale.isBogus()) {
         return String(NULL);
     }
@@ -934,9 +946,9 @@ String ICUUtil::GetDisplayScriptNative(
 String ICUUtil::GetScript(
     /* [in] */ const String& locale)
 {
-    NATIVE(Locale) icuLocale;
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(locale);
+    icuLocale = ::Locale::createFromName(locale);
     if (icuLocale.isBogus())
         return String(NULL);
 
@@ -1030,7 +1042,7 @@ static void setStringField(
 
 static void setNumberPatterns(
     /* [in] */ LocaleData* localeData,
-    /* [in] */ NATIVE(Locale)& locale)
+    /* [in] */ ::Locale& locale)
 {
     UErrorCode status = U_ZERO_ERROR;
 
@@ -1051,7 +1063,7 @@ static void setNumberPatterns(
 
 static void setDecimalFormatSymbolsData(
     /* [in] */ LocaleData* localeData,
-    /* [in] */ NATIVE(Locale)& locale)
+    /* [in] */ ::Locale& locale)
 {
     UErrorCode status = U_ZERO_ERROR;
     DecimalFormatSymbols dfs(locale, status);
@@ -1162,7 +1174,7 @@ static Boolean getDateTimePatterns(
 
 static Boolean getYesterdayTodayAndTomorrow(
     /* [in] */ LocaleData* localeData,
-    /* [in] */ const NATIVE(Locale)& locale,
+    /* [in] */ const ::Locale& locale,
     /* [in] */ const char* locale_name)
 {
     UErrorCode status = U_ZERO_ERROR;
@@ -1177,14 +1189,16 @@ static Boolean getYesterdayTodayAndTomorrow(
     UnicodeString today(ures_getUnicodeStringByKey(relative.get(), "0", &status));
     UnicodeString tomorrow(ures_getUnicodeStringByKey(relative.get(), "1", &status));
     if (U_FAILURE(status)) {
-        // ALOGE("Error getting yesterday/today/tomorrow for %s: %s", locale_name, u_errorName(status));
+        Logger::E(TAG, "Error getting yesterday/today/tomorrow for %s: %s",
+            locale_name, u_errorName(status));
         return FALSE;
     }
 
     // We title-case the strings so they have consistent capitalization (http://b/14493853).
     UniquePtr<BreakIterator> brk(BreakIterator::createSentenceInstance(locale, status));
     if (U_FAILURE(status)) {
-        // ALOGE("Error getting yesterday/today/tomorrow break iterator for %s: %s", locale_name, u_errorName(status));
+        Logger::E(TAG, "Error getting yesterday/today/tomorrow break iterator for %s: %s",
+            locale_name, u_errorName(status));
         return FALSE;
     }
     yesterday.toTitle(brk.get(), locale, U_TITLECASE_NO_LOWERCASE | U_TITLECASE_NO_BREAK_ADJUSTMENT);
@@ -1207,9 +1221,9 @@ Boolean ICUUtil::InitLocaleDataNative(
         return FALSE; // ICUUtil has a fixed-length limit.
     }
 
-    NATIVE(Locale) icuLocale;
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(languageTag);
+    icuLocale = ::Locale::createFromName(languageTag);
     if (icuLocale.isBogus()) {
         return NOERROR;
     }
@@ -1224,21 +1238,21 @@ Boolean ICUUtil::InitLocaleDataNative(
       }
     }
     if (!foundDateTimePatterns) {
-        // ALOGE("Couldn't find ICUUtil DateTimePatterns for %s", languageTag.c_str());
+        Logger::E("ICUUtil", "Couldn't find ICUUtil DateTimePatterns for %s", languageTag.string());
         return FALSE;
     }
 
     // Get the "Yesterday", "Today", and "Tomorrow" strings.
     Boolean foundYesterdayTodayAndTomorrow = FALSE;
     for (LocaleNameIterator it(icuLocale.getBaseName(), status); it.HasNext(); it.Up()) {
-      if (getYesterdayTodayAndTomorrow(localeData, icuLocale, it.Get())) {
-        foundYesterdayTodayAndTomorrow = TRUE;
-        break;
-      }
+        if (getYesterdayTodayAndTomorrow(localeData, icuLocale, it.Get())) {
+            foundYesterdayTodayAndTomorrow = TRUE;
+            break;
+        }
     }
     if (!foundYesterdayTodayAndTomorrow) {
-      // ALOGE("Couldn't find ICUUtil yesterday/today/tomorrow for %s", languageTag.c_str());
-      return FALSE;
+        Logger::E("ICUUtil", "Couldn't find ICUUtil yesterday/today/tomorrow for %s", languageTag.string());
+        return FALSE;
     }
 
     // Get the narrow "AM" and "PM" strings.
@@ -1250,8 +1264,8 @@ Boolean ICUUtil::InitLocaleDataNative(
       }
     }
     if (!foundAmPmMarkersNarrow) {
-      // ALOGE("Couldn't find ICU AmPmMarkersNarrow for %s", languageTag.c_str());
-      return FALSE;
+        Logger::E("ICUUtil", "Couldn't find ICUUtil AmPmMarkersNarrow for %s", languageTag.string());
+        return FALSE;
     }
 
     status = U_ZERO_ERROR;
@@ -1351,53 +1365,50 @@ Boolean ICUUtil::InitLocaleDataNative(
 
     String countryCode(icuLocale.getCountry());
     String internationalCurrencySymbol = ICUUtil::GetCurrencyCode(countryCode);
-
-    String currencySymbol = String(NULL);
+    Logger::I(TAG, "GetCurrencyCode %s for countryCode %s", internationalCurrencySymbol.string(), countryCode.string());
+    String currencySymbol;
     if (!internationalCurrencySymbol.IsNull()) {
         currencySymbol = ICUUtil::GetCurrencySymbol(languageTag, internationalCurrencySymbol);
     }
     else {
-        internationalCurrencySymbol = String("None");
+        internationalCurrencySymbol = "XXX";
     }
     if (currencySymbol.IsNull()) {
         // This is the UTF-8 encoding of U+00A4 (CURRENCY SIGN).
-        currencySymbol = String("\xc2\xa4");
+        currencySymbol = "\u00A4"; //\xc2\xa4
     }
     localeData->mCurrencySymbol = currencySymbol;
     localeData->mInternationalCurrencySymbol = internationalCurrencySymbol;
 
+    Logger::I(TAG, " currencySymbol %s, internationalCurrencySymbol %s",
+        currencySymbol.string(), internationalCurrencySymbol.string());
     return TRUE;
 }
 
 ECode ICUUtil::GetBestDateTimePatternNative(
-        const String& skeleton,
-        const String& languageTag,
-        String* rev)
+    /* [in] */ const String& skeleton,
+    /* [in] */ const String& languageTag,
+    /* [out] */ String* rev)
 {
-    NATIVE(Locale) icuLocale;
+    VALIDATE_NOT_NULL(rev)
+    *rev = NULL;
+
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(languageTag);
+    icuLocale = ::Locale::createFromName(languageTag);
     if (icuLocale.isBogus()) {
-        *rev = String(NULL);
         return NOERROR;
     };
 
     UErrorCode status = U_ZERO_ERROR;
     UniquePtr<DateTimePatternGenerator> generator(DateTimePatternGenerator::createInstance(icuLocale, status));
-    if (!U_SUCCESS(status)) {
-        *rev = String(NULL);
-        return maybeThrowIcuException(status);
-    }
+    FAIL_RETURN(maybeThrowIcuException("DateTimePatternGenerator::createInstance", status))
 
     if (skeleton.IsNull()) {
-        *rev = String(NULL);
         return NOERROR;
     }
     UnicodeString result(generator->getBestPattern(UnicodeString::fromUTF8(skeleton.string()), status));
-    if (!U_SUCCESS(status)) {
-        *rev = String(NULL);
-        return maybeThrowIcuException(status);
-    }
+    FAIL_RETURN(maybeThrowIcuException("DateTimePatternGenerator::getBestPattern", status))
 
     *rev = UnicodeStringToString(result);
     return NOERROR;
@@ -1407,6 +1418,9 @@ ECode ICUUtil::GetDateFormatOrder(
     /* [in] */ const String& pattern,
     /* [out, callee] */ ArrayOf<Char32>** locales)
 {
+    VALIDATE_NOT_NULL(locales)
+    *locales = NULL;
+
     AutoPtr<ArrayOf<Char32> > result = ArrayOf<Char32>::Alloc(3);
     Int32 resultIndex = 0;
     Boolean sawDay = FALSE;
@@ -1446,6 +1460,7 @@ ECode ICUUtil::GetDateFormatOrder(
             // Ignore spaces and punctuation.
         }
     }
+
     *locales = result;
     REFCOUNT_ADD(result);
     return NOERROR;
@@ -1454,6 +1469,7 @@ ECode ICUUtil::GetDateFormatOrder(
 ECode ICUUtil::GetCldrVersion(
     /* [out] */ String* rev)
 {
+    VALIDATE_NOT_NULL(rev)
     UErrorCode status = U_ZERO_ERROR;
     UVersionInfo cldrVersion;
     ulocdata_getCLDRVersion(cldrVersion, &status);
@@ -1476,6 +1492,7 @@ ECode ICUUtil::GetCurrencyDisplayName(
     /* [in] */ const String& currencyCode,
     /* [out] */ String* displayName)
 {
+    VALIDATE_NOT_NULL(displayName)
     String languageTag;
     locale->ToLanguageTag(&languageTag);
     *displayName = GetCurrencyDisplayName(languageTag, currencyCode);
@@ -1487,6 +1504,7 @@ ECode ICUUtil::GetCurrencySymbol(
     /* [in] */ const String& currencyCode,
     /* [out] */ String* currencySymbol)
 {
+    VALIDATE_NOT_NULL(currencySymbol)
     String languageTag;
     locale->ToLanguageTag(&languageTag);
     *currencySymbol = GetCurrencySymbol(languageTag, currencyCode);
@@ -1494,9 +1512,9 @@ ECode ICUUtil::GetCurrencySymbol(
 }
 
 ECode ICUUtil::GetDisplayCountry(
-        /* [in] */ ILocale* targetLocale,
-        /* [in] */ ILocale* locale,
-        /* [out] */ String* displayCountry)
+    /* [in] */ ILocale* targetLocale,
+    /* [in] */ ILocale* locale,
+    /* [out] */ String* displayCountry)
 {
     String targetLanguageTag;
     targetLocale->ToLanguageTag(&targetLanguageTag);
@@ -1512,6 +1530,9 @@ ECode ICUUtil::GetDisplayLanguage(
     /* [in] */ ILocale* locale,
     /* [out] */ String* displayLanguage)
 {
+    VALIDATE_NOT_NULL(displayLanguage)
+    *displayLanguage = NULL;
+
     String targetLanguageTag;
     targetLocale->ToLanguageTag(&targetLanguageTag);
     String languageTag;
@@ -1522,7 +1543,7 @@ ECode ICUUtil::GetDisplayLanguage(
 }
 
 AutoPtr<ILocale> ICUUtil::AddLikelySubtags(
-        /* [in] */ ILocale* locale)
+    /* [in] */ ILocale* locale)
 {
     String languageTag;
     locale->ToLanguageTag(&languageTag);
@@ -1535,25 +1556,24 @@ AutoPtr<ILocale> ICUUtil::AddLikelySubtags(
 ECode ICUUtil::SetDefaultLocale(
     /* [in] */ const String& languageTag)
 {
-    NATIVE(Locale) icuLocale;
+    ::Locale icuLocale;
     icuLocale.setToBogus();
-    icuLocale = NATIVE(Locale)::createFromName(languageTag);
+    icuLocale = ::Locale::createFromName(languageTag);
     if (icuLocale.isBogus()) {
         return NOERROR;
     }
 
     UErrorCode status = U_ZERO_ERROR;
-    NATIVE(Locale)::setDefault(icuLocale, status);
-    if (!U_SUCCESS(status)) {
-        return maybeThrowIcuException(status);
-    }
+    ::Locale::setDefault(icuLocale, status);
+    FAIL_RETURN(maybeThrowIcuException("Locale::setDefault", status))
     return NOERROR;
 }
 
 ECode ICUUtil::GetDefaultLocale(
     /* [out] */ String* defaultLocale)
 {
-    *defaultLocale = UnicodeStringToString(NATIVE(Locale)::getDefault().getName());
+    VALIDATE_NOT_NULL(defaultLocale)
+    *defaultLocale = UnicodeStringToString(::Locale::getDefault().getName());
     return NOERROR;
 }
 

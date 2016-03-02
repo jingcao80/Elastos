@@ -47,7 +47,8 @@ public:
     static CARAPI_(AutoPtr<ILocaleData>) Get(
         /* [in] */ ILocale* locale);
 
-    CARAPI_(String) ToString();
+    CARAPI ToString(
+        /* [out] */ String* str);
 
     CARAPI GetDateFormat(
         /* [in] */ DateFormat style,

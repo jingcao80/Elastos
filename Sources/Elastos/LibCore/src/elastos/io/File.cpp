@@ -275,10 +275,12 @@ ECode File::CompareTo(
     VALIDATE_NOT_NULL(result)
     *result = -1;
     VALIDATE_NOT_NULL(obj)
-    String anotherPath;
-    if (IFile::Probe(obj) == NULL) return NOERROR;
 
-    IFile::Probe(obj)->GetPath(&anotherPath);
+    IFile* afile = IFile::Probe(obj);
+    if (afile == NULL) return NOERROR;
+
+    String anotherPath;
+    afile->GetPath(&anotherPath);
     //todo: the result of String.Compare() maybe not correct;
     *result = mPath.Compare(anotherPath);
     return NOERROR;
@@ -288,12 +290,15 @@ ECode File::CompareTo(
     /* [in] */ IFile* another,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(another)
     VALIDATE_NOT_NULL(result)
+    *result = -1;
+    VALIDATE_NOT_NULL(another)
+
+    IFile* afile = IFile::Probe(another);
+    if (afile == NULL) return E_INVALID_ARGUMENT;
 
     String anotherPath;
-    if (IFile::Probe(another) == NULL) return E_INVALID_ARGUMENT;
-    IFile::Probe(another)->GetPath(&anotherPath);
+    afile->GetPath(&anotherPath);
     *result = mPath.Compare(anotherPath);
     return NOERROR;
 }
@@ -342,10 +347,11 @@ ECode File::Equals(
     *isEqual = FALSE;
     VALIDATE_NOT_NULL(obj);
 
-    if (IFile::Probe(obj) == NULL) return NOERROR;
+    IFile* file = IFile::Probe(obj);
+    if (file == NULL) return NOERROR;
 
     String path;
-    IFile::Probe(obj)->GetPath(&path);
+    file->GetPath(&path);
     *isEqual = mPath.Equals(path);
     return NOERROR;
 }
@@ -362,7 +368,7 @@ ECode File::GetAbsolutePath(
     /* [out] */ String* path)
 {
     VALIDATE_NOT_NULL(path);
-    *path = String(NULL);
+    *path = NULL;
 
     Boolean isAbsolute;
     if (IsAbsolute(&isAbsolute), isAbsolute) {

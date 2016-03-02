@@ -8,6 +8,7 @@
 #include "CParsePosition.h"
 #include "ICUUtil.h"
 #include "StringBuffer.h"
+#include "Logger.h"
 
 using Elastos::Math::IBigInteger;
 using Elastos::Core::IByte;
@@ -17,6 +18,7 @@ using Elastos::Core::IInteger64;
 using Elastos::Core::IStringBuffer;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::CLocale;
+using Elastos::Utility::Logging::Logger;
 using Libcore::ICU::ICUUtil;
 using Libcore::ICU::ILocaleData;
 using Libcore::ICU::ILocaleDataHelper;
@@ -24,6 +26,8 @@ using Libcore::ICU::CLocaleDataHelper;
 
 namespace Elastos {
 namespace Text {
+
+static const String TAG("NumberFormat");
 
 static AutoPtr<INumberFormatField> InitField(const String& name)
 {

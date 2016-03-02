@@ -57,7 +57,7 @@ static UConverter* toUConverter(Int64 address)
     return reinterpret_cast<UConverter*>(static_cast<uintptr_t>(address));
 }
 
-extern ECode maybeThrowIcuException(UErrorCode errorCode);
+extern ECode maybeThrowIcuException(const char* provider, UErrorCode errorCode);
 
 static ECode collectStandardNames(
     const char* canonicalName,
@@ -65,25 +65,19 @@ static ECode collectStandardNames(
     Vector<String>& result,
     bool* rev)
 {
+    VALIDATE_NOT_NULL(rev)
+    *rev = FALSE;
+
     UErrorCode status = U_ZERO_ERROR;
     UStringEnumeration e(ucnv_openStandardNames(canonicalName, standard, &status));
-    if (!U_SUCCESS(status)) {
-        *rev = false;
-        return maybeThrowIcuException(status);
-    }
+    FAIL_RETURN(maybeThrowIcuException("ucnv_openStandardNames", status))
 
     Int32 count = e.count(status);
-    if (!U_SUCCESS(status)) {
-        *rev = false;
-        return maybeThrowIcuException(status);
-    }
+    FAIL_RETURN(maybeThrowIcuException("StringEnumeration::count", status))
 
     for (Int32 i = 0; i < count; ++i) {
         const UnicodeString* string = e.snext(status);
-        if (!U_SUCCESS(status)) {
-            *rev = false;
-            return maybeThrowIcuException(status);
-        }
+        FAIL_RETURN(maybeThrowIcuException("StringEnumeration::snext", status))
         String s = UnicodeStringToString(*string);
         if (s.IndexOf("+,") < 0) {
             result.PushBack(s);
@@ -222,7 +216,7 @@ ECode NativeConverter::Decode(
 
     // Managed code handles some cases; throw all other errors.
     if (shouldCodecThrow(flush, errorCode)) {
-        return maybeThrowIcuException(errorCode);
+        FAIL_RETURN(maybeThrowIcuException("ucnv_fromUnicode", errorCode))
     }
     *result = errorCode;
     return NOERROR;
@@ -283,7 +277,7 @@ ECode NativeConverter::Encode(
 
     // Managed code handles some cases; throw all other errors.
     if (shouldCodecThrow(flush, errorCode)) {
-        return maybeThrowIcuException(errorCode);
+        FAIL_RETURN(maybeThrowIcuException("ucnv_toUnicode", errorCode))
     }
 
     *result = errorCode;
@@ -300,9 +294,7 @@ ECode NativeConverter::OpenConverter(
     }
     UErrorCode status = U_ZERO_ERROR;
     UConverter* cnv = ucnv_open(converterName.string(), &status);
-    if (!U_SUCCESS(status)) {
-        return maybeThrowIcuException(status);
-    }
+    FAIL_RETURN(maybeThrowIcuException("ucnv_open", status))
     *value = reinterpret_cast<uintptr_t>(cnv);
     return NOERROR;
 }
@@ -697,7 +689,7 @@ ECode NativeConverter::SetCallbackDecode(
 
     UErrorCode errorCode = U_ZERO_ERROR;
     ucnv_setToUCallBack(cnv, CHARSET_DECODER_CALLBACK, callbackContext, NULL, NULL, &errorCode);
-    return maybeThrowIcuException(errorCode);
+    return maybeThrowIcuException("toConverter", errorCode);
 }
 
 ECode NativeConverter::SetCallbackEncode(
@@ -708,7 +700,7 @@ ECode NativeConverter::SetCallbackEncode(
 {
     UConverter* cnv = toUConverter(address);
     if (cnv == NULL) {
-        return E_INVALID_ARGUMENT;
+        return maybeThrowIcuException("toUConverter", U_ILLEGAL_ARGUMENT_ERROR);
     }
 
     UConverterFromUCallback oldCallback = NULL;
@@ -725,14 +717,14 @@ ECode NativeConverter::SetCallbackEncode(
     callbackContext->onUnmappableInput = getFromUCallback(onUnmappableInput);
 
     if (javaReplacement->GetPayload() == NULL) {
-        return E_INVALID_ARGUMENT;
+        return maybeThrowIcuException("replacementBytes", U_ILLEGAL_ARGUMENT_ERROR);
     }
     memcpy(callbackContext->replacementBytes, javaReplacement->GetPayload(), javaReplacement->GetLength());
     callbackContext->replacementByteCount = javaReplacement->GetLength();
 
     UErrorCode errorCode = U_ZERO_ERROR;
     ucnv_setFromUCallBack(cnv, CHARSET_ENCODER_CALLBACK, callbackContext, NULL, NULL, &errorCode);
-    return maybeThrowIcuException(errorCode);
+    return maybeThrowIcuException("ucnv_setFromUCallBack", errorCode);
 }
 
 }    // ICU
