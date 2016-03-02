@@ -12,6 +12,7 @@ module
     merge("app/ExitTransitionCoordinator.car");
     merge("app/ActivityTransitionState.car");
     merge("app/ActivityView.car");
+    merge("app/AirplaneModeSettings.car");
     merge("app/AlarmManager.car");
     merge("app/AlarmClockInfo.car");
     merge("app/AlertDialog.car");
@@ -21,6 +22,7 @@ module
     merge("app/ApplicationErrorReport.car");
     merge("app/AppImportanceMonitor.car");
     merge("app/BackStackRecord.car");
+    merge("app/BrightnessSettings.car");
     merge("app/ContextImpl.car");
     merge("app/DatePickerDialog.car");
     merge("app/Dialog.car");
@@ -626,6 +628,22 @@ module
 
         interface IActivityContainerCallback;
         interface IBinder;
+    }
+
+    class CAirplaneModeSettings {
+        constructor();
+
+        constructor(
+            [in] Int32 value,
+            [in] Boolean override);
+
+        interface IAirplaneModeSettings;
+        interface IParcelable;
+    }
+
+    [local]
+    singleton class CAirplaneModeSettingsHelper {
+        interface IAirplaneModeSettingsHelper;
     }
 
     [local]
@@ -1759,6 +1777,21 @@ module
 
     class CBackStackRecordTransitionState {
         interface IBackStackRecordTransitionState;
+    }
+
+    class CBrightnessSettings {
+        constructor();
+
+        constructor(
+            [in] Int32 value,
+            [in] Boolean override);
+
+        interface IBrightnessSettings;
+        interface IParcelable;
+    }
+
+    singleton class CBrightnessSettingsHelper {
+        interface IBrightnessSettingsHelper;
     }
 
     class CFragmentManagerState {
