@@ -14,7 +14,7 @@ ECode Validator::Validate(
 }
 
 ECode Validator::GetFeature(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [out] */ Boolean* feature)
 {
     if (name == NULL) {
@@ -25,7 +25,7 @@ ECode Validator::GetFeature(
 }
 
 ECode Validator::SetFeature(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [in] */ Boolean value)
 {
     if (name == NULL) {
@@ -36,7 +36,7 @@ ECode Validator::SetFeature(
 }
 
 ECode Validator::SetProperty(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [out] */ IInterface** object)
 {
     if (name == NULL) {
@@ -47,7 +47,7 @@ ECode Validator::SetProperty(
 }
 
 ECode Validator::GetProperty(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [out] */ IInterface** property)
 {
     if (name == NULL) {

@@ -138,7 +138,7 @@ template <typename rc_t>
 static rc_t ErrorIfMinusOne(const char* name, rc_t rc, ECode* ec) {
     *ec = NOERROR;
     if (rc == rc_t(-1)) {
-        ALOGE("System-call error: %s", name);
+        // ALOGI("CPosix: System-call error: %s", name);
         *ec = E_ERRNO_EXCEPTION;
     }
     return rc;
@@ -319,26 +319,34 @@ static Boolean FillInetSocketAddress(
     return TRUE;
 }
 
-static AutoPtr<IStructStat> DoStat(
-    /* [in] */ String path,
-    /* [in] */ Boolean isLstat)
+static ECode DoStat(
+    /* [in] */ const String& path,
+    /* [in] */ Boolean isLstat,
+    /* [out] */ IStructStat** result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
     if (path == NULL) {
-        return NULL;
+        return NOERROR;
     }
     struct stat sb;
     Int32 rc = isLstat ? TEMP_FAILURE_RETRY(lstat(path, &sb))
                      : TEMP_FAILURE_RETRY(stat(path, &sb));
     if (rc == -1) {
         // throwErrnoException(env, isLstat ? "lstat" : "stat");
-        if (isLstat) {
-            ALOGE("System-call lstat error, errno = %d", errno);
-        } else {
-            ALOGE("System-call stat error, errno = %d", errno);
-        }
-        return NULL;
+        // if (isLstat) {
+        //     ALOGE("System-call lstat error, errno = %d", errno);
+        // } else {
+        //     ALOGE("System-call stat error, errno = %d", errno);
+        // }
+        return E_ERRNO_EXCEPTION;
     }
-    return MakeStructStat(sb);
+
+    AutoPtr<IStructStat> ss = MakeStructStat(sb);
+    *result = ss;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 class Passwd
@@ -438,7 +446,7 @@ ECode CPosix::Access(
     }
     Int32 rc = TEMP_FAILURE_RETRY(access(path, mode));
     if (rc == -1) {
-        ALOGE("System-call : access Error, errno = %d", errno);
+        // ALOGE("System-call : access Error, errno = %d", errno);
         return E_ERRNO_EXCEPTION;
     }
     *succeed = (rc == 0);
@@ -605,6 +613,7 @@ ECode CPosix::Dup(
     oldFd->GetDescriptor(&_oldFd);
     ECode ec;
     Int32 newFd = ErrorIfMinusOne("dup", TEMP_FAILURE_RETRY(dup(_oldFd)), &ec);
+    FAIL_RETURN(ec)
     if (newFd != -1) {
         CFileDescriptor::New(retFd);
         (*retFd)->SetDescriptor(newFd);
@@ -624,6 +633,7 @@ ECode CPosix::Dup2(
     oldFd->GetDescriptor(&_oldFd);
     ECode ec;
     Int32 fd = ErrorIfMinusOne("dup2", TEMP_FAILURE_RETRY(dup2(_oldFd, newFd)), &ec);
+    FAIL_RETURN(ec)
     if (fd != -1) {
         CFileDescriptor::New(retFd);
         (*retFd)->SetDescriptor(fd);
@@ -1005,12 +1015,16 @@ ECode CPosix::GetsockoptByte(
     /* [out] */ Int32* sockopt)
 {
     VALIDATE_NOT_NULL(sockopt)
+    *sockopt = 0;
+
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     u_char result = 0;
     socklen_t size = sizeof(result);
     ECode ec;
     ErrorIfMinusOne("getsockopt", TEMP_FAILURE_RETRY(getsockopt(_fd, level, option, &result, &size)), &ec);
+    FAIL_RETURN(ec)
+
     *sockopt = result;
     return ec;
 }
@@ -1049,12 +1063,16 @@ ECode CPosix::GetsockoptInt32(
     /* [out] */ Int32* sockopt)
 {
     VALIDATE_NOT_NULL(sockopt)
+    *sockopt = 0;
+
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     Int32 result = 0;
     socklen_t size = sizeof(result);
     ECode ec;
     ErrorIfMinusOne("getsockopt", TEMP_FAILURE_RETRY(getsockopt(_fd, level, option, &result, &size)), &ec);
+    FAIL_RETURN(ec)
+
     *sockopt = result;
     return ec;
 }
@@ -1209,17 +1227,19 @@ ECode CPosix::IoctlInetAddress(
     /* [out] */ IInetAddress** addr)
 {
     VALIDATE_NOT_NULL(addr)
+        *addr = NULL;
+
     struct ifreq req;
     if (!FillIfreq(interfaceName, req)) {
-        *addr = NULL;
         return NOERROR;
     }
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     ECode ec;
     Int32 rc = ErrorIfMinusOne("ioctl", TEMP_FAILURE_RETRY(ioctl(_fd, cmd, &req)), &ec);
+    FAIL_RETURN(ec)
+
     if (rc == -1) {
-        *addr = NULL;
         return ec;
     }
     AutoPtr<IInetAddress> inetAddress = SockaddrToInetAddress(reinterpret_cast<sockaddr_storage&>(req.ifr_addr), NULL);
@@ -1235,12 +1255,16 @@ ECode CPosix::IoctlInt(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
+
     // This is complicated because ioctls may return their result by updating their argument
     // or via their return value, so we need to support both.
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     ECode ec;
     Int32 rc = ErrorIfMinusOne("ioctl", TEMP_FAILURE_RETRY(ioctl(_fd, cmd, arg)), &ec);
+    FAIL_RETURN(ec)
+
     *result = rc;
     return ec;
 }
@@ -1311,6 +1335,8 @@ ECode CPosix::Lseek(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
+
     Int32 _fd;
     fd->GetDescriptor(&_fd);
     ECode ec;
@@ -1322,12 +1348,7 @@ ECode CPosix::Lstat(
     /* [in] */ const String& path,
     /* [out] */ IStructStat** stat)
 {
-    VALIDATE_NOT_NULL(stat)
-    AutoPtr<IStructStat> statObj = DoStat(path, TRUE);
-    *stat = statObj;
-    if (NULL == *stat) return E_ERRNO_EXCEPTION;
-    REFCOUNT_ADD(*stat)
-    return NOERROR;
+    return DoStat(path, TRUE, stat);
 }
 
 ECode CPosix::Mincore(
@@ -1441,17 +1462,18 @@ ECode CPosix::Open(
     /* [out] */ IFileDescriptor** fd)
 {
     VALIDATE_NOT_NULL(fd)
+    *fd = NULL;
+
     if (path == NULL) {
-        *fd = NULL;
         return NOERROR;
     }
     ECode ec;
     Int32 _fd = ErrorIfMinusOne("open", TEMP_FAILURE_RETRY(open(path, flags, mode)), &ec);
+    FAIL_RETURN(ec)
+
     if (_fd != -1) {
         CFileDescriptor::New(fd);
         (*fd)->SetDescriptor(_fd);
-    } else {
-        *fd = NULL;
     }
     return ec;
 }
@@ -1460,9 +1482,13 @@ ECode CPosix::Pipe(
     /* [out, callee] */ ArrayOf<IFileDescriptor*>** fds)
 {
     VALIDATE_NOT_NULL(fds)
+    *fds = NULL;
+
     Int32 fdsArr[2];
     ECode ec;
     Int32 _fd = ErrorIfMinusOne("pipe", TEMP_FAILURE_RETRY(pipe(&fdsArr[0])), &ec);
+    FAIL_RETURN(ec)
+
     if (_fd != -1) {
         AutoPtr<ArrayOf<IFileDescriptor*> > result = ArrayOf<IFileDescriptor*>::Alloc(2);
         for (Int32 i = 0; i < 2; ++i) {
@@ -1478,9 +1504,7 @@ ECode CPosix::Pipe(
         *fds = result;
         REFCOUNT_ADD(*fds)
     }
-    else {
-        *fds = NULL;
-    }
+
     return ec;
 }
 
@@ -1491,6 +1515,7 @@ ECode CPosix::Poll(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = -1;
     // static jfieldID fdFid = env->GetFieldID(JniConstants::structPollfdClass, "fd", "Ljava/io/FileDescriptor;");
     // static jfieldID eventsFid = env->GetFieldID(JniConstants::structPollfdClass, "events", "S");
     // static jfieldID reventsFid = env->GetFieldID(JniConstants::structPollfdClass, "revents", "S");
@@ -1846,6 +1871,8 @@ ECode CPosix::Sendfile(
     /* [out] */ Int64* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
+
     Int32 _outFd, _inFd;
     outFd->GetDescriptor(&_outFd);
     inFd->GetDescriptor(&_inFd);
@@ -1860,6 +1887,8 @@ ECode CPosix::Sendfile(
 
     ECode ec;
     *result = ErrorIfMinusOne("sendfile", TEMP_FAILURE_RETRY(sendfile(_outFd, _inFd, offsetPtr, byteCount)), &ec);
+    FAIL_RETURN(ec)
+
     if (inOffset != NULL) {
         *inOffset = offset;
     }
@@ -2149,9 +2178,12 @@ ECode CPosix::Socket(
     /* [out] */ IFileDescriptor** fd)
 {
     VALIDATE_NOT_NULL(fd)
+    *fd = NULL;
+
     ECode ec;
     Int32 _fd = ErrorIfMinusOne("socket", TEMP_FAILURE_RETRY(socket(socketDomain, type, protocol)), &ec);
-    *fd = NULL;
+    FAIL_RETURN(ec)
+
     if (_fd != -1) {
         CFileDescriptor::New(fd);
         (*fd)->SetDescriptor(_fd);
@@ -2169,6 +2201,8 @@ ECode CPosix::Socketpair(
     Int32 fds[2];
     ECode ec;
     Int32 rc = ErrorIfMinusOne("socketpair", TEMP_FAILURE_RETRY(socketpair(socketDomain, type, protocol, fds)), &ec);
+    FAIL_RETURN(ec)
+
     if (rc != -1) {
         fd1->SetDescriptor(fds[0]);
         fd2->SetDescriptor(fds[1]);
@@ -2180,12 +2214,7 @@ ECode CPosix::Stat(
     /* [in] */ const String& path,
     /* [out] */ IStructStat** stat)
 {
-    VALIDATE_NOT_NULL(stat)
-    AutoPtr<IStructStat> statObj = DoStat(path, FALSE);
-    *stat = statObj;
-    if (NULL == *stat) return E_ERRNO_EXCEPTION;
-    REFCOUNT_ADD(*stat)
-    return NOERROR;
+    return DoStat(path, FALSE, stat);
 }
 
     /* TODO: replace statfs with statvfs. */
@@ -2328,9 +2357,13 @@ ECode CPosix::Waitpid(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = -1;
+
     Int32 status;
     ECode ec;
     Int32 rc = ErrorIfMinusOne("waitpid", TEMP_FAILURE_RETRY(waitpid(pid, &status, options)), &ec);
+    FAIL_RETURN(ec)
+
     if (rc != -1 && statusArg != NULL) {
         *statusArg = status;
     }

@@ -14,20 +14,20 @@ class FactoryFinder
 {
 public:
     static CARAPI NewInstance(
-        /* [in] */ String clsName,
+        /* [in] */ const String& clsName,
         /* [in] */ IClassLoader* loader,
         /* [out] */ IInterface** obj);
 
     static CARAPI Find(
-        /* [in] */ String factoryId,
-        /* [in] */ String fallbackClassName,
+        /* [in] */ const String& factoryId,
+        /* [in] */ const String& fallbackClassName,
         /* [out] */ IInterface** obj);
 
 private:
     FactoryFinder();
 
     static CARAPI FindClassLoader(
-        /* [in] */ String clsName,
+        /* [in] */ const String& clsName,
         /* [out] */ IClassLoader** pLoader);
 
 private:

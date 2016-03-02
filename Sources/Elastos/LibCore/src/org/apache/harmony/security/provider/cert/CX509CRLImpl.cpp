@@ -408,7 +408,7 @@ ECode CX509CRLImpl::GetCriticalExtensionOIDs(
 }
 
 ECode CX509CRLImpl::GetExtensionValue(
-    /* [in] */ String oid,
+    /* [in] */ const String& oid,
     /* [out, callee] */ ArrayOf<Byte>** value)
 {
     if (mExtensions == NULL) {

@@ -90,7 +90,7 @@ public:
 
     static CARAPI GetInstance(
         /* [in] */ IInputStream* is,
-        /* [in] */ String encoding,
+        /* [in] */ const String& encoding,
         /* [out] */ IX509CertPathImpl** instance);
 
     static CARAPI GetInstance(
@@ -99,7 +99,7 @@ public:
 
     static CARAPI GetInstance(
         /* [in] */ ArrayOf<Byte>* inp,
-        /* [in] */ String encoding,
+        /* [in] */ const String& encoding,
         /* [out] */ IX509CertPathImpl** instance);
 
     CARAPI GetType(

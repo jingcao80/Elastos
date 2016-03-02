@@ -503,7 +503,7 @@ const AutoPtr<ResourceBundle::Control> ResourceBundle::NoFallbackControl::NOFALL
 const AutoPtr<ResourceBundle::Control> ResourceBundle::NoFallbackControl::NOFALLBACK_FORMAT_DEFAULT_CONTROL = new NoFallbackControl(sListDefault);
 
 ResourceBundle::NoFallbackControl::NoFallbackControl(
-    /* [in] */ String format)
+    /* [in] */ const String& format)
 {
     AutoPtr<CArrayList> outlist;
     CArrayList::NewByFriend((CArrayList**)&outlist);
@@ -522,7 +522,7 @@ ResourceBundle::NoFallbackControl::NoFallbackControl(
 }
 
 ECode ResourceBundle::NoFallbackControl::GetFallbackLocale(
-    /* [in] */ String baseName,
+    /* [in] */ const String& baseName,
     /* [in] */ ILocale* locale,
     /* [out] */ ILocale** outlocale)
 {
@@ -543,7 +543,7 @@ ECode ResourceBundle::NoFallbackControl::GetFallbackLocale(
 //==========================================================
 
 ResourceBundle::SimpleControl::SimpleControl(
-    /* [in] */ String format)
+    /* [in] */ const String& format)
 {
     AutoPtr<CArrayList> outlist;
     CArrayList::NewByFriend((CArrayList**)&outlist);
@@ -594,7 +594,7 @@ ResourceBundle::ResourceBundle()
 }
 
 ECode ResourceBundle::GetBundle(
-    /* [in] */ String bundleName,
+    /* [in] */ const String& bundleName,
     /* [out] */ IResourceBundle** outrb)
 {
     VALIDATE_NOT_NULL(outrb)
@@ -610,7 +610,7 @@ ECode ResourceBundle::GetBundle(
 }
 
 ECode ResourceBundle::GetBundle(
-    /* [in] */ String bundleName,
+    /* [in] */ const String& bundleName,
     /* [in] */ ILocale* locale,
     /* [out] */ IResourceBundle** outrb)
 {
@@ -627,7 +627,7 @@ ECode ResourceBundle::GetBundle(
 }
 
 ECode ResourceBundle::GetBundle(
-    /* [in] */ String bundleName,
+    /* [in] */ const String& bundleName,
     /* [in] */ ILocale* locale,
     /* [in] */ IClassLoader* loader,
     /* [out] */ IResourceBundle** outrb)
@@ -666,8 +666,8 @@ ECode ResourceBundle::GetBundle(
 }
 
 ECode ResourceBundle::MissingResourceException(
-    /* [in] */ String className,
-    /* [in] */ String key)
+    /* [in] */ const String& className,
+    /* [in] */ const String& key)
 {
     // String detail = "Can't find resource for bundle '" + className + "', key '" + key + "'";
     // throw new MissingResourceException(detail, className, key);
@@ -675,7 +675,7 @@ ECode ResourceBundle::MissingResourceException(
 }
 
 ECode ResourceBundle::GetBundle(
-    /* [in] */ String baseName,
+    /* [in] */ const String& baseName,
     /* [in] */ IResourceBundleControl* control,
     /* [out] */ IResourceBundle** outrb)
 {
@@ -683,7 +683,7 @@ ECode ResourceBundle::GetBundle(
 }
 
 ECode ResourceBundle::GetBundle(
-    /* [in] */ String baseName,
+    /* [in] */ const String& baseName,
     /* [in] */ ILocale* targetLocale,
     /* [in] */ IResourceBundleControl* control,
     /* [out] */ IResourceBundle** outrb)
@@ -692,7 +692,7 @@ ECode ResourceBundle::GetBundle(
 }
 
 ECode ResourceBundle::GetBundle(
-    /* [in] */ String baseName,
+    /* [in] */ const String& baseName,
     /* [in] */ ILocale* targetLocale,
     /* [in] */ IClassLoader* loader,
     /* [in] */ IResourceBundleControl* control,
@@ -931,7 +931,7 @@ AutoPtr<IClassLoader> ResourceBundle::GetLoader()
 }
 
 AutoPtr<IResourceBundle> ResourceBundle::ProcessGetBundle(
-    /* [in] */ String baseName,
+    /* [in] */ const String& baseName,
     /* [in] */ ILocale* targetLocale,
     /* [in] */ IClassLoader* loader,
     /* [in] */ IResourceBundleControl* control,
@@ -1034,7 +1034,7 @@ AutoPtr<IResourceBundle> ResourceBundle::ProcessGetBundle(
 
 AutoPtr<IResourceBundle> ResourceBundle::HandleGetBundle(
     /* [in] */ Boolean loadBase,
-    /* [in] */ String base,
+    /* [in] */ const String& base,
     /* [in] */ ILocale* locale,
     /* [in] */ IClassLoader* loader)
 {

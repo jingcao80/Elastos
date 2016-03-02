@@ -15,13 +15,22 @@
 
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+ #include <elastos/utility/Arrays.h>
 #include <elastos/utility/etl/HashMap.h>
+#include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Net.h>
+#include <Elastos.CoreLibrary.External.h>
+
+using Org::Kxml2::IO::IKXmlParser;
+using Org::Kxml2::IO::CKXmlParser;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 using namespace Elastos;
 using namespace Elastos::Core;
 using namespace Elastos::Math;
 using namespace Elastos::Net;
+using namespace Elastos::IO;
+using Elastos::Utility::Arrays;
 using Elastos::Utility::Etl::HashMap;
 
 class Base
@@ -973,6 +982,77 @@ void testMemoryLeak()
     }
 }
 
+void testXmlParser()
+{
+    printf("============================================\n");
+    printf("                 testXmlParser \n");
+    printf("============================================\n");
+    String path("bluetooth.xml");
+    AutoPtr<IFile> file;
+    ECode ec = CFile::New(path, (IFile**)&file);
+    if (FAILED(ec)) {
+        printf(" > failed to create CFile %s\n", path.string());
+    }
+
+    AutoPtr<IFileReader> fileReader;
+    ec = CFileReader::New(file, (IFileReader**)&fileReader);
+    if (FAILED(ec)) {
+        printf(" > failed to create CFileReader %s\n", path.string());
+    }
+
+    Int32 total = 0;
+    Int32 mLimit = 0;
+    AutoPtr<ArrayOf<Char32> > mBuffer = ArrayOf<Char32>::Alloc(8192);
+    IReader* mReader = IReader::Probe(fileReader);
+    ec = mReader->Read(mBuffer, mLimit, mBuffer->GetLength() - mLimit, &total);
+    if (FAILED(ec)) {
+        printf(" > failed to read from Read CFileReader %s\n", path.string());
+    }
+    else {
+        printf(" > read count %d\n", total);
+    }
+
+    while (total != -1) {
+        mLimit += total;
+        ec = mReader->Read(mBuffer, mLimit, mBuffer->GetLength() - mLimit, &total);
+        if (FAILED(ec)) {
+            printf(" > failed to read from Read CFileReader %s\n", path.string());
+        }
+    }
+
+    printf("==============================================\n");
+    printf(" mLimit: %d\n", mLimit);
+    printf("==============================================\n");
+    for (Int32 i = 0; i < mLimit; ++i) {
+        PFL_EX(" > %d : %c vs %d", i, (*mBuffer)[i], (*mBuffer)[i]);
+    }
+    printf("==============================================\n");
+
+    // AutoPtr<IXmlPullParser> parser;
+    // ec = CKXmlParser::New((IXmlPullParser**)&parser);
+    // if (FAILED(ec)) {
+    //     printf(" > failed to create NewPullParser %s\n", path.string());
+    // }
+
+    // ec = parser->SetFeature(IXmlPullParser::FEATURE_PROCESS_DOCDECL, TRUE);
+    // if (FAILED(ec)) {
+    //     printf(" > failed to SetFeature FEATURE_PROCESS_DOCDECL\n");
+    // }
+
+    // ec = parser->SetFeature(IXmlPullParser::FEATURE_PROCESS_NAMESPACES, TRUE);
+    // if (FAILED(ec)) {
+    //     printf(" > failed to SetFeature FEATURE_PROCESS_NAMESPACES\n");
+    // }
+
+    // parser->SetInput(IReader::Probe(fileReader));
+
+    // Int32 type;
+    // parser->Next(&type);
+    // printf(" === get first type: %d\n", type);
+
+    printf("==================  END  ===================\n");
+}
+
 void testQuintet()
 {
     // doTestArrayOfFreeRelease();
@@ -989,6 +1069,8 @@ void testQuintet()
     // testArrayOfString();
     //testSelfCopy();
     // testMemoryLeak();
+
+    testXmlParser();
 }
 
 int main(int argc, char *argv[])

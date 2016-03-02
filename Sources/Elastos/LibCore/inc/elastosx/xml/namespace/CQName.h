@@ -52,7 +52,7 @@ public:
         /* [in] */ const String& localPart);
 
     static CARAPI ValueOf(
-        /* [in] */ String qNameAsString,
+        /* [in] */ const String& qNameAsString,
         /* [out] */  IQName** qName);
 private:
 

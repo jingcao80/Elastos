@@ -91,6 +91,16 @@ public:
         /* [in] */ const String& s,
         /* [in] */ ILocale* locale);
 
+    // // Just the subset of error codes needed by CharsetDecoderICU/CharsetEncoderICU.
+    // static const Int32 U_ZERO_ERROR;
+    // static const Int32 U_INVALID_CHAR_FOUND;
+    // static const Int32 U_TRUNCATED_CHAR_FOUND;
+    // static const Int32 U_ILLEGAL_CHAR_FOUND;
+    // static const Int32 U_BUFFER_OVERFLOW_ERROR;
+
+    // static CARAPI_(Boolean) U_FAILURE(
+    //     /* [in] */ Int32 error);
+
     static CARAPI GetAvailableCurrencyCodes(
         /* [out, callee] */ ArrayOf<String>** codes);
 
@@ -114,7 +124,7 @@ public:
 
     static CARAPI GetCurrencySymbol(
         /* [in] */ ILocale* locale,
-        /* [in] */ String currencyCode,
+        /* [in] */ const String& currencyCode,
         /* [out] */ String* currencySymbol);
 
     static CARAPI_(String) GetCurrencySymbol(
@@ -228,7 +238,7 @@ private:
 
 public:
     static CARAPI GetBestDateTimePattern(
-        /* [in] */ String skeleton,
+        /* [in] */ const String& skeleton,
         /* [in] */ ILocale* locale,
         /* [out] */ String* rst);
 
@@ -240,7 +250,7 @@ private:
 
 public:
     static CARAPI GetDateFormatOrder(
-        /* [in] */ String pattern,
+        /* [in] */ const String& pattern,
         /* [out, callee] */ ArrayOf<Char32>** locales);
 
     static CARAPI GetCldrVersion(

@@ -32,7 +32,7 @@ public:
     CARAPI Parse(
         /* [in] */ IInputStream* is,
         /* [in] */ IDocumentHandler* hb,
-        /* [in] */ String systemId);
+        /* [in] */ const String& systemId);
 
     CARAPI Parse(
         /* [in] */ IInputStream* is,
@@ -41,14 +41,14 @@ public:
     CARAPI Parse(
         /* [in] */ IInputStream* is,
         /* [in] */ IDTDHandler* dh,
-        /* [in] */ String systemId);
+        /* [in] */ const String& systemId);
 
     CARAPI Parse(
-        /* [in] */ String uri,
+        /* [in] */ const String& uri,
         /* [in] */ IDocumentHandler* hb);
 
     CARAPI Parse(
-        /* [in] */ String uri,
+        /* [in] */ const String& uri,
         /* [in] */ IDTDHandler* dh);
 
     CARAPI Parse(

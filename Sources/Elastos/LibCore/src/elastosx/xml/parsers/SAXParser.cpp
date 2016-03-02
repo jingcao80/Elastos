@@ -42,7 +42,7 @@ ECode SAXParser::Parse(
 ECode SAXParser::Parse(
     /* [in] */ IInputStream* is,
     /* [in] */ IDocumentHandler* hb,
-    /* [in] */ String systemId)
+    /* [in] */ const String& systemId)
 {
     if (is == NULL) {
         SLOGGERD("SAXParser", "InputStream cannot be null");
@@ -72,7 +72,7 @@ ECode SAXParser::Parse(
 ECode SAXParser::Parse(
     /* [in] */ IInputStream* is,
     /* [in] */ IDTDHandler* dh,
-    /* [in] */ String systemId)
+    /* [in] */ const String& systemId)
 {
     if (is == NULL) {
         SLOGGERD("SAXParser", "InputStream cannot be null");
@@ -86,7 +86,7 @@ ECode SAXParser::Parse(
 }
 
 ECode SAXParser::Parse(
-    /* [in] */ String uri,
+    /* [in] */ const String& uri,
     /* [in] */ IDocumentHandler* hb)
 {
     if (uri == NULL) {
@@ -100,7 +100,7 @@ ECode SAXParser::Parse(
 }
 
 ECode SAXParser::Parse(
-    /* [in] */ String uri,
+    /* [in] */ const String& uri,
     /* [in] */ IDTDHandler* dh)
 {
     if (uri == NULL) {

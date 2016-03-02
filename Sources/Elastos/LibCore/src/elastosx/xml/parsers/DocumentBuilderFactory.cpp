@@ -139,7 +139,7 @@ ECode DocumentBuilderFactory::NewInstance(
 }
 
 ECode DocumentBuilderFactory::NewInstance(
-    /* [in] */ String factoryClassName,
+    /* [in] */ const String& factoryClassName,
     /* [in] */ IClassLoader* classLoader,
     /* [out] */ IDocumentBuilderFactory** instance)
 {

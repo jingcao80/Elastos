@@ -8,7 +8,7 @@ namespace Validation {
 CAR_INTERFACE_IMPL_2(ValidatorHandler, Object, IValidatorHandler, IContentHandler)
 
 ECode ValidatorHandler::GetFeature(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [out] */ Boolean* feature)
 {
     if (name == NULL) {
@@ -19,7 +19,7 @@ ECode ValidatorHandler::GetFeature(
 }
 
 ECode ValidatorHandler::SetFeature(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [in] */ Boolean value)
 {
     if (name == NULL) {
@@ -30,7 +30,7 @@ ECode ValidatorHandler::SetFeature(
 }
 
 ECode ValidatorHandler::SetProperty(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [in] */ IInterface* object)
 {
     if (name == NULL) {
@@ -41,7 +41,7 @@ ECode ValidatorHandler::SetProperty(
 }
 
 ECode ValidatorHandler::GetProperty(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [out] */ IInterface** property)
 {
     if (name == NULL) {

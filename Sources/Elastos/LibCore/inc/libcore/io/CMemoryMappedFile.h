@@ -44,7 +44,7 @@ public:
     CARAPI Close();
 
     static CARAPI MmapRO(
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [in] */ IMemoryMappedFile** rst);
 
 private:

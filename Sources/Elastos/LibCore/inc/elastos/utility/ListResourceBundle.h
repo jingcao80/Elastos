@@ -67,7 +67,7 @@ public:
         /* [out] */ IEnumeration** enu);
 
     CARAPI HandleGetObject(
-        /* [in] */ String key,
+        /* [in] */ const String& key,
         /* [out] */ IInterface** outface);
 
 protected:

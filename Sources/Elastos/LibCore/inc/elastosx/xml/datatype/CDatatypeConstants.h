@@ -33,7 +33,7 @@ public:
 
     private:
         Field(
-            /* [in] */ String str,
+            /* [in] */ const String& str,
             /* [in] */ Int32 id);
 
         String mStr;

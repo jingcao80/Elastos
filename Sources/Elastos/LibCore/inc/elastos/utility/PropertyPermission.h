@@ -18,8 +18,8 @@ public:
     CAR_INTERFACE_DECL()
 
     PropertyPermission(
-        /* [in] */ String name,
-        /* [in] */ String actions);
+        /* [in] */ const String& name,
+        /* [in] */ const String& actions);
 
     CARAPI GetName(
         /* [out] */ String* name);

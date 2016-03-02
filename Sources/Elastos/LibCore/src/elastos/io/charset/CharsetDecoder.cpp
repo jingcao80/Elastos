@@ -10,21 +10,23 @@ namespace Elastos {
 namespace IO {
 namespace Charset {
 
-const Int32 CharsetDecoder::INIT;
-const Int32 CharsetDecoder::ONGOING;
-const Int32 CharsetDecoder::END;
-const Int32 CharsetDecoder::FLUSH;
+const String CharsetDecoder::RESET("RESET");
+const String CharsetDecoder::ONGOING("ONGOING");
+const String CharsetDecoder::END_OF_INPUT("END_OF_INPUT");
+const String CharsetDecoder::FLUSHED("FLUSHED");
 
 CharsetDecoder::CharsetDecoder()
     : mAverageCharsPerByte(0.0f)
     , mMaxCharsPerByte(0.0f)
-    , mStatus(0)
-{}
+    , mReplacementChars("\ufffd")
+    , mState(RESET)
+{
+}
 
 CharsetDecoder::~CharsetDecoder()
 {}
 
-ECode CharsetDecoder::Init(
+ECode CharsetDecoder::constructor(
     /* [in] */ ICharset* charset,
     /* [in] */ Float averageCharsPerByte,
     /* [in] */ Float maxCharsPerByte)
@@ -39,14 +41,10 @@ ECode CharsetDecoder::Init(
     }
     mAverageCharsPerByte = averageCharsPerByte;
     mMaxCharsPerByte = maxCharsPerByte;
-    mCs = charset;
-    mStatus = INIT;
+    mCharset = charset;
 
-    AutoPtr<ICodingErrorAction> report;
-    CCodingErrorAction::GetREPORT((ICodingErrorAction**)&report);
-    mMalformedInputAction = report;
-    mUnmappableCharacterAction = report;
-    mReplacementChars = "\ufffd";
+    CCodingErrorAction::GetREPORT((ICodingErrorAction**)&mMalformedInputAction);
+    CCodingErrorAction::GetREPORT((ICodingErrorAction**)&mUnmappableCharacterAction);
     return NOERROR;
 }
 
@@ -64,7 +62,7 @@ ECode CharsetDecoder::Charset(
     /* [out] */ ICharset** charset)
 {
     VALIDATE_NOT_NULL(charset)
-    *charset = mCs;
+    *charset = mCharset;
     REFCOUNT_ADD(*charset)
     return NOERROR;
 }
@@ -75,53 +73,48 @@ ECode CharsetDecoder::Decode(
 {
     VALIDATE_NOT_NULL(charBuffer)
     *charBuffer = NULL;
-
-    Reset();
-    Int32 remaining = 0;
     assert(byteBuffer != NULL);
+
+    Int32 remaining = 0;
     FAIL_RETURN(IBuffer::Probe(byteBuffer)->GetRemaining(&remaining))
     Int32 length = (Int32) (remaining * mAverageCharsPerByte);
-    AutoPtr<ICharBuffer> output;
-    FAIL_RETURN(CharBuffer::Allocate(length, (ICharBuffer**)&output))
-    AutoPtr<ICoderResult> result;
 
-    while (TRUE) {
-        result = NULL;
-        FAIL_RETURN(Decode(byteBuffer, output, FALSE, (ICoderResult**)&result))
-        FAIL_RETURN(CheckCoderResult(result))
-        Boolean ret = FALSE;
-        if ((result->IsUnderflow(&ret), ret)) {
-            break;
-        }
-        else if ((result->IsOverflow(&ret), ret)) {
-            AutoPtr<ICharBuffer> tmpOutput;
-            FAIL_RETURN(AllocateMore(output, (ICharBuffer**)&tmpOutput))
-            output = tmpOutput;
-        }
-    }
+    AutoPtr<ICharBuffer> out;
+    FAIL_RETURN(CharBuffer::Allocate(length, (ICharBuffer**)&out))
 
-    result = NULL;
-    FAIL_RETURN(Decode(byteBuffer, output, TRUE, (ICoderResult**)&result))
-    FAIL_RETURN(CheckCoderResult(result))
+    Reset();
 
-    while (TRUE) {
-        result = NULL;
-        Flush(output, (ICoderResult**)&result);
-        FAIL_RETURN(CheckCoderResult(result))
-        Boolean ret = FALSE;
-        if ((result->IsOverflow(&ret), ret)) {
-            AutoPtr<ICharBuffer> tmpOutput;
-            FAIL_RETURN(AllocateMore(output, (ICharBuffer**)&tmpOutput))
-            output = tmpOutput;
+    AutoPtr<ICoderResult> OVERFLOW;
+    CCoderResult::GetOVERFLOW((ICoderResult**)&OVERFLOW);
+    while (mState != FLUSHED) {
+        AutoPtr<ICoderResult> result;
+        FAIL_RETURN(Decode(byteBuffer, out, TRUE, (ICoderResult**)&result))
+
+        if (result.Get() == OVERFLOW.Get()) {
+            AutoPtr<ICharBuffer> tempOut;
+            FAIL_RETURN(AllocateMore(out, (ICharBuffer**)&tempOut))
+            out = tempOut;
+            continue; // No point trying to flush to an already-full buffer.
         }
         else {
-            break;
+            FAIL_RETURN(CheckCoderResult(result))
+        }
+
+        result = NULL;
+        Flush(out, (ICoderResult**)&result);
+        if (result.Get() == OVERFLOW.Get()) {
+            AutoPtr<ICharBuffer> tempOut;
+            FAIL_RETURN(AllocateMore(out, (ICharBuffer**)&tempOut))
+            out = tempOut;
+        }
+        else {
+            FAIL_RETURN(CheckCoderResult(result))
         }
     }
 
-    IBuffer::Probe(output)->Flip();
-    mStatus = FLUSH;
-    *charBuffer = output;
+    IBuffer::Probe(out)->Flip();
+
+    *charBuffer = out;
     REFCOUNT_ADD(*charBuffer)
     return NOERROR;
 }
@@ -130,79 +123,86 @@ ECode CharsetDecoder::Decode(
     /* [in] */ IByteBuffer* byteBuffer,
     /* [in] */ ICharBuffer* charBuffer,
     /* [in] */ Boolean endOfInput,
-    /* [out] */ ICoderResult** result)
+    /* [out] */ ICoderResult** codeResult)
 {
-    VALIDATE_NOT_NULL(result)
-    *result = NULL;
-    /*
-     * status check
-     */
-    if ((mStatus == FLUSH) || (!endOfInput && mStatus == END)) {
-        // throw new IllegalStateException();
+    VALIDATE_NOT_NULL(codeResult)
+    *codeResult = NULL;
+    assert(byteBuffer != NULL);
+
+    if (mState != RESET && mState != ONGOING && !(endOfInput && mState == END_OF_INPUT)) {
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    // begin to decode
+    AutoPtr<ICoderResult> OVERFLOW, UNDERFLOW;
+    CCoderResult::GetOVERFLOW((ICoderResult**)&OVERFLOW);
+    CCoderResult::GetUNDERFLOW((ICoderResult**)&UNDERFLOW);
+
+    AutoPtr<ICodingErrorAction> REPORT, REPLACE;
+    CCodingErrorAction::GetREPORT((ICodingErrorAction**)&REPORT);
+    CCodingErrorAction::GetREPLACE((ICodingErrorAction**)&REPLACE);
+
+    IBuffer* bb = IBuffer::Probe(byteBuffer);
+    IBuffer* bc = IBuffer::Probe(charBuffer);
+    mState = endOfInput ? END_OF_INPUT : ONGOING;
+    ECode ec = NOERROR;
+    Boolean hasRemaining;
+    Int32 position, length;
     while (TRUE) {
-        AutoPtr<ICodingErrorAction> action;
-        ECode ec = DecodeLoop(byteBuffer, charBuffer, result);
-        if (ec == (ECode)E_BUFFER_OVER_FLOW_EXCEPTION || ec == (ECode)E_BUFFER_UNDER_FLOW_EXCEPTION) {
-            // unexpected exception
-            // throw new CoderMalfunctionError(ex);
+        AutoPtr<ICoderResult> result;
+        // try {
+        ec = DecodeLoop(byteBuffer, charBuffer, (ICoderResult**)&result);
+        if (ec == (ECode)E_BUFFER_OVER_FLOW_EXCEPTION
+            || ec == (ECode)E_BUFFER_UNDER_FLOW_EXCEPTION) {
             return E_CODER_MALFUNCTION_ERROR;
         }
-        /*
-         * result handling
-         */
-        Boolean ret = FALSE;
-        if (((*result)->IsUnderflow(&ret), ret)) {
-            Int32 remaining = 0;
-            assert(byteBuffer != NULL);
-            IBuffer::Probe(byteBuffer)->GetRemaining(&remaining);
-            mStatus = endOfInput ? END : ONGOING;
-            if (endOfInput && remaining > 0) {
-                *result = NULL;
-                CCoderResult::MalformedForLength(remaining, result);
+        else if (FAILED(ec)) {
+            return ec;
+        }
+
+        if (result.Get() == UNDERFLOW.Get()) {
+            if (endOfInput && (bb->HasRemaining(&hasRemaining), hasRemaining)) {
+                Int32 remaining = 0;
+                FAIL_RETURN(bb->GetRemaining(&remaining))
+                result = NULL;
+                CCoderResult::MalformedForLength(remaining, (ICoderResult**)&result);
             }
             else {
+                *codeResult = result;
+                REFCOUNT_ADD(*codeResult)
                 return NOERROR;
             }
         }
-        ret = FALSE;
-        if (((*result)->IsOverflow(&ret), ret)) {
+        else if (result.Get() == OVERFLOW.Get()) {
+            *codeResult = result;
+            REFCOUNT_ADD(*codeResult)
             return NOERROR;
         }
-        // set coding error handle action
-        action = mMalformedInputAction;
-        ret = FALSE;
-        if (((*result)->IsUnmappable(&ret), ret)) {
-            action = mUnmappableCharacterAction;
+
+        // We have a real error, so do what the appropriate action tells us what to do...
+        Boolean bval;
+        result->IsUnmappable(&bval);
+        AutoPtr<ICodingErrorAction> action =
+            bval ? mUnmappableCharacterAction : mMalformedInputAction;
+        if (action.Get() == REPORT.Get()) {
+            *codeResult = result;
+            REFCOUNT_ADD(*codeResult)
+            return NOERROR;
         }
-        // If the action is IGNORE or REPLACE, we should continue decoding.
-        AutoPtr<ICodingErrorAction> REPLACE;
-        CCodingErrorAction::GetREPLACE((ICodingErrorAction**)&REPLACE);
-        if ((action == REPLACE)) {
+        else if (action.Get() == REPLACE.Get()) {
             Int32 remaining = 0;
-            assert(charBuffer != NULL);
-            IBuffer::Probe(charBuffer)->GetRemaining(&remaining);
+            FAIL_RETURN(bc->GetRemaining(&remaining))
             if (remaining < mReplacementChars.GetLength()) {
-                *result = NULL;
-                return CCoderResult::GetOVERFLOW(result);
-            }
-            charBuffer->Put(mReplacementChars);
-        }
-        else {
-            AutoPtr<ICodingErrorAction> IGNORE;
-            CCodingErrorAction::GetIGNORE((ICodingErrorAction**)&IGNORE);
-            if (!(action == IGNORE)){
+                *codeResult = OVERFLOW;
+                REFCOUNT_ADD(*codeResult)
                 return NOERROR;
             }
+
+            charBuffer->Put(mReplacementChars);
         }
-        Int32 tmpPosition = 0;
-        IBuffer::Probe(byteBuffer)->GetPosition(&tmpPosition);
-        Int32 tmpLen = 0;
-        (*result)->GetLength(&tmpLen);
-        IBuffer::Probe(byteBuffer)->SetPosition(tmpPosition + tmpLen);
+
+        bb->GetPosition(&position);
+        result->GetLength(&length);
+        bb->SetPosition(position + length);
     }
     return NOERROR;
 }
@@ -221,15 +221,15 @@ ECode CharsetDecoder::Flush(
     VALIDATE_NOT_NULL(result)
     *result = NULL;
 
-    if (mStatus != END && mStatus != INIT) {
-        // throw new IllegalStateException();
+    if (mState != FLUSHED && mState != END_OF_INPUT) {
         return E_ILLEGAL_STATE_EXCEPTION;
     }
+
     FAIL_RETURN(ImplFlush(charBuffer, result))
     AutoPtr<ICoderResult> UNDERFLOW;
     CCoderResult::GetUNDERFLOW((ICoderResult**)&UNDERFLOW);
-    if (*result == UNDERFLOW) {
-        mStatus = FLUSH;
+    if (*result == UNDERFLOW.Get()) {
+        mState = FLUSHED;
     }
     return NOERROR;
 }
@@ -312,7 +312,7 @@ ECode CharsetDecoder::ReplaceWith(
 
 ECode CharsetDecoder::Reset()
 {
-    mStatus = INIT;
+    mState = RESET;
     ImplReset();
     return NOERROR;
 }

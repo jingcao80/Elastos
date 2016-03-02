@@ -43,8 +43,8 @@ private:
         /* [out] */ IIterable** it);
 
     CARAPI LoadFromServicesFile(
-        /* [in] */ String schemaLanguage,
-        /* [in] */ String resourceName,
+        /* [in] */ const String& schemaLanguage,
+        /* [in] */ const String& resourceName,
         /* [in] */ IInputStream* in,
         /* [out] */ ISchemaFactory** factory);
 

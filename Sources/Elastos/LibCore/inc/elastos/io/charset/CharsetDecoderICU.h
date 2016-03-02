@@ -15,7 +15,7 @@ public:
 
     ~CharsetDecoderICU();
 
-    CARAPI Init(
+    CARAPI constructor(
         /* [in] */ ICharset* cs,
         /* [in] */ Float averageCharsPerByte,
         /* [in] */ Int64 address);
@@ -69,7 +69,7 @@ private:
 
     static const Int32 INPUT_OFFSET = 0;
     static const Int32 OUTPUT_OFFSET = 1;
-    static const Int32 INVALID_BYTES = 2;
+    static const Int32 INVALID_CHAR_COUNT = 2;
 
     /*
      * data[INPUT_OFFSET]   = on input contains the start of input and on output the number of input bytes consumed

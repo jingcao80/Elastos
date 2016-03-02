@@ -193,21 +193,24 @@ ECode NativeConverter::Decode(
     }
 
     // Do the conversion.
-    Int32* sourceOffset = &((*data)[0]);
-    Int32* targetOffset = &((*data)[1]);
+    Int32* sourceOffset = &(*data)[0];
+    Int32* targetOffset = &(*data)[1];
     const char* mySource = reinterpret_cast<const char*>(source->GetPayload() + *sourceOffset);
     const char* mySourceLimit = reinterpret_cast<const char*>(source->GetPayload() + sourceEnd);
-    UChar* cTarget = (UChar*) target->GetPayload() + *targetOffset;
-    const UChar* cTargetLimit = (UChar*) target->GetPayload() + targetEnd;
+    AutoPtr<ArrayOf<UChar> > temp = ArrayOf<UChar>::Alloc(target->GetLength());
+    UChar* cTarget = temp->GetPayload() + *targetOffset;
+    const UChar* cTargetLimit = temp->GetPayload() + targetEnd;
     UErrorCode errorCode = U_ZERO_ERROR;
-    ucnv_toUnicode(cnv, &cTarget, cTargetLimit, &mySource, mySourceLimit, NULL, flush, &errorCode);
+    ucnv_toUnicode(cnv, &cTarget, cTargetLimit, &mySource, mySourceLimit,
+            NULL, flush, &errorCode);
+    for (Int32 i = *targetOffset; i < temp->GetLength(); ++i) {
+        (*target)[i] = (*temp)[i];
+    }
     *sourceOffset = mySource - reinterpret_cast<const char*>(source->GetPayload()) - *sourceOffset;
-    *targetOffset = cTarget - (UChar*) target->GetPayload() + *targetOffset;
+    *targetOffset = cTarget - temp->GetPayload() - *targetOffset;
 
     // If there was an error, count the problematic bytes.
-    if (U_ILLEGAL_CHAR_FOUND == errorCode
-        || U_INVALID_CHAR_FOUND == errorCode
-        || U_TRUNCATED_CHAR_FOUND == errorCode) {
+    if (errorCode == U_ILLEGAL_CHAR_FOUND || errorCode == U_INVALID_CHAR_FOUND) {
         int8_t invalidByteCount = 32;
         char invalidBytes[32] = {'\0'};
         UErrorCode minorErrorCode = U_ZERO_ERROR;

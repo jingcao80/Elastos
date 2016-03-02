@@ -6,8 +6,8 @@ namespace Utility {
 CAR_INTERFACE_IMPL(PropertyPermission, BasicPermission, IPropertyPermission)
 
 PropertyPermission::PropertyPermission(
-    /* [in] */ String name,
-    /* [in] */ String actions)
+    /* [in] */ const String& name,
+    /* [in] */ const String& actions)
     : BasicPermission(String(""))
 {}
 

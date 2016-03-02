@@ -98,7 +98,7 @@ public:
         /* [out] */ ISet** oids);
 
     CARAPI GetExtensionValue(
-        /* [in] */ String oid,
+        /* [in] */ const String& oid,
         /* [out, callee] */ ArrayOf<Byte>** value);
 
     CARAPI HasUnsupportedCriticalExtension(

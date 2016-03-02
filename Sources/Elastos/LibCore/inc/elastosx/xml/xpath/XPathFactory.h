@@ -30,15 +30,15 @@ public:
         /* [out] */ IXPathFactory** instance);
 
     virtual CARAPI IsObjectModelSupported(
-        /* [in] */ String objectModel,
+        /* [in] */ const String& objectModel,
         /* [out] */ Boolean* value) = 0;
 
     virtual CARAPI SetFeature(
-        /* [in] */ String name,
+        /* [in] */ const String& name,
         /* [in] */ Boolean value) = 0;
 
     virtual CARAPI GetFeature(
-        /* [in] */ String name,
+        /* [in] */ const String& name,
         /* [out] */ Boolean* value) = 0;
 
     virtual CARAPI SetXPathVariableResolver(

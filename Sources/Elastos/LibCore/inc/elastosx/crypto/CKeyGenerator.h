@@ -142,7 +142,7 @@ public:
      *             if {@code algorithm} is {@code null}.
      */
     static CARAPI GetInstance(
-        /* [in] */ String algorithm,
+        /* [in] */ const String& algorithm,
         /* [out] */ IKeyGenerator ** ka);
 
     /**
@@ -165,8 +165,8 @@ public:
      *             if the specified algorithm name is {@code null}.
      */
     static CARAPI GetInstance(
-        /* [in] */ String algorithm,
-        /* [in] */ String provider,
+        /* [in] */ const String& algorithm,
+        /* [in] */ const String& provider,
         /* [out] */ IKeyGenerator ** ka);
 
     /**
@@ -188,7 +188,7 @@ public:
      *             if the specified algorithm name is {@code null}.
      */
     static CARAPI GetInstance(
-        /* [in] */ String algorithm,
+        /* [in] */ const String& algorithm,
         /* [in] */ IProvider * provider,
         /* [out] */ IKeyGenerator ** ka);
 

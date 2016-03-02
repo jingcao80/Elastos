@@ -1505,7 +1505,7 @@ ECode CForkJoinPool::constructor(
     /* [in] */ IForkJoinPoolForkJoinWorkerThreadFactory* factory,
     /* [in] */ IThreadUncaughtExceptionHandler* handler,
     /* [in] */ Int32 mode,
-    /* [in] */ String workerNamePrefix)
+    /* [in] */ const String& workerNamePrefix)
 {
     mWorkerNamePrefix = workerNamePrefix;
     mFactory = factory;

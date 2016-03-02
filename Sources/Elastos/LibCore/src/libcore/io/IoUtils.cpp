@@ -43,8 +43,7 @@ IoUtils::FileReader::Init(
     // try {
     ECode ec = CIoBridge::_Open(absolutePath, O_RDONLY, (IFileDescriptor**)&mFd);
     if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
-        ALOGE("E_FILE_NOT_FOUND_EXCEPTION: create FileReader: %s", absolutePath.string());
-        return ec;
+        return E_IO_EXCEPTION;
     }
     // } catch (FileNotFoundException fnfe) {
     //     throw fnfe;
@@ -59,7 +58,7 @@ IoUtils::FileReader::Init(
     ec = os->Fstat(mFd, (IStructStat**)&stat);
     if (FAILED(ec)) {
         IoUtils::CloseQuietly(mFd);
-        ALOGE("IOException: create FileReader: %s", absolutePath.string());
+        // ALOGE("FileReader::Init IOException: create FileReader: %s", absolutePath.string());
         return E_IO_EXCEPTION;
     // throw exception.rethrowAsIOException();
     }

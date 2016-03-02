@@ -24,7 +24,7 @@ public:
         /* [out] */ IDatatypeFactory** factory);
 
     static CARAPI NewInstance(
-        /* [in] */ String factoryClassName,
+        /* [in] */ const String& factoryClassName,
         /* [in] */ IClassLoader* classLoader,
         /* [out] */ IDatatypeFactory** factory);
 
@@ -41,7 +41,7 @@ public:
     using IDatatypeFactory::NewDuration;
 
     CARAPI NewDurationDayTime(
-        /* [in] */ String lexicalRepresentation,
+        /* [in] */ const String& lexicalRepresentation,
         /* [out] */ IDuration** duration);
 
     CARAPI NewDurationDayTime(
@@ -65,7 +65,7 @@ public:
         /* [out] */ IDuration** duration);
 
     CARAPI NewDurationYearMonth(
-        /* [in] */ String lexicalRepresentation,
+        /* [in] */ const String& lexicalRepresentation,
         /* [out] */ IDuration** duration);
 
     CARAPI NewDurationYearMonth(

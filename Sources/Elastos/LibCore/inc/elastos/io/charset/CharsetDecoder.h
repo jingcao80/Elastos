@@ -17,6 +17,8 @@ public:
 
     virtual ~CharsetDecoder();
 
+    CAR_INTERFACE_DECL()
+
     /**
      * Constructs a new <code>CharsetDecoder</code> using the given
      * <code>Charset</code>, average number and maximum number of characters
@@ -35,12 +37,10 @@ public:
      *             if <code>averageCharsPerByte</code> or
      *             <code>maxCharsPerByte</code> is negative.
      */
-    Init(
+    constructor(
         /* [in] */ ICharset* charset,
         /* [in] */ Float averageCharsPerByte,
         /* [in] */ Float maxCharsPerByte);
-
-    CAR_INTERFACE_DECL()
 
     /**
      * Returns the average number of characters created by this decoder for a
@@ -458,37 +458,22 @@ private:
         /* [out] */ ICharBuffer** newOutput);
 
 private:
-    /*
-     * internal status consts
-     */
-    static const int INIT = 0;
+    static const String RESET;
+    static const String ONGOING;
+    static const String END_OF_INPUT;
+    static const String FLUSHED;
 
-    static const int ONGOING = 1;
+    AutoPtr<ICharset> mCharset;
 
-    static const int END = 2;
-
-    static const int FLUSH = 3;
-
-    // average number of chars for one byte
     Float mAverageCharsPerByte;
-
-    // maximum number of chars for one byte
     Float mMaxCharsPerByte;
 
-    // charset for this decoder
-    AutoPtr<ICharset> mCs;
-
-    // specify the action if malformed input error encountered
-    AutoPtr<ICodingErrorAction> mMalformedInputAction;
-
-    // specify the action if unmappable character error encountered
-    AutoPtr<ICodingErrorAction> mUnmappableCharacterAction;
-
-    // the replacement string
     String mReplacementChars;
 
-    // the current status
-    Int32 mStatus;
+    String mState;
+
+    AutoPtr<ICodingErrorAction> mMalformedInputAction;
+    AutoPtr<ICodingErrorAction> mUnmappableCharacterAction;
 };
 
 } // namespace CharSet

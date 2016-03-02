@@ -2,9 +2,11 @@
 #include "CCoderResult.h"
 #include "CharsetDecoderICU.h"
 #include "NativeConverter.h"
+#include "EmptyArray.h"
 #include <unicode/utypes.h>
 
 using Libcore::ICU::NativeConverter;
+using Libcore::Utility::EmptyArray;
 
 namespace Elastos {
 namespace IO {
@@ -13,7 +15,7 @@ namespace Charset {
 const Int32 CharsetDecoderICU::MAX_CHARS_PER_BYTE;
 const Int32 CharsetDecoderICU::INPUT_OFFSET;
 const Int32 CharsetDecoderICU::OUTPUT_OFFSET;
-const Int32 CharsetDecoderICU::INVALID_BYTES;
+const Int32 CharsetDecoderICU::INVALID_CHAR_COUNT;
 
 CharsetDecoderICU::CharsetDecoderICU()
     : mConverterHandle(0)
@@ -29,13 +31,13 @@ CharsetDecoderICU::~CharsetDecoderICU()
     mConverterHandle = 0;
 }
 
-ECode CharsetDecoderICU::Init(
+ECode CharsetDecoderICU::constructor(
     /* [in] */ ICharset* cs,
     /* [in] */ Float averageCharsPerByte,
     /* [in] */ Int64 address)
 {
     mConverterHandle = address;
-    return CharsetDecoder::Init(cs, averageCharsPerByte, MAX_CHARS_PER_BYTE);
+    return CharsetDecoder::constructor(cs, averageCharsPerByte, MAX_CHARS_PER_BYTE);
 }
 
 ECode CharsetDecoderICU::NewInstance(
@@ -58,7 +60,7 @@ ECode CharsetDecoderICU::NewInstance(
         Float averageCharsPerByte = 0.0f;
         NativeConverter::GetAveCharsPerByte(address, &averageCharsPerByte);
         AutoPtr<CharsetDecoderICU> result = new CharsetDecoderICU();
-        ASSERT_SUCCEEDED(result->Init(cs, averageCharsPerByte, address));
+        ASSERT_SUCCEEDED(result->constructor(cs, averageCharsPerByte, address));
 
         address = 0; // CharsetDecoderICU has taken ownership; its finalizer will do the free.
         result->UpdateCallback();
@@ -96,7 +98,7 @@ ECode CharsetDecoderICU::ImplReset()
     NativeConverter::ResetByteToChar(mConverterHandle);
     (*mData)[INPUT_OFFSET] = 0;
     (*mData)[OUTPUT_OFFSET] = 0;
-    (*mData)[INVALID_BYTES] = 0;
+    (*mData)[INVALID_CHAR_COUNT] = 0;
     mOutput = NULL;
     mInput = NULL;
     mAllocatedInput = NULL;
@@ -111,24 +113,26 @@ ECode CharsetDecoderICU::ImplFlush(
     /* [out] */ ICoderResult** result)
 {
     VALIDATE_NOT_NULL(result)
+
     // ICU needs to see an empty input.
-    mInput = ArrayOf<Byte>::Alloc(0);// EmptyArray.BYTE;
+    mInput = EmptyArray::BYTE;
     mInEnd = 0;
     (*mData)[INPUT_OFFSET] = 0;
     Int32 ret = 0;
     GetArray(outInput, &ret);
     (*mData)[OUTPUT_OFFSET] = ret;
-    (*mData)[INVALID_BYTES] = 0; // Make sure we don't see earlier errors.
+    (*mData)[INVALID_CHAR_COUNT] = 0; // Make sure we don't see earlier errors.
 
     Int32 error;
     NativeConverter::Decode(mConverterHandle, mInput, mInEnd, mOutput, mOutEnd, mData, TRUE, &error);
+
     if (U_FAILURE(UErrorCode(error))) {
         if (error == U_BUFFER_OVERFLOW_ERROR) {
             CCoderResult::GetOVERFLOW(result);
             goto EXIT;
         } else if (error == U_TRUNCATED_CHAR_FOUND) {
-            if ((*mData)[INPUT_OFFSET] > 0) {
-                CCoderResult::MalformedForLength((*mData)[INPUT_OFFSET], result);
+            if ((*mData)[INVALID_CHAR_COUNT] > 0) {
+                CCoderResult::MalformedForLength((*mData)[INVALID_CHAR_COUNT], result);
                 goto EXIT;
             }
         }
@@ -152,7 +156,8 @@ ECode CharsetDecoderICU::DecodeLoop(
     VALIDATE_NOT_NULL(byteBuffer)
 
     Boolean ret = FALSE;
-    if (!(IBuffer::Probe(byteBuffer)->HasRemaining(&ret), ret)) {
+    IBuffer::Probe(byteBuffer)->HasRemaining(&ret);
+    if (!ret) {
         CCoderResult::GetUNDERFLOW(result);
         return ec;
     }
@@ -170,10 +175,10 @@ ECode CharsetDecoderICU::DecodeLoop(
             CCoderResult::GetOVERFLOW(result);
             goto EXIT;
         } else if (error == U_INVALID_CHAR_FOUND) {
-            CCoderResult::UnmappableForLength((*mData)[INVALID_BYTES], result);
+            CCoderResult::UnmappableForLength((*mData)[INVALID_CHAR_COUNT], result);
             goto EXIT;
         } else if (error == U_ILLEGAL_CHAR_FOUND) {
-            CCoderResult::MalformedForLength((*mData)[INVALID_BYTES], result);
+            CCoderResult::MalformedForLength((*mData)[INVALID_CHAR_COUNT], result);
             goto EXIT;
         } else {
             ec = E_ASSERTION_ERROR;
@@ -204,23 +209,22 @@ ECode CharsetDecoderICU::GetArray(
     VALIDATE_NOT_NULL(result)
     *result = 0;
     VALIDATE_NOT_NULL(outBuffer)
+    IBuffer* bo = IBuffer::Probe(outBuffer);
 
     Boolean has = FALSE;
-    if ((IBuffer::Probe(outBuffer)->HasArray(&has), has)) {
+    if ((bo->HasArray(&has), has)) {
         mOutput = NULL;
         outBuffer->GetArray((ArrayOf<Char32>**)&mOutput);
-        Int32 offset = 0;
-        Int32 limit = 0;
-        IBuffer::Probe(outBuffer)->GetArrayOffset(&offset);
-        IBuffer::Probe(outBuffer)->GetLimit(&limit);
+        Int32 offset, limit, pos;
+        bo->GetArrayOffset(&offset);
+        bo->GetLimit(&limit);
+        bo->GetPosition(&pos);
         mOutEnd = offset + limit;
-        Int32 pos = 0;
-        IBuffer::Probe(outBuffer)->GetPosition(&pos);
         *result = offset + pos;
         return NOERROR;
     }
     else {
-        IBuffer::Probe(outBuffer)->GetRemaining(&mOutEnd);
+        bo->GetRemaining(&mOutEnd);
         if (mAllocatedOutput == NULL || mOutEnd > mAllocatedOutput->GetLength()) {
             mAllocatedOutput = ArrayOf<Char32>::Alloc(mOutEnd);
         }
@@ -238,31 +242,30 @@ ECode CharsetDecoderICU::GetArray(
     VALIDATE_NOT_NULL(result)
     *result = 0;
     VALIDATE_NOT_NULL(inBuffer)
+    IBuffer* bo = IBuffer::Probe(inBuffer);
 
     Boolean has = FALSE;
-    if ((IBuffer::Probe(inBuffer)->HasArray(&has), has)) {
+    if ((bo->HasArray(&has), has)) {
         mInput = NULL;
         inBuffer->GetArray((ArrayOf<Byte>**)&mInput);
-        Int32 offset = 0;
-        Int32 limit = 0;
-        IBuffer::Probe(inBuffer)->GetArrayOffset(&offset);
-        IBuffer::Probe(inBuffer)->GetLimit(&limit);
+        Int32 offset, limit, pos;
+        bo->GetArrayOffset(&offset);
+        bo->GetLimit(&limit);
+        bo->GetPosition(&pos);
         mInEnd = offset + limit;
-        Int32 pos = 0;
-        IBuffer::Probe(inBuffer)->GetPosition(&pos);
         *result = offset + pos;
         return NOERROR;
     }
     else {
-        IBuffer::Probe(inBuffer)->GetRemaining(&mInEnd);
+        bo->GetRemaining(&mInEnd);
         if (mAllocatedInput == NULL || mInEnd > mAllocatedInput->GetLength()) {
             mAllocatedInput = ArrayOf<Byte>::Alloc(mInEnd);
         }
         // Copy the input buffer into the allocated array.
         Int32 pos = 0;
-        IBuffer::Probe(inBuffer)->GetPosition(&pos);
+        bo->GetPosition(&pos);
         inBuffer->Get(mAllocatedInput, 0, mInEnd);
-        IBuffer::Probe(inBuffer)->SetPosition(pos);
+        bo->SetPosition(pos);
         // The array's start position is 0.
         mInput = mAllocatedInput;
         *result = 0;
@@ -274,13 +277,15 @@ ECode CharsetDecoderICU::SetPosition(
     /* [in] */ ICharBuffer* outBuffer)
 {
     VALIDATE_NOT_NULL(outBuffer)
+    IBuffer* bo = IBuffer::Probe(outBuffer);
+
     Boolean has = FALSE;
-    if ((IBuffer::Probe(outBuffer)->HasArray(&has), has)) {
-        Int32 pos = 0;
-        IBuffer::Probe(outBuffer)->GetPosition(&pos);
-        Int32 offset = 0;
-        IBuffer::Probe(outBuffer)->GetArrayOffset(&offset);
-        IBuffer::Probe(outBuffer)->SetPosition(pos + (*mData)[OUTPUT_OFFSET] - offset);
+    bo->HasArray(&has);
+    if (has) {
+        Int32 pos = 0, offset;
+        bo->GetPosition(&pos);
+        bo->GetArrayOffset(&offset);
+        bo->SetPosition(pos + (*mData)[OUTPUT_OFFSET] - offset);
     }
     else {
         outBuffer->Put(mOutput, 0, (*mData)[OUTPUT_OFFSET]);
@@ -294,9 +299,10 @@ ECode CharsetDecoderICU::SetPosition(
     /* [in] */ IByteBuffer* inBuffer)
 {
     VALIDATE_NOT_NULL(inBuffer)
+    IBuffer* bo = IBuffer::Probe(inBuffer);
     Int32 pos = 0;
-    IBuffer::Probe(inBuffer)->GetPosition(&pos);
-    IBuffer::Probe(inBuffer)->SetPosition(pos + (*mData)[INPUT_OFFSET]);
+    bo->GetPosition(&pos);
+    bo->SetPosition(pos + (*mData)[INPUT_OFFSET]);
     // release reference to input array, which may not be ours
     mInput = NULL;
     return NOERROR;

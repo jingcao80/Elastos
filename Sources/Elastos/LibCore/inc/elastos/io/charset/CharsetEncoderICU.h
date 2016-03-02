@@ -58,8 +58,6 @@ private:
         /* [in] */ Int64 address,
         /* [out, callee] */ ArrayOf<Byte>** resultArray);
 
-    static CARAPI_(Boolean) InitStatic();
-
     CARAPI UpdateCallback();
 
     CARAPI GetArray(
@@ -80,8 +78,7 @@ private:
     static AutoPtr< HashMap<String, AutoPtr<ArrayOf<Byte> > > > DEFAULT_REPLACEMENTS;
     static const Int32 INPUT_OFFSET = 0;
     static const Int32 OUTPUT_OFFSET = 1;
-    static const Int32 INVALID_CHARS = 2;
-    static Boolean sInitBlock;
+    static const Int32 INVALID_CHAR_COUNT = 2;
 
     /*
      * data[INPUT_OFFSET]   = on input contains the start of input and on output the number of input chars consumed

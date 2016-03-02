@@ -19,7 +19,7 @@ namespace Validation {
 CAR_INTERFACE_IMPL(SchemaFactory, Object, ISchemaFactory)
 
 ECode SchemaFactory::GetFeature(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [out] */ Boolean* feature)
 {
     *feature = FALSE;
@@ -31,7 +31,7 @@ ECode SchemaFactory::GetFeature(
 }
 
 ECode SchemaFactory::SetFeature(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [in] */ Boolean value)
 {
     if (name == NULL) {
@@ -42,7 +42,7 @@ ECode SchemaFactory::SetFeature(
 }
 
 ECode SchemaFactory::SetProperty(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [in] */ IInterface* object)
 {
     if (name == NULL) {
@@ -53,7 +53,7 @@ ECode SchemaFactory::SetProperty(
 }
 
 ECode SchemaFactory::GetProperty(
-    /* [in] */ String name,
+    /* [in] */ const String& name,
     /* [out] */ IInterface** property)
 {
     *property = NULL;

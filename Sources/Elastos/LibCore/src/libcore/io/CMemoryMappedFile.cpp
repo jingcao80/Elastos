@@ -84,7 +84,7 @@ ECode CMemoryMappedFile::Close()
 }
 
 ECode CMemoryMappedFile::MmapRO(
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [in] */ IMemoryMappedFile** rst)
 {
     VALIDATE_NOT_NULL(rst)
@@ -104,8 +104,7 @@ ECode CMemoryMappedFile::MmapRO(
     Int64 address;
     FAIL_RETURN(os->Mmap(0L, size, OsConstants::_PROT_READ, OsConstants::_MAP_SHARED, fd, 0, &address))
     FAIL_RETURN(os->Close(fd))
-    FAIL_RETURN(New(address, size, (IMemoryMappedFile**)rst))
-    return NOERROR;
+    return CMemoryMappedFile::New(address, size, rst);
 }
 
 } // namespace IO

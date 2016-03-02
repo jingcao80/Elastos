@@ -1,17 +1,19 @@
 
 #include "CKXmlParser.h"
 #include "StringUtils.h"
-#include "CString.h"
 #include "CInputStreamReader.h"
-#include "CBoolean.h"
+#include "CoreUtils.h"
+#include <elastos/utility/Arrays.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
-using Elastos::Core::CBoolean;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::StringUtils;
 using Elastos::IO::IInputStreamReader;
 using Elastos::IO::CInputStreamReader;
 using Elastos::IO::EIID_ICloseable;
+using Elastos::Utility::Arrays;
+using Elastos::Utility::Logging::Logger;
 using Org::Xmlpull::V1::EIID_IXmlPullParser;
 
 namespace Org {
@@ -293,14 +295,12 @@ ECode CKXmlParser::CheckRelaxed(
 ECode CKXmlParser::Next(
     /* [out] */ Int32* value)
 {
-    VALIDATE_NOT_NULL(value);
     return Next(FALSE, value);
 }
 
 ECode CKXmlParser::NextToken(
     /* [out] */ Int32* value)
 {
-    VALIDATE_NOT_NULL(value);
     return Next(TRUE, value);
 }
 
@@ -308,8 +308,11 @@ ECode CKXmlParser::Next(
     /* [in] */ Boolean justOneToken,
     /* [out] */ Int32* token)
 {
+    VALIDATE_NOT_NULL(token)
+    *token = -1;
+
     if (mReader == NULL) {
-        //throw new XmlPullParserException("setInput() must be called first.", this, NULL);
+        Logger::E("CKXmlParser", "setInput() must be called first.");
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 
@@ -340,11 +343,14 @@ ECode CKXmlParser::Next(
         }
     }
 
+PFL_EX(" 1 ");
     FAIL_RETURN(PeekType(FALSE, &mType));
 
+PFL_EX(" 2 mType %d", mType);
     if (mType == XML_DECLARATION) {
         FAIL_RETURN(ReadXmlDeclaration());
         FAIL_RETURN(PeekType(FALSE, &mType));
+PFL_EX(" 3 mType %d", mType);
     }
 
     mText = NULL;
@@ -356,6 +362,7 @@ ECode CKXmlParser::Next(
     Boolean throwOnResolveFailure = !justOneToken;
 
     while (TRUE) {
+PFL_EX(" 4 mType %d", mType);
         switch (mType) {
             /*
              * Return immediately after encountering a start tag, end tag, or
@@ -422,19 +429,20 @@ ECode CKXmlParser::Next(
             case DOCDECL:
                 FAIL_RETURN(ReadDoctype(justOneToken));
                 if (mParsedTopLevelStartTag) {
-                    //throw new XmlPullParserException("Unexpected token", this, null);
+                    Logger::E("CKXmlParser", "Unexpected token DOCDECL %d", __LINE__);
                     return E_XML_PULL_PARSER_EXCEPTION;
                 }
                 break;
 
             default: {
-                //throw new XmlPullParserException("Unexpected token", this, NULL);
+                Logger::E("CKXmlParser", "Unexpected token %d, line %d", mType, __LINE__);
                 return E_XML_PULL_PARSER_EXCEPTION;
             }
         }
 
+PFL_EX(" 5 mType %d", mType);
         if (mDepth == 0 && (mType == ENTITY_REF || mType == IXmlPullParser::TEXT || mType == CDSECT)) {
-            // throw new XmlPullParserException("Unexpected token", this, NULL);
+            Logger::E("CKXmlParser", "Unexpected token type %, depth %d, line %d", mDepth, mType, __LINE__);
             return E_XML_PULL_PARSER_EXCEPTION;
         }
 
@@ -462,6 +470,7 @@ ECode CKXmlParser::Next(
 
         mType = peek;
     }
+    return NOERROR;
 }
 
 /**
@@ -563,12 +572,10 @@ ECode CKXmlParser::ReadXmlDeclaration()
     if (pos < mAttributeCount && (*mAttributes)[4 * pos + 2].Equals("standalone")) {
         String st = (*mAttributes)[3 + 4 * pos];
         if (st.Equals("yes")) {
-            mStandalone = NULL;
-            CBoolean::New(TRUE, (IBoolean**)&mStandalone);
+            mStandalone = CoreUtils::Convert(TRUE);
         }
         else if (st.Equals("no")) {
-            mStandalone = NULL;
-            CBoolean::New(FALSE, (IBoolean**)&mStandalone);
+            mStandalone = CoreUtils::Convert(FALSE);
         }
         else {
             FAIL_RETURN(CheckRelaxed(String("illegal standalone value: ") + st));
@@ -589,7 +596,9 @@ ECode CKXmlParser::ReadComment(
     /* [in] */ Boolean returnText,
     /* [out] */ String* value)
 {
-    assert(value != NULL);
+    VALIDATE_NOT_NULL(value)
+    *value = NULL;
+
     FAIL_RETURN(Read(*START_COMMENT));
 
     if (mRelaxed) {
@@ -656,6 +665,9 @@ ECode CKXmlParser::ReadExternalId(
     /* [in] */ Boolean assignFields,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+
     Skip();
     Int32 c = PeekCharacter();
 
@@ -706,7 +718,8 @@ ECode CKXmlParser::ReadQuotedId(
     /* [in] */ Boolean returnText,
     /* [out] */ String* value)
 {
-    assert(value != NULL);
+    VALIDATE_NOT_NULL(value)
+    *value = NULL;
 
     Int32 quote = PeekCharacter();
     const ArrayOf<Char32>* delimiter;
@@ -828,7 +841,7 @@ ECode CKXmlParser::ReadContentSpec()
                 depth--;
             }
             else if (c == -1) {
-                // throw new XmlPullParserException("Unterminated element content spec", this, null);
+                Logger::E("CKXmlParser", "Unterminated element content spec");
                 return E_XML_PULL_PARSER_EXCEPTION;
             }
 
@@ -848,7 +861,7 @@ ECode CKXmlParser::ReadContentSpec()
         return Read(*ANY);
     }
     else {
-        //throw new XmlPullParserException("Expected element content spec", this, NULL);
+        Logger::E("CKXmlParser", "Expected element content spec");
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 }
@@ -892,7 +905,7 @@ ECode CKXmlParser::ReadAttributeListDeclaration()
         Skip();
         Boolean succeeded;
         if (mPosition + 1 >= mLimit && (FillBuffer(2, &succeeded), !succeeded)) {
-            //throw new XmlPullParserException("Malformed attribute list", this, NULL);
+            Logger::E("CKXmlParser", "Malformed attribute list");
             return E_XML_PULL_PARSER_EXCEPTION;
         }
 
@@ -918,7 +931,7 @@ ECode CKXmlParser::ReadAttributeListDeclaration()
                     mPosition++;
                 }
                 else {
-                    //throw new XmlPullParserException("Malformed attribute type", this, NULL);
+                    Logger::E("CKXmlParser", "Malformed attribute type");
                     return E_XML_PULL_PARSER_EXCEPTION;
                 }
             }
@@ -944,7 +957,7 @@ ECode CKXmlParser::ReadAttributeListDeclaration()
                 FAIL_RETURN(Read(*FIXED));
             }
             else {
-                //throw new XmlPullParserException("Malformed attribute type", this, NULL);
+                Logger::E("CKXmlParser", "Malformed attribute type");
                 return E_XML_PULL_PARSER_EXCEPTION;
             }
             Skip();
@@ -1042,7 +1055,7 @@ ECode CKXmlParser::ReadEntityDeclaration()
             }
         }
         else {
-            //throw new XmlPullParserException("Expected entity value or external ID", this, NULL);
+            Logger::E("CKXmlParser", "Expected entity value or external ID");
             return E_XML_PULL_PARSER_EXCEPTION;
         }
     }
@@ -1069,8 +1082,7 @@ ECode CKXmlParser::ReadNotationDeclaration()
     Boolean succeeded;
     FAIL_RETURN(ReadExternalId(FALSE, FALSE, &succeeded));
     if (!succeeded) {
-        // throw new XmlPullParserException(
-        //         "Expected external ID or public ID for notation", this, NULL);
+        Logger::E("CKXmlParser", "Expected external ID or public ID for notation");
         return E_XML_PULL_PARSER_EXCEPTION;
     }
     Skip();
@@ -1099,8 +1111,8 @@ ECode CKXmlParser::ReadEndTag()
         mName = (*mElementStack)[sp + 2];
     }
     else if (!mRelaxed) {
-        // throw new XmlPullParserException(
-        //         "expected: /" + (*mElementStack)[sp + 3] + " read: " + mName, this, NULL);
+        Logger::E("CKXmlParser", "expected: /%s read:%s",
+            (*mElementStack)[sp + 3].string(), mName.string());
         return E_XML_PULL_PARSER_EXCEPTION;
     }
     return NOERROR;
@@ -1113,22 +1125,34 @@ ECode CKXmlParser::PeekType(
     /* [in] */ Boolean inDeclaration,
     /* [out] */ Int32* token)
 {
+    VALIDATE_NOT_NULL(token)
+    *token = -1;
+
     Boolean succeeded;
     if (mPosition >= mLimit && (FillBuffer(1, &succeeded), !succeeded)) {
         *token = END_DOCUMENT;
         return NOERROR;
     }
 
-    switch ((*mBuffer)[mPosition]) {
+    PFL_EX("==============================================");
+    PFL_EX(" mLimit: %d", mLimit);
+    for (Int32 i = 0; i < mLimit; ++i) {
+        PFL_EX(" > %d : %c vs %d", i, (*mBuffer)[i], (*mBuffer)[i]);
+    }
+    PFL_EX("==============================================");
+
+    Char32 curChar = (*mBuffer)[mPosition];
+    PFL_EX(" mPosition %d, value: %c : %d", mPosition, curChar, curChar);
+    switch (curChar) {
     case '&':
         *token = ENTITY_REF; // &
         return NOERROR;
     case '<':
         if (mPosition + 3 >= mLimit && (FillBuffer(4, &succeeded), !succeeded)) {
-            //throw new XmlPullParserException("Dangling <", this, NULL);
+            Logger::E("CKXmlParser", "Dangling <");
             return E_XML_PULL_PARSER_EXCEPTION;
         }
-
+        PFL_EX(" mPosition + 1, value: %c", (*mBuffer)[mPosition + 1]);
         switch ((*mBuffer)[mPosition + 1]) {
         case '/':
             *token = END_TAG; // </
@@ -1175,7 +1199,8 @@ ECode CKXmlParser::PeekType(
                 *token = NOTATIONDECL; // <!N
                 return NOTATIONDECL;
             }
-            //throw new XmlPullParserException("Unexpected <!", this, NULL);
+
+            Logger::E("CKXmlParser", "Unexpected <!");
             return E_XML_PULL_PARSER_EXCEPTION;
         default:
             *token = START_TAG; // <
@@ -1188,6 +1213,8 @@ ECode CKXmlParser::PeekType(
         *token = IXmlPullParser::TEXT;
         return NOERROR;
     }
+
+    return NOERROR;
 }
 
 /**
@@ -1264,7 +1291,7 @@ ECode CKXmlParser::ParseStartTag(
                 delimiter = ' ';
             }
             else {
-                //throw new XmlPullParserException("attr value delimiter missing!", this, NULL);
+                Logger::E("CKXmlParser", "attr value delimiter missing!");
                 return E_XML_PULL_PARSER_EXCEPTION;
             }
 
@@ -1380,7 +1407,7 @@ ECode CKXmlParser::ReadEntity(
             return NOERROR;
         }
         else {
-            //throw new XmlPullParserException("unterminated entity ref", this, NULL);
+            Logger::E("CKXmlParser", "unterminated entity ref");
             return E_XML_PULL_PARSER_EXCEPTION;
         }
     }
@@ -1487,7 +1514,9 @@ ECode CKXmlParser::ReadValue(
     /* [in] */ ValueContext valueContext,
     /* [out] */ String* value)
 {
-    assert(value != NULL);
+    VALIDATE_NOT_NULL(value)
+    *value = NULL;
+
     /*
      * This method returns all of the characters from the current position
      * through to an appropriate delimiter.
@@ -1613,8 +1642,7 @@ ECode CKXmlParser::ReadValue(
 
         }
         else if (c == '%') {
-            // throw new XmlPullParserException("This parser doesn't support parameter entities",
-            //         this, NULL);
+            Logger::E("CKXmlParser", "This parser doesn't support parameter entities");
             return E_XML_PULL_PARSER_EXCEPTION;
         }
         else {
@@ -1698,8 +1726,7 @@ ECode CKXmlParser::FillBuffer(
     // If we've exhausted the current content source, remove it
     while (mNextContentSource != NULL) {
         if (mPosition < mLimit) {
-            //throw new XmlPullParserException("Unbalanced entity!", this, NULL);
-            assert(0);
+            Logger::E("CKXmlParser", "Unbalanced entity!");
             return E_XML_PULL_PARSER_EXCEPTION;
         }
         PopContentSource();
@@ -1755,7 +1782,9 @@ ECode CKXmlParser::FillBuffer(
 ECode CKXmlParser::ReadName(
     /* [out] */ String* value)
 {
-    assert(value != NULL);
+    VALIDATE_NOT_NULL(value)
+    *value = NULL;
+
     Boolean succeeded;
     if (mPosition >= mLimit && (FillBuffer(1, &succeeded), !succeeded)) {
         FAIL_RETURN(CheckRelaxed(String("name expected")));
@@ -2046,13 +2075,12 @@ ECode CKXmlParser::DefineEntityReplacementText(
     /* [in] */ const String& value)
 {
     if (mProcessDocDecl) {
-        // throw new IllegalStateException(
-        //         "Entity replacement text may not be defined with DOCTYPE processing enabled.");
+        Logger::E("CKXmlParser", "Entity replacement text may"
+            " not be defined with DOCTYPE processing enabled.");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (mReader == NULL) {
-        // throw new IllegalStateException(
-        //         "Entity replacement text must be defined after setInput()");
+        Logger::E("CKXmlParser", "Entity replacement text must be defined after setInput()");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     if (mDocumentEntities == NULL) {
@@ -2068,9 +2096,13 @@ ECode CKXmlParser::GetProperty(
     /* [out] */ IInterface** value)
 {
     VALIDATE_NOT_NULL(value);
+    *value = NULL;
 
     if (property.Equals(PROPERTY_XMLDECL_VERSION)) {
-        return CString::New(mVersion, (ICharSequence**)value);
+        AutoPtr<ICharSequence> csq = CoreUtils::Convert(mVersion);
+        *value = (IInterface*)csq.Get();
+        REFCOUNT_ADD(*value);
+        return NOERROR;
     }
     else if (property.Equals(PROPERTY_XMLDECL_STANDALONE)) {
         *value = mStandalone;
@@ -2079,19 +2111,19 @@ ECode CKXmlParser::GetProperty(
     }
     else if (property.Equals(PROPERTY_LOCATION)) {
         if (!mLocation.IsNull()) {
-            return CString::New(mLocation, (ICharSequence**)value);
+            AutoPtr<ICharSequence> csq = CoreUtils::Convert(mLocation);
+            *value = (IInterface*)csq.Get();
+            REFCOUNT_ADD(*value);
         }
         else {
-            //TODO:
-            assert(0);
-            // return mReader->ToString(value);
-            return E_NOT_IMPLEMENTED;
+            AutoPtr<ICharSequence> csq = CoreUtils::Convert(Object::ToString(mReader));
+            *value = (IInterface*)csq.Get();
+            REFCOUNT_ADD(*value);
         }
-    }
-    else {
-        *value = NULL;
         return NOERROR;
     }
+
+    return NOERROR;
 }
 
 /**
@@ -2135,6 +2167,7 @@ ECode CKXmlParser::GetNamespaceCount(
     /* [out] */ Int32* count)
 {
     VALIDATE_NOT_NULL(count);
+    *count = 0;
 
     if (depth > mDepth) {
         //throw new IndexOutOfBoundsException();
@@ -2209,6 +2242,7 @@ ECode CKXmlParser::GetPositionDescription(
     /* [out] */ String* des)
 {
     VALIDATE_NOT_NULL(des);
+    *des = NULL;
 
     StringBuilder buf(mType < (Int32)(sizeof(TYPES) / sizeof(String)) ? TYPES[mType] : String("unknown"));
     buf.AppendChar(' ');
@@ -2264,17 +2298,13 @@ ECode CKXmlParser::GetPositionDescription(
     buf.Append(lineNum);
     buf.AppendChar(':');
     buf.Append(columnNum);
-    if(!mLocation.IsNull()){
+    if (!mLocation.IsNull()){
         buf.Append(" in ");
         buf.Append(mLocation);
     }
-    else if(mReader != NULL){
-        String str("Not Implemented, add later");
-        //TODO:
-        //assert(0);
-        // mReader->ToString(&str);
+    else if (mReader != NULL){
         buf.Append(" in ");
-        buf.Append(str);
+        buf.Append(Object::ToString(mReader));
     }
     return buf.ToString(des);
 }
@@ -2316,6 +2346,7 @@ ECode CKXmlParser::IsWhitespace(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = FALSE;
 
     if (mType != IXmlPullParser::TEXT && mType != IGNORABLE_WHITESPACE && mType != CDSECT) {
         //throw new XmlPullParserException(ILLEGAL_TYPE, this, NULL);
@@ -2333,7 +2364,7 @@ ECode CKXmlParser::GetText(
         *text = NULL;
     }
     else if (mText.IsNull()) {
-        *text = String("");
+        *text = "";
     }
     else {
         *text = mText;
@@ -2345,15 +2376,15 @@ ECode CKXmlParser::GetTextCharacters(
     /* [in, out] */ ArrayOf<Int32>* poslen,
     /* [out, callee] */ ArrayOf<Char32>** characters)
 {
-    VALIDATE_NOT_NULL(poslen);
     VALIDATE_NOT_NULL(characters);
+    *characters = NULL;
+    VALIDATE_NOT_NULL(poslen);
 
     String text;
     GetText(&text);
     if (text.IsNull()) {
         (*poslen)[0] = -1;
         (*poslen)[1] = -1;
-        *characters = NULL;
         return NOERROR;
     }
     AutoPtr< ArrayOf<Char32> > result = text.GetChars();
@@ -2392,6 +2423,8 @@ ECode CKXmlParser::IsEmptyElementTag(
     /* [out] */ Boolean* isTag)
 {
     VALIDATE_NOT_NULL(isTag);
+    *isTag = FALSE;
+
     if (mType != START_TAG) {
         // throw new XmlPullParserException(ILLEGAL_TYPE, this, null);
         return E_XML_PULL_PARSER_EXCEPTION;
@@ -2431,6 +2464,7 @@ ECode CKXmlParser::GetAttributeNamespace(
     /* [out] */ String* ns)
 {
     VALIDATE_NOT_NULL(ns);
+    *ns = NULL;
 
     if (index >= mAttributeCount) {
         //throw new IndexOutOfBoundsException();
@@ -2445,6 +2479,8 @@ ECode CKXmlParser::GetAttributeName(
     /* [out] */ String* name)
 {
     VALIDATE_NOT_NULL(name);
+    *name = NULL;
+
     if (index >= mAttributeCount) {
         //throw new IndexOutOfBoundsException();
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
@@ -2458,6 +2494,8 @@ ECode CKXmlParser::GetAttributePrefix(
     /* [out] */ String* prefix)
 {
     VALIDATE_NOT_NULL(prefix);
+    *prefix = NULL;
+
     if (index >= mAttributeCount) {
         //throw new IndexOutOfBoundsException();
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
@@ -2471,6 +2509,8 @@ ECode CKXmlParser::GetAttributeValue(
     /* [out] */ String* value)
 {
     VALIDATE_NOT_NULL(value);
+    *value = NULL;
+
     if (index >= mAttributeCount) {
         //throw new IndexOutOfBoundsException();
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
@@ -2512,6 +2552,7 @@ ECode CKXmlParser::NextTag(
     /* [out] */ Int32* tag)
 {
     VALIDATE_NOT_NULL(tag);
+    *tag = -1;
 
     Int32 tmp = 0;
     FAIL_RETURN(Next(&tmp));
@@ -2520,7 +2561,7 @@ ECode CKXmlParser::NextTag(
     }
 
     if (mType != END_TAG && mType != START_TAG) {
-        //throw new XmlPullParserException("unexpected type", this, NULL);
+        Logger::E("CKXmlParser", "unexpected type");
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 
@@ -2539,8 +2580,8 @@ ECode CKXmlParser::Require(
     if (type != mType
             || (!ns.IsNull() && ns.Equals(theNs))
             || (!name.IsNull() && name.Equals(theNm))) {
-        // throw new XmlPullParserException(
-        //         "expected: " + TYPES[type] + " {" + namespace + "}" + name, this, NULL);
+        Logger::E("CKXmlParser", "expected: %s {%s} %s",
+             TYPES[type].string(), ns.string(), name.string());
         return E_XML_PULL_PARSER_EXCEPTION;
     }
     return NOERROR;
@@ -2550,9 +2591,10 @@ ECode CKXmlParser::NextText(
     /* [out] */ String* text)
 {
     VALIDATE_NOT_NULL(text);
+    *text = NULL;
 
     if (mType != START_TAG) {
-        //throw new XmlPullParserException("precondition: START_TAG", this, NULL);
+        Logger::E("CKXmlParser", "precondition: START_TAG");
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 
@@ -2568,7 +2610,7 @@ ECode CKXmlParser::NextText(
     }
 
     if (mType != END_TAG) {
-        //throw new XmlPullParserException("END_TAG expected", this, NULL);
+        Logger::E("CKXmlParser", "END_TAG expected");
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 
@@ -2589,7 +2631,7 @@ ECode CKXmlParser::SetFeature(
         mRelaxed = value;
     }
     else {
-        //throw new XmlPullParserException("unsupported feature: " + feature, this, NULL);
+        Logger::E("CKXmlParser", "unsupported feature: %s", feature.string());
         return E_XML_PULL_PARSER_EXCEPTION;
     }
     return NOERROR;
@@ -2601,10 +2643,10 @@ ECode CKXmlParser::SetProperty(
 {
     if (property.Equals(PROPERTY_LOCATION)) {
         assert(value != NULL && ICharSequence::Probe(value) != NULL);
-        ICharSequence::Probe(value)->ToString(&mLocation);
+        mLocation = Object::ToString(value);
     }
     else {
-        //throw new XmlPullParserException("unsupported property: " + property);
+        Logger::E("CKXmlParser", "unsupported property: %s", property.string());
         return E_XML_PULL_PARSER_EXCEPTION;
     }
     return NOERROR;

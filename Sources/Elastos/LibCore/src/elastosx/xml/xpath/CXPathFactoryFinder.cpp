@@ -56,7 +56,7 @@ CAR_INTERFACE_IMPL(CXPathFactoryFinder, Object, IXPathFactoryFinder)
 CAR_OBJECT_IMPL(CXPathFactoryFinder)
 
 void CXPathFactoryFinder::DebugPrintln(
-    /* [in] */ String msg)
+    /* [in] */ const String& msg)
 {
     if (debug) {
         Logger::E("JAXP: ", msg.string());
@@ -145,7 +145,7 @@ ECode CXPathFactoryFinder::NewFactory(
 }
 
 ECode CXPathFactoryFinder::_newFactory(
-    /* [in] */ String uri,
+    /* [in] */ const String& uri,
     /* [out] */ IXPathFactory** xp)
 {
     AutoPtr<IXPathFactory> xpf;
@@ -305,8 +305,8 @@ ECode CXPathFactoryFinder::CreateInstance(
 }
 
 ECode CXPathFactoryFinder::LoadFromServicesFile(
-    /* [in] */ String uri,
-    /* [in] */ String resourceName,
+    /* [in] */ const String& uri,
+    /* [in] */ const String& resourceName,
     /* [in] */ IInputStream* in,
     /* [out] */ IXPathFactory** xpf)
 {
@@ -401,7 +401,7 @@ ECode CXPathFactoryFinder::LoadFromServicesFile(
 }**/
 
 String CXPathFactoryFinder::Which(
-    /* [in] */ String classname,
+    /* [in] */ const String& classname,
     /* [in] */ IClassLoader* loader)
 {
     StringBuilder sb(classname.Replace('.', '/'));

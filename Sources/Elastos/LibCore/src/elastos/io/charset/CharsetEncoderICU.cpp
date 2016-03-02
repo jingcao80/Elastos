@@ -11,9 +11,8 @@ namespace Elastos {
 namespace IO {
 namespace Charset {
 
-AutoPtr< HashMap<String, AutoPtr<ArrayOf<Byte> > > > CharsetEncoderICU::DEFAULT_REPLACEMENTS = new HashMap<String, AutoPtr<ArrayOf<Byte> > >();
 
-Boolean CharsetEncoderICU::InitStatic()
+static AutoPtr< HashMap<String, AutoPtr<ArrayOf<Byte> > > > InitDEFAULT_REPLACEMENTS()
 {
     // ICU has different default replacements to the RI in some cases. There are many
     // additional cases, but this covers all the charsets that Java guarantees will be
@@ -22,19 +21,22 @@ Boolean CharsetEncoderICU::InitStatic()
     // byte corresponds to an entirely different character.)
     // It's odd that UTF-8 doesn't use U+FFFD, given that (unlike ISO-8859-1 and US-ASCII) it
     // can represent it, but this is what the RI does...
+
+    AutoPtr< HashMap<String, AutoPtr<ArrayOf<Byte> > > > map = new HashMap<String, AutoPtr<ArrayOf<Byte> > >();
     AutoPtr< ArrayOf<Byte> > questionMark = ArrayOf<Byte>::Alloc(1);
     (*questionMark)[0] = (Byte) '?';
-    (*CharsetEncoderICU::DEFAULT_REPLACEMENTS)[String("UTF-8")] = questionMark;
-    (*CharsetEncoderICU::DEFAULT_REPLACEMENTS)[String("ISO-8859-1")] = questionMark;
-    (*CharsetEncoderICU::DEFAULT_REPLACEMENTS)[String("US-ASCII")] = questionMark;
-    return TRUE;
+    (*map)[String("UTF-8")] = questionMark;
+    (*map)[String("ISO-8859-1")] = questionMark;
+    (*map)[String("US-ASCII")] = questionMark;
+    return map;
 }
+
+AutoPtr< HashMap<String, AutoPtr<ArrayOf<Byte> > > > CharsetEncoderICU::DEFAULT_REPLACEMENTS
+    = InitDEFAULT_REPLACEMENTS();
 
 const Int32 CharsetEncoderICU::INPUT_OFFSET;
 const Int32 CharsetEncoderICU::OUTPUT_OFFSET;
-const Int32 CharsetEncoderICU::INVALID_CHARS;
-
-Boolean CharsetEncoderICU::sInitBlock = InitStatic();
+const Int32 CharsetEncoderICU::INVALID_CHAR_COUNT;
 
 CharsetEncoderICU::CharsetEncoderICU()
     : mConverterHandle(0)
@@ -130,7 +132,7 @@ ECode CharsetEncoderICU::ImplReset()
     NativeConverter::ResetCharToByte(mConverterHandle);
     (*mData)[INPUT_OFFSET] = 0;
     (*mData)[OUTPUT_OFFSET] = 0;
-    (*mData)[INVALID_CHARS] = 0;
+    (*mData)[INVALID_CHAR_COUNT] = 0;
     mOutput = NULL;
     mInput = NULL;
     mAllocatedInput = NULL;
@@ -155,7 +157,7 @@ ECode CharsetEncoderICU::ImplFlush(
     Int32 ret = 0;
     GetArray(outBuffer, &ret);
     (*mData)[OUTPUT_OFFSET] = ret;
-    (*mData)[INVALID_CHARS] = 0; // Make sure we don't see earlier errors.
+    (*mData)[INVALID_CHAR_COUNT] = 0; // Make sure we don't see earlier errors.
 
     Int32 error;
     NativeConverter::Encode(mConverterHandle, mInput, mInEnd, mOutput, mOutEnd, mData, TRUE, &error);
@@ -164,8 +166,8 @@ ECode CharsetEncoderICU::ImplFlush(
             CCoderResult::GetOVERFLOW(result);
             goto EXIT;
         } else if (error == U_TRUNCATED_CHAR_FOUND) {
-            if ((*mData)[INPUT_OFFSET] > 0) {
-                CCoderResult::MalformedForLength((*mData)[INPUT_OFFSET], result);
+            if ((*mData)[INVALID_CHAR_COUNT] > 0) {
+                CCoderResult::MalformedForLength((*mData)[INVALID_CHAR_COUNT], result);
                 goto EXIT;
             }
         }
@@ -197,7 +199,7 @@ ECode CharsetEncoderICU::EncodeLoop(
     (*mData)[INPUT_OFFSET] = num;
     GetArray(byteBuffer, &num);
     (*mData)[OUTPUT_OFFSET]= num;
-    (*mData)[INVALID_CHARS] = 0; // Make sure we don't see earlier errors.
+    (*mData)[INVALID_CHAR_COUNT] = 0; // Make sure we don't see earlier errors.
 
     //try {
     Int32 error;
@@ -208,10 +210,10 @@ ECode CharsetEncoderICU::EncodeLoop(
             CCoderResult::GetOVERFLOW(result);
             goto EXIT;
         } else if (error == U_INVALID_CHAR_FOUND) {
-            CCoderResult::UnmappableForLength((*mData)[INVALID_CHARS], result);
+            CCoderResult::UnmappableForLength((*mData)[INVALID_CHAR_COUNT], result);
             goto EXIT;
         } else if (error == U_ILLEGAL_CHAR_FOUND) {
-            CCoderResult::MalformedForLength((*mData)[INVALID_CHARS], result);
+            CCoderResult::MalformedForLength((*mData)[INVALID_CHAR_COUNT], result);
             goto EXIT;
         } else {
             //throw new AssertionError(error);
@@ -267,21 +269,22 @@ ECode CharsetEncoderICU::GetArray(
     VALIDATE_NOT_NULL(result)
     VALIDATE_NOT_NULL(outBuffer)
     Boolean has = FALSE;
-    if ((IBuffer::Probe(outBuffer)->HasArray(&has), has)) {
+    IBuffer* bb = IBuffer::Probe(outBuffer);
+    if ((bb->HasArray(&has), has)) {
         mOutput = NULL;
         outBuffer->GetArray((ArrayOf<Byte>**)&mOutput);
         Int32 offset = 0;
         Int32 limit = 0;
-        IBuffer::Probe(outBuffer)->GetArrayOffset(&offset);
-        IBuffer::Probe(outBuffer)->GetLimit(&limit);
+        bb->GetArrayOffset(&offset);
+        bb->GetLimit(&limit);
         mOutEnd = offset + limit;
         Int32 pos = 0;
-        IBuffer::Probe(outBuffer)->GetPosition(&pos);
+        bb->GetPosition(&pos);
         *result = offset + pos;
         return NOERROR;
     }
     else {
-        IBuffer::Probe(outBuffer)->GetRemaining(&mOutEnd);
+        bb->GetRemaining(&mOutEnd);
         if (mAllocatedOutput == NULL || mOutEnd > mAllocatedOutput->GetLength()) {
             mAllocatedOutput = ArrayOf<Byte>::Alloc(mOutEnd);
         }
@@ -334,10 +337,11 @@ ECode CharsetEncoderICU::SetPosition(
 {
     VALIDATE_NOT_NULL(outBuffer)
     Boolean has = FALSE;
-    if ((IBuffer::Probe(outBuffer)->HasArray(&has), has)) {
+    IBuffer* bb = IBuffer::Probe(outBuffer);
+    if ((bb->HasArray(&has), has)) {
         Int32 offset = 0;
-        IBuffer::Probe(outBuffer)->GetArrayOffset(&offset);
-        IBuffer::Probe(outBuffer)->SetPosition((*mData)[OUTPUT_OFFSET] - offset);
+        bb->GetArrayOffset(&offset);
+        bb->SetPosition((*mData)[OUTPUT_OFFSET] - offset);
     }
     else {
         outBuffer->Put(mOutput, 0, (*mData)[OUTPUT_OFFSET]);
@@ -351,9 +355,21 @@ ECode CharsetEncoderICU::SetPosition(
     /* [in] */ ICharBuffer* inBuffer)
 {
     VALIDATE_NOT_NULL(inBuffer)
-    Int32 pos = 0;
-    IBuffer::Probe(inBuffer)->GetPosition(&pos);
-    IBuffer::Probe(inBuffer)->SetPosition(pos + (*mData)[INPUT_OFFSET] - (*mData)[INVALID_CHARS]);
+    IBuffer* bc = IBuffer::Probe(inBuffer);
+    Int32 position;
+    bc->GetPosition(&position);
+    position += (*mData)[INPUT_OFFSET] - (*mData)[INVALID_CHAR_COUNT];
+    if (position < 0) {
+        // The calculated position might be negative if we encountered an
+        // invalid char that spanned input buffers. We adjust it to 0 in this case.
+        //
+        // NOTE: The API doesn't allow us to adjust the position of the previous
+        // input buffer. (Doing that wouldn't serve any useful purpose anyway.)
+        position = 0;
+    }
+
+    bc->SetPosition(position);
+
     // release reference to input array, which may not be ours
     mInput = NULL;
     return NOERROR;

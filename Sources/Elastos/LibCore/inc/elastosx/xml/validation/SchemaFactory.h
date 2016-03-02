@@ -24,19 +24,19 @@ public:
     CAR_INTERFACE_DECL()
 
     CARAPI GetFeature(
-        /* [in] */ String name,
+        /* [in] */ const String& name,
         /* [out] */ Boolean* feature);
 
     CARAPI SetFeature(
-        /* [in] */ String name,
+        /* [in] */ const String& name,
         /* [in] */ Boolean value);
 
     CARAPI SetProperty(
-        /* [in] */ String name,
+        /* [in] */ const String& name,
         /* [in] */ IInterface* object);
 
     CARAPI GetProperty(
-        /* [in] */ String name,
+        /* [in] */ const String& name,
         /* [out] */ IInterface** property);
 
     CARAPI NewSchema(

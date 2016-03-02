@@ -143,6 +143,18 @@ const Int32 ICUUtil::IDX_SCRIPT = 1;
 const Int32 ICUUtil::IDX_REGION = 2;
 const Int32 ICUUtil::IDX_VARIANT = 3;
 
+// const Int32 ICUUtil::U_ZERO_ERROR = 0;
+// const Int32 ICUUtil::U_INVALID_CHAR_FOUND = 10;
+// const Int32 ICUUtil::U_TRUNCATED_CHAR_FOUND = 11;
+// const Int32 ICUUtil::U_ILLEGAL_CHAR_FOUND = 12;
+// const Int32 ICUUtil::U_BUFFER_OVERFLOW_ERROR = 15;
+
+// Boolean ICUUtil::U_FAILURE(
+//     /* [in] */ Int32 error)
+// {
+//     return error > U_ZERO_ERROR;
+// }
+
 ECode ICUUtil::GetISOLanguages(
     /* [out, callee] */ ArrayOf<String>** languages)
 {
@@ -367,7 +379,7 @@ ECode ICUUtil::LocalesFromStrings(
 }
 
 ECode ICUUtil::GetBestDateTimePattern(
-    /* [in] */ String skeleton,
+    /* [in] */ const String& skeleton,
     /* [in] */ ILocale* locale,
     /* [out] */ String* rst)
 {
@@ -1392,7 +1404,7 @@ ECode ICUUtil::GetBestDateTimePatternNative(
 }
 
 ECode ICUUtil::GetDateFormatOrder(
-    /* [in] */ String pattern,
+    /* [in] */ const String& pattern,
     /* [out, callee] */ ArrayOf<Char32>** locales)
 {
     AutoPtr<ArrayOf<Char32> > result = ArrayOf<Char32>::Alloc(3);
@@ -1472,7 +1484,7 @@ ECode ICUUtil::GetCurrencyDisplayName(
 
 ECode ICUUtil::GetCurrencySymbol(
     /* [in] */ ILocale* locale,
-    /* [in] */ String currencyCode,
+    /* [in] */ const String& currencyCode,
     /* [out] */ String* currencySymbol)
 {
     String languageTag;

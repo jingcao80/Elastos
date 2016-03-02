@@ -299,7 +299,7 @@ ERROR_PROCESS:
 
 ECode CX509CertPathImpl::GetInstance(
     /* [in] */ IInputStream* is,
-    /* [in] */ String encoding,
+    /* [in] */ const String& encoding,
     /* [out] */ IX509CertPathImpl** instance)
 {
     VALIDATE_NOT_NULL(instance)
@@ -377,7 +377,7 @@ ERROR_PROCESS:
 
 ECode CX509CertPathImpl::GetInstance(
     /* [in] */ ArrayOf<Byte>* inp,
-    /* [in] */ String encoding,
+    /* [in] */ const String& encoding,
     /* [out] */ IX509CertPathImpl** instance)
 {
     VALIDATE_NOT_NULL(instance)

@@ -92,7 +92,7 @@ ECode CKeyGenerator::Init(
 }
 
 ECode CKeyGenerator::GetInstance(
-    /* [in] */ String algorithm,
+    /* [in] */ const String& algorithm,
     /* [out] */ IKeyGenerator ** ka)
 {
     VALIDATE_NOT_NULL(ka)
@@ -108,8 +108,8 @@ ECode CKeyGenerator::GetInstance(
 }
 
 ECode CKeyGenerator::GetInstance(
-    /* [in] */ String algorithm,
-    /* [in] */ String provider,
+    /* [in] */ const String& algorithm,
+    /* [in] */ const String& provider,
     /* [out] */ IKeyGenerator ** ka)
 {
     VALIDATE_NOT_NULL(ka)
@@ -132,7 +132,7 @@ ECode CKeyGenerator::GetInstance(
 }
 
 ECode CKeyGenerator::GetInstance(
-    /* [in] */ String algorithm,
+    /* [in] */ const String& algorithm,
     /* [in] */ IProvider * provider,
     /* [out] */ IKeyGenerator ** ka)
 {

@@ -158,8 +158,7 @@ ECode CharsetEncoder::Encode(
     AutoPtr<IByteBuffer> output, temp;
     FAIL_RETURN(ByteBuffer::Allocate(length, (IByteBuffer**)&output));
     AutoPtr<ICoderResult> result;
-    AutoPtr<ICoderResult> UNDERFLOW;
-    AutoPtr<ICoderResult> OVERFLOW;
+    AutoPtr<ICoderResult> UNDERFLOW, OVERFLOW;
     CCoderResult::GetUNDERFLOW((ICoderResult**)&UNDERFLOW);
     CCoderResult::GetOVERFLOW((ICoderResult**)&OVERFLOW);
 

@@ -23,16 +23,16 @@ public:
         /* [out] */ IFileDescriptor** retFd);
 
     CARAPI Access(
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [in] */ Int32 mode,
         /* [out] */ Boolean* succeed);
 
     CARAPI Chmod(
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [in] */ Int32 mode);
 
     CARAPI Chown(
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [in] */ Int32 uid,
         /* [in] */ Int32 gid);
 
@@ -75,13 +75,13 @@ public:
         /* [in] */ Int64 length);
 
     CARAPI Lchown(
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [in] */ Int32 uid,
         /* [in] */ Int32 gid);
 
     CARAPI Link(
-        /* [in] */ String oldPath,
-        /* [in] */ String newPath);
+        /* [in] */ const String& oldPath,
+        /* [in] */ const String& newPath);
 
     CARAPI Lseek(
         /* [in] */ IFileDescriptor* fd,
@@ -90,14 +90,14 @@ public:
         /* [out] */ Int64* result);
 
     CARAPI Lstat(
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [out] */ IStructStat** stat);
 
     CARAPI Mkdir(
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [in] */ Int32 mode);
     CARAPI Mkfifo(
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [in] */ Int32 mode);
 
     CARAPI Open(
@@ -157,7 +157,7 @@ public:
         /* [out] */ Int32* num);
 
     CARAPI Readlink(
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [out] */ String* link);
 
     CARAPI Readv(
@@ -184,11 +184,11 @@ public:
         /* [out] */ Int32* num);
 
     CARAPI Remove(
-        /* [in] */ String path);
+        /* [in] */ const String& path);
 
     CARAPI Rename(
-        /* [in] */ String oldPath,
-        /* [in] */ String newPath);
+        /* [in] */ const String& oldPath,
+        /* [in] */ const String& newPath);
 
     CARAPI Sendfile(
         /* [in] */ IFileDescriptor* outFd,
@@ -229,17 +229,17 @@ public:
         /* [in] */ IFileDescriptor* fd2);
 
     CARAPI Stat(
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [out] */ IStructStat** stat);
 
     /* TODO: replace statfs with statvfs. */
     CARAPI StatVfs(
-        /* [in] */ String path,
+        /* [in] */ const String& path,
         /* [out] */ IStructStatVfs** statfs);
 
     CARAPI Symlink(
-        /* [in] */ String oldPath,
-        /* [in] */ String newPath);
+        /* [in] */ const String& oldPath,
+        /* [in] */ const String& newPath);
 
     CARAPI Write(
         /* [in] */ IFileDescriptor* fd,

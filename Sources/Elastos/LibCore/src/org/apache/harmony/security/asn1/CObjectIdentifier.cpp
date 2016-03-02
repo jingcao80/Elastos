@@ -143,7 +143,7 @@ ECode CObjectIdentifier::IsOID(
 }
 
 ECode CObjectIdentifier::ToIntArray(
-    /* [in] */ String str,
+    /* [in] */ const String& str,
     /* [in] */ Boolean shouldThrow,
     /* [out, callee] */ ArrayOf<Int32>** ret)
 {

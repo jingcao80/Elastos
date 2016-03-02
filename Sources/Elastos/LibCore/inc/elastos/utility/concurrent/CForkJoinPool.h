@@ -399,7 +399,7 @@ public:
         /* [in] */ IForkJoinPoolForkJoinWorkerThreadFactory* factory,
         /* [in] */ IThreadUncaughtExceptionHandler* handler,
         /* [in] */ Int32 mode,
-        /* [in] */ String workerNamePrefix);
+        /* [in] */ const String& workerNamePrefix);
 
     // Execution methods
 
@@ -906,7 +906,7 @@ private:
         /* [in] */ IForkJoinPoolForkJoinWorkerThreadFactory* factory,
         /* [in] */ IThreadUncaughtExceptionHandler* handler,
         /* [in] */ Int32 mode,
-        /* [in] */ String workerNamePrefix);
+        /* [in] */ const String& workerNamePrefix);
 
     static CARAPI_(AutoPtr<IForkJoinPool>) MakeCommonPool();
 

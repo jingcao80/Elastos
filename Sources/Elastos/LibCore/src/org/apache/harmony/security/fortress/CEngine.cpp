@@ -20,25 +20,6 @@ namespace Fortress {
 //---------------------------------------------------
 CAR_INTERFACE_IMPL(CEngine::SpiAndProvider, Object, ISpiAndProvider)
 
-ECode CEngine::SpiAndProvider::Aggregate(
-    /* [in] */ AggregateType type,
-    /* [in] */ IInterface* object)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CEngine::SpiAndProvider::GetDomain(
-    /* [out] */ IInterface** object)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
-ECode CEngine::SpiAndProvider::GetClassID(
-    /* [out] */ ClassID* clsid)
-{
-    return E_NOT_IMPLEMENTED;
-}
-
 ECode CEngine::SpiAndProvider::SetSpi(
     /* [in] */ IInterface* spi)
 {

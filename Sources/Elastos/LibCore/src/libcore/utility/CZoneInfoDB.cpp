@@ -3,6 +3,7 @@
 #include "CSystem.h"
 #include "CString.h"
 #include "ZoneInfo.h"
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/etl/List.h>
 #include "io/CMemoryMappedFile.h"
 
@@ -12,9 +13,10 @@ using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
 using Libcore::IO::IBufferIterator;
 using Elastos::Utility::Etl::List;
+using Elastos::Utility::ITimeZone;
+using Elastos::Utility::Logging::Logger;
 using Libcore::IO::CMemoryMappedFile;
 using Libcore::IO::IMemoryMappedFile;
-using Elastos::Utility::ITimeZone;
 
 namespace Libcore {
 namespace Utility {
@@ -26,7 +28,7 @@ CAR_SINGLETON_IMPL(CZoneInfoDB)
 
 CAR_INTERFACE_IMPL(CZoneInfoDB, Object, IZoneInfoDB)
 
-AutoPtr<TzData> InitDATA()
+static AutoPtr<TzData> InitDATA()
 {
     AutoPtr<CSystem> system;
     CSystem::AcquireSingletonByFriend((CSystem**)&system);
@@ -119,9 +121,9 @@ TzData::TzData(
         }
     }
 
-    // // We didn't find any usable tzdata on disk, so let's just hard-code knowledge of "GMT".
-    // // This is actually implemented in TimeZone itself, so if this is the only time zone
-    // // we report, we won't be asked any more questions.
+    // We didn't find any usable tzdata on disk, so let's just hard-code knowledge of "GMT".
+    // This is actually implemented in TimeZone itself, so if this is the only time zone
+    // we report, we won't be asked any more questions.
     ALOGE("Couldn't find any tzdata!");
     mVersion = String("missing");
     mZoneTab = String("# Emergency fallback data.\n");
@@ -135,31 +137,33 @@ Boolean TzData::LoadData(
     /* [in] */ const String& path)
 {
       // try {
-        if (FAILED(CMemoryMappedFile::MmapRO(path, (IMemoryMappedFile**)&mMappedFile))) {
-            return FALSE;
-        }
-      // } catch (ErrnoException errnoException) {
+    mMappedFile = NULL;
+    ECode ec = CMemoryMappedFile::MmapRO(path, (IMemoryMappedFile**)&mMappedFile);
+    if (ec == (ECode)E_ERRNO_EXCEPTION) {
+        return FALSE;
+    }
+    // } catch (ErrnoException errnoException) {
         // return false;
-      // }
-      // try {
-        if (FAILED(ReadHeader())) {
-            // System.logE("tzdata file \"" + path + "\" was present but invalid!", ex);
-            return FALSE;
-        } else {
-            return TRUE;
-        }
-      // } catch (Exception ex) {
+    // }
+
+    // try {
+    if (FAILED(ReadHeader())) {
+        Logger::E("TzData", "tzdata file %s was present but invalid!", path.string());
+        return FALSE;
+    }
+    else {
+        return TRUE;
+    }
+    // } catch (Exception ex) {
         // Something's wrong with the file.
         // Log the problem and return false so we try the next choice.
         // return false;
-      // }
+    // }
 }
 
 ECode TzData::ReadHeader()
 {
-    if (mMappedFile == NULL) {
-        return E_FAIL;
-    }
+    assert(mMappedFile != NULL);
 
     // byte[12] tzdata_version  -- "tzdata2012f\0"
     // int index_offset

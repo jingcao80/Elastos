@@ -25,7 +25,7 @@ Boolean FactoryFinder::sFirstTime = TRUE;
 const Int32 FactoryFinder::DEFAULT_LINE_LENGTH = 80;
 
 ECode FactoryFinder::NewInstance(
-    /* [in] */ String clsName,
+    /* [in] */ const String& clsName,
     /* [in] */ IClassLoader* loader,
     /* [out] */ IInterface** obj)
 {
@@ -46,8 +46,8 @@ ECode FactoryFinder::NewInstance(
 }
 
 ECode FactoryFinder::Find(
-    /* [in] */ String factoryId,
-    /* [in] */ String fallbackClassName,
+    /* [in] */ const String& factoryId,
+    /* [in] */ const String& fallbackClassName,
     /* [out] */ IInterface** obj)
 {
     AutoPtr<IClassLoader> pLoader;
@@ -108,7 +108,7 @@ ECode FactoryFinder::Find(
 FactoryFinder::FactoryFinder(){}
 
 ECode FactoryFinder::FindClassLoader(
-    /* [in] */ String clsName,
+    /* [in] */ const String& clsName,
     /* [out] */ IClassLoader** pLoader)
 {
     *pLoader = NULL;

@@ -129,7 +129,7 @@ ECode CQName::constructor(
 }
 
 ECode CQName::ValueOf(
-    /* [in] */ String qNameAsString,
+    /* [in] */ const String& qNameAsString,
     /* [out] */  IQName** qName)
 {
     // null is not valid

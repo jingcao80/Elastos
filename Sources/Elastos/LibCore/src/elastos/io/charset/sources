@@ -15,6 +15,7 @@ INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io;
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io/charset;
 INCLUDES += $(MAKEDIR)/../../../../inc/elastos/io/charset/spi;
 INCLUDES += $(MAKEDIR)/../../../../inc/libcore/icu;
+INCLUDES += $(MAKEDIR)/../../../../inc/libcore/utility;
 
 SOURCES = CharsetICU.cpp
 SOURCES += Charset.cpp

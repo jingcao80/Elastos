@@ -24,7 +24,7 @@ ECode CDatatypeConstants::Field::GetId(
 }
 
 CDatatypeConstants::Field::Field(
-    /* [in] */ String str,
+    /* [in] */ const String& str,
     /* [in] */ Int32 id)
 {
     mStr = str;

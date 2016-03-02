@@ -37,7 +37,7 @@ ECode DatatypeFactory::NewInstance(
 }
 
 ECode DatatypeFactory::NewInstance(
-    /* [in] */ String factoryClassName,
+    /* [in] */ const String& factoryClassName,
     /* [in] */ IClassLoader* classLoader,
     /* [out] */ IDatatypeFactory** factory)
 {
@@ -153,7 +153,7 @@ ECode DatatypeFactory::NewDuration(
 }
 
 ECode DatatypeFactory::NewDurationDayTime(
-    /* [in] */ String lexicalRepresentation,
+    /* [in] */ const String& lexicalRepresentation,
     /* [out] */ IDuration** duration)
 {
     *duration = NULL;
@@ -283,7 +283,7 @@ ECode DatatypeFactory::NewDurationDayTime(
 }
 
 ECode DatatypeFactory::NewDurationYearMonth(
-    /* [in] */ String lexicalRepresentation,
+    /* [in] */ const String& lexicalRepresentation,
     /* [out] */ IDuration** duration)
 {
     *duration = NULL;

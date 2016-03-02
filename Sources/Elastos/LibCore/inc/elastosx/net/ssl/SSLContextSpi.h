@@ -78,7 +78,7 @@ public:
      *             if the provider does not support the operation.
      */
     virtual CARAPI EngineCreateSSLEngine(
-        /* [in] */ String host,
+        /* [in] */ const String& host,
         /* [in] */ Int32 port,
         /* [out] */ ISSLEngine** engine) = 0;
 

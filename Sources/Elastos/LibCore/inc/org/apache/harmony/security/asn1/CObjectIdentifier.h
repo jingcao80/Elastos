@@ -48,7 +48,7 @@ public:
 
 private:
     static CARAPI ToIntArray(
-        /* [in] */ String str,
+        /* [in] */ const String& str,
         /* [in] */ Boolean shouldThrow,
         /* [out, callee] */ ArrayOf<Int32>** ret);
 

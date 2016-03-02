@@ -32,8 +32,6 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        CAR_OBJECT_DECL()
-
         CARAPI SetSpi(
             /* [in] */ IInterface* spi);
 

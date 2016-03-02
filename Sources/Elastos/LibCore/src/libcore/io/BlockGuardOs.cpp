@@ -75,7 +75,7 @@ ECode BlockGuardOs::Accept(
 }
 
 ECode BlockGuardOs::Access(
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [in] */ Int32 mode,
     /* [out] */ Boolean* succeed)
 {
@@ -85,7 +85,7 @@ ECode BlockGuardOs::Access(
 }
 
 ECode BlockGuardOs::Chmod(
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [in] */ Int32 mode)
 {
     BLOCKGUARD_THREADPOLICY_CALL(OnWriteToDisk)
@@ -93,7 +93,7 @@ ECode BlockGuardOs::Chmod(
 }
 
 ECode BlockGuardOs::Chown(
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [in] */ Int32 uid,
     /* [in] */ Int32 gid)
 {
@@ -212,7 +212,7 @@ ECode BlockGuardOs::Ftruncate(
 }
 
 ECode BlockGuardOs::Lchown(
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [in] */ Int32 uid,
     /* [in] */ Int32 gid)
 {
@@ -221,8 +221,8 @@ ECode BlockGuardOs::Lchown(
 }
 
 ECode BlockGuardOs::Link(
-    /* [in] */ String oldPath,
-    /* [in] */ String newPath)
+    /* [in] */ const String& oldPath,
+    /* [in] */ const String& newPath)
 {
     BLOCKGUARD_THREADPOLICY_CALL(OnWriteToDisk)
     return mOs->Link(oldPath, newPath);
@@ -239,7 +239,7 @@ ECode BlockGuardOs::Lseek(
 }
 
 ECode BlockGuardOs::Lstat(
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [out] */ IStructStat** stat)
 {
     BLOCKGUARD_THREADPOLICY_CALL(OnReadFromDisk)
@@ -247,7 +247,7 @@ ECode BlockGuardOs::Lstat(
 }
 
 ECode BlockGuardOs::Mkdir(
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [in] */ Int32 mode)
 {
     BLOCKGUARD_THREADPOLICY_CALL(OnWriteToDisk)
@@ -255,7 +255,7 @@ ECode BlockGuardOs::Mkdir(
 }
 
 ECode BlockGuardOs::Mkfifo(
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [in] */ Int32 mode)
 {
     BLOCKGUARD_THREADPOLICY_CALL(OnWriteToDisk)
@@ -376,7 +376,7 @@ ECode BlockGuardOs::Read(
 }
 
 ECode BlockGuardOs::Readlink(
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [out] */ String* link)
 {
     VALIDATE_NOT_NULL(link);
@@ -423,15 +423,15 @@ ECode BlockGuardOs::Recvfrom(
 }
 
 ECode BlockGuardOs::Remove(
-    /* [in] */ String path)
+    /* [in] */ const String& path)
 {
     BLOCKGUARD_THREADPOLICY_CALL(OnWriteToDisk)
     return mOs->Remove(path);
 }
 
 ECode BlockGuardOs::Rename(
-    /* [in] */ String oldPath,
-    /* [in] */ String newPath)
+    /* [in] */ const String& oldPath,
+    /* [in] */ const String& newPath)
 {
     BLOCKGUARD_THREADPOLICY_CALL(OnWriteToDisk)
     return mOs->Rename(oldPath, newPath);
@@ -505,7 +505,7 @@ ECode BlockGuardOs::Socketpair(
 }
 
 ECode BlockGuardOs::Stat(
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [out] */ IStructStat** stat)
 {
     BLOCKGUARD_THREADPOLICY_CALL(OnReadFromDisk)
@@ -514,7 +514,7 @@ ECode BlockGuardOs::Stat(
 
 /* TODO: replace statfs with statvfs. */
 ECode BlockGuardOs::StatVfs(
-    /* [in] */ String path,
+    /* [in] */ const String& path,
     /* [out] */ IStructStatVfs** statfs)
 {
     BLOCKGUARD_THREADPOLICY_CALL(OnReadFromDisk)
@@ -522,8 +522,8 @@ ECode BlockGuardOs::StatVfs(
 }
 
 ECode BlockGuardOs::Symlink(
-    /* [in] */ String oldPath,
-    /* [in] */ String newPath)
+    /* [in] */ const String& oldPath,
+    /* [in] */ const String& newPath)
 {
     BLOCKGUARD_THREADPOLICY_CALL(OnWriteToDisk)
     return mOs->Symlink(oldPath, newPath);

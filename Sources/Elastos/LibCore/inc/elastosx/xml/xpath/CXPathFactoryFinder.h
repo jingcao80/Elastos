@@ -52,17 +52,17 @@ public:
 
 private:
     static CARAPI_(void) DebugPrintln(
-        /* [in] */ String msg);
+        /* [in] */ const String& msg);
 
     CARAPI_(void) DebugDisplayClassLoader();
 
     CARAPI _newFactory(
-        /* [in] */ String uri,
+        /* [in] */ const String& uri,
         /* [out] */ IXPathFactory** xpf);
 
     CARAPI LoadFromServicesFile(
-        /* [in] */ String uri,
-        /* [in] */ String resourceName,
+        /* [in] */ const String& uri,
+        /* [in] */ const String& resourceName,
         /* [in] */ IInputStream* in,
         /* [out] */ IXPathFactory** xpf);
 
@@ -74,7 +74,7 @@ private:
         /* [in] */ IClassInfo* clazz );
 
     static CARAPI_(String) Which(
-        /* [in] */ String classname,
+        /* [in] */ const String& classname,
         /* [in] */ IClassLoader* loader);
 private:
     static Boolean debug;

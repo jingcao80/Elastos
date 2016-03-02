@@ -274,14 +274,14 @@ private:
     {
     public:
         NoFallbackControl(
-            /* [in] */ String format);
+            /* [in] */ const String& format);
 
         NoFallbackControl(
             /* [in] */ IList* list);
 
         // @Override
         CARAPI GetFallbackLocale(
-            /* [in] */ String baseName,
+            /* [in] */ const String& baseName,
             /* [in] */ ILocale* locale,
             /* [out] */ ILocale** outlocale);
 
@@ -297,7 +297,7 @@ private:
     {
     public:
         SimpleControl(
-            /* [in] */ String format);
+            /* [in] */ const String& format);
     };
 
 public:
@@ -319,7 +319,7 @@ public:
      *                if the {@code ResourceBundle} cannot be found.
      */
     static CARAPI GetBundle(
-        /* [in] */ String bundleName,
+        /* [in] */ const String& bundleName,
         /* [out] */ IResourceBundle** outrb);
 
     /**
@@ -335,7 +335,7 @@ public:
      *                if the resource bundle cannot be found.
      */
     static CARAPI GetBundle(
-        /* [in] */ String bundleName,
+        /* [in] */ const String& bundleName,
         /* [in] */ ILocale* locale,
         /* [out] */ IResourceBundle** outrb);
 
@@ -389,14 +389,14 @@ public:
      *                if the {@code ResourceBundle} cannot be found.
      */
     static CARAPI GetBundle(
-        /* [in] */ String bundleName,
+        /* [in] */ const String& bundleName,
         /* [in] */ ILocale* locale,
         /* [in] */ IClassLoader* loader,
         /* [out] */ IResourceBundle** outrb);
 
     static CARAPI MissingResourceException(
-        /* [in] */ String className,
-        /* [in] */ String key);
+        /* [in] */ const String& className,
+        /* [in] */ const String& key);
 
     /**
      * Finds the named resource bundle for the specified base name and control.
@@ -410,7 +410,7 @@ public:
      * @since 1.6
      */
     static CARAPI GetBundle(
-        /* [in] */ String baseName,
+        /* [in] */ const String& baseName,
         /* [in] */ IResourceBundleControl* control,
         /* [out] */ IResourceBundle** outrb);
 
@@ -428,7 +428,7 @@ public:
      * @since 1.6
      */
     static CARAPI GetBundle(
-        /* [in] */ String baseName,
+        /* [in] */ const String& baseName,
         /* [in] */ ILocale* targetLocale,
         /* [in] */ IResourceBundleControl* control,
         /* [out] */ IResourceBundle** outrb);
@@ -450,7 +450,7 @@ public:
      * @since 1.6
      */
     static CARAPI GetBundle(
-        /* [in] */ String baseName,
+        /* [in] */ const String& baseName,
         /* [in] */ ILocale* targetLocale,
         /* [in] */ IClassLoader* loader,
         /* [in] */ IResourceBundleControl* control,
@@ -564,7 +564,7 @@ private:
     static AutoPtr<IClassLoader> GetLoader();
 
     static AutoPtr<IResourceBundle> ProcessGetBundle(
-        /* [in] */ String baseName,
+        /* [in] */ const String& baseName,
         /* [in] */ ILocale* targetLocale,
         /* [in] */ IClassLoader* loader,
         /* [in] */ IResourceBundleControl* control,
@@ -573,7 +573,7 @@ private:
 
     static AutoPtr<IResourceBundle> HandleGetBundle(
         /* [in] */ Boolean loadBase,
-        /* [in] */ String base,
+        /* [in] */ const String& base,
         /* [in] */ ILocale* locale,
         /* [in] */ IClassLoader* loader);
 

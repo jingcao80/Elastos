@@ -142,7 +142,7 @@ ECode ListResourceBundle::GetKeys(
 }
 
 ECode ListResourceBundle::HandleGetObject(
-    /* [in] */ String key,
+    /* [in] */ const String& key,
     /* [out] */ IInterface** outface)
 {
     VALIDATE_NOT_NULL(outface)
