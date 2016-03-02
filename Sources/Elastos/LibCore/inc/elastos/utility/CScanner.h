@@ -1080,8 +1080,9 @@ private:
     /*
      * Get integer's pattern
      */
-    CARAPI_(AutoPtr<IPattern>) GetIntegerPattern(
-        /* [in] */ Int32 radix);
+    CARAPI GetIntegerPattern(
+        /* [in] */ Int32 radix,
+        /* [out] */ IPattern** outpat);
 
     /*
      * Get pattern of float
