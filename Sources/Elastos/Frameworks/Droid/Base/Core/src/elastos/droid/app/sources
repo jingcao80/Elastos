@@ -42,6 +42,8 @@ SOURCES += CAlarmManager.cpp
 SOURCES += CAlarmClockInfo.cpp
 SOURCES += AlertDialog.cpp
 SOURCES += CAlertDialogBuilder.cpp
+SOURCES += CAirplaneModeSettings.cpp
+SOURCES += CAirplaneModeSettingsHelper.cpp
 SOURCES += AliasActivity.cpp
 SOURCES += AppGlobals.cpp
 SOURCES += AppImportanceMonitor.cpp
@@ -61,6 +63,8 @@ SOURCES += ApplicationPackageManager.cpp
 
 SOURCES += CBackStackState.cpp
 SOURCES += CBackStackRecordTransitionState.cpp
+SOURCES += CBrightnessSettings.cpp
+SOURCES += CBrightnessSettingsHelper.cpp
 SOURCES += CContentProviderHolder.cpp
 SOURCES += CContextImpl.cpp
 SOURCES += ReceiverRestrictedContext.cpp

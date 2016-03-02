@@ -1,0 +1,46 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Core.IStringBuilder;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    interface IAirplaneModeSettings {
+        GetValue(
+            [out] Int32* value);
+
+        SetValue(
+            [in] Int32 value);
+
+        SetOverride(
+            [in] Boolean override);
+
+        IsOverride(
+            [out] Boolean* override);
+
+        IsDirty(
+            [out] Boolean* dirty);
+
+        ProcessOverride(
+            [in] IContext* context);
+
+        GetXmlString(
+            [in] IStringBuilder* builder,
+            [in] IContext* context);
+    }
+
+    interface IAirplaneModeSettingsHelper {
+        FromXml(
+            [in] IXmlPullParser* xpp,
+            [in] IContext* context,
+            [out] IAirplaneModeSettings** obj);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}
