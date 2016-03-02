@@ -31,6 +31,40 @@ public:
         /* [out] */ Int16* result);
 
     /**
+     * Parses the specified string as a byte value. The ASCII
+     * character \u002d ('-') is recognized as the minus sign.
+     *
+     * @param string
+     *            the string representation of a byte value.
+     * @return the primitive byte value represented by {@code string}.
+     * @throws NumberFormatException
+     *             if {@code string} cannot be parsed as a byte value.
+     */
+    ECO_PUBLIC static CARAPI Parse(
+        /* [in] */ const String& string,
+        /* [out] */ Byte* result);
+
+    /**
+     * Parses the specified string as a signed byte value using the specified
+     * radix. The ASCII character \u002d ('-') is recognized as the minus sign.
+     *
+     * @param string
+     *            the string representation of a byte value.
+     * @param radix
+     *            the radix to use when parsing.
+     * @return the primitive byte value represented by {@code string} using
+     *         {@code radix}.
+     * @throws NumberFormatException
+     *             if {@code string} cannot be parsed as a byte value, or
+     *             {@code radix < Character.MIN_RADIX ||
+     *             radix > Character.MAX_RADIX}.
+     */
+    ECO_PUBLIC static CARAPI Parse(
+        /* [in] */ const String& string,
+        /* [in] */ Int32 radix,
+        /* [out] */ Byte* result);
+
+    /**
      * Parses the specified string as a signed decimal short value. The ASCII
      * character \u002d ('-') is recognized as the minus sign.
      *

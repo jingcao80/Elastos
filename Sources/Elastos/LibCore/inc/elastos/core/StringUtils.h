@@ -14,6 +14,11 @@ class ECO_PUBLIC StringUtils
 public:
     // From String without error code
     //
+    static CARAPI_(Byte) ParseByte(
+        /* [in] */ const String& input,
+        /* [in] */ Int32 radix = 10,
+        /* [in] */ Byte defValue = 0);
+
     static CARAPI_(Int16) ParseInt16(
         /* [in] */ const String& input,
         /* [in] */ Int32 radix = 10,
@@ -47,6 +52,10 @@ public:
     //
     static CARAPI Parse(
         /* [in] */ const String& input,
+        /* [out] */ Byte* result);
+
+    static CARAPI Parse(
+        /* [in] */ const String& input,
         /* [out] */ Int16* result);
 
     static CARAPI Parse(
@@ -56,6 +65,11 @@ public:
     static CARAPI Parse(
         /* [in] */ const String& input,
         /* [out] */ Int64* result);
+
+    static CARAPI Parse(
+        /* [in] */ const String& input,
+        /* [in] */ Int32 radix,
+        /* [out] */ Byte* result);
 
     static CARAPI Parse(
         /* [in] */ const String& input,
