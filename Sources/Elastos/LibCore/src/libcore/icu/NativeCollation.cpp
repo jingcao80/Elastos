@@ -26,7 +26,7 @@ static UCollationElements* toCollationElements(
    return reinterpret_cast<UCollationElements*>(static_cast<uintptr_t>(address));
 }
 
-extern ECode maybeThrowIcuException(/* [in] */ UErrorCode errorCode);
+extern ECode maybeThrowIcuException(const char* provider, UErrorCode errorCode);
 
 NativeCollation::NativeCollation()
 {}
@@ -76,7 +76,7 @@ ECode NativeCollation::GetAttribute(
     UErrorCode status = U_ZERO_ERROR;
     *result = ucol_getAttribute(toCollator(collatoraddress),
             (UColAttribute)type, &status);
-    return maybeThrowIcuException(status);
+    return maybeThrowIcuException("ucol_getAttribute", status);
 }
 
 ECode NativeCollation::GetCollationElementIterator(
@@ -93,7 +93,7 @@ ECode NativeCollation::GetCollationElementIterator(
     UErrorCode status = U_ZERO_ERROR;
     UCollationElements* result = ucol_openElements(toCollator(collatoraddress),
         ustr->getBuffer(), ustr->length(), &status);
-    ECode ec = maybeThrowIcuException(status);
+    ECode ec = maybeThrowIcuException("ucol_openElements", status);
     if (FAILED(ec)) {
         delete ustr;
         return ec;
@@ -167,7 +167,7 @@ ECode NativeCollation::GetNext(
 {
     UErrorCode status = U_ZERO_ERROR;
     *result = ucol_next(toCollationElements(address), &status);
-    return maybeThrowIcuException(status);
+    return maybeThrowIcuException("ucol_next", status);
 }
 
 ECode NativeCollation::OpenCollator(
@@ -189,7 +189,7 @@ ECode NativeCollation::OpenCollator(
     }
     UErrorCode status = U_ZERO_ERROR;
     UCollator* c = ucol_open(languageTag.string(), &status);
-    FAIL_RETURN(maybeThrowIcuException(status));
+    FAIL_RETURN(maybeThrowIcuException("ucol_open", status));
     *address = static_cast<Int64>(reinterpret_cast<uintptr_t>(c));
     return NOERROR;
 }
@@ -210,7 +210,7 @@ ECode NativeCollation::OpenCollatorFromRules(
             UnicodeString::fromUTF8(rules.string()).length(),
             UColAttributeValue(normalizationmode),
             UCollationStrength(collationstrength),NULL, &status);
-    FAIL_RETURN(maybeThrowIcuException(status));
+    FAIL_RETURN(maybeThrowIcuException("ucol_openRules", status));
     *address = static_cast<Int32>(reinterpret_cast<uintptr_t>(c));
     return NOERROR;
 }
@@ -221,7 +221,7 @@ ECode NativeCollation::GetPrevious(
 {
     UErrorCode status = U_ZERO_ERROR;
     *result = ucol_previous(toCollationElements(address), &status);
-    return maybeThrowIcuException(status);
+    return maybeThrowIcuException("ucol_previous", status);
 }
 
 void NativeCollation::Reset(
@@ -237,7 +237,7 @@ ECode NativeCollation::SafeClone(
     UErrorCode status = U_ZERO_ERROR;
     Int32 bufferSize = U_COL_SAFECLONE_BUFFERSIZE;
     UCollator* c = ucol_safeClone(toCollator(collatoraddress), NULL, &bufferSize, &status);
-    FAIL_RETURN(maybeThrowIcuException(status));
+    FAIL_RETURN(maybeThrowIcuException("ucol_safeClone", status));
     *address = static_cast<Int32>(reinterpret_cast<uintptr_t>(c));
     return NOERROR;
 }
@@ -250,7 +250,7 @@ ECode NativeCollation::SetAttribute(
     UErrorCode status = U_ZERO_ERROR;
     ucol_setAttribute(toCollator(collatoraddress), (UColAttribute)type,
             (UColAttributeValue)value, &status);
-    return maybeThrowIcuException(status);
+    return maybeThrowIcuException("ucol_setAttribute", status);
 }
 
 ECode NativeCollation::SetOffset(
@@ -259,7 +259,7 @@ ECode NativeCollation::SetOffset(
 {
     UErrorCode status = U_ZERO_ERROR;
     ucol_setOffset(toCollationElements(address), offset, &status);
-    return maybeThrowIcuException(status);
+    return maybeThrowIcuException("ucol_setOffset", status);
 }
 
 ECode NativeCollation::SetText(
@@ -271,7 +271,7 @@ ECode NativeCollation::SetText(
     ucol_setText(toCollationElements(address),
         ustr->getBuffer(), ustr->length(), &status);
 
-    ECode ec = maybeThrowIcuException(status);
+    ECode ec = maybeThrowIcuException("ucol_setText", status);
     if (FAILED(ec)) {
         delete ustr;
         return ec;

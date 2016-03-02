@@ -343,14 +343,11 @@ ECode CKXmlParser::Next(
         }
     }
 
-PFL_EX(" 1 ");
     FAIL_RETURN(PeekType(FALSE, &mType));
 
-PFL_EX(" 2 mType %d", mType);
     if (mType == XML_DECLARATION) {
         FAIL_RETURN(ReadXmlDeclaration());
         FAIL_RETURN(PeekType(FALSE, &mType));
-PFL_EX(" 3 mType %d", mType);
     }
 
     mText = NULL;
@@ -362,7 +359,6 @@ PFL_EX(" 3 mType %d", mType);
     Boolean throwOnResolveFailure = !justOneToken;
 
     while (TRUE) {
-PFL_EX(" 4 mType %d", mType);
         switch (mType) {
             /*
              * Return immediately after encountering a start tag, end tag, or
@@ -440,7 +436,6 @@ PFL_EX(" 4 mType %d", mType);
             }
         }
 
-PFL_EX(" 5 mType %d", mType);
         if (mDepth == 0 && (mType == ENTITY_REF || mType == IXmlPullParser::TEXT || mType == CDSECT)) {
             Logger::E("CKXmlParser", "Unexpected token type %, depth %d, line %d", mDepth, mType, __LINE__);
             return E_XML_PULL_PARSER_EXCEPTION;
@@ -1134,16 +1129,7 @@ ECode CKXmlParser::PeekType(
         return NOERROR;
     }
 
-    PFL_EX("==============================================");
-    PFL_EX(" mLimit: %d", mLimit);
-    for (Int32 i = 0; i < mLimit; ++i) {
-        PFL_EX(" > %d : %c vs %d", i, (*mBuffer)[i], (*mBuffer)[i]);
-    }
-    PFL_EX("==============================================");
-
-    Char32 curChar = (*mBuffer)[mPosition];
-    PFL_EX(" mPosition %d, value: %c : %d", mPosition, curChar, curChar);
-    switch (curChar) {
+    switch ((*mBuffer)[mPosition]) {
     case '&':
         *token = ENTITY_REF; // &
         return NOERROR;
@@ -1152,7 +1138,7 @@ ECode CKXmlParser::PeekType(
             Logger::E("CKXmlParser", "Dangling <");
             return E_XML_PULL_PARSER_EXCEPTION;
         }
-        PFL_EX(" mPosition + 1, value: %c", (*mBuffer)[mPosition + 1]);
+
         switch ((*mBuffer)[mPosition + 1]) {
         case '/':
             *token = END_TAG; // </

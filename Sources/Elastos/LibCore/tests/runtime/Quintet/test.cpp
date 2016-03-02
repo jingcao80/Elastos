@@ -20,6 +20,8 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Net.h>
 #include <Elastos.CoreLibrary.External.h>
+#include <Elastos.CoreLibrary.Libcore.h>
+
 
 using Org::Kxml2::IO::IKXmlParser;
 using Org::Kxml2::IO::CKXmlParser;
@@ -32,6 +34,8 @@ using namespace Elastos::Net;
 using namespace Elastos::IO;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::Etl::HashMap;
+using Libcore::ICU::IICUUtil;
+using Libcore::ICU::CICUUtil;
 
 class Base
     : public Object
@@ -1053,6 +1057,24 @@ void testXmlParser()
     printf("==================  END  ===================\n");
 }
 
+void testICU()
+{
+    AutoPtr<IICUUtil> icu;
+    CICUUtil::AcquireSingleton((IICUUtil**)&icu);
+    AutoPtr<ArrayOf<String> > codes;
+    icu->GetAvailableCurrencyCodes((ArrayOf<String>**)&codes);
+
+    if (codes != NULL) {
+        for (Int32 i = 0; i < codes->GetLength(); ++i) {
+            printf(" currency codes %d: %s\n", i, (*codes)[i].string());
+        }
+    }
+
+    String currency;
+    icu->GetCurrencyCode(String("US"), &currency);
+    printf(" currency for US is %s\n", currency.string());
+}
+
 void testQuintet()
 {
     // doTestArrayOfFreeRelease();
@@ -1071,6 +1093,8 @@ void testQuintet()
     // testMemoryLeak();
 
     testXmlParser();
+
+    //testICU();
 }
 
 int main(int argc, char *argv[])
