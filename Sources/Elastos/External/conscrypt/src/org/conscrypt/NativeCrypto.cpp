@@ -7,6 +7,7 @@
 #include "elastos/coredef.h"
 #include "NativeCrypto.h"
 #include "CryptoUpcalls.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/UniquePtr.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/logging/Logger.h>
@@ -31,6 +32,7 @@
 #include "AsynchronousCloseMonitor.h"
 #endif
 
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CArrayOf;
 using Elastos::Core::CByte;
 using Elastos::Core::CInteger32;
@@ -5699,7 +5701,10 @@ static ECode GENERAL_NAME_to_object(GENERAL_NAME* gen, IInterface** result)
                 && (ASN1_PRINTABLE_type(ASN1_STRING_data(gen->d.ia5), len) != V_ASN1_T61STRING)) {
             NATIVE_TRACE("GENERAL_NAME_to_jobject(%p) => Email/DNS/URI \"%s\"", gen, data);
             String str(data);
-            return CString::New(str, (ICharSequence**)result);
+            AutoPtr<ICharSequence> csq = CoreUtils::Convert(str);
+            *result = csq.Get();
+            REFCOUNT_ADD(*result)
+            return NOERROR;
         }
         else {
             NATIVE_TRACE("GENERAL_NAME_to_jobject(%p) => Email/DNS/URI invalid", gen);
@@ -5715,7 +5720,10 @@ static ECode GENERAL_NAME_to_object(GENERAL_NAME* gen, IInterface** result)
             *result = NULL;
             return ec;
         }
-        return CString::New(str, (ICharSequence**)result);
+        AutoPtr<ICharSequence> csq = CoreUtils::Convert(str);
+        *result = csq.Get();
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
     case GEN_IPADD: {
         const void *ip = reinterpret_cast<const void *>(gen->d.ip->data);
@@ -5725,7 +5733,10 @@ static ECode GENERAL_NAME_to_object(GENERAL_NAME* gen, IInterface** result)
             if (inet_ntop(AF_INET, ip, buffer.get(), INET_ADDRSTRLEN) != NULL) {
                 NATIVE_TRACE("GENERAL_NAME_to_jobject(%p) => IPv4 %s", gen, buffer.get());
                 String str(buffer.get());
-                return CString::New(str, (ICharSequence**)result);
+                AutoPtr<ICharSequence> csq = CoreUtils::Convert(str);
+                *result = csq.Get();
+                REFCOUNT_ADD(*result)
+                return NOERROR;
             }
             else {
                 NATIVE_TRACE("GENERAL_NAME_to_jobject(%p) => IPv4 failed %s", gen, strerror(errno));
@@ -5755,7 +5766,10 @@ static ECode GENERAL_NAME_to_object(GENERAL_NAME* gen, IInterface** result)
             *result = NULL;
             return ec;
         }
-        return CString::New(str, (ICharSequence**)result);
+        AutoPtr<ICharSequence> csq = CoreUtils::Convert(str);
+        *result = csq.Get();
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
     case GEN_OTHERNAME:
     case GEN_X400:

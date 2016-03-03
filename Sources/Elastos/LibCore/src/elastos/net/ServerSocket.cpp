@@ -371,7 +371,7 @@ ECode ServerSocket::GetLocalSocketAddress(
     FAIL_RETURN(GetInetAddress((IInetAddress**)&addr));
     Int32 port;
     FAIL_RETURN(GetLocalPort(&port));
-    return CInetSocketAddress::New(addr, port, (IInetSocketAddress**)address);
+    return CInetSocketAddress::New(addr, port, address);
 }
 
 ECode ServerSocket::IsBound(

@@ -566,17 +566,17 @@ ECode DatagramSocket::GetRemoteSocketAddress(
     /* [out] */ ISocketAddress** address)
 {
     VALIDATE_NOT_NULL(address);
+    *address = NULL;
 
     Boolean isConnected;
     if (IsConnected(&isConnected), !isConnected) {
-        *address = NULL;
         return NOERROR;
     }
     AutoPtr<IInetAddress> addr;
     Int32 port;
     GetInetAddress((IInetAddress**)&addr);
     GetPort(&port);
-    return CInetSocketAddress::New(addr, port, (IInetSocketAddress**)address);
+    return CInetSocketAddress::New(addr, port, address);
 }
 
 ECode DatagramSocket::GetLocalSocketAddress(
@@ -596,7 +596,7 @@ ECode DatagramSocket::GetLocalSocketAddress(
     Int32 port;
     GetLocalAddress((IInetAddress**)&addr);
     GetLocalPort(&port);
-    return CInetSocketAddress::New(addr, port, (IInetSocketAddress**)address);
+    return CInetSocketAddress::New(addr, port, address);
 }
 
 ECode DatagramSocket::SetReuseAddress(

@@ -66,8 +66,9 @@ ECode CJDBCConnection::CreateStatement(
     /* [out] */ IStatement ** ppStatement)
 {
     AutoPtr<IJDBCStatement> s;
-    CJDBCStatement::New((IJDBCConnection*)this, (IJDBCStatement **)&s);
+    CJDBCStatement::New(this, (IJDBCStatement**)&s);
     *ppStatement = IStatement::Probe(s);
+    REFCOUNT_ADD(*ppStatement)
     return NOERROR;
 }
 
@@ -87,7 +88,7 @@ ECode CJDBCConnection::CreateStatement(
     }
 
     AutoPtr<IJDBCStatement> s;
-    CJDBCStatement::New((IJDBCConnection*)this, (IJDBCStatement**)&s);
+    CJDBCStatement::New(this, (IJDBCStatement**)&s);
     *ppStatement = IStatement::Probe(s);
     REFCOUNT_ADD(*ppStatement);
     return NOERROR;
@@ -249,8 +250,7 @@ ECode CJDBCConnection::PrepareStatement(
         resultSetConcurrency != IResultSet::CONCUR_UPDATABLE) {
         return E_SQL_FEATURE_NOT_SUPPORTED_EXCEPTION;
     }
-    return CJDBCPreparedStatement::New((IJDBCConnection*)this, sql, (IJDBCPreparedStatement**)ppStatement);
-
+    return CJDBCPreparedStatement::New(this, sql, ppStatement);
 }
 
 ECode CJDBCConnection::PrepareStatement(

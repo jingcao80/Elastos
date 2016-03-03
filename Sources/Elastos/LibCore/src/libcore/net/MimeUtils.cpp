@@ -690,7 +690,7 @@ ECode MimeUtils::GetContentTypesPropertiesStream(
         Boolean exist;
         // CFile::New(userTable, (IFile**)&f);
         if (f->Exists(&exist), exist) {
-            FAIL_RETURN(CFileInputStream::New(f, (IFileInputStream**)result));
+            FAIL_RETURN(CFileInputStream::New(f, result));
             return NOERROR;
         }
     }
@@ -710,7 +710,7 @@ ECode MimeUtils::GetContentTypesPropertiesStream(
     CFile::New(sb.ToString(), (IFile**)&f);
     Boolean exist;
     if(f->Exists(&exist), exist) {
-        FAIL_RETURN(CFileInputStream::New(f, (IFileInputStream**)result));
+        FAIL_RETURN(CFileInputStream::New(f, result));
         return NOERROR;
     }
 

@@ -32,7 +32,11 @@ ECode CloneUtils::Clone(
         // }
         // try {
         // return m.invoke(obj, (Object []) null);
-        return ICloneable::Probe(obj)->Clone((IInterface**)cloneObj);
+        AutoPtr<IInterface> tmp;
+        ICloneable::Probe(obj)->Clone((IInterface**)&tmp);
+        *cloneObj = IObject::Probe(tmp);
+        REFCOUNT_ADD(*cloneObj)
+        return NOERROR;
         // } catch (InvocationTargetException ex) {
         //     Throwable cause = ex.getCause();
         //     if (cause instanceof CloneNotSupportedException) {

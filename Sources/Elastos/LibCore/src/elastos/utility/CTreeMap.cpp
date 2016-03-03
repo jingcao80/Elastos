@@ -1539,6 +1539,8 @@ ECode CTreeMap::_KeySet::GetSubSet(
     /* [in] */ Boolean toInclusive,
     /* [out] */ INavigableSet** outnav)
 {
+    VALIDATE_NOT_NULL(outnav)
+    *outnav = NULL;
     AutoPtr<INavigableMap> res;
     mHost->GetSubMap(fromElement, fromInclusive, toElement, toInclusive, (INavigableMap**)&res);
     return res->GetNavigableKeySet(outnav);
@@ -1549,9 +1551,15 @@ ECode CTreeMap::_KeySet::GetSubSet(
     /* [in] */ IInterface* end,
     /* [out] */ ISortedSet** outsort)
 {
+    VALIDATE_NOT_NULL(outsort)
+    *outsort = NULL;
     AutoPtr<INavigableMap> res;
     mHost->GetSubMap(start, TRUE, end, FALSE, (INavigableMap**)&res);
-    return res->GetNavigableKeySet((INavigableSet**)outsort);
+    AutoPtr<INavigableSet> ns;
+    res->GetNavigableKeySet((INavigableSet**)&ns);
+    *outsort = ISortedSet::Probe(ns);
+    REFCOUNT_ADD(*outsort)
+    return NOERROR;
 }
 
 ECode CTreeMap::_KeySet::GetHeadSet(
@@ -1559,6 +1567,8 @@ ECode CTreeMap::_KeySet::GetHeadSet(
     /* [in] */ Boolean inclusive,
     /* [out] */ INavigableSet** outnav)
 {
+    VALIDATE_NOT_NULL(outnav)
+    *outnav = NULL;
     AutoPtr<INavigableMap> res;
     mHost->GetHeadMap(toElement, inclusive, (INavigableMap**)&res);
     return res->GetNavigableKeySet(outnav);
@@ -1568,9 +1578,15 @@ ECode CTreeMap::_KeySet::GetHeadSet(
     /* [in] */ IInterface* end,
     /* [out] */ ISortedSet** outsort)
 {
+    VALIDATE_NOT_NULL(outsort)
+    *outsort = NULL;
     AutoPtr<INavigableMap> res;
     mHost->GetHeadMap(end, FALSE, (INavigableMap**)&res);
-    return res->GetNavigableKeySet((INavigableSet**)outsort);
+    AutoPtr<INavigableSet> ns;
+    res->GetNavigableKeySet((INavigableSet**)&ns);
+    *outsort = ISortedSet::Probe(ns);
+    REFCOUNT_ADD(*outsort)
+    return NOERROR;
 }
 
 ECode CTreeMap::_KeySet::GetTailSet(
@@ -1578,6 +1594,8 @@ ECode CTreeMap::_KeySet::GetTailSet(
     /* [in] */ Boolean inclusive,
     /* [out] */ INavigableSet** outnav)
 {
+    VALIDATE_NOT_NULL(outnav)
+    *outnav = NULL;
     AutoPtr<INavigableMap> res;
     mHost->GetTailMap(fromElement, inclusive, (INavigableMap**)&res);
     return res->GetNavigableKeySet(outnav);
@@ -1587,14 +1605,22 @@ ECode CTreeMap::_KeySet::GetTailSet(
     /* [in] */ IInterface* start,
     /* [out] */ ISortedSet** outsort)
 {
+    VALIDATE_NOT_NULL(outsort)
+    *outsort = NULL;
     AutoPtr<INavigableMap> res;
     mHost->GetTailMap(start, TRUE, (INavigableMap**)&res);
-    return res->GetNavigableKeySet((INavigableSet**)outsort);
+    AutoPtr<INavigableSet> ns;
+    res->GetNavigableKeySet((INavigableSet**)&ns);
+    *outsort = ISortedSet::Probe(ns);
+    REFCOUNT_ADD(*outsort)
+    return NOERROR;
 }
 
 ECode CTreeMap::_KeySet::GetDescendingSet(
     /* [out] */ INavigableSet** outnav)
 {
+    VALIDATE_NOT_NULL(outnav)
+    *outnav = NULL;
     AutoPtr<BoundedMap> res = new BoundedMap(FALSE, NULL, NO_BOUND, NULL, NO_BOUND, mHost);
     return res->GetNavigableKeySet(outnav);
 }
@@ -2061,6 +2087,7 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::GetSubSet(
     /* [in] */ Boolean toInclusive,
     /* [out] */ INavigableSet** outnav)
 {
+    VALIDATE_NOT_NULL(outnav)
     AutoPtr<INavigableMap> res;
     mHost->GetSubMap(fromElement, fromInclusive, toElement, toInclusive, (INavigableMap**)&res);
     return res->GetNavigableKeySet(outnav);
@@ -2071,9 +2098,14 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::GetSubSet(
     /* [in] */ IInterface* end,
     /* [out] */ ISortedSet** outsort)
 {
+    VALIDATE_NOT_NULL(outsort)
     AutoPtr<ISortedMap> res;
     mHost->GetSubMap(start, end, (ISortedMap**)&res);
-    return INavigableMap::Probe(res)->GetNavigableKeySet((INavigableSet**)outsort);
+    AutoPtr<INavigableSet> ns;
+    INavigableMap::Probe(res)->GetNavigableKeySet((INavigableSet**)&ns);
+    *outsort = ISortedSet::Probe(ns);
+    REFCOUNT_ADD(*outsort)
+    return NOERROR;
 }
 
 ECode CTreeMap::BoundedMap::BoundedKeySet::GetHeadSet(
@@ -2081,6 +2113,7 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::GetHeadSet(
     /* [in] */ Boolean inclusive,
     /* [out] */ INavigableSet** outnav)
 {
+    VALIDATE_NOT_NULL(outnav)
     AutoPtr<INavigableMap> res;
     mHost->GetHeadMap(toElement, inclusive, (INavigableMap**)&res);
     return res->GetNavigableKeySet(outnav);
@@ -2090,9 +2123,14 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::GetHeadSet(
     /* [in] */ IInterface* end,
     /* [out] */ ISortedSet** outsort)
 {
+    VALIDATE_NOT_NULL(outsort)
     AutoPtr<ISortedMap> res;
     mHost->GetHeadMap(end, (ISortedMap**)&res);
-    return INavigableMap::Probe(res)->GetNavigableKeySet((INavigableSet**)outsort);
+    AutoPtr<INavigableSet> ns;
+    INavigableMap::Probe(res)->GetNavigableKeySet((INavigableSet**)&ns);
+    *outsort = ISortedSet::Probe(ns);
+    REFCOUNT_ADD(*outsort)
+    return NOERROR;
 }
 
 ECode CTreeMap::BoundedMap::BoundedKeySet::GetTailSet(
@@ -2100,6 +2138,7 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::GetTailSet(
     /* [in] */ Boolean inclusive,
     /* [out] */ INavigableSet** outnav)
 {
+    VALIDATE_NOT_NULL(outnav)
     AutoPtr<INavigableMap> res;
     mHost->GetTailMap(fromElement, inclusive, (INavigableMap**)&res);
     return res->GetNavigableKeySet(outnav);
@@ -2109,14 +2148,20 @@ ECode CTreeMap::BoundedMap::BoundedKeySet::GetTailSet(
     /* [in] */ IInterface* start,
     /* [out] */ ISortedSet** outsort)
 {
+    VALIDATE_NOT_NULL(outsort)
     AutoPtr<ISortedMap> res;
     mHost->GetTailMap(start, (ISortedMap**)&res);
-    return INavigableMap::Probe(res)->GetNavigableKeySet((INavigableSet**)outsort);
+    AutoPtr<INavigableSet> ns;
+    INavigableMap::Probe(res)->GetNavigableKeySet((INavigableSet**)&ns);
+    *outsort = ISortedSet::Probe(ns);
+    REFCOUNT_ADD(*outsort)
+    return NOERROR;
 }
 
 ECode CTreeMap::BoundedMap::BoundedKeySet::GetDescendingSet(
     /* [out] */ INavigableSet** outnav)
 {
+    VALIDATE_NOT_NULL(outnav)
     AutoPtr<BoundedMap> res = new BoundedMap(
         !mHost->mAscending, mHost->mFrom, mHost->mFromBound,
         mHost->mTo, mHost->mToBound, mHost->mHost);

@@ -360,21 +360,36 @@ ECode CTreeSet::GetSubSet(
     /* [in] */ IInterface* end,
     /* [out] */ ISortedSet** outsort)
 {
-    return GetSubSet(start, TRUE, end, FALSE, (INavigableSet**)outsort);
+    VALIDATE_NOT_NULL(outsort)
+    AutoPtr<INavigableSet> ns;
+    GetSubSet(start, TRUE, end, FALSE, (INavigableSet**)&ns);
+    *outsort = ISortedSet::Probe(ns);
+    REFCOUNT_ADD(*outsort);
+    return NOERROR;
 }
 
 ECode CTreeSet::GetHeadSet(
     /* [in] */ IInterface* end,
     /* [out] */ ISortedSet** outsort)
 {
-    return GetHeadSet(end, FALSE, (INavigableSet**)outsort);
+    VALIDATE_NOT_NULL(outsort)
+    AutoPtr<INavigableSet> ns;
+    GetHeadSet(end, FALSE, (INavigableSet**)&ns);
+    *outsort = ISortedSet::Probe(ns);
+    REFCOUNT_ADD(*outsort);
+    return NOERROR;
 }
 
 ECode CTreeSet::GetTailSet(
     /* [in] */ IInterface* start,
     /* [out] */ ISortedSet** outsort)
 {
-    return GetTailSet(start, TRUE, (INavigableSet**)outsort);
+    VALIDATE_NOT_NULL(outsort)
+    AutoPtr<INavigableSet> ns;
+    GetTailSet(start, TRUE, (INavigableSet**)&ns);
+    *outsort = ISortedSet::Probe(ns);
+    REFCOUNT_ADD(*outsort);
+    return NOERROR;
 }
 
 void CTreeSet::WriteObject(

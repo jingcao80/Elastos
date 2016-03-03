@@ -729,7 +729,11 @@ ECode SimpleDateFormat::Get2DigitYearStart(
 {
     VALIDATE_NOT_NULL(start)
 
-    return ICloneable::Probe(mDefaultCenturyStart)->Clone((IInterface**)start);
+    AutoPtr<IInterface> obj;
+    ICloneable::Probe(mDefaultCenturyStart)->Clone((IInterface**)&obj);
+    *start = IDate::Probe(obj);
+    REFCOUNT_ADD(*start)
+    return NOERROR;
 }
 
 ECode SimpleDateFormat::GetDateFormatSymbols(

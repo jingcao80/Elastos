@@ -186,7 +186,11 @@ ECode CSubject::GetSubject(
             VALIDATE_NOT_NULL(result)
             *result = NULL;
 
-            return mContext->GetDomainCombiner((IDomainCombiner**)result);
+            AutoPtr<IDomainCombiner> dc;
+            mContext->GetDomainCombiner((IDomainCombiner**)&dc);
+            *result = dc.Get();
+            REFCOUNT_ADD(*result)
+            return NOERROR;
         }
     private:
         AutoPtr<IAccessControlContext> mContext;

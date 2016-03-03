@@ -609,7 +609,7 @@ ECode Socket::GetLocalSocketAddress(
     Int32 localPort;
     GetLocalAddress((IInetAddress**)&localAddress);
     GetLocalPort(&localPort);
-    return CInetSocketAddress::New(localAddress, localPort, (IInetSocketAddress**)address);
+    return CInetSocketAddress::New(localAddress, localPort, address);
 }
 
 ECode Socket::GetRemoteSocketAddress(
@@ -626,7 +626,7 @@ ECode Socket::GetRemoteSocketAddress(
     Int32 port;
     GetInetAddress((IInetAddress**)&netAddress);
     GetPort(&port);
-    return CInetSocketAddress::New(netAddress, port, (IInetSocketAddress**)address);
+    return CInetSocketAddress::New(netAddress, port, address);
 }
 
 ECode Socket::IsBound(

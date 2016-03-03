@@ -1073,6 +1073,8 @@ void testICU()
     String currency;
     icu->GetCurrencyCode(String("US"), &currency);
     printf(" currency for US is %s\n", currency.string());
+
+    printf(" === sizeof(Object) %d\n", sizeof(Object));
 }
 
 void testQuintet()
@@ -1092,9 +1094,9 @@ void testQuintet()
     //testSelfCopy();
     // testMemoryLeak();
 
-    testXmlParser();
+    // testXmlParser();
 
-    //testICU();
+    testICU();
 }
 
 int main(int argc, char *argv[])

@@ -391,7 +391,14 @@ ECode NumberFormat::ParseObject(
     /* [in] */ IParsePosition* position,
     /* [out] */ IInterface** object)
 {
-    return Parse(string, position, (INumber**)object);
+    VALIDATE_NOT_NULL(object)
+    *object = NULL;
+
+    AutoPtr<INumber> number;
+    Parse(string, position, (INumber**)&number);
+    *object = number.Get();
+    REFCOUNT_ADD(*object)
+    return NOERROR;
 }
 
 ECode NumberFormat::SetCurrency(
