@@ -480,16 +480,18 @@ ECode CArrayList::Set(
     /* [in] */ IInterface* object,
     /* [out] */ IInterface** prevObject)
 {
-    VALIDATE_NOT_NULL(prevObject)
-
     AutoPtr< ArrayOf<IInterface*> > a = mArray;
     if (location >= mSize || location < 0) {
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
-    AutoPtr<IInterface> result = (*a)[location];
+
+    if (prevObject) {
+        AutoPtr<IInterface> result = (*a)[location];
+        *prevObject = result;
+        REFCOUNT_ADD(*prevObject)
+    }
+
     a->Set(location, object);
-    *prevObject = result;
-    REFCOUNT_ADD(*prevObject)
     return NOERROR;
 }
 
@@ -719,7 +721,7 @@ ECode CArrayList::Set(
     /* [in] */ Int32 value,
     /* [in] */ IInterface* obj)
 {
-    return AbstractList::Set(value, obj);
+    return Set(value, obj, NULL);
 }
 
 ECode CArrayList::AddAll(

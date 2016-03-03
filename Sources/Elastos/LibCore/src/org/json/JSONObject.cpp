@@ -53,7 +53,7 @@ ECode JSONObject::MyObject::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    *str = "null";
+    *str = "NULL";
     return NOERROR;
 }
 

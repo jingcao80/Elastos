@@ -181,7 +181,7 @@ ECode JSON::ToString(
         return seq->ToString(result);
     }
     else if (value != NULL) {
-        return Object::ToString(value);
+        *result = Object::ToString(value);
     }
     return NOERROR;
 }
