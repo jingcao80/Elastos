@@ -23,6 +23,7 @@ module
     merge("app/AppImportanceMonitor.car");
     merge("app/BackStackRecord.car");
     merge("app/BrightnessSettings.car");
+    merge("app/ComposedIconInfo.car");
     merge("app/ContextImpl.car");
     merge("app/DatePickerDialog.car");
     merge("app/Dialog.car");
@@ -1792,6 +1793,13 @@ module
 
     singleton class CBrightnessSettingsHelper {
         interface IBrightnessSettingsHelper;
+    }
+
+    class CComposedIconInfo {
+        constructor();
+
+        interface IComposedIconInfo;
+        interface IParcelable;
     }
 
     class CFragmentManagerState {

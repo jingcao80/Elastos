@@ -1,0 +1,56 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    [deprecated]
+    interface IComposedIconInfo {
+        GetIconUpon(
+            [out] Int32* iconUpon);
+
+        SetIconUpon(
+            [in] Int32 iconUpon);
+
+        GetIconMask(
+            [out] Int32* iconMask);
+
+        SetIconMask(
+            [in] Int32 iconMask);
+
+        GetIconBacks(
+            [out, callee] ArrayOf<Int32>* iconBacks);
+
+        SetIconBacks(
+            [in] ArrayOf<Int32>* iconBacks);
+
+        GetIconScale(
+            [out] Float* iconScale);
+
+        SetIconScale(
+            [in] Float iconScale);
+
+        GetIconDensity(
+            [out] Int32* iconDensity);
+
+        SetIconDensity(
+            [in] Int32 iconDensity);
+
+        GetIconSize(
+            [out] Int32* iconSize);
+
+        SetIconSize(
+            [in] Int32 iconSize);
+
+        GetColorFilter(
+            [out, callee] ArrayOf<Float>* colorFilter);
+
+        SetColorFilter(
+            [in] ArrayOf<Float>* colorFilter);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}
