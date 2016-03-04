@@ -171,7 +171,7 @@ ECode JSONStringer::Value(
     }
     else if (INumber::Probe(value) != NULL) {
         String str;
-        JSONObject::NumberToString(INumber::Probe(value), &str);
+        FAIL_RETURN(JSONObject::NumberToString(INumber::Probe(value), &str));
         mOut->Append(str);
 
     }

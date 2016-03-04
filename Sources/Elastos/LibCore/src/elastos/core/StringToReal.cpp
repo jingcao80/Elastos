@@ -1274,7 +1274,7 @@ ECode StringToReal::Parse(
     }
 
     AutoPtr<StringExponentPair> info;
-    InitialParse(s, length, TRUE, (StringExponentPair**)&info);
+    FAIL_RETURN(InitialParse(s, length, TRUE, (StringExponentPair**)&info));
     if (info->mInfinity || info->mZero) {
         *resultValue = info->SpecialValue();
         return NOERROR;
