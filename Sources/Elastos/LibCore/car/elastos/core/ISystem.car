@@ -353,8 +353,32 @@ module
          *
          * @return null
          */
-        // public static SecurityManager getSecurityManager() {
-        }
+        // public static SecurityManager getSecurityManager()
+
+        // From dalvik/VMRuntime.java
+        //
+        /**
+         * Returns the runtime instruction set corresponding to a given ABI. Multiple
+         * compatible ABIs might map to the same instruction set. For example
+         * {@code armeabi-v7a} and {@code armeabi} might map to the instruction set {@code arm}.
+         *
+         * This influences the compilation of the applications classes.
+         */
+        GetInstructionSet(
+            [in] String abi,
+            [out] String* instructionSet);
+
+        Is64BitInstructionSet(
+            [in] String instructionSet,
+            [out] Boolean* result);
+
+        Is64BitAbi(
+            [in] String abi,
+            [out] Boolean* result);
+
+        Is64Bit(
+            [out] Boolean* result);
+    }
 
     } // namespace Core
     } // namespace Elastos

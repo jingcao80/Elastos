@@ -4,6 +4,7 @@
 
 #include "_Elastos_Core_CSystem.h"
 #include "Singleton.h"
+#include "elastos/utility/etl/HashMap.h"
 
 using Elastos::IO::IInputStream;
 using Elastos::IO::IOutputStream;
@@ -11,6 +12,7 @@ using Elastos::IO::IPrintStream;
 using Elastos::IO::Channels::IChannel;
 using Elastos::Utility::IProperties;
 using Elastos::Utility::IMap;
+using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
 namespace Core {
@@ -369,6 +371,30 @@ public:
      */
     // public static SecurityManager getSecurityManager() {
 
+    // From dalvik/VMRuntime.java
+    //
+    /**
+     * Returns the runtime instruction set corresponding to a given ABI. Multiple
+     * compatible ABIs might map to the same instruction set. For example
+     * {@code armeabi-v7a} and {@code armeabi} might map to the instruction set {@code arm}.
+     *
+     * This influences the compilation of the applications classes.
+     */
+    CARAPI GetInstructionSet(
+        /* [in] */ const String& abi,
+        /* [out] */ String* instructionSet);
+
+    CARAPI Is64BitInstructionSet(
+        /* [in] */ const String& instructionSet,
+        /* [out] */ Boolean* result);
+
+    CARAPI Is64BitAbi(
+        /* [in] */ const String& abi,
+        /* [out] */ Boolean* result);
+
+    CARAPI Is64Bit(
+        /* [out] */ Boolean* result);
+
 private:
 
     CARAPI InitSystemProperties();
@@ -402,6 +428,8 @@ private:
     static AutoPtr<IInputStream> mIn;
     static AutoPtr<IPrintStream> mOut;
     static AutoPtr<IPrintStream> mErr;
+
+    static const AutoPtr<HashMap<String, String> > ABI_TO_INSTRUCTION_SET_MAP;
 };
 
 } // namespace Core

@@ -88,7 +88,6 @@ ECode SimpleDateFormat::constructor(
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&localeHelper);
     AutoPtr<ILocale> locale;
     localeHelper->GetDefault((ILocale**)&locale);
-    Logger::I(TAG, " constructor with pattern: %s, default locale: %s", pattern.string(), TO_CSTR(locale));
     return constructor(pattern, locale);
 }
 

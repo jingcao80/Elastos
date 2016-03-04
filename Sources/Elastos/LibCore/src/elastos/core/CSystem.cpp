@@ -50,6 +50,21 @@ AutoPtr<IInputStream> CSystem::mIn;
 AutoPtr<IPrintStream> CSystem::mOut;
 AutoPtr<IPrintStream> CSystem::mErr;
 
+static AutoPtr<HashMap<String, String> > InitAbiMap()
+{
+    AutoPtr<HashMap<String, String> > map = new HashMap<String, String>();
+    (*map)[String("armeabi")] = String("arm");
+    (*map)[String("armeabi-v7a")] = String("arm");
+    (*map)[String("mips")] = String("mips");
+    (*map)[String("mips64")] = String("mips64");
+    (*map)[String("x86")] = String("x86");
+    (*map)[String("x86_64")] = String("x86_64");
+    (*map)[String("arm64-v8a")] = String("arm64");
+    return map;
+}
+const AutoPtr<HashMap<String, String> > CSystem::ABI_TO_INSTRUCTION_SET_MAP = InitAbiMap();
+
+
 CAR_INTERFACE_IMPL(CSystem, Singleton, ISystem)
 
 CAR_SINGLETON_IMPL(CSystem)
@@ -524,6 +539,54 @@ ECode CSystem::ParsePropertyAssignments(
     return NOERROR;
 }
 
+// From dalvik/VMRuntime.java
+//
+ECode CSystem::GetInstructionSet(
+    /* [in] */ const String& abi,
+    /* [out] */ String* instructionSet)
+{
+    VALIDATE_NOT_NULL(instructionSet)
+    *instructionSet  = NULL;
+
+    HashMap<String, String>::Iterator it = ABI_TO_INSTRUCTION_SET_MAP->Find(abi);
+    if (it == ABI_TO_INSTRUCTION_SET_MAP->End()) {
+        ALOGE("Unsupported ABI: %s", abi.string());
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    *instructionSet = it->mSecond;
+    return NOERROR;
+}
+
+ECode CSystem::Is64BitInstructionSet(
+    /* [in] */ const String& instructionSet,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = instructionSet.Equals("arm64")
+        || instructionSet.Equals("x86_64")
+        || instructionSet.Equals("mips64");
+    return NOERROR;
+}
+
+ECode CSystem::Is64BitAbi(
+    /* [in] */ const String& abi,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
+    String set;
+    FAIL_RETURN(GetInstructionSet(abi, &set))
+    return Is64BitInstructionSet(set, result);
+}
+
+ECode CSystem::Is64Bit(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = (sizeof(void*) == sizeof(uint64_t));
+    return NOERROR;
+}
 
 } // namespace Core
 } // namespace Elastos

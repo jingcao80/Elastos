@@ -217,8 +217,6 @@ protected:
      * The length of the buffer.
      */
     Int32 mLen;
-
-    AutoPtr<IInputStream> mIn;
 };
 
 } // namespace Zip
