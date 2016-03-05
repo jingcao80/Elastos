@@ -1,0 +1,85 @@
+
+module
+{
+    interface Elastos.Droid.App.INotificationGroup;
+    interface Elastos.Droid.App.IProfile;
+    interface Elastos.Droid.Os.IParcelUuid;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    /** {@hide} */
+    interface IIProfileManager {
+        SetActiveProfile(
+            [in] IParcelUuid* profileParcelUuid,
+            [out] Boolean* result);
+
+        SetActiveProfileByName(
+            [in] String profileName,
+            [out] Boolean* result);
+
+        GetActiveProfile(
+            [out] IProfile** profile);
+
+        AddProfile(
+            [in] IProfile* profile,
+            [out] Boolean* result);
+
+        RemoveProfile(
+            [in] IProfile* profile,
+            [out] Boolean* result);
+
+        UpdateProfile(
+            [in] IProfile* profile);
+
+        GetProfile(
+            [in] IParcelUuid* profileParcelUuid,
+            [out] IProfile** profile);
+
+        GetProfileByName(
+            [in] String profileName,
+            [out] IProfile** profile);
+
+        GetProfiles(
+            [out, callee] ArrayOf<IProfile*>* profiles);
+
+        ProfileExists(
+            [in] IParcelUuid* profileUuid,
+            [out] Boolean* isExisted);
+
+        ProfileExistsByName(
+            [in] String profileName,
+            [out] Boolean* isExisted);
+
+        NotificationGroupExistsByName(
+            [in] String notificationGroupName,
+            [out] Boolean* isExisted);
+
+        GetNotificationGroups(
+            [out, callee] ArrayOf<INotificationGroup*>* groups);
+
+        AddNotificationGroup(
+            [in] INotificationGroup* group);
+
+        RemoveNotificationGroup(
+            [in] INotificationGroup* group);
+
+        UpdateNotificationGroup(
+            [in] INotificationGroup* group);
+
+        GetNotificationGroupForPackage(
+            [in] String pkg,
+            [out] INotificationGroup** group);
+
+        GetNotificationGroup(
+            [in] IParcelUuid* groupParcelUuid,
+            [out] INotificationGroup** group);
+
+        ResetAll();
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

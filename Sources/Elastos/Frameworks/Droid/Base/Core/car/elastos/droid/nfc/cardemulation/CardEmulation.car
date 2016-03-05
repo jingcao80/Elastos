@@ -5,11 +5,11 @@ module
     interface Elastos.Utility.IList;
     interface Elastos.Droid.Content.IComponentName;
     interface Elastos.Droid.App.IActivity;
-    interface Elastos.Droid.NFC.INfcAdapter;
+    interface Elastos.Droid.Nfc.INfcAdapter;
 
     namespace Elastos {
     namespace Droid {
-    namespace NFC{
+    namespace Nfc{
     namespace Cardemulation{
 
     /**
@@ -100,7 +100,7 @@ module
     }
 
     }// namespace Cardemulation
-    }// namespace NFC
+    }// namespace Nfc
     }// namespace Droid
     }// namespace Elastos
 }

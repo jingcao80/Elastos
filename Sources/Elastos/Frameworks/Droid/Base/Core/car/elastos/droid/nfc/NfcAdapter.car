@@ -1,7 +1,6 @@
 
 module
 {
-
     interface Elastos.Core.IArrayOf;
     interface Elastos.Droid.Net.IUri;
     interface Elastos.Droid.App.IActivity;
@@ -9,13 +8,11 @@ module
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Content.IIntentFilter;
     interface Elastos.Droid.Os.IBundle;
-    interface Elastos.Droid.NFC.INfcEvent;
+    interface Elastos.Droid.Nfc.INfcEvent;
 
     namespace Elastos {
     namespace Droid {
-    namespace NFC{
-
-
+    namespace Nfc {
 
     interface INfcAdapterReaderCallback {
 
@@ -52,6 +49,106 @@ module
 
     [deprecated, local]
     interface INfcAdapter {
+        const String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
+
+        const String ACTION_TECH_DISCOVERED = "android.nfc.action.TECH_DISCOVERED";
+
+        const String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
+
+        const String ACTION_TAG_LEFT_FIELD = "android.nfc.action.TAG_LOST";
+
+        const String EXTRA_TAG = "android.nfc.extra.TAG";
+
+        const String EXTRA_NDEF_MESSAGES = "android.nfc.extra.NDEF_MESSAGES";
+
+        const String EXTRA_ID = "android.nfc.extra.ID";
+
+        const String ACTION_ADAPTER_STATE_CHANGED =
+            "android.nfc.action.ADAPTER_STATE_CHANGED";
+
+        const String EXTRA_ADAPTER_STATE = "android.nfc.extra.ADAPTER_STATE";
+
+        const Int32 STATE_OFF = 1;
+        const Int32 STATE_TURNING_ON = 2;
+        const Int32 STATE_ON = 3;
+        const Int32 STATE_TURNING_OFF = 4;
+
+        const Int32 FLAG_READER_NFC_A = 0x1;
+
+        /**
+         * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
+         * <p>
+         * Setting this flag enables polling for Nfc-B technology.
+         */
+        const Int32 FLAG_READER_NFC_B = 0x2;
+
+        /**
+         * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
+         * <p>
+         * Setting this flag enables polling for Nfc-F technology.
+         */
+        const Int32 FLAG_READER_NFC_F = 0x4;
+
+        /**
+         * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
+         * <p>
+         * Setting this flag enables polling for Nfc-V (ISO15693) technology.
+         */
+        const Int32 FLAG_READER_NFC_V = 0x8;
+
+        /**
+         * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
+         * <p>
+         * Setting this flag enables polling for NfcBarcode technology.
+         */
+        const Int32 FLAG_READER_NFC_BARCODE = 0x10;
+
+        /**
+         * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
+         * <p>
+         * Setting this flag allows the caller to prevent the
+         * platform from performing an NDEF check on the tags it
+         * finds.
+         */
+        const Int32 FLAG_READER_SKIP_NDEF_CHECK = 0x80;
+
+        /**
+         * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
+         * <p>
+         * Setting this flag allows the caller to prevent the
+         * platform from playing sounds when it discovers a tag.
+         */
+        const Int32 FLAG_READER_NO_PLATFORM_SOUNDS = 0x100;
+
+        /**
+         * Int Extra for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
+         * <p>
+         * Setting this integer extra allows the calling application to specify
+         * the delay that the platform will use for performing presence checks
+         * on any discovered tag.
+         */
+        const String EXTRA_READER_PRESENCE_CHECK_DELAY = "presence";
+
+        /** @hide */
+        const Int32 FLAG_NDEF_PUSH_NO_CONFIRM = 0x1;
+
+        /** @hide */
+        const String ACTION_HANDOVER_TRANSFER_STARTED = "android.nfc.action.HANDOVER_TRANSFER_STARTED";
+
+        /** @hide */
+        const String ACTION_HANDOVER_TRANSFER_DONE = "android.nfc.action.HANDOVER_TRANSFER_DONE";
+
+        /** @hide */
+        const String EXTRA_HANDOVER_TRANSFER_STATUS = "android.nfc.extra.HANDOVER_TRANSFER_STATUS";
+
+        /** @hide */
+        const Int32 HANDOVER_TRANSFER_STATUS_SUCCESS = 0;
+        /** @hide */
+        const Int32 HANDOVER_TRANSFER_STATUS_FAILURE = 1;
+
+        /** @hide */
+        const String EXTRA_HANDOVER_TRANSFER_URI = "android.nfc.extra.HANDOVER_TRANSFER_URI";
+
         GetContext(
             [out] IContext** context);
 
@@ -202,11 +299,9 @@ module
 
         GetDefaultAdapter(
             [out] INfcAdapter** adapter);
-
-
     }
 
-    }// namespace NFC
+    }// namespace Nfc
     }// namespace Droid
     }// namespace Elastos
 }

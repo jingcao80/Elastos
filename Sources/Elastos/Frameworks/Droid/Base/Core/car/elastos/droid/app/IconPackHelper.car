@@ -1,0 +1,151 @@
+
+module
+{
+    interface Elastos.Droid.App.IComposedIconInfo;
+    interface Elastos.Droid.App.IColorFilterUtilsBuilder;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Pm.IActivityInfo;
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Graphics.IColorMatrix;
+    interface Elastos.Droid.Graphics.Drawable.IDrawable;
+    interface Elastos.Droid.Utility.ITypedValue;
+    using interface Elastos.Utility.IMap;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    interface IIconCustomizer {
+        GetComposedIconDrawable(
+            [in] IDrawable* icon,
+            [in] IContext* context,
+            [in] IComposedIconInfo* iconInfo,
+            [out] IDrawable** drawable);
+
+        GetComposedIconDrawable(
+            [in] IDrawable* icon,
+            [in] IResources* res,
+            [in] IComposedIconInfo* iconInfo,
+            [out] IDrawable** drawable);
+
+        GetValue(
+            [in] IResources* res,
+            [in] Int32 resId,
+            [in] ITypedValue* outValue,
+            [in] IDrawable* baseIcon);
+    }
+
+    interface IColorFilterUtils {
+        ParseIconFilter(
+            [in] IXmlPullParser* parser,
+            [in] IColorFilterUtilsBuilder* builder,
+            [out] Boolean* result);
+
+        /**
+         * See the following links for reference
+         * http://groups.google.com/group/android-developers/browse_thread/thread/9e215c83c3819953
+         * http://gskinner.com/blog/archives/2007/12/colormatrix_cla.html
+         * @param value
+         */
+        AdjustHue(
+            [in] Float value,
+            [out] IColorMatrix** result);
+
+        AdjustSaturation(
+            [in] Float saturation,
+            [out] IColorMatrix** result);
+
+        InvertColors(
+            [out] IColorMatrix** result);
+
+        AdjustBrightness(
+            [in] Float brightness,
+            [out] IColorMatrix** result);
+
+        AdjustContrast(
+            [in] Float contrast,
+            [out] IColorMatrix** result);
+
+        AdjustAlpha(
+            [in] Float alpha,
+            [out] IColorMatrix** result);
+
+        ApplyTint(
+            [in] Int32 color,
+            [out] IColorMatrix** result);
+    }
+
+    interface IColorFilterUtilsBuilder {
+        Hue(
+            [in] Float value);
+
+        Saturate(
+            [in] Float saturation);
+
+        Brightness(
+            [in] Float brightness);
+
+        Contrast(
+            [in] Float contrast);
+
+        Alpha(
+            [in] Float alpha);
+
+        InvertColors();
+
+        Tint(
+            [in] Int32 color);
+
+        Build(
+            [out] IColorMatrix** result);
+    }
+
+    interface IIconPackHelper {
+        LoadIconPack(
+            [in] String packageName);
+
+        GetComposedIconInfo(
+            [out] IComposedIconInfo** iconInfo);
+
+        GetIconResMapFromXml(
+            [in] IResources* res,
+            [in] String packageName,
+            [out] IMap** iconResMap);
+
+        IsIconPackLoaded(
+            [out] Boolean* isLoaded);
+
+        GetResourceIdForActivityIcon(
+            [in] IActivityInfo* info,
+            [out] Int32* resId);
+
+        GetResourceIdForApp(
+            [in] String pkgName,
+            [out] Int32* resId);
+
+        GetDrawableForActivity(
+            [in] IActivityInfo* info,
+            [out] IDrawable** drawable);
+
+        GetDrawableForActivityWithDensity(
+            [in] IActivityInfo* info,
+            [in] Int32 density,
+            [out] IDrawable** drawable);
+    }
+
+    interface IIconPackHelperHelper {
+        CreateIconResource(
+            [in] IContext* context,
+            [in] String packageName,
+            [out] IResources** iconRes);
+
+        ShouldComposeIcon(
+            [in] IComposedIconInfo* iconInfo,
+            [out] Boolean* result);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

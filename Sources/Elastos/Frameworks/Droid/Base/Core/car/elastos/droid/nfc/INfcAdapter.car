@@ -2,10 +2,10 @@
 module
 {
 
-    interface Elastos.Droid.NFC.IINfcCardEmulation;
-    interface Elastos.Droid.NFC.IINfcAdapterExtras;
-    interface Elastos.Droid.NFC.ITechListParcel;
-    interface Elastos.Droid.NFC.IINfcUnlockHandler;
+    interface Elastos.Droid.Nfc.IINfcCardEmulation;
+    interface Elastos.Droid.Nfc.IINfcAdapterExtras;
+    interface Elastos.Droid.Nfc.ITechListParcel;
+    interface Elastos.Droid.Nfc.IINfcUnlockHandler;
     interface Elastos.Droid.App.IPendingIntent;
     interface Elastos.Droid.Content.IIntentFilter;
     interface Elastos.Droid.Os.IBinder;
@@ -13,7 +13,7 @@ module
 
     namespace Elastos {
     namespace Droid {
-    namespace NFC{
+    namespace Nfc {
 
     /*
      * Copyright (C) 2010 The Android Open Source Project
@@ -102,7 +102,7 @@ module
             [in] IINfcUnlockHandler* unlockHandler);
     }
 
-    }// namespace NFC
+    }// namespace Nfc
     }// namespace Droid
     }// namespace Elastos
 }

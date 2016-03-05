@@ -66,6 +66,8 @@ SOURCES += CBackStackRecordTransitionState.cpp
 SOURCES += CBrightnessSettings.cpp
 SOURCES += CBrightnessSettingsHelper.cpp
 SOURCES += CComposedIconInfo.cpp
+SOURCES += CConnectionSettings.cpp
+SOURCES += CConnectionSettingsHelper.cpp
 SOURCES += CContentProviderHolder.cpp
 SOURCES += CContextImpl.cpp
 SOURCES += ReceiverRestrictedContext.cpp
@@ -94,6 +96,7 @@ SOURCES += CPackageDeleteObserver2.cpp
 SOURCES += CLegacyPackageDeleteObserver.cpp
 SOURCES += CPackageInstallObserver2.cpp
 
+SOURCES += IconPackHelper.cpp
 SOURCES += Instrumentation.cpp
 SOURCES += CInstrumentationHelper.cpp
 SOURCES += CInstrumentationActivityMonitor.cpp

@@ -121,6 +121,7 @@ module
     merge("content/res/ColorStateList.car");
     merge("content/res/CompatibilityInfo.car");
     merge("content/res/Configuration.car");
+    merge("content/res/IThemeService.car");
     merge("content/res/ObbInfo.car");
     merge("content/res/ObbScanner.car");
     merge("content/res/Resources.car");

@@ -3,12 +3,12 @@ module
 {
 
     interface Elastos.Droid.Content.IComponentName;
-    interface Elastos.Droid.NFC.Cardemulation.IAidGroup;
+    interface Elastos.Droid.Nfc.Cardemulation.IAidGroup;
     interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
-    namespace NFC{
+    namespace Nfc{
 
     /*
      * Copyright (C) 2013 The Android Open Source Project
@@ -83,7 +83,7 @@ module
             [out] Boolean* res);
     }
 
-    }// namespace NFC
+    }// namespace Nfc
     }// namespace Droid
     }// namespace Elastos
 }

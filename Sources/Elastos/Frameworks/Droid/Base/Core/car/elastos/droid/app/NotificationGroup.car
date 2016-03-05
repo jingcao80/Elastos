@@ -1,0 +1,54 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Core.IStringBuilder;
+    using interface Elastos.Utility.IUUID;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace App {
+
+    interface INotificationGroup {
+        GetName(
+            [out] String* name);
+
+        SetName(
+            [in] String name);
+
+        GetUuid(
+            [out] IUUID** uuid);
+
+        AddPackage(
+            [in] String pkg);
+
+        GetPackages(
+            [out, callee] ArrayOf<String>* packages);
+
+        RemovePackage(
+            [in] String pkg);
+
+        HasPackage(
+            [in] String pkg,
+            [out] Boolean* result);
+
+        IsDirty(
+            [out] Boolean* dirty);
+
+        GetXmlString(
+            [in] IStringBuilder* builder,
+            [in] IContext* context);
+    }
+
+    interface INotificationGroupHelper {
+        FromXml(
+            [in] IXmlPullParser* xpp,
+            [in] IContext* context,
+            [out] INotificationGroup** group);
+    }
+
+    } // namespace App
+    } // namespace Droid
+    } // namespace Elastos
+}

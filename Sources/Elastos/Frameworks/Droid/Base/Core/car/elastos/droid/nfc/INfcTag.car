@@ -2,11 +2,11 @@
 module
 {
 
-    interface Elastos.Droid.NFC.ITag;
+    interface Elastos.Droid.Nfc.ITag;
 
     namespace Elastos {
     namespace Droid {
-    namespace NFC{
+    namespace Nfc{
 
     /*
      * Copyright (C) 2010 The Android Open Source Project
@@ -106,7 +106,7 @@ module
 
     }
 
-    }// namespace NFC
+    }// namespace Nfc
     }// namespace Droid
     }// namespace Elastos
 }

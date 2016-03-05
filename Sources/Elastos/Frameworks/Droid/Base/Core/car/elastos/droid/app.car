@@ -24,6 +24,7 @@ module
     merge("app/BackStackRecord.car");
     merge("app/BrightnessSettings.car");
     merge("app/ComposedIconInfo.car");
+    merge("app/ConnectionSettings.car");
     merge("app/ContextImpl.car");
     merge("app/DatePickerDialog.car");
     merge("app/Dialog.car");
@@ -43,9 +44,11 @@ module
     merge("app/IAppTask.car");
     merge("app/IApplicationThread.car");
     merge("app/IBackupAgent.car");
+    merge("app/IconPackHelper.car");
     merge("app/IInstrumentationWatcher.car");
     merge("app/INotificationManager.car");
     merge("app/IProcessObserver.car");
+    merge("app/IProfileManager.car");
     merge("app/ISearchManager.car");
     merge("app/ISearchManagerCallback.car");
     merge("app/IServiceConnection.car");
@@ -68,11 +71,13 @@ module
     merge("app/MediaRouteButton.car");
     merge("app/NativeActivity.car");
     merge("app/Notification.car");
+    merge("app/NotificationGroup.car");
     merge("app/NotificationManager.car");
     merge("app/OnActivityPausedListener.car");
     merge("app/PackageInstallObserver.car");
     merge("app/PackageDeleteObserver.car");
     merge("app/Presentation.car");
+    merge("app/Profile.car");
     merge("app/ProfilerInfo.car");
     merge("app/ProgressDialog.car");
     merge("app/RemoteInput.car");
@@ -1800,6 +1805,23 @@ module
 
         interface IComposedIconInfo;
         interface IParcelable;
+    }
+
+    class CConnectionSettings {
+        constructor(
+            [in] Int32 connectionId);
+
+        constructor(
+            [in] Int32 connectionId,
+            [in] Int32 value,
+            [in] Boolean override);
+
+        interface IConnectionSettings;
+        interface IParcelable;
+    }
+
+    singleton class CConnectionSettingsHelper {
+        interface IConnectionSettingsHelper;
     }
 
     class CFragmentManagerState {

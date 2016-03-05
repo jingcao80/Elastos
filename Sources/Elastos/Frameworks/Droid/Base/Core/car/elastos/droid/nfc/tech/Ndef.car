@@ -2,12 +2,12 @@
 module
 {
 
-    interface Elastos.Droid.NFC.INdefMessage;
-    interface Elastos.Droid.NFC.ITag;
+    interface Elastos.Droid.Nfc.INdefMessage;
+    interface Elastos.Droid.Nfc.ITag;
 
     namespace Elastos {
     namespace Droid {
-    namespace NFC{
+    namespace Nfc{
     namespace Tech{
 
     /**
@@ -47,7 +47,7 @@ module
     }
 
     }// namespace Tech
-    }// namespace NFC
+    }// namespace Nfc
     }// namespace Droid
     }// namespace Elastos
 }

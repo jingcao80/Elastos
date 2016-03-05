@@ -7,14 +7,14 @@ module
     interface Elastos.Droid.App.IActivity;
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Os.IBinder;
-    interface Elastos.Droid.NFC.INfcAdapterReaderCallback;
-    interface Elastos.Droid.NFC.INfcAdapterCreateBeamUrisCallback;
-    interface Elastos.Droid.NFC.INfcAdapterCreateNdefMessageCallback;
-    interface Elastos.Droid.NFC.INfcAdapterOnNdefPushCompleteCallback;
+    interface Elastos.Droid.Nfc.INfcAdapterReaderCallback;
+    interface Elastos.Droid.Nfc.INfcAdapterCreateBeamUrisCallback;
+    interface Elastos.Droid.Nfc.INfcAdapterCreateNdefMessageCallback;
+    interface Elastos.Droid.Nfc.INfcAdapterOnNdefPushCompleteCallback;
 
     namespace Elastos {
     namespace Droid {
-    namespace NFC{
+    namespace Nfc{
 
     interface INfcApplicationState {
         Register();
@@ -97,7 +97,7 @@ module
 
     }
 
-    }// namespace NFC
+    }// namespace Nfc
     }// namespace Droid
     }// namespace Elastos
 }
