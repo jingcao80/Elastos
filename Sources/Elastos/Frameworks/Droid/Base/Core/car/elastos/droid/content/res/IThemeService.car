@@ -1,12 +1,53 @@
 
 module
 {
+//    interface Elastos.Droid.Content.Res.IIThemeChangeListener;
+    interface Elastos.Droid.Graphics.IBitmap;
+
     namespace Elastos {
     namespace Droid {
     namespace Content {
     namespace Res {
 
     interface IIThemeService {
+//        RequestThemeChangeUpdates(
+//            [in] IIThemeChangeListener* listener);
+//
+//        RemoveUpdates(
+//            [in] IIThemeChangeListener* listener);
+//
+//        RequestThemeChange(
+//            [in] IThemeChangeRequest* request,
+//            [in] Boolean removePerAppThemes);
+
+        ApplyDefaultTheme();
+
+        IsThemeApplying(
+            [out] Boolean* result);
+
+        GetProgress(
+            [out] Int32* progress);
+
+        CacheComposedIcon(
+            [in] IBitmap* icon,
+            [in] String path,
+            [out] Boolean* result);
+
+        ProcessThemeResources(
+            [in] String themePkgName,
+            [out] Boolean* result);
+
+        IsThemeBeingProcessed(
+            [in] String themePkgName,
+            [out] Boolean* result);
+
+//        RegisterThemeProcessingListener(
+//            [in] IIThemeProcessingListener* listener);
+//
+//        UnregisterThemeProcessingListener(
+//            [in] IIThemeProcessingListener* listener);
+
+        RebuildResourceCache();
     }
 
     } // namespace Res

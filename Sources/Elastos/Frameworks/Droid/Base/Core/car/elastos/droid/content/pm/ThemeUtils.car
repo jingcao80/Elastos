@@ -1,0 +1,58 @@
+
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    interface IThemeUtils {
+        /* Path inside a theme APK to the overlay folder */
+        const String OVERLAY_PATH = "assets/overlays/";
+        const String ICONS_PATH = "assets/icons/";
+        const String COMMON_RES_PATH = "assets/overlays/common/";
+        const String FONT_XML = "fonts.xml";
+        const String RESOURCE_CACHE_DIR = "/data/resource-cache/";
+        const String IDMAP_SUFFIX = "@idmap";
+        const String COMMON_RES_SUFFIX = ".common";
+        const String COMMON_RES_TARGET = "common";
+        const String ICON_HASH_FILENAME = "hash";
+
+        // path to external theme resources, i.e. bootanimation.zip
+        const String SYSTEM_THEME_PATH = "/data/system/theme";
+        const String SYSTEM_THEME_FONT_PATH = "/data/system/theme/fonts"; //SYSTEM_THEME_PATH + File.separator + "fonts";
+        const String SYSTEM_THEME_RINGTONE_PATH = "/data/system/theme/ringtones";  //SYSTEM_THEME_PATH + File.separator + "ringtones";
+        const String SYSTEM_THEME_NOTIFICATION_PATH = "/data/system/theme/notifications"; //SYSTEM_THEME_PATH + File.separator + "notifications";
+        const String SYSTEM_THEME_ALARM_PATH = "/data/system/theme/alarms"; //SYSTEM_THEME_PATH + File.separator + "alarms";
+        const String SYSTEM_THEME_ICON_CACHE_DIR = "/data/system/theme/icons"; //SYSTEM_THEME_PATH + File.separator + "icons";
+        // internal path to bootanimation.zip inside theme apk
+        const String THEME_BOOTANIMATION_PATH = "assets/bootanimation/bootanimation.zip";
+
+        const String SYSTEM_MEDIA_PATH = "/system/media/audio";
+        const String SYSTEM_ALARMS_PATH = "/system/media/audio/alarms"; //SYSTEM_MEDIA_PATH + File.separator + "alarms";
+        const String SYSTEM_RINGTONES_PATH = "/system/media/audio/ringtones"; //SYSTEM_MEDIA_PATH + File.separator + "ringtones";
+        const String SYSTEM_NOTIFICATIONS_PATH = "/system/media/audio/notifications"; //SYSTEM_MEDIA_PATH + File.separator + "notifications";
+
+        // Constants for theme change broadcast
+        const String ACTION_THEME_CHANGED = "org.cyanogenmod.intent.action.THEME_CHANGED";
+        const String CATEGORY_THEME_COMPONENT_PREFIX = "org.cyanogenmod.intent.category.";
+        const String EXTRA_COMPONENTS = "components";
+        const String EXTRA_REQUEST_TYPE = "request_type";
+        const String EXTRA_UPDATE_TIME = "update_time";
+
+        const Int32 SYSTEM_TARGET_API = 0;
+
+        GetIconPackPkgPath(
+            [in] String pkgName,
+            [out] String* path);
+
+        GetIconPackResPath(
+            [in] String pkgName,
+            [out] String* path);
+    }
+
+    }
+    }
+    }
+    }
+}

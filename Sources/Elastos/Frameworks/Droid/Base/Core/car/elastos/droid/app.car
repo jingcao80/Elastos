@@ -1800,6 +1800,12 @@ module
         interface IBrightnessSettingsHelper;
     }
 
+    class CColorFilterUtilsBuilder {
+        constructor();
+
+        interface IColorFilterUtilsBuilder;
+    }
+
     class CComposedIconInfo {
         constructor();
 

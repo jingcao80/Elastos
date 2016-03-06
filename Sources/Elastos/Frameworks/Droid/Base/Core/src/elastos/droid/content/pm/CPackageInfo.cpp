@@ -476,6 +476,20 @@ ECode CPackageInfo::SetInstallLocation(
     return NOERROR;
 }
 
+ECode CPackageInfo::GetIsLegacyIconPackPkg(
+    /* [out] */ Boolean* result)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CPackageInfo::SetIsLegacyIconPackPkg(
+    /* [in] */ Boolean isLegacyIconPackPkg)
+{
+    assert(0);
+    return NOERROR;
+}
+
 /** @hide */
 ECode CPackageInfo::GetRequiredAccountType(
     /* [out] */ String* requiredAccountType)

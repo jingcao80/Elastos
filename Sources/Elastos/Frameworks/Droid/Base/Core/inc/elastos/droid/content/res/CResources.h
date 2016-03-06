@@ -13,6 +13,7 @@
 #include "elastos/droid/utility/Pools.h"
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Droid::App::IComposedIconInfo;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Graphics::IMovie;
@@ -642,6 +643,12 @@ public:
         /* [in] */ IResourcesTheme* theme,
         /* [out] */ IDrawable** drawable);
 
+    CARAPI GetDrawable(
+        /* [in] */ Int32 id,
+        /* [in] */ IResourcesTheme* theme,
+        /* [in] */ Boolean supportComposedIcons,
+        /* [out] */ IDrawable** drawable);
+
     /**
      * Return a drawable object associated with a particular resource ID for the
      * given screen density in DPI. This will set the drawable's density to be
@@ -684,6 +691,13 @@ public:
         /* [in] */ Int32 id,
         /* [in] */ Int32 density,
         /* [in] */ IResourcesTheme* theme,
+        /* [out] */ IDrawable** drawable);
+
+    CARAPI GetDrawableForDensity(
+        /* [in] */ Int32 id,
+        /* [in] */ Int32 density,
+        /* [in] */ IResourcesTheme* theme,
+        /* [in] */ Boolean supportComposedIcons,
         /* [out] */ IDrawable** drawable);
 
     /**
@@ -1277,6 +1291,10 @@ public:
         /* [in] */ Int32 assetCookie,
         /* [in] */ const String& type,
         /* [out] */ IXmlResourceParser** resourceParser);
+
+    /** @hide */
+    CARAPI GetComposedIconInfo(
+        /* [out] */ IComposedIconInfo** iconInfo);
 
 private:
     CARAPI_(AutoPtr<INativePluralRules>) GetPluralRule();

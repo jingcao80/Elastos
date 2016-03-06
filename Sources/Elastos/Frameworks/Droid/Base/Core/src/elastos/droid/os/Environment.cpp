@@ -627,7 +627,7 @@ String Environment::GetExternalStorageState(
     AutoPtr<IStorageVolume> volume = GetStorageVolume(path);
     if (volume != NULL) {
         AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));
-        IIMountService* mountService = IIMountService::Probe(mountService);
+        IIMountService* mountService = IIMountService::Probe(obj);
         // try {
         if (mountService != NULL) {
             String result, path;
@@ -810,7 +810,7 @@ AutoPtr<IStorageVolume> Environment::GetStorageVolume(
     }
 
     AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));
-    IIMountService* mountService = IIMountService::Probe(mountService);
+    IIMountService* mountService = IIMountService::Probe(obj);
     AutoPtr<ArrayOf<IStorageVolume*> > volumes;
     mountService->GetVolumeList((ArrayOf<IStorageVolume*>**)&volumes);
     for (Int32 i = 0; i < volumes->GetLength(); ++i) {

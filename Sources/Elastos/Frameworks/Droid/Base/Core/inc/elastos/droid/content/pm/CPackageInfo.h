@@ -178,6 +178,12 @@ public:
     CARAPI SetInstallLocation(
         /* [in] */ Int32 installLocation);
 
+    CARAPI GetIsLegacyIconPackPkg(
+        /* [out] */ Boolean* result);
+
+    CARAPI SetIsLegacyIconPackPkg(
+        /* [in] */ Boolean isLegacyIconPackPkg);
+
     /** @hide */
     CARAPI GetRequiredAccountType(
         /* [out] */ String* type);

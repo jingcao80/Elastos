@@ -65,6 +65,7 @@ SOURCES += CBackStackState.cpp
 SOURCES += CBackStackRecordTransitionState.cpp
 SOURCES += CBrightnessSettings.cpp
 SOURCES += CBrightnessSettingsHelper.cpp
+SOURCES += CColorFilterUtilsBuilder.cpp
 SOURCES += CComposedIconInfo.cpp
 SOURCES += CConnectionSettings.cpp
 SOURCES += CConnectionSettingsHelper.cpp

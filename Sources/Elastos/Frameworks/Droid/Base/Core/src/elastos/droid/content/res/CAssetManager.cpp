@@ -743,6 +743,17 @@ ECode CAssetManager::AddAssetPath(
     return NOERROR;
 }
 
+ECode CAssetManager::AddIconPath(
+    /* [in] */ const String& idmapPath,
+    /* [in] */ const String& resApkPath,
+    /* [in] */ const String& prefixPath,
+    /* [in] */ Int32 pkgIdOverride,
+    /* [out] */ Int32* cookie)
+{
+    assert(0);
+    return NOERROR;
+}
+
 ECode CAssetManager::AddAssetPaths(
     /* [in] */ ArrayOf<String>* paths,
     /* [out, callee] */ ArrayOf<Int32>** cookies)
@@ -789,6 +800,13 @@ ECode CAssetManager::AddOverlayPath(
     // if (res)
     //     *result = cookie;
     // }
+    return NOERROR;
+}
+
+ECode CAssetManager::GetAppName(
+    /* [out] */ String* appName)
+{
+    assert(0);
     return NOERROR;
 }
 

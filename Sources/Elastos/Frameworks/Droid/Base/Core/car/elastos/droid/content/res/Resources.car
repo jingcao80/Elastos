@@ -4,6 +4,7 @@ module
     using interface Elastos.Core.ICharSequence;
     using interface Elastos.IO.IInputStream;
 
+    interface Elastos.Droid.App.IComposedIconInfo;
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Utility.IDisplayMetrics;
     interface Elastos.Droid.Utility.IAttributeSet;
@@ -232,6 +233,20 @@ module
 
     [deprecated]
     interface IResources {
+        // Package IDs for themes. Aapt will compile the res table with this id.
+        /** @hide */
+        const Int32 THEME_FRAMEWORK_PKG_ID = 0x60;
+        /** @hide */
+        const Int32 THEME_APP_PKG_ID = 0x61;
+        /** @hide */
+        const Int32 THEME_ICON_PKG_ID = 0x62;
+        /**
+         * The common resource pkg id needs to be less than the THEME_FRAMEWORK_PKG_ID
+         * otherwise aapt will complain and fail
+         * @hide
+         */
+        const Int32 THEME_COMMON_PKG_ID = THEME_FRAMEWORK_PKG_ID + -1;
+
         const String path_separate = " / ";
 
         /**
@@ -615,6 +630,12 @@ module
             [in] IResourcesTheme* theme,
             [out] IDrawable** drawable);
 
+        GetDrawable(
+            [in] Int32 id,
+            [in] IResourcesTheme* theme,
+            [in] Boolean supportComposedIcons,
+            [out] IDrawable** drawable);
+
         /**
          * Return a drawable object associated with a particular resource ID for the
          * given screen density in DPI. This will set the drawable's density to be
@@ -662,6 +683,14 @@ module
             [in] Int32 id,
             [in] Int32 density,
             [in] IResourcesTheme* theme,
+            [out] IDrawable** drawable);
+
+        /** @hide */
+        GetDrawableForDensity(
+            [in] Int32 id,
+            [in] Int32 density,
+            [in] IResourcesTheme* theme,
+            [in] Boolean supportComposedIcons,
             [out] IDrawable** drawable);
 
         /**
@@ -1286,6 +1315,10 @@ module
          */
         GetPreloadedDrawables(
             [out] IInt64SparseArray** array);
+
+        /** @hide */
+        GetComposedIconInfo(
+            [out] IComposedIconInfo** iconInfo);
     }
 
     interface IResourcesHelper {

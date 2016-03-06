@@ -2,11 +2,14 @@
 #include "_Elastos.Droid.Utility.h"
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.External.h"
+#include "elastos/droid/app/CColorFilterUtilsBuilder.h"
 #include "elastos/droid/app/CComposedIconInfo.h"
 #include "elastos/droid/app/IconPackHelper.h"
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/pm/CActivityInfo.h"
+#include "elastos/droid/content/pm/ThemeUtils.h"
 #include "elastos/droid/content/res/CAssetManager.h"
+#include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/graphics/CBitmapHelper.h"
 #include "elastos/droid/graphics/CCanvas.h"
 #include "elastos/droid/graphics/CPaintFlagsDrawFilter.h"
@@ -28,11 +31,15 @@ using Elastos::Droid::Content::CComponentName;
 using Elastos::Droid::Content::Pm::CActivityInfo;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::IPackageInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
+using Elastos::Droid::Content::Pm::IThemeUtils;
+using Elastos::Droid::Content::Pm::ThemeUtils;
 using Elastos::Droid::Content::Res::IAssetManager;
 using Elastos::Droid::Content::Res::CAssetManager;
 using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
+using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::Graphics::CBitmapHelper;
 using Elastos::Droid::Graphics::CCanvas;
@@ -70,6 +77,8 @@ using Elastos::Utility::CHashMap;
 using Elastos::Utility::CRandom;
 using Elastos::Utility::Logging::Logger;
 using Org::Xmlpull::V1::IXmlPullParserFactory;
+using Org::Xmlpull::V1::IXmlPullParserFactoryHelper;
+using Org::Xmlpull::V1::CXmlPullParserFactoryHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -330,9 +339,9 @@ AutoPtr<IBitmap> IconPackHelper::IconCustomizer::CreateIconBitmap(
             AutoPtr<IXfermode> mode;
             CPorterDuffXfermode::New(PorterDuffMode_DST_OVER, (IXfermode**)&mode);
             AutoPtr<IPaint> p;
-            IBitmapDrawable::Probe(mask)->GetPaint((IPaint**)&p);
+            IBitmapDrawable::Probe(back)->GetPaint((IPaint**)&p);
             p->SetXfermode(mode);
-            mask->Draw(canvas);
+            back->Draw(canvas);
         }
     }
     // Finally draw the foreground if one was supplied
@@ -361,7 +370,7 @@ Boolean IconPackHelper::IconCustomizer::CacheComposedIcon(
     // try {
     Boolean result = FALSE;
     sThemeService->CacheComposedIcon(bmp, path, &result);
-    result result;
+    return result;
     // } catch (RemoteException e) {
     //     Log.e(TAG, "Unable to cache icon.", e);
     // }
@@ -384,13 +393,15 @@ String IconPackHelper::IconCustomizer::GetCachedIconName(
     /* [in] */ Int32 density)
 {
     String str("");
-    str.AppendFormat("%s_%08x_%d.png", pkgName, resId, density);
+    str.AppendFormat("%s_%08x_%d.png", pkgName.string(), resId, density);
     return str;
 }
 
 //==========================================================
 // IconPackHelper::ColorFilterUtils::Builder
 //==========================================================
+CAR_INTERFACE_IMPL(IconPackHelper::ColorFilterUtils::Builder, Object, IColorFilterUtilsBuilder)
+
 ECode IconPackHelper::ColorFilterUtils::Builder::constructor()
 {
     CArrayList::New((IList**)&mMatrixList);
@@ -744,7 +755,9 @@ ECode IconPackHelper::ColorFilterUtils::AdjustAlpha(
     CColorMatrix::New((IColorMatrix**)&cm);
     cm->SetScale(1, 1, 1, alpha);
 
-    return cm;
+    *result = cm;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
 }
 
 ECode IconPackHelper::ColorFilterUtils::ApplyTint(
@@ -906,6 +919,7 @@ ECode IconPackHelper::LoadResourcesFromXmlParser(
             iconPackResources->Put(name, CoreUtils::Convert(drawable));
         }
     } while (parser->Next(&eventType), eventType != IXmlPullParser::END_DOCUMENT);
+    return NOERROR;
 }
 
 Boolean IconPackHelper::IsComposedIconComponent(
@@ -932,7 +946,8 @@ Boolean IconPackHelper::ParseComposedIconComponent(
         if (tag.EqualsIgnoreCase(ICON_BACK_TAG)) {
             parser->GetAttributeCount(&mIconBackCount);
             for (Int32 i = 0; i < mIconBackCount; i++) {
-                tag = String("").AppendFormat(ICON_BACK_FORMAT, i);
+                tag = "";
+                tag.AppendFormat(ICON_BACK_FORMAT.string(), i);
                 parser->GetAttributeValue(i, &icon);
                 AutoPtr<IComponentName> component;
                 CComponentName::New(tag, String(""), (IComponentName**)&component);
@@ -967,7 +982,7 @@ ECode IconPackHelper::LoadIconPack(
         mIconBackCount = 0;
         AutoPtr<IResources> res;
         FAIL_RETURN(CreateIconResource(mContext, packageName, (IResources**)&res));
-        FAIL_RETURN(GetIconResMapFromXml(res, packageName, &mIconPackResourceMap));
+        FAIL_RETURN(GetIconResMapFromXml(res, packageName, (IMap**)&mIconPackResourceMap));
         mLoadedIconPackResource = res;
         mLoadedIconPackName = packageName;
         LoadComposedIconComponents();
@@ -1001,9 +1016,10 @@ void IconPackHelper::LoadComposedIconComponents()
     if (mIconBackCount > 0) {
         AutoPtr< ArrayOf<Int32> > iconBacks = ArrayOf<Int32>::Alloc(mIconBackCount);
         for (int i = 0; i < mIconBackCount; i++) {
+            String str("");
+            str.AppendFormat(ICON_BACK_FORMAT.string(), i);
             AutoPtr<IComponentName> component;
-            CComponentName::New(String("").AppendFormat(ICON_BACK_FORMAT, i), String(""),
-                    (IComponentName**)&component);
+            CComponentName::New(str, String(""), (IComponentName**)&component);
             (*iconBacks)[i] = GetResourceIdForName(component);
         }
         mComposedIconInfo->SetIconBacks(iconBacks);
@@ -1012,7 +1028,7 @@ void IconPackHelper::LoadComposedIconComponents()
     // Get the icon scale from this pack
     AutoPtr<IInterface> obj;
     mIconPackResourceMap->Get(ICON_SCALE_COMPONENT, (IInterface**)&obj);
-    String scale = CoreUtils::Unbox(obj);
+    String scale = CoreUtils::Unbox(ICharSequence::Probe(obj));
     if (!scale.IsNull()) {
         // try {
         Float scaleValue;
@@ -1033,7 +1049,7 @@ Int32 IconPackHelper::GetResourceIdForName(
 {
     AutoPtr<IInterface> obj;
     mIconPackResourceMap->Get(component, (IInterface**)&obj);
-    String item = CoreUtils::Unbox(obj);
+    String item = CoreUtils::Unbox(ICharSequence::Probe(obj));
     if (!TextUtils::IsEmpty(item)) {
         return GetResourceIdForDrawable(item);
     }
@@ -1056,24 +1072,25 @@ ECode IconPackHelper::CreateIconResource(
     appInfo->GetPublicSourceDir(&themeApk);
 
     String prefixPath;
-    String iconApkPath;
+    String iconPkgPath;
     String iconResPath;
     Boolean result;
-    if (info->IsLegacyIconPackApk(&result), result) {
+    if (info->GetIsLegacyIconPackPkg(&result), result) {
         iconResPath = "";
-        iconApkPath = "";
+        iconPkgPath = "";
         prefixPath = "";
     }
     else {
         prefixPath = IThemeUtils::ICONS_PATH; //path inside APK
-        iconApkPath = ThemeUtils::GetIconPackApkPath(packageName);
+        iconPkgPath = ThemeUtils::GetIconPackPkgPath(packageName);
         iconResPath = ThemeUtils::GetIconPackResPath(packageName);
     }
 
     AutoPtr<IAssetManager> assets;
     CAssetManager::New((IAssetManager**)&assets);
-    assets->AddIconPath(themeApk, iconApkPath,
-            prefixPath, IResources::THEME_ICON_PKG_ID);
+    Int32 cookie;
+    assets->AddIconPath(themeApk, iconPkgPath,
+            prefixPath, IResources::THEME_ICON_PKG_ID, &cookie);
 
     AutoPtr<IResources> res;
     context->GetResources((IResources**)&res);
@@ -1102,8 +1119,10 @@ ECode IconPackHelper::GetIconResMapFromXml(
     res->GetAssets((IAssetManager**)&am);
     ECode ec = am->Open(String("appfilter.xml"), (IInputStream**)&inputStream);
     if (SUCCEEDED(ec)) {
+        AutoPtr<IXmlPullParserFactoryHelper> helper;
+        CXmlPullParserFactoryHelper::AcquireSingleton((IXmlPullParserFactoryHelper**)&helper);
         AutoPtr<IXmlPullParserFactory> factory;
-        XmlPullParserFactory::NewInstance((IXmlPullParserFactory**)&factory);
+        helper->NewInstance((IXmlPullParserFactory**)&factory);
         factory->NewPullParser((IXmlPullParser**)&parser);
         ec = parser->SetInput(inputStream, String("UTF-8"));
     }
@@ -1113,7 +1132,9 @@ ECode IconPackHelper::GetIconResMapFromXml(
         Int32 resId;
         res->GetIdentifier(String("appfilter"), String("xml"), packageName, &resId);
         if (resId != 0) {
-            res->GetXml(resId, (IXmlPullParser**)&parser);
+            AutoPtr<IXmlResourceParser> resParser;
+            res->GetXml(resId, (IXmlResourceParser**)&resParser);
+            parser = IXmlPullParser::Probe(resParser);
         }
     }
     // } catch (Exception e) {
@@ -1242,14 +1263,14 @@ ECode IconPackHelper::GetResourceIdForActivityIcon(
         return NOERROR;
     }
     String pkgName, name;
-    info->GetPackageName(&pkgName);
-    info->GetName(&name);
+    IPackageItemInfo::Probe(info)->GetPackageName(&pkgName);
+    IPackageItemInfo::Probe(info)->GetName(&name);
     AutoPtr<IComponentName> compName;
     CComponentName::New(pkgName.ToLowerCase(), name.ToLowerCase(),
             (IComponentName**)&compName);
     AutoPtr<IInterface> obj;
     mIconPackResourceMap->Get(compName, (IInterface**)&obj);
-    String drawable = CoreUtils::Unbox(obj);
+    String drawable = CoreUtils::Unbox(ICharSequence::Probe(obj));
     if (!drawable.IsNull()) {
         Int32 id = GetResourceIdForDrawable(drawable);
         if (id != 0) {
@@ -1263,7 +1284,7 @@ ECode IconPackHelper::GetResourceIdForActivityIcon(
     CComponentName::New(pkgName.ToLowerCase(), String(""), (IComponentName**)&compName);
     obj = NULL;
     mIconPackResourceMap->Get(compName, (IInterface**)&obj);
-    drawable = CoreUtils::Unbox(obj);
+    drawable = CoreUtils::Unbox(ICharSequence::Probe(obj));
     if (drawable.IsNull()) {
         *resId = 0;
         return NOERROR;
@@ -1279,8 +1300,8 @@ ECode IconPackHelper::GetResourceIdForApp(
     VALIDATE_NOT_NULL(resId);
     AutoPtr<IActivityInfo> info;
     CActivityInfo::New((IActivityInfo**)&info);
-    info->SetPackageName(pkgName);
-    info->SetName(String(""));
+    IPackageItemInfo::Probe(info)->SetPackageName(pkgName);
+    IPackageItemInfo::Probe(info)->SetName(String(""));
     return GetResourceIdForActivityIcon(info, resId);
 }
 

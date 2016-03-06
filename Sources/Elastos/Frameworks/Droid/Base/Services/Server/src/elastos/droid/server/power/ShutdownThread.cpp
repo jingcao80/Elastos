@@ -27,7 +27,7 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Internal::Telephony::IITelephony;
 using Elastos::Droid::Media::IAudioAttributesBuilder;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
-using Elastos::Droid::NFC::IINfcAdapter;
+using Elastos::Droid::Nfc::IINfcAdapter;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::IUserHandle;

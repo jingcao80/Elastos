@@ -109,6 +109,7 @@ module
     merge("content/pm/ResolveInfo.car");
     merge("content/pm/ServiceInfo.car");
     merge("content/pm/Signature.car");
+    merge("content/pm/ThemeUtils.car");
     merge("content/pm/UserInfo.car");
     merge("content/pm/VerificationParams.car");
     merge("content/pm/VerifierDeviceIdentity.car");

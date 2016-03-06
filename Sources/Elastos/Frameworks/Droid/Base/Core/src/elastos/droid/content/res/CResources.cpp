@@ -957,6 +957,16 @@ ECode CResources::GetDrawable(
     return NOERROR;
 }
 
+ECode CResources::GetDrawable(
+    /* [in] */ Int32 id,
+    /* [in] */ IResourcesTheme* theme,
+    /* [in] */ Boolean supportComposedIcons,
+    /* [out] */ IDrawable** drawable)
+{
+    assert(0);
+    return NOERROR;
+}
+
 ECode CResources::GetDrawableForDensity(
     /* [in] */ Int32 id,
     /* [in] */ Int32 density,
@@ -1012,6 +1022,17 @@ ECode CResources::GetDrawableForDensity(
 
     *drawable = res;
     REFCOUNT_ADD(*drawable)
+    return NOERROR;
+}
+
+ECode CResources::GetDrawableForDensity(
+    /* [in] */ Int32 id,
+    /* [in] */ Int32 density,
+    /* [in] */ IResourcesTheme* theme,
+    /* [in] */ Boolean supportComposedIcons,
+    /* [out] */ IDrawable** drawable)
+{
+    assert(0);
     return NOERROR;
 }
 
@@ -2519,6 +2540,13 @@ ECode CResources::RecycleCachedStyledAttributes(
         }
     }
 
+    return NOERROR;
+}
+
+ECode CResources::GetComposedIconInfo(
+    /* [out] */ IComposedIconInfo** iconInfo)
+{
+    assert(0);
     return NOERROR;
 }
 

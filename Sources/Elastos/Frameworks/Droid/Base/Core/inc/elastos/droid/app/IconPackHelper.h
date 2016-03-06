@@ -95,6 +95,8 @@ public:
             , public IColorFilterUtilsBuilder
         {
         public:
+            CAR_INTERFACE_DECL()
+
             CARAPI constructor();
 
             CARAPI Hue(

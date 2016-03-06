@@ -370,6 +370,23 @@ public:
         /* [out] */ Int32* cookie);
 
     /**
+     * Add a set of assets as an icon pack. A pkgIdOverride value will change the package's id from
+     * what is in the resource table to a new value. Manage this carefully, if icon pack has more
+     * than one package then that next package's id will use pkgIdOverride+1.
+     *
+     * Icon packs are different from overlays as they have a different pkg id and
+     * do not use idmap so no targetPkg is required
+     *
+     * {@hide}
+     */
+    CARAPI AddIconPath(
+        /* [in] */ const String& idmapPath,
+        /* [in] */ const String& resApkPath,
+        /* [in] */ const String& prefixPath,
+        /* [in] */ Int32 pkgIdOverride,
+        /* [out] */ Int32* cookie);
+
+    /**
      * Add multiple sets of assets to the asset manager at once.  See
      * {@link #addAssetPath(String)} for more information.  Returns array of
      * cookies for each added asset with 0 indicating failure, or null if
@@ -391,6 +408,10 @@ public:
     CARAPI AddOverlayPath(
         /* [in] */ const String& idmapPath,
         /* [out] */ Int32* cookie);
+
+    /** {@hide} */
+    CARAPI GetAppName(
+        /* [out] */ String* appName);
 
     /**
      * Determine whether the state in this asset manager is up-to-date with

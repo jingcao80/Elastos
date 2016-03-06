@@ -207,6 +207,12 @@ module
         SetInstallLocation(
             [in] Int32 installLocation);
 
+        GetIsLegacyIconPackPkg(
+            [out] Boolean* result);
+
+        SetIsLegacyIconPackPkg(
+            [in] Boolean isLegacyIconPackPkg);
+
         /** @hide */
         GetRequiredAccountType(
             [out] String* type);
