@@ -1219,8 +1219,11 @@ ECode Collections::_SingletonMap::MySet::Iterator::GetNext(
     /* [out] */ IInterface** object)
 {
     VALIDATE_NOT_NULL(object)
-    AutoPtr<IMapEntry> p = IMapEntry::Probe(*object);
-    return GetNext((IMapEntry**)&p);
+    AutoPtr<IMapEntry> p;
+    GetNext((IMapEntry**)&p);
+    *object = IInterface::Probe(p);
+    REFCOUNT_ADD(*object)
+    return NOERROR;
 }
 
 ECode Collections::_SingletonMap::MySet::Iterator::Remove()

@@ -93,10 +93,17 @@ ECode JSONObject::constructor(
          */
         AutoPtr<IInterface> obj;
         it->GetNext((IInterface**)&obj);
+
         AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
         AutoPtr<IInterface> keyObj;
         entry->GetKey((IInterface**)&keyObj);
         String key;
+
+        if (!ICharSequence::Probe(keyObj)) {
+            Logger::E("JSONObject", "key == null");
+            return E_NULL_POINTER_EXCEPTION;
+        }
+
         ICharSequence::Probe(keyObj)->ToString(&key);
         if (key.IsNull()) {
             Logger::E("JSONObject", "key == null");
@@ -755,7 +762,7 @@ ECode JSONObject::WriteTo(
         String key;
         ICharSequence::Probe(keyObj)->ToString(&key);
         stringer->Key(key);
-        stringer->Value(valueObj);
+        FAIL_RETURN(stringer->Value(valueObj));
     }
 
     stringer->EndObject();

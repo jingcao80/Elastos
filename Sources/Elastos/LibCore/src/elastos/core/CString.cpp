@@ -79,7 +79,10 @@ ECode CString::Equals(
     *result = FALSE;
     VALIDATE_NOT_NULL(obj)
 
-    assert(ICharSequence::Probe(obj) != NULL);
+    if (ICharSequence::Probe(obj) == NULL) {
+        return NOERROR;
+    }
+
     String str = Object::ToString(obj);
     *result = mString.Equals(str);
     return NOERROR;
