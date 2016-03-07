@@ -566,7 +566,8 @@ ECode CScanner::HasNextByte(
     AutoPtr<IPattern> integerPattern;
     FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     Boolean isByteValue = FALSE;
-    if (HasNext(integerPattern, &isByteValue), isByteValue) {
+    Boolean ishasnext = FALSE;
+    if (HasNext(integerPattern, &ishasnext), ishasnext) {
         String intString;
         (IMatchResult::Probe(mMatcher))->Group(&intString);
         intString = RemoveLocaleInfo(intString, INT);

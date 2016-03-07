@@ -49,14 +49,14 @@ ECode StringToIntegral::Parse(
 
     Int32 intValue;
     ECode ec = Parse(string, radix, &intValue);
-    Byte shortValue = (Byte) intValue;
-    if (shortValue == intValue) {
-        *result = shortValue;
+    Byte byteValue = (Byte) intValue;
+    if (byteValue == intValue) {
+        *result = byteValue;
         return ec;
     }
 
     *result = 0;
-    ALOGE("StringToIntegral::Parse() Value out of range for short: \"%s\"", string.string());
+    ALOGE("StringToIntegral::Parse() Value out of range for byte: \"%s\"", string.string());
     return E_NUMBER_FORMAT_EXCEPTION;
 }
 
