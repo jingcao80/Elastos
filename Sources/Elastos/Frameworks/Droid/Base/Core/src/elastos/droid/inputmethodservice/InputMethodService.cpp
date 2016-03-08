@@ -76,6 +76,10 @@ namespace InputMethodService {
 const String InputMethodService::TAG("InputMethodService");
 const Boolean InputMethodService::DEBUG = FALSE;
 
+const Int32 InputMethodService::VOLUME_CURSOR_OFF;
+const Int32 InputMethodService::VOLUME_CURSOR_ON;
+const Int32 InputMethodService::VOLUME_CURSOR_ON_REVERSE;
+
 const Int32 InputMethodService::MOVEMENT_DOWN;
 const Int32 InputMethodService::MOVEMENT_UP;
 const Int32 InputMethodService::Insets::TOUCHABLE_INSETS_FRAME
