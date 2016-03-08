@@ -1318,6 +1318,11 @@ private:
     AutoPtr<IOnComputeInternalInsetsListener> mInsetsComputer;
     AutoPtr<IViewOnClickListener> mActionClickListener;
 
+    Int32 mVolumeKeyCursorControl;
+    static const Int32 VOLUME_CURSOR_OFF = 0;
+    static const Int32 VOLUME_CURSOR_ON = 1;
+    static const Int32 VOLUME_CURSOR_ON_REVERSE = 2;
+
     static const Int32 MOVEMENT_DOWN = -1;
     static const Int32 MOVEMENT_UP = -2;
 

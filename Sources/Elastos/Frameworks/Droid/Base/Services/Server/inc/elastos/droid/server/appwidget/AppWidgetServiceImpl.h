@@ -631,7 +631,6 @@ public:
     CARAPI CreateAppWidgetConfigIntentSender(
         /* [in] */ const String& callingPackage,
         /* [in] */ Int32 appWidgetId,
-        /* [in] */ Int32 intentFlags,
         /* [out] */ IIntentSender** result);
 
     // @Override

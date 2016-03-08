@@ -14,6 +14,7 @@
 #include "elastos/droid/graphics/CRegion.h"
 #include "elastos/droid/app/CActivityManagerHelper.h"
 #include "elastos/droid/provider/CSettingsGlobal.h"
+#include "elastos/droid/provider/CSettingsSystem.h"
 #include <elastos/core/Character.h>
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/utility/logging/Logger.h>
@@ -36,6 +37,8 @@ using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Provider::ISettingsGlobal;
 using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Droid::Text::IInputType;
 using Elastos::Droid::Text::ISpannable;
 using Elastos::Droid::Text::ILayout;
@@ -454,6 +457,7 @@ InputMethodService::InputMethodService()
     , mIsInputViewShown(FALSE)
     , mStatusIcon(0)
     , mBackDisposition(0)
+    , mVolumeKeyCursorControl(0)
 {
     mTmpInsets = new InputMethodService::Insets();
     mTmpLocation = ArrayOf<Int32>::Alloc(2);
@@ -1688,7 +1692,9 @@ ECode InputMethodService::OnKeyDown(
     /* [out] */ Boolean* state)
 {
     assert(event != NULL && state != NULL);
-    if (keyCode == IKeyEvent::KEYCODE_BACK) {
+    Int32 code = 0;
+    event->GetKeyCode(&code);
+    if (code == IKeyEvent::KEYCODE_BACK) {
         if (HandleBack(FALSE)) {
             event->StartTracking();
             *state = TRUE;
@@ -1697,6 +1703,49 @@ ECode InputMethodService::OnKeyDown(
         *state = FALSE;
         return NOERROR;
     }
+    else if (code == IKeyEvent::KEYCODE_VOLUME_UP) {
+        AutoPtr<IContentResolver> resolver;
+        GetContentResolver((IContentResolver**)&resolver);
+        AutoPtr<ISettingsSystem> settingsSystem;
+        CSettingsSystem::AcquireSingleton(
+            (ISettingsSystem**)&settingsSystem);
+        settingsSystem->GetInt32(resolver,
+            ISettingsSystem::VOLUME_KEY_CURSOR_CONTROL,
+            0, &mVolumeKeyCursorControl);
+        Boolean isShown = FALSE;
+        if ((IsInputViewShown(&isShown), isShown)
+            && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
+            SendDownUpKeyEvents(
+                (mVolumeKeyCursorControl == VOLUME_CURSOR_ON_REVERSE)
+                ? IKeyEvent::KEYCODE_DPAD_RIGHT : IKeyEvent::KEYCODE_DPAD_LEFT);
+            *state = TRUE;
+            return NOERROR;
+        }
+        *state = FALSE;
+        return NOERROR;
+    }
+    else if (code == IKeyEvent::KEYCODE_VOLUME_DOWN) {
+        AutoPtr<IContentResolver> resolver;
+        GetContentResolver((IContentResolver**)&resolver);
+        AutoPtr<ISettingsSystem> settingsSystem;
+        CSettingsSystem::AcquireSingleton(
+            (ISettingsSystem**)&settingsSystem);
+        settingsSystem->GetInt32(resolver,
+            ISettingsSystem::VOLUME_KEY_CURSOR_CONTROL,
+            0, &mVolumeKeyCursorControl);
+        Boolean isShown = FALSE;
+        if ((IsInputViewShown(&isShown), isShown)
+            && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
+            SendDownUpKeyEvents(
+                (mVolumeKeyCursorControl == VOLUME_CURSOR_ON_REVERSE)
+                ? IKeyEvent::KEYCODE_DPAD_LEFT : IKeyEvent::KEYCODE_DPAD_RIGHT);
+            *state = TRUE;
+            return NOERROR;
+        }
+        *state = FALSE;
+        return NOERROR;
+    }
+
    *state = DoMovementKey(keyCode, event, MOVEMENT_DOWN);
     return NOERROR;
 }
@@ -1736,6 +1785,25 @@ ECode InputMethodService::OnKeyUp(
     event->IsCanceled(&canceld);
     if (code == IKeyEvent::KEYCODE_BACK && tracking && !canceld) {
         *state = HandleBack(TRUE);
+        return NOERROR;
+    }
+    if (code == IKeyEvent::KEYCODE_VOLUME_UP
+             || keyCode == IKeyEvent::KEYCODE_VOLUME_DOWN) {
+        AutoPtr<IContentResolver> resolver;
+        GetContentResolver((IContentResolver**)&resolver);
+        AutoPtr<ISettingsSystem> settingsSystem;
+        CSettingsSystem::AcquireSingleton(
+            (ISettingsSystem**)&settingsSystem);
+        settingsSystem->GetInt32(resolver,
+            ISettingsSystem::VOLUME_KEY_CURSOR_CONTROL,
+            0, &mVolumeKeyCursorControl);
+        Boolean isShown = FALSE;
+        if ((IsInputViewShown(&isShown), isShown)
+            && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
+            *state = TRUE;
+            return NOERROR;
+        }
+        *state = FALSE;
         return NOERROR;
     }
     *state = DoMovementKey(keyCode, event, MOVEMENT_UP);

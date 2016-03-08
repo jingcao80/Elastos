@@ -3511,7 +3511,6 @@ ECode AppWidgetServiceImpl::SetBindAppWidgetPermission(
 ECode AppWidgetServiceImpl::CreateAppWidgetConfigIntentSender(
     /* [in] */ const String& callingPackage,
     /* [in] */ Int32 appWidgetId,
-    /* [in] */ Int32 intentFlags,
     /* [out] */ IIntentSender** result)
 {
     VALIDATE_NOT_NULL(result);
@@ -3545,7 +3544,6 @@ ECode AppWidgetServiceImpl::CreateAppWidgetConfigIntentSender(
     //     Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
     //     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
     //     intent.setComponent(provider.info.configure);
-    //     intent.setFlags(intentFlags);
     //
     //     // All right, create the sender.
     //     final long identity = Binder.clearCallingIdentity();
@@ -3594,7 +3592,6 @@ ECode AppWidgetServiceImpl::CreateAppWidgetConfigIntentSender(
         AutoPtr<IComponentName> configure;
         provider->mInfo->GetConfigure((IComponentName**)&configure);
         intent->SetComponent(configure);
-        intent->SetFlags(intentFlags);
 
         Int64 identity = Binder::ClearCallingIdentity();
         //try {
@@ -7267,6 +7264,9 @@ void AppWidgetServiceImpl::DumpWidget(
     // if (widget.views != null) {
     //     pw.print("    views="); pw.println(widget.views);
     // }
+    // if (widget.options != null) {
+    //     pw.print("    options="); pw.println(widget.options);
+    // }
 
     pw->Print(String("  ["));
     pw->Print(index);
@@ -7288,6 +7288,10 @@ void AppWidgetServiceImpl::DumpWidget(
     if (widget->mViews != NULL) {
         pw->Print(String("    views="));
         pw->Println(TO_IINTERFACE(widget->mViews));
+    }
+    if (widget->mOptions != NULL) {
+        pw->Print(String("    options="));
+        pw->Println(TO_IINTERFACE(widget->mOptions));
     }
 }
 

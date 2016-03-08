@@ -281,12 +281,12 @@ ECode AppWidgetHost::StartAppWidgetConfigureActivityForResult(
     mContext->GetOpPackageName(&packageName);
 
     AutoPtr<IIntentSender> intentSender;
-    ECode ec = sService->CreateAppWidgetConfigIntentSender(packageName, appWidgetId,
-            intentFlags, (IIntentSender**)&intentSender);
+    ECode ec = sService->CreateAppWidgetConfigIntentSender(packageName,
+            appWidgetId, (IIntentSender**)&intentSender);
     if (!FAILED(ec)) {
         if (intentSender != NULL) {
             activity->StartIntentSenderForResult(intentSender, requestCode, NULL,
-                    0, 0, 0, options);
+                    0, intentFlags, intentFlags, options);
         }
         else {
             return E_ACTIVITY_NOT_FOUND_EXCEPTION;
