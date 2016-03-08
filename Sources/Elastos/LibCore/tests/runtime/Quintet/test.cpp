@@ -17,15 +17,22 @@
 #include <elastos/core/StringUtils.h>
  #include <elastos/utility/Arrays.h>
 #include <elastos/utility/etl/HashMap.h>
+#include "elastos/droid/os/FileUtils.h"
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Net.h>
 #include <Elastos.CoreLibrary.External.h>
 #include <Elastos.CoreLibrary.Libcore.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Internal.h>
 
+
+using Elastos::Droid::Os::FileUtils;
+using Elastos::Droid::Internal::Utility::CFastXmlSerializer;
 
 using Org::Kxml2::IO::IKXmlParser;
 using Org::Kxml2::IO::CKXmlParser;
 using Org::Xmlpull::V1::IXmlPullParser;
+using Org::Xmlpull::V1::IXmlSerializer;
 
 using namespace Elastos;
 using namespace Elastos::Core;
@@ -986,11 +993,11 @@ void testMemoryLeak()
     }
 }
 
-void testXmlParser()
+void testReadXmlParser()
 {
-    printf("============================================\n");
-    printf("                 testXmlParser \n");
-    printf("============================================\n");
+    printf("\n============================================\n");
+    printf("                 testReadXmlParser \n");
+
     String path("bluetooth.xml");
     AutoPtr<IFile> file;
     ECode ec = CFile::New(path, (IFile**)&file);
@@ -1024,57 +1031,84 @@ void testXmlParser()
         }
     }
 
-    printf("==============================================\n");
-    printf(" mLimit: %d\n", mLimit);
-    printf("==============================================\n");
+    printf(" mLimit: %d, content:\n\n", mLimit);
+
     for (Int32 i = 0; i < mLimit; ++i) {
-        PFL_EX(" > %d : %c vs %d", i, (*mBuffer)[i], (*mBuffer)[i]);
+        printf("%c", (*mBuffer)[i]);
     }
-    printf("==============================================\n");
 
-    // AutoPtr<IXmlPullParser> parser;
-    // ec = CKXmlParser::New((IXmlPullParser**)&parser);
-    // if (FAILED(ec)) {
-    //     printf(" > failed to create NewPullParser %s\n", path.string());
-    // }
-
-    // ec = parser->SetFeature(IXmlPullParser::FEATURE_PROCESS_DOCDECL, TRUE);
-    // if (FAILED(ec)) {
-    //     printf(" > failed to SetFeature FEATURE_PROCESS_DOCDECL\n");
-    // }
-
-    // ec = parser->SetFeature(IXmlPullParser::FEATURE_PROCESS_NAMESPACES, TRUE);
-    // if (FAILED(ec)) {
-    //     printf(" > failed to SetFeature FEATURE_PROCESS_NAMESPACES\n");
-    // }
-
-    // parser->SetInput(IReader::Probe(fileReader));
-
-    // Int32 type;
-    // parser->Next(&type);
-    // printf(" === get first type: %d\n", type);
-
-    printf("==================  END  ===================\n");
+    printf("\n\n==================  END  ===================\n");
 }
 
-void testICU()
+void testWriteXmlParser()
 {
-    AutoPtr<IICUUtil> icu;
-    CICUUtil::AcquireSingleton((IICUUtil**)&icu);
-    AutoPtr<ArrayOf<String> > codes;
-    icu->GetAvailableCurrencyCodes((ArrayOf<String>**)&codes);
+    printf("\n============================================\n");
+    printf("                 testWriteXmlParser \n");
 
-    if (codes != NULL) {
-        for (Int32 i = 0; i < codes->GetLength(); ++i) {
-            printf(" currency codes %d: %s\n", i, (*codes)[i].string());
-        }
+    String path("bluetooth.xml");
+    AutoPtr<IFile> file;
+    CFile::New(path, (IFile**)&file);
+    Boolean result;
+    if (file->Exists(&result), result) {
+        file->Delete(&result);
+        printf("Preserving older file backup.\n");
     }
 
-    String currency;
-    icu->GetCurrencyCode(String("US"), &currency);
-    printf(" currency for US is %s\n", currency.string());
+    ECode ec = NOERROR;
+    do {
+        String nullStr;
+        AutoPtr<IFileOutputStream> fstr;
+        AutoPtr<IBufferedOutputStream> str;
 
-    printf(" === sizeof(Object) %d\n", sizeof(Object));
+        ec = CFileOutputStream::New(file, (IFileOutputStream**)&fstr);
+        if (FAILED(ec)) break;
+        CBufferedOutputStream::New(IOutputStream::Probe(fstr), (IBufferedOutputStream**)&str);
+
+        AutoPtr<IXmlSerializer> serializer;
+        CFastXmlSerializer::New((IXmlSerializer**)&serializer);
+        ec = serializer->SetOutput(IOutputStream::Probe(str), String("utf-8"));
+        if (FAILED(ec)) break;
+
+        ec = serializer->StartDocument(nullStr, TRUE);
+        if (FAILED(ec)) break;
+        ec = serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
+        if (FAILED(ec)) break;
+
+        ec = serializer->WriteStartTag(nullStr, String("packages"));
+        if (FAILED(ec)) break;
+
+        {
+            Int32 mInternalSdkPlatform = 21;
+            Int32 mExternalSdkPlatform = 9;
+            String mFingerprint("Actions/bubble_gum_v1_0/bubble_gum_v1_0:5.0.2/LRX22G/");
+            ec = serializer->WriteStartTag(nullStr, String("last-platform-version"));
+            if (FAILED(ec)) break;
+            ec = serializer->WriteAttribute(nullStr, String("internal"), StringUtils::ToString(mInternalSdkPlatform));
+            if (FAILED(ec)) break;
+            ec = serializer->WriteAttribute(nullStr, String("external"), StringUtils::ToString(mExternalSdkPlatform));
+            if (FAILED(ec)) break;
+            ec = serializer->WriteAttribute(nullStr, String("fingerprint"), mFingerprint);
+            if (FAILED(ec)) break;
+            ec = serializer->WriteEndTag(nullStr, String("last-platform-version"));
+            if (FAILED(ec)) break;
+        }
+
+        ec = serializer->WriteEndTag(nullStr, String("packages"));
+        if (FAILED(ec)) break;
+
+        ec = serializer->EndDocument();
+        if (FAILED(ec)) break;
+
+        IFlushable::Probe(str)->Flush();
+        FileUtils::Sync(fstr);
+        ICloseable::Probe(str)->Close();
+
+        printf("\n===========testWriteXmlParser done. \n");
+    } while(0);
+
+    if (FAILED(ec)) {
+        printf("testWriteXmlParser failed.\n");
+    }
 }
 
 void testQuintet()
@@ -1094,9 +1128,8 @@ void testQuintet()
     //testSelfCopy();
     // testMemoryLeak();
 
-    // testXmlParser();
-
-    testICU();
+    testWriteXmlParser();
+    testReadXmlParser();
 }
 
 int main(int argc, char *argv[])

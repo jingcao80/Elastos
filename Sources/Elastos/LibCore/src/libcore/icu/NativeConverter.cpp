@@ -232,35 +232,31 @@ ECode NativeConverter::Encode(
     /* [in] */ Boolean flush,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result);
     UConverter* cnv = toUConverter(address);
-    if (cnv == NULL) {
-        *result = U_ILLEGAL_ARGUMENT_ERROR;
-        return E_INVALID_ARGUMENT;
-    }
-    if (source->GetPayload() == NULL) {
-        *result = U_ILLEGAL_ARGUMENT_ERROR;
-        return E_INVALID_ARGUMENT;
-    }
-    if (target->GetPayload() == NULL) {
-        *result = U_ILLEGAL_ARGUMENT_ERROR;
-        return E_INVALID_ARGUMENT;
-    }
-    if (data->GetPayload() == NULL) {
-        *result = U_ILLEGAL_ARGUMENT_ERROR;
-        return E_INVALID_ARGUMENT;
+    if (cnv == NULL || source == NULL || target == NULL || data == NULL) {
+        // maybeThrowIcuException(env, "toUConverter", U_ILLEGAL_ARGUMENT_ERROR);
+        *result = E_ILLEGAL_ARGUMENT_EXCEPTION;
+        return NOERROR;
     }
 
     // Do the conversion.
-    Int32* sourceOffset = &((*data)[0]);
-    Int32* targetOffset = &((*data)[1]);
-    const UChar* mySource = (UChar*) source->GetPayload() + *sourceOffset;
-    const UChar* mySourceLimit = (UChar*) source->GetPayload() + sourceEnd;
+    Int32* sourceOffset = &(*data)[0];
+    Int32* targetOffset = &(*data)[1];
+    AutoPtr<ArrayOf<UChar> > temp = ArrayOf<UChar>::Alloc(sourceEnd);
+    Int32 count = sourceEnd < source->GetLength() ? sourceEnd : source->GetLength();
+    for (Int32 i = 0; i < count; ++i) {
+        (*temp)[i] = (*source)[i];
+    }
+    const UChar* mySource = temp->GetPayload() + *sourceOffset;
+    const UChar* mySourceLimit= temp->GetPayload() + sourceEnd;
     char* cTarget = reinterpret_cast<char*>(target->GetPayload() + *targetOffset);
     const char* cTargetLimit = reinterpret_cast<const char*>(target->GetPayload() + targetEnd);
     UErrorCode errorCode = U_ZERO_ERROR;
-    ucnv_fromUnicode(cnv , &cTarget, cTargetLimit, &mySource, mySourceLimit, NULL, (UBool) flush, &errorCode);
-    *sourceOffset = mySource - (UChar*) (source->GetPayload()) - *sourceOffset;
-    *targetOffset = (reinterpret_cast<Byte*>(cTarget) - target->GetPayload());
+    ucnv_fromUnicode(cnv , &cTarget, cTargetLimit, &mySource, mySourceLimit,
+            NULL, (UBool)flush, &errorCode);
+    *sourceOffset = (mySource - temp->GetPayload()) - *sourceOffset;
+    *targetOffset = (reinterpret_cast<byte*>(cTarget) - target->GetPayload()) - *targetOffset;
 
     // If there was an error, count the problematic characters.
     if (U_ILLEGAL_CHAR_FOUND == errorCode
@@ -279,7 +275,6 @@ ECode NativeConverter::Encode(
     if (shouldCodecThrow(flush, errorCode)) {
         FAIL_RETURN(maybeThrowIcuException("ucnv_toUnicode", errorCode))
     }
-
     *result = errorCode;
     return NOERROR;
 }

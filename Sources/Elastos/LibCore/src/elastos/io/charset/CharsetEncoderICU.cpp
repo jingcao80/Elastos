@@ -4,8 +4,10 @@
 #include "NativeConverter.h"
 #include "CharBuffer.h"
 #include <unicode/utypes.h>
+#include "logging/Logger.h"
 
 using Libcore::ICU::NativeConverter;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace IO {
@@ -189,9 +191,9 @@ ECode CharsetEncoderICU::EncodeLoop(
     VALIDATE_NOT_NULL(charBuffer)
     Boolean ret = FALSE;
 
-    if (!(IBuffer::Probe(charBuffer)->HasRemaining(&ret), ret)) {
-        CCoderResult::GetUNDERFLOW(result);
-        return NOERROR;
+    IBuffer::Probe(charBuffer)->HasRemaining(&ret);
+    if (!ret) {
+        return CCoderResult::GetUNDERFLOW(result);
     }
 
     Int32 num = 0;
@@ -207,26 +209,28 @@ ECode CharsetEncoderICU::EncodeLoop(
     NativeConverter::Encode(mConverterHandle, mInput, mInEnd, mOutput, mOutEnd, mData, FALSE, &error);
     if (U_FAILURE(UErrorCode(error))) {
         if (error == U_BUFFER_OVERFLOW_ERROR) {
+            Logger::E("CharsetEncoderICU", "failed to encode. U_BUFFER_OVERFLOW_ERROR");
             CCoderResult::GetOVERFLOW(result);
             goto EXIT;
         } else if (error == U_INVALID_CHAR_FOUND) {
+            Logger::E("CharsetEncoderICU", "failed to encode. U_INVALID_CHAR_FOUND");
             CCoderResult::UnmappableForLength((*mData)[INVALID_CHAR_COUNT], result);
             goto EXIT;
         } else if (error == U_ILLEGAL_CHAR_FOUND) {
+            Logger::E("CharsetEncoderICU", "failed to encode. U_ILLEGAL_CHAR_FOUND");
             CCoderResult::MalformedForLength((*mData)[INVALID_CHAR_COUNT], result);
             goto EXIT;
         } else {
+            Logger::E("CharsetEncoderICU", "failed to encode.");
             //throw new AssertionError(error);
             ecode = E_ASSERTION_ERROR;
             goto EXIT;
         }
     }
+
     // Decoding succeeded: give us more data.
     CCoderResult::GetUNDERFLOW(result);
-    // } finally {
-        // SetPosition(charBuffer);
-        // SetPosition(byteBuffer);
-    // }
+
 EXIT:
     SetPosition(charBuffer);
     SetPosition(byteBuffer);

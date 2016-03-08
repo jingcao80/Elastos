@@ -52,6 +52,7 @@ ECode CharBuffer::Wrap(
     /* [out] */ ICharBuffer** buf)
 {
     VALIDATE_NOT_NULL(buf);
+    *buf = NULL;
 
     FAIL_RETURN(Arrays::CheckOffsetAndCount(array->GetLength(), start, charCount));
 

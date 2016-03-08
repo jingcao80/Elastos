@@ -9,23 +9,21 @@ namespace Elastos {
 namespace IO {
 namespace Charset {
 
-const Int32 CharsetEncoder::READY;
-const Int32 CharsetEncoder::ONGOING;
-const Int32 CharsetEncoder::END;
-const Int32 CharsetEncoder::FLUSH;
-const Int32 CharsetEncoder::INIT;
+const String CharsetEncoder::RESET("RESET");
+const String CharsetEncoder::CharsetEncoder::ONGOING("ONGOING");
+const String CharsetEncoder::END_OF_INPUT("END_OF_INPUT");
+const String CharsetEncoder::FLUSHED("FLUSHED");
+
+CAR_INTERFACE_IMPL(CharsetEncoder, Object, ICharsetEncoder)
 
 CharsetEncoder::CharsetEncoder()
     : mAverageBytesPerChar(0.0f)
     , mMaxBytesPerChar(0.0f)
-    , mStatus(0)
-    , mFinished(FALSE)
+    , mState(RESET)
 {}
 
 CharsetEncoder::~CharsetEncoder()
 {}
-
-CAR_INTERFACE_IMPL(CharsetEncoder, Object, ICharsetEncoder)
 
 ECode CharsetEncoder::Init(
     /* [in] */ ICharset* cs,
@@ -66,10 +64,9 @@ ECode CharsetEncoder::Init(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    mCs = cs;
+    mCharset = cs;
     mAverageBytesPerChar = averageBytesPerChar;
     mMaxBytesPerChar = maxBytesPerChar;
-    mStatus = INIT;
 
     AutoPtr<ICodingErrorAction> report;
     CCodingErrorAction::GetREPORT((ICodingErrorAction **)&report);
@@ -105,7 +102,7 @@ ECode CharsetEncoder::CanEncode(
     (*chars)[0] = c;
     AutoPtr<ICharBuffer> charBuffer;
     CharBuffer::Wrap(chars, (ICharBuffer**)&charBuffer);
-    return ImplCanEncode(charBuffer.Get(), result);
+    return CanEncode(ICharSequence::Probe(charBuffer), result);
 }
 
 ECode CharsetEncoder::CanEncode(
@@ -125,87 +122,131 @@ ECode CharsetEncoder::CanEncode(
         CharBuffer::Wrap(sequence, (ICharBuffer**)&cb);
     }
 
-    return ImplCanEncode(cb.Get(), result);
+    if (mState == FLUSHED) {
+        Reset();
+    }
+    if (mState != RESET) {
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    AutoPtr<ICodingErrorAction> originalMalformedInputAction = mMalformedInputAction;
+    AutoPtr<ICodingErrorAction> originalUnmappableCharacterAction = mUnmappableCharacterAction;
+
+    AutoPtr<ICodingErrorAction> report;
+    CCodingErrorAction::GetREPORT((ICodingErrorAction **)&report);
+    FAIL_RETURN(OnMalformedInput(report))
+    FAIL_RETURN(OnUnmappableCharacter(report))
+
+    AutoPtr<IByteBuffer> bb;
+    ECode ec = Encode(cb, (IByteBuffer**)&bb);
+
+    FAIL_RETURN(OnMalformedInput(originalMalformedInputAction))
+    FAIL_RETURN(OnUnmappableCharacter(originalUnmappableCharacterAction))
+    Reset();
+
+    *result = FAILED(ec) ? FALSE : TRUE;
+    return NOERROR;
 }
 
 ECode CharsetEncoder::GetCharset(
     /* [out] */ ICharset** charset)
 {
     VALIDATE_NOT_NULL(charset);
-    *charset = mCs;
+    *charset = mCharset;
     REFCOUNT_ADD(*charset);
     return NOERROR;
 }
 
 ECode CharsetEncoder::Encode(
-    /* [in] */ ICharBuffer* charBuffer,
+    /* [in] */ ICharBuffer* in,
     /* [out] */ IByteBuffer** byteBuffer)
 {
     VALIDATE_NOT_NULL(byteBuffer);
     *byteBuffer = NULL;
-    VALIDATE_NOT_NULL(charBuffer);
+    VALIDATE_NOT_NULL(in);
 
-    Int32 remaining = 0;
-    FAIL_RETURN(IBuffer::Probe(charBuffer)->GetRemaining(&remaining));
-    if (remaining == 0) {
-        return ByteBuffer::Allocate(0, byteBuffer);
-    }
-
-    FAIL_RETURN(Reset());
-
-    FAIL_RETURN(IBuffer::Probe(charBuffer)->GetRemaining(&remaining));
+    Int32 remaining;
+    IBuffer* cb = IBuffer::Probe(in);
+    FAIL_RETURN(cb->GetRemaining(&remaining));
     Int32 length = (Int32) (remaining * mAverageBytesPerChar);
-    AutoPtr<IByteBuffer> output, temp;
-    FAIL_RETURN(ByteBuffer::Allocate(length, (IByteBuffer**)&output));
-    AutoPtr<ICoderResult> result;
-    AutoPtr<ICoderResult> UNDERFLOW, OVERFLOW;
-    CCoderResult::GetUNDERFLOW((ICoderResult**)&UNDERFLOW);
+
+    AutoPtr<IByteBuffer> out;
+    ByteBuffer::Allocate(length, (IByteBuffer**)&out);
+
+    FAIL_RETURN(Reset())
+
+    AutoPtr<ICoderResult> OVERFLOW;
     CCoderResult::GetOVERFLOW((ICoderResult**)&OVERFLOW);
 
-    while (TRUE) {
-        result = NULL;
-        FAIL_RETURN(Encode(charBuffer, output.Get(), FALSE, (ICoderResult**)&result));
-        if (result.Get() == UNDERFLOW) {
-            temp = NULL;
-            FAIL_RETURN(AllocateMore(output.Get(), (IByteBuffer**)&temp));
-            output = temp;
-            continue;   // No point trying to flush to an already-full buffer.
+    AutoPtr<IByteBuffer> temp;
+    while (mState != FLUSHED) {
+        AutoPtr<ICoderResult> result;
+        FAIL_RETURN(Encode(in, out, TRUE, (ICoderResult**)&result));
+        if (result.Get() == OVERFLOW.Get()) {
+            temp = out;
+            out = NULL;
+            FAIL_RETURN(AllocateMore(temp, (IByteBuffer**)&out))
+            continue; // No point trying to flush to an already-full buffer.
         }
-        FAIL_RETURN(CheckCoderResult(result.Get()));
+        else {
+            FAIL_RETURN(CheckCoderResult(result))
+        }
+
+        result = NULL;
+        FAIL_RETURN(Flush(out, (ICoderResult**)&result));
+        if (result.Get() == OVERFLOW.Get()) {
+            temp = out;
+            out = NULL;
+            FAIL_RETURN(AllocateMore(temp, (IByteBuffer**)&out))
+        }
+        else {
+            FAIL_RETURN(CheckCoderResult(result))
+        }
     }
 
-    result = NULL;
-    FAIL_RETURN(Encode(charBuffer, output.Get(), TRUE, (ICoderResult**)&result));
-    FAIL_RETURN(CheckCoderResult(result.Get()));
-
-    while (TRUE) {
-        result = NULL;
-        FAIL_RETURN(Flush(output.Get(), (ICoderResult**)&result));
-        if ((result == OVERFLOW)) {
-            temp = NULL;
-            FAIL_RETURN(AllocateMore(output.Get(), (IByteBuffer**)&temp));
-            output = temp;
-            continue;
-        }
-        FAIL_RETURN(CheckCoderResult(result.Get()));
-        FAIL_RETURN(IBuffer::Probe(output)->Flip());
-        Boolean res;
-        FAIL_RETURN(result->IsMalformed(&res));
-        if (res) {
-            // throw new MalformedInputException(result.length());
-            return E_MALFORMED_INPUT_EXCEPTION;
-        }
-        FAIL_RETURN(result->IsUnmappable(&res));
-        if (res) {
-            // throw new UnmappableCharacterException(result.length());
-            return E_UNMAPPABLE_CHARACTER_EXCEPTION;
-        }
-        break;
-    }
-    mStatus = READY;
-    mFinished = TRUE;
-    *byteBuffer = output;
+    FAIL_RETURN(IBuffer::Probe(out)->Flip())
+    *byteBuffer = out;
     REFCOUNT_ADD(*byteBuffer)
+    return NOERROR;
+}
+
+ECode CharsetEncoder::CheckCoderResult(
+    /* [in] */ ICoderResult* result)
+{
+    VALIDATE_NOT_NULL(result);
+
+    AutoPtr<ICodingErrorAction> REPORT;
+    CCodingErrorAction::GetREPORT((ICodingErrorAction **)&REPORT);
+    Boolean isEnable = FALSE;
+
+    if ((mMalformedInputAction == REPORT) && (result->IsMalformed(&isEnable), isEnable)) {
+        // throw new MalformedInputException(result.length());
+        return E_MALFORMED_INPUT_EXCEPTION;
+    }
+    else if ((mUnmappableCharacterAction == REPORT) && (result->IsUnmappable(&isEnable), isEnable)) {
+        // throw new UnmappableCharacterException(result.length());
+        return E_UNMAPPABLE_CHARACTER_EXCEPTION;
+    }
+    return NOERROR;
+}
+
+ECode CharsetEncoder::AllocateMore(
+    /* [in, out] */ IByteBuffer* output,
+    /* [out] */ IByteBuffer** byteBuffer)
+{
+    VALIDATE_NOT_NULL(byteBuffer);
+    *byteBuffer = NULL;
+    VALIDATE_NOT_NULL(output);
+
+    Int32 cap = 0;
+    FAIL_RETURN(IBuffer::Probe(output)->GetCapacity(&cap));
+    if (cap == 0) {
+        FAIL_RETURN(ByteBuffer::Allocate(1, byteBuffer));
+        return NOERROR;
+    }
+    FAIL_RETURN(ByteBuffer::Allocate(cap * 2, byteBuffer));
+    FAIL_RETURN(IBuffer::Probe(output)->Flip());
+    FAIL_RETURN((*byteBuffer)->Put(output));
     return NOERROR;
 }
 
@@ -220,86 +261,69 @@ ECode CharsetEncoder::Encode(
     VALIDATE_NOT_NULL(charBuffer);
     VALIDATE_NOT_NULL(byteBuffer);
 
-    // If the previous step is encode(CharBuffer), then no more input is needed
-    // thus endOfInput should not be false
-    if (mStatus == READY && mFinished && !endOfInput) {
+    if (mState != RESET && mState != ONGOING && !(endOfInput && mState == END_OF_INPUT)) {
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
-    if ((mStatus == FLUSH) || (!endOfInput && mStatus == END)) {
-        return E_ILLEGAL_STATE_EXCEPTION;
-    }
+    mState = endOfInput ? END_OF_INPUT : ONGOING;
 
-    AutoPtr<ICoderResult> UNDERFLOW;
-    AutoPtr<ICoderResult> OVERFLOW;
+    AutoPtr<ICoderResult> UNDERFLOW, OVERFLOW;
     CCoderResult::GetUNDERFLOW((ICoderResult**)&UNDERFLOW);
     CCoderResult::GetOVERFLOW((ICoderResult**)&OVERFLOW);
 
+    AutoPtr<ICodingErrorAction> REPLACE, REPORT;
+    CCodingErrorAction::GetREPLACE((ICodingErrorAction **)&REPLACE);
+    CCodingErrorAction::GetREPORT((ICodingErrorAction **)&REPORT);
+
+    IBuffer* cb = IBuffer::Probe(charBuffer);
+    IBuffer* bb = IBuffer::Probe(byteBuffer);
+
     AutoPtr<ICoderResult> res;
+    Int32 remaining = 0;
+    Boolean hasRemaining = FALSE;
     while (TRUE) {
         res = NULL;
         FAIL_RETURN(EncodeLoop(charBuffer, byteBuffer, (ICoderResult**)&res));
-        if ((res == UNDERFLOW)) {
-            mStatus = endOfInput ? END : ONGOING;
-            if (endOfInput) {
-                Int32 remaining = 0;
-                IBuffer::Probe(charBuffer)->GetRemaining(&remaining);
-                if (remaining > 0) {
-                    res = NULL;
-                    FAIL_RETURN(CCoderResult::MalformedForLength(remaining, (ICoderResult**)&res));
-                } else {
-                    *result = res;
-                    REFCOUNT_ADD(*result)
-                    return NOERROR;
-                }
-            } else {
-                *result = res;
-                REFCOUNT_ADD(*result)
-                return NOERROR;
+        if (res == UNDERFLOW) {
+            if (endOfInput && (cb->HasRemaining(&hasRemaining), hasRemaining)) {
+                cb->GetRemaining(&remaining);
+                res = NULL;
+                FAIL_RETURN(CCoderResult::MalformedForLength(remaining, (ICoderResult**)&res));
             }
-        } else if ((res == OVERFLOW)) {
-            mStatus = endOfInput ? END : ONGOING;
-            *result = res;
-            REFCOUNT_ADD(*result)
-            return NOERROR;
+            break;
         }
+        else if (res.Get() == OVERFLOW) {
+            break;
+        }
+
+    // We have a real error, so do what the appropriate action tells us what to do...
         AutoPtr<ICodingErrorAction> action = mMalformedInputAction;
         Boolean enable = FALSE;
         FAIL_RETURN(res->IsUnmappable(&enable));
         if (enable) {
             action = mUnmappableCharacterAction;
         }
-        // If the action is IGNORE or REPLACE, we should continue
-        // encoding.
 
-        AutoPtr<ICodingErrorAction> REPLACE;
-        AutoPtr<ICodingErrorAction> IGNORE;
-        CCodingErrorAction::GetREPLACE((ICodingErrorAction **)&REPLACE);
-        CCodingErrorAction::GetIGNORE((ICodingErrorAction **)&IGNORE);
-
-        if ((action == REPLACE)) {
-            Int32 remaining = 0;
-            FAIL_RETURN(IBuffer::Probe(byteBuffer)->GetRemaining(&remaining));
+        if (action.Get() == REPORT) {
+            break;
+        }
+        else if (action.Get() == REPLACE) {
+            FAIL_RETURN(bb->GetRemaining(&remaining));
             if (remaining < mReplacementBytes->GetLength()) {
-                *result = OVERFLOW;
-                REFCOUNT_ADD(*result)
-                return NOERROR;
+                res = OVERFLOW;
+                break;
             }
             byteBuffer->Put(mReplacementBytes);
-        } else {
-            if (action != IGNORE) {
-                *result = res;
-                REFCOUNT_ADD(*result)
-                return NOERROR;
-            }
         }
-        Int32 pos = 0;
-        FAIL_RETURN(IBuffer::Probe(charBuffer)->GetPosition(&pos));
-        Int32 len = 0;
+
+        Int32 pos = 0, len = 0;
+        FAIL_RETURN(cb->GetPosition(&pos));
         res->GetLength(&len);
-        FAIL_RETURN(IBuffer::Probe(charBuffer)->SetPosition(pos + len));
+        FAIL_RETURN(cb->SetPosition(pos + len));
     }
 
+    *result = res;
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 
@@ -311,7 +335,7 @@ ECode CharsetEncoder::Flush(
     *result = NULL;
     VALIDATE_NOT_NULL(byteBuffer);
 
-    if (mStatus != END && mStatus != READY) {
+    if (mState != FLUSHED && mState != END_OF_INPUT) {
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 
@@ -321,12 +345,45 @@ ECode CharsetEncoder::Flush(
     AutoPtr<ICoderResult> UNDERFLOW;
     CCoderResult::GetUNDERFLOW((ICoderResult**)&UNDERFLOW);
 
-    if ((res == UNDERFLOW)) {
-        mStatus = FLUSH;
+    if (res.Get() == UNDERFLOW) {
+        mState = FLUSHED;
     }
 
     *result = res;
     REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+ECode CharsetEncoder::ImplFlush(
+    /* [in] */ IByteBuffer* outBuffer,
+    /* [out] */  ICoderResult** result)
+{
+    return CCoderResult::GetUNDERFLOW(result);
+}
+
+ECode CharsetEncoder::ImplOnMalformedInput(
+    /* [in] */ ICodingErrorAction* newAction)
+{
+    // default implementation is empty
+    return NOERROR;
+}
+ECode CharsetEncoder::ImplOnUnmappableCharacter(
+    /* [in] */ ICodingErrorAction* newAction)
+{
+    // default implementation is empty
+    return NOERROR;
+}
+
+ECode CharsetEncoder::ImplReplaceWith(
+    /* [in] */ ArrayOf<Byte>* newReplacement)
+{
+    // default implementation is empty
+    return NOERROR;
+}
+
+ECode CharsetEncoder::ImplReset()
+{
+    // default implementation is empty
     return NOERROR;
 }
 
@@ -339,7 +396,7 @@ ECode CharsetEncoder::IsLegalReplacement(
     VALIDATE_NOT_NULL(replacement);
 
     if (mDecoder == NULL) {
-        FAIL_RETURN(mCs->NewDecoder((ICharsetDecoder**)&mDecoder));
+        FAIL_RETURN(mCharset->NewDecoder((ICharsetDecoder**)&mDecoder));
 
         AutoPtr<ICodingErrorAction> REPORT;
         CCodingErrorAction::GetREPORT((ICodingErrorAction **)&REPORT);
@@ -437,7 +494,7 @@ ECode CharsetEncoder::ReplaceWith(
 
 ECode CharsetEncoder::Reset()
 {
-    mStatus = INIT;
+    mState = RESET;
     FAIL_RETURN(ImplReset());
     return NOERROR;
 }
@@ -448,115 +505,6 @@ ECode CharsetEncoder::UnmappableCharacterAction(
     VALIDATE_NOT_NULL(errorAction);
     *errorAction = mUnmappableCharacterAction;
     REFCOUNT_ADD(*errorAction)
-    return NOERROR;
-}
-
-ECode CharsetEncoder::ImplFlush(
-    /* [in] */ IByteBuffer* outBuffer,
-    /* [out] */  ICoderResult** result)
-{
-    CCoderResult::GetUNDERFLOW(result);
-    return NOERROR;
-}
-
-ECode CharsetEncoder::ImplOnMalformedInput(
-    /* [in] */ ICodingErrorAction* newAction)
-{
-    // default implementation is empty
-    return NOERROR;
-}
-ECode CharsetEncoder::ImplOnUnmappableCharacter(
-    /* [in] */ ICodingErrorAction* newAction)
-{
-    // default implementation is empty
-    return NOERROR;
-}
-
-ECode CharsetEncoder::ImplReplaceWith(
-    /* [in] */ ArrayOf<Byte>* newReplacement)
-{
-    // default implementation is empty
-    return NOERROR;
-}
-
-ECode CharsetEncoder::ImplReset()
-{
-    // default implementation is empty
-    return NOERROR;
-}
-
-ECode CharsetEncoder::ImplCanEncode(
-    /* [in] */ ICharBuffer* cb,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result)
-    *result = FALSE;
-    VALIDATE_NOT_NULL(cb)
-
-    if (mStatus == FLUSH || mStatus == INIT) {
-        mStatus = READY;
-    }
-    if (mStatus != READY) {
-        // throw new IllegalStateException("encoding already in progress");
-        return E_ILLEGAL_STATE_EXCEPTION;
-    }
-    AutoPtr<ICodingErrorAction> malformBak = mMalformedInputAction;
-    AutoPtr<ICodingErrorAction> unmapBak = mUnmappableCharacterAction;
-    AutoPtr<ICodingErrorAction> REPORT;
-    CCodingErrorAction::GetREPORT((ICodingErrorAction**)&REPORT);
-
-    FAIL_RETURN(OnMalformedInput(REPORT.Get()))
-    FAIL_RETURN(OnUnmappableCharacter(REPORT.Get()))
-    *result = TRUE;
-
-    AutoPtr<IByteBuffer> bb;
-    if(FAILED(Encode(cb, (IByteBuffer**)&bb))) {
-        *result = FALSE;
-    }
-
-    FAIL_RETURN(OnMalformedInput(malformBak))
-    FAIL_RETURN(OnUnmappableCharacter(unmapBak))
-    FAIL_RETURN(Reset())
-    return NOERROR;
-}
-
-ECode CharsetEncoder::CheckCoderResult(
-    /* [in] */ ICoderResult* result)
-{
-    VALIDATE_NOT_NULL(result);
-
-    AutoPtr<ICodingErrorAction> REPORT;
-    CCodingErrorAction::GetREPORT((ICodingErrorAction **)&REPORT);
-    Boolean isEnable = FALSE;
-
-    if ((mMalformedInputAction == REPORT) && (result->IsMalformed(&isEnable), isEnable)) {
-        // throw new MalformedInputException(result.length());
-        return E_MALFORMED_INPUT_EXCEPTION;
-    }
-    else if ((mUnmappableCharacterAction == REPORT) && (result->IsUnmappable(&isEnable), isEnable)) {
-        // throw new UnmappableCharacterException(result.length());
-        return E_UNMAPPABLE_CHARACTER_EXCEPTION;
-    }
-    return NOERROR;
-}
-
-ECode CharsetEncoder::AllocateMore(
-    /* [in, out] */ IByteBuffer* output,
-    /* [out] */ IByteBuffer** byteBuffer)
-{
-    VALIDATE_NOT_NULL(byteBuffer);
-    *byteBuffer = NULL;
-    VALIDATE_NOT_NULL(output);
-
-    Int32 cap = 0;
-    FAIL_RETURN(IBuffer::Probe(output)->GetCapacity(&cap));
-    if (cap == 0) {
-        FAIL_RETURN(ByteBuffer::Allocate(1, byteBuffer));
-        return NOERROR;
-    }
-    FAIL_RETURN(ByteBuffer::Allocate(cap * 2, byteBuffer));
-    FAIL_RETURN(IBuffer::Probe(output)->Flip());
-    FAIL_RETURN((*byteBuffer)->Put(output));
     return NOERROR;
 }
 

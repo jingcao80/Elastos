@@ -168,11 +168,6 @@ protected:
     virtual CARAPI ImplReset();
 
 private:
-    // implementation of canEncode
-    CARAPI ImplCanEncode(
-        /* [in] */ ICharBuffer* cb,
-        /* [out] */ Boolean* result);
-
     /*
      * checks the result whether it needs to throw CharacterCodingException.
      */
@@ -188,14 +183,13 @@ private:
     /*
      * internal status consts
      */
-    static const Int32 READY = 0;
-    static const Int32 ONGOING = 1;
-    static const Int32 END = 2;
-    static const Int32 FLUSH = 3;
-    static const Int32 INIT = 0;
+    static const String RESET;// = "RESET";
+    static const String ONGOING;// = "ONGOING";
+    static const String END_OF_INPUT;// = "END_OF_INPUT";
+    static const String FLUSHED;// = "FLUSHED";
 
     // the Charset which creates this encoder
-    AutoPtr<ICharset> mCs;
+    AutoPtr<ICharset> mCharset;
 
     // average bytes per character created by this encoder
     Float mAverageBytesPerChar;
@@ -206,16 +200,9 @@ private:
     // replacement byte array
     AutoPtr< ArrayOf<Byte> > mReplacementBytes;
 
-    // internal status
-    Int32 mStatus;
+    String mState;
 
-    // internal status indicates encode(CharBuffer) operation is finished
-    Boolean mFinished;
-
-    // action for malformed input
     AutoPtr<ICodingErrorAction> mMalformedInputAction;
-
-    // action for unmapped char input
     AutoPtr<ICodingErrorAction> mUnmappableCharacterAction;
 
     // decoder instance for this encoder's charset, used for replacement value

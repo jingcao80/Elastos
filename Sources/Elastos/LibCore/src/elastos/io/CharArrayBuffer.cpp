@@ -18,9 +18,7 @@ CharArrayBuffer::CharArrayBuffer()
 ECode CharArrayBuffer::constructor(
     /* [in] */ ArrayOf<Char32>* array)
 {
-    FAIL_RETURN(CharBuffer::constructor(array->GetLength(), 0))
-    mBackingArray = array;
-    return NOERROR;
+    return CharArrayBuffer::constructor(array->GetLength(), array, 0, FALSE);
 }
 
 ECode CharArrayBuffer::constructor(
@@ -39,6 +37,9 @@ ECode CharArrayBuffer::constructor(
 ECode CharArrayBuffer::GetPrimitiveArray(
     /* [out] */ Handle64* arrayHandle)
 {
+    VALIDATE_NOT_NULL(arrayHandle)
+    *arrayHandle = NULL;
+
     AutoPtr<ArrayOf<Char32> > arrayTmp;
     GetArray((ArrayOf<Char32>**)&arrayTmp);
     if (arrayTmp == NULL)
