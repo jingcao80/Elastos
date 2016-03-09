@@ -460,8 +460,9 @@ ECode CScanner::HasNext(
     }
     mMatcher->UsePattern(pattern);
     Boolean hasNext = FALSE;
+    Boolean isHasNext = FALSE;
     // check whether next token matches the specified pattern
-    if (mMatcher->Matches(&hasNext), hasNext) {
+    if (mMatcher->Matches(&isHasNext), isHasNext) {
         mCachedNextIndex = mFindStartIndex;
         mMatchSuccessful = TRUE;
         hasNext = TRUE;
@@ -488,7 +489,8 @@ ECode CScanner::HasNextBigDecimal(
 {
     AutoPtr<IPattern> floatPattern = GetFloatPattern();
     Boolean isBigDecimalValue = FALSE;
-    if (HasNext(floatPattern, &isBigDecimalValue), isBigDecimalValue) {
+    Boolean isHasNext = FALSE;
+    if (HasNext(floatPattern, &isHasNext), isHasNext) {
         String floatString;
         (IMatchResult::Probe(mMatcher))->Group(&floatString);
         floatString = RemoveLocaleInfoFromFloat(floatString);
@@ -525,7 +527,8 @@ ECode CScanner::HasNextBigInteger(
     AutoPtr<IPattern> integerPattern;
     FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     Boolean isBigIntegerValue = FALSE;
-    if (HasNext(integerPattern, &isBigIntegerValue), isBigIntegerValue) {
+    Boolean isHasNext = FALSE;
+    if (HasNext(integerPattern, &isHasNext), isHasNext) {
         String intString;
         (IMatchResult::Probe(mMatcher))->Group(&intString);
         intString = RemoveLocaleInfo(intString, INT);
@@ -566,13 +569,13 @@ ECode CScanner::HasNextByte(
     AutoPtr<IPattern> integerPattern;
     FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     Boolean isByteValue = FALSE;
-    Boolean ishasnext = FALSE;
-    if (HasNext(integerPattern, &ishasnext), ishasnext) {
+    Boolean isHasNext = FALSE;
+    if (HasNext(integerPattern, &isHasNext), isHasNext) {
         String intString;
         (IMatchResult::Probe(mMatcher))->Group(&intString);
         intString = RemoveLocaleInfo(intString, INT);
         // try {
-        Int32 outbyte;
+        Byte outbyte;
         ECode ec = StringUtils::Parse(intString, radix, &outbyte);
         if (SUCCEEDED(ec)) {
             AutoPtr<IByte> inbyte;
@@ -597,7 +600,8 @@ ECode CScanner::HasNextDouble(
 
     AutoPtr<IPattern> floatPattern = GetFloatPattern();
     Boolean isDoubleValue = FALSE;
-    if (HasNext(floatPattern, &isDoubleValue), isDoubleValue) {
+    Boolean isHasNext = FALSE;
+    if (HasNext(floatPattern, &isHasNext), isHasNext) {
         String floatString;
         (IMatchResult::Probe(mMatcher))->Group(&floatString);
         floatString = RemoveLocaleInfoFromFloat(floatString);
@@ -627,7 +631,8 @@ ECode CScanner::HasNextFloat(
 
     AutoPtr<IPattern> floatPattern = GetFloatPattern();
     Boolean isFloatValue = FALSE;
-    if (HasNext(floatPattern, &isFloatValue), isFloatValue) {
+    Boolean isHasNext = FALSE;
+    if (HasNext(floatPattern, &isHasNext), isHasNext) {
         String floatString;
         (IMatchResult::Probe(mMatcher))->Group(&floatString);
         floatString = RemoveLocaleInfoFromFloat(floatString);
@@ -667,7 +672,8 @@ ECode CScanner::HasNextInt32(
     AutoPtr<IPattern> integerPattern;
     FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     Boolean isIntValue = FALSE;
-    if (HasNext(integerPattern, &isIntValue), isIntValue) {
+    Boolean isHasNext = FALSE;
+    if (HasNext(integerPattern, &isHasNext), isHasNext) {
         String intString;
         (IMatchResult::Probe(mMatcher))->Group(&intString);
         intString = RemoveLocaleInfo(intString, INT);
@@ -720,7 +726,8 @@ ECode CScanner::HasNextInt64(
     AutoPtr<IPattern> integerPattern;
     FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     Boolean isLongValue = FALSE;
-    if (HasNext(integerPattern, &isLongValue), isLongValue) {
+    Boolean isHasNext = FALSE;
+    if (HasNext(integerPattern, &isHasNext), isHasNext) {
         String intString;
         (IMatchResult::Probe(mMatcher))->Group(&intString);
         intString = RemoveLocaleInfo(intString, INT);
@@ -759,7 +766,8 @@ ECode CScanner::HasNextInt16(
     AutoPtr<IPattern> integerPattern;
     FAIL_RETURN(GetIntegerPattern(radix, (IPattern**)&integerPattern));
     Boolean isShortValue = FALSE;
-    if (HasNext(integerPattern, &isShortValue), isShortValue) {
+    Boolean isHasNext = FALSE;
+    if (HasNext(integerPattern, &isHasNext), isHasNext) {
         String intString;
         (IMatchResult::Probe(mMatcher))->Group(&intString);
         intString = RemoveLocaleInfo(intString, INT);
