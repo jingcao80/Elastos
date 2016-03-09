@@ -17,6 +17,7 @@ namespace App {
 CarClass(CConnectionSettings)
     , public Object
     , public IConnectionSettings
+    , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL()

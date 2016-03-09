@@ -17,7 +17,7 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-CAR_INTERFACE_IMPL(CBrightnessSettings, Object, IBrightnessSettings)
+CAR_INTERFACE_IMPL_2(CBrightnessSettings, Object, IBrightnessSettings, IParcelable)
 
 CAR_OBJECT_IMPL(CBrightnessSettings)
 

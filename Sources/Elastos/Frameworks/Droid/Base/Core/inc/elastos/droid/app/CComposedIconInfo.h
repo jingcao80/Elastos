@@ -14,6 +14,7 @@ namespace App {
 CarClass(CComposedIconInfo)
     , public Object
     , public IComposedIconInfo
+    , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL()

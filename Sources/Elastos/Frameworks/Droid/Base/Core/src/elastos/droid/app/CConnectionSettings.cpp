@@ -44,7 +44,7 @@ const Int32 CConnectionSettings::CM_MODE_4G = 2;
 const Int32 CConnectionSettings::CM_MODE_2G3G = 3;
 const Int32 CConnectionSettings::CM_MODE_ALL = 4;
 
-CAR_INTERFACE_IMPL(CConnectionSettings, Object, IConnectionSettings)
+CAR_INTERFACE_IMPL_2(CConnectionSettings, Object, IConnectionSettings, IParcelable)
 
 CAR_OBJECT_IMPL(CConnectionSettings)
 

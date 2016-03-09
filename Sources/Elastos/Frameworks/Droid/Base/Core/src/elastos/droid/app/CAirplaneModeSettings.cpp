@@ -17,7 +17,7 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-CAR_INTERFACE_IMPL(CAirplaneModeSettings, Object, IAirplaneModeSettings)
+CAR_INTERFACE_IMPL_2(CAirplaneModeSettings, Object, IAirplaneModeSettings, IParcelable)
 
 CAR_OBJECT_IMPL(CAirplaneModeSettings)
 

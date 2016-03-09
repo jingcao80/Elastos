@@ -6,7 +6,7 @@ namespace Elastos {
 namespace Droid {
 namespace App {
 
-CAR_INTERFACE_IMPL(CComposedIconInfo, Object, IComposedIconInfo)
+CAR_INTERFACE_IMPL_2(CComposedIconInfo, Object, IComposedIconInfo, IParcelable)
 
 CAR_OBJECT_IMPL(CComposedIconInfo)
 

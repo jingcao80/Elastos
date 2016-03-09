@@ -17,6 +17,7 @@ namespace App {
 CarClass(CAirplaneModeSettings)
     , public Object
     , public IAirplaneModeSettings
+    , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL()
