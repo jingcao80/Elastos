@@ -1186,7 +1186,7 @@ ECode CNativeDecimalFormat::Open(
     UParseError parseError;
     if (pattern.IsNull()) {
         *result = 0;
-        return NOERROR;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     U_ICU_NAMESPACE::DecimalFormatSymbols* symbols = makeDecimalFormatSymbols(
             currencySymbol, decimalSeparator, digit, exponentSeparator, groupingSeparator,

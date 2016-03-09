@@ -426,29 +426,32 @@ ECode CLinkedHashMap::LinkedHashIterator::HasNext(
     return NOERROR;
 }
 
-AutoPtr<CLinkedHashMap::LinkedEntry> CLinkedHashMap::LinkedHashIterator::NextEntry()
+ECode CLinkedHashMap::LinkedHashIterator::NextEntry(LinkedEntry** outface)
 {
+    VALIDATE_NOT_NULL(outface)
+    *outface = NULL;
+
     if (mHost->mModCount != mExpectedModCount) {
-        // throw new ConcurrentModificationException();
-        return NULL;
+        return E_CONCURRENT_MODIFICATION_EXCEPTION;
     }
     AutoPtr<LinkedEntry> e = mNext;
     if (e == mHost->mHeader) {
-        // throw new NoSuchElementException();
-        return NULL;
+        return E_NO_SUCH_ELEMENT_EXCEPTION;
     }
     mNext = e->mNxt;
-    return mLastReturned = e;
+    mLastReturned = e;
+
+    *outface = mLastReturned;
+    REFCOUNT_ADD(*outface)
+    return NOERROR;
 }
 
 ECode CLinkedHashMap::LinkedHashIterator::Remove()
 {
     if (mHost->mModCount != mExpectedModCount) {
-        // throw new ConcurrentModificationException();
         return E_CONCURRENT_MODIFICATION_EXCEPTION;
     }
     if (mLastReturned == NULL) {
-        // throw new IllegalStateException();
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     AutoPtr<IInterface> outface;
@@ -473,7 +476,8 @@ ECode CLinkedHashMap::KeyIterator::GetNext(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<LinkedEntry> res = NextEntry();
+    AutoPtr<LinkedEntry> res;
+    FAIL_RETURN(NextEntry((LinkedEntry**)&res));
     *outface = res->mKey;
     REFCOUNT_ADD(*outface)
     return NOERROR;
@@ -494,7 +498,8 @@ ECode CLinkedHashMap::ValueIterator::GetNext(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<LinkedEntry> res = NextEntry();
+    AutoPtr<LinkedEntry> res;
+    FAIL_RETURN(NextEntry((LinkedEntry**)&res));
     *outface = res->mValue;
     REFCOUNT_ADD(*outface)
     return NOERROR;
@@ -515,7 +520,8 @@ ECode CLinkedHashMap::EntryIterator::GetNext(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<LinkedEntry> res = NextEntry();
+    AutoPtr<LinkedEntry> res;
+    FAIL_RETURN(NextEntry((LinkedEntry**)&res));
     *outface = IMapEntry::Probe(res);
     REFCOUNT_ADD(*outface)
     return NOERROR;
