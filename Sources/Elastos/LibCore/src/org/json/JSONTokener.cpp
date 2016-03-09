@@ -6,6 +6,7 @@
 #include "JSONObject.h"
 #include "CoreUtils.h"
 #include "StringUtils.h"
+#include "CString.h"
 #include "Math.h"
 #include "utility/Arrays.h"
 #include "elastos/utility/logging/Logger.h"
@@ -13,6 +14,7 @@
 using Elastos::Core::CoreUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::StringUtils;
+using Elastos::Core::CString;
 using Elastos::Core::IString;
 using Elastos::Utility::Logging::Logger;
 
@@ -183,6 +185,8 @@ ECode JSONTokener::NextString(
     /* the index of the first character not yet appended to the builder. */
     Int32 start = mPos;
 
+    AutoPtr<ICharSequence> cs;
+    CString::New(mIn, (ICharSequence**)&cs);
     while (mPos < mIn.GetLength()) {
         Int32 c = (Int32)mIn.GetChar(mPos++);
         if ((Char32)c == quote) {
@@ -193,8 +197,7 @@ ECode JSONTokener::NextString(
                 return NOERROR;
             }
             else {
-                AutoPtr<ArrayOf<Char32> > args = mIn.GetChars();
-                builder->Append(*args, start, mPos - 1);
+                builder->Append(cs, start, mPos - 1);
                 *result = builder->ToString();
                 return NOERROR;
             }
@@ -207,8 +210,9 @@ ECode JSONTokener::NextString(
             if (builder == NULL) {
                 builder = new StringBuilder();
             }
-            AutoPtr<ArrayOf<Char32> > args = mIn.GetChars();
-            builder->Append(*args, start, mPos - 1);
+
+            builder->Append(cs, start, mPos - 1);
+
             Char32 cd;
             FAIL_RETURN(ReadEscapeCharacter(&cd));
             builder->AppendChar(cd);
@@ -232,8 +236,7 @@ ECode JSONTokener::ReadEscapeCharacter(
             }
             String hex = mIn.Substring(mPos, mPos + 4);
             mPos += 4;
-            *c = (Char32)StringUtils::ParseInt32(hex, 16);
-            return NOERROR;
+            return StringUtils::Parse(hex, 16, c);
         }
 
         case 't':
