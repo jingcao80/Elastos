@@ -77,6 +77,17 @@ public:
     CARAPI OnRate(
         /* [in] */ IRating * rating);
 
+    // @Override
+    CARAPI SetRemoteControlClientBrowsedPlayer();
+
+    // @Override
+    CARAPI SetRemoteControlClientPlayItem(
+        /* [in] */ Int64 uid,
+        /* [in] */ Int32 scope);
+
+    // @Override
+    CARAPI GetRemoteControlClientNowPlayingEntries();
+
     CARAPI OnCustomAction(
         /* [in] */ const String& action,
         /* [in] */ IBundle * args);
@@ -93,6 +104,7 @@ public:
 
 private:
     AutoPtr<IWeakReference> mMediaSession;
+    static const String TAG;
 };
 
 } // namespace Session

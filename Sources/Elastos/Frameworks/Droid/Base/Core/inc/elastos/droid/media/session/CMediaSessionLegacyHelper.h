@@ -105,6 +105,17 @@ private:
             CARAPI OnSetRating(
                 /* [in] */ IRating * rating);
 
+            // @Override
+            CARAPI SetBrowsedPlayer();
+
+            // @Override
+            CARAPI SetPlayItem(
+                /* [in] */ Int32 scope,
+                /* [in] */ Int64 uid);
+
+            // @Override
+            CARAPI GetNowPlayingEntries();
+
         private:
             SessionHolder * mHost;
         };

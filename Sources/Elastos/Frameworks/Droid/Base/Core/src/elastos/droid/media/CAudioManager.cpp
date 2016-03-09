@@ -20,6 +20,7 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IPendingIntentHelper;
+//TODO: using Elastos::Droid::App::IProfileGroup;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IContentResolver;
@@ -70,7 +71,8 @@ const Int32 CAudioManager::DEFAULT_STREAM_VOLUME[] = {
     7,  // STREAM_BLUETOOTH_SCO
     7,  // STREAM_SYSTEM_ENFORCED
     11, // STREAM_DTMF
-    11  // STREAM_TTS
+    11, // STREAM_TTS
+    4   // STREAM_INCALL_MUSIC
 };
 
 const Int32 CAudioManager::AUDIOPORT_GENERATION_INIT = 0;
@@ -168,6 +170,11 @@ ECode CAudioManager::constructor(
 
     mAudioPortEventHandler = new AudioPortEventHandler(THIS_PROBE(IAudioManager));
     resources->GetBoolean(R::bool_::config_useFixedVolume, &mUseFixedVolume);
+
+    AutoPtr<IInterface> interfaceTmp;
+    assert(0);
+    context->GetSystemService(String("")/*TODO: IContext::PROFILE_SERVICE*/, (IInterface**)&interfaceTmp);
+    // TODO: mProfileManager = IProfileManager::Probe(interfaceTmp);
     return NOERROR;
 }
 
@@ -768,6 +775,32 @@ ECode CAudioManager::ShouldVibrate(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
+
+    String packageName;
+    mContext->GetPackageName(&packageName);
+    // Don't apply profiles for "android" context, as these could
+    // come from the NotificationManager, and originate from a real package.
+    if (!packageName.Equals("android")) {
+        assert(0);
+        AutoPtr<IInterface/*TODO: IProfileGroup*/> profileGroup;
+        // TODO: mProfileManager->GetActiveProfileGroup(packageName, (IProfileGroup**)&profileGroup);
+        if (profileGroup != NULL) {
+            //TODO: Logger::V(TAG, "shouldVibrate, group: " + profileGroup->GetUuid() + " mode: " + profileGroup->GetVibrateMode());
+            /*switch (profileGroup->GetVibrateMode()) {
+                case OVERRIDE :
+                    *result = TRUE;
+                    return NOERROR;
+                case SUPPRESS :
+                    *result = FALSE;
+                    return NOERROR;
+                case DEFAULT :
+                // Drop through
+            }*/
+        }
+    }
+    else {
+        Logger::V(TAG, "Not applying override for 'android' package");
+    }
 
     AutoPtr<IIAudioService> service = GetService();
     if (!service) return E_REMOTE_EXCEPTION;
@@ -1393,6 +1426,7 @@ ECode CAudioManager::RegisterMediaButtonEventReceiver(
     // construct a PendingIntent for the media button and register it
     AutoPtr<IIntent> mediaButtonIntent ;
     CIntent::New(IIntent::ACTION_MEDIA_BUTTON, (IIntent**)&mediaButtonIntent);
+    mediaButtonIntent->AddFlags(IIntent::FLAG_RECEIVER_FOREGROUND);
     //     the associated intent will be handled by the component being registered
     mediaButtonIntent->SetComponent(eventReceiver);
     AutoPtr<IPendingIntentHelper> pi;
@@ -1500,6 +1534,13 @@ ECode CAudioManager::RegisterRemoteController(
         return NOERROR;
     }
     rctlr->StartListeningToSessions();
+    AutoPtr<IIAudioService> service = GetService();
+    // try {
+        service->UpdateRemoteControllerOnExistingMediaPlayers();
+    // } catch (RemoteException e) {
+        // Log.e(TAG, "Error in calling Audio service interface" +
+        //     "updateRemoteControllerOnExistingMediaPlayers() due to " + e);
+    // }
     *result = TRUE;
     return NOERROR;
 }
@@ -1511,6 +1552,26 @@ ECode CAudioManager::UnregisterRemoteController(
         return NOERROR;
     }
     return rctlr->StopListeningToSessions();
+}
+
+ECode CAudioManager::UpdateMediaPlayerList(
+    /* [in] */ const String& packageName,
+    /* [in] */ Boolean toAdd)
+{
+    AutoPtr<IIAudioService> service = GetService();
+    // try {
+        if (toAdd) {
+            Logger::D(TAG, String("updateMediaPlayerList: Add RCC ") + packageName + String(" to List"));
+            service->AddMediaPlayerAndUpdateRemoteController(packageName);
+        }
+        else {
+            Logger::D(TAG, String("updateMediaPlayerList: Remove RCC ") + packageName + String(" from List"));
+            service->RemoveMediaPlayerAndUpdateRemoteController(packageName);
+        }
+    // } catch (RemoteException e) {
+        // Log.e(TAG, "Exception while executing updateMediaPlayerList: " + e);
+    // }
+    return NOERROR;
 }
 
 ECode CAudioManager::RegisterRemoteControlDisplay(
@@ -1640,6 +1701,52 @@ ECode CAudioManager::UnregisterAudioPolicyAsync(
     // } catch (RemoteException e) {
     //     Log.e(TAG, "Dead object in unregisterAudioPolicyAsync()", e);
     // }
+}
+
+ECode CAudioManager::SetRemoteControlClientPlayItem(
+    /* [in] */ Int64 uid,
+    /* [in] */ Int32 scope)
+{
+    AutoPtr<IIAudioService> service = GetService();
+    // try {
+        service->SetRemoteControlClientPlayItem(uid, scope);
+    // } catch (RemoteException e) {
+        // Log.e(TAG, "Dead object in setRemoteControlClientPlayItem(" + uid + ", " + scope + ")", e);
+    // }
+    return NOERROR;
+}
+
+/**
+ * @hide
+ * Request the user of a RemoteControlClient to provide with the now playing list entries.
+ * @param generationId the RemoteControlClient generation counter for which this request is
+ *     issued.
+ */
+ECode CAudioManager::GetRemoteControlClientNowPlayingEntries()
+{
+    AutoPtr<IIAudioService> service = GetService();
+    // try {
+        service->GetRemoteControlClientNowPlayingEntries();
+    // } catch (RemoteException e) {
+        // Log.e(TAG, "Dead object in getRemoteControlClientNowPlayingEntries(" + ")", e);
+    // }
+    return NOERROR;
+}
+
+/**
+ * @hide
+ * Request the user of a RemoteControlClient to set the music player as current browsed player.
+ */
+ECode CAudioManager::SetRemoteControlClientBrowsedPlayer()
+{
+    Logger::D(TAG, "setRemoteControlClientBrowsedPlayer: ");
+    AutoPtr<IIAudioService> service = GetService();
+    // try {
+        service->SetRemoteControlClientBrowsedPlayer();
+    // } catch (RemoteException e) {
+        // Log.e(TAG, "Dead object in setRemoteControlClientBrowsedPlayer(" + ")", e);
+    // }
+    return NOERROR;
 }
 
 ECode CAudioManager::ReloadAudioSettings()

@@ -114,6 +114,9 @@ private:
         const static Int32 MSG_CUSTOM_ACTION;
         const static Int32 MSG_MEDIA_BUTTON;
         const static Int32 MSG_COMMAND;
+        const static Int32 MSG_SET_BROWSED_PLAYER;
+        const static Int32 MSG_SET_PLAY_ITEM;
+        const static Int32 MSG_GET_NOW_PLAYING_ITEMS;
 
         AutoPtr<IMediaSessionCallback> mCallback;
 
@@ -138,6 +141,25 @@ private:
 
     private:
         CMediaSession* mHost;
+    };
+
+    class PlayItemToken
+        : public Object
+    {
+    public:
+        PlayItemToken(
+            /* [in] */ Int64 uid,
+            /* [in] */ Int32 scope);
+
+        CARAPI GetScope(
+            /* [out] */ Int32* result);
+
+        CARAPI GetUid(
+            /* [out] */ Int64* result);
+
+    private:
+        Int64 mUid;
+        Int32 mScope;
     };
 
 public:
@@ -369,6 +391,17 @@ public:
     CARAPI SetExtras(
         /* [in] */ IBundle * extras);
 
+    CARAPI PlayItemResponse(
+        /* [in] */ Boolean success);
+
+    CARAPI UpdateNowPlayingEntries(
+        /* [in] */ ArrayOf<Int64>* playList);
+
+    CARAPI UpdateFolderInfoBrowsedPlayer(
+        /* [in] */ const String& stringUri);
+
+    CARAPI UpdateNowPlayingContentChange();
+
     /**
      * Notify the system that the remote volume changed.
      *
@@ -421,6 +454,14 @@ public:
     CARAPI DispatchCustomAction(
         /* [in] */ const String& action,
         /* [in] */ IBundle * args);
+
+    CARAPI DispatchSetBrowsedPlayerCommand();
+
+    CARAPI DispatchSetPlayItemCommand(
+        /* [in] */ Int64 uid,
+        /* [in] */ Int32 scope);
+
+    CARAPI DispatchGetNowPlayingItemsCommand();
 
     CARAPI DispatchMediaButton(
         /* [in] */ IIntent * mediaButtonIntent);

@@ -166,6 +166,18 @@ ECode CAudioFormat::GetBytesPerSample(
     case ENCODING_PCM_FLOAT:
         *result = 4;
         return NOERROR;
+    case ENCODING_AMRNB:
+        *result = 32;
+        return NOERROR;
+    case ENCODING_AMRWB:
+        *result = 61;
+        return NOERROR;
+    case ENCODING_EVRC:
+    case ENCODING_EVRCB:
+    case ENCODING_EVRCWB:
+    case ENCODING_EVRCNW:
+        *result = 23;
+        return NOERROR;
     case ENCODING_INVALID:
     default:
         // throw new IllegalArgumentException("Bad audio format " + audioFormat);
@@ -184,6 +196,12 @@ ECode CAudioFormat::IsValidEncoding(
     case ENCODING_PCM_FLOAT:
     case ENCODING_AC3:
     case ENCODING_E_AC3:
+    case ENCODING_AMRNB:
+    case ENCODING_AMRWB:
+    case ENCODING_EVRC:
+    case ENCODING_EVRCB:
+    case ENCODING_EVRCWB:
+    case ENCODING_EVRCNW:
         *result = TRUE;
     default:
         *result = FALSE;
@@ -207,6 +225,12 @@ ECode CAudioFormat::IsEncodingLinearPcm(
         return NOERROR;
     case ENCODING_AC3:
     case ENCODING_E_AC3:
+    case ENCODING_AMRNB:
+    case ENCODING_AMRWB:
+    case ENCODING_EVRC:
+    case ENCODING_EVRCB:
+    case ENCODING_EVRCWB:
+    case ENCODING_EVRCNW:
         *result = FALSE;
         return NOERROR;
     case ENCODING_INVALID:

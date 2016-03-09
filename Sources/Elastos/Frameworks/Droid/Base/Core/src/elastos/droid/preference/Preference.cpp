@@ -1035,8 +1035,7 @@ ECode Preference::DispatchSetInitialValue()
     Boolean shouldPersist = FALSE;
     ShouldPersist(&shouldPersist);
     Boolean isPersisted = FALSE;
-    IsPersisted(&isPersisted);
-    if (!shouldPersist || !isPersisted) {
+    if (!shouldPersist || (IsPersisted(&isPersisted), !isPersisted)) {
         if (mDefaultValue != NULL) {
             return OnSetInitialValue(FALSE, mDefaultValue);
         }

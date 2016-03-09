@@ -35,64 +35,6 @@ CarClass(CRemoteControlClient)
     , public Object
     , public IRemoteControlClient
 {
-private:
-    class MediaSessionCallback
-        : public Object
-        , public IMediaSessionCallback
-    {
-    public:
-        MediaSessionCallback();
-
-        ~MediaSessionCallback();
-
-        CAR_INTERFACE_DECL()
-
-        CARAPI OnSeekTo(
-            /* [in] */ Int64 pos);
-
-        CARAPI OnSetRating(
-            /* [in] */ IRating* rating);
-
-        //override for compile
-        CARAPI OnCommand(
-            /* [in] */ const String& command,
-            /* [in] */ IBundle * arg,
-            /* [in] */ IResultReceiver * cb);
-
-        CARAPI OnMediaButtonEvent(
-            /* [in] */ IIntent * mediaButtonIntent,
-            /* [out] */ Boolean * result);
-
-        CARAPI OnPlay();
-
-        CARAPI OnPlayFromMediaId(
-            /* [in] */ const String& mediaId,
-            /* [in] */ IBundle * extras);
-
-        CARAPI OnPlayFromSearch(
-            /* [in] */ const String& query,
-            /* [in] */ IBundle * extras);
-
-        CARAPI OnSkipToQueueItem(
-            /* [in] */ Int64 id);
-
-        CARAPI OnPause();
-
-        CARAPI OnSkipToNext();
-
-        CARAPI OnSkipToPrevious();
-
-        CARAPI OnFastForward();
-
-        CARAPI OnRewind();
-
-        CARAPI OnStop();
-
-        CARAPI OnCustomAction(
-            /* [in] */ const String& action,
-            /* [in] */ IBundle * extras);
-    };
-
 public:
     /**
      * Class used to modify metadata in a {@link RemoteControlClient} object.

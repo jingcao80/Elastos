@@ -1783,7 +1783,7 @@ void MediaFocusControl::RemoveMediaButtonReceiver_syncPrs(
         mPRStack->Get(index, (IInterface**)&obj);
         AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
 
-        Boolean b;
+        Boolean b = FALSE;
 // TODO: Need PlayerRecord
         // if ((prse->HasMatchingMediaButtonIntent(pi, &b), b)) {
         //     prse->Destroy();
@@ -1801,12 +1801,12 @@ void MediaFocusControl::RemoveMediaButtonReceiver_syncPrs(
 Boolean MediaFocusControl::IsCurrentRcController(
     /* [in] */ IPendingIntent* pi)
 {
-    Boolean b1;
+    Boolean b1 = FALSE;
     mPRStack->IsEmpty(&b1);
     AutoPtr<IInterface> obj;
     mPRStack->Peek((IInterface**)&obj);
     AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
-    Boolean b2;
+    Boolean b2 = FALSE;
 // TODO: Need PlayerRecord
     // prse->HasMatchingMediaButtonIntent(pi, &b2);
     if (!b1 && b2) {
@@ -1895,7 +1895,7 @@ void MediaFocusControl::OnRcDisplayUpdate(
 {
     synchronized(mPRStack) {
         synchronized(mCurrentRcLock) {
-            Boolean b;
+            Boolean b = FALSE;
 // TODO: Need PlayerRecord
             // if ((mCurrentRcClient != NULL) && (IObject::Probe(mCurrentRcClient)->Equals(prse->GetRcc(), &b),b)) {
             //     if (DEBUG_RC) Logger::I(TAG, "Display/update remote control ");

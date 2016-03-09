@@ -65,6 +65,12 @@ ECode CAudioFormatBuilder::SetEncoding(
         case IAudioFormat::ENCODING_PCM_FLOAT:
         case IAudioFormat::ENCODING_AC3:
         case IAudioFormat::ENCODING_E_AC3:
+        case IAudioFormat::ENCODING_AMRNB:
+        case IAudioFormat::ENCODING_AMRWB:
+        case IAudioFormat::ENCODING_EVRC:
+        case IAudioFormat::ENCODING_EVRCB:
+        case IAudioFormat::ENCODING_EVRCWB:
+        case IAudioFormat::ENCODING_EVRCNW:
             mEncoding = encoding;
             break;
         case IAudioFormat::ENCODING_INVALID:

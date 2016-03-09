@@ -1,10 +1,15 @@
 #include "elastos/droid/media/session/CMediaSessionCallbackStub.h"
 #include "elastos/droid/media/session/CMediaSession.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Media {
 namespace Session {
+
+const String CMediaSessionCallbackStub::TAG("CMediaSessionCallbackStub");
 
 CAR_INTERFACE_IMPL(CMediaSessionCallbackStub, Object, IISessionCallback)
 
@@ -184,6 +189,50 @@ ECode CMediaSessionCallbackStub::OnRate(
     }
     return NOERROR;
 }
+
+ECode CMediaSessionCallbackStub::SetRemoteControlClientBrowsedPlayer()
+{
+    Logger::D(TAG, "setRemoteControlClientBrowsedPlayer in CallbackStub");
+    AutoPtr<IInterface> strongObj;
+    mMediaSession->Resolve(EIID_IInterface, (IInterface**)&strongObj);
+    IObject* objTmp = IObject::Probe(strongObj);
+    CMediaSession* session = (CMediaSession*)objTmp;
+    if (session != NULL) {
+        session->DispatchSetBrowsedPlayerCommand();
+    }
+    return NOERROR;
+}
+
+// @Override
+ECode CMediaSessionCallbackStub::SetRemoteControlClientPlayItem(
+    /* [in] */ Int64 uid,
+    /* [in] */ Int32 scope)
+{
+    Logger::D(TAG, "setRemoteControlClientPlayItem in CallbackStub");
+    AutoPtr<IInterface> strongObj;
+    mMediaSession->Resolve(EIID_IInterface, (IInterface**)&strongObj);
+    IObject* objTmp = IObject::Probe(strongObj);
+    CMediaSession* session = (CMediaSession*)objTmp;
+    if (session != NULL) {
+        session->DispatchSetPlayItemCommand(uid, scope);
+    }
+    return NOERROR;
+}
+
+// @Override
+ECode CMediaSessionCallbackStub::GetRemoteControlClientNowPlayingEntries()
+{
+    Logger::D(TAG, "getRemoteControlClientNowPlayingEntries in CallbackStub");
+    AutoPtr<IInterface> strongObj;
+    mMediaSession->Resolve(EIID_IInterface, (IInterface**)&strongObj);
+    IObject* objTmp = IObject::Probe(strongObj);
+    CMediaSession* session = (CMediaSession*)objTmp;
+    if (session != NULL) {
+        session->DispatchGetNowPlayingItemsCommand();
+    }
+    return NOERROR;
+}
+
 
 ECode CMediaSessionCallbackStub::OnCustomAction(
     /* [in] */ const String& action,

@@ -2,7 +2,7 @@
 #include <Elastos.CoreLibrary.Libcore.h>
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.View.h"
-#include "elastos/droid/os/CSystemProperties.h"
+#include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/CAndroidCharacter.h"
 #include "elastos/droid/text/MeasuredText.h"
@@ -34,7 +34,6 @@
 #include "elastos/droid/text/style/CEasyEditSpan.h"
 #include "elastos/droid/text/style/CLocaleSpan.h"
 #include "elastos/droid/text/style/CTtsSpan.h"
-#include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/content/res/CResourcesHelper.h"
 #include "elastos/droid/R.h"
@@ -57,8 +56,7 @@ using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResourcesHelper;
 using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::View::IView;
-using Elastos::Droid::Os::CSystemProperties;
-using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Libcore::ICU::IICUUtil;
 using Libcore::ICU::CICUUtil;
@@ -1941,10 +1939,8 @@ Int32 TextUtils::UnpackRangeEndFromInt64(
 Int32 TextUtils::GetLayoutDirectionFromLocale(
     /* [in] */ ILocale* locale)
 {
-    AutoPtr<ISystemProperties> systemProperty;
-    CSystemProperties::AcquireSingleton((ISystemProperties**)&systemProperty);
     Boolean mirror = FALSE;
-    systemProperty->GetBoolean(ISettingsGlobal::DEVELOPMENT_FORCE_RTL, FALSE, &mirror);
+    SystemProperties::GetBoolean(ISettingsGlobal::DEVELOPMENT_FORCE_RTL, FALSE, &mirror);
 
     AutoPtr<ILocale> root;
     AutoPtr<ILocaleHelper> helper;

@@ -147,7 +147,15 @@ public:
      */
     CARAPI OnCustomAction(
         /* [in] */ const String& action,
-        /* [in] */ IBundle * extras);
+        /* [in] */ IBundle* extras);
+
+    CARAPI SetBrowsedPlayer();
+
+    CARAPI SetPlayItem(
+        /* [in] */ Int32 scope,
+        /* [in] */ Int64 uid);
+
+    CARAPI GetNowPlayingEntries();
 
 public:
     AutoPtr<IMediaSession> mSession;

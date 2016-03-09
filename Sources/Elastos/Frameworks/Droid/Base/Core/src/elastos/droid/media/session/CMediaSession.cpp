@@ -42,6 +42,9 @@ const Int32 CMediaSession::CallbackMessageHandler::MSG_RATE = 12;
 const Int32 CMediaSession::CallbackMessageHandler::MSG_CUSTOM_ACTION = 13;
 const Int32 CMediaSession::CallbackMessageHandler::MSG_MEDIA_BUTTON = 14;
 const Int32 CMediaSession::CallbackMessageHandler::MSG_COMMAND = 15;
+const Int32 CMediaSession::CallbackMessageHandler::MSG_SET_BROWSED_PLAYER = 16;
+const Int32 CMediaSession::CallbackMessageHandler::MSG_SET_PLAY_ITEM = 17;
+const Int32 CMediaSession::CallbackMessageHandler::MSG_GET_NOW_PLAYING_ITEMS = 18;
 
 CAR_INTERFACE_IMPL(CMediaSession, Object, IMediaSession)
 
@@ -150,6 +153,27 @@ ECode CMediaSession::CallbackMessageHandler::HandleMessage(
             mCallback->OnCommand(cmd->mCommand, cmd->mExtras, cmd->mStub);
             break;
         }
+        case MSG_SET_BROWSED_PLAYER: {
+            Logger::D(TAG, "MSG_SET_BROWSED_PLAYER received in CallbackMessageHandler");
+            mCallback->SetBrowsedPlayer();
+            break;
+        }
+        case MSG_SET_PLAY_ITEM: {
+            Logger::D(TAG, "MSG_SET_PLAY_ITEM received in CallbackMessageHandler");
+            IObject* objTmp = IObject::Probe(obj);
+            PlayItemToken* playItemToken = (PlayItemToken*)objTmp;
+            Int32 scope = 0;
+            playItemToken->GetScope(&scope);
+            Int64 uid = 0;
+            playItemToken->GetUid(&uid);
+            mCallback->SetPlayItem(scope, uid);
+            break;
+        }
+        case MSG_GET_NOW_PLAYING_ITEMS: {
+            Logger::D(TAG, "MSG_GET_NOW_PLAYING_ITEMS received in CallbackMessageHandler");
+            mCallback->GetNowPlayingEntries();
+            break;
+        }
     }
     return NOERROR;
 }
@@ -198,6 +222,30 @@ ECode CMediaSession::VolumeProviderCallback::OnVolumeChanged(
     /* [in] */ IVolumeProvider* volumeProvider)
 {
     return mHost->NotifyRemoteVolumeChanged(volumeProvider);
+}
+
+CMediaSession::PlayItemToken::PlayItemToken(
+    /* [in] */ Int64 uid,
+    /* [in] */ Int32 scope)
+    : mUid(uid)
+    , mScope(scope)
+{
+}
+
+ECode CMediaSession::PlayItemToken::GetScope(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mScope;
+    return NOERROR;
+}
+
+ECode CMediaSession::PlayItemToken::GetUid(
+    /* [out] */ Int64* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mUid;
+    return NOERROR;
 }
 
 CMediaSession::CMediaSession()
@@ -477,6 +525,53 @@ ECode CMediaSession::SetExtras(
     // }
 }
 
+ECode CMediaSession::PlayItemResponse(
+    /* [in] */ Boolean success)
+{
+    Logger::D(TAG, "MediaSession: playItemResponse");
+    // try {
+        mBinder->PlayItemResponse(success);
+    // } catch (RemoteException e) {
+        // Log.wtf(TAG, "Dead object in playItemResponse.", e);
+    // }
+    return NOERROR;
+}
+
+ECode CMediaSession::UpdateNowPlayingEntries(
+    /* [in] */ ArrayOf<Int64>* playList)
+{
+    Logger::D(TAG, "MediaSession: updateNowPlayingEntries");
+    // try {
+        mBinder->UpdateNowPlayingEntries(playList);
+    // } catch (RemoteException e) {
+        // Log.wtf(TAG, "Dead object in updateNowPlayingEntries.", e);
+    // }
+    return NOERROR;
+}
+
+ECode CMediaSession::UpdateFolderInfoBrowsedPlayer(
+    /* [in] */ const String& stringUri)
+{
+    Logger::D(TAG, "MediaSession: updateFolderInfoBrowsedPlayer");
+    // try {
+        mBinder->UpdateFolderInfoBrowsedPlayer(stringUri);
+    // } catch (RemoteException e) {
+        // Log.wtf(TAG, "Dead object in updateFolderInfoBrowsedPlayer.", e);
+    // }
+    return NOERROR;
+}
+
+ECode CMediaSession::UpdateNowPlayingContentChange()
+{
+    Logger::D(TAG, "MediaSession: updateNowPlayingContentChange");
+    // try {
+        mBinder->UpdateNowPlayingContentChange();
+    // } catch (RemoteException e) {
+        // Log.wtf(TAG, "Dead object in updateNowPlayingContentChange.", e);
+    // }
+    return NOERROR;
+}
+
 ECode CMediaSession::NotifyRemoteVolumeChanged(
     /* [in] */ IVolumeProvider * provider)
 {
@@ -595,6 +690,24 @@ ECode CMediaSession::DispatchCustomAction(
     AutoPtr<ICharSequence> csq;
     CString::New(action, (ICharSequence**)&csq);
     return PostToCallback(CallbackMessageHandler::MSG_CUSTOM_ACTION, csq, args);
+}
+
+ECode CMediaSession::DispatchSetBrowsedPlayerCommand()
+{
+    return PostToCallback(CallbackMessageHandler::MSG_SET_BROWSED_PLAYER);
+}
+
+ECode CMediaSession::DispatchSetPlayItemCommand(
+    /* [in] */ Int64 uid,
+    /* [in] */ Int32 scope)
+{
+    AutoPtr<PlayItemToken> playItemToken = new PlayItemToken(uid, scope);
+    return PostToCallback(CallbackMessageHandler::MSG_SET_PLAY_ITEM, TO_IINTERFACE(playItemToken));
+}
+
+ECode CMediaSession::DispatchGetNowPlayingItemsCommand()
+{
+    return PostToCallback(CallbackMessageHandler::MSG_GET_NOW_PLAYING_ITEMS);
 }
 
 ECode CMediaSession::DispatchMediaButton(

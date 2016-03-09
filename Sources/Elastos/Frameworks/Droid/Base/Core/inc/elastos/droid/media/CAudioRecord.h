@@ -457,6 +457,10 @@ private:
         /* [in] */ Int32 channelCount,
         /* [in] */ Int32 audioFormat);
 
+    CARAPI Native_check_permission(
+        /* [in] */ const String& packageName,
+        /* [out] */ Int32* result);
+
     //---------------------------------------------------------
     // Utility methods
     //---------------------------------------------------------
@@ -465,6 +469,9 @@ private:
 
     static CARAPI_(void) Loge(
         /* [in] */ const String& msg);
+
+    CARAPI IsAudioRecordAllowed(
+        /* [out] */ Boolean* result);
 
 private:
     // Events:

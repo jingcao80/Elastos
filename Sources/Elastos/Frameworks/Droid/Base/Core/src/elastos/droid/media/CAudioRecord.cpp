@@ -1,3 +1,5 @@
+
+#include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/media/_AudioErrors.h"
 #include "elastos/droid/media/CAudioAttributes.h"
 #include "elastos/droid/media/CAudioAttributesBuilder.h"
@@ -18,6 +20,8 @@
 #include <media/AudioRecord.h>
 #include <system/audio.h>
 
+using Elastos::Droid::App::CActivityThread;
+using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
 using Elastos::Droid::Media::CAudioFormat;
 using Elastos::Droid::Media::CAudioFormatBuilder;
@@ -283,6 +287,11 @@ ECode CAudioRecord::constructor(
 //--------------------
 ECode CAudioRecord::StartRecording() // throws IllegalStateException
 {
+    Boolean isAudioRecordAllowed = FALSE;
+    if (IsAudioRecordAllowed(&isAudioRecordAllowed), !isAudioRecordAllowed) {
+        Logger::E(TAG, "User permission denied!");
+        return NOERROR;
+    }
     if (mState != STATE_INITIALIZED) {
         // throw new IllegalStateException("startRecording() called on an "
         //         + "uninitialized AudioRecord.");
@@ -304,6 +313,11 @@ ECode CAudioRecord::StartRecording() // throws IllegalStateException
 ECode CAudioRecord::StartRecording( // throws IllegalStateException
     /* [in] */ IMediaSyncEvent* syncEvent)
 {
+    Boolean isAudioRecordAllowed = FALSE;
+    if (IsAudioRecordAllowed(&isAudioRecordAllowed), !isAudioRecordAllowed) {
+        Logger::E(TAG, "User permission denied!");
+        return NOERROR;
+    }
     if (mState != STATE_INITIALIZED) {
         /*throw(new IllegalStateException("startRecording() called on an "
                 +"uninitialized AudioRecord."));*/
@@ -510,7 +524,13 @@ ECode CAudioRecord::AudioParamCheck(
             break;
         }
         case IAudioFormat::ENCODING_PCM_16BIT:
-        case IAudioFormat::ENCODING_PCM_8BIT: {
+        case IAudioFormat::ENCODING_PCM_8BIT:
+        case IAudioFormat::ENCODING_AMRNB:
+        case IAudioFormat::ENCODING_AMRWB:
+        case IAudioFormat::ENCODING_EVRC:
+        case IAudioFormat::ENCODING_EVRCB:
+        case IAudioFormat::ENCODING_EVRCWB:
+        case IAudioFormat::ENCODING_EVRCNW: {
             mAudioFormat = audioFormat;
             break;
         }
@@ -533,6 +553,11 @@ ECode CAudioRecord::AudioBuffSizeCheck(
     Int32 val;
     CAudioFormat::GetBytesPerSample(mAudioFormat, &val);
     Int32 frameSizeInBytes = mChannelCount * val;
+    //overwrite frameSizeInBytes for compress voip
+    if ((mRecordSource == IMediaRecorderAudioSource::VOICE_COMMUNICATION) &&
+        (mAudioFormat != IAudioFormat::ENCODING_PCM_16BIT)) {
+        frameSizeInBytes = mChannelCount * 1;
+    }
     if ((audioBufferSize % frameSizeInBytes != 0) || (audioBufferSize < 1)) {
         Logger::E(TAG, "Invalid audio buffer size.");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -649,6 +674,9 @@ ECode CAudioRecord::GetMinBufferSize(
             channelCount = 2;
             break;
         }
+        case IAudioFormat::CHANNEL_IN_5POINT1:
+            channelCount = 6;
+            break;
         case IAudioFormat::CHANNEL_INVALID:
         default:
         {
@@ -659,7 +687,13 @@ ECode CAudioRecord::GetMinBufferSize(
     }
 
     // PCM_8BIT is not supported at the moment
-    if (audioFormat != IAudioFormat::ENCODING_PCM_16BIT) {
+    if (audioFormat != IAudioFormat::ENCODING_PCM_16BIT
+        && audioFormat != IAudioFormat::ENCODING_AMRNB
+        && audioFormat != IAudioFormat::ENCODING_AMRWB
+        && audioFormat != IAudioFormat::ENCODING_EVRC
+        && audioFormat != IAudioFormat::ENCODING_EVRCB
+        && audioFormat != IAudioFormat::ENCODING_EVRCWB
+        && audioFormat != IAudioFormat::ENCODING_EVRCNW) {
         Loge(String("getMinBufferSize(): Invalid audio format."));
         *result = IAudioRecord::ERROR_BAD_VALUE;
         return NOERROR;
@@ -1230,6 +1264,23 @@ Int32 CAudioRecord::Native_get_min_buff_size(
     return frameCount * channelCount * audio_bytes_per_sample(format);
 }
 
+ECode CAudioRecord::Native_check_permission(
+    /* [in] */ const String& packageName,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    android::AudioRecord* lpRecorder = (android::AudioRecord*)mNativeRecorderInJavaObj;
+    if (lpRecorder == NULL) {
+        *result = IAudioSystem::ERROR;
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    assert(0);
+    //TODO: *result = NativeToElastosStatus(
+    //        lpRecorder->checkPermission((const char*)packageName.string());
+    return NOERROR;
+}
+
 //-------------------------------------------------
 
 /*static*/
@@ -1244,6 +1295,17 @@ void CAudioRecord::Loge(
     /* [in] */ const String& msg)
 {
     Logger::E(TAG, msg);
+}
+
+ECode CAudioRecord::IsAudioRecordAllowed(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    String packageName = CActivityThread::GetCurrentPackageName();
+    Int32 checkPermission = 0;
+    Native_check_permission(packageName, &checkPermission);
+    *result = (checkPermission == IAppOpsManager::MODE_ALLOWED);
+    return NOERROR;
 }
 
 } // namespace Media

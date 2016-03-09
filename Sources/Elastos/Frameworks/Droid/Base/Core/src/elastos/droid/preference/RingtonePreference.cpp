@@ -2,7 +2,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Media.h"
 #include "elastos/droid/content/CIntent.h"
-#include "elastos/droid/media/CRingtoneManagerHelper.h"
+#include "elastos/droid/media/CRingtoneManager.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/preference/RingtonePreference.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -12,8 +12,7 @@ using Elastos::Droid::App::IActivity;
 using Elastos::Droid::App::IFragment;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Media::IRingtoneManager;
-using Elastos::Droid::Media::IRingtoneManagerHelper;
-using Elastos::Droid::Media::CRingtoneManagerHelper;
+using Elastos::Droid::Media::CRingtoneManager;
 using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::CString;
@@ -185,21 +184,18 @@ ECode RingtonePreference::OnPrepareRingtonePickerIntent(
     if (mShowDefault) {
         Int32 ringtoneType = 0;
         GetRingtoneType(&ringtoneType);
-
-        AutoPtr<IRingtoneManagerHelper> helper;
-        CRingtoneManagerHelper::AcquireSingleton((IRingtoneManagerHelper**)&helper);
         if (ringtoneType == IRingtoneManager::TYPE_RINGTONE) {
             Int32 subId = 0;
             GetSubId(&subId);
             AutoPtr<IUri> defaultRingtoneUri;
-            helper->GetDefaultRingtoneUriBySubId(subId, (IUri**)&defaultRingtoneUri);
+            CRingtoneManager::GetDefaultRingtoneUriBySubId(subId, (IUri**)&defaultRingtoneUri);
             ringtonePickerIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_DEFAULT_URI, IParcelable::Probe(defaultRingtoneUri));
         }
         else {
             Int32 ringtoneType = 0;
             GetRingtoneType(&ringtoneType);
             AutoPtr<IUri> defaultUri;
-            helper->GetDefaultUri(ringtoneType, (IUri**)&defaultUri);
+            CRingtoneManager::GetDefaultUri(ringtoneType, (IUri**)&defaultUri);
             ringtonePickerIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_DEFAULT_URI, IParcelable::Probe(defaultUri));
         }
     }

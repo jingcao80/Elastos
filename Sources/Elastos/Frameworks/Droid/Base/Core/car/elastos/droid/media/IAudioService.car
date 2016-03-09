@@ -312,6 +312,21 @@ module
         [oneway] UnregisterAudioPolicyAsync(
             [in] IBinder* cb);
 
+        SetRemoteControlClientBrowsedPlayer();
+
+        GetRemoteControlClientNowPlayingEntries();
+
+        SetRemoteControlClientPlayItem(
+            [in] Int64 uid,
+            [in] Int32 scope);
+
+        UpdateRemoteControllerOnExistingMediaPlayers();
+
+        AddMediaPlayerAndUpdateRemoteController(
+            [in] String packageName);
+
+        RemoveMediaPlayerAndUpdateRemoteController(
+            [in] String packageName);
     }
 
     } // namespace Media

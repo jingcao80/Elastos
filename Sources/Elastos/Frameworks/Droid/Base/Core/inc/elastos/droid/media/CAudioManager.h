@@ -14,6 +14,7 @@
 #include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Droid::App::IPendingIntent;
+//TODO: using Elastos::Droid::App::IProfileManager;
 using Elastos::Droid::Bluetooth::IBluetoothDevice;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IContext;
@@ -1088,6 +1089,10 @@ public:
     CARAPI UnregisterRemoteController(
         /* [in] */ IRemoteController* rctlr);
 
+    CARAPI UpdateMediaPlayerList(
+        /* [in] */ const String& packageName,
+        /* [in] */ Boolean toAdd);
+
     /**
      * @hide
      * Registers a remote control display that will be sent information by remote control clients.
@@ -1179,6 +1184,14 @@ public:
      */
     CARAPI UnregisterAudioPolicyAsync(
         /* [in] */ IAudioPolicy* policy);
+
+    CARAPI SetRemoteControlClientPlayItem(
+        /* [in] */ Int64 uid,
+        /* [in] */ Int32 scope);
+
+    CARAPI GetRemoteControlClientNowPlayingEntries();
+
+    CARAPI SetRemoteControlClientBrowsedPlayer();
 
     /**
      *  @hide
@@ -1526,6 +1539,7 @@ private:
     Boolean mUseFixedVolume;
     AutoPtr<IBinder> mToken;
     static const String TAG;
+    AutoPtr</*TODO IProfileManager*/IInterface> mProfileManager;
     AutoPtr<AudioPortEventHandler> mAudioPortEventHandler;
 
     // maximum valid ringer mode value. Values must start from 0 and be contiguous.

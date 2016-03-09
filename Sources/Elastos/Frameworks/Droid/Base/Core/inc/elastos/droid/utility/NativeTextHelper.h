@@ -17,7 +17,6 @@ namespace Utility {
  *@hide
  */
 class NativeTextHelper
-    : public Object
 {
 public:
     /**

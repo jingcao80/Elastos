@@ -89,6 +89,14 @@ module
         SeekTo(
             [in] Int64 pos);
 
+        SetRemoteControlClientBrowsedPlayer();
+
+        SetRemoteControlClientPlayItem(
+            [in] Int64 uid,
+            [in] Int32 scope);
+
+        GetRemoteControlClientNowPlayingEntries();
+
         Rate(
             [in] IRating * rating);
 

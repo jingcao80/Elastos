@@ -60,6 +60,9 @@ module
         /* @hide The audio stream for text to speech (TTS) */
         const Int32 STREAM_TTS = 9;
 
+        /* @hide The audio stream for incall music delivery */
+        const Int32 STREAM_INCALL_MUSIC = 10;
+
         /**
          * @deprecated Use {@link #numStreamTypes() instead}
          */
@@ -73,6 +76,24 @@ module
         const Int32 MODE_IN_CALL = 2;
         const Int32 MODE_IN_COMMUNICATION = 3;
         const Int32 NUM_MODES = 4;
+
+        /* Call states for Voice calls */
+        /* @hide Call state for inactive call state. */
+        const Int32 CALL_INACTIVE = 0x1;
+        /* @hide Call state for active call state. */
+        const Int32 CALL_ACTIVE = 0x2;
+        /* @hide Call state for hold call state. */
+        const Int32 CALL_HOLD = 0x3;
+        /* @hide Call state for local hold call state. */
+        const Int32 CALL_LOCAL_HOLD = 0x4;
+        /* @hide Key for vsid used in setParameters */
+        const String VSID_KEY = "vsid";
+
+        /* @hide Key for call_state used in setParameters */
+        const String CALL_STATE_KEY = "call_state";
+
+        /* @hide Key for all_call_states used in getParameters */
+        const String ALL_CALL_STATES_KEY  = "all_call_states";
 
         /* Routing bits for the former setRouting/getRouting API */
         /** @deprecated */
@@ -165,10 +186,12 @@ module
         const Int32 DEVICE_OUT_SPDIF = 0x80000;
         const Int32 DEVICE_OUT_FM = 0x100000;
         const Int32 DEVICE_OUT_AUX_LINE = 0x200000;
+        const Int32 DEVICE_OUT_FM_TX = 0x1000000;
+        const Int32 DEVICE_OUT_PROXY = 0x2000000;
 
         const Int32 DEVICE_OUT_DEFAULT = 0x40000000; // DEVICE_BIT_DEFAULT;
 
-        const Int32 DEVICE_OUT_ALL = 0x403FFFFF;
+        const Int32 DEVICE_OUT_ALL = 0x433FFFFF;
                                             // (DEVICE_OUT_EARPIECE |
                                             //   DEVICE_OUT_SPEAKER |
                                             //   DEVICE_OUT_WIRED_HEADSET |
@@ -191,6 +214,8 @@ module
                                             //   DEVICE_OUT_SPDIF |
                                             //   DEVICE_OUT_FM |
                                             //   DEVICE_OUT_AUX_LINE |
+                                            //   DEVICE_OUT_FM_TX |
+                                            //   DEVICE_OUT_PROXY |
                                             //   DEVICE_OUT_DEFAULT);
 
         const Int32 DEVICE_OUT_ALL_A2DP = 0x380;
@@ -236,10 +261,13 @@ module
         const Int32 DEVICE_IN_SPDIF = 0x80010000;                 // DEVICE_BIT_IN | 0x10000;
         const Int32 DEVICE_IN_BLUETOOTH_A2DP = 0x80020000;        // DEVICE_BIT_IN | 0x20000;
         const Int32 DEVICE_IN_LOOPBACK = 0x80040000;              // DEVICE_BIT_IN | 0x40000;
+        const Int32 DEVICE_IN_PROXY = 0x8100000;                  // DEVICE_BIT_IN | 0x100000;
+        const Int32 DEVICE_IN_FM_RX = 0x8200000;                  // DEVICE_BIT_IN | 0x200000;
+        const Int32 DEVICE_IN_FM_RX_A2DP = 0x8400000;             // DEVICE_BIT_IN | 0x400000;
         const Int32 DEVICE_IN_DEFAULT = 0xC0000000;               // DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
 
 
-        const Int32 DEVICE_IN_ALL = 0xC007FFFF;
+        const Int32 DEVICE_IN_ALL = 0xC877FFFF;
                                             // (DEVICE_IN_COMMUNICATION |
                                             //  DEVICE_IN_AMBIENT |
                                             //  DEVICE_IN_BUILTIN_MIC |
@@ -259,6 +287,9 @@ module
                                             //  DEVICE_IN_SPDIF |
                                             //  DEVICE_IN_BLUETOOTH_A2DP |
                                             //  DEVICE_IN_LOOPBACK |
+                                            //  DEVICE_IN_PROXY |
+                                            //  DEVICE_IN_FM_RX |
+                                            //  DEVICE_IN_FM_RX_A2DP |
                                             //  DEVICE_IN_DEFAULT);
 
         const Int32 DEVICE_IN_ALL_SCO = 0x80000008; // DEVICE_IN_BLUETOOTH_SCO_HEADSET;
@@ -292,6 +323,8 @@ module
         const String DEVICE_OUT_SPDIF_NAME = "spdif";
         const String DEVICE_OUT_FM_NAME = "fm_transmitter";
         const String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
+        const String DEVICE_OUT_FM_TX_NAME = "fm_tx";
+        const String DEVICE_OUT_PROXY_NAME = "proxy";
 
         // phone state, match audio_mode???
         const Int32 PHONE_STATE_OFFCALL = 0;

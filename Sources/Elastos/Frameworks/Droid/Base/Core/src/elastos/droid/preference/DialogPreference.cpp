@@ -261,7 +261,7 @@ ECode DialogPreference::ShowDialog(
     /* [in] */ IBundle* state)
 {
     AutoPtr<IDialog> dialog;
-    CreateDialog((IDialog**)&dialog);
+    FAIL_RETURN(CreateDialog((IDialog**)&dialog));
     if (state != NULL) {
         dialog->OnRestoreInstanceState(state);
     }

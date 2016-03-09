@@ -476,7 +476,7 @@ ECode CMediaRecorder::SetMaxDuration(
     android::sp<android::MediaRecorder> mr = getMediaRecorder(this);
 
     char params[64];
-    sprintf(params, "max-duration=%d", max_duration_ms);
+    snprintf(params, sizeof(params), "max-duration=%d", max_duration_ms);
 
     return process_media_recorder_call(mr->setParameters(android::String8(params)),
         E_RUNTIME_EXCEPTION, "SetMaxDuration failed.");
@@ -489,7 +489,7 @@ ECode CMediaRecorder::SetMaxFileSize(
     android::sp<android::MediaRecorder> mr = getMediaRecorder(this);
 
     char params[64];
-    sprintf(params, "max-filesize=%lld", max_filesize_bytes);
+    snprintf(params, sizeof(params), "max-filesize=%lld", max_filesize_bytes);
 
     return process_media_recorder_call(mr->setParameters(android::String8(params)),
         E_RUNTIME_EXCEPTION, "SetMaxFileSize failed.");

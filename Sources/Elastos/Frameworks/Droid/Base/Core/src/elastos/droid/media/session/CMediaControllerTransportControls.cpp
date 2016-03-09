@@ -107,6 +107,38 @@ ECode CMediaControllerTransportControls::SeekTo(
     // }
 }
 
+ECode CMediaControllerTransportControls::SetRemoteControlClientBrowsedPlayer()
+{
+    Logger::D(TAG, "setRemoteControlClientBrowsedPlayer in TransportControls");
+    // try {
+        return mHost->mSessionBinder->SetRemoteControlClientBrowsedPlayer();
+    // } catch (RemoteException e) {
+        // Log.wtf(TAG, "Error calling setRemoteControlClientBrowsedPlayer.", e);
+    // }
+}
+
+ECode CMediaControllerTransportControls::SetRemoteControlClientPlayItem(
+    /* [in] */ Int64 uid,
+    /* [in] */ Int32 scope)
+{
+    Logger::D(TAG, "setRemoteControlClientPlayItem in TransportControls");
+    // try {
+        return mHost->mSessionBinder->SetRemoteControlClientPlayItem(uid, scope);
+    // } catch (RemoteException e) {
+        // Log.wtf(TAG, "Error calling setRemoteControlClientPlayItem.", e);
+    // }
+}
+
+ECode CMediaControllerTransportControls::GetRemoteControlClientNowPlayingEntries()
+{
+    Logger::D(TAG, "getRemoteControlClientNowPlayingEntries in TransportControls");
+    // try {
+        return mHost->mSessionBinder->GetRemoteControlClientNowPlayingEntries();
+    // } catch (RemoteException e) {
+        // Log.wtf(TAG, "Error calling getRemoteControlClientNowPlayingEntries.", e);
+    // }
+}
+
 ECode CMediaControllerTransportControls::FastForward()
 {
     // try {

@@ -4,6 +4,7 @@
 #include "elastos/droid/app/CStreamSettings.h"
 #include <elastos/core/StringUtils.h>
 
+using Org::Xmlpull::V1::IXmlPullParser;
 using Elastos::Core::StringUtils;
 
 namespace Elastos {

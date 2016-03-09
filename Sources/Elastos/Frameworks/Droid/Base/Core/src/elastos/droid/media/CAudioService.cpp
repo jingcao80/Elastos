@@ -174,6 +174,7 @@ const Int32 CAudioService::MUSIC_ACTIVE_POLL_PERIOD_MS = 60000;  // 1 minute pol
 const Int32 CAudioService::SAFE_VOLUME_CONFIGURE_TIMEOUT_MS = 30000;  // 30s after boot completed
 Int32 CAudioService::sSoundEffectVolumeDb;
 
+AutoPtr<IList> CAudioService::mMediaPlayers;
 AutoPtr<IList> CAudioService::SOUND_EFFECT_FILES;
 AutoPtr<ArrayOf<Int32> > CAudioService::MAX_STREAM_VOLUME;
 AutoPtr<ArrayOf<Int32> > CAudioService::STEAM_VOLUME_OPS;
@@ -226,6 +227,8 @@ Boolean CAudioService::InitStatic()
     RINGER_MODE_NAMES->Set(0, String("SILENT"));
     RINGER_MODE_NAMES->Set(1, String("VIBRATE"));
     RINGER_MODE_NAMES->Set(2, String("NORMAL"));
+
+    CArrayList::New((IList**)&mMediaPlayers);
 
     return TRUE;
 }
@@ -1550,18 +1553,13 @@ void CAudioService::ScoClient::RequestScoState(
 // TODO: Need Bluetooth
                         // if (mHost->mBluetoothHeadset != NULL && mHost->mBluetoothHeadsetDevice != NULL) {
                         //     Boolean status = FALSE;
-                        //     if (mHost->mScoAudioMode == SCO_MODE_RAW) {
-                        //         mHost->mBluetoothHeadset->ConnectAudio(&status);
+                        //     if (mHost->mScoAudioMode == SCO_MODE_VR) {
+                        //         mHost->mBluetoothHeadset->StartVoiceRecognition(mHost->mBluetoothHeadsetDevice, &status);
                         //     }
-                        //     else if (mHost->mScoAudioMode == SCO_MODE_VIRTUAL_CALL) {
+                        //     else
                         //         mHost->mBluetoothHeadset->StartScoUsingVirtualVoiceCall(
                         //                 mHost->mBluetoothHeadsetDevice, &status);
                         //     }
-                        //     else if (mHost->mScoAudioMode == SCO_MODE_VR) {
-                        //         mHost->mBluetoothHeadset->StartVoiceRecognition(
-                        //                 mHost->mBluetoothHeadsetDevice, &status);
-                        //     }
-
                         //     if (status) {
                         //         mHost->mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
                         //     }
@@ -1591,18 +1589,13 @@ void CAudioService::ScoClient::RequestScoState(
             if (mHost->mScoAudioState == SCO_STATE_ACTIVE_INTERNAL) {
                 // if (mHost->mBluetoothHeadset != NULL && mHost->mBluetoothHeadsetDevice != NULL) {
                 //     Boolean status = FALSE;
-                //     if (mHost->mScoAudioMode == SCO_MODE_RAW) {
-                //         mHost->mBluetoothHeadset->DisconnectAudio(&status);
+                //     if (mHost->mScoAudioMode == SCO_MODE_VR) {
+                //         mHost->mBluetoothHeadset->StopVoiceRecognition(mHost->mBluetoothHeadsetDevice, &status);
                 //     }
-                //     else if (mHost->mScoAudioMode == SCO_MODE_VIRTUAL_CALL) {
+                //     else
                 //         mHost->mBluetoothHeadset->StopScoUsingVirtualVoiceCall(
                 //                 mHost->mBluetoothHeadsetDevice, &status);
                 //     }
-                //     else if (mHost->mScoAudioMode == SCO_MODE_VR) {
-                //         mHost->mBluetoothHeadset->StopVoiceRecognition(
-                //                 mHost->mBluetoothHeadsetDevice, &status);
-                //     }
-
                 //     if (!status) {
                 //         mHost->mScoAudioState = SCO_STATE_INACTIVE;
                 //         mHost->BroadcastScoConnectionState(
@@ -2330,6 +2323,17 @@ ECode CAudioService::SettingsObserver::OnChange(
             mHost->SetRingerModeInt(mode, FALSE);
         }
         mHost->ReadDockAudioSettings(mHost->mContentResolver);
+
+        Int32 resTmp = 0;
+        assert(0);
+        Settings::Secure::GetInt32(mHost->mContentResolver, String("")/*TODO: ISettingsSecure::VOLUME_LINK_NOTIFICATION*/, 1, &resTmp);
+        mHost->mLinkNotificationWithVolume = (resTmp == 1);
+        if (mHost->mLinkNotificationWithVolume) {
+            (*mHost->mStreamVolumeAlias)[IAudioSystem::STREAM_NOTIFICATION] = IAudioSystem::STREAM_RING;
+        }
+        else {
+            (*mHost->mStreamVolumeAlias)[IAudioSystem::STREAM_NOTIFICATION] = IAudioSystem::STREAM_NOTIFICATION;
+        }
     }
     return NOERROR;
 }
@@ -2728,6 +2732,40 @@ ECode CAudioService::SetVolumeControllerDeathRecipient::ProxyDied()
 }
 
 //==============================================================================
+//                        CAudioService::MediaPlayerInfo
+//==============================================================================
+CAudioService::MediaPlayerInfo::MediaPlayerInfo(
+    /* [in] */ const String& packageName,
+    /* [in] */ Boolean isfocussed)
+    : mPackageName(packageName)
+    , mIsfocussed(isfocussed)
+{
+}
+
+ECode CAudioService::MediaPlayerInfo::IsFocussed(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mIsfocussed;
+    return NOERROR;
+}
+
+ECode CAudioService::MediaPlayerInfo::SetFocus(
+    /* [in] */ Boolean focus)
+{
+    mIsfocussed = focus;
+    return NOERROR;
+}
+
+ECode CAudioService::MediaPlayerInfo::GetPackageName(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mPackageName;
+    return NOERROR;
+}
+
+//==============================================================================
 //  CAudioService
 //==============================================================================
 
@@ -2772,6 +2810,7 @@ CAudioService::CAudioService()
     mFixedVolumeDevices = IAudioSystem::DEVICE_OUT_HDMI |
             IAudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET |
             IAudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET |
+            IAudioSystem::DEVICE_OUT_PROXY |
             IAudioSystem::DEVICE_OUT_HDMI_ARC |
             IAudioSystem::DEVICE_OUT_SPDIF |
             IAudioSystem::DEVICE_OUT_AUX_LINE;
@@ -3076,6 +3115,138 @@ ECode CAudioService::OnSystemReady()
             SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
 
     return StreamOverride::Init(mContext);
+}
+
+ECode CAudioService::AddMediaPlayerAndUpdateRemoteController(
+    /* [in] */ const String& packageName)
+{
+    Int32 mediaPlayerSize = 0;
+    mMediaPlayers->GetSize(&mediaPlayerSize);
+    String strMediaPalyerSize = StringUtils::ToString(mediaPlayerSize);
+    Logger::V(TAG, String("addMediaPlayerAndUpdateRemoteController: size of existing list: ") + strMediaPalyerSize);
+    Boolean playerToAdd = TRUE;
+    if (mediaPlayerSize > 0) {
+        AutoPtr<IIterator> rccIterator;
+        mMediaPlayers->GetIterator((IIterator**)&rccIterator);
+        Boolean hasNext = FALSE;
+        while (rccIterator->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> interfaceTmp;
+            rccIterator->GetNext((IInterface**)&interfaceTmp);
+            IObject* objTmp = IObject::Probe(interfaceTmp);
+            MediaPlayerInfo* player = (MediaPlayerInfo*)objTmp;
+            String playerPackageName;
+            player->GetPackageName(&playerPackageName);
+            if (packageName.Equals(playerPackageName)) {
+                Logger::E(TAG, "Player entry present, no need to add");
+                playerToAdd = FALSE;
+                player->SetFocus(TRUE);
+            }
+            else {
+                Logger::E(TAG, String("Player: ") + playerPackageName+ String("Lost Focus"));
+                player->SetFocus(FALSE);
+            }
+        }
+    }
+    if (playerToAdd) {
+        Logger::E(TAG, String("Adding Player: ") + packageName + String(" to available player list"));
+        AutoPtr<MediaPlayerInfo> playerInfo = new MediaPlayerInfo(packageName, TRUE);
+        mMediaPlayers->Add(TO_IINTERFACE(playerInfo));
+    }
+    AutoPtr<IIntent> intent;
+    CIntent::New(IAudioManager::RCC_CHANGED_ACTION, (IIntent**)&intent);
+    intent->PutExtra(IAudioManager::EXTRA_CALLING_PACKAGE_NAME, packageName);
+    intent->PutBooleanExtra(IAudioManager::EXTRA_FOCUS_CHANGED_VALUE, TRUE);
+    intent->PutBooleanExtra(IAudioManager::EXTRA_AVAILABLITY_CHANGED_VALUE, TRUE);
+    SendBroadcastToAll(intent);
+    Logger::V(TAG, String("updating focussed RCC change to RCD: CallingPackageName:")
+            + packageName);
+    return NOERROR;
+}
+
+ECode CAudioService::UpdateRemoteControllerOnExistingMediaPlayers()
+{
+    Int32 mediaPlayerSize = 0;
+    mMediaPlayers->GetSize(&mediaPlayerSize);
+    String strMediaPalyerSize = StringUtils::ToString(mediaPlayerSize);
+    Logger::V(TAG, String("updateRemoteControllerOnExistingMediaPlayers: size of Player list: ") + strMediaPalyerSize);
+    if (mediaPlayerSize > 0) {
+        Logger::V(TAG, "Inform RemoteController regarding existing RCC entry");
+        AutoPtr<IIterator> rccIterator;
+        mMediaPlayers->GetIterator((IIterator**)&rccIterator);
+        Boolean hasNext = FALSE;
+        while (rccIterator->HasNext(&hasNext), hasNext) {
+            AutoPtr<IInterface> interfaceTmp;
+            rccIterator->GetNext((IInterface**)&interfaceTmp);
+            IObject* objTmp = IObject::Probe(interfaceTmp);
+            MediaPlayerInfo* player = (MediaPlayerInfo*)objTmp;
+
+            AutoPtr<IIntent> intent;
+            CIntent::New(IAudioManager::RCC_CHANGED_ACTION, (IIntent**)&intent);
+
+            String playerPackageName;
+            player->GetPackageName(&playerPackageName);
+            intent->PutExtra(IAudioManager::EXTRA_CALLING_PACKAGE_NAME, playerPackageName);
+
+            Boolean isFocussed = FALSE;
+            player->IsFocussed(&isFocussed);
+            intent->PutBooleanExtra(IAudioManager::EXTRA_FOCUS_CHANGED_VALUE, isFocussed);
+            intent->PutBooleanExtra(IAudioManager::EXTRA_AVAILABLITY_CHANGED_VALUE, TRUE);
+            SendBroadcastToAll(intent);
+            Logger::V(TAG, String("updating RCC change: CallingPackageName:") + playerPackageName);
+        }
+    }
+    else {
+        Logger::E(TAG, "No RCC entry present to update");
+    }
+    return NOERROR;
+}
+
+ECode CAudioService::RemoveMediaPlayerAndUpdateRemoteController(
+    /* [in] */ const String& packageName)
+{
+    Int32 mediaPlayerSize = 0;
+    mMediaPlayers->GetSize(&mediaPlayerSize);
+    String strMediaPalyerSize = StringUtils::ToString(mediaPlayerSize);
+    Logger::V(TAG, String("removeMediaPlayerAndUpdateRemoteController: size of existing list: ") + strMediaPalyerSize);
+    Boolean playerToRemove = FALSE;
+    Int32 index = -1;
+    if (mediaPlayerSize > 0) {
+        AutoPtr<IIterator> rccIterator;
+        mMediaPlayers->GetIterator((IIterator**)&rccIterator);
+        Boolean hasNext = FALSE;
+        while (rccIterator->HasNext(&hasNext), hasNext) {
+            ++index;
+            AutoPtr<IInterface> interfaceTmp;
+            rccIterator->GetNext((IInterface**)&interfaceTmp);
+            IObject* objTmp = IObject::Probe(interfaceTmp);
+            MediaPlayerInfo* player = (MediaPlayerInfo*)objTmp;
+
+            String playerPackageName;
+            player->GetPackageName(&playerPackageName);
+
+            if (packageName.Equals(playerPackageName)) {
+                Logger::V(TAG, "Player entry present remove and update RemoteController");
+                playerToRemove = TRUE;
+                break;
+            }
+            else {
+                Logger::V(TAG, String("Player entry for ") + playerPackageName + String(" is not present"));
+            }
+        }
+    }
+    if (playerToRemove) {
+        Logger::E(TAG, String("Removing Player: ") + packageName + String(" from index") + StringUtils::ToString(index));
+        mMediaPlayers->Remove(index);
+    }
+    AutoPtr<IIntent> intent;
+    CIntent::New(IAudioManager::RCC_CHANGED_ACTION, (IIntent**)&intent);
+
+    intent->PutExtra(IAudioManager::EXTRA_CALLING_PACKAGE_NAME, packageName);
+    intent->PutBooleanExtra(IAudioManager::EXTRA_FOCUS_CHANGED_VALUE, FALSE);
+    intent->PutBooleanExtra(IAudioManager::EXTRA_AVAILABLITY_CHANGED_VALUE, FALSE);
+    SendBroadcastToAll(intent);
+    Logger::V(TAG, String("Updated List size: ") + strMediaPalyerSize);
+    return NOERROR;
 }
 
 ECode CAudioService::StreamToString(
@@ -3589,6 +3760,9 @@ ECode CAudioService::SetMode(
         if (mode == IAudioSystem::MODE_CURRENT) {
             mode = mMode;
         }
+        if ((mode == IAudioSystem::MODE_IN_CALL) && IsInCommunication()) {
+             AudioSystem::SetParameters(String("in_call=true"));
+        }
         newModeOwnerPid = SetModeInt(mode, cb, Binder::GetCallingPid());
     }
     // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
@@ -3941,6 +4115,29 @@ ECode CAudioService::RemoteControlDisplayWantsPlaybackPositionSync(
     return NOERROR;
 }
 
+ECode CAudioService::SetRemoteControlClientPlayItem(
+    /* [in] */ Int64 uid,
+    /* [in] */ Int32 scope)
+{
+    assert(0);
+    //TODO: mMediaFocusControl->SetRemoteControlClientPlayItem(uid, scope);
+    return NOERROR;
+}
+
+ECode CAudioService::GetRemoteControlClientNowPlayingEntries()
+{
+    assert(0);
+    //TODO: mMediaFocusControl->GetRemoteControlClientNowPlayingEntries();
+    return NOERROR;
+}
+
+ECode CAudioService::SetRemoteControlClientBrowsedPlayer()
+{
+    assert(0);
+    //TODO: mMediaFocusControl->SetRemoteControlClientBrowsedPlayer();
+    return NOERROR;
+}
+
 ECode CAudioService::RequestAudioFocus(
     /* [in] */ Int32 mainStreamType,
     /* [in] */ Int32 durationHint,
@@ -4111,10 +4308,11 @@ ECode CAudioService::UpdateRingerModeAffectedStreams(
              (1 << IAudioSystem::STREAM_SYSTEM)|(1 << IAudioSystem::STREAM_SYSTEM_ENFORCED)),
              IUserHandle::USER_CURRENT, &ringerModeAffectedStreams);
 
-    // ringtone, notification and system streams are always affected by ringer mode
+    // ringtone, notification, system and dtmf streams are always affected by ringer mode
     ringerModeAffectedStreams |= (1 << IAudioSystem::STREAM_RING)|
                                     (1 << IAudioSystem::STREAM_NOTIFICATION)|
-                                    (1 << IAudioSystem::STREAM_SYSTEM);
+                                    (1 << IAudioSystem::STREAM_SYSTEM)|
+                                    (1 << IAudioSystem::STREAM_DTMF);
 
     switch (mPlatformType) {
         case PLATFORM_TELEVISION:
@@ -4499,6 +4697,13 @@ void CAudioService::UpdateStreamVolumeAlias(
     }
 
     (*mStreamVolumeAlias)[IAudioSystem::STREAM_DTMF] = dtmfStreamAlias;
+    if (mLinkNotificationWithVolume) {
+        (*mStreamVolumeAlias)[IAudioSystem::STREAM_NOTIFICATION] = IAudioSystem::STREAM_RING;
+    }
+    else {
+        (*mStreamVolumeAlias)[IAudioSystem::STREAM_NOTIFICATION] = IAudioSystem::STREAM_NOTIFICATION;
+    }
+
     if (updateVolumes) {
         (*mStreamStates)[IAudioSystem::STREAM_DTMF]->SetAllIndexes(
                 IAudioServiceVolumeStreamState::Probe((*mStreamStates)[dtmfStreamAlias]));
@@ -4584,6 +4789,11 @@ void CAudioService::ReadPersistedSettings()
         UpdateRingerModeAffectedStreams(&b);
         ReadDockAudioSettings(cr);
     }
+
+    Int32 resTmp = 0;
+    assert(0);
+    Settings::Secure::GetInt32(cr, String("")/*TODO: ISettingsSecure::VOLUME_LINK_NOTIFICATION*/, 1, &resTmp);
+    mLinkNotificationWithVolume = (resTmp == 1);
 
     Settings::System::GetInt32ForUser(cr,
             ISettingsSystem::MUTE_STREAMS_AFFECTED,
@@ -5568,7 +5778,7 @@ void CAudioService::ReadAudioSettings(
 
 void CAudioService::CheckScoAudioState()
 {
-    Int32 state;
+    // Int32 state;
 // TODO: Need Bluetooth
     // if (mBluetoothHeadset != NULL && mBluetoothHeadsetDevice != NULL &&
     //         mScoAudioState == SCO_STATE_INACTIVE
@@ -6433,6 +6643,9 @@ void CAudioService::SendDeviceConnectionIntent(
         connType = CAudioRoutesInfo::MAIN_HEADSET;
         intent->SetAction(IIntent::ACTION_HEADSET_PLUG);
         intent->PutExtra(String("microphone"), 1);
+        if (state == 1) {
+            StartMusicPlayer();
+        }
     }
     else if (device == IAudioSystem::DEVICE_OUT_WIRED_HEADPHONE ||
                device == IAudioSystem::DEVICE_OUT_LINE) {
@@ -6440,6 +6653,9 @@ void CAudioService::SendDeviceConnectionIntent(
         connType = CAudioRoutesInfo::MAIN_HEADPHONES;
         intent->SetAction(IIntent::ACTION_HEADSET_PLUG);
         intent->PutExtra(String("microphone"), 0);
+        if (state == 1) {
+            StartMusicPlayer();
+        }
     }
     else if (device == IAudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET) {
         connType = CAudioRoutesInfo::MAIN_DOCK_SPEAKERS;
@@ -6479,6 +6695,28 @@ void CAudioService::SendDeviceConnectionIntent(
     // } finally {
     Binder::RestoreCallingIdentity(ident);
     // }
+}
+
+void CAudioService::StartMusicPlayer()
+{
+    AutoPtr<IContentResolver> contentResolver;
+    mContext->GetContentResolver((IContentResolver**)&contentResolver);
+    Int32 resTmp = 0;
+    assert(0);
+    Settings::System::GetInt32ForUser(contentResolver,
+            String("")/*TODO: ISettingsSystem::HEADSET_CONNECT_PLAYER*/, 0, IUserHandle::USER_CURRENT, &resTmp);
+    Boolean launchPlayer = (resTmp != 0);
+    if (launchPlayer) {
+        AutoPtr<IIntent> playerIntent;
+        CIntent::New(IIntent::ACTION_MAIN, (IIntent**)&playerIntent);
+        playerIntent->AddCategory(IIntent::CATEGORY_APP_MUSIC);
+        playerIntent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
+        // try {
+            mContext->StartActivity(playerIntent);
+        // } catch(ActivityNotFoundException e) {
+            // Log.e(TAG, "error launching music player", e);
+        // }
+    }
 }
 
 void CAudioService::OnSetWiredDeviceConnectionState(

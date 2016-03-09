@@ -1,12 +1,11 @@
 
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
-#include "elastos/droid/os/CServiceManager.h"
+#include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/text/method/MetaKeyKeyListener.h"
 
-using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::IPowerManager;
-using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::View::IKeyCharacterMap;
 
 namespace Elastos {
@@ -125,10 +124,7 @@ ECode MetaKeyKeyListener::AdjustMetaAfterKeypress(
     Adjust(content, ALT);
     Adjust(content, SYM);
     // try {
-        AutoPtr<IServiceManager> serviceManager;
-        CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
-        AutoPtr<IInterface> interfaceTmp;
-        serviceManager->GetService(String("power"), (IInterface**)&interfaceTmp);
+        AutoPtr<IInterface> interfaceTmp = ServiceManager::GetService(String("power"));
         // IPowerManager* power = IPowerManager::Probe(interfaceTmp);
         Int32 metaStateTmp = 0;
         GetMetaState(ICharSequence::Probe(content), META_SHIFT_ON, &metaStateTmp);
@@ -214,10 +210,7 @@ ECode MetaKeyKeyListener::OnKeyDown(
     if (keyCode == IKeyEvent::KEYCODE_SHIFT_LEFT || keyCode == IKeyEvent::KEYCODE_SHIFT_RIGHT) {
         Press(content, CAP);
         //try {
-            AutoPtr<IServiceManager> serviceManager;
-            CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
-            AutoPtr<IInterface> interfaceTmp;
-            serviceManager->GetService(String("power"), (IInterface**)&interfaceTmp);
+            AutoPtr<IInterface> interfaceTmp = ServiceManager::GetService(String("power"));
             // IPowerManager* power = IPowerManager::Probe(interfaceTmp);
 
             Int32 state = 0;
@@ -241,10 +234,7 @@ ECode MetaKeyKeyListener::OnKeyDown(
             || keyCode == IKeyEvent::KEYCODE_NUM) {
         Press(content, ALT);
         // try {
-            AutoPtr<IServiceManager> serviceManager;
-            CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
-            AutoPtr<IInterface> interfaceTmp;
-            serviceManager->GetService(String("power"), (IInterface**)&interfaceTmp);
+            AutoPtr<IInterface> interfaceTmp = ServiceManager::GetService(String("power"));
             // IPowerManager* power = IPowerManager::Probe(interfaceTmp);
 
             Int32 state = 0;

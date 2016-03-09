@@ -128,6 +128,14 @@ module
 
         OnSystemReady();
 
+        AddMediaPlayerAndUpdateRemoteController(
+            [in] String packageName);
+
+        UpdateRemoteControllerOnExistingMediaPlayers();
+
+        RemoveMediaPlayerAndUpdateRemoteController(
+            [in] String packageName);
+
         ///////////////////////////////////////////////////////////////////////////
         // IPC methods
         ///////////////////////////////////////////////////////////////////////////
@@ -380,6 +388,14 @@ module
         RemoteControlDisplayWantsPlaybackPositionSync(
             [in] IIRemoteControlDisplay* rcd,
             [in] Boolean wantsSync);
+
+        SetRemoteControlClientPlayItem(
+            [in] Int64 uid,
+            [in] Int32 scope);
+
+        GetRemoteControlClientNowPlayingEntries();
+
+        SetRemoteControlClientBrowsedPlayer();
 
         //==========================================================================================
         // Audio Focus

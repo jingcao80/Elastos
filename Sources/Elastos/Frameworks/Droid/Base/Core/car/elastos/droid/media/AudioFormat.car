@@ -27,6 +27,18 @@ module
         const Int32 ENCODING_AC3 = 5;
         /** Audio data format: E-AC-3 compressed */
         const Int32 ENCODING_E_AC3 = 6;
+        /** @hide */
+        const Int32 ENCODING_AMRNB = 100;   // accessed by native code
+        /** @hide */
+        const Int32 ENCODING_AMRWB = 101;   // accessed by native code
+        /** @hide */
+        const Int32 ENCODING_EVRC = 102;    // accessed by native code
+        /** @hide */
+        const Int32 ENCODING_EVRCB = 103;   // accessed by native code
+        /** @hide */
+        const Int32 ENCODING_EVRCWB = 104;  // accessed by native code
+        /** @hide */
+        const Int32 ENCODING_EVRCNW = 105;  // accessed by native code
 
         /** Invalid audio channel configuration */
         /** @deprecated use CHANNEL_INVALID instead  */
@@ -177,6 +189,12 @@ module
         const Int32 CHANNEL_IN_FRONT_BACK = 0x30;
          // = CHANNEL_IN_FRONT | CHANNEL_IN_BACK;
         // CHANNEL_IN_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_IN_ALL
+
+        /** @hide */
+        const Int32 CHANNEL_IN_5POINT1 = 0xFC; // 0x4 | 0x8 | 0x10 | 0x20 | 0x40 | 0x80;
+            /* (CHANNEL_IN_LEFT |
+            CHANNEL_IN_RIGHT | CHANNEL_IN_FRONT | CHANNEL_IN_BACK |
+            CHANNEL_IN_LEFT_PROCESSED | CHANNEL_IN_RIGHT_PROCESSED); */
 
         /** @hide */
         const Int32 AUDIO_FORMAT_HAS_PROPERTY_NONE = 0x0;

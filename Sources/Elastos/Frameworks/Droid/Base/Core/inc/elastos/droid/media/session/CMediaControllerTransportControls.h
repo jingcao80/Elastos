@@ -90,6 +90,14 @@ public:
     CARAPI SeekTo(
         /* [in] */ Int64 pos);
 
+    CARAPI  SetRemoteControlClientBrowsedPlayer() ;
+
+    CARAPI  SetRemoteControlClientPlayItem(
+        /* [in] */ Int64 uid,
+        /* [in] */ Int32 scope);
+
+    CARAPI  GetRemoteControlClientNowPlayingEntries();
+
     /**
      * Start fast forwarding. If playback is already fast forwarding this
      * may increase the rate.

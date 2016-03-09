@@ -361,9 +361,11 @@ ECode MediaRouterRouteInfo::RequestSetVolume(
             return ec;
         }
         // }
-    } else {
+    }
+    else {
         return ((CMediaRouter::Static*)((mHost->sStatic).Get()))->RequestSetVolume(this, volume);
     }
+    return NOERROR;
 }
 
 ECode MediaRouterRouteInfo::RequestUpdateVolume(
@@ -387,9 +389,11 @@ ECode MediaRouterRouteInfo::RequestUpdateVolume(
         // } catch (RemoteException e) {
             // Log.e(mHost->TAG, "Error setting local stream volume", e);
         // }
-    } else {
+    }
+    else {
         return ((CMediaRouter::Static*)((mHost->sStatic).Get()))->RequestUpdateVolume(this, direction);
     }
+    return NOERROR;
 }
 
 ECode MediaRouterRouteInfo::GetVolumeMax(
@@ -409,10 +413,12 @@ ECode MediaRouterRouteInfo::GetVolumeMax(
         // } catch (RemoteException e) {
             // Log.e(mHost->TAG, "Error getting local stream volume", e);
         // }
-    } else {
+    }
+    else {
         *result = mVolumeMax;
         return NOERROR;
     }
+    return NOERROR;
 }
 
 ECode MediaRouterRouteInfo::GetVolumeHandling(
@@ -503,6 +509,7 @@ ECode MediaRouterRouteInfo::SetStatusInt(
         }
         return RouteUpdated();
     }
+    return NOERROR;
 }
 
 ECode MediaRouterRouteInfo::RouteUpdated()

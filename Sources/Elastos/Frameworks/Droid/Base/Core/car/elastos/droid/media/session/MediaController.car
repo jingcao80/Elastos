@@ -93,6 +93,7 @@ module
      * Callback for receiving updates on from the session. A Callback can be
      * registered using {@link #registerCallback}
      */
+    [deprecated]
     interface IMediaControllerCallback {
         /**
          * Override to handle the session being destroyed. The session is no
@@ -165,6 +166,29 @@ module
          */
         OnAudioInfoChanged(
             [in] IMediaControllerPlaybackInfo * info);
+
+        /**
+         * @hide
+         */
+        OnUpdateFolderInfoBrowsedPlayer(
+            [in] String stringUri);
+
+        /**
+         * @hide
+         */
+        OnUpdateNowPlayingEntries(
+            [in] ArrayOf<Int64>* playList);
+
+        /**
+         * @hide
+         */
+        OnUpdateNowPlayingContentChange();
+
+        /**
+         * @hide
+         */
+        OnPlayItemResponse(
+            [in] Boolean success);
     }
 
     /**
@@ -227,6 +251,14 @@ module
          */
         SeekTo(
             [in] Int64 pos);
+
+        SetRemoteControlClientBrowsedPlayer() ;
+
+        SetRemoteControlClientPlayItem(
+            [in] Int64 uid,
+            [in] Int32 scope);
+
+        GetRemoteControlClientNowPlayingEntries();
 
         /**
          * Start fast forwarding. If playback is already fast forwarding this

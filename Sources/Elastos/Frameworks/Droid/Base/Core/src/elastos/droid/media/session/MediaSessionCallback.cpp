@@ -206,7 +206,24 @@ ECode MediaSessionCallback::OnSetRating(
 
 ECode MediaSessionCallback::OnCustomAction(
     /* [in] */ const String& action,
-    /* [in] */ IBundle * extras)
+    /* [in] */ IBundle* extras)
+{
+    return NOERROR;
+}
+
+ECode MediaSessionCallback::SetBrowsedPlayer()
+{
+    return NOERROR;
+}
+
+ECode MediaSessionCallback::SetPlayItem(
+    /* [in] */ Int32 scope,
+    /* [in] */ Int64 uid)
+{
+    return NOERROR;
+}
+
+ECode MediaSessionCallback::GetNowPlayingEntries()
 {
     return NOERROR;
 }

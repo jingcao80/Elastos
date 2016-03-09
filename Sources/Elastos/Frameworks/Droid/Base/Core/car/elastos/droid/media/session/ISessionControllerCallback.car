@@ -12,6 +12,7 @@ module
     namespace Media {
     namespace Session {
 
+    [deprecated]
     interface IISessionControllerCallback {
         OnEvent(
             [in] String event,
@@ -38,6 +39,16 @@ module
         OnVolumeInfoChanged(
             [in] IParcelableVolumeInfo * info);
 
+        OnPlayItemResponse(
+            [in] Boolean success);
+
+        OnUpdateNowPlayingEntries(
+            [in] ArrayOf<Int64>* playList);
+
+        OnUpdateFolderInfoBrowsedPlayer(
+            [in] String stringUri);
+
+        OnUpdateNowPlayingContentChange();
     }
 
     } // namespace Session

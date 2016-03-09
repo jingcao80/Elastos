@@ -109,7 +109,7 @@ Int32 CameraProfile::NativeGetImageEncodingQualityLevel(
 {
     ALOGV("NativeGetImageEncodingQualityLevel");
     android::Vector<int> levels = sProfiles->getImageEncodingQualityLevels(cameraId);
-    if (index < 0 || index >= levels.size()) {
+    if (index < 0 || index >= (Int32)levels.size()) {
         // jniThrowException(env, "java/lang/IllegalArgumentException", "out of array boundary");
         return -1;
     }

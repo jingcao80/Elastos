@@ -6,18 +6,23 @@
 #include "elastos/droid/media/session/CMediaSessionToken.h"
 #include "elastos/droid/media/session/CParcelableVolumeInfo.h"
 #include "elastos/droid/os/CHandler.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/CArrayMap.h"
 #include "elastos/droid/view/CKeyEventHelper.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::IHandler;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::CKeyEventHelper;
 using Elastos::Droid::View::IKeyEventHelper;
 using Elastos::Droid::Utility::CArrayMap;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::CString;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::IInteger64;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IMap;
 using Elastos::Utility::Logging::Logger;
@@ -28,6 +33,7 @@ namespace Media {
 namespace Session {
 
 CAR_INTERFACE_IMPL(CMediaController::CallbackStub, Object, IISessionControllerCallback)
+CAR_INTERFACE_IMPL(CMediaController::PlaybackInfo, Object, IMediaControllerPlaybackInfo)
 
 const String CMediaController::TAG("MediaController");
 
@@ -38,12 +44,76 @@ const Int32 CMediaController::MSG_UPDATE_VOLUME = 4;
 const Int32 CMediaController::MSG_UPDATE_QUEUE = 5;
 const Int32 CMediaController::MSG_UPDATE_QUEUE_TITLE = 6;
 const Int32 CMediaController::MSG_UPDATE_EXTRAS = 7;
-const Int32 CMediaController::MSG_DESTROYED = 8;
+const Int32 CMediaController::MSG_FOLDER_INFO_BROWSED_PLAYER = 8;
+const Int32 CMediaController::MSG_UPDATE_NOWPLAYING_ENTRIES = 9;
+const Int32 CMediaController::MSG_UPDATE_NOWPLAYING_CONTENT_CHANGE = 10;
+const Int32 CMediaController::MSG_PLAY_ITEM_RESPONSE = 11;
+const Int32 CMediaController::MSG_DESTROYED = 12;
+
+CMediaController::PlaybackInfo::PlaybackInfo(
+    /* [in] */ Int32 type,
+    /* [in] */ IAudioAttributes* attrs,
+    /* [in] */ Int32 control,
+    /* [in] */ Int32 max,
+    /* [in] */ Int32 current)
+    : mVolumeType(type)
+    , mVolumeControl(control)
+    , mMaxVolume(max)
+    , mCurrentVolume(current)
+    , mAudioAttrs(attrs)
+{
+}
+
+ECode  CMediaController::PlaybackInfo::GetPlaybackType(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mVolumeType;
+    return NOERROR;
+}
+
+ECode  CMediaController::PlaybackInfo::GetAudioAttributes(
+    /* [out] */ IAudioAttributes** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mAudioAttrs;
+    return NOERROR;
+}
+
+ECode  CMediaController::PlaybackInfo::GetVolumeControl(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mVolumeControl;
+    return NOERROR;
+}
+
+ECode  CMediaController::PlaybackInfo::GetMaxVolume(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mMaxVolume;
+    return NOERROR;
+}
+
+ECode  CMediaController::PlaybackInfo::GetCurrentVolume(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mCurrentVolume;
+    return NOERROR;
+}
+
+CMediaController::CallbackStub::CallbackStub(
+    /* [in] */ CMediaController * controller)
+    : mController(controller)
+{
+}
 
 ECode CMediaController::CallbackStub::OnSessionDestroyed()
 {
-    if (mHost != NULL) {
-        mHost->PostMessage(MSG_DESTROYED, NULL, NULL);
+    if (mController != NULL) {
+        mController->PostMessage(MSG_DESTROYED, NULL, NULL);
     }
     return NOERROR;
 }
@@ -52,10 +122,10 @@ ECode CMediaController::CallbackStub::OnEvent(
     /* [in] */ const String& event,
     /* [in] */ IBundle * extras)
 {
-    if (mHost != NULL) {
+    if (mController != NULL) {
         AutoPtr<ICharSequence> csq;
         CString::New(event, (ICharSequence**)&csq);
-        mHost->PostMessage(MSG_EVENT, csq, extras);
+        mController->PostMessage(MSG_EVENT, TO_IINTERFACE(csq), extras);
     }
     return NOERROR;
 }
@@ -63,8 +133,8 @@ ECode CMediaController::CallbackStub::OnEvent(
 ECode CMediaController::CallbackStub::OnPlaybackStateChanged(
     /* [in] */ IPlaybackState * state)
 {
-    if (mHost != NULL) {
-        mHost->PostMessage(MSG_UPDATE_PLAYBACK_STATE, state, NULL);
+    if (mController != NULL) {
+        mController->PostMessage(MSG_UPDATE_PLAYBACK_STATE, TO_IINTERFACE(state), NULL);
     }
     return NOERROR;
 }
@@ -72,8 +142,8 @@ ECode CMediaController::CallbackStub::OnPlaybackStateChanged(
 ECode CMediaController::CallbackStub::OnMetadataChanged(
     /* [in] */ IMediaMetadata * metadata)
 {
-    if (mHost != NULL) {
-        mHost->PostMessage(MSG_UPDATE_METADATA, metadata, NULL);
+    if (mController != NULL) {
+        mController->PostMessage(MSG_UPDATE_METADATA, TO_IINTERFACE(metadata), NULL);
     }
     return NOERROR;
 }
@@ -85,8 +155,8 @@ ECode CMediaController::CallbackStub::OnQueueChanged(
     if(parceledQueue != NULL) {
         parceledQueue->GetList((IList**)&queue);
     }
-    if (mHost != NULL) {
-        mHost->PostMessage(MSG_UPDATE_QUEUE, queue, NULL);
+    if (mController != NULL) {
+        mController->PostMessage(MSG_UPDATE_QUEUE, TO_IINTERFACE(queue), NULL);
     }
     return NOERROR;
 }
@@ -94,8 +164,8 @@ ECode CMediaController::CallbackStub::OnQueueChanged(
 ECode CMediaController::CallbackStub::OnQueueTitleChanged(
     /* [in] */ ICharSequence * title)
 {
-    if (mHost != NULL) {
-        mHost->PostMessage(MSG_UPDATE_QUEUE_TITLE, title, NULL);
+    if (mController != NULL) {
+        mController->PostMessage(MSG_UPDATE_QUEUE_TITLE, TO_IINTERFACE(title), NULL);
     }
     return NOERROR;
 }
@@ -103,8 +173,8 @@ ECode CMediaController::CallbackStub::OnQueueTitleChanged(
 ECode CMediaController::CallbackStub::OnExtrasChanged(
     /* [in] */ IBundle * extras)
 {
-    if (mHost != NULL) {
-        mHost->PostMessage(MSG_UPDATE_EXTRAS, extras, NULL);
+    if (mController != NULL) {
+        mController->PostMessage(MSG_UPDATE_EXTRAS, TO_IINTERFACE(extras), NULL);
     }
     return NOERROR;
 }
@@ -112,12 +182,60 @@ ECode CMediaController::CallbackStub::OnExtrasChanged(
 ECode CMediaController::CallbackStub::OnVolumeInfoChanged(
     /* [in] */ IParcelableVolumeInfo * pvi)
 {
-    if (mHost != NULL) {
+    if (mController != NULL) {
         AutoPtr<IMediaControllerPlaybackInfo> info;
         AutoPtr<CParcelableVolumeInfo> pvInfo = (CParcelableVolumeInfo*)pvi;
         CMediaControllerPlaybackInfo::New(pvInfo->mVolumeType, pvInfo->mAudioAttrs, pvInfo->mControlType,
                 pvInfo->mMaxVolume, pvInfo->mCurrentVolume, (IMediaControllerPlaybackInfo**)&info);
-        mHost->PostMessage(MSG_UPDATE_VOLUME, info, NULL);
+        mController->PostMessage(MSG_UPDATE_VOLUME, TO_IINTERFACE(info), NULL);
+    }
+    return NOERROR;
+}
+
+ECode CMediaController::CallbackStub::OnUpdateFolderInfoBrowsedPlayer(
+    /* [in] */ const String& stringUri)
+{
+    Logger::D(TAG, "CallBackStub: onUpdateFolderInfoBrowsedPlayer");
+    if (mController != NULL) {
+        AutoPtr<ICharSequence> charSequenceTmp;
+        CString::New(stringUri, (ICharSequence**)&charSequenceTmp);
+        mController->PostMessage(MSG_FOLDER_INFO_BROWSED_PLAYER, TO_IINTERFACE(charSequenceTmp), NULL);
+    }
+    return NOERROR;
+}
+
+ECode CMediaController::CallbackStub::OnUpdateNowPlayingEntries(
+    /* [in] */ ArrayOf<Int64>* playList)
+{
+    Logger::D(TAG, "CallBackStub: onUpdateNowPlayingEntries");
+    if (mController != NULL) {
+        AutoPtr<IList> listTmp;
+        CArrayList::New((IList**)&listTmp);
+        for (Int32 idx=0; idx<playList->GetLength(); ++idx) {
+            AutoPtr<IInteger64> intTmp = CoreUtils::Convert((*playList)[idx]);
+            listTmp->Add(TO_IINTERFACE(intTmp));
+        }
+        mController->PostMessage(MSG_UPDATE_NOWPLAYING_ENTRIES, TO_IINTERFACE(listTmp), NULL);
+    }
+    return NOERROR;
+}
+
+ECode CMediaController::CallbackStub::OnUpdateNowPlayingContentChange()
+{
+    Logger::D(TAG, "CallBackStub: onUpdateNowPlayingContentChange");
+    if (mController != NULL) {
+        mController->PostMessage(MSG_UPDATE_NOWPLAYING_CONTENT_CHANGE, NULL, NULL);
+    }
+    return NOERROR;
+}
+
+ECode CMediaController::CallbackStub::OnPlayItemResponse(
+    /* [in] */ Boolean success)
+{
+    Logger::D(TAG, "CallBackStub: onPlayItemResponse");
+    if (mController != NULL) {
+        AutoPtr<IBoolean> boolTmp = CoreUtils::Convert(success);
+        mController->PostMessage(MSG_PLAY_ITEM_RESPONSE, TO_IINTERFACE(boolTmp), NULL);
     }
     return NOERROR;
 }
@@ -168,6 +286,31 @@ ECode CMediaController::MessageHandler::HandleMessage(
             break;
         case MSG_DESTROYED:
             mCallback->OnSessionDestroyed();
+            break;
+        case MSG_FOLDER_INFO_BROWSED_PLAYER:
+            {
+                ICharSequence* charSequenceTmp = ICharSequence::Probe(obj);
+                charSequenceTmp->ToString(&str);
+                mCallback->OnUpdateFolderInfoBrowsedPlayer(str);
+            }
+            break;
+        case MSG_UPDATE_NOWPLAYING_ENTRIES:
+            {
+                assert(0);
+                // TODO: interface's type is? IList ? IArrayList?
+                // mCallback->OnUpdateNowPlayingEntries((long[]) msg.obj);
+            }
+            break;
+        case MSG_UPDATE_NOWPLAYING_CONTENT_CHANGE:
+            mCallback->OnUpdateNowPlayingContentChange();
+            break;
+        case MSG_PLAY_ITEM_RESPONSE:
+            {
+                IBoolean* boolTmp = IBoolean::Probe(obj);
+                Boolean val = FALSE;
+                boolTmp->GetValue(&val);
+                mCallback->OnPlayItemResponse(val);
+            }
             break;
     }
     return NOERROR;

@@ -53,6 +53,14 @@ module
         OnRate(
             [in] IRating * rating);
 
+        SetRemoteControlClientBrowsedPlayer();
+
+        SetRemoteControlClientPlayItem(
+            [in] Int64 uid,
+            [in] Int32 scope);
+
+        GetRemoteControlClientNowPlayingEntries();
+
         OnCustomAction(
             [in] String action,
             [in] IBundle * args);

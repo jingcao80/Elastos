@@ -5,6 +5,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/Handler.h"
 #include <elastos/core/Object.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::App::IPendingIntent;
 using Elastos::Droid::Content::IContext;
@@ -16,6 +17,7 @@ using Elastos::Droid::View::IKeyEvent;
 using Elastos::Core::ICharSequence;
 using Elastos::Utility::IList;
 using Elastos::Utility::IArrayList;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -38,6 +40,44 @@ CarClass(CMediaController)
     , public Object
     , public IMediaController
 {
+public:
+    class PlaybackInfo
+        : public Object
+        , public IMediaControllerPlaybackInfo
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        PlaybackInfo(
+            /* [in] */ Int32 type,
+            /* [in] */ IAudioAttributes* attrs,
+            /* [in] */ Int32 control,
+            /* [in] */ Int32 max,
+            /* [in] */ Int32 current);
+
+        CARAPI  GetPlaybackType(
+            /* [out] */ Int32* result);
+
+        CARAPI GetAudioAttributes(
+            /* [out] */ IAudioAttributes** result);
+
+        CARAPI GetVolumeControl(
+            /* [out] */ Int32* result);
+
+        CARAPI GetMaxVolume(
+            /* [out] */ Int32* result);
+
+        CARAPI GetCurrentVolume(
+            /* [out] */ Int32* result);
+
+    private:
+        const Int32 mVolumeType;
+        const Int32 mVolumeControl;
+        const Int32 mMaxVolume;
+        const Int32 mCurrentVolume;
+        const AutoPtr<IAudioAttributes> mAudioAttrs;
+    };
+
 private:
     class CallbackStub
         : public Object
@@ -47,9 +87,7 @@ private:
         CAR_INTERFACE_DECL()
 
         CallbackStub(
-            /* [in] */ CMediaController * host)
-            : mHost(host)
-        {}
+            /* [in] */ CMediaController * controller);
 
         // @Override
         CARAPI OnSessionDestroyed();
@@ -83,8 +121,23 @@ private:
         CARAPI OnVolumeInfoChanged(
             /* [in] */ IParcelableVolumeInfo * pvi);
 
+        // @Override
+        CARAPI OnUpdateFolderInfoBrowsedPlayer(
+            /* [in] */ const String& stringUri);
+
+        // @Override
+        CARAPI OnUpdateNowPlayingEntries(
+            /* [in] */ ArrayOf<Int64>* playList);
+
+        // @Override
+        CARAPI OnUpdateNowPlayingContentChange();
+
+        // @Override
+        CARAPI OnPlayItemResponse(
+            /* [in] */ Boolean success);
+
     private:
-        CMediaController * mHost;
+        CMediaController * mController;
     };
 
     class MessageHandler
@@ -376,6 +429,10 @@ public:
     const static Int32 MSG_UPDATE_QUEUE;
     const static Int32 MSG_UPDATE_QUEUE_TITLE;
     const static Int32 MSG_UPDATE_EXTRAS;
+    const static Int32 MSG_FOLDER_INFO_BROWSED_PLAYER;
+    const static Int32 MSG_UPDATE_NOWPLAYING_ENTRIES;
+    const static Int32 MSG_UPDATE_NOWPLAYING_CONTENT_CHANGE;
+    const static Int32 MSG_PLAY_ITEM_RESPONSE;
     const static Int32 MSG_DESTROYED;
 
     AutoPtr<IISessionController> mSessionBinder;

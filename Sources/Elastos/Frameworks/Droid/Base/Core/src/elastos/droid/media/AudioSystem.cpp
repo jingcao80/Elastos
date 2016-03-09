@@ -720,6 +720,12 @@ ECode AudioSystem::GetOutputDeviceName(
     case IAudioSystem::DEVICE_OUT_AUX_LINE:
         *result = IAudioSystem::DEVICE_OUT_AUX_LINE_NAME;
         return NOERROR;
+    case IAudioSystem::DEVICE_OUT_FM_TX:
+        *result = IAudioSystem::DEVICE_OUT_FM_TX_NAME;
+        return NOERROR;
+    case IAudioSystem::DEVICE_OUT_PROXY:
+        *result = IAudioSystem::DEVICE_OUT_PROXY_NAME;
+        return NOERROR;
     case IAudioSystem::DEVICE_OUT_DEFAULT:
     default:
         *result = "";

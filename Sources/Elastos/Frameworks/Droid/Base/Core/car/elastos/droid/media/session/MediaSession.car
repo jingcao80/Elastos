@@ -149,6 +149,14 @@ module
         OnCustomAction(
             [in] String action,
             [in] IBundle * extras);
+
+        SetBrowsedPlayer();
+
+        SetPlayItem(
+            [in] Int32 scope,
+            [in] Int64 uid);
+
+        GetNowPlayingEntries();
     }
 
     /**
@@ -196,6 +204,7 @@ module
      * <p>
      * MediaSession objects are thread safe.
      */
+    [deprecated]
     interface IMediaSession {
         /**
          * Set this flag on the session to indicate that it can handle media button
@@ -408,6 +417,17 @@ module
          */
         SetExtras(
             [in] IBundle * extras);
+
+        PlayItemResponse(
+            [in] Boolean success);
+
+        UpdateNowPlayingEntries(
+            [in] ArrayOf<Int64>* playList);
+
+        UpdateFolderInfoBrowsedPlayer(
+            [in] String stringUri);
+
+        UpdateNowPlayingContentChange();
 
         /**
          * Notify the system that the remote volume changed.

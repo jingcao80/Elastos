@@ -9,6 +9,7 @@ module
     namespace Droid {
     namespace App {
 
+    [deprecated]
     interface IStreamSettings {
         GetStreamId(
             [out] Int32* streamId);

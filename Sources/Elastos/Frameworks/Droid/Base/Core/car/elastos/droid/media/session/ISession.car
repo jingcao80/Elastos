@@ -14,6 +14,7 @@ module
     namespace Media {
     namespace Session {
 
+    [deprecated]
     interface IISession {
         SendEvent(
             [in] String event,
@@ -54,6 +55,17 @@ module
 
         SetRatingType(
             [in] Int32 type);
+
+        PlayItemResponse(
+            [in] Boolean success);
+
+        UpdateNowPlayingEntries(
+            [in] ArrayOf<Int64>* playList);
+
+        UpdateFolderInfoBrowsedPlayer(
+            [in] String stringUri);
+
+        UpdateNowPlayingContentChange();
 
         // These commands relate to volume handling
         SetPlaybackToLocal(

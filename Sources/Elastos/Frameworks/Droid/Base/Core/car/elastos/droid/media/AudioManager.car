@@ -14,6 +14,7 @@ module
     interface Elastos.Droid.Media.IAudioPatch;
     interface Elastos.Droid.Media.IAudioPortConfig;
     interface Elastos.Droid.Media.IIVolumeController;
+    interface Elastos.Droid.Media.IAudioSystem;
     interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
@@ -330,6 +331,31 @@ module
         const String ACTION_USB_AUDIO_DEVICE_PLUG =
                 "android.media.action.USB_AUDIO_DEVICE_PLUG";
 
+        /**
+         * @hide Broadcast intent when RemoteControlClient list is updated.
+         */
+        // @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String RCC_CHANGED_ACTION =
+                    "org.codeaurora.bluetooth.RCC_CHANGED_ACTION";
+
+        /**
+         * @hide Used for sharing the calling package name
+         */
+        const String EXTRA_CALLING_PACKAGE_NAME =
+                "org.codeaurora.bluetooth.EXTRA_CALLING_PACKAGE_NAME";
+
+        /**
+         * @hide Used for sharing the focus changed value
+         */
+        const String EXTRA_FOCUS_CHANGED_VALUE =
+                "org.codeaurora.bluetooth.EXTRA_FOCUS_CHANGED_VALUE";
+
+        /**
+         * @hide Used for sharing the availability changed value
+         */
+        const String EXTRA_AVAILABLITY_CHANGED_VALUE =
+                "org.codeaurora.bluetooth.EXTRA_AVAILABLITY_CHANGED_VALUE";
+
         /** The audio stream for phone calls */
         const Int32 STREAM_VOICE_CALL = 0; // IAudioSystem::STREAM_VOICE_CALL;
 
@@ -359,6 +385,9 @@ module
 
         /** @hide The audio stream for text to speech (TTS) */
         const Int32 STREAM_TTS = 9; // IAudioSystem::STREAM_TTS;
+
+        /** @hide The audio stream for incall music delivery */
+        const Int32 STREAM_INCALL_MUSIC = 10; // IAudioSystem::STREAM_INCALL_MUSIC;
 
         /** Number of audio streams */
         /**
@@ -687,6 +716,40 @@ module
          * In communication audio mode. An audio/video chat or VoIP call is established.
          */
         const Int32 MODE_IN_COMMUNICATION = 3; // IAudioSystem::MODE_IN_COMMUNICATION;
+
+        /* Calls states for Voice calls */
+        /**
+         * @hide Call state for inactive call state.
+         */
+        const Int32 CALL_INACTIVE = 0x1; // IAudioSystem::CALL_INACTIVE;
+        /**
+         * @hide Call state for active call state.
+         */
+        const Int32 CALL_ACTIVE = 0x2; // IAudioSystem::CALL_ACTIVE;
+        /**
+         * @hide Call state for hold call state.
+         */
+        const Int32 CALL_HOLD = 0x3; // IAudioSystem::CALL_HOLD;
+        /**
+         * @hide Call state for local call hold state.
+         */
+        const Int32 CALL_LOCAL_HOLD = 0x4; // IAudioSystem::CALL_LOCAL_HOLD;
+        /* Key used in setParameters for VSID and Call_state */
+        /**
+         * @hide Key for vsid used in setParameters.
+         */
+        const String VSID_KEY = "vsid"; // IAudioSystem::VSID_KEY;
+
+        /**
+         * @hide Key for call_state used in setParameters.
+         */
+        const String CALL_STATE_KEY = "call_state"; // IAudioSystem::CALL_STATE_KEY;
+
+        /**
+         * @hide Key for all_call_states used in getParameters.
+         */
+        const String ALL_CALL_STATES_KEY = "all_call_states"; // IAudioSystem::ALL_CALL_STATES_KEY;
+
 
         /* Routing bits for setRouting/getRouting API */
         /**
@@ -2107,6 +2170,10 @@ module
         UnregisterRemoteController(
             [in] IRemoteController* rctlr);
 
+        UpdateMediaPlayerList(
+            [in] String packageName,
+            [in] Boolean toAdd);
+
         /**
          * @hide
          * Registers a remote control display that will be sent information by remote control clients.
@@ -2198,6 +2265,14 @@ module
          */
         UnregisterAudioPolicyAsync(
             [in] IAudioPolicy* policy);
+
+        SetRemoteControlClientPlayItem(
+            [in] Int64 uid,
+            [in] Int32 scope);
+
+        GetRemoteControlClientNowPlayingEntries();
+
+        SetRemoteControlClientBrowsedPlayer();
 
         /**
          *  @hide

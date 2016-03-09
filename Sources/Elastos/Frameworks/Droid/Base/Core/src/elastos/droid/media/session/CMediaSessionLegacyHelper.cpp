@@ -209,6 +209,34 @@ ECode CMediaSessionLegacyHelper::SessionHolder::SessionCallback::OnSetRating(
     return NOERROR;
 }
 
+ECode CMediaSessionLegacyHelper::SessionHolder::SessionCallback::SetBrowsedPlayer()
+{
+    if (mHost->mRccListener != NULL) {
+        mHost->mRccListener->SetBrowsedPlayer();
+    }
+    return NOERROR;
+}
+
+// @Override
+ECode CMediaSessionLegacyHelper::SessionHolder::SessionCallback::SetPlayItem(
+    /* [in] */ Int32 scope,
+    /* [in] */ Int64 uid)
+{
+    if (mHost->mRccListener != NULL) {
+        mHost->mRccListener->SetPlayItem(scope, uid);
+    }
+    return NOERROR;
+}
+
+// @Override
+ECode CMediaSessionLegacyHelper::SessionHolder::SessionCallback::GetNowPlayingEntries()
+{
+    if (mHost->mRccListener != NULL) {
+        mHost->mRccListener->GetNowPlayingEntries();
+    }
+    return NOERROR;
+}
+
 CMediaSessionLegacyHelper::SessionHolder::SessionHolder(
     /* [in] */ IMediaSession * session,
     /* [in] */ IPendingIntent * pi,

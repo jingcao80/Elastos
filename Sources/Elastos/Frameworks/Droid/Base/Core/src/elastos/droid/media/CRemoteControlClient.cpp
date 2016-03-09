@@ -3,6 +3,7 @@
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/media/session/CPlaybackState.h"
 #include "elastos/droid/media/session/CPlaybackStateBuilder.h"
+#include "elastos/droid/media/session/MediaSessionCallback.h"
 #include "elastos/droid/media/CMediaMetadataBuilder.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/CLooperHelper.h"
@@ -35,6 +36,7 @@ using Elastos::Droid::Media::Session::EIID_IMediaSessionCallback;
 using Elastos::Droid::Media::Session::CPlaybackState;
 using Elastos::Droid::Media::Session::CPlaybackStateBuilder;
 using Elastos::Droid::Media::Session::IPlaybackStateBuilder;
+using Elastos::Droid::Media::Session::MediaSessionCallback;
 using Elastos::Droid::Media::CMediaMetadataBuilder;
 using Elastos::Droid::Graphics::BitmapConfig;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
@@ -602,107 +604,6 @@ void CRemoteControlClient::OnUpdateMetadata(
                 mMetadataUpdateListener->OnMetadataUpdate(key, value);
             }
         }
-}
-
-//--------------------------------------
-//    CRemoteControlClient::MediaSessionCallback
-//--------------------------------------
-CRemoteControlClient::MediaSessionCallback::MediaSessionCallback()
-{}
-
-CRemoteControlClient::MediaSessionCallback::~MediaSessionCallback()
-{}
-
-CAR_INTERFACE_IMPL(CRemoteControlClient::MediaSessionCallback, Object, IMediaSessionCallback)
-
-ECode CRemoteControlClient::MediaSessionCallback::OnSeekTo(
-    /* [in] */ Int64 pos)
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnSetRating(
-    /* [in] */ IRating* rating)
-{
-    return NOERROR;
-}
-
-//override for compile
-ECode CRemoteControlClient::MediaSessionCallback::OnCommand(
-    /* [in] */ const String& command,
-    /* [in] */ IBundle * arg,
-    /* [in] */ IResultReceiver * cb)
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnMediaButtonEvent(
-    /* [in] */ IIntent * mediaButtonIntent,
-    /* [out] */ Boolean * result)
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnPlay()
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnPlayFromMediaId(
-    /* [in] */ const String& mediaId,
-    /* [in] */ IBundle * extras)
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnPlayFromSearch(
-    /* [in] */ const String& query,
-    /* [in] */ IBundle * extras)
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnSkipToQueueItem(
-    /* [in] */ Int64 id)
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnPause()
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnSkipToNext()
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnSkipToPrevious()
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnFastForward()
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnRewind()
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnStop()
-{
-    return NOERROR;
-}
-
-ECode CRemoteControlClient::MediaSessionCallback::OnCustomAction(
-    /* [in] */ const String& action,
-    /* [in] */ IBundle * extras)
-{
-    return NOERROR;
 }
 
 } // namespace Media

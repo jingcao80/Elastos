@@ -817,6 +817,27 @@ private:
         AutoPtr<IIVolumeController> mController;
     };
 
+    class MediaPlayerInfo
+        : public Object
+    {
+    public:
+        MediaPlayerInfo(
+            /* [in] */ const String& packageName,
+            /* [in] */ Boolean isfocussed);
+
+        CARAPI IsFocussed(
+            /* [out] */ Boolean* result);
+
+        CARAPI SetFocus(
+            /* [in] */ Boolean focus);
+
+        CARAPI GetPackageName(
+            /* [out] */ String* result);
+
+    private:
+        String mPackageName;
+        Boolean mIsfocussed;
+    };
 
 public:
     CAudioService();
@@ -835,6 +856,14 @@ public:
     CARAPI SystemReady();
 
     CARAPI OnSystemReady();
+
+    CARAPI AddMediaPlayerAndUpdateRemoteController(
+        /* [in] */ const String& packageName);
+
+    CARAPI UpdateRemoteControllerOnExistingMediaPlayers();
+
+    CARAPI RemoveMediaPlayerAndUpdateRemoteController(
+        /* [in] */ const String& packageName);
 
     static CARAPI StreamToString(
         /* [in] */ Int32 stream,
@@ -1101,6 +1130,14 @@ public:
     CARAPI RemoteControlDisplayWantsPlaybackPositionSync(
         /* [in] */ IIRemoteControlDisplay* rcd,
         /* [in] */ Boolean wantsSync);
+
+    CARAPI SetRemoteControlClientPlayItem(
+        /* [in] */ Int64 uid,
+        /* [in] */ Int32 scope);
+
+    CARAPI GetRemoteControlClientNowPlayingEntries();
+
+    CARAPI SetRemoteControlClientBrowsedPlayer();
 
     //==========================================================================================
     // Audio Focus
@@ -1501,6 +1538,8 @@ private:
         /* [in] */ Int32 state,
         /* [in] */ const String& name);
 
+    CARAPI_(void) StartMusicPlayer();
+
     CARAPI_(void) OnSetWiredDeviceConnectionState(
         /* [in] */ Int32 device,
         /* [in] */ Int32 state,
@@ -1598,6 +1637,8 @@ private:
     static const Int32 PLATFORM_TELEVISION;
     // the platform type affects volume and silent mode behavior
     Int32 mPlatformType;
+
+    static AutoPtr<IList> mMediaPlayers;
 
     /** The controller for the volume UI. */
     AutoPtr<VolumeController> mVolumeController;
@@ -1709,6 +1750,8 @@ private:
 
     // stream names used by dumpStreamStates()
     static AutoPtr<ArrayOf<String> > STREAM_NAMES;
+
+    Boolean mLinkNotificationWithVolume;
 
     AutoPtr<MyAudioSystemCallback> mAudioSystemCallback;
 
