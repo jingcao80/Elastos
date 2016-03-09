@@ -24,6 +24,7 @@ module
     merge("provider/SyncStateContract.car");
     merge("provider/UserDictionary.car");
     merge("provider/VoicemailContract.car");
+    merge("provider/ThemesContract.car");
 
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Net.IUri;
