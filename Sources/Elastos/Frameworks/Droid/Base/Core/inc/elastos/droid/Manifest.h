@@ -7,11 +7,8 @@
 
 #ifndef __Elastos_Droid_Manifest_H__
 #define __Elastos_Droid_Manifest_H__
-
 #include <elastos.h>
-
 using namespace Elastos;
-
 namespace Elastos {
 namespace Droid {
 class ECO_PUBLIC Manifest {
@@ -83,6 +80,14 @@ class ECO_PUBLIC Manifest {
     <p>Not for use by third-party applications.
          */
         public: static const String ACCESS_SURFACE_FLINGER;
+        /**  Allows an application to use the Theme Service
+          @hide
+         */
+        public: static const String ACCESS_THEME_MANAGER;
+        /**  Allows an application to use the system Torch service
+        @hide
+         */
+        public: static const String ACCESS_TORCH_SERVICE;
         /**  Allows applications to access information about Wi-Fi networks
          */
         public: static const String ACCESS_WIFI_STATE;
@@ -282,7 +287,7 @@ class ECO_PUBLIC Manifest {
          */
         public: static const String BROADCAST_SCORE_NETWORKS;
         /**  Allows an application to broadcast an SMS receipt notification.
-    <p>Not for use by third-party applications.
+         Not for use by third-party applications.
          */
         public: static const String BROADCAST_SMS;
         /**  Allows an application to broadcast sticky intents.  These are
@@ -365,6 +370,10 @@ class ECO_PUBLIC Manifest {
         /**  Allows applications to change network connectivity state
          */
         public: static const String CHANGE_NETWORK_STATE;
+        /**  Allows an application to change the phone blacklist data.
+         @hide This is not a third-party API (intended for system apps).
+         */
+        public: static const String CHANGE_PHONE_BLACKLIST;
         /**  Allows applications to enter Wi-Fi Multicast mode
          */
         public: static const String CHANGE_WIFI_MULTICAST_STATE;
@@ -525,6 +534,11 @@ class ECO_PUBLIC Manifest {
         /**  @hide Allows an application to grant or revoke specific permissions.
          */
         public: static const String GRANT_REVOKE_PERMISSIONS;
+        /**  Allows an application access to the CM hardware abstraction framework (DANGEROUS)
+         <p>Not for use by third-party applications.
+         @hide
+         */
+        public: static const String HARDWARE_ABSTRACTION_ACCESS;
         /**  Allows access to hardware peripherals.  Intended only for hardware testing.
     <p>Not for use by third-party applications.
          */
@@ -562,6 +576,15 @@ class ECO_PUBLIC Manifest {
          types of interactions.
          */
         public: static const String INTERACT_ACROSS_USERS_FULL;
+        /**  Allows an application to intercept package launch actions.
+         <p> Not for use by third-party applications.
+         @hide
+         */
+        public: static const String INTERCEPT_PACKAGE_LAUNCH;
+        /**  Allows an application to intercept and rewrite outgoing SMS
+         @hide
+         */
+        public: static const String INTERCEPT_SMS;
         /**  Allows an application to open windows that are for use by parts
          of the system user interface.
          <p>Not for use by third-party applications.
@@ -674,6 +697,11 @@ class ECO_PUBLIC Manifest {
          <p>Not for use by third-party applications.
          */
         public: static const String MODIFY_PHONE_STATE;
+        /**  Allows an application to add an address to the whitelisted protected sms
+         list
+         @hide
+         */
+        public: static const String MODIFY_PROTECTED_SMS_LIST;
         /**  @SystemApi Allows formatting file systems for removable storage.
     <p>Not for use by third-party applications.
          */
@@ -721,6 +749,10 @@ class ECO_PUBLIC Manifest {
          not use. Allow an application to make its activities persistent.
          */
         public: static const String PERSISTENT_ACTIVITY;
+        /**  Allows an application to override the power key action
+        @hide
+         */
+        public: static const String PREVENT_POWER_KEY;
         /**  Allows an application to see the number being dialed during an outgoing
          call with the option to redirect the call to a different number or
          abort the call altogether.
@@ -815,6 +847,10 @@ class ECO_PUBLIC Manifest {
          specific networks and applications. @hide
          */
         public: static const String READ_NETWORK_USAGE_HISTORY;
+        /**  Allows an application to read the phone blacklist data.
+         @hide This is not a third-party API (intended for system apps).
+         */
+        public: static const String READ_PHONE_BLACKLIST;
         /**  Allows read only access to phone state.
          <p class="note"><strong>Note:</strong> If <em>both</em> your <a
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
@@ -855,6 +891,11 @@ class ECO_PUBLIC Manifest {
         /**  Allows applications to read the sync stats
          */
         public: static const String READ_SYNC_STATS;
+        /**  Allows an application to read the current theme configuration and
+          get information about the various themes currently installed
+          @hide
+         */
+        public: static const String READ_THEMES;
         /**  Allows an application to read the user dictionary. This should
          really only be required by an IME, or a dictionary editor like
          the Settings app.
@@ -914,10 +955,19 @@ class ECO_PUBLIC Manifest {
          or perform processing on them.
          */
         public: static const String RECEIVE_MMS;
+        /**  Allows an application to receive sms (usually for auth or registration)
+         from whitelisted addresses
+         @hide
+         */
+        public: static const String RECEIVE_PROTECTED_SMS;
         /**  Allows an application to monitor incoming SMS messages, to record
          or perform processing on them.
          */
         public: static const String RECEIVE_SMS;
+        /**  Allows an application to receive STK related commands.
+         @hide
+         */
+        public: static const String RECEIVE_STK_COMMANDS;
         /**  Allows an application to monitor incoming WAP push messages.
          */
         public: static const String RECEIVE_WAP_PUSH;
@@ -1002,6 +1052,10 @@ class ECO_PUBLIC Manifest {
          @hide
          */
         public: static const String SET_KEYBOARD_LAYOUT;
+        /**  Allows applications to set the keyguard wallpaper
+         @hide
+         */
+        public: static const String SET_KEYGUARD_WALLPAPER;
         /**  Allows low-level access to setting the orientation (actually
          rotation) of the screen.
          <p>Not for use by third-party applications.
@@ -1215,6 +1269,12 @@ class ECO_PUBLIC Manifest {
         /**  Allows applications to write the sync settings
          */
         public: static const String WRITE_SYNC_SETTINGS;
+        /**  Allows an application to write the current theme configuration and
+          write information about the various themes currently installed.
+          Changing themes should be done through the service ACCESS_THEME_MANAGER
+          @hide
+         */
+        public: static const String WRITE_THEMES;
         /**  Allows an application to write to the user dictionary.
          */
         public: static const String WRITE_USER_DICTIONARY;
@@ -1315,6 +1375,11 @@ class ECO_PUBLIC Manifest {
         /**  Group of permissions that are related to the screenlock.
          */
         public: static const String SCREENLOCK;
+        /**  Used for permissions that allow an application to access or configure
+         the device security information.
+         @hide This is not a third-party API (intended for system apps).
+         */
+        public: static const String SECURITY;
         /**  Used for permissions that provide access to the user's social connections,
          such as contacts, call logs, social stream, etc.  This includes
          both reading and writing of this data (which should generally be
@@ -1362,4 +1427,4 @@ class ECO_PUBLIC Manifest {
 };
 };
 
-#endif // __Elastos_Droid_Manifest_H__
+#endif // __Elastos_Droid_R_H__

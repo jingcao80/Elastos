@@ -7,9 +7,7 @@
 
 #ifndef __Elastos_Droid_R_H__
 #define __Elastos_Droid_R_H__
-
 #include <elatypes.h>
-
 namespace Elastos {
 namespace Droid {
 class ECO_PUBLIC R {
@@ -36,49 +34,52 @@ class ECO_PUBLIC R {
         public: static const int dock_top_exit = 0x010a001d;
         public: static const int fade_in = 0x010a0000;
         public: static const int fade_out = 0x010a0001;
+        public: static const int last_app_in = 0x010a0029;
+        public: static const int last_app_out = 0x010a002a;
         public: static const int linear_interpolator = 0x010a000b;
-        public: static const int lock_screen_behind_enter = 0x010a002b;
-        public: static const int lock_screen_behind_enter_fade_in = 0x010a002c;
-        public: static const int lock_screen_behind_enter_wallpaper = 0x010a002d;
-        public: static const int lock_screen_wallpaper_exit = 0x010a0030;
+        public: static const int lock_screen_behind_enter = 0x010a002d;
+        public: static const int lock_screen_behind_enter_fade_in = 0x010a002e;
+        public: static const int lock_screen_behind_enter_wallpaper = 0x010a002f;
+        public: static const int lock_screen_wallpaper_exit = 0x010a0032;
+        public: static const int lock_screen_wallpaper_exit_noop = 0x010a0033;
         public: static const int overshoot_interpolator = 0x010a0008;
-        public: static const int push_down_in = 0x010a0039;
-        public: static const int push_down_out = 0x010a003b;
-        public: static const int push_up_in = 0x010a003d;
-        public: static const int push_up_out = 0x010a003e;
-        public: static const int rotation_animation_enter = 0x010a0043;
-        public: static const int rotation_animation_jump_exit = 0x010a0044;
-        public: static const int rotation_animation_xfade_exit = 0x010a0045;
-        public: static const int screen_rotate_0_enter = 0x010a0046;
-        public: static const int screen_rotate_0_exit = 0x010a0047;
-        public: static const int screen_rotate_0_frame = 0x010a0048;
-        public: static const int screen_rotate_180_enter = 0x010a0049;
-        public: static const int screen_rotate_180_exit = 0x010a004a;
-        public: static const int screen_rotate_180_frame = 0x010a004b;
-        public: static const int screen_rotate_finish_enter = 0x010a004c;
-        public: static const int screen_rotate_finish_exit = 0x010a004d;
-        public: static const int screen_rotate_finish_frame = 0x010a004e;
-        public: static const int screen_rotate_minus_90_enter = 0x010a004f;
-        public: static const int screen_rotate_minus_90_exit = 0x010a0050;
-        public: static const int screen_rotate_minus_90_frame = 0x010a0051;
-        public: static const int screen_rotate_plus_90_enter = 0x010a0052;
-        public: static const int screen_rotate_plus_90_exit = 0x010a0053;
-        public: static const int screen_rotate_plus_90_frame = 0x010a0054;
-        public: static const int screen_rotate_start_enter = 0x010a0055;
-        public: static const int screen_rotate_start_exit = 0x010a0056;
-        public: static const int screen_rotate_start_frame = 0x010a0057;
-        public: static const int screen_user_enter = 0x010a0058;
-        public: static const int screen_user_exit = 0x010a0059;
-        public: static const int slide_in_child_bottom = 0x010a005f;
+        public: static const int push_down_in = 0x010a003c;
+        public: static const int push_down_out = 0x010a003e;
+        public: static const int push_up_in = 0x010a0040;
+        public: static const int push_up_out = 0x010a0041;
+        public: static const int rotation_animation_enter = 0x010a0046;
+        public: static const int rotation_animation_jump_exit = 0x010a0047;
+        public: static const int rotation_animation_xfade_exit = 0x010a0048;
+        public: static const int screen_rotate_0_enter = 0x010a0049;
+        public: static const int screen_rotate_0_exit = 0x010a004a;
+        public: static const int screen_rotate_0_frame = 0x010a004b;
+        public: static const int screen_rotate_180_enter = 0x010a004c;
+        public: static const int screen_rotate_180_exit = 0x010a004d;
+        public: static const int screen_rotate_180_frame = 0x010a004e;
+        public: static const int screen_rotate_finish_enter = 0x010a004f;
+        public: static const int screen_rotate_finish_exit = 0x010a0050;
+        public: static const int screen_rotate_finish_frame = 0x010a0051;
+        public: static const int screen_rotate_minus_90_enter = 0x010a0052;
+        public: static const int screen_rotate_minus_90_exit = 0x010a0053;
+        public: static const int screen_rotate_minus_90_frame = 0x010a0054;
+        public: static const int screen_rotate_plus_90_enter = 0x010a0055;
+        public: static const int screen_rotate_plus_90_exit = 0x010a0056;
+        public: static const int screen_rotate_plus_90_frame = 0x010a0057;
+        public: static const int screen_rotate_start_enter = 0x010a0058;
+        public: static const int screen_rotate_start_exit = 0x010a0059;
+        public: static const int screen_rotate_start_frame = 0x010a005a;
+        public: static const int screen_user_enter = 0x010a005b;
+        public: static const int screen_user_exit = 0x010a005c;
+        public: static const int slide_in_child_bottom = 0x010a0062;
         public: static const int slide_in_left = 0x010a0002;
-        public: static const int slide_in_right = 0x010a0061;
-        public: static const int slide_out_left = 0x010a0064;
+        public: static const int slide_in_right = 0x010a0064;
+        public: static const int slide_out_left = 0x010a0067;
         public: static const int slide_out_right = 0x010a0003;
-        public: static const int voice_activity_close_enter = 0x010a0073;
-        public: static const int voice_activity_close_exit = 0x010a0074;
-        public: static const int voice_activity_open_enter = 0x010a0075;
-        public: static const int voice_activity_open_exit = 0x010a0076;
-        public: static const int window_move_from_decor = 0x010a0083;
+        public: static const int voice_activity_close_enter = 0x010a0076;
+        public: static const int voice_activity_close_exit = 0x010a0077;
+        public: static const int voice_activity_open_enter = 0x010a0078;
+        public: static const int voice_activity_open_exit = 0x010a0079;
+        public: static const int window_move_from_decor = 0x010a0086;
     };
     public: class animator {
         /**  A simple fade-in animation.
@@ -89,45 +90,43 @@ class ECO_PUBLIC R {
         public: static const int fade_out = 0x010b0001;
     };
     public: class array {
+        /**  Do not translate. App ops request strings
+         */
+        public: static const int app_ops_labels = 0x0107000d;
         /**  This string array should be overridden by the manufacture to present a list of carrier-id,locale. The wifi regulatory domain is extracted from the locale information. This is used at startup to set system defaults by checking the system property ro.carrier for the carrier-id and searching through this array
  An Array of [[Carrier-ID]
               [default-locale]]
          */
-        public: static const int carrier_properties = 0x01070042;
+        public: static const int carrier_properties = 0x01070053;
         /**  Various locale-specific string resources for Contacts
  various string resources for Contacts
          */
-        public: static const int common_nicknames = 0x01070040;
+        public: static const int common_nicknames = 0x01070051;
         /**  Array of output values for button backlight corresponding to the LUX values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
          The brightness values must be between 0 and 255 and be non-decreasing.
          This must be overridden in platform specific overlays
- Array of output values for button backlight corresponding to the LUX values
-         in the config_autoBrightnessLevels array.  This array should have size one greater
-         than the size of the config_autoBrightnessLevels array.
-         This must be overridden in platform specific overlays
          */
-        public: static const int config_autoBrightnessButtonBacklightValues = 0x01070024;
+        public: static const int config_autoBrightnessButtonBacklightValues = 0x0107002d;
         /**  Array of output values for keyboard backlight corresponding to the LUX values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
          The brightness values must be between 0 and 255 and be non-decreasing.
          This must be overridden in platform specific overlays
          */
-        public: static const int config_autoBrightnessKeyboardBacklightValues = 0x01070025;
+        public: static const int config_autoBrightnessKeyboardBacklightValues = 0x0107002e;
         /**  Array of output values for LCD backlight corresponding to the LUX values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
          The brightness values must be between 0 and 255 and be non-decreasing.
          This must be overridden in platform specific overlays
  Array of output values for LCD backlight corresponding to the LUX values
-         in the config_autoBrightnessLevels array.  This array should have size one greater
+                  in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
          This must be overridden in platform specific overlays
- 10000+
          */
-        public: static const int config_autoBrightnessLcdBacklightValues = 0x01070023;
+        public: static const int config_autoBrightnessLcdBacklightValues = 0x0107002c;
         /**  Array of light sensor LUX values to define our levels for auto backlight brightness support.
          The N entries of this array define N + 1 control points as follows:
          (1-based arrays)
@@ -149,20 +148,28 @@ class ECO_PUBLIC R {
 
          Must be overridden in platform specific overlays
  Array of light sensor LUX values to define our levels for auto backlight brightness support.
-         The N entries of this array define N  1 zones as follows:
+                  The N entries of this array define N + 1 zones as follows:
 
          Zone 0:        0 <= LUX < array[0]
          Zone 1:        array[0] <= LUX < array[1]
          ...
          Zone N:        array[N - 1] <= LUX < array[N]
-         Zone N + 1     array[N] <= LUX < infinity
+         Zone N + 1:    array[N] <= LUX < infinity
 
          Must be overridden in platform specific overlays
          */
-        public: static const int config_autoBrightnessLevels = 0x01070022;
+        public: static const int config_autoBrightnessLevels = 0x0107002b;
+        /**  Automatic power profile management per app.
+         Each item should list the fully-qualified activity
+         name and the power profile id, separated by a comma.
+ Automatic power profile management per app.
+         Each item should list the fully-qualified activity
+         name and the power profile id, separated by a comma.
+         */
+        public: static const int config_auto_perf_activities = 0x0107004c;
         /**  Vibrator pattern for feedback when selecting a day/month/year date of a Calendar
          */
-        public: static const int config_calendarDateVibePattern = 0x0107001e;
+        public: static const int config_calendarDateVibePattern = 0x01070027;
         /**  call barring MMI code from TS 22.030 Annex B
  call barring MMI code from TS 22.030 Annex B
          Indonesia AXIS does not support Call Barring service
@@ -171,29 +178,37 @@ class ECO_PUBLIC R {
          Indonesia Hutchison does not support Call Barring service
          and "333" is used for other purpose
          */
-        public: static const int config_callBarringMMI = 0x01070034;
+        public: static const int config_callBarringMMI = 0x0107003e;
         /**  If the DUN connection for this CDMA device supports more than just DUN
  traffic you should list them here.
  If this device is not CDMA this is ignored.  If this list is empty on
  a DUN-requiring CDMA device, the DUN APN will just support just DUN.
+ If the DUN connection for this CDMA device supports more than just DUN
+ traffic you should list them here.
+ If this device is not CDMA this is ignored.  If this list is empty on
+ a DUN-requireing CDMA device, the DUN APN will support
+ just DUN.
          */
-        public: static const int config_cdma_dun_supported_types = 0x01070017;
+        public: static const int config_cdma_dun_supported_types = 0x01070020;
         /**  CDMA home system id for Verizon
  CDMA home system id for Verizon
          */
-        public: static const int config_cdma_home_system = 0x01070037;
+        public: static const int config_cdma_home_system = 0x01070041;
         /**  Vibrator pattern for feedback when selecting an hour/minute tick of a Clock
          */
-        public: static const int config_clockTickVibePattern = 0x0107001d;
+        public: static const int config_clockTickVibePattern = 0x01070026;
         /**  Set of NetworkInfo.getType() that reflect data usage.
  TYPE_MOBILE_IA
          */
-        public: static const int config_data_usage_network_types = 0x0107000f;
+        public: static const int config_data_usage_network_types = 0x01070018;
         /**  Vibrator pattern to be used as the default for notifications
          that specify DEFAULT_VIBRATE.
 
+ Vibrator pattern to be used as the default for notifications
+         that specify DEFAULT_VIBRATE.
+
          */
-        public: static const int config_defaultNotificationVibePattern = 0x0107002e;
+        public: static const int config_defaultNotificationVibePattern = 0x01070037;
         /**  If there is no preload VM number in the sim card, carriers such as
          Verizon require to load a default vm number from the configurantion.
          Define config_default_vm_number for this purpose. And there are two
@@ -208,7 +223,11 @@ class ECO_PUBLIC R {
          (3) If the config_default_vm_number array has gid special item but it doesn't match the
          current sim's gid, the last one without gid will be picked
          */
-        public: static const int config_default_vm_number = 0x0107003a;
+        public: static const int config_default_vm_number = 0x01070044;
+        /**  The list of components which should be automatically disabled.
+ Disable stock OTA components if installed
+         */
+        public: static const int config_disabledComponents = 0x0107004a;
         /**  The list of IMEs which should be disabled until used.
          This function suppresses update notifications for these pre-installed apps.
          We need to set this configuration carefully that they should not have functionarities
@@ -222,7 +241,11 @@ class ECO_PUBLIC R {
          And the disabled_until_used state for an IME is released by InputMethodManagerService
          when the IME is selected as an enabled IME.
          */
-        public: static const int config_disabledUntilUsedPreinstalledImes = 0x01070030;
+        public: static const int config_disabledUntilUsedPreinstalledImes = 0x0107003a;
+        /**  The list of components which should be forced to be enabled.
+ Force enabling of some services that could have been previously disabled
+         */
+        public: static const int config_forceEnabledComponents = 0x0107004b;
         /**  Defines the default set of global actions. Actions may still be disabled or hidden based
          on the current state of the device.
          Each item must be one of the following strings:
@@ -234,11 +257,16 @@ class ECO_PUBLIC R {
          "users" = list of users
 
  Only show settings item due to smaller real estate.
+ Defines the default set of global actions. Actions may still be disabled or hidden based
+         on the current state of the device.
          */
-        public: static const int config_globalActionsList = 0x01070035;
+        public: static const int config_globalActionsList = 0x0107003f;
         /**  Values for GPS configuration
          */
-        public: static const int config_gpsParameters = 0x01070039;
+        public: static const int config_gpsParameters = 0x01070043;
+        /**  Ignored sms packages
+         */
+        public: static const int config_ignored_sms_packages = 0x0107004e;
         /**  This string array can be overriden to add an additional DRM support for WebView EME.
  Array of "[keySystemName],[UuidOfMediaDrm]" @hide @SystemApi
  Example:
@@ -249,7 +277,7 @@ class ECO_PUBLIC R {
         /**  Vibrator pattern for a very short but reliable vibration for soft keyboard tap
  Vibrator pattern for a very short but reliable vibration for soft keyboard tap
          */
-        public: static const int config_keyboardTapVibePattern = 0x0107001c;
+        public: static const int config_keyboardTapVibePattern = 0x01070025;
         /**  Package name(s) containing location provider support.
          These packages can contain services implementing location providers,
          such as the Geocode Provider, Network Location Provider, and
@@ -264,11 +292,11 @@ class ECO_PUBLIC R {
          that matches the signature of at least one package on this list.
 
          */
-        public: static const int config_locationProviderPackageNames = 0x01070026;
+        public: static const int config_locationProviderPackageNames = 0x0107002f;
         /**  Vibrator pattern for feedback about a long screen/key press
  Vibrator pattern for feedback about a long screen/key press
          */
-        public: static const int config_longPressVibePattern = 0x0107001a;
+        public: static const int config_longPressVibePattern = 0x01070023;
         /**  Array of integer pairs controlling the rate at which the master volume changes
          in response to volume up and down key events.
          The first integer of each pair is compared against the current master volume
@@ -278,7 +306,7 @@ class ECO_PUBLIC R {
          when volume up is pressed.
  default: always increase volume by 5%
          */
-        public: static const int config_masterVolumeRamp = 0x0107000b;
+        public: static const int config_masterVolumeRamp = 0x01070014;
         /**  If the mobile hotspot feature requires provisioning, a package name and class name
         can be provided to launch a supported application that provisions the devices.
 
@@ -308,46 +336,76 @@ class ECO_PUBLIC R {
         <item>com.example.provisioning.Activity</item>
 
          */
-        public: static const int config_mobile_hotspot_provision_app = 0x01070015;
+        public: static const int config_mobile_hotspot_provision_app = 0x0107001e;
         /**  Configure mobile tcp buffer sizes in the form:
          rat-name:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
          If no value is found for the rat-name in use, the system default will be applied.
 
- Configure mobile tcp buffer sizes in the form:
-         rat-name:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
-         If no value is found for the rat-name in use, the system default will be applied.
-
          */
-        public: static const int config_mobile_tcp_buffers = 0x0107002c;
+        public: static const int config_mobile_tcp_buffers = 0x01070035;
         /**  Vibrator pattern to be used as the default for notifications
          that do not specify vibration but vibrate anyway because the device
          is in vibrate mode.
 
+ Vibrator pattern to be used as the default for notifications
+         that do not specify vibration but vibrate anyway because the device
+         is in vibrate mode.
+
          */
-        public: static const int config_notificationFallbackVibePattern = 0x0107002f;
+        public: static const int config_notificationFallbackVibePattern = 0x01070038;
+        /**  Vibrator pattern to be used as for notifications while alerts
+         are disabled (e.g. during phone calls) if enabled by the user.
+
+         */
+        public: static const int config_notificationNoAlertsVibePattern = 0x01070039;
         /**  The list of classes that should be added to the notification ranking pipline.
      See {@link com.android.server.notification.NotificationSignalExtractor}
          */
-        public: static const int config_notificationSignalExtractors = 0x01070031;
+        public: static const int config_notificationSignalExtractors = 0x0107003b;
         /**  Array of OEM specific USB mode override config.
          OEM can override a certain USB mode depending on ro.bootmode.
          Specify an array of below items to set override rule.
          [bootmode]:[original USB mode]:[USB mode used]
          */
-        public: static const int config_oemUsbModeOverride = 0x0107002b;
+        public: static const int config_oemUsbModeOverride = 0x01070034;
         /**  The list of ril radio technologies (see ServiceState.java) which only support
          a single data connection at one time.  This may change by carrier via
          overlays (some don't support multiple pdp on UMTS).  All unlisted radio
          tech types support unlimited types (practically only 2-4 used).
  EVDO_B
          */
-        public: static const int config_onlySingleDcAllowed = 0x0107002d;
+        public: static const int config_onlySingleDcAllowed = 0x01070036;
         /**  Don't use roaming icon for considered operators.
          A match on config_sameNamedOperatorConsideredRoaming supersedes a match on this.
          Can use mcc or mcc+mnc as item. For example, 302 or 21407.
          If operators, 21404 and 21407, make roaming agreements, user of 21404 should not see
          the roaming icon as using 21407 network.
          To do this, add 21407 item to values-mcc214-mnc04/config.xml
+ Tele2: Don't use roaming icon for T-Mo
+ Telfort: Don't use roaming icon for KPN
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Tele2: Don't use roaming icon for VIPnet
+ Noverca: Don't use roaming icon for TIM
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Vectone: Don't use roaming icon for T-Mobile
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Don't use roaming icon for considered operators
+ Sunalahti: Don't use roaming icon for Elisa
+ Don't use roaming icon for considered operators
+ Lycamobile: Don't use roaming icon for Vodafone
+ Vectone/Delight: Don't use roaming icon for Optimus/NOS
  Don't use roaming icon for considered operators
  Don't use roaming icon for considered operators
  Don't use roaming icon for considered operators
@@ -357,24 +415,23 @@ class ECO_PUBLIC R {
  Don't use roaming icon for considered operators
  Don't use roaming icon for considered operators
  Don't use roaming icon for considered operators
- Don't use roaming icon for considered operators
- Don't use roaming icon for considered operators
- Don't use roaming icon for considered operators
- Don't use roaming icon for considered operators
- Don't use roaming icon for considered operators
- Don't use roaming icon for considered operators
+ Virgin Mobile: Don't use roaming icon for Movistar
          */
-        public: static const int config_operatorConsideredNonRoaming = 0x01070032;
+        public: static const int config_operatorConsideredNonRoaming = 0x0107003c;
+        /**  Packages that are allowed to write killswitch values
+         */
+        public: static const int config_packagesAllowedAccessToKillSwitch = 0x0107004d;
         /**  Array of ConnectivityManager.TYPE_xxxx constants for networks that may only
          be controlled by systemOrSignature apps.
          */
-        public: static const int config_protectedNetworks = 0x0107000d;
+        public: static const int config_protectedNetworks = 0x01070016;
+        /**  Vibrator pattern for feedback about booting with safe mode disabled
+ Vibrator pattern for feedback about booting with safe mode disabled
+         */
+        public: static const int config_safeModeDisabledVibePattern = 0x01070028;
         /**  Vibrator pattern for feedback about booting with safe mode disabled
          */
-        public: static const int config_safeModeDisabledVibePattern = 0x0107001f;
-        /**  Vibrator pattern for feedback about booting with safe mode disabled
-         */
-        public: static const int config_safeModeEnabledVibePattern = 0x01070020;
+        public: static const int config_safeModeEnabledVibePattern = 0x01070029;
         /**  This is NOT just for same named operators unlike the name suggests (will blacklist regardless of name).
          A match on this supersedes a match on config_operatorConsideredNonRoaming.
          Uses "startsWith" so you can use a leading substring like the mcc or
@@ -393,12 +450,12 @@ class ECO_PUBLIC R {
  Show roaming icon though same named operators.
  Show roaming icon though same named operators.
          */
-        public: static const int config_sameNamedOperatorConsideredRoaming = 0x01070033;
+        public: static const int config_sameNamedOperatorConsideredRoaming = 0x0107003d;
         /**  List of paths to serial ports that are available to the serial manager.
          for example, /dev/ttyUSB0
 
          */
-        public: static const int config_serialPorts = 0x01070019;
+        public: static const int config_serialPorts = 0x01070022;
         /**  This config is used to check if the carrier requires converting destination
          number before sending out a SMS.
          Formats for this configuration as below:
@@ -412,7 +469,7 @@ class ECO_PUBLIC R {
              item but it doesn't match the current sim's gid, the last one without gid
              will be picked
          */
-        public: static const int config_sms_convert_destination_number_support = 0x0107003d;
+        public: static const int config_sms_convert_destination_number_support = 0x01070049;
         /**  National language locking shift tables to enable for SMS encoding.
          Decoding is always enabled. 3GPP TS 23.038 states that this feature
          should not be enabled until a formal request is issued by the relevant
@@ -424,7 +481,7 @@ class ECO_PUBLIC R {
          Example 2: devices sold in India should include tables 4 through 13
          to enable use of the new Release 9 tables for Indic languages.
          */
-        public: static const int config_sms_enabled_locking_shift_tables = 0x0107002a;
+        public: static const int config_sms_enabled_locking_shift_tables = 0x01070033;
         /**  National Language Identifier codes for the following two config items.
          (from 3GPP TS 23.038 V9.1.1 Table 6.2.1.2.4.1):
           0  - reserved
@@ -476,11 +533,11 @@ class ECO_PUBLIC R {
          Example 2: devices sold in India should include tables 4 through 13
            to enable use of the new Release 9 tables for Indic languages.
          */
-        public: static const int config_sms_enabled_single_shift_tables = 0x01070029;
+        public: static const int config_sms_enabled_single_shift_tables = 0x01070032;
         /**  Do not translate. Defines the slots for the right-hand side icons.  That is to say, the
          icons in the status bar that are not notifications.
          */
-        public: static const int config_statusBarIcons = 0x0107000a;
+        public: static const int config_statusBarIcons = 0x01070013;
         /**  default telephony hardware configuration for this platform.
 
  this string array should be overridden by the device to present a list
@@ -498,7 +555,7 @@ class ECO_PUBLIC R {
          those elements can carry.
 
          */
-        public: static const int config_telephonyHardware = 0x01070036;
+        public: static const int config_telephonyHardware = 0x01070040;
         /**  This string array can be overriden to enable test location providers initially.
  Array of "[locationProviderName],[requiresNetwork],
          [requiresSatellite],[requiresCell],[hasMonetaryCost],
@@ -512,18 +569,18 @@ class ECO_PUBLIC R {
         <item>network,false,false,false,false,true,true,true,1,2</item>
 
          */
-        public: static const int config_testLocationProviders = 0x01070027;
+        public: static const int config_testLocationProviders = 0x01070030;
         /**  List of regexpressions describing the interface (if any) that represent tetherable
          bluetooth interfaces.  If the device doesn't want to support tethering over bluetooth this
          should be empty.
  List of regexpressions describing the interface (if any) that represent tetherable
-         bluetooth interfaces.  If the device doesn't want to support tethering over bluetooth this
+                  bluetooth interfaces.  If the device doesn't want to support tethering over bluetooth this
          should be empty.
          */
-        public: static const int config_tether_bluetooth_regexs = 0x01070013;
+        public: static const int config_tether_bluetooth_regexs = 0x0107001c;
         /**  Dhcp range (min, max) to use for tethering purposes
          */
-        public: static const int config_tether_dhcp_range = 0x01070014;
+        public: static const int config_tether_dhcp_range = 0x0107001d;
         /**  Array of ConnectivityManager.TYPE_xxxx values allowable for tethering
  Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
     <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH
@@ -578,66 +635,133 @@ class ECO_PUBLIC R {
  Array of ConnectivityManager.TYPE_xxxx values allowable for tethering
  Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
     <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH
- Array of allowable ConnectivityManager network types for tethering
- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
-         [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH
- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
-         Please don't copy them, copy anything else.
  Array of ConnectivityManager.TYPE_xxxx values allowable for tethering
  Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
-         [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH or
-         [1,4,7,9] for TYPE_WIFI, TYPE_MOBILE_DUN, TYPE_BLUETOOTH and TYPE_ETHERNET
- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering
- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
-    <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH
+             <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH
          */
-        public: static const int config_tether_upstream_types = 0x01070016;
+        public: static const int config_tether_upstream_types = 0x0107001f;
         /**  List of regexpressions describing the interface (if any) that represent tetherable
          USB interfaces.  If the device doesn't want to support tething over USB this should
          be empty.  An example would be "usb.*"
  List of regexpressions describing the interface (if any) that represent tetherable
-         USB interfaces.  If the device doesn't want to support tething over USB this should
+                  USB interfaces.  If the device doesn't want to support tething over USB this should
          be empty.  An example would be "usb.*"
          */
-        public: static const int config_tether_usb_regexs = 0x01070010;
+        public: static const int config_tether_usb_regexs = 0x01070019;
         /**  List of regexpressions describing the interface (if any) that represent tetherable
          Wifi interfaces.  If the device doesn't want to support tethering over Wifi this
          should be empty.  An example would be "softap.*"
  List of regexpressions describing the interface (if any) that represent tetherable
-         Wifi interfaces.  If the device doesn't want to support tethering over Wifi this
+                  Wifi interfaces.  If the device doesn't want to support tethering over Wifi this
          should be empty.  An example would be "softap.*"
          */
-        public: static const int config_tether_wifi_regexs = 0x01070011;
+        public: static const int config_tether_wifi_regexs = 0x0107001a;
         /**  Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD
  Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD
  Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD
  Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD
          */
-        public: static const int config_twoDigitNumberPattern = 0x01070028;
+        public: static const int config_twoDigitNumberPattern = 0x01070031;
         /**  List of file paths for USB host busses to exclude from USB host support.
          For example, if the first USB bus on the device is used to communicate
          with the modem or some other restricted hardware, add "/dev/bus/usb/001/"
          to this list.  If this is empty, no parts of the host USB bus will be excluded.
 
          */
-        public: static const int config_usbHostBlacklist = 0x01070018;
+        public: static const int config_usbHostBlacklist = 0x01070021;
         /**  Vibrator pattern for feedback about touching a virtual key
  Vibrator pattern for feedback about touching a virtual key
          */
-        public: static const int config_virtualKeyVibePattern = 0x0107001b;
+        public: static const int config_virtualKeyVibePattern = 0x01070024;
         /**  service number convert map in roaming network.
  [dialstring],[replacement][,optional gid]
  service number convert map in roaming network.
  [dialstring],[replacement][,optional gid]
  service number convert map in roaming network.
          */
-        public: static const int dial_string_replace = 0x0107003b;
+        public: static const int dial_string_replace = 0x01070045;
         /**  Email address types from android.provider.Contacts. This could be used when adding a new e-mail address for a contact, for example.
          */
         public: static const int emailAddressTypes = 0x01070000;
         /**  Instant Message protocols/providers from android.provider.Contacts
          */
         public: static const int imProtocols = 0x01070001;
+        public: static const int live_display_entries = 0x01070010;
+        public: static const int live_display_summaries = 0x01070011;
+        public: static const int live_display_values = 0x01070012;
+        public: static const int locale_carrier_names = 0x01070048;
+        /**  Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Stub for Kurdish
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Stub for Asturian
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Stub for Luxembourgish
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+ Do not translate.
+         */
+        public: static const int maps_starting_lat_lng = 0x0107004f;
         /**  Do not translate.
  Do not translate.
  Do not translate.
@@ -706,76 +830,7 @@ class ECO_PUBLIC R {
  Do not translate.
  Do not translate.
          */
-        public: static const int maps_starting_lat_lng = 0x0107003e;
-        /**  Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
- Do not translate.
-         */
-        public: static const int maps_starting_zoom = 0x0107003f;
+        public: static const int maps_starting_zoom = 0x01070050;
         /**  XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else.
  This string array should be overridden by the device to present a list of network
@@ -787,22 +842,13 @@ class ECO_PUBLIC R {
          before automatically restore the default connection.  Set -1 if the connection
          does not require auto-restore.
  the 6th element indicates boot-time dependency-met value.
- This string array should be overridden by the device to present a list of network
-         attributes.  This is used by the connectivity manager to decide which networks can coexist
-         based on the hardware
- An Array of "[Connection name],[ConnectivityManager.TYPE_xxxx],
-         [associated radio-type],[priority],[restoral-timer(ms)],[dependencyMet]
- the 5th element "resore-time" indicates the number of milliseconds to delay
-         before automatically restore the default connection.  Set -1 if the connection
-         does not require auto-restore.
- the 6th element indicates boot-time dependency-met value.
          */
-        public: static const int networkAttributes = 0x0107000c;
+        public: static const int networkAttributes = 0x01070015;
         /**  networks that don't want data deactivate when shutdown the phone
          note this is dependent on the operator of the network we're on,
          not operator on the SIM
          */
-        public: static const int networks_not_clear_data = 0x0107003c;
+        public: static const int networks_not_clear_data = 0x01070046;
         /**  If EMS is not supported, framework breaks down EMS into single segment SMS
          and adds page info " x/y". This config is used to set which carrier doesn't
          support EMS and whether page info should be added at the beginning or the end.
@@ -811,10 +857,21 @@ class ECO_PUBLIC R {
          Examples: <item>simOperatorNumber;position;gid(optional)</item>>
 
          */
-        public: static const int no_ems_support_sim_operators = 0x01070038;
+        public: static const int no_ems_support_sim_operators = 0x01070042;
+        /**  Do not translate. Defines the mapping of notification package names
+         from the actual triggering package to the user selectable package.
+         E.g. GTalk notifications come via Google Services Framework
+         Format: [triggering package]|[user package]
+         */
+        public: static const int notification_light_package_mapping = 0x0107000c;
         /**  Organization types from android.provider.Contacts. This could be used when adding a new organization for a contact, for example.
          */
         public: static const int organizationTypes = 0x01070002;
+        public: static const int origin_carrier_names = 0x01070047;
+        /**  Performance profiles
+         */
+        public: static const int perf_profile_entries = 0x0107000e;
+        public: static const int perf_profile_values = 0x0107000f;
         /**  Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example.
          */
         public: static const int phoneTypes = 0x01070003;
@@ -834,13 +891,15 @@ class ECO_PUBLIC R {
          based on the hardware
  An Array of "[ConnectivityManager connectionType],
                       [# simultaneous connection types]"
- This string array should be overridden by the device to present a list of radio
-         attributes.  This is used by the connectivity manager to decide which networks can coexist
-         based on the hardware
- An Array of "[ConnectivityManager connectionType],
-                      [# simultaneous connection types]"
          */
-        public: static const int radioAttributes = 0x0107000e;
+        public: static const int radioAttributes = 0x01070017;
+        /**  Do not translate. Defines the shutdown actions passed to the kernel.
+         The first item should be empty for regular reboot.
+         */
+        public: static const int shutdown_reboot_actions = 0x0107000b;
+        /**  Defines the shutdown options shown in the reboot dialog.
+         */
+        public: static const int shutdown_reboot_options = 0x0107000a;
         /**  Used in LocalePicker
          */
         public: static const int special_locale_codes = 0x01070008;
@@ -2495,7 +2554,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
-        public: static const int closeItemLayout = 0x01010563;
+        public: static const int closeItemLayout = 0x01010564;
         /**  The unicode value or comma-separated values that this key outputs.
          <p>May be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
 <p>May be an integer value, such as "<code>100</code>".
@@ -2855,6 +2914,7 @@ containing a value of this type.
              physical screen size has changed such as switching to an external
              display. </td></tr>
 <tr><td><code>layoutDirection</code></td><td>0x2000</td><td> The layout direction has changed. For example going from LTR to RTL. </td></tr>
+<tr><td><code>themeChange</code></td><td>0x300000</td><td> Theme has changed, This should be an ORed value of all ActivityInfo.CONFIG_THEME_* </td></tr>
 <tr><td><code>fontScale</code></td><td>0x40000000</td><td> The font scaling factor has changed, that is the user has
              selected a new global font size. </td></tr>
 </table>
@@ -4009,7 +4069,7 @@ containing a value of this type.
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
-        public: static const int externalRouteEnabledDrawable = 0x01010575;
+        public: static const int externalRouteEnabledDrawable = 0x01010576;
         /**  This is the amount by which to multiply the tension.
          <p>Must be a floating point value, such as "<code>1.2</code>".
 <p>This may also be a reference to a resource (in the form
@@ -6101,7 +6161,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
-        public: static const int keyboardViewStyle = 0x0101054e;
+        public: static const int keyboardViewStyle = 0x0101054f;
         /**  This enum provides the same keycode values as can be found in
         {@link android.view.KeyEvent}.
          <p>Must be one of the following constant values.</p>
@@ -13995,72 +14055,82 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public: static const int zAdjustment = 0x010101c1;
     };
     public: class bool_ {
-        public: static const int action_bar_embed_tabs = 0x01120004;
-        public: static const int action_bar_embed_tabs_pre_jb = 0x01120005;
-        public: static const int action_bar_expanded_action_views_exclusive = 0x01120009;
+        public: static const int action_bar_embed_tabs = 0x01120005;
+        public: static const int action_bar_embed_tabs_pre_jb = 0x01120006;
+        public: static const int action_bar_expanded_action_views_exclusive = 0x0112000a;
+        /**  Boolean to enable the advanced settings switch
+         */
+        public: static const int config_advancedSettingsMode = 0x011200a0;
         /**  Whether action menu items should obey the "withText" showAsAction
          flag. This may be set to false for situations where space is
          extremely limited.
          */
-        public: static const int config_allowActionMenuItemTextWithIcon = 0x01120051;
+        public: static const int config_allowActionMenuItemTextWithIcon = 0x01120058;
         /**  If true, the screen can be rotated via the accelerometer in all 4
          rotations as the default behavior.
  If true, the screen can be rotated via the accelerometer in all 4
          rotations as the default behavior.
          */
-        public: static const int config_allowAllRotations = 0x01120026;
+        public: static const int config_allowAllRotations = 0x01120029;
         /**  Set to true if the RSSI should always display CDMA signal strength even on EVDO
          */
-        public: static const int config_alwaysUseCdmaRssi = 0x0112004d;
+        public: static const int config_alwaysUseCdmaRssi = 0x01120054;
         /**  If this is true, the screen will fade off.
  If this is true, the screen will fade off.
          */
-        public: static const int config_animateScreenLights = 0x01120023;
+        public: static const int config_animateScreenLights = 0x01120026;
         /**  Don't name config resources like this.  It should look like config_annoyDianne
          */
-        public: static const int config_annoy_dianne = 0x01120020;
-        public: static const int config_auto_attach_data_on_creation = 0x01120077;
+        public: static const int config_annoy_dianne = 0x01120023;
+        /**  Configuartion to support 7bit Ascii encoding and decoding
+         for long messages.
+         */
+        public: static const int config_ascii_7bit_support_for_long_message = 0x01120087;
+        public: static const int config_auto_attach_data_on_creation = 0x01120081;
         /**  Flag indicating whether the we should enable the automatic brightness in Settings.
          Software implementation will be used if config_hardware_auto_brightness_available is not set
- Flag indicating whether the we should enable the automatic brightness in Settings.
-         Software implementation will be used if config_hardware_auto_brightness_available is not set
+ Flag indicating whether we should enable the automatic brightness in Settings.
+                  config_hardware_automatic_brightness_available is not set, so we will use software implementation
          */
-        public: static const int config_automatic_brightness_available = 0x0112001f;
+        public: static const int config_automatic_brightness_available = 0x01120022;
         /**  Device configuration indicating whether we should avoid using accelerated graphics
          in certain places to reduce RAM footprint.  This is ignored if ro.config.low_ram
          is true (in that case this is assumed true as well).  It can allow you to tune down
          your device's memory use without going to the point of causing applications to turn
          off features.
          */
-        public: static const int config_avoidGfxAccel = 0x01120015;
+        public: static const int config_avoidGfxAccel = 0x01120017;
+        /**  Indicate whether the SD card is accessible without removing the battery.
+         */
+        public: static const int config_batterySdCardAccessibility = 0x0112002f;
         /**  Boolean indicating if current platform need do one-time bluetooth address
          re-validation
          */
-        public: static const int config_bluetooth_address_validation = 0x01120041;
+        public: static const int config_bluetooth_address_validation = 0x01120048;
         /**  Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP
          */
-        public: static const int config_bluetooth_default_profiles = 0x01120045;
+        public: static const int config_bluetooth_default_profiles = 0x0112004c;
         /**  Boolean indicating if current platform supports BLE peripheral mode
          */
-        public: static const int config_bluetooth_le_peripheral_mode_supported = 0x01120042;
+        public: static const int config_bluetooth_le_peripheral_mode_supported = 0x01120049;
         /**  Boolean indicating if current platform supports bluetooth SCO for off call
     use cases
          */
-        public: static const int config_bluetooth_sco_off_call = 0x0112003f;
+        public: static const int config_bluetooth_sco_off_call = 0x01120046;
         /**  Enables built-in SIP phone capability
          */
-        public: static const int config_built_in_sip_phone = 0x01120047;
+        public: static const int config_built_in_sip_phone = 0x0112004e;
         /**  Whether camera shutter sound is forced or not  (country specific).
  Whether camera shutter sound is forced or not  (country specific).
  Whether camera shutter sound is forced or not  (country specific).
          */
-        public: static const int config_camera_sound_forced = 0x01120063;
+        public: static const int config_camera_sound_forced = 0x0112006c;
         /**  Control whether being in the car dock should enable accelerometer based
          screen orientation.  This defaults to true because putting a device in
          a car dock make the accelerometer more a physical input (like a lid).
          */
-        public: static const int config_carDockEnablesAccelerometer = 0x0112002a;
+        public: static const int config_carDockEnablesAccelerometer = 0x0112002d;
         /**  Flag specifying whether VoLTE & VT should be available for carrier: independent of
          carrier provisioning. If false: hard disabled. If true: then depends on carrier
          provisioning, availability etc
@@ -14071,14 +14141,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          carrier provisioning. If false: hard disabled. If true: then depends on carrier
          provisioning, availability etc
          */
-        public: static const int config_carrier_volte_vt_available = 0x01120074;
+        public: static const int config_carrier_volte_vt_available = 0x0112007e;
         /**  Set to true to add links to Cell Broadcast app from Settings and MMS app.
- Set to true to add links to Cell Broadcast app from Settings and MMS app.
- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
-         Please don't copy them, copy anything else.
- Set to true to add links to Cell Broadcast app from Settings and MMS app.
          */
-        public: static const int config_cellBroadcastAppLinks = 0x0112005b;
+        public: static const int config_cellBroadcastAppLinks = 0x01120062;
+        /**  set to false if we dont need to consider data
+         service state to display signal strength bars
+         */
+        public: static const int config_combined_signal = 0x01120098;
         /**  Control whether being in the desk dock should enable accelerometer
          based screen orientation.  This defaults to true because it is
          common for desk docks to be sold in a variety of form factors
@@ -14086,39 +14156,43 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          apart and the docks cannot report their true orientation on their own,
          we rely on gravity to determine the effective orientation.
          */
-        public: static const int config_deskDockEnablesAccelerometer = 0x01120029;
+        public: static const int config_deskDockEnablesAccelerometer = 0x0112002c;
+        public: static const int config_deviceHasVariableButtonBrightness = 0x0112003d;
         /**  Flag specifying whether VoLTE & VT is availasble on device
          */
-        public: static const int config_device_volte_vt_available = 0x01120073;
+        public: static const int config_device_volte_vt_available = 0x0112007d;
         /**  Allow the menu hard key to be disabled in LockScreen on some devices
          */
-        public: static const int config_disableMenuKeyInLockScreen = 0x0112002f;
+        public: static const int config_disableMenuKeyInLockScreen = 0x01120035;
         /**  If true, then we do not ask user for permission for apps to connect to USB devices.
          Do not set this to true for production devices. Doing so will cause you to fail CTS.
          */
-        public: static const int config_disableUsbPermissionDialogs = 0x0112005e;
+        public: static const int config_disableUsbPermissionDialogs = 0x01120066;
+        /**  display for radio tech
+         */
+        public: static const int config_display_rat = 0x0112008c;
         /**  Set to true if we need to not prefer an APN.
          This is being added to enable a simple scenario of pre-paid
          provisioning on some carriers, working around a bug (7305641)
          where if the preferred is used we don't try the others.
          */
-        public: static const int config_dontPreferApn = 0x01120064;
+        public: static const int config_dontPreferApn = 0x0112006d;
         /**  If true, the doze component is not started until after the screen has been
          turned off and the screen off animation has been performed.
          */
-        public: static const int config_dozeAfterScreenOff = 0x01120058;
+        public: static const int config_dozeAfterScreenOff = 0x0112005f;
         /**  If supported and enabled, are dreams activated when docked? (by default)
          */
-        public: static const int config_dreamsActivatedOnDockByDefault = 0x01120055;
+        public: static const int config_dreamsActivatedOnDockByDefault = 0x0112005c;
         /**  If supported and enabled, are dreams activated when asleep and charging? (by default)
          */
-        public: static const int config_dreamsActivatedOnSleepByDefault = 0x01120056;
+        public: static const int config_dreamsActivatedOnSleepByDefault = 0x0112005d;
         /**  If supported, are dreams enabled? (by default)
          */
-        public: static const int config_dreamsEnabledByDefault = 0x01120054;
+        public: static const int config_dreamsEnabledByDefault = 0x0112005b;
         /**  Are we allowed to dream while not plugged in?
          */
-        public: static const int config_dreamsEnabledOnBattery = 0x01120057;
+        public: static const int config_dreamsEnabledOnBattery = 0x0112005e;
         /**  Specifies whether the dreams feature should be supported.
          When true, the system will allow the user to configure dreams (screensavers)
          to launch when a user activity timeout occurs or the system is told to nap.
@@ -14128,19 +14202,14 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          doze component is specified below since dreaming will supercede dozing and
          will prevent the system from entering a low power state until the dream ends.
          */
-        public: static const int config_dreamsSupported = 0x01120053;
+        public: static const int config_dreamsSupported = 0x0112005a;
         /**  If this value is true, duplicate Source/Destination port fields
          in WDP header of some carriers OMADM wap push are supported.
          ex: MSGTYPE-TotalSegments-CurrentSegment
              -SourcePortDestPort-SourcePortDestPort-OMADM PDU
          If false, not supported.
- If this value is true, duplicate Source/Destination port fields
-         in WDP header of some carriers OMADM wap push are supported.
-         ex: MSGTYPE-TotalSegments-CurrentSegment
-             -SourcePortDestPort-SourcePortDestPort-OMADM PDU
-         If false, not supported.
          */
-        public: static const int config_duplicate_port_omadm_wappush = 0x0112004e;
+        public: static const int config_duplicate_port_omadm_wappush = 0x01120055;
         /**  Whether to enable Hardware Activity-Recognition overlay which allows Hardware
          Activity-Recognition to be replaced by an app at run-time. When disabled, only the
          config_activityRecognitionHardwarePackageName package will be searched for
@@ -14150,7 +14219,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          wants to disable the overlay mechanism can set it to false.
 
          */
-        public: static const int config_enableActivityRecognitionHardwareOverlay = 0x0112003e;
+        public: static const int config_enableActivityRecognitionHardwareOverlay = 0x01120045;
         /**  Whether to enable fused location provider overlay which allows fused
          location provider to be replaced by an app at run-time. When disabled,
          only the config_fusedLocationProviderPackageName package will be
@@ -14161,7 +14230,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          to false.
 
          */
-        public: static const int config_enableFusedLocationOverlay = 0x0112003a;
+        public: static const int config_enableFusedLocationOverlay = 0x01120041;
         /**  Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
          config_geocoderProviderPackageName package will be searched for
@@ -14171,7 +14240,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          disable the overlay mechanism can set it to false.
 
          */
-        public: static const int config_enableGeocoderOverlay = 0x0112003c;
+        public: static const int config_enableGeocoderOverlay = 0x01120043;
         /**  Whether to enable geofence overlay which allows geofence to be replaced
          by an app at run-time. When disabled, only the
          config_geofenceProviderPackageName package will be searched for
@@ -14181,7 +14250,10 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          wants to disable the overlay mechanism can set it to false.
 
          */
-        public: static const int config_enableGeofenceOverlay = 0x0112003d;
+        public: static const int config_enableGeofenceOverlay = 0x01120044;
+        /**  True if the gesture service should be started at system start
+         */
+        public: static const int config_enableGestureService = 0x01120082;
         /**  Whether to enable Hardware FLP overlay which allows Hardware FLP to be
          replaced by an app at run-time. When disabled, only the
          config_hardwareFlpPackageName package will be searched for Hardware Flp,
@@ -14191,21 +14263,21 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          disable the overlay mechanism can set it to false.
 
          */
-        public: static const int config_enableHardwareFlpOverlay = 0x0112003b;
+        public: static const int config_enableHardwareFlpOverlay = 0x01120042;
         /**  Don't show lock screen before unlock screen (PIN/pattern/password)
          */
-        public: static const int config_enableLockBeforeUnlockScreen = 0x01120030;
+        public: static const int config_enableLockBeforeUnlockScreen = 0x01120036;
         /**  Disable lockscreen rotation by default
  Enable lockscreen rotation
          */
-        public: static const int config_enableLockScreenRotation = 0x01120031;
+        public: static const int config_enableLockScreenRotation = 0x01120037;
         /**  Enable lockscreen translucent decor by default
          */
-        public: static const int config_enableLockScreenTranslucentDecor = 0x01120032;
+        public: static const int config_enableLockScreenTranslucentDecor = 0x01120038;
         /**  Whether UI for multi user should be shown
-  Whether Multiuser UI should be shown
+ Whether UI for multi user should be shown
          */
-        public: static const int config_enableMultiUserUI = 0x0112005d;
+        public: static const int config_enableMultiUserUI = 0x01120065;
         /**  Whether to enable network location overlay which allows network
          location provider to be replaced by an app at run-time. When disabled,
          only the config_networkLocationProviderPackageName package will be
@@ -14216,16 +14288,16 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          to false.
 
          */
-        public: static const int config_enableNetworkLocationOverlay = 0x01120039;
+        public: static const int config_enableNetworkLocationOverlay = 0x01120040;
         /**  If this is true, key chords can be used to take a screenshot on the device.
          */
-        public: static const int config_enableScreenshotChord = 0x01120024;
+        public: static const int config_enableScreenshotChord = 0x01120027;
         /**  Enable translucent decor by default
          */
-        public: static const int config_enableTranslucentDecor = 0x01120033;
+        public: static const int config_enableTranslucentDecor = 0x01120039;
         /**  True if WallpaperService is enabled
          */
-        public: static const int config_enableWallpaperService = 0x01120038;
+        public: static const int config_enableWallpaperService = 0x0112003f;
         /**  Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
          Here are a few of them:
@@ -14238,48 +14310,60 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          * The remote submix module "audio.r_submix.default" must be installed on the device.
          * The device must be provisioned with HDCP keys (for protected content).
 
- Whether WiFi display is supported by this device.
-         There are many prerequisites for this feature to work correctly.
-         Here are a few of them:
-         * The WiFi radio must support WiFi P2P.
-         * The WiFi radio must support concurrent connections to the WiFi display and
-           to an access point.
-         * The Audio Flinger audio_policy.conf file must specify a rule for the "r_submix"
-           remote submix module.  This module is used to record and stream system
-           audio output to the WiFi display encoder in the media server.
-         * The remote submix module "audio.r_submix.default" must be installed on the device.
-         * The device must be provisioned with HDCP keys (for protected content).
-
          */
-        public: static const int config_enableWifiDisplay = 0x0112005f;
+        public: static const int config_enableWifiDisplay = 0x01120068;
         /**  Enable emergency call when sim is locked or puk locked. Some countries/carriers do not
          allow emergency calls to be placed without the IMSI, which is locked in the SIM.
          If so, this should be set to 'false' in an overlay.
          */
-        public: static const int config_enable_emergency_call_while_sim_locked = 0x01120036;
+        public: static const int config_enable_emergency_call_while_sim_locked = 0x0112003c;
+        /**  Configuration to sending and receiving Mms when mobile data is disable.
+         */
+        public: static const int config_enable_mms_with_mobile_data_off = 0x01120092;
         /**  Enable puk unlockscreen by default.
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer
          */
-        public: static const int config_enable_puk_unlock_screen = 0x01120035;
+        public: static const int config_enable_puk_unlock_screen = 0x0112003b;
+        /**  Configuration to enable non-default PDP during IWLAN
+         */
+        public: static const int config_feature_iwlan_enabled = 0x01120097;
+        /**  Support for disabling to fetch APN from OMH card
+         for some cdma carriers
+         */
+        public: static const int config_fetch_apn_from_omh_card = 0x0112009b;
         /**  Flag indicating that this device does not rotate and will always remain in its default
          orientation. Activities that desire to run in a non-compatible orientation will be run
          from an emulated display within the physical display.
          */
-        public: static const int config_forceDefaultOrientation = 0x01120069;
+        public: static const int config_forceDefaultOrientation = 0x01120072;
+        /**  Workaround for devices with broken keyboards
+         */
+        public: static const int config_forceDisableHardwareKeyboard = 0x01120073;
+        /**  set this value to true to set network mode as global during boot up
+         */
+        public: static const int config_global_phone_enabled = 0x01120089;
         /**  Override the DPad detection behavior for configuration purposes
          */
-        public: static const int config_hasPermanentDpad = 0x0112006b;
+        public: static const int config_hasPermanentDpad = 0x01120075;
         /**  default device has recents property
          */
-        public: static const int config_hasRecents = 0x0112006d;
+        public: static const int config_hasRecents = 0x01120077;
+        /**  If a dock provides a lid switch, that lid can be removed. This
+         setting is used to determine, whether lidOpenRotation has to be
+         applied.
+         */
+        public: static const int config_hasRemovableLid = 0x0112009d;
         /**  Is the device capable of hot swapping an UICC Card
  Is the device capable of hot swapping an UICC Card
          */
-        public: static const int config_hotswapCapable = 0x01120034;
+        public: static const int config_hotswapCapable = 0x0112003a;
+        /**  Is the battery LED intrusive? Used to decide if there should be a disable option
+         */
+        public: static const int config_intrusiveBatteryLed = 0x01120033;
         /**  Is the notification LED intrusive? Used to decide if there should be a disable option
  Is the notification LED intrusive? Used to decide if there should be a disable option
          */
-        public: static const int config_intrusiveNotificationLed = 0x0112002e;
+        public: static const int config_intrusiveNotificationLed = 0x01120031;
         /**  Indicate whether closing the lid causes the device to go to sleep and opening
          it causes the device to wake up.
          The default is false.
@@ -14287,20 +14371,30 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          it causes the device to wake up.
          The default is false.
          */
-        public: static const int config_lidControlsSleep = 0x01120028;
+        public: static const int config_lidControlsSleep = 0x0112002b;
+        /**  Is the device LTE capable
+         */
+        public: static const int config_lte_capable = 0x01120088;
         /**  If this value is true, The mms content-disposition field is supported correctly.
          If false, Content-disposition fragments are ignored
  If this value is true, The mms content-disposition field is supported correctly.
          If false, Content-disposition fragments are ignored
  If this value is true, The mms content-disposition field is supported correctly.
          If false, Content-disposition fragments are ignored
- The mms content disposition field is supported correctly. if it is true
-         If false, some fields of content disposition do not follow wap-230-wsp-20010705-a.rdf
- If this value is true, The mms content-disposition field is supported correctly.
-         If false, Content-disposition fragments are ignored
          */
-        public: static const int config_mms_content_disposition_support = 0x0112004c;
-        public: static const int config_networkSamplingWakesDevice = 0x01120075;
+        public: static const int config_mms_content_disposition_support = 0x01120053;
+        /**  monitor locale change
+         */
+        public: static const int config_monitor_locale_change = 0x0112008b;
+        /**  Does the battery LED support multiple colors?
+         Used to decide if the user can change the colors
+         */
+        public: static const int config_multiColorBatteryLed = 0x01120034;
+        /**  Does the notification LED support multiple colors?
+         Used to decide if the user can change the colors
+         */
+        public: static const int config_multiColorNotificationLed = 0x01120032;
+        public: static const int config_networkSamplingWakesDevice = 0x0112007f;
         /**  Power Management: Specifies whether to decouple the auto-suspend state of the
          device from the display on/off state.
 
@@ -14320,7 +14414,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          Refer to autosuspend.h for details.
 
          */
-        public: static const int config_powerDecoupleAutoSuspendModeFromDisplay = 0x01120059;
+        public: static const int config_powerDecoupleAutoSuspendModeFromDisplay = 0x01120060;
         /**  Power Management: Specifies whether to decouple the interactive state of the
          device from the display on/off state.
 
@@ -14339,20 +14433,53 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          Refer to power.h for details.
 
          */
-        public: static const int config_powerDecoupleInteractiveModeFromDisplay = 0x0112005a;
+        public: static const int config_powerDecoupleInteractiveModeFromDisplay = 0x01120061;
+        /**  Configuration that determines if PROTOCOL_ERRORS is to be treated as a
+         permanent error
+ Configuration that determines if PROTOCOL_ERRORS is to be treated as
+         a permamnent error
+ Configuration that determines if PROTOCOL_ERRORS is to be treated as
+         a permamnent error
+ Configuration that determines if PROTOCOL_ERRORS is to be treated as
+         a permamnent error
+ Configuration that determines if PROTOCOL_ERRORS is to be treated as
+         a permamnent error
+         */
+        public: static const int config_protocol_errors_perm_failure = 0x0112008f;
+        /**  Default value for proximity check on screen wake
+         NOTE ! - Enable for devices that have a fast response proximity sensor (ideally < 300ms)
+
+         */
+        public: static const int config_proximityCheckOnWake = 0x01120099;
+        /**  Configuration to restart radio upon PDP_DEACTIVATE with
+         error cause as Regular deactivation(36).
+         */
+        public: static const int config_radio_reset_on_regular_deactivation = 0x01120090;
+        /**  Configuration that determines if ACTIVATE_REJECT_GGSN is to be treated as
+         a permanent error
+ Configuration that determines if ACTIVATE_REJECT_GGSN is to be
+         treated as a permanent error
+ Configuration that determines if ACTIVATE_REJECT_GGSN is to be
+         treated as a permanent error
+ Configuration that determines if ACTIVATE_REJECT_GGSN is to be
+         treated as a permanent error
+ Configuration that determines if ACTIVATE_REJECT_GGSN is to be
+         treated as a permanent error
+         */
+        public: static const int config_reject_ggsn_perm_failure = 0x0112008e;
         /**  Boolean indicating if RADIO POWER OFF is required on receiving SIM REFRESH with RESET.
          This will be handled by modem if it is false.
          */
-        public: static const int config_requireRadioPowerOffOnSimRefreshReset = 0x01120066;
+        public: static const int config_requireRadioPowerOffOnSimRefreshReset = 0x0112006f;
         /**  Set to true if after a provisioning apn the radio should be restarted
          */
-        public: static const int config_restartRadioAfterProvisioning = 0x01120065;
+        public: static const int config_restartRadioAfterProvisioning = 0x0112006e;
         /**  Flag indicating whether radio is to be restarted on the error of
          PDP_FAIL_REGULAR_DEACTIVATION/0x24
  Flag indicating whether radio is to be restarted on the error of
          PDP_FAIL_REGULAR_DEACTIVATION/0x24
          */
-        public: static const int config_restart_radio_on_pdp_fail_regular_deactivation = 0x01120079;
+        public: static const int config_restart_radio_on_pdp_fail_regular_deactivation = 0x01120084;
         /**  If true, the direction rotation is applied to get to an application's requested
          orientation is reversed.  Normally, the model is that landscape is
          clockwise from portrait; thus on a portrait device an app requesting
@@ -14360,7 +14487,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          app requesting portrait will cause a counter-clockwise rotation.  Setting
          true here reverses that logic.
          */
-        public: static const int config_reverseDefaultRotation = 0x01120027;
+        public: static const int config_reverseDefaultRotation = 0x0112002a;
         /**  Whether safe headphone volume is enabled or not (country specific).
  Whether safe headphone volume is enabled or not (country specific).
  Whether safe headphone volume is enabled or not (country specific).
@@ -14370,36 +14497,52 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
  Whether safe headphone volume is enabled or not (country specific).
  Whether safe headphone volume is enabled or not (country specific).
          */
-        public: static const int config_safe_media_volume_enabled = 0x01120061;
+        public: static const int config_safe_media_volume_enabled = 0x0112006a;
+        /**  Boolean to enable stk functionality on Samsung phones
+         */
+        public: static const int config_samsung_stk = 0x0112009c;
         /**  Flag indicating whether the AUDIO_BECOMING_NOISY notification should
          be sent during a change to the audio output device.
          */
-        public: static const int config_sendAudioBecomingNoisy = 0x01120012;
+        public: static const int config_sendAudioBecomingNoisy = 0x01120014;
+        /**  Configuration to send sms on 1x when UE is attached to eHRPD and there is an active
+         1xRTT voice call, irrespective of IMS registration state
+         */
+        public: static const int config_send_sms1x_on_voice_call = 0x01120067;
+        /**  Configuartion to set zen mode when silent mode is on
+         */
+        public: static const int config_setZenModeWhenSilentModeOn = 0x01120093;
         /**  Flag indicating whether the surface flinger has limited
          alpha compositing functionality in hardware.  If set, the window
          manager will disable alpha trasformation in animations where not
          strictly needed.
          */
-        public: static const int config_sf_limitedAlpha = 0x0112000d;
+        public: static const int config_sf_limitedAlpha = 0x0112000f;
         /**  Flag indicating whether the surface flinger is inefficient
          at performing a blur.  Used by parts of the UI to turn off
          the blur effect where it isn't worth the performance hit.
          As of Honeycomb, blurring is not supported anymore.
          */
-        public: static const int config_sf_slowBlur = 0x0112000f;
+        public: static const int config_sf_slowBlur = 0x01120011;
         /**  Sets whether menu shortcuts should be displayed on panel menus when
          a keyboard is present.
          */
-        public: static const int config_showMenuShortcutsWhenKeyboardPresent = 0x01120049;
+        public: static const int config_showMenuShortcutsWhenKeyboardPresent = 0x01120050;
         /**  Whether a software navigation bar should be shown. NOTE: in the future this may be
          autodetected from the Configuration.
  Whether a software navigation bar should be shown. NOTE: in the future this may be
          autodetected from the Configuration.
          */
-        public: static const int config_showNavigationBar = 0x0112004f;
+        public: static const int config_showNavigationBar = 0x01120056;
+        /**  Setting to false will disable CM's IME switcher implementation for tablets
+         */
+        public: static const int config_show_cmIMESwitcher = 0x0112009a;
+        /**  Configuartion to support SIM refresh in STK command for dual mode card.
+         */
+        public: static const int config_sim_refresh_for_dual_mode_card = 0x0112008a;
         /**  Enables SIP on WIFI only
          */
-        public: static const int config_sip_wifi_only = 0x01120046;
+        public: static const int config_sip_wifi_only = 0x0112004d;
         /**  Flag indicating whether the current device allows sms service.
          If true, this means that the device supports both sending and
          receiving sms via the telephony network.
@@ -14409,25 +14552,33 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
          Note: Disable SMS also disable voicemail waiting sms,
                cell broadcasting sms, and MMS.
          */
-        public: static const int config_sms_capable = 0x01120044;
+        public: static const int config_sms_capable = 0x0112004b;
         /** From SmsMessage
 Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         string that's stored in 8-bit unpacked format) characters.
          */
-        public: static const int config_sms_decode_gsm_8bit_data = 0x01120076;
-        public: static const int config_sms_force_7bit_encoding = 0x0112007b;
+        public: static const int config_sms_decode_gsm_8bit_data = 0x01120080;
+        public: static const int config_sms_force_7bit_encoding = 0x01120086;
         /**  If this value is true, Sms encoded as octet is decoded by utf8 decoder.
          If false, decoded by Latin decoder.
- sms encoded as octet is decoded by utf8 decoder. if it is true
          */
-        public: static const int config_sms_utf8_support = 0x0112004b;
+        public: static const int config_sms_utf8_support = 0x01120052;
+        /**  Whether to enable softap extention feature
+         */
+        public: static const int config_softap_extention = 0x0112000c;
         /**  Flag indicating if the speed up audio on mt call code should be executed
          */
-        public: static const int config_speed_up_audio_on_mt_calls = 0x01120067;
+        public: static const int config_speed_up_audio_on_mt_calls = 0x01120070;
+        /**  spn display control
+         */
+        public: static const int config_spn_display_control = 0x0112008d;
         /**  set to false if we need to show user confirmation
          when alpha identifier is not provided by the UICC
          */
-        public: static const int config_stkNoAlphaUsrCnf = 0x0112006a;
+        public: static const int config_stkNoAlphaUsrCnf = 0x01120074;
+        /**  Boolean to enable Stylus gestures
+         */
+        public: static const int config_stylusGestures = 0x0112009e;
         /**  Auto-rotation behavior
  If true, enables auto-rotation features using the accelerometer.
          Otherwise, auto-rotation is disabled.  Applications may still request
@@ -14437,68 +14588,68 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          still use the accelerometer to determine the orientation, such as when
          docked if the dock is configured to enable the accelerometer.
          */
-        public: static const int config_supportAutoRotation = 0x01120025;
+        public: static const int config_supportAutoRotation = 0x01120028;
         /**  Indicate whether to allow the device to suspend when the screen is off
          due to the proximity sensor.  This resource should only be set to true
          if the sensor HAL correctly handles the proximity sensor as a wake-up source.
          Otherwise, the device may fail to wake out of suspend reliably.
          The default is false.
- Indicate whether to allow the device to suspend when the screen is off
-         due to the proximity sensor.  This resource should only be set to true
-         if the sensor HAL correctly handles the proximity sensor as a wake-up source.
-         Otherwise, the device may fail to wake out of suspend reliably.
-         The default is false.
          */
-        public: static const int config_suspendWhenScreenOffDueToProximity = 0x0112002b;
+        public: static const int config_suspendWhenScreenOffDueToProximity = 0x0112002e;
         /**  Enables swipe versus poly-finger touch disambiguation in the KeyboardView
          */
-        public: static const int config_swipeDisambiguation = 0x01120037;
+        public: static const int config_swipeDisambiguation = 0x0112003e;
         /**  Config determines whether to update phone object when voice registration
          state changes. Voice radio tech change will always trigger an update of
          phone object irrespective of this config
          */
-        public: static const int config_switch_phone_on_voice_reg_state_change = 0x0112007a;
+        public: static const int config_switch_phone_on_voice_reg_state_change = 0x01120085;
         /**  The default value if the SyncStorageEngine should sync automatically or not
          */
-        public: static const int config_syncstorageengine_masterSyncAutomatically = 0x0112005c;
-        /**  The VoiceMail default value is displayed to my own number if it is true
- The VoiceMail default value is displayed to my own number if it is true
+        public: static const int config_syncstorageengine_masterSyncAutomatically = 0x01120064;
+        /**  Configuartion to support ESN Tracker
          */
-        public: static const int config_telephony_use_own_number_for_voicemail = 0x0112004a;
+        public: static const int config_telephony_ESN_Tracker_enabled = 0x01120094;
+        /**  The VoiceMail default value is displayed to my own number if it is true
+         */
+        public: static const int config_telephony_use_own_number_for_voicemail = 0x01120051;
+        /**  Support in Surfaceflinger for blur layers.
+         NOTE: This requires additional hardware-specific code.
+         */
+        public: static const int config_ui_blur_enabled = 0x0112009f;
         /**  Enables or disables fading edges when marquee is enabled in TextView.
          Off by default, since the framebuffer readback used to implement the
          fading edges is prohibitively expensive on most GPUs.
- Make things go fast
          */
-        public: static const int config_ui_enableFadingMarquee = 0x01120013;
+        public: static const int config_ui_enableFadingMarquee = 0x01120015;
         /**  XXXXXX END OF RESOURCES USING WRONG NAMING CONVENTION
  If this is true, the screen will come on when you unplug usb/power/whatever.
  If this is true, the screen will come on when you unplug usb/power/whatever.
          */
-        public: static const int config_unplugTurnsOnScreen = 0x01120021;
+        public: static const int config_unplugTurnsOnScreen = 0x01120024;
         /**  Set this true only if the device has separate attention and notification lights.
          */
-        public: static const int config_useAttentionLight = 0x01120022;
+        public: static const int config_useAttentionLight = 0x01120025;
         /**  When true use the linux /dev/input/event subsystem to detect the switch changes
          on the headphone/microphone jack. When false use the older uevent framework.
- Setting this true forces the headset jack switches to use the/dev/input/event subsystem
-         rather than the uevent framework.
+ When true use the linux /dev/input/event subsystem to detect the switch changes
+        on the headphone/microphone jack. When false use the older uevent framework.
          */
-        public: static const int config_useDevInputEventForAudioJack = 0x01120060;
+        public: static const int config_useDevInputEventForAudioJack = 0x01120069;
         /**  Flag indicating that the media framework should not allow changes or mute on any
          stream or master volumes.
          */
-        public: static const int config_useFixedVolume = 0x01120068;
+        public: static const int config_useFixedVolume = 0x01120071;
         /**  Flag indicating that the media framework should allow changing
          master volume stream and nothing else .
          */
-        public: static const int config_useMasterVolume = 0x01120010;
+        public: static const int config_useMasterVolume = 0x01120012;
         /**  Flag indicating that the media framework should support playing of sounds on volume
          key usage.  This adds noticeable additional overhead to volume key processing, so
          is disableable for products for which it is irrelevant.
          */
-        public: static const int config_useVolumeKeySounds = 0x01120011;
-        public: static const int config_use_strict_phone_number_comparation = 0x0112002d;
+        public: static const int config_useVolumeKeySounds = 0x01120013;
+        public: static const int config_use_strict_phone_number_comparation = 0x01120030;
         /**  Flag indicating whether the current device is "voice capable".
          If true, this means that the device supports circuit-switched
          (i.e. voice) phone calls over the telephony network, and is
@@ -14511,7 +14662,11 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          available on *any* device with a telephony radio, even if the
          device is data-only.
          */
-        public: static const int config_voice_capable = 0x01120043;
+        public: static const int config_voice_capable = 0x0112004a;
+        /**  Boolean indicating whether Softap requires reloading AP firmware
+ Boolean indicating whether Softap requires reloading AP firmware
+         */
+        public: static const int config_wifiApFirmwareReload = 0x01120018;
         /**  Set to true if the wifi display supports compositing content stored
          in gralloc protected buffers.  For this to be true, there must exist
          a protected hardware path for surface flinger to composite and send
@@ -14525,55 +14680,59 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          flag is set for wifi displays.
 
          */
-        public: static const int config_wifiDisplaySupportsProtectedBuffers = 0x01120062;
+        public: static const int config_wifiDisplaySupportsProtectedBuffers = 0x0112006b;
         /**  Boolean indicating whether the wifi chipset supports background scanning mechanism.
          This mechanism allows the host to remain in suspend state and the dongle to actively
          scan and wake the host when a configured SSID is detected by the dongle. This chipset
          capability can provide power savings when wifi needs to be always kept on.
  Boolean indicating whether the wifi chipset has background scan support
          */
-        public: static const int config_wifi_background_scan_support = 0x01120017;
+        public: static const int config_wifi_background_scan_support = 0x0112001a;
         /**  Wifi driver supports batched scan
- Wifi driver supports batched scan
          */
-        public: static const int config_wifi_batched_scan_supported = 0x0112001e;
+        public: static const int config_wifi_batched_scan_supported = 0x01120021;
         /**  Boolean indicating whether the wifi chipset has dual frequency band support
- Boolean indicating whether the wifi chipset has dual frequency band support
          */
-        public: static const int config_wifi_dual_band_support = 0x01120016;
+        public: static const int config_wifi_dual_band_support = 0x01120019;
         /**  Boolean indicating autojoin will prefer 5GHz and choose 5GHz BSSIDs
          */
-        public: static const int config_wifi_enable_5GHz_preference = 0x01120019;
+        public: static const int config_wifi_enable_5GHz_preference = 0x0112001c;
         /**  Boolean indicating we re-try re-associating once upon disconnection and RSSI is high failure
          */
-        public: static const int config_wifi_enable_disconnection_debounce = 0x01120018;
-        public: static const int config_wifi_framework_cellular_handover_enable_user_triggered_adjustment = 0x0112001a;
+        public: static const int config_wifi_enable_disconnection_debounce = 0x0112001b;
+        public: static const int config_wifi_framework_cellular_handover_enable_user_triggered_adjustment = 0x0112001d;
         /**  Boolean indicating associated scan are allowed
          */
-        public: static const int config_wifi_framework_enable_associated_autojoin_scan = 0x0112001b;
+        public: static const int config_wifi_framework_enable_associated_autojoin_scan = 0x0112001e;
         /**  Boolean indicating associated network selection is allowed
          */
-        public: static const int config_wifi_framework_enable_associated_network_selection = 0x0112001c;
+        public: static const int config_wifi_framework_enable_associated_network_selection = 0x0112001f;
         /**  Boolean indicating that wifi only link configuratios that have exact same credentials (i.e PSK)
          */
-        public: static const int config_wifi_only_link_same_credential_configurations = 0x0112001d;
+        public: static const int config_wifi_only_link_same_credential_configurations = 0x01120020;
         /**  Set and Unsets WiMAX
          */
-        public: static const int config_wimaxEnabled = 0x01120052;
+        public: static const int config_wimaxEnabled = 0x01120059;
         /**  default value for whether circular emulators (ro.emulator.circular)
          should show a display overlay on the screen
          */
-        public: static const int config_windowEnableCircularEmulatorDisplayOverlay = 0x0112006f;
+        public: static const int config_windowEnableCircularEmulatorDisplayOverlay = 0x01120079;
         /**  default window inset isRound property
          */
-        public: static const int config_windowIsRound = 0x0112006c;
+        public: static const int config_windowIsRound = 0x01120076;
         /**  default window ShowCircularMask property
          */
-        public: static const int config_windowShowCircularMask = 0x0112006e;
+        public: static const int config_windowShowCircularMask = 0x01120078;
+        /**
+    customize the default value to instead of persist.env.spec,
+    default value is false, true is for enable spn rule
+
+         */
+        public: static const int def_telephony_spn_spec_enabled = 0x011200a1;
         /** SIM does not save, but the voice mail number to be changed.
  SIM does not save, but the voice mail number to be changed.
          */
-        public: static const int editable_voicemailnumber = 0x01120078;
+        public: static const int editable_voicemailnumber = 0x01120083;
         /**  Flag indicating whether the IMS service can be turned off. If false then
         the service will not be turned-off completely (the ImsManager.turnOffIms() will
         be disabled) but individual Features can be disabled using ImsConfig.setFeatureValue()
@@ -14581,46 +14740,55 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         the service will not be turned-off completely (the ImsManager.turnOffIms() will
         be disabled) but individual Features can be disabled using ImsConfig.setFeatureValue()
          */
-        public: static const int imsServiceAllowTurnOff = 0x01120072;
-        public: static const int preferences_prefer_dual_pane = 0x01120007;
-        public: static const int show_ongoing_ime_switcher = 0x01120008;
+        public: static const int imsServiceAllowTurnOff = 0x0112007c;
+        public: static const int preferences_prefer_dual_pane = 0x01120008;
+        /**  Whether to make default hotspot security NONE
+         */
+        public: static const int set_wifi_hotspot_security_none = 0x01120003;
+        public: static const int show_ongoing_ime_switcher = 0x01120009;
         /**  Flag indicating apps will skip sending hold request before merge. In this case
         IMS service implementation will do both.i.e.hold followed by merge.
          */
-        public: static const int skipHoldBeforeMerge = 0x01120070;
+        public: static const int skipHoldBeforeMerge = 0x0112007a;
+        /**  Boolean indicating if RADIO POWER OFF should be skipped on receiving SIM REFRESH with RESET
+ This will be handled by modem if it is true
+         */
+        public: static const int skip_radio_power_off_on_sim_refresh_reset = 0x01120063;
         /**  Boolean indicating if restoring network selection should be skipped
  The restoring is handled by modem if it is true
  Boolean indicating if restoring network selection should be skipped
  The restoring is handled by modem if it is true
          */
-        public: static const int skip_restoring_network_selection = 0x01120048;
-        public: static const int split_action_bar_is_narrow = 0x01120006;
-        public: static const int target_honeycomb_needs_options_menu = 0x0112000a;
+        public: static const int skip_restoring_network_selection = 0x0112004f;
+        public: static const int split_action_bar_is_narrow = 0x01120007;
+        public: static const int target_honeycomb_needs_options_menu = 0x0112000b;
         /**  Flag indicating emergency calls will always use IMS irrespective of the state of
     the IMS connection
          */
-        public: static const int useImsAlwaysForEmergencyCall = 0x01120071;
+        public: static const int useImsAlwaysForEmergencyCall = 0x0112007b;
+        /**  bool value to for enabling motion accelerometer
+         */
+        public: static const int use_motion_accel = 0x01120091;
     };
     public: class color {
         public: static const int background_dark = 0x0106000e;
         public: static const int background_light = 0x0106000f;
-        public: static const int battery_saver_mode_color = 0x01060059;
+        public: static const int battery_saver_mode_color = 0x0106005c;
         public: static const int black = 0x0106000c;
         /**  Default color for notification LED.
- Default color for notification LED is white.
          */
-        public: static const int config_defaultNotificationColor = 0x010600ff;
+        public: static const int config_defaultNotificationColor = 0x01060102;
         public: static const int darker_gray = 0x01060000;
-        public: static const int datepicker_default_circle_background_color_holo_light = 0x010600a2;
-        public: static const int datepicker_default_circle_background_color_material_light = 0x010600fb;
-        public: static const int datepicker_default_disabled_text_color_holo_light = 0x0106009c;
-        public: static const int datepicker_default_disabled_text_color_material_light = 0x010600f5;
-        public: static const int datepicker_default_header_dayofweek_background_color_holo_light = 0x01060098;
-        public: static const int datepicker_default_header_dayofweek_background_color_material_light = 0x010600f1;
-        public: static const int datepicker_default_header_selector_background_holo_light = 0x01060096;
-        public: static const int datepicker_default_header_selector_background_material_light = 0x010600ef;
-        public: static const int datepicker_default_normal_text_color_holo_light = 0x0106009a;
-        public: static const int datepicker_default_normal_text_color_material_light = 0x010600f3;
+        public: static const int datepicker_default_circle_background_color_holo_light = 0x010600a5;
+        public: static const int datepicker_default_circle_background_color_material_light = 0x010600fe;
+        public: static const int datepicker_default_disabled_text_color_holo_light = 0x0106009f;
+        public: static const int datepicker_default_disabled_text_color_material_light = 0x010600f8;
+        public: static const int datepicker_default_header_dayofweek_background_color_holo_light = 0x0106009b;
+        public: static const int datepicker_default_header_dayofweek_background_color_material_light = 0x010600f4;
+        public: static const int datepicker_default_header_selector_background_holo_light = 0x01060099;
+        public: static const int datepicker_default_header_selector_background_material_light = 0x010600f2;
+        public: static const int datepicker_default_normal_text_color_holo_light = 0x0106009d;
+        public: static const int datepicker_default_normal_text_color_material_light = 0x010600f6;
         /**  A really bright Holo shade of blue
          */
         public: static const int holo_blue_bright = 0x0106001b;
@@ -14651,16 +14819,16 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         /**  A light Holo shade of red
          */
         public: static const int holo_red_light = 0x01060016;
-        public: static const int input_method_navigation_guard = 0x01060032;
-        public: static const int lock_pattern_view_error_color = 0x0106004c;
+        public: static const int input_method_navigation_guard = 0x01060035;
+        public: static const int lock_pattern_view_error_color = 0x0106004f;
         /**  LockPatternView
          */
-        public: static const int lock_pattern_view_regular_color = 0x0106004a;
-        public: static const int lock_pattern_view_success_color = 0x0106004b;
-        public: static const int notification_action_color_filter = 0x01060050;
-        public: static const int notification_icon_bg_color = 0x0106004f;
-        public: static const int notification_media_primary_color = 0x01060051;
-        public: static const int notification_media_secondary_color = 0x01060052;
+        public: static const int lock_pattern_view_regular_color = 0x0106004d;
+        public: static const int lock_pattern_view_success_color = 0x0106004e;
+        public: static const int notification_action_color_filter = 0x01060053;
+        public: static const int notification_icon_bg_color = 0x01060052;
+        public: static const int notification_media_primary_color = 0x01060054;
+        public: static const int notification_media_secondary_color = 0x01060055;
         public: static const int primary_text_dark = 0x01060001;
         public: static const int primary_text_dark_nodisable = 0x01060002;
         public: static const int primary_text_light = 0x01060003;
@@ -14669,51 +14837,51 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int secondary_text_dark_nodisable = 0x01060006;
         public: static const int secondary_text_light = 0x01060007;
         public: static const int secondary_text_light_nodisable = 0x01060008;
-        public: static const int system_notification_accent_color = 0x01060058;
+        public: static const int system_notification_accent_color = 0x0106005b;
         public: static const int tab_indicator_text = 0x01060009;
-        public: static const int tab_indicator_text_v4 = 0x0106012c;
+        public: static const int tab_indicator_text_v4 = 0x0106012f;
         public: static const int tertiary_text_dark = 0x01060010;
         public: static const int tertiary_text_light = 0x01060011;
-        public: static const int timepicker_default_ampm_selected_background_color_holo_light = 0x01060092;
-        public: static const int timepicker_default_ampm_selected_background_color_material = 0x010600eb;
-        public: static const int timepicker_default_ampm_unselected_background_color_holo_light = 0x01060094;
-        public: static const int timepicker_default_ampm_unselected_background_color_material = 0x010600ec;
-        public: static const int timepicker_default_numbers_background_color_material = 0x010600ee;
-        public: static const int timepicker_default_selector_color_material = 0x010600ed;
-        public: static const int timepicker_default_text_color_holo_light = 0x01060090;
-        public: static const int timepicker_default_text_color_material = 0x010600ea;
+        public: static const int timepicker_default_ampm_selected_background_color_holo_light = 0x01060095;
+        public: static const int timepicker_default_ampm_selected_background_color_material = 0x010600ee;
+        public: static const int timepicker_default_ampm_unselected_background_color_holo_light = 0x01060097;
+        public: static const int timepicker_default_ampm_unselected_background_color_material = 0x010600ef;
+        public: static const int timepicker_default_numbers_background_color_material = 0x010600f1;
+        public: static const int timepicker_default_selector_color_material = 0x010600f0;
+        public: static const int timepicker_default_text_color_holo_light = 0x01060093;
+        public: static const int timepicker_default_text_color_material = 0x010600ed;
         public: static const int transparent = 0x0106000d;
         /**  deep orange 600
  Default user icon colors
          */
-        public: static const int user_icon_1 = 0x0106005a;
+        public: static const int user_icon_1 = 0x0106005d;
         /**  teal 500
          */
-        public: static const int user_icon_2 = 0x0106005b;
+        public: static const int user_icon_2 = 0x0106005e;
         /**  indigo 500
          */
-        public: static const int user_icon_3 = 0x0106005c;
+        public: static const int user_icon_3 = 0x0106005f;
         /**  blue 500
          */
-        public: static const int user_icon_4 = 0x0106005d;
+        public: static const int user_icon_4 = 0x01060060;
         /**  pink 500
          */
-        public: static const int user_icon_5 = 0x0106005e;
+        public: static const int user_icon_5 = 0x01060061;
         /**  green 500
          */
-        public: static const int user_icon_6 = 0x0106005f;
+        public: static const int user_icon_6 = 0x01060062;
         /**  light green 500
          */
-        public: static const int user_icon_7 = 0x01060060;
+        public: static const int user_icon_7 = 0x01060063;
         /**  orange 500
          */
-        public: static const int user_icon_8 = 0x01060061;
+        public: static const int user_icon_8 = 0x01060064;
         /**  deep orange 500
          */
-        public: static const int user_icon_default_gray = 0x01060062;
+        public: static const int user_icon_default_gray = 0x01060065;
         /**  gray 500
          */
-        public: static const int user_icon_default_white = 0x01060063;
+        public: static const int user_icon_default_white = 0x01060066;
         public: static const int white = 0x0106000b;
         public: static const int widget_edittext_dark = 0x0106000a;
     };
@@ -14816,6 +14984,19 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         /**  Text padding for dropdown items
          */
         public: static const int dropdownitem_text_padding_left = 0x01050047;
+        /**  EdgeGesture service: This is the distance a swipe can travel orthogonally to its actual swipe
+         direction to be still recognized as swipe.
+         */
+        public: static const int edge_gesture_perpendicular_distance = 0x010500a3;
+        /**  EdgeGesture service: Distance a swipe must travel to be recognized as swipe.
+         */
+        public: static const int edge_gesture_trigger_distance = 0x010500a2;
+        /**  EdgeGesture service: Thickness of the active trigger fields around the screen border
+         */
+        public: static const int edge_gesture_trigger_thickness = 0x010500a4;
+        /**  Largest size an avatar might need to be drawn in the power menu user picker
+         */
+        public: static const int global_actions_avatar_size = 0x010500a5;
         /**  width of ImmersiveModeConfirmation (-1 for match_parent)
  width of ImmersiveModeConfirmation (-1 for match_parent)
  width of ImmersiveModeConfirmation (-1 for match_parent)
@@ -14904,7 +15085,7 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          */
         public: static const int subtitle_shadow_radius = 0x0105007b;
         public: static const int text_handle_min_size = 0x0105009c;
-        public: static const int text_size_small_material = 0x010500e1;
+        public: static const int text_size_small_material = 0x010500e5;
         /**  Default width for a textview error popup
          */
         public: static const int textview_error_popup_default_width = 0x0105004a;
@@ -14948,13 +15129,14 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int clock_dial = 0x01080283;
         public: static const int clock_hand_hour = 0x01080284;
         public: static const int clock_hand_minute = 0x01080285;
-        public: static const int compass_arrow = 0x0108028b;
-        public: static const int compass_base = 0x0108028c;
-        public: static const int create_contact = 0x0108028e;
+        public: static const int cm_platlogo = 0x01080286;
+        public: static const int compass_arrow = 0x0108028c;
+        public: static const int compass_base = 0x0108028d;
+        public: static const int create_contact = 0x0108028f;
         /**   Drawable to use as a background for separators on a list with a dark background
          */
         public: static const int dark_header = 0x010800a5;
-        public: static const int default_wallpaper = 0x01080291;
+        public: static const int default_wallpaper = 0x01080292;
         public: static const int dialog_frame = 0x01080011;
         public: static const int dialog_holo_dark_frame = 0x010800b2;
         public: static const int dialog_holo_light_frame = 0x010800b3;
@@ -14967,96 +15149,102 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int editbox_background_normal = 0x01080019;
         public: static const int editbox_dropdown_dark_frame = 0x0108001a;
         public: static const int editbox_dropdown_light_frame = 0x0108001b;
-        public: static const int emo_im_angel = 0x010802d1;
-        public: static const int emo_im_cool = 0x010802d2;
-        public: static const int emo_im_crying = 0x010802d3;
-        public: static const int emo_im_embarrassed = 0x010802d4;
-        public: static const int emo_im_foot_in_mouth = 0x010802d5;
-        public: static const int emo_im_happy = 0x010802d6;
-        public: static const int emo_im_kissing = 0x010802d7;
-        public: static const int emo_im_laughing = 0x010802d8;
-        public: static const int emo_im_lips_are_sealed = 0x010802d9;
-        public: static const int emo_im_money_mouth = 0x010802da;
-        public: static const int emo_im_sad = 0x010802db;
-        public: static const int emo_im_surprised = 0x010802dc;
-        public: static const int emo_im_tongue_sticking_out = 0x010802dd;
-        public: static const int emo_im_undecided = 0x010802de;
-        public: static const int emo_im_winking = 0x010802df;
-        public: static const int emo_im_wtf = 0x010802e0;
-        public: static const int emo_im_yelling = 0x010802e1;
-        public: static const int emulator_circular_window_overlay = 0x010802e2;
-        public: static const int expander_close_holo_dark = 0x010802e3;
-        public: static const int expander_ic_maximized = 0x010802ea;
-        public: static const int expander_ic_minimized = 0x010802eb;
-        public: static const int expander_open_holo_dark = 0x010802ec;
+        public: static const int emo_im_angel = 0x010802d2;
+        public: static const int emo_im_cool = 0x010802d3;
+        public: static const int emo_im_crying = 0x010802d4;
+        public: static const int emo_im_embarrassed = 0x010802d5;
+        public: static const int emo_im_foot_in_mouth = 0x010802d6;
+        public: static const int emo_im_happy = 0x010802d7;
+        public: static const int emo_im_kissing = 0x010802d8;
+        public: static const int emo_im_laughing = 0x010802d9;
+        public: static const int emo_im_lips_are_sealed = 0x010802da;
+        public: static const int emo_im_money_mouth = 0x010802db;
+        public: static const int emo_im_sad = 0x010802dc;
+        public: static const int emo_im_surprised = 0x010802dd;
+        public: static const int emo_im_tongue_sticking_out = 0x010802de;
+        public: static const int emo_im_undecided = 0x010802df;
+        public: static const int emo_im_winking = 0x010802e0;
+        public: static const int emo_im_wtf = 0x010802e1;
+        public: static const int emo_im_yelling = 0x010802e2;
+        public: static const int emulator_circular_window_overlay = 0x010802e3;
+        public: static const int expander_close_holo_dark = 0x010802e4;
+        public: static const int expander_ic_maximized = 0x010802eb;
+        public: static const int expander_ic_minimized = 0x010802ec;
+        public: static const int expander_open_holo_dark = 0x010802ed;
         public: static const int gallery_thumb = 0x0108001c;
-        public: static const int ic_account_circle = 0x01080317;
-        public: static const int ic_audio_alarm = 0x0108031a;
-        public: static const int ic_audio_alarm_mute = 0x0108031b;
-        public: static const int ic_audio_bt = 0x0108031c;
-        public: static const int ic_audio_bt_mute = 0x0108031e;
-        public: static const int ic_audio_notification = 0x01080320;
-        public: static const int ic_audio_notification_mute = 0x01080322;
-        public: static const int ic_audio_phone = 0x01080324;
-        public: static const int ic_audio_ring_notif = 0x01080326;
-        public: static const int ic_audio_ring_notif_mute = 0x01080327;
-        public: static const int ic_audio_ring_notif_vibrate = 0x01080328;
-        public: static const int ic_audio_vol = 0x01080329;
-        public: static const int ic_audio_vol_mute = 0x0108032a;
+        public: static const int ic_account_circle = 0x01080318;
+        public: static const int ic_audio_alarm = 0x0108031b;
+        public: static const int ic_audio_alarm_mute = 0x0108031c;
+        public: static const int ic_audio_bt = 0x0108031d;
+        public: static const int ic_audio_bt_mute = 0x0108031f;
+        public: static const int ic_audio_notification = 0x01080321;
+        public: static const int ic_audio_notification_mute = 0x01080323;
+        public: static const int ic_audio_phone = 0x01080325;
+        public: static const int ic_audio_ring_notif = 0x01080327;
+        public: static const int ic_audio_ring_notif_mute = 0x01080328;
+        public: static const int ic_audio_ring_notif_vibrate = 0x01080329;
+        public: static const int ic_audio_vol = 0x0108032a;
+        public: static const int ic_audio_vol_mute = 0x0108032b;
         public: static const int ic_btn_speak_now = 0x010800a4;
-        public: static const int ic_bullet_key_permission = 0x01080335;
-        public: static const int ic_contact_picture = 0x0108034d;
-        public: static const int ic_corp_badge = 0x01080354;
-        public: static const int ic_corp_icon = 0x01080355;
-        public: static const int ic_corp_icon_badge = 0x01080356;
-        public: static const int ic_corp_statusbar_icon = 0x01080357;
+        public: static const int ic_bullet_key_permission = 0x01080336;
+        public: static const int ic_contact_picture = 0x0108034e;
+        public: static const int ic_corp_badge = 0x01080355;
+        public: static const int ic_corp_icon = 0x01080356;
+        public: static const int ic_corp_icon_badge = 0x01080357;
+        public: static const int ic_corp_statusbar_icon = 0x01080358;
         public: static const int ic_delete = 0x0108001d;
         public: static const int ic_dialog_alert = 0x01080027;
         public: static const int ic_dialog_dialer = 0x01080028;
         public: static const int ic_dialog_email = 0x01080029;
         public: static const int ic_dialog_info = 0x0108009b;
         public: static const int ic_dialog_map = 0x0108002a;
-        public: static const int ic_dialog_usb = 0x0108035f;
-        public: static const int ic_emergency = 0x01080360;
-        public: static const int ic_grayedout_printer = 0x0108036d;
+        public: static const int ic_dialog_usb = 0x01080360;
+        public: static const int ic_emergency = 0x01080361;
+        public: static const int ic_grayedout_printer = 0x0108036e;
         public: static const int ic_input_add = 0x0108002b;
         public: static const int ic_input_delete = 0x0108002c;
         public: static const int ic_input_get = 0x0108002d;
-        public: static const int ic_jog_dial_sound_off = 0x01080372;
-        public: static const int ic_jog_dial_sound_on = 0x01080373;
-        public: static const int ic_jog_dial_unlock = 0x01080374;
-        public: static const int ic_jog_dial_vibrate_on = 0x01080375;
-        public: static const int ic_lock_airplane_mode = 0x01080377;
-        public: static const int ic_lock_airplane_mode_off = 0x01080379;
-        public: static const int ic_lock_bugreport = 0x0108037b;
+        public: static const int ic_jog_dial_sound_off = 0x01080373;
+        public: static const int ic_jog_dial_sound_on = 0x01080374;
+        public: static const int ic_jog_dial_unlock = 0x01080375;
+        public: static const int ic_jog_dial_vibrate_on = 0x01080376;
+        public: static const int ic_livedisplay_notif = 0x01080378;
+        public: static const int ic_lock_airplane_mode = 0x01080379;
+        public: static const int ic_lock_airplane_mode_off = 0x0108037b;
+        public: static const int ic_lock_bugreport = 0x0108037d;
         public: static const int ic_lock_idle_alarm = 0x0108002e;
         public: static const int ic_lock_idle_charging = 0x0108001e;
         public: static const int ic_lock_idle_lock = 0x0108001f;
         public: static const int ic_lock_idle_low_battery = 0x01080020;
         public: static const int ic_lock_lock = 0x0108002f;
         public: static const int ic_lock_power_off = 0x01080030;
+        public: static const int ic_lock_power_reboot = 0x01080383;
+        public: static const int ic_lock_profile = 0x01080385;
+        public: static const int ic_lock_screenshot = 0x01080389;
+        public: static const int ic_lock_settings = 0x0108038a;
         public: static const int ic_lock_silent_mode = 0x01080031;
         public: static const int ic_lock_silent_mode_off = 0x01080032;
-        public: static const int ic_maps_indicator_current_position_anim = 0x010803ab;
+        public: static const int ic_lock_user = 0x0108038c;
+        public: static const int ic_maps_indicator_current_position_anim = 0x010803b4;
         public: static const int ic_media_ff = 0x01080021;
         public: static const int ic_media_next = 0x01080022;
         public: static const int ic_media_pause = 0x01080023;
         public: static const int ic_media_play = 0x01080024;
         public: static const int ic_media_previous = 0x01080025;
         public: static const int ic_media_rew = 0x01080026;
-        public: static const int ic_media_route_connecting_holo_dark = 0x010803b1;
-        public: static const int ic_media_route_disabled_holo_dark = 0x010803b4;
-        public: static const int ic_media_route_off_holo_dark = 0x010803ba;
-        public: static const int ic_media_route_on_holo_dark = 0x010803c6;
-        public: static const int ic_media_stop = 0x010803c9;
-        public: static const int ic_media_video_poster = 0x010803ca;
+        public: static const int ic_media_route_connecting_holo_dark = 0x010803ba;
+        public: static const int ic_media_route_disabled_holo_dark = 0x010803bd;
+        public: static const int ic_media_route_off_holo_dark = 0x010803c3;
+        public: static const int ic_media_route_on_holo_dark = 0x010803cf;
+        public: static const int ic_media_stop = 0x010803d2;
+        public: static const int ic_media_video_poster = 0x010803d3;
         public: static const int ic_menu_add = 0x01080033;
         public: static const int ic_menu_agenda = 0x01080034;
         public: static const int ic_menu_always_landscape_portrait = 0x01080035;
-        public: static const int ic_menu_archive = 0x010803cd;
+        public: static const int ic_menu_archive = 0x010803d6;
         public: static const int ic_menu_call = 0x01080036;
         public: static const int ic_menu_camera = 0x01080037;
-        public: static const int ic_menu_cc = 0x010803d3;
+        public: static const int ic_menu_cc = 0x010803dc;
         public: static const int ic_menu_close_clear_cancel = 0x01080038;
         public: static const int ic_menu_compass = 0x01080039;
         public: static const int ic_menu_crop = 0x0108003a;
@@ -15065,21 +15253,21 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int ic_menu_directions = 0x0108003d;
         public: static const int ic_menu_edit = 0x0108003e;
         public: static const int ic_menu_gallery = 0x0108003f;
-        public: static const int ic_menu_goto = 0x010803e9;
+        public: static const int ic_menu_goto = 0x010803f2;
         public: static const int ic_menu_help = 0x01080040;
         public: static const int ic_menu_info_details = 0x01080041;
         public: static const int ic_menu_manage = 0x01080042;
         public: static const int ic_menu_mapmode = 0x01080043;
         public: static const int ic_menu_month = 0x01080044;
         public: static const int ic_menu_more = 0x01080045;
-        public: static const int ic_menu_moreoverflow_normal_holo_dark = 0x010803f5;
+        public: static const int ic_menu_moreoverflow_normal_holo_dark = 0x010803fe;
         public: static const int ic_menu_my_calendar = 0x01080046;
         public: static const int ic_menu_mylocation = 0x01080047;
         public: static const int ic_menu_myplaces = 0x01080048;
-        public: static const int ic_menu_play_clip = 0x010803fc;
+        public: static const int ic_menu_play_clip = 0x01080405;
         public: static const int ic_menu_preferences = 0x01080049;
         public: static const int ic_menu_recent_history = 0x0108004a;
-        public: static const int ic_menu_refresh = 0x010803fd;
+        public: static const int ic_menu_refresh = 0x01080406;
         public: static const int ic_menu_report_image = 0x0108004b;
         public: static const int ic_menu_revert = 0x0108004c;
         public: static const int ic_menu_rotate = 0x0108004d;
@@ -15098,65 +15286,65 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int ic_menu_week = 0x01080058;
         public: static const int ic_menu_zoom = 0x01080059;
         public: static const int ic_notification_clear_all = 0x0108005a;
-        public: static const int ic_notification_ime_default = 0x0108040f;
+        public: static const int ic_notification_ime_default = 0x01080418;
         public: static const int ic_notification_overlay = 0x0108005b;
         public: static const int ic_partial_secure = 0x0108005c;
         public: static const int ic_popup_disk_full = 0x0108005d;
         public: static const int ic_popup_reminder = 0x0108005e;
         public: static const int ic_popup_sync = 0x0108005f;
-        public: static const int ic_print = 0x01080433;
-        public: static const int ic_print_error = 0x01080434;
+        public: static const int ic_print = 0x0108043c;
+        public: static const int ic_print_error = 0x0108043d;
         public: static const int ic_search_category_default = 0x01080060;
         public: static const int ic_secure = 0x01080061;
-        public: static const int ic_settings = 0x01080439;
-        public: static const int ic_settings_language = 0x0108043a;
-        public: static const int ic_text_dot = 0x0108043e;
-        public: static const int ic_volume = 0x01080445;
-        public: static const int indicator_input_error = 0x01080450;
-        public: static const int jog_dial_arrow_long_left_green = 0x01080457;
-        public: static const int jog_dial_arrow_long_right_red = 0x0108045a;
-        public: static const int jog_dial_arrow_short_left_and_right = 0x0108045d;
-        public: static const int jog_dial_bg = 0x0108045f;
-        public: static const int jog_dial_dimple = 0x01080460;
-        public: static const int jog_dial_dimple_dim = 0x01080461;
-        public: static const int jog_tab_bar_left_generic = 0x01080469;
-        public: static const int jog_tab_bar_left_unlock = 0x0108046a;
-        public: static const int jog_tab_bar_right_generic = 0x01080472;
-        public: static const int jog_tab_bar_right_sound_off = 0x01080473;
-        public: static const int jog_tab_bar_right_sound_on = 0x01080474;
-        public: static const int jog_tab_left_generic = 0x0108047a;
-        public: static const int jog_tab_left_unlock = 0x0108047d;
-        public: static const int jog_tab_right_generic = 0x01080483;
-        public: static const int jog_tab_right_sound_off = 0x01080486;
-        public: static const int jog_tab_right_sound_on = 0x01080487;
-        public: static const int jog_tab_target_gray = 0x01080488;
-        public: static const int jog_tab_target_green = 0x01080489;
-        public: static const int jog_tab_target_yellow = 0x0108048b;
+        public: static const int ic_settings = 0x01080442;
+        public: static const int ic_settings_language = 0x01080443;
+        public: static const int ic_text_dot = 0x01080447;
+        public: static const int ic_volume = 0x0108044e;
+        public: static const int indicator_input_error = 0x01080459;
+        public: static const int jog_dial_arrow_long_left_green = 0x01080460;
+        public: static const int jog_dial_arrow_long_right_red = 0x01080463;
+        public: static const int jog_dial_arrow_short_left_and_right = 0x01080466;
+        public: static const int jog_dial_bg = 0x01080468;
+        public: static const int jog_dial_dimple = 0x01080469;
+        public: static const int jog_dial_dimple_dim = 0x0108046a;
+        public: static const int jog_tab_bar_left_generic = 0x01080472;
+        public: static const int jog_tab_bar_left_unlock = 0x01080473;
+        public: static const int jog_tab_bar_right_generic = 0x0108047b;
+        public: static const int jog_tab_bar_right_sound_off = 0x0108047c;
+        public: static const int jog_tab_bar_right_sound_on = 0x0108047d;
+        public: static const int jog_tab_left_generic = 0x01080483;
+        public: static const int jog_tab_left_unlock = 0x01080486;
+        public: static const int jog_tab_right_generic = 0x0108048c;
+        public: static const int jog_tab_right_sound_off = 0x0108048f;
+        public: static const int jog_tab_right_sound_on = 0x01080490;
+        public: static const int jog_tab_target_gray = 0x01080491;
+        public: static const int jog_tab_target_green = 0x01080492;
+        public: static const int jog_tab_target_yellow = 0x01080494;
         public: static const int list_selector_background = 0x01080062;
-        public: static const int list_selector_pressed_holo_dark = 0x010804cb;
-        public: static const int loading_tile_android = 0x010804cf;
-        public: static const int magnified_region_frame = 0x010804d1;
-        public: static const int maps_google_logo = 0x010804d2;
-        public: static const int menu_background = 0x010804d4;
+        public: static const int list_selector_pressed_holo_dark = 0x010804d4;
+        public: static const int loading_tile_android = 0x010804d8;
+        public: static const int magnified_region_frame = 0x010804da;
+        public: static const int maps_google_logo = 0x010804db;
+        public: static const int menu_background = 0x010804dd;
         public: static const int menu_frame = 0x01080063;
         public: static const int menu_full_frame = 0x01080064;
         public: static const int menuitem_background = 0x01080065;
-        public: static const int no_tile_256 = 0x010804ef;
-        public: static const int notification_icon_legacy_bg = 0x010804f0;
-        public: static const int notification_template_icon_bg = 0x0108075f;
-        public: static const int notification_template_icon_low_bg = 0x01080760;
-        public: static const int picture_emergency = 0x01080543;
+        public: static const int no_tile_256 = 0x010804f8;
+        public: static const int notification_icon_legacy_bg = 0x010804f9;
+        public: static const int notification_template_icon_bg = 0x0108076a;
+        public: static const int notification_template_icon_low_bg = 0x0108076b;
+        public: static const int picture_emergency = 0x0108054d;
         public: static const int picture_frame = 0x01080066;
-        public: static const int platlogo = 0x01080544;
-        public: static const int popup_bottom_bright = 0x0108054f;
-        public: static const int popup_bottom_dark = 0x01080550;
-        public: static const int popup_bottom_medium = 0x01080551;
-        public: static const int popup_center_bright = 0x01080552;
-        public: static const int popup_center_dark = 0x01080553;
-        public: static const int popup_full_bright = 0x01080555;
-        public: static const int popup_full_dark = 0x01080556;
-        public: static const int popup_top_bright = 0x01080563;
-        public: static const int popup_top_dark = 0x01080564;
+        public: static const int platlogo = 0x0108054e;
+        public: static const int popup_bottom_bright = 0x01080559;
+        public: static const int popup_bottom_dark = 0x0108055a;
+        public: static const int popup_bottom_medium = 0x0108055b;
+        public: static const int popup_center_bright = 0x0108055c;
+        public: static const int popup_center_dark = 0x0108055d;
+        public: static const int popup_full_bright = 0x0108055f;
+        public: static const int popup_full_dark = 0x01080560;
+        public: static const int popup_top_bright = 0x0108056d;
+        public: static const int popup_top_dark = 0x0108056e;
         public: static const int presence_audio_away = 0x010800af;
         public: static const int presence_audio_busy = 0x010800b0;
         public: static const int presence_audio_online = 0x010800b1;
@@ -15172,10 +15360,10 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int presence_video_online = 0x010800ae;
         public: static const int progress_horizontal = 0x0108006c;
         public: static const int progress_indeterminate_horizontal = 0x0108006d;
-        public: static const int quickcontact_badge_overlay_dark = 0x01080592;
+        public: static const int quickcontact_badge_overlay_dark = 0x0108059c;
         public: static const int radiobutton_off_background = 0x0108006e;
         public: static const int radiobutton_on_background = 0x0108006f;
-        public: static const int reticle = 0x010805ce;
+        public: static const int reticle = 0x010805d8;
         public: static const int screen_background_dark = 0x01080098;
         /**  Semi-transparent background that can be used when placing a dark
        themed UI on top of some arbitrary background (such as the
@@ -15192,18 +15380,18 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          a light UI more visible.
          */
         public: static const int screen_background_light_transparent = 0x010800aa;
-        public: static const int scrubber_control_disabled_holo = 0x010805d8;
-        public: static const int scrubber_control_selector_holo = 0x010805e7;
-        public: static const int scrubber_progress_horizontal_holo_dark = 0x010805f1;
-        public: static const int search_spinner = 0x010805fd;
-        public: static const int sim_dark_blue = 0x01080605;
-        public: static const int sim_dark_green = 0x01080606;
-        public: static const int sim_dark_orange = 0x01080607;
-        public: static const int sim_dark_purple = 0x01080608;
-        public: static const int sim_light_blue = 0x01080609;
-        public: static const int sim_light_green = 0x0108060a;
-        public: static const int sim_light_orange = 0x0108060b;
-        public: static const int sim_light_purple = 0x0108060c;
+        public: static const int scrubber_control_disabled_holo = 0x010805e2;
+        public: static const int scrubber_control_selector_holo = 0x010805f1;
+        public: static const int scrubber_progress_horizontal_holo_dark = 0x010805fb;
+        public: static const int search_spinner = 0x01080607;
+        public: static const int sim_dark_blue = 0x0108060f;
+        public: static const int sim_dark_green = 0x01080610;
+        public: static const int sim_dark_orange = 0x01080611;
+        public: static const int sim_dark_purple = 0x01080612;
+        public: static const int sim_light_blue = 0x01080613;
+        public: static const int sim_light_green = 0x01080614;
+        public: static const int sim_light_orange = 0x01080615;
+        public: static const int sim_light_purple = 0x01080616;
         public: static const int spinner_background = 0x01080070;
         public: static const int spinner_dropdown_background = 0x01080071;
         public: static const int star_big_off = 0x01080073;
@@ -15211,33 +15399,34 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int star_off = 0x01080075;
         public: static const int star_on = 0x01080074;
         public: static const int stat_notify_call_mute = 0x01080076;
-        public: static const int stat_notify_car_mode = 0x0108064d;
+        public: static const int stat_notify_car_mode = 0x01080657;
         public: static const int stat_notify_chat = 0x01080077;
-        public: static const int stat_notify_disabled_data = 0x0108064e;
-        public: static const int stat_notify_disk_full = 0x0108064f;
+        public: static const int stat_notify_disabled_data = 0x01080658;
+        public: static const int stat_notify_disk_full = 0x01080659;
         public: static const int stat_notify_error = 0x01080078;
         public: static const int stat_notify_missed_call = 0x0108007f;
         public: static const int stat_notify_more = 0x01080079;
-        public: static const int stat_notify_rssi_in_range = 0x01080652;
+        public: static const int stat_notify_privacy_guard = 0x0108065c;
+        public: static const int stat_notify_rssi_in_range = 0x0108065d;
         public: static const int stat_notify_sdcard = 0x0108007a;
         public: static const int stat_notify_sdcard_prepare = 0x010800ab;
         public: static const int stat_notify_sdcard_usb = 0x0108007b;
-        public: static const int stat_notify_sim_toolkit = 0x01080653;
+        public: static const int stat_notify_sim_toolkit = 0x0108065e;
         public: static const int stat_notify_sync = 0x0108007c;
-        public: static const int stat_notify_sync_error = 0x01080655;
+        public: static const int stat_notify_sync_error = 0x01080660;
         public: static const int stat_notify_sync_noanim = 0x0108007d;
         public: static const int stat_notify_voicemail = 0x0108007e;
-        public: static const int stat_notify_wifi_in_range = 0x01080656;
-        public: static const int stat_sys_adb = 0x01080657;
-        public: static const int stat_sys_battery = 0x01080658;
-        public: static const int stat_sys_battery_charge = 0x01080666;
-        public: static const int stat_sys_battery_unknown = 0x01080674;
-        public: static const int stat_sys_certificate_info = 0x01080675;
+        public: static const int stat_notify_wifi_in_range = 0x01080661;
+        public: static const int stat_sys_adb = 0x01080662;
+        public: static const int stat_sys_battery = 0x01080663;
+        public: static const int stat_sys_battery_charge = 0x01080671;
+        public: static const int stat_sys_battery_unknown = 0x0108067f;
+        public: static const int stat_sys_certificate_info = 0x01080680;
         public: static const int stat_sys_data_bluetooth = 0x01080080;
-        public: static const int stat_sys_data_usb = 0x01080676;
+        public: static const int stat_sys_data_usb = 0x01080681;
         public: static const int stat_sys_download = 0x01080081;
         public: static const int stat_sys_download_done = 0x01080082;
-        public: static const int stat_sys_gps_on = 0x01080680;
+        public: static const int stat_sys_gps_on = 0x0108068b;
         public: static const int stat_sys_headset = 0x01080083;
         /**  @deprecated Replaced by a private asset in the phone app.
          */
@@ -15249,11 +15438,11 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          */
         public: static const int stat_sys_phone_call_on_hold = 0x01080086;
         public: static const int stat_sys_speakerphone = 0x01080087;
-        public: static const int stat_sys_tether_bluetooth = 0x01080695;
-        public: static const int stat_sys_tether_general = 0x01080696;
-        public: static const int stat_sys_tether_usb = 0x01080697;
-        public: static const int stat_sys_tether_wifi = 0x01080698;
-        public: static const int stat_sys_throttled = 0x01080699;
+        public: static const int stat_sys_tether_bluetooth = 0x010806a0;
+        public: static const int stat_sys_tether_general = 0x010806a1;
+        public: static const int stat_sys_tether_usb = 0x010806a2;
+        public: static const int stat_sys_tether_wifi = 0x010806a3;
+        public: static const int stat_sys_throttled = 0x010806a4;
         public: static const int stat_sys_upload = 0x01080088;
         public: static const int stat_sys_upload_done = 0x01080089;
         /**  @deprecated Replaced by a private asset in the phone app.
@@ -15263,46 +15452,46 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          */
         public: static const int stat_sys_vp_phone_call_on_hold = 0x010800a8;
         public: static const int stat_sys_warning = 0x0108008a;
-        public: static const int status_bar_background = 0x010806a0;
+        public: static const int status_bar_background = 0x010806ab;
         public: static const int status_bar_item_app_background = 0x0108008b;
         public: static const int status_bar_item_background = 0x0108008c;
         public: static const int sym_action_call = 0x0108008d;
         public: static const int sym_action_chat = 0x0108008e;
         public: static const int sym_action_email = 0x0108008f;
-        public: static const int sym_app_on_sd_unavailable_icon = 0x010806c2;
+        public: static const int sym_app_on_sd_unavailable_icon = 0x010806cd;
         public: static const int sym_call_incoming = 0x01080090;
         public: static const int sym_call_missed = 0x01080091;
         public: static const int sym_call_outgoing = 0x01080092;
         public: static const int sym_contact_card = 0x01080094;
         public: static const int sym_def_app_icon = 0x01080093;
-        public: static const int sym_keyboard_return_holo = 0x010806da;
-        public: static const int sym_keyboard_shift = 0x010806db;
-        public: static const int sym_keyboard_shift_locked = 0x010806dc;
-        public: static const int tab_bottom_left = 0x010806df;
-        public: static const int tab_bottom_left_v4 = 0x010806e0;
-        public: static const int tab_bottom_right = 0x010806e1;
-        public: static const int tab_bottom_right_v4 = 0x010806e2;
-        public: static const int tab_indicator_v4 = 0x010806eb;
-        public: static const int text_edit_paste_window = 0x01080702;
-        public: static const int text_edit_side_paste_window = 0x01080703;
-        public: static const int text_select_handle_left = 0x01080705;
-        public: static const int text_select_handle_middle = 0x01080708;
-        public: static const int text_select_handle_right = 0x0108070b;
+        public: static const int sym_keyboard_return_holo = 0x010806e5;
+        public: static const int sym_keyboard_shift = 0x010806e6;
+        public: static const int sym_keyboard_shift_locked = 0x010806e7;
+        public: static const int tab_bottom_left = 0x010806ea;
+        public: static const int tab_bottom_left_v4 = 0x010806eb;
+        public: static const int tab_bottom_right = 0x010806ec;
+        public: static const int tab_bottom_right_v4 = 0x010806ed;
+        public: static const int tab_indicator_v4 = 0x010806f6;
+        public: static const int text_edit_paste_window = 0x0108070d;
+        public: static const int text_edit_side_paste_window = 0x0108070e;
+        public: static const int text_select_handle_left = 0x01080710;
+        public: static const int text_select_handle_middle = 0x01080713;
+        public: static const int text_select_handle_right = 0x01080716;
         public: static const int title_bar = 0x01080095;
-        public: static const int title_bar_medium = 0x01080747;
+        public: static const int title_bar_medium = 0x01080752;
         /**   Drawable to use as a background for a taller version of the titlebar
          */
         public: static const int title_bar_tall = 0x010800a6;
         public: static const int toast_frame = 0x01080096;
-        public: static const int unknown_image = 0x0108074b;
-        public: static const int unlock_default = 0x0108074c;
-        public: static const int unlock_halo = 0x0108074d;
-        public: static const int unlock_ring = 0x0108074e;
-        public: static const int unlock_wave = 0x0108074f;
-        public: static const int usb_android = 0x01080750;
-        public: static const int usb_android_connected = 0x01080751;
-        public: static const int vpn_connected = 0x01080757;
-        public: static const int vpn_disconnected = 0x01080758;
+        public: static const int unknown_image = 0x01080756;
+        public: static const int unlock_default = 0x01080757;
+        public: static const int unlock_halo = 0x01080758;
+        public: static const int unlock_ring = 0x01080759;
+        public: static const int unlock_wave = 0x0108075a;
+        public: static const int usb_android = 0x0108075b;
+        public: static const int usb_android_connected = 0x0108075c;
+        public: static const int vpn_connected = 0x01080762;
+        public: static const int vpn_disconnected = 0x01080763;
         public: static const int zoom_plate = 0x01080097;
     };
     public: class fraction {
@@ -15330,75 +15519,75 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int config_maximumScreenDimRatio = 0x01130001;
     };
     public: class id {
-        public: static const int account_name = 0x010202fb;
-        public: static const int account_row_icon = 0x010202e0;
-        public: static const int account_row_text = 0x010202e1;
-        public: static const int account_type = 0x010202fa;
-        public: static const int action0 = 0x0102032d;
-        public: static const int action1 = 0x0102032e;
-        public: static const int action2 = 0x0102032f;
-        public: static const int action_bar = 0x01020375;
-        public: static const int action_bar_container = 0x01020374;
+        public: static const int account_name = 0x010202fc;
+        public: static const int account_row_icon = 0x010202e1;
+        public: static const int account_row_text = 0x010202e2;
+        public: static const int account_type = 0x010202fb;
+        public: static const int action0 = 0x0102032e;
+        public: static const int action1 = 0x0102032f;
+        public: static const int action2 = 0x01020330;
+        public: static const int action_bar = 0x0102037b;
+        public: static const int action_bar_container = 0x0102037a;
         public: static const int action_bar_spinner = 0x01020042;
-        public: static const int action_bar_subtitle = 0x010202b5;
-        public: static const int action_bar_title = 0x010202b4;
-        public: static const int action_context_bar = 0x01020376;
-        public: static const int action_divider = 0x01020334;
+        public: static const int action_bar_subtitle = 0x010202b6;
+        public: static const int action_bar_title = 0x010202b5;
+        public: static const int action_context_bar = 0x0102037c;
+        public: static const int action_divider = 0x01020335;
         public: static const int action_menu_presenter = 0x0102003f;
-        public: static const int action_mode_bar_stub = 0x0102036e;
-        public: static const int action_mode_close_button = 0x010202b6;
-        public: static const int actions = 0x0102032c;
-        public: static const int activity_chooser_view_content = 0x010202b7;
+        public: static const int action_mode_bar_stub = 0x01020374;
+        public: static const int action_mode_close_button = 0x010202b7;
+        public: static const int actions = 0x0102032d;
+        public: static const int activity_chooser_view_content = 0x010202b8;
         /**  Menu ID to perform a "add to dictionary" operation.
          */
         public: static const int addToDictionary = 0x0102002a;
-        public: static const int alertTitle = 0x010202bf;
-        public: static const int allow_button = 0x01020300;
-        public: static const int alwaysUse = 0x010202cc;
-        public: static const int amPm = 0x010203b7;
-        public: static const int ampm_label = 0x010203b1;
-        public: static const int animator = 0x010202ef;
-        public: static const int ask_checkbox = 0x010202cf;
-        public: static const int authtoken_type = 0x010202fc;
-        public: static const int back_button = 0x01020357;
+        public: static const int alertTitle = 0x010202c0;
+        public: static const int allow_button = 0x01020301;
+        public: static const int alwaysUse = 0x010202cd;
+        public: static const int amPm = 0x010203bd;
+        public: static const int ampm_label = 0x010203b7;
+        public: static const int animator = 0x010202f0;
+        public: static const int ask_checkbox = 0x010202d0;
+        public: static const int authtoken_type = 0x010202fd;
+        public: static const int back_button = 0x0102035c;
         public: static const int background = 0x01020000;
-        public: static const int banner = 0x010203c4;
-        public: static const int big_picture = 0x01020336;
-        public: static const int big_text = 0x01020332;
-        public: static const int body = 0x0102035c;
-        public: static const int breadcrumb_section = 0x010202db;
-        public: static const int button0 = 0x0102035e;
+        public: static const int banner = 0x010203ca;
+        public: static const int big_picture = 0x01020337;
+        public: static const int big_text = 0x01020333;
+        public: static const int body = 0x01020361;
+        public: static const int breadcrumb_section = 0x010202dc;
+        public: static const int button0 = 0x01020363;
         public: static const int button1 = 0x01020019;
         public: static const int button2 = 0x0102001a;
         public: static const int button3 = 0x0102001b;
-        public: static const int button4 = 0x0102035f;
-        public: static const int button5 = 0x01020360;
-        public: static const int button6 = 0x01020361;
-        public: static const int button7 = 0x01020362;
-        public: static const int buttonPanel = 0x010202c1;
-        public: static const int button_always = 0x01020366;
-        public: static const int button_bar = 0x010202d2;
-        public: static const int button_once = 0x01020365;
-        public: static const int by_common = 0x0102039a;
-        public: static const int by_org = 0x0102039c;
-        public: static const int by_org_unit = 0x0102039e;
-        public: static const int calendar_view = 0x010202e7;
-        public: static const int cancel = 0x010202df;
+        public: static const int button4 = 0x01020364;
+        public: static const int button5 = 0x01020365;
+        public: static const int button6 = 0x01020366;
+        public: static const int button7 = 0x01020367;
+        public: static const int buttonPanel = 0x010202c2;
+        public: static const int button_always = 0x0102036b;
+        public: static const int button_bar = 0x010202d3;
+        public: static const int button_once = 0x0102036a;
+        public: static const int by_common = 0x010203a0;
+        public: static const int by_org = 0x010203a2;
+        public: static const int by_org_unit = 0x010203a4;
+        public: static const int calendar_view = 0x010202e8;
+        public: static const int cancel = 0x010202e0;
         /**  The part of the UI shown by an
        {@link android.inputmethodservice.InputMethodService} that contains the
        views for displaying candidates for what the user has entered.
          */
         public: static const int candidatesArea = 0x0102001d;
-        public: static const int characterPicker = 0x010202de;
+        public: static const int characterPicker = 0x010202df;
         public: static const int checkbox = 0x01020001;
-        public: static const int chronometer = 0x01020341;
-        public: static const int clearDefaultHint = 0x010202cd;
+        public: static const int chronometer = 0x01020342;
+        public: static const int clearDefaultHint = 0x010202ce;
         /**  View ID of a {@link android.view.View} to close a popup keyboard
          */
         public: static const int closeButton = 0x01020027;
-        public: static const int compat_checkbox = 0x010202ce;
+        public: static const int compat_checkbox = 0x010202cf;
         public: static const int content = 0x01020002;
-        public: static const int contentPanel = 0x010202c4;
+        public: static const int contentPanel = 0x010202c5;
         /**  Context menu ID for the "Copy" menu item to copy the currently
        selected (or all) text in a text view to the clipboard.
          */
@@ -15409,206 +15598,211 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int copyUrl = 0x01020023;
         public: static const int current_scene = 0x01020043;
         public: static const int custom = 0x0102002b;
-        public: static const int customPanel = 0x010202c6;
+        public: static const int customPanel = 0x010202c7;
         /**  Context menu ID for the "Cut" menu item to copy and delete the currently
        selected (or all) text in a text view to the clipboard.
          */
         public: static const int cut = 0x01020020;
         public: static const int date = 0x01020061;
-        public: static const int datePicker = 0x010202e2;
-        public: static const int date_picker_day = 0x010202ed;
-        public: static const int date_picker_header = 0x010202e9;
-        public: static const int date_picker_month = 0x010202ec;
-        public: static const int date_picker_month_and_day_layout = 0x010202eb;
-        public: static const int date_picker_month_day_year_layout = 0x010202ea;
-        public: static const int date_picker_year = 0x010202ee;
-        public: static const int day = 0x010202e5;
-        public: static const int day_names = 0x010202dd;
-        public: static const int day_picker_selector_layout = 0x010202e8;
-        public: static const int decor_content_parent = 0x01020373;
-        public: static const int decrement = 0x01020349;
-        public: static const int default_activity_button = 0x010202ba;
-        public: static const int deny_button = 0x010202ff;
-        public: static const int description = 0x010202d1;
-        public: static const int divider = 0x010203b8;
+        public: static const int datePicker = 0x010202e3;
+        public: static const int date_picker_day = 0x010202ee;
+        public: static const int date_picker_header = 0x010202ea;
+        public: static const int date_picker_month = 0x010202ed;
+        public: static const int date_picker_month_and_day_layout = 0x010202ec;
+        public: static const int date_picker_month_day_year_layout = 0x010202eb;
+        public: static const int date_picker_year = 0x010202ef;
+        public: static const int day = 0x010202e6;
+        public: static const int day_names = 0x010202de;
+        public: static const int day_picker_selector_layout = 0x010202e9;
+        public: static const int decor_content_parent = 0x01020379;
+        public: static const int decrement = 0x0102034a;
+        public: static const int default_activity_button = 0x010202bb;
+        public: static const int deny_button = 0x01020300;
+        public: static const int description = 0x010202d2;
+        public: static const int divider = 0x010203be;
         public: static const int edit = 0x01020003;
-        public: static const int edit_query = 0x0102037b;
-        public: static const int edittext_container = 0x01020352;
-        public: static const int eight = 0x010203c0;
+        public: static const int edit_query = 0x01020381;
+        public: static const int edittext_container = 0x01020357;
+        public: static const int eight = 0x010203c6;
         public: static const int empty = 0x01020004;
-        public: static const int enter_pin_section = 0x010203ca;
-        public: static const int expand_activities_button = 0x010202b8;
-        public: static const int expires_on = 0x010203a3;
+        public: static const int enter_pin_section = 0x010203d0;
+        public: static const int expand_activities_button = 0x010202b9;
+        public: static const int expires_on = 0x010203a9;
         /**  The part of the UI shown by an
        {@link android.inputmethodservice.InputMethodService} that contains the
        views for interacting with the user in extraction mode.
          */
         public: static const int extractArea = 0x0102001c;
-        public: static const int ffwd = 0x01020320;
+        public: static const int ffwd = 0x01020321;
         public: static const int fillInIntent = 0x01020039;
-        public: static const int find = 0x010203da;
-        public: static const int find_next = 0x010203dd;
-        public: static const int find_prev = 0x010203dc;
-        public: static const int five = 0x010203bd;
-        public: static const int four = 0x010203bc;
-        public: static const int fullscreenArea = 0x0102030b;
-        public: static const int hard_keyboard_section = 0x0102030f;
-        public: static const int hard_keyboard_switch = 0x01020310;
-        public: static const int headers = 0x01020353;
+        public: static const int filtered_item_container = 0x0102036c;
+        public: static const int find = 0x010203e0;
+        public: static const int find_next = 0x010203e3;
+        public: static const int find_prev = 0x010203e2;
+        public: static const int five = 0x010203c3;
+        public: static const int four = 0x010203c2;
+        public: static const int fullscreenArea = 0x0102030c;
+        public: static const int hard_keyboard_section = 0x01020310;
+        public: static const int hard_keyboard_switch = 0x01020311;
+        public: static const int headers = 0x01020358;
         public: static const int hint = 0x01020005;
         public: static const int home = 0x0102002c;
-        public: static const int hour = 0x010203b5;
-        public: static const int hours = 0x010203ae;
+        public: static const int hour = 0x010203bb;
+        public: static const int hours = 0x010203b4;
         public: static const int icon = 0x01020006;
         public: static const int icon1 = 0x01020007;
         public: static const int icon2 = 0x01020008;
-        public: static const int icon_frame = 0x01020351;
+        public: static const int icon_frame = 0x01020356;
         public: static const int icon_menu_presenter = 0x0102003d;
-        public: static const int image = 0x010202b9;
-        public: static const int inbox_end_pad = 0x01020340;
-        public: static const int inbox_more = 0x0102033f;
-        public: static const int inbox_text0 = 0x01020338;
-        public: static const int inbox_text1 = 0x01020339;
-        public: static const int inbox_text2 = 0x0102033a;
-        public: static const int inbox_text3 = 0x0102033b;
-        public: static const int inbox_text4 = 0x0102033c;
-        public: static const int inbox_text5 = 0x0102033d;
-        public: static const int inbox_text6 = 0x0102033e;
-        public: static const int increment = 0x01020347;
-        public: static const int info = 0x01020345;
+        public: static const int image = 0x010202ba;
+        public: static const int inbox_end_pad = 0x01020341;
+        public: static const int inbox_more = 0x01020340;
+        public: static const int inbox_text0 = 0x01020339;
+        public: static const int inbox_text1 = 0x0102033a;
+        public: static const int inbox_text2 = 0x0102033b;
+        public: static const int inbox_text3 = 0x0102033c;
+        public: static const int inbox_text4 = 0x0102033d;
+        public: static const int inbox_text5 = 0x0102033e;
+        public: static const int inbox_text6 = 0x0102033f;
+        public: static const int increment = 0x01020348;
+        public: static const int info = 0x01020346;
         public: static const int input = 0x01020009;
         /**  The part of the UI shown by an
        {@link android.inputmethodservice.InputMethodService} that contains the
        views for entering text using the screen.
          */
         public: static const int inputArea = 0x0102001e;
-        public: static const int inputExtractAccessories = 0x0102030c;
-        public: static const int inputExtractAction = 0x0102030d;
-        public: static const int inputExtractEditButton = 0x0102030e;
+        public: static const int inputExtractAccessories = 0x0102030d;
+        public: static const int inputExtractAction = 0x0102030e;
+        public: static const int inputExtractEditButton = 0x0102030f;
         /**  View ID of the text editor inside of an extracted text layout.
          */
         public: static const int inputExtractEditText = 0x01020025;
-        public: static const int internalEmpty = 0x0102031a;
-        public: static const int issued_on = 0x010203a1;
+        public: static const int internalEmpty = 0x0102031b;
+        public: static const int issued_on = 0x010203a7;
         public: static const int keyboard = 0x0102028f;
         /**  View ID of the {@link android.inputmethodservice.KeyboardView} within
         an input method's input area.
          */
         public: static const int keyboardView = 0x01020026;
-        public: static const int leftSpacer = 0x010202c2;
+        public: static const int leftSpacer = 0x010202c3;
         public: static const int left_icon = 0x01020032;
-        public: static const int line1 = 0x01020342;
-        public: static const int line3 = 0x01020344;
+        public: static const int line1 = 0x01020343;
+        public: static const int line3 = 0x01020345;
         public: static const int list = 0x0102000a;
-        public: static const int listContainer = 0x01020319;
-        public: static const int list_footer = 0x01020354;
-        public: static const int list_item = 0x010202bb;
+        public: static const int listContainer = 0x0102031a;
+        public: static const int list_footer = 0x01020359;
+        public: static const int list_item = 0x010202bc;
         public: static const int list_menu_presenter = 0x0102003e;
         public: static const int locale = 0x010201b8;
         public: static const int lock_screen = 0x01020036;
-        public: static const int lock_to_app_checkbox = 0x0102031c;
+        public: static const int lock_to_app_checkbox = 0x0102031d;
         public: static const int mask = 0x0102002e;
-        public: static const int matches = 0x010203c9;
-        public: static const int media_actions = 0x01020335;
-        public: static const int media_route_control_frame = 0x01020328;
-        public: static const int media_route_disconnect_button = 0x01020329;
-        public: static const int media_route_extended_settings_button = 0x01020325;
-        public: static const int media_route_list = 0x01020324;
-        public: static const int media_route_volume_layout = 0x01020326;
-        public: static const int media_route_volume_slider = 0x01020327;
-        public: static const int mediacontroller_progress = 0x01020323;
+        public: static const int matches = 0x010203cf;
+        public: static const int media_actions = 0x01020336;
+        public: static const int media_route_control_frame = 0x01020329;
+        public: static const int media_route_disconnect_button = 0x0102032a;
+        public: static const int media_route_extended_settings_button = 0x01020326;
+        public: static const int media_route_list = 0x01020325;
+        public: static const int media_route_volume_layout = 0x01020327;
+        public: static const int media_route_volume_slider = 0x01020328;
+        public: static const int mediacontroller_progress = 0x01020324;
         public: static const int message = 0x0102000b;
-        public: static const int minute = 0x010203b6;
-        public: static const int minutes = 0x010203b0;
-        public: static const int mode_normal = 0x010203d4;
-        public: static const int month = 0x010202e4;
-        public: static const int month_name = 0x010202dc;
-        public: static const int mount_button = 0x010203c5;
-        public: static const int name = 0x010203cc;
+        public: static const int minute = 0x010203bc;
+        public: static const int minutes = 0x010203b6;
+        public: static const int mode_normal = 0x010203da;
+        public: static const int month = 0x010202e5;
+        public: static const int month_name = 0x010202dd;
+        public: static const int mount_button = 0x010203cb;
+        public: static const int name = 0x010203d2;
         public: static const int navigationBarBackground = 0x01020030;
-        public: static const int new_app_action = 0x01020307;
-        public: static const int new_app_description = 0x01020308;
-        public: static const int new_app_icon = 0x01020306;
-        public: static const int next = 0x01020321;
-        public: static const int next_button = 0x01020359;
-        public: static const int nine = 0x010203c1;
-        public: static const int no_applications_message = 0x0102035d;
-        public: static const int no_permissions = 0x010202d9;
-        public: static const int numberpicker_input = 0x01020348;
-        public: static const int ok = 0x0102030a;
-        public: static const int old_app_action = 0x01020303;
-        public: static const int old_app_description = 0x01020304;
-        public: static const int old_app_icon = 0x01020302;
-        public: static const int one = 0x010203b9;
-        public: static const int option1 = 0x010202f4;
-        public: static const int option2 = 0x010202f5;
-        public: static const int option3 = 0x010202f6;
-        public: static const int original_app_icon = 0x01020316;
-        public: static const int original_message = 0x01020317;
-        public: static const int overflow_divider = 0x01020337;
-        public: static const int overlay_display_window_texture = 0x0102034a;
-        public: static const int overlay_display_window_title = 0x0102034b;
-        public: static const int package_label = 0x0102034d;
-        public: static const int packages_list = 0x010202f8;
+        public: static const int new_app_action = 0x01020308;
+        public: static const int new_app_description = 0x01020309;
+        public: static const int new_app_icon = 0x01020307;
+        public: static const int next = 0x01020322;
+        public: static const int next_button = 0x0102035e;
+        public: static const int nine = 0x010203c7;
+        public: static const int no_applications_message = 0x01020362;
+        public: static const int no_permissions = 0x010202da;
+        public: static const int numberpicker_input = 0x01020349;
+        public: static const int ok = 0x0102030b;
+        public: static const int old_app_action = 0x01020304;
+        public: static const int old_app_description = 0x01020305;
+        public: static const int old_app_icon = 0x01020303;
+        public: static const int one = 0x010203bf;
+        public: static const int option1 = 0x010202f5;
+        public: static const int option2 = 0x010202f6;
+        public: static const int option3 = 0x010202f7;
+        public: static const int original_app_icon = 0x01020317;
+        public: static const int original_message = 0x01020318;
+        public: static const int overflow_divider = 0x01020338;
+        public: static const int overlay_display_window_texture = 0x0102034b;
+        public: static const int overlay_display_window_title = 0x0102034c;
+        public: static const int package_label = 0x01020352;
+        public: static const int packages_list = 0x010202f9;
         public: static const int parentMatrix = 0x01020047;
-        public: static const int parentPanel = 0x010202bc;
+        public: static const int parentPanel = 0x010202bd;
         /**  Context menu ID for the "Paste" menu item to copy the current contents
        of the clipboard into the text view.
          */
         public: static const int paste = 0x01020022;
-        public: static const int pause = 0x0102031f;
-        public: static const int perm_icon = 0x010202d3;
-        public: static const int perm_name = 0x010202d4;
-        public: static const int permission_group = 0x010202d7;
-        public: static const int permission_list = 0x010202d8;
-        public: static const int perms_list = 0x010202da;
-        public: static const int pickers = 0x010202e3;
-        public: static const int pin_cancel_button = 0x01020369;
-        public: static const int pin_confirm_text = 0x0102036d;
-        public: static const int pin_error_message = 0x01020368;
-        public: static const int pin_new_text = 0x0102036c;
-        public: static const int pin_ok_button = 0x0102036a;
-        public: static const int pin_text = 0x01020367;
-        public: static const int placeholder = 0x0102038e;
-        public: static const int prefs = 0x01020356;
-        public: static const int prefs_frame = 0x01020355;
-        public: static const int prev = 0x0102031d;
+        public: static const int pause = 0x01020320;
+        public: static const int perm_icon = 0x010202d4;
+        public: static const int perm_name = 0x010202d5;
+        public: static const int permission_group = 0x010202d8;
+        public: static const int permission_list = 0x010202d9;
+        public: static const int permission_remember_choice_checkbox = 0x0102034f;
+        public: static const int permission_remember_choice_text = 0x01020350;
+        public: static const int permission_remember_layout = 0x0102034e;
+        public: static const int permission_text = 0x0102034d;
+        public: static const int perms_list = 0x010202db;
+        public: static const int pickers = 0x010202e4;
+        public: static const int pin_cancel_button = 0x0102036f;
+        public: static const int pin_confirm_text = 0x01020373;
+        public: static const int pin_error_message = 0x0102036e;
+        public: static const int pin_new_text = 0x01020372;
+        public: static const int pin_ok_button = 0x01020370;
+        public: static const int pin_text = 0x0102036d;
+        public: static const int placeholder = 0x01020394;
+        public: static const int prefs = 0x0102035b;
+        public: static const int prefs_frame = 0x0102035a;
+        public: static const int prev = 0x0102031e;
         public: static const int primary = 0x0102000c;
-        public: static const int profile_badge_large_template = 0x01020333;
-        public: static const int profile_badge_line2 = 0x01020343;
-        public: static const int profile_badge_line3 = 0x01020346;
+        public: static const int profile_badge_large_template = 0x01020334;
+        public: static const int profile_badge_line2 = 0x01020344;
+        public: static const int profile_badge_line3 = 0x01020347;
         public: static const int progress = 0x0102000d;
-        public: static const int progressContainer = 0x01020318;
-        public: static const int progress_circular = 0x01020371;
-        public: static const int progress_horizontal = 0x01020372;
-        public: static const int progress_number = 0x010202cb;
-        public: static const int progress_percent = 0x010202ca;
-        public: static const int radial_picker = 0x010203b3;
-        public: static const int radio = 0x01020311;
-        public: static const int reask_hint = 0x010202d0;
-        public: static const int replace_app_icon = 0x01020314;
-        public: static const int replace_message = 0x01020315;
-        public: static const int resolver_list = 0x01020364;
-        public: static const int rew = 0x0102031e;
-        public: static const int rightSpacer = 0x010202c3;
+        public: static const int progressContainer = 0x01020319;
+        public: static const int progress_circular = 0x01020377;
+        public: static const int progress_horizontal = 0x01020378;
+        public: static const int progress_number = 0x010202cc;
+        public: static const int progress_percent = 0x010202cb;
+        public: static const int radial_picker = 0x010203b9;
+        public: static const int radio = 0x01020312;
+        public: static const int reask_hint = 0x010202d1;
+        public: static const int replace_app_icon = 0x01020315;
+        public: static const int replace_message = 0x01020316;
+        public: static const int resolver_list = 0x01020369;
+        public: static const int rew = 0x0102031f;
+        public: static const int rightSpacer = 0x010202c4;
         public: static const int right_icon = 0x01020034;
         public: static const int rowTypeId = 0x0102003a;
         public: static const int scene_layoutid_cache = 0x01020044;
-        public: static const int scrollView = 0x010202c5;
-        public: static const int search_app_icon = 0x01020379;
-        public: static const int search_badge = 0x0102037c;
-        public: static const int search_bar = 0x01020378;
-        public: static const int search_button = 0x0102037d;
-        public: static const int search_close_btn = 0x01020382;
-        public: static const int search_edit_frame = 0x0102037e;
-        public: static const int search_go_btn = 0x01020384;
-        public: static const int search_mag_icon = 0x0102037f;
-        public: static const int search_plate = 0x01020380;
-        public: static const int search_src_text = 0x01020381;
-        public: static const int search_view = 0x0102037a;
-        public: static const int search_voice_btn = 0x01020385;
+        public: static const int scrollView = 0x010202c6;
+        public: static const int search_app_icon = 0x0102037f;
+        public: static const int search_badge = 0x01020382;
+        public: static const int search_bar = 0x0102037e;
+        public: static const int search_button = 0x01020383;
+        public: static const int search_close_btn = 0x01020388;
+        public: static const int search_edit_frame = 0x01020384;
+        public: static const int search_go_btn = 0x0102038a;
+        public: static const int search_mag_icon = 0x01020385;
+        public: static const int search_plate = 0x01020386;
+        public: static const int search_src_text = 0x01020387;
+        public: static const int search_view = 0x01020380;
+        public: static const int search_voice_btn = 0x0102038b;
         public: static const int secondaryProgress = 0x0102000f;
-        public: static const int seekbar = 0x0102035a;
+        public: static const int seekbar = 0x0102035f;
         /**  Context menu ID for the "Select All" menu item to select all text
        in a text view.
          */
@@ -15617,108 +15811,112 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
        selection context mode in text views.
          */
         public: static const int selectTextMode = 0x0102002d;
-        public: static const int select_all = 0x010203d8;
+        public: static const int select_all = 0x010203de;
         public: static const int selectedIcon = 0x0102000e;
-        public: static const int separator = 0x010203af;
-        public: static const int serial_number = 0x01020398;
-        public: static const int seven = 0x010203bf;
-        public: static const int sha1_fingerprint = 0x010203a8;
-        public: static const int sha256_fingerprint = 0x010203a6;
-        public: static const int share = 0x010203d9;
-        public: static const int shortcut = 0x0102031b;
-        public: static const int six = 0x010203be;
-        public: static const int skip_button = 0x01020358;
-        public: static const int sms_short_code_confirm_message = 0x01020387;
-        public: static const int sms_short_code_detail_layout = 0x01020388;
-        public: static const int sms_short_code_detail_message = 0x0102038a;
-        public: static const int sms_short_code_remember_choice_checkbox = 0x0102038b;
-        public: static const int sms_short_code_remember_undo_instruction = 0x0102038d;
-        public: static const int split_action_bar = 0x01020377;
+        public: static const int separator = 0x010203b5;
+        public: static const int serial_number = 0x0102039e;
+        public: static const int seven = 0x010203c5;
+        public: static const int sha1_fingerprint = 0x010203ae;
+        public: static const int sha256_fingerprint = 0x010203ac;
+        public: static const int share = 0x010203df;
+        public: static const int shortcut = 0x0102031c;
+        public: static const int six = 0x010203c4;
+        public: static const int skip_button = 0x0102035d;
+        public: static const int sms_short_code_confirm_message = 0x0102038d;
+        public: static const int sms_short_code_detail_layout = 0x0102038e;
+        public: static const int sms_short_code_detail_message = 0x01020390;
+        public: static const int sms_short_code_remember_choice_checkbox = 0x01020391;
+        public: static const int sms_short_code_remember_undo_instruction = 0x01020393;
+        public: static const int split_action_bar = 0x0102037d;
         /**  Menu ID to perform a "start selecting text" operation.
          */
         public: static const int startSelectingText = 0x01020028;
-        public: static const int status = 0x010202f3;
+        public: static const int status = 0x010202f4;
         public: static const int statusBarBackground = 0x0102002f;
-        public: static const int status_bar_latest_event_content = 0x01020331;
+        public: static const int status_bar_latest_event_content = 0x01020332;
         /**  Menu ID to perform a "stop selecting text" operation.
          */
         public: static const int stopSelectingText = 0x01020029;
-        public: static const int submit_area = 0x01020383;
+        public: static const int submit_area = 0x01020389;
         public: static const int summary = 0x01020010;
         /**  Context menu ID for the "Input Method" menu item to being up the
        input method picker dialog, allowing the user to switch to another
        input method.
          */
         public: static const int switchInputMethod = 0x01020024;
-        public: static const int switchWidget = 0x0102035b;
-        public: static const int switch_new = 0x01020305;
-        public: static const int switch_old = 0x01020301;
+        public: static const int switchWidget = 0x01020360;
+        public: static const int switch_new = 0x01020306;
+        public: static const int switch_old = 0x01020302;
         public: static const int tabcontent = 0x01020011;
         public: static const int tabhost = 0x01020012;
         public: static const int tabs = 0x01020013;
         public: static const int text = 0x01020068;
         public: static const int text1 = 0x01020014;
         public: static const int text2 = 0x01020015;
-        public: static const int textSpacerNoButtons = 0x010202c9;
-        public: static const int three = 0x010203bb;
+        public: static const int textSpacerNoButtons = 0x010202ca;
+        public: static const int three = 0x010203c1;
         public: static const int time = 0x0102007f;
-        public: static const int timePicker = 0x010203b2;
-        public: static const int timePickerLayout = 0x010203b4;
-        public: static const int time_current = 0x01020322;
-        public: static const int time_header = 0x010203ad;
+        public: static const int timePicker = 0x010203b8;
+        public: static const int timePickerLayout = 0x010203ba;
+        public: static const int time_current = 0x01020323;
+        public: static const int time_header = 0x010203b3;
         public: static const int title = 0x01020016;
-        public: static const int titleDivider = 0x010202c0;
-        public: static const int titleDividerTop = 0x010202c7;
+        public: static const int titleDivider = 0x010202c1;
+        public: static const int titleDividerTop = 0x010202c8;
         public: static const int title_container = 0x01020035;
-        public: static const int title_template = 0x010202be;
-        public: static const int to_common = 0x01020392;
-        public: static const int to_org = 0x01020394;
-        public: static const int to_org_unit = 0x01020396;
+        public: static const int title_template = 0x010202bf;
+        public: static const int to_common = 0x01020398;
+        public: static const int to_org = 0x0102039a;
+        public: static const int to_org_unit = 0x0102039c;
         public: static const int toggle = 0x01020017;
-        public: static const int topPanel = 0x010202bd;
+        public: static const int topPanel = 0x010202be;
         public: static const int transitionPosition = 0x01020045;
         public: static const int transitionTransform = 0x01020046;
-        public: static const int two = 0x010203ba;
-        public: static const int unmount_button = 0x010203c6;
+        public: static const int two = 0x010203c0;
+        public: static const int unmount_button = 0x010203cc;
         public: static const int up = 0x0102003b;
-        public: static const int value = 0x01020312;
-        public: static const int websearch = 0x010203db;
+        public: static const int value = 0x01020313;
+        public: static const int websearch = 0x010203e1;
         public: static const int widget_frame = 0x01020018;
-        public: static const int wifi_p2p_wps_pin = 0x010203cb;
-        public: static const int year = 0x010202e6;
-        public: static const int zero = 0x010203c2;
-        public: static const int zoomControls = 0x010203d0;
-        public: static const int zoomIn = 0x010203d2;
-        public: static const int zoomMagnify = 0x010203d3;
-        public: static const int zoomOut = 0x010203d1;
+        public: static const int wifi_p2p_wps_pin = 0x010203d1;
+        public: static const int year = 0x010202e7;
+        public: static const int zero = 0x010203c8;
+        public: static const int zoomControls = 0x010203d6;
+        public: static const int zoomIn = 0x010203d8;
+        public: static const int zoomMagnify = 0x010203d9;
+        public: static const int zoomOut = 0x010203d7;
     };
     public: class integer {
         /**  Max number of downloads allowed to proceed concurrently
          */
-        public: static const int config_MaxConcurrentDownloadsAllowed = 0x010e005e;
+        public: static const int config_MaxConcurrentDownloadsAllowed = 0x010e0066;
+        /**  Timeout in MS for how long you have to long-press the back key to
+         kill the foreground app.
+         */
+        public: static const int config_backKillTimeout = 0x010e007e;
         /**  Max number of advertisers supported by bluetooth controller. 0 if the
          device does not support multiple advertisement
- Max number of advertisers supported by bluetooth controller. 0 if the
-         device does not support multiple advertisement
          */
-        public: static const int config_bluetooth_max_advertisers = 0x010e0054;
+        public: static const int config_bluetooth_max_advertisers = 0x010e005c;
         /**  Max number of scan filters supported by blutooth controller. 0 if the
          device does not support hardware scan filters
- Max number of scan filters supported by blutooth controller. 0 if the
-         device does not support hardware scan filters
          */
-        public: static const int config_bluetooth_max_scan_filters = 0x010e0053;
+        public: static const int config_bluetooth_max_scan_filters = 0x010e005b;
+        /**  The debounce time value for automatic display brightness adjustment
+         */
+        public: static const int config_brighteningLightDebounce = 0x010e0055;
+        public: static const int config_buttonBrightnessSettingDefault = 0x010e0057;
         /**  Control whether being in the car dock (and powered) always
          keeps the screen on.  By default it stays on when plugged in to
          AC.  0 will not keep it on; or together 1 to stay on when plugged
          in to AC and 2 to stay on when plugged in to USB.  (So 3 for both.)
          */
-        public: static const int config_carDockKeepsScreenOn = 0x010e0038;
+        public: static const int config_carDockKeepsScreenOn = 0x010e0039;
         /**  Car dock behavior
  The number of degrees to rotate the display when the device is in a car dock.
          A value of -1 means no change in orientation by default.
          */
-        public: static const int config_carDockRotation = 0x010e0037;
+        public: static const int config_carDockRotation = 0x010e0038;
         /**  Sprint need a 70 ms delay for 3way call
  Sprint need a 70 ms delay for 3way call
  USC need a 70 ms delay for 3way call
@@ -15745,36 +15943,38 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  Sprint need a 70 ms delay for 3way call
  Sprint need a 70 ms delay for 3way call
          */
-        public: static const int config_cdma_3waycall_flash_delay = 0x010e0075;
+        public: static const int config_cdma_3waycall_flash_delay = 0x010e007c;
         /**  Display low battery warning when battery level dips to this value.
          Also, the battery stats are flushed to disk when we hit this level.
          */
-        public: static const int config_criticalBatteryWarningLevel = 0x010e003d;
+        public: static const int config_criticalBatteryWarningLevel = 0x010e003e;
         /**  When a database query is executed, the results retuned are paginated
          in pages of size (in KB) indicated by this value
          */
-        public: static const int config_cursorWindowSize = 0x010e0060;
+        public: static const int config_cursorWindowSize = 0x010e0068;
+        public: static const int config_darkeningLightDebounce = 0x010e0056;
         /**  The default reduced-datarate notification mask
  2 means give warning
          */
-        public: static const int config_datause_notification_type = 0x010e0058;
+        public: static const int config_datause_notification_type = 0x010e0060;
         /**  The default data-use polling period.
          */
-        public: static const int config_datause_polling_period_sec = 0x010e0055;
+        public: static const int config_datause_polling_period_sec = 0x010e005d;
         /**  The default data-use threshold in bytes. 0 disables
          */
-        public: static const int config_datause_threshold_bytes = 0x010e0056;
+        public: static const int config_datause_threshold_bytes = 0x010e005e;
         /**  The default reduced-datarate value in kilobits per sec
          */
-        public: static const int config_datause_throttle_kbitsps = 0x010e0057;
+        public: static const int config_datause_throttle_kbitsps = 0x010e005f;
+        /**  Default values for display color temperature
+         */
+        public: static const int config_dayColorTemperature = 0x010e007f;
         /**  Default LED off time for notification LED in milliseconds.
- Default LED off time for notification LED in milliseconds.
          */
-        public: static const int config_defaultNotificationLedOff = 0x010e0042;
+        public: static const int config_defaultNotificationLedOff = 0x010e0043;
         /**  Default LED on time for notification LED in milliseconds.
- Default LED on time for notification LED in milliseconds.
          */
-        public: static const int config_defaultNotificationLedOn = 0x010e0041;
+        public: static const int config_defaultNotificationLedOn = 0x010e0042;
         /**  Control the default UI mode type to use when there is no other type override
          happening.  One of the following values (See Configuration.java):
              1  UI_MODE_TYPE_NORMAL
@@ -15783,50 +15983,106 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
              6  UI_MODE_TYPE_WATCH
          Any other values will have surprising consequences.
          */
-        public: static const int config_defaultUiModeType = 0x010e003a;
+        public: static const int config_defaultUiModeType = 0x010e003b;
         /**  Control whether being in the desk dock (and powered) always
          keeps the screen on.  By default it stays on when plugged in to
          AC.  0 will not keep it on; or together 1 to stay on when plugged
          in to AC and 2 to stay on when plugged in to USB.  (So 3 for both.)
          */
-        public: static const int config_deskDockKeepsScreenOn = 0x010e0036;
+        public: static const int config_deskDockKeepsScreenOn = 0x010e0037;
         /**  Desk dock behavior
  The number of degrees to rotate the display when the device is in a desk dock.
          A value of -1 means no change in orientation by default.
          */
-        public: static const int config_deskDockRotation = 0x010e0035;
+        public: static const int config_deskDockRotation = 0x010e0036;
+        /**  Hardware keys present on the device, stored as a bit field.
+         This integer should equal the sum of the corresponding value for each
+         of the following keys present:
+             1 - Home
+             2 - Back
+             4 - Menu
+             8 - Assistant (search)
+            16 - App switch
+            32 - Camera
+            64 - Volume rocker
+         For example, a device with Home, Back and Menu keys would set this
+         config to 7.
+ Hardware keys present on the device, stored as a bit field.
+         This integer should equal the sum of the corresponding value for each
+         of the following keys present:
+             1 - Home
+             2 - Back
+             4 - Menu
+             8 - Assistant (search)
+            16 - App switch
+            32 - Camera
+            64 - Volume rocker
+         For example, a device with Home, Back and Menu keys would set this
+         config to 7.
+         */
+        public: static const int config_deviceHardwareKeys = 0x010e004d;
+        /**  Hardware keys present on the device with the ability to wake, stored as a bit field.
+         This integer should equal the sum of the corresponding value for each
+         of the following keys present:
+             1 - Home
+             2 - Back
+             4 - Menu
+             8 - Assistant (search)
+            16 - App switch
+            32 - Camera
+            64 - Volume rocker
+         For example, a device with Home, Back and Menu keys would set this
+         config to 7.
+ Hardware keys present on the device with the ability to wake, stored as a bit field.
+         This integer should equal the sum of the corresponding value for each
+         of the following keys present:
+             1 - Home
+             2 - Back
+             4 - Menu
+             8 - Assistant (search)
+            16 - App switch
+            32 - Camera
+            64 - Volume rocker
+         For example, a device with Home, Back and Menu keys would set this
+         config to 7.
+         */
+        public: static const int config_deviceHardwareWakeKeys = 0x010e004e;
         /**  Control the behavior when the user double-taps the home button.
             0 - Nothing
-            1 - Recent apps view in SystemUI
+            1 - Menu key
+            2 - Recent apps view in SystemUI
+            3 - Launch assist intent
+            4 - Voice Search
+            5 - In-app Search
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
 
          */
-        public: static const int config_doubleTapOnHomeBehavior = 0x010e004a;
+        public: static const int config_doubleTapOnHomeBehavior = 0x010e004b;
         /**  When the free space available in DownloadManager's data dir falls
          below the percentage value specified by this param, DownloadManager
          starts removing files to try to make percentage of available
          free space above this threshold value.
          */
-        public: static const int config_downloadDataDirLowSpaceThreshold = 0x010e005f;
+        public: static const int config_downloadDataDirLowSpaceThreshold = 0x010e0067;
         /**  Max space (in MB) allocated to DownloadManager to store the downloaded
          files if they are to be stored in DownloadManager's data dir,
          which typically is /data/data/com.android.providers.downloads/files
          */
-        public: static const int config_downloadDataDirSize = 0x010e005d;
+        public: static const int config_downloadDataDirSize = 0x010e0065;
         /**  If the battery level drops by this percentage and the user activity timeout
          has expired, then assume the device is receiving insufficient current to charge
          effectively and terminate the dream.  Use -1 to disable this safety feature.
          */
-        public: static const int config_dreamsBatteryLevelDrainCutoff = 0x010e0069;
+        public: static const int config_dreamsBatteryLevelDrainCutoff = 0x010e0071;
         /**  Minimum battery level to allow dreaming when not powered.
          Use -1 to disable this safety feature.
          */
-        public: static const int config_dreamsBatteryLevelMinimumWhenNotPowered = 0x010e0068;
+        public: static const int config_dreamsBatteryLevelMinimumWhenNotPowered = 0x010e0070;
         /**  Minimum battery level to allow dreaming when powered.
          Use -1 to disable this safety feature.
          */
-        public: static const int config_dreamsBatteryLevelMinimumWhenPowered = 0x010e0067;
+        public: static const int config_dreamsBatteryLevelMinimumWhenPowered = 0x010e006f;
         /**  Device configuration setting the /proc/sys/vm/extra_free_kbytes tunable in the kernel
          (if it exists).  A high value will increase the amount of memory that the kernel
          tries to keep free, reducing allocation time and causing the lowmemorykiller to kill
@@ -15847,33 +16103,30 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int config_extraFreeKbytesAdjust = 0x010e000b;
         /**  Amount of time in ms the user needs to press the relevant key to bring up the global actions dialog
          */
-        public: static const int config_globalActionsKeyTimeout = 0x010e006c;
-        /**  Threshold (in ms) under which a screen off / screen on will be considered a reset of the
-         immersive mode confirmation prompt.
-         */
-        public: static const int config_immersive_mode_confirmation_panic = 0x010e0072;
+        public: static const int config_globalActionsKeyTimeout = 0x010e0074;
+        public: static const int config_keyboardBrightnessSettingDefault = 0x010e0058;
         /**  Indicate whether the lid state impacts the accessibility of
          the physical keyboard.  0 means it doesn't, 1 means it is accessible
          when the lid is open, 2 means it is accessible when the lid is
          closed.  The default is 0.
          */
-        public: static const int config_lidKeyboardAccessibility = 0x010e0033;
+        public: static const int config_lidKeyboardAccessibility = 0x010e0034;
         /**  Indicate whether the lid state impacts the accessibility of
          the navigation buttons.  0 means it doesn't, 1 means it is accessible
          when the lid is open, 2 means it is accessible when the lid is
          closed.  The default is 0.
          */
-        public: static const int config_lidNavigationAccessibility = 0x010e0034;
+        public: static const int config_lidNavigationAccessibility = 0x010e0035;
         /**  Lid switch behavior
  The number of degrees to rotate the display when the keyboard is open.
          A value of -1 means no change in orientation by default.
          */
-        public: static const int config_lidOpenRotation = 0x010e0032;
+        public: static const int config_lidOpenRotation = 0x010e0033;
         /**  Amount of time it takes for the light sensor to warm up in milliseconds.
          For this time after the screen turns on, the Power Manager
          will not debounce light sensor readings
          */
-        public: static const int config_lightSensorWarmupTime = 0x010e0051;
+        public: static const int config_lightSensorWarmupTime = 0x010e0059;
         /**  The attenuation in dB applied to the lock/unlock sounds.
          */
         public: static const int config_lockSoundVolumeDb = 0x010e0005;
@@ -15882,29 +16135,44 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int config_longAnimTime = 0x010e0002;
         /**  Control the behavior when the user long presses the home button.
             0 - Nothing
-            1 - Recent apps view in SystemUI
-            2 - Launch assist intent
+            1 - Menu key
+            2 - Recent apps view in SystemUI
+            3 - Launch assist intent
+            4 - Voice Search
+            5 - In-app Search
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
 
  see comment in values/config.xml
  see comment in values/config.xml
          */
-        public: static const int config_longPressOnHomeBehavior = 0x010e0049;
+        public: static const int config_longPressOnHomeBehavior = 0x010e004a;
+        /**  Control the behavior when the user long presses the menu button.
+            0 - Nothing
+            1 - Menu key
+            2 - Recent apps view in SystemUI
+            3 - Launch assist intent
+            4 - Voice Search
+            5 - In-app Search
+         This needs to match the constants in
+         policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
+
+         */
+        public: static const int config_longPressOnMenuBehavior = 0x010e004c;
         /**  Control the behavior when the user long presses the power button.
             0 - Nothing
             1 - Global actions menu
             2 - Power off (with confirmation)
 
          */
-        public: static const int config_longPressOnPowerBehavior = 0x010e003b;
+        public: static const int config_longPressOnPowerBehavior = 0x010e003c;
         /**  Close low battery warning when battery level reaches the lowBatteryWarningLevel
          plus this
          */
-        public: static const int config_lowBatteryCloseWarningBump = 0x010e0040;
+        public: static const int config_lowBatteryCloseWarningBump = 0x010e0041;
         /**  Display low battery warning when battery level dips to this value
          */
-        public: static const int config_lowBatteryWarningLevel = 0x010e003f;
+        public: static const int config_lowBatteryWarningLevel = 0x010e0040;
         /**  Device configuration setting the minfree tunable in the lowmemorykiller in the kernel.
          A high value will cause the lowmemorykiller to fire earlier, keeping more memory
          in the file cache and preventing I/O thrashing, but allowing fewer processes to
@@ -15912,6 +16180,13 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          thrashing if set too low.  Overrides the default value chosen by ActivityManager
          based on screen size and total memory for the largest lowmemorykiller bucket, and
          scaled proportionally to the smaller buckets.  -1 keeps the default.
+ Device configuration setting the minfree tunable in the lowmemorykiller in the
+         kernel. A high value will cause the lowmemorykiller to fire earlier, keeping more
+         memory in the file cache and preventing I/O thrashing, but allowing fewer processes
+         to stay in memory. A low value will keep more processes in memory but may cause
+         thrashing if set too low. Overrides the default value chosen by ActivityManager based
+         on screen size and total memory for the largest lowmemorykiller bucket, and scaled
+         proportionally to the smaller buckets. -1 keeps the default.
          */
         public: static const int config_lowMemoryKillerMinFreeKbytesAbsolute = 0x010e0008;
         /**  Device configuration adjusting the minfree tunable in the lowmemorykiller in the
@@ -15930,7 +16205,7 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  Maximum number of grid columns permitted in the ResolverActivity
          used for picking activities to handle an intent.
          */
-        public: static const int config_maxResolverActivityColumns = 0x010e006d;
+        public: static const int config_maxResolverActivityColumns = 0x010e0075;
         /**  Max number of Bluetooth tethering connections allowed. If this is
          updated config_tether_dhcp_range has to be updated appropriately.
          */
@@ -15950,7 +16225,7 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          device goes to sleep.
 
          */
-        public: static const int config_maximumScreenDimDuration = 0x010e006b;
+        public: static const int config_maximumScreenDimDuration = 0x010e0073;
         /**  The duration (in milliseconds) of a medium-length animation.
          */
         public: static const int config_mediumAnimTime = 0x010e0001;
@@ -15964,7 +16239,7 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          fall asleep again as soon as it is awoken.
 
          */
-        public: static const int config_minimumScreenOffTimeout = 0x010e006a;
+        public: static const int config_minimumScreenOffTimeout = 0x010e0072;
         /**  Configure mobile network MTU. The standard default is set here but each carrier
          may have a specific value set in an overlay config.xml file.
  Configure mobile network MTU. Carrier specific value is set here.
@@ -16008,55 +16283,56 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  Configure mobile network MTU. Carrier specific value is set here.
 
          */
-        public: static const int config_mobile_mtu = 0x010e0070;
+        public: static const int config_mobile_mtu = 0x010e0078;
         /**   Maximum number of supported users
-  Maximum number of supported users
+ Maximum number of supported users
          */
-        public: static const int config_multiuserMaximumUsers = 0x010e006e;
+        public: static const int config_multiuserMaximumUsers = 0x010e0076;
         /**  Default network policy warning threshold, in megabytes.
- Default network policy warning threshold, in megabytes.
          */
-        public: static const int config_networkPolicyDefaultWarning = 0x010e0066;
+        public: static const int config_networkPolicyDefaultWarning = 0x010e006e;
         /**  The maximum duration (in milliseconds) we expect a network transition to take
          */
         public: static const int config_networkTransitionTimeout = 0x010e000d;
+        public: static const int config_nightColorTemperature = 0x010e0080;
         /**  Number of notifications to keep in the notification service historical archive
  Number of notifications to keep in the notification service historical archive.
          Reduced intentionally for watches to retain minimal memory footprint
          */
-        public: static const int config_notificationServiceArchiveSize = 0x010e0048;
+        public: static const int config_notificationServiceArchiveSize = 0x010e0049;
         /**  Default value for led color when battery is fully charged
          */
-        public: static const int config_notificationsBatteryFullARGB = 0x010e0045;
+        public: static const int config_notificationsBatteryFullARGB = 0x010e0046;
         /**  Default value for LED off time when the battery is low on charge in miliseconds
          */
-        public: static const int config_notificationsBatteryLedOff = 0x010e0047;
+        public: static const int config_notificationsBatteryLedOff = 0x010e0048;
         /**  Default value for LED on time when the battery is low on charge in miliseconds
          */
-        public: static const int config_notificationsBatteryLedOn = 0x010e0046;
+        public: static const int config_notificationsBatteryLedOn = 0x010e0047;
         /**  Default value for led color when battery is low on charge
          */
-        public: static const int config_notificationsBatteryLowARGB = 0x010e0043;
+        public: static const int config_notificationsBatteryLowARGB = 0x010e0044;
         /**  Default value for led color when battery is medium charged
          */
-        public: static const int config_notificationsBatteryMediumARGB = 0x010e0044;
+        public: static const int config_notificationsBatteryMediumARGB = 0x010e0045;
         /**  Normal polling frequency in milliseconds
          */
-        public: static const int config_ntpPollingInterval = 0x010e0061;
+        public: static const int config_ntpPollingInterval = 0x010e0069;
         /**  Try-again polling interval in milliseconds, in case the network request failed
          */
-        public: static const int config_ntpPollingIntervalShorter = 0x010e0062;
+        public: static const int config_ntpPollingIntervalShorter = 0x010e006a;
         /**  Number of times to try again with the shorter interval, before backing
          off until the normal polling interval. A value < 0 indicates infinite.
          */
-        public: static const int config_ntpRetry = 0x010e0063;
+        public: static const int config_ntpRetry = 0x010e006b;
         /**  If the time difference is greater than this threshold in milliseconds,
          then update the time.
          */
-        public: static const int config_ntpThreshold = 0x010e0064;
+        public: static const int config_ntpThreshold = 0x010e006c;
         /**  Timeout to wait for NTP server response.
          */
-        public: static const int config_ntpTimeout = 0x010e0065;
+        public: static const int config_ntpTimeout = 0x010e006d;
+        public: static const int config_outdoorAmbientLux = 0x010e0081;
         /**  Override the default detection behavior for the framework method
          android.view.ViewConfiguration#hasPermanentMenuKey().
          Valid settings are:
@@ -16064,7 +16340,8 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          1 - The device DOES have a permanent menu key; ignore autodetection.
          2 - The device DOES NOT have a permanent menu key; ignore autodetection.
          */
-        public: static const int config_overrideHasPermanentMenuKey = 0x010e0074;
+        public: static const int config_overrideHasPermanentMenuKey = 0x010e007b;
+        public: static const int config_proximityCheckTimeout = 0x010e007d;
         /**  The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero
          */
@@ -16072,9 +16349,8 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         /**  Safe headphone volume index. When music stream volume is below this index
     the SPL on headphone output is compliant to EN 60950 requirements for portable music
     players.
- reference volume index for music stream to limit headphone volume and display warning
          */
-        public: static const int config_safe_media_volume_index = 0x010e006f;
+        public: static const int config_safe_media_volume_index = 0x010e0077;
         /**  Minimum allowable screen brightness to use in a very dark room.
          This value sets the floor for the darkest possible auto-brightness
          adjustment.  It is expected to be somewhat less than the first entry in
@@ -16083,34 +16359,29 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          dark rooms. The contents of the screen must still be clearly visible
          in darkness (although they may not be visible in a bright room).
          */
-        public: static const int config_screenBrightnessDark = 0x010e0050;
+        public: static const int config_screenBrightnessDark = 0x010e0054;
         /**  Screen brightness used to dim the screen when the user activity
          timeout expires.  May be less than the minimum allowed brightness setting
          that can be set by the user.
- Minimum screen brightness allowed by the power manager.
          */
-        public: static const int config_screenBrightnessDim = 0x010e004f;
+        public: static const int config_screenBrightnessDim = 0x010e0053;
         /**  Screen brightness used to dim the screen while dozing in a very low power state.
          May be less than the minimum allowed brightness setting
          that can be set by the user.
          */
-        public: static const int config_screenBrightnessDoze = 0x010e004e;
+        public: static const int config_screenBrightnessDoze = 0x010e0052;
         /**  Default screen brightness setting.
          Must be in the range specified by minimum and maximum.
- Default screen brightness setting.
-         Must be in the range specified by minimum and maximum.
          */
-        public: static const int config_screenBrightnessSettingDefault = 0x010e004d;
+        public: static const int config_screenBrightnessSettingDefault = 0x010e0051;
         /**  Maximum screen brightness allowed by the power manager.
          The user is forbidden from setting the brightness above this level.
          */
-        public: static const int config_screenBrightnessSettingMaximum = 0x010e004c;
+        public: static const int config_screenBrightnessSettingMaximum = 0x010e0050;
         /**  Minimum screen brightness setting allowed by the power manager.
          The user is forbidden from setting the brightness below this level.
- Minimum screen brightness setting allowed by the power manager.
-         The user is forbidden from setting the brightness below this level.
          */
-        public: static const int config_screenBrightnessSettingMinimum = 0x010e004b;
+        public: static const int config_screenBrightnessSettingMinimum = 0x010e004f;
         /**  The duration (in milliseconds) of a short animation.
          */
         public: static const int config_shortAnimTime = 0x010e0000;
@@ -16121,53 +16392,45 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
             3 - Really go to sleep and go home (don't doze)
 
          */
-        public: static const int config_shortPressOnPowerBehavior = 0x010e003c;
+        public: static const int config_shortPressOnPowerBehavior = 0x010e003d;
         /**  Shutdown if the battery temperature exceeds (this value * 0.1) Celsius.
- Shutdown if the battery temperature exceeds (this value * 0.1) Celsius.
          */
-        public: static const int config_shutdownBatteryTemperature = 0x010e003e;
+        public: static const int config_shutdownBatteryTemperature = 0x010e003f;
         /**  The attenuation in dB applied to the sound effects played
          through AudioManager.playSoundEffect() when no volume is specified.
          */
         public: static const int config_soundEffectVolumeDb = 0x010e0004;
         /**  Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM
          */
-        public: static const int config_toastDefaultGravity = 0x010e0071;
+        public: static const int config_toastDefaultGravity = 0x010e0079;
         /**  HDMI behavior
  The number of degrees to rotate the display when the device has HDMI connected
          but is not in a dock.  A value of -1 means no change in orientation by default.
          Use -1 except on older devices whose Hardware Composer HAL does not
          provide full support for multiple displays.
          */
-        public: static const int config_undockedHdmiRotation = 0x010e0039;
+        public: static const int config_undockedHdmiRotation = 0x010e003a;
         /**  For some operators, PDU has garbages. To fix it, need to use valid index
- Sometimes, PDU has garbages. So, need to use valid index
- Sometimes, PDU has garbages. So, need to use valid index
          */
-        public: static const int config_valid_wappush_index = 0x010e0073;
+        public: static const int config_valid_wappush_index = 0x010e007a;
         /**  Specifies the amount of time to disable virtual keys after the screen is touched
          in order to filter out accidental virtual key presses due to swiping gestures
          or taps near the edge of the display.  May be 0 to disable the feature.
          It is recommended that this value be no more than 250 ms.
          This feature should be disabled for most devices.
          */
-        public: static const int config_virtualKeyQuietTimeMillis = 0x010e0052;
+        public: static const int config_virtualKeyQuietTimeMillis = 0x010e005a;
         /**  If Voice Radio Technology is RIL_RADIO_TECHNOLOGY_LTE:14 or
          RIL_RADIO_TECHNOLOGY_UNKNOWN:0 this is the value that should be used instead.
          A configuration value of RIL_RADIO_TECHNOLOGY_UNKNOWN:0 means
          there is no replacement value and that the default assumption
          for phone type (GSM) should be used.
- If Voice Radio Technology is RIL_RADIO_TECHNOLOGY_LTE:14 this is the value
-         that should be used instead. A value of RIL_RADIO_TECHNOLOGY_UNKNOWN:0 means
-         there is no replacement value and VoLTE is assumed to be supported
-
-         For sprint we will use RIL_RADIO_TECHNOLOGY_1xRTT:6
          */
-        public: static const int config_volte_replacement_rat = 0x010e0059;
+        public: static const int config_volte_replacement_rat = 0x010e0061;
         /**  Wifi driver stop delay, in milliseconds.
          Default value is 2 minutes.
          */
-        public: static const int config_wifi_driver_stop_delay = 0x010e0031;
+        public: static const int config_wifi_driver_stop_delay = 0x010e0032;
         public: static const int config_wifi_framework_5GHz_preference_boost_factor = 0x010e0010;
         /**  Integer specifying the basic autojoin parameters
          */
@@ -16176,39 +16439,39 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int config_wifi_framework_5GHz_preference_penalty_threshold = 0x010e0013;
         /**  Integer indicating associated full scan backoff, representing a fraction: xx/8
          */
-        public: static const int config_wifi_framework_associated_full_scan_backoff = 0x010e0029;
+        public: static const int config_wifi_framework_associated_full_scan_backoff = 0x010e002a;
         /**  Integer indicating associated full scan max interval in milliseconds
          */
-        public: static const int config_wifi_framework_associated_full_scan_max_interval = 0x010e002a;
+        public: static const int config_wifi_framework_associated_full_scan_max_interval = 0x010e002b;
         /**  Integer indicating associated full scan max total dwell time in milliseconds
          */
-        public: static const int config_wifi_framework_associated_full_scan_max_total_dwell_time = 0x010e002b;
+        public: static const int config_wifi_framework_associated_full_scan_max_total_dwell_time = 0x010e002c;
         public: static const int config_wifi_framework_associated_full_scan_rx_packet_threshold = 0x010e0020;
         /**  Integer packet threshold used to allow scan while associated
          */
         public: static const int config_wifi_framework_associated_full_scan_tx_packet_threshold = 0x010e001f;
         /**  Integer indicating associated full scan max num active channels
          */
-        public: static const int config_wifi_framework_associated_partial_scan_max_num_active_channels = 0x010e002c;
+        public: static const int config_wifi_framework_associated_partial_scan_max_num_active_channels = 0x010e002d;
         /**  Integer indicating associated full scan max num passive channels
          */
-        public: static const int config_wifi_framework_associated_partial_scan_max_num_passive_channels = 0x010e002d;
+        public: static const int config_wifi_framework_associated_partial_scan_max_num_passive_channels = 0x010e002e;
         public: static const int config_wifi_framework_associated_partial_scan_rx_packet_threshold = 0x010e0022;
         public: static const int config_wifi_framework_associated_partial_scan_tx_packet_threshold = 0x010e0021;
         /**  Integer indicating associated partial scan interval in milliseconds
          */
-        public: static const int config_wifi_framework_associated_scan_interval = 0x010e0028;
+        public: static const int config_wifi_framework_associated_scan_interval = 0x010e0029;
         public: static const int config_wifi_framework_current_association_hysteresis_high = 0x010e0011;
         public: static const int config_wifi_framework_current_association_hysteresis_low = 0x010e0012;
         /**  Integer indicating number of authentication errors leading to blacklisting of the network
          */
-        public: static const int config_wifi_framework_max_auth_errors_to_blacklist = 0x010e002f;
+        public: static const int config_wifi_framework_max_auth_errors_to_blacklist = 0x010e0030;
         /**  Integer indicating number of association errors leading to blacklisting of the network
          */
-        public: static const int config_wifi_framework_max_connection_errors_to_blacklist = 0x010e002e;
+        public: static const int config_wifi_framework_max_connection_errors_to_blacklist = 0x010e002f;
         /**  Integer indicating minimum blacklisting delay of a wofo configuration due to connectin or auth errors
          */
-        public: static const int config_wifi_framework_network_black_list_min_time_milli = 0x010e0030;
+        public: static const int config_wifi_framework_network_black_list_min_time_milli = 0x010e0031;
         public: static const int config_wifi_framework_network_switch_rx_packet_threshold = 0x010e0024;
         public: static const int config_wifi_framework_network_switch_tx_packet_threshold = 0x010e0023;
         /**  Integer indicating the framework scan interval in milliseconds. This is used in the scenario
@@ -16216,7 +16479,7 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          is false) to set up a periodic wake up scan so that the device can connect to a new access
          point on the move. A value of 0 means no periodic scans will be used in the framework.
          */
-        public: static const int config_wifi_framework_scan_interval = 0x010e0027;
+        public: static const int config_wifi_framework_scan_interval = 0x010e0028;
         public: static const int config_wifi_framework_wifi_score_bad_link_speed_24 = 0x010e001b;
         public: static const int config_wifi_framework_wifi_score_bad_link_speed_5 = 0x010e001c;
         public: static const int config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz = 0x010e0018;
@@ -16233,18 +16496,21 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         /**  Integer indicating wpa_supplicant scan interval when p2p is connected in milliseconds
          */
         public: static const int config_wifi_scan_interval_p2p_connected = 0x010e0026;
+        /**  Integer indicating wpa_supplicant scan intervel when WFD session established in milliseconds
+         */
+        public: static const int config_wifi_scan_interval_wfd_connected = 0x010e0027;
         /**  Integer indicating wpa_supplicant scan interval in milliseconds
          */
         public: static const int config_wifi_supplicant_scan_interval = 0x010e0025;
         /**  Maximum number of database connections opened and managed by framework layer
          to handle queries on each database when using Write-Ahead Logging.
          */
-        public: static const int db_connection_pool_size = 0x010e005a;
+        public: static const int db_connection_pool_size = 0x010e0062;
         /**  Maximum size of the persistent journal file in bytes.
          If the journal file grows to be larger than this amount then SQLite will
          truncate it after committing the transaction.
          */
-        public: static const int db_journal_size_limit = 0x010e005b;
+        public: static const int db_journal_size_limit = 0x010e0063;
         /**  The Write-Ahead Log auto-checkpoint interval in database pages (typically 1 to 4KB).
          The log is checkpointed automatically whenever it exceeds this many pages.
          When a database is reopened, its journal mode is set back to the default
@@ -16254,7 +16520,7 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          to keep the WAL file relatively small to avoid long delays.
          The size of the WAL file is also constrained by 'db_journal_size_limit'.
          */
-        public: static const int db_wal_autocheckpoint = 0x010e005c;
+        public: static const int db_wal_autocheckpoint = 0x010e0064;
         /**  The maximum number of action buttons that should be permitted within
          an action bar/action mode. This will be used to determine how many
          showAsAction="ifRoom" items can fit. "always" items can override this.
@@ -16271,7 +16537,7 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
          an action bar/action mode. This will be used to determine how many
          showAsAction="ifRoom" items can fit. "always" items can override this.
          */
-        public: static const int max_action_buttons = 0x010e0076;
+        public: static const int max_action_buttons = 0x010e0082;
         /**  Maximum numerical value that will be shown in a status bar
          notification icon or in the notification itself. Will be replaced
          with @string/status_bar_notification_info_overflow when shown in the
@@ -16416,52 +16682,53 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int notification_template_material_media = 0x0109007f;
         public: static const int number_picker = 0x01090086;
         public: static const int overlay_display_window = 0x01090089;
-        public: static const int permissions_package_list_item = 0x0109008b;
-        public: static const int popup_menu_item_layout = 0x0109008c;
-        public: static const int preference = 0x0109008e;
+        public: static const int permission_confirmation_dialog = 0x0109008a;
+        public: static const int permissions_package_list_item = 0x0109008c;
+        public: static const int popup_menu_item_layout = 0x0109008d;
+        public: static const int preference = 0x0109008f;
         public: static const int preference_category = 0x01090002;
-        public: static const int preference_header_item = 0x01090095;
-        public: static const int preference_list_content = 0x0109009b;
-        public: static const int preference_list_content_single = 0x0109009d;
-        public: static const int preference_list_fragment = 0x0109009e;
-        public: static const int preference_widget_seekbar = 0x010900a2;
-        public: static const int progress_dialog = 0x010900a6;
-        public: static const int recent_apps_dialog = 0x010900a9;
-        public: static const int remote_views_adapter_default_loading_view = 0x010900ab;
-        public: static const int resolve_list_item = 0x010900ac;
-        public: static const int resolver_different_item_header = 0x010900ad;
-        public: static const int resolver_list = 0x010900ae;
-        public: static const int resolver_list_with_default = 0x010900af;
-        public: static const int restrictions_pin_challenge = 0x010900b0;
-        public: static const int restrictions_pin_setup = 0x010900b1;
-        public: static const int safe_mode = 0x010900b2;
-        public: static const int screen_action_bar = 0x010900b4;
-        public: static const int screen_custom_title = 0x010900b5;
-        public: static const int screen_progress = 0x010900b6;
-        public: static const int screen_simple = 0x010900b7;
-        public: static const int screen_simple_overlay_action_mode = 0x010900b8;
-        public: static const int screen_swipe_dismiss = 0x010900b9;
-        public: static const int screen_title = 0x010900ba;
-        public: static const int screen_title_icons = 0x010900bb;
-        public: static const int search_bar = 0x010900bd;
-        public: static const int search_dropdown_item_icons_2line = 0x010900be;
-        public: static const int search_view = 0x010900bf;
-        public: static const int seekbar_dialog = 0x010900c0;
-        public: static const int select_dialog = 0x010900c1;
+        public: static const int preference_header_item = 0x01090096;
+        public: static const int preference_list_content = 0x0109009c;
+        public: static const int preference_list_content_single = 0x0109009e;
+        public: static const int preference_list_fragment = 0x0109009f;
+        public: static const int preference_widget_seekbar = 0x010900a3;
+        public: static const int progress_dialog = 0x010900a7;
+        public: static const int recent_apps_dialog = 0x010900aa;
+        public: static const int remote_views_adapter_default_loading_view = 0x010900ac;
+        public: static const int resolve_list_item = 0x010900ad;
+        public: static const int resolver_different_item_header = 0x010900ae;
+        public: static const int resolver_list = 0x010900af;
+        public: static const int resolver_list_with_default = 0x010900b0;
+        public: static const int restrictions_pin_challenge = 0x010900b1;
+        public: static const int restrictions_pin_setup = 0x010900b2;
+        public: static const int safe_mode = 0x010900b3;
+        public: static const int screen_action_bar = 0x010900b5;
+        public: static const int screen_custom_title = 0x010900b6;
+        public: static const int screen_progress = 0x010900b7;
+        public: static const int screen_simple = 0x010900b8;
+        public: static const int screen_simple_overlay_action_mode = 0x010900b9;
+        public: static const int screen_swipe_dismiss = 0x010900ba;
+        public: static const int screen_title = 0x010900bb;
+        public: static const int screen_title_icons = 0x010900bc;
+        public: static const int search_bar = 0x010900be;
+        public: static const int search_dropdown_item_icons_2line = 0x010900bf;
+        public: static const int search_view = 0x010900c0;
+        public: static const int seekbar_dialog = 0x010900c1;
+        public: static const int select_dialog = 0x010900c2;
         public: static const int select_dialog_item = 0x01090011;
         public: static const int select_dialog_multichoice = 0x01090013;
-        public: static const int select_dialog_multichoice_material = 0x010900c7;
+        public: static const int select_dialog_multichoice_material = 0x010900c8;
         public: static const int select_dialog_singlechoice = 0x01090012;
-        public: static const int select_dialog_singlechoice_holo = 0x010900c8;
-        public: static const int select_dialog_singlechoice_material = 0x010900c9;
-        public: static const int simple_dropdown_hint = 0x010900ca;
+        public: static const int select_dialog_singlechoice_holo = 0x010900c9;
+        public: static const int select_dialog_singlechoice_material = 0x010900ca;
+        public: static const int simple_dropdown_hint = 0x010900cb;
         public: static const int simple_dropdown_item_1line = 0x0109000a;
         public: static const int simple_expandable_list_item_1 = 0x01090006;
         public: static const int simple_expandable_list_item_2 = 0x01090007;
         public: static const int simple_gallery_item = 0x0109000b;
         public: static const int simple_list_item_1 = 0x01090003;
         public: static const int simple_list_item_2 = 0x01090004;
-        public: static const int simple_list_item_2_single_choice = 0x010900cc;
+        public: static const int simple_list_item_2_single_choice = 0x010900cd;
         /**  A version of {@link #simple_list_item_1} that is able to change its
        background state to indicate when it is activated (that is checked by
        a ListView).
@@ -16480,34 +16747,34 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         public: static const int simple_selectable_list_item = 0x01090015;
         public: static const int simple_spinner_dropdown_item = 0x01090009;
         public: static const int simple_spinner_item = 0x01090008;
-        public: static const int sms_short_code_confirmation_dialog = 0x010900cd;
-        public: static const int ssl_certificate = 0x010900ce;
-        public: static const int status_bar_latest_event_content = 0x010900cf;
-        public: static const int tab_content = 0x010900d1;
-        public: static const int tab_indicator_holo = 0x010900d3;
+        public: static const int sms_short_code_confirmation_dialog = 0x010900ce;
+        public: static const int ssl_certificate = 0x010900cf;
+        public: static const int status_bar_latest_event_content = 0x010900d0;
+        public: static const int tab_content = 0x010900d2;
+        public: static const int tab_indicator_holo = 0x010900d4;
         public: static const int test_list_item = 0x0109000c;
-        public: static const int text_drag_thumbnail = 0x010900d5;
-        public: static const int text_edit_action_popup_text = 0x010900d6;
-        public: static const int textview_hint = 0x010900dd;
-        public: static const int time_header_label = 0x010900de;
-        public: static const int time_picker_dialog = 0x010900df;
-        public: static const int time_picker_holo = 0x010900e0;
-        public: static const int time_picker_legacy = 0x010900e1;
-        public: static const int transient_notification = 0x010900e3;
+        public: static const int text_drag_thumbnail = 0x010900d6;
+        public: static const int text_edit_action_popup_text = 0x010900d7;
+        public: static const int textview_hint = 0x010900de;
+        public: static const int time_header_label = 0x010900df;
+        public: static const int time_picker_dialog = 0x010900e0;
+        public: static const int time_picker_holo = 0x010900e1;
+        public: static const int time_picker_legacy = 0x010900e2;
+        public: static const int transient_notification = 0x010900e4;
         public: static const int two_line_list_item = 0x0109000d;
-        public: static const int typing_filter = 0x010900e5;
-        public: static const int usb_storage_activity = 0x010900e6;
-        public: static const int user_switching_dialog = 0x010900e7;
-        public: static const int voice_interaction_session = 0x010900e8;
-        public: static const int web_text_view_dropdown = 0x010900ea;
-        public: static const int webview_find = 0x010900eb;
-        public: static const int webview_select_singlechoice = 0x010900ec;
-        public: static const int wifi_p2p_dialog = 0x010900ed;
-        public: static const int wifi_p2p_dialog_row = 0x010900ee;
-        public: static const int year_label_text_view = 0x010900ef;
-        public: static const int zoom_container = 0x010900f1;
-        public: static const int zoom_controls = 0x010900f2;
-        public: static const int zoom_magnify = 0x010900f3;
+        public: static const int typing_filter = 0x010900e6;
+        public: static const int usb_storage_activity = 0x010900e7;
+        public: static const int user_switching_dialog = 0x010900e8;
+        public: static const int voice_interaction_session = 0x010900e9;
+        public: static const int web_text_view_dropdown = 0x010900eb;
+        public: static const int webview_find = 0x010900ec;
+        public: static const int webview_select_singlechoice = 0x010900ed;
+        public: static const int wifi_p2p_dialog = 0x010900ee;
+        public: static const int wifi_p2p_dialog_row = 0x010900ef;
+        public: static const int year_label_text_view = 0x010900f0;
+        public: static const int zoom_container = 0x010900f2;
+        public: static const int zoom_controls = 0x010900f3;
+        public: static const int zoom_magnify = 0x010900f4;
     };
     public: class menu {
         public: static const int webview_copy = 0x01150000;
@@ -16619,70 +16886,70 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
     public: class string {
         /**  Displayed as the title for a success/failure report enabling/disabling call barring.
          */
-        public: static const int BaMmi = 0x01040098;
+        public: static const int BaMmi = 0x01040170;
         /**  Displayed to confirm to the user that caller ID will not be restricted on the next call or in general.
          */
-        public: static const int CLIRDefaultOffNextCallOff = 0x010400a4;
+        public: static const int CLIRDefaultOffNextCallOff = 0x0104017c;
         /**  Displayed to confirm to the user that caller ID will not be restricted on the next call but usually is.
          */
-        public: static const int CLIRDefaultOffNextCallOn = 0x010400a3;
+        public: static const int CLIRDefaultOffNextCallOn = 0x0104017b;
         /**  Displayed to confirm to the user that caller ID will be not restricted on the next call even though it usually is.
          */
-        public: static const int CLIRDefaultOnNextCallOff = 0x010400a2;
+        public: static const int CLIRDefaultOnNextCallOff = 0x0104017a;
         /**  Displayed to confirm to the user that caller ID will be restricted on the next call as usual.
          */
-        public: static const int CLIRDefaultOnNextCallOn = 0x010400a1;
+        public: static const int CLIRDefaultOnNextCallOn = 0x01040179;
         /**  Displayed to tell the user that they cannot change the caller ID setting.
          */
-        public: static const int CLIRPermanent = 0x010400a6;
+        public: static const int CLIRPermanent = 0x0104017e;
         /**  Displayed as the title for a success/failure report enabling/disabling call forwarding.
          */
-        public: static const int CfMmi = 0x01040096;
+        public: static const int CfMmi = 0x0104016e;
         /**  Displayed as the title for a success/failure report enabling/disabling caller ID.
          */
-        public: static const int ClipMmi = 0x01040092;
+        public: static const int ClipMmi = 0x0104016a;
         /**  Displayed as the title for a success/failure report enabling/disabling caller ID.
          */
-        public: static const int ClirMmi = 0x01040093;
+        public: static const int ClirMmi = 0x0104016b;
         /**  Displayed as the title for a success/failure report enabling/disabling connected line ID.
          */
-        public: static const int ColpMmi = 0x01040094;
+        public: static const int ColpMmi = 0x0104016c;
         /**  Displayed as the title for a success/failure report enabling/disabling connected line ID restriction.
          */
-        public: static const int ColrMmi = 0x01040095;
+        public: static const int ColrMmi = 0x0104016d;
         /**  Displayed as the title for a success/failure report enabling/disabling call waiting.
          */
-        public: static const int CwMmi = 0x01040097;
+        public: static const int CwMmi = 0x0104016f;
         /**  Quoted name for 12am, uppercase first letter
          */
-        public: static const int Midnight = 0x0104044e;
+        public: static const int Midnight = 0x01040526;
         /**  Quoted name for 12pm, uppercase first letter
          */
-        public: static const int Noon = 0x0104044c;
+        public: static const int Noon = 0x01040524;
         /**  Displayed as the title for a success/failure report changing the SIM PIN.
          */
-        public: static const int PinMmi = 0x0104009a;
+        public: static const int PinMmi = 0x01040172;
         /**  Displayed as the title for a success/failure report changing the SIM password.
          */
-        public: static const int PwdMmi = 0x01040099;
+        public: static const int PwdMmi = 0x01040171;
         /**  Notification title to tell the user that restricted state is changed by access control.
          */
-        public: static const int RestrictedChangedTitle = 0x010400a7;
+        public: static const int RestrictedChangedTitle = 0x0104017f;
         /**  Displayed to tell the user that all emergency and normal voice services are blocked by access control.
          */
-        public: static const int RestrictedOnAllVoice = 0x010400ab;
+        public: static const int RestrictedOnAllVoice = 0x01040183;
         /**  Displayed to tell the user that data service is blocked by access control.
          */
-        public: static const int RestrictedOnData = 0x010400a8;
+        public: static const int RestrictedOnData = 0x01040180;
         /**  Displayed to tell the user that emergency service is blocked by access control.
          */
-        public: static const int RestrictedOnEmergency = 0x010400a9;
+        public: static const int RestrictedOnEmergency = 0x01040181;
         /**  Displayed to tell the user that normal service is blocked by access control.
          */
-        public: static const int RestrictedOnNormal = 0x010400aa;
+        public: static const int RestrictedOnNormal = 0x01040182;
         /**  STK setup Call
          */
-        public: static const int SetupCallDefault = 0x010405b5;
+        public: static const int SetupCallDefault = 0x0104068d;
         /**  Button to close error alert when a video cannot be played
          */
         public: static const int VideoView_error_button = 0x01040010;
@@ -16695,118 +16962,153 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         /**  Title for error alert when a video cannot be played.  it can be used by any app.
          */
         public: static const int VideoView_error_title = 0x01040012;
-        public: static const int accept = 0x010404b0;
+        public: static const int accept = 0x01040588;
         /**  Label to show for a service that is running because it is an accessibility module.
          */
-        public: static const int accessibility_binding_label = 0x01040535;
+        public: static const int accessibility_binding_label = 0x0104060d;
         /**  Text spoken when the user enabled accessibility. [CHAR LIMIT=none]
          */
-        public: static const int accessibility_enabled = 0x010405f5;
+        public: static const int accessibility_enabled = 0x010406cd;
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE]
          */
-        public: static const int action_bar_home_description = 0x0104058a;
+        public: static const int action_bar_home_description = 0x01040662;
         /**  Formatting string for describing the action bar's title/home/up affordance.
          This is a single tappable "button" that includes the app icon, the Up indicator
          (usually a "<" chevron) and the window title text.
          %1$s is the title. %2$s is the description of what tapping/clicking the whole
          thing is going to do.
          */
-        public: static const int action_bar_home_description_format = 0x0104058d;
+        public: static const int action_bar_home_description_format = 0x01040665;
         /**  Just like action_bar_home_description_format, but this one will be used
          if the window is also providing subtitle text.
          %1$s is the title. %2$s is the subtitle. %3$s is the description of what
          tapping/clicking the whole thing is going to do.
          */
-        public: static const int action_bar_home_subtitle_description_format = 0x0104058e;
+        public: static const int action_bar_home_subtitle_description_format = 0x01040666;
         /**  Content description for the action bar "up" affordance. [CHAR LIMIT=NONE]
          */
-        public: static const int action_bar_up_description = 0x0104058b;
+        public: static const int action_bar_up_description = 0x01040663;
         /**  Title for a button to expand the list of activities in ActivityChooserView [CHAR LIMIT=25]
          */
-        public: static const int activity_chooser_view_see_all = 0x010405af;
+        public: static const int activity_chooser_view_see_all = 0x01040687;
         /**  Text for the toast that is shown when the user clicks on a launcher that
          doesn't support the work profile. [CHAR LIMIT=100]
          */
-        public: static const int activity_resolver_work_profiles_support = 0x010405b8;
+        public: static const int activity_resolver_work_profiles_support = 0x01040690;
         /**  ActivityChooserView - accessibility support
  Description of the shwoing of a popup window with activities to choose from. [CHAR LIMIT=NONE]
          */
-        public: static const int activitychooserview_choose_application = 0x01040582;
+        public: static const int activitychooserview_choose_application = 0x0104065a;
         /**  Error message if the share target app cannto be launched. [CHAR LIMIT=NONE]
          */
-        public: static const int activitychooserview_choose_application_error = 0x01040583;
+        public: static const int activitychooserview_choose_application_error = 0x0104065b;
+        /**  ADB notification message
+         */
+        public: static const int adb_active_generic_notification_message = 0x0104004f;
         /**  Message of notification shown when ADB is actively connected to the phone.
          */
-        public: static const int adb_active_notification_message = 0x010404ef;
+        public: static const int adb_active_notification_message = 0x010405c7;
         /**  Title of notification shown when ADB is actively connected to the phone.
          */
-        public: static const int adb_active_notification_title = 0x010404ee;
+        public: static const int adb_active_notification_title = 0x010405c6;
+        /**  ADB over USB and network notification
+         */
+        public: static const int adb_both_active_notification_title = 0x0104004e;
+        /**  ADB over network notification
+         */
+        public: static const int adb_net_active_notification_title = 0x0104004d;
         /**  Option to add the current misspelled word to the user dictionary. [CHAR LIMIT=25]
          */
-        public: static const int addToDictionary = 0x01040454;
+        public: static const int addToDictionary = 0x0104052c;
         /**  List item to add an account [CHAR LIMIT=20]
          */
-        public: static const int add_account_button_label = 0x0104056a;
+        public: static const int add_account_button_label = 0x01040642;
         /**  Text of the alert that is displayed when an application has crashed.
          */
-        public: static const int aerr_application = 0x01040471;
+        public: static const int aerr_application = 0x01040549;
         /**  Text of the alert that is displayed when an application has crashed.
          */
-        public: static const int aerr_process = 0x01040472;
+        public: static const int aerr_process = 0x0104054a;
         /**  Title of the alert when an application has crashed.
          */
-        public: static const int aerr_title = 0x01040470;
+        public: static const int aerr_title = 0x01040548;
+        public: static const int allow = 0x01040605;
         /**  Do Not Translate: Alternate eri.xml
          */
-        public: static const int alternate_eri_file = 0x0104053a;
+        public: static const int alternate_eri_file = 0x01040612;
         /**  Option to always use the selected application resolution in the future. See the "Complete action using" dialog title
          */
-        public: static const int alwaysUse = 0x0104046a;
+        public: static const int alwaysUse = 0x01040542;
+        /**  [CHAR LIMIT=NONE] Message shown in dialog on first boot after clean install for each .apk that is optimized.
+         */
+        public: static const int android_installing_apk = 0x010400a1;
+        /**  [CHAR LIMIT=40] Title of dialog that is shown when performing a system install.
+         */
+        public: static const int android_installing_title = 0x010400a2;
         /**  [CHAR LIMIT=NONE] Message shown in upgrading dialog for each .apk that is optimized.
          */
-        public: static const int android_upgrading_apk = 0x01040486;
+        public: static const int android_upgrading_apk = 0x0104055e;
         /**  [CHAR LIMIT=NONE] Message to show in upgrading dialog when the bulk of the upgrade work is done.
          */
-        public: static const int android_upgrading_complete = 0x01040488;
+        public: static const int android_upgrading_complete = 0x01040560;
         /**  [CHAR LIMIT=NONE] Message shown in upgrading dialog when doing an fstrim.
          */
-        public: static const int android_upgrading_fstrim = 0x01040485;
+        public: static const int android_upgrading_fstrim = 0x0104055d;
         /**  [CHAR LIMIT=NONE] Message to show in upgrading dialog when reached the point of starting apps.
          */
-        public: static const int android_upgrading_starting_apps = 0x01040487;
+        public: static const int android_upgrading_starting_apps = 0x0104055f;
         /**  [CHAR LIMIT=40] Title of dialog that is shown when performing a system upgrade.
          */
-        public: static const int android_upgrading_title = 0x01040484;
+        public: static const int android_upgrading_title = 0x0104055c;
         /**  Text of the alert that is displayed when an application is not responding.
          */
-        public: static const int anr_activity_application = 0x01040474;
+        public: static const int anr_activity_application = 0x0104054c;
         /**  Text of the alert that is displayed when an application is not responding.
          */
-        public: static const int anr_activity_process = 0x01040475;
+        public: static const int anr_activity_process = 0x0104054d;
         /**  Text of the alert that is displayed when an application is not responding.
          */
-        public: static const int anr_application_process = 0x01040476;
+        public: static const int anr_application_process = 0x0104054e;
         /**  Text of the alert that is displayed when an application is not responding.
          */
-        public: static const int anr_process = 0x01040477;
+        public: static const int anr_process = 0x0104054f;
         /**  Title of the alert when an application is not responding.
          */
-        public: static const int anr_title = 0x01040473;
+        public: static const int anr_title = 0x0104054b;
+        /**  Long-press back kill application
+         */
+        public: static const int app_killed_message = 0x0104004c;
         /**  [CHAR LIMIT=NONE] Stub notification text for an app running a service that has provided
          a bad bad notification for itself.
          */
-        public: static const int app_running_notification_text = 0x0104045c;
+        public: static const int app_running_notification_text = 0x01040534;
         /**  [CHAR LIMIT=NONE] Stub notification title for an app running a service that has provided
          a bad bad notification for itself.
          */
-        public: static const int app_running_notification_title = 0x0104045b;
+        public: static const int app_running_notification_title = 0x01040533;
         /**  Do not translate. Regex used by AutoFill.
  fr-FR
  it-IT
  ja-JP
  zh-CN
+ fr-FR
+ it-IT
+ ja-JP
+ zh-CN
+ fr-FR
+ it-IT
+ ja-JP
+ zh-CN
+ fr-FR
+ it-IT
+ ja-JP
+ zh-CN
+ fr-FR
+ it-IT
+ ja-JP
+ zh-CN
          */
-        public: static const int autofill_address_line_1_label_re = 0x010403dc;
+        public: static const int autofill_address_line_1_label_re = 0x010404b4;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  en-GB
@@ -16817,65 +17119,133 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  pt-BR, pt-PT
  ru
  zh-CN
+ de-DE
+ en-GB
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ en-GB
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ en-GB
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ en-GB
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
          */
-        public: static const int autofill_address_line_1_re = 0x010403db;
+        public: static const int autofill_address_line_1_re = 0x010404b3;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  es
  fr-FR
  it-IT
  ja-JP
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
          */
-        public: static const int autofill_address_line_2_re = 0x010403dd;
+        public: static const int autofill_address_line_2_re = 0x010404b5;
         /**  Do not translate. Regex used by AutoFill.
  es
  fr-FR
  it-IT
+ es
+ fr-FR
+ it-IT
+ es
+ fr-FR
+ it-IT
+ es
+ fr-FR
+ it-IT
+ es
+ fr-FR
+ it-IT
          */
-        public: static const int autofill_address_line_3_re = 0x010403de;
+        public: static const int autofill_address_line_3_re = 0x010404b6;
         /**  String used to separate FirstName and LastName when writing out a local name
          e.g. John<separator>Smith [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_address_name_separator = 0x010403d4;
+        public: static const int autofill_address_name_separator = 0x010404ac;
         /**  Format string for displaying a name and address summary. $1 is the Full Name, $2 is autofill_address_summary_separator, $3 is the Address
          e.g. (John Smith)(, )(123 Main Street)
          */
-        public: static const int autofill_address_summary_format = 0x010403d7;
+        public: static const int autofill_address_summary_format = 0x010404af;
         /**  Format string for displaying a name. $1 is First Name, $2 is autofill_address_name_separator, $3 is Last Name.
          e.g. (John)( )(Smith)
          */
-        public: static const int autofill_address_summary_name_format = 0x010403d5;
+        public: static const int autofill_address_summary_name_format = 0x010404ad;
         /**  String used to separate Name and Address Line 1
          e.g. John Smith<separator>123 Main Street [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_address_summary_separator = 0x010403d6;
+        public: static const int autofill_address_summary_separator = 0x010404ae;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_address_type_same_as_re = 0x010403e4;
+        public: static const int autofill_address_type_same_as_re = 0x010404bc;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_address_type_use_my_re = 0x010403e5;
+        public: static const int autofill_address_type_use_my_re = 0x010404bd;
         /**  Label in a web form for "Area" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_area = 0x0104040b;
+        public: static const int autofill_area = 0x010404e3;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_area_code_notext_re = 0x010403fe;
+        public: static const int autofill_area_code_notext_re = 0x010404d6;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_area_code_re = 0x010403f1;
+        public: static const int autofill_area_code_re = 0x010404c9;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_attention_ignored_re = 0x010403d8;
+        public: static const int autofill_attention_ignored_re = 0x010404b0;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_billing_designator_re = 0x010403e6;
+        public: static const int autofill_billing_designator_re = 0x010404be;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_card_cvc_re = 0x010403f7;
+        public: static const int autofill_card_cvc_re = 0x010404cf;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_card_ignored_re = 0x010403fb;
+        public: static const int autofill_card_ignored_re = 0x010404d3;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  es
@@ -16884,8 +17254,36 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  ru
  zh-CN
  zh-TW
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
          */
-        public: static const int autofill_card_number_re = 0x010403f8;
+        public: static const int autofill_card_number_re = 0x010404d0;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  en-AU
@@ -16897,8 +17295,48 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  ru
  zh-CN
  zh-TW
+ de-DE
+ en-AU
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ en-AU
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ en-AU
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ en-AU
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ zh-TW
          */
-        public: static const int autofill_city_re = 0x010403e2;
+        public: static const int autofill_city_re = 0x010404ba;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  es
@@ -16907,35 +17345,87 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  ja-JP
  ru
  zh-CN
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ ru
+ zh-CN
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ ru
+ zh-CN
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ ru
+ zh-CN
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ ru
+ zh-CN
          */
-        public: static const int autofill_company_re = 0x010403da;
+        public: static const int autofill_company_re = 0x010404b2;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_country_code_re = 0x010403fd;
+        public: static const int autofill_country_code_re = 0x010404d5;
         /**  Do not translate. Regex used by AutoFill.
  ja-JP
  zh-CN
+ ja-JP
+ zh-CN
+ ja-JP
+ zh-CN
+ ja-JP
+ zh-CN
+ ja-JP
+ zh-CN
          */
-        public: static const int autofill_country_re = 0x010403df;
+        public: static const int autofill_country_re = 0x010404b7;
         /**  Label in a web form for "County" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_county = 0x01040405;
+        public: static const int autofill_county = 0x010404dd;
         /**  Label in a web form for "Department" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_department = 0x01040408;
+        public: static const int autofill_department = 0x010404e0;
         /**  Label in a web form for "District" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_district = 0x01040407;
+        public: static const int autofill_district = 0x010404df;
         /**  Do not translate. Regex used by AutoFill.
  ja-JP
  ru
  zh-CN
  zh-TW
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
          */
-        public: static const int autofill_email_re = 0x010403e8;
+        public: static const int autofill_email_re = 0x010404c0;
         /**  Label in a web form for "Emirate" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_emirate = 0x0104040c;
+        public: static const int autofill_emirate = 0x010404e4;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  es
@@ -16944,8 +17434,36 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  pt-BR, pt-PT
  ru
  zh-CN
+ de-DE
+ es
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ es
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ es
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ es
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
          */
-        public: static const int autofill_expiration_date_re = 0x010403fa;
+        public: static const int autofill_expiration_date_re = 0x010404d2;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  es
@@ -16955,16 +17473,68 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  pt-BR, pt-PT
  ru
  zh-CN
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
          */
-        public: static const int autofill_expiration_month_re = 0x010403f9;
+        public: static const int autofill_expiration_month_re = 0x010404d1;
         /**  Do not translate. Regex used by AutoFill.
  fr-FR
  ja-JP
  ru
  zh-CN
  zh-TW
+ fr-FR
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ fr-FR
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ fr-FR
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ fr-FR
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
          */
-        public: static const int autofill_fax_re = 0x010403fc;
+        public: static const int autofill_fax_re = 0x010404d4;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  es
@@ -16972,11 +17542,35 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  ja-JP
  pt-BR, pt-PT
  ru
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ ru
          */
-        public: static const int autofill_first_name_re = 0x010403ec;
+        public: static const int autofill_first_name_re = 0x010404c4;
         /**  Label in a web form for "Island" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_island = 0x01040406;
+        public: static const int autofill_island = 0x010404de;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  es
@@ -16985,18 +17579,50 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  ja-JP
  pt-BR, pt-PT
  ru
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
          */
-        public: static const int autofill_last_name_re = 0x010403ef;
+        public: static const int autofill_last_name_re = 0x010404c7;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_middle_initial_re = 0x010403ed;
+        public: static const int autofill_middle_initial_re = 0x010404c5;
         /**  Do not translate. Regex used by AutoFill.
  es
+ es
+ es
+ es
+ es
          */
-        public: static const int autofill_middle_name_re = 0x010403ee;
+        public: static const int autofill_middle_name_re = 0x010404c6;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_name_on_card_contextual_re = 0x010403f6;
+        public: static const int autofill_name_on_card_contextual_re = 0x010404ce;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  es
@@ -17006,36 +17632,108 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  ru
  zh-CN
  zh-TW
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ ru
+ zh-CN
+ zh-TW
          */
-        public: static const int autofill_name_on_card_re = 0x010403f5;
+        public: static const int autofill_name_on_card_re = 0x010404cd;
         /**  Do not translate. Regex used by AutoFill.
  es
  fr-FR
  ja-JP
  pt-BR, pt-PT
  zh-CN
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ zh-CN
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ zh-CN
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ zh-CN
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ zh-CN
          */
-        public: static const int autofill_name_re = 0x010403ea;
+        public: static const int autofill_name_re = 0x010404c2;
         /**  Do not translate. Regex used by AutoFill.
  fr-FR
  pt-BR, pt-PT
+ fr-FR
+ pt-BR, pt-PT
+ fr-FR
+ pt-BR, pt-PT
+ fr-FR
+ pt-BR, pt-PT
+ fr-FR
+ pt-BR, pt-PT
          */
-        public: static const int autofill_name_specific_re = 0x010403eb;
+        public: static const int autofill_name_specific_re = 0x010404c3;
         /**  Label in a web form for "Parish" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_parish = 0x0104040a;
+        public: static const int autofill_parish = 0x010404e2;
         /**  Do not translate. Regex used by AutoFill.
  pt-BR, pt-PT
+ pt-BR, pt-PT
+ pt-BR, pt-PT
+ pt-BR, pt-PT
+ pt-BR, pt-PT
          */
-        public: static const int autofill_phone_extension_re = 0x010403f4;
+        public: static const int autofill_phone_extension_re = 0x010404cc;
         /**  Do not translate. Regex used by AutoFill.
  fr-FR
  pt-BR, pt-PT
+ fr-FR
+ pt-BR, pt-PT
+ fr-FR
+ pt-BR, pt-PT
+ fr-FR
+ pt-BR, pt-PT
+ fr-FR
+ pt-BR, pt-PT
          */
-        public: static const int autofill_phone_prefix_re = 0x010403f2;
+        public: static const int autofill_phone_prefix_re = 0x010404ca;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_phone_prefix_separator_re = 0x010403ff;
+        public: static const int autofill_phone_prefix_separator_re = 0x010404d7;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  es
@@ -17044,34 +17742,70 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  pt-BR, pt-PT
  ru
  zh-CN
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ de-DE
+ es
+ fr-FR
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
          */
-        public: static const int autofill_phone_re = 0x010403f0;
+        public: static const int autofill_phone_re = 0x010404c8;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_phone_suffix_re = 0x010403f3;
+        public: static const int autofill_phone_suffix_re = 0x010404cb;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_phone_suffix_separator_re = 0x01040400;
+        public: static const int autofill_phone_suffix_separator_re = 0x010404d8;
         /**  Label in a web form for "Postal code" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_postal_code = 0x01040402;
+        public: static const int autofill_postal_code = 0x010404da;
         /**  Label in a web form for "Prefecture" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_prefecture = 0x01040409;
+        public: static const int autofill_prefecture = 0x010404e1;
         /**  Label in a web form for "Province" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_province = 0x01040401;
+        public: static const int autofill_province = 0x010404d9;
         /**  Do not translate. Regex used by AutoFill.
  es
  pt-BR, pt-PT
+ es
+ pt-BR, pt-PT
+ es
+ pt-BR, pt-PT
+ es
+ pt-BR, pt-PT
+ es
+ pt-BR, pt-PT
          */
-        public: static const int autofill_region_ignored_re = 0x010403d9;
+        public: static const int autofill_region_ignored_re = 0x010404b1;
         /**  Do not translate. Regex used by AutoFill.
          */
-        public: static const int autofill_shipping_designator_re = 0x010403e7;
+        public: static const int autofill_shipping_designator_re = 0x010404bf;
         /**  Label in a web form for "State" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_state = 0x01040403;
+        public: static const int autofill_state = 0x010404db;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  en-UK
@@ -17080,23 +17814,63 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  ru
  zh-CN
  zh-TW
+ de-DE
+ en-UK
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ en-UK
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ en-UK
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ zh-TW
+ de-DE
+ en-UK
+ ja-JP
+ pt-BR, pt-PT
+ ru
+ zh-CN
+ zh-TW
          */
-        public: static const int autofill_state_re = 0x010403e3;
+        public: static const int autofill_state_re = 0x010404bb;
         /**  Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form, and the user has configured an AutoFill profile [CHAR-LIMIT=8]
          */
-        public: static const int autofill_this_form = 0x010403d2;
+        public: static const int autofill_this_form = 0x010404aa;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  zh-CN
+ de-DE
+ zh-CN
+ de-DE
+ zh-CN
+ de-DE
+ zh-CN
+ de-DE
+ zh-CN
          */
-        public: static const int autofill_username_re = 0x010403e9;
+        public: static const int autofill_username_re = 0x010404c1;
         /**  Do not translate. Regex used by AutoFill.
  pt-BR, pt-PT
+ pt-BR, pt-PT
+ pt-BR, pt-PT
+ pt-BR, pt-PT
+ pt-BR, pt-PT
          */
-        public: static const int autofill_zip_4_re = 0x010403e1;
+        public: static const int autofill_zip_4_re = 0x010404b9;
         /**  Label in a web form for "ZIP code" [CHAR-LIMIT=NONE]
          */
-        public: static const int autofill_zip_code = 0x01040404;
+        public: static const int autofill_zip_code = 0x010404dc;
         /**  Do not translate. Regex used by AutoFill.
  de-DE
  es
@@ -17107,132 +17881,181 @@ Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
  ru
 zh-CN
  zh-TW
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+zh-CN
+ zh-TW
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+zh-CN
+ zh-TW
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+zh-CN
+ zh-TW
+ de-DE
+ es
+ fr-FR
+ it-IT
+ ja-JP
+ pt-BR, pt-PT
+ ru
+zh-CN
+ zh-TW
          */
-        public: static const int autofill_zip_code_re = 0x010403e0;
+        public: static const int autofill_zip_code_re = 0x010404b8;
         /**  Displayed when a SIM PIN password is entered incorrectly.
          */
-        public: static const int badPin = 0x01040088;
+        public: static const int badPin = 0x01040160;
         /**  Displayed when a SIM PUK password is entered incorrectly.
          */
-        public: static const int badPuk = 0x01040089;
+        public: static const int badPuk = 0x01040161;
         /**  [CHAR_LIMIT=NONE] Battery saver: Feature description
          */
-        public: static const int battery_saver_description = 0x0104067f;
+        public: static const int battery_saver_description = 0x01040757;
         /**  Description of the bluetooth a2dp audio route. [CHAR LIMIT=50]
          */
-        public: static const int bluetooth_a2dp_audio_route_name = 0x010405be;
+        public: static const int bluetooth_a2dp_audio_route_name = 0x01040696;
         /**  Message in bugreport dialog describing what it does [CHAR LIMIT=NONE]
          */
-        public: static const int bugreport_message = 0x010400f9;
+        public: static const int bugreport_message = 0x010401d1;
         /**  Format for build summary info [CHAR LIMIT=NONE]
          */
-        public: static const int bugreport_status = 0x010400fa;
+        public: static const int bugreport_status = 0x010401d2;
         /**  Take bug report menu title [CHAR LIMIT=NONE]
          */
-        public: static const int bugreport_title = 0x010400f8;
+        public: static const int bugreport_title = 0x010401d0;
         /**  Suffix added to a number to signify size in bytes.
          */
-        public: static const int byteShort = 0x0104006b;
+        public: static const int byteShort = 0x01040143;
         /**  Preference framework strings.
          */
         public: static const int cancel = 0x01040000;
         /**  Description for the capability of an accessibility service to request enhanced web accessibility.
          */
-        public: static const int capability_desc_canRequestEnhancedWebAccessibility = 0x0104014a;
+        public: static const int capability_desc_canRequestEnhancedWebAccessibility = 0x01040222;
         /**  Description for the capability of an accessibility service to request to filter key events.
          */
-        public: static const int capability_desc_canRequestFilterKeyEvents = 0x0104014c;
+        public: static const int capability_desc_canRequestFilterKeyEvents = 0x01040224;
         /**  Description for the capability of an accessibility service to request touch exploration.
          */
-        public: static const int capability_desc_canRequestTouchExploration = 0x01040148;
+        public: static const int capability_desc_canRequestTouchExploration = 0x01040220;
         /**  Description for the capability of an accessibility service to retrieve window content.
          */
-        public: static const int capability_desc_canRetrieveWindowContent = 0x01040146;
+        public: static const int capability_desc_canRetrieveWindowContent = 0x0104021e;
         /**  Title for the capability of an accessibility service to request enhanced web accessibility.
          */
-        public: static const int capability_title_canRequestEnhancedWebAccessibility = 0x01040149;
+        public: static const int capability_title_canRequestEnhancedWebAccessibility = 0x01040221;
         /**  Title for the capability of an accessibility service to request to filter key events.
          */
-        public: static const int capability_title_canRequestFilterKeyEvents = 0x0104014b;
+        public: static const int capability_title_canRequestFilterKeyEvents = 0x01040223;
         /**  Title for the capability of an accessibility service to request touch exploration.
          */
-        public: static const int capability_title_canRequestTouchExploration = 0x01040147;
+        public: static const int capability_title_canRequestTouchExploration = 0x0104021f;
         /**  Title for the capability of an accessibility service to retrieve window content.
          */
-        public: static const int capability_title_canRetrieveWindowContent = 0x01040145;
-        public: static const int car_mode_disable_notification_message = 0x01040548;
+        public: static const int capability_title_canRetrieveWindowContent = 0x0104021d;
+        public: static const int car_mode_disable_notification_message = 0x01040620;
         /**  Strings for car mode notification
  Shown when car mode is enabled
          */
-        public: static const int car_mode_disable_notification_title = 0x01040547;
+        public: static const int car_mode_disable_notification_title = 0x0104061f;
         /**  Displayed when the call forwarding query was forwarded.
          */
-        public: static const int cfTemplateForwarded = 0x010400c7;
+        public: static const int cfTemplateForwarded = 0x0104019f;
         /**  Displayed when the call forwarding query will be forwarded after some time.
          */
-        public: static const int cfTemplateForwardedTime = 0x010400c8;
+        public: static const int cfTemplateForwardedTime = 0x010401a0;
         /**  Displayed when the call forwarding query was not able to be forwarded.
          */
-        public: static const int cfTemplateNotForwarded = 0x010400c6;
+        public: static const int cfTemplateNotForwarded = 0x0104019e;
         /**  Displayed when the call forwarding query was set but forwarding is not enabled.
          */
-        public: static const int cfTemplateRegistered = 0x010400c9;
+        public: static const int cfTemplateRegistered = 0x010401a1;
         /**  Displayed when the call forwarding query was set but forwarding is not enabled.
          */
-        public: static const int cfTemplateRegisteredTime = 0x010400ca;
+        public: static const int cfTemplateRegisteredTime = 0x010401a2;
         /**  Default title for the activity chooser, when one is not given. Android allows multiple activities to perform an action.  for example, there may be many ringtone pickers installed.  A dialog is shown to the user allowing him to pick which activity should be used.  This is the title.
          */
-        public: static const int chooseActivity = 0x0104046d;
+        public: static const int chooseActivity = 0x01040545;
         /**  title for the USB activity chooser.
          */
-        public: static const int chooseUsbActivity = 0x0104046e;
+        public: static const int chooseUsbActivity = 0x01040546;
         /**  Dialog title for user to select a different wallpaper from service list
          */
-        public: static const int chooser_wallpaper = 0x01040537;
-        public: static const int common_last_name_prefixes = 0x0104005a;
-        public: static const int common_name_conjunctions = 0x0104005b;
-        public: static const int common_name_prefixes = 0x01040058;
-        public: static const int common_name_suffixes = 0x01040059;
+        public: static const int chooser_wallpaper = 0x0104060f;
+        public: static const int common_last_name_prefixes = 0x01040132;
+        public: static const int common_name_conjunctions = 0x01040133;
+        public: static const int common_name_prefixes = 0x01040130;
+        public: static const int common_name_suffixes = 0x01040131;
         /**  Label to show for a service that is running because it is providing conditions.
          */
-        public: static const int condition_provider_service_binding_label = 0x01040539;
+        public: static const int condition_provider_service_binding_label = 0x01040611;
         /**  Package name providing Hardware Activity-Recognition API support. Used only when
          config_enableActivityRecognitionHardwareOverlay is false.
          */
-        public: static const int config_activityRecognitionHardwarePackageName = 0x01040025;
+        public: static const int config_activityRecognitionHardwarePackageName = 0x010400ef;
         /**  Apps that are authorized to access shared accounts, overridden by product overlays
          */
-        public: static const int config_appsAuthorizedForSharedAccounts = 0x01040043;
+        public: static const int config_appsAuthorizedForSharedAccounts = 0x01040110;
         /**  Class name of the framework account picker activity.
          Can be customized for other product types
          */
-        public: static const int config_chooseAccountActivity = 0x0104003e;
+        public: static const int config_chooseAccountActivity = 0x0104010a;
         /**  Class name of the account type and account picker activity.
          Can be customized for other product types
          */
-        public: static const int config_chooseTypeAndAccountActivity = 0x0104003f;
+        public: static const int config_chooseTypeAndAccountActivity = 0x0104010b;
+        /**  Component name of the combo network location provider.
+         */
+        public: static const int config_comboNetworkLocationProvider = 0x010400f1;
         /**  Name of the activity or service that prompts the user to reject, accept, or whitelist
          an adb host's public key, when an unwhitelisted host connects to the local adbd.
          Can be customized for other product types
          */
-        public: static const int config_customAdbPublicKeyConfirmationComponent = 0x01040041;
+        public: static const int config_customAdbPublicKeyConfirmationComponent = 0x0104010e;
         /**  Component name of a custom ResolverActivity (Intent resolver) to be used instead of
          the default framework version. If left empty, then the framework version will be used.
          Example: com.google.android.myapp/.resolver.MyResolverActivity
          */
-        public: static const int config_customResolverActivity = 0x01040040;
+        public: static const int config_customResolverActivity = 0x0104010c;
         /**  Name of the CustomDialog that is used for VPN
          */
-        public: static const int config_customVpnConfirmDialogComponent = 0x01040042;
+        public: static const int config_customVpnConfirmDialogComponent = 0x0104010f;
         /**  The default iface on which to monitor data use
+ Default interface to monitor data use
          */
-        public: static const int config_datause_iface = 0x01040026;
+        public: static const int config_datause_iface = 0x010400f2;
         /**  Package name for default network scorer app; overridden by product overlays.
          */
-        public: static const int config_defaultNetworkScorerPackageName = 0x01040044;
+        public: static const int config_defaultNetworkScorerPackageName = 0x01040111;
+        /**  Default, comma-delimited, quick settings tiles. See QSConstants.java for a list of all available tiles
+         */
+        public: static const int config_defaultQuickSettingsTiles = 0x0104011e;
         /**  IP address of the dns server to use if nobody else suggests one
          */
-        public: static const int config_default_dns_server = 0x01040028;
+        public: static const int config_default_dns_server = 0x010400f4;
+        /**  Name of that key handler class
+         */
+        public: static const int config_deviceKeyHandlerClass = 0x01040114;
+        /**  Path to the library that contains a device specific key handler
+         */
+        public: static const int config_deviceKeyHandlerLib = 0x01040113;
         /**  ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
          try to start this dream if possible.  The dream should typically call startDozing()
@@ -17243,110 +18066,89 @@ zh-CN
          Note that doze dreams are not subject to the same start conditions as ordinary dreams.
          Doze dreams will run whenever the power manager is in a dozing state.
          */
-        public: static const int config_dozeComponent = 0x0104003b;
+        public: static const int config_dozeComponent = 0x01040107;
         /**  ComponentName of the default dream (Settings.Secure.DEFAULT_SCREENSAVER_COMPONENT)
          */
-        public: static const int config_dreamsDefaultComponent = 0x0104003a;
+        public: static const int config_dreamsDefaultComponent = 0x01040106;
         /**  Regex of wired ethernet ifaces
          */
-        public: static const int config_ethernet_iface_regex = 0x01040018;
+        public: static const int config_ethernet_iface_regex = 0x010400e2;
         /**  Configure ethernet tcp buffersizes in the form:
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
          */
-        public: static const int config_ethernet_tcp_buffers = 0x0104003c;
+        public: static const int config_ethernet_tcp_buffers = 0x01040108;
         /**  Package name providing fused location support. Used only when
          config_enableFusedLocationOverlay is false.
          */
-        public: static const int config_fusedLocationProviderPackageName = 0x01040021;
+        public: static const int config_fusedLocationProviderPackageName = 0x010400eb;
         /**  Package name providing geocoder API support. Used only when
          config_enableGeocoderOverlay is false.
          */
-        public: static const int config_geocoderProviderPackageName = 0x01040023;
+        public: static const int config_geocoderProviderPackageName = 0x010400ed;
         /**  Package name providing geofence API support. Used only when
          config_enableGeofenceOverlay is false.
          */
-        public: static const int config_geofenceProviderPackageName = 0x01040024;
+        public: static const int config_geofenceProviderPackageName = 0x010400ee;
+        /**  Component name of the geofence services provider.
+ Component name of the geofence services provider.
+         */
+        public: static const int config_geofenceServicesProvider = 0x010400f0;
         /**  Package name providing Hardware Flp. Used only when
          config_enableHardwareFlpOverlay is false.
          */
-        public: static const int config_hardwareFlpPackageName = 0x01040022;
+        public: static const int config_hardwareFlpPackageName = 0x010400ec;
+        /**  Name of the class which implements the IKillSwitch interface
+         */
+        public: static const int config_killSwitchClass = 0x0104011d;
+        /**  Path to the library that contains the kill switch library
+         */
+        public: static const int config_killSwitchLib = 0x0104011c;
         /**  MMS user agent string
- MMS user agent string
+ SoftBank maintains a MMS UserAgent whitelist, we must use one of the white-listed strings to be able to send/receive
          */
-        public: static const int config_mms_user_agent = 0x01040031;
+        public: static const int config_mms_user_agent = 0x010400fd;
         /**  MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
- MMS user agent prolfile url
          */
-        public: static const int config_mms_user_agent_profile_url = 0x01040032;
+        public: static const int config_mms_user_agent_profile_url = 0x010400fe;
         /**  Package name providing network location support. Used only when
          config_enableNetworkLocationOverlay is false.
          */
-        public: static const int config_networkLocationProviderPackageName = 0x01040020;
+        public: static const int config_networkLocationProviderPackageName = 0x010400ea;
         /**  Remote server that can provide NTP responses.
          */
-        public: static const int config_ntpServer = 0x01040034;
+        public: static const int config_ntpServer = 0x01040100;
+        /**  Configuration to set delete any partial segments expire age
+ 30 days by default (60 * 60 * 1000) * 24 * 30 , no long so use string
+         */
+        public: static const int config_partial_segment_expire_age = 0x01040116;
+        /**  When config_perf_profile_prop is defined, this value MUST be the index of
+         one of the listes values in frameworks/base/core/res/res/values/cm_arrays.xml
+         for "perf_profile_values" array. Leave it blank if the device do not support
+         performance profiles
+ When config_perf_profile_prop is defined, this value MUST be the index of
+         one of the listes values in frameworks/base/core/res/res/values/cm_arrays.xml
+         for "perf_profile_values" array. Leave it blank if the device do not support
+         performance profiles
+         */
+        public: static const int config_perf_profile_default_entry = 0x0104011b;
+        /**  Defines the system property to set for performance profile xe: sys.cpu.modes. Leave it
+         blank if the device do not support performance profiles
+ Defines the system property to set for performance profile xe: sys.cpu.modes. Leave it
+         blank if the device do not support performance profiles
+         */
+        public: static const int config_perf_profile_prop = 0x0104011a;
         /**  Flag indicating which package name can access the persistent data partition
          */
-        public: static const int config_persistentDataPackageName = 0x01040045;
+        public: static const int config_persistentDataPackageName = 0x01040112;
+        /**  Component name of a custom pre launch check activity to be used instead of default
+         framework version. Currently, there is no default version.
+         */
+        public: static const int config_prelaunchcheckactivity = 0x0104010d;
+        /**  config 2G/3G/4G RAT strings for carriers
+         */
+        public: static const int config_rat_2g = 0x01040117;
+        public: static const int config_rat_3g = 0x01040118;
+        public: static const int config_rat_4g = 0x01040119;
         /**  String containing the apn value for tethering.  May be overriden by secure settings
          TETHER_DUN_APN.  Value is a comma separated series of strings:
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
@@ -17419,61 +18221,57 @@ zh-CN
          TETHER_DUN_APN.  Value is a comma separated series of strings:
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN"
- String containing the apn value for tethering.  May be overriden by secure settings
-         TETHER_DUN_APN.  Value is a comma separated series of strings:
-         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
-         note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN"
          */
-        public: static const int config_tether_apndata = 0x01040019;
+        public: static const int config_tether_apndata = 0x010400e3;
         /**  The URL that should be sent in an x-wap-profile header with an HTTP request,
          as defined in the Open Mobile Alliance User Agent Profile specification
          OMA-TS-UAProf-V2_0-20060206-A Section 8.1.1.1. If the URL contains a '%s'
          format string then that substring will be replaced with the value of
          Build.MODEL. The format string shall not be escaped.
          */
-        public: static const int config_useragentprofile_url = 0x01040030;
+        public: static const int config_useragentprofile_url = 0x010400fc;
         /**  Package name providing WebView implementation.
          */
-        public: static const int config_webViewPackageName = 0x01040046;
+        public: static const int config_webViewPackageName = 0x01040115;
         /**  Device type information conforming to Annex B format in WiFi Direct specification.
          The default represents a dual-mode smartphone
          */
-        public: static const int config_wifi_p2p_device_type = 0x0104001a;
-        public: static const int config_wifi_random_mac_oui = 0x0104001b;
+        public: static const int config_wifi_p2p_device_type = 0x010400e4;
+        public: static const int config_wifi_random_mac_oui = 0x010400e5;
         /**  Configure wifi tcp buffersizes in the form:
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
          */
-        public: static const int config_wifi_tcp_buffers = 0x0104003d;
+        public: static const int config_wifi_tcp_buffers = 0x01040109;
         /**  Name of the wimax manager class
          */
-        public: static const int config_wimaxManagerClassname = 0x01040037;
+        public: static const int config_wimaxManagerClassname = 0x01040103;
         /**  Location of the wimax native library locaiton
          */
-        public: static const int config_wimaxNativeLibLocation = 0x01040036;
+        public: static const int config_wimaxNativeLibLocation = 0x01040102;
         /**  Name of the wimax service class
          */
-        public: static const int config_wimaxServiceClassname = 0x01040038;
+        public: static const int config_wimaxServiceClassname = 0x01040104;
         /**  Location of the wimax framwork jar location
          */
-        public: static const int config_wimaxServiceJarLocation = 0x01040035;
+        public: static const int config_wimaxServiceJarLocation = 0x01040101;
         /**  Name of the wimax state tracker clas
          */
-        public: static const int config_wimaxStateTrackerClassname = 0x01040039;
+        public: static const int config_wimaxStateTrackerClassname = 0x01040105;
         /**  Title of a button to open the settings to enable or disable keyboards, also known as input methods [CHAR LIMIT=30]
          */
-        public: static const int configure_input_methods = 0x010404f2;
+        public: static const int configure_input_methods = 0x010405ca;
         /**  A notification is shown when there is a sync error.  This is the text that will scroll through the notification bar (will be seen by the user as he uses another application).
          */
-        public: static const int contentServiceSync = 0x010400dc;
+        public: static const int contentServiceSync = 0x010401b4;
         /**  A notification is shown when there is a sync error.  This is the title of the notification.  It will be seen in the pull-down notification tray.
          */
-        public: static const int contentServiceSyncNotificationTitle = 0x010400dd;
+        public: static const int contentServiceSyncNotificationTitle = 0x010401b5;
         /**  A notification is shown when there is a sync error.  This is the message of the notification.  It describes the error, in this case is there were too many deletes. The argument is the type of content, for example Gmail or Calendar. It will be seen in the pull-down notification tray.
          */
-        public: static const int contentServiceTooManyDeletesNotificationDesc = 0x010400de;
+        public: static const int contentServiceTooManyDeletesNotificationDesc = 0x010401b6;
         /**  Text spoken when the user is performing a gesture that will enable accessibility. [CHAR LIMIT=none]
          */
-        public: static const int continue_to_enable_accessibility = 0x010405f4;
+        public: static const int continue_to_enable_accessibility = 0x010406cc;
         /**  Item on EditText context menu. This action is used to cut selected the text into the clipboard.
          */
         public: static const int copy = 0x01040001;
@@ -17482,106 +18280,106 @@ zh-CN
         public: static const int copyUrl = 0x01040002;
         /**  This string appears (on two lines) when you type a number into contacts search, to let you create a contact whose phone number is the number you typed.  The first line will be in bigger type than the second.
          */
-        public: static const int create_contact_using = 0x01040529;
+        public: static const int create_contact_using = 0x01040601;
         /**  Item on EditText context menu.  This action is used to cut selected the text into the clipboard.
          */
         public: static const int cut = 0x01040003;
         /**  Notification title when 2G-3G data usage has exceeded limit threshold. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_3g_limit_snoozed_title = 0x0104059a;
+        public: static const int data_usage_3g_limit_snoozed_title = 0x01040672;
         /**  Notification title when 2G-3G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_3g_limit_title = 0x01040595;
+        public: static const int data_usage_3g_limit_title = 0x0104066d;
         /**  Notification title when 4G data usage has exceeded limit threshold. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_4g_limit_snoozed_title = 0x0104059b;
+        public: static const int data_usage_4g_limit_snoozed_title = 0x01040673;
         /**  Notification title when 4G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_4g_limit_title = 0x01040596;
+        public: static const int data_usage_4g_limit_title = 0x0104066e;
         /**  Notification body when data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_limit_body = 0x01040599;
+        public: static const int data_usage_limit_body = 0x01040671;
         /**  Notification body when data usage has exceeded limit threshold. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_limit_snoozed_body = 0x0104059e;
+        public: static const int data_usage_limit_snoozed_body = 0x01040676;
         /**  Notification title when mobile data usage has exceeded limit threshold. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_mobile_limit_snoozed_title = 0x0104059c;
+        public: static const int data_usage_mobile_limit_snoozed_title = 0x01040674;
         /**  Notification title when mobile data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_mobile_limit_title = 0x01040597;
+        public: static const int data_usage_mobile_limit_title = 0x0104066f;
         /**  Notification body when background data usage is limited. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_restricted_body = 0x010405a0;
+        public: static const int data_usage_restricted_body = 0x01040678;
         /**  Notification title when background data usage is limited. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_restricted_title = 0x0104059f;
+        public: static const int data_usage_restricted_title = 0x01040677;
         /**  Notification body when data usage has exceeded warning threshold. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_warning_body = 0x01040594;
+        public: static const int data_usage_warning_body = 0x0104066c;
         /**  Notification title when data usage has exceeded warning threshold. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_warning_title = 0x01040593;
+        public: static const int data_usage_warning_title = 0x0104066b;
         /**  Notification title when Wi-Fi data usage has exceeded limit threshold. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_wifi_limit_snoozed_title = 0x0104059d;
+        public: static const int data_usage_wifi_limit_snoozed_title = 0x01040675;
         /**  Notification title when Wi-Fi data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32]
          */
-        public: static const int data_usage_wifi_limit_title = 0x01040598;
-        public: static const int date_and_time = 0x01040056;
+        public: static const int data_usage_wifi_limit_title = 0x01040670;
+        public: static const int date_and_time = 0x0104012e;
         /**  Description of the button to decrease the DatePicker's day value. [CHAR LIMIT=NONE]
          */
-        public: static const int date_picker_decrement_day_button = 0x01040578;
+        public: static const int date_picker_decrement_day_button = 0x01040650;
         /**  Description of the button to decrease the DatePicker's month value. [CHAR LIMIT=NONE]
          */
-        public: static const int date_picker_decrement_month_button = 0x01040576;
+        public: static const int date_picker_decrement_month_button = 0x0104064e;
         /**  Description of the button to decrease the DatePicker's year value. [CHAR LIMIT=NONE]
          */
-        public: static const int date_picker_decrement_year_button = 0x0104057a;
+        public: static const int date_picker_decrement_year_button = 0x01040652;
         /**  The title of the date picker dialog. [CHAR LIMIT=NONE]
          */
-        public: static const int date_picker_dialog_title = 0x010404ce;
+        public: static const int date_picker_dialog_title = 0x010405a6;
         /**  Description of the button to increase the DatePicker's day value. [CHAR LIMIT=NONE]
          */
-        public: static const int date_picker_increment_day_button = 0x01040577;
+        public: static const int date_picker_increment_day_button = 0x0104064f;
         /**  DatePicker - accessibility support
  Description of the button to increase the DatePicker's month value. [CHAR LIMIT=NONE]
          */
-        public: static const int date_picker_increment_month_button = 0x01040575;
+        public: static const int date_picker_increment_month_button = 0x0104064d;
         /**  Description of the button to increase the DatePicker's year value. [CHAR LIMIT=NONE]
          */
-        public: static const int date_picker_increment_year_button = 0x01040579;
-        public: static const int date_time = 0x01040057;
+        public: static const int date_picker_increment_year_button = 0x01040651;
+        public: static const int date_time = 0x0104012f;
         /**  Name of the button in the date/time picker to accept the date/time change
          */
-        public: static const int date_time_done = 0x010404d0;
+        public: static const int date_time_done = 0x010405a8;
         /**  Name of the button in the date/time picker to accept the date/time change
          */
-        public: static const int date_time_set = 0x010404cf;
+        public: static const int date_time_set = 0x010405a7;
         /**  DO NOT TRANSLATE
          */
-        public: static const int day_of_week_label_typeface = 0x01040671;
+        public: static const int day_of_week_label_typeface = 0x01040749;
         /**
         Content description for the month and day selector in the date picker, which displays
         a selectable grid of days laid out by month.
         [CHAR LIMIT=50]
 
          */
-        public: static const int day_picker_description = 0x01040667;
+        public: static const int day_picker_description = 0x0104073f;
         /**  The default journal mode to use use when Write-Ahead Logging is not active.
          Choices are: OFF, DELETE, TRUNCATE, PERSIST and MEMORY.
          PERSIST may improve performance by reducing how often journal blocks are
          reallocated (compared to truncation) resulting in better data block locality
          and less churn of the storage media.
          */
-        public: static const int db_default_journal_mode = 0x0104002d;
+        public: static const int db_default_journal_mode = 0x010400f9;
         /**  The database synchronization mode when using the default journal mode.
          FULL is safest and preserves durability at the cost of extra fsyncs.
          NORMAL also preserves durability in non-WAL modes and uses checksums to ensure
          integrity although there is a small chance that an error might go unnoticed.
          Choices are: FULL, NORMAL, OFF.
          */
-        public: static const int db_default_sync_mode = 0x0104002e;
+        public: static const int db_default_sync_mode = 0x010400fa;
         /**  The database synchronization mode when using Write-Ahead Logging.
          FULL is safest and preserves durability at the cost of extra fsyncs.
          NORMAL sacrifices durability in WAL mode because syncs are only performed before
@@ -17589,8 +18387,17 @@ zh-CN
          occurs, then committed transactions could be lost and applications might break.
          Choices are: FULL, NORMAL, OFF.
          */
-        public: static const int db_wal_sync_mode = 0x0104002f;
-        public: static const int decline = 0x010404b1;
+        public: static const int db_wal_sync_mode = 0x010400fb;
+        public: static const int decline = 0x01040589;
+        /**  Default wi-fi direct name
+         */
+        public: static const int def_wifi_direct_name = 0x0104009b;
+        /**  Default wi-fi hotspot pass
+         */
+        public: static const int def_wifi_wifihotspot_pass = 0x0104009a;
+        /**  Default wi-fi hotspot ssid
+         */
+        public: static const int def_wifi_wifihotspot_ssid = 0x01040099;
         /**  What the UI should display for "Msisdn" unless overridden by the SIM
          */
         public: static const int defaultMsisdnAlphaTag = 0x01040005;
@@ -17599,47 +18406,48 @@ zh-CN
         public: static const int defaultVoiceMailAlphaTag = 0x01040004;
         /**  Name of the default audio route category. [CHAR LIMIT=50]
          */
-        public: static const int default_audio_route_category_name = 0x010405bd;
+        public: static const int default_audio_route_category_name = 0x01040695;
         /**  Name of the default audio route when nothing is connected to
          a headphone or other wired audio output jack. [CHAR LIMIT=50]
          */
-        public: static const int default_audio_route_name = 0x010405b9;
+        public: static const int default_audio_route_name = 0x01040691;
         /**  Name of the default audio route when an audio dock is connected. [CHAR LIMIT=50]
          */
-        public: static const int default_audio_route_name_dock_speakers = 0x010405bb;
+        public: static const int default_audio_route_name_dock_speakers = 0x01040693;
         /**  Name of the default audio route when wired headphones are
          connected. [CHAR LIMIT=50]
          */
-        public: static const int default_audio_route_name_headphones = 0x010405ba;
+        public: static const int default_audio_route_name_headphones = 0x01040692;
         /**  Name of the default media route when HDMI is connected. [CHAR LIMIT=50]
          */
-        public: static const int default_media_route_name_hdmi = 0x010405bc;
+        public: static const int default_media_route_name_hdmi = 0x01040694;
         /**  Default SMS Application. This will be the default SMS application when
          the phone first boots. The user can then change the default app to oe
          of their choosing.
          This can be overridden for devices where a different default SMS
          application is desired.
          */
-        public: static const int default_sms_application = 0x01040027;
+        public: static const int default_sms_application = 0x010400f3;
         /**  Component name of the default wallpaper. This will be ImageWallpaper if not
          specified
          */
-        public: static const int default_wallpaper_component = 0x0104001e;
+        public: static const int default_wallpaper_component = 0x010400e8;
         /**  Item on EditText pop-up window. This action is used to delete the text that the user recently added. [CHAR LIMIT=15]
          */
-        public: static const int delete_ = 0x01040452;
+        public: static const int delete_ = 0x0104052a;
         /**  Option to delete the highlighted part of the text from the suggestion popup. [CHAR LIMIT=25]
          */
-        public: static const int deleteText = 0x01040455;
+        public: static const int deleteText = 0x0104052d;
         /**  Accessibility announcement when a number that had been typed in is deleted [CHAR_LIMIT=NONE]
          */
-        public: static const int deleted_key = 0x0104066c;
+        public: static const int deleted_key = 0x01040744;
+        public: static const int deny = 0x01040606;
         /**  Description of the unlock handle in the Slide unlock screen for tablets. [CHAR LIMIT=NONE]
          */
-        public: static const int description_target_unlock_tablet = 0x01040587;
+        public: static const int description_target_unlock_tablet = 0x0104065f;
         /**  This string appears (on two lines) when you type a number into contacts search, to let you dial the phone number you typed.  The first line will be in bigger type than the second.
          */
-        public: static const int dial_number_using = 0x01040528;
+        public: static const int dial_number_using = 0x01040600;
         /**  This is the generic "attention" string to be used in attention dialogs.  Typically
          combined with setIconAttribute(android.R.attr.alertDialogIcon)
          (or setIcon(android.R.drawable.ic_dialog_alert) on legacy versions of the platform)
@@ -17648,1323 +18456,1422 @@ zh-CN
         /**  Display manager service
  Name of the built-in display.  [CHAR LIMIT=50]
          */
-        public: static const int display_manager_built_in_display_name = 0x010405cb;
+        public: static const int display_manager_built_in_display_name = 0x010406a3;
         /**  Name of the HDMI display.  [CHAR LIMIT=50]
          */
-        public: static const int display_manager_hdmi_display_name = 0x010405cc;
+        public: static const int display_manager_hdmi_display_name = 0x010406a4;
         /**  Name of the N'th overlay display for testing.  [CHAR LIMIT=50]
          */
-        public: static const int display_manager_overlay_display_name = 0x010405cd;
+        public: static const int display_manager_overlay_display_name = 0x010406a5;
         /**  Title text to append when the display is secure.  [CHAR LIMIT=30]
          */
-        public: static const int display_manager_overlay_display_secure_suffix = 0x010405cf;
+        public: static const int display_manager_overlay_display_secure_suffix = 0x010406a7;
         /**  Title text to show within the overlay.  [CHAR LIMIT=50]
          */
-        public: static const int display_manager_overlay_display_title = 0x010405ce;
+        public: static const int display_manager_overlay_display_title = 0x010406a6;
         /**  USB_STORAGE_KILL_STORAGE_USERS dialog message text
          */
-        public: static const int dlg_confirm_kill_storage_users_text = 0x010404e3;
+        public: static const int dlg_confirm_kill_storage_users_text = 0x010405bb;
         /**  USB_STORAGE_KILL_STORAGE_USERS dialog
          */
-        public: static const int dlg_confirm_kill_storage_users_title = 0x010404e2;
+        public: static const int dlg_confirm_kill_storage_users_title = 0x010405ba;
         /**  USB_STORAGE_ERROR dialog  dialog
          */
-        public: static const int dlg_error_title = 0x010404e4;
+        public: static const int dlg_error_title = 0x010405bc;
         /**  USB_STORAGE_ERROR dialog  ok button
          */
-        public: static const int dlg_ok = 0x010404e5;
+        public: static const int dlg_ok = 0x010405bd;
         /**  Label for button to confirm chosen date or time [CHAR LIMIT=30]
          */
-        public: static const int done_label = 0x01040662;
+        public: static const int done_label = 0x0104073a;
         /**  Toast for double-tap
          */
-        public: static const int double_tap_toast = 0x010403d1;
+        public: static const int double_tap_toast = 0x010404a9;
         /**  [CHAR_LIMIT=NONE] Zen mode: Condition summary for built-in downtime condition, if active
          */
-        public: static const int downtime_condition_summary = 0x01040680;
+        public: static const int downtime_condition_summary = 0x01040758;
         /**  [CHAR_LIMIT=10] Suffix added to signify duration of one day with one hours
          */
-        public: static const int durationDayHour = 0x01040074;
+        public: static const int durationDayHour = 0x0104014c;
         /**  [CHAR_LIMIT=10] Suffix added to signify duration of one day with hours
          */
-        public: static const int durationDayHours = 0x01040073;
+        public: static const int durationDayHours = 0x0104014b;
         /**  [CHAR_LIMIT=10] Suffix added to signify duration in days
          */
-        public: static const int durationDays = 0x01040072;
+        public: static const int durationDays = 0x0104014a;
         /**  [CHAR_LIMIT=10] Suffix added to signify duration of one hour with one minute
          */
-        public: static const int durationHourMinute = 0x01040077;
+        public: static const int durationHourMinute = 0x0104014f;
         /**  [CHAR_LIMIT=10] Suffix added to signify duration of one hour with minutes
          */
-        public: static const int durationHourMinutes = 0x01040076;
+        public: static const int durationHourMinutes = 0x0104014e;
         /**  [CHAR_LIMIT=10] Suffix added to signify duration in hours
          */
-        public: static const int durationHours = 0x01040075;
+        public: static const int durationHours = 0x0104014d;
         /**  [CHAR_LIMIT=10] Suffix added to signify duration of one minute with one second
          */
-        public: static const int durationMinuteSecond = 0x0104007a;
+        public: static const int durationMinuteSecond = 0x01040152;
         /**  [CHAR_LIMIT=10] Suffix added to signify duration of one minute with seconds
          */
-        public: static const int durationMinuteSeconds = 0x01040079;
+        public: static const int durationMinuteSeconds = 0x01040151;
         /**  [CHAR_LIMIT=10] Suffix added to signify duration in minutes
          */
-        public: static const int durationMinutes = 0x01040078;
+        public: static const int durationMinutes = 0x01040150;
         /**  [CHAR_LIMIT=10] Suffix added to signify duration of one second
          */
-        public: static const int durationSecond = 0x0104007c;
+        public: static const int durationSecond = 0x01040154;
         /**  [CHAR_LIMIT=10] Suffix added to signify duration in seconds
          */
-        public: static const int durationSeconds = 0x0104007b;
+        public: static const int durationSeconds = 0x01040153;
         /**  Format string for times like "1:43:33" (1 hour, 43 minutes, 33 seconds)
  no translation found for elapsed_time_short_format_h_mm_ss (2997059666628785039)
          */
-        public: static const int elapsed_time_short_format_h_mm_ss = 0x01040450;
+        public: static const int elapsed_time_short_format_h_mm_ss = 0x01040528;
         /**  Format string for durations like "01:23" (1 minute, 23 seconds)
  no translation found for elapsed_time_short_format_mm_ss (1294409362352514646)
          */
-        public: static const int elapsed_time_short_format_mm_ss = 0x0104044f;
+        public: static const int elapsed_time_short_format_mm_ss = 0x01040527;
         /**  Used to replace a range of characters in text that is too wide
          for the space allocated to it (three dots).
          */
-        public: static const int ellipsis = 0x0104007d;
+        public: static const int ellipsis = 0x01040155;
         /**  Used to replace a range of characters in text that is too wide
          for the space allocated to it (two dots).
          */
-        public: static const int ellipsis_two_dots = 0x0104007e;
+        public: static const int ellipsis_two_dots = 0x01040156;
         /**  Custom email type
          */
-        public: static const int emailTypeCustom = 0x01040334;
+        public: static const int emailTypeCustom = 0x0104040c;
         /**  Home email type
          */
-        public: static const int emailTypeHome = 0x01040335;
+        public: static const int emailTypeHome = 0x0104040d;
         /**  Mobile email type
          */
-        public: static const int emailTypeMobile = 0x01040338;
+        public: static const int emailTypeMobile = 0x01040410;
         /**  Other email type
          */
-        public: static const int emailTypeOther = 0x01040337;
+        public: static const int emailTypeOther = 0x0104040f;
         /**  Work email type
          */
-        public: static const int emailTypeWork = 0x01040336;
+        public: static const int emailTypeWork = 0x0104040e;
         /**  This can be used in any application wanting to disable the text "Emergency number"
          */
-        public: static const int emergency_call_dialog_number_for_display = 0x0104036b;
+        public: static const int emergency_call_dialog_number_for_display = 0x01040443;
         /**  Shown in the lock screen when there is emergency calls only mode.
          */
-        public: static const int emergency_calls_only = 0x01040388;
+        public: static const int emergency_calls_only = 0x01040460;
         /**  How to display the lack of a phone number
          */
         public: static const int emptyPhoneNumber = 0x01040006;
         /**  Displayed when user attempts to change SIM PIN1 without enabling PIN1.
          */
-        public: static const int enablePin = 0x0104008f;
+        public: static const int enablePin = 0x01040167;
         /**  Text spoken when the user stops preforming a gesture that would enable accessibility. [CHAR LIMIT=none]
          */
-        public: static const int enable_accessibility_canceled = 0x010405f6;
+        public: static const int enable_accessibility_canceled = 0x010406ce;
         /**  Summary for a warning message about the interaction model changes after allowing an accessibility
          service to put the device into explore by touch mode, displayed as a dialog message when
          the user selects to enables the service. (default). [CHAR LIMIT=NONE]
          */
-        public: static const int enable_explore_by_touch_warning_message = 0x01040436;
+        public: static const int enable_explore_by_touch_warning_message = 0x0104050e;
         /**  Title for a warning message about the interaction model changes after allowing an accessibility
          service to put the device into explore by touch mode, displayed as a dialog message when
          the user selects to enables the service. (default). [CHAR LIMIT=45]
          */
-        public: static const int enable_explore_by_touch_warning_title = 0x01040435;
+        public: static const int enable_explore_by_touch_warning_title = 0x0104050d;
         /**  Message informing user that the change was disallowed by an administrator. [CHAR LIMIT=none]
          */
-        public: static const int error_message_change_not_allowed = 0x010405fb;
+        public: static const int error_message_change_not_allowed = 0x010406d3;
         /**  Error message title [CHAR LIMIT=35]
          */
-        public: static const int error_message_title = 0x010405fa;
+        public: static const int error_message_title = 0x010406d2;
         /**  Label for an anniversary event  [CHAR LIMIT=20]
          */
-        public: static const int eventTypeAnniversary = 0x01040332;
+        public: static const int eventTypeAnniversary = 0x0104040a;
         /**  Label for a birthday event  [CHAR LIMIT=20]
          */
-        public: static const int eventTypeBirthday = 0x01040331;
+        public: static const int eventTypeBirthday = 0x01040409;
         /**  Label for custom events  [CHAR LIMIT=20]
          */
-        public: static const int eventTypeCustom = 0x01040330;
+        public: static const int eventTypeCustom = 0x01040408;
         /**  Label for other events  [CHAR LIMIT=20]
          */
-        public: static const int eventTypeOther = 0x01040333;
-        public: static const int ext_media_badremoval_notification_message = 0x01040501;
+        public: static const int eventTypeOther = 0x0104040b;
+        public: static const int ext_media_badremoval_notification_message = 0x010405d9;
         /**  Shown when external media is unsafely removed
          */
-        public: static const int ext_media_badremoval_notification_title = 0x01040500;
-        public: static const int ext_media_checking_notification_message = 0x010404fb;
+        public: static const int ext_media_badremoval_notification_title = 0x010405d8;
+        public: static const int ext_media_checking_notification_message = 0x010405d3;
         /**  Shown when external media is being checked
          */
-        public: static const int ext_media_checking_notification_title = 0x010404fa;
-        public: static const int ext_media_nofs_notification_message = 0x010404fd;
+        public: static const int ext_media_checking_notification_title = 0x010405d2;
+        public: static const int ext_media_nofs_notification_message = 0x010405d5;
         /**  Shown when external media is blank (or unsupported filesystem)
          */
-        public: static const int ext_media_nofs_notification_title = 0x010404fc;
-        public: static const int ext_media_nomedia_notification_message = 0x01040505;
+        public: static const int ext_media_nofs_notification_title = 0x010405d4;
+        public: static const int ext_media_nomedia_notification_message = 0x010405dd;
         /**  Shown when external media is missing
          */
-        public: static const int ext_media_nomedia_notification_title = 0x01040504;
-        public: static const int ext_media_safe_unmount_notification_message = 0x01040503;
+        public: static const int ext_media_nomedia_notification_title = 0x010405dc;
+        public: static const int ext_media_safe_unmount_notification_message = 0x010405db;
         /**  Shown when external media has been safely removed
          */
-        public: static const int ext_media_safe_unmount_notification_title = 0x01040502;
-        public: static const int ext_media_unmountable_notification_message = 0x010404ff;
+        public: static const int ext_media_safe_unmount_notification_title = 0x010405da;
+        public: static const int ext_media_unmountable_notification_message = 0x010405d7;
         /**  Shown when external media is unmountable (corrupt))
          */
-        public: static const int ext_media_unmountable_notification_title = 0x010404fe;
+        public: static const int ext_media_unmountable_notification_title = 0x010405d6;
         /**  See EXTMEDIA_FORMAT.    This is the button text to format the sd card.
          */
-        public: static const int extmedia_format_button_format = 0x010404ed;
+        public: static const int extmedia_format_button_format = 0x010405c5;
         /**  See EXTMEDIA_FORMAT.   This is the message.
          */
-        public: static const int extmedia_format_message = 0x010404ec;
+        public: static const int extmedia_format_message = 0x010405c4;
         /**  See EXTMEDIA_FORMAT.  EXTMEDIA_FORMAT_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to format the SD card.  This is the title.
          */
-        public: static const int extmedia_format_title = 0x010404eb;
+        public: static const int extmedia_format_title = 0x010405c3;
         /**  Shown when face unlock failed multiple times so we're just using the backup
          */
-        public: static const int faceunlock_multiple_failures = 0x01040376;
+        public: static const int faceunlock_multiple_failures = 0x0104044e;
         /**  Title of the alert when something went wrong in the factory test.
          */
-        public: static const int factorytest_failed = 0x010403c4;
+        public: static const int factorytest_failed = 0x0104049c;
         /**  Error message displayed when the factory test could not be started.
          */
-        public: static const int factorytest_no_action = 0x010403c6;
+        public: static const int factorytest_no_action = 0x0104049e;
         /**  Error message displayed when a non-system application tries to start a factory test.
          */
-        public: static const int factorytest_not_system = 0x010403c5;
+        public: static const int factorytest_not_system = 0x0104049d;
         /**  Button to restart the device after the factory test.
          */
-        public: static const int factorytest_reboot = 0x010403c7;
-        public: static const int fast_scroll_alphabet = 0x010404f7;
+        public: static const int factorytest_reboot = 0x0104049f;
+        public: static const int fast_scroll_alphabet = 0x010405cf;
         /**  Format string used to add a suffix like "KB" or "MB" to a number
          to display a size in kilobytes, megabytes, or other size units.
          Some languages (like French) will want to add a space between
          the placeholders.
          */
-        public: static const int fileSizeSuffix = 0x01040071;
+        public: static const int fileSizeSuffix = 0x01040149;
         /**  Button allowing the user to close an application that is not responding. This will kill the application.
          */
-        public: static const int force_close = 0x01040478;
+        public: static const int force_close = 0x01040550;
         /**  Text for message to user that an error happened when formatting SD card [CHAR LIMIT=NONE]
          */
-        public: static const int format_error = 0x01040553;
+        public: static const int format_error = 0x0104062b;
         /**  Message to show when an intent automatically switches users into the personal profile.
          */
-        public: static const int forward_intent_to_owner = 0x01040531;
+        public: static const int forward_intent_to_owner = 0x01040609;
         /**  Message to show when an intent automatically switches users into a work profile.
          */
-        public: static const int forward_intent_to_work = 0x01040532;
+        public: static const int forward_intent_to_work = 0x0104060a;
         /**  Shown in gadget hosts (e.g. the home screen) when there was an error inflating
     the gadget.
          */
-        public: static const int gadget_host_error_inflating = 0x01040520;
+        public: static const int gadget_host_error_inflating = 0x010405f8;
         /**  Suffix added to a number to signify size in gigabytes.
          */
-        public: static const int gigabyteShort = 0x0104006e;
+        public: static const int gigabyteShort = 0x01040146;
         /**  label for item that generates a bug report in the phone options dialog
          */
-        public: static const int global_action_bug_report = 0x010400f7;
+        public: static const int global_action_bug_report = 0x010401cf;
+        /**  label for item that opens the profile choosing dialog
+         */
+        public: static const int global_action_choose_profile = 0x01040026;
+        /**  label for current user in phone options dialog
+         */
+        public: static const int global_action_current_user = 0x01040043;
         /**  label for item that locks the phone and enforces that it can't be unlocked without entering a credential. [CHAR LIMIT=15]
          */
-        public: static const int global_action_lockdown = 0x01040102;
+        public: static const int global_action_lockdown = 0x010401da;
         /**  label for item that turns off power in phone options dialog
          */
-        public: static const int global_action_power_off = 0x010400f6;
+        public: static const int global_action_power_off = 0x010401ce;
+        /**  label for item that reboots the phone in phone options dialog
+         */
+        public: static const int global_action_reboot = 0x01040042;
+        /**  label for item that screenshots in phone options dialog
+         */
+        public: static const int global_action_screenshot = 0x01040027;
         /**  label for item that launches settings in phone options dialog [CHAR LIMIT=15]
          */
-        public: static const int global_action_settings = 0x01040101;
+        public: static const int global_action_settings = 0x010401d9;
         /**  status message in phone options dialog for when silent mode is disabled
          */
-        public: static const int global_action_silent_mode_off_status = 0x010400fd;
+        public: static const int global_action_silent_mode_off_status = 0x010401d5;
         /**  status message in phone options dialog for when silent mode is enabled
          */
-        public: static const int global_action_silent_mode_on_status = 0x010400fc;
+        public: static const int global_action_silent_mode_on_status = 0x010401d4;
         /**  label for item that enables silent mode in phone options dialog
          */
-        public: static const int global_action_toggle_silent_mode = 0x010400fb;
+        public: static const int global_action_toggle_silent_mode = 0x010401d3;
         /**  status message in phone options dialog for when airplane mode is off
          */
-        public: static const int global_actions_airplane_mode_off_status = 0x01040100;
+        public: static const int global_actions_airplane_mode_off_status = 0x010401d8;
         /**  status message in phone options dialog for when airplane mode is on
          */
-        public: static const int global_actions_airplane_mode_on_status = 0x010400ff;
+        public: static const int global_actions_airplane_mode_on_status = 0x010401d7;
         /**  label for item that toggles airplane mode
          */
-        public: static const int global_actions_toggle_airplane_mode = 0x010400fe;
+        public: static const int global_actions_toggle_airplane_mode = 0x010401d6;
         /**  Network positioning notification message. The name of the user (e.g. John Doe) and
          service (SUPL-service) who sent the request is shown as dynamic strings.
          Translation should not be longer than master text.
          */
-        public: static const int gpsNotifMessage = 0x01040560;
+        public: static const int gpsNotifMessage = 0x01040638;
         /**  Network positioning notification ticker. The name of the user (e.g. John Doe) who sent
          the request is shown as a dynamic string.
          */
-        public: static const int gpsNotifTicker = 0x0104055e;
+        public: static const int gpsNotifTicker = 0x01040636;
         /**  Network positioning notification and verification title to inform the user about
          an incoming location request.
          */
-        public: static const int gpsNotifTitle = 0x0104055f;
+        public: static const int gpsNotifTitle = 0x01040637;
         /**  Network positioning verification No. Button to push to deny sharing of location
          information.
          */
-        public: static const int gpsVerifNo = 0x01040562;
+        public: static const int gpsVerifNo = 0x0104063a;
         /**  Network positioning verification Yes. Button to push to share location information.
          */
-        public: static const int gpsVerifYes = 0x01040561;
-        public: static const int grant_permissions_header_text = 0x0104052c;
+        public: static const int gpsVerifYes = 0x01040639;
+        public: static const int grant_permissions_header_text = 0x01040604;
         /**  Label for granularity to traverse the content on an AccessibilityNodeInfo by character. Only spoken to the user. [CHAR LIMIT=NONE]
          */
-        public: static const int granularity_label_character = 0x010403be;
+        public: static const int granularity_label_character = 0x01040496;
         /**  Label for granularity to traverse the content on an AccessibilityNodeInfo by line. Only spoken to the user. [CHAR LIMIT=NONE]
          */
-        public: static const int granularity_label_line = 0x010403c1;
+        public: static const int granularity_label_line = 0x01040499;
         /**  Label for granularity to traverse the content on an AccessibilityNodeInfo by link. Only spoken to the user. [CHAR LIMIT=NONE]
          */
-        public: static const int granularity_label_link = 0x010403c0;
+        public: static const int granularity_label_link = 0x01040498;
         /**  Label for granularity to traverse the content on an AccessibilityNodeInfo by word. Only spoken to the user. [CHAR LIMIT=NONE]
          */
-        public: static const int granularity_label_word = 0x010403bf;
+        public: static const int granularity_label_word = 0x01040497;
         /**  The default character set for GsmAlphabet
  Empty string means MBCS is not considered
          */
-        public: static const int gsm_alphabet_default_charset = 0x0104002c;
+        public: static const int gsm_alphabet_default_charset = 0x010400f8;
         /**  Title of the physical keyboard category in the input method selector [CHAR LIMIT=10]
          */
-        public: static const int hardware = 0x010404f4;
+        public: static const int hardware = 0x010405cc;
         /**  Notification text to tell the user that a heavy-weight application is running.
          */
-        public: static const int heavy_weight_notification = 0x01040489;
+        public: static const int heavy_weight_notification = 0x01040561;
         /**  Notification details to tell the user that a heavy-weight application is running.
          */
-        public: static const int heavy_weight_notification_detail = 0x0104048a;
+        public: static const int heavy_weight_notification_detail = 0x01040562;
         /**  A format string for 12-hour time of day, just the hour, not the minute, with lower-case "am" or "pm" (example: "3pm").
          */
-        public: static const int hour_ampm = 0x010403c2;
+        public: static const int hour_ampm = 0x0104049a;
         /**  A format string for 12-hour time of day, just the hour, not the minute, with capital "AM" or "PM" (example: "3PM").
          */
-        public: static const int hour_cap_ampm = 0x010403c3;
+        public: static const int hour_cap_ampm = 0x0104049b;
         /**
          Content description for the hour selector in the time picker, which displays
          selectable hours of the day along the inside edge of a circle, as in an analog clock.
          [CHAR LIMIT=50]
 
          */
-        public: static const int hour_picker_description = 0x01040663;
+        public: static const int hour_picker_description = 0x0104073b;
         /**  Displayed when a web request failed with a generic network error.
          */
-        public: static const int httpError = 0x010400ce;
+        public: static const int httpError = 0x010401a6;
         /**  Displayed when a web request failed because the authentication failed.
          */
-        public: static const int httpErrorAuth = 0x010400d1;
+        public: static const int httpErrorAuth = 0x010401a9;
         /**  Displayed when a web request failed because the URL isn't in a valid form.
          */
         public: static const int httpErrorBadUrl = 0x01040007;
         /**  Displayed when a web request failed because there was a connection error.
          */
-        public: static const int httpErrorConnect = 0x010400d3;
+        public: static const int httpErrorConnect = 0x010401ab;
         /**  Displayed when a web request failed because the a secure connection couldn't be made to the server.
          */
-        public: static const int httpErrorFailedSslHandshake = 0x010400d7;
+        public: static const int httpErrorFailedSslHandshake = 0x010401af;
         /**  Displayed when a request failed because we failed to open the file.
          */
-        public: static const int httpErrorFile = 0x010400d8;
+        public: static const int httpErrorFile = 0x010401b0;
         /**  Displayed when a request failed because the file wasn't found.
          */
-        public: static const int httpErrorFileNotFound = 0x010400d9;
+        public: static const int httpErrorFileNotFound = 0x010401b1;
         /**  Displayed when a web request failed because there was an input or output error.
          */
-        public: static const int httpErrorIO = 0x010400d4;
+        public: static const int httpErrorIO = 0x010401ac;
         /**  Displayed when a web request failed because the URL could not be found.
          */
-        public: static const int httpErrorLookup = 0x010400cf;
+        public: static const int httpErrorLookup = 0x010401a7;
         /**  Displayed when a web request was successful.
          */
-        public: static const int httpErrorOk = 0x010400cd;
+        public: static const int httpErrorOk = 0x010401a5;
         /**  Displayed when a web request failed because the authentication with the proxy failed.
          */
-        public: static const int httpErrorProxyAuth = 0x010400d2;
+        public: static const int httpErrorProxyAuth = 0x010401aa;
         /**  Displayed when a web request failed because the site tried to redirect us one too many times
          */
-        public: static const int httpErrorRedirectLoop = 0x010400d6;
+        public: static const int httpErrorRedirectLoop = 0x010401ae;
         /**  Displayed when a web request failed because the request timed out
          */
-        public: static const int httpErrorTimeout = 0x010400d5;
+        public: static const int httpErrorTimeout = 0x010401ad;
         /**  Displayed when a request failed because there are too many requests right now.
          */
-        public: static const int httpErrorTooManyRequests = 0x010400da;
+        public: static const int httpErrorTooManyRequests = 0x010401b2;
         /**  Displayed when a web request failed because the site's authentication scheme is not supported by us.
          */
-        public: static const int httpErrorUnsupportedAuthScheme = 0x010400d0;
+        public: static const int httpErrorUnsupportedAuthScheme = 0x010401a8;
         /**  Displayed when a web request failed because the protocol of the server is not supported.
          */
         public: static const int httpErrorUnsupportedScheme = 0x01040008;
         /**  AIM IM protocol type
          */
-        public: static const int imProtocolAim = 0x01040342;
+        public: static const int imProtocolAim = 0x0104041a;
         /**  Custom IM protocol type
          */
-        public: static const int imProtocolCustom = 0x01040341;
+        public: static const int imProtocolCustom = 0x01040419;
         /**  Google Talk IM protocol type
          */
-        public: static const int imProtocolGoogleTalk = 0x01040347;
+        public: static const int imProtocolGoogleTalk = 0x0104041f;
         /**  ICQ IM protocol type
          */
-        public: static const int imProtocolIcq = 0x01040348;
+        public: static const int imProtocolIcq = 0x01040420;
         /**  Jabber IM protocol type
          */
-        public: static const int imProtocolJabber = 0x01040349;
+        public: static const int imProtocolJabber = 0x01040421;
         /**  MSN IM protocol type
          */
-        public: static const int imProtocolMsn = 0x01040343;
+        public: static const int imProtocolMsn = 0x0104041b;
         /**  NetMeeting IM protocol type
          */
-        public: static const int imProtocolNetMeeting = 0x0104034a;
+        public: static const int imProtocolNetMeeting = 0x01040422;
         /**  QQ IM protocol type
          */
-        public: static const int imProtocolQq = 0x01040346;
+        public: static const int imProtocolQq = 0x0104041e;
         /**  Skype IM protocol type
          */
-        public: static const int imProtocolSkype = 0x01040345;
+        public: static const int imProtocolSkype = 0x0104041d;
         /**  Yahoo IM protocol type
          */
-        public: static const int imProtocolYahoo = 0x01040344;
+        public: static const int imProtocolYahoo = 0x0104041c;
         /**  Custom IM address type
          */
-        public: static const int imTypeCustom = 0x0104033d;
+        public: static const int imTypeCustom = 0x01040415;
         /**  Home IM address type
          */
-        public: static const int imTypeHome = 0x0104033e;
+        public: static const int imTypeHome = 0x01040416;
         /**  Other IM address type
          */
-        public: static const int imTypeOther = 0x01040340;
+        public: static const int imTypeOther = 0x01040418;
         /**  Work IM address type
          */
-        public: static const int imTypeWork = 0x0104033f;
+        public: static const int imTypeWork = 0x01040417;
         /**  Component name of the built in wallpaper used to display bitmap wallpapers. This must not be null.
          */
-        public: static const int image_wallpaper_component = 0x0104001f;
+        public: static const int image_wallpaper_component = 0x010400e9;
         /**  Long label for a button on a full-screen input method for an unknown action.
          */
-        public: static const int ime_action_default = 0x01040527;
+        public: static const int ime_action_default = 0x010405ff;
         /**  Long label for a button on a full-screen input method for the "Done" action.
          */
-        public: static const int ime_action_done = 0x01040525;
+        public: static const int ime_action_done = 0x010405fd;
         /**  Long label for a button on a full-screen input method for the "Go" action.
          */
-        public: static const int ime_action_go = 0x01040521;
+        public: static const int ime_action_go = 0x010405f9;
         /**  Long label for a button on a full-screen input method for the "Next" action.
          */
-        public: static const int ime_action_next = 0x01040524;
+        public: static const int ime_action_next = 0x010405fc;
         /**  [CHAR LIMIT=6] Long label for a button on a full-screen input method for the "Previous" action.
          */
-        public: static const int ime_action_previous = 0x01040526;
+        public: static const int ime_action_previous = 0x010405fe;
         /**  Long label for a button on a full-screen input method for the "Search" action.
          */
-        public: static const int ime_action_search = 0x01040522;
+        public: static const int ime_action_search = 0x010405fa;
         /**  Long label for a button on a full-screen input method for the "Send" action.
          */
-        public: static const int ime_action_send = 0x01040523;
+        public: static const int ime_action_send = 0x010405fb;
         /**  Title for the dialog used to display the user's IMEI number [CHAR LIMIT=10]
          */
-        public: static const int imei = 0x01040090;
+        public: static const int imei = 0x01040168;
         /**  EditText context menu
          */
-        public: static const int inputMethod = 0x01040456;
+        public: static const int inputMethod = 0x0104052e;
         /**  Label to show for a service that is running because it is an input method.
          */
-        public: static const int input_method_binding_label = 0x01040533;
+        public: static const int input_method_binding_label = 0x0104060b;
         /**  Displayed when a SIM PIN password is too long or too short.
          */
-        public: static const int invalidPin = 0x0104008b;
+        public: static const int invalidPin = 0x01040163;
         /**  Displayed when a SIM PUK password is too short.
          */
-        public: static const int invalidPuk = 0x0104008c;
+        public: static const int invalidPuk = 0x01040164;
         /**  Accessibility description for the item that is currently selected.
          */
-        public: static const int item_is_selected = 0x0104066b;
+        public: static const int item_is_selected = 0x01040743;
         /**  Message in a javascript dialog asking if the user wishes to leave the current page
          */
-        public: static const int js_dialog_before_unload = 0x010403cf;
+        public: static const int js_dialog_before_unload = 0x010404a7;
         /**  Text for the negative button on the unload javascript dialog
          */
-        public: static const int js_dialog_before_unload_negative_button = 0x010403ce;
+        public: static const int js_dialog_before_unload_negative_button = 0x010404a6;
         /**  Text for the positive button on the unload javascript dialog
          */
-        public: static const int js_dialog_before_unload_positive_button = 0x010403cd;
+        public: static const int js_dialog_before_unload_positive_button = 0x010404a5;
         /**  Title for the unload javascript dialog
          */
-        public: static const int js_dialog_before_unload_title = 0x010403cc;
+        public: static const int js_dialog_before_unload_title = 0x010404a4;
         /**  Title for a JavaScript dialog. "The page at <url of current page> says:"
          */
-        public: static const int js_dialog_title = 0x010403ca;
+        public: static const int js_dialog_title = 0x010404a2;
         /**  Default title for a javascript dialog
          */
-        public: static const int js_dialog_title_default = 0x010403cb;
+        public: static const int js_dialog_title_default = 0x010404a3;
         /**  Announce that a headset is required to hear keyboard keys while typing a password. [CHAR LIMIT=NONE]
          */
-        public: static const int keyboard_headset_required_to_hear_password = 0x01040588;
+        public: static const int keyboard_headset_required_to_hear_password = 0x01040660;
         /**  The value of a keyboard key announced when accessibility is enabled and no headsed is used. [CHAR LIMIT=NONE]
          */
-        public: static const int keyboard_password_character_no_headset = 0x01040589;
+        public: static const int keyboard_password_character_no_headset = 0x01040661;
         /**  KeyboardView - accessibility support
  Description of the Alt button in a KeyboardView. [CHAR LIMIT=NONE]
          */
-        public: static const int keyboardview_keycode_alt = 0x0104057b;
+        public: static const int keyboardview_keycode_alt = 0x01040653;
         /**  Description of the Cancel button in a KeyboardView. [CHAR LIMIT=NONE]
          */
-        public: static const int keyboardview_keycode_cancel = 0x0104057c;
+        public: static const int keyboardview_keycode_cancel = 0x01040654;
         /**  Description of the Delete button in a KeyboardView. [CHAR LIMIT=NONE]
          */
-        public: static const int keyboardview_keycode_delete = 0x0104057d;
+        public: static const int keyboardview_keycode_delete = 0x01040655;
         /**  Description of the Done button in a KeyboardView. [CHAR LIMIT=NONE]
          */
-        public: static const int keyboardview_keycode_done = 0x0104057e;
+        public: static const int keyboardview_keycode_done = 0x01040656;
         /**  Description of the Enter button in a KeyboardView. [CHAR LIMIT=NONE]
          */
-        public: static const int keyboardview_keycode_enter = 0x01040581;
+        public: static const int keyboardview_keycode_enter = 0x01040659;
         /**  Description of the Mode change button in a KeyboardView. [CHAR LIMIT=NONE]
          */
-        public: static const int keyboardview_keycode_mode_change = 0x0104057f;
+        public: static const int keyboardview_keycode_mode_change = 0x01040657;
         /**  Description of the Shift button in a KeyboardView. [CHAR LIMIT=NONE]
          */
-        public: static const int keyboardview_keycode_shift = 0x01040580;
+        public: static const int keyboardview_keycode_shift = 0x01040658;
         /**  Suffix added to a number to signify size in kilobytes.
          */
-        public: static const int kilobyteShort = 0x0104006c;
+        public: static const int kilobyteShort = 0x01040144;
         /**  This is used to express that something has occurred within the last month
          */
-        public: static const int last_month = 0x01040439;
+        public: static const int last_month = 0x01040511;
         /**  STK launch Browser
          */
-        public: static const int launchBrowserDefault = 0x010405b4;
+        public: static const int launchBrowserDefault = 0x0104068c;
         /**  [CHAR LIMIT=50] Title of the alert when application launches on top of another.
          */
-        public: static const int launch_warning_original = 0x0104047e;
+        public: static const int launch_warning_original = 0x01040556;
         /**  [CHAR LIMIT=50] Title of the alert when application launches on top of another.
          */
-        public: static const int launch_warning_replace = 0x0104047d;
+        public: static const int launch_warning_replace = 0x01040555;
         /**  [CHAR LIMIT=25] Title of the alert when application launches on top of another.
          */
-        public: static const int launch_warning_title = 0x0104047c;
+        public: static const int launch_warning_title = 0x01040554;
         /**  Delimeter used between each item in a textual list; for example "Alpha, Beta". [CHAR LIMIT=3]
          */
-        public: static const int list_delimeter = 0x010405b2;
+        public: static const int list_delimeter = 0x0104068a;
+        public: static const int live_display_auto = 0x010400d5;
+        public: static const int live_display_auto_summary = 0x010400d6;
+        public: static const int live_display_day = 0x010400d9;
+        public: static const int live_display_day_summary = 0x010400da;
+        public: static const int live_display_hint = 0x010400df;
+        public: static const int live_display_night = 0x010400db;
+        public: static const int live_display_night_summary = 0x010400dc;
+        public: static const int live_display_outdoor = 0x010400dd;
+        public: static const int live_display_outdoor_summary = 0x010400de;
+        /**  LiveDisplay strings
+         */
+        public: static const int live_display_title = 0x010400d4;
         /**  Lock-to-app dialog description.
          */
-        public: static const int lock_to_app_description = 0x01040676;
+        public: static const int lock_to_app_description = 0x0104074e;
         /**  Lock-to-app dialog description when in accessibility mode.
          */
-        public: static const int lock_to_app_description_accessible = 0x01040677;
+        public: static const int lock_to_app_description_accessible = 0x0104074f;
+        /**  Lock-to-app dialog description (for devices without navbar)
+         */
+        public: static const int lock_to_app_description_no_navbar = 0x010400e1;
         /**  Exting lock-to-app indication.
          */
-        public: static const int lock_to_app_exit = 0x0104067b;
+        public: static const int lock_to_app_exit = 0x01040753;
         /**  Lock-to-app negative response.
          */
-        public: static const int lock_to_app_negative = 0x01040678;
+        public: static const int lock_to_app_negative = 0x01040750;
         /**  Lock-to-app positive response.
          */
-        public: static const int lock_to_app_positive = 0x01040679;
+        public: static const int lock_to_app_positive = 0x01040751;
         /**  Starting lock-to-app indication.
          */
-        public: static const int lock_to_app_start = 0x0104067a;
+        public: static const int lock_to_app_start = 0x01040752;
         /**  Lock-to-app dialog title.
          */
-        public: static const int lock_to_app_title = 0x01040675;
+        public: static const int lock_to_app_title = 0x0104074d;
         /**  Notify use that they are in Lock-to-app
          */
-        public: static const int lock_to_app_toast = 0x01040672;
+        public: static const int lock_to_app_toast = 0x0104074a;
         /**  Notify use that they are in Lock-to-app in accessibility mode
          */
-        public: static const int lock_to_app_toast_accessible = 0x01040673;
+        public: static const int lock_to_app_toast_accessible = 0x0104074b;
         /**  Notify user that they are locked in lock-to-app mode
          */
-        public: static const int lock_to_app_toast_locked = 0x01040674;
+        public: static const int lock_to_app_toast_locked = 0x0104074c;
+        /**  Notify use that they are in Lock-to-app (for devices without navbar)
+         */
+        public: static const int lock_to_app_toast_no_navbar = 0x010400e0;
         /**  Lock-to-app unlock password string
          */
-        public: static const int lock_to_app_unlock_password = 0x0104067e;
+        public: static const int lock_to_app_unlock_password = 0x01040756;
         /**  Lock-to-app unlock pattern string
          */
-        public: static const int lock_to_app_unlock_pattern = 0x0104067d;
+        public: static const int lock_to_app_unlock_pattern = 0x01040755;
         /**  Lock-to-app unlock pin string
          */
-        public: static const int lock_to_app_unlock_pin = 0x0104067c;
+        public: static const int lock_to_app_unlock_pin = 0x01040754;
         /**  Accessibility description sent when user adds a cell to the pattern. [CHAR LIMIT=NONE]
          */
-        public: static const int lockscreen_access_pattern_cell_added = 0x010403a4;
+        public: static const int lockscreen_access_pattern_cell_added = 0x0104047c;
         /**  Accessibility description sent when the pattern times out and is cleared. [CHAR LIMIT=NONE]
          */
-        public: static const int lockscreen_access_pattern_cleared = 0x010403a3;
+        public: static const int lockscreen_access_pattern_cleared = 0x0104047b;
         /**  Accessibility description sent when user completes drawing a pattern. [CHAR LIMIT=NONE]
          */
-        public: static const int lockscreen_access_pattern_detected = 0x010403a5;
+        public: static const int lockscreen_access_pattern_detected = 0x0104047d;
         /**  Accessibility description sent when user starts drawing a lock pattern. [CHAR LIMIT=NONE]
          */
-        public: static const int lockscreen_access_pattern_start = 0x010403a2;
+        public: static const int lockscreen_access_pattern_start = 0x0104047a;
+        /**  Shown in the lock screen to tell the user that phone is in airplane mode
+         */
+        public: static const int lockscreen_airplane_mode_on = 0x01040088;
         /**  On the keyguard screen, it shows the carrier the phone is connected to.  This is displayed if the phone is not connected to a carrier.
          */
-        public: static const int lockscreen_carrier_default = 0x0104036c;
+        public: static const int lockscreen_carrier_default = 0x01040444;
         /**  Button at the bottom of the unlock screen to make an emergency call.
          */
-        public: static const int lockscreen_emergency_call = 0x01040371;
+        public: static const int lockscreen_emergency_call = 0x01040449;
+        /**  Shown in the lock screen when there is no SIM card.
+         */
+        public: static const int lockscreen_missing_sim_message_short = 0x01040453;
+        /**  Shown in the lock screen when SIM card is permanently disabled.
+         */
+        public: static const int lockscreen_permanent_disabled_sim_message_short = 0x01040457;
         /**  Button at the bottom of the unlock screen that lets the user return to a call
          */
-        public: static const int lockscreen_return_to_call = 0x01040372;
+        public: static const int lockscreen_return_to_call = 0x0104044a;
+        /**  Shown in the lock screen when there is SIM card IO error.
+         */
+        public: static const int lockscreen_sim_error_message_short = 0x01040087;
+        /**  Shown in the lock screen to tell the user that their SIM is locked and they must unlock it.
+         */
+        public: static const int lockscreen_sim_locked_message = 0x01040464;
+        /**  When the user enters a wrong sim pin too many times, it becomes
+         PUK locked (Pin Unlock Kode)
+         */
+        public: static const int lockscreen_sim_puk_locked_message = 0x01040462;
         /**  Shown on transport control of lockscreen. Pressing button pauses playback
          */
-        public: static const int lockscreen_transport_pause_description = 0x01040383;
+        public: static const int lockscreen_transport_pause_description = 0x0104045b;
         /**  Shown on transport control of lockscreen. Pressing button pauses playback
          */
-        public: static const int lockscreen_transport_play_description = 0x01040384;
+        public: static const int lockscreen_transport_play_description = 0x0104045c;
         /**  If the device is getting low on internal storage, a notification is shown to the user.  This is the message of that notification.
          */
-        public: static const int low_internal_storage_view_text = 0x01040459;
+        public: static const int low_internal_storage_view_text = 0x01040531;
         /**  If the device does not have storage for the main system classes, a notification is shown to the user.  This is the message of that notification.
          */
-        public: static const int low_internal_storage_view_text_no_boot = 0x0104045a;
+        public: static const int low_internal_storage_view_text_no_boot = 0x01040532;
         /**  If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification.
          */
-        public: static const int low_internal_storage_view_title = 0x01040458;
+        public: static const int low_internal_storage_view_title = 0x01040530;
         /**  If MMS discovers there isn't much space left on the device, it will show a toast with this message.
          */
-        public: static const int low_memory = 0x010400df;
+        public: static const int low_memory = 0x010401b7;
         /**
         Used to wrap a label for content description for a work profile, e.g. "Work Email" instead
         of email when there are two email apps.
         [CHAR LIMIT=20]
 
          */
-        public: static const int managed_profile_label_badge = 0x0104066d;
+        public: static const int managed_profile_label_badge = 0x01040745;
         /**  Text for message to user that SD card has been removed while in use [CHAR LIMIT=NONE]
          */
-        public: static const int media_bad_removal = 0x01040554;
+        public: static const int media_bad_removal = 0x0104062c;
         /**  Text for message to user SD card is currently being checked [CHAR LIMIT=NONE]
          */
-        public: static const int media_checking = 0x01040555;
+        public: static const int media_checking = 0x0104062d;
         /**  Text for message to user SD card has been removed [CHAR LIMIT=NONE]
          */
-        public: static const int media_removed = 0x01040556;
+        public: static const int media_removed = 0x0104062e;
         /**  Title of the media route chooser dialog. [CHAR LIMIT=40]
          */
-        public: static const int media_route_chooser_title = 0x010405c1;
+        public: static const int media_route_chooser_title = 0x01040699;
         /**  Title of the media route chooser dialog for selecting remote display routes. [CHAR LIMIT=40]
          */
-        public: static const int media_route_chooser_title_for_remote_display = 0x010405c2;
+        public: static const int media_route_chooser_title_for_remote_display = 0x0104069a;
         /**  Status message for a remote route that is confirmed to be available for connection
          */
-        public: static const int media_route_status_available = 0x010405c8;
+        public: static const int media_route_status_available = 0x010406a0;
         /**  Status message for a remote route attempting to connect
          */
-        public: static const int media_route_status_connecting = 0x010405c7;
+        public: static const int media_route_status_connecting = 0x0104069f;
         /**  Status message for a remote route that is in use (and thus unavailabe) right now
          */
-        public: static const int media_route_status_in_use = 0x010405ca;
+        public: static const int media_route_status_in_use = 0x010406a2;
         /**  Status message for remote routes that are not available for connection right now
          */
-        public: static const int media_route_status_not_available = 0x010405c9;
+        public: static const int media_route_status_not_available = 0x010406a1;
         /**  Status message for remote routes attempting to scan/determine availability
          */
-        public: static const int media_route_status_scanning = 0x010405c6;
+        public: static const int media_route_status_scanning = 0x0104069e;
         /**  Text for message to user SD card is currently mounted on a computer [CHAR LIMIT=NONE]
          */
-        public: static const int media_shared = 0x01040557;
+        public: static const int media_shared = 0x0104062f;
         /**  Text for message for an unknown external media state [CHAR LIMIT=NONE]
          */
-        public: static const int media_unknown_state = 0x01040558;
+        public: static const int media_unknown_state = 0x01040630;
         /**  Chinese Dai Pa Kai media (paper) size: 275mm x 395mm (10.827" x 15.551")
          */
-        public: static const int mediasize_chinese_om_dai_pa_kai = 0x01040639;
+        public: static const int mediasize_chinese_om_dai_pa_kai = 0x01040711;
         /**  Chinese Jurro Ku Kai media (paper) size: 275mm x 395mm (10.827" x 15.551")
          */
-        public: static const int mediasize_chinese_om_jurro_ku_kai = 0x0104063a;
+        public: static const int mediasize_chinese_om_jurro_ku_kai = 0x01040712;
         /**  Chinese Pa Kai media (paper) size: 146mm x 215mm (5.749" x 8.465")
          */
-        public: static const int mediasize_chinese_om_pa_kai = 0x01040638;
+        public: static const int mediasize_chinese_om_pa_kai = 0x01040710;
         /**  Chinese PRC 1 media (paper) size: 102mm x 165mm (4.015" x 6.496")
          */
-        public: static const int mediasize_chinese_prc_1 = 0x0104062d;
+        public: static const int mediasize_chinese_prc_1 = 0x01040705;
         /**  Chinese PRC 10 media (paper) size: 324mm x 458mm (12.756" x 18.032")
          */
-        public: static const int mediasize_chinese_prc_10 = 0x01040636;
+        public: static const int mediasize_chinese_prc_10 = 0x0104070e;
         /**  Chinese RPC 16K media (paper) size: 146mm x 215mm (5.749" x 8.465")
          */
-        public: static const int mediasize_chinese_prc_16k = 0x01040637;
+        public: static const int mediasize_chinese_prc_16k = 0x0104070f;
         /**  Chinese PRC 2 media (paper) size: 102mm x 176mm (4.015" x 6.929")
          */
-        public: static const int mediasize_chinese_prc_2 = 0x0104062e;
+        public: static const int mediasize_chinese_prc_2 = 0x01040706;
         /**  Chinese PRC 3 media (paper) size: 125mm x 176mm (4.921" x 6.929")
          */
-        public: static const int mediasize_chinese_prc_3 = 0x0104062f;
+        public: static const int mediasize_chinese_prc_3 = 0x01040707;
         /**  Chinese PRC 4 media (paper) size: 110mm x 208mm (4.330" x 8.189")
          */
-        public: static const int mediasize_chinese_prc_4 = 0x01040630;
+        public: static const int mediasize_chinese_prc_4 = 0x01040708;
         /**  Chinese PRC 5 media (paper) size: 110mm x 220mm (4.330" x 8.661")
          */
-        public: static const int mediasize_chinese_prc_5 = 0x01040631;
+        public: static const int mediasize_chinese_prc_5 = 0x01040709;
         /**  Chinese PRC 6 media (paper) size: 120mm x 320mm (4.724" x 12.599")
          */
-        public: static const int mediasize_chinese_prc_6 = 0x01040632;
+        public: static const int mediasize_chinese_prc_6 = 0x0104070a;
         /**  Chinese PRC 7 media (paper) size: 160mm x 230mm (6.299" x 9.055")
          */
-        public: static const int mediasize_chinese_prc_7 = 0x01040633;
+        public: static const int mediasize_chinese_prc_7 = 0x0104070b;
         /**  Chinese PRC 8 media (paper) size: 120mm x 309mm (4.724" x 12.165")
          */
-        public: static const int mediasize_chinese_prc_8 = 0x01040634;
+        public: static const int mediasize_chinese_prc_8 = 0x0104070c;
         /**  Chinese PRC 9 media (paper) size: 229mm x 324mm (9.016" x 12.756")
          */
-        public: static const int mediasize_chinese_prc_9 = 0x01040635;
+        public: static const int mediasize_chinese_prc_9 = 0x0104070d;
         /**  Chinese Roc 16k media (paper) size: 195mm x 270mm (7.677" x 10.629")
          */
-        public: static const int mediasize_chinese_roc_16k = 0x0104062c;
+        public: static const int mediasize_chinese_roc_16k = 0x01040704;
         /**  Chinese Roc 8k media (paper) size: 270mm x 390mm (10.629" x 15.3543")
          */
-        public: static const int mediasize_chinese_roc_8k = 0x0104062b;
+        public: static const int mediasize_chinese_roc_8k = 0x01040703;
         /**  Printing
  ISO (European standard) A0 media (paper) size: 33.11" × 46.81"
          */
-        public: static const int mediasize_iso_a0 = 0x010405fe;
+        public: static const int mediasize_iso_a0 = 0x010406d6;
         /**  ISO (European standard) A1 media (paper) size: 23.39" × 33.11"
          */
-        public: static const int mediasize_iso_a1 = 0x010405ff;
+        public: static const int mediasize_iso_a1 = 0x010406d7;
         /**  ISO (European standard) A10 media (paper) size: 1.02" x 1.46"
          */
-        public: static const int mediasize_iso_a10 = 0x01040608;
+        public: static const int mediasize_iso_a10 = 0x010406e0;
         /**  ISO (European standard) A2 media (paper) size: 16.54" x 23.39"
          */
-        public: static const int mediasize_iso_a2 = 0x01040600;
+        public: static const int mediasize_iso_a2 = 0x010406d8;
         /**  ISO (European standard) A3 media (paper) size: 11.69" x 16.54"
          */
-        public: static const int mediasize_iso_a3 = 0x01040601;
+        public: static const int mediasize_iso_a3 = 0x010406d9;
         /**  ISO (European standard) A4 media (paper) size: 8.27" x 11.69"
          */
-        public: static const int mediasize_iso_a4 = 0x01040602;
+        public: static const int mediasize_iso_a4 = 0x010406da;
         /**  ISO (European standard) A5 media (paper) size: 5.83" x 8.27"
          */
-        public: static const int mediasize_iso_a5 = 0x01040603;
+        public: static const int mediasize_iso_a5 = 0x010406db;
         /**  ISO (European standard) A6 media (paper) size: 4.13" x 5.83"
          */
-        public: static const int mediasize_iso_a6 = 0x01040604;
+        public: static const int mediasize_iso_a6 = 0x010406dc;
         /**  ISO (European standard) A7 media (paper) size: 2.91" x 4.13"
          */
-        public: static const int mediasize_iso_a7 = 0x01040605;
+        public: static const int mediasize_iso_a7 = 0x010406dd;
         /**  ISO (European standard) A8 media (paper) size: 2.05" x 2.91"
          */
-        public: static const int mediasize_iso_a8 = 0x01040606;
+        public: static const int mediasize_iso_a8 = 0x010406de;
         /**  ISO (European standard) A9 media (paper) size: 1.46" x 2.05"
          */
-        public: static const int mediasize_iso_a9 = 0x01040607;
+        public: static const int mediasize_iso_a9 = 0x010406df;
         /**  ISO (European standard) B0 media (paper) size: 39.37" x 55.67"
          */
-        public: static const int mediasize_iso_b0 = 0x01040609;
+        public: static const int mediasize_iso_b0 = 0x010406e1;
         /**  ISO (European standard) B1 media (paper) size: 27.83" x 39.37"
          */
-        public: static const int mediasize_iso_b1 = 0x0104060a;
+        public: static const int mediasize_iso_b1 = 0x010406e2;
         /**  ISO (European standard) B10 media (paper) size: 1.22" x 1.73"
          */
-        public: static const int mediasize_iso_b10 = 0x01040613;
+        public: static const int mediasize_iso_b10 = 0x010406eb;
         /**  ISO (European standard) B2 media (paper) size - 19.69" x 27.83"
          */
-        public: static const int mediasize_iso_b2 = 0x0104060b;
+        public: static const int mediasize_iso_b2 = 0x010406e3;
         /**  ISO (European standard) B3 media (paper) size: 13.90" x 19.69"
          */
-        public: static const int mediasize_iso_b3 = 0x0104060c;
+        public: static const int mediasize_iso_b3 = 0x010406e4;
         /**  ISO (European standard) B4 media (paper) size: 9.84" x 13.90"
          */
-        public: static const int mediasize_iso_b4 = 0x0104060d;
+        public: static const int mediasize_iso_b4 = 0x010406e5;
         /**  ISO (European standard) B5 media (paper) size: 6.93" x 9.84"
          */
-        public: static const int mediasize_iso_b5 = 0x0104060e;
+        public: static const int mediasize_iso_b5 = 0x010406e6;
         /**  ISO (European standard) B6 media (paper) size: 4.92" x 6.93"
          */
-        public: static const int mediasize_iso_b6 = 0x0104060f;
+        public: static const int mediasize_iso_b6 = 0x010406e7;
         /**  ISO (European standard) B7 media (paper) size: 3.46" x 4.92"
          */
-        public: static const int mediasize_iso_b7 = 0x01040610;
+        public: static const int mediasize_iso_b7 = 0x010406e8;
         /**  ISO (European standard) B8 media (paper) size: 2.44" x 3.46"
          */
-        public: static const int mediasize_iso_b8 = 0x01040611;
+        public: static const int mediasize_iso_b8 = 0x010406e9;
         /**  ISO (European standard) B9 media (paper) size: 1.73" x 2.44"
          */
-        public: static const int mediasize_iso_b9 = 0x01040612;
+        public: static const int mediasize_iso_b9 = 0x010406ea;
         /**  ISO (European standard) C0 media (paper) size: 36.10" x 51.06"
          */
-        public: static const int mediasize_iso_c0 = 0x01040614;
+        public: static const int mediasize_iso_c0 = 0x010406ec;
         /**  ISO (European standard) C1 media (paper) size: 25.51" x 36.10"
          */
-        public: static const int mediasize_iso_c1 = 0x01040615;
+        public: static const int mediasize_iso_c1 = 0x010406ed;
         /**  ISO (European standard) C10 media (paper) size: 1.10" x 1.57"
          */
-        public: static const int mediasize_iso_c10 = 0x0104061e;
+        public: static const int mediasize_iso_c10 = 0x010406f6;
         /**  ISO (European standard) C2 media (paper) size: 18.03" x 25.51"
          */
-        public: static const int mediasize_iso_c2 = 0x01040616;
+        public: static const int mediasize_iso_c2 = 0x010406ee;
         /**  ISO (European standard) C3 media (paper) size: 12.76" x 18.03"
          */
-        public: static const int mediasize_iso_c3 = 0x01040617;
+        public: static const int mediasize_iso_c3 = 0x010406ef;
         /**  ISO (European standard) C4 media (paper) size: 9.02" x 12.76"
          */
-        public: static const int mediasize_iso_c4 = 0x01040618;
+        public: static const int mediasize_iso_c4 = 0x010406f0;
         /**  ISO (European standard) C5 media (paper) size: 6.38" x 9.02"
          */
-        public: static const int mediasize_iso_c5 = 0x01040619;
+        public: static const int mediasize_iso_c5 = 0x010406f1;
         /**  ISO (European standard) C6 media (paper) size: 4.49" x 6.38"
          */
-        public: static const int mediasize_iso_c6 = 0x0104061a;
+        public: static const int mediasize_iso_c6 = 0x010406f2;
         /**  ISO (European standard) C7 media (paper) size: 3.19" x 4.49"
          */
-        public: static const int mediasize_iso_c7 = 0x0104061b;
+        public: static const int mediasize_iso_c7 = 0x010406f3;
         /**  ISO ISO C8 media (paper) size: 2.24" x 3.19"
          */
-        public: static const int mediasize_iso_c8 = 0x0104061c;
+        public: static const int mediasize_iso_c8 = 0x010406f4;
         /**  ISO ISO C9 media (paper) size: 1.57" x 2.24"
          */
-        public: static const int mediasize_iso_c9 = 0x0104061d;
+        public: static const int mediasize_iso_c9 = 0x010406f5;
         /**  Japanese Chou2 media (paper) size: 111.1mm x 146mm (4.374" x 5.748")
          */
-        public: static const int mediasize_japanese_chou2 = 0x01040649;
+        public: static const int mediasize_japanese_chou2 = 0x01040721;
         /**  Japanese Chou3 media (paper) size: 120mm x 235mm (4.724" x 9.252")
          */
-        public: static const int mediasize_japanese_chou3 = 0x01040648;
+        public: static const int mediasize_japanese_chou3 = 0x01040720;
         /**  Japanese Chou4 media (paper) size: 90mm x 205mm (3.543" x 8.071")
          */
-        public: static const int mediasize_japanese_chou4 = 0x01040647;
+        public: static const int mediasize_japanese_chou4 = 0x0104071f;
         /**  Japanese Hagaki media (paper) size: 100mm x 148mm (3.937" x 5.827")
          */
-        public: static const int mediasize_japanese_hagaki = 0x0104064a;
+        public: static const int mediasize_japanese_hagaki = 0x01040722;
         /**  Japanese JIS B0 media (paper) size: 1030mm x 1456mm (40.551" x 57.323")
          */
-        public: static const int mediasize_japanese_jis_b0 = 0x01040645;
+        public: static const int mediasize_japanese_jis_b0 = 0x0104071d;
         /**  Japanese JIS B1 media (paper) size: 728mm x 1030mm (28.661" x 40.551")
          */
-        public: static const int mediasize_japanese_jis_b1 = 0x01040644;
+        public: static const int mediasize_japanese_jis_b1 = 0x0104071c;
         /**  Japanese JIS B10 media (paper) size: 32mm x 45mm (1.259" x 1.772")
          */
-        public: static const int mediasize_japanese_jis_b10 = 0x0104063b;
+        public: static const int mediasize_japanese_jis_b10 = 0x01040713;
         /**  Japanese JIS B2 media (paper) size: 515mm x 728mm (20.276" x 28.661")
          */
-        public: static const int mediasize_japanese_jis_b2 = 0x01040643;
+        public: static const int mediasize_japanese_jis_b2 = 0x0104071b;
         /**  Japanese JIS B3 media (paper) size: 364mm x 515mm (14.331" x 20.276")
          */
-        public: static const int mediasize_japanese_jis_b3 = 0x01040642;
+        public: static const int mediasize_japanese_jis_b3 = 0x0104071a;
         /**  Japanese JIS B4 media (paper) size: 257mm x 364mm (10.118" x 14.331")
          */
-        public: static const int mediasize_japanese_jis_b4 = 0x01040641;
+        public: static const int mediasize_japanese_jis_b4 = 0x01040719;
         /**  Japanese JIS B5 media (paper) size: 182mm x 257mm (7.165" x 10.118")
          */
-        public: static const int mediasize_japanese_jis_b5 = 0x01040640;
+        public: static const int mediasize_japanese_jis_b5 = 0x01040718;
         /**  Japanese JIS B6 media (paper) size: 128mm x 182mm (5.049" x 7.165")
          */
-        public: static const int mediasize_japanese_jis_b6 = 0x0104063f;
+        public: static const int mediasize_japanese_jis_b6 = 0x01040717;
         /**  Japanese JIS B7 media (paper) size: 91mm x 128mm (3.583" x 5.049")
          */
-        public: static const int mediasize_japanese_jis_b7 = 0x0104063e;
+        public: static const int mediasize_japanese_jis_b7 = 0x01040716;
         /**  Japanese JIS B8 media (paper) size: 64mm x 91mm (2.52" x 3.583")
          */
-        public: static const int mediasize_japanese_jis_b8 = 0x0104063d;
+        public: static const int mediasize_japanese_jis_b8 = 0x01040715;
         /**  Japanese JIS B9 media (paper) size: 45mm x 64mm (1.772" x 2.52")
          */
-        public: static const int mediasize_japanese_jis_b9 = 0x0104063c;
+        public: static const int mediasize_japanese_jis_b9 = 0x01040714;
         /**  Japanese JIS Exec media (paper) size: 216mm x 330mm (8.504" x 12.992")
          */
-        public: static const int mediasize_japanese_jis_exec = 0x01040646;
+        public: static const int mediasize_japanese_jis_exec = 0x0104071e;
         /**  Japanese Kahu media (paper) size: 240mm x 322.1mm (9.449" x 12.681")
          */
-        public: static const int mediasize_japanese_kahu = 0x0104064c;
+        public: static const int mediasize_japanese_kahu = 0x01040724;
         /**  Japanese Kaku2 media (paper) size: 240mm x 332mm (9.449" x 13.071")
          */
-        public: static const int mediasize_japanese_kaku2 = 0x0104064d;
+        public: static const int mediasize_japanese_kaku2 = 0x01040725;
         /**  Japanese Oufuku media (paper) size: 148mm x 200mm (5.827" x 7.874")
          */
-        public: static const int mediasize_japanese_oufuku = 0x0104064b;
+        public: static const int mediasize_japanese_oufuku = 0x01040723;
         /**  Japanese You4 media (paper) size: 105mm x 235mm (4.134" x 9.252")
          */
-        public: static const int mediasize_japanese_you4 = 0x0104064e;
+        public: static const int mediasize_japanese_you4 = 0x01040726;
         /**  North America Foolscap media (paper) size: 8" x 13" (203mm x 330mm)
          */
-        public: static const int mediasize_na_foolscap = 0x0104062a;
+        public: static const int mediasize_na_foolscap = 0x01040702;
         /**  North America Government Letter media (paper) size: 8.0" × 10.5" (203mm x 267mm)
          */
-        public: static const int mediasize_na_gvrnmt_letter = 0x01040620;
+        public: static const int mediasize_na_gvrnmt_letter = 0x010406f8;
         /**  North America Index Card 3x5 media (paper) size: 3" x 5" (76mm x 127mm)
          */
-        public: static const int mediasize_na_index_3x5 = 0x01040625;
+        public: static const int mediasize_na_index_3x5 = 0x010406fd;
         /**  North America Index Card 4x6 media (paper) size: 4" x 6" (102mm x 152mm)
          */
-        public: static const int mediasize_na_index_4x6 = 0x01040626;
+        public: static const int mediasize_na_index_4x6 = 0x010406fe;
         /**  North America Index Card 5x8 media (paper) size: 5" x 8" (127mm x 203mm)
          */
-        public: static const int mediasize_na_index_5x8 = 0x01040627;
+        public: static const int mediasize_na_index_5x8 = 0x010406ff;
         /**  North America Junior Legal media (paper) size: 8.0" × 5.0" (203mm × 127mm)
          */
-        public: static const int mediasize_na_junior_legal = 0x01040622;
+        public: static const int mediasize_na_junior_legal = 0x010406fa;
         /**  North America Ledger media (paper) size: 17" × 11" (432mm × 279mm)
          */
-        public: static const int mediasize_na_ledger = 0x01040623;
+        public: static const int mediasize_na_ledger = 0x010406fb;
         /**  North America Legal media (paper) size: 8.5" × 14" (216mm x 356mm)
          */
-        public: static const int mediasize_na_legal = 0x01040621;
+        public: static const int mediasize_na_legal = 0x010406f9;
         /**  North America Letter media (paper) size: 8.5" × 11" (279mm x 216mm)
          */
-        public: static const int mediasize_na_letter = 0x0104061f;
+        public: static const int mediasize_na_letter = 0x010406f7;
         /**  North America Monarch media (paper) size: 7.25" x 10.5" (184mm x 267mm)
          */
-        public: static const int mediasize_na_monarch = 0x01040628;
+        public: static const int mediasize_na_monarch = 0x01040700;
         /**  North America Quarto media (paper) size: 8" x 10" (203mm x 254mm)
          */
-        public: static const int mediasize_na_quarto = 0x01040629;
+        public: static const int mediasize_na_quarto = 0x01040701;
         /**  North America Tabloid media (paper) size: 11" × 17" (279mm × 432mm)
          */
-        public: static const int mediasize_na_tabloid = 0x01040624;
+        public: static const int mediasize_na_tabloid = 0x010406fc;
         /**  Media (paper) size for specifying any paper size in landscape.
          */
-        public: static const int mediasize_unknown_landscape = 0x01040650;
+        public: static const int mediasize_unknown_landscape = 0x01040728;
         /**  Media (paper) size for specifying any paper size in portrait.
          */
-        public: static const int mediasize_unknown_portrait = 0x0104064f;
+        public: static const int mediasize_unknown_portrait = 0x01040727;
         /**  Suffix added to a number to signify size in megabytes.
          */
-        public: static const int megabyteShort = 0x0104006d;
+        public: static const int megabyteShort = 0x01040145;
         /**  Title for the dialog used to display the user's MEID number on CDMA network
          [CHAR LIMIT=10]
          */
-        public: static const int meid = 0x01040091;
+        public: static const int meid = 0x01040169;
         /**  Displayed in place of the regular shortcut letter when a menu item has Menu+delete for the shortcut.
          */
-        public: static const int menu_delete_shortcut_label = 0x0104042f;
+        public: static const int menu_delete_shortcut_label = 0x01040507;
         /**  Displayed in place of the regular shortcut letter when a menu item has Menu+enter for the shortcut.
          */
-        public: static const int menu_enter_shortcut_label = 0x0104042e;
+        public: static const int menu_enter_shortcut_label = 0x01040506;
         /**  Displayed in place of the regular shortcut letter when a menu item has Menu+space for the shortcut.
          */
-        public: static const int menu_space_shortcut_label = 0x0104042d;
+        public: static const int menu_space_shortcut_label = 0x01040505;
         /**  Quoted name for 12am, lowercase
          */
-        public: static const int midnight = 0x0104044d;
+        public: static const int midnight = 0x01040525;
         /**
          Content description for the minute selector in the time picker, which displays
          selectable five-minute intervals along the inside edge of a circle, as in an analog clock.
          [CHAR LIMIT=50]
 
          */
-        public: static const int minute_picker_description = 0x01040664;
+        public: static const int minute_picker_description = 0x0104073c;
         /**  Displayed when SIM PIN passwords are entered inconsistently.
          */
-        public: static const int mismatchPin = 0x0104008a;
+        public: static const int mismatchPin = 0x01040162;
         /**  Displayed when a phone feature triggered by an MMI code is complete.
          */
-        public: static const int mmiComplete = 0x01040087;
+        public: static const int mmiComplete = 0x0104015f;
         /**  Displayed when the user dialed an MMI code whose function
          could not be performed. This will be displayed in a toast.
          */
-        public: static const int mmiError = 0x0104007f;
+        public: static const int mmiError = 0x01040157;
         /**  Displayed when the user dialed an MMI code whose function
          could not be performed because FDN is enabled. This will be displayed in a toast.
          */
-        public: static const int mmiFdnError = 0x01040080;
+        public: static const int mmiFdnError = 0x01040158;
         /**  The default mobile provisioning apn. Empty by default, maybe overridden by
          an mcc/mnc specific config.xml
          */
-        public: static const int mobile_provisioning_apn = 0x01040029;
+        public: static const int mobile_provisioning_apn = 0x010400f5;
         /**  The default mobile provisioning url. Empty by default, maybe overridden by
          an mcc/mnc specific config.xml
          */
-        public: static const int mobile_provisioning_url = 0x0104002a;
+        public: static const int mobile_provisioning_url = 0x010400f6;
         /**  This url is used as the default url when redirection is detected. Any
          should work as all url's get redirected. But maybe overridden by
          if needed.
          */
-        public: static const int mobile_redirected_provisioning_url = 0x0104002b;
-        public: static const int month_day_year = 0x01040054;
+        public: static const int mobile_redirected_provisioning_url = 0x010400f7;
+        public: static const int month_day_year = 0x0104012c;
         /**  Menu item displayed at the end of a menu to allow users to see another page worth of menu items. This is shown on any app's menu as long as the app has too many items in the menu.
          */
-        public: static const int more_item_label = 0x0104042b;
+        public: static const int more_item_label = 0x01040503;
         /**  Displayed to prompt the user to type the PUK password to unlock
          the SIM card.
          */
-        public: static const int needPuk = 0x0104008d;
-        public: static const int needPuk2 = 0x0104008e;
+        public: static const int needPuk = 0x01040165;
+        public: static const int needPuk2 = 0x01040166;
         /**  A notification is shown when a captive portal network is detected.  This is the notification's title.
          */
-        public: static const int network_available_sign_in = 0x010404a6;
+        public: static const int network_available_sign_in = 0x0104057e;
         /**  A notification is shown when a captive portal network is detected.  This is the notification's message.
          */
-        public: static const int network_available_sign_in_detailed = 0x010404a7;
-        public: static const int new_app_action = 0x0104048f;
-        public: static const int new_app_description = 0x01040490;
+        public: static const int network_available_sign_in_detailed = 0x0104057f;
+        public: static const int new_app_action = 0x01040567;
+        public: static const int new_app_description = 0x01040568;
         /**  Preference framework strings.
          */
         public: static const int no = 0x01040009;
         /**  Text to display when there are no activities found to display in the
          activity chooser. See the "Select an action" title.
          */
-        public: static const int noApplications = 0x0104046f;
+        public: static const int noApplications = 0x01040547;
         /**  Label for the file upload control when no file has been chosen yet
          */
-        public: static const int no_file_chosen = 0x01040544;
+        public: static const int no_file_chosen = 0x0104061c;
         /**  Displayed on the Find dialog when there are no matches [CHAR LIMIT=NONE]
          */
-        public: static const int no_matches = 0x0104054e;
+        public: static const int no_matches = 0x01040626;
         /**  Quoted name for 12pm, lowercase
          */
-        public: static const int noon = 0x0104044b;
+        public: static const int noon = 0x01040523;
         /**  Label to show for a service that is running because it is observing
          the user's notifications.
          */
-        public: static const int notification_listener_binding_label = 0x01040538;
+        public: static const int notification_listener_binding_label = 0x01040610;
         /**  A notification is shown when the AccountManager is unable to
     supply an auth token without prompting the user to re-enter the
     password.  This is the text that will scroll through the
     notification bar (will be seen by the user as he uses another application).
          */
-        public: static const int notification_title = 0x010400db;
+        public: static const int notification_title = 0x010401b3;
         /**  Description of the scrolling action in NumberPicker. [CHAR LIMIT=NONE]
          */
-        public: static const int number_picker_increment_scroll_action = 0x0104056e;
+        public: static const int number_picker_increment_scroll_action = 0x01040646;
         /**  Description of the tap and hold action to get into scroll mode in NumberPicker. [CHAR LIMIT=NONE]
          */
-        public: static const int number_picker_increment_scroll_mode = 0x0104056d;
-        public: static const int numeric_date_template = 0x01040053;
+        public: static const int number_picker_increment_scroll_mode = 0x01040645;
+        public: static const int numeric_date_template = 0x0104012b;
         /**  Preference framework strings.
          */
         public: static const int ok = 0x0104000a;
-        public: static const int old_app_action = 0x0104048d;
-        public: static const int old_app_description = 0x0104048e;
+        public: static const int old_app_action = 0x01040565;
+        public: static const int old_app_description = 0x01040566;
         /**  This is used to express that something happened longer ago than the previous options
          */
-        public: static const int older = 0x0104043a;
+        public: static const int older = 0x01040512;
         /**  Displayed to the user when they do not have permission to open a particular web page.
          */
-        public: static const int open_permission_deny = 0x01040429;
+        public: static const int open_permission_deny = 0x01040501;
         /**  Custom organization type
          */
-        public: static const int orgTypeCustom = 0x0104034d;
+        public: static const int orgTypeCustom = 0x01040425;
         /**  Other organization type
          */
-        public: static const int orgTypeOther = 0x0104034c;
+        public: static const int orgTypeOther = 0x01040424;
         /**  Work organization type
          */
-        public: static const int orgTypeWork = 0x0104034b;
+        public: static const int orgTypeWork = 0x01040423;
         /**  Default name of the owner user [CHAR LIMIT=20]
          */
-        public: static const int owner_name = 0x010405f9;
+        public: static const int owner_name = 0x010406d1;
         /**  Displayed when a SIM password was entered incorrectly.
          */
-        public: static const int passwordIncorrect = 0x01040086;
+        public: static const int passwordIncorrect = 0x0104015e;
         /**  Item on EditText context menu. This action is used to paste from the clipboard into the eidt field
          */
         public: static const int paste = 0x0104000b;
-        public: static const int permission_request_notification_with_subtitle = 0x01040530;
+        public: static const int perf_profile_bal = 0x0104009d;
+        public: static const int perf_profile_perf = 0x0104009e;
+        /**  Performance profile modes
+         */
+        public: static const int perf_profile_pwrsv = 0x0104009c;
+        public: static const int permission_request_notification_with_subtitle = 0x01040608;
         /**  Text that is placed at the front of a permission name that is being added to an app [CHAR LIMIT=NONE]
          */
-        public: static const int perms_description_app = 0x010404d2;
+        public: static const int perms_description_app = 0x010405aa;
         /**  Security Permissions strings
  Text that is placed at the front of a permission name that is being added to an app [CHAR LIMIT=NONE]
          */
-        public: static const int perms_new_perm_prefix = 0x010404d1;
+        public: static const int perms_new_perm_prefix = 0x010405a9;
         /**  Suffix added to a number to signify size in petabytes.
          */
-        public: static const int petabyteShort = 0x01040070;
+        public: static const int petabyteShort = 0x01040148;
         /**  Assistant phone number type
          */
-        public: static const int phoneTypeAssistant = 0x0104032e;
+        public: static const int phoneTypeAssistant = 0x01040406;
         /**  Callback phone number type
          */
-        public: static const int phoneTypeCallback = 0x01040323;
+        public: static const int phoneTypeCallback = 0x010403fb;
         /**  Car phone number type
          */
-        public: static const int phoneTypeCar = 0x01040324;
+        public: static const int phoneTypeCar = 0x010403fc;
         /**  Company main phone number type
          */
-        public: static const int phoneTypeCompanyMain = 0x01040325;
+        public: static const int phoneTypeCompanyMain = 0x010403fd;
         /**  Custom phone number type
          */
-        public: static const int phoneTypeCustom = 0x0104031b;
+        public: static const int phoneTypeCustom = 0x010403f3;
         /**  Home fax phone number type
          */
-        public: static const int phoneTypeFaxHome = 0x01040320;
+        public: static const int phoneTypeFaxHome = 0x010403f8;
         /**  Work fax phone number type
          */
-        public: static const int phoneTypeFaxWork = 0x0104031f;
+        public: static const int phoneTypeFaxWork = 0x010403f7;
         /**  Home phone number type
          */
-        public: static const int phoneTypeHome = 0x0104031c;
+        public: static const int phoneTypeHome = 0x010403f4;
         /**  ISDN phone number type
          */
-        public: static const int phoneTypeIsdn = 0x01040326;
+        public: static const int phoneTypeIsdn = 0x010403fe;
         /**  Main phone number type
          */
-        public: static const int phoneTypeMain = 0x01040327;
+        public: static const int phoneTypeMain = 0x010403ff;
         /**  MMS phone number type
          */
-        public: static const int phoneTypeMms = 0x0104032f;
+        public: static const int phoneTypeMms = 0x01040407;
         /**  Mobile phone number type
          */
-        public: static const int phoneTypeMobile = 0x0104031d;
+        public: static const int phoneTypeMobile = 0x010403f5;
         /**  Other phone number type
          */
-        public: static const int phoneTypeOther = 0x01040322;
+        public: static const int phoneTypeOther = 0x010403fa;
         /**  Other fax phone number type
          */
-        public: static const int phoneTypeOtherFax = 0x01040328;
+        public: static const int phoneTypeOtherFax = 0x01040400;
         /**  Pager phone number type
          */
-        public: static const int phoneTypePager = 0x01040321;
+        public: static const int phoneTypePager = 0x010403f9;
         /**  Radio phone number type
          */
-        public: static const int phoneTypeRadio = 0x01040329;
+        public: static const int phoneTypeRadio = 0x01040401;
         /**  Telex phone number type
          */
-        public: static const int phoneTypeTelex = 0x0104032a;
+        public: static const int phoneTypeTelex = 0x01040402;
         /**  TTY TDD phone number type
          */
-        public: static const int phoneTypeTtyTdd = 0x0104032b;
+        public: static const int phoneTypeTtyTdd = 0x01040403;
         /**  Work phone number type
          */
-        public: static const int phoneTypeWork = 0x0104031e;
+        public: static const int phoneTypeWork = 0x010403f6;
         /**  Work mobile phone number type
          */
-        public: static const int phoneTypeWorkMobile = 0x0104032c;
+        public: static const int phoneTypeWorkMobile = 0x01040404;
         /**  Work pager phone number type
          */
-        public: static const int phoneTypeWorkPager = 0x0104032d;
+        public: static const int phoneTypeWorkPager = 0x01040405;
         /**  Description of policy access to disable all device cameras [CHAR LIMIT=110]
          */
-        public: static const int policydesc_disableCamera = 0x01040318;
+        public: static const int policydesc_disableCamera = 0x010403f0;
         /**  Description of policy access to disable all device cameras [CHAR LIMIT=110]
          */
-        public: static const int policydesc_disableKeyguardFeatures = 0x0104031a;
+        public: static const int policydesc_disableKeyguardFeatures = 0x010403f2;
         /**  Description of policy access to require encrypted storage [CHAR LIMIT=110]
          */
-        public: static const int policydesc_encryptedStorage = 0x01040316;
+        public: static const int policydesc_encryptedStorage = 0x010403ee;
         /**  Description of policy access to enforce password expiration [CHAR LIMIT=110]
          */
-        public: static const int policydesc_expirePassword = 0x01040314;
+        public: static const int policydesc_expirePassword = 0x010403ec;
         /**  Description of policy access to limiting the user's password choices
          */
-        public: static const int policydesc_forceLock = 0x0104030e;
+        public: static const int policydesc_forceLock = 0x010403e6;
         /**  Description of policy access to limiting the user's password choices
          */
-        public: static const int policydesc_limitPassword = 0x01040308;
+        public: static const int policydesc_limitPassword = 0x010403e0;
         /**  Description of policy access to reset user's password
          */
-        public: static const int policydesc_resetPassword = 0x0104030c;
+        public: static const int policydesc_resetPassword = 0x010403e4;
         /**  Description of policy access to wipe the user's data
          */
-        public: static const int policydesc_setGlobalProxy = 0x01040312;
+        public: static const int policydesc_setGlobalProxy = 0x010403ea;
         /**  Description of policy access to watch user login attempts
          */
-        public: static const int policydesc_watchLogin = 0x0104030a;
+        public: static const int policydesc_watchLogin = 0x010403e2;
         /**  Description of policy access to wipe the user's data
          */
-        public: static const int policydesc_wipeData = 0x01040310;
+        public: static const int policydesc_wipeData = 0x010403e8;
         /**  Title of policy access to disable all device cameras [CHAR LIMIT=30]
          */
-        public: static const int policylab_disableCamera = 0x01040317;
+        public: static const int policylab_disableCamera = 0x010403ef;
         /**  Title of policy access to disable all device cameras [CHAR LIMIT=30]
          */
-        public: static const int policylab_disableKeyguardFeatures = 0x01040319;
+        public: static const int policylab_disableKeyguardFeatures = 0x010403f1;
         /**  Title of policy access to require encrypted storage [CHAR LIMIT=30]
          */
-        public: static const int policylab_encryptedStorage = 0x01040315;
+        public: static const int policylab_encryptedStorage = 0x010403ed;
         /**  Title of policy access to enforce password expiration [CHAR LIMIT=30]
          */
-        public: static const int policylab_expirePassword = 0x01040313;
+        public: static const int policylab_expirePassword = 0x010403eb;
         /**  Title of policy access to force lock the device
          */
-        public: static const int policylab_forceLock = 0x0104030d;
+        public: static const int policylab_forceLock = 0x010403e5;
         /**  Policy administration
  Title of policy access to limiting the user's password choices
          */
-        public: static const int policylab_limitPassword = 0x01040307;
+        public: static const int policylab_limitPassword = 0x010403df;
         /**  Title of policy access to reset user's password
          */
-        public: static const int policylab_resetPassword = 0x0104030b;
-        public: static const int policylab_setGlobalProxy = 0x01040311;
+        public: static const int policylab_resetPassword = 0x010403e3;
+        public: static const int policylab_setGlobalProxy = 0x010403e9;
         /**  Title of policy access to watch user login attempts
          */
-        public: static const int policylab_watchLogin = 0x01040309;
+        public: static const int policylab_watchLogin = 0x010403e1;
         /**  Title of policy access to wipe the user's data
          */
-        public: static const int policylab_wipeData = 0x0104030f;
+        public: static const int policylab_wipeData = 0x010403e7;
         /**  Custom postal address type
          */
-        public: static const int postalTypeCustom = 0x01040339;
+        public: static const int postalTypeCustom = 0x01040411;
         /**  Home postal address type
          */
-        public: static const int postalTypeHome = 0x0104033a;
+        public: static const int postalTypeHome = 0x01040412;
         /**  Other postal address type
          */
-        public: static const int postalTypeOther = 0x0104033c;
+        public: static const int postalTypeOther = 0x01040414;
         /**  Work postal address type
          */
-        public: static const int postalTypeWork = 0x0104033b;
+        public: static const int postalTypeWork = 0x01040413;
         /**  Button to turn off the phone, within the Phone Options dialog
          */
-        public: static const int power_off = 0x010400e9;
+        public: static const int power_off = 0x010401c1;
         /**  Prepended to the shortcut for a menu item to indicate that the user should hold the MENU button together with the shortcut to invoke the item. For example, if the shortcut to open a new tab in browser is MENU and B together, then this would be prepended to the letter "B"
          */
-        public: static const int prepend_shortcut_label = 0x0104042c;
+        public: static const int prepend_shortcut_label = 0x01040504;
         /**  String used to display the date. Preposition for date display ("on May 29")
          */
-        public: static const int preposition_for_date = 0x0104043b;
+        public: static const int preposition_for_date = 0x01040513;
         /**  String used to display the date. Preposition for time display ("at 2:33am")
          */
-        public: static const int preposition_for_time = 0x0104043c;
+        public: static const int preposition_for_time = 0x01040514;
         /**  Message for the notification that a print service was installed. [CHAR LIMIT=50]
          */
-        public: static const int print_service_installed_message = 0x01040656;
+        public: static const int print_service_installed_message = 0x0104072e;
         /**  Title for the notification that a print service was installed. [CHAR LIMIT=50]
          */
-        public: static const int print_service_installed_title = 0x01040655;
+        public: static const int print_service_installed_title = 0x0104072d;
+        public: static const int privacy_guard_dialog_summary = 0x01040041;
+        public: static const int privacy_guard_dialog_title = 0x01040040;
+        public: static const int privacy_guard_notification = 0x0104003a;
+        public: static const int privacy_guard_notification_detail = 0x0104003b;
+        /**  The item label for the no profile selection item.
+         */
+        public: static const int profile_none = 0x01040024;
+        /**  The title of the profile picker dialog.
+         */
+        public: static const int profile_picker_title = 0x01040025;
         /**  Text for progress dialog while erasing SD card [CHAR LIMIT=NONE]
          */
-        public: static const int progress_erasing = 0x01040552;
+        public: static const int progress_erasing = 0x0104062a;
+        /**  Text for progress dialog while formatting SD card [CHAR LIMIT=NONE]
+         */
+        public: static const int progress_nomediapresent = 0x0104008d;
         /**  Text for progress dialog while unmounting SD card [CHAR LIMIT=NONE]
          */
-        public: static const int progress_unmounting = 0x01040551;
+        public: static const int progress_unmounting = 0x01040629;
         /**  Error message that is displayed when the user clicks on a quick contacts badge, but
          there is no contacts application installed that can display the quick contact
          */
-        public: static const int quick_contacts_not_available = 0x01040361;
+        public: static const int quick_contacts_not_available = 0x01040439;
         /**  DO NOT TRANSLATE
          */
-        public: static const int radial_numbers_typeface = 0x0104066f;
+        public: static const int radial_numbers_typeface = 0x01040747;
         /**  Print fail reason: the print service that has to process the print job is not available. [CHAR LIMIT=none]
          */
-        public: static const int reason_service_unavailable = 0x01040654;
+        public: static const int reason_service_unavailable = 0x0104072c;
         /**  Print fail reason: unknown. [CHAR LIMIT=25]
          */
-        public: static const int reason_unknown = 0x01040653;
+        public: static const int reason_unknown = 0x0104072b;
+        public: static const int reboot_confirm = 0x0104004a;
+        /**  Reboot Progress Dialog. This is shown if the user chooses to reboot the phone.
+         */
+        public: static const int reboot_progress = 0x0104004b;
         /**  Shutdown Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot into safe mode. [CHAR LIMIT=NONE]
          */
-        public: static const int reboot_safemode_confirm = 0x010400f1;
+        public: static const int reboot_safemode_confirm = 0x010401c9;
         /**  Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50]
          */
-        public: static const int reboot_safemode_title = 0x010400f0;
+        public: static const int reboot_safemode_title = 0x010401c8;
+        /**  Title of dialog to confirm rebooting.
+         */
+        public: static const int reboot_title = 0x01040049;
         /**  Assistant relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeAssistant = 0x0104034f;
+        public: static const int relationTypeAssistant = 0x01040427;
         /**  Brother relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeBrother = 0x01040350;
+        public: static const int relationTypeBrother = 0x01040428;
         /**  Child relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeChild = 0x01040351;
+        public: static const int relationTypeChild = 0x01040429;
         /**  Domestic Partner relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeDomesticPartner = 0x01040352;
+        public: static const int relationTypeDomesticPartner = 0x0104042a;
         /**  Father relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeFather = 0x01040353;
+        public: static const int relationTypeFather = 0x0104042b;
         /**  Friend relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeFriend = 0x01040354;
+        public: static const int relationTypeFriend = 0x0104042c;
         /**  Manager relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeManager = 0x01040355;
+        public: static const int relationTypeManager = 0x0104042d;
         /**  Mother relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeMother = 0x01040356;
+        public: static const int relationTypeMother = 0x0104042e;
         /**  Parent relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeParent = 0x01040357;
+        public: static const int relationTypeParent = 0x0104042f;
         /**  Partner relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypePartner = 0x01040358;
+        public: static const int relationTypePartner = 0x01040430;
         /**  Referred by relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeReferredBy = 0x01040359;
+        public: static const int relationTypeReferredBy = 0x01040431;
         /**  Relative relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeRelative = 0x0104035a;
+        public: static const int relationTypeRelative = 0x01040432;
         /**  Sister relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeSister = 0x0104035b;
+        public: static const int relationTypeSister = 0x01040433;
         /**  Spouse relationship type [CHAR LIMIT=20]
          */
-        public: static const int relationTypeSpouse = 0x0104035c;
+        public: static const int relationTypeSpouse = 0x01040434;
         /**  Format indicating a relative expression and time.
          Example: "4 hours ago, 11:00 am"
          */
-        public: static const int relative_time = 0x0104044a;
+        public: static const int relative_time = 0x01040522;
         /**  Item on EditText context menu. This action is used to replace the current word by other suggested words, suggested by the IME or the spell checker
          */
-        public: static const int replace = 0x01040451;
+        public: static const int replace = 0x01040529;
         /**  Button allowing the user to send a bug report for application which has encountered an error.
          */
-        public: static const int report = 0x01040479;
+        public: static const int report = 0x01040551;
         /**  Label for <input type="reset"> button in html
          */
-        public: static const int reset = 0x01040545;
+        public: static const int reset = 0x0104061d;
         /**  PIN entry dialog title for entering the administrator PIN [CHAR LIMIT=none]
          */
-        public: static const int restr_pin_enter_admin_pin = 0x01040657;
+        public: static const int restr_pin_enter_admin_pin = 0x0104072f;
         /**  PIN entry dialog label/hint for PIN [CHAR LIMIT=none]
          */
-        public: static const int restr_pin_enter_pin = 0x01040658;
+        public: static const int restr_pin_enter_pin = 0x01040730;
         /**  PIN entry dialog label/hint for incorrect PIN entry [CHAR LIMIT=none]
          */
-        public: static const int restr_pin_incorrect = 0x01040659;
+        public: static const int restr_pin_incorrect = 0x01040731;
         /**  PIN entry dialog tells the user to not enter a PIN for a while. [CHAR LIMIT=none]
          */
-        public: static const int restr_pin_try_later = 0x01040660;
-        public: static const int revoke = 0x010405fd;
+        public: static const int restr_pin_try_later = 0x01040738;
+        public: static const int revoke = 0x010406d5;
         /**  Choice in the ringtone picker.  If chosen, the default ringtone will be used.
          */
-        public: static const int ringtone_default = 0x010404a0;
+        public: static const int ringtone_default = 0x01040578;
         /**  Choice in the ringtone picker.  If chosen, the default ringtone will be used. This fills in the actual ringtone's title into the message.
          */
-        public: static const int ringtone_default_with_actual = 0x010404a1;
+        public: static const int ringtone_default_with_actual = 0x01040579;
         /**  The title of the ringtone picker dialog.
          */
-        public: static const int ringtone_picker_title = 0x010404a3;
+        public: static const int ringtone_picker_title = 0x0104057b;
         /**  Choice in the ringtone picker.  If chosen, there will be silence instead of a ringtone played.
          */
-        public: static const int ringtone_silent = 0x010404a2;
+        public: static const int ringtone_silent = 0x0104057a;
         /**  If there is ever a ringtone set for some setting, but that ringtone can no longer be resolved, t his is shown instead.  For example, if the ringtone was on a SD card and it had been removed, this woudl be shown for ringtones on that SD card.
          */
-        public: static const int ringtone_unknown = 0x010404a4;
+        public: static const int ringtone_unknown = 0x0104057c;
         /**  Default roaming indicator text
- Default roaming indicator text
          */
-        public: static const int roamingText0 = 0x010400b8;
-        public: static const int roamingText1 = 0x010400b9;
-        public: static const int roamingText10 = 0x010400c2;
-        public: static const int roamingText11 = 0x010400c3;
-        public: static const int roamingText12 = 0x010400c4;
-        public: static const int roamingText2 = 0x010400ba;
-        public: static const int roamingText3 = 0x010400bb;
-        public: static const int roamingText4 = 0x010400bc;
-        public: static const int roamingText5 = 0x010400bd;
-        public: static const int roamingText6 = 0x010400be;
-        public: static const int roamingText7 = 0x010400bf;
-        public: static const int roamingText8 = 0x010400c0;
-        public: static const int roamingText9 = 0x010400c1;
-        public: static const int roamingTextSearching = 0x010400c5;
+        public: static const int roamingText0 = 0x01040190;
+        public: static const int roamingText1 = 0x01040191;
+        public: static const int roamingText10 = 0x0104019a;
+        public: static const int roamingText11 = 0x0104019b;
+        public: static const int roamingText12 = 0x0104019c;
+        public: static const int roamingText2 = 0x01040192;
+        public: static const int roamingText3 = 0x01040193;
+        public: static const int roamingText4 = 0x01040194;
+        public: static const int roamingText5 = 0x01040195;
+        public: static const int roamingText6 = 0x01040196;
+        public: static const int roamingText7 = 0x01040197;
+        public: static const int roamingText8 = 0x01040198;
+        public: static const int roamingText9 = 0x01040199;
+        public: static const int roamingTextSearching = 0x0104019d;
         /**  Message shown in dialog when user is attempting to set the music volume above the
     recommended maximum level for headphones
          */
-        public: static const int safe_media_volume_warning = 0x010405f3;
+        public: static const int safe_media_volume_warning = 0x010406cb;
         /**  DO NOT TRANSLATE
          */
-        public: static const int sans_serif = 0x01040670;
+        public: static const int sans_serif = 0x01040748;
         /**  Title of the WebView save password dialog.  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password.
          */
-        public: static const int save_password_label = 0x010403d0;
+        public: static const int save_password_label = 0x010404a8;
         /**  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Text in the save password dialog, asking if the browser should remember a password.
          */
-        public: static const int save_password_message = 0x01040425;
+        public: static const int save_password_message = 0x010404fd;
         /**  Button in the save password dialog, saying never to remember this password. This should be short. Should be "Never for this site". But it is too long, use "Never" instead
          */
-        public: static const int save_password_never = 0x01040428;
+        public: static const int save_password_never = 0x01040500;
         /**  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Button in the save password dialog, saying not to remember this password.
          */
-        public: static const int save_password_notnow = 0x01040426;
+        public: static const int save_password_notnow = 0x010404fe;
         /**  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Button in the save password dialog, saying to remember this password.
          */
-        public: static const int save_password_remember = 0x01040427;
+        public: static const int save_password_remember = 0x010404ff;
+        public: static const int sd_ext_media_badremoval_notification_message = 0x010400c3;
+        public: static const int sd_ext_media_badremoval_notification_title = 0x010400c2;
+        public: static const int sd_ext_media_checking_notification_message = 0x010400bd;
+        /**  SD card storage notification
+         */
+        public: static const int sd_ext_media_checking_notification_title = 0x010400bc;
+        public: static const int sd_ext_media_nofs_notification_message = 0x010400bf;
+        public: static const int sd_ext_media_nofs_notification_title = 0x010400be;
+        public: static const int sd_ext_media_nomedia_notification_message = 0x010400c7;
+        public: static const int sd_ext_media_nomedia_notification_title = 0x010400c6;
+        public: static const int sd_ext_media_safe_unmount_notification_message = 0x010400c5;
+        public: static const int sd_ext_media_safe_unmount_notification_title = 0x010400c4;
+        public: static const int sd_ext_media_unmountable_notification_message = 0x010400c1;
+        public: static const int sd_ext_media_unmountable_notification_title = 0x010400c0;
+        /**  See EXTMEDIA_FORMAT.   This is the message.
+         */
+        public: static const int sd_extmedia_format_message = 0x010400ad;
+        public: static const int sd_format_error = 0x010400b0;
+        public: static const int sd_media_bad_removal = 0x010400b1;
+        public: static const int sd_media_checking = 0x010400b2;
+        public: static const int sd_media_removed = 0x010400b3;
+        public: static const int sd_media_shared = 0x010400b4;
+        public: static const int sd_progress_erasing = 0x010400af;
+        /**  Strings for ExternalStorageFormatter service (SD card).
+         */
+        public: static const int sd_progress_unmounting = 0x010400ae;
         /**  This is the default button label in the system-wide search UI.
          It is also used by the home screen's search "widget". It should be short
          */
@@ -18977,194 +19884,194 @@ zh-CN
         public: static const int selectTextMode = 0x01040016;
         /**  Accessibility announcement for the day picker [CHAR LIMIT=NONE]
          */
-        public: static const int select_day = 0x01040669;
+        public: static const int select_day = 0x01040741;
         /**  Accessibility announcement for hour circular picker [CHAR LIMIT=NONE]
          */
-        public: static const int select_hours = 0x01040665;
+        public: static const int select_hours = 0x0104073d;
         /**  Title of the pop-up dialog in which the user switches keyboard, also known as input method.
          */
-        public: static const int select_input_method = 0x010404f1;
+        public: static const int select_input_method = 0x010405c9;
         /**  Message of the notification to prompt the user to select a keyboard layout.
          */
-        public: static const int select_keyboard_layout_notification_message = 0x010404f6;
+        public: static const int select_keyboard_layout_notification_message = 0x010405ce;
         /**  Title of the notification to prompt the user to select a keyboard layout.
          */
-        public: static const int select_keyboard_layout_notification_title = 0x010404f5;
+        public: static const int select_keyboard_layout_notification_title = 0x010405cd;
         /**  Accessibility announcement for minute circular picker [CHAR LIMIT=NONE]
          */
-        public: static const int select_minutes = 0x01040666;
+        public: static const int select_minutes = 0x0104073e;
         /**  Accessibility announcement for the year picker [CHAR LIMIT=NONE]
          */
-        public: static const int select_year = 0x0104066a;
+        public: static const int select_year = 0x01040742;
         /**  Displayed in the title of the chooser for things to do with text that
          is to be sent to another application. For example, I can send
          text through SMS or IM.  A dialog with those choices would be shown,
          and this would be the title.
          */
-        public: static const int sendText = 0x01040491;
+        public: static const int sendText = 0x01040569;
         /**  STK sending DTMF, SMS, USSD, SS
          */
-        public: static const int sending = 0x010405b3;
+        public: static const int sending = 0x0104068b;
         /**  Example: Service was enabled for: Voice, Data
          */
-        public: static const int serviceClassData = 0x010400b1;
+        public: static const int serviceClassData = 0x01040189;
         /**  Meaning: asynchronous data.  Example: Service was enabled for: Voice, Async
          */
-        public: static const int serviceClassDataAsync = 0x010400b4;
+        public: static const int serviceClassDataAsync = 0x0104018c;
         /**  Meaning: synchronous data.  Example: Service was enabled for: Voice, Async
          */
-        public: static const int serviceClassDataSync = 0x010400b5;
+        public: static const int serviceClassDataSync = 0x0104018d;
         /**  Example: Service was enabled for: Voice, FAX
          */
-        public: static const int serviceClassFAX = 0x010400b2;
+        public: static const int serviceClassFAX = 0x0104018a;
         /**  Meaning: unknown.  Example: Service was enabled for: Voice, PAD
          */
-        public: static const int serviceClassPAD = 0x010400b7;
+        public: static const int serviceClassPAD = 0x0104018f;
         /**  Meaning: packet data.  Example: Service was enabled for: Voice, Packet
          */
-        public: static const int serviceClassPacket = 0x010400b6;
+        public: static const int serviceClassPacket = 0x0104018e;
         /**  Example: Service was enabled for: Voice, SMS
          */
-        public: static const int serviceClassSMS = 0x010400b3;
+        public: static const int serviceClassSMS = 0x0104018b;
         /**  Example: Service was enabled for: Voice, Data
          */
-        public: static const int serviceClassVoice = 0x010400b0;
+        public: static const int serviceClassVoice = 0x01040188;
         /**  Displayed when a phone feature such as call forwarding was deactivated.
          */
-        public: static const int serviceDisabled = 0x01040083;
+        public: static const int serviceDisabled = 0x0104015b;
         /**  Displayed when a phone feature such as call barring was activated.
          */
-        public: static const int serviceEnabled = 0x01040081;
+        public: static const int serviceEnabled = 0x01040159;
         /**  Displayed in front of the list of a set of service classes
          (voice, data, fax, etc.) that were enabled.
          */
-        public: static const int serviceEnabledFor = 0x01040082;
+        public: static const int serviceEnabledFor = 0x0104015a;
         /**  Displayed when a phone property such as a SIM password was erased.
          */
-        public: static const int serviceErased = 0x01040085;
+        public: static const int serviceErased = 0x0104015d;
         /**  Displayed to tell the user that caller ID is not provisioned for their SIM.
          */
-        public: static const int serviceNotProvisioned = 0x010400a5;
+        public: static const int serviceNotProvisioned = 0x0104017d;
         /**  Displayed when a phone property such as a SIM password was registered.
          */
-        public: static const int serviceRegistered = 0x01040084;
+        public: static const int serviceRegistered = 0x0104015c;
         /**  Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form but the user has not configured an AutoFill profile [CHAR-LIMIT=19]
          */
-        public: static const int setup_autofill = 0x010403d3;
+        public: static const int setup_autofill = 0x010404ab;
         /**  Text for WebView's text selection Action Mode
  ActionBar action to share the current selection [CHAR LIMIT=10]
          */
-        public: static const int share = 0x01040559;
+        public: static const int share = 0x01040631;
         /**  ShareActionProvider - accessibility support
  Description of the choose target button in a ShareActionProvider (share UI). [CHAR LIMIT=NONE]
          */
-        public: static const int shareactionprovider_share_with = 0x01040584;
+        public: static const int shareactionprovider_share_with = 0x0104065c;
         /**  Description of a share target (both in the list of such or the default share button) in a ShareActionProvider (share UI). [CHAR LIMIT=NONE]
          */
-        public: static const int shareactionprovider_share_with_application = 0x01040585;
+        public: static const int shareactionprovider_share_with_application = 0x0104065d;
         /**  Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will
          be a confirmation dialog.  This is the message.
          */
-        public: static const int shutdown_confirm = 0x010400ee;
+        public: static const int shutdown_confirm = 0x010401c6;
         /**  Shutdown Confirmation Dialog.  When the user chooses to power off the phone, it asks
          the user if they'd like to shut down.  This is the message.  This is used instead of
          shutdown_confirm when the system is configured to use long press to go directly to the
          power off dialog instead of the global actions menu.
          */
-        public: static const int shutdown_confirm_question = 0x010400ef;
+        public: static const int shutdown_confirm_question = 0x010401c7;
         /**  Shutdown Progress Dialog. This is shown if the user chooses to power off the phone.
          */
-        public: static const int shutdown_progress = 0x010400ed;
+        public: static const int shutdown_progress = 0x010401c5;
         /**  See SIM_ADDED_DIALOG.  This is the message of that dialog.
          */
-        public: static const int sim_added_message = 0x010404cb;
+        public: static const int sim_added_message = 0x010405a3;
         /**  See SIM_ADDED_DIALOG.  This is the title of that dialog.
          */
-        public: static const int sim_added_title = 0x010404ca;
+        public: static const int sim_added_title = 0x010405a2;
         /**  See SIM_REMOVED_DIALOG.  This is the message of that dialog.
          */
-        public: static const int sim_removed_message = 0x010404c8;
+        public: static const int sim_removed_message = 0x010405a0;
         /**  See SIM_REMOVED_DIALOG.  This is the title of that dialog.
          */
-        public: static const int sim_removed_title = 0x010404c7;
+        public: static const int sim_removed_title = 0x0104059f;
         /**  See SIM_ADDED_DIALOG.  This is the button of that dialog.
          */
-        public: static const int sim_restart_button = 0x010404cc;
+        public: static const int sim_restart_button = 0x010405a4;
         /**  Custom SIP address type. Same context as Custom phone type.
          */
-        public: static const int sipAddressTypeCustom = 0x0104035d;
+        public: static const int sipAddressTypeCustom = 0x01040435;
         /**  Home SIP address type. Same context as Home phone type.
          */
-        public: static const int sipAddressTypeHome = 0x0104035e;
+        public: static const int sipAddressTypeHome = 0x01040436;
         /**  Other SIP address type. Same context as Other phone type.
          */
-        public: static const int sipAddressTypeOther = 0x01040360;
+        public: static const int sipAddressTypeOther = 0x01040438;
         /**  Work SIP address type. Same context as Work phone type.
          */
-        public: static const int sipAddressTypeWork = 0x0104035f;
+        public: static const int sipAddressTypeWork = 0x01040437;
         /**  See SMS_DIALOG.  This is the message shown in that dialog. [CHAR LIMIT=NONE]
          */
-        public: static const int sms_control_message = 0x010404bb;
+        public: static const int sms_control_message = 0x01040593;
         /**  See SMS_DIALOG.  This is a button choice to disallow sending the SMSes. [CHAR LIMIT=30]
          */
-        public: static const int sms_control_no = 0x010404bd;
+        public: static const int sms_control_no = 0x01040595;
         /**  SMS_DIALOG: An SMS dialog is shown if an application tries to send too many SMSes.  This is the title of that dialog.
          */
-        public: static const int sms_control_title = 0x010404ba;
+        public: static const int sms_control_title = 0x01040592;
         /**  See SMS_DIALOG.  This is a button choice to allow sending the SMSes. [CHAR LIMIT=30]
          */
-        public: static const int sms_control_yes = 0x010404bc;
+        public: static const int sms_control_yes = 0x01040594;
         /**  Message details for the SMS short code confirmation dialog (premium short code). [CHAR LIMIT=NONE]
          */
-        public: static const int sms_premium_short_code_details = 0x010404c0;
+        public: static const int sms_premium_short_code_details = 0x01040598;
         /**  Text of the approval button for the SMS short code confirmation dialog. [CHAR LIMIT=30]
          */
-        public: static const int sms_short_code_confirm_allow = 0x010404c1;
+        public: static const int sms_short_code_confirm_allow = 0x01040599;
         /**  Text of the approval button for the SMS short code confirmation dialog when checkbox is checked. [CHAR LIMIT=30]
          */
-        public: static const int sms_short_code_confirm_always_allow = 0x010404c5;
+        public: static const int sms_short_code_confirm_always_allow = 0x0104059d;
         /**  Text of the cancel button for the SMS short code confirmation dialog. [CHAR LIMIT=30]
          */
-        public: static const int sms_short_code_confirm_deny = 0x010404c2;
+        public: static const int sms_short_code_confirm_deny = 0x0104059a;
         /**  The message text for the SMS short code confirmation dialog. [CHAR LIMIT=NONE]
          */
-        public: static const int sms_short_code_confirm_message = 0x010404be;
+        public: static const int sms_short_code_confirm_message = 0x01040596;
         /**  Text of the cancel button for the SMS short code confirmation dialog when checkbox is checked. [CHAR LIMIT=30]
          */
-        public: static const int sms_short_code_confirm_never_allow = 0x010404c6;
+        public: static const int sms_short_code_confirm_never_allow = 0x0104059e;
         /**  Message details for the SMS short code confirmation dialog (possible premium short code). [CHAR LIMIT=NONE]
          */
-        public: static const int sms_short_code_details = 0x010404bf;
+        public: static const int sms_short_code_details = 0x01040597;
         /**  Text shown when remember checkbox is checked to inform the user how they may undo the setting. [CHAR LIMIT=40]
          */
-        public: static const int sms_short_code_remember_undo_instruction = 0x010404c4;
+        public: static const int sms_short_code_remember_undo_instruction = 0x0104059c;
         /**  Text of the alert that is displayed when an application has violated StrictMode.
          */
-        public: static const int smv_application = 0x01040482;
+        public: static const int smv_application = 0x0104055a;
         /**  Text of the alert that is displayed when an application has violated StrictMode.
          */
-        public: static const int smv_process = 0x01040483;
+        public: static const int smv_process = 0x0104055b;
         /**  Content text for a notification. The Title of the notification is "ssl_ca_cert_warning",
          i.e.  "Network may be monitored". This says that an unknown party is doing the monitoring.
          [CHAR LIMIT=100]
          */
-        public: static const int ssl_ca_cert_noti_by_unknown = 0x010400e1;
+        public: static const int ssl_ca_cert_noti_by_unknown = 0x010401b9;
         /**  Content text for a notification. The Title of the notification is "ssl_ca_cert_warning",
          i.e.  "Network may be monitored". This indicates who is doing the monitoring.
          [CHAR LIMIT=100]
          */
-        public: static const int ssl_ca_cert_noti_managed = 0x010400e2;
+        public: static const int ssl_ca_cert_noti_managed = 0x010401ba;
         /**  Shows up when there is a user SSL CA Cert installed on the
          device.  Indicates to the user that SSL traffic can be intercepted.  [CHAR LIMIT=NONE]
          */
-        public: static const int ssl_ca_cert_warning = 0x010400e0;
+        public: static const int ssl_ca_cert_warning = 0x010401b8;
         /**  SSL Certificate dialogs
  Title for an SSL Certificate dialog
          */
-        public: static const int ssl_certificate = 0x010405a1;
+        public: static const int ssl_certificate = 0x01040679;
         /**  Message on an SSL Certificate dialog
          */
-        public: static const int ssl_certificate_is_valid = 0x010405a2;
+        public: static const int ssl_certificate_is_valid = 0x0104067a;
         /**  Text to use when the number in a notification info is too large
          (greater than status_bar_notification_info_maxnum, defined in
          values/config.xml) and must be truncated. May need to be localized
@@ -19172,86 +20079,115 @@ zh-CN
          [CHAR LIMIT=4]
          */
         public: static const int status_bar_notification_info_overflow = 0x01040017;
+        public: static const int stk_cc_ss_to_dial = 0x01040092;
+        public: static const int stk_cc_ss_to_ss = 0x01040094;
+        public: static const int stk_cc_ss_to_ussd = 0x01040093;
+        /**  Displayed when the USSD/SS request is modified by STK CC to a
+    different request. This will be displayed in a toast.
+         */
+        public: static const int stk_cc_ussd_to_dial = 0x0104008f;
+        public: static const int stk_cc_ussd_to_ss = 0x01040090;
+        public: static const int stk_cc_ussd_to_ussd = 0x01040091;
+        /**  Storage description for UICC storage. [CHAR LIMIT=NONE]
+         */
+        public: static const int storage_uicc = 0x0104008e;
+        /**  Storage description for USB storage. [CHAR LIMIT=NONE]
+         */
+        public: static const int storage_usb = 0x01040669;
+        /**  stylus gestures support
+         */
+        public: static const int stylus_app_not_installed = 0x010400a5;
         /**  Label for <input type="submit"> button in html
          */
-        public: static const int submit = 0x01040546;
+        public: static const int submit = 0x0104061e;
         /**  Label to show for a service that is running because it is a sync adapter.
          */
-        public: static const int sync_binding_label = 0x01040534;
+        public: static const int sync_binding_label = 0x0104060c;
         /**  Dialog action for when there are too many deletes that would take place and we want user confirmation, and the user wants to do nothing for now
          */
-        public: static const int sync_do_nothing = 0x01040567;
+        public: static const int sync_do_nothing = 0x0104063f;
         /**  Dialog action for when there are too many deletes that would take place and we want user confirmation, and the user wants to delete the items
          */
-        public: static const int sync_really_delete = 0x01040565;
+        public: static const int sync_really_delete = 0x0104063d;
         /**  Dialog message for when there are too many deletes that would take place and we want user confirmation
          */
-        public: static const int sync_too_many_deletes_desc = 0x01040564;
+        public: static const int sync_too_many_deletes_desc = 0x0104063c;
         /**  Dialog action for when there are too many deletes that would take place and we want user confirmation, and the user wants to undo the deletions
          */
-        public: static const int sync_undo_deletes = 0x01040566;
+        public: static const int sync_undo_deletes = 0x0104063e;
         /**  @hide DO NOT TRANSLATE. date formatting pattern for system ui.
          */
-        public: static const int system_ui_date_pattern = 0x0104005e;
+        public: static const int system_ui_date_pattern = 0x01040136;
         /**  Suffix added to a number to signify size in terabytes.
          */
-        public: static const int terabyteShort = 0x0104006f;
-        public: static const int tethered_notification_message = 0x0104054a;
+        public: static const int terabyteShort = 0x01040147;
+        public: static const int tethered_notification_message = 0x01040622;
+        public: static const int tethered_notification_multi_device_message = 0x0104008c;
+        /**  Shown when the device is tethered
+         */
+        public: static const int tethered_notification_no_device_message = 0x0104008a;
+        public: static const int tethered_notification_one_device_message = 0x0104008b;
         /**  Strings for tethered notification
  Shown when the device is tethered
          */
-        public: static const int tethered_notification_title = 0x01040549;
+        public: static const int tethered_notification_title = 0x01040621;
         /**  Text selection contextual mode title, displayed in the CAB. [CHAR LIMIT=20]
          */
-        public: static const int textSelectionCABTitle = 0x01040453;
+        public: static const int textSelectionCABTitle = 0x0104052b;
         /**  Displayed to the user to confirm that they have copied text from a web page to the clipboard.
          */
-        public: static const int text_copied = 0x0104042a;
-        public: static const int throttle_warning_notification_message = 0x0104068c;
-        public: static const int throttle_warning_notification_title = 0x0104068b;
-        public: static const int throttled_notification_message = 0x0104068e;
-        public: static const int throttled_notification_title = 0x0104068d;
-        public: static const int time_of_day = 0x01040055;
+        public: static const int text_copied = 0x01040502;
+        public: static const int theme_install_error_message = 0x010400a0;
+        /**  Theme installation error notification
+         */
+        public: static const int theme_install_error_title = 0x0104009f;
+        public: static const int theme_reset_notification_body = 0x010400a4;
+        public: static const int theme_reset_notification_title = 0x010400a3;
+        public: static const int throttle_warning_notification_message = 0x01040764;
+        public: static const int throttle_warning_notification_title = 0x01040763;
+        public: static const int throttled_notification_message = 0x01040766;
+        public: static const int throttled_notification_title = 0x01040765;
+        public: static const int time_of_day = 0x0104012d;
         /**  Description of the button to decrease the TimePicker's hour value. [CHAR LIMIT=NONE]
          */
-        public: static const int time_picker_decrement_hour_button = 0x01040572;
+        public: static const int time_picker_decrement_hour_button = 0x0104064a;
         /**  Description of the button to decrease the TimePicker's minute value. [CHAR LIMIT=NONE]
          */
-        public: static const int time_picker_decrement_minute_button = 0x01040570;
+        public: static const int time_picker_decrement_minute_button = 0x01040648;
         /**  Description of the button to decrease the TimePicker's set AM value. [CHAR LIMIT=NONE]
          */
-        public: static const int time_picker_decrement_set_am_button = 0x01040574;
+        public: static const int time_picker_decrement_set_am_button = 0x0104064c;
         /**  Date/Time picker dialogs strings
  The title of the time picker dialog. [CHAR LIMIT=NONE]
          */
-        public: static const int time_picker_dialog_title = 0x010404cd;
+        public: static const int time_picker_dialog_title = 0x010405a5;
         /**  Description of the button to increase the TimePicker's hour value. [CHAR LIMIT=NONE]
          */
-        public: static const int time_picker_increment_hour_button = 0x01040571;
+        public: static const int time_picker_increment_hour_button = 0x01040649;
         /**  TimePicker - accessibility support
  Description of the button to increase the TimePicker's minute value. [CHAR LIMIT=NONE]
          */
-        public: static const int time_picker_increment_minute_button = 0x0104056f;
+        public: static const int time_picker_increment_minute_button = 0x01040647;
         /**  Description of the button to increase the TimePicker's set PM value. [CHAR LIMIT=NONE]
          */
-        public: static const int time_picker_increment_set_pm_button = 0x01040573;
+        public: static const int time_picker_increment_set_pm_button = 0x0104064b;
         /**  DO NOT TRANSLATE
          */
-        public: static const int time_placeholder = 0x0104066e;
-        public: static const int timepicker_ampm_circle_radius_multiplier = 0x0104004a;
+        public: static const int time_placeholder = 0x01040746;
+        public: static const int timepicker_ampm_circle_radius_multiplier = 0x01040122;
         /**  New TimePicker dimensions.
          */
-        public: static const int timepicker_circle_radius_multiplier = 0x01040047;
-        public: static const int timepicker_circle_radius_multiplier_24HourMode = 0x01040048;
-        public: static const int timepicker_numbers_radius_multiplier_inner = 0x0104004c;
-        public: static const int timepicker_numbers_radius_multiplier_normal = 0x0104004b;
-        public: static const int timepicker_numbers_radius_multiplier_outer = 0x0104004d;
-        public: static const int timepicker_selection_radius_multiplier = 0x01040049;
-        public: static const int timepicker_text_size_multiplier_inner = 0x0104004f;
-        public: static const int timepicker_text_size_multiplier_normal = 0x0104004e;
-        public: static const int timepicker_text_size_multiplier_outer = 0x01040050;
-        public: static const int timepicker_transition_end_radius_multiplier = 0x01040052;
-        public: static const int timepicker_transition_mid_radius_multiplier = 0x01040051;
+        public: static const int timepicker_circle_radius_multiplier = 0x0104011f;
+        public: static const int timepicker_circle_radius_multiplier_24HourMode = 0x01040120;
+        public: static const int timepicker_numbers_radius_multiplier_inner = 0x01040124;
+        public: static const int timepicker_numbers_radius_multiplier_normal = 0x01040123;
+        public: static const int timepicker_numbers_radius_multiplier_outer = 0x01040125;
+        public: static const int timepicker_selection_radius_multiplier = 0x01040121;
+        public: static const int timepicker_text_size_multiplier_inner = 0x01040127;
+        public: static const int timepicker_text_size_multiplier_normal = 0x01040126;
+        public: static const int timepicker_text_size_multiplier_outer = 0x01040128;
+        public: static const int timepicker_transition_end_radius_multiplier = 0x0104012a;
+        public: static const int timepicker_transition_mid_radius_multiplier = 0x01040129;
         /**  How to display the lack of a name
          */
         public: static const int unknownName = 0x0104000e;
@@ -19262,204 +20198,239 @@ zh-CN
         /**  Localized strings for WebView
  Label for button in a WebView that will open a chooser to choose a file to upload
          */
-        public: static const int upload_file = 0x01040543;
+        public: static const int upload_file = 0x0104061b;
         /**  USB_PREFERENCES: Notification for when a USB accessory is attached.  This is the title
          */
-        public: static const int usb_accessory_notification_title = 0x010404e9;
+        public: static const int usb_accessory_notification_title = 0x010405c1;
         /**  USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in mass storage mode (for installer CD image).  This is the title
          */
-        public: static const int usb_cd_installer_notification_title = 0x010404e8;
+        public: static const int usb_cd_installer_notification_title = 0x010405c0;
+        /**  USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in CHARGING mode.  This is the title
+         */
+        public: static const int usb_charging_notification_title = 0x01040089;
+        /**  USB_PREFERENCES: Notification for when no USB options chosen.  This is the title
+         */
+        public: static const int usb_choose_notification_title = 0x01040050;
+        public: static const int usb_ext_media_badremoval_notification_message = 0x010400cf;
+        public: static const int usb_ext_media_badremoval_notification_title = 0x010400ce;
+        public: static const int usb_ext_media_checking_notification_message = 0x010400c9;
+        /**  USB storage notification
+         */
+        public: static const int usb_ext_media_checking_notification_title = 0x010400c8;
+        public: static const int usb_ext_media_nofs_notification_message = 0x010400cb;
+        public: static const int usb_ext_media_nofs_notification_title = 0x010400ca;
+        public: static const int usb_ext_media_nomedia_notification_message = 0x010400d3;
+        public: static const int usb_ext_media_nomedia_notification_title = 0x010400d2;
+        public: static const int usb_ext_media_safe_unmount_notification_message = 0x010400d1;
+        public: static const int usb_ext_media_safe_unmount_notification_title = 0x010400d0;
+        public: static const int usb_ext_media_unmountable_notification_message = 0x010400cd;
+        public: static const int usb_ext_media_unmountable_notification_title = 0x010400cc;
+        /**  See EXTMEDIA_FORMAT.   This is the message. [CHAR LIMIT=NONE]
+         */
+        public: static const int usb_extmedia_format_message = 0x010400ac;
+        public: static const int usb_format_error = 0x010400b7;
+        public: static const int usb_media_bad_removal = 0x010400b8;
+        public: static const int usb_media_checking = 0x010400b9;
+        public: static const int usb_media_removed = 0x010400ba;
+        public: static const int usb_media_shared = 0x010400bb;
         /**  USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in MTP mode.  This is the title
          */
-        public: static const int usb_mtp_notification_title = 0x010404e6;
+        public: static const int usb_mtp_notification_title = 0x010405be;
         /**  See USB_PREFERENCES. This is the message.
          */
-        public: static const int usb_notification_message = 0x010404ea;
+        public: static const int usb_notification_message = 0x010405c2;
+        public: static const int usb_progress_erasing = 0x010400b6;
+        /**  Strings for ExternalStorageFormatter service (USB storage).
+         */
+        public: static const int usb_progress_unmounting = 0x010400b5;
         /**  USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in PTP mode.  This is the title
          */
-        public: static const int usb_ptp_notification_title = 0x010404e7;
+        public: static const int usb_ptp_notification_title = 0x010405bf;
         /**  See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text.
          */
-        public: static const int usb_storage_error_message = 0x010404d9;
+        public: static const int usb_storage_error_message = 0x010405b1;
         /**  See USB_STORAGE.    This is the message. [CHAR LIMIT=NONE]
          */
-        public: static const int usb_storage_message = 0x010404d7;
+        public: static const int usb_storage_message = 0x010405af;
         /**  See USB_STORAGE. This is the message.
          */
-        public: static const int usb_storage_notification_message = 0x010404db;
+        public: static const int usb_storage_notification_message = 0x010405b3;
         /**  USB_STORAGE: When the user connects the phone to a computer via USB, we show a notification asking if he wants to share files across.  This is the title
          */
-        public: static const int usb_storage_notification_title = 0x010404da;
+        public: static const int usb_storage_notification_title = 0x010405b2;
         /**  See USB_STORAGE_STOP.    This is the message.
          */
-        public: static const int usb_storage_stop_message = 0x010404df;
+        public: static const int usb_storage_stop_message = 0x010405b7;
         /**  See USB_STORAGE. This is the message.
          */
-        public: static const int usb_storage_stop_notification_message = 0x010404dd;
+        public: static const int usb_storage_stop_notification_message = 0x010405b5;
         /**  USB_STORAGE_STOP: While USB storage is enabled, we show a notification dialog asking if he wants to stop. This is the title
          */
-        public: static const int usb_storage_stop_notification_title = 0x010404dc;
+        public: static const int usb_storage_stop_notification_title = 0x010405b4;
         /**  USB storage stop dialog strings
  This is the label for the activity, and should never be visible to the user.
  See USB_STORAGE_STOP.  USB_STORAGE_STOP_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to stop usb storage.  This is the title.
          */
-        public: static const int usb_storage_stop_title = 0x010404de;
+        public: static const int usb_storage_stop_title = 0x010405b6;
         /**  See USB_STORAGE.  USB_STORAGE_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to mount.  This is the title.
          */
-        public: static const int usb_storage_title = 0x010404d6;
-        public: static const int use_physical_keyboard = 0x0104068a;
+        public: static const int usb_storage_title = 0x010405ae;
+        public: static const int use_physical_keyboard = 0x01040762;
         /**  Text spoken when the current user is switched if accessibility is enabled. [CHAR LIMIT=none]
          */
-        public: static const int user_switched = 0x010405f7;
+        public: static const int user_switched = 0x010406cf;
         /**  Message shown when switching to a user [CHAR LIMIT=none]
          */
-        public: static const int user_switching_message = 0x010405f8;
+        public: static const int user_switching_message = 0x010406d0;
         /**  Title of the dialog where the user is adjusting the audio volume for alarms
          */
-        public: static const int volume_alarm = 0x01040498;
+        public: static const int volume_alarm = 0x01040570;
         /**  Content description for bluetooth volume icon [CHAR LIMIT=100]
          */
-        public: static const int volume_icon_description_bluetooth = 0x0104049b;
+        public: static const int volume_icon_description_bluetooth = 0x01040573;
         /**  Content description for in-call volume icon [CHAR LIMIT=100]
          */
-        public: static const int volume_icon_description_incall = 0x0104049d;
+        public: static const int volume_icon_description_incall = 0x01040575;
         /**  Content description for media volume icon [CHAR LIMIT=100]
          */
-        public: static const int volume_icon_description_media = 0x0104049e;
+        public: static const int volume_icon_description_media = 0x01040576;
         /**  Content description for notification volume icon [CHAR LIMIT=100]
          */
-        public: static const int volume_icon_description_notification = 0x0104049f;
+        public: static const int volume_icon_description_notification = 0x01040577;
         /**  Content description for ringer volume icon [CHAR LIMIT=100]
          */
-        public: static const int volume_icon_description_ringer = 0x0104049c;
+        public: static const int volume_icon_description_ringer = 0x01040574;
         /**  Notification body that indicates user can touch to configure lockdown VPN connection.
          */
-        public: static const int vpn_lockdown_config = 0x01040542;
+        public: static const int vpn_lockdown_config = 0x0104061a;
         /**  Notification title when connected to lockdown VPN.
          */
-        public: static const int vpn_lockdown_connected = 0x01040540;
+        public: static const int vpn_lockdown_connected = 0x01040618;
         /**  Notification title when connecting to lockdown VPN.
          */
-        public: static const int vpn_lockdown_connecting = 0x0104053f;
+        public: static const int vpn_lockdown_connecting = 0x01040617;
         /**  Notification title when error connecting to lockdown VPN.
          */
-        public: static const int vpn_lockdown_error = 0x01040541;
+        public: static const int vpn_lockdown_error = 0x01040619;
         /**  The text of the notification when VPN is active.
          */
-        public: static const int vpn_text = 0x0104053d;
+        public: static const int vpn_text = 0x01040615;
         /**  The text of the notification when VPN is active with a session name.
          */
-        public: static const int vpn_text_long = 0x0104053e;
+        public: static const int vpn_text_long = 0x01040616;
         /**  The title of the notification when VPN is active.
          */
-        public: static const int vpn_title = 0x0104053b;
+        public: static const int vpn_title = 0x01040613;
         /**  The title of the notification when VPN is active with an application name.
          */
-        public: static const int vpn_title_long = 0x0104053c;
+        public: static const int vpn_title_long = 0x01040614;
         /**  Button allowing the user to choose to wait for an application that is not responding to become responsive again.
          */
-        public: static const int wait = 0x0104047a;
+        public: static const int wait = 0x01040552;
         /**  Label to show for a service that is running because it is a wallpaper.
          */
-        public: static const int wallpaper_binding_label = 0x01040536;
+        public: static const int wallpaper_binding_label = 0x0104060e;
         /**  Do not translate.  WebView User Agent string
          */
-        public: static const int web_user_agent = 0x010403c8;
+        public: static const int web_user_agent = 0x010404a0;
         /**  Do not translate.  WebView User Agent targeted content
  Do not translate.  WebView User Agent targeted content
  Do not translate.  WebView User Agent targeted content
          */
-        public: static const int web_user_agent_target_content = 0x010403c9;
+        public: static const int web_user_agent_target_content = 0x010404a1;
         /**  Text of the alert that is displayed when a web page is not responding. [CHAR-LIMIT=NONE]
          */
-        public: static const int webpage_unresponsive = 0x0104047b;
+        public: static const int webpage_unresponsive = 0x01040553;
         /**  ActionBar action to use the current selection to perform a web search [CHAR-LIMIT=16]
          */
-        public: static const int websearch = 0x0104055b;
+        public: static const int websearch = 0x01040633;
         /**  Title of intent resolver dialog when selecting an application to run.
          */
-        public: static const int whichApplication = 0x01040460;
+        public: static const int whichApplication = 0x01040538;
         /**  Title of intent resolver dialog when selecting an application to run
          and a previously used application is known.
          */
-        public: static const int whichApplicationNamed = 0x01040461;
+        public: static const int whichApplicationNamed = 0x01040539;
         /**  Title of intent resolver dialog when selecting an editor application to run.
          */
-        public: static const int whichEditApplication = 0x01040464;
+        public: static const int whichEditApplication = 0x0104053c;
         /**  Title of intent resolver dialog when selecting an editor application to run
          and a previously used application is known.
          */
-        public: static const int whichEditApplicationNamed = 0x01040465;
+        public: static const int whichEditApplicationNamed = 0x0104053d;
         /**  Title of intent resolver dialog when selecting a HOME application to run.
          */
-        public: static const int whichHomeApplication = 0x01040468;
+        public: static const int whichHomeApplication = 0x01040540;
         /**  Title of intent resolver dialog when selecting a HOME application to run
          and a previously used application is known.
          */
-        public: static const int whichHomeApplicationNamed = 0x01040469;
+        public: static const int whichHomeApplicationNamed = 0x01040541;
         /**  Title of intent resolver dialog when selecting a sharing application to run.
          */
-        public: static const int whichSendApplication = 0x01040466;
+        public: static const int whichSendApplication = 0x0104053e;
         /**  Title of intent resolver dialog when selecting a sharing application to run
          and a previously used application is known.
          */
-        public: static const int whichSendApplicationNamed = 0x01040467;
+        public: static const int whichSendApplicationNamed = 0x0104053f;
         /**  Title of intent resolver dialog when selecting a viewer application to run.
          */
-        public: static const int whichViewApplication = 0x01040462;
+        public: static const int whichViewApplication = 0x0104053a;
         /**  Title of intent resolver dialog when selecting a viewer application to run
          and a previously used application is known.
          */
-        public: static const int whichViewApplicationNamed = 0x01040463;
+        public: static const int whichViewApplicationNamed = 0x0104053b;
         /**  Class name for default keyguard appwidget [DO NOT TRANSLATE]
          */
-        public: static const int widget_default_class_name = 0x0104001d;
+        public: static const int widget_default_class_name = 0x010400e7;
         /**  Package name for default keyguard appwidget [DO NOT TRANSLATE]
          */
-        public: static const int widget_default_package_name = 0x0104001c;
+        public: static const int widget_default_package_name = 0x010400e6;
         /**  A notification is shown when a wifi captive portal network is detected.  This is the notification's title.
  no translation found for wifi_available:one (6654123987418168693)
  no translation found for wifi_available:other (4192424489168397386)
  no translation found for wifi_available_detailed:one (1634101450343277345)
  no translation found for wifi_available_detailed:other (7915895323644292768)
          */
-        public: static const int wifi_available_sign_in = 0x010404a5;
-        public: static const int wifi_p2p_dialog_title = 0x010404ab;
-        public: static const int wifi_p2p_enabled_notification_message = 0x010404af;
-        public: static const int wifi_p2p_enabled_notification_title = 0x010404ae;
-        public: static const int wifi_p2p_failed_message = 0x010404ad;
-        public: static const int wifi_p2p_frequency_conflict_message = 0x010404b8;
-        public: static const int wifi_p2p_from_message = 0x010404b4;
-        public: static const int wifi_p2p_invitation_sent_title = 0x010404b2;
-        public: static const int wifi_p2p_invitation_to_connect_title = 0x010404b3;
-        public: static const int wifi_p2p_show_pin_message = 0x010404b7;
-        public: static const int wifi_p2p_to_message = 0x010404b5;
-        public: static const int wifi_p2p_turnon_message = 0x010404ac;
+        public: static const int wifi_available_sign_in = 0x0104057d;
+        public: static const int wifi_p2p_dialog_title = 0x01040583;
+        public: static const int wifi_p2p_enabled_notification_message = 0x01040587;
+        public: static const int wifi_p2p_enabled_notification_title = 0x01040586;
+        public: static const int wifi_p2p_failed_message = 0x01040585;
+        public: static const int wifi_p2p_frequency_conflict_message = 0x01040590;
+        public: static const int wifi_p2p_from_message = 0x0104058c;
+        public: static const int wifi_p2p_invitation_sent_title = 0x0104058a;
+        public: static const int wifi_p2p_invitation_to_connect_title = 0x0104058b;
+        public: static const int wifi_p2p_show_pin_message = 0x0104058f;
+        public: static const int wifi_p2p_to_message = 0x0104058d;
+        public: static const int wifi_p2p_turnon_message = 0x01040584;
         /**  Do not translate. Default access point SSID used for tethering
          */
-        public: static const int wifi_tether_configure_ssid_default = 0x010404aa;
+        public: static const int wifi_tether_configure_ssid_default = 0x01040582;
         /**  A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  This is the notification's title / ticker.
          */
-        public: static const int wifi_watchdog_network_disabled = 0x010404a8;
+        public: static const int wifi_watchdog_network_disabled = 0x01040580;
         /**  A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  The complete alert msg is: <hotspot name> + this string, i.e. "Linksys has a poor internet connection"
          */
-        public: static const int wifi_watchdog_network_disabled_detailed = 0x010404a9;
+        public: static const int wifi_watchdog_network_disabled_detailed = 0x01040581;
+        /**  Name of wildcard profile.
+         */
+        public: static const int wildcardProfile = 0x01040023;
         /**  Description of a wireless display route. [CHAR LIMIT=50]
          */
-        public: static const int wireless_display_route_description = 0x010405bf;
+        public: static const int wireless_display_route_description = 0x01040697;
         /**  Write fail reason: printing was cancelled.[CHAR LIMIT=none]
          */
-        public: static const int write_fail_reason_cancelled = 0x01040651;
+        public: static const int write_fail_reason_cancelled = 0x01040729;
         /**  Write fail reason: couldn't write the printed content. [CHAR LIMIT=none]
          */
-        public: static const int write_fail_reason_cannot_write = 0x01040652;
+        public: static const int write_fail_reason_cannot_write = 0x0104072a;
         /**
         Content description for the year selector in the date picker, which displays
         a scrolling, vertical list of years.
         [CHAR LIMIT=50]
 
          */
-        public: static const int year_picker_description = 0x01040668;
+        public: static const int year_picker_description = 0x01040740;
         /**  Preference framework strings.
          */
         public: static const int yes = 0x01040013;
@@ -19467,7 +20438,7 @@ zh-CN
  String.format failed for translation
  no translation found for zen_mode_duration_hours:other (5408537517529822157)
          */
-        public: static const int zen_mode_forever = 0x01040681;
+        public: static const int zen_mode_forever = 0x01040759;
     };
     public: class style {
         /**  Style to apply on top of a wallpaper settings theme when it is being
@@ -20905,10 +21876,11 @@ zh-CN
         public: static const int password_kbd_symbols = 0x0111000c;
         public: static const int password_kbd_symbols_shift = 0x0111000d;
         public: static const int power_profile = 0x0111000e;
-        public: static const int sms_7bit_translation_table = 0x01110010;
-        public: static const int sms_short_codes = 0x01110011;
-        public: static const int storage_list = 0x01110012;
-        public: static const int time_zones_by_country = 0x01110013;
+        public: static const int profile_default = 0x01110010;
+        public: static const int sms_7bit_translation_table = 0x01110011;
+        public: static const int sms_short_codes = 0x01110012;
+        public: static const int storage_list = 0x01110013;
+        public: static const int time_zones_by_country = 0x01110014;
     };
     public: class styleable {
         /** Attributes that can be used with a AbsListView.
@@ -23474,6 +24446,7 @@ containing a value of this type.
              physical screen size has changed such as switching to an external
              display. </td></tr>
 <tr><td><code>layoutDirection</code></td><td>0x2000</td><td> The layout direction has changed. For example going from LTR to RTL. </td></tr>
+<tr><td><code>themeChange</code></td><td>0x300000</td><td> Theme has changed, This should be an ORed value of all ActivityInfo.CONFIG_THEME_* </td></tr>
 <tr><td><code>fontScale</code></td><td>0x40000000</td><td> The font scaling factor has changed, that is the user has
              selected a new global font size. </td></tr>
 </table>
@@ -44226,15 +45199,30 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #RingtonePreference_dialogStyle android:dialogStyle}</code></td><td> The style of the ringtone dialog.</td></tr>
            <tr><td><code>{@link #RingtonePreference_ringtoneType android:ringtoneType}</code></td><td> Which ringtone type(s) to show in the picker.</td></tr>
            <tr><td><code>{@link #RingtonePreference_showDefault android:showDefault}</code></td><td> Whether to show an item for a default sound.</td></tr>
            <tr><td><code>{@link #RingtonePreference_showSilent android:showSilent}</code></td><td> Whether to show an item for 'Silent'.</td></tr>
            </table>
+           @see #RingtonePreference_dialogStyle
            @see #RingtonePreference_ringtoneType
            @see #RingtonePreference_showDefault
            @see #RingtonePreference_showSilent
          */
-        public: static const int RingtonePreference[3];
+        public: static const int RingtonePreference[4];
+        /**
+          <p>
+          @attr description
+           The style of the ringtone dialog.
+             @hide
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          <p>This is a private symbol.
+          @attr name android:dialogStyle
+        */
+        public: static const int RingtonePreference_dialogStyle = 3;
         /**
           <p>
           @attr description

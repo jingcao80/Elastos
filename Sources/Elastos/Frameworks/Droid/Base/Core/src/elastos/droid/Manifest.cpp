@@ -19,6 +19,8 @@ const String Manifest::permission::ACCESS_NETWORK_CONDITIONS("android.permission
 const String Manifest::permission::ACCESS_NETWORK_STATE("android.permission.ACCESS_NETWORK_STATE");
 const String Manifest::permission::ACCESS_NOTIFICATIONS("android.permission.ACCESS_NOTIFICATIONS");
 const String Manifest::permission::ACCESS_SURFACE_FLINGER("android.permission.ACCESS_SURFACE_FLINGER");
+const String Manifest::permission::ACCESS_THEME_MANAGER("android.permission.ACCESS_THEME_MANAGER");
+const String Manifest::permission::ACCESS_TORCH_SERVICE("android.permission.ACCESS_TORCH_SERVICE");
 const String Manifest::permission::ACCESS_WIFI_STATE("android.permission.ACCESS_WIFI_STATE");
 const String Manifest::permission::ACCESS_WIMAX_STATE("android.permission.ACCESS_WIMAX_STATE");
 const String Manifest::permission::ACCOUNT_MANAGER("android.permission.ACCOUNT_MANAGER");
@@ -82,6 +84,7 @@ const String Manifest::permission::CHANGE_BACKGROUND_DATA_SETTING("android.permi
 const String Manifest::permission::CHANGE_COMPONENT_ENABLED_STATE("android.permission.CHANGE_COMPONENT_ENABLED_STATE");
 const String Manifest::permission::CHANGE_CONFIGURATION("android.permission.CHANGE_CONFIGURATION");
 const String Manifest::permission::CHANGE_NETWORK_STATE("android.permission.CHANGE_NETWORK_STATE");
+const String Manifest::permission::CHANGE_PHONE_BLACKLIST("android.permission.CHANGE_PHONE_BLACKLIST");
 const String Manifest::permission::CHANGE_WIFI_MULTICAST_STATE("android.permission.CHANGE_WIFI_MULTICAST_STATE");
 const String Manifest::permission::CHANGE_WIFI_STATE("android.permission.CHANGE_WIFI_STATE");
 const String Manifest::permission::CHANGE_WIMAX_STATE("android.permission.CHANGE_WIMAX_STATE");
@@ -119,6 +122,7 @@ const String Manifest::permission::GET_TOP_ACTIVITY_INFO("android.permission.GET
 const String Manifest::permission::GLOBAL_SEARCH("android.permission.GLOBAL_SEARCH");
 const String Manifest::permission::GLOBAL_SEARCH_CONTROL("android.permission.GLOBAL_SEARCH_CONTROL");
 const String Manifest::permission::GRANT_REVOKE_PERMISSIONS("android.permission.GRANT_REVOKE_PERMISSIONS");
+const String Manifest::permission::HARDWARE_ABSTRACTION_ACCESS("android.permission.HARDWARE_ABSTRACTION_ACCESS");
 const String Manifest::permission::HARDWARE_TEST("android.permission.HARDWARE_TEST");
 const String Manifest::permission::HDMI_CEC("android.permission.HDMI_CEC");
 const String Manifest::permission::INJECT_EVENTS("android.permission.INJECT_EVENTS");
@@ -127,6 +131,8 @@ const String Manifest::permission::INSTALL_PACKAGES("android.permission.INSTALL_
 const String Manifest::permission::INSTALL_SHORTCUT("com.android.launcher.permission.INSTALL_SHORTCUT");
 const String Manifest::permission::INTERACT_ACROSS_USERS("android.permission.INTERACT_ACROSS_USERS");
 const String Manifest::permission::INTERACT_ACROSS_USERS_FULL("android.permission.INTERACT_ACROSS_USERS_FULL");
+const String Manifest::permission::INTERCEPT_PACKAGE_LAUNCH("android.permission.INTERCEPT_PACKAGE_LAUNCH");
+const String Manifest::permission::INTERCEPT_SMS("android.permission.INTERCEPT_SMS");
 const String Manifest::permission::INTERNAL_SYSTEM_WINDOW("android.permission.INTERNAL_SYSTEM_WINDOW");
 const String Manifest::permission::INTERNET("android.permission.INTERNET");
 const String Manifest::permission::INVOKE_CARRIER_SETUP("android.permission.INVOKE_CARRIER_SETUP");
@@ -153,6 +159,7 @@ const String Manifest::permission::MODIFY_AUDIO_SETTINGS("android.permission.MOD
 const String Manifest::permission::MODIFY_NETWORK_ACCOUNTING("android.permission.MODIFY_NETWORK_ACCOUNTING");
 const String Manifest::permission::MODIFY_PARENTAL_CONTROLS("android.permission.MODIFY_PARENTAL_CONTROLS");
 const String Manifest::permission::MODIFY_PHONE_STATE("android.permission.MODIFY_PHONE_STATE");
+const String Manifest::permission::MODIFY_PROTECTED_SMS_LIST("android.permission.MODIFY_PROTECTED_SMS_LIST");
 const String Manifest::permission::MOUNT_FORMAT_FILESYSTEMS("android.permission.MOUNT_FORMAT_FILESYSTEMS");
 const String Manifest::permission::MOUNT_UNMOUNT_FILESYSTEMS("android.permission.MOUNT_UNMOUNT_FILESYSTEMS");
 const String Manifest::permission::MOVE_PACKAGE("android.permission.MOVE_PACKAGE");
@@ -165,6 +172,7 @@ const String Manifest::permission::PACKAGE_USAGE_STATS("android.permission.PACKA
 const String Manifest::permission::PACKAGE_VERIFICATION_AGENT("android.permission.PACKAGE_VERIFICATION_AGENT");
 const String Manifest::permission::PERFORM_CDMA_PROVISIONING("android.permission.PERFORM_CDMA_PROVISIONING");
 const String Manifest::permission::PERSISTENT_ACTIVITY("android.permission.PERSISTENT_ACTIVITY");
+const String Manifest::permission::PREVENT_POWER_KEY("android.permission.PREVENT_POWER_KEY");
 const String Manifest::permission::PROCESS_OUTGOING_CALLS("android.permission.PROCESS_OUTGOING_CALLS");
 const String Manifest::permission::PROVIDE_TRUST_AGENT("android.permission.PROVIDE_TRUST_AGENT");
 const String Manifest::permission::READ_CALENDAR("android.permission.READ_CALENDAR");
@@ -179,6 +187,7 @@ const String Manifest::permission::READ_INPUT_STATE("android.permission.READ_INP
 const String Manifest::permission::READ_INSTALL_SESSIONS("android.permission.READ_INSTALL_SESSIONS");
 const String Manifest::permission::READ_LOGS("android.permission.READ_LOGS");
 const String Manifest::permission::READ_NETWORK_USAGE_HISTORY("android.permission.READ_NETWORK_USAGE_HISTORY");
+const String Manifest::permission::READ_PHONE_BLACKLIST("android.permission.READ_PHONE_BLACKLIST");
 const String Manifest::permission::READ_PHONE_STATE("android.permission.READ_PHONE_STATE");
 const String Manifest::permission::READ_PRECISE_PHONE_STATE("android.permission.READ_PRECISE_PHONE_STATE");
 const String Manifest::permission::READ_PRIVILEGED_PHONE_STATE("android.permission.READ_PRIVILEGED_PHONE_STATE");
@@ -188,6 +197,7 @@ const String Manifest::permission::READ_SMS("android.permission.READ_SMS");
 const String Manifest::permission::READ_SOCIAL_STREAM("android.permission.READ_SOCIAL_STREAM");
 const String Manifest::permission::READ_SYNC_SETTINGS("android.permission.READ_SYNC_SETTINGS");
 const String Manifest::permission::READ_SYNC_STATS("android.permission.READ_SYNC_STATS");
+const String Manifest::permission::READ_THEMES("android.permission.READ_THEMES");
 const String Manifest::permission::READ_USER_DICTIONARY("android.permission.READ_USER_DICTIONARY");
 const String Manifest::permission::READ_VOICEMAIL("com.android.voicemail.permission.READ_VOICEMAIL");
 const String Manifest::permission::READ_WIFI_CREDENTIAL("android.permission.READ_WIFI_CREDENTIAL");
@@ -198,7 +208,9 @@ const String Manifest::permission::RECEIVE_BOOT_COMPLETED("android.permission.RE
 const String Manifest::permission::RECEIVE_DATA_ACTIVITY_CHANGE("android.permission.RECEIVE_DATA_ACTIVITY_CHANGE");
 const String Manifest::permission::RECEIVE_EMERGENCY_BROADCAST("android.permission.RECEIVE_EMERGENCY_BROADCAST");
 const String Manifest::permission::RECEIVE_MMS("android.permission.RECEIVE_MMS");
+const String Manifest::permission::RECEIVE_PROTECTED_SMS("android.permission.RECEIVE_PROTECTED_SMS");
 const String Manifest::permission::RECEIVE_SMS("android.permission.RECEIVE_SMS");
+const String Manifest::permission::RECEIVE_STK_COMMANDS("android.permission.RECEIVE_STK_COMMANDS");
 const String Manifest::permission::RECEIVE_WAP_PUSH("android.permission.RECEIVE_WAP_PUSH");
 const String Manifest::permission::RECORD_AUDIO("android.permission.RECORD_AUDIO");
 const String Manifest::permission::RECOVERY("android.permission.RECOVERY");
@@ -220,6 +232,7 @@ const String Manifest::permission::SET_ANIMATION_SCALE("android.permission.SET_A
 const String Manifest::permission::SET_DEBUG_APP("android.permission.SET_DEBUG_APP");
 const String Manifest::permission::SET_INPUT_CALIBRATION("android.permission.SET_INPUT_CALIBRATION");
 const String Manifest::permission::SET_KEYBOARD_LAYOUT("android.permission.SET_KEYBOARD_LAYOUT");
+const String Manifest::permission::SET_KEYGUARD_WALLPAPER("android.permission.SET_KEYGUARD_WALLPAPER");
 const String Manifest::permission::SET_ORIENTATION("android.permission.SET_ORIENTATION");
 const String Manifest::permission::SET_POINTER_SPEED("android.permission.SET_POINTER_SPEED");
 const String Manifest::permission::SET_PREFERRED_APPLICATIONS("android.permission.SET_PREFERRED_APPLICATIONS");
@@ -268,6 +281,7 @@ const String Manifest::permission::WRITE_SETTINGS("android.permission.WRITE_SETT
 const String Manifest::permission::WRITE_SMS("android.permission.WRITE_SMS");
 const String Manifest::permission::WRITE_SOCIAL_STREAM("android.permission.WRITE_SOCIAL_STREAM");
 const String Manifest::permission::WRITE_SYNC_SETTINGS("android.permission.WRITE_SYNC_SETTINGS");
+const String Manifest::permission::WRITE_THEMES("android.permission.WRITE_THEMES");
 const String Manifest::permission::WRITE_USER_DICTIONARY("android.permission.WRITE_USER_DICTIONARY");
 const String Manifest::permission::WRITE_VOICEMAIL("com.android.voicemail.permission.WRITE_VOICEMAIL");
 const String Manifest::permission_group::ACCESSIBILITY_FEATURES("android.permission-group.ACCESSIBILITY_FEATURES");
@@ -291,6 +305,7 @@ const String Manifest::permission_group::NETWORK("android.permission-group.NETWO
 const String Manifest::permission_group::PERSONAL_INFO("android.permission-group.PERSONAL_INFO");
 const String Manifest::permission_group::PHONE_CALLS("android.permission-group.PHONE_CALLS");
 const String Manifest::permission_group::SCREENLOCK("android.permission-group.SCREENLOCK");
+const String Manifest::permission_group::SECURITY("android.permission-group.SECURITY");
 const String Manifest::permission_group::SOCIAL_INFO("android.permission-group.SOCIAL_INFO");
 const String Manifest::permission_group::STATUS_BAR("android.permission-group.STATUS_BAR");
 const String Manifest::permission_group::STORAGE("android.permission-group.STORAGE");

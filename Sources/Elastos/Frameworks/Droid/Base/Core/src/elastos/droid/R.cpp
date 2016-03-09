@@ -20,11 +20,14 @@ const int R::anim::dock_top_enter;
 const int R::anim::dock_top_exit;
 const int R::anim::fade_in;
 const int R::anim::fade_out;
+const int R::anim::last_app_in;
+const int R::anim::last_app_out;
 const int R::anim::linear_interpolator;
 const int R::anim::lock_screen_behind_enter;
 const int R::anim::lock_screen_behind_enter_fade_in;
 const int R::anim::lock_screen_behind_enter_wallpaper;
 const int R::anim::lock_screen_wallpaper_exit;
+const int R::anim::lock_screen_wallpaper_exit_noop;
 const int R::anim::overshoot_interpolator;
 const int R::anim::push_down_in;
 const int R::anim::push_down_out;
@@ -65,12 +68,14 @@ const int R::anim::voice_activity_open_exit;
 const int R::anim::window_move_from_decor;
 const int R::animator::fade_in;
 const int R::animator::fade_out;
+const int R::array::app_ops_labels;
 const int R::array::carrier_properties;
 const int R::array::common_nicknames;
 const int R::array::config_autoBrightnessButtonBacklightValues;
 const int R::array::config_autoBrightnessKeyboardBacklightValues;
 const int R::array::config_autoBrightnessLcdBacklightValues;
 const int R::array::config_autoBrightnessLevels;
+const int R::array::config_auto_perf_activities;
 const int R::array::config_calendarDateVibePattern;
 const int R::array::config_callBarringMMI;
 const int R::array::config_cdma_dun_supported_types;
@@ -79,9 +84,12 @@ const int R::array::config_clockTickVibePattern;
 const int R::array::config_data_usage_network_types;
 const int R::array::config_defaultNotificationVibePattern;
 const int R::array::config_default_vm_number;
+const int R::array::config_disabledComponents;
 const int R::array::config_disabledUntilUsedPreinstalledImes;
+const int R::array::config_forceEnabledComponents;
 const int R::array::config_globalActionsList;
 const int R::array::config_gpsParameters;
+const int R::array::config_ignored_sms_packages;
 const int R::array::config_keySystemUuidMapping;
 const int R::array::config_keyboardTapVibePattern;
 const int R::array::config_locationProviderPackageNames;
@@ -90,10 +98,12 @@ const int R::array::config_masterVolumeRamp;
 const int R::array::config_mobile_hotspot_provision_app;
 const int R::array::config_mobile_tcp_buffers;
 const int R::array::config_notificationFallbackVibePattern;
+const int R::array::config_notificationNoAlertsVibePattern;
 const int R::array::config_notificationSignalExtractors;
 const int R::array::config_oemUsbModeOverride;
 const int R::array::config_onlySingleDcAllowed;
 const int R::array::config_operatorConsideredNonRoaming;
+const int R::array::config_packagesAllowedAccessToKillSwitch;
 const int R::array::config_protectedNetworks;
 const int R::array::config_safeModeDisabledVibePattern;
 const int R::array::config_safeModeEnabledVibePattern;
@@ -116,17 +126,27 @@ const int R::array::config_virtualKeyVibePattern;
 const int R::array::dial_string_replace;
 const int R::array::emailAddressTypes;
 const int R::array::imProtocols;
+const int R::array::live_display_entries;
+const int R::array::live_display_summaries;
+const int R::array::live_display_values;
+const int R::array::locale_carrier_names;
 const int R::array::maps_starting_lat_lng;
 const int R::array::maps_starting_zoom;
 const int R::array::networkAttributes;
 const int R::array::networks_not_clear_data;
 const int R::array::no_ems_support_sim_operators;
+const int R::array::notification_light_package_mapping;
 const int R::array::organizationTypes;
+const int R::array::origin_carrier_names;
+const int R::array::perf_profile_entries;
+const int R::array::perf_profile_values;
 const int R::array::phoneTypes;
 const int R::array::postalAddressTypes;
 const int R::array::preloaded_color_state_lists;
 const int R::array::preloaded_drawables;
 const int R::array::radioAttributes;
+const int R::array::shutdown_reboot_actions;
+const int R::array::shutdown_reboot_options;
 const int R::array::special_locale_codes;
 const int R::array::special_locale_names;
 const int R::attr::absListViewStyle;
@@ -1417,14 +1437,17 @@ const int R::attr::zAdjustment;
 const int R::bool_::action_bar_embed_tabs;
 const int R::bool_::action_bar_embed_tabs_pre_jb;
 const int R::bool_::action_bar_expanded_action_views_exclusive;
+const int R::bool_::config_advancedSettingsMode;
 const int R::bool_::config_allowActionMenuItemTextWithIcon;
 const int R::bool_::config_allowAllRotations;
 const int R::bool_::config_alwaysUseCdmaRssi;
 const int R::bool_::config_animateScreenLights;
 const int R::bool_::config_annoy_dianne;
+const int R::bool_::config_ascii_7bit_support_for_long_message;
 const int R::bool_::config_auto_attach_data_on_creation;
 const int R::bool_::config_automatic_brightness_available;
 const int R::bool_::config_avoidGfxAccel;
+const int R::bool_::config_batterySdCardAccessibility;
 const int R::bool_::config_bluetooth_address_validation;
 const int R::bool_::config_bluetooth_default_profiles;
 const int R::bool_::config_bluetooth_le_peripheral_mode_supported;
@@ -1434,10 +1457,13 @@ const int R::bool_::config_camera_sound_forced;
 const int R::bool_::config_carDockEnablesAccelerometer;
 const int R::bool_::config_carrier_volte_vt_available;
 const int R::bool_::config_cellBroadcastAppLinks;
+const int R::bool_::config_combined_signal;
 const int R::bool_::config_deskDockEnablesAccelerometer;
+const int R::bool_::config_deviceHasVariableButtonBrightness;
 const int R::bool_::config_device_volte_vt_available;
 const int R::bool_::config_disableMenuKeyInLockScreen;
 const int R::bool_::config_disableUsbPermissionDialogs;
+const int R::bool_::config_display_rat;
 const int R::bool_::config_dontPreferApn;
 const int R::bool_::config_dozeAfterScreenOff;
 const int R::bool_::config_dreamsActivatedOnDockByDefault;
@@ -1450,6 +1476,7 @@ const int R::bool_::config_enableActivityRecognitionHardwareOverlay;
 const int R::bool_::config_enableFusedLocationOverlay;
 const int R::bool_::config_enableGeocoderOverlay;
 const int R::bool_::config_enableGeofenceOverlay;
+const int R::bool_::config_enableGestureService;
 const int R::bool_::config_enableHardwareFlpOverlay;
 const int R::bool_::config_enableLockBeforeUnlockScreen;
 const int R::bool_::config_enableLockScreenRotation;
@@ -1461,40 +1488,65 @@ const int R::bool_::config_enableTranslucentDecor;
 const int R::bool_::config_enableWallpaperService;
 const int R::bool_::config_enableWifiDisplay;
 const int R::bool_::config_enable_emergency_call_while_sim_locked;
+const int R::bool_::config_enable_mms_with_mobile_data_off;
 const int R::bool_::config_enable_puk_unlock_screen;
+const int R::bool_::config_feature_iwlan_enabled;
+const int R::bool_::config_fetch_apn_from_omh_card;
 const int R::bool_::config_forceDefaultOrientation;
+const int R::bool_::config_forceDisableHardwareKeyboard;
+const int R::bool_::config_global_phone_enabled;
 const int R::bool_::config_hasPermanentDpad;
 const int R::bool_::config_hasRecents;
+const int R::bool_::config_hasRemovableLid;
 const int R::bool_::config_hotswapCapable;
+const int R::bool_::config_intrusiveBatteryLed;
 const int R::bool_::config_intrusiveNotificationLed;
 const int R::bool_::config_lidControlsSleep;
+const int R::bool_::config_lte_capable;
 const int R::bool_::config_mms_content_disposition_support;
+const int R::bool_::config_monitor_locale_change;
+const int R::bool_::config_multiColorBatteryLed;
+const int R::bool_::config_multiColorNotificationLed;
 const int R::bool_::config_networkSamplingWakesDevice;
 const int R::bool_::config_powerDecoupleAutoSuspendModeFromDisplay;
 const int R::bool_::config_powerDecoupleInteractiveModeFromDisplay;
+const int R::bool_::config_protocol_errors_perm_failure;
+const int R::bool_::config_proximityCheckOnWake;
+const int R::bool_::config_radio_reset_on_regular_deactivation;
+const int R::bool_::config_reject_ggsn_perm_failure;
 const int R::bool_::config_requireRadioPowerOffOnSimRefreshReset;
 const int R::bool_::config_restartRadioAfterProvisioning;
 const int R::bool_::config_restart_radio_on_pdp_fail_regular_deactivation;
 const int R::bool_::config_reverseDefaultRotation;
 const int R::bool_::config_safe_media_volume_enabled;
+const int R::bool_::config_samsung_stk;
 const int R::bool_::config_sendAudioBecomingNoisy;
+const int R::bool_::config_send_sms1x_on_voice_call;
+const int R::bool_::config_setZenModeWhenSilentModeOn;
 const int R::bool_::config_sf_limitedAlpha;
 const int R::bool_::config_sf_slowBlur;
 const int R::bool_::config_showMenuShortcutsWhenKeyboardPresent;
 const int R::bool_::config_showNavigationBar;
+const int R::bool_::config_show_cmIMESwitcher;
+const int R::bool_::config_sim_refresh_for_dual_mode_card;
 const int R::bool_::config_sip_wifi_only;
 const int R::bool_::config_sms_capable;
 const int R::bool_::config_sms_decode_gsm_8bit_data;
 const int R::bool_::config_sms_force_7bit_encoding;
 const int R::bool_::config_sms_utf8_support;
+const int R::bool_::config_softap_extention;
 const int R::bool_::config_speed_up_audio_on_mt_calls;
+const int R::bool_::config_spn_display_control;
 const int R::bool_::config_stkNoAlphaUsrCnf;
+const int R::bool_::config_stylusGestures;
 const int R::bool_::config_supportAutoRotation;
 const int R::bool_::config_suspendWhenScreenOffDueToProximity;
 const int R::bool_::config_swipeDisambiguation;
 const int R::bool_::config_switch_phone_on_voice_reg_state_change;
 const int R::bool_::config_syncstorageengine_masterSyncAutomatically;
+const int R::bool_::config_telephony_ESN_Tracker_enabled;
 const int R::bool_::config_telephony_use_own_number_for_voicemail;
+const int R::bool_::config_ui_blur_enabled;
 const int R::bool_::config_ui_enableFadingMarquee;
 const int R::bool_::config_unplugTurnsOnScreen;
 const int R::bool_::config_useAttentionLight;
@@ -1504,6 +1556,7 @@ const int R::bool_::config_useMasterVolume;
 const int R::bool_::config_useVolumeKeySounds;
 const int R::bool_::config_use_strict_phone_number_comparation;
 const int R::bool_::config_voice_capable;
+const int R::bool_::config_wifiApFirmwareReload;
 const int R::bool_::config_wifiDisplaySupportsProtectedBuffers;
 const int R::bool_::config_wifi_background_scan_support;
 const int R::bool_::config_wifi_batched_scan_supported;
@@ -1518,15 +1571,19 @@ const int R::bool_::config_wimaxEnabled;
 const int R::bool_::config_windowEnableCircularEmulatorDisplayOverlay;
 const int R::bool_::config_windowIsRound;
 const int R::bool_::config_windowShowCircularMask;
+const int R::bool_::def_telephony_spn_spec_enabled;
 const int R::bool_::editable_voicemailnumber;
 const int R::bool_::imsServiceAllowTurnOff;
 const int R::bool_::preferences_prefer_dual_pane;
+const int R::bool_::set_wifi_hotspot_security_none;
 const int R::bool_::show_ongoing_ime_switcher;
 const int R::bool_::skipHoldBeforeMerge;
+const int R::bool_::skip_radio_power_off_on_sim_refresh_reset;
 const int R::bool_::skip_restoring_network_selection;
 const int R::bool_::split_action_bar_is_narrow;
 const int R::bool_::target_honeycomb_needs_options_menu;
 const int R::bool_::useImsAlwaysForEmergencyCall;
+const int R::bool_::use_motion_accel;
 const int R::color::background_dark;
 const int R::color::background_light;
 const int R::color::battery_saver_mode_color;
@@ -1624,6 +1681,10 @@ const int R::dimen::dialog_min_width_major;
 const int R::dimen::dialog_min_width_minor;
 const int R::dimen::dropdownitem_icon_width;
 const int R::dimen::dropdownitem_text_padding_left;
+const int R::dimen::edge_gesture_perpendicular_distance;
+const int R::dimen::edge_gesture_trigger_distance;
+const int R::dimen::edge_gesture_trigger_thickness;
+const int R::dimen::global_actions_avatar_size;
 const int R::dimen::immersive_mode_cling_width;
 const int R::dimen::lock_pattern_dot_line_width;
 const int R::dimen::lock_pattern_dot_size;
@@ -1685,6 +1746,7 @@ const int R::drawable::cling_button;
 const int R::drawable::clock_dial;
 const int R::drawable::clock_hand_hour;
 const int R::drawable::clock_hand_minute;
+const int R::drawable::cm_platlogo;
 const int R::drawable::compass_arrow;
 const int R::drawable::compass_base;
 const int R::drawable::create_contact;
@@ -1761,6 +1823,7 @@ const int R::drawable::ic_jog_dial_sound_off;
 const int R::drawable::ic_jog_dial_sound_on;
 const int R::drawable::ic_jog_dial_unlock;
 const int R::drawable::ic_jog_dial_vibrate_on;
+const int R::drawable::ic_livedisplay_notif;
 const int R::drawable::ic_lock_airplane_mode;
 const int R::drawable::ic_lock_airplane_mode_off;
 const int R::drawable::ic_lock_bugreport;
@@ -1770,8 +1833,13 @@ const int R::drawable::ic_lock_idle_lock;
 const int R::drawable::ic_lock_idle_low_battery;
 const int R::drawable::ic_lock_lock;
 const int R::drawable::ic_lock_power_off;
+const int R::drawable::ic_lock_power_reboot;
+const int R::drawable::ic_lock_profile;
+const int R::drawable::ic_lock_screenshot;
+const int R::drawable::ic_lock_settings;
 const int R::drawable::ic_lock_silent_mode;
 const int R::drawable::ic_lock_silent_mode_off;
+const int R::drawable::ic_lock_user;
 const int R::drawable::ic_maps_indicator_current_position_anim;
 const int R::drawable::ic_media_ff;
 const int R::drawable::ic_media_next;
@@ -1939,6 +2007,7 @@ const int R::drawable::stat_notify_disk_full;
 const int R::drawable::stat_notify_error;
 const int R::drawable::stat_notify_missed_call;
 const int R::drawable::stat_notify_more;
+const int R::drawable::stat_notify_privacy_guard;
 const int R::drawable::stat_notify_rssi_in_range;
 const int R::drawable::stat_notify_sdcard;
 const int R::drawable::stat_notify_sdcard_prepare;
@@ -2110,6 +2179,7 @@ const int R::id::expires_on;
 const int R::id::extractArea;
 const int R::id::ffwd;
 const int R::id::fillInIntent;
+const int R::id::filtered_item_container;
 const int R::id::find;
 const int R::id::find_next;
 const int R::id::find_prev;
@@ -2213,6 +2283,10 @@ const int R::id::perm_icon;
 const int R::id::perm_name;
 const int R::id::permission_group;
 const int R::id::permission_list;
+const int R::id::permission_remember_choice_checkbox;
+const int R::id::permission_remember_choice_text;
+const int R::id::permission_remember_layout;
+const int R::id::permission_text;
 const int R::id::perms_list;
 const int R::id::pickers;
 const int R::id::pin_cancel_button;
@@ -2330,22 +2404,29 @@ const int R::id::zoomIn;
 const int R::id::zoomMagnify;
 const int R::id::zoomOut;
 const int R::integer::config_MaxConcurrentDownloadsAllowed;
+const int R::integer::config_backKillTimeout;
 const int R::integer::config_bluetooth_max_advertisers;
 const int R::integer::config_bluetooth_max_scan_filters;
+const int R::integer::config_brighteningLightDebounce;
+const int R::integer::config_buttonBrightnessSettingDefault;
 const int R::integer::config_carDockKeepsScreenOn;
 const int R::integer::config_carDockRotation;
 const int R::integer::config_cdma_3waycall_flash_delay;
 const int R::integer::config_criticalBatteryWarningLevel;
 const int R::integer::config_cursorWindowSize;
+const int R::integer::config_darkeningLightDebounce;
 const int R::integer::config_datause_notification_type;
 const int R::integer::config_datause_polling_period_sec;
 const int R::integer::config_datause_threshold_bytes;
 const int R::integer::config_datause_throttle_kbitsps;
+const int R::integer::config_dayColorTemperature;
 const int R::integer::config_defaultNotificationLedOff;
 const int R::integer::config_defaultNotificationLedOn;
 const int R::integer::config_defaultUiModeType;
 const int R::integer::config_deskDockKeepsScreenOn;
 const int R::integer::config_deskDockRotation;
+const int R::integer::config_deviceHardwareKeys;
+const int R::integer::config_deviceHardwareWakeKeys;
 const int R::integer::config_doubleTapOnHomeBehavior;
 const int R::integer::config_downloadDataDirLowSpaceThreshold;
 const int R::integer::config_downloadDataDirSize;
@@ -2355,7 +2436,7 @@ const int R::integer::config_dreamsBatteryLevelMinimumWhenPowered;
 const int R::integer::config_extraFreeKbytesAbsolute;
 const int R::integer::config_extraFreeKbytesAdjust;
 const int R::integer::config_globalActionsKeyTimeout;
-const int R::integer::config_immersive_mode_confirmation_panic;
+const int R::integer::config_keyboardBrightnessSettingDefault;
 const int R::integer::config_lidKeyboardAccessibility;
 const int R::integer::config_lidNavigationAccessibility;
 const int R::integer::config_lidOpenRotation;
@@ -2363,6 +2444,7 @@ const int R::integer::config_lightSensorWarmupTime;
 const int R::integer::config_lockSoundVolumeDb;
 const int R::integer::config_longAnimTime;
 const int R::integer::config_longPressOnHomeBehavior;
+const int R::integer::config_longPressOnMenuBehavior;
 const int R::integer::config_longPressOnPowerBehavior;
 const int R::integer::config_lowBatteryCloseWarningBump;
 const int R::integer::config_lowBatteryWarningLevel;
@@ -2377,6 +2459,7 @@ const int R::integer::config_mobile_mtu;
 const int R::integer::config_multiuserMaximumUsers;
 const int R::integer::config_networkPolicyDefaultWarning;
 const int R::integer::config_networkTransitionTimeout;
+const int R::integer::config_nightColorTemperature;
 const int R::integer::config_notificationServiceArchiveSize;
 const int R::integer::config_notificationsBatteryFullARGB;
 const int R::integer::config_notificationsBatteryLedOff;
@@ -2388,7 +2471,9 @@ const int R::integer::config_ntpPollingIntervalShorter;
 const int R::integer::config_ntpRetry;
 const int R::integer::config_ntpThreshold;
 const int R::integer::config_ntpTimeout;
+const int R::integer::config_outdoorAmbientLux;
 const int R::integer::config_overrideHasPermanentMenuKey;
+const int R::integer::config_proximityCheckTimeout;
 const int R::integer::config_radioScanningTimeout;
 const int R::integer::config_safe_media_volume_index;
 const int R::integer::config_screenBrightnessDark;
@@ -2440,6 +2525,7 @@ const int R::integer::config_wifi_framework_wifi_score_good_rssi_threshold_5GHz;
 const int R::integer::config_wifi_framework_wifi_score_low_rssi_threshold_24GHz;
 const int R::integer::config_wifi_framework_wifi_score_low_rssi_threshold_5GHz;
 const int R::integer::config_wifi_scan_interval_p2p_connected;
+const int R::integer::config_wifi_scan_interval_wfd_connected;
 const int R::integer::config_wifi_supplicant_scan_interval;
 const int R::integer::db_connection_pool_size;
 const int R::integer::db_journal_size_limit;
@@ -2539,6 +2625,7 @@ const int R::layout::notification_template_material_inbox;
 const int R::layout::notification_template_material_media;
 const int R::layout::number_picker;
 const int R::layout::overlay_display_window;
+const int R::layout::permission_confirmation_dialog;
 const int R::layout::permissions_package_list_item;
 const int R::layout::popup_menu_item_layout;
 const int R::layout::preference;
@@ -2695,15 +2782,21 @@ const int R::string::activity_chooser_view_see_all;
 const int R::string::activity_resolver_work_profiles_support;
 const int R::string::activitychooserview_choose_application;
 const int R::string::activitychooserview_choose_application_error;
+const int R::string::adb_active_generic_notification_message;
 const int R::string::adb_active_notification_message;
 const int R::string::adb_active_notification_title;
+const int R::string::adb_both_active_notification_title;
+const int R::string::adb_net_active_notification_title;
 const int R::string::addToDictionary;
 const int R::string::add_account_button_label;
 const int R::string::aerr_application;
 const int R::string::aerr_process;
 const int R::string::aerr_title;
+const int R::string::allow;
 const int R::string::alternate_eri_file;
 const int R::string::alwaysUse;
+const int R::string::android_installing_apk;
+const int R::string::android_installing_title;
 const int R::string::android_upgrading_apk;
 const int R::string::android_upgrading_complete;
 const int R::string::android_upgrading_fstrim;
@@ -2714,6 +2807,7 @@ const int R::string::anr_activity_process;
 const int R::string::anr_application_process;
 const int R::string::anr_process;
 const int R::string::anr_title;
+const int R::string::app_killed_message;
 const int R::string::app_running_notification_text;
 const int R::string::app_running_notification_title;
 const int R::string::autofill_address_line_1_label_re;
@@ -2810,12 +2904,16 @@ const int R::string::config_activityRecognitionHardwarePackageName;
 const int R::string::config_appsAuthorizedForSharedAccounts;
 const int R::string::config_chooseAccountActivity;
 const int R::string::config_chooseTypeAndAccountActivity;
+const int R::string::config_comboNetworkLocationProvider;
 const int R::string::config_customAdbPublicKeyConfirmationComponent;
 const int R::string::config_customResolverActivity;
 const int R::string::config_customVpnConfirmDialogComponent;
 const int R::string::config_datause_iface;
 const int R::string::config_defaultNetworkScorerPackageName;
+const int R::string::config_defaultQuickSettingsTiles;
 const int R::string::config_default_dns_server;
+const int R::string::config_deviceKeyHandlerClass;
+const int R::string::config_deviceKeyHandlerLib;
 const int R::string::config_dozeComponent;
 const int R::string::config_dreamsDefaultComponent;
 const int R::string::config_ethernet_iface_regex;
@@ -2823,12 +2921,22 @@ const int R::string::config_ethernet_tcp_buffers;
 const int R::string::config_fusedLocationProviderPackageName;
 const int R::string::config_geocoderProviderPackageName;
 const int R::string::config_geofenceProviderPackageName;
+const int R::string::config_geofenceServicesProvider;
 const int R::string::config_hardwareFlpPackageName;
+const int R::string::config_killSwitchClass;
+const int R::string::config_killSwitchLib;
 const int R::string::config_mms_user_agent;
 const int R::string::config_mms_user_agent_profile_url;
 const int R::string::config_networkLocationProviderPackageName;
 const int R::string::config_ntpServer;
+const int R::string::config_partial_segment_expire_age;
+const int R::string::config_perf_profile_default_entry;
+const int R::string::config_perf_profile_prop;
 const int R::string::config_persistentDataPackageName;
+const int R::string::config_prelaunchcheckactivity;
+const int R::string::config_rat_2g;
+const int R::string::config_rat_3g;
+const int R::string::config_rat_4g;
 const int R::string::config_tether_apndata;
 const int R::string::config_useragentprofile_url;
 const int R::string::config_webViewPackageName;
@@ -2880,6 +2988,9 @@ const int R::string::db_default_journal_mode;
 const int R::string::db_default_sync_mode;
 const int R::string::db_wal_sync_mode;
 const int R::string::decline;
+const int R::string::def_wifi_direct_name;
+const int R::string::def_wifi_wifihotspot_pass;
+const int R::string::def_wifi_wifihotspot_ssid;
 const int R::string::defaultMsisdnAlphaTag;
 const int R::string::defaultVoiceMailAlphaTag;
 const int R::string::default_audio_route_category_name;
@@ -2892,6 +3003,7 @@ const int R::string::default_wallpaper_component;
 const int R::string::delete_;
 const int R::string::deleteText;
 const int R::string::deleted_key;
+const int R::string::deny;
 const int R::string::description_target_unlock_tablet;
 const int R::string::dial_number_using;
 const int R::string::dialog_alert_title;
@@ -2969,8 +3081,12 @@ const int R::string::forward_intent_to_work;
 const int R::string::gadget_host_error_inflating;
 const int R::string::gigabyteShort;
 const int R::string::global_action_bug_report;
+const int R::string::global_action_choose_profile;
+const int R::string::global_action_current_user;
 const int R::string::global_action_lockdown;
 const int R::string::global_action_power_off;
+const int R::string::global_action_reboot;
+const int R::string::global_action_screenshot;
 const int R::string::global_action_settings;
 const int R::string::global_action_silent_mode_off_status;
 const int R::string::global_action_silent_mode_on_status;
@@ -3061,8 +3177,19 @@ const int R::string::launch_warning_original;
 const int R::string::launch_warning_replace;
 const int R::string::launch_warning_title;
 const int R::string::list_delimeter;
+const int R::string::live_display_auto;
+const int R::string::live_display_auto_summary;
+const int R::string::live_display_day;
+const int R::string::live_display_day_summary;
+const int R::string::live_display_hint;
+const int R::string::live_display_night;
+const int R::string::live_display_night_summary;
+const int R::string::live_display_outdoor;
+const int R::string::live_display_outdoor_summary;
+const int R::string::live_display_title;
 const int R::string::lock_to_app_description;
 const int R::string::lock_to_app_description_accessible;
+const int R::string::lock_to_app_description_no_navbar;
 const int R::string::lock_to_app_exit;
 const int R::string::lock_to_app_negative;
 const int R::string::lock_to_app_positive;
@@ -3071,6 +3198,7 @@ const int R::string::lock_to_app_title;
 const int R::string::lock_to_app_toast;
 const int R::string::lock_to_app_toast_accessible;
 const int R::string::lock_to_app_toast_locked;
+const int R::string::lock_to_app_toast_no_navbar;
 const int R::string::lock_to_app_unlock_password;
 const int R::string::lock_to_app_unlock_pattern;
 const int R::string::lock_to_app_unlock_pin;
@@ -3078,9 +3206,15 @@ const int R::string::lockscreen_access_pattern_cell_added;
 const int R::string::lockscreen_access_pattern_cleared;
 const int R::string::lockscreen_access_pattern_detected;
 const int R::string::lockscreen_access_pattern_start;
+const int R::string::lockscreen_airplane_mode_on;
 const int R::string::lockscreen_carrier_default;
 const int R::string::lockscreen_emergency_call;
+const int R::string::lockscreen_missing_sim_message_short;
+const int R::string::lockscreen_permanent_disabled_sim_message_short;
 const int R::string::lockscreen_return_to_call;
+const int R::string::lockscreen_sim_error_message_short;
+const int R::string::lockscreen_sim_locked_message;
+const int R::string::lockscreen_sim_puk_locked_message;
 const int R::string::lockscreen_transport_pause_description;
 const int R::string::lockscreen_transport_play_description;
 const int R::string::low_internal_storage_view_text;
@@ -3226,6 +3360,9 @@ const int R::string::orgTypeWork;
 const int R::string::owner_name;
 const int R::string::passwordIncorrect;
 const int R::string::paste;
+const int R::string::perf_profile_bal;
+const int R::string::perf_profile_perf;
+const int R::string::perf_profile_pwrsv;
 const int R::string::permission_request_notification_with_subtitle;
 const int R::string::perms_description_app;
 const int R::string::perms_new_perm_prefix;
@@ -3281,14 +3418,24 @@ const int R::string::preposition_for_date;
 const int R::string::preposition_for_time;
 const int R::string::print_service_installed_message;
 const int R::string::print_service_installed_title;
+const int R::string::privacy_guard_dialog_summary;
+const int R::string::privacy_guard_dialog_title;
+const int R::string::privacy_guard_notification;
+const int R::string::privacy_guard_notification_detail;
+const int R::string::profile_none;
+const int R::string::profile_picker_title;
 const int R::string::progress_erasing;
+const int R::string::progress_nomediapresent;
 const int R::string::progress_unmounting;
 const int R::string::quick_contacts_not_available;
 const int R::string::radial_numbers_typeface;
 const int R::string::reason_service_unavailable;
 const int R::string::reason_unknown;
+const int R::string::reboot_confirm;
+const int R::string::reboot_progress;
 const int R::string::reboot_safemode_confirm;
 const int R::string::reboot_safemode_title;
+const int R::string::reboot_title;
 const int R::string::relationTypeAssistant;
 const int R::string::relationTypeBrother;
 const int R::string::relationTypeChild;
@@ -3338,6 +3485,26 @@ const int R::string::save_password_message;
 const int R::string::save_password_never;
 const int R::string::save_password_notnow;
 const int R::string::save_password_remember;
+const int R::string::sd_ext_media_badremoval_notification_message;
+const int R::string::sd_ext_media_badremoval_notification_title;
+const int R::string::sd_ext_media_checking_notification_message;
+const int R::string::sd_ext_media_checking_notification_title;
+const int R::string::sd_ext_media_nofs_notification_message;
+const int R::string::sd_ext_media_nofs_notification_title;
+const int R::string::sd_ext_media_nomedia_notification_message;
+const int R::string::sd_ext_media_nomedia_notification_title;
+const int R::string::sd_ext_media_safe_unmount_notification_message;
+const int R::string::sd_ext_media_safe_unmount_notification_title;
+const int R::string::sd_ext_media_unmountable_notification_message;
+const int R::string::sd_ext_media_unmountable_notification_title;
+const int R::string::sd_extmedia_format_message;
+const int R::string::sd_format_error;
+const int R::string::sd_media_bad_removal;
+const int R::string::sd_media_checking;
+const int R::string::sd_media_removed;
+const int R::string::sd_media_shared;
+const int R::string::sd_progress_erasing;
+const int R::string::sd_progress_unmounting;
 const int R::string::search_go;
 const int R::string::selectAll;
 const int R::string::selectTextMode;
@@ -3400,6 +3567,15 @@ const int R::string::ssl_ca_cert_warning;
 const int R::string::ssl_certificate;
 const int R::string::ssl_certificate_is_valid;
 const int R::string::status_bar_notification_info_overflow;
+const int R::string::stk_cc_ss_to_dial;
+const int R::string::stk_cc_ss_to_ss;
+const int R::string::stk_cc_ss_to_ussd;
+const int R::string::stk_cc_ussd_to_dial;
+const int R::string::stk_cc_ussd_to_ss;
+const int R::string::stk_cc_ussd_to_ussd;
+const int R::string::storage_uicc;
+const int R::string::storage_usb;
+const int R::string::stylus_app_not_installed;
 const int R::string::submit;
 const int R::string::sync_binding_label;
 const int R::string::sync_do_nothing;
@@ -3409,9 +3585,16 @@ const int R::string::sync_undo_deletes;
 const int R::string::system_ui_date_pattern;
 const int R::string::terabyteShort;
 const int R::string::tethered_notification_message;
+const int R::string::tethered_notification_multi_device_message;
+const int R::string::tethered_notification_no_device_message;
+const int R::string::tethered_notification_one_device_message;
 const int R::string::tethered_notification_title;
 const int R::string::textSelectionCABTitle;
 const int R::string::text_copied;
+const int R::string::theme_install_error_message;
+const int R::string::theme_install_error_title;
+const int R::string::theme_reset_notification_body;
+const int R::string::theme_reset_notification_title;
 const int R::string::throttle_warning_notification_message;
 const int R::string::throttle_warning_notification_title;
 const int R::string::throttled_notification_message;
@@ -3442,8 +3625,30 @@ const int R::string::untitled;
 const int R::string::upload_file;
 const int R::string::usb_accessory_notification_title;
 const int R::string::usb_cd_installer_notification_title;
+const int R::string::usb_charging_notification_title;
+const int R::string::usb_choose_notification_title;
+const int R::string::usb_ext_media_badremoval_notification_message;
+const int R::string::usb_ext_media_badremoval_notification_title;
+const int R::string::usb_ext_media_checking_notification_message;
+const int R::string::usb_ext_media_checking_notification_title;
+const int R::string::usb_ext_media_nofs_notification_message;
+const int R::string::usb_ext_media_nofs_notification_title;
+const int R::string::usb_ext_media_nomedia_notification_message;
+const int R::string::usb_ext_media_nomedia_notification_title;
+const int R::string::usb_ext_media_safe_unmount_notification_message;
+const int R::string::usb_ext_media_safe_unmount_notification_title;
+const int R::string::usb_ext_media_unmountable_notification_message;
+const int R::string::usb_ext_media_unmountable_notification_title;
+const int R::string::usb_extmedia_format_message;
+const int R::string::usb_format_error;
+const int R::string::usb_media_bad_removal;
+const int R::string::usb_media_checking;
+const int R::string::usb_media_removed;
+const int R::string::usb_media_shared;
 const int R::string::usb_mtp_notification_title;
 const int R::string::usb_notification_message;
+const int R::string::usb_progress_erasing;
+const int R::string::usb_progress_unmounting;
 const int R::string::usb_ptp_notification_title;
 const int R::string::usb_storage_error_message;
 const int R::string::usb_storage_message;
@@ -3504,6 +3709,7 @@ const int R::string::wifi_p2p_turnon_message;
 const int R::string::wifi_tether_configure_ssid_default;
 const int R::string::wifi_watchdog_network_disabled;
 const int R::string::wifi_watchdog_network_disabled_detailed;
+const int R::string::wildcardProfile;
 const int R::string::wireless_display_route_description;
 const int R::string::write_fail_reason_cancelled;
 const int R::string::write_fail_reason_cannot_write;
@@ -4284,6 +4490,7 @@ const int R::xml::password_kbd_qwerty_shifted;
 const int R::xml::password_kbd_symbols;
 const int R::xml::password_kbd_symbols_shift;
 const int R::xml::power_profile;
+const int R::xml::profile_default;
 const int R::xml::sms_7bit_translation_table;
 const int R::xml::sms_short_codes;
 const int R::xml::storage_list;
@@ -4399,7 +4606,7 @@ const int R::styleable::ActionMenuItemView[1] = {
 const int R::styleable::ActionMenuItemView_minWidth;
 const int R::styleable::ActionMode[6] = {
             0x010100d4, 0x01010155, 0x010102f8, 0x010102f9,
-            0x0101038b, 0x01010563
+            0x0101038b, 0x01010564
         };
 
 const int R::styleable::ActionMode_background;
@@ -4509,7 +4716,7 @@ const int R::styleable::AndroidManifestActivity[39] = {
             0x010102c0, 0x010102d3, 0x01010398, 0x010103a7,
             0x010103bf, 0x010103c9, 0x010103f2, 0x010103f5,
             0x0101042d, 0x01010445, 0x01010446, 0x01010447,
-            0x01010476, 0x010104b2, 0x01010591
+            0x01010476, 0x010104b2, 0x01010592
         };
 
 const int R::styleable::AndroidManifestActivity_allowEmbedded;
@@ -4577,7 +4784,7 @@ const int R::styleable::AndroidManifestApplication[36] = {
             0x010102b8, 0x010102ba, 0x010102be, 0x010102d3,
             0x0101035a, 0x01010398, 0x010103af, 0x010103d0,
             0x010103d5, 0x010103d6, 0x010103f2, 0x010103f4,
-            0x01010473, 0x0101048e, 0x0101058f, 0x01010590
+            0x01010473, 0x0101048e, 0x01010590, 0x01010591
         };
 
 const int R::styleable::AndroidManifestApplication_allowBackup;
@@ -5355,7 +5562,7 @@ const int R::styleable::FragmentAnimation_fragmentFadeExitAnimation;
 const int R::styleable::FragmentAnimation_fragmentOpenEnterAnimation;
 const int R::styleable::FragmentAnimation_fragmentOpenExitAnimation;
 const int R::styleable::FragmentBreadCrumbs[3] = {
-            0x010100af, 0x0101057e, 0x0101057f
+            0x010100af, 0x0101057f, 0x01010580
         };
 
 const int R::styleable::FragmentBreadCrumbs_gravity;
@@ -5405,10 +5612,10 @@ const int R::styleable::GestureOverlayView_orientation;
 const int R::styleable::GestureOverlayView_uncertainGestureColor;
 const int R::styleable::GlowPadView[17] = {
             0x010100af, 0x0101025f, 0x010103a0, 0x010103a1,
-            0x0101054f, 0x01010550, 0x01010551, 0x01010552,
-            0x01010553, 0x01010554, 0x01010555, 0x01010556,
-            0x01010557, 0x01010558, 0x01010559, 0x0101055a,
-            0x0101055b
+            0x01010550, 0x01010551, 0x01010552, 0x01010553,
+            0x01010554, 0x01010555, 0x01010556, 0x01010557,
+            0x01010558, 0x01010559, 0x0101055a, 0x0101055b,
+            0x0101055c
         };
 
 const int R::styleable::GlowPadView_allowScaling;
@@ -5658,7 +5865,7 @@ const int R::styleable::KeyboardLayout_name;
 const int R::styleable::KeyboardView[12] = {
             0x01010161, 0x01010164, 0x01010233, 0x01010234,
             0x01010235, 0x01010236, 0x01010237, 0x01010238,
-            0x01010239, 0x0101023a, 0x0101023b, 0x0101054e
+            0x01010239, 0x0101023a, 0x0101023b, 0x0101054f
         };
 
 const int R::styleable::KeyboardView_keyBackground;
@@ -5703,7 +5910,7 @@ const int R::styleable::Keyboard_Row[2] = {
 const int R::styleable::Keyboard_Row_keyboardMode;
 const int R::styleable::Keyboard_Row_rowEdgeFlags;
 const int R::styleable::KeyguardGlowStripView[4] = {
-            0x01010579, 0x0101057a, 0x0101057b, 0x0101057c
+            0x0101057a, 0x0101057b, 0x0101057c, 0x0101057d
         };
 
 const int R::styleable::KeyguardGlowStripView_dotSize;
@@ -5711,7 +5918,7 @@ const int R::styleable::KeyguardGlowStripView_glowDot;
 const int R::styleable::KeyguardGlowStripView_leftToRight;
 const int R::styleable::KeyguardGlowStripView_numDots;
 const int R::styleable::KeyguardSecurityViewFlipper_Layout[2] = {
-            0x0101055c, 0x01010581
+            0x0101055d, 0x01010582
         };
 
 const int R::styleable::KeyguardSecurityViewFlipper_Layout_layout_maxHeight;
@@ -5807,8 +6014,8 @@ const int R::styleable::ListView_headerDividersEnabled;
 const int R::styleable::ListView_overScrollFooter;
 const int R::styleable::ListView_overScrollHeader;
 const int R::styleable::LockPatternView[5] = {
-            0x0101055e, 0x0101055f, 0x01010560, 0x01010561,
-            0x01010562
+            0x0101055f, 0x01010560, 0x01010561, 0x01010562,
+            0x01010563
         };
 
 const int R::styleable::LockPatternView_aspect;
@@ -5833,7 +6040,7 @@ const int R::styleable::MaterialProgressDrawable_thickness;
 const int R::styleable::MaterialProgressDrawable_visible;
 const int R::styleable::MaterialProgressDrawable_width;
 const int R::styleable::MediaRouteButton[4] = {
-            0x0101013f, 0x01010140, 0x010103ae, 0x01010575
+            0x0101013f, 0x01010140, 0x010103ae, 0x01010576
         };
 
 const int R::styleable::MediaRouteButton_externalRouteEnabledDrawable;
@@ -5923,8 +6130,8 @@ const int R::styleable::MultiPaneChallengeLayout[1] = {
 
 const int R::styleable::MultiPaneChallengeLayout_orientation;
 const int R::styleable::MultiPaneChallengeLayout_Layout[5] = {
-            0x010100b3, 0x0101055c, 0x0101057d, 0x01010580,
-            0x01010581
+            0x010100b3, 0x0101055d, 0x0101057e, 0x01010581,
+            0x01010582
         };
 
 const int R::styleable::MultiPaneChallengeLayout_Layout_layout_centerWithinArea;
@@ -5978,7 +6185,7 @@ const int R::styleable::OvershootInterpolator[1] = {
 
 const int R::styleable::OvershootInterpolator_tension;
 const int R::styleable::PagedView[3] = {
-            0x01010576, 0x01010577, 0x01010578
+            0x01010577, 0x01010578, 0x01010579
         };
 
 const int R::styleable::PagedView_pageSpacing;
@@ -6000,7 +6207,7 @@ const int R::styleable::PatternPathMotion[1] = {
 
 const int R::styleable::PatternPathMotion_patternPathData;
 const int R::styleable::Pointer[4] = {
-            0x01010564, 0x01010565, 0x01010566, 0x01010567
+            0x01010565, 0x01010566, 0x01010567, 0x01010568
         };
 
 const int R::styleable::Pointer_pointerIconArrow;
@@ -6008,7 +6215,7 @@ const int R::styleable::Pointer_pointerIconSpotAnchor;
 const int R::styleable::Pointer_pointerIconSpotHover;
 const int R::styleable::Pointer_pointerIconSpotTouch;
 const int R::styleable::PointerIcon[3] = {
-            0x01010568, 0x01010569, 0x0101056a
+            0x01010569, 0x0101056a, 0x0101056b
         };
 
 const int R::styleable::PointerIcon_bitmap;
@@ -6049,7 +6256,7 @@ const int R::styleable::Preference_summary;
 const int R::styleable::Preference_title;
 const int R::styleable::Preference_widgetLayout;
 const int R::styleable::PreferenceActivity[3] = {
-            0x010100f2, 0x01010573, 0x01010574
+            0x010100f2, 0x01010574, 0x01010575
         };
 
 const int R::styleable::PreferenceActivity_headerLayout;
@@ -6221,14 +6428,14 @@ const int R::styleable::RelativeLayout_Layout_layout_toLeftOf;
 const int R::styleable::RelativeLayout_Layout_layout_toRightOf;
 const int R::styleable::RelativeLayout_Layout_layout_toStartOf;
 const int R::styleable::ResolverDrawerLayout[3] = {
-            0x0101011f, 0x0101058b, 0x0101058c
+            0x0101011f, 0x0101058c, 0x0101058d
         };
 
 const int R::styleable::ResolverDrawerLayout_maxCollapsedHeight;
 const int R::styleable::ResolverDrawerLayout_maxCollapsedHeightSmall;
 const int R::styleable::ResolverDrawerLayout_maxWidth;
 const int R::styleable::ResolverDrawerLayout_LayoutParams[3] = {
-            0x010100b3, 0x0101058d, 0x0101058e
+            0x010100b3, 0x0101058e, 0x0101058f
         };
 
 const int R::styleable::ResolverDrawerLayout_LayoutParams_layout_alwaysShow;
@@ -6246,10 +6453,11 @@ const int R::styleable::RestrictionEntry_entryValues;
 const int R::styleable::RestrictionEntry_key;
 const int R::styleable::RestrictionEntry_restrictionType;
 const int R::styleable::RestrictionEntry_title;
-const int R::styleable::RingtonePreference[3] = {
-            0x010101f9, 0x010101fa, 0x010101fb
+const int R::styleable::RingtonePreference[4] = {
+            0x010101f9, 0x010101fa, 0x010101fb, 0x0101054e
         };
 
+const int R::styleable::RingtonePreference_dialogStyle;
 const int R::styleable::RingtonePreference_ringtoneType;
 const int R::styleable::RingtonePreference_showDefault;
 const int R::styleable::RingtonePreference_showSilent;
@@ -6423,7 +6631,7 @@ const int R::styleable::SizeAdaptiveLayout[0] = {
         };
 
 const int R::styleable::SizeAdaptiveLayout_Layout[2] = {
-            0x0101055c, 0x0101055d
+            0x0101055d, 0x0101055e
         };
 
 const int R::styleable::SizeAdaptiveLayout_Layout_layout_maxHeight;
@@ -6434,7 +6642,7 @@ const int R::styleable::Slide[1] = {
 
 const int R::styleable::Slide_slideEdge;
 const int R::styleable::SlidingChallengeLayout_Layout[2] = {
-            0x0101055c, 0x0101057d
+            0x0101055d, 0x0101057e
         };
 
 const int R::styleable::SlidingChallengeLayout_Layout_layout_childType;
@@ -6508,8 +6716,8 @@ const int R::styleable::StateListDrawable_exitFadeDuration;
 const int R::styleable::StateListDrawable_variablePadding;
 const int R::styleable::StateListDrawable_visible;
 const int R::styleable::Storage[8] = {
-            0x0101056b, 0x0101056c, 0x0101056d, 0x0101056e,
-            0x0101056f, 0x01010570, 0x01010571, 0x01010572
+            0x0101056c, 0x0101056d, 0x0101056e, 0x0101056f,
+            0x01010570, 0x01010571, 0x01010572, 0x01010573
         };
 
 const int R::styleable::Storage_allowMassStorage;
@@ -7164,9 +7372,9 @@ const int R::styleable::Toolbar[21] = {
             0x010100af, 0x010101e1, 0x010102d1, 0x0101042e,
             0x0101042f, 0x01010453, 0x01010454, 0x01010455,
             0x01010456, 0x010104a9, 0x010104c0, 0x010104c1,
-            0x01010582, 0x01010583, 0x01010584, 0x01010585,
-            0x01010586, 0x01010587, 0x01010588, 0x01010589,
-            0x0101058a
+            0x01010583, 0x01010584, 0x01010585, 0x01010586,
+            0x01010587, 0x01010588, 0x01010589, 0x0101058a,
+            0x0101058b
         };
 
 const int R::styleable::Toolbar_buttonGravity;
