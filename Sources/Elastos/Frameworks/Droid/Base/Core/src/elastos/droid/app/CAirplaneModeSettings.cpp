@@ -23,7 +23,7 @@ CAR_OBJECT_IMPL(CAirplaneModeSettings)
 
 ECode CAirplaneModeSettings::constructor()
 {
-    return constructor(0, false);
+    return constructor(0, FALSE);
 }
 
 ECode CAirplaneModeSettings::constructor(
@@ -112,6 +112,7 @@ ECode CAirplaneModeSettings::FromXml(
     CAirplaneModeSettings::NewByFriend((CAirplaneModeSettings**)&airplaneModeDescriptor);
     String name;
     while (event != IXmlPullParser::END_TAG || (xpp->GetName(&name), !name.Equals("airplaneModeDescriptor"))) {
+        xpp->GetName(&name);
         if (event == IXmlPullParser::START_TAG) {
             if (name.Equals("value")) {
                 String text;
