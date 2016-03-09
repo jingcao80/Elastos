@@ -2,6 +2,7 @@
 #include <Elastos.CoreLibrary.Libcore.h>
 #include "Elastos.Droid.Provider.h"
 #include "Elastos.Droid.View.h"
+#include "elastos/droid/os/CSystemProperties.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/CAndroidCharacter.h"
 #include "elastos/droid/text/MeasuredText.h"
@@ -56,7 +57,8 @@ using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResourcesHelper;
 using Elastos::Droid::Content::Res::CResourcesHelper;
 using Elastos::Droid::View::IView;
-using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Internal::Utility::ArrayUtils;
 using Libcore::ICU::IICUUtil;
 using Libcore::ICU::CICUUtil;
@@ -1736,7 +1738,7 @@ Boolean TextUtils::IsPrintableAscii(
 {
     Int32 asciiFirst = 0x20;
     Int32 asciiLast = 0x7E;  // included
-    return (asciiFirst <= c && c <= asciiLast) || c == '\r' || c == '\n';
+    return (asciiFirst <= (Int32)c && (Int32)c <= asciiLast) || c == '\r' || c == '\n';
 }
 
 Boolean TextUtils::IsPrintableAsciiOnly(
@@ -1939,6 +1941,11 @@ Int32 TextUtils::UnpackRangeEndFromInt64(
 Int32 TextUtils::GetLayoutDirectionFromLocale(
     /* [in] */ ILocale* locale)
 {
+    AutoPtr<ISystemProperties> systemProperty;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&systemProperty);
+    Boolean mirror = FALSE;
+    systemProperty->GetBoolean(ISettingsGlobal::DEVELOPMENT_FORCE_RTL, FALSE, &mirror);
+
     AutoPtr<ILocale> root;
     AutoPtr<ILocaleHelper> helper;
     CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
@@ -1957,14 +1964,15 @@ Int32 TextUtils::GetLayoutDirectionFromLocale(
 
         if (scriptSubtag.EqualsIgnoreCase(ARAB_SCRIPT_SUBTAG) ||
             scriptSubtag.EqualsIgnoreCase(HEBR_SCRIPT_SUBTAG)) {
-            return IView::LAYOUT_DIRECTION_RTL;
+            // If forcing into RTL layout mode and language is RTL
+            // return LTR as default, else RTL
+            return mirror ? IView::LAYOUT_DIRECTION_LTR : IView::LAYOUT_DIRECTION_RTL;
         }
     }
 
-    // If forcing into RTL layout mode, return RTL as default, else LTR
-    Boolean bval;
-    SystemProperties::GetBoolean(ISettingsGlobal::DEVELOPMENT_FORCE_RTL, FALSE, &bval);
-    return bval ? IView::LAYOUT_DIRECTION_RTL : IView::LAYOUT_DIRECTION_LTR;
+    // If forcing into RTL layout mode and language is LTR
+    // return RTL as default, else LTR
+    return mirror ? IView::LAYOUT_DIRECTION_RTL : IView::LAYOUT_DIRECTION_LTR;
 }
 
 Int32 TextUtils::GetLayoutDirectionFromFirstChar(

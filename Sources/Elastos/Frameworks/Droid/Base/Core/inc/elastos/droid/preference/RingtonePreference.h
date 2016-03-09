@@ -49,6 +49,12 @@ public:
     CARAPI SetRingtoneType(
         /* [in] */ Int32 type);
 
+    CARAPI GetSubId(
+        /* [out] */ Int32* result);
+
+    CARAPI SetSubId(
+        /* [in] */ Int32 subId);
+
     CARAPI GetShowDefault(
         /* [out] */ Boolean* showDefault);
 
@@ -60,6 +66,12 @@ public:
 
     CARAPI SetShowSilent(
         /* [in] */ Boolean showSilent);
+
+    CARAPI GetDialogStyle(
+        /* [out] */ Int32* result);
+
+    CARAPI SetDialogStyle(
+        /* [in] */ Int32 dialogStyle);
 
     CARAPI OnActivityResult(
         /* [in] */ Int32 requestCode,
@@ -98,8 +110,9 @@ private:
     Int32 mRingtoneType;
     Boolean mShowDefault;
     Boolean mShowSilent;
-
+    Int32 mDialogStyle;
     Int32 mRequestCode;
+    Int32 mSubscriptionID;
 };
 
 }

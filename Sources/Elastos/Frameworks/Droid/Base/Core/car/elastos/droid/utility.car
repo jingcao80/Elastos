@@ -42,7 +42,9 @@ module
     merge("utility/Spline.car");
     merge("utility/StateSet.car");
     merge("utility/TimingLogger.car");
+    merge("utility/NativeTextHelper.car");
 
+    interface Elastos.Droid.Utility.INativeTextHelper;
     using interface Elastos.Core.INumber;
     using interface Elastos.Core.IComparable;
     using interface Elastos.Core.ICloneable;
@@ -326,6 +328,10 @@ module
 
         interface IInt64Array;
         interface ICloneable;
+    }
+
+    singleton class CNativeTextHelper {
+        interface INativeTextHelper;
     }
 
     } // namespace Utility

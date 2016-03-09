@@ -263,6 +263,19 @@ public:
         /* [in] */ Int32 type,
         /* [out] */ IUri** result);
 
+    /**
+     * Gets the actual default sound's {@link Uri}. This will give the actual
+     * sound {@link Uri}, instead of using this, most clients can use
+     * {@link System#DEFAULT_RINGTONE_URI}.
+     *
+     * @param subId The Subscription ID.
+     * @return A {@link Uri} pointing to the default sound for the sound type.
+     * @hide
+     */
+    static CARAPI GetDefaultRingtoneUriBySubId(
+        /* [in] */ Int32 subId,
+        /* [out] */ IUri** result);
+
 private:
     static CARAPI_(AutoPtr<IUri>) GetUriFromCursor(
         /* [in] */ ICursor* cursor);

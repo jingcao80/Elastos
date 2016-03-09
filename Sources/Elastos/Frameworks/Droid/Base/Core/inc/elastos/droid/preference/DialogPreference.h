@@ -244,6 +244,12 @@ protected:
         /* [in] */ IBundle* state);
 
     /**
+     * @hide
+     */
+    virtual  CARAPI CreateDialog(
+        /* [out] */ IDialog** isNeed);
+
+    /**
      * Returns whether the preference needs to display a soft input method when the dialog
      * is displayed. Default is false. Subclasses should override this method if they need
      * the soft input method brought up automatically.

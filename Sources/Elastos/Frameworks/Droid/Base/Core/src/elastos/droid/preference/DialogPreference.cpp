@@ -260,6 +260,24 @@ ECode DialogPreference::OnClick()
 ECode DialogPreference::ShowDialog(
     /* [in] */ IBundle* state)
 {
+    AutoPtr<IDialog> dialog;
+    CreateDialog((IDialog**)&dialog);
+    if (state != NULL) {
+        dialog->OnRestoreInstanceState(state);
+    }
+    Boolean isNeed = FALSE;
+    if (NeedInputMethod(&isNeed), isNeed) {
+        RequestInputMethod(dialog);
+    }
+    dialog->SetOnDismissListener(THIS_PROBE(IDialogInterfaceOnDismissListener));
+    dialog->Show();
+    return NOERROR;
+}
+
+ECode DialogPreference::CreateDialog(
+    /* [out] */ IDialog** isNeed)
+{
+    VALIDATE_NOT_NULL(isNeed);
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
 
@@ -291,17 +309,8 @@ ECode DialogPreference::ShowDialog(
     // Create the dialog
     AutoPtr<IAlertDialog> alertDialog;
     mBuilder->Create((IAlertDialog**)&alertDialog);
-    mDialog = IDialog::Probe(alertDialog);
-    AutoPtr<IDialog> dialog = mDialog;
-    if (state != NULL) {
-        dialog->OnRestoreInstanceState(state);
-    }
-    Boolean isNeed;
-    if (NeedInputMethod(&isNeed), isNeed) {
-        RequestInputMethod(dialog);
-    }
-    dialog->SetOnDismissListener(THIS_PROBE(IDialogInterfaceOnDismissListener));
-    dialog->Show();
+    *isNeed = IDialog::Probe(alertDialog);
+    REFCOUNT_ADD(*isNeed);
     return NOERROR;
 }
 

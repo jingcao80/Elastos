@@ -207,6 +207,13 @@ protected:
         /* [in] */ IInterface* newValue,
         /* [out] */ Boolean* shouldSetValue);
 
+    /**
+     * Returns whether the preference can be found in persistent storage
+     * @hide
+     */
+    virtual CARAPI IsPersisted(
+        /* [out] */ Boolean* result);
+
 public:
     virtual CARAPI SetOnPreferenceChangeListener(
         /* [in] */ IPreferenceOnPreferenceChangeListener* onPreferenceChangeListener);

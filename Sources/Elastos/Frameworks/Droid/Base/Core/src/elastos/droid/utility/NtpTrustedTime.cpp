@@ -6,6 +6,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
 #include "Elastos.Droid.Widget.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/utility/NtpTrustedTime.h"
 
 //#include "elastos/droid/provider/Settings.h"
@@ -26,6 +27,7 @@ using Elastos::Utility::Logging::Logger;
 // using Elastos::Droid::Net::ISntpClient;
 // using Elastos::Droid::Net::CSntpClient;
 //using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::Math;
 
 namespace Elastos {
@@ -94,7 +96,7 @@ ECode NtpTrustedTime::ForceRefresh(
     VALIDATE_NOT_NULL(isRefreshed);
     *isRefreshed = FALSE;
 
-    if (mServer.IsNullOrEmpty()) {
+    if (TextUtils::IsEmpty(mServer)) {
         // missing server, so no trusted time available
         return NOERROR;
     }

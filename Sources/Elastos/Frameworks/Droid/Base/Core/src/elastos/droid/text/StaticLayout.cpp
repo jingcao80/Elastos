@@ -1026,7 +1026,7 @@ void StaticLayout::CalculateEllipsis(
             Float sum = 0;
             Int32 i;
 
-            for (i = len; i >= 0; i--) {
+            for (i = len; i > 0; i--) {
                 assert(widths != NULL);
                 Float w = (*widths)[i - 1 + lineStart - widthStart];
 

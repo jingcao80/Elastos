@@ -425,6 +425,26 @@ ECode CRingtoneManager::GetDefaultType(
     return NOERROR;
 }
 
+ECode CRingtoneManager::GetDefaultRingtoneUriBySubId(
+    /* [in] */ Int32 subId,
+    /* [out] */ IUri** result)
+{
+    VALIDATE_NOT_NULL(result);
+    assert(0);
+    /* TODO
+    if (!(subId >= 0 &&  subId < Settings.System.MAX_NUM_RINGTONES)) {
+        return null;
+    }
+    if (subId == 0) {
+        return Settings.System.DEFAULT_RINGTONE_URI;
+    } else {
+        final String uriString =
+                Settings.System.DEFAULT_RINGTONE_URI.toString() + "_" + (subId + 1);
+        return Uri.parse(uriString);
+    }*/
+    return NOERROR;
+}
+
 /*static*/
 ECode CRingtoneManager::GetDefaultUri(
     /* [in] */ Int32 type,

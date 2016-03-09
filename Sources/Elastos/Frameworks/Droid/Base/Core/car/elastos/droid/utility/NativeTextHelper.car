@@ -1,0 +1,47 @@
+
+module
+{
+    interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Utility {
+
+    interface INativeTextHelper {
+        /**
+         * parse the string to current language string in public resources.
+         *
+         * @param context base context of the application
+         * @param originalString original string
+         * @param originNamesId the id of the original string array.
+         * @param localNamesId the id of the local string keys.
+         * @return local language string
+         */
+        GetLocalString(
+            [in] IContext* context,
+            [in] String originalString,
+            [in] Int32 originNamesId,
+            [in] Int32 localNamesId,
+            [out] String* result);
+
+        /**
+         * parse the string to current language string in current resources.
+         *
+         * @param context base context of the application
+         * @param originalString original string
+         * @param originNamesId the id of the original string array.
+         * @param localNamesId the id of the local string keys.
+         * @return local language string
+         */
+        GetInternalLocalString(
+            [in] IContext* context,
+            [in] String originalString,
+            [in] Int32 originNamesId,
+            [in] Int32 localNamesId,
+            [out] String* result);
+    }
+
+    } // namespace Utility
+    } // namepsace Droid
+    } // namespace Elastos
+}

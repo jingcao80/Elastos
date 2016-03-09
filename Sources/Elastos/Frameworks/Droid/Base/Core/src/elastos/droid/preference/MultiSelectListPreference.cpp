@@ -278,7 +278,7 @@ ECode MultiSelectListPreference::OnGetDefaultValue(
     VALIDATE_NOT_NULL(value)
     AutoPtr< ArrayOf<ICharSequence*> > defaultValues;
     a->GetTextArray(index, (ArrayOf<ICharSequence*>**)&defaultValues);
-    Int32 valueCount = defaultValues->GetLength();
+    Int32 valueCount = defaultValues != NULL ? defaultValues->GetLength() : 0;
     AutoPtr<ISet> result;
     CHashSet::New((ISet**)&result);
     for (Int32 i = 0; i < valueCount; i++) {

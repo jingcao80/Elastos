@@ -62,6 +62,13 @@ ECode CRingtoneManagerHelper::GetDefaultUri(
     return CRingtoneManager::GetDefaultUri(type, result);
 }
 
+ECode CRingtoneManagerHelper::GetDefaultRingtoneUriBySubId(
+    /* [in] */ Int32 subId,
+    /* [out] */ IUri** result)
+{
+    return CRingtoneManager::GetDefaultRingtoneUriBySubId(subId, result);
+}
+
 } // namespace Media
 } // namepsace Droid
 } // namespace Elastos

@@ -661,6 +661,15 @@ ECode Preference::CallChangeListener(
     }
 }
 
+ECode Preference::IsPersisted(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    AutoPtr<ISharedPreferences> sharedPreferences;
+    GetSharedPreferences((ISharedPreferences**)&sharedPreferences);
+    return sharedPreferences->Contains(mKey, result);
+}
+
 ECode Preference::SetOnPreferenceChangeListener(
     /* [in] */ IPreferenceOnPreferenceChangeListener* onPreferenceChangeListener)
 {
@@ -1023,20 +1032,16 @@ ECode Preference::SetDefaultValue(
 ECode Preference::DispatchSetInitialValue()
 {
     // By now, we know if we are persistent.
-    Boolean shouldPersist;
-    if (ShouldPersist(&shouldPersist), !shouldPersist) {
+    Boolean shouldPersist = FALSE;
+    ShouldPersist(&shouldPersist);
+    Boolean isPersisted = FALSE;
+    IsPersisted(&isPersisted);
+    if (!shouldPersist || !isPersisted) {
         if (mDefaultValue != NULL) {
             return OnSetInitialValue(FALSE, mDefaultValue);
         }
     }
     else {
-        AutoPtr<ISharedPreferences> sp;
-        GetSharedPreferences((ISharedPreferences**)&sp);
-        Boolean contains;
-        sp->Contains(mKey, &contains);
-        if (!contains && mDefaultValue != NULL) {
-            return OnSetInitialValue(FALSE, mDefaultValue);
-        }
         return OnSetInitialValue(TRUE, NULL);
     }
     return NOERROR;

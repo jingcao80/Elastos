@@ -2,7 +2,7 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Media.h"
 #include "elastos/droid/content/CIntent.h"
-// #include "elastos/droid/media/CRingtoneManagerHelper.h"
+#include "elastos/droid/media/CRingtoneManagerHelper.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/preference/RingtonePreference.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -13,7 +13,7 @@ using Elastos::Droid::App::IFragment;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Media::IRingtoneManager;
 using Elastos::Droid::Media::IRingtoneManagerHelper;
-// using Elastos::Droid::Media::CRingtoneManagerHelper;
+using Elastos::Droid::Media::CRingtoneManagerHelper;
 using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Core::CString;
@@ -30,7 +30,9 @@ RingtonePreference::RingtonePreference()
     : mRingtoneType(0)
     , mShowDefault(FALSE)
     , mShowSilent(FALSE)
+    , mDialogStyle(0)
     , mRequestCode(0)
+    , mSubscriptionID(0)
 {}
 
 ECode RingtonePreference::constructor(
@@ -49,6 +51,8 @@ ECode RingtonePreference::constructor(
     a->GetInt32(R::styleable::RingtonePreference_ringtoneType, IRingtoneManager::TYPE_RINGTONE, &mRingtoneType);
     a->GetBoolean(R::styleable::RingtonePreference_showDefault, TRUE, &mShowDefault);
     a->GetBoolean(R::styleable::RingtonePreference_showSilent, TRUE, &mShowSilent);
+    assert(0);
+    // TODO: a->GetResourceId(R::styleable::RingtonePreference_dialogStyle, 0, &mDialogStyle);
     a->Recycle();
     return NOERROR;
 }
@@ -89,6 +93,21 @@ ECode RingtonePreference::SetRingtoneType(
     return NOERROR;
 }
 
+ECode RingtonePreference::GetSubId(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mSubscriptionID;
+    return NOERROR;
+}
+
+ECode RingtonePreference::SetSubId(
+    /* [in] */ Int32 subId)
+{
+    mSubscriptionID = subId;
+    return NOERROR;
+}
+
 ECode RingtonePreference::GetShowDefault(
     /* [out] */ Boolean* showDefault)
 {
@@ -119,6 +138,21 @@ ECode RingtonePreference::SetShowSilent(
     return NOERROR;
 }
 
+ECode RingtonePreference::GetDialogStyle(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mDialogStyle;
+    return NOERROR;
+}
+
+ECode RingtonePreference::SetDialogStyle(
+    /* [in] */ Int32 dialogStyle)
+{
+    mDialogStyle = dialogStyle;
+    return NOERROR;
+}
+
 ECode RingtonePreference::OnClick()
 {
     AutoPtr<IIntent> intent;
@@ -144,30 +178,41 @@ ECode RingtonePreference::OnClick()
 ECode RingtonePreference::OnPrepareRingtonePickerIntent(
     /* [in] */ IIntent* ringtonePickerIntent)
 {
-    assert(0);
-#if 0 //struct IParcelable' has no member named 'PutParcelableExtra
     AutoPtr<IUri> uri;
     OnRestoreRingtone((IUri**)&uri);
-    IParcelable::Probe(ringtonePickerIntent)->PutParcelableExtra(IRingtoneManager::EXTRA_RINGTONE_EXISTING_URI,
-            IParcelable::Probe(uri));
+    ringtonePickerIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_EXISTING_URI, IParcelable::Probe(uri));
     ringtonePickerIntent->PutBooleanExtra(IRingtoneManager::EXTRA_RINGTONE_SHOW_DEFAULT, mShowDefault);
     if (mShowDefault) {
-        Int32 type;
-        GetRingtoneType(&type);
-        AutoPtr<IUri> defaultUri;
+        Int32 ringtoneType = 0;
+        GetRingtoneType(&ringtoneType);
+
         AutoPtr<IRingtoneManagerHelper> helper;
         CRingtoneManagerHelper::AcquireSingleton((IRingtoneManagerHelper**)&helper);
-        helper->GetDefaultUri(type, (IUri**)&defaultUri);
-        ringtonePickerIntent->PutParcelableExtra(IRingtoneManager::EXTRA_RINGTONE_DEFAULT_URI,
-                IParcelable::Probe(defaultUri));
+        if (ringtoneType == IRingtoneManager::TYPE_RINGTONE) {
+            Int32 subId = 0;
+            GetSubId(&subId);
+            AutoPtr<IUri> defaultRingtoneUri;
+            helper->GetDefaultRingtoneUriBySubId(subId, (IUri**)&defaultRingtoneUri);
+            ringtonePickerIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_DEFAULT_URI, IParcelable::Probe(defaultRingtoneUri));
+        }
+        else {
+            Int32 ringtoneType = 0;
+            GetRingtoneType(&ringtoneType);
+            AutoPtr<IUri> defaultUri;
+            helper->GetDefaultUri(ringtoneType, (IUri**)&defaultUri);
+            ringtonePickerIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_DEFAULT_URI, IParcelable::Probe(defaultUri));
+        }
+    }
+    if (mDialogStyle != 0) {
+        // TODO: ringtonePickerIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_DIALOG_THEME, mDialogStyle);
+        assert(0);
     }
 
     ringtonePickerIntent->PutBooleanExtra(IRingtoneManager::EXTRA_RINGTONE_SHOW_SILENT, mShowSilent);
-    ringtonePickerIntent->PutInt32Extra(IRingtoneManager::EXTRA_RINGTONE_TYPE, mRingtoneType);
-    AutoPtr<ICharSequence> cs;
-    GetTitle((ICharSequence**)&cs);
-    ringtonePickerIntent->PutCharSequenceExtra(IRingtoneManager::EXTRA_RINGTONE_TITLE, cs);
-#endif
+    ringtonePickerIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_TYPE, mRingtoneType);
+    AutoPtr<ICharSequence> charSequenceTmp;
+    GetTitle((ICharSequence**)&charSequenceTmp);
+    ringtonePickerIntent->PutExtra(IRingtoneManager::EXTRA_RINGTONE_TITLE, charSequenceTmp);
     return NOERROR;
 }
 

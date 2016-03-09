@@ -1,7 +1,12 @@
 
+#include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.View.h"
+#include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/text/method/MetaKeyKeyListener.h"
 
+using Elastos::Droid::Os::CServiceManager;
+using Elastos::Droid::Os::IPowerManager;
+using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::View::IKeyCharacterMap;
 
 namespace Elastos {
@@ -119,6 +124,27 @@ ECode MetaKeyKeyListener::AdjustMetaAfterKeypress(
     Adjust(content, CAP);
     Adjust(content, ALT);
     Adjust(content, SYM);
+    // try {
+        AutoPtr<IServiceManager> serviceManager;
+        CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
+        AutoPtr<IInterface> interfaceTmp;
+        serviceManager->GetService(String("power"), (IInterface**)&interfaceTmp);
+        // IPowerManager* power = IPowerManager::Probe(interfaceTmp);
+        Int32 metaStateTmp = 0;
+        GetMetaState(ICharSequence::Probe(content), META_SHIFT_ON, &metaStateTmp);
+        if (metaStateTmp <= 0) {
+            // TODO: power->SetKeyboardLight(FALSE, 1);
+            assert(0);
+        }
+
+        GetMetaState(ICharSequence::Probe(content), META_ALT_ON, &metaStateTmp);
+        if (metaStateTmp <= 0) {
+            // TODO: power->SetKeyboardLight(FALSE, 2);
+            assert(0);
+        }
+    // }
+    // catch (RemoteException doe)  {
+    // }
     return NOERROR;
 }
 
@@ -187,6 +213,26 @@ ECode MetaKeyKeyListener::OnKeyDown(
     VALIDATE_NOT_NULL(ret);
     if (keyCode == IKeyEvent::KEYCODE_SHIFT_LEFT || keyCode == IKeyEvent::KEYCODE_SHIFT_RIGHT) {
         Press(content, CAP);
+        //try {
+            AutoPtr<IServiceManager> serviceManager;
+            CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
+            AutoPtr<IInterface> interfaceTmp;
+            serviceManager->GetService(String("power"), (IInterface**)&interfaceTmp);
+            // IPowerManager* power = IPowerManager::Probe(interfaceTmp);
+
+            Int32 state = 0;
+            ISpanned::Probe(content)->GetSpanFlags(CAP, &state);
+            if (state == PRESSED || state == LOCKED) {
+                // TODO: power->SetKeyboardLight(true, 1);
+                assert(0);
+            }
+            else {
+                // TODO: power->SetKeyboardLight(false, 1);
+                assert(0);
+            }
+        // }
+        // catch (RemoteException doe) {
+        // }
         *ret = TRUE;
         return NOERROR;
     }
@@ -194,6 +240,26 @@ ECode MetaKeyKeyListener::OnKeyDown(
     if (keyCode == IKeyEvent::KEYCODE_ALT_LEFT || keyCode == IKeyEvent::KEYCODE_ALT_RIGHT
             || keyCode == IKeyEvent::KEYCODE_NUM) {
         Press(content, ALT);
+        // try {
+            AutoPtr<IServiceManager> serviceManager;
+            CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
+            AutoPtr<IInterface> interfaceTmp;
+            serviceManager->GetService(String("power"), (IInterface**)&interfaceTmp);
+            // IPowerManager* power = IPowerManager::Probe(interfaceTmp);
+
+            Int32 state = 0;
+            ISpanned::Probe(content)->GetSpanFlags(ALT, &state);
+            if (state == PRESSED || state == LOCKED) {
+                // TODO: power->SetKeyboardLight(TRUE, 2);
+                assert(0);
+            }
+            else {
+                // TODO: power->SetKeyboardLight(FALSE, 2);
+                assert(0);
+            }
+        // }
+        // catch (RemoteException doe) {
+        // }
         *ret = TRUE;
         return NOERROR;
     }
