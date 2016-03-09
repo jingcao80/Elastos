@@ -4,12 +4,14 @@
 #include "elastos/droid/media/CAudioService.h"
 #include "elastos/droid/media/CFocusRequester.h"
 #include "elastos/droid/media/MediaFocusControl.h"
+#include "elastos/droid/media/PlayerRecord.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/view/CKeyEvent.h"
 #include "elastos/droid/Manifest.h"
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -31,6 +33,8 @@ using Elastos::Droid::Speech::IRecognizerIntent;
 // using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::View::CKeyEvent;
 using Elastos::Droid::Manifest;
+using Elastos::Core::CoreUtils;
+using Elastos::Core::IInteger64;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CStack;
@@ -75,6 +79,9 @@ const Int32 MediaFocusControl::MSG_RCC_UPDATE_METADATA = 8;
 const Int32 MediaFocusControl::MSG_RCDISPLAY_INIT_INFO = 9;
 const Int32 MediaFocusControl::MSG_REEVALUATE_RCD = 10;
 const Int32 MediaFocusControl::MSG_UNREGISTER_MEDIABUTTONINTENT = 11;
+const Int32 MediaFocusControl::MSG_RCC_SET_BROWSED_PLAYER = 12;
+const Int32 MediaFocusControl::MSG_RCC_SET_PLAY_ITEM = 13;
+const Int32 MediaFocusControl::MSG_RCC_GET_NOW_PLAYING_ENTRIES = 14;
 
 // sendMsg() flags
 /** If the msg is already queued, replace it with this one. */
@@ -86,6 +93,7 @@ const Int32 MediaFocusControl::SENDMSG_QUEUE = 2;
 
 Object MediaFocusControl::mAudioFocusLock;
 Object MediaFocusControl::mRingingLock;
+const String MediaFocusControl::CLIENT_ID_QCHAT("QCHAT");
 
 const Int32 MediaFocusControl::VOICEBUTTON_ACTION_DISCARD_CURRENT_KEY_PRESS = 1;
 const Int32 MediaFocusControl::VOICEBUTTON_ACTION_START_VOICE_INPUT = 2;
@@ -165,6 +173,30 @@ ECode MediaFocusControl::MediaEventHandler::HandleMessage(
             msg->GetObj((IInterface**)&obj);
             mHost->OnRegisterVolumeObserverForRcc(arg1 /* rccId */,
                     IIRemoteVolumeObserver::Probe(obj) /* rvo */);
+            break;
+        }
+        case MSG_RCC_SET_PLAY_ITEM: {
+            AutoPtr<IInterface> interfaceTmp;
+            msg->GetObj((IInterface**)&interfaceTmp);
+            IInteger64* objTmp = IInteger64::Probe(interfaceTmp);
+            Int64 val = 0;
+            objTmp->GetValue(&val);
+            String strVal = StringUtils::ToString(val);
+            Logger::D(TAG, String("MSG_RCC_SET_PLAY_ITEM: ") + strVal);
+
+            Int32 arg2 = 0;
+            msg->GetArg2(&arg2);
+            mHost->OnSetRemoteControlClientPlayItem(arg2 /* scope */, val /* uid */);
+            break;
+        }
+        case MSG_RCC_GET_NOW_PLAYING_ENTRIES: {
+            Logger::D(TAG, "MSG_RCC_GET_NOW_PLAYING_ENTRIES: ");
+            mHost->OnGetRemoteControlClientNowPlayingEntries();
+            break;
+        }
+        case MSG_RCC_SET_BROWSED_PLAYER: {
+            Logger::D(TAG, "MSG_RCC_SET_BROWSED_PLAYER: ");
+            mHost->OnSetRemoteControlClientBrowsedPlayer();
             break;
         }
         case MSG_RCDISPLAY_INIT_INFO: {
@@ -446,6 +478,33 @@ ECode MediaFocusControl::OnSendFinished(
     return NOERROR;
 }
 
+ECode MediaFocusControl::SetRemoteControlClientPlayItem(
+    /* [in] */ Int64 uid,
+    /* [in] */ Int32 scope)
+{
+    AutoPtr<IInteger64> int64Tmp = CoreUtils::Convert(uid);
+    SendMsg(mEventHandler, MSG_RCC_SET_PLAY_ITEM, SENDMSG_REPLACE, 0 /* arg1 */,
+                scope /* arg2*/, TO_IINTERFACE(int64Tmp)/* obj */, 0 /* delay */);
+    return NOERROR;
+}
+
+ECode MediaFocusControl::GetRemoteControlClientNowPlayingEntries()
+{
+    AutoPtr<IInteger64> int64Tmp = CoreUtils::Convert((Int64)0);
+    SendMsg(mEventHandler, MSG_RCC_GET_NOW_PLAYING_ENTRIES, SENDMSG_REPLACE,
+                0 /* arg1 */, 0 /* arg2 ignored*/, TO_IINTERFACE(int64Tmp) /* obj */, 0 /* delay */);
+    return NOERROR;
+}
+
+ECode MediaFocusControl::SetRemoteControlClientBrowsedPlayer()
+{
+    Logger::D(TAG, "setRemoteControlClientBrowsedPlayer: ");
+    AutoPtr<IInteger64> int64Tmp = CoreUtils::Convert((Int64)0);
+    SendMsg(mEventHandler, MSG_RCC_SET_BROWSED_PLAYER, SENDMSG_REPLACE, 0/* arg1 */,
+                0 /* arg2 ignored*/, TO_IINTERFACE(int64Tmp) /* obj */, 0 /* delay */);
+    return NOERROR;
+}
+
 void MediaFocusControl::Dump(
     /* [in] */ IPrintWriter* pw)
 {
@@ -489,6 +548,62 @@ Boolean MediaFocusControl::RegisterRemoteControlDisplay(
         //         ", must have permission " + android.Manifest.permission.MEDIA_CONTENT_CONTROL +
         //         " to register IRemoteControlDisplay");
         return FALSE;
+    }
+}
+
+void MediaFocusControl::OnSetRemoteControlClientPlayItem(
+    /* [in] */ Int32 scope,
+    /* [in] */ Int64 uid)
+{
+    String strUid = StringUtils::ToString(uid);
+    Logger::D(TAG, String("onSetRemoteControlClientPlayItem: ") + strUid);
+    synchronized(mCurrentRcLock) {
+        if (mCurrentRcClient != NULL) {
+            // try {
+                mCurrentRcClient->SetPlayItem(scope, uid);
+            // } catch (RemoteException e) {
+                // Log.e(TAG, "Current valid remote client is dead: "+e);
+                // mCurrentRcClient = null;
+            // }
+        }
+    }
+}
+
+void MediaFocusControl::OnGetRemoteControlClientNowPlayingEntries()
+{
+    Logger::D(TAG, "onGetRemoteControlClientNowPlayingEntries: ");
+    synchronized(mCurrentRcLock) {
+        if (mCurrentRcClient != NULL) {
+            // try {
+                mCurrentRcClient->GetNowPlayingEntries();
+            // } catch (RemoteException e) {
+                // Log.e(TAG, "Current valid remote client is dead: "+e);
+                // mCurrentRcClient = null;
+            // }
+        }
+    }
+}
+
+void MediaFocusControl::OnSetRemoteControlClientBrowsedPlayer()
+{
+    Logger::D(TAG, "onSetRemoteControlClientBrowsedPlayer: ");
+    AutoPtr<IInterface> interfaceTmp;
+    mPRStack->Peek((IInterface**)&interfaceTmp);
+    IPlayerRecord* prseTmp = IPlayerRecord::Probe(interfaceTmp);
+    PlayerRecord* prse = (PlayerRecord*)prseTmp;
+    AutoPtr<IIRemoteControlClient> controlClient;
+    prse->GetRcc((IIRemoteControlClient**)&controlClient);
+    if (controlClient == NULL) {
+        Logger::D(TAG, "can not proceed with setBrowsedPlayer");
+    }
+    else {
+        Logger::D(TAG, "proceed with setBrowsedPlayer");
+        // try {
+            Logger::D(TAG, "Calling setBrowsedPlayer");
+            controlClient->SetBrowsedPlayer();
+        // } catch (RemoteException e) {
+            // Log.e(TAG, "Current valid remote client is dead: "+ e);
+        // }
     }
 }
 
@@ -550,7 +665,10 @@ Int32 MediaFocusControl::RequestAudioFocus(
     }
 
     synchronized(mAudioFocusLock) {
-        if (!CanReassignAudioFocus()) {
+        if (!CanReassignAudioFocus(clientId)) {
+            return IAudioManager::AUDIOFOCUS_REQUEST_FAILED;
+        }
+        if (!CanReassignAudioFocusFromQchat(mainStreamType, clientId)) {
             return IAudioManager::AUDIOFOCUS_REQUEST_FAILED;
         }
 
@@ -1237,7 +1355,13 @@ void MediaFocusControl::NotifyTopOfAudioFocusStack()
     Boolean b;
     // notify the top of the stack it gained focus
     if (!(mFocusStack->IsEmpty(&b), b)) {
-        if (CanReassignAudioFocus()) {
+        AutoPtr<IInterface> interfaceTmp;
+        mFocusStack->Peek((IInterface**)&interfaceTmp);
+        IFocusRequester* focusRequesterTmp = IFocusRequester::Probe(interfaceTmp);
+        FocusRequester* focusRequester = (FocusRequester*)focusRequesterTmp;
+        String clientId;
+        focusRequester->GetClientId(&clientId);
+        if (CanReassignAudioFocus(clientId)) {
             AutoPtr<IInterface> obj;
             mFocusStack->Peek((IInterface**)&obj);
             IFocusRequester::Probe(obj)->HandleFocusGain(IAudioManager::AUDIOFOCUS_GAIN);
@@ -1347,10 +1471,13 @@ void MediaFocusControl::RemoveFocusStackEntryForClient(
     }
 }
 
-Boolean MediaFocusControl::CanReassignAudioFocus()
+Boolean MediaFocusControl::CanReassignAudioFocus(
+    /* [in] */ const String& clientId)
 {
     // focus requests are rejected during a phone call or when the phone is ringing
     // this is equivalent to IN_VOICE_COMM_FOCUS_ID having the focus
+    // Also focus request is granted to QCHAT client even when voice call is active. QCHAT
+    // client will first check if any voice calls are in CALL_INACTIVE/CALL_HOLD state
     Boolean b1, b2;
     mFocusStack->IsEmpty(&b1);
     AutoPtr<IInterface> obj;
@@ -1359,6 +1486,29 @@ Boolean MediaFocusControl::CanReassignAudioFocus()
     fr->HasSameClient(IN_VOICE_COMM_FOCUS_ID, &b2);
     if (!b1 && b2) {
         return FALSE;
+    }
+    return TRUE;
+}
+
+Boolean MediaFocusControl::CanReassignAudioFocusFromQchat(
+    /* [in] */ Int32 streamType,
+    /* [in] */ const String& clientId)
+{
+    // Focus request is rejected for Music Player and for QChat client if the focus is already
+    // acquired by a QChat client
+    Boolean isEmpty = FALSE;
+    mFocusStack->IsEmpty(&isEmpty);
+    if (!isEmpty) {
+        AutoPtr<IInterface> interfaceTmp;
+        mFocusStack->Peek((IInterface**)&interfaceTmp);
+        IFocusRequester* focusRequesterTmp = IFocusRequester::Probe(interfaceTmp);
+        FocusRequester* focusRequester = (FocusRequester*)focusRequesterTmp;
+        String clientId;
+        focusRequester->GetClientId(&clientId);
+        if (clientId.Contains(CLIENT_ID_QCHAT) &&
+            (clientId.Contains(CLIENT_ID_QCHAT) || (streamType == IAudioManager::STREAM_MUSIC))) {
+            return FALSE;
+        }
     }
     return TRUE;
 }
@@ -1783,7 +1933,7 @@ void MediaFocusControl::RemoveMediaButtonReceiver_syncPrs(
         mPRStack->Get(index, (IInterface**)&obj);
         AutoPtr<IPlayerRecord> prse = IPlayerRecord::Probe(obj);
 
-        Boolean b = FALSE;
+        // Boolean b = FALSE;
 // TODO: Need PlayerRecord
         // if ((prse->HasMatchingMediaButtonIntent(pi, &b), b)) {
         //     prse->Destroy();
@@ -1895,7 +2045,7 @@ void MediaFocusControl::OnRcDisplayUpdate(
 {
     synchronized(mPRStack) {
         synchronized(mCurrentRcLock) {
-            Boolean b = FALSE;
+            // Boolean b = FALSE;
 // TODO: Need PlayerRecord
             // if ((mCurrentRcClient != NULL) && (IObject::Probe(mCurrentRcClient)->Equals(prse->GetRcc(), &b),b)) {
             //     if (DEBUG_RC) Logger::I(TAG, "Display/update remote control ");

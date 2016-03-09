@@ -74,6 +74,7 @@ static void elastos_media_AudioSystem_error_callback(android::status_t err)
             break;
     }
 
+    // TODO: varible error is unused, is that ok?
     int val = check_AudioSystem_Command(err);
     AudioSystem::ErrorCallbackFromNative(val);
 }
@@ -413,7 +414,7 @@ static Int32 convertAudioPortFromNative(
         return jStatus;
     }
     if (nAudioPort->num_sample_rates) {
-        for (Int32 i = 0; i < nAudioPort->num_sample_rates; i++) {
+        for (Int32 i = 0; i < (Int32)nAudioPort->num_sample_rates; i++) {
             jSamplingRates->Set(i, nAudioPort->sample_rates[i]);
         }
     }

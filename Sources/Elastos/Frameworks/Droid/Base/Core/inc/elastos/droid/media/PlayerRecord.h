@@ -26,17 +26,17 @@ namespace Media {
  * stack to its release.
  */
 class PlayerRecord
-	: public Object
-	, public IPlayerRecord
-	, public IProxyDeathRecipient
+    : public Object
+    , public IPlayerRecord
+    , public IProxyDeathRecipient
 {
 protected:
-	class RccPlaybackState
+    class RccPlaybackState
         : public Object
         , public IPlayerRecordRccPlaybackState
-	{
-	public:
-		RccPlaybackState();
+    {
+    public:
+        RccPlaybackState();
 
         virtual ~RccPlaybackState();
 
@@ -61,13 +61,13 @@ protected:
         Int32 mState;
         Int64 mPositionMs;
         Float mSpeed;
-	};
+    };
 
-	class RemotePlaybackState
+    class RemotePlaybackState
         : public Object
         , public IPlayerRecordRemotePlaybackState
-	{
-	public:
+    {
+    public:
         RemotePlaybackState();
 
         virtual ~RemotePlaybackState();
@@ -82,7 +82,7 @@ protected:
         Int32 mVolume;
         Int32 mVolumeMax;
         Int32 mVolumeHandling;
-	};
+    };
 
 private:
     class RcClientDeathHandler
@@ -116,64 +116,64 @@ private:
     };
 
 public:
-	PlayerRecord();
+    PlayerRecord();
 
-	virtual ~PlayerRecord();
+    virtual ~PlayerRecord();
 
     CAR_INTERFACE_DECL()
 
-	CARAPI Dump(
-		/* [in] */ IPrintWriter* pw,
-		/* [in] */ Boolean registrationInfo);
+    CARAPI Dump(
+        /* [in] */ IPrintWriter* pw,
+        /* [in] */ Boolean registrationInfo);
 
-	CARAPI ResetPlaybackInfo();
+    CARAPI ResetPlaybackInfo();
 
-	CARAPI UnlinkToRcClientDeath();
+    CARAPI UnlinkToRcClientDeath();
 
-	CARAPI Destroy();
+    CARAPI Destroy();
 
-	CARAPI BinderDied();
+    CARAPI BinderDied();
+
+    CARAPI GetRcc(
+        /* [out] */ IIRemoteControlClient** result);
 
 protected:
 
-	static CARAPI SetMediaFocusControl(
-		/* [in] */ IPendingIntentOnFinished* mfc);
+    static CARAPI SetMediaFocusControl(
+        /* [in] */ IPendingIntentOnFinished* mfc);
 
-	CARAPI constructor(
-		/* [in] */ IPendingIntent* mediaIntent,
-		/* [in] */ IComponentName* eventReceiver,
-		/* [in] */ IBinder* token);
+    CARAPI constructor(
+        /* [in] */ IPendingIntent* mediaIntent,
+        /* [in] */ IComponentName* eventReceiver,
+        /* [in] */ IBinder* token);
 
-	CARAPI GetRccId(
-		/* [out] */ Int32* result);
+    CARAPI GetRccId(
+        /* [out] */ Int32* result);
 
-	CARAPI GetRcc(
-		/* [out] */ IIRemoteControlClient** result);
+    CARAPI GetMediaButtonReceiver(
+        /* [out] */ IComponentName** result);
 
-	CARAPI GetMediaButtonReceiver(
-		/* [out] */ IComponentName** result);
+    CARAPI GetMediaButtonIntent(
+        /* [out] */ IPendingIntent** result);
 
-	CARAPI GetMediaButtonIntent(
-		/* [out] */ IPendingIntent** result);
+    CARAPI HasMatchingMediaButtonIntent(
+        /* [in] */ IPendingIntent* pi,
+        /* [out] */ Boolean* result);
 
-	CARAPI HasMatchingMediaButtonIntent(
-		/* [in] */ IPendingIntent* pi,
-		/* [out] */ Boolean* result);
+    CARAPI IsPlaybackActive(
+        /* [out] */ Boolean* result);
 
-	CARAPI IsPlaybackActive(
-		/* [out] */ Boolean* result);
-
-	CARAPI ResetControllerInfoForRcc(
-		/* [in] */ IIRemoteControlClient* rcClient,
+    CARAPI ResetControllerInfoForRcc(
+        /* [in] */ IIRemoteControlClient* rcClient,
         /* [in] */ const String& callingPackageName,
         /* [in] */ Int32 uid);
 
-	CARAPI ResetControllerInfoForNoRcc();
+    CARAPI ResetControllerInfoForNoRcc();
 
-	CARAPI Finalize();
+    CARAPI Finalize();
 
 public:
-	static AutoPtr<IPendingIntentOnFinished> sController; //MediaFocusControl
+    static AutoPtr<IPendingIntentOnFinished> sController; //MediaFocusControl
     /**
      * Information only used for non-local playback
      */
@@ -187,7 +187,7 @@ public:
     AutoPtr<IIRemoteVolumeObserver> mRemoteVolumeObs;
 
 private:
-	// on purpose not using this classe's name, as it will only be used from MediaFocusControl
+    // on purpose not using this classe's name, as it will only be used from MediaFocusControl
     static const String TAG;
     static const Boolean DEBUG;
 

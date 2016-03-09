@@ -1,6 +1,8 @@
+#include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Provider.h"
 #include "elastos/droid/media/CRingtoneManager.h"
 #include "elastos/droid/net/CUriHelper.h"
+#include "elastos/droid/net/Uri.h"
 #include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/provider/CMediaStoreAudioMedia.h"
 #include "elastos/droid/internal/database/CSortCursor.h"
@@ -10,11 +12,17 @@
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::App::IProfileGroup;
+using Elastos::Droid::App::ProfileGroupMode;
+using Elastos::Droid::App::ProfileGroupMode_DEFAULT;
+using Elastos::Droid::App::ProfileGroupMode_SUPPRESS;
+using Elastos::Droid::App::ProfileGroupMode_OVERRIDE;
 using Elastos::Droid::Content::IContentUris;
 using Elastos::Droid::Internal::Database::CSortCursor;
 using Elastos::Droid::Internal::Database::ISortCursor;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
+using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::IEnvironment;
 using Elastos::Droid::Provider::CMediaStoreAudioMedia;
@@ -365,7 +373,30 @@ ECode CRingtoneManager::GetActualDefaultRingtoneUri(
     AutoPtr<IUri> uri;
     uriHelper->Parse(uriString, (IUri**)&uri);
 
-    *result = !uriString.IsNull() ? uri : NULL;
+    if ((uriString == NULL) || (type & TYPE_RINGTONE) == 0) {
+        *result = !uriString.IsNull() ? uri : NULL;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
+
+    AutoPtr<IUri> ringToneUri;
+    GetStaticDefaultRingtoneUri(context, (IUri**)&ringToneUri);
+    AutoPtr<ICursor> cursor;
+    // try {
+        contentResolver->Query(uri, NULL, String(""), NULL, String(""), (ICursor**)&cursor);
+        Int32 count = 0;
+        if ((cursor != NULL) && (cursor->GetCount(&count), count > 0)) {
+            ringToneUri = NULL;
+            ringToneUri = uri;
+        }
+    // } catch (SQLiteException ex) {
+        // Log.e(TAG, "ex " + ex);
+    // } finally {
+        if (cursor != NULL)
+            ICloseable::Probe(cursor)->Close();
+    // }
+
+    *result = ringToneUri;
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -410,10 +441,15 @@ ECode CRingtoneManager::GetDefaultType(
     VALIDATE_NOT_NULL(result);
 
     AutoPtr<IUri> uri;
-    Boolean tempState;
+    Boolean tempState = FALSE;
+    Boolean tempState1 = FALSE;
+    Boolean tempState2 = FALSE;
+    assert(0);
     if (defaultRingtoneUri == NULL) {
         *result = -1;
-    } else if (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_RINGTONE_URI, &tempState), tempState) {
+    } else if ((IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_RINGTONE_URI, &tempState), tempState)
+        || (IObject::Probe(defaultRingtoneUri)->Equals(NULL/*TODO: Settings::System::DEFAULT_RINGTONE_URI_2*/, &tempState1), tempState1)
+        || (IObject::Probe(defaultRingtoneUri)->Equals(NULL/*TODO: Settings::System::DEFAULT_RINGTONE_URI_3*/, &tempState2), tempState2)) {
         *result = TYPE_RINGTONE;
     } else if (IObject::Probe(defaultRingtoneUri)->Equals(Settings::System::DEFAULT_NOTIFICATION_URI, &tempState), tempState) {
         *result = TYPE_NOTIFICATION;
@@ -422,26 +458,6 @@ ECode CRingtoneManager::GetDefaultType(
     } else {
         *result = -1;
     }
-    return NOERROR;
-}
-
-ECode CRingtoneManager::GetDefaultRingtoneUriBySubId(
-    /* [in] */ Int32 subId,
-    /* [out] */ IUri** result)
-{
-    VALIDATE_NOT_NULL(result);
-    assert(0);
-    /* TODO
-    if (!(subId >= 0 &&  subId < Settings.System.MAX_NUM_RINGTONES)) {
-        return null;
-    }
-    if (subId == 0) {
-        return Settings.System.DEFAULT_RINGTONE_URI;
-    } else {
-        final String uriString =
-                Settings.System.DEFAULT_RINGTONE_URI.toString() + "_" + (subId + 1);
-        return Uri.parse(uriString);
-    }*/
     return NOERROR;
 }
 
@@ -463,6 +479,161 @@ ECode CRingtoneManager::GetDefaultUri(
         *result = NULL;
     }
     REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode CRingtoneManager::GetStaticDefaultRingtoneUri(
+    /* [in] */ IContext* context,
+    /* [out] */ IUri** result)
+{
+    VALIDATE_NOT_NULL(result);
+    AutoPtr<IContentResolver> contentResolver;
+    context->GetContentResolver((IContentResolver**)&contentResolver);
+    String uriString;
+    Settings::System::GetString(contentResolver, ISettingsSystem::DEFAULT_RINGTONE, &uriString);
+
+    AutoPtr<IUri> uri;
+    Uri::Parse(uriString, (IUri**)&uri);
+    *result = !uriString.IsNull() ? uri : NULL;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode CRingtoneManager::GetDefaultRingtoneSubIdByUri(
+    /* [in] */ IUri* defaultRingtoneUri,
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (defaultRingtoneUri == NULL) {
+        *result = -1;
+        return NOERROR;
+    }
+    /**
+     * URI is encoded as below:
+     * DEFAULT_RINGTONE_URI: content://settings/system/ringtone
+     * DEFAULT_RINGTONE_URI_2: content://settings/system/ringtone_2
+     * DEFAULT_RINGTONE_URI_3: content://settings/system/ringtone_3
+     */
+    String defaultUriStr;
+    IObject::Probe(defaultRingtoneUri)->ToString(&defaultUriStr);
+    String defaultRingtoneUriStr;
+    IObject::Probe(Settings::System::DEFAULT_RINGTONE_URI)->ToString(&defaultRingtoneUriStr);
+    if (defaultUriStr.Equals(defaultRingtoneUriStr)) {
+        *result = 0;
+        return NOERROR;
+    }
+    String uriString;
+    IObject::Probe(defaultRingtoneUri)->ToString(&uriString);
+    Int32 parsedSubId = -1;
+    IObject::Probe(Settings::System::DEFAULT_RINGTONE_URI)->ToString(&defaultRingtoneUriStr);
+    if (uriString.StartWith(defaultRingtoneUriStr)) {
+        parsedSubId = StringUtils::ParseInt32(uriString.Substring(uriString.LastIndexOf('_') + 1));
+        assert(0);
+        if ((parsedSubId > 0 &&  parsedSubId <= -1/*TODO: ISettingsSystem::MAX_NUM_RINGTONES*/)) {
+            *result = parsedSubId - 1;
+            return NOERROR;
+        }
+    }
+    *result = -1;
+    return NOERROR;
+}
+
+ECode CRingtoneManager::GetDefaultRingtoneUriBySubId(
+    /* [in] */ Int32 subId,
+    /* [out] */ IUri** result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (!(subId >= 0 &&  subId < -1/*TODO: ISettingsSystem::MAX_NUM_RINGTONES*/)) {
+        *result = NULL;
+        return NOERROR;
+    }
+    if (subId == 0) {
+        *result = Settings::System::DEFAULT_RINGTONE_URI;
+        REFCOUNT_ADD(*result);
+        return NOERROR;
+    }
+    else {
+        String defaultRingtoneUriStr;
+        IObject::Probe(Settings::System::DEFAULT_RINGTONE_URI)->ToString(&defaultRingtoneUriStr);
+        String uriString = defaultRingtoneUriStr + String("_") + StringUtils::ToString(subId + 1);
+        return Uri::Parse(uriString, result);
+    }
+}
+
+ECode CRingtoneManager::GetActualRingtoneUriBySubId(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 subId,
+    /* [out] */ IUri** result)
+{
+    VALIDATE_NOT_NULL(context);
+    VALIDATE_NOT_NULL(result);
+    if (!(subId >= 0 &&  subId < -1/*TODO: ISettingsSystem::MAX_NUM_RINGTONES*/)) {
+        *result = NULL;
+        return NOERROR;
+    }
+    String setting;
+    if (subId == 0) {
+        setting = ISettingsSystem::RINGTONE;
+    }
+    else {
+        setting = ISettingsSystem::RINGTONE + String("_") + StringUtils::ToString(subId + 1);
+    }
+
+    AutoPtr<IContentResolver> contentResolver;
+    context->GetContentResolver((IContentResolver**)&contentResolver);
+    String uriString;
+    Settings::System::GetString(contentResolver, setting, &uriString);
+    if (uriString.IsEmpty()) {
+        *result = NULL;
+        return NOERROR;
+    }
+
+    AutoPtr<IUri> ringToneUri;
+    GetStaticDefaultRingtoneUri(context, (IUri**)&ringToneUri);
+    AutoPtr<ICursor> cursor;
+    // try {
+        AutoPtr<IUri> uri;
+        Uri::Parse(uriString, (IUri**)&uri);
+        contentResolver->Query(uri, NULL, String(""), NULL, String(""), (ICursor**)&cursor);
+        Int32 count = 0;
+        if ((cursor != NULL) && (cursor->GetCount(&count), count > 0)) {
+            ringToneUri = NULL;
+            Uri::Parse(uriString, (IUri**)&ringToneUri);
+        }
+    // } catch (SQLiteException ex) {
+        // Log.e(TAG, "ex " + ex);
+    // } finally {
+        if (cursor != NULL)
+            ICloseable::Probe(cursor)->Close();
+    // }
+    *result = ringToneUri;
+    REFCOUNT_ADD(*result);
+    return NOERROR;
+}
+
+ECode CRingtoneManager::SetActualRingtoneUriBySubId(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 subId,
+    /* [in] */ IUri* ringtoneUri)
+{
+    VALIDATE_NOT_NULL(context);
+    VALIDATE_NOT_NULL(ringtoneUri);
+    if (!(subId >= 0 &&  subId < -1/*TODO: ISettingsSystem::MAX_NUM_RINGTONES*/)) {
+        return NOERROR;
+    }
+    String setting;
+    if (subId == 0) {
+        setting = ISettingsSystem::RINGTONE;
+    }
+    else {
+        setting = ISettingsSystem::RINGTONE + String("_") + StringUtils::ToString(subId + 1);
+    }
+
+    AutoPtr<IContentResolver> contentResolver;
+    context->GetContentResolver((IContentResolver**)&contentResolver);
+    String ringtoneUriStr = ringtoneUri != NULL ? (IObject::Probe(ringtoneUri)->ToString(&ringtoneUriStr), ringtoneUriStr) : String("");
+    Boolean resTmp = FALSE;
+    Settings::System::PutString(contentResolver, setting, ringtoneUriStr, &resTmp);
     return NOERROR;
 }
 
@@ -608,6 +779,16 @@ AutoPtr<IRingtone> CRingtoneManager::GetRingtone(
     /* [in] */ IUri* ringtoneUri,
     /* [in] */ Int32 streamType)
 {
+    assert(0);
+    AutoPtr<IInterface> interfaceTmp;
+    context->GetSystemService(IContext::PROFILE_SERVICE, (IInterface**)&interfaceTmp);
+    // IObject* objTmp = IObject::Probe(interfaceTmp);
+    // TODO: ProfileManager* pm = (ProfileManager*)objTmp;
+    String packageName;
+    context->GetPackageName(&packageName);
+    AutoPtr<IProfileGroup> profileGroup;
+    // TODO: pm->GetActiveProfileGroup(packageName, (IProfileGroup**)&profileGroup);
+
 //    try {
     AutoPtr<IRingtone> r;
     ECode ec = CRingtone::New(context, TRUE, (IRingtone**)&r);
@@ -618,6 +799,22 @@ AutoPtr<IRingtone> CRingtoneManager::GetRingtone(
         ec = r->SetStreamType(streamType);
         if (FAILED(ec)) {
             goto exception;
+        }
+    }
+    if (profileGroup != NULL) {
+        ProfileGroupMode ringerMode = ProfileGroupMode_DEFAULT;
+        profileGroup->GetRingerMode(&ringerMode);
+        switch (ringerMode) {
+            case ProfileGroupMode_OVERRIDE :
+                {
+                    AutoPtr<IUri> ringer;
+                    profileGroup->GetRingerOverride((IUri**)&ringer);
+                    r->SetUri(ringer);
+                }
+                return r;
+            case ProfileGroupMode_SUPPRESS :
+                r = NULL;
+                return r;
         }
     }
     ec = r->SetUri(ringtoneUri);

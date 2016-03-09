@@ -314,8 +314,7 @@ ECode CMediaRecorder::GetAudioSourceMax(
 
     // FIXME disable selection of the remote submxi source selection once test code
     //       doesn't rely on it
-    *result = IMediaRecorderAudioSource::REMOTE_SUBMIX;
-    //return IAudioSource::VOICE_COMMUNICATION;
+    *result = IMediaRecorderAudioSource::FM_RX_A2DP;
     return NOERROR;
 }
 
@@ -354,15 +353,16 @@ ECode CMediaRecorder::SetProfile(
     SetVideoEncodingBitRate(videoBitRate);
     SetVideoEncoder(videoCodec);
 
-    Int32 quality;
-
+    Int32 quality = 0;
     profile->GetQuality(&quality);
+    Int32 audioCodec = 0;
+    profile->GetAudioCodec(&audioCodec);
     if (quality >= ICamcorderProfile::QUALITY_TIME_LAPSE_LOW &&
         quality <= ICamcorderProfile::QUALITY_TIME_LAPSE_QVGA) {
         // Nothing needs to be done. Call to setCaptureRate() enables
         // time lapse video recording.
     }
-    else {
+    else if (audioCodec >= 0) {
         Int32 audioBitRate, audioChannels, audioSampleRate, audioCodec;
 
         profile->GetAudioBitRate(&audioBitRate);
@@ -681,6 +681,14 @@ ECode CMediaRecorder::Start()
     android::sp<android::MediaRecorder> mr = getMediaRecorder(this);
     return process_media_recorder_call(mr->start(),
         E_RUNTIME_EXCEPTION, "start failed.");
+}
+
+ECode CMediaRecorder::Pause()
+{
+    assert(0);
+    // TODO: call jni func
+    android::sp<android::MediaRecorder> mr = getMediaRecorder(this);
+    return NOERROR;
 }
 
 ECode CMediaRecorder::Stop()

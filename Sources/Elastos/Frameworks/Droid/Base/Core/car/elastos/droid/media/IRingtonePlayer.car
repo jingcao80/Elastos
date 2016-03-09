@@ -23,6 +23,10 @@ module
             [in] IBinder* token,
             [out] Boolean* result);
 
+        SetVolume(
+            [in] IBinder* token,
+            [in] Float volume);
+
         /** Used for Notification sound playback. */
         PlayAsync(
             [in] IUri* uri,

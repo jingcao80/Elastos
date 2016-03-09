@@ -52,9 +52,39 @@ module
         const Int32 QUALITY_QVGA = 7;
 
         /**
-         * Quality level corresponding to the 2160p (3840x2160) resolution.
+         * Quality level corresponding to the 2160p (3840 x 2160) resolution.
          */
         const Int32 QUALITY_2160P = 8;
+
+        /** @hide
+         * Quality level corresponding to the WVGA resolution.
+         */
+        const Int32 QUALITY_WVGA = 9;
+
+        /** @hide
+         * Quality level corresponding to the VGA resolution.
+         */
+        const Int32 QUALITY_VGA = 10;
+
+        /** @hide
+         * Quality level corresponding to the WQVGA resolution.
+         */
+        const Int32 QUALITY_WQVGA = 11;
+
+        /** @hide
+         * Quality level corresponding to the FWVGA resolution.
+         */
+        const Int32 QUALITY_FWVGA = 12;
+
+        /** @hide
+         * Quality level corresponding to 4K DCI resolution
+         */
+        const Int32 QUALITY_4kDCI = 13;
+
+        /** @hide
+         * Quality level corresponding to 4K DCI resolution
+         */
+        const Int32 QUALITY_HVGA = 18;
 
         /**
          * Time lapse quality level corresponding to the lowest available resolution.
@@ -100,6 +130,31 @@ module
          * Time lapse quality level corresponding to the 2160p (3840 x 2160) resolution.
          */
         const Int32 QUALITY_TIME_LAPSE_2160P = 1008;
+
+        /** @hide
+         * Time lapse quality level corresponding to the FWVGA (864 x 480) resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_FWVGA = 1009;
+
+        /** @hide
+         * Time lapse quality level corresponding to the WVGA (800 x 480) resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_WVGA = 1010;
+
+        /** @hide
+         * Time lapse quality level corresponding to the VGA (640 x 480) resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_VGA = 1011;
+
+        /** @hide
+         * Time lapse quality level corresponding to the WQVGA (432 x 240) resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_WQVGA = 1012;
+
+        /** @hide
+         * Time lapse quality level corresponding to the 4k DCI resolution.
+         */
+        const Int32 QUALITY_TIME_LAPSE_4kDCI = 1013;
 
         /**
          * High speed ( >= 100fps) quality level corresponding to the lowest available resolution.

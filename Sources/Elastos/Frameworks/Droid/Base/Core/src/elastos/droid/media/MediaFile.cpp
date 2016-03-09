@@ -12,6 +12,8 @@ namespace Media {
 
 const Int32 MediaFile::FIRST_AUDIO_FILE_TYPE = IMediaFile::FILE_TYPE_MP3;
 const Int32 MediaFile::LAST_AUDIO_FILE_TYPE = IMediaFile::FILE_TYPE_FLAC;
+const Int32 MediaFile::FIRST_AUDIO_FILE_TYPE_EXT = IMediaFile::FILE_TYPE_DTS;
+const Int32 MediaFile::LAST_AUDIO_FILE_TYPE_EXT = IMediaFile::FILE_TYPE_APE;
 const Int32 MediaFile::FIRST_MIDI_FILE_TYPE = IMediaFile::FILE_TYPE_MID;
 const Int32 MediaFile::LAST_MIDI_FILE_TYPE = IMediaFile::FILE_TYPE_IMY;
 const Int32 MediaFile::FIRST_VIDEO_FILE_TYPE = IMediaFile::FILE_TYPE_MP4;
@@ -22,7 +24,7 @@ const Int32 MediaFile::LAST_VIDEO_FILE_TYPE2 = IMediaFile::FILE_TYPE_MP2PS;
 const Int32 MediaFile::FIRST_IMAGE_FILE_TYPE = IMediaFile::FILE_TYPE_JPEG;
 const Int32 MediaFile::LAST_IMAGE_FILE_TYPE = IMediaFile::FILE_TYPE_WEBP;
 const Int32 MediaFile::FIRST_PLAYLIST_FILE_TYPE = IMediaFile::FILE_TYPE_M3U;
-const Int32 MediaFile::LAST_PLAYLIST_FILE_TYPE = IMediaFile::FILE_TYPE_HTTPLIVE;
+const Int32 MediaFile::LAST_PLAYLIST_FILE_TYPE = IMediaFile::FILE_TYPE_DASH;
 const Int32 MediaFile::FIRST_DRM_FILE_TYPE = IMediaFile::FILE_TYPE_FL;
 const Int32 MediaFile::LAST_DRM_FILE_TYPE = IMediaFile::FILE_TYPE_FL;
 
@@ -87,6 +89,7 @@ const Int32 MediaFile::LAST_DRM_FILE_TYPE = IMediaFile::FILE_TYPE_FL;
     AddFileType(String("M3U8"), IMediaFile::FILE_TYPE_HTTPLIVE, String("application/vnd.apple.mpegurl"));
     AddFileType(String("M3U8"), IMediaFile::FILE_TYPE_HTTPLIVE, String("audio/mpegurl"));
     AddFileType(String("M3U8"), IMediaFile::FILE_TYPE_HTTPLIVE, String("audio/x-mpegurl"));
+    AddFileType(String("MPD"), IMediaFile::FILE_TYPE_DASH, String("application/dash+xml"));
 
     AddFileType(String("FL"), IMediaFile::FILE_TYPE_FL, String("application/x-android-drm-fl"));
 
@@ -101,6 +104,12 @@ const Int32 MediaFile::LAST_DRM_FILE_TYPE = IMediaFile::FILE_TYPE_FL;
     AddFileType(String("ZIP"), IMediaFile::FILE_TYPE_ZIP, String("application/zip"));
     AddFileType(String("MPG"), IMediaFile::FILE_TYPE_MP2PS, String("video/mp2p"));
     AddFileType(String("MPEG"), IMediaFile::FILE_TYPE_MP2PS, String("video/mp2p"));
+    AddFileType(String("DIVX"), IMediaFile::FILE_TYPE_DIVX, String("video/divx"));
+    AddFileType(String("QCP"), IMediaFile::FILE_TYPE_QCP, String("audio/qcelp"));
+    AddFileType(String("AC3"), IMediaFile::FILE_TYPE_AC3, String("audio/ac3"));
+    AddFileType(String("EC3"), IMediaFile::FILE_TYPE_EC3, String("audio/eac3"));
+    AddFileType(String("FLV"), IMediaFile::FILE_TYPE_FLV, String("video/x-flv"));
+    AddFileType(String("APE"), IMediaFile::FILE_TYPE_APE, String("audio/x-ape"));
 
     return TRUE;
 }
@@ -146,7 +155,9 @@ ECode MediaFile::IsAudioFileType(
     *result = ((fileType >= FIRST_AUDIO_FILE_TYPE &&
                fileType <= LAST_AUDIO_FILE_TYPE) ||
                (fileType >= FIRST_MIDI_FILE_TYPE &&
-               fileType <= LAST_MIDI_FILE_TYPE));
+               fileType <= LAST_MIDI_FILE_TYPE)||
+               (fileType >= FIRST_AUDIO_FILE_TYPE_EXT &&
+               fileType <= LAST_AUDIO_FILE_TYPE_EXT));
     return NOERROR;
 }
 

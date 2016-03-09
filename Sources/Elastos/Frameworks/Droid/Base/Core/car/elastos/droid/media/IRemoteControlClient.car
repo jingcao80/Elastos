@@ -77,6 +77,13 @@ module
             [in] Int32 key,
             [in] IRating * value);
 
+        SetPlayItem(
+            [in] Int32 scope,
+            [in] Int64 uid);
+
+        SetBrowsedPlayer();
+
+        GetNowPlayingEntries();
     }
 
     } // namespace Media

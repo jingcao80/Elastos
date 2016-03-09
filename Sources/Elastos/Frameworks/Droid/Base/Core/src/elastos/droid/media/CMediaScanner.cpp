@@ -6,9 +6,12 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Libcore.h"
 #include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.Internal.h"
 #include "Elastos.Droid.Media.h"
+#include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/mtp/CMtpConstants.h"
 #include "elastos/droid/graphics/CBitmapFactoryOptions.h"
+#include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/provider/CMediaStoreVideoMedia.h"
 #include "elastos/droid/provider/CMediaStoreAudioMedia.h"
@@ -25,6 +28,7 @@
 #include "elastos/droid/os/CSystemProperties.h"
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/sax/CRootElement.h"
+//TODO: #include "elastos/droid/telephony/CTelephonyManager.h"
 #include <elastos/droid/utility/Xml.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/Math.h>
@@ -40,6 +44,8 @@ using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Mtp::IMtpConstants;
 using Elastos::Droid::Mtp::CMtpConstants;
 using Elastos::Droid::Graphics::CBitmapFactoryOptions;
+using Elastos::Droid::Internal::Telephony::IPhoneConstants;
+using Elastos::Droid::Os::SystemProperties;
 using Elastos::Droid::Provider::CMediaStoreVideoMedia;
 using Elastos::Droid::Provider::CMediaStoreAudioMedia;
 using Elastos::Droid::Provider::CMediaStoreImagesMedia;
@@ -66,6 +72,8 @@ using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::ISystemProperties;
+//TODO: using Elastos::Droid::Telephony::CTelephonyManager;
+using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Graphics::CBitmapFactory;
 using Elastos::Droid::Graphics::IBitmapFactory;
 using Elastos::Droid::Net::IUriBuilder;
@@ -322,6 +330,7 @@ AutoPtr< ArrayOf<String> > CMediaScanner::ID3_GENRES = InitID3_GENRES();
 
 const Boolean CMediaScanner::ENABLE_BULK_INSERTS = TRUE;
 const String CMediaScanner::DEFAULT_RINGTONE_PROPERTY_PREFIX("ro.config.");
+const Int32 CMediaScanner::DEFAULT_SIM_INDEX;
 Object CMediaScanner::mLock;
 HashMap<String, String> CMediaScanner::mNoMediaPaths;
 HashMap<String, String> CMediaScanner::mMediaPaths;
@@ -1096,10 +1105,18 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
                         DoesPathHaveFilename(entry->mPath, mOwner->mDefaultNotificationFilename)) {
                     needToSetSettings = TRUE;
                 }
-            } else if (ringtones && !mOwner->mDefaultRingtoneSet) {
-                if (TextUtils::IsEmpty(mOwner->mDefaultRingtoneFilename) ||
-                        DoesPathHaveFilename(entry->mPath, mOwner->mDefaultRingtoneFilename)) {
-                    needToSetSettings = TRUE;
+            } else if (ringtones && !RingtoneDefaultsSet()) {
+                AutoPtr<ITelephonyManager> defaultTelephonyManager;
+                // TODO: CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
+                Int32 phoneCount = 0;
+                defaultTelephonyManager->GetPhoneCount(&phoneCount);
+                for (Int32 i = 0; i < phoneCount; ++i) {
+                    // Check if ringtone matches default ringtone
+                    if (TextUtils::IsEmpty((*(mOwner->mDefaultRingtoneFilenames))[i]) ||
+                            DoesPathHaveFilename(entry->mPath, (*(mOwner->mDefaultRingtoneFilenames))[i])) {
+                        needToSetSettings = TRUE;
+                        break;
+                    }
                 }
             } else if (alarms && !mOwner->mDefaultAlarmSet) {
                 if (TextUtils::IsEmpty(mOwner->mDefaultAlarmAlertFilename) ||
@@ -1169,14 +1186,62 @@ AutoPtr<IUri> CMediaScanner::MyMediaScannerClient::EndFile( // throws RemoteExce
             SetSettingIfNotSet(ISettingsSystem::NOTIFICATION_SOUND, tableUri, rowId);
             mOwner->mDefaultNotificationSet = TRUE;
         } else if (ringtones) {
-            SetSettingIfNotSet(ISettingsSystem::RINGTONE, tableUri, rowId);
-            mOwner->mDefaultRingtoneSet = TRUE;
+            // memorize default system ringtone persistently
+            SetSettingIfNotSet(ISettingsSystem::DEFAULT_RINGTONE, tableUri, rowId);
+            AutoPtr<ITelephonyManager> defaultTelephonyManager;
+            // TODO: CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
+            Int32 phoneCount = 0;
+            defaultTelephonyManager->GetPhoneCount(&phoneCount);
+            String uri;
+            for (Int32 i = 0; i < phoneCount; ++i) {
+                if ((*(mOwner->mDefaultRingtonesSet))[i]) {
+                    continue;
+                }
+
+                // Check if ringtone matches default ringtone
+                if (!TextUtils::IsEmpty((*(mOwner->mDefaultRingtoneFilenames))[i]) &&
+                        !DoesPathHaveFilename(entry->mPath, (*(mOwner->mDefaultRingtoneFilenames))[i])) {
+                    continue;
+                }
+                if (i == DEFAULT_SIM_INDEX) {
+                    uri = ISettingsSystem::RINGTONE;
+                }
+                else {
+                    uri = ISettingsSystem::RINGTONE + String("_") + StringUtils::ToString(i + 1);
+                }
+
+                // Set default ringtone
+                SetSettingIfNotSet(uri, tableUri, rowId);
+                (*(mOwner->mDefaultRingtonesSet))[i] = TRUE;
+            }
         } else if (alarms) {
             SetSettingIfNotSet(ISettingsSystem::ALARM_ALERT, tableUri, rowId);
             mOwner->mDefaultAlarmSet = TRUE;
         }
     }
     return result;
+}
+
+Boolean CMediaScanner::MyMediaScannerClient::RingtoneDefaultsSet()
+{
+    // If not multisim, just check default sim's default
+    AutoPtr<ITelephonyManager> defaultTelephonyManager;
+    // TODO: CTelephonyManager::GetDefault((ITelephonyManager**)&defaultTelephonyManager);
+    Boolean isMultiSimEnabled = FALSE;
+    defaultTelephonyManager->IsMultiSimEnabled(&isMultiSimEnabled);
+
+    if (!isMultiSimEnabled) {
+        return (*(mOwner->mDefaultRingtonesSet))[DEFAULT_SIM_INDEX];
+    }
+    // Otherwise check if all defaults were accounted for
+    Boolean defaultSet = FALSE;
+    for (Int32 i=0; i<mOwner->mDefaultRingtonesSet->GetLength(); ++i) {
+        defaultSet = (*(mOwner->mDefaultRingtonesSet))[i];
+        if (!defaultSet) {
+            return FALSE;
+        }
+    }
+    return TRUE;
 }
 
 Boolean CMediaScanner::MyMediaScannerClient::DoesPathHaveFilename(
@@ -1304,7 +1369,6 @@ CMediaScanner::CMediaScanner()
     , mExternalIsEmulated(FALSE)
     , mOriginalCount(0)
     , mWasEmptyPriorToScan(FALSE)
-    , mDefaultRingtoneSet(FALSE)
     , mDefaultNotificationSet(FALSE)
     , mDefaultAlarmSet(FALSE)
     , mCaseInsensitivePaths(FALSE)
@@ -1359,7 +1423,7 @@ ECode CMediaScanner::StopScan()
     return NOERROR;
 }
 
-CMediaScanner::ClearMediaPathCache(
+ECode CMediaScanner::ClearMediaPathCache(
     /* [in] */ Boolean clearMediaPaths,
     /* [in] */ Boolean clearNoMediaPaths)
 {
@@ -1372,15 +1436,39 @@ CMediaScanner::ClearMediaPathCache(
             mNoMediaPaths.Clear();
         }
     }
-
+    return NOERROR;
 }
 
 void CMediaScanner::SetDefaultRingtoneFileNames()
 {
     AutoPtr<ISystemProperties> sp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
-    sp->Get(DEFAULT_RINGTONE_PROPERTY_PREFIX
-            + ISettingsSystem::RINGTONE, &mDefaultRingtoneFilename);
+    String defaultAllSimRingtone;
+    sp->Get(DEFAULT_RINGTONE_PROPERTY_PREFIX + ISettingsSystem::RINGTONE, &defaultAllSimRingtone);
+
+    AutoPtr<ITelephonyManager> defaultTelephonyManager;
+    // TODO: CTelephonyManager::GetDefault((ITelephonyManager****)&defaultTelephonyManager);
+    Int32 phoneCount = 0;
+    defaultTelephonyManager->GetPhoneCount(&phoneCount);
+
+    mDefaultRingtoneFilenames = ArrayOf<String>::Alloc(phoneCount);
+    mDefaultRingtonesSet = ArrayOf<Boolean>::Alloc(phoneCount);
+
+    String strTmp;
+    SystemProperties::Get(DEFAULT_RINGTONE_PROPERTY_PREFIX + ISettingsSystem::RINGTONE, &strTmp);
+    (*mDefaultRingtoneFilenames)[DEFAULT_SIM_INDEX] = strTmp;
+
+    Boolean boolTmp = FALSE;
+    defaultTelephonyManager->IsMultiSimEnabled(&boolTmp);
+    if (boolTmp) {
+        for (Int32 i = IPhoneConstants::SUB2; i < phoneCount; ++i) {
+            String defaultIterSimRingtone;
+            SystemProperties::Get(DEFAULT_RINGTONE_PROPERTY_PREFIX + ISettingsSystem::RINGTONE
+                + String("_") + StringUtils::ToString(i + 1), defaultAllSimRingtone, &defaultIterSimRingtone);
+            (*mDefaultRingtoneFilenames)[i] = defaultIterSimRingtone;
+        }
+    }
+
     sp->Get(DEFAULT_RINGTONE_PROPERTY_PREFIX
             + ISettingsSystem::NOTIFICATION_SOUND, &mDefaultNotificationFilename);
     sp->Get(DEFAULT_RINGTONE_PROPERTY_PREFIX
@@ -1868,32 +1956,33 @@ ECode CMediaScanner::ScanSingleFile(
     AutoPtr<IUri> temp;
 
     ECode ec = Initialize(volumeName);
-    FAIL_GOTO(ec, _EXIT_)
-    ec = Prescan(path, TRUE);
-    FAIL_GOTO(ec, _EXIT_)
+    if (SUCCEEDED(ec)) {
+        ec = Prescan(path, TRUE);
+        if (SUCCEEDED(ec)) {
+            CFile::New(path, (IFile**)&file);
+            Boolean isExist;
+            file->Exists(&isExist);
+            if (isExist) {
+                *result = NULL;
+                return ReleaseReSources();
+            }
 
-    CFile::New(path, (IFile**)&file);
-    Boolean isExist;
-    file->Exists(&isExist);
-    if (isExist) {
-        *result = NULL;
-        return ReleaseReSources();
+            // lastModified is in milliseconds on Files.
+            file->GetLastModified(&tempValue);
+            lastModifiedSeconds = tempValue / 1000;
+
+            // always scan the file, so we can return the content://media Uri for existing files
+            file->GetLength(&tempValue);
+            Boolean isNoMediaPath;
+            IsNoMediaPath(path, &isNoMediaPath);
+            Boolean isDirectory = FALSE;
+            file->IsDirectory(&isDirectory);
+            temp = mClient->DoScanFile(path, mimeType, lastModifiedSeconds, tempValue, isDirectory, TRUE, isNoMediaPath);
+            *result = temp;
+            REFCOUNT_ADD(*result);
+            return ReleaseReSources();
+        }
     }
-
-    // lastModified is in milliseconds on Files.
-    file->GetLastModified(&tempValue);
-    lastModifiedSeconds = tempValue / 1000;
-
-    // always scan the file, so we can return the content://media Uri for existing files
-    file->GetLength(&tempValue);
-    Boolean isNoMediaPath;
-    IsNoMediaPath(path, &isNoMediaPath);
-    temp = mClient->DoScanFile(path, mimeType, lastModifiedSeconds, tempValue, FALSE, TRUE, isNoMediaPath);
-    *result = temp;
-    REFCOUNT_ADD(*result);
-    return ReleaseReSources();
-
-_EXIT_:
     ReleaseReSources();
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
         Logger::E(TAG, "RemoteException in CMediaScanner.scanFile()");

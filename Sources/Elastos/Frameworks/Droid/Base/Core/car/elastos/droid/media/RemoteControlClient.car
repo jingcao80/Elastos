@@ -151,6 +151,20 @@ module
         Apply();
     }
 
+    interface IRemoteControlClientOnGetNowPlayingEntriesListener {
+        OnGetNowPlayingEntries();
+    }
+
+    interface IRemoteControlClientOnSetBrowsedPlayerListener {
+        OnSetBrowsedPlayer();
+    }
+
+    interface IRemoteControlClientOnSetPlayItemListener {
+        OnSetPlayItem(
+            [in] Int32 scope,
+            [in] Int64 uid);
+    }
+
     /**
      * RemoteControlClient enables exposing information meant to be consumed by remote controls
      * capable of displaying metadata, artwork and media transport control buttons.
@@ -176,6 +190,7 @@ module
      *
      * @deprecated Use {@link MediaSession} instead.
      */
+    [deprecated]
     interface IRemoteControlClient {
         /**
          * Playback state of a RemoteControlClient which is stopped.
@@ -578,6 +593,17 @@ module
             [in] Int64 timeInMs,
             [in] Float playbackSpeed);
 
+        PlayItemResponse(
+            [in] Boolean success);
+
+        UpdateNowPlayingEntries(
+            [in] ArrayOf<Int64>* playList);
+
+        UpdateFolderInfoBrowsedPlayer(
+            [in] String stringUri);
+
+        UpdateNowPlayingContentChange();
+
         /**
          * Sets the flags for the media transport control buttons that this client supports.
          * @param transportControlFlags A combination of the following flags:
@@ -603,6 +629,15 @@ module
          */
         SetMetadataUpdateListener(
             [in] IRemoteControlClientOnMetadataUpdateListener * l);
+
+        SetNowPlayingEntriesUpdateListener(
+            [in] IRemoteControlClientOnGetNowPlayingEntriesListener* l);
+
+        SetBrowsedPlayerUpdateListener(
+            [in] IRemoteControlClientOnSetBrowsedPlayerListener* l);
+
+        SetPlayItemListener(
+            [in] IRemoteControlClientOnSetPlayItemListener* l);
 
         /**
          * Sets the listener to be called whenever the media playback position is requested

@@ -123,7 +123,7 @@ public:
         /* [in] */ Int32 key,
         /* [out] */ IDate** result);
 
-     CARAPI RecycleParcel();
+    CARAPI RecycleParcel();
 
     /**
      * @return the last available system metadata id. Ids are

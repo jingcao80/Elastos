@@ -264,6 +264,33 @@ public:
         /* [out] */ IUri** result);
 
     /**
+     * Returns the {@link Uri} for the static default ringtone.
+     * Rather than returning the actual ringtone's sound {@link Uri}, this will
+     * return the default system ringtone. When actual ringtone is not valid
+     * in media provider, default system ringtone is the one to rollback to.
+     *
+     * @return The {@link Uri} of the default system ringtone.
+     * @hide
+     */
+    static CARAPI GetStaticDefaultRingtoneUri(
+        /* [in] */ IContext* context,
+        /* [out] */ IUri** result);
+
+    /**
+     * Returns the subscription ID of {@link Uri}.
+     *
+     * @param defaultRingtoneUri The default {@link Uri}. For example,
+     *            {@link System#DEFAULT_RINGTONE_URI},
+     *            {@link System#DEFAULT_RINGTONE_URI_2}, or
+     *            {@link System#DEFAULT_RINGTONE_URI_3}.
+     * @return The Subscription ID of the defaultRingtoneUri, or -1.
+     * @hide
+     */
+    static CARAPI GetDefaultRingtoneSubIdByUri(
+        /* [in] */ IUri* defaultRingtoneUri,
+        /* [out] */ Int32* result);
+
+    /**
      * Gets the actual default sound's {@link Uri}. This will give the actual
      * sound {@link Uri}, instead of using this, most clients can use
      * {@link System#DEFAULT_RINGTONE_URI}.
@@ -275,6 +302,34 @@ public:
     static CARAPI GetDefaultRingtoneUriBySubId(
         /* [in] */ Int32 subId,
         /* [out] */ IUri** result);
+
+    /**
+     * Gets the current default sound's {@link Uri}. This will give the actual
+     * sound {@link Uri}, instead of using this, most clients can use
+     * {@link System#DEFAULT_RINGTONE_URI}.
+     *
+     * @param context A context used for querying.
+     * @param subId The Subscription ID.
+     * @return A {@link Uri} pointing to the default sound for the sound type.
+     * @hide
+     */
+    static CARAPI GetActualRingtoneUriBySubId(
+        /* [in] */ IContext* context,
+        /* [in] */ Int32 subId,
+        /* [out] */ IUri** result);
+
+    /**
+     * Sets the {@link Uri} of the default sound for a given sound type.
+     *
+     * @param context A context used for querying.
+     * @param subId The Subscription ID.
+     * @param ringtoneUri A {@link Uri} pointing to the default sound to set.
+     * @hide
+     */
+    static CARAPI SetActualRingtoneUriBySubId(
+        /* [in] */ IContext* context,
+        /* [in] */ Int32 subId,
+        /* [in] */ IUri* ringtoneUri);
 
 private:
     static CARAPI_(AutoPtr<IUri>) GetUriFromCursor(

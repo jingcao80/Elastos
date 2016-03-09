@@ -5675,7 +5675,7 @@ void CAudioService::LoadTouchSoundAssets()
                 xmlPullParser->GetAttributeValue(String(NULL), ATTR_ASSET_ID, &id);
                 String file;
                 xmlPullParser->GetAttributeValue(String(NULL), ATTR_ASSET_FILE, &file);
-                Int32 fx;
+                Int32 fx = 0;
 
                 // try {
 // TODO: Need Field

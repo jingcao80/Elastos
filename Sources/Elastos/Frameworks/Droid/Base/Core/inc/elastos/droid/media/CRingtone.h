@@ -103,6 +103,9 @@ public:
 
     CARAPI Stop();
 
+    CARAPI SetVolume(
+        /* [in] */ Float volume);
+
     CARAPI IsPlaying(
         /* [out] */ Boolean* playing);
 

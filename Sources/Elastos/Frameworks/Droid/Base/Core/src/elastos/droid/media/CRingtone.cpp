@@ -162,16 +162,23 @@ String CRingtone::GetTitle(
 
         if (ISettings::AUTHORITY.Equals(authority)) {
             if (followSettingsUri) {
-                AutoPtr<IRingtoneManagerHelper> helper;
-                CRingtoneManagerHelper::AcquireSingleton((IRingtoneManagerHelper**)&helper);
-
-                Int32 type;
-                helper->GetDefaultType(uri, &type);
-
                 AutoPtr<IUri> actualUri;
-                helper->GetActualDefaultRingtoneUri(context, type, (IUri**)&actualUri);
-                String actualTitle = GetTitle(context, actualUri, FALSE);
+                Int32 defaultTypeTmp = 0;
+                CRingtoneManager::GetDefaultType(uri, &defaultTypeTmp);
+                if (defaultTypeTmp == IRingtoneManager::TYPE_RINGTONE) {
+                    Int32 defaultRingtoneSubId = 0;
+                    CRingtoneManager::GetDefaultRingtoneSubIdByUri(uri, &defaultRingtoneSubId);
+                    CRingtoneManager::GetActualRingtoneUriBySubId(context,
+                         defaultRingtoneSubId, (IUri**)&actualUri);
+                }
+                else {
+                    Int32 defaultType = 0;
+                    CRingtoneManager::GetDefaultType(uri, &defaultType);
+                    CRingtoneManager::GetActualDefaultRingtoneUri(context,
+                         defaultType, (IUri**)&actualUri);
+                }
 
+                String actualTitle = GetTitle(context, actualUri, FALSE);
                 AutoPtr<ArrayOf<IInterface*> > array = ArrayOf<IInterface*>::Alloc(1);
                 array->Set(0, StringUtils::ParseCharSequence(actualTitle).Get());
                 context->GetString(R::string::ringtone_default_with_actual, array, &title);
@@ -329,6 +336,22 @@ ECode CRingtone::Stop()
     return NOERROR;
 }
 
+ECode CRingtone::SetVolume(
+    /* [in] */ Float volume)
+{
+    if (mLocalPlayer != NULL) {
+        mLocalPlayer->SetVolume(volume);
+    }
+    else if (mAllowRemote && mRemotePlayer != NULL) {
+        // try {
+            mRemotePlayer->SetVolume(mRemoteToken, volume);
+        // } catch (RemoteException e) {
+            // Log.w(TAG, "Problem setting ringtone volume: " + e);
+        // }
+    }
+    return NOERROR;
+}
+
 void CRingtone::DestroyLocalPlayer()
 {
     if (mLocalPlayer != NULL) {
@@ -370,11 +393,11 @@ Boolean CRingtone::PlayFallbackRingtone()
     Int32 r;
     mAudioManager->GetStreamVolume(vol, &r);
     if (r != 0) {
-        Int32 ringtoneType;
-        CRingtoneManager::GetDefaultType(mUri, &ringtoneType);
+        Int32 subId = 0;
+        CRingtoneManager::GetDefaultRingtoneSubIdByUri(mUri, &subId);
         AutoPtr<IUri> uri;
-        CRingtoneManager::GetActualDefaultRingtoneUri(mContext, ringtoneType, (IUri**)&uri);
-        if (ringtoneType == -1 || uri != NULL) {
+        if (subId == -1 &&
+            (CRingtoneManager::GetActualRingtoneUriBySubId(mContext, subId, (IUri**)&uri), uri != NULL)) {
             // Default ringtone, try fallback ringtone.
             // try {
             AutoPtr<IResources> res;

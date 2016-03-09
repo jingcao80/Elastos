@@ -16,6 +16,7 @@
 #include "elastos/droid/graphics/CRectF.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Core::AutoLock;
@@ -48,6 +49,8 @@ using Elastos::Droid::Graphics::IPaint;
 using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::IRectF;
 using Elastos::Droid::Graphics::CRectF;
+using Elastos::Core::IInteger64;
+using Elastos::Core::CoreUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -61,6 +64,9 @@ const Int32 CRemoteControlClient::PLAYBACK_TYPE_MAX = IRemoteControlClient::PLAY
 const Int64 CRemoteControlClient::POSITION_REFRESH_PERIOD_PLAYING_MS = 15000;
 const Int64 CRemoteControlClient::POSITION_REFRESH_PERIOD_MIN_MS = 2000;
 const Int32 CRemoteControlClient::MSG_POSITION_DRIFT_CHECK = 11;
+const Int32 CRemoteControlClient::MSG_SET_BROWSED_PLAYER = 12;
+const Int32 CRemoteControlClient::MSG_SET_PLAY_ITEM = 13;
+const Int32 CRemoteControlClient::MSG_GET_NOW_PLAYING_ENTRIES = 14;
 const Int64 CRemoteControlClient::POSITION_DRIFT_MAX_MS = 500;
 //----------------------------------------
 //    CRemoteControlClient::MetadataEditor
@@ -215,6 +221,70 @@ ECode CRemoteControlClient::MetadataEditor::Apply()
     return NOERROR;
 }
 
+CRemoteControlClient::InnerMediaSessionCallback::InnerMediaSessionCallback(
+    /* [in] */ CRemoteControlClient* owner)
+    : mOwner(owner)
+{
+    assert(NULL != owner);
+}
+
+ECode CRemoteControlClient::InnerMediaSessionCallback::OnSeekTo(
+    /* [in] */ Int64 pos)
+{
+    mOwner->OnSeekTo(mOwner->mCurrentClientGenId, pos);
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::InnerMediaSessionCallback::OnSetRating(
+    /* [in] */ IRating* rating)
+{
+    if ((mOwner->mTransportControlFlags & FLAG_KEY_MEDIA_RATING) != 0) {
+        mOwner->OnUpdateMetadata(mOwner->mCurrentClientGenId, IMediaMetadataEditor::RATING_KEY_BY_USER, rating);
+    }
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::InnerMediaSessionCallback::SetPlayItem(
+    /* [in] */ Int32 scope,
+    /* [in] */ Int64 uid)
+{
+    // only post messages, we can't block here
+    if (mOwner->mEventHandler != NULL) {
+        mOwner->mEventHandler->RemoveMessages(MSG_SET_PLAY_ITEM);
+        AutoPtr<IInteger64> int64Tmp = CoreUtils::Convert(uid);
+        AutoPtr<IMessage> messageTmp;
+        mOwner->mEventHandler->ObtainMessage(MSG_SET_PLAY_ITEM, 0, scope, TO_IINTERFACE(int64Tmp), (IMessage**)&messageTmp);
+        Boolean resTmp = FALSE;
+        mOwner->mEventHandler->SendMessage(messageTmp, &resTmp);
+    }
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::InnerMediaSessionCallback::GetNowPlayingEntries()
+{
+    // only post messages, we can't block here
+    if (mOwner->mEventHandler != NULL) {
+        mOwner->mEventHandler->RemoveMessages(MSG_GET_NOW_PLAYING_ENTRIES);
+        AutoPtr<IMessage> messageTmp;
+        mOwner->mEventHandler->ObtainMessage(MSG_GET_NOW_PLAYING_ENTRIES, 0, 0, NULL, (IMessage**)&messageTmp);
+        Boolean resTmp = FALSE;
+        mOwner->mEventHandler->SendMessage(messageTmp, &resTmp);
+    }
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::InnerMediaSessionCallback::SetBrowsedPlayer()
+{
+    Logger::D(TAG, "setBrowsedPlayer in RemoteControlClient");
+    if (mOwner->mEventHandler != NULL) {
+        AutoPtr<IMessage> messageTmp;
+        mOwner->mEventHandler->ObtainMessage(MSG_SET_BROWSED_PLAYER, 0, 0, NULL, (IMessage**)&messageTmp);
+        Boolean resTmp = FALSE;
+        mOwner->mEventHandler->SendMessage(messageTmp, &resTmp);
+    }
+    return NOERROR;
+}
+
 CRemoteControlClient::CRemoteControlClient()
     : mPlaybackState(PLAYSTATE_NONE)
     , mPlaybackStateChangeTimeMs(0)
@@ -349,6 +419,41 @@ ECode CRemoteControlClient::SetPlaybackState(
     return NOERROR;
 }
 
+ECode CRemoteControlClient::PlayItemResponse(
+    /* [in] */ Boolean success)
+{
+    Logger::E(TAG, "playItemResponse");
+    PlayItemResponseInt(success);
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::UpdateNowPlayingEntries(
+    /* [in] */ ArrayOf<Int64>* playList)
+{
+    Logger::E(TAG, String("updateNowPlayingEntries: Item numbers: ") + StringUtils::ToString(playList->GetLength()));
+    UpdateNowPlayingEntriesInt(playList);
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::UpdateFolderInfoBrowsedPlayer(
+    /* [in] */ const String& stringUri)
+{
+    Logger::E(TAG, "updateFolderInfoBrowsedPlayer");
+    synchronized(mCacheLock) {
+        UpdateFolderInfoBrowsedPlayerInt(stringUri);
+    }
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::UpdateNowPlayingContentChange()
+{
+    Logger::E(TAG, "updateNowPlayingContentChange");
+    synchronized(mCacheLock) {
+        UpdateNowPlayingContentChangeInt();
+    }
+    return NOERROR;
+}
+
 void CRemoteControlClient::SetPlaybackStateInt(
     /* [in] */ Int32 state,
     /* [in] */ Int64 timeInMs,
@@ -393,6 +498,47 @@ void CRemoteControlClient::SetPlaybackStateInt(
                 mSession->SetPlaybackState(mSessionPlaybackState.Get());
             }
         }
+    }
+}
+
+void CRemoteControlClient::PlayItemResponseInt(
+    /* [in] */ Boolean success)
+{
+    Logger::D(TAG, "playItemResponseInt");
+    Logger::V(TAG, String("success: ") + StringUtils::BooleanToString(success));
+
+    // USE_SESSIONS
+    if (mSession != NULL) {
+        mSession->PlayItemResponse(success);
+    }
+}
+
+void CRemoteControlClient::UpdateNowPlayingEntriesInt(
+    /* [in] */ ArrayOf<Int64>* playList)
+{
+    Logger::D(TAG, "updateNowPlayingEntriesInt");
+    // USE_SESSIONS
+    if (mSession != NULL) {
+        mSession->UpdateNowPlayingEntries(playList);
+    }
+}
+
+void CRemoteControlClient::UpdateFolderInfoBrowsedPlayerInt(
+    /* [in] */ const String& stringUri)
+{
+    Logger::D(TAG, "updateFolderInfoBrowsedPlayerInt");
+    // USE_SESSIONS
+    if (mSession != NULL) {
+        mSession->UpdateFolderInfoBrowsedPlayer(stringUri);
+    }
+}
+
+void CRemoteControlClient::UpdateNowPlayingContentChangeInt()
+{
+    Logger::D(TAG, "updateNowPlayingContentChangeInt");
+    // USE_SESSIONS
+    if (mSession != NULL) {
+        mSession->UpdateNowPlayingContentChange();
     }
 }
 
@@ -478,6 +624,36 @@ ECode CRemoteControlClient::SetMetadataUpdateListener(
 {
     synchronized(mCacheLock) {
         mMetadataUpdateListener = l;
+    }
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::SetNowPlayingEntriesUpdateListener(
+    /* [in] */ IRemoteControlClientOnGetNowPlayingEntriesListener * l)
+{
+    Logger::D(TAG, "setNowPlayingEntriesUpdateListener");
+    synchronized(mCacheLock) {
+        mGetNowPlayingEntriesListener = l;
+    }
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::SetBrowsedPlayerUpdateListener(
+    /* [in] */ IRemoteControlClientOnSetBrowsedPlayerListener * l)
+{
+    Logger::D(TAG, "setBrowsedPlayerUpdateListener");
+    synchronized(mCacheLock) {
+        mSetBrowsedPlayerListener = l;
+    }
+    return NOERROR;
+}
+
+ECode CRemoteControlClient::SetPlayItemListener(
+    /* [in] */ IRemoteControlClientOnSetPlayItemListener * l)
+{
+    Logger::D(TAG, "setPlayItemListener");
+    synchronized(mCacheLock) {
+        mSetPlayItemListener = l;
     }
     return NOERROR;
 }
@@ -573,6 +749,29 @@ ECode CRemoteControlClient::EventHandler::HandleMessage(
             mOwner->OnPositionDriftCheck();
             break;
         }
+        case MSG_SET_BROWSED_PLAYER:
+        {
+            Logger::D(TAG, "MSG_SET_BROWSED_PLAYER in RemoteControlClient");
+            mOwner->OnSetBrowsedPlayer();
+            break;
+        }
+        case MSG_SET_PLAY_ITEM:
+        {
+            Int32 arg2 = 0;
+            msg->GetArg2(&arg2);
+            AutoPtr<IInterface> interfaceTmp;
+            msg->GetObj((IInterface**)&interfaceTmp);
+            IInteger64* int64Tmp = IInteger64::Probe(interfaceTmp);
+            Int64 int64 = 0;
+            int64Tmp->GetValue(&int64);
+            mOwner->OnSetPlayItem(arg2, int64);
+            break;
+        }
+        case MSG_GET_NOW_PLAYING_ENTRIES:
+        {
+            mOwner->OnGetNowPlayingEntries();
+            break;
+        }
         default:
         {
             Logger::E(TAG, "Unknown event %d in RemoteControlClient handler", what);
@@ -604,6 +803,41 @@ void CRemoteControlClient::OnUpdateMetadata(
                 mMetadataUpdateListener->OnMetadataUpdate(key, value);
             }
         }
+}
+
+void CRemoteControlClient::OnSetPlayItem(
+    /* [in] */ Int32 scope,
+    /* [in] */ Int64 uid)
+{
+    Logger::D(TAG, "onSetPlayItem");
+    synchronized (mCacheLock) {
+        if (mSetPlayItemListener != NULL) {
+            Logger::D(TAG, "mSetPlayItemListener.onSetPlayItem");
+            mSetPlayItemListener->OnSetPlayItem(scope, uid);
+        }
+    }
+}
+
+void CRemoteControlClient::OnSetBrowsedPlayer()
+{
+    Logger::D(TAG, "onSetBrowsedPlayer");
+    synchronized (mCacheLock) {
+        if (mSetBrowsedPlayerListener != NULL) {
+            Logger::D(TAG, "mSetBrowsedPlayerListener.onSetBrowsedPlayer");
+            mSetBrowsedPlayerListener->OnSetBrowsedPlayer();
+        }
+    }
+}
+
+void CRemoteControlClient::OnGetNowPlayingEntries()
+{
+    Logger::D(TAG, "onGetNowPlayingEntries");
+    synchronized (mCacheLock) {
+        if (mGetNowPlayingEntriesListener != NULL) {
+            Logger::D(TAG, "mGetNowPlayingEntriesListener.onGetNowPlayingEntries");
+            mGetNowPlayingEntriesListener->OnGetNowPlayingEntries();
+        }
+    }
 }
 
 } // namespace Media

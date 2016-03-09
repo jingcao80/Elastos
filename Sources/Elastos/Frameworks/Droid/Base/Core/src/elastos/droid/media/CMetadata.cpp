@@ -252,9 +252,10 @@ ECode CMetadata::GetDate(
 
 ECode CMetadata::RecycleParcel()
 {
-    // ToDo recycle parcel
-    // if (mParcel != NULL)
-    // mParcel->Recycle();
+    if (mParcel != NULL) {
+        assert(0);
+        // TODO: mParcel.recycle();
+    }
     return NOERROR;
 }
 

@@ -24,6 +24,7 @@ module
      * Interface definition for the callbacks to be invoked whenever media events, metadata
      * and playback status are available.
      */
+    [deprecated]
     interface IRemoteControllerOnClientUpdateListener {
         /**
          * Called whenever all information, previously received through the other
@@ -84,6 +85,29 @@ module
          */
         OnClientMetadataUpdate(
             [in] IRemoteControllerMetadataEditor * metadataEditor);
+
+        /**
+         * @hide
+         */
+        OnClientFolderInfoBrowsedPlayer(
+            [in] String stringUri);
+
+        /**
+         * @hide
+         */
+        OnClientUpdateNowPlayingEntries(
+            [in] ArrayOf<Int64>* playList);
+
+        /**
+         * @hide
+         */
+        OnClientNowPlayingContentChange();
+
+        /**
+         * @hide
+         */
+        OnClientPlayItemResponse(
+            [in] Boolean success);
     }
 
     /**
@@ -103,7 +127,7 @@ module
      *
      * @deprecated Use {@link MediaController} instead.
      */
-    // @Deprecated
+    [deprecated]
     interface IRemoteController {
         /**
          * Default playback position synchronization mode where the RemoteControlClient is not
@@ -192,6 +216,33 @@ module
 
         /**
          * @hide
+         * Request the user of a RemoteControlClient to play the requested item.
+         * @param generationId the RemoteControlClient generation counter for which this request is
+         *     issued.
+         * @param uid uid of the song to be played.
+         * @scope scope of the file system to use
+         */
+        SetRemoteControlClientPlayItem(
+            [in] Int64 uid,
+            [in] Int32 scope);
+
+        /**
+         * @hide
+         * Request the user of a RemoteControlClient to provide with the now playing list entries.
+         * @param generationId the RemoteControlClient generation counter for which this request is
+         *     issued.
+         */
+        GetRemoteControlClientNowPlayingEntries();
+
+        /**
+         * @hide
+         * Request the user of a RemoteControlClient to set the music player as current browsed player.
+         * @param packageName package name of the targeted media player.
+         */
+        SetRemoteControlClientBrowsedPlayer();
+
+        /**
+         * @hide
          * @param wantBitmap
          * @param width
          * @param height
@@ -247,6 +298,29 @@ module
         StartListeningToSessions();
 
         StopListeningToSessions();
+
+        /**
+         * @hide
+         */
+        OnFolderInfoBrowsedPlayer(
+            [in] String stringUri);
+
+        /**
+         * @hide
+         */
+        OnNowPlayingEntriesUpdate(
+            [in] ArrayOf<Int64>* playList);
+
+        /**
+         * @hide
+         */
+        OnNowPlayingContentChange();
+
+        /**
+         * @hide
+         */
+        OnSetPlayItemResponse(
+            [in] Boolean success);
     }
 
     interface IPlaybackInfo {

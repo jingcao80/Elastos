@@ -68,6 +68,12 @@ module
          */
         const Int32 REMOTE_SUBMIX = 8;
 
+        /** @hide */
+        const Int32 FM_RX = 10;
+
+        /** @hide */
+        const Int32 FM_RX_A2DP = 11;
+
         /**
          * Audio source for preemptible, low-priority software hotword detection
          * It presents the same gain and pre processing tuning as {@link #VOICE_RECOGNITION}.
@@ -148,6 +154,12 @@ module
 
         /** VP8/VORBIS data in a WEBM container */
         const Int32 WEBM = 9;
+
+        /** @hide QCP file format */
+        const Int32 QCP = 20;
+
+        /** @hide WAVE media file format*/
+        const Int32 WAVE = 21;
     }
 
     interface IMediaRecorderAudioEncoder {
@@ -167,6 +179,12 @@ module
         const Int32 AAC_ELD = 5;
         /** Ogg Vorbis audio codec */
         const Int32 VORBIS = 6;
+        /** @hide EVRC audio codec */
+        const Int32 EVRC = 10;
+        /** @hide QCELP audio codec */
+        const Int32 QCELP = 11;
+        /** @hide Linear PCM audio codec */
+        const Int32 LPCM = 12;
     }
 
     interface IMediaRecorderVideoEncoder {
@@ -178,6 +196,7 @@ module
         const Int32 H264 = 2;
         const Int32 MPEG_4_SP = 3;
         const Int32 VP8 = 4;
+        const Int32 H265 = 5;
     }
 
     /**

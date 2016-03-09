@@ -50,7 +50,8 @@ Boolean MediaMetadataEditor::InitStatic()
     // keys with Rating values
     METADATA_KEYS_TYPE->Put(RATING_KEY_BY_OTHERS, METADATA_TYPE_RATING);
     METADATA_KEYS_TYPE->Put(RATING_KEY_BY_USER, METADATA_TYPE_RATING);
-
+    // Meta data for total number of tracks in Album
+    METADATA_KEYS_TYPE->Put(IMediaMetadataRetriever::METADATA_KEY_NUM_TRACKS, METADATA_TYPE_LONG);
     return TRUE;
 }
 

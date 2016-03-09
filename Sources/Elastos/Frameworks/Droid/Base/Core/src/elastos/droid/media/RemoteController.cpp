@@ -253,6 +253,37 @@ ECode RemoteController::MediaControllerCallback::OnMetadataChanged(
     return NOERROR;
 }
 
+ECode RemoteController::MediaControllerCallback::OnUpdateFolderInfoBrowsedPlayer(
+    /* [in] */ const String& stringUri)
+{
+    Logger::D(TAG, "MediaControllerCallback: onUpdateFolderInfoBrowsedPlayer");
+    mHost->OnFolderInfoBrowsedPlayer(stringUri);
+    return NOERROR;
+}
+
+ECode RemoteController::MediaControllerCallback::OnUpdateNowPlayingEntries(
+    /* [in] */ ArrayOf<Int64>* playList)
+{
+    Logger::D(TAG, "MediaControllerCallback: onUpdateNowPlayingEntries");
+    mHost->OnNowPlayingEntriesUpdate(playList);
+    return NOERROR;
+}
+
+ECode RemoteController::MediaControllerCallback::OnUpdateNowPlayingContentChange()
+{
+    Logger::D(TAG, "MediaControllerCallback: onUpdateNowPlayingContentChange");
+    mHost->OnNowPlayingContentChange();
+    return NOERROR;
+}
+
+ECode RemoteController::MediaControllerCallback::OnPlayItemResponse(
+    /* [in] */ Boolean success)
+{
+    Logger::D(TAG, "MediaControllerCallback: onPlayItemResponse");
+    mHost->OnSetPlayItemResponse(success);
+    return NOERROR;
+}
+
 //================================================================================
 //                      RemoteController::TopTransportSessionListener
 //================================================================================
@@ -692,7 +723,7 @@ ECode RemoteController::SeekTo(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-
+    Logger::E(TAG, "seekTo() in RemoteController");
     if (!mEnabled) {
         Slogger::E(TAG, "Cannot use seekTo() from a disabled RemoteController");
         *result = FALSE;
@@ -710,6 +741,59 @@ ECode RemoteController::SeekTo(
         }
     }
     *result = TRUE;
+    return NOERROR;
+}
+
+ECode RemoteController::SetRemoteControlClientPlayItem(
+    /* [in] */ Int64 uid,
+    /* [in] */ Int32 scope)
+{
+    Logger::E(TAG, "setRemoteControlClientPlayItem()");
+    if (!mEnabled) {
+        Logger::E(TAG, "Cannot use setRemoteControlClientPlayItem() from a disabled RemoteController");
+        return NOERROR;
+    }
+    synchronized (mInfoLock) {
+        if (mCurrentSession != NULL) {
+            AutoPtr<IMediaControllerTransportControls> control;
+            mCurrentSession->GetTransportControls((IMediaControllerTransportControls**)&control);
+            control->SetRemoteControlClientPlayItem(uid, scope);
+        }
+    }
+    return NOERROR;
+}
+
+ECode RemoteController::GetRemoteControlClientNowPlayingEntries()
+{
+    Logger::E(TAG, "getRemoteControlClientNowPlayingEntries()");
+    if (!mEnabled) {
+        Logger::E(TAG, "Cannot use getRemoteControlClientNowPlayingEntries() from a disabled RemoteController");
+        return NOERROR;
+    }
+    synchronized (mInfoLock) {
+        if (mCurrentSession != NULL) {
+            AutoPtr<IMediaControllerTransportControls> control;
+            mCurrentSession->GetTransportControls((IMediaControllerTransportControls**)&control);
+            control->GetRemoteControlClientNowPlayingEntries();
+        }
+    }
+    return NOERROR;
+}
+
+ECode RemoteController::SetRemoteControlClientBrowsedPlayer()
+{
+    Logger::E(TAG, "setRemoteControlClientBrowsedPlayer()");
+    if (!mEnabled) {
+        Logger::E(TAG, "Cannot use setRemoteControlClientBrowsedPlayer() from a disabled RemoteController");
+        return NOERROR;
+    }
+    synchronized (mInfoLock) {
+        if (mCurrentSession != NULL) {
+            AutoPtr<IMediaControllerTransportControls> control;
+            mCurrentSession->GetTransportControls((IMediaControllerTransportControls**)&control);
+            control->SetRemoteControlClientBrowsedPlayer();
+        }
+    }
     return NOERROR;
 }
 
@@ -824,6 +908,61 @@ ECode RemoteController::StopListeningToSessions()
     if (DEBUG) {
         Int32 userId = UserHandle::GetMyUserId();
         Slogger::D(TAG, "Unregistered session listener for user %d", userId);
+    }
+    return NOERROR;
+}
+
+ECode RemoteController::OnFolderInfoBrowsedPlayer(
+    /* [in] */ const String& stringUri)
+{
+    Logger::D(TAG, "RemoteController: onFolderInfoBrowsedPlayer");
+    AutoPtr<IRemoteControllerOnClientUpdateListener> l;
+    synchronized(mInfoLock) {
+        l = mOnClientUpdateListener;
+    }
+    if (l != NULL) {
+        l->OnClientFolderInfoBrowsedPlayer(stringUri);
+    }
+    return NOERROR;
+}
+
+ECode RemoteController::OnNowPlayingEntriesUpdate(
+    /* [in] */ ArrayOf<Int64>* playList)
+{
+    Logger::D(TAG, "RemoteController: onUpdateNowPlayingEntries");
+    AutoPtr<IRemoteControllerOnClientUpdateListener> l;
+    synchronized(mInfoLock) {
+        l = mOnClientUpdateListener;
+    }
+    if (l != NULL) {
+        l->OnClientUpdateNowPlayingEntries(playList);
+    }
+    return NOERROR;
+}
+
+ECode RemoteController::OnNowPlayingContentChange()
+{
+    Logger::D(TAG, "RemoteController: onNowPlayingContentChange");
+    AutoPtr<IRemoteControllerOnClientUpdateListener> l;
+    synchronized(mInfoLock) {
+        l = mOnClientUpdateListener;
+    }
+    if (l != NULL) {
+        l->OnClientNowPlayingContentChange();
+    }
+    return NOERROR;
+}
+
+ECode RemoteController::OnSetPlayItemResponse(
+    /* [in] */ Boolean success)
+{
+    Logger::D(TAG, "RemoteController: onPlayItemResponse");
+    AutoPtr<IRemoteControllerOnClientUpdateListener> l;
+    synchronized(mInfoLock) {
+        l = mOnClientUpdateListener;
+    }
+    if (l != NULL) {
+        l->OnClientPlayItemResponse(success);
     }
     return NOERROR;
 }
@@ -970,7 +1109,7 @@ void RemoteController::OnNewMetadata(
     synchronized(mInfoLock) {
         l = mOnClientUpdateListener;
         if ((mMetadataEditor != NULL) && (mMetadataEditor->mEditorMetadata != NULL)) {
-            if (mMetadataEditor->mEditorMetadata != metadata) {
+            if (TO_IINTERFACE(mMetadataEditor->mEditorMetadata) != TO_IINTERFACE(metadata)) {
                 // existing metadata, merge existing and new
                 mMetadataEditor->mEditorMetadata->PutAll(metadata);
             }
@@ -1059,6 +1198,11 @@ void RemoteController::UpdateController(
         mCurrentSession->GetSessionToken((IMediaSessionToken**)&_msToken);
         if (controller == NULL) {
             if (mCurrentSession != NULL) {
+                Logger::V(TAG, "Updating current controller as null");
+                String packageName;
+                mCurrentSession->GetPackageName(&packageName);
+                mAudioManager->UpdateMediaPlayerList(packageName, FALSE);
+
                 mCurrentSession->UnregisterCallback(mSessionCb.Get());
                 mCurrentSession = NULL;
                 SendMsg(mEventHandler, MSG_CLIENT_CHANGE, SENDMSG_REPLACE,
@@ -1067,12 +1211,28 @@ void RemoteController::UpdateController(
         } else if (mCurrentSession == NULL
                 || !(msToken == _msToken)) {
             if (mCurrentSession != NULL) {
+                String packageName;
+                controller->GetPackageName(&packageName);
+                String currSessPackageName;
+                mCurrentSession->GetPackageName(&currSessPackageName);
+                Logger::V(TAG, String("Updating current controller package as ") +
+                     packageName + String(" from ") + currSessPackageName);
                 mCurrentSession->UnregisterCallback(mSessionCb.Get());
+            }
+            else {
+                String packageName;
+                controller->GetPackageName(&packageName);
+                Logger::V(TAG, String("Updating current controller package as ") +
+                    packageName + String(" from null"));
             }
             SendMsg(mEventHandler, MSG_CLIENT_CHANGE, SENDMSG_REPLACE,
                     0 /* genId */, 0 /* clearing */, NULL /* obj */, 0 /* delay */);
             mCurrentSession = controller;
             mCurrentSession->RegisterCallback(mSessionCb.Get(), IHandler::Probe(mEventHandler));
+
+            String currSessPackageName;
+            mCurrentSession->GetPackageName(&currSessPackageName);
+            mAudioManager->UpdateMediaPlayerList(currSessPackageName, TRUE);
 
             AutoPtr<IPlaybackState> state;
             controller->GetPlaybackState((IPlaybackState**)&state);

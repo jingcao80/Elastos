@@ -171,6 +171,7 @@ module
     merge("media/ToneGenerator.car");
     merge("media/VolumeProvider.car");
     merge("media/WebVttRenderer.car");
+    merge("media/MediaFocusControl.car");
 
     interface Elastos.Droid.App.IActivity;
     interface Elastos.Droid.App.IPendingIntent;
@@ -188,6 +189,7 @@ module
     interface Elastos.Droid.Media.IAudioAttributes;
     interface Elastos.Droid.Media.IAudioFormat;
     interface Elastos.Droid.Media.IMediaDescription;
+    interface Elastos.Droid.Media.IMediaFocusControl;
     interface Elastos.Droid.Media.IMediaTimeProvider;
     interface Elastos.Droid.Media.ISubtitleController;
     interface Elastos.Droid.Media.ISubtitleControllerListener;
@@ -808,6 +810,7 @@ module
             [in] IAudioServiceVolumeController* volumeCtrl,
             [in] IAudioService* as);
 
+        interface IMediaFocusControl;
         interface IPendingIntentOnFinished;
     }
 

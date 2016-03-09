@@ -202,6 +202,14 @@ public:
         /* [in] */ const String& resultData,
         /* [in] */ IBundle* resultExtras);
 
+    CARAPI SetRemoteControlClientPlayItem(
+        /* [in] */ Int64 uid,
+        /* [in] */ Int32 scope);
+
+    CARAPI GetRemoteControlClientNowPlayingEntries();
+
+    CARAPI SetRemoteControlClientBrowsedPlayer();
+
     CARAPI_(Int32) GetCurrentAudioFocus();
 
     /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int)  */
@@ -233,6 +241,14 @@ public:
         /* [in] */ IIRemoteControlDisplay* rcd,
         /* [in] */ Int32 w,
         /* [in] */ Int32 h);
+
+    CARAPI_(void) OnSetRemoteControlClientPlayItem(
+        /* [in] */ Int32 scope,
+        /* [in] */ Int64 uid);
+
+    CARAPI_(void) OnGetRemoteControlClientNowPlayingEntries();
+
+    CARAPI_(void) OnSetRemoteControlClientBrowsedPlayer();
 
     /**
      * Unregister an IRemoteControlDisplay.
@@ -448,7 +464,16 @@ private:
      * Helper function:
      * Returns true if the system is in a state where the focus can be reevaluated, false otherwise.
      */
-    CARAPI_(Boolean) CanReassignAudioFocus();
+    CARAPI_(Boolean) CanReassignAudioFocus(
+        /* [in] */ const String& clientId);
+
+    /**
+     * Helper function:
+     * Returns true if the system is in a state where the focus can be reevaluated , false otherwise.
+     */
+    CARAPI_(Boolean) CanReassignAudioFocusFromQchat(
+        /* [in] */ Int32 streamType,
+        /* [in] */ const String& clientId);
 
     CARAPI_(void) FilterMediaKeyEvent(
         /* [in] */ IKeyEvent* keyEvent,
@@ -734,6 +759,9 @@ private:
     static const Int32 MSG_RCDISPLAY_INIT_INFO;
     static const Int32 MSG_REEVALUATE_RCD;
     static const Int32 MSG_UNREGISTER_MEDIABUTTONINTENT;
+    static const Int32 MSG_RCC_SET_BROWSED_PLAYER;
+    static const Int32 MSG_RCC_SET_PLAY_ITEM;
+    static const Int32 MSG_RCC_GET_NOW_PLAYING_ENTRIES;
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -750,6 +778,8 @@ private:
     AutoPtr<MyPhoneStateListener> mPhoneStateListener;
 
     AutoPtr<IStack> mFocusStack;
+
+    static const String CLIENT_ID_QCHAT;
 
     /**
      * The different actions performed in response to a voice button key event.

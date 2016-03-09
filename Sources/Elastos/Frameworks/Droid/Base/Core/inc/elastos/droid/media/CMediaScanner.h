@@ -173,6 +173,8 @@ private:
             /* [in] */ Boolean music,
             /* [in] */ Boolean podcasts);
 
+        CARAPI_(Boolean) RingtoneDefaultsSet();
+
         CARAPI_(Boolean) DoesPathHaveFilename(
             /* [in] */ const String& path,
             /* [in] */ const String& filename);
@@ -436,13 +438,13 @@ private:
     /** Whether the database had any entries in it before the scan started */
     Boolean mWasEmptyPriorToScan; // = FALSE;
     /** Whether the scanner has set a default sound for the ringer ringtone. */
-    Boolean mDefaultRingtoneSet;
+    AutoPtr< ArrayOf<Boolean> > mDefaultRingtonesSet;
     /** Whether the scanner has set a default sound for the notification ringtone. */
     Boolean mDefaultNotificationSet;
     /** Whether the scanner has set a default sound for the alarm ringtone. */
     Boolean mDefaultAlarmSet;
-    /** The filename for the default sound for the ringer ringtone. */
-    String mDefaultRingtoneFilename;
+    /** The filenames for the default sound for the ringer ringtone. */
+    AutoPtr< ArrayOf<String> > mDefaultRingtoneFilenames;
     /** The filename for the default sound for the notification ringtone. */
     String mDefaultNotificationFilename;
     /** The filename for the default sound for the alarm ringtone. */
@@ -454,6 +456,8 @@ private:
      * to get the full system property.
      */
     static const String DEFAULT_RINGTONE_PROPERTY_PREFIX; // "ro.config.";
+
+    static const Int32 DEFAULT_SIM_INDEX = 0;
 
     // set to true if file path comparisons should be case insensitive.
     // this should be set when scanning files on a case insensitive file system.

@@ -38,7 +38,10 @@ EncoderCapabilities::VideoEncoderCap::VideoEncoderCap(
     /* [in] */ Int32 minFrameWidth,
     /* [in] */ Int32 maxFrameWidth,
     /* [in] */ Int32 minFrameHeight,
-    /* [in] */ Int32 maxFrameHeight)
+    /* [in] */ Int32 maxFrameHeight,
+    /* [in] */ Int32 maxHFRFrameWidth,
+    /* [in] */ Int32 maxHFRFrameHeight,
+    /* [in] */ Int32 maxHFRMode)
     : mCodec(codec)
     , mMinBitRate(minBitRate)
     , mMaxBitRate(maxBitRate)
@@ -48,6 +51,9 @@ EncoderCapabilities::VideoEncoderCap::VideoEncoderCap(
     , mMaxFrameWidth(maxFrameWidth)
     , mMinFrameHeight(minFrameHeight)
     , mMaxFrameHeight(maxFrameHeight)
+    , mMaxHFRFrameWidth(maxHFRFrameWidth)
+    , mMaxHFRFrameHeight(maxHFRFrameHeight)
+    , mMaxHFRMode(maxHFRMode)
 {}
 
 EncoderCapabilities::AudioEncoderCap::AudioEncoderCap(
@@ -181,13 +187,18 @@ AutoPtr<EncoderCapabilities::VideoEncoderCap> EncoderCapabilities::Native_get_vi
     Int32 maxFrameWidth = sssProfiles->getVideoEncoderParamByName("enc.vid.width.max", encoder);
     Int32 minFrameHeight = sssProfiles->getVideoEncoderParamByName("enc.vid.height.min", encoder);
     Int32 maxFrameHeight = sssProfiles->getVideoEncoderParamByName("enc.vid.height.max", encoder);
+    assert(0);
+    Int32 maxHFRFrameWidth = sssProfiles->getVideoEncoderParamByName(""/*TODO: string is?*/, encoder);
+    Int32 maxHFRFrameHeight = sssProfiles->getVideoEncoderParamByName(""/*TODO: string is?*/, encoder);
+    Int32 maxHFRMode = sssProfiles->getVideoEncoderParamByName(""/*TODO: string is?*/, encoder);
 
     // Check on the values retrieved
     if ((minBitRate == -1 || maxBitRate == -1) ||
         (minFrameRate == -1 || maxFrameRate == -1) ||
         (minFrameWidth == -1 || maxFrameWidth == -1) ||
-        (minFrameHeight == -1 || maxFrameHeight == -1)) {
-
+        (minFrameHeight == -1 || maxFrameHeight == -1) ||
+        (maxHFRFrameWidth == -1 || maxHFRFrameHeight == -1) ||
+        (maxHFRMode == -1)) {
         // jniThrowException(env, "java/lang/RuntimeException", "Error retrieving video encoder capability params");
         return NULL;
     }
@@ -211,7 +222,10 @@ AutoPtr<EncoderCapabilities::VideoEncoderCap> EncoderCapabilities::Native_get_vi
                                                        minFrameWidth,
                                                        maxFrameWidth,
                                                        minFrameHeight,
-                                                       maxFrameHeight);
+                                                       maxFrameHeight,
+                                                       maxHFRFrameWidth,
+                                                       maxHFRFrameHeight,
+                                                       maxHFRMode);
     return cap;
 }
 

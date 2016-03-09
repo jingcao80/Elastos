@@ -17,9 +17,9 @@ namespace Media {
 static Object sLock;
 
 const Int32 CCamcorderProfile::QUALITY_LIST_START = ICamcorderProfile::QUALITY_LOW;
-const Int32 CCamcorderProfile::QUALITY_LIST_END = ICamcorderProfile::QUALITY_2160P;
+const Int32 CCamcorderProfile::QUALITY_LIST_END = ICamcorderProfile::QUALITY_HVGA;
 const Int32 CCamcorderProfile::QUALITY_TIME_LAPSE_LIST_START = ICamcorderProfile::QUALITY_TIME_LAPSE_LOW;
-const Int32 CCamcorderProfile::QUALITY_TIME_LAPSE_LIST_END = ICamcorderProfile::QUALITY_TIME_LAPSE_2160P;
+const Int32 CCamcorderProfile::QUALITY_TIME_LAPSE_LIST_END = ICamcorderProfile::QUALITY_TIME_LAPSE_4kDCI;
 const Int32 CCamcorderProfile::QUALITY_HIGH_SPEED_LIST_START = ICamcorderProfile::QUALITY_HIGH_SPEED_LOW;
 const Int32 CCamcorderProfile::QUALITY_HIGH_SPEED_LIST_END = ICamcorderProfile::QUALITY_HIGH_SPEED_2160P;
 

@@ -33,6 +33,15 @@ module
         const Int32 FILE_TYPE_MKA     = 9;
         const Int32 FILE_TYPE_FLAC    = 10;
 
+        // More audio file types
+        const Int32 FILE_TYPE_DTS   = 300;
+        const Int32 FILE_TYPE_3GPA  = 301;
+        const Int32 FILE_TYPE_AC3   = 302;
+        const Int32 FILE_TYPE_QCP   = 303;
+        const Int32 FILE_TYPE_PCM   = 304;
+        const Int32 FILE_TYPE_EC3   = 305;
+        const Int32 FILE_TYPE_APE   = 306;
+
         // MIDI file types
         const Int32 FILE_TYPE_MID     = 11;
         const Int32 FILE_TYPE_SMF     = 12;
@@ -52,6 +61,8 @@ module
 
         // More video file types
         const Int32 FILE_TYPE_MP2PS   = 200;
+        const Int32 FILE_TYPE_DIVX    = 201;
+        const Int32 FILE_TYPE_FLV     = 202;
 
         // Image file types
         const Int32 FILE_TYPE_JPEG    = 31;
@@ -66,6 +77,7 @@ module
         const Int32 FILE_TYPE_PLS      = 42;
         const Int32 FILE_TYPE_WPL      = 43;
         const Int32 FILE_TYPE_HTTPLIVE = 44;
+        const Int32 FILE_TYPE_DASH     = 45;
 
         // Drm file types
         const Int32 FILE_TYPE_FL      = 51;

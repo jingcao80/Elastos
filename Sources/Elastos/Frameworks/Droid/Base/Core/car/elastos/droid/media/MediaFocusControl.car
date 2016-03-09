@@ -1,0 +1,32 @@
+
+module
+{
+    interface Elastos.Droid.App.IPendingIntent;
+    interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Os.IBundle;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Media {
+
+    interface IMediaFocusControl {
+        OnSendFinished(
+            [in] IPendingIntent* pendingIntent,
+            [in] IIntent* intent,
+            [in] Int32 resultCode,
+            [in] String resultData,
+            [in] IBundle* resultExtras);
+
+        SetRemoteControlClientPlayItem(
+            [in] Int64 uid,
+            [in] Int32 scope);
+
+        GetRemoteControlClientNowPlayingEntries();
+
+        SetRemoteControlClientBrowsedPlayer();
+    }
+
+    } // namespace media
+    } // namepsace Droid
+    } // namespace Elastos
+}

@@ -3,6 +3,7 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Media::EIID_IFocusRequester;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Utility::Logging::Logger;
@@ -109,6 +110,14 @@ ECode FocusRequester::GetStreamType(
 {
     VALIDATE_NOT_NULL(result)
     *result = mStreamType;
+    return NOERROR;
+}
+
+ECode FocusRequester::GetClientId(
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = mClientId;
     return NOERROR;
 }
 

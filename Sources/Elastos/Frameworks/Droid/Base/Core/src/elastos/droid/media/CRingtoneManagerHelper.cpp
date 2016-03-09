@@ -62,6 +62,36 @@ ECode CRingtoneManagerHelper::GetDefaultUri(
     return CRingtoneManager::GetDefaultUri(type, result);
 }
 
+ECode CRingtoneManagerHelper::GetStaticDefaultRingtoneUri(
+    /* [in] */ IContext* context,
+    /* [out] */ IUri** result)
+{
+    return CRingtoneManager::GetStaticDefaultRingtoneUri(context, result);
+}
+
+ECode CRingtoneManagerHelper::GetDefaultRingtoneSubIdByUri(
+    /* [in] */ IUri* defaultRingtoneUri,
+    /* [out] */ Int32* result)
+{
+    return CRingtoneManager::GetDefaultRingtoneSubIdByUri(defaultRingtoneUri, result);
+}
+
+ECode CRingtoneManagerHelper::GetActualRingtoneUriBySubId(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 subId,
+    /* [out] */ IUri** result)
+{
+    return CRingtoneManager::GetActualRingtoneUriBySubId(context, subId, result);
+}
+
+ECode CRingtoneManagerHelper::SetActualRingtoneUriBySubId(
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 subId,
+    /* [in] */ IUri* ringtoneUri)
+{
+    return CRingtoneManager::SetActualRingtoneUriBySubId(context, subId, ringtoneUri);
+}
+
 ECode CRingtoneManagerHelper::GetDefaultRingtoneUriBySubId(
     /* [in] */ Int32 subId,
     /* [out] */ IUri** result)

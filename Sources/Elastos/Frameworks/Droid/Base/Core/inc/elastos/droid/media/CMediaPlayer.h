@@ -1653,7 +1653,6 @@ public:
     CARAPI SetOnInfoListener(
         /* [in] */ IMediaPlayerOnInfoListener* listener);
 
-
     CARAPI Suspend(
         /* [out] */ Boolean* result);
 
@@ -1839,6 +1838,12 @@ private:
      */
     CARAPI_(Boolean) IsVideoScalingModeSupported(
         /* [in] */ Int32 mode);
+
+    CARAPI Native_Suspend(
+        /* [out] */ Boolean* result);
+
+    CARAPI Native_Resume(
+        /* [out] */ Boolean* result);
 
 public:
     Int64 mNativeContext; // accessed by native methods

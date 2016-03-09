@@ -96,6 +96,21 @@ private:
         CARAPI OnMetadataChanged(
             /* [in] */ IMediaMetadata* metadata);
 
+        // @Override
+        CARAPI OnUpdateFolderInfoBrowsedPlayer(
+            /* [in] */ const String& stringUri);
+
+        // @Override
+        CARAPI OnUpdateNowPlayingEntries(
+            /* [in] */ ArrayOf<Int64>* playList);
+
+        // @Override
+        CARAPI OnUpdateNowPlayingContentChange();
+
+        // @Override
+        CARAPI OnPlayItemResponse(
+            /* [in] */ Boolean success);
+
     private:
         RemoteController* mHost;
     };
@@ -225,6 +240,14 @@ public:
         /* [in] */ Int64 timeMs,
         /* [out] */ Boolean* result);
 
+    CARAPI SetRemoteControlClientPlayItem(
+        /* [in] */ Int64 uid,
+        /* [in] */ Int32 scope);
+
+    CARAPI GetRemoteControlClientNowPlayingEntries();
+
+    CARAPI SetRemoteControlClientBrowsedPlayer();
+
     CARAPI SetArtworkConfiguration(
         /* [in] */ Boolean wantBitmap,
         /* [in] */ Int32 width,
@@ -249,6 +272,17 @@ public:
     CARAPI StartListeningToSessions();
 
     CARAPI StopListeningToSessions();
+
+    CARAPI OnFolderInfoBrowsedPlayer(
+        /* [in] */ const String& stringUri);
+
+    CARAPI OnNowPlayingEntriesUpdate(
+        /* [in] */ ArrayOf<Int64>* playList);
+
+    CARAPI OnNowPlayingContentChange();
+
+    CARAPI OnSetPlayItemResponse(
+        /* [in] */ Boolean success);
 
     CARAPI SetIsRegistered(
         /* [in] */ Boolean registered);

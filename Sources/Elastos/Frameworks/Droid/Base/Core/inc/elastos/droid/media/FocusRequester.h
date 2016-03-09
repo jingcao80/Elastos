@@ -58,6 +58,9 @@ public:
     CARAPI GetStreamType(
         /* [out] */ Int32* result);
 
+    virtual CARAPI GetClientId(
+        /* [out] */ String* result);
+
     CARAPI Dump(
         /* [in] */ IPrintWriter* pw);
 

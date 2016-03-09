@@ -97,6 +97,10 @@ private:
     static const Int32 FIRST_VIDEO_FILE_TYPE;
     static const Int32 LAST_VIDEO_FILE_TYPE;
 
+    // More audio file types
+    static const Int32 FIRST_AUDIO_FILE_TYPE_EXT;
+    static const Int32 LAST_AUDIO_FILE_TYPE_EXT;
+
     // More video file types
     static const Int32 FIRST_VIDEO_FILE_TYPE2;
     static const Int32 LAST_VIDEO_FILE_TYPE2;

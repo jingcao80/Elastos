@@ -11,6 +11,7 @@
 #include "Elastos.Droid.App.h"
 #include "elastos/droid/media/CMediaMetadata.h"
 #include "elastos/droid/media/MediaMetadataEditor.h"
+#include "elastos/droid/media/session/MediaSessionCallback.h"
 #include <elastos/core/Object.h>
 #include <elastos/droid/os/Handler.h>
 
@@ -21,6 +22,7 @@ using Elastos::Droid::Media::Session::IMediaSession;
 using Elastos::Droid::Media::Session::IMediaSessionCallback;
 using Elastos::Droid::Media::Session::IMediaSessionLegacyHelper;
 using Elastos::Droid::Media::Session::IPlaybackState;
+using Elastos::Droid::Media::Session::MediaSessionCallback;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IMessage;
@@ -148,6 +150,37 @@ public:
         CRemoteControlClient* mOwner;
     };
 
+private:
+    class InnerMediaSessionCallback
+        : public MediaSessionCallback
+    {
+    public:
+        InnerMediaSessionCallback(
+            /* [in] */ CRemoteControlClient* owner);
+
+        // @Override
+        CARAPI OnSeekTo(
+            /* [in] */ Int64 pos);
+
+        // @Override
+        CARAPI OnSetRating(
+            /* [in] */ IRating* rating);
+
+        // @Override
+        CARAPI SetPlayItem(
+            /* [in] */ Int32 scope,
+            /* [in] */ Int64 uid);
+
+        // @Override
+        CARAPI GetNowPlayingEntries();
+
+        // @Override
+        CARAPI SetBrowsedPlayer();
+
+    private:
+        CRemoteControlClient* mOwner;
+    };
+
 public:
     CRemoteControlClient();
 
@@ -238,6 +271,17 @@ public:
         /* [in] */ Int64 timeInMs,
         /* [in] */ Float playbackSpeed);
 
+    CARAPI PlayItemResponse(
+        /* [in] */ Boolean success);
+
+    CARAPI UpdateNowPlayingEntries(
+        /* [in] */ ArrayOf<Int64>* playList);
+
+    CARAPI UpdateFolderInfoBrowsedPlayer(
+        /* [in] */ const String& stringUri);
+
+    CARAPI UpdateNowPlayingContentChange();
+
     CARAPI SetPlaybackState(
         /* [in] */ Int32 state,
         /* [in] */ Int64 timeInMs,
@@ -292,6 +336,15 @@ public:
     CARAPI SetMetadataUpdateListener(
         /* [in] */ IRemoteControlClientOnMetadataUpdateListener * l);
 
+    CARAPI SetNowPlayingEntriesUpdateListener(
+        /* [in] */ IRemoteControlClientOnGetNowPlayingEntriesListener* l);
+
+    CARAPI SetBrowsedPlayerUpdateListener(
+        /* [in] */ IRemoteControlClientOnSetBrowsedPlayerListener* l);
+
+    CARAPI SetPlayItemListener(
+        /* [in] */ IRemoteControlClientOnSetPlayItemListener* l);
+
     CARAPI SetPlaybackPositionUpdateListener(
         /* [in] */ IRemoteControlClientOnPlaybackPositionUpdateListener * l);
 
@@ -341,6 +394,17 @@ private:
         /* [in] */ Float playbackSpeed,
         /* [in] */ Boolean hasPosition);
 
+    CARAPI_(void) PlayItemResponseInt(
+        /* [in] */ Boolean success);
+
+    CARAPI_(void) UpdateNowPlayingEntriesInt(
+        /* [in] */ ArrayOf<Int64>* playList);
+
+    CARAPI_(void) UpdateFolderInfoBrowsedPlayerInt(
+        /* [in] */ const String& stringUri);
+
+    CARAPI_(void) UpdateNowPlayingContentChangeInt();
+
     CARAPI_(void) OnPositionDriftCheck();
 
     static Int64 GetCheckPeriodFromSpeed(
@@ -355,6 +419,15 @@ private:
         /* [in] */ Int32 key,
         /* [in] */ IInterface* value);
 
+    CARAPI_(void) OnSetPlayItem(
+        /* [in] */ Int32 scope,
+        /* [in] */ Int64 uid);
+
+
+    CARAPI_(void) OnSetBrowsedPlayer();
+
+    CARAPI_(void) OnGetNowPlayingEntries();
+
 private:
     const static String TAG;
     const static Boolean DEBUG;
@@ -366,7 +439,9 @@ private:
     const static Int64 POSITION_DRIFT_MAX_MS;
 
     const static Int32 MSG_POSITION_DRIFT_CHECK;
-
+    const static Int32 MSG_SET_BROWSED_PLAYER;
+    const static Int32 MSG_SET_PLAY_ITEM;
+    const static Int32 MSG_GET_NOW_PLAYING_ENTRIES;
 
     AutoPtr<IMediaSession> mSession;
 
@@ -430,6 +505,12 @@ private:
      * it exposes.
      */
     AutoPtr<IRemoteControlClientOnMetadataUpdateListener> mMetadataUpdateListener;
+
+    AutoPtr<IRemoteControlClientOnSetBrowsedPlayerListener> mSetBrowsedPlayerListener;
+
+    AutoPtr<IRemoteControlClientOnSetPlayItemListener> mSetPlayItemListener;
+
+    AutoPtr<IRemoteControlClientOnGetNowPlayingEntriesListener> mGetNowPlayingEntriesListener;
 
     /**
      * The current remote control client generation ID across the system

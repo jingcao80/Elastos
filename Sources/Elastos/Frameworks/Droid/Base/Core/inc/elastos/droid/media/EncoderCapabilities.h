@@ -40,7 +40,10 @@ public:
             /* [in] */ Int32 minFrameWidth,
             /* [in] */ Int32 maxFrameWidth,
             /* [in] */ Int32 minFrameHeight,
-            /* [in] */ Int32 maxFrameHeight);
+            /* [in] */ Int32 maxFrameHeight,
+            /* [in] */ Int32 maxHFRFrameWidth,
+            /* [in] */ Int32 maxHFRFrameHeight,
+            /* [in] */ Int32 maxHFRMode);
 
     public:
         // These are not modifiable externally, thus are public accessible
@@ -49,6 +52,8 @@ public:
         Int32 mMinFrameRate, mMaxFrameRate;           // min and max frame rate (fps)
         Int32 mMinFrameWidth, mMaxFrameWidth;         // min and max frame width (pixel)
         Int32 mMinFrameHeight, mMaxFrameHeight;       // minn and max frame height (pixel)
+        Int32 mMaxHFRFrameWidth, mMaxHFRFrameHeight;  // max HFR size (pixel)
+        Int32 mMaxHFRMode;                            // max HFR mode
     };
 
     /**

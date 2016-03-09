@@ -2959,39 +2959,16 @@ ECode CMediaPlayer::SetOnInfoListener(
 ECode CMediaPlayer::Suspend(
     /* [out] */ Boolean* result)
 {
-    android::sp<android::MediaPlayer> mp = getMediaPlayer(this);
-    if (mp == NULL) {
-        Logger::E(TAG, "This player not initialized");
-        *result = FALSE;
-        return E_ILLEGAL_STATE_EXCEPTION;
-    }
-
-    if (mp->suspend() != android::OK) {
-        *result = FALSE;
-        return NOERROR;
-    }
-
-    *result = TRUE;
-    return NOERROR;
+    VALIDATE_NOT_NULL(result);
+    StayAwake(FALSE);
+    return Native_Suspend(result);
 }
 
 ECode CMediaPlayer::Resume(
     /* [out] */ Boolean* result)
 {
-    android::sp<android::MediaPlayer> mp = getMediaPlayer(this);
-    if (mp == NULL) {
-        Logger::E(TAG, "This player not initialized");
-        *result = FALSE;
-        return E_ILLEGAL_STATE_EXCEPTION;
-    }
-
-    if (mp->resume() != android::OK) {
-        *result = FALSE;
-        return NOERROR;
-    }
-
-    *result = TRUE;
-    return NOERROR;
+    VALIDATE_NOT_NULL(result);
+    return Native_Resume(result);
 }
 
 Boolean CMediaPlayer::IsVideoScalingModeSupported(
@@ -2999,6 +2976,42 @@ Boolean CMediaPlayer::IsVideoScalingModeSupported(
 {
     return (mode == VIDEO_SCALING_MODE_SCALE_TO_FIT ||
             mode == VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+}
+
+ECode CMediaPlayer::Native_Suspend(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    android::sp<android::MediaPlayer> mp = getMediaPlayer(this);
+    if (mp == NULL) {
+        Logger::E(TAG, "This player not initialized");
+        *result = FALSE;
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    if (mp->suspend() != android::OK) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    *result = TRUE;
+    return NOERROR;
+}
+
+ECode CMediaPlayer::Native_Resume(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    android::sp<android::MediaPlayer> mp = getMediaPlayer(this);
+    if (mp == NULL) {
+        Logger::E(TAG, "This player not initialized");
+        *result = FALSE;
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    if (mp->resume() != android::OK) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    *result = TRUE;
+    return NOERROR;
 }
 
 } // namespace Media

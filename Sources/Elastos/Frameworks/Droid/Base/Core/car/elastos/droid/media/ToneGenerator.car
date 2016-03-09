@@ -714,6 +714,25 @@ module
          */
         const Int32 TONE_CDMA_SIGNAL_OFF = 98;
 
+        /**
+         * LOCAL_CW - 440Hz
+         *
+         * @hide #ToneGenerator(int, int)
+         */
+        const Int32 TONE_LOCAL_CW = 99;
+        /**
+         * SUPERVISORY_CH - 440Hz
+         *
+         * @hide #ToneGenerator(int, int)
+         */
+        const Int32 TONE_SUPERVISORY_CH = 100;
+        /**
+         * HOLD_RECALL - 440Hz
+         *
+         * @hide #ToneGenerator(int, int)
+         */
+        const Int32 TONE_HOLD_RECALL = 101;
+
         /** Maximum volume, for use with {@link #ToneGenerator(int,int)} */
         const Int32 MAX_VOLUME = 100;
         /** Minimum volume setting, for use with {@link #ToneGenerator(int,int)} */
