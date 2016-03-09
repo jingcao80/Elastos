@@ -89,6 +89,7 @@ module
     merge("app/Service.car");
     merge("app/SharedElementCallback.car");
     merge("app/StatusBarManager.car");
+    merge("app/StreamSettings.car");
     merge("app/TaskStackBuilder.car");
     merge("app/TabActivity.car");
     merge("app/TimePickerDialog.car");
@@ -1678,6 +1679,23 @@ module
             [in] IContext* ctx);
 
         interface IStatusBarManager;
+    }
+
+    class CStreamSettings {
+        constructor(
+            [in] Int32 streamId);
+
+        constructor(
+            [in] Int32 streamId,
+            [in] Int32 value,
+            [in] Boolean override);
+
+        interface IStreamSettings;
+        interface IParcelable;
+    }
+
+    singleton class CStreamSettingsHelper {
+        interface IStreamSettingsHelper;
     }
 
     class CTaskStackBuilder {

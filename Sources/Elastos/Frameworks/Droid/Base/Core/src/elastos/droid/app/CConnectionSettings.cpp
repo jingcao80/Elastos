@@ -285,6 +285,7 @@ ECode CConnectionSettings::FromXml(
     CConnectionSettings::NewByFriend(0, (CConnectionSettings**)&connectionDescriptor);
     String name;
     while (event != IXmlPullParser::END_TAG || (xpp->GetName(&name), !name.Equals("connectionDescriptor"))) {
+        xpp->GetName(&name);
         if (event == IXmlPullParser::START_TAG) {
             if (name.Equals("connectionId")) {
                 String text;

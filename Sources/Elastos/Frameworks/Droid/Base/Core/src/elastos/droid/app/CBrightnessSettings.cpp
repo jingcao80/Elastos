@@ -124,6 +124,7 @@ ECode CBrightnessSettings::FromXml(
     CBrightnessSettings::NewByFriend((CBrightnessSettings**)&brightnessDescriptor);
     String name;
     while (event != IXmlPullParser::END_TAG || (xpp->GetName(&name), !name.Equals("brightnessDescriptor"))) {
+        xpp->GetName(&name);
         if (event == IXmlPullParser::START_TAG) {
             if (name.Equals("value")) {
                 String text;
