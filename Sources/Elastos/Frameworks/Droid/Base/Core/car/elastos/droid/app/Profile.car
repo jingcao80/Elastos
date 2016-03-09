@@ -1,11 +1,218 @@
 
 module
 {
+    interface Elastos.Droid.App.IAirplaneModeSettings;
+    interface Elastos.Droid.App.IBrightnessSettings;
+    interface Elastos.Droid.App.IConnectionSettings;
+    interface Elastos.Droid.App.IProfileGroup;
+    interface Elastos.Droid.App.IRingModeSettings;
+    interface Elastos.Droid.App.IStreamSettings;
+    interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Core.IStringBuilder;
+    using interface Elastos.Utility.IArrayList;
+    using interface Elastos.Utility.ICollection;
+    using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IUUID;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
     namespace Elastos {
     namespace Droid {
     namespace App {
 
+    /** @hide */
+    interface IProfileLockMode {
+        const Int32 DEFAULT = 0;
+        const Int32 INSECURE = 1;
+        const Int32 DISABLE = 2;
+    }
+
+    /** @hide */
+    interface IProfileExpandedDesktopMode {
+        const Int32 DEFAULT = 0;
+        const Int32 ENABLE = 1;
+        const Int32 DISABLE = 2;
+    }
+
+    /** @hide */
+    interface IProfileTriggerType {
+        const Int32 WIFI = 0;
+        const Int32 BLUETOOTH = 1;
+    }
+
+    /** @hide */
+    interface IProfileTriggerState {
+        const Int32 ON_CONNECT = 0;
+        const Int32 ON_DISCONNECT = 1;
+        const Int32 DISABLED = 2;
+        const Int32 ON_A2DP_CONNECT = 3;
+        const Int32 ON_A2DP_DISCONNECT = 4;
+    }
+
+    interface IProfileTrigger {
+        GetType(
+            [out] Int32* type);
+
+        GetName(
+            [out] String* name);
+
+        GetId(
+            [out] String* id);
+
+        GetState(
+            [out] Int32* state);
+
+        GetXmlString(
+            [in] IStringBuilder* builder,
+            [in] IContext* context);
+    }
+
+    interface IProfileTriggerHelper {
+        FromXml(
+            [in] IXmlPullParser* xpp,
+            [in] IContext* context,
+            [out] IProfileTrigger** trigger);
+    }
+
     interface IProfile {
+        GetTrigger(
+            [in] Int32 type,
+            [in] String id,
+            [out] Int32* triggerState);
+
+        GetTriggersFromType(
+            [in] Int32 type,
+            [out] IArrayList** triggers);
+
+        SetTrigger(
+            [in] Int32 type,
+            [in] String id,
+            [in] Int32 state,
+            [in] String name);
+
+        CompareTo(
+            [in] IInterface* obj,
+            [out] Int32* result);
+
+        AddProfileGroup(
+            [in] IProfileGroup* value);
+
+        RemoveProfileGroup(
+            [in] IUUID* uuid);
+
+        GetProfileGroups(
+            [out, callee] ArrayOf<IProfileGroup*>* groups);
+
+        GetProfileGroup(
+            [in] IUUID* uuid,
+            [out] IProfileGroup** group);
+
+        GetDefaultGroup(
+            [out] IProfileGroup** group);
+
+        GetName(
+            [out] String* name);
+
+        SetName(
+            [in] String name);
+
+        GetProfileType(
+            [out] Int32* type);
+
+        SetProfileType(
+            [in] Int32 type);
+
+        GetUuid(
+            [out] IUUID** uuid);
+
+        GetSecondaryUuids(
+            [out, callee] ArrayOf<IUUID*>* uuids);
+
+        SetSecondaryUuids(
+            [in] IList* uuids);
+
+        AddSecondaryUuid(
+            [in] IUUID* uuid);
+
+        GetStatusBarIndicator(
+            [out] Boolean* result);
+
+        SetStatusBarIndicator(
+            [in] Boolean newStatusBarIndicator);
+
+        IsConditionalType(
+            [out] Boolean* result);
+
+        SetConditionalType();
+
+        GetRingMode(
+            [out] IRingModeSettings** descriptor);
+
+        SetRingMode(
+            [in] IRingModeSettings* descriptor);
+
+        GetScreenLockMode(
+            [out] Int32* screenLockMode);
+
+        SetScreenLockMode(
+            [in] Int32 screenLockMode);
+
+        GetExpandedDesktopMode(
+            [out] Int32* expandedDesktopMode);
+
+        SetExpandedDesktopMode(
+            [in] Int32 expandedDesktopMode);
+
+        GetAirplaneMode(
+            [out] IAirplaneModeSettings** descriptor);
+
+        SetAirplaneMode(
+            [in] IAirplaneModeSettings* descriptor);
+
+        GetBrightness(
+            [out] IBrightnessSettings** descriptor);
+
+        SetBrightness(
+            [in] IBrightnessSettings* descriptor);
+
+        IsDirty(
+            [out] Boolean* result);
+
+        GetXmlString(
+            [in] IStringBuilder* builder,
+            [in] IContext* context);
+
+        ValidateRingtones(
+            [in] IContext* context);
+
+        DoSelect(
+            [in] IContext* context);
+
+        GetSettingsForStream(
+            [in] Int32 streamId,
+            [out] IStreamSettings** descriptor);
+
+        SetStreamSettings(
+            [in] IStreamSettings* descriptor);
+
+        GetStreamSettings(
+            [out] ICollection** descriptors);
+
+        GetSettingsForConnection(
+            [in] Int32 connectionId,
+            [out] IConnectionSettings** descriptor);
+
+        SetConnectionSettings(
+            [in] IConnectionSettings* descriptor);
+
+        GetConnectionSettings(
+            [out] ICollection** descriptors);
+    }
+
+    interface IProfileHelper {
+        FromXml(
+            [in] IXmlPullParser* xpp,
+            [in] IContext* context,
+            [out] IProfile** profile);
     }
 
     } // namespace App

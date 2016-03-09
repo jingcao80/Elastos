@@ -17,6 +17,7 @@ namespace App {
 CarClass(CBrightnessSettings)
     , public Object
     , public IBrightnessSettings
+    , public IParcelable
 {
 public:
     CAR_INTERFACE_DECL()

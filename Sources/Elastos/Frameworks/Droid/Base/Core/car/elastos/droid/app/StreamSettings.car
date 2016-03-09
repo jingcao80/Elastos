@@ -1,6 +1,10 @@
 
 module
 {
+    interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Core.IStringBuilder;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
     namespace Elastos {
     namespace Droid {
     namespace App {

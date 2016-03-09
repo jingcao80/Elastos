@@ -78,11 +78,13 @@ module
     merge("app/PackageDeleteObserver.car");
     merge("app/Presentation.car");
     merge("app/Profile.car");
+    merge("app/ProfileGroup.car");
     merge("app/ProfilerInfo.car");
     merge("app/ProgressDialog.car");
     merge("app/RemoteInput.car");
     merge("app/ResultInfo.car");
     merge("app/ResourcesManager.car");
+    merge("app/RingModeSettings.car");
     merge("app/SearchManager.car");
     merge("app/SearchDialog.car");
     merge("app/SearchableInfo.car");
@@ -155,6 +157,7 @@ module
     using interface Elastos.Utility.IList;
     using interface Elastos.Utility.IHashMap;
     using interface Elastos.Utility.IArrayList;
+    using interface Elastos.Utility.IUUID;
 
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Os.IBinder;
@@ -1235,6 +1238,23 @@ module
 
     singleton class CNotificationHelper {
         interface INotificationHelper;
+    }
+
+    class CNotificationGroup {
+        constructor(
+            [in] String name);
+
+        constructor(
+            [in] String name,
+            [in] Int32 nameResId,
+            [in] IUUID* uuid);
+
+        interface INotificationGroup;
+        interface IParcelable;
+    }
+
+    singleton class CNotificationGroupHelper {
+        interface INotificationGroupHelper;
     }
 
     class CNotificationManager {

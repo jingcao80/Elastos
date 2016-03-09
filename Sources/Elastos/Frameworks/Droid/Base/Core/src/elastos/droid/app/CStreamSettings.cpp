@@ -1,14 +1,25 @@
 
+#include "Elastos.CoreLibrary.External.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/app/CStreamSettings.h"
+#include <elastos/core/StringUtils.h>
+
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace App {
 
-CAR_INTERFACE_IMPL(CStreamSettings, Object, IStreamSettings, IParcelable)
+CAR_INTERFACE_IMPL_2(CStreamSettings, Object, IStreamSettings, IParcelable)
 
 CAR_OBJECT_IMPL(CStreamSettings)
+
+CStreamSettings::CStreamSettings()
+    : mStreamId(0)
+    , mValue(0)
+    , mOverride(FALSE)
+    , mDirty(FALSE)
+{}
 
 ECode CStreamSettings::constructor(
     /* [in] */ Int32 streamId)
