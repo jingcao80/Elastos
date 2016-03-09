@@ -256,7 +256,7 @@ ECode NativeConverter::Encode(
     ucnv_fromUnicode(cnv , &cTarget, cTargetLimit, &mySource, mySourceLimit,
             NULL, (UBool)flush, &errorCode);
     *sourceOffset = (mySource - temp->GetPayload()) - *sourceOffset;
-    *targetOffset = (reinterpret_cast<byte*>(cTarget) - target->GetPayload()) - *targetOffset;
+    *targetOffset = (reinterpret_cast<byte*>(cTarget) - target->GetPayload());
 
     // If there was an error, count the problematic characters.
     if (U_ILLEGAL_CHAR_FOUND == errorCode

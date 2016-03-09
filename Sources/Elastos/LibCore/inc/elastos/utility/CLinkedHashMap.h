@@ -60,7 +60,7 @@ private:
         CARAPI HasNext(
             /* [out] */ Boolean* value);
 
-        CARAPI_(AutoPtr<LinkedEntry>) NextEntry();
+        CARAPI NextEntry(LinkedEntry** outface);
 
         CARAPI Remove();
 
