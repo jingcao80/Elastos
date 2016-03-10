@@ -361,11 +361,6 @@ ECode ImmersiveModeConfirmation::constructor(
     mConfirm = new InnerRunnable1(this);
     CSparseBooleanArray::New((ISparseBooleanArray**)&mUserPanicResets);
     mShowDelayMs = GetNavBarExitDuration() * 3;
-    AutoPtr<IResources> resources;
-    mContext->GetResources((IResources**)&resources);
-    Int32 ivalue;
-    resources->GetInteger(R::integer::config_immersive_mode_confirmation_panic, &ivalue);
-    mPanicThresholdMs = ivalue;
     AutoPtr<IInterface> iService;
     mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&iService);
     mWindowManager = IWindowManager::Probe(iService);

@@ -1,11 +1,45 @@
 
 module
 {
+    interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Core.IStringBuilder;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
     namespace Elastos {
     namespace Droid {
     namespace App {
 
     interface IRingModeSettings {
+        GetValue(
+            [out] String* value);
+
+        SetValue(
+            [in] String value);
+
+        SetOverride(
+            [in] Boolean override);
+
+        IsOverride(
+            [out] Boolean* override);
+
+        /** @hide */
+        IsDirty(
+            [out] Boolean* dirty);
+
+        ProcessOverride(
+            [in] IContext* context);
+
+        /** @hide */
+        GetXmlString(
+            [in] IStringBuilder* builder,
+            [in] IContext* context);
+    }
+
+    interface IRingModeSettingsHelper {
+        FromXml(
+            [in] IXmlPullParser* xpp,
+            [in] IContext* context,
+            [out] IRingModeSettings** obj);
     }
 
     } // namespace App

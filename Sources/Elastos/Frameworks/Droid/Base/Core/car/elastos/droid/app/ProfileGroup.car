@@ -1,12 +1,98 @@
 
 module
 {
+    interface Elastos.Droid.App.INotification;
+    interface Elastos.Droid.App.INotificationGroup;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Core.IStringBuilder;
+    using interface Elastos.Utility.IUUID;
+    using interface Org.Xmlpull.V1.IXmlPullParser;
+
     namespace Elastos {
     namespace Droid {
     namespace App {
 
-    interface IProfileGroup {
+    enum ProfileGroupMode {
+        ProfileGroupMode_SUPPRESS,
+        ProfileGroupMode_DEFAULT,
+        ProfileGroupMode_OVERRIDE,
+    }
 
+    interface IProfileGroup {
+        /** @hide */
+        Matches(
+            [in] INotificationGroup* group,
+            [in] Boolean defaultGroup,
+            [out] Boolean* result);
+
+        GetUuid(
+            [out] IUUID** uuid);
+
+        IsDefaultGroup(
+            [out] Boolean* result);
+
+        /** @hide */
+        IsDirty(
+            [out] Boolean* dirty);
+
+        /** @hide */
+        SetSoundOverride(
+            [in] IUri* sound);
+
+        GetSoundOverride(
+            [out] IUri** sound);
+
+        /** @hide */
+        SetRingerOverride(
+            [in] IUri* ringer);
+
+        GetRingerOverride(
+            [out] IUri** ringer);
+
+        /** @hide */
+        SetSoundMode(
+            [in] ProfileGroupMode soundMode);
+
+        GetSoundMode(
+            [out] ProfileGroupMode* soundMode);
+
+        /** @hide */
+        SetRingerMode(
+            [in] ProfileGroupMode ringerMode);
+
+        GetRingerMode(
+            [out] ProfileGroupMode* ringerMode);
+
+        /** @hide */
+        SetVibrateMode(
+            [in] ProfileGroupMode vibrateMode);
+
+        GetVibrateMode(
+            [out] ProfileGroupMode* vibrateMode);
+
+        /** @hide */
+        SetLightsMode(
+            [in] ProfileGroupMode lightsMode);
+
+        GetLightsMode(
+            [out] ProfileGroupMode* lightsMode);
+
+        /** @hide */
+        ApplyOverridesToNotification(
+            [in] INotification* notification);
+
+        /** @hide */
+        GetXmlString(
+            [in] IStringBuilder* builder,
+            [in] IContext* context);
+    }
+
+    interface IProfileGroupHelper {
+        FromXml(
+            [in] IXmlPullParser* xpp,
+            [in] IContext* context,
+            [out] IProfileGroup** group);
     }
 
     } // namespace App

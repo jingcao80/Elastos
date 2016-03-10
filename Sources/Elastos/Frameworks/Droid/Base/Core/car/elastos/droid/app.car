@@ -964,6 +964,24 @@ module
         interface IPendingIntentHelper;
     }
 
+    class CProfileGroup {
+        constructor(
+            [in] IUUID* uuid,
+            [in] Boolean defaultGroup);
+
+        constructor(
+            [in] String name,
+            [in] IUUID* uuid,
+            [in] Boolean defaultGroup);
+
+        interface IProfileGroup;
+        interface IParcelable;
+    }
+
+    singleton class CProfileGroupHelper {
+        interface IProfileGroupHelper;
+    }
+
     /** @hide */
     class CProfilerInfo {
 
@@ -2070,6 +2088,21 @@ module
         constructor();
 
         interface IResourcesManager;
+    }
+
+    class CRingModeSettings {
+        constructor();
+
+        constructor(
+            [in] String value,
+            [in] Boolean override);
+
+        interface IRingModeSettings;
+        interface IParcelable;
+    }
+
+    singleton class CRingModeSettingsHelper {
+        interface IRingModeSettingsHelper;
     }
 
     class CPackageInstallObserver2 {
