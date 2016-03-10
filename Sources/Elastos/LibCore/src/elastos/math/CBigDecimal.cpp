@@ -305,7 +305,7 @@ ECode CBigDecimal::constructor(
         // Accumulating all remaining digits
         StringBuilder inSB(in.GetLength());
         inSB.Append(in);
-        inSB.Substring(begin, last + 1 - begin, &scaleString);
+        inSB.Substring(begin, in.GetLength(), &scaleString);
 
         // Checking if the scale is defined
         newScale = (Int64)mScale - StringUtils::ParseInt32(scaleString);
