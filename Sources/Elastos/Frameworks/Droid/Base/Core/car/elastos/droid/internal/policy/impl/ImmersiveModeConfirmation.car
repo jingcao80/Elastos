@@ -25,12 +25,6 @@ module
             [in] Boolean isImmersiveMode,
             [in] Boolean userSetupComplete);
 
-        OnPowerKeyDown(
-            [in] Boolean isScreenOn,
-            [in] Int64 time,
-            [in] Boolean inImmersiveMode,
-            [out] Boolean* result);
-
         ConfirmCurrentPrompt();
 
         GetClingWindowLayoutParams(

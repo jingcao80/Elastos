@@ -17308,6 +17308,56 @@ ECode CPackageManagerService::ToString(
     return Object::ToString(str);
 }
 
+ECode CPackageManagerService::SetComponentProtectedSetting(
+    /* [in] */ IComponentName* componentName,
+    /* [in] */ Boolean newState,
+    /* [in] */ Int32 userId)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CPackageManagerService::UpdateIconMapping(
+    /* [in] */ const String& pkgName)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CPackageManagerService::GetComposedIconInfo(
+    /* [out] */ IComposedIconInfo** iconInfo)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CPackageManagerService::ProcessThemeResources(
+    /* [in] */ const String& themePkgName,
+    /* [out] */ Int32* res)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CPackageManagerService::SetPreLaunchCheckActivity(
+    /* [in] */ IComponentName* componentName)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CPackageManagerService::AddPreLaunchCheckPackage(
+    /* [in] */ const String& packageName)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CPackageManagerService::RemovePreLaunchCheckPackage(
+    /* [in] */ const String& packageName)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode CPackageManagerService::ClearPreLaunchCheckPackages()
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 } // namespace Pm
 } // namespace Server
 } // namespace Droid

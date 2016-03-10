@@ -20,6 +20,10 @@ CPackageInfo::CPackageInfo()
     , mFirstInstallTime(0)
     , mLastUpdateTime(0)
     , mInstallLocation(INSTALL_LOCATION_INTERNAL_ONLY)
+    , mCoreApp(FALSE)
+    , mIsThemeApk(FALSE)
+    , mHasIconPack(FALSE)
+    , mIsLegacyIconPackApk(FALSE)
 {}
 
 CPackageInfo::~CPackageInfo()
@@ -78,6 +82,13 @@ ECode CPackageInfo::ReadFromParcel(
     source->ReadString(&mRestrictedAccountType);
     source->ReadString(&mRequiredAccountType);
     source->ReadString(&mOverlayTarget);
+
+    /* Theme-specific. */
+    source->ReadBoolean(&mIsThemeApk);
+    source->ReadArrayOfString((ArrayOf<String>**)&mOverlayTargets);
+    IParcelable::Probe(mThemeInfo)->ReadFromParcel(source);
+    source->ReadBoolean(&mHasIconPack);
+    source->ReadBoolean(&mIsLegacyIconPackApk);
     return NOERROR;
 }
 
@@ -113,6 +124,13 @@ ECode CPackageInfo::WriteToParcel(
     dest->WriteString(mRestrictedAccountType);
     dest->WriteString(mRequiredAccountType);
     dest->WriteString(mOverlayTarget);
+
+    /* Theme-specific. */
+    dest->WriteBoolean(mIsThemeApk);
+    dest->WriteArrayOfString(mOverlayTargets);
+    IParcelable::Probe(mThemeInfo)->WriteToParcel(dest);
+    dest->WriteBoolean(mHasIconPack);
+    dest->WriteBoolean(mIsLegacyIconPackApk);
     return NOERROR;
 }
 
@@ -521,6 +539,83 @@ ECode CPackageInfo::SetRestrictedAccountType(
     /* [in] */ const String& type)
 {
     mRestrictedAccountType = type;
+    return NOERROR;
+}
+
+ECode CPackageInfo::GetIsThemeApk(
+    /* [out] */ Boolean* isThemeApk)
+{
+    VALIDATE_NOT_NULL(isThemeApk)
+    *isThemeApk = mIsThemeApk;
+    return NOERROR;
+}
+
+ECode CPackageInfo::SetIsThemeApk(
+    /* [in] */ Boolean isThemeApk)
+{
+    mIsThemeApk = isThemeApk;
+    return NOERROR;
+}
+
+ECode CPackageInfo::GetHasIconPack(
+    /* [out] */ Boolean* hasIconPack)
+{
+    VALIDATE_NOT_NULL(hasIconPack)
+    *hasIconPack = mHasIconPack;
+    return NOERROR;
+}
+
+ECode CPackageInfo::SetHasIconPack(
+    /* [in] */ Boolean hasIconPack)
+{
+    mHasIconPack = hasIconPack;
+    return NOERROR;
+}
+
+ECode CPackageInfo::GetOverlayTargets(
+    /* [out, callee] */ ArrayOf<String>** targets)
+{
+    VALIDATE_NOT_NULL(targets)
+    *targets = mOverlayTargets;
+    REFCOUNT_ADD(*targets)
+    return NOERROR;
+}
+
+ECode CPackageInfo::SetOverlayTargets(
+    /* [in] */ ArrayOf<String>* targets)
+{
+    mOverlayTargets = targets;
+    return NOERROR;
+}
+
+ECode CPackageInfo::GetIsLegacyIconPackApk(
+    /* [out] */ Boolean* isLegacyIconPackApk)
+{
+    VALIDATE_NOT_NULL(isLegacyIconPackApk)
+    *isLegacyIconPackApk = mIsLegacyIconPackApk;
+    return NOERROR;
+}
+
+ECode CPackageInfo::SetIsLegacyIconPackApk(
+    /* [in] */ Boolean isLegacyIconPackApk)
+{
+    mIsLegacyIconPackApk = isLegacyIconPackApk;
+    return NOERROR;
+}
+
+ECode CPackageInfo::GetThemeInfo(
+    /* [out] */ IThemeInfo** themeInfo)
+{
+    VALIDATE_NOT_NULL(themeInfo)
+    *themeInfo = mThemeInfo;
+    REFCOUNT_ADD(*themeInfo)
+    return NOERROR;
+}
+
+ECode CPackageInfo::SetThemeInfo(
+    /* [in] */ IThemeInfo* themeInfo)
+{
+    mThemeInfo = themeInfo;
     return NOERROR;
 }
 

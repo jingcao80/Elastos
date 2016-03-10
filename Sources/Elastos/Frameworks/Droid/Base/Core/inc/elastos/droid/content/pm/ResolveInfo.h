@@ -173,6 +173,12 @@ public:
     CARAPI SetResolvePackageName(
         /* [in] */ const String& resolvePackageName);
 
+    CARAPI GetTargetComponentName(
+        /* [out] */ IComponentName** targetComponentName);
+
+    CARAPI SetTargetComponentName(
+        /* [in] */ IComponentName* targetComponentName);
+
     CARAPI GetTargetUserId(
         /* [out] */ Int32* userId);
 
@@ -286,6 +292,14 @@ public:
      * containing the resolved component.
      */
     String mResolvePackageName;
+
+    /**
+     * Optional -- if non-null, the component name of the target of the original
+     * intent. The ResolveInfo can change the component so this field stores
+     * the origial target. This can be used for retargetting by the receiver.
+     * @hide
+     */
+    AutoPtr<IComponentName> mTargetComponentName;
 
     /**
      * If not equal to UserHandle.USER_CURRENT, then the intent will be forwarded to this user.

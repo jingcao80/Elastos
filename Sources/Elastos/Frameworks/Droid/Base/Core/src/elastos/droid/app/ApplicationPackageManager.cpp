@@ -1457,6 +1457,31 @@ ECode ApplicationPackageManager::GetResourcesForApplicationAsUser(
     return E_NAME_NOT_FOUND_EXCEPTION;
 }
 
+ECode ApplicationPackageManager::GetThemedResourcesForApplication(
+    /* [in] */ IApplicationInfo* app,
+    /* [in] */ const String& themePkgName,
+    /* [out] */ IResources** res)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ApplicationPackageManager::GetThemedResourcesForApplication(
+    /* [in] */ const String& appPackageName,
+    /* [in] */ const String& themePkgName,
+    /* [out] */ IResources** res)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ApplicationPackageManager::GetThemedResourcesForApplicationAsUser(
+    /* [in] */ const String& appPackageName,
+    /* [in] */ const String& themePkgName,
+    /* [in] */ Int32 userId,
+    /* [out] */ IResources** res)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode ApplicationPackageManager::IsSafeMode(
     /* [out] */ Boolean* result)
 {
@@ -2194,6 +2219,13 @@ ECode ApplicationPackageManager::GetVerifierDeviceIdentity(
     return NOERROR;
 }
 
+ECode ApplicationPackageManager::SetComponentProtectedSetting(
+    /* [in] */ IComponentName* componentName,
+    /* [in] */ Boolean newState)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
 ECode ApplicationPackageManager::GetPackageInstaller(
     /* [out] */ IPackageInstaller** installer)
 {
@@ -2422,6 +2454,19 @@ AutoPtr<IUserInfo> ApplicationPackageManager::GetUserIfProfile(
         }
     }
     return NULL;
+}
+
+ECode ApplicationPackageManager::UpdateIconMaps(
+    /* [in] */ const String& pkgName)
+{
+    return E_NOT_IMPLEMENTED;
+}
+
+ECode ApplicationPackageManager::ProcessThemeResources(
+    /* [in] */ const String& themePkgName,
+    /* [out] */ Int32* result)
+{
+    return E_NOT_IMPLEMENTED;
 }
 
 //==========================================================================

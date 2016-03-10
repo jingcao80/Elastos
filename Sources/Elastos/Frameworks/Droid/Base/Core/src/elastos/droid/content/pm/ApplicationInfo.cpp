@@ -27,6 +27,8 @@ ApplicationInfo::ApplicationInfo()
     , mEnabled(TRUE)
     , mEnabledSetting(IPackageManager::COMPONENT_ENABLED_STATE_DEFAULT)
     , mInstallLocation(IPackageInfo::INSTALL_LOCATION_UNSPECIFIED)
+    , mIsThemeable(FALSE)
+    , mProtect(FALSE)
 {}
 
 ApplicationInfo::~ApplicationInfo()
@@ -70,6 +72,8 @@ ECode ApplicationInfo::constructor(
     mDescriptionRes = orig->mDescriptionRes;
     mUiOptions = orig->mUiOptions;
     mBackupAgentName = orig->mBackupAgentName;
+    mProtect = orig->mProtect;
+    mIsThemeable = orig->mIsThemeable;
     return NOERROR;
 }
 
@@ -199,6 +203,8 @@ ECode ApplicationInfo::ReadFromParcel(
     source->ReadString(&mBackupAgentName);
     source->ReadInt32(&mDescriptionRes);
     source->ReadInt32(&mUiOptions);
+    source->ReadBoolean(&mProtect);
+    source->ReadBoolean(&mIsThemeable);
     return NOERROR;
 }
 
@@ -247,6 +253,8 @@ ECode ApplicationInfo::WriteToParcel(
     dest->WriteString(mBackupAgentName);
     dest->WriteInt32(mDescriptionRes);
     dest->WriteInt32(mUiOptions);
+    dest->WriteBoolean(mProtect);
+    dest->WriteBoolean(mIsThemeable);
     return NOERROR;
 }
 
@@ -924,6 +932,36 @@ ECode ApplicationInfo::GetNativeLibraryRootRequiresIsa(
 {
     VALIDATE_NOT_NULL(value)
     *value = mNativeLibraryRootRequiresIsa;
+    return NOERROR;
+}
+
+ECode ApplicationInfo::GetIsThemeable(
+    /* [out] */ Int32* isThemeable)
+{
+    VALIDATE_NOT_NULL(isThemeable)
+    *isThemeable = mIsThemeable;
+    return NOERROR;
+}
+
+ECode ApplicationInfo::SetIsThemeable(
+    /* [in] */ Int32 isThemeable)
+{
+    mIsThemeable = isThemeable;
+    return NOERROR;
+}
+
+ECode ApplicationInfo::GetProtect(
+    /* [out] */ Boolean* protect)
+{
+    VALIDATE_NOT_NULL(protect)
+    *protect = mProtect;
+    return NOERROR;
+}
+
+ECode ApplicationInfo::SetProtect(
+    /* [in] */ Boolean protect)
+{
+    mProtect = protect;
     return NOERROR;
 }
 

@@ -197,12 +197,6 @@ public:
         /* [in] */ Boolean isImmersiveMode,
         /* [in] */ Boolean userSetupComplete);
 
-    virtual CARAPI OnPowerKeyDown(
-        /* [in] */ Boolean isScreenOn,
-        /* [in] */ Int64 time,
-        /* [in] */ Boolean inImmersiveMode,
-        /* [out] */ Boolean* result);
-
     virtual CARAPI ConfirmCurrentPrompt();
 
     virtual CARAPI GetClingWindowLayoutParams(
@@ -231,7 +225,6 @@ private:
     AutoPtr<IContext> mContext;
     AutoPtr<H> mHandler;
     Int64 mShowDelayMs;
-    Int64 mPanicThresholdMs;
     AutoPtr<ISparseBooleanArray> mUserPanicResets;
     Boolean mConfirmed;
     AutoPtr<ClingWindowView> mClingWindow;

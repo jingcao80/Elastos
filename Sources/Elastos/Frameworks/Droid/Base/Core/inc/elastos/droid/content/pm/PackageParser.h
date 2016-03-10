@@ -10,6 +10,7 @@
 #include <elastos/core/StringBuilder.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/utility/etl/HashSet.h>
+#include <elastos/utility/etl/HashMap.h>
 #ifdef DROID_CORE
 #include "elastos/droid/content/CComponentName.h"
 #include "elastos/droid/content/CComponentNameHelper.h"
@@ -37,6 +38,7 @@ using Elastos::Core::StringBuilder;
 using Elastos::Core::CString;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::HashSet;
+using Elastos::Utility::Etl::HashMap;
 using Elastos::IO::IFile;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IPrintWriter;
@@ -220,6 +222,7 @@ public:
         Int32 mVersionCode;
         Int32 mInstallLocation;
         AutoPtr< ArrayOf<IVerifierInfo*> > mVerifiers;
+        Boolean mIsTheme;
 
         /** Names of any split APKs, ordered by parsed splitName */
         AutoPtr<ArrayOf<String> > mSplitNames;
@@ -257,7 +260,8 @@ public:
             /* [in] */ List<AutoPtr<IVerifierInfo> >* verifiers,
             /* [in] */ ArrayOf<ISignature*>* signatures,
             /* [in] */ Boolean coreApp,
-            /* [in] */ Boolean multiArch);
+            /* [in] */ Boolean multiArch,
+            /* [in] */ Boolean isTheme);
 
     public:
         String mCodePath;
@@ -269,6 +273,7 @@ public:
         AutoPtr<ArrayOf<ISignature*> > mSignatures;
         Boolean mCoreApp;
         Boolean mMultiArch;
+        Boolean mIsTheme;
     };
 
     /**
@@ -384,6 +389,16 @@ public:
 
         // For use by package manager to keep track of when a package was last used.
         Int64 mLastPackageUsageTimeInMills;
+        // Is Theme Apk
+        Boolean mIsThemeApk;
+        List<String> mOverlayTargets;
+        HashMap<String, AutoPtr<HashMap<String, String> > > mPackageRedirections;
+
+        // Theme info
+        AutoPtr<IThemeInfo> mThemeInfo;
+
+        // Legacy icon pack
+        Boolean mIsLegacyIconPackApk;
 
         // // User set enabled state.
         // Int32 mSetEnabled;
@@ -429,6 +444,8 @@ public:
         String mOverlayTarget;
         Int32 mOverlayPriority;
         Boolean mTrustedOverlay;
+
+        Boolean mHasIconPack;
 
         /**
          * Data used to feed the KeySetManagerService
@@ -990,6 +1007,12 @@ private:
         /* [in] */ ArrayOf<String>* outError,
         /* [out] */ Package** result);
 
+    CARAPI_(AutoPtr<List<String> >) ScanPackageOverlays(
+        /* [in] */ IFile* originalFile);
+
+    CARAPI_(Boolean) PackageHasIconPack(
+        /* [in] */ IFile* originalFile);
+
     static CARAPI CollectCertificates(
         /* [in] */ Package* pkg,
         /* [in] */ IFile* apkFile,
@@ -1007,6 +1030,9 @@ private:
         /* [in] */ Int32 flags,
         /* [in] */ ArrayOf<ISignature*>* signatures,
         /* [out] */ ApkLite** apkLite);
+
+    static CARAPI_(Boolean) IsLegacyIconPack(
+        /* [in] */ IXmlPullParser* parser);
 
     /**
      * Parse the manifest of a <em>base APK</em>.
@@ -1256,6 +1282,7 @@ public:
     static const Int32 PARSE_IS_PRIVILEGED;// = 1<<7;
     static const Int32 PARSE_COLLECT_CERTIFICATES;// = 1<<8;
     static const Int32 PARSE_TRUSTED_OVERLAY;// = 1<<9;
+    static const Int32 PARSE_IS_PREBUNDLED_DIR;// = 1<<10;
 
     static const Int32 CERTIFICATE_BUFFER_SIZE;
 
@@ -1271,6 +1298,17 @@ private:
 
     /** File name in an APK for the Android manifest. */
     static const String ANDROID_MANIFEST_FILENAME;
+    /** Path to overlay directory in a theme APK */
+    static const String OVERLAY_PATH;
+    /** Path to icon directory in a theme APK */
+    static const String ICON_PATH;
+
+    static const String PACKAGE_REDIRECTIONS_XML;
+
+    static const String TAG_PACKAGE_REDIRECTIONS;
+    static const String TAG_RESOURCE_REDIRECTIONS;
+    static const String TAG_ITEM;
+    static const String ATTRIBUTE_ITEM_NAME;
 
     /**
      * @deprecated callers should move to explicitly passing around source path.

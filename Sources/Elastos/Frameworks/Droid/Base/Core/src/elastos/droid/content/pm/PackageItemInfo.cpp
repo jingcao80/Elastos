@@ -19,6 +19,7 @@ CAR_INTERFACE_IMPL(PackageItemInfo, Object, IPackageItemInfo)
 PackageItemInfo::PackageItemInfo()
     : mLabelRes(0)
     , mIcon(0)
+    , mThemeIcon(0)
     , mBanner(0)
     , mLogo(0)
     , mShowUserIcon(0)
@@ -53,6 +54,7 @@ ECode PackageItemInfo::constructor(
     mLogo = orig->mLogo;
     mMetaData = orig->mMetaData;
     mShowUserIcon = orig->mShowUserIcon;
+    mThemeIcon = orig->mThemeIcon;
 
     return NOERROR;
 }
@@ -205,6 +207,7 @@ ECode PackageItemInfo::WriteToParcel(
     dest->WriteInterfacePtr(mMetaData);
     dest->WriteInt32(mBanner);
     dest->WriteInt32(mShowUserIcon);
+    dest->WriteInt32(mThemeIcon);
     return NOERROR;
 }
 
@@ -224,6 +227,7 @@ ECode PackageItemInfo::ReadFromParcel(
     mMetaData = obj != NULL ? IBundle::Probe(obj) : NULL;
     src->ReadInt32(&mBanner);
     src->ReadInt32(&mShowUserIcon);
+    src->ReadInt32(&mThemeIcon);
     return NOERROR;
 }
 
@@ -305,6 +309,21 @@ ECode PackageItemInfo::SetIcon(
     /* [in] */ Int32 icon)
 {
     mIcon = icon;
+    return NOERROR;
+}
+
+ECode PackageItemInfo::GetThemeIcon(
+    /* [out] */ Int32* themeIcon)
+{
+    VALIDATE_NOT_NULL(themeIcon)
+    *themeIcon = mThemeIcon;
+    return NOERROR;
+}
+
+ECode PackageItemInfo::SetThemeIcon(
+    /* [in] */ Int32 themeIcon)
+{
+    mThemeIcon = themeIcon;
     return NOERROR;
 }
 

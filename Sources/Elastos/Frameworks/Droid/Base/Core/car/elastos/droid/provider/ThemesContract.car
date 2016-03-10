@@ -13,7 +13,7 @@ module {
          * The unique ID for a row.
          * <P>Type: INTEGER (long)</P>
          */
-        const String _ID = "_id";
+        const String ID = "_id";
 
         /**
          * The user visible title.
@@ -308,7 +308,7 @@ module {
          * The unique ID for a row.
          * <P>Type: INTEGER (long)</P>
          */
-        const String _ID = "_id";
+        const String ID = "_id";
 
         /**
          * The unique ID for the theme these previews belong to.

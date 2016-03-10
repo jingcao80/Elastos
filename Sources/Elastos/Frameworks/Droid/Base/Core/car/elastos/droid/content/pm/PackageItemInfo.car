@@ -133,6 +133,12 @@ module
         SetIcon(
             [in] Int32 icon);
 
+        GetThemeIcon(
+            [out] Int32* icon);
+
+        SetThemeIcon(
+            [in] Int32 icon);
+
         GetBanner(
             [out] Int32* banner);
 

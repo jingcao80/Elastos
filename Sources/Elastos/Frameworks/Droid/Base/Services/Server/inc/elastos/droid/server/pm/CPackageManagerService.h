@@ -43,6 +43,7 @@ using Elastos::Utility::IHashMap;
 using Elastos::Utility::IList;
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger64;
 using Elastos::Utility::Concurrent::Atomic::IAtomicBoolean;
+using Elastos::Droid::App::IComposedIconInfo;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IIntentReceiver;
@@ -2186,6 +2187,35 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* str);
+
+    /** Protected Apps */
+    CARAPI SetComponentProtectedSetting(
+        /* [in] */ IComponentName* componentName,
+        /* [in] */ Boolean newState,
+        /* [in] */ Int32 userId);
+
+    /** Themes */
+    CARAPI UpdateIconMapping(
+        /* [in] */ const String& pkgName);
+
+    CARAPI GetComposedIconInfo(
+        /* [out] */ IComposedIconInfo** iconInfo);
+
+    CARAPI ProcessThemeResources(
+        /* [in] */ const String& themePkgName,
+        /* [out] */ Int32* res);
+
+    /** Package interception */
+    CARAPI SetPreLaunchCheckActivity(
+        /* [in] */ IComponentName* componentName);
+
+    CARAPI AddPreLaunchCheckPackage(
+        /* [in] */ const String& packageName);
+
+    CARAPI RemovePreLaunchCheckPackage(
+        /* [in] */ const String& packageName);
+
+    CARAPI ClearPreLaunchCheckPackages();
 
 private:
     static CARAPI_(void) GetDefaultDisplayMetrics(

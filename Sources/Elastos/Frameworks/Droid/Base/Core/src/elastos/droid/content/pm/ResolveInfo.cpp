@@ -518,6 +518,22 @@ ECode ResolveInfo::SetResolvePackageName(
     return NOERROR;
 }
 
+ECode ResolveInfo::GetTargetComponentName(
+    /* [out] */ IComponentName** targetComponentName)
+{
+    VALIDATE_NOT_NULL(targetComponentName)
+    *targetComponentName = mTargetComponentName;
+    REFCOUNT_ADD(*targetComponentName)
+    return NOERROR;
+}
+
+ECode ResolveInfo::SetTargetComponentName(
+    /* [in] */ IComponentName* targetComponentName)
+{
+    mTargetComponentName = targetComponentName;
+    return NOERROR;
+}
+
 ECode ResolveInfo::GetTargetUserId(
     /* [out] */ Int32* userId)
 {

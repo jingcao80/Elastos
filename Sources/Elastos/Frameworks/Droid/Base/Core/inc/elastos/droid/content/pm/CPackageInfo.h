@@ -200,6 +200,66 @@ public:
     CARAPI SetRestrictedAccountType(
         /* [in] */ const String& type);
 
+    /**
+     * {@hide}
+     */
+    CARAPI GetIsThemeApk(
+        /* [out] */ Boolean* isThemeApk);
+
+    /**
+     * {@hide}
+     */
+    CARAPI SetIsThemeApk(
+        /* [in] */ Boolean isThemeApk);
+
+    /**
+     * {@hide}
+     */
+    CARAPI GetHasIconPack(
+        /* [out] */ Boolean* hasIconPack);
+
+    /**
+     * {@hide}
+     */
+    CARAPI SetHasIconPack(
+        /* [in] */ Boolean hasIconPack);
+
+    /**
+     * {@hide}
+     */
+    CARAPI GetOverlayTargets(
+        /* [out, callee] */ ArrayOf<String>** targets);
+
+    /**
+     * {@hide}
+     */
+    CARAPI SetOverlayTargets(
+        /* [in] */ ArrayOf<String>* targets);
+
+    /**
+     * {@hide}
+     */
+    CARAPI GetIsLegacyIconPackApk(
+        /* [out] */ Boolean* isLegacyIconPackApk);
+
+    /**
+     * {@hide}
+     */
+    CARAPI SetIsLegacyIconPackApk(
+        /* [in] */ Boolean isLegacyIconPackApk);
+
+    /**
+     * {@hide}
+     */
+    CARAPI GetThemeInfo(
+        /* [out] */ IThemeInfo** themeInfo);
+
+    /**
+     * {@hide}
+     */
+    CARAPI SetThemeInfo(
+        /* [in] */ IThemeInfo* themeInfo);
+
 public:
     /**
      * The name of this package.  From the &lt;manifest&gt; tag's "name"
@@ -375,6 +435,34 @@ public:
 
     /** @hide */
     Boolean mCoreApp;
+
+    // Is Theme Apk
+    /**
+     * {@hide}
+     */
+    Boolean mIsThemeApk;
+
+    /**
+     * {@hide}
+     */
+    Boolean mHasIconPack;
+
+    /**
+     * {@hide}
+     */
+    AutoPtr<ArrayOf<String> > mOverlayTargets;
+
+    // Is Legacy Icon Apk
+    /**
+     * {@hide}
+     */
+    Boolean mIsLegacyIconPackApk;
+
+    // ThemeInfo
+    /**
+     * {@hide}
+     */
+    AutoPtr<IThemeInfo> mThemeInfo;
 
     /** @hide */
     Boolean mRequiredForAllUsers;

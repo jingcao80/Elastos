@@ -435,6 +435,22 @@ public:
         /* [in] */ Int32 userId,
         /* [out] */ IResources** res);
 
+    CARAPI GetThemedResourcesForApplication(
+        /* [in] */ IApplicationInfo* app,
+        /* [in] */ const String& themePkgName,
+        /* [out] */ IResources** res);
+
+    CARAPI GetThemedResourcesForApplication(
+        /* [in] */ const String& appPackageName,
+        /* [in] */ const String& themePkgName,
+        /* [out] */ IResources** res);
+
+    CARAPI GetThemedResourcesForApplicationAsUser(
+        /* [in] */ const String& appPackageName,
+        /* [in] */ const String& themePkgName,
+        /* [in] */ Int32 userId,
+        /* [out] */ IResources** res);
+
     CARAPI IsSafeMode(
         /* [out] */ Boolean* result);
 
@@ -646,6 +662,10 @@ public:
     CARAPI GetVerifierDeviceIdentity(
         /* [out] */ IVerifierDeviceIdentity** identity);
 
+    CARAPI SetComponentProtectedSetting(
+        /* [in] */ IComponentName* componentName,
+        /* [in] */ Boolean newState);
+
     //@Override
     CARAPI GetPackageInstaller(
         /* [out] */ IPackageInstaller** installer);
@@ -674,6 +694,13 @@ public:
         /* [in] */ IPackageItemInfo* itemInfo,
         /* [in] */ IApplicationInfo* appInfo,
         /* [out] */ IDrawable** drawable);
+
+    CARAPI UpdateIconMaps(
+        /* [in] */ const String& pkgName);
+
+    CARAPI ProcessThemeResources(
+        /* [in] */ const String& themePkgName,
+        /* [out] */ Int32* result);
 
 private:
     CARAPI_(AutoPtr<IDrawable>) GetCachedIcon(

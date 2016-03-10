@@ -319,6 +319,18 @@ public:
     CARAPI GetNativeLibraryRootRequiresIsa(
         /* [out */ Boolean* value);
 
+    CARAPI GetIsThemeable(
+        /* [out] */ Int32* isThemeable);
+
+    CARAPI SetIsThemeable(
+        /* [in] */ Int32 isThemeable);
+
+    CARAPI GetProtect(
+        /* [out] */ Boolean* protect);
+
+    CARAPI SetProtect(
+        /* [in] */ Boolean protect);
+
 protected:
 
     // @override
@@ -595,6 +607,19 @@ public:
      * @hide
      */
     Int32 mInstallLocation;
+
+    /**
+     * Is given application theme agnostic, i.e. behaves properly when default theme is changed.
+     * {@hide}
+     */
+    Boolean mIsThemeable;
+
+    /**
+     * When true, indicates that any one component within this application is
+     * protected.
+     * @hide
+     */
+    Boolean mProtect;
 };
 
 } // namespace Pm

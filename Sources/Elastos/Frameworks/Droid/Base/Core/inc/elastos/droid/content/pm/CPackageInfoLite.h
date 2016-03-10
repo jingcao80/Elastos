@@ -76,6 +76,12 @@ public:
     CARAPI SetVerifiers(
         /* [in] */ ArrayOf<IVerifierInfo*>* verifiers);
 
+    CARAPI GetIsTheme(
+        /* [out] */ Boolean* isTheme);
+
+    CARAPI SetIsTheme(
+        /* [in] */ Boolean isTheme);
+
 public:
     /**
      * The name of this package.  From the &lt;manifest&gt; tag's "name"
@@ -105,6 +111,8 @@ public:
     Int32 mRecommendedInstallLocation;
 
     Int32 mInstallLocation;
+
+    Boolean mIsTheme;
 
     AutoPtr< ArrayOf<IVerifierInfo*> > mVerifiers;
 };

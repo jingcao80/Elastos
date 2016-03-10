@@ -16,6 +16,12 @@ namespace Pm {
  * Transfer a large list of Parcelable objects across an IPC.  Splits into
  * multiple transactions if needed.
  *
+ * Caveat: for efficiency and security, all elements must be the same concrete type.
+ * In order to avoid writing the class name of each object, we must ensure that
+ * each object is the same type, or else unparceling then reparceling the data may yield
+ * a different result if the class name encoded in the Parcelable is a Base type.
+ * See b/17671747.
+ *
  * @hide
  */
 CarClass(CParceledListSlice)
@@ -55,6 +61,11 @@ public:
 
     CARAPI GetList(
         /* [out] */ IList** list);
+
+private:
+    static CARAPI VerifySameType(
+        /* [in] */ IInterface* expected,
+        /* [in] */ IInterface* actual);
 
 private:
     static String TAG;// = "ParceledListSlice";

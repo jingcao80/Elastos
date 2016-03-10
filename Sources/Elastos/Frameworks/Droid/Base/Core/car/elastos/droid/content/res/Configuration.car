@@ -191,6 +191,43 @@ module
         const Int32 ORIENTATION_LANDSCAPE = 2;
         const Int32 ORIENTATION_SQUARE = 3;
 
+        /**
+         * @hide
+         * @deprecated
+         */
+        const String THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY
+                = "persist.sys.themePackageName";
+        /**
+         * @hide
+         * @deprecated
+         */
+        const String THEME_ICONPACK_PACKAGE_NAME_PERSISTENCE_PROPERTY
+                = "themeIconPackPkgName";
+        /**
+         * @hide
+         * @deprecated
+         */
+        const String THEME_FONT_PACKAGE_NAME_PERSISTENCE_PROPERTY
+                = "themeFontPackPkgName";
+        /**
+         * @hide
+         * Serialized json structure mapping app pkgnames to their set theme.
+         *
+         * {
+         *  "default":{
+         *"     stylePkgName":"com.jasonevil.theme.miuiv5dark",
+         *      "iconPkgName":"com.cyngn.hexo",
+         *      "fontPkgName":"com.cyngn.hexo"
+         *   }
+         * }
+
+         * If an app does not have a specific theme set then it will use the 'default' theme+
+         * example: 'default' -> overlayPkgName: 'org.blue.theme'
+         *          'com.android.phone' -> 'com.red.theme'
+         *          'com.google.vending' -> 'com.white.theme'
+         */
+        const String THEME_PKG_CONFIGURATION_PERSISTENCE_PROPERTY = "themeConfig";
+
         const Int32 UI_MODE_TYPE_MASK = 0x0f;
         const Int32 UI_MODE_TYPE_UNDEFINED = 0x00;
         const Int32 UI_MODE_TYPE_NORMAL = 0x01;

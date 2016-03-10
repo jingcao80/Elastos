@@ -59,4 +59,6 @@ SOURCES += CVerificationParams.cpp
 SOURCES += CVerifierDeviceIdentity.cpp
 SOURCES += CVerifierDeviceIdentityHelper.cpp
 SOURCES += CVerifierInfo.cpp
+SOURCES += BaseThemeInfo.cpp
+SOURCES += CThemeInfo.cpp
 SOURCES += ThemeUtils.cpp

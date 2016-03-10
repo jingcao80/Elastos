@@ -34,3 +34,4 @@ SOURCES += ResourcesKey.cpp
 SOURCES += StringBlock.cpp
 SOURCES += CTypedArray.cpp
 SOURCES += XmlBlock.cpp
+SOURCES += CThemeConfig.cpp

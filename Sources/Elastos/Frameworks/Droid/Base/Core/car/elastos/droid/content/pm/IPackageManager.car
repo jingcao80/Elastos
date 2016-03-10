@@ -3,6 +3,7 @@ module
 {
     using interface Elastos.Utility.IList;
 
+    interface Elastos.Droid.App.IComposedIconInfo;
     interface Elastos.Droid.Content.Pm.IPackageInfo;
     interface Elastos.Droid.Content.Pm.IPermissionInfo;
     interface Elastos.Droid.Content.Pm.IPermissionGroupInfo;
@@ -750,6 +751,35 @@ module
             [in] String packageName,
             [in] IKeySet* ks,
             [out] Boolean* result);
+
+        /** Protected Apps */
+        SetComponentProtectedSetting(
+            [in] IComponentName* componentName,
+            [in] Boolean newState,
+            [in] Int32 userId);
+
+        /** Themes */
+        UpdateIconMapping(
+            [in] String pkgName);
+
+        GetComposedIconInfo(
+            [out] IComposedIconInfo** iconInfo);
+
+        ProcessThemeResources(
+            [in] String themePkgName,
+            [out] Int32* res);
+
+        /** Package interception */
+        SetPreLaunchCheckActivity(
+            [in] IComponentName* componentName);
+
+        AddPreLaunchCheckPackage(
+            [in] String packageName);
+
+        RemovePreLaunchCheckPackage(
+            [in] String packageName);
+
+        ClearPreLaunchCheckPackages();
     }
 
     } // namespace Pm

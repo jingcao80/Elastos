@@ -43,6 +43,10 @@ PackageUserState::PackageUserState(
     }
 
     mBlockUninstall = orig->mBlockUninstall;
+    mProtectedComponents = orig->mProtectedComponents != NULL
+            ? new HashSet<String>(*(orig->mProtectedComponents.Get())) : NULL;
+    mVisibleComponents = orig->mVisibleComponents != NULL
+            ? new HashSet<String>(*(orig->mVisibleComponents.Get())) : NULL;
 }
 
 PackageUserState::~PackageUserState()

@@ -19,6 +19,7 @@ CPackageInfoLite::CPackageInfoLite()
     , mMultiArch(FALSE)
     , mRecommendedInstallLocation(0)
     , mInstallLocation(0)
+    , mIsTheme(FALSE)
 {}
 
 CPackageInfoLite::~CPackageInfoLite()
@@ -53,6 +54,7 @@ ECode CPackageInfoLite::ReadFromParcel(
     Int32 ival;
     source->ReadInt32(&ival);
     mMultiArch = ival != 0;
+    source->ReadBoolean(&mIsTheme);
 
     source->ReadInt32(&ival);
     if (ival == 0) {
@@ -73,6 +75,7 @@ ECode CPackageInfoLite::WriteToParcel(
     dest->WriteInt32(mRecommendedInstallLocation);
     dest->WriteInt32(mInstallLocation);
     dest->WriteInt32(mMultiArch ? 1 : 0);
+    dest->WriteBoolean(mIsTheme);
 
     if (mVerifiers == NULL || mVerifiers->GetLength() == 0) {
         dest->WriteInt32(0);
@@ -172,6 +175,21 @@ ECode CPackageInfoLite::SetVerifiers(
     /* [in] */ ArrayOf<IVerifierInfo *>* verifiers)
 {
     mVerifiers = verifiers;
+    return NOERROR;
+}
+
+ECode CPackageInfoLite::GetIsTheme(
+    /* [out] */ Boolean* isTheme)
+{
+    VALIDATE_NOT_NULL(isTheme)
+    *isTheme = mIsTheme;
+    return NOERROR;
+}
+
+ECode CPackageInfoLite::SetIsTheme(
+    /* [in] */ Boolean isTheme)
+{
+    mIsTheme = isTheme;
     return NOERROR;
 }
 

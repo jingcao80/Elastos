@@ -413,31 +413,6 @@ ECode ImmersiveModeConfirmation::ImmersiveModeChanged(
     return NOERROR;
 }
 
-ECode ImmersiveModeConfirmation::OnPowerKeyDown(
-    /* [in] */ Boolean isScreenOn,
-    /* [in] */ Int64 time,
-    /* [in] */ Boolean inImmersiveMode,
-    /* [out] */ Boolean* result)
-{
-    VALIDATE_NOT_NULL(result);
-    if (!isScreenOn && (time - mPanicTime < mPanicThresholdMs))
-    {
-        // turning the screen back on within the panic threshold
-        Boolean res;
-        mHandler->SendEmptyMessage(H::PANIC, &res);
-        *result = (mClingWindow == NULL);
-        return NOERROR;
-    }
-    if (isScreenOn && inImmersiveMode) {
-        // turning the screen off, remember if we were in immersive mode
-        mPanicTime = time;
-    } else {
-        mPanicTime = 0;
-    }
-    *result = FALSE;
-    return NOERROR;
-}
-
 ECode ImmersiveModeConfirmation::ConfirmCurrentPrompt()
 {
     if (mClingWindow != NULL)

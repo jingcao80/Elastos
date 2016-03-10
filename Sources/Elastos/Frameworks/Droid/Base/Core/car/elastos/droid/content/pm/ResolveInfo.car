@@ -4,6 +4,7 @@ module
     using interface Elastos.Core.ICharSequence;
 
     interface Elastos.Droid.Content.IIntentFilter;
+    interface Elastos.Droid.Content.IComponentName;
     interface Elastos.Droid.Content.Pm.IPackageManager;
     interface Elastos.Droid.Content.Pm.IActivityInfo;
     interface Elastos.Droid.Content.Pm.IServiceInfo;
@@ -167,6 +168,12 @@ module
 
         SetSystem(
             [in] Boolean system);
+
+        GetTargetComponentName(
+            [out] IComponentName** targetComponentName);
+
+        SetTargetComponentName(
+            [in] IComponentName* targetComponentName);
     }
 
     } // namespace Pm

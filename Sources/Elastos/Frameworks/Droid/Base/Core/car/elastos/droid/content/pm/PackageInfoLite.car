@@ -57,6 +57,12 @@ module
 
         SetVerifiers(
             [in] ArrayOf<IVerifierInfo*>* verifiers);
+
+        GetIsTheme(
+            [out] Boolean* isTheme);
+
+        SetIsTheme(
+            [in] Boolean isTheme);
     }
 
     } // namespace Pm

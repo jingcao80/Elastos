@@ -185,6 +185,13 @@ module
         const Int32 MATCH_DEFAULT_ONLY   = 0x00010000;
 
         /**
+         * Resolution flag: If there is only 1 activity that the intent resolves too and if this
+         * flag  is set perform pre launch check for the resolved activity.
+         * @hide
+         */
+        const Int32 PERFORM_PRE_LAUNCH_CHECK   = 0x00100000;
+
+        /**
          * Flag for {@link addCrossProfileIntentFilter}: if this flag is set:
          * when resolving an intent that matches the {@link CrossProfileIntentFilter}, the current
          * profile will be skipped.
@@ -600,6 +607,14 @@ module
          * @hide
          */
         const Int32 INSTALL_FAILED_VERSION_DOWNGRADE = -25;
+
+        /**
+         * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+         * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+         * the package is from unknown sources but not trusted sources.
+         * @hide
+         */
+        const Int32 INSTALL_FAILED_UNKNOWN_SOURCES = -26;
 
         /**
          * Installation parse return code: this is passed to the {@link IIPackageInstallObserver} by
@@ -1652,6 +1667,20 @@ module
          */
         const String EXTRA_REQUEST_PERMISSION_PERMISSION_LIST
                 = "android.content.pm.extra.PERMISSION_LIST";
+
+        /**
+         * Flag for {@link #setComponentProtectedSetting(android.content.ComponentName, boolean)}:
+         * This component or application has set to protected status
+         * @hide
+         */
+        const Boolean COMPONENT_PROTECTED_STATUS = FALSE;
+
+        /**
+         * Flag for {@link #setComponentProtectedSetting(android.content.ComponentName, boolean)}:
+         * This component or application has been explicitly set to visible status
+         * @hide
+         */
+        const Boolean COMPONENT_VISIBLE_STATUS = TRUE;
 
         /**
          * String extra for {@link PackageInstallObserver} in the 'extras' Bundle in case of
@@ -3376,6 +3405,25 @@ module
             [in] Int32 userId,
             [out] IResources** res);
 
+        /** @hide */
+        GetThemedResourcesForApplication(
+            [in] IApplicationInfo* app,
+            [in] String themePkgName,
+            [out] IResources** res);
+
+        /** @hide */
+        GetThemedResourcesForApplication(
+            [in] String appPackageName,
+            [in] String themePkgName,
+            [out] IResources** res);
+
+        /** @hide */
+        GetThemedResourcesForApplicationAsUser(
+            [in] String appPackageName,
+            [in] String themePkgName,
+            [in] Int32 userId,
+            [out] IResources** res);
+
         /**
          * Retrieve overall information about an application package defined
          * in a package archive file
@@ -4164,6 +4212,14 @@ module
             [out] IPackageInstaller** installer);
 
         /**
+         * Update Component protection state
+         * @hide
+         */
+        SetComponentProtectedSetting(
+            [in] IComponentName* componentName,
+            [in] Boolean newState);
+
+        /**
          * Adds a {@link CrossProfileIntentFilter}. After calling this method all intents sent from the
          * user with id sourceUserId can also be be resolved by activities in the user with id
          * targetUserId if they match the specified intent filter.
@@ -4191,6 +4247,27 @@ module
         IsPackageAvailable(
             [in] String packageName,
             [out] Boolean* result);
+
+        /**
+         * Updates the theme icon res id for the new theme
+         * @hide
+         */
+        UpdateIconMaps(
+            [in] String pkgName);
+
+        /**
+         * Used to compile theme resources for a given theme
+         * @param themePkgName
+         * @return A value of 0 indicates success.  Possible errors returned are:
+         * {@link android.content.pm.PackageManager#INSTALL_FAILED_THEME_AAPT_ERROR},
+         * {@link android.content.pm.PackageManager#INSTALL_FAILED_THEME_IDMAP_ERROR}, or
+         * {@link android.content.pm.PackageManager#INSTALL_FAILED_THEME_UNKNOWN_ERROR}
+         *
+         * @hide
+         */
+        ProcessThemeResources(
+            [in] String themePkgName,
+            [out] Int32* result);
     }
 
     interface IPackageManagerHelper {

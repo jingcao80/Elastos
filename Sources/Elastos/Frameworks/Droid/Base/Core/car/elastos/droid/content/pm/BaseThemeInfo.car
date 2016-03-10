@@ -1,0 +1,47 @@
+
+module
+{
+
+    interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Utility.IAttributeSet;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * @hide
+     */
+    interface IBaseThemeInfo {
+
+        GetResolvedString(
+            [in] IResources* res,
+            [in] IAttributeSet* attrs,
+            [in] Int32 index,
+            [out] String* str);
+
+        GetThemeId(
+            [out] String* themeId);
+
+        SetThemeId(
+            [in] String themeId);
+
+        GetName(
+            [out] String* name);
+
+        SetName(
+            [in] String name);
+
+        GetAuthor(
+            [out] String* author);
+
+        SetAuthor(
+            [in] String author);
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

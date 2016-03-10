@@ -157,6 +157,12 @@ public:
     CARAPI SetIcon(
         /* [in] */ Int32 icon);
 
+    CARAPI GetThemeIcon(
+        /* [out] */ Int32* themeIcon);
+
+    CARAPI SetThemeIcon(
+        /* [in] */ Int32 themeIcon);
+
     CARAPI GetBanner(
         /* [out] */ Int32* banner);
 
@@ -274,6 +280,13 @@ public:
      * component's icon.  From the "icon" attribute or, if not set, 0.
      */
     Int32 mIcon;
+
+    /**
+     * A drawable resource identifier in the icon pack's resources
+     * If there isn't an icon pack or not set, then 0.
+     * @hide
+     */
+    Int32 mThemeIcon;
 
     /**
      * A drawable resource identifier (in the package's resources) of this

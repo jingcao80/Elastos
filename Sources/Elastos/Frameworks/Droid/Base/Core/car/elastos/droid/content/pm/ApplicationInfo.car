@@ -309,6 +309,7 @@ module
          */
         const Int32 FLAG_MULTIARCH  = 0x80000000; // 1<<31;
 
+
         Dump(
             [in] IPrinter* pw,
             [in] String prefix);
@@ -586,6 +587,18 @@ module
 
         GetNativeLibraryRootRequiresIsa(
             [out] Boolean* value);
+
+        GetIsThemeable(
+            [out] Int32* isThemeable);
+
+        SetIsThemeable(
+            [in] Int32 isThemeable);
+
+        GetProtect(
+            [out] Boolean* protect);
+
+        SetProtect(
+            [in] Boolean protect);
     }
 
 

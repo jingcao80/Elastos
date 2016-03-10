@@ -5933,8 +5933,6 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
                 Int64 downTime;
                 event->GetDownTime(&downTime);
                 Boolean panic;
-                mImmersiveModeConfirmation->OnPowerKeyDown(interactive,
-                        downTime, IsImmersiveMode(mLastSystemUiFlags), &panic);
                 if (panic)
                 {
                     Boolean isSuccess = FALSE;

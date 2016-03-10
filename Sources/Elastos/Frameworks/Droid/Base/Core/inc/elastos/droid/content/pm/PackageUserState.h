@@ -38,6 +38,8 @@ public:
     String mLastDisableAppCaller;
     AutoPtr<HashSet<String> > mDisabledComponents;
     AutoPtr<HashSet<String> > mEnabledComponents;
+    AutoPtr<HashSet<String> > mProtectedComponents;
+    AutoPtr<HashSet<String> > mVisibleComponents;
 };
 
 } // namespace Pm

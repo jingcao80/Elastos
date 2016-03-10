@@ -11,6 +11,7 @@ module
     interface Elastos.Droid.Content.Pm.IConfigurationInfo;
     interface Elastos.Droid.Content.Pm.IFeatureInfo;
     interface Elastos.Droid.Content.Pm.IFeatureGroupInfo;
+    interface Elastos.Droid.Content.Pm.IThemeInfo;
 
     namespace Elastos {
     namespace Droid {
@@ -228,6 +229,66 @@ module
         /** @hide */
         SetRestrictedAccountType(
             [in] String type);
+
+        /**
+         * {@hide}
+         */
+        GetIsThemeApk(
+            [out] Boolean* isThemeApk);
+
+        /**
+         * {@hide}
+         */
+        SetIsThemeApk(
+            [in] Boolean isThemeApk);
+
+        /**
+         * {@hide}
+         */
+        GetHasIconPack(
+            [out] Boolean* hasIconPack);
+
+        /**
+         * {@hide}
+         */
+        SetHasIconPack(
+            [in] Boolean hasIconPack);
+
+        /**
+         * {@hide}
+         */
+        GetOverlayTargets(
+            [out, callee] ArrayOf<String>* targets);
+
+        /**
+         * {@hide}
+         */
+        SetOverlayTargets(
+            [in] ArrayOf<String>* targets);
+
+        /**
+         * {@hide}
+         */
+        GetIsLegacyIconPackApk(
+            [out] Boolean* isLegacyIconPackApk);
+
+        /**
+         * {@hide}
+         */
+        SetIsLegacyIconPackApk(
+            [in] Boolean isLegacyIconPackApk);
+
+        /**
+         * {@hide}
+         */
+        GetThemeInfo(
+            [out] IThemeInfo** themeInfo);
+
+        /**
+         * {@hide}
+         */
+        SetThemeInfo(
+            [in] IThemeInfo* themeInfo);
     }
 
     } // namespace Pm

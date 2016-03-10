@@ -4,7 +4,9 @@
 #include "elastos/droid/content/pm/CParceledListSlice.h"
 #include "elastos/droid/os/CParcel.h"
 #include <binder/Parcel.h>
+#include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Os::CParcel;
 
 namespace Elastos {
@@ -84,10 +86,14 @@ ECode CParceledListSlice::constructor(
 //             return;
 //         }
 //         while (i < N && reply.readInt() != 0) {
-//             mList.add(reply.readCreator(creator, loader));
-//             if (DEBUG) Log.d(TAG, "Read extra #" + i + ": " + mList.get(mList.size()-1));
-//             i++;
-//         }
+//            final T parcelable = reply.readCreator(creator, loader);
+//            verifySameType(listElementClass, parcelable.getClass());
+//
+//            mList.add(parcelable);
+//
+//            if (DEBUG) Log.d(TAG, "Read extra #" + i + ": " + mList.get(mList.size()-1));
+//            i++;
+//        }
 //         reply.recycle();
 //         data.recycle();
 //     }
@@ -146,10 +152,16 @@ ECode CParceledListSlice::WriteToParcel(
     // dest.writeInt(N);
     // if (DEBUG) Log.d(TAG, "Writing " + N + " items");
     // if (N > 0) {
+    //     final Class<?> listElementClass = mList.get(0).getClass();
     //     dest.writeParcelableCreator(mList.get(0));
     //     int i = 0;
     //     while (i < N && dest.dataSize() < MAX_FIRST_IPC_SIZE) {
     //         dest.writeInt(1);
+    //
+    //         final T parcelable = mList.get(i);
+    //         verifySameType(listElementClass, parcelable.getClass());
+    //         parcelable.writeToParcel(dest, callFlags);
+    //
     //         mList.get(i).writeToParcel(dest, callFlags);
     //         if (DEBUG) Log.d(TAG, "Wrote inline #" + i + ": " + mList.get(i));
     //         i++;
@@ -167,6 +179,9 @@ ECode CParceledListSlice::WriteToParcel(
     //                 if (DEBUG) Log.d(TAG, "Writing more @" + i + " of " + N);
     //                 while (i < N && reply.dataSize() < MAX_IPC_SIZE) {
     //                     reply.writeInt(1);
+    //                     final T parcelable = mList.get(i);
+    //                     verifySameType(listElementClass, parcelable.getClass());
+    //                     parcelable.writeToParcel(reply, callFlags);
     //                     mList.get(i).writeToParcel(reply, callFlags);
     //                     if (DEBUG) Log.d(TAG, "Wrote extra #" + i + ": " + mList.get(i));
     //                     i++;
@@ -183,6 +198,20 @@ ECode CParceledListSlice::WriteToParcel(
     //     }
     // }
 
+    return NOERROR;
+}
+
+ECode CParceledListSlice::VerifySameType(
+    /* [in] */ IInterface* expected,
+    /* [in] */ IInterface* actual)
+{
+    Boolean equals;
+    if (IObject::Probe(actual)->Equals(expected, &equals), !equals) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        // throw new IllegalArgumentException("Can't unparcel type "
+        //         + actual.getName() + " in list of type "
+        //         + expected.getName());
+    }
     return NOERROR;
 }
 

@@ -1,0 +1,26 @@
+
+module
+{
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Content {
+    namespace Pm {
+
+    /**
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.Pm.IBasicThemeInfo
+     */
+    interface IThemeInfo {
+        const String META_TAG_NAME = "org.cyanogenmod.theme.name";
+        const String META_TAG_AUTHOR = "org.cyanogenmod.theme.author";
+    }
+
+    } // namespace Pm
+    } // namespace Content
+    } // namespace Droid
+    } // namespace Elastos
+}

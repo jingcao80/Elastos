@@ -20,6 +20,8 @@
 #include "elastos/droid/content/pm/PackageManager.h"
 #include "elastos/droid/content/pm/CManifestDigest.h"
 #include "elastos/droid/content/pm/CVerifierInfo.h"
+#include "elastos/droid/content/pm/ThemeUtils.h"
+#include "elastos/droid/content/pm/CThemeInfo.h"
 #include "elastos/droid/content/res/CAssetManager.h"
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/os/CBundle.h"
@@ -35,6 +37,7 @@
 #include "elastos/droid/R.h"
 #include "elastos/droid/Manifest.h"
 #include <elastos/core/CoreUtils.h>
+#include <elastos/core/StringUtils.h>
 #include <elastos/utility/Arrays.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/utility/logging/Slogger.h>
@@ -58,6 +61,7 @@ using Elastos::Droid::Internal::Utility::XmlUtils;
 
 using Elastos::Core::CString;
 using Elastos::Core::CoreUtils;
+using Elastos::Core::StringUtils;
 using Elastos::Core::EIID_IComparator;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IBufferedInputStream;
@@ -68,6 +72,7 @@ using Elastos::Utility::Arrays;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IMap;
+using Elastos::Utility::IEnumeration;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Utility::Jar::IAttributes;
@@ -78,6 +83,8 @@ using Elastos::Utility::Jar::IJarFile;
 using Elastos::Utility::Jar::CJarFile;
 using Elastos::Utility::Jar::IManifest;
 using Elastos::Utility::Jar::CStrictJarFile;
+using Elastos::Utility::Zip::IZipFile;
+using Elastos::Utility::Zip::CZipFile;
 using Elastos::Security::Cert::ICertificate;
 using Elastos::Security::IPublicKey;
 using Elastos::Security::Spec::IEncodedKeySpec;
@@ -103,6 +110,13 @@ const String PackageParser::TAG("PackageParser");
 
 /** File name in an APK for the Android manifest. */
 const String PackageParser::ANDROID_MANIFEST_FILENAME("AndroidManifest.xml");
+const String PackageParser::OVERLAY_PATH("assets/overlays/");
+const String PackageParser::ICON_PATH("assets/icons/");
+const String PackageParser::PACKAGE_REDIRECTIONS_XML("res/xml/redirections.xml");
+const String PackageParser::TAG_PACKAGE_REDIRECTIONS("package-redirections");
+const String PackageParser::TAG_RESOURCE_REDIRECTIONS("resource-redirections");
+const String PackageParser::TAG_ITEM("item");
+const String PackageParser::ATTRIBUTE_ITEM_NAME("name");
 
 AutoPtr< ArrayOf<PackageParser::NewPermissionInfo*> > Init_NEW_PERMISSIONS()
 {
@@ -172,6 +186,7 @@ const Int32 PackageParser::PARSE_IS_SYSTEM_DIR = 1<<6;
 const Int32 PackageParser::PARSE_IS_PRIVILEGED = 1<<7;
 const Int32 PackageParser::PARSE_COLLECT_CERTIFICATES = 1<<8;
 const Int32 PackageParser::PARSE_TRUSTED_OVERLAY = 1<<9;
+const Int32 PackageParser::PARSE_IS_PREBUNDLED_DIR = 1<<10;
 
 const String PackageParser::ANDROID_RESOURCES("http://schemas.android.com/apk/res/android");
 
@@ -256,6 +271,7 @@ PackageParser::PackageLite::PackageLite(
     mSplitCodePaths = splitCodePaths;
     mCoreApp = baseApk->mCoreApp;
     mMultiArch = baseApk->mMultiArch;
+    mIsTheme = baseApk->mIsTheme;
 }
 
 AutoPtr<List<String> > PackageParser::PackageLite::GetAllCodePaths()
@@ -364,7 +380,8 @@ PackageParser::ApkLite::ApkLite(
     /* [in] */ List<AutoPtr<IVerifierInfo> >* verifiers,
     /* [in] */ ArrayOf<ISignature*>* signatures,
     /* [in] */ Boolean coreApp,
-    /* [in] */ Boolean multiArch)
+    /* [in] */ Boolean multiArch,
+    /* [in] */ Boolean isTheme)
     : mCodePath(codePath)
     , mPackageName(packageName)
     , mSplitName(splitName)
@@ -373,6 +390,7 @@ PackageParser::ApkLite::ApkLite(
     , mSignatures(signatures)
     , mCoreApp(coreApp)
     , mMultiArch(multiArch)
+    , mIsTheme(isTheme)
 {
     Int32 size = verifiers->GetSize();
     mVerifiers = ArrayOf<IVerifierInfo*>::Alloc(size);
@@ -394,6 +412,8 @@ PackageParser::Package::Package(
     , mSharedUserLabel(0)
     , mPreferredOrder(0)
     , mLastPackageUsageTimeInMills(0)
+    , mIsThemeApk(FALSE)
+    , mIsLegacyIconPackApk(FALSE)
     , mOperationPending(FALSE)
     , mInstallLocation(0)
     , mCoreApp(FALSE)
@@ -931,6 +951,18 @@ AutoPtr<IPackageInfo> PackageParser::GeneratePackageInfo(
     cpi->mVersionName = p->mVersionName;
     cpi->mSharedUserId = p->mSharedUserId;
     cpi->mSharedUserLabel = p->mSharedUserLabel;
+    cpi->mIsThemeApk = p->mIsThemeApk;
+    cpi->mHasIconPack = p->mHasIconPack;
+    cpi->mIsLegacyIconPackApk = p->mIsLegacyIconPackApk;
+
+    if (cpi->mIsThemeApk) {
+        cpi->mOverlayTargets = ArrayOf<String>::Alloc(p->mOverlayTargets.GetSize());
+        List<String>::Iterator it = p->mOverlayTargets.Begin();
+        for (Int32 i = 0; it != p->mOverlayTargets.End(); ++it, ++i) {
+            (*cpi->mOverlayTargets)[i] = *it;
+        }
+        cpi->mThemeInfo = p->mThemeInfo;
+    }
     cpi->mApplicationInfo = GenerateApplicationInfo(p, flags, state, userId);
     cpi->mInstallLocation = p->mInstallLocation;
     cpi->mCoreApp = p->mCoreApp;
@@ -1613,6 +1645,19 @@ ECode PackageParser::ParseBaseApk(
     pkg->mBaseCodePath = apkPath;
     pkg->mSignatures = NULL;
 
+    // If the pkg is a theme, we need to know what themes it overlays
+    // and determine if it has an icon pack
+    if (pkg->mIsThemeApk) {
+        //Determine existance of Overlays
+        AutoPtr<List<String> > overlayTargets = ScanPackageOverlays(apkFile);
+        List<String>::Iterator it = overlayTargets->Begin();
+        for (; it != overlayTargets->End(); ++it) {
+            pkg->mOverlayTargets.PushBack(*it);
+        }
+
+        pkg->mHasIconPack = PackageHasIconPack(apkFile);
+    }
+
     // } catch (PackageParserException e) {
     //     throw e;
     // } catch (Exception e) {
@@ -1788,6 +1833,117 @@ ECode PackageParser::ParseSplitApk(
     *result = pkg;
     REFCOUNT_ADD(*result)
     return NOERROR;
+}
+
+AutoPtr<List<String> > PackageParser::ScanPackageOverlays(
+    /* [in] */ IFile* originalFile)
+{
+    AutoPtr<List<String> > overlayTargets = new List<String>();
+    AutoPtr<IZipFile> privateZip;
+    // try {
+    AutoPtr<IEnumeration> privateZipEntries;
+    Boolean hasMoreElements;
+    String path;
+    originalFile->GetPath(&path);
+    ECode ec = CZipFile::New(path, (IZipFile**)&privateZip);
+    FAIL_GOTO(ec, fail)
+    privateZip->GetEntries((IEnumeration**)&privateZipEntries);
+    ec = privateZipEntries->HasMoreElements(&hasMoreElements);
+    FAIL_GOTO(ec, fail)
+    while (hasMoreElements) {
+        AutoPtr<IInterface> element;
+        ec = privateZipEntries->GetNextElement((IInterface**)&element);
+        if (FAILED(ec)) break;
+        AutoPtr<IZipEntry> zipEntry = IZipEntry::Probe(element);
+        String zipEntryName;
+        zipEntry->GetName(&zipEntryName);
+        if (zipEntryName.StartWith(OVERLAY_PATH) && zipEntryName.GetLength() > 16) {
+            AutoPtr<ArrayOf<String> > subdirs;
+            StringUtils::Split(zipEntryName, "/", (ArrayOf<String>**)&subdirs);
+            overlayTargets->PushBack((*subdirs)[2]);
+        }
+        ec = privateZipEntries->HasMoreElements(&hasMoreElements);
+        if (FAILED(ec)) break;
+    }
+    // } catch(Exception e) {
+    //     e.printStackTrace();
+    //     overlayTargets.clear();
+    // } finally {
+    //     if (privateZip != null) {
+    //         try {
+    //             privateZip.close();
+    //         } catch (Exception e) {
+    //             //Ignore
+    //         }
+    //     }
+    // }
+fail:
+    if (FAILED(ec)) {
+        // e.printStackTrace();
+        overlayTargets->Clear();
+    }
+
+    if (privateZip != NULL) {
+        // try {
+        privateZip->Close();
+        // } catch (Exception e) {
+        //     //Ignore
+        // }
+    }
+
+    return overlayTargets;
+}
+
+Boolean PackageParser::PackageHasIconPack(
+    /* [in] */ IFile* originalFile)
+{
+    AutoPtr<IZipFile> privateZip;
+    // try {
+    AutoPtr<IEnumeration> privateZipEntries;
+    Boolean hasMoreElements;
+    String path;
+    originalFile->GetPath(&path);
+    ECode ec = CZipFile::New(path, (IZipFile**)&privateZip);
+    FAIL_GOTO(ec, fail)
+    privateZip->GetEntries((IEnumeration**)&privateZipEntries);
+    ec = privateZipEntries->HasMoreElements(&hasMoreElements);
+    FAIL_GOTO(ec, fail)
+    while (hasMoreElements) {
+        AutoPtr<IInterface> element;
+        ec = privateZipEntries->GetNextElement((IInterface**)&element);
+        if (FAILED(ec)) break;
+        AutoPtr<IZipEntry> zipEntry = IZipEntry::Probe(element);
+        String zipEntryName;
+        zipEntry->GetName(&zipEntryName);
+        if (zipEntryName.StartWith(ICON_PATH) &&
+                zipEntryName.GetLength() > ICON_PATH.GetLength()) {
+            return TRUE;
+        }
+    }
+    // } catch(Exception e) {
+    //     Log.e(TAG, "Could not read zip entries while checking if apk has icon pack", e);
+    // } finally {
+    //     if (privateZip != null) {
+    //         try {
+    //             privateZip.close();
+    //         } catch (Exception e) {
+    //             //Ignore
+    //         }
+    //     }
+    // }
+fail:
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Could not read zip entries while checking if apk has icon pack 0x%08x", ec);
+    }
+
+    if (privateZip != NULL) {
+        // try {
+        privateZip->Close();
+        // } catch (Exception e) {
+        //     //Ignore
+        // }
+    }
+    return FALSE;
 }
 
 ECode PackageParser::CollectManifestDigest(
@@ -2247,6 +2403,11 @@ ECode PackageParser::ParseApkLite(
     Int32 searchDepth, depth;
     parser->GetDepth(&searchDepth);
     searchDepth += 1;
+    // Search for category and actions inside <intent-filter>
+    Int32 iconPackSearchDepth;
+    parser->GetDepth(&iconPackSearchDepth);
+    iconPackSearchDepth += 4;
+    Boolean isTheme = FALSE;
 
     String name;
     AutoPtr<List<AutoPtr<IVerifierInfo> > > verifiers = new List<AutoPtr<IVerifierInfo> >();
@@ -2278,13 +2439,69 @@ ECode PackageParser::ParseApkLite(
                 }
             }
         }
+
+        if ((parser->GetDepth(&depth), depth == searchDepth) &&
+                (parser->GetName(&name), name.Equals("meta-data"))) {
+            attrs->GetAttributeCount(&count);
+            for (Int32 i=0; i < count; i++) {
+                String attr;
+                attrs->GetAttributeName(i, &attr);
+                if (attr.Equals("name") &&
+                        IThemeInfo::META_TAG_NAME.Equals(attr)) {
+                    isTheme = TRUE;
+                    installLocation = IPackageInfo::INSTALL_LOCATION_INTERNAL_ONLY;
+                    break;
+                }
+            }
+        }
+
+        if ((parser->GetDepth(&depth), depth == searchDepth) &&
+                (parser->GetName(&name), name.Equals("theme"))) {
+            isTheme = TRUE;
+            installLocation = IPackageInfo::INSTALL_LOCATION_INTERNAL_ONLY;
+        }
+
+        if ((parser->GetDepth(&depth), depth == iconPackSearchDepth) && IsLegacyIconPack(parser)) {
+            isTheme = TRUE;
+            installLocation = IPackageInfo::INSTALL_LOCATION_INTERNAL_ONLY;
+        }
     }
 
     AutoPtr<ApkLite> al = new ApkLite(codePath, (*packageSplit)[0], (*packageSplit)[1],
-        versionCode, installLocation, verifiers, signatures, coreApp, multiArch);
+        versionCode, installLocation, verifiers, signatures, coreApp, multiArch, isTheme);
     *apkLite = al;
     REFCOUNT_ADD(*apkLite)
     return NOERROR;
+}
+
+Boolean PackageParser::IsLegacyIconPack(
+    /* [in] */ IXmlPullParser* parser)
+{
+    String name;
+    parser->GetName(&name);
+    Boolean isAction = name.Equals("action");
+    Boolean isCategory = name.Equals("category");
+    AutoPtr<ArrayOf<String> > items = isAction ? ThemeUtils::sSupportedActions
+            : (isCategory ? ThemeUtils::sSupportedCategories : NULL);
+
+    if (items != NULL) {
+        Int32 count;
+        parser->GetAttributeCount(&count);
+        for (Int32 i = 0; i < count; i++) {
+            String attrName;
+            parser->GetAttributeName(i, &attrName);
+            if (attrName.Equals("name")) {
+                String value;
+                parser->GetAttributeValue(i, &value);
+                for (Int32 j = 0; j < items->GetLength(); ++j) {
+                    if ((*items)[j].Equals(value)) {
+                        return TRUE;
+                    }
+                }
+            }
+        }
+    }
+    return FALSE;
 }
 
 AutoPtr<ISignature> PackageParser::StringToSignature(
@@ -2353,6 +2570,8 @@ ECode PackageParser::ParseBaseApk(
     }
 
     AutoPtr<PackageParser::Package> pkg = new PackageParser::Package(pkgName);
+    AutoPtr<IBundle> metaDataBundle;
+    CBundle::New((IBundle**)&metaDataBundle);
     Boolean foundApp = FALSE;
 
     AutoPtr<ITypedArray> a;
@@ -2435,6 +2654,7 @@ ECode PackageParser::ParseBaseApk(
             continue;
         }
 
+        String parserName;
         String tagName;
         parser->GetName(&tagName);
         if (tagName.Equals("application")) {
@@ -2923,6 +3143,12 @@ ECode PackageParser::ParseBaseApk(
             XmlUtils::SkipCurrentTag(parser);
             continue;
         }
+        else if (parser->GetName(&parserName), parserName.Equals("meta-data")) {
+            if ((metaDataBundle = ParseMetaData(res, parser, attrs, metaDataBundle,
+                    outError)) == NULL) {
+                return NOERROR;
+            }
+        }
         else if (RIGID_PARSER) {
             // (*outError)[0] = (const char*)(
             //     StringBuffer("Bad element under <manifest>: ") + tagName);
@@ -3030,6 +3256,9 @@ ECode PackageParser::ParseBaseApk(
         pkgFlags |= IApplicationInfo::FLAG_SUPPORTS_SCREEN_DENSITIES;
         pkg->mApplicationInfo->SetFlags(pkgFlags);
     }
+    if (pkg->mIsThemeApk || pkg->mIsLegacyIconPackApk) {
+        pkg->mApplicationInfo->SetIsThemeable(FALSE);
+    }
 
     /*
      * b/8528162: Ignore the <uses-permission android:required> attribute if
@@ -3042,6 +3271,16 @@ ECode PackageParser::ParseBaseApk(
         for (Int32 i = 0; i < (Int32)pkg->mRequestedPermissionsRequired.GetSize(); i++) {
             pkg->mRequestedPermissionsRequired[i] = TRUE;
         }
+    }
+
+    //Is this pkg a theme?
+    Boolean containsKey;
+    if (metaDataBundle->ContainsKey(IThemeInfo::META_TAG_NAME, &containsKey), containsKey) {
+        pkg->mIsThemeApk = TRUE;
+        pkg->mTrustedOverlay = TRUE;
+        pkg->mOverlayPriority = 1;
+        pkg->mThemeInfo = NULL;
+        CThemeInfo::New(metaDataBundle, (IThemeInfo**)&pkg->mThemeInfo);
     }
 
     *result = pkg;
@@ -3862,6 +4101,9 @@ Boolean PackageParser::ParseBaseApplication(
     IPackageItemInfo* pii = IPackageItemInfo::Probe(ai);
     String pkgName;
     pii->GetPackageName(&pkgName);
+
+    // assume that this package is themeable unless explicitly set to false.
+    ai->SetIsThemeable(TRUE);
 
     Int32 size = ArraySize(R::styleable::AndroidManifestApplication);
     AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
@@ -4949,6 +5191,29 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
             if (!ParseIntent(res, parser, attrs, TRUE, intent, outError)) {
                 return NULL;
             }
+
+            // Check if package is a legacy icon pack
+            if (!owner->mIsLegacyIconPackApk) {
+                for (Int32 i = 0; i < ThemeUtils::sSupportedActions->GetLength(); ++i) {
+                    String action = (*ThemeUtils::sSupportedActions)[i];
+                    Boolean hasAction;
+                    if (intent->HasAction(action, &hasAction), hasAction) {
+                        owner->mIsLegacyIconPackApk = TRUE;
+                        break;
+                    }
+                }
+            }
+            if (!owner->mIsLegacyIconPackApk) {
+                for (Int32 i = 0; i < ThemeUtils::sSupportedCategories->GetLength(); ++i) {\
+                    String category = (*ThemeUtils::sSupportedCategories)[i];
+                    Boolean hasCategory;
+                    if (intent->HasCategory(category, &hasCategory), hasCategory) {
+                        owner->mIsLegacyIconPackApk = TRUE;
+                        break;
+                    }
+                }
+            }
+
             if (intent->CountActions() == 0) {
                 String des;
                 parser->GetPositionDescription(&des);
@@ -4960,22 +5225,22 @@ AutoPtr<PackageParser::Activity> PackageParser::ParseActivity(
             }
         }
         else if (!receiver && name.Equals("preferred")) {
-                AutoPtr<ActivityIntentInfo> intent = new ActivityIntentInfo(a);
-                if (!ParseIntent(res, parser, attrs, FALSE, intent, outError)) {
-                    return NULL;
-                }
-                if (intent->CountActions() == 0) {
-                    // Slogger::W(TAG, "No actions in preferred at "
-                    //         + mArchiveSourcePath + " "
-                    //         + parser.getPositionDescription());
-                }
-                else {
-                    if (owner->mPreferredActivityFilters == NULL) {
-                        owner->mPreferredActivityFilters = new List<AutoPtr<ActivityIntentInfo> >();
-                    }
-                    owner->mPreferredActivityFilters->PushBack(intent);
-                }
+            AutoPtr<ActivityIntentInfo> intent = new ActivityIntentInfo(a);
+            if (!ParseIntent(res, parser, attrs, FALSE, intent, outError)) {
+                return NULL;
             }
+            if (intent->CountActions() == 0) {
+                // Slogger::W(TAG, "No actions in preferred at "
+                //         + mArchiveSourcePath + " "
+                //         + parser.getPositionDescription());
+            }
+            else {
+                if (owner->mPreferredActivityFilters == NULL) {
+                    owner->mPreferredActivityFilters = new List<AutoPtr<ActivityIntentInfo> >();
+                }
+                owner->mPreferredActivityFilters->PushBack(intent);
+            }
+        }
         else if (name.Equals("meta-data")) {
             if ((a->mMetaData = ParseMetaData(res, parser, attrs, a->mMetaData,
                     outError)) == NULL) {
@@ -6290,6 +6555,13 @@ Boolean PackageParser::CopyNeeded(
             && p->mUsesLibraryFiles != NULL) {
         return TRUE;
     }
+    if (state->mProtectedComponents != NULL) {
+        Boolean protect = state->mProtectedComponents->Begin() != state->mProtectedComponents->End();
+        Boolean appProtect;
+        if (p->mApplicationInfo->GetProtect(&appProtect), appProtect != protect) {
+            return TRUE;
+        }
+    }
     return FALSE;
 }
 
@@ -6336,6 +6608,9 @@ ECode PackageParser::UpdateApplicationInfo(
         aiObj->mEnabled = FALSE;
     }
     aiObj->mEnabledSetting = state->mEnabled;
+    if (state->mProtectedComponents != NULL) {
+        aiObj->mProtect = state->mProtectedComponents->Begin() != state->mProtectedComponents->End();
+    }
     return NOERROR;
 }
 

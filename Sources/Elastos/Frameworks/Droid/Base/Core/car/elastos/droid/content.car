@@ -116,6 +116,8 @@ module
     merge("content/pm/VerifierInfo.car");
     merge("content/pm/XmlSerializerAndParser.car");
     merge("content/pm/PackageParser.car");
+    merge("content/pm/BaseThemeInfo.car");
+    merge("content/pm/ThemeInfo.car");
 
     merge("content/res/AssetFileDescriptor.car");
     merge("content/res/AssetManager.car");
@@ -129,6 +131,7 @@ module
     merge("content/res/ResourcesKey.car");
     merge("content/res/TypedArray.car");
     merge("content/res/XmlResourceParser.car");
+    merge("content/res/ThemeConfig.car");
 
     using interface Elastos.Core.IComparator;
     using interface Elastos.Core.IComparable;
@@ -1146,29 +1149,29 @@ module
         interface ICloseable;
     }
 
-     [deprecated]
-     class CManifestDigest {
-         constructor();
+    [deprecated]
+    class CManifestDigest {
+        constructor();
 
-         constructor(
-             [in] ArrayOf<Byte>* digest);
+        constructor(
+            [in] ArrayOf<Byte>* digest);
 
-         interface IManifestDigest;
-         interface IParcelable;
-     }
+        interface IManifestDigest;
+        interface IParcelable;
+    }
 
-     /** @hide */
-     class CPackageCleanItem {
-         constructor();
+    /** @hide */
+    class CPackageCleanItem {
+        constructor();
 
-         constructor(
-             [in] Int32 userId,
-             [in] String packageName,
-             [in] Boolean andCode);
+        constructor(
+            [in] Int32 userId,
+            [in] String packageName,
+            [in] Boolean andCode);
 
-         interface IPackageCleanItem;
-         interface IParcelable;
-     }
+        interface IPackageCleanItem;
+        interface IParcelable;
+    }
 
     class CPackageInfo {
         constructor();
@@ -1452,6 +1455,15 @@ module
         interface IParcelable;
     }
 
+    class CThemeInfo {
+        constructor(
+            [in] IBundle* bundle);
+
+        interface IThemeInfo;
+        interface IBaseThemeInfo;
+        interface IParcelable;
+    }
+
     } // namespace Pm
     } // namespace Content
     } // namespace Droid
@@ -1645,6 +1657,15 @@ module
             [in] Int32 len);
 
         interface ITypedArray;
+    }
+
+    class CThemeConfig {
+        constructor();
+
+        interface IThemeConfig;
+        interface ICloneable;
+        interface IParcelable;
+        interface IComparable;
     }
 
     } // namespace Res
