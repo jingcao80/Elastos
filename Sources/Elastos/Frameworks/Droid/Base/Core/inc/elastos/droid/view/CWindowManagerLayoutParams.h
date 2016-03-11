@@ -217,6 +217,12 @@ public:
     CARAPI SetUserActivityTimeout(
         /* [in] */ Int32 userActivityTimeout);
 
+    CARAPI GetBlurMaskAlphaThreshold(
+    /* [out] */ Float* blurMaskAlphaThreshold);
+
+    CARAPI SetBlurMaskAlphaThreshold(
+    /* [in] */ Float blurMaskAlphaThreshold);
+
     CARAPI ReadFromParcel(
         /* [in] */ IParcel *source);
 
@@ -493,6 +499,14 @@ public:
      * @hide
      */
     Int64 mUserActivityTimeout;
+
+    /**
+     * Threshold value that blur masking layer uses to determine whether
+     * to use or discard the blurred color.
+     * Value should be between 0.0 and 1.0
+     * @hide
+     */
+    Float mBlurMaskAlphaThreshold;
 
 private:
     // internal buffer to backup/restore parameters under compatibility mode.

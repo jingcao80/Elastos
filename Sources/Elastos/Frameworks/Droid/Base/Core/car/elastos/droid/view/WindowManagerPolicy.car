@@ -408,6 +408,9 @@ module
         /** Unregister a system listener for touch events */
         UnregisterPointerEventListener(
             [in] IPointerEventListener* listener);
+
+        AddSystemUIVisibilityFlag(
+            [in] Int32 flags);
     }
 
     /**
@@ -888,6 +891,7 @@ module
          */
         CreateForceHideWallpaperExitAnimation(
             [in] Boolean goingToNotificationShade,
+            [in] Boolean keyguardShowingMedia,
             [out] IAnimation** animation);
 
         /**
@@ -1363,6 +1367,15 @@ module
          * Specifies whether there is an on-screen navigation bar separate from the status bar.
          */
         HasNavigationBar(
+            [out] Boolean* result);
+
+        HasPermanentMenuKey(
+            [out] Boolean* result);
+
+        /**
+        * Specifies whether the device needs a navigation bar (because it has no hardware buttons)
+        */
+        NeedsNavigationBar(
             [out] Boolean* result);
 
         /**

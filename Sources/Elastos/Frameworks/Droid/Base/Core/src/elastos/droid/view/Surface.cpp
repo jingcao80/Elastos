@@ -379,6 +379,33 @@ void Surface::NativeAllocateBuffers()
     surface->allocateBuffers();
 }
 
+ECode Surface::NativeSetDirtyRect(
+    /* [in] */ IRect* dirty)
+{
+#ifdef QCOM_BSP
+    sp<android::Surface> surface(reinterpret_cast<android::Surface *>(mNativeObject));
+
+    if (!isSurfaceValid(surface)) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Int32 l, t, r, b;
+    dirty->GetLeft(&l);
+    dirty->GetTop(&t);
+    dirty->GetRight(&r);
+    dirty->GetBottom(&b);
+
+    Rect rect;
+    rect.left = l;
+    rect.top = t;
+    rect.right = r;
+    rect.bottom = b;
+
+    surface->setDirtyRect(&rect);
+#endif
+    return NOERROR;
+}
+
 void Surface::SetNativeObjectLocked(
     /* [in] */ Int64 ptr)
 {
@@ -470,6 +497,20 @@ ECode Surface::constructor(
     SetNativeObjectLocked(nativeObject);
     return NOERROR;
 }
+
+/**
+ * Set dirty region passed from HW renderer.
+ * @hide
+ */
+ECode Surface::SetDirtyRect(
+    /* [in] */ IRect* dirty)
+ {
+    if (mNativeObject != 0) {
+        FAIL_RETURN(NativeSetDirtyRect(dirty))
+    }
+    return NOERROR;
+}
+
 
 ECode Surface::ReleaseSurface()
 {

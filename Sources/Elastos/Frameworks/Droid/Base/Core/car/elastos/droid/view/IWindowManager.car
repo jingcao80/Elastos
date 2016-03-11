@@ -247,7 +247,8 @@ module
 
         KeyguardGoingAway(
             [in] Boolean disableWindowAnimations,
-            [in] Boolean keyguardGoingToNotificationShade);
+            [in] Boolean keyguardGoingToNotificationShade,
+            [in] Boolean keyguardShowingMedia);
 
         CloseSystemDialogs(
             [in] String reason);
@@ -375,6 +376,18 @@ module
             [out] IBitmap** bitmap);
 
         /**
+        * Get the current x offset for the wallpaper
+        */
+        GetLastWallpaperX(
+            [out] Int32* x);
+
+        /**
+        * Get the current y offset for the wallpaper
+        */
+        GetLastWallpaperY(
+            [out] Int32* y);
+
+        /**
          * Called by the status bar to notify Views of changes to System UI visiblity.
          */
         StatusBarVisibilityChanged(
@@ -384,6 +397,15 @@ module
          * Device has a software navigation bar (separate from the status bar).
          */
         HasNavigationBar(
+            [out] Boolean* result);
+
+        HasPermanentMenuKey(
+            [out] Boolean* result);
+
+        /**
+        * Device needs a software navigation bar (because it has no hardware keys).
+        */
+        NeedsNavigationBar(
             [out] Boolean* result);
 
         /**

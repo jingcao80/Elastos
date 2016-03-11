@@ -215,6 +215,10 @@ ECode Scroller::constructor(
 
     mPhysicalCoeff = ComputeDeceleration(0.84f); // look and feel tuning
 
+    AutoPtr<IInterface> pmTmp;
+    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&pmTmp);
+    mPm = IPowerManager::Probe(pmTmp);
+
     return NOERROR;
 }
 
@@ -411,6 +415,8 @@ ECode Scroller::StartScroll(
     mDeltaX = dx;
     mDeltaY = dy;
     mDurationReciprocal = 1.0f / (Float) mDuration;
+    mPm->CpuBoost(duration * 1000);
+
     return NOERROR;
 }
 

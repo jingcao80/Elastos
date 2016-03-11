@@ -9,6 +9,7 @@
 #include "elastos/droid/view/RenderNodeAnimator.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/ViewPropertyAnimator.h"
+#include "elastos/droid/view/GLES20RecordingCanvas.h"
 #include "elastos/droid/internal/view/animation/FallbackLUTInterpolator.h"
 #include "elastos/droid/animation/ValueAnimator.h"
 #include <elastos/utility/logging/Slogger.h>
@@ -95,7 +96,8 @@ ECode RenderNodeAnimator::DelayedAnimationHelper::RemoveDelayedAnimation(
 
 ECode RenderNodeAnimator::DelayedAnimationHelper::Run()
 {
-    Int64 frameTimeMs; // = mChoreographer.getFrameTime(); zhangjingcheng
+    Int64 frameTimeMs;
+    mChoreographer->GetFrameTime(&frameTimeMs);
     mCallbackScheduled = FALSE;
 
     List<AutoPtr<IRenderNodeAnimator> >::Iterator end = mDelayedAnims.Begin();
@@ -310,12 +312,15 @@ ECode RenderNodeAnimator::SetTarget(
 ECode RenderNodeAnimator::SetTarget(
     /* [in] */ ICanvas* canvas)
 {
+    if (IGLES20RecordingCanvas::Probe(canvas) == NULL) {
+        SLOGGERE("RenderNodeAnimator", "Not a GLES20RecordingCanvas")
+    }
     // if (!(canvas instanceof GLES20RecordingCanvas)) {
     //     throw new IllegalArgumentException("Not a GLES20RecordingCanvas");
     // }
-    // final GLES20RecordingCanvas recordingCanvas = (GLES20RecordingCanvas) canvas;
-    // setTarget(recordingCanvas.mNode);
-    return NOERROR; //zhangjingcheng
+    GLES20RecordingCanvas* recordingCanvas = (GLES20RecordingCanvas*) canvas;
+    SetTarget(recordingCanvas->mNode);
+    return NOERROR;
 }
 
 ECode RenderNodeAnimator::SetStartValue(

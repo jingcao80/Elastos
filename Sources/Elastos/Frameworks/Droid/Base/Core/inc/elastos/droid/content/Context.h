@@ -2458,16 +2458,6 @@ public:
         /* [out] */ IContext** ctx) = 0;
 
     /**
-     * Creates a context given an {@link android.content.pm.ApplicationInfo}.
-     *
-     * @hide
-     */
-    virtual CARAPI CreateApplicationContext(
-        /* [in] */ IApplicationInfo* application,
-        /* [in] */ Int32 flags,
-        /* [out] */ IContext** ctx) = 0;
-
-    /**
      * Get the userId associated with this context
      * @return user id
      *

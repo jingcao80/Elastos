@@ -808,7 +808,7 @@ private:
 ECode ThreadedRenderer::NativeSetupShadersDiskCache(
     /* [in] */ const String& cacheFile)
 {
-    // Zhangyu JNI TODO
+    egl_cache_t::get()->setCacheFilename(cacheFile.string());
     return NOERROR;
 }
 

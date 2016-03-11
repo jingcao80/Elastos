@@ -166,7 +166,7 @@ ECode AbsoluteLayout::GenerateDefaultLayoutParams(
     return CAbsoluteLayoutLayoutParams::New(
             IViewGroupLayoutParams::WRAP_CONTENT,
             IViewGroupLayoutParams::WRAP_CONTENT,
-            0, 0, (IAbsoluteLayoutLayoutParams**)lp);
+            0, 0, lp);
 }
 
 //@Override

@@ -242,7 +242,9 @@ ECode AbsSeekBar::GetThumbTintMode(
 void AbsSeekBar::ApplyThumbTint()
 {
     if (mThumb != NULL && (mHasThumbTint || mHasThumbTintMode)) {
-        mThumb->Mutate((IDrawable**)&mThumb);
+        AutoPtr<IDrawable> d;
+        mThumb->Mutate((IDrawable**)&d);
+        mThumb = d;
 
         if (mHasThumbTint) {
             mThumb->SetTintList(mThumbTintList);
@@ -736,7 +738,9 @@ void AbsSeekBar::TrackTouchEvent(
     Float y;
     event->GetY(&y);
     SetHotspot(x, (Int32)y);
-    SetProgress((Int32)progress, TRUE);
+    Int32 pTmp;
+    GetProgress(&pTmp);
+    SetProgress(UpdateTouchProgress(pTmp, (Int32) progress), TRUE);
 }
 
 void AbsSeekBar::AttemptClaimDrag()
@@ -834,6 +838,13 @@ void AbsSeekBar::AnimateSetProgress(
     IAnimator::Probe(mPositionAnimator)->SetDuration(PROGRESS_ANIMATION_DURATION);
     mPositionAnimator->SetAutoCancel(TRUE);
     IAnimator::Probe(mPositionAnimator)->Start();
+}
+
+Int32 AbsSeekBar::UpdateTouchProgress(
+    /* [in] */ Int32 lastProgress,
+    /* [in] */ Int32 newProgress)
+{
+    return newProgress;
 }
 
 ECode AbsSeekBar::OnInitializeAccessibilityEvent(

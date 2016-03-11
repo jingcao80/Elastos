@@ -6,6 +6,8 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/utility/Pools.h"
 #include "elastos/droid/utility/Config.h"
+#include "elastos/droid/view/VelocityTrackerState.h"
+
 
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::IVelocityTracker;
@@ -109,33 +111,33 @@ public:
 
 private:
 
-    // static CARAPI_(AutoPtr<VelocityTrackerState>) NativeInitialize(
-    //     /* [in] */ const String& strategy);
+    static CARAPI_(AutoPtr<VelocityTrackerState>) NativeInitialize(
+        /* [in] */ const String& strategy);
 
-    // static CARAPI_(void) NativeClear(
-    //     /* [in] */ VelocityTrackerState* ptr);
+    static CARAPI_(void) NativeClear(
+        /* [in] */ VelocityTrackerState* ptr);
 
-    // static CARAPI_(void) NativeAddMovement(
-    //     /* [in] */ VelocityTrackerState* ptr,
-    //     /* [in] */ IMotionEvent* event);
+    static CARAPI_(void) NativeAddMovement(
+        /* [in] */ VelocityTrackerState* ptr,
+        /* [in] */ IMotionEvent* event);
 
-    // static CARAPI_(void) NativeComputeCurrentVelocity(
-    //     /* [in] */ VelocityTrackerState* ptr,
-    //     /* [in] */ Int32 units,
-    //     /* [in] */ Float maxVelocity);
+    static CARAPI_(void) NativeComputeCurrentVelocity(
+        /* [in] */ VelocityTrackerState* ptr,
+        /* [in] */ Int32 units,
+        /* [in] */ Float maxVelocity);
 
-    // static CARAPI_(Float) NativeGetXVelocity(
-    //     /* [in] */ VelocityTrackerState* ptr,
-    //     /* [in] */ Int32 id);
+    static CARAPI_(Float) NativeGetXVelocity(
+        /* [in] */ VelocityTrackerState* ptr,
+        /* [in] */ Int32 id);
 
-    // static CARAPI_(Float) NativeGetYVelocity(
-    //     /* [in] */ VelocityTrackerState* ptr,
-    //     /* [in] */ Int32 id);
+    static CARAPI_(Float) NativeGetYVelocity(
+        /* [in] */ VelocityTrackerState* ptr,
+        /* [in] */ Int32 id);
 
-    // static CARAPI_(Boolean) NativeGetEstimator(
-    //     /* [in] */ VelocityTrackerState* ptr,
-    //     /* [in] */ Int32 id,
-    //     /* [in] */ Estimator* outEstimator);
+    static CARAPI_(Boolean) NativeGetEstimator(
+        /* [in] */ VelocityTrackerState* ptr,
+        /* [in] */ Int32 id,
+        /* [in] */ Estimator* outEstimator);
 
 public:
 
@@ -213,7 +215,7 @@ private:
     static AutoPtr<Pools::SynchronizedPool<IVelocityTracker> > sPool;
 
 private:
-//    AutoPtr<VelocityTrackerState> mPtr;
+    AutoPtr<VelocityTrackerState> mPtr;
     String mStrategy;
 };
 

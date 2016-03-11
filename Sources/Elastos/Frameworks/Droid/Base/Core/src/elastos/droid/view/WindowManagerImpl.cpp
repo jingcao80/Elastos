@@ -1,6 +1,6 @@
 
 #include "elastos/droid/view/WindowManagerImpl.h"
-// #include "elastos/droid/view/CWindowManagerGlobal.h"
+#include "elastos/droid/view/CWindowManagerGlobal.h"
 #include "elastos/droid/ext/frameworkdef.h"
 
 namespace Elastos {
@@ -13,8 +13,7 @@ WindowManagerImpl::WindowManagerImpl(
     : mDisplay(display)
     , mParentWindow(NULL)
 {
-    assert(0 && "TODO");
-    // mGlobal = CWindowManagerGlobal::GetInstance();
+    mGlobal = CWindowManagerGlobal::GetInstance();
 }
 
 WindowManagerImpl::WindowManagerImpl(
@@ -23,8 +22,7 @@ WindowManagerImpl::WindowManagerImpl(
     : mDisplay(display)
     , mParentWindow(parentWindow)
 {
-    assert(0 && "TODO");
-    // mGlobal = CWindowManagerGlobal::GetInstance();
+    mGlobal = CWindowManagerGlobal::GetInstance();
 }
 
 AutoPtr<WindowManagerImpl> WindowManagerImpl::CreateLocalWindowManager(

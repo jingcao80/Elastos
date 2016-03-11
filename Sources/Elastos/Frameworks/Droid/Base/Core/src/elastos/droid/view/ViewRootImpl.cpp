@@ -1307,7 +1307,6 @@ ECode ViewRootImpl::constructor(
     display->GetDisplayAdjustments((IDisplayAdjustments**)&mDisplayAdjustments);
 
     mThread = Thread::GetCurrentThread();
-    assert(0 && "TODO");
     /*mLocation = new WindowLeaked(null);
     mLocation.fillInStackTrace();*/
     mWidth = -1;
@@ -2521,7 +2520,7 @@ void ViewRootImpl::PerformTraversals()
 
     Boolean insetsChanged = FALSE;
 
-    Boolean layoutRequested = mLayoutRequested && !mStopped;
+    Boolean layoutRequested = mLayoutRequested;
     if (layoutRequested) {
         AutoPtr<IContext> ctx;
         mView->GetContext((IContext**)&ctx);
@@ -2766,20 +2765,18 @@ void ViewRootImpl::PerformTraversals()
         Boolean stableInsetsChanged = !stableInsetsChangedTemp;
 
         if (contentInsetsChanged) {
-            Logger::V(TAG, "TODO, ViewRootImpl::PerformTraversals LINE:%d", __LINE__);
-            assert(0 && "TODO");
-            // Boolean isValid;
-            // if (mWidth > 0 && mHeight > 0 && lp != NULL &&
-            //     ((lp->mSystemUiVisibility|lp->mSubtreeSystemUiVisibility)
-            //         & IView::SYSTEM_UI_LAYOUT_FLAGS) == 0 &&
-            //     mSurface != NULL && (mSurface->IsValid(&isValid), isValid) &&
-            //     !mAttachInfo->mTurnOffWindowResizeAnim &&
-            //     mAttachInfo->mHardwareRenderer != NULL &&
-            //     mAttachInfo->mHardwareRenderer->IsEnabled() &&
-            //     lp != NULL && !CPixelFormat::FormatHasAlpha(lp->mFormat)
-            //     && !mBlockResizeBuffer) {
+            Boolean isValid, enabled;
+            if (mWidth > 0 && mHeight > 0 && lp != NULL &&
+                ((lp->mSystemUiVisibility|lp->mSubtreeSystemUiVisibility)
+                    & IView::SYSTEM_UI_LAYOUT_FLAGS) == 0 &&
+                mSurface != NULL && (mSurface->IsValid(&isValid), isValid) &&
+                !mAttachInfo->mTurnOffWindowResizeAnim &&
+                mAttachInfo->mHardwareRenderer != NULL &&
+                (mAttachInfo->mHardwareRenderer->IsEnabled(&enabled), enabled) &&
+                lp != NULL && !PixelFormat::FormatHasAlpha(lp->mFormat)
+                && !mBlockResizeBuffer) {
 
-            //     DisposeResizeBuffer();
+                DisposeResizeBuffer();
 
 // TODO: Again....
                /*if (mResizeBuffer == null) {
@@ -2830,7 +2827,7 @@ void ViewRootImpl::PerformTraversals()
                    mResizeBuffer.endRecording(mTempRect);
                }
                mAttachInfo.mHardwareRenderer.flushLayerUpdates();*/
-            // }
+            }
             mAttachInfo->mContentInsets->Set(mPendingContentInsets);
 
             if (DEBUG_LAYOUT) {
@@ -3100,7 +3097,7 @@ void ViewRootImpl::PerformTraversals()
             mAttachInfo->mWindowTop = frame->mTop;
         }
     }
-    const Boolean didLayout = layoutRequested && !mStopped;
+    const Boolean didLayout = layoutRequested;
     Boolean triggerGlobalLayoutListener = didLayout
         || mAttachInfo->mRecomputeGlobalAttributes;
     if (didLayout) {
@@ -3849,6 +3846,14 @@ void ViewRootImpl::Draw(
                 mAttachInfo->mHardwareRenderer->InvalidateRoot();
             }
             mResizeAlpha = resizeAlpha;
+
+            // sometimes we get the dirty rect as null
+            // and also its better to check the surface
+            // validity to avoid any crash.
+            Boolean valid;
+            if((mSurface->IsValid(&valid), valid) && dirty != NULL) {
+                mSurface->SetDirtyRect(dirty);
+            }
 
             dirty->SetEmpty();
 
@@ -5068,7 +5073,7 @@ Int32 ViewRootImpl::RelayoutWindow(
     }
 
     Int32 measuredWidth, measuredHeight;
-    AutoPtr<IRect> winFrame, pendingContentInsets, pendingVisibleInsets;
+    AutoPtr<IRect> winFrame, pendingOverscanInsets, pendingContentInsets, pendingVisibleInsets, pendingStableInsets;
     AutoPtr<IConfiguration> pendingConfiguration;
     AutoPtr<ISurface> surface;
     Int32 relayoutResult = 0;
@@ -5076,29 +5081,33 @@ Int32 ViewRootImpl::RelayoutWindow(
     mView->GetMeasuredWidth(&measuredWidth);
     mView->GetMeasuredHeight(&measuredHeight);
 
-    assert(0 && "TODO");
-    /*mWindowSession->Relayout(
+    mWindowSession->Relayout(
         (IIWindow*)mWindow, mSeq, params,
         (Int32)(measuredWidth * appScale + 0.5f),
         (Int32)(measuredHeight * appScale + 0.5f),
         viewVisibility, insetsPending ? IWindowManagerGlobal::RELAYOUT_INSETS_PENDING : 0,
-        mWinFrame, mPendingContentInsets, mPendingVisibleInsets, mPendingConfiguration, mSurface,
-        (IRect**)&winFrame, (IRect**)mPendingOverscanInsets, (IRect**)&mPendingContentInsets,
-        (IRect**)&mPendingVisibleInsets, (IRect**)&mPendingStableInsets,
-        (IConfiguration**)&mPendingConfiguration, &relayoutResult, (ISurface**)&mSurface);*/
-    /*if (winFrame != NULL)
+        mWinFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,
+        mPendingStableInsets, mPendingConfiguration, mSurface,
+        (IRect**)&winFrame, (IRect**)&pendingOverscanInsets, (IRect**)&pendingContentInsets,
+        (IRect**)&pendingVisibleInsets, (IRect**)&pendingStableInsets,
+        (IConfiguration**)&pendingConfiguration, (ISurface**)&surface, &relayoutResult);
+
+    if (mWinFrame != NULL && winFrame != NULL)
         mWinFrame->Set(winFrame);
-    if (mPendingOverscanInsets != NULL)
+    if (mPendingOverscanInsets != NULL && pendingOverscanInsets != NULL)
+        mPendingOverscanInsets->Set(pendingOverscanInsets);
+    if (mPendingContentInsets != NULL && pendingContentInsets != NULL)
         mPendingContentInsets->Set(pendingContentInsets);
-    if (pendingVisibleInsets != NULL)
+    if (mPendingVisibleInsets != NULL && pendingVisibleInsets != NULL)
         mPendingVisibleInsets->Set(pendingVisibleInsets);
-    if (pendingConfiguration != NULL)
+    if (mPendingStableInsets != NULL && pendingStableInsets != NULL)
+        mPendingStableInsets->Set(pendingStableInsets);
+    if (mPendingConfiguration != NULL && pendingConfiguration != NULL)
         mPendingConfiguration->SetTo(pendingConfiguration);
-    if (surface != NULL) {
-        Handle32 nativeSurface;
-        surface->GetSurface(&nativeSurface);
-        mSurface->SetSurface(nativeSurface);
-    }*/
+
+    if (mSurface != NULL && surface != NULL) {
+        mSurface->TransferFrom(surface);
+    }
 
     if (restore) {
         params->Restore();
@@ -6453,45 +6462,32 @@ void ViewRootImpl::HandleWindowFocusChanged(
 
         if (hasWindowFocus) {
             EnsureTouchModeLocally(inTouchMode);
-            Logger::D("ViewRootImpl", "TODO no impl, HandleWindowFocusChanged,line:%d ,hwRender:%p", __LINE__,mAttachInfo->mHardwareRenderer.Get());
-            //now because the HardwareRender is not implemented.
-            //so if need the OPENGL initialize function,try the below code
-            //here is bug, you should open the app twice, the first time is black screen
-            //AutoPtr<ISurface> surface;
-            //mHolder->GetSurface((ISurface**)&surface);
-            //Logger::D("ViewRootImpl", "HandleWindowFocusChanged,line:%d ,surface:%p", __LINE__,surface.Get());
-            //CGLES20::InitGL(surface);
-            // Boolean isValid;
-            // if (mAttachInfo->mHardwareRenderer != NULL &&
-            //     (mSurface->IsValid(&isValid), isValid)) {
-            //     mFullRedrawNeeded = TRUE;
-
-            //     CWindowManagerLayoutParams* lp = mWindowAttributes;
-            //     CRect* surfaceInsets = lp != NULL ? lp->mSurfaceInsets : NULL;
-            //     AutoPtr<ISurface> surface;
-            //     mHolder->GetSurface((ISurface**)&surface);
-            //     Boolean res;
-            //     ECode ec = mAttachInfo->mHardwareRenderer->InitializeIfNeeded(
-            //         mWidth, mHeight, surface, &res)
-            //     if (ec == (ECode)E_OUT_OF_RESOURCES_EXCEPTION) {
-            //         Logger::E(TAG, "OutOfResourcesException locking surface");
-
-            //         Boolean outOfMemory;
-            //         mWindowSession->OutOfMemory(mWindow, &outOfMemory);
-            //         if (!outOfMemory) {
-            //             Slogger:W(TAG, "No processes killed for memory; killing self");
-            //             CProcess::KillProcess(Process::MyPid());
-            //         }
-
-            //         // Retry in a bit.
-            //         sendMessageDelayed(obtainMessage(msg.what, msg.arg1, msg.arg2), 500);
-            //         return;
-            //     }
-            //     else if (FAILED(ec))
-            //     {
-            //         return;
-            //     }
-            // }
+            Boolean isValid;
+            if (mAttachInfo->mHardwareRenderer != NULL && (mSurface->IsValid(&isValid), isValid)){
+                mFullRedrawNeeded = TRUE;
+                // try {
+                    AutoPtr<IWindowManagerLayoutParams> lp = mWindowAttributes;
+                    AutoPtr<IRect> surfaceInsets;
+                    if (lp != NULL) {
+                        lp->GetSurfaceInsets((IRect**)&surfaceInsets);
+                    }
+                    Boolean result;
+                    mAttachInfo->mHardwareRenderer->InitializeIfNeeded(
+                            mWidth, mHeight, mSurface, surfaceInsets, &result);
+                // } catch (OutOfResourcesException e) {
+                //     Log.e(TAG, "OutOfResourcesException locking surface", e);
+                //     try {
+                //         if (!mWindowSession.outOfMemory(mWindow)) {
+                //             Slog.w(TAG, "No processes killed for memory; killing self");
+                //             Process.killProcess(Process.myPid());
+                //         }
+                //     } catch (RemoteException ex) {
+                //     }
+                //     // Retry in a bit.
+                //     sendMessageDelayed(obtainMessage(msg.what, msg.arg1, msg.arg2), 500);
+                //     return;
+                // }
+            }
         }
         mLastWasImTarget = CWindowManagerLayoutParams::MayUseInputMethod(
                 WINLAY_PROBE(mWindowAttributes)->mFlags);

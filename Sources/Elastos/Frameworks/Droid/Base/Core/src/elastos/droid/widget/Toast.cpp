@@ -516,8 +516,9 @@ ECode Toast::MakeText(
     AutoPtr<IToast> result;
     CToast::New(context, (IToast**)&result);
 
-    AutoPtr<ILayoutInflater> inflater;
-    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
 
     AutoPtr<IView> v;
     inflater->Inflate(R::layout::transient_notification, NULL, (IView**)&v);

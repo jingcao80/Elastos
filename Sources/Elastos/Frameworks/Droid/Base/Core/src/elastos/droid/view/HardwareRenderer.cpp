@@ -9,6 +9,7 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/view/HardwareRenderer.h"
 #include "elastos/droid/view/ThreadedRenderer.h"
+#include "elastos/droid/view/GLES20Canvas.h"
 
 using Elastos::IO::CFile;
 
@@ -79,8 +80,7 @@ ECode HardwareRenderer::EnableForegroundTrimming()
 ECode HardwareRenderer::IsAvailable(
     /* [out] */ Boolean* res)
 {
-//    return GLES20Canvas::IsAvailable();
-    *res = FALSE;
+    *res = GLES20Canvas::IsAvailable();
     return NOERROR;
 }
 
@@ -122,11 +122,11 @@ AutoPtr<HardwareRenderer> HardwareRenderer::Create(
     /* [in] */ IContext* context,
     /* [in] */ Boolean translucent)
 {
-    AutoPtr<HardwareRenderer> renderer;
-    assert (0 && "TODO");
-    // if (GLES20Canvas::IsAvailable()) {
-    //     renderer = new ThreadedRenderer(context, translucent);
-    // }
+    AutoPtr<ThreadedRenderer> renderer;
+    if (GLES20Canvas::IsAvailable()) {
+        renderer = new ThreadedRenderer();
+        renderer->constructor(context, translucent);
+    }
     return renderer;
 }
 

@@ -235,8 +235,8 @@ Int64 SystemSensorManager::BaseEventQueue::NativeInitBaseEventQueue(
     android::sp<android::SensorEventQueue> queue(mgr.createEventQueue());
 
     // android::sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, msgQ);
-    Int64 handle;
-    msgQ->GetMPtr(&handle);
+    Handle64 handle;
+    msgQ->GetNativeMessageQueue(&handle);
     AutoPtr<MessageQueue> messageQueue = reinterpret_cast<NativeMessageQueue*>(handle);
     if (messageQueue == NULL) {
         //jniThrowRuntimeException(env, "MessageQueue is not initialized.");

@@ -95,6 +95,11 @@ ECode ContextWrapper::GetTheme(
     return mBase->GetTheme(theme);
 }
 
+ECode ContextWrapper::RecreateTheme()
+{
+    return mBase->RecreateTheme();
+}
+
 ECode ContextWrapper::GetClassLoader(
     /* [out] */ IClassLoader** loader)
 {
@@ -832,7 +837,8 @@ ECode ContextWrapper::CreateApplicationContext(
     /* [in] */ Int32 flags,
     /* [out] */ IContext** ctx)
 {
-    return ((Context*)mBase.Get())->CreateApplicationContext(application, flags, ctx);
+    String str;
+    return mBase->CreateApplicationContext(application, str, flags, ctx);
 }
 
 ECode ContextWrapper::GetUserId(
@@ -853,6 +859,30 @@ ECode ContextWrapper::CreateDisplayContext(
     /* [out] */ IContext** ctx)
 {
     return mBase->CreateDisplayContext(display, ctx);
+}
+
+ECode ContextWrapper::CreatePackageContextAsUser(
+/* [in] */ const String& packageName,
+/* [in] */ const String& themePackageName,
+/* [in] */ Int32 flags,
+/* [in] */ IUserHandle* user,
+/* [out] */ IContext** ctx)
+{
+    return mBase->CreatePackageContextAsUser(packageName, themePackageName, flags, user, ctx);
+}
+
+/**
+* Creates a context given an {@link android.content.pm.ApplicationInfo}.
+*
+* @hide
+*/
+ECode ContextWrapper::CreateApplicationContext(
+/* [in] */ IApplicationInfo* application,
+/* [in] */ const String& themePackageName,
+/* [in] */ Int32 flags,
+/* [out] */ IContext** ctx)
+{
+    return mBase->CreateApplicationContext(application, themePackageName, flags, ctx);
 }
 
 ECode ContextWrapper::IsRestricted(

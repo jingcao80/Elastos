@@ -2710,7 +2710,8 @@ void RemoteViews::PerformApply(
 }
 
 AutoPtr<IContext> RemoteViews::GetContextForResources(
-    /* [in] */ IContext* context)
+    /* [in] */ IContext* context,
+    /* [in] */ const String& themePackageName)
 {
     if (mApplication != NULL) {
         Int32 appUid;
@@ -2727,7 +2728,7 @@ AutoPtr<IContext> RemoteViews::GetContextForResources(
         }
         // try {
             AutoPtr<IContext> result;
-            if (FAILED(context->CreateApplicationContext(mApplication,
+            if (FAILED(context->CreateApplicationContext(mApplication, themePackageName,
                     IContext::CONTEXT_RESTRICTED, (IContext**)&result)))
             {
                 SLOGGERE(TAG, String("Package name ") + appPkgName + " not found");
@@ -3460,13 +3461,25 @@ ECode RemoteViews::Apply(
     /* [in] */ IRemoteViewsOnClickHandler* handler,
     /* [out] */ IView** view)
 {
+    String str;
+    return Apply(ctx, parent, handler, str, view);
+}
+
+/** @hide */
+ECode RemoteViews::Apply(
+    /* [in] */ IContext* ctx,
+    /* [in] */ IViewGroup* parent,
+    /* [in] */ IRemoteViewsOnClickHandler* handler,
+    /* [in] */ const String& themePackageName,
+    /* [out] */ IView** view)
+{
     AutoPtr<IRemoteViews> rvToApply = GetRemoteViewsToApply(ctx);
     // RemoteViews may be built by an application installed in another
     // user. So build a context that loads resources from that user but
     // still returns the current users userId so settings like data / time formats
     // are loaded without requiring cross user persmissions.
     AutoPtr<IView> result;
-    AutoPtr<IContext> contextForResources = GetContextForResources(ctx);
+    AutoPtr<IContext> contextForResources = GetContextForResources(ctx, themePackageName);
     AutoPtr<IContext> inflationContext = new MyContextWrapper(ctx, contextForResources);
 
     AutoPtr<IInterface> tmp;

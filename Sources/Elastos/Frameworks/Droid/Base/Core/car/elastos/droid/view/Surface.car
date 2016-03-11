@@ -9,146 +9,149 @@ module
     namespace Droid {
     namespace View {
 
+    /**
+     * Handle onto a raw buffer that is being managed by the screen compositor.
+     */
+    interface ISurface {
         /**
-         * Handle onto a raw buffer that is being managed by the screen compositor.
+         * Rotation constant: 0 degree rotation (natural orientation)
          */
-        interface ISurface {
-            /**
-             * Rotation constant: 0 degree rotation (natural orientation)
-             */
-            const Int32 ROTATION_0       = 0;
+        const Int32 ROTATION_0       = 0;
 
-            /**
-             * Rotation constant: 90 degree rotation.
-             */
-            const Int32 ROTATION_90      = 1;
+        /**
+         * Rotation constant: 90 degree rotation.
+         */
+        const Int32 ROTATION_90      = 1;
 
-            /**
-             * Rotation constant: 180 degree rotation.
-             */
-            const Int32 ROTATION_180     = 2;
+        /**
+         * Rotation constant: 180 degree rotation.
+         */
+        const Int32 ROTATION_180     = 2;
 
-            /**
-             * Rotation constant: 270 degree rotation.
-             */
-            const Int32 ROTATION_270     = 3;
+        /**
+         * Rotation constant: 270 degree rotation.
+         */
+        const Int32 ROTATION_270     = 3;
 
 
-            /**
-             * Release the local reference to the server-side surface.
-             * Always call release() when you're done with a Surface.
-             * This will make the surface invalid.
-             */
-            ReleaseSurface();
+        /**
+         * Release the local reference to the server-side surface.
+         * Always call release() when you're done with a Surface.
+         * This will make the surface invalid.
+         */
+        ReleaseSurface();
 
-            /**
-             * Free all server-side state associated with this surface and
-             * release this object's reference.  This method can only be
-             * called from the process that created the service.
-             * @hide
-             */
-            Destroy();
+        /**
+         * Free all server-side state associated with this surface and
+         * release this object's reference.  This method can only be
+         * called from the process that created the service.
+         * @hide
+         */
+        Destroy();
 
-            /**
-             * Returns true if this object holds a valid surface.
-             *
-             * @return True if it holds a physical surface, so lockCanvas() will succeed.
-             * Otherwise returns false.
-             */
-            IsValid(
-                [out] Boolean * isValid);
+        /**
+         * Returns true if this object holds a valid surface.
+         *
+         * @return True if it holds a physical surface, so lockCanvas() will succeed.
+         * Otherwise returns false.
+         */
+        IsValid(
+            [out] Boolean * isValid);
 
-            /**
-             * Gets the generation number of this surface, incremented each time
-             * the native surface contained within this object changes.
-             *
-             * @return The current generation number.
-             * @hide
-             */
-            GetGenerationId(
-                [out] Int32* generationId);
+        /**
+         * Gets the generation number of this surface, incremented each time
+         * the native surface contained within this object changes.
+         *
+         * @return The current generation number.
+         * @hide
+         */
+        GetGenerationId(
+            [out] Int32* generationId);
 
-            /**
-             * Returns true if the consumer of this Surface is running behind the producer.
-             *
-             * @return True if the consumer is more than one buffer ahead of the producer.
-             * @hide
-             */
-            IsConsumerRunningBehind(
-                [out] Boolean* consumer);
+        /**
+         * Returns true if the consumer of this Surface is running behind the producer.
+         *
+         * @return True if the consumer is more than one buffer ahead of the producer.
+         * @hide
+         */
+        IsConsumerRunningBehind(
+            [out] Boolean* consumer);
 
-            /**
-             * Gets a {@link Canvas} for drawing into this surface.
-             *
-             * After drawing into the provided {@link Canvas}, the caller should
-             * invoke {@link #unlockCanvasAndPost} to post the new contents to the surface.
-             *
-             * @param dirty A rectangle that represents the dirty region that the caller wants
-             * to redraw.  This function may choose to expand the dirty rectangle if for example
-             * the surface has been resized or if the previous contents of the surface were
-             * not available.  The caller should redraw the entire dirty region as represented
-             * by the contents of the dirty rect upon return from this function.
-             * The caller may also pass <code>null</code> instead, in the case where the
-             * entire surface should be redrawn.
-             * @return A canvas for drawing into the surface.
-             */
-            LockCanvas(
-                [in] IRect * dirty,
-                [out] ICanvas ** canvas);
+        /**
+         * Gets a {@link Canvas} for drawing into this surface.
+         *
+         * After drawing into the provided {@link Canvas}, the caller should
+         * invoke {@link #unlockCanvasAndPost} to post the new contents to the surface.
+         *
+         * @param dirty A rectangle that represents the dirty region that the caller wants
+         * to redraw.  This function may choose to expand the dirty rectangle if for example
+         * the surface has been resized or if the previous contents of the surface were
+         * not available.  The caller should redraw the entire dirty region as represented
+         * by the contents of the dirty rect upon return from this function.
+         * The caller may also pass <code>null</code> instead, in the case where the
+         * entire surface should be redrawn.
+         * @return A canvas for drawing into the surface.
+         */
+        LockCanvas(
+            [in] IRect * dirty,
+            [out] ICanvas ** canvas);
 
-            /**
-             * Posts the new contents of the {@link Canvas} to the surface and
-             * releases the {@link Canvas}.
-             *
-             * @param canvas The canvas previously obtained from {@link #lockCanvas}.
-             */
-            UnlockCanvasAndPost(
-                [in] ICanvas * canvas);
+        /**
+         * Posts the new contents of the {@link Canvas} to the surface and
+         * releases the {@link Canvas}.
+         *
+         * @param canvas The canvas previously obtained from {@link #lockCanvas}.
+         */
+        UnlockCanvasAndPost(
+            [in] ICanvas * canvas);
 
-            /**
-             * @deprecated This API has been removed and is not supported.  Do not use.
-             */
-            //@Deprecated
-            UnlockCanvas(
-                [in] ICanvas * canvas);
+        /**
+         * @deprecated This API has been removed and is not supported.  Do not use.
+         */
+        //@Deprecated
+        UnlockCanvas(
+            [in] ICanvas * canvas);
 
-            /**
-             * Copy another surface to this one.  This surface now holds a reference
-             * to the same data as the original surface, and is -not- the owner.
-             * This is for use by the window manager when returning a window surface
-             * back from a client, converting it from the representation being managed
-             * by the window manager to the representation the client uses to draw
-             * in to it.
-             * @hide
-             */
-            CopyFrom(
-                [in] ISurfaceControl* other);
+        /**
+         * Copy another surface to this one.  This surface now holds a reference
+         * to the same data as the original surface, and is -not- the owner.
+         * This is for use by the window manager when returning a window surface
+         * back from a client, converting it from the representation being managed
+         * by the window manager to the representation the client uses to draw
+         * in to it.
+         * @hide
+         */
+        CopyFrom(
+            [in] ISurfaceControl* other);
 
-            /**
-             * Transfer the native state from 'other' to this surface, releasing it
-             * from 'other'.  This is for use in the client side for drawing into a
-             * surface; not guaranteed to work on the window manager side.
-             * This is for use by the client to move the underlying surface from
-             * one Surface object to another, in particular in SurfaceFlinger.
-             * @hide.
-             */
-            TransferFrom(
-                [in] ISurface* other);
+        /**
+         * Transfer the native state from 'other' to this surface, releasing it
+         * from 'other'.  This is for use in the client side for drawing into a
+         * surface; not guaranteed to work on the window manager side.
+         * This is for use by the client to move the underlying surface from
+         * one Surface object to another, in particular in SurfaceFlinger.
+         * @hide.
+         */
+        TransferFrom(
+            [in] ISurface* other);
 
-            /**
-             * Allocate buffers ahead of time to avoid allocation delays during rendering
-             * @hide
-             */
-            AllocateBuffers();
+        /**
+         * Allocate buffers ahead of time to avoid allocation delays during rendering
+         * @hide
+         */
+        AllocateBuffers();
 
-        }
+        SetDirtyRect(
+            [in] IRect* dirty);
 
-        interface ISurfaceHelper {
-            RotationToString(
-                [in] Int32 rotation,
-                [out] String* str);
+    }
 
-        }
+    interface ISurfaceHelper {
+        RotationToString(
+            [in] Int32 rotation,
+            [out] String* str);
+    }
+
     } // namespace View
     } // namepsace Droid
     } // namespace Elastos

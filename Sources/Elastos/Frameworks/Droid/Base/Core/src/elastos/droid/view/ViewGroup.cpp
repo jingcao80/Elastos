@@ -4387,15 +4387,15 @@ void ViewGroup::DispatchDraw(
  */
 //@Override
 ECode ViewGroup::GetOverlay(
-    /* [out] */ IViewGroupOverlay** overlay)
+    /* [out] */ IViewOverlay** overlay)
 {
     VALIDATE_NOT_NULL(overlay)
     if (mOverlay == NULL) {
         AutoPtr<IViewGroupOverlay> temp;
         CViewGroupOverlay::New(mContext, (IView*)this->Probe(EIID_IView), (IViewGroupOverlay**)&temp);
         mOverlay = IViewOverlay::Probe(temp);
-        *overlay = IViewGroupOverlay::Probe(mOverlay);
-        REFCOUNT_ADD(*overlay)
+        *overlay = mOverlay;
+        REFCOUNT_ADD(*overlay);
     }
     return NOERROR;
 }

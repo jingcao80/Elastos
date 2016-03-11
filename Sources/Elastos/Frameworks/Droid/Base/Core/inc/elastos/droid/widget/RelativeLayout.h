@@ -161,7 +161,7 @@ public:
     static AutoPtr<Pools::SynchronizedPool<Node> > sPool;
 };
 
-class RelativeLayout
+class ECO_PUBLIC RelativeLayout
     : public ViewGroup
     , public IRelativeLayout
 {
@@ -467,12 +467,12 @@ private:
 private:
     friend class LayoutParams;
 
-    static const AutoPtr<ArrayOf<Int32> > RULES_VERTICAL;
-    static const AutoPtr<ArrayOf<Int32> > RULES_HORIZONTAL;
+    ECO_LOCAL static const AutoPtr<ArrayOf<Int32> > RULES_VERTICAL;
+    ECO_LOCAL static const AutoPtr<ArrayOf<Int32> > RULES_HORIZONTAL;
     /**
      * Used to indicate left/right/top/bottom should be inferred from constraints
      */
-    static const Int32 VALUE_NOT_SET;
+    ECO_LOCAL static const Int32 VALUE_NOT_SET;
 
     AutoPtr<IView> mBaselineView;
     Boolean mHasBaselineAlignedChild;
@@ -501,7 +501,7 @@ private:
      * {@link View#MEASURED_SIZE_MASK}.
      * {@link View#MEASURED_STATE_TOO_SMALL}.
      **/
-    static const Int32 DEFAULT_WIDTH;
+    ECO_LOCAL static const Int32 DEFAULT_WIDTH;
 };
 
 } // namespace Widget

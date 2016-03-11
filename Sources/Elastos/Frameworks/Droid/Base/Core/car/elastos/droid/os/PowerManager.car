@@ -1,5 +1,7 @@
 module
 {
+    interface Elastos.Droid.Content.IIntent;
+
     namespace Elastos {
     namespace Droid {
     namespace Os {
@@ -392,7 +394,30 @@ module
 
         /** @hide */
         const String EXTRA_POWER_SAVE_MODE = "mode";
+        /**
+        * Power save profile
+        * @hide
+        */
+        const String PROFILE_POWER_SAVE = "0";
 
+        /**
+        * Balanced power profile
+        * @hide
+        */
+        const String PROFILE_BALANCED = "1";
+
+        /**
+        * High-performance profile
+        * @hide
+        */
+        const String PROFILE_HIGH_PERFORMANCE = "2";
+
+        /**
+        * Broadcast sent when profile is changed
+        * @hide
+        */
+        const String POWER_PROFILE_CHANGED
+                = "com.cyanogenmod.power.PROFILE_CHANGED";
 
         /**
          * Gets the minimum supported screen brightness setting.
@@ -574,6 +599,9 @@ module
         WakeUp(
             [in] Int64 eventTime);
 
+        WakeUpWithProximityCheck(
+            [in] Int64 time);
+
         Nap(
             [in] Int64 time);
 
@@ -659,6 +687,38 @@ module
          */
         IsPowerSaveMode(
             [out] Boolean* result);
+
+        CpuBoost(
+            [in] Int32 duration);
+
+        HasPowerProfiles(
+            [out] Boolean* result);
+
+        GetDefaultPowerProfile(
+            [out] String* profile);
+
+        SetPowerProfile(
+            [in] String profile,
+            [out] Boolean* result);
+
+        GetPowerProfile(
+            [out] String* result);
+
+        ActivityResumed(
+            [in] IIntent* intent);
+
+        SetKeyboardVisibility(
+            [in] Boolean visible);
+
+        SetKeyboardLight(
+            [in] Boolean on,
+            [in] Int32 key);
+
+        GetDefaultButtonBrightness(
+            [out] Int32* result);
+
+        GetDefaultKeyboardBrightness(
+            [out] Int32* result);
     }
 
     interface IPowerManagerHelper {

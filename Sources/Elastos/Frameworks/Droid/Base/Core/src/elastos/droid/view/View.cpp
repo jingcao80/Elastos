@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/animation/AnimatorInflater.h"
+#include "elastos/droid/animation/PropertyValuesHolder.h"
 #include "elastos/droid/content/res/CResources.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/ViewGroup.h"
@@ -68,6 +69,7 @@
 #include "elastos/droid/R.h"
 
 using Elastos::Droid::Animation::AnimatorInflater;
+using Elastos::Droid::Animation::PropertyValuesHolder;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Res::CResources;
 using Elastos::Droid::Content::Res::IResourcesTheme;
@@ -13260,8 +13262,10 @@ AutoPtr<IRenderNode> View::GetDrawableRenderNode(
     /* [in] */ IRenderNode* renderNode)
 {
     if (renderNode == NULL) {
-        assert(0 && "TODO");
-        //renderNode = RenderNode::Create(drawable.getClass().getName(), THIS_PROBE(IView));
+        AutoPtr<IClassInfo> cInfo = PropertyValuesHolder::TransformClassInfo(drawable);
+        String name;
+        cInfo->GetName(&name);
+        renderNode = RenderNode::Create(name, THIS_PROBE(IView));
     }
 
     AutoPtr<IRect> bounds;
@@ -13278,9 +13282,7 @@ AutoPtr<IRenderNode> View::GetDrawableRenderNode(
     //}
 
     // Set up drawable properties that are view-independent.
-    AutoPtr<CRect> temp = (CRect*)bounds.Get();
-    Boolean res, isProjected;
-    renderNode->SetLeftTopRightBottom(temp->mLeft, temp->mTop, temp->mRight, temp->mBottom, &res);
+    Boolean isProjected, res;
     drawable->IsProjected(&isProjected);
     renderNode->SetProjectBackwards(isProjected, &res);
     renderNode->SetProjectionReceiver(TRUE, &res);
@@ -14115,10 +14117,9 @@ ECode View::SetBackgroundColor(
     /* [in] */ Int32 color)
 {
     if (IColorDrawable::Probe(mBackground) != NULL) {
-        AutoPtr<IDrawable> drawable;
-        mBackground->Mutate((IDrawable**)&drawable);
-        assert(drawable != NULL);
-        IColorDrawable::Probe(drawable)->SetColor(color);
+        AutoPtr<IDrawable> d;
+        mBackground->Mutate((IDrawable**)&d);
+        IColorDrawable::Probe(d)->SetColor(color);
         ComputeOpaqueFlags();
         mBackgroundResource = 0;
     }
@@ -14416,7 +14417,9 @@ ECode View::ApplyBackgroundTint()
     if (mBackground != NULL && mBackgroundTint != NULL) {
         AutoPtr<TintInfo> tintInfo = mBackgroundTint;
         if (tintInfo->mHasTintList || tintInfo->mHasTintMode) {
-            mBackground->Mutate((IDrawable**)&mBackground);
+            AutoPtr<IDrawable> d;
+            mBackground->Mutate((IDrawable**)&d);
+            mBackground = d;
 
             if (tintInfo->mHasTintList) {
                 mBackground->SetTintList(tintInfo->mTintList);

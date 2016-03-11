@@ -2956,6 +2956,44 @@ ECode CMediaPlayer::SetOnInfoListener(
     return NOERROR;
 }
 
+ECode CMediaPlayer::Suspend(
+    /* [out] */ Boolean* result)
+{
+    android::sp<android::MediaPlayer> mp = getMediaPlayer(this);
+    if (mp == NULL) {
+        Logger::E(TAG, "This player not initialized");
+        *result = FALSE;
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    if (mp->suspend() != android::OK) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    *result = TRUE;
+    return NOERROR;
+}
+
+ECode CMediaPlayer::Resume(
+    /* [out] */ Boolean* result)
+{
+    android::sp<android::MediaPlayer> mp = getMediaPlayer(this);
+    if (mp == NULL) {
+        Logger::E(TAG, "This player not initialized");
+        *result = FALSE;
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    if (mp->resume() != android::OK) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    *result = TRUE;
+    return NOERROR;
+}
+
 Boolean CMediaPlayer::IsVideoScalingModeSupported(
     /* [in] */ Int32 mode)
 {

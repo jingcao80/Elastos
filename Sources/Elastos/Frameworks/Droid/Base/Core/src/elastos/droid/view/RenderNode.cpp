@@ -7,6 +7,7 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/view/RenderNode.h"
+#include "elastos/droid/view/GLES20RecordingCanvas.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/graphics/Matrix.h"
 #include "elastos/droid/graphics/Paint.h"
@@ -63,16 +64,18 @@ ECode RenderNode::Start(
 ECode RenderNode::End(
     /* [in] */ IHardwareCanvas* endCanvas)
 {
-    // if (!(endCanvas instanceof GLES20RecordingCanvas)) {
-    //     throw new IllegalArgumentException("Passed an invalid canvas to end!");
-    // }  zhangjingcheng
+    if (IGLES20RecordingCanvas::Probe(endCanvas) == NULL) {
+        SLOGGERE("RenderNode", "Passed an invalid canvas to end!")
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
-    // GLES20RecordingCanvas canvas = (GLES20RecordingCanvas) endCanvas;
-    // canvas.onPostDraw();
-    // long renderNodeData = canvas.finishRecording();
-    // nSetDisplayListData(mNativeRenderNode, renderNodeData);
-    // canvas.recycle();
-    // mValid = true;
+    GLES20RecordingCanvas* canvas = (GLES20RecordingCanvas*) endCanvas;
+    canvas->OnPostDraw();
+    Int64 renderNodeData;
+    canvas->FinishRecording(&renderNodeData);
+    nSetDisplayListData(mNativeRenderNode, renderNodeData);
+    canvas->Recycle();
+    mValid = TRUE;
     return NOERROR;
 }
 

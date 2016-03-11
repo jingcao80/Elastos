@@ -1771,9 +1771,9 @@ ECode RelativeLayout::GenerateDefaultLayoutParams(
 {
     VALIDATE_NOT_NULL(lp);
     return CRelativeLayoutLayoutParams::New(
-                IViewGroupLayoutParams::WRAP_CONTENT,
-                IViewGroupLayoutParams::WRAP_CONTENT,
-                (IRelativeLayoutLayoutParams**)lp);
+        IViewGroupLayoutParams::WRAP_CONTENT,
+        IViewGroupLayoutParams::WRAP_CONTENT,
+        lp);
 }
 
 Boolean RelativeLayout::CheckLayoutParams(
@@ -1789,7 +1789,7 @@ AutoPtr<IViewGroupLayoutParams> RelativeLayout::GenerateLayoutParams(
 
     AutoPtr<IViewGroupLayoutParams> lp;
     ASSERT_SUCCEEDED(CRelativeLayoutLayoutParams::New(p,
-            (IRelativeLayoutLayoutParams**)&lp));
+            (IViewGroupLayoutParams**)&lp));
 
     return lp;
 }

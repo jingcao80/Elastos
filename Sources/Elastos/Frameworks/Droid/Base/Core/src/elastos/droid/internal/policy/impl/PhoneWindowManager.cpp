@@ -3298,17 +3298,21 @@ ECode PhoneWindowManager::SelectRotationAnimationLw(
 }
 
 ECode PhoneWindowManager::CreateForceHideWallpaperExitAnimation(
-    /* [in] */Boolean goingToNotificationShade,
+    /* [in] */ Boolean goingToNotificationShade,
+    /* [in] */ Boolean keyguardShowingMedia,
     /* [out] */ IAnimation** anim)
 {
-    VALIDATE_NOT_NULL(anim);
+    VALIDATE_NOT_NULL(anim)
+
+    *anim = NULL;
+    AutoPtr<IAnimationUtils> animUtils;
+    CAnimationUtils::AcquireSingleton((IAnimationUtils**)&animUtils);
     if (goingToNotificationShade) {
-        *anim = NULL;
         return NOERROR;
+    } else if (keyguardShowingMedia) {
+        return animUtils->LoadAnimation(mContext, R::anim::lock_screen_wallpaper_exit_noop, anim);
     } else {
-        AutoPtr<IAnimationUtils> animUtils;
-        CAnimationUtils::AcquireSingleton((IAnimationUtils**)&animUtils);
-        return animUtils->LoadAnimation(mContext, R::anim::lock_screen_behind_enter_fade_in, (IAnimation**)&anim);
+        return animUtils->LoadAnimation(mContext, R::anim::lock_screen_behind_enter_fade_in, anim);
     }
     return NOERROR;
 }
@@ -7588,6 +7592,21 @@ ECode PhoneWindowManager::SetLastInputMethodWindowLw(
 {
     mLastInputMethodWindow = ime;
     mLastInputMethodTargetWindow = target;
+    return NOERROR;
+}
+
+ECode PhoneWindowManager::HasPermanentMenuKey(
+    /* [out] */ Boolean* result)
+{
+    return NOERROR;
+}
+
+/**
+* Specifies whether the device needs a navigation bar (because it has no hardware buttons)
+*/
+ECode PhoneWindowManager::NeedsNavigationBar(
+    /* [out] */ Boolean* result)
+{
     return NOERROR;
 }
 

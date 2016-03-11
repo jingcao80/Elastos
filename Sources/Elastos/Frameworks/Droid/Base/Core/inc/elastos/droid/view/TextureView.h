@@ -451,7 +451,6 @@ private:
     AutoPtr<IMatrix> mMatrix;
     Boolean mMatrixChanged;
 
-//    AutoPtr<ArrayOf<IInterface*> > mLock;
     Object mLock;
     Boolean mUpdateLayer;
     Boolean mUpdateSurface;
@@ -459,7 +458,6 @@ private:
     AutoPtr<ICanvas> mCanvas;
     Int32 mSaveCount;
 
-//    AutoPtr<ArrayOf<IInterface*> > mNativeWindowLock;
     Object mNativeWindowLock;
     // Set by native code, do not write!
     Int64 mNativeWindow;

@@ -26,16 +26,8 @@ void VelocityTrackerState::Clear()
 }
 
 void VelocityTrackerState::AddMovement(
-    /* [in] */ IMotionEvent* iEvent)
+    /* [in] */ const android::MotionEvent* event)
 {
-    assert(iEvent != NULL);
-
-    Handle32 hEvent = 0;
-    iEvent->GetNative(&hEvent);
-    const android::MotionEvent* event = (android::MotionEvent*)hEvent;
-    if (event == NULL) {
-        return;
-    }
     mVelocityTracker.addMovement(event);
 }
 

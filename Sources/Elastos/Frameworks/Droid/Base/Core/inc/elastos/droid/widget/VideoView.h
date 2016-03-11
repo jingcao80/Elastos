@@ -407,6 +407,9 @@ private:
      */
     CARAPI_(void) MeasureAndLayoutSubtitleWidget();
 
+    CARAPI_(Boolean) IsHTTPStreaming(
+        /* [in] */ IUri* uri);
+
 private:
     static const String TAG;
     // settable by the client
@@ -421,6 +424,7 @@ private:
     static const Int32 STATE_PLAYING;
     static const Int32 STATE_PAUSED;
     static const Int32 STATE_PLAYBACK_COMPLETED;
+    static const Int32 STATE_SUSPENDED;
 
     // mCurrentState is a VideoView object's current state.
     // mTargetState is the state that a method caller intends to reach.

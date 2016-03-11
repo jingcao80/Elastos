@@ -291,6 +291,14 @@ protected:
 
     CARAPI_(Int32) ComputeVerticalScrollRange();
 
+    CARAPI_(Int32) ListPaddingLeft();
+
+    CARAPI_(Int32) ListPaddingTop();
+
+    CARAPI_(Int32) ListPaddingRight();
+
+    CARAPI_(Int32) ListPaddingBottom();
+
 public:
     static const String GRIDVIEW_NAME;
     static const Int32 NO_STRETCH = 0;
@@ -316,7 +324,7 @@ private:
 
     Int32 mGravity;
 
-    AutoPtr<CRect> mTempRect;
+    AutoPtr<IRect> mTempRect;
 };
 
 } // namespace Widget

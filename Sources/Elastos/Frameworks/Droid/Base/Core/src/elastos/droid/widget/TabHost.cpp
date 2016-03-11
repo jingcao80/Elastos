@@ -138,9 +138,9 @@ ECode TabHost::LabelIndicatorStrategy::CreateIndicatorView(
 
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
-    AutoPtr<ILayoutInflater> inflater;
-    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
-
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
     AutoPtr<IView> tabIndicator;
     inflater->Inflate(mHost->mTabLayoutId,
            IViewGroup::Probe(mHost->mTabWidget), // tab widget is the parent
@@ -194,8 +194,9 @@ ECode TabHost::LabelAndIconIndicatorStrategy::CreateIndicatorView(
 
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
-    AutoPtr<ILayoutInflater> inflater;
-    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
     AutoPtr<IView> tabIndicator;
     inflater->Inflate(mHost->mTabLayoutId,
            IViewGroup::Probe(mHost->mTabWidget), // tab widget is the parent

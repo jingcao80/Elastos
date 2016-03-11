@@ -79,11 +79,6 @@ ECode ViewTreeObserver::InternalInsetsInfo::IsEmpty(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return contentInsets.isEmpty()
-    //  && visibleInsets.isEmpty()
-    //  && touchableRegion.isEmpty()
-    //  && mTouchableInsets == TOUCHABLE_INSETS_FRAME;
 
     Boolean isEmpty = FALSE;
     mContentInsets->IsEmpty(&isEmpty);
@@ -102,15 +97,6 @@ ECode ViewTreeObserver::InternalInsetsInfo::Equals(
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
     VALIDATE_NOT_NULL(other);
-    // ==================before translated======================
-    // if (this == o) return true;
-    // if (o == null || getClass() != o.getClass()) return false;
-    //
-    // InternalInsetsInfo other = (InternalInsetsInfo)o;
-    // return mTouchableInsets == other.mTouchableInsets &&
-    //     contentInsets.equals(other.contentInsets) &&
-    //     visibleInsets.equals(other.visibleInsets) &&
-    //     touchableRegion.equals(other.touchableRegion);
 
     IInterface* thisInterface = TO_IINTERFACE(this);
     if (other == thisInterface) {
@@ -166,72 +152,6 @@ ECode ViewTreeObserver::Merge(
     /* [in] */ IViewTreeObserver* observer)
 {
     VALIDATE_NOT_NULL(observer);
-    // ==================before translated======================
-    // if (observer.mOnWindowAttachListeners != null) {
-    //     if (mOnWindowAttachListeners != null) {
-    //         mOnWindowAttachListeners.addAll(observer.mOnWindowAttachListeners);
-    //     } else {
-    //         mOnWindowAttachListeners = observer.mOnWindowAttachListeners;
-    //     }
-    // }
-    //
-    // if (observer.mOnWindowFocusListeners != null) {
-    //     if (mOnWindowFocusListeners != null) {
-    //         mOnWindowFocusListeners.addAll(observer.mOnWindowFocusListeners);
-    //     } else {
-    //         mOnWindowFocusListeners = observer.mOnWindowFocusListeners;
-    //     }
-    // }
-    //
-    // if (observer.mOnGlobalFocusListeners != null) {
-    //     if (mOnGlobalFocusListeners != null) {
-    //         mOnGlobalFocusListeners.addAll(observer.mOnGlobalFocusListeners);
-    //     } else {
-    //         mOnGlobalFocusListeners = observer.mOnGlobalFocusListeners;
-    //     }
-    // }
-    //
-    // if (observer.mOnGlobalLayoutListeners != null) {
-    //     if (mOnGlobalLayoutListeners != null) {
-    //         mOnGlobalLayoutListeners.addAll(observer.mOnGlobalLayoutListeners);
-    //     } else {
-    //         mOnGlobalLayoutListeners = observer.mOnGlobalLayoutListeners;
-    //     }
-    // }
-    //
-    // if (observer.mOnPreDrawListeners != null) {
-    //     if (mOnPreDrawListeners != null) {
-    //         mOnPreDrawListeners.addAll(observer.mOnPreDrawListeners);
-    //     } else {
-    //         mOnPreDrawListeners = observer.mOnPreDrawListeners;
-    //     }
-    // }
-    //
-    // if (observer.mOnTouchModeChangeListeners != null) {
-    //     if (mOnTouchModeChangeListeners != null) {
-    //         mOnTouchModeChangeListeners.addAll(observer.mOnTouchModeChangeListeners);
-    //     } else {
-    //         mOnTouchModeChangeListeners = observer.mOnTouchModeChangeListeners;
-    //     }
-    // }
-    //
-    // if (observer.mOnComputeInternalInsetsListeners != null) {
-    //     if (mOnComputeInternalInsetsListeners != null) {
-    //         mOnComputeInternalInsetsListeners.addAll(observer.mOnComputeInternalInsetsListeners);
-    //     } else {
-    //         mOnComputeInternalInsetsListeners = observer.mOnComputeInternalInsetsListeners;
-    //     }
-    // }
-    //
-    // if (observer.mOnScrollChangedListeners != null) {
-    //     if (mOnScrollChangedListeners != null) {
-    //         mOnScrollChangedListeners.addAll(observer.mOnScrollChangedListeners);
-    //     } else {
-    //         mOnScrollChangedListeners = observer.mOnScrollChangedListeners;
-    //     }
-    // }
-    //
-    // observer.kill();
 
     ViewTreeObserver* observerObj = (ViewTreeObserver*)observer;
     assert(NULL == observerObj);
@@ -347,15 +267,6 @@ ECode ViewTreeObserver::AddOnWindowAttachListener(
     /* [in] */ IOnWindowAttachListener* listener)
 {
     VALIDATE_NOT_NULL(listener);
-    // ==================before translated======================
-    // checkIsAlive();
-    //
-    // if (mOnWindowAttachListeners == null) {
-    //     mOnWindowAttachListeners
-    //             = new CopyOnWriteArrayList<OnWindowAttachListener>();
-    // }
-    //
-    // mOnWindowAttachListeners.add(listener);
 
     CheckIsAlive();
     if (NULL == mOnWindowAttachListeners) {
@@ -370,12 +281,6 @@ ECode ViewTreeObserver::RemoveOnWindowAttachListener(
     /* [in] */ IOnWindowAttachListener* victim)
 {
     VALIDATE_NOT_NULL(victim);
-    // ==================before translated======================
-    // checkIsAlive();
-    // if (mOnWindowAttachListeners == null) {
-    //     return;
-    // }
-    // mOnWindowAttachListeners.remove(victim);
 
     CheckIsAlive();
     if (NULL == mOnWindowAttachListeners) {
@@ -390,15 +295,6 @@ ECode ViewTreeObserver::AddOnWindowFocusChangeListener(
     /* [in] */ IOnWindowFocusChangeListener* listener)
 {
     VALIDATE_NOT_NULL(listener);
-    // ==================before translated======================
-    // checkIsAlive();
-    //
-    // if (mOnWindowFocusListeners == null) {
-    //     mOnWindowFocusListeners
-    //             = new CopyOnWriteArrayList<OnWindowFocusChangeListener>();
-    // }
-    //
-    // mOnWindowFocusListeners.add(listener);
 
     CheckIsAlive();
     if (NULL == mOnWindowFocusListeners) {
@@ -413,12 +309,6 @@ ECode ViewTreeObserver::RemoveOnWindowFocusChangeListener(
     /* [in] */ IOnWindowFocusChangeListener* victim)
 {
     VALIDATE_NOT_NULL(victim);
-    // ==================before translated======================
-    // checkIsAlive();
-    // if (mOnWindowFocusListeners == null) {
-    //     return;
-    // }
-    // mOnWindowFocusListeners.remove(victim);
 
     CheckIsAlive();
     if (NULL == mOnWindowFocusListeners) {
@@ -433,14 +323,6 @@ ECode ViewTreeObserver::AddOnGlobalFocusChangeListener(
     /* [in] */ IOnGlobalFocusChangeListener* listener)
 {
     VALIDATE_NOT_NULL(listener);
-    // ==================before translated======================
-    // checkIsAlive();
-    //
-    // if (mOnGlobalFocusListeners == null) {
-    //     mOnGlobalFocusListeners = new CopyOnWriteArrayList<OnGlobalFocusChangeListener>();
-    // }
-    //
-    // mOnGlobalFocusListeners.add(listener);
 
     CheckIsAlive();
     if (NULL == mOnGlobalFocusListeners) {
@@ -455,12 +337,6 @@ ECode ViewTreeObserver::RemoveOnGlobalFocusChangeListener(
     /* [in] */ IOnGlobalFocusChangeListener* victim)
 {
     VALIDATE_NOT_NULL(victim);
-    // ==================before translated======================
-    // checkIsAlive();
-    // if (mOnGlobalFocusListeners == null) {
-    //     return;
-    // }
-    // mOnGlobalFocusListeners.remove(victim);
 
     CheckIsAlive();
     if (NULL == mOnGlobalFocusListeners) {
@@ -475,14 +351,6 @@ ECode ViewTreeObserver::AddOnGlobalLayoutListener(
     /* [in] */ IOnGlobalLayoutListener* listener)
 {
     VALIDATE_NOT_NULL(listener);
-    // ==================before translated======================
-    // checkIsAlive();
-    //
-    // if (mOnGlobalLayoutListeners == null) {
-    //     mOnGlobalLayoutListeners = new CopyOnWriteArray<OnGlobalLayoutListener>();
-    // }
-    //
-    // mOnGlobalLayoutListeners.add(listener);
 
     CheckIsAlive();
     if (NULL == mOnGlobalLayoutListeners) {
@@ -497,8 +365,6 @@ ECode ViewTreeObserver::RemoveGlobalOnLayoutListener(
     /* [in] */ IOnGlobalLayoutListener* victim)
 {
     VALIDATE_NOT_NULL(victim);
-    // ==================before translated======================
-    // removeOnGlobalLayoutListener(victim);
 
     return RemoveOnGlobalLayoutListener(victim);
 }
@@ -507,12 +373,6 @@ ECode ViewTreeObserver::RemoveOnGlobalLayoutListener(
     /* [in] */ IOnGlobalLayoutListener* victim)
 {
     VALIDATE_NOT_NULL(victim);
-    // ==================before translated======================
-    // checkIsAlive();
-    // if (mOnGlobalLayoutListeners == null) {
-    //     return;
-    // }
-    // mOnGlobalLayoutListeners.remove(victim);
 
     CheckIsAlive();
     if (NULL == mOnGlobalLayoutListeners) {
@@ -527,14 +387,6 @@ ECode ViewTreeObserver::AddOnPreDrawListener(
     /* [in] */ IOnPreDrawListener* listener)
 {
     VALIDATE_NOT_NULL(listener);
-    // ==================before translated======================
-    // checkIsAlive();
-    //
-    // if (mOnPreDrawListeners == null) {
-    //     mOnPreDrawListeners = new CopyOnWriteArray<OnPreDrawListener>();
-    // }
-    //
-    // mOnPreDrawListeners.add(listener);
 
     CheckIsAlive();
     if (NULL == mOnPreDrawListeners) {
@@ -549,12 +401,6 @@ ECode ViewTreeObserver::RemoveOnPreDrawListener(
     /* [in] */ IOnPreDrawListener* victim)
 {
     VALIDATE_NOT_NULL(victim);
-    // ==================before translated======================
-    // checkIsAlive();
-    // if (mOnPreDrawListeners == null) {
-    //     return;
-    // }
-    // mOnPreDrawListeners.remove(victim);
 
     CheckIsAlive();
     if (NULL == mOnPreDrawListeners) {
@@ -569,14 +415,6 @@ ECode ViewTreeObserver::AddOnDrawListener(
     /* [in] */ IOnDrawListener* listener)
 {
     VALIDATE_NOT_NULL(listener);
-    // ==================before translated======================
-    // checkIsAlive();
-    //
-    // if (mOnDrawListeners == null) {
-    //     mOnDrawListeners = new ArrayList<OnDrawListener>();
-    // }
-    //
-    // mOnDrawListeners.add(listener);
 
     CheckIsAlive();
     if (NULL == mOnDrawListeners) {
@@ -591,12 +429,6 @@ ECode ViewTreeObserver::RemoveOnDrawListener(
     /* [in] */ IOnDrawListener* victim)
 {
     VALIDATE_NOT_NULL(victim);
-    // ==================before translated======================
-    // checkIsAlive();
-    // if (mOnDrawListeners == null) {
-    //     return;
-    // }
-    // mOnDrawListeners.remove(victim);
 
     CheckIsAlive();
     if (NULL == mOnDrawListeners) {
@@ -611,14 +443,6 @@ ECode ViewTreeObserver::AddOnScrollChangedListener(
     /* [in] */ IOnScrollChangedListener* listener)
 {
     VALIDATE_NOT_NULL(listener);
-    // ==================before translated======================
-    // checkIsAlive();
-    //
-    // if (mOnScrollChangedListeners == null) {
-    //     mOnScrollChangedListeners = new CopyOnWriteArray<OnScrollChangedListener>();
-    // }
-    //
-    // mOnScrollChangedListeners.add(listener);
 
     CheckIsAlive();
     if (NULL == mOnScrollChangedListeners) {
@@ -633,12 +457,6 @@ ECode ViewTreeObserver::RemoveOnScrollChangedListener(
     /* [in] */ IOnScrollChangedListener* victim)
 {
     VALIDATE_NOT_NULL(victim);
-    // ==================before translated======================
-    // checkIsAlive();
-    // if (mOnScrollChangedListeners == null) {
-    //     return;
-    // }
-    // mOnScrollChangedListeners.remove(victim);
 
     CheckIsAlive();
     if (NULL == mOnScrollChangedListeners) {
@@ -653,14 +471,6 @@ ECode ViewTreeObserver::AddOnTouchModeChangeListener(
     /* [in] */ IOnTouchModeChangeListener* listener)
 {
     VALIDATE_NOT_NULL(listener);
-    // ==================before translated======================
-    // checkIsAlive();
-    //
-    // if (mOnTouchModeChangeListeners == null) {
-    //     mOnTouchModeChangeListeners = new CopyOnWriteArrayList<OnTouchModeChangeListener>();
-    // }
-    //
-    // mOnTouchModeChangeListeners.add(listener);
 
     CheckIsAlive();
     if (NULL == mOnTouchModeChangeListeners) {
@@ -675,12 +485,6 @@ ECode ViewTreeObserver::RemoveOnTouchModeChangeListener(
     /* [in] */ IOnTouchModeChangeListener* victim)
 {
     VALIDATE_NOT_NULL(victim);
-    // ==================before translated======================
-    // checkIsAlive();
-    // if (mOnTouchModeChangeListeners == null) {
-    //     return;
-    // }
-    // mOnTouchModeChangeListeners.remove(victim);
 
     CheckIsAlive();
     if (NULL == mOnTouchModeChangeListeners) {
@@ -695,15 +499,6 @@ ECode ViewTreeObserver::AddOnComputeInternalInsetsListener(
     /* [in] */ IOnComputeInternalInsetsListener* listener)
 {
     VALIDATE_NOT_NULL(listener);
-    // ==================before translated======================
-    // checkIsAlive();
-    //
-    // if (mOnComputeInternalInsetsListeners == null) {
-    //     mOnComputeInternalInsetsListeners =
-    //             new CopyOnWriteArray<OnComputeInternalInsetsListener>();
-    // }
-    //
-    // mOnComputeInternalInsetsListeners.add(listener);
 
     CheckIsAlive();
     if (NULL == mOnComputeInternalInsetsListeners) {
@@ -718,12 +513,6 @@ ECode ViewTreeObserver::RemoveOnComputeInternalInsetsListener(
     /* [in] */ IOnComputeInternalInsetsListener* victim)
 {
     VALIDATE_NOT_NULL(victim);
-    // ==================before translated======================
-    // checkIsAlive();
-    // if (mOnComputeInternalInsetsListeners == null) {
-    //     return;
-    // }
-    // mOnComputeInternalInsetsListeners.remove(victim);
 
     CheckIsAlive();
     if (NULL == mOnComputeInternalInsetsListeners) {
@@ -736,11 +525,6 @@ ECode ViewTreeObserver::RemoveOnComputeInternalInsetsListener(
 
 ECode ViewTreeObserver::CheckIsAlive()
 {
-    // ==================before translated======================
-    // if (!mAlive) {
-    //     throw new IllegalStateException("This ViewTreeObserver is not alive, call "
-    //             + "getViewTreeObserver() again");
-    // }
 
     if (!mAlive) {
         // throw new IllegalStateException("This ViewTreeObserver is not alive, call "
@@ -755,8 +539,6 @@ ECode ViewTreeObserver::IsAlive(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mAlive;
 
     *result = mAlive;
     return NOERROR;
@@ -765,19 +547,6 @@ ECode ViewTreeObserver::IsAlive(
 ECode ViewTreeObserver::DispatchOnWindowAttachedChange(
     /* [in] */ Boolean attached)
 {
-    // ==================before translated======================
-    // // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
-    // // perform the dispatching. The iterator is a safe guard against listeners that
-    // // could mutate the list by calling the various add/remove methods. This prevents
-    // // the array from being modified while we iterate it.
-    // final CopyOnWriteArrayList<OnWindowAttachListener> listeners
-    //         = mOnWindowAttachListeners;
-    // if (listeners != null && listeners.size() > 0) {
-    //     for (OnWindowAttachListener listener : listeners) {
-    //         if (attached) listener.onWindowAttached();
-    //         else listener.onWindowDetached();
-    //     }
-    // }
 
     // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
     // perform the dispatching. The iterator is a safe guard against listeners that
@@ -800,18 +569,6 @@ ECode ViewTreeObserver::DispatchOnWindowAttachedChange(
 ECode ViewTreeObserver::DispatchOnWindowFocusChange(
     /* [in] */ Boolean hasFocus)
 {
-    // ==================before translated======================
-    // // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
-    // // perform the dispatching. The iterator is a safe guard against listeners that
-    // // could mutate the list by calling the various add/remove methods. This prevents
-    // // the array from being modified while we iterate it.
-    // final CopyOnWriteArrayList<OnWindowFocusChangeListener> listeners
-    //         = mOnWindowFocusListeners;
-    // if (listeners != null && listeners.size() > 0) {
-    //     for (OnWindowFocusChangeListener listener : listeners) {
-    //         listener.onWindowFocusChanged(hasFocus);
-    //     }
-    // }
 
     AutoPtr< List<IOnWindowFocusChangeListener*> > listeners = mOnWindowFocusListeners;
     if (listeners != NULL && listeners->GetSize() > 0) {
@@ -830,17 +587,6 @@ ECode ViewTreeObserver::DispatchOnGlobalFocusChange(
 {
     VALIDATE_NOT_NULL(oldFocus);
     VALIDATE_NOT_NULL(newFocus);
-    // ==================before translated======================
-    // // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
-    // // perform the dispatching. The iterator is a safe guard against listeners that
-    // // could mutate the list by calling the various add/remove methods. This prevents
-    // // the array from being modified while we iterate it.
-    // final CopyOnWriteArrayList<OnGlobalFocusChangeListener> listeners = mOnGlobalFocusListeners;
-    // if (listeners != null && listeners.size() > 0) {
-    //     for (OnGlobalFocusChangeListener listener : listeners) {
-    //         listener.onGlobalFocusChanged(oldFocus, newFocus);
-    //     }
-    // }
 
     AutoPtr< List<IOnGlobalFocusChangeListener*> > listeners = mOnGlobalFocusListeners;
     if (listeners != NULL && listeners->GetSize() > 0) {
@@ -855,23 +601,6 @@ ECode ViewTreeObserver::DispatchOnGlobalFocusChange(
 
 ECode ViewTreeObserver::DispatchOnGlobalLayout()
 {
-    // ==================before translated======================
-    // // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
-    // // perform the dispatching. The iterator is a safe guard against listeners that
-    // // could mutate the list by calling the various add/remove methods. This prevents
-    // // the array from being modified while we iterate it.
-    // final CopyOnWriteArray<OnGlobalLayoutListener> listeners = mOnGlobalLayoutListeners;
-    // if (listeners != null && listeners.size() > 0) {
-    //     CopyOnWriteArray.Access<OnGlobalLayoutListener> access = listeners.start();
-    //     try {
-    //         int count = access.size();
-    //         for (int i = 0; i < count; i++) {
-    //             access.get(i).onGlobalLayout();
-    //         }
-    //     } finally {
-    //         listeners.end();
-    //     }
-    // }
 
     if (!mOnGlobalLayoutListeners->IsEmpty()) {
         List<IOnGlobalLayoutListener*>::Iterator iter = mOnGlobalLayoutListeners->Begin();
@@ -887,8 +616,6 @@ ECode ViewTreeObserver::HasOnPreDrawListeners(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mOnPreDrawListeners != null && mOnPreDrawListeners.size() > 0;
 
     *result = (mOnPreDrawListeners != NULL && mOnPreDrawListeners->GetSize() > 0);
     return NOERROR;
@@ -899,21 +626,6 @@ ECode ViewTreeObserver::DispatchOnPreDraw(
 {
     VALIDATE_NOT_NULL(result);
     *result = FALSE;
-    // ==================before translated======================
-    // boolean cancelDraw = false;
-    // final CopyOnWriteArray<OnPreDrawListener> listeners = mOnPreDrawListeners;
-    // if (listeners != null && listeners.size() > 0) {
-    //     CopyOnWriteArray.Access<OnPreDrawListener> access = listeners.start();
-    //     try {
-    //         int count = access.size();
-    //         for (int i = 0; i < count; i++) {
-    //             cancelDraw |= !(access.get(i).onPreDraw());
-    //         }
-    //     } finally {
-    //         listeners.end();
-    //     }
-    // }
-    // return cancelDraw;
 
     if (mOnPreDrawListeners != NULL && !mOnPreDrawListeners->IsEmpty()) {
         Boolean isPreDraw;
@@ -930,14 +642,6 @@ ECode ViewTreeObserver::DispatchOnPreDraw(
 
 ECode ViewTreeObserver::DispatchOnDraw()
 {
-    // ==================before translated======================
-    // if (mOnDrawListeners != null) {
-    //     final ArrayList<OnDrawListener> listeners = mOnDrawListeners;
-    //     int numListeners = listeners.size();
-    //     for (int i = 0; i < numListeners; ++i) {
-    //         listeners.get(i).onDraw();
-    //     }
-    // }
 
     if (mOnDrawListeners != NULL) {
         List<IOnDrawListener*>::Iterator iter = mOnDrawListeners->Begin();
@@ -952,14 +656,6 @@ ECode ViewTreeObserver::DispatchOnDraw()
 ECode ViewTreeObserver::DispatchOnTouchModeChanged(
     /* [in] */ Boolean inTouchMode)
 {
-    // ==================before translated======================
-    // final CopyOnWriteArrayList<OnTouchModeChangeListener> listeners =
-    //         mOnTouchModeChangeListeners;
-    // if (listeners != null && listeners.size() > 0) {
-    //     for (OnTouchModeChangeListener listener : listeners) {
-    //         listener.onTouchModeChanged(inTouchMode);
-    //     }
-    // }
 
     if (mOnTouchModeChangeListeners != NULL && mOnTouchModeChangeListeners->GetSize() > 0) {
         List<IOnTouchModeChangeListener*>::Iterator iter = mOnTouchModeChangeListeners->Begin();
@@ -973,23 +669,6 @@ ECode ViewTreeObserver::DispatchOnTouchModeChanged(
 
 ECode ViewTreeObserver::DispatchOnScrollChanged()
 {
-    // ==================before translated======================
-    // // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
-    // // perform the dispatching. The iterator is a safe guard against listeners that
-    // // could mutate the list by calling the various add/remove methods. This prevents
-    // // the array from being modified while we iterate it.
-    // final CopyOnWriteArray<OnScrollChangedListener> listeners = mOnScrollChangedListeners;
-    // if (listeners != null && listeners.size() > 0) {
-    //     CopyOnWriteArray.Access<OnScrollChangedListener> access = listeners.start();
-    //     try {
-    //         int count = access.size();
-    //         for (int i = 0; i < count; i++) {
-    //             access.get(i).onScrollChanged();
-    //         }
-    //     } finally {
-    //         listeners.end();
-    //     }
-    // }
 
     if (mOnScrollChangedListeners != NULL && mOnScrollChangedListeners->GetSize() > 0) {
         List<IOnScrollChangedListener*>::Iterator iter = mOnScrollChangedListeners->Begin();
@@ -1006,10 +685,6 @@ ECode ViewTreeObserver::HasComputeInternalInsetsListeners(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final CopyOnWriteArray<OnComputeInternalInsetsListener> listeners =
-    //         mOnComputeInternalInsetsListeners;
-    // return (listeners != null && listeners.size() > 0);
 
     *result = (mOnComputeInternalInsetsListeners != NULL && mOnComputeInternalInsetsListeners->GetSize() > 0);
     return NOERROR;
@@ -1019,24 +694,6 @@ ECode ViewTreeObserver::DispatchOnComputeInternalInsets(
     /* [in] */ IInternalInsetsInfo* inoutInfo)
 {
     VALIDATE_NOT_NULL(inoutInfo);
-    // ==================before translated======================
-    // // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
-    // // perform the dispatching. The iterator is a safe guard against listeners that
-    // // could mutate the list by calling the various add/remove methods. This prevents
-    // // the array from being modified while we iterate it.
-    // final CopyOnWriteArray<OnComputeInternalInsetsListener> listeners =
-    //         mOnComputeInternalInsetsListeners;
-    // if (listeners != null && listeners.size() > 0) {
-    //     CopyOnWriteArray.Access<OnComputeInternalInsetsListener> access = listeners.start();
-    //     try {
-    //         int count = access.size();
-    //         for (int i = 0; i < count; i++) {
-    //             access.get(i).onComputeInternalInsets(inoutInfo);
-    //         }
-    //     } finally {
-    //         listeners.end();
-    //     }
-    // }
 
     if (mOnComputeInternalInsetsListeners != NULL && mOnComputeInternalInsetsListeners->GetSize() > 0) {
         List<IOnComputeInternalInsetsListener*>::Iterator iter = mOnComputeInternalInsetsListeners->Begin();

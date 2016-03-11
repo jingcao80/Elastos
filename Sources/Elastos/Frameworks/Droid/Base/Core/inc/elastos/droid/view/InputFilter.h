@@ -13,14 +13,14 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-class InputFilter
+class ECO_PUBLIC InputFilter
     : public Object
     , public IInputFilter
     , public IIInputFilter
     , public IBinder
 {
 private:
-    class H
+    class ECO_LOCAL H
         : public Handler
     {
     public:

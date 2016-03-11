@@ -157,6 +157,7 @@ public:
     Boolean mKeyguardGoingAway;
     Boolean mKeyguardGoingAwayToNotificationShade;
     Boolean mKeyguardGoingAwayDisableWindowAnimations;
+    Boolean mKeyguardGoingAwayShowingMedia;
 
     Int32 mForceHiding;
 

@@ -6,19 +6,19 @@
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/os/Handler.h"
 #include <elastos/utility/etl/List.h>
-#include "elastos/droid/view/CSurfaceViewWindow.h"
+//#include "elastos/droid/view/CSurfaceViewWindow.h"
 
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Droid::Content::Res::ICompatibilityInfoTranslator;
-
+using Elastos::Droid::Internal::View::IBaseIWindow;
 using Elastos::Utility::Etl::List;
 
 namespace Elastos {
 namespace Droid {
 namespace View {
 
-class SurfaceView
+class ECO_PUBLIC SurfaceView
     : public View
     , public ISurfaceView
 {
@@ -282,14 +282,22 @@ public:
     static const Int32 KEEP_SCREEN_ON_MSG;
     static const Int32 GET_NEW_SURFACE_MSG;
     static const Int32 UPDATE_WINDOW_MSG;
+    static const Boolean DEBUG;
+
+    AutoPtr<IBaseIWindow> mWindow;
+    AutoPtr<IRect> mWinFrame;// = new Rect();
+    AutoPtr<IHandler> mHandler;
+    Object mSurfaceLock;
+    Int32 mLastSurfaceWidth;// = -1;
+    Int32 mLastSurfaceHeight;// = -1;
+    Boolean mUpdateWindowNeeded;
+    Boolean mReportDrawNeeded;
 
 private:
 //    friend class MySurfaceHolder;
-    friend class CSurfaceViewWindow;
+    //friend class CSurfaceViewWindow;
 
     AutoPtr<ISurfaceHolder> mSurfaceHolder;
-
-    static const Boolean DEBUG;
 
     List<AutoPtr<ISurfaceHolderCallback> > mCallbacks;
 
@@ -302,9 +310,8 @@ private:
 
     AutoPtr<IWindowManagerLayoutParams> mLayout; //= new WindowManager.LayoutParams();
     AutoPtr<IWindowSession> mSession;
-    AutoPtr<IBaseIWindow> mWindow;
     AutoPtr<IRect> mVisibleInsets;// = new Rect();
-    AutoPtr<IRect> mWinFrame;// = new Rect();
+
     AutoPtr<IRect> mOverscanInsets;
     AutoPtr<IRect> mContentInsets;// = new Rect();
     AutoPtr<IRect> mStableInsets;
@@ -313,8 +320,6 @@ private:
     Int32 mWindowType;// = WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 
     Boolean mIsCreating;// = FALSE;
-
-    AutoPtr<IHandler> mHandler;
 
     AutoPtr<IOnScrollChangedListener> mScrollChangedListener;
 
@@ -340,17 +345,11 @@ private:
     Int32 mFormat;// = -1;
     Int32 mType;// = -1;
     AutoPtr<IRect> mSurfaceFrame;// = new Rect();
-    Int32 mLastSurfaceWidth;// = -1;
-    Int32 mLastSurfaceHeight;// = -1;
-    Boolean mUpdateWindowNeeded;
-    Boolean mReportDrawNeeded;
     AutoPtr<ICompatibilityInfoTranslator> mTranslator;
 
     AutoPtr<IOnPreDrawListener> mDrawListener;
 
     Boolean mGlobalListenersAdded;
-
-    Object mSurfaceLock;
     Object mCallbacksLock;
 };
 

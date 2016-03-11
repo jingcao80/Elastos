@@ -18,7 +18,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class ArrayAdapter
+class ECO_PUBLIC ArrayAdapter
     : public BaseAdapter
     , public IArrayAdapter
     , public IFilterable

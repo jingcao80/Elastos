@@ -5,6 +5,8 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/AbsListView.h"
 
+using Elastos::Droid::Graphics::IRect;
+
 namespace Elastos {
 namespace Droid {
 namespace Widget {
@@ -753,7 +755,7 @@ private:
     Boolean mItemsCanFocus;
 
     // used for temporary calculations.
-    AutoPtr<CRect> mTempRect;
+    AutoPtr<IRect> mTempRect;
     AutoPtr<IPaint> mDividerPaint;
 
     // the single allocated result per list view; kinda cheesey but avoids

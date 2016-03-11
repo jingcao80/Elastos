@@ -312,6 +312,8 @@ module
         GetDate(
             [in] Int32 key,
             [out] IDate** result);
+
+        RecycleParcel();
     }
 
     interface IMetadataHelper {

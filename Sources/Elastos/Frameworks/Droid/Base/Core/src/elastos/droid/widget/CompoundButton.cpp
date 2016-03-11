@@ -341,7 +341,9 @@ ECode CompoundButton::GetButtonTintMode(
 void CompoundButton::ApplyButtonTint()
 {
     if (mButtonDrawable != NULL && (mHasButtonTint || mHasButtonTintMode)) {
-        mButtonDrawable->Mutate((IDrawable**)&mButtonDrawable);
+        AutoPtr<IDrawable> d;
+        mButtonDrawable->Mutate((IDrawable**)&d);
+        mButtonDrawable = d;
 
         if (mHasButtonTint) {
             mButtonDrawable->SetTintList(mButtonTintList);

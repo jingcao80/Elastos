@@ -1,8 +1,10 @@
 #include "elastos/droid/view/HardwareCanvas.h"
+#include "elastos/droid/view/GLES20Canvas.h"
 
 namespace Elastos {
 namespace Droid {
 namespace View {
+CAR_INTERFACE_IMPL(HardwareCanvas, Canvas, IHardwareCanvas)
 
 ECode HardwareCanvas::IsHardwareAccelerated(
     /* [out] */ Boolean* isAccelerated)
@@ -52,7 +54,7 @@ ECode HardwareCanvas::SetProperty(
     /* [in] */ const String& name,
     /* [in] */ const String& value)
 {
-    // GLES20Canvas.setProperty(name, value);
+    GLES20Canvas::SetProperty(name, value);
     return NOERROR;
 }
 

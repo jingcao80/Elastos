@@ -8,6 +8,7 @@
 #include "elastos/droid/widget/GroupMetadata.h"
 #include "elastos/droid/widget/PositionMetadata.h"
 #include "elastos/droid/view/SoundEffectConstants.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/CoreUtils.h>
@@ -17,6 +18,7 @@ using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::View::Accessibility::IAccessibilityRecord;
 using Elastos::Droid::View::SoundEffectConstants;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::R;
 using Elastos::Core::CoreUtils;
 using Elastos::Utility::CArrayList;

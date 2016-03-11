@@ -5,9 +5,11 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Widget.h"
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Os.h"
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::IPowerManager;
 using Elastos::Core::Object;
 
 namespace Elastos {
@@ -617,6 +619,8 @@ public:
 
     // A context-specific coefficient adjusted to physical values.
     Float mPhysicalCoeff;
+
+    AutoPtr<IPowerManager> mPm;
 
     static Float DECELERATION_RATE;
     static const Float INFLEXION = 0.35f; // Tension lines cross at (INFLEXION, 1)

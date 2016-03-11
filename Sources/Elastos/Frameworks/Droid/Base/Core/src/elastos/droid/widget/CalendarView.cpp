@@ -5,6 +5,7 @@
 #include "elastos/droid/widget/AbsListView.h"
 #include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/graphics/CPaint.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/text/format/CDateUtils.h"
 #include "elastos/droid/utility/CTypedValueHelper.h"
@@ -15,6 +16,7 @@ using Elastos::Droid::App::IService;
 using Elastos::Droid::Content::Res::CConfiguration;
 using Elastos::Droid::Database::EIID_IDataSetObserver;
 using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::PaintStyle_FILL;
 using Elastos::Droid::Graphics::PaintAlign_CENTER;
 using Elastos::Droid::Text::TextUtils;

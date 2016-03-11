@@ -23,7 +23,7 @@ namespace Widget {
  * {@link ListAdapter} interface} and {@link Spinner} (by implementing the
  * specialized {@link SpinnerAdapter} interface.
  */
-class BaseAdapter
+class ECO_PUBLIC BaseAdapter
     : public Object
     , public IBaseAdapter
     , public IListAdapter

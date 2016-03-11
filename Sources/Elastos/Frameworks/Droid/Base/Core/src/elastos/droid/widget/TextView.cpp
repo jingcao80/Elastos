@@ -10329,8 +10329,9 @@ Boolean TextView::CanPaste()
 {
     AutoPtr<IContext> c;
     GetContext((IContext**)&c);
-    AutoPtr<IClipboardManager> cm;
-    c->GetSystemService(IContext::CLIPBOARD_SERVICE, (IInterface**)&cm);
+    AutoPtr<IInterface> obj;
+    c->GetSystemService(IContext::CLIPBOARD_SERVICE, (IInterface**)&obj);
+    AutoPtr<IClipboardManager> cm = IClipboardManager::Probe(obj);
     if (!cm) return FALSE;
 
     Boolean hasClip;
@@ -10357,8 +10358,9 @@ void TextView::Paste(
 {
     AutoPtr<IContext> c;
     GetContext((IContext**)&c);
-    AutoPtr<IClipboardManager> clipboard;
-    c->GetSystemService(IContext::CLIPBOARD_SERVICE, (IInterface**)&clipboard);
+    AutoPtr<IInterface> obj;
+    c->GetSystemService(IContext::CLIPBOARD_SERVICE, (IInterface**)&obj);
+    AutoPtr<IClipboardManager> clipboard = IClipboardManager::Probe(obj);
     if (!clipboard) return;
 
     AutoPtr<IClipData> clip;
@@ -10401,8 +10403,9 @@ void TextView::SetPrimaryClip(
 {
     AutoPtr<IContext> c;
     GetContext((IContext**)&c);
-    AutoPtr<IClipboardManager> clipboard;
-    c->GetSystemService(IContext::CLIPBOARD_SERVICE, (IInterface**)&clipboard);
+    AutoPtr<IInterface> obj;
+    c->GetSystemService(IContext::CLIPBOARD_SERVICE, (IInterface**)&obj);
+    AutoPtr<IClipboardManager> clipboard = IClipboardManager::Probe(obj);
     if (!clipboard) return;
 
     clipboard->SetPrimaryClip(clip);

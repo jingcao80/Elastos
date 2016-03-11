@@ -135,6 +135,66 @@ PowerManagerService::BinderService::BinderService()
 PowerManagerService::BinderService::~BinderService()
 {}
 
+
+ECode PowerManagerService::BinderService::UpdateBlockedUids(
+    /* [in] */ Int32 uid,
+    /* [in] */ Boolean isBlocked)
+{
+    // TODO cm
+    return NOERROR;
+}
+
+ECode PowerManagerService::BinderService::CpuBoost(
+    /* [in] */ Int32 duration)
+{
+    // TODO cm
+    return NOERROR;
+}
+
+ECode PowerManagerService::BinderService::SetKeyboardVisibility(
+    /* [in] */ Boolean visible)
+{
+    // TODO cm
+    return NOERROR;
+}
+
+ECode PowerManagerService::BinderService::SetKeyboardLight(
+    /* [in] */ Boolean on,
+    /* [in] */ Int32 key)
+{
+    // TODO cm
+    return NOERROR;
+}
+
+ECode PowerManagerService::BinderService::WakeUpWithProximityCheck(
+    /* [in] */ Int64 time)
+{
+    // TODO cm
+    return NOERROR;
+}
+
+ECode PowerManagerService::BinderService::SetPowerProfile(
+    /* [in] */ const String& profile,
+    /* [out] */ Boolean* result)
+{
+    // TODO cm
+    return NOERROR;
+}
+
+ECode PowerManagerService::BinderService::GetPowerProfile(
+    /* [out] */ String* result)
+{
+    // TODO cm
+    return NOERROR;
+}
+
+ECode PowerManagerService::BinderService::ActivityResumed(
+    /* [in] */ const String& componentName)
+{
+    // TODO cm
+    return NOERROR;
+}
+
 ECode PowerManagerService::BinderService::constructor(
     /* [in] */ ISystemService* service)
 {

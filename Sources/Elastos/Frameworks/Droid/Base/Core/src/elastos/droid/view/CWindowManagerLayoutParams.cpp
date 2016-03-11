@@ -56,6 +56,7 @@ CWindowManagerLayoutParams::CWindowManagerLayoutParams()
     , mHasSystemUiListeners(FALSE)
     , mInputFeatures(0)
     , mUserActivityTimeout(-1)
+    , mBlurMaskAlphaThreshold(0.0f)
 {
     ASSERT_SUCCEEDED(CRect::New((IRect**)&mSurfaceInsets));
     ASSERT_SUCCEEDED(CString::New(String(""), (ICharSequence**)&mTitle));
@@ -270,6 +271,12 @@ ECode CWindowManagerLayoutParams::CopyFrom(
     if (mSurfaceInsets->Equals(src->mSurfaceInsets, &equals), !equals) {
         mSurfaceInsets->Set(src->mSurfaceInsets);
         *changes |= SURFACE_INSETS_CHANGED;
+    }
+
+
+    if (mBlurMaskAlphaThreshold != src->mBlurMaskAlphaThreshold) {
+        mBlurMaskAlphaThreshold = src->mBlurMaskAlphaThreshold;
+        *changes |= BLUR_MASK_ALPHA_THRESHOLD_CHANGED;
     }
 
     return NOERROR;
@@ -711,6 +718,22 @@ ECode CWindowManagerLayoutParams::SetUserActivityTimeout(
     return NOERROR;
 }
 
+ECode CWindowManagerLayoutParams::GetBlurMaskAlphaThreshold(
+    /* [out] */ Float* blurMaskAlphaThreshold)
+{
+    VALIDATE_NOT_NULL(blurMaskAlphaThreshold)
+
+    *blurMaskAlphaThreshold = mBlurMaskAlphaThreshold;
+    return NOERROR;
+}
+
+ECode CWindowManagerLayoutParams::SetBlurMaskAlphaThreshold(
+    /* [in] */ Float blurMaskAlphaThreshold)
+{
+    mBlurMaskAlphaThreshold = blurMaskAlphaThreshold;
+    return NOERROR;
+}
+
 ECode CWindowManagerLayoutParams::ReadFromParcel(
     /* [in] */ IParcel *source)
 {
@@ -753,6 +776,7 @@ ECode CWindowManagerLayoutParams::ReadFromParcel(
     source->ReadInt32(&right);
     source->ReadInt32(&bottom);
     mSurfaceInsets->Set(left, top, right, bottom);
+    source->ReadFloat(&mBlurMaskAlphaThreshold);
 
     return NOERROR;
 }
@@ -798,6 +822,7 @@ ECode CWindowManagerLayoutParams::WriteToParcel(
     dest->WriteInt32(top);
     dest->WriteInt32(right);
     dest->WriteInt32(bottom);
+    dest->WriteFloat(mBlurMaskAlphaThreshold);
 
     return NOERROR;
 }

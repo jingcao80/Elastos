@@ -157,6 +157,11 @@ module
         const Int32 FX_SURFACE_NORMAL   = 0x00000000;
 
         /**
+         * Surface creation flag: Creates a blur surface.
+         */
+        const Int32 FX_SURFACE_BLUR = 0x00010000;
+
+        /**
          * Surface creation flag: Creates a Dim surface.
          * Everything behind this surface is dimmed by the amount specified
          * in {@link #setAlpha}.  It is an error to lock a Dim surface, since it
@@ -227,9 +232,24 @@ module
             [in] Int32 w,
             [in] Int32 h);
 
+        SetBlur(
+            [in] Float blur);
+
+        SetBlurMaskSurface(
+            [in] ISurfaceControl* maskSurface);
+
+        SetBlurMaskSampling(
+            [in] Int32 blurMaskSampling);
+
+        SetBlurMaskAlphaThreshold(
+            [in] Float alpha);
+
         Hide();
 
         Show();
+
+        SetTransparent(
+            [in] Boolean isTransparent);
 
         SetTransparentRegionHint(
             [in] IRegion* region);

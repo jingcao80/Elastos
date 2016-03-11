@@ -7,6 +7,7 @@
 #include "elastos/droid/view/ViewRootImpl.h"
 #include "elastos/droid/view/CSurface.h"
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
+#include "elastos/droid/view/CSurfaceViewWindow.h"
 #include "elastos/droid/content/res/CConfiguration.h"
 #include "elastos/droid/content/res/CCompatibilityInfo.h"
 #include "elastos/droid/graphics/PixelFormat.h"
@@ -314,7 +315,11 @@ ECode SurfaceView::MyOnScrollChangedListener::OnScrollChanged()
 CAR_INTERFACE_IMPL(SurfaceView, View, ISurfaceView)
 
 SurfaceView::SurfaceView()
-    : mDrawingStopped(TRUE)
+    : mLastSurfaceWidth(-1)
+    , mLastSurfaceHeight(-1)
+    , mUpdateWindowNeeded(FALSE)
+    , mReportDrawNeeded(FALSE)
+    , mDrawingStopped(TRUE)
     , mWindowType(IWindowManagerLayoutParams::TYPE_APPLICATION_MEDIA)
     , mIsCreating(FALSE)
     , mRequestedVisible(FALSE)
@@ -332,10 +337,6 @@ SurfaceView::SurfaceView()
     , mWidth(-1)
     , mHeight(-1)
     , mFormat(-1)
-    , mLastSurfaceWidth(-1)
-    , mLastSurfaceHeight(-1)
-    , mUpdateWindowNeeded(FALSE)
-    , mReportDrawNeeded(FALSE)
 {
     mLocation = ArrayOf<Int32>::Alloc(2);
     CSurface::New((ISurface**)&mSurface);       // Current surface in use

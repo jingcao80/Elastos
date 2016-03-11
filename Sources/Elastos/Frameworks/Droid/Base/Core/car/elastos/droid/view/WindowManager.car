@@ -812,6 +812,44 @@ module
          */
         const Int32 PRIVATE_FLAG_KEYGUARD = 0x00000400;
 
+        /** Window flag: mark layer as fully transparent
+         * {@hide} */
+        const Int32 PRIVATE_FLAG_FULLY_TRANSPARENT = 0x10000000;
+
+        /**
+         * {@hide}
+         */
+        const Int32 PRIVATE_FLAG_STATUS_HIDE_FORCED = 0x00000800;
+        /**
+         * {@hide}
+         */
+        const Int32 PRIVATE_FLAG_NAV_HIDE_FORCED = 0x00001000;
+        /**
+         * The window had not set FULLSCREEN flag so don't handle it as fullscreen in layoutWindowLw
+         *
+         * {@hide}
+         */
+        const Int32 PRIVATE_FLAG_WAS_NOT_FULLSCREEN = 0x00002000;
+
+        /**
+         * Window flag: Overrides default power key behavior
+         * {@hide}
+         */
+        const Int32 PRIVATE_FLAG_PREVENT_POWER_KEY = 0x20000000;
+
+        /**
+         * Window flag: adding additional blur layer and set this as masking layer
+         * {@hide}
+         */
+        const Int32 PRIVATE_FLAG_BLUR_WITH_MASKING = 0x40000000;
+
+        /**
+         * Window flag: adding additional blur layer and set this as masking layer.
+         * This is faster and ugglier than non-scaled version.
+         * {@hide}
+         */
+        const Int32 PRIVATE_FLAG_BLUR_WITH_MASKING_SCALED = 0x80000000;
+
         /**
          * Mask for {@link #softInputMode} of the bits that determine the
          * desired visibility state of the soft input area for this window.
@@ -1007,6 +1045,8 @@ module
         /** {@hide} */
         const Int32 PREFERRED_REFRESH_RATE_CHANGED = 1 << 21;
         /** {@hide} */
+        const Int32 BLUR_MASK_ALPHA_THRESHOLD_CHANGED = 1 << 30;
+        /** {@hide} */
         const Int32 EVERYTHING_CHANGED = 0xffffffff;
 
 
@@ -1190,6 +1230,12 @@ module
 
         SetUserActivityTimeout(
             [in] Int32 userActivityTimeout);
+
+        GetBlurMaskAlphaThreshold(
+            [out] Float* blurMaskAlphaThreshold);
+
+        SetBlurMaskAlphaThreshold(
+            [in] Float blurMaskAlphaThreshold);
     }
 
     interface IWindowManagerLayoutParamsHelper {

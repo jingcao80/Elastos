@@ -91,6 +91,9 @@ public:
     CARAPI constructor(
         /* [in] */ Int64 nativeObject);
 
+    CARAPI SetDirtyRect(
+        /* [in] */ IRect* dirty);
+
     CARAPI ReleaseSurface();
 
     CARAPI Destroy();
@@ -205,6 +208,9 @@ private:
 
     CARAPI NativeWriteToParcel(
         /* [in] */ IParcel* dest);
+
+    CARAPI NativeSetDirtyRect(
+        /* [in] */ IRect* dirty);
 
     CARAPI_(void) NativeAllocateBuffers();
 

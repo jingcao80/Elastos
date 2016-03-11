@@ -1938,14 +1938,14 @@ ECode LinearLayout::GenerateDefaultLayoutParams(
         CLinearLayoutLayoutParams::New(
             IViewGroupLayoutParams::WRAP_CONTENT,
             IViewGroupLayoutParams::WRAP_CONTENT,
-            (ILinearLayoutLayoutParams**)lp);
+            lp);
         return NOERROR;
     }
     else if (mOrientation == ILinearLayout::VERTICAL) {
         CLinearLayoutLayoutParams::New(
             IViewGroupLayoutParams::MATCH_PARENT,
             IViewGroupLayoutParams::WRAP_CONTENT,
-            (ILinearLayoutLayoutParams**)lp);
+            lp);
         return NOERROR;
     }
     return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1957,7 +1957,7 @@ AutoPtr<IViewGroupLayoutParams> LinearLayout::GenerateLayoutParams(
     assert(p);
     AutoPtr<IViewGroupLayoutParams> params;
     ASSERT_SUCCEEDED(CLinearLayoutLayoutParams::New(p,
-        (ILinearLayoutLayoutParams**)&params));
+        (IViewGroupLayoutParams**)&params));
     return params;
 }
 

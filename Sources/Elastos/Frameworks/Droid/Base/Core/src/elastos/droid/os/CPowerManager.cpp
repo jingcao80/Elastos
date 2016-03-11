@@ -3,11 +3,14 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/os/CPowerManager.h"
 #include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Utility::Logging::Slogger;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Content::IComponentName;
 
 namespace Elastos {
 namespace Droid {
@@ -221,6 +224,154 @@ ECode CPowerManager::constructor(
     mService = service;
     mHandler = handler;
     return NOERROR;
+}
+
+
+ECode CPowerManager::CpuBoost(
+    /* [in] */ Int32 duration)
+{
+    // try {
+    if (mService != NULL) {
+        return mService->CpuBoost(duration);
+    }
+    // } catch (RemoteException e) {
+    // }
+    return NOERROR;
+}
+
+ECode CPowerManager::HasPowerProfiles(
+    /* [out] */ Boolean* result)
+{
+    String defaultProfile, profile;
+    GetDefaultPowerProfile(&defaultProfile);
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+
+    // res->GetString(R::string::config_perf_profile_prop, &profile);
+    *result = !TextUtils::IsEmpty(defaultProfile) &&
+           !TextUtils::IsEmpty(profile);
+    return NOERROR;
+}
+
+ECode CPowerManager::GetDefaultPowerProfile(
+    /* [out] */ String* profile)
+{
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+
+    // res->GetString(R::string::config_perf_profile_default_entry, profile);
+    return NOERROR;
+}
+
+ECode CPowerManager::SetPowerProfile(
+    /* [in] */ const String&  profile,
+    /* [out] */ Boolean* result)
+{
+    *result = FALSE;
+    Boolean hasProfiles;
+    if (HasPowerProfiles(&hasProfiles), !hasProfiles) {
+        SLOGGERE("CPowerManager", "Power profiles not enabled on this system!")
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    // try {
+    if (mService != NULL) {
+        if (FAILED(mService->SetPowerProfile(profile, result))) {
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
+    }
+    // } catch (RemoteException e) {
+        // throw new IllegalArgumentException(e);
+    // }
+    return NOERROR;
+}
+
+ECode CPowerManager::GetPowerProfile(
+    /* [out] */ String* result)
+{
+    *result = NULL;
+    Boolean hasProfiles;
+    if (HasPowerProfiles(&hasProfiles), hasProfiles) {
+        // try {
+        if (mService != NULL) {
+            return mService->GetPowerProfile(result);
+        }
+        // } catch (RemoteException e) {
+            // nothing
+        // }
+    }
+    return NOERROR;
+}
+
+ECode CPowerManager::ActivityResumed(
+    /* [in] */ IIntent* intent)
+{
+    Boolean hasProfiles;
+    if (HasPowerProfiles(&hasProfiles), hasProfiles) {
+        // try {
+        if (intent != NULL && mService != NULL) {
+            AutoPtr<IComponentName> cn;
+            intent->GetComponent((IComponentName**)&cn);
+            if (cn != NULL) {
+                String cnStr;
+                cn->FlattenToString(&cnStr);
+                return mService->ActivityResumed(cnStr);
+            }
+        }
+        // } catch (RemoteException e) {
+            // nothing
+        // }
+    }
+    return NOERROR;
+}
+
+ECode CPowerManager::SetKeyboardVisibility(
+    /* [in] */ Boolean visible)
+{
+    // try {
+    if (mService != NULL) {
+        return mService->SetKeyboardVisibility(visible);
+    }
+    // } catch (RemoteException e) {
+    // }
+    return NOERROR;
+}
+
+ECode CPowerManager::SetKeyboardLight(
+    /* [in] */ Boolean on,
+    /* [in] */ Int32 key)
+{
+    // try {
+    return mService->SetKeyboardLight(on, key);
+    // } catch (RemoteException e) {
+    // }
+}
+
+ECode CPowerManager::GetDefaultButtonBrightness(
+    /* [out] */ Int32* result)
+{
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    // return res->GetInteger(R::integer::config_buttonBrightnessSettingDefault, result);
+    return NOERROR;
+}
+
+ECode CPowerManager::GetDefaultKeyboardBrightness(
+    /* [out] */ Int32* result)
+{
+    AutoPtr<IResources> res;
+    mContext->GetResources((IResources**)&res);
+    // return res->GetInteger(R::integer::config_keyboardBrightnessSettingDefault, result);
+    return NOERROR;
+}
+
+ECode CPowerManager::WakeUpWithProximityCheck(
+        /* [in] */ Int64 time)
+{
+    // try {
+    return mService->WakeUpWithProximityCheck(time);
+    // } catch (RemoteException e) {
+    // }
 }
 
 } // namespace Os

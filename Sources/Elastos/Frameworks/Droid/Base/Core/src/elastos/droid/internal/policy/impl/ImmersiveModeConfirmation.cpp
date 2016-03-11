@@ -10,7 +10,7 @@
 #include "elastos/droid/utility/CDisplayMetrics.h"
 #include "elastos/droid/utility/CSparseBooleanArray.h"
 #include "elastos/droid/view/CWindowManagerLayoutParams.h"
-//TODO #include "elastos/droid/view/CViewHelper.h"
+#include "elastos/droid/view/View.h"
 #include "elastos/droid/view/animation/CDecelerateInterpolator.h"
 #include "elastos/droid/view/animation/CAnimationUtils.h"
 #include "elastos/droid/widget/CFrameLayoutLayoutParams.h"
@@ -50,8 +50,8 @@ using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::IViewHelper;
 using Elastos::Droid::View::IViewManager;
-//TODO using Elastos::Droid::View::CViewHelper;
 using Elastos::Droid::View::IViewPropertyAnimator;
+using Elastos::Droid::View::View;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
 using Elastos::Core::CString;
@@ -71,7 +71,6 @@ namespace Impl {
 //=====================================================================
 const Int32 ImmersiveModeConfirmation::H::SHOW;
 const Int32 ImmersiveModeConfirmation::H::HIDE;
-const Int32 ImmersiveModeConfirmation::H::PANIC;
 
 ImmersiveModeConfirmation::H::H(
     /* [in] */ ImmersiveModeConfirmation* owner)
@@ -92,9 +91,6 @@ ECode ImmersiveModeConfirmation::H::HandleMessage(
             break;
         case HIDE:
             mOwner->HandleHide();
-            break;
-        case PANIC:
-            mOwner->HandlePanic();
             break;
     }
     return NOERROR;
@@ -227,12 +223,10 @@ ECode ImmersiveModeConfirmation::ClingWindowView::OnAttachedToWindow()
     metrics->GetDensity(&density);
 
     // create the confirmation cling
-    AutoPtr<IViewHelper> viewHelper;
-    //TODO CViewHelper::AcquireSingleton((IViewHelper**)&viewHelper);
     AutoPtr<IView> view;
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    viewHelper->Inflate(context, R::layout::immersive_mode_cling, NULL, (IView**)&view);
+    View::Inflate(context, R::layout::immersive_mode_cling, NULL, (IView**)&view);
     mClingLayout = IViewGroup::Probe(view);
 
     AutoPtr<IButton> ok;
@@ -359,7 +353,6 @@ ECode ImmersiveModeConfirmation::constructor(
     mContext = context;
     mHandler = new H(this);
     mConfirm = new InnerRunnable1(this);
-    CSparseBooleanArray::New((ISparseBooleanArray**)&mUserPanicResets);
     mShowDelayMs = GetNavBarExitDuration() * 3;
     AutoPtr<IInterface> iService;
     mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&iService);
@@ -372,9 +365,6 @@ ECode ImmersiveModeConfirmation::LoadSetting(
 {
     mConfirmed = FALSE;
     mCurrentUserId = currentUserId;
-    Boolean val;
-    mUserPanicResets->Get(mCurrentUserId, FALSE, &val);
-    if (DEBUG) Slogger::D(TAG, "loadSetting() mCurrentUserId=%d resetForPanic=%d", mCurrentUserId, val);
     String value(NULL);
     //try {
     AutoPtr<IContentResolver> cResolver;
@@ -502,17 +492,6 @@ void ImmersiveModeConfirmation::SaveSetting()
     //} catch (Throwable t) {
     //    Slog.w(TAG, "Error saving confirmations, mConfirmed=" + mConfirmed, t);
     //}
-}
-
-void ImmersiveModeConfirmation::HandlePanic()
-{
-    if (DEBUG) Slogger::D(TAG, "handlePanic()");
-    Boolean val;
-    mUserPanicResets->Get(mCurrentUserId, FALSE, &val);
-    if (val) return;  // already reset for panic
-    mUserPanicResets->Put(mCurrentUserId, TRUE);
-    mConfirmed = FALSE;
-    SaveSetting();
 }
 
 void ImmersiveModeConfirmation::HandleHide()

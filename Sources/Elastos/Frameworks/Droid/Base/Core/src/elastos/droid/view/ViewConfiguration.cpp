@@ -7,7 +7,7 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/view/ViewConfiguration.h"
 #include "elastos/droid/view/CViewConfiguration.h"
-// #include "elastos/droid/view/CWindowManagerGlobal.h"
+#include "elastos/droid/view/CWindowManagerGlobal.h"
 #include "elastos/droid/graphics/CPoint.h"
 #include "elastos/droid/utility/CDisplayMetrics.h"
 #include "elastos/droid/R.h"
@@ -162,16 +162,15 @@ ECode ViewConfiguration::constructor(
         switch (configVal) {
             default:
             case HAS_PERMANENT_MENU_KEY_AUTODETECT: {
-                assert (0 && "TODO");
-                // AutoPtr<IIWindowManager> wm = CWindowManagerGlobal::GetWindowManagerService();
-                // Boolean hasNavigationBar;
-                // if (FAILED(wm->HasNavigationBar(&hasNavigationBar))) {
-                //     sHasPermanentMenuKey = FALSE;
-                // }
-                // else {
-                //     sHasPermanentMenuKey = !hasNavigationBar;
-                //     sHasPermanentMenuKeySet = TRUE;
-                // }
+                AutoPtr<IIWindowManager> wm = CWindowManagerGlobal::GetWindowManagerService();
+                Boolean hasNavigationBar;
+                if (FAILED(wm->HasNavigationBar(&hasNavigationBar))) {
+                    sHasPermanentMenuKey = FALSE;
+                }
+                else {
+                    sHasPermanentMenuKey = !hasNavigationBar;
+                    sHasPermanentMenuKeySet = TRUE;
+                }
             }
             break;
 

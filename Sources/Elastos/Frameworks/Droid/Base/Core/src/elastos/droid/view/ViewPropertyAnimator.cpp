@@ -469,7 +469,7 @@ ECode ViewPropertyAnimator::GetInterpolator(
         if (NULL == mTempValueAnimator) {
             CValueAnimator::New((IValueAnimator**)&mTempValueAnimator);
         }
-        mTempValueAnimator->GetInterpolator((ITimeInterpolator**)result);
+        mTempValueAnimator->GetInterpolator(result);
     }
     return NOERROR;
 }

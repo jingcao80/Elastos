@@ -55,7 +55,7 @@ ECode CRegion::constructor(
 }
 
 ECode CRegion::constructor(
-    /* [in] */ Int64 ni)
+    /* [in] */ Handle64 ni)
 {
     if (ni == 0) {
         //throw new RuntimeException();
@@ -67,7 +67,7 @@ ECode CRegion::constructor(
 }
 
 ECode CRegion::constructor(
-    /* [in] */ Int64 ni,
+    /* [in] */ Handle64 ni,
     /* [in] */ Int32 dummy)
 {
     return constructor(ni);
@@ -481,11 +481,11 @@ ECode CRegion::Recycle()
 }
 
 ECode CRegion::GetNativeRegion(
-    /* [out] */ Handle32* region)
+    /* [out] */ Handle64* region)
 {
     VALIDATE_NOT_NULL(region);
 
-    *region = (Handle32)mNativeRegion;
+    *region = mNativeRegion;
      return NOERROR;
 }
 
@@ -507,27 +507,27 @@ ECode CRegion::WriteToParcel(
     return NOERROR;
 }
 
-Int64 CRegion::Ni()
+Handle64 CRegion::Ni()
 {
     return mNativeRegion;
 }
 
 Boolean CRegion::NativeEquals(
-    /* [in] */ Int64 region1,
-    /* [in] */ Int64 region2)
+    /* [in] */ Handle64 region1,
+    /* [in] */ Handle64 region2)
 {
     const SkRegion *r1 = reinterpret_cast<SkRegion*>(region1);
     const SkRegion *r2 = reinterpret_cast<SkRegion*>(region2);
     return (*r1 == *r2);
 }
 
-Int64 CRegion::NativeConstructor()
+Handle64 CRegion::NativeConstructor()
 {
-    return reinterpret_cast<Int64>(new SkRegion);
+    return reinterpret_cast<Handle64>(new SkRegion);
 }
 
 void CRegion::NativeDestructor(
-    /* [in] */ Int64 regionHandle)
+    /* [in] */ Handle64 regionHandle)
 {
     SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
     SkASSERT(region);
@@ -535,8 +535,8 @@ void CRegion::NativeDestructor(
 }
 
 void CRegion::NativeSetRegion(
-    /* [in] */ Int64 dstHandle,
-    /* [in] */ Int64 srcHandle)
+    /* [in] */ Handle64 dstHandle,
+    /* [in] */ Handle64 srcHandle)
 {
     SkRegion* dst = reinterpret_cast<SkRegion*>(dstHandle);
     const SkRegion* src = reinterpret_cast<SkRegion*>(srcHandle);
@@ -545,7 +545,7 @@ void CRegion::NativeSetRegion(
 }
 
 Boolean CRegion::NativeSetRect(
-    /* [in] */ Int64 dstHandle,
+    /* [in] */ Handle64 dstHandle,
     /* [in] */ Int32 left,
     /* [in] */ Int32 top,
     /* [in] */ Int32 right,
@@ -557,9 +557,9 @@ Boolean CRegion::NativeSetRect(
 }
 
 Boolean CRegion::NativeSetPath(
-    /* [in] */ Int64 dstHandle,
-    /* [in] */ Int64 pathHandle,
-    /* [in] */ Int64 clipHandle)
+    /* [in] */ Handle64 dstHandle,
+    /* [in] */ Handle64 pathHandle,
+    /* [in] */ Handle64 clipHandle)
 {
     SkRegion*       dst  = reinterpret_cast<SkRegion*>(dstHandle);
     const SkPath*   path = reinterpret_cast<SkPath*>(pathHandle);
@@ -570,7 +570,7 @@ Boolean CRegion::NativeSetPath(
 }
 
 Boolean CRegion::NativeGetBounds(
-    /* [in] */ Int64 regionHandle,
+    /* [in] */ Handle64 regionHandle,
     /* [out] */ IRect* rectBounds)
 {
     SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
@@ -580,8 +580,8 @@ Boolean CRegion::NativeGetBounds(
 }
 
 Boolean CRegion::NativeGetBoundaryPath(
-    /* [in] */ Int64 regionHandle,
-    /* [out] */ Int64 pathHandle)
+    /* [in] */ Handle64 regionHandle,
+    /* [out] */ Handle64 pathHandle)
 {
     const SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
     SkPath*   path = reinterpret_cast<SkPath*>(pathHandle);
@@ -590,7 +590,7 @@ Boolean CRegion::NativeGetBoundaryPath(
 }
 
 Boolean CRegion::NativeOp(
-    /* [in] */ Int64 dstHandle,
+    /* [in] */ Handle64 dstHandle,
     /* [in] */ Int32 left,
     /* [in] */ Int32 top,
     /* [in] */ Int32 right,
@@ -606,9 +606,9 @@ Boolean CRegion::NativeOp(
 }
 
 Boolean CRegion::NativeOp(
-    /* [in] */ Int64 dstHandle,
+    /* [in] */ Handle64 dstHandle,
     /* [in] */ IRect* rect,
-    /* [in] */ Int64 regionHandle,
+    /* [in] */ Handle64 regionHandle,
     /* [in] */ RegionOp op)
 {
     SkRegion* dst = reinterpret_cast<SkRegion*>(dstHandle);
@@ -620,9 +620,9 @@ Boolean CRegion::NativeOp(
 }
 
 Boolean CRegion::NativeOp(
-    /* [in] */ Int64 dstHandle,
-    /* [in] */ Int64 region1Handle,
-    /* [in] */ Int64 region2Handle,
+    /* [in] */ Handle64 dstHandle,
+    /* [in] */ Handle64 region1Handle,
+    /* [in] */ Handle64 region2Handle,
     /* [in] */ RegionOp op)
 {
     SkRegion* dst = reinterpret_cast<SkRegion*>(dstHandle);
@@ -632,7 +632,7 @@ Boolean CRegion::NativeOp(
     return result;
 }
 
-Int64 CRegion::NativeCreateFromParcel(
+Handle64 CRegion::NativeCreateFromParcel(
     /* [in] */ IParcel* parcel)
 {
     if (parcel == NULL) {
@@ -646,11 +646,11 @@ Int64 CRegion::NativeCreateFromParcel(
     size_t size = p->readInt32();
     region->readFromMemory(p->readInplace(size), size);
 
-    return reinterpret_cast<Int64>(region);
+    return reinterpret_cast<Handle64>(region);
 }
 
 Boolean CRegion::NativeWriteToParcel(
-    /* [in] */ Int64 regionHandle,
+    /* [in] */ Handle64 regionHandle,
     /* [out] */ IParcel* parcel)
 {
     const SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
@@ -669,7 +669,7 @@ Boolean CRegion::NativeWriteToParcel(
 }
 
 String CRegion::NativeToString(
-    /* [in] */ Int64 regionHandle)
+    /* [in] */ Handle64 regionHandle)
 {
     SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
     char* str = region->toString();

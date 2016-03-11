@@ -34,7 +34,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class MediaController
+class ECO_PUBLIC MediaController
     : public FrameLayout
     , public IMediaController
 {

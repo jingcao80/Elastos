@@ -26,6 +26,7 @@ using Elastos::Droid::Content::Pm::EIID_IApplicationInfo;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
 using Elastos::Droid::Content::Pm::CApplicationInfo;
 using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::IPixelFormat;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Utility::MathUtils;
@@ -60,7 +61,7 @@ namespace Widget {
 const Int32 ListView::NO_POSITION = -1;
 const Float ListView::MAX_SCROLL_FACTOR = 0.33f;
 const Int32 ListView::MIN_SCROLL_PREVIEW_PIXELS = 2;
-const String ListView::LISTVIEW_NAME = String("ListView");
+const String ListView::LISTVIEW_NAME("ListView");
 
 //==============================================================================
 //            ListView::FixedViewInfo
@@ -188,7 +189,7 @@ ListView::ListView()
     , mAreAllItemsSelectable(TRUE)
     , mItemsCanFocus(FALSE)
 {
-    ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTempRect));
+    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTempRect));
     mArrowScrollFocusResult = new ArrowScrollFocusResult();
 }
 
@@ -312,7 +313,10 @@ void ListView::AdjustViewsUpOrDown()
             GetChildAt(0, (IView**)&child);
             Int32 top;
             child->GetTop(&top);
-            delta = top - mListPadding->mTop;
+
+            Int32 topTmp = 0;
+            mListPadding->GetTop(&topTmp);
+            delta = top - topTmp;
             if (mFirstPosition != 0) {
                 delta -= mDividerHeight;
             }
@@ -326,7 +330,10 @@ void ListView::AdjustViewsUpOrDown()
             child->GetBottom(&bottom);
             Int32 height;
             GetHeight(&height);
-            delta = bottom - (height - mListPadding->mBottom);
+
+            Int32 bottomTmp = 0;
+            mListPadding->GetBottom(&bottomTmp);
+            delta = bottom - (height - bottomTmp);
 
             if (mFirstPosition + childCount < mItemCount) {
                 delta += mDividerHeight;
@@ -621,7 +628,9 @@ void ListView::ClearRecycledState(
 
 Boolean ListView::ShowingTopFadingEdge()
 {
-    Int32 listTop = mScrollY + mListPadding->mTop;
+    Int32 topTmp = 0;
+    mListPadding->GetTop(&topTmp);
+    Int32 listTop = mScrollY + topTmp;
     Int32 top;
     AutoPtr<IView> view;
     GetChildAt(0, (IView**)&view);
@@ -640,7 +649,10 @@ Boolean ListView::ShowingBottomFadingEdge()
     Int32 lastVisiblePosition = mFirstPosition + childCount - 1;
     Int32 height;
     GetHeight(&height);
-    Int32 listBottom = mScrollY + height - mListPadding->mBottom;
+
+    Int32 bottomTmp = 0;
+    mListPadding->GetBottom(&bottomTmp);
+    Int32 listBottom = mScrollY + height - bottomTmp;
 
     return (lastVisiblePosition < mItemCount - 1) || (bottomOfBottomChild < listBottom);
 }
@@ -789,12 +801,16 @@ AutoPtr<IView> ListView::FillDown(
 {
     AutoPtr<IView> selectedView;
     Int32 end = mBottom - mTop;
+
+    Int32 leftTmp = 0, bottomTmp = 0;
+    mListPadding->GetLeft(&leftTmp);
+    mListPadding->GetBottom(&bottomTmp);
     if ((mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK) {
-        end -= mListPadding->mBottom;
+        end -= bottomTmp;
     }
     while(nextTop < end && pos < mItemCount) {
         Boolean selected = pos == mSelectedPosition;
-        AutoPtr<IView> child = MakeAndAddView(pos , nextTop, TRUE, mListPadding->mLeft, selected);
+        AutoPtr<IView> child = MakeAndAddView(pos , nextTop, TRUE, leftTmp, selected);
         child->GetBottom(&nextTop);
         nextTop += mDividerHeight;
         if (selected) {
@@ -815,13 +831,17 @@ AutoPtr<IView> ListView::FillUp(
     AutoPtr<IView> selectedView = NULL;
 
     Int32 end = 0;
+
+    Int32 leftTmp = 0, topTmp = 0;
+    mListPadding->GetLeft(&leftTmp);
+    mListPadding->GetTop(&topTmp);
     if ((mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK) {
-        end = mListPadding->mTop;
+        end = topTmp;
     }
 
     while(nextBottom > end && pos >= 0) {
         Boolean selected = pos == mSelectedPosition;
-        AutoPtr<IView> child = MakeAndAddView(pos , nextBottom, FALSE, mListPadding->mLeft, selected);
+        AutoPtr<IView> child = MakeAndAddView(pos , nextBottom, FALSE, leftTmp, selected);
         child->GetTop(&nextBottom);
         nextBottom -= mDividerHeight;
         if (selected) {
@@ -853,7 +873,10 @@ AutoPtr<IView> ListView::FillFromMiddle(
 {
     Int32 height = childrenBottom - childrenTop;
     Int32 position = ReconcileSelectedPosition();
-    AutoPtr<IView> sel = MakeAndAddView(position, childrenTop, TRUE, mListPadding->mLeft, TRUE);
+
+    Int32 leftTmp = 0;
+    mListPadding->GetLeft(&leftTmp);
+    AutoPtr<IView> sel = MakeAndAddView(position, childrenTop, TRUE, leftTmp, TRUE);
     mFirstPosition = position;
     Int32 selHeight;
     sel->GetMeasuredHeight(&selHeight);
@@ -905,7 +928,10 @@ AutoPtr<IView> ListView::FillFromSelection(
     AutoPtr<IView> sel = NULL;
     Int32 topSelectionPixel = GetTopSelectionPixel(childrenTop, fadingEdgeLength, selectedPosition);
     Int32 bottomSelectionPixel = GetBottomSelectionPixel(childrenBottom, fadingEdgeLength, selectedPosition);
-    sel = MakeAndAddView(selectedPosition, selectedTop, TRUE, mListPadding->mLeft, TRUE);
+
+    Int32 leftTmp = 0;
+    mListPadding->GetLeft(&leftTmp);
+    sel = MakeAndAddView(selectedPosition, selectedTop, TRUE, leftTmp, TRUE);
     Int32 top, bottom;
     sel->GetTop(&top);
     sel->GetBottom(&bottom);
@@ -992,10 +1018,14 @@ AutoPtr<IView> ListView::MoveSelection(
     sel->GetBottom(&selBottom);
     newSel->GetTop(&newTop);
     newSel->GetBottom(&newBottom);
+
+    Int32 leftTmp = 0;
+    mListPadding->GetLeft(&leftTmp);
+
     if (delta > 0) {
-        oldSel = MakeAndAddView(selectedPosition - 1, oldTop, TRUE, mListPadding->mLeft, FALSE);
+        oldSel = MakeAndAddView(selectedPosition - 1, oldTop, TRUE, leftTmp, FALSE);
         Int32 dividerHeight = mDividerHeight;
-        sel = MakeAndAddView(selectedPosition, oldBottom + dividerHeight, TRUE, mListPadding->mLeft, TRUE);
+        sel = MakeAndAddView(selectedPosition, oldBottom + dividerHeight, TRUE, leftTmp, TRUE);
         if (selBottom > bottomSelectionPixel) {
             Int32 spaceAbove, spaceBelow;
             sel->GetTop(&spaceAbove);
@@ -1022,10 +1052,10 @@ AutoPtr<IView> ListView::MoveSelection(
     }
     else if (delta < 0) {
         if (newSel != NULL) {
-            sel = MakeAndAddView(selectedPosition, newTop, TRUE, mListPadding->mLeft, TRUE);
+            sel = MakeAndAddView(selectedPosition, newTop, TRUE, leftTmp, TRUE);
         }
         else {
-            sel = MakeAndAddView(selectedPosition, oldTop, FALSE, mListPadding->mLeft, TRUE);
+            sel = MakeAndAddView(selectedPosition, oldTop, FALSE, leftTmp, TRUE);
         }
         if (selTop < topSelectionPixel) {
             Int32 spaceAbove = topSelectionPixel - selTop;
@@ -1038,7 +1068,7 @@ AutoPtr<IView> ListView::MoveSelection(
         FillAboveAndBelow(sel, selectedPosition);
     }
     else {
-        sel = MakeAndAddView(selectedPosition, oldTop, TRUE, mListPadding->mLeft, TRUE);
+        sel = MakeAndAddView(selectedPosition, oldTop, TRUE, leftTmp, TRUE);
         if (oldTop < childrenTop) {
             if (selBottom < childrenTop + 20) {
                 sel->OffsetTopAndBottom(childrenTop - selTop);
@@ -1119,10 +1149,16 @@ void ListView::OnMeasure(
         }
     }
 
+    Int32 leftTmp = 0, topTmp = 0, rightTmp = 0, bottomTmp = 0;
+    mListPadding->GetLeft(&leftTmp);
+    mListPadding->GetTop(&topTmp);
+    mListPadding->GetRight(&rightTmp);
+    mListPadding->GetBottom(&bottomTmp);
+
     if (widthMode == View::MeasureSpec::UNSPECIFIED) {
         Int32 width;
         GetVerticalScrollbarWidth(&width);
-        widthSize = mListPadding->mLeft + mListPadding->mRight + childWidth + width;
+        widthSize = leftTmp + rightTmp + childWidth + width;
     }
     else {
         widthSize |= (childState & IView::MEASURED_STATE_MASK);
@@ -1131,7 +1167,7 @@ void ListView::OnMeasure(
     if (heightMode == View::MeasureSpec::UNSPECIFIED) {
         Int32 length;
         GetVerticalFadingEdgeLength(&length);
-        heightSize = mListPadding->mTop + mListPadding->mBottom + childHeight + length * 2;
+        heightSize = topTmp + bottomTmp + childHeight + length * 2;
     }
 
     if (heightMode == View::MeasureSpec::AT_MOST) {
@@ -1169,7 +1205,7 @@ void ListView::MeasureScrapChild(
     Int32 pWidth;
     IViewGroupLayoutParams::Probe(p)->GetWidth(&pWidth);
     Int32 childWidthSpec = ViewGroup::GetChildMeasureSpec(widthMeasureSpec,
-            mListPadding->mLeft + mListPadding->mRight, pWidth);
+            ((CRect*)mListPadding.Get())->mLeft + ((CRect*)mListPadding.Get())->mRight, pWidth);
 
     Int32 lpHeight;
     IViewGroupLayoutParams::Probe(p)->GetHeight(&lpHeight);
@@ -1197,9 +1233,9 @@ Int32 ListView::MeasureHeightOfChildren(
 {
     AutoPtr<IListAdapter> adapter = mAdapter;
     if (adapter == NULL) {
-        return mListPadding->mTop + mListPadding->mBottom;
+        return ((CRect*)mListPadding.Get())->mTop + ((CRect*)mListPadding.Get())->mBottom;
     }
-    Int32 returnedHeight = mListPadding->mTop + mListPadding->mBottom;
+    Int32 returnedHeight = ((CRect*)mListPadding.Get())->mTop + ((CRect*)mListPadding.Get())->mBottom;
     Int32 dividerHeight;
     if ((mDividerHeight > 0) && mDivider != NULL) {
         dividerHeight = mDividerHeight;
@@ -1282,7 +1318,7 @@ AutoPtr<IView> ListView::FillSpecific(
     /* [in] */ Int32 top)
 {
     Boolean tempIsSelected = position == mSelectedPosition;
-    AutoPtr<IView> temp = MakeAndAddView(position, top, TRUE, mListPadding->mLeft, tempIsSelected);
+    AutoPtr<IView> temp = MakeAndAddView(position, top, TRUE, ((CRect*)mListPadding.Get())->mLeft, tempIsSelected);
     mFirstPosition = position;
 
     AutoPtr<IView> above;
@@ -1332,16 +1368,16 @@ void ListView::CorrectTooHigh(
         GetChildAt(childCount - 1, (IView**)&lastChild);
         Int32 lastBottom;
         lastChild->GetBottom(&lastBottom);
-        Int32 end = (mBottom - mTop) - mListPadding->mBottom;
+        Int32 end = (mBottom - mTop) - ((CRect*)mListPadding.Get())->mBottom;
         Int32 bottomOffSet = end - lastBottom;
         AutoPtr<IView> firstChild;
         GetChildAt(0, (IView**)&firstChild);
         Int32 firstTop;
         firstChild->GetTop(&firstTop);
 
-        if (bottomOffSet > 0 && (mFirstPosition > 0 || firstTop < mListPadding->mTop)) {
+        if (bottomOffSet > 0 && (mFirstPosition > 0 || firstTop < ((CRect*)mListPadding.Get())->mTop)) {
             if (mFirstPosition == 0) {
-                bottomOffSet = Elastos::Core::Math::Min(bottomOffSet, mListPadding->mTop - firstTop);
+                bottomOffSet = Elastos::Core::Math::Min(bottomOffSet, ((CRect*)mListPadding.Get())->mTop - firstTop);
             }
 
             OffsetChildrenTopAndBottom(bottomOffSet);
@@ -1363,8 +1399,8 @@ void ListView::CorrectTooLow(
         GetChildAt(0, (IView**)&firstChild);
         Int32 firstTop;
         firstChild->GetTop(&firstTop);
-        Int32 end = (mBottom - mTop) - mListPadding->mBottom;
-        Int32 topOffSet = firstTop - mListPadding->mTop;
+        Int32 end = (mBottom - mTop) - ((CRect*)mListPadding.Get())->mBottom;
+        Int32 topOffSet = firstTop - ((CRect*)mListPadding.Get())->mTop;
         AutoPtr<IView> lastChild;
         GetChildAt(childCount - 1, (IView**)&lastChild);
         Int32 lastBottom;
@@ -1409,8 +1445,8 @@ ECode ListView::LayoutChildren()
         return NOERROR;
     }
 
-    const Int32 childrenTop = mListPadding->mTop;
-    const Int32 childrenBottom = mBottom - mTop - mListPadding->mBottom;
+    const Int32 childrenTop = ((CRect*)mListPadding.Get())->mTop;
+    const Int32 childrenBottom = mBottom - mTop - ((CRect*)mListPadding.Get())->mBottom;
     Int32 childCount;
     GetChildCount(&childCount);
 
@@ -1876,7 +1912,7 @@ void ListView::SetupChild(
 
     if (needToMeasure) {
         Int32 childWidthSpec = ViewGroup::GetChildMeasureSpec(mWidthMeasureSpec,
-                mListPadding->mLeft + mListPadding->mRight, cp->mWidth);
+                ((CRect*)mListPadding.Get())->mLeft + ((CRect*)mListPadding.Get())->mRight, cp->mWidth);
         Int32 childHeightSpec = 0;
         if (cp->mHeight > 0) {
             childHeightSpec = View::MeasureSpec::MakeMeasureSpec(cp->mHeight,
@@ -2417,7 +2453,7 @@ ECode ListView::HandleHorizontalFocusWithinListItem(
             FocusFinder::GetInstance()->FindNextFocus(
                     theView, currentFocus, direction, (IView**)&nextFocus);
             if (nextFocus != NULL) {
-                currentFocus->GetFocusedRect((IRect*)mTempRect);
+                currentFocus->GetFocusedRect(mTempRect);
                 OffsetDescendantRectToMyCoords(currentFocus, mTempRect);
                 OffsetRectIntoDescendantCoords(nextFocus, mTempRect);
                 Boolean res = FALSE;
@@ -2468,7 +2504,7 @@ Int32 ListView::NextSelectedPositionForDirection(
     if (direction == IView::FOCUS_DOWN) {
         Int32 height;
         GetHeight(&height);
-        const Int32 listBottom = height - mListPadding->mBottom;
+        const Int32 listBottom = height - ((CRect*)mListPadding.Get())->mBottom;
         Int32 bottom;
         selectedView->GetBottom(&bottom);
         if (selectedView != NULL && bottom <= listBottom) {
@@ -2480,7 +2516,7 @@ Int32 ListView::NextSelectedPositionForDirection(
         }
     }
     else {
-        const Int32 listTop = mListPadding->mTop;
+        const Int32 listTop = ((CRect*)mListPadding.Get())->mTop;
         Int32 top;
         selectedView->GetTop(&top);
         if (selectedView != NULL && top >= listTop) {
@@ -2664,7 +2700,7 @@ void ListView::MeasureItem(
     Int32 width;
     p->GetWidth(&width);
     Int32 childWidthSpec = ViewGroup::GetChildMeasureSpec(mWidthMeasureSpec,
-            mListPadding->mLeft + mListPadding->mRight, width);
+            ((CRect*)mListPadding.Get())->mLeft + ((CRect*)mListPadding.Get())->mRight, width);
     Int32 height;
     p->GetHeight(&height);
     Int32 childHeightSpec;
@@ -2684,7 +2720,7 @@ void ListView::RelayoutMeasuredItem(
     child->GetMeasuredWidth(&w);
     Int32 h;
     child->GetMeasuredHeight(&h);
-    Int32 childLetf = mListPadding->mLeft;
+    Int32 childLetf = ((CRect*)mListPadding.Get())->mLeft;
     Int32 childRight = childLetf + w;
     Int32 childTop;
     child->GetTop(&childTop);
@@ -2705,8 +2741,8 @@ Int32 ListView::AmountToScroll(
 {
     Int32 height;
     GetHeight(&height);
-    Int32 listBottom = height - mListPadding->mBottom;
-    Int32 listTop = mListPadding->mTop;
+    Int32 listBottom = height - ((CRect*)mListPadding.Get())->mBottom;
+    Int32 listTop = ((CRect*)mListPadding.Get())->mTop;
 
     Int32 numChildren;
     GetChildCount(&numChildren);
@@ -2889,7 +2925,7 @@ AutoPtr<ListView::ArrowScrollFocusResult> ListView::ArrowScrollFocused(
     else {
         if (direction == IView::FOCUS_DOWN) {
             Boolean topFadingEdgeShowing = (mFirstPosition > 0);
-            Int32 listTop = mListPadding->mTop +
+            Int32 listTop = ((CRect*)mListPadding.Get())->mTop +
                     (topFadingEdgeShowing ? GetArrowScrollPreviewLength() : 0);
             Int32 selectedViewTop = 0;
             selectedView->GetTop(&selectedViewTop);
@@ -2903,7 +2939,7 @@ AutoPtr<ListView::ArrowScrollFocusResult> ListView::ArrowScrollFocused(
             Boolean bottomFadingEdgeShowing = (mFirstPosition + childCount - 1) < mItemCount;
             Int32 height;
             GetHeight(&height);
-            Int32 listBottom = height - mListPadding->mBottom -
+            Int32 listBottom = height - ((CRect*)mListPadding.Get())->mBottom -
                     (bottomFadingEdgeShowing ? GetArrowScrollPreviewLength() : 0);
             Int32 selectedViewBottom = 0;
             selectedView->GetBottom(&selectedViewBottom);
@@ -2992,8 +3028,10 @@ Int32 ListView::AmountToScrollToNewFocus(
     newFocus->GetDrawingRect(mTempRect);
     OffsetDescendantRectToMyCoords(newFocus, mTempRect);
     if (direction == IView::FOCUS_UP) {
-        if (mTempRect->mTop < mListPadding->mTop) {
-            amountToScroll = mListPadding->mTop - mTempRect->mTop;
+        Int32 top = 0;
+        mTempRect->GetTop(&top);
+        if (top < ((CRect*)mListPadding.Get())->mTop) {
+            amountToScroll = ((CRect*)mListPadding.Get())->mTop - top;
             if (positionOfNewFocus > 0) {
                 amountToScroll += GetArrowScrollPreviewLength();
             }
@@ -3002,9 +3040,11 @@ Int32 ListView::AmountToScrollToNewFocus(
     else {
         Int32 height;
         GetHeight(&height);
-        Int32 listBottom= height - mListPadding->mBottom;
-        if (mTempRect->mBottom > listBottom) {
-            amountToScroll = mTempRect->mBottom - listBottom;
+        Int32 listBottom= height - ((CRect*)mListPadding.Get())->mBottom;
+        Int32 bottom = 0;
+        mTempRect->GetBottom(&bottom);
+        if (bottom > listBottom) {
+            amountToScroll = bottom - listBottom;
             if (positionOfNewFocus < mItemCount - 1) {
                 amountToScroll += GetArrowScrollPreviewLength();
             }
@@ -3019,12 +3059,15 @@ Int32 ListView::DistanceToView(
     Int32 distance = 0;
     descendant->GetDrawingRect(mTempRect);
     OffsetDescendantRectToMyCoords(descendant, mTempRect);
-    Int32 listBottom = mBottom - mTop - mListPadding->mBottom;
-    if (mTempRect->mBottom < mListPadding->mTop) {
-        distance = mListPadding->mTop - mTempRect->mBottom;
+    Int32 listBottom = mBottom - mTop - ((CRect*)mListPadding.Get())->mBottom;
+    Int32 top = 0, bottom = 0;
+    mTempRect->GetTop(&top);
+    mTempRect->GetBottom(&bottom);
+    if (bottom < ((CRect*)mListPadding.Get())->mTop) {
+        distance = ((CRect*)mListPadding.Get())->mTop - bottom;
     }
-    else if (mTempRect->mTop > listBottom) {
-        distance = mTempRect->mTop - listBottom;
+    else if (top > listBottom) {
+        distance = top - listBottom;
     }
     return distance;
 }
@@ -3035,8 +3078,8 @@ void ListView::ScrollListItemsBy(
     OffsetChildrenTopAndBottom(amount);
     Int32 height;
     GetHeight(&height);
-    Int32 listBottom = height - mListPadding->mBottom;
-    Int32 listTop = mListPadding->mTop;
+    Int32 listBottom = height - ((CRect*)mListPadding.Get())->mBottom;
+    Int32 listTop = ((CRect*)mListPadding.Get())->mTop;
 
     if (amount < 0) {
         Int32 numChildren;
@@ -3120,7 +3163,7 @@ AutoPtr<IView> ListView::AddViewAbove(
     Int32 edgeOfNewChild = 0;
     theView->GetTop(&edgeOfNewChild);
     edgeOfNewChild -= mDividerHeight;
-    SetupChild(view, abovePosition, edgeOfNewChild, FALSE, mListPadding->mLeft,
+    SetupChild(view, abovePosition, edgeOfNewChild, FALSE, ((CRect*)mListPadding.Get())->mLeft,
             FALSE, (*mIsScrap)[0]);
     return view;
 }
@@ -3134,7 +3177,7 @@ AutoPtr<IView> ListView::AddViewBelow(
     Int32 edgeOfNewChild = 0;
     theView->GetTop(&edgeOfNewChild);
     edgeOfNewChild += mDividerHeight;
-    SetupChild(view, belowPosition, edgeOfNewChild, TRUE, mListPadding->mLeft,
+    SetupChild(view, belowPosition, edgeOfNewChild, TRUE, ((CRect*)mListPadding.Get())->mLeft,
             FALSE, (*mIsScrap)[0]);
     return view;
 }
@@ -3166,7 +3209,7 @@ ECode ListView::IsOpaque(
     Boolean retValue = (mCachingActive && mIsCacheColorOpaque && mDividerIsOpaque &&
             HasOpaqueScrollbars()) || (AbsListView::IsOpaque(&isOpaque), isOpaque);
     if (retValue) {
-        Int32 listTop = mListPadding != NULL ? mListPadding->mTop : mPaddingTop;
+        Int32 listTop = ((CRect*)mListPadding.Get()) != NULL ? ((CRect*)mListPadding.Get())->mTop : mPaddingTop;
         AutoPtr<IView> first;
         GetChildAt(0, (IView**)&first);
         Int32 firstTop = 0;
@@ -3177,8 +3220,8 @@ ECode ListView::IsOpaque(
 
         Int32 height;
         GetHeight(&height);
-        Int32 listBottom = height - (mListPadding != NULL ?
-                mListPadding->mBottom : mPaddingBottom);
+        Int32 listBottom = height - (((CRect*)mListPadding.Get()) != NULL ?
+                ((CRect*)mListPadding.Get())->mBottom : mPaddingBottom);
         Int32 childCount;
         GetChildCount(&childCount);
         AutoPtr<IView> last;
@@ -3272,7 +3315,7 @@ void ListView::DispatchDraw(
     Boolean drawDividers = dividerHeight > 0 && mDivider != NULL;
 
     if (drawDividers || drawOverscrollHeader || drawOverscrollFooter) {
-        AutoPtr<CRect> bounds = mTempRect;
+        AutoPtr<CRect> bounds = (CRect*)mTempRect.Get();
         bounds->mLeft = mPaddingLeft;
         bounds->mRight = mRight - mLeft -mPaddingRight;
 
@@ -3303,8 +3346,8 @@ void ListView::DispatchDraw(
         Int32 effectivePaddingTop = 0;
         Int32 effectivePaddingBottom = 0;
         if ((mGroupFlags & ViewGroup::CLIP_TO_PADDING_MASK) == ViewGroup::CLIP_TO_PADDING_MASK) {
-            effectivePaddingTop = mListPadding->mTop;
-            effectivePaddingBottom = mListPadding->mBottom;
+            effectivePaddingTop = ((CRect*)mListPadding.Get())->mTop;
+            effectivePaddingBottom = ((CRect*)mListPadding.Get())->mBottom;
         }
         Int32 listBottom = mBottom - mTop - effectivePaddingBottom +mScrollY;
         if (!mStackFromBottom) {
@@ -3596,7 +3639,7 @@ void ListView::OnFocusChanged(
             LayoutChildren();
         }
 
-        AutoPtr<CRect> otherRect = mTempRect;
+        AutoPtr<CRect> otherRect = (CRect*)mTempRect.Get();
         Int32 minDistance = Elastos::Core::Math::INT32_MAX_VALUE;
         Int32 childCount;
         GetChildCount(&childCount);

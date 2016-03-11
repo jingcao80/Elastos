@@ -143,8 +143,9 @@ AutoPtr<IIWindowManager> CWindowManagerGlobal::GetWindowManagerService()
     if (sWindowManagerService == NULL) {
         AutoPtr<IServiceManager> sm;
         CServiceManager::AcquireSingleton((IServiceManager**)&sm);
-        sm->GetService(String("window"),
-            (IInterface**)(IIWindowManager**)&sWindowManagerService);
+        AutoPtr<IInterface> obj;
+        sm->GetService(String("window"), (IInterface**)&obj);
+        sWindowManagerService = IIWindowManager::Probe(obj);
     }
     return sWindowManagerService;
 }

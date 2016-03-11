@@ -169,6 +169,36 @@ ECode SurfaceControl::Hide()
     return NOERROR;
 }
 
+ECode SurfaceControl::SetBlur(
+    /* [in] */ Float blur)
+{
+    return NOERROR;
+}
+
+ECode SurfaceControl::SetBlurMaskSurface(
+    /* [in] */ ISurfaceControl* maskSurface)
+{
+    return NOERROR;
+}
+
+ECode SurfaceControl::SetBlurMaskSampling(
+    /* [in] */ Int32 blurMaskSampling)
+{
+    return NOERROR;
+}
+
+ECode SurfaceControl::SetBlurMaskAlphaThreshold(
+    /* [in] */ Float alpha)
+{
+    return NOERROR;
+}
+
+ECode SurfaceControl::SetTransparent(
+    /* [in] */ Boolean isTransparent)
+{
+    return NOERROR;
+}
+
 ECode SurfaceControl::Show()
 {
     FAIL_RETURN(CheckNotReleased())
@@ -259,6 +289,7 @@ ECode SurfaceControl::SetOpaque(
 ECode SurfaceControl::ToString(
     /* [out] */ String* str)
 {
+    VALIDATE_NOT_NULL(str)
     *str = String("Surface(name=") + mName + ")";
     return NOERROR;
 }
@@ -280,6 +311,8 @@ ECode SurfaceControl::GetDisplayConfigs(
     /* [in] */ IBinder* displayToken,
     /* [out] */ ArrayOf<IPhysicalDisplayInfo*>** infos)
 {
+    VALIDATE_NOT_NULL(infos)
+    *infos = NULL;
     if (displayToken == NULL) {
         // throw new IllegalArgumentException("displayToken must not be null");
         SLOGGERE(TAG, "displayToken must not be null")
@@ -292,6 +325,8 @@ ECode SurfaceControl::GetActiveConfig(
     /* [in] */ IBinder* displayToken,
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
+    *res = 0;
     if (displayToken == NULL) {
         // throw new IllegalArgumentException("displayToken must not be null");
         SLOGGERE(TAG, "displayToken must not be null")
@@ -305,6 +340,7 @@ ECode SurfaceControl::SetActiveConfig(
     /* [in] */ Int32 id,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     *res = FALSE;
     if (displayToken == NULL) {
         // throw new IllegalArgumentException("displayToken must not be null");
@@ -411,6 +447,8 @@ ECode SurfaceControl::CreateDisplay(
     /* [in] */ Boolean secure,
     /* [out] */ IBinder** token)
 {
+    VALIDATE_NOT_NULL(token)
+    *token = NULL;
     if (name == NULL) {
         // throw new IllegalArgumentException("name must not be null");
         SLOGGERE(TAG, "name must not be null")
@@ -712,6 +750,7 @@ ECode SurfaceControl::NativeCreate(
     /* [in] */ Int32 flags,
     /* [out] */ Int64* ptr)
 {
+    VALIDATE_NOT_NULL(ptr)
     CSurfaceSession* sessionImpl = (CSurfaceSession*)session;
 
     sp<android::SurfaceComposerClient> client = sessionImpl->mNativeClient;
@@ -1100,6 +1139,7 @@ ECode SurfaceControl::NativeGetContentFrameStats(
 ECode SurfaceControl::NativeClearAnimationFrameStats(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     android::status_t err = android::SurfaceComposerClient::clearAnimationFrameStats();
     *result = FALSE;
 
@@ -1120,6 +1160,7 @@ ECode SurfaceControl::NativeGetAnimationFrameStats(
     /* [in] */ IWindowAnimationFrameStats* outStats,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
     android::FrameStats stats;
     *result = FALSE;
 
@@ -1249,11 +1290,15 @@ ECode SurfaceControl::NativeGetDisplayConfigs(
     *infos = NULL;
 
     sp<android::IBinder> token(IBinderForDroidObject(displayToken));
-    if (token == NULL) return NOERROR;
+    if (token == NULL) {
+        SLOGGERI(TAG, "NativeGetDisplayConfigs IBinderForDroidObject %s is null.", TO_CSTR(displayToken));
+        return NOERROR;
+    }
 
     android::Vector<android::DisplayInfo> configs;
     if (android::SurfaceComposerClient::getDisplayConfigs(token, &configs) != android::NO_ERROR ||
             configs.size() == 0) {
+        SLOGGERI(TAG, "NativeGetDisplayConfigs getDisplayConfigs: no configs!");
         return NOERROR;
     }
 
@@ -1286,6 +1331,7 @@ ECode SurfaceControl::NativeGetActiveConfig(
     /* [in] */ IBinder* displayToken,
     /* [out] */ Int32* res)
 {
+    VALIDATE_NOT_NULL(res)
     sp<android::IBinder> token(IBinderForDroidObject(displayToken));
     if (token == NULL) {
         *res = -1;
@@ -1300,6 +1346,7 @@ ECode SurfaceControl::NativeSetActiveConfig(
     /* [in] */ Int32 id,
     /* [out] */ Boolean* res)
 {
+    VALIDATE_NOT_NULL(res)
     sp<android::IBinder> token(IBinderForDroidObject(displayToken));
     if (token == NULL) return NOERROR;
     android::status_t err = android::SurfaceComposerClient::setActiveConfig(token, static_cast<int>(id));

@@ -6,6 +6,7 @@
 #include "elastos/droid/os/Runnable.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/utility/Pools.h"
+#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::R;
 using Elastos::Droid::Graphics::Drawable::Shapes::IShape;
@@ -20,7 +21,7 @@ namespace Widget {
 using Elastos::Droid::View::View;
 using Elastos::Droid::View::Animation::IInterpolator;
 
-class ProgressBar
+class ECO_PUBLIC ProgressBar
     : public View
     , public IProgressBar
 {
@@ -885,8 +886,8 @@ private:
         /* [in] */ Boolean animate);
 
 private:
-    static const Int32 MAX_LEVEL = 10000;
-    static const Int32 TIMEOUT_SEND_ACCESSIBILITY_EVENT = 200;
+    ECO_LOCAL static const Int32 MAX_LEVEL = 10000;
+    ECO_LOCAL static const Int32 TIMEOUT_SEND_ACCESSIBILITY_EVENT = 200;
 
 protected:
     Int32 mMinWidth;

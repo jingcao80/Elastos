@@ -583,8 +583,8 @@ ECode InputEventReceiver::NativeInit(
         return E_RUNTIME_EXCEPTION;
     }
 
-    Int64 msgQueuePtr = 0;
-    messageQueueObj->GetMPtr(&msgQueuePtr);
+    Handle64 msgQueuePtr = 0;
+    messageQueueObj->GetNativeMessageQueue(&msgQueuePtr);
     AutoPtr<MessageQueue> messageQueue = reinterpret_cast<NativeMessageQueue*>(msgQueuePtr);
     if (messageQueue == NULL) {
         Logger::W(TAG, "MessageQueue is not initialized.");

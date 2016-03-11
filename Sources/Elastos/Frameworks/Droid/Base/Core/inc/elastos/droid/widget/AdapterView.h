@@ -4,6 +4,7 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "Elastos.Droid.Database.h"
+#include "Elastos.Droid.View.h"
 #include "elastos/droid/view/ViewGroup.h"
 
 using Elastos::Droid::Database::IDataSetObserver;

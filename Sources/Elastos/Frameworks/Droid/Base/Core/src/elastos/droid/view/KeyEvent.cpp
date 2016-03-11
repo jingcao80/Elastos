@@ -790,6 +790,10 @@ Boolean KeyEvent::IsWakeKey(
         case IKeyEvent::KEYCODE_SLEEP:
         case IKeyEvent::KEYCODE_WAKEUP:
         case IKeyEvent::KEYCODE_PAIRING:
+        case IKeyEvent::KEYCODE_VOLUME_UP:
+        case IKeyEvent::KEYCODE_VOLUME_DOWN:
+        case IKeyEvent::KEYCODE_VOLUME_MUTE:
+
             return TRUE;
     }
     return FALSE;

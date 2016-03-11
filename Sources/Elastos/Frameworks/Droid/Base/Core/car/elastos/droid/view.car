@@ -22,6 +22,7 @@ module
     merge("view/GestureDetector.car");
 
     merge("view/Gravity.car");
+    merge("view/GLES20Canvas.car");
     merge("view/HapticFeedbackConstants.car");
     merge("view/HardwareCanvas.car");
     merge("view/HardwareLayer.car");
@@ -418,15 +419,15 @@ module
         interface IDispatcherState;
     }
 
-    //     [local]
-    //     class CDragShadowBuilder {
-    //         constructor();
+     [local]
+     class CDragShadowBuilder {
+         constructor();
 
-    //         constructor(
-    //             [in] IView* view);
+         constructor(
+             [in] IView* view);
 
-    //         interface IDragShadowBuilder;
-    //     }
+         interface IDragShadowBuilder;
+     }
 
     singleton class CGravity {
         interface IGravity;

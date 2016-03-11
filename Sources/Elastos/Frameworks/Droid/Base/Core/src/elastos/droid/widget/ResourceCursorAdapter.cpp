@@ -49,7 +49,10 @@ ECode ResourceCursorAdapter::InitImpl(
     VALIDATE_NOT_NULL(context);
 
     mLayout = mDropDownLayout = layout;
-    return context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&mInflater);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    mInflater = ILayoutInflater::Probe(obj);
+    return NOERROR;
 }
 
 ECode ResourceCursorAdapter::NewView(
@@ -58,7 +61,8 @@ ECode ResourceCursorAdapter::NewView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    VALIDATE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view)
+	
     return mInflater->Inflate(mLayout, parent, FALSE, view);
 }
 
@@ -68,7 +72,8 @@ ECode ResourceCursorAdapter::NewDropDownView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    VALIDATE_NOT_NULL(view);
+    VALIDATE_NOT_NULL(view)
+	
     return mInflater->Inflate(mDropDownLayout, parent, FALSE, view);
 }
 

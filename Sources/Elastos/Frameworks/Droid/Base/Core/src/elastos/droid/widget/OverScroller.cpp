@@ -524,6 +524,10 @@ SplineOverScroller::SplineOverScroller(
             * 39.37f // inch/meter
             * ppi
             * 0.84f; // look and feel tuning
+
+    AutoPtr<IInterface> serviceTmp;
+    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&serviceTmp);
+    mPm = IPowerManager::Probe(serviceTmp);
 }
 
 void SplineOverScroller::SetFriction(
@@ -637,7 +641,7 @@ void SplineOverScroller::StartSpringback(
     // mStartTime has been set
     mFinished = FALSE;
     mState = CUBIC;
-    mStart = start;
+    mCurrentPosition = mStart = start;
     mFinal = end;
     Int32 delta = start - end;
     mDeceleration = GetDeceleration(delta);
@@ -672,6 +676,7 @@ void SplineOverScroller::Fling(
     if (velocity != 0) {
         mDuration = mSplineDuration = GetSplineFlingDuration(velocity);
         totalDistance = GetSplineFlingDistance(velocity);
+        mPm->CpuBoost(mDuration * 1000);
     }
 
     mSplineDistance = (Int32) (totalDistance * Elastos::Core::Math::Signum(velocity));
@@ -718,7 +723,9 @@ void SplineOverScroller::FitOnBounceCurve(
 {
     // Simulate a bounce that started from edge
     Float durationToApex = - velocity / mDeceleration;
-    Float distanceToApex = velocity * velocity / 2.0f / Elastos::Core::Math::Abs(mDeceleration);
+    // The float cast below is necessary to avoid integer overflow.
+    Float velocitySquared = (float) velocity * velocity;
+    Float distanceToApex = velocitySquared / 2.0f / Elastos::Core::Math::Abs(mDeceleration);
     Float distanceToEdge = Elastos::Core::Math::Abs(end - start);
     Float totalDuration = (Float) Elastos::Core::Math::Sqrt(
             2.0 * (distanceToApex + distanceToEdge) / Elastos::Core::Math::Abs(mDeceleration));
@@ -783,12 +790,14 @@ void SplineOverScroller::NotifyEdgeReached(
 void SplineOverScroller::OnEdgeReached()
 {
     // mStart, mVelocity and mStartTime were adjusted to their values when edge was reached.
-    Float distance = mVelocity * mVelocity / (2.0f * Elastos::Core::Math::Abs(mDeceleration));
+    // The float cast below is necessary to avoid integer overflow.
+    Float velocitySquared = (float) mVelocity * mVelocity;
+    Float distance = velocitySquared / (2.0f * Elastos::Core::Math::Abs(mDeceleration));
     Float sign = Elastos::Core::Math::Signum(mVelocity);
 
     if (distance > mOver) {
         // Default deceleration is not sufficient to slow us down before boundary
-         mDeceleration = - sign * mVelocity * mVelocity / (2.0f * mOver);
+         mDeceleration = - sign * velocitySquared / (2.0f * mOver);
          distance = mOver;
     }
 

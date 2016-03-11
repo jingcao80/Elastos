@@ -1729,6 +1729,11 @@ module
         SetOnInfoListener(
             [in] IMediaPlayerOnInfoListener* listener);
 
+        Suspend(
+            [out] Boolean* result);
+
+        Resume(
+            [out] Boolean* result);
     }
 
     interface IMediaPlayerHelper {

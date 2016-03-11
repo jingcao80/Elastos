@@ -311,7 +311,9 @@ ECode MediaController::constructor(
 
 void MediaController::InitFloatingWindow()
 {
-    mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&mWindowManager);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);
+    mWindowManager = IWindowManager::Probe(obj);
     AutoPtr<IPolicyManager> policy;
     assert(0 && "TODO");
 //    CPolicyManager::AcquireSingleton((IPolicyManager**)&policy);

@@ -1,21 +1,22 @@
 #ifndef __ELASTOS_DROID_VIEW_VELOCITYTRACKERSTATE_H__
 #define __ELASTOS_DROID_VIEW_VELOCITYTRACKERSTATE_H__
 
-#include "elastos/droid/ext/frameworkext.h"
-#include "androidfw/VelocityTracker.h"
-#include "androidfw/Input.h"
-#include "utils/BitSet.h"
+#include <input/Input.h>
+#include <input/VelocityTracker.h>
+#include <utils/BitSet.h>
 
-using android::VelocityTracker;
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
 namespace View {
 
-using android::MotionEvent;
 using android::BitSet32;
 
-class VelocityTrackerState : public ElRefBase
+class VelocityTrackerState
+    : public Object
 {
 public:
     VelocityTrackerState(
@@ -26,7 +27,7 @@ public:
     void Clear();
 
     void AddMovement(
-        /* [in] */ IMotionEvent* event);
+        /* [in] */ const android::MotionEvent* event);
 
     void ComputeCurrentVelocity(
         /* [in] */ Int32 units,

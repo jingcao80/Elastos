@@ -36,6 +36,21 @@ public:
         /* [in] */ Int32 w,
         /* [in] */ Int32 h);
 
+    CARAPI SetBlur(
+        /* [in] */ Float blur);
+
+    CARAPI SetBlurMaskSurface(
+        /* [in] */ ISurfaceControl* maskSurface);
+
+    CARAPI SetBlurMaskSampling(
+        /* [in] */ Int32 blurMaskSampling);
+
+    CARAPI SetBlurMaskAlphaThreshold(
+        /* [in] */ Float alpha);
+
+    CARAPI SetTransparent(
+        /* [in] */ Boolean isTransparent);
+
     CARAPI Hide();
 
     CARAPI Show();
@@ -461,6 +476,12 @@ private:
      * Updates the value set during Surface creation (see {@link #OPAQUE}).
      */
     static const Int32 SURFACE_OPAQUE = 0x02;
+
+    /**
+     * Surface flag: Fully transparent, drop in composition if possible
+     * @hide
+     */
+    static const Int32 SURFACE_TRANSPARENT = 0x80;
 
     static Object sLock;
 

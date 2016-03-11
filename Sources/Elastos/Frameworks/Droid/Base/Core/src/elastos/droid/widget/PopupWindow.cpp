@@ -321,7 +321,9 @@ ECode PopupWindow::constructor(
     assert(ctx != NULL);
 
     mContext = ctx;
-    ctx->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&mWindowManager);
+    AutoPtr<IInterface> obj;
+    ctx->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&obj);
+    mWindowManager = IWindowManager::Probe(obj);
 
     AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
             const_cast<Int32 *>(R::styleable::PopupWindow),

@@ -60,6 +60,8 @@ public:
     CARAPI GetTheme(
         /* [out] */ IResourcesTheme** theme);
 
+    CARAPI RecreateTheme();
+
     CARAPI GetClassLoader(
         /* [out] */ IClassLoader** loader);
 
@@ -522,6 +524,24 @@ public:
     CARAPI GetDisplayAdjustments(
         /* [in] */ Int32 displayId,
         /* [out] */ IDisplayAdjustments** da);
+
+    CARAPI CreatePackageContextAsUser(
+        /* [in] */ const String& packageName,
+        /* [in] */ const String& themePackageName,
+        /* [in] */ Int32 flags,
+        /* [in] */ IUserHandle* user,
+        /* [out] */ IContext** ctx);
+
+    /**
+    * Creates a context given an {@link android.content.pm.ApplicationInfo}.
+    *
+    * @hide
+    */
+    CARAPI CreateApplicationContext(
+        /* [in] */ IApplicationInfo* application,
+        /* [in] */ const String& themePackageName,
+        /* [in] */ Int32 flags,
+        /* [out] */ IContext** ctx);
 
 protected:
     /**

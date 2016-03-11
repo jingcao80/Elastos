@@ -1563,6 +1563,13 @@ public:
         /* [in] */ IRemoteViewsOnClickHandler* handler,
         /* [out] */ IView** view);
 
+    CARAPI Apply(
+        /* [in] */ IContext* ctx,
+        /* [in] */ IViewGroup* parent,
+        /* [in] */ IRemoteViewsOnClickHandler* handler,
+        /* [in] */ const String& themePackageName,
+        /* [out] */ IView** view);
+
     /**
      * Applies all of the actions to the provided view.
      *
@@ -1627,7 +1634,8 @@ private:
         /* [in] */ IRemoteViewsOnClickHandler* handler);
 
     CARAPI_(AutoPtr<IContext>) GetContextForResources(
-        /* [in] */ IContext* context);
+        /* [in] */ IContext* context,
+        /* [in] */ const String& themePackageName);
 
     CARAPI_(void) RecalculateMemoryUsage();
 

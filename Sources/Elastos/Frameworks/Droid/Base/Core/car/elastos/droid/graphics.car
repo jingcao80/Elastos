@@ -914,10 +914,10 @@ module
             [in] Int32 bottom);
 
         /*private*/ constructor(
-            [in] Int64 ni);
+            [in] Handle64 ni);
 
         /*private*/ constructor(
-            [in] Int64 ni,
+            [in] Handle64 ni,
             [in] Int32 dummy);
 
         interface IRegion;

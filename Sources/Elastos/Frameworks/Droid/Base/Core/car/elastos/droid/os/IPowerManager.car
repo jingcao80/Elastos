@@ -104,6 +104,34 @@ module
         SetAttentionLight(
             [in] Boolean on,
             [in] Int32 color);
+
+        // update the uids being synchronized by network socket request manager
+        UpdateBlockedUids(
+            [in] Int32 uid,
+            [in] Boolean isBlocked);
+
+        CpuBoost(
+            [in] Int32 duration);
+
+        SetKeyboardVisibility(
+            [in] Boolean visible);
+
+        SetKeyboardLight(
+            [in] Boolean on,
+            [in] Int32 key);
+
+        WakeUpWithProximityCheck(
+            [in] Int64 time);
+
+        SetPowerProfile(
+            [in] String profile,
+            [out] Boolean* result);
+
+        GetPowerProfile(
+            [out] String* result);
+
+        ActivityResumed(
+            [in] String componentName);
     }
 
     } // namespace Os

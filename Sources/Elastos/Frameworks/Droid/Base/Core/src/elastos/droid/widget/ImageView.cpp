@@ -429,7 +429,9 @@ ECode ImageView::GetImageTintMode(
 void ImageView::ApplyImageTint()
 {
     if (mDrawable != NULL && (mHasDrawableTint || mHasDrawableTintMode)) {
-        mDrawable->Mutate((IDrawable**)&mDrawable);
+        AutoPtr<IDrawable> d;
+        mDrawable->Mutate((IDrawable**)&d);
+        mDrawable = d;
 
         if (mHasDrawableTint) {
             mDrawable->SetTintList(mDrawableTintList);
@@ -1245,9 +1247,10 @@ void ImageView::ApplyColorMod()
     // not reset the mColorMod flag, since these filters need to be
     // re-applied if the Drawable is changed.
     if (mDrawable != NULL && mColorMod) {
-        AutoPtr<IDrawable> drawable;
-        mDrawable->Mutate((IDrawable**)&drawable);
-        mDrawable = drawable;
+        AutoPtr<IDrawable> d;
+        mDrawable->Mutate((IDrawable**)&d);
+        mDrawable = d;
+
         if (mHasColorFilter) {
             mDrawable->SetColorFilter(mColorFilter);
         }

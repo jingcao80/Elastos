@@ -327,6 +327,18 @@ public:
 
     CARAPI_(void) KillSessionLocked();
 
+    /**
+    * Get the current x offset for the wallpaper
+    */
+    CARAPI GetLastWallpaperX(
+        /* [out] */ Int32* x);
+
+    /**
+    * Get the current y offset for the wallpaper
+    */
+    CARAPI GetLastWallpaperY(
+        /* [out] */ Int32* y);
+
 public:
     AutoPtr<CWindowManagerService> mService;
     AutoPtr<IIWindowSessionCallback> mCallback;

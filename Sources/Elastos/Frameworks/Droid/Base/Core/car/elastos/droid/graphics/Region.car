@@ -273,7 +273,7 @@ module
             [out] Boolean* result);
 
         GetNativeRegion(
-            [out] Handle32* region);
+            [out] Handle64* region);
     }
 
     interface IRegionHelper {

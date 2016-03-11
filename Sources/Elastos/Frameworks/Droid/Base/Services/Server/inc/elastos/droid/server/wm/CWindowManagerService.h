@@ -970,7 +970,29 @@ public:
 
     CARAPI KeyguardGoingAway(
         /* [in] */ Boolean disableWindowAnimations,
-        /* [in] */ Boolean keyguardGoingToNotificationShade);
+        /* [in] */ Boolean keyguardGoingToNotificationShade,
+        /* [in] */ Boolean keyguardShowingMedia);
+
+    /**
+    * Get the current x offset for the wallpaper
+    */
+    CARAPI GetLastWallpaperX(
+        /* [out] */ Int32* x);
+
+    /**
+    * Get the current y offset for the wallpaper
+    */
+    CARAPI GetLastWallpaperY(
+        /* [out] */ Int32* y);
+
+    CARAPI HasPermanentMenuKey(
+        /* [out] */ Boolean* result);
+
+    /**
+    * Device needs a software navigation bar (because it has no hardware keys).
+    */
+    CARAPI NeedsNavigationBar(
+    /* [out] */ Boolean* result);
 
     CARAPI_(void) KeyguardWaitingForActivityDrawn();
 
@@ -1015,6 +1037,8 @@ public:
     CARAPI UnregisterPointerEventListener(
         /* [in] */ IPointerEventListener* listener);
 
+    CARAPI AddSystemUIVisibilityFlag(
+        /* [in] */ Int32 flags);
     /**
      * Returns a code that describes the current state of the lid switch.
      */

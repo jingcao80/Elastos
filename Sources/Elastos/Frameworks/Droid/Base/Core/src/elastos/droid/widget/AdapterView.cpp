@@ -563,7 +563,7 @@ ECode AdapterView::GetSelectedItem(
         Int32 count;
         adapter->GetCount(&count);
         if (count > 0 && selection >= 0) {
-            adapter->GetItem(selection, (IInterface**)result);
+            adapter->GetItem(selection, result);
         }
     }
 
@@ -852,7 +852,7 @@ ECode AdapterView::GetItemAtPosition(
         *result = AutoPtr<IInterface>(NULL);
     }
     else {
-        adapter->GetItem(position, (IInterface**)result);
+        adapter->GetItem(position, result);
     }
     return NOERROR;
 }

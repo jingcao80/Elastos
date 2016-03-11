@@ -687,7 +687,9 @@ void ProgressBar::ApplyIndeterminateTint()
     if (mIndeterminateDrawable != NULL && mProgressTintInfo != NULL) {
         AutoPtr<ProgressTintInfo> tintInfo = mProgressTintInfo;
         if (tintInfo->mHasIndeterminateTint || tintInfo->mHasIndeterminateTintMode) {
-            mIndeterminateDrawable->Mutate((IDrawable**)&mIndeterminateDrawable);
+            AutoPtr<IDrawable> d;
+            mIndeterminateDrawable->Mutate((IDrawable**)&d);
+            mIndeterminateDrawable = d;
 
             if (tintInfo->mHasIndeterminateTint) {
                 mIndeterminateDrawable->SetTintList(tintInfo->mIndeterminateTintList);
@@ -976,9 +978,9 @@ AutoPtr<IDrawable> ProgressBar::GetTintTarget(
     /* [in] */ Boolean shouldFallback)
 {
     AutoPtr<IDrawable> layer;
-
     AutoPtr<IDrawable> d = mProgressDrawable;
     if (d != NULL) {
+        mProgressDrawable = NULL;
         d->Mutate((IDrawable**)&mProgressDrawable);
 
         if (ILayerDrawable::Probe(d)) {

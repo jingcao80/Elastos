@@ -132,7 +132,10 @@ ECode SimpleAdapter::constructor(
     mResource = mDropDownResource = resource;
     mFrom = from;
     mTo = to;
-    return context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&mInflater);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    mInflater = ILayoutInflater::Probe(obj);
+    return NOERROR;
 }
 
 ECode SimpleAdapter::GetCount(

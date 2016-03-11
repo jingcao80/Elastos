@@ -250,6 +250,14 @@ ECode CMetadata::GetDate(
     return NOERROR;
 }
 
+ECode CMetadata::RecycleParcel()
+{
+    // ToDo recycle parcel
+    // if (mParcel != NULL)
+    // mParcel->Recycle();
+    return NOERROR;
+}
+
 /*static*/
 ECode CMetadata::LastSytemId(
     /* [out] */ Int32* result)

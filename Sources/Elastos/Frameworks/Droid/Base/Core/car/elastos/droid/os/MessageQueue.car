@@ -81,10 +81,7 @@ module
             [in] IInterface* object);
 
         GetNativeMessageQueue(
-            [out] Handle32* queue);
-
-        GetMPtr(
-            [out] Int64* handle);
+            [out] Handle64* queue);
     }
 
     } // namespace Os

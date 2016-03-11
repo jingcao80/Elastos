@@ -670,10 +670,10 @@ protected:
         /* [in] */ Int32 offset,
         /* [in] */ Int32 count);
 
-private:
     static CARAPI ThrowIfCannotDraw(
         /* [in] */ IBitmap* bitmap);
 
+private:
     CARAPI_(Int64) InitRaster(
         /* [in] */ Int64 bitmap);
 

@@ -56,7 +56,7 @@ public:
     public:
         static const Int32 SHOW = 1;
         static const Int32 HIDE = 2;
-        static const Int32 PANIC = 3;
+
     private:
         ImmersiveModeConfirmation* mOwner;
     };
@@ -210,8 +210,6 @@ private:
 
     CARAPI_(void) SaveSetting();
 
-    CARAPI_(void) HandlePanic();
-
     CARAPI_(void) HandleHide();
 
     CARAPI_(void) HandleShow();
@@ -225,10 +223,9 @@ private:
     AutoPtr<IContext> mContext;
     AutoPtr<H> mHandler;
     Int64 mShowDelayMs;
-    AutoPtr<ISparseBooleanArray> mUserPanicResets;
+
     Boolean mConfirmed;
     AutoPtr<ClingWindowView> mClingWindow;
-    Int64 mPanicTime;
     AutoPtr<IWindowManager> mWindowManager;
     Int32 mCurrentUserId;
     AutoPtr<IRunnable> mConfirm;

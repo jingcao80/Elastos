@@ -1266,7 +1266,7 @@ public:
         /* [in] */ Int32 changeType);
 
     virtual CARAPI GetOverlay(
-        /* [out] */ IViewGroupOverlay** overlay);
+        /* [out] */ IViewOverlay** overlay);
 
     virtual CARAPI GetClipChildren(
         /* [out] */ Boolean* res);

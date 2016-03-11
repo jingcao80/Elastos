@@ -10,7 +10,18 @@
 #include "elastos/droid/graphics/CMatrix.h"
 #include "elastos/droid/graphics/CPaint.h"
 #include "elastos/droid/graphics/CSurfaceTexture.h"
+#include "elastos/droid/graphics/GraphicsNative.h"
 
+#include <ui/Region.h>
+#include <ui/Rect.h>
+
+#include <gui/GLConsumer.h>
+#include <gui/Surface.h>
+
+#include <SkBitmap.h>
+#include <SkCanvas.h>
+#include <SkImage.h>
+#include <android/native_window.h>
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
@@ -19,14 +30,59 @@ using Elastos::Droid::Graphics::CCanvas;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::CPaint;
 using Elastos::Droid::Graphics::CSurfaceTexture;
+using Elastos::Droid::Graphics::GraphicsNative;
 using Elastos::Droid::Graphics::EIID_IOnFrameAvailableListener;
 using Elastos::Droid::Utility::IDisplayMetrics;
 
 using Elastos::Utility::Logging::Logger;
 
+using namespace android;
+
 namespace Elastos {
 namespace Droid {
 namespace View {
+
+// ----------------------------------------------------------------------------
+// Native layer
+// ----------------------------------------------------------------------------
+
+// FIXME: consider exporting this to share (e.g. android_view_Surface.cpp)
+static inline SkImageInfo convertPixelFormat(const ANativeWindow_Buffer& buffer) {
+    SkImageInfo info;
+    info.fWidth = buffer.width;
+    info.fHeight = buffer.height;
+    switch (buffer.format) {
+        case WINDOW_FORMAT_RGBA_8888:
+            info.fColorType = kN32_SkColorType;
+            info.fAlphaType = kPremul_SkAlphaType;
+            break;
+        case WINDOW_FORMAT_RGBX_8888:
+            info.fColorType = kN32_SkColorType;
+            info.fAlphaType = kOpaque_SkAlphaType;
+        case WINDOW_FORMAT_RGB_565:
+            info.fColorType = kRGB_565_SkColorType;
+            info.fAlphaType = kOpaque_SkAlphaType;
+        default:
+            info.fColorType = kUnknown_SkColorType;
+            info.fAlphaType = kIgnore_SkAlphaType;
+            break;
+    }
+    return info;
+}
+
+/**
+ * This is a private API, and this implementation is also provided in the NDK.
+ * However, the NDK links against android_runtime, which means that using the
+ * NDK implementation would create a circular dependency between the libraries.
+ */
+static int32_t native_window_lock(ANativeWindow* window, ANativeWindow_Buffer* outBuffer,
+        Rect* inOutDirtyBounds) {
+    return window->perform(window, NATIVE_WINDOW_LOCK, outBuffer, inOutDirtyBounds);
+}
+
+static int32_t native_window_unlockAndPost(ANativeWindow* window) {
+    return window->perform(window, NATIVE_WINDOW_UNLOCK_AND_POST);
+}
 
 //========================================================================================
 //              TextureView::OnFrameAvailableListener::
@@ -106,10 +162,6 @@ void TextureView::Init()
 {
     CMatrix::New((IMatrix**)&mMatrix);
     CPaint::New((IPaint**)&mLayerPaint);
-
-//    mLock = ArrayOf<IInterface*>::Alloc(1);
-
-//    mNativeWindowLock = ArrayOf<IInterface*>::Alloc(1);
 
     mUpdateListener = new OnFrameAvailableListener(this);
 }
@@ -274,8 +326,7 @@ AutoPtr<IHardwareLayer> TextureView::GetHardwareLayer()
             return NULL;
         }
 
-    assert(0 && "TODO");
-    //    mLayer = mAttachInfo->mHardwareRenderer->CreateTextureLayer();
+        mAttachInfo->mHardwareRenderer->CreateTextureLayer((IHardwareLayer**)&mLayer);
         if (!mUpdateSurface) {
             // Create a new SurfaceTexture for the layer.
             CSurfaceTexture::New(FALSE, (ISurfaceTexture**)&mSurface);
@@ -567,6 +618,12 @@ ECode TextureView::SetSurfaceTexture(
     }
     mSurface = surfaceTexture;
     mUpdateSurface = TRUE;
+
+    // If the view is visible, update the listener in the new surface to use
+    // the existing listener in the view.
+    if (((mViewFlags & VISIBILITY_MASK) == VISIBLE)) {
+        mSurface->SetOnFrameAvailableListener(mUpdateListener);
+    }
     InvalidateParentIfNeeded();
     return NOERROR;
 }
@@ -591,28 +648,91 @@ ECode TextureView::SetSurfaceTextureListener(
 void TextureView::NativeCreateNativeWindow(
     /* [in] */ ISurfaceTexture* surface)
 {
-    assert(0 && "TODO");
+    CSurfaceTexture* surfaceImpl = (CSurfaceTexture*)surface;
+    sp<IGraphicBufferProducer> producer((IGraphicBufferProducer*)surfaceImpl->mProducer);;
+    sp<ANativeWindow> window = new android::Surface(producer, true);
+
+    window->incStrong((void*)&TextureView::NativeCreateNativeWindow);
+    mNativeWindow = (Int64)(window.get());
 }
 
 void TextureView::NativeDestroyNativeWindow()
 {
-    assert(0 && "TODO");
+    ANativeWindow* nativeWindow = (ANativeWindow*)mNativeWindow;
+
+    if (nativeWindow) {
+        sp<ANativeWindow> window(nativeWindow);
+            window->decStrong((void*)&TextureView::NativeCreateNativeWindow);
+        mNativeWindow = 0;
+    }
 }
 
 Boolean TextureView::NativeLockCanvas(
     /* [in] */ Int64 nativeWindow,
     /* [in] */ ICanvas* canvas,
-    /* [in] */ IRect* dirty)
+    /* [in] */ IRect* dirtyRect)
 {
-    assert(0 && "TODO");
-    return FALSE;
+    if (!nativeWindow) {
+        return FALSE;
+    }
+
+    ANativeWindow_Buffer buffer;
+
+    Rect rect;
+    if (dirtyRect) {
+        Int32 l, t, r, b;
+        dirtyRect->GetLeft(&l);
+        dirtyRect->GetTop(&t);
+        dirtyRect->GetRight(&r);
+        dirtyRect->GetBottom(&b);
+        rect.left = l;
+        rect.top = t;
+        rect.right = r;
+        rect.bottom = b;
+    } else {
+        rect.set(Rect(0x3FFF, 0x3FFF));
+    }
+
+    sp<ANativeWindow> window((ANativeWindow*) nativeWindow);
+    int32_t status = native_window_lock(window.get(), &buffer, &rect);
+    if (status) return FALSE;
+
+    ssize_t bytesCount = buffer.stride * bytesPerPixel(buffer.format);
+
+    SkBitmap bitmap;
+    bitmap.setInfo(convertPixelFormat(buffer), bytesCount);
+
+    if (buffer.width > 0 && buffer.height > 0) {
+        bitmap.setPixels(buffer.bits);
+    } else {
+        bitmap.setPixels(NULL);
+    }
+
+    canvas->SetSurfaceFormat(buffer.format);
+    canvas->SetNativeBitmap(reinterpret_cast<Int64>(&bitmap));
+
+    SkRect clipRect;
+    clipRect.set(rect.left, rect.top, rect.right, rect.bottom);
+    SkCanvas* nativeCanvas = GraphicsNative::GetNativeCanvas(canvas);
+    nativeCanvas->clipRect(clipRect);
+
+    if (dirtyRect) {
+        dirtyRect->Set(int(rect.left), int(rect.top), int(rect.right), int(rect.bottom));
+    }
+
+    return TRUE;
 }
 
 void TextureView::NativeUnlockCanvasAndPost(
     /* [in] */ Int64 nativeWindow,
     /* [in] */ ICanvas* canvas)
 {
-    assert(0 && "TODO");
+    canvas->SetNativeBitmap(0LL);
+
+    if (nativeWindow) {
+        sp<ANativeWindow> window((ANativeWindow*) nativeWindow);
+        native_window_unlockAndPost(window.get());
+    }
 }
 
 } // namespace View

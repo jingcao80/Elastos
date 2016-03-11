@@ -48,9 +48,9 @@ DisplayEventReceiver::~DisplayEventReceiver()
 
 void DisplayEventReceiver::NativeInit()
 {
-    Handle32 nativeQueue;
+    Handle64 nativeQueue;
     mMessageQueue->GetNativeMessageQueue(&nativeQueue);
-    AutoPtr<MessageQueue> messageQueue = (NativeMessageQueue*)nativeQueue;
+    AutoPtr<MessageQueue> messageQueue = reinterpret_cast<NativeMessageQueue*>(nativeQueue);
     if (messageQueue == NULL) {
         Logger::E(TAG, "MessageQueue is not initialized.");
         assert(0) ;

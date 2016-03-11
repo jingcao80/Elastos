@@ -373,7 +373,7 @@ ECode TabWidget::ChildDrawableStateChanged(
 {
     Int32 count;
     AutoPtr<IView> v;
-    if ((GetTabCount(&count), count) > 0
+    if (mSelectedTab != -1 && (GetTabCount(&count), count) > 0
         && child == (GetChildTabViewAt(mSelectedTab, (IView**)&v),  v)) {
         // To make sure that the bottom strip is redrawn
         Invalidate();
@@ -653,7 +653,7 @@ ECode TabWidget::OnFocusChange(
 {
     Int32 count;
     if (v == THIS_PROBE(IView) && hasFocus
-        && (GetTabCount(&count), count) > 0) {
+        && (GetTabCount(&count), count) > 0 && ( mSelectedTab!= -1) ) {
         AutoPtr<IView> tabView;
         GetChildTabViewAt(mSelectedTab, (IView**)&tabView);
         Boolean res;

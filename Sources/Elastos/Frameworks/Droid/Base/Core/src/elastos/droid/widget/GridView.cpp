@@ -11,6 +11,7 @@
 #include "elastos/droid/view/animation/GridLayoutAnimationController.h"
 #include "elastos/droid/widget/GridView.h"
 #include "elastos/droid/widget/CAbsListViewLayoutParams.h"
+#include "elastos/droid/graphics/CRect.h"
 #include <elastos/core/Math.h>
 
 using Elastos::Droid::Utility::MathUtils;
@@ -28,6 +29,7 @@ using Elastos::Droid::View::Accessibility::AccessibilityNodeInfoCollectionItemIn
 using Elastos::Droid::View::Animation::GridLayoutAnimationController;
 using Elastos::Droid::View::Animation::IGridLayoutAnimationParameters;
 using Elastos::Droid::Widget::CAbsListViewLayoutParams;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Core::CString;
 
 namespace Elastos {
@@ -253,7 +255,7 @@ AutoPtr<IView> GridView::FillDown(
 
     Int32 end = (mBottom - mTop);
     if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
-        end -= mListPadding->mBottom;
+        end -= ((CRect*)mListPadding.Get())->mBottom;
     }
 
     while (nextTop < end && pos < mItemCount) {
@@ -290,10 +292,10 @@ AutoPtr<IView> GridView::MakeRow(
     if (isLayoutRtl) {
         Int32 width;
         GetWidth(&width);
-        nextLeft = width - mListPadding->mRight - columnWidth -
+        nextLeft = width - ListPaddingRight() - columnWidth -
                 ((mStretchMode == STRETCH_SPACING_UNIFORM) ? horizontalSpacing : 0);
     } else {
-        nextLeft = mListPadding->mLeft +
+        nextLeft = ListPaddingLeft() +
                 ((mStretchMode == STRETCH_SPACING_UNIFORM) ? horizontalSpacing : 0);
     }
 
@@ -350,7 +352,7 @@ AutoPtr<IView> GridView::FillUp(
 
     Int32 end = 0;
     if ((mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
-        end = mListPadding->mTop;
+        end = ListPaddingTop();
     }
 
     while (nextBottom > end && pos >= 0) {
@@ -737,7 +739,7 @@ void GridView::CorrectTooHigh(
 
         Int32 lastBottom;
         lastChild->GetBottom(&lastBottom);
-        Int32 end = (mBottom - mTop) - mListPadding->mBottom;
+        Int32 end = (mBottom - mTop) - ListPaddingBottom();
 
         Int32 bottomOffset = end - lastBottom;
 
@@ -746,9 +748,9 @@ void GridView::CorrectTooHigh(
         Int32 firstTop;
         firstChild->GetTop(&firstTop);
 
-        if (bottomOffset > 0 && (mFirstPosition > 0 || firstTop < mListPadding->mTop))  {
+        if (bottomOffset > 0 && (mFirstPosition > 0 || firstTop < ListPaddingTop()))  {
             if (mFirstPosition == 0) {
-                bottomOffset = Elastos::Core::Math::Min(bottomOffset, mListPadding->mTop - firstTop);
+                bottomOffset = Elastos::Core::Math::Min(bottomOffset, ListPaddingTop() - firstTop);
             }
 
             OffsetChildrenTopAndBottom(bottomOffset);
@@ -775,9 +777,9 @@ void GridView::CorrectTooLow(
         Int32 firstTop;
         firstChild->GetTop(&firstTop);
 
-        Int32 start = mListPadding->mTop;
+        Int32 start = ListPaddingTop();
 
-        Int32 end = (mBottom - mTop) - mListPadding->mBottom;
+        Int32 end = (mBottom - mTop) - ListPaddingBottom();
 
         Int32 topOffset = firstTop - start;
         AutoPtr<IView> lastChild;
@@ -1088,16 +1090,16 @@ void GridView::OnMeasure(
 
     if (widthMode == MeasureSpec::UNSPECIFIED) {
         if (mColumnWidth > 0) {
-            widthSize = mColumnWidth + mListPadding->mLeft + mListPadding->mRight;
+            widthSize = mColumnWidth + ListPaddingLeft() + ListPaddingRight();
         } else {
-            widthSize = mListPadding->mLeft + mListPadding->mRight;
+            widthSize = ListPaddingLeft() + ListPaddingRight();
         }
         Int32 verticalScrollbarWidth;
         GetVerticalScrollbarWidth(&verticalScrollbarWidth);
         widthSize += verticalScrollbarWidth;
     }
 
-    Int32 childWidth = widthSize - mListPadding->mLeft - mListPadding->mRight;
+    Int32 childWidth = widthSize - ListPaddingLeft() - ListPaddingRight();
     DetermineColumns(childWidth);
 
     Int32 childHeight = 0;
@@ -1136,12 +1138,12 @@ void GridView::OnMeasure(
     if (heightMode == MeasureSpec::UNSPECIFIED) {
         Int32 verticalFadingEdgeLength;
         GetVerticalFadingEdgeLength(&verticalFadingEdgeLength);
-        heightSize = mListPadding->mTop + mListPadding->mBottom + childHeight +
+        heightSize = ListPaddingTop() + ListPaddingBottom() + childHeight +
                 verticalFadingEdgeLength * 2;
     }
 
     if (heightMode == MeasureSpec::AT_MOST) {
-        Int32 ourSize =  mListPadding->mTop + mListPadding->mBottom;
+        Int32 ourSize =  ListPaddingTop() + ListPaddingBottom();
 
         Int32 numColumns = mNumColumns;
         for (Int32 i = 0; i < count; i += numColumns) {
@@ -1217,8 +1219,8 @@ ECode GridView::LayoutChildren()
         return NOERROR;
     }
 
-    Int32 childrenTop = mListPadding->mTop;
-    Int32 childrenBottom = mBottom - mTop - mListPadding->mBottom;
+    Int32 childrenTop = ListPaddingTop();
+    Int32 childrenBottom = mBottom - mTop - ListPaddingBottom();
 
     Int32 childCount;
     GetChildCount(&childCount);
@@ -1906,7 +1908,7 @@ void GridView::OnFocusChanged(
 
         // figure out which item should be selected based on previously
         // focused rect
-        AutoPtr<CRect> otherRect = mTempRect;
+        AutoPtr<CRect> otherRect = (CRect*)mTempRect.Get();
         Int32 minDistance = Elastos::Core::Math::INT32_MAX_VALUE;
         Int32 childCount;
         GetChildCount(&childCount);
@@ -2067,7 +2069,7 @@ ECode GridView::AdjustViewsUpOrDown()
             GetChildAt(0, (IView**)&child);
             Int32 top = 0;
             child->GetTop(&top);
-            delta = top - mListPadding->mTop;
+            delta = top - ListPaddingTop();
             if (mFirstPosition != 0) {
                 // It's OK to have some space above the first item if it is
                 // part of the vertical spacing
@@ -2083,7 +2085,7 @@ ECode GridView::AdjustViewsUpOrDown()
             Int32 bottom, height;
             child->GetBottom(&bottom);
             GetHeight(&height);
-            delta = bottom - (height - mListPadding->mBottom);
+            delta = bottom - (height - ListPaddingBottom());
 
             if (mFirstPosition + childCount < mItemCount) {
                 // It's OK to have some space below the last item if it is
@@ -2176,6 +2178,34 @@ Int32 GridView::ComputeVerticalScrollRange()
         result += Elastos::Core::Math::Abs((Int32) ((Float) mScrollY / height * rowCount * 100));
     }
     return result;
+}
+
+Int32 GridView::ListPaddingLeft()
+{
+    Int32 res;
+    mListPadding->GetLeft(&res);
+    return res;
+}
+
+Int32 GridView::ListPaddingTop()
+{
+    Int32 res;
+    mListPadding->GetTop(&res);
+    return res;
+}
+
+Int32 GridView::ListPaddingRight()
+{
+    Int32 res;
+    mListPadding->GetRight(&res);
+    return res;
+}
+
+Int32 GridView::ListPaddingBottom()
+{
+    Int32 res;
+    mListPadding->GetBottom(&res);
+    return res;
 }
 
 //@Override

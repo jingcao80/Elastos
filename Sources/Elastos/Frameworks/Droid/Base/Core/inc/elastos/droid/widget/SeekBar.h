@@ -7,7 +7,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class SeekBar
+class ECO_PUBLIC SeekBar
     : public AbsSeekBar
     , public ISeekBar
 {

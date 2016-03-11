@@ -13,7 +13,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class AbsSeekBar
+class ECO_PUBLIC AbsSeekBar
     : public ProgressBar
     , public IAbsSeekBar
 {
@@ -283,6 +283,10 @@ protected:
     virtual CARAPI_(void) AnimateSetProgress(
         /* [in] */ Int32 progress);
 
+    virtual CARAPI_(Int32) UpdateTouchProgress(
+        /* [in] */ Int32 lastProgress,
+        /* [in] */ Int32 newProgress);
+
 private:
     CARAPI_(void) ApplyThumbTint();
 
@@ -341,9 +345,9 @@ private:
      */
     Int32 mKeyProgressIncrement;
     AutoPtr<IObjectAnimator> mPositionAnimator;
-    static const Int32 PROGRESS_ANIMATION_DURATION;
+    ECO_LOCAL static const Int32 PROGRESS_ANIMATION_DURATION;
 
-    static const Int32 NO_ALPHA;
+    ECO_LOCAL static const Int32 NO_ALPHA;
     Float mDisabledAlpha;
 
     Int32 mScaledTouchSlop;

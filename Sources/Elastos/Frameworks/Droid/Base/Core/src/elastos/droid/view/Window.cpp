@@ -7,7 +7,7 @@
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/view/Window.h"
 #include "elastos/droid/view/WindowManagerImpl.h"
-// #include "elastos/droid/view/CViewConfiguration.h"
+#include "elastos/droid/view/CViewConfiguration.h"
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/R.h"
@@ -389,10 +389,27 @@ void Window::AddPrivateFlags(
     SetPrivateFlags(flags, flags);
 }
 
+/** @hide */
+void Window::SetBlurMaskAlphaThreshold(
+    /* [in] */ Float alpha)
+{
+    AutoPtr<IWindowManagerLayoutParams> attrs;
+    GetAttributes((IWindowManagerLayoutParams**)&attrs);
+    attrs->SetBlurMaskAlphaThreshold(alpha);
+    DispatchWindowAttributesChanged(attrs);
+}
+
 ECode Window::ClearFlags(
     /* [in] */ Int32 flags)
 {
     return SetFlags(0, flags);
+}
+
+/** @hide */
+void Window::ClearPrivateFlags(
+    /* [in] */ Int32 flags)
+{
+    SetPrivateFlags(0, flags);
 }
 
 ECode Window::SetFlags(
@@ -412,6 +429,10 @@ void Window::SetPrivateFlags(
     /* [in] */ Int32 flags,
     /* [in] */ Int32 mask)
 {
+    if ((flags & mask & IWindowManagerLayoutParams::PRIVATE_FLAG_PREVENT_POWER_KEY) != 0){
+        mContext->EnforceCallingOrSelfPermission(String("android.permission.PREVENT_POWER_KEY"),
+                String("No permission to prevent power key"));
+    }
     mWindowAttributes->mPrivateFlags = (mWindowAttributes->mPrivateFlags & ~mask) | (flags & mask);
     DispatchWindowAttributesChanged(mWindowAttributes.Get());
 }
@@ -515,8 +536,7 @@ Boolean Window::IsOutOfBounds(
     Int32 x = (Int32)fX;
     Int32 y = (Int32)fY;
     Int32 slop;
-    assert(0 && "TODO");
-    // CViewConfiguration::Get(context)->GetScaledWindowTouchSlop(&slop);
+    CViewConfiguration::Get(context)->GetScaledWindowTouchSlop(&slop);
     AutoPtr<IView> decorView;
     GetDecorView((IView**)&decorView);
     Int32 width, height;

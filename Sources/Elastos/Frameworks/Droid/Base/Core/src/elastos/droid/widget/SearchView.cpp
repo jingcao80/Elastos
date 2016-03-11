@@ -5,6 +5,7 @@
 #include "elastos/droid/text/CSpannableStringBuilder.h"
 #include "elastos/droid/text/style/CImageSpan.h"
 #include "elastos/droid/content/CIntent.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/utility/CTypedValue.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/os/CBundle.h"
@@ -19,6 +20,7 @@ using Elastos::Droid::Content::Res::IResourcesTheme;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Net::IUri;
 using Elastos::Droid::Net::Uri;
 using Elastos::Droid::Os::IBundle;

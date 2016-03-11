@@ -237,6 +237,10 @@ public:
     virtual CARAPI_(void) AddPrivateFlags(
         /* [in] */ Int32 flags);
 
+    /** @hide */
+    virtual CARAPI_(void) SetBlurMaskAlphaThreshold(
+        /* [in] */ Float alpha);
+
     /**
      * Convenience function to clear the flag bits as specified in flags, as
      * per {@link #setFlags}.
@@ -244,6 +248,10 @@ public:
      * @see #setFlags
      */
     CARAPI ClearFlags(
+        /* [in] */ Int32 flags);
+
+    /** @hide */
+    virtual CARAPI_(void) ClearPrivateFlags(
         /* [in] */ Int32 flags);
 
     /**

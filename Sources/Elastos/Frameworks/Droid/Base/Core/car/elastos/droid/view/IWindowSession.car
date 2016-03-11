@@ -264,6 +264,18 @@ module
             [in] Int32 x,
             [in] Int32 y);
 
+        /**
+        * Get the current x offset for the wallpaper
+        */
+        GetLastWallpaperX(
+            [out] Int32* x);
+
+        /**
+        * Get the current y offset for the wallpaper
+        */
+        GetLastWallpaperY(
+            [out] Int32* y);
+
         SendWallpaperCommand(
             [in] IBinder* window,
             [in] String action,

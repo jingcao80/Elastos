@@ -1653,6 +1653,13 @@ public:
     CARAPI SetOnInfoListener(
         /* [in] */ IMediaPlayerOnInfoListener* listener);
 
+
+    CARAPI Suspend(
+        /* [out] */ Boolean* result);
+
+    CARAPI Resume(
+        /* [out] */ Boolean* result);
+
     /**
      * Register a callback to be invoked when an error has happened
      * during an asynchronous operation.

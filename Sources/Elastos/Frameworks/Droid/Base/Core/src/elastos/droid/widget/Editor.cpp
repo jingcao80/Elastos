@@ -11,6 +11,7 @@
 #include "elastos/droid/graphics/CMatrix.h"
 #include "elastos/droid/graphics/CPath.h"
 #include "elastos/droid/graphics/CPaint.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/CRectF.h"
 #include "elastos/droid/internal/utility/GrowingArrayUtils.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -29,7 +30,7 @@
 #include "elastos/droid/view/LayoutInflater.h"
 #include "elastos/droid/view/CViewGroupLayoutParams.h"
 #include "elastos/droid/view/CViewConfigurationHelper.h"
-//#include "elastos/droid/view/CDragShadowBuilder.h"
+#include "elastos/droid/view/CDragShadowBuilder.h"
 #include "elastos/droid/view/inputmethod/CExtractedText.h"
 #include "elastos/droid/view/inputmethod/CInputMethodManager.h"
 #include "elastos/droid/view/inputmethod/CCursorAnchorInfo.h"
@@ -62,7 +63,6 @@ using Elastos::Droid::Content::CClipDataHelper;
 using Elastos::Droid::Content::IClipDataItem;
 using Elastos::Droid::Content::IClipData;
 using Elastos::Droid::Content::IClipDataHelper;
-//using Elastos::Droid::Content::CClipDataHelper;
 using Elastos::Droid::Content::Res::ICompatibilityInfo;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Content::Pm::IApplicationInfo;
@@ -90,6 +90,7 @@ using Elastos::Droid::Graphics::Color;
 using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::CPath;
 using Elastos::Droid::Graphics::CPaint;
+using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::CRectF;
 using Elastos::Droid::Graphics::IColor;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawableCallback;
@@ -113,8 +114,8 @@ using Elastos::Droid::View::IGravity;
 using Elastos::Droid::View::EIID_IActionModeCallback;
 using Elastos::Droid::View::IViewGroupLayoutParams;
 using Elastos::Droid::View::CViewGroupLayoutParams;
-//using Elastos::Droid::View::CDragShadowBuilder;
-//using Elastos::Droid::View::Accessibility::EIID_IAccessibilityEventSource;
+using Elastos::Droid::View::IHardwareCanvas;
+using Elastos::Droid::View::CDragShadowBuilder;
 using Elastos::Droid::View::InputMethod::ICursorAnchorInfo;
 using Elastos::Droid::View::InputMethod::IInputConnection;
 using Elastos::Droid::View::InputMethod::CExtractedText;
@@ -127,9 +128,6 @@ using Elastos::Droid::Widget::CSpellChecker;
 using Elastos::Droid::Widget::Internal::EditableInputConnection;
 using Elastos::Droid::InputMethodService::EIID_IExtractEditText;
 using Elastos::Droid::InputMethodService::IExtractEditText;
-
-
-#define ITEXTVIEW_PROBE(textView) ((ITextView*)((textView)->Probe(EIID_ITextView)))
 
 namespace Elastos {
 namespace Droid {
@@ -437,9 +435,10 @@ ECode EasyEditPopupWindow::InitContentView()
     mContentView = IViewGroup::Probe(linearLayout);
     IView::Probe(mContentView)->SetBackgroundResource(R::drawable::text_edit_side_paste_window);
 
-    AutoPtr<ILayoutInflater> inflater;
+    AutoPtr<IInterface> obj;
     context->GetSystemService(
-        IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
+        IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
 
     AutoPtr<IViewGroupLayoutParams> wrapContent;
     CViewGroupLayoutParams::New(
@@ -544,7 +543,9 @@ SuggestionAdapter::SuggestionAdapter(
 {
     AutoPtr<IContext> context;
     mEditor->mTextView->GetContext((IContext**)&context);
-    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&mInflater);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    mInflater = ILayoutInflater::Probe(obj);
 }
 
 ECode SuggestionAdapter::GetCount(
@@ -1223,26 +1224,52 @@ ECode SuggestionsPopupWindow::OnItemClick(
         suggestions->Set(suggestionInfo->mSuggestionIndex, originalText);
 
         // Restore previous SuggestionSpans
+        Int32 realSuggestionLength;
+        AutoPtr<ICharSequence> csq;
+        mEditor->mTextView->GetText((ICharSequence**)&csq);
+        csq->GetLength(&realSuggestionLength);
+
         Int32 seqLen;
         subSeq->GetLength(&seqLen);
         Int32 lengthDifference = seqLen - (spanEnd - spanStart);
+        Int32 realSuggestionDiff = realSuggestionLength - (spanEnd - spanStart);
+
+        if (realSuggestionDiff < lengthDifference) {
+            lengthDifference = realSuggestionDiff;
+        }
+
         for (Int32 i = 0; i < length; i++) {
             // Only spans that include the modified region make sense after replacement
             // Spans partially included in the replaced region are removed, there is no
             // way to assign them a valid range after replacement
             if ((*suggestionSpansStarts)[i] <= spanStart &&
                     (*suggestionSpansEnds)[i] >= spanEnd) {
+                // When the SpansEnd beyond the length of mTextView here should avoid it.
+                csq = NULL;
+                mEditor->mTextView->GetText((ICharSequence**)&csq);
+                Int32 nTextLen;
+                csq->GetLength(&nTextLen);
+                Int32 spansEnd = (*suggestionSpansEnds)[i] + lengthDifference;
+                Int32 realSpansEnd = spansEnd > nTextLen ? nTextLen : spansEnd;
+
                 mEditor->mTextView->SetSpan_internal(
                         (*suggestionSpans)[i]->Probe(EIID_IInterface),
                         (*suggestionSpansStarts)[i],
-                        (*suggestionSpansEnds)[i] + lengthDifference,
+                        realSpansEnd,
                         (*suggestionSpansFlags)[i]);
             }
         }
 
         // Move cursor at the end of the replaced word
         Int32 newCursorPosition = spanEnd + lengthDifference;
-        mEditor->mTextView->SetCursorPosition_internal(newCursorPosition, newCursorPosition);
+        // When the SpansEnd beyond the length of mTextView here should avoid it.
+        csq = NULL;
+        mEditor->mTextView->GetText((ICharSequence**)&csq);
+        Int32 textLen;
+        csq->GetLength(&textLen);
+        Int32 realNewCursorPosition = newCursorPosition > textLen ? textLen
+                : newCursorPosition;
+        mEditor->mTextView->SetCursorPosition_internal(realNewCursorPosition, realNewCursorPosition);
     }
 
     Hide();
@@ -1466,9 +1493,10 @@ ECode ActionPopupWindow::InitContentView()
     mContentView = IViewGroup::Probe(linearLayout);
     IView::Probe(mContentView)->SetBackgroundResource(R::drawable::text_edit_paste_window);
 
-    AutoPtr<ILayoutInflater> inflater;
+    AutoPtr<IInterface> obj;
     context->GetSystemService(
-        IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
+        IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
 
     AutoPtr<IViewGroupLayoutParams> wrapContent;
     CViewGroupLayoutParams::New(
@@ -1730,7 +1758,9 @@ void HandleView::Show()
 void HandleView::Dismiss()
 {
     mIsDragging = FALSE;
-    mContainer->Dismiss();
+    if (IsShowing()) {
+        mContainer->Dismiss();
+    }
     OnDetached();
 }
 
@@ -3978,7 +4008,7 @@ void Editor::OnFocusChanged(
             mTextView->GetMovementMethod((IMovementMethod**)&mMovement);
             if (mMovement != NULL) {
                 mMovement->OnTakeFocus(
-                        ITEXTVIEW_PROBE(mTextView),
+                        ITextView::Probe(mTextView),
                         spannable, direction);
             }
 
@@ -4533,35 +4563,36 @@ void Editor::DrawHardwareAccelerated(
                     left = (Int32) min;
                     right = (Int32) (max + 0.5f);
                 }
-//TODO
-    //            if (blockDisplayListIsInvalid) {
-    //                HardwareCanvas hardwareCanvas = blockDisplayList->Start(
-    //                    right - left, bottom - top);
-    //                try {
-    //                    // Tighten the bounds of the viewport to the actual text size
-    //                    hardwareCanvas.setViewport(right - left, bottom - top);
-    //                    // The dirty rect should always be NULL for a display list
-    //                    hardwareCanvas.onPreDraw(NULL);
-    //                    // drawText is always relative to TextView's origin, this translation brings
-    //                    // this range of text back to the top left corner of the viewport
-    //                    hardwareCanvas.translate(-left, -top);
-    //                    layout.drawText(hardwareCanvas, blockBeginLine, blockEndLine);
-    //                    // No need to untranslate, previous context is popped after drawDisplayList
-    //                } finally {
-    //                    hardwareCanvas.onPostDraw();
-    //                    blockDisplayList.end();
-    //                    blockDisplayList.setLeftTopRightBottom(left, top, right, bottom);
-    //                    // Same as drawDisplayList below, handled by our TextView's parent
-    //                    blockDisplayList.setClipChildren(FALSE);
-    //                }
-    //            }
+               Boolean resTmp;
+               if (blockDisplayListIsInvalid) {
+                   AutoPtr<IHardwareCanvas> hardwareCanvas;
+                   blockDisplayList->Start(right - left, bottom - top, (IHardwareCanvas**)&hardwareCanvas);
+                   // try {
+                   // drawText is always relative to TextView's origin, this translation brings
+                   // this range of text back to the top left corner of the viewport
+                    if (FAILED(ICanvas::Probe(hardwareCanvas)->Translate(-left, -top)))
+                        goto finally;
+                    if (FAILED(layout->DrawText(ICanvas::Probe(hardwareCanvas), blockBeginLine, blockEndLine)))
+                        goto finally;
+                       // No need to untranslate, previous context is popped after drawDisplayList
+                   // } finally {
+                    finally:
+                       blockDisplayList->End(hardwareCanvas);
+                       // Same as drawDisplayList below, handled by our TextView's parent
+                       blockDisplayList->SetClipToBounds(FALSE, &resTmp);
+                   // }
+               }
 
                 // Valid disply list whose index is >= indexFirstChangedBlock
                     // only needs to update its drawing location.
-    //                blockDisplayList->SetLeftTopRightBottom(left, top, right, bottom);
+               blockDisplayList->SetLeftTopRightBottom(left, top, right, bottom, &resTmp);
 //
             }
 //
+
+            IHardwareCanvas* hCanvas = IHardwareCanvas::Probe(canvas);
+            Int32 tmp;
+            hCanvas->DrawRenderNode(blockDisplayList, NULL, 0, &tmp);
 //            ((HardwareCanvas) canvas).drawRenderNode(blockDisplayList, NULL,
 //                    0  no child clipping, our TextView parent enforces it );
 
@@ -5063,8 +5094,7 @@ AutoPtr<IDragShadowBuilder> Editor::GetTextThumbnailBuilder(
     IView::Probe(shadowView)->Invalidate();
 
     AutoPtr<IDragShadowBuilder> builder;
-    assert(0);
-    //CDragShadowBuilder::New(shadowView, (IDragShadowBuilder**)&builder);
+    CDragShadowBuilder::New(IView::Probe(shadowView), (IDragShadowBuilder**)&builder);
     return builder;
 }
 

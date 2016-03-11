@@ -6308,7 +6308,8 @@ ECode CWindowManagerService::DismissKeyguard()
 
 ECode CWindowManagerService::KeyguardGoingAway(
     /* [in] */ Boolean disableWindowAnimations,
-    /* [in] */ Boolean keyguardGoingToNotificationShade)
+    /* [in] */ Boolean keyguardGoingToNotificationShade,
+    /* [in] */ Boolean keyguardShowingMedia)
 {
     Int32 perm;
     FAIL_RETURN(mContext->CheckCallingOrSelfPermission(
@@ -6322,9 +6323,69 @@ ECode CWindowManagerService::KeyguardGoingAway(
         mAnimator->mKeyguardGoingAway = TRUE;
         mAnimator->mKeyguardGoingAwayToNotificationShade = keyguardGoingToNotificationShade;
         mAnimator->mKeyguardGoingAwayDisableWindowAnimations = disableWindowAnimations;
+        mAnimator->mKeyguardGoingAwayShowingMedia = keyguardShowingMedia;
         RequestTraversalLocked();
     }
     return NOERROR;
+}
+
+/**
+ * Get the current x offset for the wallpaper
+ */
+ECode CWindowManagerService::GetLastWallpaperX(
+    /* [out] */ Int32* x)
+{
+    Int32 curTokenIndex = mWallpaperTokens.GetSize();
+    while (curTokenIndex > 0) {
+        curTokenIndex--;
+        AutoPtr<WindowToken> token = mWallpaperTokens[curTokenIndex];
+        Int32 curWallpaperIndex = token->mWindows.GetSize();
+        while (curWallpaperIndex > 0) {
+            curWallpaperIndex--;
+            AutoPtr<WindowState> wallpaperWin = (token->mWindows)[curWallpaperIndex];
+            *x = wallpaperWin->mXOffset;
+            return NOERROR;
+        }
+    }
+    *x = -1;
+    return NOERROR;
+}
+
+/**
+ * Get the current y offset for the wallpaper
+ */
+ECode CWindowManagerService::GetLastWallpaperY(
+    /* [out] */ Int32* y)
+{
+    Int32 curTokenIndex = mWallpaperTokens.GetSize();
+    while (curTokenIndex > 0) {
+        curTokenIndex--;
+        AutoPtr<WindowToken> token = mWallpaperTokens[curTokenIndex];
+        Int32 curWallpaperIndex = token->mWindows.GetSize();
+        while (curWallpaperIndex > 0) {
+            curWallpaperIndex--;
+            AutoPtr<WindowState> wallpaperWin = (token->mWindows)[curWallpaperIndex];
+            *y = wallpaperWin->mYOffset;
+        }
+    }
+    *y = -1;
+    return NOERROR;
+}
+
+
+ECode CWindowManagerService::HasPermanentMenuKey(
+    /* [out] */ Boolean* result)
+{
+    return mPolicy->HasPermanentMenuKey(result);
+}
+
+/**
+ * Device needs a software navigation bar (because it has no hardware keys).
+ */
+ECode CWindowManagerService::NeedsNavigationBar(
+    /* [out] */ Boolean* result)
+{
+    return mPolicy->NeedsNavigationBar(result);
 }
 
 void CWindowManagerService::KeyguardWaitingForActivityDrawn()
@@ -6514,6 +6575,13 @@ ECode CWindowManagerService::UnregisterPointerEventListener(
     /* [in] */ IPointerEventListener* listener)
 {
     mPointerEventDispatcher->UnregisterInputEventListener(listener);
+    return NOERROR;
+}
+
+ECode CWindowManagerService::AddSystemUIVisibilityFlag(
+    /* [in] */ Int32 flags)
+{
+    mLastStatusBarVisibility |= flags;
     return NOERROR;
 }
 

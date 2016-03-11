@@ -45,7 +45,7 @@ namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-class ListPopupWindow
+class ECO_PUBLIC ListPopupWindow
     : public Object
     , public IListPopupWindow
 {

@@ -9,6 +9,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/view/InputChannel.h"
 #include "elastos/droid/view/CInputChannel.h"
+#include "elastos/droid/view/NativeInputChannel.h"
 #include <elastos/utility/logging/Slogger.h>
 #include <input/InputTransport.h>
 
@@ -27,58 +28,6 @@ typedef void (*InputChannelObjDisposeCallback)(
     /* [in] */ IInputChannel* inputChannelObj,
     /* [in] */ const android::sp<android::InputChannel>& inputChannel,
     /* [in] */ void* data);
-
-class NativeInputChannel
-{
-public:
-    NativeInputChannel(
-        /* [in] */ const sp<android::InputChannel>& inputChannel);
-
-    ~NativeInputChannel();
-
-    inline android::sp<android::InputChannel> getInputChannel()
-    { return mInputChannel; }
-
-    void setDisposeCallback(
-        /* [in] */ InputChannelObjDisposeCallback callback,
-        /* [in] */ void* data);
-
-    void invokeAndRemoveDisposeCallback(
-        /* [in] */ IInputChannel* obj);
-
-private:
-    android::sp<android::InputChannel> mInputChannel;
-    InputChannelObjDisposeCallback mDisposeCallback;
-    void* mDisposeData;
-};
-
-// ----------------------------------------------------------------------------
-
-NativeInputChannel::NativeInputChannel(
-        /* [in] */ const sp<android::InputChannel>& inputChannel) :
-    mInputChannel(inputChannel), mDisposeCallback(NULL) {
-}
-
-NativeInputChannel::~NativeInputChannel() {
-}
-
-void NativeInputChannel::setDisposeCallback(
-        /* [in] */ InputChannelObjDisposeCallback callback,
-        /* [in] */ void* data)
-{
-    mDisposeCallback = callback;
-    mDisposeData = data;
-}
-
-void NativeInputChannel::invokeAndRemoveDisposeCallback(
-        /* [in] */ IInputChannel* obj)
-{
-    if (mDisposeCallback) {
-        mDisposeCallback(obj, mInputChannel, mDisposeData);
-        mDisposeCallback = NULL;
-        mDisposeData = NULL;
-    }
-}
 
 // ----------------------------------------------------------------------------
 
@@ -175,6 +124,14 @@ ECode InputChannel::Dup(
 {
     CInputChannel::New(target);
     NativeDup(*target);
+    return NOERROR;
+}
+
+ECode InputChannel::GetNativeInputChannel(
+    /* [out] */ Handle64* ptr)
+{
+    VALIDATE_NOT_NULL(ptr);
+    *ptr = mNative;
     return NOERROR;
 }
 

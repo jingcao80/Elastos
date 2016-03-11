@@ -5,8 +5,11 @@ include $(MAKEDIR)/../../../../../../sources.inc
 
 INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../inc
+INCLUDES += $(PREBUILD_INC)/freetype
+INCLUDES += $(PREBUILD_INC)/harfbuzz_ng
 INCLUDES += $(PREBUILD_INC)/skia/utils
 INCLUDES += $(PREBUILD_INC)/skia/core
+INCLUDES += $(PREBUILD_INC)/skia/effects
 INCLUDES += $(PREBUILD_INC)/androidfw
 INCLUDES += $(PREBUILD_INC)/input
 INCLUDES += $(PREBUILD_INC)/utils
@@ -74,7 +77,7 @@ SOURCES += CRenderNodeAnimator.cpp
 SOURCES += NativeDisplayEventReceiver.cpp
 SOURCES += DisplayEventReceiver.cpp
 
-#SOURCES += NativeInputChannel.cpp
+SOURCES += NativeInputChannel.cpp
 
 #SOURCES += CInputDeviceHelper.cpp
 SOURCES += InputEventConsistencyVerifier.cpp
@@ -131,6 +134,7 @@ SOURCES += CPointerIcon.cpp
 SOURCES += CPointerIconHelper.cpp
 SOURCES += ContextThemeWrapper.cpp
 SOURCES += VelocityTracker.cpp
+SOURCES += VelocityTrackerState.cpp
 SOURCES += CVelocityTrackerHelper.cpp
 SOURCES += SoundEffectConstants.cpp
 SOURCES += CSoundEffectConstantsHelper.cpp
@@ -159,6 +163,9 @@ SOURCES += CViewAnimationUtilsHelper.cpp
 SOURCES += InputEventSender.cpp
 SOURCES += AccessibilityIterators.cpp
 SOURCES += HardwareLayer.cpp
+SOURCES += GLES20Canvas.cpp
+SOURCES += GLES20RecordingCanvas.cpp
+SOURCES += CDragShadowBuilder.cpp
 
 ELASTOS_LIBS += inputmethod/inputmethod.lib
 ELASTOS_LIBS += accessibility/accessibility.lib

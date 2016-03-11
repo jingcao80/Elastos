@@ -812,7 +812,8 @@ public:
         /* [in] */ ArrayOf<Int32>* anim);
 
     CARAPI CreateForceHideWallpaperExitAnimation(
-        /* [in] */Boolean goingToNotificationShade,
+        /* [in] */ Boolean goingToNotificationShade,
+        /* [in] */ Boolean keyguardShowingMedia,
         /* [out] */ IAnimation** anim);
 
     CARAPI ShowRecentApps();
@@ -1000,6 +1001,15 @@ public:
     // overridden by qemu.hw.mainkeys in the emulator.
     CARAPI HasNavigationBar(
         /* [out] */ Boolean* has);
+
+    CARAPI HasPermanentMenuKey(
+            /* [out] */ Boolean* result);
+
+    /**
+    * Specifies whether the device needs a navigation bar (because it has no hardware buttons)
+    */
+    CARAPI NeedsNavigationBar(
+        /* [out] */ Boolean* result);
 
     CARAPI SetLastInputMethodWindowLw(
         /* [in] */ IWindowState* ime,

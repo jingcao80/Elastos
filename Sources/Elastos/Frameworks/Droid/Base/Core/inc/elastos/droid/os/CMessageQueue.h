@@ -92,7 +92,7 @@ public:
         /* [in] */ IInterface* object);
 
     CARAPI GetNativeMessageQueue(
-        /* [out] */ Handle32* queue);
+        /* [out] */ Handle64* queue);
 
     CARAPI RemoveSyncBarrier(
         /* [in] */ Int32 token);
@@ -100,9 +100,6 @@ public:
     CARAPI EnqueueSyncBarrier(
         /* [in] */ Int64 when,
         /* [out] */ Int32* result);
-
-    CARAPI GetMPtr(
-        /* [out] */ Int64* handle);
 
 private:
     // Disposes of the underlying message queue.
@@ -131,7 +128,7 @@ private:
     CARAPI_(Boolean) IsIdlingLocked();
 
 public:
-    Int64 mPtr;
+    Handle64 mPtr;
 
 private:
     static const String TAG;

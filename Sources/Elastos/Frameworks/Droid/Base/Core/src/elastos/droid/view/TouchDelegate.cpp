@@ -6,12 +6,12 @@
 #include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Widget.h"
 #include "elastos/droid/view/TouchDelegate.h"
-//#include "elastos/droid/view/CViewConfigurationHelper.h"
+#include "elastos/droid/view/CViewConfigurationHelper.h"
 #include "elastos/droid/graphics/CRect.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::CRect;
-//using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
 
 namespace Elastos {
 namespace Droid {
@@ -36,7 +36,7 @@ ECode TouchDelegate::constructor(
     AutoPtr<IContext> cxt;
     delegateView->GetContext((IContext**)&cxt);
     AutoPtr<IViewConfigurationHelper> hlp;
-//    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&hlp);
+   CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&hlp);
     AutoPtr<IViewConfiguration> cfg;
     hlp->Get(cxt, (IViewConfiguration**)&cfg);
     cfg->GetScaledTouchSlop(&mSlop);

@@ -679,6 +679,36 @@ ECode CSession::GetWindowId(
     return NOERROR;
 }
 
+ECode CSession::GetLastWallpaperX(
+    /* [out] */ Int32* x)
+{
+    AutoLock lock(mService->mWindowMapLock);
+    Int64 ident = Binder::ClearCallingIdentity();
+    // try {
+    mService->GetLastWallpaperX(x);
+    // } finally {
+    //     Binder.restoreCallingIdentity(ident);
+    // }
+    Binder::RestoreCallingIdentity(ident);
+    return NOERROR;
+}
+
+/**
+ * Get the current y offset for the wallpaper
+ */
+ECode CSession::GetLastWallpaperY(
+    /* [out] */ Int32* y)
+{
+    AutoLock lock(mService->mWindowMapLock);
+    Int64 ident = Binder::ClearCallingIdentity();
+    // try {
+    mService->GetLastWallpaperY(y);
+    // } finally {
+    //     Binder.restoreCallingIdentity(ident);
+    // }
+    Binder::RestoreCallingIdentity(ident);
+    return NOERROR;
+}
 void CSession::WindowAddedLocked()
 {
     if (mSurfaceSession == NULL) {

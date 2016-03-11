@@ -1,11 +1,18 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/view/CDragShadowBuilder.h"
 
-#include <elastos/utility/logging.h>
+#include <elastos/utility/logging/Slogger.h>
 
 namespace Elastos {
 namespace Droid {
 namespace View {
+
+CAR_OBJECT_IMPL(CDragShadowBuilder)
+
+CAR_INTERFACE_IMPL(CDragShadowBuilder, Object, IDragShadowBuilder)
+
+CDragShadowBuilder::CDragShadowBuilder()
+{}
 
 ECode CDragShadowBuilder::constructor(
     /* [in] */ IView* view)
@@ -27,10 +34,10 @@ ECode CDragShadowBuilder::GetView(
     VALIDATE_NOT_NULL(view)
 
     if (mView == NULL) {
-        view = NULL;
+        *view = NULL;
         return NOERROR;
     }
-    return mView->Resolve(EIID_IView, (Interface**)view);
+    return mView->Resolve(EIID_IView, (IInterface**)view);
 
 }
 
@@ -39,7 +46,7 @@ ECode CDragShadowBuilder::OnProvideShadowMetrics(
     /* [in] */ IPoint* shadowTouchPoint)
 {
     AutoPtr<IView> view;
-    mView->Resolve(EIID_IView, (Interface**)&view);
+    mView->Resolve(EIID_IView, (IInterface**)&view);
     if (view != NULL) {
         Int32 w = 0, h = 0;
         view->GetWidth(&w);
@@ -61,7 +68,7 @@ ECode CDragShadowBuilder::OnDrawShadow(
     /* [in] */ ICanvas* canvas)
 {
     AutoPtr<IView> view;
-    mView->Resolve(EIID_IView, (Interface**)&view);
+    mView->Resolve(EIID_IView, (IInterface**)&view);
     if (view != NULL) {
         return view->Draw(canvas);
     }

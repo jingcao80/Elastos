@@ -3,8 +3,11 @@
 #include "elastos/droid/app/CAlertDialogBuilder.h"
 #include "elastos/droid/content/CIntent.h"
 #include "Elastos.CoreLibrary.IO.h"
-// #include "elastos/droid/media/CMediaPlayer.h"
+#include "elastos/droid/media/CMediaPlayer.h"
 #include "elastos/droid/media/CSubtitleController.h"
+#include "elastos/droid/media/CWebVttRenderer.h"
+#include "elastos/droid/media/CTtmlRenderer.h"
+#include "elastos/droid/media/CClosedCaptionRenderer.h"
 #include "elastos/droid/net/Uri.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/R.h"
@@ -20,8 +23,11 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
 using Elastos::Droid::Media::IMetadata;
-// using Elastos::Droid::Media::CMediaPlayer;
+using Elastos::Droid::Media::CMediaPlayer;
+using Elastos::Droid::Media::CWebVttRenderer;
+using Elastos::Droid::Media::CTtmlRenderer;
 using Elastos::Droid::Media::CSubtitleController;
+using Elastos::Droid::Media::CClosedCaptionRenderer;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Media::EIID_IMediaPlayerOnPreparedListener;
 using Elastos::Droid::Media::EIID_IMediaPlayerOnCompletionListener;
@@ -104,11 +110,12 @@ ECode VideoView::VVOnPreparedListener::OnPrepared(
     if (data != NULL) {
         Boolean hasRes, boolRes;
         mHost->mCanPause = (data->Has(IMetadata::PAUSE_AVAILABLE, &hasRes), !hasRes)
-                            || (data->GetBoolean(IMetadata::PAUSE_AVAILABLE, &boolRes), boolRes);
+                || (data->GetBoolean(IMetadata::PAUSE_AVAILABLE, &boolRes), boolRes);
         mHost->mCanSeekBack = (data->Has(IMetadata::SEEK_BACKWARD_AVAILABLE, &hasRes), !hasRes)
-                            || (data->GetBoolean(IMetadata::SEEK_BACKWARD_AVAILABLE, &boolRes), boolRes);
+                || (data->GetBoolean(IMetadata::SEEK_BACKWARD_AVAILABLE, &boolRes), boolRes);
         mHost->mCanSeekForward = (data->Has(IMetadata::SEEK_FORWARD_AVAILABLE, &hasRes), !hasRes)
-                            || (data->GetBoolean(IMetadata::SEEK_FORWARD_AVAILABLE, &boolRes), boolRes);
+                || (data->GetBoolean(IMetadata::SEEK_FORWARD_AVAILABLE, &boolRes), boolRes);
+        data->RecycleParcel();
     }
     else {
         mHost->mCanPause = mHost->mCanSeekBack = mHost->mCanSeekForward = TRUE;
@@ -335,7 +342,24 @@ ECode VideoView::VVSurfaceHodlerCallback::SurfaceCreated(
 {
     mHost->mSurfaceHolder = holder;
     //resume() was called before surfaceCreated()
-
+            // if current state is suspended, call resume() to init the decoders again
+    if (mHost->mCurrentState == STATE_SUSPENDED && mHost->mMediaPlayer != NULL) {
+        mHost->mMediaPlayer->SetDisplay(mHost->mSurfaceHolder);
+        Boolean resume;
+        if (mHost->mMediaPlayer->Resume(&resume), resume) {
+            mHost->mCurrentState = STATE_PREPARED;
+            if (mHost->mSeekWhenPrepared != 0) {
+                // seek if necessary
+                mHost->SeekTo(mHost->mSeekWhenPrepared);
+            }
+            if (mHost->mTargetState == STATE_PLAYING) {
+                mHost->Start();
+            }
+            return NOERROR;
+        } else {
+            mHost->ReleaseResources(FALSE);
+        }
+    }
     mHost->OpenVideo();
 
     return NOERROR;
@@ -346,7 +370,13 @@ ECode VideoView::VVSurfaceHodlerCallback::SurfaceDestroyed(
 {
     // after we return from this we can't use the surface any more
     mHost->mSurfaceHolder = NULL;
-    if (mHost->mMediaController != NULL) mHost->mMediaController->Hide();
+    if (mHost->mMediaController != NULL) {
+        mHost->mMediaController->Hide();
+    }
+    if (mHost->IsHTTPStreaming(mHost->mUri) && mHost->mCurrentState == STATE_SUSPENDED) {
+            // don't call release() while suspending
+        return NOERROR;
+    }
     mHost->ReleaseResources(TRUE);
 
     return NOERROR;
@@ -355,7 +385,8 @@ ECode VideoView::VVSurfaceHodlerCallback::SurfaceDestroyed(
 //==============================================================================
 //          VideoView::InfoListener
 //==============================================================================
-CAR_INTERFACE_IMPL(VideoView::InfoListener, Object, IMediaPlayerOnInfoListener);
+CAR_INTERFACE_IMPL(VideoView::InfoListener, Object, IMediaPlayerOnInfoListener)
+
 VideoView::InfoListener::InfoListener(
     /* [in] */ VideoView* host)
     : mHost(host)
@@ -403,6 +434,8 @@ const Int32 VideoView::STATE_PREPARED = 2;
 const Int32 VideoView::STATE_PLAYING = 3;
 const Int32 VideoView::STATE_PAUSED = 4;
 const Int32 VideoView::STATE_PLAYBACK_COMPLETED = 5;
+const Int32 VideoView::STATE_SUSPENDED = 6;
+
 
 CAR_INTERFACE_IMPL_3(VideoView, SurfaceView, IVideoView, IMediaPlayerControl, ISubtitleControllerAnchor);
 VideoView::VideoView()
@@ -631,6 +664,7 @@ ECode VideoView::AddSubtitleSource(
 
 ECode VideoView::StopPlayback()
 {
+    Logger::I(TAG, "Playback Stop begin");
     if (mMediaPlayer != NULL) {
         mMediaPlayer->Stop();
         mMediaPlayer->ReleaseResources();
@@ -638,6 +672,7 @@ ECode VideoView::StopPlayback()
         mCurrentState = STATE_IDLE;
         mTargetState  = STATE_IDLE;
     }
+    Logger::I(TAG, "Playback Stop end");
 
     return NOERROR;
 }
@@ -648,6 +683,8 @@ void VideoView::OpenVideo()
         // not ready for playback just yet, will try again later
         return;
     }
+
+    Logger::I(TAG, "Open Video");
     AutoPtr<IInterface> service;
     mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&service);
     AutoPtr<IAudioManager> am = IAudioManager::Probe(service);
@@ -658,8 +695,7 @@ void VideoView::OpenVideo()
     // called start() previously
     ReleaseResources(FALSE);
     //try {
-    assert(0 && "TODO");
-    // CMediaPlayer::New((IMediaPlayer**)&mMediaPlayer);
+    CMediaPlayer::New((IMediaPlayer**)&mMediaPlayer);
     // TODO: create SubtitleController in MediaPlayer, but we need
     // a context for the subtitle renderers
     AutoPtr<IContext> context;
@@ -675,15 +711,12 @@ void VideoView::OpenVideo()
     FAIL_GOTO(ec, exit);
     CSubtitleController::New(context, provider, ISubtitleControllerListener::Probe(mMediaPlayer)
             , (ISubtitleController**)&controller);
-    assert(0 && "TODO");
-    // webRenderer = new WebVttRenderer(context);
+    CWebVttRenderer::New(context, (ISubtitleControllerRenderer**)&webRenderer);
     controller->RegisterRenderer(webRenderer);
-    assert(0 && "TODO");
-    // tmlRenderer = new TtmlRenderer(context);
+    CTtmlRenderer::New(context, (ISubtitleControllerRenderer**)&tmlRenderer);
     controller->RegisterRenderer(tmlRenderer);
 
-    assert(0 && "TODO");
-    // closedRenderer = new ClosedCaptionRenderer(context);
+    CClosedCaptionRenderer::New(context, (ISubtitleControllerRenderer**)&closedRenderer);
     controller->RegisterRenderer(closedRenderer);
     //TODO : recycle ref?
     mMediaPlayer->SetSubtitleAnchor(controller, this);
@@ -701,6 +734,9 @@ void VideoView::OpenVideo()
     mMediaPlayer->SetOnInfoListener(mInfoListener);
     mMediaPlayer->SetOnBufferingUpdateListener(mBufferingUpdateListener);
     mCurrentBufferPercentage = 0;
+
+    Logger::I(TAG, "SetDataSource");
+
     ec = mMediaPlayer->SetDataSource(mContext, mUri, mHeaders);
     FAIL_GOTO(ec, exit);
     ec = mMediaPlayer->SetDisplay(mSurfaceHolder);
@@ -944,14 +980,48 @@ ECode VideoView::Pause()
 
 ECode VideoView::Suspend()
 {
+    Logger::I(TAG, "Playback Suspend begin");
+    // HTTP streaming will call MediaPlayer::suspend() for suspend operation, others will call release()
+    if (IsHTTPStreaming(mUri) && mCurrentState > STATE_PREPARING &&
+            mCurrentState < STATE_PLAYBACK_COMPLETED && mMediaPlayer != NULL) {
+        Boolean suspend;
+        if (mMediaPlayer->Suspend(&suspend), suspend) {
+            mTargetState = mCurrentState;
+            mCurrentState = STATE_SUSPENDED;
+            return NOERROR;
+        }
+    }
     ReleaseResources(FALSE);
+    Logger::I(TAG, "Playback Suspend end");
     return NOERROR;
 }
 
 ECode VideoView::Resume()
 {
+    // HTTP streaming (with suspended status) will call MediaPlayer::resume(), others will call openVideo()
+    if (mCurrentState == STATE_SUSPENDED && mMediaPlayer != NULL) {
+        if (mSurfaceHolder != NULL) {
+            Boolean resume;
+            if (mMediaPlayer->Resume(&resume), resume) {
+                mCurrentState = STATE_PREPARED;
+                if (mSeekWhenPrepared != 0) {
+                    // seek if necessary
+                    SeekTo(mSeekWhenPrepared);
+                }
+                if (mTargetState == STATE_PLAYING) {
+                    Start();
+                }
+                return NOERROR;
+            } else {
+                // resume failed, so call release() before openVideo()
+                ReleaseResources(FALSE);
+            }
+        } else {
+            // the surface has been destroyed, resume() will be called after surface created
+            return NOERROR;
+        }
+    }
     OpenVideo();
-
     return NOERROR;
 }
 
@@ -1016,9 +1086,10 @@ ECode VideoView::GetBufferPercentage(
 Boolean VideoView::IsInPlaybackState()
 {
     return (mMediaPlayer != NULL &&
-                mCurrentState != STATE_ERROR &&
-                mCurrentState != STATE_IDLE &&
-                mCurrentState != STATE_PREPARING);
+            mCurrentState != STATE_ERROR &&
+            mCurrentState != STATE_IDLE &&
+            mCurrentState != STATE_PREPARING &&
+            mCurrentState != STATE_SUSPENDED);
 }
 
 ECode VideoView::CanPause(
@@ -1051,8 +1122,7 @@ ECode VideoView::GetAudioSessionId(
     VALIDATE_NOT_NULL(id);
     if (mAudioSession == 0) {
         AutoPtr<IMediaPlayer> foo;
-        assert(0 && "TODO");
-        // CMediaPlayer::New((IMediaPlayer**)&foo);
+        CMediaPlayer::New((IMediaPlayer**)&foo);
         foo->GetAudioSessionId(&mAudioSession);
         foo->ReleaseResources();
     }
@@ -1126,6 +1196,27 @@ void VideoView::MeasureAndLayoutSubtitleWidget()
     const Int32 height = v1 - v2 - v3;
 
     mSubtitleWidget->SetSize(width, height);
+}
+
+Boolean VideoView::IsHTTPStreaming(
+    /* [in] */ IUri* uri)
+{
+    if (uri != NULL) {
+        String scheme;
+        uri->GetScheme(&scheme);
+        if ((scheme != NULL) && (scheme.Equals("http") || scheme.Equals("https"))) {
+            String path;
+            uri->GetPath(&path);
+            if (path == NULL || path.EndWith(".m3u8") || path.EndWith(".m3u")
+                    || path.EndWith(".mpd")) {
+                // HLS or DASH streaming source
+                return FALSE;
+            }
+            // HTTP progressive download streaming source
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 ECode VideoView::SetSubtitleWidget(

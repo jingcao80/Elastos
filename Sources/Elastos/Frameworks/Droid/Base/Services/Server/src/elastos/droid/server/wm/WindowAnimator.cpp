@@ -421,7 +421,7 @@ void WindowAnimator::UpdateWindowsLocked(
         if (!wallpaperInUnForceHiding && wallpaper != NULL
                 && !mKeyguardGoingAwayDisableWindowAnimations) {
             AutoPtr<IAnimation> a;
-            mPolicy->CreateForceHideWallpaperExitAnimation(mKeyguardGoingAwayToNotificationShade, (IAnimation**)&a);
+            mPolicy->CreateForceHideWallpaperExitAnimation(mKeyguardGoingAwayToNotificationShade, mKeyguardGoingAwayShowingMedia, (IAnimation**)&a);
             if (a != NULL) {
                 AutoPtr<WindowStateAnimator> animator = wallpaper->mWinAnimator;
                 animator->SetAnimation(a);

@@ -65,6 +65,9 @@ public:
     CARAPI Dup(
         /* [out] */ IInputChannel** target);
 
+    CARAPI GetNativeInputChannel(
+        /* [out] */ Handle64* ptr);
+
 private:
     static CARAPI NativeOpenInputChannelPair(
         /* [in] */ const String& name,

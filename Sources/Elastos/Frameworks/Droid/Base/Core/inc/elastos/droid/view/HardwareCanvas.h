@@ -17,6 +17,8 @@ class HardwareCanvas
     , public IHardwareCanvas
 {
 public:
+    CAR_INTERFACE_DECL()
+
     CARAPI IsHardwareAccelerated(
         /* [out] */ Boolean* isAccelerated);
 
@@ -50,7 +52,6 @@ public:
     static CARAPI SetProperty(
         /* [in] */ const String& name,
         /* [in] */ const String& value);
-
 };
 
 } // namespace Elastos

@@ -1225,6 +1225,8 @@ module
         GetTheme(
             [out] IResourcesTheme** theme);
 
+        /** @hide */
+        RecreateTheme();
         /**
          * Retrieve styled attribute information in this Context's theme.  See
          * {@sa Resources.Theme#obtainStyledAttributes(int[])}
@@ -3466,6 +3468,32 @@ module
             [in] String packageName,
             [in] Int32 flags,
             [in] IUserHandle* user,
+            [out] IContext** ctx);
+
+        /**
+        * Similar to {@link #createPackageContext(String, int)}, but with a
+        * different {@link UserHandle}. For example, {@link #getContentResolver()}
+        * will open any {@link Uri} as the given user. A theme package can be
+        * specified which will be used when adding resources to this context
+        *
+        * @hide
+        */
+        CreatePackageContextAsUser(
+            [in] String packageName,
+            [in] String themePackageName,
+            [in] Int32 flags,
+            [in] IUserHandle* user,
+            [out] IContext** ctx);
+
+            /** 3479
+            * Creates a context given an {@link android.content.pm.ApplicationInfo}.
+            *
+            * @hide
+            */
+        CreateApplicationContext(
+            [in] IApplicationInfo* application,
+            [in] String themePackageName,
+            [in] Int32 flags,
             [out] IContext** ctx);
 
         /**

@@ -8,6 +8,7 @@
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Content::IIntent;
 
 namespace Elastos {
 namespace Droid {
@@ -469,6 +470,41 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IIPowerManager* service,
         /* [in] */ IHandler* handler);
+
+    CARAPI CpuBoost(
+        /* [in] */ Int32 duration);
+
+    CARAPI HasPowerProfiles(
+        /* [out] */ Boolean* result);
+
+    CARAPI GetDefaultPowerProfile(
+        /* [out] */ String* profile);
+
+    CARAPI SetPowerProfile(
+        /* [in] */ const String& profile,
+        /* [out] */ Boolean* result);
+
+    CARAPI GetPowerProfile(
+        /* [out] */ String* result);
+
+    CARAPI ActivityResumed(
+        /* [in] */ IIntent* intent);
+
+    CARAPI SetKeyboardVisibility(
+        /* [in] */ Boolean visible);
+
+    CARAPI SetKeyboardLight(
+        /* [in] */ Boolean on,
+        /* [in] */ Int32 key);
+
+    CARAPI GetDefaultButtonBrightness(
+        /* [out] */ Int32* result);
+
+    CARAPI GetDefaultKeyboardBrightness(
+        /* [out] */ Int32* result);
+
+    CARAPI WakeUpWithProximityCheck(
+        /* [in] */ Int64 time);
 
 private:
     static const String TAG;

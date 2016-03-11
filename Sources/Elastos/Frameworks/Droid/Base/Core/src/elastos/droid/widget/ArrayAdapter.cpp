@@ -331,7 +331,9 @@ ECode ArrayAdapter::Init(
     /* [in] */ IList* objects)
 {
     mContext = context;
-    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&mInflater);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    mInflater = ILayoutInflater::Probe(obj);
     mResource = mDropDownResource = resource;
     mObjects = objects;
     mFieldId = textViewResourceId;

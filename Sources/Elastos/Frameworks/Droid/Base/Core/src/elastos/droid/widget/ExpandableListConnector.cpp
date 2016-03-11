@@ -35,14 +35,6 @@ AutoPtr<ExpandableListConnector::GroupMetadata> ExpandableListConnector::GroupMe
     /* [in] */ Int32 gPos,
     /* [in] */ Int64 gId)
 {
-    // ==================before translated======================
-    // GroupMetadata gm = new GroupMetadata();
-    // gm.flPos = flPos;
-    // gm.lastChildFlPos = lastChildFlPos;
-    // gm.gPos = gPos;
-    // gm.gId = gId;
-    // return gm;
-
     AutoPtr<ExpandableListConnector::GroupMetadata> gm = new GroupMetadata();
     gm->mFlPos = flPos;
     gm->mLastChildFlPos = lastChildFlPos;
@@ -55,13 +47,7 @@ ECode ExpandableListConnector::GroupMetadata::CompareTo(
     /* [in] */ IInterface* another,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // if (another == null) {
-    //     throw new IllegalArgumentException();
-    // }
-    //
-    // return gPos - another.gPos;
+    VALIDATE_NOT_NULL(result)
 
     IObject* objTmp = IObject::Probe(another);
     GroupMetadata* anotherTmp = (GroupMetadata*)objTmp;
@@ -75,9 +61,7 @@ ECode ExpandableListConnector::GroupMetadata::CompareTo(
 ECode ExpandableListConnector::GroupMetadata::DescribeContents(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return 0;
+    VALIDATE_NOT_NULL(result)
 
     *result = 0;
     return NOERROR;
@@ -87,13 +71,8 @@ ECode ExpandableListConnector::GroupMetadata::WriteToParcel(
     /* [in] */ IParcel* dest,
     /* [in] */ Int32 flags)
 {
-    VALIDATE_NOT_NULL(dest);
-    // ==================before translated======================
-    // dest.writeInt(flPos);
-    // dest.writeInt(lastChildFlPos);
-    // dest.writeInt(gPos);
-    // dest.writeLong(gId);
-
+    VALIDATE_NOT_NULL(dest)
+	
     dest->WriteInt32(mFlPos);
     dest->WriteInt32(mLastChildFlPos);
     dest->WriteInt32(this->mGPos);
@@ -150,13 +129,6 @@ AutoPtr<ExpandableListConnector::PositionMetadata> ExpandableListConnector::Posi
     /* [in] */ GroupMetadata* groupMetadata,
     /* [in] */ Int32 groupInsertIndex)
 {
-    // ==================before translated======================
-    // PositionMetadata pm = getRecycledOrCreate();
-    // pm.position = ExpandableListPosition.obtain(type, groupPos, childPos, flatListPos);
-    // pm.groupMetadata = groupMetadata;
-    // pm.groupInsertIndex = groupInsertIndex;
-    // return pm;
-
     AutoPtr<PositionMetadata> pm = GetRecycledOrCreate();
     pm->mPosition = ExpandableListPosition::Obtain(type, groupPos, childPos,flatListPos);
     pm->mGroupMetadata = groupMetadata;
@@ -166,14 +138,6 @@ AutoPtr<ExpandableListConnector::PositionMetadata> ExpandableListConnector::Posi
 
 ECode ExpandableListConnector::PositionMetadata::Recycle()
 {
-    // ==================before translated======================
-    // resetState();
-    // synchronized (sPool) {
-    //     if (sPool.size() < MAX_POOL_SIZE) {
-    //         sPool.add(this);
-    //     }
-    // }
-
     ResetState();
     AutoLock lock(sPoolLock);
     Int32 size = 0;
@@ -187,10 +151,8 @@ ECode ExpandableListConnector::PositionMetadata::Recycle()
 ECode ExpandableListConnector::PositionMetadata::IsExpanded(
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return groupMetadata != null;
-
+    VALIDATE_NOT_NULL(result)
+	
     *result = mGroupMetadata != NULL;
     return NOERROR;
 }
@@ -202,14 +164,6 @@ ExpandableListConnector::PositionMetadata::PositionMetadata()
 
 ECode ExpandableListConnector::PositionMetadata::ResetState()
 {
-    // ==================before translated======================
-    // if (position != null) {
-    //     position.recycle();
-    //     position = null;
-    // }
-    // groupMetadata = null;
-    // groupInsertIndex = 0;
-
     if(mPosition != NULL) {
         mPosition->Recycle();
         mPosition = NULL;
@@ -222,18 +176,6 @@ ECode ExpandableListConnector::PositionMetadata::ResetState()
 
 AutoPtr<ExpandableListConnector::PositionMetadata> ExpandableListConnector::PositionMetadata::GetRecycledOrCreate()
 {
-    // ==================before translated======================
-    // PositionMetadata pm;
-    // synchronized (sPool) {
-    //     if (sPool.size() > 0) {
-    //         pm = sPool.remove(0);
-    //     } else {
-    //         return new PositionMetadata();
-    //     }
-    // }
-    // pm.resetState();
-    // return pm;
-
     AutoPtr<PositionMetadata> pm = NULL;
     // synchronized
     {
@@ -280,11 +222,6 @@ ExpandableListConnector::MyDataSetObserver::MyDataSetObserver(
 
 ECode ExpandableListConnector::MyDataSetObserver::OnChanged()
 {
-    // ==================before translated======================
-    // refreshExpGroupMetadataList(true, true);
-    //
-    // notifyDataSetChanged();
-
     mOwner->RefreshExpGroupMetadataList(TRUE, TRUE);
     mOwner->NotifyDataSetChanged();
     return NOERROR;
@@ -292,11 +229,6 @@ ECode ExpandableListConnector::MyDataSetObserver::OnChanged()
 
 ECode ExpandableListConnector::MyDataSetObserver::OnInvalidated()
 {
-    // ==================before translated======================
-    // refreshExpGroupMetadataList(true, true);
-    //
-    // notifyDataSetInvalidated();
-
     mOwner->RefreshExpGroupMetadataList(TRUE, TRUE);
     mOwner->NotifyDataSetInvalidated();
     return NOERROR;
@@ -315,15 +247,8 @@ ECode ExpandableListConnector::InnerParcelableCreator::CreateFromParcel(
     /* [in] */ IParcel* in,
     /* [out] */ GroupMetadata** result)
 {
-    VALIDATE_NOT_NULL(in);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // GroupMetadata gm = GroupMetadata.obtain(
-    //         in.readInt(),
-    //         in.readInt(),
-    //         in.readInt(),
-    //         in.readLong());
-    // return gm;
+    VALIDATE_NOT_NULL(in)
+    VALIDATE_NOT_NULL(result)
 
     Int32 flPos, lastChildFlPos, pos;
     Int64 id;
@@ -340,9 +265,7 @@ ECode ExpandableListConnector::InnerParcelableCreator::NewArray(
     /* [in] */ Int32 size,
     /* [out] */ ArrayOf<GroupMetadata*>** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return new GroupMetadata[size];
+    VALIDATE_NOT_NULL(result)
 
     *result = ArrayOf<GroupMetadata*>::Alloc(size);
     for (Int32 idx=0; idx<size; ++idx) {
@@ -356,7 +279,8 @@ ECode ExpandableListConnector::InnerParcelableCreator::NewArray(
 ECode ExpandableListConnector::InnerParcelableCreator::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    VALIDATE_NOT_NULL(source);
+    VALIDATE_NOT_NULL(source)
+	
     return NOERROR;
 }
 
@@ -364,7 +288,8 @@ ECode ExpandableListConnector::InnerParcelableCreator::ReadFromParcel(
 ECode ExpandableListConnector::InnerParcelableCreator::WriteToParcel(
     /* [in] */ IParcel* source)
 {
-    VALIDATE_NOT_NULL(source);
+    VALIDATE_NOT_NULL(source)
+	
     return NOERROR;
 }
 
@@ -383,11 +308,6 @@ ExpandableListConnector::ExpandableListConnector()
 ECode ExpandableListConnector::constructor(
     /* [in] */ IExpandableListAdapter* expandableListAdapter)
 {
-    // ==================before translated======================
-    // mExpGroupMetadataList = new ArrayList<GroupMetadata>();
-    //
-    // setExpandableListAdapter(expandableListAdapter);
-
     CArrayList::New((IList**)&mExpGroupMetadataList);
     SetExpandableListAdapter(expandableListAdapter);
     return NOERROR;
@@ -396,14 +316,7 @@ ECode ExpandableListConnector::constructor(
 ECode ExpandableListConnector::SetExpandableListAdapter(
     /* [in] */ IExpandableListAdapter* expandableListAdapter)
 {
-    VALIDATE_NOT_NULL(expandableListAdapter);
-    // ==================before translated======================
-    // if (mExpandableListAdapter != null) {
-    //     mExpandableListAdapter.unregisterDataSetObserver(mDataSetObserver);
-    // }
-    //
-    // mExpandableListAdapter = expandableListAdapter;
-    // expandableListAdapter.registerDataSetObserver(mDataSetObserver);
+    VALIDATE_NOT_NULL(expandableListAdapter)
 
     if (mExpandableListAdapter != NULL) {
         FAIL_RETURN(mExpandableListAdapter->UnregisterDataSetObserver(mDataSetObserver));
@@ -417,147 +330,8 @@ ECode ExpandableListConnector::GetUnflattenedPos(
     /* [in] */ Int32 flPos,
     /* [out] */ IPositionMetadata** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // /* Keep locally since frequent use */
-    // final ArrayList<GroupMetadata> egml = mExpGroupMetadataList;
-    // final int numExpGroups = egml.size();
-    //
-    // /* Binary search variables */
-    // int leftExpGroupIndex = 0;
-    // int rightExpGroupIndex = numExpGroups - 1;
-    // int midExpGroupIndex = 0;
-    // GroupMetadata midExpGm;
-    //
-    // if (numExpGroups == 0) {
-    //     /*
-    //      * There aren't any expanded groups (hence no visible children
-    //      * either), so flPos must be a group and its group pos will be the
-    //      * same as its flPos
-    //      */
-    //     return PositionMetadata.obtain(flPos, ExpandableListPosition.GROUP, flPos,
-    //             -1, null, 0);
-    // }
-    //
-    // /*
-    //  * Binary search over the expanded groups to find either the exact
-    //  * expanded group (if we're looking for a group) or the group that
-    //  * contains the child we're looking for. If we are looking for a
-    //  * collapsed group, we will not have a direct match here, but we will
-    //  * find the expanded group just before the group we're searching for (so
-    //  * then we can calculate the group position of the group we're searching
-    //  * for). If there isn't an expanded group prior to the group being
-    //  * searched for, then the group being searched for's group position is
-    //  * the same as the flat list position (since there are no children before
-    //  * it, and all groups before it are collapsed).
-    //  */
-    // while (leftExpGroupIndex <= rightExpGroupIndex) {
-    //     midExpGroupIndex =
-    //             (rightExpGroupIndex - leftExpGroupIndex) / 2
-    //                     + leftExpGroupIndex;
-    //     midExpGm = egml.get(midExpGroupIndex);
-    //
-    //     if (flPos > midExpGm.lastChildFlPos) {
-    //         /*
-    //          * The flat list position is after the current middle group's
-    //          * last child's flat list position, so search right
-    //          */
-    //         leftExpGroupIndex = midExpGroupIndex + 1;
-    //     } else if (flPos < midExpGm.flPos) {
-    //         /*
-    //          * The flat list position is before the current middle group's
-    //          * flat list position, so search left
-    //          */
-    //         rightExpGroupIndex = midExpGroupIndex - 1;
-    //     } else if (flPos == midExpGm.flPos) {
-    //         /*
-    //          * The flat list position is this middle group's flat list
-    //          * position, so we've found an exact hit
-    //          */
-    //         return PositionMetadata.obtain(flPos, ExpandableListPosition.GROUP,
-    //                 midExpGm.gPos, -1, midExpGm, midExpGroupIndex);
-    //     } else if (flPos <= midExpGm.lastChildFlPos
-    //             /* && flPos > midGm.flPos as deduced from previous
-    //              * conditions */) {
-    //         /* The flat list position is a child of the middle group */
-    //
-    //         /*
-    //          * Subtract the first child's flat list position from the
-    //          * specified flat list pos to get the child's position within
-    //          * the group
-    //          */
-    //         final int childPos = flPos - (midExpGm.flPos + 1);
-    //         return PositionMetadata.obtain(flPos, ExpandableListPosition.CHILD,
-    //                 midExpGm.gPos, childPos, midExpGm, midExpGroupIndex);
-    //     }
-    // }
-    //
-    // /*
-    //  * If we've reached here, it means the flat list position must be a
-    //  * group that is not expanded, since otherwise we would have hit it
-    //  * in the above search.
-    //  */
-    //
-    //
-    // /**
-    //  * If we are to expand this group later, where would it go in the
-    //  * mExpGroupMetadataList ?
-    //  */
-    // int insertPosition = 0;
-    //
-    // /** What is its group position in the list of all groups? */
-    // int groupPos = 0;
-    //
-    // /*
-    //  * To figure out exact insertion and prior group positions, we need to
-    //  * determine how we broke out of the binary search.  We backtrack
-    //  * to see this.
-    //  */
-    // if (leftExpGroupIndex > midExpGroupIndex) {
-    //
-    //     /*
-    //      * This would occur in the first conditional, so the flat list
-    //      * insertion position is after the left group. Also, the
-    //      * leftGroupPos is one more than it should be (since that broke out
-    //      * of our binary search), so we decrement it.
-    //      */
-    //     final GroupMetadata leftExpGm = egml.get(leftExpGroupIndex-1);
-    //
-    //     insertPosition = leftExpGroupIndex;
-    //
-    //     /*
-    //      * Sums the number of groups between the prior exp group and this
-    //      * one, and then adds it to the prior group's group pos
-    //      */
-    //     groupPos =
-    //         (flPos - leftExpGm.lastChildFlPos) + leftExpGm.gPos;
-    // } else if (rightExpGroupIndex < midExpGroupIndex) {
-    //
-    //     /*
-    //      * This would occur in the second conditional, so the flat list
-    //      * insertion position is before the right group. Also, the
-    //      * rightGroupPos is one less than it should be, so increment it.
-    //      */
-    //     final GroupMetadata rightExpGm = egml.get(++rightExpGroupIndex);
-    //
-    //     insertPosition = rightExpGroupIndex;
-    //
-    //     /*
-    //      * Subtracts this group's flat list pos from the group after's flat
-    //      * list position to find out how many groups are in between the two
-    //      * groups. Then, subtracts that number from the group after's group
-    //      * pos to get this group's pos.
-    //      */
-    //     groupPos = rightExpGm.gPos - (rightExpGm.flPos - flPos);
-    // } else {
-    //     // TODO: clean exit
-    //     throw new RuntimeException("Unknown state");
-    // }
-    //
-    // return PositionMetadata.obtain(flPos, ExpandableListPosition.GROUP, groupPos, -1,
-    //         null, insertPosition);
-
-    assert(0);
+    VALIDATE_NOT_NULL(result)
+	
     AutoPtr<IList> egml = mExpGroupMetadataList;
     Int32 numExpGroups = 0;
     egml->GetSize(&numExpGroups);
@@ -634,118 +408,9 @@ ECode ExpandableListConnector::GetFlattenedPos(
     /* [in] */ IExpandableListPosition* pos,
     /* [out] */ IPositionMetadata** result)
 {
-    VALIDATE_NOT_NULL(pos);
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final ArrayList<GroupMetadata> egml = mExpGroupMetadataList;
-    // final int numExpGroups = egml.size();
-    //
-    // /* Binary search variables */
-    // int leftExpGroupIndex = 0;
-    // int rightExpGroupIndex = numExpGroups - 1;
-    // int midExpGroupIndex = 0;
-    // GroupMetadata midExpGm;
-    //
-    // if (numExpGroups == 0) {
-    //     /*
-    //      * There aren't any expanded groups, so flPos must be a group and
-    //      * its flPos will be the same as its group pos.  The
-    //      * insert position is 0 (since the list is empty).
-    //      */
-    //     return PositionMetadata.obtain(pos.groupPos, pos.type,
-    //             pos.groupPos, pos.childPos, null, 0);
-    // }
-    //
-    // /*
-    //  * Binary search over the expanded groups to find either the exact
-    //  * expanded group (if we're looking for a group) or the group that
-    //  * contains the child we're looking for.
-    //  */
-    // while (leftExpGroupIndex <= rightExpGroupIndex) {
-    //     midExpGroupIndex = (rightExpGroupIndex - leftExpGroupIndex)/2 + leftExpGroupIndex;
-    //     midExpGm = egml.get(midExpGroupIndex);
-    //
-    //     if (pos.groupPos > midExpGm.gPos) {
-    //         /*
-    //          * It's after the current middle group, so search right
-    //          */
-    //         leftExpGroupIndex = midExpGroupIndex + 1;
-    //     } else if (pos.groupPos < midExpGm.gPos) {
-    //         /*
-    //          * It's before the current middle group, so search left
-    //          */
-    //         rightExpGroupIndex = midExpGroupIndex - 1;
-    //     } else if (pos.groupPos == midExpGm.gPos) {
-    //         /*
-    //          * It's this middle group, exact hit
-    //          */
-    //
-    //         if (pos.type == ExpandableListPosition.GROUP) {
-    //             /* If it's a group, give them this matched group's flPos */
-    //             return PositionMetadata.obtain(midExpGm.flPos, pos.type,
-    //                     pos.groupPos, pos.childPos, midExpGm, midExpGroupIndex);
-    //         } else if (pos.type == ExpandableListPosition.CHILD) {
-    //             /* If it's a child, calculate the flat list pos */
-    //             return PositionMetadata.obtain(midExpGm.flPos + pos.childPos
-    //                     + 1, pos.type, pos.groupPos, pos.childPos,
-    //                     midExpGm, midExpGroupIndex);
-    //         } else {
-    //             return null;
-    //         }
-    //     }
-    // }
-    //
-    // /*
-    //  * If we've reached here, it means there was no match in the expanded
-    //  * groups, so it must be a collapsed group that they're search for
-    //  */
-    // if (pos.type != ExpandableListPosition.GROUP) {
-    //     /* If it isn't a group, return null */
-    //     return null;
-    // }
-    //
-    // /*
-    //  * To figure out exact insertion and prior group positions, we need to
-    //  * determine how we broke out of the binary search. We backtrack to see
-    //  * this.
-    //  */
-    // if (leftExpGroupIndex > midExpGroupIndex) {
-    //
-    //     /*
-    //      * This would occur in the first conditional, so the flat list
-    //      * insertion position is after the left group.
-    //      *
-    //      * The leftGroupPos is one more than it should be (from the binary
-    //      * search loop) so we subtract 1 to get the actual left group.  Since
-    //      * the insertion point is AFTER the left group, we keep this +1
-    //      * value as the insertion point
-    //      */
-    //     final GroupMetadata leftExpGm = egml.get(leftExpGroupIndex-1);
-    //     final int flPos =
-    //             leftExpGm.lastChildFlPos
-    //                     + (pos.groupPos - leftExpGm.gPos);
-    //
-    //     return PositionMetadata.obtain(flPos, pos.type, pos.groupPos,
-    //             pos.childPos, null, leftExpGroupIndex);
-    // } else if (rightExpGroupIndex < midExpGroupIndex) {
-    //
-    //     /*
-    //      * This would occur in the second conditional, so the flat list
-    //      * insertion position is before the right group. Also, the
-    //      * rightGroupPos is one less than it should be (from binary search
-    //      * loop), so we increment to it.
-    //      */
-    //     final GroupMetadata rightExpGm = egml.get(++rightExpGroupIndex);
-    //     final int flPos =
-    //             rightExpGm.flPos
-    //                     - (rightExpGm.gPos - pos.groupPos);
-    //     return PositionMetadata.obtain(flPos, pos.type, pos.groupPos,
-    //             pos.childPos, null, rightExpGroupIndex);
-    // } else {
-    //     return null;
-    // }
+    VALIDATE_NOT_NULL(pos)
+    VALIDATE_NOT_NULL(result)
 
-    assert(0);
     AutoPtr<IList> egml = mExpGroupMetadataList;
     Int32 numExpGroups = 0;
     egml->GetSize(&numExpGroups);
@@ -834,9 +499,6 @@ ECode ExpandableListConnector::GetFlattenedPos(
 
 Boolean ExpandableListConnector::AreAllItemsEnabled()
 {
-    // ==================before translated======================
-    // return mExpandableListAdapter.areAllItemsEnabled();
-
     Boolean enabled;
     mExpandableListAdapter->AreAllItemsEnabled(&enabled);
     return enabled;
@@ -845,22 +507,6 @@ Boolean ExpandableListConnector::AreAllItemsEnabled()
 Boolean ExpandableListConnector::IsEnabled(
     /* [in] */ Int32 flatListPos)
 {
-    // ==================before translated======================
-    // final PositionMetadata metadata = getUnflattenedPos(flatListPos);
-    // final ExpandableListPosition pos = metadata.position;
-    //
-    // boolean retValue;
-    // if (pos.type == ExpandableListPosition.CHILD) {
-    //     retValue = mExpandableListAdapter.isChildSelectable(pos.groupPos, pos.childPos);
-    // } else {
-    //     // Groups are always selectable
-    //     retValue = true;
-    // }
-    //
-    // metadata.recycle();
-    //
-    // return retValue;
-
     AutoPtr<IPositionMetadata> posMetadata;
     GetUnflattenedPos(flatListPos, (IPositionMetadata**)&posMetadata);
     PositionMetadata* metadata = (PositionMetadata*)posMetadata.Get();
@@ -881,14 +527,7 @@ Boolean ExpandableListConnector::IsEnabled(
 ECode ExpandableListConnector::GetCount(
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // /*
-    //  * Total count for the list view is the number groups plus the
-    //  * number of children from currently expanded groups (a value we keep
-    //  * cached in this class)
-    //  */
-    // return mExpandableListAdapter.getGroupCount() + mTotalExpChildrenCount;
+    VALIDATE_NOT_NULL(result)
 
     Int32 count = 0;
     mExpandableListAdapter->GetGroupCount(&count);
@@ -900,36 +539,18 @@ ECode ExpandableListConnector::GetItem(
     /* [in] */ Int32 flatListPos,
     /* [out] */ IInterface** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final PositionMetadata posMetadata = getUnflattenedPos(flatListPos);
-    //
-    // Object retValue;
-    // if (posMetadata.position.type == ExpandableListPosition.GROUP) {
-    //     retValue = mExpandableListAdapter
-    //             .getGroup(posMetadata.position.groupPos);
-    // } else if (posMetadata.position.type == ExpandableListPosition.CHILD) {
-    //     retValue = mExpandableListAdapter.getChild(posMetadata.position.groupPos,
-    //             posMetadata.position.childPos);
-    // } else {
-    //     // TODO: clean exit
-    //     throw new RuntimeException("Flat list position is of unknown type");
-    // }
-    //
-    // posMetadata.recycle();
-    //
-    // return retValue;
+    VALIDATE_NOT_NULL(result)
 
     AutoPtr<IPositionMetadata> metadata;
     GetUnflattenedPos(flatListPos, (IPositionMetadata**)&metadata);
     PositionMetadata* posMetadata = (PositionMetadata*)metadata.Get();
 
     if (posMetadata->mPosition->mType == IExpandableListPosition::GROUP) {
-        mExpandableListAdapter->GetGroup(posMetadata->mPosition->mGroupPos, (IInterface**)result);
+        mExpandableListAdapter->GetGroup(posMetadata->mPosition->mGroupPos, result);
     }
     else if (posMetadata->mPosition->mType == IExpandableListPosition::CHILD) {
         mExpandableListAdapter->GetChild(posMetadata->mPosition->mGroupPos,
-            posMetadata->mPosition->mChildPos, (IInterface**)result);
+            posMetadata->mPosition->mChildPos, result);
     }
     else {
         // TODO: clean exit
@@ -945,26 +566,7 @@ ECode ExpandableListConnector::GetItemId(
     /* [in] */ Int32 flatListPos,
     /* [out] */ Int64* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final PositionMetadata posMetadata = getUnflattenedPos(flatListPos);
-    // final long groupId = mExpandableListAdapter.getGroupId(posMetadata.position.groupPos);
-    //
-    // long retValue;
-    // if (posMetadata.position.type == ExpandableListPosition.GROUP) {
-    //     retValue = mExpandableListAdapter.getCombinedGroupId(groupId);
-    // } else if (posMetadata.position.type == ExpandableListPosition.CHILD) {
-    //     final long childId = mExpandableListAdapter.getChildId(posMetadata.position.groupPos,
-    //             posMetadata.position.childPos);
-    //     retValue = mExpandableListAdapter.getCombinedChildId(groupId, childId);
-    // } else {
-    //     // TODO: clean exit
-    //     throw new RuntimeException("Flat list position is of unknown type");
-    // }
-    //
-    // posMetadata.recycle();
-    //
-    // return retValue;
+    VALIDATE_NOT_NULL(result)
 
     AutoPtr<IPositionMetadata> metadata;
     GetUnflattenedPos(flatListPos, (IPositionMetadata**)&metadata);
@@ -1001,26 +603,6 @@ ECode ExpandableListConnector::GetView(
     VALIDATE_NOT_NULL(convertView);
     VALIDATE_NOT_NULL(parent);
     VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // final PositionMetadata posMetadata = getUnflattenedPos(flatListPos);
-    //
-    // View retValue;
-    // if (posMetadata.position.type == ExpandableListPosition.GROUP) {
-    //     retValue = mExpandableListAdapter.getGroupView(posMetadata.position.groupPos,
-    //             posMetadata.isExpanded(), convertView, parent);
-    // } else if (posMetadata.position.type == ExpandableListPosition.CHILD) {
-    //     final boolean isLastChild = posMetadata.groupMetadata.lastChildFlPos == flatListPos;
-    //
-    //     retValue = mExpandableListAdapter.getChildView(posMetadata.position.groupPos,
-    //             posMetadata.position.childPos, isLastChild, convertView, parent);
-    // } else {
-    //     // TODO: clean exit
-    //     throw new RuntimeException("Flat list position is of unknown type");
-    // }
-    //
-    // posMetadata.recycle();
-    //
-    // return retValue;
 
     AutoPtr<IPositionMetadata> metadata;
     GetUnflattenedPos(flatListPos, (IPositionMetadata**)&metadata);
@@ -1029,13 +611,13 @@ ECode ExpandableListConnector::GetView(
     Boolean expanded = FALSE;
     if (posMetadata->mPosition->mType == IExpandableListPosition::GROUP) {
         mExpandableListAdapter->GetGroupView(posMetadata->mPosition->mGroupPos,
-            (posMetadata->IsExpanded(&expanded), expanded), convertView, parent, (IView**)result);
+            (posMetadata->IsExpanded(&expanded), expanded), convertView, parent, result);
     }
     else if (posMetadata->mPosition->mType == IExpandableListPosition::CHILD) {
         Boolean isLastChild = posMetadata->mGroupMetadata->mLastChildFlPos == flatListPos;
 
         mExpandableListAdapter->GetChildView(posMetadata->mPosition->mGroupPos,
-            posMetadata->mPosition->mChildPos, isLastChild, convertView, parent, (IView**)result);
+            posMetadata->mPosition->mChildPos, isLastChild, convertView, parent, result);
     }
     else {
         // TODO: clean exit
@@ -1050,32 +632,6 @@ ECode ExpandableListConnector::GetView(
 Int32 ExpandableListConnector::GetItemViewType(
     /* [in] */ Int32 flatListPos)
 {
-    // ==================before translated======================
-    // final PositionMetadata metadata = getUnflattenedPos(flatListPos);
-    // final ExpandableListPosition pos = metadata.position;
-    //
-    // int retValue;
-    // if (mExpandableListAdapter instanceof HeterogeneousExpandableList) {
-    //     HeterogeneousExpandableList adapter =
-    //             (HeterogeneousExpandableList) mExpandableListAdapter;
-    //     if (pos.type == ExpandableListPosition.GROUP) {
-    //         retValue = adapter.getGroupType(pos.groupPos);
-    //     } else {
-    //         final int childType = adapter.getChildType(pos.groupPos, pos.childPos);
-    //         retValue = adapter.getGroupTypeCount() + childType;
-    //     }
-    // } else {
-    //     if (pos.type == ExpandableListPosition.GROUP) {
-    //         retValue = 0;
-    //     } else {
-    //         retValue = 1;
-    //     }
-    // }
-    //
-    // metadata.recycle();
-    //
-    // return retValue;
-
     AutoPtr<IPositionMetadata> metadata;
     GetUnflattenedPos(flatListPos, (IPositionMetadata**)&metadata);
     PositionMetadata* posMetadata = (PositionMetadata*)metadata.Get();
@@ -1110,15 +666,6 @@ Int32 ExpandableListConnector::GetItemViewType(
 
 Int32 ExpandableListConnector::GetViewTypeCount()
 {
-    // ==================before translated======================
-    // if (mExpandableListAdapter instanceof HeterogeneousExpandableList) {
-    //     HeterogeneousExpandableList adapter =
-    //             (HeterogeneousExpandableList) mExpandableListAdapter;
-    //     return adapter.getGroupTypeCount() + adapter.getChildTypeCount();
-    // } else {
-    //     return 2;
-    // }
-
     IHeterogeneousExpandableList* adapter = IHeterogeneousExpandableList::Probe(mExpandableListAdapter);
     if (adapter != NULL) {
         Int32 groupCount = 0;
@@ -1181,32 +728,6 @@ ECode ExpandableListConnector::CollapseGroup(
     VALIDATE_NOT_NULL(result);
 
     PositionMetadata* posMetadata = (PositionMetadata*)metadata;
-    // ==================before translated======================
-    // /*
-    //  * Collapsing requires removal from mExpGroupMetadataList
-    //  */
-    //
-    // /*
-    //  * If it is null, it must be already collapsed. This group metadata
-    //  * object should have been set from the search that returned the
-    //  * position metadata object.
-    //  */
-    // if (posMetadata.groupMetadata == null) return false;
-    //
-    // // Remove the group from the list of expanded groups
-    // mExpGroupMetadataList.remove(posMetadata.groupMetadata);
-    //
-    // // Refresh the metadata
-    // refreshExpGroupMetadataList(false, false);
-    //
-    // // Notify of change
-    // notifyDataSetChanged();
-    //
-    // // Give the callback
-    // mExpandableListAdapter.onGroupCollapsed(posMetadata.groupMetadata.gPos);
-    //
-    // return true;
-
     if (posMetadata->mGroupMetadata == NULL) {
         *result = FALSE;
         return NOERROR;
@@ -1224,16 +745,8 @@ ECode ExpandableListConnector::ExpandGroup(
     /* [in] */ Int32 groupPos,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // ExpandableListPosition elGroupPos = ExpandableListPosition.obtain(
-    //         ExpandableListPosition.GROUP, groupPos, -1, -1);
-    // PositionMetadata pm = getFlattenedPos(elGroupPos);
-    // elGroupPos.recycle();
-    // boolean retValue = expandGroup(pm);
-    // pm.recycle();
-    // return retValue;
-
+    VALIDATE_NOT_NULL(result)
+	
     AutoPtr<ExpandableListPosition> elGroupPos = ExpandableListPosition::Obtain(IExpandableListPosition::GROUP, groupPos, -1, -1);
     AutoPtr<IPositionMetadata> pm;
     GetFlattenedPos(elGroupPos, (IPositionMetadata**)&pm);
@@ -1252,56 +765,6 @@ ECode ExpandableListConnector::ExpandGroup(
     VALIDATE_NOT_NULL(result);
 
     PositionMetadata* posMetadata = (PositionMetadata*)metadata;
-    // ==================before translated======================
-    // /*
-    //  * Expanding requires insertion into the mExpGroupMetadataList
-    //  */
-    //
-    // if (posMetadata.position.groupPos < 0) {
-    //     // TODO clean exit
-    //     throw new RuntimeException("Need group");
-    // }
-    //
-    // if (mMaxExpGroupCount == 0) return false;
-    //
-    // // Check to see if it's already expanded
-    // if (posMetadata.groupMetadata != null) return false;
-    //
-    // /* Restrict number of expanded groups to mMaxExpGroupCount */
-    // if (mExpGroupMetadataList.size() >= mMaxExpGroupCount) {
-    //     /* Collapse a group */
-    //     // TODO: Collapse something not on the screen instead of the first one?
-    //     // TODO: Could write overloaded function to take GroupMetadata to collapse
-    //     GroupMetadata collapsedGm = mExpGroupMetadataList.get(0);
-    //
-    //     int collapsedIndex = mExpGroupMetadataList.indexOf(collapsedGm);
-    //
-    //     collapseGroup(collapsedGm.gPos);
-    //
-    //     /* Decrement index if it is after the group we removed */
-    //     if (posMetadata.groupInsertIndex > collapsedIndex) {
-    //         posMetadata.groupInsertIndex--;
-    //     }
-    // }
-    //
-    // GroupMetadata expandedGm = GroupMetadata.obtain(
-    //         GroupMetadata.REFRESH,
-    //         GroupMetadata.REFRESH,
-    //         posMetadata.position.groupPos,
-    //         mExpandableListAdapter.getGroupId(posMetadata.position.groupPos));
-    //
-    // mExpGroupMetadataList.add(posMetadata.groupInsertIndex, expandedGm);
-    //
-    // // Refresh the metadata
-    // refreshExpGroupMetadataList(false, false);
-    //
-    // // Notify of change
-    // notifyDataSetChanged();
-    //
-    // // Give the callback
-    // mExpandableListAdapter.onGroupExpanded(expandedGm.gPos);
-    //
-    // return true;
 
     if (posMetadata->mPosition->mGroupPos < 0) {
         // TODO clean exit
@@ -1355,18 +818,7 @@ ECode ExpandableListConnector::IsGroupExpanded(
     /* [in] */ Int32 groupPosition,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // GroupMetadata groupMetadata;
-    // for (int i = mExpGroupMetadataList.size() - 1; i >= 0; i--) {
-    //     groupMetadata = mExpGroupMetadataList.get(i);
-    //
-    //     if (groupMetadata.gPos == groupPosition) {
-    //         return true;
-    //     }
-    // }
-    //
-    // return false;
+    VALIDATE_NOT_NULL(result)
 
     Int32 size = 0;
     mExpGroupMetadataList->GetSize(&size);
@@ -1388,9 +840,6 @@ ECode ExpandableListConnector::IsGroupExpanded(
 ECode ExpandableListConnector::SetMaxExpGroupCount(
     /* [in] */ Int32 maxExpGroupCount)
 {
-    // ==================before translated======================
-    // mMaxExpGroupCount = maxExpGroupCount;
-
     mMaxExpGroupCount = maxExpGroupCount;
     return NOERROR;
 }
@@ -1398,10 +847,8 @@ ECode ExpandableListConnector::SetMaxExpGroupCount(
 ECode ExpandableListConnector::GetAdapter(
     /* [out] */ IExpandableListAdapter** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mExpandableListAdapter;
-
+    VALIDATE_NOT_NULL(result)
+	
     *result = mExpandableListAdapter;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -1410,14 +857,7 @@ ECode ExpandableListConnector::GetAdapter(
 ECode ExpandableListConnector::GetFilter(
     /* [out] */ IFilter** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // ExpandableListAdapter adapter = getAdapter();
-    // if (adapter instanceof Filterable) {
-    //     return ((Filterable) adapter).getFilter();
-    // } else {
-    //     return null;
-    // }
+    VALIDATE_NOT_NULL(result)
 
     AutoPtr<IExpandableListAdapter> adapter;
     GetAdapter((IExpandableListAdapter**)&adapter);
@@ -1434,9 +874,7 @@ ECode ExpandableListConnector::GetFilter(
 ECode ExpandableListConnector::GetExpandedGroupMetadataList(
     /* [out] */ IList** result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // return mExpGroupMetadataList;
+    VALIDATE_NOT_NULL(result)
 
     *result = mExpGroupMetadataList;
     REFCOUNT_ADD(*result);
@@ -1446,25 +884,7 @@ ECode ExpandableListConnector::GetExpandedGroupMetadataList(
 ECode ExpandableListConnector::SetExpandedGroupMetadataList(
     /* [in] */ IList* expandedGroupMetadataList)
 {
-    VALIDATE_NOT_NULL(expandedGroupMetadataList);
-    // ==================before translated======================
-    //
-    // if ((expandedGroupMetadataList == null) || (mExpandableListAdapter == null)) {
-    //     return;
-    // }
-    //
-    // // Make sure our current data set is big enough for the previously
-    // // expanded groups, if not, ignore this request
-    // int numGroups = mExpandableListAdapter.getGroupCount();
-    // for (int i = expandedGroupMetadataList.size() - 1; i >= 0; i--) {
-    //     if (expandedGroupMetadataList.get(i).gPos >= numGroups) {
-    //         // Doh, for some reason the client doesn't have some of the groups
-    //         return;
-    //     }
-    // }
-    //
-    // mExpGroupMetadataList = expandedGroupMetadataList;
-    // refreshExpGroupMetadataList(true, false);
+    VALIDATE_NOT_NULL(expandedGroupMetadataList)
 
     Int32 size = 0;
     expandedGroupMetadataList->GetSize(&size);
@@ -1491,10 +911,6 @@ ECode ExpandableListConnector::SetExpandedGroupMetadataList(
 
 Boolean ExpandableListConnector::IsEmpty()
 {
-    // ==================before translated======================
-    // ExpandableListAdapter adapter = getAdapter();
-    // return adapter != null ? adapter.isEmpty() : true;
-
     Boolean empty = FALSE;
     AutoPtr<IExpandableListAdapter> adapter;
     GetAdapter((IExpandableListAdapter**)&adapter);
@@ -1509,81 +925,7 @@ ECode ExpandableListConnector::FindGroupPosition(
     /* [in] */ Int32 seedGroupPosition,
     /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(result);
-    // ==================before translated======================
-    // int count = mExpandableListAdapter.getGroupCount();
-    //
-    // if (count == 0) {
-    //     return AdapterView.INVALID_POSITION;
-    // }
-    //
-    // // If there isn't a selection don't hunt for it
-    // if (groupIdToMatch == AdapterView.INVALID_ROW_ID) {
-    //     return AdapterView.INVALID_POSITION;
-    // }
-    //
-    // // Pin seed to reasonable values
-    // seedGroupPosition = Math.max(0, seedGroupPosition);
-    // seedGroupPosition = Math.min(count - 1, seedGroupPosition);
-    //
-    // long endTime = SystemClock.uptimeMillis() + AdapterView.SYNC_MAX_DURATION_MILLIS;
-    //
-    // long rowId;
-    //
-    // // first position scanned so far
-    // int first = seedGroupPosition;
-    //
-    // // last position scanned so far
-    // int last = seedGroupPosition;
-    //
-    // // True if we should move down on the next iteration
-    // boolean next = false;
-    //
-    // // True when we have looked at the first item in the data
-    // boolean hitFirst;
-    //
-    // // True when we have looked at the last item in the data
-    // boolean hitLast;
-    //
-    // // Get the item ID locally (instead of getItemIdAtPosition), so
-    // // we need the adapter
-    // ExpandableListAdapter adapter = getAdapter();
-    // if (adapter == null) {
-    //     return AdapterView.INVALID_POSITION;
-    // }
-    //
-    // while (SystemClock.uptimeMillis() <= endTime) {
-    //     rowId = adapter.getGroupId(seedGroupPosition);
-    //     if (rowId == groupIdToMatch) {
-    //         // Found it!
-    //         return seedGroupPosition;
-    //     }
-    //
-    //     hitLast = last == count - 1;
-    //     hitFirst = first == 0;
-    //
-    //     if (hitLast && hitFirst) {
-    //         // Looked at everything
-    //         break;
-    //     }
-    //
-    //     if (hitFirst || (next && !hitLast)) {
-    //         // Either we hit the top, or we are trying to move down
-    //         last++;
-    //         seedGroupPosition = last;
-    //         // Try going up next time
-    //         next = false;
-    //     } else if (hitLast || (!next && !hitFirst)) {
-    //         // Either we hit the bottom, or we are trying to move up
-    //         first--;
-    //         seedGroupPosition = first;
-    //         // Try going down next time
-    //         next = true;
-    //     }
-    //
-    // }
-    //
-    // return AdapterView.INVALID_POSITION;
+    VALIDATE_NOT_NULL(result)
 
     Int32 count = 0;
     mExpandableListAdapter->GetGroupCount(&count);
@@ -1651,75 +993,6 @@ ECode ExpandableListConnector::RefreshExpGroupMetadataList(
     /* [in] */ Boolean forceChildrenCountRefresh,
     /* [in] */ Boolean syncGroupPositions)
 {
-    // ==================before translated======================
-    // final ArrayList<GroupMetadata> egml = mExpGroupMetadataList;
-    // int egmlSize = egml.size();
-    // int curFlPos = 0;
-    //
-    // /* Update child count as we go through */
-    // mTotalExpChildrenCount = 0;
-    //
-    // if (syncGroupPositions) {
-    //     // We need to check whether any groups have moved positions
-    //     boolean positionsChanged = false;
-    //
-    //     for (int i = egmlSize - 1; i >= 0; i--) {
-    //         GroupMetadata curGm = egml.get(i);
-    //         int newGPos = findGroupPosition(curGm.gId, curGm.gPos);
-    //         if (newGPos != curGm.gPos) {
-    //             if (newGPos == AdapterView.INVALID_POSITION) {
-    //                 // Doh, just remove it from the list of expanded groups
-    //                 egml.remove(i);
-    //                 egmlSize--;
-    //             }
-    //
-    //             curGm.gPos = newGPos;
-    //             if (!positionsChanged) positionsChanged = true;
-    //         }
-    //     }
-    //
-    //     if (positionsChanged) {
-    //         // At least one group changed positions, so re-sort
-    //         Collections.sort(egml);
-    //     }
-    // }
-    //
-    // int gChildrenCount;
-    // int lastGPos = 0;
-    // for (int i = 0; i < egmlSize; i++) {
-    //     /* Store in local variable since we'll access freq */
-    //     GroupMetadata curGm = egml.get(i);
-    //
-    //     /*
-    //      * Get the number of children, try to refrain from calling
-    //      * another class's method unless we have to (so do a subtraction)
-    //      */
-    //     if ((curGm.lastChildFlPos == GroupMetadata.REFRESH) || forceChildrenCountRefresh) {
-    //         gChildrenCount = mExpandableListAdapter.getChildrenCount(curGm.gPos);
-    //     } else {
-    //         /* Num children for this group is its last child's fl pos minus
-    //          * the group's fl pos
-    //          */
-    //         gChildrenCount = curGm.lastChildFlPos - curGm.flPos;
-    //     }
-    //
-    //     /* Update */
-    //     mTotalExpChildrenCount += gChildrenCount;
-    //
-    //     /*
-    //      * This skips the collapsed groups and increments the flat list
-    //      * position (for subsequent exp groups) by accounting for the collapsed
-    //      * groups
-    //      */
-    //     curFlPos += (curGm.gPos - lastGPos);
-    //     lastGPos = curGm.gPos;
-    //
-    //     /* Update the flat list positions, and the current flat list pos */
-    //     curGm.flPos = curFlPos;
-    //     curFlPos += gChildrenCount;
-    //     curGm.lastChildFlPos = curFlPos;
-    // }
-
     AutoPtr<IList> egml = mExpGroupMetadataList;
     Int32 egmlSize = 0;
     egml->GetSize(&egmlSize);

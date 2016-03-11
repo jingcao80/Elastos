@@ -561,6 +561,7 @@ ECode InputDevice::ToString(
     AppendSourceDescriptionIfApplicable(description, IInputDevice::SOURCE_TOUCHPAD, String("touchpad"));
     AppendSourceDescriptionIfApplicable(description, IInputDevice::SOURCE_JOYSTICK, String("joystick"));
     AppendSourceDescriptionIfApplicable(description, IInputDevice::SOURCE_GAMEPAD, String("gamepad"));
+    AppendSourceDescriptionIfApplicable(description, IInputDevice::SOURCE_GESTURE_SENSOR, String("gesture"));
     description += " )\n";
     Int32 size;
     mMotionRanges->GetSize(&size);

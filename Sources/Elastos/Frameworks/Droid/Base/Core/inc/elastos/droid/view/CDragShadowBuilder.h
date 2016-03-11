@@ -2,8 +2,14 @@
 #ifndef __ELASTOS_DROID_VIEW_CDRAGSHADOWBUILDER_H__
 #define __ELASTOS_DROID_VIEW_CDRAGSHADOWBUILDER_H__
 
+#include "Elastos.Droid.Graphics.h"
+#include "Elastos.Droid.View.h"
+#include "elastos/droid/ext/frameworkdef.h"
 #include "_Elastos_Droid_View_CDragShadowBuilder.h"
 
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Graphics::ICanvas;
 
@@ -12,8 +18,15 @@ namespace Droid {
 namespace View {
 
 CarClass(CDragShadowBuilder)
+    , public Object
+    , public IDragShadowBuilder
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
+    CDragShadowBuilder();
     /**
      * Constructs a shadow image builder based on a View. By default, the resulting drag
      * shadow will have the same appearance and dimensions as the View, with the touch point

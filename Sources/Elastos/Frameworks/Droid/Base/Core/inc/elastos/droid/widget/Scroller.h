@@ -2,14 +2,17 @@
 #define __ELASTOS_DROID_WIDGET_SCROLLER_H__
 
 #include "Elastos.Droid.View.h"
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
+
+using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Os::IPowerManager;
 
 namespace Elastos {
 namespace Droid {
 namespace Widget {
 
-using Elastos::Droid::Content::IContext;
 using Elastos::Droid::View::Animation::IInterpolator;
 
 class Scroller
@@ -194,6 +197,8 @@ private:
     Float mFlingFriction;// = ViewConfiguration.getScrollFriction();
     Float mDeceleration;
     Float mPpi;
+
+    AutoPtr<IPowerManager> mPm;
 
     Float mPhysicalCoeff;
 };
