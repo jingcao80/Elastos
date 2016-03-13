@@ -221,8 +221,7 @@ public:
         /* [in] */ IResourcesTheme* theme);
 
     //@Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
 protected:
     CARAPI constructor(

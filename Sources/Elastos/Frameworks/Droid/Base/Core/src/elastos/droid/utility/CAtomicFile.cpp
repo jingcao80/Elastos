@@ -10,12 +10,14 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/utility/CAtomicFile.h"
 #include "elastos/droid/os/FileUtils.h"
+#include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::Os::FileUtils;
+using Elastos::Utility::Logging::Logger;
 using Elastos::IO::CFile;
 using Elastos::IO::CFileInputStream;
 using Elastos::IO::CFileOutputStream;
 using Elastos::IO::ICloseable;
-using Elastos::Droid::Os::FileUtils;
 
 namespace Elastos {
 namespace Droid {
@@ -40,7 +42,11 @@ ECode CAtomicFile::constructor(
 
     mBaseName = baseName;
     String name;
-    FAIL_RETURN(baseName->GetPath(&name));
+    ECode ec = baseName->GetPath(&name);
+    if (FAILED(ec)) {
+        Logger::E("CAtomicFile", "failed to GetPath of file %s, ec=%08x", TO_CSTR(baseName), ec);
+        return ec;
+    }
     name += ".bak";
     return CFile::New(name, (IFile**)&mBackupName);
 }
@@ -95,14 +101,14 @@ ECode CAtomicFile::StartWrite(
 
     // Rename the current file so it may be used as a backup during the next read
     Boolean b;
-    mBaseName->Exists(&b);
+    FAIL_RETURN(mBaseName->Exists(&b));
     if (b) {
         mBackupName->Exists(&b);
         if (!b) {
             mBaseName->RenameTo(mBackupName, &b);
             if (!b) {
-                //Log.w("AtomicFile", "Couldn't rename file " + mBaseName
-                //        + " to backup file " + mBackupName);
+                Logger::W("AtomicFile", "Couldn't rename file %s to backup file %s",
+                    TO_CSTR(mBaseName), TO_CSTR(mBackupName));
             }
         } else {
             Boolean result;
@@ -116,7 +122,7 @@ ECode CAtomicFile::StartWrite(
         Boolean res;
         parent->Mkdir(&res);
         if (!res) {
-            // throw new IOException("Couldn't create directory " + mBaseName);
+            Logger::W("AtomicFile", "Couldn't create directory %s", TO_CSTR(mBaseName));
             return E_IO_EXCEPTION;
         }
         String path;
@@ -124,7 +130,7 @@ ECode CAtomicFile::StartWrite(
         FileUtils::SetPermissions(
             path, FileUtils::sS_IRWXU | FileUtils::sS_IRWXG | FileUtils::sS_IXOTH, -1, -1);
         if (CFileOutputStream::New(mBaseName, stream) == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
-            // throw new IOException("Couldn't create " + mBaseName);
+            Logger::W("AtomicFile", "Couldn't create %s", TO_CSTR(mBaseName));
             return E_IO_EXCEPTION;
         }
     }
@@ -140,17 +146,21 @@ ECode CAtomicFile::StartWrite(
 ECode CAtomicFile::FinishWrite(
     /* [in] */ IFileOutputStream* str)
 {
+    ECode ec = NOERROR;
     if (str != NULL) {
         Boolean result;
         FileUtils::Sync(str);
         //try {
             ICloseable::Probe(str)->Close();
-            return mBackupName->Delete(&result);
+            ec = mBackupName->Delete(&result);
+            if (ec == (ECode)E_IO_EXCEPTION) {
+                Logger::W("CAtomicFile", "finishWrite: Got E_IO_EXCEPTION");
+            }
         //} catch (IOException e) {
         //    Log.w("AtomicFile", "finishWrite: Got exception:", e);
         //}
     }
-    return NOERROR;
+    return ec;
 }
 
 /**
@@ -161,18 +171,26 @@ ECode CAtomicFile::FinishWrite(
 ECode CAtomicFile::FailWrite(
     /* [in] */ IFileOutputStream* str)
 {
+    ECode ec = NOERROR;
     if (str != NULL) {
         Boolean result;
         FileUtils::Sync(str);
         //try {
             ICloseable::Probe(str)->Close();
-            mBaseName->Delete(&result);
-            mBackupName->RenameTo(mBaseName, &result);
+            ec = mBaseName->Delete(&result);
+            FAIL_GOTO(ec, _EXIT_)
+            ec = mBackupName->RenameTo(mBaseName, &result);
+            FAIL_GOTO(ec, _EXIT_)
         //} catch (IOException e) {
         //    Log.w("AtomicFile", "failWrite: Got exception:", e);
         //}
     }
-    return NOERROR;
+
+_EXIT_:
+    if (ec == (ECode)E_IO_EXCEPTION) {
+        Logger::W("CAtomicFile", "failWrite: Got E_IO_EXCEPTION");
+    }
+    return ec;
 }
 
 /** @hide
@@ -180,15 +198,23 @@ ECode CAtomicFile::FailWrite(
  */
 ECode CAtomicFile::Truncate()
 {
+    ECode ec = NOERROR;
     //try {
-        AutoPtr<IFileOutputStream> fos;
-        FAIL_RETURN(CFileOutputStream::New(mBaseName, (IFileOutputStream**)&fos));
-        FileUtils::Sync(fos);
-        ICloseable::Probe(fos)->Close();
+    AutoPtr<IFileOutputStream> fos;
+    ec = CFileOutputStream::New(mBaseName, (IFileOutputStream**)&fos);
+    FAIL_GOTO(ec, _EXIT_)
+
+    FileUtils::Sync(fos);
+    ICloseable::Probe(fos)->Close();
     //} catch (FileNotFoundException e) {
     //    throw new IOException("Couldn't append " + mBaseName);
     //} catch (IOException e) {
     //}
+_EXIT_:
+    if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
+        Logger::E("CAtomicFile", "Couldn't append %s", TO_CSTR(mBaseName));
+        return E_IO_EXCEPTION;
+    }
     return NOERROR;
 }
 
@@ -199,8 +225,15 @@ ECode CAtomicFile::OpenAppend(
     /* [out] */ IFileOutputStream** stream)
 {
     VALIDATE_NOT_NULL(stream);
+    *stream = NULL;
+
     //try {
-    return CFileOutputStream::New(mBaseName, TRUE, stream);
+    ECode ec = CFileOutputStream::New(mBaseName, TRUE, stream);
+    if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
+        Logger::E("CAtomicFile", "Couldn't append %s", TO_CSTR(mBaseName));
+        return E_IO_EXCEPTION;
+    }
+    return ec;
     //} catch (FileNotFoundException e) {
     //    throw new IOException("Couldn't append " + mBaseName);
     //}
@@ -222,6 +255,7 @@ ECode CAtomicFile::OpenRead(
     /* [out] */ IFileInputStream** stream)
 {
     VALIDATE_NOT_NULL(stream);
+    *stream = NULL;
     Boolean result;
     mBackupName->Exists(&result);
     if (result) {
@@ -235,7 +269,7 @@ ECode CAtomicFile::GetLastModifiedTime(
     /* [out] */ Int64* time)
 {
     VALIDATE_NOT_NULL(time)
-
+    *time = 0;
     Boolean result;
     mBackupName->Exists(&result);
     if (result) {
@@ -291,6 +325,32 @@ ECode CAtomicFile::ReadFully(
         }
     }
 
+    return NOERROR;
+}
+
+ECode CAtomicFile::Exists(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Boolean bval;
+    mBaseName->Exists(&bval);
+    if (!bval) {
+        mBackupName->Exists(&bval);
+    }
+    *result = bval;
+    return NOERROR;
+}
+
+ECode CAtomicFile::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    if (mBaseName != NULL) {
+        *str = Object::ToString(mBaseName);
+    }
+    else {
+        *str = Object::ToString(mBackupName);
+    }
     return NOERROR;
 }
 

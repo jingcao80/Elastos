@@ -190,14 +190,14 @@ ECode VelocityTracker::Recycle()
 
 VelocityTracker::VelocityTracker(
     /* [in] */ const String& strategy)
-    : mPtr(NativeInitialize(strategy))
-    , mStrategy(strategy)
-{}
+    : mStrategy(strategy)
+{
+    mPtr = NativeInitialize(strategy);
+}
 
 VelocityTracker::~VelocityTracker()
 {
     mPtr = NULL;
-
 }
 
 ECode VelocityTracker::Clear()

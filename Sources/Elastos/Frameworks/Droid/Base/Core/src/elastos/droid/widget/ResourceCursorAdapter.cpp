@@ -61,8 +61,6 @@ ECode ResourceCursorAdapter::NewView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    VALIDATE_NOT_NULL(view)
-	
     return mInflater->Inflate(mLayout, parent, FALSE, view);
 }
 
@@ -72,8 +70,6 @@ ECode ResourceCursorAdapter::NewDropDownView(
     /* [in] */ IViewGroup* parent,
     /* [out] */ IView** view)
 {
-    VALIDATE_NOT_NULL(view)
-	
     return mInflater->Inflate(mDropDownLayout, parent, FALSE, view);
 }
 

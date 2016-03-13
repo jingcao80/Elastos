@@ -23,7 +23,6 @@ namespace Hdmi {
  * Various utilities to handle HDMI CEC messages.
  */
 class HdmiUtils
-    : public Object
 {
 public:
     /**
@@ -34,9 +33,8 @@ public:
      * @param address logical address
      * @return true if the given address is valid
      */
-    static CARAPI IsValidAddress(
-        /* [in] */ Int32 address,
-        /* [out] */ Boolean* result);
+    static CARAPI_(Boolean) IsValidAddress(
+        /* [in] */ Int32 address);
 
     /**
      * Return the device type for the given logical address.
@@ -45,9 +43,8 @@ public:
      * @return device type for the given logical address; DEVICE_INACTIVE
      *         if the address is not valid.
      */
-    static CARAPI GetTypeFromAddress(
-        /* [in] */ Int32 address,
-        /* [out] */ Int32* result);
+    static CARAPI_(Int32) GetTypeFromAddress(
+        /* [in] */ Int32 address);
 
     /**
      * Return the default device name for a logical address. This is the name
@@ -57,9 +54,8 @@ public:
      * @param address logical address
      * @return default device name; empty string if the address is not valid
      */
-    static CARAPI GetDefaultDeviceName(
-        /* [in] */ Int32 address,
-        /* [out] */ String* result);
+    static CARAPI_(String) GetDefaultDeviceName(
+        /* [in] */ Int32 address);
 
     /**
      * Verify if the given address is for the given device type.  If not it will throw
@@ -81,11 +77,10 @@ public:
      * @param tag the tag of caller module (for log message)
      * @return true if the CEC message comes from the given address
      */
-    static CARAPI CheckCommandSource(
+    static CARAPI_(Boolean) CheckCommandSource(
         /* [in] */ IHdmiCecMessage* cmd,
         /* [in] */ Int32 expectedAddress,
-        /* [in] */ const String& tag,
-        /* [out] */ Boolean* result);
+        /* [in] */ const String& tag);
 
     /**
      * Parse the parameter block of CEC message as [System Audio Status].
@@ -93,9 +88,8 @@ public:
      * @param cmd the CEC message to parse
      * @return true if the given parameter has [ON] value
      */
-    static CARAPI ParseCommandParamSystemAudioStatus(
-        /* [in] */ IHdmiCecMessage* cmd,
-        /* [out] */ Boolean* result);
+    static CARAPI_(Boolean) ParseCommandParamSystemAudioStatus(
+        /* [in] */ IHdmiCecMessage* cmd);
 
     /**
      * Convert integer array to list of {@link Integer}.
@@ -105,9 +99,8 @@ public:
      * @param is integer array
      * @return {@link List} instance containing the elements in the given array
      */
-    static CARAPI AsImmutableList(
-        /* [in] */ ArrayOf<Int32>* is,
-        /* [out] */ IList** result);
+    static CARAPI_(AutoPtr<IList>) AsImmutableList(
+        /* [in] */ ArrayOf<Int32>* is);
 
     /**
      * Assemble two bytes into single integer value.
@@ -115,9 +108,8 @@ public:
      * @param data to be assembled
      * @return assembled value
      */
-    static CARAPI TwoBytesToInt(
-        /* [in] */ ArrayOf<Byte>* data,
-        /* [out] */ Int32* result);
+    static CARAPI_(Int32) TwoBytesToInt32(
+        /* [in] */ ArrayOf<Byte>* data);
 
     /**
      * Assemble two bytes into single integer value.
@@ -126,10 +118,9 @@ public:
      * @param offset offset to the data to convert in the array
      * @return assembled value
      */
-    static CARAPI TwoBytesToInt(
+    static CARAPI_(Int32) TwoBytesToInt32(
         /* [in] */ ArrayOf<Byte>* data,
-        /* [in] */ Int32 offset,
-        /* [out] */ Int32* result);
+        /* [in] */ Int32 offset);
 
     /**
      * Assemble three bytes into single integer value.
@@ -137,18 +128,15 @@ public:
      * @param data to be assembled
      * @return assembled value
      */
-    static CARAPI ThreeBytesToInt(
-        /* [in] */ ArrayOf<Byte>* data,
-        /* [out] */ Int32* result);
+    static CARAPI_(Int32) ThreeBytesToInt32(
+        /* [in] */ ArrayOf<Byte>* data);
 
-    static CARAPI SparseArrayToList(
-        /* [in] */ ISparseArray* array,
-        /* [out] */ IList** result);
+    static CARAPI_(AutoPtr<IList>) SparseArrayToList(
+        /* [in] */ ISparseArray* array);
 
-    static CARAPI MergeToUnmodifiableList(
+    static CARAPI_(AutoPtr<IList>) MergeToUnmodifiableList(
         /* [in] */ IList* a,
-        /* [in] */ IList* b,
-        /* [out] */ IList** result);
+        /* [in] */ IList* b);
 
     /**
      * See if the new path is affecting the active path.
@@ -157,10 +145,9 @@ public:
      * @param newPath new path
      * @return true if the new path changes the current active path
      */
-    static CARAPI IsAffectingActiveRoutingPath(
+    static CARAPI_(Boolean) IsAffectingActiveRoutingPath(
         /* [in] */ Int32 activePath,
-        /* [in] */ Int32 newPath,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 newPath);
 
     /**
      * See if the new path is in the active path.
@@ -169,18 +156,16 @@ public:
      * @param newPath new path
      * @return true if the new path in the active routing path
      */
-    static CARAPI IsInActiveRoutingPath(
+    static CARAPI_(Boolean) IsInActiveRoutingPath(
         /* [in] */ Int32 activePath,
-        /* [in] */ Int32 newPath,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 newPath);
 
     /**
      * Clone {@link HdmiDeviceInfo} with new power status.
      */
-    static CARAPI CloneHdmiDeviceInfo(
+    static CARAPI_(AutoPtr<IHdmiDeviceInfo>) CloneHdmiDeviceInfo(
         /* [in] */ IHdmiDeviceInfo* info,
-        /* [in] */ Int32 newPowerStatus,
-        /* [out] */ IHdmiDeviceInfo** result);
+        /* [in] */ Int32 newPowerStatus);
 
 private:
     HdmiUtils();

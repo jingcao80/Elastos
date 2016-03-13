@@ -10,28 +10,28 @@ module
     namespace Telecomm {
     namespace Telecom {
 
-        /**
-         * Simple data container encapsulating a request to some entity to
-         * create a new {@link Connection}.
-         * @hide
-         */
-        /**
-         * @Involve
-         * interface IParcelable
-         */
-        interface IConnectionRequest {
-            GetAccountHandle(
-                [out] IPhoneAccountHandle** res);
+    /**
+     * Simple data container encapsulating a request to some entity to
+     * create a new {@link Connection}.
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface IConnectionRequest {
+        GetAccountHandle(
+            [out] IPhoneAccountHandle** res);
 
-            GetAddress(
-                [out] IUri** res);
+        GetAddress(
+            [out] IUri** res);
 
-            GetExtras(
-                [out] IBundle** res);
+        GetExtras(
+            [out] IBundle** res);
 
-            GetVideoState(
-                [out] Int32* res);
-        }
+        GetVideoState(
+            [out] Int32* res);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

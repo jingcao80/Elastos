@@ -25,7 +25,7 @@ ECode CharArrayBuffer::constructor(
 }
 
 ECode CharArrayBuffer::GetData(
-    /* [out,callee] */ ArrayOf<Char32>** data)
+    /* [out, callee] */ ArrayOf<Char32>** data)
 {
     VALIDATE_NOT_NULL(data)
     *data = mData;

@@ -2622,7 +2622,7 @@ void CConnectivityService::SendStickyBroadcastDelayed(
     }
 }
 
-void CConnectivityService::SystemReady()
+ECode CConnectivityService::SystemReady()
 {
     // start network sampling ..
     AutoPtr<IIntent> intent;
@@ -2667,6 +2667,7 @@ void CConnectivityService::SystemReady()
     mHandler->ObtainMessage(EVENT_SYSTEM_READY, (IMessage**)&msg);
     mHandler->SendMessage(msg, &result);
     mPermissionMonitor->StartMonitoring();
+    return NOERROR;
 }
 
 ECode CConnectivityService::CaptivePortalCheckCompleted(
@@ -4962,14 +4963,14 @@ void CConnectivityService::CallCallbackForRequest(
     if (VDBG) {
         Slogger::D(TAG, "sending notification %s for %s",
             NotifyTypeToName(notificationType).string(),
-            Object::ToString(nri->mRequest).string());
+            TO_CSTR(nri->mRequest));
     }
 
     ECode ec = nri->mMessenger->Send(msg);
     if (ec == (ECode)E_REMOTE_EXCEPTION) {
         // may occur naturally in the race of binder death.
         Slogger::E(TAG, "RemoteException caught trying to send a callback msg for %s",
-            Object::ToString(nri->mRequest).string());
+            TO_CSTR(nri->mRequest));
     }
 }
 
@@ -5039,7 +5040,7 @@ void CConnectivityService::RematchNetworkAndRequests(
     if (DBG) Slogger::D(TAG, "rematching %s", newNetwork->Name().string());
     // Find and migrate to this Network any NetworkRequests for
     // which this network is now the best.
-    if (VDBG) Slogger::D(TAG, " network has: %s", Object::ToString(newNetwork->mNetworkCapabilities).string());
+    if (VDBG) Slogger::D(TAG, " network has: %s", TO_CSTR(newNetwork->mNetworkCapabilities));
 
 
     List<AutoPtr<NetworkAgentInfo> > affectedNetworks;
@@ -5068,7 +5069,7 @@ void CConnectivityService::RematchNetworkAndRequests(
 
         // check if it satisfies the NetworkCapabilities
         if (VDBG) Slogger::D(TAG, "  checking if request is satisfied: %s",
-            Object::ToString(nri->mRequest).string());
+            TO_CSTR(nri->mRequest));
         AutoPtr<INetworkCapabilities> netCap;
         nri->mRequest->GetNetworkCapabilities((INetworkCapabilities**)&netCap);
         netCap->SatisfiedByNetworkCapabilities(newNetwork->mNetworkCapabilities, &bval);

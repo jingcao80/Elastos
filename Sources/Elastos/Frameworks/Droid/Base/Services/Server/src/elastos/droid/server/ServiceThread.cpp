@@ -1,9 +1,12 @@
 #include "elastos/droid/server/ServiceThread.h"
 #include <elastos/droid/os/Process.h>
-// #include <elastos/droid/os/StrictMode.h>
+#include <elastos/utility/logging/Slogger.h>
+#include <Elastos.Droid.Os.h>
 
-// using Elastos::Droid::Os::StrictMode;
+using Elastos::Droid::Os::IStrictMode;
+using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::Os::Process;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -24,11 +27,13 @@ ECode ServiceThread::Run()
 {
     Process::SetCanSelfBackground(FALSE);
 
-    assert(0 && "TODO");
     // For debug builds, log event loop stalls to dropbox for analysis.
-    // if (!mAllowIo && StrictMode::ConditionallyEnableDebugLogging()) {
-    //     Slogger::I(TAG, "Enabled StrictMode logging for %s looper.");
-    // }
+    AutoPtr<IStrictMode> strictMode;
+    CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
+    Boolean bval;
+    if (!mAllowIo && (strictMode->ConditionallyEnableDebugLogging(&bval), bval)) {
+        Slogger::I(TAG, "Enabled StrictMode logging for %s looper.");
+    }
 
     return HandlerThread::Run();
 }

@@ -1,9 +1,11 @@
 
-#include "CellSignalStrength.h"
+#include "elastos/droid/telephony/CellSignalStrength.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
+
+CAR_INTERFACE_IMPL(CellSignalStrength, Object, ICellSignalStrength)
 
 static AutoPtr< ArrayOf<String> > InitSIGNAL_STRENGTH_NAMES() {
     AutoPtr< ArrayOf<String> > ssn = ArrayOf<String>::Alloc(5);

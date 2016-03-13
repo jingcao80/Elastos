@@ -14,8 +14,14 @@ namespace Droid {
 namespace Os {
 
 CarClass(CStrictModeThreadPolicyBuilder)
+    , public Object
+    , public IStrictModeThreadPolicyBuilder
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     /**
      * Create a Builder that detects nothing and has no
      * violations.  (but note that {@link #build} will default

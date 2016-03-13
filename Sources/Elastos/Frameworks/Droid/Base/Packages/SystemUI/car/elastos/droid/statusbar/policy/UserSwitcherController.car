@@ -1,8 +1,7 @@
 module
 {
-    interface Elastos.Droid.Content.IContext;
-    interface Elastos.Droid.Content.Pm.IUserInfo;
-    interface Elastos.Droid.Graphics.IBitmap;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Graphics.Drawable.IDrawable;
 
     namespace Elastos {
     namespace Droid {
@@ -11,43 +10,6 @@ module
     namespace Policy {
 
     interface IUserSwitcherControllerUserRecord {
-        SetInfo(
-            [in] IUserInfo* info);
-
-        GetInfo(
-            [out] IUserInfo** info);
-
-        SetPicture(
-            [in] IBitmap* bmp);
-
-        GetPicture(
-            [out] IBitmap** bmp);
-
-        SetIsGuest(
-            [in] Boolean value);
-
-        IsGuest(
-            [out] Boolean* value);
-
-        SetIsCurrent(
-            [in] Boolean value);
-
-        IsCurrent(
-            [out] Boolean* value);
-
-        SetisAddUser(
-            [in] Boolean value);
-
-        IsAddUser(
-            [out] Boolean* value);
-
-        /** If true, the record is only visible to the owner and only when unlocked. */
-        SetIsRestricted(
-            [in] Boolean value);
-
-        IsRestricted(
-            [out] Boolean* value);
-
         CopyWithIsCurrent(
             [in] Boolean isCurrent,
             [out] IUserSwitcherControllerUserRecord** record);
@@ -71,7 +33,8 @@ module
 
         GetDrawable(
             [in] IContext* ctx,
-            [in] IUserSwitcherControllerUserRecord* item);
+            [in] IUserSwitcherControllerUserRecord* item,
+            [out] IDrawable** drawable);
     }
 
     /**

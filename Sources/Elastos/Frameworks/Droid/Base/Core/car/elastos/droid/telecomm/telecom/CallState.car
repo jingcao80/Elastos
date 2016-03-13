@@ -7,98 +7,102 @@ module
     namespace Telecomm {
     namespace Telecom {
 
+    /**
+     * Represents the camera capabilities important to a Video Telephony provider.
+     * @hide
+     */
+    /**
+     * Defines call-state constants of the different states in which a call can exist. Although states
+     * have the notion of normal transitions, due to the volatile nature of telephony systems, code
+     * that uses these states should be resilient to unexpected state changes outside of what is
+     * considered traditional.
+     *
+     * {@hide}
+     */
+    interface ICallState {
         /**
-         * Represents the camera capabilities important to a Video Telephony provider.
-         * @hide
+         * Indicates that a call is new and not connected. This is used as the default state internally
+         * within Telecom and should not be used between Telecom and call services. Call services are
+         * not expected to ever interact with NEW calls, but {@link InCallService}s will see calls in
+         * this state.
          */
+        const Int32 NEW = 0;
+
         /**
-         * Defines call-state constants of the different states in which a call can exist. Although states
-         * have the notion of normal transitions, due to the volatile nature of telephony systems, code
-         * that uses these states should be resilient to unexpected state changes outside of what is
-         * considered traditional.
-         *
-         * {@hide}
+         * The initial state of an outgoing {@code Call}.
+         * Common transitions are to {@link #DIALING} state for a successful call or
+         * {@link #DISCONNECTED} if it failed.
          */
-        interface ICallState {
-            /**
-             * Indicates that a call is new and not connected. This is used as the default state internally
-             * within Telecom and should not be used between Telecom and call services. Call services are
-             * not expected to ever interact with NEW calls, but {@link InCallService}s will see calls in
-             * this state.
-             */
-            const Int32 NEW = 0;
+        const Int32 CONNECTING = 1;
 
-            /**
-             * The initial state of an outgoing {@code Call}.
-             * Common transitions are to {@link #DIALING} state for a successful call or
-             * {@link #DISCONNECTED} if it failed.
-             */
-            const Int32 CONNECTING = 1;
+        /**
+         * Indicates that the call is about to go into the outgoing and dialing state but is waiting for
+         * user input before it proceeds. For example, where no default {@link PhoneAccount} is set,
+         * this is the state where the InCallUI is waiting for the user to select a
+         * {@link PhoneAccount} to call from.
+         */
+        const Int32 PRE_DIAL_WAIT = 2;
 
-            /**
-             * Indicates that the call is about to go into the outgoing and dialing state but is waiting for
-             * user input before it proceeds. For example, where no default {@link PhoneAccount} is set,
-             * this is the state where the InCallUI is waiting for the user to select a
-             * {@link PhoneAccount} to call from.
-             */
-            const Int32 PRE_DIAL_WAIT = 2;
+        /**
+         * Indicates that a call is outgoing and in the dialing state. A call transitions to this state
+         * once an outgoing call has begun (e.g., user presses the dial button in Dialer). Calls in this
+         * state usually transition to {@link #ACTIVE} if the call was answered or {@link #DISCONNECTED}
+         * if the call was disconnected somehow (e.g., failure or cancellation of the call by the user).
+         */
+        const Int32 DIALING = 3;
 
-            /**
-             * Indicates that a call is outgoing and in the dialing state. A call transitions to this state
-             * once an outgoing call has begun (e.g., user presses the dial button in Dialer). Calls in this
-             * state usually transition to {@link #ACTIVE} if the call was answered or {@link #DISCONNECTED}
-             * if the call was disconnected somehow (e.g., failure or cancellation of the call by the user).
-             */
-            const Int32 DIALING = 3;
+        /**
+         * Indicates that a call is incoming and the user still has the option of answering, rejecting,
+         * or doing nothing with the call. This state is usually associated with some type of audible
+         * ringtone. Normal transitions are to {@link #ACTIVE} if answered or {@link #DISCONNECTED}
+         * otherwise.
+         */
+        const Int32 RINGING = 4;
 
-            /**
-             * Indicates that a call is incoming and the user still has the option of answering, rejecting,
-             * or doing nothing with the call. This state is usually associated with some type of audible
-             * ringtone. Normal transitions are to {@link #ACTIVE} if answered or {@link #DISCONNECTED}
-             * otherwise.
-             */
-            const Int32 RINGING = 4;
+        /**
+         * Indicates that a call is currently connected to another party and a communication channel is
+         * open between them. The normal transition to this state is by the user answering a
+         * {@link #DIALING} call or a {@link #RINGING} call being answered by the other party.
+         */
+        const Int32 ACTIVE = 5;
 
-            /**
-             * Indicates that a call is currently connected to another party and a communication channel is
-             * open between them. The normal transition to this state is by the user answering a
-             * {@link #DIALING} call or a {@link #RINGING} call being answered by the other party.
-             */
-            const Int32 ACTIVE = 5;
+        /**
+         * Indicates that the call is currently on hold. In this state, the call is not terminated
+         * but no communication is allowed until the call is no longer on hold. The typical transition
+         * to this state is by the user putting an {@link #ACTIVE} call on hold by explicitly performing
+         * an action, such as clicking the hold button.
+         */
+        const Int32 ON_HOLD = 6;
 
-            /**
-             * Indicates that the call is currently on hold. In this state, the call is not terminated
-             * but no communication is allowed until the call is no longer on hold. The typical transition
-             * to this state is by the user putting an {@link #ACTIVE} call on hold by explicitly performing
-             * an action, such as clicking the hold button.
-             */
-            const Int32 ON_HOLD = 6;
+        /**
+         * Indicates that a call is currently disconnected. All states can transition to this state
+         * by the call service giving notice that the connection has been severed. When the user
+         * explicitly ends a call, it will not transition to this state until the call service confirms
+         * the disconnection or communication was lost to the call service currently responsible for
+         * this call (e.g., call service crashes).
+         */
+        const Int32 DISCONNECTED = 7;
 
-            /**
-             * Indicates that a call is currently disconnected. All states can transition to this state
-             * by the call service giving notice that the connection has been severed. When the user
-             * explicitly ends a call, it will not transition to this state until the call service confirms
-             * the disconnection or communication was lost to the call service currently responsible for
-             * this call (e.g., call service crashes).
-             */
-            const Int32 DISCONNECTED = 7;
+        /**
+         * Indicates that the call was attempted (mostly in the context of outgoing, at least at the
+         * time of writing) but cancelled before it was successfully connected.
+         */
+        const Int32 ABORTED = 8;
 
-            /**
-             * Indicates that the call was attempted (mostly in the context of outgoing, at least at the
-             * time of writing) but cancelled before it was successfully connected.
-             */
-            const Int32 ABORTED = 8;
+        /**
+         * Indicates that the call is in the process of being disconnected and will transition next
+         * to a {@link #DISCONNECTED} state.
+         * <p>
+         * This state is not expected to be communicated from the Telephony layer, but will be reported
+         * to the InCall UI for calls where disconnection has been initiated by the user but the
+         * ConnectionService has confirmed the call as disconnected.
+         */
+        const Int32 DISCONNECTING = 9;
 
-            /**
-             * Indicates that the call is in the process of being disconnected and will transition next
-             * to a {@link #DISCONNECTED} state.
-             * <p>
-             * This state is not expected to be communicated from the Telephony layer, but will be reported
-             * to the InCall UI for calls where disconnection has been initiated by the user but the
-             * ConnectionService has confirmed the call as disconnected.
-             */
-            const Int32 DISCONNECTING = 9;
-        }
+        ToString(
+            [in] Int32 callState,
+            [out] String* result);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

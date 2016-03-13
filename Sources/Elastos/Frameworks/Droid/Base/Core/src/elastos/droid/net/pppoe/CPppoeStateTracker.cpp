@@ -190,7 +190,9 @@ ECode CPppoeStateTracker::StartMonitoring(
     Slogger::I(TAG, "start to monitor the pppoe devices");
     if (mServiceStarted) {
         mContext = context;
-        FAIL_RETURN(mContext->GetSystemService(IContext::PPPOE_SERVICE, (IPppoeManager**)&mEM));
+        AutoPtr<IInterface> obj;
+        FAIL_RETURN(mContext->GetSystemService(IContext::PPPOE_SERVICE, (IPppoeManager**)&obj));
+        mEM = IPppoeManager::Probe(obj);
         mTarget = target;
         AutoPtr<ILooper> looper;
         ASSERT_SUCCEEDED(mTarget->GetLooper((ILooper**)&looper));

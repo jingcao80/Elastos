@@ -1,12 +1,15 @@
 
-#include "CServiceStateHelper.h"
-#include "CServiceState.h"
+#include "elastos/droid/telephony/CServiceStateHelper.h"
+#include "elastos/droid/telephony/CServiceState.h"
 #include "elastos/droid/ext/frameworkdef.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
+CAR_INTERFACE_IMPL(CServiceStateHelper, Singleton, IServiceStateHelper)
+
+CAR_SINGLETON_IMPL(CServiceStateHelper)
 
 ECode CServiceStateHelper::NewFromBundle(
     /* [in] */ IBundle* m,
@@ -20,8 +23,7 @@ ECode CServiceStateHelper::RilRadioTechnologyToString(
     /* [out] */ String* res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = CServiceState::RilRadioTechnologyToString(rt);
-    return NOERROR;
+    return CServiceState::RilRadioTechnologyToString(rt, res);
 }
 
 ECode CServiceStateHelper::IsGsm(
@@ -29,8 +31,7 @@ ECode CServiceStateHelper::IsGsm(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = CServiceState::IsGsm(radioTechnology);
-    return NOERROR;
+    return CServiceState::IsGsm(radioTechnology, res);
 }
 
 ECode CServiceStateHelper::IsCdma(
@@ -38,11 +39,9 @@ ECode CServiceStateHelper::IsCdma(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    *res = CServiceState::IsCdma(radioTechnology);
-    return NOERROR;
+    return CServiceState::IsCdma(radioTechnology, res);
 }
 
-}
-}
-}
-
+} //namespace Elastos
+} //namespace Droid
+} //namespace Telephony

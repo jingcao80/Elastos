@@ -1,0 +1,63 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.IO.IFile;
+    using interface Elastos.Utility.ISet;
+
+    namespace Elastos {
+    namespace Providers {
+    namespace DownloadProvider {
+    namespace Downloads {
+
+    /**
+     * Some helper functions for the download manager
+     */
+    interface IHelpers
+    {
+        /**
+         * Creates a filename (where the file should be saved) from info about a download.
+         * This file will be touched to reserve it.
+         */
+        GenerateSaveFile(
+            [in] IContext* context,
+            [in] String url,
+            [in] String hint,
+            [in] String contentDisposition,
+            [in] String contentLocation,
+            [in] String mimeType,
+            [in] Int32 destination,
+            [out] String* result);
+
+        /**
+         * Checks whether the filename looks legitimate for security purposes. This
+         * prevents us from opening files that aren't actually downloads.
+         */
+        IsFilenameValid(
+            [in] IContext* context,
+            [in] IFile* file,
+            [out] Boolean* result);
+
+        GetRunningDestinationDirectory(
+            [in] IContext* context,
+            [in] Int32 destination,
+            [out] IFile** result);
+
+        GetSuccessDestinationDirectory(
+            [in] IContext* context,
+            [in] Int32 destination,
+            [out] IFile** result);
+
+        /**
+         * Checks whether this looks like a legitimate selection parameter
+         */
+        ValidateSelection(
+            [in] String selection,
+            [in] ISet* allowedColumns);
+    }
+
+    } // namespace Downloads
+    } // namespace DownloadProvider
+    } // namespace Providers
+    } // namespace Elastos
+}

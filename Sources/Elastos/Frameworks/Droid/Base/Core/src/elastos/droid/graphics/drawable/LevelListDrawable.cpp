@@ -58,7 +58,7 @@ ECode LevelListDrawable::LevelListState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable);
-    return CLevelListDrawable::New(this, NULL, (ILevelListDrawable**)drawable);
+    return CLevelListDrawable::New(this, NULL, drawable);
 }
 
 ECode LevelListDrawable::LevelListState::NewDrawable(
@@ -66,7 +66,7 @@ ECode LevelListDrawable::LevelListState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable);
-    return CLevelListDrawable::New(this, res, (ILevelListDrawable**)drawable);
+    return CLevelListDrawable::New(this, res, drawable);
 }
 
 void LevelListDrawable::LevelListState::GrowArray(
@@ -203,19 +203,14 @@ ECode LevelListDrawable::Inflate(
     return NOERROR;
 }
 
-ECode LevelListDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode LevelListDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated &&
-            (DrawableContainer::Mutate((IDrawable**)&tmp), tmp.Get()) == (IDrawable*)this->Probe(EIID_IDrawable)) {
+    if (!mMutated) {
         mLevelListState->mLows = mLevelListState->mLows->Clone();
         mLevelListState->mHighs = mLevelListState->mHighs->Clone();
         mMutated = TRUE;
     }
-    *drawable = (IDrawable*)this->Probe(EIID_IDrawable);
-    REFCOUNT_ADD(*drawable);
+
     return NOERROR;
 }
 

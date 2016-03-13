@@ -18,7 +18,7 @@ namespace Webkit {
  * Manages the cookies used by an application's {@link WebView} instances.
  * Cookies are manipulated according to RFC2109.
  */
-class CookieManager
+class ECO_PUBLIC CookieManager
     : public Object
     , public ICookieManager
     , public ICloneable

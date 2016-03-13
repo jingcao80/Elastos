@@ -7,6 +7,9 @@ module
     namespace Droid {
     namespace Os {
 
+    interface IBinderProxy {
+    }
+
     [deprecated]
     interface IBinder {
 

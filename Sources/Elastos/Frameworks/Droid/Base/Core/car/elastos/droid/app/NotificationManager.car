@@ -1,5 +1,6 @@
 module
 {
+    interface Elastos.Droid.Content.IComponentName;
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.App.INotification;
     interface Elastos.Droid.App.INotificationManager;
@@ -137,6 +138,12 @@ module
          * @sa #cancel
          */
         CancelAll();
+
+        /**
+         * @hide
+         */
+        GetEffectsSuppressor(
+            [out] IComponentName** name);
     }
 
     interface INotificationManagerHelper {

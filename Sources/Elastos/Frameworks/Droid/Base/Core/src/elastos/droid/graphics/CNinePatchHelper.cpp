@@ -10,7 +10,9 @@ namespace Droid {
 namespace Graphics {
 
 CAR_SINGLETON_IMPL(CNinePatchHelper);
+
 CAR_INTERFACE_IMPL(CNinePatchHelper, Singleton, INinePatchHelper);
+
 ECode CNinePatchHelper::IsNinePatchChunk(
     /* [in] */ ArrayOf<Byte>* chunk,
     /* [out] */ Boolean* result)

@@ -69,7 +69,7 @@ public class ZenModeDowntimeDaysSelection extends ScrollView {
             if (empty) {
                 empty = FALSE;
             } else {
-                sb->Append(',');
+                sb->AppendChar32(',');
             }
             sb->Append(day);
         }

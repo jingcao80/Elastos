@@ -408,7 +408,7 @@ private:
     AutoPtr<ISensor> mSensor;
     AutoPtr<SensorEventListenerImpl> mSensorEventListener;
     Int32 mCurrentRotation;
-    AutoPtr<Object> mLock;
+    Object mLock;
 };
 
 } // namespace Impl

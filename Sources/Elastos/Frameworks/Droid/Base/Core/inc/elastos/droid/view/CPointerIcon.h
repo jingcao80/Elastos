@@ -19,6 +19,7 @@ namespace View {
 CarClass(CPointerIcon)
     , public Object
     , public IPointerIcon
+    , public IParcelable
 {
 public:
     /**
@@ -193,14 +194,10 @@ public:
         /* [out] */ Float* hotSpotY);
 
     CARAPI WriteToParcel(
-        /* [in] */ IParcel* parcel,
-        /* [in] */ Int32 flags);
+        /* [in] */ IParcel* parcel);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
-
-    CARAPI DescribeContents(
-        /* [out] */ Int32* result);
 
 private:
     static CARAPI ValidateHotSpot(
@@ -211,8 +208,6 @@ private:
     static Int32 GetSystemIconStyleIndex(
         /* [in] */ Int32 style);
 
-    static AutoPtr<IPointerIcon> CreateNullIcon();
-
 private:
     CARAPI ThrowIfIconIsNotLoaded();
 
@@ -222,14 +217,12 @@ private:
         /* [in] */ Int32 resourceId);
 
 private:
-    static const char* TAG;
-
     // OEM private styles should be defined starting at this range to avoid
     // conflicts with any system styles that may be defined in the future.
-    static const Int32 STYLE_OEM_FIRST = 10000;
+    static const Int32 STYLE_OEM_FIRST;
 
     // The default pointer icon.
-    static const Int32 STYLE_DEFAULT = IPointerIcon::STYLE_ARROW;
+    static const Int32 STYLE_DEFAULT;
 
     static AutoPtr<IPointerIcon> gNullIcon;
 

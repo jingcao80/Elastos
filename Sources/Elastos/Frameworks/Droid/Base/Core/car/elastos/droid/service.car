@@ -299,6 +299,7 @@ module
             interface IContextWrapper;
             interface IService;
             interface IComponentCallbacks2;
+            interface IComponentCallbacks;
             interface IWindowCallback;
             interface IVoiceInteractionService;
         }

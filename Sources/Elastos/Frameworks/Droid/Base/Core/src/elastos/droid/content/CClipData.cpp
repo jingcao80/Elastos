@@ -1,6 +1,7 @@
 
 #include "Elastos.Droid.Graphics.h"
 #include "Elastos.Droid.Net.h"
+#include "elastos/droid/os/CStrictMode.h"
 #include "elastos/droid/content/CClipData.h"
 #include "elastos/droid/content/CClipDescription.h"
 #include "elastos/droid/content/CIntent.h"
@@ -12,6 +13,8 @@
 #include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/StringBuilder.h>
 
+using Elastos::Droid::Os::IStrictMode;
+using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::Net::Uri;
@@ -216,8 +219,10 @@ ECode CClipData::PrepareToLeaveProcess()
 
         AutoPtr<IUri> uri;
         item->GetUri((IUri**)&uri);
-        assert(0 && "TODO");
-        if (uri != NULL /* && CStrictMode::VmFileUriExposureEnabled() */) {
+        AutoPtr<IStrictMode> mode;
+        CStrictMode::AcquireSingleton((IStrictMode**)&mode);
+        Boolean bval;
+        if (uri != NULL && (mode->VmFileUriExposureEnabled(&bval), bval)) {
             uri->CheckFileUriExposed(String("ClipData.Item.getUri()"));
         }
     }

@@ -75,22 +75,24 @@ ECode SensorManager::GetSensorList(
             //TODO : make the list's item read only;
             AutoPtr<ICollections> helper;
             CCollections::AcquireSingleton((ICollections**)&helper);
-            helper->UnmodifiableList(list, (IList**)&list);
-            mSensorListByType->Put(key.Get(), TO_IINTERFACE(list));
+            AutoPtr<IList> temp = list;
+            list = NULL;
+            helper->UnmodifiableList(temp, (IList**)&list);
+            mSensorListByType->Put(key.Get(), list.Get());
         }
     }
 
     assert(list != NULL);
     Int32 count = 0;
     list->GetSize(&count);
-    if (count > 0) {
-        *sensors = ArrayOf<ISensor*>::Alloc(count);
-        REFCOUNT_ADD(*sensors);
+    *sensors = ArrayOf<ISensor*>::Alloc(count);
+    REFCOUNT_ADD(*sensors);
 
+    if (count > 0) {
         for (Int32 i = 0; i < count; i++) {
-            AutoPtr<ISensor> sensor;
+            AutoPtr<IInterface> sensor;
             list->Get(i, (IInterface**)&sensor);
-            (*sensors)->Set(i++, sensor.Get());
+            (*sensors)->Set(i++, ISensor::Probe(sensor));
         }
     }
 
@@ -102,8 +104,8 @@ ECode SensorManager::GetDefaultSensor(
     /* [out] */ ISensor** sensor)
 {
     VALIDATE_NOT_NULL(sensor);
-
     *sensor = NULL;
+
     // TODO: need to be smarter, for now, just return the 1st sensor
     AutoPtr<ArrayOf<ISensor*> > l;
     FAIL_RETURN(GetSensorList(type, (ArrayOf<ISensor*>**)&l))
@@ -127,7 +129,7 @@ ECode SensorManager::GetDefaultSensor(
             return NOERROR;
         }
     }
-    *sensor = NULL;
+
     return NOERROR;
 }
 

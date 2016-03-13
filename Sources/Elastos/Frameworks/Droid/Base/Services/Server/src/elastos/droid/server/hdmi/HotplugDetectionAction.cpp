@@ -2,6 +2,7 @@
 #include "elastos/droid/server/hdmi/HotplugDetectionAction.h"
 #include "elastos/droid/server/hdmi/Constants.h"
 #include <Elastos.CoreLibrary.Utility.h>
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Server::Hdmi::IHdmiControlServiceDevicePollingCallback;
@@ -11,6 +12,8 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Hdmi {
+
+CAR_INTERFACE_IMPL(HotplugDetectionAction, HdmiCecFeatureAction, IHotplugDetectionAction)
 
 const String HotplugDetectionAction::TAG("HotPlugDetectionAction");
 const Int32 HotplugDetectionAction::POLLING_INTERVAL_MS = 5000;
@@ -27,7 +30,7 @@ ECode HotplugDetectionAction::constructor(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        super(source);
+        super::constructor(source);
 
 #endif
 }
@@ -35,6 +38,8 @@ ECode HotplugDetectionAction::constructor(
 ECode HotplugDetectionAction::Start(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         Slogger::V(TAG, "Hot-plug dection started.");
@@ -45,7 +50,8 @@ ECode HotplugDetectionAction::Start(
         // Start timer without polling.
         // The first check for all devices will be initiated 15 seconds later.
         AddTimer(mState, POLLING_INTERVAL_MS);
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
 #endif
 }
 
@@ -53,10 +59,13 @@ ECode HotplugDetectionAction::ProcessCommand(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         // No-op
-        return FALSE;
+        *result = FALSE;
+        return NOERROR;
 #endif
 }
 
@@ -66,7 +75,7 @@ ECode HotplugDetectionAction::HandleTimerEvent(
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         if (mState != state) {
-            return;
+            return NOERROR;
         }
 
         if (mState == STATE_WAIT_FOR_NEXT_POLLING) {
@@ -99,7 +108,11 @@ ECode HotplugDetectionAction::PollDevices()
         if (mTimeoutCount == 0) {
             PollAllDevices();
         } else {
-            if (Tv()->IsSystemAudioActivated()) {
+            AutoPtr<IHdmiCecLocalDeviceTv> tv;
+            Tv((IHdmiCecLocalDeviceTv**)&tv);
+            Boolean isSystemAudioActivated;
+            tv->IsSystemAudioActivated(&isSystemAudioActivated);
+            if (isSystemAudioActivated) {
                 PollAudioSystem();
             }
         }
@@ -120,7 +133,7 @@ ECode HotplugDetectionAction::PollAllDevices()
                 CheckHotplug(ackedAddress, FALSE);
             }
         }, Constants::POLL_ITERATION_IN_ORDER
-                | Constants::POLL_STRATEGY_REMOTES_DEVICES, HdmiConfig.HOTPLUG_DETECTION_RETRY);
+                | Constants::POLL_STRATEGY_REMOTES_DEVICES, HdmiConfig::HOTPLUG_DETECTION_RETRY);
 #endif
 }
 
@@ -136,7 +149,7 @@ ECode HotplugDetectionAction::PollAudioSystem()
                 CheckHotplug(ackedAddress, TRUE);
             }
         }, Constants::POLL_ITERATION_IN_ORDER
-                | Constants::POLL_STRATEGY_SYSTEM_AUDIO, HdmiConfig.HOTPLUG_DETECTION_RETRY);
+                | Constants::POLL_STRATEGY_SYSTEM_AUDIO, HdmiConfig::HOTPLUG_DETECTION_RETRY);
 #endif
 }
 
@@ -146,7 +159,9 @@ ECode HotplugDetectionAction::CheckHotplug(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        BitSet currentInfos = InfoListToBitSet(Tv()->GetDeviceInfoList(FALSE), audioOnly);
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        BitSet currentInfos = InfoListToBitSet(tv->GetDeviceInfoList(FALSE), audioOnly);
         BitSet polledResult = AddressListToBitSet(ackedAddress);
 
         // At first, check removed devices.
@@ -172,16 +187,24 @@ ECode HotplugDetectionAction::InfoListToBitSet(
     /* [in] */ Boolean audioOnly,
     /* [out] */ IBitSet** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         BitSet set = new BitSet(NUM_OF_ADDRESS);
         for (HdmiDeviceInfo info : infoList) {
             if (audioOnly) {
-                if (info->GetDeviceType() == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
-                    set->Set(info->GetLogicalAddress());
+                Int32 deviceType;
+                info->GetDeviceType(&deviceType);
+                if (deviceType == IHdmiDeviceInfo::DEVICE_AUDIO_SYSTEM) {
+                    Int32 logicalAddr;
+                    info->GetLogicalAddress(&logicalAddr);
+                    set->Set(logicalAddr);
                 }
             } else {
-                set->Set(info->GetLogicalAddress());
+                Int32 logicalAddr;
+                info->GetLogicalAddress(&logicalAddr);
+                set->Set(logicalAddr);
             }
         }
         return set;
@@ -192,6 +215,8 @@ ECode HotplugDetectionAction::AddressListToBitSet(
     /* [in] */ IList* list,
     /* [out] */ IBitSet** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         BitSet set = new BitSet(NUM_OF_ADDRESS);
@@ -207,6 +232,8 @@ ECode HotplugDetectionAction::Complement(
     /* [in] */ IBitSet* second,
     /* [out] */ IBitSet** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         // Need to clone it so that it doesn't touch original set.
@@ -222,7 +249,9 @@ ECode HotplugDetectionAction::AddDevice(
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         // Sending <Give Physical Address> will initiate new device action.
-        SendCommand(HdmiCecMessageBuilder->BuildGivePhysicalAddress(GetSourceAddress(),
+        Int32 srcAddr;
+        GetSourceAddress(&srcAddr);
+        SendCommand(HdmiCecMessageBuilder->BuildGivePhysicalAddress(srcAddr,
                 addedAddress));
 #endif
 }
@@ -237,7 +266,9 @@ ECode HotplugDetectionAction::RemoveDevice(
         MayCancelOneTouchRecord(removedAddress);
         MayDisableSystemAudioAndARC(removedAddress);
 
-        Tv()->RemoveCecDevice(removedAddress);
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        tv->RemoveCecDevice(removedAddress);
 #endif
 }
 
@@ -246,9 +277,14 @@ ECode HotplugDetectionAction::MayChangeRoutingPath(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        HdmiDeviceInfo info = Tv()->GetCecDeviceInfo(address);
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        AutoPtr<IHdmiDeviceInfo> info;
+        tv->GetCecDeviceInfo(address, (IHdmiDeviceInfo**)&info);
         if (info != NULL) {
-            Tv()->HandleRemoveActiveRoutingPath(info->GetPhysicalAddress());
+            Int32 physicalAddr;
+            info->GetPhysicalAddress(&physicalAddr);
+            tv->HandleRemoveActiveRoutingPath(physicalAddr);
         }
 #endif
 }
@@ -258,15 +294,21 @@ ECode HotplugDetectionAction::MayCancelDeviceSelect(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        List<DeviceSelectAction> actions = GetActions(DeviceSelectAction.class);
-        if (actions->IsEmpty()) {
-            return;
+        List<DeviceSelectAction> actions = GetActions(ECLSID_CDeviceSelectAction);
+        Boolean isEmpty;
+        actions->IsEmpty(&isEmpty);
+        if (isEmpty) {
+            return NOERROR;
         }
 
         // Should have only one Device Select Action
-        DeviceSelectAction action = actions->Get(0);
-        if (action->GetTargetAddress() == address) {
-            RemoveAction(DeviceSelectAction.class);
+        AutoPtr<IInterface> obj;
+        actions->Get(0, (IInterface**)&obj);
+        DeviceSelectAction action = I::Probe(obj);
+        Int32 targetAddr;
+        action->GetTargetAddress(&targetAddr);
+        if (targetAddr == address) {
+            RemoveAction(ECLSID_CDeviceSelectAction);
         }
 #endif
 }
@@ -276,7 +318,7 @@ ECode HotplugDetectionAction::MayCancelOneTouchRecord(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        List<OneTouchRecordAction> actions = GetActions(OneTouchRecordAction.class);
+        List<OneTouchRecordAction> actions = GetActions(ECLSID_COneTouchRecordAction);
         for (OneTouchRecordAction action : actions) {
             if (action->GetRecorderAddress() == address) {
                 RemoveAction(action);
@@ -290,14 +332,20 @@ ECode HotplugDetectionAction::MayDisableSystemAudioAndARC(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        if (HdmiUtils->GetTypeFromAddress(address) != HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
-            return;
+        if (HdmiUtils->GetTypeFromAddress(address) != IHdmiDeviceInfo::DEVICE_AUDIO_SYSTEM) {
+            return NOERROR;
         }
 
         // Turn off system audio mode and update settings.
-        Tv()->SetSystemAudioMode(FALSE, TRUE);
-        if (Tv()->IsArcEstabilished()) {
-            AddAndStartAction(new RequestArcTerminationAction(LocalDevice(), address));
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        tv->SetSystemAudioMode(FALSE, TRUE);
+        Boolean isArcEstabilished;
+        tv->IsArcEstabilished(&isArcEstabilished);
+        if (isArcEstabilished) {
+            AutoPtr<RequestArcTerminationAction> newRequestArcTerminationAction = new RequestArcTerminationAction();
+            newRequestArcTerminationAction->constructor(LocalDevice(), address);
+            AddAndStartAction(newRequestArcTerminationAction);
         }
 #endif
 }

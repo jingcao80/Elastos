@@ -1,41 +1,57 @@
 
+#include <Elastos.CoreLibrary.Utility.h>
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Accounts.h"
 #include "elastos/droid/accounts/CAccountManager.h"
 #include "elastos/droid/accounts/AccountManagerResponse.h"
 #include "elastos/droid/accounts/CChooseResponse.h"
 #include "elastos/droid/accounts/CAccountManagerAmsResponse.h"
-#include "elastos/droid/accounts/ChooseTypeAndAccountActivity.h"
 #include "elastos/droid/accounts/CAccountManagerFutureResponse.h"
 #include "elastos/droid/accounts/CAccount.h"
 #include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/CUserHandleHelper.h"
-#include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/CHandler.h"
+#include "elastos/droid/os/CUserHandleHelper.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/content/CIntentFilter.h"
+#include "elastos/droid/content/CComponentNameHelper.h"
+#include "elastos/droid/content/res/CResourcesHelper.h"
+#include "elastos/droid/R.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Slogger.h>
 
-
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Core::CInteger64;
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
-using Elastos::Core::IBoolean;
-using Elastos::Core::CBoolean;
-using Elastos::Core::EIID_IRunnable;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::Looper;
 using Elastos::Droid::Os::CHandler;
 using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::IUserHandleHelper;
+using Elastos::Droid::Os::CUserHandleHelper;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
-using Elastos::Droid::Content::EIID_IBroadcastReceiver;
+using Elastos::Droid::Content::IComponentNameHelper;
+using Elastos::Droid::Content::CComponentNameHelper;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Content::Res::IResourcesHelper;
+using Elastos::Droid::Content::Res::CResourcesHelper;
+using Elastos::Droid::R;
+using Elastos::Core::CInteger64;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
+using Elastos::Core::IBoolean;
+using Elastos::Core::CBoolean;
+using Elastos::Core::EIID_IRunnable;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IMapEntry;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -43,6 +59,11 @@ namespace Accounts {
 
 const String CAccountManager::TAG("AccountManager");
 
+//===============================================================
+// CAccountManager::AmsTask
+//===============================================================
+
+CAR_INTERFACE_IMPL(CAccountManager::AmsTask, FutureTask, IAccountManagerFuture)
 
 CAccountManager::AmsTask::AmsTask(
     /* [in] */ IActivity* activity,
@@ -61,53 +82,6 @@ CAccountManager::AmsTask::AmsTask(
     // });
     ASSERT_SUCCEEDED(CAccountManagerAmsResponse::New((Handle32)this,
             (IAccountManagerResponse**)&mResponse));
-}
-
-PInterface CAccountManager::AmsTask::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IAccountManagerFuture*)this;
-    }
-    else if (riid == EIID_IAccountManagerFuture) {
-        return (IAccountManagerFuture*)this;
-    }
-    // todo: when amstask extends from futuretask, add the interface of futuretask
-    // else if (riid == ) {
-    //     return
-    // }
-
-    return NULL;
-}
-
-UInt32 CAccountManager::AmsTask::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 CAccountManager::AmsTask::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode CAccountManager::AmsTask::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    VALIDATE_NOT_NULL(pIID);
-
-    if (pObject == (IInterface*)(IAccountManagerFuture*)this) {
-        *pIID = EIID_IAccountManagerFuture;
-    }
-    // todo: when amstask extends from futuretask, add the interface of futuretask
-    // else if (pObject == ) {
-    //     *pIID =
-    // }
-    else {
-        return E_INVALID_ARGUMENT;
-    }
-
-    return  NOERROR;
 }
 
 ECode CAccountManager::AmsTask::Start(
@@ -151,47 +125,34 @@ ECode CAccountManager::AmsTask::InternalGetResult(
 {
     VALIDATE_NOT_NULL(result);
 
-    Boolean isDone;
+    Boolean isDone = FALSE;
     IsDone(&isDone);
     if (!isDone) {
         FAIL_RETURN(mHost->EnsureNotOnMainThread());
     }
-    // try {
-    // ECode ec = NOERROR;
     if (timeout == NULL) {
-        assert(0);
-        // ec = Get();
+        AutoPtr<IInterface> p;
+        Get((IInterface**)&p);
+        *result = IBundle::Probe(p);
+        REFCOUNT_ADD(*result)
+        Boolean value = FALSE;
+        Cancel(TRUE /* interrupt if running */, &value);
+        return NOERROR;
     }
     else {
-        assert(0);
-        // ec = Get(timeout, unit);
+        Int64 tm = 0;
+        timeout->GetValue(&tm);
+        AutoPtr<IInterface> p;
+        Get(tm, unit, (IInterface**)&p);
+        *result = IBundle::Probe(p);
+        REFCOUNT_ADD(*result)
+        Boolean value = FALSE;
+        Cancel(TRUE /* interrupt if running */, &value);
+        return NOERROR;
     }
-    // } catch (CancellationException e) {
-    //     throw new OperationCanceledException();
-    // } catch (TimeoutException e) {
-    //     // fall through and cancel
-    // } catch (InterruptedException e) {
-    //     // fall through and cancel
-    // } catch (ExecutionException e) {
-    //     final Throwable cause = e.getCause();
-    //     if (cause instanceof IOException) {
-    //         throw (IOException) cause;
-    //     } else if (cause instanceof UnsupportedOperationException) {
-    //         throw new AuthenticatorException(cause);
-    //     } else if (cause instanceof AuthenticatorException) {
-    //         throw (AuthenticatorException) cause;
-    //     } else if (cause instanceof RuntimeException) {
-    //         throw (RuntimeException) cause;
-    //     } else if (cause instanceof Error) {
-    //         throw (Error) cause;
-    //     } else {
-    //         throw new IllegalStateException(cause);
-    //     }
-    // } finally {
-    Boolean value;
+    Boolean value = FALSE;
     Cancel(TRUE /* interrupt if running */, &value);
     *result = NULL;
-    // }
     return E_OPERATION_CANCELED_EXCEPTION;
 }
 
@@ -199,7 +160,13 @@ ECode CAccountManager::AmsTask::GetResult(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-    return InternalGetResult(NULL, NULL, (IBundle**)result);
+    *result = NULL;
+
+    AutoPtr<IBundle> bundle;
+    FAIL_RETURN(InternalGetResult(NULL, NULL, (IBundle**)&bundle))
+    *result = bundle.Get();
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode CAccountManager::AmsTask::GetResult(
@@ -208,9 +175,15 @@ ECode CAccountManager::AmsTask::GetResult(
     /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     AutoPtr<IInteger64> integer64;
     CInteger64::New(timeout, (IInteger64**)&integer64);
-    return InternalGetResult(integer64, unit, (IBundle**)result);
+    AutoPtr<IBundle> bundle;
+    InternalGetResult(integer64, unit, (IBundle**)&bundle);
+    *result = bundle.Get();
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 void CAccountManager::AmsTask::Done()
@@ -224,23 +197,27 @@ ECode CAccountManager::AmsTask::Cancel(
     /* [in] */ Boolean mayInterruptIfRunning,
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    return FutureTask::Cancel(mayInterruptIfRunning, result);
 }
 
 ECode CAccountManager::AmsTask::IsCancelled(
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    return FutureTask::IsCancelled(result);
 }
 
 ECode CAccountManager::AmsTask::IsDone(
     /* [out] */ Boolean* result)
 {
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(result)
+    return FutureTask::IsDone(result);
 }
+
+//===============================================================
+// CAccountManager::BaseFutureTask
+//===============================================================
 
 CAccountManager::BaseFutureTask::BaseFutureTask(
     /* [in] */ IHandler* handler,
@@ -274,6 +251,11 @@ ECode CAccountManager::BaseFutureTask::StartTask()
     // }
 }
 
+//===============================================================
+// CAccountManager::Future2Task::CallbackRunnable::
+//===============================================================
+CAR_INTERFACE_IMPL(CAccountManager::Future2Task::CallbackRunnable, Object, IRunnable);
+
 CAccountManager::Future2Task::CallbackRunnable::CallbackRunnable(
     /* [in] */ IAccountManagerCallback* cb,
     /* [in] */ Future2Task* host)
@@ -281,12 +263,15 @@ CAccountManager::Future2Task::CallbackRunnable::CallbackRunnable(
     , mHost(host)
 {}
 
-CAR_INTERFACE_IMPL(CAccountManager::Future2Task::CallbackRunnable, IRunnable);
-
 ECode CAccountManager::Future2Task::CallbackRunnable::Run()
 {
     return mCallback->Run((IAccountManagerFuture*)mHost);
 }
+
+//===============================================================
+// CAccountManager::Future2Task::
+//===============================================================
+CAR_INTERFACE_IMPL(CAccountManager::Future2Task, BaseFutureTask, IAccountManagerFuture)
 
 CAccountManager::Future2Task::Future2Task(
     /* [in] */ IHandler* handler,
@@ -295,49 +280,6 @@ CAccountManager::Future2Task::Future2Task(
     : BaseFutureTask(handler, host)
     , mCallback(cb)
 {}
-
-PInterface CAccountManager::Future2Task::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IAccountManagerFuture*)this;
-    }
-    else if (riid == EIID_IAccountManagerFuture) {
-        return (IAccountManagerFuture*)this;
-    }
-    // todo: when BaseFutureTask extends from futuretask
-    // return BaseFutureTask::Probe(riid);
-
-    return NULL;
-}
-
-UInt32 CAccountManager::Future2Task::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 CAccountManager::Future2Task::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode CAccountManager::Future2Task::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    VALIDATE_NOT_NULL(pIID);
-
-    if (pObject == (IInterface*)(IAccountManagerFuture*)this) {
-        *pIID = EIID_IAccountManagerFuture;
-    }
-    // todo: when BaseFutureTask extends from futuretask
-    // return BaseFutureTask::GetInterfaceID(pObject, pIID);
-    else {
-        return E_INVALID_ARGUMENT;
-    }
-
-    return  NOERROR;
-}
 
 void CAccountManager::Future2Task::Done()
 {
@@ -442,43 +384,33 @@ ECode CAccountManager::Future2Task::IsDone(
     return E_NOT_IMPLEMENTED;
 }
 
+//===============================================================
+// CAccountManager::GetAuthTokenByTypeAndFeaturesTask::GetAccountsCallback::
+//===============================================================
+CAR_INTERFACE_IMPL(CAccountManager::GetAuthTokenByTypeAndFeaturesTask::GetAccountsCallback, Object,
+        IAccountManagerCallback);
+
 CAccountManager::GetAuthTokenByTypeAndFeaturesTask::GetAccountsCallback::GetAccountsCallback(
     /* [in] */ GetAuthTokenByTypeAndFeaturesTask* host)
     : mHost(host)
 {}
 
-CAR_INTERFACE_IMPL(CAccountManager::GetAuthTokenByTypeAndFeaturesTask::GetAccountsCallback,
-        IAccountManagerCallback);
-
 ECode CAccountManager::GetAuthTokenByTypeAndFeaturesTask::GetAccountsCallback::Run(
     /* [in] */ IAccountManagerFuture* future)
 {
-    AutoPtr<IObjectContainer> accounts;//Account[] accounts;
-    //try {
-    FAIL_RETURN(future->GetResult((IInterface**)&accounts));
-    // } catch (OperationCanceledException e) {
-    //     setException(e);
-    //     return;
-    // } catch (IOException e) {
-    //     setException(e);
-    //     return;
-    // } catch (AuthenticatorException e) {
-    //     setException(e);
-    //     return;
-    // }
+    AutoPtr<ArrayOf<IAccount*> > accounts;
+    assert(0 && "TODO"); // arrayof cannt convert to interface
+    // FAIL_RETURN(future->GetResult((IInterface**)&accounts));
 
-    AutoPtr<IObjectEnumerator> enumerator;
-    accounts->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
-    Boolean hasNext = FALSE;
-    enumerator->MoveNext(&hasNext);
-    if (!hasNext) {
-        mHost->mNumAccounts = 0;
+    mHost->mNumAccounts = accounts->GetLength();
+
+    if (accounts->GetLength() == 0) {
         if (mHost->mActivity != NULL) {
             // no accounts, add one now. pretend that the user directly
             // made this request
             mHost->mFuture = NULL;
             FAIL_RETURN(mHost->mHost->AddAccount(mHost->mAccountType, mHost->mAuthTokenType,
-                    *mHost->mFeatures, mHost->mAddAccountOptions,
+                    mHost->mFeatures, mHost->mAddAccountOptions,
                     mHost->mActivity, mHost->mMyCallback, mHost->mHandler,
                     (IAccountManagerFuture**)&mHost->mFuture));
         }
@@ -489,74 +421,78 @@ ECode CAccountManager::GetAuthTokenByTypeAndFeaturesTask::GetAccountsCallback::R
             result->PutString(IAccountManager::KEY_ACCOUNT_NAME, String(NULL));
             result->PutString(IAccountManager::KEY_ACCOUNT_TYPE, String(NULL));
             result->PutString(IAccountManager::KEY_AUTHTOKEN, String(NULL));
-            //try {
+
             mHost->mResponse->OnResult(result);
-            // } catch (RemoteException e) {
-            //     // this will never happen
-            // }
             // we are done
         }
     }
-    else {
-        AutoPtr<IAccount> account;
-        enumerator->Current((IInterface**)&account);
-        enumerator->MoveNext(&hasNext);
-        if (!hasNext) {
-            mHost->mNumAccounts = 1;
-            // have a single account, return an authtoken for it
-            mHost->mFuture = NULL;
-            if (mHost->mActivity == NULL) {
-                mHost->mHost->GetAuthToken(account, mHost->mAuthTokenType,
-                        FALSE /* notifyAuthFailure */, mHost->mMyCallback,
-                        mHost->mHandler, (IAccountManagerFuture**)&(mHost->mFuture));
-            }
-            else {
-                mHost->mHost->GetAuthToken(account, mHost->mAuthTokenType,
-                        mHost->mLoginOptions, mHost->mActivity, mHost->mMyCallback,
-                        mHost->mHandler, (IAccountManagerFuture**)&(mHost->mFuture));
-            }
+    else if (accounts->GetLength() == 1) {
+        // have a single account, return an authtoken for it
+        mHost->mFuture = NULL;
+        if (mHost->mActivity == NULL) {
+            mHost->mHost->GetAuthToken((*accounts)[0], mHost->mAuthTokenType,
+                    FALSE /* notifyAuthFailure */, mHost->mMyCallback,
+                    mHost->mHandler, (IAccountManagerFuture**)&(mHost->mFuture));
         }
         else {
-            accounts->GetObjectCount(&mHost->mNumAccounts);
-            if (mHost->mActivity != NULL) {
-                AutoPtr<IAccountManagerResponse> chooseResponse;
-                FAIL_RETURN(CChooseResponse::New((Handle32)this,
-                        (IAccountManagerResponse**)&chooseResponse));
-                // have many accounts, launch the chooser
-                AutoPtr<IIntent> intent;
-                FAIL_RETURN(CIntent::New((IIntent**)&intent));
-                intent->SetClassName(String("elastos"),
-                        String("elastos.accounts.ChooseAccountActivity"));
-                intent->PutExtra(IAccountManager::KEY_ACCOUNTS, (Int32)accounts.Get());
-                AutoPtr<AccountManagerResponse> response = new AccountManagerResponse(
-                        chooseResponse);
-                intent->PutExtra(IAccountManager::KEY_ACCOUNT_MANAGER_RESPONSE,
-                        (IParcelable*)response->Probe(EIID_IParcelable));
-                mHost->mActivity->StartActivity(intent);
-                // the result will arrive via the IAccountManagerResponse
-            }
-            else {
-                // send result since we can't prompt to select an account
-                AutoPtr<IBundle> result;
-                CBundle::New((IBundle**)&result);
-                result->PutString(IAccountManager::KEY_ACCOUNTS, String(NULL));
-                //try {
-                mHost->mResponse->OnResult(result);
-                // } catch (RemoteException e) {
-                //     // this will never happen
-                // }
-                // we are done
-            }
+            mHost->mHost->GetAuthToken((*accounts)[0], mHost->mAuthTokenType,
+                    mHost->mLoginOptions, mHost->mActivity, mHost->mMyCallback,
+                    mHost->mHandler, (IAccountManagerFuture**)&(mHost->mFuture));
+        }
+    }
+    else {
+        if (mHost->mActivity != NULL) {
+            AutoPtr<IAccountManagerResponse> chooseResponse;
+            FAIL_RETURN(CChooseResponse::New((Handle32)this,
+                    (IAccountManagerResponse**)&chooseResponse));
+            // have many accounts, launch the chooser
+            AutoPtr<IIntent> intent;
+            FAIL_RETURN(CIntent::New((IIntent**)&intent));
+            AutoPtr<IResourcesHelper> rhlp;
+            CResourcesHelper::AcquireSingleton((IResourcesHelper**)&rhlp);
+            AutoPtr<IResources> res;
+            rhlp->GetSystem((IResources**)&res);
+            String str;
+            res->GetString(R::string::config_chooseAccountActivity, &str);
+            AutoPtr<IComponentNameHelper> chlp;
+            CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&chlp);
+            AutoPtr<IComponentName> componentName;
+            chlp->UnflattenFromString(str, (IComponentName**)&componentName);
+            String pakName, clsName;
+            componentName->GetPackageName(&pakName);
+            componentName->GetClassName(&clsName);
+            intent->SetClassName(pakName, clsName);
+
+            intent->PutExtra(IAccountManager::KEY_ACCOUNTS, (Int32)accounts.Get());
+            AutoPtr<AccountManagerResponse> response = new AccountManagerResponse(
+                    chooseResponse);
+            intent->PutExtra(IAccountManager::KEY_ACCOUNT_MANAGER_RESPONSE,
+                    IParcelable::Probe(response));
+            IContext::Probe(mHost->mActivity)->StartActivity(intent);
+            // the result will arrive via the IAccountManagerResponse
+        }
+        else {
+            // send result since we can't prompt to select an account
+            AutoPtr<IBundle> result;
+            CBundle::New((IBundle**)&result);
+            result->PutString(IAccountManager::KEY_ACCOUNTS, String(NULL));
+            mHost->mResponse->OnResult(result);
+            // we are done
         }
     }
 
     return NOERROR;
 }
 
+//===============================================================
+// CAccountManager::GetAuthTokenByTypeAndFeaturesTask::
+//===============================================================
+CAR_INTERFACE_IMPL(CAccountManager::GetAuthTokenByTypeAndFeaturesTask, AmsTask, IAccountManagerCallback)
+
 CAccountManager::GetAuthTokenByTypeAndFeaturesTask::GetAuthTokenByTypeAndFeaturesTask(
     /* [in] */ const String& accountType,
     /* [in] */ const String& authTokenType,
-    /* [in] */ const ArrayOf<String>& features,
+    /* [in] */ ArrayOf<String>* features,
     /* [in] */ IActivity* activityForPrompting,
     /* [in] */ IBundle* addAccountOptions,
     /* [in] */ IBundle* loginOptions,
@@ -566,50 +502,19 @@ CAccountManager::GetAuthTokenByTypeAndFeaturesTask::GetAuthTokenByTypeAndFeature
     : AmsTask(activityForPrompting, handler, cb, host)
     , mAccountType(accountType)
     , mAuthTokenType(authTokenType)
+    , mFeatures(features)
     , mAddAccountOptions(addAccountOptions)
     , mNumAccounts(0)
 {
-    mFeatures = features.Clone();
     assert(!accountType.IsNull());
     mMyCallback = (IAccountManagerCallback*)this;
-}
-
-PInterface CAccountManager::GetAuthTokenByTypeAndFeaturesTask::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IAccountManagerCallback*)this;
-    }
-    return AmsTask::Probe(riid);
-}
-
-UInt32 CAccountManager::GetAuthTokenByTypeAndFeaturesTask::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 CAccountManager::GetAuthTokenByTypeAndFeaturesTask::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode CAccountManager::GetAuthTokenByTypeAndFeaturesTask::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    VALIDATE_NOT_NULL(pIID);
-
-    if (pObject == (IInterface*)(IAccountManagerCallback*)this) {
-        *pIID = EIID_IAccountManagerCallback;
-    }
-    return AmsTask::GetInterfaceID(pObject, pIID);
 }
 
 ECode CAccountManager::GetAuthTokenByTypeAndFeaturesTask::DoWork()
 {
     AutoPtr<IAccountManagerFuture> future;
     AutoPtr<IAccountManagerCallback> callback = new GetAccountsCallback(this);
-    return mHost->GetAccountsByTypeAndFeatures(mAccountType, *mFeatures,
+    return mHost->GetAccountsByTypeAndFeatures(mAccountType, mFeatures,
             callback, mHandler,
             (IAccountManagerFuture**)&future);
 }
@@ -655,6 +560,10 @@ ECode CAccountManager::GetAuthTokenByTypeAndFeaturesTask::Run(
     // }
 }
 
+//===============================================================
+// CAccountManager::AccountsChangedBroadcastReceiver::
+//===============================================================
+
 CAccountManager::AccountsChangedBroadcastReceiver::AccountsChangedBroadcastReceiver(
     /* [in] */ CAccountManager* host)
     : mHost(host)
@@ -668,187 +577,30 @@ ECode CAccountManager::AccountsChangedBroadcastReceiver::OnReceive(
     FAIL_RETURN(mHost->GetAccounts((ArrayOf<IAccount*>**)&accounts));
     // send the result to the listeners
     AutoLock lock(mHost->mAccountsUpdatedListenersLock);
-    HashMap<AutoPtr<IOnAccountsUpdateListener>, AutoPtr<IHandler> >::Iterator it
-            = mHost->mAccountsUpdatedListeners.Begin();
-    for (; it != mHost->mAccountsUpdatedListeners.End(); ++it) {
-        mHost->PostToHandler(it->mSecond, it->mFirst, *accounts);
+    AutoPtr<ISet> st;
+    mHost->mAccountsUpdatedListeners->GetEntrySet((ISet**)&st);
+    AutoPtr<IIterator> it;
+    st->GetIterator((IIterator**)&it);
+    Boolean bHasNxt = FALSE;
+    while ((it->HasNext(&bHasNxt), bHasNxt)) {
+        AutoPtr<IInterface> p;
+        it->GetNext((IInterface**)&p);
+        AutoPtr<IMapEntry> entry = IMapEntry::Probe(p);
+        AutoPtr<IInterface> v;
+        entry->GetValue((IInterface**)&v);
+        AutoPtr<IHandler> hl = IHandler::Probe(v);
+        AutoPtr<IInterface> k;
+        entry->GetKey((IInterface**)&k);
+        AutoPtr<IOnAccountsUpdateListener> ul = IOnAccountsUpdateListener::Probe(k);
+        mHost->PostToHandler(hl, ul, accounts);
     }
 
     return NOERROR;
 }
 
-
-CAccountManager::CAccountManager()
-{
-    mAccountsChangedBroadcastReceiver = new AccountsChangedBroadcastReceiver(this);
-}
-
-ECode CAccountManager::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IIAccountManager* service)
-{
-    mContext = context;
-    mService = service;
-    AutoPtr<ILooper> looper;
-    ASSERT_SUCCEEDED(mContext->GetMainLooper((ILooper**)&looper));
-    return CHandler::New(looper, (IHandler**)&mMainHandler);
-}
-
-ECode CAccountManager::constructor(
-    /* [in] */ IContext* context,
-    /* [in] */ IIAccountManager* service,
-    /* [in] */ IHandler* handler)
-{
-    mContext = context;
-    mService = service;
-    mMainHandler = handler;
-    return NOERROR;
-}
-
-AutoPtr<IBundle> CAccountManager::SanitizeResult(
-    /* [in] */ IBundle* result)
-{
-    if (result != NULL) {
-        Boolean isContains;
-        result->ContainsKey(KEY_AUTHTOKEN, &isContains);
-        if (isContains) {
-            String value;
-            result->GetString(KEY_AUTHTOKEN, &value);
-            AutoPtr<ICharSequence> cs;
-            CString::New(value, (ICharSequence**)&cs);
-            if (!TextUtils::IsEmpty(cs)) {
-                AutoPtr<CBundle> newResult;
-                CBundle::NewByFriend((CBundle**)&newResult);
-                newResult->PutString(KEY_AUTHTOKEN,
-                        String("<omitted for logging purposes>"));
-                return newResult;
-            }
-        }
-    }
-    return result;
-}
-
-ECode CAccountManager::Get(
-    /* [in] */ IContext* context,
-    /* [out] */ IAccountManager** accountManager)
-{
-    VALIDATE_NOT_NULL(accountManager);
-    if (context == NULL) {
-        Slogger::E(TAG, "context is null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        //throw new IllegalArgumentException("context is null");
-    }
-    return context->GetSystemService(IContext::ACCOUNT_SERVICE,
-            (IInterface**)accountManager);
-}
-
-ECode CAccountManager::GetPassword(
-    /* [in] */ IAccount* account,
-    /* [out] */ String* password)
-{
-    VALIDATE_NOT_NULL(password);
-    if (account == NULL) {
-        Slogger::E(TAG, "account is null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-//        throw new IllegalArgumentException("account is null");
-    }
-    //try {
-    return mService->GetPassword(account, password);
-    // } catch (RemoteException e) {
-    //     // will never happen
-    //     throw new RuntimeException(e);
-    // }
-}
-
-ECode CAccountManager::GetUserData(
-    /* [in] */ IAccount* account,
-    /* [in] */ const String& key,
-    /* [out] */ String* userData)
-{
-    VALIDATE_NOT_NULL(userData);
-    if (account == NULL) {
-        Slogger::E(TAG, "account is null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-//        throw new IllegalArgumentException("account is null");
-    }
-    if (key.IsNull()) {
-        Slogger::E(TAG, "key is null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-//        throw new IllegalArgumentException("key is null");
-    }
-    //try {
-    return mService->GetUserData(account, key, userData);
-    // } catch (RemoteException e) {
-    //     // will never happen
-    //     throw new RuntimeException(e);
-    // }
-}
-
-ECode CAccountManager::GetAuthenticatorTypes(
-    /* [out, callee] */ ArrayOf<IAuthenticatorDescription*>** authenticators)
-{
-    VALIDATE_NOT_NULL(authenticators);
-    //try {
-    return mService->GetAuthenticatorTypes(authenticators);
-    // } catch (RemoteException e) {
-    //     // will never happen
-    //     throw new RuntimeException(e);
-    // }
-}
-
-ECode CAccountManager::GetAccounts(
-    /* [out, callee] */ ArrayOf<IAccount*>** accounts)
-{
-    VALIDATE_NOT_NULL(accounts);
-    //try {
-    return mService->GetAccounts(String(NULL), accounts);
-    // } catch (RemoteException e) {
-    //     // won't ever happen
-    //     throw new RuntimeException(e);
-    // }
-}
-
-ECode CAccountManager::GetAccountsByType(
-    /* [in] */ const String& type,
-    /* [out, callee] */ ArrayOf<IAccount*>** accounts)
-{
-    VALIDATE_NOT_NULL(accounts);
-    AutoPtr<IUserHandle> userH;
-    Process::MyUserHandle((IUserHandle**)&userH);
-    return GetAccountsByTypeAsUser(type, userH, accounts);
-}
-
-ECode CAccountManager::GetAccountsByTypeAsUser(
-    /* [in] */ const String& type,
-    /* [in] */ IUserHandle* userHandle,
-    /* [out, callee] */ ArrayOf<IAccount*>** accounts)
-
-{
-    VALIDATE_NOT_NULL(accounts);
-    // try {
-    Int32 id;
-    userHandle->GetIdentifier(&id);
-    return mService->GetAccountsAsUser(type, id, accounts);
-    // } catch (RemoteException e) {
-    //     // won't ever happen
-    //     throw new RuntimeException(e);
-    // }
-}
-
-ECode CAccountManager::UpdateAppPermission(
-    /* [in] */ IAccount* account,
-    /* [in] */ const String& authTokenType,
-    /* [in] */ Int32 uid,
-    /* [in] */ Boolean value)
-{
-    // try {
-    return mService->UpdateAppPermission(account, authTokenType, uid, value);
-    // } catch (RemoteException e) {
-    //     // won't ever happen
-    //     throw new RuntimeException(e);
-    // }
-}
-
+//===============================================================
+// CAccountManager::Future2Task_GetAuthTokenLabel::
+//===============================================================
 CAccountManager::Future2Task_GetAuthTokenLabel::Future2Task_GetAuthTokenLabel(
     /* [in] */ IHandler* handler,
     /* [in] */ IAccountManagerCallback* cb,
@@ -887,46 +639,25 @@ ECode CAccountManager::Future2Task_GetAuthTokenLabel::BundleToResult(
     return NOERROR;
 }
 
-ECode CAccountManager::GetAuthTokenLabel(
-    /* [in] */ const String& accountType,
-    /* [in] */ const String& authTokenType,
-    /* [in] */ IAccountManagerCallback* cb,
-    /* [in] */ IHandler* handler,
-    /* [out] */ IAccountManagerFuture** future)
-{
-    VALIDATE_NOT_NULL(future);
-    *future = NULL;
-
-    if (accountType.IsNull()) {
-        Slogger::E(TAG, "accountType is null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // throw new IllegalArgumentException("accountType is null");
-    }
-    if (authTokenType.IsNull()) {
-        Slogger::E(TAG, "authTokenType is null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        // throw new IllegalArgumentException("authTokenType is null");
-    }
-    AutoPtr<Future2Task_GetAuthTokenLabel> f = new Future2Task_GetAuthTokenLabel(
-            handler, cb, this, accountType, authTokenType);
-    return f->Start(future);
-}
+//===============================================================
+// CAccountManager::Future2Task_HasFeatures::
+//===============================================================
 
 CAccountManager::Future2Task_HasFeatures::Future2Task_HasFeatures(
     /* [in] */ IHandler* handler,
     /* [in] */ IAccountManagerCallback* cb,
     /* [in] */ CAccountManager* host,
     /* [in] */ IAccount* account,
-    /* [in] */ const ArrayOf<String>& features)
+    /* [in] */ ArrayOf<String>* features)
     : Future2Task(handler, cb, host)
     , mAccount(account)
+    , mFeatures(features)
 {
-    mFeatures = features.Clone();
 }
 
 ECode CAccountManager::Future2Task_HasFeatures::DoWork()
 {
-    return mHost->mService->HasFeatures(mResponse, mAccount, *mFeatures);
+    return mHost->mService->HasFeatures(mResponse, mAccount, mFeatures);
 }
 
 ECode CAccountManager::Future2Task_HasFeatures::BundleToResult(
@@ -952,35 +683,19 @@ ECode CAccountManager::Future2Task_HasFeatures::BundleToResult(
     return NOERROR;
 }
 
-ECode CAccountManager::HasFeatures(
-    /* [in] */ IAccount* account,
-    /* [in] */ const ArrayOf<String>& features,
-    /* [in] */ IAccountManagerCallback* cb,
-    /* [in] */ IHandler* handler,
-    /* [out] */ IAccountManagerFuture** accountManagerFuture)
-{
-    VALIDATE_NOT_NULL(accountManagerFuture);
-    if (account == NULL) {
-        Slogger::E(TAG, "account is null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-//        throw new IllegalArgumentException("account is null");
-    }
-    //if (features == null) throw new IllegalArgumentException("features is null");
-    AutoPtr<Future2Task_HasFeatures> future = new Future2Task_HasFeatures(
-            handler, cb, this, account, features);
-    return future->Start(accountManagerFuture);
-}
-
+//===============================================================
+// CAccountManager::Future2Task_GetAccountsByTypeAndFeatures::
+//===============================================================
 CAccountManager::Future2Task_GetAccountsByTypeAndFeatures::Future2Task_GetAccountsByTypeAndFeatures(
     /* [in] */ IHandler* handler,
     /* [in] */ IAccountManagerCallback* cb,
     /* [in] */ CAccountManager* host,
     /* [in] */ const String& type,
-    /* [in] */ const ArrayOf<String>& features)
+    /* [in] */ ArrayOf<String>* features)
     : Future2Task(handler, cb, host)
     , mType(type)
+    , mFeatures(features)
 {
-    mFeatures = features.Clone();
 }
 
 ECode CAccountManager::Future2Task_GetAccountsByTypeAndFeatures::DoWork()
@@ -995,7 +710,7 @@ ECode CAccountManager::Future2Task_GetAccountsByTypeAndFeatures::BundleToResult(
     VALIDATE_NOT_NULL(result);
 
     Boolean isContains;
-    bundle->ContainsKey(String(IAccountManager::KEY_BOOLEAN_RESULT), &isContains);
+    bundle->ContainsKey(IAccountManager::KEY_BOOLEAN_RESULT, &isContains);
     if (!isContains) {
         Slogger::E(TAG, "no result in response");
         return E_AUTHENTICATOR_EXCEPTION;
@@ -1004,59 +719,57 @@ ECode CAccountManager::Future2Task_GetAccountsByTypeAndFeatures::BundleToResult(
     AutoPtr< ArrayOf<IParcelable*> > parcelables;
     bundle->GetParcelableArray(IAccountManager::KEY_ACCOUNTS,
             (ArrayOf<IParcelable*>**)&parcelables);
-    AutoPtr<IObjectContainer> descs;
-    CObjectContainer::New((IObjectContainer**)&descs);
+    AutoPtr<IArrayList> descs;
+    CArrayList::New((IArrayList**)&descs);
     for (Int32 i = 0; i < parcelables->GetLength(); i++) {
-        AutoPtr<IAccount> account;
-        if ((*parcelables)[i] != NULL &&
-                (*parcelables)[i]->Probe(EIID_IAccount) != NULL){
-            account = (IAccount*)(*parcelables)[i]->Probe(EIID_IAccount);
-        }
-        descs->Add((IInterface*)account);
+        AutoPtr<IAccount> account = IAccount::Probe((*parcelables)[i]);
+        descs->Add(account);
     }
-    *result = (IInterface*)descs;
+    *result = IInterface::Probe(descs);
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
-ECode CAccountManager::GetAccountsByTypeAndFeatures(
-    /* [in] */ const String& type,
-    /* [in] */ const ArrayOf<String>& features,
-    /* [in] */ IAccountManagerCallback* cb,
+//===============================================================
+// CAccountManager::Future2Task_RenameAccount::
+//===============================================================
+CAccountManager::Future2Task_RenameAccount::Future2Task_RenameAccount(
     /* [in] */ IHandler* handler,
-    /* [out] */ IAccountManagerFuture** accountManagerFuture)
+    /* [in] */ IAccountManagerCallback* cb,
+    /* [in] */ CAccountManager* host,
+    /* [in] */ IAccount* account,
+    /* [in] */ const String& newName)
+    : Future2Task(handler, cb, host)
 {
-    VALIDATE_NOT_NULL(accountManagerFuture);
-    if (type.IsNull()) {
-        Slogger::E(TAG, "type is null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-//        throw new IllegalArgumentException("type is null");
-    }
-    AutoPtr<Future2Task_GetAccountsByTypeAndFeatures> future = new Future2Task_GetAccountsByTypeAndFeatures(
-            handler, cb, this, type, features);
-    return future->Start(accountManagerFuture);
+    mAccount = account;
+    mNewName = newName;
 }
 
-ECode CAccountManager::AddAccountExplicitly(
-    /* [in] */ IAccount* account,
-    /* [in] */ const String& password,
-    /* [in] */ IBundle* userdata,
-    /* [out] */ Boolean* result)
+ECode CAccountManager::Future2Task_RenameAccount::DoWork()
+{
+    return mHost->mService->RenameAccount(mResponse, mAccount, mNewName);
+}
+
+ECode CAccountManager::Future2Task_RenameAccount::BundleToResult(
+    /* [in] */ IBundle* bundle,
+    /* [out] */ IInterface** result)
 {
     VALIDATE_NOT_NULL(result);
-    if (account == NULL) {
-        Slogger::E(TAG, "account is null");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-//        throw new IllegalArgumentException("account is null");
-    }
-    //try {
-    return mService->AddAccount(account, password, userdata, result);
-    // } catch (RemoteException e) {
-    //     // won't ever happen
-    //     throw new RuntimeException(e);
-    // }
+
+    String name;
+    bundle->GetString(KEY_ACCOUNT_NAME, &name);
+    String type;
+    bundle->GetString(KEY_ACCOUNT_TYPE, &type);
+    AutoPtr<IAccount> acc;
+    CAccount::New(name, type, (IAccount**)&acc);
+    *result = IInterface::Probe(acc);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
+//===============================================================
+// CAccountManager::Future2Task_RemoveAccount::
+//===============================================================
 CAccountManager::Future2Task_RemoveAccount::Future2Task_RemoveAccount(
     /* [in] */ IHandler* handler,
     /* [in] */ IAccountManagerCallback* cb,
@@ -1093,6 +806,534 @@ ECode CAccountManager::Future2Task_RemoveAccount::BundleToResult(
     return NOERROR;
 }
 
+//===============================================================
+// CAccountManager::Future2Task_RemoveAccountAsUser::
+//===============================================================
+CAccountManager::Future2Task_RemoveAccountAsUser::Future2Task_RemoveAccountAsUser(
+    /* [in] */ IHandler* handler,
+    /* [in] */ IAccountManagerCallback* cb,
+    /* [in] */ CAccountManager* host,
+    /* [in] */ IAccount* account,
+    /* [in] */ IUserHandle* userHandle)
+    : Future2Task(handler, cb, host)
+    , mAccount(account)
+    , mUserHandle(userHandle)
+{}
+
+ECode CAccountManager::Future2Task_RemoveAccountAsUser::DoWork()
+{
+    Int32 id = 0;
+    mUserHandle->GetIdentifier(&id);
+    return mHost->mService->RemoveAccountAsUser(mResponse, mAccount, id);
+}
+
+ECode CAccountManager::Future2Task_RemoveAccountAsUser::BundleToResult(
+    /* [in] */ IBundle* bundle,
+    /* [out] */ IInterface** result)
+{
+    VALIDATE_NOT_NULL(result)
+    Boolean bContain = FALSE;
+    if (!(bundle->ContainsKey(KEY_BOOLEAN_RESULT, &bContain), bContain)) {
+        // throw new AuthenticatorException("no result in response");
+        return E_AUTHENTICATOR_EXCEPTION;
+    }
+    Boolean kr = FALSE;
+    bundle->GetBoolean(KEY_BOOLEAN_RESULT, &kr);
+    AutoPtr<IBoolean> pKr;
+    CBoolean::New(kr, (IBoolean**)&pKr);
+    *result = pKr;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
+}
+
+//===============================================================
+// CAccountManager::AmsTask_GetAuthToken::
+//===============================================================
+CAccountManager::AmsTask_GetAuthToken::AmsTask_GetAuthToken(
+    /* [in] */ IActivity* activity,
+    /* [in] */ IHandler* handler,
+    /* [in] */ IAccountManagerCallback* cb,
+    /* [in] */ CAccountManager* host,
+    /* [in] */ IAccount* account,
+    /* [in] */ const String& authTokenType,
+    /* [in] */ Boolean notifyAuthFailure,
+    /* [in] */ Boolean expectActivityLaunch,
+    /* [in] */ IBundle* options)
+    : AmsTask(activity, handler, cb, host)
+    , mAccount(account)
+    , mAuthTokenType(authTokenType)
+    , mNotifyAuthFailure(notifyAuthFailure)
+    , mExpectActivityLaunch(expectActivityLaunch)
+    , mOptions(options)
+{}
+
+ECode CAccountManager::AmsTask_GetAuthToken::DoWork()
+{
+    return mHost->mService->GetAuthToken(mResponse, mAccount, mAuthTokenType,
+            mNotifyAuthFailure, mExpectActivityLaunch, mOptions);
+}
+
+//===============================================================
+// CAccountManager::AmsTask_AddAccount::
+//===============================================================
+CAccountManager::AmsTask_AddAccount::AmsTask_AddAccount(
+    /* [in] */ IActivity* activity,
+    /* [in] */ IHandler* handler,
+    /* [in] */ IAccountManagerCallback* cb,
+    /* [in] */ CAccountManager* host,
+    /* [in] */ const String& accountType,
+    /* [in] */ const String& authTokenType,
+    /* [in] */ ArrayOf<String>* requiredFeatures,
+    /* [in] */ IBundle* options)
+    : AmsTask(activity, handler, cb, host)
+    , mAccountType(accountType)
+    , mAuthTokenType(authTokenType)
+    , mRequiredFeatures(requiredFeatures)
+    , mOptions(options)
+{
+}
+
+ECode CAccountManager::AmsTask_AddAccount::DoWork()
+{
+    return mHost->mService->AddAccount(mResponse, mAccountType, mAuthTokenType,
+            mRequiredFeatures, mActivity != NULL, mOptions);
+}
+
+//===============================================================
+// CAccountManager::AmsTask_AddAccountAsUser::
+//===============================================================
+CAccountManager::AmsTask_AddAccountAsUser::AmsTask_AddAccountAsUser(
+    /* [in] */ IActivity* activity,
+    /* [in] */ IHandler* handler,
+    /* [in] */ IAccountManagerCallback* cb,
+    /* [in] */ CAccountManager* host,
+    /* [in] */ const String& accountType,
+    /* [in] */ const String& authTokenType,
+    /* [in] */ ArrayOf<String>* requiredFeatures,
+    /* [in] */ IBundle* optionsIn,
+    /* [in] */ Int32 id)
+    : AmsTask(activity, handler, cb, host)
+    , mAccountType(accountType)
+    , mAuthTokenType(authTokenType)
+    , mRequiredFeatures(requiredFeatures)
+    , mOptionsIn(optionsIn)
+    , mId(id)
+{
+}
+
+ECode CAccountManager::AmsTask_AddAccountAsUser::DoWork()
+{
+    return mHost->mService->AddAccountAsUser(mResponse, mAccountType, mAuthTokenType,
+            mRequiredFeatures, mActivity != NULL, mOptionsIn, mId);
+}
+
+//===============================================================
+// CAccountManager::AmsTask_ConfirmCredentialsAsUser::
+//===============================================================
+CAccountManager::AmsTask_ConfirmCredentialsAsUser::AmsTask_ConfirmCredentialsAsUser(
+    /* [in] */ IActivity* activity,
+    /* [in] */ IHandler* handler,
+    /* [in] */ IAccountManagerCallback* cb,
+    /* [in] */ CAccountManager* host,
+    /* [in] */ IAccount* account,
+    /* [in] */ IBundle* options,
+    /* [in] */ Int32 userId)
+    : AmsTask(activity, handler, cb, host)
+    , mAccount(account)
+    , mOptions(options)
+    , mUserId(userId)
+{}
+
+ECode CAccountManager::AmsTask_ConfirmCredentialsAsUser::DoWork()
+{
+    return mHost->mService->ConfirmCredentialsAsUser(mResponse, mAccount,
+            mOptions, mActivity != NULL, mUserId);
+}
+
+//===============================================================
+// CAccountManager::AmsTask_UpdateCredentials::
+//===============================================================
+CAccountManager::AmsTask_UpdateCredentials::AmsTask_UpdateCredentials(
+    /* [in] */ IActivity* activity,
+    /* [in] */ IHandler* handler,
+    /* [in] */ IAccountManagerCallback* cb,
+    /* [in] */ CAccountManager* host,
+    /* [in] */ IAccount* account,
+    /* [in] */ const String& authTokenType,
+    /* [in] */ IBundle* options)
+    : AmsTask(activity, handler, cb, host)
+    , mAccount(account)
+    , mAuthTokenType(authTokenType)
+    , mOptions(options)
+{}
+
+ECode CAccountManager::AmsTask_UpdateCredentials::DoWork()
+{
+    return mHost->mService->UpdateCredentials(mResponse, mAccount,
+            mAuthTokenType, mActivity != NULL, mOptions);
+}
+
+//===============================================================
+// CAccountManager::AmsTask_EditProperties::
+//===============================================================
+CAccountManager::AmsTask_EditProperties::AmsTask_EditProperties(
+    /* [in] */ IActivity* activity,
+    /* [in] */ IHandler* handler,
+    /* [in] */ IAccountManagerCallback* cb,
+    /* [in] */ CAccountManager* host,
+    /* [in] */ const String& authTokenType)
+    : AmsTask(activity, handler, cb, host)
+    , mAuthTokenType(authTokenType)
+{}
+
+ECode CAccountManager::AmsTask_EditProperties::DoWork()
+{
+    return mHost->mService->EditProperties(mResponse,
+            mAuthTokenType, mActivity != NULL);
+}
+
+//===============================================================
+// CAccountManager::CallbackAction::
+//===============================================================
+CAR_INTERFACE_IMPL(CAccountManager::CallbackAction, Object, IRunnable);
+
+CAccountManager::CallbackAction::CallbackAction(
+    /* [in] */ IAccountManagerCallback* accountManagerCb,
+    /* [in] */ IAccountManagerFuture* future)
+    : mCallback(accountManagerCb)
+    , mFuture(future)
+{}
+
+ECode CAccountManager::CallbackAction::Run()
+{
+    return mCallback->Run(mFuture);
+}
+
+//===============================================================
+// CAccountManager::AccountUpdateAction::
+//===============================================================
+CAR_INTERFACE_IMPL(CAccountManager::AccountUpdateAction, Object, IRunnable);
+
+CAccountManager::AccountUpdateAction::AccountUpdateAction(
+    /* [in] */ IOnAccountsUpdateListener* listener,
+    /* [in] */ ArrayOf<IAccount*>* accounts)
+    : mListener(listener)
+    , mAccounts(accounts)
+{}
+
+ECode CAccountManager::AccountUpdateAction::Run()
+{
+    //try {
+    return mListener->OnAccountsUpdated(*mAccounts);
+    // } catch (SQLException e) {
+    //     // Better luck next time.  If the problem was disk-full,
+    //     // the STORAGE_OK intent will re-trigger the update.
+    //     Log.e(TAG, "Can't update accounts", e);
+    // }
+}
+
+//===============================================================
+// CAccountManager::
+//===============================================================
+CAR_OBJECT_IMPL(CAccountManager)
+
+CAR_INTERFACE_IMPL(CAccountManager, Object, IAccountManager)
+
+CAccountManager::CAccountManager()
+{
+    mAccountsChangedBroadcastReceiver = new AccountsChangedBroadcastReceiver(this);
+}
+
+ECode CAccountManager::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IIAccountManager* service)
+{
+    mContext = context;
+    mService = service;
+    AutoPtr<ILooper> looper;
+    ASSERT_SUCCEEDED(mContext->GetMainLooper((ILooper**)&looper));
+    return CHandler::New(looper, (IHandler**)&mMainHandler);
+}
+
+ECode CAccountManager::constructor(
+    /* [in] */ IContext* context,
+    /* [in] */ IIAccountManager* service,
+    /* [in] */ IHandler* handler)
+{
+    mContext = context;
+    mService = service;
+    mMainHandler = handler;
+    return NOERROR;
+}
+
+AutoPtr<IBundle> CAccountManager::SanitizeResult(
+    /* [in] */ IBundle* result)
+{
+    if (result != NULL) {
+        Boolean isContains = FALSE;
+        result->ContainsKey(KEY_AUTHTOKEN, &isContains);
+        if (isContains) {
+            String value;
+            result->GetString(KEY_AUTHTOKEN, &value);
+            AutoPtr<ICharSequence> cs;
+            CString::New(value, (ICharSequence**)&cs);
+            if (!TextUtils::IsEmpty(cs)) {
+                AutoPtr<CBundle> newResult;
+                CBundle::NewByFriend((CBundle**)&newResult);
+                newResult->PutString(KEY_AUTHTOKEN,
+                        String("<omitted for logging purposes>"));
+                return newResult;
+            }
+        }
+    }
+    return result;
+}
+
+ECode CAccountManager::Get(
+    /* [in] */ IContext* context,
+    /* [out] */ IAccountManager** accountManager)
+{
+    VALIDATE_NOT_NULL(accountManager);
+    *accountManager = NULL;
+
+    if (context == NULL) {
+        Slogger::E(TAG, "context is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        //throw new IllegalArgumentException("context is null");
+    }
+
+    AutoPtr<IInterface> service;
+    FAIL_RETURN(context->GetSystemService(IContext::ACCOUNT_SERVICE, (IInterface**)&service))
+
+    *accountManager = IAccountManager::Probe(service);
+    REFCOUNT_ADD(*accountManager)
+    return NOERROR;
+}
+
+ECode CAccountManager::GetPassword(
+    /* [in] */ IAccount* account,
+    /* [out] */ String* password)
+{
+    VALIDATE_NOT_NULL(password);
+    if (account == NULL) {
+        Slogger::E(TAG, "account is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+//        throw new IllegalArgumentException("account is null");
+    }
+    return mService->GetPassword(account, password);
+}
+
+ECode CAccountManager::GetUserData(
+    /* [in] */ IAccount* account,
+    /* [in] */ const String& key,
+    /* [out] */ String* userData)
+{
+    VALIDATE_NOT_NULL(userData);
+    if (account == NULL) {
+        Slogger::E(TAG, "account is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+//        throw new IllegalArgumentException("account is null");
+    }
+    if (key.IsNull()) {
+        Slogger::E(TAG, "key is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+//        throw new IllegalArgumentException("key is null");
+    }
+    return mService->GetUserData(account, key, userData);
+}
+
+ECode CAccountManager::GetAuthenticatorTypes(
+    /* [out, callee] */ ArrayOf<IAuthenticatorDescription*>** authenticators)
+{
+    VALIDATE_NOT_NULL(authenticators);
+    AutoPtr<IUserHandleHelper> hlp;
+    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&hlp);
+    Int32 id = 0;
+    hlp->GetCallingUserId(&id);
+    return mService->GetAuthenticatorTypes(id, authenticators);
+}
+
+ECode CAccountManager::GetAuthenticatorTypesAsUser(
+    /* [in] */ Int32 userId,
+    /* [out, callee] */ ArrayOf<IAuthenticatorDescription*>** authenticators)
+{
+    VALIDATE_NOT_NULL(authenticators);
+    return mService->GetAuthenticatorTypes(userId, authenticators);
+}
+
+ECode CAccountManager::GetAccounts(
+    /* [out, callee] */ ArrayOf<IAccount*>** accounts)
+{
+    VALIDATE_NOT_NULL(accounts);
+    return mService->GetAccounts(String(NULL), accounts);
+}
+
+ECode CAccountManager::GetAccountsAsUser(
+    /* [in] */ Int32 userId,
+    /* [out, callee] */ ArrayOf<IAccount*>** accounts)
+{
+    VALIDATE_NOT_NULL(accounts);
+    return mService->GetAccountsAsUser(String(NULL), userId, accounts);
+}
+
+ECode CAccountManager::GetAccountsForPackage(
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32 uid,
+    /* [out, callee] */ ArrayOf<IAccount*>** accounts)
+{
+    VALIDATE_NOT_NULL(accounts);
+    return mService->GetAccountsForPackage(packageName, uid, accounts);
+}
+
+ECode CAccountManager::GetAccountsByTypeForPackage(
+    /* [in] */ const String& type,
+    /* [in] */ const String& packageName,
+    /* [out, callee] */ ArrayOf<IAccount*>** accounts)
+{
+    VALIDATE_NOT_NULL(accounts);
+    return mService->GetAccountsByTypeForPackage(type, packageName, accounts);
+}
+
+ECode CAccountManager::GetAccountsByType(
+    /* [in] */ const String& type,
+    /* [out, callee] */ ArrayOf<IAccount*>** accounts)
+{
+    VALIDATE_NOT_NULL(accounts);
+    AutoPtr<IUserHandle> userH;
+    Process::MyUserHandle((IUserHandle**)&userH);
+    return GetAccountsByTypeAsUser(type, userH, accounts);
+}
+
+ECode CAccountManager::GetAccountsByTypeAsUser(
+    /* [in] */ const String& type,
+    /* [in] */ IUserHandle* userHandle,
+    /* [out, callee] */ ArrayOf<IAccount*>** accounts)
+{
+    VALIDATE_NOT_NULL(accounts);
+    Int32 id = 0;
+    userHandle->GetIdentifier(&id);
+    return mService->GetAccountsAsUser(type, id, accounts);
+}
+
+ECode CAccountManager::UpdateAppPermission(
+    /* [in] */ IAccount* account,
+    /* [in] */ const String& authTokenType,
+    /* [in] */ Int32 uid,
+    /* [in] */ Boolean value)
+{
+    return mService->UpdateAppPermission(account, authTokenType, uid, value);
+}
+
+ECode CAccountManager::GetAuthTokenLabel(
+    /* [in] */ const String& accountType,
+    /* [in] */ const String& authTokenType,
+    /* [in] */ IAccountManagerCallback* cb,
+    /* [in] */ IHandler* handler,
+    /* [out] */ IAccountManagerFuture** future)
+{
+    VALIDATE_NOT_NULL(future);
+    *future = NULL;
+
+    if (accountType.IsNull()) {
+        Slogger::E(TAG, "accountType is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        // throw new IllegalArgumentException("accountType is null");
+    }
+    if (authTokenType.IsNull()) {
+        Slogger::E(TAG, "authTokenType is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        // throw new IllegalArgumentException("authTokenType is null");
+    }
+    AutoPtr<Future2Task_GetAuthTokenLabel> f = new Future2Task_GetAuthTokenLabel(
+            handler, cb, this, accountType, authTokenType);
+    return f->Start(future);
+}
+
+ECode CAccountManager::HasFeatures(
+    /* [in] */ IAccount* account,
+    /* [in] */ ArrayOf<String>* features,
+    /* [in] */ IAccountManagerCallback* cb,
+    /* [in] */ IHandler* handler,
+    /* [out] */ IAccountManagerFuture** accountManagerFuture)
+{
+    VALIDATE_NOT_NULL(accountManagerFuture);
+    if (account == NULL) {
+        Slogger::E(TAG, "account is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+//        throw new IllegalArgumentException("account is null");
+    }
+    //if (features == null) throw new IllegalArgumentException("features is null");
+    AutoPtr<Future2Task_HasFeatures> future = new Future2Task_HasFeatures(
+            handler, cb, this, account, features);
+    return future->Start(accountManagerFuture);
+}
+
+ECode CAccountManager::GetAccountsByTypeAndFeatures(
+    /* [in] */ const String& type,
+    /* [in] */ ArrayOf<String>* features,
+    /* [in] */ IAccountManagerCallback* cb,
+    /* [in] */ IHandler* handler,
+    /* [out] */ IAccountManagerFuture** accountManagerFuture)
+{
+    VALIDATE_NOT_NULL(accountManagerFuture);
+    if (type.IsNull()) {
+        Slogger::E(TAG, "type is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+//        throw new IllegalArgumentException("type is null");
+    }
+    AutoPtr<Future2Task_GetAccountsByTypeAndFeatures> future = new Future2Task_GetAccountsByTypeAndFeatures(
+            handler, cb, this, type, features);
+    return future->Start(accountManagerFuture);
+}
+
+ECode CAccountManager::AddAccountExplicitly(
+    /* [in] */ IAccount* account,
+    /* [in] */ const String& password,
+    /* [in] */ IBundle* userdata,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (account == NULL) {
+        Slogger::E(TAG, "account is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+//        throw new IllegalArgumentException("account is null");
+    }
+    return mService->AddAccountExplicitly(account, password, userdata, result);
+}
+
+ECode CAccountManager::RenameAccount(
+    /* [in] */ IAccount* account,
+    /* [in] */ const String& newName,
+    /* [in] */ IAccountManagerCallback* callback,
+    /* [in] */ IHandler* handler,
+    /* [out] */ IAccountManagerFuture** result)
+{
+    VALIDATE_NOT_NULL(result)
+    if (account == NULL) {
+        // throw new IllegalArgumentException("account is null.");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (TextUtils::IsEmpty(newName)) {
+        // throw new IllegalArgumentException("newName is empty or null.");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    AutoPtr<Future2Task_RenameAccount> future = new Future2Task_RenameAccount(
+            handler, callback, this, account, newName);
+    return future->Start(result);
+}
+
+ECode CAccountManager::GetPreviousName(
+    /* [in] */ IAccount* account,
+    /* [out] */ String* result)
+{
+    VALIDATE_NOT_NULL(result)
+    if (account == NULL) {
+        // throw new IllegalArgumentException("account is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    return mService->GetPreviousName(account, result);
+}
+
 ECode CAccountManager::RemoveAccount(
     /* [in] */ IAccount* account,
     /* [in] */ IAccountManagerCallback* cb,
@@ -1110,6 +1351,27 @@ ECode CAccountManager::RemoveAccount(
     return future->Start(accountManagerFuture);
 }
 
+ECode CAccountManager::RemoveAccountAsUser(
+    /* [in] */ IAccount* account,
+    /* [in] */ IAccountManagerCallback* callback,
+    /* [in] */ IHandler* handler,
+    /* [in] */ IUserHandle* userHandle,
+    /* [out] */ IAccountManagerFuture** accountManagerFuture)
+{
+    VALIDATE_NOT_NULL(accountManagerFuture)
+    if (account == NULL) {
+        // throw new IllegalArgumentException("account is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (userHandle == NULL) {
+        // throw new IllegalArgumentException("userHandle is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    AutoPtr<Future2Task_RemoveAccountAsUser> future = new Future2Task_RemoveAccountAsUser(
+            handler, callback, this, account, userHandle);
+    return future->Start(accountManagerFuture);
+}
+
 ECode CAccountManager::InvalidateAuthToken(
     /* [in] */ const String& accountType,
     /* [in] */ const String& authToken)
@@ -1119,16 +1381,10 @@ ECode CAccountManager::InvalidateAuthToken(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
 //        throw new IllegalArgumentException("accountType is null");
     }
-    //try {
     if (!authToken.IsNull()) {
         return mService->InvalidateAuthToken(accountType, authToken);
     }
-
     return NOERROR;
-    // } catch (RemoteException e) {
-    //     // won't ever happen
-    //     throw new RuntimeException(e);
-    // }
 }
 
 ECode CAccountManager::PeekAuthToken(
@@ -1147,12 +1403,7 @@ ECode CAccountManager::PeekAuthToken(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
 //        throw new IllegalArgumentException("authTokenType is null");
     }
-    //try {
     return mService->PeekAuthToken(account, authTokenType, token);
-    // } catch (RemoteException e) {
-    //     // won't ever happen
-    //     throw new RuntimeException(e);
-    // }
 }
 
 ECode CAccountManager::SetPassword(
@@ -1164,12 +1415,7 @@ ECode CAccountManager::SetPassword(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
 //        throw new IllegalArgumentException("account is null");
     }
-    //try {
     return mService->SetPassword(account, password);
-    // } catch (RemoteException e) {
-    //     // won't ever happen
-    //     throw new RuntimeException(e);
-    // }
 }
 
 ECode CAccountManager::ClearPassword(
@@ -1180,12 +1426,7 @@ ECode CAccountManager::ClearPassword(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
 //        throw new IllegalArgumentException("account is null");
     }
-    //try {
     return mService->ClearPassword(account);
-    // } catch (RemoteException e) {
-    //     // won't ever happen
-    //     throw new RuntimeException(e);
-    // }
 }
 
 ECode CAccountManager::SetUserData(
@@ -1203,12 +1444,7 @@ ECode CAccountManager::SetUserData(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
 //        throw new IllegalArgumentException("key is null");
     }
-    //try {
     return mService->SetUserData(account, key, value);
-    // } catch (RemoteException e) {
-    //     // won't ever happen
-    //     throw new RuntimeException(e);
-    // }
 }
 
 ECode CAccountManager::SetAuthToken(
@@ -1226,12 +1462,7 @@ ECode CAccountManager::SetAuthToken(
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
 //        throw new IllegalArgumentException("authTokenType is null");
     }
-    //try {
     return mService->SetAuthToken(account, authTokenType, authToken);
-    // } catch (RemoteException e) {
-    //     // won't ever happen
-    //     throw new RuntimeException(e);
-    // }
 }
 
 ECode CAccountManager::BlockingGetAuthToken(
@@ -1268,30 +1499,6 @@ ECode CAccountManager::BlockingGetAuthToken(
         return NOERROR;
     }
     return bundle->GetString(KEY_AUTHTOKEN, token);
-}
-
-CAccountManager::AmsTask_GetAuthToken::AmsTask_GetAuthToken(
-    /* [in] */ IActivity* activity,
-    /* [in] */ IHandler* handler,
-    /* [in] */ IAccountManagerCallback* cb,
-    /* [in] */ CAccountManager* host,
-    /* [in] */ IAccount* account,
-    /* [in] */ const String& authTokenType,
-    /* [in] */ Boolean notifyAuthFailure,
-    /* [in] */ Boolean expectActivityLaunch,
-    /* [in] */ IBundle* options)
-    : AmsTask(activity, handler, cb, host)
-    , mAccount(account)
-    , mAuthTokenType(authTokenType)
-    , mNotifyAuthFailure(notifyAuthFailure)
-    , mExpectActivityLaunch(expectActivityLaunch)
-    , mOptions(options)
-{}
-
-ECode CAccountManager::AmsTask_GetAuthToken::DoWork()
-{
-    return mHost->mService->GetAuthToken(mResponse, mAccount, mAuthTokenType,
-            mNotifyAuthFailure, mExpectActivityLaunch, mOptions);
 }
 
 ECode CAccountManager::GetAuthToken(
@@ -1377,33 +1584,10 @@ ECode CAccountManager::GetAuthToken(
     return task->Start(accountManagerFuture);
 }
 
-CAccountManager::AmsTask_AddAccount::AmsTask_AddAccount(
-    /* [in] */ IActivity* activity,
-    /* [in] */ IHandler* handler,
-    /* [in] */ IAccountManagerCallback* cb,
-    /* [in] */ CAccountManager* host,
-    /* [in] */ const String& accountType,
-    /* [in] */ const String& authTokenType,
-    /* [in] */ const ArrayOf<String>& requiredFeatures,
-    /* [in] */ IBundle* options)
-    : AmsTask(activity, handler, cb, host)
-    , mAccountType(accountType)
-    , mAuthTokenType(authTokenType)
-    , mOptions(options)
-{
-    mRequiredFeatures = requiredFeatures.Clone();
-}
-
-ECode CAccountManager::AmsTask_AddAccount::DoWork()
-{
-    return mHost->mService->AddAcount(mResponse, mAccountType, mAuthTokenType,
-            *mRequiredFeatures, mActivity != NULL, mOptions);
-}
-
 ECode CAccountManager::AddAccount(
     /* [in] */ const String& accountType,
     /* [in] */ const String& authTokenType,
-    /* [in] */ const ArrayOf<String>& requiredFeatures,
+    /* [in] */ ArrayOf<String>* requiredFeatures,
     /* [in] */ IBundle* addAccountOptions,
     /* [in] */ IActivity* activity,
     /* [in] */ IAccountManagerCallback* cb,
@@ -1430,6 +1614,78 @@ ECode CAccountManager::AddAccount(
     return task->Start(accountManagerFuture);
 }
 
+ECode CAccountManager::AddAccountAsUser(
+    /* [in] */ const String& accountType,
+    /* [in] */ const String& authTokenType,
+    /* [in] */ ArrayOf<String>* requiredFeatures,
+    /* [in] */ IBundle* addAccountOptions,
+    /* [in] */ IActivity* activity,
+    /* [in] */ IAccountManagerCallback* callback,
+    /* [in] */ IHandler* handler,
+    /* [in] */ IUserHandle* userHandle,
+    /* [out] */ IAccountManagerFuture** result)
+{
+    VALIDATE_NOT_NULL(result)
+    if (accountType.IsNull()) {
+        Slogger::E(TAG, "accountType is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        // throw new IllegalArgumentException("account is null");
+    }
+    if (userHandle == NULL) {
+        Slogger::E(TAG, "userHandle is null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        // throw new IllegalArgumentException("authTokenType is null");
+    }
+    AutoPtr<IBundle> optionsIn;
+    FAIL_RETURN(CBundle::New((IBundle**)&optionsIn));
+    if (addAccountOptions != NULL) {
+        optionsIn->PutAll(addAccountOptions);
+    }
+    String packageName;
+    mContext->GetPackageName(&packageName);
+    optionsIn->PutString(KEY_ELASTOS_PACKAGE_NAME, packageName);
+
+    Int32 id = 0;
+    userHandle->GetIdentifier(&id);
+    AutoPtr<AmsTask_AddAccountAsUser> task = new AmsTask_AddAccountAsUser(
+            activity, handler, callback, this, accountType, authTokenType,
+            requiredFeatures, optionsIn, id);
+    return task->Start(result);
+}
+
+ECode CAccountManager::AddSharedAccount(
+    /* [in] */ IAccount* account,
+    /* [in] */ IUserHandle* user,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Int32 id = 0;
+    user->GetIdentifier(&id);
+    return mService->AddSharedAccountAsUser(account, id, result);
+}
+
+ECode CAccountManager::RemoveSharedAccount(
+    /* [in] */ IAccount* account,
+    /* [in] */ IUserHandle* user,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    Int32 id = 0;
+    user->GetIdentifier(&id);
+    return mService->RemoveSharedAccountAsUser(account, id, result);
+}
+
+ECode CAccountManager::GetSharedAccounts(
+    /* [in] */ IUserHandle* user,
+    /* [out] */ ArrayOf<IAccount*>** result)
+{
+    VALIDATE_NOT_NULL(result)
+    Int32 id = 0;
+    user->GetIdentifier(&id);
+    return mService->GetSharedAccountsAsUser(id, result);
+
+}
+
 ECode CAccountManager::ConfirmCredentials(
     /* [in] */ IAccount* account,
     /* [in] */ IBundle* options,
@@ -1443,26 +1699,6 @@ ECode CAccountManager::ConfirmCredentials(
     Process::MyUserHandle((IUserHandle**)&userHandle);
     return ConfirmCredentialsAsUser(account, options, activity, cb, handler,
             userHandle, accountManagerFuture);
-}
-
-CAccountManager::AmsTask_ConfirmCredentialsAsUser::AmsTask_ConfirmCredentialsAsUser(
-    /* [in] */ IActivity* activity,
-    /* [in] */ IHandler* handler,
-    /* [in] */ IAccountManagerCallback* cb,
-    /* [in] */ CAccountManager* host,
-    /* [in] */ IAccount* account,
-    /* [in] */ IBundle* options,
-    /* [in] */ Int32 userId)
-    : AmsTask(activity, handler, cb, host)
-    , mAccount(account)
-    , mOptions(options)
-    , mUserId(userId)
-{}
-
-ECode CAccountManager::AmsTask_ConfirmCredentialsAsUser::DoWork()
-{
-    return mHost->mService->ConfirmCredentialsAsUser(mResponse, mAccount,
-            mOptions, mActivity != NULL, mUserId);
 }
 
 ECode CAccountManager::ConfirmCredentialsAsUser(
@@ -1487,26 +1723,6 @@ ECode CAccountManager::ConfirmCredentialsAsUser(
     return task->Start(accountManagerFuture);
 }
 
-CAccountManager::AmsTask_UpdateCredentials::AmsTask_UpdateCredentials(
-    /* [in] */ IActivity* activity,
-    /* [in] */ IHandler* handler,
-    /* [in] */ IAccountManagerCallback* cb,
-    /* [in] */ CAccountManager* host,
-    /* [in] */ IAccount* account,
-    /* [in] */ const String& authTokenType,
-    /* [in] */ IBundle* options)
-    : AmsTask(activity, handler, cb, host)
-    , mAccount(account)
-    , mAuthTokenType(authTokenType)
-    , mOptions(options)
-{}
-
-ECode CAccountManager::AmsTask_UpdateCredentials::DoWork()
-{
-    return mHost->mService->UpdateCredentials(mResponse, mAccount,
-            mAuthTokenType, mActivity != NULL, mOptions);
-}
-
 ECode CAccountManager::UpdateCredentials(
     /* [in] */ IAccount* account,
     /* [in] */ const String& authTokenType,
@@ -1525,22 +1741,6 @@ ECode CAccountManager::UpdateCredentials(
     AutoPtr<AmsTask_UpdateCredentials> task = new AmsTask_UpdateCredentials(
             activity, handler, cb, this, account, authTokenType, options);
     return task->Start(accountManagerFuture);
-}
-
-CAccountManager::AmsTask_EditProperties::AmsTask_EditProperties(
-    /* [in] */ IActivity* activity,
-    /* [in] */ IHandler* handler,
-    /* [in] */ IAccountManagerCallback* cb,
-    /* [in] */ CAccountManager* host,
-    /* [in] */ const String& authTokenType)
-    : AmsTask(activity, handler, cb, host)
-    , mAuthTokenType(authTokenType)
-{}
-
-ECode CAccountManager::AmsTask_EditProperties::DoWork()
-{
-    return mHost->mService->EditProperties(mResponse,
-            mAuthTokenType, mActivity != NULL);
 }
 
 ECode CAccountManager::EditProperties(
@@ -1581,20 +1781,6 @@ ECode CAccountManager::EnsureNotOnMainThread()
     return NOERROR;
 }
 
-CAccountManager::CallbackAction::CallbackAction(
-    /* [in] */ IAccountManagerCallback* accountManagerCb,
-    /* [in] */ IAccountManagerFuture* future)
-    : mCallback(accountManagerCb)
-    , mFuture(future)
-{}
-
-CAR_INTERFACE_IMPL(CAccountManager::CallbackAction, IRunnable);
-
-ECode CAccountManager::CallbackAction::Run()
-{
-    return mCallback->Run(mFuture);
-}
-
 void CAccountManager::PostToHandler(
     /* [in] */ IHandler* handler,
     /* [in] */ IAccountManagerCallback* cb,
@@ -1606,36 +1792,16 @@ void CAccountManager::PostToHandler(
     h->Post(action, &result);
 }
 
-CAccountManager::AccountUpdateAction::AccountUpdateAction(
-    /* [in] */ IOnAccountsUpdateListener* listener,
-    /* [in] */ ArrayOf<IAccount*>* accounts)
-    : mListener(listener)
-    , mAccounts(accounts)
-{}
-
-CAR_INTERFACE_IMPL(CAccountManager::AccountUpdateAction, IRunnable);
-
-ECode CAccountManager::AccountUpdateAction::Run()
-{
-    //try {
-    return mListener->OnAccountsUpdated(*mAccounts);
-    // } catch (SQLException e) {
-    //     // Better luck next time.  If the problem was disk-full,
-    //     // the STORAGE_OK intent will re-trigger the update.
-    //     Log.e(TAG, "Can't update accounts", e);
-    // }
-}
-
 void CAccountManager::PostToHandler(
     /* [in] */ IHandler* handler,
     /* [in] */ IOnAccountsUpdateListener* listener,
-    /* [in] */ const ArrayOf<IAccount*>& accounts)
+    /* [in] */ ArrayOf<IAccount*>* accounts)
 {
     // send a copy to make sure that one doesn't
     // change what another sees
-    AutoPtr< ArrayOf<IAccount*> > accountsCopy = ArrayOf<IAccount*>::Alloc(accounts.GetLength());
-    for (Int32 i = 0; i < accounts.GetLength(); ++i) {
-        accountsCopy->Set(i, accounts[i]);
+    AutoPtr< ArrayOf<IAccount*> > accountsCopy = ArrayOf<IAccount*>::Alloc(accounts->GetLength());
+    for (Int32 i = 0; i < accounts->GetLength(); ++i) {
+        accountsCopy->Set(i, (*accounts)[i]);
     }
 
     AutoPtr<IHandler> h = (handler == NULL) ? mMainHandler.Get() : handler;
@@ -1680,7 +1846,7 @@ ECode CAccountManager::ConvertErrorToException(
 ECode CAccountManager::GetAuthTokenByFeatures(
     /* [in] */ const String& accountType,
     /* [in] */ const String& authTokenType,
-    /* [in] */ const ArrayOf<String>& features,
+    /* [in] */ ArrayOf<String>* features,
     /* [in] */ IActivity* activity,
     /* [in] */ IBundle* addAccountOptions,
     /* [in] */ IBundle* getAuthTokenOptions,
@@ -1711,43 +1877,55 @@ ECode CAccountManager::GetAuthTokenByFeatures(
 
 ECode CAccountManager::NewChooseAccountIntent(
     /* [in] */ IAccount* selectedAccount,
-    /* [in] */ const ArrayOf<IAccount*>& allowableAccounts,
-    /* [in] */ const ArrayOf<String>& allowableAccountTypes,
+    /* [in] */ ArrayOf<IAccount*>* allowableAccounts,
+    /* [in] */ ArrayOf<String>* allowableAccountTypes,
     /* [in] */ Boolean alwaysPromptForAccount,
     /* [in] */ const String& descriptionOverrideText,
     /* [in] */ const String& addAccountAuthTokenType,
-    /* [in] */ const ArrayOf<String>& addAccountRequiredFeatures,
+    /* [in] */ ArrayOf<String>* addAccountRequiredFeatures,
     /* [in] */ IBundle* addAccountOptions,
     /* [out] */ IIntent** _intent)
 {
     VALIDATE_NOT_NULL(_intent);
     AutoPtr<IIntent> intent;
     FAIL_RETURN(CIntent::New((IIntent**)&intent));
-    intent->SetClassName(String("elastos"),
-            String("elastos.accounts.ChooseTypeAndAccountActivity"));
+    AutoPtr<IResourcesHelper> rhlp;
+    CResourcesHelper::AcquireSingleton((IResourcesHelper**)&rhlp);
+    AutoPtr<IResources> res;
+    rhlp->GetSystem((IResources**)&res);
+    String str;
+    res->GetString(R::string::config_chooseTypeAndAccountActivity, &str);
+    AutoPtr<IComponentNameHelper> chlp;
+    CComponentNameHelper::AcquireSingleton((IComponentNameHelper**)&chlp);
+    AutoPtr<IComponentName> componentName;
+    chlp->UnflattenFromString(str, (IComponentName**)&componentName);
+    String pakName, clsName;
+    componentName->GetPackageName(&pakName);
+    componentName->GetClassName(&clsName);
+    intent->SetClassName(pakName, clsName);
     AutoPtr< ArrayOf<IParcelable*> > parcelables = ArrayOf<IParcelable*>::Alloc(
-            allowableAccounts.GetLength());
-    for (Int32 i = 0; i < allowableAccounts.GetLength(); ++i) {
-        AutoPtr<IParcelable> p = (IParcelable*)allowableAccounts[i]->Probe(EIID_IParcelable);
+            allowableAccounts->GetLength());
+    for (Int32 i = 0; i < allowableAccounts->GetLength(); ++i) {
+        AutoPtr<IParcelable> p = IParcelable::Probe((*allowableAccounts)[i]);
         parcelables->Set(i, p);
     }
-    intent->PutExtra(ChooseTypeAndAccountActivity::EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST,
+    intent->PutExtra(IChooseTypeAndAccountActivity::EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST,
             parcelables);
-    intent->PutExtra(ChooseTypeAndAccountActivity::EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY,
-            const_cast<ArrayOf<String>*>(&allowableAccountTypes));
-    intent->PutExtra(ChooseTypeAndAccountActivity::EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE,
+    intent->PutExtra(IChooseTypeAndAccountActivity::EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY,
+            allowableAccountTypes);
+    intent->PutExtra(IChooseTypeAndAccountActivity::EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE,
             addAccountOptions);
-    intent->PutExtra(ChooseTypeAndAccountActivity::EXTRA_SELECTED_ACCOUNT,
+    intent->PutExtra(IChooseTypeAndAccountActivity::EXTRA_SELECTED_ACCOUNT,
             (Int32)selectedAccount);
-    intent->PutBooleanExtra(ChooseTypeAndAccountActivity::EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT,
+    intent->PutBooleanExtra(IChooseTypeAndAccountActivity::EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT,
             alwaysPromptForAccount);
-    intent->PutExtra(ChooseTypeAndAccountActivity::EXTRA_DESCRIPTION_TEXT_OVERRIDE,
+    intent->PutExtra(IChooseTypeAndAccountActivity::EXTRA_DESCRIPTION_TEXT_OVERRIDE,
             descriptionOverrideText);
-    intent->PutExtra(ChooseTypeAndAccountActivity::EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING,
+    intent->PutExtra(IChooseTypeAndAccountActivity::EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING,
             addAccountAuthTokenType);
     intent->PutExtra(
-            ChooseTypeAndAccountActivity::EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY,
-            const_cast<ArrayOf<String>*>(&addAccountRequiredFeatures));
+            IChooseTypeAndAccountActivity::EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY,
+            addAccountRequiredFeatures);
     *_intent = intent;
     REFCOUNT_ADD(*_intent);
     return NOERROR;
@@ -1766,20 +1944,17 @@ ECode CAccountManager::AddOnAccountsUpdatedListener(
 
     {
         AutoLock lock(mAccountsUpdatedListenersLock);
-        HashMap<AutoPtr<IOnAccountsUpdateListener>, AutoPtr<IHandler> >::Iterator it;
-        AutoPtr<IOnAccountsUpdateListener> key;
-        for (it = mAccountsUpdatedListeners.Begin(); it != mAccountsUpdatedListeners.End(); ++it) {
-            key = it->mFirst;
-            if (key.Get() == listener) {
-                Slogger::E(TAG, "this listener is already added");
-                return E_ILLEGAL_STATE_EXCEPTION;
-                //throw new IllegalStateException("this listener is already added");
-            }
+        Boolean bContain = FALSE;
+        if ((mAccountsUpdatedListeners->ContainsKey(listener, &bContain), bContain)) {
+            Slogger::E(TAG, "this listener is already added");
+            return E_ILLEGAL_STATE_EXCEPTION;
+            //throw new IllegalStateException("this listener is already added");
         }
 
-        Boolean wasEmpty = mAccountsUpdatedListeners.Begin() == mAccountsUpdatedListeners.End();
+        Boolean wasEmpty = FALSE;
+        mAccountsUpdatedListeners->IsEmpty(&wasEmpty);
 
-        mAccountsUpdatedListeners[listener] = handler;
+        mAccountsUpdatedListeners->Put(listener, handler);
 
         if (wasEmpty) {
             // Register a broadcast receiver to monitor account changes
@@ -1798,7 +1973,7 @@ ECode CAccountManager::AddOnAccountsUpdatedListener(
     if (updateImmediately) {
         AutoPtr< ArrayOf<IAccount*> > accounts;
         GetAccounts((ArrayOf<IAccount*>**)&accounts);
-        PostToHandler(handler, listener, *accounts);
+        PostToHandler(handler, listener, accounts);
     }
     return NOERROR;
 }
@@ -1812,23 +1987,16 @@ ECode CAccountManager::RemoveOnAccountsUpdatedListener(
 //        throw new IllegalArgumentException("listener is null");
     }
     AutoLock lock(mAccountsUpdatedListenersLock);
-    HashMap<AutoPtr<IOnAccountsUpdateListener>, AutoPtr<IHandler> >::Iterator it;
-    AutoPtr<IOnAccountsUpdateListener> key;
-    for (it = mAccountsUpdatedListeners.Begin(); it != mAccountsUpdatedListeners.End(); ++it) {
-        key = it->mFirst;
-        if (key.Get() == listener) {
-            break;
-        }
-    }
-    if (it == mAccountsUpdatedListeners.End()) {
+    Boolean bContain = FALSE;
+    if (!(mAccountsUpdatedListeners->ContainsKey(listener, &bContain), bContain)) {
         Slogger::E(TAG, "Listener was not previously added");
         return NOERROR;
     }
 
-    mAccountsUpdatedListeners.Erase(it);
-    if (mAccountsUpdatedListeners.Begin() == mAccountsUpdatedListeners.End()) {
-        return mContext->UnregisterReceiver(
-            (IBroadcastReceiver*)mAccountsChangedBroadcastReceiver->Probe(EIID_IBroadcastReceiver));
+    mAccountsUpdatedListeners->Remove(listener);
+    Boolean bEmp = FALSE;
+    if ((mAccountsUpdatedListeners->IsEmpty(&bEmp), bEmp)) {
+        return mContext->UnregisterReceiver(IBroadcastReceiver::Probe(mAccountsChangedBroadcastReceiver));
     }
 
     return NOERROR;

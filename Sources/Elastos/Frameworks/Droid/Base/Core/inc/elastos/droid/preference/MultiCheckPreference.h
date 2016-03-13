@@ -92,7 +92,7 @@ public:
      * @return The list as an array.
      */
     CARAPI GetEntries(
-        /* [out,callee] */ ArrayOf<ICharSequence*>** result);
+        /* [out, callee] */ ArrayOf<ICharSequence*>** result);
 
     /**
      * The array to find the value to save for a preference when an entry from
@@ -166,7 +166,7 @@ public:
      * Returns the currently selected values.
      */
    CARAPI GetValues(
-        /* [out,callee] */ ArrayOf<Boolean>** result);
+        /* [out, callee] */ ArrayOf<Boolean>** result);
 
     /**
      * Returns the index of the given value (in the entry values array).

@@ -721,7 +721,7 @@ ECode CPath::AddPath(
 {
     if (!((CPath*)src)->mIsSimplePath) mIsSimplePath = FALSE;
     NativeAddPath(mNativePath, ((CPath*)src)->mNativePath,
-            ((Matrix*)(IMatrix*)matrix->Probe(EIID_Matrix))->mNativeInstance);
+            ((Matrix*)matrix)->mNativeInstance);
     return NOERROR;
 }
 
@@ -794,7 +794,7 @@ ECode CPath::Transform(
         ((CPath*)dst)->mIsSimplePath = FALSE;
         dstNative = ((CPath*)dst)->mNativePath;
     }
-    NativeTransform(mNativePath, ((Matrix*)(IMatrix*)matrix->Probe(EIID_Matrix))->mNativeInstance, dstNative);
+    NativeTransform(mNativePath, ((Matrix*)matrix)->mNativeInstance, dstNative);
     return NOERROR;
 }
 
@@ -807,7 +807,7 @@ ECode CPath::Transform(
     /* [in] */ IMatrix* matrix)
 {
     mIsSimplePath = FALSE;
-    NativeTransform(mNativePath, ((Matrix*)(IMatrix*)matrix->Probe(EIID_Matrix))->mNativeInstance);
+    NativeTransform(mNativePath, ((Matrix*)matrix)->mNativeInstance);
     return NOERROR;
 }
 

@@ -15,9 +15,13 @@ module
     /**
      * @Involve
      * interface ITextView
+     * interface Elastos.Droid.View.IView
+     * interface Elastos.Droid.View.OnPreDrawListener
+     * interface Elastos.Droid.View.IKeyEventCallback
+     * interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource
+     * interface Elastos.Droid.Graphics.Drawable.IDrawableCallback
      */
     interface IKeyguardIndicationTextView {
-
         /**
          * Changes the text with an animation and makes sure a single indication is shown long enough.
          *

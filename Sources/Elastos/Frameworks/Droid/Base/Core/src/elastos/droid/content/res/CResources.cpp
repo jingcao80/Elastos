@@ -422,9 +422,9 @@ ECode CResources::constructor()
     // NOTE: Intentionally leaving this uninitialized (all values set
     // to zero), so that anyone who tries to do something that requires
     // metrics will get a very wrong value.
-    mConfiguration->SetToDefaults();
-    mMetrics->SetToDefaults();
-    UpdateConfiguration(NULL, NULL);
+    FAIL_RETURN(mConfiguration->SetToDefaults())
+    FAIL_RETURN(mMetrics->SetToDefaults())
+    FAIL_RETURN(UpdateConfiguration(NULL, NULL))
     mAssets->EnsureStringBlocks();
     return NOERROR;
 }
@@ -448,14 +448,16 @@ ECode CResources::constructor(
         return E_INVALID_ARGUMENT;
     }
     mAssets = (CAssetManager*)assets;
-    mMetrics->SetToDefaults();
+    FAIL_RETURN(mMetrics->SetToDefaults())
     if (compInfo != NULL) {
         mCompatibilityInfo = compInfo;
     }
-    UpdateConfiguration(config, metrics);
+    FAIL_RETURN(UpdateConfiguration(config, metrics))
     mAssets->EnsureStringBlocks();
-    IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(token);
-    wrs->GetWeakReference((IWeakReference**)&mToken);
+    if (token) {
+        IWeakReferenceSource* wrs = IWeakReferenceSource::Probe(token);
+        wrs->GetWeakReference((IWeakReference**)&mToken);
+    }
     return NOERROR;
 }
 
@@ -786,7 +788,7 @@ ECode CResources::ObtainTypedArray(
         return E_NOT_FOUND_EXCEPTION;
     }
 
-    AutoPtr<ITypedArray> ta = CTypedArray::Obtain(THIS_PROBE(IResources), len);
+    AutoPtr<ITypedArray> ta = CTypedArray::Obtain(this, len);
     assert(ta != NULL);
     CTypedArray* temp = (CTypedArray*)ta.Get();
     FAIL_RETURN(mAssets->RetrieveArray(id, temp->mData, &temp->mLength))
@@ -1376,9 +1378,10 @@ ECode CResources::ObtainAttributes(
     /* [out] */ ITypedArray** array)
 {
     VALIDATE_NOT_NULL(array);
+    *array = NULL;
 
     Int32 len = attrs->GetLength();
-    AutoPtr<ITypedArray> ta = CTypedArray::Obtain(THIS_PROBE(IResources), len);
+    AutoPtr<ITypedArray> ta = CTypedArray::Obtain(this, len);
     CTypedArray* temp = (CTypedArray*)ta.Get();
 
     // XXX note that for now we only work with compiled XML files.
@@ -1387,8 +1390,12 @@ ECode CResources::ObtainAttributes(
     // contained in the resources and such).
     AutoPtr<XmlBlock::Parser> parser = (XmlBlock::Parser*)set;
     Boolean result;
-    FAIL_RETURN(mAssets->RetrieveAttributes(
-            parser->mParseState, *attrs, temp->mData, temp->mIndices, &result));
+    ECode ec = mAssets->RetrieveAttributes(
+        parser->mParseState, *attrs, temp->mData, temp->mIndices, &result);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "failed to RetrieveAttributes!");
+        return ec;
+    }
 
     temp->mXml = parser;
 
@@ -1410,7 +1417,6 @@ ECode CResources::UpdateConfiguration(
     /* [in] */ IDisplayMetrics* metrics,
     /* [in] */ ICompatibilityInfo* compat)
 {
-    Logger::I(TAG, " >>>> UpdateConfiguration");
     {
         AutoLock lock(mAccessLock);
 
@@ -1471,7 +1477,7 @@ ECode CResources::UpdateConfiguration(
         }
         mMetrics->mScaledDensity = mMetrics->mDensity * mConfiguration->mFontScale;
 
-        String locale(NULL);
+        String locale;
         if (mConfiguration->mLocale != NULL) {
             String tag;
             mConfiguration->mLocale->ToLanguageTag(&tag);
@@ -1528,7 +1534,6 @@ ECode CResources::UpdateConfiguration(
         }
     }
 
-    Logger::I(TAG, " <<<< UpdateConfiguration");
     return NOERROR;
 }
 
@@ -1613,8 +1618,8 @@ void CResources::UpdateSystemConfiguration(
 {
     if (sSystem != NULL) {
         sSystem->UpdateConfiguration(config, metrics, compat);
-        //Log.i(TAG, "Updated system resources " + sSystem
-        //        + ": " + sSystem.getConfiguration());
+        if (DEBUG_CONFIG)
+            Logger::V(TAG, "Updated system resources config.");
     }
 }
 
@@ -1900,7 +1905,7 @@ ECode CResources::StartPreloading()
     }
     sPreloaded = TRUE;
     mPreloading = TRUE;
-    // sPreloadedDensity = IDisplayMetrics::DENSITY_DEVICE;
+    sPreloadedDensity = CDisplayMetrics::DENSITY_DEVICE;
     mConfiguration->mDensityDpi = sPreloadedDensity;
     UpdateConfiguration(NULL, NULL);
     return NOERROR;
@@ -2031,7 +2036,7 @@ ECode CResources::LoadDrawable(
 
     AutoPtr<IDrawable> dr;
     if (cs != NULL) {
-        cs->NewDrawable(THIS_PROBE(IResources), theme, (IDrawable**)&dr);
+        cs->NewDrawable(this, theme, (IDrawable**)&dr);
     }
     else if (isColorDrawable) {
         CColorDrawable::New(value->mData, (IDrawable**)&dr);
@@ -2146,8 +2151,8 @@ ECode CResources::LoadDrawableForCookie(
             String name;
             GetResourceName(id, &name);
             if (!name.IsNull()) {
-                Logger::D(TAG, "Loading framework drawable #%s : %s at %s",
-                    StringUtils::ToHexString(id).string(), name.string(), file.string());
+                Logger::D(TAG, "Loading framework drawable #%08x : %s at %s",
+                    id, name.string(), file.string());
             }
         }
     }
@@ -2157,21 +2162,28 @@ ECode CResources::LoadDrawableForCookie(
     }
 
     AutoPtr<IDrawable> dr;
-
-    assert(0 && "TODO");
+    ECode ec = NOERROR;
     // Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
     // try {
     if (file.EndWith(".xml")) {
         AutoPtr<IXmlResourceParser> rp;
-        LoadXmlResourceParser(file, id, value->mAssetCookie, String("drawable"), (IXmlResourceParser**)&rp);
-        // Drawable::CreateFromXml(THIS_PROBE(IResources), rp, theme, (IDrawable**)&dr);
+        ec = LoadXmlResourceParser(file, id, value->mAssetCookie, String("drawable"), (IXmlResourceParser**)&rp);
+        FAIL_GOTO(ec, _EXIT_)
+        Drawable::CreateFromXml(this, IXmlPullParser::Probe(rp), theme, (IDrawable**)&dr);
         ICloseable::Probe(rp)->Close();
     }
     else {
         AutoPtr<IInputStream> is;
-        mAssets->OpenNonAsset(value->mAssetCookie, file, IAssetManager::ACCESS_STREAMING, (IInputStream**)&is);
-        // Drawable::CreateFromResourceStream(this, value, is, file, String(NULL), (IDrawable**)&dr);
+        ec = mAssets->OpenNonAsset(value->mAssetCookie, file, IAssetManager::ACCESS_STREAMING, (IInputStream**)&is);
+        FAIL_GOTO(ec, _EXIT_)
+        Drawable::CreateFromResourceStream(this, value, is, file, NULL, (IDrawable**)&dr);
         ICloseable::Probe(is)->Close();
+    }
+
+_EXIT_:
+    if (FAILED(ec)) {
+        Logger::E(TAG, "File %s from drawable resource ID #0x08x not found.", file.string(), id);
+        return E_NOT_FOUND_EXCEPTION;
     }
     // } catch (Exception e) {
     //     Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
@@ -2242,7 +2254,7 @@ AutoPtr<IDrawable> CResources::GetCachedDrawableLocked(
     AutoPtr<IDrawableConstantState> entry = GetConstantStateLocked(drawableCache, key);
     if (entry != NULL) {
         AutoPtr<IDrawable> dr;
-        entry->NewDrawable(THIS_PROBE(IResources), (IDrawable**)&dr);
+        entry->NewDrawable(this, (IDrawable**)&dr);
         return NOERROR;
     }
     return NULL;
@@ -2347,8 +2359,7 @@ ECode CResources::LoadColorStateList(
             return E_NOT_FOUND_EXCEPTION;
         }
 
-        ec = CColorStateList::CreateFromXml(
-            THIS_PROBE(IResources), IXmlPullParser::Probe(rp), (IColorStateList**)&csl);
+        ec = CColorStateList::CreateFromXml(this, IXmlPullParser::Probe(rp), (IColorStateList**)&csl);
         rp->Close();
 
         if (FAILED(ec)) {

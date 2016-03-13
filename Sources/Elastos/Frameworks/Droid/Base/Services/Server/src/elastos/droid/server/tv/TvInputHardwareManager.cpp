@@ -726,7 +726,7 @@ ECode TvInputHardwareManager::ListenerHandler::HandleMessage(
             mHost->mListener->OnHdmiDeviceUpdated(inputId, info);
         }
         default: {
-            Slogger::W(TAG, "Unhandled message: %s", Object::ToString(msg).string());
+            Slogger::W(TAG, "Unhandled message: %s", TO_CSTR(msg));
             break;
         }
     }
@@ -799,7 +799,7 @@ ECode TvInputHardwareManager::HdmiDeviceEventListener::OnStatusChanged(
                 if (info == NULL) {
                     mHost->mHdmiDeviceList->Add(deviceInfo);
                 } else {
-                    Slogger::W(TAG, "The list already contains %s; ignoring.", Object::ToString(deviceInfo).string());
+                    Slogger::W(TAG, "The list already contains %s; ignoring.", TO_CSTR(deviceInfo));
                     return NOERROR;
                 }
                 messageType = ListenerHandler::HDMI_DEVICE_ADDED;
@@ -812,7 +812,7 @@ ECode TvInputHardwareManager::HdmiDeviceEventListener::OnStatusChanged(
                 Boolean b;
                 mHost->mHdmiDeviceList->Remove(originalDeviceInfo, &b);
                 if (!b) {
-                    Slogger::W(TAG, "The list doesn't contain %s; ignoring.", Object::ToString(deviceInfo).string());
+                    Slogger::W(TAG, "The list doesn't contain %s; ignoring.", TO_CSTR(deviceInfo));
                     return NOERROR;
                 }
                 messageType = ListenerHandler::HDMI_DEVICE_REMOVED;
@@ -825,7 +825,7 @@ ECode TvInputHardwareManager::HdmiDeviceEventListener::OnStatusChanged(
                 Boolean b;
                 mHost->mHdmiDeviceList->Remove(originalDeviceInfo, &b);
                 if (!b) {
-                    Slogger::W(TAG, "The list doesn't contain %s; ignoring.", Object::ToString(deviceInfo).string());
+                    Slogger::W(TAG, "The list doesn't contain %s; ignoring.", TO_CSTR(deviceInfo));
                     return NOERROR;
                 }
                 mHost->mHdmiDeviceList->Add(deviceInfo);
@@ -1185,7 +1185,7 @@ ECode TvInputHardwareManager::AddHardwareTvInput(
             AutoPtr<IInterface> obj;
             mInputMap->Get(oldInputId, (IInterface**)&obj);
             Slogger::W(TAG, "Trying to override previous registration: old = %s:%d, new = %s:%d",
-                    Object::ToString(obj).string(), deviceId, Object::ToString(info).string(), deviceId);
+                    TO_CSTR(obj), deviceId, TO_CSTR(info), deviceId);
         }
         String s;
         info->GetId(&s);
@@ -1241,7 +1241,7 @@ ECode TvInputHardwareManager::AddHdmiTvInput(
     /* [in] */ ITvInputInfo* info)
 {
     if (Ptr(info)->Func(info->GetType) != ITvInputInfo::TYPE_HDMI) {
-        Logger::E(TAG, "info (%s) has non-HDMI type.", Object::ToString(info).string());
+        Logger::E(TAG, "info (%s) has non-HDMI type.", TO_CSTR(info));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     synchronized(mLock) {
@@ -1250,7 +1250,7 @@ ECode TvInputHardwareManager::AddHdmiTvInput(
         Int32 parentIndex;
         IndexOfEqualValue(mHardwareInputIdMap, StringUtils::ParseCharSequence(parentId), &parentIndex);
         if (parentIndex < 0) {
-            Logger::E(TAG, "info (%s) has invalid parentId.", Object::ToString(info).string());
+            Logger::E(TAG, "info (%s) has invalid parentId.", TO_CSTR(info));
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         AutoPtr<IInterface> obj;
@@ -1260,7 +1260,7 @@ ECode TvInputHardwareManager::AddHdmiTvInput(
             obj = NULL;
             mInputMap->Get(oldInputId, (IInterface**)&obj);
             Slogger::W(TAG, "Trying to override previous registration: old = %s:%d, new = %s:%d",
-                    Object::ToString(obj).string(), id, Object::ToString(info).string(), id);
+                    TO_CSTR(obj), id, TO_CSTR(info), id);
         }
         AutoPtr<IInteger32> i32;
         CInteger32::New(id, (IInteger32**)&i32);

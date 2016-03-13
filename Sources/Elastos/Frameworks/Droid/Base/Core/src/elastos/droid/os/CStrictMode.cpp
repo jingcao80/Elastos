@@ -12,19 +12,17 @@
 #include "elastos/droid/os/CStrictModeVmPolicyBuilder.h"
 #include "elastos/droid/os/CStrictModeThreadPolicyBuilder.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/StringUtils.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.App.h>
+#include <Elastos.Droid.View.h>
+#include <Elastos.Droid.Utility.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include <pthread.h>
 
-using Elastos::Core::StringUtils;
-using Elastos::Core::IBlockGuard;
-using Elastos::Core::CBlockGuard;
-using Elastos::Core::IBlockGuardPolicy;
-using Elastos::Core::ICloseGuard;
-using Elastos::Core::CCloseGuard;
-using Elastos::Core::EIID_ICloseGuardReporter;
-using Elastos::Core::ICloseGuardHelper;
-using Elastos::Core::CCloseGuardHelper;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::Process;
@@ -46,6 +44,16 @@ using Elastos::Droid::Os::CStrictModeVmPolicyBuilder;
 using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::App::IIActivityManager;
 
+using Elastos::Core::StringUtils;
+using Elastos::Core::IBlockGuard;
+using Elastos::Core::CBlockGuard;
+using Elastos::Core::EIID_IBlockGuardPolicy;
+using Elastos::Core::ICloseGuard;
+using Elastos::Core::CCloseGuard;
+using Elastos::Core::EIID_ICloseGuardReporter;
+using Elastos::Core::ICloseGuardHelper;
+using Elastos::Core::CCloseGuardHelper;
+using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -74,6 +82,19 @@ static pthread_key_t InitSViolationsBeingTimed()
     return key;
 }
 
+static void ThreadAndroidPolicyDestructor(void* st)
+{
+    ICharSequence* callingPackage = static_cast<ICharSequence*>(st);
+    if (callingPackage) {
+        REFCOUNT_RELEASE(callingPackage)
+    }
+}
+
+static void ThreadAndroidPolicyMakeKey()
+{
+    ASSERT_TRUE(pthread_key_create(&CStrictMode::sThreadAndroidPolicyKey, ThreadAndroidPolicyDestructor) == 0);
+}
+
 const String CStrictMode::TAG("StrictMode");
 const Boolean CStrictMode::LOG_V = Logger::IsLoggable(TAG, Logger::VERBOSE);
 const Boolean CStrictMode::IS_USER_BUILD = String("user").Equals(Build::TYPE);
@@ -82,10 +103,10 @@ const Int64 CStrictMode::MIN_LOG_INTERVAL_MS = 1000;
 const Int64 CStrictMode::MIN_DIALOG_INTERVAL_MS = 30000;
 const Int32 CStrictMode::MAX_SPAN_TAGS = 20;
 const Int32 CStrictMode::MAX_OFFENSES_PER_LOOP = 10;
-const Int32 CStrictMode::DETECT_VM_FILE_URI_EXPOSURE = 0x4000;
 const Int32 CStrictMode::ALL_THREAD_DETECT_BITS =
             IStrictMode::DETECT_DISK_WRITE | IStrictMode::DETECT_DISK_READ | IStrictMode::DETECT_NETWORK | IStrictMode::DETECT_CUSTOM;
 const Int32 CStrictMode::DETECT_VM_INSTANCE_LEAKS = 0x1000;
+const Int32 CStrictMode::DETECT_VM_FILE_URI_EXPOSURE = 0x4000;
 const Int32 CStrictMode::ALL_VM_DETECT_BITS =
             IStrictMode::DETECT_VM_CURSOR_LEAKS | IStrictMode::DETECT_VM_CLOSABLE_LEAKS |
             IStrictMode::DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_INSTANCE_LEAKS |
@@ -107,7 +128,10 @@ Boolean CStrictMode::sHaveThisThreadSpanStateKey = FALSE;
 pthread_key_t CStrictMode::sThreadHandlerKey;
 Boolean CStrictMode::sHaveThreadHandlerKey = FALSE;
 
-CAR_INTERFACE_IMPL(CStrictMode::ThreadPolicy, IStrictModeThreadPolicy);
+pthread_key_t CStrictMode::sThreadAndroidPolicyKey;
+pthread_once_t CStrictMode::sThreadAndroidPolicyKeyOnce = PTHREAD_ONCE_INIT;
+
+CAR_INTERFACE_IMPL(CStrictMode::ThreadPolicy, Object, IStrictModeThreadPolicy);
 
 CStrictMode::ThreadPolicy::ThreadPolicy(Int32 mask)
     : mMask(mask)
@@ -118,13 +142,13 @@ ECode CStrictMode::ThreadPolicy::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    *str = String("[StrictMode.ThreadPolicy; mask=") + StringUtils::Int32ToString(mMask) + String("]");
+    *str = String("[StrictMode.ThreadPolicy; mask=") + StringUtils::ToString(mMask) + String("]");
     return NOERROR;
 }
 
 const AutoPtr<CStrictMode::VmPolicy> CStrictMode::VmPolicy::LAX = new CStrictMode::VmPolicy(0, CStrictMode::EMPTY_CLASS_LIMIT_MAP);
 
-CAR_INTERFACE_IMPL(CStrictMode::VmPolicy, IStrictModeVmPolicy);
+CAR_INTERFACE_IMPL(CStrictMode::VmPolicy, Object, IStrictModeVmPolicy);
 
 CStrictMode::VmPolicy::VmPolicy(
     /* [in] */ Int32 mask,
@@ -141,7 +165,7 @@ ECode CStrictMode::VmPolicy::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    *str =  String("[StrictMode.VmPolicy; mask=") + StringUtils::Int32ToString(mMask) + "]";
+    *str =  String("[StrictMode.VmPolicy; mask=") + StringUtils::ToString(mMask) + "]";
     return NOERROR;
 }
 
@@ -156,9 +180,10 @@ AutoPtr<IAtomicInteger32> CStrictMode::InitsDropboxCallsInFlight()
 }
 
 ECode CStrictMode::SetThreadPolicy(
-    /* [in] */ Handle32 policy)
+    /* [in] */ IStrictModeThreadPolicy* policy)
 {
-    SetThreadPolicyMask(((CStrictMode::ThreadPolicy*)policy)->mMask);
+    CStrictMode::ThreadPolicy* tp = (CStrictMode::ThreadPolicy*)policy;
+    SetThreadPolicyMask(tp->mMask);
     return NOERROR;
 }
 
@@ -188,6 +213,7 @@ void CStrictMode::SetBlockGuardPolicy(
         return;
     }
 
+    policy = NULL;
     helper->GetThreadPolicy((IBlockGuardPolicy**)&policy);
 
     AutoPtr<IAndroidBlockGuardPolicy> androidPolicy;
@@ -195,9 +221,17 @@ void CStrictMode::SetBlockGuardPolicy(
         androidPolicy = IAndroidBlockGuardPolicy::Probe(policy);
     }
     else {
-        assert(0 && "TODO");
-        //androidPolicy = ThreadAndroidPolicy.get();
-        helper->SetThreadPolicy((IBlockGuardPolicy*)policy);
+
+        pthread_once(&sThreadAndroidPolicyKeyOnce, ThreadAndroidPolicyMakeKey);
+
+        androidPolicy = (IAndroidBlockGuardPolicy*)pthread_getspecific(sThreadAndroidPolicyKey);
+        if (androidPolicy == NULL) {
+            androidPolicy = new AndroidBlockGuardPolicy(0);
+
+            ASSERT_TRUE(pthread_setspecific(sThreadAndroidPolicyKey, androidPolicy.Get()) == 0);
+            androidPolicy->AddRef();
+        }
+        helper->SetThreadPolicy(IBlockGuardPolicy::Probe(androidPolicy));
     }
     androidPolicy->SetPolicyMask(policyMask);
 }
@@ -265,8 +299,9 @@ ECode CStrictMode::GetThreadPolicyMask(
 }
 
 ECode CStrictMode::GetThreadPolicy(
-    /* [out] */ Handle32* policy)
+    /* [out] */ IStrictModeThreadPolicy** policy)
 {
+    VALIDATE_NOT_NULL(policy)
     // TODO: this was a last minute Gingerbread API change (to
     // introduce VmPolicy cleanly) but this isn't particularly
     // optimal for users who might call this method often.  This
@@ -274,14 +309,13 @@ ECode CStrictMode::GetThreadPolicy(
     Int32 mask;
     GetThreadPolicyMask(&mask);
     AutoPtr<ThreadPolicy> tp = new ThreadPolicy(mask);
-    *policy = (Handle32)tp.Get();
+    *policy = (IStrictModeThreadPolicy*)tp.Get();
     REFCOUNT_ADD(tp);
-
     return NOERROR;
 }
 
 ECode CStrictMode::AllowThreadDiskWrites(
-    /* [out] */ Handle32* policy)
+    /* [out] */ IStrictModeThreadPolicy** policy)
 {
     VALIDATE_NOT_NULL(policy);
 
@@ -292,15 +326,15 @@ ECode CStrictMode::AllowThreadDiskWrites(
         SetThreadPolicyMask(newPolicyMask);
     }
     AutoPtr<ThreadPolicy> tp = new ThreadPolicy(oldPolicyMask);
-    *policy = (Handle32)tp.Get();
+    *policy = (IStrictModeThreadPolicy*)tp.Get();
     REFCOUNT_ADD(tp);
-
     return NOERROR;
 }
 
 ECode CStrictMode::AllowThreadDiskReads(
-    /* [out] */ Handle32* policy)
+    /* [out] */ IStrictModeThreadPolicy** policy)
 {
+    VALIDATE_NOT_NULL(policy)
     Int32 oldPolicyMask;
     GetThreadPolicyMask(&oldPolicyMask);
     Int32 newPolicyMask = oldPolicyMask & ~(IStrictMode::DETECT_DISK_READ);
@@ -308,7 +342,7 @@ ECode CStrictMode::AllowThreadDiskReads(
         SetThreadPolicyMask(newPolicyMask);
     }
     AutoPtr<ThreadPolicy> tp = new ThreadPolicy(oldPolicyMask);
-    *policy = (Handle32)tp.Get();
+    *policy = (IStrictModeThreadPolicy*)tp.Get();
     REFCOUNT_ADD(tp);
     return NOERROR;
 }
@@ -338,9 +372,11 @@ ECode CStrictMode::ConditionallyEnableDebugLogging(
     /* [out] */ Boolean* isLogging)
 {
     VALIDATE_NOT_NULL(isLogging);
-    Boolean doFlashes = SystemProperties::GetBoolean(VISUAL_PROPERTY, FALSE)
-             && !AmTheSystemServerProcess();
-    const Boolean suppress = SystemProperties::GetBoolean(DISABLE_PROPERTY, FALSE);
+    Boolean doFlashes;
+    SystemProperties::GetBoolean(VISUAL_PROPERTY, FALSE, &doFlashes);
+    doFlashes = doFlashes && !AmTheSystemServerProcess();
+    Boolean suppress;
+    SystemProperties::GetBoolean(DISABLE_PROPERTY, FALSE, &suppress);
 
     // For debug builds, log event loop stalls to dropbox for analysis.
     // Similar logic also appears in ActivityThread.java for system apps.
@@ -385,7 +421,7 @@ ECode CStrictMode::ConditionallyEnableDebugLogging(
         }
         AutoPtr<IStrictModeVmPolicy> policy;
         policyBuilder->Build((IStrictModeVmPolicy**)&policy);
-        SetVmPolicy((Handle32)policy.Get());
+        SetVmPolicy(policy.Get());
         Boolean isEnable;
         SetCloseGuardEnabled((VmClosableObjectLeaksEnabled(&isEnable),isEnable));
     }
@@ -481,7 +517,7 @@ Boolean CStrictMode::TooManyViolationsThisLoop()
     return violations->GetSize() >= MAX_OFFENSES_PER_LOOP;
 }
 
-CAR_INTERFACE_IMPL(CStrictMode::AndroidBlockGuardPolicy, IAndroidBlockGuardPolicy);
+CAR_INTERFACE_IMPL_2(CStrictMode::AndroidBlockGuardPolicy, Object, IAndroidBlockGuardPolicy, IBlockGuardPolicy);
 
 CStrictMode::AndroidBlockGuardPolicy::AndroidBlockGuardPolicy(
     /* [in] */ Int32 policyMask)
@@ -494,7 +530,7 @@ ECode CStrictMode::AndroidBlockGuardPolicy::ToString(
 {
     VALIDATE_NOT_NULL(str);
 
-    *str = String("AndroidBlockGuardPolicy; mPolicyMask=") + StringUtils::Int32ToString(mPolicyMask);
+    *str = String("AndroidBlockGuardPolicy; mPolicyMask=") + StringUtils::ToString(mPolicyMask);
     return NOERROR;
 }
 
@@ -684,7 +720,7 @@ ECode CStrictMode::AndroidBlockGuardPolicy::HandleViolation(
         return NOERROR;
     }
 
-    if (LOG_V) Logger::D(TAG, String("handleViolation; policy=") + StringUtils::Int32ToString(((CStrictModeViolationInfo*)info)->mPolicy));
+    if (LOG_V) Logger::D(TAG, String("handleViolation; policy=") + StringUtils::ToString(((CStrictModeViolationInfo*)info)->mPolicy));
 
     CStrictModeViolationInfo* cinfo = (CStrictModeViolationInfo*)info;
     if ((cinfo->mPolicy & PENALTY_GATHER) != 0) {
@@ -823,7 +859,7 @@ ECode CStrictMode::MyThread::Run()
     //}
     Int32 outstanding;
     sDropboxCallsInFlight->DecrementAndGet(&outstanding);
-    if (LOG_V) Logger::D(TAG, String("Dropbox complete; in-flight=") + StringUtils::Int32ToString(outstanding));
+    if (LOG_V) Logger::D(TAG, String("Dropbox complete; in-flight=") + StringUtils::ToString(outstanding));
     return NOERROR;
 }
 
@@ -841,16 +877,16 @@ void CStrictMode::DropboxViolationAsync(
         return;
     }
 
-    if (LOG_V) Logger::D(TAG, String("Dropboxing async; in-flight=") + StringUtils::Int32ToString(outstanding));
+    if (LOG_V) Logger::D(TAG, String("Dropboxing async; in-flight=") + StringUtils::ToString(outstanding));
     AutoPtr<IThread> myThread = new MyThread(String("callActivityManagerForStrictModeDropbox"));
     myThread->Start();
 }
 
-CAR_INTERFACE_IMPL(CStrictMode::AndroidCloseGuardReporter, ICloseGuardReporter);
+CAR_INTERFACE_IMPL(CStrictMode::AndroidCloseGuardReporter, Object, ICloseGuardReporter);
 
 ECode CStrictMode::AndroidCloseGuardReporter::Report(
-    /* [in] */ const String& message//,
-    /* [in] */ /*Throwable allocationSite*/)
+    /* [in] */ const String& message,
+    /* [in] */ IThrowable* allocationSite)
 {
     AutoPtr<IStrictMode> sMode;
     CStrictMode::AcquireSingleton((IStrictMode**)&sMode);
@@ -877,9 +913,10 @@ ECode CStrictMode::ClearGatheredViolations()
 
 ECode CStrictMode::ConditionallyCheckInstanceCounts()
 {
-    AutoPtr<CStrictMode::VmPolicy> policy;
-    GetVmPolicy((Handle32*)&policy);
+    AutoPtr<IStrictModeVmPolicy> obj;
+    GetVmPolicy((IStrictModeVmPolicy**)&obj);
 
+    CStrictMode::VmPolicy* policy = (CStrictMode::VmPolicy*)obj.Get();
     if (policy->mClassInstanceLimit.GetSize() == 0) {
         return NOERROR;
     }
@@ -902,7 +939,7 @@ Int64 CStrictMode::sLastInstanceCountCheckMillis = 0;
 Boolean CStrictMode::sIsIdlerRegistered = FALSE;
 AutoPtr<CStrictMode::MessageQueueIdleHandler> CStrictMode::sProcessIdleHandler;
 
-CAR_INTERFACE_IMPL(CStrictMode::MessageQueueIdleHandler, IIdleHandler);
+CAR_INTERFACE_IMPL(CStrictMode::MessageQueueIdleHandler, Object, IIdleHandler);
 
 CStrictMode::MessageQueueIdleHandler::MessageQueueIdleHandler(
     /* [in] */ CStrictMode* host)
@@ -924,8 +961,12 @@ ECode CStrictMode::MessageQueueIdleHandler::QueueIdle(
     return NOERROR;
 }
 
+CAR_INTERFACE_IMPL(CStrictMode, Singleton, IStrictMode)
+
+CAR_SINGLETON_IMPL(CStrictMode)
+
 ECode CStrictMode::SetVmPolicy(
-    /* [in] */ Handle32 policy)
+    /* [in] */ IStrictModeVmPolicy* policy)
 {
     AutoLock lock(classLock);
     {
@@ -953,13 +994,14 @@ ECode CStrictMode::SetVmPolicy(
 }
 
 ECode CStrictMode::GetVmPolicy(
-    /* [out] */ Handle32* policy)
+    /* [out] */ IStrictModeVmPolicy** policy)
 {
     VALIDATE_NOT_NULL(policy);
 
     AutoLock lock(classLock);
     {
-        *policy = (Handle32)sVmPolicy.Get();
+        *policy = sVmPolicy.Get();
+        REFCOUNT_ADD(*policy)
     }
     return NOERROR;
 }
@@ -972,7 +1014,7 @@ ECode CStrictMode::EnableDefaults()
     stb->PenaltyLog();
     AutoPtr<IStrictModeThreadPolicy> stp;
     stb->Build((IStrictModeThreadPolicy**)&stp);
-    SetThreadPolicy((Handle32)stp.Get());
+    SetThreadPolicy(stp.Get());
 
     AutoPtr<IStrictModeVmPolicyBuilder> svb;
     CStrictModeVmPolicyBuilder::New((IStrictModeVmPolicyBuilder**)&svb);
@@ -980,7 +1022,7 @@ ECode CStrictMode::EnableDefaults()
     svb->PenaltyLog();
     AutoPtr<IStrictModeVmPolicy> svp;
     svb->Build((IStrictModeVmPolicy**)&svp);
-    SetVmPolicy((Handle32)svp.Get());
+    SetVmPolicy(svp.Get());
 
     return NOERROR;
 }
@@ -1009,6 +1051,14 @@ ECode CStrictMode::VmRegistrationLeaksEnabled(
     return NOERROR;
 }
 
+ECode CStrictMode::VmFileUriExposureEnabled(
+    /* [out] */ Boolean* isEnabled)
+{
+    VALIDATE_NOT_NULL(isEnabled);
+    *isEnabled = (sVmPolicyMask & DETECT_VM_FILE_URI_EXPOSURE) != 0;
+    return NOERROR;
+}
+
 ECode CStrictMode::OnSqliteObjectLeaked(
    /* [in] */ const String& message //,
    /* [in] */ /*Throwable originStack*/)
@@ -1032,6 +1082,14 @@ ECode CStrictMode::OnServiceConnectionLeaked(
    /* [in] */ /*Throwable originStack*/)
 {
     return OnVmPolicyViolation(String(NULL));
+}
+
+ECode CStrictMode::OnFileUriExposed(
+   /* [in] */ const String& location)
+{
+    String message("file:// Uri exposed through ");
+    message += location;
+    return OnVmPolicyViolation(message/*, new Throwable(message)*/);
 }
 
 /*const*/ HashMap<Int32, Int64> CStrictMode::sLastVmViolationTime;
@@ -1126,10 +1184,18 @@ ECode CStrictMode::WriteGatheredViolationsToParcel(
     } else {
         p->WriteInt32(violations->GetSize());
         List<AutoPtr<IStrictModeViolationInfo> >::Iterator it = violations->Begin();
-        for (; it != violations->End(); ++it) {
+        for (Int32 i = 0; it != violations->End(); ++it) {
+            Int32 start, end;
+            p->GetDataPosition(&start);
             (*it)->WriteToParcel(p, 0 /* unused flags? */);
+            p->GetDataPosition(&end);
+            Int32 size = end - start;
+            if (size > 10 * 1024) {
+                Logger::D(TAG, "Wrote violation #%d of %d: %d bytes", i,  violations->GetSize(), size);
+            }
+            ++i;
         }
-        if (LOG_V) Logger::D(TAG, String("wrote violations to response parcel; num=") + StringUtils::Int32ToString(violations->GetSize()));
+        if (LOG_V) Logger::D(TAG, "wrote violations to response parcel; num=%d", violations->GetSize());
         violations->Clear(); // somewhat redundant, as we're about to null the threadlocal
     }
 
@@ -1140,8 +1206,11 @@ ECode CStrictMode::ReadAndHandleBinderCallViolations(
         /* [in] */ IParcel* p)
 {
     // Our own stack trace to append
-    //TODO: StringWriter sw = new StringWriter();
-    // new LogStackTrace().printStackTrace(new PrintWriter(sw));
+    // TODO
+    // StringWriter sw = new StringWriter();
+    // PrintWriter pw = new FastPrintWriter(sw, false, 256);
+    // new LogStackTrace().printStackTrace(pw);
+    // pw.flush();
     // String ourStack = sw.toString();
 
     Int32 policyMask;
@@ -1151,11 +1220,34 @@ ECode CStrictMode::ReadAndHandleBinderCallViolations(
     Int32 numViolations;
     p->ReadInt32(&numViolations);
     for (Int32 i = 0; i < numViolations; ++i) {
-        if (LOG_V) Logger::D(TAG, String("strict mode violation stacks read from binder call.  i=") + StringUtils::Int32ToString(i));
+        if (LOG_V) Logger::D(TAG, String("strict mode violation stacks read from binder call.  i=") + StringUtils::ToString(i));
         AutoPtr<IStrictModeViolationInfo> info;
         CStrictModeViolationInfo::New(p, !currentlyGathering, (IStrictModeViolationInfo**)&info);
+
         //TODO:
+        // if (info.crashInfo.stackTrace != null && info.crashInfo.stackTrace.length() > 10000) {
+        //     String front = info.crashInfo.stackTrace.substring(256);
+        //     // 10000 characters is way too large for this to be any sane kind of
+        //     // strict mode collection of stacks.  We've had a problem where we leave
+        //     // strict mode violations associated with the thread, and it keeps tacking
+        //     // more and more stacks on to the violations.  Looks like we're in this casse,
+        //     // so we'll report it and bail on all of the current strict mode violations
+        //     // we currently are maintaining for this thread.
+        //     // First, drain the remaining violations from the parcel.
+        //     while (i < numViolations) {
+        //         info = new ViolationInfo(p, !currentlyGathering);
+        //         i++;
+        //     }
+        //     // Next clear out all gathered violations.
+        //     clearGatheredViolations();
+        //     // Now report the problem.
+        //     Slog.wtfStack(TAG, "Stack is too large: numViolations=" + numViolations
+        //             + " policy=#" + Integer.toHexString(policyMask)
+        //             + " front=" + front);
+        //     return;
+        // }
         // info.crashInfo.stackTrace += "# via Binder call with stack:\n" + ourStack;
+
         AutoPtr<IBlockGuard> helper;
         CBlockGuard::AcquireSingleton((IBlockGuard**)&helper);
         AutoPtr<IBlockGuardPolicy> policy;
@@ -1174,7 +1266,7 @@ void CStrictMode::OnBinderStrictModePolicyChange(
     SetBlockGuardPolicy(newPolicy);
 }
 
-CAR_INTERFACE_IMPL(CStrictMode::NoOpSpan, IStrictModeSpan);
+CAR_INTERFACE_IMPL(CStrictMode::NoOpSpan, Object, IStrictModeSpan);
 
 ECode CStrictMode::NoOpSpan::Finish()
 {
@@ -1250,7 +1342,7 @@ ECode CStrictMode::EnterCriticalSpan(
         if (cspan->mNext != NULL) {
             cspan->mNext->mPrev = cspan;
         }
-        if (LOG_V) Logger::D(TAG, String("Span enter=") + name + String("; size=") + StringUtils::Int32ToString(state->mActiveSize));
+        if (LOG_V) Logger::D(TAG, String("Span enter=") + name + String("; size=") + StringUtils::ToString(state->mActiveSize));
     }
     *span = _span;
     REFCOUNT_ADD(*span);
@@ -1282,13 +1374,13 @@ ECode CStrictMode::NoteDiskRead()
     AutoPtr<IBlockGuardPolicy> policy;
     helper->GetThreadPolicy((IBlockGuardPolicy**)&policy);
 
-    if(policy == NULL || policy->Probe(EIID_IAndroidBlockGuardPolicy) == NULL) {
+    AutoPtr<IAndroidBlockGuardPolicy> androidPolicy = IAndroidBlockGuardPolicy::Probe(policy.Get());
+    if(androidPolicy == NULL) {
         // StrictMode not enabled.
         return NOERROR;
     }
 
-    AutoPtr<IAndroidBlockGuardPolicy> androidPolicy = IAndroidBlockGuardPolicy::Probe(policy.Get());
-    androidPolicy->OnReadFromDisk();
+    policy->OnReadFromDisk();
     return NOERROR;
 }
 
@@ -1298,13 +1390,13 @@ ECode CStrictMode::NoteDiskWrite()
     CBlockGuard::AcquireSingleton((IBlockGuard**)&helper);
     AutoPtr<IBlockGuardPolicy> policy;
     helper->GetThreadPolicy((IBlockGuardPolicy**)&policy);
-    if(policy == NULL || policy->Probe(EIID_IAndroidBlockGuardPolicy) == NULL) {
+    AutoPtr<IAndroidBlockGuardPolicy> androidPolicy = IAndroidBlockGuardPolicy::Probe(policy.Get());
+    if(androidPolicy == NULL) {
         // StrictMode not enabled.
         return NOERROR;
     }
 
-    AutoPtr<IAndroidBlockGuardPolicy> androidPolicy = IAndroidBlockGuardPolicy::Probe(policy.Get());
-    androidPolicy->OnWriteToDisk();
+    policy->OnWriteToDisk();
     return NOERROR;
 }
 
@@ -1316,7 +1408,7 @@ ECode CStrictMode::TrackActivity(
 {
     VALIDATE_NOT_NULL(act);
     AutoPtr<InstanceTracker> ins = new InstanceTracker(instance);
-    *act = (IInterface*)ins;
+    *act = TO_IINTERFACE(ins);
     REFCOUNT_ADD(*act);
     return NOERROR;
 }
@@ -1413,8 +1505,6 @@ CStrictMode::InstanceCountViolation::InstanceCountViolation(
 
 HashMap<ClassID*, AutoPtr<IInteger32> > CStrictMode::InstanceTracker::sInstanceCounts;
 
-CAR_INTERFACE_IMPL(CStrictMode::InstanceTracker, IInterface);
-
 CStrictMode::InstanceTracker::InstanceTracker(
     /* [in] */ IInterface* instance)
 {
@@ -1455,7 +1545,7 @@ CStrictMode::InstanceTracker::~InstanceTracker()
     // }
 }
 
-Mutex CStrictMode::InstanceTracker::sInstanceCountsLock;
+Object CStrictMode::InstanceTracker::sInstanceCountsLock;
 
 Int32 CStrictMode::InstanceTracker::GetInstanceCount(
     /* [in] */ ClassID* klass)

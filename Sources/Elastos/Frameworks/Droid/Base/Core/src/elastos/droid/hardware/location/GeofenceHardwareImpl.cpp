@@ -548,8 +548,9 @@ GeofenceHardwareImpl::GeofenceHardwareImpl(
 ECode GeofenceHardwareImpl::AcquireWakeLock()
 {
     if (mWakeLock == NULL) {
-        AutoPtr<IPowerManager> powerManager;
-        mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&powerManager);
+        AutoPtr<IInterface> service;
+        FAIL_RETURN(mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&service))
+        AutoPtr<IPowerManager> powerManager = IPowerManager::Probe(service);
         powerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, TAG,
                 (IPowerManagerWakeLock**&)mWakeLock);
     }

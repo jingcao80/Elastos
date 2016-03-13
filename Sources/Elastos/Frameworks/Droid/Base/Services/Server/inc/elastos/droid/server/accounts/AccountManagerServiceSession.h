@@ -9,7 +9,7 @@ using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Content::IServiceConnection;
 using Elastos::Droid::Content::IComponentName;
-using Elastos::Droid::Accounts::IAccountAuthenticator;
+using Elastos::Droid::Accounts::IIAccountAuthenticator;
 using Elastos::Droid::Accounts::IAccountManagerResponse;
 
 namespace Elastos {
@@ -94,7 +94,7 @@ public:
 
     Int32 mNumResults;
 
-    AutoPtr<IAccountAuthenticator> mAuthenticator;
+    AutoPtr<IIAccountAuthenticator> mAuthenticator;
 
 protected:
     AutoPtr<UserAccounts> mAccounts;

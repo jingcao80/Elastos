@@ -69,7 +69,7 @@ ECode CRingtone::constructor(
     mContext = context;
 
     AutoPtr<IInterface> obj;
-    mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&mAudioManager);
+    mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
     mAudioManager = IAudioManager::Probe(obj);
 
     mAllowRemote = allowRemote;

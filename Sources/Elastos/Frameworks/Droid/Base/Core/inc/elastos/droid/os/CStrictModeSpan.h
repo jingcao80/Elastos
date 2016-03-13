@@ -12,8 +12,14 @@ namespace Droid {
 namespace Os {
 
 CarClass(CStrictModeSpan)
+    , public Object
+    , public IStrictModeSpan
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(

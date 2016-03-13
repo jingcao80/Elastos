@@ -100,6 +100,7 @@ SOURCES += Watchdog.cpp
 #SOURCES += CKortideRemoteService.cpp
 
 
+ELASTOS_LIBS += accessibility/accessibility.lib
 ELASTOS_LIBS += am/am.lib
 ELASTOS_LIBS += appwidget/appwidget.lib
 ELASTOS_LIBS += clipboard/clipboard.lib
@@ -124,10 +125,10 @@ ELASTOS_LIBS += trust/trust.lib
 ELASTOS_LIBS += twilight/twilight.lib
 ELASTOS_LIBS += wallpaper/wallpaper.lib
 ELASTOS_LIBS += webkit/webkit.lib
+ELASTOS_LIBS += media/media.lib
 
 
 #ELASTOS_LIBS += usb/usb.lib
-#ELASTOS_LIBS += accessibility/accessibility.lib
 #ELASTOS_LIBS += accounts/accounts.lib
 #ELASTOS_LIBS += search/search.lib
 #ELASTOS_LIBS += zigbee/zigbee.lib
@@ -139,7 +140,7 @@ LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
 LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
 LIBRARIES += $(XDK_USER_LIB)/crt0.lib
 LIBRARIES += $(PREBUILD_LIB)/libm.a
-LIBRARIES += -licuuc -llog -lbinder -lutils -lcutils -lselinux -lsurfaceflinger -lsensorservice -lgui -lskia -landroidfw -linput -lhardware -lusbhost -lsuspend -lpower -lhardware_legacy -ldl -lnetutils -lmedia -linputflinger
+LIBRARIES += $(PREBUILD_LIB)/libinputservice.so
+LIBRARIES += -licuuc -llog -lbinder -lutils -lcutils -lselinux -lsurfaceflinger -lsensorservice -lgui -lskia -landroidfw -linput -lhardware -lusbhost -lsuspend -lpower -lhardware_legacy -ldl -lnetutils -lmedia -linputflinger -lui
 
 #ELASTOS_LIBS += server/server.lib
-#LIBRARIES +=  -lui

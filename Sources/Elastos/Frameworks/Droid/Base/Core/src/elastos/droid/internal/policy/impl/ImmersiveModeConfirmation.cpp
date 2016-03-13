@@ -471,8 +471,7 @@ Int64 ImmersiveModeConfirmation::GetNavBarExitDuration()
     AutoPtr<IAnimation> exit;
     animationUtils->LoadAnimation(mContext, R::anim::dock_bottom_exit, (IAnimation**)&exit);
     Int64 time = 0;
-    if (exit != NULL)
-    {
+    if (exit != NULL) {
         exit->GetDuration(&time);
     }
 

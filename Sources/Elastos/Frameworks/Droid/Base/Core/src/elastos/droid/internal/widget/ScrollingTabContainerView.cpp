@@ -307,7 +307,11 @@ ECode ScrollingTabContainerView::TabAdapter::GetItem(
     VALIDATE_NOT_NULL(item);
     AutoPtr<IView> v;
     IViewGroup::Probe(mHost->mTabLayout)->GetChildAt(position, (IView**)&v);
-    return ((TabView*)ITabView::Probe(v))->GetTab((IActionBarTab**)item);
+    AutoPtr<IActionBarTab> abt;
+    ((TabView*)ITabView::Probe(v))->GetTab((IActionBarTab**)&abt);
+    *item = abt.Get();
+    REFCOUNT_ADD(*item)
+    return NOERROR;
 }
 
 ECode ScrollingTabContainerView::TabAdapter::GetItemId(

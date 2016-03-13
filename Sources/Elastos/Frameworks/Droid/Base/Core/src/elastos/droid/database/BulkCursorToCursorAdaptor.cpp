@@ -408,7 +408,7 @@ ECode BulkCursorToCursorAdaptor::GetColumnCount(
 
 ECode BulkCursorToCursorAdaptor::GetBlob(
     /* [in] */ Int32 columnIndex,
-    /* [out,callee] */ ArrayOf<Byte>** blob)
+    /* [out, callee] */ ArrayOf<Byte>** blob)
 {
     VALIDATE_NOT_NULL(blob)
     return AbstractWindowedCursor::GetBlob(columnIndex, blob);

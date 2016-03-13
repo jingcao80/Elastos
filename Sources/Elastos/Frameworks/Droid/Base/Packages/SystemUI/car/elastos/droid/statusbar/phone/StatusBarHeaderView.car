@@ -19,7 +19,7 @@ module
      * @Involve
      * interface IRelativeLayout
      * interface IViewOnClickListener
-     * interface IBatteryControllerBatteryStateChangeCallback
+     * interface IBatteryStateChangeCallback
      * interface INextAlarmControllerNextAlarmChangeCallback
      */
     interface IStatusBarHeaderView {

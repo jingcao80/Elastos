@@ -14,6 +14,7 @@ const Int32 CComposeShader::TYPE_XFERMODE = 1;
 const Int32 CComposeShader::TYPE_PORTERDUFFMODE = 2;
 
 CAR_OBJECT_IMPL(CComposeShader);
+CAR_INTERFACE_IMPL(CComposeShader, Shader, IComposeShader);
 CComposeShader::CComposeShader()
     : mType(0)
     , mPorterDuffMode(-1)
@@ -28,9 +29,9 @@ ECode CComposeShader::constructor(
     mShaderA = shaderA;
     mShaderB = shaderB;
     mXferMode = mode;
-    Init(NativeCreate1(((Shader*)(IShader*)shaderA->Probe(EIID_Shader))->mNativeInstance,
-            ((Shader*)(IShader*)shaderB->Probe(EIID_Shader))->mNativeInstance,
-            (mode != NULL) ? ((Xfermode*)(IXfermode*)mode->Probe(EIID_Xfermode))->mNativeInstance : 0));
+    Init(NativeCreate1(((Shader*)shaderA)->mNativeInstance,
+            ((Shader*)shaderB)->mNativeInstance,
+            (mode != NULL) ? ((Xfermode*)mode)->mNativeInstance : 0));
     return NOERROR;
 }
 
@@ -43,39 +44,10 @@ ECode CComposeShader::constructor(
     mShaderA = shaderA;
     mShaderB = shaderB;
     mPorterDuffMode = mode;
-    Init(NativeCreate2(((Shader*)(IShader*)shaderA->Probe(EIID_Shader))->mNativeInstance,
-            ((Shader*)(IShader*)shaderB->Probe(EIID_Shader))->mNativeInstance,
+    Init(NativeCreate2(((Shader*)shaderA)->mNativeInstance,
+            ((Shader*)shaderB)->mNativeInstance,
             mode));
     return NOERROR;
-}
-
-PInterface CComposeShader::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_Shader) {
-        return reinterpret_cast<PInterface>((Shader*)this);
-    }
-    else if (riid == EIID_IComposeShader) {
-        return (IComposeShader*)this;
-    }
-    return Shader::Probe(riid);
-}
-
-UInt32 CComposeShader::AddRef()
-{
-    return Shader::AddRef();
-}
-
-UInt32 CComposeShader::Release()
-{
-    return Shader::Release();
-}
-
-ECode CComposeShader::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return Shader::GetInterfaceID(object, iid);
 }
 
 ECode CComposeShader::Copy(

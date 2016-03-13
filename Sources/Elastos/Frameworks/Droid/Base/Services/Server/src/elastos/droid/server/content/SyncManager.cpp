@@ -1336,7 +1336,7 @@ Boolean SyncManager::SyncHandler::DispatchSyncOperation(
         ECode ec = pkgMgr->GetServiceInfo(info->mService, 0, (IServiceInfo**)&si);
         if (ec == (ECode)E_NAME_NOT_FOUND_EXCEPTION) {
             Logger::D(TAG, "Can't find a service for %s, removing settings for it",
-                Object::ToString(info->mService).string());
+                TO_CSTR(info->mService));
             return FALSE;
         }
         ai->GetUid(&targetUid);

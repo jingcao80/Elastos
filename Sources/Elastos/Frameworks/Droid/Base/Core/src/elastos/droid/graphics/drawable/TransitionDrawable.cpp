@@ -23,16 +23,14 @@ TransitionDrawable::TransitionState::TransitionState(
 ECode TransitionDrawable::TransitionState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    return CTransitionDrawable::New(this, NULL, NULL, (ITransitionDrawable**)drawable);
+    return CTransitionDrawable::New(this, NULL, NULL, drawable);
 }
 
 ECode TransitionDrawable::TransitionState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    return CTransitionDrawable::New(this, res, NULL, (ITransitionDrawable**)drawable);
+    return CTransitionDrawable::New(this, res, NULL, drawable);
 }
 
 ECode TransitionDrawable::TransitionState::NewDrawable(
@@ -40,8 +38,7 @@ ECode TransitionDrawable::TransitionState::NewDrawable(
     /* [in] */ IResourcesTheme* theme,
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    return CTransitionDrawable::New(this, res, theme, (ITransitionDrawable**)drawable);
+    return CTransitionDrawable::New(this, res, theme, drawable);
 }
 
 ECode TransitionDrawable::TransitionState::GetChangingConfigurations(

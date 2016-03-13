@@ -2,6 +2,7 @@
 module
 {
 
+    interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Telecomm.Telecom.IConnectionRequest;
     interface Elastos.Droid.Telecomm.Telecom.IRemoteConnection;
     interface Elastos.Droid.Telecomm.Telecom.IRemoteConference;
@@ -12,71 +13,93 @@ module
     namespace Telecomm {
     namespace Telecom {
 
+    /**
+     *  Encapsulates all audio states during a call.
+     *  @hide
+     */
+    /**
+     * @Involve
+     * interface Elastos.Droid.Content.IContext
+     * interface Elastos.Droid.Content.IContextWrapper
+     * interface IComponentCallbacks
+     * interface IComponentCallbacks2
+     * interface IService
+     */
+    interface IConnectionService {
         /**
-         *  Encapsulates all audio states during a call.
-         *  @hide
-         */
-        /**
-         * @Involve
-         * interface Elastos.Droid.Content.IContext
-         * interface Elastos.Droid.Content.IContextWrapper
-         * interface IComponentCallbacks
-         * interface IComponentCallbacks2
-         * interface IService
-         */
-        interface IConnectionService {
-            /**
-             * The {@link Intent} that must be declared as handled by the service.
-             * @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
-            */
-            const String SERVICE_INTERFACE = "android.telecom.ConnectionService";
+         * The {@link Intent} that must be declared as handled by the service.
+         * @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
+        */
+        const String SERVICE_INTERFACE = "android.telecom.ConnectionService";
 
-            CreateRemoteIncomingConnection(
-                [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
-                [in] IConnectionRequest* request,
-                [out] IRemoteConnection** res);
+        const Int32 MSG_ADD_CONNECTION_SERVICE_ADAPTER = 1;
+        const Int32 MSG_CREATE_CONNECTION = 2;
+        const Int32 MSG_ABORT = 3;
+        const Int32 MSG_ANSWER = 4;
+        const Int32 MSG_REJECT = 5;
+        const Int32 MSG_DISCONNECT = 6;
+        const Int32 MSG_HOLD = 7;
+        const Int32 MSG_UNHOLD = 8;
+        const Int32 MSG_ON_AUDIO_STATE_CHANGED = 9;
+        const Int32 MSG_PLAY_DTMF_TONE = 10;
+        const Int32 MSG_STOP_DTMF_TONE = 11;
+        const Int32 MSG_CONFERENCE = 12;
+        const Int32 MSG_SPLIT_FROM_CONFERENCE = 13;
+        const Int32 MSG_ON_POST_DIAL_CONTINUE = 14;
+        const Int32 MSG_REMOVE_CONNECTION_SERVICE_ADAPTER = 16;
+        const Int32 MSG_ANSWER_VIDEO = 17;
+        const Int32 MSG_MERGE_CONFERENCE = 18;
+        const Int32 MSG_SWAP_CONFERENCE = 19;
 
-            CreateRemoteOutgoingConnection(
-                [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
-                [in] IConnectionRequest* request,
-                [out] IRemoteConnection** res);
+        CreateRemoteIncomingConnection(
+            [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+            [in] IConnectionRequest* request,
+            [out] IRemoteConnection** res);
 
-            ConferenceRemoteConnections(
-                [in] IRemoteConnection* a,
-                [in] IRemoteConnection* b);
+        CreateRemoteOutgoingConnection(
+            [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+            [in] IConnectionRequest* request,
+            [out] IRemoteConnection** res);
 
-            AddConference(
-                [in] IConference* conference);
+        ConferenceRemoteConnections(
+            [in] IRemoteConnection* a,
+            [in] IRemoteConnection* b);
 
-            GetAllConnections(
-                [out] ICollection** res);
+        AddConference(
+            [in] IConference* conference);
 
-            OnCreateIncomingConnection(
-                [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
-                [in] IConnectionRequest* request,
-                [out] IConnection** res);
+        GetAllConnections(
+            [out] ICollection** res);
 
-            OnCreateOutgoingConnection(
-                [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
-                [in] IConnectionRequest* request,
-                [out] IConnection** res);
+        OnCreateIncomingConnection(
+            [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+            [in] IConnectionRequest* request,
+            [out] IConnection** res);
 
-            OnCreateUnknownConnection(
-                [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
-                [in] IConnectionRequest* request,
-                [out] IConnection** res);
+        OnCreateOutgoingConnection(
+            [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+            [in] IConnectionRequest* request,
+            [out] IConnection** res);
 
-            OnConference(
-                [in] IConnection* connection1,
-                [in] IConnection* connection2);
+        OnCreateUnknownConnection(
+            [in] IPhoneAccountHandle* connectionManagerPhoneAccount,
+            [in] IConnectionRequest* request,
+            [out] IConnection** res);
 
-            OnRemoteConferenceAdded(
-                [in] IRemoteConference* conference);
+        OnConference(
+            [in] IConnection* connection1,
+            [in] IConnection* connection2);
 
-            ContainsConference(
-                [in] IConference* conference,
-                [out] Boolean* res);
-        }
+        OnRemoteConferenceAdded(
+            [in] IRemoteConference* conference);
+
+        ContainsConference(
+            [in] IConference* conference,
+            [out] Boolean* res);
+
+        GetHandler(
+            [out] IHandler** handler);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

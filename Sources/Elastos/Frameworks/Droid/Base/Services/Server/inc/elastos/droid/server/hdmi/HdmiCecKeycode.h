@@ -41,6 +41,7 @@ private:
     class KeycodeEntry
         : public Object
     {
+        friend class HdmiCecKeycode;
     private:
         KeycodeEntry(
             /* [in] */ Int32 androidKeycode,
@@ -110,7 +111,7 @@ public:
 private:
     HdmiCecKeycode();
 
-    static AutoPtr<ArrayOf<KeycodeEntry> > InitKEYCODE_ENTRIES();
+    static AutoPtr<ArrayOf<KeycodeEntry*> > InitKEYCODE_ENTRIES();
 
 public:
     static const Int32 UNSUPPORTED_KEYCODE;
@@ -245,7 +246,7 @@ public:
 private:
     // Keycode entry container for all mappings.
     // Note that order of entry is the same as above cec keycode definition.
-    static const AutoPtr<ArrayOf<KeycodeEntry> > KEYCODE_ENTRIES;
+    static const AutoPtr<ArrayOf<KeycodeEntry*> > KEYCODE_ENTRIES;
 };
 
 } // namespace Hdmi

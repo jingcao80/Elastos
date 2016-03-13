@@ -10,6 +10,7 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CTableMaskFilter);
+CAR_INTERFACE_IMPL(CTableMaskFilter, MaskFilter, ITableMaskFilter);
 ECode CTableMaskFilter::constructor(
     /* [in] */ const ArrayOf<Byte>& table)
 {
@@ -26,35 +27,6 @@ ECode CTableMaskFilter::constructor(
 {
     mNativeInstance = ni;
     return NOERROR;
-}
-
-PInterface CTableMaskFilter::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_MaskFilter) {
-        return reinterpret_cast<PInterface>((MaskFilter*)this);
-    }
-    else if (riid == EIID_ITableMaskFilter) {
-        return (ITableMaskFilter*)this;
-    }
-    return MaskFilter::Probe(riid);
-}
-
-UInt32 CTableMaskFilter::AddRef()
-{
-    return MaskFilter::AddRef();
-}
-
-UInt32 CTableMaskFilter::Release()
-{
-    return MaskFilter::Release();
-}
-
-ECode CTableMaskFilter::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return MaskFilter::GetInterfaceID(object, iid);
 }
 
 ECode CTableMaskFilter::CreateClipTable(

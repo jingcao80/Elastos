@@ -2109,7 +2109,7 @@ void SyncStorageEngine::SetPeriodicSyncTime(
     }
     if (!found) {
         Logger::W(TAG, "Ignoring SetPeriodicSyncTime request for a sync that does not exist. Authority: %s",
-            Object::ToString(authorityInfo->mTarget).string());
+            TO_CSTR(authorityInfo->mTarget));
     }
 }
 

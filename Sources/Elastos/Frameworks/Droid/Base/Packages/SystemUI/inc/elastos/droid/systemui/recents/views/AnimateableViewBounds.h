@@ -86,7 +86,7 @@ private:
 public:
     AutoPtr<RecentsConfiguration> mConfig;
 
-    AutoPtr<IView> mSourceView; // ITaskView
+    IView* mSourceView; // TaskView, TaskView has this's reference
     AutoPtr<IRect> mTmpRect;
     AutoPtr<IRect> mClipRect;
     AutoPtr<IRect> mClipBounds;

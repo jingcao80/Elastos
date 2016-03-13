@@ -1,24 +1,37 @@
 
-#include "CCellSignalStrengthCdma.h"
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringUtils.h>
+#include "elastos/droid/telephony/CCellSignalStrengthCdma.h"
+#include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-#ifndef Integer_MAX_VALUE
-    #define Integer_MAX_VALUE 0x7fffffff
-#endif
-
-const String CCellSignalStrengthCdma::LOG_TAG("CellSignalStrengthCdma");
+const String CCellSignalStrengthCdma::TAG("CellSignalStrengthCdma");
 const Boolean CCellSignalStrengthCdma::DBG = FALSE;
 
+CAR_INTERFACE_IMPL_2(CCellSignalStrengthCdma, CellSignalStrength, ICellSignalStrengthCdma, IParcelable)
+
+CAR_OBJECT_IMPL(CCellSignalStrengthCdma)
+
+CCellSignalStrengthCdma::CCellSignalStrengthCdma()
+    : mCdmaDbm(0)
+    , mCdmaEcio(0)
+    , mEvdoDbm(0)
+    , mEvdoEcio(0)
+    , mEvdoSnr(0)
+{
+}
+
+CCellSignalStrengthCdma::~CCellSignalStrengthCdma()
+{
+}
 
 ECode CCellSignalStrengthCdma::constructor()
 {
@@ -39,12 +52,6 @@ ECode CCellSignalStrengthCdma::constructor(
     /* [in] */ ICellSignalStrengthCdma* css)
 {
     return CopyFrom(css);
-}
-
-PInterface CCellSignalStrengthCdma::Probe(
-    /* [in]  */ REIID riid)
-{
-    return CCellSignalStrengthCdma::Probe(riid);
 }
 
 ECode CCellSignalStrengthCdma::ReadFromParcel(
@@ -76,11 +83,11 @@ ECode CCellSignalStrengthCdma::WriteToParcel(
 
 ECode CCellSignalStrengthCdma::SetDefaultValues()
 {
-    mCdmaDbm = Integer_MAX_VALUE;
-    mCdmaEcio = Integer_MAX_VALUE;
-    mEvdoDbm = Integer_MAX_VALUE;
-    mEvdoEcio = Integer_MAX_VALUE;
-    mEvdoSnr = Integer_MAX_VALUE;
+    mCdmaDbm = Elastos::Core::Math::INT32_MAX_VALUE;
+    mCdmaEcio = Elastos::Core::Math::INT32_MAX_VALUE;
+    mEvdoDbm = Elastos::Core::Math::INT32_MAX_VALUE;
+    mEvdoEcio = Elastos::Core::Math::INT32_MAX_VALUE;
+    mEvdoSnr = Elastos::Core::Math::INT32_MAX_VALUE;
     return NOERROR;
 }
 
@@ -94,14 +101,16 @@ ECode CCellSignalStrengthCdma::GetLevel(
     if (evdoLevel == ICellSignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
         /* We don't know evdo, use cdma */
         GetCdmaLevel(level);
-    } else if (cdmaLevel == ICellSignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
+    }
+    else if (cdmaLevel == ICellSignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
         /* We don't know cdma, use evdo */
         GetEvdoLevel(level);
-    } else {
+    }
+    else {
         /* We know both, use the lowest level */
         *level = cdmaLevel < evdoLevel ? cdmaLevel : evdoLevel;
     }
-    if (DBG) Slogger::I(LOG_TAG, "getLevel=%d", level);
+    if (DBG) Log(String("getLevel=") + StringUtils::ToString(*level));
     return NOERROR;
 }
 
@@ -132,7 +141,7 @@ ECode CCellSignalStrengthCdma::GetAsuLevel(
     else ecioAsuLevel = 99;
 
     Int32 level = (cdmaAsuLevel < ecioAsuLevel) ? cdmaAsuLevel : ecioAsuLevel;
-    if (DBG) Log(String("getAsuLevel=") + StringUtils::Int32ToString(level));
+    if (DBG) Log(String("getAsuLevel=") + StringUtils::ToString(level));
     *asuLevel = level;
     return NOERROR;
 }
@@ -258,7 +267,7 @@ ECode CCellSignalStrengthCdma::GetCdmaLevel(
     else levelEcio = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
 
     Int32 level = (levelDbm < levelEcio) ? levelDbm : levelEcio;
-    if (DBG) Log(String("getCdmaLevel=") + StringUtils::Int32ToString(level));
+    if (DBG) Log(String("getCdmaLevel=") + StringUtils::ToString(level));
     *cdmaLevel = level;
 
     return NOERROR;
@@ -288,7 +297,7 @@ ECode CCellSignalStrengthCdma::GetEvdoLevel(
     else levelEvdoSnr = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
 
     Int32 level = (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
-    if (DBG) Log(String("getEvdoLevel=") + StringUtils::Int32ToString(level));
+    if (DBG) Log(String("getEvdoLevel=") + StringUtils::ToString(level));
     *evdoLevel = level;
     return NOERROR;
 }
@@ -391,7 +400,7 @@ ECode CCellSignalStrengthCdma::ToString(
 ECode CCellSignalStrengthCdma::Log(
     /* [in] */ const String& s)
 {
-    Slogger::W(LOG_TAG, s);
+    Logger::W(TAG, s);
     return NOERROR;
 }
 
@@ -406,6 +415,6 @@ ECode CCellSignalStrengthCdma::CopyFrom(
     return NOERROR;
 }
 
-}
-}
-}
+} // namespace Telephony
+} // namespace Droid
+} // namespace Elastos

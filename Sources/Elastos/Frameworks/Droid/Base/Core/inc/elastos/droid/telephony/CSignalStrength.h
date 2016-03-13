@@ -2,7 +2,12 @@
 #ifndef __ELASTOS_DROID_TELEPHONY_CSIGNALSTRENGTH_H__
 #define __ELASTOS_DROID_TELEPHONY_CSIGNALSTRENGTH_H__
 
+#include <Elastos.CoreLibrary.Core.h>
+#include <Elastos.CoreLibrary.Utility.h>
+#include "Elastos.Droid.Os.h"
 #include "_Elastos_Droid_Telephony_CSignalStrength.h"
+#include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Telephony::ISignalStrength;
@@ -12,8 +17,19 @@ namespace Droid {
 namespace Telephony {
 
 CarClass(CSignalStrength)
+    , public Object
+    , public ISignalStrength
+    , public IParcelable
 {
 public:
+    CSignalStrength();
+
+    virtual ~CSignalStrength();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     static CARAPI NewFromBundle(
         /* [in] */ IBundle* m,
         /* [out] */ ISignalStrength** ss);
@@ -188,8 +204,8 @@ private:
     CARAPI SetFromNotifierBundle(
         /* [in] */ IBundle* m);
 
-    static const String LOG_TAG/* = "SignalStrength"*/;
-    static const Boolean DBG = TRUE;
+    static const String TAG;
+    static const Boolean DBG = FALSE;
 
     Int32 mGsmSignalStrength; // Valid values are (0-31, 99) as defined in TS 27.007 8.5
     Int32 mGsmBitErrorRate;   // bit error rate (0-7, 99) as defined in TS 27.007 8.5

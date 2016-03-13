@@ -43,10 +43,9 @@ AutoPtr<ITypedArray> CTypedArray::Obtain(
 
     AutoPtr<ArrayOf<Int32> > a1 = ArrayOf<Int32>::Alloc(len*CAssetManager::STYLE_NUM_ENTRIES);
     AutoPtr<ArrayOf<Int32> > a2 = ArrayOf<Int32>::Alloc(1 + len);
-    AutoPtr<CTypedArray> ta;
-    ASSERT_SUCCEEDED(CTypedArray::NewByFriend(res, a1, a2, len, (CTypedArray**)&ta));
-    //Logger::I("CTypedArray", "CTypedArray::Obtain %s", TO_CSTR(ta));
-    return (ITypedArray*)ta.Get();
+    AutoPtr<ITypedArray> ta;
+    ASSERT_SUCCEEDED(CTypedArray::New(res, a1, a2, len, (ITypedArray**)&ta));
+    return ta;
 }
 
 CTypedArray::CTypedArray()

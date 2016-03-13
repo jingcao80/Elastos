@@ -1,0 +1,38 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+     * Handles scrolling while dragging
+     *
+     */
+    interface IDragScroller {
+        ScrollLeft();
+        ScrollRight();
+
+        /**
+         * The touch point has entered the scroll area; a scroll is imminent.
+         * This event will only occur while a drag is active.
+         *
+         * @param direction The scroll direction
+         */
+        OnEnterScrollArea(
+            [in] Int32 x,
+            [in] Int32 y,
+            [in] Int32 direction,
+            [out] Boolean* result);
+
+        /**
+         * The touch point has left the scroll area.
+         * NOTE: This may not be called, if a drop occurs inside the scroll area.
+         */
+        OnExitScrollArea(
+            [out] Boolean* result);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

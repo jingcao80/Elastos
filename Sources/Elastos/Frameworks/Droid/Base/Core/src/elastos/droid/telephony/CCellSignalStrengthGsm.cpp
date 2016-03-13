@@ -1,23 +1,38 @@
 
-#include "CCellSignalStrengthGsm.h"
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringUtils.h>
+#include "elastos/droid/telephony/CCellSignalStrengthGsm.h"
+#include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-#ifndef Integer_MAX_VALUE
-    #define Integer_MAX_VALUE 0x7fffffff
-#endif
-
-const String CCellSignalStrengthGsm::LOG_TAG("CCellSignalStrengthGsm");
+const String CCellSignalStrengthGsm::TAG("CCellSignalStrengthGsm");
 const Boolean CCellSignalStrengthGsm::DBG = FALSE;
+
+const Int32 CCellSignalStrengthGsm::GSM_SIGNAL_STRENGTH_GREAT = 12;
+const Int32 CCellSignalStrengthGsm::GSM_SIGNAL_STRENGTH_GOOD = 8;
+const Int32 CCellSignalStrengthGsm::GSM_SIGNAL_STRENGTH_MODERATE = 5;
+
+CAR_INTERFACE_IMPL_2(CCellSignalStrengthGsm, CellSignalStrength, ICellSignalStrengthGsm, IParcelable)
+
+CAR_OBJECT_IMPL(CCellSignalStrengthGsm)
+
+CCellSignalStrengthGsm::CCellSignalStrengthGsm()
+    : mSignalStrength(0)
+    , mBitErrorRate(0)
+{
+}
+
+CCellSignalStrengthGsm::~CCellSignalStrengthGsm()
+{
+}
 
 ECode CCellSignalStrengthGsm::constructor()
 {
@@ -35,12 +50,6 @@ ECode CCellSignalStrengthGsm::constructor(
     /* [in] */ ICellSignalStrengthGsm* css)
 {
     return CopyFrom(css);
-}
-
-PInterface CCellSignalStrengthGsm::Probe(
-    /* [in]  */ REIID riid)
-{
-    return CCellSignalStrengthGsm::Probe(riid);
 }
 
 ECode CCellSignalStrengthGsm::ReadFromParcel(
@@ -64,8 +73,8 @@ ECode CCellSignalStrengthGsm::WriteToParcel(
 
 ECode CCellSignalStrengthGsm::SetDefaultValues()
 {
-    mSignalStrength = Integer_MAX_VALUE;
-    mBitErrorRate = Integer_MAX_VALUE;
+    mSignalStrength = Elastos::Core::Math::INT32_MAX_VALUE;
+    mBitErrorRate = Elastos::Core::Math::INT32_MAX_VALUE;
     return NOERROR;
 }
 
@@ -84,7 +93,7 @@ ECode CCellSignalStrengthGsm::GetLevel(
     else if (asu >= GSM_SIGNAL_STRENGTH_GOOD)  *level = SIGNAL_STRENGTH_GOOD;
     else if (asu >= GSM_SIGNAL_STRENGTH_MODERATE)  *level = SIGNAL_STRENGTH_MODERATE;
     else *level = SIGNAL_STRENGTH_POOR;
-    if (DBG) Log(String("getLevel=") + StringUtils::Int32ToString(*level));
+    if (DBG) Log(String("getLevel=") + StringUtils::ToString(*level));
     return NOERROR;
 }
 
@@ -97,7 +106,7 @@ ECode CCellSignalStrengthGsm::GetAsuLevel(
     // signal, its better to show 0 bars to the user in such cases.
     // asu = 99 is a special case, where the signal strength is unknown.
     Int32 level = mSignalStrength;
-    if (DBG) Log(String("getAsuLevel=") + StringUtils::Int32ToString(level));
+    if (DBG) Log(String("getAsuLevel=") + StringUtils::ToString(level));
     *asuLevel = level;
     return NOERROR;
 }
@@ -107,13 +116,13 @@ ECode CCellSignalStrengthGsm::GetDbm(
 {
     VALIDATE_NOT_NULL(dbm);
     Int32 level = mSignalStrength;
-    Int32 asu = (level == 99 ? Integer_MAX_VALUE : level);
-    if (asu != Integer_MAX_VALUE) {
+    Int32 asu = (level == 99 ? Elastos::Core::Math::INT32_MAX_VALUE : level);
+    if (asu != Elastos::Core::Math::INT32_MAX_VALUE) {
         *dbm = -113 + (2 * asu);
     } else {
-        *dbm = Integer_MAX_VALUE;
+        *dbm = Elastos::Core::Math::INT32_MAX_VALUE;
     }
-    if (DBG) Log(String("getDbm=") + StringUtils::Int32ToString(*dbm));
+    if (DBG) Log(String("getDbm=") + StringUtils::ToString(*dbm));
     return NOERROR;
 }
 
@@ -142,10 +151,10 @@ ECode CCellSignalStrengthGsm::Equals(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    AutoPtr<ICellSignalStrengthGsm> s;
+    AutoPtr<CCellSignalStrengthGsm> s;
 
     //try {
-    s = ICellSignalStrengthGsm::Probe(o);
+    s = (CCellSignalStrengthGsm*)ICellSignalStrengthGsm::Probe(o);
     // } catch (ClassCastException ex) {
     //     return FALSE;
     // }
@@ -221,11 +230,20 @@ ECode CCellSignalStrengthGsm::SetBitErrorRate(
     return NOERROR;
 }
 
+ECode CCellSignalStrengthGsm::Log(
+    /* [in] */ const String& s)
+{
+    Logger::W(TAG, s);
+    return NOERROR;
+}
+
 ECode CCellSignalStrengthGsm::CopyFrom(
     /* [in] */ ICellSignalStrengthGsm* css)
 {
-    css->GetSignalStrength(&mSignalStrength);
-    css->GetBitErrorRate(&mBitErrorRate);
+    AutoPtr<CCellSignalStrengthGsm> s = (CCellSignalStrengthGsm*)css;
+
+    s->GetSignalStrength(&mSignalStrength);
+    s->GetBitErrorRate(&mBitErrorRate);
     return NOERROR;
 }
 

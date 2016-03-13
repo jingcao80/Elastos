@@ -104,7 +104,7 @@ ECode CMediaPlayerTrackInfo::ToString(
 {
     StringBuilder out;
     out.Append("CMediaPlayerTrackInfo");
-    out.Append('{');
+    out.AppendChar('{');
     switch (mTrackType) {
     case MEDIA_TRACK_TYPE_VIDEO:
         out.Append("VIDEO");

@@ -2020,17 +2020,8 @@ PhoneWindow::PanelFeatureState::SavedState::SavedState()
 {
 }
 
-//should removed
-ECode PhoneWindow::PanelFeatureState::SavedState::constructor(
-    /* [in] */ IParcelable* superState)
+ECode PhoneWindow::PanelFeatureState::SavedState::constructor()
 {
-    return NOERROR;
-}
-ECode PhoneWindow::PanelFeatureState::SavedState::DescribeContents(
-    /* [out] */ Int32* result)
-{
-    VALIDATE_NOT_NULL(result);
-    *result = 0;
     return NOERROR;
 }
 
@@ -2038,20 +2029,12 @@ ECode PhoneWindow::PanelFeatureState::SavedState::WriteToParcel(
     /* [in] */ IParcel* dest)
 {
     VALIDATE_NOT_NULL(dest);
-    // ==================before translated======================
-    // dest.writeInt(featureId);
-    // dest.writeInt(isOpen ? 1 : 0);
-    // dest.writeInt(isInExpandedMode ? 1 : 0);
-    //
-    // if (isOpen) {
-    //     dest.writeBundle(menuState);
-    // }
+
     dest->WriteInt32(mFeatureId);
     dest->WriteBoolean(mIsOpen);
     dest->WriteBoolean(mIsInExpandedMode);
 
-    if (mIsOpen)
-    {
+    if (mIsOpen) {
         dest->WriteInterfacePtr(mMenuState);
     }
     return NOERROR;
@@ -2060,23 +2043,11 @@ ECode PhoneWindow::PanelFeatureState::SavedState::WriteToParcel(
 ECode PhoneWindow::PanelFeatureState::SavedState::ReadFromParcel(
     /* [in] */ IParcel* source)
 {
-    // ==================before translated======================
-    // SavedState savedState = new SavedState();
-    // savedState.featureId = source.readInt();
-    // savedState.isOpen = source.readInt() == 1;
-    // savedState.isInExpandedMode = source.readInt() == 1;
-    //
-    // if (savedState.isOpen) {
-    //     savedState.menuState = source.readBundle();
-    // }
-    //
-    // return savedState;
     source->ReadInt32(&mFeatureId);
     source->ReadBoolean(&mIsOpen);
     source->ReadBoolean(&mIsInExpandedMode);
 
-    if (mIsOpen)
-    {
+    if (mIsOpen) {
         source->ReadInterfacePtr((Handle32*)&mMenuState);
     }
     return NOERROR;
@@ -4449,7 +4420,9 @@ AutoPtr<IKeyguardManager> PhoneWindow::GetKeyguardManager()
     if (mKeyguardManager == NULL) {
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
-        context->GetSystemService(IContext::KEYGUARD_SERVICE, (IInterface**)&mKeyguardManager);
+        AutoPtr<IInterface> service;
+        context->GetSystemService(IContext::KEYGUARD_SERVICE, (IInterface**)&service);
+        mKeyguardManager = IKeyguardManager::Probe(service);
     }
 
     return mKeyguardManager;

@@ -3,9 +3,10 @@
 #define __ELASTOS_DROID_SERVER_HDMI_POWERSTATUSMONITORACTION_H__
 
 #include "_Elastos.Droid.Server.h"
+#include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
-#include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
+#include <Elastos.Droid.Utility.h>
 
 using Elastos::Utility::IList;
 using Elastos::Droid::Utility::ISparseInt32Array;
@@ -20,8 +21,11 @@ namespace Hdmi {
  */
 class PowerStatusMonitorAction
     : public HdmiCecFeatureAction
+    , public IPowerStatusMonitorAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     PowerStatusMonitorAction();
 
     CARAPI constructor(

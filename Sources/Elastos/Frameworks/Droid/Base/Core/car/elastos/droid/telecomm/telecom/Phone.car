@@ -3,6 +3,7 @@ module
 {
     interface Elastos.Droid.Telecomm.Telecom.IPhone;
     interface Elastos.Droid.Telecomm.Telecom.ICall;
+    interface Elastos.Droid.Telecomm.Telecom.IParcelableCall;
     using interface Elastos.Utility.IList;
 
     namespace Elastos {
@@ -10,54 +11,80 @@ module
     namespace Telecomm {
     namespace Telecom {
 
-        interface IPhoneListener {
-            OnAudioStateChanged(
-                [in] IPhone* phone,
-                [in] IAudioState* audioState);
+    interface IPhoneListener {
+        OnAudioStateChanged(
+            [in] IPhone* phone,
+            [in] IAudioState* audioState);
 
-            OnBringToForeground(
-                [in] IPhone* phone,
-                [in] Boolean showDialpad);
+        OnBringToForeground(
+            [in] IPhone* phone,
+            [in] Boolean showDialpad);
 
-            OnCallAdded(
-                [in] IPhone* phone,
-                [in] ICall* call);
+        OnCallAdded(
+            [in] IPhone* phone,
+            [in] ICall* call);
 
-            OnCallRemoved(
-                [in] IPhone* phone,
-                [in] ICall* call);
-        }
+        OnCallRemoved(
+            [in] IPhone* phone,
+            [in] ICall* call);
+    }
 
-        /**
-         *  A unified virtual device providing a means of voice (and other) communication on a device.
-         *
-         *  @hide
-         *
-         */
-        interface IPhone {
-            AddListener(
-                [in] IPhoneListener* listener);
+    /**
+     *  A unified virtual device providing a means of voice (and other) communication on a device.
+     *
+     *  @hide
+     *
+     */
+    interface IPhone {
 
-            RemoveListener(
-                [in] IPhoneListener* listener);
+        InternalAddCall(
+            [in] IParcelableCall* parcelableCall);
 
-            GetCalls(
-                [out] IList** res);
+        InternalRemoveCall(
+            [in] ICall* call);
 
-            SetMuted(
-                [in] Boolean state);
+        InternalUpdateCall(
+            [in] IParcelableCall* parcelableCall);
 
-            SetAudioRoute(
-                [in] Int32 route);
+        InternalSetPostDialWait(
+            [in] String telecomId,
+            [in] String remaining);
 
-            SetProximitySensorOn();
+        InternalAudioStateChanged(
+            [in] IAudioState* audioState);
 
-            SetProximitySensorOff(
-                [in] Boolean screenOnImmediately);
+        InternalGetCallByTelecomId(
+            [in] String telecomId,
+            [out] ICall** result);
 
-            GetAudioState(
-                [out] IAudioState** res);
-        }
+        InternalBringToForeground(
+            [in] Boolean showDialpad);
+
+        Destroy();
+
+        AddListener(
+            [in] IPhoneListener* listener);
+
+        RemoveListener(
+            [in] IPhoneListener* listener);
+
+        GetCalls(
+            [out] IList** res);
+
+        SetMuted(
+            [in] Boolean state);
+
+        SetAudioRoute(
+            [in] Int32 route);
+
+        SetProximitySensorOn();
+
+        SetProximitySensorOff(
+            [in] Boolean screenOnImmediately);
+
+        GetAudioState(
+            [out] IAudioState** res);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

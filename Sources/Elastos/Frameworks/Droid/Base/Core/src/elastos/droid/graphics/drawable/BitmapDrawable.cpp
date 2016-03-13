@@ -16,12 +16,12 @@
 #include "elastos/droid/graphics/CMatrix.h"
 #include "elastos/droid/content/res/CTypedArray.h"
 #include "elastos/droid/content/res/CResources.h"
-// #include "view/CGravity.h"
+#include "elastos/droid/view/CGravity.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::View::IGravity;
-// using Elastos::Droid::View::CGravity;
+using Elastos::Droid::View::CGravity;
 using Elastos::Droid::Utility::ILayoutDirection;
 using Elastos::Droid::R;
 using Elastos::Droid::Content::Res::CTypedArray;
@@ -97,7 +97,7 @@ ECode BitmapDrawable::BitmapState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable);
-    return CBitmapDrawable::New(this, NULL, NULL, (IBitmapDrawable**)drawable);
+    return CBitmapDrawable::New(this, NULL, NULL, drawable);
 }
 
 ECode BitmapDrawable::BitmapState::NewDrawable(
@@ -105,7 +105,7 @@ ECode BitmapDrawable::BitmapState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable);
-    return CBitmapDrawable::New(this, res, NULL, (IBitmapDrawable**)drawable);
+    return CBitmapDrawable::New(this, res, NULL, drawable);
 }
 
 ECode BitmapDrawable::BitmapState::NewDrawable(
@@ -114,7 +114,7 @@ ECode BitmapDrawable::BitmapState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
     VALIDATE_NOT_NULL(drawable);
-    return CBitmapDrawable::New(this, res, theme, (IBitmapDrawable**)drawable);
+    return CBitmapDrawable::New(this, res, theme, drawable);
 }
 
 ECode BitmapDrawable::BitmapState::GetChangingConfigurations(
@@ -589,8 +589,7 @@ void BitmapDrawable::UpdateDstRectAndInsetsIfDirty()
             GetLayoutDirection(&layoutDirection);
 
             AutoPtr<IGravity> gravity;
-            assert(0 && "TODO");
-            // CGravity::AcquireSingleton((IGravity**)&gravity);
+            CGravity::AcquireSingleton((IGravity**)&gravity);
             gravity->Apply(mBitmapState->mGravity, mBitmapWidth, mBitmapHeight,
                     bounds, mDstRect, layoutDirection);
 
@@ -707,18 +706,12 @@ ECode BitmapDrawable::SetXfermode(
     return InvalidateSelf();
 }
 
-ECode BitmapDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode BitmapDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated && (Drawable::Mutate((IDrawable**)&tmp), tmp.Get())
-        == (IDrawable*)this->Probe(EIID_IDrawable)) {
+    if (!mMutated ) {
         mBitmapState = new BitmapState(mBitmapState);
         mMutated = TRUE;
     }
-    *drawable = (IDrawable*)this->Probe(EIID_IDrawable);
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 

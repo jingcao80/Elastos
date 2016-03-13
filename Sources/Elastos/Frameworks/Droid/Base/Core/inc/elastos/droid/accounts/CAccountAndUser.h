@@ -3,14 +3,27 @@
 #define __ELASTOS_DROID_ACCOUNTS_CACCOUNTANDUSER_H__
 
 #include "_Elastos_Droid_Accounts_CAccountAndUser.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
 namespace Accounts {
 
 CarClass(CAccountAndUser)
+    , public Object
+    , public IAccountAndUser
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor(
+        /* [in] */ IAccount *account,
+        /* [in] */ Int32 userId);
+
     CARAPI Equals(
         /* [in] */ IInterface *o,
         /* [out] */ Boolean *isEqual);
@@ -26,10 +39,6 @@ public:
 
     CARAPI GetUserId(
         /* [out] */ Int32 *id);
-
-    CARAPI constructor(
-        /* [in] */ IAccount *account,
-        /* [in] */ Int32 userId);
 
 public:
     AutoPtr<IAccount> mAccount;

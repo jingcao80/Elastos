@@ -169,7 +169,11 @@ ECode SessionCmdTask::Call(
     VALIDATE_NOT_NULL(result)
     String str;
     RunForResult(&str);
-    return CString::New(str, (ICharSequence**)result);
+    AutoPtr<ICharSequence> csq;
+    CString::New(str, (ICharSequence**)&csq);
+    *result = csq.Get();
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode SessionCmdTask::RunForResult(

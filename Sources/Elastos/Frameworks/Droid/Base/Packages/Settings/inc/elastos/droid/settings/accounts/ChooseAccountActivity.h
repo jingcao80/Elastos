@@ -173,7 +173,7 @@ public class ChooseAccountActivity extends PreferenceActivity {
                 final StringBuilder auths = new StringBuilder();
                 for (String a : mAuthorities) {
                     auths->Append(a);
-                    auths->Append(' ');
+                    auths->AppendChar32(' ');
                 }
                 Logger::V(TAG, "No providers found for authorities: " + auths);
             }

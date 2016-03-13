@@ -9,19 +9,18 @@ module
     namespace Telecomm {
     namespace Internal {
 
+    /**
+     * Simple response callback object.
+     *
+     * {@hide}
+     */
+    interface IRemoteServiceCallback {
+        OnError();
 
-        /**
-         * Simple response callback object.
-         *
-         * {@hide}
-         */
-        interface IRemoteServiceCallback {
-            OnError();
-
-            OnResult(
+        OnResult(
             [in] IList* components,
             [in] IList* callServices);
-        }
+    }
 
     } // namespace Internal
     } // namespace Telecomm

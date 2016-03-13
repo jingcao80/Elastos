@@ -17,6 +17,15 @@ CAR_INTERFACE_IMPL(CMotionEventHelper, Singleton, IMotionEventHelper);
 CAR_SINGLETON_IMPL(CMotionEventHelper);
 
 ECode CMotionEventHelper::Obtain(
+    /* [out] */ IMotionEvent** o)
+{
+    AutoPtr<MotionEvent> event = MotionEvent::Obtain();
+    *o = (IMotionEvent*)event.Get();
+    REFCOUNT_ADD(*o);
+    return NOERROR;
+}
+
+ECode CMotionEventHelper::Obtain(
     /* [in] */ Int64 downTime,
     /* [in] */ Int64 eventTime,
     /* [in] */ Int32 action,
@@ -33,8 +42,6 @@ ECode CMotionEventHelper::Obtain(
     /* [in] */ Int32 flags,
     /* [out] */ IMotionEvent** event)
 {
-    VALIDATE_NOT_NULL(event);
-
     return MotionEvent::Obtain(
             downTime, eventTime, action, pointerCount,
             pointerProperties, pointerCoords,
@@ -58,8 +65,6 @@ ECode CMotionEventHelper::Obtain(
     /* [in] */ Int32 flags,
     /* [out] */ IMotionEvent** event)
 {
-    VALIDATE_NOT_NULL(event);
-
     return MotionEvent::Obtain(
             downTime, eventTime, action, pointerCount, pointerIds,
             pointerCoords, metaState, xPrecision, yPrecision,
@@ -81,8 +86,6 @@ ECode CMotionEventHelper::Obtain(
     /* [in] */ Int32 edgeFlags,
     /* [out] */ IMotionEvent** event)
 {
-    VALIDATE_NOT_NULL(event);
-
     return MotionEvent::Obtain(
             downTime, eventTime, action, x, y, pressure, size, metaState,
             xPrecision, yPrecision, deviceId, edgeFlags, event);
@@ -104,8 +107,6 @@ ECode CMotionEventHelper::Obtain(
     /* [in] */ Int32 edgeFlags,
     /* [out] */ IMotionEvent** event)
 {
-    VALIDATE_NOT_NULL(event);
-
     return MotionEvent::Obtain(
             downTime, eventTime, action, pointerCount, x, y, pressure, size,
             metaState, xPrecision, yPrecision, deviceId, edgeFlags, event);
@@ -120,8 +121,6 @@ ECode CMotionEventHelper::Obtain(
     /* [in] */ Int32 metaState,
     /* [out] */ IMotionEvent** event)
 {
-    VALIDATE_NOT_NULL(event);
-
     return MotionEvent::Obtain(
             downTime, eventTime, action, x, y, metaState, event);
 }
@@ -130,8 +129,6 @@ ECode CMotionEventHelper::Obtain(
     /* [in] */ IMotionEvent* o,
     /* [out] */ IMotionEvent** event)
 {
-    VALIDATE_NOT_NULL(event);
-
     return MotionEvent::Obtain(o, event);
 }
 
@@ -139,8 +136,6 @@ ECode CMotionEventHelper::ObtainNoHistory(
     /* [in] */ IMotionEvent* o,
     /* [out] */ IMotionEvent** event)
 {
-    VALIDATE_NOT_NULL(event);
-
     return MotionEvent::ObtainNoHistory(o, event);
 }
 
@@ -149,7 +144,6 @@ ECode CMotionEventHelper::ActionToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-
     *str = MotionEvent::ActionToString(action);
     return NOERROR;
 }

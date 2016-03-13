@@ -61,7 +61,11 @@ ECode CActivityOne::MyEvaluator::Evaluate(
             }
         }
         String rstStr(*rArray);
-        return CStringWrapper::New(rstStr, (ICharSequence**)result);
+        AutoPtr<ICharSequence> csq;
+        CStringWrapper::New(rstStr, (ICharSequence**)&csq);
+        *result = csq.Get();
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     } else {
         AutoPtr<ArrayOf<Char32> > rArray = ArrayOf<Char32>::Alloc(endLength);
         for(Int32 i = 0; i < endLength; i++)
@@ -77,7 +81,11 @@ ECode CActivityOne::MyEvaluator::Evaluate(
             }
         }
         String rstStr(*rArray);
-        return CStringWrapper::New(rstStr, (ICharSequence**)result);
+        AutoPtr<ICharSequence> csq;
+        CStringWrapper::New(rstStr, (ICharSequence**)&csq);
+        *result = csq.Get();
+        REFCOUNT_ADD(*result)
+        return NOERROR;
     }
 }
 

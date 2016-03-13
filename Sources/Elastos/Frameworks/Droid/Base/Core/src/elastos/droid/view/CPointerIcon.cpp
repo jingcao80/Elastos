@@ -6,11 +6,13 @@
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/internal/utility/XmlUtils.h"
 #include "elastos/droid/R.h"
+#include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/view/CPointerIcon.h"
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Content::Res::IXmlResourceParser;
+using Elastos::Droid::Graphics::CBitmap;
 using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
 using Elastos::Droid::Graphics::Drawable::IDrawable;
 using Elastos::Droid::Internal::Utility::XmlUtils;
@@ -22,12 +24,19 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-const char* CPointerIcon::TAG = "PointerIcon";
-const Int32 CPointerIcon::STYLE_OEM_FIRST;
-const Int32 CPointerIcon::STYLE_DEFAULT;
-AutoPtr<IPointerIcon> CPointerIcon::gNullIcon = CPointerIcon::CreateNullIcon();
+static AutoPtr<IPointerIcon> InitNullIcon()
+{
+    AutoPtr<IPointerIcon> icon;
+    CPointerIcon::New(CPointerIcon::STYLE_NULL, (IPointerIcon**)&icon);
+    return icon;
+}
 
-CAR_INTERFACE_IMPL(CPointerIcon, Object, IPointerIcon)
+static const String TAG("PointerIcon");
+const Int32 CPointerIcon::STYLE_OEM_FIRST = 10000;
+const Int32 CPointerIcon::STYLE_DEFAULT = IPointerIcon::STYLE_ARROW;
+AutoPtr<IPointerIcon> CPointerIcon::gNullIcon = InitNullIcon();
+
+CAR_INTERFACE_IMPL_2(CPointerIcon, Object, IPointerIcon, IParcelable)
 
 CAR_OBJECT_IMPL(CPointerIcon)
 
@@ -64,8 +73,6 @@ ECode CPointerIcon::GetDefaultIcon(
     /* [in] */ IContext* context,
     /* [out] */ IPointerIcon** pointerIcon)
 {
-    VALIDATE_NOT_NULL(context);
-    VALIDATE_NOT_NULL(pointerIcon);
     return GetSystemIcon(context, STYLE_DEFAULT, pointerIcon);
 }
 
@@ -74,8 +81,9 @@ ECode CPointerIcon::GetSystemIcon(
     /* [in] */ Int32 style,
     /* [out] */ IPointerIcon** pointerIcon)
 {
-    VALIDATE_NOT_NULL(context);
     VALIDATE_NOT_NULL(pointerIcon);
+    *pointerIcon = NULL;
+    VALIDATE_NOT_NULL(context);
 
     if (context == NULL) {
         Logger::E(TAG, "context must not be NULL");
@@ -126,7 +134,7 @@ ECode CPointerIcon::GetSystemIcon(
         FAIL_RETURN(icon->LoadResource(context, r, resourceId));
     }
 
-    *pointerIcon = icon.Get();
+    *pointerIcon = (IPointerIcon*)icon.Get();
     REFCOUNT_ADD(*pointerIcon);
     return NOERROR;
 }
@@ -137,8 +145,9 @@ ECode CPointerIcon::CreateCustomIcon(
     /* [in] */ Float hotSpotY,
     /* [out] */ IPointerIcon** pointerIcon)
 {
-    VALIDATE_NOT_NULL(bitmap);
     VALIDATE_NOT_NULL(pointerIcon);
+    *pointerIcon = NULL;
+    VALIDATE_NOT_NULL(bitmap);
 
     if (bitmap == NULL) {
         Logger::E(TAG, "Bitmap must not be NULL");
@@ -151,7 +160,7 @@ ECode CPointerIcon::CreateCustomIcon(
     icon->mBitmap = bitmap;
     icon->mHotSpotX = hotSpotX;
     icon->mHotSpotY = hotSpotY;
-    *pointerIcon = icon.Get();
+    *pointerIcon = (IPointerIcon*)icon.Get();
     REFCOUNT_ADD(*pointerIcon);
     return NOERROR;
 }
@@ -161,17 +170,19 @@ ECode CPointerIcon::LoadCustomIcon(
     /* [in] */ Int32 resourceId,
     /* [out] */ IPointerIcon** pointerIcon)
 {
-    VALIDATE_NOT_NULL(resources);
     VALIDATE_NOT_NULL(pointerIcon);
+    *pointerIcon = NULL;
+    VALIDATE_NOT_NULL(resources);
+
     if (resources == NULL) {
         Logger::E(TAG, "resources must not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     AutoPtr<CPointerIcon> icon;
-    CPointerIcon::New(STYLE_CUSTOM, (IPointerIcon**)&icon);
+    CPointerIcon::NewByFriend(STYLE_CUSTOM, (CPointerIcon**)&icon);
     FAIL_RETURN(icon->LoadResource(NULL, resources, resourceId));
-    *pointerIcon = icon.Get();
+    *pointerIcon = (IPointerIcon*)icon.Get();
     REFCOUNT_ADD(*pointerIcon);
     return NOERROR;
 }
@@ -180,9 +191,9 @@ ECode CPointerIcon::Load(
     /* [in] */ IContext* context,
     /* [out] */ IPointerIcon** result)
 {
-    VALIDATE_NOT_NULL(context);
     VALIDATE_NOT_NULL(result);
     *result = NULL;
+    VALIDATE_NOT_NULL(context);
 
     if (context == NULL) {
         Logger::E(TAG, "context must not be NULL");
@@ -201,7 +212,7 @@ ECode CPointerIcon::Load(
     AutoPtr<IResources> r;
     context->GetResources((IResources**)&r);
     icon->LoadResource(context, r, mSystemIconResourceId);
-    *result = icon.Get();
+    *result = (IPointerIcon*)icon.Get();
     REFCOUNT_ADD(*result);
     return NOERROR;
 }
@@ -234,6 +245,7 @@ ECode CPointerIcon::GetBitmap(
     /* [out] */ IBitmap** bitmap)
 {
     VALIDATE_NOT_NULL(bitmap);
+    *bitmap = NULL;
     FAIL_RETURN(ThrowIfIconIsNotLoaded());
     *bitmap = mBitmap;
     REFCOUNT_ADD(*bitmap);
@@ -244,6 +256,7 @@ ECode CPointerIcon::GetHotSpotX(
     /* [out] */ Float* hotSpotX)
 {
     VALIDATE_NOT_NULL(hotSpotX);
+    *hotSpotX = 0;
     FAIL_RETURN(ThrowIfIconIsNotLoaded());
     *hotSpotX = mHotSpotX;
     return NOERROR;
@@ -253,22 +266,14 @@ ECode CPointerIcon::GetHotSpotY(
     /* [out] */ Float* hotSpotY)
 {
     VALIDATE_NOT_NULL(hotSpotY);
+    *hotSpotY = 0;
     FAIL_RETURN(ThrowIfIconIsNotLoaded());
     *hotSpotY = mHotSpotY;
     return NOERROR;
 }
 
-ECode CPointerIcon::DescribeContents(
-    /* [out] */ Int32* result)
-{
-    VALIDATE_NOT_NULL(result);
-    *result = 0;
-    return 0;
-}
-
 ECode CPointerIcon::WriteToParcel(
-    /* [in] */ IParcel* parcel,
-    /* [in] */ Int32 flags)
+    /* [in] */ IParcel* parcel)
 {
     VALIDATE_NOT_NULL(parcel);
     parcel->WriteInt32(mStyle);
@@ -276,8 +281,7 @@ ECode CPointerIcon::WriteToParcel(
     if (mStyle != STYLE_NULL) {
         parcel->WriteInt32(mSystemIconResourceId);
         if (mSystemIconResourceId == 0) {
-            assert(0);
-            //--IParcelable::Probe(mBitmap)->WriteToParcel(parcel, flags);
+            IParcelable::Probe(mBitmap)->WriteToParcel(parcel);
             parcel->WriteFloat(mHotSpotX);
             parcel->WriteFloat(mHotSpotY);
         }
@@ -294,6 +298,7 @@ ECode CPointerIcon::ReadFromParcel(
     if (mStyle != STYLE_NULL) {
         source->ReadInt32(&mSystemIconResourceId);
         if (mSystemIconResourceId == 0) {
+            CBitmap::New((IBitmap**)&mBitmap);
             IParcelable::Probe(mBitmap)->ReadFromParcel(source);
             source->ReadFloat(&mHotSpotX);
             source->ReadFloat(&mHotSpotY);
@@ -416,16 +421,8 @@ Int32 CPointerIcon::GetSystemIconStyleIndex(
     }
 }
 
-AutoPtr<IPointerIcon> CPointerIcon::CreateNullIcon()
-{
-    AutoPtr<CPointerIcon> icon;
-    CPointerIcon::NewByFriend(CPointerIcon::STYLE_NULL, (CPointerIcon**)&icon);
-    return icon;
-}
-
 ECode CPointerIcon::ThrowIfIconIsNotLoaded()
 {
-    assert(0);
     Boolean isLoaded = FALSE;
     IsLoaded(&isLoaded);
     if (!isLoaded) {

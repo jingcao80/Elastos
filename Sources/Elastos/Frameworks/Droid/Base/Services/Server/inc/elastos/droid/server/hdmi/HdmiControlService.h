@@ -4,14 +4,19 @@
 
 #include "_Elastos.Droid.Server.h"
 #include "elastos/droid/server/SystemService.h"
+#include "elastos/droid/server/hdmi/HdmiCecController.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDevicePlayback.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDeviceTv.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageValidator.h"
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include <Elastos.Droid.Hardware.h>
+#include <Elastos.Droid.Os.h>
 #include <elastos/core/Object.h>
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/database/ContentObserver.h>
 #include <elastos/droid/ext/frameworkext.h>
-#include <Elastos.Droid.Hardware.h>
-#include <Elastos.Droid.Os.h>
-#include "elastos/droid/server/hdmi/HdmiCecController.h"
-#include "elastos/droid/server/hdmi/HdmiCecMessageValidator.h"
+#include <elastos/droid/os/Handler.h>
+#include <elastos/droid/os/Looper.h>
 
 using Elastos::Core::IRunnable;
 using Elastos::Droid::Content::BroadcastReceiver;
@@ -20,22 +25,25 @@ using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Hardware::Hdmi::IHdmiHotplugEvent;
+using Elastos::Droid::Hardware::Hdmi::IHdmiPortInfo;
+using Elastos::Droid::Hardware::Hdmi::IIHdmiControlCallback;
 using Elastos::Droid::Hardware::Hdmi::IIHdmiControlService;
 using Elastos::Droid::Hardware::Hdmi::IIHdmiDeviceEventListener;
 using Elastos::Droid::Hardware::Hdmi::IIHdmiHotplugEventListener;
-using Elastos::Droid::Hardware::Hdmi::IIHdmiSystemAudioModeChangeListener;
-using Elastos::Droid::Hardware::Hdmi::IIHdmiVendorCommandListener;
+using Elastos::Droid::Hardware::Hdmi::IIHdmiInputChangeListener;
 using Elastos::Droid::Hardware::Hdmi::IIHdmiMhlVendorCommandListener;
 using Elastos::Droid::Hardware::Hdmi::IIHdmiRecordListener;
-using Elastos::Droid::Hardware::Hdmi::IIHdmiControlCallback;
-using Elastos::Droid::Hardware::Hdmi::IIHdmiInputChangeListener;
-using Elastos::Droid::Hardware::Hdmi::IHdmiPortInfo;
+using Elastos::Droid::Hardware::Hdmi::IIHdmiSystemAudioModeChangeListener;
+using Elastos::Droid::Hardware::Hdmi::IIHdmiVendorCommandListener;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IHandlerThread;
 using Elastos::Droid::Os::ILooper;
+using Elastos::Droid::Os::Looper;
+using Elastos::Droid::Server::Hdmi::IHdmiControlServiceSendMessageCallback;
 using Elastos::Droid::Server::SystemService;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
@@ -47,24 +55,32 @@ namespace Droid {
 namespace Server {
 namespace Hdmi {
 
+class UnmodifiableSparseInt32Array;
 class HdmiCecLocalDeviceTv;
 class HdmiCecLocalDevicePlayback;
+class UnmodifiableSparseArray;
+class HdmiMhlControllerStub;
+class HdmiCecController;
 /**
  * Provides a service for sending and processing HDMI control messages,
  * HDMI-CEC and MHL control command, and providing the information on both standard.
  */
 class HdmiControlService
     : public SystemService
+    , public IHdmiControlService
 {
 public:
     class VendorCommandListenerRecord
         : public Object
         , public IProxyDeathRecipient
     {
+        friend class HdmiControlService;
+
     public:
         CAR_INTERFACE_DECL()
 
         VendorCommandListenerRecord(
+            /* [in] */ HdmiControlService* host,
             /* [in] */ IIHdmiVendorCommandListener* listener,
             /* [in] */ Int32 deviceType);
 
@@ -72,6 +88,8 @@ public:
         CARAPI ProxyDied();
 
     private:
+        HdmiControlService* mHost;
+
         AutoPtr<IIHdmiVendorCommandListener> mListener;
 
         const Int32 mDeviceType;
@@ -84,6 +102,11 @@ public:
     {
     public:
         CAR_INTERFACE_DECL()
+
+        BinderService();
+
+        CARAPI constructor(
+            /* [in] */ IHdmiControlService* host);
 
         // @Override
         CARAPI GetSupportedTypes(
@@ -241,6 +264,9 @@ public:
 
         CARAPI ToString(
             /* [out] */ String* result);
+
+    private:
+        HdmiControlService* mHost;
     };
 
 private:
@@ -248,11 +274,17 @@ private:
         : public BroadcastReceiver
     {
     public:
+        HdmiControlBroadcastReceiver(
+            /* [in] */ HdmiControlService* host);
+
         // @ServiceThreadOnly
         // @Override
         CARAPI OnReceive(
             /* [in] */ IContext* context,
             /* [in] */ IIntent* intent);
+
+    private:
+        HdmiControlService* mHost;
     };
 
     class SettingsObserver
@@ -260,6 +292,7 @@ private:
     {
     public:
         SettingsObserver(
+            /* [in] */ HdmiControlService* host,
             /* [in] */ IHandler* handler);
 
         // onChange is set up to run in service thread.
@@ -267,22 +300,30 @@ private:
         CARAPI OnChange(
             /* [in] */ Boolean selfChange,
             /* [in] */ IUri* uri);
+
+    private:
+        HdmiControlService* mHost;
     };
 
     class HdmiMhlVendorCommandListenerRecord
         : public Object
         , public IProxyDeathRecipient
     {
+        friend class HdmiControlService;
+
     public:
         CAR_INTERFACE_DECL()
 
         HdmiMhlVendorCommandListenerRecord(
+            /* [in] */ HdmiControlService* host,
             /* [in] */ IIHdmiMhlVendorCommandListener* listener);
 
         // @Override
         CARAPI ProxyDied();
 
     private:
+        HdmiControlService* mHost;
+
         AutoPtr<IIHdmiMhlVendorCommandListener> mListener;
     };
 
@@ -292,16 +333,21 @@ private:
         : public Object
         , public IProxyDeathRecipient
     {
+        friend class HdmiControlService;
+
     public:
         CAR_INTERFACE_DECL()
 
         HotplugEventListenerRecord(
+            /* [in] */ HdmiControlService* host,
             /* [in] */ IIHdmiHotplugEventListener* listener);
 
         // @Override
         CARAPI ProxyDied();
 
     private:
+        HdmiControlService* mHost;
+
         AutoPtr<IIHdmiHotplugEventListener> mListener;
     };
 
@@ -309,16 +355,21 @@ private:
         : public Object
         , public IProxyDeathRecipient
     {
+        friend class HdmiControlService;
+
     public:
         CAR_INTERFACE_DECL()
 
         DeviceEventListenerRecord(
+            /* [in] */ HdmiControlService* host,
             /* [in] */ IIHdmiDeviceEventListener* listener);
 
         // @Override
         CARAPI ProxyDied();
 
     private:
+        HdmiControlService* mHost;
+
         AutoPtr<IIHdmiDeviceEventListener> mListener;
     };
 
@@ -326,16 +377,21 @@ private:
         : public Object
         , public IProxyDeathRecipient
     {
+        friend class HdmiControlService;
+
     public:
         CAR_INTERFACE_DECL()
 
         SystemAudioModeChangeListenerRecord(
+            /* [in] */ HdmiControlService* host,
             /* [in] */ IIHdmiSystemAudioModeChangeListener* listener);
 
         // @Override
         CARAPI ProxyDied();
 
     private:
+        HdmiControlService* mHost;
+
         AutoPtr<IIHdmiSystemAudioModeChangeListener> mListener;
     };
 
@@ -343,16 +399,21 @@ private:
         : public Object
         , public IProxyDeathRecipient
     {
+        friend class HdmiControlService;
+
     public:
         CAR_INTERFACE_DECL()
 
         HdmiRecordListenerRecord(
+            /* [in] */ HdmiControlService* host,
             /* [in] */ IIHdmiRecordListener* listener);
 
         // @Override
         CARAPI ProxyDied();
 
     private:
+        HdmiControlService* mHost;
+
         AutoPtr<IIHdmiRecordListener> mListener;
     };
 
@@ -360,21 +421,458 @@ private:
         : public Object
         , public IProxyDeathRecipient
     {
+        friend class HdmiControlService;
+
     public:
         CAR_INTERFACE_DECL()
 
-    public:
         InputChangeListenerRecord(
+            /* [in] */ HdmiControlService* host,
             /* [in] */ IIHdmiInputChangeListener* listener);
 
         // @Override
         CARAPI ProxyDied();
 
     private:
+        HdmiControlService* mHost;
         AutoPtr<IIHdmiInputChangeListener> mListener;
     };
 
+    class DeviceSelectRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        DeviceSelectRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 deviceId,
+            /* [in] */ IIHdmiControlCallback* callback);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mDeviceId;
+        AutoPtr<IIHdmiControlCallback> mCallback;
+    };
+
+    class PortSelectRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        PortSelectRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 portId,
+            /* [in] */ IIHdmiControlCallback* callback);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mPortId;
+        AutoPtr<IIHdmiControlCallback> mCallback;
+    };
+
+    class SendKeyEventRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SendKeyEventRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 deviceType,
+            /* [in] */ Int32 keyCode,
+            /* [in] */ Boolean isPressed);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mDeviceType;
+        Int32 mKeyCode;
+        Boolean mIsPressed;
+    };
+
+    class OneTouchPlayRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        OneTouchPlayRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ IIHdmiControlCallback* callback);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        AutoPtr<IIHdmiControlCallback> mCallback;
+    };
+
+    class QueryDisplayStatusRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        QueryDisplayStatusRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ IIHdmiControlCallback* callback);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        AutoPtr<IIHdmiControlCallback> mCallback;
+    };
+
+    class SetSystemAudioModeRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SetSystemAudioModeRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Boolean enabled,
+            /* [in] */ IIHdmiControlCallback* callback);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Boolean mEnabled;
+        AutoPtr<IIHdmiControlCallback> mCallback;
+    };
+
+    class SetSystemAudioVolumeRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SetSystemAudioVolumeRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 oldIndex,
+            /* [in] */ Int32 newIndex,
+            /* [in] */ Int32 maxIndex);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mOldIndex;
+        Int32 mNewIndex;
+        Int32 mMaxIndex;
+    };
+
+    class SetSystemAudioMuteRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SetSystemAudioMuteRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Boolean mute);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Boolean mMute;
+    };
+
+    class SetArcModeRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SetArcModeRunnable(
+            /* [in] */ HdmiControlService* host);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+    };
+
+    class SendVendorCommandRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SendVendorCommandRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 deviceType,
+            /* [in] */ Int32 targetAddress,
+            /* [in] */ ArrayOf<Byte>* params,
+            /* [in] */ Boolean hasVendorId);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mDeviceType;
+        Int32 mTargetAddress;
+        AutoPtr<ArrayOf<Byte> > mParams;
+        Boolean mHasVendorId;
+    };
+
+    class SendStandbyRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SendStandbyRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 deviceType,
+            /* [in] */ Int32 deviceId);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mDeviceType;
+        Int32 mDeviceId;
+    };
+
+    class StartOneTouchRecordRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        StartOneTouchRecordRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 recorderAddress,
+            /* [in] */ ArrayOf<Byte>* recordSource);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mRecorderAddress;
+        AutoPtr<ArrayOf<Byte> > mRecordSource;
+    };
+
+    class StopOneTouchRecordRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        StopOneTouchRecordRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 recorderAddress);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mRecorderAddress;
+    };
+
+    class StartTimerRecordingRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        StartTimerRecordingRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 recorderAddress,
+            /* [in] */ Int32 sourceType,
+            /* [in] */ ArrayOf<Byte>* recordSource);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mRecorderAddress;
+        Int32 mSourceType;
+        AutoPtr<ArrayOf<Byte> > mRecordSource;
+    };
+
+    class ClearTimerRecordingRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        ClearTimerRecordingRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 recorderAddress,
+            /* [in] */ Int32 sourceType,
+            /* [in] */ ArrayOf<Byte>* recordSource);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mRecorderAddress;
+        Int32 mSourceType;
+        AutoPtr<ArrayOf<Byte> > mRecordSource;
+    };
+
+    class SendMhlVendorCommandRunnable
+        : public Object
+        , public IRunnable
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SendMhlVendorCommandRunnable(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 portId,
+            /* [in] */ Int32 offset,
+            /* [in] */ Int32 length,
+            /* [in] */ ArrayOf<Byte>* data);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mPortId;
+        Int32 mOffset;
+        Int32 mLength;
+        AutoPtr<ArrayOf<Byte> > mData;
+    };
+
+    class InnerSub_AllocateAddressCallback
+        : public Object
+        , public IHdmiCecControllerAllocateAddressCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_AllocateAddressCallback(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ IHdmiCecLocalDevice* localDevice,
+            /* [in] */ IArrayList* allocatingDevices,
+            /* [in] */ IArrayList* allocatedDevices,
+            /* [in] */ ArrayOf<Int32>* finished,
+            /* [in] */ Int32 initiatedBy);
+
+        // @Override
+        CARAPI OnAllocated(
+            /* [in] */ Int32 deviceType,
+            /* [in] */ Int32 logicalAddress);
+
+    private:
+        HdmiControlService* mHost;
+        AutoPtr<IHdmiCecLocalDevice> mLocalDevice;
+        AutoPtr<IArrayList> mAllocatingDevices;
+        AutoPtr<IArrayList> mAllocatedDevices;
+        AutoPtr<ArrayOf<Int32> > mFinished;
+        Int32 mInitiatedBy;
+    };
+
+    class OnStandbyPendingActionClearedCallback
+        : public Object
+        , public IHdmiCecLocalDevicePendingActionClearedCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        OnStandbyPendingActionClearedCallback(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ IList* devices);
+
+        // @Override
+        CARAPI OnCleared(
+            /* [in] */ IHdmiCecLocalDevice* device);
+
+    private:
+        HdmiControlService* mHost;
+        AutoPtr<IList> mDevices;
+    };
+
+    class SetControlEnabledPendingActionClearedCallback
+        : public Object
+        , public IHdmiCecLocalDevicePendingActionClearedCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        SetControlEnabledPendingActionClearedCallback(
+            /* [in] */ HdmiControlService* host);
+
+        // @Override
+        CARAPI OnCleared(
+            /* [in] */ IHdmiCecLocalDevice* device);
+
+    private:
+        HdmiControlService* mHost;
+    };
+
+    class InnerSub_IHdmiControlCallbackStub
+        : public Object
+        , public IBinder
+        , public IIHdmiControlCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_IHdmiControlCallbackStub(
+            /* [in] */ HdmiControlService* host,
+            /* [in] */ Int32 lastInput);
+
+        // @Override
+        CARAPI OnComplete(
+            /* [in] */ Int32 result);
+
+        // for IBinder
+        CARAPI ToString(
+            /* [out] */ String* result);
+
+    private:
+        HdmiControlService* mHost;
+        Int32 mLastInput;
+    };
+
 public:
+    CAR_INTERFACE_DECL()
+
     HdmiControlService();
 
     CARAPI constructor(
@@ -546,7 +1044,7 @@ public:
         /* [out] */ IList** result);
 
     CARAPI GetServiceLock(
-        /* [out] */ IObject** result);
+        /* [out] */ IInterface** result);
 
     CARAPI SetAudioStatus(
         /* [in] */ Boolean mute,
@@ -585,7 +1083,7 @@ public:
 
     CARAPI InvokeRecordRequestListener(
         /* [in] */ Int32 recorderAddress,
-        /* [out, callee] */ ArrayOf<Byte>* result);
+        /* [out, callee] */ ArrayOf<Byte>** result);
 
     CARAPI InvokeOneTouchRecordResult(
         /* [in] */ Int32 result);
@@ -698,7 +1196,7 @@ public:
         /* [in] */ Int32 extra);
 
 private:
-    static CARAPI GetIntList(
+    static CARAPI GetInt32List(
         /* [in] */ const String& string,
         /* [out] */ IList** result);
 
@@ -709,7 +1207,7 @@ private:
 
     CARAPI RegisterContentObserver();
 
-    static CARAPI ToInt(
+    static CARAPI ToInt32(
         /* [in] */ Boolean enabled,
         /* [out] */ Int32* result);
 
@@ -807,7 +1305,7 @@ private:
         /* [in] */ IHdmiHotplugEvent* event);
 
     CARAPI Tv(
-        /* [out] */ HdmiCecLocalDeviceTv** result);
+        /* [out] */ IHdmiCecLocalDeviceTv** result);
 
     CARAPI Playback(
         /* [out] */ HdmiCecLocalDevicePlayback** result);
@@ -904,16 +1402,14 @@ private:
     // from being modified.
     AutoPtr<IList> mPortInfo;
 
-#if 0
     // Map from path(physical address) to port ID.
-    AutoPtr<UnmodifiableSparseIntArray> mPortIdMap;
+    AutoPtr<UnmodifiableSparseInt32Array> mPortIdMap;
 
     // Map from port ID to HdmiPortInfo.
     AutoPtr<UnmodifiableSparseArray> mPortInfoMap;
 
     // Map from port ID to HdmiDeviceInfo.
     AutoPtr<UnmodifiableSparseArray> mPortDeviceMap;
-#endif
 
     AutoPtr<HdmiCecMessageValidator> mMessageValidator;
 
@@ -943,10 +1439,8 @@ private:
     // @GuardedBy("mLock")
     AutoPtr<IList> mMhlDevices;
 
-#if 0
     // @Nullable
     AutoPtr<HdmiMhlControllerStub> mMhlController;
-#endif
 
     // Last input port before switching to the MHL port. Should switch back to this port
     // when the mobile device sends the request one touch play with off.

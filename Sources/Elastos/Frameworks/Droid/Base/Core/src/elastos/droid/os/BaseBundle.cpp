@@ -145,11 +145,9 @@ ECode BaseBundle::constructor(
         mParcelledData = NULL;
     }
 
+    mMap = NULL;
     if (b->mMap != NULL) {
         CArrayMap::New(b->mMap, (IArrayMap**)&mMap);
-    }
-    else {
-        mMap = NULL;
     }
 
     mClassLoader = b->mClassLoader;

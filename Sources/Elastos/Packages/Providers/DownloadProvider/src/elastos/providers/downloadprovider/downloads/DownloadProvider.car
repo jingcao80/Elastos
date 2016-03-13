@@ -1,0 +1,93 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IContentValues;
+    using interface Elastos.Droid.Database.ICursor;
+    using interface Elastos.Droid.Net.IUri;
+    using interface Elastos.Droid.Os.IParcelFileDescriptor;
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IPrintWriter;
+
+    namespace Elastos {
+    namespace Providers {
+    namespace DownloadProvider {
+    namespace Downloads {
+
+    /**
+     * Receives system broadcasts (boot, network connectivity)
+     */
+    [deprecated]
+    interface IDownloadProvider
+    {
+        /**
+         * Initializes the content provider when it is created.
+         */
+        OnCreate(
+            [out] Boolean* result);
+
+        /**
+         * Returns the content-provider-style MIME types of the various
+         * types accessible through this content provider.
+         */
+        GetType(
+            [in] IUri* uri,
+            [out] String* result);
+
+        /**
+         * Inserts a row in the database
+         */
+        Insert(
+            [in] IUri* uri,
+            [in] IContentValues* values,
+            [out] IUri** result);
+
+        /**
+         * Starts a database query
+         */
+        Query(
+            [in] IUri* uri,
+            [in] ArrayOf<String>* projection,
+            [in] String selection,
+            [in] ArrayOf<String>* selectionArgs,
+            [in] String sort,
+            [out] ICursor** result);
+
+        /**
+         * Updates a row in the database
+         */
+        Update(
+            [in] IUri* uri,
+            [in] IContentValues* values,
+            [in] String where,
+            [in] ArrayOf<String>* whereArgs,
+            [out] Int32* result);
+
+        /**
+         * Deletes a row in the database
+         */
+        Delete(
+            [in] IUri* uri,
+            [in] String where,
+            [in] ArrayOf<String>* whereArgs,
+            [out] Int32* result);
+
+        /**
+         * Remotely opens a file
+         */
+        OpenFile(
+            [in] IUri* uri,
+            [in] String mode,
+            [out] IParcelFileDescriptor** result);
+
+        Dump(
+            [in] IFileDescriptor* fd,
+            [in] IPrintWriter* writer,
+            [in] ArrayOf<String>* args);
+
+    }
+
+    } // namespace Downloads
+    } // namespace DownloadProvider
+    } // namespace Providers
+    } // namespace Elastos
+}

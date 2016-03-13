@@ -42,14 +42,14 @@ AnimationDrawable::AnimationState::~AnimationState()
 ECode AnimationDrawable::AnimationState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    return CAnimationDrawable::New(this, NULL, (IAnimationDrawable**)drawable);
+    return CAnimationDrawable::New(this, NULL, drawable);
 }
 
 ECode AnimationDrawable::AnimationState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    return CAnimationDrawable::New(this, res, (IAnimationDrawable**)drawable);
+    return CAnimationDrawable::New(this, res, drawable);
 }
 
 void AnimationDrawable::AnimationState::AddFrame(
@@ -322,18 +322,12 @@ ECode AnimationDrawable::Inflate(
     return SetFrame(0, TRUE, FALSE);
 }
 
-ECode AnimationDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode AnimationDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated && (DrawableContainer::Mutate((IDrawable**)&tmp), tmp.Get()) ==
-            (IDrawable*)this->Probe(EIID_IDrawable)) {
+    if (!mMutated) {
         mAnimationState->mDurations = mAnimationState->mDurations->Clone();
         mMutated = TRUE;
     }
-    *drawable = (IDrawable*)this->Probe(EIID_IDrawable);
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 

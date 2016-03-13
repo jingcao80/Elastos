@@ -46,7 +46,11 @@ ECode RectEvaluator::Evaluate(
     realEV->GetBottom(&v2);
     Int32 bottom = v1 + (Int32) ((v2 - v1) * fraction);
     if (mRect == NULL) {
-        return CRect::New(left, top, right, bottom, (IRect**)rect);
+        AutoPtr<IRect> r;
+        CRect::New(left, top, right, bottom, (IRect**)&r);
+        *rect = r;
+        REFCOUNT_ADD(*rect);
+        return NOERROR;
     }
 
     mRect->Set(left, top, right, bottom);

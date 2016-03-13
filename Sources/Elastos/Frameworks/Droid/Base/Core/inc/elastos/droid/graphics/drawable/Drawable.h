@@ -723,8 +723,7 @@ public:
      *
      * @return This drawable.
      */
-    virtual CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    virtual CARAPI Mutate();
 
     /**
      * Create a drawable from an inputstream

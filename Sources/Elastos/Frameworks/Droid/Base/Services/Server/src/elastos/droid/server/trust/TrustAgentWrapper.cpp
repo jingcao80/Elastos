@@ -149,14 +149,14 @@ ECode TrustAgentWrapper::InnerSub_Handler::HandleMessage(
             mHost->mSetTrustAgentFeaturesToken = NULL;
             if (mHost->mTrustDisabledByDpm && result) {
                 if (DEBUG) Logger::V(TAG, "Re-enabling agent because it acknowledged "
-                        "enabled features: %s", Object::ToString(mHost->mName).string());
+                        "enabled features: %s", TO_CSTR(mHost->mName));
                 mHost->mTrustDisabledByDpm = FALSE;
                 mHost->mTrustManagerService->UpdateTrust(mHost->mUserId, FALSE);
             }
         }
         else {
             if (DEBUG) Logger::W(TAG, "Ignoring MSG_SET_TRUST_AGENT_FEATURES_COMPLETED "
-                    "with obsolete token: %s", Object::ToString(mHost->mName).string());
+                    "with obsolete token: %s", TO_CSTR(mHost->mName));
         }
     }
     else if (what == TrustAgentWrapper::MSG_MANAGING_TRUST) {
@@ -187,7 +187,7 @@ ECode TrustAgentWrapper::InnerSub_ITrustAgentServiceCallback::GrantTrust(
     /* [in] */ Boolean initiatedByUser)
 {
     if (DEBUG) Slogger::V(TAG, "enableTrust(%s, durationMs = %ld, initiatedByUser = %s" ")",
-            Object::ToString(userMessage).string(), durationMs, initiatedByUser ? "TRUE" : "FALSE");
+            TO_CSTR(userMessage), durationMs, initiatedByUser ? "TRUE" : "FALSE");
     AutoPtr<IMessage> msg;
     mHost->mHandler->ObtainMessage(
             MSG_GRANT_TRUST, initiatedByUser ? 1 : 0, 0, userMessage, (IMessage**)&msg);
@@ -405,7 +405,7 @@ ECode TrustAgentWrapper::UpdateDevicePolicyFeatures(
     VALIDATE_NOT_NULL(result)
 
     Boolean trustDisabled = FALSE;
-    if (DEBUG) Slogger::V(TAG, "updateDevicePolicyFeatures(%s)", Object::ToString(mName).string());
+    if (DEBUG) Slogger::V(TAG, "updateDevicePolicyFeatures(%s)", TO_CSTR(mName));
     // try {
     ECode ec;
     do {
@@ -422,7 +422,7 @@ ECode TrustAgentWrapper::UpdateDevicePolicyFeatures(
                 ec = dpm->GetTrustAgentFeaturesEnabled(NULL, mName, (IList**)&features);
                 if (FAILED(ec)) break;
                 trustDisabled = TRUE;
-                if (DEBUG) Slogger::V(TAG, "Detected trust agents disabled. Features = %s", Object::ToString(features).string());
+                if (DEBUG) Slogger::V(TAG, "Detected trust agents disabled. Features = %s", TO_CSTR(features));
                 if (features != NULL && Ptr(features)->Func(IList::GetSize) > 0) {
                     AutoPtr<IBundle> bundle;
                     CBundle::New((IBundle**)&bundle);
@@ -431,7 +431,7 @@ ECode TrustAgentWrapper::UpdateDevicePolicyFeatures(
                     if (FAILED(ec)) break;
                     if (DEBUG) {
                         Slogger::V(TAG, "TrustAgent %s disabled until it acknowledges %s",
-                                Ptr(mName)->Func(mName->FlattenToShortString).string(), Object::ToString(features).string());
+                                Ptr(mName)->Func(mName->FlattenToShortString).string(), TO_CSTR(features));
                     }
                     CBinder::New((IBinder**)&mSetTrustAgentFeaturesToken);
                     ec = mTrustAgentService->SetTrustAgentFeaturesEnabled(bundle,

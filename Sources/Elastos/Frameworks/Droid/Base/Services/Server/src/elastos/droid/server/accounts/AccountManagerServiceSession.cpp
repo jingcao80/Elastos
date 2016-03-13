@@ -145,7 +145,7 @@ ECode AccountManagerServiceSession::OnServiceConnected(
     /* [in] */ IComponentName* name,
     /* [in] */ IBinder* service)
 {
-    mAuthenticator = IAccountAuthenticator::Probe(service);
+    mAuthenticator = IIAccountAuthenticator::Probe(service);
     // try {
     ECode ec = Run();
     if (FAILED(ec)) {

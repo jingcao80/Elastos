@@ -30,7 +30,7 @@ String BluetoothLeUtils::ToString(
         return String("{}");
     }
     AutoPtr<StringBuilder> buffer = new StringBuilder();
-    buffer->Append('{');
+    buffer->AppendChar('{');
     //Iterator<Map.Entry<T, byte[]>> it = map.entrySet().iterator();
     AutoPtr<ISet> entrySet;
     map->GetEntrySet((ISet**)&entrySet);
@@ -53,7 +53,7 @@ String BluetoothLeUtils::ToString(
             buffer->Append(", ");
         }
     }
-    buffer->Append('}');
+    buffer->AppendChar('}');
     return buffer->ToString();
 }
 
@@ -104,12 +104,12 @@ String BluetoothLeUtils::ToString(
         return String("{}");
     }
     AutoPtr<StringBuilder> buffer = new StringBuilder();
-    buffer->Append('{');
+    buffer->AppendChar('{');
     for (Int32 i = 0; i < size; ++i) {
         //buffer.append(array.keyAt(i)).append("=").append(Arrays.toString(array.valueAt(i)));
         buffer->Append("key=value");//TODO update according the above line
     }
-    buffer->Append('}');
+    buffer->AppendChar('}');
     return buffer->ToString();
 }
 

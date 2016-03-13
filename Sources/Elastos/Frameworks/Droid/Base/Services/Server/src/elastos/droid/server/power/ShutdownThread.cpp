@@ -470,8 +470,9 @@ void ShutdownThread::BeginShutdownSequence(
     IDialog::Probe(pd)->Show();
 
     sInstance->mContext = context;
-    context->GetSystemService(IContext::POWER_SERVICE,
-            (IInterface**)&sInstance->mPowerManager);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    sInstance->mPowerManager = IPowerManager::Probe(obj);
 
     // make sure we never fall asleep again
     sInstance->mCpuWakeLock = NULL;

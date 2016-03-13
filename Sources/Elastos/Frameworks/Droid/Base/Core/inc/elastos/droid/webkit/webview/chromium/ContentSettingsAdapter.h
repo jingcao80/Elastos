@@ -3,10 +3,10 @@
 #define _ELASTOS_DROID_WEBKIT_WEBVIEW_CHROMIUM_CONTENTSETTINGSADAPTER_H_
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/webkit/native/android_webview/AwSettings.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/AwSettings.h"
 #include "elastos/droid/webkit/WebSettings.h"
 
-using Elastos::Droid::Webkit::AndroidWebview::AwSettings;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::AwSettings;
 using Elastos::Droid::Webkit::LayoutAlgorithm;
 using Elastos::Droid::Webkit::PluginState;
 using Elastos::Droid::Webkit::RenderPriority;

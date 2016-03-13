@@ -1,7 +1,8 @@
 
 #include "elastos/droid/systemui/recents/views/TaskStackViewFilterAlgorithm.h"
 #include "elastos/droid/systemui/recents/views/TaskStackView.h"
-#include <Elastos/core/Math.h>
+#include "elastos/droid/systemui/recents/Constants.h"
+#include <elastos/core/Math.h>
 
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::CHashMap;
@@ -19,7 +20,7 @@ TaskStackViewFilterAlgorithm::EndActionRunnable::EndActionRunnable(
     /* [in] */ IArrayList* childrenToRemove,
     /* [in] */ Boolean unifyNewViewAnimation,
     /* [in] */ IArrayList* tasks, // item is Task
-    /* [in] */ IArrayList* taskTransforms) // item is TaskViewTrancsform
+    /* [in] */ IArrayList* taskTransforms, // item is TaskViewTrancsform
     /* [in] */ TaskStackViewFilterAlgorithm* host)
     : mChildViewTransforms(childViewTransforms)
     , mTv(tv)
@@ -58,8 +59,8 @@ ECode TaskStackViewFilterAlgorithm::EndActionRunnable::Run()
             for (Int32 i = 0; i < array->GetLength(); i++) {
                 AutoPtr<TaskView> tv = (TaskView*)ITaskView::Probe((*array)[i]);
                 AutoPtr<IInterface> value;
-                childViewTransforms->Get((*array)[i], (IInterface**)&value);
-                TaskViewTransform* t = (TaskViewTransform*)ITaskViewTransform::Probe(value);
+                mChildViewTransforms->Get((*array)[i], (IInterface**)&value);
+                TaskViewTransform* t = (TaskViewTransform*)IObject::Probe(value);
                 tv->UpdateViewPropertiesToTaskTransform(t, duration);
             }
         }
@@ -113,7 +114,7 @@ void TaskStackViewFilterAlgorithm::StartFilteringAnimation(
         AutoPtr<TaskView> tv = (TaskView*)ITaskView::Probe((*array)[i]);
         AutoPtr<IInterface> value;
         childViewTransforms->Get((*array)[i], (IInterface**)&value);
-        TaskViewTransform* t = (TaskViewTransform*)ITaskViewTransform::Probe(value);
+        TaskViewTransform* t = (TaskViewTransform*)IObject::Probe(value);
         AutoPtr<IViewPropertyAnimator> animate;
         tv->Animate((IViewPropertyAnimator**)&animate);
         animate->Cancel();
@@ -142,7 +143,7 @@ Int32 TaskStackViewFilterAlgorithm::GetEnterTransformsForFilterAnimation(
         tasks->Get(i, (IInterface**)&item);
         taskTransforms->Get(i, (IInterface**)&item2);
         Task* task = (Task*)ITask::Probe(item);
-        TaskViewTransform* toTransform = (TaskViewTransform*)ITaskViewTransform::Probe(item2));
+        TaskViewTransform* toTransform = (TaskViewTransform*)IObject::Probe(item2);
         if (toTransform->mVisible) {
             AutoPtr<TaskView> tv = mStackView->GetChildViewForTask(task);
             if (tv == NULL) {
@@ -155,7 +156,7 @@ Int32 TaskStackViewFilterAlgorithm::GetEnterTransformsForFilterAnimation(
                 tv->UpdateViewPropertiesToTaskTransform(fromTransform, 0);
 
                 toTransform->mStartDelay = offset * Constants::Values::TaskStackView::FilterStartDelay;
-                childViewTransformsOut->Put((ITaskView*)tv, (ITaskViewTransform*)toTransform);
+                childViewTransformsOut->Put((ITaskView*)tv, (IObject*)toTransform);
 
                 // Use the movement of the new views to calculate the duration of the animation
                 movement = Elastos::Core::Math::Max(movement,
@@ -201,16 +202,16 @@ Int32 TaskStackViewFilterAlgorithm::GetExitTransformsForFilterAnimation(
         if (taskIndex >= 0) {
             AutoPtr<IInterface> item;
             taskTransforms->Get(taskIndex, (IInterface**)&item);
-            transform = (TaskViewTransform*)ITaskViewTransform::Probe(item);
+            transform = (TaskViewTransform*)IObject::Probe(item);
             willBeInvisible = !transform->mVisible;
         }
         if (willBeInvisible) {
             if (taskIndex < 0) {
                 Int32 index;
-                curTasks->IndexOf(task, &index);
+                curTasks->IndexOf((ITask*)task, &index);
                 AutoPtr<IInterface> item;
                 curTaskTransforms->Get(index, (IInterface**)&item);
-                toTransform = (TaskViewTransform*)ITaskViewTransform::Probe(item);
+                toTransform = (TaskViewTransform*)IObject::Probe(item);
             }
             else {
                 toTransform = new TaskViewTransform(transform);
@@ -228,7 +229,7 @@ Int32 TaskStackViewFilterAlgorithm::GetExitTransformsForFilterAnimation(
         }
 
         toTransform->mStartDelay = offset * Constants::Values::TaskStackView::FilterStartDelay;
-        childViewTransformsOut->Put((ITaskView*)tv, (ITaskViewTransform*)toTransform);
+        childViewTransformsOut->Put((ITaskView*)tv, (IObject*)toTransform);
         offset++;
     }
     return mConfig->mFilteringCurrentViewsAnimDuration;

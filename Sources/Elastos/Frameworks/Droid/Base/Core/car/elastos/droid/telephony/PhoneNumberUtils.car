@@ -11,23 +11,54 @@ module
     namespace Droid {
     namespace Telephony {
 
+    [local, deprecated]
     interface IPhoneNumberUtils {
 
+        /*
+         * Special characters
+         *
+         * (See "What is a phone number?" doc)
+         * 'p' --- GSM pause character, same as comma
+         * 'n' --- GSM wild character
+         * 'w' --- GSM wait character
+         */
         const Char32 PAUSE = ',';
         const Char32 WAIT = ';';
         const Char32 WILD = 'N';
+
+        /*
+         * TOA = TON + NPI
+         * See TS 24.008 section 10.5.4.7 for details.
+         * These are the only really useful TOA values
+         */
         const Int32 TOA_International = 0x91;
         const Int32 TOA_Unknown = 0x81;
+
         const Int32 FORMAT_UNKNOWN = 0;
         const Int32 FORMAT_NANP = 1;
         const Int32 FORMAT_JAPAN = 2;
 
-    }
-
-    [local, deprecated]
-    interface IPhoneNumberUtilsHelper {
-
         IsISODigit (
+            [in] Char32 c,
+            [out] Boolean* res);
+
+        Is12Key(
+            [in] Char32 c,
+            [out] Boolean* res);
+
+        IsDialable(
+            [in] Char32 c,
+            [out] Boolean* res);
+
+        IsReallyDialable(
+            [in] Char32 c,
+            [out] Boolean* res);
+
+        IsNonSeparator(
+            [in] Char32 c,
+            [out] Boolean* res);
+
+        IsStartsPostDial(
             [in] Char32 c,
             [out] Boolean* res);
 
@@ -157,13 +188,16 @@ module
 
         FormatNumber(
             [in] IEditable* text,
-            [in] Int32 defaultFormattingType);
+            [in] Int32 defaultFormattingType,
+            [out] IEditable** result);
 
         FormatNanpNumber(
-            [in] IEditable* text);
+            [in] IEditable* text,
+            [out] IEditable** result);
 
         FormatJapaneseNumber(
-            [in] IEditable* text);
+            [in] IEditable* text,
+            [out] IEditable** result);
 
         FormatNumberToE164(
             [in] String phoneNumber,
@@ -193,7 +227,17 @@ module
             [in] String number,
             [out] Boolean* res);
 
+        IsEmergencyNumber(
+            [in] Int64 subId,
+            [in] String number,
+            [out] Boolean* res);
+
         IsPotentialEmergencyNumber(
+            [in] String number,
+            [out] Boolean* res);
+
+        IsPotentialEmergencyNumber(
+            [in] Int64 subId,
             [in] String number,
             [out] Boolean* res);
 
@@ -202,22 +246,51 @@ module
             [in] String defaultCountryIso,
             [out] Boolean* res);
 
+        IsEmergencyNumber(
+            [in] Int64 subId,
+            [in] String number,
+            [in] String defaultCountryIso,
+            [out] Boolean* res);
+
         IsPotentialEmergencyNumber(
             [in] String number,
             [in] String defaultCountryIso,
             [out] Boolean* res);
 
-        IsLocalEmergencyNumber(
+        IsPotentialEmergencyNumber(
+            [in] Int64 subId,
             [in] String number,
+            [in] String defaultCountryIso,
+            [out] Boolean* res);
+
+        IsLocalEmergencyNumber(
             [in] IContext* ctx,
+            [in] String number,
+            [out] Boolean* res);
+
+        IsLocalEmergencyNumber(
+            [in] IContext* ctx,
+            [in] Int64 subId,
+            [in] String number,
             [out] Boolean* res);
 
         IsPotentialLocalEmergencyNumber(
-            [in] String number,
             [in] IContext* ctx,
+            [in] String number,
+            [out] Boolean* res);
+
+        IsPotentialLocalEmergencyNumber(
+            [in] IContext* ctx,
+            [in] Int64 subId,
+            [in] String number,
             [out] Boolean* res);
 
         IsVoiceMailNumber(
+            [in] String number,
+            [out] Boolean* res);
+
+        IsVoiceMailNumber(
+            [in] Int64 subId,
             [in] String number,
             [out] Boolean* res);
 
@@ -229,11 +302,19 @@ module
             [in] String dialStr,
             [out] String* res);
 
+        CdmaCheckAndProcessPlusCodeForSms(
+            [in] String dialStr,
+            [out] String* res);
+
         CdmaCheckAndProcessPlusCodeByNumberFormat(
             [in] String dialStr,
             [in] Int32 currFormat,
             [in] Int32 defaultFormat,
             [out] String* res);
+
+        IsNanp(
+            [in] String dialStr,
+            [out] Boolean* res);
 
         IsUriNumber(
             [in] String number,
@@ -242,7 +323,6 @@ module
         GetUsernameFromUriNumber(
             [in] String number,
             [out] String* res);
-
     }
 
     } // namespace Telephony

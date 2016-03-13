@@ -22,6 +22,7 @@ module
             [in] Int32 error);
     }
 
+    [deprecated]
     interface IAudioSystem {
         /* The default audio stream */
         const Int32 STREAM_DEFAULT = -1;
@@ -362,10 +363,6 @@ module
         // must be kept in sync with value in include/system/audio.h
         const Int32 AUDIO_HW_SYNC_INVALID = 0;
 
-    }
-
-    [deprecated]
-    interface IAudioSystemHelper {
         GetNumStreamTypes(
             [out] Int32* result);
 

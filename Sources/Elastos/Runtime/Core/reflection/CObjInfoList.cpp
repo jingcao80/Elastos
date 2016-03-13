@@ -295,6 +295,7 @@ ECode CObjInfoList::AcquireModuleInfo(
 
     AutoPtr<CModuleInfo> modInfoObj;
     CClsModule* clsModule = NULL;
+    IModuleInfo* iModInfo = NULL;
 
     LockHashTable(EntryType_ClsModule);
 
@@ -348,13 +349,14 @@ ECode CObjInfoList::AcquireModuleInfo(
         goto Exit;
     }
 
+    iModInfo = (IModuleInfo*)modInfoObj.Get();
     if (!g_objInfoList.mModInfos.Put(const_cast<char*>(name.string()),
-            (IModuleInfo**)&modInfoObj)) {
+            (IModuleInfo**)&iModInfo)) {
         ec = E_OUT_OF_MEMORY;
         goto Exit;
     }
 
-    *moduleInfo = (IModuleInfo *)modInfoObj;
+    *moduleInfo = iModInfo;
     (*moduleInfo)->AddRef();
 
     ec = NOERROR;

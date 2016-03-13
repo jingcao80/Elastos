@@ -71,16 +71,14 @@ AnimatedRotateDrawable::AnimatedRotateState::AnimatedRotateState(
 ECode AnimatedRotateDrawable::AnimatedRotateState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    return CAnimatedRotateDrawable::New(
-        this, NULL, (IAnimatedRotateDrawable**)drawable);
+    return CAnimatedRotateDrawable::New(this, NULL, drawable);
 }
 
 ECode AnimatedRotateDrawable::AnimatedRotateState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    return CAnimatedRotateDrawable::New(
-        this, res, (IAnimatedRotateDrawable**)drawable);
+    return CAnimatedRotateDrawable::New(this, res, drawable);
 }
 
 ECode AnimatedRotateDrawable::AnimatedRotateState::GetChangingConfigurations(
@@ -478,19 +476,13 @@ CARAPI AnimatedRotateDrawable::SetFramesDuration(
     return NOERROR;
 }
 
-ECode AnimatedRotateDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode AnimatedRotateDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated && (Drawable::Mutate((IDrawable**)&tmp), tmp.Get())
-        == (IDrawable*)this->Probe(EIID_IDrawable)) {
-        AutoPtr<IDrawable> temp;
-        mState->mDrawable->Mutate((IDrawable**)&temp);
+    if (!mMutated) {
+        mState->mDrawable->Mutate();
         mMutated = TRUE;
     }
-    *drawable = (IDrawable*)this->Probe(EIID_IDrawable);
-    REFCOUNT_ADD(*drawable);
+
     return NOERROR;
 }
 

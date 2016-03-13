@@ -428,8 +428,7 @@ SharedPreferencesImpl::WriteToDiskRunnable::WriteToDiskRunnable(
 ECode SharedPreferencesImpl::WriteToDiskRunnable::Run()
 {
     {
-        Object& obj = mHost->mWritingToDiskLock;
-        AutoLock lock(obj);
+        AutoLock lock(mHost->mWritingToDiskLock);
         mHost->WriteToFile(mMcr);
     }
     {
@@ -472,7 +471,7 @@ ECode SharedPreferencesImpl::constructor(
     /* [in] */ IFile* file,
     /* [in] */ Int32 mode)
 {
-    Elastos::Core::CObject::New((IObject**)&mWritingToDiskLock);
+    Logger::I(TAG, " >> SharedPreferencesImpl::constructor MakeBackupFile");
     CWeakHashMap::New((IWeakHashMap**)&mListeners);
     mBackupFile = MakeBackupFile(file);
 

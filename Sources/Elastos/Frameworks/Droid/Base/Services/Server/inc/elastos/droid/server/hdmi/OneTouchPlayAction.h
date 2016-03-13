@@ -6,6 +6,7 @@
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
 #include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
+#include <Elastos.Droid.Hardware.h>
 
 using Elastos::Droid::Hardware::Hdmi::IIHdmiControlCallback;
 
@@ -24,8 +25,13 @@ class HdmiCecLocalDevicePlayback;
  */
 class OneTouchPlayAction
     : public HdmiCecFeatureAction
+    , public IOneTouchPlayAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    OneTouchPlayAction();
+
     // Factory method. Ensures arguments are valid.
     static CARAPI Create(
         /* [in] */ HdmiCecLocalDevicePlayback* source,

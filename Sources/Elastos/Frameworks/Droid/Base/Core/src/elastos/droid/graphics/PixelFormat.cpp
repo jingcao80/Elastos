@@ -70,6 +70,14 @@ ECode PixelFormat::GetPixelFormatInfo(
     return NOERROR;
 }
 
+ECode PixelFormat::GetBitsPerPixel(
+    /* [out] */ Int32* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mBitsPerPixel;
+    return NOERROR;
+}
+
 Boolean PixelFormat::IsPublicFormat(
     /* [in] */ Int32 format)
 {

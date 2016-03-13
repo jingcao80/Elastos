@@ -46,7 +46,7 @@ public:
         /* [in] */ CActivityManagerService* service,
         /* [in] */ IContext* context,
         /* [in] */ Int32 userId,
-        /* [in] */ String userName,
+        /* [in] */ const String& userName,
         /* [in] */ Boolean aboveSystem);
 
     // @Override

@@ -39,7 +39,7 @@ using Elastos::Droid::Telephony::ICellLocationHelper;
 // using Elastos::Droid::Telephony::CCellLocationHelper;
 using Elastos::Droid::Telephony::ITelephonyManagerHelper;
 // using Elastos::Droid::Telephony::CTelephonyManagerHelper;
-using Elastos::Droid::Telephony::ISubscriptionManagerHelper;
+using Elastos::Droid::Telephony::ISubscriptionManager;
 // using Elastos::Droid::Telephony::CSubscriptionManagerHelper;
 using Elastos::Droid::Internal::Telephony::EIID_IITelephonyRegistry;
 // using Elastos::Droid::Opt::Internal::Telephony::IDefaultPhoneNotifierHelper;
@@ -87,7 +87,7 @@ ECode LogSSC::Set(
     /* [in] */ const String& s,
     /* [in] */ Int64 subId,
     /* [in] */ Int32 phoneId,
-    /* [in] */ IServiceState* state)
+    /* [in] */ Elastos::Droid::Telephony::IServiceState* state)
 {
     mTime = t; mS = s; mSubId = subId; mPhoneId = phoneId; mState = state;
     return NOERROR;
@@ -163,7 +163,8 @@ ECode CTelephonyRegistry::MyHandler::HandleMessage(
             if (CTelephonyRegistry::VDBG)
                 Slogger::D("CTelephonyRegistry", "MSG_USER_SWITCHED userId=%d", arg1);
             AutoPtr<ITelephonyManagerHelper> helper;
-            //CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
+            assert(0 && "TODO");
+            // CTelephonyManagerHelper::AcquireSingleton((ITelephonyManagerHelper**)&helper);
             AutoPtr<ITelephonyManager> tm;
             helper->GetDefault((ITelephonyManager**)&tm);
             Int32 numPhones;
@@ -271,7 +272,7 @@ ECode CTelephonyRegistry::constructor(
     mDataConnectionState = ArrayOf<Int32>::Alloc(numPhones);
     mDataConnectionNetworkType = ArrayOf<Int32>::Alloc(numPhones);
     mCallIncomingNumber = ArrayOf<String>::Alloc(numPhones);
-    mServiceState = ArrayOf<IServiceState*>::Alloc(numPhones);
+    mServiceState = ArrayOf<Elastos::Droid::Telephony::IServiceState*>::Alloc(numPhones);
     mSignalStrength = ArrayOf<ISignalStrength*>::Alloc(numPhones);
     mMessageWaiting = ArrayOf<Boolean>::Alloc(numPhones);
     mDataConnectionPossible = ArrayOf<Boolean>::Alloc(numPhones);
@@ -288,7 +289,7 @@ ECode CTelephonyRegistry::constructor(
         (*mDataActivity)[i] = ITelephonyManager::DATA_ACTIVITY_NONE;
         (*mDataConnectionState)[i] = ITelephonyManager::DATA_UNKNOWN;
         (*mCallIncomingNumber)[i] = "";
-        // CServiceState::New((IServiceState**)&(*mServiceState)[i]);
+        // CServiceState::New((Elastos::Droid::Telephony::IServiceState**)&(*mServiceState)[i]);
         // CSignalStrength::New((ISignalStrength**)&(*mSignalStrength)[i]);
         (*mDataConnectionReason)[i] =  emptStr;
         (*mDataConnectionApn)[i] =  emptStr;
@@ -364,7 +365,7 @@ ECode CTelephonyRegistry::Listen(
         synchronized(mRecordsLock) {
             // register
             AutoPtr<Record> r;
-            AutoPtr<ISubscriptionManagerHelper> smHelper;
+            AutoPtr<ISubscriptionManager> smHelper;
             //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
             Boolean found = FALSE, bval;
             AutoPtr<IBinder> b = IBinder::Probe(callback);
@@ -410,8 +411,8 @@ ECode CTelephonyRegistry::Listen(
                 if ((events & IPhoneStateListener::LISTEN_SERVICE_STATE) != 0) {
                     if (VDBG) Slogger::D(TAG, "listen: call onSSC state=%s",
                         TO_CSTR((*mServiceState)[phoneId]));
-                    AutoPtr<IServiceState> ss;
-                    // CServiceState::New((*mServiceState)[phoneId]), (IServiceState**)&ss)
+                    AutoPtr<Elastos::Droid::Telephony::IServiceState> ss;
+                    // CServiceState::New((*mServiceState)[phoneId]), (Elastos::Droid::Telephony::IServiceState**)&ss)
                     ec = r->mCallback->OnServiceStateChanged(ss);
                     if (ec == (ECode)E_REMOTE_EXCEPTION) {
                         Remove(r->mBinder);
@@ -574,7 +575,7 @@ ECode CTelephonyRegistry::NotifyCallStateForSubscriber(
     }
     ECode ec = NOERROR;
     synchronized(mRecordsLock) {
-        AutoPtr<ISubscriptionManagerHelper> smHelper;
+        AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
@@ -602,7 +603,7 @@ ECode CTelephonyRegistry::NotifyCallStateForSubscriber(
 ECode CTelephonyRegistry::NotifyServiceStateForPhoneId(
     /* [in] */ Int32 phoneId,
     /* [in] */ Int64 subId,
-    /* [in] */ IServiceState* state)
+    /* [in] */ Elastos::Droid::Telephony::IServiceState* state)
 {
     if (!CheckNotifyPermission(String("notifyServiceState()"))) {
         return NOERROR;
@@ -634,8 +635,8 @@ ECode CTelephonyRegistry::NotifyServiceStateForPhoneId(
                         Slogger::D(TAG, "notifyServiceStateForSubscriber: callback.onSSC r=%s subId=%lld phoneId=%d, state=%s",
                             TO_CSTR(r), subId, phoneId, TO_CSTR(state));
                     }
-                    AutoPtr<IServiceState> ss;
-                    //CServiceState::New(state, (IServiceState**)&ss);
+                    AutoPtr<Elastos::Droid::Telephony::IServiceState> ss;
+                    //CServiceState::New(state, (Elastos::Droid::Telephony::IServiceState**)&ss);
                     ec = r->mCallback->OnServiceStateChanged(ss);
                     if (ec == (ECode)E_REMOTE_EXCEPTION) {
                         mRemoveList.PushBack(r->mBinder);
@@ -671,7 +672,7 @@ ECode CTelephonyRegistry::NotifySignalStrengthForSubscriber(
     }
     ECode ec = NOERROR;
     synchronized(mRecordsLock) {
-        AutoPtr<ISubscriptionManagerHelper> smHelper;
+        AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
@@ -745,7 +746,7 @@ ECode CTelephonyRegistry::NotifyCellInfoForSubscriber(
 
     ECode ec = NOERROR;
     synchronized(mRecordsLock) {
-        AutoPtr<ISubscriptionManagerHelper> smHelper;
+        AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
@@ -858,7 +859,7 @@ ECode CTelephonyRegistry::NotifyCallForwardingChangedForSubscriber(
     }
     ECode ec = NOERROR;
     synchronized(mRecordsLock) {
-        AutoPtr<ISubscriptionManagerHelper> smHelper;
+        AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
@@ -897,7 +898,7 @@ ECode CTelephonyRegistry::NotifyDataActivityForSubscriber(
     }
     ECode ec = NOERROR;
     synchronized(mRecordsLock) {
-        AutoPtr<ISubscriptionManagerHelper> smHelper;
+        AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
@@ -956,7 +957,7 @@ ECode CTelephonyRegistry::NotifyDataConnectionForSubscriber(
     }
     ECode ec = NOERROR;
     synchronized(mRecordsLock) {
-        AutoPtr<ISubscriptionManagerHelper> smHelper;
+        AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
@@ -1102,7 +1103,7 @@ ECode CTelephonyRegistry::NotifyCellLocationForSubscriber(
 
     ECode ec = NOERROR;
     synchronized(mRecordsLock) {
-        AutoPtr<ISubscriptionManagerHelper> smHelper;
+        AutoPtr<ISubscriptionManager> smHelper;
         //CSubscriptionManagerHelper::AcquireSingleton((ISubscriptionManagerHelper**)&smHelper);
         Int32 phoneId;
         smHelper->GetPhoneId(subId, &phoneId);
@@ -1370,7 +1371,7 @@ ECode CTelephonyRegistry::ToString(
 //
 
 ECode CTelephonyRegistry::BroadcastServiceStateChanged(
-    /* [in] */ IServiceState* state,
+    /* [in] */ Elastos::Droid::Telephony::IServiceState* state,
     /* [in] */ Int64 subId)
 {
     Int32 ival;
@@ -1642,7 +1643,7 @@ ECode CTelephonyRegistry::LogServiceStateChanged(
     /* [in] */ const String& s,
     /* [in] */ Int64 subId,
     /* [in] */ Int32 phoneId,
-    /* [in] */ IServiceState* state)
+    /* [in] */ Elastos::Droid::Telephony::IServiceState* state)
 {
     if (mLogSSC == NULL || mLogSSC->GetLength() == 0) {
         return NOERROR;

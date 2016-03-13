@@ -290,7 +290,9 @@ ECode CMediaSessionLegacyHelper::constructor(
     /* [in] */ IContext * context)
 {
     mContext = context;
-    context->GetSystemService(IContext::MEDIA_SESSION_SERVICE, (IInterface**)&mSessionManager);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::MEDIA_SESSION_SERVICE, (IInterface**)&obj);
+    mSessionManager = IMediaSessionManager::Probe(obj);
     return NOERROR;
 }
 

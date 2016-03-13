@@ -2,6 +2,7 @@
 module
 {
     using interface Elastos.Core.ICharSequence;
+    using interface Elastos.Core.ISynchronize;
 
     interface Elastos.Droid.View.IWindowManagerLayoutParams;
     interface Elastos.Droid.View.IApplicationToken;
@@ -399,7 +400,7 @@ module
          * Return the window manager lock needed to correctly call "Lw" methods.
          */
         GetWindowManagerLock(
-            [out] IInterface** lock);
+            [out] ISynchronize** lock);
 
         /** Register a system listener for touch events */
         RegisterPointerEventListener(

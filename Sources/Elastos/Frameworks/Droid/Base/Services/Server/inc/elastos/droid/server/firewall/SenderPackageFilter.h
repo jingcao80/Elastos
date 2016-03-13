@@ -1,73 +1,59 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_Server_Firewall_SenderPackageFilter_H__
+#define __ELASTOS_DROID_Server_Firewall_SenderPackageFilter_H__
 
-package com.android.server.firewall;
+#include "_Elastos.Droid.Server.h"
+#include "elastos/core/Object.h"
 
-using Elastos::Droid::App::IAppGlobals;
-using Elastos::Droid::Content::IComponentName;
-using Elastos::Droid::Content::IIntent;
-using Elastos::Droid::Content::Pm::IIPackageManager;
-using Elastos::Droid::Os::IRemoteException;
-using Elastos::Droid::Os::IUserHandle;
-
+using Elastos::Droid::internal.util.XmlUtils;
 using Org::Xmlpull::V1::IXmlPullParser;
 using Org::Xmlpull::V1::IXmlPullParserException;
+using Elastos::Utility::IArrayList;
 
-using Elastos::IO::IIOException;
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Firewall {
 
-public class SenderPackageFilter implements Filter {
-    private static const String ATTR_NAME = "name";
-
-    public final String mPackageName;
-
-    public SenderPackageFilter(String packageName) {
-        mPackageName = packageName;
-    }
-
-    //@Override
-    public Boolean Matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
-            Int32 callerUid, Int32 callerPid, String resolvedType, Int32 receivingUid) {
-        IPackageManager pm = AppGlobals->GetPackageManager();
-
-        Int32 packageUid = -1;
-        try {
-            packageUid = pm->GetPackageUid(mPackageName, UserHandle.USER_OWNER);
-        } catch (RemoteException ex) {
-            // handled below
-        }
-
-        if (packageUid == -1)  {
-            return FALSE;
-        }
-
-        return UserHandle->IsSameApp(packageUid, callerUid);
-    }
-
-    public static const FilterFactory FACTORY = new FilterFactory("sender-package") {
-        //@Override
-        public Filter NewFilter(XmlPullParser parser)
-                throws IOException, XmlPullParserException {
-            String packageName = parser->GetAttributeValue(NULL, ATTR_NAME);
-
-            if (packageName == NULL) {
-                throw new XmlPullParserException(
-                    "A package name must be specified.", parser, NULL);
-            }
-
-            return new SenderPackageFilter(packageName);
-        }
+class SenderPackageFilter
+    : public Object
+    , public IFilter;
+{
+public:
+    class FACTORY_FilterFactory
+        : public FilterFactory
+    {
+    public:
+        CARAPI_(IFilter*) NewFilter(
+            /* in */ IXmlPullParser* parser);
     };
-}
+
+public:
+    //@Override
+    CARAPI Matches(
+        /* [in] */ IIntentFirewall* ifw,
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ Int32 callerUid,
+        /* [in] */ Int32 callerPid,
+        /* [in] */ const String& resolvedType,
+        /* [in] */ Int32 receivingUid
+        /* [out] */ Boolean *ret);
+
+public:
+    SenderPackageFilter(
+        /* in */ const String& packageName);
+
+public:
+    static const AutoPtr<FACTORY_FilterFactory> FACTORY;
+
+private:
+    static const String ATTR_TYPE;          // = "name";
+    String mPackageName;
+};
+
+} // Firewall
+} // Server
+} // Droid
+} // Elastos
+
+#endif // __ELASTOS_DROID_Server_Firewall_SenderPackageFilter_H__

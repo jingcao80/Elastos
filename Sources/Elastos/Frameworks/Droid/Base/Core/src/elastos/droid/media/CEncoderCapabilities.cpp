@@ -9,7 +9,7 @@ CAR_SINGLETON_IMPL(CEncoderCapabilities)
 CAR_INTERFACE_IMPL(CEncoderCapabilities, Singleton, IEncoderCapabilities);
 
 ECode CEncoderCapabilities::GetOutputFileFormats(
-    /* [out,callee] */ ArrayOf<Int32>** result)
+    /* [out, callee] */ ArrayOf<Int32>** result)
 {
     return EncoderCapabilities::GetOutputFileFormats(result);
 }

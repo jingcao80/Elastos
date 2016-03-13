@@ -13,6 +13,7 @@ const Int32 CSweepGradient::TYPE_COLORS_AND_POSITIONS = 1;
 const Int32 CSweepGradient::TYPE_COLOR_START_AND_COLOR_END = 2;
 
 CAR_OBJECT_IMPL(CSweepGradient);
+CAR_INTERFACE_IMPL(CSweepGradient, Shader, ISweepGradient);
 CSweepGradient::CSweepGradient()
     : mType(0)
     , mCx(0)
@@ -83,35 +84,6 @@ ECode CSweepGradient::Copy(
     *shader = copy;
     REFCOUNT_ADD(*shader);
     return NOERROR;
-}
-
-PInterface CSweepGradient::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_Shader) {
-        return reinterpret_cast<PInterface>((Shader*)this);
-    }
-    else if (riid == EIID_ISweepGradient) {
-        return (ISweepGradient*)this;
-    }
-    return Shader::Probe(riid);
-}
-
-UInt32 CSweepGradient::AddRef()
-{
-    return Shader::AddRef();
-}
-
-UInt32 CSweepGradient::Release()
-{
-    return Shader::Release();
-}
-
-ECode CSweepGradient::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return Shader::GetInterfaceID(object, iid);
 }
 
 Int64 CSweepGradient::NativeCreate1(

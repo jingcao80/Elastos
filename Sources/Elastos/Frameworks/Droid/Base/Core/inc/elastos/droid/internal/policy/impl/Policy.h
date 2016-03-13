@@ -32,6 +32,8 @@ public:
 
     Policy();
 
+    CARAPI constructor();
+
     CARAPI MakeNewWindow(
         /* [in] */ IContext* context,
         /* [out] */ IWindow** window);

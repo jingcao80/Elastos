@@ -62,16 +62,15 @@ ECode UserIcons::GetDefaultUserIcon(
 
     AutoPtr<IDrawable> d;
     CResources::GetSystem()->GetDrawable(R::drawable::ic_account_circle, (IDrawable**)&d);
-    AutoPtr<IDrawable> icon;
-    d->Mutate((IDrawable**)&icon);
+    d->Mutate();
     Int32 color;
     CResources::GetSystem()->GetColor(colorResId, &color);
-    icon->SetColorFilter(color, PorterDuffMode_SRC_IN);
+    d->SetColorFilter(color, PorterDuffMode_SRC_IN);
     Int32 width, height;
-    icon->GetIntrinsicWidth(&width);
-    icon->GetIntrinsicHeight(&height);
-    icon->SetBounds(0, 0, width, height);
-    *drawable = icon;
+    d->GetIntrinsicWidth(&width);
+    d->GetIntrinsicHeight(&height);
+    d->SetBounds(0, 0, width, height);
+    *drawable = d;
     REFCOUNT_ADD(*drawable)
     return NOERROR;
 }

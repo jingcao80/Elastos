@@ -218,10 +218,9 @@ ECode TaskViewHeader::OnFinishInflate()
     drawable = NULL;
     context->GetDrawable(R::drawable::recents_task_view_header_bg, (IDrawable**)&drawable);
     mBackground = IRippleDrawable::Probe(drawable);
-    AutoPtr<IDrawable> drawable2;
-    drawable->Mutate((IDrawable**)&drawable2);
+    drawable->Mutate();
     AutoPtr<IDrawableConstantState> state;
-    drawable2->GetConstantState((IDrawableConstantState**)&state);
+    drawable->GetConstantState((IDrawableConstantState**)&state);
     drawable = NULL;
     state->NewDrawable((IDrawable**)&drawable);
     mBackground = IRippleDrawable::Probe(drawable);

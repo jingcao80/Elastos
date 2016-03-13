@@ -60,13 +60,13 @@ public class DreamBackend {
         /* [out] */ String* str)
     {
             StringBuilder sb = new StringBuilder(DreamInfo.class->GetSimpleName());
-            sb->Append('[').Append(caption);
+            sb->AppendChar32('[').Append(caption);
             if (isActive)
                 sb->Append(",active");
-            sb->Append(',').Append(componentName);
+            sb->AppendChar32(',').Append(componentName);
             if (settingsComponentName != NULL)
                 sb->Append("settings=").Append(settingsComponentName);
-            return sb->Append(']').ToString();
+            return sb->AppendChar32(']').ToString();
         }
     }
 

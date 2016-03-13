@@ -1103,14 +1103,21 @@ public:
         /* [in] */ IUri* uri,
         /* [in] */ Int32 userId);
 
+    /** @hide */
+    static CARAPI_(Int32) GetUserIdFromAuthority(
+        /* [in] */ const String& auth);
+
+    /** @hide */
     static CARAPI_(Int32) GetUserIdFromAuthority(
         /* [in] */ const String& auth,
         /* [in] */ Int32 defaultUserId);
 
+    /** @hide */
     static CARAPI_(Int32) GetUserIdFromUri(
         /* [in] */ IUri* uri,
         /* [in] */ Int32 defaultUserId);
 
+    /** @hide */
     static CARAPI_(Int32) GetUserIdFromUri(
         /* [in] */ IUri* uri);
 

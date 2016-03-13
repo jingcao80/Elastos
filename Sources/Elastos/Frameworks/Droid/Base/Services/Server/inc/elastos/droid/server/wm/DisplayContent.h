@@ -172,7 +172,7 @@ private:
 
     /** Z-ordered (bottom-most first) list of all Window objects. Assigned to an element
      * from mDisplayWindows; */
-    WindowList mWindows;
+    AutoPtr<WindowList> mWindows;
 
     AutoPtr<IDisplayInfo> mDisplayInfo;
     AutoPtr<IDisplay> mDisplay;

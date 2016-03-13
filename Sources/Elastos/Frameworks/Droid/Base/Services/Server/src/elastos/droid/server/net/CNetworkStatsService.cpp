@@ -271,8 +271,9 @@ ECode CNetworkStatsService::DropBoxNonMonotonicObserver::FoundNonMonotonic(
     builder += right;
     builder += '\n';
 
-    AutoPtr<IDropBoxManager> dropBox;
-    mOwner->mContext->GetSystemService(IContext::DROPBOX_SERVICE, (IInterface**)&dropBox);
+    AutoPtr<IInterface> obj;
+    mOwner->mContext->GetSystemService(IContext::DROPBOX_SERVICE, (IInterface**)&obj);
+    AutoPtr<IDropBoxManager> dropBox = IDropBoxManager::Probe(obj);
     return dropBox->AddText(TAG_NETSTATS_ERROR, builder.ToString());
 }
 
@@ -721,8 +722,9 @@ ECode CNetworkStatsService::constructor(
     VALIDATE_NOT_NULL(settings)
     mSettings = settings;
 
-    AutoPtr<IPowerManager> powerManager;
-    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&powerManager);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IPowerManager> powerManager = IPowerManager::Probe(obj);
     powerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, TAG, (IPowerManagerWakeLock**)&mWakeLock);
 
     AutoPtr<IHandlerThread> thread;
@@ -845,8 +847,9 @@ AutoPtr<NetworkStatsRecorder> CNetworkStatsService::BuildRecorder(
     /* [in] */ NetworkStatsSettingsConfig* config,
     /* [in] */ Boolean includeTags)
 {
-    AutoPtr<IDropBoxManager> dropBox;
-    mContext->GetSystemService(IContext::DROPBOX_SERVICE, (IInterface**)&dropBox);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::DROPBOX_SERVICE, (IInterface**)&obj);
+    AutoPtr<IDropBoxManager> dropBox = IDropBoxManager::Probe(obj);
     AutoPtr<IFileRotator> fileRotator;
     CFileRotator::New(mBaseDir, prefix, Ptr(config)->Func(config->GetRotateAgeMillis),
             Ptr(config)->Func(config->GetDeleteAgeMillis), (IFileRotator**)&fileRotator);

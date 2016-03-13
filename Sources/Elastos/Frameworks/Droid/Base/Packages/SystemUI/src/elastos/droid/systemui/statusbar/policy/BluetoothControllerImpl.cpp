@@ -91,7 +91,7 @@ BluetoothControllerImpl::DeviceInfo::DeviceInfo()
 
 BluetoothControllerImpl::ServiceListener::ServiceListener(
     /* [in] */ IBluetoothDevice* device,
-    /* [in] */ String action,
+    /* [in] */ const String& action,
     /* [in] */ Boolean connect)
     : mDevice(device)
     , mAction(action)

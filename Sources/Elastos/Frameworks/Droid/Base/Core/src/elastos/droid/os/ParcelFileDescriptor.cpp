@@ -22,7 +22,8 @@ using Libcore::IO::IMemory;
 using Libcore::IO::CMemory;
 using Elastos::IO::ByteOrder_BIG_ENDIAN;
 using Elastos::IO::EIID_ICloseable;
-using Elastos::Core::CCloseGuard;
+using Elastos::Core::ICloseGuardHelper;
+using Elastos::Core::CCloseGuardHelper;
 using Elastos::IO::CFileDescriptor;
 using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::System::OsConstants;
@@ -204,7 +205,9 @@ CAR_INTERFACE_IMPL_3(ParcelFileDescriptor, Object, IParcelFileDescriptor, IParce
 ParcelFileDescriptor::ParcelFileDescriptor()
     : mClosed(FALSE)
 {
-    CCloseGuard::New((ICloseGuard**)&mGuard);
+    AutoPtr<ICloseGuardHelper> helper;
+    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
+    helper->Get((ICloseGuard**)&mGuard);
 }
 
 ParcelFileDescriptor::~ParcelFileDescriptor()

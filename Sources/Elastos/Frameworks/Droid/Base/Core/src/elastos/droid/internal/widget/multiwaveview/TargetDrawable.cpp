@@ -78,7 +78,8 @@ ECode TargetDrawable::SetDrawable(
     }
     // Mutate the drawable so we can animate shared drawable properties.
     if (drawable != NULL) {
-        drawable->Mutate((IDrawable**)&mDrawable);
+        drawable->Mutate();
+        mDrawable = drawable;
     }
     else {
         mDrawable = NULL;
@@ -95,7 +96,8 @@ TargetDrawable::TargetDrawable(
     // Mutate the drawable so we can animate shared drawable properties.
     AutoPtr<TargetDrawable> cother = (TargetDrawable*)other;
     if (cother->mDrawable != NULL) {
-        cother->mDrawable->Mutate((IDrawable**)&mDrawable);
+        cother->mDrawable->Mutate();
+        mDrawable = cother->mDrawable;
     }
     else {
         mDrawable = NULL;

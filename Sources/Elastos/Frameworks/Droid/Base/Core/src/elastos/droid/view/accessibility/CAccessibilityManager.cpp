@@ -112,7 +112,7 @@ ECode CAccessibilityManager::constructor(
     /* [in] */ IIAccessibilityManager* service,
     /* [in] */ Int32 userId)
 {
-    assert(context != NULL && service != NULL);
+    assert(context != NULL);
     AutoPtr<ILooper> looper;
     context->GetMainLooper((ILooper**)&looper);
 

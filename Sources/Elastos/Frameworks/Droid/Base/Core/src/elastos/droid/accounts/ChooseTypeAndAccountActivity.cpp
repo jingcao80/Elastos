@@ -1,22 +1,28 @@
 
+#include <Elastos.CoreLibrary.Utility.h>
 #include "elastos/droid/accounts/ChooseTypeAndAccountActivity.h"
 #include "elastos/droid/accounts/CAccountManager.h"
-#include "elastos/droid/accounts/CAuthenticatorDescription.h"
+#include "elastos/droid/app/ActivityManagerNative.h"
 #include "elastos/droid/accounts/CAccount.h"
 #include "elastos/droid/os/Binder.h"
 #include "elastos/droid/os/CBundle.h"
+#include "elastos/droid/os/CUserHandle.h"
+#include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/os/CUserManagerHelper.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/text/TextUtils.h"
 #include "elastos/droid/widget/CArrayAdapter.h"
 #include "elastos/droid/R.h"
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Utility::Logging::Slogger;
-
-using Elastos::Core::ICharSequence;
-using Elastos::Core::CString;
+using Elastos::Droid::App::ActivityManagerNative;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::CBundle;
+using Elastos::Droid::Os::CUserHandle;
+using Elastos::Droid::Os::UserHandle;
+using Elastos::Droid::Os::IUserManager;
+using Elastos::Droid::Os::IUserManagerHelper;
+using Elastos::Droid::Os::CUserManagerHelper;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Widget::ITextView;
@@ -25,31 +31,20 @@ using Elastos::Droid::Widget::IListAdapter;
 using Elastos::Droid::Widget::IAdapter;
 using Elastos::Droid::Widget::IArrayAdapter;
 using Elastos::Droid::Widget::CArrayAdapter;
+using Elastos::Droid::Widget::IAdapterView;
+using Elastos::Droid::Widget::IAbsListView;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
+using Elastos::Core::ICharSequence;
+using Elastos::Core::CString;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Accounts {
 
-const String ChooseTypeAndAccountActivity::EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST(
-        "allowableAccounts");
-const String ChooseTypeAndAccountActivity::EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY(
-        "allowableAccountTypes");
-const String ChooseTypeAndAccountActivity::EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE(
-        "addAccountOptions");
-const String ChooseTypeAndAccountActivity::EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY(
-        "addAccountRequiredFeatures");
-const String ChooseTypeAndAccountActivity::EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING(
-        "authTokenType");
-const String ChooseTypeAndAccountActivity::EXTRA_SELECTED_ACCOUNT(
-        "selectedAccount");
-const String ChooseTypeAndAccountActivity::EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT(
-        "alwaysPromptForAccount");
-const String ChooseTypeAndAccountActivity::EXTRA_DESCRIPTION_TEXT_OVERRIDE(
-        "descriptionTextOverride");
-const Int32 ChooseTypeAndAccountActivity::REQUEST_NULL = 0;
-const Int32 ChooseTypeAndAccountActivity::REQUEST_CHOOSE_TYPE = 1;
-const Int32 ChooseTypeAndAccountActivity::REQUEST_ADD_ACCOUNT = 2;
 const String ChooseTypeAndAccountActivity::TAG("AccountChooser");
 const String ChooseTypeAndAccountActivity::KEY_INSTANCE_STATE_PENDING_REQUEST(
         "pendingRequest");
@@ -59,7 +54,34 @@ const String ChooseTypeAndAccountActivity::KEY_INSTANCE_STATE_SELECTED_ACCOUNT_N
         "selectedAccountName");
 const String ChooseTypeAndAccountActivity::KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT(
         "selectedAddAccount");
+const String ChooseTypeAndAccountActivity::KEY_INSTANCE_STATE_ACCOUNT_LIST("accountList");
 const Int32 ChooseTypeAndAccountActivity::SELECTED_ITEM_NONE = -1;
+
+//===============================================================
+// ChooseTypeAndAccountActivity::AdapterViewOnItemClickListener
+//===============================================================
+CAR_INTERFACE_IMPL(ChooseTypeAndAccountActivity::AdapterViewOnItemClickListener, Object,
+        IAdapterViewOnItemClickListener);
+
+ChooseTypeAndAccountActivity::AdapterViewOnItemClickListener::AdapterViewOnItemClickListener(
+    /* [in] */ ChooseTypeAndAccountActivity* host)
+    : mHost(host)
+{}
+
+ECode ChooseTypeAndAccountActivity::AdapterViewOnItemClickListener::OnItemClick(
+    /* [in] */ IAdapterView* parent,
+    /* [in] */ IView* view,
+    /* [in] */ Int32 position,
+    /* [in] */ Int64 id)
+{
+    mHost->mSelectedItemIndex = position;
+    return IView::Probe(mHost->mOkButton)->SetEnabled(TRUE);
+}
+
+//===============================================================
+// ChooseTypeAndAccountActivity::
+//===============================================================
+CAR_INTERFACE_IMPL_2(ChooseTypeAndAccountActivity, Activity, IChooseTypeAndAccountActivity, IAccountManagerCallback)
 
 ChooseTypeAndAccountActivity::ChooseTypeAndAccountActivity()
     : mSelectedAddNewAccount(FALSE)
@@ -72,44 +94,33 @@ ChooseTypeAndAccountActivity::~ChooseTypeAndAccountActivity()
 {
 }
 
-PInterface ChooseTypeAndAccountActivity::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_IAccountManagerCallback) {
-        return (IAccountManagerCallback*)this;
-    }
-    return Activity::Probe(riid);
-}
-
-UInt32 ChooseTypeAndAccountActivity::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 ChooseTypeAndAccountActivity::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode ChooseTypeAndAccountActivity::GetInterfaceID(
-    /* [in] */ IInterface *pObject,
-    /* [out] */ InterfaceID *pIID)
-{
-    if (pObject == (IInterface *)(IAccountManagerCallback *)this) {
-        *pIID = EIID_IAccountManagerCallback;
-        return NOERROR;
-    }
-    return Activity::GetInterfaceID(pObject, pIID);
-}
-
 ECode ChooseTypeAndAccountActivity::OnCreate(
     /* [in] */ IBundle* savedInstanceState)
 {
     FAIL_RETURN(Activity::OnCreate(savedInstanceState));
-    // if (Log.isLoggable(TAG, Log.VERBOSE)) {
-    //     Log.v(TAG, "ChooseTypeAndAccountActivity.onCreate(savedInstanceState="
-    //             + savedInstanceState + ")");
-    // }
+    if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
+        Logger::V(TAG, "ChooseTypeAndAccountActivity.onCreate(savedInstanceState=%p)",
+                    savedInstanceState);
+    }
+
+    String message(NULL);
+
+    AutoPtr<IBinder> activityToken;
+    GetActivityToken((IBinder**)&activityToken);
+    ActivityManagerNative::GetDefault()->GetLaunchedFromUid(activityToken, &mCallingUid);
+    ActivityManagerNative::GetDefault()->GetLaunchedFromPackage(
+            activityToken, &mCallingPackage);
+    if (mCallingUid != 0 && !mCallingPackage.IsNull()) {
+        AutoPtr<IUserHandle> uh;
+        CUserHandle::New(UserHandle::GetUserId(mCallingUid), (IUserHandle**)&uh);
+        AutoPtr<IUserManagerHelper> hlp;
+        CUserManagerHelper::AcquireSingleton((IUserManagerHelper**)&hlp);
+        AutoPtr<IUserManager> um;
+        hlp->Get(this, (IUserManager**)&um);
+        AutoPtr<IBundle> restrictions;
+        um->GetUserRestrictions(uh, (IBundle**)&restrictions);
+        restrictions->GetBoolean(IUserManager::DISALLOW_MODIFY_ACCOUNTS, FALSE, &mDisallowAddAccounts);
+    }
 
     // save some items we use frequently
     AutoPtr<IIntent> intent;
@@ -126,6 +137,8 @@ ECode ChooseTypeAndAccountActivity::OnCreate(
 
         savedInstanceState->GetBoolean(KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT,
                 FALSE, &mSelectedAddNewAccount);
+
+        savedInstanceState->GetParcelableArrayList(KEY_INSTANCE_STATE_ACCOUNT_LIST, (IArrayList**)&mAccounts);
     }
     else {
         mPendingRequest = REQUEST_NULL;
@@ -134,15 +147,15 @@ ECode ChooseTypeAndAccountActivity::OnCreate(
         // show is as pre-selected.
         AutoPtr<IParcelable> parcel;
         intent->GetParcelableExtra(EXTRA_SELECTED_ACCOUNT, (IParcelable**)&parcel);
-        AutoPtr<IAccount> selectedAccount = (IAccount*)parcel->Probe(EIID_IAccount);
+        AutoPtr<IAccount> selectedAccount = IAccount::Probe(parcel);
         if (selectedAccount != NULL) {
             mSelectedAccountName = ((CAccount*)selectedAccount.Get())->mName;
         }
     }
 
-    // if (Log.isLoggable(TAG, Log.VERBOSE)) {
-    //     Log.v(TAG, "selected account name is " + mSelectedAccountName);
-    // }
+    if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
+        Logger::V(TAG, "selected account name is %s", (const char*)mSelectedAccountName);
+    }
 
     mSetOfAllowableAccounts = GetAllowableAccountSet(intent);
     mSetOfRelevantAccountTypes = GetReleventAccountTypes(intent);
@@ -150,15 +163,30 @@ ECode ChooseTypeAndAccountActivity::OnCreate(
             FALSE, &mAlwaysPromptForAccount);
     intent->GetStringExtra(EXTRA_DESCRIPTION_TEXT_OVERRIDE, &mDescriptionOverride);
 
+    // Need to do this once here to request the window feature. Can't do it in onResume
+    AutoPtr<IAccountManager> accountManager;
+    FAIL_RETURN(CAccountManager::Get(this, (IAccountManager**)&accountManager));
+    mAccounts = GetAcceptableAccountChoices(accountManager);
+    Boolean bEmp = FALSE;
+    if ((mAccounts->IsEmpty(&bEmp), bEmp)
+            && mDisallowAddAccounts) {
+        Boolean b = FALSE;
+        RequestWindowFeature(IWindow::FEATURE_NO_TITLE, &b);
+        SetContentView(R::layout::app_not_authorized);
+        mDontShowPicker = TRUE;
+    }
+
     return NOERROR;
 }
 
 ECode ChooseTypeAndAccountActivity::OnResume()
 {
     FAIL_RETURN(Activity::OnResume());
-    AutoPtr<IContext> ctx = (IContext*)Probe(Elastos::Droid::Content::EIID_IContext);
+
+    if (mDontShowPicker) return NOERROR;
+
     AutoPtr<IAccountManager> accountManager;
-    FAIL_RETURN(CAccountManager::Get(ctx, (IAccountManager**)&accountManager));
+    FAIL_RETURN(CAccountManager::Get(this, (IAccountManager**)&accountManager));
 
     mAccounts = GetAcceptableAccountChoices(accountManager);
 
@@ -169,9 +197,19 @@ ECode ChooseTypeAndAccountActivity::OnResume()
     if (mPendingRequest == REQUEST_NULL) {
         // If there are no relevant accounts and only one relevant account type go directly to
         // add account. Otherwise let the user choose.
-        if (mAccounts->IsEmpty()) {
-            if (mSetOfRelevantAccountTypes->GetSize() == 1) {
-                RunAddAccountForAuthenticator(*mSetOfRelevantAccountTypes->Begin());
+        Boolean bEmp = FALSE;
+        if ((mAccounts->IsEmpty(&bEmp), bEmp)) {
+            Int32 size = 0;
+            mSetOfRelevantAccountTypes->GetSize(&size);
+            if (size == 1) {
+                AutoPtr<IIterator> it;
+                ICollection::Probe(mSetOfRelevantAccountTypes)->GetIterator((IIterator**)&it);
+                AutoPtr<IInterface> nxt;
+                it->GetNext((IInterface**)&nxt);
+                AutoPtr<ICharSequence> pCS = ICharSequence::Probe(nxt);
+                String str;
+                pCS->ToString(&str);
+                RunAddAccountForAuthenticator(str);
             }
             else {
                 StartChooseAccountTypeActivity();
@@ -180,14 +218,21 @@ ECode ChooseTypeAndAccountActivity::OnResume()
         }
 
         // if there is only one allowable account return it
-        if (!mAlwaysPromptForAccount && mAccounts->GetSize() == 1) {
-            AutoPtr<CAccount> account = (CAccount*)(*mAccounts->Begin()).Get();
-            SetResultAndFinish(account->mName, account->mType);
+        Int32 accSize = 0;
+        mAccounts->GetSize(&accSize);
+        if (!mAlwaysPromptForAccount && accSize == 1) {
+            AutoPtr<IInterface> p;
+            mAccounts->Get(0, (IInterface**)&p);
+            AutoPtr<IAccount> account = IAccount::Probe(p);
+            String name, type;
+            account->GetName(&name);
+            account->GetType(&type);
+            SetResultAndFinish(name, type);
             return NOERROR;
         }
     }
 
-    AutoPtr< ArrayOf<String> > listItems = GetListOfDisplayableOptions(mAccounts);
+    AutoPtr<ArrayOf<String> > listItems = GetListOfDisplayableOptions(mAccounts);
     mSelectedItemIndex = GetItemIndexToSelect(
         mAccounts, mSelectedAccountName, mSelectedAddNewAccount);
 
@@ -201,16 +246,15 @@ ECode ChooseTypeAndAccountActivity::OnResume()
     AutoPtr<IView> view;
     FAIL_RETURN(FindViewById(R::id::button2, (IView**)&view));
     mOkButton = IButton::Probe(view);
-    mOkButton->SetEnabled(mSelectedItemIndex != SELECTED_ITEM_NONE);
-
+    IView::Probe(mOkButton)->SetEnabled(mSelectedItemIndex != SELECTED_ITEM_NONE);
     return NOERROR;
 }
 
 ECode ChooseTypeAndAccountActivity::OnDestroy()
 {
-    // if (Log.isLoggable(TAG, Log.VERBOSE)) {
-    //     Log.v(TAG, "ChooseTypeAndAccountActivity.onDestroy()");
-    // }
+    if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
+        Logger::V(TAG, "ChooseTypeAndAccountActivity.onDestroy()");
+    }
     return Activity::OnDestroy();
 }
 
@@ -223,47 +267,68 @@ ECode ChooseTypeAndAccountActivity::OnSaveInstanceState(
         outState->PutParcelableArray(KEY_INSTANCE_STATE_EXISTING_ACCOUNTS, mExistingAccounts);
     }
     if (mSelectedItemIndex != SELECTED_ITEM_NONE) {
-        if ((UInt32)mSelectedItemIndex == mAccounts->GetSize()) {
+        Int32 size = 0;
+        mAccounts->GetSize(&size);
+        if (mSelectedItemIndex == size) {
             outState->PutBoolean(KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT, TRUE);
         }
         else {
             outState->PutBoolean(KEY_INSTANCE_STATE_SELECTED_ADD_ACCOUNT, FALSE);
-            outState->PutString(KEY_INSTANCE_STATE_SELECTED_ACCOUNT_NAME,
-                    ((CAccount*)(*mAccounts)[mSelectedItemIndex].Get())->mName);
+            AutoPtr<IInterface> p;
+            mAccounts->Get(mSelectedItemIndex, (IInterface**)&p);
+            AutoPtr<IAccount> pAcc = IAccount::Probe(p);
+            String name;
+            pAcc->GetName(&name);
+            outState->PutString(KEY_INSTANCE_STATE_SELECTED_ACCOUNT_NAME, name);
         }
     }
+    outState->PutParcelableArrayList(KEY_INSTANCE_STATE_ACCOUNT_LIST, mAccounts);
     return NOERROR;
 }
 
-void ChooseTypeAndAccountActivity::OnCancelButtonClicked(
+ECode ChooseTypeAndAccountActivity::OnCancelButtonClicked(
     /* [in] */ IView* view)
 {
-    OnBackPressed();
+    return OnBackPressed();
 }
 
-void ChooseTypeAndAccountActivity::OnOkButtonClicked(
+ECode ChooseTypeAndAccountActivity::OnOkButtonClicked(
     /* [in] */ IView* view)
 {
-    if ((UInt32)mSelectedItemIndex == mAccounts->GetSize()) {
+    Int32 size = 0;
+    mAccounts->GetSize(&size);
+    if (mSelectedItemIndex == size) {
         // Selected "Add New Account" option
         StartChooseAccountTypeActivity();
     }
     else if (mSelectedItemIndex != SELECTED_ITEM_NONE) {
-        OnAccountSelected((*mAccounts)[mSelectedItemIndex]);
+        AutoPtr<IInterface> p;
+        mAccounts->Get(mSelectedItemIndex, (IInterface**)&p);
+        AutoPtr<IAccount> pAcc = IAccount::Probe(p);
+        OnAccountSelected(pAcc);
     }
+    return NOERROR;
 }
 
 ECode ChooseTypeAndAccountActivity::OnActivityResult(
     /* [in] */ Int32 requestCode,
     /* [in] */ Int32 resultCode,
-    /* [in] */ IIntent *data)
+    /* [in] */ IIntent* data)
 {
-    // if (Log.isLoggable(TAG, Log.VERBOSE)) {
-    //     if (data != null && data.getExtras() != null) data.getExtras().keySet();
-    //     Bundle extras = data != null ? data.getExtras() : null;
-    //     Log.v(TAG, "ChooseTypeAndAccountActivity.onActivityResult(reqCode=" + requestCode
-    //             + ", resCode=" + resultCode + ", extras=" + extras + ")");
-    // }
+    if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
+        AutoPtr<IBundle> bd;
+        if (data != NULL && (data->GetExtras((IBundle**)&bd), bd) != NULL) {
+            AutoPtr<ISet> s;
+            bd->GetKeySet((ISet**)&s);
+        }
+        AutoPtr<IBundle> extras;
+        if (data != NULL) {
+            data->GetExtras((IBundle**)&bd);
+        }
+        Logger::V(TAG,
+            "ChooseTypeAndAccountActivity.onActivityResult(reqCode=%d, resCode=%d, extras=%p)",
+            requestCode, resultCode, extras.Get());
+    }
 
     // we got our result, so clear the fact that we had a pending request
     mPendingRequest = REQUEST_NULL;
@@ -271,7 +336,8 @@ ECode ChooseTypeAndAccountActivity::OnActivityResult(
     if (resultCode == RESULT_CANCELED) {
         // if canceling out of addAccount and the original state caused us to skip this,
         // finish this activity
-        if (mAccounts->Begin() == mAccounts->End()) {
+        Boolean bEmp = FALSE;
+        if ((mAccounts->IsEmpty(&bEmp), bEmp)) {
             SetResult(IActivity::RESULT_CANCELED);
             Finish();
         }
@@ -288,7 +354,7 @@ ECode ChooseTypeAndAccountActivity::OnActivityResult(
                     return NOERROR;
                 }
             }
-            Slogger::D(TAG, "ChooseTypeAndAccountActivity.onActivityResult: unable to find account type, pretending the request was canceled");
+            Logger::D(TAG, "ChooseTypeAndAccountActivity.onActivityResult: unable to find account type, pretending the request was canceled");
         }
         else if (requestCode == REQUEST_ADD_ACCOUNT) {
             String accountName(NULL);
@@ -301,22 +367,21 @@ ECode ChooseTypeAndAccountActivity::OnActivityResult(
 
             if (accountName.IsNull() || accountType.IsNull()) {
                 AutoPtr< ArrayOf<IAccount*> > currentAccounts;
-                AutoPtr<IContext> ctx = (IContext*)Probe(Elastos::Droid::Content::EIID_IContext);
                 AutoPtr<IAccountManager> accountManager;
-                FAIL_RETURN(CAccountManager::Get(ctx, (IAccountManager**)&accountManager));
-                accountManager->GetAccounts((ArrayOf<IAccount*>**)&currentAccounts);
-                AutoPtr<HashSet<AutoPtr<IAccount> > > preExistingAccounts =
-                        new HashSet<AutoPtr<IAccount> >();
+                FAIL_RETURN(CAccountManager::Get(IContext::Probe(this), (IAccountManager**)&accountManager));
+                accountManager->GetAccountsForPackage(mCallingPackage, mCallingUid, (ArrayOf<IAccount*>**)&currentAccounts);
+                AutoPtr<ISet> preExistingAccounts;
+                CHashSet::New((ISet**)&preExistingAccounts);
                 for (Int32 i = 0; i < mExistingAccounts->GetLength(); ++i) {
-                    preExistingAccounts->Insert(
-                            (IAccount*)(*mExistingAccounts)[i]->Probe(EIID_IAccount));
+                    preExistingAccounts->Add(IAccount::Probe((*mExistingAccounts)[i]));
                 }
                 for(Int32 i = 0; i < currentAccounts->GetLength(); ++i) {
-                    if (preExistingAccounts->Find((*currentAccounts)[i])
-                            == preExistingAccounts->End()) {
-                        AutoPtr<CAccount> account = (CAccount*)(*currentAccounts)[i];
-                        accountName = account->mName;
-                        accountType = account->mType;
+                    AutoPtr<IAccount> account = (*currentAccounts)[i];
+                    Boolean bContains = FALSE;
+                    preExistingAccounts->Contains(account, &bContains);
+                    if (!bContains) {
+                        account->GetName(&accountName);
+                        account->GetType(&accountType);
                         break;
                     }
                 }
@@ -327,11 +392,11 @@ ECode ChooseTypeAndAccountActivity::OnActivityResult(
                 return NOERROR;
             }
         }
-        Slogger::D(TAG, "ChooseTypeAndAccountActivity.onActivityResult: unable to find added account, pretending the request was canceled");
+        Logger::D(TAG, "ChooseTypeAndAccountActivity.onActivityResult: unable to find added account, pretending the request was canceled");
     }
-    // if (Log.isLoggable(TAG, Log.VERBOSE)) {
-    //     Log.v(TAG, "ChooseTypeAndAccountActivity.onActivityResult: canceled");
-    // }
+    if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
+        Logger::V(TAG, "ChooseTypeAndAccountActivity.onActivityResult: canceled");
+    }
     SetResult(IActivity::RESULT_CANCELED);
     return Finish();
 }
@@ -339,9 +404,9 @@ ECode ChooseTypeAndAccountActivity::OnActivityResult(
 void ChooseTypeAndAccountActivity::RunAddAccountForAuthenticator(
     /* [in] */ const String& type)
 {
-    // if (Log.isLoggable(TAG, Log.VERBOSE)) {
-    //     Log.v(TAG, "runAddAccountForAuthenticator: " + type);
-    // }
+    if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
+        Logger::V(TAG, "runAddAccountForAuthenticator: %s", (const char*)type);
+    }
     AutoPtr<IIntent> intent;
     ASSERT_SUCCEEDED(GetIntent((IIntent**)&intent));
     AutoPtr<IBundle> options;
@@ -355,15 +420,14 @@ void ChooseTypeAndAccountActivity::RunAddAccountForAuthenticator(
     AutoPtr<IAccountManager> accountManager;
     ASSERT_SUCCEEDED(CAccountManager::Get(ctx, (IAccountManager**)&accountManager));
     AutoPtr<IAccountManagerFuture> future;
-    accountManager->AddAccount(type, authTokenType, *requiredFeatures,
-            options, NULL /* activity */, (IAccountManagerCallback*)this /* callback */,
+    accountManager->AddAccount(type, authTokenType, requiredFeatures,
+            options, NULL /* activity */, this /* callback */,
             NULL /* Handler */, (IAccountManagerFuture**)&future);
 }
 
 ECode ChooseTypeAndAccountActivity::Run(
     /* [in] */ IAccountManagerFuture* accountManagerFuture)
 {
-    // try {
     AutoPtr<IBundle> accountManagerResult;
     FAIL_RETURN(accountManagerFuture->GetResult((IInterface**)&accountManagerResult));
     AutoPtr<IParcelable> parcel;
@@ -375,7 +439,8 @@ ECode ChooseTypeAndAccountActivity::Run(
         AutoPtr<IAccountManager> accountManager;
         ASSERT_SUCCEEDED(CAccountManager::Get(ctx, (IAccountManager**)&accountManager));
         mExistingAccounts = NULL;
-        accountManager->GetAccounts((ArrayOf<IAccount*>**)&mExistingAccounts);
+        accountManager->GetAccountsForPackage(mCallingPackage,
+                        mCallingUid, (ArrayOf<IAccount*>**)&mExistingAccounts);
         Int32 flags;
         intent->GetFlags(&flags);
         intent->SetFlags(flags & ~IIntent::FLAG_ACTIVITY_NEW_TASK);
@@ -387,13 +452,6 @@ ECode ChooseTypeAndAccountActivity::Run(
         }
         return NOERROR;
     }
-    // } catch (OperationCanceledException e) {
-    //     setResult(Activity.RESULT_CANCELED);
-    //     finish();
-    //     return;
-    // } catch (IOException e) {
-    // } catch (AuthenticatorException e) {
-    // }
     AutoPtr<IBundle> bundle;
     FAIL_RETURN(CBundle::New((IBundle**)&bundle));
     bundle->PutString(IAccountManager::KEY_ERROR_MESSAGE,
@@ -407,7 +465,7 @@ ECode ChooseTypeAndAccountActivity::Run(
 void ChooseTypeAndAccountActivity::OnAccountSelected(
     /* [in] */ IAccount* account)
 {
-    Slogger::D(TAG, "selected account %p", account);
+    Logger::D(TAG, "selected account %p", account);
     AutoPtr<CAccount> cls = (CAccount*)account;
     SetResultAndFinish(cls->mName, cls->mType);
 }
@@ -424,18 +482,18 @@ void ChooseTypeAndAccountActivity::SetResultAndFinish(
     ASSERT_SUCCEEDED(CIntent::New((IIntent**)&intent));
     intent->PutExtras(bundle);
     SetResult(IActivity::RESULT_OK, intent);
-    // if (Log.isLoggable(TAG, Log.VERBOSE)) {
-    //     Log.v(TAG, "ChooseTypeAndAccountActivity.setResultAndFinish: "
-    //             + "selected account " + accountName + ", " + accountType);
-    // }
+    if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
+        Logger::V(TAG, "ChooseTypeAndAccountActivity.setResultAndFinish: selected account %s, %s",
+            (const char*)accountName, (const char*)accountType);
+    }
     Finish();
 }
 
 void ChooseTypeAndAccountActivity::StartChooseAccountTypeActivity()
 {
-    // if (Log.isLoggable(TAG, Log.VERBOSE)) {
-    //     Log.v(TAG, "ChooseAccountTypeActivity.startChooseAccountTypeActivity()");
-    // }
+    if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
+        Logger::V(TAG, "ChooseAccountTypeActivity.startChooseAccountTypeActivity()");
+    }
     AutoPtr<IIntent> intent;
     assert(0);
     // ASSERT_SUCCEEDED(CIntent::New(this, ChooseAccountTypeActivity.class));
@@ -463,21 +521,26 @@ void ChooseTypeAndAccountActivity::StartChooseAccountTypeActivity()
 }
 
 Int32 ChooseTypeAndAccountActivity::GetItemIndexToSelect(
-    /* [in] */ List<AutoPtr<IAccount> >* accounts,
+    /* [in] */ IArrayList* accounts,
     /* [in] */ const String& selectedAccountName,
     /* [in] */ Boolean selectedAddNewAccount)
 {
     // If "Add account" option was previously selected by user, preserve it across
     // orientation changes.
+    Int32 size = 0;
+    accounts->GetSize(&size);
     if (selectedAddNewAccount) {
-        return accounts->GetSize();
+        return size;
     }
     // search for the selected account name if present
-    List<AutoPtr<IAccount> >::Iterator it = accounts->Begin();
-    Int32 i = 0;
-    for (; it != accounts->End(); ++it, ++i) {
-        if (((CAccount*)(*it).Get())->mName.Equals(selectedAccountName)) {
-            return i;
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> p;
+        accounts->Get(i, (IInterface**)&p);
+        AutoPtr<IAccount> pAcc = IAccount::Probe(p);
+        String name;
+        pAcc->GetName(&name);
+        if (name.Equals(selectedAccountName)) {
+          return i;
         }
     }
     // no account selected.
@@ -485,102 +548,110 @@ Int32 ChooseTypeAndAccountActivity::GetItemIndexToSelect(
 }
 
 AutoPtr< ArrayOf<String> > ChooseTypeAndAccountActivity::GetListOfDisplayableOptions(
-    /* [in] */ List<AutoPtr<IAccount> >* accounts)
+    /* [in] */ IArrayList* accounts)
 {
     // List of options includes all accounts found together with "Add new account" as the
     // last item in the list.
-    Int32 size = accounts->GetSize();
-    AutoPtr< ArrayOf<String> > listItems = ArrayOf<String>::Alloc(size + 1);
-    List<AutoPtr<IAccount> >::Iterator it = accounts->Begin();
-    for (Int32 i = 0; it != accounts->End(); ++it, ++i) {
-        (*listItems)[i] = ((CAccount*)(*it).Get())->mName;
+    Int32 size = 0;
+    accounts->GetSize(&size);
+    AutoPtr<ArrayOf<String> > listItems = ArrayOf<String>::Alloc(size + (mDisallowAddAccounts ? 0 : 1));
+    for (Int32 i = 0; i < size; i++) {
+        AutoPtr<IInterface> p;
+        accounts->Get(i, (IInterface**)&p);
+        AutoPtr<IAccount> acc = IAccount::Probe(p);
+        String name;
+        acc->GetName(&name);
+        (*listItems)[i] = name;
     }
-    AutoPtr<IResources> r;
-    ASSERT_SUCCEEDED(GetResources((IResources**)&r));
-    r->GetString(R::string::add_account_button_label, &(*listItems)[size]);
+    if (!mDisallowAddAccounts) {
+        AutoPtr<IResources> r;
+        ASSERT_SUCCEEDED(GetResources((IResources**)&r));
+        r->GetString(R::string::add_account_button_label, &(*listItems)[size]);
+    }
     return listItems;
 }
 
-AutoPtr< List<AutoPtr<IAccount> > > ChooseTypeAndAccountActivity::GetAcceptableAccountChoices(
+AutoPtr<IArrayList> ChooseTypeAndAccountActivity::GetAcceptableAccountChoices(
     /* [in] */ IAccountManager* accountManager)
 {
-    AutoPtr< ArrayOf<IAccount*> > accounts;
-    ASSERT_SUCCEEDED(accountManager->GetAccounts((ArrayOf<IAccount*>**)&accounts));
-    AutoPtr< List<AutoPtr<IAccount> > > accountsToPopulate = new List<AutoPtr<IAccount> >(accounts->GetLength());
+    AutoPtr<ArrayOf<IAccount*> > accounts;
+    ASSERT_SUCCEEDED(accountManager->GetAccountsForPackage(mCallingPackage, mCallingUid, (ArrayOf<IAccount*>**)&accounts));
+    AutoPtr<IArrayList> accountsToPopulate;
+    CArrayList::New(accounts->GetLength(), (IArrayList**)&accountsToPopulate);
     for (Int32 i = 0; i < accounts->GetLength(); ++i) {
         AutoPtr<IAccount> account = (*accounts)[i];
+        Boolean bContains = FALSE;
         if (mSetOfAllowableAccounts != NULL
-                && mSetOfAllowableAccounts->Find(account) == mSetOfAllowableAccounts->End()) {
+                && (mSetOfAllowableAccounts->Contains(account, &bContains), bContains)) {
             continue;
         }
+        String type;
+        account->GetType(&type);
+        AutoPtr<ICharSequence> pType;
+        CString::New(type, (ICharSequence**)&pType);
         if (mSetOfRelevantAccountTypes != NULL
-                && mSetOfRelevantAccountTypes->Find(((CAccount*)account.Get())->mType)
-                        == mSetOfRelevantAccountTypes->End()) {
+                && !(mSetOfRelevantAccountTypes->Contains(pType, &bContains), bContains)) {
             continue;
         }
-        accountsToPopulate->PushBack(account);
+        accountsToPopulate->Add(account);
     }
     return accountsToPopulate;
 }
 
-AutoPtr< HashSet<String> > ChooseTypeAndAccountActivity::GetReleventAccountTypes(
+AutoPtr<ISet> ChooseTypeAndAccountActivity::GetReleventAccountTypes(
     /* [in] */ IIntent* intent)
 {
     // An account type is relevant iff it is allowed by the caller and supported by the account
-      // manager.
-    AutoPtr< HashSet<String> > setOfRelevantAccountTypes;
+    // manager.
+    AutoPtr<ISet> setOfRelevantAccountTypes;
     AutoPtr< ArrayOf<String> > allowedAccountTypes;
     ASSERT_SUCCEEDED(intent->GetStringArrayExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY,
             (ArrayOf<String>**)&allowedAccountTypes));
     if (allowedAccountTypes != NULL) {
-        setOfRelevantAccountTypes = new HashSet<String>();
+        CHashSet::New((ISet**)&setOfRelevantAccountTypes);
         for (Int32 i = 0; i < allowedAccountTypes->GetLength(); ++i) {
-            setOfRelevantAccountTypes->Insert((*allowedAccountTypes)[i]);
+            AutoPtr<ICharSequence> pCS;
+            CString::New((*allowedAccountTypes)[i], (ICharSequence**)&pCS);
         }
         AutoPtr< ArrayOf<IAuthenticatorDescription*> > descs;
-        AutoPtr<IContext> ctx = (IContext*)Probe(Elastos::Droid::Content::EIID_IContext);
         AutoPtr<IAccountManager> accountManager;
-        ASSERT_SUCCEEDED(CAccountManager::Get(ctx, (IAccountManager**)&accountManager));
+        ASSERT_SUCCEEDED(CAccountManager::Get(this, (IAccountManager**)&accountManager));
         ASSERT_SUCCEEDED(accountManager->GetAuthenticatorTypes(
                 (ArrayOf<IAuthenticatorDescription*>**)&descs));
         Int32 len = descs->GetLength();
-        AutoPtr<HashSet<String> > supportedAccountTypes = new HashSet<String>(len);
+        AutoPtr<ISet> supportedAccountTypes;
+        CHashSet::New(len, (ISet**)&supportedAccountTypes);
         for (Int32 i = 0; i < len; ++i) {
-            AutoPtr<CAuthenticatorDescription> description =
-                    (CAuthenticatorDescription*)(*descs)[i];
-            supportedAccountTypes->Insert(description->mType);
+            AutoPtr<IAuthenticatorDescription> description = (*descs)[i];
+            String type;
+            description->GetType(&type);
+            AutoPtr<ICharSequence> cs;
+            CString::New(type, (ICharSequence**)&cs);
+            supportedAccountTypes->Add(cs);
         }
-        HashSet<String>::Iterator it = setOfRelevantAccountTypes->Begin();
-        for (; it != setOfRelevantAccountTypes->End();) {
-            if (supportedAccountTypes->Find(*it) == supportedAccountTypes->End()) {
-                setOfRelevantAccountTypes->Erase(it++);
-            }
-            else {
-                ++it;
-            }
-        }
+        setOfRelevantAccountTypes->RetainAll(ICollection::Probe(supportedAccountTypes));
     }
     return setOfRelevantAccountTypes;
 }
 
-AutoPtr< HashSet<AutoPtr<IAccount> > > ChooseTypeAndAccountActivity::GetAllowableAccountSet(
+AutoPtr<ISet> ChooseTypeAndAccountActivity::GetAllowableAccountSet(
     /* [in] */ IIntent* intent)
 {
-    AutoPtr< HashSet<AutoPtr<IAccount> > > setOfAllowableAccounts;
-    AutoPtr<IObjectContainer> validAccounts;
-    intent->GetParcelableArrayListExtra(EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST,
-            (IObjectContainer**)&validAccounts);
+    AutoPtr<ISet> setOfAllowableAccounts;
+    AutoPtr<IArrayList> validAccounts;
+    intent->GetParcelableArrayListExtra(EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST, (IArrayList**)&validAccounts);
     if (validAccounts != NULL) {
-        Int32 count;
-        validAccounts->GetObjectCount(&count);
-        setOfAllowableAccounts = new HashSet<AutoPtr<IAccount> >(count);
-        AutoPtr<IObjectEnumerator> enumerator;
-        validAccounts->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
-        Boolean hasNext = FALSE;
-        while(enumerator->MoveNext(&hasNext), hasNext) {
-            AutoPtr<IParcelable> parcelable;
-            enumerator->Current((IInterface**)&parcelable);
-            setOfAllowableAccounts->Insert((IAccount*)parcelable->Probe(EIID_IAccount));
+        Int32 size = 0;
+        validAccounts->GetSize(&size);
+        CHashSet::New(size, (ISet**)&setOfAllowableAccounts);
+        AutoPtr<IIterator> it;
+        ICollection::Probe(validAccounts)->GetIterator((IIterator**)&it);
+        Boolean bHasNext = FALSE;
+        while ((it->HasNext(&bHasNext), bHasNext)) {
+            AutoPtr<IInterface> ct;
+            it->GetNext((IInterface**)&ct);
+            AutoPtr<IParcelable> parcelable = IParcelable::Probe(ct);
+            setOfAllowableAccounts->Add(IAccount::Probe(parcelable));
         }
     }
     return setOfAllowableAccounts;
@@ -598,26 +669,8 @@ void ChooseTypeAndAccountActivity::OverrideDescriptionIfSupplied(
         descriptionView->SetText(csq);
     }
     else {
-        descriptionView->SetVisibility(IView::GONE);
+        IView::Probe(descriptionView)->SetVisibility(IView::GONE);
     }
-}
-
-ChooseTypeAndAccountActivity::AdapterViewOnItemClickListener::AdapterViewOnItemClickListener(
-    /* [in] */ ChooseTypeAndAccountActivity* host)
-    : mHost(host)
-{}
-
-CAR_INTERFACE_IMPL(ChooseTypeAndAccountActivity::AdapterViewOnItemClickListener,
-        IAdapterViewOnItemClickListener);
-
-ECode ChooseTypeAndAccountActivity::AdapterViewOnItemClickListener::OnItemClick(
-    /* [in] */ IAdapterView* parent,
-    /* [in] */ IView* view,
-    /* [in] */ Int32 position,
-    /* [in] */ Int64 id)
-{
-    mHost->mSelectedItemIndex = position;
-    return mHost->mOkButton->SetEnabled(TRUE);
 }
 
 void ChooseTypeAndAccountActivity::PopulateUIAccountList(
@@ -627,30 +680,28 @@ void ChooseTypeAndAccountActivity::PopulateUIAccountList(
     ASSERT_SUCCEEDED(FindViewById(R::id::list, (IView**)&view));
     AutoPtr<IListView> list = IListView::Probe(view);
 
-    AutoPtr<IContext> ctx = (IContext*)Probe(Elastos::Droid::Content::EIID_IContext);
-    AutoPtr<IObjectContainer> items;
-    CObjectContainer::New((IObjectContainer**)&items);
+    AutoPtr<IArrayList> items;
+    CArrayList::New((IArrayList**)&items);
     for (Int32 i = 0; i < listItems->GetLength(); ++i) {
         AutoPtr<ICharSequence> csq;
         CString::New((*listItems)[i], (ICharSequence**)&csq);
-        items->Add((IInterface*)csq);
+        items->Add(csq);
     }
-    AutoPtr<IArrayAdapter> arrayAdapter;
-    ASSERT_SUCCEEDED(CArrayAdapter::New(ctx,
-            R::layout::simple_list_item_single_choice, items,
-            (IArrayAdapter**)&arrayAdapter));
-    AutoPtr<IAdapter> adapter = (IAdapter*)arrayAdapter->Probe(
-            Elastos::Droid::Widget::EIID_IAdapter);
-    list->SetAdapter(adapter);
-    list->SetChoiceMode(IListView::CHOICE_MODE_SINGLE);
+    AutoPtr<IArrayAdapter> adapter;
+    ASSERT_SUCCEEDED(CArrayAdapter::New(this,
+            R::layout::simple_list_item_single_choice, IList::Probe(items),
+            (IArrayAdapter**)&adapter));
+
+    IAdapterView::Probe(list)->SetAdapter(IAdapter::Probe(adapter));
+    IAbsListView::Probe(list)->SetChoiceMode(IAbsListView::CHOICE_MODE_SINGLE);
     list->SetItemsCanFocus(FALSE);
-    list->SetOnItemClickListener(
+    IAdapterView::Probe(list)->SetOnItemClickListener(
             (IAdapterViewOnItemClickListener*)new AdapterViewOnItemClickListener(this));
     if (mSelectedItemIndex != SELECTED_ITEM_NONE) {
-        list->SetItemChecked(mSelectedItemIndex, TRUE);
-        // if (Log.isLoggable(TAG, Log.VERBOSE)) {
-        //     Log.v(TAG, "List item " + mSelectedItemIndex + " should be selected");
-        // }
+        IAbsListView::Probe(list)->SetItemChecked(mSelectedItemIndex, TRUE);
+        if (Logger::IsLoggable(TAG, Logger::VERBOSE)) {
+            Logger::V(TAG, "List item %d should be selected", mSelectedItemIndex);
+        }
     }
 }
 

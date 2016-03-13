@@ -72,8 +72,7 @@ public:
         /* [in] */ IResourcesTheme* theme);
 
     // @Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
     // @Override
     CARAPI GetConstantState(

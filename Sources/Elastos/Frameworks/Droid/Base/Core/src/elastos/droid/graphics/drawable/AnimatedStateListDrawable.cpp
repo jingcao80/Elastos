@@ -658,19 +658,15 @@ ECode AnimatedStateListDrawable::ParseItem(
     return NOERROR;
 }
 
-ECode AnimatedStateListDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode AnimatedStateListDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
     AutoPtr<IDrawable> dr;
-    if (!mMutated && (StateListDrawable::Mutate((IDrawable**)&dr), dr.Get()) == this) {
+    if (!mMutated) {
         AutoPtr<AnimatedStateListState> newState = new AnimatedStateListState(mState, this, NULL);
         SetConstantState(newState);
         mMutated = TRUE;
     }
 
-    *drawable = THIS_PROBE(IDrawable);
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 

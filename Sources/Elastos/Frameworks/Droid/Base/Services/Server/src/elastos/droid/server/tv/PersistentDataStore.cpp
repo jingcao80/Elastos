@@ -99,7 +99,7 @@ ECode PersistentDataStore::constructor(
     AutoPtr<IFile> userDir = Environment::GetUserSystemDirectory(userId);
     if (!Ptr(userDir)->Func(IFile::Exists)) {
         if (!Ptr(userDir)->Func(IFile::Mkdirs)) {
-            Logger::E(TAG, "User dir cannot be created: %s", Object::ToString(userDir).string());
+            Logger::E(TAG, "User dir cannot be created: %s", TO_CSTR(userDir));
             return E_ILLEGAL_STATE_EXCEPTION;
         }
     }

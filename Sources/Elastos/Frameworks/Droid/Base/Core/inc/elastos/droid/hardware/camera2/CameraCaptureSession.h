@@ -4,7 +4,7 @@
 
 #include "Elastos.Droid.Hardware.h"
 #include <Elastos.CoreLibrary.IO.h>
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
@@ -15,7 +15,7 @@ namespace Droid {
 namespace Hardware {
 namespace Camera2 {
 
-class CameraCaptureSession
+class ECO_PUBLIC CameraCaptureSession
     : public Object
     , public ICameraCaptureSession
     , public ICloseable

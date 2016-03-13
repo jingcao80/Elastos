@@ -1,0 +1,14 @@
+TARGET_NAME= cdma
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = CCdmaCellLocation.cpp
+SOURCES += CCdmaCellLocationHelper.cpp
+SOURCES += CCdmaSmsCbProgramData.cpp
+SOURCES += CCdmaSmsCbProgramResults.cpp

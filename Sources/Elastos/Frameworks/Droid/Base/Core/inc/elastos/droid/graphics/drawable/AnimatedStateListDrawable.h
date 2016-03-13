@@ -312,8 +312,7 @@ public:
         /* [in] */ /*@Nullable*/ IResourcesTheme* theme) /*throws XmlPullParserException, IOException*/;
 
     // @Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
 protected:
     // @Override

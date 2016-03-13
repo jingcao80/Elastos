@@ -13,7 +13,7 @@ HdmiMhlLocalDeviceStub::HdmiMhlLocalDeviceStub()
 {}
 
 ECode HdmiMhlLocalDeviceStub::constructor(
-    /* [in] */ HdmiControlService* service,
+    /* [in] */ IHdmiControlService* service,
     /* [in] */ Int32 portId)
 {
     return E_NOT_IMPLEMENTED;
@@ -35,6 +35,8 @@ ECode HdmiMhlLocalDeviceStub::OnDeviceRemoved()
 ECode HdmiMhlLocalDeviceStub::GetInfo(
     /* [out] */ IHdmiDeviceInfo** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return INFO;
@@ -73,6 +75,8 @@ ECode HdmiMhlLocalDeviceStub::SetDeviceStatusChange(
 ECode HdmiMhlLocalDeviceStub::GetPortId(
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mPortId;
@@ -104,7 +108,7 @@ AutoPtr<IHdmiDeviceInfo> HdmiMhlLocalDeviceStub::InitINFO()
     AutoPtr<IHdmiDeviceInfo> rev;
 #if 0 // TODO: Translate codes below
     = new HdmiDeviceInfo(
-            Constants.INVALID_PHYSICAL_ADDRESS, Constants.INVALID_PORT_ID, -1, -1)
+            Constants::INVALID_PHYSICAL_ADDRESS, Constants::INVALID_PORT_ID, -1, -1)
 #endif
     return rev;
 }

@@ -22,15 +22,6 @@ CMatrix::IdentityMatrix::IdentityMatrix(
     Matrix::constructor(src);
 }
 
-PInterface CMatrix::IdentityMatrix::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_Matrix) {
-        return reinterpret_cast<PInterface>((Matrix*)this);
-    }
-    return Matrix::Probe(riid);
-}
-
 ECode CMatrix::IdentityMatrix::Oops()
 {
     // throw new IllegalStateException("Matrix can not be modified");
@@ -325,14 +316,6 @@ ECode CMatrix::IdentityMatrix::SetValues(
 
 AutoPtr<IMatrix> CMatrix::IDENTITY_MATRIX = new IdentityMatrix();
 CAR_OBJECT_IMPL(CMatrix);
-PInterface CMatrix::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_Matrix) {
-        return reinterpret_cast<PInterface>((Matrix*)this);
-    }
-    return Matrix::Probe(riid);
-}
 
 } // namespace Graphics
 } // namepsace Droid

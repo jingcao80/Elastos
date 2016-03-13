@@ -14,7 +14,7 @@ class MeasurementUtils
 {
 public:
     static CARAPI_(Int64) MeasureDirectory(
-         /* [in] */ String path);
+         /* [in] */ const String& path);
 };
 
 } //namespace DefaultContainerService

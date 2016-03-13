@@ -1,9 +1,14 @@
-TARGET_NAME = chromium
-TARGET_TYPE = lib
+TARGET_NAME = Elastos.Droid.Chromium
+TARGET_TYPE = eco
+
+EXPORT_ALL_SYMBOLS=1
 
 C_DEFINES += -DDROID_CORE
 
-include $(MAKEDIR)/../../../../../../../../sources.inc
+CAR_FLAGS += -n -u
+LUBE_FLAGS += -n -u
+
+#include $(MAKEDIR)/../../../../../../../../sources.inc
 
 INCLUDES += ../../../
 INCLUDES += $(MAKEDIR)/../../../../../../inc/
@@ -13,8 +18,11 @@ INCLUDES += $(PREBUILD_INC)/skia/core
 INCLUDES += $(PREBUILD_INC)/bionic
 INCLUDES += $(PREBUILD_INC)/stlport
 
+SOURCES = Elastos.Droid.Chromium.car
+SOURCES += Elastos.CoreLibrary.cpp
+SOURCES += Elastos.Droid.Core.cpp
 
-SOURCES = ContentSettingsAdapter.cpp
+SOURCES += ContentSettingsAdapter.cpp
 SOURCES += CookieManagerAdapter.cpp
 SOURCES += DrawGLFunctor.cpp
 SOURCES += FileChooserParamsAdapter.cpp
@@ -33,3 +41,26 @@ SOURCES += WebViewContentsClientAdapter.cpp
 SOURCES += WebViewDatabaseAdapter.cpp
 SOURCES += GraphicBufferImpl.cpp
 SOURCES += PixelInfo.cpp
+SOURCES += R_Chromium.cpp
+
+ELASTOS_LIBS = native/native.lib
+
+LIBRARIES = $(XDK_USER_LIB)/Elastos.Runtime.lib
+LIBRARIES += $(XDK_TARGETS)/Elastos.Runtime.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.CoreLibrary.eco
+LIBRARIES += $(XDK_TARGETS)/Elastos.Droid.Core.eco
+LIBRARIES += -lm -lcutils -licuuc -llog -lutils -landroidfw
+
+LIBRARIES += $(XDK_USER_LIB)/crt0.lib
+LIBRARIES += $(XDK_USER_LIB)/Elastos.DroidRuntime.lib
+LIBRARIES += $(PREBUILD_LIB)/libxml2.a
+LIBRARIES += $(PREBUILD_LIB)/libstdc++.a
+#LIBRARIES += $(PREBUILD_LIB)/cxx-stl/gnu-libstdc++/armeabi/libstdc++.a
+#LIBRARIES += $(PREBUILD_LIB)/libc++.a
+LIBRARIES += $(PREBUILD_LIB)/libstagefright_amrnbenc.a
+
+LIBRARIES += -licuuc -licui18n -lbinder -lutils -lcutils -lsqlite -lskia -lui -linput -landroidfw -lselinux -lz -lusbhost -lnativebridge -lprocessgroup -lmtp -lexif -ljhead -lmedia -lcamera_client -lminikin -lhwui -lgui -lsoundtrigger -lhardware_legacy -lelwebviewchromium -lhardware -lpdfium -ljpeg -lstlport -ldl -lcamera_metadata -lEGL -lGLESv1_CM -lETC1 -lGLESv2 -lnetd_client  -lnetutils -limg_utils -lstagefright -lstagefright_foundation -lstagefright_amrnb_common
+
+APPPACK = 1
+DIRRESOURCES += $(MAKEDIR)/res;
+

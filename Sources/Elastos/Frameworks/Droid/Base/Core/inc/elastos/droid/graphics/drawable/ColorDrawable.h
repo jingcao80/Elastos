@@ -84,8 +84,7 @@ public:
      * @return This drawable.
      */
     //@Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
     //@Override
     CARAPI Draw(

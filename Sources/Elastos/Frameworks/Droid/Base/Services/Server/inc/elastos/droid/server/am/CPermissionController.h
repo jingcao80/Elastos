@@ -5,6 +5,7 @@
 #include "_Elastos_Droid_Server_Am_CPermissionController.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IPermissionController;
 
@@ -26,7 +27,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle32 host);
+        /* [in] */ IIActivityManager* host);
 
     CARAPI CheckPermission(
         /* [in] */ const String& permission,

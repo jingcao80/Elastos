@@ -3,15 +3,28 @@
 #define __ELASTOS_DROID_TELEPHONY_CCELLSIGNALSTRENGTHGSM_H__
 
 #include "_Elastos_Droid_Telephony_CCellSignalStrengthGsm.h"
-#include "CellSignalStrength.h"
+#include "elastos/droid/ext/frameworkdef.h"
+#include "elastos/droid/telephony/CellSignalStrength.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-CarClass(CCellSignalStrengthGsm), CellSignalStrength
+CarClass(CCellSignalStrengthGsm)
+    , public CellSignalStrength
+    , public ICellSignalStrengthGsm
+    , public IParcelable
 {
 public:
+    CCellSignalStrengthGsm();
+
+    virtual ~CCellSignalStrengthGsm();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(
@@ -20,9 +33,6 @@ public:
 
     CARAPI constructor(
         /* [in] */ ICellSignalStrengthGsm* css);
-
-    CARAPI_(PInterface) Probe(
-        /* [in]  */ REIID riid);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
@@ -83,12 +93,12 @@ private:
     static CARAPI Log(
         /* [in] */ const String& s);
 
-    static const String LOG_TAG/* = "CellSignalStrengthCdma"*/;
-    static const Boolean DBG/* = false*/;
+    static const String TAG;
+    static const Boolean DBG;
 
-    static const Int32 GSM_SIGNAL_STRENGTH_GREAT = 12;
-    static const Int32 GSM_SIGNAL_STRENGTH_GOOD = 8;
-    static const Int32 GSM_SIGNAL_STRENGTH_MODERATE = 8;
+    static const Int32 GSM_SIGNAL_STRENGTH_GREAT;
+    static const Int32 GSM_SIGNAL_STRENGTH_GOOD;
+    static const Int32 GSM_SIGNAL_STRENGTH_MODERATE;
 
     Int32 mSignalStrength; // Valid values are (0-31, 99) as defined in TS 27.007 8.5
     Int32 mBitErrorRate;   // bit error rate (0-7, 99) as defined in TS 27.007 8.5

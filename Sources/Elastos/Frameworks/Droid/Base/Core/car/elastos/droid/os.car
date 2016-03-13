@@ -519,6 +519,60 @@ module
         interface IPowerManagerWakeLock;
     }
 
+    class CStrictModeThreadPolicyBuilder {
+        constructor();
+
+        constructor(
+            [in] IStrictModeThreadPolicy* policy);
+
+        interface IStrictModeThreadPolicyBuilder;
+    }
+
+    class CStrictModeVmPolicyBuilder {
+        constructor();
+
+        constructor(
+            [in] IStrictModeVmPolicy* policy);
+
+        interface IStrictModeVmPolicyBuilder;
+    }
+
+    singleton class CStrictMode {
+        interface IStrictMode;
+    }
+
+    class CStrictModeSpan {
+        constructor();
+
+        constructor(
+            [in] Handle32 threadState);
+
+        interface IStrictModeSpan;
+    }
+
+    class CStrictModeViolationInfo {
+        constructor();
+
+        constructor(
+            //[in] IThrowable* tr,
+            [in] Int32 policy);
+
+        constructor(
+            [in] IParcel* pin);
+
+        constructor(
+            [in] IParcel* pin,
+            [in] Boolean unsetGatheringBit);
+
+        interface IStrictModeViolationInfo;
+    }
+
+    class CFileBridge {
+        constructor();
+
+        interface IFileBridge;
+    }
+
     // [deprecated]
     // class CDropBoxManagerEntry {
     //     constructor();
@@ -555,7 +609,6 @@ module
     //     interface IDropBoxManagerEntry;
     // }
 
-
     // [local]
     // class CDropBoxManager {
     //     constructor(
@@ -581,55 +634,6 @@ module
     //     interface IDebugMemoryInfoHelper;
     // }
 
-    // class CStrictModeThreadPolicyBuilder {
-    //     constructor();
-
-    //     constructor(
-    //         [in] IStrictModeThreadPolicy* policy);
-
-    //     interface IStrictModeThreadPolicyBuilder;
-    // }
-
-    // class CStrictModeVmPolicyBuilder {
-    //     constructor();
-
-    //     constructor(
-    //         [in] IStrictModeVmPolicy* policy);
-
-    //     interface IStrictModeVmPolicyBuilder;
-    // }
-
-    // singleton class CStrictMode {
-    //     interface IStrictMode;
-    // }
-
-    // class CStrictModeSpan {
-    //     constructor();
-
-    //     constructor(
-    //         [in] Handle32 threadState);
-
-    //     interface IStrictModeSpan;
-    // }
-
-
-    // class CStrictModeViolationInfo {
-    //     constructor();
-
-    //     constructor(
-    //         //[in] IThrowable* tr,
-    //         [in] Int32 policy);
-
-    //     constructor(
-    //         [in] IParcel* pin);
-
-    //     constructor(
-    //         [in] IParcel* pin,
-    //         [in] Boolean unsetGatheringBit);
-
-    //     interface IStrictModeViolationInfo;
-    // }
-
     // [deprecated]
     // class CParcelStringList {
     //     constructor(
@@ -642,12 +646,6 @@ module
     // singleton class CZigbeeManager {
     //     interface IZigbeeManager;
     // }
-
-    class CFileBridge {
-        constructor();
-
-        interface IFileBridge;
-    }
 
     } // namespace Os
     } // namespace Droid

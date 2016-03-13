@@ -99,7 +99,7 @@ public:
             /* [in] */ IBatteryStatsHistoryTag* o);
 
         CARAPI SetTo(
-            /* [in] */ String string,
+            /* [in] */ const String& string,
             /* [in] */ Int32 uid);
 
         CARAPI WriteToParcel(
@@ -113,7 +113,7 @@ public:
             /* [out] */ String* string);
 
         CARAPI SetString(
-            /* [in] */ String string);
+            /* [in] */ const String& string);
 
         CARAPI GetUid(
             /* [out] */ Int32* uid);
@@ -244,7 +244,7 @@ public:
     public:
         UpdateState(
             /* [in] */ Int32 code,
-            /* [in] */ String name,
+            /* [in] */ const String& name,
             /* [in] */ Int32 uid,
             /* [in] */ Int32 poolIdx,
             /* [out] */ Boolean* result);

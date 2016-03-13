@@ -114,7 +114,7 @@ ECode CCamera::SetLocation(
 ECode CCamera::GetMatrix(
     /* [in] */ IMatrix* matrix)
 {
-    NativeGetMatrix(((Matrix*)(IMatrix*)matrix->Probe(EIID_Matrix))->mNativeInstance);
+    NativeGetMatrix(((Matrix*)matrix)->mNativeInstance);
     return NOERROR;
 }
 

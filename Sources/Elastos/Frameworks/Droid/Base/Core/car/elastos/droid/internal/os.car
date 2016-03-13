@@ -1,12 +1,10 @@
 module
 {
-    merge("os/AtomicFile.car");
     merge("os/BackgroundThread.car");
     merge("os/BaseCommand.car");
     merge("os/BatterySipper.car");
     merge("os/BatteryStatsHelper.car");
     merge("os/BatteryStatsImpl.car");
-    merge("os/BinderInternal.car");
     merge("os/HandlerCaller.car");
     merge("os/IDropBoxManagerService.car");
     merge("os/InstallerConnection.car");
@@ -32,13 +30,6 @@ module
     namespace Droid {
     namespace Internal {
     namespace Os {
-
-    class CAtomicFile {
-        constructor(
-            [in] IFile* baseName);
-
-        interface IAtomicFile;
-    }
 
     singleton class CBackgroundThreadHelper {
         interface IBackgroundThreadHelper;

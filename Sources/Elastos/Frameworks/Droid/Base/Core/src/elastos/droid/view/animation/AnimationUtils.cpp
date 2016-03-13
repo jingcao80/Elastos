@@ -77,7 +77,6 @@ ECode AnimationUtils::CreateAnimationFromXml(
     /* [in] */ IXmlPullParser* parser,
     /* [out] */ IAnimation** animation)
 {
-    VALIDATE_NOT_NULL(animation);
     return CreateAnimationFromXml(
             c, parser, NULL, Xml::AsAttributeSet(parser), animation);
 }
@@ -111,22 +110,22 @@ ECode AnimationUtils::CreateAnimationFromXml(
         parser->GetName(&name);
 
         if (name.Equals("set")) {
-            FAIL_RETURN(CAnimationSet::New(c, attrs, (IAnimationSet**)&anim));
+            FAIL_RETURN(CAnimationSet::New(c, attrs, (IAnimation**)&anim));
             AutoPtr<IAnimation> temp;
             FAIL_RETURN(CreateAnimationFromXml(
                     c, parser, IAnimationSet::Probe(anim), attrs, (IAnimation**)&temp));
         }
         else if (name.Equals("alpha")) {
-            FAIL_RETURN(CAlphaAnimation::New(c, attrs, (IAlphaAnimation**)&anim));
+            FAIL_RETURN(CAlphaAnimation::New(c, attrs, (IAnimation**)&anim));
         }
         else if (name.Equals("scale")) {
-            FAIL_RETURN(CScaleAnimation::New(c, attrs, (IScaleAnimation**)&anim));
+            FAIL_RETURN(CScaleAnimation::New(c, attrs, (IAnimation**)&anim));
         }
         else if (name.Equals("rotate")) {
-            FAIL_RETURN(CRotateAnimation::New(c, attrs, (IRotateAnimation**)&anim));
+            FAIL_RETURN(CRotateAnimation::New(c, attrs, (IAnimation**)&anim));
         }
         else if (name.Equals("translate")) {
-            FAIL_RETURN(CTranslateAnimation::New(c, attrs, (ITranslateAnimation**)&anim));
+            FAIL_RETURN(CTranslateAnimation::New(c, attrs, (IAnimation**)&anim));
         }
         else {
             Logger::E("AnimationUtils", "Unknown animation name: %s", name.string());

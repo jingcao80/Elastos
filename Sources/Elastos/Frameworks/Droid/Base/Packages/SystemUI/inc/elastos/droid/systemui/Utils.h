@@ -19,7 +19,11 @@ class Utils
 {
 public:
     static AutoPtr<IClassInfo> GetClassInfo(
-        /* [in] */ const String& className);
+        /* [in] */ const String& className,
+        /* [in] */ Int32 flag = 0);
+
+public:
+    static const Int32 ELASTOS_DROID_CORE_ECO_FALG;
 
 private:
     static const String sModulePath;

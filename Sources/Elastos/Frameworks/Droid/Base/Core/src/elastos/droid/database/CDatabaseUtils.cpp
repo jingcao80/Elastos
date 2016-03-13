@@ -443,7 +443,7 @@ ECode CDatabaseUtils::GetSqlStatementType(
 ECode CDatabaseUtils::AppendSelectionArgs(
     /* [in] */ ArrayOf<String>* originalValues,
     /* [in] */ ArrayOf<String>* newValues,
-    /* [out,callee] */ ArrayOf<String>** args)
+    /* [out, callee] */ ArrayOf<String>** args)
 {
     VALIDATE_NOT_NULL(args)
     AutoPtr< ArrayOf<String> > array = DatabaseUtils::AppendSelectionArgs(originalValues, newValues);

@@ -17,6 +17,7 @@ using Elastos::Droid::Database::ICursorWindow;
 using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Droid::Os::ICancellationSignalOnCancelListener;
 using Elastos::Core::IArrayOf;
+using Elastos::Core::ICloseGuard;
 using Elastos::Core::StringBuilder;
 using Elastos::Text::ISimpleDateFormat;
 using Elastos::Utility::Regex::IPattern;
@@ -699,7 +700,7 @@ private:
 
     static AutoPtr<IPattern> TRIM_SQL_PATTERN;
 
-    //const AutoPtr<ICloseGuard> mCloseGuard;// = CloseGuard.get();
+    AutoPtr<ICloseGuard> mCloseGuard;
 
     AutoPtr<SQLiteConnectionPool> mPool;
     AutoPtr<SQLiteDatabaseConfiguration> mConfiguration;

@@ -986,6 +986,22 @@ Int32 ContentProvider::GetUserIdFromAuthority(
     /* [in] */ const String& auth,
     /* [in] */ Int32 defaultUserId)
 {
+    if (auth == NULL) return defaultUserId;
+    Int32 end = auth.LastIndexOf('@');
+    if (end == -1) return defaultUserId;
+    String userIdString = auth.Substring(0, end);
+    Int32 uid;
+    ECode ec = StringUtils::Parse(userIdString, &uid);
+    if (FAILED(ec)) {
+        Logger::W(TAG, "Error parsing userId: %s", userIdString.string());
+        return UserHandle::USER_NULL;
+    }
+    return uid;
+}
+
+Int32 ContentProvider::GetUserIdFromAuthority(
+    /* [in] */ const String& auth)
+{
     return GetUserIdFromAuthority(auth, IUserHandle::USER_CURRENT);
 }
 

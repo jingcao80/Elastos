@@ -664,8 +664,9 @@ ECode CTextServicesManagerService::GetCurrentSpellCheckerSubtype(
         String candidateLocale(NULL);
         if (hashCode == 0) {
             // Spell checker language settings == "auto"
-            AutoPtr<IInputMethodManager> imm;
-            mContext->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&imm);
+            AutoPtr<IInterface> obj;
+            mContext->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
+            AutoPtr<IInputMethodManager> imm = IInputMethodManager::Probe(obj);
             if (imm != NULL) {
                 AutoPtr<IInputMethodSubtype> currentInputMethodSubtype;
                 imm->GetCurrentInputMethodSubtype((IInputMethodSubtype**)&currentInputMethodSubtype);

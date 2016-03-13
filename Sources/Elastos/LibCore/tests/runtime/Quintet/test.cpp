@@ -1111,6 +1111,20 @@ void testWriteXmlParser()
     }
 }
 
+void testSplit()
+{
+    String str("504000 78637 720000 2304 900000 3120 1104000 444777 ");
+    AutoPtr< ArrayOf<String> > st;
+    StringUtils::Split(str, String(" "), (ArrayOf<String>**)&st);
+
+    printf(" >>> file %s, size %d\n", str.string(), st->GetLength());
+
+    for (Int32 i = 0; i < st->GetLength(); ++i) {
+        String token = (*st)[i];
+        printf("   %d: [%s]\n", i, token.string());
+    }
+}
+
 void testQuintet()
 {
     // doTestArrayOfFreeRelease();
@@ -1128,8 +1142,10 @@ void testQuintet()
     //testSelfCopy();
     // testMemoryLeak();
 
-    testWriteXmlParser();
-    testReadXmlParser();
+    // testWriteXmlParser();
+    // testReadXmlParser();
+
+    testSplit();
 }
 
 int main(int argc, char *argv[])

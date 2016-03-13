@@ -96,7 +96,9 @@ FindActionModeCallback::FindActionModeCallback(
     IView::Probe(mEditText)->SetOnClickListener(this);
     SetText(String(""));
     mCustomView->FindViewById(R::id::matches, (IView**)&mMatches);
-    context->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&mInput);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::INPUT_METHOD_SERVICE, (IInterface**)&obj);
+    mInput = IInputMethodManager::Probe(obj);
     context->GetResources((IResources**)&mResources);
 }
 

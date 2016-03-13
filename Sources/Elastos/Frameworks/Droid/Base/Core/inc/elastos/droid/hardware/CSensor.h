@@ -5,7 +5,6 @@
 #include "_Elastos_Droid_Hardware_CSensor.h"
 #include <elastos/core/Object.h>
 
-
 namespace Elastos {
 namespace Droid {
 namespace Hardware {
@@ -174,6 +173,10 @@ private:
         /* [in] */ Float res);
 
 private:
+    friend class CSensorManagerHelper;
+    friend class CSystemSensorManager;
+    friend class SystemSensorManager;
+
     // If this flag is set, the sensor defined as a wake up sensor. This field and REPORTING_MODE_*
     // constants are defined as flags in sensors.h. Modify at both places if needed.
     static const Int32 SENSOR_FLAG_WAKE_UP_SENSOR;
@@ -208,10 +211,6 @@ private:
     String  mRequiredPermission;
     Int32   mMaxDelay;
     Int32   mFlags;
-
-friend class CSensorManagerHelper;
-friend class CSystemSensorManager;
-friend class SystemSensorManager;
 };
 
 } // namespace Hardware

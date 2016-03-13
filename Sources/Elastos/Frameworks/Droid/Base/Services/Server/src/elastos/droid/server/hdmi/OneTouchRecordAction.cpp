@@ -1,12 +1,13 @@
 
 #include "elastos/droid/server/hdmi/OneTouchRecordAction.h"
 #include <Elastos.CoreLibrary.Utility.h>
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
 
-// import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION;
-// import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_ANALOGUE_SERVICE;
-// import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_CURRENTLY_SELECTED_SOURCE;
-// import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_DIGITAL_SERVICE;
-// import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_RECORDING_EXTERNAL_INPUT;
+// import static android.hardware.hdmi.IHdmiControlManager::ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION;
+// import static android.hardware.hdmi.IHdmiControlManager::ONE_TOUCH_RECORD_RECORDING_ANALOGUE_SERVICE;
+// import static android.hardware.hdmi.IHdmiControlManager::ONE_TOUCH_RECORD_RECORDING_CURRENTLY_SELECTED_SOURCE;
+// import static android.hardware.hdmi.IHdmiControlManager::ONE_TOUCH_RECORD_RECORDING_DIGITAL_SERVICE;
+// import static android.hardware.hdmi.IHdmiControlManager::ONE_TOUCH_RECORD_RECORDING_EXTERNAL_INPUT;
 
 using Elastos::Droid::Utility::ISlog;
 
@@ -33,7 +34,7 @@ ECode OneTouchRecordAction::constructor(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        super(source);
+        super::constructor(source);
         mRecorderAddress = recorderAddress;
         mRecordSource = recordSource;
 
@@ -43,10 +44,13 @@ ECode OneTouchRecordAction::constructor(
 ECode OneTouchRecordAction::Start(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         SendRecordOn();
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
 #endif
 }
 
@@ -54,17 +58,21 @@ ECode OneTouchRecordAction::SendRecordOn()
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        SendCommand(HdmiCecMessageBuilder->BuildRecordOn(GetSourceAddress(), mRecorderAddress,
+        Int32 srcAddr;
+        GetSourceAddress(&srcAddr);
+        SendCommand(HdmiCecMessageBuilder->BuildRecordOn(srcAddr, mRecorderAddress,
                 mRecordSource),
                 new SendMessageCallback() {
                 //@Override
                     CARAPI OnSendCompleted(Int32 error) {
                         // if failed to send <Record On>, display error message and finish action.
                         if (error != Constants::SEND_RESULT_SUCCESS) {
-                            Tv()->AnnounceOneTouchRecordResult(
+                            AutoPtr<IHdmiCecLocalDeviceTv> tv;
+                            Tv((IHdmiCecLocalDeviceTv**)&tv);
+                            tv->AnnounceOneTouchRecordResult(
                                     ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION);
                             Finish();
-                            return;
+                            return NOERROR;
                         }
 
                         mState = STATE_WAITING_FOR_RECORD_STATUS;
@@ -78,18 +86,24 @@ ECode OneTouchRecordAction::ProcessCommand(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         if (mState != STATE_WAITING_FOR_RECORD_STATUS) {
-            return FALSE;
+            *result = FALSE;
+            return NOERROR;
         }
 
-        switch (cmd->GetOpcode()) {
+        Int32 opcode;
+        cmd->GetOpcode(&opcode);
+        switch (opcode) {
             case Constants::MESSAGE_RECORD_STATUS:
                 return HandleRecordStatus(cmd);
 
         }
-        return FALSE;
+        *result = FALSE;
+        return NOERROR;
 #endif
 }
 
@@ -97,16 +111,25 @@ ECode OneTouchRecordAction::HandleRecordStatus(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         // Only handle message coming from original recorder.
-        if (cmd->GetSource() != mRecorderAddress) {
-            return FALSE;
+        Int32 srcAddr;
+        cmd->GetSource(&srcAddr);
+        if (srcAddr != mRecorderAddress) {
+            *result = FALSE;
+            return NOERROR;
         }
 
-        Int32 recordStatus = cmd->GetParams()[0];
-        Tv()->AnnounceOneTouchRecordResult(recordStatus);
-        Slogger::I(TAG, "Got record status:" + recordStatus + " from " + cmd->GetSource());
+        AutoPtr<ArrayOf<Byte> > params;
+        cmd->GetParams((ArrayOf<Byte>**)&params);
+        Int32 recordStatus = (*params)[0];
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        tv->AnnounceOneTouchRecordResult(recordStatus);
+        Slogger::I(TAG, "Got record status:" + recordStatus + " from " + srcAddr);
 
         // If recording started successfully, change state and keep this action until <Record Off>
         // received. Otherwise, finish action.
@@ -122,7 +145,8 @@ ECode OneTouchRecordAction::HandleRecordStatus(
                 Finish();
                 break;
         }
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
 #endif
 }
 
@@ -133,10 +157,12 @@ ECode OneTouchRecordAction::HandleTimerEvent(
 #if 0 // TODO: Translate codes below
         if (mState != state) {
             Slogger::W(TAG, "Timeout in invalid state:[Expected:" + mState + ", Actual:" + state + "]");
-            return;
+            return NOERROR;
         }
 
-        Tv()->AnnounceOneTouchRecordResult(ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION);
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        tv->AnnounceOneTouchRecordResult(ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION);
         Finish();
     }
 
@@ -148,6 +174,8 @@ ECode OneTouchRecordAction::HandleTimerEvent(
 ECode OneTouchRecordAction::GetRecorderAddress(
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mRecorderAddress;

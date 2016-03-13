@@ -27,7 +27,7 @@ const Int32 LocalDisplayAdapter::BUILT_IN_DISPLAY_IDS_TO_SCAN[] = {
     ISurfaceControl::BUILT_IN_DISPLAY_ID_MAIN,
     ISurfaceControl::BUILT_IN_DISPLAY_ID_HDMI,
 };
-const Int32 LocalDisplayAdapter::BUILT_IN_DISPLAY_IDS_COUNT;
+const Int32 LocalDisplayAdapter::BUILT_IN_DISPLAY_IDS_COUNT = 2;
 
 
 LocalDisplayAdapter::RequestDisplayStateRunnable::RequestDisplayStateRunnable(

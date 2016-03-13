@@ -160,6 +160,7 @@ CExpandHelper::CExpandHelper()
     , mExpansionStyle(NONE)
     , mWatchingForPull(FALSE)
     , mHasPopped(FALSE)
+    , mEventSource(NULL)
     , mOldHeight(0)
     , mNaturalHeight(0)
     , mInitialTouchFocusY(0)
@@ -178,6 +179,7 @@ CExpandHelper::CExpandHelper()
     , mMaximumStretch(0)
     , mOnlyMovements(FALSE)
     , mGravity(0)
+    , mScrollAdapter(NULL)
 {
     mScaleGestureListener = new ExpandScaleGestureListener(this);
 }

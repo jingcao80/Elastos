@@ -33,7 +33,8 @@ CUiModeManager::~CUiModeManager()
 
 ECode CUiModeManager::constructor()
 {
-    mService = (IUiModeManager*)ServiceManager::GetService(IContext::UI_MODE_SERVICE).Get();
+    AutoPtr<IInterface> service = ServiceManager::GetService(IContext::UI_MODE_SERVICE);
+    mService = IIUiModeManager::Probe(service);
     return mService != NULL ? NOERROR : E_REMOTE_EXCEPTION;
 }
 

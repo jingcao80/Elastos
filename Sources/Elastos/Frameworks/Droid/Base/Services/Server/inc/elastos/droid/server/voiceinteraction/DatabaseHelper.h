@@ -238,7 +238,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         StringBuilder sb = new StringBuilder();
         for (Int32 i = 0; i < users.length; i++) {
             if (i != 0) {
-                sb->Append(',');
+                sb->AppendChar32(',');
             }
             sb->Append(users[i]);
         }

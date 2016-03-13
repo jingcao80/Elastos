@@ -4,6 +4,7 @@
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.Wifi.h"
+#include "Elastos.Droid.Service.h"
 #include "elastos/droid/app/CContextImpl.h"
 #include "elastos/droid/app/ReceiverRestrictedContext.h"
 #include "elastos/droid/app/CReceiverRestrictedContext.h"
@@ -19,12 +20,20 @@
 #include "elastos/droid/app/SharedPreferencesImpl.h"
 #include "elastos/droid/app/CStatusBarManager.h"
 #include "elastos/droid/app/CResourcesManager.h"
+#include "elastos/droid/app/CAppOpsManager.h"
+#include "elastos/droid/app/CJobSchedulerImpl.h"
 // #include "elastos/droid/app/admin/CDevicePolicyManager.h"
 // #include "elastos/droid/app/backup/CBackupManager.h"
-#include "elastos/droid/hardware/display/CDisplayManager.h"
-//#include "elastos/droid/hardware/CSystemSensorManager.h"
+#include "elastos/droid/app/usage/CUsageStatsManager.h"
+#include "elastos/droid/app/trust/CTrustManager.h"
+#include "elastos/droid/appwidget/CAppWidgetManager.h"
+#include "elastos/droid/hardware/CConsumerIrManager.h"
+#include "elastos/droid/hardware/CSystemSensorManager.h"
 //#include "elastos/droid/hardware/CSerialManager.h"
 //#include "elastos/droid/hardware/usb/CUsbManager.h"
+#include "elastos/droid/hardware/camera2/CCameraManager.h"
+#include "elastos/droid/hardware/display/CDisplayManager.h"
+#include "elastos/droid/hardware/input/CInputManager.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/os/FileUtils.h"
@@ -34,16 +43,20 @@
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/CUserHandle.h"
 #include "elastos/droid/os/CPowerManager.h"
+#include "elastos/droid/os/CSystemVibrator.h"
 // #include "elastos/droid/os/CDropBoxManager.h"
 #include "elastos/droid/os/CUserManager.h"
 #include "elastos/droid/os/storage/CStorageManager.h"
 #include "elastos/droid/content/ContentProvider.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/content/CClipboardManager.h"
+#include "elastos/droid/content/CRestrictionsManager.h"
 #include "elastos/droid/content/res/CCompatibilityInfo.h"
 #include "elastos/droid/content/res/CResources.h"
+#include "elastos/droid/content/pm/CLauncherApps.h"
 #include "elastos/droid/internal/policy/CPolicyManager.h"
 #include "elastos/droid/net/CConnectivityManager.h"
+#include "elastos/droid/net/CNetworkScoreManager.h"
 #include "elastos/droid/wifi/CWifiManager.h"
 #include "elastos/droid/wifi/p2p/CWifiP2pManager.h"
 #include "elastos/droid/view/accessibility/CAccessibilityManager.h"
@@ -52,6 +65,9 @@
 #include "elastos/droid/view/WindowManagerImpl.h"
 #include "elastos/droid/view/DisplayAdjustments.h"
 #include "elastos/droid/media/CAudioManager.h"
+#include "elastos/droid/media/session/CMediaSessionManager.h"
+#include "elastos/droid/media/projection/CMediaProjectionManager.h"
+#include "elastos/droid/service/persistentdata/CPersistentDataBlockManager.h"
 #include "elastos/droid/database/sqlite/SQLiteDatabase.h"
 // #include "elastos/droid/accounts/CAccountManager.h"
 // #include "elastos/droid/privacy/CPrivacySettingsManager.h"
@@ -63,25 +79,79 @@
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::R;
+// using Elastos::Droid::Accounts::CAccountManager;
+using Elastos::Droid::Accounts::IIAccountManager;
+using Elastos::Droid::Accounts::IAccountManager;
+using Elastos::Droid::Accounts::EIID_IIAccountManager;
+using Elastos::Droid::App::CUiModeManager;
+using Elastos::Droid::App::NotificationManager;
+using Elastos::Droid::App::CStatusBarManager;
+using Elastos::Droid::App::CKeyguardManager;
+using Elastos::Droid::App::IAppOpsManager;
+using Elastos::Droid::App::CAppOpsManager;
+using Elastos::Droid::App::CJobSchedulerImpl;
+using Elastos::Droid::App::Admin::IDevicePolicyManager;
+// using Elastos::Droid::App::Admin::CDevicePolicyManager;
+using Elastos::Droid::App::Backup::IBackupManager;
+// using Elastos::Droid::App::Backup::CBackupManager;
+using Elastos::Droid::App::Job::IIJobScheduler;
+using Elastos::Droid::App::Job::IJobScheduler;
+using Elastos::Droid::App::Usage::IIUsageStatsManager;
+using Elastos::Droid::App::Usage::IUsageStatsManager;
+using Elastos::Droid::App::Usage::CUsageStatsManager;
+using Elastos::Droid::App::Trust::ITrustManager;
+using Elastos::Droid::App::Trust::CTrustManager;
+using Elastos::Droid::AppWidget::IAppWidgetManager;
+using Elastos::Droid::AppWidget::CAppWidgetManager;
 using Elastos::Droid::Content::ContentProvider;
 using Elastos::Droid::Content::IClipboardManager;
 using Elastos::Droid::Content::CClipboardManager;
+using Elastos::Droid::Content::IIRestrictionsManager;
+using Elastos::Droid::Content::IRestrictionsManager;
+using Elastos::Droid::Content::CRestrictionsManager;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::EIID_IContext;
+using Elastos::Droid::Content::Pm::IILauncherApps;
+using Elastos::Droid::Content::Pm::ILauncherApps;
+using Elastos::Droid::Content::Pm::CLauncherApps;
 using Elastos::Droid::Database::Sqlite::SQLiteDatabase;
 using Elastos::Droid::Hardware::ISystemSensorManager;
-// using Elastos::Droid::Hardware::CSystemSensorManager;
+using Elastos::Droid::Hardware::CSystemSensorManager;
 // using Elastos::Droid::Hardware::CSerialManager;
+using Elastos::Droid::Hardware::IConsumerIrManager;
+using Elastos::Droid::Hardware::CConsumerIrManager;
 using Elastos::Droid::Hardware::ISerialManager;
 using Elastos::Droid::Hardware::IISerialManager;
 using Elastos::Droid::Hardware::EIID_IISerialManager;
 using Elastos::Droid::Hardware::Display::IDisplayManager;
 using Elastos::Droid::Hardware::Display::CDisplayManager;
+using Elastos::Droid::Hardware::Input::IInputManager;
+using Elastos::Droid::Hardware::Input::CInputManager;
 using Elastos::Droid::Hardware::Usb::IIUsbManager;
 using Elastos::Droid::Hardware::Usb::IUsbManager;
 // using Elastos::Droid::Hardware::Usb::CUsbManager;
+using Elastos::Droid::Hardware::Camera2::ICameraManager;
+using Elastos::Droid::Hardware::Camera2::CCameraManager;
+using Elastos::Droid::Internal::App::IIAppOpsService;
+using Elastos::Droid::Internal::AppWidget::IIAppWidgetService;
+using Elastos::Droid::Internal::Policy::IPolicyManager;
+using Elastos::Droid::Internal::Policy::CPolicyManager;
+// using Elastos::Droid::Internal::Os::IDropBoxManagerService;
+// using Elastos::Droid::Internal::Os::EIID_IDropBoxManagerService;
 using Elastos::Droid::Location::IILocationManager;
 using Elastos::Droid::Location::EIID_IILocationManager;
+using Elastos::Droid::Media::IAudioManager;
+using Elastos::Droid::Media::CAudioManager;
+using Elastos::Droid::Media::Session::IMediaSessionManager;
+using Elastos::Droid::Media::Session::CMediaSessionManager;
+using Elastos::Droid::Media::Projection::IMediaProjectionManager;
+using Elastos::Droid::Media::Projection::CMediaProjectionManager;
+using Elastos::Droid::Net::IIConnectivityManager;
+using Elastos::Droid::Net::IConnectivityManager;
+using Elastos::Droid::Net::CConnectivityManager;
+using Elastos::Droid::Net::INetworkScoreManager;
+using Elastos::Droid::Net::CNetworkScoreManager;
+using Elastos::Droid::Net::EIID_IIEthernetManager;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::IProcess;
 using Elastos::Droid::Os::Build;
@@ -92,15 +162,25 @@ using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::IIVibratorService;
 using Elastos::Droid::Os::ServiceManager;
+using Elastos::Droid::Os::IVibrator;
+using Elastos::Droid::Os::CSystemVibrator;
 // using Elastos::Droid::Os::CDropBoxManager;
 using Elastos::Droid::Os::CUserManager;
 using Elastos::Droid::Os::IPowerManager;
 using Elastos::Droid::Os::IIPowerManager;
 using Elastos::Droid::Os::IIUserManager;
 using Elastos::Droid::Os::CPowerManager;
-// using Elastos::Droid::Os::Storage::IIMountService;
+using Elastos::Droid::Os::Storage::IIMountService;
 using Elastos::Droid::Os::Storage::IStorageManager;
 using Elastos::Droid::Os::Storage::CStorageManager;
+using Elastos::Droid::Privacy::IIPrivacySettingsManager;
+using Elastos::Droid::Privacy::IPrivacySettingsManager;
+// using Elastos::Droid::Privacy::CPrivacySettingsManager;
+// using Elastos::Droid::Privacy::Surrogate::IPrivacyLocationManager;
+// using Elastos::Droid::Privacy::Surrogate::CPrivacyLocationManager;
+using Elastos::Droid::Service::Persistentdata::IIPersistentDataBlockService;
+using Elastos::Droid::Service::Persistentdata::IPersistentDataBlockManager;
+using Elastos::Droid::Service::Persistentdata::CPersistentDataBlockManager;
 using Elastos::Droid::View::DisplayAdjustments;
 using Elastos::Droid::View::WindowManagerImpl;
 using Elastos::Droid::View::IContextThemeWrapper;
@@ -109,17 +189,7 @@ using Elastos::Droid::View::Accessibility::IAccessibilityManager;
 using Elastos::Droid::View::Accessibility::CAccessibilityManager;
 using Elastos::Droid::View::InputMethod::IInputMethodManager;
 using Elastos::Droid::View::InputMethod::CInputMethodManager;
-using Elastos::Droid::App::CUiModeManager;
-using Elastos::Droid::App::NotificationManager;
-using Elastos::Droid::App::CStatusBarManager;
-using Elastos::Droid::App::CKeyguardManager;
-using Elastos::Droid::App::Admin::IDevicePolicyManager;
-// using Elastos::Droid::App::Admin::CDevicePolicyManager;
-using Elastos::Droid::App::Backup::IBackupManager;
-// using Elastos::Droid::App::Backup::CBackupManager;
-using Elastos::Droid::Net::IIConnectivityManager;
-using Elastos::Droid::Net::IConnectivityManager;
-using Elastos::Droid::Net::CConnectivityManager;
+using Elastos::Droid::Utility::CArrayMap;
 using Elastos::Droid::Wifi::IWifiManager;
 using Elastos::Droid::Wifi::CWifiManager;
 using Elastos::Droid::Wifi::IIWifiManager;
@@ -128,23 +198,6 @@ using Elastos::Droid::Wifi::P2p::IWifiP2pManager;
 using Elastos::Droid::Wifi::P2p::CWifiP2pManager;
 using Elastos::Droid::Wifi::P2p::IIWifiP2pManager;
 using Elastos::Droid::Wifi::P2p::EIID_IIWifiP2pManager;
-using Elastos::Droid::Net::EIID_IIEthernetManager;
-using Elastos::Droid::Internal::Policy::IPolicyManager;
-using Elastos::Droid::Internal::Policy::CPolicyManager;
-// using Elastos::Droid::Internal::Os::IDropBoxManagerService;
-// using Elastos::Droid::Internal::Os::EIID_IDropBoxManagerService;
-using Elastos::Droid::Media::IAudioManager;
-using Elastos::Droid::Media::CAudioManager;
-// using Elastos::Droid::Accounts::CAccountManager;
-using Elastos::Droid::Accounts::IIAccountManager;
-using Elastos::Droid::Accounts::IAccountManager;
-using Elastos::Droid::Accounts::EIID_IIAccountManager;
-using Elastos::Droid::Privacy::IIPrivacySettingsManager;
-using Elastos::Droid::Privacy::IPrivacySettingsManager;
-// using Elastos::Droid::Privacy::CPrivacySettingsManager;
-// using Elastos::Droid::Privacy::Surrogate::IPrivacyLocationManager;
-// using Elastos::Droid::Privacy::Surrogate::CPrivacyLocationManager;
-using Elastos::Droid::Utility::CArrayMap;
 
 using Elastos::Core::CoreUtils;
 using Elastos::IO::IFileHelper;
@@ -273,10 +326,11 @@ AutoPtr<CContextImpl> CContextImpl::GetImpl(
 {
     AutoPtr<IContext> context = _context;
     AutoPtr<IContext> nextContext;
-    while ((IContextWrapper::Probe(context) != NULL) &&
-            (IContextWrapper::Probe(context)->GetBaseContext((IContext**)&nextContext), nextContext != NULL)) {
+    AutoPtr<IContextWrapper> cw = IContextWrapper::Probe(context);
+    while (cw != NULL && (cw->GetBaseContext((IContext**)&nextContext), nextContext != NULL)) {
         context = nextContext;
         nextContext = NULL;
+        cw = IContextWrapper::Probe(context);
     }
     return (CContextImpl*)IContextImpl::Probe(context);
 }
@@ -1501,8 +1555,8 @@ ECode CContextImpl::SendOrderedBroadcast(
                 scheduler = mMainThread->GetHandler();
             }
             AutoPtr<IContext> ctx = GetOuterContext();
-            LoadedPkg::ReceiverDispatcher* dispatcher = new LoadedPkg::ReceiverDispatcher(
-                    resultReceiver, ctx, scheduler, NULL, FALSE);
+            AutoPtr<LoadedPkg::ReceiverDispatcher> dispatcher = new LoadedPkg::ReceiverDispatcher();
+            FAIL_RETURN(dispatcher->constructor(resultReceiver, ctx, scheduler, NULL, FALSE))
             rd = dispatcher->GetIIntentReceiver();
         }
     }
@@ -1617,8 +1671,8 @@ ECode CContextImpl::SendOrderedBroadcastAsUser(
                 scheduler = mMainThread->GetHandler();
             }
             AutoPtr<IContext> ctx = GetOuterContext();
-            LoadedPkg::ReceiverDispatcher* dispatcher = new LoadedPkg::ReceiverDispatcher(
-                    resultReceiver, ctx, scheduler, NULL, FALSE);
+            AutoPtr<LoadedPkg::ReceiverDispatcher> dispatcher = new LoadedPkg::ReceiverDispatcher();
+            FAIL_RETURN(dispatcher->constructor(resultReceiver, ctx, scheduler, NULL, FALSE))
             rd = dispatcher->GetIIntentReceiver();
         }
     }
@@ -1692,8 +1746,8 @@ ECode CContextImpl::SendStickyOrderedBroadcast(
                 scheduler = mMainThread->GetHandler();
             }
             AutoPtr<IContext> ctx = GetOuterContext();
-            LoadedPkg::ReceiverDispatcher* dispatcher = new LoadedPkg::ReceiverDispatcher(
-                    resultReceiver, ctx, scheduler, NULL, FALSE);
+            AutoPtr<LoadedPkg::ReceiverDispatcher> dispatcher = new LoadedPkg::ReceiverDispatcher();
+            FAIL_RETURN(dispatcher->constructor(resultReceiver, ctx, scheduler, NULL, FALSE))
             rd = dispatcher->GetIIntentReceiver();
         }
     }
@@ -1795,8 +1849,8 @@ ECode CContextImpl::SendStickyOrderedBroadcastAsUser(
                 scheduler = mMainThread->GetHandler();
             }
             AutoPtr<IContext> ctx = GetOuterContext();
-            LoadedPkg::ReceiverDispatcher* dispatcher = new LoadedPkg::ReceiverDispatcher(
-                    resultReceiver, ctx, scheduler, NULL, FALSE);
+            AutoPtr<LoadedPkg::ReceiverDispatcher> dispatcher = new LoadedPkg::ReceiverDispatcher();
+            FAIL_RETURN(dispatcher->constructor(resultReceiver, ctx, scheduler, NULL, FALSE))
             rd = dispatcher->GetIIntentReceiver();
         }
     }
@@ -1911,8 +1965,8 @@ ECode CContextImpl::RegisterReceiverInternal(
             if (scheduler == NULL) {
                 scheduler = mMainThread->GetHandler();
             }
-            AutoPtr<LoadedPkg::ReceiverDispatcher> dispatcher = new LoadedPkg::ReceiverDispatcher(
-                    receiver, context, scheduler, NULL, TRUE);
+            AutoPtr<LoadedPkg::ReceiverDispatcher> dispatcher = new LoadedPkg::ReceiverDispatcher();
+            FAIL_RETURN(dispatcher->constructor(receiver, context, scheduler, NULL, TRUE))
             rd = dispatcher->GetIIntentReceiver();
         }
     }
@@ -2233,73 +2287,171 @@ ECode CContextImpl::GetSystemService(
         return NOERROR;
     }
 
-    // if (IContext::PRIVACY_SERVICE.Equals(name)) {
-    //     AutoLock lock(mCacheLock);
-    //     // BEGIN privacy-added
-    //     // Log.d(TAG, "PDroid:ContextImpl: Creating static privacy service");
-    //     // IBinder b = ServiceManager.getService("privacy");
-    //     // IPrivacySettingsManager service = IPrivacySettingsManager.Stub.asInterface(b);
-    //     AutoPtr<IInterface> b = ServiceManager::GetService(IContext::PRIVACY_SERVICE);
-    //     AutoPtr<IIPrivacySettingsManager> service = IIPrivacySettingsManager::Probe(b);
-    //     AutoPtr<IContext> ctx = GetOuterContext();
-    //     AutoPtr<IPrivacySettingsManager> privacySettingsManager;
-    //     assert(0 && "TODO");
-    //     // CPrivacySettingsManager::New(ctx, service, (IPrivacySettingsManager**)&privacySettingsManager);
-    //     *object = privacySettingsManager.Get();
-    //     REFCOUNT_ADD(*object);
-    //     // END privacy-added
-    //     return NOERROR;
-    // }
-    // else
-    if (IContext::WINDOW_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
-        AutoPtr<IDisplay> display = mDisplay;
-        if (display == NULL) {
-            AutoPtr<IInterface> obj;
-            GetOuterContext()->GetSystemService(IContext::DISPLAY_SERVICE, (IInterface**)&obj);
-            IDisplayManager* dm = IDisplayManager::Probe(obj);
-            dm->GetDisplay(IDisplay::DEFAULT_DISPLAY, (IDisplay**)&display);
-        }
-        AutoPtr<WindowManagerImpl> obj = new WindowManagerImpl(display);
-        *object = TO_IINTERFACE(obj);
-        mServiceCache[name] = *object;
+    if (IContext::ACCESSIBILITY_SERVICE.Equals(name)) {
+        AutoPtr<IAccessibilityManager> aManager;
+        CAccessibilityManager::GetInstance(this, (IAccessibilityManager**)&aManager);
+        *object = aManager.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;
     }
-    else if (IContext::LAYOUT_INFLATER_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-        AutoPtr<IPolicyManager> pm;
-        FAIL_RETURN(CPolicyManager::AcquireSingleton((IPolicyManager**)&pm));
-        AutoPtr<IContext> ctx = GetOuterContext();
-        AutoPtr<ILayoutInflater> inflater;
-        FAIL_RETURN(pm->MakeNewLayoutInflater(ctx, (ILayoutInflater**)&inflater));
-        *object = inflater.Get();
-        REFCOUNT_ADD(*object);
+    else if (IContext::CAPTIONING_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+        // public Object getService(ContextImpl ctx) {
+        //     return new CaptioningManager(ctx);
+        // }});
         return NOERROR;
     }
     else if (IContext::ACCOUNT_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
         AutoPtr<IInterface> service = ServiceManager::GetService(IContext::ACCOUNT_SERVICE);
         AutoPtr<IIAccountManager> accountService = IIAccountManager::Probe(service);
         AutoPtr<IAccountManager> accountManager;
-        AutoPtr<IContext> ctx = GetOuterContext();
         assert(0 && "TODO");
-        // CAccountManager::New(ctx, accountService, (IAccountManager**)&accountManager);
+        // CAccountManager::New(this, accountService, (IAccountManager**)&accountManager);
         *object = accountManager.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;
     }
     else if (IContext::ACTIVITY_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
-        AutoPtr<IContext> ctx = GetOuterContext();
         AutoPtr<IActivityManager> activityManager;
-        FAIL_RETURN(CActivityManager::New(ctx, mMainThread->GetHandler(),
+        FAIL_RETURN(CActivityManager::New(GetOuterContext(), mMainThread->GetHandler(),
                 (IActivityManager**)&activityManager));
         *object = activityManager.Get();
         REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::ALARM_SERVICE.Equals(name)) {
+        AutoLock lock(mCacheLock);
+
+        AutoPtr<IInterface> service = ServiceManager::GetService(IContext::ALARM_SERVICE);
+        AutoPtr<IIAlarmManager> alarmService = IIAlarmManager::Probe(service.Get());
+        assert(alarmService != NULL);
+        AutoPtr<IAlarmManager> alarmManager;
+        CAlarmManager::New(alarmService , this, (IAlarmManager**)&alarmManager);
+        *object = alarmManager.Get();
+        mServiceCache[name] = *object;
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::AUDIO_SERVICE.Equals(name)) {
+        AutoPtr<IAudioManager> obj;
+        CAudioManager::New(this, (IAudioManager**)&obj);
+        *object = obj.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+
+    else if (IContext::MEDIA_ROUTER_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+    //     AutoPtr<IMediaRouter> obj;
+    //     CMediaRouter::New(this, (IMediaRouter**)&obj);
+    //     *object = obj.Get();
+    //     REFCOUNT_ADD(*object);
+    //     return NOERROR;
+    }
+    else if (IContext::BLUETOOTH_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+        // public Object createService(ContextImpl ctx) {
+        //     return new BluetoothManager(ctx);
+        // }});
+        return NOERROR;
+    }
+    else if (IContext::HDMI_CONTROL_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+        // public Object createStaticService() {
+        //     IBinder b = ServiceManager.getService(HDMI_CONTROL_SERVICE);
+        //     return new HdmiControlManager(IHdmiControlService.Stub.asInterface(b));
+        // }});
+        return NOERROR;
+    }
+    else if (IContext::CLIPBOARD_SERVICE.Equals(name)) {
+        AutoPtr<IClipboardManager> cbm;
+        FAIL_RETURN(CClipboardManager::New(GetOuterContext(), (IClipboardManager**)&cbm))
+        *object = cbm.Get();
+        REFCOUNT_ADD(*object)
+        return NOERROR;
+    }
+    else if (IContext::CONNECTIVITY_SERVICE.Equals(name)) {
+        AutoLock lock(mCacheLock);
+
+        AutoPtr<IInterface> service = ServiceManager::GetService(IContext::CONNECTIVITY_SERVICE);
+        AutoPtr<IIConnectivityManager> mgr = IIConnectivityManager::Probe(service.Get());
+        AutoPtr<IConnectivityManager> connManager;
+        CConnectivityManager::New(mgr , (IConnectivityManager**)&connManager);
+        *object = connManager.Get();
+        mServiceCache[name] = *object;
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::COUNTRY_DETECTOR.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+        // registerService(COUNTRY_DETECTOR, new StaticServiceFetcher() {
+        //         public Object createStaticService() {
+        //             IBinder b = ServiceManager.getService(COUNTRY_DETECTOR);
+        //             return new CountryDetector(ICountryDetector.Stub.asInterface(b));
+        //         }});
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::DEVICE_POLICY_SERVICE.Equals(name)) {
+        AutoPtr<IHandler> handler = mMainThread->GetHandler();
+        AutoPtr<IDevicePolicyManager> devicePolicy;
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+        // CDevicePolicyManager::New(this, handler, (IDevicePolicyManager**)&devicePolicy);
+        *object = devicePolicy.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::DOWNLOAD_SERVICE.Equals(name)) {
+        AutoLock lock(mCacheLock);
+
+        AutoPtr<IContentResolver> resolver;
+        GetContentResolver((IContentResolver**)&resolver);
+        String pkgName;
+        GetOuterContext()->GetPackageName(&pkgName);
+        AutoPtr<IDownloadManager> downloadManager;
+        CDownloadManager::New(resolver, pkgName, (IDownloadManager**)&downloadManager);
+        *object = downloadManager.Get();
+        mServiceCache[name] = downloadManager.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::BATTERY_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+        // public Object createService(ContextImpl ctx) {
+        //     return new BatteryManager();
+        // }});
+        return NOERROR;
+    }
+    else if (IContext::NFC_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        return E_NOT_IMPLEMENTED;
+    }
+    else if (IContext::DROPBOX_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        // public Object createStaticService() {
+        //     return createDropBoxManager();
+        // }});
+        assert(0 && "TODO");
+        return NOERROR;
+    }
+    else if (IContext::INPUT_SERVICE.Equals(name)) {
+        AutoPtr<IInputManager> mgr = CInputManager::GetInstance();
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::DISPLAY_SERVICE.Equals(name)) {
+        AutoPtr<IDisplayManager> dm;
+        CDisplayManager::New(GetOuterContext(), (IDisplayManager**)&dm);
+        *object = dm.Get();
+        REFCOUNT_ADD(*object)
         return NOERROR;
     }
     else if (IContext::INPUT_METHOD_SERVICE.Equals(name)) {
@@ -2311,81 +2463,212 @@ ECode CContextImpl::GetSystemService(
         REFCOUNT_ADD(*object);
         return NOERROR;
     }
-    else if (IContext::ALARM_SERVICE.Equals(name)) {
+    else if (IContext::TEXT_SERVICES_MANAGER_SERVICE.Equals(name)) {
         AutoLock lock(mCacheLock);
-
-        AutoPtr<IInterface> service = ServiceManager::GetService(IContext::ALARM_SERVICE);
-        AutoPtr<IIAlarmManager> alarmService = IIAlarmManager::Probe(service.Get());
-        assert(alarmService != NULL);
-        AutoPtr<IAlarmManager> alarmManager;
-        AutoPtr<IContext> ctx = GetOuterContext();
-        CAlarmManager::New(alarmService , ctx, (IAlarmManager**)&alarmManager);
-        *object = alarmManager.Get();
-        mServiceCache[name] = *object;
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::BACKUP_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
-        AutoPtr<IContext> ctx = GetOuterContext();
-        AutoPtr<IBackupManager> backupManager;
-        assert(0 && "TODO");
-        // CBackupManager::New(ctx, (IBackupManager**)&backupManager);
-        *object = backupManager.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::ACCOUNT_SERVICE.Equals(name)) {
         Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        return E_NOT_IMPLEMENTED;
+        assert(0 && "TODO");
+        // AutoPtr<ITextServicesManager> iManager = CTextServicesManager::GetInstance();
+        // mServiceCache[name] = iManager;
+        // *object = iManager;
+        // REFCOUNT_ADD(*object);
+        return NOERROR;
     }
-    else if (IContext::POWER_SERVICE.Equals(name)) {
+    else if (IContext::KEYGUARD_SERVICE.Equals(name)) {
         AutoLock lock(mCacheLock);
 
+        AutoPtr<IKeyguardManager> obj;
+        CKeyguardManager::New((IKeyguardManager**)&obj);
+        mServiceCache[name] = obj.Get();
+        *object = obj.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::LAYOUT_INFLATER_SERVICE.Equals(name)) {
+        AutoPtr<IPolicyManager> pm;
+        FAIL_RETURN(CPolicyManager::AcquireSingleton((IPolicyManager**)&pm));
+        AutoPtr<ILayoutInflater> inflater;
+        FAIL_RETURN(pm->MakeNewLayoutInflater(GetOuterContext(), (ILayoutInflater**)&inflater));
+        *object = inflater.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::LOCATION_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+        // AutoPtr<IInterface> service = ServiceManager::GetService(IContext::LOCATION_SERVICE);
+        // AutoPtr<IILocationManager> mgr = IILocationManager::Probe(service);
+        // AutoPtr<ILocationManager> lm;
+        // CLocationManager::New(this, mgr, (ILocationManager**)&lm);
+        // *object = lm.Get();
+        // REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::NETWORK_POLICY_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+        // registerService(NETWORK_POLICY_SERVICE, new ServiceFetcher() {
+        //     @Override
+        //     public Object createService(ContextImpl ctx) {
+        //         return new NetworkPolicyManager(INetworkPolicyManager.Stub.asInterface(
+        //                 ServiceManager.getService(NETWORK_POLICY_SERVICE)));
+        //     }
+        // });
+        return NOERROR;
+    }
+    else if (IContext::NOTIFICATION_SERVICE.Equals(name)) {
+        AutoPtr<IContext> ctx = GetOuterContext();
+        AutoPtr<IApplicationInfo> appInfo;
+        ctx->GetApplicationInfo((IApplicationInfo**)&appInfo);
+        Int32 version;
+        appInfo->GetTargetSdkVersion(&version);
+        Int32 value = CResources::SelectSystemTheme(
+            0,
+            version,
+            R::style::Theme_Dialog,
+            R::style::Theme_Holo_Dialog,
+            R::style::Theme_DeviceDefault_Dialog,
+            R::style::Theme_DeviceDefault_Light_Dialog);
+        AutoPtr<IContext> wrapper;
+        CContextThemeWrapper::New(ctx, value, (IContext**)&wrapper);
+        AutoPtr<INotificationManager> nm;
+        CNotificationManager::New(wrapper, mMainThread->GetHandler(), (INotificationManager**)&nm);
+        *object = TO_IINTERFACE(nm);
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::SEARCH_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+    // registerService(NSD_SERVICE, new ServiceFetcher() {
+    //         @Override
+    //         public Object createService(ContextImpl ctx) {
+    //             IBinder b = ServiceManager.getService(NSD_SERVICE);
+    //             INsdManager service = INsdManager.Stub.asInterface(b);
+    //             return new NsdManager(ctx.getOuterContext(), service);
+    //         }});
+        return NOERROR;
+    }
+
+    else if (IContext::POWER_SERVICE.Equals(name)) {
         AutoPtr<IInterface> service = ServiceManager::GetService(IContext::POWER_SERVICE);
         AutoPtr<IIPowerManager> powerService = IIPowerManager::Probe(service);
         AutoPtr<IPowerManager> powerManager;
-        AutoPtr<IContext> ctx = GetOuterContext();
-        CPowerManager::New(ctx, powerService, mMainThread->GetHandler(), (IPowerManager**)&powerManager);
+        CPowerManager::New(GetOuterContext(), powerService, mMainThread->GetHandler(),
+            (IPowerManager**)&powerManager);
         *object = powerManager.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;
     }
-    else if (IContext::CONNECTIVITY_SERVICE.Equals(name)) {
-        AutoPtr<IIConnectivityManager> service =
-                (IIConnectivityManager*)ServiceManager::GetService(IContext::CONNECTIVITY_SERVICE).Get();
-        AutoPtr<IConnectivityManager> connManager;
-        CConnectivityManager::New(service , (IConnectivityManager**)&connManager);
-        *object = connManager.Get();
+    else if (IContext::SEARCH_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+        // public Object createService(ContextImpl ctx) {
+        //     return new SearchManager(ctx.getOuterContext(),
+        //             ctx.mMainThread.getHandler());
+        // }});
+        return E_NOT_IMPLEMENTED;
+    }
+    else if (IContext::SENSOR_SERVICE.Equals(name)) {
+        AutoPtr<ILooper> looper;
+        mMainThread->GetHandler()->GetLooper((ILooper**)&looper);
+        AutoPtr<ISystemSensorManager> managersensor;
+        CSystemSensorManager::New(GetOuterContext(), looper, (ISystemSensorManager**)&managersensor);
+        *object = managersensor.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::STATUS_BAR_SERVICE.Equals(name)) {
+        AutoPtr<IStatusBarManager> statusBarManager;
+        ASSERT_SUCCEEDED(CStatusBarManager::New(GetOuterContext(), (IStatusBarManager**)&statusBarManager));
+        *object = statusBarManager.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::STORAGE_SERVICE.Equals(name)) {
+        AutoLock lock(mCacheLock);
+
+        AutoPtr<ILooper> looper;
+        mMainThread->GetHandler()->GetLooper((ILooper**)&looper);
+        AutoPtr<IContentResolver> cr;
+        GetContentResolver((IContentResolver**)&cr);
+        AutoPtr<IStorageManager> sManager;
+        CStorageManager::New(cr, looper, (IStorageManager**)&sManager);
+        *object = sManager.Get();
         mServiceCache[name] = *object;
         REFCOUNT_ADD(*object);
         return NOERROR;
     }
-    else if (IContext::DISPLAY_SERVICE.Equals(name)) {
-        AutoPtr<IContext> ctx = GetOuterContext();
-        return CDisplayManager::New(ctx, (IDisplayManager**)object);
+    else if (IContext::TELEPHONY_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        // public Object createService(ContextImpl ctx) {
+        //     return new TelephonyManager(ctx.getOuterContext());
+        // }});
+        return E_NOT_IMPLEMENTED;
     }
-    else if (IContext::WIFI_SERVICE.Equals(name)) {
+    else if (IContext::TELECOM_SERVICE.Equals(name)) {
+        assert(0 && "TODO");
+        // public Object createService(ContextImpl ctx) {
+        //     return new TelecomManager(ctx.getOuterContext());
+        // }});
+        return NOERROR;
+    }
+    else if (IContext::UI_MODE_SERVICE.Equals(name)) {
         AutoLock lock(mCacheLock);
 
+        AutoPtr<IUiModeManager> uManager;
+        CUiModeManager::New((IUiModeManager**)&uManager);
+        *object = uManager.Get();
+        mServiceCache[name] = uManager.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::USB_SERVICE.Equals(name)) {
+        AutoPtr<IInterface> service = ServiceManager::GetService(IContext::USB_SERVICE);
+        AutoPtr<IIUsbManager> mgr = IIUsbManager::Probe(service);
+        AutoPtr<IUsbManager> usbManager;
+        assert(0 && "TODO");
+        // CUsbManager::New(this, mgr, (IUsbManager**)&usbManager);
+        *object = usbManager.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::SERIAL_SERVICE.Equals(name)) {
+        AutoPtr<IInterface> service = ServiceManager::GetService(IContext::SERIAL_SERVICE);
+        AutoPtr<IISerialManager> mgr = IISerialManager::Probe(service);
+        AutoPtr<ISerialManager> serialManager;
+        assert(0 && "TODO");
+        // CSerialManager::New(this, mgr , (ISerialManager**)&serialManager);
+        *object = serialManager.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::VIBRATOR_SERVICE.Equals(name)) {
+        AutoPtr<IVibrator> service;
+        CSystemVibrator::New(this, (IVibrator**)&service);
+        *object = service.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::WALLPAPER_SERVICE.Equals(name)) {
+        AutoLock lock(mCacheLock);
+
+        *object = GetWallpaperManager().Get();
+        mServiceCache[name] = GetWallpaperManager().Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::WIFI_SERVICE.Equals(name)) {
         AutoPtr<IInterface> b = ServiceManager::GetService(IContext::WIFI_SERVICE);
         AutoPtr<IIWifiManager> service = IIWifiManager::Probe(b);
-        AutoPtr<IContext> ctx = GetOuterContext();
         AutoPtr<IWifiManager> wifiManager;
-        CWifiManager::New(ctx, service, (IWifiManager**)&wifiManager);
+        CWifiManager::New(GetOuterContext(), service, (IWifiManager**)&wifiManager);
         *object = wifiManager.Get();
         REFCOUNT_ADD(*object);
         return NOERROR;
     }
     else if (IContext::WIFI_P2P_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
         AutoPtr<IInterface> b = ServiceManager::GetService(IContext::WIFI_P2P_SERVICE);
-        assert(b != NULL);
         AutoPtr<IIWifiP2pManager> service = IIWifiP2pManager::Probe(b);
-        assert(service != NULL);
-        AutoPtr<IContext> ctx = GetOuterContext();
         AutoPtr<IWifiP2pManager> wifiP2pManager;
         CWifiP2pManager::New(service, (IWifiP2pManager**)&wifiP2pManager);
         *object = wifiP2pManager.Get();
@@ -2410,273 +2693,30 @@ ECode CContextImpl::GetSystemService(
 //     }});
         return NOERROR;
     }
-
-    else if (IContext::NOTIFICATION_SERVICE.Equals(name)) {
+    else if (IContext::ETHERNET_SERVICE.Equals(name)) {
+        assert(0 && "TODO");
+        // registerService(ETHERNET_SERVICE, new ServiceFetcher() {
+        //         public Object createService(ContextImpl ctx) {
+        //             IBinder b = ServiceManager.getService(ETHERNET_SERVICE);
+        //             IEthernetManager service = IEthernetManager.Stub.asInterface(b);
+        //             return new EthernetManager(ctx.getOuterContext(), service);
+        //         }});
+    }
+    else if (IContext::WINDOW_SERVICE.Equals(name)) {
         AutoLock lock(mCacheLock);
 
-        AutoPtr<IContext> ctx = GetOuterContext();
-        AutoPtr<IApplicationInfo> appInfo;
-        ctx->GetApplicationInfo((IApplicationInfo**)&appInfo);
-        Int32 version;
-        appInfo->GetTargetSdkVersion(&version);
-        Int32 value = CResources::SelectSystemTheme(
-            0,
-            version,
-            R::style::Theme_Dialog,
-            R::style::Theme_Holo_Dialog,
-            R::style::Theme_DeviceDefault_Dialog,
-            R::style::Theme_DeviceDefault_Light_Dialog);
-        AutoPtr<IContext> wrapper;
-        CContextThemeWrapper::New(ctx, value, (IContext**)&wrapper);
-        AutoPtr<INotificationManager> nm;
-        CNotificationManager::New(wrapper, mMainThread->GetHandler(), (INotificationManager**)&nm);
-        *object = TO_IINTERFACE(nm);
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::KEYGUARD_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
-        AutoPtr<IKeyguardManager> kgManager;
-        CKeyguardManager::New((IKeyguardManager**)&kgManager);
-        mServiceCache[name] = kgManager.Get();
-        *object = kgManager.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::ACCESSIBILITY_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
-        AutoPtr<IAccessibilityManager> aManager;
-        CAccessibilityManager::GetInstance(this, (IAccessibilityManager**)&aManager);
-        *object = aManager.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-
-    else if (IContext::CAPTIONING_SERVICE.Equals(name)) {
-        assert(0 && "TODO");
-        // public Object getService(ContextImpl ctx) {
-        //     return new CaptioningManager(ctx);
-        // }});
-        return NOERROR;
-    }
-    else if (IContext::BLUETOOTH_SERVICE.Equals(name)) {
-        assert(0 && "TODO");
-        // public Object createService(ContextImpl ctx) {
-        //     return new BluetoothManager(ctx);
-        // }});
-        return NOERROR;
-    }
-    else if (IContext::HDMI_CONTROL_SERVICE.Equals(name)) {
-        assert(0 && "TODO");
-        // public Object createStaticService() {
-        //     IBinder b = ServiceManager.getService(HDMI_CONTROL_SERVICE);
-        //     return new HdmiControlManager(IHdmiControlService.Stub.asInterface(b));
-        // }});
-        return NOERROR;
-    }
-    else if (IContext::BATTERY_SERVICE.Equals(name)) {
-        assert(0 && "TODO");
-        // public Object createService(ContextImpl ctx) {
-        //     return new BatteryManager();
-        // }});
-        return NOERROR;
-    }
-    else if (IContext::TELECOM_SERVICE.Equals(name)) {
-        assert(0 && "TODO");
-        // public Object createService(ContextImpl ctx) {
-        //     return new TelecomManager(ctx.getOuterContext());
-        // }});
-        return NOERROR;
-    }
-
-    else if (IContext::LOCATION_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-        AutoPtr<IILocationManager> locationManager;
-        AutoPtr<IInterface> lm = ServiceManager::GetService(IContext::LOCATION_SERVICE);
-        if(lm != NULL)
-            locationManager = (IILocationManager*)(lm->Probe(EIID_IILocationManager));
-
-        AutoPtr<IContext> ctx = GetOuterContext();
-        // AutoPtr<IPrivacyLocationManager> privacyLocationManager;
-        // TODO Mike： Change GetOuterContext() to GetStaticOuterContext()
-        assert(0 && "TODO");
-        // CPrivacyLocationManager::New(locationManager, ctx/*GetStaticOuterContext()*/, (IPrivacyLocationManager**)&privacyLocationManager);
-
-        // *object = privacyLocationManager.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::SEARCH_SERVICE.Equals(name)) {
-        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        return E_NOT_IMPLEMENTED;
-    }
-    else if (IContext::SENSOR_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
-        //return new SystemSensorManager(ctx.getOuterContext(),ctx.mMainThread.getHandler().getLooper());
-        AutoPtr<ILooper> looper;
-        mMainThread->GetHandler()->GetLooper((ILooper**)&looper);
-        AutoPtr<IContext> ctx = GetOuterContext();
-        AutoPtr<ISystemSensorManager> managersensor;
-        assert(0 && "TODO");
-        // CSystemSensorManager::New(ctx, looper, (ISystemSensorManager**)&managersensor);
-        *object = managersensor.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::STORAGE_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-        // try {
-        AutoPtr<ILooper> looper;
-        mMainThread->GetHandler()->GetLooper((ILooper**)&looper);
-        AutoPtr<IContentResolver> cr;
-        GetContentResolver((IContentResolver**)&cr);
-        AutoPtr<IStorageManager> sManager;
-        CStorageManager::New(cr, looper, (IStorageManager**)&sManager);
-        assert(sManager != NULL);
-        *object = sManager.Get();
+        AutoPtr<IDisplay> display = mDisplay;
+        if (display == NULL) {
+            AutoPtr<IInterface> obj;
+            GetOuterContext()->GetSystemService(IContext::DISPLAY_SERVICE, (IInterface**)&obj);
+            IDisplayManager* dm = IDisplayManager::Probe(obj);
+            dm->GetDisplay(IDisplay::DEFAULT_DISPLAY, (IDisplay**)&display);
+        }
+        AutoPtr<WindowManagerImpl> obj = new WindowManagerImpl(display);
+        *object = TO_IINTERFACE(obj);
         mServiceCache[name] = *object;
         REFCOUNT_ADD(*object);
-        // } catch (RemoteException rex) {
-        //     Log.e(TAG, "Failed to create StorageManager", rex);
-        //     return NULL;
-        // }
         return NOERROR;
-    }
-    else if (IContext::USB_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-        AutoPtr<IIUsbManager> service = (IIUsbManager*)ServiceManager::GetService(IContext::USB_SERVICE).Get();
-        AutoPtr<IContext> ctx = GetOuterContext();
-        AutoPtr<IUsbManager> usbManager;
-        assert(0 && "TODO");
-        // CUsbManager::New(ctx, service, (IUsbManager**)&usbManager);
-        *object = usbManager.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-
-    }
-    else if (IContext::SERIAL_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-        AutoPtr<IInterface> service = ServiceManager::GetService(IContext::SERIAL_SERVICE);
-        assert(service != NULL);
-        AutoPtr<IISerialManager> serialService = (IISerialManager*)service->Probe(EIID_IISerialManager);
-        assert(serialService != NULL);
-        AutoPtr<IContext> ctx = GetOuterContext();
-        AutoPtr<ISerialManager> serialManager;
-        assert(0 && "TODO");
-        // CSerialManager::New(ctx, serialService , (ISerialManager**)&serialManager);
-        *object = serialManager.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::VIBRATOR_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-        AutoPtr<IIVibratorService> service = IIVibratorService::Probe(ServiceManager::GetService(IContext::VIBRATOR_SERVICE).Get());
-        mServiceCache[name] = service.Get();
-        *object = service.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::STATUS_BAR_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-        AutoPtr<IContext> ctx = GetOuterContext();
-        AutoPtr<IStatusBarManager> statusBarManager;
-        ASSERT_SUCCEEDED(CStatusBarManager::New(ctx, (IStatusBarManager**)&statusBarManager));
-        *object = statusBarManager.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::AUDIO_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
-        AutoPtr<IAudioManager> aManager;
-        CAudioManager::New(this, (IAudioManager**)&aManager);
-        *object = aManager.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::TELEPHONY_SERVICE.Equals(name)) {
-        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        return E_NOT_IMPLEMENTED;
-    }
-    else if (IContext::CLIPBOARD_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
-        AutoPtr<IClipboardManager> cbm;
-        AutoPtr<IContext> ctx = GetOuterContext();
-        FAIL_RETURN(CClipboardManager::New(ctx, (IClipboardManager**)&cbm))
-        *object = cbm.Get();
-        REFCOUNT_ADD(*object)
-        return NOERROR;
-    }
-    else if (IContext::WALLPAPER_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
-        *object = GetWallpaperManager().Get();
-        mServiceCache[name] = GetWallpaperManager().Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::DROPBOX_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-        // AutoPtr<IInterface> b = ServiceManager::GetService(IContext::DROPBOX_SERVICE);
-        // AutoPtr<IDropBoxManagerService> service = IDropBoxManagerService::Probe(b);
-        // if (service == NULL) {
-        //     // Don't return a DropBoxManager that will NPE upon use.
-        //     // This also avoids caching a broken DropBoxManager in
-        //     // getDropBoxManager during early boot, before the
-        //     // DROPBOX_SERVICE is registered.
-        //     mServiceCache[name] = NULL;
-        //     *object = NULL;
-        //     return NOERROR;
-        // }
-        // AutoPtr<IDropBoxManager> dbm;
-        assert(0 && "TODO");
-        // // CDropBoxManager::New(service, (IDropBoxManager**)&dbm);
-        // mServiceCache[name] = dbm.Get();
-        // *object = dbm.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::DEVICE_POLICY_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-        AutoPtr<IContext> ctx = GetOuterContext();
-        AutoPtr<IDevicePolicyManager> devicePolicy;
-        AutoPtr<IHandler> handler = mMainThread->GetHandler();
-        assert(0 && "TODO");
-        // CDevicePolicyManager::New(ctx, handler, (IDevicePolicyManager**)&devicePolicy);
-        *object = devicePolicy.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::UI_MODE_SERVICE.Equals(name)) {
-        AutoLock lock(mCacheLock);
-
-        AutoPtr<IUiModeManager> uManager;
-        CUiModeManager::New((IUiModeManager**)&uManager);
-        *object = uManager.Get();
-        mServiceCache[name] = uManager.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::DOWNLOAD_SERVICE.Equals(name)) {
-        AutoPtr<IContext> ctx = GetOuterContext();
-        AutoPtr<IContentResolver> resolver;
-        ctx->GetContentResolver((IContentResolver**)&resolver);
-        String pkgName;
-        ctx->GetPackageName(&pkgName);
-        AutoPtr<IDownloadManager> downloadManager;
-        CDownloadManager::New(resolver, pkgName, (IDownloadManager**)&downloadManager);
-        *object = downloadManager.Get();
-        mServiceCache[name] = downloadManager.Get();
-        REFCOUNT_ADD(*object);
-        return NOERROR;
-    }
-    else if (IContext::NFC_SERVICE.Equals(name)) {
-        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
-        return E_NOT_IMPLEMENTED;
     }
     else if (IContext::USER_SERVICE.Equals(name)) {
         AutoPtr<IInterface> b = ServiceManager::GetService(IContext::USER_SERVICE);
@@ -2687,130 +2727,164 @@ ECode CContextImpl::GetSystemService(
         REFCOUNT_ADD(*object);
         return NOERROR;
     }
-
-    // registerService(APP_OPS_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         IBinder b = ServiceManager.getService(APP_OPS_SERVICE);
-    //         IAppOpsService service = IAppOpsService.Stub.asInterface(b);
-    //         return new AppOpsManager(ctx, service);
-    //     }});
-
-    // registerService(CAMERA_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         return new CameraManager(ctx);
-    //     }
-    // });
-
-    // registerService(LAUNCHER_APPS_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         IBinder b = ServiceManager.getService(LAUNCHER_APPS_SERVICE);
-    //         ILauncherApps service = ILauncherApps.Stub.asInterface(b);
-    //         return new LauncherApps(ctx, service);
-    //     }
-    // });
-
-    // registerService(RESTRICTIONS_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         IBinder b = ServiceManager.getService(RESTRICTIONS_SERVICE);
-    //         IRestrictionsManager service = IRestrictionsManager.Stub.asInterface(b);
-    //         return new RestrictionsManager(ctx, service);
-    //     }
-    // });
-    // registerService(PRINT_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         IBinder iBinder = ServiceManager.getService(Context.PRINT_SERVICE);
-    //         IPrintManager service = IPrintManager.Stub.asInterface(iBinder);
-    //         return new PrintManager(ctx.getOuterContext(), service, UserHandle.myUserId(),
-    //                 UserHandle.getAppId(Process.myUid()));
-    //     }});
-
-    // registerService(CONSUMER_IR_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         return new ConsumerIrManager(ctx);
-    //     }});
-
-    // registerService(MEDIA_SESSION_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         return new MediaSessionManager(ctx);
-    //     }
-    // });
-
-    // registerService(TRUST_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         IBinder b = ServiceManager.getService(TRUST_SERVICE);
-    //         return new TrustManager(b);
-    //     }
-    // });
-
-    // registerService(FINGERPRINT_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         IBinder binder = ServiceManager.getService(FINGERPRINT_SERVICE);
-    //         IFingerprintService service = IFingerprintService.Stub.asInterface(binder);
-    //         return new FingerprintManager(ctx.getOuterContext(), service);
-    //     }
-    // });
-
-    // registerService(TV_INPUT_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         IBinder iBinder = ServiceManager.getService(TV_INPUT_SERVICE);
-    //         ITvInputManager service = ITvInputManager.Stub.asInterface(iBinder);
-    //         return new TvInputManager(service, UserHandle.myUserId());
-    //     }
-    // });
-
-    // registerService(NETWORK_SCORE_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         return new NetworkScoreManager(ctx);
-    //     }
-    // });
-
-    // registerService(USAGE_STATS_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         IBinder iBinder = ServiceManager.getService(USAGE_STATS_SERVICE);
-    //         IUsageStatsManager service = IUsageStatsManager.Stub.asInterface(iBinder);
-    //         return new UsageStatsManager(ctx.getOuterContext(), service);
-    //     }
-    // });
-
-    // registerService(JOB_SCHEDULER_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         IBinder b = ServiceManager.getService(JOB_SCHEDULER_SERVICE);
-    //         return new JobSchedulerImpl(IJobScheduler.Stub.asInterface(b));
-    // }});
-
-    // registerService(PERSISTENT_DATA_BLOCK_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         IBinder b = ServiceManager.getService(PERSISTENT_DATA_BLOCK_SERVICE);
-    //         IPersistentDataBlockService persistentDataBlockService =
-    //                 IPersistentDataBlockService.Stub.asInterface(b);
-    //         if (persistentDataBlockService != NULL) {
-    //             return new PersistentDataBlockManager(persistentDataBlockService);
-    //         } else {
-    //             // not supported
-    //             return NULL;
-    //         }
-    //     }
-    // });
-
-    // registerService(MEDIA_PROJECTION_SERVICE, new ServiceFetcher() {
-    //         public Object createService(ContextImpl ctx) {
-    //             return new MediaProjectionManager(ctx);
-    //         }
-    // });
-
-    // registerService(APPWIDGET_SERVICE, new ServiceFetcher() {
-    //     public Object createService(ContextImpl ctx) {
-    //         IBinder b = ServiceManager.getService(APPWIDGET_SERVICE);
-    //         return new AppWidgetManager(ctx, IAppWidgetService.Stub.asInterface(b));
-    //     }});
-
+    else if (IContext::APP_OPS_SERVICE.Equals(name)) {
+        AutoPtr<IInterface> b = ServiceManager::GetService(IContext::APP_OPS_SERVICE);
+        AutoPtr<IIAppOpsService> service = IIAppOpsService::Probe(b);
+        AutoPtr<IAppOpsManager> mgr;
+        CAppOpsManager::New(this, service, (IAppOpsManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::CAMERA_SERVICE.Equals(name)) {
+        AutoPtr<ICameraManager> mgr;
+        CCameraManager::New(this, (ICameraManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::LAUNCHER_APPS_SERVICE.Equals(name)) {
+        AutoPtr<IInterface> b = ServiceManager::GetService(IContext::LAUNCHER_APPS_SERVICE);
+        AutoPtr<IILauncherApps> service = IILauncherApps::Probe(b);
+        AutoPtr<ILauncherApps> mgr;
+        CLauncherApps::New(this, service, (ILauncherApps**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::RESTRICTIONS_SERVICE.Equals(name)) {
+        AutoPtr<IInterface> b = ServiceManager::GetService(IContext::RESTRICTIONS_SERVICE);
+        AutoPtr<IIRestrictionsManager> service = IIRestrictionsManager::Probe(b);
+        AutoPtr<IRestrictionsManager> mgr;
+        CRestrictionsManager::New(this, service, (IRestrictionsManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::PRINT_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0);
+        // AutoPtr<IInterface> b = ServiceManager::GetService(IContext::PRINT_SERVICE);
+        // AutoPtr<IIPrintManager> service = IIPrintManager::Probe(b);
+        // AutoPtr<IPrintManager> mgr;
+        // CPrintManager::New(GetOuterContext(), service, UserHandle::GetMyUserId(),
+        //     UserHandle::GetAppId(Process::MyUid()), (IPrintManager**)&mgr);
+        // *object = mgr.Get();
+        // REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::CONSUMER_IR_SERVICE.Equals(name)) {
+        AutoPtr<IConsumerIrManager> mgr;
+        CConsumerIrManager::New(this, (IConsumerIrManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::MEDIA_SESSION_SERVICE.Equals(name)) {
+        AutoPtr<IMediaSessionManager> mgr;
+        CMediaSessionManager::New(this, (IMediaSessionManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::TRUST_SERVICE.Equals(name)) {
+        AutoPtr<IInterface> b = ServiceManager::GetService(IContext::TRUST_SERVICE);
+        AutoPtr<IBinder> service = IBinder::Probe(b);
+        AutoPtr<ITrustManager> mgr;
+        CTrustManager::New(service, (ITrustManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::FINGERPRINT_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0);
+    //     AutoPtr<IInterface> b = ServiceManager::GetService(IContext::FINGERPRINT_SERVICE);
+    //     AutoPtr<IIFingerprintService> IIFingerprintService = IBinder::Probe(b);
+    //     AutoPtr<IFingerprintManager> mgr;
+    //     CFingerprintManager::New(GetOuterContext(), service, (IFingerprintManager**)&mgr);
+    //     *object = mgr.Get();
+    //     REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::TV_INPUT_SERVICE.Equals(name)) {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0);
+        // public Object createService(ContextImpl ctx) {
+        //     IBinder iBinder = ServiceManager.getService(TV_INPUT_SERVICE);
+        //     ITvInputManager service = ITvInputManager.Stub.asInterface(iBinder);
+        //     return new TvInputManager(service, UserHandle.myUserId());
+        // }
+        return NOERROR;
+    }
+    else if (IContext::NETWORK_SCORE_SERVICE.Equals(name)) {
+        AutoPtr<INetworkScoreManager> mgr;
+        CNetworkScoreManager::New(this, (INetworkScoreManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::USAGE_STATS_SERVICE.Equals(name)) {
+        AutoPtr<IInterface> b = ServiceManager::GetService(IContext::USAGE_STATS_SERVICE);
+        AutoPtr<IIUsageStatsManager> service = IIUsageStatsManager::Probe(b);
+        AutoPtr<IUsageStatsManager> mgr;
+        CUsageStatsManager::New(GetOuterContext(), service, (IUsageStatsManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::JOB_SCHEDULER_SERVICE.Equals(name)) {
+        AutoPtr<IInterface> b = ServiceManager::GetService(IContext::JOB_SCHEDULER_SERVICE);
+        AutoPtr<IIJobScheduler> service = IIJobScheduler::Probe(b);
+        AutoPtr<IJobScheduler> mgr;
+        CJobSchedulerImpl::New(service, (IJobScheduler**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::PERSISTENT_DATA_BLOCK_SERVICE.Equals(name)) {
+        AutoPtr<IInterface> b = ServiceManager::GetService(IContext::PERSISTENT_DATA_BLOCK_SERVICE);
+        AutoPtr<IIPersistentDataBlockService> service = IIPersistentDataBlockService::Probe(b);
+        if (service != NULL) {
+            AutoPtr<IPersistentDataBlockManager> mgr;
+            CPersistentDataBlockManager::New(service, (IPersistentDataBlockManager**)&mgr);
+            *object = mgr.Get();
+            REFCOUNT_ADD(*object);
+        }
+        else {
+            // not supported
+            *object = NULL;
+        }
+        return NOERROR;
+    }
+    else if (IContext::MEDIA_PROJECTION_SERVICE.Equals(name)) {
+        AutoPtr<IMediaProjectionManager> mgr;
+        CMediaProjectionManager::New(this, (IMediaProjectionManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else if (IContext::APPWIDGET_SERVICE.Equals(name)) {
+        AutoPtr<IInterface> b = ServiceManager::GetService(IContext::APPWIDGET_SERVICE);
+        AutoPtr<IIAppWidgetService> service = IIAppWidgetService::Probe(b);
+        AutoPtr<IAppWidgetManager> mgr;
+        CAppWidgetManager::New(this, service, (IAppWidgetManager**)&mgr);
+        *object = mgr.Get();
+        REFCOUNT_ADD(*object);
+        return NOERROR;
+    }
+    else {
+        Slogger::E(TAG, " >>> TODO: Service %s is not ready!", name.string());
+        assert(0 && "TODO");
+    }
     return NOERROR;
 }
 
 AutoPtr<IWallpaperManager> CContextImpl::GetWallpaperManager()
 {
     if (sWallpaperManager == NULL) {
-        CWallpaperManager::New(GetOuterContext(), NULL, (IWallpaperManager**)&sWallpaperManager);
+        CWallpaperManager::New(GetOuterContext(), mMainThread->GetHandler(),
+            (IWallpaperManager**)&sWallpaperManager);
     }
 
     return sWallpaperManager;
@@ -2837,17 +2911,24 @@ ECode CContextImpl::CheckPermission(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
-    *result = 0;
+    *result = IPackageManager::PERMISSION_DENIED;
 
     if (permission.IsNull()) {
-//        throw new IllegalArgumentException("permission is NULL");
+        Logger::E(TAG, "permission is NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
 //    try {
-    ECode ec = ActivityManagerNative::GetDefault()->CheckPermission(
-            permission, pid, uid, result);
-    if (FAILED(ec)) *result = IPackageManager::PERMISSION_DENIED;
+    ECode ec = NOERROR;
+    AutoPtr<IIActivityManager> am = ActivityManagerNative::GetDefault();
+    if (am != NULL) {
+        ec = am->CheckPermission(permission, pid, uid, result);
+        if (FAILED(ec)) {
+            *result = IPackageManager::PERMISSION_DENIED;
+            Logger::W(TAG, " CheckPermission for %s, pid %d uid %d, DENIED!",
+                permission.string(), pid, uid);
+        }
+    }
     return ec;
 //    } catch (RemoteException e) {
 //        return PackageManager.PERMISSION_DENIED;
@@ -2859,10 +2940,10 @@ ECode CContextImpl::CheckCallingPermission(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    *value = 0;
+    *value = IPackageManager::PERMISSION_DENIED;
 
     if (permission.IsNull()) {
-//        throw new IllegalArgumentException("permission is NULL");
+        Logger::E(TAG, "permission is NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -2879,10 +2960,10 @@ ECode CContextImpl::CheckCallingOrSelfPermission(
     /* [out] */ Int32* perm)
 {
     VALIDATE_NOT_NULL(perm);
-    *perm = 0;
+    *perm = IPackageManager::PERMISSION_DENIED;
 
     if (permission.IsNull()) {
-//        throw new IllegalArgumentException("permission is NULL");
+        Logger::E(TAG, "permission is NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -3065,8 +3146,7 @@ ECode CContextImpl::CheckUriPermission(
     CheckPermission(readPermission, pid, uid, &checked);
     if ((modeFlags&IIntent::FLAG_GRANT_READ_URI_PERMISSION) != 0) {
         if (readPermission == NULL
-                || checked
-                == IPackageManager::PERMISSION_GRANTED) {
+                || checked == IPackageManager::PERMISSION_GRANTED) {
             *result = IPackageManager::PERMISSION_GRANTED;
             return NOERROR;
         }
@@ -3075,16 +3155,14 @@ ECode CContextImpl::CheckUriPermission(
     CheckPermission(writePermission, pid, uid, &checked2);
     if ((modeFlags&IIntent::FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
         if (writePermission == NULL
-                || checked2
-                == IPackageManager::PERMISSION_GRANTED) {
+                || checked2 == IPackageManager::PERMISSION_GRANTED) {
             *result = IPackageManager::PERMISSION_GRANTED;
             return NOERROR;
         }
     }
     Int32 checkedUri;
     CheckUriPermission(uri, pid, uid, modeFlags, &checkedUri);
-    *result = uri != NULL ? checkedUri
-            : IPackageManager::PERMISSION_DENIED;
+    *result = uri != NULL ? checkedUri : IPackageManager::PERMISSION_DENIED;
     return NOERROR;
 }
 
@@ -3317,7 +3395,7 @@ ECode CContextImpl::CreateConfigurationContext(
     *ctx = NULL;
 
     if (overrideConfiguration == NULL) {
-//        throw new IllegalArgumentException("overrideConfiguration must not be NULL");
+        Logger::E(TAG, "overrideConfiguration must not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -3338,7 +3416,7 @@ ECode CContextImpl::CreateDisplayContext(
     *ctx = NULL;
 
     if (display == NULL) {
-//         throw new IllegalArgumentException("display must not be NULL");
+        Logger::E(TAG, "display must not be NULL");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
@@ -3395,9 +3473,7 @@ AutoPtr<CContextImpl> CContextImpl::CreateSystemContext(
     ci->mResourcesManager->GetConfiguration((IConfiguration**)&config);
     AutoPtr<IDisplayMetrics> dm;
     ci->mResourcesManager->GetDisplayMetricsLocked(IDisplay::DEFAULT_DISPLAY, (IDisplayMetrics**)&dm);
-    Logger::I(TAG, " === CreateSystemContext 1 ===");
     ci->mResources->UpdateConfiguration(config, dm);
-    Logger::I(TAG, " === CreateSystemContext 2 ===");
     return ci;
 }
 
@@ -3699,12 +3775,11 @@ AutoPtr<ArrayOf<IFile*> > CContextImpl::EnsureDirsExistOrFilter(
                     // Failing to mkdir() may be okay, since we might not have
                     // enough permissions; ask vold to create on our behalf.
                     AutoPtr<IInterface> obj = ServiceManager::GetService(String("mount"));
-                    assert(0 && "TODO");
-                    // AutoPtr<IIMountService> mount = IIMountService::Probe(obj)
+                    AutoPtr<IIMountService> mount = IIMountService::Probe(obj);
                     Int32 res = -1;
-                    // String path;
-                    // dir->GetAbsolutePath(&path);
-                    // mount->Mkdirs(packageName, path, &res);
+                    String path;
+                    dir->GetAbsolutePath(&path);
+                    mount->Mkdirs(packageName, path, &res);
                     if (res != 0) {
                         String path;
                         dir->GetPath(&path);

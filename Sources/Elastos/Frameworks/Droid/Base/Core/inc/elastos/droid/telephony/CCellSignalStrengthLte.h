@@ -3,15 +3,28 @@
 #define __ELASTOS_DROID_TELEPHONY_CCELLSIGNALSTRENGTHLTE_H__
 
 #include "_Elastos_Droid_Telephony_CCellSignalStrengthLte.h"
-#include "CellSignalStrength.h"
+#include "elastos/droid/ext/frameworkdef.h"
+#include "elastos/droid/telephony/CellSignalStrength.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-CarClass(CCellSignalStrengthLte), CellSignalStrength
+CarClass(CCellSignalStrengthLte)
+    , public CellSignalStrength
+    , public ICellSignalStrengthLte
+    , public IParcelable
 {
 public:
+    CCellSignalStrengthLte();
+
+    virtual ~CCellSignalStrengthLte();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(
@@ -24,9 +37,6 @@ public:
 
     CARAPI constructor(
         /* [in] */ ICellSignalStrengthLte* css);
-
-    CARAPI_(PInterface) Probe(
-        /* [in]  */ REIID riid);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
@@ -119,8 +129,8 @@ private:
     static CARAPI Log(
         /* [in] */ const String& s);
 
-    static const String LOG_TAG/* = "CellSignalStrengthLte"*/;
-    static const Boolean DBG/* = false*/;
+    static const String TAG;
+    static const Boolean DBG;
 
     Int32 mSignalStrength;
     Int32 mRsrp;

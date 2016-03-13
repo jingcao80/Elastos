@@ -12,6 +12,8 @@ using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IObjectAnimator;
 using Elastos::Droid::Animation::IValueAnimator;
 using Elastos::Droid::Animation::IAnimatorUpdateListener;
+using Elastos::Droid::Widget::IOverScroller;
+using Elastos::Core::IRunnable;
 
 namespace Elastos {
 namespace Droid {
@@ -36,8 +38,8 @@ private:
             /* [in] */ IAnimator* animation);
 
     private:
-        AutoPtr<IRunnable> mPostRunnable
-        AUtoPtr<IObjectAnimator> mScrollAnimator;
+        AutoPtr<IRunnable> mPostRunnable;
+        AutoPtr<IObjectAnimator> mScrollAnimator;
     };
 
     class AnimatorUpdateListener
@@ -136,7 +138,7 @@ public:
     Float mStackScrollP;
 
     AutoPtr<IOverScroller> mScroller;
-    AUtoPtr<IObjectAnimator> mScrollAnimator;
+    AutoPtr<IObjectAnimator> mScrollAnimator;
 };
 
 } // namespace Views

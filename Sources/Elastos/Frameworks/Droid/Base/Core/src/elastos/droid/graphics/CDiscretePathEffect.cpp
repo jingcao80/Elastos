@@ -9,6 +9,7 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CDiscretePathEffect);
+CAR_INTERFACE_IMPL(CDiscretePathEffect, PathEffect, IDiscretePathEffect);
 ECode CDiscretePathEffect::constructor(
     /* [in] */ Float segmentLength,
     /* [in] */ Float deviation)
@@ -17,35 +18,6 @@ ECode CDiscretePathEffect::constructor(
                         segmentLength,
                         deviation);
     return NOERROR;
-}
-
-PInterface CDiscretePathEffect::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_PathEffect) {
-        return reinterpret_cast<PInterface>((PathEffect*)this);
-    }
-    else if (riid == EIID_IDiscretePathEffect) {
-        return (IDiscretePathEffect*)this;
-    }
-    return PathEffect::Probe(riid);
-}
-
-UInt32 CDiscretePathEffect::AddRef()
-{
-    return PathEffect::AddRef();
-}
-
-UInt32 CDiscretePathEffect::Release()
-{
-    return PathEffect::Release();
-}
-
-ECode CDiscretePathEffect::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return PathEffect::GetInterfaceID(object, iid);
 }
 
 Int64 CDiscretePathEffect::NativeCreate(

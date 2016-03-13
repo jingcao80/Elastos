@@ -619,6 +619,7 @@ ECode AnimatorInflater::CreateAnimatorFromXml(
     parser->GetDepth(&depth);
     ECode ec = NOERROR;
 
+    AutoPtr<IAnimator> anim;
     while (((parser->Next(&type), type) != IXmlPullParser::END_TAG || (parser->GetDepth(&tmpD) ,tmpD) > depth)
             && type != IXmlPullParser::END_DOCUMENT) {
 
@@ -630,11 +631,18 @@ ECode AnimatorInflater::CreateAnimatorFromXml(
         parser->GetName(&name);
 
         if (name.Equals(String("objectAnimator"))) {
-            FAIL_RETURN(LoadObjectAnimator(res, theme, attrs, pixelSize, (IObjectAnimator**)animator));
-        } else if (name.Equals(String("animator"))) {
-            FAIL_RETURN(LoadAnimator(res, theme, attrs, NULL, pixelSize, (IValueAnimator**)animator));
-        } else if (name.Equals(String("set"))) {
-            CAnimatorSet::New((IAnimator**)&animator);
+            AutoPtr<IObjectAnimator> oa;
+            FAIL_RETURN(LoadObjectAnimator(res, theme, attrs, pixelSize, (IObjectAnimator**)&oa));
+            anim = IAnimator::Probe(oa);
+        }
+        else if (name.Equals(String("animator"))) {
+            AutoPtr<IValueAnimator> va;
+            FAIL_RETURN(LoadAnimator(res, theme, attrs, NULL, pixelSize, (IValueAnimator**)&va));
+            anim = IAnimator::Probe(va);
+        }
+        else if (name.Equals(String("set"))) {
+            anim = NULL;
+            CAnimatorSet::New((IAnimator**)&anim);
             AutoPtr<ITypedArray> a;
 
             AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
@@ -647,8 +655,9 @@ ECode AnimatorInflater::CreateAnimatorFromXml(
             }
             Int32 ordering = 0;
             a->GetInt32(R::styleable::AnimatorSet_ordering, TOGETHER, &ordering);
-            ec = CreateAnimatorFromXml(res, theme, parser, attrs, IAnimatorSet::Probe(*animator), ordering,
-                    pixelSize, animator);
+            AutoPtr<IAnimator> tmp;
+            ec = CreateAnimatorFromXml(res, theme, parser, attrs, IAnimatorSet::Probe(anim), ordering,
+                    pixelSize, (IAnimator**)&tmp);
             a->Recycle();
             if (FAILED(ec)) {
                 return ec;
@@ -659,7 +668,7 @@ ECode AnimatorInflater::CreateAnimatorFromXml(
         }
 
         if (parent != NULL) {
-            childAnims.PushBack(*animator);
+            childAnims.PushBack(anim);
         }
     }
     if (parent != NULL && childAnims.GetSize() > 0) {
@@ -676,6 +685,8 @@ ECode AnimatorInflater::CreateAnimatorFromXml(
         }
     }
 
+    *animator = anim;
+    REFCOUNT_ADD(*animator)
     return NOERROR;
 
 }
@@ -688,7 +699,7 @@ ECode AnimatorInflater::LoadObjectAnimator(
     /* [out] */ IObjectAnimator** animator) /*throws NotFoundException*/
 {
     VALIDATE_NOT_NULL(animator);
-    CObjectAnimator::New((IObjectAnimator**)&animator);
+    CObjectAnimator::New(animator);
 
     AutoPtr<IValueAnimator> tmp;
     return LoadAnimator(res, theme, attrs, IValueAnimator::Probe(*animator), pathErrorScale, (IValueAnimator**)&tmp);

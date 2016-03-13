@@ -2,6 +2,7 @@
 #include "elastos/droid/server/hdmi/RoutingControlAction.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.Droid.Hardware.h>
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
@@ -11,6 +12,8 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Hdmi {
+
+CAR_INTERFACE_IMPL(RoutingControlAction, HdmiCecFeatureAction, IRoutingControlAction)
 
 const String RoutingControlAction::TAG("RoutingControlAction");
 const Int32 RoutingControlAction::STATE_WAIT_FOR_ROUTING_INFORMATION = 1;
@@ -32,7 +35,7 @@ ECode RoutingControlAction::constructor(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        Super(localDevice);
+        super::constructor(localDevice);
         mCallback = callback;
         mCurrentRoutingPath = path;
         mQueryDevicePowerStatus = queryDevicePowerStatus;
@@ -47,11 +50,14 @@ ECode RoutingControlAction::constructor(
 ECode RoutingControlAction::Start(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         mState = STATE_WAIT_FOR_ROUTING_INFORMATION;
         AddTimer(mState, TIMEOUT_ROUTING_INFORMATION_MS);
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
 #endif
 }
 
@@ -59,30 +65,37 @@ ECode RoutingControlAction::ProcessCommand(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         Int32 opcode = cmd->GetOpcode();
-        Byte[] params = cmd->GetParams();
+        AutoPtr<ArrayOf<Byte> > params;
+        cmd->GetParams((ArrayOf<Byte>**)&params);
         if (mState == STATE_WAIT_FOR_ROUTING_INFORMATION
                 && opcode == Constants::MESSAGE_ROUTING_INFORMATION) {
             // Keep updating the physicalAddress as we receive <Routing Information>.
             // If the routing path doesn't belong to the currently active one, we should
             // ignore it since it might have come from other routing change sequence.
-            Int32 routingPath = HdmiUtils->TwoBytesToInt(params);
+            Int32 routingPath = HdmiUtils->TwoBytesToInt32(params);
             if (!HdmiUtils->IsInActiveRoutingPath(mCurrentRoutingPath, routingPath)) {
-                return TRUE;
+                *result = TRUE;
+                return NOERROR;
             }
             mCurrentRoutingPath = routingPath;
             // Stop possible previous routing change sequence if in progress.
-            RemoveActionExcept(RoutingControlAction.class, this);
+            RemoveActionExcept(ECLSID_CRoutingControlAction, this);
             AddTimer(mState, TIMEOUT_ROUTING_INFORMATION_MS);
-            return TRUE;
+            *result = TRUE;
+            return NOERROR;
         } else if (mState == STATE_WAIT_FOR_REPORT_POWER_STATUS
                   && opcode == Constants::MESSAGE_REPORT_POWER_STATUS) {
-            HandleReportPowerStatus(cmd->GetParams()[0]);
-            return TRUE;
+            HandleReportPowerStatus((*params)[0]);
+            *result = TRUE;
+            return NOERROR;
         }
-        return FALSE;
+        *result = FALSE;
+        return NOERROR;
 #endif
 }
 
@@ -95,19 +108,25 @@ ECode RoutingControlAction::HandleReportPowerStatus(
             if (IsPowerOnOrTransient(devicePowerStatus)) {
                 SendSetStreamPath();
             } else {
-                Tv()->UpdateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
+                AutoPtr<IHdmiCecLocalDeviceTv> tv;
+                Tv((IHdmiCecLocalDeviceTv**)&tv);
+                tv->UpdateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
             }
         }
-        FinishWithCallback(HdmiControlManager.RESULT_SUCCESS);
+        FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
 #endif
 }
 
 ECode RoutingControlAction::GetTvPowerStatus(
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return Tv()->GetPowerStatus();
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        return tv->GetPowerStatus(result);
 #endif
 }
 
@@ -115,10 +134,12 @@ ECode RoutingControlAction::IsPowerOnOrTransient(
     /* [in] */ Int32 status,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return status == HdmiControlManager.POWER_STATUS_ON
-                || status == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
+        return status == IHdmiControlManager::POWER_STATUS_ON
+                || status == IHdmiControlManager::POWER_STATUS_TRANSIENT_TO_ON;
 #endif
 }
 
@@ -126,7 +147,9 @@ ECode RoutingControlAction::SendSetStreamPath()
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        SendCommand(HdmiCecMessageBuilder->BuildSetStreamPath(GetSourceAddress(),
+        Int32 srcAddr;
+        GetSourceAddress(&srcAddr);
+        SendCommand(HdmiCecMessageBuilder->BuildSetStreamPath(srcAddr,
                 mCurrentRoutingPath));
 #endif
 }
@@ -148,32 +171,39 @@ ECode RoutingControlAction::HandleTimerEvent(
 #if 0 // TODO: Translate codes below
         if (mState != timeoutState || mState == STATE_NONE) {
             Slogger::W("CEC", "Timer in a wrong state. Ignored.");
-            return;
+            return NOERROR;
         }
         switch (timeoutState) {
             case STATE_WAIT_FOR_ROUTING_INFORMATION:
-                HdmiDeviceInfo device = Tv()->GetDeviceInfoByPath(mCurrentRoutingPath);
+                AutoPtr<IHdmiCecLocalDeviceTv> tv;
+                Tv((IHdmiCecLocalDeviceTv**)&tv);
+                HdmiDeviceInfo device = tv->GetDeviceInfoByPath(mCurrentRoutingPath);
                 if (device != NULL && mQueryDevicePowerStatus) {
-                    Int32 deviceLogicalAddress = device->GetLogicalAddress();
+                    Int32 deviceLogicalAddress;
+                    device->GetLogicalAddress(&deviceLogicalAddress);
                     QueryDevicePowerStatus(deviceLogicalAddress, new SendMessageCallback() {
                         //@Override
                         CARAPI OnSendCompleted(Int32 error) {
                             HandlDevicePowerStatusAckResult(
-                                    error == HdmiControlManager.RESULT_SUCCESS);
+                                    error == IHdmiControlManager::RESULT_SUCCESS);
                         }
                     });
                 } else {
-                    Tv()->UpdateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
-                    FinishWithCallback(HdmiControlManager.RESULT_SUCCESS);
+                    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+                    Tv((IHdmiCecLocalDeviceTv**)&tv);
+                    tv->UpdateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
+                    FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
                 }
-                return;
+                return NOERROR;
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
                 if (IsPowerOnOrTransient(GetTvPowerStatus())) {
-                    Tv()->UpdateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
+                    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+                    Tv((IHdmiCecLocalDeviceTv**)&tv);
+                    tv->UpdateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
                     SendSetStreamPath();
                 }
-                FinishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-                return;
+                FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
+                return NOERROR;
         }
 #endif
 }
@@ -184,7 +214,9 @@ ECode RoutingControlAction::QueryDevicePowerStatus(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        SendCommand(HdmiCecMessageBuilder->BuildGiveDevicePowerStatus(GetSourceAddress(), address),
+        Int32 srcAddr;
+        GetSourceAddress(&srcAddr);
+        SendCommand(HdmiCecMessageBuilder->BuildGiveDevicePowerStatus(srcAddr, address),
                 callback);
 #endif
 }
@@ -198,9 +230,11 @@ ECode RoutingControlAction::HandlDevicePowerStatusAckResult(
             mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
             AddTimer(mState, TIMEOUT_REPORT_POWER_STATUS_MS);
         } else {
-            Tv()->UpdateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
+            AutoPtr<IHdmiCecLocalDeviceTv> tv;
+            Tv((IHdmiCecLocalDeviceTv**)&tv);
+            tv->UpdateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
             SendSetStreamPath();
-            FinishWithCallback(HdmiControlManager.RESULT_SUCCESS);
+            FinishWithCallback(IHdmiControlManager::RESULT_SUCCESS);
         }
 #endif
 }
@@ -211,7 +245,7 @@ ECode RoutingControlAction::InvokeCallback(
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         if (mCallback == NULL) {
-            return;
+            return NOERROR;
         }
         try {
             mCallback->OnComplete(result);

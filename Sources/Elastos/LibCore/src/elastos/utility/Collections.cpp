@@ -1221,7 +1221,7 @@ ECode Collections::_SingletonMap::MySet::Iterator::GetNext(
     VALIDATE_NOT_NULL(object)
     AutoPtr<IMapEntry> p;
     GetNext((IMapEntry**)&p);
-    *object = IInterface::Probe(p);
+    *object = p.Get();
     REFCOUNT_ADD(*object)
     return NOERROR;
 }
@@ -5215,6 +5215,8 @@ ECode Collections::UnmodifiableList(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     if (list == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
@@ -5235,6 +5237,8 @@ ECode Collections::UnmodifiableMap(
     /* [out] */ IMap** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     if (map == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
@@ -5249,6 +5253,8 @@ ECode Collections::UnmodifiableSet(
     /* [out] */ ISet** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     if (set == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
@@ -5263,6 +5269,8 @@ ECode Collections::UnmodifiableSortedMap(
     /* [out] */ ISortedMap** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     if (map == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
@@ -5277,6 +5285,8 @@ ECode Collections::UnmodifiableSortedSet(
     /* [out] */ ISortedSet** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
     if (set == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }
@@ -5292,6 +5302,8 @@ ECode Collections::Frequency(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = 0;
+
     if (c == NULL) {
         return E_NULL_POINTER_EXCEPTION;
     }

@@ -148,7 +148,7 @@ const Int32 Constants::ENABLED = 1;
 
 Constants::Constants()
 {
- /* cannot be instantiated */
+    /* cannot be instantiated */
 }
 
 } // namespace Hdmi

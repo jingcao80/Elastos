@@ -4,23 +4,13 @@
 
 #include "elastos/droid/systemui/recents/RecentsConfiguration.h"
 #include "elastos/droid/systemui/recents/views/TaskViewTransform.h"
+#include "elastos/droid/systemui/recents/model/Task.h"
+#include <elastos/utility/etl/HashMap.h>
 
 using Elastos::Utility::IArrayList;
-using Elastos::Utility::IHashMap;
-
-namespace Elastos {
-namespace Droid {
-namespace SystemUI {
-namespace Recents {
-namespace Model {
-
-class Task;
-
-} // namespace Model
-} // namespace Recents
-} // namespace SystemUI
-} // namespace Droid
-} // namespace Elastos
+using Elastos::Utility::Etl::HashMap;
+using Elastos::Droid::SystemUI::Recents::Model::ITaskKey;
+using Elastos::Droid::SystemUI::Recents::Model::Task;
 
 namespace Elastos {
 namespace Droid {

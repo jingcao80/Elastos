@@ -937,7 +937,9 @@ WifiWatchdogStateMachine::WifiWatchdogStateMachine(
     mOnlineState = new OnlineState(this);
 
     context->GetContentResolver((IContentResolver**)&mContentResolver);
-    context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&mWifiManager);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
+    mWifiManager = IWifiManager::Probe(obj);
     AutoPtr<IHandler> h = GetHandler();
     AutoPtr<IMessenger> msgr;
     mWifiManager->GetWifiStateMachineMessenger((IMessenger**)&msgr);
@@ -974,8 +976,9 @@ AutoPtr<WifiWatchdogStateMachine> WifiWatchdogStateMachine::MakeWifiWatchdogStat
     AutoPtr<IContentResolver> contentResolver;
     context->GetContentResolver((IContentResolver**)&contentResolver);
 
-    AutoPtr<IConnectivityManager> cm;
-    context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&cm);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    AutoPtr<IConnectivityManager> cm = IConnectivityManager::Probe(obj);
     Boolean supported;
     cm->IsNetworkSupported(IConnectivityManager::TYPE_MOBILE, &supported);
     sWifiOnly = (supported == FALSE);

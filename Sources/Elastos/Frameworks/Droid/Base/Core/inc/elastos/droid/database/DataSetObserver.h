@@ -13,7 +13,7 @@ namespace Database {
  * that are observed are {@link Cursor}s or {@link android.widget.Adapter}s.
  * DataSetObserver must be implemented by objects which are added to a DataSetObservable.
  */
-class DataSetObserver
+class ECO_PUBLIC DataSetObserver
     : public Object
     , public IDataSetObserver
 {

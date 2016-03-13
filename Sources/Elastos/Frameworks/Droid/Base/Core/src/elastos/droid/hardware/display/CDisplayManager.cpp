@@ -60,10 +60,12 @@ ECode CDisplayManager::GetDisplays(
     /* [out] */ ArrayOf<IDisplay*>** displays)
 {
     VALIDATE_NOT_NULL(displays);
+    *displays = NULL;
 
     AutoPtr<ArrayOf<Int32> > displayIds;
     mGlobal->GetDisplayIds((ArrayOf<Int32>**)&displayIds);
 
+    AutoPtr<ArrayOf<IDisplay*> > array;
     synchronized(mLock) {
         //try {
             if (category.IsNull()) {
@@ -75,15 +77,14 @@ ECode CDisplayManager::GetDisplays(
                 AddPresentationDisplaysLocked(mTempDisplays, displayIds, IDisplay::TYPE_OVERLAY);
                 AddPresentationDisplaysLocked(mTempDisplays, displayIds, IDisplay::TYPE_VIRTUAL);
             }
-            *displays = ArrayOf<IDisplay*>::Alloc(mTempDisplays.GetSize());
-            if (*displays == NULL) {
+            array = ArrayOf<IDisplay*>::Alloc(mTempDisplays.GetSize());
+            if (array == NULL) {
                 mTempDisplays.Clear();
                 return E_OUT_OF_MEMORY_ERROR;
             }
-            REFCOUNT_ADD(*displays);
             List<AutoPtr<IDisplay> >::Iterator iter = mTempDisplays.Begin();
             for (Int32 i = 0; iter != mTempDisplays.End(); ++iter, i++) {
-                (*displays)->Set(i, *iter);
+                array->Set(i, *iter);
             }
 
         //} finally {
@@ -91,6 +92,8 @@ ECode CDisplayManager::GetDisplays(
         //}
     }
 
+    *displays = array;
+    REFCOUNT_ADD(*displays)
     return NOERROR;
 }
 
@@ -138,9 +141,7 @@ AutoPtr<IDisplay> CDisplayManager::GetOrCreateDisplayLocked(
     Boolean isValid;
     if (display == NULL) {
         AutoPtr<IDisplayAdjustments> infoHolder;
-        assert(0 && "TODO GetDisplayAdjustments");
-        // mContext->GetDisplayAdjustments(
-        //     displayId, (IDisplayAdjustments**)&infoHolder);
+        mContext->GetDisplayAdjustments(displayId, (IDisplayAdjustments**)&infoHolder);
         mGlobal->GetCompatibleDisplay(displayId, infoHolder, (IDisplay**)&display);
         if (display != NULL) {
             mDisplays[displayId] = display;

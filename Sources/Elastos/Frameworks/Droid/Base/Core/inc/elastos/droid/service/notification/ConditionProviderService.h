@@ -32,7 +32,7 @@ namespace Notification {
  * @hide
  */
 // @SystemApi
-class ConditionProviderService
+class ECO_PUBLIC ConditionProviderService
     : public Elastos::Droid::App::Service
     , public IConditionProviderService
 {
@@ -80,7 +80,7 @@ public:
     };
 
 private:
-    class H
+    class ECO_LOCAL H
         : public Handler
     {
         friend class Provider;
@@ -130,10 +130,10 @@ public:
         /* [out] */ IBinder** b);
 
 private:
-    CARAPI GetNotificationInterface(
+    ECO_LOCAL CARAPI GetNotificationInterface(
         /* [out] */ IINotificationManager** ni);
 
-    CARAPI_(Boolean) IsBound();
+    ECO_LOCAL CARAPI_(Boolean) IsBound();
 
 private:
     const String TAG;// = ConditionProviderService.class.getSimpleName()

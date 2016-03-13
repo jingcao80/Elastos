@@ -115,8 +115,12 @@ ECode CWallpaperManager::GetInstance(
     /* [out] */ IWallpaperManager** manager)
 {
     VALIDATE_NOT_NULL(manager);
-    return context->GetSystemService(
-            IContext::WALLPAPER_SERVICE, (IInterface**)manager);
+    *manager = NULL;
+    AutoPtr<IInterface> service;
+    FAIL_RETURN(context->GetSystemService(IContext::WALLPAPER_SERVICE, (IInterface**)&service))
+    *manager = IWallpaperManager::Probe(service);
+    REFCOUNT_ADD(*manager)
+    return NOERROR;
 }
 
 ECode CWallpaperManager::GetIWallpaperManager(

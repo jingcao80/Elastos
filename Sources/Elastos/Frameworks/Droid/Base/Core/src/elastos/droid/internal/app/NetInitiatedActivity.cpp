@@ -188,9 +188,9 @@ void NetInitiatedActivity::SendUserResponse(
     /* [in] */ Int32 response)
 {
     if (DEBUG) Logger::D(TAG, "sendUserResponse, response: %d", response);
-    AutoPtr<ILocationManager> locationManager;
-    this->GetSystemService(IContext::LOCATION_SERVICE,
-            (IInterface**)(ILocationManager**)&locationManager);
+    AutoPtr<IInterface> service;
+    GetSystemService(IContext::LOCATION_SERVICE, (IInterface**)&service);
+    AutoPtr<ILocationManager> locationManager = ILocationManager::Probe(service);
     Boolean result;
     locationManager->SendNiResponse(mNotificationId, response, &result);
 }

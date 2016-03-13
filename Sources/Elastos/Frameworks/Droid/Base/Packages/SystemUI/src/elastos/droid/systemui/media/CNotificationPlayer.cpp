@@ -49,8 +49,9 @@ ECode CNotificationPlayer::CreationAndCompletionThread::Run()
     mHost->mLooper = Looper::GetMyLooper();
     {
         AutoLock lock(mLock);
-        AutoPtr<IAudioManager> audioManager;
-        mCmd->mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&audioManager);
+        AutoPtr<IInterface> obj;
+        mCmd->mContext->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
+        AutoPtr<IAudioManager> audioManager = IAudioManager::Probe(obj);
         // try {
             AutoPtr<IMediaPlayer> player;
             CMediaPlayer::New((IMediaPlayer**)&player);
@@ -252,8 +253,9 @@ ECode CNotificationPlayer::SetUsesWakeLock(
         //         + " mThread=" + mThread);
         return E_RUNTIME_EXCEPTION;
     }
-    AutoPtr<IPowerManager> pm;
-    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&pm);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
     pm->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, mTag, (IPowerManagerWakeLock**)&mWakeLock);
     return NOERROR;
 }

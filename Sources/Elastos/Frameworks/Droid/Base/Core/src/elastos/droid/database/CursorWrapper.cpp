@@ -89,7 +89,7 @@ ECode CursorWrapper::GetColumnName(
 }
 
 ECode CursorWrapper::GetColumnNames(
-    /* [out,callee] */ ArrayOf<String>** columnNames)
+    /* [out, callee] */ ArrayOf<String>** columnNames)
 {
     VALIDATE_NOT_NULL(columnNames)
     return mCursor->GetColumnNames(columnNames);
@@ -159,7 +159,7 @@ ECode CursorWrapper::CopyStringToBuffer(
 
 ECode CursorWrapper::GetBlob(
     /* [in] */  Int32 columnIndex,
-    /* [out,callee] */ ArrayOf<Byte>** blob)
+    /* [out, callee] */ ArrayOf<Byte>** blob)
 {
     VALIDATE_NOT_NULL(blob)
     return mCursor->GetBlob(columnIndex, blob);

@@ -29,7 +29,6 @@ module
             [in] Boolean pressed);
     }
 
-
     } // namespace Policy
     } // namespace StatusBar
     } // namespace SystemUI

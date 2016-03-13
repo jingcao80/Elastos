@@ -29,7 +29,7 @@ module
         GetLocationRequests(
             [out] IList** requests);
 
-        SetLocationRequest(
+        SetLocationRequests(
             [in] IList* request);
     }
 

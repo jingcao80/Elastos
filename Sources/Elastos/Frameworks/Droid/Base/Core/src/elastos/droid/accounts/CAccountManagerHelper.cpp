@@ -1,10 +1,15 @@
 
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/accounts/CAccountManagerHelper.h"
 #include "elastos/droid/accounts/CAccountManager.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Accounts {
+
+CAR_SINGLETON_IMPL(CAccountManagerHelper)
+
+CAR_INTERFACE_IMPL(CAccountManagerHelper, Singleton, IAccountManagerHelper)
 
 ECode CAccountManagerHelper::Get(
     /* [in] */ IContext* context,
@@ -16,12 +21,12 @@ ECode CAccountManagerHelper::Get(
 
 ECode CAccountManagerHelper::NewChooseAccountIntent(
     /* [in] */ IAccount* selectedAccount,
-    /* [in] */ const ArrayOf<IAccount*>& allowableAccounts,
-    /* [in] */ const ArrayOf<String>& allowableAccountTypes,
+    /* [in] */ ArrayOf<IAccount*>* allowableAccounts,
+    /* [in] */ ArrayOf<String>* allowableAccountTypes,
     /* [in] */ Boolean alwaysPromptForAccount,
     /* [in] */ const String& descriptionOverrideText,
     /* [in] */ const String& addAccountAuthTokenType,
-    /* [in] */ const ArrayOf<String>& addAccountRequiredFeatures,
+    /* [in] */ ArrayOf<String>* addAccountRequiredFeatures,
     /* [in] */ IBundle* addAccountOptions,
     /* [out] */ IIntent** intent)
 {

@@ -45,7 +45,7 @@ CAR_INTERFACE_IMPL_2(CSession, Object, IWindowSession, IProxyDeathRecipient)
 CAR_OBJECT_IMPL(CSession)
 
 ECode CSession::constructor(
-    /* [in] */ Handle64 wmService,
+    /* [in] */ IIWindowManager* wmService,
     /* [in] */ IIWindowSessionCallback* callback,
     /* [in] */ IInputMethodClient* client,
     /* [in] */ IIInputContext* inputContext)

@@ -113,7 +113,7 @@ ECode LocalActivityManager::MoveToState(
 
         // We need to have always created the activity.
         if (localLOGV) Logger::V(TAG, "%s: starting %s",
-            r->mId.string(), Object::ToString(r->mIntent).string());
+            r->mId.string(), TO_CSTR(r->mIntent));
 
         if (r->mActivityInfo == NULL) {
             mActivityThread->ResolveActivityInfo(r->mIntent, (IActivityInfo**)&r->mActivityInfo);

@@ -27,7 +27,7 @@ public:
         /* [in] */ ArrayOf<Char32>* buf);
 
     virtual CARAPI GetData(
-        /* [out,callee] */ ArrayOf<Char32>** data);
+        /* [out, callee] */ ArrayOf<Char32>** data);
 
     virtual CARAPI SetData(
         /* [in] */ ArrayOf<Char32>* data);

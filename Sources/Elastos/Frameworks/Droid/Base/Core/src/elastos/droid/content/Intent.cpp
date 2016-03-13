@@ -902,6 +902,7 @@ ECode Intent::HasExtra(
     /* [in] */ const String& name,
     /* [out] */ Boolean* hasExtra)
 {
+    VALIDATE_NOT_NULL(hasExtra)
     if (mExtras != NULL) {
         return mExtras->ContainsKey(name, hasExtra);
     }
@@ -915,6 +916,7 @@ ECode Intent::HasExtra(
 ECode Intent::HasFileDescriptors(
     /* [out] */ Boolean* hasFileDescriptors)
 {
+    VALIDATE_NOT_NULL(hasFileDescriptors)
     if (mExtras != NULL) {
         mExtras->HasFileDescriptors(hasFileDescriptors);
     }
@@ -947,6 +949,7 @@ ECode Intent::GetBooleanExtra(
     /* [in] */ Boolean defaultValue,
     /* [out] */ Boolean* value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = defaultValue;
         return NOERROR;
@@ -961,6 +964,7 @@ ECode Intent::GetByteExtra(
     /* [in] */ Byte defaultValue,
     /* [out] */ Byte* value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = defaultValue;
         return NOERROR;
@@ -975,6 +979,7 @@ ECode Intent::GetInt16Extra(
     /* [in] */ Int16 defaultValue,
     /* [out] */ Int16* value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = defaultValue;
         return NOERROR;
@@ -989,6 +994,7 @@ ECode Intent::GetCharExtra(
     /* [in] */ Char32 defaultValue,
     /* [out] */ Char32* value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = defaultValue;
         return NOERROR;
@@ -1003,6 +1009,7 @@ ECode Intent::GetInt32Extra(
     /* [in] */ Int32 defaultValue,
     /* [out] */ Int32* value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = defaultValue;
         return NOERROR;
@@ -1017,6 +1024,7 @@ ECode Intent::GetInt64Extra(
     /* [in] */ Int64 defaultValue,
     /* [out] */ Int64* value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = defaultValue;
         return NOERROR;
@@ -1031,6 +1039,7 @@ ECode Intent::GetFloatExtra(
     /* [in] */ Float defaultValue,
     /* [out] */ Float* value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = defaultValue;
         return NOERROR;
@@ -1045,6 +1054,7 @@ ECode Intent::GetDoubleExtra(
     /* [in] */ Double defaultValue,
     /* [out] */ Double* value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = defaultValue;
         return NOERROR;
@@ -1058,6 +1068,7 @@ ECode Intent::GetStringExtra(
     /* [in] */ const String& name,
     /* [out] */ String* value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1071,6 +1082,7 @@ ECode Intent::GetCharSequenceExtra(
     /* [in] */ const String& name,
     /* [out] */ ICharSequence** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1084,6 +1096,7 @@ ECode Intent::GetParcelableExtra(
     /* [in] */ const String& name,
     /* [out] */ IParcelable** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1097,6 +1110,7 @@ ECode Intent::GetParcelableArrayExtra(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<IParcelable*>** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1110,6 +1124,7 @@ ECode Intent::GetParcelableArrayListExtra(
     /* [in] */ const String& name,
     /* [out] */ IArrayList** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1123,6 +1138,7 @@ ECode Intent::GetSerializableExtra(
     /* [in] */ const String& name,
     /* [out] */ ISerializable** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1136,6 +1152,7 @@ ECode Intent::GetInteger32ArrayListExtra(
     /* [in] */ const String& name,
     /* [out] */ IArrayList** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1149,6 +1166,7 @@ ECode Intent::GetStringArrayListExtra(
     /* [in] */ const String& name,
     /* [out] */ IArrayList** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1162,6 +1180,7 @@ ECode Intent::GetCharSequenceArrayListExtra(
     /* [in] */ const String& name,
     /* [out] */ IArrayList** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1175,6 +1194,7 @@ ECode Intent::GetBooleanArrayExtra(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<Boolean>** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1188,6 +1208,7 @@ ECode Intent::GetByteArrayExtra(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<Byte>** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1201,6 +1222,7 @@ ECode Intent::GetInt16ArrayExtra(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<Int16>** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1214,6 +1236,7 @@ ECode Intent::GetCharArrayExtra(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<Char32>** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1227,6 +1250,7 @@ ECode Intent::GetInt32ArrayExtra(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<Int32>** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1240,6 +1264,7 @@ ECode Intent::GetInt64ArrayExtra(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<Int64>** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1253,6 +1278,7 @@ ECode Intent::GetFloatArrayExtra(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<Float>** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1266,6 +1292,7 @@ ECode Intent::GetDoubleArrayExtra(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<Double>** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1279,6 +1306,7 @@ ECode Intent::GetStringArrayExtra(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<String>** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1292,6 +1320,7 @@ ECode Intent::GetCharSequenceArrayExtra(
     /* [in] */ const String& name,
     /* [out, callee] */ ArrayOf<ICharSequence*>** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1305,6 +1334,7 @@ ECode Intent::GetBundleExtra(
     /* [in] */ const String& name,
     /* [out] */ IBundle** value)
 {
+    VALIDATE_NOT_NULL(value)
     if (mExtras == NULL) {
         *value = NULL;
         return NOERROR;
@@ -1319,6 +1349,7 @@ ECode Intent::GetExtra(
     /* [in] */ IInterface* defaultValue,
     /* [out] */ IInterface** obj)
 {
+    VALIDATE_NOT_NULL(obj)
     *obj = defaultValue;
     if (mExtras != NULL) {
         AutoPtr<IInterface> newObj;
@@ -1337,6 +1368,7 @@ ECode Intent::GetExtra(
 ECode Intent::GetExtras(
     /* [out] */ IBundle** extras)
 {
+    VALIDATE_NOT_NULL(extras)
     if (mExtras != NULL) {
         return CBundle::New(mExtras, extras);
     }
@@ -1349,6 +1381,7 @@ ECode Intent::GetExtras(
 ECode Intent::GetFlags(
     /* [out] */ Int32* flags)
 {
+    VALIDATE_NOT_NULL(flags)
     *flags = mFlags;
     return NOERROR;
 }
@@ -1356,6 +1389,7 @@ ECode Intent::GetFlags(
 ECode Intent::IsExcludingStopped(
     /* [out] */ Boolean* isStopped)
 {
+    VALIDATE_NOT_NULL(isStopped)
     *isStopped = (mFlags &
             (IIntent::FLAG_EXCLUDE_STOPPED_PACKAGES|IIntent::FLAG_INCLUDE_STOPPED_PACKAGES))
                     == IIntent::FLAG_EXCLUDE_STOPPED_PACKAGES;
@@ -1365,6 +1399,7 @@ ECode Intent::IsExcludingStopped(
 ECode Intent::GetPackage(
     /* [out] */ String* packageName)
 {
+    VALIDATE_NOT_NULL(packageName)
     *packageName = mPackage;
     return NOERROR;
 }
@@ -1372,6 +1407,7 @@ ECode Intent::GetPackage(
 ECode Intent::GetComponent(
     /* [out] */ IComponentName** componentName)
 {
+    VALIDATE_NOT_NULL(componentName)
     *componentName = mComponent;
     REFCOUNT_ADD(*componentName);
     return NOERROR;
@@ -1380,6 +1416,7 @@ ECode Intent::GetComponent(
 ECode Intent::GetSourceBounds(
     /* [out] */ IRect** sourceBounds)
 {
+    VALIDATE_NOT_NULL(sourceBounds)
     *sourceBounds = mSourceBounds;
     REFCOUNT_ADD(*sourceBounds);
     return NOERROR;
@@ -1389,6 +1426,7 @@ ECode Intent::ResolveActivity(
     /* [in] */ IPackageManager* pm,
     /* [out] */ IComponentName** componentName)
 {
+    VALIDATE_NOT_NULL(componentName)
     if (mComponent != NULL) {
         *componentName = mComponent;
         REFCOUNT_ADD(*componentName);
@@ -1420,6 +1458,7 @@ ECode Intent::ResolveActivityInfo(
     /* [in] */ Int32 flags,
     /* [out] */ IActivityInfo** result)
 {
+    VALIDATE_NOT_NULL(result)
     AutoPtr<IActivityInfo> ai;
     if (mComponent != NULL) {
         // try {
@@ -2032,6 +2071,8 @@ ECode Intent::FillIn(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
+
     ECode ec = NOERROR;
     assert(other != NULL);
 
@@ -3257,6 +3298,13 @@ ECode Intent::IsDocument(
     VALIDATE_NOT_NULL(result)
     *result = (mFlags & IIntent::FLAG_ACTIVITY_NEW_DOCUMENT) == IIntent::FLAG_ACTIVITY_NEW_DOCUMENT;
     return NOERROR;
+}
+
+Boolean Intent::IsAccessUriMode(
+    /* [in] */ Int32 modeFlags)
+{
+    return (modeFlags & (IIntent::FLAG_GRANT_READ_URI_PERMISSION
+            | IIntent::FLAG_GRANT_WRITE_URI_PERMISSION)) != 0;
 }
 
 } // namespace Content

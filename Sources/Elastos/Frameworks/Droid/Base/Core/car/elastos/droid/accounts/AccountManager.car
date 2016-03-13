@@ -1,11 +1,12 @@
 
 module
 {
-    interface Elastos.Droid.Os.IBundle;
-    interface Elastos.Droid.Os.IUserHandle;
-//    interface Elastos.Droid.App.IActivity;
+    interface Elastos.Droid.App.IActivity;
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Content.IIntent;
+    interface Elastos.Droid.Os.IBundle;
+    interface Elastos.Droid.Os.IHandler;
+    interface Elastos.Droid.Os.IUserHandle;
 
     namespace Elastos {
     namespace Droid {
@@ -156,8 +157,8 @@ module
          *     authenticator known to the AccountManager service.  Empty (never
          *     null) if no authenticators are known.
          */
-//        GetAuthenticatorTypes(
-//            [out, callee] ArrayOf<IAuthenticatorDescription*>* authenticators);
+       GetAuthenticatorTypes(
+           [out, callee] ArrayOf<IAuthenticatorDescription*>* authenticators);
 
         /**
          * @hide
@@ -172,9 +173,9 @@ module
          *     authenticator known to the AccountManager service.  Empty (never
          *     null) if no authenticators are known.
          */
-//        GetAuthenticatorTypesAsUser(
-//            [in] Int32 userId,
-//            [out] ArrayOf<IAuthenticatorDescription*>** result);
+       GetAuthenticatorTypesAsUser(
+           [in] Int32 userId,
+           [out, callee] ArrayOf<IAuthenticatorDescription*>* result);
 
         /**
          * Lists all accounts of any type registered on the device.
@@ -280,12 +281,12 @@ module
          * @return a future containing the label string
          * @hide
          */
-//        GetAuthTokenLabel(
-//            [in] String accountType,
-//            [in] String authTokenType,
-//            [in] IAccountManagerCallback* cb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** future);
+        GetAuthTokenLabel(
+            [in] String accountType,
+            [in] String authTokenType,
+            [in] IAccountManagerCallback* cb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** future);
 
         /**
          * Finds out whether a particular account has all the specified features.
@@ -310,12 +311,12 @@ module
          * @return An {@link AccountManagerFuture} which resolves to a Boolean,
          * true if the account exists and has all of the specified features.
          */
-//        HasFeatures(
-//            [in] IAccount* account,
-//            [in] ArrayOf<String> features,
-//            [in] IAccountManagerCallback* accountManagerCb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** accountManagerFuture);
+        HasFeatures(
+            [in] IAccount* account,
+            [in] ArrayOf<String>* features,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** accountManagerFuture);
 
         /**
          * Lists all accounts of a type which have certain features.  The account
@@ -344,12 +345,12 @@ module
          *     {@link Account}, one per account of the specified type which
          *     matches the requested features.
          */
-//        GetAccountsByTypeAndFeatures(
-//            [in] String type,
-//            [in] ArrayOf<String> features,
-//            [in] IAccountManagerCallback* accountManagerCb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** accountManagerFuture);
+        GetAccountsByTypeAndFeatures(
+            [in] String type,
+            [in] ArrayOf<String>* features,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** accountManagerFuture);
 
         /**
          * Adds an account directly to the AccountManager.  Normally used by sign-up
@@ -394,12 +395,12 @@ module
          *     after the name change. If successful the account's name will be the
          *     specified new name.
          */
-//        RenameAccount(
-//            [in] IAccount* account,
-//            [in] String newName,
-//            [in] IAccountManagerCallback* cb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** result);
+        RenameAccount(
+            [in] IAccount* account,
+            [in] String newName,
+            [in] IAccountManagerCallback* cb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** result);
 
         /**
          * Gets the previous name associated with the account or {@code null}, if
@@ -438,22 +439,22 @@ module
          *     true if the account has been successfully removed,
          *     false if the authenticator forbids deleting this account.
          */
-//        RemoveAccount(
-//            [in] IAccount* account,
-//            [in] IAccountManagerCallback* accountManagerCb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** accountManagerFuture);
+        RemoveAccount(
+            [in] IAccount* account,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** accountManagerFuture);
 
         /**
          * @see #removeAccount(Account, AccountManagerCallback, Handler)
          * @hide
          */
-//        RemoveAccountAsUser(
-//            [in] IAccount* account,
-//            [in] IAccountManagerCallback* cb,
-//            [in] IHandler* handler,
-//            [in] IUserHandle* userHandle,
-//            [out] IAccountManagerFuture** result);
+        RemoveAccountAsUser(
+            [in] IAccount* account,
+            [in] IAccountManagerCallback* cb,
+            [in] IHandler* handler,
+            [in] IUserHandle* userHandle,
+            [out] IAccountManagerFuture** result);
 
         /**
          * Removes an auth token from the AccountManager's cache.  Does nothing if
@@ -658,14 +659,14 @@ module
          * authenticator-dependent.  The caller should verify the validity of the
          * account before requesting an auth token.
          */
-//        GetAuthToken(
-//            [in] IAccount* account,
-//            [in] String authTokenType,
-//            [in] IBundle* options,
-//            [in] IActivity* activity,
-//            [in] IAccountManagerCallback* accountManagerCb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** accoutManagerFuture);
+        GetAuthToken(
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] IBundle* options,
+            [in] IActivity* activity,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** accoutManagerFuture);
 
         /**
          * Gets an auth token of the specified type for a particular account,
@@ -735,13 +736,13 @@ module
          * authenticator-dependent.  The caller should verify the validity of the
          * account before requesting an auth token.
          */
-//        GetAuthToken(
-//            [in] IAccount* account,
-//            [in] String authTokenType,
-//            [in] Boolean notifyAuthFailure,
-//            [in] IAccountManagerCallback* accountManagerCb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** accoutManagerFuture);
+        GetAuthToken(
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] Boolean notifyAuthFailure,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** accoutManagerFuture);
 
         /**
          * Gets an auth token of the specified type for a particular account,
@@ -813,14 +814,14 @@ module
          * authenticator-dependent.  The caller should verify the validity of the
          * account before requesting an auth token.
          */
-//        GetAuthToken(
-//            [in] IAccount* account,
-//            [in] String authTokenType,
-//            [in] IBundle* options,
-//            [in] Boolean notifyAuthFailure,
-//            [in] IAccountManagerCallback* accountManagerCb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** accoutManagerFuture);
+        GetAuthToken(
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] IBundle* options,
+            [in] Boolean notifyAuthFailure,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** accoutManagerFuture);
 
         /**
          * Asks the user to add an account of a specified type.  The authenticator
@@ -870,30 +871,30 @@ module
          *      creating a new account, usually because of network trouble
          * </ul>
          */
-//        AddAccount(
-//            [in] String accountType,
-//            [in] String authTokenType,
-//            [in] ArrayOf<String> requiredFeatures,
-//            [in] IBundle* addAccountOptions,
-//            [in] IActivity* activity,
-//            [in] IAccountManagerCallback* accountManagerCb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** accoutManagerFuture);
+        AddAccount(
+            [in] String accountType,
+            [in] String authTokenType,
+            [in] ArrayOf<String>* requiredFeatures,
+            [in] IBundle* addAccountOptions,
+            [in] IActivity* activity,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** accoutManagerFuture);
 
         /**
          * @see #addAccount(String, String, String[], Bundle, Activity, AccountManagerCallback, Handler)
          * @hide
          */
-//        AddAccountAsUser(
-//            [in] String accountType,
-//            [in] String authTokenType,
-//            [in] ArrayOf<String>* requiredFeatures,
-//            [in] IBundle* addAccountOptions,
-//            [in] IActivity* activity,
-//            [in] IAccountManagerCallback* cb,
-//            [in] IHandler* handler,
-//            [in] IUserHandle* userHandle,
-//            [out] IAccountManagerFuture** result);
+        AddAccountAsUser(
+            [in] String accountType,
+            [in] String authTokenType,
+            [in] ArrayOf<String>* requiredFeatures,
+            [in] IBundle* addAccountOptions,
+            [in] IActivity* activity,
+            [in] IAccountManagerCallback* cb,
+            [in] IHandler* handler,
+            [in] IUserHandle* userHandle,
+            [out] IAccountManagerFuture** result);
 
         /**
          * Adds a shared account from the primary user to a secondary user. Adding the shared account
@@ -985,13 +986,13 @@ module
          *      verifying the password, usually because of network trouble
          * </ul>
          */
-//        ConfirmCredentials(
-//            [in] IAccount* account,
-//            [in] IBundle* options,
-//            [in] IActivity* activity,
-//            [in] IAccountManagerCallback* accountManagerCb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** accoutManagerFuture);
+        ConfirmCredentials(
+            [in] IAccount* account,
+            [in] IBundle* options,
+            [in] IActivity* activity,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** accoutManagerFuture);
 
         /**
          * Asks the user to enter a new password for an account, updating the
@@ -1040,14 +1041,14 @@ module
          *      verifying the password, usually because of network trouble
          * </ul>
          */
-//        UpdateCredentials(
-//            [in] IAccount* account,
-//            [in] String authTokenType,
-//            [in] IBundle* options,
-//            [in] IActivity* activity,
-//            [in] IAccountManagerCallback* accountManagerCb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** accoutManagerFuture);
+        UpdateCredentials(
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] IBundle* options,
+            [in] IActivity* activity,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** accoutManagerFuture);
 
         /**
          * Offers the user an opportunity to change an authenticator's settings.
@@ -1086,12 +1087,12 @@ module
          *      updating settings, usually because of network trouble
          * </ul>
          */
-//        EditProperties(
-//            [in] String accountType,
-//            [in] IActivity* activity,
-//            [in] IAccountManagerCallback* accountManagerCb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** accoutManagerFuture);
+        EditProperties(
+            [in] String accountType,
+            [in] IActivity* activity,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** accoutManagerFuture);
 
         /**
          * This convenience helper combines the functionality of
@@ -1146,16 +1147,16 @@ module
          *      updating settings, usually because of network trouble
          * </ul>
          */
-//        GetAuthTokenByFeatures(
-//            [in] String accountType,
-//            [in] String authTokenType,
-//            [in] ArrayOf<String> features,
-//            [in] IActivity* activity,
-//            [in] IBundle* addAccountOptions,
-//            [in] IBundle* getAuthTokenOptions,
-//            [in] IAccountManagerCallback* accountManagerCb,
-//            [in] IHandler* handler,
-//            [out] IAccountManagerFuture** accoutManagerFuture);
+        GetAuthTokenByFeatures(
+            [in] String accountType,
+            [in] String authTokenType,
+            [in] ArrayOf<String>* features,
+            [in] IActivity* activity,
+            [in] IBundle* addAccountOptions,
+            [in] IBundle* getAuthTokenOptions,
+            [in] IAccountManagerCallback* accountManagerCb,
+            [in] IHandler* handler,
+            [out] IAccountManagerFuture** accoutManagerFuture);
 
         /**
          * Adds an {@link OnAccountsUpdateListener} to this instance of the
@@ -1181,10 +1182,10 @@ module
          * @throws IllegalArgumentException if listener is null
          * @throws IllegalStateException if listener was already added
          */
-//        AddOnAccountsUpdatedListener(
-//            [in] IOnAccountsUpdateListener* listener,
-//            [in] IHandler* handler,
-//            [in] Boolean updateImmediately);
+        AddOnAccountsUpdatedListener(
+            [in] IOnAccountsUpdateListener* listener,
+            [in] IHandler* handler,
+            [in] Boolean updateImmediately);
 
         /**
          * Removes an {@link OnAccountsUpdateListener} previously registered with
@@ -1199,11 +1200,11 @@ module
          * @throws IllegalArgumentException if listener is null
          * @throws IllegalStateException if listener was not already added
          */
-//        RemoveOnAccountsUpdatedListener(
-//            [in] IOnAccountsUpdateListener* listener);
+        RemoveOnAccountsUpdatedListener(
+            [in] IOnAccountsUpdateListener* listener);
     }
 
-    [local]
+    [local, deprecated]
     interface IAccountManagerHelper {
         /**
          * Gets an AccountManager instance associated with a Context.
@@ -1257,12 +1258,12 @@ module
          */
         NewChooseAccountIntent(
             [in] IAccount* selectedAccount,
-            [in] ArrayOf<IAccount*> allowableAccounts,
-            [in] ArrayOf<String> allowableAccountTypes,
+            [in] ArrayOf<IAccount*>* allowableAccounts,
+            [in] ArrayOf<String>* allowableAccountTypes,
             [in] Boolean alwaysPromptForAccount,
             [in] String descriptionOverrideText,
             [in] String addAccountAuthTokenType,
-            [in] ArrayOf<String>  addAccountRequiredFeatures,
+            [in] ArrayOf<String>*  addAccountRequiredFeatures,
             [in] IBundle* addAccountOptions,
             [out] IIntent** intent);
     }

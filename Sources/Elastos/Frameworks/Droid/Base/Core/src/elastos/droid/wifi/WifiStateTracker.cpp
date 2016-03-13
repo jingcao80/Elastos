@@ -198,7 +198,9 @@ ECode WifiStateTracker::StartMonitoring(
     mCsHandler = target;
     mContext = ctx;
 
-    mContext->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&mWifiManager);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::WIFI_SERVICE, (IInterface**)&obj);
+    mWifiManager = IWifiManager::Probe(obj);
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IWifiManager::NETWORK_STATE_CHANGED_ACTION);

@@ -17,7 +17,7 @@
 package com.android.server.restrictions;
 
 import android.Manifest;
-import android.accounts.IAccountAuthenticator;
+import android.accounts.IIAccountAuthenticator;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;

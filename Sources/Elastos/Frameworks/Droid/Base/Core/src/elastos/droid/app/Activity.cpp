@@ -4065,8 +4065,9 @@ ECode Activity::Attach(
         }
     }
 
-    AutoPtr<IWindowManager> wm;
-    FAIL_RETURN(context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&wm));
+    AutoPtr<IInterface> service;
+    FAIL_RETURN(context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&service))
+    AutoPtr<IWindowManager> wm = IWindowManager::Probe(service);
     String str;
     mComponent->FlattenToString(&str);
     Int32 flags;
@@ -4819,9 +4820,9 @@ ECode Activity::GetSystemService(
     }
     else if (IContext::LAYOUT_INFLATER_SERVICE.Equals(name)) {
         if (mInflater == NULL) {
-            AutoPtr<ILayoutInflater> temp;
-            mBase->GetSystemService(
-                IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&temp);
+            AutoPtr<IInterface> service;
+            FAIL_RETURN(mBase->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service))
+            AutoPtr<ILayoutInflater> temp = ILayoutInflater::Probe(service);
             temp->CloneInContext(this, (ILayoutInflater**)&mInflater);
         }
         *object = mInflater;

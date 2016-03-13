@@ -1,18 +1,21 @@
-
 #include "elastos/droid/server/input/InputApplicationHandle.h"
+#include "elastos/droid/server/input/NativeInputApplicationHandle.h"
+#include <utils/threads.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Input {
 
+static android::Mutex gHandleMutex;
+
 CAR_INTERFACE_IMPL(InputApplicationHandle, Object, IInputApplicationHandle);
 
 InputApplicationHandle::InputApplicationHandle(
     /* [in] */ IObject* appWindowToken)
-    : mPtr(0)
-    , mAppWindowToken(appWindowToken)
+    : mAppWindowToken(appWindowToken)
     , mDispatchingTimeoutNanos(0)
+    , mPtr(0)
 {}
 
 InputApplicationHandle::~InputApplicationHandle()
@@ -26,24 +29,38 @@ InputApplicationHandle::~InputApplicationHandle()
 
 void InputApplicationHandle::NativeDispose()
 {
-/*
-static void android_server_InputApplicationHandle_nativeDispose(JNIEnv* env, jobject obj) {
-    AutoMutex _l(gHandleMutex);
+    android::AutoMutex _l(gHandleMutex);
 
-    jlong ptr = env->GetLongField(obj, gInputApplicationHandleClassInfo.ptr);
-    if (ptr) {
-        env->SetLongField(obj, gInputApplicationHandleClassInfo.ptr, 0);
+    if (mPtr) {
+        mPtr = 0;
 
-        NativeInputApplicationHandle* handle = reinterpret_cast<NativeInputApplicationHandle*>(ptr);
-        handle->decStrong((void*)android_server_InputApplicationHandle_getHandle);
+        NativeInputApplicationHandle* handle = reinterpret_cast<NativeInputApplicationHandle*>(mPtr);
+        handle->decStrong((void*)GetNativeInputApplicationHandle);
     }
 }
-    if (ptr != NULL) {
-        NativeInputApplicationHandle* handle = reinterpret_cast<NativeInputApplicationHandle*>(ptr);
-        handle->decStrong((void*)android_server_InputApplicationHandle_getHandle);
-        ptr = NULL;
+
+android::sp<android::InputApplicationHandle> GetNativeInputApplicationHandle(
+    /* [in] */ InputApplicationHandle* inputApplicationHandleObj)
+{
+    if (inputApplicationHandleObj == NULL) {
+        return NULL;
     }
-*/
+
+    android::AutoMutex _l(gHandleMutex);
+
+    Int64 ptr = inputApplicationHandleObj->mPtr;
+    NativeInputApplicationHandle* handle;
+    if (ptr) {
+        handle = reinterpret_cast<NativeInputApplicationHandle*>(ptr);
+    }
+    else {
+        AutoPtr<IWeakReference> objWeak;
+        inputApplicationHandleObj->GetWeakReference((IWeakReference**)&objWeak);
+        handle = new NativeInputApplicationHandle(objWeak);
+        handle->incStrong((void*)GetNativeInputApplicationHandle);
+        inputApplicationHandleObj->mPtr = reinterpret_cast<Int64>(handle);
+    }
+    return handle;
 }
 
 } // Input

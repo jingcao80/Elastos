@@ -12,13 +12,19 @@
 #include <sys/types.h>
 #include <android/dlext.h>
 
+#include "elastos/droid/app/AppGlobals.h"
 #include "elastos/droid/os/Build.h"
 #include "elastos/droid/os/SystemProperties.h"
+#include "elastos/droid/R.h"
 #include "elastos/droid/webkit/WebViewFactory.h"
 #include <elastos/utility/logging/Logger.h>
 
+using Elastos::Droid::App::AppGlobals;
+using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::SystemProperties;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -72,11 +78,10 @@ AutoPtr<IPackageInfo> WebViewFactory::sPackageInfo;
 
 String WebViewFactory::GetWebViewPackageName()
 {
-    assert(0);
-    // TODO
-    // return AppGlobals.getInitialApplication().getString(
-    //         com.android.internal.R.string.config_webViewPackageName);
-    return String(NULL);
+    AutoPtr<IApplication> application = AppGlobals::GetInitialApplication();
+    String result;
+    IContext::Probe(application)->GetString(R::string::config_webViewPackageName, &result);
+    return result;
 }
 
 AutoPtr<IPackageInfo> WebViewFactory::GetLoadedPackageInfo()
@@ -289,9 +294,12 @@ AutoPtr< ArrayOf<String> > WebViewFactory::GetWebViewNativeLibraryPaths()
     // PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
     // ApplicationInfo ai = pm.getApplicationInfo(getWebViewPackageName(), 0);
 
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
     // String path32;
     // String path64;
-    // boolean primaryArchIs64bit = VMRuntime.is64BitAbi(ai.primaryCpuAbi);
+    // boolean primaryArchIs64bit;
+    // system->Is64BitAbi(ai.primaryCpuAbi, &primaryArchIs64bit);
     // if (!TextUtils.isEmpty(ai.secondaryCpuAbi)) {
     //     // Multi-arch case.
     //     if (primaryArchIs64bit) {
@@ -365,10 +373,13 @@ void WebViewFactory::LoadNativeLibrary()
         return;
     }
 
-    assert(0);
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    Boolean is64Bit;
+    system->Is64Bit(&is64Bit);
     // TODO
     // try {
-    //     getUpdateService().waitForRelroCreationCompleted(VMRuntime.getRuntime().is64Bit());
+    //     getUpdateService().waitForRelroCreationCompleted(is64Bit);
     // } catch (RemoteException e) {
     //     Log.e(LOGTAG, "error waiting for relro creation, proceeding without", e);
     //     return;

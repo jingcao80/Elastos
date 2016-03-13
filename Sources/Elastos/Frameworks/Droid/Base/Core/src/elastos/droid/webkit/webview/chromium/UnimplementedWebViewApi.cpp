@@ -49,7 +49,6 @@ ECode UnimplementedWebViewApi::Invoke()
     //     }
     // }
 
-    assert(0);
     if (THROW) {
         //throw new UnimplementedWebViewApiException();
         assert(0);

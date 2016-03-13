@@ -221,7 +221,7 @@ ECode SRTTrack::UpdateView(
         for (Int32 i = 0; i < length; i++) {
             line = (*(ttc->mStrings))[i];
             sb.Append(line);
-            sb.Append('\n');
+            sb.AppendChar('\n');
         }
 
         String str = sb.ToString();

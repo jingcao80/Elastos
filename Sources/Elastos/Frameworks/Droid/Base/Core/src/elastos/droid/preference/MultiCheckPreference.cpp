@@ -130,7 +130,7 @@ ECode MultiCheckPreference::SetEntries(
 }
 
 ECode MultiCheckPreference::GetEntries(
-    /* [out,callee] */ ArrayOf<ICharSequence*>** result)
+    /* [out, callee] */ ArrayOf<ICharSequence*>** result)
 {
     VALIDATE_NOT_NULL(result)
     *result = mEntries;
@@ -175,7 +175,7 @@ void MultiCheckPreference::SetEntryValuesCS(
 }
 
 ECode MultiCheckPreference::GetEntryValues(
-    /* [out,callee] */ ArrayOf<String>** result)
+    /* [out, callee] */ ArrayOf<String>** result)
 {
     VALIDATE_NOT_NULL(result)
     *result = mEntryValues;
@@ -246,7 +246,7 @@ ECode MultiCheckPreference::SetSummary(
 }
 
 ECode MultiCheckPreference::GetValues(
-    /* [out,callee] */ ArrayOf<Boolean>** result)
+    /* [out, callee] */ ArrayOf<Boolean>** result)
 {
     VALIDATE_NOT_NULL(result)
     *result = mSetValues;

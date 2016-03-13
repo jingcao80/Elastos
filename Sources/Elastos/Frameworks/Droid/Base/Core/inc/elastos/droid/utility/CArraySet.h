@@ -6,6 +6,7 @@
 #include "elastos/droid/utility/MapCollections.h"
 
 using Elastos::Utility::ISet;
+using Elastos::Utility::IIterable;
 using Elastos::Utility::ICollection;
 
 namespace Elastos {
@@ -17,6 +18,7 @@ CarClass(CArraySet)
     , public IArraySet
     , public ISet
     , public ICollection
+    , public IIterable
 {
 private:
     class InnerMapCollections

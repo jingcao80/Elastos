@@ -724,7 +724,7 @@ ECode ActionBarContextView::GenerateDefaultLayoutParams(
     // // added to an ActionBarContextView should have them already.
     // return new MarginLayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
-    CViewGroupLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::WRAP_CONTENT, (IViewGroupLayoutParams**)result);
+    CViewGroupLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::WRAP_CONTENT, result);
     return NOERROR;
 }
 

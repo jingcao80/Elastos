@@ -490,26 +490,26 @@ ECode CWifiLinkLayerStats::ToString(
 
     StringBuilder sbuf;
     sbuf.Append(" WifiLinkLayerStats: ");
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
 
     if (mSSID != NULL) {
         sbuf.Append(" SSID: ");
         sbuf.Append(mSSID);
-        sbuf.Append('\n');
+        sbuf.AppendChar('\n');
     }
 
     if (mBSSID != NULL) {
         sbuf.Append(" BSSID: ");
         sbuf.Append(mBSSID);
-        sbuf.Append('\n');
+        sbuf.AppendChar('\n');
     }
 
     sbuf.Append(" my bss beacon rx: ");
     sbuf.Append(mBeaconRx);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append(" RSSI mgmt: ");
     sbuf.Append(mRssiMgmt);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append(" BE : ");
     sbuf.Append(" rx=");
     sbuf.Append(mRxmpduBe);
@@ -519,7 +519,7 @@ ECode CWifiLinkLayerStats::ToString(
     sbuf.Append(mLostmpduBe);
     sbuf.Append(" retries=");
     sbuf.Append(mRetriesBe);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append(" BK : ");
     sbuf.Append(" rx=");
     sbuf.Append(mRxmpduBk);
@@ -529,7 +529,7 @@ ECode CWifiLinkLayerStats::ToString(
     sbuf.Append(mLostmpduBk);
     sbuf.Append(" retries=");
     sbuf.Append(mRetriesBk);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append(" VI : ");
     sbuf.Append(" rx=");
     sbuf.Append(mRxmpduVi);
@@ -539,7 +539,7 @@ ECode CWifiLinkLayerStats::ToString(
     sbuf.Append(mLostmpduVi);
     sbuf.Append(" retries=");
     sbuf.Append(mRetriesVi);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append(" VO : ");
     sbuf.Append(" rx=");
     sbuf.Append(mRxmpduVo);
@@ -549,7 +549,7 @@ ECode CWifiLinkLayerStats::ToString(
     sbuf.Append(mLostmpduVo);
     sbuf.Append(" retries=");
     sbuf.Append(mRetriesVo);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append(" on_time : ");
     sbuf.Append(mOnTime);
     sbuf.Append(" tx_time=");
@@ -558,7 +558,7 @@ ECode CWifiLinkLayerStats::ToString(
     sbuf.Append(mRxTime);
     sbuf.Append(" scan_time=");
     sbuf.Append(mOnTimeScan);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
 
     return sbuf.ToString(str);
 }

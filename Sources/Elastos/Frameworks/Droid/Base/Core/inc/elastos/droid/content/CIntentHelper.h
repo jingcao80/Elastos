@@ -201,6 +201,9 @@ public:
         /* [in] */ const String& type,
         /* [out] */ String* mimeType);
 
+    CARAPI IsAccessUriMode(
+        /* [in] */ Int32 modeFlags,
+        /* [out] */ Boolean* result);
 private:
 };
 

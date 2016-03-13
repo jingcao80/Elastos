@@ -5,18 +5,26 @@
 #include "_Elastos_Droid_Server_Input_CInputManagerService.h"
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.Text.h"
+#include "Elastos.CoreLibrary.Core.h"
+#include "Elastos.CoreLibrary.IO.h"
 #include "Elastos.CoreLibrary.Utility.h"
+#include "elastos/droid/content/BroadcastReceiver.h"
+#include "elastos/droid/database/ContentObserver.h"
 #include "elastos/droid/os/Handler.h"
-#include "elastos/droid/server/input/PersistentDataStore.h"
 #include "elastos/droid/server/input/InputApplicationHandle.h"
 #include "elastos/droid/server/input/InputWindowHandle.h"
+#include "elastos/droid/server/input/NativeInputManager.h"
+#include "elastos/droid/server/input/PersistentDataStore.h"
+#include "elastos/core/Object.h"
 
 using Elastos::Droid::App::INotificationManager;
 using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IActivityInfo;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Database::ContentObserver;
 using Elastos::Droid::Hardware::Display::IDisplayViewport;
 using Elastos::Droid::Hardware::Input::IInputDevicesChangedListener;
 using Elastos::Droid::Hardware::Input::IKeyboardLayout;
@@ -40,13 +48,30 @@ using Elastos::Droid::View::IPointerIcon;
 using Elastos::Droid::View::IInputChannel;
 using Elastos::Droid::View::IKeyEvent;
 using Elastos::Droid::Widget::IToast;
+using Elastos::Core::Object;
 using Elastos::IO::IFileDescriptor;
 using Elastos::IO::IPrintWriter;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::IList;
+
+// these macros are defined in .../Linux/usr/include/linux/input.h
+#ifdef BTN_MOUSE
+#undef BTN_MOUSE
+#undef SW_LID
+#undef SW_KEYPAD_SLIDE
+#undef SW_HEADPHONE_INSERT
+#undef SW_MICROPHONE_INSERT
+#undef SW_LINEOUT_INSERT
+#undef SW_JACK_PHYSICAL_INSERT
+#undef SW_CAMERA_LENS_COVER
+#endif
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Input {
+
+class CInputFilterHost;
 
 /*
  * Wraps the C++ InputManager and provides its callbacks.
@@ -59,6 +84,8 @@ CarClass(CInputManagerService)
     , public IWatchdogMonitor
     , public IBinder
 {
+    friend class NativeInputManager;
+
 public:
     /**
      * Hosting interface for input filters to call back into the input manager.
@@ -143,7 +170,7 @@ private:
         CAR_INTERFACE_DECL();
 
         //@Override
-        CARAPI BinderDied();
+        CARAPI ProxyDied();
 
         CARAPI_(void) NotifyInputDevicesChanged(
             /* [in] */ ArrayOf<Int32>* info);
@@ -159,16 +186,16 @@ private:
         , public IProxyDeathRecipient
     {
     public:
+        CAR_INTERFACE_DECL();
+
         VibratorToken(
             /* [in] */ Int32 deviceId,
             /* [in] */ IBinder* token,
             /* [in] */ Int32 tokenValue,
             /* [in] */ CInputManagerService* host);
 
-        CAR_INTERFACE_DECL();
-
         //@Override
-        CARAPI BinderDied();
+        CARAPI ProxyDied();
 
     public:
         Int32 mDeviceId;
@@ -186,10 +213,10 @@ private:
         , public IInputManagerInternal
     {
     public:
+        CAR_INTERFACE_DECL();
+
         LocalService(
             /* [in] */ CInputManagerService* host);
-
-        CAR_INTERFACE_DECL();
 
         //@Override
         CARAPI SetDisplayViewports(
@@ -210,8 +237,204 @@ private:
         CInputManagerService* mHost;
     };
 
+private:
+    class BroadcastReceiverInStart
+        : public BroadcastReceiver
+    {
+    public:
+        BroadcastReceiverInStart(
+            /* [in] */ CInputManagerService* owner);
+
+        //@Override
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* info)
+        {
+            VALIDATE_NOT_NULL(info);
+            *info = "CInputManagerService::BroadcastReceiverInStart: ";
+            (*info).AppendFormat("%p", this);
+            return NOERROR;
+        }
+
+    private:
+        CInputManagerService* mOwner;
+    };
+
+    class BroadcastReceiver1InSystemRunning
+        : public BroadcastReceiver
+    {
+    public:
+        BroadcastReceiver1InSystemRunning(
+            /* [in] */ CInputManagerService* owner);
+
+        //@Override
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* info)
+        {
+            VALIDATE_NOT_NULL(info);
+            *info = "CInputManagerService::BroadcastReceiver1InSystemRunning: ";
+            (*info).AppendFormat("%p", this);
+            return NOERROR;
+        }
+
+    private:
+        CInputManagerService* mOwner;
+    };
+
+    class BroadcastReceiver2InSystemRunning
+        : public BroadcastReceiver
+    {
+    public:
+        BroadcastReceiver2InSystemRunning(
+            /* [in] */ CInputManagerService* owner);
+
+        //@Override
+        CARAPI OnReceive(
+            /* [in] */ IContext* context,
+            /* [in] */ IIntent* intent);
+
+        CARAPI ToString(
+            /* [out] */ String* info)
+        {
+            VALIDATE_NOT_NULL(info);
+            *info = "CInputManagerService::BroadcastReceiver2InSystemRunning: ";
+            (*info).AppendFormat("%p", this);
+            return NOERROR;
+        }
+
+    private:
+        CInputManagerService* mOwner;
+    };
+
+    class KeyboardLayoutVisitorInUpdateKeyboardLayouts
+        : public Object
+        , public IKeyboardLayoutVisitor
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        KeyboardLayoutVisitorInUpdateKeyboardLayouts(
+            /* [in] */ IHashSet* availableKeyboardLayouts);
+
+        CARAPI VisitKeyboardLayout(
+            /* [in] */ IResources* resources,
+            /* [in] */ const String& descriptor,
+            /* [in] */ const String& label,
+            /* [in] */ const String& collection,
+            /* [in] */ Int32 keyboardLayoutResId,
+            /* [in] */ Int32 priority);
+
+    private:
+        AutoPtr<IHashSet> mAvailableKeyboardLayouts;
+    };
+
+    class KeyboardLayoutVisitorInGetKeyboardLayouts
+        : public Object
+        , public IKeyboardLayoutVisitor
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        KeyboardLayoutVisitorInGetKeyboardLayouts(
+            /* [in] */ IArrayList* list);
+
+        CARAPI VisitKeyboardLayout(
+            /* [in] */ IResources* resources,
+            /* [in] */ const String& descriptor,
+            /* [in] */ const String& label,
+            /* [in] */ const String& collection,
+            /* [in] */ Int32 keyboardLayoutResId,
+            /* [in] */ Int32 priority);
+
+    private:
+        AutoPtr<IArrayList> mList;
+    };
+
+    class KeyboardLayoutVisitorInGetKeyboardLayout
+        : public Object
+        , public IKeyboardLayoutVisitor
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        KeyboardLayoutVisitorInGetKeyboardLayout(
+            /* [in] */ ArrayOf<IKeyboardLayout*>* layouts);
+
+        CARAPI VisitKeyboardLayout(
+            /* [in] */ IResources* resources,
+            /* [in] */ const String& descriptor,
+            /* [in] */ const String& label,
+            /* [in] */ const String& collection,
+            /* [in] */ Int32 keyboardLayoutResId,
+            /* [in] */ Int32 priority);
+
+    private:
+        AutoPtr< ArrayOf<IKeyboardLayout*> > mLayouts;
+    };
+
+    class KeyboardLayoutVisitorInGetKeyboardLayoutOverlay
+        : public Object
+        , public IKeyboardLayoutVisitor
+    {
+    public:
+        CAR_INTERFACE_DECL();
+
+        KeyboardLayoutVisitorInGetKeyboardLayoutOverlay(
+            /* [in] */ ArrayOf<String>* layoutOverlays);
+
+        CARAPI VisitKeyboardLayout(
+            /* [in] */ IResources* resources,
+            /* [in] */ const String& descriptor,
+            /* [in] */ const String& label,
+            /* [in] */ const String& collection,
+            /* [in] */ Int32 keyboardLayoutResId,
+            /* [in] */ Int32 priority);
+
+    private:
+        AutoPtr< ArrayOf<String> > mLayoutOverlays;
+    };
+
+    class ContentObserverInRegisterPointerSpeedSettingObserver
+        : public ContentObserver
+    {
+    public:
+        ContentObserverInRegisterPointerSpeedSettingObserver(
+            /* [in] */ CInputManagerService* owner,
+            /* [in] */ IHandler* handler);
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        CInputManagerService* mOwner;
+    };
+
+    class ContentObserverInRegisterShowTouchesSettingObserver
+        : public ContentObserver
+    {
+    public:
+        ContentObserverInRegisterShowTouchesSettingObserver(
+            /* [in] */ CInputManagerService* owner,
+            /* [in] */ IHandler* handler);
+
+        CARAPI OnChange(
+            /* [in] */ Boolean selfChange);
+
+    private:
+        CInputManagerService* mOwner;
+    };
+
 public:
     CAR_INTERFACE_DECL();
+
+    CAR_OBJECT_DECL()
 
     CInputManagerService();
 
@@ -226,7 +449,7 @@ public:
     CARAPI_(void) SetWiredAccessoryCallbacks(
         /* [in] */ IWiredAccessoryCallbacks* cbacks);
 
-    CARAPI_(void) Start();
+    CARAPI Start();
 
     // TODO(BT) Pass in paramter for bluetooth system
     CARAPI_(void) SystemRunning();
@@ -447,7 +670,7 @@ public:
     CARAPI TransferTouchFocus(
         /* [in] */ IInputChannel* fromChannel,
         /* [in] */ IInputChannel* toChannel,
-        /* [out] */ Boolean* transferIt);
+        /* [out] */ Boolean* result);
 
     // @Override // Binder call
     CARAPI TryPointerSpeed(
@@ -667,16 +890,13 @@ private:
     CARAPI_(String) GetDeviceAlias(
         /* [in] */ const String& uniqueId);
 
-    static CARAPI_(Int64) NativeInit(
-        /* [in] */ CInputManagerService* service,
+    CARAPI NativeInit(
         /* [in] */ IContext* context,
         /* [in] */ IMessageQueue* messageQueue);
 
-    static CARAPI_(void) NativeStart(
-        /* [in] */ Int64 ptr);
+    CARAPI NativeStart();
 
-    static CARAPI_(void) NativeSetDisplayViewport(
-        /* [in] */ Int64 ptr,
+    CARAPI_(void) NativeSetDisplayViewport(
         /* [in] */ Boolean external,
         /* [in] */ Int32 displayId,
         /* [in] */ Int32 rotation,
@@ -691,47 +911,39 @@ private:
         /* [in] */ Int32 deviceWidth,
         /* [in] */ Int32 deviceHeight);
 
-    static CARAPI_(Int32) NativeGetScanCodeState(
-        /* [in] */ Int64 ptr,
+    CARAPI_(Int32) NativeGetScanCodeState(
         /* [in] */ Int32 deviceId,
         /* [in] */ Int32 sourceMask,
         /* [in] */ Int32 scanCode);
 
-    static CARAPI_(Int32) NativeGetKeyCodeState(
-        /* [in] */ Int64 ptr,
+    CARAPI_(Int32) NativeGetKeyCodeState(
         /* [in] */ Int32 deviceId,
         /* [in] */ Int32 sourceMask,
         /* [in] */ Int32 keyCode);
 
-    static CARAPI_(Int32) NativeGetSwitchState(
-        /* [in] */ Int64 ptr,
+    CARAPI_(Int32) NativeGetSwitchState(
         /* [in] */ Int32 deviceId,
         /* [in] */ Int32 sourceMask,
         /* [in] */ Int32 sw);
 
-    static CARAPI_(Boolean) NativeHasKeys(
-        /* [in] */ Int64 ptr,
+    CARAPI_(Boolean) NativeHasKeys(
         /* [in] */ Int32 deviceId,
         /* [in] */ Int32 sourceMask,
-        /* [in] */ ArrayOf<Int32>* keyCodes,
+        /* [in] */ const ArrayOf<Int32>& keyCodes,
         /* [in] */ ArrayOf<Boolean>* keyExists);
 
-    static CARAPI_(void) NativeRegisterInputChannel(
-        /* [in] */ Int64 ptr,
-        /* [in] */ IInputChannel* inputChannel,
+    CARAPI NativeRegisterInputChannel(
+        /* [in] */ IInputChannel* inputChannelObj,
         /* [in] */ InputWindowHandle* inputWindowHandle,
         /* [in] */ Boolean monitor);
 
-    static CARAPI_(void) NativeUnregisterInputChannel(
-        /* [in] */ Int64 ptr,
-        /* [in] */ IInputChannel* inputChannel);
+    CARAPI NativeUnregisterInputChannel(
+        /* [in] */ IInputChannel* inputChannelObj);
 
-    static CARAPI_(void) NativeSetInputFilterEnabled(
-        /* [in] */ Int64 ptr,
+    CARAPI_(void) NativeSetInputFilterEnabled(
         /* [in] */ Boolean enable);
 
-    static CARAPI_(Int32) NativeInjectInputEvent(
-        /* [in] */ Int64 ptr,
+    CARAPI_(Int32) NativeInjectInputEvent(
         /* [in] */ IInputEvent* event,
         /* [in] */ Int32 displayId,
         /* [in] */ Int32 injectorPid,
@@ -740,66 +952,51 @@ private:
         /* [in] */ Int32 timeoutMillis,
         /* [in] */ Int32 policyFlags);
 
-    static CARAPI_(void) NativeSetInputWindows(
-        /* [in] */ Int64 ptr,
+    CARAPI_(void) NativeSetInputWindows(
         /* [in] */ ArrayOf<InputWindowHandle*>* windowHandles);
 
-    static CARAPI_(void) NativeSetInputDispatchMode(
-        /* [in] */ Int64 ptr,
+    CARAPI_(void) NativeSetInputDispatchMode(
         /* [in] */ Boolean enabled,
         /* [in] */ Boolean frozen);
 
-    static CARAPI_(void) NativeSetSystemUiVisibility(
-        /* [in] */ Int64 ptr,
+    CARAPI_(void) NativeSetSystemUiVisibility(
         /* [in] */ Int32 visibility);
 
-    static CARAPI_(void) NativeSetFocusedApplication(
-        /* [in] */ Int64 ptr,
+    CARAPI_(void) NativeSetFocusedApplication(
         /* [in] */ InputApplicationHandle* application);
 
-    static CARAPI_(Boolean) NativeTransferTouchFocus(
-        /* [in] */ Int64 ptr,
+    CARAPI_(Boolean) NativeTransferTouchFocus(
         /* [in] */ IInputChannel* fromChannel,
         /* [in] */ IInputChannel* toChannel);
 
-    static CARAPI_(void) NativeSetPointerSpeed(
-        /* [in] */ Int64 ptr,
+    CARAPI_(void) NativeSetPointerSpeed(
         /* [in] */ Int32 speed);
 
-    static CARAPI_(void) NativeSetShowTouches(
-        /* [in] */ Int64 ptr,
+    CARAPI_(void) NativeSetShowTouches(
         /* [in] */ Boolean enabled);
 
-    static CARAPI_(void) NativeSetInteractive(
-        /* [in] */ Int64 ptr,
+    CARAPI_(void) NativeSetInteractive(
         /* [in] */ Boolean interactive);
 
-    static CARAPI_(void) NativeReloadCalibration(
-        /* [in] */ Int64 ptr);
+    CARAPI_(void) NativeReloadCalibration();
 
-    static CARAPI_(void) NativeVibrate(
-        /* [in] */ Int64 ptr,
+    CARAPI_(void) NativeVibrate(
         /* [in] */ Int32 deviceId,
-        /* [in] */ ArrayOf<Int64>* pattern,
+        /* [in] */ const ArrayOf<Int64>& pattern,
         /* [in] */ Int32 repeat,
         /* [in] */ Int32 token);
 
-    static CARAPI_(void) NativeCancelVibrate(
-        /* [in] */ Int64 ptr,
+    CARAPI_(void) NativeCancelVibrate(
         /* [in] */ Int32 deviceId,
         /* [in] */ Int32 token);
 
-    static CARAPI_(void) NativeReloadKeyboardLayouts(
-        /* [in] */ Int64 ptr);
+    CARAPI_(void) NativeReloadKeyboardLayouts();
 
-    static CARAPI_(void) NativeReloadDeviceAliases(
-        /* [in] */ Int64 ptr);
+    CARAPI_(void) NativeReloadDeviceAliases();
 
-    static CARAPI_(String) NativeDump(
-        /* [in] */ Int64 ptr);
+    CARAPI_(String) NativeDump();
 
-    static CARAPI_(void) NativeMonitor(
-        /* [in] */ Int64 ptr);
+    CARAPI_(void) NativeMonitor();
 
 public:
     const static String TAG;
@@ -897,7 +1094,8 @@ private:
     // State for the currently installed input filter.
     Object mInputFilterLock;
     AutoPtr<IIInputFilter> mInputFilter;         // guarded by mInputFilterLock
-    AutoPtr<InputFilterHost> mInputFilterHost;  // guarded by mInputFilterLock
+    // need call AddRef and Release manually
+    CInputFilterHost* mInputFilterHost;  // guarded by mInputFilterLock
 
     // Input event injection constants defined in InputDispatcher.h.
     const static Int32 INPUT_EVENT_INJECTION_SUCCEEDED = 0;

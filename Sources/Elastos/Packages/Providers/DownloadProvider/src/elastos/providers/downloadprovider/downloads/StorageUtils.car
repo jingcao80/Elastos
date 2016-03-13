@@ -1,0 +1,55 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.IO.IFileDescriptor;
+    using interface Elastos.IO.IFile;
+    using interface Elastos.Utility.IList;
+
+    namespace Elastos {
+    namespace Providers {
+    namespace DownloadProvider {
+    namespace Downloads {
+
+    /**
+     * Utility methods for managing storage space related to
+     * {@link DownloadManager}.
+     */
+    interface IStorageUtils
+    {
+        /**
+         * Ensure that requested free space exists on the partition backing the
+         * given {@link FileDescriptor}. If not enough space is available, it tries
+         * freeing up space as follows:
+         * <ul>
+         * <li>If backed by the data partition (including emulated external
+         * storage), then ask {@link PackageManager} to free space from cache
+         * directories.
+         * <li>If backed by the cache partition, then try deleting older downloads
+         * to free space.
+         * </ul>
+         */
+        EnsureAvailableSpace(
+            [in] IContext* context,
+            [in] IFileDescriptor* fd,
+            [in] Int64 bytes);
+
+        /**
+         * Return list of all normal files under the given directory, traversing
+         * directories recursively.
+         *
+         * @param exclude ignore dirs with this name, or {@code null} to ignore.
+         * @param uid only return files owned by this UID, or {@code -1} to ignore.
+         */
+        ListFilesRecursive(
+            [in] IFile* startDir,
+            [in] String exclude,
+            [in] Int32 uid,
+            [out] IList** result);
+    }
+
+    } // namespace Downloads
+    } // namespace DownloadProvider
+    } // namespace Providers
+    } // namespace Elastos
+}

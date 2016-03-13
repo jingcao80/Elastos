@@ -26,7 +26,7 @@ public:
      * @param name the name of the new service
      * @param service the service object
      */
-    static CARAPI_(void) AddService(
+    static CARAPI AddService(
         /* [in] */ const String& name,
         /* [in] */ IInterface* service);
 
@@ -39,7 +39,7 @@ public:
      * @param allowIsolated set to true to allow isolated sandboxed processes
      * to access this service
      */
-    static CARAPI_(void) AddService(
+    static CARAPI AddService(
         /* [in] */ const String& name,
         /* [in] */ IInterface* service,
         /* [in] */ Boolean allowIsolated);

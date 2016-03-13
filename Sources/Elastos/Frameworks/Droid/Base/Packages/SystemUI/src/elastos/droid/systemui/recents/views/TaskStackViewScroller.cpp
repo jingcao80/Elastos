@@ -1,10 +1,14 @@
 
 #include "elastos/droid/systemui/recents/views/TaskStackViewScroller.h"
 #include <elastos/core/Math.h>
+#include "Elastos.Droid.Widget.h"
 
 using Elastos::Droid::Animation::CObjectAnimatorHelper;
 using Elastos::Droid::Animation::IObjectAnimatorHelper;
 using Elastos::Droid::Animation::EIID_IAnimatorUpdateListener;
+using Elastos::Droid::Animation::ITimeInterpolator;
+using Elastos::Droid::Widget::COverScroller;
+using Elastos::Core::IFloat;
 
 namespace Elastos {
 namespace Droid {
@@ -174,10 +178,10 @@ void TaskStackViewScroller::AnimateScroll(
     AutoPtr<ArrayOf<Float> > values = ArrayOf<Float>::Alloc(2);
     (*values)[0] = curScroll;
     (*values)[1] = newScroll;
-    oaHelper->OfFloat(this, String("stackScroll"), values, (IObjectAnimator**)&mScrollAnimator);
+    oaHelper->OfFloat((IObject*)this, String("stackScroll"), values, (IObjectAnimator**)&mScrollAnimator);
     IAnimator* animator = IAnimator::Probe(mScrollAnimator);
     animator->SetDuration(mConfig->mTaskStackScrollDuration);
-    animator->SetInterpolator(mConfig->mLinearOutSlowInInterpolator);
+    animator->SetInterpolator(ITimeInterpolator::Probe(mConfig->mLinearOutSlowInInterpolator));
     AutoPtr<IAnimatorUpdateListener> listener = new AnimatorUpdateListener(this);
     IValueAnimator::Probe(mScrollAnimator)->AddUpdateListener(listener);
     AutoPtr<AnimatorListenerAdapter> adapter = new MyAnimatorListenerAdapter(

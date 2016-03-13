@@ -301,7 +301,7 @@ ECode CBluetoothManagerService::BluetoothHandler::HandleMessage(
         case CBluetoothManagerService::MESSAGE_ENABLE: {
             if (DBG) {
                 Slogger::D(TAG, "MESSAGE_ENABLE: mBluetooth = %s",
-                    Object::ToString(mHost->mBluetooth).string());
+                    TO_CSTR(mHost->mBluetooth));
             }
             mHost->mHandler->RemoveMessages(CBluetoothManagerService::MESSAGE_RESTART_BLUETOOTH_SERVICE);
             mHost->mEnable = TRUE;

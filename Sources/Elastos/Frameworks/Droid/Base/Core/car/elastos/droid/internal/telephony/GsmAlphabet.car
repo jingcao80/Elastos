@@ -9,51 +9,6 @@ module
     namespace Internal {
     namespace Telephony {
 
-    /**
-     * This class implements the character set mapping between
-     * the GSM SMS 7-bit alphabet specified in TS 23.038 6.2.1
-     * and UTF-16
-     *
-     * {@hide}
-     */
-    [local]
-    interface IGsmAlphabet {
-
-        /**
-         * This escapes extended characters, and when present indicates that the
-         * following character should be looked up in the "extended" table.
-         *
-         * gsmToChar(GSM_EXTENDED_ESCAPE) returns 0xffff
-         */
-        const Byte GSM_EXTENDED_ESCAPE = 0x1B;
-
-        /**
-         * User data header requires one octet for length. Count as one septet, because
-         * all combinations of header elements below will have at least one free bit
-         * when padding to the nearest septet boundary.
-         */
-        const Int32 UDH_SEPTET_COST_LENGTH = 1;
-
-        /**
-         * Using a non-default language locking shift table OR single shift table
-         * requires a user data header of 3 octets, or 4 septets, plus UDH length.
-         */
-        const Int32 UDH_SEPTET_COST_ONE_SHIFT_TABLE = 4;
-
-        /**
-         * Using a non-default language locking shift table AND single shift table
-         * requires a user data header of 6 octets, or 7 septets, plus UDH length.
-         */
-        const Int32 UDH_SEPTET_COST_TWO_SHIFT_TABLES = 7;
-
-        /**
-         * Multi-part messages require a user data header of 5 octets, or 6 septets,
-         * plus UDH length.
-         */
-        const Int32 UDH_SEPTET_COST_CONCATENATED_MESSAGE = 6;
-
-    }
-
     interface IGsmAlphabetTextEncodingDetails {
 
         /**
@@ -116,8 +71,49 @@ module
             [out] Int32* languageShiftTable);
     }
 
+    /**
+     * This class implements the character set mapping between
+     * the GSM SMS 7-bit alphabet specified in TS 23.038 6.2.1
+     * and UTF-16
+     *
+     * {@hide}
+     */
     [deprecated]
-    interface IGsmAlphabetHelper {
+    interface IGsmAlphabet {
+
+        /**
+         * This escapes extended characters, and when present indicates that the
+         * following character should be looked up in the "extended" table.
+         *
+         * gsmToChar(GSM_EXTENDED_ESCAPE) returns 0xffff
+         */
+        const Byte GSM_EXTENDED_ESCAPE = 0x1B;
+
+        /**
+         * User data header requires one octet for length. Count as one septet, because
+         * all combinations of header elements below will have at least one free bit
+         * when padding to the nearest septet boundary.
+         */
+        const Int32 UDH_SEPTET_COST_LENGTH = 1;
+
+        /**
+         * Using a non-default language locking shift table OR single shift table
+         * requires a user data header of 3 octets, or 4 septets, plus UDH length.
+         */
+        const Int32 UDH_SEPTET_COST_ONE_SHIFT_TABLE = 4;
+
+        /**
+         * Using a non-default language locking shift table AND single shift table
+         * requires a user data header of 6 octets, or 7 septets, plus UDH length.
+         */
+        const Int32 UDH_SEPTET_COST_TWO_SHIFT_TABLES = 7;
+
+        /**
+         * Multi-part messages require a user data header of 5 octets, or 6 septets,
+         * plus UDH length.
+         */
+        const Int32 UDH_SEPTET_COST_CONCATENATED_MESSAGE = 6;
+
         /**
         * Converts a char to a GSM 7 bit table index.
         * Returns ' ' in GSM alphabet if there's no possible match. Returns
@@ -206,9 +202,9 @@ module
         * @see #stringToGsm7BitPackedWithHeader(String, byte[], int, int)
         */
         StringToGsm7BitPackedWithHeader(
-        [in] String data,
-        [in] ArrayOf<Byte>* header,
-        [out, callee] ArrayOf<Byte>* res);
+            [in] String data,
+            [in] ArrayOf<Byte>* header,
+            [out, callee] ArrayOf<Byte>* res);
 
         /**
         * Converts a String into a byte array containing the 7-bit packed

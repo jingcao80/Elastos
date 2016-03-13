@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_NET_CCONNECTIVITYMANAGERNETWORKCALLBACK_H__
 
 #include "_Elastos_Droid_Net_CConnectivityManagerNetworkCallback.h"
-#include "elastos/droid/net/CConnectivityManager.h"
+#include "elastos/droid/net/ConnectivityManagerNetworkCallback.h"
 
 namespace Elastos {
 namespace Droid {
@@ -15,7 +15,7 @@ namespace Net {
  */
 // inner class of ConnectivityManager
 CarClass(CConnectivityManagerNetworkCallback)
-    , public CConnectivityManager::ConnectivityManagerNetworkCallback
+    , public ConnectivityManagerNetworkCallback
 {
 public:
     CAR_OBJECT_DECL()

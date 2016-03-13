@@ -7,8 +7,8 @@
 #include "Elastos.Droid.Utility.h"
 #include "Elastos.Droid.Os.h"
 #include <Elastos.CoreLibrary.Utility.h>
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/os/Runnable.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/os/Runnable.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Hardware::IICameraService;
@@ -26,7 +26,7 @@ namespace Droid {
 namespace Hardware {
 namespace Camera2 {
 
-class CameraManager
+class ECO_PUBLIC CameraManager
     : public Object
     , public ICameraManager
 {

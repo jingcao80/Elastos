@@ -175,8 +175,10 @@ ECode DatabaseHelper::OnCreate(
     // try {
     AutoPtr<IServiceManager> serviceManager;
     CServiceManager::AcquireSingleton((IServiceManager**)&serviceManager);
-    AutoPtr<IIPackageManager> packageManager;
-    if (SUCCEEDED(serviceManager->GetService(String("package"), (IInterface**)&packageManager))) {
+    AutoPtr<IInterface> obj;
+    serviceManager->GetService(String("package"), (IInterface**)&obj);
+    AutoPtr<IIPackageManager> packageManager = IIPackageManager::Probe(obj);
+    if (packageManager) {
         packageManager->IsOnlyCoreApps(&onlyCore);
     }
     // } catch (RemoteException e) {

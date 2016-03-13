@@ -581,7 +581,7 @@ ECode ActionBarOverlayLayout::GenerateLayoutParams(
 
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
-    CViewGroupLayoutParams::New(context, attrs, (IViewGroupLayoutParams**)result);
+    CViewGroupLayoutParams::New(context, attrs, result);
     return NOERROR;
 }
 
@@ -1243,7 +1243,7 @@ ECode ActionBarOverlayLayout::GenerateDefaultLayoutParams(
     // ==================before translated======================
     // return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
-    CViewGroupLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::MATCH_PARENT, (IViewGroupLayoutParams**)result);
+    CViewGroupLayoutParams::New(IViewGroupLayoutParams::MATCH_PARENT, IViewGroupLayoutParams::MATCH_PARENT, result);
     return NOERROR;
 }
 
@@ -1256,7 +1256,7 @@ ECode ActionBarOverlayLayout::GenerateLayoutParams(
     // ==================before translated======================
     // return new LayoutParams(p);
 
-    CViewGroupLayoutParams::New(p, (IViewGroupLayoutParams**)result);
+    CViewGroupLayoutParams::New(p, result);
     return NOERROR;
 }
 
@@ -1749,7 +1749,7 @@ ECode ActionBarOverlayLayout::GetDecorToolbar(
         REFCOUNT_ADD(*result);
     }
     else if (toolbar) {
-        toolbar->GetWrapper((IDecorToolbar**)result);
+        return toolbar->GetWrapper(result);
     }
     else {
         //throw new IllegalStateException("Can't make a decor toolbar out of " +

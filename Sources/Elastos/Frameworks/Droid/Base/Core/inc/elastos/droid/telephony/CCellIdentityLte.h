@@ -3,16 +3,27 @@
 #define __ELASTOS_DROID_TELEPHONY_CCELLIDENTITYLTE_H__
 
 #include "_Elastos_Droid_Telephony_CCellIdentityLte.h"
-
-using Elastos::Droid::Telephony::ICellIdentityLte;
+#include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
 CarClass(CCellIdentityLte)
+    , public Object
+    , public ICellIdentityLte
+    , public IParcelable
 {
 public:
+    CCellIdentityLte();
+
+    virtual ~CCellIdentityLte();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(
@@ -61,7 +72,7 @@ public:
 
 private:
 
-    static const String LOG_TAG/* = "CellIdentityLte"*/;
+    static const String TAG;
     static const Boolean DBG = FALSE;
 
     // 3-digit Mobile Country Code, 0..999

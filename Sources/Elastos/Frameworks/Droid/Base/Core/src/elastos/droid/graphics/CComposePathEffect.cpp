@@ -9,44 +9,15 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CComposePathEffect);
+CAR_INTERFACE_IMPL(CComposePathEffect, PathEffect, IComposePathEffect);
 ECode CComposePathEffect::constructor(
     /* [in] */ IPathEffect* outerpe,
     /* [in] */ IPathEffect* innerpe)
 {
     mNativeInstance = NativeCreate(
-            ((PathEffect*)(IPathEffect*)outerpe->Probe(EIID_PathEffect))->mNativeInstance,
-            ((PathEffect*)(IPathEffect*)innerpe->Probe(EIID_PathEffect))->mNativeInstance);
+            ((PathEffect*)outerpe)->mNativeInstance,
+            ((PathEffect*)innerpe)->mNativeInstance);
     return NOERROR;
-}
-
-PInterface CComposePathEffect::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_PathEffect) {
-        return reinterpret_cast<PInterface>((PathEffect*)this);
-    }
-    else if (riid == EIID_IComposePathEffect) {
-        return (IComposePathEffect*)this;
-    }
-
-    return PathEffect::Probe(riid);
-}
-
-UInt32 CComposePathEffect::AddRef()
-{
-    return PathEffect::AddRef();
-}
-
-UInt32 CComposePathEffect::Release()
-{
-    return PathEffect::Release();
-}
-
-ECode CComposePathEffect::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return PathEffect::GetInterfaceID(object, iid);
 }
 
 Int64 CComposePathEffect::NativeCreate(

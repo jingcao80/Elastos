@@ -1,7 +1,13 @@
 
+#include <Elastos.Droid.App.h>
+#include "elastos/droid/app/CAlertDialogBuilder.h"
+#include "elastos/droid/R.h"
 #include "elastos/droid/webkit/Plugin.h"
 
+using Elastos::Droid::App::CAlertDialogBuilder;
+using Elastos::Droid::App::IAlertDialogBuilder;
 using Elastos::Droid::Content::EIID_IDialogInterfaceOnClickListener;
+using Elastos::Core::CString;
 
 namespace Elastos {
 namespace Droid {
@@ -19,15 +25,22 @@ ECode Plugin::DefaultClickHandler::HandleClickEvent(
     assert(0);
     // Show a simple popup dialog containing the description
     // string of the plugin.
-//    if (mDialog == NULL) {
-//        mDialog = new AlertDialog.Builder(context)
-//                .setTitle(mName)
-//                .setMessage(mDescription)
-//                .setPositiveButton(R.string.ok, this)
-//                .setCancelable(false)
-//                .show();
-//    }
-    return E_NOT_IMPLEMENTED;
+    if (mDialog == NULL) {
+        AutoPtr<IAlertDialogBuilder> builder;
+        CAlertDialogBuilder::New(context, (IAlertDialogBuilder**)&builder);
+
+        AutoPtr<ICharSequence> charSequenceTmp;
+        CString::New(mOwner->mName, (ICharSequence**)&charSequenceTmp);
+        builder->SetTitle(charSequenceTmp);
+
+        charSequenceTmp = NULL;
+        CString::New(mOwner->mDescription, (ICharSequence**)&charSequenceTmp);
+        builder->SetMessage(charSequenceTmp);
+        builder->SetPositiveButton(R::string::ok, this);
+        builder->SetCancelable(FALSE);
+        builder->Show((IAlertDialog**)&mDialog);
+    }
+    return NOERROR;
 }
 
 /**

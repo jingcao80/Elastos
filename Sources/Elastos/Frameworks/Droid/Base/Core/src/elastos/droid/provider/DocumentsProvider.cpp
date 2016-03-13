@@ -49,13 +49,13 @@ const Int32 DocumentsProvider::MATCH_CHILDREN = 6;
 const Int32 DocumentsProvider::MATCH_DOCUMENT_TREE = 7;
 const Int32 DocumentsProvider::MATCH_CHILDREN_TREE = 8;
 
+CAR_INTERFACE_IMPL(DocumentsProvider, ContentProvider, IDocumentsProvider)
+
 DocumentsProvider::DocumentsProvider()
 {}
 
 DocumentsProvider::~DocumentsProvider()
 {}
-
-CAR_INTERFACE_IMPL_3(DocumentsProvider, Object, IContentProvider, IComponentCallbacks2, IComponentCallbacks)
 
 //@Override
 ECode DocumentsProvider::AttachInfo(
@@ -102,7 +102,7 @@ ECode DocumentsProvider::AttachInfo(
     //     return E_SECURITY_EXCEPTION;
     // }
 
-    return IContentProvider::Probe(this)->AttachInfo(context, info);
+    return AttachInfo(context, info);
 }
 
 void DocumentsProvider::EnforceTree(
@@ -379,7 +379,7 @@ ECode DocumentsProvider::Canonicalize(
 {
     VALIDATE_NOT_NULL(result);
     AutoPtr<IContext> context;
-    IContentProvider::Probe(this)->GetContext((IContext**)&context);
+    GetContext((IContext**)&context);
     Int32 matchCode;
     mMatcher->Match(uri, &matchCode);
     switch (matchCode) {
@@ -398,7 +398,7 @@ ECode DocumentsProvider::Canonicalize(
                 // the narrow URI.
                 Int32 modeFlags = GetCallingOrSelfUriPermissionModeFlags(context, uri);
                 String calPack;
-                IContentProvider::Probe(this)->GetCallingPackage(&calPack);
+                GetCallingPackage(&calPack);
                 context->GrantUriPermission(calPack, narrowUri, modeFlags);
                 *result = narrowUri;
                 REFCOUNT_ADD(*result);
@@ -480,11 +480,11 @@ ECode DocumentsProvider::Call(
     VALIDATE_NOT_NULL(bundle);
     if (!method.StartWith("android:")) {
         // Ignore non-platform methods
-        return IContentProvider::Probe(this)->Call(method, arg, extras, bundle);
+        return Call(method, arg, extras, bundle);
     }
 
     AutoPtr<IContext> context;
-    IContentProvider::Probe(this)->GetContext((IContext**)&context);
+    GetContext((IContext**)&context);
 
     AutoPtr<IParcelable> pcl;
     extras->GetParcelable(IDocumentsContract::EXTRA_URI, (IParcelable**)&pcl);
@@ -506,7 +506,7 @@ ECode DocumentsProvider::Call(
     // try {
 
     if (IDocumentsContract::METHOD_CREATE_DOCUMENT.Equals(method)) {
-        IContentProvider::Probe(this)->EnforceWritePermissionInner(documentUri);
+        EnforceWritePermissionInner(documentUri);
 
         String mimeType;
         String displayName;
@@ -521,8 +521,9 @@ ECode DocumentsProvider::Call(
         AutoPtr<IUri> newDocumentUri;
         DocumentsContract::BuildDocumentUriMaybeUsingTree(documentUri, newDocumentId, (IUri**)&newDocumentUri);
         out->PutParcelable(IDocumentsContract::EXTRA_URI, IParcelable::Probe(newDocumentUri));
-    } else if (IDocumentsContract::METHOD_RENAME_DOCUMENT.Equals(method)) {
-            IContentProvider::Probe(this)->EnforceWritePermissionInner(documentUri);
+    }
+    else if (IDocumentsContract::METHOD_RENAME_DOCUMENT.Equals(method)) {
+            EnforceWritePermissionInner(documentUri);
 
             String displayName;
             extras->GetString(IDocumentsContractDocument::COLUMN_DISPLAY_NAME, &displayName);
@@ -539,7 +540,7 @@ ECode DocumentsProvider::Call(
                 if (!(DocumentsContract::IsTreeUri(newDocumentUri, &isUri), isUri)) {
                     Int32 modeFlags = GetCallingOrSelfUriPermissionModeFlags(context, documentUri);
                     String callPack;
-                    IContentProvider::Probe(this)->GetCallingPackage(&callPack);
+                    GetCallingPackage(&callPack);
                     context->GrantUriPermission(callPack, newDocumentUri, modeFlags);
                 }
 
@@ -549,14 +550,16 @@ ECode DocumentsProvider::Call(
                 RevokeDocumentPermission(documentId);
             }
 
-        } else if (IDocumentsContract::METHOD_DELETE_DOCUMENT.Equals(method)) {
-            IContentProvider::Probe(this)->EnforceWritePermissionInner(documentUri);
+        }
+        else if (IDocumentsContract::METHOD_DELETE_DOCUMENT.Equals(method)) {
+            EnforceWritePermissionInner(documentUri);
             DeleteDocument(documentId);
 
             // Document no longer exists, clean up any grants
             RevokeDocumentPermission(documentId);
 
-        } else {
+        }
+        else {
             // throw new UnsupportedOperationException("Method not supported " + method);
             Slogger::E("DocumentsProvider", "Method not supported %s", method.string());
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
@@ -572,7 +575,7 @@ ECode DocumentsProvider::RevokeDocumentPermission(
     /* [in] */ const String& documentId)
 {
     AutoPtr<IContext> context;
-    IContentProvider::Probe(this)->GetContext((IContext**)&context);
+    GetContext((IContext**)&context);
     AutoPtr<IUri> uri;
     DocumentsContract::BuildDocumentUri(mAuthority, documentId, (IUri**)&uri);
     context->RevokeUriPermission(uri, ~0);
@@ -675,8 +678,9 @@ ECode DocumentsProvider::OpenTypedAssetFile(
         opts->GetParcelable(IContentResolver::EXTRA_SIZE, (IParcelable**)&pla);
         AutoPtr<IPoint> sizeHint = IPoint::Probe(pla);
         return OpenDocumentThumbnail(docID, sizeHint, NULL, fileDescriptor);
-    } else {
-        return IContentProvider::Probe(this)->OpenTypedAssetFile(uri, mimeTypeFilter, opts, fileDescriptor);
+    }
+    else {
+        return OpenTypedAssetFile(uri, mimeTypeFilter, opts, fileDescriptor);
     }
 }
 
@@ -699,8 +703,9 @@ ECode DocumentsProvider:: OpenTypedAssetFile(
         opts->GetParcelable(IContentResolver::EXTRA_SIZE, (IParcelable**)&pla);
         AutoPtr<IPoint> sizeHint = IPoint::Probe(pla);
         return OpenDocumentThumbnail(docID, sizeHint, signal, (IAssetFileDescriptor**)&fileDescriptor);
-    } else {
-        return IContentProvider::Probe(this)->OpenTypedAssetFile(uri, mimeTypeFilter, opts, signal, fileDescriptor);
+    }
+    else {
+        return OpenTypedAssetFile(uri, mimeTypeFilter, opts, signal, fileDescriptor);
     }
 }
 

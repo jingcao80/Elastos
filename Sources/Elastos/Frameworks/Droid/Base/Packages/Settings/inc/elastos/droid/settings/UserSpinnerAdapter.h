@@ -1,6 +1,8 @@
 
+#ifndef __ELASTOS_DROID_SETTINGS_USERSPINNERADAPTER_H__
+#define __ELASTOS_DROID_SETTINGS_USERSPINNERADAPTER_H__
 
-package com.android.settings;
+#include "elastos/droid/ext/frameworkext.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Pm::IUserInfo;
@@ -21,114 +23,117 @@ using Elastos::Droid::Internal::Utility::IUserIcons;
 
 using Elastos::Utility::IArrayList;
 
+namespace Elastos {
+namespace Droid {
+namespace Settings {
+
 /**
  * Adapter for a spinner that shows a list of users.
  */
-public class UserSpinnerAdapter implements SpinnerAdapter {
+class UserSpinnerAdapter
+    : public Object
+    , public ISpinnerAdapter
+    , public IAdapter
+{
+public:
     // TODO: Update UI. See: http://b/16518801
     /** Holder for user details */
-    public static class UserDetails {
-        private final UserHandle mUserHandle;
-        private final String name;
-        private final Drawable icon;
+    class UserDetails
+        : public Object
+    {
+    public:
+        UserDetails(
+            /* [in] */ IUserHandle* userHandle,
+            /* [in] */ IUserManager* um,
+            /* [in] */ IContext* context);
 
-        public UserDetails(UserHandle userHandle, UserManager um, Context context) {
-            mUserHandle = userHandle;
-            UserInfo userInfo = um->GetUserInfo(mUserHandle->GetIdentifier());
-            if (userInfo->IsManagedProfile()) {
-                name = context->GetString(R::string::managed_user_title);
-                icon = Resources->GetSystem()->GetDrawable(
-                    R.drawable.ic_corp_icon);
-            } else {
-                name = userInfo.name;
-                final Int32 userId = userInfo.id;
-                if (um->GetUserIcon(userId) != NULL) {
-                    icon = new BitmapDrawable(context->GetResources(), um->GetUserIcon(userId));
-                } else {
-                    icon = UserIcons->GetDefaultUserIcon(userId, /* light= */ FALSE);
-                }
-            }
-        }
-    }
-    private ArrayList<UserDetails> data;
-    private final LayoutInflater mInflater;
+        ~UserDetails();
 
-    public UserSpinnerAdapter(Context context, ArrayList<UserDetails> users) {
-        if (users == NULL) {
-            throw new IllegalArgumentException("A list of user details must be provided");
-        }
-        this.data = users;
-        mInflater = (LayoutInflater) context->GetSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    }
+    private:
+        AutoPtr<IUserHandle> mUserHandle;
+        String mName;
+        AutoPtr<IDrawable> mIcon;
+    };
 
-    public UserHandle GetUserHandle(Int32 position) {
-        if (position < 0 || position >= data->Size()) {
-            return NULL;
-        }
-        return data->Get(position).mUserHandle;
-    }
+public:
+    CAR_INTERFACE_DECL();
+
+    UserSpinnerAdapter();
+
+    ~UserSpinnerAdapter();
+
+    CARAPI constructor(
+        /* [in] */ IContext* context,
+        /* [in] */ IArrayList* users);  /*ArrayList<UserDetails>*/
+
+    CARAPI_(AutoPtr<IUserHandle>) GetUserHandle(
+        /* [in] */ Int32 position);
 
     //@Override
-    public View GetDropDownView(Int32 position, View convertView, ViewGroup parent) {
-        final View row = convertView != NULL ? convertView : CreateUser(parent);
-
-        UserDetails user = data->Get(position);
-        ((ImageView) row->FindViewById(android.R.id.icon)).SetImageDrawable(user.icon);
-        ((TextView) row->FindViewById(android.R.id.title)).SetText(user.name);
-        return row;
-    }
-
-    private View CreateUser(ViewGroup parent) {
-        return mInflater->Inflate(R.layout.user_preference, parent, FALSE);
-    }
+    CARAPI GetDropDownView(
+        /* [in] */ Int32 position,
+        /* [in] */ IView* convertView,
+        /* [in] */ ViewGroup* parent,
+        /* [out] */ IView** view);
 
     //@Override
-    CARAPI RegisterDataSetObserver(DataSetObserver observer) {
-        // We don't support observers
-    }
+    CARAPI RegisterDataSetObserver(
+        /* [in] */ IDataSetObserver* observer);
 
     //@Override
-    CARAPI UnregisterDataSetObserver(DataSetObserver observer) {
-        // We don't support observers
-    }
+    CARAPI UnregisterDataSetObserver(
+        /* [in] */ IDataSetObserver* observer);
 
     //@Override
-    public Int32 GetCount() {
-        return data->Size();
-    }
+    CARAPI GetCount(
+        /* [out] */ Int32* count);
 
     //@Override
-    public UserDetails GetItem(Int32 position) {
-        return data->Get(position);
-    }
+    CARAPI GetItem(
+        /* [in] */ Int32 position,
+        /* [out] */ IInterface** item);
 
     //@Override
-    public Int64 GetItemId(Int32 position) {
-        return data->Get(position).mUserHandle->GetIdentifier();
-    }
+    CARAPI GetItemId(
+        /* [in] */ Int32 position,
+        /* [out] */ Int64* itemId);
 
     //@Override
-    public Boolean HasStableIds() {
-        return FALSE;
-    }
+    CARAPI HasStableIds(
+        /* [out] */ Boolean* hasStableIds);
 
     //@Override
-    public View GetView(Int32 position, View convertView, ViewGroup parent) {
-        return GetDropDownView(position, convertView, parent);
-    }
+    CARAPI GetView(
+        /* [in] */ Int32 position,
+        /* [in] */ IView* convertView,
+        /* [in] */ IViewGroup* parent,
+        /* [out] */ IView** view);
 
     //@Override
-    public Int32 GetItemViewType(Int32 position) {
-        return 0;
-    }
+    CARAPI GetItemViewType(
+        /* [in] */ Int32 position,
+        /* [out] */ Int32* viewType);
 
     //@Override
-    public Int32 GetViewTypeCount() {
-        return 1;
-    }
+    CARAPI GetViewTypeCount(
+        /* [out] */ Int32* count);
 
     //@Override
-    public Boolean IsEmpty() {
-        return data->IsEmpty();
-    }
-}
+    CARAPI IsEmpty(
+        /* [out] */ Boolean* isEmpty);
+
+private:
+    CARAPI_(AutoPtr<IView>) CreateUser(
+        /* [in] */ IViewGroup* parent);
+
+private:
+    // ArrayList<UserDetails> data;
+    AutoPtr<IArrayList> mData;
+    AutoPtr<ILayoutInflater> mInflater;
+};
+
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_USERSPINNERADAPTER_H__

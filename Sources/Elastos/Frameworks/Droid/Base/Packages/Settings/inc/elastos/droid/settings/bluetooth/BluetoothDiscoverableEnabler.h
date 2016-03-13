@@ -155,10 +155,10 @@ final class BluetoothDiscoverableEnabler implements Preference.OnPreferenceClick
     private static String FormatTimeRemaining(Int32 timeout) {
         StringBuilder sb = new StringBuilder(6);    // "mmm:ss"
         Int32 min = timeout / 60;
-        sb->Append(min).Append(':');
+        sb->Append(min).AppendChar32(':');
         Int32 sec = timeout - (min * 60);
         if (sec < 10) {
-            sb->Append('0');
+            sb->AppendChar32('0');
         }
         sb->Append(sec);
         return sb->ToString();

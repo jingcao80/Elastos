@@ -207,7 +207,7 @@ ECode SQLiteQueryBuilder::AppendColumns(
             s->Append(column);
         }
     }
-    s->Append(' ');
+    s->AppendChar(' ');
     return NOERROR;
 }
 

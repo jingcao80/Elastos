@@ -239,7 +239,7 @@ AutoPtr<IApplicationInfo> PackageItemInfo::GetApplicationInfo()
 ECode PackageItemInfo::GetName(
     /* [out] */ String* name)
 {
-    assert(name != NULL);
+    VALIDATE_NOT_NULL(name)
     *name = mName;
     return NOERROR;
 }

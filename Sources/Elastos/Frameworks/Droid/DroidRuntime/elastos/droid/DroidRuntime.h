@@ -9,6 +9,31 @@ using namespace Elastos;
 namespace Elastos {
 namespace Droid {
 
+enum InstructionSet {
+  kNone,
+  kArm,
+  kArm64,
+  kThumb2,
+  kX86,
+  kX86_64,
+  kMips,
+  kMips64
+};
+
+#if defined(__arm__)
+static const InstructionSet kRuntimeISA = kArm;
+#elif defined(__aarch64__)
+static const InstructionSet kRuntimeISA = kArm64;
+#elif defined(__mips__)
+static const InstructionSet kRuntimeISA = kMips;
+#elif defined(__i386__)
+static const InstructionSet kRuntimeISA = kX86;
+#elif defined(__x86_64__)
+static const InstructionSet kRuntimeISA = kX86_64;
+#else
+static const InstructionSet kRuntimeISA = kNone;
+#endif
+
 class DroidRuntime : public ElLightRefBase
 {
 public:
@@ -80,10 +105,36 @@ public:
     virtual void OnExit(
         /* [in] */ Int32 code) { }
 
+    // From art/runtime/Runtime.cc
+    //
+    void SetInstructionSet(
+        /* [in] */ InstructionSet instruction_set)
+    {
+        mInstructionSet = instruction_set;
+    }
+
+    InstructionSet GetInstructionSet()
+    {
+        return mInstructionSet;
+    }
+
+    String GetInstructionSetString();
+
+    // Note: Returns kNone when the string cannot be parsed to a known value.
+    InstructionSet GetInstructionSetFromString(
+        /* [in] */ const String& instruction_set);
+
+    static String GetInstructionSetString(
+        /* [in] */ InstructionSet isa);
+
+    static Boolean Is64BitInstructionSet(
+        /* [in] */ InstructionSet isa);
+
 private:
-    Boolean mExitWithoutCleanup;
     char* const mArgBlockStart;
     const size_t mArgBlockLength;
+    InstructionSet mInstructionSet;
+    Boolean mExitWithoutCleanup;
 };
 
 } // namespace Droid

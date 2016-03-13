@@ -546,7 +546,7 @@ struct input_keymap_entry {
 #define KEY_PVR 0x16e
 #define KEY_MHP 0x16f
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
-#define KEY_LANGUAGE 0x170
+#define _KEY_LANGUAGE 0x170
 #define KEY_TITLE 0x171
 #define KEY_SUBTITLE 0x172
 #define KEY_ANGLE 0x173

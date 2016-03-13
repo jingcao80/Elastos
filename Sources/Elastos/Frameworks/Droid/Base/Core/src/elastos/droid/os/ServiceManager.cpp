@@ -2,12 +2,15 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/CServiceManager.h"
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Os {
 
-const String ServiceManager::TAG("ServiceManager");
+const String ServiceManager::TAG("elserviceManager");
 AutoPtr<IServiceManager> ServiceManager::sServiceManager;
 
 AutoPtr<IServiceManager> ServiceManager::GetIServiceManager()
@@ -26,34 +29,31 @@ AutoPtr<IInterface> ServiceManager::GetService(
 {
 //    try {
     AutoPtr<IInterface> obj;
-    ECode ec = GetIServiceManager()->GetService(name, (IInterface**)&obj);
-    if (SUCCEEDED(ec)) {
-        return obj;
-    }
-    else return NULL;
+    GetIServiceManager()->GetService(name, (IInterface**)&obj);
+    return obj;
 //    } catch (RemoteException e) {
 //        Log.e(TAG, "error in getService", e);
 //    }
 }
 
-void ServiceManager::AddService(
+ECode ServiceManager::AddService(
     /* [in] */ const String& name,
     /* [in] */ IInterface* service)
 {
 //    try {
-    GetIServiceManager()->AddService(name, service, FALSE);
+    return GetIServiceManager()->AddService(name, service, FALSE);
 //    } catch (RemoteException e) {
 //        Log.e(TAG, "error in addService", e);
 //    }
 }
 
-void ServiceManager::AddService(
+ECode ServiceManager::AddService(
     /* [in] */ const String& name,
     /* [in] */ IInterface* service,
     /* [in] */ Boolean allowIsolated)
 {
     // try {
-    GetIServiceManager()->AddService(name, service, allowIsolated);
+    return GetIServiceManager()->AddService(name, service, allowIsolated);
     // } catch (RemoteException e) {
     //     Log.e(TAG, "error in addService", e);
     // }
@@ -73,9 +73,9 @@ AutoPtr<IInterface> ServiceManager::CheckService(
 //        Log.e(TAG, "error in checkService", e);
 //        return null;
 //    }
-    // assert(0);
-    PRINT_FILE_LINE_EX("TODO::ServiceManager::CheckService()");
-    return NULL;
+    AutoPtr<IInterface> obj;
+    GetIServiceManager()->GetService(name, (IInterface**)&obj);
+    return obj;
 }
 
 AutoPtr< ArrayOf<String> > ServiceManager::ListServices()
@@ -86,8 +86,9 @@ AutoPtr< ArrayOf<String> > ServiceManager::ListServices()
 //        Log.e(TAG, "error in listServices", e);
 //        return null;
 //    }
-    assert(0);
-    return NULL;
+    AutoPtr< ArrayOf<String> > services;
+    GetIServiceManager()->ListServices((ArrayOf<String>**)&services);
+    return services;
 }
 
 } // namespace Os

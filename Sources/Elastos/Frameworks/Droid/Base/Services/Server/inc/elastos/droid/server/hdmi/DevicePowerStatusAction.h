@@ -3,8 +3,10 @@
 #define __ELASTOS_DROID_SERVER_HDMI_DEVICEPOWERSTATUSACTION_H__
 
 #include "_Elastos.Droid.Server.h"
-#include <elastos/droid/ext/frameworkext.h>
+#include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
+#include <Elastos.Droid.Hardware.h>
 #include <elastos/core/Object.h>
+#include <elastos/droid/ext/frameworkext.h>
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
 using Elastos::Droid::Hardware::Hdmi::IHdmiPlaybackClient;
@@ -26,11 +28,11 @@ class HdmiCecLocalDevice;
  * Package-private, accessed by {@link HdmiControlService} only.
  */
 class DevicePowerStatusAction
-#if 0
     : public HdmiCecFeatureAction
-#endif
 {
 public:
+    DevicePowerStatusAction();
+
     static CARAPI Create(
         /* [in] */ IHdmiCecLocalDevice* source,
         /* [in] */ Int32 targetAddress,
@@ -51,7 +53,7 @@ public:
         /* [in] */ Int32 state);
 
 private:
-    DevicePowerStatusAction(
+    CARAPI constructor(
         /* [in] */ IHdmiCecLocalDevice* localDevice,
         /* [in] */ Int32 targetAddress,
         /* [in] */ IIHdmiControlCallback* callback);

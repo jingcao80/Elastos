@@ -488,7 +488,7 @@ public:
     CARAPI SendConnectedBroadcast(
         /* [in] */ INetworkInfo* info);
 
-    CARAPI_(void) SystemReady();
+    CARAPI SystemReady();
 
     /** @hide */
     CARAPI CaptivePortalCheckCompleted(

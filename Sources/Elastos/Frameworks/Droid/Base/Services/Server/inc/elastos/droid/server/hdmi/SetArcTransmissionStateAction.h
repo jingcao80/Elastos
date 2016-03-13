@@ -23,8 +23,11 @@ class HdmiCecLocalDevice;
  */
 class SetArcTransmissionStateAction
     : public HdmiCecFeatureAction
+    , public ISetArcTransmissionStateAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     SetArcTransmissionStateAction();
 
     /**
@@ -34,7 +37,7 @@ public:
      * @param enabled whether to enable ARC Transmission channel
      */
     CARAPI constructor(
-        /* [in] */ HdmiCecLocalDevice* source,
+        /* [in] */ IHdmiCecLocalDevice* source,
         /* [in] */ Int32 avrAddress,
         /* [in] */ Boolean enabled);
 

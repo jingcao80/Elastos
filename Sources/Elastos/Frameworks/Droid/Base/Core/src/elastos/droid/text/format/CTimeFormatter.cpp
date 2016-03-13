@@ -362,7 +362,7 @@ Boolean CTimeFormatter::HandleToken(
                 mNumberFormatter->Format(format, array);
                 return FALSE;
             case 'n':
-                mOutputBuilder.Append('\n');
+                mOutputBuilder.AppendChar('\n');
                 return FALSE;
             case 'p':
                 ModifyAndAppend((wtHour >= (HOURSPERDAY / 2)) ? csTwo.Get()
@@ -396,7 +396,7 @@ Boolean CTimeFormatter::HandleToken(
                 FormatInternal(String("%H:%M:%S"), wallTime, zoneInfo);
                 return FALSE;
             case 't':
-                mOutputBuilder.Append('\t');
+                mOutputBuilder.AppendChar('\t');
                 return FALSE;
             case 'U':
                 format = GetFormat(modifier, String("%02d"), String("%2d"), String("%d"), String("%02d"));

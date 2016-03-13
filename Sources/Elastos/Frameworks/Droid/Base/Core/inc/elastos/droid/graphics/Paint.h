@@ -13,8 +13,6 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-extern const InterfaceID EIID_Paint;
-
 class Paint
     : public Object
     , public IPaint

@@ -25,8 +25,11 @@ namespace Hdmi {
  */
 class VolumeControlAction
     : public HdmiCecFeatureAction
+    , public IVolumeControlAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     VolumeControlAction();
 
     /**

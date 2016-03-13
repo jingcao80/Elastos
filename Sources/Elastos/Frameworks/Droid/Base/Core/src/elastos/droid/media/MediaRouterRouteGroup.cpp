@@ -333,7 +333,7 @@ ECode MediaRouterRouteGroup::ToString(
     String routeInfoStr;
     MediaRouterRouteInfo::ToString(&routeInfoStr);
     StringBuilder sb(routeInfoStr);
-    sb.Append('[');
+    sb.AppendChar('[');
     Int32 count;
     mRoutes->GetSize(&count);
     AutoPtr<IInterface> obj;
@@ -346,7 +346,7 @@ ECode MediaRouterRouteGroup::ToString(
        rf = IMediaRouterRouteInfo::Probe(obj);
        sb.Append(rf.Get());
     }
-    sb.Append(']');
+    sb.AppendChar(']');
     return sb.ToString(result);
 }
 

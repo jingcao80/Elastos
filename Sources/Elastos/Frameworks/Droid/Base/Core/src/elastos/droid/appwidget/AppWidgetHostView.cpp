@@ -669,9 +669,9 @@ AutoPtr<IView> AppWidgetHostView::GetDefaultView()
     if (mInfo != NULL) {
         AutoPtr<IContext> theirContext = GetRemoteContext();
         mRemoteContext = theirContext;
-        AutoPtr<ILayoutInflater> inflater;
-        theirContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE,
-                (IInterface**)&inflater);
+        AutoPtr<IInterface> service;
+        theirContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service);
+        AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(service);
         AutoPtr<ILayoutInflater> theirInflater;
         inflater->CloneInContext(theirContext, (ILayoutInflater**)&theirInflater);
         inflater = theirInflater;

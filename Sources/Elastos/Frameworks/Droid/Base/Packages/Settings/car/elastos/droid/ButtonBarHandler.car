@@ -1,0 +1,24 @@
+module
+{
+    using interface Elastos.Droid.Widget.IButton;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Settings {
+
+    /**
+     * Interface letting {@link SettingsPreferenceFragment} access to bottom bar inside
+     * {@link SettingsActivity}.
+     */
+    interface IButtonBarHandler {
+        HasNextButton(
+            [out] Boolean* res);
+
+        GetNextButton(
+            [out] IButton** button);
+    }
+
+    } // namespace Settings
+    } // namespace Droid
+    } // namespace Elastos
+}

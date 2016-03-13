@@ -59,6 +59,8 @@ public:
         ADD_SERVICE = android::IBinder::FIRST_CALL_TRANSACTION,
         GET_SERVICE,
         REMOVE_SERVICE,
+        CHECK_SERVICE,
+        LIST_SERVICES,
     };
 
 protected:
@@ -79,6 +81,10 @@ private:
 
     CARAPI RemoveService(
         /* [in] */ const String& name);
+
+    CARAPI CheckService(
+        /* [in] */ const String& name,
+        /* [out] */ InterfacePack * pIp);
 
 private:
     HashMap<String, InterfacePack*> mServices;

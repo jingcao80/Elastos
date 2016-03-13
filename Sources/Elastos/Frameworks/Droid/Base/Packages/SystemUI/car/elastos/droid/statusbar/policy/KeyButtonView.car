@@ -11,7 +11,6 @@ module
      * interface Elastos.Droid.Widget.IImageView
      */
     interface IKeyButtonView {
-
         // TODO: Get rid of this
         const Float DEFAULT_QUIESCENT_ALPHA = 1;
 
@@ -26,12 +25,6 @@ module
             [in] Float alpha);
 
         GetDrawingAlpha(
-            [out] Float* alpha);
-
-        SetGlowAlpha(
-            [in] Float alpha);
-
-        GetGlowAlpha(
             [out] Float* alpha);
 
         PlaySoundEffect(

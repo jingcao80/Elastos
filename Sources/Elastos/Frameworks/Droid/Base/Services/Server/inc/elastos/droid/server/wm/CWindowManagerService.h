@@ -55,6 +55,7 @@ using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Hardware::Display::IDisplayManagerInternal;
 using Elastos::Droid::Hardware::Display::IDisplayManager;
+using Elastos::Droid::Hardware::Input::IIInputManager;
 using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Internal::View::IInputMethodClient;
 using Elastos::Droid::Internal::View::IIInputMethodManager;
@@ -67,6 +68,7 @@ using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IPowerManagerInternal;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::ILowPowerModeListener;
+using Elastos::Droid::Server::IWatchdogMonitor;
 using Elastos::Droid::Server::Display::CDisplayManagerService;
 using Elastos::Droid::Server::Input::CInputManagerService;
 using Elastos::Droid::Utility::IArraySet;
@@ -99,6 +101,7 @@ using Elastos::Droid::View::IWindowsForAccessibilityCallback;
 using Elastos::Droid::View::IMagnificationCallbacks;
 using Elastos::Droid::View::Animation::IInterpolator;
 using Elastos::Core::ICharSequence;
+using Elastos::Core::ISynchronize;
 using Elastos::Core::IInteger32;
 using Elastos::Net::ISocket;
 using Elastos::Utility::Etl::HashMap;
@@ -134,6 +137,8 @@ CarClass(CWindowManagerService)
     , public Object
     , public IIWindowManager
     , public IWindowManagerPolicyWindowManagerFuncs
+    , public IWatchdogMonitor
+    , public IBinder
 {
 public:
     class RotationWatcher : public Object
@@ -318,7 +323,7 @@ private:
     public:
         WindowManagerServiceCreator(
             /* [in] */ IContext* context,
-            /* [in] */ CInputManagerService* im,
+            /* [in] */ IIInputManager* im,
             /* [in] */ Boolean haveInputMethods,
             /* [in] */ Boolean showBootMsgs,
             /* [in] */ Boolean onlyCore);
@@ -327,7 +332,7 @@ private:
 
     public:
         AutoPtr<IContext> mContext;
-        AutoPtr<CInputManagerService> mIm;
+        AutoPtr<IIInputManager> mIm;
         Boolean mHaveInputMethods;
         Boolean mShowBootMsgs;
         Boolean mOnlyCore;
@@ -465,14 +470,14 @@ public:
 
     static AutoPtr<CWindowManagerService> Main(
         /* [in] */ IContext* context,
-        /* [in] */ CInputManagerService* im,
+        /* [in] */ IIInputManager* im,
         /* [in] */ Boolean haveInputMethods,
         /* [in] */ Boolean showBootMsgs,
         /* [in] */ Boolean onlyCore);
 
     CARAPI constructor(
         /* [in] */ IContext* context,
-        /* [in] */ Handle64 inputManager,
+        /* [in] */ IIInputManager* inputManager,
         /* [in] */ Boolean haveInputMethods,
         /* [in] */ Boolean showBootMsgs,
         /* [in] */ Boolean onlyCore);
@@ -1634,7 +1639,7 @@ public:
         /* [in] */ Int32 displayId);
 
     CARAPI GetWindowManagerLock(
-        /* [out] */ IInterface** lock);
+        /* [out] */ ISynchronize** lock);
 
     CARAPI ToString(
         /* [ou] */ String* str);
@@ -1944,45 +1949,45 @@ private:
 
 public:
     static const String TAG;
-    static const Boolean DEBUG = FALSE;
-    static const Boolean DEBUG_ADD_REMOVE = FALSE;
-    static const Boolean DEBUG_FOCUS = FALSE;
-    static const Boolean DEBUG_FOCUS_LIGHT = DEBUG_FOCUS || FALSE;
-    static const Boolean DEBUG_ANIM = FALSE;
-    static const Boolean DEBUG_LAYOUT = FALSE;
-    static const Boolean DEBUG_RESIZE = FALSE;
-    static const Boolean DEBUG_LAYERS = FALSE;
-    static const Boolean DEBUG_INPUT = FALSE;
-    static const Boolean DEBUG_INPUT_METHOD = FALSE;
-    static const Boolean DEBUG_VISIBILITY = FALSE;
-    static const Boolean DEBUG_WINDOW_MOVEMENT = FALSE;
-    static const Boolean DEBUG_TOKEN_MOVEMENT = FALSE;
-    static const Boolean DEBUG_ORIENTATION = FALSE;
-    static const Boolean DEBUG_APP_ORIENTATION = FALSE;
-    static const Boolean DEBUG_CONFIGURATION = FALSE;
-    static const Boolean DEBUG_APP_TRANSITIONS = FALSE;
-    static const Boolean DEBUG_STARTING_WINDOW = TRUE;
-    static const Boolean DEBUG_REORDER = FALSE;
-    static const Boolean DEBUG_WALLPAPER = FALSE;
-    static const Boolean DEBUG_WALLPAPER_LIGHT = FALSE || DEBUG_WALLPAPER;
-    static const Boolean DEBUG_DRAG = FALSE;
-    static const Boolean DEBUG_SCREEN_ON = FALSE;
-    static const Boolean DEBUG_SCREENSHOT = FALSE;
-    static const Boolean DEBUG_BOOT = FALSE;
-    static const Boolean DEBUG_LAYOUT_REPEATS = TRUE;
-    static const Boolean DEBUG_SURFACE_TRACE = FALSE;
-    static const Boolean DEBUG_WINDOW_TRACE = FALSE;
-    static const Boolean DEBUG_TASK_MOVEMENT = FALSE;
-    static const Boolean DEBUG_STACK = FALSE;
-    static const Boolean DEBUG_DISPLAY = FALSE;
-    static const Boolean SHOW_SURFACE_ALLOC = FALSE;
-    static const Boolean SHOW_TRANSACTIONS = FALSE;
-    static const Boolean SHOW_LIGHT_TRANSACTIONS = FALSE || SHOW_TRANSACTIONS;
-    static const Boolean HIDE_STACK_CRAWLS = TRUE;
+    static const Boolean DEBUG;
+    static const Boolean DEBUG_ADD_REMOVE;
+    static const Boolean DEBUG_FOCUS;
+    static const Boolean DEBUG_FOCUS_LIGHT;
+    static const Boolean DEBUG_ANIM;
+    static const Boolean DEBUG_LAYOUT;
+    static const Boolean DEBUG_RESIZE;
+    static const Boolean DEBUG_LAYERS;
+    static const Boolean DEBUG_INPUT;
+    static const Boolean DEBUG_INPUT_METHOD;
+    static const Boolean DEBUG_VISIBILITY;
+    static const Boolean DEBUG_WINDOW_MOVEMENT;
+    static const Boolean DEBUG_TOKEN_MOVEMENT;
+    static const Boolean DEBUG_ORIENTATION;
+    static const Boolean DEBUG_APP_ORIENTATION;
+    static const Boolean DEBUG_CONFIGURATION;
+    static const Boolean DEBUG_APP_TRANSITIONS;
+    static const Boolean DEBUG_STARTING_WINDOW;
+    static const Boolean DEBUG_REORDER;
+    static const Boolean DEBUG_WALLPAPER;
+    static const Boolean DEBUG_WALLPAPER_LIGHT;
+    static const Boolean DEBUG_DRAG;
+    static const Boolean DEBUG_SCREEN_ON;
+    static const Boolean DEBUG_SCREENSHOT;
+    static const Boolean DEBUG_BOOT;
+    static const Boolean DEBUG_LAYOUT_REPEATS;
+    static const Boolean DEBUG_SURFACE_TRACE;
+    static const Boolean DEBUG_WINDOW_TRACE;
+    static const Boolean DEBUG_TASK_MOVEMENT;
+    static const Boolean DEBUG_STACK;
+    static const Boolean DEBUG_DISPLAY;
+    static const Boolean SHOW_SURFACE_ALLOC;
+    static const Boolean SHOW_TRANSACTIONS;
+    static const Boolean SHOW_LIGHT_TRANSACTIONS;
+    static const Boolean HIDE_STACK_CRAWLS;
     static const Int32 LAYOUT_REPEAT_THRESHOLD = 4;
 
     static const Boolean PROFILE_ORIENTATION = FALSE;
-    static const Boolean localLOGV = DEBUG;
+    static const Boolean localLOGV;
 
     /** How much to multiply the policy's type layer, to reserve room
      * for multiple windows of the same type and Z-ordering adjustment

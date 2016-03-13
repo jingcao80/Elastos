@@ -59,7 +59,6 @@ module
      * Class to encapsulate all possible status bar states regarding Keyguard.
      */
     interface IStatusBarState {
-
         /**
          * The status bar is in the "normal" shade mode.
          */

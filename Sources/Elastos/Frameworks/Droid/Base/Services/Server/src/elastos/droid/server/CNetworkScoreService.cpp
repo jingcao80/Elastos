@@ -201,7 +201,7 @@ ECode CNetworkScoreService::DisableScoring()
 }
 
 ECode CNetworkScoreService::SetScorerInternal(
-    /* [in] */ String packageName,
+    /* [in] */ const String& packageName,
     /* [out] */ Boolean* result)
 {
     Int64 token = Binder::ClearCallingIdentity();

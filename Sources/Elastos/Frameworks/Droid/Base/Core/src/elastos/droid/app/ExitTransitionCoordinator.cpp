@@ -570,10 +570,7 @@ void ExitTransitionCoordinator::FadeOutBackground()
         IView* decorView = IView::Probe(decor);
         AutoPtr<IDrawable> background;
         if (decorView != NULL && (decorView->GetBackground((IDrawable**)&background), background) != NULL) {
-            background = NULL;
-            AutoPtr<IDrawable> tmp = background;
-            background = NULL;
-            tmp->Mutate((IDrawable**)&background);
+            background->Mutate();
             AutoPtr<IWindow> window;
             GetWindow((IWindow**)&window);
             window->SetBackgroundDrawable(background);

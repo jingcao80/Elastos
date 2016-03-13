@@ -3,6 +3,7 @@
 #include <Elastos.CoreLibrary.IO.h>
 #include "elastos/droid/internal/utility/CFastXmlSerializer.h"
 #include <elastos/core/StringBuilder.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::IO::CByteBufferHelper;
@@ -18,6 +19,7 @@ using Elastos::IO::ICharBuffer;
 using Elastos::IO::ICharBufferHelper;
 using Elastos::IO::IFlushable;
 using Elastos::IO::IOutputStreamWriter;
+using Elastos::Utility::Logging::Logger;
 using Org::Xmlpull::V1::EIID_IXmlSerializer;
 
 namespace Elastos {
@@ -84,6 +86,8 @@ ECode CFastXmlSerializer::Append(
     /* [in] */ Int32 i,
     /* [in] */ Int32 length)
 {
+    Int32 pos;
+    StringBuilder sb;
     if (length > BUFFER_LEN) {
         Int32 end = i + length;
         while (i < end) {
@@ -93,15 +97,16 @@ ECode CFastXmlSerializer::Append(
         }
         return NOERROR;
     }
-    Int32 pos = mPos;
+    pos = mPos;
     if ((pos + length) > BUFFER_LEN) {
         FAIL_RETURN(Flush());
         pos = mPos;
     }
 
-    StringBuilder sb(str);
+    sb += str;
     sb.GetChars(i, i + length, mText, pos);
     mPos = pos + length;
+
     return NOERROR;
 }
 
@@ -245,9 +250,10 @@ ECode CFastXmlSerializer::WriteEndTag(
     /* [in] */ const String& ns,
     /* [in] */ const String& name)
 {
+    ECode ec = NOERROR;
     mNesting--;
     if (mInTag) {
-        FAIL_RETURN(Append(String(" />\n")));
+        FAIL_RETURN((Append(String(" />\n"))));
     }
     else {
         if (mIndent && mLineStart) {
@@ -261,6 +267,7 @@ ECode CFastXmlSerializer::WriteEndTag(
         FAIL_RETURN(Append(name));
         FAIL_RETURN(Append(String(">\n")));
     }
+
     mLineStart = TRUE;
     mInTag = FALSE;
     return NOERROR;
@@ -276,10 +283,12 @@ ECode CFastXmlSerializer::FlushBytes()
 {
     Int32 position;
     IBuffer::Probe(mBytes)->GetPosition(&position);
+
     if (position > 0) {
         FAIL_RETURN(IBuffer::Probe(mBytes)->Flip());
         AutoPtr<ArrayOf<Byte> > bytes;
         mBytes->GetArray((ArrayOf<Byte>**)&bytes);
+
         FAIL_RETURN(mOutputStream->Write(bytes, 0, position));
         FAIL_RETURN(IBuffer::Probe(mBytes)->Clear());
     }
@@ -312,12 +321,12 @@ ECode CFastXmlSerializer::Flush()
                 break;
             }
             FAIL_RETURN(FlushBytes());
-            IFlushable* flushable = IFlushable::Probe(mOutputStream.Get());
+            IFlushable* flushable = IFlushable::Probe(mOutputStream);
             FAIL_RETURN(flushable->Flush());
         }
         else {
             FAIL_RETURN(mWriter->Write(mText, 0, mPos));
-            IFlushable* flushable = IFlushable::Probe(mWriter.Get());
+            IFlushable* flushable = IFlushable::Probe(mWriter);
             FAIL_RETURN(flushable->Flush());
         }
         mPos = 0;

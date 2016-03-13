@@ -1,23 +1,38 @@
 
-#include "CCellSignalStrengthLte.h"
-#include <elastos/utility/logging/Slogger.h>
-#include <elastos/core/StringUtils.h>
+#include "elastos/droid/telephony/CCellSignalStrengthLte.h"
+#include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-#ifndef Integer_MAX_VALUE
-    #define Integer_MAX_VALUE 0x7fffffff
-#endif
-
-const String CCellSignalStrengthLte::LOG_TAG("CellSignalStrengthLte");
+const String CCellSignalStrengthLte::TAG("CellSignalStrengthLte");
 const Boolean CCellSignalStrengthLte::DBG = FALSE;
+
+CAR_INTERFACE_IMPL_2(CCellSignalStrengthLte, CellSignalStrength, ICellSignalStrengthLte, IParcelable)
+
+CAR_OBJECT_IMPL(CCellSignalStrengthLte)
+
+CCellSignalStrengthLte::CCellSignalStrengthLte()
+    : mSignalStrength(0)
+    , mRsrp(0)
+    , mRsrq(0)
+    , mRssnr(0)
+    , mCqi(0)
+    , mTimingAdvance(0)
+{
+}
+
+CCellSignalStrengthLte::~CCellSignalStrengthLte()
+{
+}
 
 ECode CCellSignalStrengthLte::constructor()
 {
@@ -32,19 +47,13 @@ ECode CCellSignalStrengthLte::constructor(
     /* [in] */ Int32 cqi,
     /* [in] */ Int32 timingAdvance)
 {
-    return Initialize(signalStrength, rsrp, rsrq, rssnr, cqi, timingAdvance);;
+    return Initialize(signalStrength, rsrp, rsrq, rssnr, cqi, timingAdvance);
 }
 
 ECode CCellSignalStrengthLte::constructor(
     /* [in] */ ICellSignalStrengthLte* css)
 {
     return CopyFrom(css);
-}
-
-PInterface CCellSignalStrengthLte::Probe(
-    /* [in]  */ REIID riid)
-{
-    return CCellSignalStrengthLte::Probe(riid);
 }
 
 ECode CCellSignalStrengthLte::ReadFromParcel(
@@ -76,12 +85,12 @@ ECode CCellSignalStrengthLte::WriteToParcel(
 
 ECode CCellSignalStrengthLte::SetDefaultValues()
 {
-    mSignalStrength = Integer_MAX_VALUE;
-    mRsrp = Integer_MAX_VALUE;
-    mRsrq = Integer_MAX_VALUE;
-    mRssnr = Integer_MAX_VALUE;
-    mCqi = Integer_MAX_VALUE;
-    mTimingAdvance = Integer_MAX_VALUE;
+    mSignalStrength = Elastos::Core::Math::INT32_MAX_VALUE;
+    mRsrp = Elastos::Core::Math::INT32_MAX_VALUE;
+    mRsrq = Elastos::Core::Math::INT32_MAX_VALUE;
+    mRssnr = Elastos::Core::Math::INT32_MAX_VALUE;
+    mCqi = Elastos::Core::Math::INT32_MAX_VALUE;
+    mTimingAdvance = Elastos::Core::Math::INT32_MAX_VALUE;
     return NOERROR;
 }
 
@@ -92,22 +101,22 @@ ECode CCellSignalStrengthLte::GetLevel(
     Int32 levelRsrp = 0;
     Int32 levelRssnr = 0;
 
-    if (mRsrp == Integer_MAX_VALUE) levelRsrp = 0;
+    if (mRsrp == Elastos::Core::Math::INT32_MAX_VALUE) levelRsrp = 0;
     else if (mRsrp >= -95) levelRsrp = ICellSignalStrength::SIGNAL_STRENGTH_GREAT;
     else if (mRsrp >= -105) levelRsrp = ICellSignalStrength::SIGNAL_STRENGTH_GOOD;
     else if (mRsrp >= -115) levelRsrp = ICellSignalStrength::SIGNAL_STRENGTH_MODERATE;
     else levelRsrp = ICellSignalStrength::SIGNAL_STRENGTH_POOR;
 
     // See RIL_LTE_SignalStrength in ril.h
-    if (mRssnr == Integer_MAX_VALUE) levelRssnr = 0;
+    if (mRssnr == Elastos::Core::Math::INT32_MAX_VALUE) levelRssnr = 0;
     else if (mRssnr >= 45) levelRssnr = ICellSignalStrength::SIGNAL_STRENGTH_GREAT;
     else if (mRssnr >= 10) levelRssnr = ICellSignalStrength::SIGNAL_STRENGTH_GOOD;
     else if (mRssnr >= -30) levelRssnr = ICellSignalStrength::SIGNAL_STRENGTH_MODERATE;
     else levelRssnr = ICellSignalStrength::SIGNAL_STRENGTH_POOR;
 
-    if (mRsrp == Integer_MAX_VALUE)
+    if (mRsrp == Elastos::Core::Math::INT32_MAX_VALUE)
         *level = levelRssnr;
-    else if (mRssnr == Integer_MAX_VALUE)
+    else if (mRssnr == Elastos::Core::Math::INT32_MAX_VALUE)
         *level = levelRsrp;
     else
         *level = (levelRssnr < levelRsrp) ? levelRssnr : levelRsrp;
@@ -136,7 +145,7 @@ ECode CCellSignalStrengthLte::GetAsuLevel(
     if (lteDbm <= -140) lteAsuLevel = 0;
     else if (lteDbm >= -43) lteAsuLevel = 97;
     else lteAsuLevel = lteDbm + 140;
-    if (DBG) Log(String("Lte Asu level: ") + StringUtils::Int32ToString(lteAsuLevel));
+    if (DBG) Log(String("Lte Asu level: ") + StringUtils::ToString(lteAsuLevel));
     *asuLevel = lteAsuLevel;
     return NOERROR;
 }
@@ -176,10 +185,10 @@ ECode CCellSignalStrengthLte::Equals(
     /* [out] */ Boolean* res)
 {
     VALIDATE_NOT_NULL(res);
-    AutoPtr<ICellSignalStrengthLte> s;
+    AutoPtr<CCellSignalStrengthLte> s;
 
     //try {
-    s = ICellSignalStrengthLte::Probe(o);
+    s = (CCellSignalStrengthLte*)ICellSignalStrengthLte::Probe(o);
     //} catch (ClassCastException ex) {
     //    return false;
     //}
@@ -188,12 +197,18 @@ ECode CCellSignalStrengthLte::Equals(
         *res = FALSE;
     }
 
-    Int32 signalStrength; s->GetSignalStrength(&signalStrength);
-    Int32 rsrp; s->GetRsrp(&rsrp);
-    Int32 rsrq; s->GetRsrq(&rsrq);
-    Int32 rssnr; s->GetRssnr(&rssnr);
-    Int32 cqi; s->GetCqi(&cqi);
-    Int32 timingAdvance; s->GetTimingAdvance(&timingAdvance);
+    Int32 signalStrength;
+    s->GetSignalStrength(&signalStrength);
+    Int32 rsrp;
+    s->GetRsrp(&rsrp);
+    Int32 rsrq;
+    s->GetRsrq(&rsrq);
+    Int32 rssnr;
+    s->GetRssnr(&rssnr);
+    Int32 cqi;
+    s->GetCqi(&cqi);
+    Int32 timingAdvance;
+    s->GetTimingAdvance(&timingAdvance);
 
     *res =  (mSignalStrength == signalStrength
             && mRsrp == rsrp
@@ -358,19 +373,20 @@ ECode CCellSignalStrengthLte::SetTimingAdvance(
 ECode CCellSignalStrengthLte::Log(
     /* [in] */ const String& s)
 {
-    Slogger::W(LOG_TAG, s);
+    Logger::W(TAG, s);
     return NOERROR;
 }
 
 ECode CCellSignalStrengthLte::CopyFrom(
     /* [in] */ ICellSignalStrengthLte* css)
 {
-    css->GetSignalStrength(&mSignalStrength);
-    css->GetRsrp(&mRsrp);
-    css->GetRsrq(&mRsrq);
-    css->GetRssnr(&mRssnr);
-    css->GetCqi(&mCqi);
-    css->GetTimingAdvance(&mTimingAdvance);
+    AutoPtr<CCellSignalStrengthLte> c = (CCellSignalStrengthLte*)css;
+    c->GetSignalStrength(&mSignalStrength);
+    c->GetRsrp(&mRsrp);
+    c->GetRsrq(&mRsrq);
+    c->GetRssnr(&mRssnr);
+    c->GetCqi(&mCqi);
+    c->GetTimingAdvance(&mTimingAdvance);
     return NOERROR;
 }
 

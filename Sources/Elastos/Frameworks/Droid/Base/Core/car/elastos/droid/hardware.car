@@ -216,6 +216,7 @@ module
     interface Elastos.Droid.View.IRotationWatcher;
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Media.IAudioFormat;
+    interface Elastos.Droid.Os.ILooper;
     interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.Os.IHandler;
     interface Elastos.Droid.Os.IHandlerCallback;
@@ -238,8 +239,10 @@ module
     interface Elastos.Droid.Hardware.IParameters;
     interface Elastos.Droid.Hardware.ICameraArea;
     interface Elastos.Droid.Hardware.IHardwareCamera;
+    interface Elastos.Droid.Hardware.ICameraSize;
 
     using interface Elastos.Core.IComparator;
+    using interface Elastos.Core.IComparable;
     using interface Elastos.IO.ICloseable;
     using interface Elastos.Utility.IUUID;
     using interface Elastos.Utility.IList;
@@ -248,6 +251,15 @@ module
     namespace Elastos {
     namespace Droid {
     namespace Hardware {
+
+        class CSystemSensorManager {
+            constructor(
+                [in] IContext* ctx,
+                [in] ILooper* mainLooper);
+
+            interface ISystemSensorManager;
+            interface ISensorManager;
+        }
 
         class CConsumerIrManager {
             constructor(
@@ -314,6 +326,14 @@ module
 
         singleton class CHardwareCameraHelper {
             interface IHardwareCameraHelper;
+        }
+
+        class CHardwareCameraSize {
+            constructor(
+                [in] Int32 w,
+                [in] Int32 h);
+
+            interface ICameraSize;
         }
 
         class CTriggerEvent {
@@ -1466,6 +1486,32 @@ module
 
     namespace Input {
 
+        class CInputDeviceIdentifier {
+            constructor();
+
+            constructor(
+                [in] String descriptor,
+                [in] Int32 vendorId,
+                [in] Int32 productId);
+
+            interface IInputDeviceIdentifier;
+            interface IParcelable;
+        }
+
+        class CKeyboardLayout {
+            constructor();
+
+            constructor(
+                [in] String descriptor,
+                [in] String label,
+                [in] String collection,
+                [in] Int32 priority);
+
+            interface IKeyboardLayout;
+            interface IComparable;
+            interface IParcelable;
+        }
+
         class CInputManagerInputDevicesChangedListener {
             constructor(
                 [in] Handle32 inputManager);
@@ -1474,6 +1520,8 @@ module
         }
 
         class CInputManager {
+            constructor();
+
             interface IInputManager;
         }
 
@@ -1811,4 +1859,5 @@ module
     } // namespace Hardware
     } // namepsace Droid
     } // namespace Elastos
+
 }

@@ -324,16 +324,16 @@ const Int32 AlarmManagerService::IS_WAKEUP_MASK = AlarmManagerService::RTC_WAKEU
 // Mask for testing whether a given alarm type is wakeup vs non-wakeup
 const Int32 AlarmManagerService::TYPE_NONWAKEUP_MASK = 0x1; // low bit => non-wakeup
 
-const String AlarmManagerService::TAG("AlarmManager");
+const String AlarmManagerService::TAG("AlarmManagerService");
 const String AlarmManagerService::ClockReceiver_TAG("ClockReceiver");
 const Boolean AlarmManagerService::localLOGV = FALSE;
-const Boolean AlarmManagerService::DEBUG_BATCH = AlarmManagerService::localLOGV || FALSE;
-const Boolean AlarmManagerService::DEBUG_VALIDATE = AlarmManagerService::localLOGV || FALSE;
-const Boolean AlarmManagerService::DEBUG_ALARM_CLOCK = AlarmManagerService::localLOGV || FALSE;
+const Boolean AlarmManagerService::DEBUG_BATCH = AlarmManagerService::localLOGV;
+const Boolean AlarmManagerService::DEBUG_VALIDATE = AlarmManagerService::localLOGV;
+const Boolean AlarmManagerService::DEBUG_ALARM_CLOCK = AlarmManagerService::localLOGV;
 const Int32 AlarmManagerService::ALARM_EVENT = 1;
 const String AlarmManagerService::TIMEZONE_PROPERTY("persist.sys.timezone");
 
-AutoPtr<IIntent> InitBackgroundIntent()
+static AutoPtr<IIntent> InitBackgroundIntent()
 {
     AutoPtr<IIntent> intent;
     CIntent::New((IIntent**)&intent);
@@ -345,7 +345,7 @@ const AutoPtr<AlarmManagerService::IncreasingTimeOrder> AlarmManagerService::sIn
 
 const Boolean AlarmManagerService::WAKEUP_STATS = FALSE;
 
-AutoPtr<IIntent> InitNEXT_ALARM_CLOCK_CHANGED_INTENT()
+static AutoPtr<IIntent> InitNEXT_ALARM_CLOCK_CHANGED_INTENT()
 {
     AutoPtr<IIntent> intent;
     CIntent::New(IAlarmManager::ACTION_NEXT_ALARM_CLOCK_CHANGED, (IIntent**)&intent);
@@ -520,20 +520,24 @@ AlarmManagerService::WakeupEvent::WakeupEvent(
 //=======================================================================================
 AlarmManagerService::Batch::Batch(
     /* [in] */ AlarmManagerService* host)
+    : mHost(host)
 {
     mStart = 0;
     mEnd = Elastos::Core::Math::INT64_MAX_VALUE;
-    mHost = host;
+    mStandalone = FALSE;
+    CArrayList::New((IArrayList**)&mAlarms);
 }
 
 AlarmManagerService::Batch::Batch(
     /* [in] */ Alarm* seed,
     /* [in] */ AlarmManagerService* host)
+    : mHost(host)
 {
     mStart = seed->mWhenElapsed;
     mEnd = seed->mMaxWhen;
+    mStandalone = FALSE;
+    CArrayList::New((IArrayList**)&mAlarms);
     mAlarms->Add(TO_IINTERFACE(seed));
-    mHost = host;
 }
 
 Int32 AlarmManagerService::Batch::Size()
@@ -757,7 +761,7 @@ ECode AlarmManagerService::Batch::ToString(
     if (mStandalone) {
         b.Append(" STANDALONE");
     }
-    b.Append('}');
+    b.AppendChar('}');
     *result = b.ToString();
     return NOERROR;
 }
@@ -1013,10 +1017,12 @@ ECode AlarmManagerService::AlarmHandler::HandleMessage(
 //=======================================================================================
 // AlarmManagerService::ClockReceiver
 //=======================================================================================
-
 AlarmManagerService::ClockReceiver::ClockReceiver(
     /* [in] */ AlarmManagerService* host)
     : mHost(host)
+{}
+
+ECode AlarmManagerService::ClockReceiver::constructor()
 {
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
@@ -1025,7 +1031,7 @@ AlarmManagerService::ClockReceiver::ClockReceiver(
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
     AutoPtr<IIntent> intent;
-    context->RegisterReceiver(this, filter, (IIntent**)&intent);
+    return context->RegisterReceiver(this, filter, (IIntent**)&intent);
 }
 
 ECode AlarmManagerService::ClockReceiver::OnReceive(
@@ -1111,10 +1117,12 @@ ECode AlarmManagerService::ClockReceiver::ScheduleDateChangedEvent()
 //=======================================================================================
 // AlarmManagerService::InteractiveStateReceiver
 //=======================================================================================
-
 AlarmManagerService::InteractiveStateReceiver::InteractiveStateReceiver(
     /* [in] */ AlarmManagerService* host)
     : mHost(host)
+{}
+
+ECode AlarmManagerService::InteractiveStateReceiver::constructor()
 {
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
@@ -1124,7 +1132,7 @@ AlarmManagerService::InteractiveStateReceiver::InteractiveStateReceiver(
     AutoPtr<IContext> context;
     mHost->GetContext((IContext**)&context);
     AutoPtr<IIntent> intent;
-    context->RegisterReceiver(this, filter, (IIntent**)&intent);
+    return context->RegisterReceiver(this, filter, (IIntent**)&intent);
 }
 
 ECode AlarmManagerService::InteractiveStateReceiver::OnReceive(
@@ -1147,6 +1155,10 @@ AlarmManagerService::UninstallReceiver::UninstallReceiver(
     /* [in] */ AlarmManagerService* host)
     : mHost(host)
 {
+}
+
+ECode AlarmManagerService::UninstallReceiver::constructor()
+{
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New((IIntentFilter**)&filter);
     filter->AddAction(IIntent::ACTION_PACKAGE_REMOVED);
@@ -1164,7 +1176,7 @@ AlarmManagerService::UninstallReceiver::UninstallReceiver(
     CIntentFilter::New((IIntentFilter**)&sdFilter);
     sdFilter->AddAction(IIntent::ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
     sdFilter->AddAction(IIntent::ACTION_USER_STOPPED);
-    context->RegisterReceiver(this, sdFilter, (IIntent**)&intent);
+    return context->RegisterReceiver(this, sdFilter, (IIntent**)&intent);
 }
 
 ECode AlarmManagerService::UninstallReceiver::OnReceive(
@@ -1424,7 +1436,7 @@ ECode AlarmManagerService::Alarm::ToString(
     String pkg;
     mOperation->GetTargetPackage(&pkg);
     sb.Append(pkg);
-    sb.Append('}');
+    sb.Append("}");
     *str = sb.ToString();
     return NOERROR;
 }
@@ -1794,10 +1806,14 @@ ECode AlarmManagerService::OnStart()
 
     // now that we have initied the driver schedule the alarm
     mClockReceiver = new ClockReceiver(this);
+    FAIL_RETURN(mClockReceiver->constructor())
+
     mClockReceiver->ScheduleTimeTickEvent();
     mClockReceiver->ScheduleDateChangedEvent();
     mInteractiveStateReceiver = new InteractiveStateReceiver(this);
+    FAIL_RETURN(mInteractiveStateReceiver->constructor())
     mUninstallReceiver = new UninstallReceiver(this);
+    FAIL_RETURN(mUninstallReceiver->constructor())
 
     if (mNativeData != 0) {
         AutoPtr<AlarmThread> waitThread = new AlarmThread(this);
@@ -2999,6 +3015,14 @@ AutoPtr<AlarmManagerService::BroadcastStats> AlarmManagerService::GetStatsLocked
     }
     return bs;
 };
+
+ECode AlarmManagerService::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    *str = "AlarmManagerService";
+    return NOERROR;
+}
 
 //====================================================================================
 // native codes

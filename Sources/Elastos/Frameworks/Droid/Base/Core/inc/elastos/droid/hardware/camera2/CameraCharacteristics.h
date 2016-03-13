@@ -18,7 +18,7 @@ namespace Droid {
 namespace Hardware {
 namespace Camera2 {
 
-class CameraCharacteristics
+class ECO_PUBLIC CameraCharacteristics
     : public Object
     , public ICameraCharacteristics
     , public ICameraMetadata

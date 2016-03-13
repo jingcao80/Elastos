@@ -50,9 +50,9 @@ ECode CSamplingProfilerService::StartWorking(
         Slogger::V(TAG, "starting SamplingProfilerService!");
     }
 
-    AutoPtr<IDropBoxManager> dropbox;
-    context->GetSystemService(IContext::DROPBOX_SERVICE, (IInterface**)&dropbox);
-
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::DROPBOX_SERVICE, (IInterface**)&obj);
+    AutoPtr<IDropBoxManager> dropbox = IDropBoxManager::Probe(obj);
     // before FileObserver is ready, there could have already been some snapshots
     // in the directory, we don't want to miss them
     AutoPtr<IFile> file;

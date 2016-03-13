@@ -186,9 +186,8 @@ ECode CKeyguardAffordanceView::AnimatorUpdateListener3::OnAnimationUpdate(
     Int32 alpha = 0;
     IInteger32::Probe(obj)->GetValue(&alpha);
     if (mBackground != NULL) {
-        AutoPtr<IDrawable> d;
-        mBackground->Mutate((IDrawable**)&d);
-        d->SetAlpha(alpha);
+        mBackground->Mutate();
+        mBackground->SetAlpha(alpha);
     }
     mHost->SetImageAlpha(alpha);
     return NOERROR;
@@ -365,8 +364,7 @@ void CKeyguardAffordanceView::UpdateIconColor()
 {
     AutoPtr<IDrawable> d;
     GetDrawable((IDrawable**)&d);
-    AutoPtr<IDrawable> drawable;
-    d->Mutate((IDrawable**)&drawable);
+    d->Mutate();
     Float alpha = mCircleRadius / mMinBackgroundRadius;
     alpha = Elastos::Core::Math::Min(1.0f, alpha);
 
@@ -377,7 +375,7 @@ void CKeyguardAffordanceView::UpdateIconColor()
     ITypeEvaluator::Probe(mColorInterpolator)->Evaluate(alpha, integer1, integer2, (IInterface**)&obj);
     Int32 color = 0;
     IInteger32::Probe(obj)->GetValue(&color);
-    drawable->SetColorFilter(color, PorterDuffMode_SRC_ATOP);
+    d->SetColorFilter(color, PorterDuffMode_SRC_ATOP);
 }
 
 void CKeyguardAffordanceView::DrawBackgroundCircle(
@@ -656,9 +654,8 @@ ECode CKeyguardAffordanceView::SetImageAlpha(
     GetBackground((IDrawable**)&background);
     if (!animate) {
         if (background != NULL) {
-            AutoPtr<IDrawable> d;
-            background->Mutate((IDrawable**)&d);
-            d->SetAlpha(endAlpha);
+            background->Mutate();
+            background->SetAlpha(endAlpha);
         }
         SetImageAlpha(endAlpha);
     }

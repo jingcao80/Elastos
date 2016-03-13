@@ -1,0 +1,14 @@
+TARGET_NAME= projection
+TARGET_TYPE= lib
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../../Core/inc/
+
+include $(MAKEDIR)/../../../../../../../../../sources.inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = CMediaProjectionManager.cpp
+SOURCES += CMediaProjection.cpp
+SOURCES += MediaProjectionManagerService.cpp

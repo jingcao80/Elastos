@@ -4,7 +4,6 @@
 #include "elastos/droid/server/CInputMethodManagerServiceMethodCallback.h"
 #include "elastos/droid/server/CInputMethodManagerServiceUserSwitchObserver.h"
 #include "elastos/droid/server/wm/CWindowManagerService.h"
-#include "elastos/droid/server/statusbar/CStatusBarManagerService.h"
 #include <elastos/droid/R.h>
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/app/AppGlobals.h>
@@ -226,11 +225,11 @@ ECode CInputMethodManagerService::SessionState::ToString(
     sb += " pid ";
     sb += mClient->mPid;
     sb += " method ";
-    sb += StringUtils::ToHexString((Int32)mMethod.Get());
+    sb += TO_CSTR(mMethod);
     sb += " session ";
-    sb += StringUtils::ToHexString((Int32)mSession.Get());
+    sb += TO_CSTR(mSession);
     sb += " channel ";
-    sb += TO_STR(mChannel);
+    sb += TO_CSTR(mChannel);
     sb += "}";
     *str = sb.ToString();
     return NOERROR;
@@ -282,7 +281,7 @@ ECode CInputMethodManagerService::SettingsObserver::constructor(
     /* [in] */ IHandler* handler,
     /* [in] */ CInputMethodManagerService* host)
 {
-    ContentObserver::constructor(handler);
+    FAIL_RETURN(ContentObserver::constructor(handler))
     mHost = host;
 
     AutoPtr<IContentResolver> resolver;
@@ -669,7 +668,9 @@ ECode CInputMethodManagerService::ImeSubtypeListAdapter::constructor(
     mTextViewResourceId = textViewResourceId;
     ArrayAdapter::constructor(context, textViewResourceId, itemsList);
     mItemsList = itemsList;
-    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&mInflater);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    mInflater = ILayoutInflater::Probe(obj);
     return NOERROR;
 }
 
@@ -695,6 +696,7 @@ ECode CInputMethodManagerService::ImeSubtypeListAdapter::GetView(
     if (position < 0 || position >= size) {
         *result = view;
         REFCOUNT_ADD(*result)
+        return NOERROR;
     }
 
     AutoPtr<IInterface> obj;
@@ -848,6 +850,7 @@ void CInputMethodManagerService::InputMethodFileManager::WriteAdditionalInputMet
     Boolean bval;
     Boolean isSetMethodMap = methodMap != NULL && (methodMap->IsEmpty(&bval), !bval);
     AutoPtr<IFileOutputStream> fos;
+    String nullStr;
 
     // try {
     subtypesFile->StartWrite((IFileOutputStream**)&fos);
@@ -856,9 +859,9 @@ void CInputMethodManagerService::InputMethodFileManager::WriteAdditionalInputMet
     assert(out != NULL);
 
     out->SetOutput(IOutputStream::Probe(fos), String("utf-8"));
-    out->StartDocument(String(NULL), TRUE);
+    out->StartDocument(nullStr, TRUE);
     out->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
-    out->WriteStartTag(String(NULL), NODE_SUBTYPES);
+    out->WriteStartTag(nullStr, NODE_SUBTYPES);
 
     assert(allSubtypes != NULL);
     AutoPtr<ISet> set;
@@ -877,8 +880,8 @@ void CInputMethodManagerService::InputMethodFileManager::WriteAdditionalInputMet
         }
 
         String imiId = TO_STR(keyObj);
-        out->WriteStartTag(String(NULL), NODE_IMI);
-        out->WriteAttribute(String(NULL), ATTR_ID, imiId);
+        out->WriteStartTag(nullStr, NODE_IMI);
+        out->WriteAttribute(nullStr, ATTR_ID, imiId);
 
         allSubtypes->Get(keyObj, (IInterface**)&valueObj);
         AutoPtr<IList> subtypesList = IList::Probe(valueObj);
@@ -890,27 +893,27 @@ void CInputMethodManagerService::InputMethodFileManager::WriteAdditionalInputMet
             AutoPtr<IInterface> subtypeObj;
             lit->GetNext((IInterface**)&subtypeObj);
             AutoPtr<IInputMethodSubtype> subtype = IInputMethodSubtype::Probe(subtypeObj);
-            out->WriteStartTag(String(NULL), NODE_SUBTYPE);
+            out->WriteStartTag(nullStr, NODE_SUBTYPE);
 
             Int32 id = 0;
-            out->WriteAttribute(String(NULL), ATTR_ICON, StringUtils::ToString(subtype->GetIconResId(&id), id));
-            out->WriteAttribute(String(NULL), ATTR_LABEL, StringUtils::ToString(subtype->GetNameResId(&id), id));
+            out->WriteAttribute(nullStr, ATTR_ICON, StringUtils::ToString(subtype->GetIconResId(&id), id));
+            out->WriteAttribute(nullStr, ATTR_LABEL, StringUtils::ToString(subtype->GetNameResId(&id), id));
 
             String value;
-            out->WriteAttribute(String(NULL), ATTR_IME_SUBTYPE_LOCALE, (subtype->GetLocale(&value), value));
-            out->WriteAttribute(String(NULL), ATTR_IME_SUBTYPE_MODE, (subtype->GetMode(&value), value));
-            out->WriteAttribute(String(NULL), ATTR_IME_SUBTYPE_EXTRA_VALUE, (subtype->GetExtraValue(&value), value));
+            out->WriteAttribute(nullStr, ATTR_IME_SUBTYPE_LOCALE, (subtype->GetLocale(&value), value));
+            out->WriteAttribute(nullStr, ATTR_IME_SUBTYPE_MODE, (subtype->GetMode(&value), value));
+            out->WriteAttribute(nullStr, ATTR_IME_SUBTYPE_EXTRA_VALUE, (subtype->GetExtraValue(&value), value));
 
             Boolean isAuxiliary = FALSE;
-            out->WriteAttribute(String(NULL), ATTR_IS_AUXILIARY,
+            out->WriteAttribute(nullStr, ATTR_IS_AUXILIARY,
                     StringUtils::ToString((subtype->IsAuxiliary(&isAuxiliary), isAuxiliary) ? 1 : 0));
-            out->WriteEndTag(String(NULL), NODE_SUBTYPE);
+            out->WriteEndTag(nullStr, NODE_SUBTYPE);
         }
 
-        out->WriteEndTag(String(NULL), NODE_IMI);
+        out->WriteEndTag(nullStr, NODE_IMI);
     }
 
-    out->WriteEndTag(String(NULL), NODE_SUBTYPES);
+    out->WriteEndTag(nullStr, NODE_SUBTYPES);
     out->EndDocument();
     subtypesFile->FinishWrite(fos);
     // } catch (java.io.IOException e) {
@@ -929,6 +932,7 @@ ECode CInputMethodManagerService::InputMethodFileManager::ReadAdditionalInputMet
 
     allSubtypes->Clear();
     AutoPtr<IFileInputStream> fis;
+    String nullStr;
     // // try {
     subtypesFile->OpenRead((IFileInputStream**)&fis);
     AutoPtr<IXmlPullParser> parser;
@@ -978,22 +982,22 @@ ECode CInputMethodManagerService::InputMethodFileManager::ReadAdditionalInputMet
             }
 
             String value;
-            parser->GetAttributeValue(String(NULL), ATTR_ICON, &value);
+            parser->GetAttributeValue(nullStr, ATTR_ICON, &value);
             const Int32 icon = StringUtils::ParseInt32(value);
 
-            parser->GetAttributeValue(String(NULL), ATTR_LABEL, &value);
+            parser->GetAttributeValue(nullStr, ATTR_LABEL, &value);
             const Int32 label = StringUtils::ParseInt32(value);
             String imeSubtypeLocale;
-            parser->GetAttributeValue(String(NULL), ATTR_IME_SUBTYPE_LOCALE, &imeSubtypeLocale);
+            parser->GetAttributeValue(nullStr, ATTR_IME_SUBTYPE_LOCALE, &imeSubtypeLocale);
 
             String imeSubtypeMode;
-            parser->GetAttributeValue(String(NULL), ATTR_IME_SUBTYPE_MODE, &imeSubtypeMode);
+            parser->GetAttributeValue(nullStr, ATTR_IME_SUBTYPE_MODE, &imeSubtypeMode);
 
             String imeSubtypeExtraValue;
-            parser->GetAttributeValue(String(NULL), ATTR_IME_SUBTYPE_EXTRA_VALUE, &imeSubtypeExtraValue);
+            parser->GetAttributeValue(nullStr, ATTR_IME_SUBTYPE_EXTRA_VALUE, &imeSubtypeExtraValue);
 
             Boolean isAuxiliary = String("1").Equals(
-                (parser->GetAttributeValue(String(NULL), ATTR_IS_AUXILIARY, &value), value)) == 0;
+                (parser->GetAttributeValue(nullStr, ATTR_IS_AUXILIARY, &value), value)) == 0;
 
             AutoPtr<IInputMethodSubtypeBuilder> builder;
             CInputMethodSubtypeBuilder::New((IInputMethodSubtypeBuilder**)&builder);
@@ -1564,7 +1568,7 @@ ECode CInputMethodManagerService::GetInputMethodList(
     }
 
     AutoLock lock(mMethodMap.Get());
-    return CArrayList::New(ICollection::Probe(mMethodList), (IList**)infos);
+    return CArrayList::New(ICollection::Probe(mMethodList), infos);
 }
 
 ECode CInputMethodManagerService::GetEnabledInputMethodList(

@@ -592,6 +592,9 @@ public:
         /* [in] */ Int32 location,
         /* [in] */ IInterface* object);
 
+    CARAPI Add(
+        /* [in] */ IInterface* object);
+
     /**
      * Inserts the objects in the specified collection at the specified location
      * in this {@code List}. The objects are added in the order they are returned from

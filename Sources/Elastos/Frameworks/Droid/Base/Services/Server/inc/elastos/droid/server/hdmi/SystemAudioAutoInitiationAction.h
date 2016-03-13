@@ -18,8 +18,11 @@ namespace Hdmi {
 // Seq #27
 class SystemAudioAutoInitiationAction
     : public HdmiCecFeatureAction
+    , public ISystemAudioAutoInitiationAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     SystemAudioAutoInitiationAction();
 
     CARAPI constructor(

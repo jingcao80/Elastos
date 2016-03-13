@@ -43,7 +43,6 @@ ECode WebStorageAdapter::InnerValueCallback::OnReceiveValue(
     // }
     // callback.onReceiveValue(originsMap);
 
-    assert(0);
     assert(NULL != mOwner);
     assert(NULL != mCallback);
 
@@ -107,7 +106,6 @@ ECode WebStorageAdapter::GetOrigins(
     //     }
     // });
 
-    assert(0);
     AutoPtr<InnerValueCallback> valueCallback = new InnerValueCallback(this, callback);
     mQuotaManagerBridge->GetOrigins(valueCallback);
     return NOERROR;

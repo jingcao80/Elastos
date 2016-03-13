@@ -106,6 +106,7 @@ module
     merge("net/wimax/WimaxManagerConstants.car");
 
     interface Elastos.Droid.App.IService;
+    interface Elastos.Droid.Content.IComponentCallbacks;
     interface Elastos.Droid.Content.IComponentCallbacks2;
     interface Elastos.Droid.Content.IContext;
     interface Elastos.Droid.Content.IContextWrapper;
@@ -221,6 +222,21 @@ module
             [in] IIEthernetManager* service);
 
         interface IEthernetManager;
+    }
+
+    class CHierarchicalUri {
+        constructor();
+
+        constructor(
+            [in] String scheme,
+            [in] Handle32 authority,
+            [in] Handle32 path,
+            [in] Handle32 query,
+            [in] Handle32 fragment);
+
+        interface IParcelable;
+        interface IComparable;
+        interface IUri;
     }
 
     class CInterfaceConfiguration {
@@ -667,6 +683,19 @@ module
         interface INetworkUtils;
     }
 
+    class COpaqueUri {
+        constructor();
+
+        constructor(
+            [in] String scheme,
+            [in] Handle32 sspPart,
+            [in] Handle32 fragmentPart);
+
+        interface IParcelable;
+        interface IComparable;
+        interface IUri;
+    }
+
     class CPacProxySelector {
         constructor();
 
@@ -836,6 +865,17 @@ module
         interface IParcelable;
     }
 
+    class CStringUri {
+        constructor();
+
+        constructor(
+            [in] String uriString);
+
+        interface IParcelable;
+        interface IComparable;
+        interface IUri;
+    }
+
     singleton class CTrafficStats {
         interface ITrafficStats;
     }
@@ -896,6 +936,7 @@ module
 
         interface IService;
         interface IComponentCallbacks2;
+        interface IComponentCallbacks;
         interface IContextWrapper;
         interface IContext;
         interface IVpnService;

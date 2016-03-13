@@ -4,9 +4,9 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/webkit/GeolocationPermissions.h"
-#include "elastos/droid/webkit/native/android_webview/AwGeolocationPermissions.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/AwGeolocationPermissions.h"
 
-using Elastos::Droid::Webkit::AndroidWebview::AwGeolocationPermissions;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::AwGeolocationPermissions;
 using Elastos::Droid::Webkit::GeolocationPermissions;
 using Elastos::Droid::Webkit::IValueCallback;
 

@@ -181,9 +181,12 @@ Boolean InstallerConnection::Connect()
         if (FAILED(ec))
             break;
 
+        mIn = NULL;
         ec = mSocket->GetInputStream((IInputStream**)&mIn);
         if (FAILED(ec))
             break;
+
+        mOut = NULL;
         ec = mSocket->GetOutputStream((IOutputStream**)&mOut);
     } while (0);
 

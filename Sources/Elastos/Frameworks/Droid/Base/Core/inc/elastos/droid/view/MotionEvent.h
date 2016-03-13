@@ -1872,6 +1872,8 @@ private:
         /* [in] */ const String& label);
 
 private:
+    friend class CMotionEventHelper;
+
     static const Int64 NS_PER_MS;
 
     static const String LABEL_PREFIX;

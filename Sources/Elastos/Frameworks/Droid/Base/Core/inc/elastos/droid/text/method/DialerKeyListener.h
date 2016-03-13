@@ -35,7 +35,7 @@ public:
         /* [out] */ Int32* ret);
 
     static CARAPI GetCHARACTERS(
-        /* [out,callee] */ ArrayOf<Char32>** ret);
+        /* [out, callee] */ ArrayOf<Char32>** ret);
 
     //override
     CARAPI OnKeyUp(

@@ -26,7 +26,7 @@ namespace App {
  * <p>See the <a href="{@docRoot}guide/topics/ui/controls/pickers.html">Pickers</a>
  * guide.</p>
  */
-class DatePickerDialog
+class ECO_PUBLIC DatePickerDialog
     : public AlertDialog
     , public IDatePickerDialog
     , public IDialogInterfaceOnClickListener

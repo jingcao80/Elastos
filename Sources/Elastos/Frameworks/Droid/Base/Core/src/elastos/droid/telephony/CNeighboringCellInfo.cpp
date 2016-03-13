@@ -1,5 +1,5 @@
 
-#include "CNeighboringCellInfo.h"
+#include "elastos/droid/telephony/CNeighboringCellInfo.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 
@@ -10,13 +10,25 @@ namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
+CAR_INTERFACE_IMPL_2(CNeighboringCellInfo, Object, INeighboringCellInfo, IParcelable)
+
+CAR_OBJECT_IMPL(CNeighboringCellInfo)
+
+CNeighboringCellInfo::CNeighboringCellInfo()
+    : mRssi(UNKNOWN_RSSI)
+    , mCid(UNKNOWN_CID)
+    , mLac(UNKNOWN_CID)
+    , mPsc(UNKNOWN_CID)
+    , mNetworkType(ITelephonyManager::NETWORK_TYPE_UNKNOWN)
+{
+}
+
+CNeighboringCellInfo::~CNeighboringCellInfo()
+{
+}
+
 ECode CNeighboringCellInfo::constructor()
 {
-    mRssi = INeighboringCellInfo::UNKNOWN_RSSI;
-    mLac = INeighboringCellInfo::UNKNOWN_CID;
-    mCid = INeighboringCellInfo::UNKNOWN_CID;
-    mPsc = INeighboringCellInfo::UNKNOWN_CID;
-    mNetworkType = ITelephonyManager::NETWORK_TYPE_UNKNOWN;
     return NOERROR;
 }
 
@@ -143,14 +155,14 @@ ECode CNeighboringCellInfo::ToString(
 
     sb.Append("[");
     if (mPsc != INeighboringCellInfo::UNKNOWN_CID) {
-        sb.Append(StringUtils::Int32ToHexString(mPsc));
+        sb.Append(StringUtils::ToHexString(mPsc));
         sb.Append("@");
-        sb.Append(((mRssi == INeighboringCellInfo::UNKNOWN_RSSI)? String("-") : StringUtils::Int32ToString(mRssi)));
+        sb.Append(((mRssi == INeighboringCellInfo::UNKNOWN_RSSI)? String("-") : StringUtils::ToString(mRssi)));
     } else if(mLac != INeighboringCellInfo::UNKNOWN_CID && mCid != INeighboringCellInfo::UNKNOWN_CID) {
-        sb.Append(StringUtils::Int32ToHexString(mLac));
-        sb.Append(StringUtils::Int32ToHexString(mCid));
+        sb.Append(StringUtils::ToHexString(mLac));
+        sb.Append(StringUtils::ToHexString(mCid));
         sb.Append("@");
-        sb.Append(((mRssi == INeighboringCellInfo::UNKNOWN_RSSI)? String("-") : StringUtils::Int32ToString(mRssi)));
+        sb.Append(((mRssi == INeighboringCellInfo::UNKNOWN_RSSI)? String("-") : StringUtils::ToString(mRssi)));
     }
     sb.Append("]");
     *str = sb.ToString();

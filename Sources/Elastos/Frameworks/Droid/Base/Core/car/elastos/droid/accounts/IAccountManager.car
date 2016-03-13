@@ -50,7 +50,7 @@ module
         HasFeatures(
             [in] IAccountManagerResponse* response,
             [in] IAccount* account,
-            [in] ArrayOf<String> features);
+            [in] ArrayOf<String>* features);
 
         GetAccountsByFeatures(
             [in] IAccountManagerResponse* response,

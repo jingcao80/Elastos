@@ -141,8 +141,7 @@ public:
         /* [out] */ Int32* index);
 
     //@Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
     /** @hide */
     //@Override

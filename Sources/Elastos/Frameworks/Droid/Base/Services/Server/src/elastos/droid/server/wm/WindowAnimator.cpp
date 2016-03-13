@@ -236,7 +236,9 @@ void WindowAnimator::UpdateWindowsLocked(
 
     AutoPtr<WindowState> imeTarget = mService->mInputMethodTarget;
     AutoPtr<IWindowManagerLayoutParams> lp;
-    imeTarget->GetAttrs((IWindowManagerLayoutParams**)&lp);
+    if (imeTarget) {
+        imeTarget->GetAttrs((IWindowManagerLayoutParams**)&lp);
+    }
     Int32 flags;
     Boolean showImeOverKeyguard = imeTarget != NULL && imeTarget->IsVisibleNow() &&
             (lp->GetFlags(&flags), (flags & IWindowManagerLayoutParams::FLAG_SHOW_WHEN_LOCKED) != 0);

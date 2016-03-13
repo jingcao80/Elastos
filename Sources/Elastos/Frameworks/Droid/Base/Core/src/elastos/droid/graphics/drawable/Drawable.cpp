@@ -33,6 +33,7 @@
 #include "elastos/droid/utility/CDisplayMetrics.h"
 #include "elastos/droid/utility/Xml.h"
 #include "elastos/droid/R.h"
+#include "elastos/utility/logging/Logger.h"
 
 using Elastos::Droid::Graphics::PorterDuffMode_NONE;
 using Elastos::Droid::Content::Res::CColorStateList;
@@ -40,6 +41,7 @@ using Elastos::Droid::Utility::StateSet;
 using Elastos::Droid::Utility::CDisplayMetrics;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::R;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -632,12 +634,8 @@ ECode Drawable::GetOutline(
     return outline->SetAlpha(0);
 }
 
-ECode Drawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode Drawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    *drawable = this;
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 
@@ -807,56 +805,56 @@ ECode Drawable::CreateFromXmlInner(
     FAIL_RETURN(parser->GetName((String*)&name));
 
     if (name.Equals("selector")) {
-        FAIL_RETURN(CStateListDrawable::New((IStateListDrawable**)drawable));
+        FAIL_RETURN(CStateListDrawable::New(drawable));
     }
     else if (name.Equals("level-list")) {
-        FAIL_RETURN(CLevelListDrawable::New((ILevelListDrawable**)drawable));
+        FAIL_RETURN(CLevelListDrawable::New(drawable));
     }
     else if (name.Equals("animated-selector")) {
-        FAIL_RETURN(CAnimatedStateListDrawable::New((IAnimatedStateListDrawable**)drawable));
+        FAIL_RETURN(CAnimatedStateListDrawable::New(drawable));
     }
     else if (name.Equals("layer-list")) {
-        FAIL_RETURN(CLayerDrawable::New((ILayerDrawable**)drawable));
+        FAIL_RETURN(CLayerDrawable::New(drawable));
     }
     else if (name.Equals("transition")) {
-        FAIL_RETURN(CTransitionDrawable::New((ITransitionDrawable**)drawable));
+        FAIL_RETURN(CTransitionDrawable::New(drawable));
     }
     else if (name.Equals("ripple")) {
-        CRippleDrawable::New((IRippleDrawable**)drawable);
+        CRippleDrawable::New(drawable);
     }
     else if (name.Equals("color")) {
-        FAIL_RETURN(CColorDrawable::New((IColorDrawable**)drawable));
+        FAIL_RETURN(CColorDrawable::New(drawable));
     }
     else if (name.Equals("shape")) {
-        FAIL_RETURN(CGradientDrawable::New((IGradientDrawable**)drawable));
+        FAIL_RETURN(CGradientDrawable::New(drawable));
     }
     else if (name.Equals("vector")) {
-        CVectorDrawable::New((IVectorDrawable**)drawable);
+        CVectorDrawable::New(drawable);
     }
     else if (name.Equals("animated-vector")) {
-        CAnimatedVectorDrawable::New((IAnimatedVectorDrawable**)drawable);
+        CAnimatedVectorDrawable::New(drawable);
     }
     else if (name.Equals("scale")) {
-        FAIL_RETURN(CScaleDrawable::New((IScaleDrawable**)drawable));
+        FAIL_RETURN(CScaleDrawable::New(drawable));
     }
     else if (name.Equals("clip")) {
-        FAIL_RETURN(CClipDrawable::New((IClipDrawable**)drawable));
+        FAIL_RETURN(CClipDrawable::New(drawable));
     }
     else if (name.Equals("rotate")) {
-        FAIL_RETURN(CRotateDrawable::New((IRotateDrawable**)drawable));;
+        FAIL_RETURN(CRotateDrawable::New(drawable));;
     }
     else if (name.Equals("animated-rotate")) {
-        FAIL_RETURN(CAnimatedRotateDrawable::New((IAnimatedRotateDrawable**)drawable));
+        FAIL_RETURN(CAnimatedRotateDrawable::New(drawable));
     }
     else if (name.Equals("animation-list")) {
-        FAIL_RETURN(CAnimationDrawable::New((IAnimationDrawable**)drawable));
+        FAIL_RETURN(CAnimationDrawable::New(drawable));
     }
     else if (name.Equals("inset")) {
-        FAIL_RETURN(CInsetDrawable::New((IInsetDrawable**)drawable));
+        FAIL_RETURN(CInsetDrawable::New(drawable));
     }
     else if (name.Equals("bitmap")) {
         //noinspection deprecation
-        FAIL_RETURN(CBitmapDrawable::New(r, (IBitmapDrawable**)drawable));
+        FAIL_RETURN(CBitmapDrawable::New(r, drawable));
         if (r != NULL) {
             AutoPtr<IDisplayMetrics> metrics;
             r->GetDisplayMetrics((IDisplayMetrics**)&metrics);
@@ -864,7 +862,7 @@ ECode Drawable::CreateFromXmlInner(
         }
     }
     else if (name.Equals("nine-patch")) {
-        FAIL_RETURN(CNinePatchDrawable::New((INinePatchDrawable**)drawable));
+        FAIL_RETURN(CNinePatchDrawable::New(drawable));
         if (r != NULL) {
             AutoPtr<IDisplayMetrics> metrics;
             r->GetDisplayMetrics((IDisplayMetrics**)&metrics);
@@ -874,6 +872,7 @@ ECode Drawable::CreateFromXmlInner(
      else {
 //        throw new XmlPullParserException(parser.getPositionDescription() +
 //                ": invalid drawable tag " + name);
+        Logger::E("Drawable", "E_XML_PULL_PARSER_EXCEPTION: invalid drawable tag %s", name.string());
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 
@@ -980,12 +979,14 @@ ECode Drawable::DrawableFromBitmap(
     /* [out] */ IDrawable** drawable)
 {
     assert(drawable != NULL);
+    ECode ec = NOERROR;
+    AutoPtr<IDrawable> dr;
     if (np != NULL) {
         return CNinePatchDrawable::New(
-            res, bm, np, pad, layoutBounds, srcName, (INinePatchDrawable**)drawable);
+            res, bm, np, pad, layoutBounds, srcName, drawable);
     }
 
-    return CBitmapDrawable::New(res, bm, (IBitmapDrawable**)drawable);
+    return CBitmapDrawable::New(res, bm, drawable);
 }
 
 AutoPtr<IPorterDuffColorFilter> Drawable::UpdateTintFilter(

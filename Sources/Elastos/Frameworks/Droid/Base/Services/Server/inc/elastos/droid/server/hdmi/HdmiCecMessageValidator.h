@@ -3,8 +3,8 @@
 #define __ELASTOS_DROID_SERVER_HDMI_HDMICECMESSAGEVALIDATOR_H__
 
 #include "_Elastos.Droid.Server.h"
-#include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
+#include <elastos/droid/ext/frameworkext.h>
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Utility::ISparseArray;
@@ -82,10 +82,16 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        PhysicalAddressValidator(
+            /* [in] */ HdmiCecMessageValidator* host);
+
         // @Override
         CARAPI IsValid(
             /* [in] */ ArrayOf<Byte>* params,
             /* [out] */ Boolean* result);
+
+    private:
+        HdmiCecMessageValidator* mHost;
     };
 
     class ReportPhysicalAddressValidator
@@ -95,10 +101,16 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        ReportPhysicalAddressValidator(
+            /* [in] */ HdmiCecMessageValidator* host);
+
         // @Override
         CARAPI IsValid(
             /* [in] */ ArrayOf<Byte>* params,
             /* [out] */ Boolean* result);
+
+    private:
+        HdmiCecMessageValidator* mHost;
     };
 
     class RoutingChangeValidator
@@ -108,10 +120,16 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        RoutingChangeValidator(
+            /* [in] */ HdmiCecMessageValidator* host);
+
         // @Override
         CARAPI IsValid(
             /* [in] */ ArrayOf<Byte>* params,
             /* [out] */ Boolean* result);
+
+    private:
+        HdmiCecMessageValidator* mHost;
     };
 
 public:
@@ -144,10 +162,9 @@ private:
         /* [in] */ IHdmiCecMessageValidatorParameterValidator* validator,
         /* [in] */ Int32 addrType);
 
-    CARAPI IsValidPhysicalAddress(
+    CARAPI_(Boolean) IsValidPhysicalAddress(
         /* [in] */ ArrayOf<Byte>* params,
-        /* [in] */ Int32 offset,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 offset);
 
 public:
     AutoPtr<ISparseArray> mValidationInfo;

@@ -24,6 +24,7 @@ Boolean StateListDrawable::DEBUG = FALSE;
 String StateListDrawable::TAG("StateListDrawable");
 
 CAR_INTERFACE_IMPL(StateListDrawable, DrawableContainer, IStateListDrawable)
+
 StateListDrawable::StateListDrawable()
     : mMutated(FALSE)
 {
@@ -251,12 +252,9 @@ ECode StateListDrawable::GetStateDrawableIndex(
     return NOERROR;
 }
 
-ECode StateListDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode StateListDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated && (DrawableContainer::Mutate((IDrawable**)&tmp), tmp.Get()) == (IDrawable*)this->Probe(EIID_IDrawable)) {
+    if (!mMutated ) {
         AutoPtr<ArrayOf< AutoPtr<ArrayOf<Int32> > > > sets = mStateListState->mStateSets;
         Int32 count = sets->GetLength();
         mStateListState->mStateSets = ArrayOf< AutoPtr<ArrayOf<Int32> > >::Alloc(count);
@@ -269,8 +267,7 @@ ECode StateListDrawable::Mutate(
         }
         mMutated = TRUE;
     }
-    *drawable = (IDrawable*)this->Probe(EIID_IDrawable);
-    REFCOUNT_ADD(*drawable);
+
     return NOERROR;
 }
 
@@ -332,14 +329,14 @@ Int32 StateListDrawable::StateListState::IndexOfStateSet(
 ECode StateListDrawable::StateListState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    return CStateListDrawable::New(this, NULL, (IStateListDrawable**)drawable);
+    return CStateListDrawable::New(this, NULL, drawable);
 }
 
 ECode StateListDrawable::StateListState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    return CStateListDrawable::New(this, res, (IStateListDrawable**)drawable);
+    return CStateListDrawable::New(this, res, drawable);
 }
 
 void StateListDrawable::StateListState::GrowArray(

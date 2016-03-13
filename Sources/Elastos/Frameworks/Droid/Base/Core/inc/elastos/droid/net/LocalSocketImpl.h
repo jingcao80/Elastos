@@ -360,9 +360,9 @@ public:
     AutoPtr<ArrayOf<IFileDescriptor*> > mOutboundFileDescriptors;
 
 private:
-    AutoPtr<IInterface> mReadMonitor;
+    Object mReadMonitor;
 
-    AutoPtr<IInterface> mWriteMonitor;
+    Object mWriteMonitor;
 
     AutoPtr<SocketInputStream> mFis;
 

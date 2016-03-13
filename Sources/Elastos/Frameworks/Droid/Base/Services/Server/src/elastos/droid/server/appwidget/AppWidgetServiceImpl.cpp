@@ -1436,7 +1436,7 @@ ECode AppWidgetServiceImpl::BackupRestoreController::GetWidgetParticipants(
         Slogger::I(TAG, String("Getting widget participants for user: ") + StringUtils::ToString(userId));
     }
 
-    CArrayList::New((IList**)result);
+    CArrayList::New(result);
     //synchronized (this) {
         Int32 N = 0;
         mOwner->mWidgets->GetSize(&N);
@@ -3607,7 +3607,7 @@ ECode AppWidgetServiceImpl::CreateAppWidgetConfigIntentSender(
                 , IPendingIntent::FLAG_ONE_SHOT | IPendingIntent::FLAG_CANCEL_CURRENT
                 , NULL, userHandle, (IPendingIntent**)&pending);
 
-            pending->GetIntentSender((IIntentSender**)result);
+            pending->GetIntentSender(result);
         //} finally {
             Binder::RestoreCallingIdentity(identity);
         //}
@@ -4877,6 +4877,7 @@ ECode AppWidgetServiceImpl::GetInstalledProvidersForProfile(
     /* [out] */ IList** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
     // ==================before translated======================
     // final int userId = UserHandle.getCallingUserId();
     //
@@ -4929,7 +4930,6 @@ ECode AppWidgetServiceImpl::GetInstalledProvidersForProfile(
 
     // Ensure the profile is in the group and enabled.
     if (!mSecurityPolicy->IsEnabledGroupProfile(profileId)) {
-        *result = NULL;
         return NOERROR;
     }
 
@@ -4963,7 +4963,7 @@ ECode AppWidgetServiceImpl::GetInstalledProvidersForProfile(
             mSecurityPolicy->IsProviderInCallerOrInProfileAndWhitelListed(packageName, providerProfileId, &resTmp);
             if (providerProfileId == profileId && resTmp) {
                 if (*result == NULL) {
-                    CArrayList::New((IList**)result);
+                    CArrayList::New(result);
                 }
                 (*result)->Add(TO_IINTERFACE(CloneIfLocalBinder(info)));
             }

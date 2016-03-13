@@ -290,9 +290,9 @@ ECode LocalePicker::ConstructAdapter(
     AutoPtr<IList> localeInfos;
     GetAllAssetLocales(context, isInDeveloperMode, (IList**)&localeInfos);
 
-    AutoPtr<ILayoutInflater> inflater;
-    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE,
-            (IInterface**)(ILayoutInflater**)&inflater);
+    AutoPtr<IInterface> service;
+    FAIL_RETURN(context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service))
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(service);
     AutoPtr<LocalArrayAdapter> localAdapter = new LocalArrayAdapter();
     localAdapter->constructor(context, layoutId, fieldId, localeInfos, inflater);
     *adapter = localAdapter;

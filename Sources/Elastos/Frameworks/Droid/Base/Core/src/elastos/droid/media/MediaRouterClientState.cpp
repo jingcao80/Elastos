@@ -139,6 +139,187 @@ ECode MediaRouterClientState::RouteInfo::ToString(
     return NOERROR;
 }
 
+ECode MediaRouterClientState::RouteInfo::GetId(
+    /* [out] */ String* id)
+{
+    VALIDATE_NOT_NULL(id)
+    *id = mId;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetId(
+    /* [in] */ const String& id)
+{
+    mId = id;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::GetName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name)
+    *name = mName;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetName(
+    /* [in] */ const String& name)
+{
+    mName = name;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::GetDescription(
+    /* [out] */ String* description)
+{
+    VALIDATE_NOT_NULL(description)
+    *description = mDescription;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetDescription(
+    /* [in] */ const String& description)
+{
+    mDescription = description;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::GetSupportedTypes(
+    /* [out] */ Int32* supportedTypes)
+{
+    VALIDATE_NOT_NULL(supportedTypes)
+    *supportedTypes = mSupportedTypes;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetSupportedTypes(
+    /* [in] */ Int32 supportedTypes)
+{
+    mSupportedTypes = supportedTypes;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::GetEnabled(
+    /* [out] */ Boolean* enabled)
+{
+    VALIDATE_NOT_NULL(enabled)
+    *enabled = mEnabled;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetEnabled(
+    /* [in] */ Boolean enabled)
+{
+    mEnabled = enabled;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::GetStatusCode(
+    /* [out] */ Int32* statusCode)
+{
+    VALIDATE_NOT_NULL(statusCode)
+    *statusCode = mStatusCode;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetStatusCode(
+    /* [in] */ Int32 statusCode)
+{
+    mStatusCode = statusCode;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::GetPlaybackType(
+    /* [out] */ Int32* playbackType)
+{
+    VALIDATE_NOT_NULL(playbackType)
+    *playbackType = mPlaybackType;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetPlaybackType(
+    /* [in] */ Int32 playbackType)
+{
+    mPlaybackType = playbackType;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::GetPlaybackStream(
+    /* [out] */ Int32* playbackStream)
+{
+    VALIDATE_NOT_NULL(playbackStream)
+    *playbackStream = mPlaybackStream;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetPlaybackStream(
+    /* [in] */ Int32 playbackStream)
+{
+    mPlaybackStream = playbackStream;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::GetVolume(
+    /* [out] */ Int32* volume)
+{
+    VALIDATE_NOT_NULL(volume)
+    *volume = mVolume;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetVolume(
+    /* [in] */ Int32 volume)
+{
+    mVolume = volume;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::GetVolumeMax(
+    /* [out] */ Int32* volumeMax)
+{
+    VALIDATE_NOT_NULL(volumeMax)
+    *volumeMax = mVolumeMax;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetVolumeMax(
+    /* [in] */ Int32 volumeMax)
+{
+    mVolumeMax = volumeMax;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::GetVolumeHandling(
+    /* [out] */ Int32* volumeHandling)
+{
+    VALIDATE_NOT_NULL(volumeHandling)
+    *volumeHandling = mVolumeHandling;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetVolumeHandling(
+    /* [in] */ Int32 volumeHandling)
+{
+    mVolumeHandling = volumeHandling;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::GetPresentationDisplayId(
+    /* [out] */ Int32* presentationDisplayId)
+{
+    VALIDATE_NOT_NULL(presentationDisplayId)
+    *presentationDisplayId = mPresentationDisplayId;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::RouteInfo::SetPresentationDisplayId(
+    /* [in] */ Int32 presentationDisplayId)
+{
+    mPresentationDisplayId = presentationDisplayId;
+    return NOERROR;
+}
+
+
 //====================================================================
 //          MediaRouterClientState
 //====================================================================
@@ -212,6 +393,37 @@ ECode MediaRouterClientState::ToString(
                 + String(", routes=")
                 + str.string()
                 + String(" }");
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::GetGloballySelectedRouteId(
+    /* [out] */ String* routeId)
+{
+    VALIDATE_NOT_NULL(routeId)
+    *routeId = mGloballySelectedRouteId;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::SetGloballySelectedRouteId(
+    /* [in] */ const String& routeId)
+{
+    mGloballySelectedRouteId = routeId;
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::GetRoutes(
+    /* [out] */ IArrayList** routes)
+{
+    VALIDATE_NOT_NULL(routes)
+    *routes = mRoutes;
+    REFCOUNT_ADD(*routes)
+    return NOERROR;
+}
+
+ECode MediaRouterClientState::SetRoutes(
+    /* [in] */ IArrayList* routes)
+{
+    mRoutes = routes;
     return NOERROR;
 }
 

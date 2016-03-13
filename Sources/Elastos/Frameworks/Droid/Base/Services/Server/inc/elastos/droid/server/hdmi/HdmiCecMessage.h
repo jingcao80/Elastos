@@ -35,6 +35,9 @@ public:
         /* [in] */ Int32 opcode,
         /* [in] */ ArrayOf<Byte>* params);
 
+    static CARAPI GetEMPTY_PARAM(
+            /* [out, callee] */ ArrayOf<Byte>** result);
+
     /**
      * Return the source address field of the message. It is the logical address
      * of the device which generated the message.
@@ -70,7 +73,7 @@ public:
      * @return parameter
      */
     CARAPI GetParams(
-        /* [out, callee] */ ArrayOf<Byte>* result);
+        /* [out, callee] */ ArrayOf<Byte>** result);
 
     // @Override
     CARAPI ToString(
@@ -82,6 +85,8 @@ private:
         /* [out] */ String* result);
 
 private:
+    static AutoPtr<ArrayOf<Byte> > EMPTY_PARAM;
+
     Int32 mSource;
 
     Int32 mDestination;

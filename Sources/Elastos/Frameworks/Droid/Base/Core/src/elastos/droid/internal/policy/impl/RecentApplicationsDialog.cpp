@@ -379,7 +379,7 @@ void RecentApplicationsDialog::ReloadButtons()
     context->GetPackageManager((IPackageManager**)&pm);
     AutoPtr<IInterface> tmpObj;
     context->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&tmpObj);
-    AutoPtr<IActivityManager> am = IActivityManager::Probe(tmpObj.Get());
+    AutoPtr<IActivityManager> am = IActivityManager::Probe(tmpObj);
 
     AutoPtr<IList> recentTasks;
     am->GetRecentTasks(MAX_RECENT_TASKS, IActivityManager::RECENT_IGNORE_UNAVAILABLE,

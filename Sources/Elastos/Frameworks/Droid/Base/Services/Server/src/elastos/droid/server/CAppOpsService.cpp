@@ -27,10 +27,11 @@ using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::App::IActivityThreadHelper;
 using Elastos::Droid::App::CActivityThreadHelper;
 using Elastos::Droid::App::IAppOpsManagerOpEntry;
-// using Elastos::Droid::App::CAppOpsManagerOpEntry;
+using Elastos::Droid::App::CAppOpsManagerOpEntry;
 using Elastos::Droid::App::IAppOpsManagerPackageOps;
+using Elastos::Droid::App::CAppOpsManagerPackageOps;
 using Elastos::Droid::App::IAppOpsManagerHelper;
-//using Elastos::Droid::App::CAppOpsManagerHelper;
+using Elastos::Droid::App::CAppOpsManagerHelper;
 using Elastos::Droid::Utility::TimeUtils;
 using Elastos::Droid::Utility::Xml;
 using Elastos::Droid::Utility::CArrayMap;
@@ -119,8 +120,7 @@ CAppOpsService::Op::Op(
     , mNesting(0)
 {
     AutoPtr<IAppOpsManagerHelper> aom;
-    assert(0 && "TODO");
-    // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
     aom->OpToDefaultMode(op, &mMode);
 }
 
@@ -273,7 +273,7 @@ CAppOpsService::Restriction::Restriction()
 // CAppOpsService
 //================================================================================
 
-const String CAppOpsService::TAG("AppOps");
+const String CAppOpsService::TAG("CAppOpsService");
 const Boolean CAppOpsService::DEBUG = FALSE;
 
 // Write at most every 30 minutes.
@@ -302,7 +302,15 @@ ECode CAppOpsService::constructor(
     CSparseArray::New((ISparseArray**)&mAudioRestrictions);
     CArrayMap::New((IArrayMap**)&mClients);
 
-    CAtomicFile::New(storagePath, (IAtomicFile**)&mFile);
+    ECode ec = CAtomicFile::New(storagePath, (IAtomicFile**)&mFile);
+    if (FAILED(ec)) {
+        Slogger::E(TAG, "constructor: failed to create CAtomicFile with path [%s], ec = %08x", TO_CSTR(storagePath), ec);
+        assert(mFile != NULL);
+        return ec;
+    }
+    assert(mFile != NULL);
+    FAIL_RETURN(ec);
+
     mHandler = handler;
     ReadState();
     return NOERROR;
@@ -312,8 +320,7 @@ ECode CAppOpsService::Publish(
     /* [in] */ IContext* context)
 {
     mContext = context;
-    ServiceManager::AddService(IContext::APP_OPS_SERVICE, TO_IINTERFACE(this));
-    return NOERROR;
+    return ServiceManager::AddService(IContext::APP_OPS_SERVICE, TO_IINTERFACE(this));
 }
 
 ECode CAppOpsService::SystemReady()
@@ -433,9 +440,8 @@ AutoPtr<IArrayList> CAppOpsService::CollectOps( //ArrayList><IAppOpsManager::OpE
             pkgOps->ValueAt(j, (IInterface**)&obj);
             Op* curOp = (Op*)IObject::Probe(obj);
             AutoPtr<IAppOpsManagerOpEntry> oe;
-            assert(0 && "TODO");
-            // CAppOpsManagerOpEntry::New(curOp->mOp, curOp->mMode, curOp->mTime,
-            //     curOp->mRejectTime, curOp->mDuration, (IAppOpsManagerOpEntry**)&oe);
+            CAppOpsManagerOpEntry::New(curOp->mOp, curOp->mMode, curOp->mTime,
+                curOp->mRejectTime, curOp->mDuration, (IAppOpsManagerOpEntry**)&oe);
             resOps->Add(oe.Get());
         }
     }
@@ -449,9 +455,8 @@ AutoPtr<IArrayList> CAppOpsService::CollectOps( //ArrayList><IAppOpsManager::OpE
                     CArrayList::New((IArrayList**)&resOps);
                 }
                 AutoPtr<IAppOpsManagerOpEntry> oe;
-                assert(0 && "TODO");
-                // CAppOpsManagerOpEntry::New(curOp->mOp, curOp->mMode, curOp->mTime,
-                //     curOp->mRejectTime, curOp->mDuration, (IAppOpsManagerOpEntry**)&oe);
+                CAppOpsManagerOpEntry::New(curOp->mOp, curOp->mMode, curOp->mTime,
+                    curOp->mRejectTime, curOp->mDuration, (IAppOpsManagerOpEntry**)&oe);
                 resOps->Add(oe.Get());
             }
         }
@@ -495,10 +500,9 @@ ECode CAppOpsService::GetPackagesForOps(
                     }
 
                     AutoPtr<IAppOpsManagerPackageOps> resPackage;
-                    assert(0 && "TODO");
-                    // CAppOpsManagerPackageOps::New(
-                    //     pkgOps->mPackageName, pkgOps->mUid, IList::Probe(resOps),
-                    //     (IAppOpsManagerPackageOps**)&resPackage);
+                    CAppOpsManagerPackageOps::New(
+                        pkgOps->mPackageName, pkgOps->mUid, IList::Probe(resOps),
+                        (IAppOpsManagerPackageOps**)&resPackage);
                     res->Add(resPackage.Get());
                 }
             }
@@ -537,10 +541,9 @@ ECode CAppOpsService::GetOpsForPackage(
         CArrayList::New((IArrayList**)&res);
 
         AutoPtr<IAppOpsManagerPackageOps> resPackage;
-        assert(0 && "TODO");
-        // CAppOpsManagerPackageOps::New(
-        //     pkgOps->mPackageName, pkgOps->mUid, IList::Probe(resOps),
-        //     (IAppOpsManagerPackageOps**)&resPackage);
+        CAppOpsManagerPackageOps::New(
+            pkgOps->mPackageName, pkgOps->mUid, IList::Probe(resOps),
+            (IAppOpsManagerPackageOps**)&resPackage);
         res->Add(resPackage.Get());
         *result = IList::Probe(res);
         REFCOUNT_ADD(*result)
@@ -589,8 +592,7 @@ ECode CAppOpsService::SetMode(
     }
     Int32 code = inCode;
     AutoPtr<IAppOpsManagerHelper> aom;
-    assert(0 && "TODO");
-    // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
     FAIL_RETURN(VerifyIncomingOp(code))
     AutoPtr<IArrayList> repCbs; //ArrayList<Callback>
     aom->OpToSwitch(inCode, &code);
@@ -692,8 +694,7 @@ ECode CAppOpsService::ResetAllModes()
         Binder::GetCallingPid(), callingUid, String(NULL)))
 
     AutoPtr<IAppOpsManagerHelper> aom;
-    assert(0 && "TODO");
-    // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
     AutoPtr<IHashMap> callbacks;
     synchronized(this) {
@@ -805,8 +806,7 @@ ECode CAppOpsService::StartWatchingMode(
 
     synchronized(this) {
         AutoPtr<IAppOpsManagerHelper> aom;
-        assert(0 && "TODO");
-        // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+        CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
         Int32 op = inOp;
         aom->OpToSwitch(inOp, &op);
@@ -918,8 +918,7 @@ ECode CAppOpsService::CheckOperation(
     FAIL_RETURN(VerifyIncomingOp(code))
 
     AutoPtr<IAppOpsManagerHelper> aom;
-    assert(0 && "TODO");
-    // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
     synchronized(this) {
         if (IsOpRestricted(uid, code, packageName)) {
@@ -1054,8 +1053,7 @@ ECode CAppOpsService::NoteOperation(
     FAIL_RETURN(VerifyIncomingOp(code))
 
     AutoPtr<IAppOpsManagerHelper> aom;
-    assert(0 && "TODO");
-    // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
     synchronized(this) {
         AutoPtr<Ops> ops = GetOpsLocked(uid, packageName, TRUE);
         if (ops == NULL) {
@@ -1122,8 +1120,7 @@ ECode CAppOpsService::StartOperation(
     CSystem::AcquireSingleton((ISystem**)&system);
 
     AutoPtr<IAppOpsManagerHelper> aom;
-    assert(0 && "TODO");
-    // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
     ClientState* client = (ClientState*)token;
     synchronized(this) {
         AutoPtr<Ops> ops = GetOpsLocked(uid, packageName, TRUE);
@@ -1406,8 +1403,7 @@ Boolean CAppOpsService::IsOpRestricted(
         IBoolean::Probe(item)->GetValue(&bval);
         if (bval) {
             AutoPtr<IAppOpsManagerHelper> aom;
-            assert(0 && "TODO");
-            // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+            CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
             aom->OpAllowSystemBypassRestriction(code, &bval);
             if (bval) {
                 synchronized(this) {
@@ -1426,7 +1422,8 @@ Boolean CAppOpsService::IsOpRestricted(
 
 void CAppOpsService::ReadState()
 {
-    synchronized(mFile.Get()) {
+    ISynchronize* synObj = ISynchronize::Probe(mFile);
+    synchronized(synObj) {
         synchronized(this) {
             AutoPtr<IFileInputStream> stream;
             ECode ec = mFile->OpenRead((IFileInputStream**)&stream);
@@ -1645,11 +1642,12 @@ ECode CAppOpsService::ReadUid(
 ECode CAppOpsService::WriteState()
 {
     AutoPtr<IAppOpsManagerHelper> aom;
-    assert(0 && "TODO");
-    // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
     ECode ec = NOERROR;
-    synchronized(mFile) {
+
+    ISynchronize* synObj = ISynchronize::Probe(mFile);
+    synchronized(synObj) {
         AutoPtr<IList> allOps; //<IAppOpsManagerPackageOps>
         GetPackagesForOps(NULL, (IList**)&allOps);
 
@@ -1775,8 +1773,7 @@ ECode CAppOpsService::Dump(
     // }
 
     // AutoPtr<IAppOpsManagerHelper> aom;
-    // assert(0 && "TODO");
-    // // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+    // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
     // synchronized(this) {
     //     pw->Println("Current AppOps Service state:");
@@ -1901,8 +1898,7 @@ ECode CAppOpsService::SetUserRestrictions(
     FAIL_RETURN(CheckSystemUid(String("SetUserRestrictions")))
 
     AutoPtr<IAppOpsManagerHelper> aom;
-    assert(0 && "TODO");
-    // CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+    CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
 
     AutoPtr<IInterface> obj;
     mOpRestrictions->Get(userHandle, (IInterface**)&obj);

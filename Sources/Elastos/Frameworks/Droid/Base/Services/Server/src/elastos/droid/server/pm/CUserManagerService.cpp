@@ -298,30 +298,35 @@ ECode CUserManagerService::Init(
             mUsersDir->ToString(&usersDirStr);
 
             FileUtils::SetPermissions(usersDirStr,
-                    FileUtils::sS_IRWXU | FileUtils::sS_IRWXG
-                    | FileUtils::sS_IROTH | FileUtils::sS_IXOTH,
-                    -1, -1);
+                FileUtils::sS_IRWXU | FileUtils::sS_IRWXG
+                | FileUtils::sS_IROTH | FileUtils::sS_IXOTH,
+                -1, -1);
 
             CFile::New(mUsersDir, USER_LIST_FILENAME, (IFile**)&mUserListFile);
+            Logger::I(TAG, " read user list file %s", TO_CSTR(mUserListFile));
             ReadUserListLocked();
             // Prune out any partially created/partially removed users.
+            Boolean partial, guestToRemove;
             List< AutoPtr<IUserInfo> > partials;
             HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it;
             for (it = mUsers.Begin(); it != mUsers.End(); ++it) {
                 AutoPtr<IUserInfo> ui = it->mSecond;
-                Boolean partial, guestToRemove;
-                if (((ui->GetPartial(&partial), partial) || (ui->GetGuestToRemove(&guestToRemove), guestToRemove))
-                        && it != mUsers.Begin()) {
+                ui->GetPartial(&partial);
+                ui->GetGuestToRemove(&guestToRemove);
+                if ((partial || guestToRemove) && it != mUsers.Begin()) {
                     partials.PushBack(ui);
                 }
             }
+            Int32 i =0;
             List< AutoPtr<IUserInfo> >::Iterator pit;
             for (pit = partials.Begin(); pit != partials.End(); ++pit) {
                 AutoPtr<IUserInfo> ui = *pit;
-//                Slog.w(TAG, "Removing partially created user #" + i
-//                        + " (name=" + ui.name + ")");
                 Int32 id;
                 ui->GetId(&id);
+                String name;
+                ui->GetName(&name);
+                Slogger::W(TAG, "Removing partially created user #%d (id=%d, name=%s).", i++, id, name.string());
+
                 RemoveUserStateLocked(id);
             }
             sInstance = this;
@@ -403,7 +408,8 @@ ECode CUserManagerService::GetProfiles(
     Int64 ident = Binder::ClearCallingIdentity();
     // try {
     synchronized (mPackagesLock) {
-        *result = GetProfilesLocked(userId, enabledOnly);
+        AutoPtr<IList> list = GetProfilesLocked(userId, enabledOnly);
+        *result = list;
         REFCOUNT_ADD(*result)
     }
     // } finally {
@@ -901,44 +907,48 @@ void CUserManagerService::ReadUserListLocked()
     String tag;
     Boolean isExist;
     if (mUserListFile->Exists(&isExist), !isExist) {
+        Slogger::E(TAG, "user list file %s does not exist.");
         FallbackToSingleUserLocked();
         return;
     }
-    AutoPtr<IFileInputStream> fis;
     AutoPtr<IAtomicFile> userListFile;
     CAtomicFile::New(mUserListFile, (IAtomicFile**)&userListFile);
+
 //     try {
-    userListFile->OpenRead((IFileInputStream**)&fis);
-    AutoPtr<IXmlPullParser> parser;
-    Xml::NewPullParser((IXmlPullParser**)&parser);
-    parser->SetInput(IInputStream::Probe(fis), String(NULL));
     Int32 type;
-    while ((parser->Next(&type), type) != IXmlPullParser::START_TAG
-            && type != IXmlPullParser::END_DOCUMENT) {
-        ;
+    ECode ec = NOERROR;
+    AutoPtr<IXmlPullParser> parser;
+    String nullStr;
+    AutoPtr<IFileInputStream> fis;
+    ec = userListFile->OpenRead((IFileInputStream**)&fis);
+    FAIL_GOTO(ec, _EXIT_);
+
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    ec = parser->SetInput(IInputStream::Probe(fis), nullStr);
+    FAIL_GOTO(ec, _EXIT_);
+
+    ec = parser->Next(&type);
+    FAIL_GOTO(ec, _EXIT_);
+    while (type != IXmlPullParser::START_TAG && type != IXmlPullParser::END_DOCUMENT) {
+        ec = parser->Next(&type);
+        FAIL_GOTO(ec, _EXIT_);
     }
 
     if (type != IXmlPullParser::START_TAG) {
         Slogger::E(TAG, "Unable to read user list");
         FallbackToSingleUserLocked();
-        if (fis != NULL) {
-            // try {
-            ICloseable::Probe(fis)->Close();
-            // } catch (IOException e) {
-            // }
-        }
-        return;
+        goto _EXIT_;
     }
 
     mNextSerialNumber = -1;
     if (parser->GetName(&tag), tag.Equals(TAG_USERS)) {
         String lastSerialNumber;
-        parser->GetAttributeValue(String(NULL), ATTR_NEXT_SERIAL_NO, &lastSerialNumber);
+        parser->GetAttributeValue(nullStr, ATTR_NEXT_SERIAL_NO, &lastSerialNumber);
         if (!lastSerialNumber.IsNull()) {
             mNextSerialNumber = StringUtils::ParseInt32(lastSerialNumber);
         }
         String versionNumber;
-        parser->GetAttributeValue(String(NULL), ATTR_USER_VERSION, &versionNumber);
+        parser->GetAttributeValue(nullStr, ATTR_USER_VERSION, &versionNumber);
         if (!versionNumber.IsNull()) {
             mUserVersion = StringUtils::ParseInt32(versionNumber);
         }
@@ -950,7 +960,7 @@ void CUserManagerService::ReadUserListLocked()
             parser->GetName(&name);
             if (name.Equals(TAG_USER)) {
                 String id;
-                parser->GetAttributeValue(String(NULL), ATTR_ID, &id);
+                parser->GetAttributeValue(nullStr, ATTR_ID, &id);
                 AutoPtr<IUserInfo> user = ReadUserLocked(StringUtils::ParseInt32(id));
 
                 if (user != NULL) {
@@ -970,14 +980,17 @@ void CUserManagerService::ReadUserListLocked()
     }
     UpdateUserIdsLocked();
     UpgradeIfNecessaryLock();
-//     } catch (IOException ioe) {
-//         fallbackToSingleUserLocked();
-//     } catch (XmlPullParserException pe) {
-//         fallbackToSingleUserLocked();
-//     } catch (Exception e) {
-//         Slog.e(LOG_TAG, "Error readUserListLocked , restore default" + "\n" + e);
-//         fallbackToSingleUserLocked();
-//     } finally {
+
+_EXIT_:
+    if (ec == (ECode)E_IO_EXCEPTION || ec == (ECode)E_XML_PULL_PARSER_EXCEPTION) {
+        Slogger::E(LOG_TAG, "Error readUserListLocked , restore default. ec=%08x\n", ec);
+        FallbackToSingleUserLocked();
+    }
+    else if (FAILED(ec)) {
+        Slogger::E(LOG_TAG, "Error readUserListLocked , restore default. ec=%08x\n", ec);
+        FallbackToSingleUserLocked();
+    }
+
     if (fis != NULL) {
         // try {
         ICloseable::Probe(fis)->Close();
@@ -1174,6 +1187,7 @@ void CUserManagerService::WriteUserLocked(
 
 void CUserManagerService::WriteUserListLocked()
 {
+    String nullStr;
     AutoPtr<IFileOutputStream> fos;
     AutoPtr<IAtomicFile> userListFile;
     CAtomicFile::New(mUserListFile, (IAtomicFile**)&userListFile);
@@ -1186,28 +1200,28 @@ void CUserManagerService::WriteUserListLocked()
     AutoPtr<IXmlSerializer> serializer;
     CFastXmlSerializer::New((IXmlSerializer**)&serializer);
     serializer->SetOutput(IOutputStream::Probe(bos), String("utf-8"));
-    serializer->StartDocument(String(NULL), TRUE);
+    serializer->StartDocument(nullStr, TRUE);
     serializer->SetFeature(String("http://xmlpull.org/v1/doc/features.html#indent-output"), TRUE);
 
-    serializer->WriteStartTag(String(NULL), TAG_USERS);
-    serializer->WriteAttribute(String(NULL), ATTR_NEXT_SERIAL_NO, StringUtils::ToString(mNextSerialNumber));
-    serializer->WriteAttribute(String(NULL), ATTR_USER_VERSION, StringUtils::ToString(mUserVersion));
+    serializer->WriteStartTag(nullStr, TAG_USERS);
+    serializer->WriteAttribute(nullStr, ATTR_NEXT_SERIAL_NO, StringUtils::ToString(mNextSerialNumber));
+    serializer->WriteAttribute(nullStr, ATTR_USER_VERSION, StringUtils::ToString(mUserVersion));
 
-    serializer->WriteStartTag(String(NULL), TAG_GUEST_RESTRICTIONS);
+    serializer->WriteStartTag(nullStr, TAG_GUEST_RESTRICTIONS);
     WriteRestrictionsLocked(serializer, mGuestRestrictions);
-    serializer->WriteEndTag(String(NULL), TAG_GUEST_RESTRICTIONS);
+    serializer->WriteEndTag(nullStr, TAG_GUEST_RESTRICTIONS);
 
     HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it;
     for (it = mUsers.Begin(); it != mUsers.End(); ++it) {
         AutoPtr<IUserInfo> user = it->mSecond;
         Int32 id;
         user->GetId(&id);
-        serializer->WriteStartTag(String(NULL), TAG_USER);
-        serializer->WriteAttribute(String(NULL), ATTR_ID, StringUtils::ToString(id));
-        serializer->WriteEndTag(String(NULL), TAG_USER);
+        serializer->WriteStartTag(nullStr, TAG_USER);
+        serializer->WriteAttribute(nullStr, ATTR_ID, StringUtils::ToString(id));
+        serializer->WriteEndTag(nullStr, TAG_USER);
     }
 
-    serializer->WriteEndTag(String(NULL), TAG_USERS);
+    serializer->WriteEndTag(nullStr, TAG_USERS);
 
     serializer->EndDocument();
     userListFile->FinishWrite(fos);
@@ -2430,24 +2444,24 @@ ECode CUserManagerService::GetUserHandle(
 
 void CUserManagerService::UpdateUserIdsLocked()
 {
-    Int32 num = 0;
+    Logger::I(TAG, " > UpdateUserIdsLocked ...");
+    List<Int32> list;
+    Boolean partial;
     HashMap<Int32, AutoPtr<IUserInfo> >::Iterator it;
     for (it = mUsers.Begin(); it != mUsers.End(); ++it) {
-        Boolean partial;
         it->mSecond->GetPartial(&partial);
         if (!partial) {
-            num++;
+            list.PushBack(it->mFirst);
         }
     }
-    AutoPtr< ArrayOf<Int32> > newUsers = ArrayOf<Int32>::Alloc(num);
-    Int32 n = 0;
-    for (it = mUsers.Begin(); it != mUsers.End(); ++it) {
-        Boolean partial;
-        it->mSecond->GetPartial(&partial);
-        if (!partial) {
-            (*newUsers)[n++] = it->mFirst;
-        }
+    AutoPtr< ArrayOf<Int32> > newUsers = ArrayOf<Int32>::Alloc(list.GetSize());
+    Int32 i = 0;
+    List<Int32>::Iterator lit;
+    for (lit = list.Begin(); lit != list.End(); ++lit) {
+        Logger::I(TAG, "  user id index %d : %d", i , *lit);
+        (*newUsers)[i++] = *lit;
     }
+    Logger::I(TAG, " > UpdateUserIdsLocked size %d", list.GetSize());
     mUserIds = newUsers;
 }
 

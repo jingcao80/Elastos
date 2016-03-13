@@ -9,7 +9,7 @@ module
 
     interface IHotspotControllerCallback {
         OnHotspotChanged(
-            [out] Boolean* result);
+            [in] Boolean enabled);
     }
 
     interface IHotspotController {

@@ -199,7 +199,7 @@ public:
         /* [in] */ IPrintWriter* pw,
         /* [in] */ ArrayOf<String>* args);
 
-    CARAPI_(void) SystemReady();
+    CARAPI SystemReady();
 
     /**
      * Register a content observer tied to a specific user's view of the provider.
@@ -466,6 +466,7 @@ private:
     Boolean mFactoryTest;
     AutoPtr<ObserverNode> mRootNode;
     AutoPtr<SyncManager> mSyncManager;
+    Object mSyncManagerLock;
 };
 
 }

@@ -14,6 +14,16 @@
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
 
+#include <private/android_filesystem_config.h> // for AID_SYSTEM
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+#include <linux/capability.h>
+extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
+extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
+
 using Elastos::Droid::Utility::CTypedValue;
 using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Os::ParcelFileDescriptor;
@@ -31,6 +41,63 @@ namespace Elastos {
 namespace Droid {
 namespace Content {
 namespace Res {
+
+// This is called by zygote (running as user root) as part of preloadResources.
+static void VerifySystemIdmaps()
+{
+    pid_t pid;
+    char system_id[10];
+
+    snprintf(system_id, sizeof(system_id), "%d", AID_SYSTEM);
+
+    switch (pid = fork()) {
+        case -1:
+            ALOGE("failed to fork for idmap: %s", strerror(errno));
+            break;
+        case 0: // child
+            {
+                struct __user_cap_header_struct capheader;
+                struct __user_cap_data_struct capdata;
+
+                memset(&capheader, 0, sizeof(capheader));
+                memset(&capdata, 0, sizeof(capdata));
+
+                capheader.version = _LINUX_CAPABILITY_VERSION;
+                capheader.pid = 0;
+
+                if (capget(&capheader, &capdata) != 0) {
+                    ALOGE("capget: %s\n", strerror(errno));
+                    exit(1);
+                }
+
+                capdata.effective = capdata.permitted;
+                if (capset(&capheader, &capdata) != 0) {
+                    ALOGE("capset: %s\n", strerror(errno));
+                    exit(1);
+                }
+
+                if (setgid(AID_SYSTEM) != 0) {
+                    ALOGE("setgid: %s\n", strerror(errno));
+                    exit(1);
+                }
+
+                if (setuid(AID_SYSTEM) != 0) {
+                    ALOGE("setuid: %s\n", strerror(errno));
+                    exit(1);
+                }
+
+                execl(android::AssetManager::IDMAP_BIN, android::AssetManager::IDMAP_BIN, "--scan",
+                    android::AssetManager::OVERLAY_DIR, android::AssetManager::TARGET_PACKAGE_NAME,
+                    android::AssetManager::TARGET_APK_PATH, android::AssetManager::IDMAP_DIR, (char*)NULL);
+                ALOGE("failed to execl for idmap: %s", strerror(errno));
+                exit(1); // should never get here
+            }
+            break;
+        default: // parent
+            waitpid(pid, NULL, 0);
+            break;
+    }
+}
 
 CAR_INTERFACE_IMPL(CAssetManager::AssetInputStream, InputStream, IAssetInputStream)
 
@@ -195,7 +262,7 @@ ECode CAssetManager::constructor()
     if (DEBUG_REFS) {
         AutoLock lock(this);
         mNumRefs = 0;
-        IncRefsLocked(GetHashCode(), "AssetManager::constructor()");
+        IncRefsLocked(GetHashCode(), "CAssetManager::constructor()");
     }
 
     Init(FALSE);
@@ -210,7 +277,7 @@ ECode CAssetManager::constructor(
         AutoLock lock(this);
 
         mNumRefs = 0;
-        IncRefsLocked(GetHashCode(), "AssetManager::constructor()");
+        IncRefsLocked(GetHashCode(), "CAssetManager::constructor()");
     }
 
     Init(TRUE);
@@ -245,7 +312,7 @@ ECode CAssetManager::Close()
 
     if (mOpen) {
         mOpen = FALSE;
-        DecRefsLocked(GetHashCode(), "AssetManager::Close()");
+        DecRefsLocked(GetHashCode(), "CAssetManager::Close()");
     }
     return NOERROR;
 }
@@ -382,7 +449,7 @@ void CAssetManager::EnsureStringBlocks()
         AutoLock lock(this);
 
         if (mStringBlocks == NULL) {
-            MakeStringBlocks(sSystem->mStringBlocks);
+            MakeStringBlocks(GetSystem()->mStringBlocks);
         }
     }
 }
@@ -392,15 +459,15 @@ void CAssetManager::MakeStringBlocks(
 {
     const Int32 seedNum = seed ? seed->GetLength() : 0;
     Int32 num = GetStringBlockCount();
+    AutoPtr<ArrayOf<StringBlock*> > temp = seed;// seed maybe mStringBlocks, hold ref here.
     mStringBlocks = ArrayOf<StringBlock*>::Alloc(num);
     if (LocalLOGV) {
-        Logger::V(TAG, "Making string blocks for %p: %d",
-                this, num);
+        Logger::V(TAG, "Making string blocks for %p: size %d, seedNum:%d", this, num, seedNum);
     }
 
     for (Int32 i = 0; i < num; i++) {
         if (i < seedNum) {
-            mStringBlocks->Set(i, (*seed)[i]);
+            mStringBlocks->Set(i, (*temp)[i]);
         }
         else {
             AutoPtr<StringBlock> block = new StringBlock(GetNativeStringBlock(i), TRUE);
@@ -444,7 +511,7 @@ ECode CAssetManager::Open(
     if (SUCCEEDED(ec) && asset != 0) {
         *stream = new AssetInputStream(this, asset);
         REFCOUNT_ADD(*stream);
-        IncRefsLocked((Int32)*stream, "AssetManager::OpenEx");
+        IncRefsLocked((Int32)*stream, "CAssetManager::OpenEx");
         return NOERROR;
     }
     if (LocalLOGV) Logger::E(TAG, "Asset file: %s", fileName.string());
@@ -561,7 +628,7 @@ ECode CAssetManager::OpenNonAsset(
         if (asset != 0) {
             *stream = new AssetInputStream(this, asset);
             REFCOUNT_ADD(*stream);
-            IncRefsLocked((Int32)*stream, "AssetManager::OpenNonAssetEx3");
+            IncRefsLocked((Int32)*stream, "CAssetManager::OpenNonAssetEx3");
             return NOERROR;
         }
     }
@@ -654,7 +721,7 @@ ECode CAssetManager::OpenXmlBlockAsset(
     if (xmlBlock != 0) {
         *res = new XmlBlock(this, xmlBlock);
         REFCOUNT_ADD(*res);
-        IncRefsLocked((Int32)*res, "AssetManager::OpenXmlBlockAsset");
+        IncRefsLocked((Int32)*res, "CAssetManager::OpenXmlBlockAsset");
         return NOERROR;
     }
     if (LocalLOGV) Logger::E(TAG, String("Asset XML file: ") + fileName);
@@ -666,7 +733,7 @@ void CAssetManager::XmlBlockGone(
 {
     AutoLock lock(this);
 
-    DecRefsLocked(id, "AssetManager::XmlBlockGone");
+    DecRefsLocked(id, "CAssetManager::XmlBlockGone");
 }
 
 ECode CAssetManager::CreateTheme(
@@ -684,7 +751,7 @@ ECode CAssetManager::CreateTheme(
         }
 
         *res = NewTheme();
-        IncRefsLocked(*res, "AssetManager::CreateTheme");
+        IncRefsLocked(*res, "CAssetManager::CreateTheme");
         return NOERROR;
     }
 }
@@ -695,7 +762,7 @@ ECode CAssetManager::ReleaseTheme(
     AutoLock lock(this);
 
     DeleteTheme(theme);
-    DecRefsLocked(theme, "AssetManager::ReleaseTheme");
+    DecRefsLocked(theme, "CAssetManager::ReleaseTheme");
     return NOERROR;
 }
 
@@ -914,27 +981,7 @@ ECode CAssetManager::SetConfiguration(
     config.sdkVersion = (uint16_t)majorVersion;
     config.minorVersion = 0;
 
-    Logger::I(TAG, " >>>> SetConfiguration am %p, %s", am, locale.string());
-    Logger::I(TAG, "      config.mcc = %d", (uint16_t)mcc);
-    Logger::I(TAG, "      config.mnc = %d", (uint16_t)mnc);
-    Logger::I(TAG, "      config.orientation = %d", (uint8_t)orientation);
-    Logger::I(TAG, "      config.touchscreen = %d", (uint8_t)touchscreen);
-    Logger::I(TAG, "      config.density = %d", (uint16_t)density);
-    Logger::I(TAG, "      config.keyboard = %d", (uint8_t)keyboard);
-    Logger::I(TAG, "      config.inputFlags = %d", (uint8_t)keyboardHidden);
-    Logger::I(TAG, "      config.navigation = %d", (uint8_t)navigation);
-    Logger::I(TAG, "      config.screenWidth = %d", (uint16_t)screenWidth);
-    Logger::I(TAG, "      config.screenHeight = %d", (uint16_t)screenHeight);
-    Logger::I(TAG, "      config.smallestScreenWidthDp = %d", (uint16_t)smallestScreenWidthDp);
-    Logger::I(TAG, "      config.screenWidthDp = %d", (uint16_t)screenWidthDp);
-    Logger::I(TAG, "      config.screenHeightDp = %d", (uint16_t)screenHeightDp);
-    Logger::I(TAG, "      config.screenLayout = %d", (uint8_t)screenLayout);
-    Logger::I(TAG, "      config.uiMode = %d", (uint8_t)uiMode);
-    Logger::I(TAG, "      config.sdkVersion = %d", (uint16_t)majorVersion);
-    Logger::I(TAG, "      config.minorVersion = 0");
-
     am->setConfiguration(config, locale8);
-    Logger::I(TAG, " <<<< SetConfiguration");
     return NOERROR;
 }
 
@@ -1389,7 +1436,7 @@ ECode CAssetManager::LoadResourceValue(
     ssize_t block = res.getResource((uint32_t)ident, &value, false, density, &typeSpecFlags, &config);
 #if THROW_ON_BAD_ID
     if (block == android::BAD_INDEX) {
-        Logger::E(TAG, "E_ILLEGAL_STATE_EXCEPTION. Bad resource! line: %d", __LINE__);
+        Logger::E(TAG, "Bad resource! Line: %d", __LINE__);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
 #endif
@@ -1398,7 +1445,7 @@ ECode CAssetManager::LoadResourceValue(
         block = res.resolveReference(&value, block, &ref, &typeSpecFlags, &config);
 #if THROW_ON_BAD_ID
         if (block == android::BAD_INDEX) {
-            Logger::E(TAG, "E_ILLEGAL_STATE_EXCEPTION. Bad resource! line: %d", __LINE__);
+            Logger::E(TAG, "Bad resource! Line: %d", __LINE__);
             return E_ILLEGAL_STATE_EXCEPTION;
         }
 #endif
@@ -1462,7 +1509,7 @@ ECode CAssetManager::LoadResourceBagValue(
         block = res.resolveReference(&value, block, &ref, &typeSpecFlags);
 #if THROW_ON_BAD_ID
         if (block == android::BAD_INDEX) {
-            Logger::E(TAG, "E_ILLEGAL_STATE_EXCEPTION. Bad resource! line: %d", __LINE__);
+            Logger::E(TAG, "Bad resource! Line: %d", __LINE__);
             return E_ILLEGAL_STATE_EXCEPTION;
         }
 #endif
@@ -1514,14 +1561,12 @@ ECode CAssetManager::ApplyStyle(
     const Int32 NV = outValues->GetLength();
     if (NV < (NI * STYLE_NUM_ENTRIES)) {
 //          jniThrowException(env, "java/lang/IndexOutOfBoundsException", "out values too small");
-        *result = FALSE;
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
     Int32* src = inAttrs.GetPayload();
     if (src == NULL) {
 //          jniThrowException(env, "java/lang/OutOfMemoryError", "");
-        *result = FALSE;
         return E_OUT_OF_MEMORY_ERROR;
     }
 
@@ -1529,7 +1574,6 @@ ECode CAssetManager::ApplyStyle(
     Int32* dest = baseDest;
     if (dest == NULL) {
 //          jniThrowException(env, "java/lang/OutOfMemoryError", "");
-        *result = FALSE;
         return E_OUT_OF_MEMORY_ERROR;
     }
 
@@ -1680,8 +1724,7 @@ ECode CAssetManager::ApplyStyle(
                         &typeSetFlags, &config);
 #if THROW_ON_BAD_ID
                 if (newBlock == android::BAD_INDEX) {
-//                      jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-                    *result = FALSE;
+                    Logger::E(TAG, "Bad resource! Line: %d", __LINE__);
                     return E_ILLEGAL_STATE_EXCEPTION;
                 }
 #endif
@@ -1875,7 +1918,7 @@ ECode CAssetManager::ResolveAttrs(
                         &typeSetFlags, &config);
 #if THROW_ON_BAD_ID
                 if (newBlock == android::BAD_INDEX) {
-                    Logger::E(TAG, "E_ILLEGAL_STATE_EXCEPTION. Bad resource! line: %d", __LINE__);
+                    Logger::E(TAG, "Bad resource! Line: %d", __LINE__);
                     return E_ILLEGAL_STATE_EXCEPTION;
                 }
 #endif
@@ -1932,19 +1975,16 @@ ECode CAssetManager::RetrieveAttributes(
     *result = FALSE;
 
     if (xmlParserToken == 0) {
-        // jniThrowNullPointerException(env, "xmlParserToken");
-        *result = FALSE;
+        Logger::E(TAG, "xmlParserToken is null!");
         return E_NULL_POINTER_EXCEPTION;
     }
     if (outValues == NULL) {
-        // jniThrowNullPointerException(env, "out values");
-        *result = FALSE;
+        Logger::E(TAG, "out values is null!");
         return E_NULL_POINTER_EXCEPTION;
     }
 
     android::AssetManager* am = (android::AssetManager*)mObject;
     if (am == NULL) {
-        *result = FALSE;
         return NOERROR;
     }
     const android::ResTable& res(am->getResources());
@@ -1955,23 +1995,20 @@ ECode CAssetManager::RetrieveAttributes(
     const Int32 NI = inAttrs.GetLength();
     const Int32 NV = outValues->GetLength();
     if (NV < (NI * STYLE_NUM_ENTRIES)) {
-//          jniThrowException(env, "java/lang/IndexOutOfBoundsException", "out values too small");
-        *result = FALSE;
+        Logger::E(TAG, "out values %d too small! It should be bigger than %d.", NV, NI * STYLE_NUM_ENTRIES);
         return E_INDEX_OUT_OF_BOUNDS_EXCEPTION;
     }
 
     Int32* src = inAttrs.GetPayload();
     if (src == NULL) {
-//          jniThrowException(env, "java/lang/OutOfMemoryError", "");
-        *result = FALSE;
+        Logger::E(TAG, "OutOfMemoryError");
         return E_OUT_OF_MEMORY_ERROR;
     }
 
     Int32* baseDest = outValues->GetPayload();
     Int32* dest = baseDest;
     if (dest == NULL) {
-//          jniThrowException(env, "java/lang/OutOfMemoryError", "");
-        *result = FALSE;
+        Logger::E(TAG, "OutOfMemoryError");
         return E_OUT_OF_MEMORY_ERROR;
     }
 
@@ -2028,8 +2065,7 @@ ECode CAssetManager::RetrieveAttributes(
                     &typeSetFlags, &config);
 #if THROW_ON_BAD_ID
             if (newBlock == android::BAD_INDEX) {
-//                  jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-                *result = FALSE;
+                Logger::E(TAG, "Bad resource! Line: %d", __LINE__);
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
 #endif
@@ -2145,7 +2181,7 @@ ECode CAssetManager::RetrieveArray(
                     &typeSetFlags, &config);
 #if THROW_ON_BAD_ID
             if (newBlock == android::BAD_INDEX) {
-                Logger::E(TAG, "E_ILLEGAL_STATE_EXCEPTION. Bad resource! line: %d", __LINE__);
+                Logger::E(TAG, "Bad resource at %d, type %d! line: %d", i, value.dataType, __LINE__);
                 return E_ILLEGAL_STATE_EXCEPTION;
             }
 #endif
@@ -2366,7 +2402,7 @@ ECode CAssetManager::GetArrayStringResource(
         ssize_t block = res.resolveReference(&value, bag->stringBlock, NULL);
 #if THROW_ON_BAD_ID
         if (block == android::BAD_INDEX) {
-            Logger::E(TAG, "E_ILLEGAL_STATE_EXCEPTION. Bad resource! line: %d", __LINE__);
+            Logger::E(TAG, "Bad resource! line: %d", __LINE__);
             *result = array;
             REFCOUNT_ADD(*result);
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -2435,7 +2471,7 @@ ECode CAssetManager::GetArrayStringInfo(
 
 #if THROW_ON_BAD_ID
         if (stringBlock == android::BAD_INDEX) {
-            Logger::E(TAG, "E_ILLEGAL_STATE_EXCEPTION. Bad resource! line: %d", __LINE__);
+            Logger::E(TAG, "Bad resource! line: %d", __LINE__);
             *result = array;
             REFCOUNT_ADD(*result);
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -2459,9 +2495,10 @@ ECode CAssetManager::Init(
     /* [in] */ Boolean isSystem)
 {
     // TODO
-    // if (isSystem) {
-    //     verifySystemIdmaps();
-    // }
+    if (isSystem) {
+        VerifySystemIdmaps();
+    }
+
     android::AssetManager* am = new android::AssetManager();
     if (am == NULL) {
         // jniThrowException(env, "java/lang/OutOfMemoryError", "");
@@ -2519,7 +2556,7 @@ ECode CAssetManager::GetArrayIntResource(
         ssize_t block = res.resolveReference(&value, bag->stringBlock, NULL);
 #if THROW_ON_BAD_ID
         if (block == android::BAD_INDEX) {
-            Logger::E(TAG, "E_ILLEGAL_STATE_EXCEPTION. Bad resource! line: %d", __LINE__);
+            Logger::E(TAG, "Bad resource! line: %d", __LINE__);
             *result = array;
             REFCOUNT_ADD(*result);
             return E_ILLEGAL_STATE_EXCEPTION;
@@ -2614,7 +2651,7 @@ ECode CAssetManager::LoadThemeAttributeValue(
         block = res.resolveReference(&value, block, &ref, &typeSpecFlags);
 #if THROW_ON_BAD_ID
         if (block == android::BAD_INDEX) {
-//              jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+            Logger::E(TAG, "Bad resource! Line: %d", __LINE__);
             *result = 0;
             return E_ILLEGAL_STATE_EXCEPTION;
         }

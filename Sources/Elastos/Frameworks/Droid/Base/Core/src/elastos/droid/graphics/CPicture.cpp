@@ -130,7 +130,7 @@ ECode CPicture::Draw(
     if (mRecordingCanvas != NULL) {
         EndRecording();
     }
-    NativeDraw(((Canvas*)(ICanvas*)canvas->Probe(EIID_Canvas))->mNativeCanvasWrapper,
+    NativeDraw(((Canvas*)canvas)->mNativeCanvasWrapper,
             mNativePicture);
     return NOERROR;
 }

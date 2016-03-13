@@ -8,6 +8,7 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.Text.ITextWatcher
+     * interface Elastos.Droid.Text.INoCopySpan
      */
     interface IPhoneNumberFormattingTextWatcher {
     }

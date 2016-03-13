@@ -153,7 +153,7 @@ ECode CArrayMap::constructor(
 {
     constructor();
     if (map != NULL) {
-        PutAll(IMap::Probe(map));
+        PutAll(map);
     }
     return NOERROR;
 }

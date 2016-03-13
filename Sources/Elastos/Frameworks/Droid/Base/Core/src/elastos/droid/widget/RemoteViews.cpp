@@ -1061,6 +1061,17 @@ RemoteViews::BitmapCache::BitmapCache()
 RemoteViews::BitmapCache::BitmapCache(
     /* [in] */ IParcel* parcel)
 {
+    constructor(parcel);
+}
+
+ECode RemoteViews::BitmapCache::constructor()
+{
+    return NOERROR;
+}
+
+ECode RemoteViews::BitmapCache::constructor(
+    /* [in] */ IParcel* parcel)
+{
     Int32 count;
     parcel->ReadInt32(&count);
     for (Int32 i = 0; i< count; i++) {
@@ -1069,6 +1080,7 @@ RemoteViews::BitmapCache::BitmapCache(
         IParcelable::Probe(bmp)->ReadFromParcel(parcel);
         mBitmaps.PushBack(bmp);
     }
+    return NOERROR;
 }
 
 ECode RemoteViews::BitmapCache::GetBitmapId(
@@ -2129,11 +2141,11 @@ RemoteViews::TextViewDrawableColorFilterAction::TextViewDrawableColorFilterActio
     /* [in] */ Int32 index,
     /* [in] */ Int32 color,
     /* [in] */ PorterDuffMode mode)
-    : Action(0)
-    , mIsRelative(FALSE)
-    , mIndex(0)
-    , mColor(0)
-    , mMode(PorterDuffMode_NONE)
+    : Action(viewId)
+    , mIsRelative(isRelative)
+    , mIndex(index)
+    , mColor(color)
+    , mMode(mode)
 {}
 
 ECode RemoteViews::TextViewDrawableColorFilterAction::Apply(
@@ -2159,8 +2171,7 @@ ECode RemoteViews::TextViewDrawableColorFilterAction::Apply(
     }
     AutoPtr<IDrawable> d = (*drawables)[mIndex];
     if (d != NULL) {
-        AutoPtr<IDrawable> tmp;
-        d->Mutate((IDrawable**)&tmp);
+        d->Mutate();
         d->SetColorFilter(mColor, mMode);
     }
     return NOERROR;

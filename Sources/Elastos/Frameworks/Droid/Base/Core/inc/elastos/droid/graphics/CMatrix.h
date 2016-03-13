@@ -21,9 +21,6 @@ private:
         IdentityMatrix(
             /* [in] */ IMatrix* src);
 
-        CARAPI_(PInterface) Probe(
-            /* [in] */ REIID riid);
-
         CARAPI Oops();
 
         CARAPI Set(
@@ -184,9 +181,6 @@ private:
 
 public:
     CAR_OBJECT_DECL();
-
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
 
 public:
     static AutoPtr<IMatrix> IDENTITY_MATRIX;

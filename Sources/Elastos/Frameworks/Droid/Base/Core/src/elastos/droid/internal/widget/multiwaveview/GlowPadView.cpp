@@ -100,9 +100,8 @@ AutoPtr<IAudioAttributes> GlowPadView::VIBRATION_ATTRIBUTES;
 //=====================================================================
 //               GlowPadView::AnimationBundle::
 //=====================================================================
-Int64 GlowPadView::AnimationBundle::mSerialVersionUID = 0xA84D78726F127468L;
 
-CAR_INTERFACE_IMPL(GlowPadView::AnimationBundle, AbstractList, IAnimationBundle)
+CAR_INTERFACE_IMPL(GlowPadView::AnimationBundle, ArrayList, IAnimationBundle)
 
 ECode GlowPadView::AnimationBundle::Start()
 {

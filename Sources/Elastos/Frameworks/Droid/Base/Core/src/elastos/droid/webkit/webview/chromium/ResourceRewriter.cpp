@@ -2,6 +2,9 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/webkit/webview/chromium/ResourceRewriter.h"
+#include "elastos/droid/webkit/webview/chromium/native/content/R_Content.h"
+#include "elastos/droid/webkit/webview/chromium/native/ui/R_Ui.h"
+#include "elastos/droid/webkit/webview/chromium/R_Chromium.h"
 
 using Elastos::Droid::Content::Res::IAssetManager;
 using Elastos::Droid::Content::Res::IResources;
@@ -76,9 +79,9 @@ ECode ResourceRewriter::RewriteRValues(
             // to a bug in jarjar it's not possible to rename classes with '$' in their name.
             // See b/15684775.
 
-            //--com::android::webview::chromium::R::OnResourcesLoaded(id);
-            //--org::chromium::ui::R::OnResourcesLoaded(id);
-            //--org::chromium::content::R::OnResourcesLoaded(id);
+            Elastos::Droid::Webkit::Webview::Chromium::R::OnResourcesLoaded(id);
+            Elastos::Droid::Webkit::Webview::Chromium::Ui::R::OnResourcesLoaded(id);
+            Elastos::Droid::Webkit::Webview::Chromium::Content::R::OnResourcesLoaded(id);
             break;
         }
     }

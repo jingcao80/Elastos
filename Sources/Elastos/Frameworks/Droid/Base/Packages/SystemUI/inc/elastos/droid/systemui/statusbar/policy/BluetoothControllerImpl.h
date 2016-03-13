@@ -68,7 +68,7 @@ private:
 
         ServiceListener(
             /* [in] */ IBluetoothDevice* device,
-            /* [in] */ String action,
+            /* [in] */ const String& action,
             /* [in] */ Boolean connect);
 
         // @Override

@@ -1,10 +1,13 @@
 #ifndef __ELASTOS_DROID_PROVIDER_DOCUMENTPROVIDER_H__
 #define __ELASTOS_DROID_PROVIDER_DOCUMENTPROVIDER_H__
 
+#include "Elastos.Droid.Content.h"
+#include "_Elastos.Droid.Provider.h"
+#include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/ContentProvider.h"
 #include <elastos/core/Object.h>
 
-using Elastos::Droid::Content::IContentProvider;
+using Elastos::Droid::Content::ContentProvider;
 using Elastos::Droid::Content::IContentValues;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IUriMatcher;
@@ -20,9 +23,9 @@ namespace Elastos {
 namespace Droid {
 namespace Provider {
 
-class DocumentsProvider
-    : public Object
-    , public IContentProvider
+class ECO_PUBLIC DocumentsProvider
+    : public ContentProvider
+    , public IDocumentsProvider
 {
 public:
     CAR_INTERFACE_DECL()

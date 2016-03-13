@@ -1,9 +1,8 @@
 
-#include "CCellInfoGsm.h"
-#include "CCellIdentityGsm.h"
-#include "CCellSignalStrengthGsm.h"
+#include "elastos/droid/telephony/CCellIdentityGsm.h"
+#include "elastos/droid/telephony/CCellInfoGsm.h"
+#include "elastos/droid/telephony/CCellSignalStrengthGsm.h"
 #include <elastos/core/StringBuilder.h>
-#include "elastos/droid/ext/frameworkdef.h"
 
 using Elastos::Core::StringBuilder;
 
@@ -11,11 +10,24 @@ namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-const String CCellInfoGsm::LOG_TAG("CCellInfoGsm");
+const String CCellInfoGsm::TAG("CCellInfoGsm");
 const Boolean CCellInfoGsm::DBG = FALSE;
+
+CAR_INTERFACE_IMPL(CCellInfoGsm, CellInfo, ICellInfoGsm)
+
+CAR_OBJECT_IMPL(CCellInfoGsm)
+
+CCellInfoGsm::CCellInfoGsm()
+{
+}
+
+CCellInfoGsm::~CCellInfoGsm()
+{
+}
 
 ECode CCellInfoGsm::constructor()
 {
+    CellInfo::constructor();
     CCellIdentityGsm::New((ICellIdentityGsm**)&mCellIdentityGsm);
     CCellSignalStrengthGsm::New((ICellSignalStrengthGsm**)&mCellSignalStrengthGsm);
     return NOERROR;
@@ -24,6 +36,7 @@ ECode CCellInfoGsm::constructor()
 ECode CCellInfoGsm::constructor(
     /* [in] */ ICellInfoGsm* ci)
 {
+    CellInfo::constructor(ICellInfo::Probe(ci));
     AutoPtr<ICellIdentityGsm> cgsm;
     AutoPtr<ICellSignalStrengthGsm> sgsm;
     ci->GetCellIdentity((ICellIdentityGsm**)&cgsm);
@@ -31,51 +44,6 @@ ECode CCellInfoGsm::constructor(
     cgsm->Copy((ICellIdentityGsm**)&mCellIdentityGsm);
     sgsm->Copy((ICellSignalStrengthGsm**)&mCellSignalStrengthGsm);
     return NOERROR;
-}
-
-PInterface CCellInfoGsm::Probe(
-    /* [in]  */ REIID riid)
-{
-    return _CCellInfoGsm::Probe(riid);
-}
-
-ECode CCellInfoGsm::IsRegistered(
-    /* [out] */ Boolean* registered)
-{
-    VALIDATE_NOT_NULL(registered);
-    return CellInfo::IsRegistered(registered);
-}
-
-ECode CCellInfoGsm::SetRegisterd(
-    /* [in] */ Boolean registered)
-{
-    return CellInfo::SetRegisterd(registered);
-}
-
-ECode CCellInfoGsm::GetTimeStamp(
-    /* [out] */ Int64* timeStamp)
-{
-    VALIDATE_NOT_NULL(timeStamp);
-    return CellInfo::GetTimeStamp(timeStamp);
-}
-
-ECode CCellInfoGsm::SetTimeStamp(
-    /* [in] */ Int64 timeStamp)
-{
-    return CellInfo::SetTimeStamp(timeStamp);
-}
-
-ECode CCellInfoGsm::GetTimeStampType(
-    /* [out] */ Int32* timeStampType)
-{
-    VALIDATE_NOT_NULL(timeStampType);
-    return CellInfo::GetTimeStampType(timeStampType);
-}
-
-ECode CCellInfoGsm::SetTimeStampType(
-    /* [in] */ Int32 timeStampType)
-{
-    return CellInfo::SetTimeStampType(timeStampType);
 }
 
 ECode CCellInfoGsm::GetCellIdentity(
@@ -116,8 +84,8 @@ ECode CCellInfoGsm::GetHashCode(
     VALIDATE_NOT_NULL(hashCode);
     Int32 super, cgsm, cssgsm;
     CellInfo::GetHashCode(&super);
-    mCellIdentityGsm->GetHashCode(&cgsm);
-    mCellSignalStrengthGsm->GetHashCode(&cssgsm);
+    IObject::Probe(mCellIdentityGsm)->GetHashCode(&cgsm);
+    IObject::Probe(mCellSignalStrengthGsm)->GetHashCode(&cssgsm);
     *hashCode = super + cgsm + cssgsm;
     return NOERROR;
 }
@@ -137,10 +105,10 @@ ECode CCellInfoGsm::Equals(
     if (o != NULL) {
         AutoPtr<ICellIdentityGsm> cgsm;
         o->GetCellIdentity((ICellIdentityGsm**)&cgsm);
-        mCellIdentityGsm->Equals(cgsm, &tempRes);
+        IObject::Probe(mCellIdentityGsm)->Equals(cgsm, &tempRes);
         AutoPtr<ICellSignalStrengthGsm> sgsm;
         o->GetCellSignalStrength((ICellSignalStrengthGsm**)&sgsm);
-        mCellSignalStrengthGsm->Equals(sgsm, &tempRes2);
+        IObject::Probe(mCellSignalStrengthGsm)->Equals(sgsm, &tempRes2);
         *result = tempRes && tempRes2;
     }
     else *result = FALSE;
@@ -152,18 +120,20 @@ ECode CCellInfoGsm::ToString(
 {
     VALIDATE_NOT_NULL(str);
     StringBuilder sb;
-    sb.Append("CellInfoGsm:");
+    sb.Append("CellInfoGsm:{");
     String strSuper;
     CellInfo::ToString(&strSuper);
     sb.Append(strSuper);
-    sb.Append(", ");
+    sb.Append(" ");
     String strcGsm;
-    mCellIdentityGsm->ToString(&strcGsm);
+    IObject::Probe(mCellIdentityGsm)->ToString(&strcGsm);
     sb.Append(strcGsm);
     String strcssGsm;
-    mCellSignalStrengthGsm->ToString(&strcssGsm);
-    sb.Append(", ");
+    IObject::Probe(mCellSignalStrengthGsm)->ToString(&strcssGsm);
+    sb.Append(" ");
     sb.Append(strcssGsm);
+    sb.Append("}");
+
     *str = sb.ToString();
     return NOERROR;
 }

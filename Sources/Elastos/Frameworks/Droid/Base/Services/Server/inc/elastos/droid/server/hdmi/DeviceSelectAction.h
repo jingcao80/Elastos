@@ -3,16 +3,17 @@
 #define __ELASTOS_DROID_SERVER_HDMI_DEVICESELECTACTION_H__
 
 #include "_Elastos.Droid.Server.h"
-#include <elastos/droid/ext/frameworkext.h>
+#include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
+#include <Elastos.Droid.Hardware.h>
 #include <elastos/core/Object.h>
+#include <elastos/droid/ext/frameworkext.h>
 
-using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
+using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Hardware::Hdmi::IHdmiTvClient;
 using Elastos::Droid::Hardware::Hdmi::IIHdmiControlCallback;
-using Elastos::Droid::Utility::ISlog;
-
 using Elastos::Droid::Server::Hdmi::IHdmiControlServiceSendMessageCallback;
+using Elastos::Droid::Utility::ISlog;
 
 namespace Elastos {
 namespace Droid {
@@ -28,13 +29,31 @@ class HdmiCecLocalDeviceTv;
  * before issuing the command &gt;Set Stream path&lt;.
  */
 class DeviceSelectAction
-#if 0
     : public HdmiCecFeatureAction
-#else
-    : public Object
-#endif
+    , public IDeviceSelectAction
 {
+private:
+    class InnerSub_SendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_SendMessageCallback(
+            /* [in] */ DeviceSelectAction* host);
+
+        // @Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        DeviceSelectAction* mHost;
+    };
+
 public:
+    CAR_INTERFACE_DECL()
+
     DeviceSelectAction();
 
     /**
@@ -45,7 +64,7 @@ public:
      * @param callback callback object
      */
     CARAPI constructor(
-        /* [in] */ HdmiCecLocalDeviceTv* source,
+        /* [in] */ IHdmiCecLocalDeviceTv* source,
         /* [in] */ IHdmiDeviceInfo* target,
         /* [in] */ IIHdmiControlCallback* callback);
 

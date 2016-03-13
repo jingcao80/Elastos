@@ -12,23 +12,27 @@ namespace Input {
 
 CAR_INTERFACE_IMPL_2(InputDeviceIdentifier, Object, IInputDeviceIdentifier, IParcelable)
 
-InputDeviceIdentifier::InputDeviceIdentifier(
+InputDeviceIdentifier::InputDeviceIdentifier()
+    : mVendorId(0)
+    , mProductId(0)
+{}
+
+ECode InputDeviceIdentifier::constructor()
+{
+    return NOERROR;
+}
+
+ECode InputDeviceIdentifier::constructor(
     /* [in] */ const String& descriptor,
     /* [in] */ Int32 vendorId,
     /* [in] */ Int32 productId)
-    : mDescriptor(descriptor)
-    , mVendorId(vendorId)
-    , mProductId(productId)
 {
+    mDescriptor = descriptor;
+    mVendorId = vendorId;
+    mProductId = productId;
+    return NOERROR;
 }
 
-InputDeviceIdentifier::InputDeviceIdentifier(
-   /* [in] */ IParcel* src)
-{
-    src->ReadString(&mDescriptor);
-    src->ReadInt32(&mVendorId);
-    src->ReadInt32(&mProductId);
-}
 
 ECode InputDeviceIdentifier::GetDescriptor(
     /* [out] */ String* descriptor)

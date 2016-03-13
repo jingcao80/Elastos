@@ -3,8 +3,10 @@
 #define __ELASTOS_DROID_ACCOUNTS_CACCOUNTAUTHENTICATORTRANSPORT_H__
 
 #include "_Elastos_Droid_Accounts_CAccountAuthenticatorTransport.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IBundle;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
@@ -13,13 +15,19 @@ namespace Accounts {
 class AbstractAccountAuthenticator;
 
 CarClass(CAccountAuthenticatorTransport)
+    , public Object
+    , public IIAccountAuthenticator
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CARAPI AddAccount(
         /* [in] */ IIAccountAuthenticatorResponse* response,
         /* [in] */ const String& accountType,
         /* [in] */ const String& authTokenType,
-        /* [in] */ const ArrayOf<String>& requiredFeatures,
+        /* [in] */ ArrayOf<String>* requiredFeatures,
         /* [in] */ IBundle* options);
 
     CARAPI ConfirmCredentials(
@@ -50,7 +58,7 @@ public:
     CARAPI HasFeatures(
         /* [in] */ IIAccountAuthenticatorResponse* response,
         /* [in] */ IAccount* account,
-        /* [in] */ const ArrayOf<String>& features);
+        /* [in] */ ArrayOf<String>* features);
 
     CARAPI GetAccountRemovalAllowed(
         /* [in] */ IIAccountAuthenticatorResponse* response,
@@ -58,6 +66,15 @@ public:
 
     CARAPI constructor(
         /* [in] */ Handle32 accounts);
+
+    CARAPI GetAccountCredentialsForCloning(
+        /* [in] */ IIAccountAuthenticatorResponse* response,
+        /* [in] */ IAccount* account);
+
+    CARAPI AddAccountFromCredentials(
+        /* [in] */ IIAccountAuthenticatorResponse* response,
+        /* [in] */ IAccount* account,
+        /* [in] */ IBundle* accountCredentials);
 
 private:
     AbstractAccountAuthenticator* mHost;

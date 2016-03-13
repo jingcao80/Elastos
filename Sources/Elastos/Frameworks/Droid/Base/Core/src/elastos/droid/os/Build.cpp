@@ -34,10 +34,10 @@ static AutoPtr<ArrayOf<String> > GetStringPropertyList(
     AutoPtr<ISystemProperties> sysProp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sysProp);
     String value;
-    sysProp->Get(property, String("unknown")/*UNKNOWN*/, &value);
+    sysProp->Get(property, &value);
 
     AutoPtr<ArrayOf<String> > array;
-    if (value.IsEmpty()) {
+    if (value.IsNullOrEmpty()) {
         array = ArrayOf<String>::Alloc(0);
     }
     else {

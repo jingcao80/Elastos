@@ -65,7 +65,7 @@ Int64 calculate_dir_size(Int32 dfd)
 }
 
 Int64 MeasurementUtils::MeasureDirectory(
-     /* [in] */ String path)
+     /* [in] */ const String& path)
 {
     Int64 ret = 0L;
 

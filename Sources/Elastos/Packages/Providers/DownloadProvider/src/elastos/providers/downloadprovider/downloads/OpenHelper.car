@@ -1,0 +1,28 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IContext;
+
+    namespace Elastos {
+    namespace Providers {
+    namespace DownloadProvider {
+    namespace Downloads {
+
+    interface IOpenHelper
+    {
+        /**
+         * Build and start an {@link Intent} to view the download with given ID,
+         * handling subtleties around installing packages.
+         */
+        StartViewIntent(
+            [in] IContext* context,
+            [in] Int64 id,
+            [in] Int32 intentFlags,
+            [out] Boolean* result);
+    }
+
+    } // namespace Downloads
+    } // namespace DownloadProvider
+    } // namespace Providers
+    } // namespace Elastos
+}

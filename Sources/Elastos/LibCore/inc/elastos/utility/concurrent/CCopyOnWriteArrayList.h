@@ -14,18 +14,6 @@ CarClass(CCopyOnWriteArrayList)
 {
 public:
     CAR_OBJECT_DECL()
-
-    CARAPI Add(
-        /* [in] */ IInterface* object);
-
-    CARAPI AddAll(
-        /* [in] */ ICollection* collection);
-
-    CARAPI Remove(
-        /* [in] */ IInterface* object);
-
-    CARAPI RemoveAll(
-        /* [in] */ ICollection* collection);
 };
 
 } // namespace Concurrent

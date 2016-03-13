@@ -1,6 +1,8 @@
 
 module
 {
+    using interface Elastos.Utility.IArrayList;
+
     namespace Elastos {
     namespace Droid {
     namespace Media {
@@ -10,6 +12,77 @@ module
      * interface IParcelable
      */
     interface IMediaRouterClientStateRouteInfo {
+        GetId(
+            [out] String* id);
+
+        SetId(
+            [in] String id);
+
+        GetName(
+            [out] String* name);
+
+        SetName(
+            [in] String name);
+
+        GetDescription(
+            [out] String* description);
+
+        SetDescription(
+            [in] String description);
+
+        GetSupportedTypes(
+            [out] Int32* supportedTypes);
+
+        SetSupportedTypes(
+            [in] Int32 supportedTypes);
+
+        GetEnabled(
+            [out] Boolean* enabled);
+
+        SetEnabled(
+            [in] Boolean enabled);
+
+        GetStatusCode(
+            [out] Int32* statusCode);
+
+        SetStatusCode(
+            [in] Int32 statusCode);
+
+        GetPlaybackType(
+            [out] Int32* playbackType);
+
+        SetPlaybackType(
+            [in] Int32 playbackType);
+
+        GetPlaybackStream(
+            [out] Int32* playbackStream);
+
+        SetPlaybackStream(
+            [in] Int32 playbackStream);
+
+        GetVolume(
+            [out] Int32* volume);
+
+        SetVolume(
+            [in] Int32 volume);
+
+        GetVolumeMax(
+            [out] Int32* volumeMax);
+
+        SetVolumeMax(
+            [in] Int32 volumeMax);
+
+        GetVolumeHandling(
+            [out] Int32* volumeHandling);
+
+        SetVolumeHandling(
+            [in] Int32 volumeHandling);
+
+        GetPresentationDisplayId(
+            [out] Int32* presentationDisplayId);
+
+        SetPresentationDisplayId(
+            [in] Int32 presentationDisplayId);
     }
 
     /**
@@ -26,7 +99,19 @@ module
     interface IMediaRouterClientState {
         GetRoute(
             [in] String id,
-            [out] IMediaRouterClientStateRouteInfo ** result);
+            [out] IMediaRouterClientStateRouteInfo** result);
+
+        GetGloballySelectedRouteId(
+            [out] String* routeId);
+
+        SetGloballySelectedRouteId(
+            [in] String routeId);
+
+        GetRoutes(
+            [out] IArrayList** routes);
+
+        SetRoutes(
+            [in] IArrayList* routes);
     }
 
     } // namespace media

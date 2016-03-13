@@ -47,6 +47,7 @@ namespace Server {
  * @sa Administration
  */
 CarClass(CDevicePolicyManagerService)
+    , public IIDevicePolicyManager
 {
 public:
     class ActiveAdmin;

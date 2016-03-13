@@ -1,18 +1,23 @@
 
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.Webkit.h>
+#include <Elastos.Droid.Net.h>
+#include <Elastos.Droid.Graphics.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include "Elastos.Droid.Provider.h"
-#include "elastos/droid/content/CIntentHelper.h"
-#include "elastos/droid/graphics/CBitmapFactory.h"
-#include "elastos/droid/graphics/CCanvas.h"
-#include "elastos/droid/graphics/CPicture.h"
-#include "elastos/droid/net/CUriHelper.h"
-#include "elastos/droid/net/http/CErrorStrings.h"
-#include "elastos/droid/webkit/CJsDialogHelper.h"
+//#include "elastos/droid/content/CIntentHelper.h"
+//#include "elastos/droid/graphics/CBitmapFactory.h"
+//#include "elastos/droid/graphics/CCanvas.h"
+//#include "elastos/droid/graphics/CPicture.h"
+//#include "elastos/droid/net/CUriHelper.h"
+//#include "elastos/droid/net/http/CErrorStrings.h"
+//#include "elastos/droid/webkit/CJsDialogHelper.h"
 #include "elastos/droid/webkit/DebugFlags.h"
-#include "elastos/droid/webkit/native/base/ThreadUtils.h"
-#include "elastos/droid/webkit/native/base/TraceEvent.h"
-#include "elastos/droid/webkit/native/content/browser/ContentViewClient.h"
+#include "elastos/droid/webkit/webview/chromium/native/base/ThreadUtils.h"
+#include "elastos/droid/webkit/webview/chromium/native/base/TraceEvent.h"
+#include "elastos/droid/webkit/webview/chromium/native/content/browser/ContentViewClient.h"
 #include "elastos/droid/webkit/webview/chromium/FileChooserParamsAdapter.h"
+#include "elastos/droid/webkit/webview/chromium/R_Chromium.h"
 #include "elastos/droid/webkit/webview/chromium/UnimplementedWebViewApi.h"
 #include "elastos/droid/webkit/webview/chromium/WebViewChromium.h"
 #include "elastos/droid/webkit/webview/chromium/WebViewContentsClientAdapter.h"
@@ -37,9 +42,9 @@ using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Provider::IBrowser;
 using Elastos::Droid::Webkit::CJsDialogHelper;
 using Elastos::Droid::Webkit::DebugFlags;
-using Elastos::Droid::Webkit::Base::ThreadUtils;
-using Elastos::Droid::Webkit::Base::TraceEvent;
-using Elastos::Droid::Webkit::Content::Browser::ContentViewClient;
+using Elastos::Droid::Webkit::Webview::Chromium::Base::ThreadUtils;
+using Elastos::Droid::Webkit::Webview::Chromium::Base::TraceEvent;
+using Elastos::Droid::Webkit::Webview::Chromium::Content::Browser::ContentViewClient;
 using Elastos::Droid::Webkit::IJsDialogHelper;
 using Elastos::Droid::Webkit::IWebBackForwardList;
 using Elastos::Droid::Webkit::IWebResourceResponse;
@@ -79,7 +84,6 @@ ECode WebViewContentsClientAdapter::NullWebViewClient::ShouldOverrideKeyEvent(
     // int keyCode = event.getKeyCode();
     // return !ContentViewClient.shouldPropagateKey(keyCode);
 
-    assert(0);
     Int32 keyCode = 0;
     event->GetKeyCode(&keyCode);
     *result = !ContentViewClient::ShouldPropagateKey(keyCode);
@@ -123,7 +127,6 @@ ECode WebViewContentsClientAdapter::NullWebViewClient::ShouldOverrideUrlLoading(
     // }
     // return true;
 
-    assert(0);
     AutoPtr<IIntentHelper> helper;
     CIntentHelper::AcquireSingleton((IIntentHelper**)&helper);
     AutoPtr<IIntent> intent;
@@ -199,7 +202,6 @@ Int64 WebViewContentsClientAdapter::PermissionRequestAdapter::ToAwPermissionReso
     // }
     // return result;
 
-    assert(0);
     Int64 result = 0;
     String resource;
     for (Int32 idx=0; idx<resources->GetLength(); ++idx) {
@@ -222,7 +224,6 @@ ECode WebViewContentsClientAdapter::PermissionRequestAdapter::GetOrigin(
     // ==================before translated======================
     // return mAwPermissionRequest.getOrigin();
 
-    assert(0);
     *result = mAwPermissionRequest->GetOrigin();
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -240,7 +241,6 @@ ECode WebViewContentsClientAdapter::PermissionRequestAdapter::GetResources(
     //     return mResources;
     // }
 
-    assert(0);
     AutoLock lock(this);
     if (NULL == mResources) {
         mResources = ToPermissionResources(mAwPermissionRequest->GetResources());
@@ -262,7 +262,6 @@ ECode WebViewContentsClientAdapter::PermissionRequestAdapter::Grant(
     // else
     //     mAwPermissionRequest.deny();
 
-    assert(0);
     Int64 requestedResource = mAwPermissionRequest->GetResources();
     if ((requestedResource & ToAwPermissionResources(resources)) == requestedResource)
         return mAwPermissionRequest->Grant();
@@ -275,7 +274,6 @@ ECode WebViewContentsClientAdapter::PermissionRequestAdapter::Deny()
     // ==================before translated======================
     // mAwPermissionRequest.deny();
 
-    assert(0);
     return mAwPermissionRequest->Deny();
 }
 
@@ -293,7 +291,6 @@ AutoPtr< ArrayOf<String> > WebViewContentsClientAdapter::PermissionRequestAdapte
     // const String&[] resource_array = new const String&[result.size()];
     // return result.toArray(resource_array);
 
-    assert(0);
     Int32 size = 0;
     String tmps[4];
     if ((resources & BITMASK_RESOURCE_VIDEO_CAPTURE) != 0)
@@ -411,7 +408,6 @@ ECode WebViewContentsClientAdapter::WebResourceRequestImpl::GetUrl(
     // ==================before translated======================
     // return Uri.parse(mParams.url);
 
-    assert(0);
     AutoPtr<IUriHelper> helper;
     CUriHelper::AcquireSingleton((IUriHelper**)&helper);
     helper->Parse(mParams->url, result);
@@ -425,7 +421,6 @@ ECode WebViewContentsClientAdapter::WebResourceRequestImpl::IsForMainFrame(
     // ==================before translated======================
     // return mParams.isMainFrame;
 
-    assert(0);
     *result = mParams->isMainFrame;
     return NOERROR;
 }
@@ -437,7 +432,6 @@ ECode WebViewContentsClientAdapter::WebResourceRequestImpl::HasGesture(
     // ==================before translated======================
     // return mParams.hasUserGesture;
 
-    assert(0);
     *result = mParams->hasUserGesture;
     return NOERROR;
 }
@@ -449,7 +443,6 @@ ECode WebViewContentsClientAdapter::WebResourceRequestImpl::GetMethod(
     // ==================before translated======================
     // return mParams.method;
 
-    assert(0);
     *result = mParams->method;
     return NOERROR;
 }
@@ -528,7 +521,6 @@ AutoPtr<JsPromptResult> WebViewContentsClientAdapter::JsPromptResultReceiverAdap
     // ==================before translated======================
     // return mPromptResult;
 
-    assert(0);
     return mPromptResult;
 }
 
@@ -551,7 +543,6 @@ ECode WebViewContentsClientAdapter::JsPromptResultReceiverAdapter::OnJsResultCom
     //     }
     // }
 
-    assert(0);
     Boolean promptResult = FALSE;
     mPromptResult->GetResult(&promptResult);
     if (mChromePromptResultReceiver != NULL) {
@@ -593,7 +584,6 @@ ECode WebViewContentsClientAdapter::InnerSslErrorHandler::Proceed()
     // ==================before translated======================
     // callback.onReceiveValue(true);
 
-    assert(0);
     AutoPtr<IBoolean> input = CoreUtils::Convert(TRUE);
     mCallback->OnReceiveValue(input);
     return NOERROR;
@@ -604,7 +594,6 @@ ECode WebViewContentsClientAdapter::InnerSslErrorHandler::Cancel()
     // ==================before translated======================
     // callback.onReceiveValue(false);
 
-    assert(0);
     AutoPtr<IBoolean> input = CoreUtils::Convert(FALSE);
     mCallback->OnReceiveValue(input);
     return NOERROR;
@@ -643,7 +632,6 @@ ECode WebViewContentsClientAdapter::ClientCertRequestImpl::GetKeyTypes(
     // // This is already a copy of native argument, so return directly.
     // return mKeyTypes;
 
-    assert(0);
     *result = mKeyTypes;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -657,7 +645,6 @@ ECode WebViewContentsClientAdapter::ClientCertRequestImpl::GetPrincipals(
     // // This is already a copy of native argument, so return directly.
     // return mPrincipals;
 
-    assert(0);
     *result = mPrincipals;
     REFCOUNT_ADD(*result);
     return NOERROR;
@@ -670,7 +657,6 @@ ECode WebViewContentsClientAdapter::ClientCertRequestImpl::GetHost(
     // ==================before translated======================
     // return mHost;
 
-    assert(0);
     *result = mHost;
     return NOERROR;
 }
@@ -682,7 +668,6 @@ ECode WebViewContentsClientAdapter::ClientCertRequestImpl::GetPort(
     // ==================before translated======================
     // return mPort;
 
-    assert(0);
     *result = mPort;
     return NOERROR;
 }
@@ -696,7 +681,6 @@ ECode WebViewContentsClientAdapter::ClientCertRequestImpl::Proceed(
     // ==================before translated======================
     // mCallback.proceed(privateKey, chain);
 
-    assert(0);
     mCallback->Proceed(privateKey, chain);
     return NOERROR;
 }
@@ -706,7 +690,6 @@ ECode WebViewContentsClientAdapter::ClientCertRequestImpl::Ignore()
     // ==================before translated======================
     // mCallback.ignore();
 
-    assert(0);
     mCallback->Ignore();
     return NOERROR;
 }
@@ -716,7 +699,6 @@ ECode WebViewContentsClientAdapter::ClientCertRequestImpl::Cancel()
     // ==================before translated======================
     // mCallback.cancel();
 
-    assert(0);
     mCallback->Cancel();
     return NOERROR;
 }
@@ -751,10 +733,9 @@ ECode WebViewContentsClientAdapter::InnerValueCallback1::OnReceiveValue(
     // }
     // uploadFileCallback.onReceiveValue(s);
 
-    assert(0);
     if (mCompleted) {
         //throw new IllegalStateException("showFileChooser result was already called");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
     mCompleted = TRUE;
     IList* uriListTmp = IList::Probe(uriList);
@@ -806,10 +787,9 @@ ECode WebViewContentsClientAdapter::InnerValueCallback2::OnReceiveValue(
     // uploadFileCallback.onReceiveValue(
     //         uri == null ? null : new String[] { uri.toString() });
 
-    assert(0);
     if (mCompleted) {
         //throw new IllegalStateException("showFileChooser result was already called");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        return E_ILLEGAL_STATE_EXCEPTION;
     }
     mCompleted = TRUE;
     AutoPtr<ICharSequence> s = NULL;
@@ -853,7 +833,6 @@ ECode WebViewContentsClientAdapter::AwHttpAuthHandlerAdapter::Proceed(
     // }
     // mAwHandler.proceed(username, password);
 
-    assert(0);
     String userNameTmp = username;
     if (username.IsEmpty()) {
         userNameTmp = String("");
@@ -873,7 +852,6 @@ ECode WebViewContentsClientAdapter::AwHttpAuthHandlerAdapter::Cancel()
     // ==================before translated======================
     // mAwHandler.cancel();
 
-    assert(0);
     mAwHandler->Cancel();
     return NOERROR;
 }
@@ -885,7 +863,6 @@ ECode WebViewContentsClientAdapter::AwHttpAuthHandlerAdapter::UseHttpAuthUsernam
     // ==================before translated======================
     // return mAwHandler.isFirstAttempt();
 
-    assert(0);
     *result = mAwHandler->IsFirstAttempt();
     return NOERROR;
 }
@@ -956,7 +933,6 @@ ECode WebViewContentsClientAdapter::SetWebViewClient(
     //     mWebViewClient = new NullWebViewClient();
     // }
 
-    assert(0);
     if (client != NULL) {
         mWebViewClient = client;
     }
@@ -974,7 +950,6 @@ ECode WebViewContentsClientAdapter::SetWebChromeClient(
     // ==================before translated======================
     // mWebChromeClient = client;
 
-    assert(0);
     mWebChromeClient = client;
     return NOERROR;
 }
@@ -986,7 +961,6 @@ ECode WebViewContentsClientAdapter::SetDownloadListener(
     // ==================before translated======================
     // mDownloadListener = listener;
 
-    assert(0);
     mDownloadListener = listener;
     return NOERROR;
 }
@@ -997,7 +971,6 @@ ECode WebViewContentsClientAdapter::SetFindListener(
     // ==================before translated======================
     // mFindListener = listener;
 
-    assert(0);
     mFindListener = listener;
     return NOERROR;
 }
@@ -1008,7 +981,6 @@ ECode WebViewContentsClientAdapter::SetPictureListener(
     // ==================before translated======================
     // mPictureListener = listener;
 
-    assert(0);
     mPictureListener = listener;
     return NOERROR;
 }
@@ -1025,7 +997,6 @@ ECode WebViewContentsClientAdapter::GetVisitedHistory(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -1047,7 +1018,6 @@ ECode WebViewContentsClientAdapter::DoUpdateVisitedHistory(
     // mWebViewClient.doUpdateVisitedHistory(mWebView, url, isReload);
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         String reloadStr = (TRUE == isReload) ? String("TRUE") : String("FALSE");
@@ -1070,7 +1040,6 @@ ECode WebViewContentsClientAdapter::OnProgressChanged(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -1106,7 +1075,6 @@ AutoPtr<AwWebResourceResponse> WebViewContentsClientAdapter::ShouldInterceptRequ
     //         response.getReasonPhrase(),
     //         responseHeaders);
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         Logger::D(TAG, String("shouldInterceptRequest=") + params->url);
@@ -1155,7 +1123,6 @@ Boolean WebViewContentsClientAdapter::ShouldOverrideUrlLoading(
     // TraceEvent.end();
     // return result;
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         Logger::D(TAG, String("shouldOverrideUrlLoading=") + url);
@@ -1177,7 +1144,6 @@ ECode WebViewContentsClientAdapter::OnUnhandledKeyEvent(
     // mWebViewClient.onUnhandledKeyEvent(mWebView, event);
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         Logger::D(TAG, "onUnhandledKeyEvent");
@@ -1207,7 +1173,6 @@ Boolean WebViewContentsClientAdapter::OnConsoleMessage(
     // TraceEvent.end();
     // return result;
 
-    assert(0);
     TraceEvent::Begin();
     Boolean result = FALSE;
     if (mWebChromeClient != NULL) {
@@ -1241,7 +1206,6 @@ ECode WebViewContentsClientAdapter::OnFindResultReceived(
     // mFindListener.onFindResultReceived(activeMatchOrdinal, numberOfMatches, isDoneCounting);
     // TraceEvent.end();
 
-    assert(0);
     if (NULL == mFindListener)
         return NOERROR;
 
@@ -1266,7 +1230,6 @@ ECode WebViewContentsClientAdapter::OnNewPicture(
     // mPictureListener.onNewPicture(mWebView, picture);
     // TraceEvent.end();
 
-    assert(0);
     if (NULL == mPictureListener)
         return NOERROR;
 
@@ -1289,7 +1252,6 @@ ECode WebViewContentsClientAdapter::OnLoadResource(
     // mWebViewClient.onLoadResource(mWebView, url);
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         Logger::D(TAG, String("onLoadResource=") + url);
@@ -1318,7 +1280,6 @@ Boolean WebViewContentsClientAdapter::OnCreateWindow(
     // TraceEvent.end();
     // return result;
 
-    assert(0);
     AutoPtr<IMessage> m;
     mUiThreadHandler->ObtainMessage(NEW_WEBVIEW_CREATED, NULL/*mWebView.new WebViewTransport()*/, (IMessage**)&m);
     TraceEvent::Begin();
@@ -1344,7 +1305,6 @@ ECode WebViewContentsClientAdapter::OnCloseWindow()
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -1367,7 +1327,6 @@ ECode WebViewContentsClientAdapter::OnRequestFocus()
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -1392,7 +1351,6 @@ ECode WebViewContentsClientAdapter::OnReceivedTouchIconUrl(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -1417,7 +1375,6 @@ ECode WebViewContentsClientAdapter::OnReceivedIcon(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -1439,7 +1396,6 @@ ECode WebViewContentsClientAdapter::OnPageStarted(
     // mWebViewClient.onPageStarted(mWebView, url, mWebView.getFavicon());
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         Logger::D(TAG, String("onPageStarted=") + url);
@@ -1487,7 +1443,6 @@ ECode WebViewContentsClientAdapter::OnPageFinished(
     //     }, 100);
     // }
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         Logger::D(TAG, String("onPageFinished=") + url);
@@ -1534,7 +1489,6 @@ ECode WebViewContentsClientAdapter::OnReceivedError(
     // mWebViewClient.onReceivedError(mWebView, errorCode, description, failingUrl);
     // TraceEvent.end();
 
-    assert(0);
     String descriptionTmp = description;
     if (descriptionTmp.IsEmpty()) {
         // ErrorStrings is @hidden, so we can't do this in AwContents.
@@ -1571,7 +1525,6 @@ ECode WebViewContentsClientAdapter::OnReceivedTitle(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -1600,7 +1553,6 @@ Boolean WebViewContentsClientAdapter::ShouldOverrideKeyEvent(
     // TraceEvent.end();
     // return result;
 
-    assert(0);
     Int32 keyCode = 0;
     event->GetKeyCode(&keyCode);
     if (!ContentViewClient::ShouldPropagateKey(keyCode))
@@ -1628,7 +1580,6 @@ ECode WebViewContentsClientAdapter::OnStartContentIntent(
     // mWebViewClient.shouldOverrideUrlLoading(mWebView, contentUrl);
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         Logger::D(TAG, String("shouldOverrideUrlLoading=") + contentUrl);
@@ -1653,7 +1604,6 @@ ECode WebViewContentsClientAdapter::OnGeolocationPermissionsShowPrompt(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -1676,7 +1626,6 @@ ECode WebViewContentsClientAdapter::OnGeolocationPermissionsHidePrompt()
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -1711,7 +1660,6 @@ ECode WebViewContentsClientAdapter::OnPermissionRequest(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -1763,7 +1711,6 @@ ECode WebViewContentsClientAdapter::OnPermissionRequestCanceled(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL && mOngoingPermissionRequests != NULL) {
         if (TRACE) {
@@ -1813,7 +1760,6 @@ ECode WebViewContentsClientAdapter::HandleJsAlert(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         AutoPtr<JsPromptResultReceiverAdapter> resultReceiver = new JsPromptResultReceiverAdapter(receiver);
@@ -1861,7 +1807,6 @@ void WebViewContentsClientAdapter::HandleJsBeforeUnload(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         AutoPtr<JsPromptResultReceiverAdapter> receiverAdapter = new JsPromptResultReceiverAdapter(receiver);
@@ -1908,7 +1853,6 @@ void WebViewContentsClientAdapter::HandleJsConfirm(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         AutoPtr<JsPromptResultReceiverAdapter> receiverAdapter = new JsPromptResultReceiverAdapter(receiver);
@@ -1956,7 +1900,6 @@ void WebViewContentsClientAdapter::HandleJsPrompt(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         AutoPtr<JsPromptResultReceiverAdapter> receiverAdapter = new JsPromptResultReceiverAdapter(receiver);
@@ -1996,7 +1939,6 @@ ECode WebViewContentsClientAdapter::OnReceivedHttpAuthRequest(
     //         new AwHttpAuthHandlerAdapter(handler), host, realm);
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         Logger::D(TAG, String("onReceivedHttpAuthRequest=") + host);
@@ -2030,7 +1972,6 @@ ECode WebViewContentsClientAdapter::OnReceivedSslError(
     // mWebViewClient.onReceivedSslError(mWebView, handler, error);
     // TraceEvent.end();
 
-    assert(0);
     AutoPtr<InnerSslErrorHandler> handler = new InnerSslErrorHandler(callback);
     TraceEvent::Begin();
     if (TRACE) {
@@ -2060,7 +2001,6 @@ ECode WebViewContentsClientAdapter::OnReceivedClientCertRequest(
     // mWebViewClient.onReceivedClientCertRequest(mWebView, request);
     // TraceEvent.end();
 
-    assert(0);
     if (TRACE) {
         Logger::D(TAG, "onReceivedClientCertRequest");
     }
@@ -2083,7 +2023,6 @@ ECode WebViewContentsClientAdapter::OnReceivedLoginRequest(
     // mWebViewClient.onReceivedLoginRequest(mWebView, realm, account, args);
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         Logger::D(TAG, String("onReceivedLoginRequest=") + realm);
@@ -2106,7 +2045,6 @@ ECode WebViewContentsClientAdapter::OnFormResubmission(
     // mWebViewClient.onFormResubmission(mWebView, dontResend, resend);
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         Logger::D(TAG, "onFormResubmission");
@@ -2136,7 +2074,6 @@ ECode WebViewContentsClientAdapter::OnDownloadStart(
     //     TraceEvent.end();
     // }
 
-    assert(0);
     if (mDownloadListener != NULL) {
         TraceEvent::Begin();
         if (TRACE) {
@@ -2206,7 +2143,6 @@ ECode WebViewContentsClientAdapter::ShowFileChooser(
     //         fileChooserParams.capture ? "*" : "");
     // TraceEvent.end();
 
-    assert(0);
     if (NULL == mWebChromeClient) {
         uploadFileCallback->OnReceiveValue(NULL);
         return NOERROR;
@@ -2258,7 +2194,6 @@ ECode WebViewContentsClientAdapter::OnScaleChangedScaled(
     // mWebViewClient.onScaleChanged(mWebView, oldScale, newScale);
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (TRACE) {
         Logger::D(TAG, " onScaleChangedScaled");
@@ -2283,7 +2218,6 @@ ECode WebViewContentsClientAdapter::OnShowCustomView(
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -2306,7 +2240,6 @@ ECode WebViewContentsClientAdapter::OnHideCustomView()
     // }
     // TraceEvent.end();
 
-    assert(0);
     TraceEvent::Begin();
     if (mWebChromeClient != NULL) {
         if (TRACE) {
@@ -2365,7 +2298,7 @@ AutoPtr<IBitmap> WebViewContentsClientAdapter::GetDefaultVideoPoster()
         CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory);
 
         AutoPtr<IBitmap> poster;
-        factory->DecodeResource(resources, -1/*R.drawable.ic_media_video_poster*/, (IBitmap**)&poster);
+        factory->DecodeResource(resources, R::drawable::ic_media_video_poster, (IBitmap**)&poster);
 
         Int32 width = 0;
         Int32 height = 0;
@@ -2403,7 +2336,6 @@ AutoPtr<IView> WebViewContentsClientAdapter::GetVideoLoadingProgressView()
     // TraceEvent.end();
     // return result;
 
-    assert(0);
     TraceEvent::Begin();
     AutoPtr<IView> result = NULL;
     if (mWebChromeClient != NULL) {

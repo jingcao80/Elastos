@@ -23,12 +23,14 @@ HdmiLogger::HdmiLogger()
 }
 
 ECode HdmiLogger::Warning(
-    /* [in] */ const String& logMessage,
-    /* [in] */ ArrayOf<IObject>* objs)
+    /* [in] */ const char* fmt, ...)
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        GetLogger()->WarningInternal(ToLogString(logMessage, objs));
+        va_list ap;
+        va_start(ap, fmt);
+        GetLogger()->WarningInternal(ToLogString(fmt, ap));
+        va_end(ap);
 #endif
 }
 
@@ -38,19 +40,23 @@ ECode HdmiLogger::WarningInternal(
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         String log = UpdateLog(mWarningTimingCache, logMessage);
-        if (!log->IsEmpty()) {
+        Boolean isEmpty;
+        log->IsEmpty(&isEmpty);
+        if (!isEmpty) {
             Slogger::W(TAG, log);
         }
 #endif
 }
 
 ECode HdmiLogger::Error(
-    /* [in] */ const String& logMessage,
-    /* [in] */ ArrayOf<IObject>* objs)
+    /* [in] */ const char* fmt, ...)
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        GetLogger()->ErrorInternal(ToLogString(logMessage, objs));
+        va_list ap;
+        va_start(ap, fmt);
+        GetLogger()->ErrorInternal(ToLogString(fmt, ap));
+        va_end(ap);
 #endif
 }
 
@@ -60,19 +66,23 @@ ECode HdmiLogger::ErrorInternal(
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         String log = UpdateLog(mErrorTimingCache, logMessage);
-        if (!log->IsEmpty()) {
+        Boolean isEmpty;
+        log->IsEmpty(&isEmpty);
+        if (!isEmpty) {
             Slogger::E(TAG, log);
         }
 #endif
 }
 
 ECode HdmiLogger::Debug(
-    /* [in] */ const String& logMessage,
-    /* [in] */ ArrayOf<IObject>* objs)
+    /* [in] */ const char* fmt, ...)
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        GetLogger()->DebugInternal(ToLogString(logMessage, objs));
+    va_list ap;
+    va_start(ap, fmt);
+    GetLogger()->DebugInternal(ToLogString(fmt, ap));
+    va_end(ap);
 #endif
 }
 
@@ -82,33 +92,35 @@ ECode HdmiLogger::DebugInternal(
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         if (!DEBUG) {
-            return;
+            return NOERROR;
         }
         Slogger::D(TAG, logMessage);
 #endif
 }
 
-ECode HdmiLogger::ToLogString(
-    /* [in] */ const String& logMessage,
-    /* [in] */ ArrayOf<IObject*>* objs,
-    /* [out] */ String* result)
+String HdmiLogger::ToLogString(
+    /* [in] */ const char* fmt, ...)
 {
-    return E_NOT_IMPLEMENTED;
+    String rev;
 #if 0 // TODO: Translate codes below
-        if (objs.length > 0) {
-            return String->Format(logMessage, objs);
-        } else {
-            return logMessage;
-        }
+    va_list ap;
+    va_start(ap, fmt);
+    rev.AppendFormat(fmt, ap);
+    va_end(ap);
 #endif
+    return rev;
 }
 
 ECode HdmiLogger::GetLogger(
     /* [out] */ HdmiLogger** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        HdmiLogger logger = sLogger->Get();
+        AutoPtr<IInterface> obj;
+        sLogger->Get(, (IInterface**)&obj);
+        HdmiLogger logger = I::Probe(obj);
         if (logger == NULL) {
             logger = new HdmiLogger();
             sLogger->Set(logger);
@@ -122,10 +134,14 @@ ECode HdmiLogger::UpdateLog(
     /* [in] */ const String& logMessage,
     /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         Int64 curTime = SystemClock->UptimeMillis();
-        Pair<Long, Integer> timing = cache->Get(logMessage);
+        AutoPtr<IInterface> obj;
+        cache->Get(logMessage, (IInterface**)&obj);
+        Pair<Long, Integer> timing = I::Probe(obj);
         if (ShouldLogNow(timing, curTime)) {
             String log = BuildMessage(logMessage, timing);
             cache->Put(logMessage, new Pair<>(curTime, 1));
@@ -142,10 +158,12 @@ ECode HdmiLogger::BuildMessage(
     /* [in] */ IPair* timing,
     /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return new StringBuilder()
-                .Append("[").Append(timing == NULL ? 1 : timing.second).Append("]:")
+                .Append("[").Append(timing == NULL ? 1 : timing->mSecond).Append("]:")
                 .Append(message).ToString();
 #endif
 }
@@ -156,9 +174,11 @@ ECode HdmiLogger::IncreaseLogCount(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        Pair<Long, Integer> timing = cache->Get(message);
+        AutoPtr<IInterface> obj;
+        cache->Get(message, (IInterface**)&obj);
+        Pair<Long, Integer> timing = I::Probe(obj);
         if (timing != NULL) {
-            cache->Put(message, new Pair<>(timing.first, timing.second + 1));
+            cache->Put(message, new Pair<>(timing->mFirst, timing->mSecond + 1));
         }
 #endif
 }
@@ -168,9 +188,11 @@ ECode HdmiLogger::ShouldLogNow(
     /* [in] */ Int64 curTime,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return timing == NULL || curTime - timing.first > ERROR_LOG_DURATTION_MILLIS;
+        return timing == NULL || curTime - timing->mFirst > ERROR_LOG_DURATTION_MILLIS;
 #endif
 }
 

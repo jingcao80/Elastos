@@ -2,32 +2,23 @@
 #define __ELASTOS_DROID_OS_BINDERPROXY_H__
 
 #include "Elastos.Droid.Os.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Os {
 
-extern const InterfaceID EIID_BinderProxy;
-
 class BinderProxy
-    : public ElRefBase
+    : public Object
+    , public IBinderProxy
     , public IBinder
 {
 public:
+    CAR_INTERFACE_DECL()
+
     BinderProxy();
 
     ~BinderProxy();
-
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
-
-    CARAPI_(UInt32) AddRef();
-
-    CARAPI_(UInt32) Release();
-
-    CARAPI GetInterfaceID(
-        /* [in] */ IInterface* pObject,
-        /* [in] */ InterfaceID* pIID);
 
     CARAPI ToString(
         /* [out] */ String* str);

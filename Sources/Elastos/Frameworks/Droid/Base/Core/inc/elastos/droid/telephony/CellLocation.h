@@ -2,7 +2,10 @@
 #ifndef __ELASTOS_DROID_TELEPHONY_CELLLOCATION_H__
 #define __ELASTOS_DROID_TELEPHONY_CELLLOCATION_H__
 
+#include "Elastos.Droid.Internal.h"
+#include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IBundle;
 
@@ -11,8 +14,13 @@ namespace Droid {
 namespace Telephony {
 
 class CellLocation
+    : public Object
+    , public ICellLocation
 {
 public:
+
+    CAR_INTERFACE_DECL()
+
     /**
     * Request an update of the current location.  If the location has changed,
     * a broadcast will be sent to everyone registered with {@link

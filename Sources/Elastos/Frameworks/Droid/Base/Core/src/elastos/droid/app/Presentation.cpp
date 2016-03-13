@@ -139,7 +139,9 @@ ECode Presentation::constructor(
 
     AutoPtr<IContext> ctx;
     GetContext((IContext**)&ctx);
-    ctx->GetSystemService(IContext::DISPLAY_SERVICE, (IInterface**)&mDisplayManager);
+    AutoPtr<IInterface> service;
+    FAIL_RETURN(ctx->GetSystemService(IContext::DISPLAY_SERVICE, (IInterface**)&service))
+    mDisplayManager = IDisplayManager::Probe(service);
 
     AutoPtr<IWindow> window;
     GetWindow((IWindow**)&window);

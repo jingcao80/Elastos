@@ -1,46 +1,45 @@
 #ifndef __ELASTOS_DROID_SERVER_ACCESSIBILITY_TOUCHEXPLORER_H__
 #define __ELASTOS_DROID_SERVER_ACCESSIBILITY_TOUCHEXPLORER_H__
 
-#include "elastos/droid/ext/frameworkdef.h"
+#include <_Elastos.Droid.Server.h>
 #include "elastos/droid/os/Runnable.h"
-#include "elastos/droid/view/VelocityTracker.h"
-#include <elastos/utility/etl/List.h>
 
-using Elastos::Utility::Etl::List;
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Gesture::IGestureLibrary;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Graphics::IPoint;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::View::IVelocityTracker;
 using Elastos::Droid::View::IMotionEvent;
 using Elastos::Droid::View::Accessibility::IAccessibilityEvent;
-using Elastos::Droid::Server::Accessibility::IEventStreamTransformation;
-using Elastos::Droid::Gesture::IGesturePoint;
-using Elastos::Droid::Gesture::IGestureLibrary;
-using Elastos::Droid::Graphics::IRect;
+using Elastos::Utility::IList;
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Accessibility {
 
-class CAccessibilityManagerService;
+class AccessibilityManagerService;
 
 class TouchExplorer
-    : public ElRefBase
+    : public Object
     , public IEventStreamTransformation
 {
 public:
     /**
-     * Class for delayed sending of hover events.
+     * Class for delayed sending of hover enter and move events.
      */
-    class SendHoverDelayed
+    class SendHoverEnterAndMoveDelayed
         : public Runnable
     {
+        friend class TouchExplorer;
     public:
-        SendHoverDelayed(
-            /* [in] */ Int32 hoverAction,
-            /* [in] */ Boolean gestureStarted,
+        SendHoverEnterAndMoveDelayed(
             /* [in] */ TouchExplorer* host);
+
+        ~SendHoverEnterAndMoveDelayed();
 
         CARAPI_(void) Post(
             /* [in] */ IMotionEvent* prototype,
@@ -48,25 +47,62 @@ public:
             /* [in] */ Int32 pointerIdBits,
             /* [in] */ Int32 policyFlags);
 
-        CARAPI_(Float) GetX();
+        CARAPI_(void) AddEvent(
+            /* [in] */ IMotionEvent* event);
 
-        CARAPI_(Float) GetY();
-
-        CARAPI_(void) Remove();
-
-        CARAPI_(Boolean) IsPending();
-
-        CARAPI_(void) Clear();
+        CARAPI_(void) Cancel();
 
         CARAPI_(void) ForceSendAndRemove();
 
         CARAPI Run();
 
     private:
+        CARAPI_(Boolean) IsPending();
+
+        CARAPI_(void) Clear();
+
+    private:
         static const String LOG_TAG_SEND_HOVER_DELAYED;
 
-        Int32 mHoverAction;
-        Boolean mGestureStarted;
+        /* private final List<MotionEvent> mEvents = new ArrayList<MotionEvent>();*/
+        AutoPtr<IList> mEvents;
+
+        Int32 mPointerIdBits;
+        Int32 mPolicyFlags;
+
+        TouchExplorer* mHost;
+    };
+
+    /**
+     * Class for delayed sending of hover exit events.
+     */
+    class SendHoverExitDelayed
+        : public Runnable
+    {
+    public:
+        SendHoverExitDelayed(
+            /* [in] */ TouchExplorer* host);
+
+        ~SendHoverExitDelayed();
+
+        CARAPI_(void) Post(
+            /* [in] */ IMotionEvent* prototype,
+            /* [in] */ Int32 pointerIdBits,
+            /* [in] */ Int32 policyFlags);
+
+        CARAPI_(void) Cancel();
+
+        CARAPI_(void) ForceSendAndRemove();
+
+        CARAPI Run();
+
+    private:
+        CARAPI_(Boolean) IsPending();
+
+        CARAPI_(void) Clear();
+
+    private:
+        static const String LOG_TAG_SEND_HOVER_DELAYED;
 
         AutoPtr<IMotionEvent> mPrototype;
         Int32 mPointerIdBits;
@@ -76,12 +112,13 @@ public:
     };
 
     class InjectedPointerTracker
-        : public ElRefBase
+        : public Object
     {
-    public:
         friend class TouchExplorer;
-
+    public:
         InjectedPointerTracker();
+
+        ~InjectedPointerTracker();
 
         /**
          * Processes an injected {@link MotionEvent} event.
@@ -130,7 +167,9 @@ public:
          */
         CARAPI_(AutoPtr<IMotionEvent>) GetLastInjectedHoverEventForClick();
 
-        CARAPI_(String) ToString();
+        // @Override
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         static const String LOG_TAG_INJECTED_POINTER_TRACKER;
@@ -149,7 +188,7 @@ public:
     };
 
     class ReceivedPointerTracker
-        : public ElRefBase
+        : public Object
     {
     public:
         /**
@@ -158,8 +197,9 @@ public:
          * @param context Context for looking up resources.
          */
         ReceivedPointerTracker(
-            /* [in] */ IContext* context,
             /* [in] */ TouchExplorer* host);
+
+        ~ReceivedPointerTracker();
 
         /**
          * Clears the internals state.
@@ -185,31 +225,12 @@ public:
         CARAPI_(Int32) GetReceivedPointerDownCount();
 
         /**
-         * @return The bits of the pointers that are active.
-         */
-        CARAPI_(Int32) GetActivePointers();
-
-        /**
-         * @return The number of down input  pointers that are active.
-         */
-        CARAPI_(Int32) GetActivePointerCount();
-
-        /**
          * Whether an received pointer is down.
          *
          * @param pointerId The unique pointer id.
          * @return True if the pointer is down.
          */
         CARAPI_(Boolean) IsReceivedPointerDown(
-            /* [in] */ Int32 pointerId);
-
-        /**
-         * Whether an input pointer is active.
-         *
-         * @param pointerId The unique pointer id.
-         * @return True if the pointer is active.
-         */
-        CARAPI_(Boolean) IsActivePointer(
             /* [in] */ Int32 pointerId);
 
         /**
@@ -236,18 +257,12 @@ public:
         /**
          * @return The id of the primary pointer.
          */
-        CARAPI_(Int32) GetPrimaryActivePointerId();
+        CARAPI_(Int32) GetPrimaryPointerId();
 
         /**
          * @return The time when the last up received pointer went down.
          */
         CARAPI_(Int64) GetLastReceivedUpPointerDownTime();
-
-        /**
-         * @return The id of the last received pointer that went up.
-         */
-        CARAPI_(Int32) GetLastReceivedUpPointerId();
-
 
         /**
          * @return The down X of the last received pointer that went up.
@@ -264,29 +279,9 @@ public:
          */
         CARAPI_(Int32) GetLastReceivedDownEdgeFlags();
 
-        /**
-         * @return Whether the last received pointer that went up was active.
-         */
-        CARAPI_(Boolean) WasLastReceivedUpPointerActive();
-
-        /**
-         * Populates the active pointer IDs to the given array.
-         * <p>
-         * Note: The client is responsible for providing large enough array.
-         *
-         * @param outPointerIds The array to which to write the active pointers.
-         */
-        CARAPI_(void) PopulateActivePointerIds(
-            /* [in] */ ArrayOf<Int32>* outPointerIds);
-
-        /**
-         * @param pointerId The unique pointer id.
-         * @return Whether the pointer is active or was the last active than went up.
-         */
-        CARAPI_(Boolean) IsActiveOrWasLastActiveUpPointer(
-            /* [in] */ Int32 pointerId);
-
-        CARAPI_(String) ToString();
+        // @Override
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     private:
         /**
@@ -300,14 +295,6 @@ public:
             /* [in] */ IMotionEvent* event);
 
         /**
-         * Handles a received pointer move event.
-         *
-         * @param event The event to be handled.
-         */
-        CARAPI_(void) HandleReceivedPointerMove(
-            /* [in] */ IMotionEvent* event);
-
-        /**
          * Handles a received pointer up event.
          *
          * @param pointerIndex The index of the pointer that has changed.
@@ -318,41 +305,12 @@ public:
             /* [in] */ IMotionEvent* event);
 
         /**
-         * Detects the active pointers in an event.
-         *
-         * @param event The event to examine.
-         */
-        CARAPI_(void) DetectActivePointers(
-            /* [in] */ IMotionEvent* event);
-
-        /**
          * @return The primary active pointer.
          */
-        CARAPI_(Int32) FindPrimaryActivePointer();
-
-        /**
-         * Computes the move for a given action pointer index since the
-         * corresponding pointer went down.
-         *
-         * @param pointerIndex The action pointer index.
-         * @param event The event to examine.
-         * @return The distance the pointer has moved.
-         */
-        CARAPI_(Float) ComputePointerDeltaMove(
-            /* [in] */ Int32 pointerIndex,
-            /* [in] */ IMotionEvent* event);
+        CARAPI_(Int32) FindPrimaryPointerId();
 
     private:
         static const String LOG_TAG_RECEIVED_POINTER_TRACKER;
-
-        // The coefficient by which to multiply
-        // ViewConfiguration.#getScaledTouchSlop()
-        // to compute #mThresholdActivePointer.
-        static const Int32 COEFFICIENT_ACTIVE_POINTER;
-
-        // Pointers that moved less than mThresholdActivePointer
-        // are considered active i.e. are ignored.
-        Double mThresholdActivePointer;
 
         // Keep track of where and when a pointer went down.
         AutoPtr< ArrayOf<Float> > mReceivedPointerDownX;// = new float[MAX_POINTER_COUNT];
@@ -365,20 +323,12 @@ public:
         // The edge flags of the last received down event.
         Int32 mLastReceivedDownEdgeFlags;
 
-        // Which down pointers are active.
-        Int32 mActivePointers;
-
-        // Primary active pointer which is either the first that went down
-        // or if it goes up the next active that most recently went down.
-        Int32 mPrimaryActivePointerId;
-
-        // Flag indicating that there is at least one active pointer moving.
-        Boolean mHasMovingActivePointer;
+        // Primary pointer which is either the first that went down
+        // or if it goes up the next one that most recently went down.
+        Int32 mPrimaryPointerId;
 
         // Keep track of the last up pointer data.
         Int64 mLastReceivedUpPointerDownTime;
-        Int32 mLastReceivedUpPointerId;
-        Boolean mLastReceivedUpPointerActive;
         Float mLastReceivedUpPointerDownX;
         Float mLastReceivedUpPointerDownY;
 
@@ -389,11 +339,13 @@ public:
 
 private:
     class DoubleTapDetector
-        : public ElRefBase
+        : public Object
     {
     public:
         DoubleTapDetector(
             /* [in] */ TouchExplorer* host);
+
+        ~DoubleTapDetector();
 
         CARAPI_(void) OnMotionEvent(
             /* [in] */ IMotionEvent* event,
@@ -423,9 +375,11 @@ private:
         ExitGestureDetectionModeDelayed(
             /* [in] */ TouchExplorer* host);
 
+        ~ExitGestureDetectionModeDelayed();
+
         CARAPI_(void) Post();
 
-        CARAPI_(void) Remove();
+        CARAPI_(void) Cancel();
 
         CARAPI Run();
 
@@ -439,21 +393,26 @@ private:
     class PerformLongPressDelayed
         : public Runnable
     {
+        friend class TouchExplorer;
     public:
         PerformLongPressDelayed(
             /* [in] */ TouchExplorer* host);
+
+        ~PerformLongPressDelayed();
 
         CARAPI_(void) Post(
             /* [in] */ IMotionEvent* prototype,
             /* [in] */ Int32 policyFlags);
 
-        CARAPI_(void) Remove();
+        CARAPI_(void) Cancel();
 
-        CARAPI_(Boolean) IsPending();
 
         CARAPI Run();
 
         CARAPI_(void) Clear();
+
+    private:
+        CARAPI_(Boolean) IsPending();
 
     private:
         AutoPtr<IMotionEvent> mEvent;
@@ -470,7 +429,9 @@ private:
             /* [in] */ Int32 delay,
             /* [in] */ TouchExplorer* host);
 
-        CARAPI_(void) Remove();
+        ~SendAccessibilityEventDelayed();
+
+        CARAPI_(void) Cancel();
 
         CARAPI_(void) Post();
 
@@ -491,7 +452,7 @@ public:
 
     TouchExplorer(
         /* [in] */ IContext* context,
-        /* [in] */ CAccessibilityManagerService* service);
+        /* [in] */ AccessibilityManagerService* service);
 
     ~TouchExplorer();
 
@@ -510,7 +471,8 @@ public:
     CARAPI OnAccessibilityEvent(
         /* [in] */ IAccessibilityEvent* event);
 
-    CARAPI_(String) ToString();
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     CARAPI_(void) Clear(
@@ -562,13 +524,13 @@ private:
         /* [in] */ Int32 type);
 
     /**
-     * Sends down events to the view hierarchy for all active pointers which are
+     * Sends down events to the view hierarchy for all pointers which are
      * not already being delivered i.e. pointers that are not yet injected.
      *
      * @param prototype The prototype from which to create the injected events.
      * @param policyFlags The policy flags associated with the event.
      */
-    CARAPI_(void) SendDownForAllActiveNotInjectedPointers(
+    CARAPI_(void) SendDownForAllNotInjectedPointers(
         /* [in] */ IMotionEvent* prototype,
         /* [in] */ Int32 policyFlags);
 
@@ -591,23 +553,13 @@ private:
         /* [in] */ Int32 policyFlags);
 
     /**
-     * Sends up events to the view hierarchy for all active pointers which are
+     * Sends up events to the view hierarchy for all pointers which are
      * already being delivered i.e. pointers that are injected.
      *
      * @param prototype The prototype from which to create the injected events.
      * @param policyFlags The policy flags associated with the event.
      */
     CARAPI_(void) SendUpForInjectedDownPointers(
-        /* [in] */ IMotionEvent* prototype,
-        /* [in] */ Int32 policyFlags);
-
-    /**
-     * Sends a motion event by first stripping the inactive pointers.
-     *
-     * @param prototype The prototype from which to create the injected event.
-     * @param policyFlags The policy flags associated with the event.
-     */
-    CARAPI_(void) SendMotionEventStripInactivePointers(
         /* [in] */ IMotionEvent* prototype,
         /* [in] */ Int32 policyFlags);
 
@@ -636,6 +588,21 @@ private:
         /* [in] */ Int32 policyFlags);
 
     /**
+     * Offsets all pointers in the given event by adding the specified X and Y
+     * offsets.
+     *
+     * @param event The event to offset.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @return An event with the offset pointers or the original event if both
+     *         offsets are zero.
+     */
+    CARAPI_(AutoPtr<IMotionEvent>) OffsetEvent(
+        /* [in] */ IMotionEvent* event,
+        /* [in] */ Int32 offsetX,
+        /* [in] */ Int32 offsetY);
+
+    /**
      * Computes the action for an injected event based on a masked action
      * and a pointer index.
      *
@@ -656,6 +623,9 @@ private:
     CARAPI_(Boolean) IsDraggingGesture(
         /* [in] */ IMotionEvent* event);
 
+    CARAPI_(Boolean) ComputeClickLocation(
+        /* [in] */ IPoint* outLocation);
+
     /**
      * Gets the symbolic name of a state.
      *
@@ -664,13 +634,6 @@ private:
      */
     static CARAPI_(String) GetStateSymbolicName(
         /* [in] */ Int32 state);
-
-    /**
-     * @return The number of non injected active pointers.
-     */
-    CARAPI_(Int32) GetNotInjectedActivePointerCount(
-        /* [in] */ ReceivedPointerTracker* receivedTracker,
-        /* [in] */ InjectedPointerTracker* injectedTracker);
 
 private:
     static const Boolean DEBUG;
@@ -684,7 +647,7 @@ private:
     static const Int32 STATE_DELEGATING;
     static const Int32 STATE_GESTURE_DETECTING;
 
-    // The minimum of the cosine between the vectors of two moving
+    // The maximum of the cosine between the vectors of two moving
     // pointers so they can be considered moving in the same direction.
     static const Float MAX_DRAGGING_ANGLE_COS; // cos(pi/4)
 
@@ -715,9 +678,6 @@ private:
     // The minimal score for accepting a predicted gesture.
     static const Float MIN_PREDICTION_SCORE;
 
-    // Temporary array for storing pointer IDs.
-    AutoPtr< ArrayOf<Int32> > mTempPointerIds;
-
     // Timeout before trying to decide what the user is trying to do.
     Int32 mDetermineUserIntentTimeout;
 
@@ -742,11 +702,11 @@ private:
     // Handler for performing asynchronous operations.
     AutoPtr<IHandler> mHandler;
 
-    // Command for delayed sending of a hover enter event.
-    AutoPtr<SendHoverDelayed> mSendHoverEnterDelayed;
+    // Command for delayed sending of a hover enter and move event.
+    AutoPtr<SendHoverEnterAndMoveDelayed> mSendHoverEnterAndMoveDelayed;
 
     // Command for delayed sending of a hover exit event.
-    AutoPtr<SendHoverDelayed> mSendHoverExitDelayed;
+    AutoPtr<SendHoverExitDelayed> mSendHoverExitDelayed;
 
     // Command for delayed sending of touch exploration end events.
     AutoPtr<SendAccessibilityEventDelayed> mSendTouchExplorationEndDelayed;
@@ -783,10 +743,13 @@ private:
     AutoPtr<InjectedPointerTracker> mInjectedPointerTracker;
 
     // Handle to the accessibility manager service.
-    AutoPtr<CAccessibilityManagerService> mAms;
+    AccessibilityManagerService* mAms;
 
     // Temporary rectangle to avoid instantiation.
     AutoPtr<IRect> mTempRect;
+
+    // Temporary point to avoid instantiation.
+    AutoPtr<IPoint> mTempPoint;
 
     // Context in which this explorer operates.
     AutoPtr<IContext> mContext;
@@ -798,7 +761,8 @@ private:
     Float mPreviousY;
 
     // Buffer for storing points for gesture detection.
-    AutoPtr< List<AutoPtr<IGesturePoint> > > mStrokeBuffer;
+    /* private final ArrayList<GesturePoint> mStrokeBuffer = new ArrayList<GesturePoint>(100);*/
+    AutoPtr<IArrayList> mStrokeBuffer;
 
     // The library for gesture detection.
     AutoPtr<IGestureLibrary> mGestureLibrary;
@@ -817,12 +781,6 @@ private:
 
     // Whether touch exploration is in progress.
     Boolean mTouchExplorationInProgress;
-
-    friend class SendHoverDelayed;
-    friend class InjectedPointerTracker;
-    friend class ReceivedPointerTracker;
-    friend class ExitGestureDetectionModeDelayed;
-    friend class PerformLongPressDelayed;
 };
 
 } // Accessibility

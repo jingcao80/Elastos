@@ -315,7 +315,7 @@ ECode CWifiConfiguration::ToString(
     sbuf.Append(mNaiRealm);
     sbuf.Append(" PRIO: ");
     sbuf.Append(mPriority);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
 
     if (mNumConnectionFailures > 0) {
         sbuf.Append(" numConnectFailures ");
@@ -400,7 +400,7 @@ ECode CWifiConfiguration::ToString(
         }
     }
 
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append(" AuthAlgorithms:");
 
     mAllowedAuthAlgorithms->GetSize(&size);
@@ -422,7 +422,7 @@ ECode CWifiConfiguration::ToString(
         }
     }
 
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append(" PairwiseCiphers:");
 
     mAllowedPairwiseCiphers->GetSize(&size);
@@ -444,7 +444,7 @@ ECode CWifiConfiguration::ToString(
         }
     }
 
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append(" GroupCiphers:");
 
     mAllowedGroupCiphers->GetSize(&size);
@@ -466,10 +466,10 @@ ECode CWifiConfiguration::ToString(
         }
     }
 
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append(" PSK: ");
     if (mPreSharedKey != NULL) {
-        sbuf.Append('*');
+        sbuf.AppendChar('*');
     }
 
     sbuf.Append("\nEnterprise config:\n");
@@ -497,7 +497,7 @@ ECode CWifiConfiguration::ToString(
     Int64 now_ms;
     system->GetCurrentTimeMillis(&now_ms);
     if (mBlackListTimestamp != 0) {
-        sbuf.Append('\n');
+        sbuf.AppendChar('\n');
         Int64 diff = now_ms - mBlackListTimestamp;
         if (diff <= 0) {
             sbuf.Append(" blackListed since <incorrect>");
@@ -510,7 +510,7 @@ ECode CWifiConfiguration::ToString(
     }
 
     if (mLastConnected != 0) {
-        sbuf.Append('\n');
+        sbuf.AppendChar('\n');
         Int64 diff = now_ms - mLastConnected;
         if (diff <= 0) {
             sbuf.Append("lastConnected since <incorrect>");
@@ -523,7 +523,7 @@ ECode CWifiConfiguration::ToString(
     }
 
     if (mLastConnectionFailure != 0) {
-        sbuf.Append('\n');
+        sbuf.AppendChar('\n');
         Int64 diff = now_ms - mLastConnectionFailure;
         if (diff <= 0) {
             sbuf.Append("lastConnectionFailure since <incorrect>");
@@ -535,7 +535,7 @@ ECode CWifiConfiguration::ToString(
         }
     }
 
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     if (mLinkedConfigurations != NULL) {
         AutoPtr<ISet> keySet;
         mLinkedConfigurations->GetKeySet((ISet**)&keySet);
@@ -550,7 +550,7 @@ ECode CWifiConfiguration::ToString(
             iKey->ToString(&key);
             sbuf.Append(" linked: ");
             sbuf.Append(key);
-            sbuf.Append('\n');
+            sbuf.AppendChar('\n');
         }
     }
 
@@ -575,14 +575,14 @@ ECode CWifiConfiguration::ToString(
                 Int32 value;
                 choice->GetValue(&value);
                 sbuf.Append(value);
-                sbuf.Append('\n');
+                sbuf.AppendChar('\n');
             }
         }
     }
 
     if (mScanResultCache != NULL) {
         sbuf.Append("Scan Cache:  ");
-        sbuf.Append('\n');
+        sbuf.AppendChar('\n');
         AutoPtr<IArrayList> list = SortScanResults();
         Int32 listSize;
         list->GetSize(&listSize);
@@ -645,7 +645,7 @@ ECode CWifiConfiguration::ToString(
                 sbuf.Append("} ");
             }
 
-            sbuf.Append('\n');
+            sbuf.AppendChar('\n');
         }
     }
     sbuf.Append("triggeredLow: ");
@@ -654,23 +654,23 @@ ECode CWifiConfiguration::ToString(
     sbuf.Append(mNumUserTriggeredWifiDisableBadRSSI);
     sbuf.Append(" triggeredNotHigh: ");
     sbuf.Append(mNumUserTriggeredWifiDisableNotHighRSSI);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append("ticksLow: ");
     sbuf.Append(mNumTicksAtLowRSSI);
     sbuf.Append(" ticksBad: ");
     sbuf.Append(mNumTicksAtBadRSSI);
     sbuf.Append(" ticksNotHigh: ");
     sbuf.Append(mNumTicksAtNotHighRSSI);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append("triggeredJoin: ");
     sbuf.Append(mNumUserTriggeredJoinAttempts);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append("autoJoinBailedDueToLowRssi: ");
     sbuf.Append(mAutoJoinBailedDueToLowRssi);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
     sbuf.Append("autoJoinUseAggressiveJoinAttemptThreshold: ");
     sbuf.Append(mAutoJoinUseAggressiveJoinAttemptThreshold);
-    sbuf.Append('\n');
+    sbuf.AppendChar('\n');
 
     return sbuf.ToString(value);
 }

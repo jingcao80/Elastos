@@ -21,9 +21,6 @@ public:
 
     CARAPI constructor(
         /* [in] */ Int32 nativeCanvas);
-
-    CARAPI_(PInterface) Probe(
-        /* [in] */ REIID riid);
 };
 
 } // namespace Graphics

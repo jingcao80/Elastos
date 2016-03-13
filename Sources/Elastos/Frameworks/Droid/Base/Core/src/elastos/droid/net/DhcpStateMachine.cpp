@@ -347,15 +347,18 @@ ECode DhcpStateMachine::constructor(
     mRunningState = new RunningState(this);
     mWaitBeforeRenewalState = new WaitBeforeRenewalState(this);
 
-    mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&mAlarmManager);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
+    mAlarmManager = IAlarmManager::Probe(obj);
     AutoPtr<IIntent> dhcpRenewalIntent;
     CIntent::New(ACTION_DHCP_RENEW, NULL, (IIntent**)&dhcpRenewalIntent);
     AutoPtr<IPendingIntentHelper> helper;
     CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&helper);
     helper->GetBroadcast(mContext, DHCP_RENEW, dhcpRenewalIntent, 0, (IPendingIntent**)&mDhcpRenewalIntent);
 
-    AutoPtr<IPowerManager> powerManager;
-    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&powerManager);
+    obj = NULL;
+    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IPowerManager> powerManager = IPowerManager::Probe(obj);
     powerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, WAKELOCK_TAG, (IPowerManagerWakeLock**)&mDhcpRenewWakeLock);
     mDhcpRenewWakeLock->SetReferenceCounted(FALSE);
 

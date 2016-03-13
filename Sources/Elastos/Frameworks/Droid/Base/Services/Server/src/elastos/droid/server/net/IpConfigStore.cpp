@@ -222,14 +222,14 @@ ECode IpConfigStore::WriteConfig(
 }
 
 ECode IpConfigStore::WriteIpAndProxyConfigurations(
-    /* [in] */ String filePath,
+    /* [in] */ const String& filePath,
     /* [in] */ ISparseArray* networks)
 {
     return mWriter->Write(filePath, new InnerSub_Writer(this, networks));
 }
 
 ECode IpConfigStore::ReadIpAndProxyConfigurations(
-    /* [in] */ String filePath,
+    /* [in] */ const String& filePath,
     /* [out] */ ISparseArray** result)
 {
     AutoPtr<ISparseArray> networks;

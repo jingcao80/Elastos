@@ -18,11 +18,9 @@ module
      */
     [local]
     interface ITvStatusBar {
-
         GetStatusBarView(
             [out] IView** view);
     }
-
 
     } // namespace TV
     } // namespace StatusBar

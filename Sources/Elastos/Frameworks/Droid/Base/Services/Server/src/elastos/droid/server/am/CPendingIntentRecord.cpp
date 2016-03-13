@@ -249,7 +249,7 @@ CPendingIntentRecord::~CPendingIntentRecord()
 }
 
 ECode CPendingIntentRecord::constructor(
-    /* [in] */ Handle32 owner,
+    /* [in] */ IIActivityManager* owner,
     /* [in] */ Handle32 k,
     /* [in] */ Int32 u)
 {

@@ -986,18 +986,13 @@ ECode RippleDrawable::GetConstantState(
     return NOERROR;
 }
 
-ECode RippleDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode RippleDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> dr;
-    LayerDrawable::Mutate((IDrawable**)&dr);
+    LayerDrawable::Mutate();
 
     // LayerDrawable creates a new state using createConstantState, so
     // this should always be a safe cast.
     mState = (RippleState*) mLayerState.Get();
-    *drawable = this;
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 

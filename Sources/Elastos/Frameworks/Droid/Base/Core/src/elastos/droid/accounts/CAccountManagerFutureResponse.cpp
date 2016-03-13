@@ -1,4 +1,5 @@
 
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/accounts/CAccountManagerFutureResponse.h"
 #include <elastos/utility/logging/Slogger.h>
@@ -10,6 +11,10 @@ namespace Droid {
 namespace Accounts {
 
 const String TAG("CAccountManagerFutureResponse");
+
+CAR_OBJECT_IMPL(CAccountManagerFutureResponse)
+
+CAR_INTERFACE_IMPL(CAccountManagerFutureResponse, Object, IAccountManagerResponse)
 
 ECode CAccountManagerFutureResponse::OnResult(
     /* [in] */ IBundle* bundle)
@@ -40,8 +45,11 @@ ECode CAccountManagerFutureResponse::OnError(
     /* [in] */ Int32 errorCode,
     /* [in] */ const String& errorMessage)
 {
-    Boolean result;
-    if (errorCode == IAccountManager::ERROR_CODE_CANCELED) {
+    Boolean result = FALSE;
+    if (errorCode == IAccountManager::ERROR_CODE_CANCELED || errorCode == IAccountManager::ERROR_CODE_USER_RESTRICTED
+            || errorCode == IAccountManager::ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE) {
+        // the authenticator indicated that this request was canceled or we were
+        // forbidden to fulfill; cancel now
         return mHost->Cancel(TRUE /* mayInterruptIfRunning */, &result);
     }
     mHost->SetException(mHost->mHost->ConvertErrorToException(errorCode, errorMessage));

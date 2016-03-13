@@ -26,7 +26,7 @@ public:
     HdmiMhlLocalDeviceStub();
 
     CARAPI constructor(
-        /* [in] */ HdmiControlService* service,
+        /* [in] */ IHdmiControlService* service,
         /* [in] */ Int32 portId);
 
     CARAPI OnDeviceRemoved();
@@ -60,7 +60,7 @@ private:
 private:
     static const AutoPtr<IHdmiDeviceInfo> INFO;
 
-    AutoPtr<HdmiControlService> mService;
+    AutoPtr<IHdmiControlService> mService;
 
     Int32 mPortId;
 };

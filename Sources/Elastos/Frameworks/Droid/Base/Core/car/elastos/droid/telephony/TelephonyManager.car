@@ -90,7 +90,7 @@ module
         const Int32 NETWORK_TYPE_LTE = 13;
         const Int32 NETWORK_TYPE_EHRPD = 14;
         const Int32 NETWORK_TYPE_HSPAP = 15;
-        const Int32 NETWORK_TYPE_GSM = 15;
+        const Int32 NETWORK_TYPE_GSM = 16;
 
         const Int32 NETWORK_CLASS_UNKNOWN = 0;
         const Int32 NETWORK_CLASS_2_G = 1;
@@ -506,7 +506,7 @@ module
          * @param number The dialing number
          * @hide
          */
-        SetLine1NumberForDisplay(
+        SetLine1NumberForDisplayForSubscriber(
             [in] Int64 subId,
             [in] String alphaTag,
             [in] String number);
@@ -687,13 +687,13 @@ module
          * Returns the MMS user agent.
          */
         GetMmsUserAgent(
-            [in] String* rateInMillis);
+            [out] String* res);
 
         /**
          * Returns the MMS user agent profile URL.
          */
         GetMmsUAProfUrl(
-            [in] String* rateInMillis);
+            [out] String* res);
 
         /**
          * Opens a logical channel to the ICC card.
@@ -852,7 +852,7 @@ module
          * @param itemValue the value to write, as a String.
          * @return true on success; false on any failure.
          *
-         * @hide
+         * @hides
          */
         NvWriteItem(
             [in] Int32 itemID,
@@ -872,7 +872,7 @@ module
          *
          * @hide
          */
-        NvWriteItem(
+        NvWriteCdmaPrl(
             [in] ArrayOf<Byte>* preferredRoamingList,
             [out] Boolean* result);
 
@@ -967,7 +967,7 @@ module
          * @hide
          */
         GetPcscfAddress(
-            [in] Int32 appType,
+            [in] String appType,
             [out, callee] ArrayOf<String>* result);
 
         /**
@@ -1007,7 +1007,7 @@ module
          */
         SetPreferredNetworkType(
             [in] Int32 networkType,
-            [out] Int32* result);
+            [out] Boolean* result);
 
         /**
          * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
@@ -1226,7 +1226,7 @@ module
          * @param enable true means enabling the simplified UI.
          * @hide
          */
-        EnableSimplifiedNetworkSettings(
+        EnableSimplifiedNetworkSettingsForSubscriber(
             [in] Int64 subId,
             [in] Boolean value);
 
@@ -1270,7 +1270,7 @@ module
          */
         InvokeOemRilRequestRaw(
             [in] ArrayOf<Byte>* oemReq,
-            [in] ArrayOf<Byte>* oemResp,
+            [out, callee] ArrayOf<Byte>* oemResp,
             [out] Int32* result);
     }
 

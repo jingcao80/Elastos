@@ -3,8 +3,8 @@
 #define __ELASTOS_DROID_HARDWARE_CAMERA2_CAPTUREREQUEST_H__
 
 #include <Elastos.CoreLibrary.Utility.h>
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/hardware/camera2/CameraMetadata.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/hardware/camera2/CameraMetadata.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Droid::Hardware::Camera2::Impl::ICameraMetadataNative;
@@ -20,7 +20,7 @@ namespace Droid {
 namespace Hardware {
 namespace Camera2 {
 
-class CaptureRequest
+class ECO_PUBLIC CaptureRequest
     : public CameraMetadata
     , public ICaptureRequest
     , public IParcelable

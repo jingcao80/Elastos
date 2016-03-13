@@ -106,6 +106,15 @@ ECode CIntentHelper::NormalizeMimeType(
     return NOERROR;
 }
 
+ECode CIntentHelper::IsAccessUriMode(
+    /* [in] */ Int32 modeFlags,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = Intent::IsAccessUriMode(modeFlags);
+    return NOERROR;
+}
+
 }
 }
 }

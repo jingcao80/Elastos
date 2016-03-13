@@ -458,6 +458,7 @@ private:
         RemoteViews* mHost;
     };
 
+public:
     class ECO_LOCAL BitmapCache
         : public Object
         , public IBitmapCache
@@ -468,6 +469,11 @@ private:
         BitmapCache();
 
         BitmapCache(
+            /* [in] */ IParcel* parcel);
+
+        CARAPI constructor();
+
+        CARAPI constructor(
             /* [in] */ IParcel* parcel);
 
         CARAPI GetBitmapId(
@@ -491,6 +497,7 @@ private:
         List<AutoPtr<IBitmap> > mBitmaps;
     };
 
+private:
     class ECO_LOCAL BitmapReflectionAction : public Action
     {
     public:

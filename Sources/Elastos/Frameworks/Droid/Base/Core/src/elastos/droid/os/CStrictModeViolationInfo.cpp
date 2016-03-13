@@ -4,8 +4,14 @@
 #include "elastos/droid/os/CStrictModeSpan.h"
 #include "elastos/droid/app/CActivityThreadHelper.h"
 #include "elastos/droid/animation/CValueAnimatorHelper.h"
+#include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.Animation.h>
+#include <Elastos.Droid.Utility.h>
+#include <Elastos.CoreLibrary.IO.h>
 #include <pthread.h>
 
 using Elastos::Core::StringUtils;
@@ -22,6 +28,10 @@ using Elastos::Droid::Animation::CValueAnimatorHelper;
 namespace Elastos {
 namespace Droid {
 namespace Os {
+
+CAR_INTERFACE_IMPL(CStrictModeViolationInfo, Object, IStrictModeViolationInfo)
+
+CAR_OBJECT_IMPL(CStrictModeViolationInfo)
 
 CStrictModeViolationInfo::CStrictModeViolationInfo()
     : mDurationMillis(-1)
@@ -141,6 +151,8 @@ ECode CStrictModeViolationInfo::WriteToParcel(
     /* [in] */ IParcel* dest,
     /* [in] */ Int32 flags)
 {
+    Int32 start, end;
+    dest->GetDataPosition(&start);
 //TODO:
     // crashInfo.writeToParcel(dest, flags);
     dest->WriteInt32(mPolicy);
@@ -151,6 +163,19 @@ ECode CStrictModeViolationInfo::WriteToParcel(
     dest->WriteInt64(mNumInstances);
     dest->WriteString(mBroadcastIntentAction);
     dest->WriteArrayOfString((ArrayOf<String>*)mTags);
+    dest->GetDataPosition(&end);
+    Int32 total = end-start;
+    if (total > 10 * 1024) {
+//TODO:
+        // Slog.d(TAG, "VIO: policy=" + policy + " dur=" + durationMillis
+        //         + " numLoop=" + violationNumThisLoop
+        //         + " anim=" + numAnimationsRunning
+        //         + " uptime=" + violationUptimeMillis
+        //         + " numInst=" + numInstances);
+        // Slog.d(TAG, "VIO: action=" + broadcastIntentAction);
+        // Slog.d(TAG, "VIO: tags=" + Arrays.toString(tags));
+        // Slog.d(TAG, "VIO: TOTAL BYTES WRITTEN: " + (dest.dataPosition()-start));
+    }
     return NOERROR;
 }
 
@@ -164,27 +189,27 @@ ECode CStrictModeViolationInfo::Dump(
 //TODO:
     // crashInfo.dump(pw, prefix);
     String _prefix = prefix;
-    pw->Println(_prefix + String("policy: ") + StringUtils::Int32ToString(mPolicy));
+    pw->Println(_prefix + String("policy: ") + StringUtils::ToString(mPolicy));
     if (mDurationMillis != -1) {
-        pw->Println(_prefix + String("durationMillis: ") + StringUtils::Int32ToString(mDurationMillis));
+        pw->Println(_prefix + String("durationMillis: ") + StringUtils::ToString(mDurationMillis));
     }
     if (mNumInstances != -1) {
-        pw->Println(_prefix + String("numInstances: ") + StringUtils::Int64ToString(mNumInstances));
+        pw->Println(_prefix + String("numInstances: ") + StringUtils::ToString(mNumInstances));
     }
     if (mViolationNumThisLoop != 0) {
-        pw->Println(_prefix + String("violationNumThisLoop: ") + StringUtils::Int32ToString(mViolationNumThisLoop));
+        pw->Println(_prefix + String("violationNumThisLoop: ") + StringUtils::ToString(mViolationNumThisLoop));
     }
     if (mNumAnimationsRunning != 0) {
-        pw->Println(_prefix + String("numAnimationsRunning: ") + StringUtils::Int32ToString(mNumAnimationsRunning));
+        pw->Println(_prefix + String("numAnimationsRunning: ") + StringUtils::ToString(mNumAnimationsRunning));
     }
-    pw->Println(_prefix + String("violationUptimeMillis: ") + StringUtils::Int64ToString(mViolationUptimeMillis));
+    pw->Println(_prefix + String("violationUptimeMillis: ") + StringUtils::ToString(mViolationUptimeMillis));
     if (!mBroadcastIntentAction.IsNull()) {
         pw->Println(_prefix + String("broadcastIntentAction: ") + mBroadcastIntentAction);
     }
     if (mTags != NULL) {
         for(Int32 index = 0;index < mTags->GetLength(); index++)
         {
-            pw->Println(_prefix + String("tag[") + StringUtils::Int32ToString(index) + String("]: ") + (*mTags)[index]);
+            pw->Println(_prefix + String("tag[") + StringUtils::ToString(index) + String("]: ") + (*mTags)[index]);
         }
     }
     return NOERROR;
@@ -239,7 +264,7 @@ ECode CStrictModeViolationInfo::GetNumInstances(
 }
 
 ECode CStrictModeViolationInfo::GetTags(
-    /* [out,callee] */ ArrayOf<String>** tags)
+    /* [out, callee] */ ArrayOf<String>** tags)
 {
     VALIDATE_NOT_NULL(tags);
     *tags = mTags;

@@ -1,0 +1,79 @@
+
+module
+{
+    interface Elastos.Droid.View.IView;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Accounts {
+
+    /**
+     * @involve
+     * interface IAccountManagerCallback;
+     */
+    [local]
+    interface IChooseTypeAndAccountActivity {
+
+        /**
+         * A Parcelable ArrayList of Account objects that limits the choosable accounts to those
+         * in this list, if this parameter is supplied.
+         */
+        const String EXTRA_ALLOWABLE_ACCOUNTS_ARRAYLIST = "allowableAccounts";
+
+        /**
+         * A Parcelable ArrayList of String objects that limits the accounts to choose to those
+         * that match the types in this list, if this parameter is supplied. This list is also
+         * used to filter the allowable account types if add account is selected.
+         */
+        const String EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY = "allowableAccountTypes";
+
+        /**
+         * This is passed as the addAccountOptions parameter in AccountManager.addAccount()
+         * if it is called.
+         */
+        const String EXTRA_ADD_ACCOUNT_OPTIONS_BUNDLE = "addAccountOptions";
+
+        /**
+         * This is passed as the requiredFeatures parameter in AccountManager.addAccount()
+         * if it is called.
+         */
+        const String EXTRA_ADD_ACCOUNT_REQUIRED_FEATURES_STRING_ARRAY = "addAccountRequiredFeatures";
+
+        /**
+         * This is passed as the authTokenType string in AccountManager.addAccount()
+         * if it is called.
+         */
+        const String EXTRA_ADD_ACCOUNT_AUTH_TOKEN_TYPE_STRING = "authTokenType";
+
+        /**
+         * If set then the specified account is already "selected".
+         */
+        const String EXTRA_SELECTED_ACCOUNT = "selectedAccount";
+
+        /**
+         * If true then display the account selection list even if there is just
+         * one account to choose from. boolean.
+         */
+        const String EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT = "alwaysPromptForAccount";
+
+        /**
+         * If set then this string willb e used as the description rather than
+         * the default.
+         */
+        const String EXTRA_DESCRIPTION_TEXT_OVERRIDE = "descriptionTextOverride";
+
+        const Int32 REQUEST_NULL = 0;
+        const Int32 REQUEST_CHOOSE_TYPE = 1;
+        const Int32 REQUEST_ADD_ACCOUNT = 2;
+
+        OnCancelButtonClicked(
+            [in] IView* view);
+
+        OnOkButtonClicked(
+            [in] IView* view);
+    }
+
+    } // Accounts
+    } // Droid
+    } // Elastos
+}

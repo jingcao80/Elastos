@@ -3701,8 +3701,10 @@ ECode ProcessStats::EvaluateSystemProperties(
 
 void ProcessStats::BuildTimePeriodStartClockStr()
 {
-    DateFormat::Format(CoreUtils::Convert(String("yyyy-MM-dd-HH-mm-ss")),
-        mTimePeriodStartClock)->ToString(&mTimePeriodStartClockStr);
+    AutoPtr<ICharSequence> formatStr = CoreUtils::Convert(String("yyyy-MM-dd-HH-mm-ss"));
+    AutoPtr<ICharSequence> csq = DateFormat::Format(formatStr, mTimePeriodStartClock);
+    mTimePeriodStartClockStr = Object::ToString(csq);
+    Slogger::I(TAG, " TimePeriodStartClockStr: [%s]", mTimePeriodStartClockStr.string());
 }
 
 AutoPtr<ArrayOf<Int32> > ProcessStats::ReadTableFromParcel(

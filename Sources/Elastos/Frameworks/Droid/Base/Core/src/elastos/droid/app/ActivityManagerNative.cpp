@@ -2,13 +2,14 @@
 #include "Elastos.Droid.App.h"
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/app/ActivityManagerNative.h"
-// #include "elastos/droid/app/CAppOpsManager.h"
 #include "elastos/droid/os/ServiceManager.h"
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIIntentSender;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -20,7 +21,9 @@ AutoPtr<IIActivityManager> ActivityManagerNative::GetDefault()
 {
     AutoPtr<IIActivityManager> service =
             (IIActivityManager*)ServiceManager::GetService(IContext::ACTIVITY_SERVICE).Get();
-    assert(service != NULL);
+    if (service == NULL) {
+        Logger::W("ActivityManagerNative", "GetDefault(): %s service not ready yet.", IContext::ACTIVITY_SERVICE.string());
+    }
     return service;
 }
 
@@ -38,9 +41,10 @@ void ActivityManagerNative::BroadcastStickyIntent(
     /* [in] */ Int32 userId)
 {
     Int32 res;
+    String nullStr;
     GetDefault()->BroadcastIntent(
-        NULL, intent, String(NULL), NULL, IActivity::RESULT_OK, String(NULL), NULL,
-        String(NULL) /*permission*/, IAppOpsManager::OP_NONE, FALSE, TRUE, userId, &res);
+        NULL, intent, nullStr, NULL, IActivity::RESULT_OK, nullStr, NULL,
+        nullStr /*permission*/, IAppOpsManager::OP_NONE, FALSE, TRUE, userId, &res);
 }
 
 void ActivityManagerNative::NoteWakeupAlarm(

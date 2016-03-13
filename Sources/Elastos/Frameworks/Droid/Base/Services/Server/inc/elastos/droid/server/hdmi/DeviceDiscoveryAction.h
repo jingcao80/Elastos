@@ -5,6 +5,7 @@
 #include "_Elastos.Droid.Server.h"
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
+#include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Utility::ISlog;
@@ -33,11 +34,8 @@ namespace Hdmi {
  * </ol>
  */
 class DeviceDiscoveryAction
-#if 0
     : public HdmiCecFeatureAction
-#else
-    : public Object
-#endif
+    , public IDeviceDiscoveryAction
 {
 private:
     // An internal container used to keep track of device information during
@@ -45,6 +43,8 @@ private:
     class DeviceInfo
         : public Object
     {
+        friend class DeviceDiscoveryAction;
+
     private:
         DeviceInfo(
             /* [in] */ Int32 logicalAddress);
@@ -66,7 +66,26 @@ private:
         Int32 mDeviceType;
     };
 
+    class InnerSub_DevicePollingCallback
+        : public Object
+        , public IHdmiControlServiceDevicePollingCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_DevicePollingCallback(
+            /* [in] */ DeviceDiscoveryAction* host);
+
+        CARAPI OnPollingFinished(
+            /* [in] */ IList* ackedAddress);
+
+    private:
+        DeviceDiscoveryAction* mHost;
+    };
+
 public:
+    CAR_INTERFACE_DECL()
+
     DeviceDiscoveryAction();
 
     /**
@@ -97,9 +116,8 @@ private:
 
     CARAPI StartPhysicalAddressStage();
 
-    CARAPI VerifyValidLogicalAddress(
-        /* [in] */ Int32 address,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) VerifyValidLogicalAddress(
+        /* [in] */ Int32 address);
 
     CARAPI QueryPhysicalAddress(
         /* [in] */ Int32 address);
@@ -114,10 +132,9 @@ private:
     CARAPI QueryVendorId(
         /* [in] */ Int32 address);
 
-    CARAPI MayProcessMessageIfCached(
+    CARAPI_(Boolean) MayProcessMessageIfCached(
         /* [in] */ Int32 address,
-        /* [in] */ Int32 opcode,
-        /* [out] */ Boolean* result);
+        /* [in] */ Int32 opcode);
 
     CARAPI HandleReportPhysicalAddress(
         /* [in] */ IHdmiCecMessage* cmd);

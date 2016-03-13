@@ -1,10 +1,24 @@
 
+#include "elastos/droid/server/hdmi/Constants.h"
+#include "elastos/droid/server/hdmi/DevicePowerStatusAction.h"
 #include "elastos/droid/server/hdmi/HdmiCecLocalDevicePlayback.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageCache.h"
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include "elastos/droid/server/hdmi/HdmiUtils.h"
+#include "elastos/droid/server/hdmi/OneTouchPlayAction.h"
+#include <Elastos.CoreLibrary.IO.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Core::StringUtils;
 using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
+using Elastos::Droid::Os::CSystemProperties;
 using Elastos::Droid::Os::ISystemProperties;
 using Elastos::Droid::Utility::ISlog;
+using Elastos::IO::IPrintWriter;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -18,300 +32,295 @@ HdmiCecLocalDevicePlayback::HdmiCecLocalDevicePlayback()
 {}
 
 ECode HdmiCecLocalDevicePlayback::constructor(
-    /* [in] */ HdmiControlService* service)
+    /* [in] */ IHdmiControlService* service)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
-
-#endif
+    return HdmiCecLocalDevice::constructor(service, IHdmiDeviceInfo::DEVICE_PLAYBACK);
 }
 
 ECode HdmiCecLocalDevicePlayback::Init()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super.init();
-        mIsActiveSource = FALSE;
-
-#endif
+    HdmiCecLocalDevice::Init();
+    mIsActiveSource = FALSE;
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::OnAddressAllocated(
     /* [in] */ Int32 logicalAddress,
     /* [in] */ Int32 reason)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                mAddress, mService.getPhysicalAddress(), mDeviceType));
-        startQueuedActions();
-
-#endif
+    AssertRunOnServiceThread();
+    Int32 physicalAddr;
+    ((HdmiControlService*)mService.Get())->GetPhysicalAddress(&physicalAddr);
+    AutoPtr<IHdmiCecMessage> cmd;
+    HdmiCecMessageBuilder::BuildReportPhysicalAddressCommand(mAddress, physicalAddr, mDeviceType, (IHdmiCecMessage**)&cmd);
+    ((HdmiControlService*)mService.Get())->SendCecCommand(cmd);
+    StartQueuedActions();
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::GetPreferredAddress(
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        return SystemProperties.getInt(Constants::PROPERTY_PREFERRED_ADDRESS_PLAYBACK,
-                Constants::ADDR_UNREGISTERED);
+    VALIDATE_NOT_NULL(result)
+    *result = 0;
 
-#endif
+    AssertRunOnServiceThread();
+    AutoPtr<ISystemProperties> helper;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
+    return helper->GetInt32(Constants::PROPERTY_PREFERRED_ADDRESS_PLAYBACK,
+            Constants::ADDR_UNREGISTERED, result);
 }
 
 ECode HdmiCecLocalDevicePlayback::SetPreferredAddress(
     /* [in] */ Int32 addr)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        SystemProperties.set(Constants::PROPERTY_PREFERRED_ADDRESS_PLAYBACK,
-                String.valueOf(addr));
-
-#endif
+    AssertRunOnServiceThread();
+    AutoPtr<ISystemProperties> helper;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&helper);
+    helper->Set(Constants::PROPERTY_PREFERRED_ADDRESS_PLAYBACK,
+            StringUtils::ToString(addr));
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::OneTouchPlay(
     /* [in] */ IIHdmiControlCallback* callback)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        if (hasAction(OneTouchPlayAction.class)) {
-            Slogger::W(TAG, "oneTouchPlay already in progress");
-            invokeCallback(callback, HdmiControlManager.RESULT_ALREADY_IN_PROGRESS);
-            return;
-        }
-        // TODO: Consider the case of multiple TV sets. For now we always direct the command
-        //       to the primary one.
-        OneTouchPlayAction action = OneTouchPlayAction.create(this, Constants::ADDR_TV,
-                callback);
-        if (action == NULL) {
-            Slogger::W(TAG, "Cannot initiate oneTouchPlay");
-            invokeCallback(callback, HdmiControlManager.RESULT_EXCEPTION);
-            return;
-        }
-        addAndStartAction(action);
-
-#endif
+    AssertRunOnServiceThread();
+    Boolean hasAction;
+    HasAction(ECLSID_COneTouchPlayAction, &hasAction);
+    if (hasAction) {
+        Slogger::W(TAG, "oneTouchPlay already in progress");
+        InvokeCallback(callback, IHdmiControlManager::RESULT_ALREADY_IN_PROGRESS);
+        return NOERROR;
+    }
+    // TODO: Consider the case of multiple TV sets. For now we always direct the command
+    //       to the primary one.
+    AutoPtr<OneTouchPlayAction> action;
+    OneTouchPlayAction::Create(this, Constants::ADDR_TV,
+            callback, (OneTouchPlayAction**)&action);
+    if (action == NULL) {
+        Slogger::W(TAG, "Cannot initiate oneTouchPlay");
+        InvokeCallback(callback, IHdmiControlManager::RESULT_EXCEPTION);
+        return NOERROR;
+    }
+    AddAndStartAction(action);
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::QueryDisplayStatus(
     /* [in] */ IIHdmiControlCallback* callback)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        if (hasAction(DevicePowerStatusAction.class)) {
-            Slogger::W(TAG, "queryDisplayStatus already in progress");
-            invokeCallback(callback, HdmiControlManager.RESULT_ALREADY_IN_PROGRESS);
-            return;
-        }
-        DevicePowerStatusAction action = DevicePowerStatusAction.create(this,
-                Constants::ADDR_TV, callback);
-        if (action == NULL) {
-            Slogger::W(TAG, "Cannot initiate queryDisplayStatus");
-            invokeCallback(callback, HdmiControlManager.RESULT_EXCEPTION);
-            return;
-        }
-        addAndStartAction(action);
-
-#endif
+    AssertRunOnServiceThread();
+    Boolean hasAction;
+    HasAction(ECLSID_CDevicePowerStatusAction, &hasAction);
+    if (hasAction) {
+        Slogger::W(TAG, "queryDisplayStatus already in progress");
+        InvokeCallback(callback, IHdmiControlManager::RESULT_ALREADY_IN_PROGRESS);
+        return NOERROR;
+    }
+    AutoPtr<DevicePowerStatusAction> action;
+    DevicePowerStatusAction::Create(this, Constants::ADDR_TV, callback, (DevicePowerStatusAction**)&action);
+    if (action == NULL) {
+        Slogger::W(TAG, "Cannot initiate queryDisplayStatus");
+        InvokeCallback(callback, IHdmiControlManager::RESULT_EXCEPTION);
+        return NOERROR;
+    }
+    AddAndStartAction(action);
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::InvokeCallback(
     /* [in] */ IIHdmiControlCallback* callback,
     /* [in] */ Int32 result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        try {
-            callback.onComplete(result);
-        } catch (RemoteException e) {
-            Slogger::E(TAG, "Invoking callback failed:" + e);
+    AssertRunOnServiceThread();
+    // try {
+    ECode ec = callback->OnComplete(result);
+    // } catch (RemoteException e) {
+    if (FAILED(ec)) {
+        if ((ECode) E_REMOTE_EXCEPTION == ec) {
+            Slogger::E(TAG, "Invoking callback failed:%d", ec);
         }
-
-#endif
+        else
+            return ec;
+    }
+    // }
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::OnHotplug(
     /* [in] */ Int32 portId,
     /* [in] */ Boolean connected)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        mCecMessageCache.flushAll();
-        // We'll not clear mIsActiveSource on the hotplug event to pass CETC 11.2.2-2 ~ 3.
-        if (connected && mService.isPowerStandbyOrTransient()) {
-            mService.wakeUp();
-        }
-
-#endif
+    AssertRunOnServiceThread();
+    mCecMessageCache->FlushAll();
+    // We'll not clear mIsActiveSource on the hotplug event to pass CETC 11.2.2-2 ~ 3.
+    Boolean isPowerStandbyOrTransient;
+    ((HdmiControlService*)mService.Get())->IsPowerStandbyOrTransient(&isPowerStandbyOrTransient);
+    if (connected && isPowerStandbyOrTransient) {
+        ((HdmiControlService*)mService.Get())->WakeUp();
+    }
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::MarkActiveSource()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        mIsActiveSource = true;
-
-#endif
+    AssertRunOnServiceThread();
+    mIsActiveSource = TRUE;
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::HandleActiveSource(
     /* [in] */ IHdmiCecMessage* message,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        mayResetActiveSource(physicalAddress);
-        return true;  // Broadcast message.
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
-#endif
+    AssertRunOnServiceThread();
+    AutoPtr<ArrayOf<Byte> > params;
+    message->GetParams((ArrayOf<Byte>**)&params);
+    Int32 physicalAddress = HdmiUtils::TwoBytesToInt32(params);
+    MayResetActiveSource(physicalAddress);
+    *result = TRUE;
+    return NOERROR;  // Broadcast message.
 }
 
 ECode HdmiCecLocalDevicePlayback::MayResetActiveSource(
     /* [in] */ Int32 physicalAddress)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (physicalAddress != mService.getPhysicalAddress()) {
-            mIsActiveSource = FALSE;
-        }
-
-#endif
+    Int32 physicalAddr;
+    ((HdmiControlService*)mService.Get())->GetPhysicalAddress(&physicalAddr);
+    if (physicalAddress != physicalAddr) {
+        mIsActiveSource = FALSE;
+    }
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::HandleSetStreamPath(
     /* [in] */ IHdmiCecMessage* message,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        maySetActiveSource(physicalAddress);
-        maySendActiveSource();
-        wakeUpIfActiveSource();
-        return true;  // Broadcast message.
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
-#endif
+    AssertRunOnServiceThread();
+    AutoPtr<ArrayOf<Byte> > params;
+    message->GetParams((ArrayOf<Byte>**)&params);
+    Int32 physicalAddress = HdmiUtils::TwoBytesToInt32(params);
+    MaySetActiveSource(physicalAddress);
+    MaySendActiveSource();
+    WakeUpIfActiveSource();
+    *result = TRUE;
+    return NOERROR;  // Broadcast message.
 }
 
 ECode HdmiCecLocalDevicePlayback::HandleRoutingChange(
     /* [in] */ IHdmiCecMessage* message,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        int newPath = HdmiUtils.twoBytesToInt(message.getParams(), 2);
-        maySetActiveSource(newPath);
-        return true;  // Broadcast message.
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
-#endif
+    AssertRunOnServiceThread();
+    AutoPtr<ArrayOf<Byte> > params;
+    message->GetParams((ArrayOf<Byte>**)&params);
+    Int32 newPath = HdmiUtils::TwoBytesToInt32(params, 2);
+    MaySetActiveSource(newPath);
+    *result = TRUE;
+    return NOERROR;  // Broadcast message.
 }
 
 ECode HdmiCecLocalDevicePlayback::HandleRoutingInformation(
     /* [in] */ IHdmiCecMessage* message,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-        maySetActiveSource(physicalAddress);
-        return true;  // Broadcast message.
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
-#endif
+    AssertRunOnServiceThread();
+    AutoPtr<ArrayOf<Byte> > params;
+    message->GetParams((ArrayOf<Byte>**)&params);
+    Int32 physicalAddress = HdmiUtils::TwoBytesToInt32(params);
+    MaySetActiveSource(physicalAddress);
+    *result = TRUE;
+    return NOERROR;  // Broadcast message.
 }
 
 ECode HdmiCecLocalDevicePlayback::MaySetActiveSource(
     /* [in] */ Int32 physicalAddress)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (physicalAddress == mService.getPhysicalAddress()) {
-            mIsActiveSource = true;
-        } else {
-            mIsActiveSource = FALSE;
-        }
-
-#endif
+    Int32 physicalAddr;
+    ((HdmiControlService*)mService.Get())->GetPhysicalAddress(&physicalAddr);
+    if (physicalAddress == physicalAddr) {
+        mIsActiveSource = TRUE;
+    } else {
+        mIsActiveSource = FALSE;
+    }
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::WakeUpIfActiveSource()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mIsActiveSource && mService.isPowerStandbyOrTransient()) {
-            mService.wakeUp();
-        }
-
-#endif
+    Boolean isPowerStandbyOrTransient;
+    ((HdmiControlService*)mService.Get())->IsPowerStandbyOrTransient(&isPowerStandbyOrTransient);
+    if (mIsActiveSource && isPowerStandbyOrTransient) {
+        ((HdmiControlService*)mService.Get())->WakeUp();
+    }
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::MaySendActiveSource()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mIsActiveSource) {
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
-                    mAddress, mService.getPhysicalAddress()));
-        }
-
-#endif
+    if (mIsActiveSource) {
+        Int32 physicalAddr;
+        ((HdmiControlService*)mService.Get())->GetPhysicalAddress(&physicalAddr);
+        AutoPtr<IHdmiCecMessage> activeSource;
+        HdmiCecMessageBuilder::BuildActiveSource(mAddress, physicalAddr, (IHdmiCecMessage**)&activeSource);
+        ((HdmiControlService*)mService.Get())->SendCecCommand(activeSource);
+    }
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::HandleRequestActiveSource(
     /* [in] */ IHdmiCecMessage* message,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        assertRunOnServiceThread();
-        maySendActiveSource();
-        return true;  // Broadcast message.
+    VALIDATE_NOT_NULL(result)
+    *result = FALSE;
 
-#endif
+    AssertRunOnServiceThread();
+    MaySendActiveSource();
+    *result = TRUE;
+    return NOERROR;  // Broadcast message.
 }
 
 ECode HdmiCecLocalDevicePlayback::DisableDevice(
     /* [in] */ Boolean initiatedByCec,
     /* [in] */ IHdmiCecLocalDevicePendingActionClearedCallback* callback)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super.disableDevice(initiatedByCec, callback);
-        assertRunOnServiceThread();
-        if (!initiatedByCec && mIsActiveSource) {
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildInactiveSource(
-                    mAddress, mService.getPhysicalAddress()));
-        }
-        mIsActiveSource = FALSE;
-        checkIfPendingActionsCleared();
-
-#endif
+    HdmiCecLocalDevice::DisableDevice(initiatedByCec, callback);
+    AssertRunOnServiceThread();
+    if (!initiatedByCec && mIsActiveSource) {
+        Int32 physicalAddr;
+        ((HdmiControlService*)mService.Get())->GetPhysicalAddress(&physicalAddr);
+        AutoPtr<IHdmiCecMessage> cmd;
+        HdmiCecMessageBuilder::BuildInactiveSource(mAddress, physicalAddr, (IHdmiCecMessage**)&cmd);
+        ((HdmiControlService*)mService.Get())->SendCecCommand(cmd);
+    }
+    mIsActiveSource = FALSE;
+    CheckIfPendingActionsCleared();
+    return NOERROR;
 }
 
 ECode HdmiCecLocalDevicePlayback::Dump(
     /* [in] */ IIndentingPrintWriter* pw)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        super.dump(pw);
-        pw.println("mIsActiveSource: " + mIsActiveSource);
-
-#endif
+    HdmiCecLocalDevice::Dump(pw);
+    String s;
+    s.AppendFormat("mIsActiveSource: %s", mIsActiveSource ? "true" : "false");
+    IPrintWriter::Probe(pw)->Println(s);
+    return NOERROR;
 }
 
 } // namespace Hdmi

@@ -1,10 +1,15 @@
 
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/accounts/CChooseResponse.h"
 #include "elastos/droid/accounts/CAccount.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Accounts {
+
+CAR_OBJECT_IMPL(CChooseResponse)
+
+CAR_INTERFACE_IMPL(CChooseResponse, Object, IAccountManagerResponse)
 
 ECode CChooseResponse::OnResult(
     /* [in] */ IBundle* value)

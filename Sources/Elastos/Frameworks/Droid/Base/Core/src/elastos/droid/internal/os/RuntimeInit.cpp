@@ -46,17 +46,19 @@ ECode RuntimeInit::MyTimeZoneGetter::GetId(
 // RuntimeInit::Arguments
 //=================================================================================
 RuntimeInit::Arguments::Arguments(
-    /* [in] */ const ArrayOf<String>& args)
+    /* [in] */ ArrayOf<String>* args)
 {
     ASSERT_SUCCEEDED(ParseArgs(args));
 }
 
 ECode RuntimeInit::Arguments::ParseArgs(
-    /* [in] */ const ArrayOf<String>& args)
+    /* [in] */ ArrayOf<String>* args)
 {
+    assert(args != NULL);
+
     Int32 curArg = 0;
-    for (; curArg < args.GetLength(); curArg++) {
-        String arg = args[curArg];
+    for (; curArg < args->GetLength(); curArg++) {
+        String arg = (*args)[curArg];
 
         if (arg.Equals("--")) {
             curArg++;
@@ -67,17 +69,15 @@ ECode RuntimeInit::Arguments::ParseArgs(
         }
     }
 
-    if (curArg == args.GetLength()) {
+    if (curArg == args->GetLength()) {
         // throw new IllegalArgumentException("Missing classname argument to RuntimeInit!");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
-    mModule = args[curArg++];
-    mStartClass = args[curArg++];
-    mStartArgs = ArrayOf<String>::Alloc(args.GetLength() - curArg);
-    for (Int32 i = 0; i < mStartArgs->GetLength(); ++i) {
-        (*mStartArgs)[i] = args[curArg + i];
-    }
+    mModule = (*args)[curArg++];
+    mStartClass = (*args)[curArg++];
+    mStartArgs = ArrayOf<String>::Alloc(args->GetLength() - curArg);
+    mStartArgs->Copy(0, args, curArg, mStartArgs->GetLength());
     return NOERROR;
 }
 
@@ -329,7 +329,7 @@ ECode RuntimeInit::ApplicationInit(
 
     AutoPtr<Arguments> args;
     // try {
-    args = new Arguments(*argv);
+    args = new Arguments(argv);
     // } catch (IllegalArgumentException ex) {
     //     Slog.e(TAG, ex.getMessage());
     //     // let the process exit
@@ -355,6 +355,22 @@ void RuntimeInit::RedirectLogStreams()
     ICloseable::Probe(err)->Close();
     AutoPtr<AndroidPrintStream> warmStream = new AndroidPrintStream(Logger::WARN, String("System.err"));
     system->SetErr(warmStream);
+}
+
+ECode RuntimeInit::SetApplicationObject(
+    /* [in] */ IBinder* app)
+{
+    mApplicationObject = app;
+    return NOERROR;
+}
+
+ECode RuntimeInit::GetApplicationObject(
+    /* [out] */ IBinder** app)
+{
+    VALIDATE_NOT_NULL(app)
+    *app = mApplicationObject;
+    REFCOUNT_ADD(*app)
+    return NOERROR;
 }
 
 } // namespace Os

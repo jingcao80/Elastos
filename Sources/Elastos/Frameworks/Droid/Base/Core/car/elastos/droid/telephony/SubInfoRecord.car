@@ -14,80 +14,8 @@ module
      * @Involve
      * interface IParcelable
      */
-    [deprecated]
     interface ISubInfoRecord {
 
-        GetSubId(
-            [out] Int64* value);
-
-        SetSubId(
-            [in] Int64 value);
-
-        GetIccId(
-            [out] String* value);
-
-        SetIccId(
-            [in] String value);
-
-        GetSlotId(
-            [out] Int32* value);
-
-        SetSlotId(
-            [in] Int32 value);
-
-        GetDisplayName(
-            [out] String* value);
-
-        SetDisplayName(
-            [in] String value);
-
-        GetNameSource(
-            [out] Int32* value);
-
-        SetNameSource(
-            [in] Int32 value);
-
-        GetColor(
-            [out] Int32* value);
-
-        SetColor(
-            [in] Int32 value);
-
-        GetNumber(
-            [out] String* value);
-
-        SetNumber(
-            [in] String value);
-
-        GetDisplayNumberFormat(
-            [out] Int32* value);
-
-        SetDisplayNumberFormat(
-            [in] Int32 value);
-
-        GetDataRoaming(
-            [out] Int32* value);
-
-        SetDataRoaming(
-            [in] Int32 value);
-
-        GetSimIconRes(
-            [out, callee] ArrayOf<Int32>* value);
-
-        SetSimIconRes(
-            [in] ArrayOf<Int32>* value);
-
-        GetMcc(
-            [out] Int32* value);
-
-        SetMcc(
-            [in] Int32 value);
-
-        GetMnc(
-            [out] Int32* value);
-
-        SetMnc(
-            [in] Int32 value);
     }
 
     } // namespace Telephony

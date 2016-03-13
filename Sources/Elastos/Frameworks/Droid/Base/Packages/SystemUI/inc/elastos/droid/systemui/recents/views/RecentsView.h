@@ -3,11 +3,15 @@
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_VIEWS_RECENTSVIEW_H__
 
 #include "elastos/droid/systemui/recents/RecentsConfiguration.h"
+#include "elastos/droid/systemui/recents/views/DebugOverlayView.h"
+#include "elastos/droid/systemui/recents/views/ViewAnimation.h"
+#include "Elastos.Droid.App.h"
 #include <elastos/droid/os/Runnable.h>
 #include <elastos/droid/widget/FrameLayout.h>
 #include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::App::IActivityOptions;
+using Elastos::Droid::App::IActivityOptionsOnAnimationStartedListener;
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::View::ILayoutInflater;
 using Elastos::Droid::View::IWindowInsets;
@@ -35,7 +39,7 @@ class RecentsView
 private:
     class CallBacks
         : public Object
-        , public ITaskStackViewCallbacks,
+        , public ITaskStackViewCallbacks
         , public IPackageCallbacks
     {
     public:
@@ -90,7 +94,7 @@ private:
         CARAPI OnAnimationStarted();
 
     private:
-        RemoveView* mHost;
+        RecentsView* mHost;
         Boolean mTriggered;
     };
 
@@ -98,16 +102,16 @@ private:
     {
     public:
         LaunchRunnable(
-            /* [in] */ Task* task,
+            /* [in] */ ITask* task,
             /* [in] */ IActivityOptions* launchOpts,
             /* [in] */ Boolean lockToTask,
-            /* [in] */ RecentsView* mHost);
+            /* [in] */ RecentsView* host);
 
         // @Override
         CARAPI Run();
 
     private:
-        AutoPtr<Task> mTask;
+        AutoPtr<ITask> mTask;
         AutoPtr<IActivityOptions> mLaunchOpts;
         Boolean mLockToTask;
         RecentsView* mHost;
@@ -142,7 +146,7 @@ public:
 
     /** Sets the debug overlay */
     CARAPI SetDebugOverlay(
-        /* [in] */ IDebugOverlayView* overlay);
+        /* [in] */ DebugOverlayView* overlay);
 
     /** Set/get the bsp root node */
     CARAPI SetTaskStacks(
@@ -152,28 +156,25 @@ public:
     CARAPI RemoveAllTaskStacks();
 
     /** Launches the focused task from the first stack if possible */
-    CARAPI LaunchFocusedTask(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) LaunchFocusedTask();
 
     /** Launches the task that Recents was launched from, if possible */
-    CARAPI LaunchPreviousTask(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) LaunchPreviousTask();
 
     /** Requests all task stacks to start their enter-recents animation */
     CARAPI StartEnterRecentsAnimation(
-        /* [in] */ ITaskViewEnterContext* ctx);
+        /* [in] */ ViewAnimation::TaskViewEnterContext* ctx);
 
     /** Requests all task stacks to start their exit-recents animation */
     CARAPI StartExitToHomeAnimation(
-        /* [in] */ ITaskViewExitContext* ctx);
+        /* [in] */ ViewAnimation::TaskViewExitContext* ctx);
 
     /** Adds the search bar */
     CARAPI SetSearchBar(
         /* [in] */ IView* searchBar);
 
     /** Returns whether there is currently a search bar */
-    CARAPI HasSearchBar(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) HasSearchBar();
 
     /** Sets the visibility of the search bar */
     CARAPI SetSearchBarVisibility(
@@ -195,8 +196,7 @@ public:
     CARAPI DismissFocusedTask();
 
     /** Unfilters any filtered stacks */
-    CARAPI UnfilterFilteredStacks(
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) UnfilterFilteredStacks();
 
     /**** TaskStackView.TaskStackCallbacks Implementation ****/
 

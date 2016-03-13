@@ -4,12 +4,13 @@
 
 #include <_Elastos.Droid.Server.h>
 #include "elastos/droid/ext/frameworkext.h"
-//#include "elastos/droid/os/SystemService.h"
+#include "elastos/droid/server/SystemService.h"
 #include "elastos/droid/server/appwidget/AppWidgetServiceImpl.h"
 #include <Elastos.Droid.Content.h>
 #include "elastos/core/Object.h"
 
 using Elastos::Droid::Content::IContext;
+using Elastos::Droid::Server::SystemService;
 using Elastos::Droid::Server::AppWidget::AppWidgetServiceImpl;
 using Elastos::Core::Object;
 
@@ -22,7 +23,7 @@ namespace AppWidget {
  * SystemService that publishes an IAppWidgetService.
  */
 class AppWidgetService
-    : public Object // SystemService
+    : public SystemService
 {
 public:
     AppWidgetService();

@@ -1618,8 +1618,9 @@ void CTethering::SendTetherStateChangedBroadcast()
 void CTethering::ShowTetheredNotification(
     /* [in] */ Int32 icon)
 {
-    AutoPtr<INotificationManager> notificationManager;
-    mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&notificationManager);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
+    AutoPtr<INotificationManager> notificationManager = INotificationManager::Probe(obj);
     if (notificationManager == NULL){
         return;
     }
@@ -1683,8 +1684,9 @@ void CTethering::ShowTetheredNotification(
 
 void CTethering::ClearTetheredNotification()
 {
-    AutoPtr<INotificationManager> notificationManager;
-    mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&notificationManager);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
+    AutoPtr<INotificationManager> notificationManager = INotificationManager::Probe(obj);
     if (notificationManager != NULL && mTetheredNotification != NULL) {
         Int32 icon;
         mTetheredNotification->GetIcon(&icon);
@@ -1810,8 +1812,9 @@ ECode CTethering::SetUsbTethering(
 {
     VALIDATE_NOT_NULL(result);
     if (VDBG) Logger::D(TAG, "setUsbTethering(%d)", enable);
-    AutoPtr<IUsbManager> usbManager;
-    mContext->GetSystemService(IContext::USB_SERVICE, (IInterface**)&usbManager);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::USB_SERVICE, (IInterface**)&obj);
+    AutoPtr<IUsbManager> usbManager = IUsbManager::Probe(obj);
 
     {
         AutoLock lock(mPublicSync);

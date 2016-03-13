@@ -1,7 +1,15 @@
 
 #include "elastos/droid/server/hdmi/ActiveSourceHandler.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDeviceTv.h"
+#include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include "elastos/droid/server/hdmi/RoutingControlAction.h"
+#include <elastos/droid/net/ReturnOutValue.h>
+#include <elastos/utility/logging/Slogger.h>
 
-// using Elastos::Droid::Server::Hdmi::HdmiCecLocalDevice::ActiveSource;
+using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
+using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -11,99 +19,113 @@ namespace Hdmi {
 const String ActiveSourceHandler::TAG("ActiveSourceHandler");
 
 ECode ActiveSourceHandler::Create(
-    /* [in] */ HdmiCecLocalDeviceTv* source,
+    /* [in] */ IHdmiCecLocalDeviceTv* source,
     /* [in] */ IIHdmiControlCallback* callback,
     /* [out] */ ActiveSourceHandler** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (source == NULL) {
-            Slogger::E(TAG, "Wrong arguments");
-            return NULL;
-        }
-        return new ActiveSourceHandler(source, callback);
-#endif
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
+
+    if (source == NULL) {
+        Slogger::E(TAG, "Wrong arguments");
+        *result = NULL;
+        return NOERROR;
+    }
+    *result = new ActiveSourceHandler(source, callback);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ActiveSourceHandler::ActiveSourceHandler(
-    /* [in] */ HdmiCecLocalDeviceTv* source,
+    /* [in] */ IHdmiCecLocalDeviceTv* source,
     /* [in] */ IIHdmiControlCallback* callback)
+    : mSource(source)
+    , mCallback(callback)
 {
-#if 0 // TODO: Translate codes below
-        mSource = source;
-        mService = mSource.getService();
-        mCallback = callback;
-#endif
+    ((HdmiCecLocalDeviceTv*) mSource.Get())->GetService((IHdmiControlService**)&mService);
 }
 
 ECode ActiveSourceHandler::Process(
-    /* [in] */ HdmiCecLocalDevice::ActiveSource* newActive)
+    /* [in] */ IHdmiCecLocalDeviceActiveSource* newActive)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        // Seq #17
-        HdmiCecLocalDeviceTv tv = mSource;
-        ActiveSource activeSource = tv.getActiveSource();
-        if (activeSource.equals(newActive)) {
-            invokeCallback(HdmiControlManager.RESULT_SUCCESS);
-            return;
-        }
-        HdmiDeviceInfo device = mService.getDeviceInfo(newActive.logicalAddress);
-        if (device == NULL) {
-            tv.startNewDeviceAction(newActive);
-        }
-        if (!tv.isProhibitMode()) {
-            tv.updateActiveSource(newActive);
-            boolean notifyInputChange = (mCallback == NULL);
-            tv.updateActiveInput(newActive.physicalAddress, notifyInputChange);
-            invokeCallback(HdmiControlManager.RESULT_SUCCESS);
+    // Seq #17
+    AutoPtr<IHdmiCecLocalDeviceTv> tv = mSource;
+    AutoPtr<IHdmiCecLocalDeviceActiveSource> activeSource;
+    ((HdmiCecLocalDeviceTv*) tv.Get())->GetActiveSource((IHdmiCecLocalDeviceActiveSource**)&activeSource);
+    Boolean isEquals;
+    IObject::Probe(activeSource)->Equals(newActive, &isEquals);
+    if (isEquals) {
+        InvokeCallback(IHdmiControlManager::RESULT_SUCCESS);
+        return NOERROR;
+    }
+    AutoPtr<IHdmiDeviceInfo> device;
+    ((HdmiControlService*)mService.Get())->GetDeviceInfo(((HdmiCecLocalDevice::ActiveSource*)newActive)->mLogicalAddress, (IHdmiDeviceInfo**)&device);
+    if (device == NULL) {
+        ((HdmiCecLocalDeviceTv*) tv.Get())->StartNewDeviceAction(newActive);
+    }
+    Boolean isProhibitMode;
+    ((HdmiCecLocalDeviceTv*) tv.Get())->IsProhibitMode(&isProhibitMode);
+    if (!isProhibitMode) {
+        ((HdmiCecLocalDeviceTv*) tv.Get())->UpdateActiveSource(newActive);
+        Boolean notifyInputChange = (mCallback == NULL);
+        ((HdmiCecLocalDeviceTv*) tv.Get())->UpdateActiveInput(((HdmiCecLocalDevice::ActiveSource*)newActive)->mPhysicalAddress, notifyInputChange);
+        InvokeCallback(IHdmiControlManager::RESULT_SUCCESS);
+    } else {
+        // TV is in a mode that should keep its current source/input from
+        // being changed for its operation. Reclaim the active source
+        // or switch the port back to the one used for the current mode.
+        AutoPtr<IHdmiCecLocalDeviceActiveSource> current;
+        ((HdmiCecLocalDeviceTv*) tv.Get())->GetActiveSource((IHdmiCecLocalDeviceActiveSource**)&current);
+        if (((HdmiCecLocalDevice::ActiveSource*)current.Get())->mLogicalAddress == Ptr(this)->Func(this->GetSourceAddress)) {
+            AutoPtr<IHdmiCecMessage> activeSourceCommand;
+            HdmiCecMessageBuilder::BuildActiveSource(
+                    ((HdmiCecLocalDevice::ActiveSource*)current.Get())->mLogicalAddress, ((HdmiCecLocalDevice::ActiveSource*)current.Get())->mPhysicalAddress, (IHdmiCecMessage**)&activeSourceCommand);
+            ((HdmiControlService*)mService.Get())->SendCecCommand(activeSourceCommand);
+            ((HdmiCecLocalDeviceTv*) tv.Get())->UpdateActiveSource(current);
+            InvokeCallback(IHdmiControlManager::RESULT_SUCCESS);
         } else {
-            // TV is in a mode that should keep its current source/input from
-            // being changed for its operation. Reclaim the active source
-            // or switch the port back to the one used for the current mode.
-            ActiveSource current = tv.getActiveSource();
-            if (current.logicalAddress == getSourceAddress()) {
-                HdmiCecMessage activeSourceCommand = HdmiCecMessageBuilder.buildActiveSource(
-                        current.logicalAddress, current.physicalAddress);
-                mService.sendCecCommand(activeSourceCommand);
-                tv.updateActiveSource(current);
-                invokeCallback(HdmiControlManager.RESULT_SUCCESS);
-            } else {
-                HdmiCecMessage routingChange = HdmiCecMessageBuilder.buildRoutingChange(
-                        getSourceAddress(), newActive.physicalAddress, current.physicalAddress);
-                mService.sendCecCommand(routingChange);
-                tv.addAndStartAction(
-                        new RoutingControlAction(tv, current.physicalAddress, true, mCallback));
-            }
+            AutoPtr<IHdmiCecMessage> routingChange;
+            Int32 address;
+            GetSourceAddress(&address);
+            HdmiCecMessageBuilder::BuildRoutingChange(
+                    address, ((HdmiCecLocalDevice::ActiveSource*)newActive)->mPhysicalAddress, ((HdmiCecLocalDevice::ActiveSource*)current.Get())->mPhysicalAddress, (IHdmiCecMessage**)&routingChange);
+            ((HdmiControlService*)mService.Get())->SendCecCommand(routingChange);
+            AutoPtr<RoutingControlAction> action = new RoutingControlAction();
+            action->constructor(IHdmiCecLocalDevice::Probe(tv), ((HdmiCecLocalDevice::ActiveSource*)current.Get())->mPhysicalAddress, TRUE, mCallback);
+            ((HdmiCecLocalDeviceTv*) tv.Get())->AddAndStartAction(action.Get());
         }
-#endif
+    }
+    return NOERROR;
 }
 
 ECode ActiveSourceHandler::GetSourceAddress(
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mSource.getDeviceInfo().getLogicalAddress();
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IHdmiDeviceInfo> info;
+    ((HdmiCecLocalDeviceTv*) mSource.Get())->GetDeviceInfo((IHdmiDeviceInfo**)&info);
+    return info->GetLogicalAddress(result);
 }
 
 ECode ActiveSourceHandler::InvokeCallback(
     /* [in] */ Int32 result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mCallback == NULL) {
-            return;
+    if (mCallback == NULL) {
+        return NOERROR;
+    }
+    // try {
+    ECode ec = mCallback->OnComplete(result);
+    // } catch (RemoteException e) {
+    if (FAILED(ec)) {
+        if ((ECode) E_REMOTE_EXCEPTION == ec) {
+            Slogger::E(TAG, "Callback failed: %d", ec);
         }
-        try {
-            mCallback.onComplete(result);
-        } catch (RemoteException e) {
-            Slogger::E(TAG, "Callback failed:" + e);
-        }
-
-#endif
+        else
+            return ec;
+    }
+    // }
+    return NOERROR;
 }
 
 } // namespace Hdmi

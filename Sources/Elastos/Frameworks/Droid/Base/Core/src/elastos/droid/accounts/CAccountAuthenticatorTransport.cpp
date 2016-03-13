@@ -11,11 +11,15 @@ namespace Elastos {
 namespace Droid {
 namespace Accounts {
 
+CAR_OBJECT_IMPL(CAccountAuthenticatorTransport)
+
+CAR_INTERFACE_IMPL(CAccountAuthenticatorTransport, Object, IIAccountAuthenticator)
+
 ECode CAccountAuthenticatorTransport::AddAccount(
     /* [in] */ IIAccountAuthenticatorResponse* response,
     /* [in] */ const String& accountType,
     /* [in] */ const String& authTokenType,
-    /* [in] */ const ArrayOf<String>& requiredFeatures,
+    /* [in] */ ArrayOf<String>* requiredFeatures,
     /* [in] */ IBundle* options)
 {
     // if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -248,7 +252,7 @@ ECode CAccountAuthenticatorTransport::EditProperties(
 ECode CAccountAuthenticatorTransport::HasFeatures(
     /* [in] */ IIAccountAuthenticatorResponse* response,
     /* [in] */ IAccount* account,
-    /* [in] */ const ArrayOf<String>& features)
+    /* [in] */ ArrayOf<String>* features)
 {
     FAIL_RETURN(mHost->CheckBinderPermission());
     // try {
@@ -310,6 +314,42 @@ ECode CAccountAuthenticatorTransport::constructor(
     /* [in] */ Handle32 accounts)
 {
     mHost = (AbstractAccountAuthenticator*)accounts;
+    return NOERROR;
+}
+
+ECode CAccountAuthenticatorTransport::GetAccountCredentialsForCloning(
+    /* [in] */ IIAccountAuthenticatorResponse* response,
+    /* [in] */ IAccount* account)
+{
+    FAIL_RETURN(mHost->CheckBinderPermission());
+
+    AutoPtr<IAccountAuthenticatorResponse> aar;
+    CAccountAuthenticatorResponse::New(response, (IAccountAuthenticatorResponse**)&aar);
+    AutoPtr<IBundle> result;
+    // AbstractAccountAuthenticator.this.getAccountCredentialsForCloning(
+    //         aar, account, (IBundle**)&result);
+    if (result != NULL) {
+        response->OnResult(result);
+    }
+    return NOERROR;
+}
+
+ECode CAccountAuthenticatorTransport::AddAccountFromCredentials(
+    /* [in] */ IIAccountAuthenticatorResponse* response,
+    /* [in] */ IAccount* account,
+    /* [in] */ IBundle* accountCredentials)
+{
+    FAIL_RETURN(mHost->CheckBinderPermission());
+
+    AutoPtr<IAccountAuthenticatorResponse> aar;
+    CAccountAuthenticatorResponse::New(response, (IAccountAuthenticatorResponse**)&aar);
+    AutoPtr<IBundle> result;
+    // AbstractAccountAuthenticator.this.addAccountFromCredentials(
+    //         aar, account,
+    //         accountCredentials, (IBundle**)&result);
+    if (result != NULL) {
+        response->OnResult(result);
+    }
     return NOERROR;
 }
 

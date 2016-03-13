@@ -1,6 +1,8 @@
 
 module
 {
+    enum Elastos.Droid.Internal.Telephony.IccCardConstantsState;
+
     //
     // Elastos.Droid.Net
     //
@@ -84,7 +86,53 @@ module
     namespace Droid {
     namespace Keyguard {
 
-        interface IViewMediatorCallback {}
+        interface IViewMediatorCallback {
+            SetNeedsInput(
+                [in] Boolean needsInput);
+
+            OnUserActivityTimeoutChanged();
+
+            KeyguardDonePending();
+
+            KeyguardGone();
+
+            ReadyForKeyguardDone();
+
+            PlayTrustedSound();
+        }
+
+        interface IKeyguardUpdateMonitorCallback {
+            OnUserSwitching(
+                [in] Int32 userId);
+
+            OnUserSwitchComplete(
+                [in] Int32 userId);
+
+            OnUserRemoved(
+                [in] Int32 userId);
+
+            OnUserInfoChanged(
+                [in] Int32 userId);
+
+            OnPhoneStateChanged(
+                [in] Int32 phoneState);
+
+            OnClockVisibilityChanged();
+
+            OnDeviceProvisioned();
+
+            OnSimStateChanged(
+                [in] IccCardConstantsState simState);
+
+            OnFingerprintRecognized(
+                [in] Int32 userId);
+        }
+
+        interface IKeyguardUpdateMonitor {
+        }
+
+        interface IKeyguardDisplayManager {
+        }
 
         namespace KeyguardHostView {
             interface IOnDismissAction {}

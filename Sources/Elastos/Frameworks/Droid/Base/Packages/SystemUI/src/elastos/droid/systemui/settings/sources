@@ -1,0 +1,13 @@
+
+TARGET_NAME= settings
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = ToggleSlider.cpp
+SOURCES += BrightnessController.cpp
+SOURCES += ToggleSeekBar.cpp
+SOURCES += CurrentUserTracker.cpp
+SOURCES += BrightnessDialog.cpp

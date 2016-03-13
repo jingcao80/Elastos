@@ -134,23 +134,22 @@ CAR_OBJECT_IMPL(CInputManager);
 
 CInputManager::CInputManager()
 {
-    AutoPtr<IServiceManager> sm;
-    ASSERT_SUCCEEDED(CServiceManager::AcquireSingleton((IServiceManager**)&sm));
-    AutoPtr<IInterface> service;
-    ASSERT_SUCCEEDED(sm->GetService(IContext::INPUT_SERVICE, (IInterface**)&service));
-    mIm = IIInputManager::Probe(service);
-}
-
-CInputManager::CInputManager(
-    /* [in] */ IIInputManager* im)
-    : mIm(im)
-{
 }
 
 CInputManager::~CInputManager()
 {
     mInputDevices = NULL;
     mInputDeviceListeners.Clear();
+}
+
+ECode CInputManager::constructor()
+{
+    AutoPtr<IServiceManager> sm;
+    ASSERT_SUCCEEDED(CServiceManager::AcquireSingleton((IServiceManager**)&sm));
+    AutoPtr<IInterface> service;
+    ASSERT_SUCCEEDED(sm->GetService(IContext::INPUT_SERVICE, (IInterface**)&service));
+    mIm = IIInputManager::Probe(service);
+    return NOERROR;
 }
 
 AutoPtr<IInputManager> CInputManager::GetInstance()

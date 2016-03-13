@@ -11,6 +11,7 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CPathDashPathEffect);
+CAR_INTERFACE_IMPL(CPathDashPathEffect, PathEffect, IPathDashPathEffect);
 ECode CPathDashPathEffect::constructor(
     /* [in] */ IPath* shape,
     /* [in] */ Float advance,
@@ -23,35 +24,6 @@ ECode CPathDashPathEffect::constructor(
                         phase,
                         style);
     return NOERROR;
-}
-
-PInterface CPathDashPathEffect::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_PathEffect) {
-        return reinterpret_cast<PInterface>((PathEffect*)this);
-    }
-    else if (riid == EIID_IPathDashPathEffect) {
-        return (IPathDashPathEffect*)this;
-    }
-    return PathEffect::Probe(riid);
-}
-
-UInt32 CPathDashPathEffect::AddRef()
-{
-    return PathEffect::AddRef();
-}
-
-UInt32 CPathDashPathEffect::Release()
-{
-    return PathEffect::Release();
-}
-
-ECode CPathDashPathEffect::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return PathEffect::GetInterfaceID(object, iid);
 }
 
 Int64 CPathDashPathEffect::NativeCreate(

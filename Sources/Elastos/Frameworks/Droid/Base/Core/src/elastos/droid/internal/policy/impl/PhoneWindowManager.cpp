@@ -43,7 +43,7 @@
 #include "elastos/droid/R.h"
 #include "elastos/droid/server/LocalServices.h"
 #include "elastos/droid/media/CAudioAttributesBuilder.h"
-//TODO #include "elastos/droid/media/CRingtoneManagerHelper.h"
+#include "elastos/droid/media/CRingtoneManagerHelper.h"
 #include "elastos/droid/media/session/CMediaSessionLegacyHelperHelper.h"
 #include "elastos/droid/Manifest.h"
 #include "elastos/droid/view/animation/CAnimationUtils.h"
@@ -92,7 +92,7 @@ using Elastos::Droid::Internal::Policy::Impl::Keyguard::CKeyguardServiceDelegate
 using Elastos::Droid::Internal::Policy::Impl::Keyguard::EIID_IKeyguardServiceDelegateShowListener;
 using Elastos::Droid::Internal::Widget::CPointerLocationView;
 using Elastos::Droid::Media::CAudioAttributesBuilder;
-//TODO using Elastos::Droid::Media::CRingtoneManagerHelper;
+using Elastos::Droid::Media::CRingtoneManagerHelper;
 using Elastos::Droid::Media::IAudioAttributesBuilder;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Media::IRingtone;
@@ -246,11 +246,11 @@ static AutoPtr<CRect> InitCRect()
     return tmp;
 }
 
-String PhoneWindowManager::SYSTEM_DIALOG_REASON_KEY = String("reason");
-String PhoneWindowManager::SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = String("globalactions");
-String PhoneWindowManager::SYSTEM_DIALOG_REASON_RECENT_APPS = String("recentapps");
-String PhoneWindowManager::SYSTEM_DIALOG_REASON_HOME_KEY = String("homekey");
-String PhoneWindowManager::SYSTEM_DIALOG_REASON_ASSIST = String("assist");
+String PhoneWindowManager::SYSTEM_DIALOG_REASON_KEY("reason");
+String PhoneWindowManager::SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS("globalactions");
+String PhoneWindowManager::SYSTEM_DIALOG_REASON_RECENT_APPS("recentapps");
+String PhoneWindowManager::SYSTEM_DIALOG_REASON_HOME_KEY("homekey");
+String PhoneWindowManager::SYSTEM_DIALOG_REASON_ASSIST("assist");
 
 const Int32 PhoneWindowManager::SYSTEM_UI_CHANGING_LAYOUT =
         IView::SYSTEM_UI_FLAG_HIDE_NAVIGATION | IView::SYSTEM_UI_FLAG_FULLSCREEN
@@ -488,9 +488,9 @@ PhoneWindowManager::ClearHideNavigationFlagRunnable::ClearHideNavigationFlagRunn
 ECode PhoneWindowManager::ClearHideNavigationFlagRunnable::Run()
 {
     {
-        AutoPtr<IInterface> obj;
-        mHost->mWindowManagerFuncs->GetWindowManagerLock((IInterface**)&obj);
-        AutoLock lock((Object*)IObject::Probe(obj));
+        AutoPtr<ISynchronize> obj;
+        mHost->mWindowManagerFuncs->GetWindowManagerLock((ISynchronize**)&obj);
+        AutoLock lock(obj);
         // Clear flags.
         mHost->mForceClearedSystemUiFlags &= ~IView::SYSTEM_UI_FLAG_HIDE_NAVIGATION;
     }
@@ -703,9 +703,9 @@ ECode PhoneWindowManager::HideNavInputEventReceiver::OnInputEvent(
             // When the user taps down, we re-show the nav bar.
             Boolean changed = FALSE;
             {
-                AutoPtr<IInterface> obj;
-                mHost->mWindowManagerFuncs->GetWindowManagerLock((IInterface**)&obj);
-                AutoLock lock((Object*)IObject::Probe(obj));
+                AutoPtr<ISynchronize> obj;
+                mHost->mWindowManagerFuncs->GetWindowManagerLock((ISynchronize**)&obj);
+                AutoLock lock(obj);
                 // Any user activity always causes us to show the
                 // navigation controls, if they had been hidden.
                 // We also clear the low profile and only content
@@ -895,9 +895,9 @@ ECode PhoneWindowManager::MultiuserBroadReceiver::OnReceive(
         // the window may never have been shown for this user
         // e.g. the keyguard when going through the new-user setup flow
         {
-            AutoPtr<IInterface> obj;
-            mHost->mWindowManagerFuncs->GetWindowManagerLock((IInterface**)&obj);
-            AutoLock lock((Object*)IObject::Probe(obj));
+            AutoPtr<ISynchronize> obj;
+            mHost->mWindowManagerFuncs->GetWindowManagerLock((ISynchronize**)&obj);
+            AutoLock lock(obj);
             mHost->mLastSystemUiFlags = 0;
             mHost->UpdateSystemUiVisibilityLw();
         }
@@ -1571,12 +1571,10 @@ PhoneWindowManager::PhoneWindowManager()
     , mCurrentUserId(0)
     , mForceDefaultOrientation(FALSE)
 {
-    //ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTmpParentFrame));
-    //ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTmpDisplayFrame));
-    //ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTmpContentFrame));
-    //ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTmpVisibleFrame));
-    //ASSERT_SUCCEEDED(CRect::NewByFriend((CRect**)&mTmpNavigationFrame));
+}
 
+ECode PhoneWindowManager::constructor()
+{
     memset(mNavigationBarHeightForRotation, 0, sizeof(mNavigationBarHeightForRotation));
     memset(mNavigationBarWidthForRotation, 0, sizeof(mNavigationBarWidthForRotation));
 
@@ -1614,6 +1612,7 @@ PhoneWindowManager::PhoneWindowManager()
     mHomeDoubleTapTimeoutRunnable = new HomeDoubleTapTimeoutRunnable(this);
     mClearHideNavigationFlag = new ClearHideNavigationFlagRunnable(this);
     mRequestTransientNav = new RequestTransientBarsRunnable(this);
+    return NOERROR;
 }
 
 AutoPtr<IIStatusBarService> PhoneWindowManager::GetStatusBarService()
@@ -1675,7 +1674,7 @@ void PhoneWindowManager::UpdateOrientationListenerLp()
     // change of the currently visible window's orientation
     if (localLOGV)
         Slogger::V(TAG, "mScreenOnEarly=%d, mAwake=%d, mCurrentAppOrientation=%d, mOrientationSensorEnabled=%d",
-                                mScreenOnEarly, mAwake, mCurrentAppOrientation, mOrientationSensorEnabled);
+             mScreenOnEarly, mAwake, mCurrentAppOrientation, mOrientationSensorEnabled);
     Boolean disable = TRUE;
     if (mScreenOnEarly && mAwake) {
         if (NeedSensorRunningLp()) {
@@ -1922,8 +1921,8 @@ ECode PhoneWindowManager::Init(
     AutoPtr<ISystemProperties> sp;
     CSystemProperties::AcquireSingleton((ISystemProperties**)&sp);
 
-     mWindowManagerInternal = IWindowManagerInternal::Probe(LocalServices::GetService(EIID_IWindowManagerInternal));
-     mDreamManagerInternal = IDreamManagerInternal::Probe(LocalServices::GetService(EIID_IDreamManagerInternal));
+    mWindowManagerInternal = IWindowManagerInternal::Probe(LocalServices::GetService(EIID_IWindowManagerInternal));
+    mDreamManagerInternal = IDreamManagerInternal::Probe(LocalServices::GetService(EIID_IDreamManagerInternal));
 
     mHandler = new PolicyHandler(this);
     mWakeGestureListener = new MyWakeGestureListener(mContext, mHandler, this);
@@ -1962,7 +1961,9 @@ ECode PhoneWindowManager::Init(
     mDeskDockIntent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
         | IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
-    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&mPowerManager);
+    AutoPtr<IInterface> service;
+    context->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&service);
+    mPowerManager = IPowerManager::Probe(service);
     mPowerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
             String("PhoneWindowManager.mBroadcastWakeLock"), (IPowerManagerWakeLock**)&mBroadcastWakeLock);
     String equalsStr2;
@@ -2030,7 +2031,10 @@ ECode PhoneWindowManager::Init(
             , (ISystemGesturesPointerEventListener**)&mSystemGestures);
     CImmersiveModeConfirmation::New(mContext, (IImmersiveModeConfirmation**)&mImmersiveModeConfirmation);
     mWindowManagerFuncs->RegisterPointerEventListener(IPointerEventListener::Probe(mSystemGestures));
-    context->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&mVibrator);
+
+    service = NULL;
+    context->GetSystemService(IContext::VIBRATOR_SERVICE, (IInterface**)&service);
+    mVibrator = IVibrator::Probe(service);
 
     mLongPressVibePattern = GetLongIntArray(resources,
             R::array::config_longPressVibePattern);
@@ -2314,13 +2318,14 @@ void PhoneWindowManager::EnablePointerLocation()
         AutoPtr<ICharSequence> title;
         CString::New(String("PointerLocation"), (ICharSequence**)&title);
         lp->SetTitle(title);
-        AutoPtr<IWindowManager> wm;
-        mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&wm);
+
+        AutoPtr<IInterface> service;
+        mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&service);
+        AutoPtr<IViewManager> vm = IViewManager::Probe(service);
 
         Int32 inputFeatures = 0;
         lp->GetInputFeatures(&inputFeatures);
         lp->SetInputFeatures(inputFeatures | IWindowManagerLayoutParams::INPUT_FEATURE_NO_INPUT_CHANNEL);
-        AutoPtr<IViewManager> vm = IViewManager::Probe(wm);
         vm->AddView(IView::Probe(mPointerLocationView), IViewGroupLayoutParams::Probe(lp));
 
         mWindowManagerFuncs->RegisterPointerEventListener(IPointerEventListener::Probe(mPointerLocationView));
@@ -2331,10 +2336,12 @@ void PhoneWindowManager::DisablePointerLocation()
 {
     if (mPointerLocationView != NULL) {
         mWindowManagerFuncs->UnregisterPointerEventListener(IPointerEventListener::Probe(mPointerLocationView));
-        AutoPtr<IWindowManager> wm;
-        mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&wm);
 
-        IViewManager::Probe(wm)->RemoveView(IView::Probe(mPointerLocationView));
+        AutoPtr<IInterface> service;
+        mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&service);
+        AutoPtr<IViewManager> vm = IViewManager::Probe(service);
+
+        vm->RemoveView(IView::Probe(mPointerLocationView));
         mPointerLocationView = NULL;
     }
 }
@@ -2602,9 +2609,7 @@ ECode PhoneWindowManager::WindowTypeToLayerLw(
     /* [in] */ Int32 type,
     /* [out] */ Int32* layer)
 {
-    if (layer == NULL) {
-        return E_INVALID_ARGUMENT;
-    }
+    VALIDATE_NOT_NULL(layer)
 
     *layer = 2;
     if (type >= IWindowManagerLayoutParams::FIRST_APPLICATION_WINDOW && type <=
@@ -2734,9 +2739,7 @@ ECode PhoneWindowManager::SubWindowTypeToLayerLw(
     /* [in] */ Int32 type,
     /* [out] */ Int32* layer)
 {
-    if (layer == NULL) {
-        return E_INVALID_ARGUMENT;
-    }
+    VALIDATE_NOT_NULL(layer)
 
     switch (type) {
         case IWindowManagerLayoutParams::TYPE_APPLICATION_PANEL:
@@ -2797,6 +2800,7 @@ ECode PhoneWindowManager::GetNonDecorDisplayHeight(
     /* [in] */ Int32 rotation,
     /* [out] */ Int32* height)
 {
+    VALIDATE_NOT_NULL(height)
     if (mHasNavigationBar) {
         // For a basic navigation bar, when we are in portrait mode we place
         // the navigation bar to the bottom.
@@ -2868,9 +2872,7 @@ ECode PhoneWindowManager::CanBeForceHidden(
     /* [in] */ IWindowManagerLayoutParams* attrs,
     /* [out] */ Boolean* hiden)
 {
-    if (hiden == NULL) {
-        return E_INVALID_ARGUMENT;
-    }
+    VALIDATE_NOT_NULL(hiden)
 
     Int32 type = 0;
     attrs->GetType(&type);
@@ -3017,8 +3019,10 @@ ECode PhoneWindowManager::AddStartingWindow(
         CString::New(String("Starting ") + packageName, (ICharSequence**)&tl);
         lp->SetTitle(tl);
 
-        AutoPtr<IWindowManager> wm;
-        context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&wm);
+        AutoPtr<IInterface> service;
+        mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&service);
+        AutoPtr<IViewManager> vm = IViewManager::Probe(service);
+        AutoPtr<IWindowManager> wm = IWindowManager::Probe(service);
 
         AutoPtr<IView> view;
         win->GetDecorView((IView**)&view);
@@ -3035,7 +3039,7 @@ ECode PhoneWindowManager::AddStartingWindow(
            return NOERROR;
         }
 
-        ec = IViewManager::Probe(wm)->AddView(view, IViewGroupLayoutParams::Probe(lp));
+        ec = vm->AddView(view, IViewGroupLayoutParams::Probe(lp));
         if (FAILED(ec)) {
             return ec;
         }
@@ -3081,9 +3085,9 @@ ECode PhoneWindowManager::RemoveStartingWindow(
     }
 
     if (window != NULL) {
-        AutoPtr<IWindowManager> wm;
-        mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&wm);
-        IViewManager::Probe(wm)->RemoveView(window);
+        AutoPtr<IInterface> service;
+        mContext->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&service);
+        IViewManager::Probe(service)->RemoveView(window);
     }
 
     return NOERROR;
@@ -3094,9 +3098,7 @@ ECode PhoneWindowManager::PrepareAddWindowLw(
     /* [in] */ IWindowManagerLayoutParams* attrs,
     /* [out] */ Int32* added)
 {
-    if (added == NULL) {
-        return E_INVALID_ARGUMENT;
-    }
+    VALIDATE_NOT_NULL(added)
     Int32 type = 0;
     attrs->GetType(&type);
     switch (type) {
@@ -4027,8 +4029,9 @@ void PhoneWindowManager::LaunchAssistAction(
     /* [in] */ const String& hint)
 {
     SendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
-    AutoPtr<ISearchManager> searchManager;
-    mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&searchManager);
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::SEARCH_SERVICE, (IInterface**)&service);
+    AutoPtr<ISearchManager> searchManager = ISearchManager::Probe(service);
     AutoPtr<IIntent> intent;
     searchManager->GetAssistIntent(mContext, TRUE, IUserHandle::USER_CURRENT, (IIntent**)&intent);
 
@@ -4366,11 +4369,10 @@ ECode PhoneWindowManager::BeginLayoutLw(
             AutoPtr<ILooper> looper;
             mHandler->GetLooper((ILooper**)&looper);
 
-            //TODO
-            //mWindowManagerFuncs->AddFakeWindow(
-            //        looper, mHideNavInputEventReceiverFactory,
-            //        String("hidden nav"), IWindowManagerLayoutParams::TYPE_HIDDEN_NAV_CONSUMER, 0,
-            //        0, FALSE, FALSE, TRUE, (IFakeWindow**)&mHideNavFakeWindow);
+            mWindowManagerFuncs->AddFakeWindow(
+                   looper, mHideNavInputEventReceiverFactory,
+                   String("hidden nav"), IWindowManagerLayoutParams::TYPE_HIDDEN_NAV_CONSUMER, 0,
+                   0, FALSE, FALSE, TRUE, (IFakeWindow**)&mHideNavFakeWindow);
         }
 
         // For purposes of positioning and showing the nav bar, if we have
@@ -5936,7 +5938,7 @@ ECode PhoneWindowManager::InterceptKeyBeforeQueueing(
             if (down) {
                 Int64 downTime;
                 event->GetDownTime(&downTime);
-                Boolean panic;
+                Boolean panic = FALSE;
                 if (panic)
                 {
                     Boolean isSuccess = FALSE;
@@ -6143,9 +6145,9 @@ Boolean PhoneWindowManager::ShouldDispatchInputWhenNonInteractive()
 void PhoneWindowManager::RequestTransientBars(
     /* [in] */ IWindowState* swipeTarget)
 {
-    AutoPtr<IInterface> obj;
-    mWindowManagerFuncs->GetWindowManagerLock((IInterface**)&obj);
-    AutoLock lock((Object*)IObject::Probe(obj));
+    AutoPtr<ISynchronize> obj;
+    mWindowManagerFuncs->GetWindowManagerLock((ISynchronize**)&obj);
+    AutoLock lock(obj);
     if (!IsUserSetupComplete()) {
         // Swipe-up for navigation bar is disabled during setup
         return;
@@ -7030,6 +7032,7 @@ void PhoneWindowManager::UpdateUiMode()
     if (mUiModeManager == NULL) {
         AutoPtr<IInterface> tmpObj = ServiceManager::GetService(IContext::UI_MODE_SERVICE);
         mUiModeManager = IIUiModeManager::Probe(tmpObj);
+        assert(mUiModeManager != NULL);
     }
     //try {
         mUiModeManager->GetCurrentModeType(&mUiMode);
@@ -7105,6 +7108,7 @@ AutoPtr<IIntent> PhoneWindowManager::CreateHomeDockIntent()
         if (metaData != NULL) {
             Boolean bTemp;
             if (metaData->GetBoolean(IIntent::METADATA_DOCK_HOME, &bTemp), bTemp) {
+                intent = NULL;
                 CIntent::New((IIntent**)&intent);
                 String packageName;
                 String name;
@@ -7157,6 +7161,7 @@ Boolean PhoneWindowManager::GoHome()
         // This code brings home to the front or, if it is already
         // at the front, puts the device to sleep.
         // try {
+        String nullStr;
         Int32 testMode;
         SystemProperties::GetInt32(String("persist.sys.uts-test-mode"), 0, &testMode);
         if (testMode == 1) {
@@ -7173,11 +7178,10 @@ Boolean PhoneWindowManager::GoHome()
                 String type;
                 dock->ResolveTypeIfNeeded(resolver, &type);
                 Int32 result;
-                am->StartActivityAsUser(NULL, String(NULL), dock,
-                            type,
-                            NULL, String(NULL), 0,
-                            IActivityManager::START_FLAG_ONLY_IF_NEEDED,
-                            NULL, NULL, IUserHandle::USER_CURRENT, &result);
+                am->StartActivityAsUser(NULL, nullStr, dock,
+                    type, NULL, nullStr, 0,
+                    IActivityManager::START_FLAG_ONLY_IF_NEEDED,
+                    NULL, NULL, IUserHandle::USER_CURRENT, &result);
                 if (result == IActivityManager::START_RETURN_INTENT_TO_CALLER) {
                     return FALSE;
                 }
@@ -7186,10 +7190,12 @@ Boolean PhoneWindowManager::GoHome()
 
         AutoPtr<IContentResolver> resolver;
         mContext->GetContentResolver((IContentResolver**)&resolver);
-        String type, nullStr;
+        String type;
         mHomeIntent->ResolveTypeIfNeeded(resolver, &type);
         Int32 result;
-        am->StartActivityAsUser(NULL, String(NULL), mHomeIntent, type, NULL, nullStr, 0, IActivityManager::START_FLAG_ONLY_IF_NEEDED, NULL, NULL, IUserHandle::USER_CURRENT, &result);
+        am->StartActivityAsUser(NULL, nullStr, mHomeIntent, type, NULL, nullStr, 0,
+            IActivityManager::START_FLAG_ONLY_IF_NEEDED, NULL, NULL,
+            IUserHandle::USER_CURRENT, &result);
         if (result == IActivityManager::START_RETURN_INTENT_TO_CALLER) {
             return FALSE;
         }
@@ -7203,10 +7209,9 @@ Boolean PhoneWindowManager::GoHome()
 //TODO start TelecomManager is not implemented
 //AutoPtr<ITelecomManager> PhoneWindowManager::GetTelecommService()
 //{
-//    AutoPtr<IInterface> service;
-//    mContext->GetSystemService(IContext::TELECOM_SERVICE, (IInterface**)&service);
-//    AutoPtr<ITelecomManager> telecomManager = ITelecomManager::Probe(service);
-//    return telecomManager;
+    // AutoPtr<IInterface> service;
+    // mContext->GetSystemService(IContext::TELECOM_SERVICE, (IInterface**)&service);
+//    return ITelecomManager::Probe(service);
 //}
 //TODO end
 
@@ -7240,7 +7245,7 @@ void PhoneWindowManager::PerformAuditoryFeedbackForAccessibilityIfNeed()
     }
 
     AutoPtr<IRingtoneManagerHelper> helper;
-    //TODO CRingtoneManagerHelper::AcquireSingleton((IRingtoneManagerHelper**)&helper);
+    CRingtoneManagerHelper::AcquireSingleton((IRingtoneManagerHelper**)&helper);
     AutoPtr<IRingtone> ringTone;
     helper->GetRingtone(mContext, Settings::System::DEFAULT_NOTIFICATION_URI, (IRingtone**)&ringTone);
     ringTone->SetStreamType(IAudioManager::STREAM_MUSIC);
@@ -7322,10 +7327,10 @@ ECode PhoneWindowManager::PerformHapticFeedbackLw(
 
     if (pattern->GetLength() == 1) {
         // One-shot vibration
-        //TODO mVibrator->Vibrate(owningUid, owningPackage, (*pattern)[0], VIBRATION_ATTRIBUTES);
+        mVibrator->Vibrate(owningUid, owningPackage, (*pattern)[0], VIBRATION_ATTRIBUTES);
     } else {
         // Pattern vibration
-        //TODO mVibrator->Vibrate(owningUid, owningPackage, pattern, -1, VIBRATION_ATTRIBUTES);
+        mVibrator->Vibrate(owningUid, owningPackage, pattern, -1, VIBRATION_ATTRIBUTES);
     }
     *isSucceed = TRUE;
     return NOERROR;

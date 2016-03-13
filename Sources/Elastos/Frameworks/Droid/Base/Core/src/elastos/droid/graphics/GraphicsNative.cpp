@@ -11,6 +11,9 @@
 #include "elastos/droid/graphics/CCanvas.h"
 #include "elastos/droid/graphics/Paint.h"
 #include <skia/core/SkDither.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -341,33 +344,32 @@ ECode GraphicsNative::AllocateDroidPixelRef(
     /* [out] */ ArrayOf<Byte>** pixelRef)
 {
     VALIDATE_NOT_NULL(pixelRef);
+    *pixelRef = NULL;
 
-    assert(0 && "TODO");
-    // Sk64 size64 = bitmap->getSize64();
-    // if (size64.isNeg() || !size64.is32()) {
-    //     // jniThrowException(env, "java/lang/IllegalArgumentException",
-    //     //                   "bitmap size exceeds 32bits");
-    //     *pixelRef = NULL;
-    //     return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    // }
+    const SkImageInfo& info = bitmap->info();
+    if (info.fColorType == kUnknown_SkColorType) {
+        Logger::E("GraphicsNative", "AllocateDroidPixelRef: unknown bitmap configuration.");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
 
-    // size_t size = size64.get32();
-    // AutoPtr< ArrayOf<Byte> > arrayObj = ArrayOf<Byte>::Alloc(size);
-    // if (arrayObj) {
-    //     // TODO: make this work without jniGetNonMovableArrayElements
-    //     Byte* addr = arrayObj->GetPayload();
-    //     if (addr) {
-    //         assert(0 && "TODO");
-    //         SkPixelRef* pr/* = new DroidPixelRef((void*)addr, size, arrayObj, ctable)*/;
-    //         bitmap->setPixelRef(pr)->unref();
-    //         // since we're already allocated, we lockPixels right away
-    //         // HeapAllocator behaves this way too
-    //         bitmap->lockPixels();
-    //     }
-    // }
+    const size_t size = bitmap->getSize();
+    AutoPtr<ArrayOf<Byte> > arrayObj = ArrayOf<Byte>::Alloc(size);
+    if (arrayObj == NULL) {
+        Logger::E("GraphicsNative", "AllocateDroidPixelRef: out of memory.");
+        return E_OUT_OF_MEMORY_ERROR;
+    }
 
-    // *pixelRef = arrayObj;
-    // REFCOUNT_ADD(*pixelRef);
+    Byte* addr = (Byte*)arrayObj->GetPayload();
+    SkASSERT(addr);
+    SkPixelRef* pr = new DroidPixelRef(info, (void*) addr,
+            bitmap->rowBytes(), arrayObj, ctable);
+    bitmap->setPixelRef(pr)->unref();
+    // since we're already allocated, we lockPixels right away
+    // HeapAllocator behaves this way too
+    bitmap->lockPixels();
+
+    *pixelRef = arrayObj;
+    REFCOUNT_ADD(*pixelRef)
     return NOERROR;
 }
 

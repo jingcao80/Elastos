@@ -2,18 +2,40 @@
 #ifndef __ELASTOS_DROID_TELEPHONY_CPHONENUMBERFORMATTINGTEXTWATCHER_H__
 #define __ELASTOS_DROID_TELEPHONY_CPHONENUMBERFORMATTINGTEXTWATCHER_H__
 
+#include <Elastos.CoreLibrary.Utility.h>
 #include "_Elastos_Droid_Telephony_CPhoneNumberFormattingTextWatcher.h"
+#include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
 
-using Elastos::Core::ICharSequence;
 using Elastos::Droid::Text::IEditable;
+using Elastos::Droid::Text::INoCopySpan;
+using Elastos::Droid::Text::ITextWatcher;
+using Elastos::Core::ICharSequence;
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
 CarClass(CPhoneNumberFormattingTextWatcher)
+    , public Object
+    , public IPhoneNumberFormattingTextWatcher
+    , public ITextWatcher
+    , public INoCopySpan
 {
 public:
+    CPhoneNumberFormattingTextWatcher();
+
+    virtual ~CPhoneNumberFormattingTextWatcher();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ const String& countryCode);
+
     CARAPI BeforeTextChanged(
         /* [in] */ ICharSequence* s,
         /* [in] */ Int32 start,
@@ -29,15 +51,7 @@ public:
     CARAPI AfterTextChanged(
         /* [in] */ IEditable* s);
 
-    CARAPI constructor();
-
-    CARAPI constructor(
-        /* [in] */ const String& countryCode);
-
 private:
-
-    CARAPI Init(
-        /* [in] */ const String& countryCode);
 
     CARAPI_(String) Reformat(
         /* [in] */ ICharSequence* s,
@@ -47,24 +61,24 @@ private:
         /* [in] */ Char32 lastNonSeparator,
         /* [in] */ Boolean hasCursor);
 
-    CARAPI StopFormatting();
+    CARAPI_(void) StopFormatting();
 
     CARAPI_(Boolean) HasSeparator(
         /* [in] */ ICharSequence* s,
         /* [in] */ const Int32 start,
         /* [in] */ const Int32 count);
 
-
     /**
      * Indicates the change was caused by ourselves.
      */
-    Boolean mSelfChange/* = FALSE*/;
+    Boolean mSelfChange;
 
     /**
      * Indicates the formatting has been stopped.
      */
     Boolean mStopFormatting;
 
+// TODO: Need AsYouTypeFormatter
     //AutoPtr<AsYouTypeFormatter> mFormatter;
 };
 

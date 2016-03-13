@@ -1211,7 +1211,7 @@ ECode CBitmap::ExtractAlpha(
     VALIDATE_NOT_NULL(bitmap);
 
     FAIL_RETURN(CheckRecycled(String("Can't extractAlpha on a recycled bitmap")));
-    Int64 nativePaint = paint != NULL ? ((Paint*)(IPaint*)paint->Probe(EIID_Paint))->mNativePaint : 0;
+    Int64 nativePaint = paint != NULL ? ((Paint*)paint)->mNativePaint : 0;
     AutoPtr<IBitmap> bm;
     ECode ec = NativeExtractAlpha(mNativeBitmap, nativePaint, offsetXY, (IBitmap**)&bm);
     if (FAILED(ec)) {

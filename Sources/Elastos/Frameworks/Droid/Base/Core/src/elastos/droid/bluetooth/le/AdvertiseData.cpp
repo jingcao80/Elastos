@@ -361,7 +361,7 @@ ECode AdvertiseData::ReadFromParcel(
     builder->SetIncludeTxPowerLevel(bTRL == 1);
     builder->SetIncludeDeviceName(bDN == 1);
     //AutoPtr<IAdvertiseData> ad;
-    //builder->Build((IAdvertiseData**)ad);
+    //builder->Build((IAdvertiseData**)&ad);
     this->mServiceUuids = builder->mServiceUuids;
     this->mManufacturerSpecificData = builder->mManufacturerSpecificData;
     this->mServiceData = builder->mServiceData;

@@ -1,7 +1,12 @@
 
-#include "elastos/droid/ext/frameworkdef.h"
-#include "accessibility/GestureUtils.h"
+#include <Elastos.Droid.View.h>
+#include "elastos/droid/server/accessibility/GestureUtils.h"
 #include <elastos/core/Math.h>
+#include <elastos/droid/utility/MathUtils.h>
+
+using Elastos::Droid::Utility::MathUtils;
+using Elastos::Droid::View::IInputEvent;
+using Elastos::Droid::View::IMotionEvent;
 
 namespace Elastos {
 namespace Droid {
@@ -16,7 +21,7 @@ Boolean GestureUtils::IsTap(
     /* [in] */ Int32 actionIndex)
 {
     return EventsWithinTimeAndDistanceSlop(down, up, tapTimeSlop,
-        tapDistanceSlop, actionIndex);
+            tapDistanceSlop, actionIndex);
 }
 
 Boolean GestureUtils::IsMultiTap(
@@ -27,7 +32,7 @@ Boolean GestureUtils::IsMultiTap(
     /* [in] */ Int32 actionIndex)
 {
     return EventsWithinTimeAndDistanceSlop(firstUp, secondUp, multiTapTimeSlop,
-        multiTapDistanceSlop, actionIndex);
+            multiTapDistanceSlop, actionIndex);
 }
 
 Boolean GestureUtils::EventsWithinTimeAndDistanceSlop(
@@ -60,9 +65,7 @@ Double GestureUtils::ComputeDistance(
     second->GetX(pointerIndex, &x2);
     second->GetY(pointerIndex, &y2);
 
-    Float x = x2 - x1;
-    Float y = y2 - y1;
-    return Elastos::Core::Math::Sqrt((Double)(x * x + y * y));
+    return (Double)MathUtils::Dist(x1, y1, x2, y2);
 }
 
 Boolean GestureUtils::IsTimedOut(
@@ -73,8 +76,8 @@ Boolean GestureUtils::IsTimedOut(
     assert(firstUp != NULL && secondUp != NULL);
 
     Int64 eventTime1, eventTime2;
-    secondUp->GetEventTime(&eventTime1);
-    firstUp->GetEventTime(&eventTime2);
+    IInputEvent::Probe(secondUp)->GetEventTime(&eventTime1);
+    IInputEvent::Probe(firstUp)->GetEventTime(&eventTime2);
     Int64 deltaTime = eventTime1 - eventTime2;
     return (deltaTime >= timeout);
 }

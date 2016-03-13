@@ -1,0 +1,23 @@
+TARGET_NAME = net
+TARGET_TYPE = lib
+
+include $(MAKEDIR)/../../../../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += ../../../../../
+INCLUDES += $(MAKEDIR)/../../../../../../../../inc/
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = NetworkChangeNotifierAutoDetect.cpp
+SOURCES += DefaultElastosKeyStore.cpp
+SOURCES += ElastosNetworkLibrary.cpp
+SOURCES += NetworkChangeNotifier.cpp
+SOURCES += X509Util.cpp
+SOURCES += RemoteElastosKeyStore.cpp
+SOURCES += ElastosCertVerifyResult.cpp
+SOURCES += NetStringUtil.cpp
+SOURCES += GURLUtils.cpp
+SOURCES += ProxyChangeListener.cpp
+SOURCES += ElastosKeyStore.cpp
+SOURCES += ElastosPrivateKey.cpp

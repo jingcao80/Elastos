@@ -55,7 +55,7 @@ UserSwitchingDialog::UserSwitchingDialog(
     /* [in] */ CActivityManagerService* service,
     /* [in] */ IContext* _context,
     /* [in] */ Int32 userId,
-    /* [in] */ String userName,
+    /* [in] */ const String& userName,
     /* [in] */ Boolean aboveSystem)
 {
     AlertDialog::constructor(_context);

@@ -17,8 +17,11 @@ namespace Hdmi {
  */
 class TimerRecordingAction
     : public HdmiCecFeatureAction
+    , public ITimerRecordingAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     TimerRecordingAction();
 
     CARAPI constructor(
@@ -52,7 +55,7 @@ private:
         /* [out] */ Boolean* result);
 
     // Convert byte array to int.
-    static CARAPI BytesToInt(
+    static CARAPI BytesToInt32(
         /* [in] */ ArrayOf<Byte>* data,
         /* [out] */ Int32* result);
 

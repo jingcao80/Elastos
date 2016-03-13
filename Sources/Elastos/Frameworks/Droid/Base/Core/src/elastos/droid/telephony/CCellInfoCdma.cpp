@@ -1,7 +1,6 @@
-
-#include "CCellInfoCdma.h"
-#include "CCellIdentityCdma.h"
-#include "CCellSignalStrengthCdma.h"
+#include "elastos/droid/telephony/CCellIdentityCdma.h"
+#include "elastos/droid/telephony/CCellInfoCdma.h"
+#include "elastos/droid/telephony/CCellSignalStrengthCdma.h"
 #include <elastos/core/StringBuilder.h>
 
 using Elastos::Core::StringBuilder;
@@ -10,11 +9,24 @@ namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-const String CCellInfoCdma::LOG_TAG("CellInfoCdma");
+const String CCellInfoCdma::TAG("CellInfoCdma");
 const Boolean CCellInfoCdma::DBG = FALSE;
+
+CAR_INTERFACE_IMPL(CCellInfoCdma, CellInfo, ICellInfoCdma)
+
+CAR_OBJECT_IMPL(CCellInfoCdma)
+
+CCellInfoCdma::CCellInfoCdma()
+{
+}
+
+CCellInfoCdma::~CCellInfoCdma()
+{
+}
 
 ECode CCellInfoCdma::constructor()
 {
+    CellInfo::constructor();
     CCellIdentityCdma::New((ICellIdentityCdma**)&mCellIdentityCdma);
     CCellSignalStrengthCdma::New((ICellSignalStrengthCdma**)&mCellSignalStrengthCdma);
     return NOERROR;
@@ -23,6 +35,7 @@ ECode CCellInfoCdma::constructor()
 ECode CCellInfoCdma::constructor(
     /* [in] */ ICellInfoCdma* ci)
 {
+    CellInfo::constructor(ICellInfo::Probe(ci));
     AutoPtr<ICellIdentityCdma> ccdma;
     AutoPtr<ICellSignalStrengthCdma> csscdma;
     ci->GetCellIdentity((ICellIdentityCdma**)&ccdma);
@@ -30,51 +43,6 @@ ECode CCellInfoCdma::constructor(
     ccdma->Copy((ICellIdentityCdma**)&mCellIdentityCdma);
     csscdma->Copy((ICellSignalStrengthCdma**)&mCellSignalStrengthCdma);
     return NOERROR;
-}
-
-PInterface CCellInfoCdma::Probe(
-    /* [in]  */ REIID riid)
-{
-    return _CCellInfoCdma::Probe(riid);
-}
-
-ECode CCellInfoCdma::IsRegistered(
-    /* [out] */ Boolean* registered)
-{
-    VALIDATE_NOT_NULL(registered);
-    return CellInfo::IsRegistered(registered);
-}
-
-ECode CCellInfoCdma::SetRegisterd(
-    /* [in] */ Boolean registered)
-{
-    return CellInfo::SetRegisterd(registered);
-}
-
-ECode CCellInfoCdma::GetTimeStamp(
-    /* [out] */ Int64* timeStamp)
-{
-    VALIDATE_NOT_NULL(timeStamp);
-    return CellInfo::GetTimeStamp(timeStamp);
-}
-
-ECode CCellInfoCdma::SetTimeStamp(
-    /* [in] */ Int64 timeStamp)
-{
-    return CellInfo::SetTimeStamp(timeStamp);
-}
-
-ECode CCellInfoCdma::GetTimeStampType(
-    /* [out] */ Int32* timeStampType)
-{
-    VALIDATE_NOT_NULL(timeStampType);
-    return CellInfo::GetTimeStampType(timeStampType);
-}
-
-ECode CCellInfoCdma::SetTimeStampType(
-    /* [in] */ Int32 timeStampType)
-{
-    return CellInfo::SetTimeStampType(timeStampType);
 }
 
 ECode CCellInfoCdma::GetCellIdentity(
@@ -115,8 +83,8 @@ ECode CCellInfoCdma::GetHashCode(
     VALIDATE_NOT_NULL(hashCode);
     Int32 super, ccdma, csscdma;
     CellInfo::GetHashCode(&super);
-    mCellIdentityCdma->GetHashCode(&ccdma);
-    mCellSignalStrengthCdma->GetHashCode(&csscdma);
+    IObject::Probe(mCellIdentityCdma)->GetHashCode(&ccdma);
+    IObject::Probe(mCellSignalStrengthCdma)->GetHashCode(&csscdma);
     *hashCode = super + ccdma + csscdma;
     return NOERROR;
 }
@@ -136,10 +104,10 @@ ECode CCellInfoCdma::Equals(
     if (o != NULL) {
         AutoPtr<ICellIdentityCdma> ccdma;
         o->GetCellIdentity((ICellIdentityCdma**)&ccdma);
-        mCellIdentityCdma->Equals((IInterface*)ccdma, &tempRes);
+        IObject::Probe(mCellIdentityCdma)->Equals((IInterface*)ccdma, &tempRes);
         AutoPtr<ICellSignalStrengthCdma> csscdma;
         o->GetCellSignalStrength((ICellSignalStrengthCdma**)&csscdma);
-        mCellSignalStrengthCdma->Equals((IInterface*)csscdma, &tempRes2);
+        IObject::Probe(mCellSignalStrengthCdma)->Equals((IInterface*)csscdma, &tempRes2);
         *result = tempRes && tempRes2;
     }
     else *result = FALSE;
@@ -151,18 +119,20 @@ ECode CCellInfoCdma::ToString(
 {
     VALIDATE_NOT_NULL(str);
     StringBuilder sb;
-    sb.Append("CellInfoCdma:");
+    sb.Append("CellInfoCdma:{");
     String strSuper;
     CellInfo::ToString(&strSuper);
     sb.Append(strSuper);
     sb.Append(", ");
     String strccdma;
-    mCellIdentityCdma->ToString(&strccdma);
+    IObject::Probe(mCellIdentityCdma)->ToString(&strccdma);
     sb.Append(strccdma);
     String strcsscdma;
-    mCellSignalStrengthCdma->ToString(&strcsscdma);
+    IObject::Probe(mCellSignalStrengthCdma)->ToString(&strcsscdma);
     sb.Append(", ");
     sb.Append(strcsscdma);
+    sb.Append("}");
+
     *str = sb.ToString();
     return NOERROR;
 }

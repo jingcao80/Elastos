@@ -70,7 +70,11 @@ ECode PathKeyframes::Int32KeyframesBase::GetValue(
     VALIDATE_NOT_NULL(value);
     Int32 v = 0;
     GetInt32Value(fraction, &v);
-    return CInteger32::New(v, (IInteger32**)value);
+    AutoPtr<IInteger32> obj;
+    CInteger32::New(v, (IInteger32**)&obj);
+    *value = obj.Get();
+    REFCOUNT_ADD(*value)
+    return NOERROR;
 }
 
 CAR_INTERFACE_IMPL(PathKeyframes::FloatKeyframesBase, SimpleKeyframes, IFloatKeyframes);
@@ -93,7 +97,11 @@ ECode PathKeyframes::FloatKeyframesBase::GetValue(
     VALIDATE_NOT_NULL(value);
     Float f = 0.f;
     GetFloatValue(fraction, &f);
-    return CFloat::New(f, (IFloat**)value);
+    AutoPtr<IFloat> obj;
+    CFloat::New(f, (IFloat**)&obj);
+    *value = obj.Get();
+    REFCOUNT_ADD(*value)
+    return NOERROR;
 }
 
 ECode PathKeyframes::FloatKeyframesBase1::GetFloatValue(
@@ -101,9 +109,9 @@ ECode PathKeyframes::FloatKeyframesBase1::GetFloatValue(
     /* [out] */ Float* value)
 {
     VALIDATE_NOT_NULL(value);
-    AutoPtr<IPointF> pointF;
+    AutoPtr<IInterface> pointF;
     GetValue(fraction, (IInterface**)&pointF);
-    return pointF->GetX(value);
+    return IPointF::Probe(pointF)->GetX(value);
 }
 
 ECode PathKeyframes::FloatKeyframesBase2::GetFloatValue(
@@ -111,9 +119,9 @@ ECode PathKeyframes::FloatKeyframesBase2::GetFloatValue(
     /* [out] */ Float* value)
 {
     VALIDATE_NOT_NULL(value);
-    AutoPtr<IPointF> pointF;
+    AutoPtr<IInterface> pointF;
     GetValue(fraction, (IInterface**)&pointF);
-    return pointF->GetY(value);
+    return IPointF::Probe(pointF)->GetY(value);
 }
 
 ECode PathKeyframes::Int32KeyframesBase1::GetInt32Value(
@@ -121,10 +129,10 @@ ECode PathKeyframes::Int32KeyframesBase1::GetInt32Value(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    AutoPtr<IPointF> pointF;
+    AutoPtr<IInterface> pointF;
     GetValue(fraction, (IInterface**)&pointF);
     Float v = 0.f;
-    pointF->GetX(&v);
+    IPointF::Probe(pointF)->GetX(&v);
     *value = Elastos::Core::Math::Round(v);
     return NOERROR;
 }
@@ -134,10 +142,10 @@ ECode PathKeyframes::Int32KeyframesBase2::GetInt32Value(
     /* [out] */ Int32* value)
 {
     VALIDATE_NOT_NULL(value);
-    AutoPtr<IPointF> pointF;
+    AutoPtr<IInterface> pointF;
     GetValue(fraction, (IInterface**)&pointF);
     Float v = 0.f;
-    pointF->GetY(&v);
+    IPointF::Probe(pointF)->GetY(&v);
     *value = Elastos::Core::Math::Round(v);
     return NOERROR;
 }
@@ -192,15 +200,33 @@ ECode PathKeyframes::GetValue(
 {
     VALIDATE_NOT_NULL(value);
     Int32 numPoints = mKeyframeData->GetLength() / 3;
+
+    AutoPtr<IPointF> obj;
     if (fraction < 0) {
-        return InterpolateInRange(fraction, 0, 1, (IPointF**)value);
-    } else if (fraction > 1) {
-        return InterpolateInRange(fraction, numPoints - 2, numPoints - 1, (IPointF**)value);
-    } else if (fraction == 0) {
-        return PointForIndex(0, (IPointF**)value);
-    } else if (fraction == 1) {
-        return PointForIndex(numPoints - 1, (IPointF**)value);
-    } else {
+        InterpolateInRange(fraction, 0, 1, (IPointF**)&obj);
+        *value = obj.Get();
+        REFCOUNT_ADD(*value)
+        return NOERROR;
+    }
+    else if (fraction > 1) {
+        InterpolateInRange(fraction, numPoints - 2, numPoints - 1, (IPointF**)&obj);
+        *value = obj.Get();
+        REFCOUNT_ADD(*value)
+        return NOERROR;
+    }
+    else if (fraction == 0) {
+        PointForIndex(0, (IPointF**)&obj);
+        *value = obj.Get();
+        REFCOUNT_ADD(*value)
+        return NOERROR;
+    }
+    else if (fraction == 1) {
+        PointForIndex(numPoints - 1, (IPointF**)&obj);
+        *value = obj.Get();
+        REFCOUNT_ADD(*value)
+        return NOERROR;
+    }
+    else {
         // Binary search for the correct section
         Int32 low = 0;
         Int32 high = numPoints - 1;
@@ -211,15 +237,23 @@ ECode PathKeyframes::GetValue(
 
             if (fraction < midFraction) {
                 high = mid - 1;
-            } else if (fraction > midFraction) {
+            }
+            else if (fraction > midFraction) {
                 low = mid + 1;
-            } else {
-                return PointForIndex(mid, (IPointF**)value);
+            }
+            else {
+                PointForIndex(mid, (IPointF**)&obj);
+                *value = obj.Get();
+                REFCOUNT_ADD(*value)
+                return NOERROR;
             }
         }
 
         // now high is below the fraction and low is above the fraction
-        return InterpolateInRange(fraction, high, low, (IPointF**)value);
+        InterpolateInRange(fraction, high, low, (IPointF**)&obj);
+        *value = obj.Get();
+        REFCOUNT_ADD(*value)
+        return NOERROR;
     }
 }
 

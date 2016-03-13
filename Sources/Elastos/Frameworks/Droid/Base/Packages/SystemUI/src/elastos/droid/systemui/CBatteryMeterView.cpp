@@ -8,8 +8,8 @@
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Droid::Content::CIntent;
-using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::ITypedArray;
 using Elastos::Droid::Graphics::CPath;

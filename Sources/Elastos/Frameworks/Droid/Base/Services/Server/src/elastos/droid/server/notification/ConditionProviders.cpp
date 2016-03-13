@@ -669,6 +669,7 @@ void ConditionProviders::SetAutomaticZenModeConditions(
 
 AutoPtr< ArrayOf<ICondition*> > ConditionProviders::GetAutomaticZenModeConditions()
 {
+    AutoPtr< ArrayOf<ICondition*> > result;
     synchronized(mMutex) {
         Int32 N;
         mRecords->GetSize(&N);
@@ -686,20 +687,20 @@ AutoPtr< ArrayOf<ICondition*> > ConditionProviders::GetAutomaticZenModeCondition
         }
 
         if (rt == NULL) {
-            return NO_CONDITIONS;
+            result =  NO_CONDITIONS;
         }
         else {
             Int32 size;
             rt->GetSize(&size);
-            AutoPtr< ArrayOf<ICondition*> > result = ArrayOf<ICondition*>::Alloc(size);
+            result = ArrayOf<ICondition*>::Alloc(size);
             for (Int32 i = 0; i < size; ++i) {
                 AutoPtr<IInterface> object;
                 rt->Get(i, (IInterface**)&object);
                 (*result)[i] = ICondition::Probe(object);
             }
-            return result;
         }
     }
+    return result;
 }
 
 ECode ConditionProviders::UnsubscribeLocked(

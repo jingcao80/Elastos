@@ -27,7 +27,7 @@ namespace Server {
         } \
     } while(0);
 
-const String SystemServiceManager::TAG("elSystemServiceManager");
+const String SystemServiceManager::TAG("SystemServiceManager");
 const String SystemServiceManager::sConstructorSignature("Ctx");
 
 CAR_INTERFACE_IMPL(SystemServiceManager, Object, ISystemServiceManager)
@@ -134,7 +134,7 @@ ECode SystemServiceManager::StartBootPhase(
     }
     mCurrentPhase = phase;
 
-    Slogger::I(TAG, "Starting phase %d", mCurrentPhase);
+    Slogger::I(TAG, "StartBootPhase %d", mCurrentPhase);
     ECode ec = NOERROR;
     ISystemService* service;
     List<AutoPtr<ISystemService> >::Iterator it;
@@ -143,8 +143,8 @@ ECode SystemServiceManager::StartBootPhase(
         ec = service->OnBootPhase(mCurrentPhase);
         if (FAILED(ec)) {
             Slogger::E(TAG, "Failed to boot service %s: onBootPhase threw an exception"
-            " during phase %d, error code: %08x",
-            TO_CSTR(service), mCurrentPhase, ec);
+                " during phase %d, error code: %08x",
+                TO_CSTR(service), mCurrentPhase, ec);
             return E_RUNTIME_EXCEPTION;
         }
     }

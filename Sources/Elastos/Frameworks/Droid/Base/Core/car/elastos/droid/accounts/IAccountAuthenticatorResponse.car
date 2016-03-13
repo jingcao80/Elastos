@@ -8,7 +8,7 @@ module
     namespace Accounts {
 
     /**
-     * The interface used to return responses from an {@link IAccountAuthenticator}
+     * The interface used to return responses from an {@link IIAccountAuthenticator}
      * @hide
      */
     interface IIAccountAuthenticatorResponse {

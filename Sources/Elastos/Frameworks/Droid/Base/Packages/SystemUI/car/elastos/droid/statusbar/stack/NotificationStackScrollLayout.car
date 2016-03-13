@@ -142,8 +142,7 @@ module
 
         SetUserExpandedChild(
             [in] IView* v,
-            [in] Boolean userExpanded,
-            [out] Boolean* result);
+            [in] Boolean userExpanded);
 
         SetUserLockedChild(
             [in] IView* v,
@@ -335,7 +334,7 @@ module
         GoToFullShade(
             [in] Int64 delay);
 
-        cancelExpandHelper();
+        CancelExpandHelper();
 
         SetIntrinsicPadding(
             [in] Int32 intrinsicPadding);
@@ -362,10 +361,10 @@ module
         SetEmptyShadeView(
             [in] IEmptyShadeView* emptyShadeView);
 
-        updateEmptyShadeView(
+        UpdateEmptyShadeView(
             [in] Boolean visible);
 
-        updateDismissView(
+        UpdateDismissView(
             [in] Boolean visible);
 
         SetDismissAllInProgress(

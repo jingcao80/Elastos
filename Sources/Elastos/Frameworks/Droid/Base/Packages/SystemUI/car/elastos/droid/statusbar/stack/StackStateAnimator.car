@@ -16,7 +16,6 @@ module
      */
     [local]
     interface IStackStateAnimator {
-
         const Int32 ANIMATION_DURATION_STANDARD = 360;
         const Int32 ANIMATION_DURATION_GO_TO_FULL_SHADE = 448;
         const Int32 ANIMATION_DURATION_APPEAR_DISAPPEAR = 464;
@@ -40,13 +39,6 @@ module
 
         CancelOverScrollAnimators(
             [in] Boolean onTop);
-
-        /**
-         * Get the end value of the height animation running on a view or the actualHeight
-         * if no animation is running.
-         */
-        GetFinalActualHeight(
-            [in] IExpandableView* view);
     }
 
     } // namespace Stack

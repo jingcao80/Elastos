@@ -50,6 +50,78 @@ public:
 		CARAPI ToString(
 			/* [out] */ String* result);
 
+        CARAPI GetId(
+            /* [out] */ String* id);
+
+        CARAPI SetId(
+            /* [in] */ const String& id);
+
+        CARAPI GetName(
+            /* [out] */ String* name);
+
+        CARAPI SetName(
+            /* [in] */ const String& name);
+
+        CARAPI GetDescription(
+            /* [out] */ String* description);
+
+        CARAPI SetDescription(
+            /* [in] */ const String& description);
+
+        CARAPI GetSupportedTypes(
+            /* [out] */ Int32* supportedTypes);
+
+        CARAPI SetSupportedTypes(
+            /* [in] */ Int32 supportedTypes);
+
+        CARAPI GetEnabled(
+            /* [out] */ Boolean* enabled);
+
+        CARAPI SetEnabled(
+            /* [in] */ Boolean enabled);
+
+        CARAPI GetStatusCode(
+            /* [out] */ Int32* statusCode);
+
+        CARAPI SetStatusCode(
+            /* [in] */ Int32 statusCode);
+
+        CARAPI GetPlaybackType(
+            /* [out] */ Int32* playbackType);
+
+        CARAPI SetPlaybackType(
+            /* [in] */ Int32 playbackType);
+
+        CARAPI GetPlaybackStream(
+            /* [out] */ Int32* playbackStream);
+
+        CARAPI SetPlaybackStream(
+            /* [in] */ Int32 playbackStream);
+
+        CARAPI GetVolume(
+            /* [out] */ Int32* volume);
+
+        CARAPI SetVolume(
+            /* [in] */ Int32 volume);
+
+        CARAPI GetVolumeMax(
+            /* [out] */ Int32* volumeMax);
+
+        CARAPI SetVolumeMax(
+            /* [in] */ Int32 volumeMax);
+
+        CARAPI GetVolumeHandling(
+            /* [out] */ Int32* volumeHandling);
+
+        CARAPI SetVolumeHandling(
+            /* [in] */ Int32 volumeHandling);
+
+        CARAPI GetPresentationDisplayId(
+            /* [out] */ Int32* presentationDisplayId);
+
+        CARAPI SetPresentationDisplayId(
+            /* [in] */ Int32 presentationDisplayId);
+
 	public:
         String mId;
         String mName;
@@ -94,6 +166,18 @@ public:
 
 	CARAPI ToString(
 		/* [out] */ String* result);
+
+    CARAPI GetGloballySelectedRouteId(
+        /* [out] */ String* routeId);
+
+    CARAPI SetGloballySelectedRouteId(
+        /* [in] */ const String& routeId);
+
+    CARAPI GetRoutes(
+        /* [out] */ IArrayList** routes);
+
+    CARAPI SetRoutes(
+        /* [in] */ IArrayList* routes);
 
 public:
 	AutoPtr<IArrayList> mRoutes;

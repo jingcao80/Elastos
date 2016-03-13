@@ -14,10 +14,6 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-// {01FD9701-2074-4DDE-98A8-81D5FEB5C140}
-extern const InterfaceID EIID_Matrix =
-    { 0x1fd9701, 0x2074, 0x4dde, { 0x98, 0xa8, 0x81, 0xd5, 0xfe, 0xb5, 0xc1, 0x40 } };
-
 CAR_INTERFACE_IMPL(Matrix, Object, IMatrix);
 Matrix::~Matrix()
 {
@@ -33,7 +29,7 @@ ECode Matrix::constructor()
 ECode Matrix::constructor(
     /* [in] */ IMatrix* src)
 {
-    Int64 nSrc = src != NULL ? ((Matrix*)(IMatrix*)src->Probe(EIID_Matrix))->mNativeInstance : 0;
+    Int64 nSrc = src != NULL ? ((Matrix*)src)->mNativeInstance : 0;
     mNativeInstance = NativeCreate(nSrc);
     return NOERROR;
 }
@@ -71,7 +67,7 @@ ECode Matrix::Set(
         Reset();
     }
     else {
-        NativeSet(mNativeInstance, ((Matrix*)(IMatrix*)src->Probe(EIID_Matrix))->mNativeInstance);
+        NativeSet(mNativeInstance, ((Matrix*)src)->mNativeInstance);
     }
     return NOERROR;
 }
@@ -88,7 +84,7 @@ ECode Matrix::Equals(
         *isEqual = FALSE;
         return NOERROR;
     }
-    *isEqual = NativeEquals(mNativeInstance, ((Matrix*)(IMatrix*)obj->Probe(EIID_Matrix))->mNativeInstance);
+    *isEqual = NativeEquals(mNativeInstance, ((Matrix*)IMatrix::Probe(obj))->mNativeInstance);
     return NOERROR;
 }
 
@@ -228,8 +224,8 @@ ECode Matrix::SetConcat(
 {
     VALIDATE_NOT_NULL(result);
     NativeSetConcat(mNativeInstance,
-            ((Matrix*)(IMatrix*)a->Probe(EIID_Matrix))->mNativeInstance,
-            ((Matrix*)(IMatrix*)b->Probe(EIID_Matrix))->mNativeInstance);
+            ((Matrix*)a)->mNativeInstance,
+            ((Matrix*)b)->mNativeInstance);
     *result = TRUE;
     return NOERROR;
 }
@@ -352,7 +348,7 @@ ECode Matrix::PreConcat(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePreConcat(mNativeInstance, ((Matrix*)(IMatrix*)other->Probe(EIID_Matrix))->mNativeInstance);
+    NativePreConcat(mNativeInstance, ((Matrix*)other)->mNativeInstance);
     *result = TRUE;
     return NOERROR;
 }
@@ -475,7 +471,7 @@ ECode Matrix::PostConcat(
     /* [out] */ Boolean* result)
 {
     VALIDATE_NOT_NULL(result);
-    NativePostConcat(mNativeInstance, ((Matrix*)(IMatrix*)other->Probe(EIID_Matrix))->mNativeInstance);
+    NativePostConcat(mNativeInstance, ((Matrix*)other)->mNativeInstance);
     *result = TRUE;
     return NOERROR;
 }
@@ -566,7 +562,7 @@ ECode Matrix::Invert(
     /* [in] */ IMatrix* inverse,
     /* [out] */ Boolean* result)
 {
-    *result = NativeInvert(mNativeInstance, ((Matrix*)(IMatrix*)inverse->Probe(EIID_Matrix))->mNativeInstance);
+    *result = NativeInvert(mNativeInstance, ((Matrix*)inverse)->mNativeInstance);
     return NOERROR;
 }
 

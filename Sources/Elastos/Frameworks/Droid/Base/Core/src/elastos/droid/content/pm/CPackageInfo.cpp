@@ -86,7 +86,9 @@ ECode CPackageInfo::ReadFromParcel(
     /* Theme-specific. */
     source->ReadBoolean(&mIsThemeApk);
     source->ReadArrayOfString((ArrayOf<String>**)&mOverlayTargets);
-    IParcelable::Probe(mThemeInfo)->ReadFromParcel(source);
+    obj = NULL;
+    source->ReadInterfacePtr((Handle32*)&obj);
+    mThemeInfo = IThemeInfo::Probe(obj);
     source->ReadBoolean(&mHasIconPack);
     source->ReadBoolean(&mIsLegacyIconPackApk);
     return NOERROR;
@@ -128,7 +130,7 @@ ECode CPackageInfo::WriteToParcel(
     /* Theme-specific. */
     dest->WriteBoolean(mIsThemeApk);
     dest->WriteArrayOfString(mOverlayTargets);
-    IParcelable::Probe(mThemeInfo)->WriteToParcel(dest);
+    dest->WriteInterfacePtr(mThemeInfo);
     dest->WriteBoolean(mHasIconPack);
     dest->WriteBoolean(mIsLegacyIconPackApk);
     return NOERROR;

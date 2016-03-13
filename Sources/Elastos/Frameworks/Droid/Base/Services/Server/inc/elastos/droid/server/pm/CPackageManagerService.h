@@ -937,6 +937,39 @@ public:/* package */
         AutoPtr<SharedUserSetting> mSharedUser;
     };
 
+    struct ResolvePrioritySorterFunc
+    {
+        Int32 operator()(
+            /* [in] */ AutoPtr<IResolveInfo>& r1,
+            /* [in] */ AutoPtr<IResolveInfo>& r2);
+    };
+
+    class ResolvePrioritySorter
+        : public Object
+        , public IComparator
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI Compare(
+            /* [in] */ IInterface* lhs,
+            /* [in] */ IInterface* rhs,
+            /* [out] */ Int32* result);
+    };
+
+    class ProviderInitOrderSorter
+        : public Object
+        , public IComparator
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        CARAPI Compare(
+            /* [in] */ IInterface* lhs,
+            /* [in] */ IInterface* rhs,
+            /* [out] */ Int32* result);
+    };
+
 private:
     class PackageUsage : public Object
     {
@@ -1184,32 +1217,6 @@ private:
         AutoPtr<IIntentSender> mPi;
     };
 
-    class ResolvePrioritySorter
-        : public Object
-        , public IComparator
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        CARAPI Compare(
-            /* [in] */ IInterface* lhs,
-            /* [in] */ IInterface* rhs,
-            /* [out] */ Int32* result);
-    };
-
-    class ProviderInitOrderSorter
-        : public Object
-        , public IComparator
-    {
-    public:
-        CAR_INTERFACE_DECL()
-
-        CARAPI Compare(
-            /* [in] */ IInterface* lhs,
-            /* [in] */ IInterface* rhs,
-            /* [out] */ Int32* result);
-    };
-
     class PackageComparator
         : public Object
         , public IComparator
@@ -1378,10 +1385,6 @@ public:
         /* [in] */ Handle64 installer,
         /* [in] */ Boolean factoryTest,
         /* [in] */ Boolean onlyCore);
-
-    static CARAPI_(AutoPtr<IComparator>) InitResolvePrioritySorter();
-
-    static CARAPI_(AutoPtr<IComparator>) InitProviderInitOrderSorter();
 
     CARAPI_(AutoPtr<IBundle>) ExtrasForInstallResult(
         /* [in] */ PackageInstalledInfo* res);
@@ -2917,9 +2920,9 @@ private:
 
 public:/*package*/
     static const String TAG;
-    static const Boolean DEBUG_SETTINGS = FALSE;
-    static const Boolean DEBUG_PREFERRED = FALSE;
-    static const Boolean DEBUG_UPGRADE = FALSE;
+    static const Boolean DEBUG_SETTINGS;
+    static const Boolean DEBUG_PREFERRED;
+    static const Boolean DEBUG_UPGRADE;
     static const Int32 SCAN_NO_DEX = 1 << 1;
     static const Int32 SCAN_FORCE_DEX = 1 << 2;
     static const Int32 SCAN_UPDATE_SIGNATURE = 1 << 3;
@@ -2971,7 +2974,7 @@ public:/*package*/
     static const Int32 UPDATE_PERMISSIONS_REPLACE_ALL = 1 << 2;
 
     // ------- apps on sdcard specific code -------
-    static const Boolean DEBUG_SD_INSTALL = FALSE;
+    static const Boolean DEBUG_SD_INSTALL;
 
     AutoPtr<ServiceThread> mHandlerThread;
     AutoPtr<IHandler> mHandler;//   final PackageHandler mHandler;
@@ -3098,16 +3101,16 @@ public:/*package*/
     Int32 mNextInstallToken; // nonzero; will be wrapped back to 1 when ++ overflows
 
 private:
-    static const Boolean DEBUG_INSTALL = FALSE;
-    static const Boolean DEBUG_REMOVE = FALSE;
-    static const Boolean DEBUG_BROADCASTS = FALSE;
-    static const Boolean DEBUG_SHOW_INFO = FALSE;
-    static const Boolean DEBUG_PACKAGE_INFO = FALSE;
-    static const Boolean DEBUG_INTENT_MATCHING = FALSE;
-    static const Boolean DEBUG_PACKAGE_SCANNING = FALSE;
-    static const Boolean DEBUG_VERIFY = FALSE;
-    static const Boolean DEBUG_DEXOPT = FALSE;
-    static const Boolean DEBUG_ABI_SELECTION = FALSE;
+    static const Boolean DEBUG_INSTALL;
+    static const Boolean DEBUG_REMOVE;
+    static const Boolean DEBUG_BROADCASTS;
+    static const Boolean DEBUG_SHOW_INFO;
+    static const Boolean DEBUG_PACKAGE_INFO;
+    static const Boolean DEBUG_INTENT_MATCHING;
+    static const Boolean DEBUG_PACKAGE_SCANNING;
+    static const Boolean DEBUG_VERIFY;
+    static const Boolean DEBUG_DEXOPT;
+    static const Boolean DEBUG_ABI_SELECTION;
 
     static const Int32 RADIO_UID = IProcess::PHONE_UID;
     static const Int32 LOG_UID = IProcess::LOG_UID;
@@ -3207,8 +3210,8 @@ private:
 
     AutoPtr<PackageUsage> mPackageUsage;
 
+    static const ResolvePrioritySorterFunc sResolvePrioritySorterFunc;
     static AutoPtr<IComparator> sResolvePrioritySorter;
-
     static AutoPtr<IComparator> sProviderInitOrderSorter;
 
     Boolean mMediaMounted;

@@ -454,9 +454,9 @@ void CDeviceStorageMonitorService::SendNotification()
 
     lowMemIntent->PutExtra(String("memory"), mFreeMem);
     lowMemIntent->AddFlags(IIntent::FLAG_ACTIVITY_NEW_TASK);
-    AutoPtr<INotificationManager> mNotificationMgr;
-    mContext->GetSystemService(
-                    IContext::NOTIFICATION_SERVICE, (IInterface**)&mNotificationMgr);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
+    AutoPtr<INotificationManager> notificationMgr = INotificationManager::Probe(obj);
     AutoPtr<ICharSequence> title;
     mContext->GetText(R::string::low_internal_storage_view_title, (ICharSequence**)&title);
     AutoPtr<ICharSequence> details;
@@ -481,7 +481,7 @@ void CDeviceStorageMonitorService::SendNotification()
 
     AutoPtr<IUserHandle> UserHandle_ALL;
     CUserHandle::New(IUserHandle::USER_ALL, (IUserHandle**)&UserHandle_ALL);
-    mNotificationMgr->NotifyAsUser(String(NULL), LOW_MEMORY_NOTIFICATION_ID, notification,
+    notificationMgr->NotifyAsUser(String(NULL), LOW_MEMORY_NOTIFICATION_ID, notification,
             UserHandle_ALL);
     mContext->SendStickyBroadcastAsUser(mStorageLowIntent, UserHandle_ALL);
 
@@ -491,13 +491,13 @@ void CDeviceStorageMonitorService::CancelNotification()
 {
     if(localLOGV)
         Slogger::I(TAG, "Canceling low memory notification");
-    AutoPtr<INotificationManager> mNotificationMgr;
-    mContext->GetSystemService(
-                    IContext::NOTIFICATION_SERVICE, (IInterface**)&mNotificationMgr);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
+    AutoPtr<INotificationManager> notificationMgr = INotificationManager::Probe(obj);
     //cancel notification since memory has been freed
     AutoPtr<IUserHandle> UserHandle_ALL;
     CUserHandle::New(IUserHandle::USER_ALL, (IUserHandle**)&UserHandle_ALL);
-    mNotificationMgr->CancelAsUser(String(NULL), LOW_MEMORY_NOTIFICATION_ID, UserHandle_ALL);
+    notificationMgr->CancelAsUser(String(NULL), LOW_MEMORY_NOTIFICATION_ID, UserHandle_ALL);
 
     mContext->RemoveStickyBroadcastAsUser(mStorageLowIntent, UserHandle_ALL);
     mContext->SendBroadcastAsUser(mStorageOkIntent, UserHandle_ALL);

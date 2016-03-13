@@ -4,7 +4,6 @@
 #include "_Elastos.Droid.Server.h"
 #include "elastos/core/Object.h"
 
-
 namespace Elastos {
 namespace Droid {
 namespace Server {
@@ -35,10 +34,9 @@ public:
     // Dispatching timeout.
     Int64 mDispatchingTimeoutNanos;
 
-private:
+public:
     // Pointer to the native input application handle.
     // This field is lazily initialized via JNI.
-    //@SuppressWarnings("unused")
     Int64 mPtr;
 };
 

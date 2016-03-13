@@ -167,6 +167,7 @@ module
     interface Elastos.Droid.Content.IIntent;
     interface Elastos.Droid.Content.IIIntentSender;
     interface Elastos.Droid.Content.IComponentName;
+    interface Elastos.Droid.Content.IIRestrictionsManager;
     interface Elastos.Droid.Content.Res.IResources;
     interface Elastos.Droid.Content.Pm.IApplicationInfo;
     interface Elastos.Droid.Content.Pm.IPackageManager;
@@ -824,6 +825,10 @@ module
         }
 
         class CRestrictionsManager {
+            constructor(
+                [in] IContext* context,
+                [in] IIRestrictionsManager* service);
+
             interface IRestrictionsManager;
         }
 

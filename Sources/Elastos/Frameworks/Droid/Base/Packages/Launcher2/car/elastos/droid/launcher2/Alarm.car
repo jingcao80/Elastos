@@ -1,0 +1,35 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    interface IAlarmOnAlarmListener;
+
+    /*
+     * @invoke
+     * interface IRunnable
+    */
+    interface IAlarm {
+        SetOnAlarmListener(
+            [in] IAlarmOnAlarmListener* alarmListener);
+
+        SetAlarm(
+            [in] Int64 millisecondsInFuture);
+
+        CancelAlarm();
+
+        AlarmPending(
+            [out] Boolean* result);
+    }
+
+    interface IAlarmOnAlarmListener {
+        OnAlarm(
+            [in] IAlarm* alarm);
+
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

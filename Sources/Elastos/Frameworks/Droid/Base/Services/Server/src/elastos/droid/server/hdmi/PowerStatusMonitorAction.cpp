@@ -3,6 +3,7 @@
 #include <Elastos.Droid.Hardware.h>
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.Droid.Utility.h>
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Server::Hdmi::IHdmiControlServiceSendMessageCallback;
@@ -12,6 +13,8 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Hdmi {
+
+CAR_INTERFACE_IMPL(PowerStatusMonitorAction, HdmiCecFeatureAction, IPowerStatusMonitorAction)
 
 const String PowerStatusMonitorAction::TAG("PowerStatusMonitorAction");
 const Int32 PowerStatusMonitorAction::STATE_WAIT_FOR_REPORT_POWER_STATUS = 1;
@@ -32,7 +35,7 @@ ECode PowerStatusMonitorAction::constructor(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        super(source);
+        super::constructor(source);
 
 #endif
 }
@@ -40,10 +43,13 @@ ECode PowerStatusMonitorAction::constructor(
 ECode PowerStatusMonitorAction::Start(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         QueryPowerStatus();
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
 #endif
 }
 
@@ -51,10 +57,13 @@ ECode PowerStatusMonitorAction::ProcessCommand(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         if (mState != STATE_WAIT_FOR_REPORT_POWER_STATUS) {
-            return FALSE;
+            *result = FALSE;
+            return NOERROR;
         }
         return HandleReportPowerStatus(cmd);
 #endif
@@ -64,17 +73,25 @@ ECode PowerStatusMonitorAction::HandleReportPowerStatus(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        Int32 sourceAddress = cmd->GetSource();
+        Int32 srcAddr;
+        cmd->GetSource(&srcAddr);
+        Int32 sourceAddress = srcAddr;
         Int32 oldStatus = mPowerStatus->Get(sourceAddress, INVALID_POWER_STATUS);
         if (oldStatus == INVALID_POWER_STATUS) {
             // if no device exists for incoming message, hands it over to other actions.
-            return FALSE;
+            *result = FALSE;
+            return NOERROR;
         }
-        Int32 newStatus = cmd->GetParams()[0] & 0xFF;
+        AutoPtr<ArrayOf<Byte> > params;
+        cmd->GetParams((ArrayOf<Byte>**)&params);
+        Int32 newStatus = (*params)[0] & 0xFF;
         UpdatePowerStatus(sourceAddress, newStatus, TRUE);
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
 #endif
 }
 
@@ -98,7 +115,9 @@ ECode PowerStatusMonitorAction::HandleTimeout()
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        for (Int32 i = 0; i < mPowerStatus->Size(); ++i) {
+        Int32 size;
+        mPowerStatus->GetSize(&size);
+        for (Int32 i = 0; i < size; ++i) {
             Int32 logicalAddress = mPowerStatus->KeyAt(i);
             UpdatePowerStatus(logicalAddress, POWER_STATUS_UNKNOWN, FALSE);
         }
@@ -114,7 +133,9 @@ ECode PowerStatusMonitorAction::ResetPowerStatus(
 #if 0 // TODO: Translate codes below
         mPowerStatus->Clear();
         for (HdmiDeviceInfo info : deviceInfos) {
-            mPowerStatus->Append(info->GetLogicalAddress(), info->GetDevicePowerStatus());
+            Int32 logicalAddr;
+            info->GetLogicalAddress(&logicalAddr);
+            mPowerStatus->Append(logicalAddr, info->GetDevicePowerStatus());
         }
 #endif
 }
@@ -123,11 +144,16 @@ ECode PowerStatusMonitorAction::QueryPowerStatus()
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        List<HdmiDeviceInfo> deviceInfos = Tv()->GetDeviceInfoList(FALSE);
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        List<HdmiDeviceInfo> deviceInfos = tv->GetDeviceInfoList(FALSE);
         ResetPowerStatus(deviceInfos);
         for (HdmiDeviceInfo info : deviceInfos) {
-            final Int32 logicalAddress = info->GetLogicalAddress();
-            SendCommand(HdmiCecMessageBuilder->BuildGiveDevicePowerStatus(GetSourceAddress(),
+            Int32 logicalAddress;
+            info->GetLogicalAddress(&logicalAddress);
+            Int32 srcAddr;
+            GetSourceAddress(&srcAddr);
+            SendCommand(HdmiCecMessageBuilder->BuildGiveDevicePowerStatus(srcAddr,
                     logicalAddress),
                     new SendMessageCallback() {
                         //@Override
@@ -156,7 +182,9 @@ ECode PowerStatusMonitorAction::UpdatePowerStatus(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        Tv()->UpdateDevicePowerStatus(logicalAddress, newStatus);
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        tv->UpdateDevicePowerStatus(logicalAddress, newStatus);
 
         if (remove) {
             mPowerStatus->Delete(logicalAddress);

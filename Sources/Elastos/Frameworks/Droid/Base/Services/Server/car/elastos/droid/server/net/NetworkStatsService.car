@@ -17,7 +17,6 @@ module
      * @Involved
      * no super interface
      */
-    [local]
     interface INetworkStatsSettings {
         GetPollInterval(
             [out] Int64* result);

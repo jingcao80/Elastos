@@ -6,6 +6,7 @@
 #include "elastos/droid/text/format/DateFormat.h"
 #include "elastos/droid/text/format/CDateUtils.h"
 #include "elastos/droid/text/CSpannedString.h"
+#include "elastos/droid/text/CSpannableStringBuilder.h"
 #include "elastos/droid/provider/CSettingsSystem.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/StringBuilder.h>
@@ -20,6 +21,7 @@ using Elastos::Droid::Content::Res::IConfiguration;
 using Elastos::Droid::Provider::CSettingsSystem;
 using Elastos::Droid::Provider::ISettingsSystem;
 using Elastos::Droid::Text::ISpannableStringBuilder;
+using Elastos::Droid::Text::CSpannableStringBuilder;
 using Elastos::Droid::Text::ISpannedString;
 using Elastos::Droid::Text::CSpannedString;
 using Elastos::Droid::Text::IEditable;
@@ -34,7 +36,6 @@ using Elastos::Text::CSimpleDateFormat;
 using Elastos::Utility::IDate;
 using Elastos::Utility::CDate;
 using Elastos::Utility::ICalendar;
-using Elastos::Utility::IGregorianCalendar;
 using Elastos::Utility::CGregorianCalendar;
 using Elastos::Utility::ITimeZone;
 using Elastos::Utility::ILocaleHelper;
@@ -286,7 +287,7 @@ AutoPtr<ICharSequence> DateFormat::Format(
     /* [in] */ Int64 inTimeInMillis)
 {
     AutoPtr<IDate> date;
-    CDate::New(inTimeInMillis, (IDate**)&date);
+    ASSERT_SUCCEEDED(CDate::New(inTimeInMillis, (IDate**)&date))
     return Format(inFormat, date);
 }
 
@@ -294,8 +295,9 @@ AutoPtr<ICharSequence> DateFormat::Format(
     /* [in] */ ICharSequence* inFormat,
     /* [in] */ IDate* inDate)
 {
+    assert(inDate != NULL);
     AutoPtr<ICalendar> c;
-    CGregorianCalendar::New((IGregorianCalendar**)&c);
+    CGregorianCalendar::New((ICalendar**)&c);
     c->SetTime(inDate);
 
     return Format(inFormat, c);
@@ -305,11 +307,12 @@ AutoPtr<ICharSequence> DateFormat::Format(
     /* [in] */ const String& format,
     /* [in] */ IDate* inDate)
 {
+    assert(inDate != NULL);
     AutoPtr<ICharSequence> inFormat;
     CString::New(format, (ICharSequence**)&inFormat);
 
     AutoPtr<ICalendar> c;
-    CGregorianCalendar::New((IGregorianCalendar**)&c);
+    CGregorianCalendar::New((ICalendar**)&c);
     c->SetTime(inDate);
 
     return Format(inFormat, c);
@@ -389,8 +392,9 @@ AutoPtr<ICharSequence> DateFormat::Format(
     /* [in] */ ICharSequence* inFormat,
     /* [in] */ ICalendar* inDate)
 {
+    assert(inDate != NULL);
     AutoPtr<ISpannableStringBuilder> s;
-    // CSpannableStringBuilder::New(inFormat, (ISpannableStringBuilder**)&s);
+    CSpannableStringBuilder::New(inFormat, (ISpannableStringBuilder**)&s);
     Int32 count;
 
     AutoPtr<ILocaleHelper> localeHelper;

@@ -794,7 +794,6 @@ module
        interface IPointerIconHelper;
     }
 
-
     class CDragEvent {
         constructor();
 

@@ -1,0 +1,47 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");
+    importlib("Elastos.Droid.Core.eco");
+
+    submodule Elastos.Droid.Webkit.Native {
+    merge("../../../../../../car/elastos/droid/webkit/webview/chromium/native/ui/ColorSuggestionListAdapter.car");
+    merge("../../../../../../car/elastos/droid/webkit/webview/chromium/native/ui/OnColorChangedListener.car");
+
+    merge("../../../../../../car/elastos/droid/webkit/webview/chromium/native/net/IRemoteElastosKeyStore.car");
+    merge("../../../../../../car/elastos/droid/webkit/webview/chromium/native/net/IRemoteElastosKeyStoreCallbacks.car");
+    merge("../../../../../../car/elastos/droid/webkit/webview/chromium/native/net/IRemoteElastosKeyStoreInterface.car");
+
+    merge("../../../../../../car/elastos/droid/webkit/webview/chromium/native/content/common/IChildProcessCallback.car");
+    merge("../../../../../../car/elastos/droid/webkit/webview/chromium/native/content/common/IChildProcessService.car");
+    merge("../../../../../../car/elastos/droid/webkit/webview/chromium/native/content/common/SurfaceWrapper.car");
+    merge("../../../../../../car/elastos/droid/webkit/webview/chromium/native/content/common/Common.car");
+    }
+
+    submodule Elastos.Droid.Webkit.Webview {
+    merge("../../../../../../car/elastos/droid/webkit/webview/chromium/WebViewChromiumFactoryProvider.car");
+    }
+
+    using interface Elastos.Droid.Webkit.IWebViewFactoryProvider;
+    interface Elastos.Droid.Webkit.Webview.Chromium.IWebViewChromiumFactoryProvider;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+    namespace Webview {
+    namespace Chromium {
+
+    class CWebViewChromiumFactoryProvider {
+    	constructor();
+
+        interface IWebViewChromiumFactoryProvider;
+        interface IWebViewFactoryProvider;
+    }
+
+    } // namespace Chromium
+    } // namespace Webview
+    } // namespace Webkit
+    } // namespace Droid
+    } // namespace Elastos
+}
+

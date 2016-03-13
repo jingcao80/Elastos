@@ -64,9 +64,10 @@ static const String ERROR_STR = String("ERROR");
  static Boolean Wake()
  {
     AutoPtr<IServiceManager> sm;
-    AutoPtr<IPowerManager> pm;
     ASSERT_SUCCEEDED(CServiceManager::AcquireSingleton((IServiceManager**)&sm));
-    sm->GetService(IContext::POWER_SERVICE, (IInterface**)&pm);
+    AutoPtr<IInterface> obj;
+    sm->GetService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IPowerManager> pm = IPowerManager::Probe(obj);
     ECode e = pm->WakeUp(SystemClock::GetUptimeMillis());
     if (FAILED(e)) {
         Logger::E(TAG, "Got remote exception!");

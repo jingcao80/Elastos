@@ -364,7 +364,7 @@ private:
 
 private:
     static const String TAG;
-    static const Boolean LOGD = FALSE;
+    static const Boolean LOGD;
 
     // TODO: remove outstanding sessions when installer package goes away
     // TODO: notify listeners in other users when package has been installed there

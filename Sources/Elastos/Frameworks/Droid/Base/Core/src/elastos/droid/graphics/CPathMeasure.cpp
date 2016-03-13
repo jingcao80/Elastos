@@ -93,7 +93,7 @@ ECode CPathMeasure::GetMatrix(
     VALIDATE_NOT_NULL(result);
 
     *result = NativeGetMatrix(mNativeInstance, distance,
-            ((Matrix*)(IMatrix*)matrix->Probe(EIID_Matrix))->Ni(), flags);
+            ((Matrix*)matrix)->Ni(), flags);
     return NOERROR;
 }
 

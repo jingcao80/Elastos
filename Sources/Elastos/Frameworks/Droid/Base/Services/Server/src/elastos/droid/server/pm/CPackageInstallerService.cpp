@@ -446,8 +446,8 @@ void InternalCallback::OnSessionSealedBlocking(
 //                  CPackageInstallerService
 //==============================================================================
 
-const String CPackageInstallerService::TAG("PackageInstaller");
-const Boolean CPackageInstallerService::LOGD;
+const String CPackageInstallerService::TAG("CPackageInstallerService");
+const Boolean CPackageInstallerService::LOGD = TRUE;
 const String CPackageInstallerService::TAG_SESSIONS("sessions");
 const String CPackageInstallerService::TAG_SESSION("session");
 const String CPackageInstallerService::ATTR_SESSION_ID("sessionId");
@@ -479,22 +479,23 @@ AutoPtr<IFilenameFilter> CPackageInstallerService::InitStageFilter()
 }
 AutoPtr<IFilenameFilter> CPackageInstallerService::sStageFilter = InitStageFilter();
 
-CPackageInstallerService::CPackageInstallerService()
-{
-    mInternalCallback = new InternalCallback(this);
-    // TODO: SecureRandom has not been realized
-    // CSecureRandom::New((IRandom**)&mRandom);
-}
-
 CAR_INTERFACE_IMPL_2(CPackageInstallerService, Object, IIPackageInstaller, IBinder)
 
 CAR_OBJECT_IMPL(CPackageInstallerService)
 
+CPackageInstallerService::CPackageInstallerService()
+{
+}
+
 ECode CPackageInstallerService::constructor(
-	/* [in] */ IContext* context,
+    /* [in] */ IContext* context,
     /* [in] */ IIPackageManager* pm,
     /* [in] */ IFile* stagingDir)
 {
+    mInternalCallback = new InternalCallback(this);
+    // TODO: SecureRandom has not been realized
+    // CSecureRandom::New((IRandom**)&mRandom);
+
     mContext = context;
     mPm = (CPackageManagerService*)pm;
     AutoPtr<IInterface> service;
@@ -558,7 +559,7 @@ ECode CPackageInstallerService::constructor(
 
         // Clean up orphaned icons
         Set<AutoPtr<IFile> >::Iterator iconIt = unclaimedIcons.Begin();
-        for (; iconIt != unclaimedStages.End(); ++iconIt) {
+        for (; iconIt != unclaimedIcons.End(); ++iconIt) {
             AutoPtr<IFile> icon = *iconIt;
             Slogger::W(TAG, "Deleting orphan icon %p", icon.Get());
             icon->Delete();
@@ -657,18 +658,25 @@ void CPackageInstallerService::ReadSessionsLocked()
 
     mSessions.Clear();
 
-    AutoPtr<IFileInputStream> fis;
-    // try {
-    mSessionsFile->OpenRead((IFileInputStream**)&fis);
-    AutoPtr<IXmlPullParser> in;
-    Xml::NewPullParser((IXmlPullParser**)&in);
-    in->SetInput(IInputStream::Probe(fis), String(NULL));
-
     AutoPtr<IIoUtils> ioutils;
     CIoUtils::AcquireSingleton((IIoUtils**)&ioutils);
-    AutoPtr<ICloseable> closeFis = ICloseable::Probe(fis);
 
+    AutoPtr<IFileInputStream> fis;
+    AutoPtr<IXmlPullParser> in;
+    AutoPtr<ICloseable> closeFis;
     Int32 type;
+
+    // try {
+    ECode ec = mSessionsFile->OpenRead((IFileInputStream**)&fis);
+    FAIL_GOTO(ec, _EXIT_)
+
+    ec = Xml::NewPullParser((IXmlPullParser**)&in);
+    FAIL_GOTO(ec, _EXIT_)
+
+    in->SetInput(IInputStream::Probe(fis), String(NULL));
+
+    closeFis = ICloseable::Probe(fis);
+
     while (in->Next(&type), type != IXmlPullParser::END_DOCUMENT) {
         if (type == IXmlPullParser::START_TAG) {
             String tag;
@@ -712,16 +720,19 @@ void CPackageInstallerService::ReadSessionsLocked()
             }
         }
     }
+
+_EXIT_:
     ioutils->CloseQuietly(closeFis);
-    // } catch (FileNotFoundException e) {
-    //     // Missing sessions are okay, probably first boot
-    // } catch (IOException e) {
-    //     Slog.wtf(TAG, "Failed reading install sessions", e);
-    // } catch (XmlPullParserException e) {
-    //     Slog.wtf(TAG, "Failed reading install sessions", e);
-    // } finally {
-    //     IoUtils.closeQuietly(fis);
-    // }
+
+    if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
+        // Missing sessions are okay, probably first boot
+    }
+    else if (ec == (ECode)E_IO_EXCEPTION) {
+        Slogger::E(TAG, "Failed reading install sessions. E_IO_EXCEPTION");
+    }
+    else if (ec == (ECode)E_XML_PULL_PARSER_EXCEPTION) {
+        Slogger::E(TAG, "Failed reading install sessions. E_XML_PULL_PARSER_EXCEPTION");
+    }
 }
 
 ECode CPackageInstallerService::ReadSessionLocked(

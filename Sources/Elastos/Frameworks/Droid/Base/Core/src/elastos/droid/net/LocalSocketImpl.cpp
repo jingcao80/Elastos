@@ -72,9 +72,9 @@ ECode LocalSocketImpl::SocketInputStream::Read(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
 
-    AutoPtr<IInterface> obj = mHost->mReadMonitor;
-    synchronized(obj) {
+    synchronized(mHost->mReadMonitor) {
         AutoPtr<IFileDescriptor> myFd = mHost->mFd;
         if (myFd == NULL) {
             Logger::E("LocalSocketImpl", "socket closed");
@@ -102,9 +102,9 @@ ECode LocalSocketImpl::SocketInputStream::Read(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
 
-    AutoPtr<IInterface> obj = mHost->mReadMonitor;
-    synchronized(obj) {
+    synchronized(mHost->mReadMonitor) {
         AutoPtr<IFileDescriptor> myFd = mHost->mFd;
         if (myFd == NULL) {
             Logger::E("LocalSocketImpl", "socket closed");
@@ -143,8 +143,7 @@ ECode LocalSocketImpl::SocketOutputStream::Write(
     /* [in] */ Int32 off,
     /* [in] */ Int32 len)
 {
-    AutoPtr<IInterface> obj = mHost->mWriteMonitor;
-    synchronized(obj) {
+    synchronized(mHost->mWriteMonitor) {
         AutoPtr<IFileDescriptor> myFd = mHost->mFd;
         if (myFd == NULL) {
             Logger::E("LocalSocketImpl", "socket closed");
@@ -162,8 +161,7 @@ ECode LocalSocketImpl::SocketOutputStream::Write(
 ECode LocalSocketImpl::SocketOutputStream::Write(
     /* [in] */ Int32 b)
 {
-    AutoPtr<IInterface> obj = mHost->mWriteMonitor;
-    synchronized(obj) {
+    synchronized(mHost->mWriteMonitor) {
         AutoPtr<IFileDescriptor> myFd = mHost->mFd;
         if (myFd == NULL) {
             Logger::E("LocalSocketImpl", "socket closed");
@@ -426,11 +424,11 @@ ECode LocalSocketImpl::NativePending(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = -1;
 
     int fd;
 
     if (fileDescriptor == NULL) {
-        *result = -1;
         return NOERROR;
     }
     fileDescriptor->GetDescriptor(&fd);
@@ -482,6 +480,7 @@ ECode LocalSocketImpl::NativeRead(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
 
     Int32 fd;
     Int32 err;
@@ -519,6 +518,7 @@ ECode LocalSocketImpl::NativeReadba(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
 
     Int32 fd;
     Byte* byteBuffer;
@@ -688,6 +688,7 @@ ECode LocalSocketImpl::NativeGetPeerCredentials(
     /* [out] */ ICredentials** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
 
     int err;
     Int32 fd;
@@ -727,6 +728,7 @@ ECode LocalSocketImpl::NativeGetOption(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = 0;
 
     Int32 ret, value;
     int opt, level;
@@ -843,6 +845,7 @@ ECode LocalSocketImpl::Accept(
     /* [out] */ IFileDescriptor** result)
 {
     VALIDATE_NOT_NULL(result)
+    *result = NULL;
 
     union {
         struct sockaddr address;
@@ -1014,6 +1017,7 @@ ECode LocalSocketImpl::GetInputStream(
     /* [out] */ IInputStream** is)
 {
     VALIDATE_NOT_NULL(is);
+    *is = NULL;
 
     if (mFd == NULL) {
         Logger::E("LocalSocketImpl", "socket not created");
@@ -1035,6 +1039,7 @@ ECode LocalSocketImpl::GetOutputStream(
     /* [out] */ IOutputStream** os)
 {
     VALIDATE_NOT_NULL(os);
+    *os = NULL;
 
     if (mFd == NULL) {
         Logger::E("LocalSocketImpl", "socket not created");

@@ -17,7 +17,7 @@ public:
      * @see android.media.MediaRecorder.OutputFormat
      */
     CARAPI GetOutputFileFormats(
-        /* [out,callee] */ ArrayOf<Int32>** result);
+        /* [out, callee] */ ArrayOf<Int32>** result);
 
     /**
      * Returns the capabilities of the supported video encoders.

@@ -33,7 +33,7 @@ namespace Webkit {
 // Within WebKit, Geolocation permissions may be applied either temporarily
 // (for the duration of the page) or permanently. This class deals only with
 // permanent permissions.
-class GeolocationPermissions
+class ECO_PUBLIC GeolocationPermissions
     : public Object
     , public IGeolocationPermissions
 {

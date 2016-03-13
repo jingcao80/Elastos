@@ -1,16 +1,25 @@
 
 #include "elastos/droid/systemui/recents/views/RecentsView.h"
+#include "elastos/droid/systemui/recents/views/TaskStackView.h"
 #include "elastos/droid/systemui/recents/Constants.h"
+#include "Elastos.Droid.Net.h"
+#include "Elastos.Droid.Provider.h"
 #include <elastos/droid/view/LayoutInflater.h>
 
+using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::App::CActivityOptionsHelper;
 using Elastos::Droid::App::IActivityOptionsHelper;
 using Elastos::Droid::App::CTaskStackBuilderHelper;
 using Elastos::Droid::App::ITaskStackBuilderHelper;
+using Elastos::Droid::App::ITaskStackBuilder;
+using Elastos::Droid::App::EIID_IActivityOptionsOnAnimationStartedListener;
 using Elastos::Droid::Content::IComponentName;
 using Elastos::Droid::Content::CIntent;
 using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Graphics::CBitmapHelper;
+using Elastos::Droid::Graphics::BitmapConfig_ALPHA_8;
+using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IBitmapHelper;
 using Elastos::Droid::Graphics::CCanvas;
@@ -20,11 +29,12 @@ using Elastos::Droid::Graphics::IRect;
 using Elastos::Droid::Net::CUriHelper;
 using Elastos::Droid::Net::IUriHelper;
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Os::CUserHandle;
 using Elastos::Droid::Os::IUserHandle;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::SystemUI::Recents::Model::EIID_IPackageCallbacks;
-using Elastos::Droid::SystemUI::Recents::Model::RecentsTaskLoader;
+// using Elastos::Droid::SystemUI::Recents::Model::RecentsTaskLoader;
 
 namespace Elastos {
 namespace Droid {
@@ -79,18 +89,19 @@ ECode RecentsView::CallBacks::OnTaskStackUnfilterTriggered()
 ECode RecentsView::CallBacks::OnComponentRemoved(
     /* [in] */ IHashSet* cns)
 {
-    return mHost->OnComponentRemoved();
+    return mHost->OnComponentRemoved(cns);
 }
 
 ECode RecentsView::OnAnimationStartedRunnable::Run()
 {
-    AutoPtr<SystemServicesProxy> ssp =
-        RecentsTaskLoader::GetInstance()->GetSystemServicesProxy();
-    ssp->LockCurrentTask();
+    assert(0);
+    // AutoPtr<SystemServicesProxy> ssp =
+    //     RecentsTaskLoader::GetInstance()->GetSystemServicesProxy();
+    // ssp->LockCurrentTask();
     return NOERROR;
 }
 
-CAR_INTERFACE_DECL(RecentsView::OnAnimationStartedListener, Object, IActivityOptionsOnAnimationStartedListener)
+CAR_INTERFACE_IMPL(RecentsView::OnAnimationStartedListener, Object, IActivityOptionsOnAnimationStartedListener)
 
 RecentsView::OnAnimationStartedListener::OnAnimationStartedListener(
     /* [in] */ RecentsView* host)
@@ -111,10 +122,10 @@ ECode RecentsView::OnAnimationStartedListener::OnAnimationStarted()
 }
 
 RecentsView::LaunchRunnable::LaunchRunnable(
-    /* [in] */ Task* task,
+    /* [in] */ ITask* task,
     /* [in] */ IActivityOptions* launchOpts,
     /* [in] */ Boolean lockToTask,
-    /* [in] */ RecentsView* mHost)
+    /* [in] */ RecentsView* host)
     : mTask(task)
     , mLaunchOpts(launchOpts)
     , mLockToTask(lockToTask)
@@ -124,30 +135,32 @@ RecentsView::LaunchRunnable::LaunchRunnable(
 // @Override
 ECode RecentsView::LaunchRunnable::Run()
 {
-    AutoPtr<SystemServicesProxy> ssp =
-        RecentsTaskLoader::GetInstance()->GetSystemServicesProxy();
-    if (mTask->mIsActive) {
-        // Bring an active task to the foreground
-        ssp->MoveTaskToFront(mTask->mKey->mId, mLaunchOpts);
-    }
-    else {
-        AutoPtr<IContext> context;
-        mHost->GetContext((IContext**)&context);
-        if (ssp->StartActivityFromRecents(context, mTask->mKey->mId,
-                mTask->mActivityLabel, mLaunchOpts)) {
-            if (mLaunchOpts == NULL && mLockToTask) {
-                ssp->LockCurrentTask();
-            }
-        }
-        else {
-            // Dismiss the task and return the user to home if we fail to
-            // launch the task
-            mHost->OnTaskViewDismissed(mTask);
-            if (mHost->mCb != NULL) {
-                mHost->mCb->OnTaskLaunchFailed();
-            }
-        }
-    }
+    assert(0);
+    // Task* task = (Task*)mTask.Get();
+    // AutoPtr<SystemServicesProxy> ssp =
+    //     RecentsTaskLoader::GetInstance()->GetSystemServicesProxy();
+    // if (task->mIsActive) {
+    //     // Bring an active task to the foreground
+    //     ssp->MoveTaskToFront(task->mKey->mId, mLaunchOpts);
+    // }
+    // else {
+    //     AutoPtr<IContext> context;
+    //     mHost->GetContext((IContext**)&context);
+    //     if (ssp->StartActivityFromRecents(context, task->mKey->mId,
+    //             task->mActivityLabel, mLaunchOpts)) {
+    //         if (mLaunchOpts == NULL && mLockToTask) {
+    //             ssp->LockCurrentTask();
+    //         }
+    //     }
+    //     else {
+    //         // Dismiss the task and return the user to home if we fail to
+    //         // launch the task
+    //         mHost->OnTaskViewDismissed(task);
+    //         if (mHost->mCb != NULL) {
+    //             mHost->mCb->OnTaskLaunchFailed();
+    //         }
+    //     }
+    // }
 
     return NOERROR;
 }
@@ -203,7 +216,7 @@ ECode RecentsView::SetCallbacks(
 
 /** Sets the debug overlay */
 ECode RecentsView::SetDebugOverlay(
-    /* [in] */ IDebugOverlayView* overlay)
+    /* [in] */ DebugOverlayView* overlay)
 {
     mDebugOverlay = overlay;
     return NOERROR;
@@ -234,9 +247,8 @@ ECode RecentsView::SetTaskStacks(
         AutoPtr<ITaskStack> stack = ITaskStack::Probe(item);
         AutoPtr<IContext> context;
         GetContext((IContext**)&context);
-        AutoPtr<ITaskStackView> stackView;
-        assert(0);
-        // CTaskStackView::New(context, stack, (ITaskStackView**)&stackView);
+        AutoPtr<TaskStackView> stackView = new TaskStackView();
+        stackView->constructor(context, stack);
         stackView->SetCallbacks(mCallBacks);
         // Enable debug mode drawing
         if (mConfig->mDebugModeEnabled) {
@@ -262,14 +274,12 @@ ECode RecentsView::RemoveAllTaskStacks()
             RemoveViewAt(i);
         }
     }
-    return NOERROR
+    return NOERROR;
 }
 
 /** Launches the focused task from the first stack if possible */
-ECode RecentsView::LaunchFocusedTask(
-    /* [out] */ Boolean* result)
+Boolean RecentsView::LaunchFocusedTask()
 {
-    VALIDATE_NOT_NULL(result);
     // Get the first stack view
     Int32 childCount;
     GetChildCount(&childCount);
@@ -289,21 +299,17 @@ ECode RecentsView::LaunchFocusedTask(
                 AutoPtr<ITask> task = tv->GetTask();
                 if (tv->IsFocusedTask()) {
                     OnTaskViewClicked(stackView, tv, stack, task, FALSE);
-                    *result = TRUE;
-                    return NOERROR;
+                    return TRUE;
                 }
             }
         }
     }
-    *result = FALSE;
-    return NOERROR;
+    return FALSE;
 }
 
 /** Launches the task that Recents was launched from, if possible */
-ECode RecentsView::LaunchPreviousTask(
-    /* [out] */ Boolean* result)
+Boolean RecentsView::LaunchPreviousTask()
 {
-    VALIDATE_NOT_NULL(result);
     // Get the first stack view
     Int32 childCount;
     GetChildCount(&childCount);
@@ -313,7 +319,7 @@ ECode RecentsView::LaunchPreviousTask(
         if (child != mSearchBar) {
             AutoPtr<TaskStackView> stackView = (TaskStackView*)ITaskStackView::Probe(child);
             AutoPtr<TaskStack> stack = stackView->mStack;
-            AutoPtr<IList> tasks = stack->GetTasks();
+            AutoPtr<IArrayList> tasks = stack->GetTasks();
 
             // Find the launch task in the stack
             Boolean isEmpty;
@@ -328,20 +334,18 @@ ECode RecentsView::LaunchPreviousTask(
                     if (task->mIsLaunchTarget) {
                         AutoPtr<ITaskView> tv = stackView->GetChildViewForTask(task);
                         OnTaskViewClicked(stackView, tv, stack, task, FALSE);
-                        *result = TRUE;
-                        return NOERROR;
+                        return TRUE;
                     }
                 }
             }
         }
     }
-    *result = FALSE;
-    return NOERROR;
+    return FALSE;
 }
 
 /** Requests all task stacks to start their enter-recents animation */
 ECode RecentsView::StartEnterRecentsAnimation(
-    /* [in] */ ITaskViewEnterContext* ctx)
+    /* [in] */ ViewAnimation::TaskViewEnterContext* ctx)
 {
     Int32 childCount;
     GetChildCount(&childCount);
@@ -349,7 +353,7 @@ ECode RecentsView::StartEnterRecentsAnimation(
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
         if (child != mSearchBar) {
-            AutoPtr<ITaskStackView> stackView = ITaskStackView::Probe(child);
+            AutoPtr<TaskStackView> stackView = (TaskStackView*)ITaskStackView::Probe(child);
             stackView->StartEnterRecentsAnimation(ctx);
         }
     }
@@ -358,7 +362,7 @@ ECode RecentsView::StartEnterRecentsAnimation(
 
 /** Requests all task stacks to start their exit-recents animation */
 ECode RecentsView::StartExitToHomeAnimation(
-    /* [in] */ ITaskViewExitContext* ctx)
+    /* [in] */ ViewAnimation::TaskViewExitContext* ctx)
 {
     Int32 childCount;
     GetChildCount(&childCount);
@@ -366,7 +370,7 @@ ECode RecentsView::StartExitToHomeAnimation(
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
         if (child != mSearchBar) {
-            AutoPtr<ITaskStackView> stackView = ITaskStackView::Probe(child);
+            AutoPtr<TaskStackView> stackView = (TaskStackView*)ITaskStackView::Probe(child);
             stackView->StartExitToHomeAnimation(ctx);
         }
     }
@@ -396,12 +400,9 @@ ECode RecentsView::SetSearchBar(
 }
 
 /** Returns whether there is currently a search bar */
-ECode RecentsView::HasSearchBar(
-    /* [out] */ Boolean* result)
+Boolean RecentsView::HasSearchBar()
 {
-    VALIDATE_NOT_NULL(result);
-    *result = mSearchBar != NULL;
-    return NOERROR;
+    return mSearchBar != NULL;
 }
 
 /** Sets the visibility of the search bar */
@@ -465,7 +466,6 @@ void RecentsView::OnMeasure(
     }
 
     SetMeasuredDimension(width, height);
-    return NOERROR;
 }
 
 /**
@@ -522,9 +522,9 @@ ECode RecentsView::OnApplyWindowInsets(
 {
     VALIDATE_NOT_NULL(outInsets);
     // Update the configuration with the latest system insets and trigger a relayout
-    AutoPtr<IWindowInsets> swInsets;
-    insets->GetSystemWindowInsets((IWindowInsets**)&swInsets);
-    mConfig->UpdateSystemInsets(swInsets);
+    AutoPtr<IRect> rect;
+    insets->GetSystemWindowInsets((IRect**)&rect);
+    mConfig->UpdateSystemInsets(rect);
     RequestLayout();
     return insets->ConsumeSystemWindowInsets(outInsets);
 }
@@ -539,7 +539,7 @@ ECode RecentsView::OnUserInteraction()
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
         if (child != mSearchBar) {
-            AutoPtr<ITaskStackView> stackView = ITaskStackView::Probe(child);
+            AutoPtr<TaskStackView> stackView = (TaskStackView*)ITaskStackView::Probe(child);
             stackView->OnUserInteraction();
         }
     }
@@ -557,7 +557,7 @@ ECode RecentsView::FocusNextTask(
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
         if (child != mSearchBar) {
-            AutoPtr<ITaskStackView> stackView = ITaskStackView::Probe(child);
+            AutoPtr<TaskStackView> stackView = (TaskStackView*)ITaskStackView::Probe(child);
             stackView->FocusNextTask(forward);
             break;
         }
@@ -575,7 +575,7 @@ ECode RecentsView::DismissFocusedTask()
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
         if (child != mSearchBar) {
-            AutoPtr<ITaskStackView> stackView = ITaskStackView::Probe(child);
+            AutoPtr<TaskStackView> stackView = (TaskStackView*)ITaskStackView::Probe(child);
             stackView->DismissFocusedTask();
             break;
         }
@@ -584,10 +584,8 @@ ECode RecentsView::DismissFocusedTask()
 }
 
 /** Unfilters any filtered stacks */
-ECode RecentsView::UnfilterFilteredStacks(
-    /* [out] */ Boolean* result)
+Boolean RecentsView::UnfilterFilteredStacks()
 {
-    VALIDATE_NOT_NULL(result);
     if (mStacks != NULL) {
         // Check if there are any filtered stacks and unfilter them before we back out of Recents
         Boolean stacksUnfiltered = FALSE;
@@ -602,11 +600,9 @@ ECode RecentsView::UnfilterFilteredStacks(
                 stacksUnfiltered = TRUE;
             }
         }
-        *result = stacksUnfiltered;
-        return NOERROR;
+        return stacksUnfiltered;
     }
-    *result = FALSE;
-    return NOERROR;
+    return FALSE;
 }
 
 /**** TaskStackView.TaskStackCallbacks Implementation ****/
@@ -653,8 +649,6 @@ ECode RecentsView::OnTaskViewClicked(
     }
 
     // Compute the thumbnail to scale up from
-    AutoPtr<SystemServicesProxy> ssp =
-            RecentsTaskLoader::GetInstance()->GetSystemServicesProxy();
     AutoPtr<IActivityOptions> opts;
     Int32 w, h;
     if (task->mThumbnail != NULL && (task->mThumbnail->GetWidth(&w), w > 0) &&
@@ -692,7 +686,7 @@ ECode RecentsView::OnTaskViewClicked(
         }
         else {
             // Notify the system to skip the thumbnail layer by using an ALPHA_8 bitmap
-            bHelper->GreateBitmap(1, 1, BitmapConfig_ALPHA_8, (IBitmap**)&b);
+            bHelper->CreateBitmap(1, 1, BitmapConfig_ALPHA_8, (IBitmap**)&b);
         }
         AutoPtr<IActivityOptionsOnAnimationStartedListener> animStartedListener;
         if (lockToTask) {
@@ -767,16 +761,17 @@ ECode RecentsView::OnTaskViewAppInfoClicked(
 ECode RecentsView::OnTaskViewDismissed(
     /* [in] */ ITask* _t)
 {
-    Task* t = (Task*)_t;
-    // Remove any stored data from the loader.  We currently don't bother notifying the views
-    // that the data has been unloaded because at the point we call onTaskViewDismissed(), the views
-    // either don't need to be updated, or have already been removed.
-    AutoPtr<RecentsTaskLoader> loader = RecentsTaskLoader::GetInstance();
-    loader->DeleteTaskData(t, FALSE);
+    assert(0);
+    // Task* t = (Task*)_t;
+    // // Remove any stored data from the loader.  We currently don't bother notifying the views
+    // // that the data has been unloaded because at the point we call onTaskViewDismissed(), the views
+    // // either don't need to be updated, or have already been removed.
+    // AutoPtr<RecentsTaskLoader> loader = RecentsTaskLoader::GetInstance();
+    // loader->DeleteTaskData(t, FALSE);
 
-    // Remove the old task from activity manager
-    loader->GetSystemServicesProxy()->RemoveTask(t->mKey->mId,
-            Utilities::IsDocument(t->mKey->mBaseIntent));
+    // // Remove the old task from activity manager
+    // loader->GetSystemServicesProxy()->RemoveTask(t->mKey->mId,
+    //         Utilities::IsDocument(t->mKey->mBaseIntent));
     return NOERROR;
 }
 
@@ -795,7 +790,7 @@ ECode RecentsView::OnTaskStackFilterTriggered()
         mSearchBar->Animate((IViewPropertyAnimator**)&animate);
         animate->Alpha(0.0f);
         animate->SetStartDelay(0);
-        animate->SetInterpolator(mConfig->mFastOutSlowInInterpolator);
+        animate->SetInterpolator(ITimeInterpolator::Probe(mConfig->mFastOutSlowInInterpolator));
         animate->SetDuration(mConfig->mFilteringCurrentViewsAnimDuration);
         animate->WithLayer();
         animate->Start();
@@ -812,7 +807,7 @@ ECode RecentsView::OnTaskStackUnfilterTriggered()
         mSearchBar->Animate((IViewPropertyAnimator**)&animate);
         animate->Alpha(1.0f);
         animate->SetStartDelay(0);
-        animate->SetInterpolator(mConfig->mFastOutSlowInInterpolator);
+        animate->SetInterpolator(ITimeInterpolator::Probe(mConfig->mFastOutSlowInInterpolator));
         animate->SetDuration(mConfig->mFilteringNewViewsAnimDuration);
         animate->WithLayer();
         animate->Start();
@@ -833,7 +828,7 @@ ECode RecentsView::OnComponentRemoved(
         AutoPtr<IView> child;
         GetChildAt(i, (IView**)&child);
         if (child != mSearchBar) {
-            AutoPtr<ITaskStackView> stackView = ITaskStackView::Probe(child);
+            AutoPtr<TaskStackView> stackView = (TaskStackView*)ITaskStackView::Probe(child);
             stackView->OnComponentRemoved(cns);
         }
     }

@@ -26,8 +26,11 @@ namespace Hdmi {
 // Seq #3
 class HotplugDetectionAction
     : public HdmiCecFeatureAction
+    , public IHotplugDetectionAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     HotplugDetectionAction();
 
     /**

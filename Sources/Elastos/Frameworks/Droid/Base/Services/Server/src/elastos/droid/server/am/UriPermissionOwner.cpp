@@ -40,7 +40,7 @@ AutoPtr<IBinder> UriPermissionOwner::GetExternalTokenLocked()
 {
     if (mExternalToken == NULL) {
         AutoPtr<IBinder> token;
-        CUriPermissionOwnerExternalToken::New((Handle32)this, (IBinder**)&token);
+        CUriPermissionOwnerExternalToken::New(this, (IBinder**)&token);
         // this method is only called by CActivityManagerService::NewUriPermissionOwner,
         // in NewUriPermissionOwner, token hold owner's reference. add by xihao
         //
@@ -54,12 +54,13 @@ AutoPtr<IBinder> UriPermissionOwner::GetExternalTokenLocked()
 AutoPtr<UriPermissionOwner> UriPermissionOwner::FromExternalToken(
     /* [in] */ IBinder* token)
 {
-    Handle32 owner = 0;
-    if (IUriPermissionOwnerExternalToken::Probe(token) != NULL) {
-        IUriPermissionOwnerExternalToken::Probe(token)->GetOwner(&owner);
+    IUriPermissionOwnerExternalToken* upoet = IUriPermissionOwnerExternalToken::Probe(token);
+    if (upoet != NULL) {
+        AutoPtr<IObject> owner;
+        upoet->GetOwner((IObject**)&owner);
+        return (UriPermissionOwner*)owner.Get();
     }
-
-    return (UriPermissionOwner*)owner;
+    return NULL;
 }
 
 ECode UriPermissionOwner::RemoveUriPermissionsLocked()

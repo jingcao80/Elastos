@@ -6,6 +6,11 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
+CAR_SINGLETON_IMPL(CPointerIconHelper)
+
+CAR_INTERFACE_IMPL(CPointerIconHelper, Singleton, IPointerIconHelper)
+
+
 ECode CPointerIconHelper::GetNullIcon(
     /* [out] */ IPointerIcon** pointerIcon)
 {

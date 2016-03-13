@@ -95,24 +95,24 @@ ECode EntropyMixer::MyBroadcastReceiver::OnReceive(
 //============================================================
 // EntropyMixer
 //============================================================
-CAR_INTERFACE_IMPL(EntropyMixer, Object, IBinder)
+CAR_INTERFACE_IMPL_2(EntropyMixer, Object, IEntropyMixer, IBinder)
 
-EntropyMixer::EntropyMixer(
+ECode EntropyMixer::constructor(
     /* [in] */ IContext* context)
 {
     StringBuilder sb(GetSystemDir());
     sb += "/entropy.dat";
-    Init(context, sb.ToString(),
+    return Init(context, sb.ToString(),
         String("/dev/urandom"), String("/dev/hw_random"));
 }
 
-EntropyMixer::EntropyMixer(
+ECode EntropyMixer::constructor(
     /* [in] */ IContext* context,
     /* [in] */ const String& entropyFile,
     /* [in] */ const String& randomDevice,
     /* [in] */ const String& hwRandomDevice)
 {
-    Init(context, entropyFile, randomDevice, hwRandomDevice);
+    return Init(context, entropyFile, randomDevice, hwRandomDevice);
 }
 
 ECode EntropyMixer::Init(
@@ -134,6 +134,9 @@ ECode EntropyMixer::Init(
         return E_NULL_POINTER_EXCEPTION;
     }
 
+    AutoPtr<MyHandler> mh = new MyHandler(this);
+    mh->constructor();
+    mHandler = (IHandler*)mh.Get();
     mRandomDevice = randomDevice;
     mHwRandomDevice = hwRandomDevice;
     mEntropyFile = entropyFile;

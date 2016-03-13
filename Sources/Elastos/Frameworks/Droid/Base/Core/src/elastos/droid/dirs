@@ -6,6 +6,7 @@
 
 
 DIRS += accessibilityservice
+DIRS += accounts
 DIRS += app
 DIRS += appwidget
 DIRS += animation
@@ -32,8 +33,10 @@ DIRS += server
 DIRS += service
 DIRS += speech
 #DIRS += systemui
+DIRS += telephony
 DIRS += text
 DIRS += transition
+DIRS += telecomm
 DIRS += utility
 DIRS += webkit
 DIRS += widget
@@ -43,7 +46,6 @@ DIRS += wifi
 #DIRS += speech
 #DIRS += privacy
 #DIRS += accounts
-#DIRS += telephony
 #DIRS += statusbar
 #DIRS += googleremote
 #DIRS += wifidisplay

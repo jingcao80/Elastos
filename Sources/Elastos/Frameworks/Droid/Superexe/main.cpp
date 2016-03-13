@@ -171,7 +171,9 @@ int LaunchApp(void *handle, char *appName)
     int nWaitTime = 3;
     AutoPtr<IIPrivacySettingsManager> privacyManager;
     for (int i = 0; i < 15; i++) {
-        serviceManager->GetService(String("privacy"), (IInterface**)&privacyManager);
+        AutoPtr<IInterface> obj;
+        serviceManager->GetService(String("privacy"), (IInterface**)&obj);
+        privacyManager = IIPrivacySettingsManager::Probe(obj);
         if (NULL != privacyManager) break;
         else {
             printf("---- %s, wait for SystemServer! %ds\n", __FUNCTION__, ++nWaitTime);

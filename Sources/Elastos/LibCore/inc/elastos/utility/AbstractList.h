@@ -412,8 +412,8 @@ public:
     CARAPI RetainAll(
         /* [in] */ ICollection* collection);
 
-    CARAPI GetSize(
-            /* [out] */ Int32* size);
+    virtual CARAPI GetSize(
+            /* [out] */ Int32* size) = 0;
 
     CARAPI ToArray(
         /* [out, callee] */ ArrayOf<IInterface*>** array);

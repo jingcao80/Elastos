@@ -7,7 +7,7 @@ namespace Droid {
 namespace Server {
 namespace Hdmi {
 
-const String UnmodifiableSparseInt32Array::TAG("ImmutableSparseIntArray");
+const String UnmodifiableSparseInt32Array::TAG("ImmutableSparseInt32Array");
 
 ECode UnmodifiableSparseInt32Array::constructor(
     /* [in] */ ISparseInt32Array* array)
@@ -22,9 +22,11 @@ ECode UnmodifiableSparseInt32Array::constructor(
 ECode UnmodifiableSparseInt32Array::GetSize(
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return mArray->Size();
+        return mArray->GetSize(result);
 #endif
 }
 
@@ -32,9 +34,13 @@ ECode UnmodifiableSparseInt32Array::Get(
     /* [in] */ Int32 key,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return mArray->Get(key);
+        AutoPtr<IInterface> obj;
+        mArray->Get(key, (IInterface**)&obj);
+        return I::Probe(obj);
 #endif
 }
 
@@ -43,6 +49,8 @@ ECode UnmodifiableSparseInt32Array::Get(
     /* [in] */ Int32 valueIfKeyNotFound,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mArray->Get(key, valueIfKeyNotFound);
@@ -53,6 +61,8 @@ ECode UnmodifiableSparseInt32Array::KeyAt(
     /* [in] */ Int32 index,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mArray->KeyAt(index);
@@ -63,6 +73,8 @@ ECode UnmodifiableSparseInt32Array::ValueAt(
     /* [in] */ Int32 index,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mArray->ValueAt(index);
@@ -73,6 +85,8 @@ ECode UnmodifiableSparseInt32Array::IndexOfValue(
     /* [in] */ Int32 value,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mArray->IndexOfValue(value);
@@ -82,6 +96,8 @@ ECode UnmodifiableSparseInt32Array::IndexOfValue(
 ECode UnmodifiableSparseInt32Array::ToString(
     /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mArray->ToString();

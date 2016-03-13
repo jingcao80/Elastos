@@ -34,16 +34,13 @@ class HdmiLogger
 {
 public:
     static CARAPI Warning(
-        /* [in] */ const String& logMessage,
-        /* [in] */ ArrayOf<IObject>* objs);
+        /* [in] */ const char* fmt, ...);
 
     static CARAPI Error(
-        /* [in] */ const String& logMessage,
-        /* [in] */ ArrayOf<IObject>* objs);
+        /* [in] */ const char* fmt, ...);
 
     static CARAPI Debug(
-        /* [in] */ const String& logMessage,
-        /* [in] */ ArrayOf<IObject>* objs);
+        /* [in] */ const char* fmt, ...);
 
 private:
     HdmiLogger();
@@ -57,10 +54,8 @@ private:
     CARAPI DebugInternal(
         /* [in] */ const String& logMessage);
 
-    static CARAPI ToLogString(
-        /* [in] */ const String& logMessage,
-        /* [in] */ ArrayOf<IObject*>* objs,
-        /* [out] */ String* result);
+    static CARAPI_(String) ToLogString(
+        /* [in] */ const char* fmt, ...);
 
     static CARAPI GetLogger(
         /* [out] */ HdmiLogger** result);

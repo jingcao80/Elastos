@@ -3,19 +3,24 @@
 #define __ELASTOS_DROID_SERVER_HDMI_HDMICECCONTROLLER_H__
 
 #include "_Elastos.Droid.Server.h"
+#include "elastos/droid/server/hdmi/Constants.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDevice.h"
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
 #include <Elastos.Droid.Internal.h>
 #include <elastos/core/Object.h>
 #include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/os/Runnable.h>
 
 using Elastos::Core::IInteger32;
 using Elastos::Core::IRunnable;
+using Elastos::Droid::Hardware::Hdmi::IHdmiPortInfo;
 using Elastos::Droid::Internal::Utility::IIndentingPrintWriter;
 using Elastos::Droid::Internal::Utility::IPredicate;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Utility::IList;
-using Elastos::Droid::Hardware::Hdmi::IHdmiPortInfo;
 using Elastos::Droid::Os::IMessageQueue;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Utility::ISparseArray;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -44,10 +49,18 @@ private:
         , public IPredicate
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        RemoteDevicePredicate(
+            /* [in] */ HdmiCecController* host);
+
         // @Override
         CARAPI Apply(
-            /* [in] */ IInteger32* address,
+            /* [in] */ IInterface* address,
             /* [out] */ Boolean* result);
+
+    private:
+        HdmiCecController* mHost;
     };
 
     class SystemAudioPredicate
@@ -55,10 +68,136 @@ private:
         , public IPredicate
     {
     public:
+        CAR_INTERFACE_DECL()
+
         // @Override
         CARAPI Apply(
-            /* [in] */ IInteger32* address,
+            /* [in] */ IInterface* address,
             /* [out] */ Boolean* result);
+    };
+
+    class InnerSub_Runnable
+        : public Runnable
+    {
+    public:
+        InnerSub_Runnable(
+            /* [in] */ HdmiCecController* host,
+            /* [in] */ Int32 deviceType,
+            /* [in] */ Int32 preferredAddress,
+            /* [in] */ IHdmiCecControllerAllocateAddressCallback* callback);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiCecController* mHost;
+        Int32 mDeviceType;
+        Int32 mPreferredAddress;
+        AutoPtr<IHdmiCecControllerAllocateAddressCallback> mCallback;
+    };
+
+    class HandleRunnable
+        : public Runnable
+    {
+    public:
+        HandleRunnable(
+            /* [in] */ IHdmiCecControllerAllocateAddressCallback* callback,
+            /* [in] */ Int32 deviceType,
+            /* [in] */ Int32 assignedAddress);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        IHdmiCecControllerAllocateAddressCallback* mCallback;
+        Int32 mDeviceType;
+        Int32 mAssignedAddress;
+    };
+
+    class DevRunnable
+        : public Runnable
+    {
+    private:
+        class ServiceRunnable
+            : public Runnable
+        {
+        public:
+            ServiceRunnable(
+                /* [in] */ DevRunnable* host,
+                /* [in] */ Int32 sourceAddress,
+                /* [in] */ IList* candidates,
+                /* [in] */ Int32 retryCount,
+                /* [in] */ IHdmiControlServiceDevicePollingCallback* callback,
+                /* [in] */ IList* allocated);
+
+            // @Override
+            CARAPI Run();
+
+        private:
+            DevRunnable* mHost;
+            Int32 mSourceAddress;
+            AutoPtr<IList> mCandidates;
+            Int32 mRetryCount;
+            AutoPtr<IHdmiControlServiceDevicePollingCallback> mCallback;
+            AutoPtr<IList> mAllocated;
+        };
+
+    public:
+        DevRunnable(
+            /* [in] */ HdmiCecController* host,
+            /* [in] */ Int32 sourceAddress,
+            /* [in] */ IInteger32* candidate,
+            /* [in] */ Int32 retryCount,
+            /* [in] */ IList* allocated,
+            /* [in] */ IList* candidates,
+            /* [in] */ IHdmiControlServiceDevicePollingCallback* callback);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiCecController* mHost;
+        Int32 mSourceAddress;
+        AutoPtr<IInteger32> mCandidate;
+        Int32 mRetryCount;
+        AutoPtr<IList> mAllocated;
+        AutoPtr<IList> mCandidates;
+        AutoPtr<IHdmiControlServiceDevicePollingCallback> mCallback;
+    };
+
+    class IoRunnable
+        : public Runnable
+    {
+    private:
+        class ServiceThreadRunnable
+            : public Runnable
+        {
+        public:
+            ServiceThreadRunnable(
+                /* [in] */ IHdmiControlServiceSendMessageCallback* callback,
+                /* [in] */ Int32 finalError);
+
+            // @Override
+            CARAPI Run();
+
+        private:
+            AutoPtr<IHdmiControlServiceSendMessageCallback> mCallback;
+            Int32 mFinalError;
+        };
+
+    public:
+        IoRunnable(
+            /* [in] */ HdmiCecController* host,
+            /* [in] */ IHdmiCecMessage* cecMessage,
+            /* [in] */ IHdmiControlServiceSendMessageCallback* callback);
+
+        // @Override
+        CARAPI Run();
+
+    private:
+        HdmiCecController* mHost;
+        AutoPtr<IHdmiCecMessage> mCecMessage;
+        AutoPtr<IHdmiControlServiceSendMessageCallback> mCallback;
     };
 
 public:
@@ -73,7 +212,7 @@ public:
      *         returns {@code null}.
      */
     static CARAPI Create(
-        /* [in] */ HdmiControlService* service,
+        /* [in] */ IHdmiControlService* service,
         /* [out] */ HdmiCecController** result);
 
     // @ServiceThreadOnly
@@ -101,7 +240,7 @@ public:
         /* [in] */ IHdmiCecControllerAllocateAddressCallback* callback);
 
     CARAPI GetPortInfos(
-        /* [out, callee] */ ArrayOf<IHdmiPortInfo*>* result);
+        /* [out, callee] */ ArrayOf<IHdmiPortInfo*>** result);
 
     /**
      * Return the locally hosted logical device of a given type.
@@ -248,7 +387,7 @@ public:
 private:
     // Private constructor.  Use HdmiCecController.create().
     HdmiCecController(
-        /* [in] */ HdmiControlService* service);
+        /* [in] */ IHdmiControlService* service);
 
     CARAPI Init(
         /* [in] */ Int64 nativePtr);
@@ -262,7 +401,7 @@ private:
     static CARAPI BuildBody(
         /* [in] */ Int32 opcode,
         /* [in] */ ArrayOf<Byte>* params,
-        /* [out, callee] */ ArrayOf<Byte>* result);
+        /* [out, callee] */ ArrayOf<Byte>** result);
 
     CARAPI PickPollCandidates(
         /* [in] */ Int32 pickStrategy,
@@ -358,7 +497,7 @@ private:
 
     static CARAPI NativeGetPortInfos(
         /* [in] */ Int64 controllerPtr,
-        /* [out, callee] */ ArrayOf<IHdmiPortInfo*>* result);
+        /* [out, callee] */ ArrayOf<IHdmiPortInfo*>** result);
 
     static CARAPI NativeSetOption(
         /* [in] */ Int64 controllerPtr,
@@ -398,7 +537,7 @@ private:
     // interacts with HAL.
     /* volatile */ Int64 mNativePtr;
 
-    AutoPtr<HdmiControlService> mService;
+    AutoPtr<IHdmiControlService> mService;
 
     // Stores the local CEC devices in the system. Device type is used for key.
     AutoPtr<ISparseArray> mLocalDevices;

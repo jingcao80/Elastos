@@ -58,6 +58,7 @@ module
     using interface Elastos.IO.IFilterOutputStream;
     using interface Elastos.Utility.IMap;
     using interface Elastos.Utility.ISet;
+    using interface Elastos.Utility.IIterable;
     using interface Elastos.Utility.ICollection;
     using interface Org.Xmlpull.V1.IXmlPullParser;
 
@@ -85,6 +86,10 @@ module
         interface IMap;
     }
 
+    singleton class CArrayMapHelper {
+        interface IArrayMapHelper;
+    }
+
     class CArraySet {
         constructor();
 
@@ -97,6 +102,7 @@ module
         interface IArraySet;
         interface ISet;
         interface ICollection;
+        interface IIterable;
     }
 
     singleton class CBase64 {

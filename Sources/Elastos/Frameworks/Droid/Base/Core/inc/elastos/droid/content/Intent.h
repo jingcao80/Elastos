@@ -715,6 +715,16 @@ public:
 
     CARAPI IsDocument(
         /* [out] */ Boolean* result);
+
+    /**
+     * Test if given mode flags specify an access mode, which must be at least
+     * read and/or write.
+     *
+     * @hide
+     */
+    static CARAPI_(Boolean) IsAccessUriMode(
+        /* [in] */ Int32 modeFlags);
+
 private:
     ECO_LOCAL static CARAPI_(AutoPtr<IClipDataItem>) MakeClipItem(
         /* [in] */ ArrayOf<IUri*>* streams,

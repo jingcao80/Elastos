@@ -49,8 +49,12 @@ ECode NetworkPolicyManager::From(
     /* [out] */ INetworkPolicyManager** result)
 {
     VALIDATE_NOT_NULL(result);
+    *result = NULL;
 
-    ASSERT_SUCCEEDED(context->GetSystemService(IContext::NETWORK_POLICY_SERVICE, (IInterface**)result));
+    AutoPtr<IInterface> obj;
+    ASSERT_SUCCEEDED(context->GetSystemService(IContext::NETWORK_POLICY_SERVICE, (IInterface**)&obj));
+    *result = INetworkPolicyManager::Probe(obj);
+    REFCOUNT_ADD(*result)
     return NOERROR;
 }
 

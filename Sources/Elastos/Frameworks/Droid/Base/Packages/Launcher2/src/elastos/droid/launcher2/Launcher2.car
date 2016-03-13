@@ -1,0 +1,36 @@
+module
+{
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("../../..//../car/elastos/droid/launcher2/WallpaperChooserDialogFragment.car");
+
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.IFragment;
+    using interface Elastos.Droid.App.IDialogFragment;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnCancelListener;
+    using interface Elastos.Droid.Content.IDialogInterfaceOnDismissListener;
+    using interface Elastos.Droid.Widget.IAdapterViewOnItemSelectedListener;
+    using interface Elastos.Droid.Widget.IAdapterViewOnItemClickListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    class CWallpaperChooser {
+        interface IActivity;
+    }
+
+    class CWallpaperChooserDialogFragment {
+        interface IWallpaperChooserDialogFragment;
+        interface IFragment;
+        interface IDialogInterfaceOnCancelListener;
+        interface IDialogInterfaceOnDismissListener;
+        interface IDialogFragment;
+        interface IAdapterViewOnItemSelectedListener;
+        interface IAdapterViewOnItemClickListener;
+    }
+
+    } //namespace Launcher2
+    } //namespace Droid
+    } //namespace Elastos
+}

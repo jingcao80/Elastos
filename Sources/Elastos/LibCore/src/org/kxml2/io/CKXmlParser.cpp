@@ -311,6 +311,7 @@ ECode CKXmlParser::Next(
 
     if (mReader == NULL) {
         Logger::E("CKXmlParser", "setInput() must be called first.");
+        assert(0 && "TODO");
         return E_XML_PULL_PARSER_EXCEPTION;
     }
 

@@ -10,6 +10,7 @@
 #include "elastos/droid/server/display/DisplayDeviceInfo.h"
 #include <elastos/utility/logging/Slogger.h>
 #include "elastos/droid/os/Handler.h"
+#include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
@@ -23,7 +24,7 @@ using Elastos::Droid::View::CSurfaceControlHelper;
 using Elastos::Droid::View::IGravity;
 using Elastos::Droid::Utility::IDisplayMetrics;
 using Elastos::Droid::Provider::ISettingsGlobal;
-// using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Provider::Settings;
 using Elastos::Core::StringUtils;
 using Elastos::Core::ICharSequence;
 using Elastos::Core::CString;
@@ -314,15 +315,11 @@ ECode OverlayDisplayAdapter::RegisterRunnable::Run()
 {
     AutoPtr<IContentResolver> cr;
     mHost->GetContext()->GetContentResolver((IContentResolver**)&cr);
-    AutoPtr<ISettingsGlobal> sg;
-    assert(0 && "TODO");
-    // CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
     AutoPtr<IUri> uri;
-    sg->GetUriFor(ISettingsGlobal::OVERLAY_DISPLAY_DEVICES, (IUri**)&uri);
+    Settings::Global::GetUriFor(ISettingsGlobal::OVERLAY_DISPLAY_DEVICES, (IUri**)&uri);
     AutoPtr<OverlayDisplayContentObserver> ovdco = new OverlayDisplayContentObserver(mHost);
     ovdco->constructor(mHost->GetHandler());
-    IContentObserver* co = (IContentObserver*)ovdco;
-    cr->RegisterContentObserver(uri, TRUE, co);
+    cr->RegisterContentObserver(uri, TRUE, (IContentObserver*)ovdco.Get());
 
     mHost->UpdateOverlayDisplayDevices();
 
@@ -397,11 +394,8 @@ void OverlayDisplayAdapter::UpdateOverlayDisplayDevicesLocked()
 
     AutoPtr<IContentResolver> cr;
     context->GetContentResolver((IContentResolver**)&cr);
-    AutoPtr<ISettingsGlobal> sg;
-    assert(0 && "TODO");
-    // CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&sg);
     String value;
-    sg->GetString(cr, ISettingsGlobal::OVERLAY_DISPLAY_DEVICES, &value);
+    Settings::Global::GetString(cr, ISettingsGlobal::OVERLAY_DISPLAY_DEVICES, &value);
     if (value.IsNull()) {
         value = String("");
     }

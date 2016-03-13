@@ -536,8 +536,7 @@ module
          *
          * @return This drawable.
          */
-        Mutate(
-            [out] IDrawable** drawable);
+        Mutate();
 
         /**
          * Use the current

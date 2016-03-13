@@ -37,8 +37,11 @@ class HdmiCecLocalDevice
 public:
     class ActiveSource
         : public Object
+        , public IHdmiCecLocalDeviceActiveSource
     {
     public:
+        CAR_INTERFACE_DECL()
+
         CARAPI constructor();
 
         CARAPI constructor(
@@ -48,25 +51,25 @@ public:
         static CARAPI Of(
             /* [in] */ Int32 logical,
             /* [in] */ Int32 physical,
-            /* [out] */ ActiveSource** result);
+            /* [out] */ IHdmiCecLocalDeviceActiveSource** result);
 
         CARAPI IsValid(
             /* [out] */ Boolean* result);
 
         CARAPI Invalidate();
 
-        CARAPI Equals(
+        CARAPI IsEquals(
             /* [in] */ Int32 logical,
             /* [in] */ Int32 physical,
             /* [out] */ Boolean* result);
 
         // @Override
         CARAPI Equals(
-            /* [in] */ IObject* obj,
+            /* [in] */ IInterface* obj,
             /* [out] */ Boolean* result);
 
         // @Override
-        CARAPI HashCode(
+        CARAPI GetHashCode(
             /* [out] */ Int32* result);
 
         // @Override
@@ -84,9 +87,35 @@ private:
         : public Handler
     {
     public:
+        InnerSub_Handler(
+            /* [in] */ HdmiCecLocalDevice* host);
+
         // @Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
+    private:
+        HdmiCecLocalDevice* mHost;
+    };
+
+    class InnerSub_PendingActionClearedCallback
+        : public Object
+        , public IHdmiCecLocalDevicePendingActionClearedCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_PendingActionClearedCallback(
+            /* [in] */ HdmiCecLocalDevice* host,
+            /* [in] */ IHdmiCecLocalDevicePendingActionClearedCallback* origialCallback);
+
+        // @Override
+        CARAPI OnCleared(
+            /* [in] */ IHdmiCecLocalDevice* device);
+
+    private:
+        HdmiCecLocalDevice* mHost;
+        AutoPtr<IHdmiCecLocalDevicePendingActionClearedCallback> mOrigialCallback;
     };
 
 public:
@@ -95,12 +124,12 @@ public:
     HdmiCecLocalDevice();
 
     CARAPI constructor(
-        /* [in] */ HdmiControlService* service,
+        /* [in] */ IHdmiControlService* service,
         /* [in] */ Int32 deviceType);
 
     // Factory method that returns HdmiCecLocalDevice of corresponding type.
     static CARAPI Create(
-        /* [in] */ HdmiControlService* service,
+        /* [in] */ IHdmiControlService* service,
         /* [in] */ Int32 deviceType,
         /* [out] */ IHdmiCecLocalDevice** result);
 
@@ -327,7 +356,7 @@ public:
 
     // @ServiceThreadOnly
     CARAPI AddAndStartAction(
-        /* [in] */  );
+        /* [in] */ HdmiCecFeatureAction* action);
 
     // @ServiceThreadOnly
     CARAPI StartQueuedActions();
@@ -356,15 +385,13 @@ public:
     // Remove all actions matched with the given Class type.
     // @ServiceThreadOnly
     CARAPI RemoveAction(
-        /* [in] */ ClassID clazz,
-        /* [out] */ HdmiCecFeatureAction** result);
+        /* [in] */ ClassID clazz);
 
     // Remove all actions matched with the given Class type besides |exception|.
     // @ServiceThreadOnly
     CARAPI RemoveActionExcept(
         /* [in] */ ClassID clazz,
-        /* [in] */ HdmiCecFeatureAction* exception,
-        /* [out] */ HdmiCecFeatureAction** result);
+        /* [in] */ HdmiCecFeatureAction* exception);
 
     CARAPI CheckIfPendingActionsCleared();
 
@@ -381,7 +408,7 @@ public:
         /* [in] */ Boolean connected);
 
     CARAPI GetService(
-        /* [out] */ HdmiControlService** result);
+        /* [out] */ IHdmiControlService** result);
 
     // @ServiceThreadOnly
     CARAPI IsConnectedToArcPort(
@@ -389,10 +416,10 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI GetActiveSource(
-        /* [out] */ ActiveSource** result);
+        /* [out] */ IHdmiCecLocalDeviceActiveSource** result);
 
     CARAPI SetActiveSource(
-        /* [in] */ ActiveSource* newActive);
+        /* [in] */ IHdmiCecLocalDeviceActiveSource* newActive);
 
     CARAPI SetActiveSource(
         /* [in] */ IHdmiDeviceInfo* info);
@@ -482,9 +509,7 @@ private:
     CARAPI HandleDisableDeviceTimeout();
 
 public:
-#if 0
-    AutoPtr<HdmiControlService> mService;
-#endif
+    AutoPtr<IHdmiControlService> mService;
 
     Int32 mDeviceType;
 
@@ -505,11 +530,9 @@ public:
 protected:
     // Logical address of the active source.
     // @GuardedBy("mLock")
-    AutoPtr<ActiveSource> mActiveSource;
+    AutoPtr<IHdmiCecLocalDeviceActiveSource> mActiveSource;
 
-#if 0
     AutoPtr<HdmiCecMessageCache> mCecMessageCache;
-#endif
 
 private:
     static const String TAG;

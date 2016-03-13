@@ -19,8 +19,11 @@ namespace Hdmi {
  */
 class RequestArcTerminationAction
     : public RequestArcAction
+    , public IRequestArcTerminationAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     /**
      * @Constructor
      *

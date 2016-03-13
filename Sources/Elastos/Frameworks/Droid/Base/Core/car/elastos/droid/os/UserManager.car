@@ -566,6 +566,23 @@ module
             [out] IUserInfo** userInfo);
 
         /**
+         * Creates a secondary user with the specified name and options and configures it with default
+         * restrictions.
+         * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+         *
+         * @param name the user's name
+         * @param flags flags that identify the type of user and other properties.
+         * @see UserInfo
+         *
+         * @return the UserInfo object for the created user, or null if the user could not be created.
+         * @hide
+         */
+        CreateSecondaryUser(
+            [in] String name,
+            [in] Int32 flags,
+            [out] IUserInfo** userInfo);
+
+        /**
          * @hide
          * Marks the guest user for deletion to allow a new guest to be created before deleting
          * the current user who is a guest.
@@ -601,6 +618,16 @@ module
         GetUsers(
             [in] Boolean excludeDying,
             [out] IList** users);
+
+        /**
+         * Checks whether it's possible to add more users. Caller must hold the MANAGE_USERS
+         * permission.
+         *
+         * @return true if more users can be added, false if limit has been reached.
+         * @hide
+         */
+        CanAddMoreUsers(
+            [out] Boolean* result);
 
         /**
          * Returns list of the profiles of userHandle including
@@ -765,6 +792,15 @@ module
          */
         GetDefaultGuestRestrictions(
             [out] IBundle** bundle);
+
+        /**
+         * Returns true if the user switcher should be shown, this will be if there
+         * are multiple users that aren't managed profiles.
+         * @hide
+         * @return true if user switcher should be shown.
+         */
+        IsUserSwitcherEnabled(
+            [out] Boolean* result);
     }
 
     interface IUserManagerHelper {

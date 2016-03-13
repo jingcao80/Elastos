@@ -601,6 +601,13 @@ public:
         /* [in] */ const String& key,
         /* [out, callee] */ ArrayOf<ICharSequence*>** value);
 
+    // add for java compatible
+    CARAPI SetJavaData(
+        /* [in] */ ArrayOf<Byte>* data);
+
+    CARAPI GetJavaData(
+        /* [out, callee] */ ArrayOf<Byte>** data);
+
 public:
     static AutoPtr<IBundle> EMPTY;
 
@@ -608,6 +615,8 @@ private:
     Boolean mHasFds;
     Boolean mFdsKnown;
     Boolean mAllowFds;
+    // add for java compatible
+    AutoPtr<ArrayOf<Byte> > mJavaData;
 };
 
 } // namespace Os

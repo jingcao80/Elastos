@@ -6,13 +6,13 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/graphics/drawable/ScaleDrawable.h"
 #include "elastos/droid/graphics/drawable/CScaleDrawable.h"
-// #include "elastos/droid/view/CGravity.h"
+#include "elastos/droid/view/CGravity.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/StringUtils.h>
 
 using Elastos::Core::StringUtils;
 using Elastos::Droid::View::IGravity;
-// using Elastos::Droid::View::CGravity;
+using Elastos::Droid::View::CGravity;
 using Elastos::Droid::R;
 
 namespace Elastos {
@@ -53,16 +53,14 @@ ScaleDrawable::ScaleState::ScaleState(
 ECode ScaleDrawable::ScaleState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    return CScaleDrawable::New(this, NULL, (IScaleDrawable**)drawable);
+    return CScaleDrawable::New(this, NULL, drawable);
 }
 
 ECode ScaleDrawable::ScaleState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    return CScaleDrawable::New(this, res, (IScaleDrawable**)drawable);
+    return CScaleDrawable::New(this, res, drawable);
 }
 
 ECode ScaleDrawable::ScaleState::GetChangingConfigurations(
@@ -363,8 +361,7 @@ void ScaleDrawable::OnBoundsChange(
     Int32 layoutDirection = 0;
     GetLayoutDirection(&layoutDirection);
     AutoPtr<IGravity> gravity;
-    assert(0 && "TODO");
-    // CGravity::AcquireSingleton((IGravity**)&gravity);
+    CGravity::AcquireSingleton((IGravity**)&gravity);
     gravity->Apply(mScaleState->mGravity, w, h, bounds, r, layoutDirection);
 
     if (w > 0 && h > 0) {
@@ -400,19 +397,12 @@ ECode ScaleDrawable::GetConstantState(
     return NOERROR;
 }
 
-ECode ScaleDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode ScaleDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated &&
-            (Drawable::Mutate((IDrawable**)&tmp), tmp.Get()) == THIS_PROBE(IDrawable)) {
-        tmp = NULL;
-        mScaleState->mDrawable->Mutate((IDrawable**)&tmp);
+    if (!mMutated) {
+        mScaleState->mDrawable->Mutate();
         mMutated = TRUE;
     }
-    *drawable = THIS_PROBE(IDrawable);
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 

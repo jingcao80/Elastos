@@ -24,6 +24,9 @@ public:
         /* [in] */ Int32 format,
         /* [in] */ IPixelFormat* info);
 
+    CARAPI GetBitsPerPixel(
+        /* [out] */ Int32* result);
+
     /**
      * Determine whether or not this is a public-visible and non-deprecated {@code format}.
      *

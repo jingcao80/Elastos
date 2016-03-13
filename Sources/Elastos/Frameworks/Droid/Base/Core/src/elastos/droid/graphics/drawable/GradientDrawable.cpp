@@ -124,18 +124,14 @@ ECode GradientDrawable::GradientState::CanApplyTheme(
 ECode GradientDrawable::GradientState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-
-    return CGradientDrawable::New(this, NULL, (IGradientDrawable**)drawable);
+    return CGradientDrawable::New(this, NULL, drawable);
 }
 
 ECode GradientDrawable::GradientState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-
-    return CGradientDrawable::New(this, NULL, (IGradientDrawable**)drawable);
+    return CGradientDrawable::New(this, NULL, drawable);
 }
 
 ECode GradientDrawable::GradientState::NewDrawable(
@@ -143,9 +139,7 @@ ECode GradientDrawable::GradientState::NewDrawable(
     /* [in] */ IResourcesTheme* theme,
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-
-    return CGradientDrawable::New(this, theme, (IGradientDrawable**)drawable);
+    return CGradientDrawable::New(this, theme, drawable);
 }
 
 ECode GradientDrawable::GradientState::GetChangingConfigurations(
@@ -1720,18 +1714,13 @@ ECode GradientDrawable::GetOutline(
     return NOERROR;
 }
 
-ECode GradientDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode GradientDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated && (Drawable::Mutate((IDrawable**)&tmp), tmp.Get()) == (IDrawable*)this->Probe(EIID_IDrawable)) {
+    if (!mMutated) {
         mGradientState = new GradientState(mGradientState);
         InitializeWithState(mGradientState);
         mMutated = TRUE;
     }
-    *drawable = (IDrawable*)this->Probe(EIID_IDrawable);
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 

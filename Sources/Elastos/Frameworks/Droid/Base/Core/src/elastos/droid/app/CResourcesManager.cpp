@@ -200,6 +200,7 @@ ECode CResourcesManager::GetTopLevelResources(
 {
     VALIDATE_NOT_NULL(result)
     *result = NULL;
+    assert(compatInfo != NULL);
 
     Float scale;
     compatInfo->GetApplicationScale(&scale);
@@ -207,34 +208,36 @@ ECode CResourcesManager::GetTopLevelResources(
     AutoPtr<IResources> r;
     synchronized(this) {
         // Resources is app scale dependent.
-        if (FALSE) {
-            Logger::W(TAG, "getTopLevelResources: %s / %f", resDir.string(), scale);
-        }
         AutoPtr<IInterface> obj, resObj;
         mActiveResources->Get(TO_IINTERFACE(key), (IInterface**)&obj);
-        IWeakReference* wr = IWeakReference::Probe(obj);
-        wr->Resolve(EIID_IInterface, (IInterface**)&resObj);
-        if (resObj != NULL) {
-            r = IResources::Probe(resObj);
+        if (obj != NULL) {
+            IWeakReference* wr = IWeakReference::Probe(obj);
+            wr->Resolve(EIID_IInterface, (IInterface**)&resObj);
+            if (resObj != NULL) {
+                r = IResources::Probe(resObj);
 
-            //if (r != NULL) Logger::I(TAG, "isUpToDate " + resDir + ": " + r.getAssets().isUpToDate());
-            AutoPtr<IAssetManager> assets;
-            r->GetAssets((IAssetManager**)&assets);
-            Boolean bval;
-            assets->IsUpToDate(&bval);
-            if (bval) {
-                if (FALSE) {
-                    AutoPtr<ICompatibilityInfo> ci;
-                    r->GetCompatibilityInfo((ICompatibilityInfo**)&ci);
-                    Float applicationScale;
-                    ci->GetApplicationScale(&applicationScale);
-                    Logger::W(TAG, "Returning cached resources %s %s : appScale=%f",
-                        TO_CSTR(r), resDir.string(), applicationScale);
+                //if (r != NULL) Logger::I(TAG, "isUpToDate " + resDir + ": " + r.getAssets().isUpToDate());
+                AutoPtr<IAssetManager> assets;
+                r->GetAssets((IAssetManager**)&assets);
+                Boolean bval;
+                assets->IsUpToDate(&bval);
+                if (bval) {
+                    if (FALSE) {
+                        AutoPtr<ICompatibilityInfo> ci;
+                        r->GetCompatibilityInfo((ICompatibilityInfo**)&ci);
+                        Float applicationScale;
+                        ci->GetApplicationScale(&applicationScale);
+                        Logger::W(TAG, "Returning cached resources %s %s : appScale=%f",
+                            TO_CSTR(r), resDir.string(), applicationScale);
+                    }
+                    *result = r;
+                    REFCOUNT_ADD(*result)
+                    return NOERROR;
                 }
-                *result = r;
-                REFCOUNT_ADD(*result)
-                return NOERROR;
             }
+        }
+        else {
+            Logger::W(TAG, "getTopLevelResources: %s / %f", resDir.string(), scale);
         }
     }
 

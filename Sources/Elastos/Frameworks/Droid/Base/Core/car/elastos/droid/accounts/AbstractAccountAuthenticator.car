@@ -1,7 +1,9 @@
 
 module
 {
-//    interface Elastos.Droid.os.IBinder;
+    interface Elastos.Droid.Accounts.IAccountAuthenticatorResponse;
+    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Os.IBundle;
 
     namespace Elastos {
     namespace Droid {
@@ -84,13 +86,14 @@ module
      * The {@link AccountAuthenticatorActivity} handles this, so one may wish to extend that when
      * writing activities to handle these requests.
      */
+    [deprecated]
     interface IAbstractAccountAuthenticator {
 
         /**
          * @return the IBinder for the AccountAuthenticator
          */
-//        GetIBinder(
-//            [out] IBinder** result);
+        GetIBinder(
+            [out] IBinder** result);
 
         /**
          * Returns a Bundle that contains the Intent of the activity that can be used to edit the
@@ -104,10 +107,10 @@ module
          *   If this is null then the request is considered to still be active and the result should
          *   sent later using response.
          */
-//        EditProperties(
-//            [in] IAccountAuthenticatorResponse* response,
-//            [in] String accountType,
-//            [out] IBundle** result);
+        EditProperties(
+            [in] IAccountAuthenticatorResponse* response,
+            [in] String accountType,
+            [out] IBundle** result);
 
         /**
          * Adds an account of the specified accountType.
@@ -129,13 +132,13 @@ module
          * @throws NetworkErrorException if the authenticator could not honor the request due to a
          * network error
          */
-//        AddAccount(
-//            [in] IAccountAuthenticatorResponse* response,
-//            [in] String accountType,
-//            [in] String authTokenType,
-//            [in] ArrayOf<String>* requiredFeatures,
-//            [in] IBundle* options,
-//            [out] IBundle** result);
+        AddAccount(
+            [in] IAccountAuthenticatorResponse* response,
+            [in] String accountType,
+            [in] String authTokenType,
+            [in] ArrayOf<String>* requiredFeatures,
+            [in] IBundle* options,
+            [out] IBundle** result);
 
         /**
          * Checks that the user knows the credentials of an account.
@@ -153,11 +156,11 @@ module
          * @throws NetworkErrorException if the authenticator could not honor the request due to a
          * network error
          */
-//        ConfirmCredentials(
-//            [in] IAccountAuthenticatorResponse* response,
-//            [in] IAccount* account,
-//            [in] IBundle* options,
-//            [out] IBundle** result);
+        ConfirmCredentials(
+            [in] IAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [in] IBundle* options,
+            [out] IBundle** result);
         /**
          * Gets the authtoken for an account.
          * @param response to send the result back to the AccountManager, will never be null
@@ -176,12 +179,12 @@ module
          * @throws NetworkErrorException if the authenticator could not honor the request due to a
          * network error
          */
-//        GetAuthToken(
-//            [in] IAccountAuthenticatorResponse* response,
-//            [in] IAccount* account,
-//            [in] String authTokenType,
-//            [in] IBundle* options,
-//            [out] IBundle** result);
+        GetAuthToken(
+            [in] IAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] IBundle* options,
+            [out] IBundle** result);
 
         /**
          * Ask the authenticator for a localized label for the given authTokenType.
@@ -211,12 +214,12 @@ module
          * @throws NetworkErrorException if the authenticator could not honor the request due to a
          * network error
          */
-//        UpdateCredentials(
-//            [in] IAccountAuthenticatorResponse* response,
-//            [in] IAccount* account,
-//            [in] String authTokenType,
-//            [in] IBundle* options,
-//            [out] IBundle** result);
+        UpdateCredentials(
+            [in] IAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [in] String authTokenType,
+            [in] IBundle* options,
+            [out] IBundle** result);
 
         /**
          * Checks if the account supports all the specified authenticator specific features.
@@ -235,11 +238,11 @@ module
          * @throws NetworkErrorException if the authenticator could not honor the request due to a
          * network error
          */
-//        HasFeatures(
-//            [in] IAccountAuthenticatorResponse* response,
-//            [in] IAccount* account,
-//            [in] ArrayOf<String>* features,
-//            [out] IBundle** result);
+        HasFeatures(
+            [in] IAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [in] ArrayOf<String>* features,
+            [out] IBundle** result);
 
         /**
          * Checks if the removal of this account is allowed.
@@ -257,10 +260,10 @@ module
          * @throws NetworkErrorException if the authenticator could not honor the request due to a
          * network error
          */
-//        GetAccountRemovalAllowed(
-//            [in] IAccountAuthenticatorResponse* response,
-//            [in] IAccount* account,
-//            [out] IBundle** result);
+        GetAccountRemovalAllowed(
+            [in] IAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [out] IBundle** result);
 
         /**
          * Returns a Bundle that contains whatever is required to clone the account on a different
@@ -273,10 +276,10 @@ module
          * @throws NetworkErrorException
          * @see {@link #addAccountFromCredentials(AccountAuthenticatorResponse, Account, Bundle)}
          */
-//        GetAccountCredentialsForCloning(
-//            [in] IAccountAuthenticatorResponse* response,
-//            [in] IAccount* account,
-//            [out] IBundle** result);
+        GetAccountCredentialsForCloning(
+            [in] IAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [out] IBundle** result);
 
         /**
          * Creates an account based on credentials provided by the authenticator instance of another
@@ -290,11 +293,11 @@ module
          * @throws NetworkErrorException
          * @see {@link #getAccountCredentialsForCloning(AccountAuthenticatorResponse, Account)}
          */
-//        AddAccountFromCredentials(
-//            [in] IAccountAuthenticatorResponse* response,
-//            [in] IAccount* account,
-//            [in] IBundle* accountCredentials,
-//            [out] IBundle** result);
+        AddAccountFromCredentials(
+            [in] IAccountAuthenticatorResponse* response,
+            [in] IAccount* account,
+            [in] IBundle* accountCredentials,
+            [out] IBundle** result);
     }
 
     } // Accounts

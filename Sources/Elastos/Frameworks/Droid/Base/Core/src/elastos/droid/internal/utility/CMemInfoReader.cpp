@@ -2,13 +2,16 @@
 #include "Elastos.Droid.Os.h"
 #include "elastos/droid/internal/utility/CMemInfoReader.h"
 // #include "elastos/droid/os/CDebug.h"
-// #include "elastos/droid/os/CStrictMode.h"
+#include "elastos/droid/os/CStrictMode.h"
+#include <elastos/utility/logging/Logger.h>
 
 // using Elastos::Droid::Os::CDebug;
-// using Elastos::Droid::Os::CStrictMode;
+using Elastos::Droid::Os::IStrictMode;
+using Elastos::Droid::Os::CStrictMode;
 using Elastos::Droid::Os::IDebug;
 using Elastos::Droid::Os::IStrictMode;
 using Elastos::Droid::Os::IStrictModeThreadPolicy;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -34,14 +37,14 @@ ECode CMemInfoReader::ReadMemInfo()
     // Permit disk reads here, as /proc/meminfo isn't really "on
     // disk" and should be fast.  TODO: make BlockGuard ignore
     // /proc/ and /sys/ files perhaps?
+    Logger::W("CMemInfoReader::ReadMemInfo()", " === TODO CDebugis not implemented");
     AutoPtr<IStrictMode> strictMode;
-    assert(0 && "TODO:CStrictMode is not implemented");
-    // CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
+    CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
     AutoPtr<IStrictModeThreadPolicy> savedPolicy;
     strictMode->AllowThreadDiskReads((IStrictModeThreadPolicy**)&savedPolicy);
-    assert(0 && "TODO:CDebug is not implemented");
-    //ECode ec = CDebug::GetMemInfo(mInfos);
-    strictMode->SetThreadPolicy(savedPolicy);
+    // assert(0 && "TODO:CDebug is not implemented");
+    // //ECode ec = CDebug::GetMemInfo(mInfos);
+    // strictMode->SetThreadPolicy(savedPolicy);
     return NOERROR;//ec;
 }
 

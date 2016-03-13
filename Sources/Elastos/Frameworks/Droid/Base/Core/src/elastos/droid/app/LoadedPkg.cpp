@@ -14,11 +14,13 @@
 #include "elastos/droid/content/pm/PackageManager.h"
 #include "elastos/droid/content/pm/CApplicationInfo.h"
 #include "elastos/droid/view/DisplayAdjustments.h"
+#include <elastos/droid/DroidRuntime.h>
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringBuffer.h>
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Droid::DroidRuntime;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::CUserHandle;
@@ -34,6 +36,8 @@ using Elastos::Droid::View::DisplayAdjustments;
 using Elastos::Core::EIID_IRunnable;
 using Elastos::Core::CPathClassLoader;
 using Elastos::Core::StringBuilder;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::IO::CFile;
 using Elastos::Utility::Etl::Pair;
 using Elastos::Utility::Logging::Slogger;
@@ -164,36 +168,43 @@ ECode LoadedPkg::ReceiverDispatcher::Args::Run()
 //==============================================================================
 CAR_INTERFACE_IMPL(LoadedPkg::ReceiverDispatcher, Object, IReceiverDispatcher)
 
-LoadedPkg::ReceiverDispatcher::ReceiverDispatcher(
-    /* [in] */ IBroadcastReceiver* receiver,
-    /* [in] */ IContext* context,
-    /* [in] */ IHandler* activityThread,
-    /* [in] */ IInstrumentation* instrumentation,
-    /* [in] */ Boolean registered)
+LoadedPkg::ReceiverDispatcher::ReceiverDispatcher()
     : mIIntentReceiver(NULL)
-    , mReceiver(receiver)
-    , mContext(context)
-    , mActivityThread(activityThread)
-    , mInstrumentation(instrumentation)
-    , mRegistered(registered)
+    , mRegistered(FALSE)
     , mForgotten(FALSE)
     , mHasUsed(FALSE)
-{
-
-    // if (activityThread == null) {
-    //     throw new NullPointerException("Handler must not be null");
-    // }
-    assert(activityThread != NULL);
-    CInnerReceiver::New((IReceiverDispatcher*)this, !registered, &mIIntentReceiver);
-    // mLocation = new IntentReceiverLeaked(null);
-    // mLocation.fillInStackTrace();
-}
+{}
 
 LoadedPkg::ReceiverDispatcher::~ReceiverDispatcher()
 {
     if (mRegistered && mIIntentReceiver != NULL) {
         mIIntentReceiver->Release();
     }
+}
+
+ECode LoadedPkg::ReceiverDispatcher::constructor(
+    /* [in] */ IBroadcastReceiver* receiver,
+    /* [in] */ IContext* context,
+    /* [in] */ IHandler* activityThread,
+    /* [in] */ IInstrumentation* instrumentation,
+    /* [in] */ Boolean registered)
+{
+    if (activityThread == NULL) {
+        Slogger::E("LoadedPkg::ReceiverDispatcher", "Handler must not be null!");
+        assert(activityThread != NULL);
+        return E_NULL_POINTER_EXCEPTION;
+    }
+
+    mReceiver = receiver;
+    mContext = context;
+    mActivityThread = activityThread;
+    mInstrumentation = instrumentation;
+    mRegistered = registered;
+
+    CInnerReceiver::New(this, !registered, (IIntentReceiver**)&mIIntentReceiver);
+    // mLocation = new IntentReceiverLeaked(null);
+    // mLocation.fillInStackTrace();
+    return NOERROR;
 }
 
 ECode LoadedPkg::ReceiverDispatcher::Validate(
@@ -604,6 +615,7 @@ ECode LoadedPkg::constructor(
     mIncludeCode = TRUE;
     mRegisterPackage = FALSE;
     //mClassLoader = ClassLoader.getSystemClassLoader();
+    GetSystemClassLoader((IClassLoader**)&mClassLoader);
     mResources = CResources::GetSystem();
     return NOERROR;
 }
@@ -628,18 +640,23 @@ AutoPtr<IApplicationInfo> LoadedPkg::AdjustNativeLibraryPaths(
     // depending on what the current runtime's instruction set is.
     CApplicationInfo* info = (CApplicationInfo*)aInfo;
     if (info->mPrimaryCpuAbi != NULL && info->mSecondaryCpuAbi != NULL) {
-        assert(0 && "TODO");
-        // final String runtimeIsa = VMRuntime.getRuntime().vmInstructionSet();
-        // final String secondaryIsa = VMRuntime.getInstructionSet(info.secondaryCpuAbi);
+        AutoPtr<ISystem> system;
+        CSystem::AcquireSingleton((ISystem**)&system);
+        String runtimeIsa = DroidRuntime::GetRuntime()->GetInstructionSetString();
+        String secondaryIsa;
+        system->GetInstructionSet(info->mSecondaryCpuAbi, &secondaryIsa);
 
-        // // If the runtimeIsa is the same as the primary isa, then we do nothing.
-        // // Everything will be set up correctly because info.nativeLibraryDir will
-        // // correspond to the right ISA.
-        // if (runtimeIsa.equals(secondaryIsa)) {
-        //     final ApplicationInfo modified = new ApplicationInfo(info);
-        //     modified.nativeLibraryDir = modified.secondaryNativeLibraryDir;
-        //     return modified;
-        // }
+        // If the runtimeIsa is the same as the primary isa, then we do nothing.
+        // Everything will be set up correctly because info.nativeLibraryDir will
+        // correspond to the right ISA.
+        if (runtimeIsa.Equals(secondaryIsa)) {
+            AutoPtr<IApplicationInfo> modified;
+            CApplicationInfo::New(info, (IApplicationInfo**)&modified);
+            String dir;
+            modified->GetSecondaryNativeLibraryDir(&dir);
+            modified->SetNativeLibraryDir(dir);
+            return modified;
+        }
     }
 
     return aInfo;
@@ -687,7 +704,6 @@ ECode LoadedPkg::SetCompatibilityInfo(
     return mDisplayAdjustments->SetCompatibilityInfo(compatInfo);
 }
 
-
 ECode LoadedPkg::GetClassLoader(
     /* [out] */ IClassLoader** loader)
 {
@@ -707,7 +723,7 @@ ECode LoadedPkg::GetClassLoader(
     //     // The activity manager will perform ensure that dexopt is performed before
     //     // spinning up the process.
     //     if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
-    //         final String isa = VMRuntime.getRuntime().vmInstructionSet();
+    //         final String isa = DroidRuntime.getRuntime()->GetInstructionSetString();
     //         try {
     //             ActivityThread.getPackageManager().performDexOptIfNeeded(mPackageName, isa);
     //         } catch (RemoteException re) {
@@ -815,10 +831,23 @@ ECode LoadedPkg::GetClassLoader(
     //     }
     // }
     // return mClassLoader;
-//TODO:
-    ASSERT_SUCCEEDED(CPathClassLoader::New(
-        String("Elastos.Droid.Core.eco"), (IClassLoader**)&mClassLoader));
-    *loader = mClassLoader;
+
+    GetSystemClassLoader(loader);
+    mClassLoader = *loader;
+    return NOERROR;
+}
+
+ECode LoadedPkg::GetSystemClassLoader(
+    /* [out] */ IClassLoader** loader)
+{
+    VALIDATE_NOT_NULL(loader)
+    *loader = NULL;
+
+    String systemModule("/system/lib/Elastos.Droid.Core.eco");
+    AutoPtr<IClassLoader> cl;
+    ECode ec = CPathClassLoader::New(systemModule, (IClassLoader**)&cl);
+    if (FAILED(ec)) Slogger::E(TAG, "failed to load system class loaded %s", systemModule.string());
+    *loader = cl;
     REFCOUNT_ADD(*loader);
     return NOERROR;
 }
@@ -976,7 +1005,10 @@ ECode LoadedPkg::MakeApplication(
     String appClass;
     FAIL_RETURN(mApplicationInfo->GetClassName(&appClass));
     if (forceDefaultAppClass || (appClass.IsNull())) {
-        appClass = String("Application");/* "android.app.Application" */;
+        appClass = String("LElastos/Droid/App/CApplication;");/* "android.app.Application" */;
+
+        Slogger::I(TAG, " >> MakeApplication: mPackageName %s, appClass %s",
+            mPackageName.string(), appClass.string());
 
         //    try {
         AutoPtr<IClassLoader> cl;
@@ -1021,13 +1053,18 @@ ECode LoadedPkg::MakeApplication(
             sb.Append(".eco");
         }
         String path = sb.ToString();
+        Int32 index = appClass.LastIndexOf('.');
+        String shortClassName = index > 0 ? appClass.Substring(index + 1) : appClass;
+
+        Slogger::I(TAG, " >> MakeApplication: path %s, appClass %s, shortClassName %s",
+            path.string(), appClass.string(), shortClassName.string());
+
         AutoPtr<IModuleInfo> moduleInfo;
         if (FAILED(CReflector::AcquireModuleInfo(path, (IModuleInfo**)&moduleInfo))) {
             Slogger::E(TAG, "HandleBindApplication: Cann't Find the Instrumentation path is %s", path.string());
             return E_RUNTIME_EXCEPTION;
         }
-        Int32 index = appClass.LastIndexOf('.');
-        String shortClassName = index > 0 ? appClass.Substring(index + 1) : appClass;
+
         AutoPtr<IClassInfo> classInfo;
         if (FAILED(moduleInfo->GetClassInfo(shortClassName, (IClassInfo**)&classInfo))) {
             Slogger::E(TAG, "HandleBindApplication: Get class info of %s failed.", shortClassName.string());
@@ -1258,7 +1295,8 @@ ECode LoadedPkg::GetReceiverDispatcher(
     }
 
     if (rd == NULL){
-        rd = new ReceiverDispatcher(r, context, handler, instrumentation, registered);
+        rd = new ReceiverDispatcher();
+        FAIL_RETURN(rd->constructor(r, context, handler, instrumentation, registered))
         if (registered) {
             if (map == NULL) {
                 map = new ReceiverMap();

@@ -1,46 +1,49 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_Server_Firewall_OrFilter_H__
+#define __ELASTOS_DROID_Server_Firewall_OrFilter_H__
 
-package com.android.server.firewall;
+#include "_Elastos.Droid.Server.h"
+#include "elastos/core/Object.h"
 
-using Elastos::Droid::Content::IComponentName;
-using Elastos::Droid::Content::IIntent;
+using Elastos::Droid::internal.util.XmlUtils;
 using Org::Xmlpull::V1::IXmlPullParser;
 using Org::Xmlpull::V1::IXmlPullParserException;
+using Elastos::Utility::IArrayList;
 
-using Elastos::IO::IIOException;
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Firewall {
 
-class OrFilter extends FilterList {
-    //@Override
-    public Boolean Matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
-            Int32 callerUid, Int32 callerPid, String resolvedType, Int32 receivingUid) {
-        for (Int32 i=0; i<children->Size(); i++) {
-            if (children->Get(i).Matches(ifw, resolvedComponent, intent, callerUid, callerPid,
-                    resolvedType, receivingUid)) {
-                return TRUE;
-            }
-        }
-        return FALSE;
-    }
-
-    public static const FilterFactory FACTORY = new FilterFactory("or") {
-        //@Override
-        public Filter NewFilter(XmlPullParser parser)
-                throws IOException, XmlPullParserException {
-            return new OrFilter()->ReadFromXml(parser);
-        }
+class OrFilter
+    : public FilterList
+{
+public:
+    class FACTORY_FilterFactory
+        : public FilterFactory
+    {
+    public:
+        CARAPI_(Filter*) NewFilter(
+            /* in */ IXmlPullParser* parser);
     };
-}
+
+    //@Override
+    CARAPI Matches(
+        /* [in] */ IIntentFirewall* ifw,
+        /* [in] */ IComponentName* resolvedComponent,
+        /* [in] */ IIntent* intent,
+        /* [in] */ Int32 callerUid,
+        /* [in] */ Int32 callerPid,
+        /* [in] */ const String& resolvedType,
+        /* [in] */ Int32 receivingUid
+        /* [out] */ Boolean *ret);
+
+public:
+    static const AutoPtr<FACTORY_FilterFactory> FACTORY;
+};
+
+} // Firewall
+} // Server
+} // Droid
+} // Elastos
+
+#endif // __ELASTOS_DROID_Server_Firewall_OrFilter_H__

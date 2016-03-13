@@ -169,7 +169,7 @@ ProcessList::ProcessList()
         129024, 225000, 325000
     };
     size = ArraySize(oomMinFreeHigh);
-    mOomMinFreeHigh->Copy(oomMinFreeHigh, size);
+    mOomMinFreeHigh = ArrayOf<Int32>::Alloc(oomMinFreeHigh, size);
 
     mOomMinFree = ArrayOf<Int32>::Alloc(mOomAdj->GetLength());
 

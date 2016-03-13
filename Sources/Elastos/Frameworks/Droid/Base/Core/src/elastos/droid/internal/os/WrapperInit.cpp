@@ -63,7 +63,10 @@ ECode WrapperInit::Main(
 
     // Launch the application.
     AutoPtr<ArrayOf<String> > runtimeArgs = ArrayOf<String>::Alloc(args->GetLength() - 2);
-    runtimeArgs->Copy(args, 2);
+    for (Int32 i = 0; i < runtimeArgs->GetLength(); ++i) {
+        runtimeArgs->Set(i, (*args)[i + 2]);
+    }
+
     AutoPtr<IRunnable> task;
     ECode ec = RuntimeInit::WrapperInit(targetSdkVersion, runtimeArgs, (IRunnable**)&task);
     FAIL_RETURN(ec)

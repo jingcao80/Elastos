@@ -7,6 +7,10 @@ namespace Elastos {
 namespace Droid {
 namespace Accounts {
 
+CAR_SINGLETON_IMPL(CAuthenticatorDescriptionHelper)
+
+CAR_INTERFACE_IMPL(CAuthenticatorDescriptionHelper, Singleton, IAuthenticatorDescriptionHelper)
+
 ECode CAuthenticatorDescriptionHelper::NewKey(
     /* [in] */ const String& type,
     /* [out] */ IAuthenticatorDescription** description)

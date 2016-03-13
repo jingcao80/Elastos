@@ -1,6 +1,7 @@
 
 #include <Elastos.CoreLibrary.Utility.h>
 #include "Elastos.Droid.Net.h"
+#include <elastos/droid/DroidRuntime.h>
 #include "elastos/droid/app/ApplicationPackageManager.h"
 #include "elastos/droid/app/CContextImpl.h"
 #include "elastos/droid/os/Process.h"
@@ -25,6 +26,7 @@
 #include <elastos/utility/logging/Logger.h>
 
 using Elastos::Droid::R;
+using Elastos::Droid::DroidRuntime;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::CUserHandle;
@@ -52,6 +54,8 @@ using Elastos::Droid::Graphics::Drawable::EIID_IDrawableConstantState;
 
 using Elastos::Core::CoreUtils;
 using Elastos::Core::EIID_ICharSequence;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::Utility::IList;
 using Elastos::Utility::CArrayList;
 using Elastos::Utility::IIterator;
@@ -390,16 +394,20 @@ void ApplicationPackageManager::MaybeAdjustApplicationInfo(
     info->GetPrimaryCpuAbi(&pca);
     info->GetSecondaryCpuAbi(&sca);
     if (!pca.IsNull() && !sca.IsNull()) {
-        assert(0 && "TODO");
-        // String runtimeIsa = VMRuntime.getRuntime().vmInstructionSet();
-        // String secondaryIsa = VMRuntime.getInstructionSet(info.secondaryCpuAbi);
+        AutoPtr<ISystem> system;
+        CSystem::AcquireSingleton((ISystem**)&system);
+        String runtimeIsa = DroidRuntime::GetRuntime()->GetInstructionSetString();
+        String secondaryIsa;
+        system->GetInstructionSet(sca, &secondaryIsa);
 
-        // // If the runtimeIsa is the same as the primary isa, then we do nothing.
-        // // Everything will be set up correctly because info.nativeLibraryDir will
-        // // correspond to the right ISA.
-        // if (runtimeIsa.Equals(secondaryIsa)) {
-        //     info->SetNativeLibraryDir(info.secondaryNativeLibraryDir);
-        // }
+        // If the runtimeIsa is the same as the primary isa, then we do nothing.
+        // Everything will be set up correctly because info.nativeLibraryDir will
+        // correspond to the right ISA.
+        if (runtimeIsa.Equals(secondaryIsa)) {
+            String dir;
+            info->GetSecondaryNativeLibraryDir(&dir);
+            info->SetNativeLibraryDir(dir);
+        }
     }
 }
 

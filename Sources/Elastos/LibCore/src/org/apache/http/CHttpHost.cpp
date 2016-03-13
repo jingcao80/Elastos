@@ -60,7 +60,7 @@ ECode CHttpHost::ToURI(
     buffer->Append(mHostName);
     if (mPort != -1) {
         buffer->Append(':');
-        buffer->Append(StringUtils::ToString(mPort));
+        buffer->Append(mPort);
     }
     return IObject::Probe(buffer)->ToString(uri);
 }
@@ -75,7 +75,7 @@ ECode CHttpHost::ToHostString(
     buffer->Append(mHostName);
     if (mPort != -1) {
         buffer->Append(':');
-        buffer->Append(StringUtils::ToString(mPort));
+        buffer->Append(mPort);
     }
     return IObject::Probe(buffer)->ToString(hostString);
 }

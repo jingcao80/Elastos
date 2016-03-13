@@ -4,21 +4,26 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "_Elastos_Droid_View_CPointerIconHelper.h"
-#include <elastos/core/Object.h>
+#include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Core::Object;
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Droid {
 namespace View {
 
 CarClass(CPointerIconHelper)
-    , public Object
+    , public Singleton
+    , public IPointerIconHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
+
     /**
      * Gets a special pointer icon that has no bitmap.
      *

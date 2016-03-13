@@ -30,7 +30,7 @@ ECode ComponentInfo::constructor(
 {
     VALIDATE_NOT_NULL(orig)
 
-    PackageItemInfo::constructor((IPackageItemInfo*)orig);
+    PackageItemInfo::constructor(IPackageItemInfo::Probe(orig));
     orig->GetApplicationInfo((IApplicationInfo**)&mApplicationInfo);
     orig->GetProcessName(&mProcessName);
     orig->GetDescriptionRes(&mDescriptionRes);

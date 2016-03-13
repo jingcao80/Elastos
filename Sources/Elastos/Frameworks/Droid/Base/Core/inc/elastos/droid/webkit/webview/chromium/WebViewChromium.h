@@ -3,12 +3,14 @@
 #define _ELASTOS_DROID_WEBKIT_WEBVIEW_CHROMIUM_WEBVIEWCHROMIUM_H_
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/webkit/native/android_webview/AwContents.h"
-#include "elastos/droid/webkit/native/content/browser/LoadUrlParams.h"
-#include "elastos/droid/webkit/native/content/browser/SmartClipProvider.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/AwContents.h"
+#include "elastos/droid/webkit/webview/chromium/native/content/browser/LoadUrlParams.h"
+#include "elastos/droid/webkit/webview/chromium/native/content/browser/SmartClipProvider.h"
 #include "elastos/droid/webkit/webview/chromium/ContentSettingsAdapter.h"
 #include "elastos/droid/webkit/webview/chromium/DrawGLFunctor.h"
 #include "elastos/droid/webkit/webview/chromium/WebViewContentsClientAdapter.h"
+#include "elastos/droid/webkit/webview/chromium/WebViewChromiumFactoryProvider.h"
+#include <Elastos.Droid.Webkit.h>
 #include "elastos/utility/concurrent/FutureTask.h"
 
 using Elastos::Droid::Content::IContextWrapper;
@@ -32,9 +34,9 @@ using Elastos::Droid::View::InputMethod::IEditorInfo;
 using Elastos::Droid::View::InputMethod::IInputConnection;
 using Elastos::Droid::View::IView;
 using Elastos::Droid::View::IViewGroupLayoutParams;
-using Elastos::Droid::Webkit::AndroidWebview::AwContents;
-using Elastos::Droid::Webkit::Content::Browser::LoadUrlParams;
-using Elastos::Droid::Webkit::Content::Browser::SmartClipProvider;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::AwContents;
+using Elastos::Droid::Webkit::Webview::Chromium::Content::Browser::LoadUrlParams;
+using Elastos::Droid::Webkit::Webview::Chromium::Content::Browser::SmartClipProvider;
 using Elastos::Droid::Webkit::IDownloadListener;
 using Elastos::Droid::Webkit::IWebBackForwardList;
 using Elastos::Droid::Webkit::IWebChromeClient;
@@ -49,6 +51,7 @@ using Elastos::Droid::Webkit::IWebViewProviderViewDelegate;
 using Elastos::Droid::Webkit::Webview::Chromium::ContentSettingsAdapter;
 using Elastos::Droid::Webkit::Webview::Chromium::DrawGLFunctor;
 using Elastos::Droid::Webkit::Webview::Chromium::WebViewContentsClientAdapter;
+using Elastos::Droid::Webkit::Webview::Chromium::IWebViewChromiumFactoryProvider;
 using Elastos::Core::IClassLoader;
 using Elastos::Core::IInteger32;
 using Elastos::Core::IRunnable;
@@ -74,7 +77,8 @@ namespace Chromium {
   * and a small set of no-op deprecated APIs.
   */
 class WebViewChromium
-    : public SmartClipProvider
+    : public Object
+    , public SmartClipProvider
     , public IWebViewProvider
     , public IWebViewProviderScrollDelegate
     , public IWebViewProviderViewDelegate
@@ -2656,7 +2660,7 @@ public:
     // Implements SmartClipProvider
     // @Override
     CARAPI SetSmartClipResultHandler(
-        /* [in] */ const IHandler* resultHandler);
+        /* [in] */ IHandler* resultHandler);
 
 public:
     // The WebView that this WebViewChromium is the provider for.

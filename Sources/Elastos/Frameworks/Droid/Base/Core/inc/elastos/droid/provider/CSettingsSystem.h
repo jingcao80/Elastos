@@ -15,7 +15,7 @@ namespace Provider {
 
 CarClass(CSettingsSystem)
     , public Singleton
-    , public Settings::System
+    , public ISettingsSystem
 {
 public:
     CAR_SINGLETON_DECL()
@@ -30,20 +30,8 @@ public:
     CARAPI GetContentUri(
         /* [out] */ IUri** uri);
 
-    CARAPI GetSettingsToBackup(
+    CARAPI GetSETTINGS_TO_BACKUP(
         /* [out] */ ArrayOf<String>** array);
-
-    CARAPI GetDefaultRingtoneUri(
-        /* [out] */ IUri** uri);
-
-    CARAPI GetDefaultNotificationUri(
-        /* [out] */ IUri** uri);
-
-    CARAPI GetDefaultAlarmAlertUri(
-        /* [out] */ IUri** uri);
-
-    CARAPI GetVolumnSettings(
-        /* [out, callee] */ ArrayOf<String>** settings);
 
     /** @hide */
     CARAPI GetMovedKeys(
@@ -424,6 +412,21 @@ public:
         /* [in] */ IContentResolver* cr,
         /* [in] */ Boolean flag,
         /* [in] */ Int32 userHandle);
+
+    CARAPI GetVOLUME_SETTINGS(
+        /* [out, callee] */ ArrayOf<String>** settings);
+
+    CARAPI GetDEFAULT_RINGTONE_URI(
+        /* [out] */ IUri** uri);
+
+    CARAPI GetDEFAULT_NOTIFICATION_URI(
+        /* [out] */ IUri** uri);
+
+    CARAPI GetDEFAULT_ALARM_ALERT_URI(
+        /* [out] */ IUri** uri);
+
+    CARAPI GetCONTENT_URI(
+        /* [out] */ IUri** uri);
 };
 
 } //namespace Provider

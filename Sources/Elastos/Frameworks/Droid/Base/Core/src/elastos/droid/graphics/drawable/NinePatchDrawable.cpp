@@ -831,19 +831,14 @@ ECode NinePatchDrawable::GetConstantState(
     return NOERROR;
 }
 
-ECode NinePatchDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode NinePatchDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated && (Drawable::Mutate((IDrawable**)&tmp), tmp.Get())
-        == (IDrawable*)this->Probe(EIID_IDrawable)) {
+    if (!mMutated) {
         mNinePatchState = new NinePatchState(mNinePatchState);
         mNinePatch = mNinePatchState->mNinePatch;
         mMutated = TRUE;
     }
-    *drawable = (IDrawable*)this->Probe(EIID_IDrawable);
-    REFCOUNT_ADD(*drawable);
+
     return NOERROR;
 }
 

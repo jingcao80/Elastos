@@ -30,7 +30,7 @@ namespace Webkit {
 
 class CWebView;
 
-class FindActionModeCallback
+class ECO_PUBLIC FindActionModeCallback
     : public Object
     , public IActionModeCallback
     , public ITextWatcher

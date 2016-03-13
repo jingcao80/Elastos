@@ -45,8 +45,10 @@ void ShortcutManager::Observe()
     AutoPtr<IUri> contentUri;
     settingsBookmarks->GetCONTENT_URI((IUri**)&contentUri);
     contentResolver->Query(
-            contentUri, sProjection, String(NULL), NULL, String(NULL), (ICursor**)&mCursor);
-    mCursor->RegisterContentObserver(this);
+        contentUri, sProjection, String(NULL), NULL, String(NULL), (ICursor**)&mCursor);
+    if (mCursor) {
+        mCursor->RegisterContentObserver(this);
+    }
     UpdateShortcuts();
 }
 
@@ -61,7 +63,7 @@ void ShortcutManager::UpdateShortcuts()
 {
     AutoPtr<ICursor> c = mCursor;
     Boolean isRequerySuccess = FALSE;
-    if (!(c->Requery(&isRequerySuccess), isRequerySuccess)) {
+    if (c == NULL || (c->Requery(&isRequerySuccess), !isRequerySuccess)) {
         Slogger::E(TAG, "ShortcutObserver could not re-query shortcuts.");
         return;
     }

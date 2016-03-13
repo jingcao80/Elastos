@@ -51,8 +51,8 @@ ECode FileInputStream::constructor(
     CFileDescriptor::New((IFileDescriptor**)&mFd);
     String path;
     file->GetPath(&path);
-    AutoPtr<CIoBridge> ioBridge;
-    CIoBridge::AcquireSingletonByFriend((CIoBridge**)&ioBridge);
+    AutoPtr<IIoBridge> ioBridge;
+    CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
     AutoPtr<IFileDescriptor> fd;
     FAIL_RETURN(ioBridge->Open(path, OsConstants::_O_RDONLY, (IFileDescriptor**)&fd));
     Int32 ifd;
@@ -88,8 +88,8 @@ ECode FileInputStream::Available(
 {
     VALIDATE_NOT_NULL(avail)
 
-    AutoPtr<CIoBridge> ioBridge;
-    CIoBridge::AcquireSingletonByFriend((CIoBridge**)&ioBridge);
+    AutoPtr<IIoBridge> ioBridge;
+    CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
     ECode ec = ioBridge->Available(mFd, avail);
     if (FAILED(ec)) {
         return E_IO_EXCEPTION;
@@ -105,8 +105,8 @@ ECode FileInputStream::Close()
             ICloseable::Probe(mChannel)->Close();
         }
         if (mShouldClose) {
-            AutoPtr<CIoBridge> ioBridge;
-            CIoBridge::AcquireSingletonByFriend((CIoBridge**)&ioBridge);
+            AutoPtr<IIoBridge> ioBridge;
+            CIoBridge::AcquireSingleton((IIoBridge**)&ioBridge);
             ioBridge->CloseAndSignalBlockedThreads(mFd);
         }
         else {

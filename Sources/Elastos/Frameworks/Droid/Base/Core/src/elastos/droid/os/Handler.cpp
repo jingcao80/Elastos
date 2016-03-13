@@ -569,7 +569,7 @@ ECode Handler::RemoveMessages(
 {
     AutoPtr<IMessageQueue> queue = mQueue;
     if (queue == NULL) {
-        Logger::E("Handler", "Error: RemoveMessagesEx2 called with no mQueue");
+        Logger::E("Handler", "Error: RemoveMessages called with no mQueue");
         return E_RUNTIME_EXCEPTION;
     }
 

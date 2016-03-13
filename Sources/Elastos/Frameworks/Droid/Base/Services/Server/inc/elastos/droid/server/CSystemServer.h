@@ -5,14 +5,16 @@
 #include "_Elastos_Droid_Server_CSystemServer.h"
 #include <Elastos.Droid.Content.h>
 #include <Elastos.CoreLibrary.Utility.h>
-#include <elastos/core/Singleton.h>
-#include <elastos/droid/os/Runnable.h>
 #include "elastos/droid/server/am/CActivityManagerService.h"
 #include "elastos/droid/server/display/CDisplayManagerService.h"
 #include "elastos/droid/server/input/CInputManagerService.h"
 #include "elastos/droid/server/pm/Installer.h"
 #include "elastos/droid/server/pm/CPackageManagerService.h"
 #include "elastos/droid/server/power/PowerManagerService.h"
+#include "elastos/droid/server/statusbar/CStatusBarManagerService.h"
+#include "elastos/droid/server/wallpaper/CWallpaperManagerService.h"
+#include <elastos/core/Singleton.h>
+#include <elastos/droid/os/Runnable.h>
 
 using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Content::IContext;
@@ -24,6 +26,8 @@ using Elastos::Droid::Server::Input::CInputManagerService;
 using Elastos::Droid::Server::Pm::Installer;
 using Elastos::Droid::Server::Pm::CPackageManagerService;
 using Elastos::Droid::Server::Power::PowerManagerService;
+using Elastos::Droid::Server::StatusBar::CStatusBarManagerService;
+using Elastos::Droid::Server::Wallpaper::CWallpaperManagerService;
 using Elastos::Utility::ITimer;
 
 
@@ -32,6 +36,8 @@ namespace Droid {
 namespace Server {
 
 class CInputMethodManagerService;
+class CTextServicesManagerService;
+class CNetworkManagementService;
 
 class SystemServer
     : public Object
@@ -42,19 +48,19 @@ private:
     {
     public:
         // AutoPtr<CMountService> mMountServiceF;
-        // AutoPtr<CNetworkManagementService> mNetworkManagementF;
+        AutoPtr<CNetworkManagementService> mNetworkManagementF;
         // AutoPtr<CNetworkStatsService> mNetworkStatsF;
         // AutoPtr<CNetworkPolicyManagerService> mNetworkPolicyF;
         // AutoPtr<CConnectivityService> mConnectivityF;
         // AutoPtr<CNetworkScoreService> mNetworkScoreF;
-        // AutoPtr<CWallpaperManagerService> mWallpaperF;
+        AutoPtr<CWallpaperManagerService> mWallpaperF;
         AutoPtr<CInputMethodManagerService> mImmF;
         // AutoPtr<CLocationManagerService> mLocationF;
         // AutoPtr<CCountryDetectorService> mCountryDetectorF;
         // AutoPtr<CNetworkTimeUpdateService> mNetworkTimeUpdaterF;
         // AutoPtr<CCommonTimeManagementService> mCommonTimeMgmtServiceF;
-        // AutoPtr<CTextServicesManagerService> mTextServiceManagerServiceF;
-        // AutoPtr<CStatusBarManagerService> mStatusBarF;
+        AutoPtr<CTextServicesManagerService> mTextServiceManagerServiceF;
+        AutoPtr<CStatusBarManagerService> mStatusBarF;
         // AutoPtr<CAssetAtlasService> mAtlasF;
         AutoPtr<CInputManagerService> mInputManagerF;
         // AutoPtr<CTelephonyRegistry> mTelephonyRegistryF;

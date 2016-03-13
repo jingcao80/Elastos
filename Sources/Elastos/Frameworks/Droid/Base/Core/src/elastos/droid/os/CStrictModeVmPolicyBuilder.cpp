@@ -6,6 +6,10 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
+CAR_INTERFACE_IMPL(CStrictModeVmPolicyBuilder, Object, IStrictModeVmPolicyBuilder)
+
+CAR_OBJECT_IMPL(CStrictModeVmPolicyBuilder)
+
 ECode CStrictModeVmPolicyBuilder::constructor()
 {
     mMask = 0;
@@ -57,7 +61,8 @@ ECode CStrictModeVmPolicyBuilder::DetectActivityLeaks()
 ECode CStrictModeVmPolicyBuilder::DetectAll()
 {
     return Enable(IStrictMode::DETECT_VM_ACTIVITY_LEAKS | IStrictMode::DETECT_VM_CURSOR_LEAKS
-                | IStrictMode::DETECT_VM_CLOSABLE_LEAKS | IStrictMode::DETECT_VM_REGISTRATION_LEAKS);
+                | IStrictMode::DETECT_VM_CLOSABLE_LEAKS | IStrictMode::DETECT_VM_REGISTRATION_LEAKS
+                | CStrictMode::DETECT_VM_FILE_URI_EXPOSURE);
 }
 
 ECode CStrictModeVmPolicyBuilder::DetectLeakedSqlLiteObjects()
@@ -68,6 +73,11 @@ ECode CStrictModeVmPolicyBuilder::DetectLeakedSqlLiteObjects()
 ECode CStrictModeVmPolicyBuilder::DetectLeakedClosableObjects()
 {
     return Enable(IStrictMode::DETECT_VM_CLOSABLE_LEAKS);
+}
+
+ECode CStrictModeVmPolicyBuilder::DetectFileUriExposure()
+{
+    return Enable(CStrictMode::DETECT_VM_FILE_URI_EXPOSURE);
 }
 
 ECode CStrictModeVmPolicyBuilder::DetectLeakedRegistrationObjects()

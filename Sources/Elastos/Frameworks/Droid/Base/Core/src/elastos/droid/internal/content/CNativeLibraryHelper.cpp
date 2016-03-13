@@ -45,6 +45,8 @@ using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Os::Build;
 using Elastos::Droid::Os::SELinux;
 using Elastos::Droid::System::OsConstants;
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::IO::CFile;
 using Elastos::Utility::Logging::Slogger;
 
@@ -313,8 +315,10 @@ ECode CNativeLibraryHelper::CopyNativeBinariesForSupportedAbi(
          * If we have a matching instruction set, construct a subdir under the native
          * library root that corresponds to this instruction set.
          */
-        // String instructionSet = VMRuntime.getInstructionSet(abiList[abi]);
+        AutoPtr<ISystem> system;
+        CSystem::AcquireSingleton((ISystem**)&system);
         String instructionSet;
+        system->GetInstructionSet((*abiList)[abi], &instructionSet);
         if ((*abiList)[abi].Equals("armeabi"))
             instructionSet = "arm";
         else if ((*abiList)[abi].Equals("armeabi-v7a"))

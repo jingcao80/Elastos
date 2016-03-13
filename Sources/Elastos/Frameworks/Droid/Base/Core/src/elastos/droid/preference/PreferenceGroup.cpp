@@ -95,7 +95,11 @@ ECode PreferenceGroup::GetPreference(
     /* [out] */ IPreference** preference)
 {
     VALIDATE_NOT_NULL(preference)
-    return mPreferenceList->Get(index, (IInterface**)preference);
+    AutoPtr<IInterface> obj;
+    mPreferenceList->Get(index, (IInterface**)&obj);
+    *preference = IPreference::Probe(obj);
+    REFCOUNT_ADD(*preference)
+    return NOERROR;
 }
 
 ECode PreferenceGroup::AddPreference(

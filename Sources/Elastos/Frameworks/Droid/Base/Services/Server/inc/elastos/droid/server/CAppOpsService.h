@@ -10,8 +10,6 @@
 #include <Elastos.Droid.Content.h>
 #include <Elastos.Droid.Os.h>
 #include <Elastos.Droid.Utility.h>
-#include <Elastos.Droid.Utility.h>
-#include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.External.h>
 

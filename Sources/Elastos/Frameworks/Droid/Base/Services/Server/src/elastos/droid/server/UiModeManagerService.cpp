@@ -399,7 +399,9 @@ ECode UiModeManagerService::OnStart()
     Settings::Secure::GetInt32(resolver, ISettingsSecure::UI_NIGHT_MODE,
         IUiModeManager::MODE_NIGHT_AUTO, &mNightMode);
 
-    mTwilightManager->RegisterListener(mTwilightListener, mHandler);
+    if (mTwilightManager != NULL) {
+        mTwilightManager->RegisterListener(mTwilightListener, mHandler);
+    }
 
     CUiModeManagerBinderService::New(this, (IIUiModeManager**)&mService);
     PublishBinderService(IContext::UI_MODE_SERVICE, IBinder::Probe(mService));
@@ -770,8 +772,9 @@ ECode UiModeManagerService::AdjustStatusBarCarModeLocked()
     AutoPtr<IContext> context;
     GetContext((IContext**)&context);
     if (mStatusBarManager == NULL) {
-        context->GetSystemService(IContext::STATUS_BAR_SERVICE,
-            (IInterface **)&mStatusBarManager);
+        AutoPtr<IInterface> obj;
+        context->GetSystemService(IContext::STATUS_BAR_SERVICE, (IInterface **)&obj);
+        mStatusBarManager = IStatusBarManager::Probe(obj);
     }
 
     // Fear not: StatusBarManagerService manages a list of requests to disable
@@ -786,9 +789,9 @@ ECode UiModeManagerService::AdjustStatusBarCarModeLocked()
     }
 
     if (mNotificationManager == NULL) {
-        context->GetSystemService(IContext::NOTIFICATION_SERVICE,
-            (IInterface **)&mNotificationManager);
-
+        AutoPtr<IInterface> obj;
+        context->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
+        mNotificationManager = INotificationManager::Probe(obj);
     }
 
     String nullStr;
@@ -848,10 +851,12 @@ ECode UiModeManagerService::UpdateTwilight()
 
 ECode UiModeManagerService::UpdateComputedNightModeLocked()
 {
-    AutoPtr<ITwilightState> state;
-    mTwilightManager->GetCurrentState((ITwilightState **)&state);
-    if (state != NULL) {
-        state->IsNight(&mComputedNightMode);
+    if (mTwilightManager) {
+        AutoPtr<ITwilightState> state;
+        mTwilightManager->GetCurrentState((ITwilightState **)&state);
+        if (state != NULL) {
+            state->IsNight(&mComputedNightMode);
+        }
     }
     return NOERROR;
 }

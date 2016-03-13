@@ -3,21 +3,44 @@
 
 #include "_Elastos_Droid_Os_CStrictMode.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Singleton.h>
+#include <elastos/core/Thread.h>
 #include <elastos/utility/etl/List.h>
-#include <elastos/core/Object.h>
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Core::IInteger32;
-using Elastos::Core::CInteger32;
-using Elastos::Core::ICloseGuardReporter;
 using Elastos::Droid::Os::IStrictModeSpan;
 using Elastos::Droid::Os::IStrictModeThreadPolicy;
 using Elastos::Droid::Os::IStrictModeVmPolicy;
 using Elastos::Droid::View::IIWindowManager;
+using Elastos::Core::Thread;
+using Elastos::Core::IThrowable;
+using Elastos::Core::IInteger32;
+using Elastos::Core::CInteger32;
+using Elastos::Core::ICloseGuardReporter;
+using Elastos::Core::IBlockGuardPolicy;
 using Elastos::Utility::Etl::List;
 using Elastos::Utility::Etl::HashMap;
 using Elastos::Utility::Concurrent::Atomic::IAtomicInteger32;
-using Elastos::Utility::Concurrent::Atomic::CAtomicInteger32;
+
+#ifndef DEFINE_HASH_FUNC_FOR_PTR_USING_ADDR
+#define DEFINE_HASH_FUNC_FOR_PTR_USING_ADDR(TypeName) \
+_ETL_NAMESPACE_BEGIN \
+template<> struct Hash<TypeName *> \
+{ \
+    size_t operator()(const TypeName * s) const { return (size_t)s; }  \
+}; \
+_ETL_NAMESPACE_END
+#endif
+
+#ifndef DEFINE_HASH_FUNC_FOR_AUTOPTR_USING_ADDR
+#define DEFINE_HASH_FUNC_FOR_AUTOPTR_USING_ADDR(TypeName) \
+_ETL_NAMESPACE_BEGIN \
+template<> struct Hash<AutoPtr<TypeName> > \
+{ \
+    size_t operator()(const AutoPtr<TypeName> s) const { return (size_t)s.Get(); }  \
+}; \
+_ETL_NAMESPACE_END
+#endif
 
 DEFINE_HASH_FUNC_FOR_PTR_USING_ADDR(ClassID)
 
@@ -28,20 +51,22 @@ namespace Os {
 class CStrictModeSpan;
 
 CarClass(CStrictMode)
+    , public Singleton
+    , public IStrictMode
 {
 public:
     class ThreadPolicy
-        : public ElRefBase
+        : public Object
         , public IStrictModeThreadPolicy
     {
     public:
+        CAR_INTERFACE_DECL();
+
         CARAPI ToString(
             /* [out] */ String* str);
 
         ThreadPolicy(
             /* [in] */ Int32 mask);
-
-        CAR_INTERFACE_DECL();
 
     public:
         /**
@@ -58,18 +83,18 @@ public:
      * <p>The policy is enabled by {@link #setVmPolicy}.
      */
     class VmPolicy
-        : public ElRefBase
+        : public Object
         , public IStrictModeVmPolicy
     {
     public:
+        CAR_INTERFACE_DECL();
+
         VmPolicy(
             /* [in] */ Int32 mask,
             /* [in] */ HashMap<Handle32, Int32> classInstanceLimit);
 
         CARAPI ToString(
             /* [out] */ String* str);
-
-        CAR_INTERFACE_DECL();
 
     public:
         /**
@@ -100,7 +125,7 @@ public:
     };
 
     class ThreadSpanState
-        : public ElRefBase
+        : public Object
     {
     public:
         AutoPtr<CStrictModeSpan> mActiveHead;    // doubly-linked list.
@@ -133,8 +158,9 @@ private:
     };
 
     class AndroidBlockGuardPolicy
-        : public ElRefBase
+        : public Object
         , public IAndroidBlockGuardPolicy
+        , public IBlockGuardPolicy
     {
     public:
         CAR_INTERFACE_DECL();
@@ -195,19 +221,19 @@ private:
     };
 
     class AndroidCloseGuardReporter
-        : public ElRefBase
+        : public Object
         , public ICloseGuardReporter
     {
     public:
         CAR_INTERFACE_DECL()
 
         CARAPI Report(
-            /* [in] */ const String& message//,
-            /* [in] */ /*Throwable allocationSite*/);
+            /* [in] */ const String& message,
+            /* [in] */ IThrowable* allocationSite);
     };
 
     class MessageQueueIdleHandler
-        : public ElRefBase
+        : public Object
         , public IIdleHandler
     {
     public:
@@ -224,7 +250,7 @@ private:
     };
 
     class NoOpSpan
-        : public ElRefBase
+        : public Object
         , public IStrictModeSpan
     {
     public:
@@ -258,12 +284,9 @@ private:
     };
 
     class InstanceTracker
-        : public ElRefBase
-        , public IInterface
+        : public Object
     {
     public:
-        CAR_INTERFACE_DECL();
-
         InstanceTracker(
             /* [in] */ IInterface* instance);
 
@@ -280,7 +303,7 @@ private:
         static Object sInstanceCountsLock;
     };
 
-    class MyThread : public ThreadBase
+    class MyThread : public Thread
     {
     public:
         MyThread(
@@ -290,20 +313,24 @@ private:
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_SINGLETON_DECL()
+
     CARAPI SetThreadPolicy(
-        /* [in] */ Handle32 policy);
+        /* [in] */ IStrictModeThreadPolicy* policy);
 
     CARAPI GetThreadPolicyMask(
         /* [out] */ Int32* mask);
 
     CARAPI GetThreadPolicy(
-        /* [out] */ Handle32* policy);
+        /* [out] */ IStrictModeThreadPolicy** policy);
 
     CARAPI AllowThreadDiskWrites(
-        /* [out] */ Handle32* policy);
+        /* [out] */ IStrictModeThreadPolicy** policy);
 
     CARAPI AllowThreadDiskReads(
-        /* [out] */ Handle32* policy);
+        /* [out] */ IStrictModeThreadPolicy** policy);
 
     CARAPI ConditionallyEnableDebugLogging(
         /* [out] */ Boolean* isLogging);
@@ -318,10 +345,10 @@ public:
     CARAPI ConditionallyCheckInstanceCounts();
 
     CARAPI SetVmPolicy(
-        /* [in] */ Handle32 policy);
+        /* [in] */ IStrictModeVmPolicy* policy);
 
     CARAPI GetVmPolicy(
-        /* [out] */ Handle32* policy);
+        /* [out] */ IStrictModeVmPolicy** policy);
 
     CARAPI EnableDefaults();
 
@@ -332,6 +359,9 @@ public:
         /* [out] */ Boolean* isEnabled);
 
     CARAPI VmRegistrationLeaksEnabled(
+        /* [out] */ Boolean* isEnabled);
+
+    CARAPI VmFileUriExposureEnabled(
         /* [out] */ Boolean* isEnabled);
 
     CARAPI OnSqliteObjectLeaked(
@@ -346,6 +376,9 @@ public:
 
     CARAPI OnServiceConnectionLeaked(
        /* [in] */ /*Throwable originStack*/);
+
+    CARAPI OnFileUriExposed(
+       /* [in] */ const String& location);
 
     CARAPI OnVmPolicyViolation(
        /* [in] */ const String& message//,
@@ -456,6 +489,10 @@ private:
 
     static CARAPI_(AutoPtr<ThreadSpanState>) GetThisThreadSpanState();
 
+public:
+    static pthread_once_t sThreadAndroidPolicyKeyOnce;
+    static pthread_key_t sThreadAndroidPolicyKey; //
+
 private:
     friend class CStrictModeThreadPolicyBuilder;
     friend class CStrictModeVmPolicyBuilder;
@@ -486,6 +523,11 @@ private:
      */
     static const Int32 DETECT_VM_INSTANCE_LEAKS;  // for VmPolicy
 
+    /**
+     * @hide
+     */
+    static const Int32 DETECT_VM_FILE_URI_EXPOSURE;  // for VmPolicy
+
     static const Int32 ALL_VM_DETECT_BITS;
 
     /**
@@ -497,8 +539,6 @@ private:
      * Mask of all the penalty bits valid for VM policies.
      */
     static const Int32 VM_PENALTY_MASK;
-
-    static const Int32 DETECT_VM_FILE_URI_EXPOSURE;// = 0x4000;  // for VmPolicy
 
     // TODO: wrap in some ImmutableHashMap thing.
     // Note: must be before static initialization of sVmPolicy.
@@ -541,6 +581,7 @@ private:
     static pthread_key_t sViolationsBeingTimed;
 
     static AutoPtr<IIWindowManager> sWindowManager;
+
 
     Object classLock;
     Object stateLock;

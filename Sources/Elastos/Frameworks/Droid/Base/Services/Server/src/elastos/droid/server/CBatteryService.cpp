@@ -875,10 +875,10 @@ void CBatteryService::LogBatteryStatsLocked()
     AutoPtr<IBinder> batteryInfoService = IBinder::Probe(service);
     if (batteryInfoService == NULL) return;
 
-    AutoPtr<IDropBoxManager> db;
-    mContext->GetSystemService(IContext::DROPBOX_SERVICE, (IInterface**)&db);
+    service = NULL;
+    mContext->GetSystemService(IContext::DROPBOX_SERVICE, (IInterface**)&service);
+    AutoPtr<IDropBoxManager> db = IDropBoxManager::Probe(service);
     Boolean isTagEnabled;
-    ;
     if (db == NULL
             || (db->IsTagEnabled(String("BATTERY_DISCHARGE_INFO"), &isTagEnabled), !isTagEnabled)) {
         return;

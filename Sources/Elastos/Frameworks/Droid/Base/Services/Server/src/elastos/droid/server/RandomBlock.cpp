@@ -29,7 +29,7 @@ ECode RandomBlock::FromFile(
 
     if (DEBUG) Slogger::V(TAG, "reading from file %s", filename.string());
     AutoPtr<IInputStream> stream;
-    CFileInputStream::New(filename, (IInputStream**)&stream);
+    FAIL_RETURN(CFileInputStream::New(filename, (IInputStream**)&stream));
     ECode ec = FromStream(stream, block);
     Close(ICloseable::Probe(stream));
     return ec;
@@ -41,6 +41,7 @@ ECode RandomBlock::FromStream(
 {
     VALIDATE_NOT_NULL(block)
     *block = NULL;
+    VALIDATE_NOT_NULL(in)
 
     AutoPtr<RandomBlock> retval = new RandomBlock();
     Int32 total = 0, result;

@@ -30,6 +30,11 @@ module
      * interface IViewGroupLayoutParams;
      */
     interface IPreferenceFrameLayoutParams {
+        SetRemoveBorders(
+            [in] Boolean res);
+
+        GetRemoveBorders(
+            [out] Boolean* res);
     }
 
     } // namespace Preference

@@ -1,0 +1,157 @@
+
+module
+{
+    importlib("Elastos.CoreLibrary.eco");
+    importlib("Elastos.Droid.Core.eco");
+
+    merge("DownloadDrmHelper.car");
+    merge("DownloadIdleService.car");
+    merge("SystemFacade.car");
+    merge("DownloadInfo.car");
+    merge("DownloadNotifier.car");
+    merge("DownloadProvider.car");
+    merge("DownloadReceiver.car");
+    merge("DownloadScanner.car");
+    merge("DownloadService.car");
+    merge("DownloadStorageProvider.car");
+    merge("DownloadThread.car");
+    merge("Helpers.car");
+    merge("OpenHelper.car");
+    merge("SizeLimitActivity.car");
+    merge("StorageUtils.car");
+
+    using interface Elastos.Core.IRunnable;
+    using interface Elastos.Droid.App.IService;
+    using interface Elastos.Droid.App.IActivity;
+    using interface Elastos.Droid.App.Job.IJobService;
+    using interface Elastos.Droid.Content.IContextWrapper;
+    using interface Elastos.Droid.Content.IComponentCallbacks;
+    using interface Elastos.Droid.Content.IComponentCallbacks2;
+    using interface Elastos.Droid.Content.IContentProvider;
+    using interface Elastos.Droid.Content.IBroadcastReceiver;
+    using interface Elastos.Droid.Content.IContext;
+    using interface Elastos.Droid.Media.IMediaScannerConnectionClient;
+    using interface Elastos.Droid.View.IContextThemeWrapper;
+
+    interface Elastos.Providers.DownloadProvider.Downloads.IDownloadDrmHelper;
+    interface Elastos.Providers.DownloadProvider.Downloads.IDownloadIdleService;
+    interface Elastos.Providers.DownloadProvider.Downloads.IDownloadInfo;
+    interface Elastos.Providers.DownloadProvider.Downloads.IDownloadNotifier;
+    interface Elastos.Providers.DownloadProvider.Downloads.IDownloadReceiver;
+    interface Elastos.Providers.DownloadProvider.Downloads.IDownloadScanner;
+    interface Elastos.Providers.DownloadProvider.Downloads.IDownloadService;
+    interface Elastos.Providers.DownloadProvider.Downloads.IDownloadStorageProvider;
+    interface Elastos.Providers.DownloadProvider.Downloads.IDownloadThread;
+    interface Elastos.Providers.DownloadProvider.Downloads.IHelpers;
+    interface Elastos.Providers.DownloadProvider.Downloads.IOpenHelper;
+    interface Elastos.Providers.DownloadProvider.Downloads.ISizeLimitActivity;
+    interface Elastos.Providers.DownloadProvider.Downloads.IStorageUtils;
+    interface Elastos.Providers.DownloadProvider.Downloads.IDownloadInfoReader;
+
+    namespace Elastos {
+    namespace Providers {
+    namespace DownloadProvider {
+    namespace Downloads {
+
+    singleton class CDownloadDrmHelper {
+        interface IDownloadDrmHelper;
+    }
+
+    class CDownloadIdleService {
+        interface IService;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IJobService;
+        interface IDownloadIdleService;
+    }
+
+    class CDownloadInfo {
+        constructor(
+            [in] IContext* context,
+            [in] ISystemFacade* systemFacade,
+            [in] IDownloadNotifier* notifier);
+
+        interface IDownloadInfo;
+    }
+
+    class CDownloadNotifier {
+        constructor(
+            [in] IContext* context);
+
+        interface IDownloadNotifier;
+    }
+
+    class CDownloadProvider {
+        interface IContentProvider;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        interface IDownloadProvider;
+    }
+
+    class CDownloadReceiver {
+        interface IBroadcastReceiver;
+        interface IDownloadReceiver;
+    }
+
+    class CDownloadScanner {
+        constructor(
+            [in] IContext* context);
+
+        interface IDownloadScanner;
+        interface IMediaScannerConnectionClient;
+    }
+
+    class CDownloadService {
+        interface IService;
+        interface IDownloadService;
+    }
+
+    class CDownloadStorageProvider {
+        interface IContentProvider;
+        interface IDownloadStorageProvider;
+    }
+
+    class CDownloadThread {
+        constructor(
+            [in] IContext* context,
+            [in] ISystemFacade* systemFacade,
+            [in] IDownloadNotifier* notifier,
+            [in] IDownloadInfo* info);
+
+        interface IRunnable;
+        interface IDownloadThread;
+    }
+
+    singleton class CHelpers {
+        interface IHelpers;
+    }
+
+    singleton class COpenHelper {
+        interface IOpenHelper;
+    }
+
+    class CSizeLimitActivity {
+        interface IActivity;
+        // interface ILayoutInflaterFactory;
+        // interface ILayoutInflaterFactory2;
+        // interface IWindowCallback;
+        // interface IKeyEventCallback;
+        // interface IViewOnCreateContextMenuListener;
+        interface IComponentCallbacks;
+        interface IComponentCallbacks2;
+        // interface IOnWindowDismissedCallback;
+        interface IContextThemeWrapper;
+        interface IContextWrapper;
+        interface IContext;
+        interface ISizeLimitActivity;
+    }
+
+    singleton class CStorageUtils {
+        interface IStorageUtils;
+    }
+
+    } // namespace Downloads
+    } // namespace PackageInstaller
+    } // namespace Apps
+    } // namespace Elastos
+}

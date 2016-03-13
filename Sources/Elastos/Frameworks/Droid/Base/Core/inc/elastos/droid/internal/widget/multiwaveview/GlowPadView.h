@@ -7,8 +7,7 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/animation/AnimatorListenerAdapter.h"
-
-#include <elastos/utility/AbstractList.h>
+#include <elastos/utility/ArrayList.h>
 
 using Elastos::Droid::Animation::AnimatorListenerAdapter;
 using Elastos::Droid::Animation::IAnimator;
@@ -20,7 +19,7 @@ using Elastos::Droid::Media::IAudioAttributes;
 using Elastos::Droid::Os::IVibrator;
 using Elastos::Droid::View::IMotionEvent;
 
-using Elastos::Utility::AbstractList;
+using Elastos::Utility::ArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -37,8 +36,7 @@ class GlowPadView
 {
 private:
     class AnimationBundle
-//        : public ArrayList
-        : public AbstractList
+        : public ArrayList
         , public IAnimationBundle
     {
     public:
@@ -58,7 +56,6 @@ private:
             /* [out] */ IInterface** object);
 
     private:
-        static Int64 mSerialVersionUID;
         Boolean mSuspended;
     };
 

@@ -16,22 +16,27 @@ const Int32 HdmiMhlControllerStub::NO_SUPPORTED_FEATURES = 0;
 const Int32 HdmiMhlControllerStub::INVALID_DEVICE_ROLES = 0;
 
 HdmiMhlControllerStub::HdmiMhlControllerStub(
-    /* [in] */ HdmiControlService* service)
+    /* [in] */ IHdmiControlService* service)
 {}
 
 ECode HdmiMhlControllerStub::IsReady(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return FALSE;
+        *result = FALSE;
+        return NOERROR;
 #endif
 }
 
 ECode HdmiMhlControllerStub::Create(
-    /* [in] */ HdmiControlService* service,
+    /* [in] */ IHdmiControlService* service,
     /* [out] */ HdmiMhlControllerStub** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return new HdmiMhlControllerStub(service);
@@ -39,7 +44,7 @@ ECode HdmiMhlControllerStub::Create(
 }
 
 ECode HdmiMhlControllerStub::GetPortInfos(
-    /* [out, callee] */ ArrayOf<IHdmiPortInfo*>* result)
+    /* [out, callee] */ ArrayOf<IHdmiPortInfo*>** result)
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
@@ -51,9 +56,12 @@ ECode HdmiMhlControllerStub::GetLocalDevice(
     /* [in] */ Int32 portId,
     /* [out] */ HdmiMhlLocalDeviceStub** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return NULL;
+        *result = NULL;
+        return NOERROR;
 #endif
 }
 
@@ -61,15 +69,20 @@ ECode HdmiMhlControllerStub::GetLocalDeviceById(
     /* [in] */ Int32 deviceId,
     /* [out] */ HdmiMhlLocalDeviceStub** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return NULL;
+        *result = NULL;
+        return NOERROR;
 #endif
 }
 
 ECode HdmiMhlControllerStub::GetAllLocalDevices(
     /* [out] */ ISparseArray** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mLocalDevices;
@@ -80,9 +93,12 @@ ECode HdmiMhlControllerStub::RemoveLocalDevice(
     /* [in] */ Int32 portId,
     /* [out] */ HdmiMhlLocalDeviceStub** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return NULL;
+        *result = NULL;
+        return NOERROR;
 #endif
 }
 
@@ -90,9 +106,12 @@ ECode HdmiMhlControllerStub::AddLocalDevice(
     /* [in] */ HdmiMhlLocalDeviceStub* device,
     /* [out] */ HdmiMhlLocalDeviceStub** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return NULL;
+        *result = NULL;
+        return NOERROR;
 #endif
 }
 
@@ -130,6 +149,8 @@ ECode HdmiMhlControllerStub::GetMhlVersion(
     /* [in] */ Int32 portId,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return INVALID_MHL_VERSION;
@@ -140,6 +161,8 @@ ECode HdmiMhlControllerStub::GetPeerMhlVersion(
     /* [in] */ Int32 portId,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return INVALID_MHL_VERSION;
@@ -150,6 +173,8 @@ ECode HdmiMhlControllerStub::GetSupportedFeatures(
     /* [in] */ Int32 portId,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return NO_SUPPORTED_FEATURES;
@@ -161,6 +186,8 @@ ECode HdmiMhlControllerStub::GetEcbusDeviceRoles(
     /* [in] */ Int32 portId,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return INVALID_DEVICE_ROLES;

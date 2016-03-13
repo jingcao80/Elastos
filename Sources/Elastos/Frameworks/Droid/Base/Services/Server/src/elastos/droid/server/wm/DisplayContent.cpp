@@ -45,6 +45,8 @@ DisplayContent::DisplayContent(
     Boolean result;
     display->GetDisplayInfo(mDisplayInfo, &result);
     mIsDefaultDisplay = mDisplayId == IDisplay::DEFAULT_DISPLAY;
+
+    mWindows = new WindowList();
 }
 
 Int32 DisplayContent::GetDisplayId()
@@ -54,7 +56,7 @@ Int32 DisplayContent::GetDisplayId()
 
 AutoPtr<List<AutoPtr<WindowState> > > DisplayContent::GetWindowList()
 {
-    return &mWindows;
+    return mWindows;
 }
 
 AutoPtr<IDisplay> DisplayContent::GetDisplay()
@@ -345,10 +347,16 @@ ECode DisplayContent::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str)
-    String infoStr;
-    IObject::Probe(mDisplayInfo)->ToString(&infoStr);
-    *str = String("Display ") + StringUtils::ToString(mDisplayId) +
-            String(" info=") + infoStr + String(" stacks=")/* + mStacks*/;
+    StringBuilder sb("DisplayContent{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += " displayId=";
+    sb += mDisplayId;
+    sb += " info=";
+    sb += Object::ToString(mDisplayInfo);
+    sb += " stacks=";
+    sb += mStacks.GetSize();
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 

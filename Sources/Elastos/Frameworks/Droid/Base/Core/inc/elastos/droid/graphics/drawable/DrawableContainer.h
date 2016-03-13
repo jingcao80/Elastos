@@ -3,6 +3,11 @@
 #define __ELASTOS_DROID_GRAPHICS_DRAWABLE_DRAWABLECONTAINER_H__
 
 #include "elastos/droid/graphics/drawable/Drawable.h"
+#include "elastos/droid/os/Runnable.h"
+#include <Elastos.Droid.Utility.h>
+
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Utility::ISparseArray;
 
 namespace Elastos {
 namespace Droid {
@@ -114,7 +119,7 @@ public:
 
         AutoPtr<IResourcesTheme> mTheme;
 
-        // SparseArray<ConstantStateFuture> mDrawableFutures;
+        AutoPtr<ISparseArray> mDrawableFutures;//SparseArray<ConstantStateFuture>
 
         Int32 mChangingConfigurations;
         Int32 mChildrenChangingConfigurations;
@@ -162,14 +167,11 @@ public:
     };
 
     class _Runnable
-        : public Object
-        , public IRunnable
+        : public Runnable
     {
     public:
         _Runnable(
             /* [in] */ DrawableContainer* host);
-
-        CAR_INTERFACE_DECL();
 
         CARAPI Run();
 
@@ -182,46 +184,30 @@ private:
          * Class capable of cloning a Drawable from another Drawable's
          * ConstantState.
          */
-        // private static class ConstantStateFuture {
-        //     private final ConstantState mConstantState;
+        class ConstantStateFuture
+            : public Object
+        {
+        public:
+            ConstantStateFuture(
+                /* [in] */ IDrawable* source);
 
-        //     private ConstantStateFuture(Drawable source) {
-        //         mConstantState = source.getConstantState();
-        //     }
+            /**
+             * Obtains and prepares the Drawable represented by this future.
+             *
+             * @param state the container into which this future will be placed
+             * @return a prepared Drawable
+             */
+            AutoPtr<IDrawable> Get(
+                /* [in] */ DrawableContainerState* state);
 
-        //     /**
-        //      * Obtains and prepares the Drawable represented by this future.
-        //      *
-        //      * @param state the container into which this future will be placed
-        //      * @return a prepared Drawable
-        //      */
-        //     public Drawable get(DrawableContainerState state) {
-        //         final Drawable result;
-        //         if (state.mRes == null) {
-        //             result = mConstantState.newDrawable();
-        //         } else if (state.mTheme == null) {
-        //             result = mConstantState.newDrawable(state.mRes);
-        //         } else {
-        //             result = mConstantState.newDrawable(state.mRes, state.mTheme);
-        //         }
-        //         result.setLayoutDirection(state.mLayoutDirection);
-        //         result.setCallback(state.mOwner);
-
-        //         if (state.mMutated) {
-        //             result.mutate();
-        //         }
-
-        //         return result;
-        //     }
-
-        //     /**
-        //      * Whether the constant state wrapped by this future can apply a
-        //      * theme.
-        //      */
-        //     public boolean canApplyTheme() {
-        //         return mConstantState.canApplyTheme();
-        //     }
-        // };
+            /**
+             * Whether the constant state wrapped by this future can apply a
+             * theme.
+             */
+            Boolean CanApplyTheme();
+        private:
+            AutoPtr<IDrawableConstantState> mConstantState;
+        };
 
 public:
     CAR_INTERFACE_DECL();
@@ -394,8 +380,7 @@ public:
         /* [out] */ IDrawableConstantState** state);
 
     //@Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
 protected:
     //@Override

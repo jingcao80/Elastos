@@ -3,19 +3,18 @@
 #define __ELASTOS_DROID_SERVER_HDMI_HDMICECFEATUREACTION_H__
 
 #include "_Elastos.Droid.Server.h"
-#include <elastos/droid/ext/frameworkext.h>
+#include <Elastos.CoreLibrary.Utility.h>
 #include <elastos/core/Object.h>
+#include <elastos/droid/ext/frameworkext.h>
 #include <elastos/droid/os/Handler.h>
 
 using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::IMessage;
+using Elastos::Droid::Server::Hdmi::IHdmiControlServiceDevicePollingCallback;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Droid::Utility::ISlog;
-
-using Elastos::Droid::Server::Hdmi::IHdmiControlServiceDevicePollingCallback;
-
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 
@@ -44,6 +43,7 @@ class HdmiControlService;
  */
 class HdmiCecFeatureAction
     : public Object
+    , public IHdmiCecFeatureAction
 {
 private:
     class ActionTimerHandler
@@ -51,6 +51,11 @@ private:
         , public IHdmiCecFeatureActionActionTimer
     {
     public:
+        CAR_INTERFACE_DECL()
+
+        ActionTimerHandler(
+            /* [in] */ HdmiCecFeatureAction* host);
+
         CARAPI constructor(
             /* [in] */ ILooper* looper);
 
@@ -65,9 +70,14 @@ private:
         // @Override
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
+    private:
+        HdmiCecFeatureAction* mHost;
     };
 
 public:
+    CAR_INTERFACE_DECL()
+
     HdmiCecFeatureAction();
 
     CARAPI constructor(
@@ -84,8 +94,8 @@ public:
      *
      * @return true if the operation is successful; otherwise false.
      */
-    CARAPI Start(
-        /* [out] */ Boolean* result);
+    virtual CARAPI Start(
+        /* [out] */ Boolean* result) = 0;
 
     /**
      * Process the command. Called whenever a new command arrives.
@@ -94,9 +104,9 @@ public:
      * @return true if the command was consumed in the process; Otherwise false, which
      *          indicates that the command shall be handled by other actions.
      */
-    CARAPI ProcessCommand(
+    virtual CARAPI ProcessCommand(
         /* [in] */ IHdmiCecMessage* cmd,
-        /* [out] */ Boolean* result);
+        /* [out] */ Boolean* result) = 0;
 
     /**
      * Called when the action should handle the timer event it created before.
@@ -145,13 +155,11 @@ public:
         /* [in] */ HdmiCecFeatureAction* action);
 
     CARAPI RemoveAction(
-        /* [in] */ ClassID clazz,
-        /* [out] */ HdmiCecFeatureAction** result);
+        /* [in] */ ClassID clazz);
 
     CARAPI RemoveActionExcept(
         /* [in] */ ClassID clazz,
-        /* [in] */ HdmiCecFeatureAction* exception,
-        /* [out] */ HdmiCecFeatureAction** result);
+        /* [in] */ HdmiCecFeatureAction* exception);
 
     CARAPI PollDevices(
         /* [in] */ IHdmiControlServiceDevicePollingCallback* callback,
@@ -180,7 +188,7 @@ public:
         /* [out] */ HdmiCecLocalDevicePlayback** result);
 
     CARAPI Tv(
-        /* [out] */ HdmiCecLocalDeviceTv** result);
+        /* [out] */ IHdmiCecLocalDeviceTv** result);
 
     CARAPI GetSourceAddress(
         /* [out] */ Int32* result);
@@ -217,9 +225,7 @@ public:
 private:
     static const String TAG;
 
-#if 0
-    AutoPtr<HdmiControlService> mService;
-#endif
+    AutoPtr<IHdmiControlService> mService;
 
     AutoPtr<IHdmiCecLocalDevice> mSource;
 

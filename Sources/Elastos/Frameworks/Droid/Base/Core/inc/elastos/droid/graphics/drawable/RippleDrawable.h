@@ -195,8 +195,7 @@ public:
         /* [out] */ IDrawableConstantState** state);
 
     // @Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
     // @Override
     CARAPI_(AutoPtr<LayerState>) CreateConstantState(

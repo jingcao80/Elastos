@@ -1,0 +1,30 @@
+
+module
+{
+    using interface Elastos.Droid.Content.IDialogInterface;
+
+    namespace Elastos {
+    namespace Providers {
+    namespace DownloadProvider {
+    namespace Downloads {
+
+    /**
+     * Activity to show dialogs to the user when a download exceeds a limit on download sizes for
+     * mobile networks.  This activity gets started by the background download service when a download's
+     * size is discovered to be exceeded one of these thresholds.
+     */
+    interface ISizeLimitActivity
+    {
+        OnCancel(
+            [in] IDialogInterface* dialog);
+
+        OnClick(
+            [in] IDialogInterface* dialog,
+            [in] Int32 which);
+    }
+
+    } // namespace Downloads
+    } // namespace DownloadProvider
+    } // namespace Providers
+    } // namespace Elastos
+}

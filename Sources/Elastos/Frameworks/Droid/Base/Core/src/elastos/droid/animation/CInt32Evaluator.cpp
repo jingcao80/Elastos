@@ -27,7 +27,11 @@ ECode CInt32Evaluator::Evaluate(
 
     Int32 retValue = (Int32)(startInt + fraction * (endInt - startInt));
 
-    return CInteger32::New(retValue, (IInteger32**)result);
+    AutoPtr<IInteger32> obj;
+    CInteger32::New(retValue, (IInteger32**)&obj);
+    *result = obj.Get();
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 }   //namespace Animation

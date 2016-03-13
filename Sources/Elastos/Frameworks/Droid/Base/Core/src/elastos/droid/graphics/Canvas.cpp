@@ -108,10 +108,6 @@ private:
 };
 
 
-// {CC4FB366-48F0-48FF-A6B6-670E64F46A7B}
-extern const InterfaceID EIID_Canvas =
-    { 0xcc4fb366, 0x48f0, 0x48ff, { 0xa6, 0xb6, 0x67, 0xe, 0x64, 0xf4, 0x6a, 0x7b } };
-
 CAR_INTERFACE_IMPL(Canvas, Object, ICanvas);
 Canvas::Canvas()
     : mDensity(IBitmap::DENSITY_NONE)
@@ -604,7 +600,7 @@ ECode Canvas::Concat(
     /* [in] */ IMatrix* matrix)
 {
     if (matrix != NULL) {
-        Int32 nativeMatrix = ((Matrix*)(IMatrix*)matrix->Probe(EIID_Matrix))->mNativeInstance;
+        Int32 nativeMatrix = ((Matrix*)matrix)->mNativeInstance;
         NativeConcat(mNativeCanvasWrapper, nativeMatrix);
     }
     return NOERROR;
@@ -615,7 +611,7 @@ ECode Canvas::SetMatrix(
 {
     Int32 nativeMatrix = 0;
     if (matrix != NULL) {
-        nativeMatrix = ((Matrix*)(IMatrix*)matrix->Probe(EIID_Matrix))->mNativeInstance;
+        nativeMatrix = ((Matrix*)matrix)->mNativeInstance;
     }
     NativeSetMatrix(mNativeCanvasWrapper, nativeMatrix);
     return NOERROR;
@@ -626,7 +622,7 @@ ECode Canvas::GetMatrix(
 {
     assert(ctm != NULL);
 
-    Int32 nativeMatrix = ((Matrix*)(IMatrix*)ctm->Probe(EIID_Matrix))->mNativeInstance;
+    Int32 nativeMatrix = ((Matrix*)ctm)->mNativeInstance;
     NativeGetCTM(mNativeCanvasWrapper, nativeMatrix);
     return NOERROR;
 }
@@ -791,7 +787,7 @@ ECode Canvas::SetDrawFilter(
 {
     Int32 nativeFilter = 0;
     if (filter != NULL) {
-        nativeFilter = ((DrawFilter*)(IDrawFilter*)filter->Probe(EIID_DrawFilter))->mNativeInstance;
+        nativeFilter = ((DrawFilter*)filter)->mNativeInstance;
     }
     mDrawFilter = filter;
     NativeSetDrawFilter(mNativeCanvasWrapper, nativeFilter);

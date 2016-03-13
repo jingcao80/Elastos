@@ -1,10 +1,10 @@
 
-#include "CellInfo.h"
-#include <elastos/core/StringBuilder.h>
+#include "elastos/droid/telephony/CellInfo.h"
 #include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
 
-using Elastos::Core::StringBuilder;
 using Elastos::Core::Math;
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -13,6 +13,9 @@ namespace Telephony {
 const Int32 CellInfo::TYPE_GSM = 1;
 const Int32 CellInfo::TYPE_CDMA = 2;
 const Int32 CellInfo::TYPE_LTE = 3;
+const Int32 CellInfo::TYPE_WCDMA = 4;
+
+CAR_INTERFACE_IMPL_2(CellInfo, Object, ICellInfo, IParcelable)
 
 CellInfo::CellInfo()
     : mRegistered(FALSE)
@@ -20,7 +23,12 @@ CellInfo::CellInfo()
     , mTimeStampType(ICellInfo::TIMESTAMP_TYPE_UNKNOWN)
 {}
 
-ECode CellInfo::Init(
+ECode CellInfo::constructor()
+{
+    return NOERROR;
+}
+
+ECode CellInfo::constructor(
     /* [in] */ ICellInfo* ci)
 {
     Boolean isRegistered;
@@ -42,7 +50,7 @@ ECode CellInfo::IsRegistered(
     return NOERROR;
 }
 
-ECode CellInfo::SetRegisterd(
+ECode CellInfo::SetRegistered(
     /* [in] */ Boolean registered)
 {
     mRegistered = registered;
@@ -140,7 +148,7 @@ ECode CellInfo::ToString(
     StringBuilder sb;
     String timeStampType;
 
-    sb.Append(" mRegistered=");
+    sb.Append("mRegistered=");
     sb.Append(mRegistered ? "YES" : "NO");
     timeStampType = TimeStampTypeToString(mTimeStampType);
     sb.Append(" mTimeStampType=");

@@ -3,15 +3,28 @@
 #define __ELASTOS_DROID_TELEPHONY_CCELLSIGNALSTRENGTHCDMA_H__
 
 #include "_Elastos_Droid_Telephony_CCellSignalStrengthCdma.h"
-#include "CellSignalStrength.h"
+#include "elastos/droid/ext/frameworkdef.h"
+#include "elastos/droid/telephony/CellSignalStrength.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-CarClass(CCellSignalStrengthCdma), CellSignalStrength
+CarClass(CCellSignalStrengthCdma)
+    , public CellSignalStrength
+    , public ICellSignalStrengthCdma
+    , public IParcelable
 {
 public:
+    CCellSignalStrengthCdma();
+
+    virtual ~CCellSignalStrengthCdma();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(
@@ -23,9 +36,6 @@ public:
 
     CARAPI constructor(
         /* [in] */ ICellSignalStrengthCdma* css);
-
-    CARAPI_(PInterface) Probe(
-        /* [in]  */ REIID riid);
 
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
@@ -112,8 +122,8 @@ private:
     static CARAPI Log(
         /* [in] */ const String& s);
 
-    static const String LOG_TAG/* = "CellSignalStrengthCdma"*/;
-    static const Boolean DBG/* = false*/;
+    static const String TAG;
+    static const Boolean DBG;
 
     Int32 mCdmaDbm;   // This value is the RSSI value
     Int32 mCdmaEcio;  // This value is the Ec/Io

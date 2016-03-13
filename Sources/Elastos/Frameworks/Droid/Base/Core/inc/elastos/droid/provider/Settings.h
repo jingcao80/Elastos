@@ -869,17 +869,17 @@ public:
             /* [in] */ Int32 userId,
             /* [out] */ Boolean* result);
 
-    private:
-        ECO_LOCAL static CARAPI_(Boolean) InitHashSet();
+        static Int32 GetLocationModeForUser(
+            /* [in] */ IContentResolver* cr,
+            /* [in] */ Int32 userId);
 
-        ECO_LOCAL static Boolean SetLocationModeForUser(
+        static Boolean SetLocationModeForUser(
             /* [in] */ IContentResolver* cr,
             /* [in] */ Int32 mode,
             /* [in] */ Int32 userId);
 
-        ECO_LOCAL static Int32 GetLocationModeForUser(
-            /* [in] */ IContentResolver* cr,
-            /* [in] */ Int32 userId);
+    private:
+        ECO_LOCAL static CARAPI_(Boolean) InitHashSet();
 
     public:
         static const AutoPtr<IUri> CONTENT_URI;

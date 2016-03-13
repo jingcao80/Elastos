@@ -409,7 +409,7 @@ private:
     CARAPI FlushLocked();
 
 private:
-    AutoPtr<IWriter> sDummyWriter;
+    static AutoPtr<IWriter> sDummyWriter;
     Int32 mBufferLen;
     AutoPtr<ArrayOf<Char32> > mText;
     Int32 mPos;

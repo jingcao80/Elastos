@@ -423,7 +423,7 @@ String SslCertificate::Fingerprint(
         Byte b = (*bytes)[i];
         IntegralToString::AppendByteAsHex(*sb, b, TRUE);
         if (i + 1 != bytes->GetLength()) {
-            sb->Append(':');
+            sb->AppendChar(':');
         }
     }
     return sb->ToString();

@@ -38,7 +38,7 @@ namespace Am {
 NativeCrashListener::NativeCrashReporter::NativeCrashReporter(
     /* [in] */ ProcessRecord* app,
     /* [in] */ Int32 signal,
-    /* [in] */ String report,
+    /* [in] */ const String& report,
     /* [in] */ NativeCrashListener* owner)
 {
     Thread::constructor(String("NativeCrashReport"));

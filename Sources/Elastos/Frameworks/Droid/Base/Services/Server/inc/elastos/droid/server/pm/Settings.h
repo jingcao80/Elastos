@@ -529,8 +529,8 @@ private:
      */
     static const Int32 CURRENT_DATABASE_VERSION = DatabaseVersion::SIGNATURE_MALFORMED_RECOVER;
 
-    static const Boolean DEBUG_STOPPED = FALSE;
-    static const Boolean DEBUG_MU = FALSE;
+    static const Boolean DEBUG_STOPPED;
+    static const Boolean DEBUG_MU;
 
     static const String TAG_READ_EXTERNAL_STORAGE;
     static const String ATTR_ENFORCEMENT;

@@ -741,8 +741,10 @@ ECode CObjectStub::S_CreateObject(
 
     ec = iObj->GetClassID(&clsid);
     if (FAILED(ec)) {
+        String str;
+        iObj->ToString(&str);
         MARSHAL_DBGOUT(MSHDBG_ERROR, ALOGE(
-                "Create stub: fail to get object's ClassID.\n"));
+                "Create stub: fail to get object's ClassID. %s\n", str.string()));
         goto ErrorExit;
     }
 

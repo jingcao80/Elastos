@@ -6,6 +6,7 @@
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/FileUtils.h"
 #include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/os/CStrictMode.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -15,6 +16,9 @@ using Elastos::Droid::Internal::Utility::CFastPrintWriter;
 using Elastos::Droid::Os::FileUtils;
 using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::IStrictMode;
+using Elastos::Droid::Os::CStrictMode;
+using Elastos::Droid::Os::IStrictModeThreadPolicy;
 using Elastos::Core::AutoLock;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
@@ -917,24 +921,21 @@ AutoPtr<ArrayOf<Int64> > ProcessCpuTracker::GetCpuSpeedTimes(
     String file = ReadFile(String("/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state"), '\0');
     // Note: file may be null on kernels without cpufreq (i.e. the emulator's)
     if (!file.IsNull()) {
+        file = file.Replace('\n', ' ');
         AutoPtr< ArrayOf<String> > st;
-        StringUtils::Split(file, String(" |\\n"), (ArrayOf<String>**)&st);
-        if (st && st->GetLength() > 0) {
+        StringUtils::Split(file, String(" "), (ArrayOf<String>**)&st);
+        if (st && st->GetLength() > 1) {
             for (Int32 i = 0; i < st->GetLength(); ++i) {
                 String token = (*st)[i];
-                //try {
                 (*tempSpeeds)[speed] = StringUtils::ParseInt64(token);
                 token = (*st)[++i];
                 (*tempTimes)[speed] = StringUtils::ParseInt64(token);
                 speed++;
                 if (speed == MAX_SPEEDS) break; // No more
-                // if (localLOGV && out == null) {
-                //     Slog.v(TAG, "First time : Speed/Time = " + tempSpeeds[speed - 1]
-                //           + "\t" + tempTimes[speed - 1]);
-                // }
-                //} catch (NumberFormatException nfe) {
-                //    Slog.i(TAG, "Unable to parse time_in_state");
-                //}
+                if (localLOGV && out == NULL) {
+                    Slogger::V(TAG, "First time : Speed/Time = %lld\t%lld",
+                        (*tempSpeeds)[speed - 1], (*tempTimes)[speed - 1]);
+                }
             }
         }
     }
@@ -1267,39 +1268,44 @@ String ProcessCpuTracker::ReadFile(
     // Permit disk reads here, as /proc/meminfo isn't really "on
     // disk" and should be fast.  TODO: make BlockGuard ignore
     // /proc/ and /sys/ files perhaps?
-    //StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
+    AutoPtr<IStrictMode> strictMode;
+    CStrictMode::AcquireSingleton((IStrictMode**)&strictMode);
+    AutoPtr<IStrictModeThreadPolicy> savedPolicy;
+    strictMode->AllowThreadDiskReads((IStrictModeThreadPolicy**)&savedPolicy);
+
     AutoPtr<IFileInputStream> is;
     Int32 len;
+    String result;
     //try {
     ECode ec = CFileInputStream::New(file, (IFileInputStream**)&is);
-    if (FAILED(ec)) goto ERROR;
+    FAIL_GOTO(ec, _EXIT_)
     IInputStream::Probe(is)->Read(mBuffer, &len);
     ICloseable::Probe(is)->Close();
 
     if (len > 0) {
         Int32 i;
-        AutoPtr< ArrayOf<Char32> > intBuffer = ArrayOf<UInt32>::Alloc(len);
+        AutoPtr< ArrayOf<Char32> > intBuffer = ArrayOf<Char32>::Alloc(len);
         for (i = 0; i < len; i++) {
             (*intBuffer)[i] = (Char32)(*mBuffer)[i];
             if ((*mBuffer)[i] == endChar) {
                 break;
             }
         }
-        return String(*intBuffer, 0, i);
+        result = String(*intBuffer, 0, i);
     }
     //} catch (java.io.FileNotFoundException e) {
     //} catch (java.io.IOException e) {
     //} finally {
-ERROR:
+_EXIT_:
     if (is != NULL) {
         //try {
         ICloseable::Probe(is)->Close();
         //} catch (java.io.IOException e) {
         //}
     }
-    //StrictMode.setThreadPolicy(savedPolicy);
+    strictMode->SetThreadPolicy(savedPolicy);
     //}
-    return String(NULL);
+    return result;
 }
 
 void ProcessCpuTracker::GetName(

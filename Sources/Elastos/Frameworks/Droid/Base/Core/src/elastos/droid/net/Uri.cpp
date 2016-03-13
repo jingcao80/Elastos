@@ -4,9 +4,11 @@
 #include <Elastos.CoreLibrary.Libcore.h>
 #include <Elastos.CoreLibrary.Net.h>
 #include "elastos/droid/net/Uri.h"
+#include "elastos/droid/net/CStringUri.h"
+#include "elastos/droid/net/COpaqueUri.h"
+#include "elastos/droid/net/CHierarchicalUri.h"
 #include "elastos/droid/net/CUriBuilder.h"
 #include "elastos/droid/net/ReturnOutValue.h"
-#include "elastos/droid/net/Uri.h"
 #include "elastos/droid/os/Build.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
@@ -71,6 +73,11 @@ StringUri::StringUri()
     , mScheme(Uri::NOT_CACHED)
 {}
 
+ECode StringUri::constructor()
+{
+    return NOERROR;
+}
+
 ECode StringUri::constructor(
     /* [in] */ const String& uriString)
 {
@@ -93,11 +100,7 @@ ECode StringUri::ReadFrom(
     String str;
     parcel->ReadString(&str);
 
-    AutoPtr<StringUri> curi = new StringUri();
-    curi->constructor(str);
-    *uri = IUri::Probe(curi);
-    REFCOUNT_ADD(*uri);
-    return NOERROR;
+    return CStringUri::New(str, uri);
 }
 
 ECode StringUri::WriteToParcel(
@@ -143,7 +146,7 @@ ECode StringUri::IsHierarchical(
         return NOERROR;
     }
 
-    if (mUriString.GetLength() == (UInt32)(ssi + 1)) {
+    if (mUriString.GetLength() == (ssi + 1)) {
         // No ssp.
         *isHierarchical = FALSE;
         return NOERROR;
@@ -313,7 +316,7 @@ String StringUri::ParsePath()
     if (ssi > -1) {
         AutoPtr<ArrayOf<Char32> > charArray = uriString.GetChars();
         // Is there anything after the ':'?
-        Boolean schemeOnly = (UInt32)(ssi + 1) == charArray->GetLength();
+        Boolean schemeOnly = (ssi + 1) == charArray->GetLength();
         if (schemeOnly) {
             // Opaque URI.
             return String(NULL);
@@ -558,10 +561,16 @@ ECode StringUri::BuildUpon(
 //====================================================================
 //                    OpaqueUri
 //====================================================================
+
+ECode OpaqueUri::constructor()
+{
+    return NOERROR;
+}
+
 ECode OpaqueUri::constructor(
     /* [in] */ const String& scheme,
-    /* [in] */ Uri::Part* ssp,
-    /* [in] */ Uri::Part* fragment)
+    /* [in] */ Handle32 ssp,
+    /* [in] */ Handle32 fragment)
 {
     mScheme = scheme;
     mSsp = (Part*)ssp;
@@ -588,11 +597,7 @@ ECode OpaqueUri::ReadFrom(
     Uri::Part::ReadFrom(parcel, (Uri::Part**)&p1);
     Uri::Part::ReadFrom(parcel, (Uri::Part**)&p2);
 
-    AutoPtr<OpaqueUri> curi = new OpaqueUri();
-    curi->constructor(str, p1, p2);
-    *result = IUri::Probe(curi);
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+    return COpaqueUri::New(str, (Handle32)p1.Get(), (Handle32)p2.Get(), result);
 }
 
 ECode OpaqueUri::WriteToParcel(
@@ -874,12 +879,29 @@ ECode Uri::PathSegments::Get(
     return NOERROR;
 }
 
-ECode Uri::PathSegments::Size(
+ECode Uri::PathSegments::GetSize(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
-
     *result = mSize;
+    return NOERROR;
+}
+
+ECode Uri::PathSegments::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("Uri::PathSegments{");
+    sb += "size:";
+    sb += mSize;
+    if (mSegments) {
+        for (Int32 i = 0; i < mSegments->GetLength(); ++i) {
+            sb += ",";
+            sb += (*mSegments)[i];
+        }
+    }
+    sb += "}";
+    *str = sb.ToString();
     return NOERROR;
 }
 
@@ -1089,18 +1111,23 @@ HierarchicalUri::HierarchicalUri()
     mUriString = Uri::NOT_CACHED;
 }
 
+ECode HierarchicalUri::constructor()
+{
+    return NOERROR;
+}
+
 ECode HierarchicalUri::constructor(
     /* [in] */ const String& scheme,
-    /* [in] */ Uri::Part* authority,
-    /* [in] */ Uri::PathPart* path,
-    /* [in] */ Uri::Part* query,
-    /* [in] */ Uri::Part* fragment)
+    /* [in] */ Handle32 authority,
+    /* [in] */ Handle32 path,
+    /* [in] */ Handle32 query,
+    /* [in] */ Handle32 fragment)
 {
     mScheme = scheme;
-    mAuthority = authority;
-    mPath = path;
-    mQuery = query;
-    mFragment = fragment;
+    mAuthority = (Part*)authority;
+    mPath = (PathPart*)path;
+    mQuery = (Part*)query;
+    mFragment = (Part*)fragment;
     return NOERROR;
 }
 
@@ -1121,12 +1148,8 @@ ECode HierarchicalUri::ReadFrom(
     Uri::Part::ReadFrom(parcel, (Uri::Part**)&p3);
     Uri::Part::ReadFrom(parcel, (Uri::Part**)&p4);
 
-    AutoPtr<HierarchicalUri> curi = new HierarchicalUri();
-    curi->constructor(str, p1, p2, p3, p4);
-
-    *result = IUri::Probe(curi);
-    REFCOUNT_ADD(*result);
-    return NOERROR;
+    return CHierarchicalUri::New(str, (Handle32)p1.Get(), (Handle32)p2.Get(),
+        (Handle32)p3.Get(), (Handle32)p4.Get(), result);
 }
 
 ECode HierarchicalUri::ReadFromParcel(
@@ -1600,15 +1623,14 @@ ECode UriBuilder::Build(
     VALIDATE_NOT_NULL(result);
     *result = NULL;
 
-    AutoPtr<IUri> uri;
     if (mOpaquePart != NULL) {
         if (mScheme.IsNull()) {
             Logger::E("UriBuilder", "An opaque URI must have a scheme.");
             return E_UNSUPPORTED_OPERATION_EXCEPTION;
         }
 
-        uri = new OpaqueUri();
-        FAIL_RETURN(((OpaqueUri*)uri.Get())->constructor(mScheme, mOpaquePart, mFragment));
+        return COpaqueUri::New(mScheme, (Handle32)mOpaquePart.Get(),
+            (Handle32)mFragment.Get(), result);
     }
     else {
         // Hierarchical URIs should not return null for getPath().
@@ -1624,12 +1646,10 @@ ECode UriBuilder::Build(
             }
         }
 
-        uri = new HierarchicalUri();
-        FAIL_RETURN(((HierarchicalUri*)uri.Get())->constructor(mScheme, mAuthority, mPath, mQuery, mFragment));
+        return CHierarchicalUri::New(mScheme, (Handle32)mAuthority.Get(),
+            (Handle32)mPath.Get(), (Handle32)mQuery.Get(), (Handle32)mFragment.Get(), result);
     }
 
-    *result = uri;
-    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
@@ -2052,8 +2072,9 @@ const Int32 Uri::NULL_TYPE_ID = 0;
 AutoPtr<IUri> Uri::CreateEmpty()
 {
     AutoPtr<IUri> rev;
-    rev = new HierarchicalUri();
-    ((HierarchicalUri*)rev.Get())->constructor(String(NULL), Part::sNULL, PathPart::sEMPTY, Part::sNULL, Part::sNULL);
+    CHierarchicalUri::New(String(NULL), (Handle32)Part::sNULL.Get(),
+        (Handle32)PathPart::sEMPTY.Get(), (Handle32)Part::sNULL.Get(),
+        (Handle32)Part::sNULL.Get(), (IUri**)&rev);
     return rev;
 }
 const AutoPtr<IUri> Uri::EMPTY = CreateEmpty();
@@ -2148,14 +2169,14 @@ ECode Uri::ToSafeString(
                 || scheme.EqualsIgnoreCase("mailto")) {
             StringBuilder builder(64);
             builder.Append(scheme);
-            builder.Append(':');
+            builder.AppendChar(':');
             if (ssp != NULL) {
                 for (Int32 i=0; i<ssp.GetLength(); i++) {
                     Char32 c = ssp.GetChar(i);
                     if (c == '-' || c == '@' || c == '.') {
                         builder.AppendChar(c);
                     } else {
-                        builder.Append('x');
+                        builder.AppendChar('x');
                     }
                 }
             }
@@ -2168,7 +2189,7 @@ ECode Uri::ToSafeString(
     StringBuilder builder(64);
     if (scheme != NULL) {
         builder.Append(scheme);
-        builder.Append(':');
+        builder.AppendChar(':');
     }
     if (ssp != NULL) {
         builder.Append(ssp);
@@ -2180,9 +2201,7 @@ ECode Uri::Parse(
     /* [in] */ const String& uriString,
     /* [out] */ IUri** result)
 {
-    AutoPtr<StringUri> rev = new StringUri();
-    rev->constructor(uriString);
-    FUNC_RETURN(rev)
+    return CStringUri::New(uriString, result);
 }
 
 ECode Uri::FromFile(
@@ -2196,9 +2215,8 @@ ECode Uri::FromFile(
         return E_NULL_POINTER_EXCEPTION;
     }
     AutoPtr<PathPart> path = PathPart::FromDecoded(Ptr(file)->Func(file->GetAbsolutePath));
-    AutoPtr<HierarchicalUri> rev = new HierarchicalUri();
-    rev->constructor(String("file"), Part::sEMPTY, path, Part::sNULL, Part::sNULL);
-    FUNC_RETURN(rev)
+    return CHierarchicalUri::New(String("file"), (Handle32)Part::sEMPTY.Get(), (Handle32)path.Get(),
+        (Handle32)Part::sNULL.Get(), (Handle32)Part::sNULL.Get(), result);
 }
 
 ECode Uri::FromParts(
@@ -2217,9 +2235,9 @@ ECode Uri::FromParts(
         Logger::E("Uri", "ssp");
         return E_NULL_POINTER_EXCEPTION;
     }
-    AutoPtr<OpaqueUri> rev = new OpaqueUri();
-    rev->constructor(scheme, Part::FromDecoded(ssp), Part::FromDecoded(fragment));
-    FUNC_RETURN(rev)
+    AutoPtr<Part> sspPart = Part::FromDecoded(ssp);
+    AutoPtr<Part> fragmentPart = Part::FromDecoded(fragment);
+    return COpaqueUri::New(scheme, (Handle32)sspPart.Get(), (Handle32)fragmentPart.Get(), result);
 }
 
 ECode Uri::GetQueryParameterNames(

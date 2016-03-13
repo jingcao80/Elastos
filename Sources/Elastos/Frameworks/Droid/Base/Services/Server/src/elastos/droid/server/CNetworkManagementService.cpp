@@ -747,13 +747,17 @@ ECode CNetworkManagementService::NotifyInterfaceClassActivity(
         if (mLastPowerStateFromRadio != powerState) {
             mLastPowerStateFromRadio = powerState;
             // try {
-            ECode ec = Ptr(this)->Func(this->GetBatteryStats)->NoteMobileRadioPowerState(powerState, tsNanos);
-            // } catch (RemoteException e) {
-            if (FAILED(ec)) {
-                if ((ECode)E_REMOTE_EXCEPTION != ec)
-                    return ec;
+            AutoPtr<IIBatteryStats> bstats;
+            GetBatteryStats((IIBatteryStats**)&bstats);
+            if (bstats != NULL) {
+                ECode ec = bstats->NoteMobileRadioPowerState(powerState, tsNanos);
+                // } catch (RemoteException e) {
+                if (FAILED(ec)) {
+                    if ((ECode)E_REMOTE_EXCEPTION != ec)
+                        return ec;
+                }
+                // }
             }
-            // }
         }
     }
 

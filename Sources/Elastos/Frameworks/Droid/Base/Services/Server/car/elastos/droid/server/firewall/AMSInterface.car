@@ -1,0 +1,30 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Server {
+    namespace Firewall {
+
+    /**
+     * This interface contains the methods we need from ActivityManagerService. This allows AMS to
+     * export these methods to us without making them public, and also makes it easier to test this
+     * component.
+     */
+    interface IAMSInterface {
+        CheckComponentPermission(
+            [in] String permission,
+            [in] Int32 pid,
+            [in] Int32 uid,
+            [in] Int32 owningUid,
+            [in] Boolean exported
+            [out] Int32 ret);
+
+        GetAMSLock(
+            [out] IInterface *ret);
+    }
+
+    } // Firewall
+    } // Server
+    } // Droid
+    } // Elastos
+}

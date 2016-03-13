@@ -3,7 +3,7 @@
 #define __ELASTOS_DROID_HARDWARE_CAMERA2_CAMERAMETADATA_H__
 
 #include "Elastos.Droid.Hardware.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
 
 using Elastos::Core::Object;
@@ -15,7 +15,7 @@ namespace Droid {
 namespace Hardware {
 namespace Camera2 {
 
-class CameraMetadata
+class ECO_PUBLIC CameraMetadata
     : public Object
     , public ICameraMetadata
 {

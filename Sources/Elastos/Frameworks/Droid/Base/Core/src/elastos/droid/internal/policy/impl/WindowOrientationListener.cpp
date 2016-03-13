@@ -441,27 +441,23 @@ Boolean WindowOrientationListener::SensorEventListenerImpl::IsPredictedRotationA
     /* [in] */ Int64 now)
 {
     // The predicted rotation must have settled long enough.
-    if (now < mPredictedRotationTimestampNanos + PROPOSAL_SETTLE_TIME_NANOS)
-    {
+    if (now < mPredictedRotationTimestampNanos + PROPOSAL_SETTLE_TIME_NANOS) {
         return FALSE;
     }
 
     // The last flat state (time since picked up) must have been sufficiently long ago.
-    if (now < mFlatTimestampNanos + PROPOSAL_MIN_TIME_SINCE_FLAT_ENDED_NANOS)
-    {
+    if (now < mFlatTimestampNanos + PROPOSAL_MIN_TIME_SINCE_FLAT_ENDED_NANOS) {
         return FALSE;
     }
 
     // The last swing state (time since last movement to put down) must have been
     // sufficiently long ago.
-    if (now < mSwingTimestampNanos + PROPOSAL_MIN_TIME_SINCE_SWING_ENDED_NANOS)
-    {
+    if (now < mSwingTimestampNanos + PROPOSAL_MIN_TIME_SINCE_SWING_ENDED_NANOS) {
         return FALSE;
     }
 
     // The last acceleration state must have been sufficiently long ago.
-    if (now < mAccelerationTimestampNanos + PROPOSAL_MIN_TIME_SINCE_ACCELERATION_ENDED_NANOS)
-    {
+    if (now < mAccelerationTimestampNanos + PROPOSAL_MIN_TIME_SINCE_ACCELERATION_ENDED_NANOS) {
         return FALSE;
     }
 
@@ -611,14 +607,12 @@ ECode WindowOrientationListener::constructor(
 ECode WindowOrientationListener::Enable()
 {
     AutoLock lock(mLock);
-    if (mSensor == NULL)
-    {
+    if (mSensor == NULL) {
         Logger::W(TAG, "Cannot detect sensors. Not enabled");
         return NOERROR;
     }
     if (mEnabled == FALSE) {
-        if (LOG)
-        {
+        if (LOG) {
             Logger::D(TAG, "WindowOrientationListener enabled");
         }
         mSensorEventListener->ResetLocked();
@@ -632,15 +626,12 @@ ECode WindowOrientationListener::Enable()
 ECode WindowOrientationListener::Disable()
 {
     AutoLock lock(mLock);
-    if (mSensor == NULL)
-    {
+    if (mSensor == NULL) {
         Logger::W(TAG, "Cannot detect sensors. Invalid disable");
         return NOERROR;
     }
-    if (mEnabled == TRUE)
-    {
-        if (LOG)
-        {
+    if (mEnabled == TRUE) {
+        if (LOG) {
             Logger::D(TAG, "WindowOrientationListener disabled");
         }
         mSensorManager->UnregisterListener(mSensorEventListener);
@@ -662,8 +653,7 @@ ECode WindowOrientationListener::GetProposedRotation(
 {
     VALIDATE_NOT_NULL(result);
     AutoLock lock(mLock);
-    if (mEnabled)
-    {
+    if (mEnabled) {
         mSensorEventListener->GetProposedRotationLocked(result);
         return NOERROR;
     }
@@ -713,9 +703,10 @@ ECode WindowOrientationListener::constructor(
     context->GetSystemService(IContext::SENSOR_SERVICE, (IInterface**)&obj);
     mSensorManager = ISensorManager::Probe(obj);
     mRate = rate;
-    mSensorManager->GetDefaultSensor(USE_GRAVITY_SENSOR? ISensor::TYPE_GRAVITY : ISensor::TYPE_ACCELEROMETER, (ISensor**)&mSensor);
-    if (mSensor != NULL)
-    {
+    mSensorManager->GetDefaultSensor(
+        USE_GRAVITY_SENSOR? ISensor::TYPE_GRAVITY : ISensor::TYPE_ACCELEROMETER,
+        (ISensor**)&mSensor);
+    if (mSensor != NULL) {
         // Create listener only if sensors do exist
         mSensorEventListener = new SensorEventListenerImpl(this);
     }

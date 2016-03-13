@@ -6,6 +6,7 @@
 #include "Elastos.CoreLibrary.IO.h"
 #include <elastos/core/Object.h>
 
+using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::App::IIActivityContainer;
 using Elastos::Droid::Content::IIIntentSender;
 using Elastos::Droid::Content::IIntent;
@@ -96,7 +97,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle32 owner,
+        /* [in] */ IIActivityManager* owner,
         /* [in] */ Handle32 k,
         /* [in] */ Int32 u);
 

@@ -53,6 +53,12 @@ public:
         CARAPI SetGravity(
             /* [in] */ Int32 gravity);
 
+        CARAPI SetRemoveBorders(
+            /* [in] */ Boolean res);
+
+        CARAPI GetRemoveBorders(
+            /* [out] */ Boolean* res);
+
     public:
         Boolean mRemoveBorders;
     };

@@ -1,11 +1,13 @@
 
 #include "elastos/droid/database/CContentObserverTransport.h"
 
+using Elastos::Droid::Database::EIID_IIContentObserver;
+
 namespace Elastos {
 namespace Droid {
 namespace Database {
 
-CAR_INTERFACE_IMPL(CContentObserverTransport, Object, IContentObserverTransport);
+CAR_INTERFACE_IMPL_2(CContentObserverTransport, Object, IContentObserverTransport, IIContentObserver);
 
 CAR_OBJECT_IMPL(CContentObserverTransport)
 
@@ -32,6 +34,12 @@ ECode CContentObserverTransport::constructor(
 {
     mContentObserver = contentObserver;
     return NOERROR;
+}
+
+ECode CContentObserverTransport::ToString(
+    /* [out] */ String* str)
+{
+    return Object::ToString(str);
 }
 
 } //Database

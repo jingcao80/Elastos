@@ -39,12 +39,6 @@ module
     merge("webkit/WebViewFragment.car");
     merge("webkit/WebViewFactory.car");
     merge("webkit/WebViewFactoryProvider.car");
-    merge("webkit/webview/chromium/WebViewChromiumFactoryProvider.car");
-    merge("webkit/native/ui/OnColorChangedListener.car");
-    merge("webkit/native/ui/ColorSuggestionListAdapter.car");
-    merge("webkit/native/net/IRemoteElastosKeyStore.car");
-    merge("webkit/native/net/IRemoteElastosKeyStoreCallbacks.car");
-    merge("webkit/native/net/IRemoteElastosKeyStoreInterface.car");
 
     using interface Elastos.IO.IInputStream;
     using interface Elastos.Utility.IMap;
@@ -66,7 +60,7 @@ module
     interface Elastos.Droid.View.IViewOnCreateContextMenuListener;
     interface Elastos.Droid.View.IViewGroupOnHierarchyChangeListener;
     interface Elastos.Droid.View.Accessibility.IAccessibilityEventSource;
-    interface Elastos.Droid.Webkit.Webview.Chromium.IWebViewChromiumFactoryProvider;
+    //interface Elastos.Droid.Webkit.Webview.Chromium.IWebViewChromiumFactoryProvider;
 
     namespace Elastos {
     namespace Droid {
@@ -316,21 +310,21 @@ module
     } // namepsace Droid
     } // namespace Elastos
 
-    namespace Elastos {
-    namespace Droid {
-    namespace Webkit {
-    namespace Webview {
-    namespace Chromium {
+    //namespace Elastos {
+    //namespace Droid {
+    //namespace Webkit {
+    //namespace Webview {
+    //namespace Chromium {
 
-    class CWebViewChromiumFactoryProvider {
-        constructor();
+    //class CWebViewChromiumFactoryProvider {
+    //    constructor();
 
-        interface IWebViewChromiumFactoryProvider;
-    }
+    //    interface IWebViewChromiumFactoryProvider;
+    //}
 
-    } // namespace Chromium
-    } // namespace Webview
-    } // namespace Webkit
-    } // namepsace Droid
-    } // namespace Elastos
+    //} // namespace Chromium
+    //} // namespace Webview
+    //} // namespace Webkit
+    //} // namepsace Droid
+    //} // namespace Elastos
 }

@@ -56,7 +56,7 @@ ECode CGetAccountsByTypeAndFeatureSession::CheckAccount()
         return SendResult();
     }
 
-    AutoPtr<IAccountAuthenticator> accountAuthenticator = mAuthenticator;
+    AutoPtr<IIAccountAuthenticator> accountAuthenticator = mAuthenticator;
     if (accountAuthenticator == NULL) {
         // It is possible that the authenticator has died, which is indicated by
         // mAuthenticator being set to null. If this happens then just abort.

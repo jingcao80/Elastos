@@ -1,26 +1,37 @@
 
-#include "CCellIdentityGsm.h"
-#include "elastos/droid/ext/frameworkdef.h"
+#include "elastos/droid/telephony/CCellIdentityGsm.h"
+#include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringBuilder;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-#define INTEGER_MAX_VALUE 0x7FFFFFFF;
-const String CCellIdentityGsm::LOG_TAG("CCellIdentityGsm");
+const String CCellIdentityGsm::TAG("CCellIdentityGsm");
+const Boolean CCellIdentityGsm::DBG;
+
+CAR_INTERFACE_IMPL_2(CCellIdentityGsm, Object, ICellIdentityGsm, IParcelable)
+
+CAR_OBJECT_IMPL(CCellIdentityGsm)
+
+CCellIdentityGsm::CCellIdentityGsm()
+    : mMcc(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mMnc(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mLac(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mCid(Elastos::Core::Math::INT32_MAX_VALUE)
+{
+}
+
+CCellIdentityGsm::~CCellIdentityGsm()
+{
+}
 
 ECode CCellIdentityGsm::constructor()
 {
-    mMcc = INTEGER_MAX_VALUE;
-    mMnc = INTEGER_MAX_VALUE;
-    mLac = INTEGER_MAX_VALUE;
-    mCid = INTEGER_MAX_VALUE;
-    mPsc = INTEGER_MAX_VALUE;
     return NOERROR;
 }
 
@@ -28,14 +39,12 @@ ECode CCellIdentityGsm::constructor(
     /* [in] */ Int32 mcc,
     /* [in] */ Int32 mnc,
     /* [in] */ Int32 lac,
-    /* [in] */ Int32 cid,
-    /* [in] */ Int32 psc)
+    /* [in] */ Int32 cid)
 {
     mMcc = mcc;
     mMnc = mnc;
     mLac = lac;
     mCid = cid;
-    mPsc = psc;
     return NOERROR;
 }
 
@@ -46,7 +55,6 @@ ECode CCellIdentityGsm::constructor(
     cid->GetMnc(&mMnc);
     cid->GetLac(&mLac);
     cid->GetCid(&mCid);
-    cid->GetPsc(&mPsc);
     return NOERROR;
 }
 
@@ -65,7 +73,6 @@ ECode CCellIdentityGsm::ReadFromParcel(
     source->ReadInt32(&mMnc);
     source->ReadInt32(&mLac);
     source->ReadInt32(&mCid);
-    source->ReadInt32(&mPsc);
     return NOERROR;
 }
 
@@ -75,13 +82,12 @@ ECode CCellIdentityGsm::WriteToParcel(
     if (DBG) {
         String str;
         ToString(&str);
-        Slogger::I(LOG_TAG, "writeToParcel(Parcel, int): %s", str.string());
+        Logger::I(TAG, "writeToParcel(Parcel, int): %s", str.string());
     }
     dest->WriteInt32(mMcc);
     dest->WriteInt32(mMnc);
     dest->WriteInt32(mLac);
     dest->WriteInt32(mCid);
-    dest->WriteInt32(mPsc);
     return NOERROR;
 }
 
@@ -121,7 +127,7 @@ ECode CCellIdentityGsm::GetPsc(
     /* [out] */ Int32* psc)
 {
     VALIDATE_NOT_NULL(psc);
-    *psc = mPsc;
+    *psc = Elastos::Core::Math::INT32_MAX_VALUE;
     return NOERROR;
 }
 
@@ -129,9 +135,9 @@ ECode CCellIdentityGsm::GetHashCode(
     /* [out] */ Int32* hashCode)
 {
     VALIDATE_NOT_NULL(hashCode);
-    int primeNum = 31;
-    *hashCode = ((mMcc * primeNum) + (mMnc * primeNum) + (mLac * primeNum) + (mCid * primeNum) +
-            (mPsc * primeNum));
+    Int32 primeNum = 31;
+    *hashCode = ((mMcc * primeNum) + (mMnc * primeNum) +
+            (mLac * primeNum) + (mCid * primeNum));
     return NOERROR;
 }
 
@@ -156,8 +162,7 @@ ECode CCellIdentityGsm::Equals(
     *res = (mMcc == mcc &&
         mMnc == mnc &&
         mLac == lac &&
-        mCid == cid &&
-        mPsc == psc);
+        mCid == cid);
     // } catch (ClassCastException e) {
     //     return false;
     // }
@@ -171,18 +176,17 @@ ECode CCellIdentityGsm::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    StringBuilder sb;
-    sb.Append("super.toString()");
+    StringBuilder sb("CellIdentityGsm:{");
     sb.Append(" mMcc=");
     sb.Append(mMcc);
     sb.Append(" mMnc=");
-    sb.Append(mMcc);
+    sb.Append(mMnc);
     sb.Append(" mLac=");
     sb.Append(mLac);
     sb.Append(" mCid=");
     sb.Append(mCid);
-    sb.Append(" mPsc=");
-    sb.Append(mPsc);
+    sb.Append("}");
+
     *str = sb.ToString();
     return NOERROR;
 }

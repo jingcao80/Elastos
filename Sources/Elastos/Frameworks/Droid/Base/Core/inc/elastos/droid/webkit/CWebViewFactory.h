@@ -6,6 +6,7 @@
 #include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Content::Pm::IPackageInfo;
+using Elastos::Droid::Webkit::IWebViewFactory;
 
 namespace Elastos {
 namespace Droid {

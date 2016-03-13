@@ -1,26 +1,24 @@
 
-#include "elastos/droid/app/CActivityManagerHelper.h"
-#include "elastos/droid/app/CActivityThreadHelper.h"
+#include <Elastos.Droid.Webkit.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.App.h>
 #include "elastos/droid/os/Build.h"
-#include "elastos/droid/os/CLooperHelper.h"
 //#include "elastos/droid/os/CStrictMode.h"
 #include "elastos/droid/os/FileUtils.h"
-#include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/R.h"
-#include "elastos/droid/webkit/CWebViewFactory.h"
-#include "elastos/droid/webkit/native/android_webview/AwBrowserProcess.h"
-#include "elastos/droid/webkit/native/android_webview/AwContentsStatics.h"
-#include "elastos/droid/webkit/native/android_webview/AwResource.h"
-#include "elastos/droid/webkit/native/android_webview/AwSettings.h"
-#include "elastos/droid/webkit/native/base/CommandLine.h"
-#include "elastos/droid/webkit/native/base/MemoryPressureListener.h"
-#include "elastos/droid/webkit/native/base/PathService.h"
-#include "elastos/droid/webkit/native/base/PathUtils.h"
-#include "elastos/droid/webkit/native/base/ThreadUtils.h"
-#include "elastos/droid/webkit/native/base/TraceEvent.h"
-#include "elastos/droid/webkit/native/content/app/ContentMain.h"
-#include "elastos/droid/webkit/native/content/browser/ContentViewStatics.h"
-#include "elastos/droid/webkit/native/content/browser/ResourceExtractor.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/AwBrowserProcess.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/AwContentsStatics.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/AwResource.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/AwSettings.h"
+#include "elastos/droid/webkit/webview/chromium/native/base/CommandLine.h"
+#include "elastos/droid/webkit/webview/chromium/native/base/MemoryPressureListener.h"
+#include "elastos/droid/webkit/webview/chromium/native/base/PathService.h"
+#include "elastos/droid/webkit/webview/chromium/native/base/PathUtils.h"
+#include "elastos/droid/webkit/webview/chromium/native/base/ThreadUtils.h"
+#include "elastos/droid/webkit/webview/chromium/native/base/TraceEvent.h"
+#include "elastos/droid/webkit/webview/chromium/native/content/app/ContentMain.h"
+#include "elastos/droid/webkit/webview/chromium/native/content/browser/ContentViewStatics.h"
+#include "elastos/droid/webkit/webview/chromium/native/content/browser/ResourceExtractor.h"
 #include "elastos/droid/webkit/webview/chromium/FileChooserParamsAdapter.h"
 #include "elastos/droid/webkit/webview/chromium/GraphicsUtils.h"
 #include "elastos/droid/webkit/webview/chromium/ResourceRewriter.h"
@@ -45,25 +43,27 @@ using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::ILooperHelper;
 using Elastos::Droid::Os::IStrictMode;
 using Elastos::Droid::Os::IStrictModeThreadPolicy;
-using Elastos::Droid::Os::SystemProperties;
-using Elastos::Droid::Webkit::AndroidWebview::AwBrowserProcess;
-using Elastos::Droid::Webkit::AndroidWebview::AwContentsStatics;
-using Elastos::Droid::Webkit::AndroidWebview::AwResource;
-using Elastos::Droid::Webkit::AndroidWebview::AwSettings;
-using Elastos::Droid::Webkit::Base::CommandLine;
-using Elastos::Droid::Webkit::Base::MemoryPressureListener;
-using Elastos::Droid::Webkit::Base::PathService;
-using Elastos::Droid::Webkit::Base::PathUtils;
-using Elastos::Droid::Webkit::Base::ThreadUtils;
-using Elastos::Droid::Webkit::Base::TraceEvent;
-using Elastos::Droid::Webkit::Content::App::ContentMain;
-using Elastos::Droid::Webkit::Content::Browser::ContentViewStatics;
-using Elastos::Droid::Webkit::Content::Browser::ResourceExtractor;
+using Elastos::Droid::Os::ISystemProperties;
+using Elastos::Droid::Os::CSystemProperties;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::AwBrowserProcess;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::AwContentsStatics;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::AwResource;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::AwSettings;
+using Elastos::Droid::Webkit::Webview::Chromium::Base::CommandLine;
+using Elastos::Droid::Webkit::Webview::Chromium::Base::MemoryPressureListener;
+using Elastos::Droid::Webkit::Webview::Chromium::Base::PathService;
+using Elastos::Droid::Webkit::Webview::Chromium::Base::PathUtils;
+using Elastos::Droid::Webkit::Webview::Chromium::Base::ThreadUtils;
+using Elastos::Droid::Webkit::Webview::Chromium::Base::TraceEvent;
+using Elastos::Droid::Webkit::Webview::Chromium::Content::App::ContentMain;
+using Elastos::Droid::Webkit::Webview::Chromium::Content::Browser::ContentViewStatics;
+using Elastos::Droid::Webkit::Webview::Chromium::Content::Browser::ResourceExtractor;
 using Elastos::Droid::Webkit::CWebViewFactory;
 using Elastos::Droid::Webkit::IWebViewFactory;
 using Elastos::Droid::Webkit::Webview::Chromium::FileChooserParamsAdapter;
 using Elastos::Droid::Webkit::Webview::Chromium::ResourceRewriter;
 using Elastos::Droid::Webkit::Webview::Chromium::WebViewChromium;
+using Elastos::Droid::Webkit::Webview::Chromium::EIID_IWebViewChromiumFactoryProvider;
 using Elastos::Core::AutoLock;
 using Elastos::Core::CSystem;
 using Elastos::Core::EIID_IRunnable;
@@ -238,7 +238,7 @@ const String WebViewChromiumFactoryProvider::CHROMIUM_PREFS_NAME("WebViewChromiu
 const String WebViewChromiumFactoryProvider::VERSION_CODE_PREF("lastVersionCodeUsed");
 const String WebViewChromiumFactoryProvider::COMMAND_LINE_FILE("/data/local/tmp/webview-command-line");
 
-CAR_INTERFACE_IMPL(WebViewChromiumFactoryProvider, Object, IWebViewFactoryProvider)
+CAR_INTERFACE_IMPL_2(WebViewChromiumFactoryProvider, Object, IWebViewFactoryProvider, IWebViewChromiumFactoryProvider)
 
 WebViewChromiumFactoryProvider::WebViewChromiumFactoryProvider()
     : mStarted(FALSE)
@@ -623,7 +623,9 @@ ECode WebViewChromiumFactoryProvider::InitTraceEvent()
 
     SyncATraceState();
     AutoPtr<IRunnable> runnable = new InnerSyncATraceStateRunnable();
-    return SystemProperties::AddChangeCallback(runnable);
+    AutoPtr<ISystemProperties> systemProperty;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&systemProperty);
+    return systemProperty->AddChangeCallback(runnable);
 }
 
 ECode WebViewChromiumFactoryProvider::SyncATraceState()
@@ -633,7 +635,9 @@ ECode WebViewChromiumFactoryProvider::SyncATraceState()
     // TraceEvent.setATraceEnabled((enabledFlags & Trace.TRACE_TAG_WEBVIEW) != 0);
 
     Int64 enabledFlags = 0;
-    SystemProperties::GetInt64(String("debug.atrace.tags.enableflags"), 0, &enabledFlags);
+    AutoPtr<ISystemProperties> systemProperty;
+    CSystemProperties::AcquireSingleton((ISystemProperties**)&systemProperty);
+    systemProperty->GetInt64(String("debug.atrace.tags.enableflags"), 0, &enabledFlags);
     TraceEvent::SetATraceEnabled((enabledFlags /*& Trace.TRACE_TAG_WEBVIEW*/) != 0);
     return NOERROR;
 }
@@ -931,7 +935,6 @@ ECode WebViewChromiumFactoryProvider::SetWebContentsDebuggingEnabled(
     // }
     // mDevToolsServer.setRemoteDebuggingEnabled(enable);
 
-    assert(0);
     AutoPtr<ILooper> looper;
     AutoPtr<ILooperHelper> helper;
     CLooperHelper::AcquireSingleton((ILooperHelper**)&helper);

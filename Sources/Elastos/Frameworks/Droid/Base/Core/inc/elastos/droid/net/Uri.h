@@ -114,8 +114,11 @@ public:
             /* [in] */ Int32 index,
             /* [out] */ IInterface** value);
 
-        CARAPI Size(
+        CARAPI GetSize(
             /* [out] */ Int32* result);
+
+        CARAPI ToString(
+            /* [out] */ String* str);
 
     public:
         /* const */ static AutoPtr<PathSegments> sEMPTY;
@@ -733,6 +736,13 @@ class StringUri
     : public AbstractHierarchicalUri
 {
 public:
+    StringUri();
+
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ const String& uriString);
+
     static CARAPI ReadFrom(
         /* [in] */ IParcel* parcel,
         /* [out] */ IUri** uri);
@@ -816,11 +826,6 @@ public:
         /* [out] */ IUriBuilder** result);
 
 private:
-    StringUri();
-
-    CARAPI constructor(
-        /* [in] */ const String& uriString);
-
     /** Finds the first ':'. Returns -1 if none found. */
     CARAPI_(Int32) FindSchemeSeparator();
 
@@ -874,6 +879,13 @@ protected:
 class OpaqueUri : public Uri
 {
 public:
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ const String& scheme,
+        /* [in] */ Handle32 ssp,
+        /* [in] */ Handle32 fragment);
+
     static CARAPI ReadFrom(
         /* [in] */ IParcel* parcel,
         /* [out] */ IUri** uri);
@@ -947,12 +959,6 @@ public:
     virtual CARAPI BuildUpon(
         /* [out] */ IUriBuilder** result);
 
-private:
-    CARAPI constructor(
-        /* [in] */ const String& scheme,
-        /* [in] */ Uri::Part* ssp,
-        /* [in] */ Uri::Part* fragment);
-
 public:
     /** Used in parcelling. */
     static const Int32 TYPE_ID = 2;
@@ -970,15 +976,20 @@ private:
 class HierarchicalUri
     : public AbstractHierarchicalUri
 {
+    friend class UriBuilder;
+    friend class Uri;
+
 public:
     HierarchicalUri();
 
+    CARAPI constructor();
+
     CARAPI constructor(
         /* [in] */ const String& scheme,
-        /* [in] */ Uri::Part* authority,
-        /* [in] */ Uri::PathPart* path,
-        /* [in] */ Uri::Part* query,
-        /* [in] */ Uri::Part* fragment);
+        /* [in] */ Handle32 authority,
+        /* [in] */ Handle32 path,
+        /* [in] */ Handle32 query,
+        /* [in] */ Handle32 fragment);
 
     static CARAPI ReadFrom(
         /* [in] */ IParcel* parcel,

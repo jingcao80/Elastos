@@ -67,9 +67,9 @@ static void BlockSigpipe()
 DroidRuntime::DroidRuntime(
     /* [in] */ char* argBlockStart,
     /* [in] */ const size_t argBlockLength)
-    : mExitWithoutCleanup(FALSE)
-    , mArgBlockStart(argBlockStart)
+    : mArgBlockStart(argBlockStart)
     , mArgBlockLength(argBlockLength)
+    , mExitWithoutCleanup(FALSE)
 {
     // move to AppRuntime　in app_main.cpp
     //SkGraphics::Init();
@@ -78,6 +78,8 @@ DroidRuntime::DroidRuntime(
 
     // Pre-allocate enough space to hold a fair number of options.
     //mOptions.setCapacity(20);
+
+    SetInstructionSet(kRuntimeISA);
 
     assert(sCurRuntime == NULL);        // one per process
     sCurRuntime = this;
@@ -158,7 +160,13 @@ ECode DroidRuntime::CallMain(
         return ec;
     }
 
-    argumentList->SetInputArgumentOfCarArray(0, args);
+    ec = argumentList->SetInputArgumentOfCarArray(0, *args);
+    if (FAILED(ec)) {
+        Logger::E(TAG, "Set Input Argument of Car array in \"%s/%s\" \"Main\" method failed!\n",
+            moduleName.string(), className.string());
+        return ec;
+    }
+
     ec = methodInfo->Invoke(object, argumentList);
     if (FAILED(ec)) {
         Logger::E(TAG, "Invoke \"%s/%s\" \"Main\" method failed!\n",
@@ -273,6 +281,80 @@ void DroidRuntime::Exit(
 AutoPtr<Elastos::Droid::DroidRuntime> DroidRuntime::GetRuntime()
 {
     return sCurRuntime;
+}
+
+String DroidRuntime::GetInstructionSetString()
+{
+    InstructionSet is = GetInstructionSet();
+    return GetInstructionSetString(is);
+}
+
+InstructionSet DroidRuntime::GetInstructionSetFromString(
+    /* [in] */ const String& instruction_set)
+{
+    if (instruction_set.Equals("arm")) {
+        return kArm;
+    }
+    else if (instruction_set.Equals("arm64")) {
+        return kArm64;
+    }
+    else if (instruction_set.Equals("x86")) {
+        return kX86;
+    }
+    else if (instruction_set.Equals("x86_64")) {
+        return kX86_64;
+    }
+    else if (instruction_set.Equals("mips")) {
+        return kMips;
+    }
+
+    return kNone;
+}
+
+String DroidRuntime::GetInstructionSetString(
+    /* [in] */ InstructionSet isa)
+{
+    switch (isa) {
+    case kArm:
+    case kThumb2:
+        return String("arm");
+    case kArm64:
+        return String("arm64");
+    case kX86:
+        return String("x86");
+    case kX86_64:
+        return String("x86_64");
+    case kMips:
+        return String("mips");
+    case kNone:
+        return String("none");
+    default:
+        ALOGE("Unknown ISA %d", isa);
+      return String(NULL);
+    }
+}
+
+Boolean DroidRuntime::Is64BitInstructionSet(
+    /* [in] */ InstructionSet isa)
+{
+    switch (isa) {
+    case kArm:
+    case kThumb2:
+    case kX86:
+    case kMips:
+      return FALSE;
+
+    case kArm64:
+    case kX86_64:
+      return TRUE;
+
+    case kNone:
+      ALOGE("ISA kNone does not have bit width.");
+      return FALSE;
+    default:
+      ALOGE("Unknown ISA %d", isa);
+      return FALSE;
+    }
 }
 
 } // namespace Droid

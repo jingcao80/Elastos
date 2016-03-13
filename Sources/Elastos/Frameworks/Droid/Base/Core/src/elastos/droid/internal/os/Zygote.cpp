@@ -46,7 +46,7 @@ namespace Droid {
 namespace Internal {
 namespace Os {
 
-AutoPtr<IZygoteHooks> InitZygoteHooks()
+static AutoPtr<IZygoteHooks> InitZygoteHooks()
 {
     AutoPtr<IZygoteHooks> hooks;
     CZygoteHooks::New((IZygoteHooks**)&hooks);
@@ -55,7 +55,7 @@ AutoPtr<IZygoteHooks> InitZygoteHooks()
 
 const AutoPtr<IZygoteHooks> Zygote::VM_HOOKS = InitZygoteHooks();
 static const String TAG("CZygote");
-static const Boolean DEBUG = FALSE;
+static const Boolean DEBUG = TRUE;
 
 Int32 Zygote::ForkAndSpecialize(
     /* [in] */ Int32 uid,
@@ -70,6 +70,8 @@ Int32 Zygote::ForkAndSpecialize(
     /* [in] */ const String& instructionSet,
     /* [in] */ const String& appDataDir)
 {
+    if (DEBUG) Logger::I(TAG, "Zygote::ForkAndSpecialize: %s", niceName.string());
+
     Int32 startTime = SystemClock::GetElapsedRealtime();
     VM_HOOKS->PreFork();
     CheckTime(startTime, String("Zygote.preFork"));
@@ -106,6 +108,8 @@ Int32 Zygote::ForkSystemServer(
     /* [in] */ Int64 permittedCapabilities,
     /* [in] */ Int64 effectiveCapabilities)
 {
+    if (DEBUG) Logger::I(TAG, "Zygote::ForkSystemServer");
+
     VM_HOOKS->PreFork();
     Int32 pid = NativeForkSystemServer(
             uid, gid, gids, debugFlags, rlimits, permittedCapabilities, effectiveCapabilities);
@@ -125,6 +129,7 @@ void Zygote::CallPostForkChildHooks(
 ECode Zygote::ExecShell(
     /* [in] */ const String& command)
 {
+    if (DEBUG) Logger::I(TAG, "Zygote::ExecShell: %s", command.string());
     AutoPtr<ArrayOf<String> > args = ArrayOf<String>::Alloc(3);
     (*args)[0] = "/system/bin/sh";
     (*args)[1] = "-c";

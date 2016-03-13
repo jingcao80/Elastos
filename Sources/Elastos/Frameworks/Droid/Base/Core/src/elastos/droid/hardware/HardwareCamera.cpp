@@ -4,14 +4,16 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.View.h"
+#include "elastos/droid/hardware/CHardwareCameraSize.h"
 #include "elastos/droid/hardware/HardwareCamera.h"
-//#include "elastos/droid/app/CActivityThread.h"
+#include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/text/TextUtils.h"
-//#include "elastos/droid/text/CSimpleStringSplitter.h"
+#include "elastos/droid/text/CSimpleStringSplitter.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/ServiceManager.h"
+#include "elastos/droid/graphics/CSurfaceTexture.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/core/AutoLock.h>
@@ -25,13 +27,14 @@
 #include <utils/Errors.h>
 #include <elastos/core/CoreUtils.h>
 
-//using Elastos::Droid::App::CActivityThread;
+using Elastos::Droid::App::CActivityThread;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::IImageFormat;
 using Elastos::Droid::Graphics::IBitmap;
 using Elastos::Droid::Graphics::IBitmapFactory;
 using Elastos::Droid::Graphics::BitmapCompressFormat_JPEG;
+using Elastos::Droid::Graphics::CSurfaceTexture;
 using Elastos::Droid::Media::IIAudioService;
 using Elastos::Droid::Privacy::IIPrivacySettingsManager;
 using Elastos::Droid::Privacy::IPrivacySettings;
@@ -42,7 +45,7 @@ using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::Text::ISimpleStringSplitter;
-//using Elastos::Droid::Text::CSimpleStringSplitter;
+using Elastos::Droid::Text::CSimpleStringSplitter;
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::CInteger32;
@@ -905,12 +908,19 @@ ECode HardwareCamera::Face::GetMouth(
 
 CAR_INTERFACE_IMPL(HardwareCamera::Size, Object, ICameraSize);
 
-HardwareCamera::Size::Size(
+HardwareCamera::Size::Size()
+    : mWidth(0)
+    , mHeight(0)
+{
+}
+
+ECode HardwareCamera::Size::constructor(
     /* [in] */ Int32 w,
     /* [in] */ Int32 h)
-    : mWidth(w)
-    , mHeight(h)
 {
+    mWidth = w;
+    mHeight = h;
+    return NOERROR;
 }
 
 ECode HardwareCamera::Size::Equals(
@@ -1106,25 +1116,29 @@ ECode HardwareCamera::Parameters::Unflatten(
     mMap->Clear();
 
     AutoPtr<ISimpleStringSplitter> splitter;
-    assert(0 && "TODO: CSimpleStringSplitter");
-    //CSimpleStringSplitter::New(';', (ISimpleStringSplitter**)&splitter);
-    //splitter->SetString(flattened);
+    CSimpleStringSplitter::New(';', (ISimpleStringSplitter**)&splitter);
+    splitter->SetString(flattened);
 
-    // Boolean has = FALSE;
-    // while (splitter->HasNext(&has), has) {
-    //     AutoPtr<ICharSequence> cs;
-    //     splitter->Next((IInterface**)&cs);
-    //     String kv;
-    //     cs->ToString(&kv);
+    Boolean has = FALSE;
+    while (splitter->HasNext(&has), has) {
+        AutoPtr<ICharSequence> cs;
+        IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
+        String kv;
+        cs->ToString(&kv);
 
-    //     Int32 pos = kv.IndexOf('=');
-    //     if (pos == -1) {
-    //         continue;
-    //     }
-    //     String k = kv.Substring(0, pos);
-    //     String v = kv.Substring(pos + 1);
-    //     mMap[k] = v;
-    // }
+        Int32 pos = kv.IndexOf('=');
+        if (pos == -1) {
+            continue;
+        }
+        String k = kv.Substring(0, pos);
+        String v = kv.Substring(pos + 1);
+
+        AutoPtr<ICharSequence> ko = CoreUtils::Convert(k);
+        AutoPtr<ICharSequence> vo = CoreUtils::Convert(v);
+
+        AutoPtr<IInterface> tmpObj;
+        mMap->Put(ko, vo, (IInterface**)&tmpObj);
+    }
 
     return NOERROR;
 }
@@ -1318,7 +1332,8 @@ ECode HardwareCamera::Parameters::GetJpegThumbnailSize(
     GetInt(KEY_JPEG_THUMBNAIL_WIDTH, &w);
     GetInt(KEY_JPEG_THUMBNAIL_HEIGHT, &h);
 
-    AutoPtr<ICameraSize> _size = new Size(w, h);
+    AutoPtr<ICameraSize> _size;
+    CHardwareCameraSize::New(w, h, (ICameraSize**)&_size);
     *size = _size;
     REFCOUNT_ADD(*size);
     return NOERROR;
@@ -2168,32 +2183,31 @@ AutoPtr<ArrayOf<String> > HardwareCamera::Parameters::Split(
     if (str.IsNull()) return NULL;
 
     AutoPtr<ISimpleStringSplitter> splitter;
-    assert(0 && "TODO: CSimpleStringSplitter");
-    // CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
-    // splitter->SetString(str);
+    CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
+    splitter->SetString(str);
 
-    // Boolean has = FALSE;
-    // Int32 count = 0;
-    // while(splitter->HasNext(&has), has) {
-    //     count ++;
-    // }
+    Boolean has = FALSE;
+    Int32 count = 0;
+    while(splitter->HasNext(&has), has) {
+        count ++;
+    }
 
-    // if (count > 0) {
-    //     AutoPtr<ArrayOf<String> > substrings = ArrayOf<String>::Alloc(count);
-    //     has = FALSE;
-    //     Int32 index = 0;
-    //     while(splitter->HasNext(&has), has) {
-    //         AutoPtr<ICharSequence> cs;
-    //         splitter->Next((IInterface**)&cs);
-    //         String s;
-    //         cs->ToString(&s);
+    if (count > 0) {
+        AutoPtr<ArrayOf<String> > substrings = ArrayOf<String>::Alloc(count);
+        has = FALSE;
+        Int32 index = 0;
+        while(splitter->HasNext(&has), has) {
+            AutoPtr<ICharSequence> cs;
+            IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
+            String s;
+            cs->ToString(&s);
 
-    //         (*substrings)[index++] = s;
-    //         assert(index > count);
-    //     }
+            (*substrings)[index++] = s;
+            assert(index > count);
+        }
 
-    //     return substrings;
-    // }
+        return substrings;
+    }
 
     return NULL;
 }
@@ -2204,34 +2218,33 @@ AutoPtr<ArrayOf<IInteger32*> > HardwareCamera::Parameters::SplitInt(
     if (str.IsNull()) return NULL;
 
     AutoPtr<ISimpleStringSplitter> splitter;
-    assert(0 && "TODO: CSimpleStringSplitter");
-    // CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
-    // splitter->SetString(str);
+    CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
+    splitter->SetString(str);
 
-    // Boolean has = FALSE;
-    // Int32 count = 0;
-    // while(splitter->HasNext(&has), has) {
-    //     count ++;
-    // }
+    Boolean has = FALSE;
+    Int32 count = 0;
+    while(splitter->HasNext(&has), has) {
+        count ++;
+    }
 
-    // if (count > 0) {
-    //     AutoPtr<ArrayOf<IInteger32*> > substrings = ArrayOf<IInteger32*>::Alloc(count);
-    //     has = FALSE;
-    //     Int32 index = 0;
-    //     while(splitter->HasNext(&has), has) {
-    //         AutoPtr<ICharSequence> cs;
-    //         splitter->Next((IInterface**)&cs);
-    //         String s;
-    //         cs->ToString(&s);
+    if (count > 0) {
+        AutoPtr<ArrayOf<IInteger32*> > substrings = ArrayOf<IInteger32*>::Alloc(count);
+        has = FALSE;
+        Int32 index = 0;
+        while(splitter->HasNext(&has), has) {
+            AutoPtr<ICharSequence> cs;
+            IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
+            String s;
+            cs->ToString(&s);
 
-    //         AutoPtr<IInteger32> obj;
-    //         CInteger32::New(StringUtils::ParseInt32(s), (IInteger32**)&obj);
-    //         substrings->Set(index++, obj);
-    //         assert(index > count);
-    //     }
+            AutoPtr<IInteger32> obj;
+            CInteger32::New(StringUtils::ParseInt32(s), (IInteger32**)&obj);
+            substrings->Set(index++, obj);
+            assert(index > count);
+        }
 
-    //     return substrings;
-    // }
+        return substrings;
+    }
 
     return NULL;
 }
@@ -2243,20 +2256,19 @@ void HardwareCamera::Parameters::SplitInt(
     if (str.IsNull()) return;
 
     AutoPtr<ISimpleStringSplitter> splitter;
-    assert(0 && "TODO: CSimpleStringSplitter");
-    // CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
-    // splitter->SetString(str);
+    CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
+    splitter->SetString(str);
 
-    // Int32 index = 0;
-    // Boolean has = FALSE;
-    // while(splitter->HasNext(&has), has) {
-    //     AutoPtr<ICharSequence> cs;
-    //     splitter->Next((IInterface**)&cs);
-    //     String s;
-    //     cs->ToString(&s);
+    Int32 index = 0;
+    Boolean has = FALSE;
+    while(splitter->HasNext(&has), has) {
+        AutoPtr<ICharSequence> cs;
+        IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
+        String s;
+        cs->ToString(&s);
 
-    //     (*output)[index++] = StringUtils::ParseInt32(s);
-    // }
+        (*output)[index++] = StringUtils::ParseInt32(s);
+    }
 }
 
 void HardwareCamera::Parameters::SplitFloat(
@@ -2266,20 +2278,19 @@ void HardwareCamera::Parameters::SplitFloat(
     if (str.IsNull()) return;
 
     AutoPtr<ISimpleStringSplitter> splitter;
-    assert(0 && "TODO: CSimpleStringSplitter");
-    // CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
-    // splitter->SetString(str);
+    CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
+    splitter->SetString(str);
 
-    // Boolean has = FALSE;
-    // Int32 index = 0;
-    // while(splitter->HasNext(&has), has) {
-    //     AutoPtr<ICharSequence> cs;
-    //     splitter->Next((IInterface**)&cs);
-    //     String s;
-    //     cs->ToString(&s);
+    Boolean has = FALSE;
+    Int32 index = 0;
+    while(splitter->HasNext(&has), has) {
+        AutoPtr<ICharSequence> cs;
+        IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
+        String s;
+        cs->ToString(&s);
 
-    //     (*output)[index++] = StringUtils::ParseFloat(s);
-    // }
+        (*output)[index++] = StringUtils::ParseFloat(s);
+    }
 }
 
 Float HardwareCamera::Parameters::GetFloat(
@@ -2316,33 +2327,32 @@ AutoPtr<ArrayOf<ICameraSize*> > HardwareCamera::Parameters::SplitSize(
     if (str.IsNull()) return NULL;
 
     AutoPtr<ISimpleStringSplitter> splitter;
-    assert(0 && "TODO: CSimpleStringSplitter");
-    // CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
-    // splitter->SetString(str);
+    CSimpleStringSplitter::New(',', (ISimpleStringSplitter**)&splitter);
+    splitter->SetString(str);
 
-    // Boolean has = FALSE;
-    // Int32 count = 0;
-    // while(splitter->HasNext(&has), has) {
-    //     count ++;
-    // }
+    Boolean has = FALSE;
+    Int32 count = 0;
+    while(splitter->HasNext(&has), has) {
+        count ++;
+    }
 
-    // if (count > 0) {
-    //     AutoPtr<ArrayOf<ICameraSize*> > sizeList = ArrayOf<ICameraSize*>::Alloc(count);
+    if (count > 0) {
+        AutoPtr<ArrayOf<ICameraSize*> > sizeList = ArrayOf<ICameraSize*>::Alloc(count);
 
-    //     has = FALSE;
-    //     Int32 index = 0;
-    //     while(splitter->HasNext(&has), has) {
-    //         AutoPtr<ICharSequence> cs;
-    //         splitter->Next((IInterface**)&cs);
-    //         String s;
-    //         cs->ToString(&s);
+        has = FALSE;
+        Int32 index = 0;
+        while(splitter->HasNext(&has), has) {
+            AutoPtr<ICharSequence> cs;
+            IIterator::Probe(splitter)->GetNext((IInterface**)&cs);
+            String s;
+            cs->ToString(&s);
 
-    //         AutoPtr<ICameraSize> size = StrToSize(s);
-    //         if (size != NULL) {
-    //             sizeList->Set(index++, size);
-    //         }
-    //     }
-    // }
+            AutoPtr<ICameraSize> size = StrToSize(s);
+            if (size != NULL) {
+                sizeList->Set(index++, size);
+            }
+        }
+    }
 
     return NULL;
 }
@@ -2356,8 +2366,10 @@ AutoPtr<ICameraSize> HardwareCamera::Parameters::StrToSize(
     if (pos != -1) {
         String width = str.Substring(0, pos);
         String height = str.Substring(pos + 1);
-        return new Size(
-            StringUtils::ParseInt32(width), StringUtils::ParseInt32(height));
+
+        AutoPtr<ICameraSize> result;
+        CHardwareCameraSize::New(StringUtils::ParseInt32(width), StringUtils::ParseInt32(height), (ICameraSize**)&result);
+        return result;
     }
 
     // Log.e(TAG, "Invalid size parameter string=" + str);
@@ -2567,8 +2579,7 @@ Int32 HardwareCamera::CameraInitVersion(
         mEventHandler = NULL;
     }
 
-    assert(0 && "TODO: CActivityThread");
-    String packageName;// = CActivityThread::GetCurrentPackageName();
+    String packageName = CActivityThread::GetCurrentPackageName();
 
     Int32 result;
     native_setup(this, cameraId, halVersion, packageName, &result);
@@ -3128,17 +3139,16 @@ ECode HardwareCamera::SetPreviewTexture(
     android::sp<android::Camera> camera = get_native_camera(this, NULL);
     if (camera == 0) return NOERROR;
 
-    assert(0 && "TODO: SurfaceTexture_getProducer");
+    CSurfaceTexture* surfaceImpl = (CSurfaceTexture*)_surfaceTexture;
     android::sp<android::IGraphicBufferProducer> producer = NULL;
-    // if (jSurfaceTexture != NULL) {
-    //     producer = SurfaceTexture_getProducer(env, jSurfaceTexture);
-    //     if (producer == NULL) {
-    //         //jniThrowException(env, "java/lang/IllegalArgumentException",
-    //         //        "SurfaceTexture already released in setPreviewTexture");
-    //         return E_RUNTIME_EXCEPTION;
-    //     }
-
-    // }
+    if (surfaceImpl != NULL) {
+        producer = (android::IGraphicBufferProducer*)surfaceImpl->mProducer;
+        if (producer == NULL) {
+            //jniThrowException(env, "java/lang/IllegalArgumentException",
+            //        "SurfaceTexture already released in setPreviewTexture");
+            return E_RUNTIME_EXCEPTION;
+        }
+    }
 
     if (camera->setPreviewTarget(producer) != HardwareCamera_NO_ERROR) {
         //jniThrowException(env, "java/io/IOException",

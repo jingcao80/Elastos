@@ -251,7 +251,7 @@ ECode CAudioService::StreamVolumeCommand::ToString(
     sb.Append(mFlags);
     sb.Append(",device=");
     sb.Append(mDevice);
-    sb.Append('}');
+    sb.AppendChar('}');
     return sb.ToString(result);
 }
 

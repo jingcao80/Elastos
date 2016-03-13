@@ -6,11 +6,11 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/graphics/drawable/ClipDrawable.h"
 #include "elastos/droid/graphics/drawable/CClipDrawable.h"
-// #include "elastos/droid/view/CGravity.h"
+#include "elastos/droid/view/CGravity.h"
 #include "elastos/droid/R.h"
 
 using Elastos::Droid::View::IGravity;
-// using Elastos::Droid::View::CGravity;
+using Elastos::Droid::View::CGravity;
 using Elastos::Droid::R;
 
 namespace Elastos {
@@ -60,7 +60,7 @@ ECode ClipDrawable::ClipState::NewDrawable(
 {
     VALIDATE_NOT_NULL(drawable);
 
-    return CClipDrawable::New(this, NULL, (IClipDrawable**)drawable);
+    return CClipDrawable::New(this, NULL, drawable);
 }
 
 ECode ClipDrawable::ClipState::NewDrawable(
@@ -69,7 +69,7 @@ ECode ClipDrawable::ClipState::NewDrawable(
 {
     VALIDATE_NOT_NULL(drawable);
 
-    return CClipDrawable::New(this, res, (IClipDrawable**)drawable);
+    return CClipDrawable::New(this, res, drawable);
 }
 
 ECode ClipDrawable::ClipState::GetChangingConfigurations(
@@ -328,8 +328,7 @@ ECode ClipDrawable::Draw(
     Int32 layoutDirection = 0;
     GetLayoutDirection(&layoutDirection);
     AutoPtr<IGravity> gravity;
-    assert(0 && "TODO");
-    // CGravity::AcquireSingleton((IGravity**)&gravity);
+    CGravity::AcquireSingleton((IGravity**)&gravity);
     gravity->Apply(mClipState->mGravity, w, h, bounds, r, layoutDirection);
 
     if (w > 0 && h > 0) {

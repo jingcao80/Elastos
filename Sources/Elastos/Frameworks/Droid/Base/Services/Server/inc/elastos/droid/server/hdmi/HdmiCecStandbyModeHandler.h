@@ -55,6 +55,7 @@ private:
         CAR_INTERFACE_DECL()
 
         Aborter(
+            /* [in] */ HdmiCecStandbyModeHandler* host,
             /* [in] */ Int32 reason);
 
         // @Override
@@ -63,6 +64,7 @@ private:
             /* [out] */ Boolean* result);
 
     private:
+        HdmiCecStandbyModeHandler* mHost;
         const Int32 mReason;
     };
 
@@ -73,10 +75,16 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        AutoOnHandler(
+            /* [in] */ HdmiCecStandbyModeHandler* host);
+
         // @Override
         CARAPI Handle(
             /* [in] */ IHdmiCecMessage* message,
             /* [out] */ Boolean* result);
+
+    private:
+        HdmiCecStandbyModeHandler* mHost;
     };
 
     class UserControlProcessedHandler
@@ -86,10 +94,16 @@ private:
     public:
         CAR_INTERFACE_DECL()
 
+        UserControlProcessedHandler(
+            /* [in] */ HdmiCecStandbyModeHandler* host);
+
         // @Override
         CARAPI Handle(
             /* [in] */ IHdmiCecMessage* message,
             /* [out] */ Boolean* result);
+
+    private:
+        HdmiCecStandbyModeHandler* mHost;
     };
 
 public:
@@ -97,7 +111,7 @@ public:
 
     CARAPI constructor(
         /* [in] */ IHdmiControlService* service,
-        /* [in] */ HdmiCecLocalDeviceTv* tv);
+        /* [in] */ IHdmiCecLocalDeviceTv* tv);
 
     /**
      * Handles the CEC message in the standby mode.
@@ -118,7 +132,7 @@ private:
 private:
     AutoPtr<IHdmiControlService> mService;
 
-    AutoPtr<HdmiCecLocalDeviceTv> mTv;
+    AutoPtr<IHdmiCecLocalDeviceTv> mTv;
 
     AutoPtr<ISparseArray> mCecMessageHandlers;
 

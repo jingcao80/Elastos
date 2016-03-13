@@ -76,14 +76,16 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
-        ReceiverDispatcher(
+        ReceiverDispatcher();
+
+        virtual ~ReceiverDispatcher();
+
+        CARAPI constructor(
             /* [in] */ IBroadcastReceiver* receiver,
             /* [in] */ IContext* context,
             /* [in] */ IHandler* handler,
             /* [in] */ IInstrumentation* instrumentation,
             /* [in] */ Boolean registered);
-
-        virtual ~ReceiverDispatcher();
 
         CARAPI Validate(
            /* [in] */ IContext* context,
@@ -106,7 +108,7 @@ public:
             /* [in] */ Int32 sendingUser);
 
     public:
-        IIntentReceiver* mIIntentReceiver;
+        AutoPtr<IIntentReceiver> mIIntentReceiver;
         AutoPtr<IBroadcastReceiver> mReceiver;
         AutoPtr<IContext> mContext;
         AutoPtr<IHandler> mActivityThread;
@@ -334,6 +336,9 @@ public:
         /* [in] */ IContext* context,
         /* [in] */ IServiceConnection* c,
         /* [out] */ IIServiceConnection** result);
+
+    static CARAPI GetSystemClassLoader(
+        /* [out] */ IClassLoader** loader);
 
 private:
     /**

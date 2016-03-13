@@ -1,21 +1,51 @@
 
 module
 {
-
     namespace Elastos {
     namespace Droid {
     namespace Telecomm {
     namespace Telecom {
 
+    /**
+     *  Encapsulates all audio states during a call.
+     *  @hide
+     *
+     * @Involve
+     * interface IParcelable
+     */
+    interface IAudioState {
+
+        /** Direct the audio stream through the device's earpiece. */
+        const Int32 ROUTE_EARPIECE      = 0x00000001;
+
+        /** Direct the audio stream through Bluetooth. */
+        const Int32 ROUTE_BLUETOOTH     = 0x00000002;
+
+        /** Direct the audio stream through a wired headset. */
+        const Int32 ROUTE_WIRED_HEADSET = 0x00000004;
+
+        /** Direct the audio stream through the device's speakerphone. */
+        const Int32 ROUTE_SPEAKER       = 0x00000008;
+
         /**
-         *  Encapsulates all audio states during a call.
-         *  @hide
-         *
-         * @Involve
-         * interface IParcelable
+         * Direct the audio stream through the device's earpiece or wired headset if one is
+         * connected.
          */
-        interface IAudioState {
-        }
+        const Int32 ROUTE_WIRED_OR_EARPIECE = ROUTE_EARPIECE | ROUTE_WIRED_HEADSET;
+
+        /** Bit mask of all possible audio routes.
+         *
+         * @hide
+         */
+        const Int32 ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
+                ROUTE_SPEAKER;
+    }
+
+    interface IAudioStateHelper {
+        AudioRouteToString(
+            [in] Int32 route,
+            [out] String* result);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

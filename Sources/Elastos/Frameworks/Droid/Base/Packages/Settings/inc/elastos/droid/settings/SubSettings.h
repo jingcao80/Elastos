@@ -1,24 +1,33 @@
 
+#ifndef __ELASTOS_DROID_SETTINGS_SUBSETTINGS_H__
+#define __ELASTOS_DROID_SETTINGS_SUBSETTINGS_H__
 
-package com.android.settings;
+#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/settings/SettingsActivity.h"
 
-using Elastos::Droid::Utility::ILog;
+namespace Elastos {
+namespace Droid {
+namespace Settings {
 
 /**
  * Stub class for showing sub-settings; we can't use the main Settings class
  * since for our app it is a special singleTask class.
  */
-public class SubSettings extends SettingsActivity {
+class SubSettings
+    : public SettingsActivity
+{
+public:
+    //@Override
+    CARAPI OnNavigateUp(
+        /* [out] */ Boolean* res);
 
     //@Override
-    public Boolean OnNavigateUp() {
-        Finish();
-        return TRUE;
-    }
+    CARAPI_(Boolean) IsValidFragment(
+        /* [in] */ const String& fragmentName);
+};
 
-    //@Override
-    protected Boolean IsValidFragment(String fragmentName) {
-        Logger::D("SubSettings", "Launching fragment " + fragmentName);
-        return TRUE;
-    }
-}
+} // namespace Settings
+} // namespace Droid
+} // namespace Elastos
+
+#endif //__ELASTOS_DROID_SETTINGS_SUBSETTINGS_H__

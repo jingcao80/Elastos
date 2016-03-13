@@ -1,6 +1,14 @@
 
+#include "elastos/droid/server/hdmi/Constants.h"
 #include "elastos/droid/server/hdmi/DevicePowerStatusAction.h"
-#include <Elastos.Droid.Hardware.h>
+#include "elastos/droid/server/hdmi/HdmiCecMessageBuilder.h"
+#include "elastos/droid/server/hdmi/HdmiConfig.h"
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.CoreLibrary.h>
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -10,107 +18,117 @@ namespace Hdmi {
 const String DevicePowerStatusAction::TAG("DevicePowerStatusAction");
 const Int32 DevicePowerStatusAction::STATE_WAITING_FOR_REPORT_POWER_STATUS = 1;
 
+DevicePowerStatusAction::DevicePowerStatusAction()
+    : mTargetAddress(0)
+{}
+
 ECode DevicePowerStatusAction::Create(
     /* [in] */ IHdmiCecLocalDevice* source,
     /* [in] */ Int32 targetAddress,
     /* [in] */ IIHdmiControlCallback* callback,
     /* [out] */ DevicePowerStatusAction** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (source == NULL || callback == NULL) {
-            Slogger::E(TAG, "Wrong arguments");
-            return NULL;
-        }
-        return new DevicePowerStatusAction(source, targetAddress, callback);
+    VALIDATE_NOT_NULL(result)
+    *result = NULL;
 
-#endif
+    if (source == NULL || callback == NULL) {
+        Slogger::E(TAG, "Wrong arguments");
+        *result = NULL;
+        return NOERROR;
+    }
+    *result = new DevicePowerStatusAction();
+    (*result)->constructor(source, targetAddress, callback);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
-DevicePowerStatusAction::DevicePowerStatusAction(
+ECode DevicePowerStatusAction::constructor(
     /* [in] */ IHdmiCecLocalDevice* localDevice,
     /* [in] */ Int32 targetAddress,
     /* [in] */ IIHdmiControlCallback* callback)
-    : mTargetAddress(targetAddress)
-    , mCallback(callback)
 {
-#if 0 // TODO: Translate codes below
+    mTargetAddress = targetAddress;
+    mCallback = callback;
     HdmiCecFeatureAction::constructor(localDevice);
-#endif
+    return NOERROR;
 }
 
 ECode DevicePowerStatusAction::Start(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        queryDevicePowerStatus();
-        mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
-        addTimer(mState, HdmiConfig.TIMEOUT_MS);
-        return true;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    QueryDevicePowerStatus();
+    mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
+    AddTimer(mState, HdmiConfig::TIMEOUT_MS);
+    *result = TRUE;
+    return NOERROR;
 }
 
 ECode DevicePowerStatusAction::QueryDevicePowerStatus()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(),
-                mTargetAddress));
-
-#endif
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    AutoPtr<IHdmiCecMessage> cmd;
+    HdmiCecMessageBuilder::BuildGiveDevicePowerStatus(srcAddr, mTargetAddress, (IHdmiCecMessage**)&cmd);
+    SendCommand(cmd);
+    return NOERROR;
 }
 
 ECode DevicePowerStatusAction::ProcessCommand(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState != STATE_WAITING_FOR_REPORT_POWER_STATUS) {
-            return FALSE;
-        }
-        if (cmd.getOpcode() == Constants::MESSAGE_REPORT_POWER_STATUS) {
-            int status = cmd.getParams()[0];
-            invokeCallback(status);
-            finish();
-            return true;
-        }
-        return FALSE;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    if (mState != STATE_WAITING_FOR_REPORT_POWER_STATUS) {
+        *result = FALSE;
+        return NOERROR;
+    }
+    Int32 opcode;
+    cmd->GetOpcode(&opcode);
+    if (opcode == Constants::MESSAGE_REPORT_POWER_STATUS) {
+        AutoPtr<ArrayOf<Byte> > array;
+        cmd->GetParams((ArrayOf<Byte>**)&array);
+        Int32 status = (*array)[0];
+        InvokeCallback(status);
+        Finish();
+        *result = TRUE;
+        return NOERROR;
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode DevicePowerStatusAction::HandleTimerEvent(
     /* [in] */ Int32 state)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mState != state) {
-            return;
-        }
-        if (state == STATE_WAITING_FOR_REPORT_POWER_STATUS) {
-            // Got no response from TV. Report status 'unknown'.
-            invokeCallback(HdmiControlManager.POWER_STATUS_UNKNOWN);
-            finish();
-        }
-
-#endif
+    if (mState != state) {
+        return NOERROR;
+    }
+    if (state == STATE_WAITING_FOR_REPORT_POWER_STATUS) {
+        // Got no response from TV. Report status 'unknown'.
+        InvokeCallback(IHdmiControlManager::POWER_STATUS_UNKNOWN);
+        Finish();
+    }
+    return NOERROR;
 }
 
 ECode DevicePowerStatusAction::InvokeCallback(
     /* [in] */ Int32 result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        try {
-            mCallback.onComplete(result);
-        } catch (RemoteException e) {
-            Slogger::E(TAG, "Callback failed:" + e);
+    // try {
+    ECode ec = mCallback->OnComplete(result);
+    // } catch (RemoteException e) {
+    if (FAILED(ec)) {
+        if ((ECode)E_REMOTE_EXCEPTION == ec) {
+            Slogger::E(TAG, "Callback failed:%d", ec);
         }
-
-#endif
+        else
+            return ec;
+    }
+    // }
+    return NOERROR;
 }
 
 } // namespace Hdmi

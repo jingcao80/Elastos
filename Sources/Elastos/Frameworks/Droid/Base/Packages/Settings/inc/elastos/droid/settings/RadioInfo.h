@@ -536,7 +536,7 @@ public class RadioInfo extends Activity {
         if (mCellInfoValue != NULL) {
             Int32 index = 0;
             for (CellInfo ci : mCellInfoValue) {
-                value->Append('[');
+                value->AppendChar32('[');
                 value->Append(index);
                 value->Append("]=");
                 value->Append(ci->ToString());

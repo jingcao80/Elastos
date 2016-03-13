@@ -219,6 +219,7 @@ module
     interface Elastos.Droid.AccessibilityService.IIAccessibilityServiceClient;
     interface Elastos.Droid.Utility.IAttributeSet;
     interface Elastos.Droid.Utility.IArrayMap;
+    interface Elastos.Droid.Internal.App.IIAppOpsService;
     interface Elastos.Droid.Internal.App.IIAppOpsCallback;
     interface Elastos.Droid.Internal.App.IIVoiceInteractor;
     interface Elastos.Droid.Internal.App.IIVoiceInteractorCallback;
@@ -1072,6 +1073,13 @@ module
         interface IParcelable;
     }
 
+    class CAppOpsManager {
+        constructor(
+            [in] IContext* ctx,
+            [in] IIAppOpsService* service);
+
+        interface IAppOpsManager;
+    }
     singleton class CAppOpsManagerHelper {
         interface IAppOpsManagerHelper;
     }

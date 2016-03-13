@@ -4,11 +4,9 @@
 
 #include "Elastos.Droid.Core.h"
 #include <Elastos.Droid.Os.h>
-#include <elastos/core/Singleton.h>
 #include <elastos/utility/TimeZoneGetter.h>
 
 using Elastos::Droid::Os::IBinder;
-using Elastos::Core::Singleton;
 using Elastos::Core::IRunnable;
 using Elastos::Utility::TimeZoneGetter;
 
@@ -18,7 +16,6 @@ namespace Internal {
 namespace Os {
 
 class RuntimeInit
-    : public Singleton
 {
 private:
     class MyTimeZoneGetter
@@ -47,14 +44,14 @@ public:
          * @throws IllegalArgumentException
          */
         Arguments(
-            /* [in] */ const ArrayOf<String>& args);
+            /* [in] */ ArrayOf<String>* args);
 
     private:
         /**
          * Parses the commandline arguments intended for the Runtime.
          */
         CARAPI ParseArgs(
-            /* [in] */ const ArrayOf<String>& args);
+            /* [in] */ ArrayOf<String>* args);
 
     public:
         /** first non-option argument */
@@ -109,7 +106,19 @@ public:
      */
     static CARAPI_(void) RedirectLogStreams();
 
+    /**
+     * Set the object identifying this application/process, for reporting VM
+     * errors.
+     */
+    static CARAPI SetApplicationObject(
+        /* [in] */ IBinder* app);
+
+    static CARAPI GetApplicationObject(
+        /* [out] */ IBinder** app);
+
 private:
+    RuntimeInit();
+    RuntimeInit(const RuntimeInit&);
 
     static CARAPI_(void) nativeZygoteInit();
 

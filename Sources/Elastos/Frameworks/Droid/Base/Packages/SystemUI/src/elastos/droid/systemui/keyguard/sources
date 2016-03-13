@@ -1,0 +1,11 @@
+
+TARGET_NAME= keyguard
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = keyguard.cpp
+SOURCES += KeyguardViewMediator.cpp
+SOURCES += KeyguardService.cpp

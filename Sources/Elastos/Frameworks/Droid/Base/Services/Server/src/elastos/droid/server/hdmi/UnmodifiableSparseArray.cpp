@@ -22,9 +22,11 @@ ECode UnmodifiableSparseArray::constructor(
 ECode UnmodifiableSparseArray::GetSize(
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return mArray->Size();
+        return mArray->GetSize(result);
 #endif
 }
 
@@ -32,9 +34,13 @@ ECode UnmodifiableSparseArray::Get(
     /* [in] */ Int32 key,
     /* [out] */ IInterface** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        return mArray->Get(key);
+        AutoPtr<IInterface> obj;
+        mArray->Get(key, (IInterface**)&obj);
+        return I::Probe(obj);
 #endif
 }
 
@@ -43,6 +49,8 @@ ECode UnmodifiableSparseArray::Get(
     /* [in] */ IInterface* valueIfKeyNotFound,
     /* [out] */ IInterface** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mArray->Get(key, valueIfKeyNotFound);
@@ -53,6 +61,8 @@ ECode UnmodifiableSparseArray::KeyAt(
     /* [in] */ Int32 index,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mArray->KeyAt(index);
@@ -63,6 +73,8 @@ ECode UnmodifiableSparseArray::ValueAt(
     /* [in] */ Int32 index,
     /* [out] */ IInterface** result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mArray->ValueAt(index);
@@ -73,6 +85,8 @@ ECode UnmodifiableSparseArray::IndexOfValue(
     /* [in] */ IInterface* value,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mArray->IndexOfValue(value);
@@ -82,6 +96,8 @@ ECode UnmodifiableSparseArray::IndexOfValue(
 ECode UnmodifiableSparseArray::ToString(
     /* [out] */ String* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         return mArray->ToString();

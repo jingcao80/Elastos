@@ -1279,7 +1279,7 @@ void TaskRecord::Dump(
         sb.Append(prefix);
         sb.Append("intent={");
         mIntent->ToShortString(&sb, FALSE, TRUE, FALSE, TRUE);
-        sb.Append('}');
+        sb.Append("}");
         pw->Println(sb.ToString());
     }
     if (mAffinityIntent != NULL) {
@@ -1287,7 +1287,7 @@ void TaskRecord::Dump(
         sb.Append(prefix);
         sb.Append("mAffinityIntent={");
         mAffinityIntent->ToShortString(&sb, FALSE, TRUE, FALSE, TRUE);
-        sb.Append('}');
+        sb.Append("}");
         pw->Println(sb.ToString());
     }
     if (mOrigActivity != NULL) {
@@ -1404,7 +1404,7 @@ String TaskRecord::ToString()
         sb.Append(mUserId);
         sb.Append(" sz=");
         sb.Append((Int32)mActivities->GetSize());
-        sb.Append('}');
+        sb.AppendChar('}');
         return sb.ToString();
     }
     sb.Append("TaskRecord{");

@@ -774,7 +774,7 @@ ECode TvInputHal::DeviceAvailableFromNative(
     /* [in] */ ITvInputHardwareInfo* info)
 {
     if (DEBUG) {
-        Slogger::D(TAG, "deviceAvailableFromNative: info = %s", Object::ToString(info).string());
+        Slogger::D(TAG, "deviceAvailableFromNative: info = %s", TO_CSTR(info));
     }
     AutoPtr<IMessage> msg;
     mHandler->ObtainMessage(EVENT_DEVICE_AVAILABLE, info, (IMessage**)&msg);
@@ -830,7 +830,7 @@ ECode TvInputHal::HandleMessage(
             synchronized(mLock) {
                 RetrieveStreamConfigsLocked(Ptr(info)->Func(info->GetDeviceId));
                 if (DEBUG) {
-                    Slogger::D(TAG, "EVENT_DEVICE_AVAILABLE: info = %s", Object::ToString(info).string());
+                    Slogger::D(TAG, "EVENT_DEVICE_AVAILABLE: info = %s", TO_CSTR(info));
                 }
                 AutoPtr<IInterface> obj;
                 mStreamConfigs->Get(Ptr(info)->Func(info->GetDeviceId), (IInterface**)&obj);
@@ -885,7 +885,7 @@ ECode TvInputHal::HandleMessage(
             break;
         }
         default:
-            Slogger::E(TAG, "Unknown event: %s", Object::ToString(msg).string());
+            Slogger::E(TAG, "Unknown event: %s", TO_CSTR(msg));
             *result = FALSE;
             return NOERROR;
     }

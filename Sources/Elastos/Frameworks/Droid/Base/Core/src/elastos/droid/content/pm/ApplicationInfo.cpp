@@ -164,16 +164,11 @@ ECode ApplicationInfo::ReadFromParcel(
     source->ReadString(&mPermission);
     source->ReadString(&mProcessName);
     source->ReadString(&mClassName);
-    source->ReadInt32(&mDescriptionRes);
     source->ReadInt32(&mTheme);
-    source->ReadString(&mManageSpaceActivityName);
-    source->ReadString(&mBackupAgentName);
-    source->ReadInt32(&mUiOptions);
     source->ReadInt32(&mFlags);
     source->ReadInt32(&mRequiresSmallestWidthDp);
     source->ReadInt32(&mCompatibleWidthLimitDp);
     source->ReadInt32(&mLargestWidthLimitDp);
-
     source->ReadString(&mScanSourceDir);
     source->ReadString(&mScanPublicSourceDir);
     source->ReadString(&mSourceDir);
@@ -183,9 +178,7 @@ ECode ApplicationInfo::ReadFromParcel(
     source->ReadString(&mNativeLibraryDir);
     source->ReadString(&mSecondaryNativeLibraryDir);
     source->ReadString(&mNativeLibraryRootDir);
-    Int32 ival;
-    source->ReadInt32(&ival);
-    mNativeLibraryRootRequiresIsa = ival != 0;
+    source->ReadBoolean(&mNativeLibraryRootRequiresIsa);
     source->ReadString(&mPrimaryCpuAbi);
     source->ReadString(&mSecondaryCpuAbi);
     source->ReadArrayOfString((ArrayOf<String>**)&mResourceDirs);
@@ -195,8 +188,7 @@ ECode ApplicationInfo::ReadFromParcel(
     source->ReadInt32(&mUid);
     source->ReadInt32(&mTargetSdkVersion);
     source->ReadInt32(&mVersionCode);
-    source->ReadInt32(&ival);
-    mEnabled = ival != 0;
+    source->ReadBoolean(&mEnabled);
     source->ReadInt32(&mEnabledSetting);
     source->ReadInt32(&mInstallLocation);
     source->ReadString(&mManageSpaceActivityName);
@@ -218,11 +210,7 @@ ECode ApplicationInfo::WriteToParcel(
     dest->WriteString(mPermission);
     dest->WriteString(mProcessName);
     dest->WriteString(mClassName);
-    dest->WriteInt32(mDescriptionRes);
     dest->WriteInt32(mTheme);
-    dest->WriteString(mManageSpaceActivityName);
-    dest->WriteString(mBackupAgentName);
-    dest->WriteInt32(mUiOptions);
     dest->WriteInt32(mFlags);
     dest->WriteInt32(mRequiresSmallestWidthDp);
     dest->WriteInt32(mCompatibleWidthLimitDp);
@@ -236,7 +224,7 @@ ECode ApplicationInfo::WriteToParcel(
     dest->WriteString(mNativeLibraryDir);
     dest->WriteString(mSecondaryNativeLibraryDir);
     dest->WriteString(mNativeLibraryRootDir);
-    dest->WriteInt32(mNativeLibraryRootRequiresIsa ? 1 : 0);
+    dest->WriteBoolean(mNativeLibraryRootRequiresIsa);
     dest->WriteString(mPrimaryCpuAbi);
     dest->WriteString(mSecondaryCpuAbi);
     dest->WriteArrayOfString(mResourceDirs);
@@ -246,7 +234,7 @@ ECode ApplicationInfo::WriteToParcel(
     dest->WriteInt32(mUid);
     dest->WriteInt32(mTargetSdkVersion);
     dest->WriteInt32(mVersionCode);
-    dest->WriteInt32(mEnabled ? 1 : 0);
+    dest->WriteBoolean(mEnabled);
     dest->WriteInt32(mEnabledSetting);
     dest->WriteInt32(mInstallLocation);
     dest->WriteString(mManageSpaceActivityName);

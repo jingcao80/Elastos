@@ -4,10 +4,10 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/webkit/CookieManager.h"
-#include "elastos/droid/webkit/native/android_webview/AwCookieManager.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/AwCookieManager.h"
 
 using Elastos::Droid::Net::IWebAddress;
-using Elastos::Droid::Webkit::AndroidWebview::AwCookieManager;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::AwCookieManager;
 using Elastos::Droid::Webkit::CookieManager;
 using Elastos::Droid::Webkit::IValueCallback;
 using Elastos::Droid::Webkit::IWebView;

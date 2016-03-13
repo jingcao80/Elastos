@@ -337,7 +337,7 @@ String Duration::ToString(
         buf = new StringBuilder(3 - insertionPoint + intString.GetLength());
         buf->Append("0.");
         for (int i = 0; i < -insertionPoint; i++) {
-            buf->Append('0');
+            buf->AppendChar('0');
         }
         buf->Append(intString);
     }

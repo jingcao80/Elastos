@@ -2,16 +2,15 @@
 #ifndef __ELASTOS_DROID_GRAPHICS_DRAWABLE_INSETDRAWABLE_H__
 #define __ELASTOS_DROID_GRAPHICS_DRAWABLE_INSETDRAWABLE_H__
 
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/graphics/drawable/Drawable.h"
-#include "elastos/droid/graphics/CRect.h"
+#include <elastos/droid/ext/frameworkext.h>
+#include <elastos/droid/graphics/drawable/Drawable.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Graphics {
 namespace Drawable {
 
-class InsetDrawable
+class ECO_PUBLIC InsetDrawable
     : public Drawable
     , public IInsetDrawable
     , public IDrawableCallback
@@ -183,8 +182,7 @@ public:
         /* [out] */ IDrawableConstantState** state);
 
     //@Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
     virtual CARAPI GetDrawable(
         /* [out] */ IDrawable** drawable);
@@ -232,7 +230,7 @@ private:
 
 private:
     AutoPtr<InsetState> mInsetState;
-    AutoPtr<CRect> mTmpRect;
+    AutoPtr<IRect> mTmpRect;
     Boolean mMutated;
 };
 

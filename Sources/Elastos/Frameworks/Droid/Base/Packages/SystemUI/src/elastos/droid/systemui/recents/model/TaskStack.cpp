@@ -1,6 +1,7 @@
 
 #include "elastos/droid/systemui/recents/model/TaskStack.h"
 #include "elastos/droid/systemui/recents/Constants.h"
+#include "elastos/droid/systemui/recents/misc/NamedCounter.h"
 #include <elastos/core/StringBuilder.h>
 
 using Elastos::Droid::Graphics::IColor;
@@ -13,7 +14,7 @@ using Elastos::Utility::ICollections;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::CRandom;
 using Elastos::Utility::IRandom;
-using Elastos::Droid::SystemUI::Recents::Misc::INamedCounter;
+using Elastos::Droid::SystemUI::Recents::Misc::NamedCounter;
 
 namespace Elastos {
 namespace Droid {
@@ -23,16 +24,16 @@ namespace Model {
 
 FilteredTaskList::FilteredTaskList()
 {
-    CArrayList::New((IList**)&mTasks);
-    CArrayList::New((IList**)&mFilteredTasks);
+    CArrayList::New((IArrayList**)&mTasks);
+    CArrayList::New((IArrayList**)&mFilteredTasks);
 }
 
 /** Sets the task filter, saving the current touch state */
 Boolean FilteredTaskList::SetFilter(
     /* [in] */ ITaskFilter* filter)
 {
-    AutoPtr<IList> prevFilteredTasks;
-    CArrayList::New(ICollection::Probe(mFilteredTasks), (IList**)&prevFilteredTasks);
+    AutoPtr<IArrayList> prevFilteredTasks;
+    CArrayList::New(ICollection::Probe(mFilteredTasks), (IArrayList**)&prevFilteredTasks);
     mFilter = filter;
     UpdateFilteredTasks();
     Boolean equals;
@@ -157,7 +158,7 @@ Boolean FilteredTaskList::HasFilter()
 }
 
 /** Returns the list of filtered tasks */
-AutoPtr<IList> FilteredTaskList::GetTasks()
+AutoPtr<IArrayList> FilteredTaskList::GetTasks()
 {
     return mFilteredTasks;
 }
@@ -239,7 +240,7 @@ const Int32 TaskStack::IndividualTaskIdOffset;
 TaskStack::TaskStack()
 {
     mTaskList = new FilteredTaskList();
-    CArrayList::New((IList**)&mGroups);
+    CArrayList::New((IArrayList**)&mGroups);
 }
 
 /** Sets the callbacks for this task stack */
@@ -289,7 +290,7 @@ void TaskStack::RemoveTask(
 void TaskStack::SetTasks(
     /* [in] */ IList* tasks)
 {
-    AutoPtr<IList> taskList = mTaskList->GetTasks();
+    AutoPtr<IArrayList> taskList = mTaskList->GetTasks();
     Int32 taskCount;
     taskList->GetSize(&taskCount);
     for (Int32 i = 0; i < taskCount; i++) {
@@ -333,7 +334,7 @@ AutoPtr<Task> TaskStack::GetFrontMostTask()
 }
 
 /** Gets the tasks */
-AutoPtr<IList> TaskStack::GetTasks()
+AutoPtr<IArrayList> TaskStack::GetTasks()
 {
     return mTaskList->GetTasks();
 }
@@ -355,7 +356,7 @@ Int32 TaskStack::IndexOfTask(
 AutoPtr<Task> TaskStack::FindTaskWithId(
     /* [in] */ Int32 taskId)
 {
-    AutoPtr<IList> tasks = mTaskList->GetTasks();
+    AutoPtr<IArrayList> tasks = mTaskList->GetTasks();
     Int32 taskCount;
     tasks->GetSize(&taskCount);
     for (Int32 i = 0; i < taskCount; i++) {
@@ -375,8 +376,8 @@ AutoPtr<Task> TaskStack::FindTaskWithId(
 void TaskStack::FilterTasks(
     /* [in] */ Task* t)
 {
-    AutoPtr<IList> oldStack;
-    CArrayList::New(ICollection::Probe(mTaskList->GetTasks()), (IList**)&oldStack);
+    AutoPtr<IArrayList> oldStack;
+    CArrayList::New(ICollection::Probe(mTaskList->GetTasks()), (IArrayList**)&oldStack);
 
     // Set the task list filter
     AutoPtr<ITaskFilter> filter = new TaskFilter(t);
@@ -389,8 +390,8 @@ void TaskStack::FilterTasks(
 /** Unfilters the current stack */
 void TaskStack::UnfilterTasks()
 {
-    AutoPtr<IList> oldStack;
-    CArrayList::New(ICollection::Probe(mTaskList->GetTasks()), (IList**)&oldStack);
+    AutoPtr<IArrayList> oldStack;
+    CArrayList::New(ICollection::Probe(mTaskList->GetTasks()), (IArrayList**)&oldStack);
 
     // Unset the filter, then update the virtual scroll
     mTaskList->RemoveFilter();
@@ -439,14 +440,13 @@ void TaskStack::CreateAffiliatedGroupings(
     if (Constants::DebugFlags::App::EnableSimulatedTaskGroups) {
         HashMap<AutoPtr<ITaskKey>, AutoPtr<ITask> > taskMap;
         // Sort all tasks by increasing firstActiveTime of the task
-        AutoPtr<IList> tasks = mTaskList->GetTasks();
+        AutoPtr<IArrayList> tasks = mTaskList->GetTasks();
         AutoPtr<IComparator> comparator = new TaskComparator();
         AutoPtr<ICollections> collections;
         CCollections::AcquireSingleton((ICollections**)&collections);
-        collections->Sort(tasks, comparator);
+        collections->Sort(IList::Probe(tasks), comparator);
         // Create groups when sequential packages are the same
-        assert(0);
-        AutoPtr<INamedCounter> counter;// = new NamedCounter(String("task-group"), String(""));
+        AutoPtr<NamedCounter> counter = new NamedCounter(String("task-group"), String(""));
         Int32 taskCount;
         tasks->GetSize(&taskCount);
         String prevPackage("");
@@ -481,7 +481,7 @@ void TaskStack::CreateAffiliatedGroupings(
         }
         // Sort groups by increasing latestActiveTime of the group
         comparator = new TaskGroupingComparator();
-        collections->Sort(mGroups, comparator);
+        collections->Sort(IList::Probe(mGroups), comparator);
         // Sort group tasks by increasing firstActiveTime of the task, and also build a new list of
         // tasks
         Int32 taskIndex = 0;
@@ -492,8 +492,8 @@ void TaskStack::CreateAffiliatedGroupings(
             AutoPtr<IInterface> item;
             tasks->Get(i, (IInterface**)&item);
             TaskGrouping* group = (TaskGrouping*)ITaskGrouping::Probe(item);
-            collections->Sort(group->mTaskKeys, comparator);
-            AutoPtr<IList> groupTasks = group->mTaskKeys;
+            collections->Sort(IList::Probe(group->mTaskKeys), comparator);
+            AutoPtr<IArrayList> groupTasks = group->mTaskKeys;
             Int32 groupTaskCount;
             groupTasks->GetSize(&groupTaskCount);
             for (Int32 j = 0; j < groupTaskCount; j++) {
@@ -504,12 +504,12 @@ void TaskStack::CreateAffiliatedGroupings(
                 taskIndex++;
             }
         }
-        mTaskList->Set(tasks);
+        mTaskList->Set(IList::Probe(tasks));
     }
     else {
         // Create the task groups
         HashMap<AutoPtr<ITaskKey>, AutoPtr<Task> > tasksMap;
-        AutoPtr<IList> tasks = mTaskList->GetTasks();
+        AutoPtr<IArrayList> tasks = mTaskList->GetTasks();
         Int32 taskCount;
         tasks->GetSize(&taskCount);
         for (Int32 i = 0; i < taskCount; i++) {
@@ -566,7 +566,7 @@ CARAPI TaskStack::ToString(
 {
     VALIDATE_NOT_NULL(str);
     StringBuilder sb("Tasks:\n");
-    AutoPtr<IList> taskList = mTaskList->GetTasks();
+    AutoPtr<IArrayList> taskList = mTaskList->GetTasks();
     Int32 taskCount;
     taskList->GetSize(&taskCount);
     for (Int32 i = 0; i < taskCount; i++) {

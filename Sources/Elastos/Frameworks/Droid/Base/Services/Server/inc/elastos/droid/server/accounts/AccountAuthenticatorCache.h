@@ -24,7 +24,7 @@ namespace Server {
 namespace Accounts {
 
 /**
- * A cache of services that export the {@link IAccountAuthenticator} interface. This cache
+ * A cache of services that export the {@link IIAccountAuthenticator} interface. This cache
  * is built by interrogating the {@link PackageManager} and is updated as packages are added,
  * removed and changed. The authenticators are referred to by their account type and
  * are made available via the {@link RegisteredServicesCache#getServiceInfo} method.

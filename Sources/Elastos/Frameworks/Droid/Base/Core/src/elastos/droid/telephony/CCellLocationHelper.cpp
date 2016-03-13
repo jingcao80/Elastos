@@ -1,12 +1,15 @@
 
-#include "CCellLocationHelper.h"
-#include "CellLocation.h"
+#include "elastos/droid/telephony/CCellLocationHelper.h"
+#include "elastos/droid/telephony/CellLocation.h"
 #include "elastos/droid/ext/frameworkdef.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
+CAR_INTERFACE_IMPL(CCellLocationHelper, Singleton, ICellLocationHelper)
+
+CAR_SINGLETON_IMPL(CCellLocationHelper)
 
 ECode CCellLocationHelper::RequestLocationUpdate()
 {

@@ -13,6 +13,7 @@
 #include <elastos/droid/widget/ArrayAdapter.h>
 #include <elastos/droid/database/ContentObserver.h>
 #include "elastos/droid/internal/content/PackageMonitor.h"
+#include "elastos/droid/server/statusbar/CStatusBarManagerService.h"
 #include <elastos/utility/etl/HashMap.h>
 #include <elastos/utility/etl/List.h>
 #include <elastos/core/StringBuilder.h>
@@ -72,6 +73,7 @@ using Elastos::Droid::Internal::View::IInputBindResult;
 using Elastos::Droid::Utility::IAtomicFile;
 using Elastos::Droid::Utility::IPair;
 using Elastos::Droid::Server::Wm::IOnHardKeyboardStatusChangeListener;
+using Elastos::Droid::Server::StatusBar::CStatusBarManagerService;
 
 using Elastos::Core::IComparable;
 using Elastos::Core::StringBuilder;
@@ -87,15 +89,7 @@ namespace Wm {
     class CWindowManagerService;
 }}}}
 
-namespace Elastos {
-namespace Droid {
-namespace Server {
-namespace StatusBar {
-    class CStatusBarManagerService;
-}}}}
-
 using Elastos::Droid::Server::Wm::CWindowManagerService;
-using Elastos::Droid::Server::StatusBar::CStatusBarManagerService;
 
 namespace Elastos {
 namespace Droid {

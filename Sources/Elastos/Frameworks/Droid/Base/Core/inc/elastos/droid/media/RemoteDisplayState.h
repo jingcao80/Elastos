@@ -51,6 +51,54 @@ public:
 		CARAPI ToString(
 			/* [out] */ String* result);
 
+        CARAPI GetId(
+            /* [out] */ String* id);
+
+        CARAPI SetId(
+            /* [in] */ const String& id);
+
+        CARAPI GetName(
+            /* [out] */ String* name);
+
+        CARAPI SetName(
+            /* [in] */ const String& name);
+
+        CARAPI GetDescription(
+            /* [out] */ String* description);
+
+        CARAPI SetDescription(
+            /* [in] */ const String& description);
+
+        CARAPI GetStatus(
+            /* [out] */ Int32* status);
+
+        CARAPI SetStatus(
+            /* [in] */ Int32 status);
+
+        CARAPI GetVolume(
+            /* [out] */ Int32* volume);
+
+        CARAPI SetVolume(
+            /* [in] */ Int32 volume);
+
+        CARAPI GetVolumeMax(
+            /* [out] */ Int32* volumeMax);
+
+        CARAPI SetVolumeMax(
+            /* [in] */ Int32 volumeMax);
+
+        CARAPI GetVolumeHandling(
+            /* [out] */ Int32* volumeHandling);
+
+        CARAPI SetVolumeHandling(
+            /* [in] */ Int32 volumeHandling);
+
+        CARAPI GetPresentationDisplayId(
+            /* [out] */ Int32* presentationDisplayId);
+
+        CARAPI SetPresentationDisplayId(
+            /* [in] */ Int32 presentationDisplayId);
+
 	public:
         String mId;
         String mName;

@@ -10,6 +10,7 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CEmbossMaskFilter);
+CAR_INTERFACE_IMPL(CEmbossMaskFilter, MaskFilter, IEmbossMaskFilter);
 ECode CEmbossMaskFilter::constructor(
     /* [in] */ const ArrayOf<Float>& direction,
     /* [in] */ Float ambient,
@@ -23,35 +24,6 @@ ECode CEmbossMaskFilter::constructor(
 
     mNativeInstance = NativeConstructor(direction, ambient, specular, blurRadius);
     return NOERROR;
-}
-
-PInterface CEmbossMaskFilter::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_MaskFilter) {
-        return reinterpret_cast<PInterface>((MaskFilter*)this);
-    }
-    else if (riid == EIID_IEmbossMaskFilter) {
-        return (IEmbossMaskFilter*)this;
-    }
-    return MaskFilter::Probe(riid);
-}
-
-UInt32 CEmbossMaskFilter::AddRef()
-{
-    return MaskFilter::AddRef();
-}
-
-UInt32 CEmbossMaskFilter::Release()
-{
-    return MaskFilter::Release();
-}
-
-ECode CEmbossMaskFilter::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return MaskFilter::GetInterfaceID(object, iid);
 }
 
 Int64 CEmbossMaskFilter::NativeConstructor(

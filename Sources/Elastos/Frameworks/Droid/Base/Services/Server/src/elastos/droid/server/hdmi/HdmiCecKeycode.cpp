@@ -1,5 +1,9 @@
 
 #include "elastos/droid/server/hdmi/HdmiCecKeycode.h"
+#include <Elastos.Droid.View.h>
+
+using Elastos::Core::CBoolean;
+using Elastos::Core::IBoolean;
 
 namespace Elastos {
 namespace Droid {
@@ -14,64 +18,45 @@ HdmiCecKeycode::KeycodeEntry::KeycodeEntry(
     /* [in] */ Int32 cecKeycode,
     /* [in] */ Boolean isRepeatable)
 {
-#if 0 // TODO: Translate codes below
-                mAndroidKeycode = androidKeycode;
-                mCecKeycode = cecKeycode;
-                mIsRepeatable = isRepeatable;
-
-#endif
+    mAndroidKeycode = androidKeycode;
+    mCecKeycode = cecKeycode;
+    mIsRepeatable = isRepeatable;
 }
 
 HdmiCecKeycode::KeycodeEntry::KeycodeEntry(
     /* [in] */ Int32 androidKeycode,
     /* [in] */ Int32 cecKeycode)
 {
-#if 0 // TODO: Translate codes below
-                this(androidKeycode, cecKeycode, true);
-
-#endif
+    KeycodeEntry(androidKeycode, cecKeycode, TRUE);
 }
 
 Int32 HdmiCecKeycode::KeycodeEntry::ToCecKeycodeIfMatched(
     /* [in] */ Int32 androidKeycode)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if (mAndroidKeycode == androidKeycode) {
-                    return mCecKeycode;
-                } else {
-                    return UNSUPPORTED_KEYCODE;
-                }
-
-#endif
+    if (mAndroidKeycode == androidKeycode) {
+        return mCecKeycode;
+    } else {
+        return UNSUPPORTED_KEYCODE;
+    }
 }
 
 Int32 HdmiCecKeycode::KeycodeEntry::ToAndroidKeycodeIfMatched(
     /* [in] */ Int32 cecKeycode)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                if (cecKeycode == mCecKeycode) {
-                    return mAndroidKeycode;
-                } else {
-                    return UNSUPPORTED_KEYCODE;
-                }
-
-#endif
+    if (cecKeycode == mCecKeycode) {
+        return mAndroidKeycode;
+    } else {
+        return UNSUPPORTED_KEYCODE;
+    }
 }
 
 AutoPtr<IBoolean> HdmiCecKeycode::KeycodeEntry::IsRepeatableIfMatched(
     /* [in] */ Int32 androidKeycode)
 {
     AutoPtr<IBoolean> rev;
-#if 0 // TODO: Translate codes below
-                if (mAndroidKeycode == androidKeycode) {
-                    return mIsRepeatable;
-                } else {
-                    return null;
-                }
-
-#endif
+    if (mAndroidKeycode == androidKeycode) {
+        CBoolean::New(mIsRepeatable, (IBoolean**)&rev);
+    }
     return rev;
 }
 
@@ -190,7 +175,7 @@ const Int32 HdmiCecKeycode::UI_SOUND_PRESENTATION_BASS_STEP_MINUS = 0xB3;
 const Int32 HdmiCecKeycode::UI_SOUND_PRESENTATION_TREBLE_STEP_PLUS = 0xC1;
 const Int32 HdmiCecKeycode::UI_SOUND_PRESENTATION_TREBLE_NEUTRAL = 0xC2;
 const Int32 HdmiCecKeycode::UI_SOUND_PRESENTATION_TREBLE_STEP_MINUS = 0xC3;
-const AutoPtr<ArrayOf<HdmiCecKeycode::KeycodeEntry> > HdmiCecKeycode::KEYCODE_ENTRIES = InitKEYCODE_ENTRIES();
+const AutoPtr<ArrayOf<HdmiCecKeycode::KeycodeEntry*> > HdmiCecKeycode::KEYCODE_ENTRIES = InitKEYCODE_ENTRIES();
 
 HdmiCecKeycode::HdmiCecKeycode()
 {}
@@ -199,202 +184,199 @@ ECode HdmiCecKeycode::AndroidKeyToCecKey(
     /* [in] */ Int32 keycode,
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        for (int i = 0; i < KEYCODE_ENTRIES.length; ++i) {
-            int cecKeycode = KEYCODE_ENTRIES[i].toCecKeycodeIfMatched(keycode);
-            if (cecKeycode != UNSUPPORTED_KEYCODE) {
-                return cecKeycode;
-            }
-        }
-        return UNSUPPORTED_KEYCODE;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    for (Int32 i = 0; i < KEYCODE_ENTRIES->GetLength(); ++i) {
+        Int32 cecKeycode = (*KEYCODE_ENTRIES)[i]->ToCecKeycodeIfMatched(keycode);
+        if (cecKeycode != UNSUPPORTED_KEYCODE) {
+            *result = cecKeycode;
+            return NOERROR;
+        }
+    }
+    *result = UNSUPPORTED_KEYCODE;
+    return NOERROR;
 }
 
 ECode HdmiCecKeycode::CecKeyToAndroidKey(
     /* [in] */ Int32 keycode,
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        for (int i = 0; i < KEYCODE_ENTRIES.length; ++i) {
-            int androidKey = KEYCODE_ENTRIES[i].toAndroidKeycodeIfMatched(keycode);
-            if (androidKey != UNSUPPORTED_KEYCODE) {
-                return androidKey;
-            }
-        }
-        return UNSUPPORTED_KEYCODE;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    for (Int32 i = 0; i < KEYCODE_ENTRIES->GetLength(); ++i) {
+        Int32 androidKey = (*KEYCODE_ENTRIES)[i]->ToAndroidKeycodeIfMatched(keycode);
+        if (androidKey != UNSUPPORTED_KEYCODE) {
+            *result = androidKey;
+            return NOERROR;
+        }
+    }
+    *result = UNSUPPORTED_KEYCODE;
+    return NOERROR;
 }
 
 ECode HdmiCecKeycode::IsRepeatableKey(
     /* [in] */ Int32 androidKeycode,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        for (int i = 0; i < KEYCODE_ENTRIES.length; ++i) {
-            Boolean isRepeatable = KEYCODE_ENTRIES[i].isRepeatableIfMatched(androidKeycode);
-            if (isRepeatable != NULL) {
-                return isRepeatable;
-            }
-        }
-        return FALSE;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    for (Int32 i = 0; i < KEYCODE_ENTRIES->GetLength(); ++i) {
+        AutoPtr<IBoolean> isRepeatable = (*KEYCODE_ENTRIES)[i]->IsRepeatableIfMatched(androidKeycode);
+        if (isRepeatable != NULL) {
+            return isRepeatable->GetValue(result);
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
 }
 
 ECode HdmiCecKeycode::IsSupportedKeycode(
     /* [in] */ Int32 androidKeycode,
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return HdmiCecKeycode.androidKeyToCecKey(androidKeycode)
-                != HdmiCecKeycode.UNSUPPORTED_KEYCODE;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    Int32 cecKey;
+    HdmiCecKeycode::AndroidKeyToCecKey(androidKeycode, &cecKey);
+    *result = cecKey != HdmiCecKeycode::UNSUPPORTED_KEYCODE;
+    return NOERROR;
 }
 
-AutoPtr<ArrayOf<HdmiCecKeycode::KeycodeEntry> > HdmiCecKeycode::InitKEYCODE_ENTRIES()
+AutoPtr<ArrayOf<HdmiCecKeycode::KeycodeEntry*> > HdmiCecKeycode::InitKEYCODE_ENTRIES()
 {
-    AutoPtr<ArrayOf<KeycodeEntry> > rev;
-#if 0 // TODO: Translate codes below
-        private static final KeycodeEntry[] KEYCODE_ENTRIES = new KeycodeEntry[] {
-                new KeycodeEntry(KeyEvent.KEYCODE_DPAD_CENTER, CEC_KEYCODE_SELECT),
-                new KeycodeEntry(KeyEvent.KEYCODE_DPAD_UP, CEC_KEYCODE_UP),
-                new KeycodeEntry(KeyEvent.KEYCODE_DPAD_DOWN, CEC_KEYCODE_DOWN),
-                new KeycodeEntry(KeyEvent.KEYCODE_DPAD_LEFT, CEC_KEYCODE_LEFT),
-                new KeycodeEntry(KeyEvent.KEYCODE_DPAD_RIGHT, CEC_KEYCODE_RIGHT),
-                // No Android keycode defined for CEC_KEYCODE_RIGHT_UP
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RIGHT_UP),
-                // No Android keycode defined for CEC_KEYCODE_RIGHT_DOWN
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RIGHT_DOWN),
-                // No Android keycode defined for CEC_KEYCODE_LEFT_UP
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_LEFT_UP),
-                // No Android keycode defined for CEC_KEYCODE_LEFT_DOWN
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_LEFT_DOWN),
-                new KeycodeEntry(KeyEvent.KEYCODE_HOME, CEC_KEYCODE_ROOT_MENU, FALSE),
-                new KeycodeEntry(KeyEvent.KEYCODE_SETTINGS, CEC_KEYCODE_SETUP_MENU, FALSE),
-                new KeycodeEntry(KeyEvent.KEYCODE_MENU, CEC_KEYCODE_CONTENTS_MENU, FALSE),
-                // No Android keycode defined for CEC_KEYCODE_FAVORITE_MENU
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_FAVORITE_MENU),
-                new KeycodeEntry(KeyEvent.KEYCODE_BACK, CEC_KEYCODE_EXIT),
-                // RESERVED
-                new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_TOP_MENU, CEC_KEYCODE_MEDIA_TOP_MENU),
-                // No Android keycode defined for CEC_KEYCODE_MEDIA_CONTEXT_SENSITIVE_MENU
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_MEDIA_CONTEXT_SENSITIVE_MENU),
-                // RESERVED
-                // No Android keycode defined for CEC_KEYCODE_NUMBER_ENTRY_MODE
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_NUMBER_ENTRY_MODE),
-                new KeycodeEntry(KeyEvent.KEYCODE_11, CEC_KEYCODE_NUMBER_11),
-                new KeycodeEntry(KeyEvent.KEYCODE_12, CEC_KEYCODE_NUMBER_12),
-                new KeycodeEntry(KeyEvent.KEYCODE_0, CEC_KEYCODE_NUMBER_0_OR_NUMBER_10),
-                new KeycodeEntry(KeyEvent.KEYCODE_1, CEC_KEYCODE_NUMBERS_1),
-                new KeycodeEntry(KeyEvent.KEYCODE_2, CEC_KEYCODE_NUMBERS_2),
-                new KeycodeEntry(KeyEvent.KEYCODE_3, CEC_KEYCODE_NUMBERS_3),
-                new KeycodeEntry(KeyEvent.KEYCODE_4, CEC_KEYCODE_NUMBERS_4),
-                new KeycodeEntry(KeyEvent.KEYCODE_5, CEC_KEYCODE_NUMBERS_5),
-                new KeycodeEntry(KeyEvent.KEYCODE_6, CEC_KEYCODE_NUMBERS_6),
-                new KeycodeEntry(KeyEvent.KEYCODE_7, CEC_KEYCODE_NUMBERS_7),
-                new KeycodeEntry(KeyEvent.KEYCODE_8, CEC_KEYCODE_NUMBERS_8),
-                new KeycodeEntry(KeyEvent.KEYCODE_9, CEC_KEYCODE_NUMBERS_9),
-                new KeycodeEntry(KeyEvent.KEYCODE_PERIOD, CEC_KEYCODE_DOT),
-                new KeycodeEntry(KeyEvent.KEYCODE_NUMPAD_ENTER, CEC_KEYCODE_ENTER),
-                new KeycodeEntry(KeyEvent.KEYCODE_CLEAR, CEC_KEYCODE_CLEAR),
-                // RESERVED
-                // No Android keycode defined for CEC_KEYCODE_NEXT_FAVORITE
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_NEXT_FAVORITE),
-                new KeycodeEntry(KeyEvent.KEYCODE_CHANNEL_UP, CEC_KEYCODE_CHANNEL_UP),
-                new KeycodeEntry(KeyEvent.KEYCODE_CHANNEL_DOWN, CEC_KEYCODE_CHANNEL_DOWN),
-                new KeycodeEntry(KeyEvent.KEYCODE_LAST_CHANNEL, CEC_KEYCODE_PREVIOUS_CHANNEL),
-                // No Android keycode defined for CEC_KEYCODE_SOUND_SELECT
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SOUND_SELECT),
-                new KeycodeEntry(KeyEvent.KEYCODE_TV_INPUT, CEC_KEYCODE_INPUT_SELECT),
-                new KeycodeEntry(KeyEvent.KEYCODE_INFO, CEC_KEYCODE_DISPLAY_INFORMATION),
-                // No Android keycode defined for CEC_KEYCODE_HELP
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_HELP),
-                new KeycodeEntry(KeyEvent.KEYCODE_PAGE_UP, CEC_KEYCODE_PAGE_UP),
-                new KeycodeEntry(KeyEvent.KEYCODE_PAGE_DOWN, CEC_KEYCODE_PAGE_DOWN),
-                // RESERVED
-                new KeycodeEntry(KeyEvent.KEYCODE_POWER, CEC_KEYCODE_POWER, FALSE),
-                new KeycodeEntry(KeyEvent.KEYCODE_VOLUME_UP, CEC_KEYCODE_VOLUME_UP),
-                new KeycodeEntry(KeyEvent.KEYCODE_VOLUME_DOWN, CEC_KEYCODE_VOLUME_DOWN),
-                new KeycodeEntry(KeyEvent.KEYCODE_VOLUME_MUTE, CEC_KEYCODE_MUTE, FALSE),
-                new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_PLAY, CEC_KEYCODE_PLAY),
-                new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_STOP, CEC_KEYCODE_STOP),
-                new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_PAUSE, CEC_KEYCODE_PAUSE),
-                new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_RECORD, CEC_KEYCODE_RECORD),
-                new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_REWIND, CEC_KEYCODE_REWIND),
-                new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_FAST_FORWARD, CEC_KEYCODE_FAST_FORWARD),
-                new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_EJECT, CEC_KEYCODE_EJECT),
-                new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_NEXT, CEC_KEYCODE_FORWARD),
-                new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_PREVIOUS, CEC_KEYCODE_BACKWARD),
-                // No Android keycode defined for CEC_KEYCODE_STOP_RECORD
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_STOP_RECORD),
-                // No Android keycode defined for CEC_KEYCODE_PAUSE_RECORD
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_RECORD),
-                // No Android keycode defined for CEC_KEYCODE_RESERVED
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RESERVED),
-                // No Android keycode defined for CEC_KEYCODE_ANGLE
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_ANGLE),
-                // No Android keycode defined for CEC_KEYCODE_SUB_PICTURE
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SUB_PICTURE),
-                // No Android keycode defined for CEC_KEYCODE_VIDEO_ON_DEMAND
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_VIDEO_ON_DEMAND),
-                new KeycodeEntry(KeyEvent.KEYCODE_GUIDE, CEC_KEYCODE_ELECTRONIC_PROGRAM_GUIDE),
-                // No Android keycode defined for CEC_KEYCODE_TIMER_PROGRAMMING
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_TIMER_PROGRAMMING),
-                // No Android keycode defined for CEC_KEYCODE_INITIAL_CONFIGURATION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_INITIAL_CONFIGURATION),
-                // No Android keycode defined for CEC_KEYCODE_SELECT_BROADCAST_TYPE
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_BROADCAST_TYPE),
-                // No Android keycode defined for CEC_KEYCODE_SELECT_SOUND_PRESENTATION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_SOUND_PRESENTATION),
-                // RESERVED
-                // The following deterministic key definitions do not need key mapping
-                // since they are supposed to be generated programmatically only.
-                // No Android keycode defined for CEC_KEYCODE_PLAY_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PLAY_FUNCTION),
-                // No Android keycode defined for CEC_KEYCODE_PAUSE_PLAY_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_PLAY_FUNCTION),
-                // No Android keycode defined for CEC_KEYCODE_RECORD_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RECORD_FUNCTION),
-                // No Android keycode defined for CEC_KEYCODE_PAUSE_RECORD_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_RECORD_FUNCTION),
-                // No Android keycode defined for CEC_KEYCODE_STOP_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_STOP_FUNCTION),
-                // No Android keycode defined for CEC_KEYCODE_MUTE_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_MUTE_FUNCTION, FALSE),
-                // No Android keycode defined for CEC_KEYCODE_RESTORE_VOLUME_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RESTORE_VOLUME_FUNCTION, FALSE),
-                // No Android keycode defined for CEC_KEYCODE_TUNE_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_TUNE_FUNCTION),
-                // No Android keycode defined for CEC_KEYCODE_SELECT_MEDIA_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_MEDIA_FUNCTION),
-                // No Android keycode defined for CEC_KEYCODE_SELECT_AV_INPUT_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AV_INPUT_FUNCTION),
-                // No Android keycode defined for CEC_KEYCODE_SELECT_AUDIO_INPUT_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AUDIO_INPUT_FUNCTION),
-                // No Android keycode defined for CEC_KEYCODE_POWER_TOGGLE_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_TOGGLE_FUNCTION),
-                // No Android keycode defined for CEC_KEYCODE_POWER_OFF_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_OFF_FUNCTION),
-                // No Android keycode defined for CEC_KEYCODE_POWER_ON_FUNCTION
-                new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_ON_FUNCTION, FALSE),
-                // RESERVED
-                new KeycodeEntry(KeyEvent.KEYCODE_PROG_BLUE, CEC_KEYCODE_F1_BLUE),
-                new KeycodeEntry(KeyEvent.KEYCODE_PROG_RED, CEC_KEYCODE_F2_RED),
-                new KeycodeEntry(KeyEvent.KEYCODE_PROG_GREEN, CEC_KEYCODE_F3_GREEN),
-                new KeycodeEntry(KeyEvent.KEYCODE_PROG_YELLOW, CEC_KEYCODE_F4_YELLOW),
-                new KeycodeEntry(KeyEvent.KEYCODE_F5, CEC_KEYCODE_F5),
-                new KeycodeEntry(KeyEvent.KEYCODE_TV_DATA_SERVICE, CEC_KEYCODE_DATA),
-                // RESERVED
-                // Add a new key mapping here if new keycode is introduced.
-        }
-#endif
+    KeycodeEntry* tmp[] = {
+        new KeycodeEntry(IKeyEvent::KEYCODE_DPAD_CENTER, CEC_KEYCODE_SELECT),
+        new KeycodeEntry(IKeyEvent::KEYCODE_DPAD_UP, CEC_KEYCODE_UP),
+        new KeycodeEntry(IKeyEvent::KEYCODE_DPAD_DOWN, CEC_KEYCODE_DOWN),
+        new KeycodeEntry(IKeyEvent::KEYCODE_DPAD_LEFT, CEC_KEYCODE_LEFT),
+        new KeycodeEntry(IKeyEvent::KEYCODE_DPAD_RIGHT, CEC_KEYCODE_RIGHT),
+        // No Android keycode defined for CEC_KEYCODE_RIGHT_UP
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RIGHT_UP),
+        // No Android keycode defined for CEC_KEYCODE_RIGHT_DOWN
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RIGHT_DOWN),
+        // No Android keycode defined for CEC_KEYCODE_LEFT_UP
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_LEFT_UP),
+        // No Android keycode defined for CEC_KEYCODE_LEFT_DOWN
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_LEFT_DOWN),
+        new KeycodeEntry(IKeyEvent::KEYCODE_HOME, CEC_KEYCODE_ROOT_MENU, FALSE),
+        new KeycodeEntry(IKeyEvent::KEYCODE_SETTINGS, CEC_KEYCODE_SETUP_MENU, FALSE),
+        new KeycodeEntry(IKeyEvent::KEYCODE_MENU, CEC_KEYCODE_CONTENTS_MENU, FALSE),
+        // No Android keycode defined for CEC_KEYCODE_FAVORITE_MENU
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_FAVORITE_MENU),
+        new KeycodeEntry(IKeyEvent::KEYCODE_BACK, CEC_KEYCODE_EXIT),
+        // RESERVED
+        new KeycodeEntry(IKeyEvent::KEYCODE_MEDIA_TOP_MENU, CEC_KEYCODE_MEDIA_TOP_MENU),
+        // No Android keycode defined for CEC_KEYCODE_MEDIA_CONTEXT_SENSITIVE_MENU
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_MEDIA_CONTEXT_SENSITIVE_MENU),
+        // RESERVED
+        // No Android keycode defined for CEC_KEYCODE_NUMBER_ENTRY_MODE
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_NUMBER_ENTRY_MODE),
+        new KeycodeEntry(IKeyEvent::KEYCODE_11, CEC_KEYCODE_NUMBER_11),
+        new KeycodeEntry(IKeyEvent::KEYCODE_12, CEC_KEYCODE_NUMBER_12),
+        new KeycodeEntry(IKeyEvent::KEYCODE_0, CEC_KEYCODE_NUMBER_0_OR_NUMBER_10),
+        new KeycodeEntry(IKeyEvent::KEYCODE_1, CEC_KEYCODE_NUMBERS_1),
+        new KeycodeEntry(IKeyEvent::KEYCODE_2, CEC_KEYCODE_NUMBERS_2),
+        new KeycodeEntry(IKeyEvent::KEYCODE_3, CEC_KEYCODE_NUMBERS_3),
+        new KeycodeEntry(IKeyEvent::KEYCODE_4, CEC_KEYCODE_NUMBERS_4),
+        new KeycodeEntry(IKeyEvent::KEYCODE_5, CEC_KEYCODE_NUMBERS_5),
+        new KeycodeEntry(IKeyEvent::KEYCODE_6, CEC_KEYCODE_NUMBERS_6),
+        new KeycodeEntry(IKeyEvent::KEYCODE_7, CEC_KEYCODE_NUMBERS_7),
+        new KeycodeEntry(IKeyEvent::KEYCODE_8, CEC_KEYCODE_NUMBERS_8),
+        new KeycodeEntry(IKeyEvent::KEYCODE_9, CEC_KEYCODE_NUMBERS_9),
+        new KeycodeEntry(IKeyEvent::KEYCODE_PERIOD, CEC_KEYCODE_DOT),
+        new KeycodeEntry(IKeyEvent::KEYCODE_NUMPAD_ENTER, CEC_KEYCODE_ENTER),
+        new KeycodeEntry(IKeyEvent::KEYCODE_CLEAR, CEC_KEYCODE_CLEAR),
+        // RESERVED
+        // No Android keycode defined for CEC_KEYCODE_NEXT_FAVORITE
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_NEXT_FAVORITE),
+        new KeycodeEntry(IKeyEvent::KEYCODE_CHANNEL_UP, CEC_KEYCODE_CHANNEL_UP),
+        new KeycodeEntry(IKeyEvent::KEYCODE_CHANNEL_DOWN, CEC_KEYCODE_CHANNEL_DOWN),
+        new KeycodeEntry(IKeyEvent::KEYCODE_LAST_CHANNEL, CEC_KEYCODE_PREVIOUS_CHANNEL),
+        // No Android keycode defined for CEC_KEYCODE_SOUND_SELECT
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SOUND_SELECT),
+        new KeycodeEntry(IKeyEvent::KEYCODE_TV_INPUT, CEC_KEYCODE_INPUT_SELECT),
+        new KeycodeEntry(IKeyEvent::KEYCODE_INFO, CEC_KEYCODE_DISPLAY_INFORMATION),
+        // No Android keycode defined for CEC_KEYCODE_HELP
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_HELP),
+        new KeycodeEntry(IKeyEvent::KEYCODE_PAGE_UP, CEC_KEYCODE_PAGE_UP),
+        new KeycodeEntry(IKeyEvent::KEYCODE_PAGE_DOWN, CEC_KEYCODE_PAGE_DOWN),
+        // RESERVED
+        new KeycodeEntry(IKeyEvent::KEYCODE_POWER, CEC_KEYCODE_POWER, FALSE),
+        new KeycodeEntry(IKeyEvent::KEYCODE_VOLUME_UP, CEC_KEYCODE_VOLUME_UP),
+        new KeycodeEntry(IKeyEvent::KEYCODE_VOLUME_DOWN, CEC_KEYCODE_VOLUME_DOWN),
+        new KeycodeEntry(IKeyEvent::KEYCODE_VOLUME_MUTE, CEC_KEYCODE_MUTE, FALSE),
+        new KeycodeEntry(IKeyEvent::KEYCODE_MEDIA_PLAY, CEC_KEYCODE_PLAY),
+        new KeycodeEntry(IKeyEvent::KEYCODE_MEDIA_STOP, CEC_KEYCODE_STOP),
+        new KeycodeEntry(IKeyEvent::KEYCODE_MEDIA_PAUSE, CEC_KEYCODE_PAUSE),
+        new KeycodeEntry(IKeyEvent::KEYCODE_MEDIA_RECORD, CEC_KEYCODE_RECORD),
+        new KeycodeEntry(IKeyEvent::KEYCODE_MEDIA_REWIND, CEC_KEYCODE_REWIND),
+        new KeycodeEntry(IKeyEvent::KEYCODE_MEDIA_FAST_FORWARD, CEC_KEYCODE_FAST_FORWARD),
+        new KeycodeEntry(IKeyEvent::KEYCODE_MEDIA_EJECT, CEC_KEYCODE_EJECT),
+        new KeycodeEntry(IKeyEvent::KEYCODE_MEDIA_NEXT, CEC_KEYCODE_FORWARD),
+        new KeycodeEntry(IKeyEvent::KEYCODE_MEDIA_PREVIOUS, CEC_KEYCODE_BACKWARD),
+        // No Android keycode defined for CEC_KEYCODE_STOP_RECORD
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_STOP_RECORD),
+        // No Android keycode defined for CEC_KEYCODE_PAUSE_RECORD
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_RECORD),
+        // No Android keycode defined for CEC_KEYCODE_RESERVED
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RESERVED),
+        // No Android keycode defined for CEC_KEYCODE_ANGLE
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_ANGLE),
+        // No Android keycode defined for CEC_KEYCODE_SUB_PICTURE
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SUB_PICTURE),
+        // No Android keycode defined for CEC_KEYCODE_VIDEO_ON_DEMAND
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_VIDEO_ON_DEMAND),
+        new KeycodeEntry(IKeyEvent::KEYCODE_GUIDE, CEC_KEYCODE_ELECTRONIC_PROGRAM_GUIDE),
+        // No Android keycode defined for CEC_KEYCODE_TIMER_PROGRAMMING
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_TIMER_PROGRAMMING),
+        // No Android keycode defined for CEC_KEYCODE_INITIAL_CONFIGURATION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_INITIAL_CONFIGURATION),
+        // No Android keycode defined for CEC_KEYCODE_SELECT_BROADCAST_TYPE
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_BROADCAST_TYPE),
+        // No Android keycode defined for CEC_KEYCODE_SELECT_SOUND_PRESENTATION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_SOUND_PRESENTATION),
+        // RESERVED
+        // The following deterministic key definitions do not need key mapping
+        // since they are supposed to be generated programmatically only.
+        // No Android keycode defined for CEC_KEYCODE_PLAY_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PLAY_FUNCTION),
+        // No Android keycode defined for CEC_KEYCODE_PAUSE_PLAY_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_PLAY_FUNCTION),
+        // No Android keycode defined for CEC_KEYCODE_RECORD_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RECORD_FUNCTION),
+        // No Android keycode defined for CEC_KEYCODE_PAUSE_RECORD_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_RECORD_FUNCTION),
+        // No Android keycode defined for CEC_KEYCODE_STOP_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_STOP_FUNCTION),
+        // No Android keycode defined for CEC_KEYCODE_MUTE_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_MUTE_FUNCTION, FALSE),
+        // No Android keycode defined for CEC_KEYCODE_RESTORE_VOLUME_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RESTORE_VOLUME_FUNCTION, FALSE),
+        // No Android keycode defined for CEC_KEYCODE_TUNE_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_TUNE_FUNCTION),
+        // No Android keycode defined for CEC_KEYCODE_SELECT_MEDIA_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_MEDIA_FUNCTION),
+        // No Android keycode defined for CEC_KEYCODE_SELECT_AV_INPUT_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AV_INPUT_FUNCTION),
+        // No Android keycode defined for CEC_KEYCODE_SELECT_AUDIO_INPUT_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AUDIO_INPUT_FUNCTION),
+        // No Android keycode defined for CEC_KEYCODE_POWER_TOGGLE_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_TOGGLE_FUNCTION),
+        // No Android keycode defined for CEC_KEYCODE_POWER_OFF_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_OFF_FUNCTION),
+        // No Android keycode defined for CEC_KEYCODE_POWER_ON_FUNCTION
+        new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_ON_FUNCTION, FALSE),
+        // RESERVED
+        new KeycodeEntry(IKeyEvent::KEYCODE_PROG_BLUE, CEC_KEYCODE_F1_BLUE),
+        new KeycodeEntry(IKeyEvent::KEYCODE_PROG_RED, CEC_KEYCODE_F2_RED),
+        new KeycodeEntry(IKeyEvent::KEYCODE_PROG_GREEN, CEC_KEYCODE_F3_GREEN),
+        new KeycodeEntry(IKeyEvent::KEYCODE_PROG_YELLOW, CEC_KEYCODE_F4_YELLOW),
+        new KeycodeEntry(IKeyEvent::KEYCODE_F5, CEC_KEYCODE_F5),
+        new KeycodeEntry(IKeyEvent::KEYCODE_TV_DATA_SERVICE, CEC_KEYCODE_DATA),
+        // RESERVED
+        // Add a new key mapping here if new keycode is introduced.
+    };
+    AutoPtr<ArrayOf<KeycodeEntry*> > rev = ArrayOf<KeycodeEntry*>::Alloc(tmp, sizeof(tmp)/sizeof(KeycodeEntry*));
     return rev;
 }
 

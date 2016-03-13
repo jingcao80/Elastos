@@ -97,7 +97,9 @@ ECode NetworkTimeUpdateService::constructor(
     CNtpTrustedTimeHelper::AcquireSingleton((INtpTrustedTimeHelper**)&helper);
     helper->GetInstance(context, (INtpTrustedTime**)&mTime);
 
-    mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&mAlarmManager);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
+    mAlarmManager = IAlarmManager::Probe(obj);
 
     AutoPtr<IIntent> pollIntent;
     CIntent::New(ACTION_POLL, NULL, (IIntent**)&pollIntent);
@@ -335,8 +337,9 @@ ECode NetworkTimeUpdateService::ConnectivityReceiver::OnReceive(
     intent->GetAction(&action);
     if (IConnectivityManager::CONNECTIVITY_ACTION.Equals(action)) {
         // There is connectivity
-        AutoPtr<IConnectivityManager> connManager;
-        context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&connManager);
+        AutoPtr<IInterface> obj;
+        context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+        AutoPtr<IConnectivityManager> connManager = IConnectivityManager::Probe(obj);
         AutoPtr<INetworkInfo> netInfo;
         connManager->GetActiveNetworkInfo((INetworkInfo**)&netInfo);
         if (netInfo != NULL) {

@@ -173,20 +173,20 @@ ECode ProtocolVersion::LessEquals(
     return NOERROR;
 }
 
-CARAPI ProtocolVersion::ToString(
+ECode ProtocolVersion::ToString(
     /* [out] */ String* string)
 {
     AutoPtr<ICharArrayBuffer> buffer;
     CCharArrayBuffer::New(16, (ICharArrayBuffer**)&buffer);
-    buffer->Append(this->mProtocol);
+    buffer->Append(mProtocol);
     buffer->Append('/');
-    buffer->Append(StringUtils::ToString(this->mMajor));
+    buffer->Append(mMajor);
     buffer->Append('.');
-    buffer->Append(StringUtils::ToString(this->mMinor));
+    buffer->Append(mMinor);
     return IObject::Probe(buffer)->ToString(string);
 }
 
-CARAPI ProtocolVersion::CloneImpl(
+ECode ProtocolVersion::CloneImpl(
     /* [in] */ IProtocolVersion* ver)
 {
     assert(ver);

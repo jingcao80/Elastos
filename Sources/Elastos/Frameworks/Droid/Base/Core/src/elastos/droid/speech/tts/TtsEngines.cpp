@@ -233,8 +233,10 @@ ECode TtsEngines::GetEngineInfo(
     // Note that the current API allows only one engine per
     // package name. Since the "engine name" is the same as
     // the package name.
-    oc->Get(0, (IInterface**)ppRet);
-
+    AutoPtr<IInterface> obj;
+    oc->Get(0, (IInterface**)&obj);
+    *ppRet = ITextToSpeechEngineInfo::Probe(obj);
+    REFCOUNT_ADD(*ppRet)
     return NOERROR;
 }
 
@@ -252,7 +254,7 @@ ECode TtsEngines::GetEngines(
 
     AutoPtr<ICollections> c;
     CCollections::AcquireSingleton((ICollections**)&c);
-    c->GetEmptyList((IList**)ppRet);
+    c->GetEmptyList(ppRet);
 
     if (oc == NULL) {
         return NOERROR;

@@ -3,14 +3,27 @@
 #define __ELASTOS_DROID_TELEPHONY_CCELLIDENTITYCDMA_H__
 
 #include "_Elastos_Droid_Telephony_CCellIdentityCdma.h"
+#include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
 CarClass(CCellIdentityCdma)
+    , public Object
+    , public ICellIdentityCdma
+    , public IParcelable
 {
 public:
+    CCellIdentityCdma();
+
+    virtual ~CCellIdentityCdma();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(
@@ -59,8 +72,8 @@ public:
 
 private:
 
-    static const String LOG_TAG/* = "CellSignalStrengthCdma"*/;
-    static const Boolean DBG/* = false*/;
+    static const String TAG;
+    static const Boolean DBG;
 
     // Network Id 0..65535
     Int32 mNetworkId;

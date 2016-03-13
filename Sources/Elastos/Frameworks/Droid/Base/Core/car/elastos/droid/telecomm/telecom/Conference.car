@@ -11,113 +11,114 @@ module
     namespace Telecomm {
     namespace Telecom {
 
-        interface IConferenceListener {
-            OnStateChanged(
-                [in] IConference* conference,
-                [in] Int32 oldState,
-                [in] Int32 newState);
+    interface IConferenceListener {
+        OnStateChanged(
+            [in] IConference* conference,
+            [in] Int32 oldState,
+            [in] Int32 newState);
 
-            OnDisconnected(
-                [in] IConference* conference,
-                [in] IDisconnectCause* disconnectCause);
+        OnDisconnected(
+            [in] IConference* conference,
+            [in] IDisconnectCause* disconnectCause);
 
-            OnConnectionAdded(
-                [in] IConference* conference,
-                [in] IConference* connection);
+        OnConnectionAdded(
+            [in] IConference* conference,
+            [in] IConnection* connection);
 
-            OnConnectionRemoved(
-                [in] IConference* conference,
-                [in] IConference* connection);
+        OnConnectionRemoved(
+            [in] IConference* conference,
+            [in] IConnection* connection);
 
-            OnConferenceableConnectionsChanged(
-                [in] IConference* conference,
-                [in] IList* conferenceableConnections);
+        OnConferenceableConnectionsChanged(
+            [in] IConference* conference,
+            [in] IList* conferenceableConnections);
 
-            OnDestroyed(
-                [in] IConference* conference);
+        OnDestroyed(
+            [in] IConference* conference);
 
-            OnCapabilitiesChanged(
-                [in] IConference* conference,
-                [in] Int32 capabilities);
-        }
+        OnCapabilitiesChanged(
+            [in] IConference* conference,
+            [in] Int32 capabilities);
+    }
 
-        /**
-         *  Encapsulates all audio states during a call.
-         *  @hide
-         */
-        interface IConference {
-            GetPhoneAccountHandle(
-                [out] IPhoneAccountHandle** res);
+    /**
+     *  Encapsulates all audio states during a call.
+     *  @hide
+     */
+    interface IConference {
+        GetPhoneAccountHandle(
+            [out] IPhoneAccountHandle** res);
 
-            GetConnections(
-                [out] IList** res);
+        GetConnections(
+            [out] IList** res);
 
-            GetState(
-                [out] Int32* res);
+        GetState(
+            [out] Int32* res);
 
-            GetCapabilities(
-                [out] Int32* res);
+        GetCapabilities(
+            [out] Int32* res);
 
-            GetAudioState(
-                [out] IAudioState** res);
+        GetAudioState(
+            [out] IAudioState** res);
 
-            OnDisconnect();
+        OnDisconnect();
 
-            OnSeparate(
-                [in] IConnection* connection);
+        OnSeparate(
+            [in] IConnection* connection);
 
-            OnMerge(
-                [in] IConnection* connection);
+        OnMerge(
+            [in] IConnection* connection);
 
-            OnHold();
+        OnHold();
 
-            OnUnhold();
+        OnUnhold();
 
-            OnMerge();
+        OnMerge();
 
-            OnSwap();
+        OnSwap();
 
-            OnPlayDtmfTone(
-                [in] Char32 c);
+        OnPlayDtmfTone(
+            [in] Char32 c);
 
-            OnStopDtmfTone();
+        OnStopDtmfTone();
 
-            OnAudioStateChanged(
-                [in] IAudioState* state);
+        OnAudioStateChanged(
+            [in] IAudioState* state);
 
-            SetOnHold();
+        SetOnHold();
 
-            SetActive();
+        SetActive();
 
-            SetDisconnected(
-                [in] IDisconnectCause* disconnectCause);
+        SetDisconnected(
+            [in] IDisconnectCause* disconnectCause);
 
-            SetCapabilities(
-                [in] Int32 capabilities);
+        SetCapabilities(
+            [in] Int32 capabilities);
 
-            AddConnection(
-                [in] IConnection* connection,
-                [out] Boolean* res);
+        AddConnection(
+            [in] IConnection* connection,
+            [out] Boolean* res);
 
-            RemoveConnection(
-                [in] IConnection* connection);
+        RemoveConnection(
+            [in] IConnection* connection);
 
-            SetConferenceableConnections(
-                [in] IList* conferenceableConnections);
+        SetConferenceableConnections(
+            [in] IList* conferenceableConnections);
 
-            GetConferenceableConnections(
-                [out] IList** res);
+        GetConferenceableConnections(
+            [out] IList** res);
 
-            Destroy();
+        Destroy();
 
-            AddListener(
-                [in] IConferenceListener* listener,
-                [out] IConference** res);
+        AddListener(
+            [in] IConferenceListener* listener);
 
-            RemoveListener(
-                [in] IConferenceListener* listener,
-                [out] IConference** res);
-        }
+        RemoveListener(
+            [in] IConferenceListener* listener);
+
+        SetAudioState(
+            [in] IAudioState* state);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

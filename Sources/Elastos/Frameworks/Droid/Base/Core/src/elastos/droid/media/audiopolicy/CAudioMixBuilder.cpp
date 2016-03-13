@@ -4,7 +4,6 @@
 #include "elastos/droid/media/CAudioFormatBuilder.h"
 
 using Elastos::Droid::Media::CAudioFormatBuilder;
-using Elastos::Droid::Media::IAudioSystemHelper;
 
 namespace Elastos {
 namespace Droid {

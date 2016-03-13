@@ -464,8 +464,9 @@ void CAccountManagerService::SystemReady()
 AutoPtr<IUserManager> CAccountManagerService::GetUserManager()
 {
     if (mUserManager == NULL) {
-        ASSERT_SUCCEEDED(mContext->GetSystemService(IContext::USER_SERVICE,
-                (IInterface**)&mUserManager));
+        AutoPtr<IInterface> obj;
+        ASSERT_SUCCEEDED(mContext->GetSystemService(IContext::USER_SERVICE, (IInterface**)&obj));
+        mUserManager = IUserManager::Probe(obj);
     }
     return mUserManager;
 }
@@ -2473,9 +2474,9 @@ void CAccountManagerService::InstallNotification(
     /* [in] */ INotification* n,
     /* [in] */ IUserHandle* user)
 {
-    AutoPtr<INotificationManager> nm;
-    ASSERT_SUCCEEDED(mContext->GetSystemService(IContext::NOTIFICATION_SERVICE,
-            (IInterface**)&nm));
+    AutoPtr<IInterface> obj;
+    ASSERT_SUCCEEDED(mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj));
+    AutoPtr<INotificationManager> nm = INotificationManager::Probe(obj);
     nm->NotifyAsUser(String(NULL), notificationId, n, user);
 }
 
@@ -2485,12 +2486,10 @@ void CAccountManagerService::CancelNotification(
 {
     Int64 identityToken = Binder::ClearCallingIdentity();
     // try {
-    AutoPtr<INotificationManager> nm;
-    if (FAILED(mContext->GetSystemService(IContext::NOTIFICATION_SERVICE,
-            (IInterface**)&nm))) {
-        Binder::RestoreCallingIdentity(identityToken);
-        return;
-    }
+    AutoPtr<IInterface> obj;
+    ASSERT_SUCCEEDED(mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj));
+    AutoPtr<INotificationManager> nm = INotificationManager::Probe(obj);
+
     nm->CancelAsUser(String(NULL), id, user);
     // } finally {
     Binder::RestoreCallingIdentity(identityToken);

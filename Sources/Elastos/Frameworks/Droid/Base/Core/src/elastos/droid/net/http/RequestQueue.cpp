@@ -324,7 +324,9 @@ ECode RequestQueue::constructor(
     mActivePool = new ActivePool(connectionCount, this);
     mActivePool->Startup();
 
-    context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&mConnectivityManager);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+    mConnectivityManager = IConnectivityManager::Probe(obj);
 
     return NOERROR;
 }

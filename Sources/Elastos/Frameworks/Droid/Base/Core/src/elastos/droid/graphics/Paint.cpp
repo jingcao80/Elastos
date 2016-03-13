@@ -86,10 +86,6 @@ private:
 
 static const String TAG("Paint");
 
-// {4407AE9E-A61A-4FE3-8F99-12BFFDD68E56}
-extern const InterfaceID EIID_Paint =
-    { 0x4407ae9e, 0xa61a, 0x4fe3, { 0x8f, 0x99, 0x12, 0xbf, 0xfd, 0xd6, 0x8e, 0x56 } };
-
 static void DefaultSettingsForElastos(SkPaint* paint)
 {
     // GlyphID encoding is required because we are using Harfbuzz shaping
@@ -162,7 +158,7 @@ ECode Paint::constructor(
     /* [in] */ IPaint* paint)
 {
     VALIDATE_NOT_NULL(paint);
-    Paint* paint_ = (Paint*)(IPaint*)paint->Probe(EIID_Paint);
+    Paint* paint_ = (Paint*)paint;
     mNativePaint = NativeInitWithPaint(paint_->mNativePaint);
     SetClassVariablesFrom(paint_);
     return NOERROR;
@@ -204,7 +200,7 @@ ECode Paint::Set(
     /* [in] */ IPaint* src)
 {
     assert(src != NULL);
-    Paint* src_ = (Paint*)(IPaint*)src->Probe(EIID_Paint);
+    Paint* src_ = (Paint*)src;
     if (this != src_) {
         assert(src_ != NULL);
         // copy over the native settings
@@ -562,7 +558,7 @@ ECode Paint::SetShader(
 {
     Int64 shaderNative = 0;
     if (shader != NULL) {
-        Shader* s = (Shader*)(IShader*)shader->Probe(EIID_Shader);
+        Shader* s = (Shader*)shader;
         assert(s != NULL);
         shaderNative = s->mNativeInstance;
     }
@@ -606,7 +602,7 @@ ECode Paint::SetXfermode(
 {
     Int64 xfermodeNative = 0;
     if (xfermode != NULL) {
-        Xfermode* x = (Xfermode*)(IXfermode*)xfermode->Probe(EIID_Xfermode);
+        Xfermode* x = (Xfermode*)xfermode;
         assert(x != NULL);
         xfermodeNative = x->mNativeInstance;
     }
@@ -628,7 +624,7 @@ ECode Paint::SetPathEffect(
 {
     Int64 effectNative = 0;
     if (effect != NULL) {
-        PathEffect* pe = (PathEffect*)(IPathEffect*)effect->Probe(EIID_PathEffect);
+        PathEffect* pe = (PathEffect*)effect;
         assert(pe != NULL);
         effectNative = pe->mNativeInstance;
     }
@@ -650,7 +646,7 @@ ECode Paint::SetMaskFilter(
 {
     Int64 maskfilterNative = 0;
     if (maskfilter != NULL) {
-        MaskFilter* mf = (MaskFilter*)(IMaskFilter*)maskfilter->Probe(EIID_MaskFilter);
+        MaskFilter* mf = (MaskFilter*)maskfilter;
         assert(mf != NULL);
         maskfilterNative = mf->mNativeInstance;
     }
@@ -693,7 +689,7 @@ ECode Paint::SetRasterizer(
 {
     Int64 rasterizerNative = 0;
     if (rasterizer != NULL) {
-        Rasterizer* r = (Rasterizer*)(IRasterizer*)rasterizer->Probe(EIID_Rasterizer);
+        Rasterizer* r = (Rasterizer*)rasterizer;
         assert(r != NULL);
         rasterizerNative = r->mNativeInstance;
     }
@@ -1520,7 +1516,7 @@ ECode Paint::GetTextRunCursor(
    }
    if (IGraphicsOperations::Probe(text)) {
        return IGraphicsOperations::Probe(text)->GetTextRunCursor(
-               contextStart, contextEnd, dir, offset, cursorOpt, (IPaint*)this->Probe(EIID_Paint), position);
+               contextStart, contextEnd, dir, offset, cursorOpt, this, position);
    }
 
     Int32 contextLen = contextEnd - contextStart;

@@ -86,11 +86,11 @@ ECode BasicLineFormatter::AppendProtocolVersion(
     result->Append('/');
     Int32 major;
     version->GetMajor(&major);
-    result->Append(StringUtils::ToString(major));
+    result->Append(major);
     result->Append('.');
     Int32 minor;
     version->GetMinor(&minor);
-    result->Append(StringUtils::ToString(minor));
+    result->Append(minor);
 
     *buf = result;
     REFCOUNT_ADD(*buf)
@@ -227,7 +227,7 @@ ECode BasicLineFormatter::DoFormatStatusLine(
     buffer->Append(' ');
     Int32 code;
     statline->GetStatusCode(&code);
-    buffer->Append(StringUtils::ToString(code));
+    buffer->Append(code);
     buffer->Append(' '); // keep whitespace even if reason phrase is empty
     if (!reason.IsNull()) {
         buffer->Append(reason);

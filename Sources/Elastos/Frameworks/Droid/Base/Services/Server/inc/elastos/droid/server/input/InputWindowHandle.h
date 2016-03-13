@@ -99,10 +99,9 @@ public:
     // Display this input is on.
     Int32 mDisplayId;
 
-private:
+public:
     // Pointer to the native input window handle.
     // This field is lazily initialized via JNI.
-    //@SuppressWarnings("unused")
     Int64 mPtr;
 };
 

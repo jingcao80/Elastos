@@ -582,7 +582,7 @@ public:
     CARAPI AppendSelectionArgs(
         /* [in] */ ArrayOf<String>* originalValues,
         /* [in] */ ArrayOf<String>* newValues,
-        /* [out,callee] */ ArrayOf<String>** args);
+        /* [out, callee] */ ArrayOf<String>** args);
 };
 
 } //Database

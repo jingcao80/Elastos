@@ -33,7 +33,7 @@ module
     /**
      * @Involve
      * interface Elastos.Droid.SystemUI.ISystemUI
-     * ICommandQueueCallbacks
+     * interface ICommandQueueCallbacks
      * IActivatableNotificationViewOnActivatedListener
      * interface Elastos.Droid.RecentsComponentCallbacks
      * inIExpandableNotificationRowExpansionLogger
@@ -92,7 +92,7 @@ module
             [out] Boolean* result);
 
         OnNotificationClear(
-            [out] IStatusBarNotification** notification);
+            [in] IStatusBarNotification* notification);
 
         MakeClicker(
             [in] IPendingIntent* intent,

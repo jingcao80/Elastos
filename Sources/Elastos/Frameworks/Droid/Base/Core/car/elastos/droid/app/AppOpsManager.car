@@ -260,7 +260,7 @@ module
          * @param ops The set of operations you are interested in, or null if you want all of them.
          * @hide
          */
-        GetPackagesForOps(
+        GetOpsForPackage(
             [in] Int32 uid,
             [in] String packageName,
             [in] ArrayOf<Int32>* ops,
@@ -426,8 +426,7 @@ module
         FinishOp(
             [in] String op,
             [in] Int32 uid,
-            [in] String packageName,
-            [out] Int32* result);
+            [in] String packageName);
 
         /**
          * Do a quick check for whether an application might be able to perform an operation.
@@ -481,7 +480,7 @@ module
             [in] Int32 op,
             [in] Int32 stream,
             [in] Int32 uid,
-            [in] Int32 packageName,
+            [in] String packageName,
             [out] Int32* result);
 
         /**
@@ -493,7 +492,7 @@ module
             [in] Int32 op,
             [in] Int32 stream,
             [in] Int32 uid,
-            [in] Int32 packageName,
+            [in] String packageName,
             [out] Int32* result);
 
         /**

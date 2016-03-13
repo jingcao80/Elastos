@@ -1,0 +1,38 @@
+
+module
+{
+    using interface Elastos.Droid.App.Job.IJobParameters;
+
+    namespace Elastos {
+    namespace Providers {
+    namespace DownloadProvider {
+    namespace Downloads {
+
+    interface IDownloadIdleService
+    {
+        OnStartJob(
+            [in] IJobParameters* params,
+            [out] Boolean* result);
+
+        OnStopJob(
+            [in] IJobParameters* params,
+            [out] Boolean* result);
+
+        /**
+         * Remove stale downloads that third-party apps probably forgot about. We
+         * only consider non-visible downloads that haven't been touched in over a
+         * week.
+         */
+        CleanStale();
+
+        /**
+         * Clean up orphan downloads, both in database and on disk.
+         */
+        CleanOrphans();
+    }
+
+    } // namespace Downloads
+    } // namespace DownloadProvider
+    } // namespace Providers
+    } // namespace Elastos
+}

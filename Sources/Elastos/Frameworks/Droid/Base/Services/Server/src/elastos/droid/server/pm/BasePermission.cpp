@@ -1,5 +1,8 @@
 
 #include "elastos/droid/server/pm/BasePermission.h"
+#include <elastos/core/StringBuilder.h>
+
+using Elastos::Core::StringBuilder;
 
 namespace Elastos {
 namespace Droid {
@@ -21,6 +24,25 @@ BasePermission::BasePermission(
     , mProtectionLevel(IPermissionInfo::PROTECTION_SIGNATURE)
     , mUid(0)
 {}
+
+ECode BasePermission::ToString(
+    /* [out] */ String* str)
+{
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb;
+    sb += "name=";
+    sb += mName;
+    sb += " package=";
+    sb += mSourcePackage;
+    sb += " type=";
+    sb += mType;
+    sb += " rotectionLevel=";
+    sb += mProtectionLevel;
+    sb += " uid=";
+    sb += mUid;
+    *str = sb.ToString();
+    return NOERROR;
+}
 
 } // namespace Pm
 } // namespace Server

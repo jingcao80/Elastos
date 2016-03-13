@@ -1,26 +1,37 @@
-
-#include "CCellIdentityCdma.h"
+#include "elastos/droid/telephony/CCellIdentityCdma.h"
+#include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringBuilder;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-const String CCellIdentityCdma::LOG_TAG("CCellIdentityCdma");
+const String CCellIdentityCdma::TAG("CCellIdentityCdma");
 const Boolean CCellIdentityCdma::DBG = FALSE;
+
+CAR_INTERFACE_IMPL_2(CCellIdentityCdma, Object, ICellIdentityCdma, IParcelable)
+
+CAR_OBJECT_IMPL(CCellIdentityCdma)
+
+CCellIdentityCdma::CCellIdentityCdma()
+    : mNetworkId(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mSystemId(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mBasestationId(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mLongitude(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mLatitude(Elastos::Core::Math::INT32_MAX_VALUE)
+{
+}
+
+CCellIdentityCdma::~CCellIdentityCdma()
+{
+}
 
 ECode CCellIdentityCdma::constructor()
 {
-    Int32 intMaxVal = 0x7FFFFFFF;
-    mNetworkId = intMaxVal;
-    mSystemId = intMaxVal;
-    mBasestationId = intMaxVal;
-    mLongitude = intMaxVal;
-    mLatitude = intMaxVal;
     return NOERROR;
 }
 
@@ -80,7 +91,7 @@ ECode CCellIdentityCdma::WriteToParcel(
     if (DBG) {
         String str;
         ToString(&str);
-        Slogger::I(LOG_TAG, String("writeToParcel(Parcel, int): ") + str);
+        Logger::I(TAG, String("writeToParcel(Parcel, int): ") + str);
     }
     dest->WriteInt32(mNetworkId);
     dest->WriteInt32(mSystemId);
@@ -177,13 +188,13 @@ ECode CCellIdentityCdma::ToString(
 {
     VALIDATE_NOT_NULL(str);
     StringBuilder sb;
-    sb.Append("CdmaCellIdentitiy:");
-    sb.Append("super class");
+    sb.Append("CellIdentityCdma:{");
     sb.Append(" mNetworkId="); sb.Append(mNetworkId);
     sb.Append(" mSystemId="); sb.Append(mSystemId);
     sb.Append(" mBasestationId="); sb.Append(mBasestationId);
     sb.Append(" mLongitude="); sb.Append(mLongitude);
     sb.Append(" mLatitude="); sb.Append(mLatitude);
+    sb.Append("}");
 
     *str = sb.ToString();
     return NOERROR;

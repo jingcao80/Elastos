@@ -23,7 +23,7 @@ module
             [in] INetworkControllerAccessPoint* ap);
 
         FireCallback(
-            [in] ArrayOf<INetworkControllerAccessPoint*>* aps);
+            [in] ArrayOf<IInterface*>* aps);
     }
 
     } // namespace Policy

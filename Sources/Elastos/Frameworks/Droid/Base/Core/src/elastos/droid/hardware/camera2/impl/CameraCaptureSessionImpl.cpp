@@ -547,6 +547,7 @@ ECode CameraCaptureSessionImpl::SetRepeatingRequest(
 
         FAIL_RETURN(CheckNotClosed())
 
+        AutoPtr<IHandler> tmp = handler;
         CameraDeviceImpl::CheckHandler(handler, _callback, (IHandler**)handler);
 
         if (VERBOSE) {

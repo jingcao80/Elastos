@@ -39,7 +39,7 @@ module
         GetGameHeight(
             [out] Int32* height);
 
-        getGameTime(
+        GetGameTime(
             [out] Float* time);
 
         GetLastTimeStep(
@@ -86,6 +86,23 @@ module
             [in] Int32 a,
             [in] Int32 b,
             [out] Int32* ret);
+    }
+
+    interface IGameView {
+        Step(
+            [in] Int64 t_ms,
+            [in] Int64 dt_ms,
+            [in] Float t,
+            [in] Float dt);
+    }
+
+    interface IObstacle {
+    }
+
+    interface IScenery {
+    }
+
+    interface IPop {
     }
 
     } // namespace Egg

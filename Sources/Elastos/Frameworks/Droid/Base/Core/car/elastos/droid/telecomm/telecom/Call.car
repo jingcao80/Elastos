@@ -4,200 +4,279 @@ module
     interface Elastos.Droid.Net.IUri;
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Telecomm.Telecom.ICallListener;
+    interface Elastos.Droid.Telecomm.Telecom.IParcelableCall;
     using interface Elastos.Utility.IList;
+    using interface Elastos.Utility.IMap;
 
     namespace Elastos {
     namespace Droid {
     namespace Telecomm {
     namespace Telecom {
 
-        interface ICallDetails {
-            GetHandle(
-                [out] IUri** res);
+    interface ICallDetails {
+        GetHandle(
+            [out] IUri** res);
 
-            GetHandlePresentation(
-                [out] Int32* res);
+        GetHandlePresentation(
+            [out] Int32* res);
 
-            GetCallerDisplayName(
-                [out] String* res);
+        GetCallerDisplayName(
+            [out] String* res);
 
-            GetCallerDisplayNamePresentation(
-                [out] Int32* res);
+        GetCallerDisplayNamePresentation(
+            [out] Int32* res);
 
-            GetAccountHandle(
-                [out] IPhoneAccountHandle** res);
+        GetAccountHandle(
+            [out] IPhoneAccountHandle** res);
 
-            GetCallCapabilities(
-                [out] Int32* res);
+        GetCallCapabilities(
+            [out] Int32* res);
 
-            GetCallProperties(
-                [out] Int32* res);
+        GetCallProperties(
+            [out] Int32* res);
 
-            GetDisconnectCause(
-                [out] IDisconnectCause** res);
+        GetDisconnectCause(
+            [out] IDisconnectCause** res);
 
-            GetConnectTimeMillis(
-                [out] Int64* res);
+        GetConnectTimeMillis(
+            [out] Int64* res);
 
-            GetGatewayInfo(
-                [out] IGatewayInfo** res);
+        GetGatewayInfo(
+            [out] IGatewayInfo** res);
 
-            GetVideoState(
-                [out] Int32* res);
+        GetVideoState(
+            [out] Int32* res);
 
-            GetStatusHints(
-                [out] IStatusHints** res);
+        GetStatusHints(
+            [out] IStatusHints** res);
 
-            GetExtras(
-                [out] IBundle** res);
-        }
+        GetExtras(
+            [out] IBundle** res);
+    }
+
+    /**
+     *  Encapsulates all audio states during a call.
+     *  @hide
+     */
+    interface ICall {
 
         /**
-         *  Encapsulates all audio states during a call.
-         *  @hide
+         * The state of a {@code Call} when newly created.
          */
-        interface ICall {
-            GetHandle(
-                [out] IUri** res);
+        const Int32 STATE_NEW = 0;
 
-            GetHandlePresentation(
-                [out] Int32* res);
+        /**
+         * The state of an outgoing {@code Call} when dialing the remote number, but not yet connected.
+         */
+        const Int32 STATE_DIALING = 1;
 
-            GetCallerDisplayName(
-                [out] String* res);
+        /**
+         * The state of an incoming {@code Call} when ringing locally, but not yet connected.
+         */
+        const Int32 STATE_RINGING = 2;
 
-            GetCallerDisplayNamePresentation(
-                [out] Int32* res);
+        /**
+         * The state of a {@code Call} when in a holding state.
+         */
+        const Int32 STATE_HOLDING = 3;
 
-            GetAccountHandle(
-                [out] IPhoneAccountHandle** res);
+        /**
+         * The state of a {@code Call} when actively supporting conversation.
+         */
+        const Int32 STATE_ACTIVE = 4;
 
-            GetCallCapabilities(
-                [out] Int32* res);
+        /**
+         * The state of a {@code Call} when no further voice or other communication is being
+         * transmitted, the remote side has been or will inevitably be informed that the {@code Call}
+         * is no longer active, and the local data transport has or inevitably will release resources
+         * associated with this {@code Call}.
+         */
+        const Int32 STATE_DISCONNECTED = 7;
 
-            GetCallProperties(
-                [out] Int32* res);
+        /**
+         * The state of an outgoing {@code Call}, but waiting for user input before proceeding.
+         */
+        const Int32 STATE_PRE_DIAL_WAIT = 8;
 
-            GetDisconnectCause(
-                [out] IDisconnectCause** res);
+        /**
+         * The initial state of an outgoing {@code Call}.
+         * Common transitions are to {@link #STATE_DIALING} state for a successful call or
+         * {@link #STATE_DISCONNECTED} if it failed.
+         */
+        const Int32 STATE_CONNECTING = 9;
 
-            GetConnectTimeMillis(
-                [out] Int64* res);
+        /**
+         * The state of a {@code Call} when the user has initiated a disconnection of the call, but the
+         * call has not yet been disconnected by the underlying {@code ConnectionService}.  The next
+         * state of the call is (potentially) {@link #STATE_DISCONNECTED}.
+         */
+        const Int32 STATE_DISCONNECTING = 10;
 
-            GetGatewayInfo(
-                [out] IGatewayInfo** res);
+        /**
+         * The key to retrieve the optional {@code PhoneAccount}s Telecom can bundle with its Call
+         * extras. Used to pass the phone accounts to display on the front end to the user in order to
+         * select phone accounts to (for example) place a call.
+         *
+         * @hide
+         */
+        const String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
 
-            GetVideoState(
-                [out] Int32* res);
+        GetHandle(
+            [out] IUri** res);
 
-            GetStatusHints(
-                [out] IStatusHints** res);
+        GetHandlePresentation(
+            [out] Int32* res);
 
-            GetExtras(
-                [out] IBundle** res);
+        GetCallerDisplayName(
+            [out] String* res);
 
-            GetRemainingPostDialSequence(
-                [out] String* res);
+        GetCallerDisplayNamePresentation(
+            [out] Int32* res);
 
-            Answer(
-                [in] Int32 videoState);
+        GetAccountHandle(
+            [out] IPhoneAccountHandle** res);
 
-            Reject(
-                [in] Boolean rejectWithMessage,
-                [in] String textMessage);
+        GetCallCapabilities(
+            [out] Int32* res);
 
-            Disconnect();
+        GetCallProperties(
+            [out] Int32* res);
 
-            Hold();
+        GetDisconnectCause(
+            [out] IDisconnectCause** res);
 
-            Unhold();
+        GetConnectTimeMillis(
+            [out] Int64* res);
 
-            PlayDtmfTone(
-                [in] Char32 digit);
+        GetGatewayInfo(
+            [out] IGatewayInfo** res);
 
-            StopDtmfTone();
+        GetVideoState(
+            [out] Int32* res);
 
-            PostDialContinue(
-                [in] Boolean proceed);
+        GetStatusHints(
+            [out] IStatusHints** res);
 
-            PhoneAccountSelected(
-                [in] IPhoneAccountHandle* accountHandle);
+        GetExtras(
+            [out] IBundle** res);
 
-            Conference(
-                [in] ICall* callToConferenceWith);
+        GetRemainingPostDialSequence(
+            [out] String* res);
 
-            SplitFromConference();
+        Answer(
+            [in] Int32 videoState);
 
-            MergeConference();
+        Reject(
+            [in] Boolean rejectWithMessage,
+            [in] String textMessage);
 
-            SwapConference();
+        Disconnect();
 
-            GetParent(
-                [out] ICall** res);
+        Hold();
 
-            GetChildren(
-                [out] IList** res);
+        Unhold();
 
-            GetConferenceableCalls(
-                [out] IList** res);
+        PlayDtmfTone(
+            [in] Char32 digit);
 
-            GetState(
-                [out] Int32* res);
+        StopDtmfTone();
 
-            GetCannedTextResponses(
-                [out] IList** res);
+        PostDialContinue(
+            [in] Boolean proceed);
 
-            GetVideoCall(
-                [out] IInCallServiceVideoCall** res);
+        PhoneAccountSelected(
+            [in] IPhoneAccountHandle* accountHandle);
 
-            GetDetails(
-                [out] ICallDetails** res);
+        Conference(
+            [in] ICall* callToConferenceWith);
 
-            AddListener(
-                [in] ICallListener* listener);
+        SplitFromConference();
 
-            RemoveListener(
-                [in] ICallListener* listener);
+        MergeConference();
 
+        SwapConference();
 
-       }
+        GetParent(
+            [out] ICall** res);
 
-       interface ICallListener {
-            OnStateChanged(
-                [in] ICall* call,
-                [in] Int32 state);
+        GetChildren(
+            [out] IList** res);
 
-            OnParentChanged(
-                [in] ICall* call,
-                [in] ICall* parent);
+        GetConferenceableCalls(
+            [out] IList** res);
 
-            OnChildrenChanged(
-                [in] ICall* call,
-                [in] IList* children);
+        GetState(
+            [out] Int32* res);
 
-            OnDetailsChanged(
-                [in] ICall* call,
-                [in] ICallDetails* details);
+        GetCannedTextResponses(
+            [out] IList** res);
 
-            OnCannedTextResponsesLoaded(
-                [in] ICall* call,
-                [in] IList* cannedTextResponses);
+        GetVideoCall(
+            [out] IInCallServiceVideoCall** res);
 
-            OnPostDialWait(
-                [in] ICall* call,
-                [in] String remainingPostDialSequence);
+        GetDetails(
+            [out] ICallDetails** res);
 
-            OnVideoCallChanged(
-                [in] ICall* call,
-                [in] IInCallServiceVideoCall* videoCall);
+        AddListener(
+            [in] ICallListener* listener);
 
-            OnCallDestroyed(
-                [in] ICall* call);
+        RemoveListener(
+            [in] ICallListener* listener);
 
-            OnConferenceableCallsChanged(
-                [in] ICall* call,
-                [in] IList* conferenceableCalls);
-        }
+        /** {@hide} */
+        InternalGetCallId(
+            [out] String* result);
+
+        /** {@hide} */
+        InternalUpdate(
+            [in] IParcelableCall* parcelableCall,
+            [in] IMap* callIdMap);
+
+        /** {@hide} */
+        InternalSetPostDialWait(
+            [in] String remaining);
+
+        /** {@hide} */
+        InternalSetDisconnected();
+   }
+
+   interface ICallListener {
+        OnStateChanged(
+            [in] ICall* call,
+            [in] Int32 state);
+
+        OnParentChanged(
+            [in] ICall* call,
+            [in] ICall* parent);
+
+        OnChildrenChanged(
+            [in] ICall* call,
+            [in] IList* children);
+
+        OnDetailsChanged(
+            [in] ICall* call,
+            [in] ICallDetails* details);
+
+        OnCannedTextResponsesLoaded(
+            [in] ICall* call,
+            [in] IList* cannedTextResponses);
+
+        OnPostDialWait(
+            [in] ICall* call,
+            [in] String remainingPostDialSequence);
+
+        OnVideoCallChanged(
+            [in] ICall* call,
+            [in] IInCallServiceVideoCall* videoCall);
+
+        OnCallDestroyed(
+            [in] ICall* call);
+
+        OnConferenceableCallsChanged(
+            [in] ICall* call,
+            [in] IList* conferenceableCalls);
+    }
+
     } // namespace Telecom
     } // namespace Telecomm
     } // namespace Droid

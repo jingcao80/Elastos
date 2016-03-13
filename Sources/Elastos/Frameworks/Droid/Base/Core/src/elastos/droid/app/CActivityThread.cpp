@@ -1,7 +1,8 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include <Elastos.CoreLibrary.Text.h>
-#include "Elastos.Droid.Provider.h"
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.Droid.Internal.h>
 #include "elastos/droid/app/CActivityThread.h"
 #include "elastos/droid/app/CApplicationThread.h"
 #include "elastos/droid/app/CContextImpl.h"
@@ -22,7 +23,8 @@
 #include "elastos/droid/graphics/CBitmap.h"
 #include "elastos/droid/view/View.h"
 #include "elastos/droid/view/HardwareRenderer.h"
-#include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
+#include "elastos/droid/view/ViewRootImpl.h"
+#include "elastos/droid/view/CWindowManagerGlobal.h"
 #include "elastos/droid/os/UserHandle.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/SystemClock.h"
@@ -34,9 +36,9 @@
 #include "elastos/droid/os/SystemProperties.h"
 #include "elastos/droid/os/CPersistableBundle.h"
 #include "elastos/droid/os/CMessage.h"
-#include "elastos/droid/view/ViewRootImpl.h"
-#include "elastos/droid/view/CWindowManagerGlobal.h"
+#include "elastos/droid/internal/os/CRuntimeInit.h"
 #include "elastos/droid/database/sqlite/CSQLiteDatabaseHelper.h"
+#include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
 #include "elastos/droid/R.h"
 #include <elastos/core/Thread.h>
 #include <elastos/core/StringBuilder.h>
@@ -102,6 +104,8 @@ using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::CPersistableBundle;
 using Elastos::Droid::Os::CMessage;
 using Elastos::Droid::Utility::IPair;
+using Elastos::Droid::Internal::Os::IRuntimeInit;
+using Elastos::Droid::Internal::Os::CRuntimeInit;
 
 using Elastos::Core::ISystem;
 using Elastos::Core::IClassLoader;
@@ -132,7 +136,7 @@ namespace App {
 
 const String CActivityThread::TAG("CActivityThread");
 const Boolean CActivityThread::localLOGV = FALSE;
-const Boolean CActivityThread::DEBUG_MESSAGES = FALSE;
+const Boolean CActivityThread::DEBUG_MESSAGES = TRUE;
 const Boolean CActivityThread::DEBUG_BROADCAST = FALSE;
 const Boolean CActivityThread::DEBUG_RESULTS = FALSE;
 const Boolean CActivityThread::DEBUG_BACKUP = FALSE;
@@ -1638,7 +1642,7 @@ ECode CActivityThread::InstallSystemApplicationInfo(
     /* [in] */ IApplicationInfo* info,
     /* [in] */ IClassLoader* classLoader)
 {
-    Slogger::D(TAG, " > TODO: CActivityThread::InstallSystemApplicationInfo");
+    Slogger::D(TAG, " > TODO: CActivityThread::InstallSystemApplicationInfo: %s", TO_CSTR(info));
 
     synchronized(this) {
         AutoPtr<IContextImpl> ctx;
@@ -4667,12 +4671,20 @@ AutoPtr< List<AutoPtr<IComponentCallbacks2> > > CActivityThread::CollectComponen
     /* [in] */ IConfiguration* newConfig)
 {
     AutoPtr< List<AutoPtr<IComponentCallbacks2> > > callbacks = new List<AutoPtr<IComponentCallbacks2> >();
+    // assert(0 && "TODO");
+    IComponentCallbacks* cc;
+    IComponentCallbacks2* cc2;
 
     {
         AutoLock lock(mResourcesManager);
         List<AutoPtr<IApplication> >::Iterator it;
         for (it = mAllApplications.Begin(); it != mAllApplications.End(); ++it) {
-            callbacks->PushBack(IComponentCallbacks2::Probe(*it));
+            // assert(0 && "TODO");
+            cc = IComponentCallbacks::Probe(*it);
+            assert(cc);
+            cc2 = IComponentCallbacks2::Probe(*it);
+            assert(cc2);
+            callbacks->PushBack(cc2);
         }
 
         if (mActivities.Begin() != mActivities.End()) {
@@ -4690,7 +4702,12 @@ AutoPtr< List<AutoPtr<IComponentCallbacks2> > > CActivityThread::CollectComponen
                     if (!isFinish && (allActivities || !ar->mPaused)) {
                         // If the activity is currently resumed, its configuration
                         // needs to change right now.
-                        callbacks->PushBack(IComponentCallbacks2::Probe(a));
+                        // assert(0 && "TODO");
+                        cc = IComponentCallbacks::Probe(a);
+                        assert(cc);
+                        cc2 = IComponentCallbacks2::Probe(a);
+                        assert(cc2);
+                        callbacks->PushBack(cc2);
                     }
                     else if (thisConfig != NULL) {
                         // Otherwise, we will tell it about the change
@@ -4711,7 +4728,12 @@ AutoPtr< List<AutoPtr<IComponentCallbacks2> > > CActivityThread::CollectComponen
             HashMap<AutoPtr<IBinder>, AutoPtr<IService> >:: Iterator it;
             for (it = mServices.Begin(); it != mServices.End(); ++it) {
                 AutoPtr<IService> service = it->mSecond;
-                callbacks->PushBack(IComponentCallbacks2::Probe(service));
+                // assert(0 && "TODO");
+                cc = IComponentCallbacks::Probe(service);
+                assert(cc);
+                cc2 = IComponentCallbacks2::Probe(service);
+                assert(cc2);
+                callbacks->PushBack(cc2);
             }
         }
     }
@@ -4721,7 +4743,12 @@ AutoPtr< List<AutoPtr<IComponentCallbacks2> > > CActivityThread::CollectComponen
             HashMap<AutoPtr<IBinder>, AutoPtr<ProviderClientRecord> >::Iterator it;
             for (it = mLocalProviders.Begin(); it != mLocalProviders.End(); ++it) {
                 AutoPtr<ProviderClientRecord> providerClientRecord = it->mSecond;
-                callbacks->PushBack(IComponentCallbacks2::Probe(providerClientRecord->mLocalProvider));
+                // assert(0 && "TODO");
+                cc = IComponentCallbacks::Probe(providerClientRecord->mLocalProvider);
+                assert(cc);
+                cc2 = IComponentCallbacks2::Probe(providerClientRecord->mLocalProvider);
+                assert(cc2);
+                callbacks->PushBack(cc2);
             }
         }
     }
@@ -4769,7 +4796,7 @@ ECode CActivityThread::PerformConfigurationChanged(
     if (DEBUG_CONFIGURATION)
         Slogger::V(TAG, "Config callback %p: shouldChangeConfig=%d", cb, shouldChangeConfig);
     if (shouldChangeConfig) {
-        activity->OnConfigurationChanged(config);
+        IComponentCallbacks::Probe(cb)->OnConfigurationChanged(config);
 
         if (activity != NULL) {
             Boolean isCalled;
@@ -6283,7 +6310,9 @@ ECode CActivityThread::Attach(
 //         });
 //         android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
 //                                                 UserHandle.myUserId());
-//         RuntimeInit.setApplicationObject(mAppThread.asBinder());
+        AutoPtr<IRuntimeInit> runtimeInit;
+        CRuntimeInit::AcquireSingleton((IRuntimeInit**)&runtimeInit);
+        runtimeInit->SetApplicationObject(IBinder::Probe(mAppThread));
         AutoPtr<IIActivityManager> mgr = ActivityManagerNative::GetDefault();
 //         try {
         mgr->AttachApplication(mAppThread);

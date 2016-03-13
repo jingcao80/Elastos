@@ -515,8 +515,7 @@ public:
         /* [in] */ IResourcesTheme* theme);
 
     // @Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
     CARAPI_(AutoPtr<IInterface>) GetTargetByName(
         /* [in] */ const String& name);

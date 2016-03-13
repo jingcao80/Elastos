@@ -9,6 +9,11 @@ module
     namespace Telecomm {
     namespace Telecom {
 
+    inteface IVideoCallbackServant {
+        GetStub(
+            [out] IIVideoCallback** stub);
+    }
+
     } // namespace Telecom
     } // namespace Telecomm
     } // namespace Droid

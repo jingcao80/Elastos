@@ -142,7 +142,7 @@ private:
 private:
     static const String TAG;
     static const Int32 BUILT_IN_DISPLAY_IDS_TO_SCAN[];
-    static const Int32 BUILT_IN_DISPLAY_IDS_COUNT = 2;
+    static const Int32 BUILT_IN_DISPLAY_IDS_COUNT;
 
     HashMap<Int32, AutoPtr<LocalDisplayDevice> > mDevices;
     AutoPtr<HotplugDisplayEventReceiver> mHotplugReceiver;

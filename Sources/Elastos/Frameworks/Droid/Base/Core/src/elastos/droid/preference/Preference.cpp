@@ -275,8 +275,9 @@ ECode Preference::OnCreateView(
     /* [out] */ IView** view)
 {
     VALIDATE_NOT_NULL(view)
-    AutoPtr<ILayoutInflater> layoutInflater;
-    mContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&layoutInflater);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ILayoutInflater> layoutInflater = ILayoutInflater::Probe(obj);
 
     AutoPtr<IView> layout;
     layoutInflater->Inflate(mLayoutResId, parent, FALSE, (IView**)&layout);

@@ -13,6 +13,7 @@
 #include <elastos/core/Thread.h>
 #include <elastos/utility/etl/List.h>
 
+using Elastos::Droid::App::IIActivityManager;
 using Elastos::Droid::Internal::App::IIProcessStats;
 using Elastos::Droid::Internal::App::IProcessStats;
 using Elastos::Droid::Internal::App::IProcessState;
@@ -94,7 +95,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle32 am,
+        /* [in] */ IIActivityManager* am,
         /* [in] */ IFile* file);
 
     CARAPI_(AutoPtr<IProcessState>) GetProcessStateLocked(

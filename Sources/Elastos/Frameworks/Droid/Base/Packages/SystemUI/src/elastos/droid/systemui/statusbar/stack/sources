@@ -1,0 +1,16 @@
+
+TARGET_NAME= stack
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../../sources.inc
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+SOURCES += AmbientState.cpp
+SOURCES += AnimationFilter.cpp
+SOURCES += StackIndentationFunctor.cpp
+SOURCES += PiecewiseLinearIndentationFunctor.cpp
+SOURCES += StackScrollState.cpp
+SOURCES += StackScrollAlgorithm.cpp
+SOURCES += StackStateAnimator.cpp
+SOURCES += CNotificationStackScrollLayout.cpp

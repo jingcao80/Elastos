@@ -9,43 +9,15 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CSumPathEffect);
+CAR_INTERFACE_IMPL(CSumPathEffect, PathEffect, ISumPathEffect);
 ECode CSumPathEffect::constructor(
     /* [in] */ IPathEffect* first,
     /* [in] */ IPathEffect* second)
 {
     mNativeInstance = NativeCreate((
-            (PathEffect*)(IPathEffect*)first->Probe(EIID_PathEffect))->mNativeInstance,
-            ((PathEffect*)(IPathEffect*)second->Probe(EIID_PathEffect))->mNativeInstance);
+            (PathEffect*)first)->mNativeInstance,
+            ((PathEffect*)second)->mNativeInstance);
     return NOERROR;
-}
-
-PInterface CSumPathEffect::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_PathEffect) {
-        return reinterpret_cast<PInterface>((PathEffect*)this);
-    }
-    else if (riid == EIID_ISumPathEffect) {
-        return (ISumPathEffect*)this;
-    }
-    return PathEffect::Probe(riid);
-}
-
-UInt32 CSumPathEffect::AddRef()
-{
-    return PathEffect::AddRef();
-}
-
-UInt32 CSumPathEffect::Release()
-{
-    return PathEffect::Release();
-}
-
-ECode CSumPathEffect::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return PathEffect::GetInterfaceID(object, iid);
 }
 
 Int64 CSumPathEffect::NativeCreate(

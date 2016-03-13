@@ -12,6 +12,7 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CBitmapShader);
+CAR_INTERFACE_IMPL(CBitmapShader, Shader, IBitmapShader);
 ECode CBitmapShader::constructor(
     /* [in] */ IBitmap* bitmap,
     /* [in] */ ShaderTileMode tileX,
@@ -35,35 +36,6 @@ ECode CBitmapShader::Copy(
     *shader = copy;
     REFCOUNT_ADD(*shader);
     return NOERROR;
-}
-
-PInterface CBitmapShader::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_Shader) {
-        return reinterpret_cast<PInterface>((Shader*)this);
-    }
-    else if (riid == EIID_IBitmapShader) {
-        return ((IBitmapShader*)this);
-    }
-    return Shader::Probe(riid);
-}
-
-UInt32 CBitmapShader::AddRef()
-{
-    return Shader::AddRef();
-}
-
-UInt32 CBitmapShader::Release()
-{
-    return Shader::Release();
-}
-
-ECode CBitmapShader::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return Shader::GetInterfaceID(object, iid);
 }
 
 Int64 CBitmapShader::NativeCreate(

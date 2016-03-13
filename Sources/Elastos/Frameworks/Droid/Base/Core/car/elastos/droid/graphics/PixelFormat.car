@@ -71,6 +71,9 @@ module
         GetPixelFormatInfo(
             [in] Int32 format,
             [in] IPixelFormat* info);
+
+        GetBitsPerPixel(
+            [out] Int32* result);
     }
 
     } // namespace Graphics

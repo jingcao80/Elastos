@@ -100,9 +100,7 @@ ECode DisplaySettings::ReadSettingsLocked()
     // try {
     ECode ec = mFile->OpenRead((IFileInputStream**)&stream);
     if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
-        AutoPtr<IFile> baseF;
-        mFile->GetBaseFile((IFile**)&baseF);
-        Slogger::I(TAG, "No existing display settings %p; starting empty", baseF.Get());
+        Slogger::I(TAG, "No existing display settings %s; starting empty", TO_CSTR(mFile));
         return NOERROR;
     }
     // } catch (FileNotFoundException e) {

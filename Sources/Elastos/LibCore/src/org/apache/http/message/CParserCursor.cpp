@@ -76,11 +76,11 @@ ECode CParserCursor::ToString(
     AutoPtr<ICharArrayBuffer> buffer;
     CCharArrayBuffer::New(16, (ICharArrayBuffer**)&buffer);
     buffer->Append('[');
-    buffer->Append(StringUtils::ToString(mLowerBound));
+    buffer->Append(mLowerBound);
     buffer->Append('>');
-    buffer->Append(StringUtils::ToString(mPos));
+    buffer->Append(mPos);
     buffer->Append('>');
-    buffer->Append(StringUtils::ToString(mUpperBound));
+    buffer->Append(mUpperBound);
     buffer->Append(']');
     return IObject::Probe(buffer)->ToString(str);
 }

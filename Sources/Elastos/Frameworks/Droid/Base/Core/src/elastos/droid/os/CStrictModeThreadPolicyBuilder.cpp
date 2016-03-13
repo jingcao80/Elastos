@@ -6,6 +6,10 @@ namespace Elastos {
 namespace Droid {
 namespace Os {
 
+CAR_INTERFACE_IMPL(CStrictModeThreadPolicyBuilder, Object, IStrictModeThreadPolicyBuilder)
+
+CAR_OBJECT_IMPL(CStrictModeThreadPolicyBuilder)
+
 ECode CStrictModeThreadPolicyBuilder::constructor()
 {
     mMask = 0;

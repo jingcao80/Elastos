@@ -179,9 +179,9 @@ public class WifiStatusTest extends Activity {
             mHiddenSSID->SetText(String->ValueOf(wifiInfo->GetHiddenSSID()));
             Int32 ipAddr = wifiInfo->GetIpAddress();
             StringBuffer ipBuf = new StringBuffer();
-            ipBuf->Append(ipAddr  & 0xff).Append('.').
-                Append((ipAddr >>>= 8) & 0xff).Append('.').
-                Append((ipAddr >>>= 8) & 0xff).Append('.').
+            ipBuf->Append(ipAddr  & 0xff).AppendChar32('.').
+                Append((ipAddr >>>= 8) & 0xff).AppendChar32('.').
+                Append((ipAddr >>>= 8) & 0xff).AppendChar32('.').
                 Append((ipAddr >>>= 8) & 0xff);
 
             mIPAddr->SetText(ipBuf);

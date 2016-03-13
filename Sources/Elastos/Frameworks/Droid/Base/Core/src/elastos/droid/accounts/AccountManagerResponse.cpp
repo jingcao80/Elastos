@@ -6,6 +6,8 @@ namespace Elastos {
 namespace Droid {
 namespace Accounts {
 
+CAR_INTERFACE_IMPL(AccountManagerResponse, Object, IParcelable);
+
 AccountManagerResponse::AccountManagerResponse(
     /* [in] */ IAccountManagerResponse* response)
     : mResponse(response)
@@ -18,27 +20,17 @@ AccountManagerResponse::AccountManagerResponse(
             (Handle32*)(IAccountManagerResponse**)&mResponse));
 }
 
-CAR_INTERFACE_IMPL(AccountManagerResponse, IParcelable);
-
 ECode AccountManagerResponse::OnResult(
     /* [in] */ IBundle* result)
 {
-    // try {
     return mResponse->OnResult(result);
-    // } catch (RemoteException e) {
-    //     // this should never happen
-    // }
 }
 
-ECode AccountManagerResponse::onError(
+ECode AccountManagerResponse::OnError(
     /* [in] */ Int32 errorCode,
     /* [in] */ const String& errorMessage)
 {
-    // try {
     return mResponse->OnError(errorCode, errorMessage);
-    // } catch (RemoteException e) {
-    //     // this should never happen
-    // }
 }
 
 ECode AccountManagerResponse::WriteToParcel(

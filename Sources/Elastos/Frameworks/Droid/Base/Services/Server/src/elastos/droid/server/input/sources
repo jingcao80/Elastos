@@ -5,11 +5,17 @@ INCLUDES += ../
 INCLUDES += $(MAKEDIR)/../../../../../inc
 INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
 
+#PREBUILD_INC = ./Build/Prebuilt/Linux/usr/include
+INCLUDES += $(PREBUILD_INC)/skia/core
+
 C_DEFINES += -DDROID_SERVER
 include $(MAKEDIR)/../../../../../../../../sources.inc
 
 SOURCES = InputApplicationHandle.cpp
 SOURCES += InputWindowHandle.cpp
 SOURCES += PersistentDataStore.cpp
-SOURCES += CIInputFilterHost.cpp
+SOURCES += CInputFilterHost.cpp
 SOURCES += CInputManagerService.cpp
+SOURCES += NativeInputManager.cpp
+SOURCES += NativeInputApplicationHandle.cpp
+SOURCES += NativeInputWindowHandle.cpp

@@ -537,7 +537,7 @@ ECode TvInputManagerService::BinderService::ReleaseSession(
     /* [in] */ Int32 userId)
 {
     if (DEBUG) {
-        Slogger::D(TAG, "releaseSession(sessionToken=%s)", Object::ToString(sessionToken).string());
+        Slogger::D(TAG, "releaseSession(sessionToken=%s)", TO_CSTR(sessionToken));
     }
     Int32 callingUid = Binder::GetCallingUid();
     Int32 resolvedUserId;
@@ -560,7 +560,7 @@ ECode TvInputManagerService::BinderService::SetMainSession(
     /* [in] */ Int32 userId)
 {
     if (DEBUG) {
-        Slogger::D(TAG, "setMainSession(sessionToken=%s)", Object::ToString(sessionToken).string());
+        Slogger::D(TAG, "setMainSession(sessionToken=%s)", TO_CSTR(sessionToken));
     }
     Int32 callingUid = Binder::GetCallingUid();
     Int32 resolvedUserId;
@@ -578,7 +578,7 @@ ECode TvInputManagerService::BinderService::SetMainSession(
                 return NOERROR;
             }
             if (DEBUG) {
-                Slogger::D(TAG, "mainSessionToken=%s", Object::ToString(sessionToken).string());
+                Slogger::D(TAG, "mainSessionToken=%s", TO_CSTR(sessionToken));
             }
             AutoPtr<IBinder> oldMainSessionToken = userState->mMainSessionToken;
             userState->mMainSessionToken = sessionToken;
@@ -1334,7 +1334,7 @@ ECode TvInputManagerService::BinderService::Dump(
                 entry->GetValue((IInterface**)&obj);
                 AutoPtr<ClientState> client = (ClientState*) IObject::Probe(obj);
                 String s;
-                s.AppendFormat("%s:%s", Object::ToString(Ptr(entry)->Func(entry->GetKey)).string(), Object::ToString(client).string());
+                s.AppendFormat("%s:%s", Object::ToString(Ptr(entry)->Func(entry->GetKey)).string(), TO_CSTR(client));
                 IPrintWriter::Probe(pw)->Println(s);
                 pw->IncreaseIndent();
                 IPrintWriter::Probe(pw)->Println(String("sessionTokens:"));
@@ -1363,7 +1363,7 @@ ECode TvInputManagerService::BinderService::Dump(
                 obj = NULL;
                 entry->GetKey((IInterface**)&obj);
                 String s;
-                s.AppendFormat("%s:%s", Object::ToString(obj).string(), Object::ToString(service).string());
+                s.AppendFormat("%s:%s", TO_CSTR(obj), TO_CSTR(service));
                 IPrintWriter::Probe(pw)->Println(s);
                 pw->IncreaseIndent();
                 IPrintWriter::Probe(pw)->Println(String("sessionTokens:"));
@@ -1523,7 +1523,7 @@ ECode TvInputManagerService::TvInputState::ToString(
     VALIDATE_NOT_NULL(result)
 
     String rev;
-    rev.AppendFormat("info: %s; state: %d", Object::ToString(mInfo).string(), mState);
+    rev.AppendFormat("info: %s; state: %d", TO_CSTR(mInfo), mState);
     *result = rev;
     return NOERROR;
 }
@@ -1612,7 +1612,7 @@ ECode TvInputManagerService::InputServiceConnection::OnServiceConnected(
     /* [in] */ IBinder* service)
 {
     if (DEBUG) {
-        Slogger::D(TAG, "onServiceConnected(component=%s)", Object::ToString(component).string());
+        Slogger::D(TAG, "onServiceConnected(component=%s)", TO_CSTR(component));
     }
     synchronized(mHost->mLock) {
         AutoPtr<UserState> userState;
@@ -1694,13 +1694,13 @@ ECode TvInputManagerService::InputServiceConnection::OnServiceDisconnected(
     /* [in] */ IComponentName* component)
 {
     if (DEBUG) {
-        Slogger::D(TAG, "onServiceDisconnected(component=%s)", Object::ToString(component).string());
+        Slogger::D(TAG, "onServiceDisconnected(component=%s)", TO_CSTR(component));
     }
     Boolean isEquals;
     IObject::Probe(mComponent)->Equals(component, &isEquals);
     if (!isEquals) {
         Logger::E(TAG, "Mismatched ComponentName: %s (expected), %s (actual).",
-                Object::ToString(mComponent).string(), Object::ToString(component).string());
+                TO_CSTR(mComponent), TO_CSTR(component));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     synchronized(mHost->mLock) {
@@ -1941,7 +1941,7 @@ ECode TvInputManagerService::SessionCallback::OnChannelRetuned(
 {
     synchronized(mHost->mLock) {
         if (DEBUG) {
-            Slogger::D(TAG, "onChannelRetuned(%s)", Object::ToString(channelUri).string());
+            Slogger::D(TAG, "onChannelRetuned(%s)", TO_CSTR(channelUri));
         }
         if (mSessionState->mSession == NULL || mSessionState->mClient == NULL) {
             return NOERROR;
@@ -1970,7 +1970,7 @@ ECode TvInputManagerService::SessionCallback::OnTracksChanged(
 {
     synchronized(mHost->mLock) {
         if (DEBUG) {
-            Slogger::D(TAG, "onTracksChanged(%s)", Object::ToString(tracks).string());
+            Slogger::D(TAG, "onTracksChanged(%s)", TO_CSTR(tracks));
         }
         if (mSessionState->mSession == NULL || mSessionState->mClient == NULL) {
             return NOERROR;
@@ -2150,7 +2150,7 @@ ECode TvInputManagerService::SessionCallback::OnSessionEvent(
 {
     synchronized(mHost->mLock) {
         if (DEBUG) {
-            Slogger::D(TAG, "onEvent(what=%s, data=%s)", eventType.string(), Object::ToString(eventArgs).string());
+            Slogger::D(TAG, "onEvent(what=%s, data=%s)", eventType.string(), TO_CSTR(eventArgs));
         }
         if (mSessionState->mSession == NULL || mSessionState->mClient == NULL) {
             return NOERROR;
@@ -3009,7 +3009,7 @@ ECode TvInputManagerService::GetServiceStateLocked(
     AutoPtr<ServiceState> serviceState = (ServiceState*) IObject::Probe(obj);
     if (serviceState == NULL) {
         Logger::E(TAG, "Service state not found for %s (userId=%d)",
-                Object::ToString(component).string(), userId);
+                TO_CSTR(component), userId);
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     FUNC_RETURN(serviceState)
@@ -3030,13 +3030,13 @@ ECode TvInputManagerService::GetSessionStateLocked(
     userState->mSessionStateMap->Get(sessionToken, (IInterface**)&obj);
     AutoPtr<SessionState> sessionState = (SessionState*) IObject::Probe(obj);
     if (sessionState == NULL) {
-        Logger::E(TAG, "Session state not found for token %s", Object::ToString(sessionToken).string());
+        Logger::E(TAG, "Session state not found for token %s", TO_CSTR(sessionToken));
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
     // Only the application that requested this session or the system can access it.
     if (callingUid != IProcess::SYSTEM_UID && callingUid != sessionState->mCallingUid) {
         Logger::E(TAG, "Illegal access to the session with token %s from uid %d",
-                Object::ToString(sessionToken).string(), callingUid);
+                TO_CSTR(sessionToken), callingUid);
         return E_SECURITY_EXCEPTION;
     }
     FUNC_RETURN(sessionState)
@@ -3066,7 +3066,7 @@ ECode TvInputManagerService::GetSessionLocked(
     AutoPtr<IITvInputSession> session = sessionState->mSession;
     if (session == NULL) {
         Logger::E(TAG, "Session not yet created for token %s",
-                Object::ToString(sessionState->mSessionToken).string());
+                TO_CSTR(sessionState->mSessionToken));
         return E_ILLEGAL_STATE_EXCEPTION;
     }
     FUNC_RETURN(session)
@@ -3126,7 +3126,7 @@ ECode TvInputManagerService::UpdateServiceConnectionLocked(
             return NOERROR;
         }
         if (DEBUG) {
-            Slogger::D(TAG, "bindServiceAsUser(service=%s, userId=%d)", Object::ToString(component).string(), userId);
+            Slogger::D(TAG, "bindServiceAsUser(service=%s, userId=%d)", TO_CSTR(component), userId);
         }
         AutoPtr<IIntent> i;
         CIntent::New(ITvInputService::SERVICE_INTERFACE, (IIntent**)&i);
@@ -3139,7 +3139,7 @@ ECode TvInputManagerService::UpdateServiceConnectionLocked(
         // This means that the service is already connected but its state indicates that we have
         // nothing to do with it. Then, disconnect the service.
         if (DEBUG) {
-            Slogger::D(TAG, "unbindService(service=%s)", Object::ToString(component).string());
+            Slogger::D(TAG, "unbindService(service=%s)", TO_CSTR(component));
         }
         mContext->UnbindService(serviceState->mConnection);
         userState->mServiceStateMap->Remove(component);

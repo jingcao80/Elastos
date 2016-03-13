@@ -22,6 +22,54 @@ module
         IsValid(
             [out] Boolean * result);
 
+        GetId(
+            [out] String* id);
+
+        SetId(
+            [in] String id);
+
+        GetName(
+            [out] String* name);
+
+        SetName(
+            [in] String name);
+
+        GetDescription(
+            [out] String* description);
+
+        SetDescription(
+            [in] String description);
+
+        GetStatus(
+            [out] Int32* status);
+
+        SetStatus(
+            [in] Int32 status);
+
+        GetVolume(
+            [out] Int32* volume);
+
+        SetVolume(
+            [in] Int32 volume);
+
+        GetVolumeMax(
+            [out] Int32* volumeMax);
+
+        SetVolumeMax(
+            [in] Int32 volumeMax);
+
+        GetVolumeHandling(
+            [out] Int32* volumeHandling);
+
+        SetVolumeHandling(
+            [in] Int32 volumeHandling);
+
+        GetPresentationDisplayId(
+            [out] Int32* presentationDisplayId);
+
+        SetPresentationDisplayId(
+            [in] Int32 presentationDisplayId);
+
     }
 
     /**

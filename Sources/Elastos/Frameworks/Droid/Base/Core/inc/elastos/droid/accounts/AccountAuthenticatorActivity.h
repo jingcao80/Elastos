@@ -1,7 +1,8 @@
 #ifndef __ELASTOS_DROID_ACCOUNTS_ACCOUNTAUTHENTICATORACTIVITY_H__
 #define __ELASTOS_DROID_ACCOUNTS_ACCOUNTAUTHENTICATORACTIVITY_H__
 
-#include "Elastos.Droid.Core_server.h"
+//#include "Elastos.Droid.Core.Server.h"
+#include "_Elastos.Droid.Accounts.h"
 #include "elastos/droid/app/Activity.h"
 
 using Elastos::Droid::App::Activity;
@@ -24,16 +25,20 @@ namespace Accounts {
  * is never set or if it is set to null then error {@link AccountManager#ERROR_CODE_CANCELED}
  * will be called on the response.
  */
-class AccountAuthenticatorActivity : public Activity
+class AccountAuthenticatorActivity
+    : public Activity
+    , public IAccountAuthenticatorActivity
 {
 public:
+    CAR_INTERFACE_DECL()
+
     /**
      * Set the result that is to be sent as the result of the request that caused this
      * Activity to be launched. If result is null or this method is never called then
      * the request will be canceled.
      * @param result this is returned as the result of the AbstractAccountAuthenticator request
      */
-    CARAPI_(void) SetAccountAuthenticatorResult(
+    CARAPI SetAccountAuthenticatorResult(
         /* [in] */ IBundle* result);
 
     /**

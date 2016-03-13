@@ -274,13 +274,14 @@ public:
     public:
         CAR_INTERFACE_DECL()
 
+        Size();
         /**
          * Sets the dimensions for pictures.
          *
          * @param w the photo width (pixels)
          * @param h the photo height (pixels)
          */
-        Size(
+        CARAPI constructor(
             /* [in] */ Int32 w,
             /* [in] */ Int32 h);
 

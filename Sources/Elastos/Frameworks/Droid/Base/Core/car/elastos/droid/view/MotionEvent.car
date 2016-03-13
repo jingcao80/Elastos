@@ -2228,6 +2228,9 @@ module
 
     [deprecated]
     interface IMotionEventHelper {
+        Obtain(
+            [out] IMotionEvent** o);
+
         /**
          * Create a new MotionEvent, filling in all of the basic values that
          * define the motion.

@@ -27,8 +27,11 @@ class HdmiCecLocalDevice;
  */
 class SendKeyAction
     : public HdmiCecFeatureAction
+    , public ISendKeyAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     SendKeyAction();
 
     /**
@@ -39,7 +42,7 @@ public:
      * @param keycode remote control key code as defined in {@link KeyEvent}
      */
     CARAPI constructor(
-        /* [in] */ HdmiCecLocalDevice* source,
+        /* [in] */ IHdmiCecLocalDevice* source,
         /* [in] */ Int32 targetAddress,
         /* [in] */ Int32 keycode);
 

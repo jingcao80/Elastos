@@ -4,9 +4,9 @@
 
 #include "Elastos.Droid.Webkit.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/webkit/native/android_webview/AwQuotaManagerBridge.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/AwQuotaManagerBridge.h"
 
-using Elastos::Droid::Webkit::AndroidWebview::AwQuotaManagerBridge;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::AwQuotaManagerBridge;
 using Elastos::Droid::Webkit::IValueCallback;
 using Elastos::Droid::Webkit::IWebStorage;
 

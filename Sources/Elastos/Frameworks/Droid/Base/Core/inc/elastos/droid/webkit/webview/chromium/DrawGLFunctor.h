@@ -3,11 +3,11 @@
 #define _ELASTOS_DROID_WEBKIT_WEBVIEW_CHROMIUM_DRAWGLFUNCTOR_H_
 
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/webkit/native/content/common/CleanupReference.h"
+#include "elastos/droid/webkit/webview/chromium/native/content/common/CleanupReference.h"
 
 using Elastos::Droid::View::IHardwareCanvas;
 using Elastos::Droid::View::IViewRootImpl;
-using Elastos::Droid::Webkit::Content::Common::CleanupReference;
+using Elastos::Droid::Webkit::Webview::Chromium::Content::Common::CleanupReference;
 using Elastos::Core::IRunnable;
 
 namespace Elastos {

@@ -1,40 +1,38 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_Server_Firewall_FilterFactory_H__
+#define __ELASTOS_DROID_Server_Firewall_FilterFactory_H__
 
-package com.android.server.firewall;
+#include "_Elastos.Droid.Server.h"
+#include "elastos/core/Object.h"
 
-using Org::Xmlpull::V1::IXmlPullParser;
-using Org::Xmlpull::V1::IXmlPullParserException;
+using Elastos::Droid::Server::Firewall::IFilter;
 
-using Elastos::IO::IIOException;
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Firewall {
 
-public abstract class FilterFactory {
-    private final String mTag;
+class FilterFactory
+    : public Object
+{
+public:
+    CARAPI_(String) GetTagName();
 
-    protected FilterFactory(String tag) {
-        if (tag == NULL) {
-            throw new NullPointerException();
-        }
-        mTag = tag;
-    }
+    // throws IOException, XmlPullParserException;
+    virtual IFilter* NewFilter(
+        /* in */ IXmlPullParser* parser);
 
-    public String GetTagName() {
-        return mTag;
-    }
+protected:
+    FilterFactory();
 
-    public abstract Filter NewFilter(XmlPullParser parser)
-            throws IOException, XmlPullParserException;
-}
+    CARAPI constructor(
+        /* in */ const String& tag);
+private:
+    String mTag;
+};
+
+} // Firewall
+} // Server
+} // Droid
+} // Elastos
+
+#endif // __ELASTOS_DROID_Server_Firewall_FilterFactory_H__

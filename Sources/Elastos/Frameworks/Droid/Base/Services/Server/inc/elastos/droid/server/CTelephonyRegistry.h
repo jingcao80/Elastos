@@ -6,6 +6,7 @@
 #include <elastos/droid/os/Handler.h>
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/utility/etl/List.h>
+#include <Elastos.Droid.Telephony.h>
 #include <Elastos.CoreLibrary.IO.h>
 #include <Elastos.CoreLibrary.Utility.h>
 
@@ -26,7 +27,6 @@ using Elastos::Droid::Telephony::IDataConnectionRealTimeInfo;
 using Elastos::Droid::Telephony::ITelephonyManager;
 using Elastos::Droid::Telephony::ISubscriptionManager;
 using Elastos::Droid::Telephony::IPhoneStateListener;
-using Elastos::Droid::Telephony::IServiceState;
 using Elastos::Droid::Telephony::ISignalStrength;
 using Elastos::Droid::Telephony::ICellInfo;
 using Elastos::Droid::Telephony::IVoLteServiceState;
@@ -66,7 +66,7 @@ public:
         /* [in] */ const String& s,
         /* [in] */ Int64 subId,
         /* [in] */ Int32 phoneId,
-        /* [in] */ IServiceState* state);
+        /* [in] */ Elastos::Droid::Telephony::IServiceState* state);
 
     //@Override
     CARAPI ToString(
@@ -76,7 +76,7 @@ private:
     String mS;
     Int64 mSubId;
     Int32 mPhoneId;
-    AutoPtr<IServiceState> mState;
+    AutoPtr<Elastos::Droid::Telephony::IServiceState> mState;
 };
 
 }// Server
@@ -124,15 +124,11 @@ private:
         String mPkgForDebug;
 
         AutoPtr<IBinder> mBinder;
-
         AutoPtr<IIPhoneStateListener> mCallback;
 
         Int32 mCallerUid;
-
         Int32 mEvents;
-
         Int64 mSubId;
-
         Int32 mPhoneId;
     };
 
@@ -224,7 +220,7 @@ public:
     CARAPI NotifyServiceStateForPhoneId(
         /* [in] */ Int32 phoneId,
         /* [in] */ Int64 subId,
-        /* [in] */ IServiceState* state);
+        /* [in] */ Elastos::Droid::Telephony::IServiceState* state);
 
     CARAPI NotifySignalStrength(
         /* [in] */ ISignalStrength* signalStrength);
@@ -342,7 +338,7 @@ private:
     //
 
     CARAPI BroadcastServiceStateChanged(
-        /* [in] */ IServiceState* state,
+        /* [in] */ Elastos::Droid::Telephony::IServiceState* state,
         /* [in] */ Int64 subId);
 
     CARAPI BroadcastSignalStrengthChanged(
@@ -408,7 +404,7 @@ private:
         /* [in] */ const String& s,
         /* [in] */ Int64 subId,
         /* [in] */ Int32 phoneId,
-        /* [in] */ IServiceState* state);
+        /* [in] */ Elastos::Droid::Telephony::IServiceState* state);
 
     CARAPI ToStringLogSSC(
         /* [in] */ const String& prompt);
@@ -435,7 +431,7 @@ private:
 
     AutoPtr< ArrayOf<String> > mCallIncomingNumber;
 
-    AutoPtr< ArrayOf<IServiceState*> > mServiceState;
+    AutoPtr< ArrayOf<Elastos::Droid::Telephony::IServiceState*> > mServiceState;
 
     AutoPtr< ArrayOf<ISignalStrength*> > mSignalStrength;
 

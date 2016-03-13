@@ -2,16 +2,16 @@
 #ifndef __ELASTOS_DROID_SERVER_AM_BATTERYSTATSSERVICE_H__
 #define __ELASTOS_DROID_SERVER_AM_BATTERYSTATSSERVICE_H__
 
+#include "elastos/droid/ext/frameworkext.h"
+#include "Elastos.Droid.Os.h"
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Internal.h"
-#include "Elastos.Droid.Os.h"
-#include "elastos/droid/ext/frameworkext.h"
-#include "elastos/core/Object.h"
+#include "Elastos.Droid.Bluetooth.h"
 #include "elastos/core/Thread.h"
 
 using Elastos::Droid::Bluetooth::IBluetoothHeadset;
 using Elastos::Droid::Bluetooth::IBluetoothProfile;
-//TODO using Elastos::Droid::Bluetooth::IBluetoothProfileServiceListener;
+using Elastos::Droid::Bluetooth::IBluetoothProfileServiceListener;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Internal::App::IIBatteryStats;
 using Elastos::Droid::Internal::Os::IBatteryStatsImpl;
@@ -35,22 +35,22 @@ namespace Am {
 
 class BatteryStatsService
     : public Object
-    , public IBinder
     , public IIBatteryStats
     , public ILowPowerModeListener
+    , public IBinder
 {
 private:
     class BluetoothProfileServiceListener
         : public Object
-        //TODO , public IBluetoothProfileServiceListener
+        , public IBluetoothProfileServiceListener
     {
     public:
+        CAR_INTERFACE_DECL()
+
         BluetoothProfileServiceListener(
             /* [in] */ BatteryStatsService* host)
             : mHost(host)
         {}
-
-        //TODO CAR_INTERFACE_DECL()
 
         CARAPI OnServiceConnected(
             /* [in] */ Int32 profile,
@@ -75,7 +75,7 @@ private:
     private:
         AutoPtr<ArrayOf<Int32> > mIrqs;
         AutoPtr<ArrayOf<String> > mReasons;
-        BatteryStatsService* mOwner;
+        BatteryStatsService* mHost;
     };
 
 public:
@@ -87,7 +87,7 @@ public:
         /* [in] */ IFile* systemDir,
         /* [in] */ IHandler* handler);
 
-    CARAPI_(void) Publish(
+    CARAPI Publish(
         /* [in] */ IContext* context);
 
     /**
@@ -416,10 +416,8 @@ public:
 
 private:
     Boolean mBluetoothPendingStats;
-    //TODO AutoPtr<IBluetoothHeadset> mBluetoothHeadset;
-    IBluetoothHeadset* mBluetoothHeadset;//TODO remove, replaced by above line
-
-    //TODO AutoPtr<IBluetoothProfileServiceListener> mBluetoothProfileServiceListener;
+    AutoPtr<IBluetoothHeadset> mBluetoothHeadset;
+    AutoPtr<IBluetoothProfileServiceListener> mBluetoothProfileServiceListener;
 };
 
 } // namespace Am

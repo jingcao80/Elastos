@@ -51,8 +51,9 @@ ECode CPinyinEnvironment::OnConfigurationChanged(
     mConfig->GetOrientation(&ori1);
     newConfig->GetOrientation(&ori2);
     if (ori1 != ori2) {
-        AutoPtr<IWindowManager> wm;
-        FAIL_RETURN(context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&wm));
+        AutoPtr<IInterface> service;
+        FAIL_RETURN(context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&service))
+        AutoPtr<IWindowManager> wm = IWindowManager::Probe(service);
         AutoPtr<IDisplay> d;
         wm->GetDefaultDisplay((IDisplay**)&d);
         d->GetWidth(&mScreenWidth);

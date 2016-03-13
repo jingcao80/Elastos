@@ -11,6 +11,7 @@
 #include "elastos/droid/view/CInputChannel.h"
 #include "elastos/droid/view/NativeInputChannel.h"
 #include <elastos/utility/logging/Slogger.h>
+#include <binder/Parcel.h>
 #include <input/InputTransport.h>
 
 using Elastos::Utility::Logging::Slogger;
@@ -216,17 +217,13 @@ ECode InputChannel::NativeReadFromParcel(
     }
 
     if (in != NULL) {
-        Boolean isInitialized = FALSE;
-        in->ReadBoolean(&isInitialized);
+        android::Parcel* parcel;
+        in->GetElementPayload((Handle32*)&parcel);
+        Boolean isInitialized = parcel->readInt32();
         if (isInitialized) {
-            String rStr;
-            in->ReadString(&rStr);
-            const char* tmpStr = rStr.string();
-
-            String8 name = String8(tmpStr);
-            Int32 rawFd;
-            in->ReadFileDescriptor(&rawFd);
-            Int32 dupFd = dup(rawFd);
+            String8 name = parcel->readString8();
+            int rawFd = parcel->readFileDescriptor();
+            int dupFd = dup(rawFd);
             if (dupFd < 0) {
                 ALOGE("Error %d dup channel fd %d.", errno, rawFd);
                 ALOGE("Could not read input channel file descriptors from parcel.");
@@ -244,16 +241,19 @@ ECode InputChannel::NativeReadFromParcel(
 ECode InputChannel::NativeWriteToParcel(
     /* [in] */ IParcel* dest)
 {
-
-    if (0 != mNative) {
-        NativeInputChannel* pNative = reinterpret_cast<NativeInputChannel*>(mNative);
-        android::sp<android::InputChannel> inputChannel = pNative->getInputChannel();
-        dest->WriteBoolean(TRUE);
-        dest->WriteString(String(inputChannel->getName().string()));
-        dest->WriteDupFileDescriptor(inputChannel->getFd());
-    }
-    else {
-        dest->WriteInt32(FALSE);
+    if (dest) {
+        android::Parcel* parcel;
+        dest->GetElementPayload((Handle32*)&parcel);
+        if (0 != mNative) {
+            NativeInputChannel* pNative = reinterpret_cast<NativeInputChannel*>(mNative);
+            android::sp<android::InputChannel> inputChannel = pNative->getInputChannel();
+            parcel->writeInt32(1);
+            parcel->writeString8(inputChannel->getName());
+            parcel->writeDupFileDescriptor(inputChannel->getFd());
+        }
+        else {
+            parcel->writeInt32(0);
+        }
     }
 
     // if ((flags & PARCELABLE_WRITE_RETURN_VALUE) != 0) {

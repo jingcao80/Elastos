@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_SERVER_PM_LAUNCHERAPPSSERVICE_H__
 
 #include "elastos/droid/server/SystemService.h"
+#include <Elastos.Droid.Content.h>
 
 using Elastos::Droid::Server::SystemService;
 using Elastos::Droid::Content::Pm::IILauncherApps;
@@ -19,7 +20,7 @@ namespace Pm {
 class LauncherAppsService : public SystemService
 {
 public:
-    LauncherAppsService(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     CARAPI OnStart();

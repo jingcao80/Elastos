@@ -2360,7 +2360,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 StringBuilder b = new StringBuilder(256);
                 b->Append("beginBackup: [");
                 for (BackupRequest req : mOriginalQueue) {
-                    b->Append(' ');
+                    b->AppendChar32(' ');
                     b->Append(req.packageName);
                 }
                 b->Append(" ]");
@@ -2987,7 +2987,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 this->NotifyAll();
             }
         }
-        
+
     }
 
     private void RouteSocketDataToOutput(ParcelFileDescriptor inPipe, OutputStream out)
@@ -3378,7 +3378,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         String mCurrentPassword;
         String mEncryptPassword;
 
-        PerformAdbBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer, 
+        PerformAdbBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer,
                 Boolean includeApks, Boolean includeObbs, Boolean includeShared,
                 Boolean doWidgets, String curPassword, String encryptPassword, Boolean doAllApps,
                 Boolean doSystem, Boolean doCompress, String[] packages, AtomicBoolean latch) {
@@ -3442,16 +3442,16 @@ public class BackupManagerService extends IBackupManager.Stub {
 
             // line 4: name of encryption algorithm
             headerbuf->Append(ENCRYPTION_ALGORITHM_NAME);
-            headerbuf->Append('\n');
+            headerbuf->AppendChar32('\n');
             // line 5: user password salt [hex]
             headerbuf->Append(ByteArrayToHex(newUserSalt));
-            headerbuf->Append('\n');
+            headerbuf->AppendChar32('\n');
             // line 6: master key checksum salt [hex]
             headerbuf->Append(ByteArrayToHex(checksumSalt));
-            headerbuf->Append('\n');
+            headerbuf->AppendChar32('\n');
             // line 7: number of PBKDF2 rounds used [decimal]
             headerbuf->Append(PBKDF2_HASH_ROUNDS);
-            headerbuf->Append('\n');
+            headerbuf->AppendChar32('\n');
 
             // line 8: IV of the user key [hex]
             Cipher mkC = Cipher->GetInstance("AES/CBC/PKCS5Padding");
@@ -3459,7 +3459,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
             Byte[] IV = mkC->GetIV();
             headerbuf->Append(ByteArrayToHex(IV));
-            headerbuf->Append('\n');
+            headerbuf->AppendChar32('\n');
 
             // line 9: master IV + key blob, encrypted by the user key [hex].  Blob format:
             //    [Byte] IV length = Niv
@@ -3488,7 +3488,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             mkOut->Flush();
             Byte[] encryptedMk = mkC->DoFinal(blob->ToByteArray());
             headerbuf->Append(ByteArrayToHex(encryptedMk));
-            headerbuf->Append('\n');
+            headerbuf->AppendChar32('\n');
 
             return finalOutput;
         }
@@ -3538,7 +3538,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                         StringBuilder sb = new StringBuilder(128);
                         sb->Append("   ");
                         for (String s : pkgs) {
-                            sb->Append(' ');
+                            sb->AppendChar32(' ');
                             sb->Append(s);
                         }
                         Slogger::I(TAG, sb->ToString());
@@ -3713,7 +3713,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         AtomicBoolean mKeepRunning;     // signal from job scheduler
         FullBackupJob mJob;             // if a scheduled job needs to be finished afterwards
 
-        PerformFullTransportBackupTask(IFullBackupRestoreObserver observer, 
+        PerformFullTransportBackupTask(IFullBackupRestoreObserver observer,
                 String[] whichPackages, Boolean updateSchedule,
                 FullBackupJob runningJob, AtomicBoolean latch) {
             Super(observer);
@@ -3980,7 +3980,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     }
                 }
             }
-            
+
         }
     }
 
@@ -4188,11 +4188,11 @@ public class BackupManagerService extends IBackupManager.Stub {
     {
             StringBuilder sb = new StringBuilder(128);
             sb->Append("FileMetadata{");
-            sb->Append(packageName); sb->Append(',');
-            sb->Append(type); sb->Append(',');
-            sb->Append(domain); sb->Append(':'); sb->Append(path); sb->Append(',');
+            sb->Append(packageName); sb->AppendChar32(',');
+            sb->Append(type); sb->AppendChar32(',');
+            sb->Append(domain); sb->AppendChar32(':'); sb->Append(path); sb->AppendChar32(',');
             sb->Append(size);
-            sb->Append('}');
+            sb->AppendChar32('}');
             return sb->ToString();
         }
     }
@@ -7016,20 +7016,20 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
 
         /*
          * SKETCH OF OPERATION
-         * 
+         *
          * create one of these PerformUnifiedRestoreTask objects, telling it which
          * dataset & transport to address, and then parameters within the restore
          * operation: single target package vs many, etc.
          *
          * 1. transport->StartRestore(token, list-of-packages).  If we need @pm@  it is
          * always placed first and the settings provider always placed last [for now].
-         * 
+         *
          * 1a [if we needed @pm@ then NextRestorePackage() and restore the PMBA inline]
-         * 
+         *
          *   [ state change => RUNNING_QUEUE ]
-         * 
+         *
          * NOW ITERATE:
-         * 
+         *
          * { 3. t->NextRestorePackage()
          *   4. does the metadata for this package allow us to restore it?
          *      does the on-disk app permit us to restore it? [re-check allowBackup etc]
@@ -7040,7 +7040,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
          *       5c. call into agent to perform restore
          *       5d. tear down agent
          *       [ state change => RUNNING_QUEUE ]
-         * 
+         *
          *   6. else it's a stream dataset:
          *       [ state change => RESTORE_FULL ]
          *       6a. instantiate the engine for a stream restore: engine handles agent lifecycles
@@ -7048,12 +7048,12 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
          *       6c. ITERATE GetNextFullRestoreDataChunk() and copy data to engine runner socket
          *       [ state change => RUNNING_QUEUE ]
          * }
-         * 
+         *
          *   [ state change => FINAL ]
-         * 
+         *
          * 7. t->FinishRestore(), release wakelock, etc.
-         * 
-         * 
+         *
+         *
          */
 
         // state INITIAL : set up for the restore and read the metadata if necessary
@@ -8960,7 +8960,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
                 if (packages == NULL) {
                     b->Append("NULL");
                 } else {
-                    b->Append('{');
+                    b->AppendChar32('{');
                     Boolean first = TRUE;
                     for (String s : packages) {
                         if (!first) {
@@ -8968,7 +8968,7 @@ if (MORE_DEBUG) Slogger::V(TAG, "   + got " + nRead + "; now wanting " + (size -
                         } else first = FALSE;
                         b->Append(s);
                     }
-                    b->Append('}');
+                    b->AppendChar32('}');
                 }
                 Slogger::D(TAG, b->ToString());
             }

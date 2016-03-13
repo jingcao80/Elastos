@@ -146,8 +146,7 @@ public:
         /* [out] */ IDrawableConstantState** state);
 
     //@Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
 protected:
     CARAPI constructor();

@@ -27,7 +27,7 @@ module
         IsRegistered(
             [out] Boolean* registered);
 
-        SetRegisterd(
+        SetRegistered(
             [in] Boolean registered);
 
         GetTimeStamp(

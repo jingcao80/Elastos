@@ -29,8 +29,13 @@ module
      * interface ILinearLayout
      */
     interface IUserDetailItemView {
-        SetListening(
-            [in] Boolean listening);
+        Bind(
+            [in] String name,
+            [in] IBitmap* picture);
+
+        Bind(
+            [in] String name,
+            [in] IDrawable* picture);
     }
 
     [local]
@@ -40,14 +45,6 @@ module
             [in] IView* convertView,
             [in] IViewGroup* root,
             [out] IUserDetailItemView** ret);
-
-        Bind(
-            [in] String name,
-            [in] IBitmap* picture);
-
-        Bind(
-            [in] String name,
-            [in] IDrawable* picture);
     }
 
     } // namespace Tiles

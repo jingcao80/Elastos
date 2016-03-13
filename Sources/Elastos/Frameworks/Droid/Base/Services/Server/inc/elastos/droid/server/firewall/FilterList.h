@@ -1,41 +1,41 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+#ifndef __ELASTOS_DROID_Server_Firewall_FilterList_H__
+#define __ELASTOS_DROID_Server_Firewall_FilterList_H__
 
-package com.android.server.firewall;
+#include "_Elastos.Droid.Server.h"
+#include "elastos/core/Object.h"
 
 using Elastos::Droid::internal.util.XmlUtils;
 using Org::Xmlpull::V1::IXmlPullParser;
 using Org::Xmlpull::V1::IXmlPullParserException;
-
-using Elastos::IO::IIOException;
 using Elastos::Utility::IArrayList;
+using Elastos::Droid::Server::Firewall::IFilter;
 
-abstract class FilterList implements Filter {
-    protected final ArrayList<Filter> children = new ArrayList<Filter>();
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Firewall {
 
-    public FilterList ReadFromXml(XmlPullParser parser) throws IOException, XmlPullParserException {
-        Int32 outerDepth = parser->GetDepth();
-        while (XmlUtils->NextElementWithin(parser, outerDepth)) {
-            ReadChild(parser);
-        }
-        return this;
-    }
+class FilterList
+    : public Object
+    , public IFilter
+{
+public:
+    // throws IOException, XmlPullParserException
+    CARAPI_(FilterList*) ReadFromXml(
+        /* in */ IXmlPullParser* parser);
 
-    protected void ReadChild(XmlPullParser parser) throws IOException, XmlPullParserException {
-        Filter filter = IntentFirewall->ParseFilter(parser);
-        children->Add(filter);
-    }
-}
+    // throws IOException, XmlPullParserException
+    CARAPI_(void) ReadChild(
+        /* in */ IXmlPullParser* parser);
+
+protected:
+    AutoPtr<IArrayList<IFilter> > children;
+
+};
+
+} // Firewall
+} // Server
+} // Droid
+} // Elastos
+
+#endif // __ELASTOS_DROID_Server_Firewall_FilterList_H__

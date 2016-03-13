@@ -5,12 +5,23 @@
 #include "elastos/droid/os/BinderProxy.h"
 #include <binder/Binder.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
+
+#define DEBUG_DEATH 0
+#if DEBUG_DEATH
+#define LOGDEATH ALOGD
+#else
+#define LOGDEATH ALOGV
+#endif
 
 using Elastos::Core::AutoLock;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Os {
+
+static String TAG("NativeBinder");
 
 static struct bindernative_offsets_t
 {
@@ -86,10 +97,10 @@ AutoPtr<IBinder> DroidObjectForIBinder(const android::sp<android::IBinder>& val)
 {
     if (val == NULL) return NULL;
 
-    if (val->checkSubclass(NULL/*&gBinderOffsets*/)) {
+    if (val->checkSubclass(&gBinderOffsets)) {
         // One of our own!
         AutoPtr<IInterface> object = static_cast<DroidBBinder*>(val.get())->object();
-        // LOGDEATH("objectForBinder %p: it's our own %p!\n", val.get(), object);
+        // LOGDEATH("objectForBinder %p: it's our own %p!\n", val.get(), object.Get());
         return IBinder::Probe(object);
     }
 
@@ -105,7 +116,7 @@ AutoPtr<IBinder> DroidObjectForIBinder(const android::sp<android::IBinder>& val)
         //     ALOGV("objectForBinder %p: found existing %p!\n", val.get(), res);
         //     return res;
         // }
-        // LOGDEATH("Proxy object %p of IBinder %p no longer in working set!!!", object, val.get());
+        // LOGDEATH("Proxy object %p of IBinder %p no longer in working set!!!", object.Get(), val.get());
         // android_atomic_dec(&gNumProxyRefs);
         // val->detachObject(&gBinderProxyOffsets);
         // env->DeleteGlobalRef(object);
@@ -114,7 +125,7 @@ AutoPtr<IBinder> DroidObjectForIBinder(const android::sp<android::IBinder>& val)
 
     object = new BinderProxy();
     if (object != NULL) {
-        // LOGDEATH("objectForBinder %p: created new proxy %p !\n", val.get(), object);
+        // LOGDEATH("objectForBinder %p: created new proxy %p !\n", val.get(), object.Get());
         // The proxy holds a reference to the native object.
         object->mObject = (Int32)val.get();
         val->incStrong(object.Get());
@@ -142,17 +153,23 @@ AutoPtr<IBinder> DroidObjectForIBinder(const android::sp<android::IBinder>& val)
 
 android::sp<android::IBinder> IBinderForDroidObject(IBinder* obj)
 {
-    if (obj == NULL) return NULL;
+    android::sp<android::IBinder> jbinder = NULL;
 
-    DroidBBinderHolder* dbh = (DroidBBinderHolder*)((CBinder*)obj)->mObject;
-    return dbh != NULL ? dbh->get(obj) : NULL;
-
-    if (obj->Probe(EIID_BinderProxy) != NULL) {
-        return (android::IBinder*)((BinderProxy*)obj)->mObject;
+    if (obj == NULL) {
+        jbinder = NULL;
+    }
+    else if (obj->Probe(EIID_IBinderProxy) != NULL) {
+        jbinder = (android::IBinder*)((BinderProxy*)obj)->mObject;
+    }
+    else if (obj->Probe(EIID_IBinder) != NULL) {
+        DroidBBinderHolder* dbh = (DroidBBinderHolder*)((CBinder*)obj)->mObject;
+        jbinder = dbh != NULL ? dbh->get(obj) : NULL;
+    }
+    else {
+        Logger::W(TAG, "IBinderForDroidObject: %p is not a Binder object", obj);
     }
 
-    // ALOGW("ibinderForJavaObject: %p is not a Binder object", obj);
-    return NULL;
+    return jbinder;
 }
 
 } // namespace Os

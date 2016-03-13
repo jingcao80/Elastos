@@ -13,7 +13,7 @@ namespace SystemUI {
 class BitmapHelper
 {
 public:
-    AutoPtr<IBitmap> CreateCircularClip(
+    static AutoPtr<IBitmap> CreateCircularClip(
         /* [in] */ IBitmap* input,
         /* [in] */ Int32 width,
         /* [in] */ Int32 height);

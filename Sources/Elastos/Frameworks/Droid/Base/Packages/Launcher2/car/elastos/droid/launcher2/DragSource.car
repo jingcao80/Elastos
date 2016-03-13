@@ -1,0 +1,39 @@
+module
+{
+    namespace Elastos {
+    namespace Droid {
+    namespace Launcher2 {
+
+    /**
+     * Interface defining an object that can originate a drag.
+     *
+     */
+    interface IDragSource {
+        /**
+         * @return whether items dragged from this source supports
+         */
+        SupportsFlingToDelete(
+            [out] Boolean* result);
+
+        /**
+         * A callback specifically made back to the source after an item from this source has been flung
+         * to be deleted on a DropTarget.  In such a situation, this method will be called after
+         * onDropCompleted, and more importantly, after the fling animation has completed.
+         */
+        OnFlingToDeleteCompleted();
+
+        /**
+         * A callback made back to the source after an item from this source has been dropped on a
+         * DropTarget.
+         */
+        OnDropCompleted(
+            [in] View target,
+            [in] IDropTargetDragObject* d,
+            [in] Boolean isFlingToDelete,
+            [in] Boolean success);
+    }
+
+    } // namespace Launcher2
+    } // namespace Droid
+    } // namespace Elastos
+}

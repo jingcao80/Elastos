@@ -3,8 +3,10 @@
 
 #include "_Elastos_Droid_Database_CContentObserverTransport.h"
 #include <elastos/core/Object.h>
+#include <Elastos.Droid.Database.h>
 
 using Elastos::Droid::Net::IUri;
+using Elastos::Droid::Database::IIContentObserver;
 
 namespace Elastos {
 namespace Droid {
@@ -13,6 +15,7 @@ namespace Database {
 CarClass(CContentObserverTransport)
     , public Object
     , public IContentObserverTransport
+    , public IIContentObserver
 {
 public:
     CAR_INTERFACE_DECL()
@@ -28,6 +31,9 @@ public:
 
     CARAPI constructor(
         /* [in] */ IContentObserver* contentObserver);
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
     AutoPtr<IContentObserver> mContentObserver;

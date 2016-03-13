@@ -20,8 +20,11 @@ namespace Hdmi {
 // Seq #33
 class SystemAudioActionFromAvr
     : public SystemAudioAction
+    , public ISystemAudioActionFromAvr
 {
 public:
+    CAR_INTERFACE_DECL()
+
     /**
      * Constructor
      *

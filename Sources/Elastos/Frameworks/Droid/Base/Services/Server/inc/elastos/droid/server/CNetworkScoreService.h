@@ -77,7 +77,7 @@ public:
 private:
     /** Set the active scorer. Callers are responsible for checking permissions as appropriate. */
     CARAPI SetScorerInternal(
-        /* [in] */ String packageName,
+        /* [in] */ const String& packageName,
         /* [out] */ Boolean* result);
 
     /** Clear scores. Callers are responsible for checking permissions as appropriate. */

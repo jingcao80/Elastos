@@ -427,14 +427,14 @@ ECode CAccessibilityWindowInfo::ToString(
                 mChildIds->Get(i, &value);
                 builder->Append(value);
                 if (i < childCount - 1) {
-                    builder->Append(',');
+                    builder->AppendChar(',');
                 }
             }
         }
         else {
             builder->Append("null");
         }
-        builder->Append(']');
+        builder->AppendChar(']');
     }
     else {
         builder->Append(", hasParent=");
@@ -445,7 +445,7 @@ ECode CAccessibilityWindowInfo::ToString(
         builder->Append(mChildIds != NULL && size > 0);
     }
 
-    builder->Append(']');
+    builder->AppendChar(']');
     *s = builder->ToString();
     return NOERROR;
 }

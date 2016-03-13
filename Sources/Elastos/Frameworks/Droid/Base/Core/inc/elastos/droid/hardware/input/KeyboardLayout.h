@@ -28,14 +28,15 @@ class KeyboardLayout
 public:
     CAR_INTERFACE_DECL()
 
-    KeyboardLayout(
+    KeyboardLayout();
+
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ const String& descriptor,
         /* [in] */ const String& label,
         /* [in] */ const String& collection,
         /* [in] */ Int32 priority);
-
-    KeyboardLayout(
-       /* [in] */ IParcel* source);
 
     /**
      * Gets the keyboard layout descriptor, which can be used to retrieve

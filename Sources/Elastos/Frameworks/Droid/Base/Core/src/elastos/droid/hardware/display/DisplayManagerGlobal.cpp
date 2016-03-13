@@ -3,12 +3,14 @@
 #include "Elastos.Droid.Media.h"
 #include "Elastos.Droid.View.h"
 #include "elastos/droid/hardware/display/DisplayManagerGlobal.h"
+#include "elastos/droid/hardware/display/CVirtualDisplay.h"
 #include "elastos/droid/hardware/display/WifiDisplayStatus.h"
 #include "elastos/droid/hardware/display/CDisplayManagerCallback.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/os/Looper.h"
 #include "elastos/droid/text/TextUtils.h"
-//#include "elastos/droid/view/Display.h"
+#include "elastos/droid/view/DisplayAdjustments.h"
+#include "elastos/droid/view/CDisplay.h"
 #include <elastos/core/AutoLock.h>
 #include <elastos/utility/logging/Logger.h>
 
@@ -18,6 +20,8 @@ using Elastos::Droid::Os::ILooper;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::View::CDisplay;
+using Elastos::Droid::View::DisplayAdjustments;
 using Elastos::Droid::Media::Projection::IIMediaProjection;
 using Elastos::Utility::Logging::Logger;
 
@@ -223,7 +227,7 @@ ECode DisplayManagerGlobal::GetDisplayInfo(
     return NOERROR;
 
     // } catch (RemoteException ex) {
-    //     Log.e(TAG, "Could not get display information from display manager.", ex);
+    //     Logger::E(TAG, "Could not get display information from display manager.", ex);
     //     return NULL;
     // }
 }
@@ -259,7 +263,7 @@ ECode DisplayManagerGlobal::GetDisplayIds(
     return NOERROR;
 
     // } catch (RemoteException ex) {
-    //     Log.e(TAG, "Could not get display ids from display manager.", ex);
+    //     Logger::E(TAG, "Could not get display ids from display manager.", ex);
     //     return new Int32[] { Display.DEFAULT_DISPLAY };
     // }
 }
@@ -270,23 +274,23 @@ ECode DisplayManagerGlobal::GetCompatibleDisplay(
     /* [out] */ IDisplay** display)
 {
     VALIDATE_NOT_NULL(display);
+    *display = NULL;
 
     AutoPtr<IDisplayInfo> displayInfo;
     GetDisplayInfo(displayId, (IDisplayInfo**)&displayInfo);
     if (displayInfo == NULL) {
-        *display = NULL;
         return NOERROR;
     }
 
-    assert(0 && "TODO View::Display");
-    //*display = new View::Display(this, displayId, displayInfo, cih);
-    if (*display) {
-        REFCOUNT_ADD(*display);
-        return NOERROR;
-    }
-    else {
+    AutoPtr<IDisplay> obj;
+    CDisplay::New(this, displayId, displayInfo, cih, (IDisplay**)&obj);
+    if (obj == NULL) {
         return E_OUT_OF_MEMORY_ERROR;
     }
+
+    *display = obj;
+    REFCOUNT_ADD(*display);
+    return NOERROR;
 }
 
 ECode DisplayManagerGlobal::GetRealDisplay(
@@ -296,8 +300,7 @@ ECode DisplayManagerGlobal::GetRealDisplay(
     VALIDATE_NOT_NULL(display);
 
     AutoPtr<IDisplayAdjustments> da;
-    assert(0 && "TODO GetDEFAULT_DISPLAY_ADJUSTMENTS");
-    //GetDEFAULT_DISPLAY_ADJUSTMENTS((IDisplayAdjustments**)&da);
+    DisplayAdjustments::GetDEFAULT_DISPLAY_ADJUSTMENTS((IDisplayAdjustments**)&da);
     return GetCompatibleDisplay(displayId, da, display);
 }
 
@@ -308,8 +311,7 @@ ECode DisplayManagerGlobal::GetRealDisplay(
 {
     VALIDATE_NOT_NULL(display);
 
-    assert(0 && "TODO new DisplayAdjustments");
-    AutoPtr<IDisplayAdjustments> adjustment;// = new DisplayAdjustments(token);
+    AutoPtr<IDisplayAdjustments> adjustment = new DisplayAdjustments(token);
     return GetCompatibleDisplay(displayId, adjustment, display);
 }
 
@@ -431,9 +433,10 @@ ECode DisplayManagerGlobal::StopWifiDisplayScan()
                 Logger::E(TAG, "Failed to scan for Wifi displays.");
                 return E_REMOTE_EXCEPTION;
             }
-        } else if (mWifiDisplayScanNestCount < 0) {
-            //Log.wtf(TAG, "Wifi display scan nest count became negative: "
-            //        + mWifiDisplayScanNestCount);
+        }
+        else if (mWifiDisplayScanNestCount < 0) {
+            Logger::E(TAG, "Wifi display scan nest count became negative: %d",
+                mWifiDisplayScanNestCount);
             mWifiDisplayScanNestCount = 0;
         }
     }
@@ -547,55 +550,53 @@ ECode DisplayManagerGlobal::CreateVirtualDisplay(
     /* [in] */ IHandler* handler,
     /* [out] */ IVirtualDisplay** outvd)
 {
-    assert(0 && "TODO TextUtils::IsEmpty");
-    // if (TextUtils::IsEmpty(name)) {
-    //     //throw new IllegalArgumentException("name must be non-null and non-empty");
-    //     return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    // }
+    VALIDATE_NOT_NULL(outvd)
+    *outvd = NULL;
+
+    if (TextUtils::IsEmpty(name)) {
+        Logger::E(TAG, "name must be non-null and non-empty");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
     if (width <= 0 || height <= 0 || densityDpi <= 0) {
-        //throw new IllegalArgumentException("width, height, and densityDpi must be "
-        //        + "greater than 0");
+        Logger::E(TAG, "width, height, and densityDpi must be greater than 0");
         return E_ILLEGAL_ARGUMENT_EXCEPTION;
     }
 
     AutoPtr<VirtualDisplayCallback> callbackWrapper = new VirtualDisplayCallback(cb, handler);
-    AutoPtr<IMediaProjection> projec;
-    assert(0 && "TODO projection->GetProjection");
-    AutoPtr<IIMediaProjection> projectionToken;// = projection != NULL ?
-            //(projection->GetProjection((IMediaProjection**)&projec), projec) : NULL;
+    AutoPtr<IIMediaProjection> projectionToken;
+    if (projection != NULL) {
+        projection->GetProjection((IIMediaProjection**)&projectionToken);
+    }
     Int32 displayId;
     //try {
     String pName;
     context->GetPackageName(&pName);
     if(FAILED(mDm->CreateVirtualDisplay(callbackWrapper, projectionToken,
             pName, name, width, height, densityDpi, surface, flags, &displayId))) {
-        *outvd = NULL;
+        Logger::E(TAG, "Could not create virtual display: %s", name.string());
         return E_REMOTE_EXCEPTION;
     }
     //} catch (RemoteException ex) {
-    //    Log.e(TAG, "Could not create virtual display: " + name, ex);
+    //    Logger::E(TAG, "Could not create virtual display: " + name, ex);
     //    return null;
     //}
     if (displayId < 0) {
-        //Log.e(TAG, "Could not create virtual display: " + name);
-        *outvd = NULL;
+        Logger::E(TAG, "Could not create virtual display: %s", name.string());
         return NOERROR;
     }
 
     AutoPtr<IDisplay> display;
     FAIL_RETURN(GetRealDisplay(displayId, (IDisplay**)&display))
     if (display == NULL) {
-        //Log.wtf(TAG, "Could not obtain display info for newly created "
-        //         + "virtual display: " + name);
+        Logger::E(TAG, "Could not obtain display info for newly created virtual display: %s",
+            name.string());
         if (FAILED(mDm->ReleaseVirtualDisplay(callbackWrapper))) {
             return E_REMOTE_EXCEPTION;
         }
-        *outvd = NULL;
         return NOERROR;
     }
-    assert(0 && "TODO View::Display");
-    // return CVirtualDisplay::New(this, display, callbackWrapper, surface, outvd);
-    return NOERROR;
+
+    return CVirtualDisplay::New(this, display, callbackWrapper, surface, outvd);
 }
 
 ECode DisplayManagerGlobal::SetVirtualDisplaySurface(

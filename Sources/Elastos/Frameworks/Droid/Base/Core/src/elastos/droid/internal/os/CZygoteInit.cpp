@@ -92,7 +92,11 @@ ECode CZygoteInit::MethodAndArgsCaller::Run()
         return ec;
     }
 
-    argumentList->SetInputArgumentOfCarArray(0, mArgs.Get());
+    ec = argumentList->SetInputArgumentOfCarArray(0, *mArgs);
+    if (FAILED(ec)) {
+        Logger::E("CZygoteInit", "Set Input Argument of Car array in \"Main\" method failed!\n");
+        return ec;
+    }
 
     ec = mMethod->Invoke(mObject, argumentList);
     if (FAILED(ec)) {
@@ -241,23 +245,18 @@ void CZygoteInit::PreloadResources()
         Int64 startTime = SystemClock::GetUptimeMillis();
         AutoPtr<ITypedArray> ar;
         mResources->ObtainTypedArray(R::array::preloaded_drawables, (ITypedArray**)&ar);
-        if (ar != NULL) {
-            Int32 N = PreloadDrawables(ar);
-            ar->Recycle();
-            Logger::I(TAG, "...preloaded %d drawables in %lld ms",
-                N, (SystemClock::GetUptimeMillis() - startTime));
+        Int32 N = PreloadDrawables(ar);
+        ar->Recycle();
+        Logger::I(TAG, "...preloaded %d drawables in %lld ms",
+            N, (SystemClock::GetUptimeMillis() - startTime));
 
-            startTime = SystemClock::GetUptimeMillis();
-            ar = NULL;
-            mResources->ObtainTypedArray(R::array::preloaded_color_state_lists, (ITypedArray**)&ar);
-            N = PreloadColorStateLists(ar);
-            ar->Recycle();
-            Logger::I(TAG, "...preloaded %d color state lists in %lld ms",
-                N, (SystemClock::GetUptimeMillis() - startTime));
-        }
-        else {
-            Logger::E(TAG, "failed to ObtainTypedArray R::array::preloaded_drawables");
-        }
+        startTime = SystemClock::GetUptimeMillis();
+        ar = NULL;
+        mResources->ObtainTypedArray(R::array::preloaded_color_state_lists, (ITypedArray**)&ar);
+        N = PreloadColorStateLists(ar);
+        ar->Recycle();
+        Logger::I(TAG, "...preloaded %d color state lists in %lld ms",
+            N, (SystemClock::GetUptimeMillis() - startTime));
     }
     mResources->FinishPreloading();
 
@@ -338,7 +337,6 @@ ECode CZygoteInit::HandleSystemServerProcess(
     /* [in] */ ZygoteConnection::Arguments* parsedArgs,
     /* [out] */ IRunnable** task)
 {
-    Logger::I(TAG, "Handleing system server process...");
     VALIDATE_NOT_NULL(task);
     *task = NULL;
 
@@ -370,11 +368,15 @@ ECode CZygoteInit::HandleSystemServerProcess(
             amendedArgs->Copy(2, args);
         }
 
+        Logger::I(TAG, "Handleing system server process: WrapperInit::ExecApplication %s",
+            parsedArgs->mNiceName.string());
         return WrapperInit::ExecApplication(parsedArgs->mInvokeWith,
             parsedArgs->mNiceName, parsedArgs->mTargetSdkVersion,
             NULL, args);
     }
     else {
+        Logger::I(TAG, "Handleing system server process: RuntimeInit::ZygoteInit");
+
         // ClassLoader cl = null;
         // if (systemServerClasspath != null) {
         //     cl = new PathClassLoader(systemServerClasspath, ClassLoader.getSystemClassLoader());

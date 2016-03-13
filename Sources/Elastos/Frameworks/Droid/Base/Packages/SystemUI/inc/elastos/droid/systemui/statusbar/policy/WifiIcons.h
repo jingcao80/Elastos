@@ -2,7 +2,7 @@
 #ifndef __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_WIFIICONS_H__
 #define __ELASTOS_DROID_SYSTEMUI_STATUSBAR_POLICY_WIFIICONS_H__
 
-#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/droid/ext/frameworkext.h>
 
 namespace Elastos {
 namespace Droid {

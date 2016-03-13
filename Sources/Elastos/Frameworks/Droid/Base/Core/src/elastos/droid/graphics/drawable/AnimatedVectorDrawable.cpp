@@ -38,8 +38,7 @@ AnimatedVectorDrawable::AnimatedVectorDrawableState::AnimatedVectorDrawableState
             AutoPtr<IDrawable> dr;
             state->NewDrawable((IDrawable**)&dr);
             mVectorDrawable = IVectorDrawable::Probe(dr);
-            dr = NULL;
-            IDrawable::Probe(mVectorDrawable)->Mutate((IDrawable**)&dr);
+            dr->Mutate();
             ((VectorDrawable*)mVectorDrawable.Get())->SetAllowCaching(FALSE);
             AutoPtr<IRect> r;
             IDrawable::Probe(copy->mVectorDrawable)->GetBounds((IRect**)&r);
@@ -144,18 +143,12 @@ ECode AnimatedVectorDrawable::constructor(
     return NOERROR;
 }
 
-ECode AnimatedVectorDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode AnimatedVectorDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> dr;
-    if (!mMutated && (Drawable::Mutate((IDrawable**)&dr), dr.Get()) == this) {
-        dr = NULL;
-        IDrawable::Probe(mAnimatedVectorState->mVectorDrawable)->Mutate((IDrawable**)&dr);
+    if (!mMutated) {
+        IDrawable::Probe(mAnimatedVectorState->mVectorDrawable)->Mutate();
         mMutated = TRUE;
     }
-    *drawable = THIS_PROBE(IDrawable);
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 
@@ -333,8 +326,7 @@ ECode AnimatedVectorDrawable::Inflate(
                     AutoPtr<IDrawable> dr;
                     res->GetDrawable(drawableRes, theme, (IDrawable**)&dr);
                     AutoPtr<IVectorDrawable> vectorDrawable;
-                    AutoPtr<IDrawable> tmp;
-                    dr->Mutate((IDrawable**)&tmp);
+                    dr->Mutate();
                     ((VectorDrawable*)vectorDrawable.Get())->SetAllowCaching(FALSE);
                     vectorDrawable->GetPixelSize(&pathErrorScale);
                     mAnimatedVectorState->mVectorDrawable = vectorDrawable;

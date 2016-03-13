@@ -5,7 +5,9 @@
 #include "Arrays.h"
 #include "AutoLock.h"
 
+using Elastos::Core::EIID_ICloneable;
 using Elastos::Utility::Arrays;
+using Elastos::IO::EIID_ISerializable;
 
 namespace Elastos {
 namespace Utility {
@@ -16,7 +18,8 @@ namespace Concurrent {
 //==========================================================
 const AutoPtr< ArrayOf<IInterface*> > CopyOnWriteArrayList::sEmptyArray = ArrayOf<IInterface*>::Alloc(0);
 
-CAR_INTERFACE_IMPL_4(CopyOnWriteArrayList, Object, ICopyOnWriteArrayList, ICollection, IIterable, IRandomAccess)
+CAR_INTERFACE_IMPL_7(CopyOnWriteArrayList, Object, \
+    ICopyOnWriteArrayList, IList, ICollection, IIterable, IRandomAccess, ICloneable, ISerializable)
 
 ECode CopyOnWriteArrayList::constructor()
 {
@@ -281,6 +284,13 @@ ECode CopyOnWriteArrayList::Add(
     newElements->Copy(location + 1, mElements, location, mElements->GetLength() - location);
     mElements = newElements;
     return NOERROR;
+}
+
+ECode CopyOnWriteArrayList::Add(
+    /* [in] */ IInterface* object)
+{
+    Boolean result;
+    return Add(object, &result);
 }
 
 ECode CopyOnWriteArrayList::AddAll(
@@ -646,8 +656,8 @@ Int32 CopyOnWriteArrayList::RemoveOrRetain(
         newSize += (mElements->GetLength() - to);
 
         if (newSize < newElements->GetLength()) {
-            AutoPtr< ArrayOf<IInterface*> > newElements2;
-            assert(0);
+            AutoPtr< ArrayOf<IInterface*> > newElements2 = ArrayOf<IInterface*>::Alloc(newSize);
+            newElements2->Copy(newElements, 0, newSize);
             //Arrays::_CopyOfRange(newElements, 0, newSize, (ArrayOf<IInterface*>**)&newElements2); // trim to size
             newElements = newElements2;
         }

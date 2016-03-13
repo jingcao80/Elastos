@@ -10,6 +10,7 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CPaintFlagsDrawFilter);
+CAR_INTERFACE_IMPL(CPaintFlagsDrawFilter, DrawFilter, IPaintFlagsDrawFilter);
 ECode CPaintFlagsDrawFilter::constructor(
     /* [in] */ Int32 clearBits,
     /* [in] */ Int32 setBits)
@@ -18,35 +19,6 @@ ECode CPaintFlagsDrawFilter::constructor(
     mSetBits = setBits;
     mNativeInstance = NativeConstructor(clearBits, setBits);
     return NOERROR;
-}
-
-PInterface CPaintFlagsDrawFilter::Probe(
-    /* [in]  */ REIID riid)
-{
-    if (riid == EIID_DrawFilter) {
-        return reinterpret_cast<PInterface>((DrawFilter*)this);
-    }
-    else if (riid == EIID_IPaintFlagsDrawFilter) {
-        return (IPaintFlagsDrawFilter*)this;
-    }
-    return DrawFilter::Probe(riid);
-}
-
-UInt32 CPaintFlagsDrawFilter::AddRef()
-{
-    return DrawFilter::AddRef();
-}
-
-UInt32 CPaintFlagsDrawFilter::Release()
-{
-    return DrawFilter::Release();
-}
-
-ECode CPaintFlagsDrawFilter::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return DrawFilter::GetInterfaceID(object, iid);
 }
 
 // Custom version of SkPaintFlagsDrawFilter that also calls setFilterLevel.

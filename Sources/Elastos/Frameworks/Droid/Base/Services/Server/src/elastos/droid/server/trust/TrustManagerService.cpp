@@ -839,7 +839,7 @@ ECode TrustManagerService::MaybeEnableFactoryTrustAgents(
         resolveInfo->GetServiceInfo((IServiceInfo**)&serviceInfo);
         Ptr(IComponentInfo::Probe(serviceInfo))->Func(IComponentInfo::GetApplicationInfo)->GetFlags(&applicationInfoFlags);
         if ((applicationInfoFlags & IApplicationInfo::FLAG_SYSTEM) == 0) {
-            Logger::I(TAG, "Leaving agent %s disabled because package is not a system package.", Object::ToString(componentName).string());
+            Logger::I(TAG, "Leaving agent %s disabled because package is not a system package.", TO_CSTR(componentName));
             continue;
         }
         ISet::Probe(discoveredAgents)->Add(componentName);
@@ -877,7 +877,7 @@ AutoPtr<IList> TrustManagerService::ResolveAllowedTrustAgents(
         pm->CheckPermission(PERMISSION_PROVIDE_AGENT, packageName, &permission);
         if (permission != IPackageManager::PERMISSION_GRANTED) {
             AutoPtr<IComponentName> name = GetComponentName(resolveInfo);
-            Logger::W(TAG, "Skipping agent %s because package does not have permission %s.", Object::ToString(name).string(), PERMISSION_PROVIDE_AGENT.string());
+            Logger::W(TAG, "Skipping agent %s because package does not have permission %s.", TO_CSTR(name), PERMISSION_PROVIDE_AGENT.string());
             continue;
         }
         allowedAgents->Add(resolveInfo);

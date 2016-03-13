@@ -1,4 +1,7 @@
 #include "elastos/droid/server/input/InputWindowHandle.h"
+#include "elastos/droid/server/input/NativeInputApplicationHandle.h"
+#include "elastos/droid/server/input/NativeInputWindowHandle.h"
+#include <utils/threads.h>
 
 using Elastos::Droid::Graphics::CRegion;
 
@@ -6,6 +9,8 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Input {
+
+static android::Mutex gHandleMutex;
 
 CAR_INTERFACE_IMPL(InputWindowHandle, Object, IInputWindowHandle);
 
@@ -50,19 +55,42 @@ InputWindowHandle::~InputWindowHandle()
 
 void InputWindowHandle::NativeDispose()
 {
-/*
-static void android_server_InputWindowHandle_nativeDispose(JNIEnv* env, jobject obj) {
-    AutoMutex _l(gHandleMutex);
+    android::AutoMutex _l(gHandleMutex);
 
-    jlong ptr = env->GetLongField(obj, gInputWindowHandleClassInfo.ptr);
-    if (ptr) {
-        env->SetLongField(obj, gInputWindowHandleClassInfo.ptr, 0);
+    if (mPtr) {
+        mPtr = 0;
 
-        NativeInputWindowHandle* handle = reinterpret_cast<NativeInputWindowHandle*>(ptr);
-        handle->decStrong((void*)android_server_InputWindowHandle_getHandle);
+        NativeInputWindowHandle* handle = reinterpret_cast<NativeInputWindowHandle*>(mPtr);
+        handle->decStrong((void*)GetNativeInputWindowHandle);
     }
 }
-*/
+
+android::sp<NativeInputWindowHandle> GetNativeInputWindowHandle(
+    /* [in] */ InputWindowHandle* inputWindowHandleObj)
+{
+    if (!inputWindowHandleObj) {
+        return NULL;
+    }
+
+    android::AutoMutex _l(gHandleMutex);
+
+    Int64 ptr = inputWindowHandleObj->mPtr;
+    NativeInputWindowHandle* handle;
+    if (ptr) {
+        handle = reinterpret_cast<NativeInputWindowHandle*>(ptr);
+    }
+    else {
+        InputApplicationHandle* inputApplicationHandleObj = inputWindowHandleObj->mInputApplicationHandle;
+        android::sp<android::InputApplicationHandle> inputApplicationHandle =
+                GetNativeInputApplicationHandle(inputApplicationHandleObj);
+
+        AutoPtr<IWeakReference> objWeak;
+        inputWindowHandleObj->GetWeakReference((IWeakReference**)&objWeak);
+        handle = new NativeInputWindowHandle(inputApplicationHandle, objWeak);
+        handle->incStrong((void*)GetNativeInputWindowHandle);
+        inputWindowHandleObj->mPtr = reinterpret_cast<Int64>(handle);
+    }
+    return handle;
 }
 
 } // Input

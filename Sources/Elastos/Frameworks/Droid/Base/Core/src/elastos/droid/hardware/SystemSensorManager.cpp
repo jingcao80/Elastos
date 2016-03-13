@@ -40,7 +40,7 @@ namespace Hardware {
 
 Boolean SystemSensorManager::sSensorModuleInitialized = FALSE;
 Object SystemSensorManager::sSensorModuleLock;
-AutoPtr<List<AutoPtr<ISensor> > > SystemSensorManager::sFullSensorsList;
+AutoPtr<List<AutoPtr<ISensor> > > SystemSensorManager::sFullSensorsList = new List<AutoPtr<ISensor> >();
 HashMap<Int32, AutoPtr<ISensor> > SystemSensorManager::sHandleToSensor;
 
 CAR_INTERFACE_IMPL(SystemSensorManager, SensorManager, ISystemSensorManager);
@@ -583,6 +583,7 @@ ECode SystemSensorManager::GetFullSensorList(
     *sensors = NULL;
     if (sFullSensorsList->IsEmpty() == FALSE) {
         *sensors = ArrayOf<ISensor*>::Alloc(sFullSensorsList->GetSize());
+        REFCOUNT_ADD(*sensors);
 
         List< AutoPtr<ISensor> >::Iterator ator = sFullSensorsList->Begin();
         Int32 index = 0;
@@ -590,7 +591,6 @@ ECode SystemSensorManager::GetFullSensorList(
             (*sensors)->Set(index++, *ator);
         }
     }
-    REFCOUNT_ADD(*sensors);
 
     return NOERROR;
 }
@@ -795,67 +795,40 @@ ECode SystemSensorManager::FlushImpl(
 
 void SystemSensorManager::NativeClassInit()
 {
-    assert(0);
-    // jclass sensorClass = _env->FindClass("android/hardware/Sensor");
-    // SensorOffsets& sensorOffsets = gSensorOffsets;
-    // sensorOffsets.name        = _env->GetFieldID(sensorClass, "mName",      "Ljava/lang/String;");
-    // sensorOffsets.vendor      = _env->GetFieldID(sensorClass, "mVendor",    "Ljava/lang/String;");
-    // sensorOffsets.version     = _env->GetFieldID(sensorClass, "mVersion",   "I");
-    // sensorOffsets.handle      = _env->GetFieldID(sensorClass, "mHandle",    "I");
-    // sensorOffsets.type        = _env->GetFieldID(sensorClass, "mType",      "I");
-    // sensorOffsets.range       = _env->GetFieldID(sensorClass, "mMaxRange",  "F");
-    // sensorOffsets.resolution  = _env->GetFieldID(sensorClass, "mResolution","F");
-    // sensorOffsets.power       = _env->GetFieldID(sensorClass, "mPower",     "F");
-    // sensorOffsets.minDelay    = _env->GetFieldID(sensorClass, "mMinDelay",  "I");
-    // sensorOffsets.fifoReservedEventCount =
-    //         _env->GetFieldID(sensorClass, "mFifoReservedEventCount",  "I");
-    // sensorOffsets.fifoMaxEventCount = _env->GetFieldID(sensorClass, "mFifoMaxEventCount",  "I");
-    // sensorOffsets.stringType = _env->GetFieldID(sensorClass, "mStringType", "Ljava/lang/String;");
-    // sensorOffsets.requiredPermission = _env->GetFieldID(sensorClass, "mRequiredPermission",
-    //                                                     "Ljava/lang/String;");
-    // sensorOffsets.maxDelay    = _env->GetFieldID(sensorClass, "mMaxDelay",  "I");
-    // sensorOffsets.flags = _env->GetFieldID(sensorClass, "mFlags",  "I");
 }
 
 Int32 SystemSensorManager::NativeGetNextSensor(
-    /* [in] */ ISensor* sensor,
-    /* [in] */ Int32 next)
+    /* [in] */ ISensor* sensorObj,
+    /* [in] */ Int32 iNext)
 {
-    assert(0);
-    // SensorManager& mgr(SensorManager::getInstance());
+    CSensor* sensor = (CSensor*)sensorObj;
+    size_t next = size_t(iNext);
+    android::SensorManager& mgr(android::SensorManager::getInstance());
 
-    // Sensor const* const* sensorList;
-    // size_t count = mgr.getSensorList(&sensorList);
-    // if (size_t(next) >= count)
-    //     return -1;
+    android::Sensor const* const* sensorList;
+    size_t count = mgr.getSensorList(&sensorList);
+    if (next >= count)
+        return -1;
 
-    // Sensor const* const list = sensorList[next];
-    // const SensorOffsets& sensorOffsets(gSensorOffsets);
-    // jstring name = env->NewStringUTF(list->getName().string());
-    // jstring vendor = env->NewStringUTF(list->getVendor().string());
-    // jstring stringType = env->NewStringUTF(list->getStringType().string());
-    // jstring requiredPermission = env->NewStringUTF(list->getRequiredPermission().string());
-    // env->SetObjectField(sensor, sensorOffsets.name,      name);
-    // env->SetObjectField(sensor, sensorOffsets.vendor,    vendor);
-    // env->SetIntField(sensor, sensorOffsets.version,      list->getVersion());
-    // env->SetIntField(sensor, sensorOffsets.handle,       list->getHandle());
-    // env->SetIntField(sensor, sensorOffsets.type,         list->getType());
-    // env->SetFloatField(sensor, sensorOffsets.range,      list->getMaxValue());
-    // env->SetFloatField(sensor, sensorOffsets.resolution, list->getResolution());
-    // env->SetFloatField(sensor, sensorOffsets.power,      list->getPowerUsage());
-    // env->SetIntField(sensor, sensorOffsets.minDelay,     list->getMinDelay());
-    // env->SetIntField(sensor, sensorOffsets.fifoReservedEventCount,
-    //                  list->getFifoReservedEventCount());
-    // env->SetIntField(sensor, sensorOffsets.fifoMaxEventCount,
-    //                  list->getFifoMaxEventCount());
-    // env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
-    // env->SetObjectField(sensor, sensorOffsets.requiredPermission,
-    //                     requiredPermission);
-    // env->SetIntField(sensor, sensorOffsets.maxDelay, list->getMaxDelay());
-    // env->SetIntField(sensor, sensorOffsets.flags, list->getFlags());
-    // next++;
-    // return size_t(next) < count ? next : 0;
-    return 0;
+    android::Sensor const* const list = sensorList[next];
+    sensor->mName = String(list->getName().string());
+    sensor->mVendor = String(list->getVendor().string());
+    sensor->mStringType = String(list->getStringType().string());
+    sensor->mRequiredPermission = String(list->getRequiredPermission().string());
+    sensor->mVersion = list->getVersion();
+    sensor->mHandle = list->getHandle();
+    sensor->mType = list->getType();
+    sensor->mMaxRange = list->getMaxValue();
+    sensor->mResolution = list->getResolution();
+    sensor->mPower = list->getPowerUsage();
+    sensor->mMinDelay = list->getMinDelay();
+    sensor->mFifoReservedEventCount = list->getFifoReservedEventCount();
+    sensor->mFifoMaxEventCount = list->getFifoMaxEventCount();
+    sensor->mMaxDelay = list->getMaxDelay();
+    sensor->mFlags = list->getFlags();
+
+    next++;
+    return next < count ? next : 0;
 }
 
 } // namespace Hardware

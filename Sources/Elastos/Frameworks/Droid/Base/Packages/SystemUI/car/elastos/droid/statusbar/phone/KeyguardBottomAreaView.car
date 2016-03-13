@@ -24,7 +24,7 @@ module
      * interface IFrameLayout
      * interface IViewOnClickListener
      * interface IUnlockMethodCacheOnUnlockMethodChangedListener
-     * interface IAccessibilityControllerAccessibilityStateChangedCallback
+     * interface IAccessibilityStateChangedCallback
      * interface IViewOnLongClickListener
      */
     [local]

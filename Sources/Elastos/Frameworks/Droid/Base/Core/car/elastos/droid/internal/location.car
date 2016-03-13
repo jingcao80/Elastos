@@ -4,4 +4,64 @@ module
     merge("location/ILocationProvider.car");
     merge("location/ProviderProperties.car");
     merge("location/ProviderRequest.car");
+
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Location.IINetInitiatedListener;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Location {
+
+    [local]
+    class CGpsNetInitiatedHandler {
+        constructor(
+            [in] IContext* ctx,
+            [in] IINetInitiatedListener* netInitiatedListener,
+            [in] Boolean isSuplEsEnabled);
+
+        interface IGpsNetInitiatedHandler;
+    }
+
+    class CProviderProperties {
+        constructor();
+
+        constructor(
+            [in] Boolean mRequiresNetwork,
+            [in] Boolean mRequiresSatellite,
+            [in] Boolean mRequiresCell,
+            [in] Boolean mHasMonetaryCost,
+            [in] Boolean mSupportsAltitude,
+            [in] Boolean mSupportsSpeed,
+            [in] Boolean mSupportsBearing,
+            [in] Int32 mPowerRequirement,
+            [in] Int32 mAccuracy);
+
+        interface IProviderProperties;
+        interface IParcelable;
+    }
+
+    class CProviderRequest {
+        constructor();
+
+        interface IProviderRequest;
+        interface IParcelable;
+    }
+
+    class CGpsNiNotification {
+        constructor();
+
+        interface IGpsNiNotification;
+    }
+
+    class CGpsNiResponse {
+        constructor();
+
+        interface IGpsNiResponse;
+    }
+
+    } // namespace Location
+    } // namespace Internal
+    } // namespace Droid
+    } // namespace Elastos
 }

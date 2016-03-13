@@ -1350,8 +1350,9 @@ ECode WifiStateMachine::DriverStartedState::Enter()
     // We may have missed screen update at boot
     Boolean received;
     if (mOwner->mScreenBroadcastReceived->Get(&received), !received) {
-        AutoPtr<IPowerManager> powerManager;
-        mOwner->mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&powerManager);
+        AutoPtr<IInterface> obj;
+        mOwner->mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+        AutoPtr<IPowerManager> powerManager = IPowerManager::Probe(obj);
         Boolean isOn;
         powerManager->IsScreenOn(&isOn);
         mOwner->HandleScreenStateChanged(isOn);
@@ -3455,7 +3456,9 @@ WifiStateMachine::WifiStateMachine(
     mLastNetworkId = IWifiConfiguration::INVALID_NETWORK_ID;
     mLastSignalLevel = -1;
 
-    mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&mAlarmManager);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
+    mAlarmManager = IAlarmManager::Probe(obj);
     AutoPtr<IIntent> scanIntent;
     CIntent::New(ACTION_START_SCAN, NULL, (IIntent**)&scanIntent);
     AutoPtr<IPendingIntentHelper> helper;
@@ -3509,8 +3512,9 @@ WifiStateMachine::WifiStateMachine(
     AutoPtr<IContentObserver> observer = new WifiContentObserver(handler, this);
     cr->RegisterContentObserver(uri, FALSE, observer);
 
-    AutoPtr<IPowerManager> powerManager;
-    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&powerManager);
+    obj = NULL;
+    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    AutoPtr<IPowerManager> powerManager = IPowerManager::Probe(obj);
     powerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, TAG, (IPowerManagerWakeLock**)&mWakeLock);
     powerManager->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK, String("WifiSuspend"), (IPowerManagerWakeLock**)&mSuspendWakeLock);
     mSuspendWakeLock->SetReferenceCounted(FALSE);
@@ -4193,7 +4197,9 @@ void WifiStateMachine::HandleScreenStateChanged(
 void WifiStateMachine::CheckAndSetConnectivityInstance()
 {
     if (mConnectivityManager == NULL) {
-        mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&mConnectivityManager);
+        AutoPtr<IInterface> obj;
+        mContext->GetSystemService(IContext::CONNECTIVITY_SERVICE, (IInterface**)&obj);
+        mConnectivityManager = IConnectivityManager::Probe(obj);
     }
 }
 

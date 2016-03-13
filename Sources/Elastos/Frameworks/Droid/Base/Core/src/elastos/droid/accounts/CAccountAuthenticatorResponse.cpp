@@ -7,6 +7,10 @@ namespace Accounts {
 
 const String CAccountAuthenticatorResponse::TAG("AccountAuthenticator");
 
+CAR_OBJECT_IMPL(CAccountAuthenticatorResponse)
+
+CAR_INTERFACE_IMPL(CAccountAuthenticatorResponse, Object, IAccountAuthenticatorResponse)
+
 ECode CAccountAuthenticatorResponse::OnResult(
     /* [in] */ IBundle* result)
 {

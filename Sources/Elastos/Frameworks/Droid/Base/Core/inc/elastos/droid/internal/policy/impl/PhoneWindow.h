@@ -593,12 +593,7 @@ public:
 
             SavedState();
 
-            //should removed
-            CARAPI constructor(
-                /* [in] */ IParcelable* superState);
-
-            virtual CARAPI DescribeContents(
-                /* [out] */ Int32* result);
+            constructor();
 
             CARAPI ReadFromParcel(
                 /* [in] */ IParcel* in);

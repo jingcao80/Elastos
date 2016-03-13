@@ -6,6 +6,8 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Core::ISystem;
+using Elastos::Core::CSystem;
 using Elastos::Core::StringBuilder;
 using Elastos::Core::StringUtils;
 using Elastos::Droid::Internal::Os::CInstallerConnection;
@@ -468,11 +470,14 @@ Boolean Installer::IsValidInstructionSet(
         return FALSE;
     }
 
+    AutoPtr<ISystem> system;
+    CSystem::AcquireSingleton((ISystem**)&system);
+    String is;
     for (Int32 i = 0; i < Build::SUPPORTED_ABIS->GetLength(); ++i) {
-        assert(0);
-        // if (instructionSet.equals(VMRuntime.getInstructionSet(abi))) {
-        //     return true;
-        // }
+        system->GetInstructionSet((*Build::SUPPORTED_ABIS)[i], &is);
+        if (instructionSet.Equals(is)) {
+            return true;
+        }
     }
 
     return FALSE;

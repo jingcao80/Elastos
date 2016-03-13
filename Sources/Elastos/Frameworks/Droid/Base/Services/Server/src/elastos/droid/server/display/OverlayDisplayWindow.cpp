@@ -359,8 +359,9 @@ Boolean OverlayDisplayWindow::UpdateDefaultDisplayInfo()
 
 void OverlayDisplayWindow::CreateWindow()
 {
-    AutoPtr<ILayoutInflater> inflater;
-    mContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
     assert(inflater != NULL);
 
     mWindowContent = NULL;

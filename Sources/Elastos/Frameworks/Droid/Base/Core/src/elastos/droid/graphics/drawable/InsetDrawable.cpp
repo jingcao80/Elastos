@@ -1,6 +1,6 @@
 
 #include "Elastos.Droid.Os.h"
-#include "elastos/droid/ext/frameworkext.h"
+#include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/drawable/InsetDrawable.h"
 #include "elastos/droid/graphics/drawable/CInsetDrawable.h"
 #include "elastos/droid/graphics/Insets.h"
@@ -65,16 +65,14 @@ InsetDrawable::InsetState::InsetState(
 ECode InsetDrawable::InsetState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    return CInsetDrawable::New(this, NULL, (IInsetDrawable**)drawable);
+    return CInsetDrawable::New(this, NULL, drawable);
 }
 
 ECode InsetDrawable::InsetState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    return CInsetDrawable::New(this, res, (IInsetDrawable**)drawable);
+    return CInsetDrawable::New(this, res, drawable);
 }
 
 ECode InsetDrawable::InsetState::GetChangingConfigurations(
@@ -476,7 +474,7 @@ Boolean InsetDrawable::OnLevelChange(
 void InsetDrawable::OnBoundsChange(
     /* [in] */ IRect* bounds)
 {
-    CRect* r = mTmpRect;
+    CRect* r = (CRect*)mTmpRect.Get();
     r->Set(bounds);
 
     r->mLeft += mInsetState->mInsetLeft;
@@ -521,18 +519,12 @@ ECode InsetDrawable::GetConstantState(
     return NOERROR;
 }
 
-ECode InsetDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode InsetDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated && (Drawable::Mutate((IDrawable**)&tmp), tmp.Get()) == THIS_PROBE(IDrawable)) {
-        tmp = NULL;
-        mInsetState->mDrawable->Mutate((IDrawable**)&tmp);
+    if (!mMutated) {
+        mInsetState->mDrawable->Mutate();
         mMutated = TRUE;
     }
-    *drawable = THIS_PROBE(IDrawable);
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 

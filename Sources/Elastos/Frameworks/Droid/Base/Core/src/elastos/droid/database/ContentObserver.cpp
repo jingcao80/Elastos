@@ -57,7 +57,7 @@ ECode ContentObserver::GetContentObserver(
 
     synchronized(mLock) {
         if (mTransport == NULL) {
-            CContentObserverTransport::New((IContentObserver*)this->Probe(EIID_IContentObserver), (IContentObserverTransport**)&mTransport);
+            CContentObserverTransport::New(THIS_PROBE(IContentObserver), (IContentObserverTransport**)&mTransport);
         }
         *contentObserver = IIContentObserver::Probe(mTransport);
         REFCOUNT_ADD(*contentObserver)

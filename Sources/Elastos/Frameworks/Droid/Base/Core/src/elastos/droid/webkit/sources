@@ -70,6 +70,6 @@ SOURCES += WebSettings.cpp
 SOURCES += WebStorage.cpp
 SOURCES += WebViewDatabase.cpp
 
-ELASTOS_LIBS = native/native.lib
+#ELASTOS_LIBS = native/native.lib
 #ELASTOS_LIBS += webview/webview.lib
-ELASTOS_LIBS += webview/chromium/chromium.lib
+#ELASTOS_LIBS += webview/chromium/chromium.lib

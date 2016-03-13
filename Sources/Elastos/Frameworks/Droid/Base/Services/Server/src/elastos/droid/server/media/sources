@@ -1,0 +1,24 @@
+TARGET_NAME= media
+TARGET_TYPE= lib
+
+INCLUDES += ../
+INCLUDES += $(MAKEDIR)/../../../../../inc
+INCLUDES += $(MAKEDIR)/../../../../../../../Core/inc/
+
+include $(MAKEDIR)/../../../../../../../../sources.inc
+
+C_DEFINES += -DDROID_SERVER
+
+SOURCES = CSessionController.cpp
+SOURCES += CMediaSession.cpp
+SOURCES += CMediaRouterService.cpp
+SOURCES += MediaSessionRecord.cpp
+SOURCES += MediaSessionService.cpp
+SOURCES += CSessionManagerImpl.cpp
+SOURCES += CKeyEventWakeLockReceiver.cpp
+SOURCES += MediaSessionStack.cpp
+SOURCES += RemoteDisplayProviderProxy.cpp
+SOURCES += CProviderCallback.cpp
+SOURCES += RemoteDisplayProviderWatcher.cpp
+
+ELASTOS_LIBS += projection/projection.lib

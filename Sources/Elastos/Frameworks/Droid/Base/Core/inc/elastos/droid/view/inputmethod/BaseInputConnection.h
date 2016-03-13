@@ -3,8 +3,10 @@
 #define __ELASTOS_DROID_VIEW_INPUTMETHOD_BASEINPUTCONNECTION_H__
 
 #include "Elastos.Droid.Text.h"
+#include "Elastos.Droid.View.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/view/CKeyCharacterMap.h"
+#include <elastos/core/Object.h>
+//#include "elastos/droid/view/CKeyCharacterMap.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Graphics::IRect;
@@ -20,7 +22,7 @@ using Elastos::Droid::Text::ISpannable;
 using Elastos::Droid::Text::IEditable;
 using Elastos::Droid::Text::INoCopySpan;
 using Elastos::Droid::Text::Style::ISuggestionSpan;
-
+using Elastos::Droid::View::IKeyCharacterMap;
 using Elastos::Core::ICharSequence;
 
 namespace Elastos {
@@ -34,7 +36,7 @@ namespace InputMethod {
  * Implementors of this class will want to be sure to implement
  * {@link #getEditable} to provide access to their own editable object.
  */
-class BaseInputConnection
+class ECO_PUBLIC BaseInputConnection
     : public Object
     , public IBaseInputConnection
     , public IInputConnection
@@ -297,7 +299,7 @@ private:
     AutoPtr<ArrayOf<IInterface*> > mDefaultComposingSpans;
 
     AutoPtr<IEditable> mEditable;
-    AutoPtr<CKeyCharacterMap> mKeyCharacterMap;
+    AutoPtr<IKeyCharacterMap> mKeyCharacterMap;
 };
 
 } // namespace InputMethod

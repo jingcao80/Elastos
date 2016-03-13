@@ -18,7 +18,6 @@
 #include "elastos/droid/os/Handler.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/R.h"
-#include "elastos/droid/telephony/CDctConstants.h"
 // #include "elastos/droid/telephony/CTelephonyManager.h"
 #include "elastos/droid/text/TextUtils.h"
 #include <elastos/core/StringUtils.h>
@@ -55,7 +54,6 @@ using Elastos::Droid::Os::IMessage;
 using Elastos::Droid::Os::IMessenger;
 using Elastos::Droid::Os::IServiceManager;
 using Elastos::Droid::Os::ServiceManager;
-using Elastos::Droid::Telephony::CDctConstants;
 using Elastos::Droid::Telephony::IPhoneStateListener;
 using Elastos::Droid::Telephony::ISignalStrength;
 using Elastos::Droid::Telephony::ITelephonyManager;

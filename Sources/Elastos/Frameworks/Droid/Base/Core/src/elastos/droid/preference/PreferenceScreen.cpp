@@ -98,8 +98,9 @@ ECode PreferenceScreen::ShowDialog(
         av->SetAdapter(NULL);
     }
 
-    AutoPtr<ILayoutInflater> inflater;
-    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(obj);
     AutoPtr<IView> childPrefScreen;
     inflater->Inflate(R::layout::preference_list_fragment, NULL, (IView**)&childPrefScreen);
     mListView = NULL;

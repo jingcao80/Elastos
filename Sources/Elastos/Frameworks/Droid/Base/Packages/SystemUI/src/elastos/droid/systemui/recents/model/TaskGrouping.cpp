@@ -17,7 +17,7 @@ TaskGrouping::TaskGrouping(
     : mAffiliation(affiliation)
     , mLatestActiveTimeInGroup(0)
 {
-    CArrayList::New((IList**)&mTaskKeys);
+    CArrayList::New((IArrayList**)&mTaskKeys);
 }
 
 /** Adds a new task to this group. */

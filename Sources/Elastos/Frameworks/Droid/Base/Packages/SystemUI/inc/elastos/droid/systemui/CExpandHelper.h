@@ -246,7 +246,7 @@ private:
     Int32 mExpansionStyle;// = NONE;
     Boolean mWatchingForPull;
     Boolean mHasPopped;
-    AutoPtr<IView> mEventSource;
+    IView* mEventSource;
     Float mOldHeight;
     Float mNaturalHeight;
     Float mInitialTouchFocusY;
@@ -274,7 +274,7 @@ private:
     Boolean mOnlyMovements;
 
     Int32 mGravity;
-    AutoPtr<IScrollAdapter> mScrollAdapter;
+    IScrollAdapter* mScrollAdapter;
     AutoPtr<IFlingAnimationUtils> mFlingAnimationUtils;
     AutoPtr<IVelocityTracker> mVelocityTracker;
 };

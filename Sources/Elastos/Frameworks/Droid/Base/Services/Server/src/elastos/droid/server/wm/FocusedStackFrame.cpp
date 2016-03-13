@@ -40,7 +40,7 @@ FocusedStackFrame::FocusedStackFrame(
     //         1, 1, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
     // } else {
     CSurfaceControl::New(session, String("FocusedStackFrame"),
-            1, 1, IPixelFormat::TRANSLUCENT, ISurfaceControl::HIDDEN, (ISurfaceControl**)&ctrl);
+        1, 1, IPixelFormat::TRANSLUCENT, ISurfaceControl::HIDDEN, (ISurfaceControl**)&ctrl);
     // }
     Int32 stack;
     display->GetLayerStack(&stack);
@@ -121,14 +121,14 @@ void FocusedStackFrame::SetVisibility(
         String str1, str2;
         mLastBounds->ToShortString(&str1);
         mBounds->ToShortString(&str2);
-        Slogger::I(TAG, "setVisibility: on=%d mLastBounds=%s mBounds=%s", on, str1.string(), str2.string());
+        Slogger::I(TAG, "setVisibility: on=%d mLastBounds=%s mBounds=%s",
+            on, str1.string(), str2.string());
     }
     if (mSurfaceControl == NULL) {
         return;
     }
     if (on) {
-        Boolean equals;
-        if (IObject::Probe(mLastBounds)->Equals(mBounds, &equals), !equals) {
+        if (Object::Equals(mLastBounds, mBounds)) {
             // Erase the previous rectangle.
             PositionSurface(mLastBounds);
             Draw(mLastBounds, IColor::TRANSPARENT);
@@ -149,7 +149,8 @@ void FocusedStackFrame::SetBounds(
     /* [in] */ TaskStack* stack)
 {
     stack->GetBounds(mBounds);
-    if (FALSE && CWindowManagerService::DEBUG_STACK) Slogger::I(TAG, "setBounds: bounds=%p", mBounds.Get());
+    if (FALSE && CWindowManagerService::DEBUG_STACK)
+        Slogger::I(TAG, "setBounds: bounds=%p", mBounds.Get());
 }
 
 void FocusedStackFrame::SetLayer(

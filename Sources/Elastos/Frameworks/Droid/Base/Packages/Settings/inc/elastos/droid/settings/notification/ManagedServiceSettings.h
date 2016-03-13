@@ -174,7 +174,7 @@ public abstract class ManagedServiceSettings extends ListFragment {
             if (sb == NULL) {
                 sb = new StringBuilder();
             } else {
-                sb->Append(':');
+                sb->AppendChar32(':');
             }
             sb->Append(cn->FlattenToString());
         }

@@ -14,8 +14,14 @@ namespace Droid {
 namespace Os {
 
 CarClass(CStrictModeVmPolicyBuilder)
+    , public Object
+    , public IStrictModeVmPolicyBuilder
 {
 public:
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(
@@ -62,6 +68,14 @@ public:
      * avoid unnecessary resources leaks.
      */
     CARAPI DetectLeakedClosableObjects();
+
+    /**
+     * Detect when a {@code file://} {@link android.net.Uri} is exposed beyond this
+     * app. The receiving app may not have access to the sent path.
+     * Instead, when sharing files between apps, {@code content://}
+     * should be used with permission grants.
+     */
+    CARAPI DetectFileUriExposure();
 
     /**
      * Detect when a {@link BroadcastReceiver} or

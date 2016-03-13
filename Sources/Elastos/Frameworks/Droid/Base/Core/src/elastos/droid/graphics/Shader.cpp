@@ -10,10 +10,6 @@ namespace Elastos {
 namespace Droid {
 namespace Graphics {
 
-// {AE795BA0-60FF-4BED-ADF2-9BDE205AB72F}
-extern const InterfaceID EIID_Shader =
-    { 0xae795ba0, 0x60ff, 0x4bed, { 0xad, 0xf2, 0x9b, 0xde, 0x20, 0x5a, 0xb7, 0x2f } };
-
 CAR_INTERFACE_IMPL(Shader, Object, IShader);
 Shader::~Shader()
 {

@@ -84,6 +84,7 @@ module
      * @Involved
      * interface IService;
      * interface IComponentCallbacks2;
+     * interface IComponentCallbacks;
      * interface IContextWrapper;
      * interface IContext;
      */

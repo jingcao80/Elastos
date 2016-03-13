@@ -3,7 +3,9 @@
 #define __ELASTOS_DROID_INTERNAL_OS_CRUNTIMEINIT_H__
 
 #include "_Elastos_Droid_Internal_Os_CRuntimeInit.h"
-#include "RuntimeInit.h"
+#include <elastos/core/Singleton.h>
+
+using Elastos::Droid::Os::IBinder;
 
 namespace Elastos {
 namespace Droid {
@@ -11,7 +13,7 @@ namespace Internal {
 namespace Os {
 
 CarClass(CRuntimeInit)
-    , public RuntimeInit
+    , public Singleton
     , public IRuntimeInit
 {
 public:
@@ -21,6 +23,12 @@ public:
 
     CARAPI Main(
         /* [in] */ const ArrayOf<String>& args);
+
+    CARAPI SetApplicationObject(
+        /* [in] */ IBinder* app);
+
+    CARAPI GetApplicationObject(
+        /* [out] */ IBinder** app);
 };
 
 } // namespace Os

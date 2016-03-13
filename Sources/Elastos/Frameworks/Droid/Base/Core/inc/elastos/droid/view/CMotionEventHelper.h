@@ -19,6 +19,9 @@ public:
     CAR_SINGLETON_DECL();
 
     CARAPI Obtain(
+        /* [out] */ IMotionEvent** o);
+
+    CARAPI Obtain(
         /* [in] */ Int64 downTime,
         /* [in] */ Int64 eventTime,
         /* [in] */ Int32 action,

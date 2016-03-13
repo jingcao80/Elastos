@@ -5,6 +5,7 @@
 #include "_Elastos_Droid_Os_CStrictModeViolationInfo.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include <elastos/core/Object.h>
+#include <Elastos.Droid.App.h>
 
 using Elastos::Droid::App::IApplicationErrorReportCrashInfo;
 using Elastos::Droid::Utility::IPrinter;
@@ -14,9 +15,15 @@ namespace Droid {
 namespace Os {
 
 CarClass(CStrictModeViolationInfo)
+    , public Object
+    , public IStrictModeViolationInfo
 {
 public:
     CStrictModeViolationInfo();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
 
     CARAPI constructor();
 
@@ -67,7 +74,7 @@ public:
         /* [out] */ Int64* num);
 
     CARAPI GetTags(
-        /* [out,callee] */ ArrayOf<String>** tags);
+        /* [out, callee] */ ArrayOf<String>** tags);
 
     CARAPI GetCrashInfo(
         /* [out] */ IApplicationErrorReportCrashInfo** crashInfo);

@@ -69,6 +69,7 @@
 #include "elastos/droid/widget/CZoomButtonsController.h"
 #include "elastos/droid/widget/CRemoteViews.h"
 #include "elastos/droid/widget/CRemoteViewsAdapter.h"
+#include "elastos/droid/widget/CRemoteViewsBitmapCache.h"
 #include "elastos/droid/widget/CRemoteViewsListAdapter.h"
 #include "elastos/droid/widget/CRemoteViewsFactoryAdapter.h"
 #include "elastos/droid/widget/CRemoteViewsAdapterServiceConnection.h"
@@ -157,6 +158,7 @@ CAR_OBJECT_IMPL(CZoomButton)
 CAR_OBJECT_IMPL(CZoomButtonsController)
 CAR_OBJECT_IMPL(CRemoteViews)
 CAR_OBJECT_IMPL(CRemoteViewsAdapter)
+CAR_OBJECT_IMPL(CRemoteViewsBitmapCache)
 CAR_OBJECT_IMPL(CRemoteViewsListAdapter)
 CAR_OBJECT_IMPL(CRemoteViewsFactoryAdapter)
 CAR_OBJECT_IMPL(CRemoteViewsAdapterServiceConnection)

@@ -65,9 +65,8 @@ public:
         /* [in] */ IHdmiCecMessage* message);
 
 private:
-    CARAPI IsCacheable(
-        /* [in] */ Int32 opcode,
-        /* [out] */ Boolean* result);
+    CARAPI_(Boolean) IsCacheable(
+        /* [in] */ Int32 opcode);
 
     static AutoPtr<IFastImmutableArraySet> InitCACHEABLE_OPCODES();
 

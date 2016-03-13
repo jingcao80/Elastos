@@ -1,6 +1,14 @@
 
+#include "elastos/droid/server/hdmi/Constants.h"
 #include "elastos/droid/server/hdmi/HdmiCecMessageCache.h"
 #include <Elastos.Droid.Utility.h>
+#include <Elastos.CoreLibrary.Utility.h>
+
+using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Droid::Utility::ISparseArray;
+using Elastos::Utility::ISet;
+using Elastos::Core::CInteger32;
+using Elastos::Core::IInteger32;
 
 namespace Elastos {
 namespace Droid {
@@ -9,9 +17,7 @@ namespace Hdmi {
 
 HdmiCecMessageCache::HdmiCecMessageCache()
 {
-#if 0 // TODO: Translate codes below
-    AutoPtr<ISparseArray> mCache = new SparseArray<>();
-#endif
+    CSparseArray::New((ISparseArray**)&mCache);
 }
 
 ECode HdmiCecMessageCache::constructor()
@@ -24,78 +30,75 @@ ECode HdmiCecMessageCache::GetMessage(
     /* [in] */ Int32 opcode,
     /* [out] */ IHdmiCecMessage** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        SparseArray<HdmiCecMessage> messages = mCache.get(address);
-        if (messages == NULL) {
-            return NULL;
-        }
-        return messages.get(opcode);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IInterface> obj;
+    mCache->Get(address, (IInterface**)&obj);
+    AutoPtr<ISparseArray> messages = ISparseArray::Probe(obj);
+    if (messages == NULL) {
+        *result = NULL;
+        return NOERROR;
+    }
+    obj = NULL;
+    messages->Get(opcode, (IInterface**)&obj);
+    *result = IHdmiCecMessage::Probe(obj);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode HdmiCecMessageCache::FlushMessagesFrom(
     /* [in] */ Int32 address)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mCache.remove(address);
-
-#endif
+    return mCache->Remove(address);
 }
 
 ECode HdmiCecMessageCache::FlushAll()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mCache.clear();
-
-#endif
+    return mCache->Clear();
 }
 
 ECode HdmiCecMessageCache::CacheMessage(
     /* [in] */ IHdmiCecMessage* message)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        int opcode = message.getOpcode();
-        if (!isCacheable(opcode)) {
-            return;
-        }
-        int source = message.getSource();
-        SparseArray<HdmiCecMessage> messages = mCache.get(source);
-        if (messages == NULL) {
-            messages = new SparseArray<>();
-            mCache.put(source, messages);
-        }
-        messages.put(opcode, message);
-
-#endif
+    Int32 opcode;
+    message->GetOpcode(&opcode);
+    if (!IsCacheable(opcode)) {
+        return NOERROR;
+    }
+    Int32 source;
+    message->GetSource(&source);
+    AutoPtr<IInterface> obj;
+    mCache->Get(source, (IInterface**)&obj);
+    AutoPtr<ISparseArray> messages = ISparseArray::Probe(obj);
+    if (messages == NULL) {
+        CSparseArray::New((ISparseArray**)&messages);
+        mCache->Put(source, messages);
+    }
+    messages->Put(opcode, message);
+    return NOERROR;
 }
 
-ECode HdmiCecMessageCache::IsCacheable(
-    /* [in] */ Int32 opcode,
-    /* [out] */ Boolean* result)
+Boolean HdmiCecMessageCache::IsCacheable(
+    /* [in] */ Int32 opcode)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return CACHEABLE_OPCODES.contains(opcode);
-
-#endif
+    AutoPtr<IInteger32> iOpcode;
+    CInteger32::New(opcode, (IInteger32**)&iOpcode);
+    Boolean rev;
+    ISet::Probe(CACHEABLE_OPCODES)->Contains(iOpcode, &rev);
+    return rev;
 }
 
 AutoPtr<IFastImmutableArraySet> HdmiCecMessageCache::InitCACHEABLE_OPCODES()
 {
     AutoPtr<IFastImmutableArraySet> rev;
-#if 0 // TODO: Translate codes below
-     = new FastImmutableArraySet<>(new Integer[] {
-                        Constants.MESSAGE_SET_OSD_NAME,
-                        Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS,
-                        Constants.MESSAGE_DEVICE_VENDOR_ID,
-                        Constants.MESSAGE_CEC_VERSION,
-                }
-#endif
+    // TODO: Waiting for CFastImmutableArraySet
+    assert(0);
+    // = new FastImmutableArraySet<>(new Integer[] {
+    //                 Constants::MESSAGE_SET_OSD_NAME,
+    //                 Constants::MESSAGE_REPORT_PHYSICAL_ADDRESS,
+    //                 Constants::MESSAGE_DEVICE_VENDOR_ID,
+    //                 Constants::MESSAGE_CEC_VERSION,
+    //         }
     return rev;
 }
 

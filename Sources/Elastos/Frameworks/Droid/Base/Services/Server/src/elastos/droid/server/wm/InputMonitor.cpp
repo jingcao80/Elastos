@@ -274,7 +274,7 @@ void InputMonitor::UpdateInputWindowsLw(
     for (Int32 displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
         AutoPtr<IInterface> value;
         mService->mDisplayContents->ValueAt(displayNdx, (IInterface**)&value);
-        AutoPtr<DisplayContent> displayContent = (DisplayContent*)(IObject*)value.Get();
+        AutoPtr<DisplayContent> displayContent = (DisplayContent*)IObject::Probe(value);;
         AutoPtr<List<AutoPtr<WindowState> > > windows = displayContent->GetWindowList();
         List<AutoPtr<WindowState> >::ReverseIterator winRit = windows->RBegin();
         for (; winRit != windows->REnd(); ++winRit) {

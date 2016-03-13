@@ -3,40 +3,31 @@
 #define __ELASTOS_DROID_TELEPHONY_CCELLINFOCDMA_H__
 
 #include "_Elastos_Droid_Telephony_CCellInfoCdma.h"
-#include "telephony/CellInfo.h"
+#include "elastos/droid/ext/frameworkdef.h"
+#include "elastos/droid/telephony/CellInfo.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-CarClass(CCellInfoCdma), public CellInfo
+CarClass(CCellInfoCdma)
+    , public CellInfo
+    , public ICellInfoCdma
 {
 public:
+    CCellInfoCdma();
+
+    virtual ~CCellInfoCdma();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(
         /* [in] */ ICellInfoCdma* ci);
-
-    CARAPI_(PInterface) Probe(
-        /* [in]  */ REIID riid);
-
-    CARAPI IsRegistered(
-        /* [out] */ Boolean* registered);
-
-    CARAPI SetRegisterd(
-        /* [in] */ Boolean registered);
-
-    CARAPI GetTimeStamp(
-        /* [out] */ Int64* timeStamp);
-
-    CARAPI SetTimeStamp(
-        /* [in] */ Int64 timeStamp);
-
-    CARAPI GetTimeStampType(
-        /* [out] */ Int32* timeStampType);
-
-    CARAPI SetTimeStampType(
-        /* [in] */ Int32 timeStampType);
 
     CARAPI GetHashCode(
         /* [out] */ Int32* hashCode);
@@ -67,7 +58,7 @@ public:
         /* [in] */ IParcel* dest);
 
 private:
-    static const String LOG_TAG;
+    static const String TAG;
     static const Boolean DBG;
 
     AutoPtr<ICellIdentityCdma> mCellIdentityCdma;

@@ -6,6 +6,7 @@ module
     interface Elastos.Droid.Telephony.ICellInfo;
     interface Elastos.Droid.Telephony.INeighboringCellInfo;
     interface Elastos.Droid.Telephony.IIccOpenLogicalChannelResponse;
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
@@ -380,7 +381,7 @@ module
          */
         GetNeighboringCellInfo(
             [in] String callingPkg,
-            [out, callee] ArrayOf<INeighboringCellInfo*>* array);
+            [out] IList** array);
 
         GetCallState(
             [out] Int32* result);
@@ -572,7 +573,7 @@ module
          * Returns the all observed cell information of the device.
          */
         GetAllCellInfo(
-            [out, callee] ArrayOf<ICellInfo*>* list);
+            [out] IList** list);
 
         /**
          * Sets minimum time in milli-seconds between onCellInfoChanged
@@ -851,7 +852,7 @@ module
          */
         GetCarrierPackageNamesForIntent(
             [in] IIntent* intent,
-            [out, callee] ArrayOf<String>* list);
+            [out] IList** list);
 
         /**
          * Set whether Android should display a simplified Mobile Network Settings UI

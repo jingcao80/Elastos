@@ -33,6 +33,12 @@ module
      * interface IDemoMode
      * interface IDragDownHelperDragDownCallback
      * interface IActivityStarter
+     * interface Elastos.Droid.SystemUI.ISystemUI
+     * interface ICommandQueueCallbacks
+     * IActivatableNotificationViewOnActivatedListener
+     * interface Elastos.Droid.RecentsComponentCallbacks
+     * inIExpandableNotificationRowExpansionLogger
+     * interface Elastos.Droid.INotificationDataEnvironment
      */
     [local, deprecated]
     interface IPhoneStatusBar {

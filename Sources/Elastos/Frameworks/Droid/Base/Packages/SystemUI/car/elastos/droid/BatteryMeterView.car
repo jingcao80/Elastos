@@ -10,7 +10,7 @@ module
      * @Involve
      * interface IView
      * interface IDemoMode
-     * interface IBatteryControllerBatteryStateChangeCallback
+     * interface IBatteryStateChangeCallback
      */
     interface IBatteryMeterView {
         SetBatteryController(

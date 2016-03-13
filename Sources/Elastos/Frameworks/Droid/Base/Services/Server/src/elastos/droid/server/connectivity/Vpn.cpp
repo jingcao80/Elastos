@@ -978,7 +978,7 @@ AutoPtr<ILinkProperties> Vpn::MakeLinkProperties()
             it->GetNext((IInterface**)&obj);
             String domain = Object::ToString(obj);
             buffer.Append(domain);
-            buffer.Append(' ');
+            buffer.Append(" ");
         }
     }
     lp->SetDomains(buffer.ToString().Trim());

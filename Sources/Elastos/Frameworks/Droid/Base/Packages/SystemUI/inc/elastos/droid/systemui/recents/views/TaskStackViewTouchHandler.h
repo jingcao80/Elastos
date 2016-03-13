@@ -12,6 +12,8 @@ namespace SystemUI {
 namespace Recents {
 namespace Views {
 
+class TaskStackView;
+
 /* Handles touch events for a TaskStackView. */
 class TaskStackViewTouchHandler : public Object
 {
@@ -124,7 +126,7 @@ public:
     static Int32 INACTIVE_POINTER_ID;
 
     AutoPtr<RecentsConfiguration> mConfig;
-    AutoPtr<TaskStackView> mSv;
+    TaskStackView* mSv; // TaskStackView has this's reference
     AutoPtr<TaskStackViewScroller> mScroller;
     AutoPtr<IVelocityTracker> mVelocityTracker;
 
@@ -137,7 +139,7 @@ public:
     Int32 mInitialMotionY;
     Int32 mLastMotionX;
     Int32 mLastMotionY;
-    Int32 mActivePointerId = INACTIVE_POINTER_ID;
+    Int32 mActivePointerId;
     AutoPtr<TaskView> mActiveTaskView;
 
     Int32 mMinimumVelocity;

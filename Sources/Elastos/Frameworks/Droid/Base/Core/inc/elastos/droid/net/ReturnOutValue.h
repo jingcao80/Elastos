@@ -5,6 +5,7 @@
 #include "Elastos.Droid.Net.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
+#include <assert.h>
 
 using Elastos::Utility::ICollection;
 using Elastos::Utility::IIterator;
@@ -29,7 +30,8 @@ using Elastos::Utility::IIterator;
  * }
  *
  */
-#define FOR_EACH(iterator, container) AutoPtr<IIterator> iterator;      \
+#define FOR_EACH(iterator, container) AutoPtr<IIterator> iterator;                          \
+        assert(container != NULL && ICollection::Probe(container) != NULL);                 \
         ICollection::Probe(container)->GetIterator((IIterator**)&iterator);                 \
         while (ReturnOutValue(iterator, iterator->HasNext))
 
@@ -136,7 +138,9 @@ class Redefine
 public:
     Redefine(T_OBJ* obj)
         : mPtr(obj)
-    {}
+    {
+        assert(obj != NULL);
+    }
 
     template <typename T_REV>
     T_REV Func(ECode (T_OBJ::*func)(T_REV*))
@@ -173,6 +177,7 @@ private:
 template <typename T_OBJ, typename T_REV>
 T_REV ReturnOutValue(T_OBJ* obj, ECode (T_OBJ::*func)(T_REV*))
 {
+    assert(obj != NULL);
     T_REV rev;
     (obj->*func)(&rev);
     return rev;
@@ -181,6 +186,7 @@ T_REV ReturnOutValue(T_OBJ* obj, ECode (T_OBJ::*func)(T_REV*))
 template <typename T_OBJ, typename T_REV>
 AutoPtr<T_REV> ReturnOutValue(T_OBJ* obj, ECode (T_OBJ::*func)(T_REV**))
 {
+    assert(obj != NULL);
     AutoPtr<T_REV> rev;
     (obj->*func)((T_REV**)&rev);
     return rev;
@@ -189,6 +195,7 @@ AutoPtr<T_REV> ReturnOutValue(T_OBJ* obj, ECode (T_OBJ::*func)(T_REV**))
 template <typename T_OBJ, typename T_REV, typename T_PARA1>
 AutoPtr<T_REV> ReturnOutValue(T_OBJ* obj, ECode (T_OBJ::*func)(T_PARA1 para1, T_REV**), T_PARA1 para1)
 {
+    assert(obj != NULL);
     AutoPtr<T_REV> rev;
     (obj->*func)(para1, (T_REV**)&rev);
     return rev;
@@ -197,6 +204,7 @@ AutoPtr<T_REV> ReturnOutValue(T_OBJ* obj, ECode (T_OBJ::*func)(T_PARA1 para1, T_
 template <typename T_OBJ, typename T_REV, typename T_PARA1>
 T_REV ReturnOutValue(T_OBJ* obj, ECode (T_OBJ::*func)(T_PARA1 para1, T_REV*), T_PARA1 para1)
 {
+    assert(obj != NULL);
     T_REV rev;
     (obj->*func)(para1, &rev);
     return rev;
@@ -205,6 +213,7 @@ T_REV ReturnOutValue(T_OBJ* obj, ECode (T_OBJ::*func)(T_PARA1 para1, T_REV*), T_
 template <typename T_OBJ, typename T_REV, typename T_PARA1>
 T_REV ReturnOutValue(T_OBJ* obj, ECode (T_OBJ::*func)(T_PARA1* para1, T_REV*), T_PARA1* para1)
 {
+    assert(obj != NULL);
     T_REV rev;
     (obj->*func)(para1, &rev);
     return rev;

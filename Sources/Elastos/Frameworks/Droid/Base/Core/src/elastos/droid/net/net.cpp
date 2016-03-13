@@ -6,6 +6,7 @@
 #include "elastos/droid/net/CDhcpResults.h"
 #include "elastos/droid/net/CDhcpStateMachine.h"
 #include "elastos/droid/net/CEthernetManager.h"
+#include "elastos/droid/net/CHierarchicalUri.h"
 #include "elastos/droid/net/CIpConfiguration.h"
 #include "elastos/droid/net/CIpPrefix.h"
 #include "elastos/droid/net/CLinkAddress.h"
@@ -38,6 +39,7 @@
 #include "elastos/droid/net/CNetworkStatsHistory.h"
 #include "elastos/droid/net/CNetworkStatsHistoryEntry.h"
 #include "elastos/droid/net/CNetworkTemplate.h"
+#include "elastos/droid/net/COpaqueUri.h"
 #include "elastos/droid/net/CPacProxySelector.h"
 #include "elastos/droid/net/CProxyDataTracker.h"
 #include "elastos/droid/net/CProxyInfo.h"
@@ -50,6 +52,7 @@
 #include "elastos/droid/net/CScoredNetwork.h"
 #include "elastos/droid/net/CSntpClient.h"
 #include "elastos/droid/net/CStaticIpConfiguration.h"
+#include "elastos/droid/net/CStringUri.h"
 #include "elastos/droid/net/CUriBuilder.h"
 #include "elastos/droid/net/CUidRange.h"
 #include "elastos/droid/net/CUrlQuerySanitizer.h"
@@ -93,6 +96,8 @@ CAR_OBJECT_IMPL(CDhcpResults)
 CAR_OBJECT_IMPL(CDhcpStateMachine)
 
 CAR_OBJECT_IMPL(CEthernetManager)
+
+CAR_OBJECT_IMPL(CHierarchicalUri)
 
 CAR_OBJECT_IMPL(CIpConfiguration)
 
@@ -158,6 +163,8 @@ CAR_OBJECT_IMPL(CNetworkStatsHistoryEntry)
 
 CAR_OBJECT_IMPL(CNetworkTemplate)
 
+CAR_OBJECT_IMPL(COpaqueUri)
+
 CAR_OBJECT_IMPL(CPacProxySelector)
 
 CAR_OBJECT_IMPL(CProxyDataTracker)
@@ -181,6 +188,8 @@ CAR_OBJECT_IMPL(CScoredNetwork)
 CAR_OBJECT_IMPL(CSntpClient)
 
 CAR_OBJECT_IMPL(CStaticIpConfiguration)
+
+CAR_OBJECT_IMPL(CStringUri)
 
 CAR_OBJECT_IMPL(CUriBuilder)
 

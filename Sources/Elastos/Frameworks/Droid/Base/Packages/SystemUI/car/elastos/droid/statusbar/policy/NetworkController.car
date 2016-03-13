@@ -83,8 +83,11 @@ module
     interface INetworkSignalChangedCallback {
         OnWifiSignalChanged(
             [in] Boolean enabled,
+            [in] Boolean connected,
             [in] Int32 wifiSignalIconId,
-            [in] String wifitSignalContentDescriptionId,
+            [in] Boolean activityIn,
+            [in] Boolean activityOut,
+            [in] String wifiSignalContentDescriptionId,
             [in] String description);
 
         OnMobileDataSignalChanged(
@@ -92,10 +95,17 @@ module
             [in] Int32 mobileSignalIconId,
             [in] String mobileSignalContentDescriptionId,
             [in] Int32 dataTypeIconId,
+            [in] Boolean activityIn,
+            [in] Boolean activityOut,
             [in] String dataTypeContentDescriptionId,
-            [in] String description);
+            [in] String description,
+            [in] Boolean noSim,
+            [in] Boolean isDataTypeIconWide);
 
         OnAirplaneModeChanged(
+            [in] Boolean enabled);
+
+        OnMobileDataEnabled(
             [in] Boolean enabled);
     }
 

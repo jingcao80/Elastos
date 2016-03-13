@@ -15,6 +15,7 @@ namespace View {
 class WindowManagerImpl
     : public Object
     , public IWindowManager
+    , public IViewManager
 {
 public:
     CAR_INTERFACE_DECL();

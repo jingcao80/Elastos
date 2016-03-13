@@ -120,7 +120,7 @@ CProcessStatsService::CProcessStatsService()
 }
 
 ECode CProcessStatsService::constructor(
-    /* [in] */ Handle32 am,
+    /* [in] */ IIActivityManager* am,
     /* [in] */ IFile* file)
 {
     mAm = (CActivityManagerService*)am;
@@ -380,8 +380,7 @@ void CProcessStatsService::PerformWriteState()
     if (DEBUG) {
         AutoPtr<IFile> baseFile;
         mFile->GetBaseFile((IFile**)&baseFile);
-        String str;
-        IObject::Probe(mFile)->ToString(&str);
+        String str = Object::ToString(mFile);
         Slogger::D(TAG, "Performing write to %s", str.string());
     }
     AutoPtr<IParcel> data;

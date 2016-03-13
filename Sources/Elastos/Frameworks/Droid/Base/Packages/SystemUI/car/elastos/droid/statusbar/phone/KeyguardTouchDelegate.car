@@ -16,7 +16,6 @@ module
      *
      */
     interface IKeyguardTouchDelegate {
-
         IsSecure(
             [out] Boolean* result);
 
@@ -38,7 +37,6 @@ module
     }
 
     interface IOnKeyguardConnectionListener {
-
         OnKeyguardServiceConnected(
             [in] IKeyguardTouchDelegate* keyguardTouchDelegate);
 
@@ -47,7 +45,6 @@ module
     }
 
     interface IKeyguardTouchDelegateHelper {
-
         GetInstance(
             [in] IContext* ctx,
             [out] IKeyguardTouchDelegate** result);

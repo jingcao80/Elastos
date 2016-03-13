@@ -8,8 +8,8 @@ module
     interface Elastos.Droid.Media.IRating;
     interface Elastos.Droid.Media.IMediaMetadata;
     interface Elastos.Droid.View.IKeyEvent;
-    interface IISessionControllerCallback;
-    interface IParcelableVolumeInfo;
+    interface Elastos.Droid.Media.Session.IISessionControllerCallback;
+    interface Elastos.Droid.Media.Session.IParcelableVolumeInfo;
 
     namespace Elastos {
     namespace Droid {

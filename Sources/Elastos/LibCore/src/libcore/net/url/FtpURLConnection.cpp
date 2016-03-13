@@ -430,12 +430,14 @@ ECode FtpURLConnection::Port()
     mControlSocket->GetLocalAddress((IInetAddress**)&iadd);
     String outstr;
     iadd->GetHostAddress(&outstr);
-    String inputstr = String("PORT ") + outstr.Replace('.',',');
-    inputstr.Append(',');
-    inputstr += StringUtils::ToString(mDataPort >> 8);
-    inputstr.Append(',');
-    inputstr += StringUtils::ToString(mDataPort & 255) + String("\r\n");
-    Write(inputstr);
+    StringBuilder sb("PORT ");
+    sb += outstr.Replace('.',',');
+    sb += ",";
+    sb += StringUtils::ToString(mDataPort >> 8);
+    sb += ",";
+    sb += StringUtils::ToString(mDataPort & 255);
+    sb += "\r\n";
+    Write(sb.ToString());
 
     Int32 value = 0;
     if ((GetReply(&value), value) != FTP_OK) {

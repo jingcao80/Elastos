@@ -33,6 +33,7 @@ SOURCES += CrossProfileIntentResolver.cpp
 SOURCES += CKeySetHandle.cpp
 SOURCES += KeySetManagerService.cpp
 SOURCES += LauncherAppsService.cpp
+SOURCES += CLauncherAppsService.cpp
 SOURCES += CLauncherAppsImpl.cpp
 SOURCES += CPackageInstallerService.cpp
 SOURCES += CPackageInstallerSession.cpp

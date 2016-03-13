@@ -62,6 +62,17 @@ module
         const String EXTRA_SCAN_AVAILABLE = "scan_enabled";
 
         /**
+         * Broadcast intent action indicating that Wi-Fi has been enabled, disabled,
+         * enabling, disabling, or unknown. One extra provides this state as an int.
+         * Another extra provides the previous state, if available.
+         *
+         * @see #EXTRA_WIFI_STATE
+         * @see #EXTRA_PREVIOUS_WIFI_STATE
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String WIFI_STATE_CHANGED_ACTION = "android.net.wifi.WIFI_STATE_CHANGED";
+
+        /**
          * The lookup key for an int that indicates whether Wi-Fi is enabled,
          * disabled, enabling, disabling, or unknown.  Retrieve it with
          * {@link android.content.Intent#getIntExtra(String,int)}.
@@ -255,6 +266,18 @@ module
         const String EXTRA_WIFI_INFO = "wifiInfo";
 
         /**
+         * Broadcast intent action indicating that the state of establishing a connection to
+         * an access point has changed.One extra provides the new
+         * {@link SupplicantState}. Note that the supplicant state is Wi-Fi specific, and
+         * is not generally the most useful thing to look at if you are just interested in
+         * the overall state of connectivity.
+         * @see #EXTRA_NEW_STATE
+         * @see #EXTRA_SUPPLICANT_ERROR
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String SUPPLICANT_STATE_CHANGED_ACTION = "android.net.wifi.supplicant.STATE_CHANGE";
+
+        /**
          * The lookup key for a {@link SupplicantState} describing the new state
          * Retrieve with
          * {@link android.content.Intent#getParcelableExtra(String)}.
@@ -332,6 +355,28 @@ module
         const Int32 CHANGE_REASON_CONFIG_CHANGE = 2;
 
         /**
+         * An access point scan has completed, and results are available from the supplicant.
+         * Call {@link #getScanResults()} to obtain the results.
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String SCAN_RESULTS_AVAILABLE_ACTION = "android.net.wifi.SCAN_RESULTS";
+
+        /**
+         * A batch of access point scans has been completed and the results areavailable.
+         * Call {@link #getBatchedScanResults()} to obtain the results.
+         * @hide pending review
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String BATCHED_SCAN_RESULTS_AVAILABLE_ACTION = "android.net.wifi.BATCHED_RESULTS";
+
+        /**
+         * The RSSI (signal strength) has changed.
+         * @see #EXTRA_NEW_RSSI
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String RSSI_CHANGED_ACTION = "android.net.wifi.RSSI_CHANGED";
+
+        /**
          * The lookup key for an {@code int} giving the new RSSI in dBm.
          */
         const String EXTRA_NEW_RSSI = "newRssi";
@@ -358,6 +403,36 @@ module
          * @hide
          */
         const String EXTRA_NETWORK_CAPABILITIES = "networkCapabilities";
+
+
+        /**
+         * The network IDs of the configured networks could have changed.
+         */
+        //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        const String NETWORK_IDS_CHANGED_ACTION = "android.net.wifi.NETWORK_IDS_CHANGED";
+
+        /**
+         * Activity Action: Show a system activity that allows the user to enable
+         * scans to be available even with Wi-Fi turned off.
+         *
+         * <p>Notification of the result of this activity is posted using the
+         * {@link android.app.Activity#onActivityResult} callback. The
+         * <code>resultCode</code>
+         * will be {@link android.app.Activity#RESULT_OK} if scan always mode has
+         * been turned on or {@link android.app.Activity#RESULT_CANCELED} if the user
+         * has rejected the request or an error has occurred.
+         */
+        //@SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+        const String ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE =
+                "android.net.wifi.action.REQUEST_SCAN_ALWAYS_AVAILABLE";
+
+        /**
+         * Activity Action: Pick a Wi-Fi network to connect to.
+         * <p>Input: Nothing.
+         * <p>Output: Nothing.
+         */
+        //@SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+        const String ACTION_PICK_WIFI_NETWORK = "android.net.wifi.PICK_WIFI_NETWORK";
 
         /**
          * In this Wi-Fi lock mode, Wi-Fi will be kept active,

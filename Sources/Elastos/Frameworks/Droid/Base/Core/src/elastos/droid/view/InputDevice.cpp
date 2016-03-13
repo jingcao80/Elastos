@@ -5,17 +5,21 @@
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Location.h"
 #include "Elastos.Droid.Widget.h"
+
+#include "elastos/droid/os/NullVibrator.h"
 #include "elastos/droid/view/InputDevice.h"
 #include "elastos/droid/view/CKeyCharacterMap.h"
 #include "elastos/droid/view/MotionEvent.h"
 #include "elastos/droid/hardware/input/CInputManager.h"
-#include "elastos/droid/hardware/input/InputDeviceIdentifier.h"
+#include "elastos/droid/hardware/input/CInputDeviceIdentifier.h"
 #include "elastos/droid/hardware/input/CInputManagerHelper.h"
 #include <elastos/core/AutoLock.h>
 
 using Elastos::Core::AutoLock;
+using Elastos::Utility::CArrayList;
+using Elastos::Droid::Os::NullVibrator;
 using Elastos::Droid::Hardware::Input::CInputManager;
-using Elastos::Droid::Hardware::Input::InputDeviceIdentifier;
+using Elastos::Droid::Hardware::Input::CInputDeviceIdentifier;
 using Elastos::Droid::Hardware::Input::IInputManagerHelper;
 using Elastos::Droid::Hardware::Input::CInputManagerHelper;
 using Elastos::Droid::Hardware::Input::IInputManager;
@@ -128,6 +132,7 @@ ECode InputDevice::MotionRange::GetResolution(
 
 InputDevice::InputDevice()
 {
+    CArrayList::New((IArrayList**)&mMotionRanges);
 }
 
 InputDevice::~InputDevice()
@@ -167,7 +172,7 @@ ECode InputDevice::constructor(
     mKeyCharacterMap = keyCharacterMap;
     mHasVibrator = hasVibrator;
     mHasButtonUnderPad = hasButtonUnderPad;
-    mIdentifier = new InputDeviceIdentifier(descriptor, vendorId, productId);
+    CInputDeviceIdentifier::New(descriptor, vendorId, productId, (IInputDeviceIdentifier**)&mIdentifier);
     return NOERROR;
 }
 
@@ -392,7 +397,7 @@ ECode InputDevice::GetMotionRanges(
 {
     VALIDATE_NOT_NULL(motionRanges);
 
-    *motionRanges = mMotionRanges;
+    *motionRanges = IList::Probe(mMotionRanges);
     REFCOUNT_ADD(*motionRanges)
     return NOERROR;
 }
@@ -416,15 +421,15 @@ ECode InputDevice::GetVibrator(
 {
     VALIDATE_NOT_NULL(vibrator);
 
-    AutoLock lock(mMotionRangesLock);
+    ISynchronize* sync = ISynchronize::Probe(mMotionRanges);
+    AutoLock lock(sync);
     if (mVibrator == NULL) {
         if (mHasVibrator) {
             CInputManager::GetInstance()->GetInputDeviceVibrator(
                 mId, (IVibrator**)&mVibrator);
         }
         else {
-            //mVibrator = CNullVibrator::GetInstance();
-            assert(0);
+            mVibrator = (IVibrator*)NullVibrator::GetInstance().Get();
         }
     }
     *vibrator = mVibrator;
@@ -464,7 +469,7 @@ ECode InputDevice::ReadFromParcel(
     }
     in->ReadBoolean(&mHasVibrator);
     in->ReadBoolean(&mHasButtonUnderPad);
-    mIdentifier = new InputDeviceIdentifier(mDescriptor, mVendorId, mProductId);
+    CInputDeviceIdentifier::New(mDescriptor, mVendorId, mProductId, (IInputDeviceIdentifier**)&mIdentifier);
 
     for (;;) {
         Int32 axis;

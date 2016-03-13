@@ -705,7 +705,7 @@ public class InputMethodAndLanguageSettings extends SettingsPreferenceFragment
                 for (Int32 j = 0; j < subtypeCount; j++) {
                     InputMethodSubtype subtype = subtypes->Get(j);
                     if (builder->Length() > 0) {
-                        builder->Append(',');
+                        builder->AppendChar32(',');
                     }
                     CharSequence subtypeLabel = subtype->GetDisplayName(context,
                             inputMethod->GetPackageName(), inputMethod->GetServiceInfo()

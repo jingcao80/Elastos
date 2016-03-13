@@ -4,9 +4,9 @@
 
 #include "Elastos.Droid.Webkit.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/webkit/native/content/browser/NavigationHistory.h"
+#include "elastos/droid/webkit/webview/chromium/native/content/browser/NavigationHistory.h"
 
-using Elastos::Droid::Webkit::Content::Browser::NavigationHistory;
+using Elastos::Droid::Webkit::Webview::Chromium::Content::Browser::NavigationHistory;
 using Elastos::Droid::Webkit::IWebBackForwardList;
 using Elastos::Droid::Webkit::IWebHistoryItem;
 using Elastos::Utility::IList;

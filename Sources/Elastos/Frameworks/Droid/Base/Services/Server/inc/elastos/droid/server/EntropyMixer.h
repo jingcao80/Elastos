@@ -4,6 +4,7 @@
 
 #include <elastos/droid/content/BroadcastReceiver.h>
 #include <elastos/droid/os/Handler.h>
+#include "_Elastos.Droid.Server.h"
 
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
@@ -48,6 +49,7 @@ namespace Server {
  */
 class EntropyMixer
     : public Object
+    , public IEntropyMixer
     , public IBinder
 {
 private:
@@ -86,11 +88,11 @@ private:
 public:
     CAR_INTERFACE_DECL()
 
-    EntropyMixer(
+    CARAPI constructor(
         /* [in] */ IContext* context);
 
     /** Test only interface, not for public use */
-    EntropyMixer(
+    CARAPI constructor(
         /* [in] */ IContext* context,
         /* [in] */ const String& entropyFile,
         /* [in] */ const String& randomDevice,
@@ -98,6 +100,7 @@ public:
 
     CARAPI ToString(
         /* [out] */ String* str);
+
 private:
     CARAPI Init(
         /* [in] */ IContext* context,

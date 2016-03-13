@@ -5,7 +5,9 @@
 #include "elastos/droid/systemui/recents/RecentsConfiguration.h"
 #include "elastos/droid/systemui/recents/model/Task.h"
 #include "elastos/droid/systemui/recents/views/ViewPool.h"
+#include <elastos/droid/os/Runnable.h>
 
+using Elastos::Droid::Os::Runnable;
 using Elastos::Utility::IArrayList;
 using Elastos::Utility::IHashMap;
 
@@ -30,7 +32,7 @@ private:
             /* [in] */ IArrayList* childrenToRemove,
             /* [in] */ Boolean unifyNewViewAnimation,
             /* [in] */ IArrayList* tasks, // item is Task
-            /* [in] */ IArrayList* taskTransforms) // item is TaskViewTrancsform
+            /* [in] */ IArrayList* taskTransforms, // item is TaskViewTrancsform
             /* [in] */ TaskStackViewFilterAlgorithm* host);
 
         // @Override
@@ -39,7 +41,7 @@ private:
     private:
         AutoPtr<IHashMap> mChildViewTransforms;
         AutoPtr<ITaskView> mTv;
-        AutoPtr<IArrayList> mChildrenToRemove
+        AutoPtr<IArrayList> mChildrenToRemove;
         Boolean mUnifyNewViewAnimation;
         AutoPtr<IArrayList> mTasks;
         AutoPtr<IArrayList> mTaskTransforms;
@@ -84,7 +86,7 @@ public:
 
 public:
     AutoPtr<RecentsConfiguration> mConfig;
-    AutoPtr<TaskStackView> mStackView;
+    TaskStackView* mStackView; // TaskStackView has this's reference
     AutoPtr<ViewPool> mViewPool;
 };
 

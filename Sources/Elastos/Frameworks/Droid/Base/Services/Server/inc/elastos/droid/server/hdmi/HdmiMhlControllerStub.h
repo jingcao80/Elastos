@@ -31,11 +31,11 @@ public:
         /* [out] */ Boolean* result);
 
     static CARAPI Create(
-        /* [in] */ HdmiControlService* service,
+        /* [in] */ IHdmiControlService* service,
         /* [out] */ HdmiMhlControllerStub** result);
 
     CARAPI GetPortInfos(
-        /* [out, callee] */ ArrayOf<IHdmiPortInfo*>* result);
+        /* [out, callee] */ ArrayOf<IHdmiPortInfo*>** result);
 
     /**
      * Return {@link HdmiMhlLocalDeviceStub} matched with the given port id.
@@ -126,7 +126,7 @@ public:
 private:
     // Private constructor. Use HdmiMhlControllerStub.create().
     HdmiMhlControllerStub(
-        /* [in] */ HdmiControlService* service);
+        /* [in] */ IHdmiControlService* service);
 
     static CARAPI_(AutoPtr<ISparseArray>) InitArray();
 

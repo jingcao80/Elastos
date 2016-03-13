@@ -27,8 +27,11 @@ namespace Hdmi {
  */
 class NewDeviceAction
     : public HdmiCecFeatureAction
+    , public INewDeviceAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     NewDeviceAction();
 
     /**
@@ -57,7 +60,7 @@ public:
         /* [in] */ Int32 state);
 
     CARAPI IsActionOf(
-        /* [in] */ HdmiCecLocalDevice::ActiveSource* activeSource,
+        /* [in] */ IHdmiCecLocalDeviceActiveSource* activeSource,
         /* [out] */ Boolean* result);
 
     // that contains the name of the device for display on screen.

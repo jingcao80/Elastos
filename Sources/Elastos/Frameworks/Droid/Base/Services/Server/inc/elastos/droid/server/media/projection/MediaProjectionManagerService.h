@@ -1,54 +1,46 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.server.media.projection;
+#ifndef __ELASTOS_DROID_SERVER_MEDIA_PROJECTION_MEDIAPROJECTIONMANAGERSERVICE_H__
+#define __ELASTOS_DROID_SERVER_MEDIA_PROJECTION_MEDIAPROJECTIONMANAGERSERVICE_H__
 
-using Elastos::Droid::Server::IWatchdog;
+#include "elastos/droid/ext/frameworkext.h"
+#define HASH_FOR_OS
+#include "elastos/droid/ext/frameworkhash.h"
+#include <Elastos.CoreLibrary.Utility.h>
+#include <Elastos.Droid.Os.h>
+#include <Elastos.Droid.Server.h>
+#include <Elastos.Droid.Media.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.App.h>
+#include <_Elastos.Droid.Server.h>
+#include "elastos/droid/server/SystemService.h"
+#include "elastos/droid/server/media/projection/CMediaProjection.h"
+#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Droid::Manifest;
 using Elastos::Droid::App::IAppOpsManager;
 using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::Pm::IPackageManager;
-using Elastos::Droid::Hardware::Display::IDisplayManager;
 using Elastos::Droid::Media::IMediaRouter;
-using Elastos::Droid::Media::Iprojection.IMediaProjectionManager;
-using Elastos::Droid::Media::Iprojection.IMediaProjection;
-using Elastos::Droid::Media::Iprojection.IMediaProjectionCallback;
-using Elastos::Droid::Media::Iprojection.IMediaProjectionWatcherCallback;
-using Elastos::Droid::Media::Iprojection.MediaProjectionInfo;
-using Elastos::Droid::Media::Iprojection.MediaProjectionManager;
+using Elastos::Droid::Media::IMediaRouterRouteInfo;
+using Elastos::Droid::Media::IMediaRouterRouteGroup;
+using Elastos::Droid::Media::IMediaRouterCallback;
+using Elastos::Droid::Media::IMediaRouterSimpleCallback;
+using Elastos::Droid::Media::Projection::IMediaProjectionInfo;
+using Elastos::Droid::Media::Projection::IIMediaProjectionWatcherCallback;
 using Elastos::Droid::Os::IBinder;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::IIBinder;
-using Elastos::Droid::Os::IIBinder.DeathRecipient;
-using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::IRemoteException;
-using Elastos::Droid::Os::IUserHandle;
-using Elastos::Droid::Utility::IArrayMap;
-using Elastos::Droid::Utility::ISlog;
+using Elastos::Droid::Os::Runnable;
+using Elastos::Droid::Server::IWatchdogMonitor;
+using Elastos::Droid::Server::SystemService;
+using Elastos::Utility::Etl::HashMap;
 
-using Elastos::Droid::Server::ISystemService;
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Media {
+namespace Projection {
 
-using Elastos::IO::IFileDescriptor;
-using Elastos::IO::IPrintWriter;
-using Elastos::Utility::IArrayList;
-using Elastos::Utility::ICollection;
-using Elastos::Utility::IList;
-using Elastos::Utility::IMap;
+class CMediaProjectionManager;
 
 /**
  * Manages MediaProjection sessions.
@@ -58,571 +50,248 @@ using Elastos::Utility::IMap;
  * grants <b>must</b> validate the token before use by calling {@link
  * IMediaProjectionService#isValidMediaProjection}.
  */
-public class MediaProjectionManagerService extends SystemService
-        implements Watchdog.Monitor {
-    private static const String TAG = "MediaProjectionManagerService";
+class MediaProjectionManagerService
+    : public SystemService
+    , public IWatchdogMonitor
+{
+private:
+    class AddCallbackDeathRecipient
+        : public Object
+        , public IProxyDeathRecipient
+    {
+    public:
+        AddCallbackDeathRecipient(
+            /* [in] */ IIMediaProjectionWatcherCallback* callback,
+            /* [in] */ MediaProjectionManagerService* host)
+            : mCallback(callback)
+            , mHost(host)
+        {}
 
-    private final Object mLock = new Object(); // Protects the list of media projections
-    private final Map<IBinder, IBinder.DeathRecipient> mDeathEaters;
-    private final CallbackDelegate mCallbackDelegate;
-
-    private final Context mContext;
-    private final AppOpsManager mAppOps;
-
-    private final MediaRouter mMediaRouter;
-    private final MediaRouterCallback mMediaRouterCallback;
-    private MediaRouter.RouteInfo mMediaRouteInfo;
-
-    private IBinder mProjectionToken;
-    private MediaProjection mProjectionGrant;
-
-    public MediaProjectionManagerService(Context context) {
-        Super(context);
-        mContext = context;
-        mDeathEaters = new ArrayMap<IBinder, IBinder.DeathRecipient>();
-        mCallbackDelegate = new CallbackDelegate();
-        mAppOps = (AppOpsManager) mContext->GetSystemService(Context.APP_OPS_SERVICE);
-        mMediaRouter = (MediaRouter) mContext->GetSystemService(Context.MEDIA_ROUTER_SERVICE);
-        mMediaRouterCallback = new MediaRouterCallback();
-        Watchdog->GetInstance()->AddMonitor(this);
-    }
-
-    //@Override
-    CARAPI OnStart() {
-        PublishBinderService(Context.MEDIA_PROJECTION_SERVICE, new BinderService(),
-                FALSE /*allowIsolated*/);
-        mMediaRouter->AddCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY, mMediaRouterCallback,
-                MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
-    }
-
-    //@Override
-    CARAPI OnSwitchUser(Int32 userId) {
-        mMediaRouter->RebindAsUser(userId);
-    }
-
-    //@Override
-    CARAPI Monitor() {
-        synchronized(mLock) { /* check for deadlock */ }
-    }
-
-    private void StartProjectionLocked(final MediaProjection projection) {
-        if (mProjectionGrant != NULL) {
-            mProjectionGrant->Stop();
-        }
-        if (mMediaRouteInfo != NULL) {
-            mMediaRouter->GetDefaultRoute()->Select();
-        }
-        mProjectionToken = projection->AsBinder();
-        mProjectionGrant = projection;
-        DispatchStart(projection);
-    }
-
-    private void StopProjectionLocked(final MediaProjection projection) {
-        mProjectionToken = NULL;
-        mProjectionGrant = NULL;
-        DispatchStop(projection);
-    }
-
-    private void AddCallback(final IMediaProjectionWatcherCallback callback) {
-        IBinder.DeathRecipient deathRecipient = new IBinder->DeathRecipient() {
-            //@Override
-            CARAPI BinderDied() {
-                synchronized(mLock) {
-                    RemoveCallback(callback);
-                }
-            }
-        };
-        synchronized(mLock) {
-            mCallbackDelegate->Add(callback);
-            LinkDeathRecipientLocked(callback, deathRecipient);
-        }
-    }
-
-    private void RemoveCallback(IMediaProjectionWatcherCallback callback) {
-        synchronized(mLock) {
-            UnlinkDeathRecipientLocked(callback);
-            mCallbackDelegate->Remove(callback);
-        }
-    }
-
-    private void LinkDeathRecipientLocked(IMediaProjectionWatcherCallback callback,
-            IBinder.DeathRecipient deathRecipient) {
-        try {
-            final IBinder token = callback->AsBinder();
-            token->LinkToDeath(deathRecipient, 0);
-            mDeathEaters->Put(token, deathRecipient);
-        } catch (RemoteException e) {
-            Slogger::E(TAG, "Unable to link to death for media projection monitoring callback", e);
-        }
-    }
-
-    private void UnlinkDeathRecipientLocked(IMediaProjectionWatcherCallback callback) {
-        final IBinder token = callback->AsBinder();
-        IBinder.DeathRecipient deathRecipient = mDeathEaters->Remove(token);
-        if (deathRecipient != NULL) {
-            token->UnlinkToDeath(deathRecipient, 0);
-        }
-    }
-
-    private void DispatchStart(MediaProjection projection) {
-        mCallbackDelegate->DispatchStart(projection);
-    }
-
-    private void DispatchStop(MediaProjection projection) {
-        mCallbackDelegate->DispatchStop(projection);
-    }
-
-    private Boolean IsValidMediaProjection(IBinder token) {
-        synchronized(mLock) {
-            if (mProjectionToken != NULL) {
-                return mProjectionToken->Equals(token);
-            }
-            return FALSE;
-        }
-    }
-
-    private MediaProjectionInfo GetActiveProjectionInfo() {
-        synchronized(mLock) {
-            if (mProjectionGrant == NULL) {
-                return NULL;
-            }
-            return mProjectionGrant->GetProjectionInfo();
-        }
-    }
-
-    private void Dump(final PrintWriter pw) {
-        pw->Println("MEDIA PROJECTION MANAGER (dumpsys media_projection)");
-        synchronized(mLock) {
-            pw->Println("Media Projection: ");
-            if (mProjectionGrant != NULL ) {
-                mProjectionGrant->Dump(pw);
-            } else {
-                pw->Println("NULL");
-            }
-        }
-    }
-
-    private final class BinderService extends IMediaProjectionManager.Stub {
-
-        //@Override // Binder call
-        public Boolean HasProjectionPermission(Int32 uid, String packageName) {
-            Int64 token = Binder->ClearCallingIdentity();
-            Boolean hasPermission = FALSE;
-            try {
-                hasPermission |= CheckPermission(packageName,
-                        Manifest::permission::CAPTURE_VIDEO_OUTPUT)
-                        || mAppOps->NoteOpNoThrow(
-                                AppOpsManager.OP_PROJECT_MEDIA, uid, packageName)
-                        == AppOpsManager.MODE_ALLOWED;
-            } finally {
-                Binder->RestoreCallingIdentity(token);
-            }
-            return hasPermission;
-        }
-
-        //@Override // Binder call
-        public IMediaProjection CreateProjection(Int32 uid, String packageName, Int32 type,
-                Boolean isPermanentGrant) {
-            if (mContext->CheckCallingPermission(Manifest::permission::MANAGE_MEDIA_PROJECTION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to grant "
-                        + "projection permission");
-            }
-            if (packageName == NULL || packageName->IsEmpty()) {
-                throw new IllegalArgumentException("package name must not be empty");
-            }
-            Int64 callingToken = Binder->ClearCallingIdentity();
-            MediaProjection projection;
-            try {
-                projection = new MediaProjection(type, uid, packageName);
-                if (isPermanentGrant) {
-                    mAppOps->SetMode(AppOpsManager.OP_PROJECT_MEDIA,
-                            projection.uid, projection.packageName, AppOpsManager.MODE_ALLOWED);
-                }
-            } finally {
-                Binder->RestoreCallingIdentity(callingToken);
-            }
-            return projection;
-        }
-
-        //@Override // Binder call
-        public Boolean IsValidMediaProjection(IMediaProjection projection) {
-            return MediaProjectionManagerService.this->IsValidMediaProjection(
-                    projection->AsBinder());
-        }
-
-        //@Override // Binder call
-        public MediaProjectionInfo GetActiveProjectionInfo() {
-            if (mContext->CheckCallingPermission(Manifest::permission::MANAGE_MEDIA_PROJECTION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to add "
-                        + "projection callbacks");
-            }
-            final Int64 token = Binder->ClearCallingIdentity();
-            try {
-                return MediaProjectionManagerService.this->GetActiveProjectionInfo();
-            } finally {
-                Binder->RestoreCallingIdentity(token);
-            }
-        }
-
-        //@Override // Binder call
-        CARAPI StopActiveProjection() {
-            if (mContext->CheckCallingPermission(Manifest::permission::MANAGE_MEDIA_PROJECTION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to add "
-                        + "projection callbacks");
-            }
-            final Int64 token = Binder->ClearCallingIdentity();
-            try {
-                if (mProjectionGrant != NULL) {
-                    mProjectionGrant->Stop();
-                }
-            } finally {
-                Binder->RestoreCallingIdentity(token);
-            }
-
-        }
-
-        //@Override //Binder call
-        CARAPI AddCallback(final IMediaProjectionWatcherCallback callback) {
-            if (mContext->CheckCallingPermission(Manifest::permission::MANAGE_MEDIA_PROJECTION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to add "
-                        + "projection callbacks");
-            }
-            final Int64 token = Binder->ClearCallingIdentity();
-            try {
-                MediaProjectionManagerService.this->AddCallback(callback);
-            } finally {
-                Binder->RestoreCallingIdentity(token);
-            }
-        }
+        CAR_INTERFACE_DECL()
 
         //@Override
-        CARAPI RemoveCallback(IMediaProjectionWatcherCallback callback) {
-            if (mContext->CheckCallingPermission(Manifest::permission::MANAGE_MEDIA_PROJECTION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to remove "
-                        + "projection callbacks");
-            }
-            final Int64 token = Binder->ClearCallingIdentity();
-            try {
-                MediaProjectionManagerService.this->RemoveCallback(callback);
-            } finally {
-                Binder->RestoreCallingIdentity(token);
-            }
-        }
+        CARAPI ProxyDied();
 
-        //@Override // Binder call
-        CARAPI Dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
-            if (mContext == NULL
-                    || mContext->CheckCallingOrSelfPermission(Manifest::permission::DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw->Println("Permission Denial: can't dump MediaProjectionManager from from pid="
-                        + Binder->GetCallingPid() + ", uid=" + Binder->GetCallingUid());
-                return;
-            }
+    private:
+        AutoPtr<IIMediaProjectionWatcherCallback> mCallback;
+        MediaProjectionManagerService* mHost;
+    };
 
-            final Int64 token = Binder->ClearCallingIdentity();
-            try {
-                Dump(pw);
-            } finally {
-                Binder->RestoreCallingIdentity(token);
-            }
-        }
+    class MediaRouterCallback
+        : public Object
+        , public IMediaRouterCallback
+        , public IMediaRouterSimpleCallback
+    {
+    public:
+        MediaRouterCallback(
+            /* [in] */ MediaProjectionManagerService* host)
+            : mHost(host)
+        {}
 
+        CAR_INTERFACE_DECL()
 
-        private Boolean CheckPermission(String packageName, String permission) {
-            return mContext->GetPackageManager()->CheckPermission(permission, packageName)
-                    == PackageManager.PERMISSION_GRANTED;
-        }
-    }
+        CARAPI OnRouteSelected(
+            /* [in] */ IMediaRouter* router,
+            /* [in] */ Int32 type,
+            /* [in] */ IMediaRouterRouteInfo* info);
 
-    private final class MediaProjection extends IMediaProjection.Stub {
-        public final Int32 uid;
-        public final String packageName;
-        public final UserHandle userHandle;
+        CARAPI OnRouteUnselected(
+            /* [in] */ IMediaRouter* router,
+            /* [in] */ Int32 type,
+            /* [in] */ IMediaRouterRouteInfo* info);
 
-        private IBinder mToken;
-        private IBinder.DeathRecipient mDeathEater;
-        private Int32 mType;
+        CARAPI OnRouteAdded(
+            /* [in] */ IMediaRouter* router,
+            /* [in] */ IMediaRouterRouteInfo* info);
 
-        public MediaProjection(Int32 type, Int32 uid, String packageName) {
-            mType = type;
-            this.uid = uid;
-            this.packageName = packageName;
-            userHandle = new UserHandle(UserHandle->GetUserId(uid));
-        }
+        CARAPI OnRouteRemoved(
+            /* [in] */ IMediaRouter* router,
+            /* [in] */ IMediaRouterRouteInfo* info);
 
-        //@Override // Binder call
-        public Boolean CanProjectVideo() {
-            return mType == MediaProjectionManager.TYPE_MIRRORING ||
-                    mType == MediaProjectionManager.TYPE_SCREEN_CAPTURE;
-        }
+        CARAPI OnRouteChanged(
+            /* [in] */ IMediaRouter* router,
+            /* [in] */ IMediaRouterRouteInfo* info);
 
-        //@Override // Binder call
-        public Boolean CanProjectSecureVideo() {
-            return FALSE;
-        }
+        CARAPI OnRouteGrouped(
+            /* [in] */ IMediaRouter* router,
+            /* [in] */ IMediaRouterRouteInfo* info,
+            /* [in] */ IMediaRouterRouteGroup* group,
+            /* [in] */ Int32 index);
 
-        //@Override // Binder call
-        public Boolean CanProjectAudio() {
-            return mType == MediaProjectionManager.TYPE_MIRRORING ||
-                    mType == MediaProjectionManager.TYPE_PRESENTATION;
-        }
+        CARAPI OnRouteUngrouped(
+            /* [in] */ IMediaRouter* router,
+            /* [in] */ IMediaRouterRouteInfo* info,
+            /* [in] */ IMediaRouterRouteGroup* group);
 
-        //@Override // Binder call
-        public Int32 ApplyVirtualDisplayFlags(Int32 flags) {
-            if (mType == MediaProjectionManager.TYPE_SCREEN_CAPTURE) {
-                flags &= ~DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
-                flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
-                        | DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
-                return flags;
-            } else if (mType == MediaProjectionManager.TYPE_MIRRORING) {
-                flags &= ~(DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR);
-                flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY |
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
-                return flags;
-            } else if (mType == MediaProjectionManager.TYPE_PRESENTATION) {
-                flags &= ~DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
-                flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION |
-                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
-                return flags;
-            } else  {
-                throw new RuntimeException("Unknown MediaProjection type");
-            }
-        }
+        CARAPI OnRouteVolumeChanged(
+            /* [in] */ IMediaRouter* router,
+            /* [in] */ IMediaRouterRouteInfo* info);
 
-        //@Override // Binder call
-        CARAPI Start(final IMediaProjectionCallback callback) {
-            if (callback == NULL) {
-                throw new IllegalArgumentException("callback must not be NULL");
-            }
-            synchronized(mLock) {
-                if (IsValidMediaProjection(AsBinder())) {
-                    throw new IllegalStateException(
-                            "Cannot start already started MediaProjection");
-                }
-                RegisterCallback(callback);
-                try {
-                    mToken = callback->AsBinder();
-                    mDeathEater = new IBinder->DeathRecipient() {
-                        //@Override
-                        CARAPI BinderDied() {
-                            mCallbackDelegate->Remove(callback);
-                            Stop();
-                        }
-                    };
-                    mToken->LinkToDeath(mDeathEater, 0);
-                } catch (RemoteException e) {
-                    Slogger::W(TAG,
-                            "MediaProjectionCallbacks must be valid, aborting MediaProjection", e);
-                    return;
-                }
-                StartProjectionLocked(this);
-            }
-        }
+        CARAPI OnRoutePresentationDisplayChanged(
+            /* [in] */ IMediaRouter* router,
+            /* [in] */ IMediaRouterRouteInfo* info);
 
-        //@Override // Binder call
-        CARAPI Stop() {
-            synchronized(mLock) {
-                if (!IsValidMediaProjection(AsBinder())) {
-                    Slogger::W(TAG, "Attempted to stop inactive MediaProjection "
-                            + "(uid=" + Binder->GetCallingUid() + ", "
-                            + "pid=" + Binder->GetCallingPid() + ")");
-                    return;
-                }
-                mToken->UnlinkToDeath(mDeathEater, 0);
-                StopProjectionLocked(this);
-            }
-        }
+    private:
+        MediaProjectionManagerService* mHost;
+    };
 
-        //@Override
-        CARAPI RegisterCallback(IMediaProjectionCallback callback) {
-            if (callback == NULL) {
-                throw new IllegalArgumentException("callback must not be NULL");
-            }
-            mCallbackDelegate->Add(callback);
-        }
+    class CallbackDelegate : public Object
+    {
+    public:
+        CallbackDelegate();
 
-        //@Override
-        CARAPI UnregisterCallback(IMediaProjectionCallback callback) {
-            if (callback == NULL) {
-                throw new IllegalArgumentException("callback must not be NULL");
-            }
-            mCallbackDelegate->Remove(callback);
-        }
+        CARAPI_(void) Add(
+            /* [in] */ IIMediaProjectionCallback* callback);
 
-        public MediaProjectionInfo GetProjectionInfo() {
-            return new MediaProjectionInfo(packageName, userHandle);
-        }
+        CARAPI_(void) Add(
+            /* [in] */ IIMediaProjectionWatcherCallback* callback);
 
-        CARAPI Dump(PrintWriter pw) {
-            pw->Println("(" + packageName + ", uid=" + uid + "): " + TypeToString(mType));
-        }
-    }
+        CARAPI_(void) Remove(
+            /* [in] */ IIMediaProjectionCallback* callback);
 
-    private class MediaRouterCallback extends MediaRouter.SimpleCallback {
-        //@Override
-        CARAPI OnRouteSelected(MediaRouter router, Int32 type, MediaRouter.RouteInfo info) {
-            synchronized(mLock) {
-                if ((type & MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY) != 0) {
-                    mMediaRouteInfo = info;
-                    if (mProjectionGrant != NULL) {
-                        mProjectionGrant->Stop();
-                    }
-                }
-            }
-        }
+        CARAPI_(void) Remove(
+            /* [in] */ IIMediaProjectionWatcherCallback* callback);
 
-        //@Override
-        CARAPI OnRouteUnselected(MediaRouter route, Int32 type, MediaRouter.RouteInfo info) {
-            if (mMediaRouteInfo == info) {
-                mMediaRouteInfo = NULL;
-            }
-        }
-    }
+        CARAPI_(void) DispatchStart(
+            /* [in] */ CMediaProjection* projection);
 
+        CARAPI_(void) DispatchStop(
+            /* [in] */ CMediaProjection* projection);
 
-    private static class CallbackDelegate {
-        private Map<IBinder, IMediaProjectionCallback> mClientCallbacks;
-        private Map<IBinder, IMediaProjectionWatcherCallback> mWatcherCallbacks;
-        private Handler mHandler;
-        private Object mLock = new Object();
+    private:
+        HashMap<AutoPtr<IBinder>, AutoPtr<IIMediaProjectionCallback> > mClientCallbacks;
+        HashMap<AutoPtr<IBinder>, AutoPtr<IIMediaProjectionWatcherCallback> > mWatcherCallbacks;
+        AutoPtr<IHandler> mHandler;
+        Object mLock;
+    };
 
-        public CallbackDelegate() {
-            mHandler = new Handler(Looper->GetMainLooper(), NULL, TRUE /*async*/);
-            mClientCallbacks = new ArrayMap<IBinder, IMediaProjectionCallback>();
-            mWatcherCallbacks = new ArrayMap<IBinder, IMediaProjectionWatcherCallback>();
-        }
+    class WatcherStartCallback : public Runnable
+    {
+    public:
+        WatcherStartCallback(
+            /* [in] */ IMediaProjectionInfo* info,
+            /* [in] */ IIMediaProjectionWatcherCallback* callback)
+            : mCallback(callback)
+            , mInfo(info)
+        {}
 
-        CARAPI Add(IMediaProjectionCallback callback) {
-            synchronized(mLock) {
-                mClientCallbacks->Put(callback->AsBinder(), callback);
-            }
-        }
+        CARAPI Run();
 
-        CARAPI Add(IMediaProjectionWatcherCallback callback) {
-            synchronized(mLock) {
-                mWatcherCallbacks->Put(callback->AsBinder(), callback);
-            }
-        }
+    private:
+        AutoPtr<IIMediaProjectionWatcherCallback> mCallback;
+        AutoPtr<IMediaProjectionInfo> mInfo;
+    };
 
-        CARAPI Remove(IMediaProjectionCallback callback) {
-            synchronized(mLock) {
-                mClientCallbacks->Remove(callback->AsBinder());
-            }
-        }
+    class WatcherStopCallback : public Runnable
+    {
+    public:
+        WatcherStopCallback(
+            /* [in] */ IMediaProjectionInfo* info,
+            /* [in] */ IIMediaProjectionWatcherCallback* callback)
+            : mCallback(callback)
+            , mInfo(info)
+        {}
 
-        CARAPI Remove(IMediaProjectionWatcherCallback callback) {
-            synchronized(mLock) {
-                mWatcherCallbacks->Remove(callback->AsBinder());
-            }
-        }
+        CARAPI Run();
 
-        CARAPI DispatchStart(MediaProjection projection) {
-            if (projection == NULL) {
-                Slogger::E(TAG, "Tried to dispatch start notification for a NULL media projection."
-                        + " Ignoring!");
-                return;
-            }
-            synchronized(mLock) {
-                for (IMediaProjectionWatcherCallback callback : mWatcherCallbacks->Values()) {
-                    MediaProjectionInfo info = projection->GetProjectionInfo();
-                    mHandler->Post(new WatcherStartCallback(info, callback));
-                }
-            }
-        }
+    private:
+        AutoPtr<IIMediaProjectionWatcherCallback> mCallback;
+        AutoPtr<IMediaProjectionInfo> mInfo;
+    };
 
-        CARAPI DispatchStop(MediaProjection projection) {
-            if (projection == NULL) {
-                Slogger::E(TAG, "Tried to dispatch stop notification for a NULL media projection."
-                        + " Ignoring!");
-                return;
-            }
-            synchronized(mLock) {
-                for (IMediaProjectionCallback callback : mClientCallbacks->Values()) {
-                    mHandler->Post(new ClientStopCallback(callback));
-                }
+    class ClientStopCallback : public Runnable
+    {
+    public:
+        ClientStopCallback(
+            /* [in] */ IIMediaProjectionCallback* callback)
+            : mCallback(callback)
+        {}
 
-                for (IMediaProjectionWatcherCallback callback : mWatcherCallbacks->Values()) {
-                    MediaProjectionInfo info = projection->GetProjectionInfo();
-                    mHandler->Post(new WatcherStopCallback(info, callback));
-                }
-            }
-        }
-    }
+        CARAPI Run();
 
-    private static const class WatcherStartCallback implements Runnable {
-        private IMediaProjectionWatcherCallback mCallback;
-        private MediaProjectionInfo mInfo;
+    private:
+        AutoPtr<IIMediaProjectionCallback> mCallback;
+    };
 
-        public WatcherStartCallback(MediaProjectionInfo info,
-                IMediaProjectionWatcherCallback callback) {
-            mInfo = info;
-            mCallback = callback;
-        }
+public:
+    CAR_INTERFACE_DECL()
 
-        //@Override
-        CARAPI Run() {
-            try {
-                mCallback->OnStart(mInfo);
-            } catch (RemoteException e) {
-                Slogger::W(TAG, "Failed to notify media projection has stopped", e);
-            }
-        }
-    }
+    MediaProjectionManagerService(
+        /* [in] */ IContext* context);
 
-    private static const class WatcherStopCallback implements Runnable {
-        private IMediaProjectionWatcherCallback mCallback;
-        private MediaProjectionInfo mInfo;
+    // @Override
+    CARAPI OnStart();
 
-        public WatcherStopCallback(MediaProjectionInfo info,
-                IMediaProjectionWatcherCallback callback) {
-            mInfo = info;
-            mCallback = callback;
-        }
+    // @Override
+    CARAPI OnSwitchUser(
+        /* [in] */ Int32 userId);
 
-        //@Override
-        CARAPI Run() {
-            try {
-                mCallback->OnStop(mInfo);
-            } catch (RemoteException e) {
-                Slogger::W(TAG, "Failed to notify media projection has stopped", e);
-            }
-        }
-    }
+    // @Override
+    CARAPI Monitor();
 
-    private static const class ClientStopCallback implements Runnable {
-        private IMediaProjectionCallback mCallback;
+private:
+    CARAPI_(void) StartProjectionLocked(
+        /* [in] */ CMediaProjection* projection);
 
-        public ClientStopCallback(IMediaProjectionCallback callback) {
-            mCallback = callback;
-        }
+    CARAPI_(void) StopProjectionLocked(
+        /* [in] */ CMediaProjection* projection);
 
-        //@Override
-        CARAPI Run() {
-            try {
-                mCallback->OnStop();
-            } catch (RemoteException e) {
-                Slogger::W(TAG, "Failed to notify media projection has stopped", e);
-            }
-        }
-    }
+    CARAPI_(void) AddCallback(
+        /* [in] */ IIMediaProjectionWatcherCallback* callback);
 
+    CARAPI_(void) RemoveCallback(
+        /* [in] */ IIMediaProjectionWatcherCallback* callback);
 
-    private static String TypeToString(Int32 type) {
-        switch (type) {
-            case MediaProjectionManager.TYPE_SCREEN_CAPTURE:
-                return "TYPE_SCREEN_CAPTURE";
-            case MediaProjectionManager.TYPE_MIRRORING:
-                return "TYPE_MIRRORING";
-            case MediaProjectionManager.TYPE_PRESENTATION:
-                return "TYPE_PRESENTATION";
-        }
-        return Integer->ToString(type);
-    }
-}
+    CARAPI_(void) LinkDeathRecipientLocked(
+        /* [in] */ IIMediaProjectionWatcherCallback* callback,
+        /* [in] */ IProxyDeathRecipient* deathRecipient);
+
+    CARAPI_(void) UnlinkDeathRecipientLocked(
+        /* [in] */ IIMediaProjectionWatcherCallback* callback);
+
+    CARAPI_(void) DispatchStart(
+        /* [in] */ CMediaProjection* projection);
+
+    CARAPI_(void) DispatchStop(
+        /* [in] */ CMediaProjection* projection);
+
+    CARAPI_(Boolean) IsValidMediaProjection(
+        /* [in] */ IBinder* token);
+
+    CARAPI_(AutoPtr<IMediaProjectionInfo>) GetActiveProjectionInfo();
+
+    // CARAPI_(void) dump(final PrintWriter pw);
+
+    static CARAPI_(String) TypeToString(
+        /* [in] */ Int32 type);
+
+private:
+    static const String TAG;;
+
+    Object mLock; // Protects the list of media projections
+    HashMap<AutoPtr<IBinder>, AutoPtr<IProxyDeathRecipient> > mDeathEaters;
+    AutoPtr<CallbackDelegate> mCallbackDelegate;
+
+    AutoPtr<IContext> mContext;
+    AutoPtr<IAppOpsManager> mAppOps;
+
+    AutoPtr<IMediaRouter> mMediaRouter;
+    AutoPtr<MediaRouterCallback> mMediaRouterCallback;
+    AutoPtr<IMediaRouterRouteInfo> mMediaRouteInfo;
+
+    AutoPtr<IBinder> mProjectionToken;
+    AutoPtr<CMediaProjection> mProjectionGrant;
+
+    friend class MediaRouterCallback;
+    friend class CMediaProjection;
+    friend class CMediaProjectionManager;
+    friend class AddCallbackDeathRecipient;
+};
+
+} // namespace Projection
+} // namespace Media
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
+
+#endif // __ELASTOS_DROID_SERVER_POWER_MEDIAPROJECTIONMANAGERSERVICE_H__

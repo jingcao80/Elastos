@@ -6,7 +6,7 @@
 #include "Elastos.CoreLibrary.Utility.h"
 #include <elastos/utility/etl/HashMap.h>
 
-using Elastos::Utility::IList;
+using Elastos::Utility::IArrayList;
 using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
@@ -74,7 +74,7 @@ public:
     Int64 mLatestActiveTimeInGroup;
 
     AutoPtr<Task::TaskKey> mFrontMostTaskKey;
-    AutoPtr<IList> mTaskKeys; // item is Task::TaskKey
+    AutoPtr<IArrayList> mTaskKeys; // item is Task::TaskKey
     HashMap<AutoPtr<ITaskKey>, Int32> mTaskKeyIndices;
 };
 

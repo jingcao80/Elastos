@@ -1,7 +1,17 @@
 
-#include "elastos/droid/systemui/recents/views/TaskStackViewTouchHandler.h"
+#include "elastos/droid/systemui/recents/views/TaskStackView.h"
 #include "elastos/droid/systemui/recents/Constants.h"
 #include <elastos/core/Math.h>
+
+using Elastos::Droid::View::CMotionEventHelper;
+using Elastos::Droid::View::IMotionEventHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IViewParent;
+using Elastos::Droid::View::CVelocityTrackerHelper;
+using Elastos::Droid::View::IVelocityTrackerHelper;
+using Elastos::Droid::View::IVelocityTracker;
 
 namespace Elastos {
 namespace Droid {
@@ -81,7 +91,9 @@ TaskStackViewTouchHandler::TaskStackViewTouchHandler(
     configuration->GetScaledMinimumFlingVelocity(&mMinimumVelocity);
     configuration->GetScaledMaximumFlingVelocity(&mMaximumVelocity);
     configuration->GetScaledTouchSlop(&mScrollTouchSlop);
-    configuration->GetScaledPagingTouchSlop(&mPagingTouchSlop);
+    Int32 pagingTouchSlop;
+    configuration->GetScaledPagingTouchSlop(&pagingTouchSlop);
+    mPagingTouchSlop = pagingTouchSlop;
     mSv = sv;
     mScroller = scroller;
     mConfig = config;
@@ -181,7 +193,7 @@ Boolean TaskStackViewTouchHandler::OnInterceptTouchEvent(
 
     Boolean isRunning;
     Boolean wasScrolling = mScroller->IsScrolling() || (mScroller->mScrollAnimator != NULL
-        && (mScroller->mScrollAnimator->IsRunning(&isRunning), isRunning));
+        && (IAnimator::Probe(mScroller->mScrollAnimator)->IsRunning(&isRunning), isRunning));
     Int32 action;
     ev->GetAction(&action);
     switch (action & IMotionEvent::ACTION_MASK) {
@@ -214,7 +226,7 @@ Boolean TaskStackViewTouchHandler::OnInterceptTouchEvent(
             ev->GetX(activePointerIndex, &px);
             ev->GetY(activePointerIndex, &py);
             Int32 y = (Int32)py;
-            Int32 x = (Int32)px);
+            Int32 x = (Int32)px;
             if (Elastos::Core::Math::Abs(y - mInitialMotionY) > mScrollTouchSlop) {
                 // Save the touch move info
                 mIsScrolling = TRUE;
@@ -372,7 +384,7 @@ Boolean TaskStackViewTouchHandler::OnTouchEvent(
                         Elastos::Core::Math::Abs((Float) velocity / mMaximumVelocity)) *
                         Constants::Values::TaskStackView::TaskStackOverscrollRange);
                 // Fling scroll
-                mScroller->MScroller->Fling(0, mScroller->ProgressToScrollRange(mScroller->GetStackScroll()),
+                mScroller->mScroller->Fling(0, mScroller->ProgressToScrollRange(mScroller->GetStackScroll()),
                         0, velocity,
                         0, 0,
                         mScroller->ProgressToScrollRange(mSv->mLayoutAlgorithm->mMinScrollP),

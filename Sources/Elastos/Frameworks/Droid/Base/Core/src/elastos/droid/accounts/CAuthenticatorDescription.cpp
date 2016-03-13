@@ -11,6 +11,10 @@ namespace Accounts {
 
 const String CAuthenticatorDescription::TAG("AuthenticatorDescription");
 
+CAR_OBJECT_IMPL(CAuthenticatorDescription)
+
+CAR_INTERFACE_IMPL_2(CAuthenticatorDescription, Object, IAuthenticatorDescription, IParcelable)
+
 CAuthenticatorDescription::CAuthenticatorDescription()
     : mLabelId(0)
     , mIconId(0)

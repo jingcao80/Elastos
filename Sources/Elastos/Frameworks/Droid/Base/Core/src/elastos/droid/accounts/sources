@@ -24,3 +24,4 @@ SOURCES += AccountAuthenticatorActivity.cpp
 SOURCES += ChooseAccountActivity.cpp
 SOURCES += ChooseAccountTypeActivity.cpp
 SOURCES += CAccountAndUser.cpp
+SOURCES += CCantAddAccountActivity.cpp

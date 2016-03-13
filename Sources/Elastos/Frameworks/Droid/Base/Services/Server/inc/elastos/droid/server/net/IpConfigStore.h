@@ -42,11 +42,11 @@ public:
     CARAPI constructor();
 
     CARAPI WriteIpAndProxyConfigurations(
-        /* [in] */ String filePath,
+        /* [in] */ const String& filePath,
         /* [in] */ ISparseArray* networks);
 
     CARAPI ReadIpAndProxyConfigurations(
-        /* [in] */ String filePath,
+        /* [in] */ const String& filePath,
         /* [out] */ ISparseArray** result);
 
     CARAPI Loge(

@@ -69,16 +69,14 @@ RotateDrawable::RotateState::RotateState(
 ECode RotateDrawable::RotateState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    return CRotateDrawable::New(this, NULL, (IRotateDrawable**)drawable);
+    return CRotateDrawable::New(this, NULL, drawable);
 }
 
 ECode RotateDrawable::RotateState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    return CRotateDrawable::New(this, res, (IRotateDrawable**)drawable);
+    return CRotateDrawable::New(this, res, drawable);
 }
 
 ECode RotateDrawable::RotateState::GetChangingConfigurations(
@@ -545,19 +543,12 @@ ECode RotateDrawable::Inflate(
     return NOERROR;
 }
 
-ECode RotateDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode RotateDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated &&
-            (Drawable::Mutate((IDrawable**)&tmp), tmp.Get()) == THIS_PROBE(IDrawable)) {
-        tmp = NULL;
-        mState->mDrawable->Mutate((IDrawable**)&tmp);
+    if (!mMutated) {
+        mState->mDrawable->Mutate();
         mMutated = TRUE;
     }
-    *drawable = THIS_PROBE(IDrawable);
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 

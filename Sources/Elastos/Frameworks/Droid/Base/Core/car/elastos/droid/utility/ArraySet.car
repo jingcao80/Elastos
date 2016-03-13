@@ -1,5 +1,7 @@
 module
 {
+    using interface Elastos.Utility.IIterator;
+    using interface Elastos.Utility.ICollection;
 
     namespace Elastos {
     namespace Droid {
@@ -30,6 +32,7 @@ module
      * interface ICollection;
      * interface ISet;
      */
+    [deprecated]
     interface IArraySet {
         /**
          * Ensure the array map can hold at least <var>minimumCapacity</var>
@@ -72,6 +75,78 @@ module
         RemoveAt(
             [in] Int32 index,
             [out] IInterface** outface);
+
+        /**
+         * interfaces from ICollection
+         *
+         */
+        GetIterator(
+            [out] IIterator** it);
+
+        Add(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Add(
+            [in] IInterface* object);
+
+        AddAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        AddAll(
+            [in] ICollection* collection);
+
+        Clear();
+
+        Contains(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        ContainsAll(
+            [in] ICollection* collection,
+            [out] Boolean* result);
+
+        Equals(
+            [in] IInterface* object,
+            [out] Boolean* result);
+
+        GetHashCode(
+            [out] Int32* hashCode);
+
+        IsEmpty(
+            [out] Boolean* result);
+
+        Remove(
+            [in] IInterface* object,
+            [out] Boolean* modified);
+
+        Remove(
+            [in] IInterface* object);
+
+        RemoveAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RemoveAll(
+            [in] ICollection* collection);
+
+        RetainAll(
+            [in] ICollection* collection,
+            [out] Boolean* modified);
+
+        RetainAll(
+            [in] ICollection* collection);
+
+        GetSize(
+            [out] Int32* size);
+
+        ToArray(
+            [out, callee] ArrayOf<IInterface*>* array);
+
+        ToArray(
+            [in] ArrayOf<IInterface*>* inArray,
+            [out, callee] ArrayOf<IInterface*>* outArray);
     }
 
     } // namespace Utility

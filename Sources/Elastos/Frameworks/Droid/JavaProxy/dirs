@@ -1,2 +1,2 @@
 
-DIRS += src
+DIRS += src/elastos/droid/javaproxy

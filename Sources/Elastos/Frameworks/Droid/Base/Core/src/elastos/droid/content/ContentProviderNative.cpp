@@ -1101,7 +1101,7 @@ ECode ContentProviderNative::CreateUri(
     if (1 == type) {
         ecode = data->ReadString(&str1);
         FAILED_WITH_RETURN(ecode, reply, result)
-//***        ecode = CStringUri::New(str1, (IUri**)url);
+//***        ecode = CStringUri::New(str1, url);
 //***        FAILED_WITH_RETURN(ecode, reply, result);
     }
     else if (2 == type) {
@@ -1113,7 +1113,7 @@ ECode ContentProviderNative::CreateUri(
 //***        AutoPtr<IPart> part2;
 //***        ecode = Part::ReadFrom(data, (IPart**)&part2);
 //***        FAILED_WITH_RETURN(ecode, reply, result);
-//***        ecode = COpaqueUri::New(str1, part1, part2, (IUri**)url);
+//***        ecode = COpaqueUri::New(str1, part1, part2, url);
 //***        FAILED_WITH_RETURN(ecode, reply, result);
     }
     else if (3 == type) {
@@ -1131,7 +1131,7 @@ ECode ContentProviderNative::CreateUri(
 //***        AutoPtr<IPart> part3;
 //***        ecode = Part::ReadFrom(data, (IPart**)&part3);
 //***        FAILED_WITH_RETURN(ecode, reply, result);
-//***        ecode = CHierarchicalUri::New(str1, part1, pathPart1, part2, part3, (IUri**)url);
+//***        ecode = CHierarchicalUri::New(str1, part1, pathPart1, part2, part3, url);
 //***        FAILED_WITH_RETURN(ecode, reply, result);
     }
 

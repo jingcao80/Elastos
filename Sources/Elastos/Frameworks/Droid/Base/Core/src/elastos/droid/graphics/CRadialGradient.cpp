@@ -12,6 +12,7 @@ const Int32 CRadialGradient::TYPE_COLORS_AND_POSITIONS = 1;
 const Int32 CRadialGradient::TYPE_COLOR_CENTER_AND_COLOR_EDGE = 2;
 
 CAR_OBJECT_IMPL(CRadialGradient);
+CAR_INTERFACE_IMPL(CRadialGradient, Shader, IRadialGradient);
 CRadialGradient::CRadialGradient()
     : mType(0)
     , mX(0)
@@ -74,35 +75,6 @@ ECode CRadialGradient::constructor(
     mTileMode = tile;
     Init(NativeCreate2(x, y, radius, centerColor, edgeColor, tile));
     return NOERROR;
-}
-
-PInterface CRadialGradient::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_Shader) {
-        return reinterpret_cast<PInterface>((Shader*)this);
-    }
-    else if (riid == EIID_IRadialGradient) {
-        return (IRadialGradient*)this;
-    }
-    return Shader::Probe(riid);
-}
-
-UInt32 CRadialGradient::AddRef()
-{
-    return Shader::AddRef();
-}
-
-UInt32 CRadialGradient::Release()
-{
-    return Shader::Release();
-}
-
-ECode CRadialGradient::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return Shader::GetInterfaceID(object, iid);
 }
 
 ECode CRadialGradient::Copy(

@@ -5,19 +5,23 @@
 #include "_Elastos_Droid_Accounts_CAccountManager.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
-#include <elastos/utility/etl/HashMap.h>
-#include <elastos/FutureTask.h>
+#include <elastos/utility/concurrent/FutureTask.h>
+#include <elastos/core/Object.h>
+#include "Elastos.CoreLibrary.Utility.h"
+#include "Elastos.Droid.Os.h"
 
-using Elastos::Utility::Etl::HashMap;
-using Elastos::Core::IRunnable;
-using Elastos::Core::IInteger64;
-using Elastos::Utility::Concurrent::ITimeUnit;
-using Elastos::Utility::Concurrent::FutureTask;
+using Elastos::Droid::App::IActivity;
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Os::IHandler;
 using Elastos::Droid::Os::IUserHandle;
+using Elastos::Core::Object;
+using Elastos::Core::IRunnable;
+using Elastos::Core::IInteger64;
+using Elastos::Utility::IHashMap;
+using Elastos::Utility::Concurrent::ITimeUnit;
+using Elastos::Utility::Concurrent::FutureTask;
 
 namespace Elastos {
 namespace Droid {
@@ -28,32 +32,22 @@ class CAccountManagerFutureResponse;
 class CChooseResponse;
 
 CarClass(CAccountManager)
+    , public Object
+    , public IAccountManager
 {
 private:
     class AmsTask
-        : public ElRefBase
+        : public FutureTask
         , public IAccountManagerFuture
-        , public FutureTask
     {
     public:
+        CAR_INTERFACE_DECL()
+
         AmsTask(
             /* [in] */ IActivity* activity,
             /* [in] */ IHandler* handler,
             /* [in] */ IAccountManagerCallback* cb,
             /* [in] */ CAccountManager* host);
-
-        virtual ~AmsTask() {}
-
-        CARAPI_(PInterface) Probe(
-            /* [in]  */ REIID riid);
-
-        CARAPI_(UInt32) AddRef();
-
-        CARAPI_(UInt32) Release();
-
-        CARAPI GetInterfaceID(
-            /* [in] */ IInterface *pObject,
-            /* [out] */ InterfaceID *pIID);
 
         CARAPI Start(
             /* [out] */ IAccountManagerFuture** accountManagerFuture);
@@ -102,7 +96,8 @@ private:
         friend class CChooseResponse;
     };
 
-    class AmsTask_GetAuthToken : public AmsTask
+    class AmsTask_GetAuthToken
+        : public AmsTask
     {
     public:
         AmsTask_GetAuthToken(
@@ -126,7 +121,8 @@ private:
         AutoPtr<IBundle> mOptions;
     };
 
-    class AmsTask_AddAccount : public AmsTask
+    class AmsTask_AddAccount
+        : public AmsTask
     {
     public:
         AmsTask_AddAccount(
@@ -136,7 +132,7 @@ private:
             /* [in] */ CAccountManager* host,
             /* [in] */ const String& accountType,
             /* [in] */ const String& authTokenType,
-            /* [in] */ const ArrayOf<String>& requiredFeatures,
+            /* [in] */ ArrayOf<String>* requiredFeatures,
             /* [in] */ IBundle* options);
 
         CARAPI DoWork();
@@ -148,7 +144,33 @@ private:
         AutoPtr<IBundle> mOptions;
     };
 
-    class AmsTask_ConfirmCredentialsAsUser : public AmsTask
+    class AmsTask_AddAccountAsUser
+        : public AmsTask
+    {
+    public:
+        AmsTask_AddAccountAsUser(
+            /* [in] */ IActivity* activity,
+            /* [in] */ IHandler* handler,
+            /* [in] */ IAccountManagerCallback* cb,
+            /* [in] */ CAccountManager* host,
+            /* [in] */ const String& accountType,
+            /* [in] */ const String& authTokenType,
+            /* [in] */ ArrayOf<String>* requiredFeatures,
+            /* [in] */ IBundle* optionsIn,
+            /* [in] */ Int32 id);
+
+        CARAPI DoWork();
+
+    private:
+        String mAccountType;
+        String mAuthTokenType;
+        AutoPtr<ArrayOf<String> > mRequiredFeatures;
+        AutoPtr<IBundle> mOptionsIn;
+        Int32 mId;
+    };
+
+    class AmsTask_ConfirmCredentialsAsUser
+        : public AmsTask
     {
     public:
         AmsTask_ConfirmCredentialsAsUser(
@@ -168,7 +190,8 @@ private:
         Int32 mUserId;
     };
 
-    class AmsTask_UpdateCredentials : public AmsTask
+    class AmsTask_UpdateCredentials
+        : public AmsTask
     {
     public:
         AmsTask_UpdateCredentials(
@@ -188,7 +211,8 @@ private:
         AutoPtr<IBundle> mOptions;
     };
 
-    class AmsTask_EditProperties : public AmsTask
+    class AmsTask_EditProperties
+        : public AmsTask
     {
     public:
         AmsTask_EditProperties(
@@ -205,25 +229,12 @@ private:
     };
 
     class BaseFutureTask
-        : public ElRefBase
-        , public FutureTask
+        : public FutureTask
     {
     public:
         BaseFutureTask(
             /* [in] */ IHandler* handler,
             /* [in] */ CAccountManager* host);
-
-        // when extends from futuretask, add these functions
-        // CARAPI_(PInterface) Probe(
-        //     /* [in]  */ REIID riid);
-
-        // CARAPI_(UInt32) AddRef();
-
-        // CARAPI_(UInt32) Release();
-
-        // CARAPI GetInterfaceID(
-        //     /* [in] */ IInterface *pObject,
-        //     /* [out] */ InterfaceID *pIID);
 
         virtual CARAPI DoWork() = 0;
 
@@ -244,20 +255,20 @@ private:
     };
 
     class Future2Task
-        : public IAccountManagerFuture
-        , public BaseFutureTask
+        : public BaseFutureTask
+        , public IAccountManagerFuture
     {
     private:
         class CallbackRunnable
-            : public ElRefBase
+            : public Object
             , public IRunnable
         {
         public:
+            CAR_INTERFACE_DECL();
+
             CallbackRunnable(
                 /* [in] */ IAccountManagerCallback* cb,
                 /* [in] */ Future2Task* host);
-
-            CAR_INTERFACE_DECL();
 
             CARAPI Run();
 
@@ -267,23 +278,14 @@ private:
         };
 
     public:
+        CAR_INTERFACE_DECL()
+
         Future2Task(
             /* [in] */ IHandler* handler,
             /* [in] */ IAccountManagerCallback* cb,
             /* [in] */ CAccountManager* host);
 
         virtual ~Future2Task() {}
-
-        CARAPI_(PInterface) Probe(
-            /* [in]  */ REIID riid);
-
-        CARAPI_(UInt32) AddRef();
-
-        CARAPI_(UInt32) Release();
-
-        CARAPI GetInterfaceID(
-            /* [in] */ IInterface *pObject,
-            /* [out] */ InterfaceID *pIID);
 
         CARAPI Start(
             /* [out] */ IAccountManagerFuture** accountManagerFuture);
@@ -319,7 +321,8 @@ private:
         AutoPtr<IAccountManagerCallback> mCallback;
     };
 
-    class Future2Task_GetAuthTokenLabel : public Future2Task
+    class Future2Task_GetAuthTokenLabel
+        : public Future2Task
     {
     public:
         Future2Task_GetAuthTokenLabel(
@@ -340,7 +343,8 @@ private:
         String mAuthTokenType;
     };
 
-    class Future2Task_HasFeatures : public Future2Task
+    class Future2Task_HasFeatures
+        : public Future2Task
     {
     public:
         Future2Task_HasFeatures(
@@ -348,7 +352,7 @@ private:
             /* [in] */ IAccountManagerCallback* cb,
             /* [in] */ CAccountManager* host,
             /* [in] */ IAccount* account,
-            /* [in] */ const ArrayOf<String>& features);
+            /* [in] */ ArrayOf<String>* features);
 
         CARAPI DoWork();
 
@@ -361,7 +365,8 @@ private:
         AutoPtr< ArrayOf<String> > mFeatures;
     };
 
-    class Future2Task_GetAccountsByTypeAndFeatures : public Future2Task
+    class Future2Task_GetAccountsByTypeAndFeatures
+        : public Future2Task
     {
     public:
         Future2Task_GetAccountsByTypeAndFeatures(
@@ -369,7 +374,7 @@ private:
             /* [in] */ IAccountManagerCallback* cb,
             /* [in] */ CAccountManager* host,
             /* [in] */ const String& type,
-            /* [in] */ const ArrayOf<String>& features);
+            /* [in] */ ArrayOf<String>* features);
 
         CARAPI DoWork();
 
@@ -382,7 +387,30 @@ private:
         AutoPtr< ArrayOf<String> > mFeatures;
     };
 
-    class Future2Task_RemoveAccount : public Future2Task
+    class Future2Task_RenameAccount
+        : public Future2Task
+    {
+    public:
+        Future2Task_RenameAccount(
+            /* [in] */ IHandler* handler,
+            /* [in] */ IAccountManagerCallback* cb,
+            /* [in] */ CAccountManager* host,
+            /* [in] */ IAccount* account,
+            /* [in] */ const String& newName);
+
+        CARAPI DoWork();
+
+        CARAPI BundleToResult(
+            /* [in] */ IBundle* bundle,
+            /* [out] */ IInterface** result);
+
+    private:
+        AutoPtr<IAccount> mAccount;
+        String mNewName;
+    };
+
+    class Future2Task_RemoveAccount
+        : public Future2Task
     {
     public:
         Future2Task_RemoveAccount(
@@ -401,20 +429,42 @@ private:
         AutoPtr<IAccount> mAccount;
     };
 
+    class Future2Task_RemoveAccountAsUser
+        : public Future2Task
+    {
+    public:
+        Future2Task_RemoveAccountAsUser(
+            /* [in] */ IHandler* handler,
+            /* [in] */ IAccountManagerCallback* cb,
+            /* [in] */ CAccountManager* host,
+            /* [in] */ IAccount* account,
+            /* [in] */ IUserHandle* userHandle);
+
+        CARAPI DoWork();
+
+        CARAPI BundleToResult(
+            /* [in] */ IBundle* bundle,
+            /* [out] */ IInterface** result);
+
+    public:
+        AutoPtr<IAccount> mAccount;
+        AutoPtr<IUserHandle> mUserHandle;
+    };
+
     class GetAuthTokenByTypeAndFeaturesTask
         : public AmsTask
         , public IAccountManagerCallback
     {
     private:
         class GetAccountsCallback
-                : public ElRefBase
-                , public IAccountManagerCallback
+            : public Object
+            , public IAccountManagerCallback
         {
         public:
+            CAR_INTERFACE_DECL();
+
             GetAccountsCallback(
                 /* [in] */ GetAuthTokenByTypeAndFeaturesTask* host);
-
-            CAR_INTERFACE_DECL();
 
             CARAPI Run(
                 /* [in] */ IAccountManagerFuture* future);
@@ -424,27 +474,18 @@ private:
         };
 
     public:
+        CAR_INTERFACE_DECL()
+
         GetAuthTokenByTypeAndFeaturesTask(
             /* [in] */ const String& accountType,
             /* [in] */ const String& authTokenType,
-            /* [in] */ const ArrayOf<String>& features,
+            /* [in] */ ArrayOf<String>* features,
             /* [in] */ IActivity* activityForPrompting,
             /* [in] */ IBundle* addAccountOptions,
             /* [in] */ IBundle* loginOptions,
             /* [in] */ IAccountManagerCallback* cb,
             /* [in] */ IHandler* handler,
             /* [in] */ CAccountManager* host);
-
-        CARAPI_(PInterface) Probe(
-            /* [in]  */ REIID riid);
-
-        CARAPI_(UInt32) AddRef();
-
-        CARAPI_(UInt32) Release();
-
-        CARAPI GetInterfaceID(
-            /* [in] */ IInterface *pObject,
-            /* [out] */ InterfaceID *pIID);
 
         CARAPI DoWork();
 
@@ -489,15 +530,15 @@ private:
     };
 
     class CallbackAction
-        : public ElRefBase
+        : public Object
         , public IRunnable
     {
     public:
+        CAR_INTERFACE_DECL();
+
         CallbackAction(
             /* [in] */ IAccountManagerCallback* accountManagerCb,
             /* [in] */ IAccountManagerFuture* future);
-
-        CAR_INTERFACE_DECL();
 
         CARAPI Run();
 
@@ -507,15 +548,15 @@ private:
     };
 
     class AccountUpdateAction
-        : public ElRefBase
+        : public Object
         , public IRunnable
     {
     public:
+        CAR_INTERFACE_DECL();
+
         AccountUpdateAction(
             /* [in] */ IOnAccountsUpdateListener* listener,
             /* [in] */ ArrayOf<IAccount*>* accounts);
-
-        CAR_INTERFACE_DECL();
 
         CARAPI Run();
 
@@ -525,6 +566,10 @@ private:
     };
 
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CAccountManager();
 
     CARAPI constructor(
@@ -613,6 +658,23 @@ public:
         /* [out, callee] */ ArrayOf<IAuthenticatorDescription*>** authenticators);
 
     /**
+     * @hide
+     * Lists the currently registered authenticators for a given user id.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>The caller has to be in the same user or have the permission
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     *
+     * @return An array of {@link AuthenticatorDescription} for every
+     *     authenticator known to the AccountManager service.  Empty (never
+     *     null) if no authenticators are known.
+     */
+    CARAPI GetAuthenticatorTypesAsUser(
+        /* [in] */ Int32 userId,
+        /* [out, callee] */ ArrayOf<IAuthenticatorDescription*>** authenticators);
+
+    /**
      * Lists all accounts of any type registered on the device.
      * Equivalent to getAccountsByType(null).
      *
@@ -625,6 +687,49 @@ public:
      *     (never null) if no accounts have been added.
      */
     CARAPI GetAccounts(
+        /* [out, callee] */ ArrayOf<IAccount*>** accounts);
+
+    /**
+     * @hide
+     * Lists all accounts of any type registered on the device for a given
+     * user id. Equivalent to getAccountsByType(null).
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#GET_ACCOUNTS}.
+     *
+     * @return An array of {@link Account}, one for each account.  Empty
+     *     (never null) if no accounts have been added.
+     */
+    CARAPI GetAccountsAsUser(
+        /* [in] */ Int32 userId,
+        /* [out, callee] */ ArrayOf<IAccount*>** accounts);
+
+    /**
+     * @hide
+     * For use by internal activities. Returns the list of accounts that the calling package
+     * is authorized to use, particularly for shared accounts.
+     * @param packageName package name of the calling app.
+     * @param uid the uid of the calling app.
+     * @return the accounts that are available to this package and user.
+     */
+    CARAPI GetAccountsForPackage(
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 uid,
+        /* [out, callee] */ ArrayOf<IAccount*>** accounts);
+
+    /**
+     * Returns the accounts visible to the specified package, in an environment where some apps
+     * are not authorized to view all accounts. This method can only be called by system apps.
+     * @param type The type of accounts to return, null to retrieve all accounts
+     * @param packageName The package name of the app for which the accounts are to be returned
+     * @return An array of {@link Account}, one per matching account.  Empty
+     *     (never null) if no accounts of the specified type have been added.
+     */
+    CARAPI GetAccountsByTypeForPackage(
+        /* [in] */ const String& type,
+        /* [in] */ const String& packageName,
         /* [out, callee] */ ArrayOf<IAccount*>** accounts);
 
     /**
@@ -711,7 +816,7 @@ public:
      */
     CARAPI HasFeatures(
         /* [in] */ IAccount* account,
-        /* [in] */ const ArrayOf<String>& features,
+        /* [in] */ ArrayOf<String>* features,
         /* [in] */ IAccountManagerCallback* cb,
         /* [in] */ IHandler* handler,
         /* [out] */ IAccountManagerFuture** accountManagerFuture);
@@ -745,7 +850,7 @@ public:
      */
     CARAPI GetAccountsByTypeAndFeatures(
         /* [in] */ const String& type,
-        /* [in] */ const ArrayOf<String>& features,
+        /* [in] */ ArrayOf<String>* features,
         /* [in] */ IAccountManagerCallback* cb,
         /* [in] */ IHandler* handler,
         /* [out] */ IAccountManagerFuture** accountManagerFuture);
@@ -773,6 +878,50 @@ public:
         /* [out] */ Boolean* result);
 
     /**
+     * Rename the specified {@link Account}.  This is equivalent to removing
+     * the existing account and adding a new renamed account with the old
+     * account's user data.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS}
+     * and have the same UID as the account's authenticator.
+     *
+     * @param account The {@link Account} to rename
+     * @param newName String name to be associated with the account.
+     * @param callback Callback to invoke when the request completes, null for
+     *     no callback
+     * @param handler {@link Handler} identifying the callback thread, null for
+     *     the main thread
+     * @return An {@link AccountManagerFuture} which resolves to the Account
+     *     after the name change. If successful the account's name will be the
+     *     specified new name.
+     */
+    CARAPI RenameAccount(
+        /* [in] */ IAccount* account,
+        /* [in] */ const String& newName,
+        /* [in] */ IAccountManagerCallback* callback,
+        /* [in] */ IHandler* handler,
+        /* [out] */ IAccountManagerFuture** result);
+
+    /**
+     * Gets the previous name associated with the account or {@code null}, if
+     * none. This is intended so that clients of {@link
+     * #LOGIN_ACCOUNTS_CHANGED_ACTION} broadcasts can determine if an
+     * authenticator has renamed an account.
+     *
+     * <p>It is safe to call this method from the main thread.
+     *
+     * @param account The account to query for a previous name.
+     * @return The account's previous name, null if the account has never been
+     *         renamed.
+     */
+    CARAPI GetPreviousName(
+        /* [in] */ IAccount* account,
+        /* [out] */ String* result);
+
+    /**
      * Removes an account from the AccountManager.  Does nothing if the account
      * does not exist.  Does not delete the account from the server.
      * The authenticator may have its own policies preventing account
@@ -797,6 +946,17 @@ public:
         /* [in] */ IAccount* account,
         /* [in] */ IAccountManagerCallback* cb,
         /* [in] */ IHandler* handler,
+        /* [out] */ IAccountManagerFuture** accountManagerFuture);
+
+    /**
+     * @see #removeAccount(Account, AccountManagerCallback, Handler)
+     * @hide
+     */
+    CARAPI RemoveAccountAsUser(
+        /* [in] */ IAccount* account,
+        /* [in] */ IAccountManagerCallback* callback,
+        /* [in] */ IHandler* handler,
+        /* [in] */ IUserHandle* userHandle,
         /* [out] */ IAccountManagerFuture** accountManagerFuture);
 
     /**
@@ -1217,12 +1377,63 @@ public:
     CARAPI AddAccount(
         /* [in] */ const String& accountType,
         /* [in] */ const String& authTokenType,
-        /* [in] */ const ArrayOf<String>& requiredFeatures,
+        /* [in] */ ArrayOf<String>* requiredFeatures,
         /* [in] */ IBundle* addAccountOptions,
         /* [in] */ IActivity* activity,
         /* [in] */ IAccountManagerCallback* cb,
         /* [in] */ IHandler* handler,
         /* [out] */ IAccountManagerFuture** accountManagerFuture);
+
+    /**
+     * @see #addAccount(String, String, String[], Bundle, Activity, AccountManagerCallback, Handler)
+     * @hide
+     */
+    CARAPI AddAccountAsUser(
+        /* [in] */ const String& accountType,
+        /* [in] */ const String& authTokenType,
+        /* [in] */ ArrayOf<String>* requiredFeatures,
+        /* [in] */ IBundle* addAccountOptions,
+        /* [in] */ IActivity* activity,
+        /* [in] */ IAccountManagerCallback* callback,
+        /* [in] */ IHandler* handler,
+        /* [in] */ IUserHandle* userHandle,
+        /* [out] */ IAccountManagerFuture** result);
+
+    /**
+     * Adds a shared account from the primary user to a secondary user. Adding the shared account
+     * doesn't take effect immediately. When the target user starts up, any pending shared accounts
+     * are attempted to be copied to the target user from the primary via calls to the
+     * authenticator.
+     * @param account the account to share
+     * @param user the target user
+     * @return
+     * @hide
+     */
+    CARAPI AddSharedAccount(
+        /* [in] */ IAccount* account,
+        /* [in] */ IUserHandle* user,
+        /* [out] */ Boolean* result);
+
+    /**
+     * @hide
+     * Removes the shared account.
+     * @param account the account to remove
+     * @param user the user to remove the account from
+     * @return
+     */
+    CARAPI RemoveSharedAccount(
+        /* [in] */ IAccount* account,
+        /* [in] */ IUserHandle* user,
+        /* [out] */ Boolean* result);
+
+    /**
+     * @hide
+     * @param user
+     * @return
+     */
+    CARAPI GetSharedAccounts(
+        /* [in] */ IUserHandle* user,
+        /* [out] */ ArrayOf<IAccount*>** result);
 
     /**
      * Confirms that the user knows the password for an account to make extra
@@ -1456,7 +1667,7 @@ public:
     CARAPI GetAuthTokenByFeatures(
         /* [in] */ const String& accountType,
         /* [in] */ const String& authTokenType,
-        /* [in] */ const ArrayOf<String>& features,
+        /* [in] */ ArrayOf<String>* features,
         /* [in] */ IActivity* activity,
         /* [in] */ IBundle* addAccountOptions,
         /* [in] */ IBundle* getAuthTokenOptions,
@@ -1498,12 +1709,12 @@ public:
      */
     static CARAPI NewChooseAccountIntent(
         /* [in] */ IAccount* selectedAccount,
-        /* [in] */ const ArrayOf<IAccount*>& allowableAccounts,
-        /* [in] */ const ArrayOf<String>& allowableAccountTypes,
+        /* [in] */ ArrayOf<IAccount*>* allowableAccounts,
+        /* [in] */ ArrayOf<String>* allowableAccountTypes,
         /* [in] */ Boolean alwaysPromptForAccount,
         /* [in] */ const String& descriptionOverrideText,
         /* [in] */ const String& addAccountAuthTokenType,
-        /* [in] */ const ArrayOf<String>&  addAccountRequiredFeatures,
+        /* [in] */ ArrayOf<String>*  addAccountRequiredFeatures,
         /* [in] */ IBundle* addAccountOptions,
         /* [out] */ IIntent** intent);
 
@@ -1563,7 +1774,7 @@ private:
     CARAPI_(void) PostToHandler(
         /* [in] */ IHandler* handler,
         /* [in] */ IOnAccountsUpdateListener* listener,
-        /* [in] */ const ArrayOf<IAccount*>& accounts);
+        /* [in] */ ArrayOf<IAccount*>* accounts);
 
     CARAPI ConvertErrorToException(
         /* [in] */ Int32 code,
@@ -1576,8 +1787,7 @@ private:
     AutoPtr<IIAccountManager> mService;
     AutoPtr<IHandler> mMainHandler;
 
-    HashMap<AutoPtr<IOnAccountsUpdateListener>, AutoPtr<IHandler> >
-            mAccountsUpdatedListeners;
+    AutoPtr<IHashMap> mAccountsUpdatedListeners;
     Object mAccountsUpdatedListenersLock;
 
     /**

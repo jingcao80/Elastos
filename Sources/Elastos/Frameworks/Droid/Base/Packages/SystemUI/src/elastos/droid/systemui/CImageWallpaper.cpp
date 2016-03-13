@@ -43,7 +43,9 @@ ECode CImageWallpaper::OnCreate()
 {
     WallpaperService::OnCreate();
 
-    GetSystemService(WALLPAPER_SERVICE, (IInterface**)&mWallpaperManager);
+    AutoPtr<IInterface> obj;
+    GetSystemService(WALLPAPER_SERVICE, (IInterface**)&obj);
+    mWallpaperManager = IWallpaperManager::Probe(obj);
 
     //noinspection PointlessBooleanExpression,ConstantConditions
     // if (FIXED_SIZED_SURFACE && USE_OPENGL) {

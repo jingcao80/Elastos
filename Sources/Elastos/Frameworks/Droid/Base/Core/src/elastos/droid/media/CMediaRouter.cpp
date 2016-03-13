@@ -165,7 +165,9 @@ CMediaRouter::Static::Static(
     AutoPtr<IBinder> b = IBinder::Probe(obj);
     mAudioService = IIAudioService::Probe(obj.Get());
 
-    appContext->GetSystemService(IContext::DISPLAY_SERVICE, (IInterface**)&mDisplayService);
+    obj = NULL;
+    appContext->GetSystemService(IContext::DISPLAY_SERVICE, (IInterface**)&obj);
+    mDisplayService = IDisplayManager::Probe(obj);
 
     obj = NULL;
     serviceManager->GetService(IContext::MEDIA_ROUTER_SERVICE, (IInterface**)&obj);

@@ -2,15 +2,18 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/os/BinderProxy.h"
 #include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
 #include <binder/IBinder.h>
+
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
 
 namespace Elastos {
 namespace Droid {
 namespace Os {
 
-// {C9B1505E-E42A-4175-A9AC-57D819F1428F}
-extern const InterfaceID EIID_BinderProxy =
-    { 0xc9b1505e, 0xe42a, 0x4175, { 0xa9, 0xac, 0x57, 0xd8, 0x19, 0xf1, 0x42, 0x8f } };
+CAR_INTERFACE_IMPL_2(BinderProxy, Object, IBinderProxy, IBinder)
 
 BinderProxy::BinderProxy()
     : mObject(0)
@@ -19,40 +22,6 @@ BinderProxy::BinderProxy()
 BinderProxy::~BinderProxy()
 {
     Destroy();
-}
-
-PInterface BinderProxy::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IBinder*)this;
-    }
-    else if (riid == EIID_IBinder) {
-        return (IBinder*)this;
-    }
-    if (riid == EIID_BinderProxy) {
-        return reinterpret_cast<PInterface>((BinderProxy*)this);
-    }
-
-    return NULL;
-}
-
-UInt32 BinderProxy::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 BinderProxy::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode BinderProxy::GetInterfaceID(
-    /* [in] */ IInterface* pObject,
-    /* [in] */ InterfaceID* pIID)
-{
-    assert(0);
-    return E_NOT_IMPLEMENTED;
 }
 
 ECode BinderProxy::GetHashCode(
@@ -66,8 +35,12 @@ ECode BinderProxy::GetHashCode(
 ECode BinderProxy::ToString(
     /* [out] */ String* str)
 {
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    VALIDATE_NOT_NULL(str)
+    StringBuilder sb("BinderProxy:{");
+    sb += StringUtils::ToHexString((Int32)this);
+    sb += "}";
+    *str = sb.ToString();
+    return NOERROR;
 }
 
 void BinderProxy::Destroy()

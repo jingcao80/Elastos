@@ -9,7 +9,7 @@
 #include <cutils/properties.h>
 #include <cutils/trace.h>
 #include <elastos/droid/DroidRuntime.h>
-//#include <private/android_filesystem_config.h>  // for AID_SYSTEM
+#include <private/android_filesystem_config.h>  // for AID_SYSTEM
 
 #include <skia/core/SkGraphics.h>
 
@@ -155,28 +155,28 @@ static void maybeCreateDalvikCache()
 #else
 #error "Unknown instruction set"
 #endif
-    // const char* androidRoot = getenv("ANDROID_DATA");
-    // LOG_ALWAYS_FATAL_IF(androidRoot == NULL, "ANDROID_DATA environment variable unset");
+    const char* androidRoot = getenv("ANDROID_DATA");
+    LOG_ALWAYS_FATAL_IF(androidRoot == NULL, "ANDROID_DATA environment variable unset");
 
-    // char dalvikCacheDir[PATH_MAX];
-    // const int numChars = snprintf(dalvikCacheDir, PATH_MAX,
-    //         "%s/dalvik-cache/%s", androidRoot, kInstructionSet);
-    // LOG_ALWAYS_FATAL_IF((numChars >= PATH_MAX || numChars < 0),
-    //         "Error constructing dalvik cache : %s", strerror(errno));
+    char dalvikCacheDir[PATH_MAX];
+    const int numChars = snprintf(dalvikCacheDir, PATH_MAX,
+            "%s/dalvik-cache/%s", androidRoot, kInstructionSet);
+    LOG_ALWAYS_FATAL_IF((numChars >= PATH_MAX || numChars < 0),
+            "Error constructing dalvik cache : %s", strerror(errno));
 
-    // int result = mkdir(dalvikCacheDir, 0711);
-    // LOG_ALWAYS_FATAL_IF((result < 0 && errno != EEXIST),
-    //         "Error creating cache dir %s : %s", dalvikCacheDir, strerror(errno));
+    int result = mkdir(dalvikCacheDir, 0711);
+    LOG_ALWAYS_FATAL_IF((result < 0 && errno != EEXIST),
+            "Error creating cache dir %s : %s", dalvikCacheDir, strerror(errno));
 
-    // // We always perform these steps because the directory might
-    // // already exist, with wider permissions and a different owner
-    // // than we'd like.
-    // result = chown(dalvikCacheDir, AID_ROOT, AID_ROOT);
-    // LOG_ALWAYS_FATAL_IF((result < 0), "Error changing dalvik-cache ownership : %s", strerror(errno));
+    // We always perform these steps because the directory might
+    // already exist, with wider permissions and a different owner
+    // than we'd like.
+    result = chown(dalvikCacheDir, AID_ROOT, AID_ROOT);
+    LOG_ALWAYS_FATAL_IF((result < 0), "Error changing dalvik-cache ownership : %s", strerror(errno));
 
-    // result = chmod(dalvikCacheDir, 0711);
-    // LOG_ALWAYS_FATAL_IF((result < 0),
-    //         "Error changing dalvik-cache permissions : %s", strerror(errno));
+    result = chmod(dalvikCacheDir, 0711);
+    LOG_ALWAYS_FATAL_IF((result < 0),
+            "Error changing dalvik-cache permissions : %s", strerror(errno));
 }
 
 #if defined(__LP64__)

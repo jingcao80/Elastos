@@ -2,24 +2,32 @@
 #ifndef __ELASTOS_DROID_TELEPHONY_CELLINFO_H__
 #define __ELASTOS_DROID_TELEPHONY_CELLINFO_H__
 
+#include "Elastos.Droid.Telephony.h"
 #include "elastos/droid/ext/frameworkext.h"
-
-using Elastos::Droid::Telephony::ICellInfo;
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
 class CellInfo
+    : public Object
+    , public ICellInfo
+    , public IParcelable
 {
 public:
-    virtual CARAPI_(PInterface) Probe(
-        /* [in]  */ REIID riid) = 0;
+
+    CAR_INTERFACE_DECL()
+
+    CARAPI constructor();
+
+    CARAPI constructor(
+        /* [in] */ ICellInfo* ci);
 
     CARAPI IsRegistered(
         /* [out] */ Boolean* registered);
 
-    CARAPI SetRegisterd(
+    CARAPI SetRegistered(
         /* [in] */ Boolean registered);
 
     CARAPI GetTimeStamp(
@@ -54,9 +62,6 @@ public:
 protected:
     CellInfo();
 
-    CARAPI Init(
-        /* [in] */ ICellInfo* ci);
-
 private:
     static CARAPI_(String) TimeStampTypeToString(
         /* [in] */ Int32 type);
@@ -69,6 +74,8 @@ protected:
     static const Int32 TYPE_CDMA;
     /** @hide */
     static const Int32 TYPE_LTE;
+    /** @hide */
+    static const Int32 TYPE_WCDMA;
 
 private:
     // True if device is mRegistered to the mobile network

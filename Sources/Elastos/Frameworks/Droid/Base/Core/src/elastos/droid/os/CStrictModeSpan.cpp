@@ -1,8 +1,13 @@
 #include "elastos/droid/os/CStrictModeSpan.h"
+#include <elastos/core/AutoLock.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Os {
+
+CAR_INTERFACE_IMPL(CStrictModeSpan, Object, IStrictModeSpan)
+
+CAR_OBJECT_IMPL(CStrictModeSpan)
 
 ECode CStrictModeSpan::constructor()
 {

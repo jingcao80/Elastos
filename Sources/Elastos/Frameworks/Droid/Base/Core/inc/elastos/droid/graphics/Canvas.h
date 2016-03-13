@@ -32,7 +32,7 @@ class Canvas
     friend class Elastos::Droid::View::Surface;
 
 public:
-    CAR_INTERFACE_DECL();
+    CAR_INTERFACE_DECL()
 
     Canvas();
 

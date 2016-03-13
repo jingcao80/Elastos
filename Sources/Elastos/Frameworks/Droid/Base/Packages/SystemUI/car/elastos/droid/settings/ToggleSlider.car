@@ -10,7 +10,7 @@ module
 
     interface IToggleSlider;
 
-    interface IListener {
+    interface IToggleSliderListener {
 
         OnInit(
             [in] IToggleSlider* v);
@@ -36,7 +36,7 @@ module
             [in] IBrightnessMirrorController* c);
 
         SetOnChangedListener(
-            [in] IListener* l);
+            [in] IToggleSliderListener* l);
 
         SetChecked(
             [in] Boolean checked);

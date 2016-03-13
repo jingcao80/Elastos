@@ -112,7 +112,6 @@ ECode Settings::NameValueTable::GetUriFor(
     /* [in] */ const String& name,
     /* [out] */ IUri** value)
 {
-    VALIDATE_NOT_NULL(value)
     return Uri::WithAppendedPath(uri, name, value);
 }
 
@@ -137,9 +136,8 @@ ECode Settings::NameValueCache::LazyGetProvider(
 {
     VALIDATE_NOT_NULL(provider);
     AutoPtr<IIContentProvider> cp;
-    //TODO
-    // ISynchronize* sync = ISynchronize::Probe(this);
-    // synchronized(sync) {
+
+    synchronized(this) {
         cp = mContentProvider;
         if (cp == NULL) {
             String authority;
@@ -147,7 +145,7 @@ ECode Settings::NameValueCache::LazyGetProvider(
             cr->AcquireProvider(authority, (IIContentProvider**)&mContentProvider);
             cp = mContentProvider;
         }
-    // }
+    }
 
     *provider = cp;
     REFCOUNT_ADD(*provider)
@@ -196,15 +194,15 @@ ECode Settings::NameValueCache::GetStringForUser(
     /* [out] */ String* value)
 {
     VALIDATE_NOT_NULL(value)
+    *value = NULL;
+
     Boolean isSelf = (userHandle == UserHandle::GetMyUserId());
     if (isSelf) {
         Int64 newValuesVersion;
         SystemProperties::GetInt64(mVersionSystemProperty, 0, &newValuesVersion);
 
         // Our own user's settings data uses a client-side cache
-        //TODO
-        // ISynchronize* sync = ISynchronize::Probe(this);
-        // synchronized(sync) {
+        synchronized(this) {
             if (mValuesVersion != newValuesVersion) {
                 if (LOCAL_LOGV || FALSE) {
                     String segment;
@@ -224,7 +222,7 @@ ECode Settings::NameValueCache::GetStringForUser(
                 AutoPtr<ICharSequence> cs = ICharSequence::Probe(interf);
                 return cs->ToString(value); // Could be null, that's OK -- negative caching
             }
-        // }
+        }
     } else {
         if (LOCAL_LOGV)
             Slogger::V(TAG, "get setting for user %d by user %d so skipping cache", userHandle, UserHandle::GetMyUserId());
@@ -1254,7 +1252,6 @@ ECode Settings::Secure::GetString(
     /* [in] */ const String& name,
     /* [out] */ String* value)
 {
-    VALIDATE_NOT_NULL(value)
     return GetStringForUser(resolver, name, UserHandle::GetMyUserId(), value);
 }
 
@@ -1264,6 +1261,9 @@ ECode Settings::Secure::GetStringForUser(
     /* [in] */ Int32 userHandle,
     /* [out] */ String* value)
 {
+    VALIDATE_NOT_NULL(value)
+    *value = NULL;
+
     Boolean flag = FALSE;
     Settings::Secure::MOVED_TO_GLOBAL->Contains(CoreUtils::Convert(name), &flag);
     if (flag) {
@@ -1273,15 +1273,12 @@ ECode Settings::Secure::GetStringForUser(
 
     Settings::Secure::MOVED_TO_LOCK_SETTINGS->Contains(CoreUtils::Convert(name), &flag);
     if (flag) {
-        //TODO
-        // ISynchronize* sync = ISynchronize::Probe(sSecureLock);
-        // synchronized(sync)
-        // {
+        synchronized(sSecureLock) {
             if (sLockSettings == NULL) {
                 sLockSettings = (IILockSettings*)ServiceManager::GetService(String("lock_settings")).Get();
                 sIsSystemProcess = Process::MyUid() == IProcess::SYSTEM_UID;
             }
-        // }
+        }
         if (sLockSettings != NULL && !sIsSystemProcess) {
             // try {
             return sLockSettings->GetString(name, String("0"), userHandle, value);
@@ -1300,7 +1297,6 @@ ECode Settings::Secure::PutString(
     /* [in] */ const String& value,
     /* [out] */ Boolean* result)
 {
-    VALIDATE_NOT_NULL(result)
     return PutStringForUser(resolver, name, value, UserHandle::GetMyUserId(), result);
 }
 
@@ -1669,15 +1665,13 @@ ECode Settings::Secure::SetLocationProviderEnabledForUser(
     // and let the SettingsProvider handle it rather than reading and modifying
     // the list of enabled providers.
     String provider;
-    //TODO
-    // ISynchronize* sync = ISynchronize::Probe(sLocationSettingsLock);
-    // synchronized(sync) {
+    synchronized(sLocationSettingsLock) {
         if (enabled) {
             provider = String("+") + _provider;
         } else {
             provider = String("-") + _provider;
         }
-    // }
+    }
 
     return PutStringForUser(cr, ISettingsSecure::LOCATION_PROVIDERS_ALLOWED, provider, userId, result);
 }
@@ -1687,9 +1681,8 @@ Boolean Settings::Secure::SetLocationModeForUser(
     /* [in] */ Int32 mode,
     /* [in] */ Int32 userId)
 {
-    //TODO
-    // ISynchronize* sync = ISynchronize::Probe(sLocationSettingsLock);
-    // synchronized(sync) {
+    Boolean result = FALSE;
+    synchronized(sLocationSettingsLock) {
         Boolean gps = FALSE;
         Boolean network = FALSE;
         switch (mode) {
@@ -1710,23 +1703,22 @@ Boolean Settings::Secure::SetLocationModeForUser(
                 // return E_ILLEGAL_ARGUMENT_EXCEPTION;
                 return FALSE;
         }
-        Boolean gpsSuccess = FALSE;
+
         Settings::Secure::SetLocationProviderEnabledForUser(
-            cr, ILocationManager::GPS_PROVIDER, gps, userId, &gpsSuccess);
-        Boolean nlpSuccess = FALSE;
-        Settings::Secure::SetLocationProviderEnabledForUser(
-            cr, ILocationManager::NETWORK_PROVIDER, network, userId, &nlpSuccess);
-        return gpsSuccess && nlpSuccess;
-    // }
+            cr, ILocationManager::GPS_PROVIDER, gps, userId, &result);
+        if (result) {
+            Settings::Secure::SetLocationProviderEnabledForUser(
+                cr, ILocationManager::NETWORK_PROVIDER, network, userId, &result);
+        }
+    }
+    return result;
 }
 
 Int32 Settings::Secure::GetLocationModeForUser(
     /* [in] */ IContentResolver* cr,
     /* [in] */ Int32 userId)
 {
-    //TODO
-    // ISynchronize* sync = ISynchronize::Probe(sLocationSettingsLock);
-    // synchronized(sync) {
+    synchronized(sLocationSettingsLock) {
         Boolean gpsEnabled = FALSE;
         Settings::Secure::IsLocationProviderEnabledForUser(
             cr, ILocationManager::GPS_PROVIDER, userId, &gpsEnabled);
@@ -1735,14 +1727,18 @@ Int32 Settings::Secure::GetLocationModeForUser(
             cr, ILocationManager::NETWORK_PROVIDER, userId, &networkEnabled);
         if (gpsEnabled && networkEnabled) {
             return ISettingsSecure::LOCATION_MODE_HIGH_ACCURACY;
-        } else if (gpsEnabled) {
+        }
+        else if (gpsEnabled) {
             return ISettingsSecure::LOCATION_MODE_SENSORS_ONLY;
-        } else if (networkEnabled) {
+        }
+        else if (networkEnabled) {
             return ISettingsSecure::LOCATION_MODE_BATTERY_SAVING;
-        } else {
+        }
+        else {
             return ISettingsSecure::LOCATION_MODE_OFF;
         }
-    // }
+    }
+    return ISettingsSecure::LOCATION_MODE_OFF;
 }
 
 //================================================================================
@@ -1905,7 +1901,6 @@ ECode Settings::Global::GetUriFor(
     /* [in] */ const String& name,
     /* [out] */ IUri** uri)
 {
-    VALIDATE_NOT_NULL(uri)
     return NameValueTable::GetUriFor(CONTENT_URI, name, uri);
 }
 

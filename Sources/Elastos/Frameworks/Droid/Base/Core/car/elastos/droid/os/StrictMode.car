@@ -254,6 +254,14 @@ module
         DetectLeakedClosableObjects();
 
         /**
+         * Detect when a {@code file://} {@link android.net.Uri} is exposed beyond this
+         * app. The receiving app may not have access to the sent path.
+         * Instead, when sharing files between apps, {@code content://}
+         * should be used with permission grants.
+         */
+        DetectFileUriExposure();
+
+        /**
          * Detect when a {@link BroadcastReceiver} or
          * {@link ServiceConnection} is leaked during {@link Context}
          * teardown.
@@ -542,6 +550,12 @@ module
         VmRegistrationLeaksEnabled(
             [out] Boolean* isEnabled);
 
+        /**
+         * @hide
+         */
+        VmFileUriExposureEnabled(
+            [out] Boolean* isEnabled);
+
          /**
          * @hide
          */
@@ -566,6 +580,12 @@ module
          */
         OnServiceConnectionLeaked(
             /*[in] Throwable originStack*/);
+
+        /**
+         * @hide
+         */
+        OnFileUriExposed(
+            [in] String location);
 
         /**
          * @hide

@@ -937,7 +937,9 @@ ECode VoiceInteractionSession::OnCreate(
     /* [in] */ IBundle* args)
 {
     mTheme = mTheme != 0 ? mTheme : R::style::Theme_DeviceDefault_VoiceInteractionSession;
-    mContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&mInflater);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&obj);
+    mInflater = ILayoutInflater::Probe(obj);
     CSoftInputWindow::New(mContext, String("VoiceInteractionSession"),
         mTheme, mCallbacks, this, mDispatcherState,
         IWindowManagerLayoutParams::TYPE_VOICE_INTERACTION,

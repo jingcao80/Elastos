@@ -1,0 +1,2 @@
+DIRS += cdma
+DIRS += gsm

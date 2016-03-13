@@ -2745,6 +2745,15 @@ module
         interface ILayoutInflaterFilter;
     }
 
+    class CRemoteViewsBitmapCache {
+        constructor();
+
+        constructor(
+            [in] IParcel* parcel);
+
+        interface IBitmapCache;
+    }
+
     [local]
     class CRemoteViewsAdapter {
         constructor(

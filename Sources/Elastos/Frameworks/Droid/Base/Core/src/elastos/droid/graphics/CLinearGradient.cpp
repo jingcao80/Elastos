@@ -13,7 +13,7 @@ const Int32 CLinearGradient::TYPE_COLORS_AND_POSITIONS = 1;
 const Int32 CLinearGradient::TYPE_COLOR_START_AND_COLOR_END = 2;
 
 CAR_OBJECT_IMPL(CLinearGradient);
-
+CAR_INTERFACE_IMPL(CLinearGradient, Shader, ILinearGradient);
 CLinearGradient::CLinearGradient()
     : mType(0)
     , mX0(0)
@@ -73,35 +73,6 @@ ECode CLinearGradient::constructor(
     mTileMode = tile;
     Init(NativeCreate2(x0, y0, x1, y1, color0, color1, tile));
     return NOERROR;
-}
-
-PInterface CLinearGradient::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_Shader) {
-        return reinterpret_cast<PInterface>((Shader*)this);
-    }
-    else if (riid == EIID_ILinearGradient) {
-        return (ILinearGradient*)this;
-    }
-    return Shader::Probe(riid);
-}
-
-UInt32 CLinearGradient::AddRef()
-{
-    return Shader::AddRef();
-}
-
-UInt32 CLinearGradient::Release()
-{
-    return Shader::Release();
-}
-
-ECode CLinearGradient::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return Shader::GetInterfaceID(object, iid);
 }
 
 Int64 CLinearGradient::NativeCreate1(

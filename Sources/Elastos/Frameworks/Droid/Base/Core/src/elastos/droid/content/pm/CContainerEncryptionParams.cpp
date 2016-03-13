@@ -306,7 +306,7 @@ ECode CContainerEncryptionParams::ToString(
     sb.Append(mEncryptedDataStart);
     sb.Append(",mDataEnd=");
     sb.Append(mDataEnd);
-    sb.Append('}');
+    sb.AppendChar('}');
 
     *str = sb.ToString();
     return NOERROR;

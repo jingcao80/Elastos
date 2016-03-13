@@ -6,6 +6,7 @@
 #include <elastos/droid/ext/frameworkext.h>
 #include <elastos/core/Object.h>
 #include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
+#include <Elastos.Droid.Hardware.h>
 
 using Elastos::Droid::Hardware::Hdmi::IIHdmiControlCallback;
 
@@ -29,8 +30,11 @@ namespace Hdmi {
  */
 class RoutingControlAction
     : public HdmiCecFeatureAction
+    , public IRoutingControlAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     RoutingControlAction();
 
     CARAPI constructor(

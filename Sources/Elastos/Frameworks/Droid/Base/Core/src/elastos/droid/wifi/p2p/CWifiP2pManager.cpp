@@ -584,7 +584,7 @@ ECode CWifiP2pManager::GetMessenger(
     *msg = NULL;
 
     // try {
-    return mService->GetMessenger((IMessenger**)msg);
+    return mService->GetMessenger(msg);
     // } catch (RemoteException e) {
     //     return null;
     // }

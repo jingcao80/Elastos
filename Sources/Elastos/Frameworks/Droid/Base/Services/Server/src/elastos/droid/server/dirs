@@ -1,6 +1,6 @@
 
 
-#DIRS = accessibility
+DIRS = accessibility
 #DIRS += accounts
 DIRS += am
 DIRS += appwidget
@@ -18,7 +18,7 @@ DIRS += input
 #DIRS += job
 DIRS += lights
 DIRS += location
-#DIRS += media
+DIRS += media
 DIRS += net
 DIRS += notification
 DIRS += os

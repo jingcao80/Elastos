@@ -7,7 +7,8 @@ namespace Elastos {
 namespace Droid {
 namespace View {
 
-CAR_INTERFACE_IMPL(WindowManagerImpl, Object, IWindowManager);
+CAR_INTERFACE_IMPL_2(WindowManagerImpl, Object, IWindowManager, IViewManager);
+
 WindowManagerImpl::WindowManagerImpl(
     /* [in] */ IDisplay* display)
     : mDisplay(display)

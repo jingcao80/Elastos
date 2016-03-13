@@ -4,10 +4,10 @@
 
 #include "Elastos.Droid.Webkit.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/webkit/native/content/browser/NavigationEntry.h"
+#include "elastos/droid/webkit/webview/chromium/native/content/browser/NavigationEntry.h"
 
 using Elastos::Droid::Graphics::IBitmap;
-using Elastos::Droid::Webkit::Content::Browser::NavigationEntry;
+using Elastos::Droid::Webkit::Webview::Chromium::Content::Browser::NavigationEntry;
 using Elastos::Droid::Webkit::IWebHistoryItem;
 
 namespace Elastos {

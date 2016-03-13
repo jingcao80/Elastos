@@ -1,14 +1,18 @@
 
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/accounts/AccountAuthenticatorActivity.h"
 
 namespace Elastos {
 namespace Droid {
 namespace Accounts {
 
-void AccountAuthenticatorActivity::SetAccountAuthenticatorResult(
+CAR_INTERFACE_IMPL(AccountAuthenticatorActivity, Activity, IAccountAuthenticatorActivity)
+
+ECode AccountAuthenticatorActivity::SetAccountAuthenticatorResult(
     /* [in] */ IBundle* result)
 {
     mResultBundle = result;
+    return NOERROR;
 }
 
 ECode AccountAuthenticatorActivity::OnCreate(
@@ -21,8 +25,7 @@ ECode AccountAuthenticatorActivity::OnCreate(
     FAIL_RETURN(GetIntent((IIntent**)&intent));
     FAIL_RETURN(intent->GetParcelableExtra(
             IAccountManager::KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, (IParcelable**)&parcelable));
-    mAccountAuthenticatorResponse = (IAccountAuthenticatorResponse*)
-            parcelable->Probe(EIID_IAccountAuthenticatorResponse);
+    mAccountAuthenticatorResponse = IAccountAuthenticatorResponse::Probe(parcelable);
     if (mAccountAuthenticatorResponse != NULL) {
         return mAccountAuthenticatorResponse->OnRequestContinued();
     }

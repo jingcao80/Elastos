@@ -1,228 +1,255 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-package com.android.server.media;
+#ifndef __ELASTOS_DROID_SERVER_MEDIA_MEDIASESSIONRECORD_H__
+#define __ELASTOS_DROID_SERVER_MEDIA_MEDIASESSIONRECORD_H__
+
+#include "elastos/droid/ext/frameworkext.h"
+#include <Elastos.Droid.View.h>
+#include <_Elastos.Droid.Server.h>
+#include "elastos/droid/server/media/CSessionController.h"
+#include "elastos/droid/server/media/CMediaSession.h"
+#include "elastos/droid/os/Handler.h"
+#include "elastos/droid/os/Runnable.h"
+#include <elastos/core/AutoLock.h>
+#include <elastos/utility/etl/List.h>
 
 using Elastos::Droid::App::IPendingIntent;
-using Elastos::Droid::Content::IComponentName;
-using Elastos::Droid::Content::IContext;
-using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Content::Pm::IParceledListSlice;
+using Elastos::Droid::Media::IMediaMetadata;
+using Elastos::Droid::Media::IAudioAttributes;
 using Elastos::Droid::Media::IAudioManager;
 using Elastos::Droid::Media::IAudioManagerInternal;
-using Elastos::Droid::Media::IAudioSystem;
-using Elastos::Droid::Media::IMediaDescription;
-using Elastos::Droid::Media::IMediaMetadata;
 using Elastos::Droid::Media::IRating;
-using Elastos::Droid::Media::IVolumeProvider;
-using Elastos::Droid::Media::Isession.ISession;
-using Elastos::Droid::Media::Isession.ISessionCallback;
-using Elastos::Droid::Media::Isession.ISessionController;
-using Elastos::Droid::Media::Isession.ISessionControllerCallback;
-using Elastos::Droid::Media::Isession.MediaController;
-using Elastos::Droid::Media::Isession.MediaController.PlaybackInfo;
-using Elastos::Droid::Media::Isession.MediaSession;
-using Elastos::Droid::Media::Isession.ParcelableVolumeInfo;
-using Elastos::Droid::Media::Isession.PlaybackState;
-using Elastos::Droid::Media::IAudioAttributes;
-using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Os::IBinder;
+using Elastos::Droid::Media::Session::IISessionControllerCallback;
+using Elastos::Droid::Media::Session::IPlaybackState;
+using Elastos::Droid::Media::Session::IISessionCallback;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::IDeadObjectException;
 using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::IIBinder;
+using Elastos::Droid::Os::Handler;
 using Elastos::Droid::Os::ILooper;
-using Elastos::Droid::Os::IMessage;
-using Elastos::Droid::Os::IRemoteException;
+using Elastos::Droid::Os::Runnable;
 using Elastos::Droid::Os::IResultReceiver;
-using Elastos::Droid::Os::ISystemClock;
-using Elastos::Droid::Utility::ILog;
-using Elastos::Droid::Utility::ISlog;
 using Elastos::Droid::View::IKeyEvent;
+using Elastos::Core::ICharSequence;
+using Elastos::Utility::Etl::List;
 
-using Elastos::Droid::Server::ILocalServices;
+namespace Elastos {
+namespace Droid {
+namespace Server {
+namespace Media {
 
-using Elastos::IO::IPrintWriter;
-using Elastos::Utility::IArrayList;
-using Elastos::Utility::IUUID;
+class MediaSessionService;
 
 /**
  * This is the system implementation of a Session. Apps will interact with the
  * MediaSession wrapper class instead.
  */
-public class MediaSessionRecord implements IBinder.DeathRecipient {
-    private static const String TAG = "MediaSessionRecord";
-    private static const Boolean DEBUG = FALSE;
+class MediaSessionRecord
+    : public Object
+    , public IProxyDeathRecipient
+{
+public:
+    class SessionCb : public Object
+    {
+    public:
+        SessionCb(
+            /* [in] */ IISessionCallback* cb)
+            : mCb(cb)
+        {}
 
-    /**
-     * The length of time a session will still be considered active after
-     * pausing in ms.
-     */
-    private static const Int32 ACTIVE_BUFFER = 30000;
+        CARAPI SendMediaButton(
+            /* [in] */ IKeyEvent* keyEvent,
+            /* [in] */ Int32 sequenceId,
+            /* [in] */ IResultReceiver* cb,
+            /* [out] */ Boolean* result);
 
-    /**
-     * The amount of time we'll send an assumed volume after the last volume
-     * command before reverting to the last reported volume.
-     */
-    private static const Int32 OPTIMISTIC_VOLUME_TIMEOUT = 1000;
+        CARAPI SendCommand(
+            /* [in] */ const String& command,
+            /* [in] */ IBundle* args,
+            /* [in] */ IResultReceiver* cb);
 
-    private final MessageHandler mHandler;
+        CARAPI SendCustomAction(
+            /* [in] */ const String& action,
+            /* [in] */ IBundle* args);
 
-    private final Int32 mOwnerPid;
-    private final Int32 mOwnerUid;
-    private final Int32 mUserId;
-    private final String mPackageName;
-    private final String mTag;
-    private final ControllerStub mController;
-    private final SessionStub mSession;
-    private final SessionCb mSessionCb;
-    private final MediaSessionService mService;
+        CARAPI Play();
 
-    private final Object mLock = new Object();
-    private final ArrayList<ISessionControllerCallback> mControllerCallbacks =
-            new ArrayList<ISessionControllerCallback>();
+        CARAPI PlayFromMediaId(
+            /* [in] */ const String& mediaId,
+            /* [in] */ IBundle* extras);
 
-    private Int64 mFlags;
-    private PendingIntent mMediaButtonReceiver;
-    private PendingIntent mLaunchIntent;
+        CARAPI PlayFromSearch(
+            /* [in] */ const String& query,
+            /* [in] */ IBundle* extras);
 
-    // TransportPerformer fields
+        CARAPI SkipToTrack(
+            /* [in] */ Int64 id);
 
-    private Bundle mExtras;
-    private MediaMetadata mMetadata;
-    private PlaybackState mPlaybackState;
-    private ParceledListSlice mQueue;
-    private CharSequence mQueueTitle;
-    private Int32 mRatingType;
-    private Int64 mLastActiveTime;
-    // End TransportPerformer fields
+        CARAPI Pause();
 
-    // Volume handling fields
-    private AudioAttributes mAudioAttrs;
-    private AudioManager mAudioManager;
-    private AudioManagerInternal mAudioManagerInternal;
-    private Int32 mVolumeType = PlaybackInfo.PLAYBACK_TYPE_LOCAL;
-    private Int32 mVolumeControlType = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
-    private Int32 mMaxVolume = 0;
-    private Int32 mCurrentVolume = 0;
-    private Int32 mOptimisticVolume = -1;
-    // End volume handling fields
+        CARAPI Stop();
 
-    private Boolean mIsActive = FALSE;
-    private Boolean mDestroyed = FALSE;
+        CARAPI Next();
 
-    public MediaSessionRecord(Int32 ownerPid, Int32 ownerUid, Int32 userId, String ownerPackageName,
-            ISessionCallback cb, String tag, MediaSessionService service, Handler handler) {
-        mOwnerPid = ownerPid;
-        mOwnerUid = ownerUid;
-        mUserId = userId;
-        mPackageName = ownerPackageName;
-        mTag = tag;
-        mController = new ControllerStub();
-        mSession = new SessionStub();
-        mSessionCb = new SessionCb(cb);
-        mService = service;
-        mHandler = new MessageHandler(handler->GetLooper());
-        mAudioManager = (AudioManager) service->GetContext()->GetSystemService(Context.AUDIO_SERVICE);
-        mAudioManagerInternal = LocalServices->GetService(AudioManagerInternal.class);
-        mAudioAttrs = new AudioAttributes->Builder()->SetUsage(AudioAttributes.USAGE_MEDIA).Build();
-    }
+        CARAPI Previous();
+
+        CARAPI FastForward();
+
+        CARAPI Rewind();
+
+        CARAPI SeekTo(
+            /* [in] */ Int64 pos);
+
+        CARAPI Rate(
+            /* [in] */ IRating* rating);
+
+        CARAPI AdjustVolume(
+            /* [in] */ Int32 direction);
+
+        CARAPI SetVolumeTo(
+            /* [in] */ Int32 value);
+
+    private:
+        AutoPtr<IISessionCallback> mCb;
+
+        friend class MediaSessionRecord;
+    };
+
+private:
+    class MessageHandler : public Handler
+    {
+    public:
+        MessageHandler(
+            /* [in] */ ILooper* looper,
+            /* [in] */ MediaSessionRecord* host)
+            : Handler(looper)
+            , mHost(host)
+        {}
+
+        // @Override
+        CARAPI HandleMessage(
+            /* [in] */ IMessage* msg);
+
+        CARAPI_(void) Post(
+            /* [in] */ Int32 what);
+
+        CARAPI_(void) Post(
+            /* [in] */ Int32 what,
+            /* [in] */ IObject* obj);
+
+        CARAPI_(void) Post(
+            /* [in] */ Int32 what,
+            /* [in] */ IObject* obj,
+            /* [in] */ IBundle* data);
+
+    private:
+        static const Int32 MSG_UPDATE_METADATA = 1;
+        static const Int32 MSG_UPDATE_PLAYBACK_STATE = 2;
+        static const Int32 MSG_UPDATE_QUEUE = 3;
+        static const Int32 MSG_UPDATE_QUEUE_TITLE = 4;
+        static const Int32 MSG_UPDATE_EXTRAS = 5;
+        static const Int32 MSG_SEND_EVENT = 6;
+        static const Int32 MSG_UPDATE_SESSION_STATE = 7;
+        static const Int32 MSG_UPDATE_VOLUME = 8;
+        static const Int32 MSG_DESTROYED = 9;
+
+        MediaSessionRecord* mHost;
+
+        friend class CMediaSession;
+        friend class MediaSessionRecord;
+    };
+
+    class ClearOptimisticVolumeRunnable : public Runnable
+    {
+    public:
+        ClearOptimisticVolumeRunnable(
+            /* [in] */ MediaSessionRecord* host)
+            : mHost(host)
+        {}
+
+        CARAPI Run( );
+
+    private:
+        MediaSessionRecord* mHost;
+    };
+
+public:
+    CAR_INTERFACE_DECL()
+
+    MediaSessionRecord(
+        /* [in] */ Int32 ownerPid,
+        /* [in] */ Int32 ownerUid,
+        /* [in] */ Int32 userId,
+        /* [in] */ const String& ownerPackageName,
+        /* [in] */ IISessionCallback* cb,
+        /* [in] */ const String& tag,
+        /* [in] */ MediaSessionService* service,
+        /* [in] */ IHandler* handler);
 
     /**
      * Get the binder for the {@link MediaSession}.
      *
      * @return The session binder apps talk to.
      */
-    public ISession GetSessionBinder() {
-        return mSession;
-    }
+    CARAPI_(AutoPtr<IISession>) GetSessionBinder();
 
     /**
      * Get the binder for the {@link MediaController}.
      *
      * @return The controller binder apps talk to.
      */
-    public ISessionController GetControllerBinder() {
-        return mController;
-    }
+    CARAPI_(AutoPtr<IISessionController>) GetControllerBinder();
 
     /**
      * Get the info for this session.
      *
      * @return Info that identifies this session.
      */
-    public String GetPackageName() {
-        return mPackageName;
-    }
+    CARAPI_(String) GetPackageName();
 
     /**
      * Get the tag for the session.
      *
      * @return The session's tag.
      */
-    public String GetTag() {
-        return mTag;
-    }
+    CARAPI_(String) GetTag();
 
     /**
      * Get the intent the app set for their media button receiver.
      *
-     * @return The pending intent set by the app or NULL.
+     * @return The pending intent set by the app or null.
      */
-    public PendingIntent GetMediaButtonReceiver() {
-        return mMediaButtonReceiver;
-    }
+    CARAPI_(AutoPtr<IPendingIntent>) GetMediaButtonReceiver();
 
     /**
      * Get this session's flags.
      *
      * @return The flags for this session.
      */
-    public Int64 GetFlags() {
-        return mFlags;
-    }
+    CARAPI_(Int64) GetFlags();
 
     /**
      * Check if this session has the specified flag.
      *
      * @param flag The flag to check.
-     * @return True if this session has that flag set, FALSE otherwise.
+     * @return True if this session has that flag set, false otherwise.
      */
-    public Boolean HasFlag(Int32 flag) {
-        return (mFlags & flag) != 0;
-    }
+    CARAPI_(Boolean) HasFlag(
+        /* [in] */ Int32 flag);
 
     /**
      * Get the user id this session was created for.
      *
      * @return The user id for this session.
      */
-    public Int32 GetUserId() {
-        return mUserId;
-    }
+    CARAPI_(Int32) GetUserId();
 
     /**
      * Check if this session has system priorty and should receive media buttons
      * before any other sessions.
      *
-     * @return True if this is a system priority session, FALSE otherwise
+     * @return True if this is a system priority session, false otherwise
      */
-    public Boolean IsSystemPriority() {
-        return (mFlags & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0;
-    }
+    CARAPI_(Boolean) IsSystemPriority();
 
     /**
      * Send a volume adjustment to the session owner. Direction must be one of
@@ -236,122 +263,43 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * @param useSuggested True to use adjustSuggestedStreamVolume instead of
      *            adjustStreamVolume.
      */
-    CARAPI AdjustVolume(Int32 direction, Int32 flags, String packageName, Int32 uid,
-            Boolean useSuggested) {
-        Int32 previousFlagPlaySound = flags & AudioManager.FLAG_PLAY_SOUND;
-        if (IsPlaybackActive(FALSE) || HasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
-            flags &= ~AudioManager.FLAG_PLAY_SOUND;
-        }
-        if (direction > 1) {
-            direction = 1;
-        } else if (direction < -1) {
-            direction = -1;
-        }
-        if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
-            Int32 stream = AudioAttributes->ToLegacyStreamType(mAudioAttrs);
-            if (useSuggested) {
-                if (AudioSystem->IsStreamActive(stream, 0)) {
-                    mAudioManagerInternal->AdjustSuggestedStreamVolumeForUid(stream, direction,
-                            flags, packageName, uid);
-                } else {
-                    flags |= previousFlagPlaySound;
-                    mAudioManagerInternal->AdjustSuggestedStreamVolumeForUid(
-                            AudioManager.USE_DEFAULT_STREAM_TYPE, direction, flags, packageName,
-                            uid);
-                }
-            } else {
-                mAudioManagerInternal->AdjustStreamVolumeForUid(stream, direction, flags,
-                        packageName, uid);
-            }
-        } else {
-            if (mVolumeControlType == VolumeProvider.VOLUME_CONTROL_FIXED) {
-                // Nothing to do, the volume cannot be changed
-                return;
-            }
-            mSessionCb->AdjustVolume(direction);
+    CARAPI_(void) AdjustVolume(
+        /* [in] */ Int32 direction,
+        /* [in] */ Int32 flags,
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 uid,
+        /* [in] */ Boolean useSuggested);
 
-            Int32 volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
-            mOptimisticVolume = volumeBefore + direction;
-            mOptimisticVolume = Math->Max(0, Math->Min(mOptimisticVolume, mMaxVolume));
-            mHandler->RemoveCallbacks(mClearOptimisticVolumeRunnable);
-            mHandler->PostDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
-            if (volumeBefore != mOptimisticVolume) {
-                PushVolumeUpdate();
-            }
-
-            if (DEBUG) {
-                Logger::D(TAG, "Adjusted optimistic volume to " + mOptimisticVolume + " max is "
-                        + mMaxVolume);
-            }
-        }
-    }
-
-    CARAPI SetVolumeTo(Int32 value, Int32 flags, String packageName, Int32 uid) {
-        if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
-            Int32 stream = AudioAttributes->ToLegacyStreamType(mAudioAttrs);
-            mAudioManagerInternal->SetStreamVolumeForUid(stream, value, flags, packageName, uid);
-        } else {
-            if (mVolumeControlType != VolumeProvider.VOLUME_CONTROL_ABSOLUTE) {
-                // Nothing to do. The volume can't be set directly.
-                return;
-            }
-            value = Math->Max(0, Math->Min(value, mMaxVolume));
-            mSessionCb->SetVolumeTo(value);
-
-            Int32 volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
-            mOptimisticVolume = Math->Max(0, Math->Min(value, mMaxVolume));
-            mHandler->RemoveCallbacks(mClearOptimisticVolumeRunnable);
-            mHandler->PostDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
-            if (volumeBefore != mOptimisticVolume) {
-                PushVolumeUpdate();
-            }
-
-            if (DEBUG) {
-                Logger::D(TAG, "Set optimistic volume to " + mOptimisticVolume + " max is "
-                        + mMaxVolume);
-            }
-        }
-    }
+    CARAPI_(void) SetVolumeTo(
+        /* [in] */ Int32 value,
+        /* [in] */ Int32 flags,
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 uid);
 
     /**
      * Check if this session has been set to active by the app.
      *
-     * @return True if the session is active, FALSE otherwise.
+     * @return True if the session is active, false otherwise.
      */
-    public Boolean IsActive() {
-        return mIsActive && !mDestroyed;
-    }
+    CARAPI_(Boolean) IsActive();
 
     /**
      * Check if the session is currently performing playback. This will also
-     * return TRUE if the session was recently paused.
+     * return true if the session was recently paused.
      *
      * @param includeRecentlyActive True if playback that was recently paused
-     *            should count, FALSE if it shouldn't.
-     * @return True if the session is performing playback, FALSE otherwise.
+     *            should count, false if it shouldn't.
+     * @return True if the session is performing playback, false otherwise.
      */
-    public Boolean IsPlaybackActive(Boolean includeRecentlyActive) {
-        Int32 state = mPlaybackState == NULL ? 0 : mPlaybackState->GetState();
-        if (MediaSession->IsActiveState(state)) {
-            return TRUE;
-        }
-        if (includeRecentlyActive && state == mPlaybackState.STATE_PAUSED) {
-            Int64 inactiveTime = SystemClock->UptimeMillis() - mLastActiveTime;
-            if (inactiveTime < ACTIVE_BUFFER) {
-                return TRUE;
-            }
-        }
-        return FALSE;
-    }
+    CARAPI_(Boolean) IsPlaybackActive(
+        /* [in] */ Boolean includeRecentlyActive);
 
     /**
      * Get the type of playback, either local or remote.
      *
      * @return The current type of playback.
      */
-    public Int32 GetPlaybackType() {
-        return mVolumeType;
-    }
+    CARAPI_(Int32) GetPlaybackType();
 
     /**
      * Get the local audio stream being used. Only valid if playback type is
@@ -359,18 +307,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @return The audio stream the session is using.
      */
-    public AudioAttributes GetAudioAttributes() {
-        return mAudioAttrs;
-    }
+    CARAPI_(AutoPtr<IAudioAttributes>) GetAudioAttributes();
 
     /**
      * Get the type of volume control. Only valid if playback type is remote.
      *
      * @return The volume control type being used.
      */
-    public Int32 GetVolumeControl() {
-        return mVolumeControlType;
-    }
+    CARAPI_(Int32) GetVolumeControl();
 
     /**
      * Get the max volume that can be set. Only valid if playback type is
@@ -378,9 +322,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @return The max volume that can be set.
      */
-    public Int32 GetMaxVolume() {
-        return mMaxVolume;
-    }
+    CARAPI_(Int32) GetMaxVolume();
 
     /**
      * Get the current volume for this session. Only valid if playback type is
@@ -388,9 +330,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @return The current volume of the remote playback.
      */
-    public Int32 GetCurrentVolume() {
-        return mCurrentVolume;
-    }
+    CARAPI_(Int32) GetCurrentVolume();
 
     /**
      * Get the volume we'd like it to be set to. This is only valid for a short
@@ -398,856 +338,128 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      *
      * @return The current optimistic volume or -1.
      */
-    public Int32 GetOptimisticVolume() {
-        return mOptimisticVolume;
-    }
+    CARAPI_(Int32) GetOptimisticVolume();
 
-    public Boolean IsTransportControlEnabled() {
-        return HasFlag(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
-    }
+    CARAPI_(Boolean) IsTransportControlEnabled();
 
-    //@Override
-    CARAPI BinderDied() {
-        mService->SessionDied(this);
-    }
+    // @Override
+    CARAPI ProxyDied();
 
     /**
      * Finish cleaning up this session, including disconnecting if connected and
      * removing the death observer from the callback binder.
      */
-    CARAPI OnDestroy() {
-        synchronized(mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            mDestroyed = TRUE;
-            mHandler->Post(MessageHandler.MSG_DESTROYED);
-        }
-    }
+    CARAPI_(void) OnDestroy();
 
-    public ISessionCallback GetCallback() {
-        return mSessionCb.mCb;
-    }
+    CARAPI_(AutoPtr<IISessionCallback>) GetCallback();
 
-    CARAPI SendMediaButton(KeyEvent ke, Int32 sequenceId, ResultReceiver cb) {
-        mSessionCb->SendMediaButton(ke, sequenceId, cb);
-    }
+    CARAPI_(void) SendMediaButton(
+        /* [in] */ IKeyEvent* ke,
+        /* [in] */ Int32 sequenceId,
+        /* [in] */ IResultReceiver* cb);
 
-    CARAPI Dump(PrintWriter pw, String prefix) {
-        pw->Println(prefix + mTag + " " + this);
+    // CARAPI_(void) dump(PrintWriter pw, String prefix);
 
-        final String indent = prefix + "  ";
-        pw->Println(indent + "ownerPid=" + mOwnerPid + ", ownerUid=" + mOwnerUid
-                + ", userId=" + mUserId);
-        pw->Println(indent + "package=" + mPackageName);
-        pw->Println(indent + "launchIntent=" + mLaunchIntent);
-        pw->Println(indent + "mediaButtonReceiver=" + mMediaButtonReceiver);
-        pw->Println(indent + "active=" + mIsActive);
-        pw->Println(indent + "flags=" + mFlags);
-        pw->Println(indent + "rating type=" + mRatingType);
-        pw->Println(indent + "controllers: " + mControllerCallbacks->Size());
-        pw->Println(indent + "state=" + (mPlaybackState == NULL ? NULL : mPlaybackState->ToString()));
-        pw->Println(indent + "audioAttrs=" + mAudioAttrs);
-        pw->Println(indent + "volumeType=" + mVolumeType + ", controlType=" + mVolumeControlType
-                + ", max=" + mMaxVolume + ", current=" + mCurrentVolume);
-        pw->Println(indent + "metadata:" + GetShortMetadataString());
-        pw->Println(indent + "queueTitle=" + mQueueTitle + ", size="
-                + (mQueue == NULL ? 0 : mQueue->GetList()->Size()));
-    }
-
-    //@Override
     CARAPI ToString(
-        /* [out] */ String* str)
-    {
-        return mPackageName + "/" + mTag;
-    }
+        /* [out] */ String* str);
 
-    private String GetShortMetadataString() {
-        Int32 fields = mMetadata == NULL ? 0 : mMetadata->Size();
-        MediaDescription description = mMetadata == NULL ? NULL : mMetadata
-                .GetDescription();
-        return "size=" + fields + ", description=" + description;
-    }
+private:
+    CARAPI_(String) GetShortMetadataString();
 
-    private void PushPlaybackStateUpdate() {
-        synchronized(mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            for (Int32 i = mControllerCallbacks->Size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks->Get(i);
-                try {
-                    cb->OnPlaybackStateChanged(mPlaybackState);
-                } catch (DeadObjectException e) {
-                    mControllerCallbacks->Remove(i);
-                    Logger::W(TAG, "Removed dead callback in pushPlaybackStateUpdate.", e);
-                } catch (RemoteException e) {
-                    Logger::W(TAG, "unexpected exception in pushPlaybackStateUpdate.", e);
-                }
-            }
-        }
-    }
+    CARAPI_(void) PushPlaybackStateUpdate();
 
-    private void PushMetadataUpdate() {
-        synchronized(mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            for (Int32 i = mControllerCallbacks->Size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks->Get(i);
-                try {
-                    cb->OnMetadataChanged(mMetadata);
-                } catch (DeadObjectException e) {
-                    Logger::W(TAG, "Removing dead callback in pushMetadataUpdate. ", e);
-                    mControllerCallbacks->Remove(i);
-                } catch (RemoteException e) {
-                    Logger::W(TAG, "unexpected exception in pushMetadataUpdate. ", e);
-                }
-            }
-        }
-    }
+    CARAPI_(void) PushMetadataUpdate();
 
-    private void PushQueueUpdate() {
-        synchronized(mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            for (Int32 i = mControllerCallbacks->Size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks->Get(i);
-                try {
-                    cb->OnQueueChanged(mQueue);
-                } catch (DeadObjectException e) {
-                    mControllerCallbacks->Remove(i);
-                    Logger::W(TAG, "Removed dead callback in pushQueueUpdate.", e);
-                } catch (RemoteException e) {
-                    Logger::W(TAG, "unexpected exception in pushQueueUpdate.", e);
-                }
-            }
-        }
-    }
+    CARAPI_(void) PushQueueUpdate();
 
-    private void PushQueueTitleUpdate() {
-        synchronized(mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            for (Int32 i = mControllerCallbacks->Size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks->Get(i);
-                try {
-                    cb->OnQueueTitleChanged(mQueueTitle);
-                } catch (DeadObjectException e) {
-                    mControllerCallbacks->Remove(i);
-                    Logger::W(TAG, "Removed dead callback in pushQueueTitleUpdate.", e);
-                } catch (RemoteException e) {
-                    Logger::W(TAG, "unexpected exception in pushQueueTitleUpdate.", e);
-                }
-            }
-        }
-    }
+    CARAPI_(void) PushQueueTitleUpdate();
 
-    private void PushExtrasUpdate() {
-        synchronized(mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            for (Int32 i = mControllerCallbacks->Size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks->Get(i);
-                try {
-                    cb->OnExtrasChanged(mExtras);
-                } catch (DeadObjectException e) {
-                    mControllerCallbacks->Remove(i);
-                    Logger::W(TAG, "Removed dead callback in pushExtrasUpdate.", e);
-                } catch (RemoteException e) {
-                    Logger::W(TAG, "unexpected exception in pushExtrasUpdate.", e);
-                }
-            }
-        }
-    }
+    CARAPI_(void) PushExtrasUpdate();
 
-    private void PushVolumeUpdate() {
-        synchronized(mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            ParcelableVolumeInfo info = mController->GetVolumeAttributes();
-            for (Int32 i = mControllerCallbacks->Size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks->Get(i);
-                try {
-                    cb->OnVolumeInfoChanged(info);
-                } catch (DeadObjectException e) {
-                    Logger::W(TAG, "Removing dead callback in pushVolumeUpdate. ", e);
-                } catch (RemoteException e) {
-                    Logger::W(TAG, "Unexpected exception in pushVolumeUpdate. ", e);
-                }
-            }
-        }
-    }
+    CARAPI_(void) PushVolumeUpdate();
 
-    private void PushEvent(String event, Bundle data) {
-        synchronized(mLock) {
-            if (mDestroyed) {
-                return;
-            }
-            for (Int32 i = mControllerCallbacks->Size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks->Get(i);
-                try {
-                    cb->OnEvent(event, data);
-                } catch (DeadObjectException e) {
-                    Logger::W(TAG, "Removing dead callback in pushEvent.", e);
-                    mControllerCallbacks->Remove(i);
-                } catch (RemoteException e) {
-                    Logger::W(TAG, "unexpected exception in pushEvent.", e);
-                }
-            }
-        }
-    }
+    CARAPI_(void) PushEvent(
+        /* [in] */ const String& event,
+        /* [in] */ IBundle* data);
 
-    private void PushSessionDestroyed() {
-        synchronized(mLock) {
-            // This is the only method that may be (and can only be) called
-            // after the session is destroyed.
-            if (!mDestroyed) {
-                return;
-            }
-            for (Int32 i = mControllerCallbacks->Size() - 1; i >= 0; i--) {
-                ISessionControllerCallback cb = mControllerCallbacks->Get(i);
-                try {
-                    cb->OnSessionDestroyed();
-                } catch (DeadObjectException e) {
-                    Logger::W(TAG, "Removing dead callback in pushEvent.", e);
-                    mControllerCallbacks->Remove(i);
-                } catch (RemoteException e) {
-                    Logger::W(TAG, "unexpected exception in pushEvent.", e);
-                }
-            }
-            // After notifying clear all listeners
-            mControllerCallbacks->Clear();
-        }
-    }
+    CARAPI_(void) PushSessionDestroyed();
 
-    private PlaybackState GetStateWithUpdatedPosition() {
-        PlaybackState state;
-        Int64 duration = -1;
-        synchronized(mLock) {
-            state = mPlaybackState;
-            if (mMetadata != NULL && mMetadata->ContainsKey(MediaMetadata.METADATA_KEY_DURATION)) {
-                duration = mMetadata->GetLong(MediaMetadata.METADATA_KEY_DURATION);
-            }
-        }
-        PlaybackState result = NULL;
-        if (state != NULL) {
-            if (state->GetState() == PlaybackState.STATE_PLAYING
-                    || state->GetState() == PlaybackState.STATE_FAST_FORWARDING
-                    || state->GetState() == PlaybackState.STATE_REWINDING) {
-                Int64 updateTime = state->GetLastPositionUpdateTime();
-                Int64 currentTime = SystemClock->ElapsedRealtime();
-                if (updateTime > 0) {
-                    Int64 position = (Int64) (state->GetPlaybackSpeed()
-                            * (currentTime - updateTime)) + state->GetPosition();
-                    if (duration >= 0 && position > duration) {
-                        position = duration;
-                    } else if (position < 0) {
-                        position = 0;
-                    }
-                    PlaybackState.Builder builder = new PlaybackState->Builder(state);
-                    builder->SetState(state->GetState(), position, state->GetPlaybackSpeed(),
-                            currentTime);
-                    result = builder->Build();
-                }
-            }
-        }
-        return result == NULL ? state : result;
-    }
+    CARAPI_(AutoPtr<IPlaybackState>) GetStateWithUpdatedPosition();
 
-    private Int32 GetControllerCbIndexForCb(ISessionControllerCallback cb) {
-        IBinder binder = cb->AsBinder();
-        for (Int32 i = mControllerCallbacks->Size() - 1; i >= 0; i--) {
-            if (binder->Equals(mControllerCallbacks->Get(i).AsBinder())) {
-                return i;
-            }
-        }
-        return -1;
-    }
+    CARAPI_(List<AutoPtr<IISessionControllerCallback> >::Iterator) GetControllerCbIndexForCb(
+        /* [in] */ IISessionControllerCallback* cb);
 
-    private final Runnable mClearOptimisticVolumeRunnable = new Runnable() {
-        //@Override
-        CARAPI Run() {
-            Boolean needUpdate = (mOptimisticVolume != mCurrentVolume);
-            mOptimisticVolume = -1;
-            if (needUpdate) {
-                PushVolumeUpdate();
-            }
-        }
-    };
+private:
+    static const String TAG;
+    static const Boolean DEBUG = FALSE;
 
-    private final class SessionStub extends ISession.Stub {
-        //@Override
-        CARAPI Destroy() {
-            mService->DestroySession(MediaSessionRecord.this);
-        }
+    /**
+     * The length of time a session will still be considered active after
+     * pausing in ms.
+     */
+    static const Int32 ACTIVE_BUFFER = 30000;
 
-        //@Override
-        CARAPI SendEvent(String event, Bundle data) {
-            mHandler->Post(MessageHandler.MSG_SEND_EVENT, event,
-                    data == NULL ? NULL : new Bundle(data));
-        }
+    /**
+     * The amount of time we'll send an assumed volume after the last volume
+     * command before reverting to the last reported volume.
+     */
+    static const Int32 OPTIMISTIC_VOLUME_TIMEOUT = 1000;
 
-        //@Override
-        public ISessionController GetController() {
-            return mController;
-        }
+    AutoPtr<MessageHandler> mHandler;
 
-        //@Override
-        CARAPI SetActive(Boolean active) {
-            mIsActive = active;
-            mService->UpdateSession(MediaSessionRecord.this);
-            mHandler->Post(MessageHandler.MSG_UPDATE_SESSION_STATE);
-        }
+    Int32 mOwnerPid;
+    Int32 mOwnerUid;
+    Int32 mUserId;
+    String mPackageName;
+    String mTag;
+    AutoPtr<CSessionController> mController;
+    AutoPtr<CMediaSession> mSession;
+    AutoPtr<SessionCb> mSessionCb;
+    AutoPtr<MediaSessionService> mService;
 
-        //@Override
-        CARAPI SetFlags(Int32 flags) {
-            if ((flags & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
-                Int32 pid = GetCallingPid();
-                Int32 uid = GetCallingUid();
-                mService->EnforcePhoneStatePermission(pid, uid);
-            }
-            mFlags = flags;
-            mHandler->Post(MessageHandler.MSG_UPDATE_SESSION_STATE);
-        }
+    Object mLock;
+    List<AutoPtr<IISessionControllerCallback> > mControllerCallbacks;
 
-        //@Override
-        CARAPI SetMediaButtonReceiver(PendingIntent pi) {
-            mMediaButtonReceiver = pi;
-        }
+    Int64 mFlags;
+    AutoPtr<IPendingIntent> mMediaButtonReceiver;
+    AutoPtr<IPendingIntent> mLaunchIntent;
 
-        //@Override
-        CARAPI SetLaunchPendingIntent(PendingIntent pi) {
-            mLaunchIntent = pi;
-        }
+    // TransportPerformer fields
 
-        //@Override
-        CARAPI SetMetadata(MediaMetadata metadata) {
-            synchronized(mLock) {
-                MediaMetadata temp = metadata == NULL ? NULL : new MediaMetadata->Builder(metadata)
-                        .Build();
-                // This is to guarantee that the underlying bundle is unparceled
-                // before we set it to prevent concurrent reads from throwing an
-                // exception
-                if (temp != NULL) {
-                    temp->Size();
-                }
-                mMetadata = temp;
-            }
-            mHandler->Post(MessageHandler.MSG_UPDATE_METADATA);
-        }
+    AutoPtr<IBundle> mExtras;
+    AutoPtr<IMediaMetadata> mMetadata;
+    AutoPtr<IPlaybackState> mPlaybackState;
+    AutoPtr<IParceledListSlice> mQueue;
+    AutoPtr<ICharSequence> mQueueTitle;
+    Int32 mRatingType;
+    Int64 mLastActiveTime;
+    // End TransportPerformer fields
 
-        //@Override
-        CARAPI SetPlaybackState(PlaybackState state) {
-            Int32 oldState = mPlaybackState == NULL ? 0 : mPlaybackState->GetState();
-            Int32 newState = state == NULL ? 0 : state->GetState();
-            if (MediaSession->IsActiveState(oldState) && newState == PlaybackState.STATE_PAUSED) {
-                mLastActiveTime = SystemClock->ElapsedRealtime();
-            }
-            synchronized(mLock) {
-                mPlaybackState = state;
-            }
-            mService->OnSessionPlaystateChange(MediaSessionRecord.this, oldState, newState);
-            mHandler->Post(MessageHandler.MSG_UPDATE_PLAYBACK_STATE);
-        }
+    // Volume handling fields
+    AutoPtr<IAudioAttributes> mAudioAttrs;
+    AutoPtr<IAudioManager> mAudioManager;
+    AutoPtr<IAudioManagerInternal> mAudioManagerInternal;
+    Int32 mVolumeType;
+    Int32 mVolumeControlType;
+    Int32 mMaxVolume;
+    Int32 mCurrentVolume;
+    Int32 mOptimisticVolume;
+    // End volume handling fields
 
-        //@Override
-        CARAPI SetQueue(ParceledListSlice queue) {
-            synchronized(mLock) {
-                mQueue = queue;
-            }
-            mHandler->Post(MessageHandler.MSG_UPDATE_QUEUE);
-        }
+    Boolean mIsActive;
+    Boolean mDestroyed;
 
-        //@Override
-        CARAPI SetQueueTitle(CharSequence title) {
-            mQueueTitle = title;
-            mHandler->Post(MessageHandler.MSG_UPDATE_QUEUE_TITLE);
-        }
+    AutoPtr<IRunnable> mClearOptimisticVolumeRunnable;
 
-        //@Override
-        CARAPI SetExtras(Bundle extras) {
-            synchronized(mLock) {
-                mExtras = extras == NULL ? NULL : new Bundle(extras);
-            }
-            mHandler->Post(MessageHandler.MSG_UPDATE_EXTRAS);
-        }
+    friend class CSessionController;
+    friend class SessionCb;
+    friend class ClearOptimisticVolumeRunnable;
+    friend class CMediaSession;
+};
 
-        //@Override
-        CARAPI SetRatingType(Int32 type) {
-            mRatingType = type;
-        }
+} // namespace Media
+} // namespace Server
+} // namespace Droid
+} // namespace Elastos
 
-        //@Override
-        CARAPI SetCurrentVolume(Int32 volume) {
-            mCurrentVolume = volume;
-            mHandler->Post(MessageHandler.MSG_UPDATE_VOLUME);
-        }
-
-        //@Override
-        CARAPI SetPlaybackToLocal(AudioAttributes attributes) {
-            Boolean typeChanged;
-            synchronized(mLock) {
-                typeChanged = mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE;
-                mVolumeType = PlaybackInfo.PLAYBACK_TYPE_LOCAL;
-                if (attributes != NULL) {
-                    mAudioAttrs = attributes;
-                } else {
-                    Logger::E(TAG, "Received NULL audio attributes, using existing attributes");
-                }
-            }
-            if (typeChanged) {
-                mService->OnSessionPlaybackTypeChanged(MediaSessionRecord.this);
-            }
-        }
-
-        //@Override
-        CARAPI SetPlaybackToRemote(Int32 control, Int32 max) {
-            Boolean typeChanged;
-            synchronized(mLock) {
-                typeChanged = mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL;
-                mVolumeType = PlaybackInfo.PLAYBACK_TYPE_REMOTE;
-                mVolumeControlType = control;
-                mMaxVolume = max;
-            }
-            if (typeChanged) {
-                mService->OnSessionPlaybackTypeChanged(MediaSessionRecord.this);
-            }
-        }
-    }
-
-    class SessionCb {
-        private final ISessionCallback mCb;
-
-        public SessionCb(ISessionCallback cb) {
-            mCb = cb;
-        }
-
-        public Boolean SendMediaButton(KeyEvent keyEvent, Int32 sequenceId, ResultReceiver cb) {
-            Intent mediaButtonIntent = new Intent(IIntent::ACTION_MEDIA_BUTTON);
-            mediaButtonIntent->PutExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
-            try {
-                mCb->OnMediaButton(mediaButtonIntent, sequenceId, cb);
-                return TRUE;
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in sendMediaRequest.", e);
-            }
-            return FALSE;
-        }
-
-        CARAPI SendCommand(String command, Bundle args, ResultReceiver cb) {
-            try {
-                mCb->OnCommand(command, args, cb);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in sendCommand.", e);
-            }
-        }
-
-        CARAPI SendCustomAction(String action, Bundle args) {
-            try {
-                mCb->OnCustomAction(action, args);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in sendCustomAction.", e);
-            }
-        }
-
-        CARAPI Play() {
-            try {
-                mCb->OnPlay();
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in play.", e);
-            }
-        }
-
-        CARAPI PlayFromMediaId(String mediaId, Bundle extras) {
-            try {
-                mCb->OnPlayFromMediaId(mediaId, extras);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in playUri.", e);
-            }
-        }
-
-        CARAPI PlayFromSearch(String query, Bundle extras) {
-            try {
-                mCb->OnPlayFromSearch(query, extras);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in playFromSearch.", e);
-            }
-        }
-
-        CARAPI SkipToTrack(Int64 id) {
-            try {
-                mCb->OnSkipToTrack(id);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in skipToTrack", e);
-            }
-        }
-
-        CARAPI Pause() {
-            try {
-                mCb->OnPause();
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in pause.", e);
-            }
-        }
-
-        CARAPI Stop() {
-            try {
-                mCb->OnStop();
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in stop.", e);
-            }
-        }
-
-        CARAPI Next() {
-            try {
-                mCb->OnNext();
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in next.", e);
-            }
-        }
-
-        CARAPI Previous() {
-            try {
-                mCb->OnPrevious();
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in previous.", e);
-            }
-        }
-
-        CARAPI FastForward() {
-            try {
-                mCb->OnFastForward();
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in fastForward.", e);
-            }
-        }
-
-        CARAPI Rewind() {
-            try {
-                mCb->OnRewind();
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in rewind.", e);
-            }
-        }
-
-        CARAPI SeekTo(Int64 pos) {
-            try {
-                mCb->OnSeekTo(pos);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in seekTo.", e);
-            }
-        }
-
-        CARAPI Rate(Rating rating) {
-            try {
-                mCb->OnRate(rating);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in rate.", e);
-            }
-        }
-
-        CARAPI AdjustVolume(Int32 direction) {
-            try {
-                mCb->OnAdjustVolume(direction);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in adjustVolume.", e);
-            }
-        }
-
-        CARAPI SetVolumeTo(Int32 value) {
-            try {
-                mCb->OnSetVolumeTo(value);
-            } catch (RemoteException e) {
-                Slogger::E(TAG, "Remote failure in setVolumeTo.", e);
-            }
-        }
-    }
-
-    class ControllerStub extends ISessionController.Stub {
-        //@Override
-        CARAPI SendCommand(String command, Bundle args, ResultReceiver cb)
-                throws RemoteException {
-            mSessionCb->SendCommand(command, args, cb);
-        }
-
-        //@Override
-        public Boolean SendMediaButton(KeyEvent mediaButtonIntent) {
-            return mSessionCb->SendMediaButton(mediaButtonIntent, 0, NULL);
-        }
-
-        //@Override
-        CARAPI RegisterCallbackListener(ISessionControllerCallback cb) {
-            synchronized(mLock) {
-                // If this session is already destroyed tell the caller and
-                // don't add them.
-                if (mDestroyed) {
-                    try {
-                        cb->OnSessionDestroyed();
-                    } catch (Exception e) {
-                        // ignored
-                    }
-                    return;
-                }
-                if (GetControllerCbIndexForCb(cb) < 0) {
-                    mControllerCallbacks->Add(cb);
-                    if (DEBUG) {
-                        Logger::D(TAG, "registering controller callback " + cb);
-                    }
-                }
-            }
-        }
-
-        //@Override
-        CARAPI UnregisterCallbackListener(ISessionControllerCallback cb)
-                throws RemoteException {
-            synchronized(mLock) {
-                Int32 index = GetControllerCbIndexForCb(cb);
-                if (index != -1) {
-                    mControllerCallbacks->Remove(index);
-                }
-                if (DEBUG) {
-                    Logger::D(TAG, "unregistering callback " + cb + ". index=" + index);
-                }
-            }
-        }
-
-        //@Override
-        public String GetPackageName() {
-            return mPackageName;
-        }
-
-        //@Override
-        public String GetTag() {
-            return mTag;
-        }
-
-        //@Override
-        public PendingIntent GetLaunchPendingIntent() {
-            return mLaunchIntent;
-        }
-
-        //@Override
-        public Int64 GetFlags() {
-            return mFlags;
-        }
-
-        //@Override
-        public ParcelableVolumeInfo GetVolumeAttributes() {
-            synchronized(mLock) {
-                Int32 type;
-                Int32 max;
-                Int32 current;
-                if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE) {
-                    type = mVolumeControlType;
-                    max = mMaxVolume;
-                    current = mOptimisticVolume != -1 ? mOptimisticVolume
-                            : mCurrentVolume;
-                } else {
-                    Int32 stream = AudioAttributes->ToLegacyStreamType(mAudioAttrs);
-                    type = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
-                    max = mAudioManager->GetStreamMaxVolume(stream);
-                    current = mAudioManager->GetStreamVolume(stream);
-                }
-                return new ParcelableVolumeInfo(mVolumeType, mAudioAttrs, type, max, current);
-            }
-        }
-
-        //@Override
-        CARAPI AdjustVolume(Int32 direction, Int32 flags, String packageName) {
-            Int32 uid = Binder->GetCallingUid();
-            final Int64 token = Binder->ClearCallingIdentity();
-            try {
-                MediaSessionRecord.this->AdjustVolume(direction, flags, packageName, uid, FALSE);
-            } finally {
-                Binder->RestoreCallingIdentity(token);
-            }
-        }
-
-        //@Override
-        CARAPI SetVolumeTo(Int32 value, Int32 flags, String packageName) {
-            Int32 uid = Binder->GetCallingUid();
-            final Int64 token = Binder->ClearCallingIdentity();
-            try {
-                MediaSessionRecord.this->SetVolumeTo(value, flags, packageName, uid);
-            } finally {
-                Binder->RestoreCallingIdentity(token);
-            }
-        }
-
-        //@Override
-        CARAPI Play() throws RemoteException {
-            mSessionCb->Play();
-        }
-
-        //@Override
-        CARAPI PlayFromMediaId(String mediaId, Bundle extras) throws RemoteException {
-            mSessionCb->PlayFromMediaId(mediaId, extras);
-        }
-
-        //@Override
-        CARAPI PlayFromSearch(String query, Bundle extras) throws RemoteException {
-            mSessionCb->PlayFromSearch(query, extras);
-        }
-
-        //@Override
-        CARAPI SkipToQueueItem(Int64 id) {
-            mSessionCb->SkipToTrack(id);
-        }
-
-
-        //@Override
-        CARAPI Pause() throws RemoteException {
-            mSessionCb->Pause();
-        }
-
-        //@Override
-        CARAPI Stop() throws RemoteException {
-            mSessionCb->Stop();
-        }
-
-        //@Override
-        CARAPI Next() throws RemoteException {
-            mSessionCb->Next();
-        }
-
-        //@Override
-        CARAPI Previous() throws RemoteException {
-            mSessionCb->Previous();
-        }
-
-        //@Override
-        CARAPI FastForward() throws RemoteException {
-            mSessionCb->FastForward();
-        }
-
-        //@Override
-        CARAPI Rewind() throws RemoteException {
-            mSessionCb->Rewind();
-        }
-
-        //@Override
-        CARAPI SeekTo(Int64 pos) throws RemoteException {
-            mSessionCb->SeekTo(pos);
-        }
-
-        //@Override
-        CARAPI Rate(Rating rating) throws RemoteException {
-            mSessionCb->Rate(rating);
-        }
-
-        //@Override
-        CARAPI SendCustomAction(String action, Bundle args)
-                throws RemoteException {
-            mSessionCb->SendCustomAction(action, args);
-        }
-
-
-        //@Override
-        public MediaMetadata GetMetadata() {
-            synchronized(mLock) {
-                return mMetadata;
-            }
-        }
-
-        //@Override
-        public PlaybackState GetPlaybackState() {
-            return GetStateWithUpdatedPosition();
-        }
-
-        //@Override
-        public ParceledListSlice GetQueue() {
-            synchronized(mLock) {
-                return mQueue;
-            }
-        }
-
-        //@Override
-        public CharSequence GetQueueTitle() {
-            return mQueueTitle;
-        }
-
-        //@Override
-        public Bundle GetExtras() {
-            synchronized(mLock) {
-                return mExtras;
-            }
-        }
-
-        //@Override
-        public Int32 GetRatingType() {
-            return mRatingType;
-        }
-
-        //@Override
-        public Boolean IsTransportControlEnabled() {
-            return MediaSessionRecord.this->IsTransportControlEnabled();
-        }
-    }
-
-    private class MessageHandler extends Handler {
-        private static const Int32 MSG_UPDATE_METADATA = 1;
-        private static const Int32 MSG_UPDATE_PLAYBACK_STATE = 2;
-        private static const Int32 MSG_UPDATE_QUEUE = 3;
-        private static const Int32 MSG_UPDATE_QUEUE_TITLE = 4;
-        private static const Int32 MSG_UPDATE_EXTRAS = 5;
-        private static const Int32 MSG_SEND_EVENT = 6;
-        private static const Int32 MSG_UPDATE_SESSION_STATE = 7;
-        private static const Int32 MSG_UPDATE_VOLUME = 8;
-        private static const Int32 MSG_DESTROYED = 9;
-
-        public MessageHandler(Looper looper) {
-            Super(looper);
-        }
-        //@Override
-        CARAPI HandleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_UPDATE_METADATA:
-                    PushMetadataUpdate();
-                    break;
-                case MSG_UPDATE_PLAYBACK_STATE:
-                    PushPlaybackStateUpdate();
-                    break;
-                case MSG_UPDATE_QUEUE:
-                    PushQueueUpdate();
-                    break;
-                case MSG_UPDATE_QUEUE_TITLE:
-                    PushQueueTitleUpdate();
-                    break;
-                case MSG_UPDATE_EXTRAS:
-                    PushExtrasUpdate();
-                    break;
-                case MSG_SEND_EVENT:
-                    PushEvent((String) msg.obj, msg->GetData());
-                    break;
-                case MSG_UPDATE_SESSION_STATE:
-                    // TODO add session state
-                    break;
-                case MSG_UPDATE_VOLUME:
-                    PushVolumeUpdate();
-                    break;
-                case MSG_DESTROYED:
-                    PushSessionDestroyed();
-            }
-        }
-
-        CARAPI Post(Int32 what) {
-            Post(what, NULL);
-        }
-
-        CARAPI Post(Int32 what, Object obj) {
-            ObtainMessage(what, obj).SendToTarget();
-        }
-
-        CARAPI Post(Int32 what, Object obj, Bundle data) {
-            Message msg = ObtainMessage(what, obj);
-            msg->SetData(data);
-            msg->SendToTarget();
-        }
-    }
-
-}
+#endif // __ELASTOS_DROID_SERVER_MEDIA_MEDIASESSIONRECORD_H__

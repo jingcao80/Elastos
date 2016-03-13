@@ -3,7 +3,7 @@
 #include <elastos/droid/utility/Xml.h>
 #include <elastos/droid/internal/utility/XmlUtils.h>
 #include <elastos/droid/internal/utility/ArrayUtils.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 
 using Elastos::Droid::Os::Process;
@@ -18,7 +18,7 @@ using Elastos::IO::ICloseable;
 using Elastos::IO::IReader;
 using Elastos::IO::IFileReader;
 using Elastos::IO::CFileReader;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 
 namespace Elastos {
@@ -130,7 +130,7 @@ ECode SystemConfig::ReadPermissions(
     // Read permissions from given directory.
     if (!exists || !isDir) {
         if (!onlyFeatures) {
-            Slogger::W(TAG, "No directory %s, skipping", TO_CSTR(libraryDir));
+            Logger::W(TAG, "No directory %s, skipping", TO_CSTR(libraryDir));
         }
         return NOERROR;
     }
@@ -138,7 +138,7 @@ ECode SystemConfig::ReadPermissions(
     Boolean canRead;
     libraryDir->CanRead(&canRead);
     if (!canRead) {
-        Slogger::W(TAG, "Directory %s cannot be read", TO_CSTR(libraryDir));
+        Logger::W(TAG, "Directory %s cannot be read", TO_CSTR(libraryDir));
         return NOERROR;
     }
 
@@ -158,14 +158,14 @@ ECode SystemConfig::ReadPermissions(
             }
 
             if (!path.EndWith(".xml")) {
-                Slogger::I(TAG, "Non-xml file %s in %s directory, ignoring",
+                Logger::I(TAG, "Non-xml file %s in %s directory, ignoring",
                     TO_CSTR(f),
                     TO_CSTR(libraryDir));
                 continue;
             }
             f->CanRead(&canRead);
             if (!canRead) {
-                Slogger::W(TAG, "Permissions library file %s cannot be read",
+                Logger::W(TAG, "Permissions library file %s cannot be read",
                     TO_CSTR(f));
                 continue;
             }
@@ -191,10 +191,9 @@ ECode SystemConfig::ReadPermissionsFromXml(
     /* [in] */ Boolean onlyFeatures)
 {
     AutoPtr<IFileReader> permReader;
-
     ECode ec = CFileReader::New(permFile, (IFileReader**)&permReader);
     if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION){
-        Slogger::W(TAG, "Couldn't find or open permissions file %s", TO_CSTR(permFile));
+        Logger::W(TAG, "Couldn't find or open permissions file %s", TO_CSTR(permFile));
         return NOERROR;
     }
 
@@ -208,7 +207,9 @@ ECode SystemConfig::ReadPermissionsFromXml(
     const String spackage("package");
 
     AutoPtr<IXmlPullParser> parser;
-    Xml::NewPullParser((IXmlPullParser**)&parser);
+    ec = Xml::NewPullParser((IXmlPullParser**)&parser);
+    FAIL_GOTO(ec, _Exit_)
+
     ec = parser->SetInput(IReader::Probe(permReader));
     FAIL_GOTO(ec, _Exit_)
 
@@ -221,14 +222,14 @@ ECode SystemConfig::ReadPermissionsFromXml(
     }
 
     if (type != IXmlPullParser::START_TAG) {
-        Slogger::E(TAG, "No start tag found");
+        Logger::E(TAG, "No start tag found");
         ec =  E_XML_PULL_PARSER_EXCEPTION;
         FAIL_GOTO(ec, _Exit_)
     }
 
     parser->GetName(&name);
     if (!name.Equals("permissions") && !name.Equals("config")) {
-        Slogger::E(TAG, "Unexpected start tag: found %s, expected 'permissions' or 'config'", name.string());
+        Logger::E(TAG, "Unexpected start tag: found %s, expected 'permissions' or 'config'", name.string());
         ec =  E_XML_PULL_PARSER_EXCEPTION;
         FAIL_GOTO(ec, _Exit_)
     }
@@ -250,7 +251,7 @@ ECode SystemConfig::ReadPermissionsFromXml(
             }
             else {
                 parser->GetPositionDescription(&pos);
-                Slogger::W(TAG, "<group> without gid at %s", pos.string());
+                Logger::W(TAG, "<group> without gid at %s", pos.string());
             }
 
             XmlUtils::SkipCurrentTag(parser);
@@ -260,7 +261,7 @@ ECode SystemConfig::ReadPermissionsFromXml(
             FAIL_GOTO(parser->GetAttributeValue(nullStr, sname, &perm), _Exit_)
             if (perm.IsNull()) {
                 parser->GetPositionDescription(&pos);
-                Slogger::W(TAG, "<permission> without name at %s", pos.string());
+                Logger::W(TAG, "<permission> without name at %s", pos.string());
                 XmlUtils::SkipCurrentTag(parser);
                 continue;
             }
@@ -271,7 +272,7 @@ ECode SystemConfig::ReadPermissionsFromXml(
             FAIL_GOTO(parser->GetAttributeValue(nullStr, sname, &perm), _Exit_)
             if (perm == NULL) {
                 parser->GetPositionDescription(&pos);
-                Slogger::W(TAG, "<assign-permission> without name at %s", pos.string());
+                Logger::W(TAG, "<assign-permission> without name at %s", pos.string());
                 XmlUtils::SkipCurrentTag(parser);
                 continue;
             }
@@ -279,14 +280,14 @@ ECode SystemConfig::ReadPermissionsFromXml(
             FAIL_GOTO(parser->GetAttributeValue(nullStr, String("uid"), &uidStr), _Exit_)
             if (uidStr == NULL) {
                 parser->GetPositionDescription(&pos);
-                Slogger::W(TAG, "<assign-permission> without uid at %s", pos.string());
+                Logger::W(TAG, "<assign-permission> without uid at %s", pos.string());
                 XmlUtils::SkipCurrentTag(parser);
                 continue;
             }
             uid = Process::GetUidForName(uidStr);
             if (uid < 0) {
                 parser->GetPositionDescription(&pos);
-                Slogger::W(TAG, "<assign-permission> with unknown uid \"%s\" at ",
+                Logger::W(TAG, "<assign-permission> with unknown uid \"%s\" at ",
                     uidStr.string(), pos.string());
                 XmlUtils::SkipCurrentTag(parser);
                 continue;
@@ -312,11 +313,11 @@ ECode SystemConfig::ReadPermissionsFromXml(
             FAIL_GOTO(parser->GetAttributeValue(nullStr, String("file"), &lfile), _Exit_)
             if (lname == NULL) {
                 parser->GetPositionDescription(&pos);
-                Slogger::W(TAG, "<library> without name at %s", pos.string());
+                Logger::W(TAG, "<library> without name at %s", pos.string());
             }
             else if (lfile == NULL) {
                 parser->GetPositionDescription(&pos);
-                Slogger::W(TAG, "<library> without file at %s", pos.string());
+                Logger::W(TAG, "<library> without file at %s", pos.string());
             }
             else {
                 //Log.i(TAG, "Got library " + lname + " in " + lfile);
@@ -330,7 +331,7 @@ ECode SystemConfig::ReadPermissionsFromXml(
             FAIL_GOTO(parser->GetAttributeValue(nullStr, sname, &fname), _Exit_)
             if (fname.IsNull()) {
                 parser->GetPositionDescription(&pos);
-                Slogger::W(TAG, "<feature> without name at %s", pos.string());
+                Logger::W(TAG, "<feature> without name at %s", pos.string());
             }
             else {
                 //Log.i(TAG, "Got feature " + fname);
@@ -347,7 +348,7 @@ ECode SystemConfig::ReadPermissionsFromXml(
             FAIL_GOTO(parser->GetAttributeValue(nullStr, spackage, &pkgname), _Exit_)
             if (pkgname.IsNull()) {
                 parser->GetPositionDescription(&pos);
-                Slogger::W(TAG, "<allow-in-power-save> without package at %s", pos.string());
+                Logger::W(TAG, "<allow-in-power-save> without package at %s", pos.string());
             }
             else {
                 mAllowInPowerSave->Insert(pkgname);
@@ -360,7 +361,7 @@ ECode SystemConfig::ReadPermissionsFromXml(
             FAIL_GOTO(parser->GetAttributeValue(nullStr, spackage, &pkgname), _Exit_)
             if (pkgname.IsNull()) {
                 parser->GetPositionDescription(&pos);
-                Slogger::W(TAG, "<fixed-ime-app> without package at %s", pos.string());
+                Logger::W(TAG, "<fixed-ime-app> without package at %s", pos.string());
             } else {
                 mFixedImeApps->Insert(pkgname);
             }
@@ -378,10 +379,10 @@ ECode SystemConfig::ReadPermissionsFromXml(
 
 _Exit_:
     if (ec == (ECode)E_XML_PULL_PARSER_EXCEPTION) {
-        Slogger::W(TAG, "Got execption parsing permissions. %08x", ec);
+        Logger::W(TAG, "Got execption parsing permissions. E_XML_PULL_PARSER_EXCEPTION");
     }
     else if (ec == (ECode)E_IO_EXCEPTION) {
-        Slogger::W(TAG, "Got execption parsing permissions. %08x", ec);
+        Logger::W(TAG, "Got execption parsing permissions. E_IO_EXCEPTION");
     }
 
     return ec;
@@ -425,7 +426,7 @@ ECode SystemConfig::ReadPermission(
             else {
                 String pos;
                 parser->GetPositionDescription(&pos);
-                Slogger::W(TAG, "<group> without gid at %s", pos.string());
+                Logger::W(TAG, "<group> without gid at %s", pos.string());
             }
         }
         XmlUtils::SkipCurrentTag(parser);

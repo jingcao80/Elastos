@@ -147,8 +147,7 @@ public:
     CARAPI SetFramesDuration(
         /* [in] */ Int32 framesDuration);
 
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
 protected:
     CARAPI_(void) OnBoundsChange(

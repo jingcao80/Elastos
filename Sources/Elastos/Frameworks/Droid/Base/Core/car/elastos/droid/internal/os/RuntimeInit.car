@@ -1,6 +1,8 @@
 
 module
 {
+    interface Elastos.Droid.Os.IBinder;
+
     namespace Elastos {
     namespace Droid {
     namespace Internal {
@@ -10,6 +12,12 @@ module
     interface IRuntimeInit {
         Main(
             [in] ArrayOf<String> argv);
+
+        SetApplicationObject(
+            [in] IBinder* app);
+
+        GetApplicationObject(
+            [out] IBinder** app);
     }
 
     } // namespace Os

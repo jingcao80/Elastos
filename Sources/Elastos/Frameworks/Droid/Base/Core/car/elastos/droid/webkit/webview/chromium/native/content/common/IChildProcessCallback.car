@@ -1,0 +1,40 @@
+
+module
+{
+    interface Elastos.Droid.Webkit.Webview.Chromium.Content.Common.ISurfaceWrapper;
+    using interface Elastos.Droid.View.ISurface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+    namespace Webview {
+    namespace Chromium {
+    namespace Content {
+    namespace Common {
+
+    interface IChildProcessCallback {
+        // Conduit to pass a Surface from the sandboxed renderer to the plugin.
+        EstablishSurfacePeer(
+            [in] Int32 pid,
+            [in] ISurface* surface,
+            [in] Int32 primaryID,
+            [in] Int32 secondaryID);
+
+        GetViewSurface(
+            [in] Int32 surfaceId,
+            [out] ISurfaceWrapper** result);
+
+        GetSurfaceTextureSurface(
+            [in] Int32 primaryId,
+            [in] Int32 secondaryId,
+            [out] ISurfaceWrapper** result);
+    }
+
+    } // namespace Common
+    } // namespace Content
+    } // namespace Chromium
+    } // namespace Webview
+    } // namespace Webkit
+    } // namespace Droid
+    } // namespace Elastos
+}

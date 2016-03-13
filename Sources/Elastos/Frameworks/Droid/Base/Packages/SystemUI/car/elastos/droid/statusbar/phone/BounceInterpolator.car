@@ -13,6 +13,7 @@ module
     /**
      * @Involve
      * interface IInterpolator
+     * interface Elastos.Droid.Animation.ITimeInterpolator
      */
     interface IBounceInterpolator {
     }

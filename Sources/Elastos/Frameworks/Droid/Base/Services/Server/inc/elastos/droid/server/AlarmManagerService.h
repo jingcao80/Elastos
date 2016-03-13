@@ -377,6 +377,8 @@ private:
         ClockReceiver(
             /* [in] */ AlarmManagerService* host);
 
+        CARAPI constructor();
+
         //@Override
         CARAPI OnReceive(
             /* [in] */ IContext* context,
@@ -396,7 +398,7 @@ private:
         InteractiveStateReceiver(
             /* [in] */ AlarmManagerService* host);
 
-        InteractiveStateReceiver();
+        CARAPI constructor();
 
         //@Override
         CARAPI OnReceive(
@@ -412,6 +414,8 @@ private:
     public:
         UninstallReceiver(
             /* [in] */ AlarmManagerService* host);
+
+        CARAPI constructor();
 
         //@Override
         CARAPI OnReceive(
@@ -501,6 +505,9 @@ public:
 
     //@Override
     CARAPI Finalize();
+
+    CARAPI ToString(
+        /* [out] */ String* str);
 
 private:
 

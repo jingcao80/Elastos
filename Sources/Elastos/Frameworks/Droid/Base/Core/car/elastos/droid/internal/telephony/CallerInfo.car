@@ -33,6 +33,17 @@ module
         IsVoiceMailNumber(
             [out] Boolean* result);
 
+        MarkAsEmergency(
+            [in] IContext* context,
+            [out] ICallerInfo** callerInfo);
+
+        MarkAsVoiceMail(
+            [out] ICallerInfo** callerInfo);
+
+        MarkAsVoiceMail(
+            [in] Int64 subId,
+            [out] ICallerInfo** callerInfo);
+
         /**
          * Updates this CallerInfo's geoDescription field, based on the raw
          * phone number in the phoneNumber field.
@@ -71,8 +82,6 @@ module
             [in] String geoDescription);
 
         GetGeoDescription(
-            [in] IContext* ctx,
-            [in] String number,
             [out] String* geoDescription);
 
         SetCnapName(
@@ -163,11 +172,11 @@ module
         GetContactRingtoneUri(
             [out] IUri** contactRingtoneUri);
 
-        GetShouldSendToVoicemail(
-            [out] Boolean* shouldSendToVoicemail);
-
         SetShouldSendToVoicemail(
             [in] Boolean shouldSendToVoicemail);
+
+        GetShouldSendToVoicemail(
+            [out] Boolean* shouldSendToVoicemail);
 
         /**
          * Drawable representing the caller image.  This is essentially
@@ -210,11 +219,11 @@ module
          * those images aren't pointing to valid objects.
          */
 
-        GetIsCachedPhotoCurrent(
-            [out] Boolean* isCachedPhotoCurrent);
-
         SetIsCachedPhotoCurrent(
             [in] Boolean isCachedPhotoCurrent);
+
+        GetIsCachedPhotoCurrent(
+            [out] Boolean* isCachedPhotoCurrent);
     }
 
     [local]

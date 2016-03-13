@@ -343,8 +343,7 @@ public:
         /* [in] */ IXfermode* xfermode);
 
     //@Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
     CARAPI IsStateful(
         /* [out] */ Boolean* is);

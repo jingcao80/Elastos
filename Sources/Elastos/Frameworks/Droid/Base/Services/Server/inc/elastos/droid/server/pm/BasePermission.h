@@ -21,6 +21,8 @@ public:
         /* [in] */ const String& sourcePackage,
         /* [in] */ Int32 type);
 
+    CARAPI ToString(
+        /* [out] */ String* str);
 public:
     static const Int32 TYPE_NORMAL = 0;
 

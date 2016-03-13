@@ -97,7 +97,6 @@ void CInflater::EndImpl(
     /* [in] */ NativeZipStream* stream)
 {
     inflateEnd(&stream->mStream);
-    delete stream;
 }
 
 ECode CInflater::Finished(

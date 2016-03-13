@@ -57,8 +57,8 @@ ECode VoiceInteractor::HandlerCallerCallback::ExecuteMessage(
         case MSG_CONFIRMATION_RESULT:
             request = mHost->PullRequest(IIVoiceInteractorRequest::Probe(args->mArg1), TRUE);
             if (DEBUG) Logger::D("VoiceInteractor", "onConfirmResult: req=%s / %s confirmed %d result=%s",
-                Object::ToString(args->mArg1).string(), TO_CSTR(request),
-                arg1, Object::ToString(args->mArg2).string());
+                TO_CSTR(args->mArg1), TO_CSTR(request),
+                arg1, TO_CSTR(args->mArg2));
                if (request != NULL) {
                 IVoiceInteractorConfirmationRequest::Probe(request)->OnConfirmationResult(arg1 != 0, IBundle::Probe(args->mArg2));
                 request->Clear();
@@ -68,8 +68,8 @@ ECode VoiceInteractor::HandlerCallerCallback::ExecuteMessage(
         case MSG_COMPLETE_VOICE_RESULT:
             request = mHost->PullRequest(IIVoiceInteractorRequest::Probe(args->mArg1), TRUE);
             if (DEBUG) Logger::D("VoiceInteractor", "onCompleteVoice: req=%s / %s result=%s",
-                Object::ToString(args->mArg1).string(), TO_CSTR(request),
-                Object::ToString(args->mArg2).string());
+                TO_CSTR(args->mArg1), TO_CSTR(request),
+                TO_CSTR(args->mArg2));
             if (request != NULL) {
                 IVoiceInteractorCompleteVoiceRequest::Probe(request)->OnCompleteResult(IBundle::Probe(args->mArg2));
                 request->Clear();
@@ -79,8 +79,8 @@ ECode VoiceInteractor::HandlerCallerCallback::ExecuteMessage(
         case MSG_ABORT_VOICE_RESULT:
             request = mHost->PullRequest(IIVoiceInteractorRequest::Probe(args->mArg1), TRUE);
             if (DEBUG) Logger::D("VoiceInteractor", "onAbortVoice: req=%s / %s result=%s",
-                Object::ToString(args->mArg1).string(), TO_CSTR(request),
-                Object::ToString(args->mArg2).string());
+                TO_CSTR(args->mArg1), TO_CSTR(request),
+                TO_CSTR(args->mArg2));
             if (request != NULL) {
                 IVoiceInteractorAbortVoiceRequest::Probe(request)->OnAbortResult(IBundle::Probe(args->mArg2));
                 request->Clear();
@@ -90,8 +90,8 @@ ECode VoiceInteractor::HandlerCallerCallback::ExecuteMessage(
         case MSG_COMMAND_RESULT:
             request = mHost->PullRequest(IIVoiceInteractorRequest::Probe(args->mArg1), arg1 != 0);
             if (DEBUG) Logger::D("VoiceInteractor", "onCommandResult: req=%s / %s result=%s",
-                Object::ToString(args->mArg1).string(), TO_CSTR(request),
-                Object::ToString(args->mArg2).string());
+                TO_CSTR(args->mArg1), TO_CSTR(request),
+                TO_CSTR(args->mArg2));
             if (request != NULL) {
                 IVoiceInteractorCommandRequest::Probe(request)->OnCommandResult(IBundle::Probe(args->mArg2));
                 if (arg1 != 0) {
@@ -103,7 +103,7 @@ ECode VoiceInteractor::HandlerCallerCallback::ExecuteMessage(
         case MSG_CANCEL_RESULT:
             request = mHost->PullRequest(IIVoiceInteractorRequest::Probe(args->mArg1), TRUE);
             if (DEBUG) Logger::D("VoiceInteractor", "onCancelResult: req=%s / %s",
-                Object::ToString(args->mArg1).string(), TO_CSTR(request));
+                TO_CSTR(args->mArg1), TO_CSTR(request));
             if (request != NULL) {
                 request->OnCancel();
                 request->Clear();

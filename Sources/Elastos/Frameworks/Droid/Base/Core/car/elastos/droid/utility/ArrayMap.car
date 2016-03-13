@@ -217,6 +217,11 @@ module
             [out] ICollection** value);
     }
 
+    interface IArrayMapHelper {
+        GetEMPTY(
+            [out] IArrayMap** map);
+    }
+
     } // namespace Utility
     } // namespace Droid
     } // namespace Elastos

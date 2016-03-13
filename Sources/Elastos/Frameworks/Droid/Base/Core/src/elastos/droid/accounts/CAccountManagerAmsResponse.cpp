@@ -1,4 +1,6 @@
 
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/ext/frameworkdef.h"
 #include "elastos/droid/accounts/CAccountManagerAmsResponse.h"
 
@@ -8,43 +10,45 @@ namespace Elastos {
 namespace Droid {
 namespace Accounts {
 
+CAR_OBJECT_IMPL(CAccountManagerAmsResponse)
+
+CAR_INTERFACE_IMPL(CAccountManagerAmsResponse, Object, IAccountManagerResponse)
+
 ECode CAccountManagerAmsResponse::OnResult(
     /* [in] */ IBundle* bundle)
 {
     AutoPtr<IParcelable> parcelable;
     FAIL_RETURN(bundle->GetParcelable(IAccountManager::KEY_INTENT,
             (IParcelable**)&parcelable));
-    AutoPtr<IIntent> intent = (IIntent*)parcelable->Probe(Elastos::Droid::Content::EIID_IIntent);
-    Boolean value;
+    AutoPtr<IIntent> intent = IIntent::Probe(parcelable);
+    Boolean value = FALSE;
     if (intent != NULL && mHost->mActivity != NULL) {
         // since the user provided an Activity we will silently start intents
         // that we see
-        return mHost->mActivity->StartActivity(intent);
+        return IContext::Probe(mHost->mActivity)->StartActivity(intent);
         // leave the Future running to wait for the real response to this request
     }
     else if (bundle->GetBoolean(String("retry"), &value), value) {
-        // try {
         return mHost->DoWork();
-        // } catch (RemoteException e) {
-        //     // this will only happen if the system process is dead, which means
-        //     // we will be dying ourselves
-        // }
     }
     else {
         return mHost->Set(bundle);
     }
+    return NOERROR;
 }
 
 ECode CAccountManagerAmsResponse::OnError(
-    /* [in] */ Int32 errorCode,
+    /* [in] */ Int32 code,
     /* [in] */ const String& errorMessage)
 {
-    Boolean result;
-    if (errorCode == IAccountManager::ERROR_CODE_CANCELED) {
-        // the authenticator indicated that this request was canceled, do so now
+    Boolean result = FALSE;
+    if (code == IAccountManager::ERROR_CODE_CANCELED || code == IAccountManager::ERROR_CODE_USER_RESTRICTED
+            || code == IAccountManager::ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE) {
+        // the authenticator indicated that this request was canceled or we were
+        // forbidden to fulfill; cancel now
         return mHost->Cancel(TRUE /* mayInterruptIfRunning */, &result);
     }
-    mHost->SetException(mHost->mHost->ConvertErrorToException(errorCode, errorMessage));
+    mHost->SetException(mHost->mHost->ConvertErrorToException(code, errorMessage));
     return NOERROR;
 }
 

@@ -405,8 +405,7 @@ ECode CLauncherAppsImpl::GetLauncherActivities(
     VALIDATE_NOT_NULL(list)
     *list = NULL;
 
-    String str;
-    IObject::Probe(user)->ToString(&str);
+    String str = Object::ToString(user);
     FAIL_RETURN(EnsureInUserProfiles(user,
             String("Cannot retrieve activities for unrelated profile ") + str))
     if (!IsUserEnabled(user)) {
@@ -437,8 +436,7 @@ ECode CLauncherAppsImpl::ResolveActivity(
     VALIDATE_NOT_NULL(info)
     *info = NULL;
 
-    String str;
-    IObject::Probe(user)->ToString(&str);
+    String str = Object::ToString(user);
     FAIL_RETURN(EnsureInUserProfiles(user,
             String("Cannot resolve activity for unrelated profile ") + str))
     if (!IsUserEnabled(user)) {
@@ -465,8 +463,7 @@ ECode CLauncherAppsImpl::IsPackageEnabled(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    String str;
-    IObject::Probe(user)->ToString(&str);
+    String str = Object::ToString(user);
     FAIL_RETURN(EnsureInUserProfiles(user,
             String("Cannot check package for unrelated profile ") + str))
     if (!IsUserEnabled(user)) {
@@ -504,8 +501,7 @@ ECode CLauncherAppsImpl::IsActivityEnabled(
     VALIDATE_NOT_NULL(result)
     *result = FALSE;
 
-    String str;
-    IObject::Probe(user)->ToString(&str);
+    String str = Object::ToString(user);
     FAIL_RETURN(EnsureInUserProfiles(user,
             String("Cannot check component for unrelated profile ") + str))
     if (!IsUserEnabled(user)) {
@@ -537,8 +533,7 @@ ECode CLauncherAppsImpl::StartActivityAsUser(
     /* [in] */ IBundle* opts,
     /* [in] */ IUserHandle* user)
 {
-    String str;
-    IObject::Probe(user)->ToString(&str);
+    String str = Object::ToString(user);
     FAIL_RETURN(EnsureInUserProfiles(user,
             String("Cannot start activity for unrelated profile ") + str))
     if (!IsUserEnabled(user)) {
@@ -622,8 +617,7 @@ ECode CLauncherAppsImpl::ShowAppDetailsAsUser(
     /* [in] */ IBundle* opts,
     /* [in] */ IUserHandle* user)
 {
-    String str;
-    IObject::Probe(user)->ToString(&str);
+    String str = Object::ToString(user);
     FAIL_RETURN(EnsureInUserProfiles(user,
             String("Cannot show app details for unrelated profile ") + str))
     if (!IsUserEnabled(user)) {

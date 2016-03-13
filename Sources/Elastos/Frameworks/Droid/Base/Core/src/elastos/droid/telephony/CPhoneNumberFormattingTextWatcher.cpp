@@ -1,11 +1,13 @@
 
-#include "CPhoneNumberFormattingTextWatcher.h"
+#include "elastos/droid/telephony/CPhoneNumberFormattingTextWatcher.h"
+#include "elastos/droid/telephony/PhoneNumberUtils.h"
 #include "elastos/droid/text/Selection.h"
-#include "CPhoneNumberUtils.h"
-//#include "CString.h"
 
-using Elastos::Core::CString;
+using Elastos::Droid::Text::EIID_INoCopySpan;
+using Elastos::Droid::Text::EIID_ITextWatcher;
+using Elastos::Droid::Text::ISpannable;
 using Elastos::Droid::Text::Selection;
+using Elastos::Core::CString;
 using Elastos::Utility::CLocaleHelper;
 using Elastos::Utility::ILocale;
 using Elastos::Utility::ILocaleHelper;
@@ -14,6 +16,46 @@ namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
+CAR_INTERFACE_IMPL_3(CPhoneNumberFormattingTextWatcher, Object,
+        IPhoneNumberFormattingTextWatcher,
+        ITextWatcher, INoCopySpan)
+
+CAR_OBJECT_IMPL(CPhoneNumberFormattingTextWatcher)
+
+CPhoneNumberFormattingTextWatcher::CPhoneNumberFormattingTextWatcher()
+    : mSelfChange(FALSE)
+    , mStopFormatting(FALSE)
+{
+}
+
+CPhoneNumberFormattingTextWatcher::~CPhoneNumberFormattingTextWatcher()
+{
+}
+
+ECode CPhoneNumberFormattingTextWatcher::constructor()
+{
+    AutoPtr<ILocale> deloc;
+    AutoPtr<ILocaleHelper> helper;
+    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
+    helper->GetDefault((ILocale**)&deloc);
+    String countryCode;
+    deloc->GetCountry(&countryCode);
+    return constructor(countryCode);
+}
+
+ECode CPhoneNumberFormattingTextWatcher::constructor(
+    /* [in] */ const String& countryCode)
+{
+    if (countryCode.IsNull()) {
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    assert(0);
+// TODO: Need AsYouTypeFormatter
+    //mFormatter = PhoneNumberUtil.getInstance().getAsYouTypeFormatter(countryCode);
+
+    return NOERROR;
+}
 
 ECode CPhoneNumberFormattingTextWatcher::BeforeTextChanged(
     /* [in] */ ICharSequence* s,
@@ -53,19 +95,23 @@ ECode CPhoneNumberFormattingTextWatcher::AfterTextChanged(
     if (mStopFormatting) {
         // Restart the formatting when all texts were clear.
         Int32 len;
-        mStopFormatting = !((s->GetLength(&len), len) == 0);
+        mStopFormatting = !((ICharSequence::Probe(s)->GetLength(&len), len) == 0);
         return NOERROR;
     }
     if (mSelfChange) {
         // Ignore the change caused by s.replace().
         return NOERROR;
     }
-    String formatted = Reformat(s, Selection::GetSelectionEnd(s));
+    String formatted = Reformat(ICharSequence::Probe(s),
+            Selection::GetSelectionEnd(ICharSequence::Probe(s)));
     if (!formatted.IsNull()) {
-        Int32 rememberedPos;/* = mFormatter.getRememberedPosition()*/;
+        Int32 rememberedPos;
+        assert(0);
+// TODO: Need AsYouTypeFormatter
+        // rememberedPos = mFormatter.getRememberedPosition();
         mSelfChange = TRUE;
         Int32 len1, len2;
-        s->GetLength(&len1);
+        ICharSequence::Probe(s)->GetLength(&len1);
         AutoPtr<ICharSequence> cs;
         CString::New(formatted, (ICharSequence**)&cs);
         cs->GetLength(&len2);
@@ -73,40 +119,12 @@ ECode CPhoneNumberFormattingTextWatcher::AfterTextChanged(
         // The text could be changed by other TextWatcher after we changed it. If we found the
         // text is not the one we were expecting, just give up calling setSelection().
         String str;
-        s->ToString(&str);
+        IObject::Probe(s)->ToString(&str);
         if (formatted.Equals(str)) {
-            Selection::SetSelection(s, rememberedPos);
+            Selection::SetSelection(ISpannable::Probe(s), rememberedPos);
         }
         mSelfChange = FALSE;
     }
-
-    return NOERROR;
-}
-
-ECode CPhoneNumberFormattingTextWatcher::constructor()
-{
-    AutoPtr<ILocale> deloc;
-    AutoPtr<ILocaleHelper> helper;
-    CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
-    helper->GetDefault((ILocale**)&deloc);
-    String countryCode;
-    deloc->GetCountry(&countryCode);
-    return Init(countryCode);
-}
-
-ECode CPhoneNumberFormattingTextWatcher::constructor(
-    /* [in] */ const String& countryCode)
-{
-    return Init(countryCode);
-}
-
-ECode CPhoneNumberFormattingTextWatcher::Init(
-        /* [in] */ const String& countryCode)
-{
-    if (countryCode.IsNull()) return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    //mFormatter = PhoneNumberUtil.getInstance().getAsYouTypeFormatter(countryCode);
-    mSelfChange = FALSE;
-    assert(0);
 
     return NOERROR;
 }
@@ -118,6 +136,8 @@ String CPhoneNumberFormattingTextWatcher::Reformat(
     // The index of Char32 to the leftward of the cursor.
     Int32 curIndex = cursor - 1;
     String formatted;
+    assert(0);
+// TODO: Need AsYouTypeFormatter
     //mFormatter.clear();
     Char32 lastNonSeparator = 0;
     Boolean hasCursor = FALSE, tmpRes;
@@ -126,7 +146,7 @@ String CPhoneNumberFormattingTextWatcher::Reformat(
     for (Int32 i = 0; i < len; i++) {
         Char32 c;
         s->GetCharAt(i, &c);
-        if (CPhoneNumberUtils::IsNonSeparator(c, &tmpRes), tmpRes) {
+        if (PhoneNumberUtils::IsNonSeparator(c, &tmpRes), tmpRes) {
             if (lastNonSeparator != 0) {
                 formatted = GetFormattedNumber(lastNonSeparator, hasCursor);
                 hasCursor = FALSE;
@@ -148,17 +168,19 @@ String CPhoneNumberFormattingTextWatcher::GetFormattedNumber(
     /* [in] */ Char32 lastNonSeparator,
     /* [in] */ Boolean hasCursor)
 {
+    assert(0);
+// TODO: Need AsYouTypeFormatter
     /*return hasCursor ? mFormatter.inputDigitAndRememberPosition(lastNonSeparator)
             : mFormatter.inputDigit(lastNonSeparator);*/
-    assert(0);
     return String(NULL);
 }
 
-ECode CPhoneNumberFormattingTextWatcher::StopFormatting()
+void CPhoneNumberFormattingTextWatcher::StopFormatting()
 {
     mStopFormatting = TRUE;
+    assert(0);
+// TODO: Need AsYouTypeFormatter
     //mFormatter.clear();
-    return NOERROR;
 }
 
 Boolean CPhoneNumberFormattingTextWatcher::HasSeparator(
@@ -170,15 +192,13 @@ Boolean CPhoneNumberFormattingTextWatcher::HasSeparator(
         Char32 c;
         s->GetCharAt(i, &c);
         Boolean res;
-        if (!CPhoneNumberUtils::IsNonSeparator(c, &res)) {
+        if (PhoneNumberUtils::IsNonSeparator(c, &res), !res) {
             return TRUE;
         }
     }
     return FALSE;
-
 }
 
-}
-}
-}
-
+} // namespace Telephony
+} // namespace Droid
+} // namespace Elastos

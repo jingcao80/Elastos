@@ -533,7 +533,7 @@ void BroadcastQueue::DeliverToRegisteredReceiverLocked(
         }
     }
     if (!skip) {
-        assert(0);
+        //assert(0 && TODO);
         // skip = !mService->mIntentFirewall->CheckBroadcast(r->mIntent, r->mCallingUid,
         //         r->mCallingPid, r->mResolvedType, filter->mReceiverList->mUid);
     }
@@ -916,7 +916,7 @@ ECode BroadcastQueue::ProcessNextBroadcast(
         }
     }
     if (!skip) {
-        assert(0);
+        //assert(0 && TODO);
         // skip = !mService->mIntentFirewall->CheckBroadcast(r->mIntent, r->mCallingUid,
         //     r->mCallingPid, r->mResolvedType, appUid);
     }

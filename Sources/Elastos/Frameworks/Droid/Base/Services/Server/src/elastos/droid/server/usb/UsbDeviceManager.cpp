@@ -1039,7 +1039,9 @@ void UsbDeviceManager::SystemReady()
         Slogger::D(UsbDeviceManager::TAG, "systemReady");
     }
 
-    mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&mNotificationManager);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&obj);
+    mNotificationManager = INotificationManager::Probe(obj);
 
     // We do not show the USB notification if the primary volume supports mass storage.
     // The legacy mass storage UI will be used instead.

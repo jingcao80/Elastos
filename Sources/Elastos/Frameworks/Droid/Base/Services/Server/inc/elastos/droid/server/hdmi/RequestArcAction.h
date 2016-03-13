@@ -17,8 +17,11 @@ namespace Hdmi {
  */
 class RequestArcAction
     : public HdmiCecFeatureAction
+    , public IRequestArcAction
 {
 public:
+    CAR_INTERFACE_DECL()
+
     RequestArcAction();
 
     /**

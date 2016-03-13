@@ -102,7 +102,7 @@ public:
 
     virtual CARAPI GetBlob(
         /* [in] */  Int32 columnIndex,
-        /* [out,callee] */ ArrayOf<Byte>** blob);
+        /* [out, callee] */ ArrayOf<Byte>** blob);
 
     virtual CARAPI GetWantsAllOnMoveCalls(
         /* [out] */ Boolean* value);

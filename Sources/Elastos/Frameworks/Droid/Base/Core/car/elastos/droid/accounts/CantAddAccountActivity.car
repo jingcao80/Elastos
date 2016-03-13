@@ -1,6 +1,8 @@
 
 module
 {
+    interface Elastos.Droid.View.IView;
+
     namespace Elastos {
     namespace Droid {
     namespace Accounts {
@@ -9,10 +11,13 @@ module
      * @hide
      * Just shows an error message about the account restrictions for the limited user.
      */
+    [local]
     interface ICantAddAccountActivity {
 
-//        OnCancelButtonClicked(
-//            [in] IView* view);
+        const String EXTRA_ERROR_CODE = "android.accounts.extra.ERROR_CODE";
+
+        OnCancelButtonClicked(
+            [in] IView* view);
     }
 
     } // Accounts

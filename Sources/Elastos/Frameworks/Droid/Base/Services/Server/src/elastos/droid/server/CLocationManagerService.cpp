@@ -651,9 +651,9 @@ void CLocationManagerService::Init()
 {
     // if (D) Log.d(TAG, "init()");
 
-    AutoPtr<IPowerManager> pmc;
-    ASSERT_SUCCEEDED(mContext->GetSystemService(IContext::POWER_SERVICE,
-           (IInterface**)&pmc));
+    AutoPtr<IInterface> obj;
+    ASSERT_SUCCEEDED(mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj));
+    AutoPtr<IPowerManager> pmc = IPowerManager::Probe(obj);
     if(mWakeLock) mWakeLock = NULL;
     pmc->NewWakeLock(IPowerManager::PARTIAL_WAKE_LOCK,
             WAKELOCK_KEY, (IPowerManagerWakeLock**)&mWakeLock);

@@ -1,4 +1,5 @@
 
+#include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.CoreLibrary.Utility.Concurrent.h>
 #include "Elastos.Droid.Utility.h"
 #include "elastos/droid/os/CHandlerThread.h"
@@ -17,6 +18,7 @@ using Elastos::Droid::Internal::Utility::IProtocol;
 using Elastos::Core::AutoLock;
 using Elastos::Core::IThread;
 using Elastos::Utility::IArrayList;
+using Elastos::Utility::IList;
 using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
@@ -204,9 +206,13 @@ ECode CWifiScanner::GetAvailableChannels(
 {
     VALIDATE_NOT_NULL(result);
     // try {
-        AutoPtr<IBundle> bundle;
-        mService->GetAvailableChannels(band, (IBundle**)&bundle);
-        return bundle->GetIntegerArrayList(GET_AVAILABLE_CHANNELS_EXTRA, (IArrayList**)result);
+    AutoPtr<IBundle> bundle;
+    mService->GetAvailableChannels(band, (IBundle**)&bundle);
+    AutoPtr<IArrayList> al;
+    bundle->GetIntegerArrayList(GET_AVAILABLE_CHANNELS_EXTRA, (IArrayList**)&al);
+    *result = IList::Probe(al);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
     // } catch (RemoteException e) {
     //     return null;
     // }

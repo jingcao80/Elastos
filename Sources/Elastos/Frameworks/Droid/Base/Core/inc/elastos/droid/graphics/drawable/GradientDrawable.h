@@ -341,8 +341,7 @@ public:
         /* [out] */ IDrawableConstantState** state);
 
     //@Override
-    CARAPI Mutate(
-        /* [out] */ IDrawable** drawable);
+    CARAPI Mutate();
 
     virtual CARAPI IsStateful(
         /* [out] */ Boolean* isStateful);

@@ -54,16 +54,14 @@ ECode ShapeDrawable::ShapeState::CanApplyTheme(
 ECode ShapeDrawable::ShapeState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    return CShapeDrawable::New(this, NULL, NULL, (IShapeDrawable**)drawable);
+    return CShapeDrawable::New(this, NULL, NULL, drawable);
 }
 
 ECode ShapeDrawable::ShapeState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
-    return CShapeDrawable::New(this, res, NULL, (IShapeDrawable**)drawable);
+    return CShapeDrawable::New(this, res, NULL, drawable);
 }
 
 ECode ShapeDrawable::ShapeState::NewDrawable(
@@ -71,7 +69,7 @@ ECode ShapeDrawable::ShapeState::NewDrawable(
     /* [in] */ IResourcesTheme* theme,
     /* [out] */ IDrawable** drawable)
 {
-    return CShapeDrawable::New(this, res, theme, (IShapeDrawable**)drawable);
+    return CShapeDrawable::New(this, res, theme, drawable);
 }
 
 ECode ShapeDrawable::ShapeState::GetChangingConfigurations(
@@ -589,13 +587,9 @@ ECode ShapeDrawable::GetConstantState(
     return NOERROR;
 }
 
-ECode ShapeDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode ShapeDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated &&
-            (Drawable::Mutate((IDrawable**)&tmp), tmp.Get()) == (IDrawable*)this->Probe(EIID_IDrawable)) {
+    if (!mMutated) {
         AutoPtr<IPaint> paint;
         if (mShapeState->mPaint != NULL) {
             CPaint::New(mShapeState->mPaint, (IPaint**)&paint);
@@ -615,16 +609,15 @@ ECode ShapeDrawable::Mutate(
         mShapeState->mPadding = padding;
 
 //        try {
-        AutoPtr<IShape> shape;
+        AutoPtr<IInterface> shape;
         ICloneable::Probe(mShapeState->mShape)->Clone((IInterface**)&shape);
-        mShapeState->mShape = shape;
+        mShapeState->mShape = IShape::Probe(shape);
 //        } catch (CloneNotSupportedException e) {
 //            return null;
 //        }
         mMutated = TRUE;
     }
-    *drawable = (IDrawable*)this->Probe(EIID_IDrawable);
-    REFCOUNT_ADD(*drawable);
+
     return NOERROR;
 }
 

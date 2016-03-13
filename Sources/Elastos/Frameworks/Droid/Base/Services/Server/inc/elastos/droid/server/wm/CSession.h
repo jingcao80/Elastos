@@ -9,6 +9,7 @@ using Elastos::Droid::View::IWindowSession;
 using Elastos::Droid::View::IIWindow;
 using Elastos::Droid::View::IWindowManagerLayoutParams;
 using Elastos::Droid::View::IWindowManager;
+using Elastos::Droid::View::IIWindowManager;
 using Elastos::Droid::View::IInputChannel;
 using Elastos::Droid::View::ISurface;
 using Elastos::Droid::View::ISurfaceSession;
@@ -41,7 +42,7 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle64 wmService,
+        /* [in] */ IIWindowManager* wmService,
         /* [in] */ IIWindowSessionCallback* callback,
         /* [in] */ IInputMethodClient* client,
         /* [in] */ IIInputContext* inputContext);

@@ -26,7 +26,7 @@ public:
     HdmiCecLocalDevicePlayback();
 
     CARAPI constructor(
-        /* [in] */ HdmiControlService* service);
+        /* [in] */ IHdmiControlService* service);
 
     // @Override
     CARAPI Init();

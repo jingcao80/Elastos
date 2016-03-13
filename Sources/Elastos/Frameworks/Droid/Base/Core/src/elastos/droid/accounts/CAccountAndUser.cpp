@@ -6,6 +6,10 @@ namespace Elastos {
 namespace Droid {
 namespace Accounts {
 
+CAR_OBJECT_IMPL(CAccountAndUser)
+
+CAR_INTERFACE_IMPL(CAccountAndUser, Object, IAccountAndUser)
+
 ECode CAccountAndUser::Equals(
     /* [in] */ IInterface *o,
     /* [out] */ Boolean *isEqual)

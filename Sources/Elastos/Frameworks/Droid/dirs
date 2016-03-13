@@ -12,7 +12,7 @@ DIRS += Base/Test-runner
 #DIRS += Base/Packages/
 
 #DIRS += Lib
-#DIRS += JavaProxy
+DIRS += JavaProxy
 #DIRS += DevSamples
 #DIRS += Commands
 

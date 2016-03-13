@@ -1,6 +1,19 @@
 
 #include "elastos/droid/server/hdmi/HdmiCecFeatureAction.h"
-#include <Elastos.CoreLibrary.Utility.h>
+#include "elastos/droid/server/hdmi/HdmiCecLocalDevicePlayback.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDeviceTv.h"
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
+#include <Elastos.CoreLibrary.h>
+#include <Elastos.Droid.Utility.h>
+#include <elastos/droid/net/ReturnOutValue.h>
+#include <elastos/utility/logging/Slogger.h>
+
+using Elastos::Core::IRunnable;
+using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
+using Elastos::Droid::Utility::CPairHelper;
+using Elastos::Droid::Utility::IPairHelper;
+using Elastos::Utility::CArrayList;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
@@ -10,57 +23,56 @@ namespace Hdmi {
 //=============================================================================
 // HdmiCecFeatureAction::ActionTimerHandler
 //=============================================================================
+CAR_INTERFACE_IMPL(HdmiCecFeatureAction::ActionTimerHandler, Handler, IHdmiCecFeatureActionActionTimer)
+
+HdmiCecFeatureAction::ActionTimerHandler::ActionTimerHandler(
+    /* [in] */ HdmiCecFeatureAction* host)
+    : mHost(host)
+{}
+
 ECode HdmiCecFeatureAction::ActionTimerHandler::constructor(
     /* [in] */ ILooper* looper)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                super(looper);
-
-#endif
+    return Handler::constructor(looper);
 }
 
 ECode HdmiCecFeatureAction::ActionTimerHandler::SendTimerMessage(
     /* [in] */ Int32 state,
     /* [in] */ Int64 delayMillis)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                // The third argument(0) is not used.
-                sendMessageDelayed(obtainMessage(MSG_TIMEOUT, state, 0), delayMillis);
-
-#endif
+    // The third argument(0) is not used.
+    AutoPtr<IMessage> msg;
+    ObtainMessage(MSG_TIMEOUT, state, 0, (IMessage**)&msg);
+    Boolean bNoUse;
+    return SendMessageDelayed(msg, delayMillis, &bNoUse);
 }
 
 ECode HdmiCecFeatureAction::ActionTimerHandler::ClearTimerMessage()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                removeMessages(MSG_TIMEOUT);
-
-#endif
+    return RemoveMessages(MSG_TIMEOUT);
 }
 
 ECode HdmiCecFeatureAction::ActionTimerHandler::HandleMessage(
     /* [in] */ IMessage* msg)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-                switch (msg.what) {
-                case MSG_TIMEOUT:
-                    handleTimerEvent(msg.arg1);
-                    break;
-                default:
-                    Slog.w(TAG, "Unsupported message:" + msg.what);
-                    break;
-                }
-
-#endif
+    Int32 what;
+    msg->GetWhat(&what);
+    if (what == MSG_TIMEOUT) {
+        Int32 arg1;
+        msg->GetArg1(&arg1);
+        mHost->HandleTimerEvent(arg1);
+    }
+    else {
+        Slogger::W(TAG, "Unsupported message:%d", what);
+    }
+    return NOERROR;
 }
 
 //=============================================================================
 // HdmiCecFeatureAction
 //=============================================================================
+CAR_INTERFACE_IMPL(HdmiCecFeatureAction, Object, IHdmiCecFeatureAction)
+
 const String HdmiCecFeatureAction::TAG("HdmiCecFeatureAction");
 const Int32 HdmiCecFeatureAction::MSG_TIMEOUT = 100;
 const Int32 HdmiCecFeatureAction::STATE_NONE = 0;
@@ -72,157 +84,98 @@ HdmiCecFeatureAction::HdmiCecFeatureAction()
 ECode HdmiCecFeatureAction::constructor(
     /* [in] */ IHdmiCecLocalDevice* source)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mSource = source;
-        mService = mSource.getService();
-        mActionTimer = createActionTimer(mService.getServiceLooper());
-
-#endif
+    mSource = source;
+    ((HdmiCecLocalDevice*)mSource.Get())->GetService((IHdmiControlService**)&mService);
+    AutoPtr<ILooper> serviceLooper;
+    ((HdmiControlService*)mService.Get())->GetServiceLooper((ILooper**)&serviceLooper);
+    CreateActionTimer(serviceLooper, (IHdmiCecFeatureActionActionTimer**)&mActionTimer);
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::SetActionTimer(
     /* [in] */ IHdmiCecFeatureActionActionTimer* actionTimer)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mActionTimer = actionTimer;
-
-#endif
-}
-
-ECode HdmiCecFeatureAction::Start(
-    /* [out] */ Boolean* result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
-}
-
-ECode HdmiCecFeatureAction::ProcessCommand(
-    /* [in] */ IHdmiCecMessage* cmd,
-    /* [out] */ Boolean* result)
-{
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-#endif
+    mActionTimer = actionTimer;
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::CreateActionTimer(
     /* [in] */ ILooper* looper,
     /* [out] */ IHdmiCecFeatureActionActionTimer** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return new ActionTimerHandler(looper);
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    *result = new ActionTimerHandler(this);
+    ((ActionTimerHandler*)(*result))->constructor(looper);
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::AddTimer(
     /* [in] */ Int32 state,
     /* [in] */ Int32 delayMillis)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mActionTimer.sendTimerMessage(state, delayMillis);
-
-#endif
+    return mActionTimer->SendTimerMessage(state, delayMillis);
 }
 
 ECode HdmiCecFeatureAction::Started(
     /* [out] */ Boolean* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mState != STATE_NONE;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    *result = mState != STATE_NONE;
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::SendCommand(
     /* [in] */ IHdmiCecMessage* cmd)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mService.sendCecCommand(cmd);
-
-#endif
+    return ((HdmiControlService*)mService.Get())->SendCecCommand(cmd);
 }
 
 ECode HdmiCecFeatureAction::SendCommand(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [in] */ IHdmiControlServiceSendMessageCallback* callback)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mService.sendCecCommand(cmd, callback);
-
-#endif
+    return ((HdmiControlService*)mService.Get())->SendCecCommand(cmd, callback);
 }
 
 ECode HdmiCecFeatureAction::AddAndStartAction(
     /* [in] */ HdmiCecFeatureAction* action)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mSource.addAndStartAction(action);
-
-#endif
+    return ((HdmiCecLocalDevice*) mSource.Get())->AddAndStartAction(action);
 }
 
 ECode HdmiCecFeatureAction::GetActions(
     /* [in] */ ClassID clazz,
     /* [out] */ IList** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mSource.getActions(clazz);
-
-#endif
+    return ((HdmiCecLocalDevice*) mSource.Get())->GetActions(clazz, result);
 }
 
 ECode HdmiCecFeatureAction::GetCecMessageCache(
     /* [out] */ HdmiCecMessageCache** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mSource.getCecMessageCache();
-
-#endif
+    return ((HdmiCecLocalDevice*) mSource.Get())->GetCecMessageCache(result);
 }
 
 ECode HdmiCecFeatureAction::RemoveAction(
     /* [in] */ HdmiCecFeatureAction* action)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mSource.removeAction(action);
-
-#endif
+    return ((HdmiCecLocalDevice*) mSource.Get())->RemoveAction(action);
 }
 
 ECode HdmiCecFeatureAction::RemoveAction(
-    /* [in] */ ClassID clazz,
-    /* [out] */ HdmiCecFeatureAction** result)
+    /* [in] */ ClassID clazz)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mSource.removeActionExcept(clazz, NULL);
-
-#endif
+    return ((HdmiCecLocalDevice*) mSource.Get())->RemoveActionExcept(clazz, NULL);
 }
 
 ECode HdmiCecFeatureAction::RemoveActionExcept(
     /* [in] */ ClassID clazz,
-    /* [in] */ HdmiCecFeatureAction* exception,
-    /* [out] */ HdmiCecFeatureAction** result)
+    /* [in] */ HdmiCecFeatureAction* exception)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mSource.removeActionExcept(clazz, exception);
-
-#endif
+    return ((HdmiCecLocalDevice*) mSource.Get())->RemoveActionExcept(clazz, exception);
 }
 
 ECode HdmiCecFeatureAction::PollDevices(
@@ -230,127 +183,126 @@ ECode HdmiCecFeatureAction::PollDevices(
     /* [in] */ Int32 pickStrategy,
     /* [in] */ Int32 retryCount)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mService.pollDevices(callback, getSourceAddress(), pickStrategy, retryCount);
-
-#endif
+    Int32 srcAddr;
+    GetSourceAddress(&srcAddr);
+    ((HdmiControlService*)mService.Get())->PollDevices(callback, srcAddr, pickStrategy, retryCount);
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::Clear()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mState = STATE_NONE;
-        // Clear all timers.
-        mActionTimer.clearTimerMessage();
-
-#endif
+    mState = STATE_NONE;
+    // Clear all timers.
+    mActionTimer->ClearTimerMessage();
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::Finish()
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        finish(true);
-
-#endif
+    return Finish(TRUE);
 }
 
 ECode HdmiCecFeatureAction::Finish(
     /* [in] */ Boolean removeSelf)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        clear();
-        if (removeSelf) {
-            removeAction(this);
-        }
-        if (mOnFinishedCallbacks != NULL) {
-            for (Pair<HdmiCecFeatureAction, Runnable> actionCallbackPair: mOnFinishedCallbacks) {
-                if (actionCallbackPair.first.mState != STATE_NONE) {
-                    actionCallbackPair.second.run();
-                }
+    Clear();
+    if (removeSelf) {
+        RemoveAction(this);
+    }
+    if (mOnFinishedCallbacks != NULL) {
+        FOR_EACH(it, mOnFinishedCallbacks) {
+            AutoPtr<IInterface> obj;
+            it->GetNext((IInterface**)&obj);
+            AutoPtr<IPair> actionCallbackPair = IPair::Probe(obj);
+            AutoPtr<IInterface> first;
+            actionCallbackPair->GetFirst((IInterface**)&first);
+            if (((HdmiCecFeatureAction*)IObject::Probe(first))->mState != STATE_NONE) {
+                AutoPtr<IInterface> second;
+                actionCallbackPair->GetSecond((IInterface**)&second);
+                IRunnable::Probe(second)->Run();
             }
-            mOnFinishedCallbacks = NULL;
         }
-
-#endif
+        mOnFinishedCallbacks = NULL;
+    }
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::LocalDevice(
     /* [out] */ IHdmiCecLocalDevice** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mSource;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    *result = mSource;
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::Playback(
     /* [out] */ HdmiCecLocalDevicePlayback** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return (HdmiCecLocalDevicePlayback) mSource;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    *result = (HdmiCecLocalDevicePlayback*) mSource.Get();
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::Tv(
-    /* [out] */ HdmiCecLocalDeviceTv** result)
+    /* [out] */ IHdmiCecLocalDeviceTv** result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return (HdmiCecLocalDeviceTv) mSource;
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    *result = (HdmiCecLocalDeviceTv*) mSource.Get();
+    REFCOUNT_ADD(*result)
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::GetSourceAddress(
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mSource.getDeviceInfo().getLogicalAddress();
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IHdmiDeviceInfo> info;
+    ((HdmiCecLocalDevice*) mSource.Get())->GetDeviceInfo((IHdmiDeviceInfo**)&info);
+    Int32 logicalAddr;
+    info->GetLogicalAddress(&logicalAddr);
+    *result = logicalAddr;
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::GetSourcePath(
     /* [out] */ Int32* result)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        return mSource.getDeviceInfo().getPhysicalAddress();
+    VALIDATE_NOT_NULL(result)
 
-#endif
+    AutoPtr<IHdmiDeviceInfo> info;
+    ((HdmiCecLocalDevice*) mSource.Get())->GetDeviceInfo((IHdmiDeviceInfo**)&info);
+    Int32 physicalAddr;
+    info->GetPhysicalAddress(&physicalAddr);
+    *result = physicalAddr;
+    return NOERROR;
 }
 
 ECode HdmiCecFeatureAction::SendUserControlPressedAndReleased(
     /* [in] */ Int32 targetAddress,
     /* [in] */ Int32 uiCommand)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        mSource.sendUserControlPressedAndReleased(targetAddress, uiCommand);
-
-#endif
+    return ((HdmiCecLocalDevice*) mSource.Get())->SendUserControlPressedAndReleased(targetAddress, uiCommand);
 }
 
 ECode HdmiCecFeatureAction::AddOnFinishedCallback(
     /* [in] */ HdmiCecFeatureAction* action,
     /* [in] */ IRunnable* runnable)
 {
-    return E_NOT_IMPLEMENTED;
-#if 0 // TODO: Translate codes below
-        if (mOnFinishedCallbacks == NULL) {
-            mOnFinishedCallbacks = new ArrayList<>();
-        }
-        mOnFinishedCallbacks.add(Pair.create(action, runnable));
-
-#endif
+    if (mOnFinishedCallbacks == NULL) {
+        CArrayList::New((IArrayList**)&mOnFinishedCallbacks);
+    }
+    AutoPtr<IPairHelper> helper;
+    CPairHelper::AcquireSingleton((IPairHelper**)&helper);
+    AutoPtr<IPair> pair;
+    helper->Create(TO_IINTERFACE(action), runnable, (IPair**)&pair);
+    mOnFinishedCallbacks->Add(pair);
+    return NOERROR;
 }
 
 } // namespace Hdmi

@@ -27,7 +27,7 @@ namespace Os {
  * the system that your process needs to continue running), the connection will
  * break if your process goes away for any reason, etc.</p>
  */
-class ResultReceiver
+class ECO_PUBLIC ResultReceiver
     : public Object
     , public IResultReceiver
     , public IParcelable
@@ -108,7 +108,7 @@ protected:
      * defined by the sender.
      * @param resultData Any additional data provided by the sender.
      */
-    void OnReceiveResult(
+    virtual CARAPI_(void) OnReceiveResult(
         /* [in] */ Int32 resultCode,
         /* [in] */ IBundle* resultData) {
     }

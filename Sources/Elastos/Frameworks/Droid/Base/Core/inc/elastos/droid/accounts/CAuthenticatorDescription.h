@@ -3,14 +3,24 @@
 #define __ELASTOS_DROID_ACCOUNTS_CAUTHENTICATORDESCRIPTION_H__
 
 #include "_Elastos_Droid_Accounts_CAuthenticatorDescription.h"
+#include <elastos/core/Object.h>
+
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
 namespace Accounts {
 
 CarClass(CAuthenticatorDescription)
+    , public Object
+    , public IAuthenticatorDescription
+    , public IParcelable
 {
 public:
+    CAR_OBJECT_DECL()
+
+    CAR_INTERFACE_DECL()
+
     CAuthenticatorDescription();
 
     /**

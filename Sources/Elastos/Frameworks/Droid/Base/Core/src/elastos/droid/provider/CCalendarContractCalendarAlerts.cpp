@@ -220,7 +220,7 @@ EXIT:
 
 ECode CCalendarContractCalendarAlerts::ScheduleAlarm(
     /* [in] */ IContext* context,
-    /* [in] */ IAlarmManager* manager,
+    /* [in] */ IAlarmManager* mgr,
     /* [in] */ Int64 alarmTime)
 {
     if (DEBUG) {
@@ -232,8 +232,11 @@ ECode CCalendarContractCalendarAlerts::ScheduleAlarm(
         Slogger::D(String("Calendar")/*TAG*/, String("Schedule alarm at ") + StringUtils::ToString(alarmTime) + String(" ") + schedTime);
     }
 
+    AutoPtr<IAlarmManager> manager = mgr;
     if (manager == NULL) {
-        FAIL_RETURN(context->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&manager));
+        AutoPtr<IInterface> obj;
+        FAIL_RETURN(context->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj));
+        manager = IAlarmManager::Probe(obj);
     }
 
     AutoPtr<IIntent> intent;

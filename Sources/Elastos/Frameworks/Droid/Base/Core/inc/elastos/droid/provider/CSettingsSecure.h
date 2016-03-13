@@ -14,7 +14,7 @@ namespace Provider {
 
 CarClass(CSettingsSecure)
     , public Singleton
-    , public Settings::Secure
+    , public ISettingsSecure
 {
 public:
     CAR_SINGLETON_DECL()
@@ -391,6 +391,30 @@ public:
 
     CARAPI GetCLONE_TO_MANAGED_PROFILE(
         /* [out, callee] */ ArrayOf<String>** array);
+
+    CARAPI GetSETTINGS_TO_BACKUP(
+        /* [out, callee] */ ArrayOf<String>** backups);
+
+    CARAPI GetCONTENT_URI(
+        /* [out] */ IUri** uri);
+
+    CARAPI SetLocationProviderEnabledForUser(
+        /* [in] */ IContentResolver* cr,
+        /* [in] */ const String& provider,
+        /* [in] */ Boolean enabled,
+        /* [in] */ Int32 userId,
+        /* [out] */ Boolean* result);
+
+    CARAPI SetLocationModeForUser(
+        /* [in] */ IContentResolver* cr,
+        /* [in] */ Int32 mode,
+        /* [in] */ Int32 userId,
+        /* [out] */ Boolean* result);
+
+    CARAPI GetLocationModeForUser(
+        /* [in] */ IContentResolver* cr,
+        /* [in] */ Int32 userId,
+        /* [out] */ Int32* mode);
 };
 
 } //namespace Provider

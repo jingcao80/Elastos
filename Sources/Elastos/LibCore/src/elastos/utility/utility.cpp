@@ -10,6 +10,7 @@
 #include "CTimer.h"
 #include "CDate.h"
 #include "CObservable.h"
+#include "CArrayList.h"
 
 namespace Elastos {
 namespace Utility {
@@ -26,6 +27,8 @@ CAR_OBJECT_IMPL(CRandom)
 CAR_OBJECT_IMPL(CTimer)
 CAR_OBJECT_IMPL(CDate)
 CAR_OBJECT_IMPL(CObservable)
+CAR_OBJECT_IMPL(CArrayList)
+
 
 } // namespace Utility
 } // namespace Elastos

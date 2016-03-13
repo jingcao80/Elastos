@@ -100,17 +100,138 @@ ECode RemoteDisplayState::RemoteDisplayInfo::ToString(
 {
 	VALIDATE_NOT_NULL(result);
     *result = String("RemoteDisplayInfo{ id=") + mId
-                + String(", name=") + mName
-                + String(", description=") + mDescription
-                + String(", status=") + mStatus
-                + String(", volume=") + mVolume
-                + String(", volumeMax=") + mVolumeMax
-                + String(", volumeHandling=") + mVolumeHandling
-                + String(", presentationDisplayId=") + mPresentationDisplayId
-                + String(" }");
+                + ", name=" + mName
+                + ", description=" + mDescription
+                + ", status=" + mStatus
+                + ", volume=" + mVolume
+                + ", volumeMax=" + mVolumeMax
+                + ", volumeHandling=" + mVolumeHandling
+                + ", presentationDisplayId=" + mPresentationDisplayId
+                + " }";
 
     return NOERROR;
 }
+
+ECode RemoteDisplayState::RemoteDisplayInfo::GetId(
+    /* [out] */ String* id)
+{
+    VALIDATE_NOT_NULL(id)
+    *id = mId;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::SetId(
+    /* [in] */ const String& id)
+{
+    mId = id;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::GetName(
+    /* [out] */ String* name)
+{
+    VALIDATE_NOT_NULL(name)
+    *name = mName;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::SetName(
+    /* [in] */ const String& name)
+{
+    mName = name;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::GetDescription(
+    /* [out] */ String* description)
+{
+    VALIDATE_NOT_NULL(description)
+    *description = mDescription;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::SetDescription(
+    /* [in] */ const String& description)
+{
+    mDescription = description;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::GetStatus(
+    /* [out] */ Int32* status)
+{
+    VALIDATE_NOT_NULL(status)
+    *status = mStatus;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::SetStatus(
+    /* [in] */ Int32 status)
+{
+    mStatus = status;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::GetVolume(
+    /* [out] */ Int32* volume)
+{
+    VALIDATE_NOT_NULL(volume)
+    *volume = mVolume;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::SetVolume(
+    /* [in] */ Int32 volume)
+{
+    mVolume = volume;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::GetVolumeMax(
+    /* [out] */ Int32* volumeMax)
+{
+    VALIDATE_NOT_NULL(volumeMax)
+    *volumeMax = mVolumeMax;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::SetVolumeMax(
+    /* [in] */ Int32 volumeMax)
+{
+    mVolumeMax = volumeMax;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::GetVolumeHandling(
+    /* [out] */ Int32* volumeHandling)
+{
+    VALIDATE_NOT_NULL(volumeHandling)
+    *volumeHandling = mVolumeHandling;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::SetVolumeHandling(
+    /* [in] */ Int32 volumeHandling)
+{
+    mVolumeHandling = volumeHandling;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::GetPresentationDisplayId(
+    /* [out] */ Int32* presentationDisplayId)
+{
+    VALIDATE_NOT_NULL(presentationDisplayId)
+    *presentationDisplayId = mPresentationDisplayId;
+    return NOERROR;
+}
+
+ECode RemoteDisplayState::RemoteDisplayInfo::SetPresentationDisplayId(
+    /* [in] */ Int32 presentationDisplayId)
+{
+    mPresentationDisplayId = presentationDisplayId;
+    return NOERROR;
+}
+
 
 //==========================================================================
 //          RemoteDisplayState

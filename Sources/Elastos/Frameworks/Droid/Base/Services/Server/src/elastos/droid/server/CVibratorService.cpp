@@ -400,7 +400,9 @@ void CVibratorService::VibratorOff()
 
 ECode CVibratorService::SystemReady()
 {
-    mContext->GetSystemService(IContext::INPUT_SERVICE, (IInterface**)&mIm);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::INPUT_SERVICE, (IInterface**)&obj);
+    mIm = IInputManager::Probe(obj);
 
     mSettingObserver = new SettingsObserver(mH, this);
     mSettingObserver->constructor(NULL);

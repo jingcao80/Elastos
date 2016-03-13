@@ -2,6 +2,7 @@
 #include "elastos/droid/server/hdmi/SendKeyAction.h"
 #include "elastos/droid/server/hdmi/Constants.h"
 #include <Elastos.CoreLibrary.Utility.h>
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
 
 using Elastos::Droid::Utility::ISlog;
 using Elastos::Droid::View::IKeyEvent;
@@ -10,6 +11,8 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Hdmi {
+
+CAR_INTERFACE_IMPL(SendKeyAction, HdmiCecFeatureAction, ISendKeyAction)
 
 const String SendKeyAction::TAG("SendKeyAction");
 const Int32 SendKeyAction::STATE_PROCESSING_KEYCODE = 1;
@@ -20,13 +23,13 @@ SendKeyAction::SendKeyAction()
 {}
 
 ECode SendKeyAction::constructor(
-    /* [in] */ HdmiCecLocalDevice* source,
+    /* [in] */ IHdmiCecLocalDevice* source,
     /* [in] */ Int32 targetAddress,
     /* [in] */ Int32 keycode)
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        super(source);
+        super::constructor(source);
         mTargetAddress = targetAddress;
         mLastKeycode = keycode;
 
@@ -36,18 +39,24 @@ ECode SendKeyAction::constructor(
 ECode SendKeyAction::Start(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         SendKeyDown(mLastKeycode);
         // finish action for non-repeatable key.
-        if (!HdmiCecKeycode->IsRepeatableKey(mLastKeycode)) {
+        Boolean isRepeatableKey;
+        HdmiCecKeycode->IsRepeatableKey(mLastKeycode, &isRepeatableKey);
+        if (!isRepeatableKey) {
             SendKeyUp();
             Finish();
-            return TRUE;
+            *result = TRUE;
+            return NOERROR;
         }
         mState = STATE_PROCESSING_KEYCODE;
         AddTimer(mState, Constants::IRT_MS);
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
 #endif
 }
 
@@ -59,7 +68,7 @@ ECode SendKeyAction::ProcessKeyEvent(
 #if 0 // TODO: Translate codes below
         if (mState != STATE_PROCESSING_KEYCODE) {
             Slogger::W(TAG, "Not in a valid state");
-            return;
+            return NOERROR;
         }
         // A new key press event that comes in with a key code different from the last
         // one sets becomes a new key code to be used for press-and-hold operation.
@@ -69,10 +78,12 @@ ECode SendKeyAction::ProcessKeyEvent(
         if (isPressed) {
             if (keycode != mLastKeycode) {
                 SendKeyDown(keycode);
-                if (!HdmiCecKeycode->IsRepeatableKey(keycode)) {
+                Boolean isRepeatableKey;
+                HdmiCecKeycode->IsRepeatableKey(keycode, &isRepeatableKey);
+                if (!isRepeatableKey) {
                     SendKeyUp();
                     Finish();
-                    return;
+                    return NOERROR;
                 }
                 mActionTimer->ClearTimerMessage();
                 AddTimer(mState, Constants::IRT_MS);
@@ -93,10 +104,12 @@ ECode SendKeyAction::SendKeyDown(
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         Int32 cecKeycode = HdmiCecKeycode->AndroidKeyToCecKey(keycode);
-        if (cecKeycode == HdmiCecKeycode.UNSUPPORTED_KEYCODE) {
-            return;
+        if (cecKeycode == HdmiCecKeycode::UNSUPPORTED_KEYCODE) {
+            return NOERROR;
         }
-        SendCommand(HdmiCecMessageBuilder->BuildUserControlPressed(GetSourceAddress(),
+        Int32 srcAddr;
+        GetSourceAddress(&srcAddr);
+        SendCommand(HdmiCecMessageBuilder->BuildUserControlPressed(srcAddr,
                 mTargetAddress, new Byte[] { (Byte) (cecKeycode & 0xFF) }));
 #endif
 }
@@ -105,7 +118,9 @@ ECode SendKeyAction::SendKeyUp()
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        SendCommand(HdmiCecMessageBuilder->BuildUserControlReleased(GetSourceAddress(),
+        Int32 srcAddr;
+        GetSourceAddress(&srcAddr);
+        SendCommand(HdmiCecMessageBuilder->BuildUserControlReleased(srcAddr,
                 mTargetAddress));
 #endif
 }
@@ -114,10 +129,13 @@ ECode SendKeyAction::ProcessCommand(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         // Send key action doesn't need any incoming CEC command, hence does not consume it.
-        return FALSE;
+        *result = FALSE;
+        return NOERROR;
 #endif
 }
 
@@ -132,7 +150,7 @@ ECode SendKeyAction::HandleTimerEvent(
         // command and start another timer to schedule the next press-and-hold command.
         if (mState != STATE_PROCESSING_KEYCODE) {
             Slogger::W(TAG, "Not in a valid state");
-            return;
+            return NOERROR;
         }
         SendKeyDown(mLastKeycode);
         AddTimer(mState, Constants::IRT_MS);

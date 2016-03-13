@@ -8,7 +8,6 @@ module
     namespace Policy {
 
     interface IFlashlightListener {
-
         /**
          * Called when the flashlight turns off unexpectedly.
          */
@@ -48,7 +47,6 @@ module
         RemoveListener(
             [in] IFlashlightListener* l);
     }
-
 
     } // namespace Policy
     } // namespace StatusBar

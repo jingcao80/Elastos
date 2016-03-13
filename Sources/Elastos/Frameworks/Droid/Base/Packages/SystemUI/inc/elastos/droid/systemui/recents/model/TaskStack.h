@@ -6,6 +6,7 @@
 #include "elastos/droid/systemui/recents/model/TaskGrouping.h"
 
 using Elastos::Core::IComparator;
+using Elastos::Utility::IList;
 
 namespace Elastos {
 namespace Droid {
@@ -55,7 +56,7 @@ public:
     CARAPI_(Boolean) HasFilter();
 
     /** Returns the list of filtered tasks */
-    CARAPI_(AutoPtr<IList>) GetTasks();
+    CARAPI_(AutoPtr<IArrayList>) GetTasks();
 
 private:
     /** Updates the list of filtered tasks whenever the base task list changes */
@@ -65,8 +66,8 @@ private:
     CARAPI_(void) UpdateFilteredTaskIndices();
 
 public:
-    AutoPtr<IList> mTasks; // item is ITask
-    AutoPtr<IList> mFilteredTasks; // item is ITask
+    AutoPtr<IArrayList> mTasks; // item is ITask
+    AutoPtr<IArrayList> mFilteredTasks; // item is ITask
     HashMap<AutoPtr<ITaskKey>, Int32> mTaskIndices;
     AutoPtr<ITaskFilter> mFilter;
 };
@@ -188,7 +189,7 @@ public:
     CARAPI_(AutoPtr<Task>) GetFrontMostTask();
 
     /** Gets the tasks */
-    CARAPI_(AutoPtr<IList>) GetTasks();
+    CARAPI_(AutoPtr<IArrayList>) GetTasks();
 
     /** Gets the number of tasks */
     CARAPI_(Int32) GetTaskCount();
@@ -243,7 +244,7 @@ public:
     AutoPtr<FilteredTaskList> mTaskList;
     AutoPtr<ITaskStackCallbacks> mCb;
 
-    AutoPtr<IList> mGroups; // item is TaskGrouping
+    AutoPtr<IArrayList> mGroups; // item is TaskGrouping
     HashMap<Int32, AutoPtr<TaskGrouping> > mAffinitiesGroups;
 };
 

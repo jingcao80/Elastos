@@ -7,11 +7,11 @@ namespace Droid {
 namespace Server {
 namespace Pm {
 
-LauncherAppsService::LauncherAppsService(
+ECode LauncherAppsService::constructor(
     /* [in] */ IContext* context)
 {
     SystemService::constructor(context);
-    CLauncherAppsImpl::New(context, (IILauncherApps**)&mLauncherAppsImpl);
+    return CLauncherAppsImpl::New(context, (IILauncherApps**)&mLauncherAppsImpl);
 }
 
 ECode LauncherAppsService::OnStart()

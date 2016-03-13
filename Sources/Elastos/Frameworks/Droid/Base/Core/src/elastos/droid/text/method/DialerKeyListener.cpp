@@ -45,7 +45,7 @@ AutoPtr< ArrayOf<Char32> > DialerKeyListener::GetAcceptedChars()
 }
 
 ECode DialerKeyListener::GetCHARACTERS(
-    /* [out,callee] */ ArrayOf<Char32>** ret)
+    /* [out, callee] */ ArrayOf<Char32>** ret)
 {
     VALIDATE_NOT_NULL(ret)
     *ret = CHARACTERS;

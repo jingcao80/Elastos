@@ -26,13 +26,14 @@ class InputDeviceIdentifier
 public:
     CAR_INTERFACE_DECL()
 
-    InputDeviceIdentifier(
+    InputDeviceIdentifier();
+
+    CARAPI constructor();
+
+    CARAPI constructor(
         /* [in] */ const String& descriptor,
         /* [in] */ Int32 vendorId,
         /* [in] */ Int32 productId);
-
-    InputDeviceIdentifier(
-       /* [in] */ IParcel* src);
 
     CARAPI GetDescriptor(
         /* [out] */ String* dsp);

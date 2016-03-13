@@ -8,18 +8,6 @@ module
     namespace Phone {
 
     interface IBarTransitions {
-
-        const Int32 MODE_OPAQUE = 0;
-        const Int32 MODE_SEMI_TRANSPARENT = 1;
-        const Int32 MODE_TRANSLUCENT = 2;
-        const Int32 MODE_LIGHTS_OUT = 3;
-        const Int32 MODE_TRANSPARENT = 4;
-        const Int32 MODE_WARNING = 5;
-
-        const Int32 LIGHTS_IN_DURATION = 250;
-        const Int32 LIGHTS_OUT_DURATION = 750;
-        const Int32 BACKGROUND_DURATION = 200;
-
         GetMode(
             [out] Int32* m);
 
@@ -28,13 +16,6 @@ module
             [in] Boolean animate);
 
         FinishAnimations();
-    }
-
-    interface IBarTransitionsHelper {
-
-        ModeToString(
-            [in] Int32 mode,
-            [out] String* result);
     }
 
     } // namespace Phone

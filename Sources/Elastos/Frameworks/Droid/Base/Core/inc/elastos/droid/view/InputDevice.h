@@ -10,6 +10,7 @@
 
 using Elastos::Core::StringUtils;
 using Elastos::Core::StringBuilder;
+using Elastos::Utility::IArrayList;
 using Elastos::Utility::IList;
 using Elastos::Droid::Os::IVibrator;
 using Elastos::Droid::Hardware::Input::IInputDeviceIdentifier;
@@ -472,8 +473,7 @@ private:
     AutoPtr<IKeyCharacterMap> mKeyCharacterMap;
     Boolean mHasVibrator;
     Boolean mHasButtonUnderPad;
-    AutoPtr<IList> mMotionRanges;
-    Object mMotionRangesLock;
+    AutoPtr<IArrayList> mMotionRanges;
 
     AutoPtr<IVibrator> mVibrator; // guarded by mMotionRanges during initialization
 };

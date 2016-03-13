@@ -91,6 +91,9 @@ module
          */
         ReadFully(
             [out, callee] ArrayOf<Byte>* data);
+
+        Exists(
+            [out] Boolean* result);
     }
 
     } // namespace Utility

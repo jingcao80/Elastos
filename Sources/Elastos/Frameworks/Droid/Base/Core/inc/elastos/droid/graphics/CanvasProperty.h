@@ -26,7 +26,7 @@ public:
  * TODO: Make public?
  * @hide
  */
-class CanvasProperty/*<T>*/
+class ECO_PUBLIC CanvasProperty/*<T>*/
     : public Object
     , public ICanvasProperty
 {

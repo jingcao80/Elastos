@@ -25,7 +25,6 @@ module
      */
     interface ISubscriptionManager {
 
-
         /** An invalid phone identifier */
         /** @hide - to be unhidden */
         const Int32 INVALID_PHONE_ID = -1000;
@@ -216,9 +215,6 @@ module
          */
         const String MNC = "mnc";
 
-    }
-
-    interface ISubscriptionManagerHelper {
         GetCONTENT_URI(
             [out] IUri** uri);
 
@@ -249,7 +245,7 @@ module
          * @hide - to be unhidden
          */
         GetSubInfoUsingSlotId(
-            [in] String slotId,
+            [in] Int32 slotId,
             [out] IList** ids);
 
         /**

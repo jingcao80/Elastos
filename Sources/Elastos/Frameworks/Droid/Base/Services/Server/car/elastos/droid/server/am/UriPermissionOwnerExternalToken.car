@@ -11,7 +11,7 @@ module
      */
     interface IUriPermissionOwnerExternalToken {
         GetOwner(
-            [out] Handle32 *owner);
+            [out] IObject** owner);
     }
 
     } // namespace Am

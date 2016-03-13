@@ -1,2 +1,3 @@
 DIRS += model
 DIRS += views
+DIRS += misc

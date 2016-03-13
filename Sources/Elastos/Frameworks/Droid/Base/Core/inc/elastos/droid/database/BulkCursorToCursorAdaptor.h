@@ -156,7 +156,7 @@ public:
 
     CARAPI GetBlob(
         /* [in] */ Int32 columnIndex,
-        /* [out,callee] */ ArrayOf<Byte>** blob);
+        /* [out, callee] */ ArrayOf<Byte>** blob);
 
     CARAPI GetString(
         /* [in] */ Int32 columnIndex,

@@ -3,9 +3,9 @@
 #define __ELASTOS_DROID_SERVER_HDMI_HDMICECLOCALDEVICETV_H__
 
 #include "_Elastos.Droid.Server.h"
+#include "elastos/droid/server/hdmi/HdmiCecLocalDevice.h"
 #include <elastos/core/Object.h>
 #include <elastos/droid/ext/frameworkext.h>
-#include "elastos/droid/server/hdmi/HdmiCecLocalDevice.h"
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Hardware::Hdmi::IIHdmiControlCallback;
@@ -13,6 +13,8 @@ using Elastos::Droid::Internal::Utility::IIndentingPrintWriter;
 using Elastos::Utility::ICollection;
 using Elastos::Utility::ICollections;
 using Elastos::Utility::IList;
+using Elastos::Droid::Utility::ISparseArray;
+using Elastos::Droid::Utility::IArraySet;
 
 namespace Elastos {
 namespace Droid {
@@ -25,12 +27,52 @@ class HdmiCecStandbyModeHandler;
  */
 class HdmiCecLocalDeviceTv
     : public HdmiCecLocalDevice
+    , public IHdmiCecLocalDeviceTv
 {
+private:
+    class InnerSub_DeviceDiscoveryCallback
+        : public Object
+        , public IDeviceDiscoveryActionDeviceDiscoveryCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_DeviceDiscoveryCallback(
+            /* [in] */ HdmiCecLocalDeviceTv* host);
+
+        // @Override
+        CARAPI OnDeviceDiscoveryDone(
+            /* [in] */ IList* deviceInfos);
+
+    private:
+        HdmiCecLocalDeviceTv* mHost;
+    };
+
+    class InnerSub_SendMessageCallback
+        : public Object
+        , public IHdmiControlServiceSendMessageCallback
+    {
+    public:
+        CAR_INTERFACE_DECL()
+
+        InnerSub_SendMessageCallback(
+            /* [in] */ HdmiCecLocalDeviceTv* host);
+
+        // @Override
+        CARAPI OnSendCompleted(
+            /* [in] */ Int32 error);
+
+    private:
+        HdmiCecLocalDeviceTv* mHost;
+    };
+
 public:
+    CAR_INTERFACE_DECL()
+
     HdmiCecLocalDeviceTv();
 
     CARAPI constructor(
-        /* [in] */ HdmiControlService* service);
+        /* [in] */ IHdmiControlService* service);
 
     // @Override
     // @ServiceThreadOnly
@@ -72,7 +114,7 @@ public:
 
     // @ServiceThreadOnly
     CARAPI UpdateActiveSource(
-        /* [in] */ HdmiCecLocalDevice::ActiveSource* newActive);
+        /* [in] */ IHdmiCecLocalDeviceActiveSource* newActive);
 
     CARAPI GetPortId(
         /* [in] */ Int32 physicalAddress,
@@ -174,7 +216,7 @@ public:
         /* [out] */ Boolean* result);
 
     CARAPI StartNewDeviceAction(
-        /* [in] */ HdmiCecLocalDevice::ActiveSource* activeSource);
+        /* [in] */ IHdmiCecLocalDeviceActiveSource* activeSource);
 
     /**
      * Whether the given path is located in the tail of current active path.
@@ -671,18 +713,47 @@ private:
     // @GuardedBy("mLock")
     Boolean mSystemAudioActivated;
 
+    // The previous port id (input) before switching to the new one. This is remembered in order to
+    // be able to switch to it upon receiving <Inactive Source> from currently active source.
+    // This remains valid only when the active source was switched via one touch play operation
+    // (either by TV or source device). Manual port switching invalidates this value to
+    // Constants.PORT_INVALID, for which case <Inactive Source> does not do anything.
+    // @GuardedBy("mLock")
+    Int32 mPrevPortId;
+
+    // @GuardedBy("mLock")
+    Int32 mSystemAudioVolume;
+
+    // @GuardedBy("mLock")
+    Boolean mSystemAudioMute;
+
+    // Copy of mDeviceInfos to guarantee thread-safety.
+    // @GuardedBy("mLock")
+    AutoPtr<IList> mSafeAllDeviceInfos;
+    // All external cec input(source) devices. Does not include system audio device.
+    // @GuardedBy("mLock")
+    AutoPtr<IList> mSafeExternalInputs;
+
+    // Map-like container of all cec devices including local ones.
+    // device id is used as key of container.
+    // This is not thread-safe. For external purpose use mSafeDeviceInfos.
+    AutoPtr<ISparseArray> mDeviceInfos;
+
     // If true, TV going to standby mode puts other devices also to standby.
     Boolean mAutoDeviceOff;
 
     // If true, TV wakes itself up when receiving <Text/Image View On>.
     Boolean mAutoWakeup;
 
-#if 0
     AutoPtr<HdmiCecStandbyModeHandler> mStandbyHandler;
-#endif
 
+    // If true, do not do routing control/send active source for internal source.
     // Set to true when the device was woken up by <Text/Image View On>.
     Boolean mSkipRoutingControl;
+
+    // Set of physical addresses of CEC switches on the CEC bus. Managed independently from
+    // other CEC devices since they might not have logical address.
+    AutoPtr<IArraySet> mCecSwitches;
 };
 
 } // namespace Hdmi

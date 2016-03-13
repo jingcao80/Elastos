@@ -442,8 +442,7 @@ AutoPtr<IView> KeyguardServiceDelegate::CreateScrim(
     AutoPtr<ICharSequence> title;
     CString::New(String("KeyguardScrim"), (ICharSequence**)&title);
     lp->SetTitle(title);
-    AutoPtr<IWindowManager> wm;
-    //WindowManager wm = (WindowManager) context.getSystemService(IContext::WINDOW_SERVICE);
+    AutoPtr<IInterface> wm;
     context->GetSystemService(IContext::WINDOW_SERVICE, (IInterface**)&wm);
     AutoPtr<IViewManager> viewManager = IViewManager::Probe(wm);
     AutoPtr<IViewGroupLayoutParams> viewGroupLayoutParams = IViewGroupLayoutParams::Probe(lp);

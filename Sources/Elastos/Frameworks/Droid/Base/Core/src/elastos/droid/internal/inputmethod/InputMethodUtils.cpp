@@ -259,7 +259,7 @@ ECode InputMethodUtils::InputMethodSettings::EnableAllIMEsIfThereIsNoEnabledIME(
             imi->GetId(&id);
             Slogger::I(TAG, "Adding: %s", id.string());
             if (i > 0)
-                sb.Append(':');
+                sb.AppendChar(':');
             sb.Append(id);
         }
         PutEnabledInputMethodsStr(sb.ToString());

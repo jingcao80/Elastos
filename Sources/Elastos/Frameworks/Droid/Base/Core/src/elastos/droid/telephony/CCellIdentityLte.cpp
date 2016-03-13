@@ -1,27 +1,38 @@
 
-#include "CCellIdentityLte.h"
-#include "elastos/droid/ext/frameworkdef.h"
+#include "elastos/droid/telephony/CCellIdentityLte.h"
+#include <elastos/core/Math.h>
 #include <elastos/core/StringBuilder.h>
-#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/logging/Logger.h>
 
 using Elastos::Core::StringBuilder;
-using Elastos::Utility::Logging::Slogger;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
-#define INTEGER_MAX_VALUE 0x7FFFFFFF;
-const String LOG_TAG("CCellIdentityLte");
+const String CCellIdentityLte::TAG("CCellIdentityLte");
+const Boolean CCellIdentityLte::DBG;
+
+CAR_INTERFACE_IMPL_2(CCellIdentityLte, Object, ICellIdentityLte, IParcelable)
+
+CAR_OBJECT_IMPL(CCellIdentityLte)
+
+CCellIdentityLte::CCellIdentityLte()
+    : mMcc(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mMnc(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mCi(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mPci(Elastos::Core::Math::INT32_MAX_VALUE)
+    , mTac(Elastos::Core::Math::INT32_MAX_VALUE)
+{
+}
+
+CCellIdentityLte::~CCellIdentityLte()
+{
+}
 
 ECode CCellIdentityLte::constructor()
 {
-    mMcc = INTEGER_MAX_VALUE;
-    mMnc = INTEGER_MAX_VALUE;
-    mCi = INTEGER_MAX_VALUE;
-    mPci = INTEGER_MAX_VALUE;
-    mTac = INTEGER_MAX_VALUE;
-
     return NOERROR;
 }
 
@@ -68,7 +79,7 @@ ECode CCellIdentityLte::WriteToParcel(
     if (DBG) {
         String str;
         ToString(&str);
-        Slogger::I(LOG_TAG, "writeToParcel(Parcel, int): %s", str.string());
+        Logger::I(TAG, "writeToParcel(Parcel, int): %s", str.string());
     }
     dest->WriteInt32(mMcc);
     dest->WriteInt32(mMnc);
@@ -176,13 +187,13 @@ ECode CCellIdentityLte::ToString(
     /* [out] */ String* str)
 {
     VALIDATE_NOT_NULL(str);
-    StringBuilder sb;
-    sb.Append("super.toString()");
+    StringBuilder sb("CellIdentityLte:{");
     sb.Append(" mMcc="); sb.Append(mMcc);
     sb.Append(" mMnc="); sb.Append(mMnc);
     sb.Append(" mCi="); sb.Append(mCi);
     sb.Append(" mPci="); sb.Append(mPci);
     sb.Append(" mTac="); sb.Append(mTac);
+    sb.Append("}");
 
     *str = sb.ToString();
 

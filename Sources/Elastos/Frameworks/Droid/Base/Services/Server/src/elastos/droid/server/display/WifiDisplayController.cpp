@@ -809,7 +809,7 @@ ECode WifiDisplayController::WifiP2pReceiver::OnReceive(
         mHost->mThisDevice = IWifiP2pDevice::Probe(parcelable);
         if (DEBUG) {
             Slogger::D(TAG, "Received WIFI_P2P_THIS_DEVICE_CHANGED_ACTION: mThisDevice=%s"
-                , Object::ToString(mHost->mThisDevice).string());
+                , TO_CSTR(mHost->mThisDevice));
         }
     }
 

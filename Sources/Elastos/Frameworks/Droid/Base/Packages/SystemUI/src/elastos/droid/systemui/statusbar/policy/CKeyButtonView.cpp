@@ -1,7 +1,35 @@
+
 #include "elastos/droid/systemui/statusbar/policy/CKeyButtonView.h"
+#include "elastos/droid/systemui/statusbar/policy/KeyButtonRipple.h"
+#include "../../R.h"
+#include "Elastos.Droid.App.h"
+#include "Elastos.Droid.Hardware.h"
+#include <elastos/core/Math.h>
+#include <elastos/droid/os/SystemClock.h>
+#include <elastos/utility/logging/Logger.h>
 
-using Elastos::Droid::View::EIID_View;
-
+using Elastos::Droid::Animation::CObjectAnimator;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::App::CActivityManagerHelper;
+using Elastos::Droid::App::IActivityManagerHelper;
+using Elastos::Droid::Hardware::Input::CInputManagerHelper;
+using Elastos::Droid::Hardware::Input::IInputManager;
+using Elastos::Droid::Hardware::Input::IInputManagerHelper;
+using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::View::CKeyEvent;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::IHapticFeedbackConstants;
+using Elastos::Droid::View::IInputEvent;
+using Elastos::Droid::View::IInputDevice;
+using Elastos::Droid::View::IKeyEvent;
+using Elastos::Droid::View::IKeyCharacterMap;
+using Elastos::Droid::View::ISoundEffectConstants;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::Accessibility::CAccessibilityNodeInfoAccessibilityAction;
+using Elastos::Droid::View::Accessibility::IAccessibilityNodeInfoAccessibilityAction;
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -9,27 +37,57 @@ namespace SystemUI {
 namespace StatusBar {
 namespace Policy {
 
-
-IVIEW_METHODS_IMPL(CKeyButtonView, KeyButtonView)
-IDRAWABLECALLBACK_METHODS_IMPL(CKeyButtonView, KeyButtonView)
-IKEYEVENTCALLBACK_METHODS_IMPL(CKeyButtonView, KeyButtonView)
-IACCESSIBILITYEVENTSOURCE_METHODS_IMPL(CKeyButtonView, KeyButtonView)
-
-
-PInterface CKeyButtonView::Probe(
-    /* [in] */ REIID riid)
+//==============================================================================
+//                  CKeyButtonView::CheckLongPressRunnable
+//==============================================================================
+CKeyButtonView::CheckLongPressRunnable::CheckLongPressRunnable(
+    /* [in] */ CKeyButtonView* host)
+    : mHost(host)
 {
-    if (riid == EIID_View) {
-        return reinterpret_cast<PInterface>((View*)this);
+}
+
+ECode CKeyButtonView::CheckLongPressRunnable::Run()
+{
+    Boolean tmp = FALSE;
+    if (mHost->IsPressed(&tmp), tmp) {
+        // Logger.d("CKeyButtonView", "longpressed: " + this);
+        if (mHost->IsLongClickable(&tmp), tmp) {
+            // Just an old-fashioned ImageView
+            mHost->PerformLongClick(&tmp);
+        }
+        else {
+            mHost->SendEvent(IKeyEvent::ACTION_DOWN, IKeyEvent::FLAG_LONG_PRESS);
+            mHost->SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_LONG_CLICKED);
+        }
     }
-    return _CKeyButtonView::Probe(riid);
+
+    return NOERROR;
+}
+
+//==============================================================================
+//                  CKeyButtonView
+//==============================================================================
+const String CKeyButtonView::TAG("StatusBar.KeyButtonView");
+const Boolean CKeyButtonView::DEBUG = FALSE;
+const Float CKeyButtonView::DEFAULT_QUIESCENT_ALPHA = 1.f;
+CAR_INTERFACE_IMPL(CKeyButtonView, ImageView, IKeyButtonView);
+CKeyButtonView::CKeyButtonView()
+    : mDownTime(0)
+    , mCode(0)
+    , mTouchSlop(0)
+    , mDrawingAlpha(1.0)
+    , mQuiescentAlpha(DEFAULT_QUIESCENT_ALPHA)
+    , mSupportsLongpress(TRUE)
+{
+    CObjectAnimator::New((IAnimator**)&mAnimateToQuiescent);
+    mCheckLongPress = new CheckLongPressRunnable(this);
 }
 
 ECode CKeyButtonView::constructor(
     /* [in] */ IContext* context,
     /* [in] */ IAttributeSet* attrs)
 {
-    return KeyButtonView::Init(context, attrs);
+    return constructor(context, attrs, 0);
 }
 
 ECode CKeyButtonView::constructor(
@@ -37,256 +95,259 @@ ECode CKeyButtonView::constructor(
     /* [in] */ IAttributeSet* attrs,
     /* [in] */ Int32 defStyle)
 {
-    return KeyButtonView::Init(context, attrs, defStyle);
+    ASSERT_SUCCEEDED(ImageView::constructor(context, attrs));
+
+    AutoPtr<ArrayOf<Int32> > attrIds = ArrayOf<Int32>::Alloc(
+            const_cast<Int32 *>(R::styleable::KeyButtonView),
+            ArraySize(R::styleable::KeyButtonView));
+    AutoPtr<ITypedArray> a;
+    FAIL_RETURN(context->ObtainStyledAttributes(attrs, attrIds, defStyle, 0, (ITypedArray**)&a));
+
+    a->GetInt32(R::styleable::KeyButtonView_keyCode, 0, &mCode);
+    a->GetBoolean(R::styleable::KeyButtonView_keyRepeat, TRUE, &mSupportsLongpress);
+
+    SetDrawingAlpha(mQuiescentAlpha);
+
+    a->Recycle();
+
+    SetClickable(TRUE);
+
+    AutoPtr<IViewConfigurationHelper> helper;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
+    AutoPtr<IViewConfiguration> vc;
+    helper->Get(context, (IViewConfiguration**)&vc);
+    vc->GetScaledTouchSlop(&mTouchSlop);
+
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::AUDIO_SERVICE, (IInterface**)&obj);
+    mAudioManager = IAudioManager::Probe(obj);
+    AutoPtr<IDrawable> d = new KeyButtonRipple(context, this);
+    SetBackground(d);
+    return NOERROR;
 }
 
-ECode CKeyButtonView::SetDrawingAlpha(
-    /* [in] */ Float alpha)
+ECode CKeyButtonView::OnInitializeAccessibilityNodeInfo(
+    /* [in] */ IAccessibilityNodeInfo* info)
 {
-    return KeyButtonView::SetDrawingAlpha(alpha);
+    ImageView::OnInitializeAccessibilityNodeInfo(info);
+    if (mCode != 0) {
+        AutoPtr<IAccessibilityNodeInfoAccessibilityAction> an;
+        CAccessibilityNodeInfoAccessibilityAction::New(IAccessibilityNodeInfo::ACTION_CLICK, NULL,
+                (IAccessibilityNodeInfoAccessibilityAction**)&an);
+        info->AddAction(an);
+        if (mSupportsLongpress) {
+            an = NULL;
+            CAccessibilityNodeInfoAccessibilityAction::New(IAccessibilityNodeInfo::ACTION_LONG_CLICK, NULL,
+                    (IAccessibilityNodeInfoAccessibilityAction**)&an);
+            info->AddAction(an);
+        }
+    }
+    return NOERROR;
+}
+
+ECode CKeyButtonView::PerformAccessibilityAction(
+    /* [in] */ Int32 action,
+    /* [in] */ IBundle* arguments,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    if (action == IAccessibilityNodeInfo::ACTION_CLICK && mCode != 0) {
+        SendEvent(IKeyEvent::ACTION_DOWN, 0, SystemClock::GetUptimeMillis());
+        SendEvent(IKeyEvent::ACTION_UP, 0);
+        SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_CLICKED);
+        PlaySoundEffect(ISoundEffectConstants::CLICK);
+        *result = TRUE;
+        return NOERROR;
+    }
+    else if (action == IAccessibilityNodeInfo::ACTION_LONG_CLICK && mCode != 0 && mSupportsLongpress) {
+        SendEvent(IKeyEvent::ACTION_DOWN, IKeyEvent::FLAG_LONG_PRESS);
+        SendEvent(IKeyEvent::ACTION_UP, 0);
+        SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_LONG_CLICKED);
+        *result = TRUE;
+        return NOERROR;
+    }
+    return ImageView::PerformAccessibilityAction(action, arguments, result);
+}
+
+ECode CKeyButtonView::SetQuiescentAlpha(
+    /* [in] */ Float alpha,
+    /* [in] */ Boolean animate)
+{
+    mAnimateToQuiescent->Cancel();
+    alpha = Elastos::Core::Math::Min(Elastos::Core::Math::Max(alpha, 0.f), 1.f);
+    if (alpha == mQuiescentAlpha && alpha == mDrawingAlpha) return NOERROR;
+    mQuiescentAlpha = alpha;
+    if (DEBUG) Logger::D(TAG, "New quiescent alpha = %f", mQuiescentAlpha);
+    if (animate) {
+        AutoPtr<IObjectAnimator> o = AnimateToQuiescent();
+        mAnimateToQuiescent = IAnimator::Probe(o);
+        mAnimateToQuiescent->Start();
+    }
+    else {
+        SetDrawingAlpha(mQuiescentAlpha);
+    }
+    return NOERROR;
+}
+
+AutoPtr<IObjectAnimator> CKeyButtonView::AnimateToQuiescent()
+{
+    AutoPtr<ArrayOf<Float> > param = ArrayOf<Float>::Alloc(1);
+    (*param)[0] = mQuiescentAlpha;
+    AutoPtr<IObjectAnimatorHelper> aHelper;
+    CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&aHelper);
+
+    AutoPtr<IObjectAnimator> o;
+    aHelper->OfFloat(THIS_PROBE(IInterface), String("drawingAlpha"), param,
+            (IObjectAnimator**)&o);
+
+    return o;
+}
+
+ECode CKeyButtonView::GetQuiescentAlpha(
+    /* [out] */ Float* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = mQuiescentAlpha;
+    return NOERROR;
 }
 
 ECode CKeyButtonView::GetDrawingAlpha(
-    /* [out] */ Float* alpha)
+    /* [out] */ Float* result)
 {
-    VALIDATE_NOT_NULL(alpha);
-    *alpha = KeyButtonView::GetDrawingAlpha();
+    VALIDATE_NOT_NULL(result);
+    *result = mDrawingAlpha;
     return NOERROR;
 }
 
-ECode CKeyButtonView::SetGlowAlpha(
-    /* [in] */ Float alpha)
+ECode CKeyButtonView::SetDrawingAlpha(
+    /* [in] */ Float x)
 {
-    return KeyButtonView::SetGlowAlpha(alpha);
-}
-
-ECode CKeyButtonView::GetGlowAlpha(
-    /* [out] */ Float* alpha)
-{
-    VALIDATE_NOT_NULL(alpha);
-    *alpha = KeyButtonView::GetGlowAlpha();
+    SetImageAlpha((Int32) (x * 255));
+    mDrawingAlpha = x;
     return NOERROR;
 }
 
-ECode CKeyButtonView::SetGlowScale(
-    /* [in] */ Float scale)
+ECode CKeyButtonView::OnTouchEvent(
+    /* [in] */ IMotionEvent* ev,
+    /* [out] */ Boolean* result)
 {
-    return KeyButtonView::SetGlowScale(scale);
+    Int32 action;
+    ev->GetAction(&action);
+    Int32 x, y;
+    Float fx, fy;
+    Boolean tmp = FALSE;
+    switch (action) {
+        case IMotionEvent::ACTION_DOWN: {
+            //Logger.d("CKeyButtonView", "press");
+            mDownTime = SystemClock::GetUptimeMillis();
+            SetPressed(TRUE);
+            if (mCode != 0) {
+                SendEvent(IKeyEvent::ACTION_DOWN, 0, mDownTime);
+            }
+            else {
+                // Provide the same haptic feedback that the system offers for virtual keys.
+                PerformHapticFeedback(IHapticFeedbackConstants::VIRTUAL_KEY, &tmp);
+            }
+            if (mSupportsLongpress) {
+                RemoveCallbacks(mCheckLongPress, &tmp);
+                AutoPtr<IViewConfigurationHelper> helper;
+                CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper);
+                Int32 timeout;
+                helper->GetLongPressTimeout(&timeout);
+                PostDelayed(mCheckLongPress, timeout, &tmp);
+            }
+        }
+            break;
+        case IMotionEvent::ACTION_MOVE: {
+            ev->GetX(&fx);
+            ev->GetY(&fy);
+            x = (Int32)fx;
+            y = (Int32)fy;
+            Int32 w = 0, h = 0;
+            GetWidth(&w);
+            GetHeight(&h);
+            SetPressed(x >= -mTouchSlop
+                    && x < w + mTouchSlop
+                    && y >= -mTouchSlop
+                    && y < h + mTouchSlop);
+        }
+            break;
+        case IMotionEvent::ACTION_CANCEL:
+            SetPressed(FALSE);
+            if (mCode != 0) {
+                SendEvent(IKeyEvent::ACTION_UP, IKeyEvent::FLAG_CANCELED);
+            }
+            if (mSupportsLongpress) {
+                RemoveCallbacks(mCheckLongPress, &tmp);
+            }
+            break;
+        case IMotionEvent::ACTION_UP:
+            Boolean doIt = FALSE;
+            IsPressed(&doIt);
+            SetPressed(FALSE);
+            if (mCode != 0) {
+                if (doIt) {
+                    SendEvent(IKeyEvent::ACTION_UP, 0);
+                    SendAccessibilityEvent(IAccessibilityEvent::TYPE_VIEW_CLICKED);
+                    PlaySoundEffect(ISoundEffectConstants::CLICK);
+                }
+                else {
+                    SendEvent(IKeyEvent::ACTION_UP, IKeyEvent::FLAG_CANCELED);
+                }
+            }
+            else {
+                // no key code, just a regular ImageView
+                if (doIt) {
+                    PerformClick(&tmp);
+                }
+            }
+            if (mSupportsLongpress) {
+                RemoveCallbacks(mCheckLongPress, &tmp);
+            }
+            break;
+    }
+
+    return TRUE;
 }
 
-ECode CKeyButtonView::GetGlowScale(
-    /* [out] */ Float* scale)
+ECode CKeyButtonView::PlaySoundEffect(
+    /* [in] */ Int32 soundConstant)
 {
-    VALIDATE_NOT_NULL(scale);
-    *scale = KeyButtonView::GetGlowScale();
+    AutoPtr<IActivityManagerHelper> helper;
+    CActivityManagerHelper::AcquireSingleton((IActivityManagerHelper**)&helper);
+    Int32 user = 0;
+    helper->GetCurrentUser(&user);
+    mAudioManager->PlaySoundEffect(soundConstant, user);
     return NOERROR;
 }
 
-ECode CKeyButtonView::GetAdjustViewBounds(
-    /* [out] */ Boolean* res)
+ECode CKeyButtonView::SendEvent(
+    /* [in] */ Int32 action,
+    /* [in] */ Int32 flags)
 {
-    VALIDATE_NOT_NULL(res);
-    *res = KeyButtonView::GetAdjustViewBounds();
+    SendEvent(action, flags, SystemClock::GetUptimeMillis());
     return NOERROR;
 }
 
-ECode CKeyButtonView::SetAdjustViewBounds(
-    /* [in] */ Boolean adjustViewBounds)
+void CKeyButtonView::SendEvent(
+    /* [in] */ Int32 action,
+    /* [in] */ Int32 flags,
+    /* [in] */ Int64 when)
 {
-    return KeyButtonView::SetAdjustViewBounds(adjustViewBounds);
-}
+    Int32 repeatCount = (flags & IKeyEvent::FLAG_LONG_PRESS) != 0 ? 1 : 0;
+    AutoPtr<IKeyEvent> ev;
+    CKeyEvent::New(mDownTime, when, action, mCode, repeatCount,
+            0, IKeyCharacterMap::VIRTUAL_KEYBOARD, 0,
+            flags | IKeyEvent::FLAG_FROM_SYSTEM | IKeyEvent::FLAG_VIRTUAL_HARD_KEY,
+            IInputDevice::SOURCE_KEYBOARD, (IKeyEvent**)&ev);
 
-ECode CKeyButtonView::GetMaxWidth(
-    /* [out] */ Int32* width)
-{
-    VALIDATE_NOT_NULL(width);
-    *width = KeyButtonView::GetMaxWidth();
-    return NOERROR;
-}
-
-ECode CKeyButtonView::SetMaxWidth(
-    /* [in] */ Int32 maxWidth)
-{
-    return KeyButtonView::SetMaxWidth(maxWidth);
-}
-
-ECode CKeyButtonView::GetMaxHeight(
-    /* [out] */ Int32* height)
-{
-    VALIDATE_NOT_NULL(height);
-    *height = KeyButtonView::GetMaxHeight();
-    return NOERROR;
-}
-
-ECode CKeyButtonView::SetMaxHeight(
-    /* [in] */ Int32 maxHeight)
-{
-    return KeyButtonView::SetMaxHeight(maxHeight);
-}
-
-ECode CKeyButtonView::GetDrawable(
-    /* [out] */ IDrawable** drawable)
-{
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> cf = KeyButtonView::GetDrawable();
-    *drawable = cf;
-    REFCOUNT_ADD(*drawable);
-    return NOERROR;
-}
-
-ECode CKeyButtonView::SetImageResource(
-    /* [in] */ Int32 resId)
-{
-    return KeyButtonView::SetImageResource(resId);
-}
-
-ECode CKeyButtonView::SetImageURI(
-    /* [in] */ IUri* uri)
-{
-    return KeyButtonView::SetImageURI(uri);
-}
-
-ECode CKeyButtonView::SetImageDrawable(
-    /* [in] */ IDrawable* drawable)
-{
-    return KeyButtonView::SetImageDrawable(drawable);
-}
-
-ECode CKeyButtonView::SetImageBitmap(
-    /* [in] */ IBitmap* bm)
-{
-    return KeyButtonView::SetImageBitmap(bm);
-}
-
-ECode CKeyButtonView::SetImageState(
-    /* [in] */ ArrayOf<Int32>* state,
-    /* [in] */ Boolean mg)
-{
-    return KeyButtonView::SetImageState(state, mg);
-}
-
-ECode CKeyButtonView::SetImageLevel(
-    /* [in] */ Int32 level)
-{
-    return KeyButtonView::SetImageLevel(level);
-}
-
-ECode CKeyButtonView::SetScaleType(
-    /* [in] */ ImageViewScaleType scaleType)
-{
-    return KeyButtonView::SetScaleType(scaleType);
-}
-
-ECode CKeyButtonView::GetScaleType(
-    /* [out] */ ImageViewScaleType* scaleType)
-{
-    VALIDATE_NOT_NULL(scaleType);
-    *scaleType = KeyButtonView::GetScaleType();
-    return NOERROR;
-}
-
-ECode CKeyButtonView::GetImageMatrix(
-    /* [out] */ IMatrix** martix)
-{
-    VALIDATE_NOT_NULL(martix);
-    AutoPtr<IMatrix> cf = KeyButtonView::GetImageMatrix();
-    *martix = cf;
-    REFCOUNT_ADD(*martix);
-    return NOERROR;
-}
-
-ECode CKeyButtonView::SetImageMatrix(
-    /* [in] */ IMatrix* matrix)
-{
-    return KeyButtonView::SetImageMatrix(matrix);
-}
-
-ECode CKeyButtonView::GetCropToPadding(
-    /* [out] */ Boolean* padding)
-{
-    VALIDATE_NOT_NULL(padding);
-    *padding = KeyButtonView::GetCropToPadding();
-    return NOERROR;
-}
-
-ECode CKeyButtonView::SetCropToPadding(
-    /* [in] */ Boolean cropToPadding)
-{
-    return KeyButtonView::SetCropToPadding(cropToPadding);
-}
-
-ECode CKeyButtonView::SetBaseline(
-    /* [in] */ Int32 baseline)
-{
-    return KeyButtonView::SetBaseline(baseline);
-}
-
-ECode CKeyButtonView::SetBaselineAlignBottom(
-    /* [in] */ Boolean aligned)
-{
-    return KeyButtonView::SetBaselineAlignBottom(aligned);
-}
-
-ECode CKeyButtonView::GetBaselineAlignBottom(
-    /* [out] */ Boolean* aligned)
-{
-    VALIDATE_NOT_NULL(aligned);
-    *aligned = KeyButtonView::GetBaselineAlignBottom();
-    return NOERROR;
-}
-
-ECode CKeyButtonView::SetColorFilter(
-    /* [in] */ Int32 color)
-{
-    return KeyButtonView::SetColorFilter(color);
-}
-
-ECode CKeyButtonView::SetColorFilter(
-    /* [in] */ Int32 color,
-    /* [in] */ PorterDuffMode mode)
-{
-    return KeyButtonView::SetColorFilter(color, mode);
-}
-
-ECode CKeyButtonView::ClearColorFilter()
-{
-    return KeyButtonView::ClearColorFilter();
-}
-
-ECode CKeyButtonView::GetColorFilter(
-    /* [out] */ IColorFilter** filter)
-{
-    VALIDATE_NOT_NULL(filter);
-    AutoPtr<IColorFilter> cf = KeyButtonView::GetColorFilter();
-    *filter = cf;
-    REFCOUNT_ADD(*filter);
-    return NOERROR;
-}
-
-ECode CKeyButtonView::SetColorFilter(
-    /* [in] */ IColorFilter* cf)
-{
-    return KeyButtonView::SetColorFilter(cf);
-}
-
-ECode CKeyButtonView::GetImageAlpha(
-    /* [out] */ Int32* alpha)
-{
-    VALIDATE_NOT_NULL(alpha);
-    *alpha = KeyButtonView::GetImageAlpha();
-    return NOERROR;
-}
-
-ECode CKeyButtonView::SetImageAlpha(
-    /* [in] */ Int32 alpha)
-{
-    return KeyButtonView::SetImageAlpha(alpha);
-}
-
-ECode CKeyButtonView::SetAlpha(
-    /* [in] */ Int32 alpha)
-{
-    return KeyButtonView::SetAlpha(alpha);
+    AutoPtr<IInputManagerHelper> helper;
+    CInputManagerHelper::AcquireSingleton((IInputManagerHelper**)&helper);
+    AutoPtr<IInputManager> inputManager;
+    helper->GetInstance((IInputManager**)&inputManager);
+    Boolean result;
+    inputManager->InjectInputEvent(
+            IInputEvent::Probe(ev), IInputManager::INJECT_INPUT_EVENT_MODE_ASYNC, &result);
 }
 
 }// namespace Policy

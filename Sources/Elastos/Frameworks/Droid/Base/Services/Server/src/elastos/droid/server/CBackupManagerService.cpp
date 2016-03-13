@@ -1624,16 +1624,16 @@ AutoPtr<IOutputStream> CBackupManagerService::PerformFullBackupTask::EmitAesBack
  *
  *    // line 4: name of encryption algorithm
  *    headerbuf->Append(ENCRYPTION_ALGORITHM_NAME);
- *    headerbuf->Append('\n');
+ *    headerbuf->AppendChar32('\n');
  *    // line 5: user password salt [hex]
  *    headerbuf->Append(ByteArrayToHex(newUserSalt));
- *    headerbuf->Append('\n');
+ *    headerbuf->AppendChar32('\n');
  *    // line 6: master key checksum salt [hex]
  *    headerbuf->Append(ByteArrayToHex(checksumSalt));
- *    headerbuf->Append('\n');
+ *    headerbuf->AppendChar32('\n');
  *    // line 7: number of PBKDF2 rounds used [decimal]
  *    headerbuf->Append(PBKDF2_HASH_ROUNDS);
- *    headerbuf->Append('\n');
+ *    headerbuf->AppendChar32('\n');
  *
  *    // line 8: IV of the user key [hex]
  *    Cipher mkC = Cipher->GetInstance("AES/CBC/PKCS5Padding");
@@ -1641,7 +1641,7 @@ AutoPtr<IOutputStream> CBackupManagerService::PerformFullBackupTask::EmitAesBack
  *
  *    ArrayOf<Byte> IV = mkC->GetIV();
  *    headerbuf->Append(ByteArrayToHex(IV));
- *    headerbuf->Append('\n');
+ *    headerbuf->AppendChar32('\n');
  *
  *    // line 9: master IV + key blob, encrypted by the user key [hex].  Blob format:
  *    //    [byte] IV length = Niv
@@ -1674,7 +1674,7 @@ AutoPtr<IOutputStream> CBackupManagerService::PerformFullBackupTask::EmitAesBack
  *    mkOut->Flush();
  *    ArrayOf<Byte> encryptedMk = mkC->DoFinal(blob->ToByteArray());
  *    headerbuf->Append(ByteArrayToHex(encryptedMk));
- *    headerbuf->Append('\n');
+ *    headerbuf->AppendChar32('\n');
  *
  *    return finalOutput;
  */
@@ -4591,8 +4591,12 @@ ECode CBackupManagerService::constructor(
 
     mActivityManager = ActivityManagerNative::GetDefault();
 
-    mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&mAlarmManager);
-    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&mPowerManager);
+    AutoPtr<IInterface> obj;
+    mContext->GetSystemService(IContext::ALARM_SERVICE, (IInterface**)&obj);
+    mAlarmManager = IAlarmManager::Probe(obj);
+    obj = NULL;
+    mContext->GetSystemService(IContext::POWER_SERVICE, (IInterface**)&obj);
+    mPowerManager = IPowerManager::Probe(obj);
     AutoPtr<IInterface> mountService = ServiceManager::GetService(String("mount"));
     mMountService = IIMountService::Probe(mountService);
 

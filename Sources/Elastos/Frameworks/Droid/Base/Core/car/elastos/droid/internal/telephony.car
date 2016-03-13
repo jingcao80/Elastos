@@ -22,4 +22,75 @@ module
     merge("telephony/SmsRawData.car");
     merge("telephony/TelephonyIntents.car");
     merge("telephony/TelephonyProperties.car");
+
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Internal {
+    namespace Telephony {
+
+        class CCallInfo {
+
+            constructor();
+
+            constructor(
+                [in] String handle);
+
+            interface ICallInfo;
+            interface IParcelable;
+        }
+
+        class CCallerInfo {
+
+            constructor();
+
+            interface ICallerInfo;
+        }
+
+        singleton class CCallerInfoHelper {
+
+            interface ICallerInfoHelper;
+        }
+
+        class CCallerInfoAsyncQuery {
+
+            constructor();
+
+            interface ICallerInfoAsyncQuery;
+        }
+
+        singleton class CCallerInfoAsyncQueryHelper {
+
+            interface ICallerInfoAsyncQueryHelper;
+        }
+
+        class CGsmAlphabetTextEncodingDetails {
+
+            constructor();
+
+            interface IGsmAlphabetTextEncodingDetails;
+        }
+
+        singleton class CGsmAlphabet {
+
+            interface IGsmAlphabet;
+        }
+
+        [deprecated]
+        class CSmsRawData {
+
+            constructor();
+
+            constructor(
+                [in] ArrayOf<Byte>* data);
+
+            interface ISmsRawData;
+            interface IParcelable;
+        }
+
+    } // Telephony
+    } // Internal
+    } // Droid
+    } // Elastos
+
 }

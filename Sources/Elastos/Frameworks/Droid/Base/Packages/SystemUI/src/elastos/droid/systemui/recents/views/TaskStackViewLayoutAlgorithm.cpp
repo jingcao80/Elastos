@@ -1,7 +1,11 @@
 
 #include "elastos/droid/systemui/recents/views/TaskStackViewLayoutAlgorithm.h"
-#include "elastos/droid/systemui/recents/model/Task.h"
-#include <Elastos/core/Math.h>
+#include "elastos/droid/systemui/recents/model/TaskGrouping.h"
+#include "Elastos.CoreLibrary.Utility.h"
+#include <elastos/core/Math.h>
+
+using Elastos::Droid::Graphics::CRect;
+using Elastos::Droid::SystemUI::Recents::Model::ITask;
 
 namespace Elastos {
 namespace Droid {
@@ -148,7 +152,7 @@ void TaskStackViewLayoutAlgorithm::ComputeMinMaxScroll(
     else {
         mInitialScrollP = pAtFrontMostCardTop - 0.825f;
     }
-    mInitialScrollP = Elastos::Core::Math::Max(0, mInitialScrollP);
+    mInitialScrollP = Elastos::Core::Math::Max(0.0f, mInitialScrollP);
 }
 
 /** Update/get the transform */
@@ -174,7 +178,7 @@ AutoPtr<TaskViewTransform> TaskStackViewLayoutAlgorithm::GetStackTransform(
     /* [in] */ TaskViewTransform* prevTransform)
 {
     Float pTaskRelative = taskProgress - stackScroll;
-    Float pBounded = Elastos::Core::Math::Max(0, Elastos::Core::Math::Min(pTaskRelative, 1.0f));
+    Float pBounded = Elastos::Core::Math::Max(0.0f, Elastos::Core::Math::Min(pTaskRelative, 1.0f));
     // If the task top is outside of the bounds below the screen, then immediately reset it
     if (pTaskRelative > 1.0f) {
         transformOut->Reset();
@@ -184,7 +188,7 @@ AutoPtr<TaskViewTransform> TaskStackViewLayoutAlgorithm::GetStackTransform(
     // The check for the top is trickier, since we want to show the next task if it is at all
     // visible, even if p < 0.
     if (pTaskRelative < 0.0f) {
-        if (prevTransform != NULL && Float.compare(prevTransform.p, 0.0f) <= 0) {
+        if (prevTransform != NULL && Elastos::Core::Math::Compare(prevTransform->mP, 0.0f) <= 0) {
             transformOut->Reset();
             transformOut->mRect->Set(mTaskRect);
             return transformOut;
@@ -200,7 +204,7 @@ AutoPtr<TaskViewTransform> TaskStackViewLayoutAlgorithm::GetStackTransform(
     Int32 top;
     mStackVisibleRect->GetTop(&top);
     transformOut->mTranslationY = CurveProgressToScreenY(pBounded) - top - scaleYOffset;
-    transformOut->mTranslationZ = Elastos::Core::Math::Max(minZ, minZ + (pBounded * (maxZ - minZ)));
+    transformOut->mTranslationZ = Elastos::Core::Math::Max(minZ, minZ + (Int32)(pBounded * (maxZ - minZ)));
     transformOut->mRect->Set(mTaskRect);
     transformOut->mRect->Offset(0, transformOut->mTranslationY);
     assert(0);
@@ -299,13 +303,13 @@ Float TaskStackViewLayoutAlgorithm::Reverse(
 Float TaskStackViewLayoutAlgorithm::LogFunc(
     /* [in] */ Float x)
 {
-    return 1.0f - (Float) (Elastos::Core::Math::Pow(LogBase, reverse(x))) / (LogBase);
+    return 1.0f - (Float) (Elastos::Core::Math::Pow(LogBase, Reverse(x))) / (LogBase);
 }
 /** The inverse of the log function describing the curve. */
 Float TaskStackViewLayoutAlgorithm::InvLogFunc(
     /* [in] */ Float y)
 {
-    return (Float) (Elastos::Core::Math::Log((1.0f - reverse(y)) * (LogBase - 1) + 1) / Elastos::Core::Math::Log(LogBase));
+    return (Float) (Elastos::Core::Math::Log((1.0f - Reverse(y)) * (LogBase - 1) + 1) / Elastos::Core::Math::Log(LogBase));
 }
 
 /** Converts from the progress along the curve to a screen coordinate. */
@@ -315,7 +319,7 @@ Int32 TaskStackViewLayoutAlgorithm::CurveProgressToScreenY(
     Int32 top, height;
     mStackVisibleRect->GetTop(&top);
     mStackVisibleRect->GetHeight(&height);
-    if (p < 0 || p > 1) return top + (Int32) (p * height;
+    if (p < 0 || p > 1) return top + (Int32) (p * height);
     Float pIndex = p * PrecisionSteps;
     Int32 pFloorIndex = (Int32) Elastos::Core::Math::Floor(pIndex);
     Int32 pCeilIndex = (Int32) Elastos::Core::Math::Ceil(pIndex);
@@ -325,7 +329,7 @@ Int32 TaskStackViewLayoutAlgorithm::CurveProgressToScreenY(
         xFraction = ((*sXp)[pCeilIndex] - (*sXp)[pFloorIndex]) * pFraction;
     }
     Float x = (*sXp)[pFloorIndex] + xFraction;
-    return top + (Int32) (x * height;
+    return top + (Int32) (x * height);
 }
 
 /** Converts from the progress along the curve to a scale. */

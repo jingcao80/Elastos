@@ -125,8 +125,9 @@ AutoPtr<IInterface> CRecentTasksLoader::TaskLoaderAsyncTask::DoInBackground(
     Process::SetThreadPriority(IProcess::THREAD_PRIORITY_BACKGROUND);
     AutoPtr<IPackageManager> pm;
     mHost->mContext->GetPackageManager((IPackageManager**)&pm);
-    AutoPtr<IActivityManager> am;
-    mHost->mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
+    AutoPtr<IInterface> obj;
+    mHost->mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&obj);
+    AutoPtr<IActivityManager> am = IActivityManager::Probe(obj);
 
     AutoPtr<IObjectContainer> objectcontainer;
     am->GetRecentTasks(MAX_TASKS, IActivityManager::RECENT_IGNORE_UNAVAILABLE, (IObjectContainer**)&objectcontainer);
@@ -348,8 +349,9 @@ ECode CRecentTasksLoader::constructor(
     AutoPtr<IDisplayMetrics> dm;
     res->GetDisplayMetrics((IDisplayMetrics**)&dm);
     if (isTablet) {
-        AutoPtr<IActivityManager> activityManager;
-        context->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&activityManager);
+        AutoPtr<IInterface> obj;
+        context->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&obj);
+        AutoPtr<IActivityManager> activityManager = IActivityManager::Probe(obj);
         activityManager->GetLauncherLargeIconDensity(&mIconDpi);
     }
     else {
@@ -533,8 +535,9 @@ AutoPtr<ITaskDescription> CRecentTasksLoader::CreateTaskDescription(
 void CRecentTasksLoader::LoadThumbnailAndIcon(
     /* [in] */ ITaskDescription* td)
 {
-    AutoPtr<IActivityManager> am;
-    mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&obj);
+    AutoPtr<IActivityManager> am = IActivityManager::Probe(obj);
     AutoPtr<IPackageManager> pm;
     mContext->GetPackageManager((IPackageManager**)&pm);
     Int32 persistentTaskId;
@@ -750,8 +753,9 @@ ECode CRecentTasksLoader::LoadFirstTask(
     VALIDATE_NOT_NULL(des);
     *des = NULL;
 
-    AutoPtr<IActivityManager> am;
-    mContext->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&am);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::ACTIVITY_SERVICE, (IInterface**)&obj);
+    AutoPtr<IActivityManager> am = IActivityManager::Probe(obj);
 
     Int32 identifier;
     UserHandle::CURRENT->GetIdentifier(&identifier);

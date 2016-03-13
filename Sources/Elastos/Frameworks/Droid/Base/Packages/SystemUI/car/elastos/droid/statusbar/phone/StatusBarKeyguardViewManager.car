@@ -111,7 +111,7 @@ module
             [in] IKeyEvent* event,
             [out] Boolean* ret);
 
-        onActivityDrawn();
+        OnActivityDrawn();
 
         ShouldDisableWindowAnimationsForUnlock(
             [out] Boolean* ret);

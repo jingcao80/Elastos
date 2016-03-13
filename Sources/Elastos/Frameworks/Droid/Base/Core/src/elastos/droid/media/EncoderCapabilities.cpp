@@ -68,7 +68,7 @@ EncoderCapabilities::AudioEncoderCap::AudioEncoderCap(
 {}
 
 ECode EncoderCapabilities::GetOutputFileFormats(
-    /* [out,callee] */ ArrayOf<Int32>** result)
+    /* [out, callee] */ ArrayOf<Int32>** result)
 {
     VALIDATE_NOT_NULL(result);
     *result = NULL;

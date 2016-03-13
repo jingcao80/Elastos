@@ -3,8 +3,9 @@
 #define  __ELASTOS_DROID_SYSTEMUI_RECENTS_VIEWS_VIEWANIMATION_H__
 
 #include "elastos/droid/systemui/recents/views/TaskViewTransform.h"
+#include "elastos/droid/systemui/recents/misc/ReferenceCountedTrigger.h"
 
-using Elastos::Droid::SystemUI::Recents::Misc::IReferenceCountedTrigger;
+using Elastos::Droid::SystemUI::Recents::Misc::ReferenceCountedTrigger;
 
 namespace Elastos {
 namespace Droid {
@@ -21,7 +22,7 @@ public:
     {
     public:
         TaskViewEnterContext(
-            /* [in] */ IReferenceCountedTrigger* t)
+            /* [in] */ ReferenceCountedTrigger* t)
             : mPostAnimationTrigger(t)
             , mCurrentTaskOccludesLaunchTarget(FALSE)
             , mCurrentStackViewIndex(0)
@@ -32,7 +33,7 @@ public:
     public:
         // A trigger to run some logic when all the animations complete.  This works around the fact
         // that it is difficult to coordinate ViewPropertyAnimators
-        AutoPtr<IReferenceCountedTrigger> mPostAnimationTrigger;
+        AutoPtr<ReferenceCountedTrigger> mPostAnimationTrigger;
         // An update listener to notify as the enter animation progresses (used for the home transition)
         AutoPtr<IAnimatorUpdateListener> mUpdateListener;
 
@@ -55,7 +56,7 @@ public:
     {
     public:
         TaskViewExitContext(
-            /* [in] */ IReferenceCountedTrigger* t)
+            /* [in] */ ReferenceCountedTrigger* t)
             : mPostAnimationTrigger(t)
             , mOffscreenTranslationY(0)
         {
@@ -64,7 +65,7 @@ public:
     public:
         // A trigger to run some logic when all the animations complete.  This works around the fact
         // that it is difficult to coordinate ViewPropertyAnimators
-        AutoPtr<IReferenceCountedTrigger> mPostAnimationTrigger;
+        AutoPtr<ReferenceCountedTrigger> mPostAnimationTrigger;
 
         // The translationY to apply to a TaskView to move it off the bottom of the task stack
         Int32 mOffscreenTranslationY;

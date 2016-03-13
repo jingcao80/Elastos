@@ -1,6 +1,7 @@
 
 #include "elastos/droid/server/am/CPermissionController.h"
 #include "elastos/droid/server/am/CActivityManagerService.h"
+#include <Elastos.Droid.App.h>
 
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Os::EIID_IBinder;
@@ -15,7 +16,7 @@ CAR_INTERFACE_IMPL_2(CPermissionController, Object, IPermissionController, IBind
 CAR_OBJECT_IMPL(CPermissionController)
 
 ECode CPermissionController::constructor(
-    /* [in] */ Handle32 host)
+    /* [in] */ IIActivityManager* host)
 {
     mActivityManagerService = (CActivityManagerService*)host;
     return NOERROR;

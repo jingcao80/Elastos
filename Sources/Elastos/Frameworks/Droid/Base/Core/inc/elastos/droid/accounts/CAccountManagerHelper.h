@@ -3,18 +3,25 @@
 #define __ELASTOS_DROID_ACCOUNTS_CACCOUNTMANAGERHELPER_H__
 
 #include "_Elastos_Droid_Accounts_CAccountManagerHelper.h"
+#include <elastos/core/Singleton.h>
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Os::IBundle;
+using Elastos::Core::Singleton;
 
 namespace Elastos {
 namespace Droid {
 namespace Accounts {
 
 CarClass(CAccountManagerHelper)
+    , public Singleton
+    , public IAccountManagerHelper
 {
 public:
+    CAR_SINGLETON_DECL()
+
+    CAR_INTERFACE_DECL()
     /**
      * Gets an AccountManager instance associated with a Context.
      * The {@link Context} will be used as long as the AccountManager is
@@ -67,12 +74,12 @@ public:
      */
     CARAPI NewChooseAccountIntent(
         /* [in] */ IAccount* selectedAccount,
-        /* [in] */ const ArrayOf<IAccount*>& allowableAccounts,
-        /* [in] */ const ArrayOf<String>& allowableAccountTypes,
+        /* [in] */ ArrayOf<IAccount*>* allowableAccounts,
+        /* [in] */ ArrayOf<String>* allowableAccountTypes,
         /* [in] */ Boolean alwaysPromptForAccount,
         /* [in] */ const String& descriptionOverrideText,
         /* [in] */ const String& addAccountAuthTokenType,
-        /* [in] */ const ArrayOf<String>&  addAccountRequiredFeatures,
+        /* [in] */ ArrayOf<String>*  addAccountRequiredFeatures,
         /* [in] */ IBundle* addAccountOptions,
         /* [out] */ IIntent** intent);
 };

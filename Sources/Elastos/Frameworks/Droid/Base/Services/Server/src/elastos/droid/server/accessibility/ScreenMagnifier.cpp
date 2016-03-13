@@ -1,104 +1,434 @@
 
-#include "accessibility/ScreenMagnifier.h"
-#include "accessibility/GestureUtils.h"
-#include "accessibility/CViewportWindow.h"
-#include "elastos/droid/os/ServiceManager.h"
+#include <Elastos.Droid.Graphics.h>
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.Droid.Utility.h>
+#include "elastos/droid/server/accessibility/AccessibilityManagerService.h"
+#include "elastos/droid/server/accessibility/CMagnificationController.h"
+#include "elastos/droid/server/accessibility/GestureUtils.h"
+#include "elastos/droid/server/accessibility/ScreenMagnifier.h"
+#include "elastos/droid/os/Binder.h"
+#include "elastos/droid/os/Process.h"
 #include "elastos/droid/os/SystemClock.h"
-#include "elastos/droid/os/SomeArgs.h"
+#include "elastos/droid/server/LocalServices.h"
 #include "elastos/droid/text/TextUtils.h"
-#include "accessibility/CMagnificationController.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Slogger.h>
+#include <elastos/core/CoreUtils.h>
 #include <elastos/core/Math.h>
 
-using Elastos::Utility::ILocale;
-using Elastos::Utility::CLocaleHelper;
-using Elastos::Utility::ILocaleHelper;
-using Elastos::Utility::Logging::Slogger;
-using Elastos::Core::CString;
-using Elastos::Core::IInteger32;
-using Elastos::Droid::View::CScaleGestureDetector;
-using Elastos::Droid::View::CGestureDetector;
-using Elastos::Droid::View::IViewConfiguration;
-using Elastos::Droid::View::IViewConfigurationHelper;
-using Elastos::Droid::View::CViewConfigurationHelper;
-using Elastos::Droid::View::IMotionEventHelper;
-using Elastos::Droid::View::CMotionEventHelper;
-using Elastos::Droid::View::ISurface;
-using Elastos::Droid::View::IView;
-using Elastos::Droid::View::IViewGroupLayoutParams;
-using Elastos::Droid::View::CViewGroupLayoutParams;
-using Elastos::Droid::View::CWindowManagerLayoutParams;
-using Elastos::Droid::View::IWindowManagerPolicy;
-using Elastos::Droid::View::IWindowInfoHelper;
-// using Elastos::Droid::View::CWindowInfoHelper;
-using Elastos::Droid::View::CDisplayInfo;
-using Elastos::Droid::View::CPointerCoords;
-using Elastos::Droid::View::CPointerProperties;
-using Elastos::Droid::View::EIID_IDisplayContentChangeListener;
-using Elastos::Droid::View::Animation::CDecelerateInterpolator;
-using Elastos::Droid::View::Animation::IDecelerateInterpolator;
-using Elastos::Droid::Os::ServiceManager;
-using Elastos::Droid::Os::SystemClock;
-using Elastos::Droid::Os::SomeArgs;
+using Elastos::Droid::Animation::EIID_ITypeEvaluator;
+using Elastos::Droid::Animation::IAnimator;
+using Elastos::Droid::Animation::IObjectAnimator;
+using Elastos::Droid::Animation::IObjectAnimatorHelper;
+using Elastos::Droid::Animation::CObjectAnimatorHelper;
+using Elastos::Droid::Animation::ITimeInterpolator;
 using Elastos::Droid::Content::IBroadcastReceiver;
 using Elastos::Droid::Content::IIntentFilter;
 using Elastos::Droid::Content::CIntentFilter;
 using Elastos::Droid::Content::IContentResolver;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Graphics::CRect;
-using Elastos::Droid::Graphics::IColor;
-using Elastos::Droid::Graphics::PorterDuffMode;
-using Elastos::Droid::Graphics::IPixelFormat;
-using Elastos::Droid::Text::TextUtils;
-using Elastos::Droid::Animation::IObjectAnimatorHelper;
-using Elastos::Droid::Animation::CObjectAnimatorHelper;
-using Elastos::Droid::Animation::IObjectAnimator;
-using Elastos::Droid::Animation::EIID_IAnimatorListener;
-using Elastos::Droid::Animation::EIID_ITypeEvaluator;
-using Elastos::Droid::Hardware::Display::EIID_IDisplayListener;
-using Elastos::Droid::Utility::IProperty;
-using Elastos::Droid::Utility::IPropertyHelper;
-using Elastos::Droid::Utility::CPropertyHelper;
-using Elastos::Droid::Provider::ISettingsGlobal;
-using Elastos::Droid::Provider::CSettingsGlobal;
+using Elastos::Droid::Graphics::CRegion;
+using Elastos::Droid::Graphics::IRegionHelper;
+using Elastos::Droid::Graphics::CRegionHelper;
+using Elastos::Droid::Internal::Os::ISomeArgs;
+using Elastos::Droid::Internal::Os::ISomeArgsHelper;
+using Elastos::Droid::Internal::Os::CSomeArgsHelper;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Provider::ISettingsSecure;
 using Elastos::Droid::Provider::CSettingsSecure;
-
+using Elastos::Droid::Server::LocalServices;
+using Elastos::Droid::Text::TextUtils;
+using Elastos::Droid::Utility::IProperty;
+using Elastos::Droid::Utility::IPropertyHelper;
+// using Elastos::Droid::Utility::CPropertyHelper;
+using Elastos::Droid::View::Animation::CDecelerateInterpolator;
+using Elastos::Droid::View::Animation::IDecelerateInterpolator;
+using Elastos::Droid::View::Animation::IInterpolator;
+using Elastos::Droid::View::CScaleGestureDetector;
+using Elastos::Droid::View::CGestureDetector;
+using Elastos::Droid::View::IGestureDetectorOnGestureListener;
+using Elastos::Droid::View::IViewConfiguration;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
+using Elastos::Droid::View::IMotionEventHelper;
+using Elastos::Droid::View::CMotionEventHelper;
+using Elastos::Droid::View::IInputEvent;
+using Elastos::Droid::View::IView;
+using Elastos::Droid::View::CPointerCoords;
+using Elastos::Droid::View::CPointerProperties;
+using Elastos::Droid::View::EIID_IScaleGestureDetectorOnScaleGestureListener;
+using Elastos::Droid::View::EIID_IWindowManagerInternal;
+using Elastos::Droid::View::EIID_IMagnificationCallbacks;
+using Elastos::Droid::View::CMagnificationSpecHelper;
+using Elastos::Droid::View::IMagnificationSpecHelper;
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::ILocale;
+using Elastos::Utility::CLocaleHelper;
+using Elastos::Utility::ILocaleHelper;
+using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Accessibility {
 
-const Boolean ScreenMagnifier::DEBUG_STATE_TRANSITIONS = TRUE;
-const Boolean ScreenMagnifier::DEBUG_DETECTING = TRUE;
-const Boolean ScreenMagnifier::DEBUG_TRANSFORMATION = TRUE;
-const Boolean ScreenMagnifier::DEBUG_PANNING = TRUE;
-const Boolean ScreenMagnifier::DEBUG_SCALING = TRUE;
-const Boolean ScreenMagnifier::DEBUG_VIEWPORT_WINDOW = TRUE;
-const Boolean ScreenMagnifier::DEBUG_WINDOW_TRANSITIONS = TRUE;
-const Boolean ScreenMagnifier::DEBUG_ROTATION = TRUE;
-const Boolean ScreenMagnifier::DEBUG_MAGNIFICATION_CONTROLLER = TRUE;
-
 const String ScreenMagnifier::TAG("ScreenMagnifier");//ScreenMagnifier.class.getSimpleName();
+
+const Boolean ScreenMagnifier::DEBUG_STATE_TRANSITIONS = FALSE;
+const Boolean ScreenMagnifier::DEBUG_DETECTING = FALSE;
+const Boolean ScreenMagnifier::DEBUG_SET_MAGNIFICATION_SPEC = FALSE;
+const Boolean ScreenMagnifier::DEBUG_PANNING = FALSE;
+const Boolean ScreenMagnifier::DEBUG_SCALING = FALSE;
+const Boolean ScreenMagnifier::DEBUG_MAGNIFICATION_CONTROLLER = FALSE;
 
 const Int32 ScreenMagnifier::STATE_DELEGATING = 1;
 const Int32 ScreenMagnifier::STATE_DETECTING = 2;
 const Int32 ScreenMagnifier::STATE_VIEWPORT_DRAGGING = 3;
 const Int32 ScreenMagnifier::STATE_MAGNIFIED_INTERACTION = 4;
 const Float ScreenMagnifier::DEFAULT_MAGNIFICATION_SCALE = 2.0f;
-const Int32 ScreenMagnifier::DEFAULT_SCREEN_MAGNIFICATION_AUTO_UPDATE = 1;
-const Float ScreenMagnifier::DEFAULT_WINDOW_ANIMATION_SCALE = 1.0f;
 const Int32 ScreenMagnifier::MULTI_TAP_TIME_SLOP_ADJUSTMENT = 50;
+
+const Int32 ScreenMagnifier::MESSAGE_ON_MAGNIFIED_BOUNDS_CHANGED = 1;
+const Int32 ScreenMagnifier::MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED = 2;
+const Int32 ScreenMagnifier::MESSAGE_ON_USER_CONTEXT_CHANGED = 3;
+const Int32 ScreenMagnifier::MESSAGE_ON_ROTATION_CHANGED = 4;
+
+const Int32 ScreenMagnifier::DEFAULT_SCREEN_MAGNIFICATION_AUTO_UPDATE = 1;
+
+const Int32 ScreenMagnifier::MY_PID = Process::MyPid();
+
+const String ScreenMagnifier::MagnificationController::PROPERTY_NAME_MAGNIFICATION_SPEC("magnificationSpec");
 
 const Float ScreenMagnifier::MagnifiedContentInteractonStateHandler::MIN_SCALE = 1.3f;
 const Float ScreenMagnifier::MagnifiedContentInteractonStateHandler::MAX_SCALE = 5.0f;
 const Float ScreenMagnifier::MagnifiedContentInteractonStateHandler::SCALING_THRESHOLD = 0.3f;
 
-//==================================================================
-// ScreenMagnifier::MagnifiedContentInteractonStateHandler
-//==================================================================
+const Int32 ScreenMagnifier::DetectingStateHandler::MESSAGE_ON_ACTION_TAP_AND_HOLD = 1;
+const Int32 ScreenMagnifier::DetectingStateHandler::MESSAGE_TRANSITION_TO_DELEGATING_STATE = 2;
+const Int32 ScreenMagnifier::DetectingStateHandler::ACTION_TAP_COUNT = 3;
+
+const Int32 ScreenMagnifier::MotionEventInfo::MAX_POOL_SIZE = 10;
+Int32 ScreenMagnifier::MotionEventInfo::sPoolSize = 0;
+Object ScreenMagnifier::MotionEventInfo::sLock;
+AutoPtr<ScreenMagnifier::MotionEventInfo> ScreenMagnifier::MotionEventInfo::sPool;
+
+const Int32 ScreenMagnifier::ScreenStateObserver::MESSAGE_ON_SCREEN_STATE_CHANGE;
+
+//===============================================================================
+//                  ScreenMagnifier::MagnificationController
+//===============================================================================
+
+CAR_INTERFACE_IMPL(ScreenMagnifier::MagnificationController, Object, IMagnificationController);
+
+ScreenMagnifier::MagnificationController::MagnificationController()
+{}
+
+ScreenMagnifier::MagnificationController::~MagnificationController()
+{}
+
+ECode ScreenMagnifier::MagnificationController::constructor(
+    /* [in] */ IEventStreamTransformation* screenMagnifier,
+    /* [in] */ Int64 animationDuration)
+{
+    AutoPtr<IMagnificationSpecHelper> helper;
+    CMagnificationSpecHelper::AcquireSingleton((IMagnificationSpecHelper**)&helper);
+    helper->Obtain((IMagnificationSpec**)&mSentMagnificationSpec);
+    helper->Obtain((IMagnificationSpec**)&mCurrentMagnificationSpec);
+
+    CRect::New((IRect**)&mTempRect);
+    /*  */
+
+    mHost = (ScreenMagnifier*)screenMagnifier;
+
+    AutoPtr<IPropertyHelper> propertyhelper;
+    assert(0 && "TODO");
+    // CPropertyHelper::AcquireSingleton((IPropertyHelper**)&propertyhelper);
+    AutoPtr<IProperty> property;
+    propertyhelper->Of(ECLSID_CMagnificationControllerClassObject,
+            CarDataType_Interface,
+            PROPERTY_NAME_MAGNIFICATION_SPEC, (IProperty**)&property);
+
+    AutoPtr<ITypeEvaluator> evaluator = new MagnificationSpecTypeEvaluator();
+
+    AutoPtr<ArrayOf<IInterface*> > objArrays = ArrayOf<IInterface*>::Alloc(2);
+    objArrays->Set(0, TO_IINTERFACE(mSentMagnificationSpec));
+    objArrays->Set(1, TO_IINTERFACE(mCurrentMagnificationSpec));
+
+    AutoPtr<IObjectAnimatorHelper> objAnimhelper;
+    CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&objAnimhelper);
+    AutoPtr<IObjectAnimator> objAnim;
+    objAnimhelper->OfObject(TO_IINTERFACE(this), property, evaluator,
+            objArrays, (IObjectAnimator**)&objAnim);
+    mTransformationAnimator = IValueAnimator::Probe(objAnim);
+
+    mTransformationAnimator->SetDuration(animationDuration);
+    AutoPtr<IInterpolator> interpolator;
+    CDecelerateInterpolator::New(2.5f, (IInterpolator**)&interpolator);
+    IAnimator::Probe(mTransformationAnimator)->SetInterpolator(ITimeInterpolator::Probe(interpolator));
+    return NOERROR;
+}
+
+ECode ScreenMagnifier::MagnificationController::IsMagnifying(
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    Float scale;
+    mCurrentMagnificationSpec->GetScale(&scale);
+    *result = scale > 1.0f;
+    return NOERROR;
+}
+
+ECode ScreenMagnifier::MagnificationController::Reset(
+    /* [in] */ Boolean animate)
+{
+    Boolean isRunning;
+    IAnimator::Probe(mTransformationAnimator)->IsRunning(&isRunning);
+
+    if (isRunning) {
+        IAnimator::Probe(mTransformationAnimator)->Cancel();
+    }
+
+    mCurrentMagnificationSpec->Clear();
+    if (animate) {
+        AnimateMangificationSpec(mSentMagnificationSpec, mCurrentMagnificationSpec);
+    }
+    else {
+        SetMagnificationSpec(mCurrentMagnificationSpec);
+    }
+
+    AutoPtr<IRect> bounds = mTempRect;
+    bounds->SetEmpty();
+    mHost->mAms->OnMagnificationStateChanged();
+
+    return NOERROR;
+}
+
+ECode ScreenMagnifier::MagnificationController::GetScale(
+    /* [out] */ Float* value)
+{
+    return mCurrentMagnificationSpec->GetScale(value);
+}
+
+ECode ScreenMagnifier::MagnificationController::GetOffsetX(
+    /* [out] */ Float* value)
+{
+    return mCurrentMagnificationSpec->GetOffsetX(value);
+}
+
+ECode ScreenMagnifier::MagnificationController::GetOffsetY(
+    /* [out] */ Float* value)
+{
+    return mCurrentMagnificationSpec->GetOffsetY(value);
+}
+
+ECode ScreenMagnifier::MagnificationController::SetScale(
+    /* [in] */ Float scale,
+    /* [in] */ Float pivotX,
+    /* [in] */ Float pivotY,
+    /* [in] */ Boolean animate)
+{
+    AutoPtr<IRect> magnifiedFrame = mTempRect;
+    Boolean res;
+    mHost->mMagnifiedBounds->GetBounds(magnifiedFrame, &res);
+
+    AutoPtr<IMagnificationSpec> spec = mCurrentMagnificationSpec;
+
+    Float oldScale;
+    spec->GetScale(&oldScale);
+    Float X, Y;
+    spec->GetOffsetX(&X);
+    spec->GetOffsetY(&Y);
+    Int32 width, height;
+    magnifiedFrame->GetWidth(&width);
+    magnifiedFrame->GetHeight(&height);
+
+    Float oldCenterX = (-X + width / 2) / oldScale;
+    Float oldCenterY = (-Y + height / 2) / oldScale;
+    Float normPivotX = (-X + pivotX) / oldScale;
+    Float normPivotY = (-Y + pivotY) / oldScale;
+    Float offsetX = (oldCenterX - normPivotX) * (oldScale / scale);
+    Float offsetY = (oldCenterY - normPivotY) * (oldScale / scale);
+    Float centerX = normPivotX + offsetX;
+    Float centerY = normPivotY + offsetY;
+    SetScaleAndMagnifiedRegionCenter(scale, centerX, centerY, animate);
+
+    return NOERROR;
+}
+
+ECode ScreenMagnifier::MagnificationController::SetMagnifiedRegionCenter(
+    /* [in] */ Float centerX,
+    /* [in] */ Float centerY,
+    /* [in] */ Boolean animate)
+{
+    Float scale;
+    mCurrentMagnificationSpec->GetScale(&scale);
+    return SetScaleAndMagnifiedRegionCenter(scale, centerX, centerY, animate);
+}
+
+ECode ScreenMagnifier::MagnificationController::OffsetMagnifiedRegionCenter(
+    /* [in] */ Float offsetX,
+    /* [in] */ Float offsetY)
+{
+    Float x, y;
+    mCurrentMagnificationSpec->GetOffsetX(&x);
+    mCurrentMagnificationSpec->GetOffsetY(&y);
+    Float nonNormOffsetX = x - offsetX;
+    using Elastos::Core::Math;
+    mCurrentMagnificationSpec->SetOffsetX(Math::Min(Math::Max(nonNormOffsetX,
+            GetMinOffsetX()), 0.f));
+    Float nonNormOffsetY = y - offsetY;
+    mCurrentMagnificationSpec->SetOffsetY(Math::Min(Math::Max(nonNormOffsetY,
+            GetMinOffsetY()), 0.f));
+    SetMagnificationSpec(mCurrentMagnificationSpec);
+    return NOERROR;
+}
+
+ECode ScreenMagnifier::MagnificationController::SetScaleAndMagnifiedRegionCenter(
+    /* [in] */ Float scale,
+    /* [in] */ Float centerX,
+    /* [in] */ Float centerY,
+    /* [in] */ Boolean animate)
+{
+    Float s, x, y;
+    mCurrentMagnificationSpec->GetScale(&s);
+    mCurrentMagnificationSpec->GetOffsetX(&x);
+    mCurrentMagnificationSpec->GetOffsetX(&y);
+    using Elastos::Core::Math;
+    if (Math::Compare(s, scale) == 0
+            && Math::Compare(x, centerX) == 0
+            && Math::Compare(y, centerY) == 0) {
+        return NOERROR;
+    }
+
+    Boolean isRunning;
+    if (IAnimator::Probe(mTransformationAnimator)->IsRunning(&isRunning), isRunning) {
+        IAnimator::Probe(mTransformationAnimator)->Cancel();
+    }
+
+    if (DEBUG_MAGNIFICATION_CONTROLLER) {
+        Slogger::I(String("CMagnificationController"), "scale: %f offsetX: %f offsetY: %f",
+            scale, centerX, centerY);
+    }
+
+    UpdateMagnificationSpec(scale, centerX, centerY);
+    if (animate) {
+        AnimateMangificationSpec(mSentMagnificationSpec, mCurrentMagnificationSpec);
+    }
+    else {
+        SetMagnificationSpec(mCurrentMagnificationSpec);
+    }
+    mHost->mAms->OnMagnificationStateChanged();
+    return NOERROR;
+}
+
+ECode ScreenMagnifier::MagnificationController::UpdateMagnificationSpec(
+    /* [in] */ Float scale,
+    /* [in] */ Float magnifiedCenterX,
+    /* [in] */ Float magnifiedCenterY)
+{
+    AutoPtr<IRect> magnifiedFrame = mTempRect;
+    Boolean res;
+    mHost->mMagnifiedBounds->GetBounds(magnifiedFrame, &res);
+    mCurrentMagnificationSpec->SetScale(scale);
+    Int32 viewportWidth;
+    magnifiedFrame->GetWidth(&viewportWidth);
+    Float nonNormOffsetX = viewportWidth / 2 - magnifiedCenterX * scale;
+    using Elastos::Core::Math;
+    mCurrentMagnificationSpec->SetOffsetX(Math::Min(Math::Max(nonNormOffsetX,
+            GetMinOffsetX()), 0.f));
+    Int32 viewportHeight;
+    magnifiedFrame->GetHeight(&viewportHeight);
+    Float nonNormOffsetY = viewportHeight / 2 - magnifiedCenterY * scale;
+    mCurrentMagnificationSpec->SetOffsetY(Math::Min(Math::Max(nonNormOffsetY,
+            GetMinOffsetY()), 0.f));
+    return NOERROR;
+}
+
+Float ScreenMagnifier::MagnificationController::GetMinOffsetX()
+{
+    AutoPtr<IRect> magnifiedFrame = mTempRect;
+    Boolean res;
+    mHost->mMagnifiedBounds->GetBounds(magnifiedFrame, &res);
+    Int32 width;
+    magnifiedFrame->GetWidth(&width);
+
+    Float scale;
+    mCurrentMagnificationSpec->GetScale(&scale);
+
+    Float viewportWidth = (Float)width;
+    return viewportWidth - viewportWidth * scale;
+}
+
+Float ScreenMagnifier::MagnificationController::GetMinOffsetY()
+{
+    AutoPtr<IRect> magnifiedFrame = mTempRect;
+    Boolean res;
+    mHost->mMagnifiedBounds->GetBounds(magnifiedFrame, &res);
+    Int32 height;
+    magnifiedFrame->GetHeight(&height);
+
+    Float scale;
+    mCurrentMagnificationSpec->GetScale(&scale);
+
+    Float viewportHeight = (Float)height;
+    return viewportHeight - viewportHeight * scale;
+}
+
+ECode ScreenMagnifier::MagnificationController::AnimateMangificationSpec(
+    /* [in] */ IMagnificationSpec* fromSpec,
+    /* [in] */ IMagnificationSpec* toSpec)
+{
+    AutoPtr<ArrayOf<IInterface*> > objArrays = ArrayOf<IInterface*>::Alloc(2);
+    objArrays->Set(0, TO_IINTERFACE(fromSpec));
+    objArrays->Set(1, TO_IINTERFACE(toSpec));
+    mTransformationAnimator->SetObjectValues(objArrays);
+    IAnimator::Probe(mTransformationAnimator)->Start();
+    return NOERROR;
+}
+
+ECode ScreenMagnifier::MagnificationController::GetMagnificationSpec(
+    /* [out] */ IMagnificationSpec** spec)
+{
+    VALIDATE_NOT_NULL(spec);
+    *spec = mSentMagnificationSpec;
+    REFCOUNT_ADD(*spec);
+    return NOERROR;
+}
+
+ECode ScreenMagnifier::MagnificationController::SetMagnificationSpec(
+    /* [in] */ IMagnificationSpec* spec)
+{
+    if (DEBUG_SET_MAGNIFICATION_SPEC) {
+        Slogger::I(LOG_TAG, "Sending: %p", spec);
+    }
+
+    Float scale, sx, sy;
+    spec->GetScale(&scale);
+    spec->GetOffsetX(&sx);
+    spec->GetOffsetY(&sy);
+    mSentMagnificationSpec->SetScale(scale);
+    mSentMagnificationSpec->SetOffsetX(sx);
+    mSentMagnificationSpec->SetOffsetY(sy);
+
+    AutoPtr<IMagnificationSpecHelper> helper;
+    CMagnificationSpecHelper::AcquireSingleton((IMagnificationSpecHelper**)&helper);
+    AutoPtr<IMagnificationSpec> magn;
+    helper->Obtain((IMagnificationSpec**)&magn);
+    mHost->mWindowManager->SetMagnificationSpec(magn);
+
+    return NOERROR;
+}
+
+//===============================================================================
+//                  ScreenMagnifier::MagnifiedContentInteractonStateHandler
+//===============================================================================
+
+CAR_INTERFACE_IMPL(ScreenMagnifier::MagnifiedContentInteractonStateHandler,
+        GestureDetector::SimpleOnGestureListener, IScaleGestureDetectorOnScaleGestureListener);
+
 ScreenMagnifier::MagnifiedContentInteractonStateHandler::MagnifiedContentInteractonStateHandler(
     /* [in] */ IContext* context,
     /* [in] */ ScreenMagnifier* host)
@@ -106,47 +436,13 @@ ScreenMagnifier::MagnifiedContentInteractonStateHandler::MagnifiedContentInterac
     , mScaling(FALSE)
     , mHost(host)
 {
-    ASSERT_SUCCEEDED(CScaleGestureDetector::New(context, (IScaleGestureDetectorOnScaleGestureListener*)this,
-        (IScaleGestureDetector**)&mScaleGestureDetector));
-    ASSERT_SUCCEEDED(CGestureDetector::New(context, (IGestureDetectorOnGestureListener*)this,
-        (IGestureDetector**)&mGestureDetector));
-}
-
-PInterface ScreenMagnifier::MagnifiedContentInteractonStateHandler::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_IInterface) {
-        return (PInterface)(IGestureDetectorOnGestureListener*)this;
-    }
-    else if (riid == Elastos::Droid::View::EIID_IOnGestureListener) {
-        return (IGestureDetectorOnGestureListener*)this;
-    }
-    else if (riid == Elastos::Droid::View::EIID_IOnDoubleTapListener) {
-        return (IGestureDetectorOnDoubleTapListener*)this;
-    }
-    else if (riid == Elastos::Droid::View::EIID_IOnScaleGestureListener) {
-        return (IScaleGestureDetectorOnScaleGestureListener*)this;
-    }
-
-    return NULL;
-}
-
-UInt32 ScreenMagnifier::MagnifiedContentInteractonStateHandler::AddRef()
-{
-    return ElRefBase::AddRef();
-}
-
-UInt32 ScreenMagnifier::MagnifiedContentInteractonStateHandler::Release()
-{
-    return ElRefBase::Release();
-}
-
-ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::GetInterfaceID(
-    /* [in] */ IInterface* pObject,
-    /* [in] */ InterfaceID* pIID)
-{
-    assert(0);
-    return E_NOT_IMPLEMENTED;
+    ASSERT_SUCCEEDED(CScaleGestureDetector::New(context,
+            (IScaleGestureDetectorOnScaleGestureListener*)this,
+            (IScaleGestureDetector**)&mScaleGestureDetector));
+    mScaleGestureDetector->SetQuickScaleEnabled(FALSE);
+    ASSERT_SUCCEEDED(CGestureDetector::New(context,
+            (IGestureDetectorOnGestureListener*)this,
+            (IGestureDetector**)&mGestureDetector));
 }
 
 ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnMotionEvent(
@@ -182,30 +478,6 @@ ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnMotionEvent(
     return NOERROR;
 }
 
-ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnDown(
-    /* [in] */ IMotionEvent* e,
-    /* [out] */ Boolean* res)
-{
-    VALIDATE_NOT_NULL(res);
-    *res = FALSE;
-    return NOERROR;
-}
-
-ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnShowPress(
-    /* [in] */ IMotionEvent* e)
-{
-    return NOERROR;
-}
-
-ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnSingleTapUp(
-    /* [in] */ IMotionEvent* e,
-    /* [out] */ Boolean* res)
-{
-    VALIDATE_NOT_NULL(res);
-    *res = FALSE;
-    return NOERROR;
-}
-
 ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnScroll(
     /* [in] */ IMotionEvent* e1,
     /* [in] */ IMotionEvent* e2,
@@ -220,66 +492,12 @@ ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnScroll(
         return NOERROR;
     }
 
-    Float scale, centerX, centerY;
-    mHost->mMagnificationController->GetScale(&scale);
-    mHost->mMagnificationController->GetMagnifiedRegionCenterX(&centerX);
-    mHost->mMagnificationController->GetMagnifiedRegionCenterY(&centerY);
-    Float scrollX = distanceX / scale;
-    Float scrollY = distanceY / scale;
-    centerX += scrollX;
-    centerY += scrollY;
-
     if (ScreenMagnifier::DEBUG_PANNING) {
         Slogger::I(ScreenMagnifier::TAG,
-            "Panned content by scrollX: %f scrollY: %f", scrollX, scrollY);
+            "Panned content by scrollX: %f scrollY: %f", distanceX, distanceY);
     }
 
-    mHost->mMagnificationController->SetMagnifiedRegionCenter(centerX, centerY, FALSE);
-    return NOERROR;
-}
-
-ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnLongPress(
-    /* [in] */ IMotionEvent* e)
-{
-    return NOERROR;
-}
-
-ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnFling(
-    /* [in] */ IMotionEvent* e1,
-    /* [in] */ IMotionEvent* e2,
-    /* [in] */ Float velocityX,
-    /* [in] */ Float velocityY,
-    /* [out] */ Boolean* res)
-{
-    VALIDATE_NOT_NULL(res);
-    *res = FALSE;
-    return NOERROR;
-}
-
-ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnSingleTapConfirmed(
-    /* [in] */ IMotionEvent* e,
-    /* [out] */ Boolean* res)
-{
-    VALIDATE_NOT_NULL(res);
-    *res = FALSE;
-    return NOERROR;
-}
-
-ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnDoubleTap(
-    /* [in] */ IMotionEvent* e,
-    /* [out] */ Boolean* res)
-{
-    VALIDATE_NOT_NULL(res);
-    *res = FALSE;
-    return NOERROR;
-}
-
-ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnDoubleTapEvent(
-    /* [in] */ IMotionEvent* e,
-    /* [out] */ Boolean* res)
-{
-    VALIDATE_NOT_NULL(res);
-    *res = FALSE;
+    mHost->mMagnificationController->OffsetMagnifiedRegionCenter(distanceX, distanceY);
     return NOERROR;
 }
 
@@ -300,7 +518,7 @@ ECode ScreenMagnifier::MagnifiedContentInteractonStateHandler::OnScale(
             Float scaleFactor;
             detector->GetScaleFactor(&scaleFactor);
             Float deltaScale = scaleFactor - mInitialScaleFactor;
-            if (Elastos::Core::Math::Abs(deltaScale) > SCALING_THRESHOLD) {
+            if (Math::Abs(deltaScale) > SCALING_THRESHOLD) {
                 mScaling = TRUE;
                 return NOERROR;
             }
@@ -350,13 +568,17 @@ void ScreenMagnifier::MagnifiedContentInteractonStateHandler::Clear()
     mScaling = FALSE;
 }
 
-//==================================================================
-// ScreenMagnifier::StateViewportDraggingHandler
-//==================================================================
+//===============================================================================
+//                  ScreenMagnifier::StateViewportDraggingHandler
+//===============================================================================
+
 ScreenMagnifier::StateViewportDraggingHandler::StateViewportDraggingHandler(
     /* [in] */ ScreenMagnifier* host)
     : mLastMoveOutsideMagnifiedRegion(FALSE)
     , mHost(host)
+{}
+
+ScreenMagnifier::StateViewportDraggingHandler::~StateViewportDraggingHandler()
 {}
 
 ECode ScreenMagnifier::StateViewportDraggingHandler::OnMotionEvent(
@@ -389,7 +611,7 @@ ECode ScreenMagnifier::StateViewportDraggingHandler::OnMotionEvent(
             event->GetX(&eventX);
             event->GetY(&eventY);
             Boolean isContains;
-            mHost->mViewport->GetBounds()->Contains((Int32)eventX, (Int32)eventY, &isContains);
+            mHost->mMagnifiedBounds->Contains((Int32)eventX, (Int32)eventY, &isContains);
             if (isContains) {
                 if (mLastMoveOutsideMagnifiedRegion) {
                     mLastMoveOutsideMagnifiedRegion = FALSE;
@@ -410,7 +632,6 @@ ECode ScreenMagnifier::StateViewportDraggingHandler::OnMotionEvent(
         case IMotionEvent::ACTION_UP: {
             if (!mHost->mTranslationEnabledBeforePan) {
                 mHost->mMagnificationController->Reset(TRUE);
-                mHost->mViewport->SetFrameShown(FALSE, TRUE);
             }
             Clear();
             mHost->TransitionToState(ScreenMagnifier::STATE_DETECTING);
@@ -431,57 +652,20 @@ void ScreenMagnifier::StateViewportDraggingHandler::Clear()
     mLastMoveOutsideMagnifiedRegion = FALSE;
 }
 
-//==================================================================
-// ScreenMagnifier::DetectingStateHandler
-//==================================================================
-const Int32 ScreenMagnifier::DetectingStateHandler::MESSAGE_ON_ACTION_TAP_AND_HOLD = 1;
-const Int32 ScreenMagnifier::DetectingStateHandler::MESSAGE_TRANSITION_TO_DELEGATING_STATE = 2;
-const Int32 ScreenMagnifier::DetectingStateHandler::ACTION_TAP_COUNT = 3;
-
-ECode ScreenMagnifier::DetectingStateHandler::MyHandler::HandleMessage(
-    /* [in] */ IMessage* msg)
-{
-    Int32 what;
-    msg->GetWhat(&what);
-
-    switch(what) {
-        case DetectingStateHandler::MESSAGE_ON_ACTION_TAP_AND_HOLD:{
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            IMotionEvent* event = IMotionEvent::Probe(obj);
-            Int32 policyFlags;
-            msg->GetArg1(&policyFlags);
-            mHost->OnActionTapAndHold(event, policyFlags);
-            break;
-        }
-
-        case DetectingStateHandler::MESSAGE_TRANSITION_TO_DELEGATING_STATE:{
-            mHost->HandleTransitionToDelegatingState();
-            break;
-        }
-
-        default:
-            Slogger::E(ScreenMagnifier::TAG, "Unknown message type: %d", what);
-            return E_ILLEGAL_STATE_EXCEPTION;
-    }
-
-    return NOERROR;
-}
+//===============================================================================
+//                  ScreenMagnifier::DetectingStateHandler
+//===============================================================================
 
 ScreenMagnifier::DetectingStateHandler::DetectingStateHandler(
     /* [in] */ ScreenMagnifier* host)
     : mTapCount(0)
     , mHost(host)
 {
-    mHandler = new MyHandler(this);
+    mHandler = new HandlerInDetectingStateHandlerHandler(this, mHost);
 }
 
-void ScreenMagnifier::DetectingStateHandler::HandleTransitionToDelegatingState()
-{
-    mHost->TransitionToState(ScreenMagnifier::STATE_DELEGATING);
-    SendDelayedMotionEvents();
-    Clear();
-}
+ScreenMagnifier::DetectingStateHandler::~DetectingStateHandler()
+{}
 
 void ScreenMagnifier::DetectingStateHandler::OnMotionEvent(
     /* [in] */ IMotionEvent* event,
@@ -498,7 +682,7 @@ void ScreenMagnifier::DetectingStateHandler::OnMotionEvent(
             event->GetX(&x);
             event->GetY(&y);
             Boolean isContains;
-            mHost->mViewport->GetBounds()->Contains((Int32)x, (Int32)y, &isContains);
+            mHost->mMagnifiedBounds->Contains((Int32)x, (Int32)y, &isContains);
             if (!isContains) {
                 TransitionToDelegatingStateAndClear();
                 return;
@@ -566,7 +750,7 @@ void ScreenMagnifier::DetectingStateHandler::OnMotionEvent(
             event->GetX(&x);
             event->GetY(&y);
             Boolean isContains;
-            mHost->mViewport->GetBounds()->Contains((Int32)x, (Int32)y, &isContains);
+            mHost->mMagnifiedBounds->Contains((Int32)x, (Int32)y, &isContains);
             if (!isContains) {
                 TransitionToDelegatingStateAndClear();
                 return;
@@ -629,7 +813,7 @@ void ScreenMagnifier::DetectingStateHandler::ClearTapDetectionState()
 void ScreenMagnifier::DetectingStateHandler::ClearLastTapUpEvent()
 {
     if (mLastTapUpEvent != NULL) {
-        mLastTapUpEvent->Recycle();
+        IInputEvent::Probe(mLastTapUpEvent)->Recycle();
         mLastTapUpEvent = NULL;
     }
 }
@@ -637,7 +821,7 @@ void ScreenMagnifier::DetectingStateHandler::ClearLastTapUpEvent()
 void ScreenMagnifier::DetectingStateHandler::ClearLastDownEvent()
 {
     if (mLastDownEvent != NULL) {
-        mLastDownEvent->Recycle();
+        IInputEvent::Probe(mLastDownEvent)->Recycle();
         mLastDownEvent = NULL;
     }
 }
@@ -669,8 +853,8 @@ void ScreenMagnifier::DetectingStateHandler::SendDelayedMotionEvents()
         AutoPtr<IMotionEvent> event = ObtainEventWithOffsetTimeAndDownTime(info->mEvent, offset);
         AutoPtr<IMotionEvent> rawEvent = ObtainEventWithOffsetTimeAndDownTime(info->mRawEvent, offset);
         OnMotionEvent(event, rawEvent, info->mPolicyFlags);
-        event->Recycle();
-        rawEvent->Recycle();
+        IInputEvent::Probe(event)->Recycle();
+        IInputEvent::Probe(rawEvent)->Recycle();
         info->Recycle();
     }
 }
@@ -689,16 +873,16 @@ AutoPtr<IMotionEvent> ScreenMagnifier::DetectingStateHandler::ObtainEventWithOff
     }
     Int64 downTime, eventTime;
     event->GetDownTime(&downTime);
-    event->GetEventTime(&eventTime);
+    IInputEvent::Probe(event)->GetEventTime(&eventTime);
     downTime += offset;
     eventTime += offset;
     Int32 action, metaState, buttonState, deviceId, edgeFlags, source, flags;
     event->GetAction(&action);
     event->GetMetaState(&metaState);
     event->GetButtonState(&buttonState);
-    event->GetDeviceId(&deviceId);
+    IInputEvent::Probe(event)->GetDeviceId(&deviceId);
     event->GetEdgeFlags(&edgeFlags);
-    event->GetSource(&source);
+    IInputEvent::Probe(event)->GetSource(&source);
     event->GetFlags(&flags);
 
     AutoPtr<IMotionEventHelper> helper;
@@ -741,11 +925,9 @@ void ScreenMagnifier::DetectingStateHandler::OnActionTap(
         up->GetY(&y);
         mHost->mMagnificationController->SetScaleAndMagnifiedRegionCenter(
             mHost->GetPersistedScale(), x, y, TRUE);
-        mHost->mViewport->SetFrameShown(TRUE, TRUE);
     }
     else {
         mHost->mMagnificationController->Reset(TRUE);
-        mHost->mViewport->SetFrameShown(FALSE, TRUE);
     }
 }
 
@@ -763,18 +945,59 @@ void ScreenMagnifier::DetectingStateHandler::OnActionTapAndHold(
     down->GetX(&x);
     down->GetY(&y);
     mHost->mMagnificationController->SetScaleAndMagnifiedRegionCenter(
-        mHost->GetPersistedScale(), x, y, TRUE);
-    mHost->mViewport->SetFrameShown(TRUE, TRUE);
+            mHost->GetPersistedScale(), x, y, TRUE);
     mHost->TransitionToState(ScreenMagnifier::STATE_VIEWPORT_DRAGGING);
 }
 
-//==================================================================
-// ScreenMagnifier::MotionEventInfo
-//==================================================================
-const Int32 ScreenMagnifier::MotionEventInfo::MAX_POOL_SIZE = 10;
-Int32 ScreenMagnifier::MotionEventInfo::sPoolSize = 0;
-Mutex ScreenMagnifier::MotionEventInfo::sLock;
-AutoPtr<ScreenMagnifier::MotionEventInfo> ScreenMagnifier::MotionEventInfo::sPool;
+//===============================================================================
+//                  ScreenMagnifier::HandlerInDetectingStateHandlerHandler
+//===============================================================================
+
+ScreenMagnifier::HandlerInDetectingStateHandlerHandler::HandlerInDetectingStateHandlerHandler(
+    /* [in] */ DetectingStateHandler* owner,
+    /* [in] */ ScreenMagnifier* host)
+    : mOwner(owner)
+    , mHost(host)
+{}
+
+ScreenMagnifier::HandlerInDetectingStateHandlerHandler::~HandlerInDetectingStateHandlerHandler()
+{}
+
+ECode ScreenMagnifier::HandlerInDetectingStateHandlerHandler::HandleMessage(
+    /* [in] */ IMessage* msg)
+{
+    Int32 what;
+    msg->GetWhat(&what);
+
+    switch (what) {
+        case DetectingStateHandler::MESSAGE_ON_ACTION_TAP_AND_HOLD:{
+            AutoPtr<IInterface> obj;
+            msg->GetObj((IInterface**)&obj);
+            IMotionEvent* event = IMotionEvent::Probe(obj);
+            Int32 policyFlags;
+            msg->GetArg1(&policyFlags);
+            mOwner->OnActionTapAndHold(event, policyFlags);
+            break;
+        }
+
+        case DetectingStateHandler::MESSAGE_TRANSITION_TO_DELEGATING_STATE:{
+            mHost->TransitionToState(ScreenMagnifier::STATE_DELEGATING);
+            mOwner->SendDelayedMotionEvents();
+            mOwner->Clear();
+            break;
+        }
+
+        default:
+            Slogger::E(ScreenMagnifier::TAG, "Unknown message type: %d", what);
+            return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    return NOERROR;
+}
+
+//===============================================================================
+//                  ScreenMagnifier::MotionEventInfo
+//===============================================================================
 
 ScreenMagnifier::MotionEventInfo::MotionEventInfo()
     : mPolicyFlags(0)
@@ -782,24 +1005,28 @@ ScreenMagnifier::MotionEventInfo::MotionEventInfo()
     , mInPool(FALSE)
 {}
 
+ScreenMagnifier::MotionEventInfo::~MotionEventInfo()
+{}
+
 AutoPtr<ScreenMagnifier::MotionEventInfo> ScreenMagnifier::MotionEventInfo::Obtain(
     /* [in] */ IMotionEvent* event,
     /* [in] */ IMotionEvent* rawEvent,
     /* [in] */ Int32 policyFlags)
 {
-    AutoLock lock(sLock);
     AutoPtr<MotionEventInfo> info;
-    if (sPoolSize > 0) {
-        sPoolSize--;
-        info = sPool;
-        sPool = info->mNext;
-        info->mNext = NULL;
-        info->mInPool = FALSE;
+    synchronized(sLock) {
+        if (sPoolSize > 0) {
+            sPoolSize--;
+            info = sPool;
+            sPool = info->mNext;
+            info->mNext = NULL;
+            info->mInPool = FALSE;
+        }
+        else {
+            info = new MotionEventInfo();
+        }
+        info->Initialize(event, rawEvent, policyFlags);
     }
-    else {
-        info = new MotionEventInfo();
-    }
-    info->Initialize(event, rawEvent, policyFlags);
     return info;
 }
 
@@ -820,78 +1047,110 @@ void ScreenMagnifier::MotionEventInfo::Initialize(
 
 ECode ScreenMagnifier::MotionEventInfo::Recycle()
 {
-    AutoLock lock(sLock);
-    if (mInPool) {
-        Slogger::E(ScreenMagnifier::TAG, "Already recycled.");
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-    }
+    synchronized(sLock) {
+        if (mInPool) {
+            Slogger::E(ScreenMagnifier::TAG, "Already recycled.");
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
+        }
 
-    Clear();
-    if (sPoolSize < MAX_POOL_SIZE) {
-        sPoolSize++;
-        mNext = sPool;
-        sPool = this;
-        mInPool = TRUE;
-    }
+        Clear();
+        if (sPoolSize < MAX_POOL_SIZE) {
+            sPoolSize++;
+            mNext = sPool;
+            sPool = this;
+            mInPool = TRUE;
+        }
 
+        return NOERROR;
+    }
     return NOERROR;
 }
 
 void ScreenMagnifier::MotionEventInfo::Clear()
 {
-    mEvent->Recycle();
+    IInputEvent::Probe(mEvent)->Recycle();
     mEvent = NULL;
-    mRawEvent->Recycle();
+    IInputEvent::Probe(mRawEvent)->Recycle();
     mRawEvent = NULL;
     mPolicyFlags = 0;
     mCachedTimeMillis = 0;
 }
 
-//==================================================================
-// ScreenMagnifier::ScreenStateObserver::MyHandler
-//==================================================================
-const Int32 ScreenMagnifier::ScreenStateObserver::MESSAGE_ON_SCREEN_STATE_CHANGE = 1;
+//===============================================================================
+//                  ScreenMagnifier::MagnificationSpecTypeEvaluator
+//===============================================================================
 
-ECode ScreenMagnifier::ScreenStateObserver::MyHandler::HandleMessage(
-    /* [in] */ IMessage* msg)
+CAR_INTERFACE_IMPL(ScreenMagnifier::MagnificationSpecTypeEvaluator, Object, ITypeEvaluator)
+
+ScreenMagnifier::MagnificationSpecTypeEvaluator::MagnificationSpecTypeEvaluator()
 {
-    Int32 what;
-    msg->GetWhat(&what);
+    AutoPtr<IMagnificationSpecHelper> helper;
+    CMagnificationSpecHelper::AcquireSingleton((IMagnificationSpecHelper**)&helper);
+    helper->Obtain((IMagnificationSpec**)&mTempTransformationSpec);
+}
 
-    switch(what) {
-        case ScreenMagnifier::ScreenStateObserver::MESSAGE_ON_SCREEN_STATE_CHANGE:{
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            ICharSequence* seq = ICharSequence::Probe(obj);
-            String action;
-            seq->ToString(&action);
-            mHost->HandleOnScreenStateChange(action);
-            break;
-        }
-    }
+ScreenMagnifier::MagnificationSpecTypeEvaluator::~MagnificationSpecTypeEvaluator()
+{}
 
+ECode ScreenMagnifier::MagnificationSpecTypeEvaluator::Evaluate(
+    /* [in] */ Float fraction,
+    /* [in] */ IInterface* fromSpecObj,
+    /* [in] */ IInterface* toSpecObj,
+    /* [out] */ IInterface** result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+    VALIDATE_NOT_NULL(fromSpecObj);
+    VALIDATE_NOT_NULL(toSpecObj);
+
+    AutoPtr<IMagnificationSpec> fromSpec = IMagnificationSpec::Probe(fromSpecObj);
+    AutoPtr<IMagnificationSpec> toSpec = IMagnificationSpec::Probe(toSpecObj);
+
+    AutoPtr<IMagnificationSpec> temp = mTempTransformationSpec;
+    Float fromSpecScale, toSpecScale;
+    fromSpec->GetScale(&fromSpecScale);
+    toSpec->GetScale(&toSpecScale);
+    temp->SetScale(fromSpecScale + (toSpecScale - fromSpecScale) * fraction);
+
+    Float fromSpecOffsetX, toSpecOffsetX;
+    fromSpec->GetOffsetX(&fromSpecOffsetX);
+    toSpec->GetOffsetX(&toSpecOffsetX);
+    temp->SetOffsetX(fromSpecOffsetX + (toSpecOffsetX - fromSpecOffsetX) * fraction);
+
+    Float fromSpecOffsetY, toSpecOffsetY;
+    fromSpec->GetOffsetY(&fromSpecOffsetY);
+    toSpec->GetOffsetY(&toSpecOffsetY);
+    temp->SetOffsetY(fromSpecOffsetY + (toSpecOffsetY - fromSpecOffsetY) * fraction);
+
+    *result = temp;
+    REFCOUNT_ADD(*result);
     return NOERROR;
 }
 
-//==================================================================
-// ScreenMagnifier::ScreenStateObserver
-//==================================================================
+//===============================================================================
+//                  ScreenMagnifier::ScreenStateObserver
+//===============================================================================
+
 ScreenMagnifier::ScreenStateObserver::ScreenStateObserver(
     /* [in] */ IContext* context,
-    /* [in] */ Viewport* viewport,
     /* [in] */ IMagnificationController* magnificationController,
     /* [in] */ ScreenMagnifier* host)
+    : mContext(context)
+    , mMagnificationController(magnificationController)
+    , mHost(host)
 {
-    mHandler = new ScreenStateObserver::MyHandler(this);
+    mHandler = new HandlerInScreenStateObserver(this);
 
-    mContext = context;
-    mViewport = viewport;
-    mMagnificationController = magnificationController;
+    // mContext = context;
+    // mMagnificationController = magnificationController;
     AutoPtr<IIntentFilter> filter;
     CIntentFilter::New(IIntent::ACTION_SCREEN_OFF, (IIntentFilter**)&filter);
     AutoPtr<IIntent> res;
     mContext->RegisterReceiver((IBroadcastReceiver*)this, filter, (IIntent**)&res);
 }
+
+ScreenMagnifier::ScreenStateObserver::~ScreenStateObserver()
+{}
 
 void ScreenMagnifier::ScreenStateObserver::Destroy()
 {
@@ -904,917 +1163,157 @@ ECode ScreenMagnifier::ScreenStateObserver::OnReceive(
 {
     String action;
     intent->GetAction(&action);
-    AutoPtr<ICharSequence> seq;
-    CString::New(action, (ICharSequence**)&seq);
     AutoPtr<IMessage> msg;
-    mHandler->ObtainMessage(MESSAGE_ON_SCREEN_STATE_CHANGE, (IMessage**)&msg);
-    msg->SetObj(seq);
-    Boolean result;
-    return mHandler->SendMessage(msg, &result);
+    mHandler->ObtainMessage(MESSAGE_ON_SCREEN_STATE_CHANGE,
+            CoreUtils::Convert(action), (IMessage**)&msg);
+    return msg->SendToTarget();
 }
 
 void ScreenMagnifier::ScreenStateObserver::HandleOnScreenStateChange(
     /* [in] */ const String& action)
 {
-    Boolean bval;
-    if (action.Equals(IIntent::ACTION_SCREEN_OFF)
-        && (mMagnificationController->IsMagnifying(&bval), bval)
-        && IsScreenMagnificationAutoUpdateEnabled(mContext))
+    Boolean res;
+    if ((mMagnificationController->IsMagnifying(&res), res)
+        && mHost->IsScreenMagnificationAutoUpdateEnabled(mContext))
     {
         mMagnificationController->Reset(FALSE);
-        mViewport->SetFrameShown(FALSE, FALSE);
     }
 }
 
+//===============================================================================
+//                  ScreenMagnifier::HandlerInScreenStateObserver
+//===============================================================================
 
-//==================================================================
-// ScreenMagnifier::DisplayContentObserver::MyDisplayContentChangeListener
-//==================================================================
-
-CAR_INTERFACE_IMPL(ScreenMagnifier::DisplayContentObserver::MyDisplayContentChangeListener, IDisplayContentChangeListener)
-
-ECode ScreenMagnifier::DisplayContentObserver::MyDisplayContentChangeListener::OnWindowTransition(
-    /* [in] */ Int32 displayId,
-    /* [in] */ Int32 transition,
-    /* [in] */ IWindowInfo* info)
-{
-    AutoPtr<IWindowInfoHelper> helper;
-    assert(0);
-    // ASSERT_SUCCEEDED(CWindowInfoHelper::AcquireSingleton((IWindowInfoHelper**)&helper));
-    AutoPtr<IWindowInfo> outInfo;
-    helper->Obtain(info, (IWindowInfo**)&outInfo);
-
-    AutoPtr<IMessage> msg;
-    mHost->mHandler->ObtainMessage(
-        ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_WINDOW_TRANSITION,
-        (IMessage**)&msg);
-    msg->SetArg1(transition);
-    msg->SetObj(outInfo);
-    Boolean result;
-    return mHost->mHandler->SendMessage(msg, &result);
-}
-
-ECode ScreenMagnifier::DisplayContentObserver::MyDisplayContentChangeListener::OnRectangleOnScreenRequested(
-    /* [in] */ Int32 displayId,
-    /* [in] */ IRect* rectangle,
-    /* [in] */ Boolean immediate)
-{
-    AutoPtr<SomeArgs> args = SomeArgs::Obtain();
-    rectangle->Get(&args->mArgi1, &args->mArgi2, &args->mArgi3, &args->mArgi4);
-
-    AutoPtr<IMessage> msg;
-    mHost->mHandler->ObtainMessage(
-        ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED,
-        (IMessage**)&msg);
-    msg->SetArg1(immediate ? 1 : 0);
-    msg->SetObj(args);
-    Boolean result;
-    return mHost->mHandler->SendMessage(msg, &result);
-}
-
-ECode ScreenMagnifier::DisplayContentObserver::MyDisplayContentChangeListener::OnWindowLayersChanged(
-    /* [in] */ Int32 displayId)
-{
-    AutoPtr<IMessage> msg;
-    mHost->mHandler->ObtainMessage(
-        ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_WINDOW_LAYERS_CHANGED,
-        (IMessage**)&msg);
-    msg->SetArg1(displayId);
-    Boolean result;
-    return mHost->mHandler->SendMessage(msg, &result);
-}
-
-ECode ScreenMagnifier::DisplayContentObserver::MyDisplayContentChangeListener::OnRotationChanged(
-    /* [in] */ Int32 rotation)
-{
-    AutoPtr<IMessage> msg;
-    mHost->mHandler->ObtainMessage(
-        ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_ROTATION_CHANGED,
-        (IMessage**)&msg);
-    msg->SetArg1(rotation);
-    Boolean result;
-    return mHost->mHandler->SendMessage(msg, &result);
-}
-
-
-//==================================================================
-// ScreenMagnifier::DisplayContentObserver::MyHandler
-//==================================================================
-const Int32 ScreenMagnifier::DisplayContentObserver::MESSAGE_SHOW_VIEWPORT_FRAME = 1;
-const Int32 ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED = 3;
-const Int32 ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_WINDOW_TRANSITION = 4;
-const Int32 ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_ROTATION_CHANGED = 5;
-const Int32 ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_WINDOW_LAYERS_CHANGED = 6;
-
-
-ECode ScreenMagnifier::DisplayContentObserver::MyHandler::HandleMessage(
-    /* [in] */ IMessage* msg)
-{
-    Int32 what, arg1;
-    msg->GetWhat(&what);
-    msg->GetArg1(&arg1);
-
-    switch(what) {
-        case ScreenMagnifier::DisplayContentObserver::MESSAGE_SHOW_VIEWPORT_FRAME:{
-            mHost->mViewport->SetFrameShown(TRUE, TRUE);
-            break;
-        }
-        case ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED: {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            SomeArgs* args = (SomeArgs*)obj.Get();
-            Boolean immediate = (arg1 == 1);
-            mHost->mTempRect->Set(args->mArgi1, args->mArgi2, args->mArgi3, args->mArgi4);
-            mHost->HandleOnRectangleOnScreenRequested(mHost->mTempRect, immediate);
-            args->Recycle();
-            break;
-        }
-        case ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_WINDOW_TRANSITION: {
-            AutoPtr<IInterface> obj;
-            msg->GetObj((IInterface**)&obj);
-            IWindowInfo* info = IWindowInfo::Probe(obj);
-            mHost->HandleOnWindowTransition(arg1, info);
-            break;
-        }
-        case ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_ROTATION_CHANGED: {
-            mHost->HandleOnRotationChanged(arg1);
-            break;
-        }
-        case ScreenMagnifier::DisplayContentObserver::MESSAGE_ON_WINDOW_LAYERS_CHANGED: {
-            Boolean bval;
-            mHost->mMagnificationController->IsMagnifying(&bval);
-            mHost->mViewport->RecomputeBounds(bval);
-        }
-        break;
-
-        default: {
-            // throw new IllegalArgumentException("Unknown message: " + action);
-            return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        }
-    }
-
-    return NOERROR;
-}
-
-//==================================================================
-// ScreenMagnifier::DisplayContentObserver
-//==================================================================
-ScreenMagnifier::DisplayContentObserver::DisplayContentObserver(
-    /* [in] */ IContext* context,
-    /* [in] */ Viewport* viewport,
-    /* [in] */ IMagnificationController* magnificationController,
-    /* [in] */ IIWindowManager* windowManagerService,
-    /* [in] */ DisplayProvider* displayProvider,
-    /* [in] */ Int64 longAnimationDuration,
-    /* [in] */ Float windowAnimationScale)
-{
-    mHandler = new MyHandler(this);
-    ASSERT_SUCCEEDED(CRect::New((IRect**)&mTempRect));
-
-    mContext = context;
-    mViewport = viewport;
-    mMagnificationController = magnificationController;
-    mWindowManagerService = windowManagerService;
-    mDisplayProvider = displayProvider;
-    mLongAnimationDuration = longAnimationDuration;
-    mWindowAnimationScale = windowAnimationScale;
-
-    mDisplayContentChangeListener = new MyDisplayContentChangeListener(this);
-
-    // try {
-    Int32 displayId;
-    mDisplayProvider->GetDisplay()->GetDisplayId(&displayId);
-    mWindowManagerService->AddDisplayContentChangeListener(
-        displayId, mDisplayContentChangeListener);
-    // } catch (RemoteException re) {
-    //     /* ignore */
-    // }
-}
-
-void ScreenMagnifier::DisplayContentObserver::Destroy()
-{
-    // try {
-    Int32 displayId;
-    mDisplayProvider->GetDisplay()->GetDisplayId(&displayId);
-    mWindowManagerService->RemoveDisplayContentChangeListener(
-        displayId, mDisplayContentChangeListener);
-    // } catch (RemoteException re) {
-    //     /* ignore*/
-    // }
-}
-
-void ScreenMagnifier::DisplayContentObserver::HandleOnRotationChanged(
-    /* [in] */ Int32 rotation)
-{
-    if (ScreenMagnifier::DEBUG_ROTATION) {
-        Slogger::I(ScreenMagnifier::TAG, "Rotation: %s",
-            RotationToString(rotation).string());
-    }
-
-    ResetMagnificationIfNeeded();
-    mViewport->SetFrameShown(FALSE, FALSE);
-    mViewport->RotationChanged();
-    mViewport->RecomputeBounds(FALSE);
-
-    Boolean bval;
-    if (mMagnificationController->IsMagnifying(&bval), bval) {
-        Int64 delay = (Int64)(2 * mLongAnimationDuration * mWindowAnimationScale);
-        Boolean result;
-        mHandler->SendEmptyMessageDelayed(MESSAGE_SHOW_VIEWPORT_FRAME, delay, &result);
-    }
-}
-
-void ScreenMagnifier::DisplayContentObserver::HandleOnWindowTransition(
-    /* [in] */ Int32 transition,
-    /* [in] */ IWindowInfo* info)
-{
-    if (ScreenMagnifier::DEBUG_WINDOW_TRANSITIONS) {
-        Slogger::I(ScreenMagnifier::TAG, "Window transitioning: %s",
-            WindowTransitionToString(transition).string());
-    }
-
-    // try {
-    Boolean magnifying;
-    mMagnificationController->IsMagnifying(&magnifying);
-    if (magnifying) {
-        switch (transition) {
-            case IWindowManagerPolicy::TRANSIT_ACTIVITY_OPEN:
-            case IWindowManagerPolicy::TRANSIT_TASK_OPEN:
-            case IWindowManagerPolicy::TRANSIT_TASK_TO_FRONT:
-            case IWindowManagerPolicy::TRANSIT_WALLPAPER_OPEN:
-            case IWindowManagerPolicy::TRANSIT_WALLPAPER_CLOSE:
-            case IWindowManagerPolicy::TRANSIT_WALLPAPER_INTRA_OPEN: {
-                ResetMagnificationIfNeeded();
-            }
-        }
-    }
-
-    Int32 type;
-    info->GetType(&type);
-    if (type == IWindowManagerLayoutParams::TYPE_NAVIGATION_BAR
-        || type == IWindowManagerLayoutParams::TYPE_INPUT_METHOD
-        || type == IWindowManagerLayoutParams::TYPE_INPUT_METHOD_DIALOG
-        || type == IWindowManagerLayoutParams::TYPE_KEYGUARD
-        || type == IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG)
-    {
-        switch (transition) {
-            case IWindowManagerPolicy::TRANSIT_ENTER:
-            case IWindowManagerPolicy::TRANSIT_SHOW:
-            case IWindowManagerPolicy::TRANSIT_EXIT:
-            case IWindowManagerPolicy::TRANSIT_HIDE: {
-                mViewport->RecomputeBounds(magnifying);
-            }
-            break;
-        }
-    }
-
-    switch (transition) {
-        case IWindowManagerPolicy::TRANSIT_ENTER:
-        case IWindowManagerPolicy::TRANSIT_SHOW: {
-            if (!magnifying || !IsScreenMagnificationAutoUpdateEnabled(mContext)) {
-                break;
-            }
-            switch (type) {
-                // TODO: Are these all the windows we want to make
-                //       visible when they appear on the screen?
-                //       Do we need to take some of them out?
-                case IWindowManagerLayoutParams::TYPE_APPLICATION:
-                case IWindowManagerLayoutParams::TYPE_APPLICATION_PANEL:
-                case IWindowManagerLayoutParams::TYPE_APPLICATION_MEDIA:
-                case IWindowManagerLayoutParams::TYPE_APPLICATION_SUB_PANEL:
-                case IWindowManagerLayoutParams::TYPE_APPLICATION_ATTACHED_DIALOG:
-                case IWindowManagerLayoutParams::TYPE_SEARCH_BAR:
-                case IWindowManagerLayoutParams::TYPE_PHONE:
-                case IWindowManagerLayoutParams::TYPE_SYSTEM_ALERT:
-                case IWindowManagerLayoutParams::TYPE_TOAST:
-                case IWindowManagerLayoutParams::TYPE_SYSTEM_OVERLAY:
-                case IWindowManagerLayoutParams::TYPE_PRIORITY_PHONE:
-                case IWindowManagerLayoutParams::TYPE_SYSTEM_DIALOG:
-                case IWindowManagerLayoutParams::TYPE_KEYGUARD_DIALOG:
-                case IWindowManagerLayoutParams::TYPE_SYSTEM_ERROR:
-                case IWindowManagerLayoutParams::TYPE_VOLUME_OVERLAY:
-                case IWindowManagerLayoutParams::TYPE_NAVIGATION_BAR_PANEL:
-                case IWindowManagerLayoutParams::TYPE_RECENTS_OVERLAY: {
-                    AutoPtr<IRect> magnifiedRegionBounds;
-                    mMagnificationController->GetMagnifiedRegionBounds((IRect**)&magnifiedRegionBounds);
-                    AutoPtr<IRect> touchableRegion;
-                    info->GetTouchableRegion((IRect**)&touchableRegion);
-                    Boolean result;
-                    magnifiedRegionBounds->Intersect(touchableRegion, &result);
-                    if (!result) {
-                        EnsureRectangleInMagnifiedRegionBounds(
-                            magnifiedRegionBounds, touchableRegion);
-                    }
-                }
-                break;
-            }
-            break;
-        }
-    }
-    // } finally {
-    if (info != NULL) {
-        info->Recycle();
-    }
-    // }
-}
-
-void ScreenMagnifier::DisplayContentObserver::HandleOnRectangleOnScreenRequested(
-    /* [in] */ IRect* rectangle,
-    /* [in] */ Boolean immediate)
-{
-    Boolean bval;
-    if (mMagnificationController->IsMagnifying(&bval), !bval) {
-        return;
-    }
-    AutoPtr<IRect> magnifiedRegionBounds;
-    mMagnificationController->GetMagnifiedRegionBounds((IRect**)&magnifiedRegionBounds);
-    Boolean isContains;
-    magnifiedRegionBounds->Contains(rectangle, &isContains);
-    if (isContains) {
-        return;
-    }
-    EnsureRectangleInMagnifiedRegionBounds(magnifiedRegionBounds, rectangle);
-}
-
-void ScreenMagnifier::DisplayContentObserver::EnsureRectangleInMagnifiedRegionBounds(
-    /* [in] */ IRect* magnifiedRegionBounds,
-    /* [in] */ IRect* rectangle)
-{
-    Boolean result;
-    rectangle->Intersect(mViewport->GetBounds(), &result);
-    if (!result) {
-        return;
-    }
-
-    Float scrollX, scrollY;
-    Int32 width1, width2, left1, left2, right1, right2;
-    rectangle->GetWidth(&width1);
-    magnifiedRegionBounds->GetWidth(&width2);
-    rectangle->GetLeft(&left1);
-    magnifiedRegionBounds->GetLeft(&left2);
-    rectangle->GetRight(&right1);
-    magnifiedRegionBounds->GetRight(&right2);
-    if (width1 > width2) {
-        AutoPtr<ILocaleHelper> helper;
-        CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
-        AutoPtr<ILocale> locale;
-        helper->GetDefault((ILocale**)&locale);
-        Int32 direction = TextUtils::GetLayoutDirectionFromLocale(locale);
-        if (direction == IView::LAYOUT_DIRECTION_LTR) {
-            scrollX = (Float)(left1 - left2);
-        }
-        else {
-            scrollX = (Float)(right1 - right2);
-        }
-    }
-    else if (left1 < left2) {
-        scrollX = (Float)(left1 - left2);
-    }
-    else if (right1 > right2) {
-        scrollX = (Float)(right1 - right2);
-    }
-    else {
-        scrollX = 0;
-    }
-
-    Int32 height1, height2, top1, top2, bottom1, bottom2;
-    rectangle->GetHeight(&height1);
-    magnifiedRegionBounds->GetHeight(&height2);
-    rectangle->GetTop(&top1);
-    magnifiedRegionBounds->GetTop(&top2);
-    rectangle->GetBottom(&bottom1);
-    magnifiedRegionBounds->GetBottom(&bottom2);
-    if (height1 > height2) {
-        scrollY = (Float)(top1 - top1);
-    }
-    else if (top1 < top2) {
-        scrollY = (Float)(top1 - top1);
-    }
-    else if (bottom1 > bottom2) {
-        scrollY = (Float)(bottom1 - bottom2);
-    }
-    else {
-        scrollY = 0;
-    }
-
-    Float viewportCenterX, viewportCenterY;
-    mMagnificationController->GetMagnifiedRegionCenterX(&viewportCenterX);
-    mMagnificationController->GetMagnifiedRegionCenterY(&viewportCenterY);
-    viewportCenterX += scrollX;
-    viewportCenterY += scrollY;
-    mMagnificationController->SetMagnifiedRegionCenter(
-        viewportCenterX, viewportCenterY, TRUE);
-}
-
-void ScreenMagnifier::DisplayContentObserver::ResetMagnificationIfNeeded()
-{
-    Boolean bval;
-    if ((mMagnificationController->IsMagnifying(&bval), bval)
-        && IsScreenMagnificationAutoUpdateEnabled(mContext)) {
-        mMagnificationController->Reset(TRUE);
-        mViewport->SetFrameShown(FALSE, TRUE);
-    }
-}
-
-String ScreenMagnifier::DisplayContentObserver::WindowTransitionToString(
-    /* [in] */ Int32 transition)
-{
-    switch (transition) {
-        case IWindowManagerPolicy::TRANSIT_UNSET: {
-            return String("TRANSIT_UNSET");
-        }
-        case IWindowManagerPolicy::TRANSIT_NONE: {
-            return String("TRANSIT_NONE");
-        }
-        case IWindowManagerPolicy::TRANSIT_ENTER: {
-            return String("TRANSIT_ENTER");
-        }
-        case IWindowManagerPolicy::TRANSIT_EXIT: {
-            return String("TRANSIT_EXIT");
-        }
-        case IWindowManagerPolicy::TRANSIT_SHOW: {
-            return String("TRANSIT_SHOW");
-        }
-        case IWindowManagerPolicy::TRANSIT_EXIT_MASK: {
-            return String("TRANSIT_EXIT_MASK");
-        }
-        case IWindowManagerPolicy::TRANSIT_PREVIEW_DONE: {
-            return String("TRANSIT_PREVIEW_DONE");
-        }
-        case IWindowManagerPolicy::TRANSIT_ACTIVITY_OPEN: {
-            return String("TRANSIT_ACTIVITY_OPEN");
-        }
-        case IWindowManagerPolicy::TRANSIT_ACTIVITY_CLOSE: {
-            return String("TRANSIT_ACTIVITY_CLOSE");
-        }
-        case IWindowManagerPolicy::TRANSIT_TASK_OPEN: {
-            return String("TRANSIT_TASK_OPEN");
-        }
-        case IWindowManagerPolicy::TRANSIT_TASK_CLOSE: {
-            return String("TRANSIT_TASK_CLOSE");
-        }
-        case IWindowManagerPolicy::TRANSIT_TASK_TO_FRONT: {
-            return String("TRANSIT_TASK_TO_FRONT");
-        }
-        case IWindowManagerPolicy::TRANSIT_TASK_TO_BACK: {
-            return String("TRANSIT_TASK_TO_BACK");
-        }
-        case IWindowManagerPolicy::TRANSIT_WALLPAPER_CLOSE: {
-            return String("TRANSIT_WALLPAPER_CLOSE");
-        }
-        case IWindowManagerPolicy::TRANSIT_WALLPAPER_OPEN: {
-            return String("TRANSIT_WALLPAPER_OPEN");
-        }
-        case IWindowManagerPolicy::TRANSIT_WALLPAPER_INTRA_OPEN: {
-            return String("TRANSIT_WALLPAPER_INTRA_OPEN");
-        }
-        case IWindowManagerPolicy::TRANSIT_WALLPAPER_INTRA_CLOSE: {
-            return String("TRANSIT_WALLPAPER_INTRA_CLOSE");
-        }
-
-        default: {
-            return String("<UNKNOWN>");
-        }
-    }
-}
-
-String ScreenMagnifier::DisplayContentObserver::RotationToString(
-    /* [in] */ Int32 rotation)
-{
-    switch (rotation) {
-        case ISurface::ROTATION_0: {
-            return String("ROTATION_0");
-        }
-        case ISurface::ROTATION_90: {
-            return String("ROATATION_90");
-        }
-        case ISurface::ROTATION_180: {
-            return String("ROATATION_180");
-        }
-        case ISurface::ROTATION_270: {
-            return String("ROATATION_270");
-        }
-        default: {
-            String info("Invalid rotation: ");
-            info.AppendFormat("%d", rotation);
-            return info;
-        }
-    }
-}
-
-//==================================================================
-// ScreenMagnifier::Viewport::ViewportAnimatorListener
-//==================================================================
-ScreenMagnifier::Viewport::ViewportAnimatorListener::ViewportAnimatorListener(
-    /* [in] */ Viewport* host)
+ScreenMagnifier::HandlerInScreenStateObserver::HandlerInScreenStateObserver(
+    /* [in] */ ScreenStateObserver* host)
     : mHost(host)
 {}
 
-CAR_INTERFACE_IMPL(ScreenMagnifier::Viewport::ViewportAnimatorListener, IAnimatorListener);
+ScreenMagnifier::HandlerInScreenStateObserver::~HandlerInScreenStateObserver()
+{}
 
-ECode ScreenMagnifier::Viewport::ViewportAnimatorListener::OnAnimationStart(
-    /* [in] */ IAnimator* animation)
+ECode ScreenMagnifier::HandlerInScreenStateObserver::HandleMessage(
+    /* [in] */ IMessage* message)
 {
-    /* do nothing - stub */
-    return NOERROR;
-}
+    Int32 what;
+    message->GetWhat(&what);
 
-ECode ScreenMagnifier::Viewport::ViewportAnimatorListener::OnAnimationEnd(
-    /* [in] */ IAnimator* animation)
-{
-    AutoPtr<IInteger32> value;
-    mHost->mShowHideFrameAnimator->GetAnimatedValue((IInterface**)&value);
-    Int32 res;
-    value->GetValue(&res);
-    if (res == MIN_ALPHA) {
-        mHost->mViewportFrame->Hide();
-    }
-    return NOERROR;
-}
-
-ECode ScreenMagnifier::Viewport::ViewportAnimatorListener::OnAnimationCancel(
-    /* [in] */ IAnimator* animation)
-{
-    /* do nothing - stub */
-    return NOERROR;
-}
-
-ECode ScreenMagnifier::Viewport::ViewportAnimatorListener::OnAnimationRepeat(
-    /* [in] */ IAnimator* animation)
-{
-    /* do nothing - stub */
-    return NOERROR;
-}
-
-//==================================================================
-// ScreenMagnifier::Viewport::ViewportTypeEvaluator
-//==================================================================
-ScreenMagnifier::Viewport::ViewportTypeEvaluator::ViewportTypeEvaluator()
-{
-    CRect::New((IRect**)&mReusableResultRect);
-}
-
-CAR_INTERFACE_IMPL(ScreenMagnifier::Viewport::ViewportTypeEvaluator, ITypeEvaluator);
-
-ECode ScreenMagnifier::Viewport::ViewportTypeEvaluator::Evaluate(
-    /* [in] */ Float fraction,
-    /* [in] */ IInterface* startValue,
-    /* [in] */ IInterface* endValue,
-    /* [out] */ IInterface** result)
-{
-    VALIDATE_NOT_NULL(result);
-
-    AutoPtr<IRect> temp = mReusableResultRect;
-    AutoPtr<IRect> fromFrame = IRect::Probe(startValue);
-    AutoPtr<IRect> toFrame = IRect::Probe(endValue);
-    Int32 fromLeft, toLeft;
-    fromFrame->GetLeft(&fromLeft);
-    toFrame->GetLeft(&toLeft);
-    temp->SetLeft((Int32)(fromLeft + (toLeft - fromLeft) * fraction));
-    Int32 fromTop, toTop;
-    fromFrame->GetTop(&fromTop);
-    toFrame->GetTop(&toTop);
-    temp->SetTop((Int32)(fromTop + (toTop - fromTop) * fraction));
-    Int32 fromRight, toRight;
-    fromFrame->GetRight(&fromRight);
-    toFrame->GetRight(&toRight);
-    temp->SetRight((Int32)(fromRight + (toRight - fromRight) * fraction));
-    Int32 fromBottom, toBottom;
-    fromFrame->GetBottom(&fromBottom);
-    toFrame->GetBottom(&toBottom);
-    temp->SetBottom((Int32)(fromBottom + (toBottom - fromBottom) * fraction));
-
-    *result = (IInterface*)temp.Get();
-    REFCOUNT_ADD(temp);
-    return NOERROR;
-}
-
-//==================================================================
-// DisplayProvider
-//==================================================================
-CAR_INTERFACE_IMPL(DisplayProvider, IDisplayListener);
-
-DisplayProvider::DisplayProvider(
-    /* [in] */ IContext* context,
-    /* [in] */ IWindowManager* windowManager)
-{
-    CDisplayInfo::New((IDisplayInfo**)&mDefaultDisplayInfo);
-
-    mWindowManager = windowManager;
-    ASSERT_SUCCEEDED(context->GetSystemService(IContext::DISPLAY_SERVICE,
-        (IInterface**)&mDisplayManager));
-    ASSERT_SUCCEEDED(mWindowManager->GetDefaultDisplay((IDisplay**)&mDefaultDisplay));
-    mDisplayManager->RegisterDisplayListener((IDisplayListener*)this, NULL);
-    UpdateDisplayInfo();
-}
-
-AutoPtr<IDisplayInfo> DisplayProvider::GetDisplayInfo()
-{
-    return mDefaultDisplayInfo;
-}
-
-AutoPtr<IDisplay> DisplayProvider::GetDisplay()
-{
-    return mDefaultDisplay;
-}
-
-void DisplayProvider::UpdateDisplayInfo()
-{
-    Boolean result;
-    if (mDefaultDisplay->GetDisplayInfo(mDefaultDisplayInfo, &result), !result) {
-        Slogger::E(ScreenMagnifier::TAG, "Default display is not valid.");
-    }
-}
-
-void DisplayProvider::Destroy()
-{
-    mDisplayManager->UnregisterDisplayListener((IDisplayListener*)this);
-}
-
-ECode DisplayProvider::OnDisplayAdded(
-    /* [in] */ Int32 displayId)
-{
-    /* do noting */
-    return NOERROR;
-}
-
-ECode DisplayProvider::OnDisplayRemoved(
-    /* [in] */ Int32 displayId)
-{
-    // Having no default display
-    return NOERROR;
-}
-
-ECode DisplayProvider::OnDisplayChanged(
-    /* [in] */ Int32 displayId)
-{
-    UpdateDisplayInfo();
-    return NOERROR;
-}
-
-//==================================================================
-// ScreenMagnifier::Viewport
-//==================================================================
-const String ScreenMagnifier::Viewport::PROPERTY_NAME_ALPHA("alpha");
-const String ScreenMagnifier::Viewport::PROPERTY_NAME_BOUNDS("bounds");
-const Int32 ScreenMagnifier::Viewport::MIN_ALPHA = 0;
-const Int32 ScreenMagnifier::Viewport::MAX_ALPHA = 255;
-
-ScreenMagnifier::Viewport::Viewport(
-    /* [in] */ IContext* context,
-    /* [in] */ IWindowManager* windowManager,
-    /* [in] */ IIWindowManager* windowManagerService,
-    /* [in] */ DisplayProvider* displayInfoProvider,
-    /* [in] */ IInterpolator* animationInterpolator,
-    /* [in] */ Int64 animationDuration)
-{
-    CRect::New((IRect**)&mTempRect1);
-    CRect::New((IRect**)&mTempRect2);
-    CRect::New((IRect**)&mTempRect3);
-
-    mWindowManagerService = windowManagerService;
-    mDisplayProvider = displayInfoProvider;
-
-    CViewportWindow::New(context, windowManager, (Handle32)displayInfoProvider,
-        (IViewportWindow**)&mViewportFrame);
-
-    AutoPtr<IObjectAnimatorHelper> helper;
-    CObjectAnimatorHelper::AcquireSingleton((IObjectAnimatorHelper**)&helper);
-    AutoPtr< ArrayOf<Int32> > args = ArrayOf<Int32>::Alloc(2);
-    (*args)[0] = MIN_ALPHA;
-    (*args)[1] = MAX_ALPHA;
-    AutoPtr<IObjectAnimator> objAnimator;
-    ASSERT_SUCCEEDED(helper->OfInt32(mViewportFrame, PROPERTY_NAME_ALPHA, args,
-        (IObjectAnimator**)&objAnimator));
-    mShowHideFrameAnimator = (IValueAnimator*)objAnimator->Probe(
-        Elastos::Droid::Animation::EIID_IValueAnimator);
-    mShowHideFrameAnimator->SetInterpolator(animationInterpolator);
-    mShowHideFrameAnimator->SetDuration(animationDuration);
-    AutoPtr<IAnimatorListener> listener = new ViewportAnimatorListener(this);
-    mShowHideFrameAnimator->AddListener(listener);
-
-    // Property<ViewportWindow, Rect> property = Property.of(ViewportWindow.class,
-    //         Rect.class, PROPERTY_NAME_BOUNDS);
-    AutoPtr<ITypeEvaluator> evaluator = (ITypeEvaluator*)new ViewportTypeEvaluator();
-
-    // mResizeFrameAnimator = ObjectAnimator.ofObject(mViewportFrame, property,
-    //         evaluator, mViewportFrame.mBounds, mViewportFrame.mBounds);
-    mResizeFrameAnimator->SetDuration(animationDuration);
-    mResizeFrameAnimator->SetInterpolator(animationInterpolator);
-
-    RecomputeBounds(FALSE);
-}
-
-void ScreenMagnifier::Viewport::RecomputeBounds(
-    /* [in] */ Boolean animate)
-{
-    AutoPtr<IRect> magnifiedFrame = mTempRect1;
-    magnifiedFrame->Set(0, 0, 0, 0);
-
-    AutoPtr<IDisplayInfo> displayInfo = mDisplayProvider->GetDisplayInfo();
-
-    AutoPtr<IRect> availableFrame = mTempRect2;
-    Int32 w, h;
-    displayInfo->GetLogicalWidth(&w);
-    displayInfo->GetLogicalHeight(&h);
-    availableFrame->Set(0, 0, w, h);
-
-    AutoPtr<IObjectContainer> infos;
-    //???????
-    // ArrayList<WindowInfo> infos = mTempWindowInfoList;
-    // infos.Clear();
-    // try {
-    Int32 displayId;
-    mDisplayProvider->GetDisplay()->GetDisplayId(&displayId);
-    mWindowManagerService->GetVisibleWindowsForDisplay(displayId, (IObjectContainer**)&infos);
-    mTempWindowInfoList.Clear();
-    // Collections.sort(infos, mWindowInfoInverseComparator);
-    AutoPtr<IObjectEnumerator> enumerator;
-    infos->GetObjectEnumerator((IObjectEnumerator**)&enumerator);
-    Boolean hasNext = FALSE;
-    while (enumerator->MoveNext(&hasNext), hasNext) {
-        AutoPtr<IWindowInfo> info;
-        enumerator->Current((IInterface**)&info);
-        mTempWindowInfoList.PushBack(info);
-        Int32 type;
-        info->GetType(&type);
-        if (type == IWindowManagerLayoutParams::TYPE_MAGNIFICATION_OVERLAY) {
-            continue;
-        }
-        AutoPtr<IRect> windowFrame = mTempRect3;
-        AutoPtr<IRect> touchableRegion;
-        info->GetTouchableRegion((IRect**)&touchableRegion);
-        windowFrame->Set(touchableRegion);
-        if (IsWindowMagnified(type)) {
-            magnifiedFrame->Union(windowFrame);
-            Boolean bval;
-            magnifiedFrame->Intersect(availableFrame, &bval);
-        }
-        else {
-            Subtract(windowFrame, magnifiedFrame);
-            Subtract(availableFrame, windowFrame);
-        }
-        if (availableFrame == magnifiedFrame) {
+    switch (what) {
+        case 1 /*MESSAGE_ON_SCREEN_STATE_CHANGE*/:{
+            AutoPtr<IInterface> obj;
+            message->GetObj((IInterface**)&obj);
+            String action;
+            ICharSequence::Probe(obj)->ToString(&action);
+            mHost->HandleOnScreenStateChange(action);
             break;
         }
     }
-    // } catch (RemoteException re) {
-        /* ignore */
-    // } finally {
-    List<AutoPtr<IWindowInfo> >::ReverseIterator rit = mTempWindowInfoList.RBegin();
-    while(rit != mTempWindowInfoList.REnd()) {
-        (*rit)->Recycle();
-        rit = List<AutoPtr<IWindowInfo> >::ReverseIterator(mTempWindowInfoList.Erase(--(rit.GetBase())));
-    }
-    // }
 
-    Int32 displayWidth, displayHeight;
-    AutoPtr<IDisplayInfo> disInfo = mDisplayProvider->GetDisplayInfo();
-    disInfo->GetLogicalWidth(&displayWidth);
-    disInfo->GetLogicalHeight(&displayHeight);
-    Boolean bval;
-    magnifiedFrame->Intersect(0, 0, displayWidth, displayHeight, &bval);
-
-    Resize(magnifiedFrame, animate);
+    return NOERROR;
 }
 
-Boolean ScreenMagnifier::Viewport::IsWindowMagnified(
-    /* [in] */ Int32 type)
+//===============================================================================
+//                  ScreenMagnifier::InitmHandler
+//===============================================================================
+
+ScreenMagnifier::InitmHandler::InitmHandler(
+    /* [in] */ ScreenMagnifier* host)
+    : mHost(host)
+{}
+
+ScreenMagnifier::InitmHandler::~InitmHandler()
+{}
+
+ECode ScreenMagnifier::InitmHandler::HandleMessage(
+    /* [in] */ IMessage* message)
 {
-    return (type != IWindowManagerLayoutParams::TYPE_NAVIGATION_BAR
-            && type != IWindowManagerLayoutParams::TYPE_INPUT_METHOD
-            && type != IWindowManagerLayoutParams::TYPE_INPUT_METHOD_DIALOG);
+    Int32 what;
+    message->GetWhat(&what);
+    switch (what) {
+        case MESSAGE_ON_MAGNIFIED_BOUNDS_CHANGED: {
+            AutoPtr<IInterface> obj;
+            message->GetObj((IInterface**)&obj);
+            AutoPtr<IRegion> bounds = IRegion::Probe(obj);
+            mHost->HandleOnMagnifiedBoundsChanged(bounds);
+            bounds->Recycle();
+        } break;
+        case MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED: {
+            AutoPtr<IInterface> obj;
+            message->GetObj((IInterface**)&obj);
+            AutoPtr<ISomeArgs> args = ISomeArgs::Probe(obj);
+            Int32 left, top, right, bottom;
+            args->GetInt32Arg(1, &left);
+            args->GetInt32Arg(2, &top);
+            args->GetInt32Arg(3, &right);
+            args->GetInt32Arg(4, &bottom);
+            mHost->HandleOnRectangleOnScreenRequested(left, top, right, bottom);
+            args->Recycle();
+        } break;
+        case MESSAGE_ON_USER_CONTEXT_CHANGED: {
+            mHost->HandleOnUserContextChanged();
+        } break;
+        case MESSAGE_ON_ROTATION_CHANGED: {
+            Int32 rotation;
+            message->GetArg1(&rotation);
+            mHost->HandleOnRotationChanged(rotation);
+        } break;
+    }
+    return NOERROR;
 }
 
-void ScreenMagnifier::Viewport::RotationChanged()
+//===============================================================================
+//                  ScreenMagnifier::PersistScaleAsyncTask
+//===============================================================================
+
+ScreenMagnifier::PersistScaleAsyncTask::PersistScaleAsyncTask(
+    /* [in] */ ScreenMagnifier* host,
+    /* [in] */ Float scale)
+    : mHost(host)
+    , mScale(scale)
+{}
+
+ScreenMagnifier::PersistScaleAsyncTask::~PersistScaleAsyncTask()
+{}
+
+ECode ScreenMagnifier::PersistScaleAsyncTask::DoInBackground(
+    /* [in] */ ArrayOf<IInterface*>* params,
+    /* [out] */ IInterface** result)
 {
-    mViewportFrame->RotationChanged();
+    VALIDATE_NOT_NULL(result);
+    *result = NULL;
+
+    AutoPtr<ISettingsSecure> secure;
+    ASSERT_SUCCEEDED(CSettingsSecure::AcquireSingleton((ISettingsSecure**)&secure));
+    AutoPtr<IContentResolver> resolver;
+    mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
+
+    Boolean res;
+    secure->PutFloat(resolver,
+        ISettingsSecure::ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, mScale, &res);
+    return NOERROR;
 }
 
-AutoPtr<IRect> ScreenMagnifier::Viewport::GetBounds()
-{
-    AutoPtr<IRect> rect;
-    mViewportFrame->GetBounds((IRect**)&rect);
-    return rect;
-}
+//===============================================================================
+//                  ScreenMagnifier
+//===============================================================================
 
-void ScreenMagnifier::Viewport::SetFrameShown(
-    /* [in] */ Boolean shown,
-    /* [in] */ Boolean animate)
-{
-    Boolean bval;
-    mViewportFrame->IsShown(&bval);
-    if (bval == shown) {
-        return;
-    }
-    if (animate) {
-        Boolean isRunning;
-        if (mShowHideFrameAnimator->IsRunning(&isRunning), isRunning) {
-            mShowHideFrameAnimator->Reverse();
-        }
-        else {
-            if (shown) {
-                mViewportFrame->Show();
-                mShowHideFrameAnimator->Start();
-            }
-            else {
-                mShowHideFrameAnimator->Reverse();
-            }
-        }
-    }
-    else {
-        mShowHideFrameAnimator->Cancel();
-        if (shown) {
-            mViewportFrame->Show();
-        }
-        else {
-            mViewportFrame->Hide();
-        }
-    }
-}
-
-void ScreenMagnifier::Viewport::Resize(
-    /* [in] */ IRect* bounds,
-    /* [in] */ Boolean animate)
-{
-    AutoPtr<IRect> rect;
-    mViewportFrame->GetBounds((IRect**)&rect);
-    Boolean bval;
-    if (rect->Equals(bounds, &bval), bval) {
-        return;
-    }
-    if (animate) {
-        Boolean isRunning;
-        if (mResizeFrameAnimator->IsRunning(&isRunning), isRunning) {
-            mResizeFrameAnimator->Cancel();
-        }
-
-        AutoPtr<ArrayOf<IInterface*> > objArray = ArrayOf<IInterface*>::Alloc(2);
-        objArray->Set(0, rect);
-        objArray->Set(1, bounds);
-        mResizeFrameAnimator->SetObjectValues(objArray);
-        mResizeFrameAnimator->Start();
-    }
-    else {
-        mViewportFrame->SetBounds(bounds);
-    }
-}
-
-Boolean ScreenMagnifier::Viewport::Subtract(
-    /* [in] */ IRect* lhs,
-    /* [in] */ IRect* rhs)
-{
-    Int32 right1, left1, top1, bottom1;
-    Int32 right2, left2, top2, bottom2;
-    lhs->GetRight(&right1);
-    lhs->GetLeft(&left1);
-    lhs->GetTop(&top1);
-    lhs->GetBottom(&bottom1);
-    rhs->GetRight(&right2);
-    rhs->GetLeft(&left2);
-    rhs->GetTop(&top2);
-    rhs->GetBottom(&bottom2);
-    if (right1 < left2 || left1  > right2
-            || bottom1 < top2 || top1 > bottom2) {
-        return FALSE;
-    }
-    if (left1 < left2) {
-        lhs->SetRight(left2);
-    }
-    if (top1 < top2) {
-        lhs->SetBottom(top2);
-    }
-    if (right1 > right2) {
-        lhs->SetLeft(right2);
-    }
-    if (bottom1 > bottom2) {
-        lhs->SetTop(bottom2);
-    }
-    return TRUE;
-}
-
-//==================================================================
-// ScreenMagnifier
-//==================================================================
-
-CAR_INTERFACE_IMPL(ScreenMagnifier, IEventStreamTransformation);
+CAR_INTERFACE_IMPL_2(ScreenMagnifier, Object, IMagnificationCallbacks, IEventStreamTransformation);
 
 ScreenMagnifier::ScreenMagnifier(
-    /* [in] */ IContext* context)
+    /* [in] */ IContext* context,
+    /* [in] */ Int32 displayId,
+    /* [in] */ AccessibilityManagerService* service)
     : mTapDistanceSlop(0)
     , mMultiTapDistanceSlop(0)
-    , mShortAnimationDuration(0)
     , mLongAnimationDuration(0)
-    , mWindowAnimationScale(0)
     , mCurrentState(0)
     , mPreviousState(0)
     , mTranslationEnabledBeforePan(FALSE)
     , mDelegatingStateDownTime(0)
+    , mUpdateMagnificationSpecOnNextBoundsChange(FALSE)
 {
-    mWindowManagerService = IIWindowManager::Probe(ServiceManager::GetService(String("window")));
-    mDetectingStateHandler = new DetectingStateHandler(this);
-    mStateViewportDraggingHandler = new StateViewportDraggingHandler(this);
-    CDecelerateInterpolator::New(2.5f, (IDecelerateInterpolator**)&mInterpolator);
+    CRect::New((IRect**)&mTempRect);
+    CRect::New((IRect**)&mTempRect1);
 
     AutoPtr<IViewConfigurationHelper> helper;
     ASSERT_SUCCEEDED(CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&helper));
@@ -1823,44 +1322,232 @@ ScreenMagnifier::ScreenMagnifier(
     helper->GetDoubleTapTimeout(&timeout);
     mMultiTapTimeSlop = timeout - MULTI_TAP_TIME_SLOP_ADJUSTMENT;
 
+    CRegion::New((IRegion**)&mMagnifiedBounds);
+
+    mHandler = new InitmHandler(this);
+    /*   */
+
     mContext = context;
-    ASSERT_SUCCEEDED(context->GetSystemService(IContext::WINDOW_SERVICE,
-        (IInterface**)&mWindowManager));
+    AutoPtr<IInterface> obj = LocalServices::GetService(EIID_IWindowManagerInternal);
+    mWindowManager = IWindowManagerInternal::Probe(obj);
+    mAms = service;
 
     AutoPtr<IResources> r;
     ASSERT_SUCCEEDED(context->GetResources((IResources**)&r));
-    r->GetInteger(R::integer::config_shortAnimTime, &mShortAnimationDuration);
-    r->GetInteger(R::integer::config_longAnimTime, &mLongAnimationDuration);
-
+    Int32 result;
+    r->GetInteger(R::integer::config_longAnimTime, &result);
+    mLongAnimationDuration = (Int64)result;
     AutoPtr<IViewConfiguration> config;
     ASSERT_SUCCEEDED(helper->Get(context, (IViewConfiguration**)&config));
     config->GetScaledTouchSlop(&mTapDistanceSlop);
     config->GetScaledDoubleTapSlop(&mMultiTapDistanceSlop);
 
-    AutoPtr<IContentResolver> resolver;
-    context->GetContentResolver((IContentResolver**)&resolver);
-    AutoPtr<ISettingsGlobal> settingsGlobal;
-    ASSERT_SUCCEEDED(CSettingsGlobal::AcquireSingleton((ISettingsGlobal**)&settingsGlobal));
-    settingsGlobal->GetFloat(resolver,
-        ISettingsGlobal::WINDOW_ANIMATION_SCALE, DEFAULT_WINDOW_ANIMATION_SCALE,
-        &mWindowAnimationScale);
-
-    CMagnificationController::New((Handle32)this, mShortAnimationDuration,
-        (IMagnificationController**)&mMagnificationController);
-
-    mDisplayProvider = new DisplayProvider(context, mWindowManager);
-    mViewport = new Viewport(mContext, mWindowManager, mWindowManagerService,
-        mDisplayProvider, mInterpolator, mShortAnimationDuration);
-    mDisplayContentObserver = new DisplayContentObserver(mContext, mViewport,
-        mMagnificationController, mWindowManagerService, mDisplayProvider,
-        mLongAnimationDuration, mWindowAnimationScale);
-    mScreenStateObserver = new ScreenStateObserver(mContext, mViewport,
-        mMagnificationController, this);
-
+    mDetectingStateHandler = new DetectingStateHandler(this);
+    mStateViewportDraggingHandler = new StateViewportDraggingHandler(this);
     mMagnifiedContentInteractonStateHandler =
-        new MagnifiedContentInteractonStateHandler(context, this);
+            new MagnifiedContentInteractonStateHandler(context, this);
+
+    CMagnificationController::New((IEventStreamTransformation*)this,
+            mLongAnimationDuration,
+            (IMagnificationController**)&mMagnificationController);
+    mScreenStateObserver = new ScreenStateObserver(context,
+            mMagnificationController, this);
+
+    mWindowManager->SetMagnificationCallbacks((IMagnificationCallbacks*)this);
 
     TransitionToState(STATE_DETECTING);
+}
+
+ScreenMagnifier::~ScreenMagnifier()
+{
+    mAms = NULL;
+}
+
+ECode ScreenMagnifier::OnMagnifedBoundsChanged(
+    /* [in] */ IRegion* bounds)
+{
+    AutoPtr<IRegionHelper> helper;
+    CRegionHelper::AcquireSingleton((IRegionHelper**)&helper);
+    AutoPtr<IRegion> newBounds;
+    helper->Obtain(bounds, (IRegion**)&newBounds);
+    AutoPtr<IMessage> message;
+    mHandler->ObtainMessage(MESSAGE_ON_MAGNIFIED_BOUNDS_CHANGED, newBounds, (IMessage**)&message);
+    message->SendToTarget();
+    if (MY_PID != Binder::GetCallingPid()) {
+        bounds->Recycle();
+    }
+    return NOERROR;
+}
+
+void ScreenMagnifier::HandleOnMagnifiedBoundsChanged(
+    /* [in] */ IRegion* bounds)
+{
+    // If there was a rotation we have to update the center of the magnified
+    // region since the old offset X/Y may be out of its acceptable range for
+    // the new display width and height.
+
+    if (mUpdateMagnificationSpecOnNextBoundsChange) {
+        mUpdateMagnificationSpecOnNextBoundsChange = FALSE;
+        AutoPtr<IMagnificationSpec> spec;
+        mMagnificationController->GetMagnificationSpec((IMagnificationSpec**)&spec);
+        AutoPtr<IRect> magnifiedFrame = mTempRect;
+        Boolean res;
+        mMagnifiedBounds->GetBounds(magnifiedFrame, &res);
+        Float scale;
+        spec->GetScale(&scale);
+        Float offsetX, offsetY;
+        spec->GetOffsetX(&offsetX);
+        spec->GetOffsetY(&offsetY);
+        Int32 width, height;
+        magnifiedFrame->GetWidth(&width);
+        magnifiedFrame->GetHeight(&height);
+        Float centerX = (-offsetX + width / 2) / scale;
+        Float centerY = (-offsetY + height / 2) / scale;
+        mMagnificationController->SetScaleAndMagnifiedRegionCenter(scale, centerX,
+                centerY, FALSE);
+    }
+    Boolean res;
+    mMagnifiedBounds->Set(bounds, &res);
+    mAms->OnMagnificationStateChanged();
+}
+
+ECode ScreenMagnifier::OnRectangleOnScreenRequested(
+    /* [in] */ Int32 left,
+    /* [in] */ Int32 top,
+    /* [in] */ Int32 right,
+    /* [in] */ Int32 bottom)
+{
+    AutoPtr<ISomeArgsHelper> helper;
+    CSomeArgsHelper::AcquireSingleton((ISomeArgsHelper**)&helper);
+    AutoPtr<ISomeArgs> args;
+    helper->Obtain((ISomeArgs**)&args);
+    args->SetInt32Arg(1, left);
+    args->SetInt32Arg(2, top);
+    args->SetInt32Arg(3, right);
+    args->SetInt32Arg(4, bottom);
+
+    AutoPtr<IMessage> message;
+    mHandler->ObtainMessage(MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED, args, (IMessage**)&message);
+    message->SendToTarget();
+
+    return NOERROR;
+}
+
+void ScreenMagnifier::HandleOnRectangleOnScreenRequested(
+    /* [in] */ Int32 left,
+    /* [in] */ Int32 top,
+    /* [in] */ Int32 right,
+    /* [in] */ Int32 bottom)
+{
+    AutoPtr<IRect> magnifiedFrame = mTempRect;
+    Boolean res;
+    mMagnifiedBounds->GetBounds(magnifiedFrame, &res);
+    if (magnifiedFrame->Intersects(left, top, right, bottom, &res), !res) {
+        return;
+    }
+    AutoPtr<IRect> magnifFrameInScreenCoords = mTempRect1;
+    GetMagnifiedFrameInContentCoords(magnifFrameInScreenCoords);
+    Float scrollX;
+    Float scrollY;
+    Int32 width, height;
+    magnifFrameInScreenCoords->GetWidth(&width);
+    magnifFrameInScreenCoords->GetHeight(&height);
+    Int32 _left, _top, _right, _bottom;
+    magnifFrameInScreenCoords->Get(&_left, &_top, &_right, &_bottom);
+    if (right - left > width) {
+        AutoPtr<ILocaleHelper> helper;
+        CLocaleHelper::AcquireSingleton((ILocaleHelper**)&helper);
+        AutoPtr<ILocale> locale;
+        helper->GetDefault((ILocale**)&locale);
+        Int32 direction = TextUtils::GetLayoutDirectionFromLocale(locale);
+        if (direction == IView::LAYOUT_DIRECTION_LTR) {
+            scrollX = left - _left;
+        }
+        else {
+            scrollX = right - _right;
+        }
+    }
+    else if (left < _left) {
+        scrollX = left - _left;
+    }
+    else if (right > _right) {
+        scrollX = right - _right;
+    }
+    else {
+        scrollX = 0;
+    }
+    if (bottom - top > height) {
+        scrollY = top - _top;
+    }
+    else if (top < _top) {
+        scrollY = top - _top;
+    }
+    else if (bottom > _bottom) {
+        scrollY = bottom - _bottom;
+    }
+    else {
+        scrollY = 0;
+    }
+    Float scale;
+    mMagnificationController->GetScale(&scale);
+    mMagnificationController->OffsetMagnifiedRegionCenter(scrollX * scale, scrollY * scale);
+}
+
+ECode ScreenMagnifier::OnRotationChanged(
+    /* [in] */ Int32 rotation)
+{
+    AutoPtr<IMessage> message;
+    mHandler->ObtainMessage(MESSAGE_ON_ROTATION_CHANGED, rotation, 0,
+            (IMessage**)&message);
+    message->SendToTarget();
+
+    return NOERROR;
+}
+
+void ScreenMagnifier::HandleOnRotationChanged(
+    /* [in] */ Int32 rotation)
+{
+    ResetMagnificationIfNeeded();
+    Boolean res;
+    if (mMagnificationController->IsMagnifying(&res), res) {
+        mUpdateMagnificationSpecOnNextBoundsChange = TRUE;
+    }
+}
+
+ECode ScreenMagnifier::OnUserContextChanged()
+{
+    Boolean res;
+    mHandler->SendEmptyMessage(MESSAGE_ON_USER_CONTEXT_CHANGED, &res);
+    return NOERROR;
+}
+
+void ScreenMagnifier::HandleOnUserContextChanged()
+{
+    ResetMagnificationIfNeeded();
+}
+
+void ScreenMagnifier::GetMagnifiedFrameInContentCoords(
+    /* [in] */ IRect* rect)
+{
+    AutoPtr<IMagnificationSpec> spec;
+    mMagnificationController->GetMagnificationSpec((IMagnificationSpec**)&spec);
+    Boolean res;
+    mMagnifiedBounds->GetBounds(rect, &res);
+    Float offsetX, offsetY, scale;
+    spec->GetOffsetX(&offsetX);
+    spec->GetOffsetY(&offsetY);
+    spec->GetScale(&scale);
+    rect->Offset((Int32) -offsetX, (Int32) -offsetY);
+    rect->Scale(1.0f / scale);
+}
+
+void ScreenMagnifier::ResetMagnificationIfNeeded()
+{
+    Boolean res;
+    if ((mMagnificationController->IsMagnifying(&res), res)
+            && IsScreenMagnificationAutoUpdateEnabled(mContext)) {
+        mMagnificationController->Reset(TRUE);
+    }
 }
 
 ECode ScreenMagnifier::OnMotionEvent(
@@ -1873,17 +1560,21 @@ ECode ScreenMagnifier::OnMotionEvent(
         case STATE_DELEGATING: {
             HandleMotionEventStateDelegating(event, rawEvent, policyFlags);
         } break;
+
         case STATE_DETECTING: {
             mDetectingStateHandler->OnMotionEvent(event, rawEvent, policyFlags);
         } break;
+
         case STATE_VIEWPORT_DRAGGING: {
             mStateViewportDraggingHandler->OnMotionEvent(event, policyFlags);
         } break;
+
         case STATE_MAGNIFIED_INTERACTION: {
             // mMagnifiedContentInteractonStateHandler handles events only
             // if this is the current state since it uses ScaleGestureDetecotr
             // and a GestureDetector which need well formed event stream.
         } break;
+
         default: {
             Slogger::E(TAG, "Unknown state: %d", mCurrentState);
             return E_ILLEGAL_ARGUMENT_EXCEPTION;
@@ -1923,11 +1614,8 @@ ECode ScreenMagnifier::Clear()
 
 ECode ScreenMagnifier::OnDestroy()
 {
-    mMagnificationController->SetScaleAndMagnifiedRegionCenter(1.0f, 0, 0, TRUE);
-    mViewport->SetFrameShown(FALSE, TRUE);
-    mDisplayProvider->Destroy();
-    mDisplayContentObserver->Destroy();
     mScreenStateObserver->Destroy();
+    mWindowManager->SetMagnificationCallbacks(NULL);
     return NOERROR;
 }
 
@@ -1961,14 +1649,14 @@ void ScreenMagnifier::HandleMotionEventStateDelegating(
         event->GetY(&eventY);
         Boolean bval;
         if ((mMagnificationController->IsMagnifying(&bval), bval)
-            && (mViewport->GetBounds()->Contains((Int32)eventX, (Int32)eventY, &bval), bval))
+            && (mMagnifiedBounds->Contains((Int32)eventX, (Int32)eventY, &bval), bval))
         {
             Float scale;
             Float scaledOffsetX;
             Float scaledOffsetY;
             mMagnificationController->GetScale(&scale);
-            mMagnificationController->GetScaledOffsetX(&scaledOffsetX);
-            mMagnificationController->GetScaledOffsetY(&scaledOffsetY);
+            mMagnificationController->GetOffsetX(&scaledOffsetX);
+            mMagnificationController->GetOffsetY(&scaledOffsetY);
 
             Int32 pointerCount;
             event->GetPointerCount(&pointerCount);
@@ -1988,11 +1676,11 @@ void ScreenMagnifier::HandleMotionEventStateDelegating(
 
             Int64 downTime, eventTime;
             event->GetDownTime(&downTime);
-            event->GetEventTime(&eventTime);
+            IInputEvent::Probe(event)->GetEventTime(&eventTime);
             Int32 action, deviceId, source, flags;
             event->GetAction(&action);
-            event->GetDeviceId(&deviceId);
-            event->GetSource(&source);
+            IInputEvent::Probe(event)->GetDeviceId(&deviceId);
+            IInputEvent::Probe(event)->GetSource(&source);
             event->GetFlags(&flags);
 
             event = NULL;
@@ -2084,20 +1772,6 @@ ECode ScreenMagnifier::TransitionToState(
     mPreviousState = mCurrentState;
     mCurrentState = state;
     return NOERROR;
-}
-
-AutoPtr<IInterface> ScreenMagnifier::PersistScaleAsyncTask::DoInBackground(
-    /* [in] */ ArrayOf<IInterface*>* params)
-{
-    AutoPtr<ISettingsSecure> secure;
-    ASSERT_SUCCEEDED(CSettingsSecure::AcquireSingleton((ISettingsSecure**)&secure));
-    AutoPtr<IContentResolver> resolver;
-    mHost->mContext->GetContentResolver((IContentResolver**)&resolver);
-
-    Boolean bval;
-    secure->PutFloat(resolver,
-        ISettingsSecure::ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, mScale, &bval);
-    return NULL;
 }
 
 void ScreenMagnifier::PersistScale(

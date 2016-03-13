@@ -165,8 +165,6 @@ private:
     };
 
 public:
-    CAR_INTERFACE_DECL()
-
     UiModeManagerService();
 
     CARAPI constructor(

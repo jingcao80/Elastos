@@ -6,9 +6,11 @@
 #include <utils/Log.h>
 #include "elastos/droid/os/CServiceManager.h"
 #include "elastos/droid/os/Process.h"
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Slogger.h>
+#include <elastos/utility/etl/List.h>
 
+using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Slogger;
 
 #define ELASTOS_SERVICEMGR_NAME "elastos.servicemanager"
@@ -21,6 +23,8 @@ enum {
     ADD_SERVICE = android::IBinder::FIRST_CALL_TRANSACTION,
     GET_SERVICE,
     REMOVE_SERVICE,
+    CHECK_SERVICE,
+    LIST_SERVICES,
 };
 
 // come from marshal.h
@@ -131,17 +135,25 @@ ECode CServiceManager::GetService(
     data.writeCString(name.string());
     android::status_t ret = get_service_manager()->transact(GET_SERVICE, data, &reply);
     if (ret != android::NO_ERROR) {
+        Slogger::E("CServiceManager", "Failed to transact GET_SERVICE %s", name.string());
         return E_REMOTE_EXCEPTION;
     }
 
     ec = (ECode)reply.readInt32();
-    if (FAILED(ec)) return ec;
+    if (FAILED(ec)) {
+        Slogger::E("CServiceManager", "Failed to get service %s, ec=%08x", name.string(), ec);
+        return ec;
+    }
 
     size = reply.readInt32();
     binder = reply.readStrongBinder();
-    // TODO: release buf.
     buf = malloc(size);
-    if (!buf) return E_OUT_OF_MEMORY;
+    if (!buf) {
+        Slogger::E("CServiceManager", "Failed to get service %s, no enough memory, needs %d",
+            name.string(), size);
+        return E_OUT_OF_MEMORY;
+    }
+
     reply.read(buf, (size_t)size);
     ((InterfacePack*)buf)->m_pBinder = binder;
     ec = _CObject_UnmarshalInterface(
@@ -149,10 +161,10 @@ ECode CServiceManager::GetService(
     free(buf);
     if (SUCCEEDED(ec)) {
         mServiceCache[name] = *service;
+        return NOERROR;
     }
-    else {
-        Slogger::E("CServiceManager", "Failed to get service %s", name.string());
-    }
+
+    Slogger::E("CServiceManager", "Failed to get service %s, ec=%08x", name.string(), ec);
     return ec;
 }
 
@@ -184,10 +196,43 @@ ECode CServiceManager::CheckService(
     return NOERROR;
 }
 
+static String String16ToString(const android::String16& str16)
+{
+    Int32 size = str16.size();
+    const char16_t* p = str16.string();
+    AutoPtr<ArrayOf<Char32> > buf = ArrayOf<Char32>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        buf->Set(i, (Char32)(*(p + i)));
+    }
+    String str(*buf);
+    return str;
+}
+
 ECode CServiceManager::ListServices(
     /* [out, callee] */ ArrayOf<String>** services)
 {
-    assert(0);
+    VALIDATE_NOT_NULL(services)
+
+    AutoPtr< ArrayOf<String> > array;
+
+    android::Parcel data, reply;
+    android::status_t ret = get_service_manager()->transact(LIST_SERVICES, data, &reply);
+    if (ret != android::NO_ERROR) {
+        array = ArrayOf<String>::Alloc(0);
+        *services = array;
+        REFCOUNT_ADD(*services)
+        return E_REMOTE_EXCEPTION;
+    }
+
+    Int32 size = reply.readInt32();
+    array = ArrayOf<String>::Alloc(size);
+    for (Int32 i = 0; i < size; ++i) {
+        android::String16 str16 = reply.readString16();
+        array->Set(i, String16ToString(str16));
+    }
+
+    *services = array;
+    REFCOUNT_ADD(*services)
     return NOERROR;
 }
 

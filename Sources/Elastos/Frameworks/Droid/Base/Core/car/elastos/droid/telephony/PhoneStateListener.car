@@ -9,6 +9,7 @@ module
     interface Elastos.Droid.Telephony.IPreciseDataConnectionState;
     interface Elastos.Droid.Telephony.IDataConnectionRealTimeInfo;
     interface Elastos.Droid.Telephony.IVoLteServiceState;
+    using interface Elastos.Utility.IList;
 
     namespace Elastos {
     namespace Droid {
@@ -114,7 +115,7 @@ module
             [in] Int32 otaspMode);
 
         OnCellInfoChanged(
-            [in] ArrayOf<ICellInfo*>* cellInfo);
+            [in] IList* cellInfo);
 
 
         /**

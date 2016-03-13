@@ -166,7 +166,6 @@ module
         }
 
         singleton class CEnableAccessibilityControllerHelper {
-
             interface IEnableAccessibilityControllerHelper;
         }
 
@@ -213,6 +212,7 @@ module
         }
 
         class CPhoneWindowRotationWatcher {
+            constructor();
 
             interface IPhoneWindowRotationWatcher;
             interface IBinder;
@@ -220,18 +220,22 @@ module
         }
 
         class CPhoneWindowSavedState {
+            constructor();
 
             interface IPhoneWindowSavedState;
             interface IParcelable;
         }
 
         class CPhoneWindowManager {
+            constructor();
 
             interface IPhoneWindowManager;
             interface IWindowManagerPolicy;
         }
 
         class CPolicy {
+            constructor();
+
             interface IIPolicy;
         }
 

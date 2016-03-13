@@ -4,11 +4,11 @@
 
 #include "Elastos.Droid.Webkit.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/webkit/native/android_webview/AwFormDatabase.h"
-#include "elastos/droid/webkit/native/android_webview/HttpAuthDatabase.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/AwFormDatabase.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/HttpAuthDatabase.h"
 
-using Elastos::Droid::Webkit::AndroidWebview::AwFormDatabase;
-using Elastos::Droid::Webkit::AndroidWebview::HttpAuthDatabase;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::AwFormDatabase;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::HttpAuthDatabase;
 using Elastos::Droid::Webkit::IWebViewDatabase;
 
 namespace Elastos {

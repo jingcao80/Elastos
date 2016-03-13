@@ -15,7 +15,7 @@ namespace View {
 /**
  * Provides helper functions for configuring the display rotation policy.
  */
-class RotationPolicy
+class ECO_PUBLIC RotationPolicy
 {
 public:
     /**
@@ -52,7 +52,7 @@ public:
     };
 
 private:
-    class RotationRunnable
+    class ECO_LOCAL RotationRunnable
         : public Runnable
     {
     public:
@@ -145,17 +145,17 @@ public:
 private:
     RotationPolicy();
 
-    static Boolean AreAllRotationsAllowed(
+    ECO_LOCAL static Boolean AreAllRotationsAllowed(
         /* [in] */ IContext* context);
 
-    static void SetRotationLock(
+    ECO_LOCAL static void SetRotationLock(
         /* [in] */ Boolean enabled,
         /* [in] */ Int32 rotation);
 
 private:
-    static const String TAG;
-    static const Int32 CURRENT_ROTATION;
-    static const Int32 NATURAL_ROTATION;
+    ECO_LOCAL static const String TAG;
+    ECO_LOCAL static const Int32 CURRENT_ROTATION;
+    ECO_LOCAL static const Int32 NATURAL_ROTATION;
 };
 
 } // namespace View

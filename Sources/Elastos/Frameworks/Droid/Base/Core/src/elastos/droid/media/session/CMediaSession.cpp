@@ -283,8 +283,9 @@ ECode CMediaSession::constructor(
     }
 
     CMediaSessionCallbackStub::New(this, (IISessionCallback**)&mCbStub);
-    AutoPtr<IMediaSessionManager> manager;
-    context->GetSystemService(IContext::MEDIA_SESSION_SERVICE, (IInterface**)&manager);
+    AutoPtr<IInterface> obj;
+    context->GetSystemService(IContext::MEDIA_SESSION_SERVICE, (IInterface**)&obj);
+    AutoPtr<IMediaSessionManager> manager = IMediaSessionManager::Probe(obj);
     // try {
     manager->CreateSession(mCbStub, tag, userId, (IISession**)&mBinder);
     AutoPtr<IISessionController> controller;

@@ -9,40 +9,12 @@ namespace Droid {
 namespace Graphics {
 
 CAR_OBJECT_IMPL(CCornerPathEffect);
+CAR_INTERFACE_IMPL(CCornerPathEffect, PathEffect, ICornerPathEffect);
 ECode CCornerPathEffect::constructor(
     /* [in] */ Float radius)
 {
     mNativeInstance = NativeCreate(radius);
     return NOERROR;
-}
-
-PInterface CCornerPathEffect::Probe(
-    /* [in] */ REIID riid)
-{
-    if (riid == EIID_PathEffect) {
-        return reinterpret_cast<PInterface>((PathEffect*)this);
-    }
-    else if (riid == EIID_ICornerPathEffect) {
-        return (ICornerPathEffect*)this;
-    }
-    return PathEffect::Probe(riid);
-}
-
-UInt32 CCornerPathEffect::AddRef()
-{
-    return PathEffect::AddRef();
-}
-
-UInt32 CCornerPathEffect::Release()
-{
-    return PathEffect::Release();
-}
-
-ECode CCornerPathEffect::GetInterfaceID(
-    /* [in] */ IInterface* object,
-    /* [out] */ InterfaceID* iid)
-{
-    return PathEffect::GetInterfaceID(object, iid);
 }
 
 Int64 CCornerPathEffect::NativeCreate(

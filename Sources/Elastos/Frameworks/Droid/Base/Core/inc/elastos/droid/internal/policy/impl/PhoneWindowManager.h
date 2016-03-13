@@ -683,6 +683,8 @@ public:
 
     PhoneWindowManager();
 
+    CARAPI constructor();
+
     CARAPI ShowGlobalActions();
 
     CARAPI Init(

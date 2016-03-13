@@ -12,25 +12,26 @@ namespace Input {
 
 CAR_INTERFACE_IMPL_3(KeyboardLayout, Object, IKeyboardLayout, IComparable, IParcelable)
 
-KeyboardLayout::KeyboardLayout(
+KeyboardLayout::KeyboardLayout()
+    : mPriority(0)
+{}
+
+ECode KeyboardLayout::constructor()
+{
+    return NOERROR;
+}
+
+ECode KeyboardLayout::constructor(
     /* [in] */ const String& descriptor,
     /* [in] */ const String& label,
     /* [in] */ const String& collection,
     /* [in] */ Int32 priority)
-    : mDescriptor(descriptor)
-    , mLabel(label)
-    , mCollection(collection)
-    , mPriority(priority)
 {
-}
-
-KeyboardLayout::KeyboardLayout(
-   /* [in] */ IParcel* source)
-{
-    source->ReadString(&mDescriptor);
-    source->ReadString(&mLabel);
-    source->ReadString(&mCollection);
-    source->ReadInt32(&mPriority);
+    mDescriptor = descriptor;
+    mLabel = label;
+    mCollection = collection;
+    mPriority = priority;
+    return NOERROR;
 }
 
 ECode KeyboardLayout::GetDescriptor(

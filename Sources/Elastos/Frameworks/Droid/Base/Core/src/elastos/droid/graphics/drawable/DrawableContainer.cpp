@@ -1,16 +1,18 @@
 
 #include "Elastos.Droid.Content.h"
 #include "Elastos.Droid.Os.h"
-#include "Elastos.Droid.Utility.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/graphics/drawable/DrawableContainer.h"
 #include "elastos/droid/graphics/CRect.h"
 #include "elastos/droid/graphics/Insets.h"
 #include "elastos/droid/os/SystemClock.h"
+#include "elastos/droid/utility/CSparseArray.h"
 
 using Elastos::Droid::Os::SystemClock;
+using Elastos::Droid::Utility::CSparseArray;
 using Elastos::Droid::Utility::ILayoutDirection;
 using Elastos::Core::EIID_IRunnable;
+using Elastos::Core::ICloneable;
 
 namespace Elastos {
 namespace Droid {
@@ -123,9 +125,8 @@ ECode DrawableContainer::SetAlpha(
         mAlpha = alpha;
         if (mCurrDrawable != NULL) {
             if (mEnterAnimationEnd == 0) {
-                AutoPtr<IDrawable> dr;
-                mCurrDrawable->Mutate((IDrawable**)&dr);
-                dr->SetAlpha(alpha);
+                mCurrDrawable->Mutate();
+                mCurrDrawable->SetAlpha(alpha);
             }
             else {
                 Animate(FALSE);
@@ -149,9 +150,8 @@ ECode DrawableContainer::SetDither(
     if (mDrawableContainerState->mDither != dither) {
         mDrawableContainerState->mDither = dither;
         if (mCurrDrawable != NULL) {
-            AutoPtr<IDrawable> dr;
-            mCurrDrawable->Mutate((IDrawable**)&dr);
-            dr->SetDither(mDrawableContainerState->mDither);
+            mCurrDrawable->Mutate();
+            mCurrDrawable->SetDither(mDrawableContainerState->mDither);
         }
     }
     return NOERROR;
@@ -165,9 +165,8 @@ ECode DrawableContainer::SetColorFilter(
     if (mDrawableContainerState->mColorFilter.Get() != cf) {
         mDrawableContainerState->mColorFilter = cf;
         if (mCurrDrawable != NULL) {
-            AutoPtr<IDrawable> dr;
-            mCurrDrawable->Mutate((IDrawable**)&dr);
-            dr->SetColorFilter(cf);
+            mCurrDrawable->Mutate();
+            mCurrDrawable->SetColorFilter(cf);
         }
     }
     return NOERROR;
@@ -182,9 +181,8 @@ ECode DrawableContainer::SetTintList(
         mDrawableContainerState->mTintList = tint;
 
         if (mCurrDrawable != NULL) {
-            AutoPtr<IDrawable> drawable;
-            mCurrDrawable->Mutate((IDrawable**)&drawable);
-            drawable->SetTintList(tint);
+            mCurrDrawable->Mutate();
+            mCurrDrawable->SetTintList(tint);
         }
     }
     return NOERROR;
@@ -199,9 +197,8 @@ ECode DrawableContainer::SetTintMode(
         mDrawableContainerState->mTintMode = tintMode;
 
         if (mCurrDrawable != NULL) {
-            AutoPtr<IDrawable> drawable;
-            mCurrDrawable->Mutate((IDrawable**)&drawable);
-            drawable->SetTintMode(tintMode);
+            mCurrDrawable->Mutate();
+            mCurrDrawable->SetTintMode(tintMode);
         }
     }
     return NOERROR;
@@ -246,9 +243,8 @@ ECode DrawableContainer::SetAutoMirrored(
     if (mDrawableContainerState->mAutoMirrored != mirrored) {
         mDrawableContainerState->mAutoMirrored = mirrored;
         if (mCurrDrawable != NULL) {
-            AutoPtr<IDrawable> drawable;
-            mCurrDrawable->Mutate((IDrawable**)&drawable);
-            drawable->SetAutoMirrored(mDrawableContainerState->mAutoMirrored);
+            mCurrDrawable->Mutate();
+            mCurrDrawable->SetAutoMirrored(mDrawableContainerState->mAutoMirrored);
         }
     }
     return NOERROR;
@@ -273,9 +269,8 @@ ECode DrawableContainer::JumpToCurrentState()
     if (mCurrDrawable != NULL) {
         mCurrDrawable->JumpToCurrentState();
         if (mHasAlpha) {
-            AutoPtr<IDrawable> dr;
-            mCurrDrawable->Mutate((IDrawable**)&dr);
-            dr->SetAlpha(mAlpha);
+            mCurrDrawable->Mutate();
+            mCurrDrawable->SetAlpha(mAlpha);
         }
     }
     if (mExitAnimationEnd != 0) {
@@ -545,8 +540,7 @@ ECode DrawableContainer::SelectDrawable(
         mCurrDrawable = d;
         mCurIndex = idx;
         if (d != NULL) {
-            AutoPtr<IDrawable> dr;
-            d->Mutate((IDrawable**)&dr);
+            d->Mutate();
             if (mDrawableContainerState->mEnterFadeDuration > 0) {
                 mEnterAnimationEnd = now + mDrawableContainerState->mEnterFadeDuration;
             }
@@ -623,18 +617,16 @@ void DrawableContainer::Animate(
     if (mCurrDrawable != NULL) {
         if (mEnterAnimationEnd != 0) {
             if (mEnterAnimationEnd <= now) {
-                AutoPtr<IDrawable> dr;
-                mCurrDrawable->Mutate((IDrawable**)&dr);
-                dr->SetAlpha(mAlpha);
+                mCurrDrawable->Mutate();
+                mCurrDrawable->SetAlpha(mAlpha);
                 mEnterAnimationEnd = 0;
             }
             else {
                 Int32 animAlpha = (Int32)((mEnterAnimationEnd - now) * 255)
                         / mDrawableContainerState->mEnterFadeDuration;
                 //if (DEBUG) android.util.Log.i(TAG, toString() + " cur alpha " + animAlpha);
-                AutoPtr<IDrawable> dr;
-                mCurrDrawable->Mutate((IDrawable**)&dr);
-                dr->SetAlpha(((255 - animAlpha) * mAlpha) / 255);
+                mCurrDrawable->Mutate();
+                mCurrDrawable->SetAlpha(((255 - animAlpha) * mAlpha) / 255);
                 animating = TRUE;
             }
         }
@@ -655,9 +647,8 @@ void DrawableContainer::Animate(
                 Int32 animAlpha = (Int32)((mExitAnimationEnd - now) * 255)
                         / mDrawableContainerState->mExitFadeDuration;
                 //if (DEBUG) android.util.Log.i(TAG, toString() + " last alpha " + animAlpha);
-                AutoPtr<IDrawable> dr;
-                mLastDrawable->Mutate((IDrawable**)&dr);
-                dr->SetAlpha((animAlpha * mAlpha) / 255);
+                mLastDrawable->Mutate();
+                mCurrDrawable->SetAlpha((animAlpha * mAlpha) / 255);
                 animating = TRUE;
             }
         }
@@ -706,17 +697,12 @@ ECode DrawableContainer::GetConstantState(
     return NOERROR;
 }
 
-ECode DrawableContainer::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode DrawableContainer::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> d;
-    if (!mMutated && (Drawable::Mutate((IDrawable**)&d), d.Get()) == (IDrawable*)this->Probe(EIID_IDrawable)) {
+    if (!mMutated) {
         mDrawableContainerState->Mutate();
         mMutated = TRUE;
     }
-    *drawable = (IDrawable*)this->Probe(EIID_IDrawable);
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 
@@ -808,20 +794,23 @@ DrawableContainer::DrawableContainerState::DrawableContainerState(
         mDrawables = ArrayOf<IDrawable*>::Alloc(origDr->GetLength());
         mNumChildren = orig->mNumChildren;
 
-        assert(0 && "TODO");
-        // final SparseArray<ConstantStateFuture> origDf = orig->mDrawableFutures;
-        // if (origDf != NULL) {
-        //     mDrawableFutures = origDf->Clone();
-        // } else {
-        //     mDrawableFutures = new SparseArray<ConstantStateFuture>(mNumChildren);
-        // }
+        AutoPtr<ISparseArray> origDf = orig->mDrawableFutures;
+        if (origDf != NULL) {
+            AutoPtr<IInterface> obj;
+            ICloneable::Probe(origDf)->Clone((IInterface**)&obj);
+            mDrawableFutures = ISparseArray::Probe(obj);
+        }
+        else {
+            CSparseArray::New(mNumChildren, (ISparseArray**)&mDrawableFutures);
+        }
 
-        // const Int32 N = mNumChildren;
-        // for (Int32 i = 0; i < N; i++) {
-        //     if (origDr[i] != NULL) {
-        //         mDrawableFutures.put(i, new ConstantStateFuture(origDr[i]));
-        //     }
-        // }
+        const Int32 N = mNumChildren;
+        for (Int32 i = 0; i < N; i++) {
+            if ((*origDr)[i] != NULL) {
+                AutoPtr<ConstantStateFuture> csf = new ConstantStateFuture((*origDr)[i]);
+                mDrawableFutures->Put(i, TO_IINTERFACE(csf));
+            }
+        }
     } else {
         mDrawables = ArrayOf<IDrawable*>::Alloc(10);
         mNumChildren = 0;
@@ -877,16 +866,20 @@ Int32 DrawableContainer::DrawableContainerState::GetCapacity()
 
 void DrawableContainer::DrawableContainerState::CreateAllFutures()
 {
-    assert(0 && "TODO");
-    // if (mDrawableFutures != NULL) {
-    //     final int futureCount = mDrawableFutures.size();
-    //     for (int keyIndex = 0; keyIndex < futureCount; keyIndex++) {
-    //         final int index = mDrawableFutures.keyAt(keyIndex);
-    //         mDrawables[index] = mDrawableFutures.valueAt(keyIndex).get(this);
-    //     }
+    if (mDrawableFutures != NULL) {
+        Int32 futureCount;
+        mDrawableFutures->GetSize(&futureCount);
+        for (Int32 keyIndex = 0; keyIndex < futureCount; keyIndex++) {
+            Int32 index;
+            mDrawableFutures->KeyAt(keyIndex, &index);
+            AutoPtr<IInterface> obj;
+            mDrawableFutures->ValueAt(keyIndex, (IInterface**)&obj);
+            ConstantStateFuture* csf = (ConstantStateFuture*)IObject::Probe(obj);
+            mDrawables->Set(index, csf->Get(this));
+        }
 
-    //     mDrawableFutures = null;
-    // }
+        mDrawableFutures = NULL;
+    }
 }
 
 Int32 DrawableContainer::DrawableContainerState::GetChildCount()
@@ -904,22 +897,25 @@ AutoPtr< ArrayOf<IDrawable*> > DrawableContainer::DrawableContainerState::GetChi
 AutoPtr<IDrawable> DrawableContainer::DrawableContainerState::GetChild(
     /* [in] */ Int32 index)
 {
-    assert(0 && "TODO");
-    // final Drawable result = mDrawables[index];
-    // if (result != null) {
-    //     return result;
-    // }
+    AutoPtr<IDrawable> result = (*mDrawables)[index];
+    if (result != NULL) {
+        return result;
+    }
 
-    // // Prepare future drawable if necessary.
-    // if (mDrawableFutures != null) {
-    //     final int keyIndex = mDrawableFutures.indexOfKey(index);
-    //     if (keyIndex >= 0) {
-    //         final Drawable prepared = mDrawableFutures.valueAt(keyIndex).get(this);
-    //         mDrawables[index] = prepared;
-    //         mDrawableFutures.removeAt(keyIndex);
-    //         return prepared;
-    //     }
-    // }
+    // Prepare future drawable if necessary.
+    if (mDrawableFutures != NULL) {
+        Int32 keyIndex;
+        mDrawableFutures->IndexOfKey(index, &keyIndex);
+        if (keyIndex >= 0) {
+            AutoPtr<IInterface> obj;
+            mDrawableFutures->ValueAt(keyIndex, (IInterface**)&obj);
+            AutoPtr<ConstantStateFuture> cs = (ConstantStateFuture*)IObject::Probe(obj);
+            AutoPtr<IDrawable> prepared = cs->Get(this);
+            mDrawables->Set(index, prepared);
+            mDrawableFutures->RemoveAt(keyIndex);
+            return prepared;
+        }
+    }
 
     return NULL;
 }
@@ -927,16 +923,15 @@ AutoPtr<IDrawable> DrawableContainer::DrawableContainerState::GetChild(
 ECode DrawableContainer::DrawableContainerState::SetLayoutDirection(
     /* [in] */ Int32 layoutDirection)
 {
-    assert(0 && "TODO");
     // No need to call createAllFutures, since future drawables will
     // change layout direction when they are prepared.
-    // final int N = mNumChildren;
-    // final Drawable[] drawables = mDrawables;
-    // for (int i = 0; i < N; i++) {
-    //     if (drawables[i] != null) {
-    //         drawables[i].setLayoutDirection(layoutDirection);
-    //     }
-    // }
+    Int32 N = mNumChildren;
+    AutoPtr<ArrayOf<IDrawable*> > drawables = mDrawables;
+    for (Int32 i = 0; i < N; i++) {
+        if ((*drawables)[i] != NULL) {
+            (*drawables)[i]->SetLayoutDirection(layoutDirection);
+        }
+    }
 
     mLayoutDirection = layoutDirection;
     return NOERROR;
@@ -945,16 +940,15 @@ ECode DrawableContainer::DrawableContainerState::SetLayoutDirection(
 ECode DrawableContainer::DrawableContainerState::ApplyTheme(
     /* [in] */ IResourcesTheme* theme)
 {
-    assert(0 && "TODO");
     // No need to call createAllFutures, since future drawables will
     // apply the theme when they are prepared.
-    // final int N = mNumChildren;
-    // final Drawable[] drawables = mDrawables;
-    // for (int i = 0; i < N; i++) {
-    //     if (drawables[i] != null) {
-    //         drawables[i].applyTheme(theme);
-    //     }
-    // }
+    Int32 N = mNumChildren;
+    AutoPtr<ArrayOf<IDrawable*> > drawables = mDrawables;
+    for (Int32 i = 0; i < N; i++) {
+        if ((*drawables)[i] != NULL) {
+            (*drawables)[i]->ApplyTheme(theme);
+        }
+    }
 
     mTheme = theme;
     return NOERROR;
@@ -963,23 +957,31 @@ ECode DrawableContainer::DrawableContainerState::ApplyTheme(
 ECode DrawableContainer::DrawableContainerState::CanApplyTheme(
     /* [out] */ Boolean* can)
 {
-    assert(0 && "TODO");
     VALIDATE_NOT_NULL(can);
-    // final int N = mNumChildren;
-    // final Drawable[] drawables = mDrawables;
-    // for (int i = 0; i < N; i++) {
-    //     final Drawable d = drawables[i];
-    //     if (d != null) {
-    //         if (d.canApplyTheme()) {
-    //             return true;
-    //         }
-    //     } else {
-    //         final ConstantStateFuture future = mDrawableFutures.get(i);
-    //         if (future != null && future.canApplyTheme()) {
-    //             return true;
-    //         }
-    //     }
-    // }
+    Int32 N = mNumChildren;
+    IDrawable* d;
+    Boolean bval;
+    AutoPtr<ArrayOf<IDrawable*> > drawables = mDrawables;
+    for (Int32 i = 0; i < N; i++) {
+        d = (*drawables)[i];
+        if (d != NULL) {
+            if (d->CanApplyTheme(&bval), bval) {
+                *can = TRUE;
+                return NOERROR;
+            }
+        }
+        else {
+            AutoPtr<IInterface> obj;
+            mDrawableFutures->Get(i, (IInterface**)&obj);
+            if (obj != NULL) {
+                ConstantStateFuture* future = (ConstantStateFuture*)IObject::Probe(obj);
+                if (future->CanApplyTheme()) {
+                    *can = TRUE;
+                    return NOERROR;
+                }
+            }
+        }
+    }
 
     *can = FALSE;
     return NOERROR;
@@ -987,16 +989,15 @@ ECode DrawableContainer::DrawableContainerState::CanApplyTheme(
 
 ECode DrawableContainer::DrawableContainerState::Mutate()
 {
-    assert(0 && "TODO");
     // No need to call createAllFutures, since future drawables will
     // mutate when they are prepared.
-    // final int N = mNumChildren;
-    // final Drawable[] drawables = mDrawables;
-    // for (int i = 0; i < N; i++) {
-    //     if (drawables[i] != null) {
-    //         drawables[i].mutate();
-    //     }
-    // }
+    Int32 N = mNumChildren;
+    AutoPtr<ArrayOf<IDrawable*> > drawables = mDrawables;
+    for (Int32 i = 0; i < N; i++) {
+        if ((*drawables)[i] != NULL) {
+            (*drawables)[i]->Mutate();
+        }
+    }
 
     mMutated = TRUE;
     return NOERROR;
@@ -1220,7 +1221,6 @@ Boolean DrawableContainer::DrawableContainerState::CanConstantState()
     return TRUE;
 }
 
-CAR_INTERFACE_IMPL(DrawableContainer::_Runnable, Object, IRunnable)
 DrawableContainer::_Runnable::_Runnable(
     /* [in] */ DrawableContainer* host)
     : mHost(host)
@@ -1231,6 +1231,42 @@ ECode DrawableContainer::_Runnable::Run()
     mHost->Animate(TRUE);
     mHost->InvalidateSelf();
     return NOERROR;
+}
+
+DrawableContainer::ConstantStateFuture::ConstantStateFuture(
+    /* [in] */ IDrawable* source)
+{
+    source->GetConstantState((IDrawableConstantState**)&mConstantState);
+}
+
+AutoPtr<IDrawable> DrawableContainer::ConstantStateFuture::Get(
+    /* [in] */ DrawableContainerState* state)
+{
+    AutoPtr<IDrawable> result;
+    if (state->mRes == NULL) {
+        mConstantState->NewDrawable((IDrawable**)&result);
+    }
+    else if (state->mTheme == NULL) {
+        mConstantState->NewDrawable(state->mRes, (IDrawable**)&result);
+    }
+    else {
+        mConstantState->NewDrawable(state->mRes, state->mTheme, (IDrawable**)&result);
+    }
+    result->SetLayoutDirection(state->mLayoutDirection);
+    result->SetCallback(state->mOwner);
+
+    if (state->mMutated) {
+        result->Mutate();
+    }
+
+    return result;
+}
+
+Boolean DrawableContainer::ConstantStateFuture::CanApplyTheme()
+{
+    Boolean bval;
+    mConstantState->CanApplyTheme(&bval);
+    return bval;
 }
 
 } // namespace Drawable

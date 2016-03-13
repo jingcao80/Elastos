@@ -41,10 +41,11 @@ AutoPtr<HashMap<String, AutoPtr<CMonkeySourceNetworkViews::ViewIntrospectionComm
 
  AutoPtr<IIPackageManager> CMonkeySourceNetworkViews::InitStatics()
  {
-    AutoPtr<IIPackageManager> pm = NULL;
-    AutoPtr<IServiceManager> sm = NULL;
+    AutoPtr<IServiceManager> sm;
     ASSERT_SUCCEEDED(CServiceManager::AcquireSingleton((IServiceManager**)&sm));
-    sm->GetService(String("package"), (IInterface**)&pm);
+    AutoPtr<IInterface> obj;
+    sm->GetService(String("package"), (IInterface**)&obj);
+    AutoPtr<IIPackageManager> pm = IIPackageManager::Probe(obj);
 
     COMMAND_MAP = new HashMap<String, AutoPtr<ViewIntrospectionCommand> >();
     (*COMMAND_MAP)[String("getlocation")] = new GetLocation();

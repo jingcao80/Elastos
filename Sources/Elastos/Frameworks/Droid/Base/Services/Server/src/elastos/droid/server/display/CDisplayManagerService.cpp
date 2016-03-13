@@ -4,6 +4,9 @@
 #include "elastos/droid/server/display/LocalDisplayAdapter.h"
 #include "elastos/droid/server/display/WifiDisplayAdapter.h"
 #include "elastos/droid/server/display/OverlayDisplayAdapter.h"
+#include "elastos/droid/server/LocalServices.h"
+#include "elastos/droid/server/DisplayThread.h"
+#include "elastos/droid/server/UiThread.h"
 #include "elastos/droid/os/SystemClock.h"
 #include "elastos/droid/os/Process.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -29,6 +32,7 @@ using Elastos::Droid::Os::SystemClock;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::CDisplayInfo;
+using Elastos::Droid::View::EIID_IWindowManagerInternal;
 using Elastos::Droid::Content::Pm::IPackageManager;
 using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Hardware::Display::IDisplayManager;
@@ -38,6 +42,10 @@ using Elastos::Droid::Hardware::Display::IDisplayManagerGlobal;
 using Elastos::Droid::Hardware::Display::EIID_IDisplayViewport;
 using Elastos::Droid::Hardware::Display::CWifiDisplayStatus;
 using Elastos::Droid::Hardware::Display::CDisplayViewport;
+using Elastos::Droid::Hardware::Input::EIID_IInputManagerInternal;
+using Elastos::Droid::Server::LocalServices;
+using Elastos::Droid::Server::DisplayThread;
+using Elastos::Droid::Server::UiThread;
 using Elastos::Core::Thread;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::IIterator;
@@ -821,6 +829,13 @@ CDisplayManagerService::CDisplayManagerService()
     , mPendingTraversal(FALSE)
     , mWifiDisplayScanRequestCount(0)
 {
+}
+
+ECode CDisplayManagerService::constructor(
+    /* [in] */ IContext* context)
+{
+    SystemService::constructor(context);
+
     CDisplayViewport::New((IDisplayViewport**)&mDefaultViewport);
     CDisplayViewport::New((IDisplayViewport**)&mExternalTouchViewport);
 
@@ -834,20 +849,14 @@ CDisplayManagerService::CDisplayManagerService()
 
     CCopyOnWriteArrayList::New((ICopyOnWriteArrayList**)&mDisplayTransactionListeners);
     CArrayList::New((IArrayList**)&mTempDisplayStateWorkQueue);
-}
 
-ECode CDisplayManagerService::constructor(
-    /* [in] */ IContext* context)
-{
-    SystemService::constructor(context);
     mContext = context;
 
     AutoPtr<ILooper> looper;
-    assert(0 && "TODO");
-    // looper = DisplayThread.get().getLooper();
+    DisplayThread::Get()->GetLooper((ILooper**)&looper);
 
     mHandler = new DisplayManagerHandler(looper, this);
-    // mUiHandler = UiThread::GetHandler();
+    mUiHandler = UiThread::GetHandler();
     mDisplayAdapterListener = new DisplayAdapterListener(this);
 
     AutoPtr<ISystemProperties> sysProp;
@@ -875,8 +884,8 @@ ECode CDisplayManagerService::OnBootPhase(
     /* [in] */ Int32 phase)
 {
     if (phase == PHASE_WAIT_FOR_DEFAULT_DISPLAY) {
-        ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-        synchronized(sync) {
+        Object* obj = (Object*)mSyncRoot.Get();
+        synchronized(obj) {
             Int64 timeout = SystemClock::GetUptimeMillis() + WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT;
             HashMap<Int32, AutoPtr<LogicalDisplay> >::Iterator it;
             it = mLogicalDisplays.Find(IDisplay::DEFAULT_DISPLAY);
@@ -887,7 +896,7 @@ ECode CDisplayManagerService::OnBootPhase(
                     return E_RUNTIME_EXCEPTION;
                 }
                 if (DEBUG) {
-                    Slogger::D(TAG, "waitForDefaultDisplay: waiting, timeout=%ld", delay);
+                    // Slogger::D(TAG, "waitForDefaultDisplay: waiting, timeout=%ld", delay);
                 }
                 // try {
                     mSyncRoot->Wait(delay);
@@ -903,11 +912,12 @@ ECode CDisplayManagerService::OnBootPhase(
 
 ECode CDisplayManagerService::WindowManagerAndInputReady()
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
-        assert(0 && "TODO");
-        // mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
-        // mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
+        AutoPtr<IInterface> service = LocalServices::GetService(EIID_IWindowManagerInternal);
+        mWindowManagerInternal = IWindowManagerInternal::Probe(service);
+        service = LocalServices::GetService(EIID_IInputManagerInternal);
+        mInputManagerInternal = IInputManagerInternal::Probe(service);
         ScheduleTraversalLocked(FALSE);
     }
     return NOERROR;
@@ -1091,8 +1101,7 @@ ECode CDisplayManagerService::RegisterCallbackInternal(
     synchronized(syncRoot) {
         HashMap<Int32, AutoPtr<CallbackRecord> >::Iterator find = mCallbacks.Find(callingPid);
         if (find != mCallbacks.End()) {
-            Slogger::E(TAG, "The calling process has already "
-                "registered an IIDisplayManagerCallback.");
+            Slogger::E(TAG, "The calling process has already registered an IIDisplayManagerCallback.");
             return E_SECURITY_EXCEPTION;
         }
 
@@ -1125,8 +1134,8 @@ void CDisplayManagerService::OnCallbackDied(
 ECode CDisplayManagerService::StartWifiDisplayScanInternal(
     /* [in] */ Int32 callingPid)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
 
         HashMap<Int32, AutoPtr<CallbackRecord> >::Iterator find = mCallbacks.Find(callingPid);
         if (find != mCallbacks.End()) {
@@ -1155,8 +1164,8 @@ ECode CDisplayManagerService::StartWifiDisplayScanLocked(
 ECode CDisplayManagerService::StopWifiDisplayScanInternal(
     /* [in] */ Int32 callingPid)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         HashMap<Int32, AutoPtr<CallbackRecord> >::Iterator find = mCallbacks.Find(callingPid);
         if (find == mCallbacks.End()) {
             Slogger::E(TAG, "The calling process has not registered an IIDisplayManagerCallback.");
@@ -1190,8 +1199,8 @@ ECode CDisplayManagerService::StopWifiDisplayScanLocked(
 ECode CDisplayManagerService::ConnectWifiDisplayInternal(
     /* [in] */ const String& address)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestConnectLocked(address);
         }
@@ -1201,8 +1210,8 @@ ECode CDisplayManagerService::ConnectWifiDisplayInternal(
 
 ECode CDisplayManagerService::PauseWifiDisplayInternal()
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestPauseLocked();
         }
@@ -1212,8 +1221,8 @@ ECode CDisplayManagerService::PauseWifiDisplayInternal()
 
 ECode CDisplayManagerService::ResumeWifiDisplayInternal()
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestResumeLocked();
         }
@@ -1223,8 +1232,8 @@ ECode CDisplayManagerService::ResumeWifiDisplayInternal()
 
 ECode CDisplayManagerService::DisconnectWifiDisplayInternal()
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestDisconnectLocked();
         }
@@ -1236,8 +1245,8 @@ ECode CDisplayManagerService::RenameWifiDisplayInternal(
     /* [in] */ const String& address,
     /* [in] */ const String& alias)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestRenameLocked(address, alias);
         }
@@ -1248,8 +1257,8 @@ ECode CDisplayManagerService::RenameWifiDisplayInternal(
 ECode CDisplayManagerService::ForgetWifiDisplayInternal(
     /* [in] */ const String& address)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         if (mWifiDisplayAdapter != NULL) {
             mWifiDisplayAdapter->RequestForgetLocked(address);
         }
@@ -1262,10 +1271,8 @@ ECode CDisplayManagerService::GetWifiDisplayStatusInternal(
 {
     VALIDATE_NOT_NULL(status);
 
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
-        Object* obj = (Object*)mSyncRoot.Get();
-    AutoLock lock(obj);
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         if (mWifiDisplayAdapter != NULL) {
             AutoPtr<IWifiDisplayStatus> s = mWifiDisplayAdapter->GetWifiDisplayStatusLocked();
             *status = s;
@@ -1291,8 +1298,8 @@ Int32 CDisplayManagerService::CreateVirtualDisplayInternal(
     /* [in] */ ISurface* surface,
     /* [in] */ Int32 flags)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         if (mVirtualDisplayAdapter == NULL) {
             Slogger::W(TAG,
                 "Rejecting request to create private virtual display "
@@ -1328,8 +1335,8 @@ ECode CDisplayManagerService::ResizeVirtualDisplayInternal(
     /* [in] */ Int32 height,
     /* [in] */ Int32 densityDpi)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         if (mVirtualDisplayAdapter == NULL) {
             return NOERROR;
         }
@@ -1343,8 +1350,8 @@ ECode CDisplayManagerService::SetVirtualDisplaySurfaceInternal(
     /* [in] */ IBinder* appToken,
     /* [in] */ ISurface* surface)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         if (mVirtualDisplayAdapter == NULL) {
             return NOERROR;
         }
@@ -1357,8 +1364,8 @@ ECode CDisplayManagerService::SetVirtualDisplaySurfaceInternal(
 ECode CDisplayManagerService::ReleaseVirtualDisplayInternal(
     /* [in] */ IBinder* appToken)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         if (mVirtualDisplayAdapter == NULL) {
             return NOERROR;
         }
@@ -1457,8 +1464,8 @@ void CDisplayManagerService::RegisterDisplayAdapterLocked(
 void CDisplayManagerService::HandleDisplayDeviceAdded(
    /* [in] */ DisplayDevice* device)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         HandleDisplayDeviceAddedLocked(device);
     }
 }
@@ -1466,15 +1473,14 @@ void CDisplayManagerService::HandleDisplayDeviceAdded(
 void CDisplayManagerService::HandleDisplayDeviceAddedLocked(
    /* [in] */ DisplayDevice* device)
 {
+    Slogger::I(TAG, "Display device added: %s", TO_CSTR(device->GetDisplayDeviceInfoLocked()));
+
     AutoPtr<DisplayDevice> dd = device;
-    if (Find(mDisplayDevices.Begin(), mDisplayDevices.End(), dd) == mDisplayDevices.End()) {
+    if (Find(mDisplayDevices.Begin(), mDisplayDevices.End(), dd) != mDisplayDevices.End()) {
         Slogger::W(TAG, "Attempted to add already added display device: %s",
-            Object::ToString(device->GetDisplayDeviceInfoLocked()).string());
+            TO_CSTR(device->GetDisplayDeviceInfoLocked()));
         return;
     }
-
-    Slogger::I(TAG, "Display device added: %s",
-        Object::ToString(device->GetDisplayDeviceInfoLocked()).string());
 
     mDisplayDevices.PushBack(dd);
     AddLogicalDisplayLocked(device);
@@ -1488,17 +1494,16 @@ void CDisplayManagerService::HandleDisplayDeviceAddedLocked(
 void CDisplayManagerService::HandleDisplayDeviceChanged(
     /* [in] */ DisplayDevice* device)
 {
+    Slogger::I(TAG, "Display device changed: %s", TO_CSTR(device->GetDisplayDeviceInfoLocked()));
+
     Object* obj = (Object*)mSyncRoot.Get();
     AutoLock lock(obj);
-    if (Find(mDisplayDevices.Begin(), mDisplayDevices.End(),
-        AutoPtr<DisplayDevice>(device)) == mDisplayDevices.End()) {
+    AutoPtr<DisplayDevice> dd = device;
+    if (Find(mDisplayDevices.Begin(), mDisplayDevices.End(), dd) == mDisplayDevices.End()) {
         Slogger::W(TAG, "Attempted to change non-existent display device: %s",
-            Object::ToString(device->GetDisplayDeviceInfoLocked()).string());
+            TO_CSTR(device->GetDisplayDeviceInfoLocked()));
         return;
     }
-
-    Slogger::I(TAG, "Display device changed: %s",
-        Object::ToString(device->GetDisplayDeviceInfoLocked()).string());
 
     device->ApplyPendingDisplayDeviceInfoChangesLocked();
     if (UpdateLogicalDisplaysLocked()) {
@@ -1509,8 +1514,8 @@ void CDisplayManagerService::HandleDisplayDeviceChanged(
 void CDisplayManagerService::HandleDisplayDeviceRemoved(
     /* [in] */ DisplayDevice* device)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         HandleDisplayDeviceRemovedLocked(device);
     }
 }
@@ -1522,14 +1527,13 @@ void CDisplayManagerService::HandleDisplayDeviceRemovedLocked(
     List<AutoPtr<DisplayDevice> >::Iterator find = Find(mDisplayDevices.Begin(), mDisplayDevices.End(),dd);
     if (find == mDisplayDevices.End()) {
         Slogger::W(TAG, "Attempted to remove non-existent display device: %s",
-            Object::ToString(device->GetDisplayDeviceInfoLocked()).string());
+            TO_CSTR(device->GetDisplayDeviceInfoLocked()));
         return;
     }
 
     mDisplayDevices.Erase(find);
 
-    Slogger::I(TAG, "Display device removed: %s",
-        Object::ToString(device->GetDisplayDeviceInfoLocked()).string());
+    Slogger::I(TAG, "Display device removed: %s", TO_CSTR(device->GetDisplayDeviceInfoLocked()));
 
     UpdateLogicalDisplaysLocked();
     ScheduleTraversalLocked(FALSE);
@@ -1567,15 +1571,13 @@ void CDisplayManagerService::AddLogicalDisplayLocked(
     Boolean isDefault = (deviceInfo->mFlags
         & DisplayDeviceInfo::FLAG_DEFAULT_DISPLAY) != 0;
     if (isDefault && mLogicalDisplays.Find(IDisplay::DEFAULT_DISPLAY) != mLogicalDisplays.End()) {
-        Slogger::W(TAG, "Ignoring attempt to add a second default display: %s"
-            , TO_CSTR(deviceInfo));
+        Slogger::W(TAG, "Ignoring attempt to add a second default display: %s", TO_CSTR(deviceInfo));
         isDefault = FALSE;
     }
 
     if (!isDefault && mSingleDisplayDemoMode) {
         Slogger::I(TAG, "Not creating a logical display for a secondary display "
-            " because single display demo mode is enabled: %s",
-            TO_CSTR(deviceInfo));
+            " because single display demo mode is enabled: %s", TO_CSTR(deviceInfo));
         return;
     }
 
@@ -1587,8 +1589,7 @@ void CDisplayManagerService::AddLogicalDisplayLocked(
     if (!display->IsValidLocked()) {
         // This should never happen currently.
         Slogger::W(TAG, "Ignoring display device because the logical display "
-            "created from it was not considered valid: %s",
-            TO_CSTR(deviceInfo));
+            "created from it was not considered valid: %s", TO_CSTR(deviceInfo));
         return;
     }
 
@@ -1675,8 +1676,8 @@ void CDisplayManagerService::SetDisplayPropertiesInternal(
     /* [in] */ Float requestedRefreshRate,
     /* [in] */ Boolean inTraversal)
 {
-    ISynchronize* sync = ISynchronize::Probe(mTempDisplayStateWorkQueue);
-    synchronized(sync) {
+    Object* obj = (Object*)mSyncRoot.Get();
+    synchronized(obj) {
         HashMap<Int32, AutoPtr<LogicalDisplay> >::Iterator it;
         it = mLogicalDisplays.Find(displayId);
         if (it == mLogicalDisplays.End()) {
@@ -1740,7 +1741,7 @@ void CDisplayManagerService::ConfigureDisplayInTransactionLocked(
     if (display == NULL) {
         // TODO: no logical display for the device, blank it
         Slogger::W(TAG, "Missing logical display to use for physical display device: %s",
-            Object::ToString(device->GetDisplayDeviceInfoLocked()).string());
+            TO_CSTR(device->GetDisplayDeviceInfoLocked()));
         return;
     }
 
@@ -1767,8 +1768,7 @@ void CDisplayManagerService::SetViewportLocked(
     /* [in] */ DisplayDevice* device)
 {
     viewport->SetValid(TRUE);
-    assert(0 && "TODO");
-    // viewport->SetDisplayId(display->GetDisplayIdLocked());
+    viewport->SetDisplayId(display->GetDisplayIdLocked());
     device->PopulateViewportLocked(viewport);
 }
 

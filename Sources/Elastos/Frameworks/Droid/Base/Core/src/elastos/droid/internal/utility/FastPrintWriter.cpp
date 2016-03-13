@@ -29,6 +29,8 @@ namespace Droid {
 namespace Internal {
 namespace Utility {
 
+AutoPtr<IWriter> FastPrintWriter::sDummyWriter = new DummyWriter();
+
 ECode FastPrintWriter::DummyWriter::Close()
 {
     Logger::E("FastPrintWriter", "Shouldn't be here");
@@ -48,7 +50,7 @@ ECode FastPrintWriter::DummyWriter::Write(
     return Close();
 }
 
-CAR_INTERFACE_IMPL(FastPrintWriter, Object, IFastPrintWriter)
+CAR_INTERFACE_IMPL(FastPrintWriter, PrintWriter, IFastPrintWriter)
 
 FastPrintWriter::FastPrintWriter()
     : mBufferLen(0)
@@ -56,7 +58,6 @@ FastPrintWriter::FastPrintWriter()
     , mAutoFlush(FALSE)
     , mIoError(FALSE)
 {
-    sDummyWriter = new DummyWriter();
 }
 
 ECode FastPrintWriter::constructor(
@@ -77,16 +78,19 @@ ECode FastPrintWriter::constructor(
     /* [in] */ Boolean autoFlush,
     /* [in] */ Int32 bufferLen)
 {
-    FAIL_RETURN(PrintWriter::constructor(sDummyWriter, autoFlush))
     if (out == NULL) {
         Logger::D("FastPrintWriter", "out is NULL");
         return E_NULL_POINTER_EXCEPTION;
     }
+
+    FAIL_RETURN(PrintWriter::constructor(sDummyWriter, autoFlush))
+
     mBufferLen = bufferLen;
     mText = ArrayOf<Char32>::Alloc(bufferLen);
     AutoPtr<IByteBufferHelper> bbHelper;
     CByteBufferHelper::AcquireSingleton((IByteBufferHelper**)&bbHelper);
-    bbHelper->Allocate(mBufferLen, (IByteBuffer**)&mBytes);
+    FAIL_RETURN(bbHelper->Allocate(mBufferLen, (IByteBuffer**)&mBytes))
+
     mOutputStream = out;
     mWriter = NULL;
     mPrinter = NULL;

@@ -45,7 +45,9 @@ ECode PrivacyContentResolver::EnforcePrivacyPermission(
 
     if (uri != NULL) {
         if (mPrivacySetMan == NULL) {
-            context->GetSystemService(String("privacy"), (IInterface**)(IPrivacySettingsManager**)&mPrivacySetMan);
+            AutoPtr<IInterface> obj;
+            context->GetSystemService(String("privacy"), (IInterface**)&obj);
+            mPrivacySetMan = IPrivacySettingsManager::Probe(obj);
         }
 
         String packageName;
@@ -211,7 +213,9 @@ ECode PrivacyContentResolver::EnforcePrivacyPermission(
 
     if (uri != NULL) {
         if (mPrivacySetMan == NULL) {
-            context->GetSystemService(String("privacy"), (IInterface**)(IPrivacySettingsManager**)&mPrivacySetMan);
+            AutoPtr<IInterface> obj;
+            context->GetSystemService(String("privacy"), (IInterface**)&mPrivacySetMan);
+            mPrivacySetMan = IPrivacySettingsManager::Probe(obj);
         }
 
         String packageName;

@@ -16,7 +16,6 @@ ECode CSettingsSecure::GetUriFor(
     /* [in] */ const String& name,
     /* [out] */ IUri** uri)
 {
-    VALIDATE_NOT_NULL(uri)
     return Settings::NameValueTable::GetUriFor(u, name, uri);
 }
 
@@ -317,7 +316,57 @@ ECode CSettingsSecure::GetCLONE_TO_MANAGED_PROFILE(
 {
     VALIDATE_NOT_NULL(array);
     *array = Settings::Secure::CLONE_TO_MANAGED_PROFILE;
-    REFCOUNT_ADD(*array);
+    REFCOUNT_ADD(*array)
+    return NOERROR;
+}
+
+ECode CSettingsSecure::GetSETTINGS_TO_BACKUP(
+    /* [out, callee] */ ArrayOf<String>** backups)
+{
+    VALIDATE_NOT_NULL(backups)
+    *backups = Settings::Secure::SETTINGS_TO_BACKUP;
+    REFCOUNT_ADD(*backups)
+    return NOERROR;
+}
+
+ECode CSettingsSecure::GetCONTENT_URI(
+    /* [out] */ IUri** uri)
+{
+    VALIDATE_NOT_NULL(uri);
+    *uri = Settings::Secure::CONTENT_URI;
+    REFCOUNT_ADD(*uri)
+    return NOERROR;
+}
+
+ECode CSettingsSecure::SetLocationProviderEnabledForUser(
+    /* [in] */ IContentResolver* cr,
+    /* [in] */ const String& provider,
+    /* [in] */ Boolean enabled,
+    /* [in] */ Int32 userId,
+    /* [out] */ Boolean* result)
+{
+    return Settings::Secure::SetLocationProviderEnabledForUser(
+        cr, provider, enabled, userId, result);
+}
+
+ECode CSettingsSecure::SetLocationModeForUser(
+    /* [in] */ IContentResolver* cr,
+    /* [in] */ Int32 mode,
+    /* [in] */ Int32 userId,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+    *result = Settings::Secure::SetLocationModeForUser(cr, mode, userId);
+    return NOERROR;
+}
+
+ECode CSettingsSecure::GetLocationModeForUser(
+    /* [in] */ IContentResolver* cr,
+    /* [in] */ Int32 userId,
+    /* [out] */ Int32* mode)
+{
+    VALIDATE_NOT_NULL(mode)
+    *mode = Settings::Secure::GetLocationModeForUser(cr, userId);
     return NOERROR;
 }
 

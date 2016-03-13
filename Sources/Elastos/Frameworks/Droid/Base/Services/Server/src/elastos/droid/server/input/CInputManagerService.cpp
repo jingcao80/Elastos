@@ -1,32 +1,126 @@
+
+#include <Elastos.CoreLibrary.External.h>
+#include <Elastos.CoreLibrary.Libcore.h>
+#include <Elastos.Droid.Core.Server.h>
+#include <Elastos.Droid.Internal.h>
+#include <Elastos.Droid.Content.h>
+#include <Elastos.Droid.View.h>
+#include <Elastos.Droid.Widget.h>
+#include <Elastos.Droid.App.h>
+#include <Elastos.Droid.Hardware.h>
+#include <Elastos.Droid.Provider.h>
+#include <Elastos.Droid.Bluetooth.h>
+#define HASH_FOR_OS
+#include <elastos/droid/ext/frameworkhash.h>
+#include "elastos/droid/internal/utility/XmlUtils.h"
+#include "elastos/droid/os/Binder.h"
+#include "elastos/droid/os/NativeMessageQueue.h"
+#include "elastos/droid/os/Process.h"
+#include "elastos/droid/os/UserHandle.h"
+#include "elastos/droid/utility/Xml.h"
+#include "elastos/droid/provider/Settings.h"
+#include "elastos/droid/view/NativeInputChannel.h"
+#include "elastos/droid/server/input/CInputFilterHost.h"
+#include "elastos/droid/server/input/NativeInputWindowHandle.h"
 #include "elastos/droid/server/input/CInputManagerService.h"
 #include "elastos/droid/server/DisplayThread.h"
 #include "elastos/droid/server/LocalServices.h"
+#include "elastos/droid/server/Watchdog.h"
+#include "elastos/droid/Manifest.h"
 #include "elastos/droid/R.h"
-#include "Elastos.Droid.Core.Server.h"
-#include "Elastos.Droid.Internal.h"
-#include "Elastos.Droid.Content.h"
-#include "Elastos.Droid.View.h"
-#include "Elastos.Droid.App.h"
-#include "Elastos.Droid.Widget.h"
-#include <elastos/utility/logging/Slogger.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/core/CoreUtils.h>
+#include <elastos/core/Math.h>
+#include <elastos/core/StringBuilder.h>
+#include <elastos/core/StringUtils.h>
+#include <elastos/utility/etl/List.h>
+#include <elastos/utility/logging/Slogger.h>
 
-using Elastos::Droid::Content::IContext;
+using Elastos::Droid::App::INotification;
+using Elastos::Droid::App::INotificationBuilder;
+using Elastos::Droid::App::CNotificationBuilder;
+using Elastos::Droid::App::IPendingIntent;
+using Elastos::Droid::App::IPendingIntentHelper;
+using Elastos::Droid::App::CPendingIntentHelper;
+using Elastos::Droid::Bluetooth::IBluetoothDevice;
+using Elastos::Droid::Bluetooth::IBluetoothAdapterHelper;
+using Elastos::Droid::Bluetooth::CBluetoothAdapterHelper;
+using Elastos::Droid::Content::IContentResolver;
+using Elastos::Droid::Content::CIntent;
+using Elastos::Droid::Content::CComponentName;
+using Elastos::Droid::Content::IComponentName;
+using Elastos::Droid::Content::CIntentFilter;
+using Elastos::Droid::Content::IIntentFilter;
+using Elastos::Droid::Content::Pm::IApplicationInfo;
+using Elastos::Droid::Content::Pm::IComponentInfo;
+using Elastos::Droid::Content::Pm::IResolveInfo;
+using Elastos::Droid::Content::Pm::IPackageItemInfo;
 using Elastos::Droid::Content::Res::IResources;
+using Elastos::Droid::Content::Res::ITypedArray;
+using Elastos::Droid::Content::Res::IXmlResourceParser;
 using Elastos::Droid::Hardware::Input::IInputManager;
+// using Elastos::Droid::Hardware::Input::CKeyboardLayout;
+using Elastos::Droid::Hardware::Input::IKeyboardLayout;
 using Elastos::Droid::Hardware::Input::EIID_IIInputManager;
 using Elastos::Droid::Hardware::Input::EIID_IInputManagerInternal;
-using Elastos::Droid::Os::IHandler;
-using Elastos::Droid::Os::CHandler;
+using Elastos::Droid::Graphics::IRect;
+using Elastos::Droid::Internal::Utility::XmlUtils;
+using Elastos::Droid::Os::Binder;
+using Elastos::Droid::Os::CEnvironment;
+using Elastos::Droid::Os::IEnvironment;
+using Elastos::Droid::Os::IUserHandle;
+using Elastos::Droid::Os::MessageQueue;
+using Elastos::Droid::Os::NativeMessageQueue;
+using Elastos::Droid::Os::Process;
+using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Os::EIID_IBinder;
+using Elastos::Droid::Provider::Settings;
+using Elastos::Droid::Provider::ISettings;
+using Elastos::Droid::Provider::ISettingsSystem;
+using Elastos::Droid::Server::Watchdog;
 using Elastos::Droid::Utility::CSparseArray;
+using Elastos::Droid::Utility::IAttributeSet;
+using Elastos::Droid::Utility::Xml;
+using Elastos::Droid::View::IViewConfigurationHelper;
+using Elastos::Droid::View::CViewConfigurationHelper;
 using Elastos::Droid::View::IDisplay;
+using Elastos::Droid::View::IMotionEvent;
+using Elastos::Droid::View::CInputChannelHelper;
+using Elastos::Droid::View::IInputChannelHelper;
 using Elastos::Droid::View::IWindowManagerPolicy;
+using Elastos::Droid::View::NativeInputChannel;
+using Elastos::Droid::View::IPointerIconHelper;
+using Elastos::Droid::View::CPointerIconHelper;
+using Elastos::Droid::View::ISurface;
+using Elastos::Droid::View::EIID_IInputDevice;
 using Elastos::Droid::View::EIID_IIInputFilterHost;
+using Elastos::Droid::Widget::CToastHelper;
+using Elastos::Droid::Widget::IToastHelper;
+using Elastos::Droid::Manifest;
 using Elastos::Droid::R;
+using Elastos::Core::CoreUtils;
 using Elastos::Core::IArrayOf;
+using Elastos::Core::CArrayOf;
+using Elastos::Core::StringBuilder;
+using Elastos::Core::StringUtils;
+using Elastos::IO::ICloseable;
+using Elastos::IO::CFile;
+using Elastos::IO::IFile;
+using Elastos::IO::CFileReader;
+using Elastos::IO::IFileReader;
+using Elastos::IO::IInputStream;
+using Elastos::IO::CInputStreamReader;
+using Elastos::IO::IInputStreamReader;
+using Elastos::IO::IReader;
 using Elastos::Utility::CArrayList;
+using Elastos::Utility::IHashSet;
+using Elastos::Utility::CHashSet;
+using Elastos::Utility::IIterator;
+using Elastos::Utility::Etl::List;
 using Elastos::Utility::Logging::Slogger;
+using Libcore::IO::CStreams;
+using Libcore::IO::IStreams;
+using Org::Xmlpull::V1::IXmlPullParser;
 
 namespace Elastos {
 namespace Droid {
@@ -128,7 +222,7 @@ ECode CInputManagerService::InputFilterHost::SendInputEvent(
     Object& lock = mHost->mInputFilterLock;
     synchronized (lock) {
         if (!mDisconnected) {
-            NativeInjectInputEvent(mHost->mPtr, event, IDisplay::DEFAULT_DISPLAY, 0, 0,
+            mHost->NativeInjectInputEvent(event, IDisplay::DEFAULT_DISPLAY, 0, 0,
                     IInputManager::INJECT_INPUT_EVENT_MODE_ASYNC, 0,
                     policyFlags | IWindowManagerPolicy::FLAG_FILTERED);
         }
@@ -192,7 +286,7 @@ CInputManagerService::InputDevicesChangedListenerRecord::InputDevicesChangedList
 {}
 
 //@Override
-ECode CInputManagerService::InputDevicesChangedListenerRecord::BinderDied()
+ECode CInputManagerService::InputDevicesChangedListenerRecord::ProxyDied()
 {
     if (DEBUG) {
         Slogger::D(TAG, "Input devices changed listener for pid %d died.", mPid);
@@ -207,7 +301,7 @@ void CInputManagerService::InputDevicesChangedListenerRecord::NotifyInputDevices
     ECode ec = mListener->OnInputDevicesChanged(info);
     if (FAILED(ec)) {
         Slogger::W(TAG, "Failed to notify process %d that input devices changed, assuming it died.", mPid);
-        BinderDied();
+        ProxyDied();
     }
 }
 
@@ -229,7 +323,7 @@ CInputManagerService::VibratorToken::VibratorToken(
 {}
 
 //@Override
-ECode CInputManagerService::VibratorToken::BinderDied()
+ECode CInputManagerService::VibratorToken::ProxyDied()
 {
     if (DEBUG) {
         Slogger::D(TAG, "Vibrator token died.");
@@ -269,7 +363,209 @@ ECode CInputManagerService::LocalService::InjectInputEvent(
 ECode CInputManagerService::LocalService::SetInteractive(
     /* [in] */ Boolean interactive)
 {
-    NativeSetInteractive(mHost->mPtr, interactive);
+    mHost->NativeSetInteractive(interactive);
+    return NOERROR;
+}
+
+
+//------------------------------------------------------------------------------
+//  CInputManagerService::BroadcastReceiverInStart
+//------------------------------------------------------------------------------
+CInputManagerService::BroadcastReceiverInStart::BroadcastReceiverInStart(
+    /* [in] */ CInputManagerService* owner)
+    : mOwner(owner)
+{}
+
+//@Override
+ECode CInputManagerService::BroadcastReceiverInStart::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    mOwner->UpdatePointerSpeedFromSettings();
+    mOwner->UpdateShowTouchesFromSettings();
+    return NOERROR;
+}
+
+
+//------------------------------------------------------------------------------
+//  CInputManagerService::BroadcastReceiver1InSystemRunning
+//------------------------------------------------------------------------------
+CInputManagerService::BroadcastReceiver1InSystemRunning::BroadcastReceiver1InSystemRunning(
+    /* [in] */ CInputManagerService* owner)
+    : mOwner(owner)
+{}
+
+//@Override
+ECode CInputManagerService::BroadcastReceiver1InSystemRunning::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    mOwner->UpdateKeyboardLayouts();
+    return NOERROR;
+}
+
+
+//------------------------------------------------------------------------------
+//  CInputManagerService::BroadcastReceiver2InSystemRunning
+//------------------------------------------------------------------------------
+CInputManagerService::BroadcastReceiver2InSystemRunning::BroadcastReceiver2InSystemRunning(
+    /* [in] */ CInputManagerService* owner)
+    : mOwner(owner)
+{}
+
+//@Override
+ECode CInputManagerService::BroadcastReceiver2InSystemRunning::OnReceive(
+    /* [in] */ IContext* context,
+    /* [in] */ IIntent* intent)
+{
+    mOwner->ReloadDeviceAliases();
+    return NOERROR;
+}
+
+
+//------------------------------------------------------------------------------
+//  CInputManagerService::KeyboardLayoutVisitorInUpdateKeyboardLayouts
+//------------------------------------------------------------------------------
+CAR_INTERFACE_IMPL(CInputManagerService::KeyboardLayoutVisitorInUpdateKeyboardLayouts, Object, IKeyboardLayoutVisitor);
+
+CInputManagerService::KeyboardLayoutVisitorInUpdateKeyboardLayouts::KeyboardLayoutVisitorInUpdateKeyboardLayouts(
+    /* [in] */ IHashSet* availableKeyboardLayouts)
+    : mAvailableKeyboardLayouts(availableKeyboardLayouts)
+{}
+
+ECode CInputManagerService::KeyboardLayoutVisitorInUpdateKeyboardLayouts::VisitKeyboardLayout(
+    /* [in] */ IResources* resources,
+    /* [in] */ const String& descriptor,
+    /* [in] */ const String& label,
+    /* [in] */ const String& collection,
+    /* [in] */ Int32 keyboardLayoutResId,
+    /* [in] */ Int32 priority)
+{
+    mAvailableKeyboardLayouts->Add(CoreUtils::Convert(descriptor));
+    return NOERROR;
+}
+
+
+//------------------------------------------------------------------------------
+//  CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayouts
+//------------------------------------------------------------------------------
+CAR_INTERFACE_IMPL(CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayouts, Object, IKeyboardLayoutVisitor);
+
+CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayouts::KeyboardLayoutVisitorInGetKeyboardLayouts(
+    /* [in] */ IArrayList* list)
+    : mList(list)
+{}
+
+ECode CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayouts::VisitKeyboardLayout(
+    /* [in] */ IResources* resources,
+    /* [in] */ const String& descriptor,
+    /* [in] */ const String& label,
+    /* [in] */ const String& collection,
+    /* [in] */ Int32 keyboardLayoutResId,
+    /* [in] */ Int32 priority)
+{
+    AutoPtr<IKeyboardLayout> layout;
+    assert(0);
+    // TODO
+    // CKeyboardLayout::New(descriptor, label, collection, priority, (IKeyboardLayout**)&layout);
+    mList->Add(layout);
+    return NOERROR;
+}
+
+
+//------------------------------------------------------------------------------
+//  CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayout
+//------------------------------------------------------------------------------
+CAR_INTERFACE_IMPL(CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayout, Object, IKeyboardLayoutVisitor);
+
+CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayout::KeyboardLayoutVisitorInGetKeyboardLayout(
+    /* [in] */ ArrayOf<IKeyboardLayout*>* layouts)
+    : mLayouts(layouts)
+{}
+
+ECode CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayout::VisitKeyboardLayout(
+    /* [in] */ IResources* resources,
+    /* [in] */ const String& descriptor,
+    /* [in] */ const String& label,
+    /* [in] */ const String& collection,
+    /* [in] */ Int32 keyboardLayoutResId,
+    /* [in] */ Int32 priority)
+{
+    AutoPtr<IKeyboardLayout> layout;
+    assert(0);
+    // TODO:
+    // CKeyboardLayout::New(descriptor, label, collection, priority, (IKeyboardLayout**)&layout);
+    mLayouts->Set(0, layout);
+    return NOERROR;
+}
+
+
+//------------------------------------------------------------------------------
+//  CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayoutOverlay
+//------------------------------------------------------------------------------
+CAR_INTERFACE_IMPL(CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayoutOverlay, Object, IKeyboardLayoutVisitor);
+
+CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayoutOverlay::KeyboardLayoutVisitorInGetKeyboardLayoutOverlay(
+    /* [in] */ ArrayOf<String>* layoutOverlays)
+    : mLayoutOverlays(layoutOverlays)
+{}
+
+ECode CInputManagerService::KeyboardLayoutVisitorInGetKeyboardLayoutOverlay::VisitKeyboardLayout(
+    /* [in] */ IResources* resources,
+    /* [in] */ const String& descriptor,
+    /* [in] */ const String& label,
+    /* [in] */ const String& collection,
+    /* [in] */ Int32 keyboardLayoutResId,
+    /* [in] */ Int32 priority)
+{
+    (*mLayoutOverlays)[0] = descriptor;
+    AutoPtr<IInputStream> inputStream;
+    resources->OpenRawResource(keyboardLayoutResId, (IInputStream**)&inputStream);
+    AutoPtr<IInputStreamReader> reader;
+    CInputStreamReader::New(inputStream, (IInputStreamReader**)&reader);
+    AutoPtr<IStreams> stream;
+    CStreams::AcquireSingleton((IStreams**)&stream);
+    String result;
+    stream->ReadFully(IReader::Probe(reader), &result);
+    (*mLayoutOverlays)[1] = result;
+    return NOERROR;
+}
+
+
+//------------------------------------------------------------------------------
+//  CInputManagerService::ContentObserverInRegisterPointerSpeedSettingObserver
+//------------------------------------------------------------------------------
+CInputManagerService::ContentObserverInRegisterPointerSpeedSettingObserver::ContentObserverInRegisterPointerSpeedSettingObserver(
+    /* [in] */ CInputManagerService* owner,
+    /* [in] */ IHandler* handler)
+    : mOwner(owner)
+{
+    ContentObserver::constructor(handler);
+}
+
+ECode CInputManagerService::ContentObserverInRegisterPointerSpeedSettingObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    mOwner->UpdatePointerSpeedFromSettings();
+    return NOERROR;
+}
+
+
+//------------------------------------------------------------------------------
+//  CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver
+//------------------------------------------------------------------------------
+CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver::ContentObserverInRegisterShowTouchesSettingObserver(
+    /* [in] */ CInputManagerService* owner,
+    /* [in] */ IHandler* handler)
+    : mOwner(owner)
+{
+    ContentObserver::constructor(handler);
+}
+
+ECode CInputManagerService::ContentObserverInRegisterShowTouchesSettingObserver::OnChange(
+    /* [in] */ Boolean selfChange)
+{
+    mOwner->UpdateShowTouchesFromSettings();
     return NOERROR;
 }
 
@@ -277,7 +573,7 @@ ECode CInputManagerService::LocalService::SetInteractive(
 //==============================================================================
 //  CInputManagerService
 //==============================================================================
-const String CInputManagerService::TAG("InputManager");
+const String CInputManagerService::TAG("CInputManagerService");
 const Boolean CInputManagerService::DEBUG;
 const String CInputManagerService::EXCLUDED_DEVICES_PATH("etc/excluded-input-devices.xml");
 
@@ -294,29 +590,19 @@ const Int32 CInputManagerService::INPUT_EVENT_INJECTION_TIMED_OUT;
 
 const Int32 CInputManagerService::INJECTION_TIMEOUT_MILLIS;
 const Int32 CInputManagerService::KEY_STATE_UNKNOWN;
-
 const Int32 CInputManagerService::KEY_STATE_UP;
-
 const Int32 CInputManagerService::KEY_STATE_DOWN;
-
 const Int32 CInputManagerService::KEY_STATE_VIRTUAL;
 
 const Int32 CInputManagerService::BTN_MOUSE;
 
 const Int32 CInputManagerService::SW_LID;
-
 const Int32 CInputManagerService::SW_KEYPAD_SLIDE;
-
 const Int32 CInputManagerService::SW_HEADPHONE_INSERT;
-
 const Int32 CInputManagerService::SW_MICROPHONE_INSERT;
-
 const Int32 CInputManagerService::SW_LINEOUT_INSERT;
-
 const Int32 CInputManagerService::SW_JACK_PHYSICAL_INSERT;
-
 const Int32 CInputManagerService::SW_CAMERA_LENS_COVER;
-
 const Int32 CInputManagerService::SW_LID_BIT;
 const Int32 CInputManagerService::SW_KEYPAD_SLIDE_BIT;
 const Int32 CInputManagerService::SW_HEADPHONE_INSERT_BIT;
@@ -328,9 +614,10 @@ const Int32 CInputManagerService::SW_CAMERA_LENS_COVER_BIT;
 
 CAR_INTERFACE_IMPL_3(CInputManagerService, Object, IIInputManager, IWatchdogMonitor, IBinder);
 
+CAR_OBJECT_IMPL(CInputManagerService)
+
 CInputManagerService::CInputManagerService()
-    : mPtr(0)
-    , mSystemReady(FALSE)
+    : mSystemReady(FALSE)
     , mInputDevicesChangedPending(FALSE)
     , mKeyboardLayoutNotificationShown(FALSE)
     , mNextVibratorTokenValue(0)
@@ -344,7 +631,9 @@ CInputManagerService::CInputManagerService()
 }
 
 CInputManagerService::~CInputManagerService()
-{}
+{
+    mInputFilterHost = NULL;
+}
 
 ECode CInputManagerService::constructor(
     /* [in] */ IContext* context)
@@ -363,30 +652,46 @@ ECode CInputManagerService::constructor(
     mHandler->GetLooper((ILooper**)&looper);
     AutoPtr<IMessageQueue> queue;
     looper->GetQueue((IMessageQueue**)&queue);
-    mPtr = NativeInit(this, mContext, queue);
+    FAIL_RETURN(NativeInit(mContext, queue));
 
-    LocalServices::AddService(EIID_IInputManagerInternal, (IInputManagerInternal*)new LocalService(this));
+    AutoPtr<IInputManagerInternal> imi = new LocalService(this);
+    LocalServices::AddService(EIID_IInputManagerInternal, imi.Get());
     return NOERROR;
 }
 
-/**
- * these native functions come from ./frameworks/base/services/core/jni/com_android_server_input_InputManagerService.cpp
- */
-Int64 CInputManagerService::NativeInit(
-    /* [in] */ CInputManagerService* service,
+ECode CInputManagerService::NativeInit(
     /* [in] */ IContext* context,
     /* [in] */ IMessageQueue* messageQueue)
 {
+    Handle64 ptr;
+    messageQueue->GetNativeMessageQueue(&ptr);
+    AutoPtr<MessageQueue> nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
+    if (nativeMessageQueue == NULL) {
+        mPtr = 0;
+        Slogger::E(TAG, "MessageQueue is not initialized.");
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    NativeInputManager* im = new NativeInputManager(context, this,
+            nativeMessageQueue->GetLooper());
+    im->incStrong(0);
+    mPtr = reinterpret_cast<Int64>(im);
+    return NOERROR;
 }
 
-void CInputManagerService::NativeStart(
-    /* [in] */ Int64 ptr)
+ECode CInputManagerService::NativeStart()
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    android::status_t result = im->getInputManager()->start();
+    if (result) {
+        Slogger::E(TAG, "Input manager could not be started.");
+        return E_RUNTIME_EXCEPTION;
+    }
+    return NOERROR;
 }
 
 void CInputManagerService::NativeSetDisplayViewport(
-    /* [in] */ Int64 ptr,
     /* [in] */ Boolean external,
     /* [in] */ Int32 displayId,
     /* [in] */ Int32 rotation,
@@ -401,71 +706,186 @@ void CInputManagerService::NativeSetDisplayViewport(
     /* [in] */ Int32 deviceWidth,
     /* [in] */ Int32 deviceHeight)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    android::DisplayViewport v;
+    v.displayId = displayId;
+    v.orientation = rotation;
+    v.logicalLeft = logicalLeft;
+    v.logicalTop = logicalTop;
+    v.logicalRight = logicalRight;
+    v.logicalBottom = logicalBottom;
+    v.physicalLeft = physicalLeft;
+    v.physicalTop = physicalTop;
+    v.physicalRight = physicalRight;
+    v.physicalBottom = physicalBottom;
+    v.deviceWidth = deviceWidth;
+    v.deviceHeight = deviceHeight;
+    im->setDisplayViewport(external, v);
 }
 
 Int32 CInputManagerService::NativeGetScanCodeState(
-    /* [in] */ Int64 ptr,
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 sourceMask,
     /* [in] */ Int32 scanCode)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    return im->getInputManager()->getReader()->getScanCodeState(
+            deviceId, uint32_t(sourceMask), scanCode);
 }
 
 Int32 CInputManagerService::NativeGetKeyCodeState(
-    /* [in] */ Int64 ptr,
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 sourceMask,
     /* [in] */ Int32 keyCode)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    return im->getInputManager()->getReader()->getKeyCodeState(
+            deviceId, uint32_t(sourceMask), keyCode);
 }
 
 Int32 CInputManagerService::NativeGetSwitchState(
-    /* [in] */ Int64 ptr,
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 sourceMask,
     /* [in] */ Int32 sw)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    return im->getInputManager()->getReader()->getSwitchState(
+            deviceId, uint32_t(sourceMask), sw);
 }
 
 Boolean CInputManagerService::NativeHasKeys(
-    /* [in] */ Int64 ptr,
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 sourceMask,
-    /* [in] */ ArrayOf<Int32>* keyCodes,
+    /* [in] */ const ArrayOf<Int32>& keyCodes,
     /* [in] */ ArrayOf<Boolean>* keyExists)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    int32_t* codes = (int32_t*)keyCodes.GetPayload();
+    uint8_t* flags = (uint8_t*)keyExists->GetPayload();
+    Int32 numCodes = keyCodes.GetLength();
+    if (numCodes == keyExists->GetLength()) {
+        return im->getInputManager()->getReader()->hasKeys(
+                deviceId, uint32_t(sourceMask), numCodes, codes, flags);
+    }
+
+    return FALSE;
 }
 
-void CInputManagerService::NativeRegisterInputChannel(
-    /* [in] */ Int64 ptr,
-    /* [in] */ IInputChannel* inputChannel,
-    /* [in] */ InputWindowHandle* inputWindowHandle,
+static void HandleInputChannelDisposed(
+    /* [in] */ IInputChannel* inputChannelObj,
+    /* [in] */ const android::sp<android::InputChannel>& inputChannel,
+    /* [in] */ void* data)
+{
+    NativeInputManager* im = static_cast<NativeInputManager*>(data);
+
+    Slogger::W(CInputManagerService::TAG, "Input channel object '%s' was disposed without first being unregistered with "
+            "the input manager!", inputChannel->getName().string());
+    im->unregisterInputChannel(inputChannel);
+}
+
+ECode CInputManagerService::NativeRegisterInputChannel(
+    /* [in] */ IInputChannel* inputChannelObj,
+    /* [in] */ InputWindowHandle* inputWindowHandleObj,
     /* [in] */ Boolean monitor)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    Handle64 ptr;
+    inputChannelObj->GetNativeInputChannel(&ptr);
+    NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(ptr);
+    android::sp<android::InputChannel> inputChannel = nativeInputChannel->getInputChannel();
+    if (inputChannel == NULL) {
+        Slogger::E(TAG, "inputChannel is not initialized");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    android::sp<android::InputWindowHandle> inputWindowHandle =
+            GetNativeInputWindowHandle(inputWindowHandleObj);
+
+    android::status_t status = im->registerInputChannel(
+            inputChannel, inputWindowHandle, monitor);
+    if (status) {
+        Slogger::E(TAG, "Failed to register input channel.  status=%d", status);
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    if (!monitor) {
+        nativeInputChannel->setDisposeCallback(
+            HandleInputChannelDisposed, im);
+    }
+
+    return NOERROR;
 }
 
-void CInputManagerService::NativeUnregisterInputChannel(
-    /* [in] */ Int64 ptr,
-    /* [in] */ IInputChannel* inputChannel)
+ECode CInputManagerService::NativeUnregisterInputChannel(
+    /* [in] */ IInputChannel* inputChannelObj)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    Handle64 ptr;
+    inputChannelObj->GetNativeInputChannel(&ptr);
+    NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(ptr);
+    android::sp<android::InputChannel> inputChannel = nativeInputChannel->getInputChannel();
+    if (inputChannel == NULL) {
+        Slogger::E(TAG, "inputChannel is not initialized");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+
+    nativeInputChannel->setDisposeCallback(NULL, NULL);
+
+    android::status_t status = im->unregisterInputChannel(inputChannel);
+    if (status && status != android::BAD_VALUE) { // ignore already unregistered channel
+        Slogger::E(TAG, "Failed to unregister input channel.  status=%d", status);
+        return E_RUNTIME_EXCEPTION;
+    }
+
+    return NOERROR;
 }
 
 void CInputManagerService::NativeSetInputFilterEnabled(
-    /* [in] */ Int64 ptr,
     /* [in] */ Boolean enable)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->getInputManager()->getDispatcher()->setInputFilterEnabled(enable);
+}
+
+static void KeyEvent_toNative(
+    /* [in] */ IKeyEvent* event,
+    /* [in] */ android::KeyEvent* androidEvent)
+{
+    Int32 deviceId;
+    event->GetKeyboardDevice(&deviceId);
+    Int32 source;
+    IInputEvent::Probe(event)->GetSource(&source);
+    Int32 metaState;
+    event->GetMetaState(&metaState);
+    Int32 action;
+    event->GetAction(&action);
+    Int32 keyCode;
+    event->GetKeyCode(&keyCode);
+    Int32 scanCode;
+    event->GetScanCode(&scanCode);
+    Int32 repeatCount;
+    event->GetRepeatCount(&repeatCount);
+    Int32 flags;
+    event->GetFlags(&flags);
+    Int64 downTime;
+    event->GetDownTime(&downTime);
+    Int64 eventTime;
+    IInputEvent::Probe(event)->GetEventTime(&eventTime);
+
+    androidEvent->initialize(deviceId, source, action, flags, keyCode, scanCode, metaState, repeatCount,
+            milliseconds_to_nanoseconds(downTime),
+            milliseconds_to_nanoseconds(eventTime));
 }
 
 Int32 CInputManagerService::NativeInjectInputEvent(
-    /* [in] */ Int64 ptr,
     /* [in] */ IInputEvent* event,
     /* [in] */ Int32 displayId,
     /* [in] */ Int32 injectorPid,
@@ -474,134 +894,324 @@ Int32 CInputManagerService::NativeInjectInputEvent(
     /* [in] */ Int32 timeoutMillis,
     /* [in] */ Int32 policyFlags)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    if (IKeyEvent::Probe(event)) {
+        android::KeyEvent keyEvent;
+        KeyEvent_toNative(IKeyEvent::Probe(event), &keyEvent);
+
+        return (Int32)im->getInputManager()->getDispatcher()->injectInputEvent(
+                &keyEvent, displayId, injectorPid, injectorUid, syncMode, timeoutMillis,
+                uint32_t(policyFlags));
+    }
+    else if (IMotionEvent::Probe(event)) {
+        Handle64 ptr;
+        IMotionEvent::Probe(event)->GetNative(&ptr);
+        const android::MotionEvent* motionEvent = reinterpret_cast<android::MotionEvent*>(ptr);
+
+        return im->getInputManager()->getDispatcher()->injectInputEvent(
+                motionEvent, displayId, injectorPid, injectorUid, syncMode, timeoutMillis,
+                uint32_t(policyFlags));
+    }
+    else {
+        Slogger::E(TAG, "Invalid input event type.");
+        return INPUT_EVENT_INJECTION_FAILED;
+    }
 }
 
 void CInputManagerService::NativeSetInputWindows(
-    /* [in] */ Int64 ptr,
     /* [in] */ ArrayOf<InputWindowHandle*>* windowHandles)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->setInputWindows(windowHandles);
 }
 
 void CInputManagerService::NativeSetInputDispatchMode(
-    /* [in] */ Int64 ptr,
     /* [in] */ Boolean enabled,
     /* [in] */ Boolean frozen)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->setInputDispatchMode(enabled, frozen);
 }
 
 void CInputManagerService::NativeSetSystemUiVisibility(
-    /* [in] */ Int64 ptr,
     /* [in] */ Int32 visibility)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->setSystemUiVisibility(visibility);
 }
 
 void CInputManagerService::NativeSetFocusedApplication(
-    /* [in] */ Int64 ptr,
     /* [in] */ InputApplicationHandle* application)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->setFocusedApplication(application);
 }
 
 Boolean CInputManagerService::NativeTransferTouchFocus(
-    /* [in] */ Int64 ptr,
-    /* [in] */ IInputChannel* fromChannel,
-    /* [in] */ IInputChannel* toChannel)
+    /* [in] */ IInputChannel* fromChannelObj,
+    /* [in] */ IInputChannel* toChannelObj)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    Handle64 ptr;
+    fromChannelObj->GetNativeInputChannel(&ptr);
+    NativeInputChannel* nativeInputChannel = reinterpret_cast<NativeInputChannel*>(ptr);
+    android::sp<android::InputChannel> fromChannel = nativeInputChannel->getInputChannel();
+
+    toChannelObj->GetNativeInputChannel(&ptr);
+    nativeInputChannel = reinterpret_cast<NativeInputChannel*>(ptr);
+    android::sp<android::InputChannel> toChannel = nativeInputChannel->getInputChannel();
+
+    if (fromChannel == NULL || toChannel == NULL) {
+        return FALSE;
+    }
+
+    return im->getInputManager()->getDispatcher()->transferTouchFocus(fromChannel, toChannel);
 }
 
 void CInputManagerService::NativeSetPointerSpeed(
-    /* [in] */ Int64 ptr,
     /* [in] */ Int32 speed)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->setPointerSpeed(speed);
 }
 
 void CInputManagerService::NativeSetShowTouches(
-    /* [in] */ Int64 ptr,
     /* [in] */ Boolean enabled)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->setShowTouches(enabled);
 }
 
 void CInputManagerService::NativeSetInteractive(
-    /* [in] */ Int64 ptr,
     /* [in] */ Boolean interactive)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->setInteractive(interactive);
 }
 
-void CInputManagerService::NativeReloadCalibration(
-    /* [in] */ Int64 ptr)
+void CInputManagerService::NativeReloadCalibration()
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->reloadCalibration();
 }
 
 void CInputManagerService::NativeVibrate(
-    /* [in] */ Int64 ptr,
     /* [in] */ Int32 deviceId,
-    /* [in] */ ArrayOf<Int64>* pattern,
+    /* [in] */ const ArrayOf<Int64>& pattern,
     /* [in] */ Int32 repeat,
     /* [in] */ Int32 token)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    size_t patternSize = pattern.GetLength();
+    if (patternSize > MAX_VIBRATE_PATTERN_SIZE) {
+        Slogger::I(TAG, "Skipped requested vibration because the pattern size is %d "
+                "which is more than the maximum supported size of %d.",
+                patternSize, MAX_VIBRATE_PATTERN_SIZE);
+        return; // limit to reasonable size
+    }
+
+    nsecs_t patternTmp[patternSize];
+    for (size_t i = 0; i < patternSize; i++) {
+        patternTmp[i] = Elastos::Core::Math::Max(Int64(0), Elastos::Core::Math::Min(pattern[i],
+            (Int64)MAX_VIBRATE_PATTERN_DELAY_NSECS / 1000000LL)) * 1000000LL;
+    }
+
+    im->getInputManager()->getReader()->vibrate(
+            deviceId, patternTmp, patternSize, repeat, token);
 }
 
 void CInputManagerService::NativeCancelVibrate(
-    /* [in] */ Int64 ptr,
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 token)
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->getInputManager()->getReader()->cancelVibrate(deviceId, token);
 }
 
-void CInputManagerService::NativeReloadKeyboardLayouts(
-    /* [in] */ Int64 ptr)
+void CInputManagerService::NativeReloadKeyboardLayouts()
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->getInputManager()->getReader()->requestRefreshConfiguration(
+            android::InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUTS);
 }
 
-void CInputManagerService::NativeReloadDeviceAliases(
-    /* [in] */ Int64 ptr)
+void CInputManagerService::NativeReloadDeviceAliases()
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->getInputManager()->getReader()->requestRefreshConfiguration(
+            android::InputReaderConfiguration::CHANGE_DEVICE_ALIAS);
 }
 
-String CInputManagerService::NativeDump(
-    /* [in] */ Int64 ptr)
+String CInputManagerService::NativeDump()
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    android::String8 dump;
+    im->dump(dump);
+    return String(dump.string());
 }
 
-void CInputManagerService::NativeMonitor(
-    /* [in] */ Int64 ptr)
+void CInputManagerService::NativeMonitor()
 {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(mPtr);
 
+    im->getInputManager()->getReader()->monitor();
+    im->getInputManager()->getDispatcher()->monitor();
 }
-
 
 void CInputManagerService::SetWindowManagerCallbacks(
     /* [in] */ IWindowManagerCallbacks* cbacks)
 {
-
+    mWindowManagerCallbacks = cbacks;
 }
 
 void CInputManagerService::SetWiredAccessoryCallbacks(
     /* [in] */ IWiredAccessoryCallbacks* cbacks)
 {
+    mWiredAccessoryCallbacks = cbacks;
 }
 
-void CInputManagerService::Start()
+ECode CInputManagerService::Start()
 {
+    Slogger::I(TAG, "Starting input manager");
+    FAIL_RETURN(NativeStart());
+
+    // Add ourself to the Watchdog monitors.
+    Watchdog::GetInstance()->AddMonitor(this);
+
+    RegisterPointerSpeedSettingObserver();
+    RegisterShowTouchesSettingObserver();
+
+    AutoPtr<IIntentFilter> intentFilter;
+    CIntentFilter::New(IIntent::ACTION_USER_SWITCHED, (IIntentFilter**)&intentFilter);
+    AutoPtr<BroadcastReceiverInStart> receiver = new BroadcastReceiverInStart(this);
+    AutoPtr<IIntent> result;
+    mContext->RegisterReceiver(
+            receiver, intentFilter, String(NULL),
+            mHandler, (IIntent**)&result);
+
+    UpdatePointerSpeedFromSettings();
+    UpdateShowTouchesFromSettings();
+
+    return NOERROR;
 }
 
 // TODO(BT) Pass in paramter for bluetooth system
 void CInputManagerService::SystemRunning()
 {
+    if (DEBUG) {
+        Slogger::D(TAG, "System ready.");
+    }
+    AutoPtr<IInterface> service;
+    mContext->GetSystemService(IContext::NOTIFICATION_SERVICE, (IInterface**)&service);
+    mNotificationManager = INotificationManager::Probe(service);
+    mSystemReady = TRUE;
+
+    AutoPtr<IIntentFilter> filter;
+    CIntentFilter::New(IIntent::ACTION_PACKAGE_ADDED, (IIntentFilter**)&filter);
+    filter->AddAction(IIntent::ACTION_PACKAGE_REMOVED);
+    filter->AddAction(IIntent::ACTION_PACKAGE_CHANGED);
+    filter->AddAction(IIntent::ACTION_PACKAGE_REPLACED);
+    filter->AddDataScheme(String("package"));
+    AutoPtr<BroadcastReceiver1InSystemRunning> myBREx = new BroadcastReceiver1InSystemRunning(this);
+    AutoPtr<IIntent> result;
+    mContext->RegisterReceiver(
+        myBREx.Get(), filter, String(NULL), mHandler, (IIntent**)&result);
+
+    filter = NULL;
+    result = NULL;
+    CIntentFilter::New(IBluetoothDevice::ACTION_ALIAS_CHANGED, (IIntentFilter**)&filter);
+    AutoPtr<BroadcastReceiver2InSystemRunning> myBREx2 = new BroadcastReceiver2InSystemRunning(this);
+    mContext->RegisterReceiver(
+        myBREx2, filter,String(NULL), mHandler, (IIntent**)&result);
+
+    Boolean bval;
+    mHandler->SendEmptyMessage(MSG_RELOAD_DEVICE_ALIASES, &bval);
+    mHandler->SendEmptyMessage(MSG_UPDATE_KEYBOARD_LAYOUTS, &bval);
+
+    if (mWiredAccessoryCallbacks != NULL) {
+        mWiredAccessoryCallbacks->SystemReady();
+    }
+}
+
+void CInputManagerService::ReloadKeyboardLayouts()
+{
+    if (DEBUG) {
+        Slogger::D(TAG, "Reloading keyboard layouts.");
+    }
+    NativeReloadKeyboardLayouts();
+}
+
+void CInputManagerService::ReloadDeviceAliases()
+{
+    if (DEBUG) {
+        Slogger::D(TAG, "Reloading device names.");
+    }
+    NativeReloadDeviceAliases();
+}
+
+void CInputManagerService::SetDisplayViewportsInternal(
+    /* [in] */ IDisplayViewport* defaultViewport,
+    /* [in] */ IDisplayViewport* externalTouchViewport)
+{
+    Boolean isValid;
+    if (defaultViewport->IsValid(&isValid), isValid) {
+        SetDisplayViewport(FALSE, defaultViewport);
+    }
+
+    if (externalTouchViewport->IsValid(&isValid), isValid) {
+        SetDisplayViewport(TRUE, externalTouchViewport);
+    }
+    else if (defaultViewport->IsValid(&isValid), isValid) {
+        SetDisplayViewport(TRUE, defaultViewport);
+    }
+}
+
+void CInputManagerService::SetDisplayViewport(
+    /* [in] */ Boolean external,
+    /* [in] */ IDisplayViewport* viewport)
+{
+    AutoPtr<IRect> rect;
+    viewport->GetLogicalFrame((IRect**)&rect);
+    Int32 logicalLeft, logicalTop, logicalRight, logicalBottom;
+    rect->GetLeft(&logicalLeft);
+    rect->GetTop(&logicalTop);
+    rect->GetRight(&logicalRight);
+    rect->GetBottom(&logicalBottom);
+
+    AutoPtr<IRect> rectP;
+    viewport->GetPhysicalFrame((IRect**)&rectP);
+    Int32 physicalLeft, physicalTop, physicalRight, physicalBottom;
+    rectP->GetLeft(&physicalLeft);
+    rectP->GetTop(&physicalTop);
+    rectP->GetRight(&physicalRight);
+    rectP->GetBottom(&physicalBottom);
+
+    Int32 displayId, orientation, width, height;
+    viewport->GetDisplayId(&displayId);
+    viewport->GetOrientation(&orientation);
+    viewport->GetDeviceWidth(&width);
+    viewport->GetDeviceHeight(&height);
+
+    NativeSetDisplayViewport(external,
+            displayId, orientation,
+            logicalLeft, logicalTop, logicalRight, logicalBottom,
+            physicalLeft, physicalTop, physicalRight, physicalBottom,
+            width, height);
 }
 
 /**
@@ -618,6 +1228,7 @@ Int32 CInputManagerService::GetKeyCodeState(
     /* [in] */ Int32 sourceMask,
     /* [in] */ Int32 keyCode)
 {
+    return NativeGetKeyCodeState(deviceId, sourceMask, keyCode);
 }
 
 /**
@@ -634,6 +1245,7 @@ Int32 CInputManagerService::GetScanCodeState(
     /* [in] */ Int32 sourceMask,
     /* [in] */ Int32 scanCode)
 {
+    return NativeGetScanCodeState(deviceId, sourceMask, scanCode);
 }
 
 /**
@@ -650,6 +1262,7 @@ Int32 CInputManagerService::GetSwitchState(
     /* [in] */ Int32 sourceMask,
     /* [in] */ Int32 switchCode)
 {
+    return NativeGetSwitchState(deviceId, sourceMask, switchCode);
 }
 
 /**
@@ -672,6 +1285,16 @@ ECode CInputManagerService::HasKeys(
     /* [in] */ ArrayOf<Boolean>* keyExists,
     /* [out] */ Boolean* hasKeys)
 {
+    VALIDATE_NOT_NULL(hasKeys);
+    *hasKeys = FALSE;
+
+    if (keyExists == NULL || keyExists->GetLength() < keyCodes.GetLength()) {
+        Slogger::E(TAG, "keyExists must not be NULL and must be at "
+                "least as large as keyCodes.");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    *hasKeys = NativeHasKeys(deviceId, sourceMask, keyCodes, keyExists);
     return NOERROR;
 }
 
@@ -684,6 +1307,24 @@ ECode CInputManagerService::MonitorInput(
     /* [in] */ const String& inputChannelName,
     /* [out] */ IInputChannel** ic)
 {
+    VALIDATE_NOT_NULL(ic);
+    *ic = NULL;
+
+    if (inputChannelName.IsNull()) {
+        Slogger::E(TAG, "inputChannelName must not be NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    AutoPtr<IInputChannelHelper> icHelper;
+    CInputChannelHelper::AcquireSingleton((IInputChannelHelper**)&icHelper);
+    AutoPtr<ArrayOf<IInputChannel*> > icp;
+    FAIL_RETURN(icHelper->OpenInputChannelPair(inputChannelName, (ArrayOf<IInputChannel*>**)&icp));
+    AutoPtr<IInputChannel> inputChannel0 = (*icp)[0];
+    AutoPtr<IInputChannel> inputChannel1 = (*icp)[1];
+    FAIL_RETURN(NativeRegisterInputChannel(inputChannel0, NULL, TRUE));
+    FAIL_RETURN(inputChannel0->Dispose()); // don't need to retain the Java object reference
+    *ic = inputChannel1;
+    REFCOUNT_ADD(*ic);
     return NOERROR;
 }
 
@@ -697,7 +1338,12 @@ ECode CInputManagerService::RegisterInputChannel(
     /* [in] */ IInputChannel* inputChannel,
     /* [in] */ InputWindowHandle* inputWindowHandle)
 {
-    return NOERROR;
+    if (inputChannel == NULL) {
+        Slogger::E(TAG, "inputChannel must not be NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    return NativeRegisterInputChannel(inputChannel, inputWindowHandle, FALSE);
 }
 
 /**
@@ -707,7 +1353,12 @@ ECode CInputManagerService::RegisterInputChannel(
 ECode CInputManagerService::UnregisterInputChannel(
     /* [in] */ IInputChannel* inputChannel)
 {
-    return NOERROR;
+    if (inputChannel == NULL) {
+        Slogger::E(TAG, "inputChannel must not be NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    return NativeUnregisterInputChannel(inputChannel);
 }
 
 /**
@@ -735,7 +1386,7 @@ void CInputManagerService::SetInputFilter(
             mInputFilterHost->DisconnectLocked();
             mInputFilterHost = NULL;
             //try {
-//                oldFilter->Uninstall();
+            oldFilter->Uninstall();
             //} catch (RemoteException re) {
                 /* ignore */
             //}
@@ -743,16 +1394,16 @@ void CInputManagerService::SetInputFilter(
 
         if (filter != NULL) {
             mInputFilter = filter;
-            mInputFilterHost = new InputFilterHost();
-            mInputFilterHost->constructor(IIInputManager::Probe(this));
+            mInputFilterHost = NULL;
+            CInputFilterHost::NewByFriend((IIInputManager*)this, (CInputFilterHost**)&mInputFilterHost);
             //try {
-//                filter->Install(mInputFilterHost);
+            filter->Install(mInputFilterHost);
             //} catch (RemoteException re) {
                 /* ignore */
             //}
         }
 
-        NativeSetInputFilterEnabled(mPtr, filter != NULL);
+        NativeSetInputFilterEnabled(filter != NULL);
     }
 }
 
@@ -762,6 +1413,60 @@ ECode CInputManagerService::InjectInputEvent(
     /* [in] */ Int32 mode,
     /* [out] */ Boolean* injectIt)
 {
+    InjectInputEventInternal(event, IDisplay::DEFAULT_DISPLAY, mode, injectIt);
+    return NOERROR;
+}
+
+ECode CInputManagerService::InjectInputEventInternal(
+    /* [in] */ IInputEvent* event,
+    /* [in] */ Int32 displayId,
+    /* [in] */ Int32 mode,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result);
+    *result = FALSE;
+
+    if (event == NULL) {
+        Slogger::E(TAG, "event must not be NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (mode != IInputManager::INJECT_INPUT_EVENT_MODE_ASYNC
+        && mode != IInputManager::INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH
+        && mode != IInputManager::INJECT_INPUT_EVENT_MODE_WAIT_FOR_RESULT) {
+        Slogger::E(TAG, "mode is invalid");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Int32 pid = Binder::GetCallingPid();
+    Int32 uid = Binder::GetCallingUid();
+    Int64 ident = Binder::ClearCallingIdentity();
+    Int32 res = NativeInjectInputEvent(event, displayId, pid, uid, mode,
+            INJECTION_TIMEOUT_MILLIS, IWindowManagerPolicy::FLAG_DISABLE_KEY_REPEAT);
+
+    Binder::RestoreCallingIdentity(ident);
+
+    switch (res) {
+        case INPUT_EVENT_INJECTION_PERMISSION_DENIED:
+            Slogger::W(TAG, "Input event injection from pid %d permission denied.", pid);
+            Slogger::E(TAG, "Injecting to another application requires INJECT_EVENTS permission");
+            return E_SECURITY_EXCEPTION;
+
+        case INPUT_EVENT_INJECTION_SUCCEEDED:
+            *result = TRUE;
+            break;
+
+        case INPUT_EVENT_INJECTION_TIMED_OUT:
+            Slogger::W(TAG, "Input event injection from pid %d timed out.", pid);
+            *result = FALSE;
+            break;
+
+        case INPUT_EVENT_INJECTION_FAILED:
+        default:
+            Slogger::W(TAG, "Input event injection from pid %d failed", pid);
+            *result = FALSE;
+            break;
+    }
+
     return NOERROR;
 }
 
@@ -775,6 +1480,22 @@ ECode CInputManagerService::GetInputDevice(
     /* [in] */ Int32 deviceId,
     /* [out, callee] */ IInputDevice** inputDevice)
 {
+    VALIDATE_NOT_NULL(inputDevice);
+    *inputDevice = NULL;
+
+    synchronized (mInputDevicesLock) {
+        Int32 count = mInputDevices->GetLength();
+        for (Int32 i = 0; i < count; i++) {
+            AutoPtr<IInputDevice> device = (*mInputDevices)[i];
+            Int32 id;
+            device->GetId(&id);
+            if (id == deviceId) {
+                *inputDevice = device;
+                REFCOUNT_ADD(*inputDevice);
+                return NOERROR;
+            }
+        }
+    }
     return NOERROR;
 }
 
@@ -786,6 +1507,21 @@ ECode CInputManagerService::GetInputDevice(
 ECode CInputManagerService::GetInputDeviceIds(
     /* [out, callee] */ ArrayOf<Int32>** deviceIds)
 {
+    VALIDATE_NOT_NULL(deviceIds);
+    *deviceIds = NULL;
+
+    synchronized (mInputDevicesLock) {
+        Int32 count = mInputDevices->GetLength();
+        AutoPtr< ArrayOf<Int32> > ids = ArrayOf<Int32>::Alloc(count);
+        for (Int32 i = 0; i < count; i++) {
+            Int32 id;
+            (*mInputDevices)[i]->GetId(&id);
+            (*ids)[i] = id;
+        }
+        *deviceIds = ids;
+        REFCOUNT_ADD(*deviceIds);
+    }
+
     return NOERROR;
 }
 
@@ -794,8 +1530,13 @@ ECode CInputManagerService::GetInputDeviceIds(
  * @return The array of input devices.
  */
 ECode CInputManagerService::GetInputDevices(
-    /* [out, callee] */ ArrayOf<IInputDevice*>** inputDevices )
+    /* [out, callee] */ ArrayOf<IInputDevice*>** inputDevices)
 {
+    synchronized (mInputDevicesLock) {
+        *inputDevices = mInputDevices;
+        REFCOUNT_ADD(*inputDevices);
+    }
+
     return NOERROR;
 }
 
@@ -803,7 +1544,152 @@ ECode CInputManagerService::GetInputDevices(
 ECode CInputManagerService::RegisterInputDevicesChangedListener(
     /* [in] */ IInputDevicesChangedListener* listener)
 {
+    if (listener == NULL) {
+        Slogger::E(TAG, "listener must not be NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    synchronized (mInputDevicesLock) {
+        Int32 callingPid = Binder::GetCallingPid();
+        AutoPtr<IInterface> outface;
+        mInputDevicesChangedListeners->Get(callingPid, (IInterface**)&outface);
+        if (outface != NULL) {
+            Slogger::E(TAG, "The calling process has already "
+                    "registered an InputDevicesChangedListener.");
+            return E_SECURITY_EXCEPTION;
+        }
+
+        AutoPtr<InputDevicesChangedListenerRecord> record =
+                new InputDevicesChangedListenerRecord(callingPid, listener, this);
+
+        AutoPtr<IProxy> proxy = (IProxy*)listener->Probe(EIID_IProxy);
+        if (proxy != NULL && FAILED(proxy->LinkToDeath(record, 0))) {
+            // give up
+            return E_RUNTIME_EXCEPTION;
+        }
+
+        mInputDevicesChangedListeners->Put(callingPid, (IObject*)record.Get());
+    }
+
     return NOERROR;
+}
+
+void CInputManagerService::OnInputDevicesChangedListenerDied(
+    /* [in] */ Int32 pid)
+{
+    synchronized (mInputDevicesLock) {
+        mInputDevicesChangedListeners->Remove(pid);
+    }
+}
+
+// Must be called on handler.
+void CInputManagerService::DeliverInputDevicesChanged(
+    /* [in] */ ArrayOf<IInputDevice*>* oldInputDevices)
+{
+    // Scan for changes.
+    Int32 numFullKeyboardsAdded = 0;
+    mTempInputDevicesChangedListenersToNotify.Clear();
+    mTempFullKeyboards.Clear();
+    AutoPtr<ArrayOf<Int32> > deviceIdAndGeneration;
+    synchronized (mInputDevicesLock) {
+        if (!mInputDevicesChangedPending) {
+            return;
+        }
+        mInputDevicesChangedPending = FALSE;
+
+        Int32 size;
+        mInputDevicesChangedListeners->GetSize(&size);
+        for (Int32 i = 0;  i < size;  i++) {
+            AutoPtr<IInterface> outface;
+            mInputDevicesChangedListeners->Get(i, (IInterface**)&outface);
+            mTempInputDevicesChangedListenersToNotify->Add(outface);
+        }
+
+        Int32 numDevices = mInputDevices->GetLength();
+        deviceIdAndGeneration = ArrayOf<Int32>::Alloc(numDevices * 2);
+        for (Int32 i = 0; i < numDevices; i++) {
+            AutoPtr<IInputDevice> inputDevice = (*mInputDevices)[i];
+            Int32 temp;
+            inputDevice->GetId(&temp);
+            (*deviceIdAndGeneration)[i * 2] = temp;
+            inputDevice->GetGeneration(&temp);
+            (*deviceIdAndGeneration)[i * 2 + 1] = temp;
+
+            Boolean isVirtual, isFullKeyboard;
+            if ((inputDevice->IsVirtual(&isVirtual), !isVirtual)
+                && (inputDevice->IsFullKeyboard(&isFullKeyboard), isFullKeyboard)) {
+                String descriptor;
+                inputDevice->GetDescriptor(&descriptor);
+                if (!ContainsInputDeviceWithDescriptor(oldInputDevices, descriptor)) {
+                    mTempFullKeyboards->Add(numFullKeyboardsAdded++, inputDevice);
+                }
+                else {
+                    mTempFullKeyboards->Add(inputDevice);
+                }
+            }
+        }
+    }
+
+    // Notify listeners.
+    Int32 numListeners;
+    mInputDevicesChangedListeners->GetSize(&numListeners);
+    for (int i = 0; i < numListeners; i++) {
+        AutoPtr<IInterface> obj;
+        mTempInputDevicesChangedListenersToNotify->Get(i, (IInterface**)&obj);
+        InputDevicesChangedListenerRecord* inputDeviceRec = (InputDevicesChangedListenerRecord*)IObject::Probe(obj);
+        inputDeviceRec->NotifyInputDevicesChanged(deviceIdAndGeneration);
+    }
+    mTempInputDevicesChangedListenersToNotify.Clear();
+
+    // Check for missing keyboard layouts.
+    if (mNotificationManager != NULL) {
+        Int32 numFullKeyboards;
+        mTempFullKeyboards->GetSize(&numFullKeyboards);
+        Boolean missingLayoutForExternalKeyboard = FALSE;
+        Boolean missingLayoutForExternalKeyboardAdded = FALSE;
+        Boolean multipleMissingLayoutsForExternalKeyboardsAdded = FALSE;
+        AutoPtr<IInputDevice> keyboardMissingLayout;
+        synchronized (mDataStore) {
+            for (int i = 0; i < numFullKeyboards; i++) {
+                AutoPtr<IInputDevice> inputDevice;
+                mTempFullKeyboards->Get(i, (IInterface**)&inputDevice);
+                AutoPtr<IInputDeviceIdentifier> identifier;
+                inputDevice->GetIdentifier((IInputDeviceIdentifier**)&identifier);
+                String layout;
+                GetCurrentKeyboardLayoutForInputDevice(identifier, &layout);
+                if (layout.IsNull()) {
+                    missingLayoutForExternalKeyboard = TRUE;
+                    if (i < numFullKeyboardsAdded) {
+                        missingLayoutForExternalKeyboardAdded = TRUE;
+                    }
+                    if (keyboardMissingLayout == NULL) {
+                        keyboardMissingLayout = inputDevice;
+                    }
+                    else {
+                        multipleMissingLayoutsForExternalKeyboardsAdded = TRUE;
+                    }
+                }
+            }
+        }
+
+        if (missingLayoutForExternalKeyboard) {
+            if (missingLayoutForExternalKeyboardAdded) {
+                if (multipleMissingLayoutsForExternalKeyboardsAdded) {
+                    // We have more than one keyboard missing a layout, so drop the
+                    // user at the generic input methods page so they can pick which
+                    // one to set.
+                    ShowMissingKeyboardLayoutNotification(NULL);
+                }
+                else {
+                    ShowMissingKeyboardLayoutNotification(keyboardMissingLayout);
+                }
+            }
+        }
+        else if (mKeyboardLayoutNotificationShown) {
+            HideMissingKeyboardLayoutNotification();
+        }
+    }
+    mTempFullKeyboards.Clear();
 }
 
 // @Override // Binder call & native callback
@@ -812,6 +1698,18 @@ ECode CInputManagerService::GetTouchCalibrationForInputDevice(
     /* [in] */ Int32 surfaceRotation,
     /* [out] */ ITouchCalibration** inputDevice)
 {
+    if (inputDeviceDescriptor == NULL) {
+        //throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
+        Slogger::E(TAG, "inputDeviceDescriptor must not be null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    synchronized (mDataStore) {
+        AutoPtr<ITouchCalibration> tc = mDataStore->GetTouchCalibration(inputDeviceDescriptor, surfaceRotation);
+        *inputDevice = tc;
+        REFCOUNT_ADD(*inputDevice);
+    }
+
     return NOERROR;
 }
 
@@ -821,14 +1719,143 @@ ECode CInputManagerService::SetTouchCalibrationForInputDevice(
     /* [in] */ Int32 surfaceRotation,
     /* [in] */ ITouchCalibration* calibration)
 {
+    if (!CheckCallingPermission(Manifest::permission::SET_INPUT_CALIBRATION,
+            String("setTouchCalibrationForInputDevice()")) ) {
+        //throw new SecurityException("Requires SET_INPUT_CALIBRATION permission");
+        Slogger::E(TAG, "Requires SET_INPUT_CALIBRATION permission");
+        return E_SECURITY_EXCEPTION;
+    }
+    if (inputDeviceDescriptor.IsNull()) {
+        //throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
+        Slogger::E(TAG, "inputDeviceDescriptor must not be null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (calibration == NULL) {
+        //throw new IllegalArgumentException("calibration must not be null");
+        Slogger::E(TAG, "calibration must not be null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (surfaceRotation < ISurface::ROTATION_0 || surfaceRotation > ISurface::ROTATION_270) {
+        //throw new IllegalArgumentException("surfaceRotation value out of bounds");
+        Slogger::E(TAG, "surfaceRotation value out of bounds");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    synchronized (mDataStore) {
+        if (mDataStore->SetTouchCalibration(inputDeviceDescriptor, surfaceRotation,
+                calibration)) {
+            NativeReloadCalibration();
+        }
+        mDataStore->SaveIfNeeded();
+    }
+
     return NOERROR;
+}
+
+// Must be called on handler.
+void CInputManagerService::ShowMissingKeyboardLayoutNotification(
+    /* [in] */ IInputDevice* device)
+{
+    if (!mKeyboardLayoutNotificationShown) {
+        AutoPtr<IIntent> intent;
+        CIntent::New(ISettings::ACTION_INPUT_METHOD_SETTINGS, (IIntent**)&intent);
+        if (device != NULL) {
+            AutoPtr<IInputDeviceIdentifier> identifier;
+            device->GetIdentifier((IInputDeviceIdentifier**)&identifier);
+            intent->PutExtra(ISettings::EXTRA_INPUT_DEVICE_IDENTIFIER, IParcelable::Probe(identifier));
+        }
+        intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
+                | IIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                | IIntent::FLAG_ACTIVITY_CLEAR_TOP);
+        AutoPtr<IPendingIntentHelper> piHelper;
+        CPendingIntentHelper::AcquireSingleton((IPendingIntentHelper**)&piHelper);
+        AutoPtr<IPendingIntent> keyboardLayoutIntent;
+        piHelper->GetActivityAsUser(
+                mContext, 0, intent, 0, NULL, UserHandle::CURRENT,
+                (IPendingIntent**)&keyboardLayoutIntent);
+
+        AutoPtr<IResources> r;
+        mContext->GetResources((IResources**)&r);
+        AutoPtr<INotificationBuilder> builder;
+        CNotificationBuilder::New(mContext, (INotificationBuilder**)&builder);
+        String str;
+        r->GetString(R::string::select_keyboard_layout_notification_title, &str);
+        builder->SetContentTitle(CoreUtils::Convert(str));
+        r->GetString(R::string::select_keyboard_layout_notification_message, &str);
+        builder->SetContentText(CoreUtils::Convert(str));
+        builder->SetContentIntent(keyboardLayoutIntent);
+        builder->SetSmallIcon(R::drawable::ic_settings_language);
+        builder->SetPriority(INotification::PRIORITY_LOW);
+
+        Int32 color;
+        r->GetColor(R::color::system_notification_accent_color, &color);
+        builder->SetColor(color);
+
+        AutoPtr<INotification> notification;
+        builder->Build((INotification**)&notification);
+        mNotificationManager->NotifyAsUser(String(NULL),
+                R::string::select_keyboard_layout_notification_title,
+                notification, UserHandle::ALL);
+        mKeyboardLayoutNotificationShown = TRUE;
+    }
+}
+
+// Must be called on handler.
+void CInputManagerService::HideMissingKeyboardLayoutNotification()
+{
+    if (mKeyboardLayoutNotificationShown) {
+        mKeyboardLayoutNotificationShown = FALSE;
+        mNotificationManager->CancelAsUser(String(NULL),
+                R::string::select_keyboard_layout_notification_title,
+                UserHandle::ALL);
+    }
+}
+
+// Must be called on handler.
+void CInputManagerService::UpdateKeyboardLayouts()
+{
+    // Scan all input devices state for keyboard layouts that have been uninstalled.
+    AutoPtr<IHashSet> availableKeyboardLayouts;
+    CHashSet::New((IHashSet**)&availableKeyboardLayouts);
+    AutoPtr<KeyboardLayoutVisitorInUpdateKeyboardLayouts> myKV =
+            new KeyboardLayoutVisitorInUpdateKeyboardLayouts(availableKeyboardLayouts);
+    VisitAllKeyboardLayouts(myKV);
+
+    synchronized (mDataStore) {
+        mDataStore->RemoveUninstalledKeyboardLayouts(ISet::Probe(availableKeyboardLayouts));
+        mDataStore->SaveIfNeeded();
+    }
+
+    // Reload keyboard layouts.
+    ReloadKeyboardLayouts();
+}
+
+Boolean CInputManagerService::ContainsInputDeviceWithDescriptor(
+    /* [in] */ ArrayOf<IInputDevice*>* inputDevices,
+    /* [in] */ const String& descriptor)
+{
+    Int32 numDevices = inputDevices->GetLength();
+    for (Int32 i = 0; i < numDevices; i++) {
+        String descriptor2;
+        (*inputDevices)[i]->GetDescriptor(&descriptor2);
+        if (descriptor2.Equals(descriptor)) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 // @Override // Binder call
 ECode CInputManagerService::GetKeyboardLayouts(
     /* [out, callee] */ ArrayOf<IKeyboardLayout*>** kbLayouts)
 {
-    return NOERROR;
+    VALIDATE_NOT_NULL(kbLayouts);
+
+    AutoPtr<IArrayList> list;
+    CArrayList::New((IArrayList**)&list);
+    AutoPtr<KeyboardLayoutVisitorInGetKeyboardLayouts> myKVEx = new KeyboardLayoutVisitorInGetKeyboardLayouts(list);
+    VisitAllKeyboardLayouts(myKVEx);
+    return list->ToArray((ArrayOf<IInterface*>**)kbLayouts);
 }
 
 // @Override // Binder call
@@ -836,6 +1863,220 @@ ECode CInputManagerService::GetKeyboardLayout(
     /* [in] */ const String& keyboardLayoutDescriptor,
     /* [out, callee] */ IKeyboardLayout** kbLayout)
 {
+    VALIDATE_NOT_NULL(kbLayout);
+    *kbLayout = NULL;
+
+    if (keyboardLayoutDescriptor.IsNull()) {
+        Slogger::E(TAG, "keyboardLayoutDescriptor must not be NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    AutoPtr< ArrayOf<IKeyboardLayout*> > result = ArrayOf<IKeyboardLayout*>::Alloc(1);
+    AutoPtr<KeyboardLayoutVisitorInGetKeyboardLayout> myKVEx2 =
+            new KeyboardLayoutVisitorInGetKeyboardLayout(result);
+    VisitKeyboardLayout(keyboardLayoutDescriptor, myKVEx2);
+    if ((*result)[0] == NULL) {
+        Slogger::W(TAG, "Could not get keyboard kbLayout with descriptor '%d'.",
+                keyboardLayoutDescriptor.string());
+    }
+    *kbLayout = (*result)[0];
+    REFCOUNT_ADD(*kbLayout);
+    return NOERROR;
+}
+
+void CInputManagerService::VisitAllKeyboardLayouts(
+    /* [in] */ IKeyboardLayoutVisitor* visitor)
+{
+    AutoPtr<IPackageManager> pm;
+    mContext->GetPackageManager((IPackageManager**)&pm);
+    AutoPtr<IIntent> intent;
+    CIntent::New(IInputManager::ACTION_QUERY_KEYBOARD_LAYOUTS, (IIntent**)&intent);
+
+    AutoPtr<IList> listcontainer;
+    pm->QueryBroadcastReceivers(
+            intent, IPackageManager::GET_META_DATA, (IList**)&listcontainer);
+    AutoPtr<IIterator> it;
+    listcontainer->GetIterator((IIterator**)&it);
+    Boolean hasNext = FALSE;
+    while (it->HasNext(&hasNext), hasNext) {
+        AutoPtr<IInterface> obj;
+        it->GetNext((IInterface**)&obj);
+        IResolveInfo* resolveInfo =  IResolveInfo::Probe(obj);
+        AutoPtr<IActivityInfo> activityInfo;
+        resolveInfo->GetActivityInfo((IActivityInfo**)&activityInfo);
+        Int32 priority;
+        resolveInfo->GetPriority(&priority);
+        VisitKeyboardLayoutsInPackage(pm, activityInfo, String(NULL), priority, visitor);
+    }
+}
+
+void CInputManagerService::VisitKeyboardLayout(
+    /* [in] */ const String& keyboardLayoutDescriptor,
+    /* [in] */ IKeyboardLayoutVisitor* visitor)
+{
+    AutoPtr<KeyboardLayoutDescriptor> d =
+            KeyboardLayoutDescriptor::Parse(keyboardLayoutDescriptor);
+    if (d != NULL) {
+        AutoPtr<IPackageManager> pm;
+        mContext->GetPackageManager((IPackageManager**)&pm);
+        AutoPtr<IComponentName> componentName;
+        CComponentName::New(
+                d->mPackageName, d->mReceiverName, (IComponentName**)&componentName);
+        AutoPtr<IActivityInfo> receiver;
+        ECode ec = pm->GetReceiverInfo(
+                componentName, IPackageManager::GET_META_DATA, (IActivityInfo**)&receiver);
+        if (FAILED(ec)) return;
+        VisitKeyboardLayoutsInPackage(pm, receiver, d->mKeyboardLayoutName, 0, visitor);
+    }
+}
+
+void CInputManagerService::VisitKeyboardLayoutsInPackage(
+    /* [in] */ IPackageManager* pm,
+    /* [in] */ IActivityInfo* receiver,
+    /* [in] */ const String& keyboardName,
+    /* [in] */ Int32 requestedPriority,
+    /* [in] */ IKeyboardLayoutVisitor* visitor)
+{
+    AutoPtr<IBundle> metaData;
+    IPackageItemInfo::Probe(receiver)->GetMetaData((IBundle**)&metaData);
+    if (metaData == NULL) {
+        return;
+    }
+
+    String packageName, receiverName;
+    IPackageItemInfo::Probe(receiver)->GetPackageName(&packageName);
+    IPackageItemInfo::Probe(receiver)->GetName(&receiverName);
+
+    Int32 configResId;
+    metaData->GetInt32(IInputManager::META_DATA_KEYBOARD_LAYOUTS, &configResId);
+    if (configResId == 0) {
+        Slogger::W(TAG, "Missing meta-data '%s' on receiver %s/%s",
+                IInputManager::META_DATA_KEYBOARD_LAYOUTS.string(),
+                packageName.string(), receiverName.string());
+        return;
+    }
+
+    AutoPtr<ICharSequence> receiverLabel;
+    IPackageItemInfo::Probe(receiver)->LoadLabel(pm, (ICharSequence**)&receiverLabel);
+    String collection("");
+    if (receiverLabel != NULL) {
+        receiverLabel->ToString(&collection);
+    }
+    Int32 priority;
+    AutoPtr<IApplicationInfo> info;
+    IComponentInfo::Probe(receiver)->GetApplicationInfo((IApplicationInfo**)&info);
+    Int32 flags;
+    if (info->GetFlags(&flags), (flags & IApplicationInfo::FLAG_SYSTEM) != 0) {
+        priority = requestedPriority;
+    }
+    else {
+        priority = 0;
+    }
+
+    ECode ec;
+    AutoPtr<IApplicationInfo> appInfo;
+    AutoPtr<IResources> resources;
+    AutoPtr<IXmlResourceParser> parser;
+    AutoPtr<IXmlPullParser> pullParser;
+
+    IComponentInfo::Probe(receiver)->GetApplicationInfo((IApplicationInfo**)&appInfo);
+    ec = pm->GetResourcesForApplication(appInfo, (IResources**)&resources);
+    FAIL_GOTO(ec, _Exit3_);
+    ec = resources->GetXml(configResId, (IXmlResourceParser**)&parser);
+    FAIL_GOTO(ec, _Exit3_);
+
+    pullParser = IXmlPullParser::Probe(parser);
+    ec = XmlUtils::BeginDocument(pullParser, String("keyboard-layouts"));
+    FAIL_GOTO(ec, _Exit2_);
+
+    for (;;) {
+        ec = XmlUtils::NextElement(pullParser);
+        FAIL_GOTO(ec, _Exit2_);
+
+        String element;
+        pullParser->GetName(&element);
+        if (element.IsNull()) {
+            break;
+        }
+        if (element.Equals("keyboard-layout")) {
+            Int32 size = ArraySize(R::styleable::KeyboardLayout);
+            AutoPtr<ArrayOf<Int32> > layout = ArrayOf<Int32>::Alloc(size);
+            layout->Copy(R::styleable::KeyboardLayout, size);
+            AutoPtr<ITypedArray> a;
+            resources->ObtainAttributes(
+                    IAttributeSet::Probe(parser), layout, (ITypedArray**)&a);
+
+            String name;
+            String label;
+            Int32 keyboardLayoutResId;
+            ec = a->GetString(R::styleable::KeyboardLayout_name, &name);
+            FAIL_GOTO(ec, _Exit1_);
+            ec = a->GetString(R::styleable::KeyboardLayout_label, &label);
+            FAIL_GOTO(ec, _Exit1_);
+            ec = a->GetResourceId(
+                    R::styleable::KeyboardLayout_keyboardLayout, 0,
+                    &keyboardLayoutResId);
+            FAIL_GOTO(ec, _Exit1_);
+            if (name.IsNull() || label.IsNull() || keyboardLayoutResId == 0) {
+                Slogger::W(TAG, "Missing required 'name', 'label' or 'keyboardLayout' "
+                        "attributes in keyboard layout resource from receiver %s/%s",
+                        packageName.string(), receiverName.string());
+            }
+            else {
+                String descriptor = KeyboardLayoutDescriptor::Format(
+                        packageName, receiverName, name);
+                if (keyboardName.IsNull() || name.Equals(keyboardName)) {
+                    visitor->VisitKeyboardLayout(resources, descriptor,
+                            label, collection, keyboardLayoutResId, priority);
+                }
+            }
+_Exit1_:
+            a->Recycle();
+        }
+        else {
+            Slogger::W(TAG, "Skipping unrecognized element '%s"
+                    "' in keyboard layout resource from receiver %s/%s",
+                    element.string(), packageName.string(), receiverName.string());
+        }
+    }
+_Exit2_:
+    parser->Close();
+
+_Exit3_:
+    if (FAILED(ec)) {
+        Slogger::W(TAG, "Could not parse keyboard layout resource from receiver %s, %s",
+                packageName.string(), receiverName.string());
+    }
+}
+
+/**
+ * Builds a layout descriptor for the vendor/product. This returns the
+ * descriptor for ids that aren't useful (such as the default 0, 0).
+ */
+ECode CInputManagerService::GetLayoutDescriptor(
+    /* [in] */ IInputDeviceIdentifier* identifier,
+    /* [out] */ String* layoutDescriptor)
+{
+    String str;
+    if (identifier == NULL || (identifier->GetDescriptor(&str), str.IsNull())) {
+        //throw new IllegalArgumentException("identifier and descriptor must not be null");
+        Slogger::E(TAG, "identifier and descriptor must not be null");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    Int32 vendorId, productId;
+    identifier->GetVendorId(&vendorId);
+    identifier->GetProductId(&productId);
+    if (vendorId == 0 && productId == 0) {
+        identifier->GetDescriptor(layoutDescriptor);
+        return NOERROR;
+    }
+    StringBuilder bob;
+    bob.Append("vendor:");
+    bob.Append(vendorId);
+    bob.Append(",product:");
+    bob.Append(productId);
+    *layoutDescriptor = bob.ToString();
     return NOERROR;
 }
 
@@ -844,6 +2085,24 @@ ECode CInputManagerService::GetCurrentKeyboardLayoutForInputDevice(
     /* [in] */ IInputDeviceIdentifier* identifier,
     /* [out, callee] */ String* kbLayout)
 {
+    VALIDATE_NOT_NULL(kbLayout);
+
+    String key;
+    GetLayoutDescriptor(identifier, &key);
+    synchronized (mDataStore) {
+        // try loading it using the layout descriptor if we have it
+        String layout = mDataStore->GetCurrentKeyboardLayout(key);
+        String str;
+        identifier->GetDescriptor(&str);
+        if (layout.IsNull() && !key.Equals(str)) {
+            // if it doesn't exist fall back to the device descriptor
+            layout = mDataStore->GetCurrentKeyboardLayout(str);
+        }
+        if (DEBUG) {
+            Slogger::D(TAG, "Loaded keyboard layout id for %s and got %s", key.string(), layout.string());
+        }
+        *kbLayout = layout;
+    }
     return NOERROR;
 }
 
@@ -852,6 +2111,29 @@ ECode CInputManagerService::SetCurrentKeyboardLayoutForInputDevice(
     /* [in] */ IInputDeviceIdentifier* identifier,
     /* [in] */ const String& keyboardLayoutDescriptor)
 {
+    if (!CheckCallingPermission(
+            Elastos::Droid::Manifest::permission::SET_KEYBOARD_LAYOUT,
+            String("setCurrentKeyboardLayoutForInputDevice()"))) {
+        Slogger::E(TAG, "Requires SET_KEYBOARD_LAYOUT permission");
+        return E_SECURITY_EXCEPTION;
+    }
+    if (keyboardLayoutDescriptor.IsNull()) {
+        Slogger::E(TAG, "keyboardLayoutDescriptor must not be NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    String key;
+    GetLayoutDescriptor(identifier, &key);
+    synchronized (mDataStore) {
+        if (mDataStore->SetCurrentKeyboardLayout(key, keyboardLayoutDescriptor)) {
+            if (DEBUG) {
+                Slogger::D(TAG, "Saved keyboard layout using %s", key.string());
+            }
+            Boolean result;
+            mHandler->SendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS, &result);
+        }
+        mDataStore->SaveIfNeeded();
+    }
     return NOERROR;
 }
 
@@ -860,6 +2142,21 @@ ECode CInputManagerService::GetKeyboardLayoutsForInputDevice(
     /* [in] */ IInputDeviceIdentifier* identifier,
     /* [out, callee] */ ArrayOf<String>** kbLayouts)
 {
+    VALIDATE_NOT_NULL(kbLayouts);
+
+    String key;
+    GetLayoutDescriptor(identifier, &key);
+    synchronized (mDataStore) {
+        AutoPtr<ArrayOf<String> > layouts = mDataStore->GetKeyboardLayouts(key);
+        String str;
+        identifier->GetDescriptor(&str);
+        if ((layouts == NULL || layouts->GetLength() == 0) && !key.Equals(str)) {
+            layouts = mDataStore->GetKeyboardLayouts(str);
+        }
+        *kbLayouts = layouts;
+        REFCOUNT_ADD(*kbLayouts);
+    }
+
     return NOERROR;
 }
 
@@ -868,6 +2165,33 @@ ECode CInputManagerService::AddKeyboardLayoutForInputDevice(
     /* [in] */ IInputDeviceIdentifier* identifier,
     /* [in] */ const String& keyboardLayoutDescriptor)
 {
+    if (!CheckCallingPermission(
+            Elastos::Droid::Manifest::permission::SET_KEYBOARD_LAYOUT,
+            String("addKeyboardLayoutForInputDevice()"))) {
+        Slogger::E(TAG, "Requires SET_KEYBOARD_LAYOUT permission");
+        return E_SECURITY_EXCEPTION;
+    }
+    if (keyboardLayoutDescriptor.IsNull()) {
+        Slogger::E(TAG, "keyboardLayoutDescriptor must not be NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    String key;
+    GetLayoutDescriptor(identifier, &key);
+    synchronized (mDataStore) {
+        String oldLayout = mDataStore->GetCurrentKeyboardLayout(key);
+        String str;
+        identifier->GetDescriptor(&str);
+        if (oldLayout.IsNull() && !key.Equals(str)) {
+            oldLayout = mDataStore->GetCurrentKeyboardLayout(str);
+        }
+        if (mDataStore->AddKeyboardLayout(key, keyboardLayoutDescriptor)
+                && !oldLayout.Equals(mDataStore->GetCurrentKeyboardLayout(key))) {
+            Boolean result;
+            mHandler->SendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS, &result);
+        }
+        mDataStore->SaveIfNeeded();
+    }
     return NOERROR;
 }
 
@@ -876,6 +2200,37 @@ ECode CInputManagerService::RemoveKeyboardLayoutForInputDevice(
     /* [in] */ IInputDeviceIdentifier* identifier,
     /* [in] */ const String& keyboardLayoutDescriptor)
 {
+    if (!CheckCallingPermission(
+            Elastos::Droid::Manifest::permission::SET_KEYBOARD_LAYOUT,
+            String("removeKeyboardLayoutForInputDevice()"))) {
+        Slogger::E(TAG, "Requires SET_KEYBOARD_LAYOUT permission");
+        return E_SECURITY_EXCEPTION;
+    }
+    if (keyboardLayoutDescriptor.IsNull()) {
+        Slogger::E(TAG, "keyboardLayoutDescriptor must not be NULL");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    String key;
+    GetLayoutDescriptor(identifier, &key);
+    synchronized (mDataStore) {
+        String oldLayout = mDataStore->GetCurrentKeyboardLayout(key);
+        String str;
+        identifier->GetDescriptor(&str);
+        if (oldLayout.IsNull() && !key.Equals(str)) {
+            oldLayout = mDataStore->GetCurrentKeyboardLayout(str);
+        }
+        Boolean removed = mDataStore->RemoveKeyboardLayout(key, keyboardLayoutDescriptor);
+        if (!key.Equals(str)) {
+            // We need to remove from both places to ensure it is gone
+            removed |= mDataStore->RemoveKeyboardLayout(str, keyboardLayoutDescriptor);
+        }
+        if (removed && !oldLayout.Equals(mDataStore->GetCurrentKeyboardLayout(key))) {
+            Boolean result;
+            mHandler->SendEmptyMessage(MSG_RELOAD_KEYBOARD_LAYOUTS, &result);
+        }
+        mDataStore->SaveIfNeeded();
+    }
     return NOERROR;
 }
 
@@ -883,27 +2238,83 @@ void CInputManagerService::SwitchKeyboardLayout(
     /* [in] */ Int32 deviceId,
     /* [in] */ Int32 direction)
 {
+    AutoPtr<IMessage> msg;
+    mHandler->ObtainMessage(MSG_SWITCH_KEYBOARD_LAYOUT, (IMessage**)&msg);
+    msg->SetArg1(deviceId);
+    msg->SetArg2(direction);
+    Boolean result;
+    mHandler->SendMessage(msg, &result);
+}
+
+// Must be called on handler.
+void CInputManagerService::HandleSwitchKeyboardLayout(
+    /* [in] */ Int32 deviceId,
+    /* [in] */ Int32 direction)
+{
+    AutoPtr<IInputDevice> device;
+    GetInputDevice(deviceId, (IInputDevice**)&device);
+    if (device != NULL) {
+        Boolean changed;
+        String keyboardLayoutDescriptor;
+
+        AutoPtr<IInputDeviceIdentifier> identifier;
+        device->GetIdentifier((IInputDeviceIdentifier**)&identifier);
+        String key;
+        GetLayoutDescriptor((IInputDeviceIdentifier*)identifier, &key);
+        synchronized (mDataStore) {
+            changed = mDataStore->SwitchKeyboardLayout(key, direction);
+            keyboardLayoutDescriptor = mDataStore->GetCurrentKeyboardLayout(key);
+            mDataStore->SaveIfNeeded();
+        }
+
+        if (changed) {
+            if (mSwitchedKeyboardLayoutToast != NULL) {
+                mSwitchedKeyboardLayoutToast->Cancel();
+                mSwitchedKeyboardLayoutToast = NULL;
+            }
+            if (!keyboardLayoutDescriptor.IsNull()) {
+                AutoPtr<IKeyboardLayout> keyboardLayout;
+                GetKeyboardLayout(keyboardLayoutDescriptor, (IKeyboardLayout**)&keyboardLayout);
+                if (keyboardLayout != NULL) {
+                    AutoPtr<IToastHelper> toastHelper;
+                    CToastHelper::AcquireSingleton((IToastHelper**)&toastHelper);
+                    String label;
+                    keyboardLayout->GetLabel(&label);
+                    toastHelper->MakeText(
+                            mContext, CoreUtils::Convert(label), IToast::LENGTH_SHORT,
+                            (IToast**)&mSwitchedKeyboardLayoutToast);
+                    mSwitchedKeyboardLayoutToast->Show();
+                }
+            }
+
+            ReloadKeyboardLayouts();
+        }
+    }
 }
 
 void CInputManagerService::SetInputWindows(
     /* [in] */ ArrayOf<InputWindowHandle*>* windowHandles)
 {
+    NativeSetInputWindows(windowHandles);
 }
 
 void CInputManagerService::SetFocusedApplication(
     /* [in] */ InputApplicationHandle* application)
 {
+    NativeSetFocusedApplication(application);
 }
 
 void CInputManagerService::SetInputDispatchMode(
     /* [in] */ Boolean enabled,
     /* [in] */ Boolean frozen)
 {
+    NativeSetInputDispatchMode(enabled, frozen);
 }
 
 void CInputManagerService::SetSystemUiVisibility(
     /* [in] */ Int32 visibility)
 {
+    NativeSetSystemUiVisibility(visibility);
 }
 
 /**
@@ -922,8 +2333,19 @@ void CInputManagerService::SetSystemUiVisibility(
 ECode CInputManagerService::TransferTouchFocus(
     /* [in] */ IInputChannel* fromChannel,
     /* [in] */ IInputChannel* toChannel,
-    /* [out] */ Boolean* transferIt)
+    /* [out] */ Boolean* result)
 {
+    if (fromChannel == NULL) {
+        Slogger::E(TAG, "fromChannel must not be NULL");
+        *result = FALSE;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    if (toChannel == NULL) {
+        Slogger::E(TAG, "toChannel must not be NULL");
+        *result = FALSE;
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+    *result = NativeTransferTouchFocus(fromChannel, toChannel);
     return NOERROR;
 }
 
@@ -931,15 +2353,87 @@ ECode CInputManagerService::TransferTouchFocus(
 ECode CInputManagerService::TryPointerSpeed(
     /* [in] */ Int32 speed)
 {
+    if (!CheckCallingPermission(
+            Elastos::Droid::Manifest::permission::SET_POINTER_SPEED,
+            String("tryPointerSpeed()"))) {
+        Slogger::E(TAG, "Requires SET_POINTER_SPEED permission");
+        return E_SECURITY_EXCEPTION;
+    }
+
+    if (speed < IInputManager::MIN_POINTER_SPEED
+            || speed > IInputManager::MAX_POINTER_SPEED) {
+        Slogger::E(TAG, "speed out of range");
+        return E_ILLEGAL_ARGUMENT_EXCEPTION;
+    }
+
+    SetPointerSpeedUnchecked(speed);
     return NOERROR;
 }
 
 void CInputManagerService::UpdatePointerSpeedFromSettings()
 {
+    Int32 speed = GetPointerSpeedSetting();
+    SetPointerSpeedUnchecked(speed);
+}
+
+void CInputManagerService::SetPointerSpeedUnchecked(
+    /* [in] */ Int32 speed)
+{
+    speed = Elastos::Core::Math::Min(Elastos::Core::Math::Max(speed, IInputManager::MIN_POINTER_SPEED),
+            IInputManager::MAX_POINTER_SPEED);
+    NativeSetPointerSpeed(speed);
+}
+
+void CInputManagerService::RegisterPointerSpeedSettingObserver()
+{
+    AutoPtr<ContentObserverInRegisterPointerSpeedSettingObserver> settingsObserver =
+            new ContentObserverInRegisterPointerSpeedSettingObserver(this, mHandler);
+
+    AutoPtr<IUri> uri;
+    Settings::System::GetUriFor(ISettingsSystem::POINTER_SPEED, (IUri**)&uri);
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    resolver->RegisterContentObserver(uri, TRUE, settingsObserver, IUserHandle::USER_ALL);
+}
+
+Int32 CInputManagerService::GetPointerSpeedSetting()
+{
+    Int32 speed = IInputManager::DEFAULT_POINTER_SPEED;
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    Settings::System::GetInt32ForUser(
+        resolver, ISettingsSystem::POINTER_SPEED,
+        IUserHandle::USER_CURRENT, &speed);
+    return speed;
 }
 
 void CInputManagerService::UpdateShowTouchesFromSettings()
 {
+    Int32 setting = GetShowTouchesSetting(0);
+    NativeSetShowTouches(setting != 0);
+}
+
+void CInputManagerService::RegisterShowTouchesSettingObserver()
+{
+    AutoPtr<ContentObserverInRegisterShowTouchesSettingObserver> settingsObserver =
+            new ContentObserverInRegisterShowTouchesSettingObserver(this, mHandler);
+    AutoPtr<IUri> uri;
+    Settings::System::GetUriFor(ISettingsSystem::SHOW_TOUCHES, (IUri**)&uri);
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    resolver->RegisterContentObserver(uri, TRUE, settingsObserver, IUserHandle::USER_ALL);
+}
+
+Int32 CInputManagerService::GetShowTouchesSetting(
+    /* [in] */ Int32 defaultValue)
+{
+    Int32 result = defaultValue;
+    AutoPtr<IContentResolver> resolver;
+    mContext->GetContentResolver((IContentResolver**)&resolver);
+    Settings::System::GetInt32ForUser(
+            resolver, ISettingsSystem::SHOW_TOUCHES,
+            IUserHandle::USER_CURRENT, &result);
+    return result;
 }
 
 // Binder call
@@ -950,6 +2444,29 @@ ECode CInputManagerService::Vibrate(
     /* [in] */ Int32 repeat,
     /* [in] */ IBinder* token)
 {
+    if (repeat >= pattern.GetLength()) {
+        return E_ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+    }
+
+    AutoPtr<VibratorToken> v;
+    synchronized (mVibratorLock) {
+        HashMap<AutoPtr<IBinder>, AutoPtr<VibratorToken> >::Iterator find
+                = mVibratorTokens.Find(token);
+        if (find == mVibratorTokens.End()) {
+            v = new VibratorToken(deviceId, token, mNextVibratorTokenValue++, this);
+            AutoPtr<IProxy> proxy = (IProxy*)token->Probe(EIID_IProxy);
+            if (FAILED(proxy->LinkToDeath(v, 0))) {
+                // give up
+                return E_RUNTIME_EXCEPTION;
+            }
+            mVibratorTokens[token] =  v;
+        }
+    }
+
+    synchronized (v) {
+        v->mVibrating = TRUE;
+        NativeVibrate(deviceId, pattern, repeat, v->mTokenValue);
+    }
     return NOERROR;
 }
 
@@ -959,7 +2476,39 @@ ECode CInputManagerService::CancelVibrate(
     /* [in] */ Int32 deviceId,
     /* [in] */ IBinder* token)
 {
+    AutoPtr<VibratorToken> v;
+    synchronized (mVibratorLock) {
+        HashMap<AutoPtr<IBinder>, AutoPtr<VibratorToken> >::Iterator find
+                = mVibratorTokens.Find(token);
+        if (find == mVibratorTokens.End() || find->mSecond->mDeviceId != deviceId) {
+            return NOERROR; // nothing to cancel
+        }
+        v = find->mSecond;
+    }
+
+    CancelVibrateIfNeeded(v);
     return NOERROR;
+}
+
+void CInputManagerService::OnVibratorTokenDied(
+    /* [in] */ VibratorToken* v)
+{
+    synchronized (mVibratorLock) {
+        mVibratorTokens.Erase(v->mToken);
+    }
+
+    CancelVibrateIfNeeded(v);
+}
+
+void CInputManagerService::CancelVibrateIfNeeded(
+    /* [in] */ VibratorToken* v)
+{
+    synchronized (v) {
+        if (v->mVibrating) {
+            NativeCancelVibrate(v->mDeviceId, v->mTokenValue);
+            v->mVibrating = FALSE;
+        }
+    }
 }
 
 // @Override
@@ -968,172 +2517,86 @@ ECode CInputManagerService::Dump(
     /* [in] */ IPrintWriter* pw,
     /* [in] */ ArrayOf<String>* args)
 {
+    Int32 result;
+    FAIL_RETURN(mContext->CheckCallingOrSelfPermission(Elastos::Droid::Manifest::permission::DUMP, &result));
+    if (result != IPackageManager::PERMISSION_GRANTED) {
+        pw->Print(String("Permission Denial: can't dump InputManager from from pid=")
+                + StringUtils::ToString(Binder::GetCallingPid())
+                + ", uid=" + StringUtils::ToString(Binder::GetCallingUid()));
+        return NOERROR;
+    }
+
+    pw->Print(String("INPUT MANAGER (dumpsys input)\n"));
+    String dumpStr = NativeDump();
+    if (!dumpStr.IsNull()) {
+        pw->Println(dumpStr);
+    }
     return NOERROR;
-}
-
-// Called by the heartbeat to ensure locks are not held indefinitely (for deadlock detection).
-// @Override
-ECode CInputManagerService::Monitor()
-{
-    return NOERROR;
-}
-
-ECode CInputManagerService::ToString(
-    /* [out] */ String* str)
-{
-    return NOERROR;
-}
-
-
-void CInputManagerService::ReloadKeyboardLayouts()
-{
-
-}
-
-void CInputManagerService::ReloadDeviceAliases()
-{
-
-}
-
-void CInputManagerService::SetDisplayViewportsInternal(
-    /* [in] */ IDisplayViewport* defaultViewport,
-    /* [in] */ IDisplayViewport* externalTouchViewport)
-{
-}
-
-void CInputManagerService::SetDisplayViewport(
-    /* [in] */ Boolean external,
-    /* [in] */ IDisplayViewport* viewport)
-{
-}
-
-ECode CInputManagerService::InjectInputEventInternal(
-    /* [in] */ IInputEvent* event,
-    /* [in] */ Int32 displayId,
-    /* [in] */ Int32 mode,
-    /* [out] */ Boolean* result)
-{
-}
-
-void CInputManagerService::OnInputDevicesChangedListenerDied(
-    /* [in] */ Int32 pid)
-{
-}
-
-// Must be called on handler.
-void CInputManagerService::DeliverInputDevicesChanged(
-    /* [in] */ ArrayOf<IInputDevice*>* oldInputDevices)
-{
-}
-
-// Must be called on handler.
-void CInputManagerService::ShowMissingKeyboardLayoutNotification(
-    /* [in] */ IInputDevice* device)
-{
-}
-
-// Must be called on handler.
-void CInputManagerService::HideMissingKeyboardLayoutNotification()
-{
-}
-
-// Must be called on handler.
-void CInputManagerService::UpdateKeyboardLayouts()
-{
-}
-
-Boolean CInputManagerService::ContainsInputDeviceWithDescriptor(
-    /* [in] */ ArrayOf<IInputDevice*>* inputDevices,
-    /* [in] */ const String& descriptor)
-{
-}
-
-
-void CInputManagerService::VisitAllKeyboardLayouts(
-    /* [in] */ IKeyboardLayoutVisitor* visitor)
-{
-}
-
-void CInputManagerService::VisitKeyboardLayout(
-    /* [in] */ const String& keyboardLayoutDescriptor,
-    /* [in] */ IKeyboardLayoutVisitor* visitor)
-{
-}
-
-void CInputManagerService::VisitKeyboardLayoutsInPackage(
-    /* [in] */ IPackageManager* pm,
-    /* [in] */ IActivityInfo* receiver,
-    /* [in] */ const String& keyboardName,
-    /* [in] */ Int32 requestedPriority,
-    /* [in] */ IKeyboardLayoutVisitor* visitor)
-{
-}
-
-/**
- * Builds a layout descriptor for the vendor/product. This returns the
- * descriptor for ids that aren't useful (such as the default 0, 0).
- */
-ECode CInputManagerService::GetLayoutDescriptor(
-    /* [in] */ IInputDeviceIdentifier* identifier,
-    /* [out] */ String* layoutDescriptor)
-{
-}
-
-// Must be called on handler.
-void CInputManagerService::HandleSwitchKeyboardLayout(
-    /* [in] */ Int32 deviceId,
-    /* [in] */ Int32 direction)
-{
-}
-
-void CInputManagerService::SetPointerSpeedUnchecked(
-    /* [in] */ Int32 speed)
-{
-}
-
-void CInputManagerService::RegisterPointerSpeedSettingObserver()
-{
-}
-
-Int32 CInputManagerService::GetPointerSpeedSetting()
-{
-}
-
-void CInputManagerService::RegisterShowTouchesSettingObserver()
-{
-}
-
-Int32 CInputManagerService::GetShowTouchesSetting(
-    /* [in] */ Int32 defaultValue)
-{
-}
-
-void CInputManagerService::OnVibratorTokenDied(
-    /* [in] */ VibratorToken* v)
-{
-}
-
-void CInputManagerService::CancelVibrateIfNeeded(
-    /* [in] */ VibratorToken* v)
-{
 }
 
 Boolean CInputManagerService::CheckCallingPermission(
     /* [in] */ const String& permission,
     /* [in] */ const String& func)
 {
+    // Quick check: if the calling permission is me, it's all okay.
+    if (Binder::GetCallingPid() == Process::MyPid()) {
+        return TRUE;
+    }
+
+    Int32 value;
+    mContext->CheckCallingPermission(permission, &value);
+    if (value == IPackageManager::PERMISSION_GRANTED) {
+        return TRUE;
+    }
+    String msg = String("Permission Denial: ") + func + " from pid="
+            + StringUtils::ToString(Binder::GetCallingPid())
+            + ", uid=" + StringUtils::ToString(Binder::GetCallingUid())
+            + " requires " + permission;
+    Slogger::W(TAG, msg);
+    return FALSE;
+}
+
+// Called by the heartbeat to ensure locks are not held indefinitely (for deadlock detection).
+// @Override
+ECode CInputManagerService::Monitor()
+{
+    synchronized (mInputFilterLock) {
+        ;
+    }
+    NativeMonitor();
+    return NOERROR;
 }
 
 // Native callback.
 void CInputManagerService::NotifyConfigurationChanged(
     /* [in] */ Int64 whenNanos)
 {
+    mWindowManagerCallbacks->NotifyConfigurationChanged();
 }
 
 // Native callback.
 void CInputManagerService::NotifyInputDevicesChanged(
     /* [in] */ ArrayOf<IInputDevice*>* inputDevices)
 {
+    synchronized (mInputDevicesLock) {
+        if (!mInputDevicesChangedPending) {
+            mInputDevicesChangedPending = TRUE;
+            Int32 length = inputDevices->GetLength();
+            AutoPtr<IArrayOf> container;
+            CArrayOf::New(EIID_IInputDevice, length, (IArrayOf**)&container);
+            for (Int32 i = 0; i < length; ++i) {
+                container->Set(i, (*inputDevices)[i]);
+            }
+
+            AutoPtr<IMessage> msg;
+            mHandler->ObtainMessage(MSG_DELIVER_INPUT_DEVICES_CHANGED, (IMessage**)&msg);
+            msg->SetObj(container);
+            Boolean result;
+            mHandler->SendMessage(msg, &result);
+        }
+
+        mInputDevices = inputDevices;
+    }
 }
 
 // Native callback.
@@ -1142,12 +2605,32 @@ void CInputManagerService::NotifySwitch(
     /* [in] */ Int32 switchValues,
     /* [in] */ Int32 switchMask)
 {
+    if (DEBUG) {
+        Slogger::D(TAG, "notifySwitch: values=%x, mask=%x",
+                switchValues, switchMask);
+    }
+
+    if ((switchMask & SW_LID_BIT) != 0) {
+        Boolean lidOpen = ((switchValues & SW_LID_BIT) == 0);
+        mWindowManagerCallbacks->NotifyLidSwitchChanged(whenNanos, lidOpen);
+    }
+
+    if ((switchMask & SW_CAMERA_LENS_COVER_BIT) != 0) {
+        Boolean lensCovered = ((switchValues & SW_CAMERA_LENS_COVER_BIT) != 0);
+        mWindowManagerCallbacks->NotifyCameraLensCoverSwitchChanged(whenNanos, lensCovered);
+    }
+
+    if (mUseDevInputEventForAudioJack && (switchMask & SW_JACK_BITS) != 0) {
+        mWiredAccessoryCallbacks->NotifyWiredAccessoryChanged(
+                whenNanos, switchValues, switchMask);
+    }
 }
 
 // Native callback.
 void CInputManagerService::NotifyInputChannelBroken(
     /* [in] */ InputWindowHandle* inputWindowHandle)
 {
+    mWindowManagerCallbacks->NotifyInputChannelBroken(inputWindowHandle);
 }
 
 // Native callback.
@@ -1156,6 +2639,9 @@ Int64 CInputManagerService::NotifyANR(
     /* [in] */ InputWindowHandle* inputWindowHandle,
     /* [in] */ const String& reason)
 {
+    Int64 ret;
+    mWindowManagerCallbacks->NotifyANR(inputApplicationHandle, inputWindowHandle, reason, &ret);
+    return ret;
 }
 
 // Native callback.
@@ -1163,6 +2649,14 @@ Boolean CInputManagerService::FilterInputEvent(
     /* [in] */ IInputEvent* event,
     /* [in] */ Int32 policyFlags)
 {
+    synchronized (mInputFilterLock) {
+        if (mInputFilter != NULL) {
+            mInputFilter->FilterInputEvent(event, policyFlags);
+            return FALSE;
+        }
+    }
+    event->Recycle();
+    return TRUE;
 }
 
 // Native callback.
@@ -1170,6 +2664,9 @@ Int32 CInputManagerService::InterceptKeyBeforeQueueing(
     /* [in] */ IKeyEvent* event,
     /* [in] */ Int32 policyFlags)
 {
+    Int32 ret;
+    mWindowManagerCallbacks->InterceptKeyBeforeQueueing(event, policyFlags, &ret);
+    return ret;
 }
 
 // Native callback.
@@ -1177,6 +2674,10 @@ Int32 CInputManagerService::InterceptMotionBeforeQueueingNonInteractive(
     /* [in] */ Int64 whenNanos,
     /* [in] */ Int32 policyFlags)
 {
+    Int32 ret;
+    mWindowManagerCallbacks->InterceptMotionBeforeQueueingNonInteractive(
+            whenNanos, policyFlags, &ret);
+    return ret;
 }
 
 // Native callback.
@@ -1185,6 +2686,9 @@ Int64 CInputManagerService::InterceptKeyBeforeDispatching(
     /* [in] */ IKeyEvent* event,
     /* [in] */ Int32 policyFlags)
 {
+    Int64 ret;
+    mWindowManagerCallbacks->InterceptKeyBeforeDispatching(focus, event, policyFlags, &ret);
+    return ret;
 }
 
 // Native callback.
@@ -1193,7 +2697,9 @@ AutoPtr<IKeyEvent> CInputManagerService::DispatchUnhandledKey(
     /* [in] */ IKeyEvent* event,
     /* [in] */ Int32 policyFlags)
 {
-    return NULL;
+    AutoPtr<IKeyEvent> keyEvent;
+    mWindowManagerCallbacks->DispatchUnhandledKey(focus, event, policyFlags, (IKeyEvent**)&keyEvent);
+    return keyEvent;
 }
 
 // Native callback.
@@ -1201,68 +2707,207 @@ Boolean CInputManagerService::CheckInjectEventsPermission(
     /* [in] */ Int32 injectorPid,
     /* [in] */ Int32 injectorUid)
 {
+    Int32 value;
+    mContext->CheckPermission(
+            Elastos::Droid::Manifest::permission::INJECT_EVENTS,
+            injectorPid, injectorUid, &value);
+    return value == IPackageManager::PERMISSION_GRANTED;
 }
 
 // Native callback.
 Int32 CInputManagerService::GetVirtualKeyQuietTimeMillis()
 {
+    AutoPtr<IResources> resources;
+    mContext->GetResources((IResources**)&resources);
+    Int32 value = 0;
+    resources->GetInteger(R::integer::config_virtualKeyQuietTimeMillis, &value);
+    return value;
 }
 
 // Native callback.
 AutoPtr< ArrayOf<String> > CInputManagerService::GetExcludedDeviceNames()
 {
+    List<String> names;
+
+    // Read partner-provided list of excluded input devices
+    AutoPtr<IXmlPullParser> parser;
+    // Environment.getRootDirectory() is a fancy way of saying ANDROID_ROOT or "/system".
+    AutoPtr<IEnvironment> env;
+    CEnvironment::AcquireSingleton((IEnvironment**)&env);
+    AutoPtr<IFile> root;
+    env->GetRootDirectory((IFile**)&root);
+    AutoPtr<IFile> confFile;
+    CFile::New(root, EXCLUDED_DEVICES_PATH, (IFile**)&confFile);
+    AutoPtr<IFileReader> confreader;
+    ECode ec = CFileReader::New(confFile, (IFileReader**)&confreader);
+    FAIL_GOTO(ec, _Exit_);
+    Xml::NewPullParser((IXmlPullParser**)&parser);
+    ec = parser->SetInput(IReader::Probe(confreader));
+    FAIL_GOTO(ec, _Exit_);
+    ec = XmlUtils::BeginDocument(parser, String("devices"));
+    FAIL_GOTO(ec, _Exit_);
+
+    while (TRUE) {
+        ec = XmlUtils::NextElement(parser);
+        FAIL_GOTO(ec, _Exit_);
+        String name;
+        parser->GetName(&name);
+        if (!name.Equals("device")) {
+            break;
+        }
+        ec = parser->GetAttributeValue(String(NULL), String("name"), &name);
+        FAIL_GOTO(ec, _Exit_);
+        if (!name.IsNull()) {
+            names.PushBack(name);
+        }
+    }
+_Exit_:
+    if (ec == (ECode)E_FILE_NOT_FOUND_EXCEPTION) {
+        // It's ok if the file does not exist.
+    }
+    else if (FAILED(ec)) {
+        String path;
+        confFile->GetAbsolutePath(&path);
+        Slogger::E(TAG, "Exception while parsing '%s'", path.string());
+    }
+
+    if (confreader != NULL) {
+        ICloseable::Probe(confreader)->Close();
+    }
+
+    AutoPtr<ArrayOf<String> > array = ArrayOf<String>::Alloc(names.GetSize());
+    List<String>::Iterator iter = names.Begin();
+    for (Int32 i = 0; iter != names.End(); ++iter, ++i) {
+        (*array)[i] = *iter;
+    }
+
+    return array;
 }
 
 // Native callback.
 Int32 CInputManagerService::GetKeyRepeatTimeout()
 {
+    AutoPtr<IViewConfigurationHelper> vh;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&vh);
+    Int32 value;
+    vh->GetKeyRepeatTimeout(&value);
+    return value;
 }
 
 // Native callback.
 Int32 CInputManagerService::GetKeyRepeatDelay()
 {
+    AutoPtr<IViewConfigurationHelper> vh;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&vh);
+    Int32 value;
+    vh->GetKeyRepeatDelay(&value);
+    return value;
 }
 
 // Native callback.
 Int32 CInputManagerService::GetHoverTapTimeout()
 {
+    AutoPtr<IViewConfigurationHelper> vh;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&vh);
+    Int32 value;
+    vh->GetHoverTapTimeout(&value);
+    return value;
 }
 
 // Native callback.
 Int32 CInputManagerService::GetHoverTapSlop()
 {
+    AutoPtr<IViewConfigurationHelper> vh;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&vh);
+    Int32 value;
+    vh->GetHoverTapSlop(&value);
+    return value;
 }
 
 // Native callback.
 Int32 CInputManagerService::GetDoubleTapTimeout()
 {
+    AutoPtr<IViewConfigurationHelper> vh;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&vh);
+    Int32 value;
+    vh->GetDoubleTapTimeout(&value);
+    return value;
 }
 
 // Native callback.
 Int32 CInputManagerService::GetLongPressTimeout()
 {
+    AutoPtr<IViewConfigurationHelper> vh;
+    CViewConfigurationHelper::AcquireSingleton((IViewConfigurationHelper**)&vh);
+    Int32 value;
+    vh->GetLongPressTimeout(&value);
+    return value;
 }
 
 // Native callback.
 Int32 CInputManagerService::GetPointerLayer()
 {
+    Int32 ret;
+    mWindowManagerCallbacks->GetPointerLayer(&ret);
+    return ret;
 }
 
 // Native callback.
 AutoPtr<IPointerIcon> CInputManagerService::GetPointerIcon()
 {
+    AutoPtr<IPointerIconHelper> ph;
+    CPointerIconHelper::AcquireSingleton((IPointerIconHelper**)&ph);
+    AutoPtr<IPointerIcon> icon;
+    ph->GetDefaultIcon(mContext, (IPointerIcon**)&icon);
+    return icon;
 }
 
 // Native callback.
 AutoPtr< ArrayOf<String> > CInputManagerService::GetKeyboardLayoutOverlay(
     /* [in] */ IInputDeviceIdentifier* identifier)
 {
+    if (!mSystemReady) {
+        return NULL;
+    }
+
+    String keyboardLayoutDescriptor;
+    GetCurrentKeyboardLayoutForInputDevice(identifier, &keyboardLayoutDescriptor);
+    if (keyboardLayoutDescriptor.IsNull()) {
+        return NULL;
+    }
+
+    AutoPtr<ArrayOf<String> > result = ArrayOf<String>::Alloc(2);
+    AutoPtr<KeyboardLayoutVisitorInGetKeyboardLayoutOverlay> myKVEx3 =
+            new KeyboardLayoutVisitorInGetKeyboardLayoutOverlay(result);
+    VisitKeyboardLayout(keyboardLayoutDescriptor, myKVEx3);
+    if ((*result)[0].IsNull()) {
+        Slogger::W(TAG, "Could not get keyboard layout with descriptor '%s'.",
+                keyboardLayoutDescriptor.string());
+        return NULL;
+    }
+    return result;
 }
 
 // Native callback.
 String CInputManagerService::GetDeviceAlias(
     /* [in] */ const String& uniqueId)
 {
+    AutoPtr<IBluetoothAdapterHelper> bh;
+    CBluetoothAdapterHelper::AcquireSingleton((IBluetoothAdapterHelper**)&bh);
+    Boolean res;
+    bh->CheckBluetoothAddress(uniqueId, &res);
+    if (res) {
+        // TODO(BT) mBluetoothService.getRemoteAlias(uniqueId)
+        return String(NULL);
+    }
+    return String(NULL);
+}
+
+ECode CInputManagerService::ToString(
+    /* [out] */ String* str)
+{
+    *str = "CInputManagerService";
+    return NOERROR;
 }
 
 } // Input

@@ -7,7 +7,7 @@ namespace Droid {
 namespace Media {
 
 ECode CEncoderCapabilitiesHelper::GetOutputFileFormats(
-    /* [out,callee] */ ArrayOf<Int32>** result)
+    /* [out, callee] */ ArrayOf<Int32>** result)
 {
     return CEncoderCapabilities::GetOutputFileFormats(result);
 }

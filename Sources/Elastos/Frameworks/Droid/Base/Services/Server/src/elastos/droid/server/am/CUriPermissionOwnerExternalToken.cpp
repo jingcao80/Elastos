@@ -15,17 +15,18 @@ CAR_INTERFACE_IMPL_2(CUriPermissionOwnerExternalToken, Object, IUriPermissionOwn
 CAR_OBJECT_IMPL(CUriPermissionOwnerExternalToken)
 
 ECode CUriPermissionOwnerExternalToken::constructor(
-    /* [in] */ Handle32 owner)
+    /* [in] */ IObject* owner)
 {
-    mUriOwner = (UriPermissionOwner*)owner;
+    mUriOwner = owner;
     return NOERROR;
 }
 
 ECode CUriPermissionOwnerExternalToken::GetOwner(
-    /* [out] */ Handle32 *owner)
+    /* [out] */ IObject** owner)
 {
     VALIDATE_NOT_NULL(owner)
-    *owner = (Handle32)mUriOwner.Get();
+    *owner = mUriOwner;
+    REFCOUNT_ADD(*owner)
     return NOERROR;
 }
 

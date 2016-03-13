@@ -24,6 +24,8 @@
 using Elastos::Droid::Os::CParcelFileDescriptor;
 using Elastos::Droid::Os::EIID_ICancellationSignalOnCancelListener;
 using Elastos::Core::IByte;
+using Elastos::Core::ICloseGuardHelper;
+using Elastos::Core::CCloseGuardHelper;
 using Elastos::Core::CString;
 using Elastos::Core::ISystem;
 using Elastos::Core::CSystem;
@@ -530,8 +532,7 @@ ECode SQLiteConnection::NativeOpen(
     }
 
     // Register custom Android functions.
-    assert(0 && "TODO");
-    //err = register_android_functions(db, UTF16_STORAGE);
+    err = register_android_functions(db, UTF16_STORAGE);
     if (err) {
         *result = 0;
         sqlite3_close(db);
@@ -1270,7 +1271,10 @@ SQLiteConnection::SQLiteConnection(
 
     mPreparedStatementCache = new PreparedStatementCache(mConfiguration->mMaxSqlCacheSize, this);
 
-    //mCloseGuard->Open("close");
+    AutoPtr<ICloseGuardHelper> helper;
+    CCloseGuardHelper::AcquireSingleton((ICloseGuardHelper**)&helper);
+    helper->Get((ICloseGuard**)&mCloseGuard);
+    mCloseGuard->Open(String("close"));
 }
 
 SQLiteConnection::~SQLiteConnection()
@@ -1335,12 +1339,12 @@ ECode SQLiteConnection::Open()
 void SQLiteConnection::Dispose(
     /* [in] */ Boolean finalized)
 {
-    // if (mCloseGuard != NULL) {
-    //     if (finalized) {
-    //         mCloseGuard->WarnIfOpen();
-    //     }
-    //     mCloseGuard->Close();
-    // }
+    if (mCloseGuard != NULL) {
+        if (finalized) {
+            mCloseGuard->WarnIfOpen();
+        }
+        mCloseGuard->Close();
+    }
 
     if (mConnectionPtr != 0) {
         Int32 cookie = mRecentOperations->BeginOperation(String("close"), String(NULL), NULL);

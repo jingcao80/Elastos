@@ -58,6 +58,7 @@ ECode Xml::Parse(
 {
     // try {
     AutoPtr<IXMLReader> reader;
+    assert(0 && "TODO");
     //CExpatReader::New((IXMLReader**)&reader);
     reader->SetContentHandler(contentHandler);
 
@@ -83,6 +84,7 @@ ECode Xml::Parse(
     /* [in] */ IContentHandler* contentHandler)
 {
     AutoPtr<IXMLReader> reader;
+    assert(0 && "TODO");
     //CExpatReader::New((IXMLReader**)&reader);
     reader->SetContentHandler(contentHandler);
 
@@ -98,6 +100,7 @@ ECode Xml::Parse(
     /* [in] */ IContentHandler* contentHandler)
 {
     AutoPtr<IXMLReader> reader;
+    assert(0 && "TODO");
     //CExpatReader::New((IXMLReader**)&reader);
     reader->SetContentHandler(contentHandler);
 
@@ -112,18 +115,28 @@ ECode Xml::NewPullParser(
     /* [out] */ IXmlPullParser** result)
 {
     VALIDATE_NOT_NULL(result)
-    // // try {
+    *result = NULL;
+    // try {
     AutoPtr<IXmlPullParser> parser;
-    CKXmlParser::New((IXmlPullParser**)&parser);
+    ECode ec = CKXmlParser::New((IXmlPullParser**)&parser);
+    FAIL_GOTO(ec, _EXIT)
 
-    parser->SetFeature(IXmlPullParser::FEATURE_PROCESS_DOCDECL, TRUE);
-    parser->SetFeature(IXmlPullParser::FEATURE_PROCESS_NAMESPACES, TRUE);
+    ec = parser->SetFeature(IXmlPullParser::FEATURE_PROCESS_DOCDECL, TRUE);
+    FAIL_GOTO(ec, _EXIT)
+
+    ec = parser->SetFeature(IXmlPullParser::FEATURE_PROCESS_NAMESPACES, TRUE);
+    FAIL_GOTO(ec, _EXIT)
+
     *result = parser;
     REFCOUNT_ADD(*result)
-    // } catch (XmlPullParserException e) {
-    //     throw new AssertionError();
-    // }
     return NOERROR;
+
+_EXIT:
+    if (ec == (ECode)E_XML_PULL_PARSER_EXCEPTION) {
+        return E_ASSERTION_ERROR;
+    }
+
+    return ec;
 }
 
 ECode Xml::NewSerializer(

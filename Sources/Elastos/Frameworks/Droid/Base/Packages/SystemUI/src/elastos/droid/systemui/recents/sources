@@ -10,3 +10,4 @@ SOURCES += RecentsConfiguration.cpp
 
 ELASTOS_LIBS += model/model.lib
 ELASTOS_LIBS += views/views.lib
+ELASTOS_LIBS += misc/misc.lib

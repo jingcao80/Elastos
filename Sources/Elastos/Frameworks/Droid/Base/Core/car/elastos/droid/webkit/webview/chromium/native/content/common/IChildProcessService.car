@@ -1,0 +1,35 @@
+
+module
+{
+    interface Elastos.Droid.Webkit.Webview.Chromium.Content.Common.IChildProcessCallback;
+    using interface Elastos.Droid.Os.IBundle;
+    using interface Elastos.Droid.View.ISurface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+    namespace Webview {
+    namespace Chromium {
+    namespace Content {
+    namespace Common {
+
+    [deprecated]
+    interface IChildProcessService {
+        // Sets up the initial IPC channel and returns the pid of the child process.
+        SetupConnection(
+            [in] IBundle* args,
+            [in] IChildProcessCallback* cb,
+            [out] Int32* result);
+
+        // Asks the child service to crash so that we can test the termination logic.
+        CrashIntentionallyForTesting();
+    }
+
+    } // namespace Common
+    } // namespace Content
+    } // namespace Chromium
+    } // namespace Webview
+    } // namespace Webkit
+    } // namespace Droid
+    } // namespace Elastos
+}

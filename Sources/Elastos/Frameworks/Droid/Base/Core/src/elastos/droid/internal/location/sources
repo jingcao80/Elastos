@@ -1,0 +1,11 @@
+TARGET_NAME= location
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+SOURCES = CGpsNetInitiatedHandler.cpp
+SOURCES += CProviderProperties.cpp
+SOURCES += CProviderRequest.cpp

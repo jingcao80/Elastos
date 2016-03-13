@@ -1,0 +1,15 @@
+
+TARGET_NAME= misc
+TARGET_TYPE= lib
+
+include $(MAKEDIR)/../../../../../../../../../sources.inc
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../../inc/
+
+SOURCES = DebugTrigger.cpp
+SOURCES += DozeTrigger.cpp
+SOURCES += NamedCounter.cpp
+SOURCES += ReferenceCountedTrigger.cpp
+SOURCES += Console.cpp
+SOURCES += SystemServicesProxy.cpp
+SOURCES += Utilities.cpp

@@ -3,6 +3,7 @@
 #include "elastos/droid/server/hdmi/HdmiConfig.h"
 #include <Elastos.CoreLibrary.Utility.h>
 #include <Elastos.Droid.Hardware.h>
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiDeviceInfo;
 using Elastos::Droid::Hardware::Hdmi::IHdmiControlManager;
@@ -14,6 +15,8 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Hdmi {
+
+CAR_INTERFACE_IMPL(SystemAudioAction, HdmiCecFeatureAction, ISystemAudioAction)
 
 const String SystemAudioAction::TAG("SystemAudioAction");
 const Int32 SystemAudioAction::STATE_CHECK_ROUTING_IN_PRGRESS = 1;
@@ -36,8 +39,8 @@ ECode SystemAudioAction::constructor(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        Super(source);
-        HdmiUtils->VerifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        super::constructor(source);
+        HdmiUtils->VerifyAddressType(avrAddress, IHdmiDeviceInfo::DEVICE_AUDIO_SYSTEM);
         mAvrLogicalAddress = avrAddress;
         mTargetAudioStatus = targetStatus;
         mCallback = callback;
@@ -48,18 +51,22 @@ ECode SystemAudioAction::SendSystemAudioModeRequest()
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        List<RoutingControlAction> routingActions = GetActions(RoutingControlAction.class);
-        if (!routingActions->IsEmpty()) {
+        List<RoutingControlAction> routingActions = GetActions(ECLSID_CRoutingControlAction);
+        Boolean isEmpty;
+        routingActions->IsEmpty(&isEmpty);
+        if (!isEmpty) {
             mState = STATE_CHECK_ROUTING_IN_PRGRESS;
             // Should have only one Routing Control Action
-            RoutingControlAction routingAction = routingActions->Get(0);
+            AutoPtr<IInterface> obj;
+            routingActions->Get(0, (IInterface**)&obj);
+            RoutingControlAction routingAction = I::Probe(obj);
             routingAction->AddOnFinishedCallback(this, new Runnable() {
                 //@Override
                 CARAPI Run() {
                     SendSystemAudioModeRequestInternal();
                 }
             });
-            return;
+            return NOERROR;
         }
         SendSystemAudioModeRequestInternal();
 #endif
@@ -69,9 +76,15 @@ ECode SystemAudioAction::SendSystemAudioModeRequestInternal()
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        Int32 avrPhysicalAddress = Tv()->GetAvrDeviceInfo().GetPhysicalAddress();
-        HdmiCecMessage command = HdmiCecMessageBuilder->BuildSystemAudioModeRequest(
-                GetSourceAddress(),
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        AutoPtr<IHdmiDeviceInfo> info;
+        tv->GetAvrDeviceInfo((IHdmiDeviceInfo**)&info);
+        Int32 avrPhysicalAddress;
+        info->GetPhysicalAddress(&avrPhysicalAddress);
+        Int32 srcAddr;
+        GetSourceAddress(&srcAddr);
+        HdmiCecMessage command = HdmiCecMessageBuilder->BuildSystemAudioModeRequest(srcAddr,
                 mAvrLogicalAddress, avrPhysicalAddress, mTargetAudioStatus);
         SendCommand(command, new HdmiControlService->SendMessageCallback() {
             //@Override
@@ -79,7 +92,7 @@ ECode SystemAudioAction::SendSystemAudioModeRequestInternal()
                 if (error != Constants::SEND_RESULT_SUCCESS) {
                     HdmiLogger->Debug("Failed to send <System Audio Mode Request>:" + error);
                     SetSystemAudioMode(FALSE);
-                    FinishWithCallback(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
+                    FinishWithCallback(IHdmiControlManager::RESULT_COMMUNICATION_FAILED);
                 }
             }
         });
@@ -96,8 +109,8 @@ ECode SystemAudioAction::HandleSendSystemAudioModeRequestTimeout()
                 || mSendRetryCount++ >= MAX_SEND_RETRY_COUNT) {
             HdmiLogger->Debug("[T]:wait for <Set System Audio Mode>.");
             SetSystemAudioMode(FALSE);
-            FinishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
-            return;
+            FinishWithCallback(IHdmiControlManager::RESULT_TIMEOUT);
+            return NOERROR;
         }
         SendSystemAudioModeRequest();
 #endif
@@ -108,7 +121,9 @@ ECode SystemAudioAction::SetSystemAudioMode(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        Tv()->SetSystemAudioMode(mode, TRUE);
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        tv->SetSystemAudioMode(mode, TRUE);
 #endif
 }
 
@@ -116,37 +131,50 @@ ECode SystemAudioAction::ProcessCommand(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         switch (mState) {
             case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
-                if (cmd->GetOpcode() == Constants::MESSAGE_FEATURE_ABORT
-                        && (cmd->GetParams()[0] & 0xFF)
+            {
+                Int32 opcode;
+                cmd->GetOpcode(&opcode);
+                if (opcode == Constants::MESSAGE_FEATURE_ABORT
+                        AutoPtr<ArrayOf<Byte> > params;
+                        cmd->GetParams((ArrayOf<Byte>**)&params);
+                        && ((*params)[0] & 0xFF)
                                 == Constants::MESSAGE_SYSTEM_AUDIO_MODE_REQUEST) {
                     HdmiLogger->Debug("Failed to start system audio mode request.");
                     SetSystemAudioMode(FALSE);
-                    FinishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
-                    return TRUE;
+                    FinishWithCallback(IHdmiControlManager::RESULT_EXCEPTION);
+                    *result = TRUE;
+                    return NOERROR;
                 }
-                if (cmd->GetOpcode() != Constants::MESSAGE_SET_SYSTEM_AUDIO_MODE
+                if (opcode != Constants::MESSAGE_SET_SYSTEM_AUDIO_MODE
                         || !HdmiUtils->CheckCommandSource(cmd, mAvrLogicalAddress, TAG)) {
-                    return FALSE;
+                    *result = FALSE;
+                    return NOERROR;
                 }
                 Boolean receivedStatus = HdmiUtils->ParseCommandParamSystemAudioStatus(cmd);
                 if (receivedStatus == mTargetAudioStatus) {
                     SetSystemAudioMode(receivedStatus);
                     StartAudioStatusAction();
-                    return TRUE;
+                    *result = TRUE;
+                    return NOERROR;
                 } else {
                     HdmiLogger->Debug("Unexpected system audio mode request:" + receivedStatus);
                     // Unexpected response, consider the request is newly initiated by AVR.
                     // To return 'FALSE' will initiate new SystemAudioActionFromAvr by the control
                     // service.
-                    FinishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
-                    return FALSE;
+                    FinishWithCallback(IHdmiControlManager::RESULT_EXCEPTION);
+                    *result = FALSE;
+                    return NOERROR;
                 }
+            }
             default:
-                return FALSE;
+                *result = FALSE;
+                return NOERROR;
         }
 #endif
 }
@@ -155,7 +183,9 @@ ECode SystemAudioAction::StartAudioStatusAction()
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        AddAndStartAction(new SystemAudioStatusAction(Tv(), mAvrLogicalAddress, mCallback));
+        AutoPtr<SystemAudioStatusAction> newSystemAudioStatusAction = new SystemAudioStatusAction();
+        newSystemAudioStatusAction->constructor(Tv(), mAvrLogicalAddress, mCallback);
+        AddAndStartAction(newSystemAudioStatusAction);
         Finish();
 #endif
 }
@@ -164,8 +194,8 @@ ECode SystemAudioAction::RemoveSystemAudioActionInProgress()
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        RemoveActionExcept(SystemAudioActionFromTv.class, this);
-        RemoveActionExcept(SystemAudioActionFromAvr.class, this);
+        RemoveActionExcept(ECLSID_CSystemAudioActionFromTv, this);
+        RemoveActionExcept(ECLSID_CSystemAudioActionFromAvr, this);
 #endif
 }
 
@@ -175,12 +205,12 @@ ECode SystemAudioAction::HandleTimerEvent(
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         if (mState != state) {
-            return;
+            return NOERROR;
         }
         switch (mState) {
             case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
                 HandleSendSystemAudioModeRequestTimeout();
-                return;
+                return NOERROR;
         }
 #endif
 }

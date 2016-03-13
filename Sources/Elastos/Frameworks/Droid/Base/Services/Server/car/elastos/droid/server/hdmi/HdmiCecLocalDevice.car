@@ -18,6 +18,22 @@ module
     }
 
     /**
+     * @Involved
+     * no super interface
+     */
+    interface IHdmiCecLocalDeviceActiveSource {
+        IsValid(
+            [out] Boolean* result);
+
+        Invalidate();
+
+        IsEquals(
+            [in] Int32 logical,
+            [in] Int32 physical,
+            [out] Boolean* result);
+    }
+
+    /**
      * A callback interface to get notified when all pending action is cleared.
      * It can be called when timeout happened.
      */

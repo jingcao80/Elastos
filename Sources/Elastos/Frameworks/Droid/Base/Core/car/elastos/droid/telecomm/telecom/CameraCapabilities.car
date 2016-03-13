@@ -7,27 +7,27 @@ module
     namespace Telecomm {
     namespace Telecom {
 
-        /**
-         * Represents the camera capabilities important to a Video Telephony provider.
-         * @hide
-         */
-        /**
-         * @Involve
-         * interface IParcelable
-         */
-        interface ICameraCapabilities {
-            IsZoomSupported(
-                [out] Boolean* res);
+    /**
+     * Represents the camera capabilities important to a Video Telephony provider.
+     * @hide
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface ICameraCapabilities {
+        IsZoomSupported(
+            [out] Boolean* res);
 
-            GetMaxZoom(
-                [out] Float* res);
+        GetMaxZoom(
+            [out] Float* res);
 
-            GetWidth(
-                [out] Int32* res);
+        GetWidth(
+            [out] Int32* res);
 
-            GetHeight(
-                [out] Int32* res);
-        }
+        GetHeight(
+            [out] Int32* res);
+    }
 
     } // namespace Telecom
     } // namespace Telecomm

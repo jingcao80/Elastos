@@ -5,6 +5,9 @@
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 #include <elastos/core/AutoLock.h>
+#include <elastos/utility/logging/Logger.h>
+
+using Elastos::Utility::Logging::Logger;
 
 namespace Elastos {
 namespace Droid {
@@ -57,6 +60,7 @@ public:
          */
         SimplePool(
             /* [in] */ Int32 maxPoolSize)
+            : mPoolSize(maxPoolSize)
         {
             assert(maxPoolSize > 0);
             mPool = ArrayOf<T*>::Alloc(maxPoolSize);
@@ -66,6 +70,12 @@ public:
         {
             if (mPoolSize > 0) {
                 Int32 lastPooledIndex = mPoolSize - 1;
+                assert(mPool != NULL);
+                assert(lastPooledIndex >= 0);
+                ELA_ASSERT_WITH_BLOCK(lastPooledIndex < mPool->GetLength()) {
+                    Logger::E("Pools", "error: lastPooledIndex: %d bigger than mPool->GetLength(): %d, mPoolSize: %d",
+                        lastPooledIndex, mPool->GetLength(), mPoolSize);
+                }
                 AutoPtr<T> instance = (*mPool)[lastPooledIndex];
                 mPool->Set(lastPooledIndex, NULL);
                 mPoolSize--;

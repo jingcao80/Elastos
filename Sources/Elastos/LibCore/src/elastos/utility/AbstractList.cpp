@@ -884,13 +884,6 @@ ECode AbstractList::ToArray(
     return AbstractCollection::ToArray(contents, outArray);
 }
 
-ECode AbstractList::GetSize(
-        /* [out] */ Int32* size)
-{
-    assert(0);
-    return E_NOT_IMPLEMENTED;
-}
-
 ECode AbstractList::Contains(
     /* [in] */ IInterface* object,
     /* [out] */ Boolean* result)

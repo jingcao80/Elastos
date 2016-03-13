@@ -2,7 +2,10 @@
 #ifndef __ELASTOS_DROID_TELEPHONY_CSERVICESTATE_H__
 #define __ELASTOS_DROID_TELEPHONY_CSERVICESTATE_H__
 
+#include "Elastos.Droid.Os.h"
 #include "_Elastos_Droid_Telephony_CServiceState.h"
+#include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IBundle;
 
@@ -11,21 +14,18 @@ namespace Droid {
 namespace Telephony {
 
 CarClass(CServiceState)
+    , public Object
+    , public IServiceState
+    , public IParcelable
 {
 public:
+    CServiceState();
 
-    static CARAPI NewFromBundle(
-        /* [in] */ IBundle* m,
-        /* [out] */ IServiceState** res);
+    virtual ~CServiceState();
 
-    static CARAPI_(String) RilRadioTechnologyToString(
-        /* [in] */ Int32 rt);
+    CAR_INTERFACE_DECL()
 
-    static CARAPI_(Boolean) IsGsm(
-        /* [in] */ Int32 radioTechnology);
-
-    static CARAPI_(Boolean) IsCdma(
-        /* [in] */ Int32  radioTechnology);
+    CAR_OBJECT_DECL()
 
     CARAPI constructor();
 
@@ -39,6 +39,12 @@ public:
         /* [in] */ IParcel* dest);
 
     CARAPI GetState(
+        /* [out] */ Int32* state);
+
+    CARAPI GetVoiceRegState(
+        /* [out] */ Int32* state);
+
+    CARAPI GetDataRegState(
         /* [out] */ Int32* state);
 
     CARAPI GetRoaming(
@@ -88,6 +94,12 @@ public:
     CARAPI SetState(
         /* [in] */ Int32 state);
 
+    CARAPI SetVoiceRegState(
+        /* [in] */ Int32 state);
+
+    CARAPI SetDataRegState(
+        /* [in] */ Int32 state);
+
     CARAPI SetRoaming(
         /* [in] */ Boolean roaming);
 
@@ -120,7 +132,10 @@ public:
     CARAPI FillInNotifierBundle(
         /* [in] */ IBundle* m);
 
-    CARAPI SetRadioTechnology(
+    CARAPI SetRilVoiceRadioTechnology(
+        /* [in] */ Int32 state);
+
+    CARAPI SetRilDataRadioTechnology(
         /* [in] */ Int32 state);
 
     CARAPI SetCssIndicator(
@@ -130,14 +145,23 @@ public:
         /* [in] */ Int32 systemId,
         /* [in] */ Int32 networkId);
 
-    CARAPI GetRilRadioTechnology(
-        /* [out] */ Int32* rilRadioTechnology);
+    CARAPI GetRilVoiceRadioTechnology(
+        /* [out] */ Int32* rilVoiceRadioTechnology);
+
+    CARAPI GetRilDataRadioTechnology(
+        /* [out] */ Int32* rilDataRadioTechnology);
 
     CARAPI GetRadioTechnology(
         /* [out] */ Int32* radioTechnology);
 
     CARAPI GetNetworkType(
-        /* [out] */ Int32* networkType);
+        /* [out] */ Int32* type);
+
+    CARAPI GetDataNetworkType(
+        /* [out] */ Int32* type);
+
+    CARAPI GetVoiceNetworkType(
+        /* [out] */ Int32* type);
 
     CARAPI GetCssIndicator(
         /* [out] */ Int32* cssIndicator);
@@ -148,24 +172,47 @@ public:
     CARAPI GetSystemId(
         /* [out] */ Int32* systemId);
 
+    static CARAPI NewFromBundle(
+        /* [in] */ IBundle* m,
+        /* [out] */ IServiceState** res);
+
+    static CARAPI RilRadioTechnologyToString(
+        /* [in] */ Int32 rt,
+        /* [out] */ String* str);
+
+    static CARAPI IsGsm(
+        /* [in] */ Int32 radioTechnology,
+        /* [out] */ Boolean* result);
+
+    static CARAPI IsCdma(
+        /* [in] */ Int32  radioTechnology,
+        /* [out] */ Boolean* result);
+
 protected:
     CARAPI CopyFrom(
         /* [in] */ IServiceState* s);
 
 private:
+    CARAPI SetNullState(
+        /* [in] */ Int32 state);
 
     static CARAPI_(Boolean) EqualsHandlesNulls(
         /* [in] */ const String& a,
         /* [in] */ const String& b);
 
-    CARAPI SetNullState(
-        /* [in] */ Int32 state);
-
     CARAPI SetFromNotifierBundle(
         /* [in] */ IBundle* m);
 
-    static const String LOG_TAG/* = "PHONE"*/;
-    Int32 mState/*STATE_OUT_OF_SERVICE*/;
+    CARAPI RilRadioTechnologyToNetworkType(
+        /* [in] */ Int32 rt,
+        /* [out] */ Int32* networkType);
+
+private:
+    static const String TAG;
+    static const Boolean DBG;
+
+    Int32 mVoiceRegState;
+    Int32 mDataRegState;
     Boolean mRoaming;
     String mOperatorAlphaLong;
     String mOperatorAlphaShort;
@@ -174,8 +221,9 @@ private:
 
     Boolean mIsEmergencyOnly;
 
-    //***** CDMA
-    Int32 mRadioTechnology;
+    Int32 mRilVoiceRadioTechnology;
+    Int32 mRilDataRadioTechnology;
+
     Boolean mCssIndicator;
     Int32 mNetworkId;
     Int32 mSystemId;
@@ -185,8 +233,8 @@ private:
     Int32 mCdmaEriIconMode;
 };
 
-}
-}
-}
+} // namespace Telephony
+} // namespace Droid
+} // namespace Elastos
 
 #endif // __ELASTOS_DROID_TELEPHONY_CSERVICESTATE_H__

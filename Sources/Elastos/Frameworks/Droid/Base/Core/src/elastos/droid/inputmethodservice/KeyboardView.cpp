@@ -518,8 +518,9 @@ ECode KeyboardView::constructor(
     context->ObtainStyledAttributes(attrs, attrIds,
             defStyleAttr, defStyleRes, (ITypedArray**)&a);
 
-    AutoPtr<ILayoutInflater> inflate;
-    context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflate);
+    AutoPtr<IInterface> service;
+    FAIL_RETURN(context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service))
+    AutoPtr<ILayoutInflater> inflate = ILayoutInflater::Probe(service);
 
     Int32 previewLayout = 0;
     Int32 keyTextSize = 0;
@@ -1510,9 +1511,9 @@ ECode KeyboardView::OnLongPress(
         if (mMiniKeyboardContainer == NULL) {
             AutoPtr<IContext> context;
             GetContext((IContext**)&context);
-            AutoPtr<ILayoutInflater> inflater;
-            context->GetSystemService(
-                    IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&inflater);
+            AutoPtr<IInterface> service;
+            FAIL_RETURN(context->GetSystemService(IContext::LAYOUT_INFLATER_SERVICE, (IInterface**)&service))
+            AutoPtr<ILayoutInflater> inflater = ILayoutInflater::Probe(service);
             inflater->Inflate(mPopupLayout, NULL, (IView**)&mMiniKeyboardContainer);
             mMiniKeyboardContainer->FindViewById(R::id::keyboardView,
                     (IView**)&mMiniKeyboard);

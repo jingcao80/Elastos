@@ -57,14 +57,14 @@ ECode ColorDrawable::ColorState::CanApplyTheme(
 ECode ColorDrawable::ColorState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    return CColorDrawable::New(THIS_PROBE(IDrawableConstantState), NULL, NULL, (IColorDrawable**)drawable);
+    return CColorDrawable::New(THIS_PROBE(IDrawableConstantState), NULL, NULL, drawable);
 }
 
 ECode ColorDrawable::ColorState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    return CColorDrawable::New(THIS_PROBE(IDrawableConstantState), res, NULL, (IColorDrawable**)drawable);
+    return CColorDrawable::New(THIS_PROBE(IDrawableConstantState), res, NULL, drawable);
 }
 
 ECode ColorDrawable::ColorState::NewDrawable(
@@ -72,7 +72,7 @@ ECode ColorDrawable::ColorState::NewDrawable(
     /* [in] */ IResourcesTheme* theme,
     /* [out] */ IDrawable** drawable)
 {
-    return CColorDrawable::New(THIS_PROBE(IDrawableConstantState), res, theme, (IColorDrawable**)drawable);
+    return CColorDrawable::New(THIS_PROBE(IDrawableConstantState), res, theme, drawable);
 }
 
 ECode ColorDrawable::ColorState::GetChangingConfigurations(
@@ -115,17 +115,12 @@ ECode ColorDrawable::GetChangingConfigurations(
     return NOERROR;
 }
 
-ECode ColorDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode ColorDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> tmp;
-    if (!mMutated && (Drawable::Mutate((IDrawable**)&tmp), tmp.Get()) == (IDrawable*)this->Probe(EIID_IDrawable)) {
+    if (!mMutated ) {
         mColorState = new ColorState(mColorState);
         mMutated = TRUE;
     }
-    *drawable = (IDrawable*)this->Probe(EIID_IDrawable);
-    REFCOUNT_ADD(*drawable);
     return NOERROR;
 }
 

@@ -3,14 +3,27 @@
 #define __ELASTOS_DROID_TELEPHONY_CNEIGHBORINGCELLINFO_H__
 
 #include "_Elastos_Droid_Telephony_CNeighboringCellInfo.h"
+#include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
 CarClass(CNeighboringCellInfo)
+    , public Object
+    , public INeighboringCellInfo
+    , public IParcelable
 {
 public:
+    CNeighboringCellInfo();
+
+    virtual ~CNeighboringCellInfo();
+
+    CAR_INTERFACE_DECL()
+
+    CAR_OBJECT_DECL()
+
     CARAPI constructor();
 
     CARAPI constructor(

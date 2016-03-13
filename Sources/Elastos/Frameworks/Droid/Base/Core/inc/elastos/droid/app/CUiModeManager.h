@@ -76,7 +76,7 @@ public:
         /* [out] */ Int32 * mode);
 
 public:
-    AutoPtr<IUiModeManager> mService;
+    AutoPtr<IIUiModeManager> mService;
 };
 
 } // namespace App

@@ -4,12 +4,12 @@
 
 #include "Elastos.Droid.Webkit.h"
 #include "elastos/droid/ext/frameworkext.h"
-#include "elastos/droid/webkit/native/android_webview/AwContentsClient.h"
+#include "elastos/droid/webkit/webview/chromium/native/android_webview/AwContentsClient.h"
 
 using Elastos::Droid::Content::IContext;
 using Elastos::Droid::Content::IIntent;
 using Elastos::Droid::Net::IUri;
-using Elastos::Droid::Webkit::AndroidWebview::AwContentsClient;
+using Elastos::Droid::Webkit::Webview::Chromium::AndroidWebview::AwContentsClient;
 using Elastos::Droid::Webkit::IWebChromeClientFileChooserParams;
 using Elastos::Core::ICharSequence;
 

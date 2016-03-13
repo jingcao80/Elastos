@@ -10,6 +10,7 @@ C_DEFINES += -DDROID_CORE
 
 SOURCES = net.cpp
 SOURCES += BaseNetworkStateTracker.cpp
+SOURCES += ConnectivityManagerNetworkCallback.cpp
 SOURCES += CConnectivityManager.cpp
 SOURCES += CConnectivityManagerHelper.cpp
 SOURCES += CCredentials.cpp

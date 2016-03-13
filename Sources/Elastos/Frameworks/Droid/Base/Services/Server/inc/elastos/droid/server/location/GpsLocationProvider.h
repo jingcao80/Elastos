@@ -485,7 +485,7 @@ private:
         /* [in] */ IProperties* properties);
 
     CARAPI_(Boolean) LoadPropertiesFromFile(
-        /* [in] */ String filename,
+        /* [in] */ const String& filename,
         /* [in] */ IProperties* properties);
 
     CARAPI_(void) ListenForBroadcasts();

@@ -33,7 +33,10 @@ using Elastos::Droid::Content::Res::IResources;
 using Elastos::Droid::Database::ICursor;
 using Elastos::Droid::Hardware::Location::GeofenceHardwareImpl;
 using Elastos::Droid::Hardware::Location::IGeofenceHardware;
-// using Elastos::Droid::Internal::Location::CProviderProperties;
+using Elastos::Droid::Internal::Location::CGpsNiNotification;
+using Elastos::Droid::Internal::Location::IGpsNiNotification;
+using Elastos::Droid::Internal::Location::CGpsNetInitiatedHandler;
+using Elastos::Droid::Internal::Location::CProviderProperties;
 using Elastos::Droid::Internal::Telephony::IPhoneConstants;
 using Elastos::Droid::Internal::Telephony::ITelephonyIntents;
 using Elastos::Droid::Location::CLocation;
@@ -101,10 +104,12 @@ using Elastos::Net::IInetAddressHelper;
 using Elastos::Utility::CDate;
 using Elastos::Utility::CProperties;
 using Elastos::Utility::IDate;
+using Elastos::Utility::IMapEntry;
 using Elastos::Utility::IHashTable;
 using Elastos::Utility::IIterable;
 using Elastos::Utility::IIterator;
 using Elastos::Utility::IList;
+using Elastos::Utility::ISet;
 using Elastos::Utility::Logging::Logger;
 using Libcore::IO::CIoUtils;
 using Libcore::IO::IIoUtils;
@@ -116,13 +121,10 @@ namespace Location {
 
 static AutoPtr<IProviderProperties> InitPROPERTIES()
 {
-#if 0 //TODO  CProviderProperties
     AutoPtr<IProviderProperties> pp;
     CProviderProperties::New(TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE,
-        ICriteria::POWER_HIGH, ICriteria::ACCURACY_FINE, (IProviderProperties**)&pp);
+        ICriteria::Criteria_POWER_HIGH, ICriteria::Criteria_ACCURACY_FINE, (IProviderProperties**)&pp);
     return pp;
-#endif
-    return NULL;
 }
 
 //===========================================
@@ -940,8 +942,7 @@ GpsLocationProvider::GpsLocationProvider(
     ReloadGpsProperties(mContext, mProperties);
 
     // Create a GPS net-initiated handler.
-    //TODO
-    // CGpsNetInitiatedHandler::New(context, mNetInitiatedListener, mSuplEsEnabled, (IGpsNetInitiatedHandler**)&mNIHandler);
+    CGpsNetInitiatedHandler::New(context, mNetInitiatedListener, mSuplEsEnabled, (IGpsNetInitiatedHandler**)&mNIHandler);
 
     // construct handler, listen for events
     mHandler = new ProviderHandler(looper, this);
@@ -1130,7 +1131,7 @@ void GpsLocationProvider::LoadPropertiesFromResource(
 }
 
 Boolean GpsLocationProvider::LoadPropertiesFromFile(
-    /* [in] */ String filename,
+    /* [in] */ const String& filename,
     /* [in] */ IProperties* properties)
 {
 
@@ -2299,21 +2300,20 @@ ECode GpsLocationProvider::ReportNiNotification(
     Logger::I(TAG, "requestorId: %s, text: %s, requestorIdEncoding: %d, textEncoding: %d",
         requestorId.string(), text.string(), requestorIdEncoding, textEncoding);
 
-#if 0 //TODO GpsNetInitiatedHandler::GpsNiNotification
-    AutoPtr<IGpsNiNotification> notification = new GpsNiNotification();
+    AutoPtr<IGpsNiNotification> notification;
+    CGpsNiNotification::New((IGpsNiNotification**)&notification);
+    notification->SetNotificationId(notificationId);
+    notification->SetNiType(niType);
+    notification->SetNeedNotify((notifyFlags & IGpsNetInitiatedHandler::GPS_NI_NEED_NOTIFY) != 0);
+    notification->SetNeedVerify((notifyFlags & IGpsNetInitiatedHandler::GPS_NI_NEED_VERIFY) != 0);
+    notification->SetPrivacyOverride((notifyFlags & IGpsNetInitiatedHandler::GPS_NI_PRIVACY_OVERRIDE) != 0);
+    notification->SetTimeOut(timeout);
+    notification->SetDefaultResponse(defaultResponse);
+    notification->SetRequestorId(requestorId);
+    notification->SetText(text);
+    notification->SetRequestorIdEncoding(requestorIdEncoding);
+    notification->SetTextEncoding(textEncoding);
 
-    notification.notificationId = notificationId;
-    notification.niType = niType;
-    notification.needNotify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_NOTIFY) != 0;
-    notification.needVerify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_VERIFY) != 0;
-    notification.privacyOverride = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_PRIVACY_OVERRIDE) != 0;
-    notification.timeout = timeout;
-    notification.defaultResponse = defaultResponse;
-    notification.requestorId = requestorId;
-    notification.text = text;
-    notification.requestorIdEncoding = requestorIdEncoding;
-    notification.textEncoding = textEncoding;
-#endif
     // Process extras, assuming the format is
     // one of more lines of "key = value"
     AutoPtr<IBundle> bundle;
@@ -2331,16 +2331,22 @@ ECode GpsLocationProvider::ReportNiNotification(
         Logger::E(TAG, "reportNiNotification cannot parse extras data: %s", extras.string());
         return E_IO_EXCEPTION;
     }
-#if 0 //TODO
-    for (Entry<Object, Object> ent : extraProp.entrySet())
-    {
-        bundle.putString((String) ent.getKey(), (String) ent.getValue());
+
+    AutoPtr<ISet> set;
+    IHashTable::Probe(extraProp)->GetEntrySet((ISet**)&set);
+    AutoPtr<ArrayOf<IInterface*> > array;
+    set->ToArray((ArrayOf<IInterface*>**)&array);
+    for (Int32 i = 0; i < array->GetLength(); i++) {
+        AutoPtr<IMapEntry> ent = IMapEntry::Probe((*array)[i]);
+        AutoPtr<IInterface> key, value;
+        ent->GetKey((IInterface**)&key);
+        ent->GetValue((IInterface**)&value);
+        bundle->PutString(TO_STR(key), TO_STR(value));
     }
 
-    notification.extras = bundle;
+    notification->SetExtras(bundle);
+    mNIHandler->HandleNiNotification(notification);
 
-    mNIHandler.handleNiNotification(notification);
-#endif
     return NOERROR;
 }
 

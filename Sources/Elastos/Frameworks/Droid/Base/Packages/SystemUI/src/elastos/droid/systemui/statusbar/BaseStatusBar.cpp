@@ -979,7 +979,7 @@ ECode BaseStatusBar::Start()
     mContext->GetContentResolver((IContentResolver**)&cr);
     AutoPtr<IUri> uri;
     Elastos::Droid::Provider::Settings::Global::GetUriFor(ISettingsGlobal::DEVICE_PROVISIONED, (IUri**)&uri);
-    cr->RegisterContentObserver( uri, TRUE, mSettingsObserver);
+    cr->RegisterContentObserver(uri, TRUE, mSettingsObserver);
 
     uri = NULL;
     Elastos::Droid::Provider::Settings::Global::GetUriFor(ISettingsGlobal::ZEN_MODE, (IUri**)&uri);
@@ -2717,7 +2717,8 @@ ECode BaseStatusBar::UpdateNotification(
                 AutoPtr<IViewGroup> holder;
                 mHeadsUpNotificationView->GetHolder((IViewGroup**)&holder);
                 if (InflateViewsForHeadsUp(newEntry, holder)) {
-                    mHeadsUpNotificationView->ShowNotification(newEntry);
+                    Boolean tmp = FALSE;
+                    mHeadsUpNotificationView->ShowNotification(newEntry, &tmp);
                     if (alertAgain) {
                         ResetHeadsUpDecayTimer();
                     }

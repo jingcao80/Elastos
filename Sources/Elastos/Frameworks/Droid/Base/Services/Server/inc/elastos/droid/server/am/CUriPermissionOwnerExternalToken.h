@@ -23,16 +23,16 @@ public:
     CAR_OBJECT_DECL()
 
     CARAPI constructor(
-        /* [in] */ Handle32 owner);
+        /* [in] */ IObject* owner);
 
     CARAPI GetOwner(
-        /* [out] */ Handle32 *owner);
+        /* [out] */ IObject** owner);
 
     CARAPI ToString(
-        /* [out] */ String *str);
+        /* [out] */ String* str);
 
 public:
-    AutoPtr<UriPermissionOwner> mUriOwner;
+    AutoPtr<IObject> mUriOwner; // UriPermissionOwner
 };
 
 } // namespace Am

@@ -15,12 +15,10 @@ module
      * Keyguard.
      */
     interface IActivityStarter {
-
         StartActivity(
             [in] IIntent* intent,
             [in] Boolean dismissShade);
     }
-
 
     } // namespace Phone
     } // namespace StatusBar

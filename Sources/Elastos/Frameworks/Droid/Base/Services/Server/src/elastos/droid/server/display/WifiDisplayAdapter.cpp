@@ -425,21 +425,22 @@ WifiDisplayAdapter::RegisterRunnable::RegisterRunnable(
 
 ECode WifiDisplayAdapter::RegisterRunnable::Run()
 {
-    AutoPtr<IContext> context = mHost->GetContext();
-    mHost->mDisplayController = new WifiDisplayController(
-        context, mHost->GetHandler(), mHost->mWifiDisplayListener);
+    // assert(0 && "TODO");
+    // AutoPtr<IContext> context = mHost->GetContext();
+    // mHost->mDisplayController = new WifiDisplayController(
+    //     context, mHost->GetHandler(), mHost->mWifiDisplayListener);
 
-    AutoPtr<IUserHandle> all;
-    AutoPtr<IUserHandleHelper> helper;
-    CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
-    helper->GetALL((IUserHandle**)&all);
+    // AutoPtr<IUserHandle> all;
+    // AutoPtr<IUserHandleHelper> helper;
+    // CUserHandleHelper::AcquireSingleton((IUserHandleHelper**)&helper);
+    // helper->GetALL((IUserHandle**)&all);
 
-    String nullStr;
-    AutoPtr<IIntent> stickyIntent;
-    AutoPtr<IIntentFilter> intentFilter;
-    CIntentFilter::New(ACTION_DISCONNECT, (IIntentFilter**)&intentFilter);
-    context->RegisterReceiverAsUser(mHost->mBroadcastReceiver, all,
-        intentFilter, nullStr, mHost->mHandler, (IIntent**)&stickyIntent);
+    // String nullStr;
+    // AutoPtr<IIntent> stickyIntent;
+    // AutoPtr<IIntentFilter> intentFilter;
+    // CIntentFilter::New(ACTION_DISCONNECT, (IIntentFilter**)&intentFilter);
+    // context->RegisterReceiverAsUser(mHost->mBroadcastReceiver, all,
+    //     intentFilter, nullStr, mHost->mHandler, (IIntent**)&stickyIntent);
     return NOERROR;
 }
 

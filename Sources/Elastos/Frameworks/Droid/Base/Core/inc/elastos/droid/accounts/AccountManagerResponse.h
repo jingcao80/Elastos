@@ -2,31 +2,33 @@
 #ifndef __ELASTOS_DROID_ACCOUNTS_ACCOUNTMANAGERRESPONSE_H__
 #define __ELASTOS_DROID_ACCOUNTS_ACCOUNTMANAGERRESPONSE_H__
 
-#include "Elastos.Droid.Core_server.h"
+#include "_Elastos.Droid.Accounts.h"
+#include <elastos/core/Object.h>
 
 using Elastos::Droid::Os::IBundle;
+using Elastos::Core::Object;
 
 namespace Elastos {
 namespace Droid {
 namespace Accounts {
 
 class AccountManagerResponse
-    : public ElRefBase
+    : public Object
     , public IParcelable
 {
 public:
+    CAR_INTERFACE_DECL()
+
     AccountManagerResponse(
         /* [in] */ IAccountManagerResponse* response);
 
     AccountManagerResponse(
         /* [in] */ IParcel* parcel);
 
-    CAR_INTERFACE_DECL();
-
     CARAPI OnResult(
         /* [in] */ IBundle* result);
 
-    CARAPI onError(
+    CARAPI OnError(
         /* [in] */ Int32 errorCode,
         /* [in] */ const String& errorMessage);
 

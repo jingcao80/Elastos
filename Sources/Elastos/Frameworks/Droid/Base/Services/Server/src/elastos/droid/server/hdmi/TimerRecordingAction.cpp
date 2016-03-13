@@ -1,12 +1,13 @@
 
 #include "elastos/droid/server/hdmi/TimerRecordingAction.h"
 #include <elastos/utility/Arrays.h>
+#include "elastos/droid/server/hdmi/HdmiControlService.h"
 
-// import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION;
-// import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE;
-// import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_ANALOGUE;
-// import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_DIGITAL;
-// import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL;
+// import static android.hardware.hdmi.IHdmiControlManager::TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION;
+// import static android.hardware.hdmi.IHdmiControlManager::TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE;
+// import static android.hardware.hdmi.IHdmiControlManager::TIMER_RECORDING_TYPE_ANALOGUE;
+// import static android.hardware.hdmi.IHdmiControlManager::TIMER_RECORDING_TYPE_DIGITAL;
+// import static android.hardware.hdmi.IHdmiControlManager::TIMER_RECORDING_TYPE_EXTERNAL;
 
 using Elastos::Droid::Utility::ISlog;
 
@@ -16,6 +17,8 @@ namespace Elastos {
 namespace Droid {
 namespace Server {
 namespace Hdmi {
+
+CAR_INTERFACE_IMPL(TimerRecordingAction, HdmiCecFeatureAction, ITimerRecordingAction)
 
 const String TimerRecordingAction::TAG("TimerRecordingAction");
 const Int32 TimerRecordingAction::TIMER_STATUS_TIMEOUT_MS = 120000;
@@ -34,7 +37,7 @@ ECode TimerRecordingAction::constructor(
 {
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        Super(source);
+        super::constructor(source);
         mRecorderAddress = recorderAddress;
         mSourceType = sourceType;
         mRecordSource = recordSource;
@@ -44,10 +47,13 @@ ECode TimerRecordingAction::constructor(
 ECode TimerRecordingAction::Start(
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         SendTimerMessage();
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
 #endif
 }
 
@@ -58,31 +64,41 @@ ECode TimerRecordingAction::SendTimerMessage()
         HdmiCecMessage message = NULL;
         switch (mSourceType) {
             case TIMER_RECORDING_TYPE_DIGITAL:
-                message = HdmiCecMessageBuilder->BuildSetDigitalTimer(GetSourceAddress(),
+                Int32 srcAddr;
+                GetSourceAddress(&srcAddr);
+                message = HdmiCecMessageBuilder->BuildSetDigitalTimer(srcAddr,
                         mRecorderAddress, mRecordSource);
                 break;
             case TIMER_RECORDING_TYPE_ANALOGUE:
-                message = HdmiCecMessageBuilder->BuildSetAnalogueTimer(GetSourceAddress(),
+                Int32 srcAddr;
+                GetSourceAddress(&srcAddr);
+                message = HdmiCecMessageBuilder->BuildSetAnalogueTimer(srcAddr,
                         mRecorderAddress, mRecordSource);
                 break;
             case TIMER_RECORDING_TYPE_EXTERNAL:
-                message = HdmiCecMessageBuilder->BuildSetExternalTimer(GetSourceAddress(),
+                Int32 srcAddr;
+                GetSourceAddress(&srcAddr);
+                message = HdmiCecMessageBuilder->BuildSetExternalTimer(srcAddr,
                         mRecorderAddress, mRecordSource);
                 break;
             default:
-                Tv()->AnnounceTimerRecordingResult(
+                AutoPtr<IHdmiCecLocalDeviceTv> tv;
+                Tv((IHdmiCecLocalDeviceTv**)&tv);
+                tv->AnnounceTimerRecordingResult(
                         TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE);
                 Finish();
-                return;
+                return NOERROR;
         }
         SendCommand(message, new SendMessageCallback() {
             //@Override
             CARAPI OnSendCompleted(Int32 error) {
                 if (error != Constants::SEND_RESULT_SUCCESS) {
-                    Tv()->AnnounceTimerRecordingResult(
+                    AutoPtr<IHdmiCecLocalDeviceTv> tv;
+                    Tv((IHdmiCecLocalDeviceTv**)&tv);
+                    tv->AnnounceTimerRecordingResult(
                             TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
                     Finish();
-                    return;
+                    return NOERROR;
                 }
                 mState = STATE_WAITING_FOR_TIMER_STATUS;
                 AddTimer(mState, TIMER_STATUS_TIMEOUT_MS);
@@ -95,23 +111,32 @@ ECode TimerRecordingAction::ProcessCommand(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
         if (mState != STATE_WAITING_FOR_TIMER_STATUS) {
-            return FALSE;
+            *result = FALSE;
+            return NOERROR;
         }
 
-        if (cmd->GetSource() != mRecorderAddress) {
-            return FALSE;
+        Int32 srcAddr;
+        cmd->GetSource(&srcAddr);
+        if (srcAddr != mRecorderAddress) {
+            *result = FALSE;
+            return NOERROR;
         }
 
-        switch (cmd->GetOpcode()) {
+        Int32 opcode;
+        cmd->GetOpcode(&opcode);
+        switch (opcode) {
             case Constants::MESSAGE_TIMER_STATUS:
                 return HandleTimerStatus(cmd);
             case Constants::MESSAGE_FEATURE_ABORT:
                 return HandleFeatureAbort(cmd);
         }
-        return FALSE;
+        *result = FALSE;
+        return NOERROR;
 #endif
 }
 
@@ -119,12 +144,17 @@ ECode TimerRecordingAction::HandleTimerStatus(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        Byte[] timerStatusData = cmd->GetParams();
+        AutoPtr<ArrayOf<Byte> > timerStatusData;
+        cmd->GetParams((ArrayOf<Byte>**)&timerStatusData);
         // [Timer Status Data] should be one or three bytes.
-        if (timerStatusData.length == 1 || timerStatusData.length == 3) {
-            Tv()->AnnounceTimerRecordingResult(BytesToInt(timerStatusData));
+        if (timerStatusData->GetLength() == 1 || timerStatusData->GetLength() == 3) {
+            AutoPtr<IHdmiCecLocalDeviceTv> tv;
+            Tv((IHdmiCecLocalDeviceTv**)&tv);
+            tv->AnnounceTimerRecordingResult(BytesToInt32(timerStatusData));
             Slogger::I(TAG, "Received [Timer Status Data]:" + Arrays->ToString(timerStatusData));
         } else {
             Slogger::W(TAG, "Invalid [Timer Status Data]:" + Arrays->ToString(timerStatusData));
@@ -132,7 +162,8 @@ ECode TimerRecordingAction::HandleTimerStatus(
 
         // Unlike one touch record, finish timer record when <Timer Status> is received.
         Finish();
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
 #endif
 }
 
@@ -140,39 +171,49 @@ ECode TimerRecordingAction::HandleFeatureAbort(
     /* [in] */ IHdmiCecMessage* cmd,
     /* [out] */ Boolean* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        Byte[] params = cmd->GetParams();
-        Int32 messageType = params[0] & 0xFF;
+        AutoPtr<ArrayOf<Byte> > params;
+        cmd->GetParams((ArrayOf<Byte>**)&params);
+        Int32 messageType = (*params)[0] & 0xFF;
         switch (messageType) {
             case Constants::MESSAGE_SET_DIGITAL_TIMER: // fall through
             case Constants::MESSAGE_SET_ANALOG_TIMER: // fall through
             case Constants::MESSAGE_SET_EXTERNAL_TIMER: // fall through
                 break;
             default:
-                return FALSE;
+                *result = FALSE;
+                return NOERROR;
         }
-        Int32 reason = params[1] & 0xFF;
+        Int32 reason = (*params)[1] & 0xFF;
         Slogger::I(TAG, "[Feature Abort] for " + messageType + " reason:" + reason);
-        Tv()->AnnounceTimerRecordingResult(TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        tv->AnnounceTimerRecordingResult(TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
         Finish();
-        return TRUE;
+        *result = TRUE;
+        return NOERROR;
 #endif
 }
 
-ECode TimerRecordingAction::BytesToInt(
+ECode TimerRecordingAction::BytesToInt32(
     /* [in] */ ArrayOf<Byte>* data,
     /* [out] */ Int32* result)
 {
+    VALIDATE_NOT_NULL(result)
+
     return E_NOT_IMPLEMENTED;
 #if 0 // TODO: Translate codes below
-        if (data.length > 4) {
-            throw new IllegalArgumentException("Invalid data size:" + Arrays->ToString(data));
+        if (data->GetLength() > 4) {
+            Logger::E(TAG, "Invalid data size:" + Arrays->ToString(data));
+            return E_ILLEGAL_ARGUMENT_EXCEPTION;
         }
         Int32 result = 0;
-        for (Int32 i = 0; i < data.length; ++i) {
+        for (Int32 i = 0; i < data->GetLength(); ++i) {
             Int32 shift = (3 - i) * 8;
-            result |= ((data[i] & 0xFF) << shift);
+            result |= (((*data)[i] & 0xFF) << shift);
         }
         return result;
 #endif
@@ -185,10 +226,12 @@ ECode TimerRecordingAction::HandleTimerEvent(
 #if 0 // TODO: Translate codes below
         if (mState != state) {
             Slogger::W(TAG, "Timeout in invalid state:[Expected:" + mState + ", Actual:" + state + "]");
-            return;
+            return NOERROR;
         }
 
-        Tv()->AnnounceTimerRecordingResult(TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
+        AutoPtr<IHdmiCecLocalDeviceTv> tv;
+        Tv((IHdmiCecLocalDeviceTv**)&tv);
+        tv->AnnounceTimerRecordingResult(TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION);
         Finish();
 #endif
 }

@@ -60,6 +60,21 @@ ECode PreferenceFrameLayout::LayoutParams::SetGravity(
     return FrameLayout::LayoutParams::SetGravity(gravity);
 }
 
+ECode PreferenceFrameLayout::LayoutParams::SetRemoveBorders(
+    /* [in] */ Boolean res)
+{
+    mRemoveBorders = res;
+    return NOERROR;
+}
+
+ECode PreferenceFrameLayout::LayoutParams::GetRemoveBorders(
+    /* [out] */ Boolean* res)
+{
+    VALIDATE_NOT_NULL(res);
+    *res = mRemoveBorders;
+    return NOERROR;
+}
+
 //====================================================
 // PreferenceFrameLayout
 //====================================================

@@ -200,7 +200,6 @@ VectorDrawable::VectorDrawableState::VectorDrawableState()
 ECode VectorDrawable::VectorDrawableState::NewDrawable(
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
     return CVectorDrawable::New(this, NULL, NULL, drawable);
 }
 
@@ -208,7 +207,6 @@ ECode VectorDrawable::VectorDrawableState::NewDrawable(
     /* [in] */ IResources* res,
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
     return CVectorDrawable::New(this, res, NULL, drawable);
 }
 
@@ -217,7 +215,6 @@ ECode VectorDrawable::VectorDrawableState::NewDrawable(
     /* [in] */ IResourcesTheme* theme,
     /* [out] */ IDrawable** drawable)
 {
-    VALIDATE_NOT_NULL(drawable);
     return CVectorDrawable::New(this, res, theme, drawable);
 }
 
@@ -1152,17 +1149,13 @@ ECode VectorDrawable::constructor(
     return NOERROR;
 }
 
-ECode VectorDrawable::Mutate(
-    /* [out] */ IDrawable** drawable)
+ECode VectorDrawable::Mutate()
 {
-    VALIDATE_NOT_NULL(drawable);
-    AutoPtr<IDrawable> dr;
-    if (!mMutated && (Drawable::Mutate((IDrawable**)&dr), dr.Get()) == this) {
+    if (!mMutated) {
         mVectorState = new VectorDrawableState(mVectorState);
         mMutated = TRUE;
     }
-    *drawable = THIS_PROBE(IDrawable);
-    REFCOUNT_ADD(*drawable);
+
     return NOERROR;
 }
 

@@ -2,17 +2,21 @@
 #ifndef __ELASTOS_DROID_TELEPHONY_CELLSIGNALSTRENGTH_H__
 #define __ELASTOS_DROID_TELEPHONY_CELLSIGNALSTRENGTH_H__
 
-#include "Elastos.Droid.Core_server.h"
+#include "Elastos.Droid.Telephony.h"
+#include "elastos/droid/ext/frameworkext.h"
+#include <elastos/core/Object.h>
 
 namespace Elastos {
 namespace Droid {
 namespace Telephony {
 
 class CellSignalStrength
+    : public Object
+    , public ICellSignalStrength
 {
 public:
-    virtual CARAPI_(PInterface) Probe(
-            /* [in]  */ REIID riid) = 0;
+
+    CAR_INTERFACE_DECL()
 
     CARAPI SetDefaultValues();
 

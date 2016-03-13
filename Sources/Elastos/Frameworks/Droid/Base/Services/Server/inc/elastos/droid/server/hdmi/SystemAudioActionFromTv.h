@@ -19,8 +19,11 @@ namespace Hdmi {
  */
 class SystemAudioActionFromTv
     : public SystemAudioAction
+    , public ISystemAudioActionFromTv
 {
 public:
+    CAR_INTERFACE_DECL()
+
     /**
      * Constructor
      *

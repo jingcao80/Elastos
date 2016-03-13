@@ -6,6 +6,7 @@ module
     using interface Elastos.Droid.Os.ILooper;
     using interface Elastos.Droid.View.IView;
     using interface Elastos.Droid.View.IViewGroup;
+    using interface Elastos.Core.IBoolean;
     using interface Elastos.Core.ICharSequence;
     using interface Elastos.Core.IStringBuilder;
     using interface Elastos.Utility.ICollection;
@@ -28,11 +29,11 @@ module
 
     [local]
     interface IQSTileDetailAdapter {
-        getTitle(
+        GetTitle(
             [out] Int32* title);
 
         GetToggleState(
-            [out] Boolean* state);
+            [out] IBoolean** state);
 
         CreateDetailView(
             [in] IContext* ctx,
@@ -44,7 +45,7 @@ module
             [out] IIntent** intent);
 
         SetToggleState(
-            [in] Boolean state);
+            [in] IBoolean* state);
     }
 
     /*

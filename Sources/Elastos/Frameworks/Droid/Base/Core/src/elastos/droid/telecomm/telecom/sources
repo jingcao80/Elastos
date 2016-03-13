@@ -1,0 +1,26 @@
+
+TARGET_NAME= telecom
+TARGET_TYPE= lib
+
+C_DEFINES += -DDROID_CORE
+
+include $(MAKEDIR)/../../../../../../../sources.inc
+
+INCLUDES += ../../
+INCLUDES += $(MAKEDIR)/../../../../../inc/
+
+
+C_DEFINES += -DDROID_CORE
+
+SOURCES = AudioState.cpp
+SOURCES += Call.cpp
+SOURCES += CCallState.cpp
+SOURCES += CameraCapabilities.cpp
+SOURCES += Conference.cpp
+SOURCES += Connection.cpp
+SOURCES += ConnectionRequest.cpp
+SOURCES += ConnectionService.cpp
+SOURCES += CConnectionServiceBinder.cpp
+SOURCES += CRemoteServiceCallback.cpp
+SOURCES += CVideoProviderBinder.cpp
+SOURCES += ConnectionServiceAdapter.cpp

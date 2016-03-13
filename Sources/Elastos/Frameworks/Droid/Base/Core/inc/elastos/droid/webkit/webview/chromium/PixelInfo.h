@@ -9,10 +9,11 @@
 #include <cstdlib>
 #include <utils/Log.h>
 #include "elastos/droid/webkit/webview/chromium/GraphicBufferImpl.h"
-#include "elastos/droid/graphics/GraphicsNative.h"
+#include <Elastos.Droid.Graphics.h>
+//#include "elastos/droid/graphics/GraphicsNative.h"
 #include "SkCanvasStateUtils.h"
 #include "SkGraphics.h"
-#include "SkPicture.h"
+//TODO: compile error; #include "SkPicture.h"
 
 namespace Elastos {
 namespace Droid {

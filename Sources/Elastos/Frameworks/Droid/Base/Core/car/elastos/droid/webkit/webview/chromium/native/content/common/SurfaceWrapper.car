@@ -1,0 +1,33 @@
+
+module
+{
+    using interface Elastos.Droid.View.ISurface;
+
+    namespace Elastos {
+    namespace Droid {
+    namespace Webkit {
+    namespace Webview {
+    namespace Chromium {
+    namespace Content {
+    namespace Common {
+
+    /**
+     * A wrapper for marshalling a Surface without self-destruction.
+     */
+    /**
+     * @Involve
+     * interface IParcelable
+     */
+    interface ISurfaceWrapper {
+        GetSurface(
+            [out] ISurface** result);
+    }
+
+    } // namespace Common
+    } // namespace Content
+    } // namespace Chromium
+    } // namespace Webview
+    } // namespace Webkit
+    } // namespace Droid
+    } // namespace Elastos
+}

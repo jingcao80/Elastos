@@ -109,6 +109,8 @@ public:
 
     ~CInputManager();
 
+    constructor();
+
     /**
      * Gets information about the input device with the specified id.
      * @param id The device id.
@@ -409,8 +411,6 @@ public:
         /* [out] */ IVibrator** vibrator);
 
 private:
-    CInputManager(
-        /* [in] */ IIInputManager* im);
 
     static Boolean ContainsDeviceId(
         /* [in] */ ArrayOf<Int32>* deviceIdAndGeneration,

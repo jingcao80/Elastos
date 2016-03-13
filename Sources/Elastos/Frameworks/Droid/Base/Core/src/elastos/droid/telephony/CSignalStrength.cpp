@@ -1,8 +1,7 @@
 
-#include "CSignalStrength.h"
-#include <elastos/utility/logging/Slogger.h>
+#include "elastos/droid/telephony/CSignalStrength.h"
 #include <elastos/core/StringBuilder.h>
-#include "elastos/droid/ext/frameworkdef.h"
+#include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Core::StringBuilder;
 using Elastos::Utility::Logging::Slogger;
@@ -21,24 +20,37 @@ static AutoPtr< ArrayOf<String> > InitSIGNAL_STRENGTH_NAMES() {
     return ssnames;
 }
 
-const String CSignalStrength::LOG_TAG("CSignalStrength");
+const String CSignalStrength::TAG("CSignalStrength");
+const Boolean CSignalStrength::DBG;
 const AutoPtr< ArrayOf<String> > CSignalStrength::SIGNAL_STRENGTH_NAMES = InitSIGNAL_STRENGTH_NAMES();
+
+CAR_INTERFACE_IMPL_2(CSignalStrength, Object, ISignalStrength, IParcelable)
+
+CAR_OBJECT_IMPL(CSignalStrength)
+
+CSignalStrength::CSignalStrength()
+    : mGsmSignalStrength(99)
+    , mGsmBitErrorRate(-1)
+    , mCdmaDbm(-1)
+    , mCdmaEcio(-1)
+    , mEvdoDbm(-1)
+    , mEvdoEcio(-1)
+    , mEvdoSnr(-1)
+    , mLteSignalStrength(99)
+    , mLteRsrp(ISignalStrength::INVALID)
+    , mLteRsrq(ISignalStrength::INVALID)
+    , mLteRssnr(ISignalStrength::INVALID)
+    , mLteCqi(ISignalStrength::INVALID)
+    , mIsGsm(FALSE)
+{
+}
+
+CSignalStrength::~CSignalStrength()
+{
+}
 
 ECode CSignalStrength::constructor()
 {
-    mGsmSignalStrength = 99;
-    mGsmBitErrorRate = -1;
-    mCdmaDbm = -1;
-    mCdmaEcio = -1;
-    mEvdoDbm = -1;
-    mEvdoEcio = -1;
-    mEvdoSnr = -1;
-    mLteSignalStrength = 99;
-    mLteRsrp = ISignalStrength::INVALID;
-    mLteRsrq = ISignalStrength::INVALID;
-    mLteRssnr = ISignalStrength::INVALID;
-    mLteCqi = ISignalStrength::INVALID;
-    mIsGsm = TRUE;
     return NOERROR;
 }
 
@@ -192,7 +204,7 @@ ECode CSignalStrength::Initialize(
     if (DBG) {
         String str;
         ToString(&str);
-        Slogger::I(LOG_TAG, "initialize: %s", str.string());
+        Slogger::I(TAG, "initialize: %s", str.string());
     }
 
     return NOERROR;
@@ -200,7 +212,7 @@ ECode CSignalStrength::Initialize(
 
 ECode CSignalStrength::ValidateInput()
 {
-    if (DBG) Slogger::I(LOG_TAG, "Signal before validate=+ this");
+    if (DBG) Slogger::I(TAG, "Signal before validate=+ this");
     // TS 27.007 8.5
     mGsmSignalStrength = mGsmSignalStrength >= 0 ? mGsmSignalStrength : 99;
     // BER no change;
@@ -209,7 +221,7 @@ ECode CSignalStrength::ValidateInput()
     mCdmaEcio = (mCdmaEcio > 0) ? -mCdmaEcio : -160;
 
     mEvdoDbm = (mEvdoDbm > 0) ? -mEvdoDbm : -120;
-    mEvdoEcio = (mEvdoEcio > 0) ? -mEvdoEcio : -1;
+    mEvdoEcio = (mEvdoEcio >= 0) ? -mEvdoEcio : -1;
     mEvdoSnr = ((mEvdoSnr > 0) && (mEvdoSnr <= 8)) ? mEvdoSnr : -1;
 
     // TS 36.214 Physical Layer Section 5.1.3, TS 36.331 RRC
@@ -219,7 +231,7 @@ ECode CSignalStrength::ValidateInput()
     mLteRssnr = ((mLteRssnr >= -200) && (mLteRssnr <= 300)) ? mLteRssnr
             : ISignalStrength::INVALID;
     // Cqi no change
-    if (DBG) Slogger::I(LOG_TAG, "Signal after validate= + this");
+    if (DBG) Slogger::I(TAG, "Signal after validate= + this");
 
     return NOERROR;
 }
@@ -328,15 +340,16 @@ ECode CSignalStrength::GetLteCqi(
 }
 
 ECode CSignalStrength::GetLevel(
-    /* [out] */ Int32* level)
+    /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(level);
+    VALIDATE_NOT_NULL(result);
 
+    Int32 level;
     if (mIsGsm) {
-        //level = getLteLevel();
-        //if (level == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
-            GetGsmLevel(level);
-        //}
+        GetLteLevel(&level);
+        if (level == ISignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
+            GetGsmLevel(&level);
+        }
     } else {
         Int32 cdmaLevel;
         GetCdmaLevel(&cdmaLevel);
@@ -344,16 +357,17 @@ ECode CSignalStrength::GetLevel(
         GetEvdoLevel(&evdoLevel);
         if (evdoLevel == ISignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
             /* We don't know evdo, use cdma */
-            *level = cdmaLevel;
+            level = cdmaLevel;
         } else if (cdmaLevel == ISignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
             /* We don't know cdma, use evdo */
-            *level = evdoLevel;
+            level = evdoLevel;
         } else {
             /* We know both, use the lowest level */
-            *level = cdmaLevel < evdoLevel ? cdmaLevel : evdoLevel;
+            level = cdmaLevel < evdoLevel ? cdmaLevel : evdoLevel;
         }
     }
-    if (DBG) Slogger::I(LOG_TAG, "getLevel=%d", *level);
+    if (DBG) Slogger::I(TAG, "getLevel=%d", level);
+    *result = level;
     return NOERROR;
 }
 
@@ -384,21 +398,20 @@ ECode CSignalStrength::GetAsuLevel(
             *asuLevel = cdmaAsuLevel < evdoAsuLevel ? cdmaAsuLevel : evdoAsuLevel;
         }
     }
-    if (DBG) Slogger::I(LOG_TAG, "getAsuLevel=%d", *asuLevel);
+    if (DBG) Slogger::I(TAG, "getAsuLevel=%d", *asuLevel);
     return NOERROR;
 }
 
 ECode CSignalStrength::GetDbm(
-    /* [out] */ Int32* dbm)
+    /* [out] */ Int32* result)
 {
-    VALIDATE_NOT_NULL(dbm);
-    Int32 lteLevel;
+    VALIDATE_NOT_NULL(result);
+    Int32 dBm;
     Boolean isGsm;
     if(IsGsm(&isGsm), isGsm) {
-        if ((GetLteLevel(&lteLevel), lteLevel) == ISignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
-            GetGsmDbm(dbm);
-        } else {
-            GetLteDbm(dbm);
+        GetLteDbm(&dBm);
+        if (dBm == INVALID) {
+            GetGsmDbm(&dBm);
         }
     } else {
         Int32 cdmaDbm;
@@ -406,11 +419,12 @@ ECode CSignalStrength::GetDbm(
         Int32 evdoDbm;
         GetEvdoDbm(&evdoDbm);
 
-        *dbm = ((evdoDbm == -120) ? cdmaDbm : ((cdmaDbm == -120) ? evdoDbm
+        dBm = ((evdoDbm == -120) ? cdmaDbm : ((cdmaDbm == -120) ? evdoDbm
                 : (cdmaDbm < evdoDbm ? cdmaDbm : evdoDbm)));
         return NOERROR;
     }
-    if (DBG) Slogger::I(LOG_TAG, "getDbm=%d", *dbm);
+    if (DBG) Slogger::I(TAG, "getDbm=%d", dBm);
+    *result = dBm;
     return NOERROR;
 }
 
@@ -428,7 +442,7 @@ ECode CSignalStrength::GetGsmDbm(
     } else {
         dBm = -1;
     }
-    if (DBG) Slogger::I(LOG_TAG, "getGsmDbm=%d", dBm);
+    if (DBG) Slogger::I(TAG, "getGsmDbm=%d", dBm);
     *gsmDbm = dBm;
     return NOERROR;
 }
@@ -450,7 +464,7 @@ ECode CSignalStrength::GetGsmLevel(
     else if (asu >= 8)  level = ISignalStrength::SIGNAL_STRENGTH_GOOD;
     else if (asu >= 5)  level = ISignalStrength::SIGNAL_STRENGTH_MODERATE;
     else level = ISignalStrength::SIGNAL_STRENGTH_POOR;
-    if (DBG) Slogger::I(LOG_TAG, "getGsmLevel=%d", level);
+    if (DBG) Slogger::I(TAG, "getGsmLevel=%d", level);
     *gsmLevel = level;
     return NOERROR;
 }
@@ -466,7 +480,7 @@ ECode CSignalStrength::GetGsmAsuLevel(
     // asu = 99 is a special case, where the signal strength is unknown.
     Int32 level;
     GetGsmSignalStrength(&level);
-    if (DBG) Slogger::I(LOG_TAG, "getGsmAsuLevel=%d", level);
+    if (DBG) Slogger::I(TAG, "getGsmAsuLevel=%d", level);
     *gsmAsuLevel = level;
 
     return NOERROR;
@@ -497,7 +511,7 @@ ECode CSignalStrength::GetCdmaLevel(
     else levelEcio = ISignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
 
     Int32 level = (levelDbm < levelEcio) ? levelDbm : levelEcio;
-    if (DBG) Slogger::I(LOG_TAG, "getCdmaLevel=%d", level);
+    if (DBG) Slogger::I(TAG, "getCdmaLevel=%d", level);
     *cdmaLevel = level;
     return NOERROR;
 }
@@ -529,7 +543,7 @@ ECode CSignalStrength::GetCdmaAsuLevel(
     else ecioAsuLevel = 99;
 
     Int32 level = (*cdmaAsuLevel < ecioAsuLevel) ? *cdmaAsuLevel : ecioAsuLevel;
-    if (DBG) Slogger::I(LOG_TAG, "getCdmaAsuLevel=%d", level);
+    if (DBG) Slogger::I(TAG, "getCdmaAsuLevel=%d", level);
     return NOERROR;
 }
 
@@ -558,7 +572,7 @@ ECode CSignalStrength::GetEvdoLevel(
     else levelEvdoSnr = ISignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
 
     Int32 level = (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
-    if (DBG) Slogger::I(LOG_TAG, "getEvdoLevel=%d", level);
+    if (DBG) Slogger::I(TAG, "getEvdoLevel=%d", level);
     *evdoLevel = level;
     return NOERROR;
 }
@@ -590,7 +604,7 @@ ECode CSignalStrength::GetEvdoAsuLevel(
     else levelEvdoSnr = 99;
 
     Int32 level = (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
-    if (DBG) Slogger::I(LOG_TAG, "getEvdoAsuLevel=%d", level);
+    if (DBG) Slogger::I(TAG, "getEvdoAsuLevel=%d", level);
     *evdoAsuLevel = level;
     return NOERROR;
 }
@@ -636,7 +650,7 @@ ECode CSignalStrength::GetLteLevel(
     else if (mLteRssnr >= -200)
         snrIconLevel = ISignalStrength::SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
 
-    if (DBG) Slogger::I(LOG_TAG, "getLTELevel - rsrp:%d snr:%d rsrpIconLevel:%d snrIconLevel:%d",mLteRsrp, mLteRssnr, rsrpIconLevel, snrIconLevel);
+    if (DBG) Slogger::I(TAG, "getLTELevel - rsrp:%d snr:%d rsrpIconLevel:%d snrIconLevel:%d",mLteRsrp, mLteRssnr, rsrpIconLevel, snrIconLevel);
 
     /* Choose a measurement type to use for notification */
     if (snrIconLevel != -1 && rsrpIconLevel != -1) {
@@ -665,7 +679,7 @@ ECode CSignalStrength::GetLteLevel(
     else if (mLteSignalStrength >= 8) rssiIconLevel = ISignalStrength::SIGNAL_STRENGTH_GOOD;
     else if (mLteSignalStrength >= 5) rssiIconLevel = ISignalStrength::SIGNAL_STRENGTH_MODERATE;
     else if (mLteSignalStrength >= 0) rssiIconLevel = ISignalStrength::SIGNAL_STRENGTH_POOR;
-    if (DBG) Slogger::I(LOG_TAG, "getLTELevel - rssi:%d rssiIconLevel:%d", mLteSignalStrength, rssiIconLevel);
+    if (DBG) Slogger::I(TAG, "getLTELevel - rssi:%d rssiIconLevel:%d", mLteSignalStrength, rssiIconLevel);
     *lteLevel = rssiIconLevel;
     return NOERROR;
 }
@@ -692,7 +706,7 @@ ECode CSignalStrength::GetLteAsuLevel(
      */
     if (lteDbm == ISignalStrength::INVALID) *lteAsuLevel = 255;
     else *lteAsuLevel = lteDbm + 140;
-    if (DBG) Slogger::I(LOG_TAG, "Lte Asu level:%d" , *lteAsuLevel);
+    if (DBG) Slogger::I(TAG, "Lte Asu level:%d" , *lteAsuLevel);
     return NOERROR;
 }
 

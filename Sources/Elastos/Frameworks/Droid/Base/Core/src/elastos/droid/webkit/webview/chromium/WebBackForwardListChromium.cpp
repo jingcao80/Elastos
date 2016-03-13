@@ -30,7 +30,6 @@ WebBackForwardListChromium::WebBackForwardListChromium(
     //             new WebHistoryItemChromium(nav_history.getEntryAtIndex(i)));
     // }
 
-    assert(0);
     mCurrentIndex = nav_history->GetCurrentEntryIndex();
     CArrayList::New(nav_history->GetEntryCount(), (IList**)&mHistroryItemList);
     for (Int32 i = 0; i < nav_history->GetEntryCount(); ++i) {
@@ -135,7 +134,6 @@ ECode WebBackForwardListChromium::Clone(
     // }
     // return new WebBackForwardListChromium(list, mCurrentIndex);
 
-    assert(0);
     Int32 size = 0;
     GetSize(&size);
     AutoPtr<IList> list;

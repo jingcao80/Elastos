@@ -10,7 +10,7 @@ module
     namespace Telephony {
 
     [local]
-    interface IOnQueryCompleteListener {
+    interface ICallerInfoAsyncQueryOnQueryCompleteListener {
         OnQueryComplete(
             [in] Int32 token,
             [in] IInterface* cookie,
@@ -24,7 +24,7 @@ module
          */
         AddQueryListener(
             [in] Int32 token,
-            [in] IOnQueryCompleteListener* listener,
+            [in] ICallerInfoAsyncQueryOnQueryCompleteListener* listener,
             [in] IInterface* cookie);
     }
 
@@ -37,7 +37,7 @@ module
             [in] Int32 token,
             [in] IContext* ctx,
             [in] IUri* contactRef,
-            [in] IOnQueryCompleteListener* listener,
+            [in] ICallerInfoAsyncQueryOnQueryCompleteListener* listener,
             [in] IInterface* cookie,
             [out] ICallerInfoAsyncQuery** cia);
 
@@ -56,7 +56,7 @@ module
             [in] Int32 token,
             [in] IContext* ctx,
             [in] String number,
-            [in] IOnQueryCompleteListener* listener,
+            [in] ICallerInfoAsyncQueryOnQueryCompleteListener* listener,
             [in] IInterface* cookie,
             [out] ICallerInfoAsyncQuery** cia);
 
@@ -75,7 +75,7 @@ module
             [in] Int32 token,
             [in] IContext* ctx,
             [in] String number,
-            [in] IOnQueryCompleteListener* listener,
+            [in] ICallerInfoAsyncQueryOnQueryCompleteListener* listener,
             [in] IInterface* cookie,
             [in] Int64 subId,
             [out] ICallerInfoAsyncQuery** cia);
