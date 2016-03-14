@@ -487,10 +487,12 @@ ECode KeyguardViewMediator::MyRunnable::Run()
     // Don't actually hide the Keyguard at the moment, wait for window
     // manager until it tells us it's safe to do so with
     // startKeyguardExitAnimation.
-    Boolean b1, b2;
+    Boolean b1, b2, b3;
     mHost->mStatusBarKeyguardViewManager->ShouldDisableWindowAnimationsForUnlock(&b1);
     mHost->mStatusBarKeyguardViewManager->IsGoingToNotificationShade(&b2);
-    ECode ec = mHost->mWM->KeyguardGoingAway(b1, b2);
+    // assert(0 && "TODO");
+    // mStatusBarKeyguardViewManager.isKeyguardShowingMedia()
+    ECode ec = mHost->mWM->KeyguardGoingAway(b1, b2, b3);
     if (FAILED(ec)) {
         Logger::E(TAG, "Error while calling WindowManager%08x", ec);
         return E_REMOTE_EXCEPTION;
