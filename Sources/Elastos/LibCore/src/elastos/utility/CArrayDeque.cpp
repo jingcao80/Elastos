@@ -451,7 +451,7 @@ ECode CArrayDeque::Add(
 {
     VALIDATE_NOT_NULL(value)
 
-    AddLast(e);
+    FAIL_RETURN(AddLast(e));
     *value = TRUE;
     return NOERROR;
 }

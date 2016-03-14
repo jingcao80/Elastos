@@ -1889,18 +1889,20 @@ public:
         /* [in] */ Boolean ascending,
         /* [in] */ Relation src);
 
-    CARAPI_(AutoPtr<IInterface>) PutInternal(
+    CARAPI PutInternal(
         /* [in] */ IInterface* key,
-        /* [in] */ IInterface* value);
+        /* [in] */ IInterface* value,
+        /* [out] */ IInterface** object);
 
     /**
      * Returns the node at or adjacent to the given key, creating it if requested.
      *
      * @throws ClassCastException if {@code key} and the tree's keys aren't mutually comparable.
      */
-    CARAPI_(AutoPtr<Node>) Find(
+    CARAPI Find(
         /* [in] */ IInterface* key,
-        /* [in] */ Relation relation);
+        /* [in] */ Relation relation,
+        /* [out] */ Node ** node);
 
     // @SuppressWarnings("unchecked") // this method throws ClassCastExceptions!
     CARAPI_(AutoPtr<Node>) FindByObject(

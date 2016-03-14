@@ -77,7 +77,7 @@ ECode CTreeMap::constructor(
         AutoPtr<IInterface> valueface;
         entry->GetKey((IInterface**)&keyface);
         entry->GetValue((IInterface**)&valueface);
-        PutInternal(keyface, valueface);
+        FAIL_RETURN(PutInternal(keyface, valueface, NULL));
     }
     return NOERROR;
 }
@@ -115,7 +115,7 @@ ECode CTreeMap::constructor(
         AutoPtr<IInterface> valueface;
         entry->GetKey((IInterface**)&keyface);
         entry->GetValue((IInterface**)&valueface);
-        PutInternal(keyface, valueface);
+        FAIL_RETURN(PutInternal(keyface, valueface, NULL));
     }
     return NOERROR;
 }
@@ -186,15 +186,7 @@ ECode CTreeMap::Put(
     /* [in] */ PInterface value,
     /* [out] */ PInterface* oldValue)
 {
-    if (oldValue) {
-        AutoPtr<IInterface> res = PutInternal(key, value);
-        *oldValue = res;
-        REFCOUNT_ADD(*oldValue)
-    }
-    else {
-        PutInternal(key, value);
-    }
-    return NOERROR;
+    return PutInternal(key, value, oldValue);
 }
 
 ECode CTreeMap::Put(
@@ -232,33 +224,48 @@ ECode CTreeMap::Remove(
     return Remove(key, (IInterface**)&obj);
 }
 
-AutoPtr<IInterface> CTreeMap::PutInternal(
+ECode CTreeMap::PutInternal(
     /* [in] */ IInterface* key,
-    /* [in] */ IInterface* value)
+    /* [in] */ IInterface* value,
+    /* [out] */ IInterface** object)
 {
-    AutoPtr<Node> created = Find(key, CREATE);
+    AutoPtr<Node> created;
+    FAIL_RETURN(Find(key, CREATE, (Node**)&created));
     AutoPtr<IInterface> result = created->mValue;
     created->mValue = value;
-    return result;
+
+    if (object) {
+        *object = created->Probe(EIID_IInterface);
+        REFCOUNT_ADD(*object)
+    }
+    return NOERROR;
 }
 
-AutoPtr<CTreeMap::Node> CTreeMap::Find(
+ECode CTreeMap::Find(
     /* [in] */ IInterface* key,
-    /* [in] */ Relation relation)
+    /* [in] */ Relation relation,
+    /* [out] */ Node** node)
 {
+    VALIDATE_NOT_NULL(node)
+    *node = NULL;
+
+    if (NULL == key) return E_NULL_POINTER_EXCEPTION;
+
     if (mRoot == NULL) {
         if (mComparator == NATURAL_ORDER && !(IComparable::Probe(key))) {
             // throw new ClassCastException(key.getClass().getName() + " is not Comparable"); // NullPointerException ok
-            return NULL;
+            return E_CLASS_CAST_EXCEPTION;
         }
         if (relation == CREATE) {
             mRoot = new Node(NULL, key);
             mSize = 1;
             mModCount++;
-            return mRoot;
+            *node = mRoot;
+            REFCOUNT_ADD(*node)
+            return NOERROR;
         }
         else {
-            return NULL;
+            return NOERROR;
         }
     }
 
@@ -284,17 +291,23 @@ AutoPtr<CTreeMap::Node> CTreeMap::Find(
         if (comparison == 0) {
             switch (relation) {
                 case LOWER:
-                    return nearest->GetPrev();
+                    *node = nearest->GetPrev();
+                    REFCOUNT_ADD(*node)
+                    return NOERROR;
                 case FLOOR:
                 case EQUAL:
                 case CREATE:
                 case CEILING:
-                    return nearest;
+                    *node = nearest;
+                    REFCOUNT_ADD(*node)
+                    return NOERROR;
                 case HIGHER:
-                    return nearest->GetNext();
+                    *node = nearest->GetNext();
+                    REFCOUNT_ADD(*node)
+                    return NOERROR;
                 default:
                     assert(0);
-                    return NULL;
+                    return NOERROR;
             }
         }
 
@@ -312,56 +325,69 @@ AutoPtr<CTreeMap::Node> CTreeMap::Find(
             switch (relation) {
                 case LOWER:
                 case FLOOR:
-                    return nearest->GetPrev();
+                    *node = nearest->GetPrev();
+                    REFCOUNT_ADD(*node)
+                    return NOERROR;
                 case CEILING:
                 case HIGHER:
-                    return nearest;
+                    *node = nearest;
+                    REFCOUNT_ADD(*node)
+                    return NOERROR;
                 case EQUAL:
-                    return NULL;
+                    return NOERROR;
                 case CREATE: {
                     AutoPtr<Node> created = new Node(nearest, key);
                     nearest->mLeft = created;
                     mSize++;
                     mModCount++;
                     Rebalance(nearest, TRUE);
-                    return created;
+                    *node = created;
+                    REFCOUNT_ADD(*node)
+                    return NOERROR;
                 }
                 default:
                     assert(0);
-                    return NULL;
+                    return NOERROR;
             }
         }
         else { // comparison > 0, nearest.key is lower
             switch (relation) {
                 case LOWER:
                 case FLOOR:
-                    return nearest;
+                    *node = nearest;
+                    REFCOUNT_ADD(*node)
+                    return NOERROR;
                 case CEILING:
                 case HIGHER:
-                    return nearest->GetNext();
+                    *node = nearest->GetNext();
+                    REFCOUNT_ADD(*node)
+                    return NOERROR;
                 case EQUAL:
-                    return NULL;
+                    return NOERROR;
                 case CREATE: {
                     AutoPtr<Node> created = new Node(nearest, key);
                     nearest->mRight = created;
                     mSize++;
                     mModCount++;
                     Rebalance(nearest, TRUE);
-                    return created;
+                    *node = created;
+                    REFCOUNT_ADD(*node)
+                    return NOERROR;
                 }
                 default:
                     assert(0);
-                    return NULL;
+                    return NOERROR;
             }
         }
     }
-    return NULL;
+    return NOERROR;
 }
 
 AutoPtr<CTreeMap::Node> CTreeMap::FindByObject(
     /* [in] */ IInterface* key)
 {
-    AutoPtr<Node> res = Find(key, EQUAL);
+    AutoPtr<Node> res;
+    Find(key, EQUAL, (Node**)&res);
     return res;
 }
 
@@ -700,7 +726,8 @@ ECode CTreeMap::GetLowerEntry(
 {
     VALIDATE_NOT_NULL(outent)
 
-    AutoPtr<Node> res = Find(key, LOWER);
+    AutoPtr<Node> res;
+    FAIL_RETURN(Find(key, LOWER, (Node**)&res));
     AutoPtr<SimpleImmutableEntry> outsim = ImmutableCopy((IMapEntry*)res.Get());
     *outent = (IMapEntry*)outsim.Get();
     REFCOUNT_ADD(*outent)
@@ -713,7 +740,9 @@ ECode CTreeMap::GetLowerKey(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<IMapEntry> entry = Find(key, LOWER);
+    AutoPtr<Node> res;
+    FAIL_RETURN(Find(key, LOWER, (Node**)&res));
+    AutoPtr<IMapEntry> entry = IMapEntry::Probe(res);
     AutoPtr<IInterface> resint;
     *outface = entry != NULL ? (entry->GetKey((IInterface**)&resint), resint) : NULL;
     REFCOUNT_ADD(*outface)
@@ -726,7 +755,8 @@ ECode CTreeMap::GetFloorEntry(
 {
     VALIDATE_NOT_NULL(outent)
 
-    AutoPtr<Node> res = Find(key, FLOOR);
+    AutoPtr<Node> res;
+    FAIL_RETURN(Find(key, FLOOR, (Node**)&res));
     AutoPtr<SimpleImmutableEntry> outsim = ImmutableCopy((IMapEntry*)res.Get());
     *outent = (IMapEntry*)outsim.Get();
     REFCOUNT_ADD(*outent)
@@ -739,7 +769,9 @@ ECode CTreeMap::GetFloorKey(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<IMapEntry> entry = Find(key, FLOOR);
+    AutoPtr<Node> res;
+    FAIL_RETURN(Find(key, FLOOR, (Node**)&res));
+    AutoPtr<IMapEntry> entry = IMapEntry::Probe(res);
     AutoPtr<IInterface> keyface;
     *outface = entry != NULL ? (entry->GetKey((IInterface**)&keyface), keyface) : NULL;
     REFCOUNT_ADD(*outface)
@@ -752,7 +784,8 @@ ECode CTreeMap::GetCeilingEntry(
 {
     VALIDATE_NOT_NULL(outent)
 
-    AutoPtr<Node> res = Find(key, CEILING);
+    AutoPtr<Node> res;
+    FAIL_RETURN(Find(key, CEILING, (Node**)&res));
     AutoPtr<SimpleImmutableEntry> outsim = ImmutableCopy((IMapEntry*)res.Get());
     *outent = (IMapEntry*)outsim.Get();
     REFCOUNT_ADD(*outent)
@@ -765,7 +798,9 @@ ECode CTreeMap::GetCeilingKey(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<IMapEntry> entry = Find(key, CEILING);
+    AutoPtr<Node> res;
+    FAIL_RETURN(Find(key, CEILING, (Node**)&res));
+    AutoPtr<IMapEntry> entry = IMapEntry::Probe(res);
     AutoPtr<IInterface> keyface;
     *outface = entry != NULL ? (entry->GetKey((IInterface**)&keyface), keyface) : NULL;
     REFCOUNT_ADD(*outface)
@@ -778,7 +813,8 @@ ECode CTreeMap::GetHigherEntry(
 {
     VALIDATE_NOT_NULL(outent)
 
-    AutoPtr<Node> res = Find(key, HIGHER);
+    AutoPtr<Node> res;
+    FAIL_RETURN(Find(key, HIGHER, (Node**)&res));
     AutoPtr<SimpleImmutableEntry> outsim = ImmutableCopy((IMapEntry*)res.Get());
     *outent = (IMapEntry*)outsim.Get();
     REFCOUNT_ADD(*outent)
@@ -791,7 +827,9 @@ ECode CTreeMap::GetHigherKey(
 {
     VALIDATE_NOT_NULL(outface)
 
-    AutoPtr<IMapEntry> entry = Find(key, HIGHER);
+    AutoPtr<Node> res;
+    FAIL_RETURN(Find(key, HIGHER, (Node**)&res));
+    AutoPtr<IMapEntry> entry = IMapEntry::Probe(res);
     AutoPtr<IInterface> keyface;
     *outface = entry != NULL ? (entry->GetKey((IInterface**)&keyface), keyface) : NULL;
     REFCOUNT_ADD(*outface)
@@ -2360,15 +2398,7 @@ ECode CTreeMap::BoundedMap::Put(
         return OutOfBounds(key, mFromBound, mToBound);
     }
 
-    if (oldValue) {
-        AutoPtr<IInterface> obj = mHost->PutInternal(key, value);
-        *oldValue = obj;
-        REFCOUNT_ADD(*oldValue)
-    }
-    else {
-        mHost->PutInternal(key, value);
-    }
-    return NOERROR;
+    return mHost->PutInternal(key, value, oldValue);
 }
 
 ECode CTreeMap::BoundedMap::Put(
@@ -2533,10 +2563,10 @@ AutoPtr<CTreeMap::Node> CTreeMap::BoundedMap::Endpoint(
                 node = mHost->mRoot == NULL ? NULL : mHost->mRoot->GetFirst();
                 break;
             case INCLUSIVE:
-                node = mHost->Find(mFrom, CEILING);
+                mHost->Find(mFrom, CEILING, (Node**)&node);
                 break;
             case EXCLUSIVE:
-                node = mHost->Find(mFrom, HIGHER);
+                mHost->Find(mFrom, HIGHER, (Node**)&node);
                 break;
             default:
                 // throw new AssertionError();
@@ -2550,10 +2580,10 @@ AutoPtr<CTreeMap::Node> CTreeMap::BoundedMap::Endpoint(
                 node = mHost->mRoot == NULL ? NULL : mHost->mRoot->GetLast();
                 break;
             case INCLUSIVE:
-                node = mHost->Find(mTo, FLOOR);
+                mHost->Find(mTo, FLOOR, (Node**)&node);
                 break;
             case EXCLUSIVE:
-                node = mHost->Find(mTo, LOWER);
+                mHost->Find(mTo, LOWER, (Node**)&node);
                 break;
             default:
                 // throw new AssertionError();
@@ -2601,7 +2631,8 @@ AutoPtr<IMapEntry> CTreeMap::BoundedMap::FindBounded(
         fromBoundForCheck = NO_BOUND; // we've already checked the lower bound
     }
 
-    AutoPtr<Node> nodfind = mHost->Find(key, relation);
+    AutoPtr<Node> nodfind;
+    mHost->Find(key, relation, (Node**)&nodfind);
     return GetBound(nodfind, fromBoundForCheck, toBoundForCheck);
 }
 
@@ -3236,6 +3267,8 @@ ECode CTreeMap::OrderComparator::Compare(
     /* [out] */ Int32* result)
 {
     VALIDATE_NOT_NULL(result)
+
+    if (NULL == lhs) return E_NULL_POINTER_EXCEPTION;
 
     AutoPtr<IComparable> a = (IComparable*) lhs->Probe(EIID_IComparable);
 
