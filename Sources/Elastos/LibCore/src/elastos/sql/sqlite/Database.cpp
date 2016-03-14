@@ -1338,6 +1338,7 @@ ECode Database::_Exec(
             // throwoom(env, "unable to allocate arg vector");
             return E_NULL_POINTER_EXCEPTION;
         }
+        memset(cargv, 0, (sizeof (*argv) + sizeof (char *)) * MAX_PARAMS);
         argv = (struct args *) (cargv + MAX_PARAMS);
         for (i = 0; i < MAX_PARAMS; i++) {
             cargv[i] = 0;

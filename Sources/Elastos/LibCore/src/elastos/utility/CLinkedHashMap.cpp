@@ -14,10 +14,12 @@ CAR_INTERFACE_IMPL(CLinkedHashMap, HashMap, ILinkedHashMap);
 
 CLinkedHashMap::~CLinkedHashMap()
 {
-    Clear();
-    // mHeader adds 2 refcount in LinkedEntry()
-    mHeader->mNxt = NULL;
-    mHeader->mPrv = NULL;
+    if (mHeader) {
+        Clear();
+        // mHeader adds 2 refcount in LinkedEntry()
+        mHeader->mNxt = NULL;
+        mHeader->mPrv = NULL;
+    }
 }
 
 ECode CLinkedHashMap::constructor()
