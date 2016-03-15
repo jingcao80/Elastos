@@ -198,8 +198,6 @@ public:
     CARAPI RetainAll(
         /* [in] */ ICollection* collection);
 
-    CARAPI ToString(
-        /* [out] */ String* str);
 protected:
     CARAPI RemoveRange(
         /* [in] */ Int32 fromIndex,

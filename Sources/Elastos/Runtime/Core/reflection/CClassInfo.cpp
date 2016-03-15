@@ -492,7 +492,9 @@ ECode CClassInfo::AcquireConstructorList()
         clsName = adjustNameAddr(mBase, mClassDirEntry->mName);
         clsName += "ClassObject";
 
-        ec = pModuleInfo->GetClassInfo(clsName, (IClassInfo**)&mCtorClassInfo);
+        AutoPtr<IClassInfo> classInfo;
+        ec = pModuleInfo->GetClassInfo(clsName, (IClassInfo**)&classInfo);
+        mCtorClassInfo = (CClassInfo*)classInfo.Get();
     }
     g_objInfoList.UnlockHashTable(EntryType_Class);
 

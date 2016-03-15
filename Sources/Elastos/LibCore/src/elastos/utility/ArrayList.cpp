@@ -750,17 +750,6 @@ ECode ArrayList::RetainAll(
     return AbstractList::RetainAll(collection);
 }
 
-ECode ArrayList::ToString(
-    /* [out] */ String* str)
-{
-    VALIDATE_NOT_NULL(str)
-    StringBuilder sb("ArrayList{size=");
-    sb += mSize;
-    sb += "}";
-    *str = sb.ToString();
-    return NOERROR;
-}
-
 
 } // namespace Utility
 } // namespace Elastos
