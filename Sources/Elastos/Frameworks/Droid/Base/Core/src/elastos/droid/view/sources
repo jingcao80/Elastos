@@ -166,6 +166,7 @@ SOURCES += HardwareLayer.cpp
 SOURCES += GLES20Canvas.cpp
 SOURCES += GLES20RecordingCanvas.cpp
 SOURCES += CDragShadowBuilder.cpp
+SOURCES += WindowManagerPolicyControl.cpp
 
 ELASTOS_LIBS += inputmethod/inputmethod.lib
 ELASTOS_LIBS += accessibility/accessibility.lib

@@ -5,7 +5,7 @@
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/graphics/drawable/CColorDrawable.h"
 #include "elastos/droid/internal/policy/impl/ImmersiveModeConfirmation.h"
-#include "elastos/droid/internal/policy/impl/CPolicyControl.h"
+#include "elastos/droid/view/WindowManagerPolicyControl.h"
 #include "elastos/droid/provider/Settings.h"
 #include "elastos/droid/utility/CDisplayMetrics.h"
 #include "elastos/droid/utility/CSparseBooleanArray.h"
@@ -52,6 +52,7 @@ using Elastos::Droid::View::IViewHelper;
 using Elastos::Droid::View::IViewManager;
 using Elastos::Droid::View::IViewPropertyAnimator;
 using Elastos::Droid::View::View;
+using Elastos::Droid::View::WindowManagerPolicyControl;
 using Elastos::Droid::Widget::IButton;
 using Elastos::Droid::Widget::CFrameLayoutLayoutParams;
 using Elastos::Core::CString;
@@ -386,10 +387,7 @@ ECode ImmersiveModeConfirmation::ImmersiveModeChanged(
     mHandler->RemoveMessages(H::SHOW);
     if (isImmersiveMode)
     {
-        Boolean disabled;
-        AutoPtr<IPolicyControl> policyControl;
-        CPolicyControl::AcquireSingleton((IPolicyControl**)&policyControl);
-        policyControl->DisableImmersiveConfirmation(pkg, &disabled);
+        Boolean disabled = WindowManagerPolicyControl::DisableImmersiveConfirmation(pkg);
         if (DEBUG) Slogger::D(TAG, "immersiveModeChanged() disabled=%d mConfirmed=%d", disabled, mConfirmed);
         if (!disabled && (DEBUG_SHOW_EVERY_TIME || !mConfirmed) && userSetupComplete)
         {
