@@ -326,6 +326,8 @@ public:
 
     CARAPI ClearWallpaper();
 
+    CARAPI ClearKeyguardWallpaper();
+
     CARAPI HasNamedWallpaper(
         /* [in] */ const String& name,
         /* [out] */ Boolean* hasNamedWallpaper);
@@ -348,6 +350,11 @@ public:
         /* [out] */ IBundle** outParams,
         /* [out] */ IParcelFileDescriptor** wallpaper);
 
+    CARAPI GetKeyguardWallpaper(
+        /* [in] */ IIWallpaperManagerCallback* cb,
+        /* [out] */ IBundle** outParams,
+        /* [out] */ IParcelFileDescriptor** descriptor);
+
     CARAPI GetWallpaperInfo(
         /* [out] */ IWallpaperInfo** info);
 
@@ -358,6 +365,10 @@ public:
     CARAPI UpdateWallpaperBitmapLocked(
         /* [in] */ const String& name,
         /* [in] */ IWallpaperData* wallpaper,
+        /* [out] */ IParcelFileDescriptor** descriptor);
+
+    CARAPI SetKeyguardWallpaper(
+        /* [in] */ const String& name,
         /* [out] */ IParcelFileDescriptor** descriptor);
 
     CARAPI SetWallpaperComponent(
