@@ -1,8 +1,11 @@
 
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/content/pm/CPackageInfo.h"
+#include <elastos/core/CoreUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
+using Elastos::Core::CoreUtils;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Logging::Slogger;
 
 namespace Elastos {
@@ -85,7 +88,16 @@ ECode CPackageInfo::ReadFromParcel(
 
     /* Theme-specific. */
     source->ReadBoolean(&mIsThemeApk);
-    source->ReadArrayOfString((ArrayOf<String>**)&mOverlayTargets);
+    Int32 size;
+    source->ReadInt32(&size);
+    if (size > 0) {
+        CArrayList::New((IArrayList**)&mOverlayTargets);
+        for (Int32 i = 0; i < size; i++) {
+            String str;
+            source->ReadString(&str);
+            mOverlayTargets->Add(CoreUtils::Convert(str));
+        }
+    }
     obj = NULL;
     source->ReadInterfacePtr((Handle32*)&obj);
     mThemeInfo = IThemeInfo::Probe(obj);
@@ -129,7 +141,18 @@ ECode CPackageInfo::WriteToParcel(
 
     /* Theme-specific. */
     dest->WriteBoolean(mIsThemeApk);
-    dest->WriteArrayOfString(mOverlayTargets);
+    Int32 size = 0;
+    if (mOverlayTargets != NULL) {
+        mOverlayTargets->GetSize(&size);
+    }
+    dest->WriteInt32(size);
+    if (size > 0) {
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> obj;
+            mOverlayTargets->Get(i, (IInterface**)&obj);
+            dest->WriteString(CoreUtils::Unbox(ICharSequence::Probe(obj)));
+        }
+    }
     dest->WriteInterfacePtr(mThemeInfo);
     dest->WriteBoolean(mHasIconPack);
     dest->WriteBoolean(mIsLegacyIconPackApk);
@@ -575,7 +598,7 @@ ECode CPackageInfo::SetHasIconPack(
 }
 
 ECode CPackageInfo::GetOverlayTargets(
-    /* [out, callee] */ ArrayOf<String>** targets)
+    /* [out] */ IArrayList** targets)
 {
     VALIDATE_NOT_NULL(targets)
     *targets = mOverlayTargets;
@@ -584,7 +607,7 @@ ECode CPackageInfo::GetOverlayTargets(
 }
 
 ECode CPackageInfo::SetOverlayTargets(
-    /* [in] */ ArrayOf<String>* targets)
+    /* [in] */ IArrayList* targets)
 {
     mOverlayTargets = targets;
     return NOERROR;

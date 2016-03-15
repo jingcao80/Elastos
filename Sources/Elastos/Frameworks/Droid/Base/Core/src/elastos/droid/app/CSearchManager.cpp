@@ -134,13 +134,6 @@ ECode CSearchManager::TriggerSearch(
     /* [in] */ IComponentName* launchActivity,
     /* [in] */ IBundle* appSearchData)
 {
-    String name;
-    launchActivity->GetPackageName(&name);
-    if (!mAssociatedPackage.Equals(name)) {
-        return E_ILLEGAL_ARGUMENT_EXCEPTION;
-        //throw new IllegalArgumentException("invoking app search on a different package " +
-        //        "not associated with this search manager");
-    }
     if (query == NULL || TextUtils::GetTrimmedLength(query) == 0) {
         //Log.w(TAG, "triggerSearch called with empty query, ignoring.");
         return NOERROR;

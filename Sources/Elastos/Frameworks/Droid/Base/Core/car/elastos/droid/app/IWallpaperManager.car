@@ -21,6 +21,14 @@ module
             [out] IParcelFileDescriptor** descriptor);
 
         /**
+         * Set the keyguard wallpaper.
+         * @hide
+         */
+        SetKeyguardWallpaper(
+            [in] String name,
+            [out] IParcelFileDescriptor** descriptor);
+
+        /**
          * Set the live wallpaper.
          */
         SetWallpaperComponent(
@@ -35,6 +43,15 @@ module
             [out] IParcelFileDescriptor** descriptor);
 
         /**
+         * Get the keyguard wallpaper.
+         * @hide
+         */
+        GetKeyguardWallpaper(
+            [in] IIWallpaperManagerCallback* cb,
+            [out] IBundle** outParams,
+            [out] IParcelFileDescriptor** descriptor);
+
+        /**
          * Get information about a live wallpaper.
          */
         GetWallpaperInfo(
@@ -44,6 +61,12 @@ module
          * Clear the wallpaper.
          */
         ClearWallpaper();
+
+        /*
+         * Clear the keyguard wallpaper.
+         * @hide
+         */
+        ClearKeyguardWallpaper();
 
         /**
          * Return whether there is a wallpaper set with the given name.

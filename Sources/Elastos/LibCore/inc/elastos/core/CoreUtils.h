@@ -39,6 +39,9 @@ public:
     static CARAPI_(AutoPtr<IInteger32>) Convert(
         /* [in] */ Int32 value);
 
+    static CARAPI_(Int32) Unbox(
+        /* [in] */ IInteger32* value);
+
     static CARAPI_(AutoPtr<IInteger64>) Convert(
         /* [in] */ Int64 value);
 

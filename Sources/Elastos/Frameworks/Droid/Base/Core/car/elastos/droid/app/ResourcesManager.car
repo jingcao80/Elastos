@@ -1,10 +1,12 @@
 
 module
 {
-    interface Elastos.Droid.Os.IBinder;
+    interface Elastos.Droid.Content.IContext;
+    interface Elastos.Droid.Content.Pm.IIPackageManager;
     interface Elastos.Droid.Content.Res.IConfiguration;
     interface Elastos.Droid.Content.Res.ICompatibilityInfo;
     interface Elastos.Droid.Content.Res.IResources;
+    interface Elastos.Droid.Os.IBinder;
     interface Elastos.Droid.View.IDisplayAdjustments;
     interface Elastos.Droid.Utility.IDisplayMetrics;
 
@@ -40,7 +42,27 @@ module
             [in] ArrayOf<String>* overlayDirs,
             [in] ArrayOf<String>* libDirs,
             [in] Int32 displayId,
+            [in] String packageName,
             [in] IConfiguration* overrideConfiguration,
+            [in] ICompatibilityInfo* compatInfo,
+            [in] IBinder* token,
+            [in] IContext* context,
+            [out] IResources** res);
+
+        /**
+         * Creates the top level Resources for applications with the given compatibility info.
+         *
+         * @param resDir the resource directory.
+         * @param compatInfo the compability info. Must not be null.
+         * @param token the application token for determining stack bounds.
+         *
+         * @hide
+         */
+        GetTopLevelThemedResources(
+            [in] String resDir,
+            [in] Int32 displayId,
+            [in] String packageName,
+            [in] String themePackageName,
             [in] ICompatibilityInfo* compatInfo,
             [in] IBinder* token,
             [out] IResources** res);
@@ -51,6 +73,10 @@ module
             [out] Boolean* result);
     }
 
+    interface IResourcesManagerHelper {
+        GetPackageManager(
+            [out] IIPackageManager** pm);
+    }
 
     } // namespace App
     } // namespace Droid

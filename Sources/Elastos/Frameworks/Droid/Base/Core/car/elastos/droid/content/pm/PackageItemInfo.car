@@ -13,7 +13,6 @@ module
     namespace Content {
     namespace Pm {
 
-
     /**
      * Base class containing information common to all package items held by the
      * package manager. This provides a very common basic set of attributes: a
@@ -133,10 +132,10 @@ module
         SetIcon(
             [in] Int32 icon);
 
-        GetThemeIcon(
+        GetThemedIcon(
             [out] Int32* icon);
 
-        SetThemeIcon(
+        SetThemedIcon(
             [in] Int32 icon);
 
         GetBanner(

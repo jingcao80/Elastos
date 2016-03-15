@@ -180,6 +180,10 @@ module
         GetFastDrawable(
             [out] IDrawable** drawable);
 
+        /** @hide */
+        GetFastKeyguardDrawable(
+            [out] IDrawable** drawable);
+
         /**
          * Like #getFastDrawable(), but if there is no wallpaper set,
          * a null pointer is returned.
@@ -203,12 +207,23 @@ module
             [out] IBitmap** bitmap);
 
         /**
+         * @hide
+         */
+        GetKeyguardBitmap(
+            [out] IBitmap** bitmap);
+
+        /**
          * Remove all internal references to the last loaded wallpaper.  Useful
          * for apps that want to reduce memory usage when they only temporarily
          * need to have the wallpaper.  After calling, the next request for the
          * wallpaper will require reloading it again from disk.
          */
         ForgetLoadedWallpaper();
+
+        /**
+         * @hide
+         */
+        ForgetLoadedKeyguardWallpaper();
 
         /**
          * If the current wallpaper is a live wallpaper component, return the
@@ -283,6 +298,14 @@ module
             [in] IBitmap* bitmap);
 
         /**
+         * @param bitmap
+         * @throws IOException
+         * @hide
+         */
+        SetKeyguardBitmap(
+            [in] IBitmap* bitmap);
+
+        /**
          * Change the current system wallpaper to a specific byte stream.  The
          * give InputStream is copied into persistent storage and will now be
          * used as the wallpaper.  Currently it must be either a JPEG or PNG
@@ -305,6 +328,12 @@ module
          * wallpaper.
          */
         SetStream(
+            [in] IInputStream* data);
+
+        /**
+         * @hide
+         */
+        SetKeyguardStream(
             [in] IInputStream* data);
 
         /**
@@ -439,6 +468,14 @@ module
             [in] Float xStep,
             [in] Float yStep);
 
+        /** @hide */
+        GetLastWallpaperX(
+            [out] Int32* x);
+
+        /** @hide */
+        GetLastWallpaperY(
+            [out] Int32* y);
+
         /**
          * Send an arbitrary command to the current active wallpaper.
          *
@@ -497,6 +534,15 @@ module
          * wallpaper.
          */
         Clear();
+
+        /** @hide */
+        Clear(
+            [in] Boolean setToDefault);
+
+        /**
+         * @hide
+         */
+        ClearKeyguardWallpaper();
     }
 
     [local]

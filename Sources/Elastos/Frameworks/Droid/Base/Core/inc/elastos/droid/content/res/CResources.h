@@ -1293,6 +1293,17 @@ public:
         /* [out] */ IXmlResourceParser** resourceParser);
 
     /** @hide */
+    CARAPI UpdateStringCache();
+
+    /** @hide */
+    CARAPI SetIconResources(
+        /* [in] */ ISparseArray* icons);
+
+    /** @hide */
+    CARAPI SetComposedIconInfo(
+        /* [in] */ IComposedIconInfo* iconInfo);
+
+    /** @hide */
     CARAPI GetComposedIconInfo(
         /* [out] */ IComposedIconInfo** iconInfo);
 

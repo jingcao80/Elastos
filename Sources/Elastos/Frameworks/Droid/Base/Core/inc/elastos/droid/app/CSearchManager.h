@@ -289,11 +289,6 @@ public:
 
     AutoPtr<IContext> mContext;
 
-    /**
-     * The package associated with this seach manager.
-     */
-    String mAssociatedPackage;
-
     // package private since they are used by the inner class SearchManagerCallback
     /* package */ AutoPtr<IHandler> mHandler;
     /* package */ AutoPtr<ISearchManagerOnDismissListener> mDismissListener;

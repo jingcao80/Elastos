@@ -1311,7 +1311,7 @@ ECode CActivityThread::GetTopLevelResources(
     AutoPtr<ICompatibilityInfo> info;
     pkgInfo->GetCompatibilityInfo((ICompatibilityInfo**)&info);
     return mResourcesManager->GetTopLevelResources(resDir, splitResDirs, overlayDirs,
-        libDirs, displayId, overrideConfiguration, info, NULL, res);
+        libDirs, displayId, String(NULL), overrideConfiguration, info, NULL, NULL, res);
 }
 
 ECode CActivityThread::GetHandler(

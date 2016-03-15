@@ -494,25 +494,11 @@ ECode CCompatibilityInfo::GetApplicationDensity(
     return NOERROR;
 }
 
-ECode CCompatibilityInfo::SetApplicationDensity(
-    /* [in] */ Int32 applicationDensity)
-{
-    mApplicationDensity = applicationDensity;
-    return NOERROR;
-}
-
 ECode CCompatibilityInfo::GetApplicationScale(
     /* [out] */ Float* applicationScale)
 {
     VALIDATE_NOT_NULL(applicationScale);
     *applicationScale = mApplicationScale;
-    return NOERROR;
-}
-
-ECode CCompatibilityInfo::SetApplicationScale(
-    /* [in] */ Float applicationScale)
-{
-    mApplicationScale = applicationScale;
     return NOERROR;
 }
 
@@ -524,10 +510,10 @@ ECode CCompatibilityInfo::GetApplicationInvertedScale(
     return NOERROR;
 }
 
-ECode CCompatibilityInfo::SetApplicationInvertedScale(
-    /* [in] */ Float applicationInvertedScale)
+ECode CCompatibilityInfo::GetIsThemeable(
+    /* [out] */ Boolean* isThemeable)
 {
-    mApplicationInvertedScale = applicationInvertedScale;
+    assert(0);
     return NOERROR;
 }
 

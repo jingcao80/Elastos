@@ -1,6 +1,7 @@
 
 module
 {
+    interface Elastos.Droid.Content.Res.IThemeConfig;
     using interface Elastos.Utility.ILocale;
 
     namespace Elastos {
@@ -310,6 +311,12 @@ module
 
         SetLocale(
             [in] ILocale* locale);
+
+        GetThemeConfig(
+            [out] IThemeConfig** themeConfig);
+
+        SetThemeConfig(
+            [in] IThemeConfig* themeConfig);
 
         IsUserSetLocale(
             [out] Boolean* userSetLocale);

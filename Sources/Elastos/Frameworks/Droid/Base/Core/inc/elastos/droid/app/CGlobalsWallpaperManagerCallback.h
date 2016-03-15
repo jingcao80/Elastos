@@ -34,6 +34,7 @@ private:
 
         CARAPI HandleMessage(
             /* [in] */ IMessage* msg);
+
     private:
         CGlobalsWallpaperManagerCallback* mHost;
     };
@@ -48,16 +49,33 @@ public:
 
     CARAPI OnWallpaperChanged();
 
+    CARAPI OnKeyguardWallpaperChanged();
+
     CARAPI_(AutoPtr<IBitmap>) PeekWallpaperBitmap(
         /* [in] */ IContext* context,
         /* [in] */ Boolean returnDefault);
 
+    /**
+     * @hide
+     */
+    CARAPI_(AutoPtr<IBitmap>) PeekKeyguardWallpaperBitmap(
+        /* [in] */ IContext* context);
+
     CARAPI_(void) ForgetLoadedWallpaper();
+
+    CARAPI_(void) ForgetLoadedKeyguardWallpaper();
+
+    /** @hide */
+    CARAPI_(void) ClearKeyguardWallpaper();
 
     CARAPI ToString(
         /* [out] */ String* str);
+
 private:
     CARAPI_(AutoPtr<IBitmap>) GetCurrentWallpaperLocked(
+        /* [in] */ IContext* context);
+
+    CARAPI_(AutoPtr<IBitmap>) GetCurrentKeyguardWallpaperLocked(
         /* [in] */ IContext* context);
 
     CARAPI_(AutoPtr<IBitmap>) GetDefaultWallpaperLocked(
@@ -71,6 +89,7 @@ private:
     AutoPtr<IIWallpaperManager> mService;
     AutoPtr<IBitmap> mWallpaper;
     AutoPtr<IBitmap> mDefaultWallpaper;
+    AutoPtr<IBitmap> mKeyguardWallpaper;
 
     friend class CWallpaperManager;
 };

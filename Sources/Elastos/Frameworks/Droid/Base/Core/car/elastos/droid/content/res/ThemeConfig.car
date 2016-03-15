@@ -16,6 +16,30 @@ module
         const String SYSTEMUI_NAVBAR_PKG = "com.android.systemui.navbar";
         const String SYSTEMUI_STATUS_BAR_PKG = "com.android.systemui";
 
+        GetOverlayPkgNameForApp(
+            [in] String appPkgName,
+            [out] String* overlayPkgName);
+
+        GetIconPackPkgName(
+            [out] String* icPkgName);
+    }
+
+    interface IThemeConfigBuilder {
+        /**
+         * For uniquely theming a specific app. ex. "Dialer gets red theme,
+         * Calculator gets blue theme"
+         */
+        DefaultOverlay(
+            [in] String themePkgName);
+
+        DefaultFont(
+            [in] String themePkgName);
+
+        DefaultIcon(
+            [in] String themePkgName);
+
+        Build(
+            [out] IThemeConfig** themeConfig);
     }
 
     }

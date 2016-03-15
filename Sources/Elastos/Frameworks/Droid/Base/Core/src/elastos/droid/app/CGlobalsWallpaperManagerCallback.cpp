@@ -4,23 +4,21 @@
 #include "Elastos.Droid.Content.h"
 #include "elastos/droid/app/CGlobalsWallpaperManagerCallback.h"
 #include "elastos/droid/app/CWallpaperManager.h"
-#include "elastos/droid/os/CBundle.h"
 #include "elastos/droid/os/ServiceManager.h"
 #include "elastos/droid/graphics/CBitmapFactoryOptions.h"
-#include "elastos/droid/graphics/CBitmapFactory.h"
+#include "elastos/droid/graphics/BitmapFactory.h"
 #include "elastos/droid/R.h"
 #include <elastos/utility/logging/Logger.h>
 #include <elastos/core/AutoLock.h>
 
 using Elastos::Droid::Os::EIID_IBinder;
 using Elastos::Droid::Os::IBundle;
-using Elastos::Droid::Os::CBundle;
 using Elastos::Droid::Os::IParcelFileDescriptor;
 using Elastos::Droid::Os::ServiceManager;
 using Elastos::Droid::Graphics::IBitmapFactoryOptions;
 using Elastos::Droid::Graphics::CBitmapFactoryOptions;
 using Elastos::Droid::Graphics::IBitmapFactory;
-using Elastos::Droid::Graphics::CBitmapFactory;
+using Elastos::Droid::Graphics::BitmapFactory;
 using Elastos::Utility::Logging::Logger;
 using Elastos::IO::ICloseable;
 using Elastos::IO::IFileDescriptor;
@@ -51,6 +49,13 @@ CAR_INTERFACE_IMPL_2(CGlobalsWallpaperManagerCallback, Object, IIWallpaperManage
 
 CAR_OBJECT_IMPL(CGlobalsWallpaperManagerCallback)
 
+ECode CGlobalsWallpaperManagerCallback::constructor(
+    /* [in] */ ILooper* looper)
+{
+    mService = (IIWallpaperManager*)ServiceManager::GetService(IContext::WALLPAPER_SERVICE).Get();
+    return NOERROR;
+}
+
 ECode CGlobalsWallpaperManagerCallback::OnWallpaperChanged()
 {
     /* The wallpaper has changed but we shouldn't eagerly load the
@@ -61,6 +66,14 @@ ECode CGlobalsWallpaperManagerCallback::OnWallpaperChanged()
     synchronized(this) {
         mWallpaper = NULL;
         mDefaultWallpaper = NULL;
+    }
+    return NOERROR;
+}
+
+ECode CGlobalsWallpaperManagerCallback::OnKeyguardWallpaperChanged()
+{
+    synchronized(this) {
+        mKeyguardWallpaper = NULL;
     }
     return NOERROR;
 }
@@ -94,11 +107,35 @@ AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::PeekWallpaperBitmap(
     return mWallpaper;
 }
 
+AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::PeekKeyguardWallpaperBitmap(
+    /* [in] */ IContext* context)
+{
+    synchronized(this) {
+        if (mKeyguardWallpaper != NULL) {
+            return mKeyguardWallpaper;
+        }
+        // try {
+        mKeyguardWallpaper = GetCurrentKeyguardWallpaperLocked(context);
+        // } catch (OutOfMemoryError e) {
+        //     Log.w(TAG, "No memory load current keyguard wallpaper", e);
+        // }
+        return mKeyguardWallpaper;
+    }
+    return NULL;
+}
+
 void CGlobalsWallpaperManagerCallback::ForgetLoadedWallpaper()
 {
     AutoLock lock(this);
     mWallpaper = NULL;
     mDefaultWallpaper = NULL;
+}
+
+void CGlobalsWallpaperManagerCallback::ForgetLoadedKeyguardWallpaper()
+{
+    synchronized(this) {
+        mKeyguardWallpaper = NULL;
+    }
 }
 
 AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::GetCurrentWallpaperLocked(
@@ -112,23 +149,55 @@ AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::GetCurrentWallpaperLocked(
     // try {
     AutoPtr<IBundle> params;
     AutoPtr<IParcelFileDescriptor> fd;
-    ASSERT_SUCCEEDED(mService->GetWallpaper((IIWallpaperManagerCallback*)this,
-        (IBundle**)&params, (IParcelFileDescriptor**)&fd));
-    if (fd != NULL) {
-
+    ECode ec = mService->GetWallpaper((IIWallpaperManagerCallback*)this,
+            (IBundle**)&params, (IParcelFileDescriptor**)&fd);
+    if (SUCCEEDED(ec) && fd != NULL) {
         // try {
         AutoPtr<IBitmapFactoryOptions> options;
-        ASSERT_SUCCEEDED(CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&options));
-        AutoPtr<IBitmapFactory> factory;
-        ASSERT_SUCCEEDED(CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory));
+        CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&options);
         AutoPtr<IFileDescriptor> desc;
-        ASSERT_SUCCEEDED(fd->GetFileDescriptor((IFileDescriptor**)&desc));
+        fd->GetFileDescriptor((IFileDescriptor**)&desc);
         AutoPtr<IBitmap> bm;
-        ASSERT_SUCCEEDED(factory->DecodeFileDescriptor(desc, NULL, options, (IBitmap**)&bm));
+        ec = BitmapFactory::DecodeFileDescriptor(desc, NULL, options, (IBitmap**)&bm);
         fd->Close();
-        return bm;
+        if (SUCCEEDED(ec)) return bm;
+        Logger::W("GlobalsWallpaperManagerCallback", "Can't decode file");
         // } catch (OutOfMemoryError e) {
         //     Log.w(TAG, "Can't decode file", e);
+        // } finally {
+        //     try {
+        //         fd.close();
+        //     } catch (IOException e) {
+        //         // Ignore
+        //     }
+        // }
+    }
+    // } catch (RemoteException e) {
+    //     // Ignore
+    // }
+    return NULL;
+}
+
+AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::GetCurrentKeyguardWallpaperLocked(
+    /* [in] */ IContext* context)
+{
+    // try {
+    AutoPtr<IBundle> params;
+    AutoPtr<IParcelFileDescriptor> fd;
+    ECode ec = mService->GetKeyguardWallpaper(this, (IBundle**)&params, (IParcelFileDescriptor**)&fd);
+    if (SUCCEEDED(ec) && fd != NULL) {
+        // try {
+        AutoPtr<IBitmapFactoryOptions> options;
+        CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&options);
+        AutoPtr<IFileDescriptor> desc;
+        fd->GetFileDescriptor((IFileDescriptor**)&desc);
+        AutoPtr<IBitmap> bm;
+        ECode ec = BitmapFactory::DecodeFileDescriptor(desc, NULL, options, (IBitmap**)&bm);
+        fd->Close();
+        if (SUCCEEDED(ec)) return bm;
+        Logger::W("GlobalsWallpaperManagerCallback", "Can't decode file");
+        // } catch (OutOfMemoryError e) {
+        //     Log.w("GlobalsWallpaperManagerCallback", "Can't decode file", e);
         // } finally {
         //     try {
         //         fd.close();
@@ -150,17 +219,12 @@ AutoPtr<IBitmap> CGlobalsWallpaperManagerCallback::GetDefaultWallpaperLocked(
     if (is != NULL) {
         // try {
         AutoPtr<IBitmapFactoryOptions> options;
-        ASSERT_SUCCEEDED(CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&options));
-        AutoPtr<IBitmapFactory> factory;
-        ASSERT_SUCCEEDED(CBitmapFactory::AcquireSingleton((IBitmapFactory**)&factory));
+        CBitmapFactoryOptions::New((IBitmapFactoryOptions**)&options);
         AutoPtr<IBitmap> bm;
-        ECode ec = factory->DecodeStream(is, NULL, options, (IBitmap**)&bm);
-        if (ec == (ECode)E_OUT_OF_MEMORY_ERROR) {
-            Logger::W("GlobalsWallpaperManagerCallback", "Can't decode stream");
-        }
-
+        ECode ec = BitmapFactory::DecodeStream(is, NULL, options, (IBitmap**)&bm);
         ICloseable::Probe(is)->Close();
-        return bm;
+        if (SUCCEEDED(ec)) return bm;
+        Logger::W("GlobalsWallpaperManagerCallback", "Can't decode stream");
         // } catch (OutOfMemoryError e) {
         //     Log.w(TAG, "Can't decode stream", e);
         // } finally {
@@ -181,17 +245,22 @@ void CGlobalsWallpaperManagerCallback::HandleClearWallpaper()
     mDefaultWallpaper = NULL;
 }
 
-ECode CGlobalsWallpaperManagerCallback::constructor(
-    /* [in] */ ILooper* looper)
-{
-    mService = (IIWallpaperManager*)ServiceManager::GetService(IContext::WALLPAPER_SERVICE).Get();
-    return NOERROR;
-}
-
 ECode CGlobalsWallpaperManagerCallback::ToString(
     /* [out] */ String* str)
 {
     return Object::ToString(str);
+}
+
+void CGlobalsWallpaperManagerCallback::ClearKeyguardWallpaper()
+{
+    synchronized(this) {
+        // try {
+        mService->ClearKeyguardWallpaper();
+        // } catch (RemoteException e) {
+        //     // ignore
+        // }
+        mKeyguardWallpaper = NULL;
+    }
 }
 
 } // namespace App

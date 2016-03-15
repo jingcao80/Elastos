@@ -17,6 +17,11 @@ module
          * Called when the wallpaper has changed
          */
         OnWallpaperChanged();
+
+        /**
+         * Called when the keygaurd wallpaper has changed
+         */
+        OnKeyguardWallpaperChanged();
     }
 
     } // namespace App

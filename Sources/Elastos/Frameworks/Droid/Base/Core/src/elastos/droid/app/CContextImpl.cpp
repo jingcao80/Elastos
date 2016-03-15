@@ -3585,8 +3585,8 @@ ECode CContextImpl::constructor(
             mPackageInfo->GetApplicationInfo((IApplicationInfo**)&ai);
             ai->GetSharedLibraryFiles((ArrayOf<String>**)&sharedLibraryFiles);
             mResourcesManager->GetTopLevelResources(
-                resDir, splitResDirs, overlayDirs, sharedLibraryFiles, displayId,
-                overrideConfiguration, compatInfo, activityToken,
+                resDir, splitResDirs, overlayDirs, sharedLibraryFiles, displayId, String(NULL),
+                overrideConfiguration, compatInfo, activityToken, NULL,
                 (IResources**)&resources);
         }
     }

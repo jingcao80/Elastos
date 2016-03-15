@@ -140,6 +140,10 @@ public:
     CARAPI GetFastDrawable(
         /* [out] */ IDrawable** drawable);
 
+    /** @hide */
+    CARAPI GetFastKeyguardDrawable(
+        /* [out] */ IDrawable** drawable);
+
     /**
      * Like {@link #getFastDrawable()}, but if there is no wallpaper set,
      * a null pointer is returned.
@@ -159,12 +163,23 @@ public:
         /* [out] */ IBitmap** bitmap);
 
     /**
+     * @hide
+     */
+    CARAPI GetKeyguardBitmap(
+        /* [out] */ IBitmap** bitmap);
+
+    /**
      * Remove all internal references to the last loaded wallpaper.  Useful
      * for apps that want to reduce memory usage when they only temporarily
      * need to have the wallpaper.  After calling, the next request for the
      * wallpaper will require reloading it again from disk.
      */
     CARAPI ForgetLoadedWallpaper();
+
+    /**
+     * @hide
+     */
+    CARAPI ForgetLoadedKeyguardWallpaper();
 
     /**
      * If the current wallpaper is a live wallpaper component, return the
@@ -225,6 +240,14 @@ public:
         /* [in] */ IBitmap* bitmap);
 
     /**
+     * @param bitmap
+     * @throws IOException
+     * @hide
+     */
+    CARAPI SetKeyguardBitmap(
+        /* [in] */ IBitmap* bitmap);
+
+    /**
      * Change the current system wallpaper to a specific byte stream.  The
      * give InputStream is copied into persistent storage and will now be
      * used as the wallpaper.  Currently it must be either a JPEG or PNG
@@ -240,6 +263,12 @@ public:
      * wallpaper.
      */
     CARAPI SetStream(
+        /* [in] */ IInputStream* data);
+
+    /**
+     * @hide
+     */
+    CARAPI SetKeyguardStream(
         /* [in] */ IInputStream* data);
 
     /**
@@ -363,6 +392,14 @@ public:
         /* [in] */ Float xStep,
         /* [in] */ Float yStep);
 
+    /** @hide */
+    CARAPI GetLastWallpaperX(
+        /* [out] */ Int32* x);
+
+    /** @hide */
+    CARAPI GetLastWallpaperY(
+        /* [out] */ Int32* y);
+
     /**
      * Send an arbitrary command to the current active wallpaper.
      *
@@ -409,6 +446,15 @@ public:
      * wallpaper.
      */
     CARAPI Clear();
+
+    /** @hide */
+    CARAPI Clear(
+        /* [in] */ Boolean setToDefault);
+
+    /**
+     * @hide
+     */
+    CARAPI ClearKeyguardWallpaper();
 
     /**
      * Open stream representing the default static image wallpaper.

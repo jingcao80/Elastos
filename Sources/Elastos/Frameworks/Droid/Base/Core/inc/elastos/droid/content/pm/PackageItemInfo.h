@@ -157,10 +157,10 @@ public:
     CARAPI SetIcon(
         /* [in] */ Int32 icon);
 
-    CARAPI GetThemeIcon(
+    CARAPI GetThemedIcon(
         /* [out] */ Int32* themeIcon);
 
-    CARAPI SetThemeIcon(
+    CARAPI SetThemedIcon(
         /* [in] */ Int32 themeIcon);
 
     CARAPI GetBanner(
@@ -286,7 +286,7 @@ public:
      * If there isn't an icon pack or not set, then 0.
      * @hide
      */
-    Int32 mThemeIcon;
+    Int32 mThemedIcon;
 
     /**
      * A drawable resource identifier (in the package's resources) of this
