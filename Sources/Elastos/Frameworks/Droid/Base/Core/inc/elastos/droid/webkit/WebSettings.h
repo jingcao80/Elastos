@@ -23,7 +23,7 @@ namespace Webkit {
 // This is an abstract base class: concrete WebViewProviders must
 // create a class derived from this, and return an instance of it in the
 // WebViewProvider.getWebSettingsProvider() method implementation.
-class WebSettings
+class ECO_PUBLIC WebSettings
     : public Object
     , public IWebSettings
 {

@@ -889,6 +889,12 @@ ECode WallpaperManagerService::ClearWallpaperLocked(
     return NOERROR;
 }
 
+ECode WallpaperManagerService::ClearKeyguardWallpaper()
+{
+    assert(0);
+    return NOERROR;
+}
+
 ECode WallpaperManagerService::HasNamedWallpaper(
     /* [in] */ const String& name,
     /* [out] */ Boolean* hasNamedWallpaper)
@@ -1159,6 +1165,15 @@ ECode WallpaperManagerService::GetWallpaper(
     return NOERROR;
 }
 
+ECode WallpaperManagerService::GetKeyguardWallpaper(
+    /* [in] */ IIWallpaperManagerCallback* cb,
+    /* [out] */ IBundle** outParams,
+    /* [out] */ IParcelFileDescriptor** descriptor)
+{
+    assert(0);
+    return NOERROR;
+}
+
 ECode WallpaperManagerService::GetWallpaperInfo(
     /* [out] */ IWallpaperInfo** info)
 {
@@ -1265,6 +1280,14 @@ ECode WallpaperManagerService::UpdateWallpaperBitmapLocked(
         return NOERROR;
     }
     *descriptor = NULL;
+    return NOERROR;
+}
+
+ECode WallpaperManagerService::SetKeyguardWallpaper(
+    /* [in] */ const String& name,
+    /* [out] */ IParcelFileDescriptor** descriptor)
+{
+    assert(0);
     return NOERROR;
 }
 

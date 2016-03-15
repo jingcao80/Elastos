@@ -60,10 +60,23 @@ ECode CThemeConfig::ReadFromParcel(
     return NOERROR;
 }
 
+ECode CThemeConfig::GetBootTheme(
+    /* [in] */ IContentResolver* resolver,
+    /* [out] */ IThemeConfig** themeConfig)
+{
+    return NOERROR;
+}
+
 AutoPtr<IThemeConfig> CThemeConfig::FromJson(
     /* [in] */ const String& json)
 {
     return NULL;
+}
+
+ECode CThemeConfig::GetSystemTheme(
+    /* [out] */ IThemeConfig** themeConfig)
+{
+    return NOERROR;
 }
 
 }
