@@ -34,6 +34,13 @@ public:
 
     CARAPI constructor();
 
+    CARAPI GetOverlayPkgNameForApp(
+        /* [in] */ const String& appPkgName,
+        /* [out] */ String* overlayPkgName);
+
+    CARAPI GetIconPackPkgName(
+        /* [out] */ String* icPkgName);
+
     CARAPI Clone(
         /* [out] */ IInterface** object);
 
@@ -47,8 +54,24 @@ public:
     CARAPI ReadFromParcel(
         /* [in] */ IParcel* source);
 
+    /**
+     * Represents the theme that the device booted into. This is used to
+     * simulate a "default" configuration based on the user's last known
+     * preference until the theme is switched at runtime.
+     */
+    static CARAPI GetBootTheme(
+        /* [in] */ IContentResolver* resolver,
+        /* [out] */ IThemeConfig** themeConfig);
+
     static CARAPI_(AutoPtr<IThemeConfig>) FromJson(
         /* [in] */ const String& json);
+
+    /**
+     * Represents the system framework theme, perceived by the system as there
+     * being no theme applied.
+     */
+    static CARAPI GetSystemTheme(
+        /* [out] */ IThemeConfig** themeConfig);
 };
 
 } // namespace Res

@@ -8,6 +8,7 @@ module
     interface Elastos.Droid.Os.IBundle;
     interface Elastos.Droid.Utility.IDisplayMetrics;
     interface Elastos.Droid.Utility.IAttributeSet;
+    interface Elastos.Droid.Utility.ISparseArray;
     interface Elastos.Droid.Utility.ITypedValue;
     interface Elastos.Droid.Utility.IInt64SparseArray;
     interface Elastos.Droid.Graphics.Drawable.IDrawable;
@@ -1315,6 +1316,17 @@ module
          */
         GetPreloadedDrawables(
             [out] IInt64SparseArray** array);
+
+        /** @hide */
+        UpdateStringCache();
+
+        /** @hide */
+        SetIconResources(
+            [in] ISparseArray* icons);
+
+        /** @hide */
+        SetComposedIconInfo(
+            [in] IComposedIconInfo* iconInfo);
 
         /** @hide */
         GetComposedIconInfo(

@@ -172,6 +172,12 @@ public:
     CARAPI SetLocale(
         /* [in] */ ILocale* locale);
 
+    CARAPI GetThemeConfig(
+        /* [out] */ IThemeConfig** themeConfig);
+
+    CARAPI SetThemeConfig(
+        /* [in] */ IThemeConfig* themeConfig);
+
     CARAPI GetFontScale(
         /* [out] */ Float* fontScale);
 

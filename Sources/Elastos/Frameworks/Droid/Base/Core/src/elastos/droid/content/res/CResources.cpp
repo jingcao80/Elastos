@@ -2554,6 +2554,28 @@ ECode CResources::RecycleCachedStyledAttributes(
     return NOERROR;
 }
 
+ECode CResources::UpdateStringCache()
+{
+    assert(0);
+    return NOERROR;
+}
+
+/** @hide */
+ECode CResources::SetIconResources(
+    /* [in] */ ISparseArray* icons)
+{
+    assert(0);
+    return NOERROR;
+}
+
+/** @hide */
+ECode CResources::SetComposedIconInfo(
+    /* [in] */ IComposedIconInfo* iconInfo)
+{
+    assert(0);
+    return NOERROR;
+}
+
 ECode CResources::GetComposedIconInfo(
     /* [out] */ IComposedIconInfo** iconInfo)
 {

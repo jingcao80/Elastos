@@ -168,20 +168,14 @@ public:
     CARAPI GetApplicationDensity(
         /* [out] */ Int32* applicationDensity);
 
-    CARAPI SetApplicationDensity(
-        /* [in] */ Int32 applicationDensity);
-
     CARAPI GetApplicationScale(
         /* [out] */ Float* applicationScale);
-
-    CARAPI SetApplicationScale(
-        /* [in] */ Float applicationScale);
 
     CARAPI GetApplicationInvertedScale(
         /* [out] */ Float* applicationInvertedScale);
 
-    CARAPI SetApplicationInvertedScale(
-        /* [in] */ Float applicationInvertedScale);
+    CARAPI GetIsThemeable(
+        /* [out] */ Boolean* isThemeable);
 
     CARAPI constructor(
         /* [in] */ IApplicationInfo* appInfo,

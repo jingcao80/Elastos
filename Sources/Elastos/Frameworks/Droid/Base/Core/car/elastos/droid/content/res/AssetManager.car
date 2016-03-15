@@ -1,10 +1,10 @@
 
 module
 {
-    using interface Elastos.IO.IInputStream;
-
     interface Elastos.Droid.Content.Res.IAssetFileDescriptor;
     interface Elastos.Droid.Content.Res.IXmlResourceParser;
+    using interface Elastos.IO.IInputStream;
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -209,6 +209,25 @@ module
             [in] String path,
             [out] Int32* cookie);
 
+        AddOverlayPath(
+            [in] String idmapPath,
+            [in] String themePkgPath,
+            [in] String resPkgPath,
+            [in] String targetPkgPath,
+            [in] String prefixPath,
+            [out] Int32* cookie);
+
+        /**
+         * Add a set of common assets.
+         *
+         * {@hide}
+         */
+        AddCommonOverlayPath(
+            [in] String themePkgPath,
+            [in] String resPkgPath,
+            [in] String prefixPath,
+            [out] Int32* cookie);
+
         /**
          * Add a set of assets as an icon pack. A pkgIdOverride value will change the package's id from
          * what is in the resource table to a new value. Manage this carefully, if icon pack has more
@@ -227,6 +246,19 @@ module
             [out] Int32* cookie);
 
         /**
+        * Delete a set of overlay assets from the asset manager. Not for use by
+        * applications. Returns true if succeeded or false on failure.
+        *
+        * Also works for icon packs
+        *
+        * {@hide}
+        */
+        RemoveOverlayPath(
+            [in] String packageName,
+            [in] Int32 cookie,
+            [out] Boolean* result);
+
+        /**
          * Add multiple sets of assets to the asset manager at once.  See
          * {@sa #addAssetPath(String)} for more information.  Returns array of
          * cookies for each added asset with 0 indicating failure, or null if
@@ -237,7 +269,102 @@ module
             [in] ArrayOf<String>* paths,
             [out, callee] ArrayOf<Int32>* cookies);
 
-         /**
+        /**
+         * Sets a flag indicating that this AssetManager should have themes
+         * attached, according to the initial request to create it by the
+         * ApplicationContext.
+         *
+         * {@hide}
+         */
+        SetThemeSupport(
+            [in] Boolean themeSupport);
+
+        /**
+         * Should this AssetManager have themes attached, according to the initial
+         * request to create it by the ApplicationContext?
+         *
+         * {@hide}
+         */
+        HasThemeSupport(
+            [out] Boolean* themeSupport);
+
+        /**
+         * Get package name of current icon pack (may return null).
+         * {@hide}
+         */
+        GetIconPackageName(
+            [out] String* pkgName);
+
+        /**
+         * Sets icon package name
+         * {@hide}
+         */
+        SetIconPackageName(
+            [in] String packageName);
+
+        /**
+         * Get package name of current common resources (may return null).
+         * {@hide}
+         */
+        GetCommonResPackageName(
+            [out] String* pkgName);
+
+        /**
+         * Sets common resources package name
+         * {@hide}
+         */
+        SetCommonResPackageName(
+            [in] String packageName);
+
+        /**
+         * Get package name of current theme (may return null).
+         * {@hide}
+         */
+        GetThemePackageName(
+            [out] String* pkgName);
+
+        /**
+         * Sets package name and highest level style id for current theme (null, 0 is allowed).
+         * {@hide}
+         */
+        SetThemePackageName(
+            [in] String packageName);
+
+        /**
+         * Get asset cookie for current theme (may return 0).
+         * {@hide}
+         */
+        GetThemeCookies(
+            [out] IArrayList** cookies);
+
+        /** {@hide} */
+        SetIconPackCookie(
+            [in] Int32 cookie);
+
+        /** {@hide} */
+        GetIconPackCookie(
+            [out] Int32* cookie);
+
+        /** {@hide} */
+        SetCommonResCookie(
+            [in] Int32 cookie);
+
+        /** {@hide} */
+        GetCommonResCookie(
+            [out] Int32* cookie);
+
+        /**
+         * Sets asset cookie for current theme (0 if not a themed asset manager).
+         * {@hide}
+         */
+        AddThemeCookie(
+            [in] Int32 cookie);
+
+        /** {@hide} */
+        SetAppName(
+            [in] String pkgName);
+
+        /**
          * Add a set of assets to overlay an already added set of assets.
          *
          * This is only intended for application resources. System wide resources
@@ -306,6 +433,33 @@ module
         GetCookieName(
             [in] Int32 cookie,
             [out] String* name);
+
+        /**
+         * {@hide}
+         */
+        GetBasePackageCount(
+            [out] Int32* pkgCount);
+
+        /**
+         * {@hide}
+         */
+        GetBasePackageName(
+            [in] Int32 index,
+            [out] String* pkgName);
+
+        /**
+         * {@hide}
+         */
+        GetBaseResourcePackageName(
+            [in] Int32 index,
+            [out] String* pkgName);
+
+        /**
+         * {@hide}
+         */
+        GetBasePackageId(
+            [in] Int32 index,
+            [out] Int32* pkgId);
 
         GetNativeAssetManager(
             [out] Int64* assetMgr);

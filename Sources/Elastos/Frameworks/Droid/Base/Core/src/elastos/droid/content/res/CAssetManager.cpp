@@ -810,12 +810,43 @@ ECode CAssetManager::AddAssetPath(
     return NOERROR;
 }
 
+ECode CAssetManager::AddOverlayPath(
+    /* [in] */ const String& idmapPath,
+    /* [in] */ const String& themePkgPath,
+    /* [in] */ const String& resPkgPath,
+    /* [in] */ const String& targetPkgPath,
+    /* [in] */ const String& prefixPath,
+    /* [out] */ Int32* cookie)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::AddCommonOverlayPath(
+    /* [in] */ const String& themePkgPath,
+    /* [in] */ const String& resPkgPath,
+    /* [in] */ const String& prefixPath,
+    /* [out] */ Int32* cookie)
+{
+    assert(0);
+    return NOERROR;
+}
+
 ECode CAssetManager::AddIconPath(
     /* [in] */ const String& idmapPath,
     /* [in] */ const String& resApkPath,
     /* [in] */ const String& prefixPath,
     /* [in] */ Int32 pkgIdOverride,
     /* [out] */ Int32* cookie)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::RemoveOverlayPath(
+    /* [in] */ const String& packageName,
+    /* [in] */ Int32 cookie,
+    /* [out] */ Boolean* result)
 {
     assert(0);
     return NOERROR;
@@ -841,6 +872,111 @@ ECode CAssetManager::AddAssetPaths(
 
     *cookies = arr;
     REFCOUNT_ADD(*cookies);
+    return NOERROR;
+}
+
+ECode CAssetManager::SetThemeSupport(
+    /* [in] */ Boolean themeSupport)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::HasThemeSupport(
+    /* [out] */ Boolean* themeSupport)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::GetIconPackageName(
+    /* [out] */ String* pkgName)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::SetIconPackageName(
+    /* [in] */ const String& packageName)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::GetCommonResPackageName(
+    /* [out] */ String* pkgName)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::SetCommonResPackageName(
+    /* [in] */ const String& packageName)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::GetThemePackageName(
+    /* [out] */ String* pkgName)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::SetThemePackageName(
+    /* [in] */ const String& packageName)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::GetThemeCookies(
+    /* [out] */ IArrayList** cookies)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::SetIconPackCookie(
+    /* [in] */ Int32 cookie)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::GetIconPackCookie(
+    /* [out] */ Int32* cookie)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::SetCommonResCookie(
+    /* [in] */ Int32 cookie)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::GetCommonResCookie(
+    /* [out] */ Int32* cookie)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::AddThemeCookie(
+    /* [in] */ Int32 cookie)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CAssetManager::SetAppName(
+    /* [in] */ const String& pkgName)
+{
+    assert(0);
     return NOERROR;
 }
 
@@ -2509,6 +2645,46 @@ ECode CAssetManager::Init(
 
     if (LocalLOGV) Logger::V(TAG, "Created AssetManager %p for object %p\n", am, this);
     mObject = (Int64)am;
+    return NOERROR;
+}
+
+ECode CAssetManager::GetBasePackageCount(
+    /* [out] */ Int32* pkgCount)
+{
+    assert(0);
+    return NOERROR;
+}
+
+/**
+ * {@hide}
+ */
+ECode CAssetManager::GetBasePackageName(
+    /* [in] */ Int32 index,
+    /* [out] */ String* pkgName)
+{
+    assert(0);
+    return NOERROR;
+}
+
+/**
+ * {@hide}
+ */
+ECode CAssetManager::GetBaseResourcePackageName(
+    /* [in] */ Int32 index,
+    /* [out] */ String* pkgName)
+{
+    assert(0);
+    return NOERROR;
+}
+
+/**
+ * {@hide}
+ */
+ECode CAssetManager::GetBasePackageId(
+    /* [in] */ Int32 index,
+    /* [out] */ Int32* pkgId)
+{
+    assert(0);
     return NOERROR;
 }
 

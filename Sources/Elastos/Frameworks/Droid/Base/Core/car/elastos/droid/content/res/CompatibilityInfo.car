@@ -128,20 +128,14 @@ module
         GetApplicationDensity(
             [out] Int32* applicationDensity);
 
-        SetApplicationDensity(
-            [in] Int32 applicationDensity);
-
         GetApplicationScale(
             [out] Float* applicationScale);
-
-        SetApplicationScale(
-            [in] Float applicationScale);
 
         GetApplicationInvertedScale(
             [out] Float* applicationInvertedScale);
 
-        SetApplicationInvertedScale(
-            [in] Float applicationInvertedScale);
+        GetIsThemeable(
+            [out] Boolean* isThemeable);
 
         /**
          * @return true if the scaling is required

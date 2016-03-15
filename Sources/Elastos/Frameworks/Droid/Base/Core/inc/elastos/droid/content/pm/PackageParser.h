@@ -40,6 +40,7 @@ using Elastos::Core::CString;
 using Elastos::IO::IFile;
 using Elastos::IO::IInputStream;
 using Elastos::IO::IPrintWriter;
+using Elastos::Utility::IArrayList;
 using Elastos::Utility::Jar::IStrictJarFile;
 using Elastos::Utility::Zip::IZipEntry;
 using Elastos::Utility::Etl::List;
@@ -92,7 +93,7 @@ public:
     class ServiceIntentInfo;
     class ProviderIntentInfo;
 
-    class BufferWrapper : public Object 
+    class BufferWrapper : public Object
     {
     public:
         AutoPtr<ArrayOf<Byte> > mBuffer;
@@ -399,7 +400,7 @@ public:
         Int64 mLastPackageUsageTimeInMills;
         // Is Theme Apk
         Boolean mIsThemeApk;
-        List<String> mOverlayTargets;
+        AutoPtr<IArrayList> mOverlayTargets;
         HashMap<String, AutoPtr<HashMap<String, String> > > mPackageRedirections;
 
         // Theme info

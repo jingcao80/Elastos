@@ -19,6 +19,7 @@
 #include "elastos/droid/graphics/CBitmapFactoryOptions.h"
 #include "elastos/droid/graphics/BitmapRegionDecoder.h"
 #include "elastos/droid/graphics/drawable/CBitmapDrawable.h"
+#include "elastos/droid/os/CParcelFileDescriptorAutoCloseOutputStream.h"
 #include "elastos/droid/view/CWindowManagerGlobal.h"
 #include "elastos/droid/utility/CDisplayMetrics.h"
 #include "elastos/droid/text/TextUtils.h"
@@ -50,6 +51,7 @@ using Elastos::Droid::Graphics::CRect;
 using Elastos::Droid::Graphics::IXfermode;
 using Elastos::Droid::Graphics::BitmapCompressFormat_PNG;
 using Elastos::Droid::Graphics::BitmapConfig_ARGB_8888;
+using Elastos::Droid::Graphics::BitmapConfig_RGB_565;
 using Elastos::Droid::Graphics::BitmapFactory;
 using Elastos::Droid::Graphics::IBitmapFactory;
 using Elastos::Droid::Graphics::CBitmapFactory;
@@ -61,6 +63,7 @@ using Elastos::Droid::Graphics::MatrixScaleToFit_FILL;
 using Elastos::Droid::Graphics::Drawable::EIID_IDrawable;
 using Elastos::Droid::Graphics::Drawable::IBitmapDrawable;
 using Elastos::Droid::Graphics::Drawable::CBitmapDrawable;
+using Elastos::Droid::Os::CParcelFileDescriptorAutoCloseOutputStream;
 using Elastos::Droid::View::CWindowManagerGlobal;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IWindowManager;
@@ -396,6 +399,18 @@ ECode CWallpaperManager::GetFastDrawable(
     return NOERROR;
 }
 
+ECode CWallpaperManager::GetFastKeyguardDrawable(
+    /* [out] */ IDrawable** drawable)
+{
+    VALIDATE_NOT_NULL(drawable);
+    AutoPtr<IBitmap> bm = sGlobals->PeekKeyguardWallpaperBitmap(mContext);
+    if (bm != NULL) {
+        return CFastBitmapDrawable::New(bm, drawable);
+    }
+    *drawable = NULL;
+    return NOERROR;
+}
+
 ECode CWallpaperManager::PeekFastDrawable(
     /* [out] */ IDrawable** drawable)
 {
@@ -422,9 +437,25 @@ ECode CWallpaperManager::GetBitmap(
     return NOERROR;
 }
 
+ECode CWallpaperManager::GetKeyguardBitmap(
+    /* [out] */ IBitmap** bitmap)
+{
+    VALIDATE_NOT_NULL(bitmap);
+    AutoPtr<IBitmap> bm = sGlobals->PeekKeyguardWallpaperBitmap(mContext);
+    *bitmap = bm;
+    REFCOUNT_ADD(*bitmap);
+    return NOERROR;
+}
+
 ECode CWallpaperManager::ForgetLoadedWallpaper()
 {
     sGlobals->ForgetLoadedWallpaper();
+    return NOERROR;
+}
+
+ECode CWallpaperManager::ForgetLoadedKeyguardWallpaper()
+{
+    sGlobals->ForgetLoadedKeyguardWallpaper();
     return NOERROR;
 }
 
@@ -589,6 +620,38 @@ ECode CWallpaperManager::SetBitmap(
     // }
 }
 
+ECode CWallpaperManager::SetKeyguardBitmap(
+    /* [in] */ IBitmap* bitmap)
+{
+    if (sGlobals->mService == NULL) {
+        Logger::W(TAG, "WallpaperService not running");
+        return NOERROR;
+    }
+    // try {
+    AutoPtr<IParcelFileDescriptor> fd;
+    ECode ec = sGlobals->mService->SetKeyguardWallpaper(String(NULL), (IParcelFileDescriptor**)&fd);
+    if (FAILED(ec) || fd == NULL) {
+        return NOERROR;
+    }
+    AutoPtr<IFileOutputStream> fos;
+    // try {
+    CParcelFileDescriptorAutoCloseOutputStream::New(fd, (IFileOutputStream**)&fos);
+    Boolean result;
+    bitmap->Compress(BitmapCompressFormat_PNG, 90, IOutputStream::Probe(fos), &result);
+    if (fos != NULL) {
+        ICloseable::Probe(fos)->Close();
+    }
+    return NOERROR;
+    // } finally {
+    //     if (fos != null) {
+    //         fos.close();
+    //     }
+    // }
+    // } catch (RemoteException e) {
+    //     // Ignore
+    // }
+}
+
 ECode CWallpaperManager::SetStream(
     /* [in] */ IInputStream* data)
 {
@@ -614,6 +677,35 @@ ECode CWallpaperManager::SetStream(
         ICloseable::Probe(fos)->Close();
     }
     return NOERROR;
+    // }
+    // } catch (RemoteException e) {
+    //     // Ignore
+    // }
+}
+
+ECode CWallpaperManager::SetKeyguardStream(
+    /* [in] */ IInputStream* data)
+{
+    if (sGlobals->mService == NULL) {
+        Logger::W(TAG, "CWallpaperService not running");
+        return NOERROR;
+    }
+    // try {
+    AutoPtr<IParcelFileDescriptor> fd;
+    ECode ec = sGlobals->mService->SetKeyguardWallpaper(String(NULL), (IParcelFileDescriptor**)&fd);
+    if (FAILED(ec) || fd == NULL) return NOERROR;
+    AutoPtr<IFileOutputStream> fos;
+    // try {
+    CParcelFileDescriptorAutoCloseOutputStream::New(fd, (IFileOutputStream**)&fos);
+    SetWallpaper(data, fos);
+    if (fos != NULL) {
+        ICloseable::Probe(fos)->Close();
+    }
+    return NOERROR;
+    // } finally {
+    //     if (fos != null) {
+    //         fos.close();
+    //     }
     // }
     // } catch (RemoteException e) {
     //     // Ignore
@@ -773,6 +865,38 @@ ECode CWallpaperManager::SetWallpaperOffsetSteps(
     return NOERROR;
 }
 
+/** @hide */
+ECode CWallpaperManager::GetLastWallpaperX(
+    /* [out] */ Int32* x)
+{
+    VALIDATE_NOT_NULL(x);
+    // try {
+    ECode ec = CWindowManagerGlobal::GetWindowSession()->GetLastWallpaperX(x);
+    if (SUCCEEDED(ec)) return NOERROR;
+    // } catch (RemoteException e) {
+    //     // Ignore.
+    // }
+
+    *x = -1;
+    return NOERROR;
+}
+
+/** @hide */
+ECode CWallpaperManager::GetLastWallpaperY(
+    /* [out] */ Int32* y)
+{
+    VALIDATE_NOT_NULL(y);
+    // try {
+    ECode ec = CWindowManagerGlobal::GetWindowSession()->GetLastWallpaperY(y);
+    if (SUCCEEDED(ec)) return NOERROR;
+    // } catch (RemoteException e) {
+    //     // Ignore.
+    // }
+
+    *y = -1;
+    return NOERROR;
+}
+
 ECode CWallpaperManager::SendWallpaperCommand(
     /* [in] */ IBinder *windowToken,
     /* [in] */ const String &action,
@@ -805,7 +929,35 @@ ECode CWallpaperManager::ClearWallpaperOffsets(
 
 ECode CWallpaperManager::Clear()
 {
-    return SetStream(OpenDefaultWallpaper(mContext));
+    return Clear(TRUE);
+}
+
+/** @hide */
+ECode CWallpaperManager::Clear(
+    /* [in] */ Boolean setToDefault)
+{
+    if (setToDefault) {
+        return SetStream(OpenDefaultWallpaper(mContext));
+    }
+    else {
+        AutoPtr<IBitmap> blackBmp;
+        CBitmap::CreateBitmap(1, 1, BitmapConfig_RGB_565, (IBitmap**)&blackBmp);
+        AutoPtr<IResources> res;
+        mContext->GetResources((IResources**)&res);
+        Int32 color;
+        res->GetColor(R::color::black, &color);
+        blackBmp->SetPixel(0, 0, color);
+        return SetBitmap(blackBmp);
+    }
+}
+
+/**
+ * @hide
+ */
+ECode CWallpaperManager::ClearKeyguardWallpaper()
+{
+    sGlobals->ClearKeyguardWallpaper();
+    return NOERROR;
 }
 
 AutoPtr<IInputStream> CWallpaperManager::OpenDefaultWallpaper(

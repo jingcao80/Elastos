@@ -22,6 +22,19 @@ ECode CThemeConfig::constructor()
     return NOERROR;
 }
 
+ECode CThemeConfig::GetOverlayPkgNameForApp(
+    /* [in] */ const String& appPkgName,
+    /* [out] */ String* overlayPkgName)
+{
+    return NOERROR;
+}
+
+ECode CThemeConfig::GetIconPackPkgName(
+    /* [out] */ String* icPkgName)
+{
+    return NOERROR;
+}
+
 ECode CThemeConfig::Clone(
     /* [out] */ IInterface** object)
 {

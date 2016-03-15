@@ -68,6 +68,7 @@ using Elastos::IO::IBufferedInputStream;
 using Elastos::IO::CBufferedInputStream;
 using Elastos::IO::ICloseable;
 using Elastos::IO::CFile;
+using Elastos::Utility::CArrayList;
 using Elastos::Utility::Arrays;
 using Elastos::Utility::ISet;
 using Elastos::Utility::IIterator;
@@ -428,6 +429,7 @@ PackageParser::Package::Package(
     mApplicationInfo->SetUid(-1);
 
     CArraySet::New(4, (IArraySet**)&mDexOptPerformed);
+    CArrayList::New(0, (IArrayList**)&mOverlayTargets);
 }
 
 PackageParser::Package::~Package()
@@ -966,11 +968,7 @@ AutoPtr<IPackageInfo> PackageParser::GeneratePackageInfo(
     cpi->mIsLegacyIconPackApk = p->mIsLegacyIconPackApk;
 
     if (cpi->mIsThemeApk) {
-        cpi->mOverlayTargets = ArrayOf<String>::Alloc(p->mOverlayTargets.GetSize());
-        List<String>::Iterator it = p->mOverlayTargets.Begin();
-        for (Int32 i = 0; it != p->mOverlayTargets.End(); ++it, ++i) {
-            (*cpi->mOverlayTargets)[i] = *it;
-        }
+        cpi->mOverlayTargets = p->mOverlayTargets;
         cpi->mThemeInfo = p->mThemeInfo;
     }
     cpi->mApplicationInfo = GenerateApplicationInfo(p, flags, state, userId);
@@ -1662,7 +1660,7 @@ ECode PackageParser::ParseBaseApk(
         AutoPtr<List<String> > overlayTargets = ScanPackageOverlays(apkFile);
         List<String>::Iterator it = overlayTargets->Begin();
         for (; it != overlayTargets->End(); ++it) {
-            pkg->mOverlayTargets.PushBack(*it);
+            pkg->mOverlayTargets->Add(CoreUtils::Convert(*it));
         }
 
         pkg->mHasIconPack = PackageHasIconPack(apkFile);

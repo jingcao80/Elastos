@@ -25,6 +25,8 @@ public:
         /* [in] */ Int32 displayId,
         /* [in] */ IConfiguration* overrideConfiguration,
         /* [in] */ Float scale,
+        /* [in] */ Boolean isThemeable,
+        /* [in] */ IThemeConfig* themeConfig,
         /* [in] */ IBinder* token);
 
     Boolean HasOverrideConfiguration();

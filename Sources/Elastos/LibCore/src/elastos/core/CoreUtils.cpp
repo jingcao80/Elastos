@@ -53,6 +53,15 @@ AutoPtr<IInteger32> CoreUtils::Convert(
     return (IInteger32*)obj.Get();
 }
 
+Int32 CoreUtils::Unbox(
+    /* [in] */ IInteger32* value)
+{
+    if (value == NULL) return 0;
+    Int32 iVal;
+    value->GetValue(&iVal);
+    return iVal;
+}
+
 AutoPtr<IInteger64> CoreUtils::Convert(
     /* [in] */ Int64 value)
 {

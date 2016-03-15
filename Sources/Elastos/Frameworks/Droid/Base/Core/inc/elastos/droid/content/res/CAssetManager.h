@@ -13,6 +13,7 @@ using Elastos::Droid::Utility::ITypedValue;
 using Elastos::Droid::Utility::ISparseArray;
 using Elastos::IO::ICloseable;
 using Elastos::IO::InputStream;
+using Elastos::Utility::IArrayList;
 using Elastos::Utility::Etl::HashMap;
 
 namespace Elastos {
@@ -369,6 +370,25 @@ public:
         /* [in] */ const String& path,
         /* [out] */ Int32* cookie);
 
+    CARAPI AddOverlayPath(
+        /* [in] */ const String& idmapPath,
+        /* [in] */ const String& themePkgPath,
+        /* [in] */ const String& resPkgPath,
+        /* [in] */ const String& targetPkgPath,
+        /* [in] */ const String& prefixPath,
+        /* [out] */ Int32* cookie);
+
+    /**
+     * Add a set of common assets.
+     *
+     * {@hide}
+     */
+    CARAPI AddCommonOverlayPath(
+        /* [in] */ const String& themePkgPath,
+        /* [in] */ const String& resPkgPath,
+        /* [in] */ const String& prefixPath,
+        /* [out] */ Int32* cookie);
+
     /**
      * Add a set of assets as an icon pack. A pkgIdOverride value will change the package's id from
      * what is in the resource table to a new value. Manage this carefully, if icon pack has more
@@ -387,6 +407,19 @@ public:
         /* [out] */ Int32* cookie);
 
     /**
+    * Delete a set of overlay assets from the asset manager. Not for use by
+    * applications. Returns true if succeeded or false on failure.
+    *
+    * Also works for icon packs
+    *
+    * {@hide}
+    */
+    CARAPI RemoveOverlayPath(
+        /* [in] */ const String& packageName,
+        /* [in] */ Int32 cookie,
+        /* [out] */ Boolean* result);
+
+    /**
      * Add multiple sets of assets to the asset manager at once.  See
      * {@link #addAssetPath(String)} for more information.  Returns array of
      * cookies for each added asset with 0 indicating failure, or null if
@@ -397,7 +430,102 @@ public:
         /* [in] */ ArrayOf<String>* paths,
         /* [out, callee] */ ArrayOf<Int32>** cookies);
 
-     /**
+    /**
+     * Sets a flag indicating that this AssetManager should have themes
+     * attached, according to the initial request to create it by the
+     * ApplicationContext.
+     *
+     * {@hide}
+     */
+    CARAPI SetThemeSupport(
+        /* [in] */ Boolean themeSupport);
+
+    /**
+     * Should this AssetManager have themes attached, according to the initial
+     * request to create it by the ApplicationContext?
+     *
+     * {@hide}
+     */
+    CARAPI HasThemeSupport(
+        /* [out] */ Boolean* themeSupport);
+
+    /**
+     * Get package name of current icon pack (may return null).
+     * {@hide}
+     */
+    CARAPI GetIconPackageName(
+        /* [out] */ String* pkgName);
+
+    /**
+     * Sets icon package name
+     * {@hide}
+     */
+    CARAPI SetIconPackageName(
+        /* [in] */ const String& packageName);
+
+    /**
+     * Get package name of current common resources (may return null).
+     * {@hide}
+     */
+    CARAPI GetCommonResPackageName(
+        /* [out] */ String* pkgName);
+
+    /**
+     * Sets common resources package name
+     * {@hide}
+     */
+    CARAPI SetCommonResPackageName(
+        /* [in] */ const String& packageName);
+
+    /**
+     * Get package name of current theme (may return null).
+     * {@hide}
+     */
+    CARAPI GetThemePackageName(
+        /* [out] */ String* pkgName);
+
+    /**
+     * Sets package name and highest level style id for current theme (null, 0 is allowed).
+     * {@hide}
+     */
+    CARAPI SetThemePackageName(
+        /* [in] */ const String& packageName);
+
+    /**
+     * Get asset cookie for current theme (may return 0).
+     * {@hide}
+     */
+    CARAPI GetThemeCookies(
+        /* [out] */ IArrayList** cookies);
+
+    /** {@hide} */
+    CARAPI SetIconPackCookie(
+        /* [in] */ Int32 cookie);
+
+    /** {@hide} */
+    CARAPI GetIconPackCookie(
+        /* [out] */ Int32* cookie);
+
+    /** {@hide} */
+    CARAPI SetCommonResCookie(
+        /* [in] */ Int32 cookie);
+
+    /** {@hide} */
+    CARAPI GetCommonResCookie(
+        /* [out] */ Int32* cookie);
+
+    /**
+     * Sets asset cookie for current theme (0 if not a themed asset manager).
+     * {@hide}
+     */
+    CARAPI AddThemeCookie(
+        /* [in] */ Int32 cookie);
+
+    /** {@hide} */
+    CARAPI SetAppName(
+        /* [in] */ const String& pkgName);
+
+    /**
      * Add a set of assets to overlay an already added set of assets.
      *
      * This is only intended for application resources. System wide resources
@@ -585,6 +713,33 @@ public:
     CARAPI GetStyleAttributes(
         /* [in] */ Int32 arrayRes,
         /* [out] */ ArrayOf<Int32>** result);
+
+    /**
+     * {@hide}
+     */
+    CARAPI GetBasePackageCount(
+        /* [out] */ Int32* pkgCount);
+
+    /**
+     * {@hide}
+     */
+    CARAPI GetBasePackageName(
+        /* [in] */ Int32 index,
+        /* [out] */ String* pkgName);
+
+    /**
+     * {@hide}
+     */
+    CARAPI GetBaseResourcePackageName(
+        /* [in] */ Int32 index,
+        /* [out] */ String* pkgName);
+
+    /**
+     * {@hide}
+     */
+    CARAPI GetBasePackageId(
+        /* [in] */ Int32 index,
+        /* [out] */ Int32* pkgId);
 
     CARAPI_(Int32) GetHashCode();
 

@@ -2,8 +2,11 @@
 #ifndef __ELASTOS_DROID_CONTENT_PM_CPACKAGEINFO_H__
 #define __ELASTOS_DROID_CONTENT_PM_CPACKAGEINFO_H__
 
+#include "Elastos.CoreLibrary.Utility.h"
 #include "_Elastos_Droid_Content_Pm_CPackageInfo.h"
 #include <elastos/core/Object.h>
+
+using Elastos::Utility::IArrayList;
 
 namespace Elastos {
 namespace Droid {
@@ -228,13 +231,13 @@ public:
      * {@hide}
      */
     CARAPI GetOverlayTargets(
-        /* [out, callee] */ ArrayOf<String>** targets);
+        /* [out] */ IArrayList** targets);
 
     /**
      * {@hide}
      */
     CARAPI SetOverlayTargets(
-        /* [in] */ ArrayOf<String>* targets);
+        /* [in] */ IArrayList* targets);
 
     /**
      * {@hide}
@@ -450,7 +453,7 @@ public:
     /**
      * {@hide}
      */
-    AutoPtr<ArrayOf<String> > mOverlayTargets;
+    AutoPtr<IArrayList> mOverlayTargets;
 
     // Is Legacy Icon Apk
     /**

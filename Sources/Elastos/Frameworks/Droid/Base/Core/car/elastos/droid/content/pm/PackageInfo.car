@@ -12,6 +12,7 @@ module
     interface Elastos.Droid.Content.Pm.IFeatureInfo;
     interface Elastos.Droid.Content.Pm.IFeatureGroupInfo;
     interface Elastos.Droid.Content.Pm.IThemeInfo;
+    using interface Elastos.Utility.IArrayList;
 
     namespace Elastos {
     namespace Droid {
@@ -258,13 +259,13 @@ module
          * {@hide}
          */
         GetOverlayTargets(
-            [out, callee] ArrayOf<String>* targets);
+            [out] IArrayList** targets);
 
         /**
          * {@hide}
          */
         SetOverlayTargets(
-            [in] ArrayOf<String>* targets);
+            [in] IArrayList* targets);
 
         /**
          * {@hide}

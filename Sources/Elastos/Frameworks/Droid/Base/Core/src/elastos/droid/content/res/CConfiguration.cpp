@@ -1011,6 +1011,20 @@ ECode CConfiguration::SetLocale(
     return SetLayoutDirection(mLocale);
 }
 
+ECode CConfiguration::GetThemeConfig(
+    /* [out] */ IThemeConfig** themeConfig)
+{
+    assert(0);
+    return NOERROR;
+}
+
+ECode CConfiguration::SetThemeConfig(
+    /* [in] */ IThemeConfig* themeConfig)
+{
+    assert(0);
+    return NOERROR;
+}
+
 ECode CConfiguration::GetLayoutDirection(
     /* [out] */ Int32* dir)
 {
