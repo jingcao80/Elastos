@@ -302,7 +302,7 @@ ECode TimeZone::GetTimeZone(
     // In the database?
     AutoPtr<IZoneInfo> zi;
     FAIL_RETURN(CZoneInfoDB::GetInstance()->MakeTimeZone(id, (IZoneInfo**)&zi))
-    ITimeZone * zone = ITimeZone::Probe(zi);
+    AutoPtr<ITimeZone> zone = ITimeZone::Probe(zi);
     // Custom time zone?
     if (zone == NULL && id.GetLength() > 3 && id.StartWith("GMT")) {
         zone = GetCustomTimeZone(id);
