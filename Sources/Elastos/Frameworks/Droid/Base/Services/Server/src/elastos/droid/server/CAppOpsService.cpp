@@ -1,5 +1,6 @@
 
 #include "elastos/droid/server/CAppOpsService.h"
+#include "elastos/droid/app/AppOpsManager.h"
 #include <elastos/droid/Manifest.h>
 #include <elastos/droid/os/Binder.h>
 #include <elastos/droid/os/Process.h>
@@ -16,6 +17,7 @@
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Manifest;
+using Elastos::Droid::App::AppOpsManager;
 using Elastos::Droid::Os::Process;
 using Elastos::Droid::Os::Binder;
 using Elastos::Droid::Os::EIID_IBinder;
@@ -278,6 +280,20 @@ const Boolean CAppOpsService::DEBUG = FALSE;
 
 // Write at most every 30 minutes.
 const Int64 CAppOpsService::WRITE_DELAY = DEBUG ? 1000 : 30*60*1000;
+
+static AutoPtr<ArrayOf<Int32> > InitPRIVACY_GUARD_OP_STATES() {
+    AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(5);
+
+    array->Set(0, IAppOpsManager::OP_COARSE_LOCATION);
+    array->Set(1, IAppOpsManager::OP_READ_CALL_LOG);
+    array->Set(2, IAppOpsManager::OP_READ_CONTACTS);
+    array->Set(3, IAppOpsManager::OP_READ_CALENDAR);
+    array->Set(4, IAppOpsManager::OP_READ_SMS);
+
+    return array;
+}
+
+AutoPtr<ArrayOf<Int32> > CAppOpsService::PRIVACY_GUARD_OP_STATES = InitPRIVACY_GUARD_OP_STATES();
 
 CAR_INTERFACE_IMPL_2(CAppOpsService, Object, IIAppOpsService, IBinder)
 
@@ -1931,6 +1947,109 @@ ECode CAppOpsService::RemoveUser(
 {
     FAIL_RETURN(CheckSystemUid(String("RemoveUser")))
     mOpRestrictions->Remove(userHandle);
+    return NOERROR;
+}
+
+ECode CAppOpsService::IsControlAllowed(
+    /* [in] */ Int32 code,
+    /* [in] */ const String& packageName,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    // Boolean isShow = TRUE;
+    // if (mPolicy != NULL) {
+    //     mPolicy->IsControlAllowed(code, packageName, &isShow);
+    // }
+    // *result = isShow;
+    return NOERROR;
+}
+
+ECode CAppOpsService::GetPrivacyGuardSettingForPackage(
+    /* [in] */ Int32 uid,
+    /* [in] */ const String& packageName,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    for (Int32 i = 0; i < PRIVACY_GUARD_OP_STATES->GetLength(); i++) {
+        Int32 op = (*PRIVACY_GUARD_OP_STATES)[i];
+        AutoPtr<IAppOpsManagerHelper> aom;
+        CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+        Int32 switchOp;
+        aom->OpToSwitch(op, &switchOp);
+        Int32 mode;
+        CheckOperation(op, uid, packageName, &mode);
+        if (mode != IAppOpsManager::MODE_ALLOWED && !IsOpRestricted(uid, op, packageName)) {
+            *result = TRUE;
+            return NOERROR;
+        }
+    }
+    *result = FALSE;
+    return NOERROR;
+}
+
+ECode CAppOpsService::SetPrivacyGuardSettingForPackage(
+    /* [in] */ Int32 uid,
+    /* [in] */ const String& packageName,
+    /* [in] */ Boolean state)
+{
+    for (Int32 i = 0; i < PRIVACY_GUARD_OP_STATES->GetLength(); i++) {
+        Int32 op = (*PRIVACY_GUARD_OP_STATES)[i];
+        AutoPtr<IAppOpsManagerHelper> aom;
+        CAppOpsManagerHelper::AcquireSingleton((IAppOpsManagerHelper**)&aom);
+        Int32 switchOp;
+        aom->OpToSwitch(op, &switchOp);
+        return SetMode(switchOp, uid, packageName, state
+                ? IAppOpsManager::MODE_ASK : IAppOpsManager::MODE_ALLOWED);
+    }
+    return NOERROR;
+}
+
+ECode CAppOpsService::ResetCounters()
+{
+    FAIL_RETURN(mContext->EnforcePermission(Manifest::permission::UPDATE_APP_OPS_STATS,
+        Binder::GetCallingPid(), Binder::GetCallingUid(), String(NULL)))
+
+    synchronized(this) {
+        Int32 size;
+        mUidOps->GetSize(&size);
+        for (Int32 i = 0; i < size; i++) {
+            AutoPtr<IInterface> obj;
+            mUidOps->ValueAt(i, (IInterface**)&obj);
+            AutoPtr<IHashMap> packages = IHashMap::Probe(obj);
+
+            AutoPtr<ISet> set;
+            packages->GetEntrySet((ISet**)&set);
+            AutoPtr<IIterator> it;
+            set->GetIterator((IIterator**)&it);
+            Boolean b;
+            while (it->HasNext(&b), b) {
+                obj = NULL;
+                it->GetNext((IInterface**)&obj);
+                AutoPtr<IMapEntry> entry = IMapEntry::Probe(obj);
+                AutoPtr<IInterface> iKey;
+                entry->GetKey((IInterface**)&iKey);
+                String packageName;
+                ICharSequence::Probe(iKey)->ToString(&packageName);
+                AutoPtr<IInterface> iValue;
+                entry->GetValue((IInterface**)&iValue);
+                AutoPtr<Ops> pkgOps = (Ops*)(IObject*)iValue.Get();
+
+                Int32 s;
+                pkgOps->GetSize(&s);
+                for (Int32 j = 0; j < s; j++) {
+                    obj = NULL;
+                    pkgOps->ValueAt(j, (IInterface**)&obj);
+                    AutoPtr<Op> curOp = (Op*)(IObject*)obj.Get();
+                    curOp->mAllowedCount = 0;
+                    curOp->mIgnoredCount = 0;
+                }
+            }
+        }
+        // ensure the counter reset persists
+        ScheduleWriteNowLocked();
+    }
     return NOERROR;
 }
 

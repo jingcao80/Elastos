@@ -29,6 +29,7 @@ module
      */
     [local]
     interface IExternalMediaFormatActivity {
+        const String FORMAT_PATH = "format_path";
     }
 
     } // namespace App

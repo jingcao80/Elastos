@@ -148,6 +148,7 @@ public:
     Int32 mKeyCount;
     // AutoPtr<IPathInterpolator> mInterpolator;
     AutoPtr<ITimeInterpolator> mInterpolator;
+    Boolean mIsCM;
 };
 
 } //namespace App

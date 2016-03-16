@@ -81,15 +81,56 @@ ECode ExternalMediaFormatActivity::OnCreate(
 {
     AlertActivity::OnCreate(savedInstanceState);
 
+    // This is necessary because this class's caller,
+    // packages/SystemUI/src/com/android/systemui/usb/StorageNotification.java,
+    // supplies the path to be erased/formatted as a String, instead of a
+    // StorageVolume. This for-loop gets the correct StorageVolume from the
+    // given path.
+    AutoPtr<IInterface> service;
+    GetSystemService(IContext::STORAGE_SERVICE, (IInterface**)&service);
+    mStorageManager = IStorageManager::Probe(service);
+    AutoPtr<IIntent> intent;
+    GetIntent((IIntent**)&intent);
+    String path;
+    intent->GetStringExtra(FORMAT_PATH, &path);
+    AutoPtr<ArrayOf<IStorageVolume*> > volumes;
+    mStorageManager->GetVolumeList((ArrayOf<IStorageVolume*>**)&volumes);
+
+    for (Int32 i = 0; i < volumes->GetLength(); i++) {
+        AutoPtr<IStorageVolume> sv = (*volumes)[i];
+        String str;
+        sv->GetPath(&str);
+        if (path.Equals(str)) {
+            mStorageVolume = sv;
+            break;
+        }
+    }
+
     Logger::D("ExternalMediaFormatActivity", "onCreate!");
+    String str;
+    mStorageVolume->GetPath(&str);
+    Logger::D("ExternalMediaFormatActivity", "The storage volume to be formatted is : %s", str.string());
+
+    Int32 id;
+    mStorageVolume->GetDescriptionId(&id);
+    Boolean isUsbStorage = id == R::string::storage_usb;
+
     // Set up the "dialog"
     AutoPtr<IAlertControllerAlertParams> p = mAlertParams;
     AutoPtr<ICharSequence> charSequence;
     GetText(R::string::extmedia_format_title, (ICharSequence**)&charSequence);
     p->SetTitle(charSequence);
+
     charSequence = NULL;
-    GetText(R::string::extmedia_format_message, (ICharSequence**)&charSequence);
+    GetText(isUsbStorage ?
+            R::string::usb_extmedia_format_message :
+            R::string::sd_extmedia_format_message, (ICharSequence**)&charSequence);
+    // p.mMessage = String.format(getString(isUsbStorage ?
+    //                 com.android.internal.R.string.usb_extmedia_format_message :
+    //                 com.android.internal.R.string.sd_extmedia_format_message),
+    //         mStorageVolume.getPath());
     p->SetMessage(charSequence);
+
     charSequence = NULL;
     GetText(R::string::extmedia_format_button_format, (ICharSequence**)&charSequence);
     p->SetPositiveButtonText(charSequence);
@@ -135,6 +176,7 @@ ECode ExternalMediaFormatActivity::OnClick(
         AutoPtr<IIntent> intent;
         CIntent::New(IExternalStorageFormatter::FORMAT_ONLY, (IIntent**)&intent);
         intent->SetComponent(CExternalStorageFormatter::COMPONENT_NAME);
+        intent->PutExtra(IStorageVolume::EXTRA_STORAGE_VOLUME, IParcelable::Probe(mStorageVolume));
         AutoPtr<IComponentName> component;
         StartService(intent, (IComponentName**)&component);
     }

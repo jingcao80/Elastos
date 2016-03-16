@@ -96,6 +96,25 @@ module
 
         RemoveUser(
             [in] Int32 userHandle);
+
+        IsControlAllowed(
+            [in] Int32 code,
+            [in] String packageName,
+            [out] Boolean* result);
+
+        // Privacy guard methods
+        GetPrivacyGuardSettingForPackage(
+            [in] Int32 uid,
+            [in] String packageName,
+            [out] Boolean* result);
+
+        SetPrivacyGuardSettingForPackage(
+            [in] Int32 uid,
+            [in] String packageName,
+            [in] Boolean state);
+
+        // AppOps accounting
+        ResetCounters();
     }
 
     }//namespace App

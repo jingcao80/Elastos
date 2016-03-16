@@ -136,6 +136,7 @@ ECode PlatLogoActivity::LocalRunnable::Run()
     intent->SetFlags(IIntent::FLAG_ACTIVITY_NEW_TASK
             | IIntent::FLAG_ACTIVITY_CLEAR_TASK
             | IIntent::FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+    intent->PutExtra(String("is_cm"), mHost->mIsCM);
     intent->AddCategory(String("com.android.internal.category.PLATLOGO"));
     if (mHost->StartActivity(intent) == (ECode)E_ACTIVITY_NOT_FOUND_EXCEPTION) {
         Logger::E("PlatLogoActivity", "No more eggs.");
@@ -306,6 +307,9 @@ ECode PlatLogoActivity::OnCreate(
 {
     Activity::OnCreate(savedInstanceState);
     CFrameLayout::New(IContext::Probe(this), (IFrameLayout**)&mLayout);
+    AutoPtr<IIntent> intent;
+    GetIntent((IIntent**)&intent);
+    intent->HasExtra(String("is_cm"), &mIsCM);
     SetContentView(IView::Probe(mLayout));
     return NOERROR;
 }
@@ -340,7 +344,8 @@ ECode PlatLogoActivity::OnAttachedToWindow()
     im->SetScaleX(0);
     im->SetScaleY(0);
     AutoPtr<IDrawable> platlogo;
-    GetDrawable(R::drawable::platlogo, (IDrawable**)&platlogo);
+    GetDrawable(mIsCM ? R::drawable::cm_platlogo : R::drawable::platlogo,
+        (IDrawable**)&platlogo);
     platlogo->SetAlpha(0);
     imageview->SetImageDrawable(platlogo);
     im->SetBackground(MakeRipple());

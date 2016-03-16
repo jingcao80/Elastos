@@ -53,6 +53,7 @@ using Elastos::Droid::Os::UserHandle;
 using Elastos::Droid::Provider::ISettings;
 using Elastos::Droid::Text::TextUtils;
 using Elastos::Droid::View::EIID_IViewOnClickListener;
+using Elastos::Droid::View::EIID_IViewOnLongClickListener;
 using Elastos::Droid::View::LayoutInflater;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemClickListener;
 using Elastos::Droid::Widget::EIID_IAdapterViewOnItemLongClickListener;
@@ -166,6 +167,34 @@ ECode ResolverActivity::ViewOnClickListener::OnClick(
     /* [in] */ IView* v)
 {
     return mHost->Finish();
+}
+
+CAR_INTERFACE_IMPL(ResolverActivity::FilteredItemContainerOnLongCliskListener,
+        Object, IViewOnLongClickListener)
+
+ResolverActivity::FilteredItemContainerOnLongCliskListener::FilteredItemContainerOnLongCliskListener(
+    /* [in] */ ResolverActivity* host,
+    /* [in] */ ResolveListAdapter* adapter)
+    : mHost(host)
+    , mAdapter(adapter)
+{}
+
+ECode ResolverActivity::FilteredItemContainerOnLongCliskListener::OnLongClick(
+    /* [in] */ IView* v,
+    /* [out] */ Boolean* result)
+{
+    VALIDATE_NOT_NULL(result)
+
+    AutoPtr<DisplayResolveInfo> filteredItem = mAdapter->GetFilteredItem();
+
+    if (filteredItem == NULL) {
+        *result = FALSE;
+        return NOERROR;
+    }
+
+    mHost->ShowAppDetails(filteredItem->mRi);
+    *result = TRUE;
+    return NOERROR;
 }
 
 ResolverActivity::ResolveListAdapter::ResolveListAdapter(
@@ -1093,6 +1122,13 @@ ECode ResolverActivity::OnCreate(
     }
 
     if (hasFilteredItem) {
+        view = NULL;
+        FindViewById(R::id::filtered_item_container, (IView**)&view);
+        mFilteredItemContainer = IViewGroup::Probe(view);
+        AutoPtr<FilteredItemContainerOnLongCliskListener> l =
+                new FilteredItemContainerOnLongCliskListener(this, mAdapter);
+        IView::Probe(mFilteredItemContainer)->SetOnLongClickListener(l);
+
         Int32 position = mAdapter->GetFilteredPosition();
         SetAlwaysButtonEnabled(TRUE, position, FALSE);
         IView::Probe(mOnceButton)->SetEnabled(TRUE);

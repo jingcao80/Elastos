@@ -2,12 +2,15 @@
 #ifndef __ELASTOS_DROID_INTERNAL_APP_EXTERNALMEDIAFORMATACTIVITY_H__
 #define __ELASTOS_DROID_INTERNAL_APP_EXTERNALMEDIAFORMATACTIVITY_H__
 
+#include "Elastos.Droid.Os.h"
 #include "elastos/droid/internal/app/AlertActivity.h"
 #include "elastos/droid/content/BroadcastReceiver.h"
 
 using Elastos::Droid::Content::IDialogInterfaceOnClickListener;
 using Elastos::Droid::Content::BroadcastReceiver;
 using Elastos::Droid::Content::IBroadcastReceiver;
+using Elastos::Droid::Os::Storage::IStorageManager;
+using Elastos::Droid::Os::Storage::IStorageVolume;
 
 namespace Elastos {
 namespace Droid {
@@ -74,6 +77,9 @@ protected:
 
 private:
     static const Int32 POSITIVE_BUTTON;
+
+    AutoPtr<IStorageManager> mStorageManager;
+    AutoPtr<IStorageVolume> mStorageVolume;
 
     AutoPtr<IBroadcastReceiver> mStorageReceiver;
 };

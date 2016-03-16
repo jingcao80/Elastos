@@ -17,6 +17,7 @@ using Elastos::Droid::Internal::Content::PackageMonitor;
 using Elastos::Droid::Internal::Content::EIID_IPackageMonitor;
 using Elastos::Droid::Os::AsyncTask;
 using Elastos::Droid::View::IViewOnClickListener;
+using Elastos::Droid::View::IViewOnLongClickListener;
 using Elastos::Droid::Widget::BaseAdapter;
 using Elastos::Droid::Widget::IAdapterView;
 using Elastos::Droid::Widget::IAdapterViewOnItemClickListener;
@@ -320,6 +321,26 @@ private:
         Boolean mFilterLastUsed;
     };
 
+    class FilteredItemContainerOnLongCliskListener
+        : public Object
+        , public IViewOnLongClickListener
+    {
+    public:
+        FilteredItemContainerOnLongCliskListener(
+            /* [in] */ ResolverActivity* host,
+            /* [in] */ ResolveListAdapter* adapter);
+
+        CAR_INTERFACE_DECL();
+
+        CARAPI OnLongClick(
+            /* [in] */ IView* v,
+            /* [out] */ Boolean* result);
+
+    private:
+        ResolverActivity* mHost;
+        ResolveListAdapter* mAdapter;
+    };
+
 public:
     ResolverActivity();
 
@@ -445,6 +466,7 @@ private:
     Boolean mAlwaysUseOption;
     Boolean mShowExtended;
     AutoPtr<IListView> mListView;
+    AutoPtr<IViewGroup> mFilteredItemContainer;
     AutoPtr<IButton> mAlwaysButton;
     AutoPtr<IButton> mOnceButton;
     Int32 mIconDpi;

@@ -116,6 +116,13 @@ module
          */
         const Int32 MODE_DEFAULT = 3;
 
+        /**
+         * @hide Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}:
+         * AppOps Service should show a dialog box on screen to get user
+         * permission.
+         */
+        const Int32 MODE_ASK = 4;
+
         /** @hide No operation specified. */
         const Int32 OP_NONE = -1;
         /** @hide Access to coarse location information. */

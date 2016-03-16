@@ -183,6 +183,12 @@ void ProcessStats::DurationsTable::AddDuration(
         mDurationsTable = mStats->mAddInt64Table;
         mDurationsTableSize = mStats->mAddInt64TableSize;
     }
+
+    Int32 size = mStats->mInt64s.GetSize();
+    if (((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK) >= size) {
+        return;
+    }
+
     AutoPtr<ArrayOf<Int64> > longs = mStats->mInt64s[(off >> OFFSET_ARRAY_SHIFT) & OFFSET_ARRAY_MASK];
     if (DEBUG) Slogger::D(TAG, "Duration of %s state %d inc by %lld from %lld",
         mName.string(), state, dur, (*longs)[(off >> OFFSET_INDEX_SHIFT) & OFFSET_INDEX_MASK]);
@@ -705,6 +711,12 @@ void ProcessStats::ProcessState::AddPss(
         mPssTable = mStats->mAddInt64Table;
         mPssTableSize = mStats->mAddInt64TableSize;
     }
+
+    Int32 size = mStats->mInt64s.GetSize();
+    if (((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK) >= size) {
+        return;
+    }
+
     AutoPtr<ArrayOf<Int64> > longs = mStats->mInt64s[(off >> OFFSET_ARRAY_SHIFT) & OFFSET_ARRAY_MASK];
     idx = (off >> OFFSET_INDEX_SHIFT) & OFFSET_INDEX_MASK;
     Int64 count = (*longs)[idx+PSS_SAMPLE_COUNT];

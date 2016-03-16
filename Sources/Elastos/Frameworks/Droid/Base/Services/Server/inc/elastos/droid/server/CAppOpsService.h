@@ -113,6 +113,9 @@ private:
         Int64 mTime;
         Int64 mRejectTime;
         Int32 mNesting;
+
+        Int32 mAllowedCount;
+        Int32 mIgnoredCount;
     };
 
     class Ops
@@ -340,6 +343,23 @@ public:
     CARAPI RemoveUser(
         /* [in] */ Int32 userHandle);
 
+    CARAPI IsControlAllowed(
+        /* [in] */ Int32 code,
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* result);
+
+    CARAPI GetPrivacyGuardSettingForPackage(
+        /* [in] */ Int32 uid,
+        /* [in] */ const String& packageName,
+        /* [out] */ Boolean* result);
+
+    CARAPI SetPrivacyGuardSettingForPackage(
+        /* [in] */ Int32 uid,
+        /* [in] */ const String& packageName,
+        /* [in] */ Boolean state);
+
+    CARAPI ResetCounters();
+
     CARAPI ToString(
         /* [out] */ String* str);
 
@@ -410,6 +430,8 @@ private:
 
     // Write at most every 30 minutes.
     static const Int64 WRITE_DELAY;
+
+    static AutoPtr<ArrayOf<Int32> > PRIVACY_GUARD_OP_STATES;
 
     AutoPtr<IContext> mContext;
     AutoPtr<IAtomicFile> mFile;
