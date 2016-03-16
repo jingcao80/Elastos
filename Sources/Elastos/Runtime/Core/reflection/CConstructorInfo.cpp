@@ -3,6 +3,7 @@
 //==========================================================================
 
 #include "CConstructorInfo.h"
+#include <elautoptr.h>
 
 UInt32 CConstructorInfo::AddRef()
 {
@@ -52,9 +53,12 @@ ECode CConstructorInfo::Init(
     mClsId.mClsid =  clsId->mClsid;
     strcpy(mClsId.mUunm, clsId->mUunm);
 
+    AutoPtr<IInterface> obj;
     mMethodInfo = NULL;
-    return g_objInfoList.AcquireMethodInfo(clsModule, methodDescriptor,
-            index, (IInterface **)&mMethodInfo);
+    ECode ec = g_objInfoList.AcquireMethodInfo(clsModule, methodDescriptor,
+            index, (IInterface **)&obj);
+    mMethodInfo = (CMethodInfo*)obj.Get();
+    return ec;
 }
 
 ECode CConstructorInfo::GetName(

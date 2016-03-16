@@ -405,6 +405,7 @@ ECode CObjInfoList::AcquireClassInfo(
 
     IInterface** obj = mClassInfos.Get(&clsDirEntry);
     if (!obj) {
+        IInterface *interfaceObj = NULL;
         AutoPtr<CClassInfo> classInfoObj = new CClassInfo(clsModule, clsDirEntry);
         if (classInfoObj == NULL) {
             UnlockHashTable(EntryType_Class);
@@ -417,12 +418,13 @@ ECode CObjInfoList::AcquireClassInfo(
             return ec;
         }
 
-        if (!mClassInfos.Put(&clsDirEntry, (IInterface**)&classInfoObj)) {
+        interfaceObj = (IInterface*)classInfoObj.Get();
+        if (!mClassInfos.Put(&clsDirEntry, (IInterface**)&interfaceObj)) {
             UnlockHashTable(EntryType_Class);
             return E_OUT_OF_MEMORY;
         }
 
-        *object = classInfoObj;
+        *object = interfaceObj;
         (*object)->AddRef();
     }
     else {
@@ -463,6 +465,7 @@ ECode CObjInfoList::AcquireStaticStructInfo(
 
     IInterface** obj = mStructInfos.Get(&structDirEntry);
     if (!obj) {
+        IInterface *interfaceObj = NULL;
         AutoPtr<CStructInfo> structInfoObj = new CStructInfo();
         if (structInfoObj == NULL) {
             UnlockHashTable(EntryType_Struct);
@@ -475,12 +478,13 @@ ECode CObjInfoList::AcquireStaticStructInfo(
             return ec;
         }
 
-        if (!mStructInfos.Put(&structDirEntry, (IInterface**)&structInfoObj)) {
+        interfaceObj = (IInterface*)structInfoObj.Get();
+        if (!mStructInfos.Put(&structDirEntry, (IInterface**)&interfaceObj)) {
             UnlockHashTable(EntryType_Struct);
             return E_OUT_OF_MEMORY;
         }
 
-        *object = structInfoObj;
+        *object = interfaceObj;
         (*object)->AddRef();
     }
     else {
@@ -595,6 +599,7 @@ ECode CObjInfoList::AcquireStaticEnumInfo(
 
     IInterface** obj = mEnumInfos.Get(&enumDirEntry);
     if (!obj) {
+        IInterface *interfaceObj = NULL;
         AutoPtr<CEnumInfo> enumInfoObj = new CEnumInfo();
         if (enumInfoObj == NULL) {
             UnlockHashTable(EntryType_Enum);
@@ -607,12 +612,13 @@ ECode CObjInfoList::AcquireStaticEnumInfo(
             return ec;
         }
 
-        if (!mEnumInfos.Put(&enumDirEntry, (IInterface**)&enumInfoObj)) {
+        interfaceObj = (IInterface*)enumInfoObj.Get();
+        if (!mEnumInfos.Put(&enumDirEntry, (IInterface**)&interfaceObj)) {
             UnlockHashTable(EntryType_Enum);
             return E_OUT_OF_MEMORY;
         }
 
-        *object = enumInfoObj;
+        *object = interfaceObj;
         (*object)->AddRef();
     }
     else {
@@ -747,6 +753,7 @@ ECode CObjInfoList::AcquireTypeAliasInfo(
 
     IInterface** obj = mTypeAliasInfos.Get(&aliasDirEntry);
     if (!obj) {
+        IInterface *interfaceObj = NULL;
         AutoPtr<CTypeAliasInfo> aliasInfoObj = new CTypeAliasInfo(clsModule,
                 aliasDirEntry);
         if (aliasInfoObj == NULL) {
@@ -754,12 +761,13 @@ ECode CObjInfoList::AcquireTypeAliasInfo(
             return E_OUT_OF_MEMORY;
         }
 
-        if (!mTypeAliasInfos.Put(&aliasDirEntry, (IInterface**)&aliasInfoObj)) {
+        interfaceObj = (IInterface*)aliasInfoObj.Get();
+        if (!mTypeAliasInfos.Put(&aliasDirEntry, (IInterface**)&interfaceObj)) {
             UnlockHashTable(EntryType_TypeAliase);
             return E_OUT_OF_MEMORY;
         }
 
-        *object = aliasInfoObj;
+        *object = interfaceObj;
         (*object)->AddRef();
     }
     else {
@@ -804,6 +812,7 @@ ECode CObjInfoList::AcquireInterfaceInfo(
 
     IInterface** obj = mIFInfos.Get(&iid);
     if (!obj) {
+        IInterface *interfaceObj = NULL;
         AutoPtr<CInterfaceInfo> ifInfoObj = new CInterfaceInfo(clsModule, index);
         if (ifInfoObj == NULL) {
             UnlockHashTable(EntryType_Interface);
@@ -816,12 +825,13 @@ ECode CObjInfoList::AcquireInterfaceInfo(
             return ec;
         }
 
-        if (!mIFInfos.Put(&iid, (IInterface**)&ifInfoObj)) {
+        interfaceObj = (IInterface*)ifInfoObj.Get();
+        if (!mIFInfos.Put(&iid, (IInterface**)&interfaceObj)) {
             UnlockHashTable(EntryType_Interface);
             return E_OUT_OF_MEMORY;
         }
 
-        *object = ifInfoObj;
+        *object = interfaceObj;
         (*object)->AddRef();
     }
     else {
@@ -862,6 +872,7 @@ ECode CObjInfoList::AcquireMethodInfo(
     memcpy((PByte)&keyValue + 4, &index, 4);
     IInterface** obj = mMethodInfos.Get(&keyValue);
     if (!obj) {
+        IMethodInfo* iMethodInfo = NULL;
         AutoPtr<CMethodInfo> methodInfoObj = new CMethodInfo(clsModule,
                 methodDescriptor, index);
         if (methodInfoObj == NULL) {
@@ -875,11 +886,12 @@ ECode CObjInfoList::AcquireMethodInfo(
             return ec;
         }
 
-        if (!mMethodInfos.Put(&keyValue, (IInterface**)&methodInfoObj)) {
+        iMethodInfo = (IMethodInfo*)methodInfoObj.Get();
+        if (!mMethodInfos.Put(&keyValue, (IInterface**)&iMethodInfo)) {
             UnlockHashTable(EntryType_Method);
             return E_OUT_OF_MEMORY;
         }
-        *object = methodInfoObj;
+        *object = iMethodInfo;
         (*object)->AddRef();
     }
     else {
@@ -1078,6 +1090,7 @@ ECode CObjInfoList::AcquireLocalPtrInfo(
     memcpy((PByte)&keyValue + 4, &pointer, 4);
     IInterface** obj = mLocalPtrInfos.Get(&keyValue);
     if (!obj) {
+        ILocalPtrInfo *interfaceObj = NULL;
         AutoPtr<CLocalPtrInfo> localPtrInfoObj = new CLocalPtrInfo(clsModule,
                 typeDescriptor, pointer);
         if (localPtrInfoObj == NULL) {
@@ -1085,11 +1098,12 @@ ECode CObjInfoList::AcquireLocalPtrInfo(
             return E_OUT_OF_MEMORY;
         }
 
-        if (!mLocalPtrInfos.Put(&keyValue, (IInterface**)&localPtrInfoObj)) {
+        interfaceObj = (ILocalPtrInfo*)localPtrInfoObj.Get();
+        if (!mLocalPtrInfos.Put(&keyValue, (IInterface**)&interfaceObj)) {
             UnlockHashTable(EntryType_Local);
             return E_OUT_OF_MEMORY;
         }
-        *localPtrInfo = localPtrInfoObj;
+        *localPtrInfo = interfaceObj;
         (*localPtrInfo)->AddRef();
     }
     else {

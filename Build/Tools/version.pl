@@ -75,7 +75,7 @@ if ($ARGV[0] eq "__Elastos_CAR") {
     #get the corresponding cls file path.
     $VS_CLS_NAME=~m/^(.*)\/(.*)$/;
     $VS_CLS_NAME=$2;
-    $VS_CLS_NAME=~s/.car/.cls/;
+    $VS_CLS_NAME=~s/\.car/\.cls/;
 
     $VS_RUNTIME_CLS="$VS_XDK_RUNTIME_PLATFORM/$VS_CLS_NAME";
     $VS_TARGET_CLS="$VS_CLS_NAME";
