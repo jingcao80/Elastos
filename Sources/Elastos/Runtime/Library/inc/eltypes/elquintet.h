@@ -104,6 +104,26 @@ DECL_TYPE2FLAG_TMPL(ElLightRefBase *,   CarQuintetFlag_Type_LightRefObject);
 template <class T>
 class ArrayOf;
 
+
+//---------------CheckCompletedTypeOp----------------------------------------
+template <class T, Boolean isPointer>
+struct CheckCompletedTypeOp
+{
+    void operator()(void)
+    {
+    }
+};
+
+template<class T>
+struct CheckCompletedTypeOp<T, TRUE>
+{
+    void operator()(void)
+    {
+    }
+
+    AutoPtr<T> temp;
+};
+
 //---------------QuintetObjectReleaseOp----------------------------------------
 
 template <class T>
@@ -242,6 +262,11 @@ public:
     Int32 Release() const {
         PCarQuintet pCq = (const PCarQuintet)this;
         if (IS_QUINTENT_FLAG(pCq, CarQuintetFlag_HeapAlloced)) {
+#ifdef _DEBUG
+        typedef typename TypeTraits<T>::BaredType CompletedType;
+        CheckCompletedTypeOp<CompletedType, (TypeTraits<T>::isPointer != 0)> op;
+        op();
+#endif
             QuintetObjectReleaseOp<T> releaseOp;
             SharedBuffer * buf = SharedBuffer::GetBufferFromData(pCq);
             if (IS_QUINTENT_FLAG(pCq, CarQuintetFlag_AutoRefCounted)) {

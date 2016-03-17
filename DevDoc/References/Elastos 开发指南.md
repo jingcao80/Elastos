@@ -39,7 +39,7 @@
 
 <span id="traslaterules"></span>
 ### 转译规则
-1. Java 函数返回 this 的情况  
+1. Java 函数返回 this 的情况
     若 Java 函数 return this，则对应的 Car 函数不需用通过 out 参数返回 this 指针。由于 Car 对象不能实现函数连调(如:a->Foo()->Bar())，因此这个 out 参数可以省略，以简化调用方代码的编写。例如以下 Java 方法:
 
     ``` java
@@ -63,10 +63,10 @@
 <span id="carfunction"></span>
 ### Car 函数命名约束
 
-1. Car 函数不支持重载，因此如果一个 Car 接口的既有函数（包括从父接口继承而来的函数）已有某个特定名称的函数，而又需要继续添加参数个数或类型不同的重载函数，那么：  
-第二个重载函数要加后缀 Ex；  
-第三个重载函数要加后缀 Ex2；  
-第四个重载函数要加后缀 Ex3；  
+1. Car 函数不支持重载，因此如果一个 Car 接口的既有函数（包括从父接口继承而来的函数）已有某个特定名称的函数，而又需要继续添加参数个数或类型不同的重载函数，那么：
+第二个重载函数要加后缀 Ex；
+第三个重载函数要加后缀 Ex2；
+第四个重载函数要加后缀 Ex3；
 ... 依次类推。
 
     示例：
@@ -116,7 +116,7 @@
     ```
     并提供了基于地址比较，返回地址作为 HashCode 以及 ToString 返回十六进制显示的地址的默认实现。因此如果你需要自己的 Car 接口中提供这些函数的不同实现，请在自己的 Car 接口中同时提供这三个函数，而且这三个函数都不需要添加后缀。如果需要提供不是比较 IInterface 的便利比较函数，这些便利函数的命名遵循前一条款中的命名约束。
 
-    示例：  
+    示例：
     /Elastos/FrameworkDroid/Base/Core/car/graphics/Point.car
 
     ``` cpp
@@ -248,23 +248,23 @@
 <span id="arrayof"></span>
 ### ArrayOf
 
-1. 简介  
+1. 简介
     <code>ArrayOf</code>实现了类似数组的功能，即在一块连续的内存中分配若干个元素。同时 <code>ArrayOf</code>能对 Car 对象指针，继承自<code>ElRefBase/ElLightRefBase</code>类的对象指针以及 String 进行自动应用计数管理（前提是通过<code>Set(Int32 index, T const other)</code>设置元素。
 
     <code>ArrayOf</code>自身实现了引用计数，因此通常情况下，它都是与<code>AutoPtr</code>结合在一起使用的。
 
     <code>ArrayOf</code>源码定义在<code>Elastos/Runtime/Library/inc/eltypes/elquintet.h</code>中。
 
-2. 引用计数说明  
+2. 引用计数说明
     引起<code>ArrayOf</code>引用计数变化的成员方法可以分为三组:
 
-    * 创建操作(<code>__Alloc/Clone__</code>)：  
+    * 创建操作(<code>__Alloc/Clone__</code>)：
     创建或克隆一个新对象，并且引用计数为 0（即还没有引入引用计数机制），返回的新对象需要加入<code>AutoPtr</code>自动释放或手动调用<code>Free/Release</code>释放；
 
-    * 减少引用计数操作(<code>__Release/Free__</code>)：  
+    * 减少引用计数操作(<code>__Release/Free__</code>)：
     <code>Release/Free</code>这两个接口完全等价，出于一致性考虑请使用<code>Release()</code>，或加入<code>AutoPtr</code>由<code>AutoPtr</code>在内部调用<code>Release()</code>自动减少引用计数，并在恰当的时候释放分配的内存；
 
-    * 增加引用计数(<code>__AddRef__</code>)：  
+    * 增加引用计数(<code>__AddRef__</code>)：
     将一个<code>ArrayOf</code>指针赋值给一个<code>AutoPtr</code>变量就是调用<code>AddRef</code>来增加引用计数的。如果需要手动增加引用计数，通常使用宏<code>INTERFACE_ADDREF(array)</code>来实现。
 
 3. 注意事项
@@ -288,7 +288,7 @@
         mChildrenThreads = newThreads;
         ```
 
-     * 作为 Car 函数的<code>out, callee</code>参数  
+     * 作为 Car 函数的<code>out, callee</code>参数
 
         ``` cpp
         // IPackageInfo.car
@@ -327,7 +327,7 @@
             /* [in] */ const String& str);
         ```
 
-5. 双重数组  
+5. 双重数组
 对于双重数组，请使用<code>AutoPtr\<ArrayOf\<AutoPtr\<ArrayOf\<T\> \> \> \></code>形式。为了简化代码的编写，有两种办法，这两种办法都实现在<code>elquintent.h</code>文件中：
 
     * 使用模板类。优点:通用性好。缺点:可读性不好。
@@ -359,20 +359,20 @@
 
 <span id="etl"></span>
 ### ETL
-1. 简介  
+1. 简介
     ETL 是基于 SGI 实现的一套 C++ 模版库，它的使用方法与 STL 相似。
 
     在使用 ETL 之前需要预设一些宏，这些宏在<code>#include <cmdef.h>(Libcore 下)</code> 和<code>#include \<ext/frameworkdef.h> (Framework 下)</code>中有定义，所以在<code>include</code>任何 ETL 容器头文件之前，务必先<code>include</code>这两个头文件之一。
 
-2. 引用计数说明  
+2. 引用计数说明
     ETL 中的容器自身都添加了引用计数功能，因此可以使用 AutoPtr 包装它们，如：AutoPtr< List<Int32> >。但 ETL 容器并不会修改放置在它里面的元素的引用计数，这一点与 STL 的行为是一致的。
 
-3. 遍历过程中如何修改迭代器  
+3. 遍历过程中如何修改迭代器
     要特别留意在使用<code>Iterator/ReverseIterator</code>遍历的过程中修改迭代器的情况，常见的情形就是遍历过程中调用<code>Erase</code>修改迭代器使得当前迭代器失效（请参考[Effective STL](http://book.douban.com/subject/1243751/)）。下面将介绍各种容器分别在正向和反向遍历过程中<code>Erase</code>元素的正确使用方法。
 
     * 对于正向迭代器 Iterator 来说，List 和 HashMap 各有不同。
 
-        List 的 Erase 返回下一个迭代器，所以使用<code>it = Erase(it)</code>即可；而 HashMap 的<code>Erase</code>返回<code>void</code>，所以需要生成当前迭代器的副本，然后递增当前迭代器，再<code>Erase</code>副本，这个顺序一定不能错。又因为 HashMap 重载的后缀++操作符是先创建副本，然后递增迭代器，然后返回副本，所以可以使用<code>map.Erase(mit++)</code>简化代码。  
+        List 的 Erase 返回下一个迭代器，所以使用<code>it = Erase(it)</code>即可；而 HashMap 的<code>Erase</code>返回<code>void</code>，所以需要生成当前迭代器的副本，然后递增当前迭代器，再<code>Erase</code>副本，这个顺序一定不能错。又因为 HashMap 重载的后缀++操作符是先创建副本，然后递增迭代器，然后返回副本，所以可以使用<code>map.Erase(mit++)</code>简化代码。
 
         List 使用示例:
 
@@ -388,7 +388,7 @@
         }
         ```
 
-        HashMap 使用示例:  
+        HashMap 使用示例:
 
         ``` cpp
         HashMap<Int32, Int32>::Iterator mit;
@@ -404,7 +404,7 @@
 
     * 对于反向迭代器，HashMap 没有反向迭代器，就只有 List 一种情形。由于反向迭代器是由后往前和正向迭代器相差一个元素，而<code>Erase</code>只接收正向迭代器，因此需要将反向迭代器转换为正向迭代器，情况更加复杂。首先要获得合适的正向迭代器，所以需要<code>--(rit.GetBase())</code>获得需要删除元素的正向迭代器，然后调用 Erase 删除该元素。然后将<code>Erase</code>返回的正向迭代器。
 
-        List 使用示例:  
+        List 使用示例:
 
         ``` cpp
         List<Int32>::ReverseIterator rit;
@@ -420,7 +420,7 @@
 
     * 对 Erase 的用法 HashSet 与 HashMap 相同，Vector 用 Iterator 进行<code>Erase</code>与 List 相同，但 ReverseIterator 与 List 略有不同，因为 Vector 删除一个元素之后会进行内存拷贝，所以所删元素之后的迭代器均会失效，但 Vector 与 List 用 ReverseIterator 进行<code>Erase</code>可以统一到一个形式中去，所以统一下用法如下:
 
-        * 使用 List/Vector 的正向迭代器 Iterator 遍历删除。  
+        * 使用 List/Vector 的正向迭代器 Iterator 遍历删除。
 
             ``` cpp
             List<Int32>::Iterator lit;
@@ -432,7 +432,7 @@
             vit = vector.Erase(vit);
             ```
 
-        * 使用 List/Vector 的反向迭代器 ReverseIterator 遍历删除。  
+        * 使用 List/Vector 的反向迭代器 ReverseIterator 遍历删除。
 
             ``` cpp
             List<Int32>::ReverseIterator lrit;
@@ -444,7 +444,7 @@
             vrit = Vector<Int32>::ReverseIterator(vector.Erase(--(vrit.GetBase())));
             ```
 
-       * 使用 HashMap/HashSet 的正向迭代器 Iterator 遍历删除。  
+       * 使用 HashMap/HashSet 的正向迭代器 Iterator 遍历删除。
 
             ``` cpp
             HashMap<Int32, Int32>::Iterator mit;
@@ -456,10 +456,10 @@
             set.Erase(sit++);
             ```
 
-4. Car 对象作为 HashMap/HashSet 的 key  
+4. Car 对象作为 HashMap/HashSet 的 key
     用 Car 对象作为 HashMap/HashSet 的 key 需要考虑是使用对象地址还是使用对象的 GetHashCode 返回的 hash 值作为 key 值。这需要特化<code>Hash/EqualTo</code>这两个类模版已满足 ETL 用作 key 的约束。在<code>frameworkhash.h</code>中针对 Car 接口提供了一些便利的宏，并且通常也在其中定义这些特化模版。
 
-5. 错误用法  
+5. 错误用法
     下面是用正向迭代器进行反向遍历的错误代码，请留意:
 
     ``` cpp
@@ -473,7 +473,7 @@
 
     这是一种错误的用法，请使用反向迭代器 ReverseIterator 进行遍历。
 
-6. 其他容器  
+6. 其他容器
 
     * 由于 ETL 不能作为参数用在 Car 函数中，所以需要有 Car 接口容器类，当前代码中使用到<code>IArray，IObjectContainer，IObjectInt32Map，IObjectStringMap</code>等几个主要的 Car 接口容器类。
 
@@ -499,7 +499,7 @@
         }
         ```
 
-        __注意：__  
+        __注意：__
         在上面的<code>while</code>循环中，<code>AutoPtr<IInterface> obj;</code>是声明在<code>while</code>循环体内的，而不是放在<code>while</code>循环体外。要小心 Car 指针变量作为 out 参数在循环中的多次使用，这很容易导致内存泄漏，在循环使用之前需要显式地调用<code>obj = NULL;</code>以清除上一次存储的内容。
 
     * <code>IList，IMap，ICollection，ISet</code>等 Car 容器类是与 Android 中的容器类一一对应的，将来会用这些容器类替代上面提到的<code>IObjectContainer，IObjectInt32Map，IObjectStringMap</code>等容器类。
@@ -510,7 +510,7 @@
 <span id="smartptr"></span>
 ## 智能指针
 
-1. __AutoPtr__  <span id="autoptr"></span>  
+1. __AutoPtr__  <span id="autoptr"></span>
     Elastos 中的<code>AutoPtr</code>类似于 STL 中的 shared_ptr 或 Android 中的 sp。
 
     * 使用<code>AutoPtr</code>作为返回值
@@ -555,7 +555,7 @@
         }
         ```
 
-    * 在循环中使用<code>AutoPtr</code>作为 out 参数  
+    * 在循环中使用<code>AutoPtr</code>作为 out 参数
     要小心 Car 指针变量作为 out 参数在循环中的多次使用，这很容易导致内存泄漏，在循环使用之前需要显式地调用<code>obj = NULL;</code> 以清除上一次存储的内容。或将变量的生命周期限定在循环体内。
 
         正确用法：
@@ -587,10 +587,10 @@
         }
         ```
 
-2. __弱引用__  <span id="weakreference"></span>  
+2. __弱引用__  <span id="weakreference"></span>
     为了避免强引用导致的循环引用，Car 中引入了弱引用（IWeakReference/IWeakReferenceSource）的概念。Car 中的弱引用是基于 ElRefBase 实现的，详细代码情参考<code>elrefbase.h/elrefbase.cpp</code>。
 
-    * Car 类实现弱引用  
+    * Car 类实现弱引用
         若 Car 类需要实现该功能，请在 sources 编译脚本中添加如下 flag 以开启 Car 编译器自动生成弱引用代码功能。
 
         ```
@@ -650,7 +650,7 @@
 
 <span id="thread"></span>
 ## 多线程
-1. 继承 IThread，IRunnable，IHandler  
+1. 继承 IThread，IRunnable，IHandler
     IThread，IRunnable，IHandler 都有标准的父类，应该优先通过继承这些父类来实现子类的功能。
 
     * IThread 的父类为 <code>Elastos::Core::Threading::ThreadBase</code>
@@ -658,10 +658,10 @@
     * IHandler  的父类为 <code>Elastos::Droid::Os::HandlerBase</code>
     * 此外 <code>Elastos::Droid::Os::HandlerRunableBase</code> 同时实现了 IHandler 与 IRunnable 接口。
 
-2. 锁  
+2. 锁
     有两种方式来使用锁：<code>Elastos::Core::Threading::Metux</code>与<code>Elastos::Core::Threading::Object</code>，两者均提供了 Autolock 的便利设施。Object 还具备 Wait/Notify 功能。
 
-3. 设置 IMessage 的 obj 参数  
+3. 设置 IMessage 的 obj 参数
     如果需要将自定义数据类型设置为 IMessage 的 obj 参数，那么该参数必须继承自 IInterface，通常我们会通过如下模式的代码来使用：
 
     ``` cpp
@@ -854,7 +854,7 @@ Elastos 的 eco 支持根据 logcat 中程序 crash 的地址定位到源码中�
 2. 进入 shell 环境，赋予 /data/debug 写的权限： chmod 777 /data/debug，然后启用内存调试开关：
 
     ``` shell
-    adb shell setprop libc.debug.malloc 1
+    adb shell setprop libc.debug.malloc 15
     adb shell stop
     adb shell start
     ```
@@ -898,7 +898,7 @@ Elastos 的 eco 支持根据 logcat 中程序 crash 的地址定位到源码中�
 
 <span id="exception"></span>
 ## 异常
-1. 关于 exceptions 的定义  
+1. 关于 exceptions 的定义
     翻译 framework 过程中，若碰到一些还没有在系统中定义的 Java exception，请统一在 ElastosRDK4\_2\_2/Sources/Elastos/Frameworks/Droid/Base/Core/car/Exceptions.car 中添加。
 
     例如，Droid Content 和 Droid App 模块的分别为 Elastos Content exception codes (Family: 0x50 - 0xD0)和 Elastos App exception codes (Family: 0x51 - 0xD1)。如需添加新的模块编号必须在 ElastosRDK4\_2\_2/Sources/Elastos/LibCore/car/Exception&ErrorCode.txt 中登记。
