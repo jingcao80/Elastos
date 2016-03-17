@@ -117,7 +117,7 @@ ECode CStringTokenizer::GetNextElement(
     VALIDATE_NOT_NULL(inter)
 
     String str;
-    GetNextToken(&str);
+    FAIL_RETURN(GetNextToken(&str));
     AutoPtr<ICharSequence> sq;
     CString::New(str, (ICharSequence**)&sq);
     *inter = sq;
