@@ -23,6 +23,7 @@ CarClass(CTreeMap)
     , public INavigableMap
     , public ICloneable
     , public ISerializable
+    , public ITreeMap
 {
 public:
     class Node
