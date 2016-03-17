@@ -1057,6 +1057,35 @@ module
          */
         const String MEDIA_PROJECTION_SERVICE = "media_projection";
 
+        /**
+         * Use with {@link #getSystemService} to retrieve a
+         * {@link com.android.server.TorchService} for accessing torch service.
+         *
+         * @see #getSystemService
+         * @see com.android.server.TorchService
+         * @hide
+         */
+        const String TORCH_SERVICE = "torch";
+
+        /**
+         * Use with {@link #getSystemService} to retrieve a
+         * {@link android.hardware.CmHardwareManager} for controlling
+         * hw specific features
+         *
+         * @see #getSystemService
+         * @see android.hardware.CmHardwareManager
+         * @hide
+         */
+        const String CMHW_SERVICE = "cmhw";
+
+        /**
+         * {@link com.android.server.KillSwitchService}for accessing the kill switch service.
+         *
+         * @see #getSystemService
+         * @see com.android.server.KillSwitchService
+         * @hide
+         */
+        const String KILLSWITCH_SERVICE = "killswitch";
 
         /**
          * Flag for use with {@sa #createPackageContext}: include the application

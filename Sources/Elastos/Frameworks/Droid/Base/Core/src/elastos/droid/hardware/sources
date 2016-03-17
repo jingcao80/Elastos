@@ -26,6 +26,7 @@ SOURCES += CameraInfo.cpp
 SOURCES += CTriggerEvent.cpp
 SOURCES += hardware.cpp
 SOURCES += CHardwareCameraSize.cpp
+SOURCES += CCmHardwareManager.cpp
 
 ELASTOS_LIBS += display/display.lib
 ELASTOS_LIBS += input/input.lib

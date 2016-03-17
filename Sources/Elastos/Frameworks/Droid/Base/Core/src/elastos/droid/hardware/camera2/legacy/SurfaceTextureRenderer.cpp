@@ -8,17 +8,17 @@
 #include "elastos/droid/graphics/CSurfaceTexture.h"
 #include "elastos/droid/os/Environment.h"
 #include "elastos/droid/os/SystemProperties.h"
- #include "elastos/droid/text/format/CTime.h"
-//#include "elastos/droid/opengl/CEGL14Helper.h"
-//#include "elastos/droid/opengl/Matrix.h"
+#include "elastos/droid/text/format/CTime.h"
+#include "elastos/droid/opengl/CEGL14.h"
+#include "elastos/droid/opengl/CEGL14Helper.h"
+#include "elastos/droid/opengl/CGLES20.h"
+#include "elastos/droid/opengl/CMatrix.h"
 #include <elastos/core/StringBuilder.h>
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Slogger.h>
 
 using Elastos::Droid::Hardware::Camera2::Legacy::CPerfMeasurement;
 using Elastos::Droid::Hardware::Camera2::ICameraCharacteristics;
-using Elastos::Droid::Graphics::IMatrix;
-using Elastos::Droid::Graphics::CMatrix;
 using Elastos::Droid::Graphics::MatrixScaleToFit_CENTER;;
 using Elastos::Droid::Graphics::IRectF;
 using Elastos::Droid::Graphics::CRectF;
@@ -27,13 +27,17 @@ using Elastos::Droid::Graphics::ISurfaceTexture;
 using Elastos::Droid::Graphics::CSurfaceTexture;
 using Elastos::Droid::Os::Environment;
 using Elastos::Droid::Os::SystemProperties;
+using Elastos::Droid::Opengl::CEGL14;
+using Elastos::Droid::Opengl::CEGL14Helper;
+using Elastos::Droid::Opengl::CGLES20;
+using Elastos::Droid::Opengl::CMatrix;
+using Elastos::Droid::Opengl::IGLES11Ext;
 using Elastos::Droid::Opengl::IGLES20;
 using Elastos::Droid::Opengl::IEGL14;
 using Elastos::Droid::Opengl::IEGL14Helper;
-// using Elastos::Droid::Opengl::IEGLConfig;
-// using Elastos::Droid::Opengl::IEGLDisplay;
-// using Elastos::Droid::Opengl::Matrix;
-// using Elastos::Droid::Opengl::CEGL14Helper;
+using Elastos::Droid::Opengl::IEGLConfig;
+using Elastos::Droid::Opengl::IEGLDisplay;
+using Elastos::Droid::Opengl::IMatrix;
 using Elastos::Droid::Text::Format::CTime;
 using Elastos::Droid::Text::Format::ITime;
 using Elastos::Droid::Utility::ISize;
@@ -65,7 +69,6 @@ CAR_INTERFACE_IMPL(SurfaceTextureRenderer, Object, ISurfaceTextureRenderer)
 
 const String SurfaceTextureRenderer::TAG("SurfaceTextureRenderer");// = SurfaceTextureRenderer.class.getSimpleName();
 const Boolean SurfaceTextureRenderer::DEBUG = FALSE;//Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
-const Int32 SurfaceTextureRenderer::EGL_RECORDABLE_ANDROID = 0x3142; // from EGL/eglext.h
 const Int32 SurfaceTextureRenderer::GL_MATRIX_SIZE = 16;
 const Int32 SurfaceTextureRenderer::VERTEX_POS_SIZE = 3;
 const Int32 SurfaceTextureRenderer::VERTEX_UV_SIZE = 2;
@@ -172,11 +175,10 @@ SurfaceTextureRenderer::SurfaceTextureRenderer()
     , maPositionHandle(0)
     , maTextureHandle(0)
 {
-    assert(0);
-    // AutoPtr<IEGL14Helper> helper;
-    // CEGL14Helper::AcquireSingleton((IEGL14Helper**)&helper);
-    // helper->GetNoDisplay((IEGLDisplay**)&mEGLDisplay);
-    // helper->GetNoContext((IEGLContext**)&mEGLContext);
+    AutoPtr<IEGL14Helper> helper;
+    CEGL14Helper::AcquireSingleton((IEGL14Helper**)&helper);
+    helper->GetNoDisplay((IEGLDisplay**)&mEGLDisplay);
+    helper->GetNoContext((IEGLContext**)&mEGLContext);
 
     CArrayList::New((IList**)&mSurfaces);
     CArrayList::New((IList**)&mConversionSurfaces);
@@ -232,8 +234,9 @@ ECode SurfaceTextureRenderer::constructor(
         IBuffer::Probe(mTriangleVertices)->SetPosition(0);
     }
 
-    assert(0 && "need opengl::Matrix");
-    //Matrix::SetIdentityM(mSTMatrix, 0);
+    AutoPtr<IMatrix> matrix;
+    CMatrix::AcquireSingleton((IMatrix**)&matrix);
+    matrix->SetIdentityM(mSTMatrix, 0);
     return NOERROR;
 }
 
@@ -245,29 +248,30 @@ ECode SurfaceTextureRenderer::LoadShader(
     VALIDATE_NOT_NULL(result);
     *result = 0;
 
-    assert(0 && "need opengl::GLES20");
-    // Int32 shader;
-    // GLES20::GlCreateShader(shaderType, &shader);
-    // StringBuilder sb;
-    // sb += "glCreateShader type=";
-    // sb += shaderType;
-    // FAIL_RETURN(CheckGlError(sb.ToString()))
-    // GLES20::GlShaderSource(shader, source);
-    // GLES20::GlCompileShader(shader);
-    // AutoPtr<ArrayOf<Int32> > compiled = ArrayOf<Int32>::Alloc(1);
-    // GLES20::GlGetShaderiv(shader, IGLES20::GL_COMPILE_STATUS, compiled, 0);
-    // if ((*compiled)[0] == 0) {
-    //     Slogger::E(TAG, "Could not compile shader %d:", shaderType);
-    //     String str;
-    //     GLES20::GlGetShaderInfoLog(shader, &str);
-    //     Slogger::E(TAG, " %s", str.string());
-    //     GLES20::GlDeleteShader(shader);
-    //     // TODO: handle this more gracefully
-    //     //throw new IllegalStateException("Could not compile shader " + shaderType);
-    //     Slogger::E(TAG, "Could not compile shader %d", shaderType);
-    //     return E_ILLEGAL_STATE_EXCEPTION;;
-    // }
-    // *result = shader;
+    AutoPtr<IGLES20> gles20;
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
+    Int32 shader;
+    gles20->GlCreateShader(shaderType, &shader);
+    StringBuilder sb;
+    sb += "glCreateShader type=";
+    sb += shaderType;
+    FAIL_RETURN(CheckGlError(sb.ToString()))
+    gles20->GlShaderSource(shader, source);
+    gles20->GlCompileShader(shader);
+    AutoPtr<ArrayOf<Int32> > compiled = ArrayOf<Int32>::Alloc(1);
+    gles20->GlGetShaderiv(shader, IGLES20::_GL_COMPILE_STATUS, compiled, 0);
+    if ((*compiled)[0] == 0) {
+        Slogger::E(TAG, "Could not compile shader %d:", shaderType);
+        String str;
+        gles20->GlGetShaderInfoLog(shader, &str);
+        Slogger::E(TAG, " %s", str.string());
+        gles20->GlDeleteShader(shader);
+        // TODO: handle this more gracefully
+        //throw new IllegalStateException("Could not compile shader " + shaderType);
+        Slogger::E(TAG, "Could not compile shader %d", shaderType);
+        return E_ILLEGAL_STATE_EXCEPTION;;
+    }
+    *result = shader;
     return NOERROR;
 }
 
@@ -292,32 +296,32 @@ ECode SurfaceTextureRenderer::CreateProgram(
         return NOERROR;
     }
 
-    assert(0 && "need opengl::GLES20");
+    AutoPtr<IGLES20> gles20;
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
     Int32 program;
-    // GLES20::GlCreateProgram(&program);
-    // FAIL_RETURN(CheckGlError("glCreateProgram"))
-    // if (program == 0) {
-    //     Slogger::E(TAG, "Could not create program");
-    // }
-    // GLES20::GlAttachShader(program, vertexShader);
-    // FAIL_RETURN(CheckGlError("glAttachShader"))
-    // GLES20::GlAttachShader(program, pixelShader);
-    // FAIL_RETURN(CheckGlError("glAttachShader"))
-    // GLES20::GlLinkProgram(program);
-    // int[] linkStatus = new int[1];
-    // AutoPtr<ArrayOf<Int32> > linkStatus = ArrayOf<Int32>::Alloc(1);
-    // GLES20::GlGetProgramiv(program, IGLES20::GL_LINK_STATUS, linkStatus, 0);
-    // if ((*linkStatus)[0] != IGLES20::GL_TRUE) {
-    //     Slogger::E(TAG, "Could not link program: ");
-    //     String str;
-    //     GLES20::GlGetProgramInfoLog(program, &str);
-    //     Slogger::E(TAG, str);
-    //     GLES20::GlDeleteProgram(program);
-    //     // TODO: handle this more gracefully
-    //     //throw new IllegalStateException("Could not link program");
-    //     Slogger::E(TAG, "Could not link program");
-    //     return E_ILLEGAL_STATE_EXCEPTION;;
-    // }
+    gles20->GlCreateProgram(&program);
+    FAIL_RETURN(CheckGlError(String("glCreateProgram")))
+    if (program == 0) {
+        Slogger::E(TAG, "Could not create program");
+    }
+    gles20->GlAttachShader(program, vertexShader);
+    FAIL_RETURN(CheckGlError(String("glAttachShader")))
+    gles20->GlAttachShader(program, pixelShader);
+    FAIL_RETURN(CheckGlError(String("glAttachShader")))
+    gles20->GlLinkProgram(program);
+    AutoPtr<ArrayOf<Int32> > linkStatus = ArrayOf<Int32>::Alloc(1);
+    gles20->GlGetProgramiv(program, IGLES20::_GL_LINK_STATUS, linkStatus, 0);
+    if ((*linkStatus)[0] != IGLES20::_GL_TRUE) {
+        Slogger::E(TAG, "Could not link program: ");
+        String str;
+        gles20->GlGetProgramInfoLog(program, &str);
+        Slogger::E(TAG, str);
+        gles20->GlDeleteProgram(program);
+        // TODO: handle this more gracefully
+        //throw new IllegalStateException("Could not link program");
+        Slogger::E(TAG, "Could not link program");
+        return E_ILLEGAL_STATE_EXCEPTION;;
+    }
     *result = program;
     return NOERROR;
 }
@@ -330,8 +334,9 @@ ECode SurfaceTextureRenderer::DrawFrame(
     FAIL_RETURN(CheckGlError(String("onDrawFrame start")))
     st->GetTransformMatrix(mSTMatrix);
 
-    assert(0 && "need opengl::Matrix");
-    //Matrix::SetIdentityM(mMVPMatrix, /*smOffset*/0);
+    AutoPtr<IMatrix> matrix;
+    CMatrix::AcquireSingleton((IMatrix**)&matrix);
+    matrix->SetIdentityM(mMVPMatrix, /*smOffset*/0);
 
     // Find intermediate buffer dimensions
     AutoPtr<ISize> dimens;
@@ -361,8 +366,8 @@ ECode SurfaceTextureRenderer::DrawFrame(
     CRectF::New(/*left*/0, /*top*/0, /*right*/texWidth, /*bottom*/texHeight, (IRectF**)&intermediate);
     AutoPtr<IRectF> output;
     CRectF::New(/*left*/0, /*top*/0, /*right*/width, /*bottom*/height, (IRectF**)&output);
-    AutoPtr<IMatrix> boxingXform;
-    CMatrix::New((IMatrix**)&boxingXform);
+    AutoPtr<Elastos::Droid::Graphics::IMatrix> boxingXform;
+    Elastos::Droid::Graphics::CMatrix::New((Elastos::Droid::Graphics::IMatrix**)&boxingXform);
     Boolean result;
     boxingXform->SetRectToRect(output, intermediate, MatrixScaleToFit_CENTER, &result);
     boxingXform->MapRect(output, &result);
@@ -383,49 +388,51 @@ ECode SurfaceTextureRenderer::DrawFrame(
 
     // Scale opposite dimension in clip coordinates so output is letterboxed/pillerboxed into
     // the intermediate dimensions (rather than vice-versa).
-    assert(0 && "need opengl::Matrix && GLES20");
-    // Matrix::ScaleM(mMVPMatrix, /*offset*/0, /*x*/scaleY, /*y*/scaleX, /*z*/1);
+    matrix->ScaleM(mMVPMatrix, /*offset*/0, /*x*/scaleY, /*y*/scaleX, /*z*/1);
 
-    // if (DEBUG) {
-    //     Slogger::D(TAG, "Scaling factors (S_x = %f,S_y = %f) used for %fx%f surface,"
-    //             "intermediate buffer size is %fx%f", scaleX, scaleY, width,
-    //             height, texWidth, texHeight);
-    // }
+    if (DEBUG) {
+        Slogger::D(TAG, "Scaling factors (S_x = %f,S_y = %f) used for %fx%f surface,"
+                "intermediate buffer size is %fx%f", scaleX, scaleY, width,
+                height, texWidth, texHeight);
+    }
 
-    // // Set viewport to be output buffer dimensions
-    // GLES20::GlViewport(0, 0, width, height);
+    AutoPtr<IGLES20> gles20;
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
+    // Set viewport to be output buffer dimensions
+    gles20->GlViewport(0, 0, width, height);
 
-    // if (DEBUG) {
-    //     GLES20::GlClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-    //     GLES20::GlClear(IGLES20::GL_DEPTH_BUFFER_BIT | IGLES20::GL_COLOR_BUFFER_BIT);
-    // }
+    if (DEBUG) {
+        gles20->GlClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        gles20->GlClear(IGLES20::_GL_DEPTH_BUFFER_BIT | IGLES20::_GL_COLOR_BUFFER_BIT);
+    }
 
-    // GLES20::GlUseProgram(mProgram);
-    // FAIL_RETURN(CheckGlError("glUseProgram"))
+    gles20->GlUseProgram(mProgram);
+    FAIL_RETURN(CheckGlError(String("glUseProgram")))
 
-    // GLES20::GlActiveTexture(IGLES20::GL_TEXTURE0);
-    // GLES20::GlBindTexture(IGLES11Ext::GL_TEXTURE_EXTERNAL_OES, mTextureID);
+    gles20->GlActiveTexture(IGLES20::_GL_TEXTURE0);
+    gles20->GlBindTexture(IGLES11Ext::_GL_TEXTURE_EXTERNAL_OES, mTextureID);
 
-    // mTriangleVertices->Position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
-    // GLES20::GlVertexAttribPointer(maPositionHandle, VERTEX_POS_SIZE, IGLES20::GL_FLOAT,
-    //         /*normalized*/ FALSE, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
-    // FAIL_RETURN(CheckGlError("glVertexAttribPointer maPosition"))
-    // GLES20::GlEnableVertexAttribArray(maPositionHandle);
-    // FAIL_RETURN(CheckGlError("glEnableVertexAttribArray maPositionHandle"))
+    AutoPtr<IBuffer> buffer = IBuffer::Probe(mTriangleVertices);
+    buffer->SetPosition(TRIANGLE_VERTICES_DATA_POS_OFFSET);
+    gles20->GlVertexAttribPointer(maPositionHandle, VERTEX_POS_SIZE, IGLES20::_GL_FLOAT,
+            /*normalized*/ FALSE, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, buffer);
+    FAIL_RETURN(CheckGlError(String("glVertexAttribPointer maPosition")))
+    gles20->GlEnableVertexAttribArray(maPositionHandle);
+    FAIL_RETURN(CheckGlError(String("glEnableVertexAttribArray maPositionHandle")))
 
-    // mTriangleVertices->Position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
-    // GLES20::GlVertexAttribPointer(maTextureHandle, VERTEX_UV_SIZE, IGLES20::GL_FLOAT,
-    //         /*normalized*/ FALSE, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
-    // FAIL_RETURN(CheckGlError("glVertexAttribPointer maTextureHandle"))
-    // GLES20::GlEnableVertexAttribArray(maTextureHandle))
-    // FAIL_RETURN(CheckGlError("glEnableVertexAttribArray maTextureHandle"))
+    buffer->SetPosition(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+    gles20->GlVertexAttribPointer(maTextureHandle, VERTEX_UV_SIZE, IGLES20::_GL_FLOAT,
+            /*normalized*/ FALSE, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, buffer);
+    FAIL_RETURN(CheckGlError(String("glVertexAttribPointer maTextureHandle")))
+    gles20->GlEnableVertexAttribArray(maTextureHandle);
+    FAIL_RETURN(CheckGlError(String("glEnableVertexAttribArray maTextureHandle")))
 
-    // GLES20::GlUniformMatrix4fv(muMVPMatrixHandle, /*count*/ 1, /*transpose*/ false, mMVPMatrix,
-    //         /*offset*/ 0);
-    // GLES20::GlUniformMatrix4fv(muSTMatrixHandle, /*count*/ 1, /*transpose*/ false, mSTMatrix,
-    //         /*offset*/ 0);
+    gles20->GlUniformMatrix4fv(muMVPMatrixHandle, /*count*/ 1, /*transpose*/ FALSE, mMVPMatrix,
+            /*offset*/ 0);
+    gles20->GlUniformMatrix4fv(muSTMatrixHandle, /*count*/ 1, /*transpose*/ FALSE, mSTMatrix,
+            /*offset*/ 0);
 
-    // GLES20::GlDrawArrays(GLES20.GL_TRIANGLE_STRIP, /*offset*/ 0, /*count*/ 4);
+    gles20->GlDrawArrays(IGLES20::_GL_TRIANGLE_STRIP, /*offset*/ 0, /*count*/ 4);
     return CheckGlError(String("glDrawArrays"));
 }
 
@@ -437,53 +444,54 @@ ECode SurfaceTextureRenderer::InitializeGLState()
         Slogger::E(TAG, "failed creating program");
         return E_ILLEGAL_STATE_EXCEPTION;
     }
-    assert(0 && "need opengl:: GLES20");
-    // GLES20::GlGetAttribLocation(mProgram, String("aPosition"), &maPositionHandle);
-    // FAIL_RETURN(CheckGlError("glGetAttribLocation aPosition"))
-    // if (maPositionHandle == -1) {
-    //     //throw new IllegalStateException("Could not get attrib location for aPosition");
-    //     Slogger::E(TAG, "Could not get attrib location for aPosition");
-    //     return E_ILLEGAL_STATE_EXCEPTION;
-    // }
-    // GLES20::GlGetAttribLocation(mProgram, String("aTextureCoord"), &maTextureHandle);
-    // FAIL_RETURN(CheckGlError("glGetAttribLocation aTextureCoord"))
-    // if (maTextureHandle == -1) {
-    //     //throw new IllegalStateException("Could not get attrib location for aTextureCoord");
-    //     Slogger::E(TAG, "Could not get attrib location for aTextureCoord");
-    //     return E_ILLEGAL_STATE_EXCEPTION;
-    // }
+    AutoPtr<IGLES20> gles20;
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
+    gles20->GlGetAttribLocation(mProgram, String("aPosition"), &maPositionHandle);
+    FAIL_RETURN(CheckGlError(String("glGetAttribLocation aPosition")))
+    if (maPositionHandle == -1) {
+        //throw new IllegalStateException("Could not get attrib location for aPosition");
+        Slogger::E(TAG, "Could not get attrib location for aPosition");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
+    gles20->GlGetAttribLocation(mProgram, String("aTextureCoord"), &maTextureHandle);
+    FAIL_RETURN(CheckGlError(String("glGetAttribLocation aTextureCoord")))
+    if (maTextureHandle == -1) {
+        //throw new IllegalStateException("Could not get attrib location for aTextureCoord");
+        Slogger::E(TAG, "Could not get attrib location for aTextureCoord");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    // GLES20::GlGetUniformLocation(mProgram, String("uMVPMatrix"), &muMVPMatrixHandle);
-    // FAIL_RETURN(CheckGlError("glGetUniformLocation uMVPMatrix"))
-    // if (muMVPMatrixHandle == -1) {
-    //     //throw new IllegalStateException("Could not get attrib location for uMVPMatrix");
-    //     Slogger::E(TAG, "Could not get attrib location for uMVPMatrix");
-    //     return E_ILLEGAL_STATE_EXCEPTION;
-    // }
+    gles20->GlGetUniformLocation(mProgram, String("uMVPMatrix"), &muMVPMatrixHandle);
+    FAIL_RETURN(CheckGlError(String("glGetUniformLocation uMVPMatrix")))
+    if (muMVPMatrixHandle == -1) {
+        //throw new IllegalStateException("Could not get attrib location for uMVPMatrix");
+        Slogger::E(TAG, "Could not get attrib location for uMVPMatrix");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    // GLES20::GlGetUniformLocation(mProgram, String("uSTMatrix"), &muSTMatrixHandle);
-    // FAIL_RETURN(CheckGlError("glGetUniformLocation uSTMatrix"))
-    // if (muSTMatrixHandle == -1) {
-    //     //throw new IllegalStateException("Could not get attrib location for uSTMatrix");
-    //     Slogger::E(TAG, "Could not get attrib location for uSTMatrix");
-    //     return E_ILLEGAL_STATE_EXCEPTION;
-    // }
+    gles20->GlGetUniformLocation(mProgram, String("uSTMatrix"), &muSTMatrixHandle);
+    FAIL_RETURN(CheckGlError(String("glGetUniformLocation uSTMatrix")))
+    if (muSTMatrixHandle == -1) {
+        //throw new IllegalStateException("Could not get attrib location for uSTMatrix");
+        Slogger::E(TAG, "Could not get attrib location for uSTMatrix");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
-    // AutoPtr<ArrayOf<Int32> > textures = ArrayOf<Int32>::Alloc(1);
-    // GLES20::GlGenTextures(/*n*/ 1, textures, /*offset*/ 0);
+    AutoPtr<ArrayOf<Int32> > textures = ArrayOf<Int32>::Alloc(1);
+    gles20->GlGenTextures(/*n*/ 1, textures, /*offset*/ 0);
 
-    // mTextureID = (*textures)[0];
-    // GLES20::GlBindTexture(IGLES11Ext::GL_TEXTURE_EXTERNAL_OES, mTextureID);
-    // FAIL_RETURN(CheckGlError("glBindTexture mTextureID"))
+    mTextureID = (*textures)[0];
+    gles20->GlBindTexture(IGLES11Ext::_GL_TEXTURE_EXTERNAL_OES, mTextureID);
+    FAIL_RETURN(CheckGlError(String("glBindTexture mTextureID")))
 
-    // GLES20::GlTexParameterf(IGLES11Ext::GL_TEXTURE_EXTERNAL_OES, IGLES20::GL_TEXTURE_MIN_FILTER,
-    //         IGLES20::GL_NEAREST);
-    // GLES20::GlTexParameterf(IGLES11Ext::GL_TEXTURE_EXTERNAL_OES, IGLES20::GL_TEXTURE_MAG_FILTER,
-    //         IGLES20::GL_LINEAR);
-    // GLES20::GlTexParameteri(IGLES11Ext::GL_TEXTURE_EXTERNAL_OES, IGLES20::GL_TEXTURE_WRAP_S,
-    //         IGLES20::GL_CLAMP_TO_EDGE);
-    // GLES20::GlTexParameteri(IGLES11Ext::GL_TEXTURE_EXTERNAL_OES, IGLES20::GL_TEXTURE_WRAP_T,
-    //         IGLES20::GL_CLAMP_TO_EDGE);
+    gles20->GlTexParameterf(IGLES11Ext::_GL_TEXTURE_EXTERNAL_OES, IGLES20::_GL_TEXTURE_MIN_FILTER,
+            IGLES20::_GL_NEAREST);
+    gles20->GlTexParameterf(IGLES11Ext::_GL_TEXTURE_EXTERNAL_OES, IGLES20::_GL_TEXTURE_MAG_FILTER,
+            IGLES20::_GL_LINEAR);
+    gles20->GlTexParameteri(IGLES11Ext::_GL_TEXTURE_EXTERNAL_OES, IGLES20::_GL_TEXTURE_WRAP_S,
+            IGLES20::_GL_CLAMP_TO_EDGE);
+    gles20->GlTexParameteri(IGLES11Ext::_GL_TEXTURE_EXTERNAL_OES, IGLES20::_GL_TEXTURE_WRAP_T,
+            IGLES20::_GL_CLAMP_TO_EDGE);
     return CheckGlError(String("glTexParameter"));
 }
 
@@ -506,22 +514,22 @@ void SurfaceTextureRenderer::ClearState()
 
 ECode SurfaceTextureRenderer::ConfigureEGLContext()
 {
-    assert(0 && "need opengl:: EGL14");
-    // EGL14::EglGetDisplay(IEGL14::_EGL_DEFAULT_DISPLAY, (IEGLDisplay**)&mEGLDisplay);
-    // AutoPtr<IEGL14Helper> helper;
-    // CEGL14Helper::AcquireSingleton((IEGL14Helper**)&helper);
-    // AutoPtr<IEGLDisplay> display;
-    // helper->GetNoDisplay((IEGLDisplay**)&display);
-    // if (mEGLDisplay == display) {
-    //     //throw new IllegalStateException("No EGL14 display");
-    //     Slogger::E(TAG, "No EGL14 display");
-    //     return E_ILLEGAL_STATE_EXCEPTION;
-    // }
+    AutoPtr<IEGL14> egl14;
+    CEGL14::AcquireSingleton((IEGL14**)&egl14);
+    egl14->EglGetDisplay(IEGL14::_EGL_DEFAULT_DISPLAY, (IEGLDisplay**)&mEGLDisplay);
+    AutoPtr<IEGL14Helper> helper;
+    CEGL14Helper::AcquireSingleton((IEGL14Helper**)&helper);
+    AutoPtr<IEGLDisplay> display;
+    helper->GetNoDisplay((IEGLDisplay**)&display);
+    if (mEGLDisplay == display) {
+        //throw new IllegalStateException("No EGL14 display");
+        Slogger::E(TAG, "No EGL14 display");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
 
     AutoPtr<ArrayOf<Int32> > version = ArrayOf<Int32>::Alloc(2);
     Boolean result;
-    assert(0 && "need opengl:: EGL14");
-    //EGL14::EglInitialize(mEGLDisplay, version, /*offset*/ 0, version, /*offset*/ 1, &result);
+    egl14->EglInitialize(mEGLDisplay, version, /*offset*/ 0, version, /*offset*/ 1, &result);
     if (!result) {
         //throw new IllegalStateException("Cannot initialize EGL14");
         Slogger::E(TAG, "Cannot initialize EGL14");
@@ -529,44 +537,59 @@ ECode SurfaceTextureRenderer::ConfigureEGLContext()
     }
 
     AutoPtr<ArrayOf<Int32> > attribList = ArrayOf<Int32>::Alloc(13);
-    (*attribList)[0] = IEGL14::EGL_RED_SIZE;
+    (*attribList)[0] = EGL_RED_SIZE;
     (*attribList)[1] = EGL_COLOR_BITLENGTH;
-    (*attribList)[2] = IEGL14::EGL_GREEN_SIZE;
+    (*attribList)[2] = EGL_GREEN_SIZE;
     (*attribList)[3] = EGL_COLOR_BITLENGTH;
-    (*attribList)[4] = IEGL14::EGL_BLUE_SIZE;
+    (*attribList)[4] = EGL_BLUE_SIZE;
     (*attribList)[5] = EGL_COLOR_BITLENGTH;
-    (*attribList)[6] = IEGL14::EGL_RENDERABLE_TYPE;
-    (*attribList)[7] = IEGL14::EGL_OPENGL_ES2_BIT;
+    (*attribList)[6] = EGL_RENDERABLE_TYPE;
+    (*attribList)[7] = EGL_OPENGL_ES2_BIT;
     (*attribList)[8] = EGL_RECORDABLE_ANDROID;
     (*attribList)[9] = 1;
-    (*attribList)[10] = IEGL14::EGL_SURFACE_TYPE;
-    (*attribList)[11] = IEGL14::EGL_PBUFFER_BIT | IEGL14::EGL_WINDOW_BIT;
-    (*attribList)[12] = IEGL14::EGL_NONE;
+    (*attribList)[10] = EGL_SURFACE_TYPE;
+    (*attribList)[11] = EGL_PBUFFER_BIT | EGL_WINDOW_BIT;
+    (*attribList)[12] = EGL_NONE;
 
-    AutoPtr<ArrayOf<IEGLConfig*> > configs = ArrayOf<IEGLConfig*>::Alloc(1);
+    AutoPtr<ArrayOf<Elastos::Droid::Opengl::IEGLConfig*> > configs = ArrayOf<Elastos::Droid::Opengl::IEGLConfig*>::Alloc(1);
     AutoPtr<ArrayOf<Int32> > numConfigs = ArrayOf<Int32>::Alloc(1);
-    assert(0 && "need opengl:: EGL14");
-    //EGL14::EglChooseConfig(mEGLDisplay, attribList, /*offset*/ 0, configs, /*offset*/ 0,
-    //        configs->GetLength(), numConfigs, /*offset*/ 0);
+    Boolean res;
+    egl14->EglChooseConfig(mEGLDisplay, attribList, /*offset*/ 0, configs, /*offset*/ 0,
+           configs->GetLength(), numConfigs, /*offset*/ 0, &res);
     FAIL_RETURN(CheckEglError(String("eglCreateContext RGB888+recordable ES2")))
+    if ((*numConfigs)[0] == 0) {
+        Slogger::W(TAG, "eglChooseConfig returned no configs, retrying without EGL_RECORDABLE_ANDROID");
+        Int32 _attribList2[] = {
+            EGL_RED_SIZE, EGL_COLOR_BITLENGTH,
+            EGL_GREEN_SIZE, EGL_COLOR_BITLENGTH,
+            EGL_BLUE_SIZE, EGL_COLOR_BITLENGTH,
+            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT | EGL_WINDOW_BIT,
+            EGL_NONE
+        };
+        AutoPtr<ArrayOf<Int32> > attribList2 = ArrayOf<Int32>::Alloc(
+            _attribList2, sizeof(_attribList2) / sizeof(Int32));
+        egl14->EglChooseConfig(mEGLDisplay, attribList2, /*offset*/ 0, configs, /*offset*/ 0,
+                configs->GetLength(), numConfigs, /*offset*/ 0, &res);
+        FAIL_RETURN(CheckEglError(String("eglCreateContext RGB888 ES2")));
+    }
     mConfigs = (*configs)[0];
 
     AutoPtr<ArrayOf<Int32> > attrib_list = ArrayOf<Int32>::Alloc(3);
-    (*attrib_list)[0] = IEGL14::EGL_CONTEXT_CLIENT_VERSION;
+    (*attrib_list)[0] = EGL_CONTEXT_CLIENT_VERSION;
     (*attrib_list)[1] = GLES_VERSION;
-    (*attrib_list)[2] = IEGL14::EGL_NONE;
+    (*attrib_list)[2] = EGL_NONE;
 
-    assert(0 && "need opengl:: EGL14");
-    //EGL14::EglCreateContext(mEGLDisplay, configs[0], EGL14.EGL_NO_CONTEXT,
-    //        attrib_list, /*offset*/ 0, (IEGLContext**)&mEGLContext);
+    egl14->EglCreateContext(mEGLDisplay, (*configs)[0], CEGL14::eglNoContextObject,
+           attrib_list, /*offset*/ 0, (IEGLContext**)&mEGLContext);
     FAIL_RETURN(CheckEglError(String("eglCreateContext")))
-    // AutoPtr<IEGLContext> context;
-    // helper->GetNoContext((IEGLContext**)&context);
-    // if(mEGLContext == context) {
-    //     //throw new IllegalStateException("No EGLContext could be made");
-    //     Slogger::E(TAG, "No EGLContext could be made");
-    //     return E_ILLEGAL_STATE_EXCEPTION;
-    // }
+    AutoPtr<IEGLContext> context;
+    helper->GetNoContext((IEGLContext**)&context);
+    if(mEGLContext == context) {
+        //throw new IllegalStateException("No EGLContext could be made");
+        Slogger::E(TAG, "No EGLContext could be made");
+        return E_ILLEGAL_STATE_EXCEPTION;
+    }
     return NOERROR;
 }
 
@@ -589,7 +612,7 @@ ECode SurfaceTextureRenderer::ConfigureEGLOutputSurfaces(
         }
     }
     AutoPtr<ArrayOf<Int32> > surfaceAttribs = ArrayOf<Int32>::Alloc(1);
-    (*surfaceAttribs)[0] = IEGL14::EGL_NONE;
+    (*surfaceAttribs)[0] = EGL_NONE;
 
     AutoPtr<ArrayOf<IInterface*> > array;
     surfaces->ToArray((ArrayOf<IInterface*>**)&array);
@@ -659,20 +682,21 @@ ECode SurfaceTextureRenderer::ConfigureEGLPbufferSurfaces(
         // Find max surface size, ensure PBuffer can hold this many pixels
         maxLength = (length > maxLength) ? length : maxLength;
         AutoPtr<ArrayOf<Int32> > surfaceAttribs = ArrayOf<Int32>::Alloc(5);
-        (*surfaceAttribs)[0] = IEGL14::EGL_WIDTH;
+        (*surfaceAttribs)[0] = EGL_WIDTH;
         (*surfaceAttribs)[1] = width;
-        (*surfaceAttribs)[2] = IEGL14::EGL_HEIGHT;
+        (*surfaceAttribs)[2] = EGL_HEIGHT;
         (*surfaceAttribs)[3] = height;
-        (*surfaceAttribs)[4] = IEGL14::EGL_NONE;
+        (*surfaceAttribs)[4] = EGL_NONE;
 
         holder->mWidth = width;
         holder->mHeight = height;
 
+        AutoPtr<IEGL14> egl14;
+        CEGL14::AcquireSingleton((IEGL14**)&egl14);
         AutoPtr<IEGLSurface> eglSurface;
         ECode ec;
-        assert(0 && "need EGL14");
-        // ec = EGL14::EglCreatePbufferSurface(mEGLDisplay, mConfigs,
-        //         surfaceAttribs, 0, (IEGLSurface**)&eglSurface);
+        ec = egl14->EglCreatePbufferSurface(mEGLDisplay, mConfigs,
+                surfaceAttribs, 0, (IEGLSurface**)&eglSurface);
         holder->mEglSurface = eglSurface;
         FAIL_RETURN(CheckEglError(String("eglCreatePbufferSurface")))
         //} catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
@@ -700,60 +724,65 @@ ECode SurfaceTextureRenderer::ConfigureEGLPbufferSurfaces(
 
 void SurfaceTextureRenderer::ReleaseEGLContext()
 {
-    assert(0 && "need IEGL14Helper && EGL14");
-    // AutoPtr<IEGL14Helper> helper;
-    // CEGL14Helper::AcquireSingleton((IEGL14Helper**)&helper);
-    // AutoPtr<IEGLDisplay> display;
-    // helper->GetNoDisplay((IEGLDisplay**)&display);
-    // if (mEGLDisplay != display) {
-    //     Boolean result;
-    //     EGL14::EglMakeCurrent(mEGLDisplay, IEGL14::EGL_NO_SURFACE, IEGL14::EGL_NO_SURFACE,
-    //             IEGL14::EGL_NO_CONTEXT, &result);
-    //     DumpGlTiming();
-    //     if (mSurfaces != NULL) {
-    //         Int32 size;
-    //         mSurfaces->GetSize(&size);
-    //         for (Int32 i = 0; i < size; i++) {
-    //             AutoPtr<IInterface> obj;
-    //             mSurfaces->Get(i, (IInterface**)&obj);
-    //             AutoPtr<EGLSurfaceHolder> holder = (EGLSurfaceHolder*)IObject::Probe(obj);
+    AutoPtr<IEGL14Helper> helper;
+    CEGL14Helper::AcquireSingleton((IEGL14Helper**)&helper);
+    AutoPtr<IEGLDisplay> display;
+    helper->GetNoDisplay((IEGLDisplay**)&display);
+    if (mEGLDisplay != display) {
+        AutoPtr<IEGL14> egl14;
+        CEGL14::AcquireSingleton((IEGL14**)&egl14);
+        Boolean result;
+        egl14->EglMakeCurrent(mEGLDisplay, CEGL14::eglNoSurfaceObject, CEGL14::eglNoSurfaceObject,
+                CEGL14::eglNoContextObject, &result);
+        DumpGlTiming();
+        if (mSurfaces != NULL) {
+            Int32 size;
+            mSurfaces->GetSize(&size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                mSurfaces->Get(i, (IInterface**)&obj);
+                AutoPtr<EGLSurfaceHolder> holder = (EGLSurfaceHolder*)IObject::Probe(obj);
 
-    //             if (holder->mSurface != NULL) {
-    //                 EGL14::EglDestroySurface(mEGLDisplay, holder->mSurface);
-    //             }
+                if (holder->mEglSurface != NULL) {
+                    Boolean res;
+                    egl14->EglDestroySurface(mEGLDisplay, holder->mEglSurface, &res);
+                }
 
-    //         }
-    //     }
-    //     if (mConversionSurfaces != NULL) {
-    //         Int32 size;
-    //         mConversionSurfaces->GetSize(&size);
-    //         for (Int32 i = 0; i < size; i++) {
-    //             AutoPtr<IInterface> obj;
-    //             mConversionSurfaces->Get(i, (IInterface**)&obj);
-    //             AutoPtr<EGLSurfaceHolder> holder = (EGLSurfaceHolder*)IObject::Probe(obj);
-    //             AutoPtr<IEGLSurface> surface = holder->mEglSurface;
-    //             if (surface != NULL) {
-    //                 EGL14::EglDestroySurface(mEGLDisplay, surface);
-    //             }
-    //         }
-    //     }
-    //     EGL14::EglDestroyContext(mEGLDisplay, mEGLContext);
-    //     EGL14::EglReleaseThread();
-    //     EGL14::EglTerminate(mEGLDisplay);
-    // }
+            }
+        }
+        if (mConversionSurfaces != NULL) {
+            Int32 size;
+            mConversionSurfaces->GetSize(&size);
+            for (Int32 i = 0; i < size; i++) {
+                AutoPtr<IInterface> obj;
+                mConversionSurfaces->Get(i, (IInterface**)&obj);
+                AutoPtr<EGLSurfaceHolder> holder = (EGLSurfaceHolder*)IObject::Probe(obj);
+                AutoPtr<IEGLSurface> surface = holder->mEglSurface;
+                if (surface != NULL) {
+                    Boolean res;
+                    egl14->EglDestroySurface(mEGLDisplay, surface, &res);
+                }
+            }
+        }
+        Boolean res;
+        egl14->EglDestroyContext(mEGLDisplay, mEGLContext, &res);
+        egl14->EglReleaseThread(&res);
+        egl14->EglTerminate(mEGLDisplay, &res);
+    }
 
-    // mConfigs = NULL;
-    // mEGLDisplay = EGL14::EGL_NO_DISPLAY;
-    // mEGLContext = EGL14::EGL_NO_CONTEXT;
-    // ClearState();
-    return;
+    mConfigs = NULL;
+    mEGLDisplay = CEGL14::eglNoDisplayObject;
+    mEGLContext = CEGL14::eglNoContextObject;
+    ClearState();
 }
 
 ECode SurfaceTextureRenderer::MakeCurrent(
     /* [in] */ IEGLSurface* surface)
 {
-    assert(0 && "need EGL14");
-    //EGL14::EglMakeCurrent(mEGLDisplay, surface, surface, mEGLContext);
+    AutoPtr<IEGL14> egl14;
+    CEGL14::AcquireSingleton((IEGL14**)&egl14);
+    Boolean res;
+    egl14->EglMakeCurrent(mEGLDisplay, surface, surface, mEGLContext, &res);
     return CheckEglError(String("makeCurrent"));
 }
 
@@ -763,18 +792,20 @@ ECode SurfaceTextureRenderer::SwapBuffers(
 {
     VALIDATE_NOT_NULL(result);
 
-    assert(0 && "need EGL14");
-    //EGL14::EglSwapBuffers(mEGLDisplay, surface, &result);
+    AutoPtr<IEGL14> egl14;
+    CEGL14::AcquireSingleton((IEGL14**)&egl14);
+    egl14->EglSwapBuffers(mEGLDisplay, surface, result);
     return CheckEglError(String("swapBuffers"));
 }
 
 ECode SurfaceTextureRenderer::CheckEglError(
     /* [in] */ const String& msg)
 {
+    AutoPtr<IEGL14> egl14;
+    CEGL14::AcquireSingleton((IEGL14**)&egl14);
     Int32 error;
-    assert(0 && "need EGL14");
-    //EGL14::EglGetError(&error);
-    if (error != IEGL14::EGL_SUCCESS) {
+    egl14->EglGetError(&error);
+    if (error != EGL_SUCCESS) {
         //throw new IllegalStateException(msg + ": EGL error: 0x" + Integer.toHexString(error));
         Slogger::E(TAG, "%s: EGL error: 0x%x", msg.string(), StringUtils::ToHexString(error).string());
         return E_ILLEGAL_STATE_EXCEPTION;
@@ -785,9 +816,10 @@ ECode SurfaceTextureRenderer::CheckEglError(
 ECode SurfaceTextureRenderer::CheckGlError(
     /* [in] */ const String& msg)
 {
+    AutoPtr<IGLES20> gles20;
+    CGLES20::AcquireSingleton((IGLES20**)&gles20);
     Int32 error;
-    assert(0 && "need GLES20");
-    //GLES20::GlGetError(&error);
+    gles20->GlGetError(&error);
     if (error != IGLES20::_GL_NO_ERROR) {
         //throw new IllegalStateException(msg + ": GLES20 error: 0x" + Integer.toHexString(error));
         Slogger::E(TAG, "%s: GLES20 error: 0x%x", msg.string(), StringUtils::ToHexString(error).string());
@@ -1096,9 +1128,10 @@ ECode SurfaceTextureRenderer::DrawIntoSurfaces(
             MakeCurrent(holder->mEglSurface);
             DrawFrame(mSurfaceTexture, holder->mWidth, holder->mHeight);
             IBuffer::Probe(mPBufferPixels)->Clear();
-            assert(0 && "need GLES20");
-            // GLES20::GlReadPixels(/*x*/ 0, /*y*/ 0, holder->mWidth, holder->mHeight,
-            //         IGLES20::GL_RGBA, IGLES20::GL_UNSIGNED_BYTE, mPBufferPixels);
+            AutoPtr<IGLES20> gles20;
+            CGLES20::AcquireSingleton((IGLES20**)&gles20);
+            gles20->GlReadPixels(/*x*/ 0, /*y*/ 0, holder->mWidth, holder->mHeight,
+                    IGLES20::_GL_RGBA, IGLES20::_GL_UNSIGNED_BYTE, IBuffer::Probe(mPBufferPixels));
             FAIL_RETURN(CheckGlError(String("glReadPixels")))
 
             //try {

@@ -3,6 +3,7 @@ module
 {
     merge("hardware/Camera.car");
     merge("hardware/CameraInfo.car");
+    merge("hardware/CmHardwareManager.car");
     merge("hardware/ISerialManager.car");
     merge("hardware/Sensor.car");
     merge("hardware/SensorEvent.car");
@@ -22,6 +23,7 @@ module
     merge("hardware/ICameraServiceListener.car");
     merge("hardware/ICameraClient.car");
     merge("hardware/ICameraService.car");
+    merge("hardware/ICmHardwareService.car");
     merge("hardware/IProCameraCallbacks.car");
 
     merge("hardware/display/DisplayManager.car");
@@ -259,6 +261,13 @@ module
 
             interface ISystemSensorManager;
             interface ISensorManager;
+        }
+
+        class CCmHardwareManager {
+            constructor(
+                [in] IContext* ctx);
+
+            interface ICmHardwareManager;
         }
 
         class CConsumerIrManager {

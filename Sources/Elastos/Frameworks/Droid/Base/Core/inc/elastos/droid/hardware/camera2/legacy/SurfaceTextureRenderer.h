@@ -17,10 +17,10 @@ using Elastos::IO::IByteBuffer;
 using Elastos::IO::IFloatBuffer;
 using Elastos::Utility::IList;
 using Elastos::Utility::ICollection;
-using Elastosx::Microedition::Khronos::Egl::IEGLConfig;
-using Elastosx::Microedition::Khronos::Egl::IEGLSurface;
-using Elastosx::Microedition::Khronos::Egl::IEGLDisplay;
-using Elastosx::Microedition::Khronos::Egl::IEGLContext;
+using Elastos::Droid::Opengl::IEGLConfig;
+using Elastos::Droid::Opengl::IEGLSurface;
+using Elastos::Droid::Opengl::IEGLDisplay;
+using Elastos::Droid::Opengl::IEGLContext;
 
 namespace Elastos {
 namespace Droid {
@@ -164,7 +164,6 @@ private:
 private:
     static const String TAG;
     static const Boolean DEBUG;
-    static const Int32 EGL_RECORDABLE_ANDROID; // from EGL/eglext.h
     static const Int32 GL_MATRIX_SIZE;
     static const Int32 VERTEX_POS_SIZE;
     static const Int32 VERTEX_UV_SIZE;

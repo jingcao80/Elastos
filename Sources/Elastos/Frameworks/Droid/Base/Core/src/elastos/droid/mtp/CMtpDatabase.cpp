@@ -8,8 +8,7 @@
 #include <elastos/core/StringUtils.h>
 #include <elastos/utility/logging/Logger.h>
 #include "elastos/droid/text/TextUtils.h"
-// TODO: Need CMediaScanner
-// #include "elastos/droid/media/CMediaScanner.h"
+#include "elastos/droid/media/CMediaScanner.h"
 #include "elastos/droid/content/CIntent.h"
 #include "elastos/droid/content/CIntentFilter.h"
 #include "elastos/droid/content/CContentValues.h"
@@ -24,10 +23,8 @@
 #include "MtpStringBuffer.h"
 #include "MtpUtils.h"
 #include "mtp.h"
-//TODO: Need provider/CMediaStoreFiles
-// #include "elastos/droid/provider/CMediaStoreFiles.h"
-//TODO: Need provider/CMediaStoreAudioPlaylists
-// #include "elastos/droid/provider/CMediaStoreAudioPlaylists.h"
+#include "elastos/droid/provider/CMediaStoreFiles.h"
+#include "elastos/droid/provider/CMediaStoreAudioPlaylists.h"
 
 extern "C" {
 #include "libexif/exif-content.h"
@@ -56,8 +53,7 @@ using Elastos::Utility::Logging::Logger;
 using Elastos::Droid::Os::IBundle;
 using Elastos::Droid::Os::IBatteryManager;
 using Elastos::Droid::Text::TextUtils;
-// TODO: Need CMediaScanner
-// using Elastos::Droid::Media::CMediaScanner;
+using Elastos::Droid::Media::CMediaScanner;
 using Elastos::Droid::View::IDisplay;
 using Elastos::Droid::View::IWindowManager;
 using Elastos::Droid::Database::Sqlite::ISQLiteDatabase;
@@ -76,12 +72,10 @@ using Elastos::Droid::Mtp::CMtpPropertyGroup;
 using Elastos::Droid::Provider::IBaseColumns;
 using Elastos::Droid::Provider::IMediaStoreFilesFileColumns;
 using Elastos::Droid::Provider::IMediaStoreFiles;
-//TODO: Need provider/CMediaStoreFiles
-// using Elastos::Droid::Provider::CMediaStoreFiles;
+using Elastos::Droid::Provider::CMediaStoreFiles;
 using Elastos::Droid::Provider::IMediaStore;
 using Elastos::Droid::Provider::IMediaStoreAudioPlaylists;
-//TODO: Need provider/CMediaStoreAudioPlaylists
-// using Elastos::Droid::Provider::CMediaStoreAudioPlaylists;
+using Elastos::Droid::Provider::CMediaStoreAudioPlaylists;
 using Elastos::Droid::Provider::IMediaStoreMediaColumns;
 
 namespace Elastos {
@@ -407,6 +401,65 @@ out:
     return result;
 }
 
+
+static Boolean ReadLongValue(Int32 type, MtpDataPacket& packet, Int64 longValue)
+{
+    switch (type) {
+        case MTP_TYPE_INT8: {
+            int8_t temp;
+            if (!packet.getInt8(temp)) return false;
+            longValue = temp;
+            break;
+        }
+        case MTP_TYPE_UINT8: {
+            uint8_t temp;
+            if (!packet.getUInt8(temp)) return false;
+            longValue = temp;
+            break;
+        }
+        case MTP_TYPE_INT16: {
+            int16_t temp;
+            if (!packet.getInt16(temp)) return false;
+            longValue = temp;
+            break;
+        }
+        case MTP_TYPE_UINT16: {
+            uint16_t temp;
+            if (!packet.getUInt16(temp)) return false;
+            longValue = temp;
+            break;
+        }
+        case MTP_TYPE_INT32: {
+            int32_t temp;
+            if (!packet.getInt32(temp)) return false;
+            longValue = temp;
+            break;
+        }
+        case MTP_TYPE_UINT32: {
+            uint32_t temp;
+            if (!packet.getUInt32(temp)) return false;
+            longValue = temp;
+            break;
+        }
+        case MTP_TYPE_INT64: {
+            int64_t temp;
+            if (!packet.getInt64(temp)) return false;
+            longValue = temp;
+            break;
+        }
+        case MTP_TYPE_UINT64: {
+            uint64_t temp;
+            if (!packet.getUInt64(temp)) return false;
+            longValue = temp;
+            break;
+        }
+        default:
+            ALOGE("unsupported type in readLongValue");
+            return false;
+    }
+    return true;
+}
+
 MtpResponseCode MyMtpDatabase::setObjectPropertyValue(
     MtpObjectHandle handle,
     MtpObjectProperty property,
@@ -420,47 +473,21 @@ MtpResponseCode MyMtpDatabase::setObjectPropertyValue(
     Int64 longValue = 0;
     String stringValue;
 
-    // TODO:
-//    switch (type) {
-//        case MTP_TYPE_INT8:
-//            longValue = packet.getInt8();
-//            break;
-//        case MTP_TYPE_UINT8:
-//            longValue = packet.getUInt8();
-//            break;
-//        case MTP_TYPE_INT16:
-//            longValue = packet.getInt16();
-//            break;
-//        case MTP_TYPE_UINT16:
-//            longValue = packet.getUInt16();
-//            break;
-//        case MTP_TYPE_INT32:
-//            longValue = packet.getInt32();
-//            break;
-//        case MTP_TYPE_UINT32:
-//            longValue = packet.getUInt32();
-//            break;
-//        case MTP_TYPE_INT64:
-//            longValue = packet.getInt64();
-//            break;
-//        case MTP_TYPE_UINT64:
-//            longValue = packet.getUInt64();
-//            break;
-//        case MTP_TYPE_STR:
-//        {
-//            MtpStringBuffer buffer;
-//            packet.getString(buffer);
-//            stringValue = String((const char *)buffer);
-//            break;
-//         }
-//        default:
-//            // ALOGE("unsupported type in setObjectPropertyValue\n");
-//            return MTP_RESPONSE_INVALID_OBJECT_PROP_FORMAT;
-//    }
+    MtpResponseCode result = MTP_RESPONSE_INVALID_OBJECT_PROP_FORMAT;
 
-    Int32 result = mDatabase->SetObjectProperty((Int32)handle, (Int32)property, (Int64)longValue, stringValue);
+    if (type == MTP_TYPE_STR) {
+        MtpStringBuffer buffer;
+        if (!packet.getString(buffer))
+            return result;
+        stringValue = (const char *)buffer;
+    }
+    else {
+        if (!ReadLongValue(type, packet, longValue))
+            return result;
+    }
 
-    // checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    result = mDatabase->SetObjectProperty((Int32)handle, (Int32)property, longValue, stringValue);
+
     return result;
 }
 
@@ -545,47 +572,21 @@ MtpResponseCode MyMtpDatabase::setDevicePropertyValue(
     Int64 longValue = 0;
     String stringValue;
 
-    // TODO:
-//    switch (type) {
-//        case MTP_TYPE_INT8:
-//            longValue = packet.getInt8();
-//            break;
-//        case MTP_TYPE_UINT8:
-//            longValue = packet.getUInt8();
-//            break;
-//        case MTP_TYPE_INT16:
-//            longValue = packet.getInt16();
-//            break;
-//        case MTP_TYPE_UINT16:
-//            longValue = packet.getUInt16();
-//            break;
-//        case MTP_TYPE_INT32:
-//            longValue = packet.getInt32();
-//            break;
-//        case MTP_TYPE_UINT32:
-//            longValue = packet.getUInt32();
-//            break;
-//        case MTP_TYPE_INT64:
-//            longValue = packet.getInt64();
-//            break;
-//        case MTP_TYPE_UINT64:
-//            longValue = packet.getUInt64();
-//            break;
-//        case MTP_TYPE_STR:
-//        {
-//            MtpStringBuffer buffer;
-//            packet.getString(buffer);
-//            stringValue = String((const char *)buffer);
-//            break;
-//         }
-//        default:
-//            // ALOGE("unsupported type in setDevicePropertyValue\n");
-//            return MTP_RESPONSE_INVALID_OBJECT_PROP_FORMAT;
-//    }
+    MtpResponseCode result = MTP_RESPONSE_INVALID_DEVICE_PROP_FORMAT;
 
-    Int32 result = mDatabase->SetDeviceProperty((Int32)property, longValue, stringValue);
+    if (type == MTP_TYPE_STR) {
+        MtpStringBuffer buffer;
+        if (!packet.getString(buffer))
+            return result;
+        stringValue = (const char *)buffer;
+    }
+    else {
+        if (!ReadLongValue(type, packet, longValue))
+            return result;
+    }
 
-    // checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    result = mDatabase->SetDeviceProperty((Int32)property, longValue, stringValue);
+
     return result;
 }
 
@@ -1257,11 +1258,9 @@ ECode CMtpDatabase::constructor(
     mVolumeName = volumeName;
     mMediaStoragePath = storagePath;
     AutoPtr<IMediaStoreFiles> files;
-//TODO: Need provider/CMediaStoreFiles
-    // CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
+    CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
     files->GetMtpObjectsUri(volumeName, (IUri**)&mObjectsUri);
-// TODO: Need CMediaScanner
-    // CMediaScanner::New(context, (IMediaScanner**)&mMediaScanner);
+    CMediaScanner::New(context, (IMediaScanner**)&mMediaScanner);
 
     mSubDirectories = subDirectories;
     if (subDirectories != NULL) {
@@ -1610,8 +1609,7 @@ void CMtpDatabase::EndSendObject(
             //try {
                 AutoPtr<IUri> uri;
                 AutoPtr<IMediaStoreAudioPlaylists> list;
-//TODO: Need provider/CMediaStoreAudioPlaylists
-                // CMediaStoreAudioPlaylists::AcquireSingleton((IMediaStoreAudioPlaylists**)&list);
+                CMediaStoreAudioPlaylists::AcquireSingleton((IMediaStoreAudioPlaylists**)&list);
                 AutoPtr<IUri> extUri;
                 list->GetEXTERNAL_CONTENT_URI((IUri**)&extUri);
                 mMediaProvider->Insert(mPackageName, extUri, values, (IUri**)&uri);
@@ -2261,8 +2259,7 @@ Int32 CMtpDatabase::DeleteFile(
             // recursive case - delete all children first
             AutoPtr<IUri> uri;
             AutoPtr<IMediaStoreFiles> files;
-//TODO: Need provider/CMediaStoreFiles
-            // CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
+            CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
             files->GetMtpObjectsUri(mVolumeName, (IUri**)&uri);
             Int32 count;
             Int32 len = path.GetLength() + 1;
@@ -2279,8 +2276,7 @@ Int32 CMtpDatabase::DeleteFile(
 
         AutoPtr<IUri> uri;
         AutoPtr<IMediaStoreFiles> files;
-//TODO: Need provider/CMediaStoreFiles
-        // CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
+        CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
         files->GetMtpObjectsUri(mVolumeName, handle, (IUri**)&uri);
         Int32 v;
         mMediaProvider->Delete(mPackageName, uri, String(NULL), NULL, &v);
@@ -2314,8 +2310,7 @@ AutoPtr<ArrayOf<Int32> > CMtpDatabase::GetObjectReferences(
 {
     AutoPtr<IUri> uri;
     AutoPtr<IMediaStoreFiles> files;
-//TODO: Need provider/CMediaStoreFiles
-    // CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
+    CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
     files->GetMtpReferencesUri(mVolumeName, handle, (IUri**)&uri);
     AutoPtr<ICursor> c;
     //try {
@@ -2353,8 +2348,7 @@ Int32 CMtpDatabase::SetObjectReferences(
     mDatabaseModified = TRUE;
     AutoPtr<IUri> uri;
     AutoPtr<IMediaStoreFiles> files;
-//TODO: Need provider/CMediaStoreFiles
-    // CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
+    CMediaStoreFiles::AcquireSingleton((IMediaStoreFiles**)&files);
     files->GetMtpReferencesUri(mVolumeName, handle, (IUri**)&uri);
     Int32 count = references->GetLength();
     AutoPtr<ArrayOf<IContentValues*> > valuesList =ArrayOf<IContentValues*>::Alloc(count);
