@@ -281,7 +281,8 @@ const Boolean CAppOpsService::DEBUG = FALSE;
 // Write at most every 30 minutes.
 const Int64 CAppOpsService::WRITE_DELAY = DEBUG ? 1000 : 30*60*1000;
 
-static AutoPtr<ArrayOf<Int32> > InitPRIVACY_GUARD_OP_STATES() {
+static AutoPtr<ArrayOf<Int32> > InitPRIVACY_GUARD_OP_STATES()
+{
     AutoPtr<ArrayOf<Int32> > array = ArrayOf<Int32>::Alloc(5);
 
     array->Set(0, IAppOpsManager::OP_COARSE_LOCATION);
@@ -1957,6 +1958,7 @@ ECode CAppOpsService::IsControlAllowed(
 {
     VALIDATE_NOT_NULL(result)
 
+// TODO: Need mPolicy
     // Boolean isShow = TRUE;
     // if (mPolicy != NULL) {
     //     mPolicy->IsControlAllowed(code, packageName, &isShow);

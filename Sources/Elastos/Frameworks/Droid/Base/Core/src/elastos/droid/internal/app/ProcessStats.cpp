@@ -185,7 +185,7 @@ void ProcessStats::DurationsTable::AddDuration(
     }
 
     Int32 size = mStats->mInt64s.GetSize();
-    if (((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK) >= size) {
+    if (((off >> OFFSET_ARRAY_SHIFT) & OFFSET_ARRAY_MASK) >= size) {
         return;
     }
 
@@ -713,7 +713,7 @@ void ProcessStats::ProcessState::AddPss(
     }
 
     Int32 size = mStats->mInt64s.GetSize();
-    if (((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK) >= size) {
+    if (((off >> OFFSET_ARRAY_SHIFT) & OFFSET_ARRAY_MASK) >= size) {
         return;
     }
 
