@@ -3,8 +3,9 @@
 #include <Elastos.Droid.Webkit.h>
 #include <Elastos.Droid.Net.h>
 #include <Elastos.Droid.Graphics.h>
+#include <Elastos.Droid.Provider.h>
 #include <Elastos.CoreLibrary.IO.h>
-#include "Elastos.Droid.Provider.h"
+#include <Elastos.CoreLibrary.Security.h>
 //#include "elastos/droid/content/CIntentHelper.h"
 //#include "elastos/droid/graphics/CBitmapFactory.h"
 //#include "elastos/droid/graphics/CCanvas.h"

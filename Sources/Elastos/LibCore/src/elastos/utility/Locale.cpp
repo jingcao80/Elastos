@@ -1,4 +1,5 @@
 
+#include "_Elastos.CoreLibrary.IO.h"
 #include "Locale.h"
 #include "ICUUtil.h"
 #include "StringBuilder.h"
@@ -13,6 +14,7 @@
 #include "CChar32.h"
 #include "CArrayList.h"
 #include "CoreUtils.h"
+
 
 using Elastos::Core::IChar32;
 using Elastos::Core::CChar32;

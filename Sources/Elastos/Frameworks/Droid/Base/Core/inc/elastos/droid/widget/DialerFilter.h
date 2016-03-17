@@ -2,6 +2,7 @@
 #ifndef __ELASTOS_DROID_WIDGET_DIALERFILTER_H__
 #define __ELASTOS_DROID_WIDGET_DIALERFILTER_H__
 
+#include "_Elastos.Droid.Text.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include "elastos/droid/widget/RelativeLayout.h"
 

@@ -1,6 +1,7 @@
 
-#include "elastos/droid/server/hdmi/HdmiMhlControllerStub.h"
+#include <Elastos.Droid.Hardware.h>
 #include <Elastos.Droid.Utility.h>
+#include "elastos/droid/server/hdmi/HdmiMhlControllerStub.h"
 
 using Elastos::Droid::Hardware::Hdmi::IHdmiPortInfo;
 

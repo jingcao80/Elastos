@@ -2,6 +2,7 @@
 #define __ELASTOS_DROID_SERVICE_NOTIFICATION_ZENMODECONFIG_H__
 
 #include "Elastos.Droid.Content.h"
+#include "_Elastos.Droid.Net.h"
 #include "elastos/droid/ext/frameworkext.h"
 #include <elastos/core/Object.h>
 
