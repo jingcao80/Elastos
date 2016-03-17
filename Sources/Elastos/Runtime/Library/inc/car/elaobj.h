@@ -292,4 +292,34 @@ struct Conversion<DerivedT*, BaseT*>                                        \
 };
 #endif
 
+// Helper traits get bared type
+//
+template <typename T>
+struct TypeTraitsItem
+{
+    typedef T                       BaredType;
+    enum { isPointer = FALSE };
+};
+
+template <typename T>
+struct TypeTraitsItem<T*>
+{
+    typedef T                       BaredType;
+    enum { isPointer = TRUE };
+};
+
+template <typename T>
+struct TypeTraitsItem<const T*>
+{
+    typedef T                       BaredType;
+    enum { isPointer = TRUE };
+};
+
+template <typename T>
+struct TypeTraits
+{
+    typedef typename TypeTraitsItem<T>::BaredType        BaredType;
+    enum { isPointer = TypeTraitsItem<T>::isPointer };
+};
+
 #endif // __ELAOBJ_H__
